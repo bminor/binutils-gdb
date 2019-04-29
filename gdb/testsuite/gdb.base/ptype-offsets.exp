@@ -38,7 +38,7 @@ gdb_test "ptype /o struct abc" \
 "/* offset    |  size */  type = struct abc \{" \
 "                         public:" \
 "/*    8      |     8 */    void *field1;" \
-"/*   16:31   |     4 */    unsigned int field2 : 1;" \
+"/*   16: 0   |     4 */    unsigned int field2 : 1;" \
 "/* XXX  7-bit hole   */" \
 "/* XXX  3-byte hole  */" \
 "/*   20      |     4 */    int field3;" \
@@ -63,7 +63,7 @@ gdb_test "ptype /oTM struct abc" \
 "/* offset    |  size */  type = struct abc \{" \
 "                         public:" \
 "/*    8      |     8 */    void *field1;" \
-"/*   16:31   |     4 */    unsigned int field2 : 1;" \
+"/*   16: 0   |     4 */    unsigned int field2 : 1;" \
 "/* XXX  7-bit hole   */" \
 "/* XXX  3-byte hole  */" \
 "/*   20      |     4 */    int field3;" \
@@ -93,7 +93,7 @@ gdb_test "ptype /TMo struct abc" \
 "/* offset    |  size */  type = struct abc \{" \
 "                         public:" \
 "/*    8      |     8 */    void *field1;" \
-"/*   16:31   |     4 */    unsigned int field2 : 1;" \
+"/*   16: 0   |     4 */    unsigned int field2 : 1;" \
 "/* XXX  7-bit hole   */" \
 "/* XXX  3-byte hole  */" \
 "/*   20      |     4 */    int field3;" \
@@ -264,15 +264,15 @@ gdb_test "ptype /o struct poi" \
 gdb_test "ptype /o struct tyu" \
     [string_to_regexp [multi_line \
 "/* offset    |  size */  type = struct tyu \{" \
-"/*    0:31   |     4 */    int a1 : 1;" \
-"/*    0:28   |     4 */    int a2 : 3;" \
-"/*    0: 5   |     4 */    int a3 : 23;" \
+"/*    0: 0   |     4 */    int a1 : 1;" \
+"/*    0: 1   |     4 */    int a2 : 3;" \
+"/*    0: 4   |     4 */    int a3 : 23;" \
 "/*    3: 3   |     1 */    signed char a4 : 2;" \
 "/* XXX  3-bit hole   */" \
 "/* XXX  4-byte hole  */" \
 "/*    8      |     8 */    int64_t a5;" \
-"/*   16:27   |     4 */    int a6 : 5;" \
-"/*   16:56   |     8 */    int64_t a7 : 3;" \
+"/*   16: 0   |     4 */    int a6 : 5;" \
+"/*   16: 5   |     8 */    int64_t a7 : 3;" \
 "/* XXX  7-byte padding  */" \
 "" \
 "                           /* total size (bytes):   24 */" \
@@ -293,8 +293,8 @@ gdb_test "ptype /o struct asd" \
 "" \
 "                                   /* total size (bytes):    8 */" \
 "                               \} f3;" \
-"/*   24:27   |     4 */        int f4 : 5;" \
-"/*   24:26   |     4 */        unsigned int f5 : 1;" \
+"/*   24: 0   |     4 */        int f4 : 5;" \
+"/*   24: 5   |     4 */        unsigned int f5 : 1;" \
 "/* XXX  2-bit hole   */" \
 "/* XXX  1-byte hole  */" \
 "/*   26      |     2 */        short f6;" \
@@ -304,11 +304,11 @@ gdb_test "ptype /o struct asd" \
 "                           \} f7;" \
 "/*   32      |     8 */    unsigned long f8;" \
 "/*   40      |     8 */    signed char *f9;" \
-"/*   48:28   |     4 */    int f10 : 4;" \
-"/*   48:27   |     4 */    unsigned int f11 : 1;" \
-"/*   48:26   |     4 */    unsigned int f12 : 1;" \
-"/*   48:25   |     4 */    unsigned int f13 : 1;" \
-"/*   48:24   |     4 */    unsigned int f14 : 1;" \
+"/*   48: 0   |     4 */    int f10 : 4;" \
+"/*   48: 4   |     4 */    unsigned int f11 : 1;" \
+"/*   48: 5   |     4 */    unsigned int f12 : 1;" \
+"/*   48: 6   |     4 */    unsigned int f13 : 1;" \
+"/*   48: 7   |     4 */    unsigned int f14 : 1;" \
 "/* XXX  7-byte hole  */" \
 "/*   56      |     8 */    void *f15;" \
 "/*   64      |     8 */    void *f16;" \

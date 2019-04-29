@@ -17861,15 +17861,16 @@ bitfields:
 /* XXX  3-bit hole   */
 /* XXX  4-byte hole  */
 /*    8      |     8 */    int64_t a5;
-/*   16:27   |     4 */    int a6 : 5;
-/*   16:56   |     8 */    int64_t a7 : 3;
+/*   16: 0   |     4 */    int a6 : 5;
+/*   16: 5   |     8 */    int64_t a7 : 3;
+"/* XXX  7-byte padding  */
 
                            /* total size (bytes):   24 */
                          @}
 @end smallexample
 
-Note how the offset information is now extended to also include how
-many bits are left to be used in each bitfield.
+Note how the offset information is now extended to also include the
+first bit of the bitfield.
 @end table
 
 @kindex ptype

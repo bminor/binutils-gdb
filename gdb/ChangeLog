@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* typeprint.c (print_offset_data::update): Print the bit offset,
+	not the number of bits remaining.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* typeprint.c (print_offset_data::maybe_print_hole): Add extra
 	padding at end of comment.
 

@@ -131,32 +131,16 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
 
   maybe_print_hole (stream, bitpos, "hole");
 
-  if (TYPE_FIELD_PACKED (type, field_idx))
+  if (TYPE_FIELD_PACKED (type, field_idx)
+      || offset_bitpos % TARGET_CHAR_BIT != 0)
     {
-      /* We're dealing with a bitfield.  Print how many bits are left
-	 to be used.  */
-      unsigned int bitsize = TYPE_FIELD_BITSIZE (type, field_idx);
-      /* The bitpos relative to the beginning of our container
-	 field.  */
-      unsigned int relative_bitpos;
+      /* We're dealing with a bitfield.  Print the bit offset.  */
+      fieldsize_bit = TYPE_FIELD_BITSIZE (type, field_idx);
 
-      /* The following was copied from
-	 value.c:value_primitive_field.  */
-      if ((bitpos % fieldsize_bit) + bitsize <= fieldsize_bit)
-	relative_bitpos = bitpos % fieldsize_bit;
-      else
-	relative_bitpos = bitpos % TARGET_CHAR_BIT;
+      unsigned real_bitpos = bitpos + offset_bitpos;
 
-      /* This is the exact offset (in bits) of this bitfield.  */
-      unsigned int bit_offset
-	= (bitpos - relative_bitpos) + offset_bitpos;
-
-      /* The position of the field, relative to the beginning of the
-	 struct, and how many bits are left to be used in this
-	 container.  */
-      fprintf_filtered (stream, "/* %4u:%2u", bit_offset / TARGET_CHAR_BIT,
-			fieldsize_bit - (relative_bitpos + bitsize));
-      fieldsize_bit = bitsize;
+      fprintf_filtered (stream, "/* %4u:%2u", real_bitpos / TARGET_CHAR_BIT,
+			real_bitpos % TARGET_CHAR_BIT);
     }
   else
     {

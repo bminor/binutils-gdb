@@ -1,3 +1,7 @@
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Symbols): Document change to ptype/o.
+
 2019-05-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Separate Debug Files): Document how the
