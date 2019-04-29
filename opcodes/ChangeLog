@@ -1,3 +1,7 @@
+2019-04-29  John Darrington  <john@darrington.wattle.id.au>
+
+        * s12z-opc.c (shift_discrim): Return OP_INVALID when reading fails.
+
 2019-04-26  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 

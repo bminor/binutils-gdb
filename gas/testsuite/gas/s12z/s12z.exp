@@ -117,6 +117,7 @@ run_dump_test lea-immu18
 run_dump_test ext24-ld-xy
 run_dump_test st-xy
 run_dump_test bit-manip-invalid
+run_dump_test truncated
 
 # Symbol related tests
 run_dump_test opr-symbol

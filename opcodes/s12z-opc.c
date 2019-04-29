@@ -2292,7 +2292,7 @@ shift_discrim (struct mem_read_abstraction_base *mra,  enum optr hint ATTRIBUTE_
   uint8_t sb;
   int status = mra->read (mra, 0, 1, &sb);
   if (status < 0)
-    return status;
+    return OP_INVALID;
 
   enum SB_DIR  dir = (sb & 0x40) ? SB_LEFT : SB_RIGHT;
   enum SB_TYPE type = (sb & 0x80) ? SB_ARITHMETIC : SB_LOGICAL;
