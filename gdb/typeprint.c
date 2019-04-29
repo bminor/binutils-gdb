@@ -94,11 +94,11 @@ print_offset_data::maybe_print_hole (struct ui_file *stream,
       unsigned int hole_bit = hole % TARGET_CHAR_BIT;
 
       if (hole_bit > 0)
-	fprintf_filtered (stream, "/* XXX %2u-bit %s  */\n", hole_bit,
+	fprintf_filtered (stream, "/* XXX %2u-bit %s   */\n", hole_bit,
 			  for_what);
 
       if (hole_byte > 0)
-	fprintf_filtered (stream, "/* XXX %2u-byte %s */\n", hole_byte,
+	fprintf_filtered (stream, "/* XXX %2u-byte %s  */\n", hole_byte,
 			  for_what);
     }
 }

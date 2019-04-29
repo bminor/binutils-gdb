@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* typeprint.c (print_offset_data::maybe_print_hole): Add extra
+	padding at end of comment.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_property) <PROP_ADDR_OFFSET>:
 	Compare main types.
 

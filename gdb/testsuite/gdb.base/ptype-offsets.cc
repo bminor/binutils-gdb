@@ -66,7 +66,7 @@ struct abc
   {}
 
   /* Typedef defined in-struct.  */
-  typedef int my_int_type;
+  typedef short my_int_type;
 
   my_int_type field9;
 };

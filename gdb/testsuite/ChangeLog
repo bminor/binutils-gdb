@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.base/ptype-offsets.exp: Use string_to_regexp.  Fix test
+	cases.
+	* gdb.base/ptype-offsets.cc (struct abc) <my_int_type>: Now
+	"short".
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/vla.exp: New file.
 	* gdb.ada/vla/vla.adb: New file.
 
