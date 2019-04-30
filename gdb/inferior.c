@@ -208,6 +208,10 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
   inf->pending_detach = 0;
   /* Reset it.  */
   inf->control = inferior_control_state (NO_STOP_QUIETLY);
+
+  /* Clear the register cache and the frame cache.  */
+  registers_changed ();
+  reinit_frame_cache ();
 }
 
 void

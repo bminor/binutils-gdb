@@ -1,3 +1,9 @@
+2019-05-04  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* corelow.c (core_target::detach): Ensure frame cache and
+	register caches are cleared.
+	inferior.c (exit_inferior_1): Likewise.
+
 2019-05-03  Sandra Loosemore  <sandra@codesourcery.com>
 	    Tom Tromey  <tom@tromey.com>
 

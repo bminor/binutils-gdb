@@ -535,6 +535,8 @@ core_target::detach (inferior *inf, int from_tty)
      'this'.  */
   unpush_target (this);
 
+  /* Clear the register cache and the frame cache.  */
+  registers_changed ();
   reinit_frame_cache ();
   maybe_say_no_core_file_now (from_tty);
 }
