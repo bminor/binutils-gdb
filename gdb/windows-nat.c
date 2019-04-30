@@ -1637,11 +1637,11 @@ get_windows_debug_event (struct target_ops *ops,
       else if (saw_create == 1)
 	{
 	  windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
-					 main_thread_id),
+					 current_event.dwThreadId),
 				 0, true /* main_thread_p */);
 	  ourstatus->kind = TARGET_WAITKIND_EXITED;
 	  ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
-	  thread_id = main_thread_id;
+	  thread_id = current_event.dwThreadId;
 	}
       break;
 
