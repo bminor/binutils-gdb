@@ -237,7 +237,6 @@ static DEBUG_EVENT current_event;	/* The current debug event from
 					   WaitForDebugEvent */
 static HANDLE current_process_handle;	/* Currently executing process */
 static windows_thread_info *current_thread;	/* Info on currently selected thread */
-static DWORD main_thread_id;		/* Thread ID of the main thread */
 
 /* Counts of things.  */
 static int exception_count = 0;
@@ -1030,7 +1029,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
 	  retval = strtoul (p, &p, 0);
 	  if (!retval)
-	    retval = main_thread_id;
+	    retval = current_event.dwThreadId;
 	  else if ((x = (LPCVOID) (uintptr_t) strtoull (p, NULL, 0))
 		   && ReadProcessMemory (current_process_handle, x,
 					 &saved_context,
@@ -1406,14 +1405,13 @@ fake_create_process (void)
        (unsigned) GetLastError ());
       /*  We can not debug anything in that case.  */
     }
-  main_thread_id = current_event.dwThreadId;
   current_thread
     = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
 				  current_event.dwThreadId),
 			  current_event.u.CreateThread.hThread,
 			  current_event.u.CreateThread.lpThreadLocalBase,
 			  true /* main_thread_p */);
-  return main_thread_id;
+  return current_event.dwThreadId;
 }
 
 void
@@ -1611,7 +1609,6 @@ get_windows_debug_event (struct target_ops *ops,
 	break;
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
-      main_thread_id = current_event.dwThreadId;
       /* Add the main thread.  */
       th = windows_add_thread
         (ptid_t (current_event.dwProcessId, 0,
@@ -1656,7 +1653,7 @@ get_windows_debug_event (struct target_ops *ops,
       catch_errors (handle_load_dll);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      thread_id = main_thread_id;
+      thread_id = current_event.dwThreadId;
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -1669,7 +1666,7 @@ get_windows_debug_event (struct target_ops *ops,
       catch_errors (handle_unload_dll);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      thread_id = main_thread_id;
+      thread_id = current_event.dwThreadId;
       break;
 
     case EXCEPTION_DEBUG_EVENT:

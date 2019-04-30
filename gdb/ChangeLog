@@ -1,5 +1,17 @@
 2019-04-30  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (main_thread_id): Delete.
+	(handle_output_debug_string): Replace main_thread_id by
+	current_event.dwThreadId.
+	(fake_create_process): Likewise.
+	(get_windows_debug_event) <CREATE_PROCESS_DEBUG_EVENT>:
+	Do not set main_thread_id.
+	<LOAD_DLL_DEBUG_EVENT>: Replace main_thread_id by
+	current_event.dwThreadId.
+	<UNLOAD_DLL_DEBUG_EVENT>: Likewise.
+
+2019-04-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (get_windows_debug_event) <EXIT_PROCESS_DEBUG_EVENT>:
 	Use current_event.dwThreadId instead of main_thread_id.
 
