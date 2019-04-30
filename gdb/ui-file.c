@@ -396,3 +396,35 @@ tee_file::can_emit_style_escape ()
 	  && m_one->term_out ()
 	  && term_cli_styling ());
 }
+
+/* See ui-file.h.  */
+
+void
+no_terminal_escape_file::write (const char *buf, long length_buf)
+{
+  std::string copy (buf, length_buf);
+  this->puts (copy.c_str ());
+}
+
+/* See ui-file.h.  */
+
+void
+no_terminal_escape_file::puts (const char *buf)
+{
+  while (*buf != '\0')
+    {
+      const char *esc = strchr (buf, '\033');
+      if (esc == nullptr)
+	break;
+
+      int n_read = 0;
+      if (!skip_ansi_escape (esc, &n_read))
+	++esc;
+
+      this->stdio_file::write (buf, esc - buf);
+      buf = esc + n_read;
+    }
+
+  if (*buf != '\0')
+    this->stdio_file::write (buf, strlen (buf));
+}

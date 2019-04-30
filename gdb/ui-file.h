@@ -287,4 +287,20 @@ private:
   ui_file_up m_two;
 };
 
+/* A ui_file implementation that filters out terminal escape
+   sequences.  */
+
+class no_terminal_escape_file : public stdio_file
+{
+public:
+  no_terminal_escape_file ()
+  {
+  }
+
+  /* Like the stdio_file methods, but these filter out terminal escape
+     sequences.  */
+  void write (const char *buf, long length_buf) override;
+  void puts (const char *linebuffer) override;
+};
+
 #endif

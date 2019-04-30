@@ -233,8 +233,8 @@ private:
 
 /* Skip an ANSI escape sequence in BUF.  BUF must begin with an ESC
    character.  Return true if an escape sequence was successfully
-   skipped; false otherwise.  In either case, N_READ is updated to
-   reflect the number of chars read from BUF.  */
+   skipped; false otherwise.  If an escape sequence was skipped,
+   N_READ is updated to reflect the number of chars read from BUF.  */
 
 extern bool skip_ansi_escape (const char *buf, int *n_read);
 

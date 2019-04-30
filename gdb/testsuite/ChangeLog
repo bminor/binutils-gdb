@@ -1,5 +1,10 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/24502:
+	* gdb.base/style-logging.exp: New file.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.base/symfile-warn.exp: New file.
 	* gdb.base/symfile-warn.c: New file.
 

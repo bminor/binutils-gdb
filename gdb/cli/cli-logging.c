@@ -100,7 +100,7 @@ handle_redirections (int from_tty)
       return;
     }
 
-  stdio_file_up log (new stdio_file ());
+  stdio_file_up log (new no_terminal_escape_file ());
   if (!log->open (logging_filename, logging_overwrite ? "w" : "a"))
     perror_with_name (_("set logging"));
 

@@ -1,5 +1,15 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/24502:
+	* ui-style.h (skip_ansi_escape): Update comment.
+	* ui-file.h (class no_terminal_escape_file): New class.
+	* ui-file.c (no_terminal_escape_file::write)
+	(no_terminal_escape_file::puts): New methods.
+	* cli/cli-logging.c (handle_redirections): Use
+	no_terminal_escape_file.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	* NEWS: Move convenience variable news above Python news.
 
 2019-06-14  Tom Tromey  <tom@tromey.com>
