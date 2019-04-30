@@ -1,5 +1,14 @@
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_check_relocs): Set has_gotrel for
+	R_PPC64_GOT_PCREL34.
+	(xlate_pcrel_opt): New function.
+	(ppc64_elf_edit_toc): Handle R_PPC64_GOT_PCREL34.
+	(ppc64_elf_relocate_section): Edit GOT indirect to GOT relative
+	for R_PPC64_GOT_PCREL34.  Implement R_PPC64_PCREL_OPT optimisation.
+
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (BFD_RELOC_PPC64_D34, BFD_RELOC_PPC64_D34_LO),
 	(BFD_RELOC_PPC64_D34_HI30, BFD_RELOC_PPC64_D34_HA30),
 	(BFD_RELOC_PPC64_PCREL34, BFD_RELOC_PPC64_GOT_PCREL34),

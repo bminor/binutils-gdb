@@ -4567,6 +4567,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT16_DS:
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_GOT16_LO_DS:
+	case R_PPC64_GOT_PCREL34:
 	  ppc64_elf_tdata (abfd)->has_gotrel = 1;
 	  ppc64_elf_section_data (sec)->has_gotrel = 1;
 	  /* Fall through.  */
@@ -4574,7 +4575,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_HI:
 	case R_PPC64_GOT16_LO:
-	case R_PPC64_GOT_PCREL34:
 	dogot:
 	  /* This symbol requires a global offset table entry.  */
 	  sec->has_toc_reloc = 1;
@@ -8141,6 +8141,114 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 	      && (insn & 1) == 0));
 }
 
+/* PCREL_OPT in one instance flags to the linker that a pair of insns:
+     pld ra,symbol@got@pcrel
+     load/store rt,0(ra)
+   or
+     paddi ra,symbol@pcrel
+     load/store rt,0(ra)
+   may be translated to
+     pload/pstore rt,symbol@pcrel
+     nop.
+   This function returns true if the optimization is possible, placing
+   the prefix insn in *PINSN1 and a NOP in *PINSN2.
+
+   On entry to this function, the linker has already determined that
+   the pld can be replaced with paddi: *PINSN1 is that paddi insn,
+   while *PINSN2 is the second instruction.  */
+
+static bfd_boolean
+xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2)
+{
+  uint32_t insn2 = *pinsn2 >> 32;
+  uint64_t i1new;
+
+  /* Check that regs match.  */
+  if (((insn2 >> 16) & 31) != ((*pinsn1 >> 21) & 31))
+    return FALSE;
+
+  switch ((insn2 >> 26) & 63)
+    {
+    default:
+      return FALSE;
+
+    case 32: /* lwz */
+    case 34: /* lbz */
+    case 36: /* stw */
+    case 38: /* stb */
+    case 40: /* lhz */
+    case 42: /* lha */
+    case 44: /* sth */
+    case 48: /* lfs */
+    case 50: /* lfd */
+    case 52: /* stfs */
+    case 54: /* stfd */
+      /* These are the PMLS cases, where we just need to tack a prefix
+	 on the insn.  Check that the D field is zero.  */
+      if ((insn2 & 0xffff) != 0)
+	return FALSE;
+      i1new = ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
+	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      break;
+
+    case 58: /* lwa, ld */
+      if ((insn2 & 0xfffd) != 0)
+	return FALSE;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | (insn2 & 2 ? 41ULL << 26 : 57ULL << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+
+    case 57: /* lxsd, lxssp */
+      if ((insn2 & 0xfffc) != 0 || (insn2 & 3) < 2)
+	return FALSE;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | ((40ULL | (insn2 & 3)) << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+
+    case 61: /* stxsd, stxssp, lxv, stxv  */
+      if ((insn2 & 3) == 0)
+	return FALSE;
+      else if ((insn2 & 3) >= 2)
+	{
+	  if ((insn2 & 0xfffc) != 0)
+	    return FALSE;
+	  i1new = ((1ULL << 58) | (1ULL << 52)
+		   | ((44ULL | (insn2 & 3)) << 26)
+		   | (insn2 & (31ULL << 21)));
+	}
+      else
+	{
+	  if ((insn2 & 0xfff0) != 0)
+	    return FALSE;
+	  i1new = ((1ULL << 58) | (1ULL << 52)
+		   | ((50ULL | (insn2 & 4) | ((insn2 & 8) >> 3)) << 26)
+		   | (insn2 & (31ULL << 21)));
+	}
+      break;
+
+    case 56: /* lq */
+      if ((insn2 & 0xffff) != 0)
+	return FALSE;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      break;
+
+    case 62: /* std, stq */
+      if ((insn2 & 0xfffd) != 0)
+	return FALSE;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | ((insn2 & 2) == 0 ? 61ULL << 26 : 60ULL << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+    }
+
+  *pinsn1 = i1new;
+  *pinsn2 = (uint64_t) NOP << 32;
+  return TRUE;
+}
+
 /* Examine all relocs referencing .toc sections in order to remove
    unused .toc entries.  */
 
@@ -8797,8 +8905,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
     }
 
   /* Look for cases where we can change an indirect GOT access to
-     a GOT relative access, possibly reducing the number of GOT
-     entries.  */
+     a GOT relative or PC relative access, possibly reducing the
+     number of GOT entries.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *sec;
@@ -8849,8 +8957,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      asection *sym_sec;
 	      struct elf_link_hash_entry *h;
 	      struct got_entry *ent;
-	      bfd_vma val;
-	      unsigned char buf[4];
+	      bfd_vma sym_addend, val, pc;
+	      unsigned char buf[8];
 	      unsigned int insn;
 
 	      r_type = ELF64_R_TYPE (rel->r_info);
@@ -8862,6 +8970,11 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		case R_PPC64_GOT16_DS:
 		case R_PPC64_GOT16_HA:
 		case R_PPC64_GOT16_LO_DS:
+		  sym_addend = rel->r_addend;
+		  break;
+
+		case R_PPC64_GOT_PCREL34:
+		  sym_addend = 0;
 		  break;
 		}
 
@@ -8877,7 +8990,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		val = h->root.u.def.value;
 	      else
 		val = sym->st_value;
-	      val += rel->r_addend;
+	      val += sym_addend;
 	      val += sym_sec->output_section->vma + sym_sec->output_offset;
 
 	      switch (r_type)
@@ -8919,6 +9032,22 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  if ((insn & (0x3f << 26 | 0x3)) != 58u << 26 /* ld */)
 		    continue;
 		  break;
+
+		case R_PPC64_GOT_PCREL34:
+		  pc = rel->r_offset;
+		  pc += sec->output_section->vma + sec->output_offset;
+		  if (val - pc + (1ULL << 33) >= 1ULL << 34)
+		    continue;
+		  if (!bfd_get_section_contents (ibfd, sec, buf,
+						 rel->r_offset & ~3, 8))
+		    goto got_error_ret;
+		  insn = bfd_get_32 (ibfd, buf);
+		  if ((insn & (-1u << 18)) != ((1u << 26) | (1u << 20)))
+		    continue;
+		  insn = bfd_get_32 (ibfd, buf + 4);
+		  if ((insn & (0x3f << 26)) != 57u << 26)
+		    continue;
+		  break;
 		}
 
 	      if (h != NULL)
@@ -8929,7 +9058,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  ent = local_got_ents[r_symndx];
 		}
 	      for (; ent != NULL; ent = ent->next)
-		if (ent->addend == rel->r_addend
+		if (ent->addend == sym_addend
 		    && ent->owner == ibfd
 		    && ent->tls_type == 0)
 		  break;
@@ -13772,6 +13901,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       Elf_Internal_Rela orig_rel;
       reloc_howto_type *howto;
       struct reloc_howto_struct alt_howto;
+      uint64_t pinsn;
+      bfd_vma offset;
 
     again:
       orig_rel = *rel;
@@ -14134,7 +14265,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_LD) == 0)
 	    {
 	      unsigned int insn1, insn2;
-	      bfd_vma offset;
 
 	    tls_ldgd_opt:
 	      offset = (bfd_vma) -1;
@@ -14236,9 +14366,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && rel + 1 < relend)
 	    {
 	      unsigned int insn2;
-	      bfd_vma offset = rel->r_offset;
 	      enum elf_ppc64_reloc_type r_type1 = ELF64_R_TYPE (rel[1].r_info);
 
+	      offset = rel->r_offset;
 	      if (is_plt_seq_reloc (r_type1))
 		{
 		  bfd_put_32 (output_bfd, NOP, contents + offset);
@@ -14285,9 +14415,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && rel + 1 < relend)
 	    {
 	      unsigned int insn2;
-	      bfd_vma offset = rel->r_offset;
 	      enum elf_ppc64_reloc_type r_type1 = ELF64_R_TYPE (rel[1].r_info);
 
+	      offset = rel->r_offset;
 	      if (is_plt_seq_reloc (r_type1))
 		{
 		  bfd_put_32 (output_bfd, NOP, contents + offset);
@@ -14431,7 +14561,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && relocation + 0x80008000 <= 0xffffffff)
 	    {
 	      unsigned int insn1, insn2;
-	      bfd_vma offset = rel->r_offset - d_offset;
+	      offset = rel->r_offset - d_offset;
 	      insn1 = bfd_get_32 (input_bfd, contents + offset);
 	      insn2 = bfd_get_32 (input_bfd, contents + offset + 4);
 	      if ((insn1 & 0xffff0000) == ADDIS_R2_R12
@@ -14823,6 +14953,74 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		}
 	    }
 	  break;
+
+	case R_PPC64_GOT_PCREL34:
+	  from = (rel->r_offset
+		  + input_section->output_section->vma
+		  + input_section->output_offset);
+	  if (relocation - from + (1ULL << 33) < 1ULL << 34
+	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	    {
+	      offset = rel->r_offset;
+	      pinsn = bfd_get_32 (input_bfd, contents + offset);
+	      pinsn <<= 32;
+	      pinsn |= bfd_get_32 (input_bfd, contents + offset + 4);
+	      if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
+		   == ((1ULL << 58) | (1ULL << 52) | (57ULL << 26) /* pld */))
+		{
+		  /* Replace with paddi.  */
+		  pinsn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
+		  r_type = R_PPC64_PCREL34;
+		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+		  bfd_put_32 (input_bfd, pinsn >> 32, contents + offset);
+		  bfd_put_32 (input_bfd, pinsn, contents + offset + 4);
+		  goto pcrelopt;
+		}
+	    }
+	  break;
+
+	case R_PPC64_PCREL34:
+	  if (SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	    {
+	      offset = rel->r_offset;
+	      pinsn = bfd_get_32 (input_bfd, contents + offset);
+	      pinsn <<= 32;
+	      pinsn |= bfd_get_32 (input_bfd, contents + offset + 4);
+	      if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
+		   == ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
+		       | (14ULL << 26) /* paddi */))
+		{
+		pcrelopt:
+		  if (rel + 1 < relend
+		      && rel[1].r_offset == offset
+		      && rel[1].r_info == ELF64_R_INFO (0, R_PPC64_PCREL_OPT))
+		    {
+		      bfd_vma off2 = rel[1].r_addend;
+		      if (off2 == 0)
+			/* zero means next insn.  */
+			off2 = 8;
+		      off2 += offset;
+		      if (off2 + 4 <= input_section->size)
+			{
+			  uint64_t pinsn2;
+			  pinsn2 = bfd_get_32 (input_bfd, contents + off2);
+			  pinsn2 <<= 32;
+			  if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
+			    break;
+			  if (xlate_pcrel_opt (&pinsn, &pinsn2))
+			    {
+			      bfd_put_32 (input_bfd, pinsn >> 32,
+					  contents + offset);
+			      bfd_put_32 (input_bfd, pinsn,
+					  contents + offset + 4);
+			      bfd_put_32 (input_bfd, pinsn2 >> 32,
+					  contents + off2);
+			    }
+			}
+		    }
+		}
+	    }
+	  break;
 	}
 
       /* Set `addend'.  */
@@ -14847,6 +15045,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GNU_VTINHERIT:
 	case R_PPC64_GNU_VTENTRY:
 	case R_PPC64_ENTRY:
+	case R_PPC64_PCREL_OPT:
 	  goto copy_reloc;
 
 	  /* GOT16 relocations.  Like an ADDR16 using the symbol's
@@ -15882,8 +16081,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    r = bfd_reloc_outofrange;
 	  else
 	    {
-	      uint64_t pinsn;
-
 	      relocation += addend;
 	      if (howto->pc_relative)
 		relocation -= (rel->r_offset

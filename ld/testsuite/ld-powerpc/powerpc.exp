@@ -260,6 +260,10 @@ set ppc64elftests {
     {"notoc ext" "" "" "-a64" {ext.s} {} ""}
     {"notoc" "-melf64ppc --no-plt-localentry -T ext.lnk" "" "-a64" {notoc.s}
 	{{objdump -d notoc.d} {readelf {-wf -W} notoc.wf}} "notoc"}
+    {"pcrelopt" "-melf64ppc --hash-style=gnu" "tmpdir/symtocbase.so"
+	"-a64 -mfuture" {pcrelopt.s}
+	{{objdump {-d -Mfuture} pcrelopt.d}
+	 {readelf {-S --wide} pcrelopt.sec}} "pcrelopt" }
 }
 
 set ppceabitests {
