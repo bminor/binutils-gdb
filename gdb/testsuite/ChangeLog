@@ -1,5 +1,14 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* README (Testsuite Parameters): Add replay logging to
+	GDBSERVER_DEBUG.
+	(gdbserver,debug): Refer to GDBSERVER_DEBUG.
+	* lib/gdbserver-support.exp (gdbserver_start): Treat gdbserverdebug
+	as a comma separated list.
+	(gdb_debug_init): Override procedure.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* lib/gdb.exp (default_gdb_spawn): Call gdb_write_cmd_file.
 	(gdb_write_cmd_file): New procedure.
 	* lib/gdbserver-support.exp (gdbserver_start): Call

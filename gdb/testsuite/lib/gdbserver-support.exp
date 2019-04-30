@@ -293,13 +293,23 @@ proc gdbserver_start { options arguments } {
 	# Enable debug if set.
 	if [gdbserver_debug_enabled] {
 	    global gdbserverdebug
-	    set debugfile [standard_output_file gdbserver.debug]
-	    if { $gdbserverdebug == "debug" } {
-		append gdbserver_command " --debug --debug-file=$debugfile"
-	    } elseif { $gdbserverdebug == "remote" } {
-		append gdbserver_command " --remote-debug --debug-file=$debugfile"
-	    } elseif { $gdbserverdebug == "all" } {
-		append gdbserver_command " --debug --remote-debug --debug-file=$debugfile"
+	    set enabled 0
+	    foreach entry [split $gdbserverdebug ,] {
+	      switch -- $entry {
+		"debug" {
+		  append gdbserver_command " --debug"
+		  set enabled 1
+		}
+		"remote" {
+		  append gdbserver_command " --remote-debug"
+		  set enabled 1
+		}
+	      }
+	    }
+	    # Ensure debugfile is only added if something has been enabled
+	    if { $enabled } {
+	      set debugfile [standard_output_file gdbserver.debug]
+	      append gdbserver_command " --debug-file=$debugfile"
 	    }
 	}
 
@@ -595,9 +605,13 @@ proc gdbserver_debug_enabled { } {
 	}
     }
 
-    # Only return success on valid values.
-    return [expr { $gdbserverdebug == "debug" || $gdbserverdebug == "remote"
-		   || $gdbserverdebug == "all" }]
+    # Expand the all option
+    if { $gdbserverdebug == "all" } {
+      set gdbserverdebug "debug,remote,replay"
+    }
+
+    # Ensure it is not empty.
+    return [expr { $gdbserverdebug != "" }]
 }
 
 # Write the command line used to invocate gdbserver to the cmd file.
@@ -607,4 +621,29 @@ proc gdbserver_write_cmd_file { cmdline } {
     set cmd_file [open $logfile w]
     puts $cmd_file $cmdline
     catch "close $cmd_file"
+}
+
+# Override gdb_debug_init so that we can set replay logging in GDB if required.
+# Backup the original function so we can call it afterwards
+
+rename gdb_debug_init _gdb_debug_init
+
+proc gdb_debug_init { } {
+    global gdbserverdebug
+    global gdb_prompt
+
+    if [gdbserver_debug_enabled] {
+      foreach entry [split $gdbserverdebug ,] {
+	if { $entry == "replay" } {
+	  set replayfile [standard_output_file_with_gdb_instance gdbserver.replay]
+          send_gdb "set remotelogfile $replayfile\n" optional
+	  gdb_expect 10 {
+	    -re "$gdb_prompt $" {}
+	  }
+	}
+      }
+    }
+
+    # Now call the standard debug init function
+    _gdb_debug_init
 }
