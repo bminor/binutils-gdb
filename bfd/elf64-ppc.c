@@ -1594,6 +1594,9 @@ struct ppc64_elf_obj_tdata
   /* Set if toc/got ha relocs detected not using r2, or lo reloc
      instruction not one we handle.  */
   unsigned int unexpected_toc_insn : 1;
+
+  /* Set if got relocs that can be optimised are present in this file.  */
+  unsigned int has_gotrel : 1;
 };
 
 #define ppc64_elf_tdata(bfd) \
@@ -1793,6 +1796,9 @@ struct _ppc64_elf_section_data
 
   /* Flag set when PLTCALL relocs are detected.  */
   unsigned int has_pltcall:1;
+
+  /* Flag set when section has GOT relocations that can be optimised.  */
+  unsigned int has_gotrel:1;
 };
 
 #define ppc64_elf_section_data(sec) \
@@ -4383,14 +4389,19 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	dogottls:
 	  sec->has_tls_reloc = 1;
-	  /* Fall through */
+	  goto dogot;
 
-	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_DS:
 	case R_PPC64_GOT16_HA:
+	case R_PPC64_GOT16_LO_DS:
+	  ppc64_elf_tdata (abfd)->has_gotrel = 1;
+	  ppc64_elf_section_data (sec)->has_gotrel = 1;
+	  /* Fall through.  */
+
+	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_HI:
 	case R_PPC64_GOT16_LO:
-	case R_PPC64_GOT16_LO_DS:
+	dogot:
 	  /* This symbol requires a global offset table entry.  */
 	  sec->has_toc_reloc = 1;
 	  if (r_type == R_PPC64_GOT_TLSLD16
@@ -8577,6 +8588,161 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
       free (skip);
+    }
+
+  /* Look for cases where we can change an indirect GOT access to
+     a GOT relative access, possibly reducing the number of GOT
+     entries.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    {
+      asection *sec;
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
+      Elf_Internal_Rela *relstart, *rel;
+      bfd_vma got;
+
+      if (!is_ppc64_elf (ibfd))
+	continue;
+
+      if (!ppc64_elf_tdata (ibfd)->has_gotrel)
+	continue;
+
+      sec = ppc64_elf_tdata (ibfd)->got;
+      got = sec->output_section->vma + sec->output_offset + 0x8000;
+
+      local_syms = NULL;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	{
+	  if (sec->reloc_count == 0
+	      || !ppc64_elf_section_data (sec)->has_gotrel
+	      || discarded_section (sec))
+	    continue;
+
+	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
+						info->keep_memory);
+	  if (relstart == NULL)
+	    {
+	    got_error_ret:
+	      if (local_syms != NULL
+		  && symtab_hdr->contents != (unsigned char *) local_syms)
+		free (local_syms);
+	      if (sec != NULL
+		  && relstart != NULL
+		  && elf_section_data (sec)->relocs != relstart)
+		free (relstart);
+	      return FALSE;
+	    }
+
+	  for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+	    {
+	      enum elf_ppc64_reloc_type r_type;
+	      unsigned long r_symndx;
+	      Elf_Internal_Sym *sym;
+	      asection *sym_sec;
+	      struct elf_link_hash_entry *h;
+	      struct got_entry *ent;
+	      bfd_vma val;
+	      unsigned char buf[4];
+	      unsigned int insn;
+
+	      r_type = ELF64_R_TYPE (rel->r_info);
+	      switch (r_type)
+		{
+		default:
+		  continue;
+
+		case R_PPC64_GOT16_DS:
+		case R_PPC64_GOT16_HA:
+		case R_PPC64_GOT16_LO_DS:
+		  break;
+		}
+
+	      r_symndx = ELF64_R_SYM (rel->r_info);
+	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+			      r_symndx, ibfd))
+		goto got_error_ret;
+
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+		continue;
+
+	      if (h != NULL)
+		val = h->root.u.def.value;
+	      else
+		val = sym->st_value;
+	      val += rel->r_addend;
+	      val += sym_sec->output_section->vma + sym_sec->output_offset;
+
+	      switch (r_type)
+		{
+		default:
+		  continue;
+
+		case R_PPC64_GOT16_DS:
+		  if (val - got + 0x8000 >= 0x10000)
+		    continue;
+		  if (!bfd_get_section_contents (ibfd, sec, buf,
+						 rel->r_offset & ~3, 4))
+		    goto got_error_ret;
+		  insn = bfd_get_32 (ibfd, buf);
+		  if ((insn & (0x3f << 26 | 0x3)) != 58u << 26 /* ld */)
+		    continue;
+		  break;
+
+		case R_PPC64_GOT16_HA:
+		  if (val - got + 0x80008000ULL >= 0x100000000ULL)
+		    continue;
+
+		  if (!bfd_get_section_contents (ibfd, sec, buf,
+						 rel->r_offset & ~3, 4))
+		    goto got_error_ret;
+		  insn = bfd_get_32 (ibfd, buf);
+		  if (((insn & ((0x3f << 26) | 0x1f << 16))
+		       != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+		    continue;
+		  break;
+
+		case R_PPC64_GOT16_LO_DS:
+		  if (val - got + 0x80008000ULL >= 0x100000000ULL)
+		    continue;
+		  if (!bfd_get_section_contents (ibfd, sec, buf,
+						 rel->r_offset & ~3, 4))
+		    goto got_error_ret;
+		  insn = bfd_get_32 (ibfd, buf);
+		  if ((insn & (0x3f << 26 | 0x3)) != 58u << 26 /* ld */)
+		    continue;
+		  break;
+		}
+
+	      if (h != NULL)
+		ent = h->got.glist;
+	      else
+		{
+		  struct got_entry **local_got_ents = elf_local_got_ents (ibfd);
+		  ent = local_got_ents[r_symndx];
+		}
+	      for (; ent != NULL; ent = ent->next)
+		if (ent->addend == rel->r_addend
+		    && ent->owner == ibfd
+		    && ent->tls_type == 0)
+		  break;
+	      BFD_ASSERT (ent && ent->got.refcount > 0);
+	      ent->got.refcount -= 1;
+	    }
+
+	  if (elf_section_data (sec)->relocs != relstart)
+	    free (relstart);
+	}
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
+	}
     }
 
   return TRUE;
@@ -14395,6 +14561,44 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_put_32 (input_bfd, NOP, contents + rel->r_offset);
 	      goto copy_reloc;
+	    }
+	  break;
+
+	case R_PPC64_GOT16_DS:
+	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
+	  if (relocation + addend - from + 0x8000 < 0x10000
+	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	    {
+	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
+	      if ((insn & (0x3f << 26 | 0x3)) == 58u << 26 /* ld */)
+		{
+		  insn += (14u << 26) - (58u << 26);
+		  bfd_put_32 (input_bfd, insn, contents + (rel->r_offset & ~3));
+		  r_type = R_PPC64_TOC16;
+		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+		}
+	    }
+	  break;
+
+	case R_PPC64_GOT16_LO_DS:
+	case R_PPC64_GOT16_HA:
+	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
+	  if (relocation + addend - from + 0x80008000ULL < 0x100000000ULL
+	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	    {
+	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
+	      if ((insn & (0x3f << 26 | 0x3)) == 58u << 26 /* ld */)
+		{
+		  insn += (14u << 26) - (58u << 26);
+		  bfd_put_32 (input_bfd, insn, contents + (rel->r_offset & ~3));
+		  r_type = R_PPC64_TOC16_LO;
+		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+		}
+	      else if ((insn & (0x3f << 26)) == 15u << 26 /* addis */)
+		{
+		  r_type = R_PPC64_TOC16_HA;
+		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+		}
 	    }
 	  break;
 	}

@@ -1,3 +1,12 @@
+2019-04-30  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add has_gotrel.
+	(struct _ppc64_elf_section_data): Likewise.
+	(ppc64_elf_check_relocs): Set above fields.
+	(ppc64_elf_edit_toc): Add a pass over GOT relocs.
+	(ppc64_elf_relocate_section): Edit GOT indirect to GOT relative
+	when possible.
+
 2019-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24486
