@@ -58,8 +58,6 @@
 #include "target-float.h"
 #include <algorithm>
 
-static const struct objfile_data *mips_pdr_data;
-
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
 
 static int mips32_instruction_has_delay_slot (struct gdbarch *gdbarch,
@@ -8984,8 +8982,6 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, _("mips_abi_strings out of sync"));
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-
-  mips_pdr_data = register_objfile_data ();
 
   /* Create feature sets with the appropriate properties.  The values
      are not important.  */

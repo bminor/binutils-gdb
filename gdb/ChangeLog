@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* mips-tdep.c (mips_pdr_data): Remove.
+	(_initialize_mips_tdep): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* hppa-tdep.c (hppa_objfile_priv_data): Change type.
 	(hppa_init_objfile_priv_data, read_unwind_info)
 	(find_unwind_entry, _initialize_hppa_tdep): Update.
