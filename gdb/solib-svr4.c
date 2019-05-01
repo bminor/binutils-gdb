@@ -322,53 +322,53 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 
 struct svr4_info
 {
-  CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
+  svr4_info () = default;
+  ~svr4_info ();
+
+  /* Base of dynamic linker structures.  */
+  CORE_ADDR debug_base = 0;
 
   /* Validity flag for debug_loader_offset.  */
-  int debug_loader_offset_p;
+  int debug_loader_offset_p = 0;
 
   /* Load address for the dynamic linker, inferred.  */
-  CORE_ADDR debug_loader_offset;
+  CORE_ADDR debug_loader_offset = 0;
 
   /* Name of the dynamic linker, valid if debug_loader_offset_p.  */
-  char *debug_loader_name;
+  char *debug_loader_name = nullptr;
 
   /* Load map address for the main executable.  */
-  CORE_ADDR main_lm_addr;
+  CORE_ADDR main_lm_addr = 0;
 
-  CORE_ADDR interp_text_sect_low;
-  CORE_ADDR interp_text_sect_high;
-  CORE_ADDR interp_plt_sect_low;
-  CORE_ADDR interp_plt_sect_high;
+  CORE_ADDR interp_text_sect_low = 0;
+  CORE_ADDR interp_text_sect_high = 0;
+  CORE_ADDR interp_plt_sect_low = 0;
+  CORE_ADDR interp_plt_sect_high = 0;
 
   /* Nonzero if the list of objects was last obtained from the target
      via qXfer:libraries-svr4:read.  */
-  int using_xfer;
+  int using_xfer = 0;
 
   /* Table of struct probe_and_action instances, used by the
      probes-based interface to map breakpoint addresses to probes
      and their associated actions.  Lookup is performed using
      probe_and_action->prob->address.  */
-  htab_t probes_table;
+  htab_up probes_table;
 
   /* List of objects loaded into the inferior, used by the probes-
      based interface.  */
-  struct so_list *solib_list;
+  struct so_list *solib_list = nullptr;
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_data *solib_svr4_pspace_data;
+static const struct program_space_key<svr4_info> solib_svr4_pspace_data;
 
 /* Free the probes table.  */
 
 static void
 free_probes_table (struct svr4_info *info)
 {
-  if (info->probes_table == NULL)
-    return;
-
-  htab_delete (info->probes_table);
-  info->probes_table = NULL;
+  info->probes_table.reset (nullptr);
 }
 
 /* Free the solib list.  */
@@ -380,15 +380,9 @@ free_solib_list (struct svr4_info *info)
   info->solib_list = NULL;
 }
 
-static void
-svr4_pspace_data_cleanup (struct program_space *pspace, void *arg)
+svr4_info::~svr4_info ()
 {
-  struct svr4_info *info = (struct svr4_info *) arg;
-
-  free_probes_table (info);
-  free_solib_list (info);
-
-  xfree (info);
+  free_solib_list (this);
 }
 
 /* Get the svr4 data for program space PSPACE.  If none is found yet, add it now.
@@ -397,15 +391,11 @@ svr4_pspace_data_cleanup (struct program_space *pspace, void *arg)
 static struct svr4_info *
 get_svr4_info (program_space *pspace)
 {
-  struct svr4_info *info;
+  struct svr4_info *info = solib_svr4_pspace_data.get (pspace);
 
-  info = (struct svr4_info *) program_space_data (pspace,
-						  solib_svr4_pspace_data);
-  if (info != NULL)
-    return info;
+  if (info == NULL)
+    info = solib_svr4_pspace_data.emplace (pspace);
 
-  info = XCNEW (struct svr4_info);
-  set_program_space_data (pspace, solib_svr4_pspace_data, info);
   return info;
 }
 
@@ -1677,7 +1667,8 @@ probes_table_htab_remove_objfile_probes (void **slot, void *info)
   struct objfile *objfile = (struct objfile *) info;
 
   if (pa->objfile == objfile)
-    htab_clear_slot (get_svr4_info (objfile->pspace)->probes_table, slot);
+    htab_clear_slot (get_svr4_info (objfile->pspace)->probes_table.get (),
+		     slot);
 
   return 1;
 }
@@ -1689,7 +1680,7 @@ probes_table_remove_objfile_probes (struct objfile *objfile)
 {
   svr4_info *info = get_svr4_info (objfile->pspace);
   if (info->probes_table != nullptr)
-    htab_traverse_noresize (info->probes_table,
+    htab_traverse_noresize (info->probes_table.get (),
 			    probes_table_htab_remove_objfile_probes, objfile);
 }
 
@@ -1706,12 +1697,12 @@ register_solib_event_probe (svr4_info *info, struct objfile *objfile,
 
   /* Create the probes table, if necessary.  */
   if (info->probes_table == NULL)
-    info->probes_table = htab_create_alloc (1, hash_probe_and_action,
-					    equal_probe_and_action,
-					    xfree, xcalloc, xfree);
+    info->probes_table.reset (htab_create_alloc (1, hash_probe_and_action,
+						 equal_probe_and_action,
+						 xfree, xcalloc, xfree));
 
   lookup.address = address;
-  slot = htab_find_slot (info->probes_table, &lookup, INSERT);
+  slot = htab_find_slot (info->probes_table.get (), &lookup, INSERT);
   gdb_assert (*slot == HTAB_EMPTY_ENTRY);
 
   pa = XCNEW (struct probe_and_action);
@@ -1734,7 +1725,7 @@ solib_event_probe_at (struct svr4_info *info, CORE_ADDR address)
   void **slot;
 
   lookup.address = address;
-  slot = htab_find_slot (info->probes_table, &lookup, NO_INSERT);
+  slot = htab_find_slot (info->probes_table.get (), &lookup, NO_INSERT);
 
   if (slot == NULL)
     return NULL;
@@ -2012,8 +2003,7 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b, void *arg)
       struct svr4_info *info;
       struct probe_and_action *pa;
 
-      info = ((struct svr4_info *)
-	      program_space_data (loc->pspace, solib_svr4_pspace_data));
+      info = solib_svr4_pspace_data.get (loc->pspace);
       if (info == NULL || info->probes_table == NULL)
 	continue;
 
@@ -3243,8 +3233,6 @@ void
 _initialize_svr4_solib (void)
 {
   solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
-  solib_svr4_pspace_data
-    = register_program_space_data_with_cleanup (NULL, svr4_pspace_data_cleanup);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;

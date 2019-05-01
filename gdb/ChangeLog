@@ -1,5 +1,18 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* solib-svr4.c (struct svr4_info): Add initializers and
+	destructor.
+	<probes_table>: Now an htab_up.
+	(solib_svr4_pspace_data): Change type.
+	(free_probes_table): Simplify.
+	(~svr4_info): Rename from svr4_pspace_data_cleanup.
+	(get_svr4_info, probes_table_htab_remove_objfile_probes)
+	(probes_table_remove_objfile_probes, register_solib_event_probe)
+	(solib_event_probe_at, svr4_update_solib_event_breakpoint)
+	(_initialize_svr4_solib): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_pspace_data): Change type.
 	(remote_pspace_data_cleanup): Remove.
 	(get_remote_exec_file, set_pspace_remote_exec_file)
