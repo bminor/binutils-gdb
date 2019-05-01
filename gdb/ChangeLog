@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* elfread.c (elf_objfile_gnu_ifunc_cache_data): Change type.
+	(elf_gnu_ifunc_record_cache): Update.  Don't allocate hash table
+	on obstack.
+	(elf_gnu_ifunc_resolve_by_cache, _initialize_elfread): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* mdebugread.c (basic_type_data): Change type.
 	(basic_type, _initialize_mdebugread): Update.
 

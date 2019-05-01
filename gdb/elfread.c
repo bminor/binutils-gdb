@@ -639,7 +639,8 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 
 /* The data pointer is htab_t for gnu_ifunc_record_cache_unchecked.  */
 
-static const struct objfile_data *elf_objfile_gnu_ifunc_cache_data;
+static const struct objfile_key<htab, htab_deleter>
+  elf_objfile_gnu_ifunc_cache_data;
 
 /* Map function names to CORE_ADDR in elf_objfile_gnu_ifunc_cache_data.  */
 
@@ -710,15 +711,13 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (len > 4 && strcmp (target_name + len - 4, "@plt") == 0)
     return 0;
 
-  htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+  htab = elf_objfile_gnu_ifunc_cache_data.get (objfile);
   if (htab == NULL)
     {
-      htab = htab_create_alloc_ex (1, elf_gnu_ifunc_cache_hash,
-				   elf_gnu_ifunc_cache_eq,
-				   NULL, &objfile->objfile_obstack,
-				   hashtab_obstack_allocate,
-				   dummy_obstack_deallocate);
-      set_objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data, htab);
+      htab = htab_create_alloc (1, elf_gnu_ifunc_cache_hash,
+				elf_gnu_ifunc_cache_eq,
+				NULL, xcalloc, xfree);
+      elf_objfile_gnu_ifunc_cache_data.set (objfile, htab);
     }
 
   entry_local.addr = addr;
@@ -769,7 +768,7 @@ elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
       struct elf_gnu_ifunc_cache *entry_p;
       void **slot;
 
-      htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+      htab = elf_objfile_gnu_ifunc_cache_data.get (objfile);
       if (htab == NULL)
 	continue;
 
@@ -1462,6 +1461,5 @@ _initialize_elfread (void)
 {
   add_symtab_fns (bfd_target_elf_flavour, &elf_sym_fns);
 
-  elf_objfile_gnu_ifunc_cache_data = register_objfile_data ();
   gnu_ifunc_fns_p = &elf_gnu_ifunc_fns;
 }
