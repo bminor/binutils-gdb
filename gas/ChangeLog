@@ -1,3 +1,15 @@
+2019-05-01  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Add case for
+	AARCH64_OPND_TME_UIMM16.
+	(aarch64_features): Add "tme".
+	* doc/c-aarch64.texi: Document the same.
+	* testsuite/gas/aarch64/tme-invalid.d: New test.
+	* testsuite/gas/aarch64/tme-invalid.l: New test.
+	* testsuite/gas/aarch64/tme-invalid.s: New test.
+	* testsuite/gas/aarch64/tme.d: New test.
+	* testsuite/gas/aarch64/tme.s: New test.
+
 2019-04-29  John Darrington <john@darrington.wattle.id.au>
 
         * testsuite/gas/s12z/truncated.d: New file.

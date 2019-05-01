@@ -86,7 +86,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SSBS		0x800000000000ULL
 /* Memory Tagging Extension.  */
 #define AARCH64_FEATURE_MEMTAG		0x1000000000000ULL
-
+/* Transactional Memory Extension.  */
+#define AARCH64_FEATURE_TME		0x2000000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -409,6 +410,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
   AARCH64_OPND_SVE_Zt,		/* SVE vector register in Zt.  */
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
+  AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };
 

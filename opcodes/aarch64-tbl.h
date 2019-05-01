@@ -74,6 +74,12 @@
   QLF2(X,NIL),			\
 }
 
+/* e.g. TCANCEL #<imm>.  */
+#define QL_IMM_NIL		\
+{				\
+  QLF1(NIL),			\
+}
+
 /* e.g. B.<cond> <label>.  */
 #define QL_PCREL_NIL		\
 {				\
@@ -2198,6 +2204,8 @@ static const aarch64_feature_set aarch64_feature_bti =
   AARCH64_FEATURE (AARCH64_FEATURE_BTI, 0);
 static const aarch64_feature_set aarch64_feature_memtag =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_5 | AARCH64_FEATURE_MEMTAG, 0);
+static const aarch64_feature_set aarch64_feature_tme =
+  AARCH64_FEATURE (AARCH64_FEATURE_TME, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2233,6 +2241,7 @@ static const aarch64_feature_set aarch64_feature_memtag =
 #define PREDRES		&aarch64_feature_predres
 #define BTI		&aarch64_feature_bti
 #define MEMTAG		&aarch64_feature_memtag
+#define TME		&aarch64_feature_tme
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2300,6 +2309,8 @@ static const aarch64_feature_set aarch64_feature_memtag =
   { NAME, OPCODE, MASK, CLASS, 0, BTI, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define MEMTAG_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, MEMTAG, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _TME_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, TME, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3564,6 +3575,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   /* PC-rel. addressing.  */
   CORE_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_PCREL21), QL_ADRP, 0),
   CORE_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_ADRP), QL_ADRP, 0),
+  /* TME Instructions.  */
+  _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
+  _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
+  _TME_INSN ("ttest", 0xd5233160, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
+  _TME_INSN ("tcancel", 0xd4600000, 0xffe0001f, 0, 0, OP1 (TME_UIMM16), QL_IMM_NIL, 0),
   /* System.  */
   CORE_INSN ("msr", 0xd500401f, 0xfff8f01f, ic_system, 0, OP2 (PSTATEFIELD, UIMM4), {}, F_SYS_WRITE),
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),
@@ -4919,5 +4935,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE vector register")						\
     Y(SVE_REG, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
       "a list of SVE vector registers")					\
+    Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
+      "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\
       "an indexed SM3 vector immediate")

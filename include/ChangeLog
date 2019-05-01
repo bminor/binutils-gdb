@@ -1,3 +1,8 @@
+2019-05-01  Sudakshina Das  <sudi.das@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_TME): New.
+	(enum aarch64_opnd): Add AARCH64_OPND_TME_UIMM16.
+
 2019-04-26  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 

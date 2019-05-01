@@ -194,6 +194,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{memtag} @tab ARMv8.5-A @tab No
  @tab Enable ARMv8.5-A Memory Tagging Extensions.
+@item @code{tme} @tab ARMv8-A @tab No
+ @tab Enable Transactional Memory Extensions.
 @end multitable
 
 @node AArch64 Syntax

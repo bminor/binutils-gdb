@@ -2125,6 +2125,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_NZCV:
 	case AARCH64_OPND_CCMP_IMM:
 	case AARCH64_OPND_EXCEPTION:
+	case AARCH64_OPND_TME_UIMM16:
 	case AARCH64_OPND_UIMM4:
 	case AARCH64_OPND_UIMM4_ADDG:
 	case AARCH64_OPND_UIMM7:
@@ -3326,6 +3327,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMMR:
     case AARCH64_OPND_IMMS:
     case AARCH64_OPND_FBITS:
+    case AARCH64_OPND_TME_UIMM16:
     case AARCH64_OPND_SIMM5:
     case AARCH64_OPND_SVE_SHLIMM_PRED:
     case AARCH64_OPND_SVE_SHLIMM_UNPRED:

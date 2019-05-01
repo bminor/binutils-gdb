@@ -1,3 +1,16 @@
+2019-05-01  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+	* aarch64-opc.c (operand_general_constraint_met_p): Add case for
+	AARCH64_OPND_TME_UIMM16.
+	(aarch64_print_operand): Likewise.
+	* aarch64-tbl.h (QL_IMM_NIL): New.
+	(TME): New.
+	(_TME_INSN): New.
+	(struct aarch64_opcode): Add tstart, tcommit, ttest and tcancel.
+
 2019-04-29  John Darrington  <john@darrington.wattle.id.au>
 
         * s12z-opc.c (shift_discrim): Return OP_INVALID when reading fails.
