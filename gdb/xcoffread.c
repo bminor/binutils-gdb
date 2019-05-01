@@ -53,10 +53,6 @@
 #include "aout/stab_gnu.h"
 
 
-/* Key for XCOFF-associated data.  */
-
-static const struct objfile_data *xcoff_objfile_data_key;
-
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
@@ -125,32 +121,35 @@ static CORE_ADDR first_object_file_end;
 
 static unsigned local_symesz;
 
-struct coff_symfile_info
+struct xcoff_symfile_info
   {
-    file_ptr min_lineno_offset;	/* Where in file lowest line#s are.  */
-    file_ptr max_lineno_offset;	/* 1+last byte of line#s in file.  */
+    file_ptr min_lineno_offset {};	/* Where in file lowest line#s are.  */
+    file_ptr max_lineno_offset {};	/* 1+last byte of line#s in file.  */
 
     /* Pointer to the string table.  */
-    char *strtbl;
+    char *strtbl = nullptr;
 
     /* Pointer to debug section.  */
-    char *debugsec;
+    char *debugsec = nullptr;
 
     /* Pointer to the a.out symbol table.  */
-    char *symtbl;
+    char *symtbl = nullptr;
 
     /* Number of symbols in symtbl.  */
-    int symtbl_num_syms;
+    int symtbl_num_syms = 0;
 
     /* Offset in data section to TOC anchor.  */
-    CORE_ADDR toc_offset;
+    CORE_ADDR toc_offset = 0;
   };
+
+/* Key for XCOFF-associated data.  */
+
+static const struct objfile_key<xcoff_symfile_info> xcoff_objfile_data_key;
 
 /* Convenience macro to access the per-objfile XCOFF data.  */
 
 #define XCOFF_DATA(objfile)						\
-  ((struct coff_symfile_info *) objfile_data ((objfile),		\
-					      xcoff_objfile_data_key))
+  xcoff_objfile_data_key.get (objfile)
 
 /* XCOFF names for dwarf sections.  There is no compressed sections.  */
 
@@ -1006,7 +1005,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   bfd *abfd = objfile->obfd;
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym.  */
-  struct coff_symfile_info *xcoff = XCOFF_DATA (objfile);
+  struct xcoff_symfile_info *xcoff = XCOFF_DATA (objfile);
   char *strtbl = xcoff->strtbl;
   char *debugsec = xcoff->debugsec;
   const char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
@@ -1710,7 +1709,7 @@ coff_getfilename (union internal_auxent *aux_entry, struct objfile *objfile)
 static void
 read_symbol (struct internal_syment *symbol, int symno)
 {
-  struct coff_symfile_info *xcoff = XCOFF_DATA (this_symtab_objfile);
+  struct xcoff_symfile_info *xcoff = XCOFF_DATA (this_symtab_objfile);
   int nsyms = xcoff->symtbl_num_syms;
   char *stbl = xcoff->symtbl;
 
@@ -1747,7 +1746,7 @@ read_symbol_lineno (int symno)
   struct objfile *objfile = this_symtab_objfile;
   int xcoff64 = bfd_xcoff_is_xcoff64 (objfile->obfd);
 
-  struct coff_symfile_info *info = XCOFF_DATA (objfile);
+  struct xcoff_symfile_info *info = XCOFF_DATA (objfile);
   int nsyms = info->symtbl_num_syms;
   char *stbl = info->symtbl;
   char *strtbl = info->strtbl;
@@ -1813,7 +1812,7 @@ gotit:
 static void
 find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 {
-  struct coff_symfile_info *info;
+  struct xcoff_symfile_info *info;
   int size, count;
   file_ptr offset, maxoff;
 
@@ -1823,7 +1822,7 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
     return;
 
   size = count * coff_data (abfd)->local_linesz;
-  info = (struct coff_symfile_info *) vpinfo;
+  info = (struct xcoff_symfile_info *) vpinfo;
   offset = asect->line_filepos;
   maxoff = offset + size;
 
@@ -1934,11 +1933,8 @@ xcoff_new_init (struct objfile *objfile)
 static void
 xcoff_symfile_init (struct objfile *objfile)
 {
-  struct coff_symfile_info *xcoff;
-
   /* Allocate struct to keep track of the symfile.  */
-  xcoff = XNEW (struct coff_symfile_info);
-  set_objfile_data (objfile, xcoff_objfile_data_key, xcoff);
+  xcoff_objfile_data_key.emplace (objfile);
 
   /* XCOFF objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could
@@ -1971,7 +1967,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   int val;
   unsigned char lengthbuf[4];
   char *strtbl;
-  struct coff_symfile_info *xcoff = XCOFF_DATA (objfile);
+  struct xcoff_symfile_info *xcoff = XCOFF_DATA (objfile);
 
   xcoff->strtbl = NULL;
 
@@ -2925,7 +2921,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   int num_symbols;		/* # of symbols */
   file_ptr symtab_offset;	/* symbol table and */
   file_ptr stringtab_offset;	/* string table file offsets */
-  struct coff_symfile_info *info;
+  struct xcoff_symfile_info *info;
   const char *name;
   unsigned int size;
 
@@ -3143,19 +3139,8 @@ xcoff_get_n_import_files (bfd *abfd)
   return l_nimpid - 1;
 }
 
-/* Free the per-objfile xcoff data.  */
-
-static void
-xcoff_free_info (struct objfile *objfile, void *arg)
-{
-  xfree (arg);
-}
-
 void
 _initialize_xcoffread (void)
 {
   add_symtab_fns (bfd_target_xcoff_flavour, &xcoff_sym_fns);
-
-  xcoff_objfile_data_key = register_objfile_data_with_cleanup (NULL,
-							       xcoff_free_info);
 }

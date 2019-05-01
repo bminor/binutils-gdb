@@ -1,5 +1,16 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (struct xcoff_symfile_info): Rename from
+	coff_symfile_info.  Add initializers.
+	(xcoff_objfile_data_key): Move lower.  Change type.
+	(XCOFF_DATA): Rewrite.
+	(xcoff_free_info): Remove.
+	(xcoff_symfile_init, _initialize_xcoffread, read_xcoff_symtab)
+	(read_symbol, read_symbol_lineno, find_linenos, init_stringtab)
+	(xcoff_initial_scan): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* solib-svr4.c (struct svr4_info): Add initializers and
 	destructor.
 	<probes_table>: Now an htab_up.
