@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* utils.c (fputs_maybe_filtered): Reset style after paging, even
+	when no wrap column is set.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* c-lang.c (c_get_string): Handle non-C-style arrays.
 
 2019-05-08  Tom Tromey  <tromey@adacore.com>
