@@ -1808,10 +1808,20 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	    {
 	      unsigned int save_chars = chars_printed;
 
+	      /* If we change the style, below, we'll want to reset it
+		 before continuing to print.  If there is no wrap
+		 column, then we'll only reset the style if the pager
+		 prompt is given; and to avoid emitting style
+		 sequences in the middle of a run of text, we track
+		 this as well.  */
+	      ui_file_style save_style;
+	      bool did_paginate = false;
+
 	      chars_printed = 0;
 	      lines_printed++;
 	      if (wrap_column)
 		{
+		  save_style = wrap_style;
 		  if (can_emit_style_escape (stream))
 		    emit_style_escape (ui_file_style (), stream);
 		  /* If we aren't actually wrapping, don't output
@@ -1821,21 +1831,27 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		  fputc_unfiltered ('\n', stream);
 		}
 	      else
-		flush_wrap_buffer (stream);
+		{
+		  save_style = applied_style;
+		  flush_wrap_buffer (stream);
+		}
 
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
 		 this loop, so we must continue to check it here.  */
 	      if (lines_printed >= lines_per_page - 1
 		  && !pagination_disabled_for_command)
-		prompt_for_continue ();
+		{
+		  prompt_for_continue ();
+		  did_paginate = true;
+		}
 
 	      /* Now output indentation and wrapped string.  */
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
 		  if (can_emit_style_escape (stream))
-		    emit_style_escape (wrap_style, stream);
+		    emit_style_escape (save_style, stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1846,6 +1862,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		    + (save_chars - wrap_column);
 		  wrap_column = 0;	/* And disable fancy wrap */
 		}
+	      else if (did_paginate && can_emit_style_escape (stream))
+		emit_style_escape (save_style, stream);
 	    }
 	}
 
