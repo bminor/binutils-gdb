@@ -1,5 +1,13 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* fbsd-tdep.c (struct fbsd_pspace_data): Add initializers.
+	(fbsd_pspace_data_handle): Move lower.  Change type.
+	(get_fbsd_pspace_data): Update.
+	(fbsd_pspace_data_cleanup): Remove.
+	(_initialize_fbsd_tdep): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-tasks.c (ada_tasks_pspace_data_handle): Change type.
 	(get_ada_tasks_pspace_data): Update.
 	(ada_tasks_pspace_data_cleanup): Remove.

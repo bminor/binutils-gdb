@@ -445,39 +445,28 @@ get_fbsd_gdbarch_data (struct gdbarch *gdbarch)
 	  gdbarch_data (gdbarch, fbsd_gdbarch_data_handle));
 }
 
-/* Per-program-space data for FreeBSD architectures.  */
-static const struct program_space_data *fbsd_pspace_data_handle;
-
 struct fbsd_pspace_data
 {
   /* Offsets in the runtime linker's 'Obj_Entry' structure.  */
-  LONGEST off_linkmap;
-  LONGEST off_tlsindex;
-  bool rtld_offsets_valid;
+  LONGEST off_linkmap = 0;
+  LONGEST off_tlsindex = 0;
+  bool rtld_offsets_valid = false;
 };
+
+/* Per-program-space data for FreeBSD architectures.  */
+static const struct program_space_key<fbsd_pspace_data>
+  fbsd_pspace_data_handle;
 
 static struct fbsd_pspace_data *
 get_fbsd_pspace_data (struct program_space *pspace)
 {
   struct fbsd_pspace_data *data;
 
-  data = ((struct fbsd_pspace_data *)
-	  program_space_data (pspace, fbsd_pspace_data_handle));
+  data = fbsd_pspace_data_handle.get (pspace);
   if (data == NULL)
-    {
-      data = XCNEW (struct fbsd_pspace_data);
-      set_program_space_data (pspace, fbsd_pspace_data_handle, data);
-    }
+    data = fbsd_pspace_data_handle.emplace (pspace);
 
   return data;
-}
-
-/* The cleanup callback for FreeBSD architecture per-program-space data.  */
-
-static void
-fbsd_pspace_data_cleanup (struct program_space *pspace, void *data)
-{
-  xfree (data);
 }
 
 /* This is how we want PTIDs from core files to be printed.  */
@@ -2100,6 +2089,4 @@ _initialize_fbsd_tdep (void)
 {
   fbsd_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_fbsd_gdbarch_data);
-  fbsd_pspace_data_handle
-    = register_program_space_data_with_cleanup (NULL, fbsd_pspace_data_cleanup);
 }
