@@ -119,6 +119,24 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     } else {
 	fail "nm -P"
     }
+
+    # Test nm -t d
+    # Look for leading zeroes and only the digits 0..9 in the actual value.
+    set got [binutils_run $NM "$NMFLAGS -t d $tempfile"]
+    if [regexp "0+\[1-9\]\[0-9\]* T text_symbol3" $got] then {
+	pass "nm -t d"
+    } else {
+	fail "nm -t d"
+    }
+
+    # Test nm --format=posix
+    # ref: PR 24507 - no leading zeros.
+    set got [binutils_run $NM "$NMFLAGS --format=posix $tempfile"]
+    if [regexp "text_symbol3 T \[1-9a-f\]\[0-9a-f\]*" $got] then {
+	pass "nm --format posix"
+    } else {
+	fail "nm --format posix"
+    }
 }
 
 # Test nm --size-sort

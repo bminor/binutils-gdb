@@ -1,3 +1,17 @@
+2019-05-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 24507
+	* nm.c: (print_format): New variable.
+	(value_format_32bit, value_format_64bit): Delete.
+	(set_print_radix): Remove code to alter value_format strings.
+	(set_output_format): Record chosen format in print_format.
+	(get_print_format): New function - constructs a printf formatting
+	string according to the requirements of size, radix, and output
+	format.
+	(print_value): Use get_print_format.
+	* testsuite/binutils-all/nm.exp: Add tests of "nm --format=posix"
+	and "nm -t d".
+
 2019-04-30  Alan Modra  <amodra@gmail.com>
 
 	* wrstabs.c (stab_start_class_type): Add assert to work around
