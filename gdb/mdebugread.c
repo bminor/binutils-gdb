@@ -1358,14 +1358,15 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 /* Basic types.  */
 
-static const struct objfile_data *basic_type_data;
+static const struct objfile_key<struct type *,
+				gdb::noop_deleter<struct type *>>
+  basic_type_data;
 
 static struct type *
 basic_type (int bt, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct type **map_bt
-    = (struct type **) objfile_data (objfile, basic_type_data);
+  struct type **map_bt = basic_type_data.get (objfile);
   struct type *tp;
 
   if (bt >= btMax)
@@ -1375,7 +1376,7 @@ basic_type (int bt, struct objfile *objfile)
     {
       map_bt = OBSTACK_CALLOC (&objfile->objfile_obstack,
 			       btMax, struct type *);
-      set_objfile_data (objfile, basic_type_data, map_bt);
+      basic_type_data.set (objfile, map_bt);
     }
 
   if (map_bt[bt])
@@ -4811,8 +4812,6 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 void
 _initialize_mdebugread (void)
 {
-  basic_type_data = register_objfile_data ();
-
   mdebug_register_index
     = register_symbol_register_impl (LOC_REGISTER, &mdebug_register_funcs);
   mdebug_regparm_index

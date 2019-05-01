@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* mdebugread.c (basic_type_data): Change type.
+	(basic_type, _initialize_mdebugread): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* common/gdb_unique_ptr.h (struct noop_deleter): New.
 
 2019-05-08  Tom Tromey  <tom@tromey.com>
