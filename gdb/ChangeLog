@@ -1,5 +1,11 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* hppa-tdep.c (hppa_objfile_priv_data): Change type.
+	(hppa_init_objfile_priv_data, read_unwind_info)
+	(find_unwind_entry, _initialize_hppa_tdep): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* elfread.c (elf_objfile_gnu_ifunc_cache_data): Change type.
 	(elf_gnu_ifunc_record_cache): Update.  Don't allocate hash table
 	on obstack.

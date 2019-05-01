@@ -84,7 +84,9 @@ struct hppa_objfile_private
    that separately and make this static. The solib data is probably hpux-
    specific, so we can create a separate extern objfile_data that is registered
    by hppa-hpux-tdep.c and shared with pa64solib.c and somsolib.c.  */
-static const struct objfile_data *hppa_objfile_priv_data = NULL;
+static const struct objfile_key<hppa_objfile_private,
+				gdb::noop_deleter<hppa_objfile_private>>
+  hppa_objfile_priv_data;
 
 /* Get at various relevent fields of an instruction word.  */
 #define MASK_5 0x1f
@@ -208,7 +210,7 @@ hppa_init_objfile_priv_data (struct objfile *objfile)
   hppa_objfile_private *priv
     = OBSTACK_ZALLOC (&objfile->objfile_obstack, hppa_objfile_private);
 
-  set_objfile_data (objfile, hppa_objfile_priv_data, priv);
+  hppa_objfile_priv_data.set (objfile, priv);
 
   return priv;
 }
@@ -466,8 +468,7 @@ read_unwind_info (struct objfile *objfile)
 	 compare_unwind_entries);
 
   /* Keep a pointer to the unwind information.  */
-  obj_private = (struct hppa_objfile_private *) 
-	        objfile_data (objfile, hppa_objfile_priv_data);
+  obj_private = hppa_objfile_priv_data.get (objfile);
   if (obj_private == NULL)
     obj_private = hppa_init_objfile_priv_data (objfile);
 
@@ -501,16 +502,14 @@ find_unwind_entry (CORE_ADDR pc)
     {
       struct hppa_unwind_info *ui;
       ui = NULL;
-      priv = ((struct hppa_objfile_private *)
-	      objfile_data (objfile, hppa_objfile_priv_data));
+      priv = hppa_objfile_priv_data.get (objfile);
       if (priv)
 	ui = ((struct hppa_objfile_private *) priv)->unwind_info;
 
       if (!ui)
 	{
 	  read_unwind_info (objfile);
-	  priv = ((struct hppa_objfile_private *)
-		  objfile_data (objfile, hppa_objfile_priv_data));
+	  priv = hppa_objfile_priv_data.get (objfile);
 	  if (priv == NULL)
 	    error (_("Internal error reading unwind information."));
 	  ui = ((struct hppa_objfile_private *) priv)->unwind_info;
@@ -3173,8 +3172,6 @@ void
 _initialize_hppa_tdep (void)
 {
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
-
-  hppa_objfile_priv_data = register_objfile_data ();
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   _("Print unwind table entry at given address."),
