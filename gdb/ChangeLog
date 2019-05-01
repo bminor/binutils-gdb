@@ -1,5 +1,16 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (struct ada_inferior_data): Add initializers.
+	(ada_inferior_data): Change type.
+	(ada_inferior_data_cleanup): Remove.
+	(get_ada_inferior_data, ada_inferior_exit)
+	(struct ada_pspace_data): Add initializers, destructor.
+	(ada_pspace_data_handle): Change type.
+	(get_ada_pspace_data): Update.
+	(ada_pspace_data_cleanup): Remove.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* coffread.c (struct coff_symfile_info): Add initializers.
 	(coff_objfile_data_key): Move lower.  Change type.
 	(coff_symfile_init, coff_symfile_read, _initialize_coffread):

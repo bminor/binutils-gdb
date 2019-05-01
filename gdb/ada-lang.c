@@ -378,27 +378,16 @@ struct ada_inferior_data
      tagged types.  With older versions of GNAT, this type was directly
      accessible through a component ("tsd") in the object tag.  But this
      is no longer the case, so we cache it for each inferior.  */
-  struct type *tsd_type;
+  struct type *tsd_type = nullptr;
 
   /* The exception_support_info data.  This data is used to determine
      how to implement support for Ada exception catchpoints in a given
      inferior.  */
-  const struct exception_support_info *exception_info;
+  const struct exception_support_info *exception_info = nullptr;
 };
 
 /* Our key to this module's inferior data.  */
-static const struct inferior_data *ada_inferior_data;
-
-/* A cleanup routine for our inferior data.  */
-static void
-ada_inferior_data_cleanup (struct inferior *inf, void *arg)
-{
-  struct ada_inferior_data *data;
-
-  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
-  if (data != NULL)
-    xfree (data);
-}
+static const struct inferior_key<ada_inferior_data> ada_inferior_data;
 
 /* Return our inferior data for the given inferior (INF).
 
@@ -413,12 +402,9 @@ get_ada_inferior_data (struct inferior *inf)
 {
   struct ada_inferior_data *data;
 
-  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
+  data = ada_inferior_data.get (inf);
   if (data == NULL)
-    {
-      data = XCNEW (struct ada_inferior_data);
-      set_inferior_data (inf, ada_inferior_data, data);
-    }
+    data = ada_inferior_data.emplace (inf);
 
   return data;
 }
@@ -429,8 +415,7 @@ get_ada_inferior_data (struct inferior *inf)
 static void
 ada_inferior_exit (struct inferior *inf)
 {
-  ada_inferior_data_cleanup (inf, NULL);
-  set_inferior_data (inf, ada_inferior_data, NULL);
+  ada_inferior_data.clear (inf);
 }
 
 
@@ -439,12 +424,18 @@ ada_inferior_exit (struct inferior *inf)
 /* This module's per-program-space data.  */
 struct ada_pspace_data
 {
+  ~ada_pspace_data ()
+  {
+    if (sym_cache != NULL)
+      ada_free_symbol_cache (sym_cache);
+  }
+
   /* The Ada symbol cache.  */
-  struct ada_symbol_cache *sym_cache;
+  struct ada_symbol_cache *sym_cache = nullptr;
 };
 
 /* Key to our per-program-space data.  */
-static const struct program_space_data *ada_pspace_data_handle;
+static const struct program_space_key<ada_pspace_data> ada_pspace_data_handle;
 
 /* Return this module's data for the given program space (PSPACE).
    If not is found, add a zero'ed one now.
@@ -456,27 +447,11 @@ get_ada_pspace_data (struct program_space *pspace)
 {
   struct ada_pspace_data *data;
 
-  data = ((struct ada_pspace_data *)
-	  program_space_data (pspace, ada_pspace_data_handle));
+  data = ada_pspace_data_handle.get (pspace);
   if (data == NULL)
-    {
-      data = XCNEW (struct ada_pspace_data);
-      set_program_space_data (pspace, ada_pspace_data_handle, data);
-    }
+    data = ada_pspace_data_handle.emplace (pspace);
 
   return data;
-}
-
-/* The cleanup callback for this module's per-program-space data.  */
-
-static void
-ada_pspace_data_cleanup (struct program_space *pspace, void *data)
-{
-  struct ada_pspace_data *pspace_data = (struct ada_pspace_data *) data;
-
-  if (pspace_data->sym_cache != NULL)
-    ada_free_symbol_cache (pspace_data->sym_cache);
-  xfree (pspace_data);
 }
 
                         /* Utilities */
@@ -14648,10 +14623,4 @@ DWARF attribute."),
   gdb::observers::new_objfile.attach (ada_new_objfile_observer);
   gdb::observers::free_objfile.attach (ada_free_objfile_observer);
   gdb::observers::inferior_exit.attach (ada_inferior_exit);
-
-  /* Setup various context-specific data.  */
-  ada_inferior_data
-    = register_inferior_data_with_cleanup (NULL, ada_inferior_data_cleanup);
-  ada_pspace_data_handle
-    = register_program_space_data_with_cleanup (NULL, ada_pspace_data_cleanup);
 }
