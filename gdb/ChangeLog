@@ -1,5 +1,13 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* coffread.c (struct coff_symfile_info): Add initializers.
+	(coff_objfile_data_key): Move lower.  Change type.
+	(coff_symfile_init, coff_symfile_read, _initialize_coffread):
+	Update.
+	(coff_free_info): Remove.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* fbsd-tdep.c (struct fbsd_pspace_data): Add initializers.
 	(fbsd_pspace_data_handle): Move lower.  Change type.
 	(get_fbsd_pspace_data): Update.
