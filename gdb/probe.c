@@ -47,7 +47,7 @@ public:
   bool is_linespec (const char **linespecp) const override;
 
   /* See probe.h.  */
-  void get_probes (std::vector<probe *> *probesp,
+  void get_probes (std::vector<std::unique_ptr<probe>> *probesp,
 		   struct objfile *objfile) const override;
 
   /* See probe.h.  */
@@ -84,10 +84,10 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 			   objfile_namestr) != 0)
 	continue;
 
-      const std::vector<probe *> &probes
+      const std::vector<std::unique_ptr<probe>> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (probe *p : probes)
+      for (auto &p : probes)
 	{
 	  if (spops != &any_static_probe_ops && p->get_static_ops () != spops)
 	    continue;
@@ -103,7 +103,7 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 	  sal.explicit_pc = 1;
 	  sal.section = find_pc_overlay (sal.pc);
 	  sal.pspace = search_pspace;
-	  sal.prob = p;
+	  sal.prob = p.get ();
 	  sal.objfile = objfile;
 
 	  result->push_back (std::move (sal));
@@ -223,9 +223,9 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
   if (!objfile->sf || !objfile->sf->sym_probe_fns)
     return result;
 
-  const std::vector<probe *> &probes
+  const std::vector<std::unique_ptr<probe>> &probes
     = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-  for (probe *p : probes)
+  for (auto &p : probes)
     {
       if (p->get_provider () != provider)
 	continue;
@@ -233,7 +233,7 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
       if (p->get_name () != name)
 	continue;
 
-      result.push_back (p);
+      result.push_back (p.get ());
     }
 
   return result;
@@ -256,13 +256,13 @@ find_probe_by_pc (CORE_ADDR pc)
 	continue;
 
       /* If this proves too inefficient, we can replace with a hash.  */
-      const std::vector<probe *> &probes
+      const std::vector<std::unique_ptr<probe>> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-      for (probe *p : probes)
+      for (auto &p : probes)
 	if (p->get_relocated_address (objfile) == pc)
 	  {
 	    result.objfile = objfile;
-	    result.prob = p;
+	    result.prob = p.get ();
 	    return result;
 	  }
     }
@@ -305,10 +305,10 @@ collect_probes (const std::string &objname, const std::string &provider,
 	    continue;
 	}
 
-      const std::vector<probe *> &probes
+      const std::vector<std::unique_ptr<probe>> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (probe *p : probes)
+      for (auto &p : probes)
 	{
 	  if (spops != &any_static_probe_ops && p->get_static_ops () != spops)
 	    continue;
@@ -321,7 +321,7 @@ collect_probes (const std::string &objname, const std::string &provider,
 	      && probe_pat->exec (p->get_name ().c_str (), 0, NULL, 0) != 0)
 	    continue;
 
-	  result.emplace_back (p, objfile);
+	  result.emplace_back (p.get (), objfile);
 	}
     }
 
@@ -750,7 +750,7 @@ any_static_probe_ops::is_linespec (const char **linespecp) const
 /* Implementation of 'get_probes' method.  */
 
 void
-any_static_probe_ops::get_probes (std::vector<probe *> *probesp,
+any_static_probe_ops::get_probes (std::vector<std::unique_ptr<probe>> *probesp,
 				  struct objfile *objfile) const
 {
   /* No probes can be provided by this dummy backend.  */

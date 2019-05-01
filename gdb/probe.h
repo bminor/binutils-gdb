@@ -62,7 +62,7 @@ public:
   virtual bool is_linespec (const char **linespecp) const = 0;
 
   /* Function that should fill PROBES with known probes from OBJFILE.  */
-  virtual void get_probes (std::vector<probe *> *probes,
+  virtual void get_probes (std::vector<std::unique_ptr<probe>> *probes,
 			    struct objfile *objfile) const = 0;
 
   /* Return a pointer to a name identifying the probe type.  This is

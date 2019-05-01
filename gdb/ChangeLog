@@ -1,5 +1,27 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* symfile.h (struct sym_probe_fns) <sym_get_probes>: Change type.
+	* symfile-debug.c (debug_sym_get_probes): Change type.
+	* stap-probe.c (handle_stap_probe):
+	(stap_static_probe_ops::get_probes): Change type.
+	* probe.h (class static_probe_ops) <get_probes>: Change type.
+	* probe.c (class any_static_probe_ops) <get_probes>: Change type.
+	(parse_probes_in_pspace): Update.
+	(find_probes_in_objfile, find_probe_by_pc, collect_probes):
+	Update.
+	(any_static_probe_ops::get_probes): Change type.
+	* elfread.c (elfread_data): New typedef.
+	(probe_key): Change type.
+	(elf_get_probes): Likewise.  Update.
+	(probe_key_free): Remove.
+	(_initialize_elfread): Update.
+	* dtrace-probe.c (class dtrace_static_probe_ops) <get_probes>:
+	Change type.
+	(dtrace_process_dof_probe, dtrace_process_dof)
+	(dtrace_static_probe_ops::get_probe): Change type.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (struct xcoff_symfile_info): Rename from
 	coff_symfile_info.  Add initializers.
 	(xcoff_objfile_data_key): Move lower.  Change type.

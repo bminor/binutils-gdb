@@ -382,13 +382,13 @@ static const struct quick_symbol_functions debug_sym_quick_functions =
 
 /* Debugging version of struct sym_probe_fns.  */
 
-static const std::vector<probe *> &
+static const std::vector<std::unique_ptr<probe>> &
 debug_sym_get_probes (struct objfile *objfile)
 {
   const struct debug_sym_fns_data *debug_data
     = symfile_debug_objfile_data_key.get (objfile);
 
-  const std::vector<probe *> &retval
+  const std::vector<std::unique_ptr<probe>> &retval
     = debug_data->real_sf->sym_probe_fns->sym_get_probes (objfile);
 
   fprintf_filtered (gdb_stdlog,

@@ -64,9 +64,13 @@ struct elfinfo
     asection *mdebugsect;	/* Section pointer for .mdebug section */
   };
 
+/* Type for per-BFD data.  */
+
+typedef std::vector<std::unique_ptr<probe>> elfread_data;
+
 /* Per-BFD data for probe info.  */
 
-static const struct bfd_data *probe_key = NULL;
+static const struct bfd_key<elfread_data> probe_key;
 
 /* Minimal symbols located at the GOT entries for .plt - that is the real
    pointer where the given entry will jump to.  It gets updated by the real
@@ -1347,41 +1351,22 @@ elf_symfile_init (struct objfile *objfile)
 
 /* Implementation of `sym_get_probes', as documented in symfile.h.  */
 
-static const std::vector<probe *> &
+static const elfread_data &
 elf_get_probes (struct objfile *objfile)
 {
-  std::vector<probe *> *probes_per_bfd;
-
-  /* Have we parsed this objfile's probes already?  */
-  probes_per_bfd = (std::vector<probe *> *) bfd_data (objfile->obfd, probe_key);
+  elfread_data *probes_per_bfd = probe_key.get (objfile->obfd);
 
   if (probes_per_bfd == NULL)
     {
-      probes_per_bfd = new std::vector<probe *>;
+      probes_per_bfd = probe_key.emplace (objfile->obfd);
 
       /* Here we try to gather information about all types of probes from the
 	 objfile.  */
       for (const static_probe_ops *ops : all_static_probe_ops)
 	ops->get_probes (probes_per_bfd, objfile);
-
-      set_bfd_data (objfile->obfd, probe_key, probes_per_bfd);
     }
 
   return *probes_per_bfd;
-}
-
-/* Helper function used to free the space allocated for storing SystemTap
-   probe information.  */
-
-static void
-probe_key_free (bfd *abfd, void *d)
-{
-  std::vector<probe *> *probes = (std::vector<probe *> *) d;
-
-  for (probe *p : *probes)
-    delete p;
-
-  delete probes;
 }
 
 
@@ -1475,7 +1460,6 @@ static const struct gnu_ifunc_fns elf_gnu_ifunc_fns =
 void
 _initialize_elfread (void)
 {
-  probe_key = register_bfd_data_with_cleanup (NULL, probe_key_free);
   add_symtab_fns (bfd_target_elf_flavour, &elf_sym_fns);
 
   elf_objfile_gnu_ifunc_cache_data = register_objfile_data ();

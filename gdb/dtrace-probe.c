@@ -81,7 +81,7 @@ public:
   bool is_linespec (const char **linespecp) const override;
 
   /* See probe.h.  */
-  void get_probes (std::vector<probe *> *probesp,
+  void get_probes (std::vector<std::unique_ptr<probe>> *probesp,
 		   struct objfile *objfile) const override;
 
   /* See probe.h.  */
@@ -380,7 +380,7 @@ struct dtrace_dof_probe
 static void
 dtrace_process_dof_probe (struct objfile *objfile,
 			  struct gdbarch *gdbarch,
-			  std::vector<probe *> *probesp,
+			  std::vector<std::unique_ptr<probe>> *probesp,
 			  struct dtrace_dof_hdr *dof,
 			  struct dtrace_dof_probe *probe,
 			  struct dtrace_dof_provider *provider,
@@ -507,7 +507,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 					    std::move (enablers_copy));
 
       /* Successfully created probe.  */
-      probesp->push_back (ret);
+      probesp->emplace_back (ret);
     }
 }
 
@@ -518,7 +518,8 @@ dtrace_process_dof_probe (struct objfile *objfile,
 
 static void
 dtrace_process_dof (asection *sect, struct objfile *objfile,
-		    std::vector<probe *> *probesp, struct dtrace_dof_hdr *dof)
+		    std::vector<std::unique_ptr<probe>> *probesp,
+		    struct dtrace_dof_hdr *dof)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dtrace_dof_sect *section;
@@ -833,8 +834,9 @@ dtrace_static_probe_ops::is_linespec (const char **linespecp) const
 /* Implementation of the get_probes method.  */
 
 void
-dtrace_static_probe_ops::get_probes (std::vector<probe *> *probesp,
-				     struct objfile *objfile) const
+dtrace_static_probe_ops::get_probes
+  (std::vector<std::unique_ptr<probe>> *probesp,
+   struct objfile *objfile) const
 {
   bfd *abfd = objfile->obfd;
   asection *sect = NULL;

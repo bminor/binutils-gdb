@@ -106,7 +106,7 @@ public:
   bool is_linespec (const char **linespecp) const override;
 
   /* See probe.h.  */
-  void get_probes (std::vector<probe *> *probesp,
+  void get_probes (std::vector<std::unique_ptr<probe>> *probesp,
 		   struct objfile *objfile) const override;
 
   /* See probe.h.  */
@@ -1497,7 +1497,8 @@ stap_probe::gen_info_probes_table_values () const
 
 static void
 handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
-		   std::vector<probe *> *probesp, CORE_ADDR base)
+		   std::vector<std::unique_ptr<probe>> *probesp,
+		   CORE_ADDR base)
 {
   bfd *abfd = objfile->obfd;
   int size = bfd_get_arch_size (abfd) / 8;
@@ -1561,7 +1562,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 				    address, gdbarch, sem_addr, probe_args);
 
   /* Successfully created probe.  */
-  probesp->push_back (ret);
+  probesp->emplace_back (ret);
 }
 
 /* Helper function which tries to find the base address of the SystemTap
@@ -1615,8 +1616,9 @@ stap_static_probe_ops::is_linespec (const char **linespecp) const
 /* Implementation of the 'get_probes' method.  */
 
 void
-stap_static_probe_ops::get_probes (std::vector<probe *> *probesp,
-				   struct objfile *objfile) const
+stap_static_probe_ops::get_probes
+  (std::vector<std::unique_ptr<probe>> *probesp,
+   struct objfile *objfile) const
 {
   /* If we are here, then this is the first time we are parsing the
      SystemTap probe's information.  We basically have to count how many
