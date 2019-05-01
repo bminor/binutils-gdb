@@ -53,3 +53,8 @@ if ![info exists CXX_FOR_TARGET] {
     set CXX_FOR_TARGET "$found_gxx"
 }
 set CXX_FOR_TARGET "$contrib_dir/cc-with-tweaks.sh $CC_WITH_TWEAKS_FLAGS $CXX_FOR_TARGET"
+
+set pwd [exec pwd -P]
+exec echo $GDB $INTERNAL_GDBFLAGS $GDBFLAGS \"\$@\" > $pwd/gdb.sh
+exec chmod +x gdb.sh
+set env(GDB) $pwd/gdb.sh

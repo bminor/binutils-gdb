@@ -1,5 +1,9 @@
 2019-05-01  Tom de Vries  <tdevries@suse.de>
 
+	* boards/cc-with-tweaks.exp: Generate gdb.sh, and pass it in env(GDB).
+
+2019-05-01  Tom de Vries  <tdevries@suse.de>
+
 	* boards/dwarf4-gdb-index.exp: Use cc-with-tweaks.exp.
 
 2019-04-30  Ali Tamur  <tamur@google.com>
