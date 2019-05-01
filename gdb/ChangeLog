@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (rs6000_builtin_type_data): Change type.
+	(rs6000_builtin_type, _initialize_stabsread): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* mips-tdep.c (mips_pdr_data): Remove.
 	(_initialize_mips_tdep): Update.
 

@@ -2075,13 +2075,14 @@ again:
 /* RS/6000 xlc/dbx combination uses a set of builtin types, starting from -1.
    Return the proper type node for a given builtin type number.  */
 
-static const struct objfile_data *rs6000_builtin_type_data;
+static const struct objfile_key<struct type *,
+				gdb::noop_deleter<struct type *>>
+  rs6000_builtin_type_data;
 
 static struct type *
 rs6000_builtin_type (int typenum, struct objfile *objfile)
 {
-  struct type **negative_types
-    = (struct type **) objfile_data (objfile, rs6000_builtin_type_data);
+  struct type **negative_types = rs6000_builtin_type_data.get (objfile);
 
   /* We recognize types numbered from -NUMBER_RECOGNIZED to -1.  */
 #define NUMBER_RECOGNIZED 34
@@ -2098,7 +2099,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       /* This includes an empty slot for type number -0.  */
       negative_types = OBSTACK_CALLOC (&objfile->objfile_obstack,
 				       NUMBER_RECOGNIZED + 1, struct type *);
-      set_objfile_data (objfile, rs6000_builtin_type_data, negative_types);
+      rs6000_builtin_type_data.set (objfile, negative_types);
     }
 
   if (negative_types[-typenum] != NULL)
@@ -4800,8 +4801,6 @@ hashname (const char *name)
 void
 _initialize_stabsread (void)
 {
-  rs6000_builtin_type_data = register_objfile_data ();
-
   undef_types_allocated = 20;
   undef_types_length = 0;
   undef_types = XNEWVEC (struct type *, undef_types_allocated);
