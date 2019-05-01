@@ -1,3 +1,7 @@
+2019-05-01  Tom de Vries  <tdevries@suse.de>
+
+	* boards/dwarf4-gdb-index.exp: Use cc-with-tweaks.exp.
+
 2019-04-30  Ali Tamur  <tamur@google.com>
 
 	* lib/dwarf.exp(): Added DW_FORM_strx1-4.
