@@ -584,9 +584,6 @@ extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
 
-/* * The name of the interpreter if specified on the command line.  */
-extern char *interpreter_p;
-
 struct target_waitstatus;
 struct cmd_list_element;
 

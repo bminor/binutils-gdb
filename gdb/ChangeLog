@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* tui/tui-interp.c: Include main.h.
+	* interps.c: Include main.h.
+	* main.h (interpreter_p): Declare.
+	* defs.h (interpreter_p): Don't declare.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2loc.c: Include dwarf2read.h.
 	* defs.h (read_unsigned_leb128): Don't declare.
 	* dwarf2read.h (read_unsigned_leb128): Declare.

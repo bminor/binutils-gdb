@@ -34,6 +34,7 @@
 #include "observable.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "main.h"
 
 /* Set to 1 when the TUI mode must be activated when we first start
    gdb.  */

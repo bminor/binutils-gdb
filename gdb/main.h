@@ -35,6 +35,9 @@ extern int return_child_result_value;
 extern int batch_silent;
 extern int batch_flag;
 
+/* * The name of the interpreter if specified on the command line.  */
+extern char *interpreter_p;
+
 /* From mingw-hdep.c, used by main.c.  */
 
 /* Return argv[0] in absolute form, if possible, or ARGV0 if not.  The
