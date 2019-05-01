@@ -1,3 +1,8 @@
+2019-05-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* rust-lang.c (val_print_struct): Handle printing structures
+	containing strings.
+
 2019-05-02  Tom Tromey  <tromey@adacore.com>
 
 	* valarith.c (_initialize_valarith): Remove.

@@ -378,6 +378,14 @@ val_print_struct (struct type *type, int embedded_offset,
 
   if (rust_slice_type_p (type) && strcmp (TYPE_NAME (type), "&str") == 0)
     {
+      /* If what we are printing here is actually a string within a
+	 structure then VAL will be the original parent value, while TYPE
+	 will be the type of the structure representing the string we want
+	 to print.
+	 However, RUST_VAL_PRINT_STR looks up the fields of the string
+	 inside VAL, assuming that VAL is the string.
+	 So, recreate VAL as a value representing just the string.  */
+      val = value_at_lazy (type, value_address (val) + embedded_offset);
       rust_val_print_str (stream, val, options);
       return;
     }

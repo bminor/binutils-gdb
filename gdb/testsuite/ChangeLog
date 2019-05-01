@@ -1,3 +1,9 @@
+2019-05-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.rust/simple.exp: Add new test case.
+	* gdb.rust/simple.rs (struct StringAtOffset): New struct.
+	(main): Initialise an instance of the new struct.
+
 2019-05-01  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/packed_array_assign/aggregates.ads (Nested_Packed): New

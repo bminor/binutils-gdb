@@ -85,6 +85,12 @@ union Union {
     f2: u8,
 }
 
+struct StringAtOffset {
+    pub field1: &'static str,
+    pub field2: i32,
+    pub field3: &'static str,
+}
+
 // A simple structure whose layout won't be changed by the compiler,
 // so that ptype/o testing will work on any platform.
 struct SimpleLayout {
@@ -145,6 +151,8 @@ fn main () {
 
     let to1 = &w[..3];
     let to2 = &slice[..1];
+
+    let st = StringAtOffset { field1: "hello", field2: 1, field3: "world" };
 
     // tests for enum optimizations
 

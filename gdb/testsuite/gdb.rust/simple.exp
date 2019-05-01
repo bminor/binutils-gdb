@@ -239,6 +239,9 @@ gdb_test "print custom_some" \
     " = simple::NonZeroOptimized::Value\\(\[a-z\]+::string::String .*"
 gdb_test "print custom_none" " = simple::NonZeroOptimized::Empty"
 
+gdb_test "print st" \
+    " = simple::StringAtOffset {field1: \"hello\", field2: 1, field3: \"world\"}"
+
 proc test_one_slice {svar length base range} {
     global hex
 
