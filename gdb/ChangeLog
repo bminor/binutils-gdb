@@ -1,5 +1,13 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* nto-tdep.c (nto_inferior_data_reg): Change type.
+	(nto_inferior_data): Update.
+	(nto_inferior_data_cleanup, nto_new_inferior_data)
+	(_initialize_nto_tdep): Remove.
+	* nto-tdep.h (struct nto_inferior_data): Add initializers.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (struct ada_inferior_data): Add initializers.
 	(ada_inferior_data): Change type.
 	(ada_inferior_data_cleanup): Remove.
