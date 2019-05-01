@@ -403,4 +403,6 @@ struct signatured_type
 typedef struct signatured_type *sig_type_ptr;
 DEF_VEC_P (sig_type_ptr);
 
+ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
+
 #endif /* DWARF2READ_H */

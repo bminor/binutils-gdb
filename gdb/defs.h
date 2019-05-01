@@ -582,10 +582,6 @@ extern void copy_integer_to_size (gdb_byte *dest, int dest_size,
 
 extern int watchdog;
 
-/* From dwarf2read.c */
-
-ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
-
 /* Hooks for alternate command interfaces.  */
 
 /* * The name of the interpreter if specified on the command line.  */

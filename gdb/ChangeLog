@@ -1,5 +1,11 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2loc.c: Include dwarf2read.h.
+	* defs.h (read_unsigned_leb128): Don't declare.
+	* dwarf2read.h (read_unsigned_leb128): Declare.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* utils.c (fputs_maybe_filtered): Call can_emit_style_escape as a
 	method.
 

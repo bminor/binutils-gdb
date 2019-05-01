@@ -36,6 +36,7 @@
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
+#include "dwarf2read.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
 #include "common/selftest.h"
