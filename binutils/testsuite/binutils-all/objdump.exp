@@ -526,7 +526,7 @@ proc test_build_id_debuglink {} {
     }
     set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }

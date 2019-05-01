@@ -683,7 +683,7 @@ proc test_gnu_debuglink {} {
 
     set test "gnu-debuglink"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }
