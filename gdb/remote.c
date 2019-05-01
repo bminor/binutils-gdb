@@ -10378,9 +10378,9 @@ remote_target::remove_watchpoint (CORE_ADDR addr, int len,
 }
 
 
-int remote_hw_watchpoint_limit = -1;
-int remote_hw_watchpoint_length_limit = -1;
-int remote_hw_breakpoint_limit = -1;
+static int remote_hw_watchpoint_limit = -1;
+static int remote_hw_watchpoint_length_limit = -1;
+static int remote_hw_breakpoint_limit = -1;
 
 int
 remote_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)

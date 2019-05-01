@@ -1,5 +1,11 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* remote.c (remote_hw_watchpoint_limit)
+	(remote_hw_watchpoint_length_limit, remote_hw_breakpoint_limit):
+	Now static.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* maint.c (_initialize_maint_cmds): Move initialization code to
 	remote.c.
 	(watchdog, show_watchdog): Move to remote.c.
