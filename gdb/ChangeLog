@@ -1,5 +1,9 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* common/gdb_unique_ptr.h (struct noop_deleter): New.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* nto-tdep.c (nto_inferior_data_reg): Change type.
 	(nto_inferior_data): Update.
 	(nto_inferior_data_cleanup, nto_new_inferior_data)

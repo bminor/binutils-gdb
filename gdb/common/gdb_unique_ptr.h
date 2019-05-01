@@ -47,6 +47,13 @@ struct xfree_deleter<T[]>
 template<typename T> using unique_xmalloc_ptr
   = std::unique_ptr<T, xfree_deleter<T>>;
 
+/* A no-op deleter.  */
+template<typename T>
+struct noop_deleter
+{
+  void operator() (T *ptr) const { }
+};
+
 } /* namespace gdb */
 
 #endif /* COMMON_GDB_UNIQUE_PTR_H */
