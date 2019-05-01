@@ -46,20 +46,6 @@
 
 static void maintenance_do_deprecate (const char *, int);
 
-/* Set this to the maximum number of seconds to wait instead of waiting forever
-   in target_wait().  If this timer times out, then it generates an error and
-   the command is aborted.  This replaces most of the need for timeouts in the
-   GDB test suite, and makes it possible to distinguish between a hung target
-   and one with slow communications.  */
-
-int watchdog = 0;
-static void
-show_watchdog (struct ui_file *file, int from_tty,
-	       struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("Watchdog timer is %s.\n"), value);
-}
-
 /* Access the maintenance subcommands.  */
 
 static void
@@ -1147,16 +1133,6 @@ If a filter is given, only the tests with that value in their name will ran."),
 
   add_cmd ("selftests", class_maintenance, maintenance_info_selftests,
 	 _("List the registered selftests."), &maintenanceinfolist);
-
-  add_setshow_zinteger_cmd ("watchdog", class_maintenance, &watchdog, _("\
-Set watchdog timer."), _("\
-Show watchdog timer."), _("\
-When non-zero, this timeout is used instead of waiting forever for a target\n\
-to finish a low-level step or continue operation.  If the specified amount\n\
-of time passes without a response from the target, an error occurs."),
-			    NULL,
-			    show_watchdog,
-			    &setlist, &showlist);
 
   add_setshow_boolean_cmd ("profile", class_maintenance,
 			   &maintenance_profile_p, _("\

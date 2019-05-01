@@ -578,10 +578,6 @@ extern void copy_integer_to_size (gdb_byte *dest, int dest_size,
 				  const gdb_byte *source, int source_size,
 				  bool is_signed, enum bfd_endian byte_order);
 
-/* From valops.c */
-
-extern int watchdog;
-
 /* Hooks for alternate command interfaces.  */
 
 struct target_waitstatus;

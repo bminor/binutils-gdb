@@ -9461,6 +9461,20 @@ remote_target::read_frame (gdb::char_vector *buf_p)
     }
 }
 
+/* Set this to the maximum number of seconds to wait instead of waiting forever
+   in target_wait().  If this timer times out, then it generates an error and
+   the command is aborted.  This replaces most of the need for timeouts in the
+   GDB test suite, and makes it possible to distinguish between a hung target
+   and one with slow communications.  */
+
+static int watchdog = 0;
+static void
+show_watchdog (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Watchdog timer is %s.\n"), value);
+}
+
 /* Read a packet from the remote machine, with error checking, and
    store it in *BUF.  Resize *BUF if necessary to hold the result.  If
    FOREVER, wait forever rather than timing out; this is used (in
@@ -14751,6 +14765,16 @@ stepping is supported by the target.  The default is on."),
 			   show_range_stepping,
 			   &setlist,
 			   &showlist);
+
+  add_setshow_zinteger_cmd ("watchdog", class_maintenance, &watchdog, _("\
+Set watchdog timer."), _("\
+Show watchdog timer."), _("\
+When non-zero, this timeout is used instead of waiting forever for a target\n\
+to finish a low-level step or continue operation.  If the specified amount\n\
+of time passes without a response from the target, an error occurs."),
+			    NULL,
+			    show_watchdog,
+			    &setlist, &showlist);
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

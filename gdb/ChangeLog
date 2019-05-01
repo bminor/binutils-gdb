@@ -1,5 +1,15 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* maint.c (_initialize_maint_cmds): Move initialization code to
+	remote.c.
+	(watchdog, show_watchdog): Move to remote.c.
+	* remote.c (watchdog, show_watchdog): Move from maint.c.  Make
+	"watchdog" static.
+	(_initialize_remote): Move initialization code from maint.c.
+	* defs.h (watchdog): Don't declare.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* tui/tui-interp.c: Include main.h.
 	* interps.c: Include main.h.
 	* main.h (interpreter_p): Declare.
