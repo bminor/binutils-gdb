@@ -142,35 +142,27 @@ struct ada_tasks_pspace_data
   /* Nonzero if the data has been initialized.  If set to zero,
      it means that the data has either not been initialized, or
      has potentially become stale.  */
-  int initialized_p;
+  int initialized_p = 0;
 
   /* The ATCB record type.  */
-  struct type *atcb_type;
+  struct type *atcb_type = nullptr;
 
   /* The ATCB "Common" component type.  */
-  struct type *atcb_common_type;
+  struct type *atcb_common_type = nullptr;
 
   /* The type of the "ll" field, from the atcb_common_type.  */
-  struct type *atcb_ll_type;
+  struct type *atcb_ll_type = nullptr;
 
   /* The type of the "call" field, from the atcb_common_type.  */
-  struct type *atcb_call_type;
+  struct type *atcb_call_type = nullptr;
 
   /* The index of various fields in the ATCB record and sub-records.  */
-  struct atcb_fieldnos atcb_fieldno;
+  struct atcb_fieldnos atcb_fieldno {};
 };
 
 /* Key to our per-program-space data.  */
-static const struct program_space_data *ada_tasks_pspace_data_handle;
-
-/* A cleanup routine for our per-program-space data.  */
-static void
-ada_tasks_pspace_data_cleanup (struct program_space *pspace, void *arg)
-{
-  struct ada_tasks_pspace_data *data
-    = (struct ada_tasks_pspace_data *) arg;
-  xfree (data);
-}
+static const struct program_space_key<ada_tasks_pspace_data>
+  ada_tasks_pspace_data_handle;
 
 /* The kind of data structure used by the runtime to store the list
    of Ada tasks.  */
@@ -245,7 +237,8 @@ struct ada_tasks_inferior_data
 };
 
 /* Key to our per-inferior data.  */
-static const struct inferior_data *ada_tasks_inferior_data_handle;
+static const struct inferior_key<ada_tasks_inferior_data>
+  ada_tasks_inferior_data_handle;
 
 /* Return the ada-tasks module's data for the given program space (PSPACE).
    If none is found, add a zero'ed one now.
@@ -257,13 +250,9 @@ get_ada_tasks_pspace_data (struct program_space *pspace)
 {
   struct ada_tasks_pspace_data *data;
 
-  data = ((struct ada_tasks_pspace_data *)
-	  program_space_data (pspace, ada_tasks_pspace_data_handle));
+  data = ada_tasks_pspace_data_handle.get (pspace);
   if (data == NULL)
-    {
-      data = XCNEW (struct ada_tasks_pspace_data);
-      set_program_space_data (pspace, ada_tasks_pspace_data_handle, data);
-    }
+    data = ada_tasks_pspace_data_handle.emplace (pspace);
 
   return data;
 }
@@ -285,24 +274,11 @@ get_ada_tasks_inferior_data (struct inferior *inf)
 {
   struct ada_tasks_inferior_data *data;
 
-  data = ((struct ada_tasks_inferior_data *)
-	  inferior_data (inf, ada_tasks_inferior_data_handle));
+  data = ada_tasks_inferior_data_handle.get (inf);
   if (data == NULL)
-    {
-      data = new ada_tasks_inferior_data;
-      set_inferior_data (inf, ada_tasks_inferior_data_handle, data);
-    }
+    data = ada_tasks_inferior_data_handle.emplace (inf);
 
   return data;
-}
-
-/* A cleanup routine for our per-inferior data.  */
-static void
-ada_tasks_inferior_data_cleanup (struct inferior *inf, void *arg)
-{
-  struct ada_tasks_inferior_data *data
-    = (struct ada_tasks_inferior_data *) arg;
-  delete data;
 }
 
 /* Return the task number of the task whose thread is THREAD, or zero
@@ -1431,13 +1407,6 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
 void
 _initialize_tasks (void)
 {
-  ada_tasks_pspace_data_handle
-    = register_program_space_data_with_cleanup (NULL,
-						ada_tasks_pspace_data_cleanup);
-  ada_tasks_inferior_data_handle
-    = register_inferior_data_with_cleanup (NULL,
-					   ada_tasks_inferior_data_cleanup);
-
   /* Attach various observers.  */
   gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer);
   gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer);
