@@ -5458,14 +5458,15 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 /* This set of objfile-based types is intended to be used by symbol
    readers as basic types.  */
 
-static const struct objfile_data *objfile_type_data;
+static const struct objfile_key<struct objfile_type,
+				gdb::noop_deleter<struct objfile_type>>
+  objfile_type_data;
 
 const struct objfile_type *
 objfile_type (struct objfile *objfile)
 {
   struct gdbarch *gdbarch;
-  struct objfile_type *objfile_type
-    = (struct objfile_type *) objfile_data (objfile, objfile_type_data);
+  struct objfile_type *objfile_type = objfile_type_data.get (objfile);
 
   if (objfile_type)
     return objfile_type;
@@ -5570,7 +5571,7 @@ objfile_type (struct objfile *objfile)
     = init_integer_type (objfile, gdbarch_addr_bit (gdbarch), 1,
 			 "__CORE_ADDR");
 
-  set_objfile_data (objfile, objfile_type_data, objfile_type);
+  objfile_type_data.set (objfile, objfile_type);
   return objfile_type;
 }
 
@@ -5578,7 +5579,6 @@ void
 _initialize_gdbtypes (void)
 {
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
-  objfile_type_data = register_objfile_data ();
 
   add_setshow_zuinteger_cmd ("overload", no_class, &overload_debug,
 			     _("Set debugging of C++ overloading."),

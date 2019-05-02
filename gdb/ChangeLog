@@ -1,5 +1,10 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* gdbtypes.c (objfile_type_data): Change type.
+	(objfile_type, _initialize_gdbtypes): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2-frame.c (dwarf2_frame_objfile_data): Change type.
 	(dwarf2_frame_find_fde, dwarf2_build_frame_info)
 	(_initialize_dwarf2_frame): Update.
