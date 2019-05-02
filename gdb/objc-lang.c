@@ -75,7 +75,7 @@ struct objc_method {
   CORE_ADDR imp;
 };
 
-static const struct objfile_data *objc_objfile_data;
+static const struct objfile_key<unsigned int> objc_objfile_data;
 
 /* Lookup a structure type named "struct NAME", visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
@@ -1004,7 +1004,7 @@ find_methods (char type, const char *theclass, const char *category,
 
       unsigned int objfile_csym = 0;
 
-      objc_csym = (unsigned int *) objfile_data (objfile, objc_objfile_data);
+      objc_csym = objc_objfile_data.get (objfile);
       if (objc_csym != NULL && *objc_csym == 0)
 	/* There are no ObjC symbols in this objfile.  Skip it entirely.  */
 	continue;
@@ -1056,11 +1056,7 @@ find_methods (char type, const char *theclass, const char *category,
 	}
 
       if (objc_csym == NULL)
-	{
-	  objc_csym = XOBNEW (&objfile->objfile_obstack, unsigned int);
-	  *objc_csym = objfile_csym;
-	  set_objfile_data (objfile, objc_objfile_data, objc_csym);
-	}
+	objc_csym = objc_objfile_data.emplace (objfile, objfile_csym);
       else
 	/* Count of ObjC methods in this objfile should be constant.  */
 	gdb_assert (*objc_csym == objfile_csym);
@@ -1575,10 +1571,4 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   if (res == 0)
     return 1;
   return 0;
-}
-
-void
-_initialize_objc_lang (void)
-{
-  objc_objfile_data = register_objfile_data ();
 }

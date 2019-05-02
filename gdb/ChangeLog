@@ -1,5 +1,11 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* objc-lang.c (objc_objfile_data): Change type.
+	(find_methods): Update.
+	(_initialize_objc_lang): Remove.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (rs6000_builtin_type_data): Change type.
 	(rs6000_builtin_type, _initialize_stabsread): Update.
 
