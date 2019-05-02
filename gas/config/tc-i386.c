@@ -6242,7 +6242,19 @@ process_suffix (void)
 	   /* exclude fldenv/frstor/fsave/fstenv */
 	   && i.tm.opcode_modifier.no_ssuf)
     {
-      i.suffix = stackop_size;
+      if (stackop_size == LONG_MNEM_SUFFIX
+	  && i.tm.base_opcode == 0xcf)
+	{
+	  /* stackop_size is set to LONG_MNEM_SUFFIX for the
+	     .code16gcc directive to support 16-bit mode with
+	     32-bit address.  For IRET without a suffix, generate
+	     16-bit IRET (opcode 0xcf) to return from an interrupt
+	     handler.  */
+	  i.suffix = WORD_MNEM_SUFFIX;
+	  as_warn (_("generating 16-bit `iret' for .code16gcc directive"));
+	}
+      else
+	i.suffix = stackop_size;
     }
   else if (intel_syntax
 	   && !i.suffix
@@ -6352,13 +6364,7 @@ process_suffix (void)
 	    if (!add_prefix (ADDR_PREFIX_OPCODE))
 	      return 0;
 	}
-      /* stackop_size is set to LONG_MNEM_SUFFIX for the .code16gcc
-	 directive to support 16bit mode with 32-bit address.  Since
-	 IRET (opcode 0xcf) in 16bit mode returns from an interrupt
-	 in 16bit mode, we shouldn't add DATA_PREFIX_OPCODE here.  */
       else if (i.suffix != QWORD_MNEM_SUFFIX
-	       && (stackop_size != LONG_MNEM_SUFFIX
-		   || i.tm.base_opcode != 0xcf)
 	       && !i.tm.opcode_modifier.ignoresize
 	       && !i.tm.opcode_modifier.floatmf
 	       && !i.tm.opcode_modifier.vex

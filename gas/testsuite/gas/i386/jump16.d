@@ -1,5 +1,6 @@
 #name: i386 jump16
 #objdump: -drw -mi8086
+#warning_output: jump16.e
 
 .*:     file format .*i386.*
 
@@ -69,4 +70,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	ea 00 00 90 90       	ljmp   \$0x9090,\$0x0	f2: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	cf                   	iret   
 [ 	]*[a-f0-9]+:	cf                   	iret   
+[ 	]*[a-f0-9]+:	66 cf                	iretl  
+[ 	]*[a-f0-9]+:	cf                   	iret   
+[ 	]*[a-f0-9]+:	cf                   	iret   
+[ 	]*[a-f0-9]+:	66 cf                	iretl  
 #pass
