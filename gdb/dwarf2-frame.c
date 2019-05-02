@@ -1463,7 +1463,9 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
   return get_frame_base (this_frame);
 }
 
-const struct objfile_data *dwarf2_frame_objfile_data;
+const struct objfile_key<dwarf2_fde_table,
+			 gdb::noop_deleter<dwarf2_fde_table>>
+  dwarf2_frame_objfile_data;
 
 static unsigned int
 read_1_byte (bfd *abfd, const gdb_byte *buf)
@@ -1708,13 +1710,11 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
-      fde_table = ((struct dwarf2_fde_table *)
-		   objfile_data (objfile, dwarf2_frame_objfile_data));
+      fde_table = dwarf2_frame_objfile_data.get (objfile);
       if (fde_table == NULL)
 	{
 	  dwarf2_build_frame_info (objfile);
-	  fde_table = ((struct dwarf2_fde_table *)
-		       objfile_data (objfile, dwarf2_frame_objfile_data));
+	  fde_table = dwarf2_frame_objfile_data.get (objfile);
 	}
       gdb_assert (fde_table != NULL);
 
@@ -2397,7 +2397,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       xfree (fde_table.entries);
     }
 
-  set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
+  dwarf2_frame_objfile_data.set (objfile, fde_table2);
 }
 
 /* Handle 'maintenance show dwarf unwinders'.  */
@@ -2416,7 +2416,6 @@ void
 _initialize_dwarf2_frame (void)
 {
   dwarf2_frame_data = gdbarch_data_register_pre_init (dwarf2_frame_init);
-  dwarf2_frame_objfile_data = register_objfile_data ();
 
   add_setshow_boolean_cmd ("unwinders", class_obscure,
 			   &dwarf2_frame_unwinders_enabled_p , _("\

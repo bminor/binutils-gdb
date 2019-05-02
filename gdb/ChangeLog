@@ -1,5 +1,11 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2-frame.c (dwarf2_frame_objfile_data): Change type.
+	(dwarf2_frame_find_fde, dwarf2_build_frame_info)
+	(_initialize_dwarf2_frame): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* objc-lang.c (objc_objfile_data): Change type.
 	(find_methods): Update.
 	(_initialize_objc_lang): Remove.
