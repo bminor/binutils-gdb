@@ -1,3 +1,9 @@
+2019-05-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 24493
+	* coffcode.h (styp_to_sec_flags): Treat .gnu.debuglink and
+	.gnu.debugaltlink sections as debugging sections.
+
 2019-04-30  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add has_gotrel.

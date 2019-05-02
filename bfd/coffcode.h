@@ -1174,6 +1174,11 @@ styp_to_sec_flags (bfd *abfd,
 #ifdef COFF_LONG_SECTION_NAMES
       || CONST_STRNEQ (name, GNU_LINKONCE_WI)
       || CONST_STRNEQ (name, GNU_LINKONCE_WT)
+      /* FIXME: These definitions ought to be in a header file.  */
+#define GNU_DEBUGLINK		".gnu_debuglink"
+#define GNU_DEBUGALTLINK	".gnu_debugaltlink"
+      || CONST_STRNEQ (name, GNU_DEBUGLINK)
+      || CONST_STRNEQ (name, GNU_DEBUGALTLINK)
 #endif
       || CONST_STRNEQ (name, ".stab"))
     is_dbg = TRUE;
