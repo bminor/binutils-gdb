@@ -1740,8 +1740,3 @@ value_in (struct value *element, struct value *set)
     error (_("First argument of 'IN' not in range"));
   return member;
 }
-
-void
-_initialize_valarith (void)
-{
-}

@@ -1,3 +1,7 @@
+2019-05-02  Tom Tromey  <tromey@adacore.com>
+
+	* valarith.c (_initialize_valarith): Remove.
+
 2019-05-01  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_value_primitive_field): Treat more fields as
