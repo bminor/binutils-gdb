@@ -1,3 +1,7 @@
+2019-05-03  Tom de Vries  <tdevries@suse.de>
+
+	* boards/cc-with-gdb-index.exp: New file.
+
 2019-05-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.rust/simple.exp: Add new test case.
