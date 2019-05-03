@@ -1407,9 +1407,17 @@ convert_char_literal (struct type *type, LONGEST val)
     return val;
 
   xsnprintf (name, sizeof (name), "QU%02x", (int) val);
+  size_t len = strlen (name);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1)
     {
-      if (strcmp (name, TYPE_FIELD_NAME (type, f)) == 0)
+      /* Check the suffix because an enum constant in a package will
+	 have a name like "pkg__QUxx".  This is safe enough because we
+	 already have the correct type, and because mangling means
+	 there can't be clashes.  */
+      const char *ename = TYPE_FIELD_NAME (type, f);
+      size_t elen = strlen (ename);
+
+      if (elen >= len && strcmp (name, ename + elen - len) == 0)
 	return TYPE_FIELD_ENUMVAL (type, f);
     }
   return val;

@@ -1,3 +1,8 @@
+2019-05-03  Tom Tromey  <tromey@adacore.com>
+
+	* ada-exp.y (convert_char_literal): Check suffix of each
+	enumerator.
+
 2019-05-03  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
 
 	PR ada/21406:

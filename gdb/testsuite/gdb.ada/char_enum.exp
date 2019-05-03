@@ -27,5 +27,4 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print Char_Enum_Type'('B')" "= 1 'B'"
-
-
+gdb_test "print pck.Global_Enum_Type'('Y')" "= 1 'Y'"

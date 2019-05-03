@@ -1,3 +1,9 @@
+2019-05-03  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/char_enum/pck.ads (Global_Enum_Type): New type.
+	* gdb.ada/char_enum/foo.adb: Use Global_Enum_Type.
+	* gdb.ada/char_enum.exp: Add test.
+
 2019-05-03  Tom de Vries  <tdevries@suse.de>
 
 	* boards/cc-with-gdb-index.exp: New file.
