@@ -49,3 +49,7 @@ gdb_test "info exceptions const.aint" \
                 "constraint_error: $hex" \
                 "const.aint_global_gdb_e: $hex"]
 
+foreach cmd {exception handlers} {
+    gdb_test "complete catch $cmd const.a" \
+	"catch $cmd const.aint_global_gdb_e"
+}

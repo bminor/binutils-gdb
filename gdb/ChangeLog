@@ -1,5 +1,10 @@
 2019-05-10  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (catch_ada_completer): New function.
+	(_initialize_ada_language): Use it.
+
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
 	* thread.c (print_thread_info): Make "requested_threads" const.
 	* gdbthread.h (print_thread_info): Make "requested_threads"
 	const.

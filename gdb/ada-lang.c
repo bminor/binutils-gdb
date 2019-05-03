@@ -13342,6 +13342,22 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
 				   from_tty);
 }
 
+/* Completion function for the Ada "catch" commands.  */
+
+static void
+catch_ada_completer (struct cmd_list_element *cmd, completion_tracker &tracker,
+		     const char *text, const char *word)
+{
+  std::vector<ada_exc_info> exceptions = ada_exceptions_list (NULL);
+
+  for (const ada_exc_info &info : exceptions)
+    {
+      if (startswith (info.name, word))
+	tracker.add_completion
+	  (gdb::unique_xmalloc_ptr<char> (xstrdup (info.name)));
+    }
+}
+
 /* Split the arguments specified in a "catch assert" command.
 
    ARGS contains the command's arguments (or the empty string if
@@ -14562,7 +14578,7 @@ termination).\n\
 Otherwise, the catchpoint only stops when the name of the exception being\n\
 raised is the same as ARG."),
 		     catch_ada_exception_command,
-                     NULL,
+		     catch_ada_completer,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
 
@@ -14570,7 +14586,7 @@ raised is the same as ARG."),
 Catch Ada exceptions, when handled.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_ada_handlers_command,
-                     NULL,
+                     catch_ada_completer,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("assert", _("\
