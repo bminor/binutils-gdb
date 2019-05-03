@@ -1,5 +1,9 @@
 2019-05-03  Eli Zaretskii  <eliz@gnu.org>
 
+	* windows-nat.c [_WIN32_WINNT]: Define _WIN32_WINNT to Windows XP
+	level, so that various Windows header files expose the necessary
+	declarations and definitions.
+
 	* symfile.c (find_separate_debug_file): Remove colon from the
 	drive spec of DOS/Windows file names of the target, so that the
 	file name produced from DEBUGDIR and the target's directory will

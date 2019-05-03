@@ -34,6 +34,15 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
+/* We need at least the level of XP for CONSOLE_FONT_INFO.  */
+#ifdef _WIN32_WINNT
+# if _WIN32_WINNT < 0x0501
+#  undef _WIN32_WINNT
+#  define _WIN32_WINNT 0x0501
+# endif
+#else
+# define _WIN32_WINNT 0x0501
+#endif
 #include <windows.h>
 #include <imagehlp.h>
 #include <psapi.h>
