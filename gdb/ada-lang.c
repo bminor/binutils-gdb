@@ -12483,7 +12483,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
      because the expression may hold the addresses of multiple symbols
      in some cases.  */
   std::multimap<program_space *, struct bp_location *> loc_map;
-  for (struct bp_location *bl = c->loc; bl != NULL; bl = bl->next)
+  for (bp_location *bl = c->loc; bl != NULL; bl = bl->next)
     loc_map.emplace (bl->pspace, bl);
 
   scoped_restore_current_program_space save_pspace;
@@ -13231,7 +13231,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
   excep_string = ada_encode (excep_string);
   std::vector<struct bound_minimal_symbol> symbols
     = ada_lookup_simple_minsyms (excep_string);
-  for (const struct bound_minimal_symbol &msym : symbols)
+  for (const bound_minimal_symbol &msym : symbols)
     {
       if (!result.empty ())
 	result += " or ";

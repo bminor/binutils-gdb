@@ -15962,7 +15962,7 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
 	 field for our sole member child.  */
       struct attribute *discr = dwarf2_attr (child_die, DW_AT_discr_value, cu);
 
-      for (struct die_info *variant_child = child_die->child;
+      for (die_info *variant_child = child_die->child;
 	   variant_child != NULL;
 	   variant_child = sibling_die (variant_child))
 	{

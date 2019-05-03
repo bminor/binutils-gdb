@@ -1,3 +1,24 @@
+2019-05-03  Sandra Loosemore  <sandra@codesourcery.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* dictionary.c (collate_pending_symbols_by_language): Remove
+	"struct" from foreach.
+	* symtab.c (lookup_global_symbol_from_objfile)
+	(lookup_symbol_in_objfile_from_linkage_name): Remove "struct" from
+	foreach.
+	* ser-tcp.c (net_open): Remove "struct" from foreach.
+	* objfiles.c (objfile_relocate, objfile_rebase)
+	(objfile_has_symbols): Remove "struct" from foreach.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Remove "struct"
+	from foreach.
+	* dwarf2read.c (handle_struct_member_die): Remove "struct" from
+	foreach.
+	* darwin-nat.c (thread_info_from_private_thread_info): Remove
+	"struct" from foreach.
+	* ada-lang.c (create_excep_cond_exprs)
+	(ada_exception_catchpoint_cond_string): Remove "struct" from
+	foreach.
+
 2019-05-03  Tom Tromey  <tromey@adacore.com>
 
 	* ada-exp.y (convert_char_literal): Check suffix of each

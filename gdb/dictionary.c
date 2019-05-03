@@ -932,7 +932,7 @@ collate_pending_symbols_by_language (const struct pending *symbol_list)
 {
   std::unordered_map<enum language, std::vector<symbol *>> nsyms;
 
-  for (const struct pending *list_counter = symbol_list;
+  for (const pending *list_counter = symbol_list;
        list_counter != nullptr; list_counter = list_counter->next)
     {
       for (int i = list_counter->nsyms - 1; i >= 0; --i)

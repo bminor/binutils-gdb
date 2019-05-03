@@ -2246,7 +2246,7 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   const char *name,
 				   const domain_enum domain)
 {
-  for (struct objfile *objfile : main_objfile->separate_debug_objfiles ())
+  for (objfile *objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result
         = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK, name, domain);
@@ -2333,7 +2333,7 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
   else
     main_objfile = objfile;
 
-  for (struct objfile *cur_objfile : main_objfile->separate_debug_objfiles ())
+  for (::objfile *cur_objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result;
 

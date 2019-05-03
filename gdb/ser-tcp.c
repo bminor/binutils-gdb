@@ -319,7 +319,7 @@ net_open (struct serial *scb, const char *name)
     {
       got_connrefused = false;
 
-      for (struct addrinfo *iter = ainfo; iter != NULL; iter = iter->ai_next)
+      for (addrinfo *iter = ainfo; iter != NULL; iter = iter->ai_next)
 	{
 	  /* Iterate over the list of possible addresses to connect
 	     to.  For each, we'll try to connect and see if it

@@ -864,7 +864,7 @@ objfile_relocate (struct objfile *objfile,
 
   changed |= objfile_relocate1 (objfile, new_offsets);
 
-  for (struct objfile *debug_objfile : objfile->separate_debug_objfiles ())
+  for (::objfile *debug_objfile : objfile->separate_debug_objfiles ())
     {
       if (debug_objfile == objfile)
 	continue;
@@ -919,7 +919,7 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
 {
   int changed = 0;
 
-  for (struct objfile *debug_objfile : objfile->separate_debug_objfiles ())
+  for (::objfile *debug_objfile : objfile->separate_debug_objfiles ())
     changed |= objfile_rebase1 (debug_objfile, slide);
 
   /* Relocate breakpoints as necessary, after things are relocated.  */
@@ -960,7 +960,7 @@ objfile_has_full_symbols (struct objfile *objfile)
 int
 objfile_has_symbols (struct objfile *objfile)
 {
-  for (struct objfile *o : objfile->separate_debug_objfiles ())
+  for (::objfile *o : objfile->separate_debug_objfiles ())
     if (objfile_has_partial_symbols (o) || objfile_has_full_symbols (o))
       return 1;
   return 0;
