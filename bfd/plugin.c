@@ -530,12 +530,12 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
   struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
   long nsyms = plugin_data->nsyms;
   const struct ld_plugin_symbol *syms = plugin_data->syms;
-  static asection fake_section;
-  static asection fake_common_section;
+  static asection fake_section
+    = BFD_FAKE_SECTION (fake_section, NULL, "plug", 0,
+			SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS);
+  static asection fake_common_section
+    = BFD_FAKE_SECTION (fake_common_section, NULL, "plug", 0, SEC_IS_COMMON);
   int i;
-
-  fake_section.name = ".text";
-  fake_common_section.flags = SEC_IS_COMMON;
 
   for (i = 0; i < nsyms; i++)
     {

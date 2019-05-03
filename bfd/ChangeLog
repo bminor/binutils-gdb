@@ -1,3 +1,15 @@
+2019-05-04  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* syms.c (coff_section_type): Only allow '.', '$' and numeric
+	following the standard section names.
+	(bfd_decode_symclass): Prioritize section flag tests in
+	decode_section_type before name tests in coff_section_type.
+	* plugin.c (bfd_plugin_canonicalize_symtab): Init fake_section
+	and fake_common_section using BFD_FAKE_SECTION.  Use "fake" as
+	their names and choose standard .text section flags for
+	fake_section.
+
 2019-05-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 24493

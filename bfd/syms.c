@@ -595,8 +595,9 @@ static const struct section_to_type stt[] =
 /* Return the single-character symbol type corresponding to
    section S, or '?' for an unknown COFF section.
 
-   Check for any leading string which matches, so .text5 returns
-   't' as well as .text */
+   Check for leading strings which match, followed by a number, '.',
+   or '$' so .text5 matches the .text entry, but .init_array doesn't
+   match the .init entry.  */
 
 static char
 coff_section_type (const char *s)
@@ -604,8 +605,12 @@ coff_section_type (const char *s)
   const struct section_to_type *t;
 
   for (t = &stt[0]; t->section; t++)
-    if (!strncmp (s, t->section, strlen (t->section)))
-      return t->type;
+    {
+      size_t len = strlen (t->section);
+      if (strncmp (s, t->section, len) == 0
+	  && memchr (".$0123456789", s[len], 13) != 0)
+	return t->type;
+    }
 
   return '?';
 }
@@ -700,9 +705,9 @@ bfd_decode_symclass (asymbol *symbol)
     c = 'a';
   else if (symbol->section)
     {
-      c = coff_section_type (symbol->section->name);
+      c = decode_section_type (symbol->section);
       if (c == '?')
-	c = decode_section_type (symbol->section);
+	c = coff_section_type (symbol->section->name);
     }
   else
     return '?';
