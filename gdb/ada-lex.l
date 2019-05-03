@@ -89,7 +89,7 @@ static int paren_depth;
 
 %}
 
-%option case-insensitive interactive nodefault
+%option case-insensitive interactive nodefault noyywrap
 
 %s BEFORE_QUAL_QUOTE
 
@@ -632,12 +632,6 @@ rewind_to_char (int ch)
   while (toupper (*pstate->lexptr) != toupper (ch))
     pstate->lexptr -= 1;
   yyrestart (NULL);
-}
-
-int
-yywrap(void)
-{
-  return 1;
 }
 
 /* Dummy definition to suppress warnings about unused static definitions. */

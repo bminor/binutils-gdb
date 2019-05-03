@@ -717,7 +717,6 @@ primary	:	'*' primary		%prec '.'
 #define yy_switch_to_buffer ada_yy_switch_to_buffer
 #define yyrestart ada_yyrestart
 #define yytext ada_yytext
-#define yywrap ada_yywrap
 
 static struct obstack temp_parse_space;
 

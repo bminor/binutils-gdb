@@ -1,3 +1,10 @@
+2019-05-03  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
+
+	PR ada/21406:
+	* ada-exp.y (yywrap): Don't define.
+	* ada-lex.l (%option): Add noyywrap
+	(yywrap): Remove.
+
 2019-05-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* common/common-defs.h [__MINGW32__ || __CYGWIN__]: Define
