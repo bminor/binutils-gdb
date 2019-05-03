@@ -72,6 +72,20 @@
 #define _FORTIFY_SOURCE 2
 #endif
 
+/* We don't support Windows versions before XP, so we define
+   _WIN32_WINNT correspondingly to ensure the Windows API headers
+   expose the required symbols.  */
+#if defined (__MINGW32__) || defined (__CYGWIN__)
+# ifdef _WIN32_WINNT
+#  if _WIN32_WINNT < 0x0501
+#   undef _WIN32_WINNT
+#   define _WIN32_WINNT 0x0501
+#  endif
+# else
+#  define _WIN32_WINNT 0x0501
+# endif
+#endif	/* __MINGW32__ || __CYGWIN__ */
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

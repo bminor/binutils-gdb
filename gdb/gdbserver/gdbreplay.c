@@ -45,10 +45,6 @@
 #endif
 
 #if USE_WIN32API
-#if _WIN32_WINNT < 0x0501
-# undef _WIN32_WINNT
-# define _WIN32_WINNT 0x0501
-#endif
 #include <ws2tcpip.h>
 #endif
 
