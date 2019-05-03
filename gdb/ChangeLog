@@ -1,3 +1,10 @@
+2019-05-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* symfile.c (find_separate_debug_file): Remove colon from the
+	drive spec of DOS/Windows file names of the target, so that the
+	file name produced from DEBUGDIR and the target's directory will
+	be valid on DOS/Windows systems.
+
 2019-04-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (get_windows_debug_event) <EXIT_PROCESS_DEBUG_EVENT>:
