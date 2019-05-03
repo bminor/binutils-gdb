@@ -18,10 +18,12 @@ program prog
   integer(2) :: twoBytes
   character  :: chValue
   logical(1) :: logValue
+  real(kind=16) :: rVal
 
   oneByte  = 1
   twoBytes = 2
   chValue  = 'a'
   logValue = .true.
+  rVal = 2000
   write(*,*) s
 end

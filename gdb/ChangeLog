@@ -1,5 +1,14 @@
 2019-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR gdb/18644:
+	* f-lang.c (build_fortran_types): Use floatformats_ia64_quad for
+	16-byte floats.
+	* i386-tdep.c (i386_floatformat_for_type): Use
+	floatformats_ia64_quad for the 16-byte floating point component
+	within a fortran 32-byte complex number.
+
+2019-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (struct cu_partial_die_info): Add constructor,
 	delete default constructor.
 	(find_partial_die): Update to return const struct.

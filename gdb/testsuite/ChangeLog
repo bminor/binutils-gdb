@@ -1,3 +1,13 @@
+2019-05-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/18644
+	* gdb.fortran/complex.exp: Remove setup_kfail calls.
+	* gdb.fortran/printing-types.exp: Add new test.
+	* gdb.fortran/printing-types.f90: Add 16-byte real variable for
+	testing.
+	* gdb.fortran/type-kinds.exp (test_cast_1_to_type_kind): Remove
+	setup_kfail call.
+
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* README (Running the Testsuite): Change example.

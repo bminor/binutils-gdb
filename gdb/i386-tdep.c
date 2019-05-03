@@ -8158,7 +8158,9 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
   if (len == 128 && name)
     if (strcmp (name, "__float128") == 0
 	|| strcmp (name, "_Float128") == 0
-	|| strcmp (name, "complex _Float128") == 0)
+	|| strcmp (name, "complex _Float128") == 0
+	|| strcmp (name, "complex(kind=16)") == 0
+	|| strcmp (name, "real(kind=16)") == 0)
       return floatformats_ia64_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);

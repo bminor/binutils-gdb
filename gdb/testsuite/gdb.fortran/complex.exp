@@ -33,7 +33,6 @@ gdb_test "print c4" " = \\(1000,-50\\)"
 gdb_test "print c8" " = \\(321,-22\\)"
 gdb_test "print dc" " = \\(321,-22\\)"
 
-setup_kfail gdb/18644 "*-*-*"
 gdb_test "print c16" " = \\(-874,19\\)"
 
 gdb_test "whatis c" "type = complex\\(kind=4\\)"
@@ -53,7 +52,6 @@ gdb_test "print \$_creal (dc)" " = 321"
 gdb_test "whatis \$" " = real\\*8"
 
 gdb_test "whatis c16" "type = complex\\(kind=16\\)"
-setup_kfail gdb/18644 "*-*-*"
 gdb_test "print \$_creal (c16)" " = -874"
 gdb_test "whatis \$" " = real\\*16"
 

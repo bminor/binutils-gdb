@@ -27,12 +27,6 @@ if { [skip_fortran_tests] } { continue }
 proc test_cast_1_to_type_kind {base_type type_kind cast_result size_result} {
     set type_string "$base_type (kind=$type_kind)"
     gdb_test "p (($type_string) 1)" " = $cast_result"
-
-    if {($base_type == "real" || $base_type == "complex")
-	&& $type_kind == 16} {
-	setup_kfail gdb/18644 "*-*-*"
-    }
-
     gdb_test "p sizeof (($type_string) 1)" " = $size_result"
 }
 
