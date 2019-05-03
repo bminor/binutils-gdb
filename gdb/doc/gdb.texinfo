@@ -20007,9 +20007,13 @@ uses two different methods of looking for the debug file:
 @item
 For the ``debug link'' method, @value{GDBN} looks up the named file in
 the directory of the executable file, then in a subdirectory of that
-directory named @file{.debug}, and finally under each one of the global debug
-directories, in a subdirectory whose name is identical to the leading
-directories of the executable's absolute file name.
+directory named @file{.debug}, and finally under each one of the
+global debug directories, in a subdirectory whose name is identical to
+the leading directories of the executable's absolute file name.  (On
+MS-Windows/MS-DOS, the drive letter of the executable's leading
+directories is converted to a one-letter subdirectory, i.e.@:
+@file{d:/usr/bin/} is converted to @file{/d/usr/bin/}, because Windows
+filesystems disallow colons in file names.)
 
 @item
 For the ``build ID'' method, @value{GDBN} looks in the

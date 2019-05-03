@@ -1,3 +1,9 @@
+2019-05-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Separate Debug Files): Document how the
+	subdirectory of the global debug directory is computed on
+	MS-Windows/MS-DOS.
+
 2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Print Settings): Document 'print max-depth'.

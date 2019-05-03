@@ -1443,11 +1443,33 @@ find_separate_debug_file (const char *dir,
     = dirnames_to_char_ptr_vec (debug_file_directory);
   gdb::unique_xmalloc_ptr<char> canon_sysroot = gdb_realpath (gdb_sysroot);
 
+ /* MS-Windows/MS-DOS don't allow colons in file names; we must
+    convert the drive letter into a one-letter directory, so that the
+    file name resulting from splicing below will be valid.
+
+    FIXME: The below only works when GDB runs on MS-Windows/MS-DOS.
+    There are various remote-debugging scenarios where such a
+    transformation of the drive letter might be required when GDB runs
+    on a Posix host, see
+
+    https://sourceware.org/ml/gdb-patches/2019-04/msg00605.html
+
+    If some of those scenarions need to be supported, we will need to
+    use a different condition for HAS_DRIVE_SPEC and a different macro
+    instead of STRIP_DRIVE_SPEC, which work on Posix systems as well.  */
+  std::string drive;
+  if (HAS_DRIVE_SPEC (dir_notarget))
+    {
+      drive = dir_notarget[0];
+      dir_notarget = STRIP_DRIVE_SPEC (dir_notarget);
+    }
+
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
       debugfile = target_prefix ? "target:" : "";
       debugfile += debugdir.get ();
       debugfile += "/";
+      debugfile += drive;
       debugfile += dir_notarget;
       debugfile += debuglink;
 
