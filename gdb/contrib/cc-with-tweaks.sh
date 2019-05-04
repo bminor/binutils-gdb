@@ -42,7 +42,8 @@
 # -Z invoke objcopy --compress-debug-sections
 # -z compress using dwz
 # -m compress using dwz -m
-# -i make an index
+# -i make an index (.gdb_index)
+# -n make a dwarf5 index (.debug_names)
 # -p create .dwp files (Fission), you need to also use gcc option -gsplit-dwarf
 # If nothing is given, no changes are made
 
@@ -77,6 +78,7 @@ next_is_output_file=no
 output_file=a.out
 
 want_index=false
+index_options=""
 want_dwz=false
 want_multi=false
 want_dwp=false
@@ -87,6 +89,7 @@ while [ $# -gt 0 ]; do
 	-Z) want_objcopy_compress=true ;;
 	-z) want_dwz=true ;;
 	-i) want_index=true ;;
+	-n) want_index=true; index_options=-dwarf-5;;
 	-m) want_multi=true ;;
 	-p) want_dwp=true ;;
 	*) break ;;
@@ -170,7 +173,8 @@ if [ "$want_index" = true ]; then
     # Filter out these messages which would stop dejagnu testcase run:
     # echo "$myname: No index was created for $file" 1>&2
     # echo "$myname: [Was there no debuginfo? Was there already an index?]" 1>&2
-    GDB=$GDB $GDB_ADD_INDEX "$output_file" 2>&1|grep -v "^${GDB_ADD_INDEX##*/}: " >&2
+    GDB=$GDB $GDB_ADD_INDEX $index_options "$output_file" 2>&1 \
+	| grep -v "^${GDB_ADD_INDEX##*/}: " >&2
     rc=${PIPESTATUS[0]}
     [ $rc != 0 ] && exit $rc
 fi

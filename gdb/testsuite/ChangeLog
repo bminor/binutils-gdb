@@ -1,3 +1,7 @@
+2019-05-04  Tom de Vries  <tdevries@suse.de>
+
+	* boards/cc-with-debug-names.exp: New file.
+
 2019-05-03  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/char_enum/pck.ads (Global_Enum_Type): New type.

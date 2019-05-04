@@ -1,3 +1,7 @@
+2019-05-04  Tom de Vries  <tdevries@suse.de>
+
+	* contrib/cc-with-tweaks.sh: Support -n arg.
+
 2019-05-04  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* corelow.c (core_target::detach): Ensure frame cache and
