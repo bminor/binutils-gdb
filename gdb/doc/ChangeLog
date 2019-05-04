@@ -1,3 +1,10 @@
+2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Shell Commands): Document pipe command.
+	(Logging Output): Add a reference to pipe command.
+	(Convenience Variables): Document $_shell_exitcode and
+	$_shell_exitstatus.
+
 2019-05-29  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Continuing and Stepping): Document new

@@ -1454,6 +1454,68 @@ Execute the @code{make} program with the specified
 arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @end table
 
+@table @code
+@kindex pipe
+@kindex |
+@cindex send the output of a gdb command to a shell command
+@anchor{pipe}
+@item pipe [@var{command}] | @var{shell_command}
+@itemx | [@var{command}] | @var{shell_command}
+@itemx pipe -d @var{delim} @var{command} @var{delim} @var{shell_command}
+@itemx | -d @var{delim} @var{command} @var{delim} @var{shell_command}
+Executes @var{command} and sends its output to @var{shell_command}.
+Note that no space is needed around @code{|}.
+If no @var{command} is provided, the last command executed is repeated.
+
+In case the @var{command} contains a @code{|}, the option @code{-d @var{delim}}
+can be used to specify an alternate delimiter string @var{delim} that separates
+the @var{command} from the @var{shell_command}.
+
+Example:
+@smallexample
+@group
+(gdb) p var
+$1 = @{
+  black = 144,
+  red = 233,
+  green = 377,
+  blue = 610,
+  white = 987
+@}
+@end group
+@group
+(gdb) pipe p var|wc
+      7      19      80
+(gdb) |p var|wc -l
+7
+@end group
+@group
+(gdb) p /x var
+$4 = @{
+  black = 0x90,
+  red = 0xe9,
+  green = 0x179,
+  blue = 0x262,
+  white = 0x3db
+@}
+(gdb) ||grep red
+  red => 0xe9,
+@end group
+@group
+(gdb) | -d ! echo this contains a | char\n ! sed -e 's/|/PIPE/'
+this contains a PIPE char
+(gdb) | -d xxx echo this contains a | char!\n xxx sed -e 's/|/PIPE/'
+this contains a PIPE char!
+(gdb)
+@end group
+@end smallexample
+@end table
+
+The convenience variables @code{$_shell_exitcode} and @code{$_shell_exitsignal}
+can be used to examine the exit status of the last shell command launched
+by @code{shell}, @code{make}, @code{pipe} and @code{|}.
+@xref{Convenience Vars,, Convenience Variables}.
+
 @node Logging Output
 @section Logging Output
 @cindex logging @value{GDBN} output
@@ -1485,6 +1547,8 @@ Set @code{debugredirect} if you want debug output to go only to the log file.
 Show the current values of the logging settings.
 @end table
 
+You can also redirect the output of a @value{GDBN} command to a
+shell command.  @xref{pipe}.
 @node Commands
 @chapter @value{GDBN} Commands
 
@@ -11304,6 +11368,21 @@ the value 12 for @code{$_gdb_minor}.  These variables allow you to
 write scripts that work with different versions of @value{GDBN}
 without errors caused by features unavailable in some of those
 versions.
+
+@item $_shell_exitcode
+@itemx $_shell_exitsignal
+@vindex $_shell_exitcode@r{, convenience variable}
+@vindex $_shell_exitsignal@r{, convenience variable}
+@cindex shell command, exit code
+@cindex shell command, exit signal
+@cindex exit status of shell commands
+@value{GDBN} commands such as @code{shell} and @code{|} are launching
+shell commands.  When a launched command terminates, @value{GDBN}
+automatically maintains the variables @code{$_shell_exitcode}
+and @code{$_shell_exitsignal} according to the exit status of the last
+launched command.  These variables are set and used similarly to
+the variables @code{$_exitcode} and @code{$_exitsignal}.
+
 @end table
 
 @node Convenience Funs

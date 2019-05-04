@@ -27,7 +27,19 @@
      'array_indexes', 'symbols', 'unions', 'deref_refs', 'actual_objects',
      'static_members', 'max_elements', 'repeat_threshold', and 'format'.
 
+* New built-in convenience variables $_shell_exitcode and $_shell_exitsignal
+  provide the exitcode or exit status of the shell commands launched by
+  GDB commands such as "shell", "pipe" and "make".
+
 * New commands
+
+| [COMMAND] | SHELL_COMMAND
+| -d DELIM COMMAND DELIM SHELL_COMMAND
+pipe [COMMAND] | SHELL_COMMAND
+pipe -d DELIM COMMAND DELIM SHELL_COMMAND
+  Executes COMMAND and sends its output to SHELL_COMMAND.
+  With no COMMAND, repeat the last executed command
+  and send its output to SHELL_COMMAND.
 
 set may-call-functions [on|off]
 show may-call-functions
