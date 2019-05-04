@@ -2065,10 +2065,7 @@ resolve_dynamic_array (struct type *type,
   prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
   if (prop != NULL)
     {
-      int prop_eval_ok
-	= dwarf2_evaluate_property (prop, NULL, addr_stack, &value);
-
-      if (prop_eval_ok)
+      if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
 	{
 	  remove_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
 	  bit_stride = (unsigned int) (value * 8);

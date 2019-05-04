@@ -1,5 +1,14 @@
 2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2loc.c (dwarf2_evaluate_property): Change return type, and
+	update return statements.
+	* dwarf2loc.h (dwarf2_evaluate_property): Update return type on
+	declaration, and update comment to match.
+	* gdbtypes.c (resolve_dynamic_array): Update call to
+	dwarf2_evaluate_property to match new return type.
+
+2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* valarith.c (value_subscripted_rvalue): Change lowerbound
 	parameter type from int to LONGEST.
 	* value.h (value_subscripted_rvalue): Likewise in declaration.

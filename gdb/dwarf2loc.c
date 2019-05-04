@@ -2425,14 +2425,14 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
 /* See dwarf2loc.h.  */
 
-int
+bool
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			  struct frame_info *frame,
 			  struct property_addr_info *addr_stack,
 			  CORE_ADDR *value)
 {
   if (prop == NULL)
-    return 0;
+    return false;
 
   if (frame == NULL && has_stack_frames ())
     frame = get_selected_frame (NULL);
@@ -2454,7 +2454,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
 		*value = value_as_address (val);
 	      }
-	    return 1;
+	    return true;
 	  }
       }
       break;
@@ -2476,7 +2476,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	    if (!value_optimized_out (val))
 	      {
 		*value = value_as_address (val);
-		return 1;
+		return true;
 	      }
 	  }
       }
@@ -2484,7 +2484,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_CONST:
       *value = prop->data.const_val;
-      return 1;
+      return true;
 
     case PROP_ADDR_OFFSET:
       {
@@ -2510,11 +2510,11 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  val = value_at (baton->offset_info.type,
 			  pinfo->addr + baton->offset_info.offset);
 	*value = value_as_address (val);
-	return 1;
+	return true;
       }
     }
 
-  return 0;
+  return false;
 }
 
 /* See dwarf2loc.h.  */

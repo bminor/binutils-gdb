@@ -135,13 +135,13 @@ struct property_addr_info
    property. When evaluating a property that is not related to a type, it can
    be NULL.
 
-   Returns 1 if PROP could be converted and the static value is passed back
-   into VALUE, otherwise returns 0.  */
+   Returns true if PROP could be converted and the static value is passed
+   back into VALUE, otherwise returns false.  */
 
-int dwarf2_evaluate_property (const struct dynamic_prop *prop,
-			      struct frame_info *frame,
-			      struct property_addr_info *addr_stack,
-			      CORE_ADDR *value);
+bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			       struct frame_info *frame,
+			       struct property_addr_info *addr_stack,
+			       CORE_ADDR *value);
 
 /* A helper for the compiler interface that compiles a single dynamic
    property to C code.
