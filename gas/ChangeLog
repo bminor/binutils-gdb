@@ -1,3 +1,18 @@
+2019-05-04  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-m32c.c (insn_size): Delete static var.
+	(md_begin): Don't set it.
+	(m32c_md_end): Delete.
+	(md_assemble): Add insn_size auto var.
+	* config/tc-m32c.h (md_end): Don't define.
+	(m32c_md_end): Delete.
+	(NOP_OPCODE, HANDLE_ALIGN, MAX_MEM_FOR_RS_ALIGN_CODE): Define.
+	* testsuite/gas/all/align.d: Remove m32c from notarget list.
+	* testsuite/gas/all/incbin.d: Likewise.
+	* testsuite/gas/elf/dwarf2-11.d: Likewise.
+	* testsuite/gas/macros/semi.d: Likewise.
+	* testsuite/gas/all/gas.exp (do_comment): Similarly.
+
 2019-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24485

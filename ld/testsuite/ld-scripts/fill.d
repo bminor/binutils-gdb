@@ -6,7 +6,7 @@
 #skip: ia64-*-* mips*-*-freebsd* mips*-*-gnu* mips*-*-irix* mips*-*-kfreebsd*
 #skip: mips*-*-linux* mips*-*-netbsd* mips*-*-openbsd* mips*-*-sysv4*
 #skip: tilegx*-*-* tilepro-*-* x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*
-#xfail: alpha*-*-*ecoff m32c-*-* sh-*-pe sparc*-*-coff
+#xfail: alpha*-*-*ecoff sh-*-pe sparc*-*-coff
 #xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
 #
 # See also fill16.d.  We use `skip' for configurations unsupported
@@ -16,7 +16,6 @@
 #
 # alpha-linuxecoff pads out code to 16 bytes.
 # ia64 aligns code to minimum 16 bytes.
-# m32c pads out code sections with 4 NOPs (see `m32c_md_end').
 # mips aligns to minimum 16 bytes (except for bare-metal ELF and VxWorks).
 # sh-pe pads out code sections to 16 bytes
 # sparc-coff aligns to 8 bytes

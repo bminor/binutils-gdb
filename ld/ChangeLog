@@ -1,5 +1,10 @@
 2019-05-04  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/fill.d: Don't xfail m32c
+	* testsuite/ld-scripts/fill16.d: Likewise.
+
+2019-05-04  Alan Modra  <amodra@gmail.com>
+
 	PR 24511
 	* testsuite/ld-elf/pr14156a.d: Allow for .init/.fini being a
 	data section on hppa64.

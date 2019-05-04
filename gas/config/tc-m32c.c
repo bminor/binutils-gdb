@@ -86,7 +86,6 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 static unsigned long m32c_mach = bfd_mach_m16c;
 static int cpu_mach = (1 << MACH_M16C);
-static int insn_size;
 static int m32c_relax = 0;
 
 /* Flags to set in the elf header */
@@ -185,22 +184,6 @@ md_begin (void)
 
   /* Set the machine type */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_m32c, m32c_mach);
-
-  insn_size = 0;
-}
-
-void
-m32c_md_end (void)
-{
-  int i, n_nops;
-
-  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
-    {
-      /* Pad with nops for objdump.  */
-      n_nops = (32 - ((insn_size) % 32)) / 8;
-      for (i = 1; i <= n_nops; i++)
-	md_assemble ((char *) "nop");
-    }
 }
 
 void
@@ -335,6 +318,7 @@ md_assemble (char * str)
   char *    errmsg;
   finished_insnS results;
   int rl_type;
+  int insn_size;
 
   if (m32c_mach == bfd_mach_m32c && m32c_indirect_operand (str))
     return;

@@ -29,9 +29,6 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-#define md_end  m32c_md_end
-extern void m32c_md_end (void);
-
 #define md_start_line_hook m32c_start_line_hook
 extern void m32c_start_line_hook (void);
 
@@ -85,3 +82,7 @@ extern long md_pcrel_from_section (struct fix *, segT);
 extern int m32c_is_colon_insn (char *, char *);
 
 #define H_TICK_HEX 1
+
+#define NOP_OPCODE (bfd_get_mach (stdoutput) == bfd_mach_m32c ? 0xde : 0x04)
+#define HANDLE_ALIGN(fragP)
+#define MAX_MEM_FOR_RS_ALIGN_CODE 1

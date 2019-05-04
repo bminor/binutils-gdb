@@ -4,7 +4,7 @@
 #ld: -T fill.t
 #objdump: -s -j .text
 #skip: arm-*-coff i[3-7]86-*-coff
-#xfail: alpha*-*-*ecoff m32c-*-* sh-*-pe sparc*-*-coff
+#xfail: alpha*-*-*ecoff sh-*-pe sparc*-*-coff
 #xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
 #
 # See also fill.d.  We use `skip' for configurations unsupported
@@ -15,7 +15,6 @@
 # alpha-linuxecoff pads out code to 16 bytes.
 # arm-coff always aligns code to 4 bytes.
 # i386-coff always aligns code to 4 bytes.
-# m32c pads out code sections with 4 NOPs (see `m32c_md_end').
 # sh-pe pads out code sections to 16 bytes
 # sparc-coff aligns to 8 bytes
 # tic30-coff aligns to 2 bytes
