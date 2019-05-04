@@ -1,3 +1,36 @@
+2019-07-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* frame.h (enum print_what): New value 'SHORT_LOCATION', update
+	comments.
+	(print_frame_info_auto, print_frame_info_source_line,
+	print_frame_info_location, print_frame_info_source_and_location,
+	print_frame_info_location_and_address, print_frame_info_short_location):
+	New declarations.
+	(struct frame_print_options): New member print_frame_info.
+	* extension.h (enum ext_lang_frame_args): New value CLI_PRESENCE.
+	* stack.h (get_user_print_what_frame_info): New declaration.
+	(frame_show_address): New declaration.
+	* stack.c (print_frame_arguments_choices): New value 'presence'.
+	(print_frame_info_auto, print_frame_info_source_line,
+	print_frame_info_location, print_frame_info_source_and_location,
+	print_frame_info_location_and_address, print_frame_info_short_location,
+	print_frame_info_choices, print_frame_info_print_what): New definitions.
+	(print_frame_args): Only print dots for args if print frame-arguments
+	is 'presence'.
+	(frame_print_option_defs): New element for "frame-info".
+	(get_user_print_what_frame_info): New function.
+	(frame_show_address): Make non static.  Move comment to stack.h.
+	(print_frame_info_to_print_what): New function.
+	(print_frame_info): Update comment.  Use fp_opts.print_frame_info
+	to decide what to print.
+	(backtrace_command_1): Handle the new print_frame_arguments_presence
+	value.
+	(_initialize_stack): Call add_setshow_enum_cmd for frame-info.
+	* python/py-framefilter.c (py_print_args): Handle CLI_PRESENCE.
+	(py_print_frame): In non-mi mode, use LOCATION as default for
+	print_what, similarly to frame information printed directly by
+	backtrace command. Handle frame-info user option in non MI mode.
+
 2019-07-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* linux-thread-db.c (thread_db_target::thread_handle_to_thread_info):

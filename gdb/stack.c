@@ -61,14 +61,43 @@
 const char print_frame_arguments_all[] = "all";
 const char print_frame_arguments_scalars[] = "scalars";
 const char print_frame_arguments_none[] = "none";
+const char print_frame_arguments_presence[] = "presence";
 
 static const char *const print_frame_arguments_choices[] =
 {
   print_frame_arguments_all,
   print_frame_arguments_scalars,
   print_frame_arguments_none,
+  print_frame_arguments_presence,
   NULL
 };
+
+/* The possible choices of "set print frame-info", and the value
+   of this setting.  */
+
+const char print_frame_info_auto[] = "auto";
+const char print_frame_info_source_line[] = "source-line";
+const char print_frame_info_location[] = "location";
+const char print_frame_info_source_and_location[] = "source-and-location";
+const char print_frame_info_location_and_address[] = "location-and-address";
+const char print_frame_info_short_location[] = "short-location";
+
+static const char *const print_frame_info_choices[] =
+{
+  print_frame_info_auto,
+  print_frame_info_source_line,
+  print_frame_info_location,
+  print_frame_info_source_and_location,
+  print_frame_info_location_and_address,
+  print_frame_info_short_location,
+  NULL
+};
+
+/* print_frame_info_print_what[i] maps a choice to the corresponding
+   print_what enum.  */
+static const gdb::optional<enum print_what> print_frame_info_print_what[] =
+  {{}, /* Empty value for "auto".  */
+   SRC_LINE, LOCATION, SRC_AND_LOC, LOC_AND_ADDRESS, SHORT_LOCATION};
 
 /* The possible choices of "set print entry-values", and the value
    of this setting.  */
@@ -137,6 +166,17 @@ or both.  Note that one or both of these values may be <optimized out>."),
     N_("If set, frame arguments are printed in raw form, bypassing any\n\
 pretty-printers for that value.")
   },
+
+  enum_option_def {
+    "frame-info",
+    print_frame_info_choices,
+    [] (frame_print_options *opt) { return &opt->print_frame_info; },
+    NULL, /* show_cmd_cb */
+    N_("Set printing of frame information."),
+    N_("Show printing of frame information."),
+    NULL /* help_doc */
+  }
+
 };
 
 /* Options for the "backtrace" command.  */
@@ -209,10 +249,9 @@ static struct symtab *last_displayed_symtab = 0;
 static int last_displayed_line = 0;
 
 
-/* Return 1 if we should display the address in addition to the location,
-   because we are in the middle of a statement.  */
+/* See stack.h.  */
 
-static int
+int
 frame_show_address (struct frame_info *frame,
 		    struct symtab_and_line sal)
 {
@@ -631,9 +670,14 @@ print_frame_args (const frame_print_options &fp_opts,
   long highest_offset = -1;
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
+  /* True if we should print arg names.  If false, we only indicate
+     the presence of arguments by printing ellipsis.  */
+  bool print_names
+    = fp_opts.print_frame_arguments != print_frame_arguments_presence;
   /* True if we should print arguments, false otherwise.  */
   bool print_args
-    = fp_opts.print_frame_arguments != print_frame_arguments_none;
+    = (print_names
+       && fp_opts.print_frame_arguments != print_frame_arguments_none);
 
   if (func)
     {
@@ -652,6 +696,13 @@ print_frame_args (const frame_print_options &fp_opts,
 
 	  if (!SYMBOL_IS_ARGUMENT (sym))
 	    continue;
+
+	  if (!print_names)
+	    {
+	      uiout->text ("...");
+	      first = 0;
+	      break;
+	    }
 
 	  switch (SYMBOL_CLASS (sym))
 	    {
@@ -801,8 +852,11 @@ print_frame_args (const frame_print_options &fp_opts,
       else
 	start = highest_offset;
 
-      print_frame_nameless_args (frame, start, num - args_printed,
-				 first, stream);
+      if (!print_names && !first && num > 0)
+	uiout->text ("...");
+      else
+	print_frame_nameless_args (frame, start, num - args_printed,
+				   first, stream);
     }
 }
 
@@ -859,13 +913,37 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
     }
 }
 
+/* Converts the PRINT_FRAME_INFO choice to an optional enum print_what.
+   Value not present indicates to the caller to use default values
+   specific to the command being executed.  */
+
+static gdb::optional<enum print_what>
+print_frame_info_to_print_what (const char *print_frame_info)
+{
+  for (int i = 0; print_frame_info_choices[i] != NULL; i++)
+    if (print_frame_info == print_frame_info_choices[i])
+      return print_frame_info_print_what[i];
+
+  internal_error (__FILE__, __LINE__,
+		  "Unexpected print frame-info value `%s'.",
+		  print_frame_info);
+}
+
+/* See stack.h.  */
+
+void
+get_user_print_what_frame_info (gdb::optional<enum print_what> *what)
+{
+  *what
+    = print_frame_info_to_print_what
+        (user_frame_print_options.print_frame_info);
+}
+
 /* Print information about frame FRAME.  The output is format according
-   to PRINT_LEVEL and PRINT_WHAT and PRINT_ARGS.  The meaning of
-   PRINT_WHAT is:
-   
-   SRC_LINE: Print only source line.
-   LOCATION: Print only location.
-   SRC_AND_LOC: Print location and source line.
+   to PRINT_LEVEL and PRINT_WHAT and PRINT_ARGS.  For the meaning of
+   PRINT_WHAT, see enum print_what comments in frame.h.
+   Note that PRINT_WHAT is overriden if FP_OPTS.print_frame_info
+   != print_frame_info_auto.
 
    Used in "where" output, and to emit breakpoint or step
    messages.  */
@@ -880,6 +958,13 @@ print_frame_info (const frame_print_options &fp_opts,
   int source_print;
   int location_print;
   struct ui_out *uiout = current_uiout;
+
+  if (!current_uiout->is_mi_like_p ()
+      && fp_opts.print_frame_info != print_frame_info_auto)
+    {
+      /* Use the specific frame information desired by the user.  */
+      print_what = *print_frame_info_to_print_what (fp_opts.print_frame_info);
+    }
 
   if (get_frame_type (frame) == DUMMY_FRAME
       || get_frame_type (frame) == SIGTRAMP_FRAME
@@ -944,10 +1029,10 @@ print_frame_info (const frame_print_options &fp_opts,
      to get the line containing FRAME->pc.  */
   symtab_and_line sal = find_frame_sal (frame);
 
-  location_print = (print_what == LOCATION 
+  location_print = (print_what == LOCATION
+		    || print_what == SRC_AND_LOC
 		    || print_what == LOC_AND_ADDRESS
-		    || print_what == SRC_AND_LOC);
-
+		    || print_what == SHORT_LOCATION);
   if (location_print || !sal.symtab)
     print_frame (fp_opts, frame, print_level, print_what, print_args, sal);
 
@@ -1258,7 +1343,7 @@ print_frame (const frame_print_options &fp_opts,
 	QUIT;
       }
     uiout->text (")");
-    if (sal.symtab)
+    if (print_what != SHORT_LOCATION && sal.symtab)
       {
 	const char *filename_display;
       
@@ -1281,7 +1366,8 @@ print_frame (const frame_print_options &fp_opts,
 	annotate_frame_source_end ();
       }
 
-    if (pc_p && (funname == NULL || sal.symtab == NULL))
+    if (print_what != SHORT_LOCATION
+	&& pc_p && (funname == NULL || sal.symtab == NULL))
       {
 	char *lib = solib_name_from_address (get_frame_program_space (frame),
 					     get_frame_pc (frame));
@@ -1891,8 +1977,12 @@ backtrace_command_1 (const frame_print_options &fp_opts,
 	arg_type = CLI_SCALAR_VALUES;
       else if (fp_opts.print_frame_arguments == print_frame_arguments_all)
 	arg_type = CLI_ALL_VALUES;
-      else
+      else if (fp_opts.print_frame_arguments == print_frame_arguments_presence)
+	arg_type = CLI_PRESENCE;
+      else if (fp_opts.print_frame_arguments == print_frame_arguments_none)
 	arg_type = NO_VALUES;
+      else
+	gdb_assert (0);
 
       result = apply_ext_lang_frame_filter (get_current_frame (), flags,
 					    arg_type, current_uiout,

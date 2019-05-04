@@ -125,7 +125,10 @@ enum ext_lang_frame_args
     CLI_SCALAR_VALUES,
 
     /* Print all values for arguments when invoked from the CLI. */
-    CLI_ALL_VALUES
+    CLI_ALL_VALUES,
+
+    /* Only indicate the presence of arguments when invoked from the CLI.  */
+    CLI_PRESENCE
   };
 
 /* The possible results of

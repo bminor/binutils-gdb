@@ -25,6 +25,8 @@
 #include "python.h"
 #include "ui-out.h"
 #include "valprint.h"
+#include "stack.h"
+#include "source.h"
 #include "annotate.h"
 #include "hashtab.h"
 #include "demangle.h"
@@ -713,9 +715,21 @@ py_print_args (PyObject *filter,
   annotate_frame_args ();
   out->text (" (");
 
-  if (args_iter != Py_None
-      && (enumerate_args (args_iter.get (), out, args_type, 0, frame)
-	  == EXT_LANG_BT_ERROR))
+  if (args_type == CLI_PRESENCE)
+    {
+      if (args_iter != Py_None)
+	{
+	  gdbpy_ref<> item (PyIter_Next (args_iter.get ()));
+
+	  if (item != NULL)
+	    out->text ("...");
+	  else if (PyErr_Occurred ())
+	    return EXT_LANG_BT_ERROR;
+	}
+    }
+  else if (args_iter != Py_None
+	   && (enumerate_args (args_iter.get (), out, args_type, 0, frame)
+	       == EXT_LANG_BT_ERROR))
     return EXT_LANG_BT_ERROR;
 
   out->text (")");
@@ -748,7 +762,16 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   struct gdbarch *gdbarch = NULL;
   struct frame_info *frame = NULL;
   struct value_print_options opts;
+
   int print_level, print_frame_info, print_args, print_locals;
+  /* Note that the below default in non-mi mode is the same as the
+     default value for the backtrace command (see the call to print_frame_info
+     in backtrace_command_1).
+     Having the same default ensures that 'bt' and 'bt no-filters'
+     have the same behaviour when some filters exist but do not apply
+     to a frame.  */
+  enum print_what print_what
+    = out->is_mi_like_p () ? LOC_AND_ADDRESS : LOCATION;
   gdb::unique_xmalloc_ptr<char> function_to_free;
 
   /* Extract print settings from FLAGS.  */
@@ -758,6 +781,17 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   print_locals = (flags & PRINT_LOCALS) ? 1 : 0;
 
   get_user_print_options (&opts);
+  if (print_frame_info)
+  {
+    gdb::optional<enum print_what> user_frame_info_print_what;
+
+    get_user_print_what_frame_info (&user_frame_info_print_what);
+    if (!out->is_mi_like_p () && user_frame_info_print_what.has_value ())
+      {
+	/* Use the specific frame information desired by the user.  */
+	print_what = *user_frame_info_print_what;
+      }
+  }
 
   /* Get the underlying frame.  This is needed to determine GDB
   architecture, and also, in the cases of frame variables/arguments to
@@ -770,6 +804,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   frame = frame_object_to_frame_info (py_inf_frame.get ());
   if (frame == NULL)
     return EXT_LANG_BT_ERROR;
+
+  symtab_and_line sal = find_frame_sal (frame);
 
   gdbarch = get_frame_arch (frame);
 
@@ -815,9 +851,19 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	}
     }
 
+  /* For MI, each piece is controlled individually.  */
+  bool location_print = (print_frame_info
+			 && !out->is_mi_like_p ()
+			 && (print_what == LOCATION
+			     || print_what == SRC_AND_LOC
+			     || print_what == LOC_AND_ADDRESS
+			     || print_what == SHORT_LOCATION));
+
   /* Print frame level.  MI does not require the level if
      locals/variables only are being printed.  */
-  if ((print_frame_info || print_args) && print_level)
+  if (print_level
+      && (location_print
+	  || (out->is_mi_like_p () && (print_frame_info || print_args))))
     {
       struct frame_info **slot;
       int level;
@@ -843,16 +889,21 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	}
     }
 
-  if (print_frame_info)
+  if (location_print || (out->is_mi_like_p () && print_frame_info))
     {
       /* Print address to the address field.  If an address is not provided,
 	 print nothing.  */
       if (opts.addressprint && has_addr)
 	{
-	  annotate_frame_address ();
-	  out->field_core_addr ("addr", gdbarch, address);
-	  annotate_frame_address_end ();
-	  out->text (" in ");
+	  if (!sal.symtab
+	      || frame_show_address (frame, sal)
+	      || print_what == LOC_AND_ADDRESS)
+	    {
+	      annotate_frame_address ();
+	      out->field_core_addr ("addr", gdbarch, address);
+	      annotate_frame_address_end ();
+	      out->text (" in ");
+	    }
 	}
 
       /* Print frame function name.  */
@@ -904,14 +955,17 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
   /* Frame arguments.  Check the result, and error if something went
      wrong.  */
-  if (print_args)
+  if (print_args && (location_print || out->is_mi_like_p ()))
     {
       if (py_print_args (filter, out, args_type, frame) == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
     }
 
   /* File name/source/line number information.  */
-  if (print_frame_info)
+  bool print_location_source
+    = ((location_print && print_what != SHORT_LOCATION)
+       || (out->is_mi_like_p () && print_frame_info));
+  if (print_location_source)
     {
       annotate_frame_source_begin ();
 
@@ -963,12 +1017,24 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
                            (gdbarch_bfd_arch_info (gdbarch))->printable_name);
     }
 
+  bool source_print
+    = (! out->is_mi_like_p ()
+       && (print_what == SRC_LINE || print_what == SRC_AND_LOC));
+  if (source_print)
+    {
+      if (print_location_source)
+	out->text ("\n"); /* Newline after the location source.  */
+      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+    }
+
   /* For MI we need to deal with the "children" list population of
      elided frames, so if MI output detected do not send newline.  */
   if (! out->is_mi_like_p ())
     {
       annotate_frame_end ();
-      out->text ("\n");
+      /* print_source_lines has already printed a newline.  */
+      if (!source_print)
+	out->text ("\n");
     }
 
   if (print_locals)
