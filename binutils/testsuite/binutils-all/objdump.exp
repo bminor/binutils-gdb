@@ -672,6 +672,60 @@ if {[is_elf_format]} then {
     test_follow_debuglink "--dwarf=follow-links --headers --wide" objdump.WK3
 }
 
+# Test objdump output with start and stop address limits for the specified
+# dump option
+
+proc test_objdump_limited { testfile dopt want start stop } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS $dopt --start-address 0x$start --stop-address 0x$stop $testfile"]
+
+    if [regexp $want $got] then {
+	pass "objdump $dopt --start-address 0x$start --stop-address 0x$stop ($testfile)"
+    } else {
+	fail "objdump $dopt --start-address 0x$start --stop-address 0x$stop ($testfile)"
+    }
+}
+
+# Test objdump -d --start-address M --stop-address N
+
+proc test_objdump_disas_limited { testfile start stop } {
+    set want "$testfile:\[ 	\]*file format.*Disassembly of section .text:\n.*\[ \]*$start:.*"
+    test_objdump_limited $testfile -d $want $start $stop
+}
+
+# Test objdump -s --start-address M --stop-address N
+
+proc test_objdump_content_limited { testfile start stop } {
+    set want "$testfile:\[ 	\]*file format.*Contents of section .text:\n\[ \]*$start .*"
+    test_objdump_limited $testfile -s $want $start $stop
+}
+
+# Test objdump with --start-address and --stop-address options for higher
+# address ranges which may be sign-extended on targets that treat addresses
+# as signed.  We only check that objdump produces some dump output at the
+# specified start address as a proxy for correct enforcement of the
+# start/stop limits.
+
+if {[is_elf_format]} then {
+    # generate a copy of the test object with .text repositioned
+    if { [binutils_run $OBJCOPY "--change-section-address .text=0x80000000 tmpdir/bintest.o tmpdir/bintest_signed.o"] != "" } {
+	fail "Failed to reposition .text to 0x80000000 (tmpdir/bintest.o -> tmpdir/bintest_signed.o)"
+	return
+    }
+
+    if [is_remote host] {
+	set testfile3 [remote_download host tmpdir/bintest_signed.o]
+    } else {
+	set testfile3 tmpdir/bintest_signed.o
+    }
+
+    test_objdump_content_limited $testfile3 "80000004" "80000008"
+    test_objdump_disas_limited $testfile3 "80000004" "80000008"
+    remote_file host delete $testfile3
+}
+
 # Options which are not tested: -a -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

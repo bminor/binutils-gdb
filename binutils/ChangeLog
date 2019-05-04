@@ -1,3 +1,11 @@
+2019-05-08  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* objdump.c (sign_extend_address): New function.
+	(dump_bfd): Sign-extend user-specified start/stop addresses
+	for targets that need it.
+	* testsuite/binutils-all/objdump.exp: Add tests for objdump
+	with start and stop addresses in higher address ranges.
+
 2019-05-01  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/binutils-all/objdump.exp: Correct executable
