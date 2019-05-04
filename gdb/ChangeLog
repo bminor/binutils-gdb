@@ -1,3 +1,9 @@
+2019-05-04  Raul Tambre  <raul@tambre.ee>
+
+	* python/lib/gdb/prompt.py (_ExtendedPrompt)
+	<before_prompt_hook, get_show_string>: Fix incorrect use of 'is'
+	operator for comparison.
+
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
 	* psymtab.c (psymbol_name_matches, match_partial_symbol)
