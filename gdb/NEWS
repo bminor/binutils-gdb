@@ -36,6 +36,11 @@
   ** gdb.Type has a new property 'objfile' which returns the objfile the
      type was defined in.
 
+  ** The frame information printed by the python frame filtering code
+     is now consistent with what the 'backtrace' command prints when
+     there are no filters, or when the 'backtrace' '-no-filters' option
+     is given.
+
 * New commands
 
 | [COMMAND] | SHELL_COMMAND
@@ -104,6 +109,14 @@ maint show test-settings KIND
   A set of commands used by the testsuite for exercising the settings
   infrastructure.
 
+set print frame-info [short-location|location|location-and-address
+                        |source-and-location|source-line|auto]
+show print frame-info
+  This controls what frame information is printed by the commands printing
+  a frame.  This setting will e.g. influence the behaviour of 'backtrace',
+  'frame', 'stepi'.  The python frame filtering also respect this setting.
+  The 'backtrace' '-frame-info' option can override this global setting.
+
 * Changed commands
 
 help
@@ -129,6 +142,10 @@ show style
   The "show style" and its subcommands are now styling
   a style name in their output using its own style, to help
   the user visualize the different styles.
+
+set print frame-arguments
+  The new value 'presence' indicates to only indicate the presence of
+  arguments using ..., instead of printing argument names and values.
 
 set print raw-frame-arguments
 show print raw-frame-arguments
@@ -184,6 +201,8 @@ maint show test-options-completion-result
       -entry-values no|only|preferred|if-needed|both|compact|default
       -frame-arguments all|scalars|none
       -raw-frame-arguments [on|off]
+      -frame-info auto|source-line|location|source-and-location
+           |location-and-address|short-location
       -past-main [on|off]
       -past-entry [on|off]
 

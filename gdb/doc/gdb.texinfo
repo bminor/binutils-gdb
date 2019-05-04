@@ -7806,6 +7806,10 @@ Related setting: @ref{set print frame-arguments}.
 @item -raw-frame-arguments [@code{on}|@code{off}]
 Set whether to print frame arguments in raw form.
 Related setting: @ref{set print raw-frame-arguments}.
+
+@item -frame-info @code{auto}|@code{source-line}|@code{location}|@code{source-and-location}|@code{location-and-address}|@code{short-location}
+Set printing of frame information.
+Related setting: @ref{set print frame-info}.
 @end table
 
 The optional @var{qualifier} is maintained for backward compatibility.
@@ -7870,6 +7874,8 @@ The value of parameter @code{data} in frame 1 has been replaced by
 only if it is a scalar (integer, pointer, enumeration, etc).  See command
 @kbd{set print frame-arguments} in @ref{Print Settings} for more details
 on how to configure the way function parameter values are printed.
+The command @kbd{set print frame-info} (@pxref{Print Settings}) controls
+what frame information is printed.
 
 @cindex optimized out, in backtrace
 @cindex function call arguments, optimized out
@@ -10816,7 +10822,7 @@ If the number is 0, then the printing is unlimited.
 @cindex printing frame argument values
 @cindex print all frame argument values
 @cindex print frame argument values for scalars only
-@cindex do not print frame argument values
+@cindex do not print frame arguments
 This command allows to control how the values of arguments are printed
 when the debugger prints a frame (@pxref{Frames}).  The possible
 values are:
@@ -10844,6 +10850,17 @@ is replaced by @code{@dots{}}.  In this case, the example above now becomes:
 #1  0x08048361 in call_me (i=@dots{}, s=@dots{}, ss=@dots{}, u=@dots{}, e=@dots{})
   at frame-args.c:23
 @end smallexample
+
+@item presence
+Only the presence of arguments is indicated by @code{@dots{}}.
+The @code{@dots{}} are not printed for function without any arguments.
+None of the argument names and values are printed.
+In this case, the example above now becomes:
+
+@smallexample
+#1  0x08048361 in call_me (@dots{}) at frame-args.c:23
+@end smallexample
+
 @end table
 
 By default, only scalar arguments are printed.  This command can be used
@@ -10854,8 +10871,8 @@ information printed in each frame, making the backtrace more readable.
 Also, it improves performance when displaying Ada frames, because
 the computation of large arguments can sometimes be CPU-intensive,
 especially in large applications.  Setting @code{print frame-arguments}
-to @code{scalars} (the default) or @code{none} avoids this computation,
-thus speeding up the display of each Ada frame.
+to @code{scalars} (the default), @code{none} or @code{presence} avoids
+this computation, thus speeding up the display of each Ada frame.
 
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
@@ -10987,6 +11004,46 @@ entry resolution see @ref{set debug entry-values}.
 @item show print entry-values
 Show the method being used for printing of frame argument values at function
 entry.
+
+@anchor{set print frame-info}
+@item set print frame-info @var{value}
+@kindex set print frame-info
+@cindex printing frame information
+@cindex frame information, printing
+This command allows to control the information printed when
+the debugger prints a frame.  See @ref{Frames}, @ref{Backtrace},
+for a general explanation about frames and frame information.
+Note that some other settings (such as @code{set print frame-arguments}
+and @code{set print address}) are also influencing if and how some frame
+information is displayed.  In particular, the frame program counter is never
+printed if @code{set print address} is off.
+
+The possible values for @code{set print frame-info} are:
+@table @code
+@item short-location
+Print the frame level, the program counter (if not at the
+beginning of the location source line), the function, the function
+arguments.
+@item location
+Same as @code{short-location} but also print the source file and source line
+number.
+@item location-and-address
+Same as @code{location} but print the program counter even if located at the
+beginning of the location source line.
+@item source-line
+Print the program counter (if not at the beginning of the location
+source line), the line number and the source line.
+@item source-and-location
+Print what @code{location} and @code{source-line} are printing.
+@item auto
+The information printed for a frame is decided automatically
+by the @value{GDBN} command that prints a frame.
+For example, @code{frame} prints the information printed by
+@code{source-and-location} while @code{stepi} will switch between
+@code{source-line} and @code{source-and-location} depending on the program
+counter.
+The default value is @code{auto}.
+@end table
 
 @anchor{set print repeats}
 @item set print repeats @var{number-of-repeats}
