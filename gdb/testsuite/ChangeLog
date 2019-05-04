@@ -1,3 +1,17 @@
+2019-07-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/options.exp: Update backtrace - completion to
+	new option -frame-info.
+	* gdb.base/frame-args.exp: Test new 'frame-arguments presence'.
+	Test new 'set print frame-info'.  Test backtrace -frame-info
+	overriding 'set print frame-info'.
+	* gdb.python/py-framefilter.exp: Test new 'frame-arguments presence'.
+	Test new 'set print frame-info'.
+	Verify consistency of backtrace with and without filters, with and
+	without -no-filters.
+	* gdb.python/py-framefilter-invalidarg.exp: Update to new print_what
+	default.
+
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.linespec/explicit.exp: Fix completion trigger for "complete with
