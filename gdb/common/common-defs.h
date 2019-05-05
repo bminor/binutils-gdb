@@ -30,7 +30,7 @@
 #ifdef GDBSERVER
 #include "build-gnulib-gdbserver/config.h"
 #else
-#include "build-gnulib/config.h"
+#include "../../gnulib/config.h"
 #endif
 
 #undef PACKAGE_NAME

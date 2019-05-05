@@ -1,3 +1,19 @@
+2019-06-14  Tom Tromey  <tom@tromey.com>
+
+	* gnulib: Move directory to top-level.
+	* configure.ac: Don't configure gnulib.
+	* configure: Rebuild.
+	* common/common-defs.h: Use new path to gnulib.
+	* Makefile.in (GNULIB_BUILDDIR): Now ../gnulib.
+	(GNULIB_H): Remove.
+	(INCGNU): Look in new gnulib location.
+	(HFILES_NO_SRCDIR): Remove gnulib files.
+	(SUBDIR, REQUIRED_SUBDIRS): Remove gnulib.
+	(generated_files): Remove GNULIB_H.
+	($(LIBGNU), all-lib): Remove targets.
+	(distclean): Don't mention GNULIB_BUILDDIR.
+	($(GNULIB_BUILDDIR)/Makefile): Remove target.
+
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
 	* symfile.c (add_symbol_file_command): Remove obsolete comment.

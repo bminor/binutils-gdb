@@ -1,3 +1,10 @@
+2019-06-14  Tom Tromey  <tom@tromey.com>
+
+	* configure.ac: Use new path to gnulib.
+	* configure: Rebuild.
+	* Makefile.in (INCGNU, $(GNULIB_BUILDDIR)/Makefile): Use new path
+	to gnulib.
+
 2019-06-11  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (SFILES): Add alloc.c.

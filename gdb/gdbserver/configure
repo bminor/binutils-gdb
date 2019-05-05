@@ -6073,7 +6073,7 @@ fi
 # "gnulib", to avoid the problem of both GDB and GDBserver wanting to
 # build it in the same directory, when building in the source dir.
 
-  in_src="../gnulib"
+  in_src="../../gnulib"
   in_build="build-gnulib-gdbserver"
   in_extra_args="$gnulib_extra_configure_args"
 

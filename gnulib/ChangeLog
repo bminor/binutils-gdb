@@ -1,0 +1,6 @@
+2019-06-14  Tom Tromey  <tom@tromey.com>
+
+	* update-gnulib.sh: Adjust paths.
+	* Makefile.in: Adjust paths.
+	* configure.ac: Adjust paths.  Use ACX_LARGEFILE.
+	* configure: Rebuild.

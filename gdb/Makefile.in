@@ -224,13 +224,9 @@ CODESIGN_CERT = @CODESIGN_CERT@
 GDBFLAGS =
 
 # Helper code from gnulib.
-GNULIB_BUILDDIR = build-gnulib
+GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
-INCGNU = -I$(srcdir)/gnulib/import -I$(GNULIB_BUILDDIR)/import
-
-# Generated headers in the gnulib directory.  These must be listed
-# so that they are generated before other files are compiled.
-GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
+INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
 
 #
 # CLI sub directory definitons
@@ -1499,14 +1495,6 @@ HFILES_NO_SRCDIR = \
 	config/djgpp/nl_types.h \
 	config/i386/nm-i386gnu.h \
 	config/sparc/nm-sol2.h \
-	gnulib/import/inttypes.in.h \
-	gnulib/import/stddef.in.h \
-	gnulib/import/stdint.in.h \
-	gnulib/import/str-two-way.h \
-	gnulib/import/string.in.h \
-	gnulib/import/extra/snippet/arg-nonnull.h \
-	gnulib/import/extra/snippet/c++defs.h \
-	gnulib/import/extra/snippet/warn-on-use.h \
 	mi/mi-cmds.h \
 	mi/mi-common.h \
 	mi/mi-console.h \
@@ -1592,14 +1580,14 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
-SUBDIRS = doc @subdirs@ data-directory $(GNULIB_BUILDDIR)
+SUBDIRS = doc @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS)
 
 # List of subdirectories in the build tree that must exist.
 # This is used to force build failures in existing trees when
 # a new directory is added.
 # The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = doc | testsuite | $(GNULIB_BUILDDIR) | data-directory
+REQUIRED_SUBDIRS = doc | testsuite | data-directory
 
 # Parser intermediate files.
 YYFILES = \
@@ -1629,7 +1617,6 @@ generated_files = \
 	config.h \
 	gcore \
 	jit-reader.h \
-	$(GNULIB_H) \
 	$(NAT_GENERATED_FILES)
 
 # Flags needed to compile Python code
@@ -1901,12 +1888,6 @@ ifneq ($(CODESIGN_CERT),)
 endif
 
 # Convenience rule to handle recursion.
-$(LIBGNU) $(GNULIB_H): all-lib
-all-lib: $(GNULIB_BUILDDIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=$(GNULIB_BUILDDIR) subdir_do
-.PHONY: all-lib
-
-# Convenience rule to handle recursion.
 .PHONY: all-data-directory
 all-data-directory: data-directory/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=data-directory subdir_do
@@ -1962,7 +1943,6 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # always included in SUBDIRS.  Remove the gdbserver files explicitly.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(CLEANDIRS)" subdir_do
-	rm -rf $(GNULIB_BUILDDIR)
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
@@ -2018,13 +1998,6 @@ Makefile: Makefile.in config.status
 	CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS= \
 	  CONFIG_HEADERS= \
-	  $(SHELL) config.status
-
-$(GNULIB_BUILDDIR)/Makefile: gnulib/Makefile.in config.status
-	@cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
-	  CONFIG_COMMANDS="depfiles" \
-	  CONFIG_HEADERS= \
-	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
 data-directory/Makefile: data-directory/Makefile.in config.status

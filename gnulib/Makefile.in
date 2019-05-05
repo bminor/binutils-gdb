@@ -199,7 +199,7 @@ config.status: $(srcdir)/configure
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
-ACLOCAL_AMFLAGS = -I import/m4 -I ../../config
+ACLOCAL_AMFLAGS = -I import/m4 -I ../config
 
 include $(srcdir)/aclocal-m4-deps.mk
 
@@ -240,6 +240,6 @@ force_update:
 MAKEOVERRIDES=
 
 # Disable implicit make rules.
-include $(srcdir)/../disable-implicit-rules.mk
+include $(srcdir)/../gdb/disable-implicit-rules.mk
 
 ### end of the libgnu Makefile.in.

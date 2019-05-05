@@ -1,3 +1,12 @@
+2019-06-14  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Add gnulib.
+	* gnulib: New directory, move from gdb/gnulib.
+	* configure.ac (host_libs): Add gnulib.
+	* configure: Rebuild.
+	* Makefile.def (host_modules, dependencies): Add gnulib.
+	* Makefile.in: Rebuild.
+
 2019-06-03  Nick Clifton  <nickc@redhat.com>
 
 	Revert:

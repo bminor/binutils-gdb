@@ -88,7 +88,7 @@ fi
 # gdbserver/.  We need to build gnulib under some other directory not
 # "gnulib", to avoid the problem of both GDB and GDBserver wanting to
 # build it in the same directory, when building in the source dir.
-ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"],
+ACX_CONFIGURE_DIR(["../../gnulib"], ["build-gnulib-gdbserver"],
                   ["$gnulib_extra_configure_args"])
 
 ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
