@@ -1,3 +1,11 @@
+2019-05-06  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (BFD_RELOC_PPC64_TPREL16_HIGH, BFD_RELOC_PPC64_TPREL16_HIGHA),
+	(BFD_RELOC_PPC64_DTPREL16_HIGH, BFD_RELOC_PPC64_DTPREL16_HIGHA):
+	Sort before BFD_RELOC_PPC64_DTPREL16_HIGHESTA entry.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2019-05-04  Alan Modra  <amodra@gmail.com>
 
 	PR 24511
