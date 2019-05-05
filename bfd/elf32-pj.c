@@ -54,6 +54,7 @@ pj_elf_reloc (bfd *abfd,
     }
 
   if (symbol_in != NULL
+      && (symbol_in->flags & BSF_WEAK) == 0
       && bfd_is_und_section (symbol_in->section))
     return bfd_reloc_undefined;
 

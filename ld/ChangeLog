@@ -1,3 +1,7 @@
+2019-05-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/weak-undef.exp: Don't xfail pj.
+
 2019-05-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/fill.d: Don't xfail m32c

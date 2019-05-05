@@ -35,7 +35,6 @@ if { ![is_elf_format] && ![is_pecoff_format] } then {
     if {! [istarget i?86-*-*]} {
 	setup_xfail *-*-pe*
     }
-    setup_xfail pj-*-*
     fail $testname
 } elseif {![is_remote host] && [which $objdump] == 0} then {
     unresolved $testname
