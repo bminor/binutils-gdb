@@ -251,6 +251,7 @@ if { [is_elf_format] } then {
     run_dump_test "dwarf2-16"
     run_dump_test "dwarf2-17"
     run_dump_test "dwarf2-18"
+    run_dump_test "dwarf2-19"
     run_dump_test "bss"
     run_dump_test "bad-bss"
     run_dump_test "bad-section-flag"
