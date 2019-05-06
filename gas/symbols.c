@@ -3288,7 +3288,7 @@ symbol_relc_make_sym (symbolS * sym)
      is defined as an expression or a plain value.  */
   if (   S_GET_SEGMENT (sym) == expr_section
       || S_GET_SEGMENT (sym) == absolute_section)
-    return symbol_relc_make_expr (& sym->sy_value);
+    return symbol_relc_make_expr (symbol_get_value_expression (sym));
 
   /* This may be a "fake symbol", referring to ".".
      Write out a special null symbol to refer to this position.  */
