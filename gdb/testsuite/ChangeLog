@@ -1,3 +1,9 @@
+2019-05-06  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (exec_has_index_section): New proc.
+	* gdb.base/index-cache.exp: Handle case that binfile contains an index
+	section.
+
 2019-05-04  Tom de Vries  <tdevries@suse.de>
 
 	* boards/cc-with-debug-names.exp: New file.
