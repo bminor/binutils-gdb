@@ -1097,19 +1097,6 @@ use_complex_relocs_for (symbolS * symp)
     case O_constant:
       return 0;
 
-    case O_symbol:
-    case O_symbol_rva:
-    case O_uminus:
-    case O_bit_not:
-    case O_logical_not:
-      if (  (S_IS_COMMON (symp->sy_value.X_add_symbol)
-	   || S_IS_LOCAL (symp->sy_value.X_add_symbol))
-	  &&
-	      (S_IS_DEFINED (symp->sy_value.X_add_symbol)
-	   && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section))
-	return 0;
-      break;
-
     case O_multiply:
     case O_divide:
     case O_modulus:
@@ -1129,18 +1116,22 @@ use_complex_relocs_for (symbolS * symp)
     case O_gt:
     case O_logical_and:
     case O_logical_or:
-
-      if (  (S_IS_COMMON (symp->sy_value.X_add_symbol)
-	   || S_IS_LOCAL (symp->sy_value.X_add_symbol))
-	  &&
-	    (S_IS_COMMON (symp->sy_value.X_op_symbol)
+      if ((S_IS_COMMON (symp->sy_value.X_op_symbol)
 	   || S_IS_LOCAL (symp->sy_value.X_op_symbol))
-
-	  && S_IS_DEFINED (symp->sy_value.X_add_symbol)
 	  && S_IS_DEFINED (symp->sy_value.X_op_symbol)
-	  && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section
 	  && S_GET_SEGMENT (symp->sy_value.X_op_symbol) != expr_section)
-	return 0;
+	{
+	case O_symbol:
+	case O_symbol_rva:
+	case O_uminus:
+	case O_bit_not:
+	case O_logical_not:
+	  if ((S_IS_COMMON (symp->sy_value.X_add_symbol)
+	       || S_IS_LOCAL (symp->sy_value.X_add_symbol))
+	      && S_IS_DEFINED (symp->sy_value.X_add_symbol)
+	      && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section)
+	    return 0;
+	}
       break;
 
     default:
