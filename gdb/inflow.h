@@ -22,7 +22,7 @@
 
 #include <unistd.h>
 #include <signal.h>
-#include "common/job-control.h"
+#include "gdbsupport/job-control.h"
 
 /* RAII class used to ignore SIGTTOU in a scope.  */
 

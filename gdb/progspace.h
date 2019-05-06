@@ -22,12 +22,12 @@
 #define PROGSPACE_H
 
 #include "target.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "gdb_bfd.h"
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "registry.h"
-#include "common/next-iterator.h"
-#include "common/safe-iterator.h"
+#include "gdbsupport/next-iterator.h"
+#include "gdbsupport/safe-iterator.h"
 
 struct target_ops;
 struct bfd;

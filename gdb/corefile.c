@@ -138,7 +138,7 @@ validate_files (void)
     }
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 char *
 get_exec_file (int err)

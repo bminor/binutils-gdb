@@ -1,7 +1,7 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
   Original: 32bit-csr.xml */
 
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 static int
 create_feature_riscv_32bit_csr (struct target_desc *result, long regnum)

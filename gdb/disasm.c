@@ -29,7 +29,7 @@
 #include "source.h"
 #include "safe-ctype.h"
 #include <algorithm>
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "valprint.h"
 
 /* Disassemble functions.

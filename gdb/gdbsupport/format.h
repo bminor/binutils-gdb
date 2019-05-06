@@ -20,7 +20,7 @@
 #ifndef COMMON_FORMAT_H
 #define COMMON_FORMAT_H
 
-#include "common/gdb_string_view.h"
+#include "gdbsupport/gdb_string_view.h"
 
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1

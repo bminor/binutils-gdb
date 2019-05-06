@@ -18,9 +18,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include "common/symbol.h"
+#include "gdbsupport/symbol.h"
 
-/* See common/symbol.h.  */
+/* See gdbsupport/symbol.h.  */
 
 int
 find_minimal_symbol_address (const char *name, CORE_ADDR *addr,

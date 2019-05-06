@@ -26,7 +26,7 @@
 #include "symfile-add-flags.h"
 #include "objfile-flags.h"
 #include "gdb_bfd.h"
-#include "common/function-view.h"
+#include "gdbsupport/function-view.h"
 
 /* Opaque declarations.  */
 struct target_section;

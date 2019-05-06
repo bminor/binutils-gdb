@@ -22,8 +22,8 @@
 #include "ui-out.h"
 #include "gdbcmd.h"
 #include "hashtab.h"
-#include "common/filestuff.h"
-#include "common/vec.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/vec.h"
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
 #ifndef MAP_FAILED

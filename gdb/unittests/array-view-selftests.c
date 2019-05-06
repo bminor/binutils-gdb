@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/array-view.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/array-view.h"
 #include <array>
 
 namespace selftests {

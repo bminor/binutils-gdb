@@ -44,7 +44,7 @@
 #include "language.h"
 #include "valprint.h"
 #include "osdata.h"
-#include "common/gdb_splay_tree.h"
+#include "gdbsupport/gdb_splay_tree.h"
 #include "tracepoint.h"
 #include "ctf.h"
 #include "ada-lang.h"
@@ -52,14 +52,14 @@
 #include "extension.h"
 #include "gdbcmd.h"
 #include "observable.h"
-#include "common/gdb_optional.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/byte-vector.h"
 
 #include <ctype.h>
-#include "common/run-time-clock.h"
+#include "gdbsupport/run-time-clock.h"
 #include <chrono>
 #include "progspace-and-thread.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/rsp-low.h"
 #include <algorithm>
 #include <set>
 #include <map>

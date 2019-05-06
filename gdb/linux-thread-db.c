@@ -21,7 +21,7 @@
 #include <dlfcn.h>
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
 #include "gdbcmd.h"
@@ -46,7 +46,7 @@
 #include <ctype.h>
 #include "nat/linux-namespaces.h"
 #include <algorithm>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 #include "valprint.h"
 
 /* GNU/Linux libthread_db support.

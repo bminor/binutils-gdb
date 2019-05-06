@@ -27,10 +27,10 @@
 
 case "${host}" in
 
-*-mingw*)	common_host_obs=common/mingw-strerror.o
+*-mingw*)	common_host_obs=gdbsupport/mingw-strerror.o
 		;;
 *)
-		common_host_obs=common/posix-strerror.o
+		common_host_obs=gdbsupport/posix-strerror.o
 		;;
 
 esac

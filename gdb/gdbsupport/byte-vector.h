@@ -18,7 +18,7 @@
 #ifndef COMMON_BYTE_VECTOR_H
 #define COMMON_BYTE_VECTOR_H
 
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 
 namespace gdb {
 

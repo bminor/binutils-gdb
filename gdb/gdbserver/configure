@@ -5916,7 +5916,7 @@ if $enable_unittests; then
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
 
-  srv_selftest_objs="common/selftest.o"
+  srv_selftest_objs="gdbsupport/selftest.o"
 
 fi
 
@@ -5958,7 +5958,7 @@ ac_config_commands="$ac_config_commands depdir"
 
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch common"
+CONFIG_SRC_SUBDIR="arch gdbsupport"
 
 
 ac_config_commands="$ac_config_commands gdbdepdir"
@@ -7892,7 +7892,7 @@ esac
 . ${srcdir}/configure.srv
 
 # Add in the common host objects.
-. ${srcdir}/../common/common.host
+. ${srcdir}/../gdbsupport/common.host
 srv_host_obs="$common_host_obs"
 
 if test "${srv_mingwce}" = "yes"; then

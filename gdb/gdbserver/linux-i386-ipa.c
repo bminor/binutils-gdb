@@ -22,7 +22,7 @@
 #include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-x86-tdesc.h"
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 
 /* GDB register numbers.  */
 

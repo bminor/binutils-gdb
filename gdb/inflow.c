@@ -34,7 +34,7 @@
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif
-#include "common/job-control.h"
+#include "gdbsupport/job-control.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>

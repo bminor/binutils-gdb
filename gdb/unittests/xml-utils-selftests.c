@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/xml-utils.h"
-#include "common/selftest.h"
+#include "gdbsupport/xml-utils.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace xml_utils {

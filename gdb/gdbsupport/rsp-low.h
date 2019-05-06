@@ -20,7 +20,7 @@
 #ifndef COMMON_RSP_LOW_H
 #define COMMON_RSP_LOW_H
 
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 /* Convert hex digit A to a number, or throw an exception.  */
 

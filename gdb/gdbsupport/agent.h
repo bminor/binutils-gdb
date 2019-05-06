@@ -20,7 +20,7 @@
 #ifndef COMMON_AGENT_H
 #define COMMON_AGENT_H
 
-#include "common/preprocessor.h"
+#include "gdbsupport/preprocessor.h"
 
 int agent_run_command (int pid, const char *cmd, int len);
 
@@ -31,7 +31,7 @@ int agent_look_up_symbols (void *);
 /* Define an entry in an IPA symbol list array.  If IPA_SYM is used, the macro
    IPA_SYM_STRUCT_NAME must be defined to the structure name holding the IPA
    symbol addresses in that particular file, before including
-   common/agent.h.  */
+   gdbsupport/agent.h.  */
 #define IPA_SYM(SYM)                                   \
   {                                                    \
     STRINGIFY (IPA_SYM_EXPORTED_NAME (SYM)),           \

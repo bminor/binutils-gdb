@@ -22,7 +22,7 @@
 
 #include "gdb_obstack.h"
 #include "symfile.h"
-#include "common/next-iterator.h"
+#include "gdbsupport/next-iterator.h"
 #include "bcache.h"
 
 struct partial_symbol;

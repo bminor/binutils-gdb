@@ -50,7 +50,7 @@
 #include "cp-support.h"
 #include "language.h"
 #include "cli/cli-utils.h"
-#include "common/symbol.h"
+#include "gdbsupport/symbol.h"
 #include <algorithm>
 #include "safe-ctype.h"
 
@@ -433,7 +433,7 @@ lookup_bound_minimal_symbol (const char *name)
   return lookup_minimal_symbol (name, NULL, NULL);
 }
 
-/* See common/symbol.h.  */
+/* See gdbsupport/symbol.h.  */
 
 int
 find_minimal_symbol_address (const char *name, CORE_ADDR *addr,

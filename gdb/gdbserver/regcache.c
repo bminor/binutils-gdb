@@ -20,7 +20,7 @@
 #include "regdef.h"
 #include "gdbthread.h"
 #include "tdesc.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/rsp-low.h"
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *
@@ -63,7 +63,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
   return regcache;
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 struct regcache *
 get_thread_regcache_for_ptid (ptid_t ptid)
@@ -291,7 +291,7 @@ register_size (const struct target_desc *tdesc, int n)
   return find_register_by_number (tdesc, n).size / 8;
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 int
 regcache_register_size (const struct regcache *regcache, int n)
@@ -312,7 +312,7 @@ supply_register (struct regcache *regcache, int n, const void *buf)
   return regcache->raw_supply (n, buf);
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 void
 regcache::raw_supply (int n, const void *buf)
@@ -415,7 +415,7 @@ collect_register (struct regcache *regcache, int n, void *buf)
   regcache->raw_collect (n, buf);
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 void
 regcache::raw_collect (int n, void *buf) const
@@ -500,7 +500,7 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
 #endif
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 enum register_status
 regcache::get_register_status (int regnum) const
@@ -513,7 +513,7 @@ regcache::get_register_status (int regnum) const
 #endif
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 bool
 regcache::raw_compare (int regnum, const void *buf, int offset) const

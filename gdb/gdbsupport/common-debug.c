@@ -1,6 +1,6 @@
-/* Error reporting facilities.
+/* Debug printing functions.
 
-   Copyright (C) 1986-2019 Free Software Foundation, Inc.
+   Copyright (C) 2014-2019 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,52 +18,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
-#include "errors.h"
+#include "common-debug.h"
 
-/* See common/errors.h.  */
+/* See gdbsupport/common-debug.h.  */
+
+int show_debug_regs;
+
+/* See gdbsupport/common-debug.h.  */
 
 void
-warning (const char *fmt, ...)
+debug_printf (const char *fmt, ...)
 {
   va_list ap;
 
   va_start (ap, fmt);
-  vwarning (fmt, ap);
-  va_end (ap);
-}
-
-/* See common/errors.h.  */
-
-void
-error (const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  verror (fmt, ap);
-  va_end (ap);
-}
-
-/* See common/errors.h.  */
-
-void
-internal_error (const char *file, int line, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  internal_verror (file, line, fmt, ap);
-  va_end (ap);
-}
-
-/* See common/errors.h.  */
-
-void
-internal_warning (const char *file, int line, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  internal_vwarning (file, line, fmt, ap);
+  debug_vprintf (fmt, ap);
   va_end (ap);
 }

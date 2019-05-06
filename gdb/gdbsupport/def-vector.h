@@ -19,7 +19,7 @@
 #define COMMON_DEF_VECTOR_H
 
 #include <vector>
-#include "common/default-init-alloc.h"
+#include "gdbsupport/default-init-alloc.h"
 
 namespace gdb {
 

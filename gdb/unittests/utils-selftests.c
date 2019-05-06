@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace utils {

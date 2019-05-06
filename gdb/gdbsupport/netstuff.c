@@ -30,14 +30,14 @@
 #include <netinet/tcp.h>
 #endif
 
-/* See common/netstuff.h.  */
+/* See gdbsupport/netstuff.h.  */
 
 scoped_free_addrinfo::~scoped_free_addrinfo ()
 {
   freeaddrinfo (m_res);
 }
 
-/* See common/netstuff.h.  */
+/* See gdbsupport/netstuff.h.  */
 
 parsed_connection_spec
 parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint)
@@ -111,7 +111,7 @@ parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint)
   return ret;
 }
 
-/* See common/netstuff.h.  */
+/* See gdbsupport/netstuff.h.  */
 
 parsed_connection_spec
 parse_connection_spec (const char *spec, struct addrinfo *hint)

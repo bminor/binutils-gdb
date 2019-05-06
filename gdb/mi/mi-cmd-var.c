@@ -30,7 +30,7 @@
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "inferior.h"
 
 extern unsigned int varobjdebug;		/* defined in varobj.c.  */

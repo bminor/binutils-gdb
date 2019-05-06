@@ -55,7 +55,7 @@ fi
 GDB_AC_LIBMCHECK(${libmcheck_default})
 
 GDB_AC_SELFTEST([
-  srv_selftest_objs="common/selftest.o"
+  srv_selftest_objs="gdbsupport/selftest.o"
 ])
 
 ACX_NONCANONICAL_TARGET
@@ -65,7 +65,7 @@ ACX_NONCANONICAL_HOST
 ZW_CREATE_DEPDIR
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch common"
+CONFIG_SRC_SUBDIR="arch gdbsupport"
 AC_SUBST(CONFIG_SRC_SUBDIR)
 
 AC_CONFIG_COMMANDS([gdbdepdir],[
@@ -255,7 +255,7 @@ esac
 . ${srcdir}/configure.srv
 
 # Add in the common host objects.
-. ${srcdir}/../common/common.host
+. ${srcdir}/../gdbsupport/common.host
 srv_host_obs="$common_host_obs"
 
 if test "${srv_mingwce}" = "yes"; then

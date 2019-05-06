@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include "event-top.h"
 #include "gdbthread.h"
 #include "fnmatch.h"
@@ -65,14 +65,14 @@
 #include "gdb_usleep.h"
 #include "interps.h"
 #include "gdb_regex.h"
-#include "common/job-control.h"
-#include "common/selftest.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/job-control.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/gdb_optional.h"
 #include "cp-support.h"
 #include <algorithm>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 
 void (*deprecated_error_begin_hook) (void);
 

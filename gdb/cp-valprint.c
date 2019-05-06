@@ -35,7 +35,7 @@
 #include "language.h"
 #include "extension.h"
 #include "typeprint.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;

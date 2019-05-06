@@ -303,7 +303,7 @@ skip_to_space (char *chp)
   return (char *) skip_to_space ((const char *) chp);
 }
 
-/* See common/common-utils.h.  */
+/* See gdbsupport/common-utils.h.  */
 
 void
 free_vector_argv (std::vector<char *> &v)
@@ -314,7 +314,7 @@ free_vector_argv (std::vector<char *> &v)
   v.clear ();
 }
 
-/* See common/common-utils.h.  */
+/* See gdbsupport/common-utils.h.  */
 
 std::string
 stringify_argv (const std::vector<char *> &args)
@@ -337,7 +337,7 @@ stringify_argv (const std::vector<char *> &args)
   return ret;
 }
 
-/* See common/common-utils.h.  */
+/* See gdbsupport/common-utils.h.  */
 
 ULONGEST
 align_up (ULONGEST v, int n)
@@ -347,7 +347,7 @@ align_up (ULONGEST v, int n)
   return (v + n - 1) & -n;
 }
 
-/* See common/common-utils.h.  */
+/* See gdbsupport/common-utils.h.  */
 
 ULONGEST
 align_down (ULONGEST v, int n)

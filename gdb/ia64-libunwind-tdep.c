@@ -36,7 +36,7 @@
 #include "ia64-libunwind-tdep.h"
 
 #include "complaints.h"
-#include "common/preprocessor.h"
+#include "gdbsupport/preprocessor.h"
 
 /* IA-64 is the only target that currently uses ia64-libunwind-tdep.
    Note how UNW_TARGET, UNW_OBJ, etc. are compile time constants below.

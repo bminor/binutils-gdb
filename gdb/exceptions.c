@@ -27,7 +27,7 @@
 #include "serial.h"
 #include "gdbthread.h"
 #include "top.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 static void
 print_flush (void)

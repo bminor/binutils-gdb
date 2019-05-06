@@ -40,7 +40,7 @@
 #ifdef __MINGW32__
 #include <windows.h>
 #endif
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
 #include <map>

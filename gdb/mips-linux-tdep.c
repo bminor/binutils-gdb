@@ -38,7 +38,7 @@
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "xml-syscall.h"
-#include "common/gdb_signals.h"
+#include "gdbsupport/gdb_signals.h"
 
 #include "features/mips-linux.c"
 #include "features/mips-dsp-linux.c"
@@ -1437,7 +1437,7 @@ mips_gdb_signal_to_target (struct gdbarch *gdbarch,
 }
 
 /* Translate signals based on MIPS signal values.
-   Adapted from gdb/common/signals.c.  */
+   Adapted from gdb/gdbsupport/signals.c.  */
 
 static enum gdb_signal
 mips_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)

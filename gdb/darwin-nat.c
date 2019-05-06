@@ -63,10 +63,10 @@
 
 #include "darwin-nat.h"
 #include "filenames.h"
-#include "common/filestuff.h"
-#include "common/gdb_unlinker.h"
-#include "common/pathstuff.h"
-#include "common/scoped_fd.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/gdb_unlinker.h"
+#include "gdbsupport/pathstuff.h"
+#include "gdbsupport/scoped_fd.h"
 #include "nat/fork-inferior.h"
 
 /* Quick overview.

@@ -20,7 +20,7 @@
 #ifndef COMMON_PATHSTUFF_H
 #define COMMON_PATHSTUFF_H
 
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 /* Path utilities.  */
 

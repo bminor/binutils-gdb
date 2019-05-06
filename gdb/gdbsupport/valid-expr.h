@@ -26,8 +26,8 @@
 #ifndef COMMON_VALID_EXPR_H
 #define COMMON_VALID_EXPR_H
 
-#include "common/preprocessor.h"
-#include "common/traits.h"
+#include "gdbsupport/preprocessor.h"
+#include "gdbsupport/traits.h"
 
 /* Macro that uses SFINAE magic to detect whether the EXPR expression
    is either valid or ill-formed, at compile time, without actually

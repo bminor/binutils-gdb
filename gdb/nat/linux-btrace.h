@@ -22,8 +22,8 @@
 #ifndef NAT_LINUX_BTRACE_H
 #define NAT_LINUX_BTRACE_H
 
-#include "common/btrace-common.h"
-#include "common/vec.h"
+#include "gdbsupport/btrace-common.h"
+#include "gdbsupport/vec.h"
 #if HAVE_LINUX_PERF_EVENT_H
 #  include <linux/perf_event.h>
 #endif

@@ -17,7 +17,7 @@
 #if !defined (COMPLETER_H)
 #define COMPLETER_H 1
 
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "command.h"
 
 /* Types of functions in struct match_list_displayer.  */

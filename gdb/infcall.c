@@ -41,7 +41,7 @@
 #include "interps.h"
 #include "thread-fsm.h"
 #include <algorithm>
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 
 /* If we can't find a function's name from its address,
    we print this instead.  */

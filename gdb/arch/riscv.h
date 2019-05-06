@@ -20,7 +20,7 @@
 #ifndef ARCH_RISCV_H
 #define ARCH_RISCV_H
 
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 /* The set of RISC-V architectural features that we track that impact how
    we configure the actual gdbarch instance.  We hold one of these in the

@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <utility>
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 gdb_environ &
 gdb_environ::operator= (gdb_environ &&e)
@@ -39,7 +39,7 @@ gdb_environ::operator= (gdb_environ &&e)
   return *this;
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 gdb_environ gdb_environ::from_host_environ ()
 {
@@ -59,7 +59,7 @@ gdb_environ gdb_environ::from_host_environ ()
   return e;
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 void
 gdb_environ::clear ()
@@ -86,7 +86,7 @@ match_var_in_string (const char *string, const char *var, size_t var_len)
   return false;
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 const char *
 gdb_environ::get (const char *var) const
@@ -100,7 +100,7 @@ gdb_environ::get (const char *var) const
   return NULL;
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 void
 gdb_environ::set (const char *var, const char *value)
@@ -124,7 +124,7 @@ gdb_environ::set (const char *var, const char *value)
   m_user_unset_env.erase (std::string (var));
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 void
 gdb_environ::unset (const char *var, bool update_unset_list)
@@ -152,7 +152,7 @@ gdb_environ::unset (const char *var, bool update_unset_list)
     m_user_unset_env.insert (std::string (var));
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 void
 gdb_environ::unset (const char *var)
@@ -160,7 +160,7 @@ gdb_environ::unset (const char *var)
   unset (var, true);
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 char **
 gdb_environ::envp () const
@@ -168,7 +168,7 @@ gdb_environ::envp () const
   return const_cast<char **> (&m_environ_vector[0]);
 }
 
-/* See common/environ.h.  */
+/* See gdbsupport/environ.h.  */
 
 const std::set<std::string> &
 gdb_environ::user_set_env () const

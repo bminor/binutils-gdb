@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-utils.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace cli_utils {

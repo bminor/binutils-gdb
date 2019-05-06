@@ -21,7 +21,7 @@
 #define FILENAME_SEEN_CACHE_H
 
 #include "defs.h"
-#include "common/function-view.h"
+#include "gdbsupport/function-view.h"
 
 /* Cache to watch for file names already seen.  */
 

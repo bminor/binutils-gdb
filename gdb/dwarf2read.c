@@ -58,7 +58,7 @@
 #include "psympriv.h"
 #include <sys/stat.h>
 #include "completer.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "c-lang.h"
 #include "go-lang.h"
 #include "valprint.h"
@@ -68,15 +68,15 @@
 #include "gdb_bfd.h"
 #include "f-lang.h"
 #include "source.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "build-id.h"
 #include "namespace.h"
-#include "common/gdb_unlinker.h"
-#include "common/function-view.h"
-#include "common/gdb_optional.h"
-#include "common/underlying.h"
-#include "common/byte-vector.h"
-#include "common/hash_enum.h"
+#include "gdbsupport/gdb_unlinker.h"
+#include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/underlying.h"
+#include "gdbsupport/byte-vector.h"
+#include "gdbsupport/hash_enum.h"
 #include "filename-seen-cache.h"
 #include "producer.h"
 #include <fcntl.h>
@@ -84,12 +84,12 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include <cmath>
 #include <set>
 #include <forward_list>
 #include "rust-lang.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.

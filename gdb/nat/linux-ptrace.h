@@ -21,7 +21,7 @@
 struct buffer;
 
 #include "nat/gdb_ptrace.h"
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))

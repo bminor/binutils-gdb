@@ -30,7 +30,7 @@
 #include "demangle.h"
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 enum mi_print_types
 {

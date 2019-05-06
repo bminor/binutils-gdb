@@ -26,7 +26,7 @@
 #include "mi-getopt.h"
 #include "symtab.h"
 #include "target.h"
-#include "common/environ.h"
+#include "gdbsupport/environ.h"
 #include "command.h"
 #include "ui-out.h"
 #include "top.h"

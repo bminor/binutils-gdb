@@ -20,7 +20,7 @@
 #include "common-defs.h"
 #include "scoped_mmap.h"
 #include "scoped_fd.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 
 #ifdef HAVE_SYS_MMAN_H
 

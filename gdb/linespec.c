@@ -44,8 +44,8 @@
 #include "ada-lang.h"
 #include "stack.h"
 #include "location.h"
-#include "common/function-view.h"
-#include "common/def-vector.h"
+#include "gdbsupport/function-view.h"
+#include "gdbsupport/def-vector.h"
 #include <algorithm>
 
 /* An enumeration of the various things a user might attempt to

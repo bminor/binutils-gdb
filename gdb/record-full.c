@@ -36,8 +36,8 @@
 #include "gdb_bfd.h"
 #include "observable.h"
 #include "infrun.h"
-#include "common/gdb_unlinker.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/gdb_unlinker.h"
+#include "gdbsupport/byte-vector.h"
 
 #include <signal.h>
 

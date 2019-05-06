@@ -20,8 +20,8 @@
 #ifndef INFERIOR_ITER_H
 #define INFERIOR_ITER_H
 
-#include "common/filtered-iterator.h"
-#include "common/safe-iterator.h"
+#include "gdbsupport/filtered-iterator.h"
+#include "gdbsupport/safe-iterator.h"
 
 /* A forward iterator that iterates over all inferiors.  */
 

@@ -50,7 +50,7 @@
 #include "objfiles.h"
 #include "user-regs.h"
 #include <algorithm>
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */

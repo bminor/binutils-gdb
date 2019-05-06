@@ -64,11 +64,11 @@
 #include "parser-defs.h"
 #include "completer.h"
 #include "progspace-and-thread.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "filename-seen-cache.h"
 #include "arch-utils.h"
 #include <algorithm>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 /* Forward declarations for local functions.  */
 

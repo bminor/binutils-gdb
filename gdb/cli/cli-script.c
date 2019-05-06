@@ -33,7 +33,7 @@
 #include "extension.h"
 #include "interps.h"
 #include "compile/compile.h"
-#include "common/gdb_string_view.h"
+#include "gdbsupport/gdb_string_view.h"
 #include "python/python.h"
 #include "guile/guile.h"
 

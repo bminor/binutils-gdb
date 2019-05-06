@@ -19,7 +19,7 @@
 #ifndef GDBSERVER_SERVER_H
 #define GDBSERVER_SERVER_H
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 
 gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
@@ -27,7 +27,7 @@ gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 #include "wincecompat.h"
 #endif
 
-#include "common/version.h"
+#include "gdbsupport/version.h"
 
 #if !HAVE_DECL_STRERROR
 #ifndef strerror
@@ -54,13 +54,13 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #  define PROG "gdbserver"
 #endif
 
-#include "common/buffer.h"
-#include "common/xml-utils.h"
+#include "gdbsupport/buffer.h"
+#include "gdbsupport/xml-utils.h"
 #include "regcache.h"
-#include "common/gdb_signals.h"
+#include "gdbsupport/gdb_signals.h"
 #include "target.h"
 #include "mem-break.h"
-#include "common/environ.h"
+#include "gdbsupport/environ.h"
 
 /* Target-specific functions */
 
@@ -104,7 +104,7 @@ extern int in_queued_stop_replies (ptid_t ptid);
 
 #include "utils.h"
 #include "debug.h"
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

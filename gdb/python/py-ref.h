@@ -20,7 +20,7 @@
 #ifndef PYTHON_PY_REF_H
 #define PYTHON_PY_REF_H
 
-#include "common/gdb_ref_ptr.h"
+#include "gdbsupport/gdb_ref_ptr.h"
 
 /* A policy class for gdb::ref_ptr for Python reference counting.  */
 template<typename T>

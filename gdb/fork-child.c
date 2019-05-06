@@ -25,17 +25,17 @@
 #include "terminal.h"
 #include "gdbthread.h"
 #include "top.h"
-#include "common/job-control.h"
-#include "common/filestuff.h"
+#include "gdbsupport/job-control.h"
+#include "gdbsupport/filestuff.h"
 #include "nat/fork-inferior.h"
-#include "common/common-inferior.h"
+#include "gdbsupport/common-inferior.h"
 
 /* The exec-wrapper, if any, that will be used when starting the
    inferior.  */
 
 static char *exec_wrapper = NULL;
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_exec_wrapper ()

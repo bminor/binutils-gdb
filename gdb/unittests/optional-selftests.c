@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Used by the included .cc files below.  Included here because the
    included test files are wrapped in a namespace.  */

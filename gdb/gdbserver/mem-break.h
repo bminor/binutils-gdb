@@ -21,7 +21,7 @@
 #ifndef GDBSERVER_MEM_BREAK_H
 #define GDBSERVER_MEM_BREAK_H
 
-#include "common/break-common.h"
+#include "gdbsupport/break-common.h"
 
 /* Breakpoints are opaque.  */
 struct breakpoint;

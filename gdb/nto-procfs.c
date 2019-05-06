@@ -42,8 +42,8 @@
 #include "regcache.h"
 #include "solib.h"
 #include "inf-child.h"
-#include "common/filestuff.h"
-#include "common/scoped_fd.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/scoped_fd.h"
 
 #define NULL_PID		0
 #define _DEBUG_FLAG_TRACE	(_DEBUG_FLAG_TRACE_EXEC|_DEBUG_FLAG_TRACE_RD|\

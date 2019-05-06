@@ -21,7 +21,7 @@
 #define INFCALL_H
 
 #include "dummy-frame.h"
-#include "common/array-view.h"
+#include "gdbsupport/array-view.h"
 
 struct value;
 struct type;

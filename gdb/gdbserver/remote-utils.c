@@ -24,9 +24,9 @@
 #include "gdbthread.h"
 #include "tdesc.h"
 #include "dll.h"
-#include "common/rsp-low.h"
-#include "common/netstuff.h"
-#include "common/filestuff.h"
+#include "gdbsupport/rsp-low.h"
+#include "gdbsupport/netstuff.h"
+#include "gdbsupport/filestuff.h"
 #include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -55,7 +55,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #include <unistd.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>

@@ -1,3 +1,22 @@
+2019-07-09  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* configure.ac: Change common to gdbsupport.
+	* acinclude.m4: Change common to gdbsupport.
+	* Makefile.in (SFILES, OBS, GDBREPLAY_OBS, IPA_OBJS)
+	(version-generated.c, gdbsupport/%-ipa.o, gdbsupport/%.o): Change
+	common to gdbsupport.
+	* ax.c, event-loop.c, fork-child.c, gdb_proc_service.h,
+	gdbreplay.c, gdbthread.h, hostio-errno.c, hostio.c, i387-fp.c,
+	inferiors.c, inferiors.h, linux-aarch64-tdesc-selftest.c,
+	linux-amd64-ipa.c, linux-i386-ipa.c, linux-low.c,
+	linux-tic6x-low.c, linux-x86-low.c, linux-x86-tdesc-selftest.c,
+	linux-x86-tdesc.c, lynx-i386-low.c, lynx-low.c, mem-break.h,
+	nto-x86-low.c, regcache.c, regcache.h, remote-utils.c, server.c,
+	server.h, spu-low.c, symbol.c, target.h, tdesc.c, tdesc.h,
+	thread-db.c, tracepoint.c, win32-i386-low.c, win32-low.c: Change
+	common to gdbsupport.
+
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-aarch32-low.c (arm_read_description, arm_regsets): Use new

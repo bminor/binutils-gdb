@@ -93,7 +93,7 @@ const struct extension_language_defn extension_language_python =
 #include "python-internal.h"
 #include "linespec.h"
 #include "source.h"
-#include "common/version.h"
+#include "gdbsupport/version.h"
 #include "target.h"
 #include "gdbthread.h"
 #include "interps.h"

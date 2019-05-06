@@ -19,7 +19,7 @@
 #ifndef GDBSERVER_GDB_PROC_SERVICE_H
 #define GDBSERVER_GDB_PROC_SERVICE_H
 
-#include "common/gdb_proc_service.h"
+#include "gdbsupport/gdb_proc_service.h"
 
 /* Structure that identifies the target process.  */
 struct ps_prochandle

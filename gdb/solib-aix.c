@@ -26,7 +26,7 @@
 #include "xcoffread.h"
 #include "observable.h"
 #include "gdbcmd.h"
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 
 /* Variable controlling the output of the debugging traces for
    this module.  */

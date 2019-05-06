@@ -19,7 +19,7 @@
 #define INFRUN_H 1
 
 #include "symtab.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 struct target_waitstatus;
 struct frame_info;

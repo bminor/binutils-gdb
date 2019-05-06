@@ -19,7 +19,7 @@
 #ifndef CHARSET_H
 #define CHARSET_H
 
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 
 /* If the target program uses a different character set than the host,
    GDB has some support for translating between the two; GDB converts

@@ -23,7 +23,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
-#include "common/environ.h"
+#include "gdbsupport/environ.h"
 #include "value.h"
 #include "target.h"
 #include "gdbthread.h"
@@ -45,7 +45,7 @@
 #include "thread-fsm.h"
 #include "tid-parse.h"
 #include <algorithm>
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "inline-frame.h"
 #include "stack.h"
 
@@ -1307,7 +1307,7 @@ switch_to_thread (thread_info *thr)
   reinit_frame_cache ();
 }
 
-/* See common/common-gdbthread.h.  */
+/* See gdbsupport/common-gdbthread.h.  */
 
 void
 switch_to_thread (ptid_t ptid)

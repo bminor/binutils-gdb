@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/rsp-low.h"
 
 namespace selftests {
 namespace rsp_low {

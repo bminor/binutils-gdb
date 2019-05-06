@@ -35,7 +35,7 @@
 #include "typeprint.h"
 #include <ctype.h>
 #include <algorithm>
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 #include "cli/cli-option.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */

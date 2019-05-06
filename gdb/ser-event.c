@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "ser-event.h"
 #include "serial.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 
 /* On POSIX hosts, a serial_event is basically an abstraction for the
    classical self-pipe trick.

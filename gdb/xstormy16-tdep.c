@@ -33,7 +33,7 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "objfiles.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 enum gdb_regnum
 {

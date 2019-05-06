@@ -25,7 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "common/environ.h"
+#include "gdbsupport/environ.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "symfile.h"
@@ -58,7 +58,7 @@
 #include "thread-fsm.h"
 #include "top.h"
 #include "interps.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "source.h"
 
 /* Local functions: */
@@ -213,7 +213,7 @@ show_args_command (struct ui_file *file, int from_tty,
   deprecated_show_value_hack (file, from_tty, c, get_inferior_args ());
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 void
 set_inferior_cwd (const char *cwd)
@@ -228,7 +228,7 @@ set_inferior_cwd (const char *cwd)
     inf->cwd.reset (xstrdup (cwd));
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_inferior_cwd ()

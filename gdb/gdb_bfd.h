@@ -21,7 +21,7 @@
 #define GDB_BFD_H
 
 #include "registry.h"
-#include "common/gdb_ref_ptr.h"
+#include "gdbsupport/gdb_ref_ptr.h"
 
 DECLARE_REGISTRY (bfd);
 

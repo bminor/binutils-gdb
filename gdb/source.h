@@ -19,7 +19,7 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
-#include "common/scoped_fd.h"
+#include "gdbsupport/scoped_fd.h"
 
 struct symtab;
 

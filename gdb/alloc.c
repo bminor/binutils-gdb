@@ -34,9 +34,9 @@
    GDBSERVER define when possible, and for this file it seemed
    simple to do so.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "libiberty.h"
-#include "common/errors.h"
+#include "gdbsupport/errors.h"
 
 /* The xmalloc() (libiberty.h) family of memory management routines.
 

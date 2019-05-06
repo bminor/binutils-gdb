@@ -26,7 +26,7 @@
 #include "top.h"
 #include "target.h"
 #include "guile-internal.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)

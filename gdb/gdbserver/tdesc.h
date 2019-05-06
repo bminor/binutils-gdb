@@ -19,7 +19,7 @@
 #ifndef GDBSERVER_TDESC_H
 #define GDBSERVER_TDESC_H
 
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 #include "regdef.h"
 #include <vector>

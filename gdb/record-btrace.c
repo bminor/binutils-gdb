@@ -38,7 +38,7 @@
 #include "infrun.h"
 #include "event-loop.h"
 #include "inf-loop.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "inferior.h"
 #include <algorithm>
 

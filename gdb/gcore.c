@@ -35,9 +35,9 @@
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
 #include <algorithm>
-#include "common/gdb_unlinker.h"
-#include "common/byte-vector.h"
-#include "common/scope-exit.h"
+#include "gdbsupport/gdb_unlinker.h"
+#include "gdbsupport/byte-vector.h"
+#include "gdbsupport/scope-exit.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during

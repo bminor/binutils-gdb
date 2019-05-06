@@ -39,14 +39,14 @@
 #include "disasm.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 #include <algorithm>
 #include "target-descriptions.h"
 #include "arch/amd64.h"
 #include "producer.h"
 #include "ax.h"
 #include "ax-gdb.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 #include "osabi.h"
 #include "x86-tdep.h"
 

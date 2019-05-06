@@ -19,7 +19,7 @@
 #ifndef GDBSERVER_INFERIORS_H
 #define GDBSERVER_INFERIORS_H
 
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include <list>
 
 struct thread_info;

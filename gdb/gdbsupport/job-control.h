@@ -23,7 +23,7 @@
 
 /* Do we have job control?  Can be assumed to always be the same
    within a given run of GDB.  Use in gdb/inflow.c and
-   common/common-inflow.c.  */
+   gdbsupport/common-inflow.c.  */
 extern int job_control;
 
 /* Set the process group of the caller to its own pid, or do nothing

@@ -17,18 +17,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "nat/linux-namespaces.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include <fcntl.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include <signal.h>
 #include <sched.h>
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 
 /* See nat/linux-namespaces.h.  */
 int debug_linux_namespaces;

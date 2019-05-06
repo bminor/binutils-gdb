@@ -20,7 +20,7 @@
 #ifndef MACROTAB_H
 #define MACROTAB_H
 
-#include "common/function-view.h"
+#include "gdbsupport/function-view.h"
 
 struct obstack;
 struct bcache;

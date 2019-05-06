@@ -18,32 +18,32 @@
 
 #include "server.h"
 #include "gdbthread.h"
-#include "common/agent.h"
+#include "gdbsupport/agent.h"
 #include "notif.h"
 #include "tdesc.h"
-#include "common/rsp-low.h"
-#include "common/signals-state-save-restore.h"
+#include "gdbsupport/rsp-low.h"
+#include "gdbsupport/signals-state-save-restore.h"
 #include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#include "common/gdb_vecs.h"
-#include "common/gdb_wait.h"
-#include "common/btrace-common.h"
-#include "common/filestuff.h"
+#include "gdbsupport/gdb_vecs.h"
+#include "gdbsupport/gdb_wait.h"
+#include "gdbsupport/btrace-common.h"
+#include "gdbsupport/filestuff.h"
 #include "tracepoint.h"
 #include "dll.h"
 #include "hostio.h"
 #include <vector>
-#include "common/common-inferior.h"
-#include "common/job-control.h"
-#include "common/environ.h"
+#include "gdbsupport/common-inferior.h"
+#include "gdbsupport/job-control.h"
+#include "gdbsupport/environ.h"
 #include "filenames.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
-#include "common/selftest.h"
-#include "common/scope-exit.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/scope-exit.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -258,7 +258,7 @@ target_running (void)
   return get_first_thread () != NULL;
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_exec_wrapper ()
@@ -266,7 +266,7 @@ get_exec_wrapper ()
   return !wrapper_argv.empty () ? wrapper_argv.c_str () : NULL;
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 char *
 get_exec_file (int err)

@@ -213,7 +213,7 @@ current_process (void)
   return get_thread_process (current_thread);
 }
 
-/* See common/common-gdbthread.h.  */
+/* See gdbsupport/common-gdbthread.h.  */
 
 void
 switch_to_thread (ptid_t ptid)
@@ -222,7 +222,7 @@ switch_to_thread (ptid_t ptid)
   current_thread = find_thread_ptid (ptid);
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_inferior_cwd ()
@@ -230,7 +230,7 @@ get_inferior_cwd ()
   return current_inferior_cwd;
 }
 
-/* See common/common-inferior.h.  */
+/* See gdbsupport/common-inferior.h.  */
 
 void
 set_inferior_cwd (const char *cwd)

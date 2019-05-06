@@ -25,7 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "breakpoint.h"
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "cli/cli-script.h"
@@ -63,12 +63,12 @@
 #include "solist.h"
 #include "event-loop.h"
 #include "thread-fsm.h"
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 #include "progspace-and-thread.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "arch-utils.h"
-#include "common/scope-exit.h"
-#include "common/forward-scope-exit.h"
+#include "gdbsupport/scope-exit.h"
+#include "gdbsupport/forward-scope-exit.h"
 
 /* Prototypes for local functions */
 

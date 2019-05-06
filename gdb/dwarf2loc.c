@@ -39,12 +39,12 @@
 #include "dwarf2read.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
-#include "common/underlying.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/underlying.h"
+#include "gdbsupport/byte-vector.h"
 
 extern int dwarf_always_disassemble;
 

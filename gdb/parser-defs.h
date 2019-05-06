@@ -23,7 +23,7 @@
 #if !defined (PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "expression.h"
 
 struct block;

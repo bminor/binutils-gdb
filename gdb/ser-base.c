@@ -23,7 +23,7 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #endif

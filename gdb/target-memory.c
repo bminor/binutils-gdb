@@ -19,11 +19,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "target.h"
 #include "memory-map.h"
 
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #include <algorithm>
 
 static bool

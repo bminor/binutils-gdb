@@ -21,7 +21,7 @@
 #ifndef MI_MI_CMD_BREAK_H
 #define MI_MI_CMD_BREAK_H
 
-#include "common/scoped_restore.h"
+#include "gdbsupport/scoped_restore.h"
 
 /* Setup the reporting of the insertion of a new breakpoint or
    catchpoint.  */

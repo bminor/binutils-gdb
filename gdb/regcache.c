@@ -168,7 +168,7 @@ register_size (struct gdbarch *gdbarch, int regnum)
   return size;
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 int
 regcache_register_size (const struct regcache *regcache, int n)
@@ -284,7 +284,7 @@ regcache::restore (readonly_detached_regcache *src)
     }
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 enum register_status
 reg_buffer::get_register_status (int regnum) const
@@ -372,7 +372,7 @@ get_current_regcache (void)
   return get_thread_regcache (inferior_thread ());
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 struct regcache *
 get_thread_regcache_for_ptid (ptid_t ptid)
@@ -931,7 +931,7 @@ regcache::cooked_write_part (int regnum, int offset, int len,
   write_part (regnum, offset, len, buf, false);
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 void
 reg_buffer::raw_supply (int regnum, const void *buf)
@@ -996,7 +996,7 @@ reg_buffer::raw_supply_zeroed (int regnum)
   m_register_status[regnum] = REG_VALID;
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 void
 reg_buffer::raw_collect (int regnum, void *buf) const
@@ -1148,7 +1148,7 @@ regcache::collect_regset (const struct regset *regset,
   transfer_regset (regset, nullptr, regnum, nullptr, (gdb_byte *) buf, size);
 }
 
-/* See common/common-regcache.h.  */
+/* See gdbsupport/common-regcache.h.  */
 
 bool
 reg_buffer::raw_compare (int regnum, const void *buf, int offset) const
@@ -1380,7 +1380,7 @@ register_dump::dump (ui_file *file)
 }
 
 #if GDB_SELF_TEST
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #include "target-float.h"
 

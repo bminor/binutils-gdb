@@ -45,11 +45,11 @@
  */
 
 #include "hashtab.h"
-#include "common/array-view.h"
-#include "common/offset-type.h"
-#include "common/enum-flags.h"
-#include "common/underlying.h"
-#include "common/print-utils.h"
+#include "gdbsupport/array-view.h"
+#include "gdbsupport/offset-type.h"
+#include "gdbsupport/enum-flags.h"
+#include "gdbsupport/underlying.h"
+#include "gdbsupport/print-utils.h"
 #include "gdbarch.h"
 
 /* Forward declarations for prototypes.  */

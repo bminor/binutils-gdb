@@ -41,8 +41,8 @@
 #include "user-regs.h"
 #include <algorithm>
 #include "completer.h"
-#include "common/selftest.h"
-#include "common/array-view.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/array-view.h"
 
 /* Definition of a user function.  */
 struct internal_function

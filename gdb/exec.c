@@ -45,7 +45,7 @@
 #include <sys/stat.h>
 #include "solist.h"
 #include <algorithm>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 

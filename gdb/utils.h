@@ -22,7 +22,7 @@
 #define UTILS_H
 
 #include "exceptions.h"
-#include "common/scoped_restore.h"
+#include "gdbsupport/scoped_restore.h"
 #include <chrono>
 
 extern void initialize_utils (void);

@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "common/fileio.h"
+#include "gdbsupport/fileio.h"
 
 struct fd_list
 {

@@ -20,7 +20,7 @@
 #define DISASM_H
 
 #include "dis-asm.h"
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 enum gdb_disassembly_flag
   {

@@ -17,16 +17,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "fork-inferior.h"
 #include "target/waitstatus.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "target/target.h"
-#include "common/common-inferior.h"
-#include "common/common-gdbthread.h"
-#include "common/pathstuff.h"
-#include "common/signals-state-save-restore.h"
-#include "common/gdb_tilde_expand.h"
+#include "gdbsupport/common-inferior.h"
+#include "gdbsupport/common-gdbthread.h"
+#include "gdbsupport/pathstuff.h"
+#include "gdbsupport/signals-state-save-restore.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 #include <vector>
 
 extern char **environ;

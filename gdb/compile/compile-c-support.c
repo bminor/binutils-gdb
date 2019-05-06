@@ -27,8 +27,8 @@
 #include "macrotab.h"
 #include "macroscope.h"
 #include "regcache.h"
-#include "common/function-view.h"
-#include "common/preprocessor.h"
+#include "gdbsupport/function-view.h"
+#include "gdbsupport/preprocessor.h"
 
 /* See compile-internal.h.  */
 

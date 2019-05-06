@@ -23,7 +23,7 @@
 #include "record.h"
 #include "observable.h"
 #include "inferior.h"
-#include "common/common-utils.h"
+#include "gdbsupport/common-utils.h"
 #include "cli/cli-utils.h"
 #include "disasm.h"
 

@@ -31,7 +31,7 @@
 #endif
 
 #include <sys/types.h>
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #include "gdb_select.h"
 #include "observable.h"
 #include "top.h"

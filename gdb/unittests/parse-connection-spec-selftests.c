@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/netstuff.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/netstuff.h"
 #include "diagnostics.h"
 #ifdef USE_WIN32API
 #include <ws2tcpip.h>

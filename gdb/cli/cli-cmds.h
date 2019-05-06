@@ -17,8 +17,8 @@
 #ifndef CLI_CLI_CMDS_H
 #define CLI_CLI_CMDS_H
 
-#include "common/filestuff.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Chain containing all defined commands.  */
 

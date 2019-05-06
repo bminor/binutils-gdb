@@ -17,9 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "x86-dregs.h"
-#include "common/break-common.h"
+#include "gdbsupport/break-common.h"
 
 /* Support for hardware watchpoints and breakpoints using the x86
    debug registers.

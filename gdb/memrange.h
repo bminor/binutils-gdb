@@ -20,7 +20,7 @@
 #ifndef MEMRANGE_H
 #define MEMRANGE_H
 
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 
 /* Defines a [START, START + LENGTH) memory range.  */
 

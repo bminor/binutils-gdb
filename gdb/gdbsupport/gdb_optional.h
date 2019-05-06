@@ -20,7 +20,7 @@
 #ifndef COMMON_GDB_OPTIONAL_H
 #define COMMON_GDB_OPTIONAL_H
 
-#include "common/traits.h"
+#include "gdbsupport/traits.h"
 
 namespace gdb
 {

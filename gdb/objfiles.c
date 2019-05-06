@@ -52,7 +52,7 @@
 #include "solist.h"
 #include "gdb_bfd.h"
 #include "btrace.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 #include <vector>
 

@@ -65,7 +65,7 @@
 #include "ax-gdb.h"
 #include "dummy-frame.h"
 #include "interps.h"
-#include "common/format.h"
+#include "gdbsupport/format.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
 #include "cli/cli-style.h"
@@ -82,8 +82,8 @@
 #include "extension.h"
 #include <algorithm>
 #include "progspace-and-thread.h"
-#include "common/array-view.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/array-view.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Prototypes for local functions.  */
 

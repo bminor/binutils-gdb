@@ -21,7 +21,7 @@
 #define BUILD_ID_H
 
 #include "gdb_bfd.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/rsp-low.h"
 
 /* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
 

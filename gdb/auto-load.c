@@ -36,11 +36,11 @@
 #include "completer.h"
 #include "fnmatch.h"
 #include "top.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "extension.h"
 #include "gdb/section-scripts.h"
 #include <algorithm>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).

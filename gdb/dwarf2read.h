@@ -24,7 +24,7 @@
 #include "dwarf-index-cache.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
-#include "common/hash_enum.h"
+#include "gdbsupport/hash_enum.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;

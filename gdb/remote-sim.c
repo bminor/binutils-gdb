@@ -41,7 +41,7 @@
 #include "arch-utils.h"
 #include "readline/readline.h"
 #include "gdbthread.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 /* Prototypes */
 

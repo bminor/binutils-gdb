@@ -24,7 +24,7 @@
 #define LANGUAGE_H 1
 
 #include "symtab.h"
-#include "common/function-view.h"
+#include "gdbsupport/function-view.h"
 #include "expression.h"
 
 /* Forward decls for prototypes.  */

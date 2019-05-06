@@ -32,7 +32,7 @@
 #include "obsd-tdep.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
 

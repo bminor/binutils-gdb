@@ -20,7 +20,7 @@
 #ifndef ARCH_AARCH64_H
 #define ARCH_AARCH64_H
 
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 /* Create the aarch64 target description.  A non zero VQ value indicates both
    the presence of SVE and the Vector Quotient - the number of 128bit chunks in

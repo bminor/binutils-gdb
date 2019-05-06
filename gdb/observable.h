@@ -20,7 +20,7 @@
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 
-#include "common/observable.h"
+#include "gdbsupport/observable.h"
 
 struct bpstats;
 struct so_list;

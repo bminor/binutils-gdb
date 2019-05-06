@@ -23,12 +23,12 @@
 #include "build-id.h"
 #include "cli/cli-cmds.h"
 #include "command.h"
-#include "common/scoped_mmap.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/scoped_mmap.h"
+#include "gdbsupport/pathstuff.h"
 #include "dwarf-index-write.h"
 #include "dwarf2read.h"
 #include "objfiles.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include <string>
 #include <stdlib.h>
 

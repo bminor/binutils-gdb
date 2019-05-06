@@ -22,16 +22,16 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "remote.h"
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include <sys/stat.h>
 #include "remote-fileio.h"
 #include "event-loop.h"
 #include "target.h"
 #include "filenames.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 
 #include <fcntl.h>
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>		/* For cygwin_conv_path.  */
 #endif

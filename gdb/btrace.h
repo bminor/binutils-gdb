@@ -26,9 +26,9 @@
    inferior.  For presentation purposes, the branch trace is represented as a
    list of sequential control-flow blocks, one such list per thread.  */
 
-#include "common/btrace-common.h"
+#include "gdbsupport/btrace-common.h"
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 #if defined (HAVE_LIBIPT)
 #  include <intel-pt.h>

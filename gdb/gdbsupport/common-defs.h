@@ -126,14 +126,14 @@
 #include "common-debug.h"
 #include "cleanups.h"
 #include "common-exceptions.h"
-#include "common/poison.h"
+#include "gdbsupport/poison.h"
 
 #define EXTERN_C extern "C"
 #define EXTERN_C_PUSH extern "C" {
 #define EXTERN_C_POP }
 
 /* Pull in gdb::unique_xmalloc_ptr.  */
-#include "common/gdb_unique_ptr.h"
+#include "gdbsupport/gdb_unique_ptr.h"
 
 /* String containing the current directory (what getwd would return).  */
 extern char *current_directory;

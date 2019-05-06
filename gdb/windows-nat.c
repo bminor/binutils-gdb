@@ -67,8 +67,8 @@
 #include "x86-nat.h"
 #include "complaints.h"
 #include "inf-child.h"
-#include "common/gdb_tilde_expand.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/gdb_tilde_expand.h"
+#include "gdbsupport/pathstuff.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop

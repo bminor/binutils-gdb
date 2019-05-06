@@ -21,7 +21,7 @@ m4_include(../../config/lead-dot.m4)
 dnl codeset.m4 is needed for common.m4, but not for
 dnl anything else in gdbserver.
 m4_include(../../config/codeset.m4)
-m4_include(../common/common.m4)
+m4_include(../gdbsupport/common.m4)
 
 dnl For libiberty_INIT.
 m4_include(../libiberty.m4)

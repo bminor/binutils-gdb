@@ -24,8 +24,8 @@
 #define GNULIB_NAMESPACE gnulib
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/gdb_string_view.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/gdb_string_view.h"
 
 /* Used by the included .cc files below.  Included here because the
    included test files are wrapped in a namespace.  */

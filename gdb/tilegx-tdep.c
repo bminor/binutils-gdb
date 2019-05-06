@@ -40,7 +40,7 @@
 #include "tilegx-tdep.h"
 #include "opcode/tilegx.h"
 #include <algorithm>
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 struct tilegx_frame_cache
 {

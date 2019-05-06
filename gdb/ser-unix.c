@@ -26,11 +26,11 @@
 #include <sys/types.h>
 #include "terminal.h"
 #include <sys/socket.h>
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 
 #include "gdb_select.h"
 #include "gdbcmd.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include <termios.h>
 #include "inflow.h"
 

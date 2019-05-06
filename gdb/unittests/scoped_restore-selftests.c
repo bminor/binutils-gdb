@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/scoped_restore.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/scoped_restore.h"
 
 namespace selftests {
 namespace scoped_restore_tests {

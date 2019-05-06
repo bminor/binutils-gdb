@@ -20,7 +20,7 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-#include "common/common-regcache.h"
+#include "gdbsupport/common-regcache.h"
 #include <forward_list>
 
 struct regcache;
@@ -68,7 +68,7 @@ extern void regcache_cooked_write_unsigned (struct regcache *regcache,
 
 /* Special routines to read/write the PC.  */
 
-/* For regcache_read_pc see common/common-regcache.h.  */
+/* For regcache_read_pc see gdbsupport/common-regcache.h.  */
 extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
 /* Mapping between register numbers and offsets in a buffer, for use
@@ -181,10 +181,10 @@ public:
   /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
-  /* See common/common-regcache.h.  */
+  /* See gdbsupport/common-regcache.h.  */
   enum register_status get_register_status (int regnum) const override;
 
-  /* See common/common-regcache.h.  */
+  /* See gdbsupport/common-regcache.h.  */
   void raw_collect (int regnum, void *buf) const override;
 
   /* Collect register REGNUM from REGCACHE.  Store collected value as an integer
@@ -199,7 +199,7 @@ public:
      reading only LEN.  */
   void raw_collect_part (int regnum, int offset, int len, gdb_byte *out) const;
 
-  /* See common/common-regcache.h.  */
+  /* See gdbsupport/common-regcache.h.  */
   void raw_supply (int regnum, const void *buf) override;
 
   void raw_supply (int regnum, const reg_buffer &src)
@@ -228,7 +228,7 @@ public:
 
   virtual ~reg_buffer () = default;
 
-  /* See common/common-regcache.h.  */
+  /* See gdbsupport/common-regcache.h.  */
   bool raw_compare (int regnum, const void *buf, int offset) const override;
 
 protected:

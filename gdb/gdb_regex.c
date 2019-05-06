@@ -17,7 +17,7 @@
 
 #include "defs.h"
 #include "gdb_regex.h"
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 
 compiled_regex::compiled_regex (const char *regex, int cflags,
 				const char *message)

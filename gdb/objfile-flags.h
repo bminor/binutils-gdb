@@ -20,7 +20,7 @@
 #if !defined (OBJFILE_FLAGS_H)
 #define OBJFILE_FLAGS_H
 
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 /* Defines for the objfile flags field.  Defined in a separate file to
    break circular header dependencies.  */

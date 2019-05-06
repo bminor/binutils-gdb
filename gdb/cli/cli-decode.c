@@ -24,7 +24,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Prototypes for local functions.  */
 

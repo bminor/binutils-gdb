@@ -31,14 +31,14 @@
 #include "regcache.h"
 #include "inf-child.h"
 #include "nat/fork-inferior.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 
 #define _STRUCTURED_PROC 1	/* Should be done by configure script.  */
 
 #include <sys/procfs.h>
 #include <sys/fault.h>
 #include <sys/syscall.h>
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_bfd.h"
@@ -46,8 +46,8 @@
 #include "auxv.h"
 #include "procfs.h"
 #include "observable.h"
-#include "common/scoped_fd.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/scoped_fd.h"
+#include "gdbsupport/pathstuff.h"
 
 /* This module provides the interface between GDB and the
    /proc file system, which is used on many versions of Unix

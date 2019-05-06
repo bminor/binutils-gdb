@@ -529,7 +529,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi common compile tui unittests guile python \
+CONFIG_SRC_SUBDIR = arch cli mi gdbsupport compile tui unittests guile python \
 	target nat
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
@@ -948,35 +948,35 @@ COMMON_SFILES = \
 	cli-out.c \
 	coff-pe-read.c \
 	coffread.c \
-	common/agent.c \
-	common/btrace-common.c \
-	common/buffer.c \
-	common/cleanups.c \
-	common/common-debug.c \
-	common/common-exceptions.c \
-	common/common-regcache.c \
-	common/common-utils.c \
-	common/errors.c \
-	common/environ.c \
-	common/fileio.c \
-	common/filestuff.c \
-	common/format.c \
-	common/job-control.c \
-	common/gdb_tilde_expand.c \
-	common/gdb_vecs.c \
-	common/netstuff.c \
-	common/new-op.c \
-	common/pathstuff.c \
-	common/print-utils.c \
-	common/ptid.c \
-	common/rsp-low.c \
-	common/run-time-clock.c \
-	common/scoped_mmap.c \
-	common/signals.c \
-	common/signals-state-save-restore.c \
-	common/tdesc.c \
-	common/vec.c \
-	common/xml-utils.c \
+	gdbsupport/agent.c \
+	gdbsupport/btrace-common.c \
+	gdbsupport/buffer.c \
+	gdbsupport/cleanups.c \
+	gdbsupport/common-debug.c \
+	gdbsupport/common-exceptions.c \
+	gdbsupport/common-regcache.c \
+	gdbsupport/common-utils.c \
+	gdbsupport/errors.c \
+	gdbsupport/environ.c \
+	gdbsupport/fileio.c \
+	gdbsupport/filestuff.c \
+	gdbsupport/format.c \
+	gdbsupport/job-control.c \
+	gdbsupport/gdb_tilde_expand.c \
+	gdbsupport/gdb_vecs.c \
+	gdbsupport/netstuff.c \
+	gdbsupport/new-op.c \
+	gdbsupport/pathstuff.c \
+	gdbsupport/print-utils.c \
+	gdbsupport/ptid.c \
+	gdbsupport/rsp-low.c \
+	gdbsupport/run-time-clock.c \
+	gdbsupport/scoped_mmap.c \
+	gdbsupport/signals.c \
+	gdbsupport/signals-state-save-restore.c \
+	gdbsupport/tdesc.c \
+	gdbsupport/vec.c \
+	gdbsupport/xml-utils.c \
 	complaints.c \
 	completer.c \
 	continuations.c \
@@ -1442,45 +1442,45 @@ HFILES_NO_SRCDIR = \
 	cli/cli-setshow.h \
 	cli/cli-style.h \
 	cli/cli-utils.h \
-	common/buffer.h \
-	common/cleanups.h \
-	common/common-debug.h \
-	common/common-defs.h \
-	common/common-exceptions.h \
-	common/common-gdbthread.h \
-	common/common-regcache.h \
-	common/common-types.h \
-	common/common-utils.h \
-	common/job-control.h \
-	common/errors.h \
-	common/environ.h \
-	common/fileio.h \
-	common/format.h \
-	common/gdb_assert.h \
-	common/gdb_tilde_expand.h \
-	common/gdb_locale.h \
-	common/gdb_proc_service.h \
-	common/gdb_setjmp.h \
-	common/gdb_signals.h \
-	common/gdb_sys_time.h \
-	common/gdb_vecs.h \
-	common/gdb_wait.h \
-	common/common-inferior.h \
-	common/netstuff.h \
-	common/host-defs.h \
-	common/pathstuff.h \
-	common/print-utils.h \
-	common/ptid.h \
-	common/queue.h \
-	common/rsp-low.h \
-	common/run-time-clock.h \
-	common/signals-state-save-restore.h \
-	common/symbol.h \
-	common/tdesc.h \
-	common/vec.h \
-	common/version.h \
-	common/x86-xstate.h \
-	common/xml-utils.h \
+	gdbsupport/buffer.h \
+	gdbsupport/cleanups.h \
+	gdbsupport/common-debug.h \
+	gdbsupport/common-defs.h \
+	gdbsupport/common-exceptions.h \
+	gdbsupport/common-gdbthread.h \
+	gdbsupport/common-regcache.h \
+	gdbsupport/common-types.h \
+	gdbsupport/common-utils.h \
+	gdbsupport/job-control.h \
+	gdbsupport/errors.h \
+	gdbsupport/environ.h \
+	gdbsupport/fileio.h \
+	gdbsupport/format.h \
+	gdbsupport/gdb_assert.h \
+	gdbsupport/gdb_tilde_expand.h \
+	gdbsupport/gdb_locale.h \
+	gdbsupport/gdb_proc_service.h \
+	gdbsupport/gdb_setjmp.h \
+	gdbsupport/gdb_signals.h \
+	gdbsupport/gdb_sys_time.h \
+	gdbsupport/gdb_vecs.h \
+	gdbsupport/gdb_wait.h \
+	gdbsupport/common-inferior.h \
+	gdbsupport/netstuff.h \
+	gdbsupport/host-defs.h \
+	gdbsupport/pathstuff.h \
+	gdbsupport/print-utils.h \
+	gdbsupport/ptid.h \
+	gdbsupport/queue.h \
+	gdbsupport/rsp-low.h \
+	gdbsupport/run-time-clock.h \
+	gdbsupport/signals-state-save-restore.h \
+	gdbsupport/symbol.h \
+	gdbsupport/tdesc.h \
+	gdbsupport/vec.h \
+	gdbsupport/version.h \
+	gdbsupport/x86-xstate.h \
+	gdbsupport/xml-utils.h \
 	compile/compile.h \
 	compile/compile-c.h \
 	compile/compile-cplus.h \
@@ -2109,8 +2109,8 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 version.c: stamp-version; @true
 # Note that the obvious names for the temp file are taken by
 # create-version.sh.
-stamp-version: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
-	$(ECHO_GEN) $(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
+stamp-version: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/gdbsupport/create-version.sh
+	$(ECHO_GEN) $(SHELL) $(srcdir)/gdbsupport/create-version.sh $(srcdir) \
 	    $(host_alias) $(target_alias) version-t.t
 	@$(SHELL) $(srcdir)/../move-if-change version-t.t version.c
 	@echo stamp > stamp-version
@@ -2344,8 +2344,8 @@ ALLDEPFILES = \
 	xtensa-linux-tdep.c \
 	xtensa-tdep.c \
 	xtensa-xtregs.c \
-	common/mingw-strerror.c \
-	common/posix-strerror.c
+	gdbsupport/mingw-strerror.c \
+	gdbsupport/posix-strerror.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.

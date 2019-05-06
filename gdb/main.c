@@ -40,13 +40,13 @@
 #include "maint.h"
 
 #include "filenames.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include <signal.h>
 #include "event-top.h"
 #include "infrun.h"
-#include "common/signals-state-save-restore.h"
+#include "gdbsupport/signals-state-save-restore.h"
 #include <vector>
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
 
 /* The selected interpreter.  This will be used as a set command

@@ -34,7 +34,7 @@
 #include "extension.h"
 #include <ctype.h>
 #include "mi-parse.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include "safe-ctype.h"
 
 enum what_to_list { locals, arguments, all };

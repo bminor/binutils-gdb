@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/format.h"
-#include "common/selftest.h"
+#include "gdbsupport/format.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace format_pieces {

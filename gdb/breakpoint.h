@@ -21,14 +21,14 @@
 
 #include "frame.h"
 #include "value.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "ax.h"
 #include "command.h"
-#include "common/break-common.h"
+#include "gdbsupport/break-common.h"
 #include "probe.h"
 #include "location.h"
 #include <vector>
-#include "common/array-view.h"
+#include "gdbsupport/array-view.h"
 #include "cli/cli-script.h"
 
 struct block;

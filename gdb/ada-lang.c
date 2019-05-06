@@ -49,9 +49,9 @@
 #include "valprint.h"
 #include "source.h"
 #include "observable.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "stack.h"
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "typeprint.h"
 #include "namespace.h"
 
@@ -60,8 +60,8 @@
 #include "mi/mi-common.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
-#include "common/function-view.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/function-view.h"
+#include "gdbsupport/byte-vector.h"
 #include <algorithm>
 #include <map>
 

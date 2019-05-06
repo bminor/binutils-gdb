@@ -19,10 +19,10 @@
 
 #include "defs.h"
 
-#include "common/filestuff.h"
-#include "common/selftest.h"
-#include "common/byte-vector.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/byte-vector.h"
+#include "gdbsupport/pathstuff.h"
 
 namespace selftests {
 namespace mkdir_recursive {

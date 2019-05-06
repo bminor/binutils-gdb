@@ -35,14 +35,14 @@
 #include "source.h"
 #include "block.h"
 #include "arch-utils.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "target.h"
 #include "osabi.h"
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include "valprint.h"
-#include "common/gdb_optional.h"
-#include "common/gdb_unlinker.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/gdb_unlinker.h"
+#include "gdbsupport/pathstuff.h"
 
 
 

@@ -19,14 +19,14 @@
 
 #include "defs.h"
 
-#include "common/filestuff.h"
-#include "common/scoped_mmap.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/scoped_mmap.h"
 #include "config.h"
 
 #if defined(HAVE_SYS_MMAN_H)
 
-#include "common/selftest.h"
-#include "common/gdb_unlinker.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/gdb_unlinker.h"
 
 #include <unistd.h>
 

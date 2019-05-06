@@ -63,7 +63,7 @@ gdb_setpgid ()
   return retval;
 }
 
-/* See common/common-terminal.h.  */
+/* See gdbsupport/common-terminal.h.  */
 
 void
 have_job_control ()

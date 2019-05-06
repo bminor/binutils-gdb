@@ -334,7 +334,7 @@ Do not include gnu-regex.h, instead include gdb_regex.h"
 
 BEGIN { doc["wait.h"] = "\
 Do not include wait.h or sys/wait.h, instead include gdb_wait.h"
-    fix("wait.h", "common/gdb_wait.h", 2);
+    fix("wait.h", "gdbsupport/gdb_wait.h", 2);
     category["wait.h"] = ari_regression
 }
 /^#[[:space:]]*include[[:space:]]*.wait\.h./ \
@@ -446,7 +446,7 @@ Do not use PARAMS(), ISO C 90 implies prototypes"
 BEGIN { doc["__func__"] = "\
 Do not use __func__, ISO C 90 does not support this macro"
     category["__func__"] = ari_regression
-    fix("__func__", "common/gdb_assert.h", 1)
+    fix("__func__", "gdbsupport/gdb_assert.h", 1)
 }
 /(^|[^_[:alnum:]])__func__([^_[:alnum:]]|$)/ {
     fail("__func__")
@@ -593,8 +593,8 @@ BEGIN { doc["strerror"] = "\
 Do not use strerror(), instead use safe_strerror()"
     category["strerror"] = ari_regression
     fix("strerror", "gdb/gdb_string.h", 1)
-    fix("strerror", "gdb/common/mingw-strerror.c", 1)
-    fix("strerror", "gdb/common/posix-strerror.c", 1)
+    fix("strerror", "gdb/gdbsupport/mingw-strerror.c", 1)
+    fix("strerror", "gdb/gdbsupport/posix-strerror.c", 1)
 }
 /(^|[^_[:alnum:]])strerror[[:space:]]*\(/ {
     fail("strerror")
@@ -1080,7 +1080,7 @@ Do not use asprintf(), instead use xstrprintf()"
 
 BEGIN { doc["vasprintf"] = "\
 Do not use vasprintf(), instead use xstrvprintf"
-    fix("vasprintf", "common/common-utils.c", 1)
+    fix("vasprintf", "gdbsupport/common-utils.c", 1)
     category["vasprintf"] = ari_regression
 }
 /(^|[^_[:alnum:]])vasprintf[[:space:]]*\(/ {

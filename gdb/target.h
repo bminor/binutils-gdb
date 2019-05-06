@@ -42,7 +42,7 @@ struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
 #include "breakpoint.h" /* For enum bptype.  */
-#include "common/scoped_restore.h"
+#include "gdbsupport/scoped_restore.h"
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -74,15 +74,15 @@ struct inferior;
 #include "bfd.h"
 #include "symtab.h"
 #include "memattr.h"
-#include "common/vec.h"
-#include "common/gdb_signals.h"
+#include "gdbsupport/vec.h"
+#include "gdbsupport/gdb_signals.h"
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
 #include "disasm.h"
 #include "tracepoint.h"
 
-#include "common/break-common.h" /* For enum target_hw_bp_type.  */
+#include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
 
 enum strata
   {

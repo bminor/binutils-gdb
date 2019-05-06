@@ -25,7 +25,7 @@
 #include "target.h"
 #include "cli/cli-utils.h"
 #include <algorithm>
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 /* Copied from bfd_put_bits.  */
 

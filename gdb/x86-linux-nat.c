@@ -35,7 +35,7 @@
 #ifdef __x86_64__
 #include "amd64-linux-tdep.h"
 #endif
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 #include "nat/linux-btrace.h"
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"

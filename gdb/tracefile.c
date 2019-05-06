@@ -22,7 +22,7 @@
 #include "ctf.h"
 #include "exec.h"
 #include "regcache.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 /* Helper macros.  */
 

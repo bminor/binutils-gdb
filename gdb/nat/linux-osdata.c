@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "linux-osdata.h"
 
 #include <sys/types.h>
@@ -32,11 +32,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "common/xml-utils.h"
-#include "common/buffer.h"
+#include "gdbsupport/xml-utils.h"
+#include "gdbsupport/buffer.h"
 #include <dirent.h>
 #include <sys/stat.h>
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include <algorithm>
 
 #define NAMELEN(dirent) strlen ((dirent)->d_name)

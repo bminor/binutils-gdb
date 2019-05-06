@@ -44,7 +44,7 @@
 #include "infcall.h"
 #include "ax.h"
 #include "ax-gdb.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 
 #include "aarch64-tdep.h"
 #include "aarch64-ravenscar-thread.h"
@@ -52,7 +52,7 @@
 #include "elf-bfd.h"
 #include "elf/aarch64.h"
 
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 
 #include "record.h"
 #include "record-full.h"

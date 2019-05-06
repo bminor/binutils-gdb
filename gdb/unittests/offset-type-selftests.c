@@ -18,10 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/offset-type.h"
-#include "common/underlying.h"
-#include "common/valid-expr.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/offset-type.h"
+#include "gdbsupport/underlying.h"
+#include "gdbsupport/valid-expr.h"
 
 namespace selftests {
 namespace offset_type {

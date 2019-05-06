@@ -46,7 +46,7 @@
 #include "valprint.h"
 #include "c-lang.h"
 
-#include "common/format.h"
+#include "gdbsupport/format.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,

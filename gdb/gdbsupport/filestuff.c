@@ -426,7 +426,7 @@ gdb_pipe_cloexec (int filedes[2])
   return result;
 }
 
-/* See common/filestuff.h.  */
+/* See gdbsupport/filestuff.h.  */
 
 bool
 is_regular_file (const char *name, int *errno_ptr)
@@ -457,7 +457,7 @@ is_regular_file (const char *name, int *errno_ptr)
   return false;
 }
 
-/* See common/filestuff.h.  */
+/* See gdbsupport/filestuff.h.  */
 
 bool
 mkdir_recursive (const char *dir)

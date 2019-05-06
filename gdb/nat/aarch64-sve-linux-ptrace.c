@@ -19,13 +19,13 @@
 
 #include <sys/utsname.h>
 #include <sys/uio.h>
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "elf/external.h"
 #include "elf/common.h"
 #include "aarch64-sve-linux-ptrace.h"
 #include "arch/aarch64.h"
-#include "common/common-regcache.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/common-regcache.h"
+#include "gdbsupport/byte-vector.h"
 
 /* See nat/aarch64-sve-linux-ptrace.h.  */
 

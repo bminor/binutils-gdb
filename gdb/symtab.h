@@ -23,13 +23,13 @@
 #include <array>
 #include <vector>
 #include <string>
-#include "common/gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
 #include "gdb_regex.h"
-#include "common/enum-flags.h"
-#include "common/function-view.h"
-#include "common/gdb_optional.h"
-#include "common/next-iterator.h"
+#include "gdbsupport/enum-flags.h"
+#include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/next-iterator.h"
 #include "completer.h"
 
 /* Opaque declarations.  */

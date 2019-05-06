@@ -19,11 +19,11 @@
 
 
 #include "defs.h"
-#include "common/preprocessor.h"
+#include "gdbsupport/preprocessor.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
 #include "compile-cplus.h"
-#include "common/gdb_assert.h"
+#include "gdbsupport/gdb_assert.h"
 #include "symtab.h"
 #include "source.h"
 #include "cp-support.h"

@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/environ.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/environ.h"
 #include "diagnostics.h"
 
 static const char gdb_selftest_env_var[] = "GDB_SELFTEST_ENVIRON";

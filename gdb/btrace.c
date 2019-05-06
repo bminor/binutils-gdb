@@ -31,7 +31,7 @@
 #include "filenames.h"
 #include "xml-support.h"
 #include "regcache.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/rsp-low.h"
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
 
@@ -2074,7 +2074,7 @@ parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
   gdb::unique_xmalloc_ptr<gdb_byte> data ((gdb_byte *) xmalloc (size));
   bin = data.get ();
 
-  /* We use hex encoding - see common/rsp-low.h.  */
+  /* We use hex encoding - see gdbsupport/rsp-low.h.  */
   while (len > 0)
     {
       char hi, lo;

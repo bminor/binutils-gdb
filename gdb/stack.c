@@ -52,7 +52,7 @@
 #include "symfile.h"
 #include "extension.h"
 #include "observable.h"
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 #include "cli/cli-option.h"
 
 /* The possible choices of "set print frame-arguments", and the value

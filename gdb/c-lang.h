@@ -29,7 +29,7 @@ struct parser_state;
 #include "value.h"
 #include "macroexp.h"
 #include "parser-defs.h"
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 
 /* The various kinds of C string and character.  Note that these

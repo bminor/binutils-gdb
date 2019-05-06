@@ -24,8 +24,8 @@
 #include "gdbcmd.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
-#include "common/filestuff.h"
-#include "common/netstuff.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/netstuff.h"
 
 #include <sys/types.h>
 
@@ -36,7 +36,7 @@
 #include <sys/ioctl.h>  /* For FIONBIO.  */
 #endif
 
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 
 #ifdef USE_WIN32API
 #include <ws2tcpip.h>

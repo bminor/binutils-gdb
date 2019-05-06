@@ -19,14 +19,14 @@
 
 #include "defs.h"
 #if GDB_SELF_TEST
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #include "inferior.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "test-target.h"
 #include "target-float.h"
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 
 namespace selftests {
 

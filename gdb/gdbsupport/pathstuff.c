@@ -27,7 +27,7 @@
 #include <windows.h>
 #endif
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 gdb::unique_xmalloc_ptr<char>
 gdb_realpath (const char *filename)
@@ -80,7 +80,7 @@ gdb_realpath (const char *filename)
   return make_unique_xstrdup (filename);
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 gdb::unique_xmalloc_ptr<char>
 gdb_realpath_keepfile (const char *filename)
@@ -124,7 +124,7 @@ gdb_realpath_keepfile (const char *filename)
   return gdb::unique_xmalloc_ptr<char> (result);
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 gdb::unique_xmalloc_ptr<char>
 gdb_abspath (const char *path)
@@ -145,7 +145,7 @@ gdb_abspath (const char *path)
 	     path, (char *) NULL));
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 const char *
 child_path (const char *parent, const char *child)
@@ -195,7 +195,7 @@ child_path (const char *parent, const char *child)
   return NULL;
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 bool
 contains_dir_separator (const char *path)
@@ -209,7 +209,7 @@ contains_dir_separator (const char *path)
   return false;
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 std::string
 get_standard_cache_dir ()
@@ -241,7 +241,7 @@ get_standard_cache_dir ()
   return {};
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 std::string
 get_standard_temp_dir ()
@@ -266,7 +266,7 @@ get_standard_temp_dir ()
 #endif
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 const char *
 get_shell ()
@@ -278,7 +278,7 @@ get_shell ()
   return ret;
 }
 
-/* See common/pathstuff.h.  */
+/* See gdbsupport/pathstuff.h.  */
 
 gdb::char_vector
 make_temp_filename (const std::string &f)

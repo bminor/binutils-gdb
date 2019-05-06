@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 		      int regnum, int save_restore_, const char *group_,
@@ -114,7 +114,7 @@ tdesc_predefined_type (enum tdesc_type_kind kind)
   gdb_assert_not_reached ("bad predefined tdesc type");
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_named_type (const struct tdesc_feature *feature, const char *id)
@@ -132,7 +132,7 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
   return NULL;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
@@ -145,7 +145,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
   feature->registers.emplace_back (reg);
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
@@ -157,7 +157,7 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_struct (struct tdesc_feature *feature, const char *name)
@@ -169,7 +169,7 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
@@ -179,7 +179,7 @@ tdesc_set_struct_size (tdesc_type_with_fields *type, int size)
   type->size = size;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
@@ -191,7 +191,7 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
@@ -206,7 +206,7 @@ tdesc_create_flags (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
 tdesc_create_enum (struct tdesc_feature *feature, const char *name,
@@ -221,7 +221,7 @@ tdesc_create_enum (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
@@ -235,7 +235,7 @@ tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
   type->fields.emplace_back (field_name, field_type, -1, -1);
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
@@ -248,7 +248,7 @@ tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
   type->fields.emplace_back (field_name, field_type, start, end);
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
@@ -266,7 +266,7 @@ tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
   tdesc_add_typed_bitfield (type, field_name, start, end, field_type);
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_flag (tdesc_type_with_fields *type, int start,
@@ -280,7 +280,7 @@ tdesc_add_flag (tdesc_type_with_fields *type, int start,
 			     start, start);
 }
 
-/* See common/tdesc.h.  */
+/* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_enum_value (tdesc_type_with_fields *type, int value,

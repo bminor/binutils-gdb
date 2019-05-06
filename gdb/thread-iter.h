@@ -19,9 +19,9 @@
 #ifndef THREAD_ITER_H
 #define THREAD_ITER_H
 
-#include "common/filtered-iterator.h"
-#include "common/next-iterator.h"
-#include "common/safe-iterator.h"
+#include "gdbsupport/filtered-iterator.h"
+#include "gdbsupport/next-iterator.h"
+#include "gdbsupport/safe-iterator.h"
 
 /* A forward iterator that iterates over a given inferior's
    threads.  */

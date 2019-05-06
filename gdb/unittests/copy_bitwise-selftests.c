@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 #include "utils.h"
 
 namespace selftests {

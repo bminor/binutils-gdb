@@ -424,7 +424,7 @@ struct linux_target_ops the_low_target = {
 };
 
 #if GDB_SELF_TEST
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace tdesc {

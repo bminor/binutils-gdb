@@ -19,7 +19,7 @@
 #ifndef GDB_PROC_SERVICE_H
 #define GDB_PROC_SERVICE_H
 
-#include "common/gdb_proc_service.h"
+#include "gdbsupport/gdb_proc_service.h"
 
 struct thread_info;
 

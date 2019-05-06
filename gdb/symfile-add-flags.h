@@ -20,7 +20,7 @@
 #if !defined (SYMFILE_ADD_FLAGS_H)
 #define SYMFILE_ADD_FLAGS_H
 
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    symbol_file_add, etc.  Defined in a separate file to break circular

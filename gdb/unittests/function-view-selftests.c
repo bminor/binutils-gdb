@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/selftest.h"
-#include "common/function-view.h"
+#include "gdbsupport/selftest.h"
+#include "gdbsupport/function-view.h"
 
 namespace selftests {
 namespace function_view {

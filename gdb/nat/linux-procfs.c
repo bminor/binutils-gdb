@@ -16,9 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "linux-procfs.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include <dirent.h>
 #include <sys/stat.h>
 

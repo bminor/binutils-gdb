@@ -25,7 +25,7 @@
 
 #include <vector>
 
-#include "common/enum-flags.h"
+#include "gdbsupport/enum-flags.h"
 
 class ui_out_level;
 class ui_out_table;

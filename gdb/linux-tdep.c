@@ -37,8 +37,8 @@
 #include "infcall.h"
 #include "gdbcmd.h"
 #include "gdb_regex.h"
-#include "common/enum-flags.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/enum-flags.h"
+#include "gdbsupport/gdb_optional.h"
 
 #include <ctype.h>
 

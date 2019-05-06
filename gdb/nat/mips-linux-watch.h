@@ -19,7 +19,7 @@
 #define NAT_MIPS_LINUX_WATCH_H
 
 #include <asm/ptrace.h>
-#include "common/break-common.h"
+#include "gdbsupport/break-common.h"
 
 #define MAX_DEBUG_REGISTER 8
 

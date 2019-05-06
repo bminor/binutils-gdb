@@ -20,7 +20,7 @@
 #ifndef TOP_H
 #define TOP_H
 
-#include "common/buffer.h"
+#include "gdbsupport/buffer.h"
 #include "event-loop.h"
 #include "value.h"
 

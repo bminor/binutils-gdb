@@ -34,7 +34,7 @@
 #include "filenames.h"
 #include "fnmatch.h"
 #include "gdb_regex.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 #include <list>
 
 /* True if we want to print debug printouts related to file/function

@@ -19,7 +19,7 @@
 
 #include "defs.h"
 
-/* See common/common-debug.h.  */
+/* See gdbsupport/common-debug.h.  */
 
 void
 debug_vprintf (const char *fmt, va_list ap)

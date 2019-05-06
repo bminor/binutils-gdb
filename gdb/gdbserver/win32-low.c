@@ -32,8 +32,8 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <process.h>
-#include "common/gdb_tilde_expand.h"
-#include "common/common-inferior.h"
+#include "gdbsupport/gdb_tilde_expand.h"
+#include "gdbsupport/common-inferior.h"
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>

@@ -22,7 +22,7 @@
 
 #include "frame.h"		/* For struct frame_id.  */
 #include "extension.h"
-#include "common/gdb_ref_ptr.h"
+#include "gdbsupport/gdb_ref_ptr.h"
 
 struct block;
 struct expression;

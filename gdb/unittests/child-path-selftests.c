@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/pathstuff.h"
-#include "common/selftest.h"
+#include "gdbsupport/pathstuff.h"
+#include "gdbsupport/selftest.h"
 
 namespace selftests {
 namespace child_path {

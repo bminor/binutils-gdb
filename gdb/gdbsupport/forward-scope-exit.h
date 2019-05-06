@@ -18,7 +18,7 @@
 #ifndef COMMON_FORWARD_SCOPE_EXIT_H
 #define COMMON_FORWARD_SCOPE_EXIT_H
 
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 #include <functional>
 
 /* A forward_scope_exit is like scope_exit, but instead of giving it a

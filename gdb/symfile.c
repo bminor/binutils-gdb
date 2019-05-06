@@ -56,11 +56,11 @@
 #include "stack.h"
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
-#include "common/byte-vector.h"
-#include "common/pathstuff.h"
-#include "common/selftest.h"
+#include "gdbsupport/byte-vector.h"
+#include "gdbsupport/pathstuff.h"
+#include "gdbsupport/selftest.h"
 #include "cli/cli-style.h"
-#include "common/forward-scope-exit.h"
+#include "gdbsupport/forward-scope-exit.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

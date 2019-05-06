@@ -39,7 +39,7 @@
 #include "observable.h"
 #include "objfiles.h"
 #include "extension.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 extern unsigned int overload_debug;
 /* Local functions.  */

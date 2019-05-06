@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 /* This function is NOT auto generated from xml.  Create the aarch64 with SVE
    feature into RESULT, where SCALE is the number of 128 bit chunks in a Z

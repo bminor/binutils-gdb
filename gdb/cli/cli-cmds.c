@@ -23,7 +23,7 @@
 #include "readline/tilde.h"
 #include "completer.h"
 #include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
-#include "common/gdb_wait.h"	/* For shell escape implementation.  */
+#include "gdbsupport/gdb_wait.h"	/* For shell escape implementation.  */
 #include "gdbcmd.h"
 #include "gdb_regex.h"	/* Used by apropos_command.  */
 #include "gdb_vfork.h"
@@ -37,7 +37,7 @@
 #include "source.h"
 #include "disasm.h"
 #include "tracepoint.h"
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "location.h"
 #include "block.h"
 
@@ -52,7 +52,7 @@
 #include "cli/cli-utils.h"
 
 #include "extension.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 #ifdef TUI
 #include "tui/tui.h"	/* For tui_active et.al.  */

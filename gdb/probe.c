@@ -36,7 +36,7 @@
 #include "location.h"
 #include <ctype.h>
 #include <algorithm>
-#include "common/gdb_optional.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Class that implements the static probe methods for "any" probe.  */
 

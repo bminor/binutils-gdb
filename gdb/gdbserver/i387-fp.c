@@ -18,7 +18,7 @@
 
 #include "server.h"
 #include "i387-fp.h"
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 
 static const int num_mpx_bnd_registers = 4;
 static const int num_mpx_cfg_registers = 2;

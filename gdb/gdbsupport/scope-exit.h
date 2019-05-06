@@ -20,7 +20,7 @@
 
 #include <functional>
 #include <type_traits>
-#include "common/preprocessor.h"
+#include "gdbsupport/preprocessor.h"
 
 /* scope_exit is a general-purpose scope guard that calls its exit
    function at the end of the current scope.  A scope_exit may be

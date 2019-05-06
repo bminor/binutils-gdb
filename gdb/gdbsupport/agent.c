@@ -19,7 +19,7 @@
 
 #include "common-defs.h"
 #include "target/target.h"
-#include "common/symbol.h"
+#include "gdbsupport/symbol.h"
 #include <unistd.h>
 #include "filestuff.h"
 

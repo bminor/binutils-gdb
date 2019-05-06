@@ -18,9 +18,9 @@
 
 #include "server.h"
 #include "ax.h"
-#include "common/format.h"
+#include "gdbsupport/format.h"
 #include "tracepoint.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/rsp-low.h"
 
 static void ax_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
@@ -60,7 +60,7 @@ enum gdb_agent_op
   {
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  \
     gdb_agent_op_ ## NAME = VALUE,
-#include "common/ax.def"
+#include "gdbsupport/ax.def"
 #undef DEFOP
     gdb_agent_op_last
   };
@@ -69,7 +69,7 @@ static const char *gdb_agent_op_names [gdb_agent_op_last] =
   {
     "?undef?"
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , # NAME
-#include "common/ax.def"
+#include "gdbsupport/ax.def"
 #undef DEFOP
   };
 
@@ -78,7 +78,7 @@ static const unsigned char gdb_agent_op_sizes [gdb_agent_op_last] =
   {
     0
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , SIZE
-#include "common/ax.def"
+#include "gdbsupport/ax.def"
 #undef DEFOP
   };
 #endif

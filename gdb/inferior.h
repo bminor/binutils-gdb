@@ -44,16 +44,16 @@ struct thread_info;
 #include "frame.h"
 
 /* For gdb_environ.  */
-#include "common/environ.h"
+#include "gdbsupport/environ.h"
 
 #include "progspace.h"
 #include "registry.h"
 
 #include "symfile-add-flags.h"
-#include "common/refcounted-object.h"
-#include "common/forward-scope-exit.h"
+#include "gdbsupport/refcounted-object.h"
+#include "gdbsupport/forward-scope-exit.h"
 
-#include "common/common-inferior.h"
+#include "gdbsupport/common-inferior.h"
 #include "gdbthread.h"
 
 struct infcall_suspend_state;

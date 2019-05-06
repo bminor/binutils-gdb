@@ -22,9 +22,9 @@
 #define XML_SUPPORT_H
 
 #include "gdb_obstack.h"
-#include "common/vec.h"
-#include "common/xml-utils.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/vec.h"
+#include "gdbsupport/xml-utils.h"
+#include "gdbsupport/byte-vector.h"
 
 struct gdb_xml_parser;
 struct gdb_xml_element;

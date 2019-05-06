@@ -49,10 +49,10 @@
 #include "cli/cli-option.h"
 #include "cli/cli-script.h"
 #include "cli/cli-style.h"
-#include "common/format.h"
+#include "gdbsupport/format.h"
 #include "source.h"
-#include "common/byte-vector.h"
-#include "common/gdb_optional.h"
+#include "gdbsupport/byte-vector.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Last specified output format.  */
 

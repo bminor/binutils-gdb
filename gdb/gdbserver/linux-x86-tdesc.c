@@ -21,7 +21,7 @@
 #include "tdesc.h"
 #include "linux-x86-tdesc.h"
 #include "arch/i386.h"
-#include "common/x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 #ifdef __x86_64__
 #include "arch/amd64.h"
 #endif

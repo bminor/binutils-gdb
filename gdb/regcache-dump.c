@@ -18,7 +18,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "regcache.h"
-#include "common/def-vector.h"
+#include "gdbsupport/def-vector.h"
 #include "valprint.h"
 #include "remote.h"
 #include "reggroups.h"

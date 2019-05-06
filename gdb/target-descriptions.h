@@ -21,7 +21,7 @@
 
 #ifndef TARGET_DESCRIPTIONS_H
 #define TARGET_DESCRIPTIONS_H 1
-#include "common/tdesc.h"
+#include "gdbsupport/tdesc.h"
 
 struct tdesc_arch_data;
 struct target_ops;

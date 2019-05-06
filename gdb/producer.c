@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "producer.h"
-#include "common/selftest.h"
+#include "gdbsupport/selftest.h"
 
 /* See producer.h.  */
 

@@ -38,7 +38,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "objfiles.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/byte-vector.h"
 
 
 /* Decorations for Pascal.  */

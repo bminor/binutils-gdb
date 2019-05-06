@@ -19,13 +19,13 @@
 #include "server.h"
 #include "linux-low.h"
 #include "nat/linux-osdata.h"
-#include "common/agent.h"
+#include "gdbsupport/agent.h"
 #include "tdesc.h"
-#include "common/rsp-low.h"
-#include "common/signals-state-save-restore.h"
+#include "gdbsupport/rsp-low.h"
+#include "gdbsupport/signals-state-save-restore.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "common/gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #include "nat/gdb_ptrace.h"
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
@@ -43,14 +43,14 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/uio.h>
-#include "common/filestuff.h"
+#include "gdbsupport/filestuff.h"
 #include "tracepoint.h"
 #include "hostio.h"
 #include <inttypes.h>
-#include "common/common-inferior.h"
+#include "gdbsupport/common-inferior.h"
 #include "nat/fork-inferior.h"
-#include "common/environ.h"
-#include "common/scoped_restore.h"
+#include "gdbsupport/environ.h"
+#include "gdbsupport/scoped_restore.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -105,7 +105,7 @@
 
 #ifdef HAVE_LINUX_BTRACE
 # include "nat/linux-btrace.h"
-# include "common/btrace-common.h"
+# include "gdbsupport/btrace-common.h"
 #endif
 
 #ifndef HAVE_ELF32_AUXV_T
@@ -7189,7 +7189,7 @@ linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
   if (size == 0)
     return;
 
-  /* We use hex encoding - see common/rsp-low.h.  */
+  /* We use hex encoding - see gdbsupport/rsp-low.h.  */
   buffer_grow_str (buffer, "<raw>\n");
 
   while (size-- > 0)

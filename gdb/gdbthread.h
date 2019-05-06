@@ -27,12 +27,12 @@ struct symtab;
 #include "frame.h"
 #include "ui-out.h"
 #include "btrace.h"
-#include "common/vec.h"
+#include "gdbsupport/vec.h"
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
-#include "common/refcounted-object.h"
-#include "common/common-gdbthread.h"
-#include "common/forward-scope-exit.h"
+#include "gdbsupport/refcounted-object.h"
+#include "gdbsupport/common-gdbthread.h"
+#include "gdbsupport/forward-scope-exit.h"
 
 struct inferior;
 

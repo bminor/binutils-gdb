@@ -18,7 +18,7 @@
 
 #include "defs.h"
 #include "source-cache.h"
-#include "common/scoped_fd.h"
+#include "gdbsupport/scoped_fd.h"
 #include "source.h"
 #include "cli/cli-style.h"
 

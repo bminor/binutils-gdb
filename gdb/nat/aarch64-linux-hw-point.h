@@ -19,7 +19,7 @@
 #ifndef NAT_AARCH64_LINUX_HW_POINT_H
 #define NAT_AARCH64_LINUX_HW_POINT_H
 
-#include "common/break-common.h" /* For enum target_hw_bp_type.  */
+#include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
 
 /* Macro definitions, data structures, and code for the hardware
    breakpoint and hardware watchpoint support follow.  We use the

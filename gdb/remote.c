@@ -42,12 +42,12 @@
 #include "cli/cli-setshow.h"
 #include "target-descriptions.h"
 #include "gdb_bfd.h"
-#include "common/filestuff.h"
-#include "common/rsp-low.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/rsp-low.h"
 #include "disasm.h"
 #include "location.h"
 
-#include "common/gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 
 #include "event-loop.h"
 #include "event-top.h"
@@ -68,13 +68,13 @@
 #include "tracepoint.h"
 #include "ax.h"
 #include "ax-gdb.h"
-#include "common/agent.h"
+#include "gdbsupport/agent.h"
 #include "btrace.h"
 #include "record-btrace.h"
 #include <algorithm>
-#include "common/scoped_restore.h"
-#include "common/environ.h"
-#include "common/byte-vector.h"
+#include "gdbsupport/scoped_restore.h"
+#include "gdbsupport/environ.h"
+#include "gdbsupport/byte-vector.h"
 #include <unordered_map>
 
 /* The remote target.  */

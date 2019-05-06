@@ -32,7 +32,7 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "source.h"
-#include "common/pathstuff.h"
+#include "gdbsupport/pathstuff.h"
 
 #define QNX_NOTE_NAME	"QNX"
 #define QNX_INFO_SECT_NAME "QNX_info"

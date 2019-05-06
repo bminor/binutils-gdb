@@ -33,7 +33,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "common/common-utils.h"
+#include "gdbsupport/common-utils.h"
 #include "coff/internal.h"
 
 #include <ctype.h>

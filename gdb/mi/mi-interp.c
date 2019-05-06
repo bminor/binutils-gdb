@@ -38,7 +38,7 @@
 #include "cli-out.h"
 #include "thread-fsm.h"
 #include "cli/cli-interp.h"
-#include "common/scope-exit.h"
+#include "gdbsupport/scope-exit.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */

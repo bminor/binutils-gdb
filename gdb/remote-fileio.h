@@ -22,7 +22,7 @@
 #ifndef REMOTE_FILEIO_H
 #define REMOTE_FILEIO_H
 
-#include "common/fileio.h"
+#include "gdbsupport/fileio.h"
 
 struct cmd_list_element;
 struct remote_target;

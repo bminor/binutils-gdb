@@ -66,7 +66,7 @@ private:
   glob_t m_glob;
 };
 
-/* See common/gdb_tilde_expand.h.  */
+/* See gdbsupport/gdb_tilde_expand.h.  */
 
 std::string
 gdb_tilde_expand (const char *dir)
@@ -81,7 +81,7 @@ gdb_tilde_expand (const char *dir)
   return expanded_dir;
 }
 
-/* See common/gdb_tilde_expand.h.  */
+/* See gdbsupport/gdb_tilde_expand.h.  */
 
 gdb::unique_xmalloc_ptr<char>
 gdb_tilde_expand_up (const char *dir)
