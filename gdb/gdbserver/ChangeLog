@@ -1,3 +1,8 @@
+2019-05-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* linux-x86-low.c (x86_fill_gregset): Don't compile 64-bit
+	sign extension code on 32-bit builds.
+
 2019-05-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* remote-utils.c:

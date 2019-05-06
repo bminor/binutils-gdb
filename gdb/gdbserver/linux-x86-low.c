@@ -339,6 +339,7 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
   collect_register_by_name (regcache, "orig_eax",
 			    ((char *) buf) + ORIG_EAX * REGSIZE);
 
+#ifdef __x86_64__
   /* Sign extend EAX value to avoid potential syscall restart
      problems. 
 
@@ -351,6 +352,7 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
 
       *(int64_t *) ptr = *(int32_t *) ptr;
     }
+#endif
 }
 
 static void
