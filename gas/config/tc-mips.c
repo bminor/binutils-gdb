@@ -16454,9 +16454,13 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
       *input_line_pointer = c;
       SKIP_WHITESPACE_AFTER_NAME ();
 
+#ifdef TE_IRIX
       /* On Irix 5, every global symbol that is not explicitly labelled as
          being a function is apparently labelled as being an object.  */
       flag = BSF_OBJECT;
+#else
+      flag = BSF_NO_FLAGS;
+#endif
 
       if (!is_end_of_line[(unsigned char) *input_line_pointer]
 	  && (*input_line_pointer != ','))

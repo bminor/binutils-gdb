@@ -1,3 +1,10 @@
+2019-05-20  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	PR 14798
+	* testsuite/ld-mips-elf/reloc-6a.s: Specify .text section for
+	global code symbols.
+	* testsuite/ld-mips-elf/reloc-6b.s: Likewise.
+
 2019-05-17  Alan Modra  <amodra@gmail.com>
 
 	PR 24567

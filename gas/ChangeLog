@@ -1,3 +1,13 @@
+2019-05-20  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	PR 14798
+	* config/tc-mips.c (s_mips_globl): Only treat symbols that are
+	not explicitly labelled as BSF_OBJECTs for IRIX targets.
+	* testsuite/gas/mips/pr14798.s: New test source.
+	* testsuite/gas/mips/pr14798-irix.d: New test.
+	* testsuite/gas/mips/pr14798.d: Likewise.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2019-05-17  John Darrington  <john@darrington.wattle.id.au>
 
 	* doc/c-arm.texi (ARM Options): Remove "(r)" and "(tm)"

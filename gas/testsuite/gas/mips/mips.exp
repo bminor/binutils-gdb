@@ -2087,4 +2087,10 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "llpscp-32" [mips_arch_list_matching mips32r6]
     run_dump_test_arch "llpscp-64" "" mips64r6
+
+    if [istarget *-*-irix*] {
+	run_dump_test "pr14798-irix"
+    } else {
+	run_dump_test "pr14798"
+    }
 }
