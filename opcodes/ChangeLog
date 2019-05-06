@@ -1,3 +1,8 @@
+2019-05-10  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+        * mips-opc.c (mips_opcodes): Enable ADD, SUB, DADD and DSUB
+	macros for R6.
+
 2019-05-11  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (print_insn_powerpc) Don't skip optional operands

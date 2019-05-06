@@ -1,3 +1,13 @@
+2019-05-10  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* config/tc-mips.c (macro) <M_ADD_I, M_SUB_I, M_DADD_I, M_DSUB_I>:
+	Add expansions for MIPS r6.
+	* testsuite/gas/mips/add.s: Enable tests for R6.
+	* testsuite/gas/mips/daddi.s: Annotate to test DADD for R6.
+	* testsuite/gas/mips/mipsr6@add.d: Likewise.
+	* gas/testsuite/gas/mips/mipsr6@dadd.d: New test.
+	* gas/testsuite/gas/mips/mips.exp: Run the new test.
+
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/gas/aarch64/sve2.d: Remove file format restriction.

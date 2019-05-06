@@ -1502,6 +1502,7 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching mips32] ] ]
     run_dump_test_arches "daddi"	[mips_arch_list_matching mips3 \
 						!mips32r6]
+    run_dump_test_arches "dadd" 	[mips_arch_list_matching mips64r6]
     run_dump_test_arches "pref" [lsort -dictionary -unique [concat \
 					[mips_arch_list_matching mips4] \
 					[mips_arch_list_matching mips32] ] ]
