@@ -1,5 +1,11 @@
 2019-05-07  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/24522
+	* gdb.dwarf2/dw2-case-insensitive-debug.S: Fix debug_info_offset in
+	.debug_aranges section.
+
+2019-05-07  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24159
 	* lib/dwarf.exp: Fix handling of DW_FORM_ref_addr.
 

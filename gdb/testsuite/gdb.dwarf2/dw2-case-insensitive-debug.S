@@ -64,7 +64,7 @@
 	.4byte	.Laranges_end - .Laranges_start	// Length of Address Ranges Info
 .Laranges_start:
 	.2byte	0x2	// DWARF Version
-	.4byte	0 // .Ldebug_info0 - Offset of Compilation Unit Info
+	.4byte	.Lcu1_begin // .Ldebug_info0 - Offset of Compilation Unit Info
 	.byte	PTRBITS / 8	// Size of Address
 	.byte	0	// Size of Segment Descriptor
 	.2byte	0	// Pad to 16 byte boundary
