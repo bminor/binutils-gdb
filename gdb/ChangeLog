@@ -1,5 +1,11 @@
 2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2read.c (read_subrange_index_type): New function.
+	(read_subrange_type): Move code into new function and call it.
+	* gdbtypes.c (create_range_type): Add some asserts.
+
+2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_property): Change return type, and
 	update return statements.
 	* dwarf2loc.h (dwarf2_evaluate_property): Update return type on

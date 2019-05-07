@@ -17752,6 +17752,56 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
   return 1;
 }
 
+/* Read the DW_AT_type attribute for a sub-range.  If this attribute is not
+   present (which is valid) then compute the default type based on the
+   compilation units address size.  */
+
+static struct type *
+read_subrange_index_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *index_type = die_type (die, cu);
+
+  /* Dwarf-2 specifications explicitly allows to create subrange types
+     without specifying a base type.
+     In that case, the base type must be set to the type of
+     the lower bound, upper bound or count, in that order, if any of these
+     three attributes references an object that has a type.
+     If no base type is found, the Dwarf-2 specifications say that
+     a signed integer type of size equal to the size of an address should
+     be used.
+     For the following C code: `extern char gdb_int [];'
+     GCC produces an empty range DIE.
+     FIXME: muller/2010-05-28: Possible references to object for low bound,
+     high bound or count are not yet handled by this code.  */
+  if (TYPE_CODE (index_type) == TYPE_CODE_VOID)
+    {
+      struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      int addr_size = gdbarch_addr_bit (gdbarch) /8;
+      struct type *int_type = objfile_type (objfile)->builtin_int;
+
+      /* Test "int", "long int", and "long long int" objfile types,
+	 and select the first one having a size above or equal to the
+	 architecture address size.  */
+      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+	index_type = int_type;
+      else
+	{
+	  int_type = objfile_type (objfile)->builtin_long;
+	  if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+	    index_type = int_type;
+	  else
+	    {
+	      int_type = objfile_type (objfile)->builtin_long_long;
+	      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+		index_type = int_type;
+	    }
+	}
+    }
+
+  return index_type;
+}
+
 /* Read the given DW_AT_subrange DIE.  */
 
 static struct type *
@@ -17766,7 +17816,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   const char *name;
   ULONGEST negative_mask;
 
-  orig_base_type = die_type (die, cu);
+  orig_base_type = read_subrange_index_type (die, cu);
+
   /* If ORIG_BASE_TYPE is a typedef, it will not be TYPE_UNSIGNED,
      whereas the real type might be.  So, we use ORIG_BASE_TYPE when
      creating the range type, but we use the result of check_typedef
@@ -17847,45 +17898,6 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 			 "- DIE at %s [in module %s]"),
 		       sect_offset_str (die->sect_off),
 		       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
-	}
-	
-    }
-
-  /* Dwarf-2 specifications explicitly allows to create subrange types
-     without specifying a base type.
-     In that case, the base type must be set to the type of
-     the lower bound, upper bound or count, in that order, if any of these
-     three attributes references an object that has a type.
-     If no base type is found, the Dwarf-2 specifications say that
-     a signed integer type of size equal to the size of an address should
-     be used.
-     For the following C code: `extern char gdb_int [];'
-     GCC produces an empty range DIE.
-     FIXME: muller/2010-05-28: Possible references to object for low bound,
-     high bound or count are not yet handled by this code.  */
-  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
-    {
-      struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-      int addr_size = gdbarch_addr_bit (gdbarch) /8;
-      struct type *int_type = objfile_type (objfile)->builtin_int;
-
-      /* Test "int", "long int", and "long long int" objfile types,
-	 and select the first one having a size above or equal to the
-	 architecture address size.  */
-      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
-	base_type = int_type;
-      else
-	{
-	  int_type = objfile_type (objfile)->builtin_long;
-	  if (int_type && TYPE_LENGTH (int_type) >= addr_size)
-	    base_type = int_type;
-	  else
-	    {
-	      int_type = objfile_type (objfile)->builtin_long_long;
-	      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
-		base_type = int_type;
-	    }
 	}
     }
 

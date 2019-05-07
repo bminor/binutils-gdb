@@ -914,6 +914,11 @@ create_range_type (struct type *result_type, struct type *index_type,
 		   const struct dynamic_prop *low_bound,
 		   const struct dynamic_prop *high_bound)
 {
+  /* The INDEX_TYPE should be a type capable of holding the upper and lower
+     bounds, as such a zero sized, or void type makes no sense.  */
+  gdb_assert (TYPE_CODE (index_type) != TYPE_CODE_VOID);
+  gdb_assert (TYPE_LENGTH (index_type) > 0);
+
   if (result_type == NULL)
     result_type = alloc_type_copy (index_type);
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
