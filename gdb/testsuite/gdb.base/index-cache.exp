@@ -50,7 +50,7 @@ proc ls_host { dir } {
 	}
     }
 
-    return "0 $filtered"
+    return [list 0 $filtered]
 }
 
 # Execute "show index-cache stats" and verify the output against expected

@@ -1,5 +1,9 @@
 2019-05-07  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/index-cache.exp (ls_host): Fix return statement.
+
+2019-05-07  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24522
 	* gdb.dlang/watch-loc.c: Fix debug_info_offset in .debug_aranges
 	section.
