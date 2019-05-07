@@ -20,8 +20,6 @@
 #ifndef COMMON_SCOPED_MMAP_H
 #define COMMON_SCOPED_MMAP_H
 
-#include "config.h"
-
 #ifdef HAVE_SYS_MMAN_H
 
 #include <sys/mman.h>
