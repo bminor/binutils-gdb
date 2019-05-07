@@ -567,10 +567,8 @@ namespace eval Dwarf {
 	    }
 
 	    % {
-		# Label reference, an offset from .debug_info.  Assuming
-		# .Lcu1_begin is on .debug_info.
-		set cu1_label [_compute_label "cu1_begin"]
-		set new_value "[string range $value 1 end] - $cu1_label"
+		# Label reference, an offset from .debug_info.
+		set new_value "[string range $value 1 end]"
 
 		return DW_FORM_ref_addr
 	    }

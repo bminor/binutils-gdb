@@ -1,3 +1,8 @@
+2019-05-07  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24159
+	* lib/dwarf.exp: Fix handling of DW_FORM_ref_addr.
+
 2019-05-06  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (exec_has_index_section): New proc.
