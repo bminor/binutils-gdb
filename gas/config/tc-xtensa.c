@@ -628,6 +628,7 @@ static bfd_boolean maybe_has_short_loop = FALSE;
 static bfd_boolean workaround_close_loop_end = FALSE;
 static bfd_boolean maybe_has_close_loop_end = FALSE;
 static bfd_boolean enforce_three_byte_loop_align = FALSE;
+static bfd_boolean opt_linkrelax = TRUE;
 
 /* When workaround_short_loops is TRUE, all loops with early exits must
    have at least 3 instructions.  workaround_all_short_loops is a modifier
@@ -827,10 +828,10 @@ md_parse_option (int c, const char *arg)
       as_warn (_("--no-density option is ignored"));
       return 1;
     case option_link_relax:
-      linkrelax = 1;
+      opt_linkrelax = TRUE;
       return 1;
     case option_no_link_relax:
-      linkrelax = 0;
+      opt_linkrelax = FALSE;
       return 1;
     case option_flix:
       produce_flix = FLIX_ALL;
@@ -5258,7 +5259,7 @@ md_begin (void)
   xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
 
-  linkrelax = 1;
+  linkrelax = opt_linkrelax;
 
   /* Set up the literal sections.  */
   memset (&default_lit_sections, 0, sizeof (default_lit_sections));
