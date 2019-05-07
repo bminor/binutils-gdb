@@ -1,6 +1,12 @@
 2019-05-07  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24522
+	* gdb.dlang/watch-loc.c: Fix debug_info_offset in .debug_aranges
+	section.
+
+2019-05-07  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24522
 	* gdb.dwarf2/dw2-case-insensitive-debug.S: Fix debug_info_offset in
 	.debug_aranges section.
 
