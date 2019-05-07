@@ -1,3 +1,8 @@
+2019-05-07  Alexandre Oliva <aoliva@redhat.com>
+
+	* testsuite/gas/elf/dwarf2-18.d: Xfail mep-*.
+	* testsuite/gas/elf/dwarf2-19.d: Likewise.
+
 2019-05-07  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (use_complex_relocs_for): Formatting.  Factor out
