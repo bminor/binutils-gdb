@@ -17,7 +17,7 @@
 
 	.file "dwarf2-19.c"
 	.text 0
-	.balign 4
+	.balign 8
 	.globl _start
 _start:
 	.file 1 "dwarf2-19.c"
@@ -36,6 +36,6 @@ _start:
 	.loc 1 3 view .L2	/* same address as .L4 below -> view 2 */
 
 	.text 1
-	.dc.l 0
+	.quad 0
 	.loc 1 4 view .L3	/* bumped address from .L1's, view 0 */
 	.loc 1 5 view .L4	/* same address, view 1 */

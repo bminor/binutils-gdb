@@ -1,5 +1,46 @@
 2019-05-08  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/elf/dwarf2-1.s,
+	* testsuite/gas/elf/dwarf2-2.s,
+	* testsuite/gas/elf/dwarf2-5.s,
+	* testsuite/gas/elf/dwarf2-7.s,
+	* testsuite/gas/elf/dwarf2-8.s,
+	* testsuite/gas/elf/dwarf2-9.s,
+	* testsuite/gas/elf/dwarf2-10.s,
+	* testsuite/gas/elf/dwarf2-11.s,
+	* testsuite/gas/elf/dwarf2-12.s,
+	* testsuite/gas/elf/dwarf2-13.s,
+	* testsuite/gas/elf/dwarf2-14.s,
+	* testsuite/gas/elf/dwarf2-15.s,
+	* testsuite/gas/elf/dwarf2-16.s,
+	* testsuite/gas/elf/dwarf2-17.s,
+	* testsuite/gas/elf/dwarf2-18.s,
+	* testsuite/gas/elf/dwarf2-19.s: Double size of align and simulated
+	instructions.
+	* testsuite/gas/elf/dwarf2-1.d,
+	* testsuite/gas/elf/dwarf2-2.d,
+	* testsuite/gas/elf/dwarf2-5.d,
+	* testsuite/gas/elf/dwarf2-7.d,
+	* testsuite/gas/elf/dwarf2-8.d,
+	* testsuite/gas/elf/dwarf2-9.d,
+	* testsuite/gas/elf/dwarf2-10.d,
+	* testsuite/gas/elf/dwarf2-11.d,
+	* testsuite/gas/elf/dwarf2-12.d,
+	* testsuite/gas/elf/dwarf2-13.d,
+	* testsuite/gas/elf/dwarf2-14.d,
+	* testsuite/gas/elf/dwarf2-15.d,
+	* testsuite/gas/elf/dwarf2-16.d,
+	* testsuite/gas/elf/dwarf2-17.d,
+	* testsuite/gas/elf/dwarf2-18.d,
+	* testsuite/gas/elf/dwarf2-19.d: Use xfail rather than notarget.
+	Remove avr, pru, tile, xtensa from xfails.  Update expected output.
+	* testsuite/gas/elf/elf.exp: Sort targets.
+	(dump_opts): Pass {as -mno-relax} for riscv, {as -mno-link-relax}
+	for avr and pru, and {as --no-link-relax} for xtensa to dwarf tests.
+	* testsuite/gas/elf/section2.e-miwmmxt: Delete unused file.
+
+2019-05-08  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-xtensa.c (opt_linkrelax): New variable.
 	(md_parse_option): Set it here.
 	(md_begin): Copy opt_linkrelax to linkrelax.

@@ -17,15 +17,15 @@
 
 	.file "dwarf2-15.c"
 	.text
-	.balign 8
+	.balign 16
 	.globl _start
 _start:
 	.file 1 "dwarf2-15.c"
 	.loc 1 1 view 0
-	.dc.l 0
+	.quad 0
 	.loc 1 2 view -0
 	.loc 1 3 view .L1
-	.dc.l 0
+	.quad 0
 	.size _start, .-_start
 
 	.section .rodata

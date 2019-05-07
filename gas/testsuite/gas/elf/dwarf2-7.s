@@ -17,7 +17,7 @@
 
 	.file "dwarf2-7.c"
 	.text
-	.balign 4
+	.balign 8
 	.globl _start
 _start:
 	.file 1 "dwarf2-7.c"
@@ -32,5 +32,5 @@ _start:
 func:
 	.loc 1 2 view -0
 	.loc 1 3 view .L1
-	.dc.l 0
+	.quad 0
 	.size func, .-func

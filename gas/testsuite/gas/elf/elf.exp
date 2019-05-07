@@ -55,14 +55,37 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 # We're testing bits in obj-elf -- don't run on anything else.
 if { [is_elf_format] } then {
     set target_machine ""
+    set dump_opts ""
+    if {[istarget "arc*-*-*"]} {
+	set target_machine -arc
+    }
+    if {[istarget "arm*-*-*"]} {
+	set target_machine -arm
+    }
+    if {[istarget "avr*-*-*"]} {
+	set dump_opts {{as -mno-link-relax}}
+    }
+    if {[istarget "m32r*-*-*"]} then {
+	set target_machine -m32r
+    }
     if {[istarget "mips*-*-*"]} then {
 	set target_machine -mips
     }
-    if {[istarget m32r*-*-*]} then {
-	set target_machine -m32r
-    }
     if {[istarget "msp430-*-*"]} then {
 	set target_machine -msp430
+    }
+    if {[istarget "pru-*-*"]} {
+	set dump_opts {{as -mno-link-relax}}
+    }
+    if {[istarget "riscv*-*-*"]} then {
+	set target_machine -riscv
+	set dump_opts {{as -mno-relax}}
+    }
+    if {[istarget "rl78-*-*"]} then {
+	set target_machine -rl78
+    }
+    if {[istarget "rx-*-*"]} then {
+	set target_machine -rx
     }
     if {[istarget "score-*-*"]} then {
 	set target_machine -score
@@ -70,26 +93,12 @@ if { [is_elf_format] } then {
     if {[istarget "tic6x-*-*"]} then {
 	set target_machine -tic6x
     }
-    if {[istarget "xtensa*-*-*"]} then {
-	set target_machine -xtensa
-    }
-    if {[istarget "rx-*-*"]} then {
-	set target_machine -rx
-    }
-    if {[istarget "riscv*-*-*"]} then {
-	set target_machine -riscv
-    }
     if {[istarget "v850*-*-*"]} then {
 	set target_machine -v850
     }
-    if {[istarget "rl78-*-*"]} then {
-	set target_machine -rl78
-    }
-    if {[istarget "arm*-*-*"]} {
-	set target_machine -arm
-    }
-    if {[istarget "arc*-*-*"]} {
-	set target_machine -arc
+    if {[istarget "xtensa*-*-*"]} then {
+	set target_machine -xtensa
+	set dump_opts {{as --no-link-relax}}
     }
 
     # The MN10300 and Xtensa ports disable the assembler's call frame
@@ -233,25 +242,25 @@ if { [is_elf_format] } then {
     run_dump_test "section12b"
     run_dump_test "section13"
     run_dump_test "section14"
-    run_dump_test "dwarf2-1"
-    run_dump_test "dwarf2-2"
-    run_dump_test "dwarf2-3"
-    run_dump_test "dwarf2-4"
-    run_dump_test "dwarf2-5"
-    run_dump_test "dwarf2-6"
-    run_dump_test "dwarf2-7"
-    run_dump_test "dwarf2-8"
-    run_dump_test "dwarf2-9"
-    run_dump_test "dwarf2-10"
-    run_dump_test "dwarf2-11"
-    run_dump_test "dwarf2-12"
-    run_dump_test "dwarf2-13"
-    run_dump_test "dwarf2-14"
-    run_dump_test "dwarf2-15"
-    run_dump_test "dwarf2-16"
-    run_dump_test "dwarf2-17"
-    run_dump_test "dwarf2-18"
-    run_dump_test "dwarf2-19"
+    run_dump_test "dwarf2-1" $dump_opts
+    run_dump_test "dwarf2-2" $dump_opts
+    run_dump_test "dwarf2-3" $dump_opts
+    run_dump_test "dwarf2-4" $dump_opts
+    run_dump_test "dwarf2-5" $dump_opts
+    run_dump_test "dwarf2-6" $dump_opts
+    run_dump_test "dwarf2-7" $dump_opts
+    run_dump_test "dwarf2-8" $dump_opts
+    run_dump_test "dwarf2-9" $dump_opts
+    run_dump_test "dwarf2-10" $dump_opts
+    run_dump_test "dwarf2-11" $dump_opts
+    run_dump_test "dwarf2-12" $dump_opts
+    run_dump_test "dwarf2-13" $dump_opts
+    run_dump_test "dwarf2-14" $dump_opts
+    run_dump_test "dwarf2-15" $dump_opts
+    run_dump_test "dwarf2-16" $dump_opts
+    run_dump_test "dwarf2-17" $dump_opts
+    run_dump_test "dwarf2-18" $dump_opts
+    run_dump_test "dwarf2-19" $dump_opts
     run_dump_test "bss"
     run_dump_test "bad-bss"
     run_dump_test "bad-section-flag"

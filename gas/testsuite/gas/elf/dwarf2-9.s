@@ -28,5 +28,5 @@ _start:
 
 	.text
 	.loc 1 2 view 0
-	.int 0
+	.quad 0
 	.size _start, .-_start

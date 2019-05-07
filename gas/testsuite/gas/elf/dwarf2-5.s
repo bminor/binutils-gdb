@@ -17,35 +17,35 @@
 
 	.file "dwarf2-5.c"
 	.text
-	.balign 4
+	.balign 8
 	.globl _start
 _start:
 	.file 1 "dwarf2-5.c"
 	.loc 1 1 view 0
 	.loc 1 2 view .L2
-	.dc.l 0
+	.quad 0
 	.loc 1 3 view 0
-	.balign 4
+	.balign 8
 	.loc 1 4 view .L4
 	.loc 1 5 view .L5
 	.org .+1
-	.balign 4
+	.balign 8
 	.loc 1 6 view 0
-	.dc.l 0
+	.quad 0
 	.text
 	.globl func
 	.type func, %function
 func:
 	.loc 1 7 view 0
 	.loc 1 8 view .L8
-	.dc.l 0
+	.quad 0
 	.loc 1 9 view 0
 	.loc 1 10 view .L10
 	.pushsection .text
 	.loc 1 11 view .L11
 	.popsection
 	.loc 1 12 view .L12
-	.dc.l 0
+	.quad 0
 	.size func, .-func
 
 	.section .rodata

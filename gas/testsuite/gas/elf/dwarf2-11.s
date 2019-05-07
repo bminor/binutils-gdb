@@ -17,12 +17,12 @@
 
 	.file "dwarf2-11.c"
 	.text
-	.balign 8
+	.balign 16
 	.globl _start
 _start:
 	.file 1 "dwarf2-11.c"
-	.dc.l 0
+	.quad 0
 	.loc 1 1 view 0
-	.balign 8
+	.balign 16
 	.loc 1 2 view 0
 	.size _start, .-_start

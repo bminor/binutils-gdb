@@ -23,5 +23,5 @@ _start:
 	.file 1 "dwarf2-8.c"
 	.loc 1 1 view 0
 	.loc 1 2 view 0
-	.int 0
+	.quad 0
 	.size _start, .-_start
