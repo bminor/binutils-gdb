@@ -1,3 +1,7 @@
+2019-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Merge two 'New commands' sections.
+
 2019-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint.c (ada_val_print_gnat_array): Remove language
