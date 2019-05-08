@@ -1,5 +1,33 @@
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new MI commands.
+	* break-catch-throw.c (enum exception_event_kind): Move to
+	breakpoint.h.
+	(print_mention_exception_catchpoint): Output text as a single
+	message.
+	(catch_exception_command_1): Rename to...
+	(catch_exception_event): ...this, make non-static, update header
+	command, and change some parameter types.
+	(catch_catch_command): Update for changes to
+	catch_exception_command_1.
+	(catch_throw_command): Likewise.
+	(catch_rethrow_command): Likewise.
+	* breakpoint.c (enum exception_event_kind): Delete.
+	* breakpoint.h (enum exception_event_kind): Moved here from
+	break-catch-throw.c.
+	(catch_exception_event): Declare.
+	* mi/mi-cmd-catch.c (mi_cmd_catch_exception_event): New function.
+	(mi_cmd_catch_throw): New function.
+	(mi_cmd_catch_rethrow): New function.
+	(mi_cmd_catch_catch): New function.
+	* mi/mi-cmds.c (mi_cmds): Add 'catch-throw', 'catch-rethrow', and
+	'catch-catch' entries.
+	* mi/mi-cmds.h (mi_cmd_catch_throw): Declare.
+	(mi_cmd_catch_rethrow): Declare.
+	(mi_cmd_catch_catch): Declare.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* annotate.c (annotate_source_line): Change return type to void,
 	update implementation to match.
 	* annotate.h (annotate_source_line): Change return type to void,

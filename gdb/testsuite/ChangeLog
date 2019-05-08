@@ -1,5 +1,12 @@
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-catch-cpp-exceptions.cc: New file.
+	* gdb.mi/mi-catch-cpp-exceptions.exp: New file.
+	* lib/mi-support.exp (mi_expect_stop): Handle 'exception-caught'
+	as a stop reason.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/annota1.exp: Update expected results.
 	* gdb.cp/annota2.exp: Likewise.
 	* gdb.cp/annota3.exp: Likewise.

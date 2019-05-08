@@ -85,14 +85,6 @@
 #include "common/array-view.h"
 #include "common/gdb_optional.h"
 
-/* Enums for exception-handling support.  */
-enum exception_event_kind
-{
-  EX_EVENT_THROW,
-  EX_EVENT_RETHROW,
-  EX_EVENT_CATCH
-};
-
 /* Prototypes for local functions.  */
 
 static void map_breakpoint_numbers (const char *,

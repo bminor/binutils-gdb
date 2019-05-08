@@ -37,14 +37,6 @@
 #include "cp-support.h"
 #include "location.h"
 
-/* Enums for exception-handling support.  */
-enum exception_event_kind
-{
-  EX_EVENT_THROW,
-  EX_EVENT_RETHROW,
-  EX_EVENT_CATCH
-};
-
 /* Each spot where we may place an exception-related catchpoint has
    two names: the SDT probe point and the function name.  This
    structure holds both.  */
@@ -317,12 +309,12 @@ print_mention_exception_catchpoint (struct breakpoint *b)
   enum exception_event_kind kind = classify_exception_breakpoint (b);
 
   bp_temp = b->disposition == disp_del;
-  uiout->text (bp_temp ? _("Temporary catchpoint ")
-			      : _("Catchpoint "));
-  uiout->field_int ("bkptno", b->number);
-  uiout->text ((kind == EX_EVENT_THROW ? _(" (throw)")
-		       : (kind == EX_EVENT_CATCH ? _(" (catch)")
-			  : _(" (rethrow)"))));
+  uiout->message ("%s %d %s",
+		  (bp_temp ? _("Temporary catchpoint ") : _("Catchpoint")),
+		  b->number,
+		  (kind == EX_EVENT_THROW
+		   ? _("(throw)") : (kind == EX_EVENT_CATCH
+				     ? _("(catch)") : _("(rethrow)"))));
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for throw and
@@ -420,13 +412,11 @@ extract_exception_regexp (const char **string)
   return std::string ();
 }
 
-/* Deal with "catch catch", "catch throw", and "catch rethrow"
-   commands.  */
+/* See breakpoint.h.  */
 
-static void
-catch_exception_command_1 (enum exception_event_kind ex_event,
-			   const char *arg,
-			   int tempflag, int from_tty)
+void
+catch_exception_event (enum exception_event_kind ex_event,
+		       const char *arg, bool tempflag, int from_tty)
 {
   const char *cond_string = NULL;
 
@@ -456,9 +446,9 @@ static void
 catch_catch_command (const char *arg, int from_tty,
 		     struct cmd_list_element *command)
 {
-  int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
-  catch_exception_command_1 (EX_EVENT_CATCH, arg, tempflag, from_tty);
+  catch_exception_event (EX_EVENT_CATCH, arg, tempflag, from_tty);
 }
 
 /* Implementation of "catch throw" command.  */
@@ -467,9 +457,9 @@ static void
 catch_throw_command (const char *arg, int from_tty,
 		     struct cmd_list_element *command)
 {
-  int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
-  catch_exception_command_1 (EX_EVENT_THROW, arg, tempflag, from_tty);
+  catch_exception_event (EX_EVENT_THROW, arg, tempflag, from_tty);
 }
 
 /* Implementation of "catch rethrow" command.  */
@@ -478,9 +468,9 @@ static void
 catch_rethrow_command (const char *arg, int from_tty,
 		       struct cmd_list_element *command)
 {
-  int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
-  catch_exception_command_1 (EX_EVENT_RETHROW, arg, tempflag, from_tty);
+  catch_exception_event (EX_EVENT_RETHROW, arg, tempflag, from_tty);
 }
 
 

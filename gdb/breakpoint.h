@@ -42,6 +42,16 @@ struct linespec_result;
 struct linespec_sals;
 struct inferior;
 
+/* Enum for exception-handling support in 'catch throw', 'catch rethrow',
+   'catch catch' and the MI equivalent.  */
+
+enum exception_event_kind
+{
+  EX_EVENT_THROW,
+  EX_EVENT_RETHROW,
+  EX_EVENT_CATCH
+};
+
 /* Why are we removing the breakpoint from the target?  */
 
 enum remove_bp_reason
@@ -1674,5 +1684,15 @@ extern cmd_list_element *commands_cmd_element;
    multi-location breakpoint (see PR 9659).  */
 
 extern bool fix_multi_location_breakpoint_output_globally;
+
+/* Deal with "catch catch", "catch throw", and "catch rethrow" commands and
+   the MI equivalents.  Sets up to catch events of type EX_EVENT.  When
+   TEMPFLAG is true only the next matching event is caught after which the
+   catch-point is deleted.  If REGEX is not NULL then only exceptions whose
+   type name matches REGEX will trigger the event.  */
+
+extern void catch_exception_event (enum exception_event_kind ex_event,
+				   const char *regex, bool tempflag,
+				   int from_tty);
 
 #endif /* !defined (BREAKPOINT_H) */

@@ -29793,6 +29793,7 @@ catchpoints.
 @menu
 * Shared Library GDB/MI Catchpoint Commands::
 * Ada Exception GDB/MI Catchpoint Commands::
+* C++ Exception GDB/MI Catchpoint Commands::
 @end menu
 
 @node Shared Library GDB/MI Catchpoint Commands
@@ -29989,6 +29990,145 @@ The corresponding @value{GDBN} command is @samp{catch handlers}.
 enabled="y",addr="0x0000000000402f68",
 what="`Constraint_Error' Ada exception handlers",thread-groups=["i1"],
 times="0",original-location="__gnat_begin_handler"@}
+(gdb)
+@end smallexample
+
+@node C++ Exception GDB/MI Catchpoint Commands
+@subsection C@t{++} Exception @sc{gdb/mi} Catchpoints
+
+The following @sc{gdb/mi} commands can be used to create catchpoints
+that stop the execution when C@t{++} exceptions are being throw, rethrown,
+or caught.
+
+@subheading The @code{-catch-throw} Command
+@findex -catch-throw
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-throw [ -t ] [ -r @var{regexp}]
+@end smallexample
+
+Stop when the debuggee throws a C@t{++} exception.  If @var{regexp} is
+given, then only exceptions whose type matches the regular expression
+will be caught.
+
+If @samp{-t} is given, then the catchpoint is enabled only for one
+stop, the catchpoint is automatically deleted after stopping once for
+the event.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{catch throw}
+and @samp{tcatch throw} (@pxref{Set Catchpoints}).
+
+@subsubheading Example
+
+@smallexample
+-catch-throw -r exception_type
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+  addr="0x00000000004006c0",what="exception throw",
+  catch-type="throw",thread-groups=["i1"],
+  regexp="exception_type",times="0"@}
+(gdb)
+-exec-run
+^running
+(gdb)
+~"\n"
+~"Catchpoint 1 (exception thrown), 0x00007ffff7ae00ed
+  in __cxa_throw () from /lib64/libstdc++.so.6\n"
+*stopped,bkptno="1",reason="breakpoint-hit",disp="keep",
+  frame=@{addr="0x00007ffff7ae00ed",func="__cxa_throw",
+  args=[],from="/lib64/libstdc++.so.6",arch="i386:x86-64"@},
+  thread-id="1",stopped-threads="all",core="6"
+(gdb)
+@end smallexample
+
+@subheading The @code{-catch-rethrow} Command
+@findex -catch-rethrow
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-rethrow [ -t ] [ -r @var{regexp}]
+@end smallexample
+
+Stop when a C@t{++} exception is re-thrown.  If @var{regexp} is given,
+then only exceptions whose type matches the regular expression will be
+caught.
+
+If @samp{-t} is given, then the catchpoint is enabled only for one
+stop, the catchpoint is automatically deleted after the first event is
+caught.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{catch rethrow}
+and @samp{tcatch rethrow} (@pxref{Set Catchpoints}).
+
+@subsubheading Example
+
+@smallexample
+-catch-rethrow -r exception_type
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+  addr="0x00000000004006c0",what="exception rethrow",
+  catch-type="rethrow",thread-groups=["i1"],
+  regexp="exception_type",times="0"@}
+(gdb)
+-exec-run
+^running
+(gdb)
+~"\n"
+~"Catchpoint 1 (exception rethrown), 0x00007ffff7ae00ed
+  in __cxa_rethrow () from /lib64/libstdc++.so.6\n"
+*stopped,bkptno="1",reason="breakpoint-hit",disp="keep",
+  frame=@{addr="0x00007ffff7ae00ed",func="__cxa_rethrow",
+  args=[],from="/lib64/libstdc++.so.6",arch="i386:x86-64"@},
+  thread-id="1",stopped-threads="all",core="6"
+(gdb)
+@end smallexample
+
+@subheading The @code{-catch-catch} Command
+@findex -catch-catch
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-catch [ -t ] [ -r @var{regexp}]
+@end smallexample
+
+Stop when the debuggee catches a C@t{++} exception.  If @var{regexp}
+is given, then only exceptions whose type matches the regular
+expression will be caught.
+
+If @samp{-t} is given, then the catchpoint is enabled only for one
+stop, the catchpoint is automatically deleted after the first event is
+caught.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{catch catch}
+and @samp{tcatch catch} (@pxref{Set Catchpoints}).
+
+@subsubheading Example
+
+@smallexample
+-catch-catch -r exception_type
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+  addr="0x00000000004006c0",what="exception catch",
+  catch-type="catch",thread-groups=["i1"],
+  regexp="exception_type",times="0"@}
+(gdb)
+-exec-run
+^running
+(gdb)
+~"\n"
+~"Catchpoint 1 (exception caught), 0x00007ffff7ae00ed
+  in __cxa_begin_catch () from /lib64/libstdc++.so.6\n"
+*stopped,bkptno="1",reason="breakpoint-hit",disp="keep",
+  frame=@{addr="0x00007ffff7ae00ed",func="__cxa_begin_catch",
+  args=[],from="/lib64/libstdc++.so.6",arch="i386:x86-64"@},
+  thread-id="1",stopped-threads="all",core="6"
 (gdb)
 @end smallexample
 

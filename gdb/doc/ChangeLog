@@ -1,3 +1,10 @@
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (GDB/MI Catchpoint Commands): Add menu entry to new
+	node.
+	(C++ Exception GDB/MI Catchpoint Commands): New node to describe
+	new MI commands.
+
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Command Completion): Mention command options too.

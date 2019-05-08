@@ -213,6 +213,10 @@ maint show test-options-completion-result
   were to be given as a command itself.  This is intended for use by MI
   frontends in cases when separate CLI and MI channels cannot be used.
 
+-catch-throw, -catch-rethrow, and -catch-catch
+  These can be used to catch C++ exceptions in a similar fashion to
+  the CLI commands 'catch throw', 'catch rethrow', and 'catch catch'.
+
 * Testsuite
 
   The testsuite now creates the files gdb.cmd (containing the arguments
