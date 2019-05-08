@@ -1826,7 +1826,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		    + (save_chars - wrap_column);
 		  wrap_column = 0;	/* And disable fancy wrap */
 		}
-	      else if (did_paginate && can_emit_style_escape (stream))
+	      else if (did_paginate && stream->can_emit_style_escape ())
 		emit_style_escape (save_style, stream);
 	    }
 	}
