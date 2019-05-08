@@ -1,3 +1,9 @@
+2019-05-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 24523
+	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Return TRUE
+	rather than FALSE if encountering a non-ELF file.
+
 2019-05-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-pj.c (pj_elf_reloc): Don't report undefined weak as an error.
