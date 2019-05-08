@@ -2443,15 +2443,15 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       {
 	const struct dwarf2_property_baton *baton
 	  = (const struct dwarf2_property_baton *) prop->data.baton;
+	gdb_assert (baton->property_type != NULL);
 
 	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame,
 				       addr_stack ? addr_stack->addr : 0,
 				       value))
 	  {
-	    if (baton->referenced_type)
+	    if (baton->locexpr.is_reference)
 	      {
-		struct value *val = value_at (baton->referenced_type, *value);
-
+		struct value *val = value_at (baton->property_type, *value);
 		*value = value_as_address (val);
 	      }
 	    return true;
@@ -2471,7 +2471,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	data = dwarf2_find_location_expression (&baton->loclist, &size, pc);
 	if (data != NULL)
 	  {
-	    val = dwarf2_evaluate_loc_desc (baton->referenced_type, frame, data,
+	    val = dwarf2_evaluate_loc_desc (baton->property_type, frame, data,
 					    size, baton->loclist.per_cu);
 	    if (!value_optimized_out (val))
 	      {
@@ -2497,7 +2497,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  {
 	    /* This approach lets us avoid checking the qualifiers.  */
 	    if (TYPE_MAIN_TYPE (pinfo->type)
-		== TYPE_MAIN_TYPE (baton->referenced_type))
+		== TYPE_MAIN_TYPE (baton->property_type))
 	      break;
 	  }
 	if (pinfo == NULL)

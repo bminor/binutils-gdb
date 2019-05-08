@@ -1,5 +1,26 @@
 2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2loc.c (dwarf2_evaluate_property): Update to take account
+	of changes to field names, and use new is_reference field to
+	decide if a property is a reference or not.
+	* dwarf2loc.h (struct dwarf2_locexpr_baton): Add 'is_reference'
+	field.
+	(struct dwarf2_property_baton): Update header comment, rename
+	'referenced_type' to 'property_type' and update comments.
+	* dwarf2read.c (attr_to_dynamic_prop): Add extra parameter to hold
+	default property type, store in property baton, update to take
+	accound of renamed field.
+	(read_func_scope): Update call to attr_to_dynamic_prop.
+	(read_array_type): Likewise.
+	(dwarf2_per_cu_addr_sized_int_type): New function.
+	(read_subrange_index_type): Move type finding code to
+	dwarf2_per_cu_addr_sized_int_type.
+	(read_subrange_type): Update calls to attr_to_dynamic_prop.
+	(dwarf2_per_cu_addr_type): New function.
+	(set_die_type): Update calls to attr_to_dynamic_prop.
+
+2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (read_subrange_index_type): New function.
 	(read_subrange_type): Move code into new function and call it.
 	* gdbtypes.c (create_range_type): Add some asserts.
