@@ -1,3 +1,18 @@
+2019-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (ada_val_print_gnat_array): Remove language
+	parameter and use Ada language definition instead.
+	(ada_val_print_ptr): Remove unused language parameter.
+	(ada_val_print_num): Remove language parameter and use Ada language
+	definition instead.
+	(ada_val_print_enum, ada_val_print_flt): Remove unused language
+	parameter.
+	(ada_val_print_struct_union, ada_val_print_ref): Remove language
+	parameter and use Ada language definition instead.
+	(ada_val_print_1): Update all ada_val_print_xxx calls.
+	Remove language parameter.
+	(ada_val_print): Update ada_val_print_1 call.
+
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
 	* remote.c (remote_hw_watchpoint_limit)
