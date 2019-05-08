@@ -139,7 +139,7 @@ generate_build_id (bfd *abfd,
 
       if (!rpc_library)
 	return FALSE;
-      uuid_create = (UuidCreateFn) GetProcAddress (rpc_library, "UuidCreate");
+      uuid_create = (UuidCreateFn) (void (WINAPI *)(void)) GetProcAddress (rpc_library, "UuidCreate");
       if (!uuid_create)
 	{
 	  FreeLibrary (rpc_library);

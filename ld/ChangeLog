@@ -1,3 +1,9 @@
+2019-05-08  Pekka Seppänen  <pexu@sourceware.mail.kapsi.fi>
+
+	PR 24536
+	* ldbuildid.c (generate_build_id): Cast return value from
+	GetProcAddress in order to avoid a compile time warning.
+
 2019-05-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-undefined/weak-undef.exp: Don't xfail pj.
