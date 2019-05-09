@@ -1241,8 +1241,9 @@ aarch64_ins_sve_shrimm (const aarch64_operand *self,
   const aarch64_opnd_info *prev_operand;
   unsigned int esize;
 
-  assert (info->idx > 0);
-  prev_operand = &inst->operands[info->idx - 1];
+  unsigned int opnd_backshift = get_operand_specific_data (self);
+  assert (info->idx >= (int)opnd_backshift);
+  prev_operand = &inst->operands[info->idx - opnd_backshift];
   esize = aarch64_get_qualifier_esize (prev_operand->qualifier);
   insert_all_fields (self, code, 16 * esize - info->imm.value);
   return TRUE;
@@ -1624,6 +1625,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
     case sve_index:
     case sve_shift_pred:
     case sve_shift_unpred:
+    case sve_shift_tsz_hsd:
       /* For indices and shift amounts, the variant is encoded as
 	 part of the immediate.  */
       break;

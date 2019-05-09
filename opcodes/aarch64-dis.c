@@ -2832,6 +2832,17 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	variant = i;
       break;
 
+    case sve_shift_tsz_hsd:
+      i = extract_fields (inst->value, 0, 2, FLD_SVE_sz, FLD_SVE_tszl_19);
+      if (i == 0)
+	return FALSE;
+      while (i != 1)
+	{
+	  i >>= 1;
+	  variant += 1;
+	}
+      break;
+
     default:
       /* No mapping between instruction class and qualifiers.  */
       return TRUE;

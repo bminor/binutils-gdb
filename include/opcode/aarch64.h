@@ -394,6 +394,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_SHLIMM_UNPRED, /* SVE shift left amount (unpredicated).  */
   AARCH64_OPND_SVE_SHRIMM_PRED,	  /* SVE shift right amount (predicated).  */
   AARCH64_OPND_SVE_SHRIMM_UNPRED, /* SVE shift right amount (unpredicated).  */
+  AARCH64_OPND_SVE_SHRIMM_UNPRED_22,	/* SVE 3 bit shift right unpred.  */
   AARCH64_OPND_SVE_SIMM5,	/* SVE signed 5-bit immediate.  */
   AARCH64_OPND_SVE_SIMM5B,	/* SVE secondary signed 5-bit immediate.  */
   AARCH64_OPND_SVE_SIMM6,	/* SVE signed 6-bit immediate.  */
@@ -597,6 +598,7 @@ enum aarch64_insn_class
   sve_size_bh,
   sve_size_sd2,
   sve_size_013,
+  sve_shift_tsz_hsd,
   testbranch,
   cryptosm3,
   cryptosm4,

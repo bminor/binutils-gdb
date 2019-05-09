@@ -4923,10 +4923,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SVE_tszh,FLD_SVE_imm5), "a shift-left immediate operand")	\
     Y(IMMEDIATE, sve_shlimm, "SVE_SHLIMM_UNPRED", 0,			\
       F(FLD_SVE_tszh,FLD_imm5), "a shift-left immediate operand")	\
-    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_PRED", 0,			\
+    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_PRED", 1 << OPD_F_OD_LSB,	\
       F(FLD_SVE_tszh,FLD_SVE_imm5), "a shift-right immediate operand")	\
-    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_UNPRED", 0,			\
+    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_UNPRED", 1 << OPD_F_OD_LSB,	\
       F(FLD_SVE_tszh,FLD_imm5), "a shift-right immediate operand")	\
+    Y(IMMEDIATE, sve_shrimm, "SVE_SHRIMM_UNPRED_22", 2 << OPD_F_OD_LSB,	\
+      F(FLD_SVE_sz, FLD_SVE_tszl_19, FLD_SVE_imm3),			\
+      "a shift-right immediate operand")				\
     Y(IMMEDIATE, imm, "SVE_SIMM5", OPD_F_SEXT, F(FLD_SVE_imm5),		\
       "a 5-bit signed immediate")					\
     Y(IMMEDIATE, imm, "SVE_SIMM5B", OPD_F_SEXT, F(FLD_SVE_imm5b),	\
