@@ -1659,6 +1659,11 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       insert_field (FLD_SVE_sz, &inst->value, aarch64_get_variant (inst), 0);
       break;
 
+    case sve_size_hsd2:
+      insert_field (FLD_SVE_size, &inst->value,
+		    aarch64_get_variant (inst) + 1, 0);
+      break;
+
     default:
       break;
     }

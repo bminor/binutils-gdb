@@ -311,6 +311,7 @@ const aarch64_field fields[] =
     { 10,  2 }, /* SVE_rot2: 2-bit rotation amount.  */
     { 10,  1 }, /* SVE_rot3: 1-bit rotation amount at bit 10.  */
     { 22,  1 }, /* SVE_sz: 1-bit element size select.  */
+    { 17,  2 }, /* SVE_size: 2-bit element size, bits [18,17].  */
     { 16,  4 }, /* SVE_tsz: triangular size select.  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
     {  8,  2 }, /* SVE_tszl_8: triangular size select low, bits [9,8].  */
