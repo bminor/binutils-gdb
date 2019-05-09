@@ -1,5 +1,10 @@
 2019-05-09  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.arch/amd64-tailcall-self.S: Make DW_FORM_ref4 references
+	CU-relative.
+
+2019-05-09  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.arch/amd64-entry-value-paramref.S: Make DW_FORM_ref4 references
 	CU-relative.
 
