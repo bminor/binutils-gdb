@@ -1,5 +1,10 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Handle new SVE_Zm3_11_INDEX
+	operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Handle new SVE_IMM_ROT3 operand.
 
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>

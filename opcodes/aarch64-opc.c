@@ -294,6 +294,8 @@ const aarch64_field fields[] =
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
     {  5,  1 }, /* SVE_i1: single-bit immediate.  */
     { 22,  1 }, /* SVE_i3h: high bit of 3-bit immediate.  */
+    { 11,  1 }, /* SVE_i3l: low bit of 3-bit immediate.  */
+    { 19,  2 }, /* SVE_i3h2: two high bits of 3bit immediate, bits [20,19].  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -1515,6 +1517,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	case AARCH64_OPND_SVE_Zm3_INDEX:
 	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm3_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  shift = get_operand_specific_data (&aarch64_operands[type]);
@@ -3303,6 +3306,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SVE_Zm3_INDEX:
     case AARCH64_OPND_SVE_Zm3_22_INDEX:
+    case AARCH64_OPND_SVE_Zm3_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
       snprintf (buf, size, "z%d.%s[%" PRIi64 "]", opnd->reglane.regno,

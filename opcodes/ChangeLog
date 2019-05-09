@@ -1,5 +1,18 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+	* aarch64-opc.c (operand_general_constraint_met_p): Constraint checking
+	for SVE_Zm3_11_INDEX.
+	(aarch64_print_operand): Add printing for SVE_Zm3_11_INDEX.
+	(fields): Handle SVE_i3l and SVE_i3h2 fields.
+	* aarch64-opc.h (enum aarch64_field_kind): New SVE_i3l and SVE_i3h2
+	fields.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Use new SVE_Zm3_11_INDEX operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Handle
 	sve_size_hsd2 iclass encode.
 	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Handle
