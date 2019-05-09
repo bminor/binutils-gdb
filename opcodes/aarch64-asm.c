@@ -1626,6 +1626,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
     case sve_shift_pred:
     case sve_shift_unpred:
     case sve_shift_tsz_hsd:
+    case sve_shift_tsz_bhsd:
       /* For indices and shift amounts, the variant is encoded as
 	 part of the immediate.  */
       break;
