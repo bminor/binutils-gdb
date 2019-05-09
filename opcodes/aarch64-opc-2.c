@@ -198,6 +198,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_INT_REG, "SVE_Rn_SP", OPD_F_MAYBE_SP | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Rn}, "an integer register or SP"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHLIMM_PRED", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_tszh,FLD_SVE_imm5}, "a shift-left immediate operand"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHLIMM_UNPRED", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_tszh,FLD_imm5}, "a shift-left immediate operand"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHLIMM_UNPRED_22", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_sz, FLD_SVE_tszl_19, FLD_SVE_imm3}, "a shift-left immediate operand"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHRIMM_PRED", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_tszh,FLD_SVE_imm5}, "a shift-right immediate operand"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHRIMM_UNPRED", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_tszh,FLD_imm5}, "a shift-right immediate operand"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_SHRIMM_UNPRED_22", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_sz, FLD_SVE_tszl_19, FLD_SVE_imm3}, "a shift-right immediate operand"},

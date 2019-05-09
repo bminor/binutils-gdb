@@ -2531,6 +2531,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SVE_SHLIMM_PRED:
 	case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+	case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:
 	  size = aarch64_get_qualifier_esize (opnds[idx - 1].qualifier);
 	  if (!value_in_range_p (opnd->imm.value, 0, 8 * size - 1))
 	    {
@@ -3358,6 +3359,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SIMM5:
     case AARCH64_OPND_SVE_SHLIMM_PRED:
     case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+    case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:
     case AARCH64_OPND_SVE_SHRIMM_PRED:
     case AARCH64_OPND_SVE_SHRIMM_UNPRED:
     case AARCH64_OPND_SVE_SHRIMM_UNPRED_22:

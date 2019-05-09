@@ -1,5 +1,16 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+	* aarch64-opc.c (operand_general_constraint_met_p): Constraint checking
+	for SVE_SHLIMM_UNPRED_22.
+	(aarch64_print_operand): Add printing for SVE_SHLIMM_UNPRED_22.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Use new SVE_SHLIMM_UNPRED_22
+	operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Handle
 	sve_size_tsz_bhs iclass encode.
 	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Handle

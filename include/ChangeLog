@@ -1,5 +1,10 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* opcode/aarch64.h (enum aarch64_opnd): New SVE_SHLIMM_UNPRED_22
+	operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* opcode/aarch64.h (enum aarch64_insn_class): Add sve_size_tsz_bhs
 	iclass.
 

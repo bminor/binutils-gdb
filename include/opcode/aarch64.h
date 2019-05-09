@@ -392,6 +392,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Rn_SP,	/* Integer Rn or SP, alt. SVE position.  */
   AARCH64_OPND_SVE_SHLIMM_PRED,	  /* SVE shift left amount (predicated).  */
   AARCH64_OPND_SVE_SHLIMM_UNPRED, /* SVE shift left amount (unpredicated).  */
+  AARCH64_OPND_SVE_SHLIMM_UNPRED_22,	/* SVE 3 bit shift left unpred.  */
   AARCH64_OPND_SVE_SHRIMM_PRED,	  /* SVE shift right amount (predicated).  */
   AARCH64_OPND_SVE_SHRIMM_UNPRED, /* SVE shift right amount (unpredicated).  */
   AARCH64_OPND_SVE_SHRIMM_UNPRED_22,	/* SVE 3 bit shift right unpred.  */
