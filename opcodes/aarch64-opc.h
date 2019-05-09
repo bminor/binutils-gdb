@@ -136,6 +136,7 @@ enum aarch64_field_kind
   FLD_SVE_prfop,
   FLD_SVE_rot1,
   FLD_SVE_rot2,
+  FLD_SVE_rot3,
   FLD_SVE_sz,
   FLD_SVE_tsz,
   FLD_SVE_tszh,

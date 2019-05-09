@@ -1,5 +1,17 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+	* aarch64-opc.c (operand_general_constraint_met_p): Constraint checking
+	for SVE_IMM_ROT3.
+	(aarch64_print_operand): Add printing for SVE_IMM_ROT3.
+	(fields): Handle SVE_rot3 field.
+	* aarch64-opc.h (enum aarch64_field_kind): New SVE_rot3 field.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Use new SVE_IMM_ROT3 operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-opc.c (verify_constraints): Check for movprfx for sve2
 	instructions.
 

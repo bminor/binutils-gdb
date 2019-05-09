@@ -1,5 +1,9 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* opcode/aarch64.h (enum aarch64_opnd): New SVE_IMM_ROT3 operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_SVE2
 	AARCH64_FEATURE_SVE2_AES, AARCH64_FEATURE_SVE2_BITPERM,
 	AARCH64_FEATURE_SVE2_SM4, AARCH64_FEATURE_SVE2_SHA3): New

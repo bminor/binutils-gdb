@@ -4879,6 +4879,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a 1-bit rotation specifier for complex arithmetic operations")	\
     Y(IMMEDIATE, imm_rotate2, "SVE_IMM_ROT2", 0, F(FLD_SVE_rot2),	\
       "a 2-bit rotation specifier for complex arithmetic operations")	\
+    Y(IMMEDIATE, imm_rotate1, "SVE_IMM_ROT3", 0, F(FLD_SVE_rot3),	\
+      "a 1-bit rotation specifier for complex arithmetic operations")	\
     Y(IMMEDIATE, inv_limm, "SVE_INV_LIMM", 0,				\
       F(FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms),				\
       "an inverted 13-bit logical immediate")				\

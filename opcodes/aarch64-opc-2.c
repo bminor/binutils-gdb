@@ -178,6 +178,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_I1_ZERO_ONE", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_i1}, "either 0.0 or 1.0"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_IMM_ROT1", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_rot1}, "a 1-bit rotation specifier for complex arithmetic operations"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_IMM_ROT2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_rot2}, "a 2-bit rotation specifier for complex arithmetic operations"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_IMM_ROT3", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_rot3}, "a 1-bit rotation specifier for complex arithmetic operations"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_INV_LIMM", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms}, "an inverted 13-bit logical immediate"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_LIMM", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms}, "a 13-bit logical immediate"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "SVE_LIMM_MOV", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_N,FLD_SVE_immr,FLD_SVE_imms}, "a 13-bit logical move immediate"},
