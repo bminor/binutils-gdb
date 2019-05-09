@@ -4969,6 +4969,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_11_INDEX", 			\
       3 << OPD_F_OD_LSB, F(FLD_SVE_i3h2, FLD_SVE_i3l, FLD_SVE_imm3),    \
       "an indexed SVE vector register")					\
+    Y(SVE_REG, sve_quad_index, "SVE_Zm4_11_INDEX", 			\
+      4 << OPD_F_OD_LSB, F(FLD_SVE_i2h, FLD_SVE_i3l, FLD_SVE_imm4),     \
+      "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm4_INDEX", 			\
       4 << OPD_F_OD_LSB, F(FLD_SVE_Zm_16),				\
       "an indexed SVE vector register")					\

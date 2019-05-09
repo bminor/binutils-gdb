@@ -5655,6 +5655,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zm3_INDEX:
 	case AARCH64_OPND_SVE_Zm3_22_INDEX:
 	case AARCH64_OPND_SVE_Zm3_11_INDEX:
+	case AARCH64_OPND_SVE_Zm4_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  reg_type = REG_TYPE_ZN;
