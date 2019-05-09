@@ -141,6 +141,7 @@ enum aarch64_field_kind
   FLD_SVE_rot3,
   FLD_SVE_sz,
   FLD_SVE_size,
+  FLD_SVE_sz2,
   FLD_SVE_tsz,
   FLD_SVE_tszh,
   FLD_SVE_tszl_8,

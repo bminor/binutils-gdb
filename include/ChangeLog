@@ -1,5 +1,9 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* opcode/aarch64.h (enum aarch64_insn_class): Add sve_size_sd2 iclass.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* opcode/aarch64.h (enum aarch64_opnd): New SVE_ADDR_ZX operand.
 
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
