@@ -1,3 +1,8 @@
+2019-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* scripttempl/pru.sc (__init_array_begin, __init_array_begin):
+	Rename.
+
 2019-05-08  Pekka Seppänen  <pexu@sourceware.mail.kapsi.fi>
 
 	PR 24536
