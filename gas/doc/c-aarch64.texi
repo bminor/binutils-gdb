@@ -196,6 +196,16 @@ automatically cause those extensions to be disabled.
  @tab Enable ARMv8.5-A Memory Tagging Extensions.
 @item @code{tme} @tab ARMv8-A @tab No
  @tab Enable Transactional Memory Extensions.
+@item @code{sve2} @tab ARMv8-A @tab No
+ @tab Enable the SVE2 Extension.
+@item @code{bitperm} @tab ARMv8-A @tab No
+ @tab Enable SVE2 BITPERM Extension.
+@item @code{sve2-sm4} @tab ARMv8-A @tab No
+ @tab Enable SVE2 SM4 Extension.
+@item @code{sve2-aes} @tab ARMv8-A @tab No
+ @tab Enable SVE2 AES Extension.
+@item @code{sve2-sha3} @tab ARMv8-A @tab No
+ @tab Enable SVE2 SHA3 Extension.
 @end multitable
 
 @node AArch64 Syntax

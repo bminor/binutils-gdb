@@ -89,6 +89,13 @@ typedef uint32_t aarch64_insn;
 /* Transactional Memory Extension.  */
 #define AARCH64_FEATURE_TME		0x2000000000000ULL
 
+/* SVE2 instructions.  */
+#define AARCH64_FEATURE_SVE2		0x000000010
+#define AARCH64_FEATURE_SVE2_AES		0x000000080
+#define AARCH64_FEATURE_SVE2_BITPERM	0x000000100
+#define AARCH64_FEATURE_SVE2_SM4		0x000000200
+#define AARCH64_FEATURE_SVE2_SHA3	0x000000400
+
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
 						 AARCH64_FEATURE_FP  \

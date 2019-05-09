@@ -2206,6 +2206,16 @@ static const aarch64_feature_set aarch64_feature_memtag =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_5 | AARCH64_FEATURE_MEMTAG, 0);
 static const aarch64_feature_set aarch64_feature_tme =
   AARCH64_FEATURE (AARCH64_FEATURE_TME, 0);
+static const aarch64_feature_set aarch64_feature_sve2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2, 0);
+static const aarch64_feature_set aarch64_feature_sve2aes =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_AES, 0);
+static const aarch64_feature_set aarch64_feature_sve2sha3 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_SHA3, 0);
+static const aarch64_feature_set aarch64_feature_sve2sm4 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_SM4, 0);
+static const aarch64_feature_set aarch64_feature_sve2bitperm =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_BITPERM, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2242,6 +2252,11 @@ static const aarch64_feature_set aarch64_feature_tme =
 #define BTI		&aarch64_feature_bti
 #define MEMTAG		&aarch64_feature_memtag
 #define TME		&aarch64_feature_tme
+#define SVE2		&aarch64_feature_sve2
+#define SVE2_AES		&aarch64_feature_sve2aes
+#define SVE2_SHA3	&aarch64_feature_sve2sha3
+#define SVE2_SM4		&aarch64_feature_sve2sm4
+#define SVE2_BITPERM	&aarch64_feature_sve2bitperm
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2311,6 +2326,27 @@ static const aarch64_feature_set aarch64_feature_tme =
   { NAME, OPCODE, MASK, CLASS, 0, MEMTAG, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _TME_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, TME, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define SVE2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2, OPS, QUALS, \
+    FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
+#define SVE2AES_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2_AES, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2SHA3_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2_SHA3, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2SM4_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2_SM4, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2SM4_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2_SM4, OPS, QUALS, \
+    FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
+#define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {

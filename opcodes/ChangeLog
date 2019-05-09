@@ -1,3 +1,14 @@
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-tbl.h
+	(aarch64_feature_sve2, aarch64_feature_sve2aes,
+	aarch64_feature_sve2sha3, aarch64_feature_sve2sm4,
+	aarch64_feature_sve2bitperm): New feature sets.
+	(SVE2, SVE2_AES, SVE2_SHA3, SVE2_SM4, SVE2_BITPERM): New macros
+	for feature set addresses.
+	(SVE2_INSN, SVE2_INSNC, SVE2AES_INSN, SVE2SHA3_INSN,
+	SVE2SM4_INSN, SVE2SM4_INSNC, SVE2BITPERM_INSN): New macros.
+
 2019-05-06  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
