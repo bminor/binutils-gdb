@@ -1673,6 +1673,12 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 		    aarch64_get_variant (inst) + 1, 0);
       break;
 
+    case sve_size_tsz_bhs:
+      insert_fields (&inst->value,
+		     (1 << aarch64_get_variant (inst)),
+		     0, 2, FLD_SVE_tszl_19, FLD_SVE_sz);
+      break;
+
     case sve_size_013:
       variant = aarch64_get_variant (inst);
       if (variant == 2)
