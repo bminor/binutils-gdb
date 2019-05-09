@@ -4807,6 +4807,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX_LSL3",			\
       (3 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
       "an address with a scalar register offset")			\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_ZX",				\
+      0 << OPD_F_OD_LSB , F(FLD_SVE_Zn,FLD_Rm),				\
+      "vector of address with a scalar register offset")		\
     Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RZ", 0 << OPD_F_OD_LSB,	\
       F(FLD_Rn,FLD_SVE_Zm_16),						\
       "an address with a vector register offset")			\

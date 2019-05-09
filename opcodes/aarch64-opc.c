@@ -1899,6 +1899,17 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  max_value = 7;
 	  goto sve_imm_offset;
 
+	case AARCH64_OPND_SVE_ADDR_ZX:
+	  /* Everything is already ensured by parse_operands or
+	     aarch64_ext_sve_addr_rr_lsl (because this is a very specific
+	     argument type).  */
+	  assert (opnd->addr.offset.is_reg);
+	  assert (opnd->addr.preind);
+	  assert ((aarch64_operands[type].flags & OPD_F_NO_ZR) == 0);
+	  assert (opnd->shifter.kind == AARCH64_MOD_LSL);
+	  assert (opnd->shifter.operator_present == 0);
+	  break;
+
 	case AARCH64_OPND_SVE_ADDR_R:
 	case AARCH64_OPND_SVE_ADDR_RR:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
@@ -3581,6 +3592,13 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
 	 get_offset_int_reg_name (opnd));
+      break;
+
+    case AARCH64_OPND_SVE_ADDR_ZX:
+      print_register_offset_address
+	(buf, size, opnd,
+	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier),
+	 get_64bit_int_reg_name (opnd->addr.offset.regno, 0));
       break;
 
     case AARCH64_OPND_SVE_ADDR_RZ:

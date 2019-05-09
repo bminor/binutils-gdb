@@ -1,5 +1,11 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* config/tc-aarch64.c (REG_ZR): Macro specifying zero register.
+	(parse_address_main): Account for new addressing mode [Zn.S, Xm].
+	(parse_operands): Handle new SVE_ADDR_ZX operand.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Handle new SVE_Zm3_11_INDEX
 	operand.
 

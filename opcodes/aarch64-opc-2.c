@@ -151,6 +151,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RX_LSL1", (1 << OPD_F_OD_LSB) | OPD_F_NO_ZR | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RX_LSL2", (2 << OPD_F_OD_LSB) | OPD_F_NO_ZR | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RX_LSL3", (3 << OPD_F_OD_LSB) | OPD_F_NO_ZR | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_Rm}, "an address with a scalar register offset"},
+  {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_ZX", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn,FLD_Rm}, "vector of address with a scalar register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RZ", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_SVE_Zm_16}, "an address with a vector register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RZ_LSL1", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_SVE_Zm_16}, "an address with a vector register offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RZ_LSL2", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_SVE_Zm_16}, "an address with a vector register offset"},
