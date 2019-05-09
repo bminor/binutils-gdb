@@ -1,5 +1,9 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* testsuite/gas/aarch64/sve2.d: Remove file format restriction.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* testsuite/gas/aarch64/illegal-sve2-aes.d: New test.
 	* testsuite/gas/aarch64/illegal-sve2-bitperm.d: New test.
 	* testsuite/gas/aarch64/illegal-sve2-sha3.d: Test new instructions.

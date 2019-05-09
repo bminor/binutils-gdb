@@ -1,7 +1,7 @@
 #as: -march=armv8-a+sve2+sve2-aes+sve2-sm4+sve2-sha3+bitperm
 #objdump: -dr
 
-[^:]+:     file format elf64-littleaarch64
+[^:]+:     file format .*
 
 
 Disassembly of section \.text:
