@@ -322,11 +322,11 @@ Disassembly of section \.text:
  4e0:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e4:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e8:	(fc 0d 55 8e|8e 55 0d fc) 	mtfsf   6,f10,0,1
- 4ec:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1,0
+ 4ec:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1
  4f0:	(fc 0c 5d 8f|8f 5d 0c fc) 	mtfsf\.  6,f11
  4f4:	(fc 0c 5d 8f|8f 5d 0c fc) 	mtfsf\.  6,f11
  4f8:	(fc 0d 5d 8f|8f 5d 0d fc) 	mtfsf\.  6,f11,0,1
- 4fc:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf\.  6,f11,1,0
+ 4fc:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf\.  6,f11,1
  500:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
  504:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
  508:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0

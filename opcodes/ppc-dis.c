@@ -479,7 +479,7 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 
 /* Determine whether the optional operand(s) should be printed.  */
 
-static int
+static bfd_boolean
 skip_optional_operands (const unsigned char *opindex,
 			uint64_t insn, ppc_cpu_t dialect)
 {
@@ -490,7 +490,7 @@ skip_optional_operands (const unsigned char *opindex,
     {
       operand = &powerpc_operands[*opindex];
       if ((operand->flags & PPC_OPERAND_NEXT) != 0)
-	return 0;
+	return FALSE;
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
 	{
 	  /* Negative count is used as a flag to extract function.  */
@@ -498,11 +498,11 @@ skip_optional_operands (const unsigned char *opindex,
 	  if (operand_value_powerpc (operand, insn, dialect)
 	      != ppc_optional_operand_value (operand, insn, dialect,
 					     num_optional))
-	    return 0;
+	    return FALSE;
 	}
     }
 
-  return 1;
+  return TRUE;
 }
 
 /* Find a match for INSN in the opcode table, given machine DIALECT.  */
@@ -731,7 +731,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	need_7spaces = 7,
 	need_paren
       } op_separator;
-      int skip_optional;
+      bfd_boolean skip_optional;
       int spaces;
 
       (*info->fprintf_func) (info->stream, "%s", opcode->name);
@@ -742,7 +742,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
       /* Now extract and print the operands.  */
       op_separator = spaces;
-      skip_optional = -1;
+      skip_optional = FALSE;
       for (opindex = opcode->operands; *opindex != 0; opindex++)
 	{
 	  int64_t value;
@@ -753,9 +753,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	     then don't print any of them.  */
 	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
 	    {
-	      if (skip_optional < 0)
-		skip_optional = skip_optional_operands (opindex, insn,
-							dialect);
+	      if (!skip_optional)
+		skip_optional = skip_optional_operands (opindex, insn, dialect);
 	      if (skip_optional)
 		continue;
 	    }

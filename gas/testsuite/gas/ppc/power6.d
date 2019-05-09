@@ -58,8 +58,8 @@ Disassembly of section \.text:
   c0:	(fc 0c 5d 8f|8f 5d 0c fc) 	mtfsf.  6,f11
   c4:	(fc 0d 55 8e|8e 55 0d fc) 	mtfsf   6,f10,0,1
   c8:	(fc 0d 5d 8f|8f 5d 0d fc) 	mtfsf.  6,f11,0,1
-  cc:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1,0
-  d0:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf.  6,f11,1,0
+  cc:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1
+  d0:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf.  6,f11,1
   d4:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
   d8:	(ff 00 f1 0d|0d f1 00 ff) 	mtfsfi. 6,15
   dc:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
