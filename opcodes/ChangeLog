@@ -1,6 +1,13 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Handle
+	sve_size_013 iclass encode.
+	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Handle
+	sve_size_013 iclass decode.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Handle
 	sve_size_bh iclass encode.
 	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Handle
 	sve_size_bh iclass decode.

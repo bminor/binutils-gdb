@@ -1613,6 +1613,7 @@ do_special_encoding (struct aarch64_inst *inst)
 static void
 aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 {
+  int variant = 0;
   switch (inst->opcode->iclass)
     {
     case sve_cpy:
@@ -1667,6 +1668,13 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
     case sve_size_hsd2:
       insert_field (FLD_SVE_size, &inst->value,
 		    aarch64_get_variant (inst) + 1, 0);
+      break;
+
+    case sve_size_013:
+      variant = aarch64_get_variant (inst);
+      if (variant == 2)
+	  variant = 3;
+      insert_field (FLD_size, &inst->value, variant, 0);
       break;
 
     default:
