@@ -1,5 +1,35 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-tbl.h (OP_SVE_BBU): New variant set.
+	(OP_SVE_BBB): New variant set.
+	(OP_SVE_DDDD): New variant set.
+	(OP_SVE_HHH): New variant set.
+	(OP_SVE_HHHU): New variant set.
+	(OP_SVE_SSS): New variant set.
+	(OP_SVE_SSSU): New variant set.
+	(OP_SVE_SHH): New variant set.
+	(OP_SVE_SBBU): New variant set.
+	(OP_SVE_DSS): New variant set.
+	(OP_SVE_DHHU): New variant set.
+	(OP_SVE_VMV_HSD_BHS): New variant set.
+	(OP_SVE_VVU_HSD_BHS): New variant set.
+	(OP_SVE_VVVU_SD_BH): New variant set.
+	(OP_SVE_VVVU_BHSD): New variant set.
+	(OP_SVE_VVV_QHD_DBS): New variant set.
+	(OP_SVE_VVV_HSD_BHS): New variant set.
+	(OP_SVE_VVV_HSD_BHS2): New variant set.
+	(OP_SVE_VVV_BHS_HSD): New variant set.
+	(OP_SVE_VV_BHS_HSD): New variant set.
+	(OP_SVE_VVV_SD): New variant set.
+	(OP_SVE_VVU_BHS_HSD): New variant set.
+	(OP_SVE_VZVV_SD): New variant set.
+	(OP_SVE_VZVV_BH): New variant set.
+	(OP_SVE_VZV_SD): New variant set.
+	(aarch64_opcode_table): Add sve2 instructions.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-asm-2.c: Regenerated.
 	* aarch64-dis-2.c: Regenerated.
 	* aarch64-opc-2.c: Regenerated.
