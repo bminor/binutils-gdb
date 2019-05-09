@@ -1,5 +1,10 @@
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-opc.c (verify_constraints): Check for movprfx for sve2
+	instructions.
+
+2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-tbl.h
 	(aarch64_feature_sve2, aarch64_feature_sve2aes,
 	aarch64_feature_sve2sha3, aarch64_feature_sve2sm4,

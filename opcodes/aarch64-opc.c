@@ -4867,7 +4867,9 @@ verify_constraints (const struct aarch64_inst *inst,
 	{
 	  /* Check to see if the MOVPRFX SVE instruction is followed by an SVE
 	     instruction for better error messages.  */
-	  if (!opcode->avariant || !(*opcode->avariant & AARCH64_FEATURE_SVE))
+	  if (!opcode->avariant
+	      || !(*opcode->avariant &
+		   (AARCH64_FEATURE_SVE | AARCH64_FEATURE_SVE2)))
 	    {
 	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
 	      mismatch_detail->error = _("SVE instruction expected after "
