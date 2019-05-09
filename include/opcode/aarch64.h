@@ -594,6 +594,7 @@ enum aarch64_insn_class
   sve_size_hsd,
   sve_size_hsd2,
   sve_size_sd,
+  sve_size_bh,
   sve_size_sd2,
   testbranch,
   cryptosm3,
