@@ -1,5 +1,10 @@
 2019-05-14  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (coerce_unspec_val_to_type): Only set address when
+	value is not lval_memory.
+
+2019-05-14  Tom Tromey  <tromey@adacore.com>
+
 	* solib.c (info_sharedlibrary_command): Style the file name.
 
 2019-05-14  Alan Hayward  <alan.hayward@arm.com>
