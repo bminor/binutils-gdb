@@ -6337,13 +6337,19 @@ print_one_breakpoint_location (struct breakpoint *b,
     }
 }
 
+/* See breakpoint.h. */
+
+bool fix_multi_location_breakpoint_output_globally = false;
+
 static void
 print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
 		      int allflag)
 {
   struct ui_out *uiout = current_uiout;
-  bool use_fixed_output = mi_multi_location_breakpoint_output_fixed (uiout);
+  bool use_fixed_output
+    = (uiout->test_flags (fix_multi_location_breakpoint_output)
+       || fix_multi_location_breakpoint_output_globally);
 
   gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
   print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);

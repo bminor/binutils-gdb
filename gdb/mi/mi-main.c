@@ -2699,31 +2699,13 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
   }
 }
 
-/* Whether to use the fixed output when printing information about a
-   multi-location breakpoint (see PR 9659).  */
-
-static bool fix_multi_location_breakpoint_output = false;
-
 /* See mi/mi-main.h.  */
 
 void
 mi_cmd_fix_multi_location_breakpoint_output (const char *command, char **argv,
 					     int argc)
 {
-  fix_multi_location_breakpoint_output = true;
-}
-
-/* See mi/mi-main.h.  */
-
-bool
-mi_multi_location_breakpoint_output_fixed (ui_out *uiout)
-{
-  mi_ui_out *mi_uiout = dynamic_cast<mi_ui_out *> (uiout);
-
-  if (mi_uiout == nullptr)
-    return false;
-
-  return mi_uiout->version () >= 3 || fix_multi_location_breakpoint_output;
+  fix_multi_location_breakpoint_output_globally = true;
 }
 
 void

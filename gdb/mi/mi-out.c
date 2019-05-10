@@ -280,7 +280,9 @@ mi_ui_out::version ()
 /* Constructor for an `mi_out_data' object.  */
 
 mi_ui_out::mi_ui_out (int mi_version)
-: m_suppress_field_separator (false),
+: ui_out (mi_version >= 3
+	  ? fix_multi_location_breakpoint_output : (ui_out_flag) 0),
+  m_suppress_field_separator (false),
   m_suppress_output (false),
   m_mi_version (mi_version)
 {

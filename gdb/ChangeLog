@@ -1,5 +1,24 @@
 2019-05-10  Simon Marchi  <simon.marchi@efficios.com>
 
+	* breakpoint.h (fix_multi_location_breakpoint_output_globally):
+	New variable declaration.
+	* breakpoint.c (fix_multi_location_breakpoint_output_globally):
+	New variable.
+	(print_one_breakpoint): Use ui_out::test_flags and new global
+	variable to compute use_fixed_output.
+	* mi/mi-main.h (mi_multi_location_breakpoint_output_fixed):
+	Remove.
+	* mi/mi-main.c (fix_multi_location_breakpoint_output): Remove.
+	(mi_multi_location_breakpoint_output_fixed): Remove.
+	(mi_cmd_fix_multi_location_breakpoint_output): Adjust to set the
+	new variable.
+	* mi/mi-out.c (mi_ui_out::mi_ui_out): Set
+	fix_multi_location_breakpoint_output flag if version >= 3.
+	* ui-out.h (enum ui_out_flag)
+	<fix_multi_location_breakpoint_output>: New enumerator.
+
+2019-05-10  Simon Marchi  <simon.marchi@efficios.com>
+
 	* contrib/cc-with-tweaks.sh: Validate dwz's work.
 
 2019-05-10  Tom Tromey  <tromey@adacore.com>

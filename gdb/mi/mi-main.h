@@ -59,12 +59,4 @@ extern struct mi_suppress_notification mi_suppress_notification;
 extern void mi_cmd_fix_multi_location_breakpoint_output (const char *command,
 							 char **argv, int argc);
 
-/* Return whether -break-list, -break-insert, =breakpoint-created and
-   =breakpoint-modified should use the "fixed" output format (see PR
-   9659).
-
-   Return false if UIOUT is not an MI UI.  */
-
-extern bool mi_multi_location_breakpoint_output_fixed (ui_out *uiout);
-
 #endif /* MI_MI_MAIN_H */

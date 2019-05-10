@@ -1670,4 +1670,9 @@ extern void print_breakpoint (breakpoint *bp);
 /* Command element for the 'commands' command.  */
 extern cmd_list_element *commands_cmd_element;
 
+/* Whether to use the fixed output when printing information about a
+   multi-location breakpoint (see PR 9659).  */
+
+extern bool fix_multi_location_breakpoint_output_globally;
+
 #endif /* !defined (BREAKPOINT_H) */

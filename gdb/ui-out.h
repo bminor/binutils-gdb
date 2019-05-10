@@ -49,9 +49,10 @@ enum ui_align
 
 /* flags enum */
 enum ui_out_flag
-  {
-    ui_source_list = (1 << 0),
-  };
+{
+  ui_source_list = (1 << 0),
+  fix_multi_location_breakpoint_output = (1 << 1),
+};
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
 
