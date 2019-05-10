@@ -1371,6 +1371,12 @@ object which is convertible to a @value{GDBN} value.
 This method is optional.  If it does not exist, @value{GDBN} will act
 as though the value has no children.
 
+For efficiency, the @code{children} method should lazily compute its
+results.  This will let @value{GDBN} read as few elements as
+necessary, for example when various print settings (@pxref{Print
+Settings}) or @code{-var-list-children} (@pxref{GDB/MI Variable
+Objects}) limit the number of elements to be displayed.
+
 Children may be hidden from display based on the value of @samp{set
 print max-depth} (@pxref{Print Settings}).
 @end defun

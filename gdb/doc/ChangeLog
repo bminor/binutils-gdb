@@ -1,5 +1,10 @@
 2019-05-10  Tom Tromey  <tromey@adacore.com>
 
+	* python.texi (Pretty Printing API): Mention lazy computation for
+	"children".
+
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.texinfo (Set Catchpoints): Add text for parameter to "catch
 	exception" and "catch handlers".  Move "catch exception unhandled"
 	text.  Use @var for "catch load" and "catch unload"
