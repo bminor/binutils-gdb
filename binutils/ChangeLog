@@ -1,3 +1,10 @@
+2019-05-10  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objdump.exp (test_objdump_disas_limited),
+	(test_objdump_content_limited): Add text arg, use in place of .text.
+	(bintest_signed.o): Call get_standard_section_names for name of
+	text section.
+
 2019-05-08  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* objdump.c (sign_extend_address): New function.

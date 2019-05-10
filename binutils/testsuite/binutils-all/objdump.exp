@@ -690,15 +690,15 @@ proc test_objdump_limited { testfile dopt want start stop } {
 
 # Test objdump -d --start-address M --stop-address N
 
-proc test_objdump_disas_limited { testfile start stop } {
-    set want "$testfile:\[ 	\]*file format.*Disassembly of section .text:\n.*\[ \]*$start:.*"
+proc test_objdump_disas_limited { testfile text start stop } {
+    set want "$testfile:\[ 	\]*file format.*Disassembly of section $text:\n.*\[ \]*$start:.*"
     test_objdump_limited $testfile -d $want $start $stop
 }
 
 # Test objdump -s --start-address M --stop-address N
 
-proc test_objdump_content_limited { testfile start stop } {
-    set want "$testfile:\[ 	\]*file format.*Contents of section .text:\n\[ \]*$start .*"
+proc test_objdump_content_limited { testfile text start stop } {
+    set want "$testfile:\[ 	\]*file format.*Contents of section $text:\n\[ \]*$start .*"
     test_objdump_limited $testfile -s $want $start $stop
 }
 
@@ -709,9 +709,15 @@ proc test_objdump_content_limited { testfile start stop } {
 # start/stop limits.
 
 if {[is_elf_format]} then {
+    set sect_names [get_standard_section_names]
+    if { $sect_names != "" } {
+	set text [lindex $sect_names 0]
+    } else {
+	set text ".text"
+    }
     # generate a copy of the test object with .text repositioned
-    if { [binutils_run $OBJCOPY "--change-section-address .text=0x80000000 tmpdir/bintest.o tmpdir/bintest_signed.o"] != "" } {
-	fail "Failed to reposition .text to 0x80000000 (tmpdir/bintest.o -> tmpdir/bintest_signed.o)"
+    if { [binutils_run $OBJCOPY "--change-section-address $text=0x80000000 tmpdir/bintest.o tmpdir/bintest_signed.o"] != "" } {
+	fail "Failed to reposition $text to 0x80000000 (tmpdir/bintest.o -> tmpdir/bintest_signed.o)"
 	return
     }
 
@@ -721,8 +727,8 @@ if {[is_elf_format]} then {
 	set testfile3 tmpdir/bintest_signed.o
     }
 
-    test_objdump_content_limited $testfile3 "80000004" "80000008"
-    test_objdump_disas_limited $testfile3 "80000004" "80000008"
+    test_objdump_content_limited $testfile3 $text "80000004" "80000008"
+    test_objdump_disas_limited $testfile3 $text "80000004" "80000008"
     remote_file host delete $testfile3
 }
 
