@@ -2103,9 +2103,6 @@ md_number_to_chars (char *buf, valueT val, int n)
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {

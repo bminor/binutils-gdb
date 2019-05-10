@@ -1,3 +1,54 @@
+2019-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 24538
+	* macro.c (get_any_string): Increase size of buffer used to hold
+	decimal value of expression result.
+	* dw2gencfi.c (get_debugseg_name): Handle an empty name.
+	* dwarf2dbg.c (get_filenum): Catch integer wraparound when
+	extending allocate file array.
+	(dwarf2_directive_filename): Add extra checks of the computed file
+	number.
+	* config/tc-arm.c (arm_tc_equal_in_insn): Insert copy of name into
+	warning hash table.
+	(s_arm_eabi_attribute): Check for obj_elf_vendor_attribute
+	returning -1.
+	* config/tc-i386.c (i386_output_nops): Catch an attempt to
+	generate nops of negative lengths.
+	* as.h (MAX_LITTLENUMS): Move definition to here from...
+	* config/atof-ieee.c: ...here.
+	* config/tc-aarch64.c: ...here.
+	* config/tc-arc.c: ...here.
+	* config/tc-arm.c: ...here.
+	* config/tc-epiphany.c: ...here.
+	* config/tc-i386.c: ...here.
+	* config/tc-ia64.c: ...here.  (And correct the value).
+	* config/tc-m32c.c: ...here.
+	* config/tc-m32r.c: ...here.
+	* config/tc-metag.c: ...here.
+	* config/tc-microblaze.c: ...here.
+	* config/tc-nds32.c: ...here.
+	* config/tc-or1k.c: ...here.
+	* config/tc-score.c: ...here.
+	* config/tc-score7.c: ...here.
+	* config/tc-tic4x.c: ...here.
+	* config/tc-tilegx.c: ...here.
+	* config/tc-tilepro.c: ...here.
+	* config/tc-visium.c: ...here.
+	* config/tc-sh.c (md_assemble): Add check for an instruction with
+	no opcodes.
+	* config/tc-mips.c (mips_lookup_insn): Add check for very short
+	instruction name.
+	* config/tc-tic54x.c: Use unsigned chars to access is_end_of_line
+	array.
+	(tic54x_start_line_hook): Check for an empty line.
+	(next_line_shows_parallel): Do not walk off the end of the string.
+	(tic54x_macro_start): Check for too much macro nesting.
+	(tic54x_start_label): Add label_start parameter.  Use this
+	parameter to check the first character of the label.
+
+	* config/tc-tic54x.h (TC_START_LABEL_WITHOUT_COLON): Pass
+	line_start variable to tic54x_start_label.
+
 2019-05-10  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* config/tc-mips.c (macro) <M_ADD_I, M_SUB_I, M_DADD_I, M_DSUB_I>:

@@ -7316,9 +7316,6 @@ md_number_to_chars (char *buf, valueT val, int n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 /* This function is called to convert an ASCII string into a floating point
    value in format used by the CPU.  */
 

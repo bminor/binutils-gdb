@@ -1299,7 +1299,16 @@ i386_output_nops (char *where, const unsigned char *const *patt,
   /* Place the longer NOP first.  */
   int last;
   int offset;
-  const unsigned char *nops =  patt[max_single_nop_size - 1];
+  const unsigned char *nops;
+
+  if (max_single_nop_size < 1)
+    {
+      as_fatal (_("i386_output_nops called to generate nops of at most %d bytes!"),
+		max_single_nop_size);
+      return;
+    }
+
+  nops = patt[max_single_nop_size - 1];
 
   /* Use the smaller one if the requsted one isn't available.  */
   if (nops == NULL)

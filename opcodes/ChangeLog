@@ -1,3 +1,9 @@
+2019-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 24538
+	* ia64-opc.c (ia64_find_matching_opcode): Check for reaching the
+	end of the table prematurely.
+
 2019-05-10  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
         * mips-opc.c (mips_opcodes): Enable ADD, SUB, DADD and DSUB

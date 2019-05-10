@@ -2525,37 +2525,31 @@ md_assemble (char *str)
       char *name = initial_str;
       int name_length = 0;
       const sh_opcode_info *op;
-      int found = 0;
+      bfd_boolean found = FALSE;
 
-      /* identify opcode in string */
+      /* Identify opcode in string.  */
       while (ISSPACE (*name))
-	{
-	  name++;
-	}
-      while (!ISSPACE (name[name_length]))
-	{
-	  name_length++;
-	}
+	name++;
 
-      /* search for opcode in full list */
+      while (name[name_length] != '\0' && !ISSPACE (name[name_length]))
+	name_length++;
+
+      /* Search for opcode in full list.  */
       for (op = sh_table; op->name; op++)
 	{
 	  if (strncasecmp (op->name, name, name_length) == 0
 	      && op->name[name_length] == '\0')
 	    {
-	      found = 1;
+	      found = TRUE;
 	      break;
 	    }
 	}
 
-      if ( found )
-	{
-	  as_bad (_("opcode not valid for this cpu variant"));
-	}
+      if (found)
+	as_bad (_("opcode not valid for this cpu variant"));
       else
-	{
-	  as_bad (_("unknown opcode"));
-	}
+	as_bad (_("unknown opcode"));
+
       return;
     }
 

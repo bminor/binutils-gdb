@@ -528,9 +528,6 @@ const char * fp_const[] =
   "0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0", 0
 };
 
-/* Number of littlenums required to hold an extended precision number.	*/
-#define MAX_LITTLENUMS 6
-
 LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 #define FAIL	(-1)
@@ -4746,7 +4743,7 @@ s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
 {
   int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
 
-  if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
+  if (tag >= 0 && tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     attributes_set_explicitly[tag] = 1;
 }
 
@@ -23436,7 +23433,7 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
 	    already_warned = hash_new ();
 	  /* Only warn about the symbol once.  To keep the code
 	     simple we let hash_insert do the lookup for us.  */
-	  if (hash_insert (already_warned, name, NULL) == NULL)
+	  if (hash_insert (already_warned, nbuf, NULL) == NULL)
 	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
 	}
       else

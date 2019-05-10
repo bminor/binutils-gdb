@@ -1198,9 +1198,6 @@ const pseudo_typeS md_pseudo_table[] =
   { NULL, 0, 0 }
 };
 
-/* Equal to MAX_PRECISION in atof-ieee.c  */
-#define MAX_LITTLENUMS 6
-
 /* Turn the string pointed to by litP into a floating point constant
    of type TYPE, and emit the appropriate bytes.  The number of
    LITTLENUMS emitted is stored in *SIZEP.  An error message is

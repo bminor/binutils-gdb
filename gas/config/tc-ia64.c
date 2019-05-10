@@ -11570,8 +11570,6 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixp)
    of LITTLENUMS emitted is stored in *SIZE.  An error message is
    returned, or NULL on OK.  */
 
-#define MAX_LITTLENUMS 5
-
 const char *
 md_atof (int type, char *lit, int *size)
 {

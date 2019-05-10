@@ -48,9 +48,6 @@
 #define LP_INSN(x)	 ((MAJOR_OPCODE (x) == 0x4) \
 			  && (SUB_OPCODE (x) == 0x28))
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 #ifndef TARGET_WITH_CPU
 #define TARGET_WITH_CPU "arc700"
 #endif /* TARGET_WITH_CPU */

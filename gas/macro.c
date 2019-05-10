@@ -374,7 +374,7 @@ get_any_string (size_t idx, sb *in, sb *out)
       else if (in->ptr[idx] == '%' && macro_alternate)
 	{
 	  offsetT val;
-	  char buf[20];
+	  char buf[64];
 
 	  /* Turns the next expression into a string.  */
 	  /* xgettext: no-c-format */

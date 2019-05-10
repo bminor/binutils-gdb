@@ -3760,7 +3760,8 @@ ignore_rest_of_line (void)
   input_line_pointer++;
 
   /* Return pointing just after end-of-line.  */
-  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
+  if (input_line_pointer <= buffer_limit)
+    know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* Sets frag for given symbol to zero_address_frag, except when the

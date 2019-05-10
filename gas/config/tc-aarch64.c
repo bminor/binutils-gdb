@@ -238,9 +238,6 @@ set_fatal_syntax_error (const char *error)
   set_error (AARCH64_OPDE_FATAL_SYNTAX_ERROR, error);
 }
 
-/* Number of littlenums required to hold an extended precision number.  */
-#define MAX_LITTLENUMS 6
-
 /* Return value for certain parsers when the parsing fails; those parsers
    return the information of the parsed result, e.g. register number, on
    success.  */

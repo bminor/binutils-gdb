@@ -14250,7 +14250,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
       opend = dot != NULL ? dot - name : length;
       if (opend >= 3 && name[opend - 2] == '1' && name[opend - 1] == '6')
 	suffix = 2;
-      else if (name[opend - 2] == '3' && name[opend - 1] == '2')
+      else if (opend >= 2 && name[opend - 2] == '3' && name[opend - 1] == '2')
 	suffix = 4;
       else
 	suffix = 0;

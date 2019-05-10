@@ -1314,9 +1314,6 @@ const pseudo_typeS md_pseudo_table[] =
   { NULL, 0, 0 }
 };
 
-/* Equal to MAX_PRECISION in atof-ieee.c  */
-#define MAX_LITTLENUMS 6
-
 void
 md_number_to_chars (char * buf, valueT val, int n)
 {

@@ -225,37 +225,37 @@ emit_expr_encoded (expressionS *exp, int encoding, bfd_boolean emit_encoding)
 static char *
 get_debugseg_name (segT seg, const char *base_name)
 {
-  const char *name;
+  const char * name;
+  const char * dollar;
+  const char * dot;
 
   if (!seg)
-    name = "";
-  else
+    return concat (base_name, NULL);
+
+  name = bfd_get_section_name (stdoutput, seg);
+
+  if (name == NULL || *name == 0)
+    return concat (base_name, NULL);
+	
+  dollar = strchr (name, '$');
+  dot = strchr (name + 1, '.');
+
+  if (!dollar && !dot)
     {
-      const char * dollar;
-      const char * dot;
+      if (!strcmp (base_name, ".eh_frame_entry")
+	  && strcmp (name, ".text") != 0)
+	return concat (base_name, ".", name, NULL);
 
-      name = bfd_get_section_name (stdoutput, seg);
-
-      dollar = strchr (name, '$');
-      dot = strchr (name + 1, '.');
-
-      if (!dollar && !dot)
-	{
-	  if (!strcmp (base_name, ".eh_frame_entry")
-	      && strcmp (name, ".text") != 0)
-	    return concat (base_name, ".", name, NULL);
-
-	  name = "";
-	}
-      else if (!dollar)
-	name = dot;
-      else if (!dot)
-	name = dollar;
-      else if (dot < dollar)
-	name = dot;
-      else
-	name = dollar;
+      name = "";
     }
+  else if (!dollar)
+    name = dot;
+  else if (!dot)
+    name = dollar;
+  else if (dot < dollar)
+    name = dot;
+  else
+    name = dollar;
 
   return concat (base_name, name, NULL);
 }

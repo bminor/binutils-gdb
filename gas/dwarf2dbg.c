@@ -751,8 +751,14 @@ get_filenum (const char *filename, unsigned int num)
       unsigned int old = files_allocated;
 
       files_allocated = i + 32;
-      files = XRESIZEVEC (struct file_entry, files, files_allocated);
+      /* Catch wraparound.  */
+      if (files_allocated <= old)
+	{
+	  as_bad (_("file number %u is too big"), i);
+	  return 0;
+	}
 
+      files = XRESIZEVEC (struct file_entry, files, files_allocated);
       memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
     }
 
@@ -803,13 +809,18 @@ dwarf2_directive_filename (void)
      being supplied.  Turn off gas generated debug info.  */
   debug_type = DEBUG_NONE;
 
-  if (num < (int) files_in_use && files[num].filename != 0)
+  if (num < (offsetT) files_in_use && files[num].filename != 0)
     {
       as_bad (_("file number %ld already allocated"), (long) num);
       return NULL;
     }
+  else if (num < 0)
+    {
+      as_bad (_("file number %ld is too small!"), (long) num);
+      return NULL;
+    }
 
-  get_filenum (filename, num);
+  get_filenum (filename, (unsigned int) num);
 
   return filename;
 }

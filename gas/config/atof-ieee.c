@@ -695,8 +695,6 @@ print_gen (gen)
 }
 #endif
 
-#define MAX_LITTLENUMS 6
-
 /* This is a utility function called from various tc-*.c files.  It
    is here in order to reduce code duplication.
 

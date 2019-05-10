@@ -479,6 +479,10 @@ void   as_bad_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				  const char *, unsigned);
 void   print_version_id (void);
 char * app_push (void);
+
+/* Number of littlenums required to hold an extended precision number.	*/
+#define MAX_LITTLENUMS 6
+
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
 const char * ieee_md_atof (int, char *, int *, bfd_boolean);
 const char * vax_md_atof (int, char *, int *);

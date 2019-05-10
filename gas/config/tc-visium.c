@@ -821,9 +821,6 @@ md_begin (void)
    emitted is stored in *sizeP .  An error message is returned,
    or NULL on OK.  */
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
