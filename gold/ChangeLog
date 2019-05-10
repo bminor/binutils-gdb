@@ -1,3 +1,26 @@
+2019-05-10  Joshua Oreman  <oremanj@hudson-trading.com>
+
+	PR gold/21066
+	* gc.h (gc_process_relocs): Track relocations in .eh_frame sections
+	when ICF is enabled, even though the .eh_frame sections themselves
+	are not foldable.
+	* icf.cc (get_section_contents): Change arguments to permit operation
+	on just part of a section. Include extra identity regions in the
+	referring section's contents recursively.
+	(match_sections): Lock object here instead of in get_section_contents
+	so that get_section_contents can operate recursively.
+	(Icf::add_ehframe_links): New method.
+	(Icf::find_identical_sections): Pass .eh_frame sections to
+	add_ehframe_links(). Increase default iteration count from 2 to 3
+	because handling exception info typically requires one extra iteration.
+	* icf.h (Icf::extra_identity_list_): New data member with accessor.
+	(is_section_foldable_candidate): Include .gcc_except_table sections.
+	* options.h: Update documentation for new default ICF iteration count.
+	* testsuite/Makefile.am (icf_test_pr21066): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_test_pr21066.cc: New source file.
+	* testsuite/icf_test_pr21066.sh: New test script.
+
 2019-02-19  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
      PR gold/23870

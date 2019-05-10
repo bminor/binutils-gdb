@@ -946,7 +946,7 @@ class General_options
 	      {"none", "all", "safe"});
 
   DEFINE_uint(icf_iterations, options::TWO_DASHES , '\0', 0,
-	      N_("Number of iterations of ICF (default 2)"), N_("COUNT"));
+	      N_("Number of iterations of ICF (default 3)"), N_("COUNT"));
 
   DEFINE_special(incremental, options::TWO_DASHES, '\0',
 		 N_("Do an incremental link if possible; "

@@ -129,7 +129,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.sh pr20717.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_dynamic_list_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh icf_test_pr21066.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_pie_test.sh \
@@ -152,6 +152,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.stdout pr20717.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_dynamic_list_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.map \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test_pr21066.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_1.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_2.stdout \
@@ -182,6 +183,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test pr14265 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	pr20717 gc_dynamic_list_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_test.map \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test_pr21066 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test_pr21066.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_pie_test \
@@ -2705,6 +2708,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -5517,6 +5521,13 @@ icf_test.sh.log: icf_test.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+icf_test_pr21066.sh.log: icf_test_pr21066.sh
+	@p='icf_test_pr21066.sh'; \
+	b='icf_test_pr21066.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 icf_keep_unique_test.sh.log: icf_keep_unique_test.sh
 	@p='icf_keep_unique_test.sh'; \
 	b='icf_keep_unique_test.sh'; \
@@ -7935,6 +7946,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -o icf_test -Wl,--icf=all,-Map,icf_test.map icf_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.map: icf_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch icf_test.map
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test_pr21066.o: icf_test_pr21066.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test_pr21066: icf_test_pr21066.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -o icf_test_pr21066 -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test_pr21066.map icf_test_pr21066.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test_pr21066.map: icf_test_pr21066
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch icf_test_pr21066.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test.o: icf_keep_unique_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld

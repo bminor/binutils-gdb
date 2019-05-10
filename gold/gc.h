@@ -200,7 +200,8 @@ gc_process_relocs(
   bool check_section_for_function_pointers = false;
 
   if (parameters->options().icf_enabled()
-      && is_section_foldable_candidate(src_section_name.c_str()))
+      && (is_section_foldable_candidate(src_section_name)
+          || is_prefix_of(".eh_frame", src_section_name.c_str())))
     {
       is_icf_tracked = true;
       Section_id src_id(src_obj, src_indx);

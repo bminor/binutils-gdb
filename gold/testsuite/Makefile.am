@@ -278,6 +278,16 @@ icf_test: icf_test.o gcctestdir/ld
 icf_test.map: icf_test
 	@touch icf_test.map
 
+check_SCRIPTS += icf_test_pr21066.sh
+check_DATA += icf_test_pr21066.map
+MOSTLYCLEANFILES += icf_test_pr21066 icf_test_pr21066.map
+icf_test_pr21066.o: icf_test_pr21066.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+icf_test_pr21066: icf_test_pr21066.o gcctestdir/ld
+	$(CXXLINK) -o icf_test_pr21066 -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test_pr21066.map icf_test_pr21066.o
+icf_test_pr21066.map: icf_test_pr21066
+	@touch icf_test_pr21066.map
+
 check_SCRIPTS += icf_keep_unique_test.sh
 check_DATA += icf_keep_unique_test.stdout
 MOSTLYCLEANFILES += icf_keep_unique_test
