@@ -1191,7 +1191,8 @@ No selected thread.  See `help thread'.\n");
 /* See gdbthread.h.  */
 
 void
-print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
+print_thread_info (struct ui_out *uiout, const char *requested_threads,
+		   int pid)
 {
   print_thread_info_1 (uiout, requested_threads, 1, pid, 0);
 }

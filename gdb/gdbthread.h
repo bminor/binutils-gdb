@@ -632,7 +632,8 @@ extern int print_thread_events;
    all attached PIDs are printed.  If both REQUESTED_THREADS is not
    NULL and PID is not -1, then the thread is printed if it belongs to
    the specified process.  Otherwise, an error is raised.  */
-extern void print_thread_info (struct ui_out *uiout, char *requested_threads,
+extern void print_thread_info (struct ui_out *uiout,
+			       const char *requested_threads,
 			       int pid);
 
 /* Save/restore current inferior/thread/frame.  */

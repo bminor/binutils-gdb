@@ -1,3 +1,11 @@
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
+	* thread.c (print_thread_info): Make "requested_threads" const.
+	* gdbthread.h (print_thread_info): Make "requested_threads"
+	const.
+	* ada-tasks.c (print_ada_task_info): Make "taskno_str" const.
+	* ada-lang.h (print_ada_task_info): Make "taskno_str" const.
+
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
 	* gdbtypes.c (objfile_type_data): Change type.

@@ -1001,7 +1001,7 @@ ada_build_task_list ()
 
 void
 print_ada_task_info (struct ui_out *uiout,
-		     char *arg_str,
+		     const char *arg_str,
 		     struct inferior *inf)
 {
   struct ada_tasks_inferior_data *data;

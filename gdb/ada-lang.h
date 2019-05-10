@@ -412,7 +412,7 @@ extern void iterate_over_live_ada_tasks
 extern const char *ada_get_tcb_types_info (void);
 
 extern void print_ada_task_info (struct ui_out *uiout,
-				 char *taskno_str,
+				 const char *taskno_str,
 				 struct inferior *inf);
 
 #endif
