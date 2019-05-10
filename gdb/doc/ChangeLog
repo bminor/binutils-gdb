@@ -1,3 +1,9 @@
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Add text for parameter to "catch
+	exception" and "catch handlers".  Move "catch exception unhandled"
+	text.  Use @var for "catch load" and "catch unload"
+
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Symbols): Document change to ptype/o.

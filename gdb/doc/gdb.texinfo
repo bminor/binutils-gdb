@@ -4509,7 +4509,7 @@ You cannot raise an exception interactively.
 You cannot install an exception handler interactively.
 @end itemize
 
-@item exception
+@item exception @r{[}@var{name}@r{]}
 @kindex catch exception
 @cindex Ada exception catching
 @cindex catch Ada exceptions
@@ -4527,7 +4527,11 @@ called @code{Constraint_Error} is defined in package @code{Pck}, then
 the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
 
-@item handlers
+@item exception unhandled
+@kindex catch exception unhandled
+An exception that was raised but is not handled by the program.
+
+@item handlers @r{[}@var{name}@r{]}
 @kindex catch handlers
 @cindex Ada exception handlers catching
 @cindex catch Ada exceptions when handled
@@ -4546,10 +4550,6 @@ user-defined one.  For instance, assuming an exception called
  @code{Constraint_Error} is defined in package @code{Pck}, then the
 command to use to catch such exceptions handling is
 @kbd{catch handlers Pck.Constraint_Error}.
-
-@item exception unhandled
-@kindex catch exception unhandled
-An exception that was raised but is not handled by the program.
 
 @item assert
 @kindex catch assert
@@ -4727,8 +4727,8 @@ A call to @code{fork}.
 @kindex catch vfork
 A call to @code{vfork}.
 
-@item load @r{[}regexp@r{]}
-@itemx unload @r{[}regexp@r{]}
+@item load @r{[}@var{regexp}@r{]}
+@itemx unload @r{[}@var{regexp}@r{]}
 @kindex catch load
 @kindex catch unload
 The loading or unloading of a shared library.  If @var{regexp} is
