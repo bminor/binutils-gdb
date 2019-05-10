@@ -51,7 +51,8 @@ static void list_args_or_locals (const frame_print_options &fp_opts,
 static int frame_filters = 0;
 
 void
-mi_cmd_enable_frame_filters (const char *command, char **argv, int argc)
+mi_cmd_enable_frame_filters (const char *command, const char *const *argv,
+			     int argc)
 {
   if (argc != 0)
     error (_("-enable-frame-filters: no arguments allowed"));
@@ -82,7 +83,8 @@ mi_apply_ext_lang_frame_filter (frame_info_ptr frame,
    displayed.  */
 
 void
-mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
+mi_cmd_stack_list_frames (const char *command, const char *const *argv,
+			  int argc)
 {
   int frame_low;
   int frame_high;
@@ -105,7 +107,7 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
      --no-frame-filters.  */
   while (1)
     {
-      char *oarg;
+      const char *oarg;
       int opt = mi_getopt ("-stack-list-frames", argc, argv,
 			   opts, &oind, &oarg);
       if (opt < 0)
@@ -185,7 +187,8 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
+mi_cmd_stack_info_depth (const char *command, const char *const *argv,
+			 int argc)
 {
   int frame_high;
   int i;
@@ -214,7 +217,8 @@ mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
    values.  */
 
 void
-mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
+mi_cmd_stack_list_locals (const char *command, const char *const *argv,
+			  int argc)
 {
   frame_info_ptr frame;
   int raw_arg = 0;
@@ -239,7 +243,7 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
 
       while (1)
 	{
-	  char *oarg;
+	  const char *oarg;
 	  /* Don't parse 'print-values' as an option.  */
 	  int opt = mi_getopt ("-stack-list-locals", argc - 1, argv,
 			       opts, &oind, &oarg);
@@ -290,7 +294,7 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
    values.  */
 
 void
-mi_cmd_stack_list_args (const char *command, char **argv, int argc)
+mi_cmd_stack_list_args (const char *command, const char *const *argv, int argc)
 {
   int frame_low;
   int frame_high;
@@ -316,7 +320,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 
   while (1)
     {
-      char *oarg;
+      const char *oarg;
       int opt = mi_getopt_allow_unknown ("-stack-list-args", argc, argv,
 					 opts, &oind, &oarg);
 
@@ -406,7 +410,8 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
    parse_print_value for possible values.  */
 
 void
-mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
+mi_cmd_stack_list_variables (const char *command, const char *const *argv,
+			     int argc)
 {
   frame_info_ptr frame;
   int raw_arg = 0;
@@ -431,7 +436,7 @@ mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
 
       while (1)
 	{
-	  char *oarg;
+	  const char *oarg;
 	  /* Don't parse 'print-values' as an option.  */
 	  int opt = mi_getopt ("-stack-list-variables", argc - 1,
 			       argv, opts, &oind, &oarg);
@@ -746,7 +751,8 @@ parse_frame_specification (const char *frame_exp)
 /* Implement the -stack-select-frame MI command.  */
 
 void
-mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
+mi_cmd_stack_select_frame (const char *command, const char *const *argv,
+			   int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
@@ -754,7 +760,8 @@ mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_stack_info_frame (const char *command, char **argv, int argc)
+mi_cmd_stack_info_frame (const char *command, const char *const *argv,
+			 int argc)
 {
   if (argc > 0)
     error (_("-stack-info-frame: No arguments allowed"));

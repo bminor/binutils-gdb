@@ -24,10 +24,10 @@
 /* Get a file from the target.  */
 
 void
-mi_cmd_target_file_get (const char *command, char **argv, int argc)
+mi_cmd_target_file_get (const char *command, const char *const *argv, int argc)
 {
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   const char *remote_file, *local_file;
   static const struct mi_opt opts[] =
     {
@@ -48,10 +48,10 @@ mi_cmd_target_file_get (const char *command, char **argv, int argc)
 /* Send a file to the target.  */
 
 void
-mi_cmd_target_file_put (const char *command, char **argv, int argc)
+mi_cmd_target_file_put (const char *command, const char *const *argv, int argc)
 {
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   const char *remote_file, *local_file;
   static const struct mi_opt opts[] =
     {
@@ -72,10 +72,11 @@ mi_cmd_target_file_put (const char *command, char **argv, int argc)
 /* Delete a file on the target.  */
 
 void
-mi_cmd_target_file_delete (const char *command, char **argv, int argc)
+mi_cmd_target_file_delete (const char *command, const char *const *argv,
+			   int argc)
 {
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   const char *remote_file;
   static const struct mi_opt opts[] =
     {

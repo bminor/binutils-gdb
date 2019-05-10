@@ -97,7 +97,7 @@ setup_breakpoint_reporting (void)
    and return it.  */
 
 static std::string
-mi_argv_to_format (char **argv, int argc)
+mi_argv_to_format (const char *const *argv, int argc)
 {
   int i;
   std::string result;
@@ -166,14 +166,15 @@ mi_argv_to_format (char **argv, int argc)
    If not, it will insert other type breakpoint.  */
 
 static void
-mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
+mi_cmd_break_insert_1 (int dprintf, const char *command,
+		       const char *const *argv, int argc)
 {
   const char *address = NULL;
   int hardware = 0;
   int temp_p = 0;
   int thread = -1;
   int ignore_count = 0;
-  char *condition = NULL;
+  const char *condition = NULL;
   int pending = 0;
   int enabled = 1;
   int tracepoint = 0;
@@ -219,7 +220,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   /* Parse arguments. It could be -r or -h or -t, <location> or ``--''
      to denote the end of the option list. */
   int oind = 0;
-  char *oarg;
+  const char *oarg;
 
   while (1)
     {
@@ -373,7 +374,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
    See the MI manual for the list of possible options.  */
 
 void
-mi_cmd_break_insert (const char *command, char **argv, int argc)
+mi_cmd_break_insert (const char *command, const char *const *argv, int argc)
 {
   mi_cmd_break_insert_1 (0, command, argv, argc);
 }
@@ -382,7 +383,7 @@ mi_cmd_break_insert (const char *command, char **argv, int argc)
    See the MI manual for the list of possible options.  */
 
 void
-mi_cmd_dprintf_insert (const char *command, char **argv, int argc)
+mi_cmd_dprintf_insert (const char *command, const char *const *argv, int argc)
 {
   mi_cmd_break_insert_1 (1, command, argv, argc);
 }
@@ -391,7 +392,8 @@ mi_cmd_dprintf_insert (const char *command, char **argv, int argc)
    See the MI manual for the list of options.  */
 
 void
-mi_cmd_break_condition (const char *command, char **argv, int argc)
+mi_cmd_break_condition (const char *command, const char *const *argv,
+			int argc)
 {
   enum option
     {
@@ -406,7 +408,7 @@ mi_cmd_break_condition (const char *command, char **argv, int argc)
 
   /* Parse arguments.  */
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   bool force_condition = false;
 
   while (true)
@@ -451,7 +453,8 @@ enum wp_type
 };
 
 void
-mi_cmd_break_passcount (const char *command, char **argv, int argc)
+mi_cmd_break_passcount (const char *command, const char *const *argv,
+			int argc)
 {
   int n;
   int p;
@@ -482,9 +485,9 @@ mi_cmd_break_passcount (const char *command, char **argv, int argc)
    -break-watch -a <expr> --> insert an access wp.  */
 
 void
-mi_cmd_break_watch (const char *command, char **argv, int argc)
+mi_cmd_break_watch (const char *command, const char *const *argv, int argc)
 {
-  char *expr = NULL;
+  const char *expr = NULL;
   enum wp_type type = REG_WP;
   enum opt
     {
@@ -499,7 +502,7 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
 
   /* Parse arguments. */
   int oind = 0;
-  char *oarg;
+  const char *oarg;
 
   while (1)
     {
@@ -542,7 +545,7 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_break_commands (const char *command, char **argv, int argc)
+mi_cmd_break_commands (const char *command, const char *const *argv, int argc)
 {
   counted_command_line break_command;
   char *endptr;

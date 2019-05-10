@@ -32,7 +32,8 @@ enum print_values {
    PRINT_SIMPLE_VALUES
 };
 
-typedef void (mi_cmd_argv_ftype) (const char *command, char **argv, int argc);
+typedef void (mi_cmd_argv_ftype) (const char *command, const char *const *argv,
+				  int argc);
 
 /* Declarations of the functions implementing each command.  */
 

@@ -29,7 +29,7 @@
 /* Handler for the -catch-assert command.  */
 
 void
-mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_assert (const char *cmd, const char *const *argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch();
   std::string condition;
@@ -37,7 +37,7 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
   int temp = 0;
 
   int oind = 0;
-  char *oarg;
+  const char *oarg;
 
   enum opt
     {
@@ -86,7 +86,7 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
 /* Handler for the -catch-exception command.  */
 
 void
-mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_exception (const char *cmd, const char *const *argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch();
   std::string condition;
@@ -96,7 +96,7 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
   enum ada_exception_catchpoint_kind ex_kind = ada_catch_exception;
 
   int oind = 0;
-  char *oarg;
+  const char *oarg;
 
   enum opt
     {
@@ -160,7 +160,7 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
 /* Handler for the -catch-handlers command.  */
 
 void
-mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_handlers (const char *cmd, const char *const *argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   std::string condition;
@@ -169,7 +169,7 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
   int temp = 0;
 
   int oind = 0;
-  char *oarg;
+  const char *oarg;
 
   enum opt
     {
@@ -224,13 +224,13 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
 /* Common path for the -catch-load and -catch-unload.  */
 
 static void
-mi_catch_load_unload (int load, char *argv[], int argc)
+mi_catch_load_unload (int load, const char *const *argv, int argc)
 {
   const char *actual_cmd = load ? "-catch-load" : "-catch-unload";
   int temp = 0;
   int enabled = 1;
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   enum opt
     {
       OPT_TEMP,
@@ -274,7 +274,7 @@ mi_catch_load_unload (int load, char *argv[], int argc)
 /* Handler for the -catch-load.  */
 
 void
-mi_cmd_catch_load (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_load (const char *cmd, const char *const *argv, int argc)
 {
   mi_catch_load_unload (1, argv, argc);
 }
@@ -283,7 +283,7 @@ mi_cmd_catch_load (const char *cmd, char *argv[], int argc)
 /* Handler for the -catch-unload.  */
 
 void
-mi_cmd_catch_unload (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_unload (const char *cmd, const char *const *argv, int argc)
 {
   mi_catch_load_unload (0, argv, argc);
 }
@@ -294,12 +294,13 @@ mi_cmd_catch_unload (const char *cmd, char *argv[], int argc)
 
 static void
 mi_cmd_catch_exception_event (enum exception_event_kind kind,
-			      const char *cmd, char *argv[], int argc)
+			      const char *cmd, const char *const *argv,
+			      int argc)
 {
-  char *regex = NULL;
+  const char *regex = NULL;
   bool temp = false;
   int oind = 0;
-  char *oarg;
+  const char *oarg;
   enum opt
     {
       OPT_TEMP,
@@ -338,7 +339,7 @@ mi_cmd_catch_exception_event (enum exception_event_kind kind,
 /* Handler for -catch-throw.  */
 
 void
-mi_cmd_catch_throw (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_throw (const char *cmd, const char *const *argv, int argc)
 {
   mi_cmd_catch_exception_event (EX_EVENT_THROW, cmd, argv, argc);
 }
@@ -346,7 +347,7 @@ mi_cmd_catch_throw (const char *cmd, char *argv[], int argc)
 /* Handler for -catch-rethrow.  */
 
 void
-mi_cmd_catch_rethrow (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_rethrow (const char *cmd, const char *const *argv, int argc)
 {
   mi_cmd_catch_exception_event (EX_EVENT_RETHROW, cmd, argv, argc);
 }
@@ -354,7 +355,7 @@ mi_cmd_catch_rethrow (const char *cmd, char *argv[], int argc)
 /* Handler for -catch-catch.  */
 
 void
-mi_cmd_catch_catch (const char *cmd, char *argv[], int argc)
+mi_cmd_catch_catch (const char *cmd, const char *const *argv, int argc)
 {
   mi_cmd_catch_exception_event (EX_EVENT_CATCH, cmd, argv, argc);
 }

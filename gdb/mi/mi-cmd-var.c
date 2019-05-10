@@ -89,13 +89,13 @@ print_varobj (struct varobj *var, enum print_values print_values,
 /* VAROBJ operations */
 
 void
-mi_cmd_var_create (const char *command, char **argv, int argc)
+mi_cmd_var_create (const char *command, const char *const *argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   CORE_ADDR frameaddr = 0;
   struct varobj *var;
-  char *frame;
-  char *expr;
+  const char *frame;
+  const char *expr;
   enum varobj_type var_type;
 
   if (argc != 3)
@@ -140,9 +140,9 @@ mi_cmd_var_create (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_delete (const char *command, char **argv, int argc)
+mi_cmd_var_delete (const char *command, const char *const *argv, int argc)
 {
-  char *name;
+  const char *name;
   struct varobj *var;
   int numdel;
   int children_only_p = 0;
@@ -214,7 +214,7 @@ mi_parse_format (const char *arg)
 }
 
 void
-mi_cmd_var_set_format (const char *command, char **argv, int argc)
+mi_cmd_var_set_format (const char *command, const char *const *argv, int argc)
 {
   enum varobj_display_formats format;
   struct varobj *var;
@@ -240,7 +240,8 @@ mi_cmd_var_set_format (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_set_visualizer (const char *command, char **argv, int argc)
+mi_cmd_var_set_visualizer (const char *command, const char *const *argv,
+			   int argc)
 {
   struct varobj *var;
 
@@ -256,7 +257,7 @@ mi_cmd_var_set_visualizer (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
+mi_cmd_var_set_frozen (const char *command, const char *const *argv, int argc)
 {
   struct varobj *var;
   bool frozen;
@@ -281,7 +282,7 @@ mi_cmd_var_set_frozen (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_show_format (const char *command, char **argv, int argc)
+mi_cmd_var_show_format (const char *command, const char *const *argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   enum varobj_display_formats format;
@@ -300,7 +301,8 @@ mi_cmd_var_show_format (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_info_num_children (const char *command, char **argv, int argc)
+mi_cmd_var_info_num_children (const char *command, const char *const *argv,
+			      int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
@@ -360,7 +362,8 @@ mi_simple_type_p (struct type *type)
 }
 
 void
-mi_cmd_var_list_children (const char *command, char **argv, int argc)
+mi_cmd_var_list_children (const char *command, const char *const *argv,
+			  int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;  
@@ -416,7 +419,7 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_info_type (const char *command, char **argv, int argc)
+mi_cmd_var_info_type (const char *command, const char *const *argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
@@ -432,7 +435,8 @@ mi_cmd_var_info_type (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_info_path_expression (const char *command, char **argv, int argc)
+mi_cmd_var_info_path_expression (const char *command, const char *const *argv,
+				 int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
@@ -449,7 +453,8 @@ mi_cmd_var_info_path_expression (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_info_expression (const char *command, char **argv, int argc)
+mi_cmd_var_info_expression (const char *command, const char *const *argv,
+			    int argc)
 {
   struct ui_out *uiout = current_uiout;
   const struct language_defn *lang;
@@ -470,7 +475,8 @@ mi_cmd_var_info_expression (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_show_attributes (const char *command, char **argv, int argc)
+mi_cmd_var_show_attributes (const char *command, const char *const *argv,
+			    int argc)
 {
   struct ui_out *uiout = current_uiout;
   int attr;
@@ -494,7 +500,8 @@ mi_cmd_var_show_attributes (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_evaluate_expression (const char *command, char **argv, int argc)
+mi_cmd_var_evaluate_expression (const char *command, const char *const *argv,
+				int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
@@ -502,7 +509,7 @@ mi_cmd_var_evaluate_expression (const char *command, char **argv, int argc)
   enum varobj_display_formats format;
   int formatFound;
   int oind;
-  char *oarg;
+  const char *oarg;
     
   enum opt
   {
@@ -561,7 +568,7 @@ mi_cmd_var_evaluate_expression (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_assign (const char *command, char **argv, int argc)
+mi_cmd_var_assign (const char *command, const char *const *argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
@@ -619,10 +626,10 @@ mi_cmd_var_update_iter (struct varobj *var, bool only_floating,
 }
 
 void
-mi_cmd_var_update (const char *command, char **argv, int argc)
+mi_cmd_var_update (const char *command, const char *const *argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  char *name;
+  const char *name;
   enum print_values print_values;
 
   if (argc != 1 && argc != 2)
@@ -741,7 +748,8 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 }
 
 void
-mi_cmd_enable_pretty_printing (const char *command, char **argv, int argc)
+mi_cmd_enable_pretty_printing (const char *command, const char *const *argv,
+			       int argc)
 {
   if (argc != 0)
     error (_("-enable-pretty-printing: no arguments allowed"));
@@ -750,7 +758,8 @@ mi_cmd_enable_pretty_printing (const char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_var_set_update_range (const char *command, char **argv, int argc)
+mi_cmd_var_set_update_range (const char *command, const char *const *argv,
+			     int argc)
 {
   struct varobj *var;
   int from, to;
