@@ -1,3 +1,9 @@
+2019-05-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1708192
+	* dwarf2read.c (parse_macro_definition): Check whether 'body' is
+	NULL, and complain/return if that's the case.
+
 2019-05-15  John Darrington <john@darrington.wattle.id.au>
 
 	* s12z-tdep.c (push_pull_get_stack_adjustment): New function.
