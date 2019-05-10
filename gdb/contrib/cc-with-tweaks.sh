@@ -180,11 +180,41 @@ if [ "$want_index" = true ]; then
 fi
 
 if [ "$want_dwz" = true ]; then
-    $DWZ "$output_file" > /dev/null 2>&1
+    # Validate dwz's result by checking if the executable was modified.
+    cp "$output_file" "${output_file}.copy"
+    $DWZ "$output_file" > /dev/null
+    cmp "$output_file" "$output_file.copy" > /dev/null
+    cmp_rc=$?
+    rm -f "${output_file}.copy"
+
+    case $cmp_rc in
+    0)
+	echo "$myname: dwz did not modify ${output_file}."
+        exit 1
+	;;
+    1)
+	# File was modified, great.
+	;;
+    *)
+	# Other cmp error, it presumably has already printed something on
+	# stderr.
+	exit 1
+	;;
+    esac
 elif [ "$want_multi" = true ]; then
+    # Remove the dwz output file if it exists, so we don't mistake it for a
+    # new file in case dwz fails.
+    rm -f "${output_file}.dwz"
+
     cp $output_file ${output_file}.alt
-    $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null 2>&1
+    $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null
     rm -f ${output_file}.alt
+
+    # Validate dwz's work by checking if the expected output file exists.
+    if [ ! -f "${output_file}.dwz" ]; then
+	echo "$myname: dwz file ${output_file}.dwz missing."
+	exit 1
+    fi
 fi
 
 if [ "$want_dwp" = true ]; then

@@ -1,3 +1,7 @@
+2019-05-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* contrib/cc-with-tweaks.sh: Validate dwz's work.
+
 2019-05-10  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (catch_ada_completer): New function.
