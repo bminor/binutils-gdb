@@ -61,6 +61,8 @@ struct terminal_info
   terminal_info () = default;
   ~terminal_info ();
 
+  terminal_info &operator= (const terminal_info &) = default;
+
   /* The name of the tty (from the `tty' command) that we gave to the
      inferior when it was started.  */
   char *run_terminal = nullptr;

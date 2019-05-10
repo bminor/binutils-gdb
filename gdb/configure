@@ -15436,7 +15436,10 @@ build_warnings="-Wall -Wpointer-arith \
 -Wsuggest-override \
 -Wimplicit-fallthrough=3 \
 -Wduplicated-cond \
--Wshadow=local"
+-Wshadow=local \
+-Wdeprecated-copy \
+-Wdeprecated-copy-dtor \
+-Wredundant-move"
 
 case "${host}" in
   *-*-mingw32*)

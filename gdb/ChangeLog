@@ -1,5 +1,12 @@
 2019-05-29  Tom Tromey  <tromey@adacore.com>
 
+	* inflow.c (struct terminal_info): Add default operator=.
+	* configure: Rebuild.
+	* warning.m4 (AM_GDB_WARNINGS): Add -Wdeprecated-copy,
+	-Wdeprecated-copy-dtor, -Wredundant-move.
+
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
 	* NEWS: Add entry.
 	* infcmd.c (print_return_value_1): Handle finish_print
 	option.
