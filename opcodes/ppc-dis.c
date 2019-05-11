@@ -749,9 +749,11 @@ print_insn_powerpc (bfd_vma memaddr,
 
 	  operand = powerpc_operands + *opindex;
 
-	  /* If all of the optional operands have the value zero,
-	     then don't print any of them.  */
-	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+	  /* If all of the optional operands past this one have their
+	     default value, then don't print any of them.  Except in
+	     raw mode, print them all.  */
+	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	      && (dialect & PPC_OPCODE_RAW) == 0)
 	    {
 	      if (!skip_optional)
 		skip_optional = skip_optional_operands (opindex, insn, dialect);
