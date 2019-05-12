@@ -623,7 +623,7 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
-/* See langauge.h.  */
+/* See language.h.  */
 
 int
 language_sniff_from_mangled_name (const struct language_defn *lang,
