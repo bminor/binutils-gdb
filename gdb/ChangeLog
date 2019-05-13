@@ -1,3 +1,7 @@
+2019-05-14  Tom Tromey  <tromey@adacore.com>
+
+	* solib.c (info_sharedlibrary_command): Style the file name.
+
 2019-05-14  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_vnh_type): Add half view.

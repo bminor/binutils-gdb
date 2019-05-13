@@ -1104,7 +1104,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	else
 	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-	uiout->field_string ("name", so->so_name);
+	uiout->field_string ("name", so->so_name, ui_out_style_kind::FILE);
 
 	uiout->text ("\n");
       }
