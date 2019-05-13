@@ -39,4 +39,4 @@ gdb_test "print WWC" \
          "= 99 'c'"  \
          "print WWC"
 
-
+gdb_test "print MC" " = 77 'M'"

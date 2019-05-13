@@ -1,3 +1,11 @@
+2019-09-03  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/bias.exp: New file.
+	* gdb.ada/bias/bias.adb: New file.
+	* gdb.ada/print_chars.exp: Add regression test.
+	* gdb.ada/print_chars/foo.adb (My_Character): New type.
+	(MC): New variable.
+
 2019-08-29  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/argv0-symlink.exp: Run only on native target

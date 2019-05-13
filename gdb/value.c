@@ -2751,10 +2751,16 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_CHAR:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
-      if (nosign)
-	return extract_unsigned_integer (valaddr, len, byte_order);
-      else
-	return extract_signed_integer (valaddr, len, byte_order);
+      {
+	LONGEST result;
+	if (nosign)
+	  result = extract_unsigned_integer (valaddr, len, byte_order);
+	else
+	  result = extract_signed_integer (valaddr, len, byte_order);
+	if (code == TYPE_CODE_RANGE)
+	  result += TYPE_RANGE_DATA (type)->bias;
+	return result;
+      }
 
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
@@ -3315,12 +3321,14 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_RANGE:
+      num -= TYPE_RANGE_DATA (type)->bias;
+      /* Fall through.  */
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
-    case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
       store_signed_integer (buf, len, byte_order, num);
       break;

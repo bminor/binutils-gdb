@@ -405,21 +405,30 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 
   /* Historically gdb has printed floats by first casting them to a
      long, and then printing the long.  PR cli/16242 suggests changing
-     this to using C-style hex float format.  */
-  gdb::byte_vector converted_float_bytes;
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && (options->format == 'o'
-	  || options->format == 'x'
-	  || options->format == 't'
-	  || options->format == 'z'
-	  || options->format == 'd'
-	  || options->format == 'u'))
+     this to using C-style hex float format.
+
+     Biased range types must also be unbiased here; the unbiasing is
+     done by unpack_long.  */
+  gdb::byte_vector converted_bytes;
+  /* Some cases below will unpack the value again.  In the biased
+     range case, we want to avoid this, so we store the unpacked value
+     here for possible use later.  */
+  gdb::optional<LONGEST> val_long;
+  if ((TYPE_CODE (type) == TYPE_CODE_FLT
+       && (options->format == 'o'
+	   || options->format == 'x'
+	   || options->format == 't'
+	   || options->format == 'z'
+	   || options->format == 'd'
+	   || options->format == 'u'))
+      || (TYPE_CODE (type) == TYPE_CODE_RANGE
+	  && TYPE_RANGE_DATA (type)->bias != 0))
     {
-      LONGEST val_long = unpack_long (type, valaddr);
-      converted_float_bytes.resize (TYPE_LENGTH (type));
-      store_signed_integer (converted_float_bytes.data (), TYPE_LENGTH (type),
-			    byte_order, val_long);
-      valaddr = converted_float_bytes.data ();
+      val_long.emplace (unpack_long (type, valaddr));
+      converted_bytes.resize (TYPE_LENGTH (type));
+      store_signed_integer (converted_bytes.data (), TYPE_LENGTH (type),
+			    byte_order, *val_long);
+      valaddr = converted_bytes.data ();
     }
 
   /* Printing a non-float type as 'f' will interpret the data as if it were
@@ -469,7 +478,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       {
 	struct value_print_options opts = *options;
 
-	LONGEST val_long = unpack_long (type, valaddr);
+	if (!val_long.has_value ())
+	  val_long.emplace (unpack_long (type, valaddr));
 
 	opts.format = 0;
 	if (TYPE_UNSIGNED (type))
@@ -477,15 +487,15 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
  	else
 	  type = builtin_type (gdbarch)->builtin_true_char;
 
-	value_print (value_from_longest (type, val_long), stream, &opts);
+	value_print (value_from_longest (type, *val_long), stream, &opts);
       }
       break;
 
     case 'a':
       {
-	CORE_ADDR addr = unpack_pointer (type, valaddr);
-
-	print_address (gdbarch, addr, stream);
+	if (!val_long.has_value ())
+	  val_long.emplace (unpack_long (type, valaddr));
+	print_address (gdbarch, *val_long, stream);
       }
       break;
 

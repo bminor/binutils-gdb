@@ -841,8 +841,15 @@ ada_val_print_num (struct type *type, const gdb_byte *valaddr,
       fputs_filtered (str.c_str (), stream);
       return;
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
+  else if (TYPE_CODE (type) == TYPE_CODE_RANGE
+	   && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ENUM
+	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_BOOL
+	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR))
     {
+      /* For enum-valued ranges, we want to recurse, because we'll end
+	 up printing the constant's name rather than its numeric
+	 value.  Character and fixed-point types are also printed
+	 differently, so recuse for those as well.  */
       struct type *target_type = TYPE_TARGET_TYPE (type);
 
       if (TYPE_LENGTH (type) != TYPE_LENGTH (target_type))

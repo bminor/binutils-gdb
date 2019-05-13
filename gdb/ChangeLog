@@ -1,3 +1,18 @@
+2019-09-03  Tom Tromey  <tromey@adacore.com>
+
+	* ada-valprint.c (ada_val_print_num): Don't recurse for range
+	types.
+	(has_negatives): Unbias a range type bound.
+	* dwarf2read.c (read_subrange_type): Handle DW_AT_GNU_bias.
+	* gdbtypes.c (operator==): Handle new field.
+	(create_range_type): Add "bias" parameter.
+	(create_static_range_type, resolve_dynamic_range): Update.
+	* gdbtypes.h (struct range_bounds) <bias>: New member.
+	(create_range_type): Add bias parameter.
+	* printcmd.c (print_scalar_formatted): Unbias range types.
+	* value.c (unpack_long): Unbias range types.
+	(pack_long): Bias range types.
+
 2019-09-02  Alan Hayward  <alan.hayward@arm.com>
 
 	* solib-svr4.c (svr4_find_and_create_probe_breakpoints): Check all

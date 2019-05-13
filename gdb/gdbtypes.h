@@ -617,6 +617,11 @@ struct range_bounds
 
   struct dynamic_prop high;
 
+  /* * The bias.  Sometimes a range value is biased before storage.
+     The bias is added to the stored bits to form the true value.  */
+
+  LONGEST bias;
+
   /* True if HIGH range bound contains the number of elements in the
      subrange.  This affects how the final high bound is computed.  */
 
@@ -1951,7 +1956,8 @@ extern struct type *create_array_type_with_stride
 
 extern struct type *create_range_type (struct type *, struct type *,
 				       const struct dynamic_prop *,
-				       const struct dynamic_prop *);
+				       const struct dynamic_prop *,
+				       LONGEST);
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);

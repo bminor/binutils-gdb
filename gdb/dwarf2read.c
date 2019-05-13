@@ -17901,6 +17901,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  LONGEST bias = 0;
+  struct attribute *bias_attr = dwarf2_attr (die, DW_AT_GNU_bias, cu);
+  if (bias_attr != nullptr && attr_form_is_constant (bias_attr))
+    bias = dwarf2_get_attr_constant_value (bias_attr, 0);
+
   /* Normally, the DWARF producers are expected to use a signed
      constant form (Eg. DW_FORM_sdata) to express negative bounds.
      But this is unfortunately not always the case, as witnessed
@@ -17917,7 +17922,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       && !TYPE_UNSIGNED (base_type) && (high.data.const_val & negative_mask))
     high.data.const_val |= negative_mask;
 
-  range_type = create_range_type (NULL, orig_base_type, &low, &high);
+  range_type = create_range_type (NULL, orig_base_type, &low, &high, bias);
 
   if (high_bound_is_count)
     TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count = 1;

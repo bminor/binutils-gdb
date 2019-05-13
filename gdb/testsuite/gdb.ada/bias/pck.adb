@@ -1,4 +1,4 @@
---  Copyright 2007-2019 Free Software Foundation, Inc.
+--  Copyright 2012-2019 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,17 +13,11 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with Pck; use Pck;
+with System;
 
-procedure Foo is
-   C : Character := 'a';
-   WC : Wide_Character := 'b';
-   WWC : Wide_Wide_Character := 'c';
-
-   type My_Character is new Character;
-   MC : My_Character := 'M';
-begin
-   Do_Nothing (C'Address);  -- START
-   Do_Nothing (WC'Address);
-   Do_Nothing (WWC'Address);
-end Foo;
+package body Pck is
+   procedure Do_Nothing (A : System.Address) is
+   begin
+      null;
+   end Do_Nothing;
+end Pck;
