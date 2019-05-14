@@ -102,6 +102,50 @@ proc objcopy_test {testname srcfile} {
 
 objcopy_test "simple copy" bintest.s
 
+# Test verilog data width
+proc objcopy_test_verilog {testname} {
+    global OBJCOPY
+    global OBJCOPYFLAGS
+    global srcdir
+    global subdir
+    global copyfile
+    set binfile tmpdir/verilogtest.o
+    set verilog tmpdir/verilog
+
+    set got [binutils_assemble $srcdir/$subdir/verilogtest.s $binfile]
+    if {![binutils_assemble $srcdir/$subdir/verilogtest.s $binfile]} then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+
+    set got [binutils_run $OBJCOPY "-O verilog $binfile $verilog"]
+    if ![string equal "" $got] then {
+	fail "objcopy ($testname)"
+    }
+
+    set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 0 $binfile $verilog-0.hex"]
+    if ![regexp "verilog data width must be at least 1 byte" $got] then {
+	fail "objcopy ($testname 0) {$got}"
+    } else {
+	pass "objcopy ($testname 0)"
+    }
+
+    foreach width {1 2 4 8} {
+	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
+	if ![string equal "" $got] then {
+	    fail "objcopy ($testname $width)"
+	}
+        send_log "regexp_diff $verilog-$width.hex $srcdir/$subdir/verilog-$width.hex\n"
+	if {! [regexp_diff "$verilog-$width.hex" "$srcdir/$subdir/verilog-$width.hex"]} {
+	    pass "objcopy ($testname $width)"
+	} else {
+	    fail "objcopy ($testname $width)"
+	}
+    }
+}
+
+objcopy_test_verilog "verilog data width"
+
 if { [file exists $tempfile] } {
     # Test reversing bytes in a section.
 

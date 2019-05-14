@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --verilog-data-width option to objcopy for verilog targets to control
+  width of data elements in verilog hex format.
+
 * The separate debug info file options of readelf (--debug-dump=links
   and --debug-dump=follow) and objdump (--dwarf=links and
   --dwarf=follow-links) will now display and/or follow multiple links if
