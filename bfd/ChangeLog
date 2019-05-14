@@ -1,3 +1,24 @@
+2019-05-21  Matthew Fortune  <matthew.fortune@mips.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* elfxx-mips.c (LA25_BC): New macro.
+	(mips_elf_link_hash_table)<compact_branches>: New field.
+	(STUB_JALRC): New macro.
+	(mipsr6_o32_exec_plt0_entry_compact): New array.
+	(mipsr6_n32_exec_plt0_entry_compact): Likewise.
+	(mipsr6_n64_exec_plt0_entry_compact): Likewise.
+	(mipsr6_exec_plt_entry_compact): Likewise.
+	(mips_elf_create_la25_stub): Use BC instead of J for stubs
+	when compact_branches is true.
+	(_bfd_mips_elf_finish_dynamic_symbol): Choose the compact
+	PLT for MIPSR6 with compact_branches.  Do not reorder the
+	compact branches PLT.  Switch the lazy stub for MIPSR6
+	with compact_branches to use JALRC.
+	(mips_finish_exec_plt): Choose the compact PLT0 for MIPSR6
+	when compact_branches is true.
+	(_bfd_mips_elf_compact_branches): New function.
+	* elfxx-mips.h (_bfd_mips_elf_compact_branches): New prototype.
+
 2019-05-21  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/24373

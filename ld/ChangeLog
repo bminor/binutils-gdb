@@ -1,3 +1,25 @@
+2019-05-21  Matthew Fortune  <matthew.fortune@mips.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* emultempl/mipself.em (compact_branches): New static variable.
+	(mips_create_output_section_statements): Call
+	_bfd_mips_elf_compact_branches.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_COMPACT_BRANCHES and
+	OPTION_NO_COMPACT_BRANCHES.
+	(PARSE_AND_LIST_LONGOPTS): Add compact-branches,
+	no-compact-branches.
+	(PARSE_AND_LIST_OPTIONS): Add --compact-branches,
+	--no-compact-branches.
+	(PARSE_AND_LIST_ARGS_CASES): Handle the above.
+	* ld.texinfo: Document --compact-branches, --no-compact-branches.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-r6.dd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1-r6.nd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3a-r6.dd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3a-r6.gd: New test.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1a-r6.s: New test source.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3a-r6.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp: Add tests

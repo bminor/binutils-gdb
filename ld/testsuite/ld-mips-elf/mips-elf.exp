@@ -523,6 +523,12 @@ if { $linux_gnu } {
 	 {{objdump -dr pic-and-nonpic-1.dd}
 	  {readelf --symbols pic-and-nonpic-1.nd}}
 	 "pic-and-nonpic-1-static1.o"}
+	{"PIC and non-PIC test 1 R6 compact branches (static 1)"
+	 "-melf32btsmip -Tpic-and-nonpic-1.ld --compact-branches" ""
+	 "-32 -EB -mips32r6" {pic-and-nonpic-1a-r6.s pic-and-nonpic-1b.s}
+	 {{objdump -dr pic-and-nonpic-1-r6.dd}
+	  {readelf --symbols pic-and-nonpic-1-r6.nd}}
+	 "pic-and-nonpic-1-r6-static1.o"}
 	{"PIC and non-PIC test 1 (static 2)"
 	 "-melf32btsmip -Tpic-and-nonpic-1.ld tmpdir/pic-and-nonpic-1-rel.o" ""
 	 "" {}
@@ -586,6 +592,13 @@ if { $linux_gnu } {
 	  {readelf --symbols pic-and-nonpic-3b.nd}
 	  {readelf -d pic-and-nonpic-3b.ad}}
 	 "pic-and-nonpic-3b"}
+	{"PIC and non-PIC test 3 R6 compact branches (shared library)"
+	 "-melf32btsmip -shared --compact-branches -Tpic-and-nonpic-3a.ld" ""
+	 "-32 -EB -mips32r6" {pic-and-nonpic-3a-r6.s}
+	 {{readelf --segments pic-and-nonpic-3a.sd}
+	  {readelf -A pic-and-nonpic-3a-r6.gd}
+	  {objdump -dr pic-and-nonpic-3a-r6.dd}}
+	 "pic-and-nonpic-3a-r6.so"}
     }
     run_dump_test_o32 "pic-and-nonpic-3-error" {noarch {as -EB} {ld -EB}}
     run_ld_link_tests {

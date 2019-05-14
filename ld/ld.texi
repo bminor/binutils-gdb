@@ -3197,6 +3197,13 @@ calculated.  By default or if @samp{--no-ignore-branch-isa} is used
 a check is made causing the loss of an ISA mode transition to produce
 an error.
 
+@kindex --compact-branches
+@item --compact-branches
+@kindex --no-compact-branches
+@item --compact-branches
+These options control the generation of compact instructions by the linker
+in the PLT entries for MIPS R6.
+
 @end table
 
 @c man end
