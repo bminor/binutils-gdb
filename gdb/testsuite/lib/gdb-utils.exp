@@ -37,3 +37,21 @@ proc string_to_regexp {str} {
     regsub -all {[]*+.|(){}^$\[\\]} $str {\\&} result
     return $result
 }
+
+# Wrap STR in an ANSI terminal escape sequences -- one to set the
+# style to STYLE, and one to reset the style to the default.  The
+# return value is suitable for use as a regular expression.
+
+# STYLE can either be the payload part of an ANSI terminal sequence,
+# or a shorthand for one of the gdb standard styles: "file",
+# "function", "variable", or "address".
+
+proc style {str style} {
+    switch -exact -- $style {
+	file { set style 32 }
+	function { set style 33 }
+	variable { set style 36 }
+	address { set style 34 }
+    }
+    return "\033\\\[${style}m${str}\033\\\[m"
+}

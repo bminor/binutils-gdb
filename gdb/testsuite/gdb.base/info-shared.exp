@@ -161,8 +161,10 @@ with_test_prefix styled {
 
 	# Simple test for "info sharedlibrary" styling.  Look for styled
 	# addresses and file name.
-	set addr "\033\\\[34m${hex}\033\\\[m"
-	set sofile "\033\\\[32m\[^\033\]+\033\\\[m"
+	set addr [style $hex address]
+	# Use a non-greedy match here to avoid accidentally picking up
+	# other escape sequences.
+	set sofile [style ".*?" file]
 	gdb_test_no_output "set style enabled on"
 	gdb_test "info sharedlibrary" \
 	    "$addr\[ \t\]+$addr.*$sofile\r\n.*"

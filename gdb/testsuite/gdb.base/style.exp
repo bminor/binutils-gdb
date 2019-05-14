@@ -41,10 +41,10 @@ save_vars { env(TERM) } {
 
     gdb_test_no_output "set style enabled on"
 
-    set main_expr "\033\\\[33mmain\033\\\[m"
-    set base_file_expr "\033\\\[32m.*style\\.c\033\\\[m"
+    set main_expr [style main function]
+    set base_file_expr [style ".*style\\.c" file]
     set file_expr "$base_file_expr:\[0-9\]"
-    set arg_expr "\033\\\[36marg.\033\\\[m"
+    set arg_expr [style "arg." variable]
 
     gdb_test "frame" \
 	"$main_expr.*$arg_expr.*$arg_expr.*$file_expr.*"
@@ -58,7 +58,7 @@ save_vars { env(TERM) } {
 
     gdb_test "break main" "file $base_file_expr.*"
 
-    gdb_test "print &main" " = .* \033\\\[34m$hex\033\\\[m <$main_expr>"
+    gdb_test "print &main" " = .* [style $hex address] <$main_expr>"
 
     # Regression test for a bug where line-wrapping would occur at the
     # wrong spot with styling.  There were different bugs at different
@@ -86,11 +86,12 @@ save_vars { env(TERM) } {
     gdb_exit
     gdb_spawn
 
-    gdb_test "" "\033\\\[35;1mGNU gdb.*\033\\\[m.*" \
+    set vers [style "GNU gdb.*" "35;1"]
+    gdb_test "" "${vers}.*" \
 	"version is styled"
 
     set quoted [string_to_regexp $binfile]
     gdb_test "file $binfile" \
-	"Reading symbols from \033\\\[32m${quoted}\033\\\[m..." \
+	"Reading symbols from [style $quoted file]..." \
 	"filename is styled when loading symbol file"
 }
