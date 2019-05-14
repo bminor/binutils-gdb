@@ -270,6 +270,12 @@ i386_intel_simplify_register (expressionS *e)
   else
     reg_num = e->X_md - 1;
 
+  if (reg_num < 0 || reg_num >= (int) i386_regtab_size)
+    {
+      as_bad (_("invalid register number"));
+      return 0;
+    }
+
   if (!intel_state.in_bracket)
     {
       if (i.op[this_operand].regs)
