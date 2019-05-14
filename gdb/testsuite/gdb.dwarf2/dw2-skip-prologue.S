@@ -123,7 +123,7 @@
 	.section	.debug_loc
 loclist:
 	/* Reset the location list base address first.  */
-	.4byte		-1, 0
+	PTRBYTE		-1, 0
 
 	PTRBYTE		func_start, func_end
 	.2byte		2f-1f
