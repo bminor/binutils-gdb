@@ -1,5 +1,10 @@
 2019-05-14  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.texinfo (Automatic symbol index cache): Add concept and command
+	index entries.
+
+2019-05-14  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.texinfo (Maintenance Commands): Remove superfluous
 	quoting on command index entry for "maint info selftests".
 
