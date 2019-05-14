@@ -1,3 +1,14 @@
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* testsuite/gas/mips/r6-branch-constraints.s: Rename to ...
+	* testsuite/gas/mips/r6-reg-constraints.s: this and add test
+	case for DAUI.
+	* testsuite/gas/mips/r6-branch-constraints.l: Rename to ...
+	* testsuite/gas/mips/r6-reg-constraints.l: this and add test
+	for DAUI.
+	* testsuite/gas/mips/mips.exp: Rename test from
+	r6-branch-constraints to r6-reg-constraints.
+
 2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR 24559

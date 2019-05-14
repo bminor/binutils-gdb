@@ -23,3 +23,4 @@
 .*:23: Error: the source register must not be \$0 `bnec \$0,\$2,.'
 .*:24: Error: invalid operands `bnec \$2,\$0,.'
 .*:25: Error: invalid operands `bnec \$2,\$2,.'
+.*:26: Error: the source register must not be \$0 `daui \$2,\$0,1'

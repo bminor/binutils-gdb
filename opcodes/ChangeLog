@@ -1,3 +1,8 @@
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Change source register
+	constraint for DAUI.
+
 2019-05-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

@@ -3271,7 +3271,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* MIPS r6.  */
 {"aui",			"t,s,u",	0x3c000000, 0xfc000000,	WR_1|RD_2,		0,		I37,		0,	0 },
 {"auipc",		"s,u",		0xec1e0000, 0xfc1f0000, WR_1,			RD_pc,		I37,		0,	0 },
-{"daui",		"t,s,u",	0x74000000, 0xfc000000,	WR_1|RD_2,		0,		I37,		0,	0 },
+{"daui",		"t,-s,u",	0x74000000, 0xfc000000,	WR_1|RD_2,		0,		I37,		0,	0 },
 {"dahi",		"s,-d,u",	0x04060000, 0xfc1f0000,	MOD_1,			0,		I69,		0,	0 },
 {"dati",		"s,-d,u",	0x041e0000, 0xfc1f0000,	MOD_1,			0,		I69,		0,	0 },
 
