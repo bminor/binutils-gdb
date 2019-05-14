@@ -5359,6 +5359,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_unsigned_long_long
     = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
 			 1, "unsigned long long");
+  builtin_type->builtin_half
+    = arch_float_type (gdbarch, gdbarch_half_bit (gdbarch),
+		       "half", gdbarch_half_format (gdbarch));
   builtin_type->builtin_float
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));

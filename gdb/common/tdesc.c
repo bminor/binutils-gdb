@@ -50,6 +50,7 @@ static tdesc_type_builtin tdesc_predefined_types[] =
   { "uint128", TDESC_TYPE_UINT128 },
   { "code_ptr", TDESC_TYPE_CODE_PTR },
   { "data_ptr", TDESC_TYPE_DATA_PTR },
+  { "ieee_half", TDESC_TYPE_IEEE_HALF },
   { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
   { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
   { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },

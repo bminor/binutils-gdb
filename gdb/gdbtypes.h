@@ -1595,6 +1595,7 @@ struct builtin_type
   struct type *builtin_unsigned_short;
   struct type *builtin_unsigned_int;
   struct type *builtin_unsigned_long;
+  struct type *builtin_half;
   struct type *builtin_float;
   struct type *builtin_double;
   struct type *builtin_long_double;
@@ -1690,6 +1691,7 @@ struct objfile_type
   struct type *builtin_unsigned_int;
   struct type *builtin_unsigned_long;
   struct type *builtin_unsigned_long_long;
+  struct type *builtin_half;
   struct type *builtin_float;
   struct type *builtin_double;
   struct type *builtin_long_double;

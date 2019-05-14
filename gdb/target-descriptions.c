@@ -119,6 +119,11 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 
       switch (e->kind)
 	{
+	case TDESC_TYPE_IEEE_HALF:
+	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_ieee_half",
+				    floatformats_ieee_half);
+	  return;
+
 	case TDESC_TYPE_IEEE_SINGLE:
 	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_ieee_single",
 				    floatformats_ieee_single);

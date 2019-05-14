@@ -1,3 +1,17 @@
+2019-05-14  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_vnh_type): Add half view.
+	(aarch64_vnv_type): Likewise.
+	* target-descriptions.c (make_gdb_type): Add TDESC_TYPE_IEEE_HALF.
+	* common/tdesc.c: Likewise.
+	* common/tdesc.h (enum tdesc_type_kind): Likewise.
+	* features/aarch64-fpu.c (create_feature_aarch64_fpu): Regenerate.
+	* features/aarch64-fpu.xml: Add ieee half view.
+	* features/aarch64-sve.c (create_feature_aarch64_fpu): Likewise.
+	* gdbtypes.c (gdbtypes_post_init): Add builtin_half
+	* gdbtypes.h (struct builtin_type): Likewise.
+	(struct objfile_type): Likewise.
+
 2019-05-12  Paul Naert  <paul.naert@polymtl.ca>
 
 	* language.c (language_sniff_from_mangled_name): Fix "langauge"

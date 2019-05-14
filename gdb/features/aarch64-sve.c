@@ -55,6 +55,9 @@ create_feature_aarch64_sve (struct target_desc *result, long regnum,
   element_type = tdesc_named_type (feature, "int32");
   tdesc_create_vector (feature, "svevss", element_type, 4 * scale);
 
+  element_type = tdesc_named_type (feature, "ieee_half");
+  tdesc_create_vector (feature, "svevhf", element_type, 8 * scale);
+
   element_type = tdesc_named_type (feature, "uint16");
   tdesc_create_vector (feature, "svevhu", element_type, 8 * scale);
 
@@ -90,6 +93,8 @@ create_feature_aarch64_sve (struct target_desc *result, long regnum,
   tdesc_add_field (type_with_fields, "s", field_type);
 
   type_with_fields = tdesc_create_union (feature, "svevnh");
+  field_type = tdesc_named_type (feature, "svevhf");
+  tdesc_add_field (type_with_fields, "f", field_type);
   field_type = tdesc_named_type (feature, "svevhu");
   tdesc_add_field (type_with_fields, "u", field_type);
   field_type = tdesc_named_type (feature, "svevhs");

@@ -1885,6 +1885,9 @@ aarch64_vnh_type (struct gdbarch *gdbarch)
       t = arch_composite_type (gdbarch, "__gdb_builtin_type_vnh",
 			       TYPE_CODE_UNION);
 
+      elem = builtin_type (gdbarch)->builtin_half;
+      append_composite_type_field (t, "f", elem);
+
       elem = builtin_type (gdbarch)->builtin_uint16;
       append_composite_type_field (t, "u", elem);
 
@@ -1963,6 +1966,8 @@ aarch64_vnv_type (struct gdbarch *gdbarch)
 
       sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnh",
 				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "f",
+				   init_vector_type (bt->builtin_half, 8));
       append_composite_type_field (sub, "u",
 				   init_vector_type (bt->builtin_uint16, 8));
       append_composite_type_field (sub, "s",
