@@ -1,5 +1,10 @@
 2019-05-15  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-csky.c (md_convert_frag): Initialise trailing
+	padding for COND_JUMP_PIC.
+
+2019-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2dbg.c: Whitespace fixes.
 	(get_filenum): Don't strdup "file".  Adjust error message.
 	(dwarf2_directive_filename): Use an unsigned type for "num".

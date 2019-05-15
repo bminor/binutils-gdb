@@ -4426,6 +4426,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec,  fragS *fragp)
 		buf[20] = (disp >> 8) & 0xff;
 		buf[21] = disp & 0xff;
 	      }
+	    buf[22] = 0;  /* initialise.  */
+	    buf[23] = 0;
 	    fragp->fr_fix += C32_LEN_PIC;
 
 	  } /* end if is_unaligned.  */
