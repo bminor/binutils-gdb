@@ -795,12 +795,12 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
 }
 
 /* Attempt to initialize dlopen()ed libthread_db, described by INFO.
-   Return 1 on success.
+   Return true on success.
    Failure could happen if libthread_db does not have symbols we expect,
    or when it refuses to work with the current inferior (e.g. due to
    version mismatch between libthread_db and libpthread).  */
 
-static int
+static bool
 try_thread_db_load_1 (struct thread_db_info *info)
 {
   td_err_e err;
@@ -818,7 +818,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   do									\
     {									\
       if ((a) == NULL)							\
-	return 0;							\
+	return false;							\
   } while (0)
 
   CHK (TDB_VERBOSE_DLSYM (info, td_init));
@@ -828,7 +828,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
     {
       warning (_("Cannot initialize libthread_db: %s"),
 	       thread_db_err_str (err));
-      return 0;
+      return false;
     }
 
   CHK (TDB_VERBOSE_DLSYM (info, td_ta_new));
@@ -857,7 +857,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
             default:
               warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
           }
-      return 0;
+      return false;
     }
 
   /* These are essential.  */
@@ -892,7 +892,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   if (check_thread_db_on_load)
     {
       if (!check_thread_db (info, libthread_db_debug))
-	return 0;
+	return false;
     }
 
   if (info->td_ta_thr_iter_p == NULL)
@@ -914,7 +914,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
       /* Even if libthread_db initializes, if the thread list is
          corrupted, we'd not manage to list any threads.  Better reject this
          thread_db, and fall back to at least listing LWPs.  */
-      return 0;
+      return false;
     }
 
   printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
@@ -942,14 +942,14 @@ try_thread_db_load_1 (struct thread_db_info *info)
   if (thread_db_list->next == NULL)
     push_target (&the_thread_db_target);
 
-  return 1;
+  return true;
 }
 
 /* Attempt to use LIBRARY as libthread_db.  LIBRARY could be absolute,
    relative, or just LIBTHREAD_DB.  */
 
-static int
-try_thread_db_load (const char *library, int check_auto_load_safe)
+static bool
+try_thread_db_load (const char *library, bool check_auto_load_safe)
 {
   void *handle;
   struct thread_db_info *info;
@@ -968,14 +968,14 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
 	  if (libthread_db_debug)
 	    fprintf_unfiltered (gdb_stdlog, _("open failed: %s.\n"),
 				safe_strerror (errno));
-	  return 0;
+	  return false;
 	}
 
       if (!file_is_auto_load_safe (library, _("auto-load: Loading libthread-db "
 					      "library \"%s\" from explicit "
 					      "directory.\n"),
 				   library))
-	return 0;
+	return false;
     }
 
   handle = dlopen (library, RTLD_NOW);
@@ -983,7 +983,7 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
     {
       if (libthread_db_debug)
 	fprintf_unfiltered (gdb_stdlog, _("dlopen failed: %s.\n"), dlerror ());
-      return 0;
+      return false;
     }
 
   if (libthread_db_debug && strchr (library, '/') == NULL)
@@ -1008,11 +1008,11 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
     info->filename = gdb_realpath (library).release ();
 
   if (try_thread_db_load_1 (info))
-    return 1;
+    return true;
 
   /* This library "refused" to work on current inferior.  */
   delete_thread_db_info (inferior_ptid.pid ());
-  return 0;
+  return false;
 }
 
 /* Subroutine of try_thread_db_load_from_pdir to simplify it.
@@ -1020,7 +1020,7 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
    SUBDIR may be NULL.  It may also be something like "../lib64".
    The result is true for success.  */
 
-static int
+static bool
 try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
 {
   const char *obj_name = objfile_name (obj);
@@ -1029,7 +1029,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
     {
       warning (_("Expected absolute pathname for libpthread in the"
 		 " inferior, but got %s."), obj_name);
-      return 0;
+      return false;
     }
 
   std::string path = obj_name;
@@ -1041,7 +1041,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
     path = path + subdir + "/";
   path += LIBTHREAD_DB_SO;
 
-  return try_thread_db_load (path.c_str (), 1);
+  return try_thread_db_load (path.c_str (), true);
 }
 
 /* Handle $pdir in libthread-db-search-path.
@@ -1049,17 +1049,17 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
    SUBDIR may be NULL.  It may also be something like "../lib64".
    The result is true for success.  */
 
-static int
+static bool
 try_thread_db_load_from_pdir (const char *subdir)
 {
   if (!auto_load_thread_db)
-    return 0;
+    return false;
 
   for (objfile *obj : current_program_space->objfiles ())
     if (libpthread_name_p (objfile_name (obj)))
       {
 	if (try_thread_db_load_from_pdir_1 (obj, subdir))
-	  return 1;
+	  return true;
 
 	/* We may have found the separate-debug-info version of
 	   libpthread, and it may live in a directory without a matching
@@ -1068,10 +1068,10 @@ try_thread_db_load_from_pdir (const char *subdir)
 	  return try_thread_db_load_from_pdir_1 (obj->separate_debug_objfile_backlink,
 						 subdir);
 
-	return 0;
+	return false;
       }
 
-  return 0;
+  return false;
 }
 
 /* Handle $sdir in libthread-db-search-path.
@@ -1079,34 +1079,34 @@ try_thread_db_load_from_pdir (const char *subdir)
    dlopen(file_without_path) will look.
    The result is true for success.  */
 
-static int
+static bool
 try_thread_db_load_from_sdir (void)
 {
-  return try_thread_db_load (LIBTHREAD_DB_SO, 0);
+  return try_thread_db_load (LIBTHREAD_DB_SO, false);
 }
 
 /* Try to load libthread_db from directory DIR of length DIR_LEN.
    The result is true for success.  */
 
-static int
+static bool
 try_thread_db_load_from_dir (const char *dir, size_t dir_len)
 {
   if (!auto_load_thread_db)
-    return 0;
+    return false;
 
   std::string path = std::string (dir, dir_len) + "/" + LIBTHREAD_DB_SO;
 
-  return try_thread_db_load (path.c_str (), 1);
+  return try_thread_db_load (path.c_str (), true);
 }
 
 /* Search libthread_db_search_path for libthread_db which "agrees"
    to work on current inferior.
    The result is true for success.  */
 
-static int
+static bool
 thread_db_load_search (void)
 {
-  int rc = 0;
+  bool rc = false;
 
   std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
     = dirnames_to_char_ptr_vec (libthread_db_search_path);
@@ -1159,22 +1159,22 @@ thread_db_load_search (void)
   return rc;
 }
 
-/* Return non-zero if the inferior has a libpthread.  */
+/* Return true if the inferior has a libpthread.  */
 
-static int
+static bool
 has_libpthread (void)
 {
   for (objfile *obj : current_program_space->objfiles ())
     if (libpthread_name_p (objfile_name (obj)))
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* Attempt to load and initialize libthread_db.
    Return 1 on success.  */
 
-static int
+static bool
 thread_db_load (void)
 {
   struct thread_db_info *info;
@@ -1182,19 +1182,19 @@ thread_db_load (void)
   info = get_thread_db_info (inferior_ptid.pid ());
 
   if (info != NULL)
-    return 1;
+    return true;
 
   /* Don't attempt to use thread_db on executables not running
      yet.  */
   if (!target_has_registers)
-    return 0;
+    return false;
 
   /* Don't attempt to use thread_db for remote targets.  */
   if (!(target_can_run () || core_bfd))
-    return 0;
+    return false;
 
   if (thread_db_load_search ())
-    return 1;
+    return true;
 
   /* We couldn't find a libthread_db.
      If the inferior has a libpthread warn the user.  */
@@ -1202,13 +1202,13 @@ thread_db_load (void)
     {
       warning (_("Unable to find libthread_db matching inferior's thread"
 		 " library, thread debugging will not be available."));
-      return 0;
+      return false;
     }
 
   /* Either this executable isn't using libpthread at all, or it is
      statically linked.  Since we can't easily distinguish these two cases,
      no warning is issued.  */
-  return 0;
+  return false;
 }
 
 static void

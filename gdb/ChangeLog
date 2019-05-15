@@ -1,3 +1,16 @@
+2019-05-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* linux-thread-db.c (try_thread_db_load_1): Change return type
+	to bool.
+	(try_thread_db_load): Likewise.
+	(try_thread_db_load_from_pdir_1): Likewise.
+	(try_thread_db_load_from_pdir): Likewise.
+	(try_thread_db_load_from_sdir): Likewise.
+	(try_thread_db_load_from_dir): Likewise.
+	(thread_db_load_search): Likewise.
+	(has_libpthread): Likewise.
+	(thread_db_load): Likewise.
+
 2019-05-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1708192
