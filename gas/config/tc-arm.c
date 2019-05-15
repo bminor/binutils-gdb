@@ -15580,6 +15580,32 @@ do_mve_vcmp (void)
 }
 
 static void
+do_mve_vfmas (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_F_MVE | N_KEY, N_EQK, N_EQK);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (inst.operands[2].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+  else if (inst.operands[2].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+
+  inst.instruction |= (et.size == 16) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
+static void
 do_mve_vcmul (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQQI, NS_NULL);
@@ -19003,7 +19029,15 @@ do_neon_recip_est (void)
 static void
 do_neon_cls (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  enum neon_shape rs;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+   rs = neon_select_shape (NS_QQ, NS_NULL);
+  else
+   rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+
   struct neon_type_el et = neon_check_type (2, rs,
     N_EQK, N_S8 | N_S16 | N_S32 | N_KEY);
   neon_two_same (neon_quad (rs), 1, et.size);
@@ -19012,7 +19046,15 @@ do_neon_cls (void)
 static void
 do_neon_clz (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  enum neon_shape rs;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+   rs = neon_select_shape (NS_QQ, NS_NULL);
+  else
+   rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+
   struct neon_type_el et = neon_check_type (2, rs,
     N_EQK, N_I8 | N_I16 | N_I32 | N_KEY);
   neon_two_same (neon_quad (rs), 1, et.size);
@@ -23645,10 +23687,8 @@ static const struct asm_opcode insns[] =
  NUF(vrsqrte,   1b30480, 2, (RNDQ, RNDQ),     neon_recip_est),
  NUF(vrsqrteq,  1b30480, 2, (RNQ,  RNQ),      neon_recip_est),
   /* VCLS. Types S8 S16 S32.  */
- NUF(vcls,      1b00400, 2, (RNDQ, RNDQ),     neon_cls),
  NUF(vclsq,     1b00400, 2, (RNQ,  RNQ),      neon_cls),
   /* VCLZ. Types I8 I16 I32.  */
- NUF(vclz,      1b00480, 2, (RNDQ, RNDQ),     neon_clz),
  NUF(vclzq,     1b00480, 2, (RNQ,  RNQ),      neon_clz),
   /* VCNT. Size 8.  */
  NUF(vcnt,      1b00500, 2, (RNDQ, RNDQ),     neon_cnt),
@@ -24182,6 +24222,7 @@ static const struct asm_opcode insns[] =
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
  mToC("vcmul", ee300e00,   4, (RMQ, RMQ, RMQ, EXPi),		  mve_vcmul),
+ mToC("vfmas", ee311e40,   3, (RMQ, RMQ, RR),			  mve_vfmas),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1
@@ -24237,6 +24278,8 @@ static const struct asm_opcode insns[] =
  mnUF(vorr,      _vorr,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vorn,      _vorn,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(veor,      _veor,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ),      neon_logic),
+ MNUF(vcls,      1b00400,	  2, (RNDQMQ, RNDQMQ),		     neon_cls),
+ MNUF(vclz,      1b00480,	  2, (RNDQMQ, RNDQMQ),		     neon_clz),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3

@@ -1,5 +1,21 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_mve_vfmas): New encoding function.
+	(do_neon_cls): Change to support MVE variants.
+	(do_neon_clz): Change to support MVE variants.
+	(insns): Change to support MVE variants and add new.
+	* testsuite/gas/arm/mve-vcls-bad.d: New test.
+	* testsuite/gas/arm/mve-vcls-bad.l: New test.
+	* testsuite/gas/arm/mve-vcls-bad.s: New test.
+	* testsuite/gas/arm/mve-vclz-bad.d: New test.
+	* testsuite/gas/arm/mve-vclz-bad.l: New test.
+	* testsuite/gas/arm/mve-vclz-bad.s: New test.
+	* testsuite/gas/arm/mve-vfmas-bad.d: New test.
+	* testsuite/gas/arm/mve-vfmas-bad.l: New test.
+	* testsuite/gas/arm/mve-vfmas-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum operand_parse_code): New operands.
 	(parse_operands): Handle new operands.
 	(do_mve_vcmul): New encoding function.
