@@ -6951,6 +6951,7 @@ enum operand_parse_code
   OP_RNSDQ_RNSC_MQ, /* Vector S, D or Q reg, Neon scalar or MVE vector register.
 		     */
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
+  OP_RNDQMQ_RNSC, /* Neon D, Q or MVE vector reg, or Neon scalar.  */
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
   OP_VMOV,      /* Neon VMOV operands.  */
   OP_RNDQ_Ibig,	/* Neon D or Q reg, or big immediate for logic and VMVN.  */
@@ -7346,6 +7347,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  }
 	  break;
 
+	case OP_RNDQMQ_RNSC:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rndq_rnsc);
+	  break;
+	try_rndq_rnsc:
 	case OP_RNDQ_RNSC:
 	  {
 	    po_scalar_or_goto (8, try_ndq, REG_TYPE_VFD);
@@ -15575,6 +15580,38 @@ do_mve_vcmp (void)
 }
 
 static void
+do_mve_vcmul (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQI, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_F_MVE | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  unsigned rot = inst.relocs[0].exp.X_add_number;
+  constraint (rot != 0 && rot != 90 && rot != 180 && rot != 270,
+	      _("immediate out of range"));
+
+  if (et.size == 32 && (inst.operands[0].reg == inst.operands[1].reg
+			|| inst.operands[0].reg == inst.operands[2].reg))
+    as_tsktsk (BAD_MVE_SRCDEST);
+
+  inst.instruction |= (et.size == 32) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= (rot > 90) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[2].reg);
+  inst.instruction |= (rot == 90 || rot == 270);
+  inst.is_neon = 1;
+}
+
+static void
 do_vfp_nsyn_cmp (void)
 {
   enum neon_shape rs;
@@ -19677,16 +19714,23 @@ neon_scalar_for_vcmla (unsigned opnd, unsigned elsize)
 static void
 do_vcmla (void)
 {
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
-	      _(BAD_FPU));
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext)
+	      && (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8)
+		  || !mark_feature_used (&arm_ext_v8_3)), (BAD_FPU));
   constraint (inst.relocs[0].exp.X_op != O_constant,
 	      _("expression too complex"));
   unsigned rot = inst.relocs[0].exp.X_add_number;
   constraint (rot != 0 && rot != 90 && rot != 180 && rot != 270,
 	      _("immediate out of range"));
   rot /= 90;
+
+  if (check_simd_pred_availability (1, NEON_CHECK_ARCH8 | NEON_CHECK_CC))
+    return;
+
   if (inst.operands[2].isscalar)
     {
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+	first_error (_("invalid instruction shape"));
       enum neon_shape rs = neon_select_shape (NS_DDSI, NS_QQSI, NS_NULL);
       unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
 				       N_KEY | N_F16 | N_F32).size;
@@ -19705,9 +19749,19 @@ do_vcmla (void)
     }
   else
     {
-      enum neon_shape rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
+      enum neon_shape rs;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+	rs = neon_select_shape (NS_QQQI, NS_NULL);
+      else
+	rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
+
       unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
 				       N_KEY | N_F16 | N_F32).size;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext) && size == 32
+	  && (inst.operands[0].reg == inst.operands[1].reg
+	      || inst.operands[0].reg == inst.operands[2].reg))
+	as_tsktsk (BAD_MVE_SRCDEST);
+
       neon_three_same (neon_quad (rs), 0, -1);
       inst.instruction &= 0x00ffffff; /* Undo neon_dp_fixup.  */
       inst.instruction |= 0xfc200800;
@@ -19719,20 +19773,60 @@ do_vcmla (void)
 static void
 do_vcadd (void)
 {
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
-	      _(BAD_FPU));
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+	      && (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8)
+		  || !mark_feature_used (&arm_ext_v8_3)), (BAD_FPU));
   constraint (inst.relocs[0].exp.X_op != O_constant,
 	      _("expression too complex"));
+
   unsigned rot = inst.relocs[0].exp.X_add_number;
   constraint (rot != 90 && rot != 270, _("immediate out of range"));
-  enum neon_shape rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
-  unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
-				   N_KEY | N_F16 | N_F32).size;
-  neon_three_same (neon_quad (rs), 0, -1);
-  inst.instruction &= 0x00ffffff; /* Undo neon_dp_fixup.  */
-  inst.instruction |= 0xfc800800;
-  inst.instruction |= (rot == 270) << 24;
-  inst.instruction |= (size == 32) << 20;
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_F16 | N_F32);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_QQQI, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_F16 | N_F32 | N_I8
+			    | N_I16 | N_I32);
+      if (et.size == 32 && inst.operands[0].reg == inst.operands[2].reg)
+	as_tsktsk (_("Warning: 32-bit element size and same first and third "
+		     "operand makes instruction UNPREDICTABLE"));
+    }
+
+  if (et.type == NT_invtype)
+    return;
+
+  if (check_simd_pred_availability (et.type == NT_float, NEON_CHECK_ARCH8
+				    | NEON_CHECK_CC))
+    return;
+
+  if (et.type == NT_float)
+    {
+      neon_three_same (neon_quad (rs), 0, -1);
+      inst.instruction &= 0x00ffffff; /* Undo neon_dp_fixup.  */
+      inst.instruction |= 0xfc800800;
+      inst.instruction |= (rot == 270) << 24;
+      inst.instruction |= (et.size == 32) << 20;
+    }
+  else
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
+      inst.instruction = 0xfe000f00;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= neon_logbits (et.size) << 20;
+      inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+      inst.instruction |= (rot == 270) << 12;
+      inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+      inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+      inst.instruction |= LOW4 (inst.operands[2].reg);
+      inst.is_neon = 1;
+    }
 }
 
 /* Dot Product instructions encoding support.  */
@@ -22719,8 +22813,6 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_3
  NCE (vjcvt, eb90bc0, 2, (RVS, RVD), vjcvt),
- NUF (vcmla, 0, 4, (RNDQ, RNDQ, RNDQ_RNSC, EXPi), vcmla),
- NUF (vcadd, 0, 4, (RNDQ, RNDQ, RNDQ, EXPi), vcadd),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT   & fpu_neon_ext_dotprod
@@ -24087,6 +24179,10 @@ static const struct asm_opcode insns[] =
  mCEF(vaddv,	_vaddv,	    2, (RRe, RMQ),			  mve_vaddv),
  mCEF(vaddva,	_vaddva,    2, (RRe, RMQ),			  mve_vaddv),
 
+#undef THUMB_VARIANT
+#define THUMB_VARIANT & mve_fp_ext
+ mToC("vcmul", ee300e00,   4, (RMQ, RMQ, RMQ, EXPi),		  mve_vcmul),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1
 #undef  THUMB_VARIANT
@@ -24141,6 +24237,13 @@ static const struct asm_opcode insns[] =
  mnUF(vorr,      _vorr,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vorn,      _vorn,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(veor,      _veor,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ),      neon_logic),
+
+#undef	ARM_VARIANT
+#define ARM_VARIANT & arm_ext_v8_3
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT & arm_ext_v6t2_v8m
+ MNUF (vcadd, 0, 4, (RNDQMQ, RNDQMQ, RNDQMQ, EXPi), vcadd),
+ MNUF (vcmla, 0, 4, (RNDQMQ, RNDQMQ, RNDQMQ_RNSC, EXPi), vcmla),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT

@@ -2,6 +2,33 @@
 
 	* config/tc-arm.c (enum operand_parse_code): New operands.
 	(parse_operands): Handle new operands.
+	(do_mve_vcmul): New encoding function.
+	(do_vcmla): Change to support MVE variants.
+	(do_vcadd): Change to support MVE variants.
+	(insns): Change existing to support MVE variants and add new.
+	* testsuite/gas/arm/mve-vcadd-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vcadd-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vcadd-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vcadd-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vcadd-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vcadd-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vcmla-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vcmul-bad-2.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (enum operand_parse_code): New operands.
+	(parse_operands): Handle new operands.
 	(enum vfp_or_neon_is_neon_bits): Moved
 	(vfp_or_neon_is_neon): Moved
 	(check_simd_pred_availability): Moved.
