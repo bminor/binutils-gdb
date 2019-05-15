@@ -1,5 +1,23 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vddup, M_MNEM_vdwdup, M_MNEM_vidup,
+	 M_MNEM_viwdup): New instruction encodings.
+	(NEON_SHAPE_DEF): New shapes.
+	(do_mve_viddup): New encoding function.
+	(do_neon_dup): Change to support new MVE variants.
+	(insns): Change existing to accept MVE variants and add new.
+	* testsuite/gas/arm/mve-vddup-bad.d: New test.
+	* testsuite/gas/arm/mve-vddup-bad.l: New test.
+	* testsuite/gas/arm/mve-vddup-bad.s: New test.
+	* testsuite/gas/arm/mve-vdup-bad.d: New test.
+	* testsuite/gas/arm/mve-vdup-bad.l: New test.
+	* testsuite/gas/arm/mve-vdup-bad.s: New test.
+	* testsuite/gas/arm/mve-vidup-bad.d: New test.
+	* testsuite/gas/arm/mve-vidup-bad.l: New test.
+	* testsuite/gas/arm/mve-vidup-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vfmas): New encoding function.
 	(do_neon_cls): Change to support MVE variants.
 	(do_neon_clz): Change to support MVE variants.
