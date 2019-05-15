@@ -510,7 +510,10 @@ struct arm_it
     unsigned isreg	: 1;  /* Operand was a register.  */
     unsigned immisreg	: 2;  /* .imm field is a second register.
 				 0: imm, 1: gpr, 2: MVE Q-register.  */
-    unsigned isscalar   : 1;  /* Operand is a (Neon) scalar.  */
+    unsigned isscalar   : 2;  /* Operand is a (SIMD) scalar:
+				 0) not scalar,
+				 1) Neon scalar,
+				 2) MVE scalar.  */
     unsigned immisalign : 1;  /* Immediate is an alignment specifier.  */
     unsigned immisfloat : 1;  /* Immediate was parsed as a float.  */
     /* Note: we abuse "regisimm" to mean "is Neon register" in VMOV
@@ -1653,9 +1656,14 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
     {
       if (type != REG_TYPE_VFD
 	  && !(type == REG_TYPE_VFS
-	       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_2)))
+	       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_2))
+	  && !(type == REG_TYPE_NQ
+	       && ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)))
 	{
-	  first_error (_("only D registers may be indexed"));
+	  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	    first_error (_("only D and Q registers may be indexed"));
+	  else
+	    first_error (_("only D registers may be indexed"));
 	  return FAIL;
 	}
 
@@ -1744,27 +1752,41 @@ arm_typed_reg_parse (char **ccp, enum arm_reg_type type,
    just do easy checks here, and do further checks later.  */
 
 static int
-parse_scalar (char **ccp, int elsize, struct neon_type_el *type)
+parse_scalar (char **ccp, int elsize, struct neon_type_el *type, enum
+	      arm_reg_type reg_type)
 {
   int reg;
   char *str = *ccp;
   struct neon_typed_alias atype;
-  enum arm_reg_type reg_type = REG_TYPE_VFD;
-
-  if (elsize == 4)
-    reg_type = REG_TYPE_VFS;
+  unsigned reg_size;
 
   reg = parse_typed_reg_or_scalar (&str, reg_type, NULL, &atype);
+
+  switch (reg_type)
+    {
+    case REG_TYPE_VFS:
+      reg_size = 32;
+      break;
+    case REG_TYPE_VFD:
+      reg_size = 64;
+      break;
+    case REG_TYPE_MQ:
+      reg_size = 128;
+      break;
+    default:
+      gas_assert (0);
+      return FAIL;
+    }
 
   if (reg == FAIL || (atype.defined & NTA_HASINDEX) == 0)
     return FAIL;
 
-  if (atype.index == NEON_ALL_LANES)
+  if (reg_type != REG_TYPE_MQ && atype.index == NEON_ALL_LANES)
     {
       first_error (_("scalar must have an index"));
       return FAIL;
     }
-  else if (atype.index >= 64 / elsize)
+  else if (atype.index >= reg_size / elsize)
     {
       first_error (_("scalar index out of range"));
       return FAIL;
@@ -6539,7 +6561,61 @@ parse_neon_mov (char **str, int *which_operand)
   char *ptr = *str;
   struct neon_type_el optype;
 
-  if ((val = parse_scalar (&ptr, 8, &optype)) != FAIL)
+   if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_MQ)) != FAIL)
+    {
+      /* Cases 17 or 19.  */
+      inst.operands[i].reg = val;
+      inst.operands[i].isvec = 1;
+      inst.operands[i].isscalar = 2;
+      inst.operands[i].vectype = optype;
+      inst.operands[i++].present = 1;
+
+      if (skip_past_comma (&ptr) == FAIL)
+	goto wanted_comma;
+
+      if ((val = arm_reg_parse (&ptr, REG_TYPE_RN)) != FAIL)
+	{
+	  /* Case 17: VMOV<c>.<dt> <Qd[idx]>, <Rt>  */
+	  inst.operands[i].reg = val;
+	  inst.operands[i].isreg = 1;
+	  inst.operands[i].present = 1;
+	}
+      else if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_MQ)) != FAIL)
+	{
+	  /* Case 19: VMOV<c> <Qd[idx]>, <Qd[idx2]>, <Rt>, <Rt2>  */
+	  inst.operands[i].reg = val;
+	  inst.operands[i].isvec = 1;
+	  inst.operands[i].isscalar = 2;
+	  inst.operands[i].vectype = optype;
+	  inst.operands[i++].present = 1;
+
+	  if (skip_past_comma (&ptr) == FAIL)
+	    goto wanted_comma;
+
+	  if ((val = arm_reg_parse (&ptr, REG_TYPE_RN)) == FAIL)
+	    goto wanted_arm;
+
+	  inst.operands[i].reg = val;
+	  inst.operands[i].isreg = 1;
+	  inst.operands[i++].present = 1;
+
+	  if (skip_past_comma (&ptr) == FAIL)
+	    goto wanted_comma;
+
+	  if ((val = arm_reg_parse (&ptr, REG_TYPE_RN)) == FAIL)
+	    goto wanted_arm;
+
+	  inst.operands[i].reg = val;
+	  inst.operands[i].isreg = 1;
+	  inst.operands[i].present = 1;
+	}
+      else
+	{
+	  first_error (_("expected ARM or MVE vector register"));
+	  return FAIL;
+	}
+    }
+   else if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_VFD)) != FAIL)
     {
       /* Case 4: VMOV<c><q>.<size> <Dn[x]>, <Rd>.  */
       inst.operands[i].reg = val;
@@ -6557,8 +6633,10 @@ parse_neon_mov (char **str, int *which_operand)
       inst.operands[i].isreg = 1;
       inst.operands[i].present = 1;
     }
-  else if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_NSDQ, &rtype, &optype))
-	   != FAIL)
+  else if (((val = arm_typed_reg_parse (&ptr, REG_TYPE_NSDQ, &rtype, &optype))
+	    != FAIL)
+	   || ((val = arm_typed_reg_parse (&ptr, REG_TYPE_MQ, &rtype, &optype))
+	       != FAIL))
     {
       /* Cases 0, 1, 2, 3, 5 (D only).  */
       if (skip_past_comma (&ptr) == FAIL)
@@ -6655,7 +6733,7 @@ parse_neon_mov (char **str, int *which_operand)
     }
   else if ((val = arm_reg_parse (&ptr, REG_TYPE_RN)) != FAIL)
     {
-      /* Cases 6, 7.  */
+      /* Cases 6, 7, 16, 18.  */
       inst.operands[i].reg = val;
       inst.operands[i].isreg = 1;
       inst.operands[i++].present = 1;
@@ -6663,7 +6741,15 @@ parse_neon_mov (char **str, int *which_operand)
       if (skip_past_comma (&ptr) == FAIL)
 	goto wanted_comma;
 
-      if ((val = parse_scalar (&ptr, 8, &optype)) != FAIL)
+      if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_MQ)) != FAIL)
+	{
+	  /* Case 18: VMOV<c>.<dt> <Rt>, <Qn[idx]>  */
+	  inst.operands[i].reg = val;
+	  inst.operands[i].isscalar = 2;
+	  inst.operands[i].present = 1;
+	  inst.operands[i].vectype = optype;
+	}
+      else if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_VFD)) != FAIL)
 	{
 	  /* Case 6: VMOV<c><q>.<dt> <Rd>, <Dn[x]>  */
 	  inst.operands[i].reg = val;
@@ -6673,7 +6759,6 @@ parse_neon_mov (char **str, int *which_operand)
 	}
       else if ((val = arm_reg_parse (&ptr, REG_TYPE_RN)) != FAIL)
 	{
-	  /* Case 7: VMOV<c><q> <Rd>, <Rn>, <Dm>  */
 	  inst.operands[i].reg = val;
 	  inst.operands[i].isreg = 1;
 	  inst.operands[i++].present = 1;
@@ -6682,37 +6767,70 @@ parse_neon_mov (char **str, int *which_operand)
 	    goto wanted_comma;
 
 	  if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_VFSD, &rtype, &optype))
-	      == FAIL)
+	      != FAIL)
 	    {
-	      first_error (_(reg_expected_msgs[REG_TYPE_VFSD]));
-	      return FAIL;
-	    }
+	      /* Case 7: VMOV<c><q> <Rd>, <Rn>, <Dm>  */
 
-	  inst.operands[i].reg = val;
-	  inst.operands[i].isreg = 1;
-	  inst.operands[i].isvec = 1;
-	  inst.operands[i].issingle = (rtype == REG_TYPE_VFS);
-	  inst.operands[i].vectype = optype;
-	  inst.operands[i].present = 1;
-
-	  if (rtype == REG_TYPE_VFS)
-	    {
-	      /* Case 14.  */
-	      i++;
-	      if (skip_past_comma (&ptr) == FAIL)
-		goto wanted_comma;
-	      if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_VFS, NULL,
-					      &optype)) == FAIL)
-		{
-		  first_error (_(reg_expected_msgs[REG_TYPE_VFS]));
-		  return FAIL;
-		}
 	      inst.operands[i].reg = val;
 	      inst.operands[i].isreg = 1;
 	      inst.operands[i].isvec = 1;
-	      inst.operands[i].issingle = 1;
+	      inst.operands[i].issingle = (rtype == REG_TYPE_VFS);
 	      inst.operands[i].vectype = optype;
 	      inst.operands[i].present = 1;
+
+	      if (rtype == REG_TYPE_VFS)
+		{
+		  /* Case 14.  */
+		  i++;
+		  if (skip_past_comma (&ptr) == FAIL)
+		    goto wanted_comma;
+		  if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_VFS, NULL,
+						  &optype)) == FAIL)
+		    {
+		      first_error (_(reg_expected_msgs[REG_TYPE_VFS]));
+		      return FAIL;
+		    }
+		  inst.operands[i].reg = val;
+		  inst.operands[i].isreg = 1;
+		  inst.operands[i].isvec = 1;
+		  inst.operands[i].issingle = 1;
+		  inst.operands[i].vectype = optype;
+		  inst.operands[i].present = 1;
+		}
+	    }
+	  else
+	    {
+	      if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_MQ))
+		       != FAIL)
+		{
+		  /* Case 16: VMOV<c> <Rt>, <Rt2>, <Qd[idx]>, <Qd[idx2]>  */
+		  inst.operands[i].reg = val;
+		  inst.operands[i].isvec = 1;
+		  inst.operands[i].isscalar = 2;
+		  inst.operands[i].vectype = optype;
+		  inst.operands[i++].present = 1;
+
+		  if (skip_past_comma (&ptr) == FAIL)
+		    goto wanted_comma;
+
+		  if ((val = parse_scalar (&ptr, 8, &optype, REG_TYPE_MQ))
+		      == FAIL)
+		    {
+		      first_error (_(reg_expected_msgs[REG_TYPE_MQ]));
+		      return FAIL;
+		    }
+		  inst.operands[i].reg = val;
+		  inst.operands[i].isvec = 1;
+		  inst.operands[i].isscalar = 2;
+		  inst.operands[i].vectype = optype;
+		  inst.operands[i].present = 1;
+		}
+	      else
+		{
+		  first_error (_("VFP single, double or MVE vector register"
+			       " expected"));
+		  return FAIL;
+		}
 	    }
 	}
       else if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_VFS, NULL, &optype))
@@ -6989,10 +7107,11 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
     }								\
   while (0)
 
-#define po_scalar_or_goto(elsz, label)					\
+#define po_scalar_or_goto(elsz, label, reg_type)			\
   do									\
     {									\
-      val = parse_scalar (& str, elsz, & inst.operands[i].vectype);	\
+      val = parse_scalar (& str, elsz, & inst.operands[i].vectype,	\
+			  reg_type);					\
       if (val == FAIL)							\
 	goto label;							\
       inst.operands[i].reg = val;					\
@@ -7140,7 +7259,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 	/* Neon scalar. Using an element size of 8 means that some invalid
 	   scalars are accepted here, so deal with those in later code.  */
-	case OP_RNSC:  po_scalar_or_goto (8, failure);    break;
+	case OP_RNSC:  po_scalar_or_goto (8, failure, REG_TYPE_VFD);    break;
 
 	case OP_RNDQ_I0:
 	  {
@@ -7173,7 +7292,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_RR_RNSC:
 	  {
-	    po_scalar_or_goto (8, try_rr);
+	    po_scalar_or_goto (8, try_rr, REG_TYPE_VFD);
 	    break;
 	    try_rr:
 	    po_reg_or_fail (REG_TYPE_RN);
@@ -7186,19 +7305,21 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	try_rnsdq_rnsc:
 	case OP_RNSDQ_RNSC:
 	  {
-	    po_scalar_or_goto (8, try_nsdq);
+	    po_scalar_or_goto (8, try_nsdq, REG_TYPE_VFD);
+	    inst.error = 0;
 	    break;
 	    try_nsdq:
 	    po_reg_or_fail (REG_TYPE_NSDQ);
+	    inst.error = 0;
 	  }
 	  break;
 
 	case OP_RNSD_RNSC:
 	  {
-	    po_scalar_or_goto (8, try_s_scalar);
+	    po_scalar_or_goto (8, try_s_scalar, REG_TYPE_VFD);
 	    break;
 	    try_s_scalar:
-	    po_scalar_or_goto (4, try_nsd);
+	    po_scalar_or_goto (4, try_nsd, REG_TYPE_VFS);
 	    break;
 	    try_nsd:
 	    po_reg_or_fail (REG_TYPE_NSD);
@@ -7207,7 +7328,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_RNDQ_RNSC:
 	  {
-	    po_scalar_or_goto (8, try_ndq);
+	    po_scalar_or_goto (8, try_ndq, REG_TYPE_VFD);
 	    break;
 	    try_ndq:
 	    po_reg_or_fail (REG_TYPE_NDQ);
@@ -7216,7 +7337,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_RND_RNSC:
 	  {
-	    po_scalar_or_goto (8, try_vfd);
+	    po_scalar_or_goto (8, try_vfd, REG_TYPE_VFD);
 	    break;
 	    try_vfd:
 	    po_reg_or_fail (REG_TYPE_VFD);
@@ -10169,6 +10290,10 @@ do_sxth (void)
 static void
 do_vfp_sp_monadic (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)
+	      && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	      _(BAD_FPU));
+
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
   encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Sm);
 }
@@ -10204,6 +10329,10 @@ do_vfp_sp_dp_cvt (void)
 static void
 do_vfp_reg_from_sp (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)
+	     && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	     _(BAD_FPU));
+
   inst.instruction |= inst.operands[0].reg << 12;
   encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Sn);
 }
@@ -10221,6 +10350,10 @@ do_vfp_reg2_from_sp2 (void)
 static void
 do_vfp_sp_from_reg (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)
+	     && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	     _(BAD_FPU));
+
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sn);
   inst.instruction |= inst.operands[1].reg << 12;
 }
@@ -10323,6 +10456,10 @@ do_vfp_xp_ldstmdb (void)
 static void
 do_vfp_dp_rd_rm (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1)
+	      && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	      _(BAD_FPU));
+
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Dd);
   encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Dm);
 }
@@ -10344,6 +10481,10 @@ do_vfp_dp_rd_rn (void)
 static void
 do_vfp_dp_rd_rn_rm (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+	      && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	      _(BAD_FPU));
+
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Dd);
   encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Dn);
   encode_arm_vfp_reg (inst.operands[2].reg, VFP_REG_Dm);
@@ -10358,6 +10499,10 @@ do_vfp_dp_rd (void)
 static void
 do_vfp_dp_rm_rd_rn (void)
 {
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+	      && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+	      _(BAD_FPU));
+
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Dm);
   encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Dd);
   encode_arm_vfp_reg (inst.operands[2].reg, VFP_REG_Dn);
@@ -13961,6 +14106,10 @@ do_t_loloop (void)
 #define M_MNEM_vldrh	0xec100e10
 #define M_MNEM_vldrw	0xec100e40
 #define M_MNEM_vldrd	0xec100e50
+#define M_MNEM_vmovlt	0xeea01f40
+#define M_MNEM_vmovlb	0xeea00f40
+#define M_MNEM_vmovnt	0xfe311e81
+#define M_MNEM_vmovnb	0xfe310e81
 
 /* Neon instruction encoder helpers.  */
 
@@ -14125,6 +14274,8 @@ NEON_ENC_TAB
      - a table used to drive neon_select_shape.  */
 
 #define NEON_SHAPE_DEF			\
+  X(4, (R, R, S, S), QUAD),		\
+  X(4, (S, S, R, R), QUAD),		\
   X(3, (R, Q, Q), QUAD),		\
   X(3, (D, D, D), DOUBLE),		\
   X(3, (Q, Q, Q), QUAD),		\
@@ -17854,6 +18005,67 @@ do_neon_dup (void)
     }
 }
 
+static void
+do_mve_mov (int toQ)
+{
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    return;
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = MVE_UNPREDICABLE_INSN;
+
+  unsigned Rt = 0, Rt2 = 1, Q0 = 2, Q1 = 3;
+  if (toQ)
+    {
+      Q0 = 0;
+      Q1 = 1;
+      Rt = 2;
+      Rt2 = 3;
+    }
+
+  constraint (inst.operands[Q0].reg != inst.operands[Q1].reg + 2,
+	      _("Index one must be [2,3] and index two must be two less than"
+		" index one."));
+  constraint (inst.operands[Rt].reg == inst.operands[Rt2].reg,
+	      _("General purpose registers may not be the same"));
+  constraint (inst.operands[Rt].reg == REG_SP
+	      || inst.operands[Rt2].reg == REG_SP,
+	      BAD_SP);
+  constraint (inst.operands[Rt].reg == REG_PC
+	      || inst.operands[Rt2].reg == REG_PC,
+	      BAD_PC);
+
+  inst.instruction = 0xec000f00;
+  inst.instruction |= HI1 (inst.operands[Q1].reg / 32) << 23;
+  inst.instruction |= !!toQ << 20;
+  inst.instruction |= inst.operands[Rt2].reg << 16;
+  inst.instruction |= LOW4 (inst.operands[Q1].reg / 32) << 13;
+  inst.instruction |= (inst.operands[Q1].reg % 4) << 4;
+  inst.instruction |= inst.operands[Rt].reg;
+}
+
+static void
+do_mve_movn (void)
+{
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    return;
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  struct neon_type_el et = neon_check_type (2, NS_QQ, N_EQK, N_I16 | N_I32
+					    | N_KEY);
+
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= (neon_logbits (et.size) - 1) << 18;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
+
+}
+
 /* VMOV has particularly many variations. It can be one of:
      0. VMOV<c><q> <Qd>, <Qm>
      1. VMOV<c><q> <Dd>, <Dm>
@@ -17883,6 +18095,10 @@ do_neon_dup (void)
    (Two ARM regs to two VFP singles.)
     15. VMOV <Sd>, <Se>, <Rn>, <Rm>
    (Two VFP singles to two ARM regs.)
+   16. VMOV<c> <Rt>, <Rt2>, <Qd[idx]>, <Qd[idx2]>
+   17. VMOV<c> <Qd[idx]>, <Qd[idx2]>, <Rt>, <Rt2>
+   18. VMOV<c>.<dt> <Rt>, <Qn[idx]>
+   19. VMOV<c>.<dt> <Qd[idx]>, <Rt>
 
    These cases can be disambiguated using neon_select_shape, except cases 1/9
    and 3/11 which depend on the operand type too.
@@ -17898,10 +18114,11 @@ do_neon_dup (void)
 static void
 do_neon_mov (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_RRFF, NS_FFRR, NS_DRR, NS_RRD,
-					  NS_QQ, NS_DD, NS_QI, NS_DI, NS_SR,
-					  NS_RS, NS_FF, NS_FI, NS_RF, NS_FR,
-					  NS_HR, NS_RH, NS_HI, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_RRSS, NS_SSRR, NS_RRFF, NS_FFRR,
+					  NS_DRR, NS_RRD, NS_QQ, NS_DD, NS_QI,
+					  NS_DI, NS_SR, NS_RS, NS_FF, NS_FI,
+					  NS_RF, NS_FR, NS_HR, NS_RH, NS_HI,
+					  NS_NULL);
   struct neon_type_el et;
   const char *ldconst = 0;
 
@@ -17920,7 +18137,7 @@ do_neon_mov (void)
 
     case NS_QQ:  /* case 0/1.  */
       {
-	if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+	if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
 	  return;
 	/* The architecture manual I have doesn't explicitly state which
 	   value the U bit should have for register->register moves, but
@@ -17950,7 +18167,7 @@ do_neon_mov (void)
       /* fall through.  */
 
     case NS_QI:  /* case 2/3.  */
-      if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+      if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
 	return;
       inst.instruction = 0x0800010;
       neon_move_immediate ();
@@ -17977,12 +18194,31 @@ do_neon_mov (void)
 	et = neon_check_type (2, NS_NULL, N_8 | N_16 | N_32 | N_KEY, N_EQK);
 	logsize = neon_logbits (et.size);
 
-	constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
-		    _(BAD_FPU));
-	constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1)
-		    && et.size != 32, _(BAD_FPU));
+	if (et.size != 32)
+	  {
+	    if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		&& vfp_or_neon_is_neon (NEON_CHECK_ARCH) == FAIL)
+	      return;
+	  }
+	else
+	  {
+	    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1)
+			&& !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+			_(BAD_FPU));
+	  }
+
+	if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	  {
+	    if (inst.operands[1].reg == REG_SP)
+	      as_tsktsk (MVE_BAD_SP);
+	    else if (inst.operands[1].reg == REG_PC)
+	      as_tsktsk (MVE_BAD_PC);
+	  }
+	unsigned size = inst.operands[0].isscalar == 1 ? 64 : 128;
+
 	constraint (et.type == NT_invtype, _("bad type for scalar"));
-	constraint (x >= 64 / et.size, _("scalar index out of range"));
+	constraint (x >= size / et.size, _("scalar index out of range"));
+
 
 	switch (et.size)
 	  {
@@ -17992,7 +18228,7 @@ do_neon_mov (void)
 	  default: ;
 	  }
 
-	bcdebits |= x << logsize;
+	bcdebits |= (x & ((1 << (3-logsize)) - 1)) << logsize;
 
 	inst.instruction = 0xe000b10;
 	do_vfp_cond_or_thumb ();
@@ -18000,12 +18236,14 @@ do_neon_mov (void)
 	inst.instruction |= HI1 (dn) << 7;
 	inst.instruction |= inst.operands[1].reg << 12;
 	inst.instruction |= (bcdebits & 3) << 5;
-	inst.instruction |= (bcdebits >> 2) << 21;
+	inst.instruction |= ((bcdebits >> 2) & 3) << 21;
+	inst.instruction |= (x >> (3-logsize)) << 16;
       }
       break;
 
     case NS_DRR:  /* case 5 (fmdrr).  */
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2),
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+		  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
 		  _(BAD_FPU));
 
       inst.instruction = 0xc400b10;
@@ -18037,12 +18275,32 @@ do_neon_mov (void)
 			      N_EQK, N_S8 | N_S16 | N_U8 | N_U16 | N_32 | N_KEY);
 	logsize = neon_logbits (et.size);
 
-	constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
-		    _(BAD_FPU));
-	constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1)
-		    && et.size != 32, _(BAD_FPU));
+	if (et.size != 32)
+	  {
+	    if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		&& vfp_or_neon_is_neon (NEON_CHECK_CC
+					| NEON_CHECK_ARCH) == FAIL)
+	      return;
+	  }
+	else
+	  {
+	    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1)
+			&& !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+			_(BAD_FPU));
+	  }
+
+	if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	  {
+	    if (inst.operands[0].reg == REG_SP)
+	      as_tsktsk (MVE_BAD_SP);
+	    else if (inst.operands[0].reg == REG_PC)
+	      as_tsktsk (MVE_BAD_PC);
+	  }
+
+	unsigned size = inst.operands[1].isscalar == 1 ? 64 : 128;
+
 	constraint (et.type == NT_invtype, _("bad type for scalar"));
-	constraint (x >= 64 / et.size, _("scalar index out of range"));
+	constraint (x >= size / et.size, _("scalar index out of range"));
 
 	switch (et.size)
 	  {
@@ -18052,7 +18310,7 @@ do_neon_mov (void)
 	  default: ;
 	  }
 
-	abcdebits |= x << logsize;
+	abcdebits |= (x & ((1 << (3-logsize)) - 1)) << logsize;
 	inst.instruction = 0xe100b10;
 	do_vfp_cond_or_thumb ();
 	inst.instruction |= LOW4 (dn) << 16;
@@ -18060,11 +18318,13 @@ do_neon_mov (void)
 	inst.instruction |= inst.operands[0].reg << 12;
 	inst.instruction |= (abcdebits & 3) << 5;
 	inst.instruction |= (abcdebits >> 2) << 21;
+	inst.instruction |= (x >> (3-logsize)) << 16;
       }
       break;
 
     case NS_RRD:  /* case 7 (fmrrd).  */
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2),
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+		  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
 		  _(BAD_FPU));
 
       inst.instruction = 0xc500b10;
@@ -18131,11 +18391,21 @@ do_neon_mov (void)
 	do_scalar_fp16_v82_encode ();
       break;
 
+    case NS_RRSS:
+      do_mve_mov (0);
+      break;
+    case NS_SSRR:
+      do_mve_mov (1);
+      break;
+
     /* The encoders for the fmrrs and fmsrr instructions expect three operands
        (one of which is a list), but we have parsed four.  Do some fiddling to
        make the operands what do_vfp_reg2_from_sp2 and do_vfp_sp2_from_reg2
        expect.  */
     case NS_RRFF:  /* case 14 (fmrrs).  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+		  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+		  _(BAD_FPU));
       constraint (inst.operands[3].reg != inst.operands[2].reg + 1,
 		  _("VFP registers must be adjacent"));
       inst.operands[2].imm = 2;
@@ -18144,6 +18414,9 @@ do_neon_mov (void)
       break;
 
     case NS_FFRR:  /* case 15 (fmsrr).  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2)
+		  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext),
+		  _(BAD_FPU));
       constraint (inst.operands[1].reg != inst.operands[0].reg + 1,
 		  _("VFP registers must be adjacent"));
       inst.operands[1] = inst.operands[2];
@@ -18161,6 +18434,39 @@ do_neon_mov (void)
     default:
       abort ();
     }
+}
+
+static void
+do_mve_movl (void)
+{
+  if (!(inst.operands[0].present && inst.operands[0].isquad
+      && inst.operands[1].present && inst.operands[1].isquad
+      && !inst.operands[2].present))
+    {
+      inst.instruction = 0;
+      inst.cond = 0xb;
+      if (thumb_mode)
+	set_pred_insn_type (INSIDE_IT_INSN);
+      do_neon_mov ();
+      return;
+    }
+
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    return;
+
+  if (inst.cond != COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+
+  struct neon_type_el et = neon_check_type (2, NS_QQ, N_EQK, N_S8 | N_U8
+					    | N_S16 | N_U16 | N_KEY);
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= (neon_logbits (et.size) + 1) << 19;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
 }
 
 static void
@@ -21208,6 +21514,10 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define cCE(mnem,  op, nops, ops, ae)	\
   { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
 
+/* mov instructions that are shared between coprocessor and MVE.  */
+#define mcCE(mnem,  op, nops, ops, ae)	\
+  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##ae, 0 }
+
 /* Legacy coprocessor instructions where conditional infix and conditional
    suffix are ambiguous.  For consistency this includes all FPA instructions,
    not just the potentially ambiguous ones.  */
@@ -22482,9 +22792,6 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd  /* VFP V1xD (single precision).  */
 
   /* Moves and type conversions.  */
- cCE("fcpys",	eb00a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE("fmrs",	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
- cCE("fmsr",	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
  cCE("fmstat",	ef1fa10, 0, (),		      noargs),
  cCE("vmrs",	ef00a10, 2, (APSR_RR, RVC),   vmrs),
  cCE("vmsr",	ee00a10, 2, (RVC, RR),        vmsr),
@@ -22556,7 +22863,6 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT  & fpu_vfp_ext_v1 /* VFP V1 (Double precision).  */
 
   /* Moves and type conversions.  */
- cCE("fcpyd",	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
  cCE("fcvtds",	eb70ac0, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
  cCE("fcvtsd",	eb70bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
  cCE("fmdhr",	e200b10, 2, (RVD, RR),	      vfp_dp_rn_rd),
@@ -22591,14 +22897,6 @@ static const struct asm_opcode insns[] =
  cCE("fcmpzd",	eb50b40, 1, (RVD),	      vfp_dp_rd),
  cCE("fcmped",	eb40bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
  cCE("fcmpezd",	eb50bc0, 1, (RVD),	      vfp_dp_rd),
-
-#undef  ARM_VARIANT
-#define ARM_VARIANT  & fpu_vfp_ext_v2
-
- cCE("fmsrr",	c400a10, 3, (VRSLST, RR, RR), vfp_sp2_from_reg2),
- cCE("fmrrs",	c500a10, 3, (RR, RR, VRSLST), vfp_reg2_from_sp2),
- cCE("fmdrr",	c400b10, 3, (RVD, RR, RR),    vfp_dp_rm_rd_rn),
- cCE("fmrrd",	c500b10, 3, (RR, RR, RVD),    vfp_dp_rd_rn_rm),
 
 /* Instructions which may belong to either the Neon or VFP instruction sets.
    Individual encoder functions perform additional architecture checks.  */
@@ -22638,7 +22936,6 @@ static const struct asm_opcode insns[] =
 
 
   /* NOTE: All VMOV encoding is special-cased!  */
- NCE(vmov,      0,       1, (VMOV), neon_mov),
  NCE(vmovq,     0,       1, (VMOV), neon_mov),
 
 #undef  THUMB_VARIANT
@@ -23382,10 +23679,23 @@ static const struct asm_opcode insns[] =
  mCEF(vldrw,	_vldrw,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
  mCEF(vldrd,	_vldrd,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
 
+ mCEF(vmovnt,	_vmovnt,    2, (RMQ, RMQ),			  mve_movn),
+ mCEF(vmovnb,	_vmovnb,    2, (RMQ, RMQ),			  mve_movn),
+
 #undef  ARM_VARIANT
-#define ARM_VARIANT    & fpu_vfp_ext_v1xd
+#define ARM_VARIANT  & fpu_vfp_ext_v1
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
+
+ mcCE(fcpyd,	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT  & fpu_vfp_ext_v1xd
+
+ MNCE(vmov,   0,	1, (VMOV),	      neon_mov),
+ mcCE(fmrs,	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
+ mcCE(fmsr,	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
+ mcCE(fcpys,	eb00a40, 2, (RVS, RVS),	      vfp_sp_monadic),
 
  mCEF(vmullt, _vmullt,	3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ),	mve_vmull),
  mnCEF(vadd,  _vadd,	3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR),	neon_addsub_if_i),
@@ -23393,6 +23703,17 @@ static const struct asm_opcode insns[] =
 
  MNCEF(vabs,  1b10300,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
  MNCEF(vneg,  1b10380,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
+
+ mCEF(vmovlt, _vmovlt,	1, (VMOV),		mve_movl),
+ mCEF(vmovlb, _vmovlb,	1, (VMOV),		mve_movl),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT  & fpu_vfp_ext_v2
+
+ mcCE(fmsrr,	c400a10, 3, (VRSLST, RR, RR), vfp_sp2_from_reg2),
+ mcCE(fmrrs,	c500a10, 3, (RR, RR, VRSLST), vfp_reg2_from_sp2),
+ mcCE(fmdrr,	c400b10, 3, (RVD, RR, RR),    vfp_dp_rm_rd_rn),
+ mcCE(fmrrd,	c500b10, 3, (RR, RR, RVD),    vfp_dp_rd_rn_rm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_armv8xd

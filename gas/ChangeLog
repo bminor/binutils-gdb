@@ -1,5 +1,36 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (struct arm_it): Expand isscalar field to be able to
+	distinguish between types of scalar.
+	(parse_typed_reg_or_scalar): Change to accept MVE scalar variants.
+	(parse_scalar): Likewise.
+	(parse_neon_mov): Accept MVE variant.
+	(po_scalar_or_goto): Make use reg_type.
+	(parse_operands): Change uses of po_scalar_or_goto.
+	(do_vfp_sp_monadic): Change to accept MVE variants.
+	(do_vfp_reg_from_sp): Likewise.
+	(do_vfp_sp_from_reg): Likewise.
+	(do_vfp_dp_rd_rm): Likewise.
+	(do_vfp_dp_rd_rn_rm): Likewise.
+	(do_vfp_dp_rm_rd_rn): Likewise.
+	(M_MNEM_vmovlt, M_MNEM_vmovlb, M_MNEM_vmovnt, M_MNEM_vmovnb): New
+	instruction encodings.
+	(NEON_SHAPE_DEF): New shape.
+	(do_mve_mov): New encoding fuction.
+	(do_mve_movn): Likewise.
+	(do_mve_movl): Likewise.
+	(do_neon_mov): Change to accept MVE variants.
+	(mcCE): New MACRO.
+	(insns): Accept new MVE variants and instructions.
+	* testsuite/gas/arm/mve-vmov-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vmov-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vmov-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vmov-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vmov-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vmov-bad-2.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum operand_parse_code): Add new operand.
 	(parse_operands): Handle new operand.
 	(do_neon_cvt_1): Handle MVE variants.
