@@ -1,3 +1,8 @@
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* readelf.c (arm_attr_tag_MVE_arch): New array for Tag_MVE_arch values.
+	(arm_attr_public_tag arm_attr_public_tags): Add case for Tag_MVE_arch.
+
 2019-05-14  Jamey Hicks  <jamey.hicks@gmail.com>
 
 	PR 19921

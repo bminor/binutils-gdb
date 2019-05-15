@@ -1,3 +1,11 @@
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (mve_ext, mve_fp_ext): New features.
+	(armv8_1m_main_ext_table): Add new extensions.
+	(aeabi_set_public_attributes): Translate new features to new build attributes.
+	(arm_convert_symbolic_attribute): Add Tag_MVE_arch.
+	* doc/c-arm.texi: Document new extensions and new build attribute.
+
 2019-05-15  John Darrington <john@darrington.wattle.id.au>
 
 	* config/tc-s12z.c (register_prefix): New variable.  (md_show_usage,

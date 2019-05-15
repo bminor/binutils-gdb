@@ -302,6 +302,10 @@ static const arm_feature_set fpu_neon_ext_v1 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
+static const arm_feature_set mve_ext =
+  ARM_FEATURE_COPROC (FPU_MVE);
+static const arm_feature_set mve_fp_ext =
+  ARM_FEATURE_COPROC (FPU_MVE_FP);
 #ifdef OBJ_ELF
 static const arm_feature_set fpu_vfp_fp16 =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
@@ -27248,6 +27252,12 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
   ARM_ADD ("fp.dp",
 	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
 			FPU_VFP_V5D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
+  ARM_EXT ("mve", ARM_FEATURE_COPROC (FPU_MVE),
+	   ARM_FEATURE_COPROC (FPU_MVE | FPU_MVE_FP)),
+  ARM_ADD ("mve.fp",
+	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
+			FPU_MVE | FPU_MVE_FP | FPU_VFP_V5_SP_D16 |
+			FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
@@ -28425,6 +28435,11 @@ aeabi_set_public_attributes (void)
 	}
     }
 
+  if (ARM_CPU_HAS_FEATURE (flags, mve_fp_ext))
+    aeabi_set_attribute_int (Tag_MVE_arch, 2);
+  else if (ARM_CPU_HAS_FEATURE (flags, mve_ext))
+    aeabi_set_attribute_int (Tag_MVE_arch, 1);
+
   /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16) && fp16_optional)
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
@@ -28766,6 +28781,7 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_T2EE_use),
       T (Tag_Virtualization_use),
       T (Tag_DSP_extension),
+      T (Tag_MVE_arch),
       /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };

@@ -103,6 +103,8 @@
 #define FPU_VFP_EXT_ARMV8xD  0x00002000	/* Single-precision FP for ARMv8.  */
 #define FPU_NEON_EXT_RDMA    0x00001000	/* v8.1 Adv.SIMD extensions.	   */
 #define FPU_NEON_EXT_DOTPROD 0x00000800	/* Dot Product extension.	   */
+#define FPU_MVE		     0x00000400 /* MVE Integer extension.	   */
+#define FPU_MVE_FP	     0x00000200 /* MVE Floating Point extension.   */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,

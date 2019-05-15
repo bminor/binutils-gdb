@@ -363,8 +363,13 @@ For @code{armv8.1-m.main}:
 for Armv8.1-M Mainline with 16 double-word registers.
 @code{+fp.dp}: Enables double precision scalar Floating Point Extensions for
 Armv8.1-M Mainline, implies @code{+fp}.
+@code{+mve}: Enables integer only M-profile Vector Extension for
+Armv8.1-M Mainline, implies @code{+dsp}.
+@code{+mve.fp}: Enables Floating Point M-profile Vector Extension for
+Armv8.1-M Mainline, implies @code{+mve} and @code{+fp}.
 @code{+nofp}: Disables all FPU instructions.
 @code{+nodsp}: Disables DSP Extension.
+@code{+nomve}: Disables all M-profile Vector Extensions.
 
 For @code{armv8-a}:
 
@@ -891,7 +896,7 @@ The @var{tag} is either an attribute number, or one of the following:
 @code{Tag_CPU_raw_name}, @code{Tag_CPU_name}, @code{Tag_CPU_arch},
 @code{Tag_CPU_arch_profile}, @code{Tag_ARM_ISA_use},
 @code{Tag_THUMB_ISA_use}, @code{Tag_FP_arch}, @code{Tag_WMMX_arch},
-@code{Tag_Advanced_SIMD_arch}, @code{Tag_PCS_config},
+@code{Tag_Advanced_SIMD_arch}, @code{Tag_MVE_arch}, @code{Tag_PCS_config},
 @code{Tag_ABI_PCS_R9_use}, @code{Tag_ABI_PCS_RW_data},
 @code{Tag_ABI_PCS_RO_data}, @code{Tag_ABI_PCS_GOT_use},
 @code{Tag_ABI_PCS_wchar_t}, @code{Tag_ABI_FP_rounding},

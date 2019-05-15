@@ -14713,6 +14713,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	case Tag_CPU_unaligned_access:
 	case Tag_T2EE_use:
 	case Tag_MPextension_use:
+	case Tag_MVE_arch:
 	  /* Use the largest value specified.  */
 	  if (in_attr[i].i > out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;

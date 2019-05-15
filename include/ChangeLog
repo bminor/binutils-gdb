@@ -1,3 +1,8 @@
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* elf/arm.h (Tag_MVE_arch): Define new enum value.
+	* opcode/arm.h (FPU_MVE, FPU_MVE_FP): New MACROs for new features.
+
 2019-05-09  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/aarch64.h (enum aarch64_opnd): New SVE_SHLIMM_UNPRED_22

@@ -1,3 +1,7 @@
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm.h (Tag_MVE_arch): Define new enum value.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* arm.h (R_ARM_THM_BF12): New relocation code.
