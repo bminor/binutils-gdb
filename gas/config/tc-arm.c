@@ -508,7 +508,8 @@ struct arm_it
     struct neon_type_el vectype;
     unsigned present	: 1;  /* Operand present.  */
     unsigned isreg	: 1;  /* Operand was a register.  */
-    unsigned immisreg	: 1;  /* .imm field is a second register.  */
+    unsigned immisreg	: 2;  /* .imm field is a second register.
+				 0: imm, 1: gpr, 2: MVE Q-register.  */
     unsigned isscalar   : 1;  /* Operand is a (Neon) scalar.  */
     unsigned immisalign : 1;  /* Immediate is an alignment specifier.  */
     unsigned immisfloat : 1;  /* Immediate was parsed as a float.  */
@@ -5289,7 +5290,7 @@ parse_qfloat_immediate (char **ccp, int *immed)
 /* Shift operands.  */
 enum shift_kind
 {
-  SHIFT_LSL, SHIFT_LSR, SHIFT_ASR, SHIFT_ROR, SHIFT_RRX
+  SHIFT_LSL, SHIFT_LSR, SHIFT_ASR, SHIFT_ROR, SHIFT_RRX, SHIFT_UXTW
 };
 
 struct asm_shift_name
@@ -5306,6 +5307,7 @@ enum parse_shift_mode
   SHIFT_LSL_OR_ASR_IMMEDIATE,	/* Shift must be LSL or ASR immediate.	*/
   SHIFT_ASR_IMMEDIATE,		/* Shift must be ASR immediate.	 */
   SHIFT_LSL_IMMEDIATE,		/* Shift must be LSL immediate.	 */
+  SHIFT_UXTW_IMMEDIATE		/* Shift must be UXTW immediate.  */
 };
 
 /* Parse a <shift> specifier on an ARM data processing instruction.
@@ -5350,7 +5352,13 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
   switch (mode)
     {
     case NO_SHIFT_RESTRICT:
-    case SHIFT_IMMEDIATE:   break;
+    case SHIFT_IMMEDIATE:
+      if (shift == SHIFT_UXTW)
+	{
+	  inst.error = _("'UXTW' not allowed here");
+	  return FAIL;
+	}
+      break;
 
     case SHIFT_LSL_OR_ASR_IMMEDIATE:
       if (shift != SHIFT_LSL && shift != SHIFT_ASR)
@@ -5372,6 +5380,13 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       if (shift != SHIFT_ASR)
 	{
 	  inst.error = _("'ASR' required");
+	  return FAIL;
+	}
+      break;
+    case SHIFT_UXTW_IMMEDIATE:
+      if (shift != SHIFT_UXTW)
+	{
+	  inst.error = _("'UXTW' required");
 	  return FAIL;
 	}
       break;
@@ -5744,7 +5759,21 @@ parse_address_main (char **str, int i, int group_relocations,
   /* PR gas/14887: Allow for whitespace after the opening bracket.  */
   skip_whitespace (p);
 
-  if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
+  if (group_type == GROUP_MVE)
+    {
+      enum arm_reg_type rtype = REG_TYPE_MQ;
+      struct neon_type_el et;
+      if ((reg = arm_typed_reg_parse (&p, rtype, &rtype, &et)) != FAIL)
+	{
+	  inst.operands[i].isquad = 1;
+	}
+      else if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
+	{
+	  inst.error = BAD_ADDR_MODE;
+	  return PARSE_OPERAND_FAIL;
+	}
+    }
+  else if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
       if (group_type == GROUP_MVE)
 	inst.error = BAD_ADDR_MODE;
@@ -5762,7 +5791,26 @@ parse_address_main (char **str, int i, int group_relocations,
       if (*p == '+') p++;
       else if (*p == '-') p++, inst.operands[i].negative = 1;
 
-      if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
+      enum arm_reg_type rtype = REG_TYPE_MQ;
+      struct neon_type_el et;
+      if (group_type == GROUP_MVE
+	  && (reg = arm_typed_reg_parse (&p, rtype, &rtype, &et)) != FAIL)
+	{
+	  inst.operands[i].immisreg = 2;
+	  inst.operands[i].imm = reg;
+
+	  if (skip_past_comma (&p) == SUCCESS)
+	    {
+	      if (parse_shift (&p, i, SHIFT_UXTW_IMMEDIATE) == SUCCESS)
+		{
+		  inst.operands[i].imm |= inst.relocs[0].exp.X_add_number << 5;
+		  inst.relocs[0].exp.X_add_number = 0;
+		}
+	      else
+		return PARSE_OPERAND_FAIL;
+	    }
+	}
+      else if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
 	{
 	  inst.operands[i].imm = reg;
 	  inst.operands[i].immisreg = 1;
@@ -5919,7 +5967,15 @@ parse_address_main (char **str, int i, int group_relocations,
 	  if (*p == '+') p++;
 	  else if (*p == '-') p++, inst.operands[i].negative = 1;
 
-	  if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
+	  enum arm_reg_type rtype = REG_TYPE_MQ;
+	  struct neon_type_el et;
+	  if (group_type == GROUP_MVE
+	      && (reg = arm_typed_reg_parse (&p, rtype, &rtype, &et)) != FAIL)
+	    {
+	      inst.operands[i].immisreg = 2;
+	      inst.operands[i].imm = reg;
+	    }
+	  else if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
 	    {
 	      /* We might be using the immediate for alignment already. If we
 		 are, OR the register number into the low-order bits.  */
@@ -13893,6 +13949,14 @@ do_t_loloop (void)
 #define M_MNEM_vld41	0xfc901e21
 #define M_MNEM_vld42	0xfc901e41
 #define M_MNEM_vld43	0xfc901e61
+#define M_MNEM_vstrb	0xec000e00
+#define M_MNEM_vstrh	0xec000e10
+#define M_MNEM_vstrw	0xec000e40
+#define M_MNEM_vstrd	0xec000e50
+#define M_MNEM_vldrb	0xec100e00
+#define M_MNEM_vldrh	0xec100e10
+#define M_MNEM_vldrw	0xec100e40
+#define M_MNEM_vldrd	0xec100e50
 
 /* Neon instruction encoder helpers.  */
 
@@ -15738,6 +15802,247 @@ check_simd_pred_availability (int fp, unsigned check)
 	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
     }
   return 0;
+}
+
+static void
+do_mve_vstr_vldr_QI (int size, int elsize, int load)
+{
+  constraint (size < 32, BAD_ADDR_MODE);
+  constraint (size != elsize, BAD_EL_TYPE);
+  constraint (inst.operands[1].immisreg, BAD_ADDR_MODE);
+  constraint (!inst.operands[1].preind, BAD_ADDR_MODE);
+  constraint (load && inst.operands[0].reg == inst.operands[1].reg,
+	      _("destination register and offset register may not be the"
+		" same"));
+
+  int imm = inst.relocs[0].exp.X_add_number;
+  int add = 1;
+  if (imm < 0)
+    {
+      add = 0;
+      imm = -imm;
+    }
+  constraint ((imm % (size / 8) != 0)
+	      || imm > (0x7f << neon_logbits (size)),
+	      (size == 32) ? _("immediate must be a multiple of 4 in the"
+			       " range of +/-[0,508]")
+			   : _("immediate must be a multiple of 8 in the"
+			       " range of +/-[0,1016]"));
+  inst.instruction |= 0x11 << 24;
+  inst.instruction |= add << 23;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= inst.operands[1].writeback << 21;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= 1 << 12;
+  inst.instruction |= (size == 64) << 8;
+  inst.instruction &= 0xffffff00;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= imm >> neon_logbits (size);
+}
+
+static void
+do_mve_vstr_vldr_RQ (int size, int elsize, int load)
+{
+    unsigned os = inst.operands[1].imm >> 5;
+    constraint (os != 0 && size == 8,
+		_("can not shift offsets when accessing less than half-word"));
+    constraint (os && os != neon_logbits (size),
+		_("shift immediate must be 1, 2 or 3 for half-word, word"
+		  " or double-word accesses respectively"));
+    if (inst.operands[1].reg == REG_PC)
+      as_tsktsk (MVE_BAD_PC);
+
+    switch (size)
+      {
+      case 8:
+	constraint (elsize >= 64, BAD_EL_TYPE);
+	break;
+      case 16:
+	constraint (elsize < 16 || elsize >= 64, BAD_EL_TYPE);
+	break;
+      case 32:
+      case 64:
+	constraint (elsize != size, BAD_EL_TYPE);
+	break;
+      default:
+	break;
+      }
+    constraint (inst.operands[1].writeback || !inst.operands[1].preind,
+		BAD_ADDR_MODE);
+    if (load)
+      {
+	constraint (inst.operands[0].reg == (inst.operands[1].imm & 0x1f),
+		    _("destination register and offset register may not be"
+		    " the same"));
+	constraint (size == elsize && inst.vectype.el[0].type != NT_unsigned,
+		    BAD_EL_TYPE);
+	constraint (inst.vectype.el[0].type != NT_unsigned
+		    && inst.vectype.el[0].type != NT_signed, BAD_EL_TYPE);
+	inst.instruction |= (inst.vectype.el[0].type == NT_unsigned) << 28;
+      }
+    else
+      {
+	constraint (inst.vectype.el[0].type != NT_untyped, BAD_EL_TYPE);
+      }
+
+    inst.instruction |= 1 << 23;
+    inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+    inst.instruction |= inst.operands[1].reg << 16;
+    inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+    inst.instruction |= neon_logbits (elsize) << 7;
+    inst.instruction |= HI1 (inst.operands[1].imm) << 5;
+    inst.instruction |= LOW4 (inst.operands[1].imm);
+    inst.instruction |= !!os;
+}
+
+static void
+do_mve_vstr_vldr_RI (int size, int elsize, int load)
+{
+  enum neon_el_type type = inst.vectype.el[0].type;
+
+  constraint (size >= 64, BAD_ADDR_MODE);
+  switch (size)
+    {
+    case 16:
+      constraint (elsize < 16 || elsize >= 64, BAD_EL_TYPE);
+      break;
+    case 32:
+      constraint (elsize != size, BAD_EL_TYPE);
+      break;
+    default:
+      break;
+    }
+  if (load)
+    {
+      constraint (elsize != size && type != NT_unsigned
+		  && type != NT_signed, BAD_EL_TYPE);
+    }
+  else
+    {
+      constraint (elsize != size && type != NT_untyped, BAD_EL_TYPE);
+    }
+
+  int imm = inst.relocs[0].exp.X_add_number;
+  int add = 1;
+  if (imm < 0)
+    {
+      add = 0;
+      imm = -imm;
+    }
+
+  if ((imm % (size / 8) != 0) || imm > (0x7f << neon_logbits (size)))
+    {
+      switch (size)
+	{
+	case 8:
+	  constraint (1, _("immediate must be in the range of +/-[0,127]"));
+	  break;
+	case 16:
+	  constraint (1, _("immediate must be a multiple of 2 in the"
+			   " range of +/-[0,254]"));
+	  break;
+	case 32:
+	  constraint (1, _("immediate must be a multiple of 4 in the"
+			   " range of +/-[0,508]"));
+	  break;
+	}
+    }
+
+  if (size != elsize)
+    {
+      constraint (inst.operands[1].reg > 7, BAD_HIREG);
+      constraint (inst.operands[0].reg > 14,
+		  _("MVE vector register in the range [Q0..Q7] expected"));
+      inst.instruction |= (load && type == NT_unsigned) << 28;
+      inst.instruction |= (size == 16) << 19;
+      inst.instruction |= neon_logbits (elsize) << 7;
+    }
+  else
+    {
+      if (inst.operands[1].reg == REG_PC)
+	as_tsktsk (MVE_BAD_PC);
+      else if (inst.operands[1].reg == REG_SP && inst.operands[1].writeback)
+	as_tsktsk (MVE_BAD_SP);
+      inst.instruction |= 1 << 12;
+      inst.instruction |= neon_logbits (size) << 7;
+    }
+  inst.instruction |= inst.operands[1].preind << 24;
+  inst.instruction |= add << 23;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= inst.operands[1].writeback << 21;
+  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction &= 0xffffff80;
+  inst.instruction |= imm >> neon_logbits (size);
+
+}
+
+static void
+do_mve_vstr_vldr (void)
+{
+  unsigned size;
+  int load = 0;
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  switch (inst.instruction)
+    {
+    default:
+      gas_assert (0);
+      break;
+    case M_MNEM_vldrb:
+      load = 1;
+      /* fall through.  */
+    case M_MNEM_vstrb:
+      size = 8;
+      break;
+    case M_MNEM_vldrh:
+      load = 1;
+      /* fall through.  */
+    case M_MNEM_vstrh:
+      size = 16;
+      break;
+    case M_MNEM_vldrw:
+      load = 1;
+      /* fall through.  */
+    case M_MNEM_vstrw:
+      size = 32;
+      break;
+    case M_MNEM_vldrd:
+      load = 1;
+      /* fall through.  */
+    case M_MNEM_vstrd:
+      size = 64;
+      break;
+    }
+  unsigned elsize = inst.vectype.el[0].size;
+
+  if (inst.operands[1].isquad)
+    {
+      /* We are dealing with [Q, imm]{!} cases.  */
+      do_mve_vstr_vldr_QI (size, elsize, load);
+    }
+  else
+    {
+      if (inst.operands[1].immisreg == 2)
+	{
+	  /* We are dealing with [R, Q, {UXTW #os}] cases.  */
+	  do_mve_vstr_vldr_RQ (size, elsize, load);
+	}
+      else if (!inst.operands[1].immisreg)
+	{
+	  /* We are dealing with [R, Imm]{!}/[R], Imm cases.  */
+	  do_mve_vstr_vldr_RI (size, elsize, load);
+	}
+      else
+	constraint (1, BAD_ADDR_MODE);
+    }
+
+  inst.is_neon = 1;
 }
 
 static void
@@ -20578,7 +20883,8 @@ static const struct asm_shift_name shift_names [] =
   { "lsr", SHIFT_LSR },	 { "LSR", SHIFT_LSR },
   { "asr", SHIFT_ASR },	 { "ASR", SHIFT_ASR },
   { "ror", SHIFT_ROR },	 { "ROR", SHIFT_ROR },
-  { "rrx", SHIFT_RRX },	 { "RRX", SHIFT_RRX }
+  { "rrx", SHIFT_RRX },	 { "RRX", SHIFT_RRX },
+  { "uxtw", SHIFT_UXTW}, { "UXTW", SHIFT_UXTW}
 };
 
 /* Table of all explicit relocation names.  */
@@ -22948,6 +23254,14 @@ static const struct asm_opcode insns[] =
  mCEF(vld41,	_vld41,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
  mCEF(vld42,	_vld42,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
  mCEF(vld43,	_vld43,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vstrb,	_vstrb,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vstrh,	_vstrh,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vstrw,	_vstrw,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vstrd,	_vstrd,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vldrb,	_vldrb,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vldrh,	_vldrh,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vldrw,	_vldrw,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
+ mCEF(vldrd,	_vldrd,	    2, (RMQ, ADDRMVE),			mve_vstr_vldr),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v1xd

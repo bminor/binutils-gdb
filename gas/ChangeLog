@@ -1,5 +1,39 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (struct arm_it): Make immisreg field larger to hold
+	type of register.
+	(enum shift_kind): Add SHIFT_UXTW shift kind.
+	(enum parse_shift_mode): Add SHIFT_UXTW_IMMEDIATE shift mode.
+	(parse_shift): Handle new shift type.
+	(parse_address_main): Accept new addressing modes.
+	(M_MNEM_vstrb, M_MNEM_vstrh, M_MNEM_vstrw, M_MNEM_vstrd,
+	 M_MNEM_vldrb, M_MNEM_vldrh, M_MNEM_vldrw, M_MNEM_vldrd): New
+	instruction encodings.
+	(do_mve_vstr_vldr_QI): New encoding functions.
+	(do_mve_vstr_vldr_RQ): Likewise.
+	(do_mve_vstr_vldr_RI): Likewise.
+	(do_mve_vstr_vldr): Likewise.
+	* testsuite/gas/arm/mve-vldr-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vldr-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vldr-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vldr-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vldr-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vldr-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vldr-bad-3.d: New test.
+	* testsuite/gas/arm/mve-vldr-bad-3.l: New test.
+	* testsuite/gas/arm/mve-vldr-bad-3.s: New test.
+	* testsuite/gas/arm/mve-vstr-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vstr-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vstr-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vstr-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vstr-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vstr-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vstr-bad-3.d: New test.
+	* testsuite/gas/arm/mve-vstr-bad-3.l: New test.
+	* testsuite/gas/arm/mve-vstr-bad-3.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum it_instruction_type): Add MVE_UNPREDICABLE_INSN.
 	(BAD_EL_TYPE): New error message.
 	(parse_neon_el_struct_list): Adapt to be able to accept MVE variant.
