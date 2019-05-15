@@ -1,3 +1,10 @@
+2019-05-15  John Darrington <john@darrington.wattle.id.au>
+
+	* s12z-tdep.c (push_pull_get_stack_adjustment): New function.
+	(advance, posn, abstract_read_memory): New functions.
+	[struct mem_read_abstraction]: New struct.
+	(s12z_frame_cache): Use opcodes API to interpret stack frame code.
+
 2019-05-14  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (coerce_unspec_val_to_type): Only set address when
