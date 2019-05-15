@@ -7664,7 +7664,7 @@ subject, see the hardware manufacturer's manual.
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
 @end ifset
 @ifset S12Z
-* S12Z-Dependent::            S12Z Dependent Features
+* S12Z-Dependent::              S12Z Dependent Features
 @end ifset
 @ifset METAG
 * Meta-Dependent ::             Meta Dependent Features
