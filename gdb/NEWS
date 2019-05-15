@@ -39,6 +39,13 @@ show may-call-functions
   an error when a command (such as print expression) calls a function
   in the program.
 
+set print finish [on|off]
+show print finish
+  This controls whether the `finish' command will display the value
+  that is returned by the current function.  When `off', the value is
+  still entered into the value history, but it is not printed.  The
+  default is `on'.
+
 set print max-depth
 show print max-depth
   Allows deeply nested structures to be simplified when printing by

@@ -5599,6 +5599,15 @@ abbreviated as @code{fin}.
 Contrast this with the @code{return} command (@pxref{Returning,
 ,Returning from a Function}).
 
+@kindex set print finish
+@kindex show print finish
+@item set print finish @r{[}on|off@r{]}
+@itemx show print finish
+By default the @code{finish} command will show the value that is
+returned by the function.  This can be disabled using @code{set print
+finish off}.  When disabled, the value is still entered into the value
+history (@pxref{Value History}), but not displayed.
+
 @kindex until
 @kindex u @r{(@code{until})}
 @cindex run until specified location

@@ -1621,10 +1621,14 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
       uiout->text (" = ");
       get_user_print_options (&opts);
 
-      string_file stb;
-
-      value_print (rv->value, &stb, &opts);
-      uiout->field_stream ("return-value", stb);
+      if (opts.finish_print)
+	{
+	  string_file stb;
+	  value_print (rv->value, &stb, &opts);
+	  uiout->field_stream ("return-value", stb);
+	}
+      else
+	uiout->field_string ("return-value", _("<not displayed>"));
       uiout->text ("\n");
     }
   else
@@ -3096,6 +3100,19 @@ info_proc_cmd_all (const char *args, int from_tty)
   info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
 
+/* Implement `show print finish'.  */
+
+static void
+show_print_finish (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c,
+		   const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of return value after `finish' is %s.\n"),
+		    value);
+}
+
+
 /* This help string is used for the run, start, and starti commands.
    It is defined as a macro to prevent duplication.  */
 
@@ -3420,4 +3437,12 @@ List files opened by the specified process."),
   add_cmd ("all", class_info, info_proc_cmd_all, _("\
 List all available info about the specified process."),
 	   &info_proc_cmdlist);
+
+  add_setshow_boolean_cmd ("finish", class_support,
+			   &user_print_options.finish_print, _("\
+Set whether `finish' prints the return value."), _("\
+Show whether `finish' prints the return value."), NULL,
+			   NULL,
+			   show_print_finish,
+			   &setprintlist, &showprintlist);
 }

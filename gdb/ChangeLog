@@ -1,3 +1,14 @@
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
+	* NEWS: Add entry.
+	* infcmd.c (print_return_value_1): Handle finish_print
+	option.
+	(show_print_finish): New function.
+	(_initialize_infcmd): Add "set/show print finish" commands.
+	* valprint.c (user_print_options): Initialize new member.
+	* valprint.h (struct value_print_options) <finish_print>: New
+	member.
+
 2019-05-28  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_remove_Xbn_suffix)

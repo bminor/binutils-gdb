@@ -95,6 +95,9 @@ struct value_print_options
 
   /* Maximum print depth when printing nested aggregates.  */
   int max_depth;
+
+  /* Whether "finish" should print the value.  */
+  int finish_print;
 };
 
 /* The global print options set by the user.  In general this should

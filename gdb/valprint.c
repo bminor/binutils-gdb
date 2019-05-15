@@ -111,7 +111,8 @@ struct value_print_options user_print_options =
   0,				/* raw */
   0,				/* summary */
   1,				/* symbol_print */
-  PRINT_MAX_DEPTH_DEFAULT	/* max_depth */
+  PRINT_MAX_DEPTH_DEFAULT,	/* max_depth */
+  1				/* finish_print */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */
