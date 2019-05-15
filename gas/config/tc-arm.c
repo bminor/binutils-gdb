@@ -708,7 +708,7 @@ struct asm_opcode
   unsigned int tag : 4;
 
   /* Basic instruction code.  */
-  unsigned int avalue : 28;
+  unsigned int avalue;
 
   /* Thumb-format instruction code.  */
   unsigned int tvalue;
@@ -851,6 +851,8 @@ struct asm_opcode
 #define BAD_ARGS	_("bad arguments to instruction")
 #define BAD_SP          _("r13 not allowed here")
 #define BAD_PC		_("r15 not allowed here")
+#define BAD_ODD		_("Odd register not allowed here")
+#define BAD_EVEN	_("Even register not allowed here")
 #define BAD_COND	_("instruction cannot be conditional")
 #define BAD_OVERLAP	_("registers may not be the same")
 #define BAD_HIREG	_("lo register required")
@@ -884,6 +886,7 @@ struct asm_opcode
 			  " operand")
 #define MVE_BAD_SP	_("Warning: instruction is UNPREDICTABLE with SP" \
 			  " operand")
+#define BAD_SIMD_TYPE	_("bad type in SIMD instruction")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -6714,8 +6717,12 @@ enum operand_parse_code
 		 */
   OP_RNSDQMQR,	/* Neon single, double or quad register, MVE vector register or
 		   GPR (no SP/SP)  */
+  OP_RMQ,	/* MVE vector register.  */
+
   /* New operands for Armv8.1-M Mainline.  */
   OP_LR,	/* ARM LR register */
+  OP_RRe,	/* ARM register, only even numbered.  */
+  OP_RRo,	/* ARM register, only odd numbered, not r13 or r15.  */
   OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
 
   OP_REGLST,	/* ARM register list */
@@ -6973,6 +6980,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RRnpc:
 	case OP_RRnpcsp:
 	case OP_oRR:
+	case OP_RRe:
+	case OP_RRo:
 	case OP_LR:
 	case OP_oLR:
 	case OP_RR:    po_reg_or_fail (REG_TYPE_RN);	  break;
@@ -7036,6 +7045,9 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  try_nsdq2:
 	  po_reg_or_fail (REG_TYPE_NSDQ);
 	  inst.error = 0;
+	  break;
+	case OP_RMQ:
+	  po_reg_or_fail (REG_TYPE_MQ);
 	  break;
 	/* Neon scalar. Using an element size of 8 means that some invalid
 	   scalars are accepted here, so deal with those in later code.  */
@@ -7555,6 +7567,24 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_oLR:
 	  if (inst.operands[i].reg != REG_LR)
 	    inst.error = _("operand must be LR register");
+	  break;
+
+	case OP_RRe:
+	  if (inst.operands[i].isreg
+	      && (inst.operands[i].reg & 0x00000001) != 0)
+	    inst.error = BAD_ODD;
+	  break;
+
+	case OP_RRo:
+	  if (inst.operands[i].isreg)
+	    {
+	      if ((inst.operands[i].reg & 0x00000001) != 1)
+		inst.error = BAD_EVEN;
+	      else if (inst.operands[i].reg == REG_SP)
+		as_tsktsk (MVE_BAD_SP);
+	      else if (inst.operands[i].reg == REG_PC)
+		inst.error = BAD_PC;
+	    }
 	  break;
 
 	default:
@@ -13793,6 +13823,17 @@ do_t_loloop (void)
     }
 }
 
+/* MVE instruction encoder helpers.  */
+#define M_MNEM_vabav	0xee800f01
+#define M_MNEM_vmladav	  0xeef00e00
+#define M_MNEM_vmladava	  0xeef00e20
+#define M_MNEM_vmladavx	  0xeef01e00
+#define M_MNEM_vmladavax  0xeef01e20
+#define M_MNEM_vmlsdav	  0xeef00e01
+#define M_MNEM_vmlsdava	  0xeef00e21
+#define M_MNEM_vmlsdavx	  0xeef01e01
+#define M_MNEM_vmlsdavax  0xeef01e21
+
 /* Neon instruction encoder helpers.  */
 
 /* Encodings for the different types for various Neon opcodes.  */
@@ -13956,6 +13997,7 @@ NEON_ENC_TAB
      - a table used to drive neon_select_shape.  */
 
 #define NEON_SHAPE_DEF			\
+  X(3, (R, Q, Q), QUAD),		\
   X(3, (D, D, D), DOUBLE),		\
   X(3, (Q, Q, Q), QUAD),		\
   X(3, (D, D, I), DOUBLE),		\
@@ -14683,7 +14725,7 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
 
 		  if ((given_type & types_allowed) == 0)
 		    {
-		      first_error (_("bad type in SIMD instruction"));
+		      first_error (BAD_SIMD_TYPE);
 		      return badtype;
 		    }
 		}
@@ -15162,6 +15204,19 @@ mve_encode_qqr (int size, int fp)
   inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
   inst.instruction |= HI1 (inst.operands[1].reg) << 7;
   inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
+static void
+mve_encode_rqq (unsigned bit28, unsigned size)
+{
+  inst.instruction |= bit28 << 28;
+  inst.instruction |= neon_logbits (size) << 20;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= inst.operands[0].reg << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[2].reg);
   inst.is_neon = 1;
 }
 
@@ -15881,6 +15936,65 @@ do_neon_qdmulh (void)
       /* The U bit (rounding) comes from bit mask.  */
       neon_three_same (neon_quad (rs), 0, et.size);
     }
+}
+
+static void
+do_mve_vabav (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RQQ, NS_NULL);
+
+  if (rs == NS_NULL)
+    return;
+
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    return;
+
+  struct neon_type_el et = neon_check_type (2, NS_NULL, N_EQK, N_KEY | N_S8
+					    | N_S16 | N_S32 | N_U8 | N_U16
+					    | N_U32);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_rqq (et.type == NT_unsigned, et.size);
+}
+
+static void
+do_mve_vmladav (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RQQ, NS_NULL);
+  struct neon_type_el et = neon_check_type (3, rs,
+					    N_EQK, N_EQK, N_SU_MVE | N_KEY);
+
+  if (et.type == NT_unsigned
+      && (inst.instruction == M_MNEM_vmladavx
+	  || inst.instruction == M_MNEM_vmladavax
+	  || inst.instruction == M_MNEM_vmlsdav
+	  || inst.instruction == M_MNEM_vmlsdava
+	  || inst.instruction == M_MNEM_vmlsdavx
+	  || inst.instruction == M_MNEM_vmlsdavax))
+    first_error (BAD_SIMD_TYPE);
+
+  constraint (inst.operands[2].reg > 14,
+	      _("MVE vector register in the range [Q0..Q7] expected"));
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (inst.instruction == M_MNEM_vmlsdav
+      || inst.instruction == M_MNEM_vmlsdava
+      || inst.instruction == M_MNEM_vmlsdavx
+      || inst.instruction == M_MNEM_vmlsdavax)
+    inst.instruction |= (et.size == 8) << 28;
+  else
+    inst.instruction |= (et.size == 8) << 8;
+
+  mve_encode_rqq (et.type == NT_unsigned, 64);
+  inst.instruction |= (et.size == 32) << 16;
 }
 
 static void
@@ -20573,7 +20687,7 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 /*   */
 #define mCEF(mnem, op, nops, ops, enc)				\
-  { #mnem, OPS##nops ops, OT_csuffixF, 0, M_MNEM##op,		\
+  { #mnem, OPS##nops ops, OT_csuffixF, M_MNEM##op, M_MNEM##op,	\
     ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 1 }
 
 
@@ -22632,6 +22746,19 @@ static const struct asm_opcode insns[] =
  ToC("vpstete",	fe71ef4d, 0, (), mve_vpt),
  ToC("vpsteet",	fe716f4d, 0, (), mve_vpt),
  ToC("vpsteee",	fe712f4d, 0, (), mve_vpt),
+
+ /* MVE and MVE FP only.  */
+ mCEF(vabav,	_vabav,	    3, (RRnpcsp, RMQ, RMQ),		  mve_vabav),
+ mCEF(vmladav,	  _vmladav,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmladava,	  _vmladava,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmladavx,	  _vmladavx,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmladavax,  _vmladavax,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlav,	  _vmladav,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlava,	  _vmladava,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlsdav,	  _vmlsdav,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlsdava,	  _vmlsdava,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlsdavx,	  _vmlsdavx,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+ mCEF(vmlsdavax,  _vmlsdavax,	3, (RRe, RMQ, RMQ),		mve_vmladav),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v1xd

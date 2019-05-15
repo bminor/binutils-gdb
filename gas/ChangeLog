@@ -1,5 +1,32 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (struct asm_opcode): Make avalue a full int.
+	(BAD_ODD, BAD_EVEN, BAD_SIMD_TYPE): New errors.
+	(enum operand_parse_code): Handle new operands.
+	(parse_operands): Likewise.
+	(M_MNEM_vabav, M_MNEM_vmladav, M_MNEM_vmladava, M_MNEM_vmladavx,
+	 M_MNEM_vmladavax, M_MNEM_vmlsdav, M_MNEM_vmlsdava, M_MNEM_vmlsdavx,
+	 M_MNEM_vmlsdavax): Define new encodings.
+	(NEON_SHAPE_DEF): Add new shape.
+	(neon_check_type): Use BAD_SIMD_TYPE.
+	(mve_encode_rqq): New encoding helper function.
+	(do_mve_vabav, do_mve_vmladav): New encoding functions.
+	(mCEF): New MACRO.
+	* testsuite/gas/arm/mve-vabav-bad.d: New test.
+	* testsuite/gas/arm/mve-vabav-bad.l: New test.
+	* testsuite/gas/arm/mve-vabav-bad.s: New test.
+	* testsuite/gas/arm/mve-vmladav-bad.d: New test.
+	* testsuite/gas/arm/mve-vmladav-bad.l: New test.
+	* testsuite/gas/arm/mve-vmladav-bad.s: New test.
+	* testsuite/gas/arm/mve-vmlav-bad.d: New test.
+	* testsuite/gas/arm/mve-vmlav-bad.l: New test.
+	* testsuite/gas/arm/mve-vmlav-bad.s: New test.
+	* testsuite/gas/arm/mve-vmlsdav-bad.d: New test.
+	* testsuite/gas/arm/mve-vmlsdav-bad.l: New test.
+	* testsuite/gas/arm/mve-vmlsdav-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_neon_abs_neg): Make it accept MVE variant.
 	(insns): Change vabs and vneg entries to accept MVE variants.
 	* testsuite/gas/arm/mve-vabsneg-bad-1.d: New test.
