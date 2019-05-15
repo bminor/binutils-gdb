@@ -1,5 +1,16 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_neon_abs_neg): Make it accept MVE variant.
+	(insns): Change vabs and vneg entries to accept MVE variants.
+	* testsuite/gas/arm/mve-vabsneg-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vabsneg-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vabsneg-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vabsneg-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vabsneg-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vabsneg-bad-2.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum it_instruction_type): Rename to...
 	(enum pred_instruction_type): ... this. Include VPT types.
 	(it_insn_type): Rename to ...

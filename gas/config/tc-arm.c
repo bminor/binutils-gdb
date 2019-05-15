@@ -15950,11 +15950,12 @@ do_neon_abs_neg (void)
   if (try_vfp_nsyn (2, do_vfp_nsyn_abs_neg) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
-    return;
-
   rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
   et = neon_check_type (2, rs, N_EQK, N_S_32 | N_F_16_32 | N_KEY);
+
+  if (check_simd_pred_availability (et.type == NT_float,
+				    NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
 
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[0].reg) << 22;
@@ -21909,9 +21910,6 @@ static const struct asm_opcode insns[] =
  nCEF(vmla,     _vmla,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
  nCEF(vmls,     _vmls,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
 
- NCEF(vabs,     1b10300, 2, (RNSDQ, RNSDQ), neon_abs_neg),
- NCEF(vneg,     1b10380, 2, (RNSDQ, RNSDQ), neon_abs_neg),
-
  NCE(vldm,      c900b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vldmia,    c900b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vldmdb,    d100b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
@@ -22642,6 +22640,9 @@ static const struct asm_opcode insns[] =
 
  mnCEF(vadd,     _vadd,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
  mnCEF(vsub,     _vsub,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
+
+ MNCEF(vabs,  1b10300,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
+ MNCEF(vneg,  1b10380,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT & fpu_neon_ext_v1
