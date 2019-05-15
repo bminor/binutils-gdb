@@ -19693,6 +19693,9 @@ elf32_arm_write_section (bfd *output_bfd,
 		bfd_vma branch_to_veneer =
 		  stm32l4xx_errnode->u.b.veneer->vma - stm32l4xx_errnode->vma;
 
+		/* The instruction is before the label.  */
+		target -= 4;
+
 		if ((signed) branch_to_veneer < -(1 << 24)
 		    || (signed) branch_to_veneer >= (1 << 24))
 		  {
@@ -19710,14 +19713,14 @@ elf32_arm_write_section (bfd *output_bfd,
 		       output_bfd,
 		       (uint64_t) (stm32l4xx_errnode->vma - 4),
 		       (int64_t) out_of_range);
+
+		    /* Don't leave contents uninitialised.  */
+		    bfd_put_16 (output_bfd, 0, contents + target);
 		    continue;
 		  }
 
 		insn = create_instruction_branch_absolute
 		  (stm32l4xx_errnode->u.b.veneer->vma - stm32l4xx_errnode->vma);
-
-		/* The instruction is before the label.  */
-		target -= 4;
 
 		put_thumb2_insn (globals, output_bfd,
 				 (bfd_vma) insn, contents + target);
