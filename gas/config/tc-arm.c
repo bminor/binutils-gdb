@@ -14136,6 +14136,9 @@ do_t_loloop (void)
 #define M_MNEM_vmovlb	0xeea00f40
 #define M_MNEM_vmovnt	0xfe311e81
 #define M_MNEM_vmovnb	0xfe310e81
+#define M_MNEM_vadc	0xee300f00
+#define M_MNEM_vadci	0xee301f00
+#define M_MNEM_vbrsr	0xfe011e60
 
 /* Neon instruction encoder helpers.  */
 
@@ -16756,6 +16759,52 @@ do_neon_qdmulh (void)
       /* The U bit (rounding) comes from bit mask.  */
       neon_three_same (neon_quad (rs), 0, et.size);
     }
+}
+
+static void
+do_mve_vadc (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_KEY | N_I32, N_EQK, N_EQK);
+
+  if (et.type == NT_invtype)
+    first_error (BAD_EL_TYPE);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_qqq (0, 64);
+}
+
+static void
+do_mve_vbrsr (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_8 | N_16 | N_32 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_qqr (et.size, 0);
+}
+
+static void
+do_mve_vsbc (void)
+{
+  neon_check_type (3, NS_QQQ, N_EQK, N_EQK, N_I32 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_qqq (1, 64);
 }
 
 static void
@@ -23909,6 +23958,10 @@ static const struct asm_opcode insns[] =
  ToC("vpsteee",	fe712f4d, 0, (), mve_vpt),
 
  /* MVE and MVE FP only.  */
+ mCEF(vadc,	_vadc,      3, (RMQ, RMQ, RMQ),			  mve_vadc),
+ mCEF(vadci,	_vadci,     3, (RMQ, RMQ, RMQ),			  mve_vadc),
+ mToC("vsbc",	fe300f00,   3, (RMQ, RMQ, RMQ),			  mve_vsbc),
+ mToC("vsbci",	fe301f00,   3, (RMQ, RMQ, RMQ),			  mve_vsbc),
  mCEF(vmullb,	_vmullb,    3, (RMQ, RMQ, RMQ),			  mve_vmull),
  mCEF(vabav,	_vabav,	    3, (RRnpcsp, RMQ, RMQ),		  mve_vabav),
  mCEF(vmladav,	  _vmladav,	3, (RRe, RMQ, RMQ),		mve_vmladav),
@@ -23945,6 +23998,7 @@ static const struct asm_opcode insns[] =
 
  mCEF(vmovnt,	_vmovnt,    2, (RMQ, RMQ),			  mve_movn),
  mCEF(vmovnb,	_vmovnb,    2, (RMQ, RMQ),			  mve_movn),
+ mCEF(vbrsr,	_vbrsr,     3, (RMQ, RMQ, RR),			  mve_vbrsr),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1

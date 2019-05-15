@@ -1,5 +1,22 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vadc, M_MNEM_vadci, M_MNEM_vbrsr):
+	New instruction encodings.
+	(do_mve_vadc): New encoding instruction.
+	(do_mve_vbrsr): Likewise.
+	(do_mve_vsbc): Likewise.
+	* testsuite/gas/arm/mve-vadc-bad.d: New test.
+	* testsuite/gas/arm/mve-vadc-bad.l: New test.
+	* testsuite/gas/arm/mve-vadc-bad.s: New test.
+	* testsuite/gas/arm/mve-vbrsr-bad.d: New test.
+	* testsuite/gas/arm/mve-vbrsr-bad.l: New test.
+	* testsuite/gas/arm/mve-vbrsr-bad.s: New test.
+	* testsuite/gas/arm/mve-vsbc-bad.d: New test.
+	* testsuite/gas/arm/mve-vsbc-bad.l: New test.
+	* testsuite/gas/arm/mve-vsbc-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (MVE_BAD_QREG): New error message.
 	(enum operand_parse_code): Define new operand.
 	(parse_operands): Handle new operand.
