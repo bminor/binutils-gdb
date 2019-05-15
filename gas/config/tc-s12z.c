@@ -32,6 +32,8 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = "#*";
 const char line_separator_chars[] = "";
 
+static char * register_prefix = NULL;
+
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
@@ -40,10 +42,12 @@ static char *fail_line_pointer;
 
 /* Options and initialization.  */
 
-const char *md_shortopts = "Sm:";
+const char *md_shortopts = "";
 
 struct option md_longopts[] =
   {
+   {"mreg-prefix", required_argument, NULL, OPTION_MD_BASE},
+   {NULL, no_argument, NULL, 0}
   };
 
 size_t md_longopts_size = sizeof (md_longopts);
@@ -92,8 +96,12 @@ s12z_listing_header (void)
 }
 
 void
-md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
+md_show_usage (FILE *stream)
 {
+  fprintf (stream,
+      _("\ns12z options:\n"
+	"  -mreg-prefix=PREFIX     set a prefix used to indicate register names (default none)"
+        "\n"));
 }
 
 void
@@ -102,9 +110,17 @@ s12z_print_statistics (FILE *file ATTRIBUTE_UNUSED)
 }
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char *arg)
 {
-  return 0;
+  switch (c)
+    {
+    case OPTION_MD_BASE:
+      register_prefix = xstrdup (arg);
+      break;
+    default:
+      return 0;
+    }
+  return 1;
 }
 
 symbolS *
@@ -310,13 +326,30 @@ static bfd_boolean
 lex_reg_name (uint16_t which, int *reg)
 {
   char *p = input_line_pointer;
-  while (p != 0 &&
-	 ((*p >= 'a' && *p <='z') || (*p >= '0' && *p <= '9') || (*p >= 'A' && *p <='Z')))
+
+  if (p == 0)
+    return false;
+
+  /* Scan (and ignore) the register prefix.  */
+  if (register_prefix)
+    {
+      int len = strlen (register_prefix);
+      if (0 == strncmp (register_prefix, p, len))
+        p += len;
+      else
+        return false;
+    }
+
+  char *start_of_reg_name = p;
+
+  while ((*p >= 'a' && *p <='z')
+         || (*p >= '0' && *p <= '9')
+         || (*p >= 'A' && *p <='Z'))
     {
       p++;
     }
 
-  size_t len = p - input_line_pointer;
+  size_t len = p - start_of_reg_name;
 
   if (len <= 0)
     return false;
@@ -327,7 +360,7 @@ lex_reg_name (uint16_t which, int *reg)
       gas_assert (registers[i].name);
 
       if (len == strlen (registers[i].name)
-	  && 0 == strncasecmp (registers[i].name, input_line_pointer, len))
+	  && 0 == strncasecmp (registers[i].name, start_of_reg_name, len))
 	{
 	  if ((0x1U << i) & which)
 	    {

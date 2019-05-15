@@ -4,11 +4,11 @@
 @ifset GENERIC
 @page
 @node S12Z-Dependent
-@chapter S12Z Dependent Features
+@chapter   S12Z Dependent Features
 @end ifset
 @ifclear GENERIC
 @node Machine Dependencies
-@chapter S12Z Dependent Features
+@chapter   S12Z Dependent Features
 @end ifclear
 
 The Freescale S12Z version of @code{@value{AS}} has a few machine
@@ -19,7 +19,7 @@ dependent features.
 * S12Z-Opts::                   S12Z Options
 * S12Z-Syntax::                 Syntax
 * S12Z-Directives::             Assembler Directives
-* S12Z-opcodes::                Opcodes
+* S12Z-Opcodes::                Opcodes
 @end menu
 
 @node S12Z-Opts
@@ -28,8 +28,24 @@ dependent features.
 @cindex options, S12Z
 @cindex S12Z options
 
+The S12Z version of @code{@value{AS}} has the following options:
+
+@cindex @samp{-mreg-prefix=@var{prefix}} option, reg-prefix
+You can use the @samp{-mreg-prefix=@var{pfx}} option to indicate
+that the assembler expects each register name to be prefixed with the
+string @var{pfx}.
+
+For an explanation of what this means and why it might be needed,
+see @ref{Register Notation}.
+
 @node S12Z-Syntax
 @section Syntax
+
+
+@menu
+* Register Notation::                How to refer to registers
+@end menu
+
 
 @cindex S12Z syntax
 @cindex syntax, S12Z
@@ -109,16 +125,21 @@ Thus, they must be within the range [-32768, 32767].
 @item Register
 @samp{@var{reg}}
 
+@cindex register names, S12Z
 Some instructions accept a register as an operand.
-In general, @var{reg} may be a data register (@samp{D0}, @samp{D1} @dots{}
-@samp{D7}), the @var{X} register or the @var{Y} register.
+In general, @var{reg} may be a
+data register (@samp{D0}, @samp{D1} @dots{} @samp{D7}),
+the @samp{X} register or the @samp{Y} register.
 
 A few instructions accept as an argument the stack pointer
 register (@samp{S}), and/or the program counter (@samp{P}).
 
 Some very special instructions accept arguments which refer to the
 condition code register.  For these arguments the  syntax is
-@samp{CCR}, @samp{CCH} or @samp{CCL} which refer to the complete condition code register, the condition code register high byte and the condition code register low byte respectively.
+@samp{CCR}, @samp{CCH} or @samp{CCL} which refer to the complete
+condition code register, the condition code register high byte
+and the condition code register low byte respectively.
+
 
 @item Absolute Direct
 @samp{@var{symbol}}, or @samp{@var{digits}}
@@ -178,8 +199,6 @@ must be one of the data registers @samp{D0}, @samp{D1} @dots{} @samp{D7}.
 If any of the registers @samp{D2} @dots{} @samp{D5} are specified, then
 the register value is treated as a signed value.
 Otherwise it is treated as unsigned.
-
-
 @end table
 
 For example:
@@ -199,12 +218,61 @@ For example:
 	psh     cch
 @end smallexample
 
+@node Register Notation
+@subsection Register Notation
+
+@cindex register notation, S12Z
+Without a register prefix (@pxref{S12Z-Opts}), S12Z assembler code is expected in the traditional
+format like this:
+@smallexample
+lea s, (-2,s)
+st d2, (0,s)
+ld x,  symbol
+tfr d2, d6
+cmp d6, #1532
+@end smallexample
+
+@noindent
+However, if @code{@value{AS}} is started with (for example) @samp{-mreg-prefix=%}
+then all register names must be prefixed with @samp{%} as follows:
+@smallexample
+lea %s, (-2,%s)
+st %d2, (0,%s)
+ld %x,  symbol
+tfr %d2, %d6
+cmp %d6, #1532
+@end smallexample
+
+The register prefix feature is intended to be used by compilers
+to avoid ambiguity between symbols and register names.
+Consider the following assembler instruction:
+@smallexample
+st d0, d1
+@end smallexample
+@noindent
+This instruction is most likely to
+mean ``Store the value in the register D0 into the register D1'' and that is the
+default way in which @code{@value{AS}} interprets it.
+However it could also be intended to mean
+``Store the value in the register D0 into the memory referenced by the symbol
+named @samp{d1}''.
+If that is what is intended then @code{@value{AS}} must be invoked with
+@samp{-mreg-prefix=@var{pfx}} and the code written as
+@smallexample
+st @var{pfx}d0, d1
+@end smallexample
+@noindent
+where @var{pfx} is the chosen register prefix.
+For this reason, compiler back-ends should choose a register prefix which
+cannot be confused with a symbol name.
+
+
 @node S12Z-Directives
 @section Assembler Directives
 
 @cindex assembler directives, S12Z
 
-@node S12Z-opcodes
+@node S12Z-Opcodes
 @section Opcodes
 
 @cindex S12Z opcodes

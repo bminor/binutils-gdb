@@ -138,3 +138,7 @@ run_dump_test st-large-direct
 run_dump_test st-small-direct
 
 run_dump_test imm-dest
+
+# Miscellaneous
+
+run_dump_test reg-prefix

@@ -1,3 +1,13 @@
+2019-05-15  John Darrington <john@darrington.wattle.id.au>
+
+	* config/tc-s12z.c (register_prefix): New variable.  (md_show_usage,
+	md_parse_option):  parse the new option.
+	(lex_reg_name): Scan the prefix if one is set.
+	* doc/c-s12z.texi (S12Z-Opts): Document the new option.
+	* testsuite/gas/s12z/reg-prefix.d: New file.
+	* testsuite/gas/s12z/reg-prefix.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+
 2019-05-14  John Darrington <john@darrington.wattle.id.au>
 
 	* doc/as.texi (Machine Dependencies): Fix misaligned menu entry.
