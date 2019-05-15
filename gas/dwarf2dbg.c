@@ -754,7 +754,7 @@ get_filenum (const char *filename, unsigned int num)
       /* Catch wraparound.  */
       if (files_allocated <= old)
 	{
-	  as_bad (_("file number %u is too big"), i);
+	  as_bad (_("file number %lu is too big"), (unsigned long) i);
 	  return 0;
 	}
 
@@ -762,7 +762,7 @@ get_filenum (const char *filename, unsigned int num)
       memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
     }
 
-  files[i].filename = num ? file : xstrdup (file);
+  files[i].filename = file;
   files[i].dir = dir;
   if (files_in_use < i + 1)
     files_in_use = i + 1;
@@ -781,7 +781,7 @@ get_filenum (const char *filename, unsigned int num)
 char *
 dwarf2_directive_filename (void)
 {
-  offsetT num;
+  valueT num;
   char *filename;
   int filename_len;
 
@@ -799,7 +799,7 @@ dwarf2_directive_filename (void)
     return NULL;
   demand_empty_rest_of_line ();
 
-  if (num < 1)
+  if ((offsetT) num < 1)
     {
       as_bad (_("file number less than one"));
       return NULL;
@@ -809,14 +809,15 @@ dwarf2_directive_filename (void)
      being supplied.  Turn off gas generated debug info.  */
   debug_type = DEBUG_NONE;
 
-  if (num < (offsetT) files_in_use && files[num].filename != 0)
+  if (num != (unsigned int) num
+      || num >= (size_t) -1 / sizeof (struct file_entry) - 32)
     {
-      as_bad (_("file number %ld already allocated"), (long) num);
+      as_bad (_("file number %lu is too big"), (unsigned long) num);
       return NULL;
     }
-  else if (num < 0)
+  if (num < files_in_use && files[num].filename != 0)
     {
-      as_bad (_("file number %ld is too small!"), (long) num);
+      as_bad (_("file number %u already allocated"), (unsigned int) num);
       return NULL;
     }
 
@@ -1172,10 +1173,10 @@ scale_addr_delta (addressT *addr_delta)
   if (DWARF2_LINE_MIN_INSN_LENGTH > 1)
     {
       if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
-        {
+	{
 	  as_bad("unaligned opcodes detected in executable segment");
-          printed_this = 1;
-        }
+	  printed_this = 1;
+	}
       *addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
     }
 }
@@ -1750,10 +1751,10 @@ out_file_list (void)
       out_uleb128 (files[i].dir);	/* directory number */
       /* Output the last modification timestamp.  */
       out_uleb128 (DWARF2_FILE_TIME_NAME (files[i].filename,
-				          files[i].dir ? dirs [files [i].dir] : ""));
+					  files[i].dir ? dirs [files [i].dir] : ""));
       /* Output the filesize.  */
       out_uleb128 (DWARF2_FILE_SIZE_NAME (files[i].filename,
-				          files[i].dir ? dirs [files [i].dir] : ""));
+					  files[i].dir ? dirs [files [i].dir] : ""));
     }
 
   /* Terminate filename list.  */

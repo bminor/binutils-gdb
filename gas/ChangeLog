@@ -1,5 +1,13 @@
 2019-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2dbg.c: Whitespace fixes.
+	(get_filenum): Don't strdup "file".  Adjust error message.
+	(dwarf2_directive_filename): Use an unsigned type for "num".
+	Catch truncation of file number and overflow of get_filenum
+	XRESIZEVEC multiplication.  Delete dead code.
+
+2019-05-15  Alan Modra  <amodra@gmail.com>
+
 	PR 24538
 	* config/tc-tic54x.c (tic54x_start_line_hook): Do skip end of line
 	chars in setting endp.
@@ -256,7 +264,7 @@
 
 2019-04-29  John Darrington <john@darrington.wattle.id.au>
 
-        * testsuite/gas/s12z/truncated.d: New file.
+	* testsuite/gas/s12z/truncated.d: New file.
 	* testsuite/gas/s12z/truncated.s: New file.
 	* testsuite/gas/s12z/s12z.exp: Add new test.
 
@@ -509,7 +517,7 @@
 	* testsuite/gas/arm/archv8m_1m-cmse-main.s: Likewise.
 
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
-            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (operand_parse_code): Add OP_LR and OP_oLR
 	for the LR operand and optional LR operand.
@@ -531,7 +539,7 @@
 	* testsuite/gas/arm/armv8_1-m-tloop-bad.l: New.
 
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
-            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (T16_32_TAB): New entriy for bfcsel.
 	(do_t_v8_1_branch): New switch case for bfcsel.
@@ -552,7 +560,7 @@
 	(tc_gen_reloc): Likewise.
 
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
-            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (T16_32_TAB): New entrie for bfl.
 	(do_t_v8_1_branch): New switch case for bfl.
@@ -584,7 +592,7 @@
 	* testsuite/gas/arm/armv8_1-m-bf-exchange-bad.d: New
 
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
-            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (T16_32_TAB): New entries for bf.
 	(do_t_branch_future): New.
@@ -660,11 +668,11 @@
 	* testsuite/gas/mips/mips.exp: Run the new test.
 
 2019-04-12  John Darrington <john@darrington.wattle.id.au>
-	
+
 	config/tc-s12z.h: Remove definition of macro TC_M68K
 
 2019-04-01  John Darrington <john@darrington.wattle.id.au>
-	
+
 	config/tc-s12z.c: Use bfd_boolean where appropriate.
 
 2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
@@ -1292,7 +1300,7 @@
 
 2019-01-31  John Darrington <john@darrington.wattle.id.au>
 
-        * config/tc-s12z.c (lex_imm): Add new argument exp_o.
+	* config/tc-s12z.c (lex_imm): Add new argument exp_o.
 	(emit_reloc): New function.
 	(md_apply_fix): [BFD_RELOC_S12Z_OPR] Recognise that it
 	can be either 2 bytes or 3 bytes long.
@@ -1545,7 +1553,7 @@
 
 2019-01-09  John Darrington <john@darrington.wattle.id.au>
 
-        * testsuite/gas/s12z/jsr.s: New case.
+	* testsuite/gas/s12z/jsr.s: New case.
 	* testsuite/gas/s12z/jsr.d: New case.
 
 2019-01-09  Andrew Paprocki  <andrew@ishiboo.com>
