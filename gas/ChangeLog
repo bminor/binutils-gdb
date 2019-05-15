@@ -1,5 +1,25 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum it_instruction_type): Add MVE_UNPREDICABLE_INSN.
+	(BAD_EL_TYPE): New error message.
+	(parse_neon_el_struct_list): Adapt to be able to accept MVE variant.
+	(parse_address_main): Likewise.
+	(group_reloc_type): Add GROUP_MVE.
+	(enum operand_parse_code): Add new operands.
+	(parse_operands): Handle new operands.
+	(M_MNEM_vst20, M_MNEM_vst21, M_MNEM_vst40, M_MNEM_vst41, M_MNEM_vst42,
+	 M_MNEM_vst43, M_MNEM_vld20, M_MNEM_vld21, M_MNEM_vld40, M_MNEM_vld41,
+	 M_MNEM_vld42, M_MNEM_vld43): New encodings.
+	(do_mve_vst_vld): New encoding function.
+	(do_neon_ld_st_interleave): Use BAD_EL_TYPE.
+	(it_fsm_pre_encode): Handle new it_instruction_type
+	(handle_pred_state): Likewise.
+	* testsuite/gas/arm/mve-vstld-bad.d: New test.
+	* testsuite/gas/arm/mve-vstld-bad.l: New test.
+	* testsuite/gas/arm/mve-vstld-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (BAD_MVE_AUTO): New error message.
 	(BAD_MVE_SRCDEST): Likewise.
 	(mark_feature_used): Diagnose MVE only instructions when in

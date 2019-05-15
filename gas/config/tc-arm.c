@@ -465,8 +465,9 @@ enum pred_instruction_type
 			      i.e. BKPT and NOP.  */
    IT_INSN,		   /* The IT insn has been parsed.  */
    VPT_INSN,		   /* The VPT/VPST insn has been parsed.  */
-   MVE_OUTSIDE_PRED_INSN   /* Instruction to indicate a MVE instruction without
+   MVE_OUTSIDE_PRED_INSN , /* Instruction to indicate a MVE instruction without
 			      a predication code.  */
+   MVE_UNPREDICABLE_INSN   /* MVE instruction that is non-predicable.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -857,7 +858,7 @@ struct asm_opcode
 #define BAD_OVERLAP	_("registers may not be the same")
 #define BAD_HIREG	_("lo register required")
 #define BAD_THUMB32	_("instruction not supported in Thumb16 mode")
-#define BAD_ADDR_MODE   _("instruction does not accept this addressing mode");
+#define BAD_ADDR_MODE   _("instruction does not accept this addressing mode")
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
 #define BAD_BRANCH_OFF	_("branch out of range or not a multiple of 2")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
@@ -892,6 +893,7 @@ struct asm_opcode
     " use a valid -march or -mcpu option.")
 #define BAD_MVE_SRCDEST	_("Warning: 32-bit element size and same destination "\
 			  "and source operands makes instruction UNPREDICTABLE")
+#define BAD_EL_TYPE	_("bad element type for instruction")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -2211,6 +2213,7 @@ neon_alias_types_same (struct neon_typed_alias *a, struct neon_typed_alias *b)
 
 static int
 parse_neon_el_struct_list (char **str, unsigned *pbase,
+			   int mve,
 			   struct neon_type_el *eltype)
 {
   char *ptr = *str;
@@ -2220,7 +2223,8 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
   int lane = -1;
   int leading_brace = 0;
   enum arm_reg_type rtype = REG_TYPE_NDQ;
-  const char *const incr_error = _("register stride must be 1 or 2");
+  const char *const incr_error = mve ? _("register stride must be 1") :
+    _("register stride must be 1 or 2");
   const char *const type_error = _("mismatched element/structure types in list");
   struct neon_typed_alias firsttype;
   firsttype.defined = 0;
@@ -2234,6 +2238,8 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
   do
     {
       struct neon_typed_alias atype;
+      if (mve)
+	rtype = REG_TYPE_MQ;
       int getreg = parse_typed_reg_or_scalar (&ptr, rtype, &rtype, &atype);
 
       if (getreg == FAIL)
@@ -2341,7 +2347,7 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
     lane = NEON_INTERLEAVE_LANES;
 
   /* Sanity check.  */
-  if (lane == -1 || base_reg == -1 || count < 1 || count > 4
+  if (lane == -1 || base_reg == -1 || count < 1 || (!mve && count > 4)
       || (count > 1 && reg_incr == -1))
     {
       first_error (_("error parsing element/structure list"));
@@ -5486,7 +5492,8 @@ typedef enum
 
   GROUP_LDR,
   GROUP_LDRS,
-  GROUP_LDC
+  GROUP_LDC,
+  GROUP_MVE
 } group_reloc_type;
 
 static struct group_reloc_table_entry group_reloc_table[] =
@@ -5739,7 +5746,10 @@ parse_address_main (char **str, int i, int group_relocations,
 
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
-      inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
+      if (group_type == GROUP_MVE)
+	inst.error = BAD_ADDR_MODE;
+      else
+	inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
       return PARSE_OPERAND_FAIL;
     }
   inst.operands[i].reg = reg;
@@ -6747,6 +6757,8 @@ enum operand_parse_code
   OP_NRDLST,    /* Neon double-precision register list (d0-d31, qN aliases) */
   OP_NSTRLST,   /* Neon element/structure list */
   OP_VRSDVLST,  /* VFP single or double-precision register list and VPR */
+  OP_MSTRLST2,	/* MVE vector list with two elements.  */
+  OP_MSTRLST4,	/* MVE vector list with four elements.  */
 
   OP_RNDQ_I0,   /* Neon D or Q reg, or immediate zero.  */
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
@@ -6787,6 +6799,7 @@ enum operand_parse_code
   OP_SH,	/* shifter operand */
   OP_SHG,	/* shifter operand with possible group relocation */
   OP_ADDR,	/* Memory address expression (any mode) */
+  OP_ADDRMVE,	/* Memory address expression for MVE's VSTR/VLDR.  */
   OP_ADDRGLDR,	/* Mem addr expr (any mode) with possible LDR group reloc */
   OP_ADDRGLDRS, /* Mem addr expr (any mode) with possible LDRS group reloc */
   OP_ADDRGLDC,  /* Mem addr expr (any mode) with possible LDC group reloc */
@@ -7470,12 +7483,23 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 				    REGLIST_NEON_D, &partial_match);
 	  break;
 
+	case OP_MSTRLST4:
+	case OP_MSTRLST2:
+	  val = parse_neon_el_struct_list (&str, &inst.operands[i].reg,
+					   1, &inst.operands[i].vectype);
+	  if (val != (((op_parse_code == OP_MSTRLST2) ? 3 : 7) << 5 | 0xe))
+	    goto failure;
+	  break;
 	case OP_NSTRLST:
 	  val = parse_neon_el_struct_list (&str, &inst.operands[i].reg,
-					   &inst.operands[i].vectype);
+					   0, &inst.operands[i].vectype);
 	  break;
 
 	  /* Addressing modes */
+	case OP_ADDRMVE:
+	  po_misc_or_fail (parse_address_group_reloc (&str, i, GROUP_MVE));
+	  break;
+
 	case OP_ADDR:
 	  po_misc_or_fail (parse_address (&str, i));
 	  break;
@@ -7578,6 +7602,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_VRSDVLST:
 	case OP_NRDLST:
 	case OP_NSTRLST:
+	case OP_MSTRLST2:
+	case OP_MSTRLST4:
 	  if (val == FAIL)
 	    goto failure;
 	  inst.operands[i].imm = val;
@@ -13855,6 +13881,18 @@ do_t_loloop (void)
 #define M_MNEM_vmlsdavax  0xeef01e21
 #define M_MNEM_vmullt	0xee011e00
 #define M_MNEM_vmullb	0xee010e00
+#define M_MNEM_vst20	0xfc801e00
+#define M_MNEM_vst21	0xfc801e20
+#define M_MNEM_vst40	0xfc801e01
+#define M_MNEM_vst41	0xfc801e21
+#define M_MNEM_vst42	0xfc801e41
+#define M_MNEM_vst43	0xfc801e61
+#define M_MNEM_vld20	0xfc901e00
+#define M_MNEM_vld21	0xfc901e20
+#define M_MNEM_vld40	0xfc901e01
+#define M_MNEM_vld41	0xfc901e21
+#define M_MNEM_vld42	0xfc901e41
+#define M_MNEM_vld43	0xfc901e61
 
 /* Neon instruction encoder helpers.  */
 
@@ -15700,6 +15738,44 @@ check_simd_pred_availability (int fp, unsigned check)
 	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
     }
   return 0;
+}
+
+static void
+do_mve_vst_vld (void)
+{
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    return;
+
+  constraint (!inst.operands[1].preind || inst.relocs[0].exp.X_add_symbol != 0
+	      || inst.relocs[0].exp.X_add_number != 0
+	      || inst.operands[1].immisreg != 0,
+	      BAD_ADDR_MODE);
+  constraint (inst.vectype.el[0].size > 32, BAD_EL_TYPE);
+  if (inst.operands[1].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+  else if (inst.operands[1].reg == REG_SP && inst.operands[1].writeback)
+    as_tsktsk (MVE_BAD_SP);
+
+
+  /* These instructions are one of the "exceptions" mentioned in
+     handle_pred_state.  They are MVE instructions that are not VPT compatible
+     and do not accept a VPT code, thus appending such a code is a syntax
+     error.  */
+  if (inst.cond > COND_ALWAYS)
+    first_error (BAD_SYNTAX);
+  /* If we append a scalar condition code we can set this to
+     MVE_OUTSIDE_PRED_INSN as it will also lead to a syntax error.  */
+  else if (inst.cond < COND_ALWAYS)
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+  else
+    inst.pred_insn_type = MVE_UNPREDICABLE_INSN;
+
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= inst.operands[1].writeback << 21;
+  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= neon_logbits (inst.vectype.el[0].size) << 7;
+  inst.is_neon = 1;
 }
 
 static void
@@ -18008,7 +18084,7 @@ do_neon_ld_st_interleave (void)
 
   constraint (typebits == -1, _("bad list type for instruction"));
   constraint (((inst.instruction >> 8) & 3) && et.size == 64,
-	      _("bad element type for instruction"));
+	      BAD_EL_TYPE);
 
   inst.instruction &= ~0xf00;
   inst.instruction |= typebits << 8;
@@ -19371,7 +19447,7 @@ it_fsm_pre_encode (void)
    Specifications say that any non-MVE instruction inside a VPT block is
    UNPREDICTABLE, with the exception of the BKPT instruction.  Whereas most MVE
    instructions are deemed to be UNPREDICTABLE if inside an IT block.  For the
-   few exceptions this will be handled at their respective handler functions.
+   few exceptions we have MVE_UNPREDICABLE_INSN.
    The error messages provided depending on the different combinations possible
    are described in the cases below:
    For 'most' MVE instructions:
@@ -19408,6 +19484,7 @@ handle_pred_state (void)
     case OUTSIDE_PRED_BLOCK:
       switch (inst.pred_insn_type)
 	{
+	case MVE_UNPREDICABLE_INSN:
 	case MVE_OUTSIDE_PRED_INSN:
 	  if (inst.cond < COND_ALWAYS)
 	    {
@@ -19507,6 +19584,7 @@ handle_pred_state (void)
 	{
 	case INSIDE_VPT_INSN:
 	case VPT_INSN:
+	case MVE_UNPREDICABLE_INSN:
 	case MVE_OUTSIDE_PRED_INSN:
 	  gas_assert (0);
 	case OUTSIDE_PRED_INSN:
@@ -19656,6 +19734,9 @@ handle_pred_state (void)
 		    gas_assert (0);
 		  }
 	      }
+	  case MVE_UNPREDICABLE_INSN:
+	    as_tsktsk (now_pred.type == SCALAR_PRED ? MVE_NOT_IT : MVE_NOT_VPT);
+	    return SUCCESS;
 	  case INSIDE_IT_INSN:
 	    if (inst.cond > COND_ALWAYS)
 	      {
@@ -22854,6 +22935,19 @@ static const struct asm_opcode insns[] =
  mCEF(vmlsdava,	  _vmlsdava,	3, (RRe, RMQ, RMQ),		mve_vmladav),
  mCEF(vmlsdavx,	  _vmlsdavx,	3, (RRe, RMQ, RMQ),		mve_vmladav),
  mCEF(vmlsdavax,  _vmlsdavax,	3, (RRe, RMQ, RMQ),		mve_vmladav),
+
+ mCEF(vst20,	_vst20,	    2, (MSTRLST2, ADDRMVE),		mve_vst_vld),
+ mCEF(vst21,	_vst21,	    2, (MSTRLST2, ADDRMVE),		mve_vst_vld),
+ mCEF(vst40,	_vst40,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vst41,	_vst41,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vst42,	_vst42,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vst43,	_vst43,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vld20,	_vld20,	    2, (MSTRLST2, ADDRMVE),		mve_vst_vld),
+ mCEF(vld21,	_vld21,	    2, (MSTRLST2, ADDRMVE),		mve_vst_vld),
+ mCEF(vld40,	_vld40,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vld41,	_vld41,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vld42,	_vld42,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
+ mCEF(vld43,	_vld43,	    2, (MSTRLST4, ADDRMVE),		mve_vst_vld),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v1xd
