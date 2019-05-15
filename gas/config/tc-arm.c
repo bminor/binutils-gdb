@@ -522,6 +522,7 @@ struct arm_it
     unsigned isvec      : 1;  /* Is a single, double or quad VFP/Neon reg.  */
     unsigned isquad     : 1;  /* Operand is SIMD quad register.  */
     unsigned issingle   : 1;  /* Operand is VFP single-precision register.  */
+    unsigned iszr	: 1;  /* Operand is ZR register.  */
     unsigned hasreloc	: 1;  /* Operand has relocation suffix.  */
     unsigned writeback	: 1;  /* Operand has trailing !  */
     unsigned preind	: 1;  /* Preindexed address.  */
@@ -646,6 +647,7 @@ enum arm_reg_type
   REG_TYPE_MMXWCG,
   REG_TYPE_XSCALE,
   REG_TYPE_RNB,
+  REG_TYPE_ZR
 };
 
 /* Structure for a hash table entry for a register.
@@ -898,6 +900,7 @@ struct asm_opcode
 #define BAD_MVE_SRCDEST	_("Warning: 32-bit element size and same destination "\
 			  "and source operands makes instruction UNPREDICTABLE")
 #define BAD_EL_TYPE	_("bad element type for instruction")
+#define MVE_BAD_QREG	_("MVE vector register Q[0..7] expected")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -6894,6 +6897,7 @@ enum operand_parse_code
   OP_RNQ,	/* Neon quad precision register */
   OP_RNQMQ,	/* Neon quad or MVE vector register.  */
   OP_RVSD,	/* VFP single or double precision register */
+  OP_RVSD_COND,	/* VFP single, double precision register or condition code.  */
   OP_RVSDMQ,	/* VFP single, double precision or MVE vector register.  */
   OP_RNSD,      /* Neon single or double precision register */
   OP_RNDQ,      /* Neon double or quad precision register */
@@ -6917,6 +6921,7 @@ enum operand_parse_code
   OP_RNSDQMQR,	/* Neon single, double or quad register, MVE vector register or
 		   GPR (no SP/SP)  */
   OP_RMQ,	/* MVE vector register.  */
+  OP_RMQRZ,	/* MVE vector or ARM register including ZR.  */
 
   /* New operands for Armv8.1-M Mainline.  */
   OP_LR,	/* ARM LR register */
@@ -6938,6 +6943,8 @@ enum operand_parse_code
   OP_RNDQ_I0,   /* Neon D or Q reg, or immediate zero.  */
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
   OP_RSVD_FI0, /* VFP S or D reg, or floating point immediate zero.  */
+  OP_RSVDMQ_FI0, /* VFP S, D, MVE vector register or floating point immediate
+		    zero.  */
   OP_RR_RNSC,   /* ARM reg or Neon scalar.  */
   OP_RNSD_RNSC, /* Neon S or D reg, or Neon scalar.  */
   OP_RNSDQ_RNSC, /* Vector S, D or Q reg, or Neon scalar.  */
@@ -7028,6 +7035,8 @@ enum operand_parse_code
   OP_oROR,	 /* ROR 0/8/16/24 */
   OP_oBARRIER_I15, /* Option argument for a barrier instruction.  */
 
+  OP_oRMQRZ,	/* optional MVE vector or ARM register including ZR.  */
+
   /* Some pre-defined mixed (ARM/THUMB) operands.  */
   OP_RR_npcsp		= MIX_ARM_THUMB_OPERANDS (OP_RR, OP_RRnpcsp),
   OP_RRnpc_npcsp	= MIX_ARM_THUMB_OPERANDS (OP_RRnpc, OP_RRnpcsp),
@@ -7077,6 +7086,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
       inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
 			     || rtype == REG_TYPE_VFD		\
 			     || rtype == REG_TYPE_NQ);		\
+      inst.operands[i].iszr = (rtype == REG_TYPE_ZR);		\
     }								\
   while (0)
 
@@ -7095,6 +7105,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
       inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
 			     || rtype == REG_TYPE_VFD		\
 			     || rtype == REG_TYPE_NQ);		\
+      inst.operands[i].iszr = (rtype == REG_TYPE_ZR);		\
     }								\
   while (0)
 
@@ -7240,6 +7251,9 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 	try_rvsd:
 	case OP_RVSD:  po_reg_or_fail (REG_TYPE_VFSD);    break;
+	case OP_RVSD_COND:
+	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
+	  break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
 	case OP_RNSDQMQR:
@@ -7274,6 +7288,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_reg_or_goto (REG_TYPE_VFSD, try_imm0);
 	  break;
 
+	case OP_RSVDMQ_FI0:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rsvd_fi0);
+	  break;
+	try_rsvd_fi0:
 	case OP_RSVD_FI0:
 	  {
 	    po_reg_or_goto (REG_TYPE_VFSD, try_ifimm0);
@@ -7548,6 +7566,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_CPSF:	 val = parse_cps_flags (&str);		break;
 	case OP_ENDI:	 val = parse_endian_specifier (&str);	break;
 	case OP_oROR:	 val = parse_ror (&str);		break;
+	try_cond:
 	case OP_COND:	 val = parse_cond (&str);		break;
 	case OP_oBARRIER_I15:
 	  po_barrier_or_imm (str); break;
@@ -7721,6 +7740,17 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_misc_or_fail (parse_shift (&str, i, SHIFT_LSL_OR_ASR_IMMEDIATE));
 	  break;
 
+	case OP_RMQRZ:
+	case OP_oRMQRZ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rr_zr);
+	  break;
+	try_rr_zr:
+	  po_reg_or_goto (REG_TYPE_RN, ZR);
+	  break;
+	ZR:
+	  po_reg_or_fail (REG_TYPE_ZR);
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), op_parse_code);
 	}
@@ -7764,10 +7794,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	    inst.error = BAD_PC;
 	  break;
 
+	case OP_RVSD_COND:
 	case OP_VLDR:
 	  if (inst.operands[i].isreg)
 	    break;
 	/* fall through.  */
+
 	case OP_CPSF:
 	case OP_ENDI:
 	case OP_oROR:
@@ -7794,6 +7826,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_oLR:
 	  if (inst.operands[i].reg != REG_LR)
 	    inst.error = _("operand must be LR register");
+	  break;
+
+	case OP_RMQRZ:
+	case OP_oRMQRZ:
+	  if (!inst.operands[i].iszr && inst.operands[i].reg == REG_PC)
+	    inst.error = BAD_PC;
 	  break;
 
 	case OP_RRe:
@@ -12006,18 +12044,6 @@ do_t_it (void)
   inst.instruction |= cond << 4;
 }
 
-static void
-do_mve_vpt (void)
-{
-  /* We are dealing with a vector predicated block.  */
-  set_pred_insn_type (VPT_INSN);
-  now_pred.cc = 0;
-  now_pred.mask = ((inst.instruction & 0x00400000) >> 19)
-		  | ((inst.instruction & 0xe000) >> 13);
-  now_pred.warn_deprecated = FALSE;
-  now_pred.type = VECTOR_PRED;
-}
-
 /* Helper function used for both push/pop and ldm/stm.  */
 static void
 encode_thumb2_multi (bfd_boolean do_io, int base, unsigned mask,
@@ -14276,6 +14302,8 @@ NEON_ENC_TAB
 #define NEON_SHAPE_DEF			\
   X(4, (R, R, S, S), QUAD),		\
   X(4, (S, S, R, R), QUAD),		\
+  X(3, (I, Q, Q), QUAD),		\
+  X(3, (I, Q, R), QUAD),		\
   X(3, (R, Q, Q), QUAD),		\
   X(3, (D, D, D), DOUBLE),		\
   X(3, (Q, Q, Q), QUAD),		\
@@ -15314,10 +15342,239 @@ do_vfp_nsyn_nmul (void)
 
 }
 
+/* Turn a size (8, 16, 32, 64) into the respective bit number minus 3
+   (0, 1, 2, 3).  */
+
+static unsigned
+neon_logbits (unsigned x)
+{
+  return ffs (x) - 4;
+}
+
+#define LOW4(R) ((R) & 0xf)
+#define HI1(R) (((R) >> 4) & 1)
+
+static unsigned
+mve_get_vcmp_vpt_cond (struct neon_type_el et)
+{
+  switch (et.type)
+    {
+    default:
+      first_error (BAD_EL_TYPE);
+      return 0;
+    case NT_float:
+      switch (inst.operands[0].imm)
+	{
+	default:
+	  first_error (_("invalid condition"));
+	  return 0;
+	case 0x0:
+	  /* eq.  */
+	  return 0;
+	case 0x1:
+	  /* ne.  */
+	  return 1;
+	case 0xa:
+	  /* ge/  */
+	  return 4;
+	case 0xb:
+	  /* lt.  */
+	  return 5;
+	case 0xc:
+	  /* gt.  */
+	  return 6;
+	case 0xd:
+	  /* le.  */
+	  return 7;
+	}
+    case NT_integer:
+      /* only accept eq and ne.  */
+      if (inst.operands[0].imm > 1)
+	{
+	  first_error (_("invalid condition"));
+	  return 0;
+	}
+      return inst.operands[0].imm;
+    case NT_unsigned:
+      if (inst.operands[0].imm == 0x2)
+	return 2;
+      else if (inst.operands[0].imm == 0x8)
+	return 3;
+      else
+	{
+	  first_error (_("invalid condition"));
+	  return 0;
+	}
+    case NT_signed:
+      switch (inst.operands[0].imm)
+	{
+	  default:
+	    first_error (_("invalid condition"));
+	    return 0;
+	  case 0xa:
+	    /* ge.  */
+	    return 4;
+	  case 0xb:
+	    /* lt.  */
+	    return 5;
+	  case 0xc:
+	    /* gt.  */
+	    return 6;
+	  case 0xd:
+	    /* le.  */
+	    return 7;
+	}
+    }
+  /* Should be unreachable.  */
+  abort ();
+}
+
+static void
+do_mve_vpt (void)
+{
+  /* We are dealing with a vector predicated block.  */
+  if (inst.operands[0].present)
+    {
+      enum neon_shape rs = neon_select_shape (NS_IQQ, NS_IQR, NS_NULL);
+      struct neon_type_el et
+	= neon_check_type (3, rs, N_EQK, N_KEY | N_F_MVE | N_I_MVE | N_SU_32,
+			   N_EQK);
+
+      unsigned fcond = mve_get_vcmp_vpt_cond (et);
+
+      constraint (inst.operands[1].reg > 14, MVE_BAD_QREG);
+
+      if (et.type == NT_invtype)
+	return;
+
+      if (et.type == NT_float)
+	{
+	  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext),
+		      BAD_FPU);
+	  constraint (et.size != 16 && et.size != 32, BAD_EL_TYPE);
+	  inst.instruction |= (et.size == 16) << 28;
+	  inst.instruction |= 0x3 << 20;
+	}
+      else
+	{
+	  constraint (et.size != 8 && et.size != 16 && et.size != 32,
+		      BAD_EL_TYPE);
+	  inst.instruction |= 1 << 28;
+	  inst.instruction |= neon_logbits (et.size) << 20;
+	}
+
+      if (inst.operands[2].isquad)
+	{
+	  inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+	  inst.instruction |= LOW4 (inst.operands[2].reg);
+	  inst.instruction |= (fcond & 0x2) >> 1;
+	}
+      else
+	{
+	  if (inst.operands[2].reg == REG_SP)
+	    as_tsktsk (MVE_BAD_SP);
+	  inst.instruction |= 1 << 6;
+	  inst.instruction |= (fcond & 0x2) << 4;
+	  inst.instruction |= inst.operands[2].reg;
+	}
+      inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+      inst.instruction |= (fcond & 0x4) << 10;
+      inst.instruction |= (fcond & 0x1) << 7;
+
+    }
+    set_pred_insn_type (VPT_INSN);
+    now_pred.cc = 0;
+    now_pred.mask = ((inst.instruction & 0x00400000) >> 19)
+		    | ((inst.instruction & 0xe000) >> 13);
+    now_pred.warn_deprecated = FALSE;
+    now_pred.type = VECTOR_PRED;
+    inst.is_neon = 1;
+}
+
+static void
+do_mve_vcmp (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
+  if (!inst.operands[1].isreg || !inst.operands[1].isquad)
+    first_error (_(reg_expected_msgs[REG_TYPE_MQ]));
+  if (!inst.operands[2].present)
+    first_error (_("MVE vector or ARM register expected"));
+  constraint (inst.operands[1].reg > 14, MVE_BAD_QREG);
+
+  /* Deal with 'else' conditional MVE's vcmp, it will be parsed as vcmpe.  */
+  if ((inst.instruction & 0xffffffff) == N_MNEM_vcmpe
+      && inst.operands[1].isquad)
+    {
+      inst.instruction = N_MNEM_vcmp;
+      inst.cond = 0x10;
+    }
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  enum neon_shape rs = neon_select_shape (NS_IQQ, NS_IQR, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_KEY | N_F_MVE | N_I_MVE | N_SU_32,
+		       N_EQK);
+
+  constraint (rs == NS_IQR && inst.operands[2].reg == REG_PC
+	      && !inst.operands[2].iszr, BAD_PC);
+
+  unsigned fcond = mve_get_vcmp_vpt_cond (et);
+
+  inst.instruction = 0xee010f00;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= (fcond & 0x4) << 10;
+  inst.instruction |= (fcond & 0x1) << 7;
+  if (et.type == NT_float)
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext),
+		  BAD_FPU);
+      inst.instruction |= (et.size == 16) << 28;
+      inst.instruction |= 0x3 << 20;
+    }
+  else
+    {
+      inst.instruction |= 1 << 28;
+      inst.instruction |= neon_logbits (et.size) << 20;
+    }
+  if (inst.operands[2].isquad)
+    {
+      inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+      inst.instruction |= (fcond & 0x2) >> 1;
+      inst.instruction |= LOW4 (inst.operands[2].reg);
+    }
+  else
+    {
+      if (inst.operands[2].reg == REG_SP)
+	as_tsktsk (MVE_BAD_SP);
+      inst.instruction |= 1 << 6;
+      inst.instruction |= (fcond & 0x2) << 4;
+      inst.instruction |= inst.operands[2].reg;
+    }
+
+  inst.is_neon = 1;
+  return;
+}
+
 static void
 do_vfp_nsyn_cmp (void)
 {
   enum neon_shape rs;
+  if (!inst.operands[0].isreg)
+    {
+      do_mve_vcmp ();
+      return;
+    }
+  else
+    {
+      constraint (inst.operands[2].present, BAD_SYNTAX);
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd),
+		  BAD_FPU);
+    }
+
   if (inst.operands[1].isreg)
     {
       rs = neon_select_shape (NS_HH, NS_FF, NS_DD, NS_NULL);
@@ -15434,18 +15691,6 @@ neon_dp_fixup (struct arm_it* insn)
 
   insn->instruction = i;
 }
-
-/* Turn a size (8, 16, 32, 64) into the respective bit number minus 3
-   (0, 1, 2, 3).  */
-
-static unsigned
-neon_logbits (unsigned x)
-{
-  return ffs (x) - 4;
-}
-
-#define LOW4(R) ((R) & 0xf)
-#define HI1(R) (((R) >> 4) & 1)
 
 static void
 mve_encode_qqr (int size, int fp)
@@ -21096,6 +21341,10 @@ static const struct reg_entry reg_names[] =
   REGDEF(WR, 7,RN), REGDEF(SB, 9,RN), REGDEF(SL,10,RN), REGDEF(FP,11,RN),
   REGDEF(IP,12,RN), REGDEF(SP,13,RN), REGDEF(LR,14,RN), REGDEF(PC,15,RN),
 
+  /* Defining the new Zero register from ARMv8.1-M.  */
+  REGDEF(zr,15,ZR),
+  REGDEF(ZR,15,ZR),
+
   /* Coprocessor numbers.  */
   REGSET(p, CP), REGSET(P, CP),
 
@@ -22911,8 +23160,6 @@ static const struct asm_opcode insns[] =
  nCE(vnmul,     _vnmul,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
  nCE(vnmla,     _vnmla,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
  nCE(vnmls,     _vnmls,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
- nCE(vcmp,      _vcmp,    2, (RVSD, RSVD_FI0),    vfp_nsyn_cmp),
- nCE(vcmpe,     _vcmpe,   2, (RVSD, RSVD_FI0),    vfp_nsyn_cmp),
  NCE(vpush,     0,       1, (VRSDLST),          vfp_nsyn_push),
  NCE(vpop,      0,       1, (VRSDLST),          vfp_nsyn_pop),
  NCE(vcvtz,     0,       2, (RVSD, RVSD),       vfp_nsyn_cvtz),
@@ -23628,6 +23875,23 @@ static const struct asm_opcode insns[] =
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & mve_ext
+
+ ToC("vpt",	ee410f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptt",	ee018f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpte",	ee418f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpttt",	ee014f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptte",	ee01cf00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptet",	ee41cf00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptee",	ee414f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptttt",	ee012f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpttte",	ee016f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpttet",	ee01ef00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpttee",	ee01af00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptett",	ee41af00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vptete",	ee41ef00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpteet",	ee416f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+ ToC("vpteee",	ee412f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
+
  ToC("vpst",	fe710f4d, 0, (), mve_vpt),
  ToC("vpstt",	fe318f4d, 0, (), mve_vpt),
  ToC("vpste",	fe718f4d, 0, (), mve_vpt),
@@ -23706,6 +23970,9 @@ static const struct asm_opcode insns[] =
 
  mCEF(vmovlt, _vmovlt,	1, (VMOV),		mve_movl),
  mCEF(vmovlb, _vmovlb,	1, (VMOV),		mve_movl),
+
+ mnCE(vcmp,      _vcmp,    3, (RVSD_COND, RSVDMQ_FI0, oRMQRZ),    vfp_nsyn_cmp),
+ mnCE(vcmpe,     _vcmpe,   3, (RVSD_COND, RSVDMQ_FI0, oRMQRZ),    vfp_nsyn_cmp),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v2

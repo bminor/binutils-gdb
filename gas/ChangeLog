@@ -1,5 +1,32 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (MVE_BAD_QREG): New error message.
+	(enum operand_parse_code): Define new operand.
+	(parse_operands): Handle new operand.
+	(do_mve_vpt): Change for VPT blocks.
+	(NEON_SHAPE_DEF): New shape.
+	(neon_logbits): Moved.
+	(LOW4): Moved
+	(HI1): Moved
+	(mve_get_vcmp_vpt_cond): New function to translate vpt conditions.
+	(do_mve_vcmp): New encoding function.
+	(do_vfp_nsyn_cmp): Changed to support MVE variants.
+	(insns): Change to support MVE variants of vcmp and add vpt.
+	* testsuite/gas/arm/mve-vcmp-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vcmp-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vcmp-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vcmp-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vcmp-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vcmp-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vpt-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vpt-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vpt-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vpt-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vpt-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vpt-bad-2.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (struct arm_it): Expand isscalar field to be able to
 	distinguish between types of scalar.
 	(parse_typed_reg_or_scalar): Change to accept MVE scalar variants.
