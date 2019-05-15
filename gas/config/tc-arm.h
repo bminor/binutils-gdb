@@ -254,21 +254,25 @@ arm_min (int am_p1, int am_p2)
 /* Registers are generally saved at negative offsets to the CFA.  */
 #define DWARF2_CIE_DATA_ALIGNMENT     (-4)
 
-/* State variables for IT block handling.  */
-enum it_state
+/* State variables for predication block handling.  */
+enum pred_state
 {
-  OUTSIDE_IT_BLOCK, MANUAL_IT_BLOCK, AUTOMATIC_IT_BLOCK
+  OUTSIDE_PRED_BLOCK, MANUAL_PRED_BLOCK, AUTOMATIC_PRED_BLOCK
 };
-struct current_it
+enum pred_type {
+  SCALAR_PRED, VECTOR_PRED
+};
+struct current_pred
 {
   int mask;
-  enum it_state state;
+  enum pred_state state;
   int cc;
   int block_length;
   char *insn;
   int state_handled;
   int warn_deprecated;
   int insn_cond;
+  enum pred_type type;
 };
 
 #ifdef OBJ_ELF
@@ -303,7 +307,7 @@ struct arm_segment_info_type
      emitted only once per section, to save unnecessary bloat.  */
   unsigned int marked_pr_dependency;
 
-  struct current_it current_it;
+  struct current_pred current_pred;
 };
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */

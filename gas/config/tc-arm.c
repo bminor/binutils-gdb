@@ -453,16 +453,20 @@ struct neon_type
   unsigned elems;
 };
 
-enum it_instruction_type
+enum pred_instruction_type
 {
-   OUTSIDE_IT_INSN,
+   OUTSIDE_PRED_INSN,
+   INSIDE_VPT_INSN,
    INSIDE_IT_INSN,
    INSIDE_IT_LAST_INSN,
    IF_INSIDE_IT_LAST_INSN, /* Either outside or inside;
 			      if inside, should be the last one.  */
    NEUTRAL_IT_INSN,        /* This could be either inside or outside,
 			      i.e. BKPT and NOP.  */
-   IT_INSN                 /* The IT insn has been parsed.  */
+   IT_INSN,		   /* The IT insn has been parsed.  */
+   VPT_INSN,		   /* The VPT/VPST insn has been parsed.  */
+   MVE_OUTSIDE_PRED_INSN   /* Instruction to indicate a MVE instruction without
+			      a predication code.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -494,7 +498,7 @@ struct arm_it
     int			     pc_rel;
   } relocs[ARM_IT_MAX_RELOCS];
 
-  enum it_instruction_type it_insn_type;
+  enum pred_instruction_type pred_insn_type;
 
   struct
   {
@@ -511,7 +515,7 @@ struct arm_it
        instructions. This allows us to disambiguate ARM <-> vector insns.  */
     unsigned regisimm   : 1;  /* 64-bit immediate, reg forms high 32 bits.  */
     unsigned isvec      : 1;  /* Is a single, double or quad VFP/Neon reg.  */
-    unsigned isquad     : 1;  /* Operand is Neon quad-precision register.  */
+    unsigned isquad     : 1;  /* Operand is SIMD quad register.  */
     unsigned issingle   : 1;  /* Operand is VFP single-precision register.  */
     unsigned hasreloc	: 1;  /* Operand has relocation suffix.  */
     unsigned writeback	: 1;  /* Operand has trailing !  */
@@ -630,12 +634,13 @@ enum arm_reg_type
   REG_TYPE_MVFX,
   REG_TYPE_MVDX,
   REG_TYPE_MVAX,
+  REG_TYPE_MQ,
   REG_TYPE_DSPSC,
   REG_TYPE_MMXWR,
   REG_TYPE_MMXWC,
   REG_TYPE_MMXWCG,
   REG_TYPE_XSCALE,
-  REG_TYPE_RNB
+  REG_TYPE_RNB,
 };
 
 /* Structure for a hash table entry for a register.
@@ -677,6 +682,7 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_MMXWC]  = N_("iWMMXt control register expected"),
   [REG_TYPE_MMXWCG] = N_("iWMMXt scalar register expected"),
   [REG_TYPE_XSCALE] = N_("XScale accumulator register expected"),
+  [REG_TYPE_MQ]	    = N_("MVE vector register expected"),
   [REG_TYPE_RNB]    = N_("")
 };
 
@@ -716,6 +722,9 @@ struct asm_opcode
 
   /* Function to call to encode instruction in Thumb format.  */
   void (* tencode) (void);
+
+  /* Indicates whether this instruction may be vector predicated.  */
+  unsigned int mayBeVecPred : 1;
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -838,6 +847,7 @@ struct asm_opcode
 #define THUMB_LOAD_BIT 0x0800
 #define THUMB2_LOAD_BIT 0x00100000
 
+#define BAD_SYNTAX	_("syntax error")
 #define BAD_ARGS	_("bad arguments to instruction")
 #define BAD_SP          _("r13 not allowed here")
 #define BAD_PC		_("r15 not allowed here")
@@ -849,9 +859,13 @@ struct asm_opcode
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
 #define BAD_BRANCH_OFF	_("branch out of range or not a multiple of 2")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
+#define BAD_NOT_VPT	_("instruction missing MVE vector predication code")
 #define BAD_FPU		_("selected FPU does not support instruction")
 #define BAD_OUT_IT 	_("thumb conditional instruction should be in IT block")
+#define BAD_OUT_VPT	\
+	_("vector predicated instruction should be in VPT/VPST block")
 #define BAD_IT_COND	_("incorrect condition in IT block")
+#define BAD_VPT_COND	_("incorrect condition in VPT/VPST block")
 #define BAD_IT_IT 	_("IT falling in the range of a previous IT block")
 #define MISSING_FNSTART	_("missing .fnstart before unwinding directive")
 #define BAD_PC_ADDRESSING \
@@ -862,9 +876,18 @@ struct asm_opcode
 #define BAD_FP16	_("selected processor does not support fp16 instruction")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 #define THUMB1_RELOC_ONLY  _("relocation valid in thumb1 code only")
+#define MVE_NOT_IT	_("Warning: instruction is UNPREDICTABLE in an IT " \
+			  "block")
+#define MVE_NOT_VPT	_("Warning: instruction is UNPREDICTABLE in a VPT " \
+			  "block")
+#define MVE_BAD_PC	_("Warning: instruction is UNPREDICTABLE with PC" \
+			  " operand")
+#define MVE_BAD_SP	_("Warning: instruction is UNPREDICTABLE with SP" \
+			  " operand")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
+static struct hash_control * arm_vcond_hsh;
 static struct hash_control * arm_shift_hsh;
 static struct hash_control * arm_psr_hsh;
 static struct hash_control * arm_v7m_psr_hsh;
@@ -916,15 +939,15 @@ typedef enum asmfunc_states
 static asmfunc_states asmfunc_state = OUTSIDE_ASMFUNC;
 
 #ifdef OBJ_ELF
-#  define now_it seg_info (now_seg)->tc_segment_info_data.current_it
+#  define now_pred seg_info (now_seg)->tc_segment_info_data.current_pred
 #else
-static struct current_it now_it;
+static struct current_pred now_pred;
 #endif
 
 static inline int
-now_it_compatible (int cond)
+now_pred_compatible (int cond)
 {
-  return (cond & ~1) == (now_it.cc & ~1);
+  return (cond & ~1) == (now_pred.cc & ~1);
 }
 
 static inline int
@@ -933,39 +956,39 @@ conditional_insn (void)
   return inst.cond != COND_ALWAYS;
 }
 
-static int in_it_block (void);
+static int in_pred_block (void);
 
-static int handle_it_state (void);
+static int handle_pred_state (void);
 
 static void force_automatic_it_block_close (void);
 
 static void it_fsm_post_encode (void);
 
-#define set_it_insn_type(type)			\
+#define set_pred_insn_type(type)			\
   do						\
     {						\
-      inst.it_insn_type = type;			\
-      if (handle_it_state () == FAIL)		\
+      inst.pred_insn_type = type;			\
+      if (handle_pred_state () == FAIL)		\
 	return;					\
     }						\
   while (0)
 
-#define set_it_insn_type_nonvoid(type, failret) \
+#define set_pred_insn_type_nonvoid(type, failret) \
   do						\
     {                                           \
-      inst.it_insn_type = type;			\
-      if (handle_it_state () == FAIL)		\
+      inst.pred_insn_type = type;			\
+      if (handle_pred_state () == FAIL)		\
 	return failret;				\
     }						\
   while(0)
 
-#define set_it_insn_type_last()				\
+#define set_pred_insn_type_last()				\
   do							\
     {							\
       if (inst.cond == COND_ALWAYS)			\
-	set_it_insn_type (IF_INSIDE_IT_LAST_INSN);	\
+	set_pred_insn_type (IF_INSIDE_IT_LAST_INSN);	\
       else						\
-	set_it_insn_type (INSIDE_IT_LAST_INSN);		\
+	set_pred_insn_type (INSIDE_IT_LAST_INSN);		\
     }							\
   while (0)
 
@@ -1497,6 +1520,32 @@ parse_neon_operand_type (struct neon_type_el *vectype, char **ccp)
 #define NEON_ALL_LANES		15
 #define NEON_INTERLEAVE_LANES	14
 
+/* Record a use of the given feature.  */
+static void
+record_feature_use (const arm_feature_set *feature)
+{
+  if (thumb_mode)
+    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
+  else
+    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+}
+
+/* If the given feature available in the selected CPU, mark it as used.
+   Returns TRUE iff feature is available.  */
+static bfd_boolean
+mark_feature_used (const arm_feature_set *feature)
+{
+  /* Ensure the option is valid on the current architecture.  */
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
+    return FALSE;
+
+  /* Add the appropriate architecture feature for the barrier option used.
+     */
+  record_feature_use (feature);
+
+  return TRUE;
+}
+
 /* Parse either a register or a scalar, with an optional type. Return the
    register number, and optionally fill in the actual type of the register
    when multiple alternatives were given (NEON_TYPE_NDQ) in *RTYPE, and
@@ -1542,6 +1591,26 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
       || (type == REG_TYPE_MMXWC
 	  && (reg->type == REG_TYPE_MMXWCG)))
     type = (enum arm_reg_type) reg->type;
+
+  if (type == REG_TYPE_MQ)
+    {
+      if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	return FAIL;
+
+      if (!reg || reg->type != REG_TYPE_NQ)
+	return FAIL;
+
+      if (reg->number > 14 && !mark_feature_used (&fpu_vfp_ext_d32))
+	{
+	  first_error (_("expected MVE register [q0..q7]"));
+	  return FAIL;
+	}
+      type = REG_TYPE_NQ;
+    }
+  else if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+	   && (type == REG_TYPE_NQ))
+    return FAIL;
+
 
   if (type != reg->type)
     return FAIL;
@@ -3762,10 +3831,10 @@ emit_insn (expressionS *exp, int nbytes)
 	    }
 	  else
 	    {
-	      if (now_it.state == AUTOMATIC_IT_BLOCK)
-		set_it_insn_type_nonvoid (OUTSIDE_IT_INSN, 0);
+	      if (now_pred.state == AUTOMATIC_PRED_BLOCK)
+		set_pred_insn_type_nonvoid (OUTSIDE_PRED_INSN, 0);
 	      else
-		set_it_insn_type_nonvoid (NEUTRAL_IT_INSN, 0);
+		set_pred_insn_type_nonvoid (NEUTRAL_IT_INSN, 0);
 
 	      if (thumb_mode && (size > THUMB_SIZE) && !target_big_endian)
 		emit_thumb32_expr (exp);
@@ -6293,31 +6362,6 @@ parse_cond (char **str)
   return c->value;
 }
 
-/* Record a use of the given feature.  */
-static void
-record_feature_use (const arm_feature_set *feature)
-{
-  if (thumb_mode)
-    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
-  else
-    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
-}
-
-/* If the given feature is currently allowed, mark it as used and return TRUE.
-   Return FALSE otherwise.  */
-static bfd_boolean
-mark_feature_used (const arm_feature_set *feature)
-{
-  /* Ensure the option is currently allowed.  */
-  if (!ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
-    return FALSE;
-
-  /* Add the appropriate architecture feature for the barrier option used.  */
-  record_feature_use (feature);
-
-  return TRUE;
-}
-
 /* Parse an option for a barrier instruction.  Returns the encoding for the
    option, or FAIL.  */
 static int
@@ -6643,10 +6687,15 @@ enum operand_parse_code
   OP_RVS,	/* VFP single precision register */
   OP_RVD,	/* VFP double precision register (0..15) */
   OP_RND,       /* Neon double precision register (0..31) */
+  OP_RNDMQ,     /* Neon double precision (0..31) or MVE vector register.  */
+  OP_RNDMQR,    /* Neon double precision (0..31), MVE vector or ARM register.
+		 */
   OP_RNQ,	/* Neon quad precision register */
+  OP_RNQMQ,	/* Neon quad or MVE vector register.  */
   OP_RVSD,	/* VFP single or double precision register */
   OP_RNSD,      /* Neon single or double precision register */
   OP_RNDQ,      /* Neon double or quad precision register */
+  OP_RNDQMQ,     /* Neon double, quad or MVE vector register.  */
   OP_RNSDQ,	/* Neon single, double or quad precision register */
   OP_RNSC,      /* Neon scalar D[X] */
   OP_RVC,	/* VFP control register */
@@ -6661,6 +6710,10 @@ enum operand_parse_code
   OP_RIWG,	/* iWMMXt wCG register */
   OP_RXA,	/* XScale accumulator register */
 
+  OP_RNSDQMQ,	/* Neon single, double or quad register or MVE vector register
+		 */
+  OP_RNSDQMQR,	/* Neon single, double or quad register, MVE vector register or
+		   GPR (no SP/SP)  */
   /* New operands for Armv8.1-M Mainline.  */
   OP_LR,	/* ARM LR register */
   OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
@@ -6753,8 +6806,11 @@ enum operand_parse_code
   OP_oRRw,	 /* ARM register, not r15, optional trailing ! */
   OP_oRND,       /* Optional Neon double precision register */
   OP_oRNQ,       /* Optional Neon quad precision register */
+  OP_oRNDQMQ,     /* Optional Neon double, quad or MVE vector register.  */
   OP_oRNDQ,      /* Optional Neon double or quad precision register */
   OP_oRNSDQ,	 /* Optional single, double or quad precision vector register */
+  OP_oRNSDQMQ,	 /* Optional single, double or quad register or MVE vector
+		    register.  */
   OP_oSHll,	 /* LSL immediate */
   OP_oSHar,	 /* ASR immediate */
   OP_oSHllar,	 /* LSL or ASR immediate */
@@ -6926,6 +6982,14 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVS:   po_reg_or_fail (REG_TYPE_VFS);	  break;
 	case OP_RVD:   po_reg_or_fail (REG_TYPE_VFD);	  break;
 	case OP_oRND:
+	case OP_RNDMQR:
+	  po_reg_or_goto (REG_TYPE_RN, try_rndmq);
+	  break;
+	try_rndmq:
+	case OP_RNDMQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rnd);
+	  break;
+	try_rnd:
 	case OP_RND:   po_reg_or_fail (REG_TYPE_VFD);	  break;
 	case OP_RVC:
 	  po_reg_or_goto (REG_TYPE_VFC, coproc_reg);
@@ -6945,14 +7009,34 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RIWG:  po_reg_or_fail (REG_TYPE_MMXWCG);  break;
 	case OP_RXA:   po_reg_or_fail (REG_TYPE_XSCALE);  break;
 	case OP_oRNQ:
+	case OP_RNQMQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_nq);
+	  break;
+	try_nq:
 	case OP_RNQ:   po_reg_or_fail (REG_TYPE_NQ);      break;
 	case OP_RNSD:  po_reg_or_fail (REG_TYPE_NSD);     break;
+	case OP_oRNDQMQ:
+	case OP_RNDQMQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rndq);
+	  break;
+	try_rndq:
 	case OP_oRNDQ:
 	case OP_RNDQ:  po_reg_or_fail (REG_TYPE_NDQ);     break;
 	case OP_RVSD:  po_reg_or_fail (REG_TYPE_VFSD);    break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
-
+	case OP_RNSDQMQR:
+	  po_reg_or_goto (REG_TYPE_RN, try_mq);
+	  break;
+	  try_mq:
+	case OP_oRNSDQMQ:
+	case OP_RNSDQMQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_nsdq2);
+	  break;
+	  try_nsdq2:
+	  po_reg_or_fail (REG_TYPE_NSDQ);
+	  inst.error = 0;
+	  break;
 	/* Neon scalar. Using an element size of 8 means that some invalid
 	   scalars are accepted here, so deal with those in later code.  */
 	case OP_RNSC:  po_scalar_or_goto (8, failure);    break;
@@ -7490,7 +7574,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  /* The parse routine should already have set inst.error, but set a
 	     default here just in case.  */
 	  if (!inst.error)
-	    inst.error = _("syntax error");
+	    inst.error = BAD_SYNTAX;
 	  return FAIL;
 	}
 
@@ -7502,7 +7586,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  && upat[i+1] == OP_stop)
 	{
 	  if (!inst.error)
-	    inst.error = _("syntax error");
+	    inst.error = BAD_SYNTAX;
 	  return FAIL;
 	}
 
@@ -7583,7 +7667,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 static void
 do_scalar_fp16_v82_encode (void)
 {
-  if (inst.cond != COND_ALWAYS)
+  if (inst.cond < COND_ALWAYS)
     as_warn (_("ARMv8.2 scalar fp16 instruction cannot be conditional,"
 	       " the behaviour is UNPREDICTABLE"));
   constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
@@ -9056,9 +9140,9 @@ do_it (void)
   inst.size = 0;
   if (unified_syntax)
     {
-      set_it_insn_type (IT_INSN);
-      now_it.mask = (inst.instruction & 0xf) | 0x10;
-      now_it.cc = inst.operands[0].imm;
+      set_pred_insn_type (IT_INSN);
+      now_pred.mask = (inst.instruction & 0xf) | 0x10;
+      now_pred.cc = inst.operands[0].imm;
     }
 }
 
@@ -10800,7 +10884,7 @@ do_t_add_sub (void)
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
 
   if (Rd == REG_PC)
-    set_it_insn_type_last ();
+    set_pred_insn_type_last ();
 
   if (unified_syntax)
     {
@@ -10811,9 +10895,9 @@ do_t_add_sub (void)
       flags = (inst.instruction == T_MNEM_adds
 	       || inst.instruction == T_MNEM_subs);
       if (flags)
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
       if (!inst.operands[2].isreg)
 	{
 	  int add;
@@ -11090,9 +11174,9 @@ do_t_arit3 (void)
 
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (THUMB_SETS_FLAGS (inst.instruction))
-	    narrow = !in_it_block ();
+	    narrow = !in_pred_block ();
 	  else
-	    narrow = in_it_block ();
+	    narrow = in_pred_block ();
 
 	  if (Rd > 7 || Rn > 7 || Rs > 7)
 	    narrow = FALSE;
@@ -11178,9 +11262,9 @@ do_t_arit3c (void)
 
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (THUMB_SETS_FLAGS (inst.instruction))
-	    narrow = !in_it_block ();
+	    narrow = !in_pred_block ();
 	  else
-	    narrow = in_it_block ();
+	    narrow = in_pred_block ();
 
 	  if (Rd > 7 || Rn > 7 || Rs > 7)
 	    narrow = FALSE;
@@ -11319,7 +11403,7 @@ do_t_bfx (void)
 static void
 do_t_blx (void)
 {
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
 
   if (inst.operands[0].isreg)
     {
@@ -11343,9 +11427,9 @@ do_t_branch (void)
   bfd_reloc_code_real_type reloc;
 
   cond = inst.cond;
-  set_it_insn_type (IF_INSIDE_IT_LAST_INSN);
+  set_pred_insn_type (IF_INSIDE_IT_LAST_INSN);
 
-  if (in_it_block ())
+  if (in_pred_block ())
     {
       /* Conditional branches inside IT blocks are encoded as unconditional
 	 branches.  */
@@ -11412,7 +11496,7 @@ do_t_bkpt_hlt1 (int range)
       inst.instruction |= inst.operands[0].imm;
     }
 
-  set_it_insn_type (NEUTRAL_IT_INSN);
+  set_pred_insn_type (NEUTRAL_IT_INSN);
 }
 
 static void
@@ -11430,7 +11514,7 @@ do_t_bkpt (void)
 static void
 do_t_branch23 (void)
 {
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
   encode_branch (BFD_RELOC_THUMB_PCREL_BRANCH23);
 
   /* md_apply_fix blows up with 'bl foo(PLT)' where foo is defined in
@@ -11458,7 +11542,7 @@ do_t_branch23 (void)
 static void
 do_t_bx (void)
 {
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
   inst.instruction |= inst.operands[0].reg << 3;
   /* ??? FIXME: Should add a hacky reloc here if reg is REG_PC.	 The reloc
      should cause the alignment to be checked once it is known.	 This is
@@ -11470,7 +11554,7 @@ do_t_bxj (void)
 {
   int Rm;
 
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
   Rm = inst.operands[0].reg;
   reject_bad_reg (Rm);
   inst.instruction |= Rm << 16;
@@ -11496,20 +11580,20 @@ do_t_clz (void)
 static void
 do_t_csdb (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 }
 
 static void
 do_t_cps (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   inst.instruction |= inst.operands[0].imm;
 }
 
 static void
 do_t_cpsi (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   if (unified_syntax
       && (inst.operands[1].present || inst.size_req == 4)
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6_notm))
@@ -11556,7 +11640,7 @@ do_t_cpy (void)
 static void
 do_t_cbz (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   constraint (inst.operands[0].reg > 7, BAD_HIREG);
   inst.instruction |= inst.operands[0].reg;
   inst.relocs[0].pc_rel = 1;
@@ -11602,10 +11686,11 @@ do_t_it (void)
 {
   unsigned int cond = inst.operands[0].imm;
 
-  set_it_insn_type (IT_INSN);
-  now_it.mask = (inst.instruction & 0xf) | 0x10;
-  now_it.cc = cond;
-  now_it.warn_deprecated = FALSE;
+  set_pred_insn_type (IT_INSN);
+  now_pred.mask = (inst.instruction & 0xf) | 0x10;
+  now_pred.cc = cond;
+  now_pred.warn_deprecated = FALSE;
+  now_pred.type = SCALAR_PRED;
 
   /* If the condition is a negative condition, invert the mask.  */
   if ((cond & 0x1) == 0x0)
@@ -11615,22 +11700,22 @@ do_t_it (void)
       if ((mask & 0x7) == 0)
 	{
 	  /* No conversion needed.  */
-	  now_it.block_length = 1;
+	  now_pred.block_length = 1;
 	}
       else if ((mask & 0x3) == 0)
 	{
 	  mask ^= 0x8;
-	  now_it.block_length = 2;
+	  now_pred.block_length = 2;
 	}
       else if ((mask & 0x1) == 0)
 	{
 	  mask ^= 0xC;
-	  now_it.block_length = 3;
+	  now_pred.block_length = 3;
 	}
       else
 	{
 	  mask ^= 0xE;
-	  now_it.block_length = 4;
+	  now_pred.block_length = 4;
 	}
 
       inst.instruction &= 0xfff0;
@@ -11638,6 +11723,18 @@ do_t_it (void)
     }
 
   inst.instruction |= cond << 4;
+}
+
+static void
+do_mve_vpt (void)
+{
+  /* We are dealing with a vector predicated block.  */
+  set_pred_insn_type (VPT_INSN);
+  now_pred.cc = 0;
+  now_pred.mask = ((inst.instruction & 0x00400000) >> 19)
+		  | ((inst.instruction & 0xe000) >> 13);
+  now_pred.warn_deprecated = FALSE;
+  now_pred.type = VECTOR_PRED;
 }
 
 /* Helper function used for both push/pop and ldm/stm.  */
@@ -11666,7 +11763,7 @@ encode_thumb2_multi (bfd_boolean do_io, int base, unsigned mask,
 	  if (mask & (1 << 14))
 	    inst.error = _("LR and PC should not both be in register list");
 	  else
-	    set_it_insn_type_last ();
+	    set_pred_insn_type_last ();
 	}
     }
   else if (store)
@@ -11880,7 +11977,7 @@ do_t_ldst (void)
   if (inst.operands[0].isreg
       && !inst.operands[0].preind
       && inst.operands[0].reg == REG_PC)
-    set_it_insn_type_last ();
+    set_pred_insn_type_last ();
 
   opcode = inst.instruction;
   if (unified_syntax)
@@ -12139,7 +12236,7 @@ do_t_mov_cmp (void)
   Rm = inst.operands[1].reg;
 
   if (Rn == REG_PC)
-    set_it_insn_type_last ();
+    set_pred_insn_type_last ();
 
   if (unified_syntax)
     {
@@ -12151,7 +12248,7 @@ do_t_mov_cmp (void)
 
       low_regs = (Rn <= 7 && Rm <= 7);
       opcode = inst.instruction;
-      if (in_it_block ())
+      if (in_pred_block ())
 	narrow = opcode != T_MNEM_movs;
       else
 	narrow = opcode != T_MNEM_movs || low_regs;
@@ -12222,7 +12319,7 @@ do_t_mov_cmp (void)
       if (!inst.operands[1].isreg)
 	{
 	  /* Immediate operand.  */
-	  if (!in_it_block () && opcode == T_MNEM_mov)
+	  if (!in_pred_block () && opcode == T_MNEM_mov)
 	    narrow = 0;
 	  if (low_regs && narrow)
 	    {
@@ -12258,7 +12355,7 @@ do_t_mov_cmp (void)
 	  /* Register shifts are encoded as separate shift instructions.  */
 	  bfd_boolean flags = (inst.instruction == T_MNEM_movs);
 
-	  if (in_it_block ())
+	  if (in_pred_block ())
 	    narrow = !flags;
 	  else
 	    narrow = flags;
@@ -12314,7 +12411,7 @@ do_t_mov_cmp (void)
 	      && (inst.instruction == T_MNEM_mov
 		  || inst.instruction == T_MNEM_movs))
 	    {
-	      if (in_it_block ())
+	      if (in_pred_block ())
 		narrow = (inst.instruction == T_MNEM_mov);
 	      else
 		narrow = (inst.instruction == T_MNEM_movs);
@@ -12493,9 +12590,9 @@ do_t_mvn_tst (void)
 	       || inst.instruction == T_MNEM_tst)
 	narrow = TRUE;
       else if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
 
       if (!inst.operands[1].isreg)
 	{
@@ -12660,9 +12757,9 @@ do_t_mul (void)
 	  || Rm > 7)
 	narrow = FALSE;
       else if (inst.instruction == T_MNEM_muls)
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
     }
   else
     {
@@ -12728,7 +12825,7 @@ do_t_mull (void)
 static void
 do_t_nop (void)
 {
-  set_it_insn_type (NEUTRAL_IT_INSN);
+  set_pred_insn_type (NEUTRAL_IT_INSN);
 
   if (unified_syntax)
     {
@@ -12766,9 +12863,9 @@ do_t_neg (void)
       bfd_boolean narrow;
 
       if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
       if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
 	narrow = FALSE;
       if (inst.size_req == 4)
@@ -13030,9 +13127,9 @@ do_t_rsb (void)
       bfd_boolean narrow;
 
       if ((inst.instruction & 0x00100000) != 0)
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
 
       if (Rd > 7 || Rs > 7)
 	narrow = FALSE;
@@ -13070,7 +13167,7 @@ do_t_setend (void)
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
       as_tsktsk (_("setend use is deprecated for ARMv8"));
 
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   if (inst.operands[0].imm)
     inst.instruction |= 0x8;
 }
@@ -13100,9 +13197,9 @@ do_t_shift (void)
 	}
 
       if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = !in_it_block ();
+	narrow = !in_pred_block ();
       else
-	narrow = in_it_block ();
+	narrow = in_pred_block ();
       if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
 	narrow = FALSE;
       if (!inst.operands[2].isreg && shift_kind == SHIFT_ROR)
@@ -13272,7 +13369,7 @@ do_t_smc (void)
   inst.instruction |= (value & 0x0ff0);
   inst.instruction |= (value & 0x000f) << 16;
   /* PR gas/15623: SMC instructions must be last in an IT block.  */
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
 }
 
 static void
@@ -13447,7 +13544,7 @@ do_t_tb (void)
   int half;
 
   half = (inst.instruction & 0x10) != 0;
-  set_it_insn_type_last ();
+  set_pred_insn_type_last ();
   constraint (inst.operands[0].immisreg,
 	      _("instruction requires register index"));
 
@@ -13483,7 +13580,7 @@ do_t_udf (void)
       inst.instruction |= inst.operands[0].imm;
     }
 
-  set_it_insn_type (NEUTRAL_IT_INSN);
+  set_pred_insn_type (NEUTRAL_IT_INSN);
 }
 
 
@@ -13671,7 +13768,7 @@ do_t_loloop (void)
 {
   unsigned long insn = inst.instruction;
 
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   inst.instruction = THUMB_OP32 (inst.instruction);
 
   switch (insn)
@@ -13713,13 +13810,16 @@ struct neon_tab_entry
 /* Map overloaded Neon opcodes to their respective encodings.  */
 #define NEON_ENC_TAB					\
   X(vabd,	0x0000700, 0x1200d00, N_INV),		\
+  X(vabdl,	0x0800700, N_INV,     N_INV),		\
   X(vmax,	0x0000600, 0x0000f00, N_INV),		\
   X(vmin,	0x0000610, 0x0200f00, N_INV),		\
   X(vpadd,	0x0000b10, 0x1000d00, N_INV),		\
   X(vpmax,	0x0000a00, 0x1000f00, N_INV),		\
   X(vpmin,	0x0000a10, 0x1200f00, N_INV),		\
   X(vadd,	0x0000800, 0x0000d00, N_INV),		\
+  X(vaddl,	0x0800000, N_INV,     N_INV),		\
   X(vsub,	0x1000800, 0x0200d00, N_INV),		\
+  X(vsubl,	0x0800200, N_INV,     N_INV),		\
   X(vceq,	0x1000810, 0x0000e00, 0x1b10100),	\
   X(vcge,	0x0000310, 0x1000e00, 0x1b10080),	\
   X(vcgt,	0x0000300, 0x1200e00, 0x1b10000),	\
@@ -13862,6 +13962,7 @@ NEON_ENC_TAB
   X(3, (Q, Q, I), QUAD),		\
   X(3, (D, D, S), DOUBLE),		\
   X(3, (Q, Q, S), QUAD),		\
+  X(3, (Q, Q, R), QUAD),		\
   X(2, (D, D), DOUBLE),			\
   X(2, (Q, Q), QUAD),			\
   X(2, (D, S), DOUBLE),			\
@@ -14051,6 +14152,9 @@ enum neon_type_mask
 #define N_I_ALL    (N_I8 | N_I16 | N_I32 | N_I64)
 #define N_IF_32    (N_I8 | N_I16 | N_I32 | N_F16 | N_F32)
 #define N_F_ALL    (N_F16 | N_F32 | N_F64)
+#define N_I_MVE	   (N_I8 | N_I16 | N_I32)
+#define N_F_MVE	   (N_F16 | N_F32)
+#define N_SU_MVE   (N_S8 | N_S16 | N_S32 | N_U8 | N_U16 | N_U32)
 
 /* Pass this as the first type argument to neon_check_type to ignore types
    altogether.  */
@@ -14579,7 +14683,7 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
 
 		  if ((given_type & types_allowed) == 0)
 		    {
-		      first_error (_("bad type in Neon instruction"));
+		      first_error (_("bad type in SIMD instruction"));
 		      return badtype;
 		    }
 		}
@@ -15022,6 +15126,45 @@ neon_logbits (unsigned x)
 #define LOW4(R) ((R) & 0xf)
 #define HI1(R) (((R) >> 4) & 1)
 
+static void
+mve_encode_qqr (int size, int fp)
+{
+  if (inst.operands[2].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+  else if (inst.operands[2].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+
+  if (fp)
+    {
+      /* vadd.  */
+      if (((unsigned)inst.instruction) == 0xd00)
+	inst.instruction = 0xee300f40;
+      /* vsub.  */
+      else if (((unsigned)inst.instruction) == 0x200d00)
+	inst.instruction = 0xee301f40;
+
+      /* Setting size which is 1 for F16 and 0 for F32.  */
+      inst.instruction |= (size == 16) << 28;
+    }
+  else
+    {
+      /* vadd.  */
+      if (((unsigned)inst.instruction) == 0x800)
+	inst.instruction = 0xee010f40;
+      /* vsub.  */
+      else if (((unsigned)inst.instruction) == 0x1000800)
+	inst.instruction = 0xee011f40;
+      /* Setting bits for size.  */
+      inst.instruction |= neon_logbits (size) << 20;
+    }
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
 /* Encode insns with bit pattern:
 
   |28/24|23|22 |21 20|19 16|15 12|11    8|7|6|5|4|3  0|
@@ -15343,26 +15486,27 @@ static void
 neon_dyadic_misc (enum neon_el_type ubit_meaning, unsigned types,
 		  unsigned destbits)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_QQR, NS_NULL);
   struct neon_type_el et = neon_check_type (3, rs, N_EQK | destbits, N_EQK,
 					    types | N_KEY);
   if (et.type == NT_float)
     {
       NEON_ENCODE (FLOAT, inst);
-      neon_three_same (neon_quad (rs), 0, et.size == 16 ? (int) et.size : -1);
+      if (rs == NS_QQR)
+	mve_encode_qqr (et.size, 1);
+      else
+	neon_three_same (neon_quad (rs), 0, et.size == 16 ? (int) et.size : -1);
     }
   else
     {
       NEON_ENCODE (INTEGER, inst);
-      neon_three_same (neon_quad (rs), et.type == ubit_meaning, et.size);
+      if (rs == NS_QQR)
+	mve_encode_qqr (et.size, 0);
+      else
+	neon_three_same (neon_quad (rs), et.type == ubit_meaning, et.size);
     }
 }
 
-static void
-do_neon_dyadic_if_su (void)
-{
-  neon_dyadic_misc (NT_unsigned, N_SUF_32, 0);
-}
 
 static void
 do_neon_dyadic_if_su_d (void)
@@ -15421,31 +15565,92 @@ vfp_or_neon_is_neon (unsigned check)
 	inst.instruction |= inst.uncond_value << 28;
     }
 
-  if ((check & NEON_CHECK_ARCH)
-      && !mark_feature_used (&fpu_neon_ext_v1))
-    {
-      first_error (_(BAD_FPU));
-      return FAIL;
-    }
 
-  if ((check & NEON_CHECK_ARCH8)
-      && !mark_feature_used (&fpu_neon_ext_armv8))
-    {
-      first_error (_(BAD_FPU));
-      return FAIL;
-    }
+    if (((check & NEON_CHECK_ARCH) && !mark_feature_used (&fpu_neon_ext_v1))
+	|| ((check & NEON_CHECK_ARCH8)
+	    && !mark_feature_used (&fpu_neon_ext_armv8)))
+      {
+	first_error (_(BAD_FPU));
+	return FAIL;
+      }
 
   return SUCCESS;
+}
+
+static int
+check_simd_pred_availability (int fp, unsigned check)
+{
+  if (inst.cond > COND_ALWAYS)
+    {
+      if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  inst.error = BAD_FPU;
+	  return 1;
+	}
+      inst.pred_insn_type = INSIDE_VPT_INSN;
+    }
+  else if (inst.cond < COND_ALWAYS)
+    {
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+      else if (vfp_or_neon_is_neon (check) == FAIL)
+	return 2;
+    }
+  else
+    {
+      if (!ARM_CPU_HAS_FEATURE (cpu_variant, fp ? mve_fp_ext : mve_ext)
+	  && vfp_or_neon_is_neon (check) == FAIL)
+	return 3;
+
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+    }
+  return 0;
+}
+
+static void
+do_neon_dyadic_if_su (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_QQR, NS_NULL);
+  struct neon_type_el et = neon_check_type (3, rs, N_EQK , N_EQK,
+					    N_SUF_32 | N_KEY);
+
+  if (check_simd_pred_availability (et.type == NT_float,
+				    NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  neon_dyadic_misc (NT_unsigned, N_SUF_32, 0);
 }
 
 static void
 do_neon_addsub_if_i (void)
 {
-  if (try_vfp_nsyn (3, do_vfp_nsyn_add_sub) == SUCCESS)
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)
+      && try_vfp_nsyn (3, do_vfp_nsyn_add_sub) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
-    return;
+  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_QQR, NS_NULL);
+  struct neon_type_el et = neon_check_type (3, rs, N_EQK,
+					    N_EQK, N_IF_32 | N_I64 | N_KEY);
+
+  constraint (rs == NS_QQR && et.size == 64, BAD_FPU);
+  /* If we are parsing Q registers and the element types match MVE, which NEON
+     also supports, then we must check whether this is an instruction that can
+     be used by both MVE/NEON.  This distinction can be made based on whether
+     they are predicated or not.  */
+  if ((rs == NS_QQQ || rs == NS_QQR) && et.size != 64)
+    {
+      if (check_simd_pred_availability (et.type == NT_float,
+					NEON_CHECK_ARCH | NEON_CHECK_CC))
+	return;
+    }
+  else
+    {
+      /* If they are either in a D register or are using an unsupported.  */
+      if (rs != NS_QQR
+	  && vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+	return;
+    }
 
   /* The "untyped" case can't happen. Do this to stop the "U" bit being
      affected if we specify unsigned args.  */
@@ -16128,7 +16333,7 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
     constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
 		_(BAD_FP16));
 
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   switch (flavour)
     {
@@ -16283,7 +16488,7 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
       if (mode != neon_cvt_mode_x && mode != neon_cvt_mode_z)
 	{
 	  NEON_ENCODE (FLOAT, inst);
-	  set_it_insn_type (OUTSIDE_IT_INSN);
+	  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
 	  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
 	    return;
@@ -16584,10 +16789,49 @@ neon_mixed_length (struct neon_type_el et, unsigned size)
 static void
 do_neon_dyadic_long (void)
 {
-  /* FIXME: Type checking for lengthening op.  */
-  struct neon_type_el et = neon_check_type (3, NS_QDD,
-    N_EQK | N_DBL, N_EQK, N_SU_32 | N_KEY);
-  neon_mixed_length (et, et.size);
+  enum neon_shape rs = neon_select_shape (NS_QDD, NS_QQQ, NS_QQR, NS_NULL);
+  if (rs == NS_QDD)
+    {
+      if (vfp_or_neon_is_neon (NEON_CHECK_ARCH | NEON_CHECK_CC) == FAIL)
+	return;
+
+      NEON_ENCODE (INTEGER, inst);
+      /* FIXME: Type checking for lengthening op.  */
+      struct neon_type_el et = neon_check_type (3, NS_QDD,
+	N_EQK | N_DBL, N_EQK, N_SU_32 | N_KEY);
+      neon_mixed_length (et, et.size);
+    }
+  else if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+	   && (inst.cond == 0xf || inst.cond == 0x10))
+    {
+      /* If parsing for MVE, vaddl/vsubl/vabdl{e,t} can only be vadd/vsub/vabd
+	 in an IT block with le/lt conditions.  */
+
+      if (inst.cond == 0xf)
+	inst.cond = 0xb;
+      else if (inst.cond == 0x10)
+	inst.cond = 0xd;
+
+      inst.pred_insn_type = INSIDE_IT_INSN;
+
+      if (inst.instruction == N_MNEM_vaddl)
+	{
+	  inst.instruction = N_MNEM_vadd;
+	  do_neon_addsub_if_i ();
+	}
+      else if (inst.instruction == N_MNEM_vsubl)
+	{
+	  inst.instruction = N_MNEM_vsub;
+	  do_neon_addsub_if_i ();
+	}
+      else if (inst.instruction == N_MNEM_vabdl)
+	{
+	  inst.instruction = N_MNEM_vabd;
+	  do_neon_dyadic_if_su ();
+	}
+    }
+  else
+    first_error (BAD_FPU);
 }
 
 static void
@@ -17860,7 +18104,7 @@ do_vfp_nsyn_fpv8 (enum neon_shape rs)
 static void
 do_vsel (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) != SUCCESS)
     first_error (_("invalid instruction shape"));
@@ -17869,7 +18113,7 @@ do_vsel (void)
 static void
 do_vmaxnm (void)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) == SUCCESS)
     return;
@@ -17902,7 +18146,7 @@ do_vrint_1 (enum neon_cvt_mode mode)
       /* VFP encodings.  */
       if (mode == neon_cvt_mode_a || mode == neon_cvt_mode_n
 	  || mode == neon_cvt_mode_p || mode == neon_cvt_mode_m)
-	set_it_insn_type (OUTSIDE_IT_INSN);
+	set_pred_insn_type (OUTSIDE_PRED_INSN);
 
       NEON_ENCODE (FPV8, inst);
       if (rs == NS_FF || rs == NS_HH)
@@ -17938,7 +18182,7 @@ do_vrint_1 (enum neon_cvt_mode mode)
       if (et.type == NT_invtype)
 	return;
 
-      set_it_insn_type (OUTSIDE_IT_INSN);
+      set_pred_insn_type (OUTSIDE_PRED_INSN);
       NEON_ENCODE (FLOAT, inst);
 
       if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
@@ -18167,7 +18411,7 @@ do_neon_dotproduct_u (void)
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   if (neon_check_type (2, NS_QQ, N_EQK | N_UNT, elttype | N_UNT | N_KEY).type
       == NT_invtype)
@@ -18192,7 +18436,7 @@ do_crypto_2op_1 (unsigned elttype, int op)
 static void
 do_crypto_3op_1 (int u, int op)
 {
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   if (neon_check_type (3, NS_QQQ, N_EQK | N_UNT, N_EQK | N_UNT,
 		       N_32 | N_UNT | N_KEY).type == NT_invtype)
@@ -18295,7 +18539,7 @@ do_crc32_1 (unsigned int poly, unsigned int sz)
   unsigned int Rn = inst.operands[1].reg;
   unsigned int Rm = inst.operands[2].reg;
 
-  set_it_insn_type (OUTSIDE_IT_INSN);
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
   inst.instruction |= LOW4 (Rd) << (thumb_mode ? 8 : 12);
   inst.instruction |= LOW4 (Rn) << 16;
   inst.instruction |= LOW4 (Rm);
@@ -18537,9 +18781,10 @@ enum opcode_tag
   OT_unconditionalF,	/* Instruction cannot be conditionalized
 			   and carries 0xF in its ARM condition field.  */
   OT_csuffix,		/* Instruction takes a conditional suffix.  */
-  OT_csuffixF,		/* Some forms of the instruction take a conditional
-			   suffix, others place 0xF where the condition field
-			   would be.  */
+  OT_csuffixF,		/* Some forms of the instruction take a scalar
+			   conditional suffix, others place 0xF where the
+			   condition field would be, others take a vector
+			   conditional suffix.  */
   OT_cinfix3,		/* Instruction takes a conditional infix,
 			   beginning at character index 3.  (In
 			   unified mode, it becomes a suffix.)  */
@@ -18685,17 +18930,35 @@ opcode_lookup (char **str)
       inst.cond = cond->value;
       return opcode;
     }
+ if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+   {
+    /* Cannot have a conditional suffix on a mnemonic of less than a character.
+     */
+    if (end - base < 2)
+      return NULL;
+     affix = end - 1;
+     cond = (const struct asm_cond *) hash_find_n (arm_vcond_hsh, affix, 1);
+     opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+						      affix - base);
+     /* If this opcode can not be vector predicated then don't accept it with a
+	vector predication code.  */
+     if (opcode && !opcode->mayBeVecPred)
+       opcode = NULL;
+   }
+  if (!opcode || !cond)
+    {
+      /* Cannot have a conditional suffix on a mnemonic of less than two
+	 characters.  */
+      if (end - base < 3)
+	return NULL;
 
-  /* Cannot have a conditional suffix on a mnemonic of less than two
-     characters.  */
-  if (end - base < 3)
-    return NULL;
+      /* Look for suffixed mnemonic.  */
+      affix = end - 2;
+      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+      opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+							affix - base);
+    }
 
-  /* Look for suffixed mnemonic.  */
-  affix = end - 2;
-  cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
-  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
-						    affix - base);
   if (opcode && cond)
     {
       /* step CE */
@@ -18774,7 +19037,7 @@ opcode_lookup (char **str)
 
 /* This function generates an initial IT instruction, leaving its block
    virtually open for the new instructions. Eventually,
-   the mask will be updated by now_it_add_mask () each time
+   the mask will be updated by now_pred_add_mask () each time
    a new instruction needs to be included in the IT block.
    Finally, the block is closed with close_automatic_it_block ().
    The block closure can be requested either from md_assemble (),
@@ -18783,14 +19046,14 @@ opcode_lookup (char **str)
 static void
 new_automatic_it_block (int cond)
 {
-  now_it.state = AUTOMATIC_IT_BLOCK;
-  now_it.mask = 0x18;
-  now_it.cc = cond;
-  now_it.block_length = 1;
+  now_pred.state = AUTOMATIC_PRED_BLOCK;
+  now_pred.mask = 0x18;
+  now_pred.cc = cond;
+  now_pred.block_length = 1;
   mapping_state (MAP_THUMB);
-  now_it.insn = output_it_inst (cond, now_it.mask, NULL);
-  now_it.warn_deprecated = FALSE;
-  now_it.insn_cond = TRUE;
+  now_pred.insn = output_it_inst (cond, now_pred.mask, NULL);
+  now_pred.warn_deprecated = FALSE;
+  now_pred.insn_cond = TRUE;
 }
 
 /* Close an automatic IT block.
@@ -18799,29 +19062,29 @@ new_automatic_it_block (int cond)
 static void
 close_automatic_it_block (void)
 {
-  now_it.mask = 0x10;
-  now_it.block_length = 0;
+  now_pred.mask = 0x10;
+  now_pred.block_length = 0;
 }
 
 /* Update the mask of the current automatically-generated IT
    instruction. See comments in new_automatic_it_block ().  */
 
 static void
-now_it_add_mask (int cond)
+now_pred_add_mask (int cond)
 {
 #define CLEAR_BIT(value, nbit)  ((value) & ~(1 << (nbit)))
 #define SET_BIT_VALUE(value, bitvalue, nbit)  (CLEAR_BIT (value, nbit) \
 					      | ((bitvalue) << (nbit)))
   const int resulting_bit = (cond & 1);
 
-  now_it.mask &= 0xf;
-  now_it.mask = SET_BIT_VALUE (now_it.mask,
+  now_pred.mask &= 0xf;
+  now_pred.mask = SET_BIT_VALUE (now_pred.mask,
 				   resulting_bit,
-				  (5 - now_it.block_length));
-  now_it.mask = SET_BIT_VALUE (now_it.mask,
+				  (5 - now_pred.block_length));
+  now_pred.mask = SET_BIT_VALUE (now_pred.mask,
 				   1,
-				   ((5 - now_it.block_length) - 1) );
-  output_it_inst (now_it.cc, now_it.mask, now_it.insn);
+				   ((5 - now_pred.block_length) - 1));
+  output_it_inst (now_pred.cc, now_pred.mask, now_pred.insn);
 
 #undef CLEAR_BIT
 #undef SET_BIT_VALUE
@@ -18829,9 +19092,9 @@ now_it_add_mask (int cond)
 
 /* The IT blocks handling machinery is accessed through the these functions:
      it_fsm_pre_encode ()               from md_assemble ()
-     set_it_insn_type ()                optional, from the tencode functions
-     set_it_insn_type_last ()           ditto
-     in_it_block ()                     ditto
+     set_pred_insn_type ()		optional, from the tencode functions
+     set_pred_insn_type_last ()		ditto
+     in_pred_block ()			ditto
      it_fsm_post_encode ()              from md_assemble ()
      force_automatic_it_block_close ()  from label handling functions
 
@@ -18841,37 +19104,38 @@ now_it_add_mask (int cond)
 	on the inst.condition.
      2) During the tencode function, two things may happen:
 	a) The tencode function overrides the IT insn type by
-	   calling either set_it_insn_type (type) or set_it_insn_type_last ().
+	   calling either set_pred_insn_type (type) or
+	   set_pred_insn_type_last ().
 	b) The tencode function queries the IT block state by
-	   calling in_it_block () (i.e. to determine narrow/not narrow mode).
+	   calling in_pred_block () (i.e. to determine narrow/not narrow mode).
 
-	Both set_it_insn_type and in_it_block run the internal FSM state
-	handling function (handle_it_state), because: a) setting the IT insn
+	Both set_pred_insn_type and in_pred_block run the internal FSM state
+	handling function (handle_pred_state), because: a) setting the IT insn
 	type may incur in an invalid state (exiting the function),
 	and b) querying the state requires the FSM to be updated.
 	Specifically we want to avoid creating an IT block for conditional
 	branches, so it_fsm_pre_encode is actually a guess and we can't
 	determine whether an IT block is required until the tencode () routine
 	has decided what type of instruction this actually it.
-	Because of this, if set_it_insn_type and in_it_block have to be used,
-	set_it_insn_type has to be called first.
+	Because of this, if set_pred_insn_type and in_pred_block have to be
+	used, set_pred_insn_type has to be called first.
 
-	set_it_insn_type_last () is a wrapper of set_it_insn_type (type), that
-	determines the insn IT type depending on the inst.cond code.
+	set_pred_insn_type_last () is a wrapper of set_pred_insn_type (type),
+	that determines the insn IT type depending on the inst.cond code.
 	When a tencode () routine encodes an instruction that can be
 	either outside an IT block, or, in the case of being inside, has to be
-	the last one, set_it_insn_type_last () will determine the proper
+	the last one, set_pred_insn_type_last () will determine the proper
 	IT instruction type based on the inst.cond code. Otherwise,
-	set_it_insn_type can be called for overriding that logic or
+	set_pred_insn_type can be called for overriding that logic or
 	for covering other cases.
 
-	Calling handle_it_state () may not transition the IT block state to
-	OUTSIDE_IT_BLOCK immediately, since the (current) state could be
+	Calling handle_pred_state () may not transition the IT block state to
+	OUTSIDE_PRED_BLOCK immediately, since the (current) state could be
 	still queried. Instead, if the FSM determines that the state should
-	be transitioned to OUTSIDE_IT_BLOCK, a flag is marked to be closed
+	be transitioned to OUTSIDE_PRED_BLOCK, a flag is marked to be closed
 	after the tencode () function: that's what it_fsm_post_encode () does.
 
-	Since in_it_block () calls the state handling function to get an
+	Since in_pred_block () calls the state handling function to get an
 	updated state, an error may occur (due to invalid insns combination).
 	In that case, inst.error is set.
 	Therefore, inst.error has to be checked after the execution of
@@ -18879,74 +19143,150 @@ now_it_add_mask (int cond)
 
      3) Back in md_assemble(), it_fsm_post_encode () is called to commit
 	any pending state change (if any) that didn't take place in
-	handle_it_state () as explained above.  */
+	handle_pred_state () as explained above.  */
 
 static void
 it_fsm_pre_encode (void)
 {
   if (inst.cond != COND_ALWAYS)
-    inst.it_insn_type = INSIDE_IT_INSN;
+    inst.pred_insn_type =  INSIDE_IT_INSN;
   else
-    inst.it_insn_type = OUTSIDE_IT_INSN;
+    inst.pred_insn_type = OUTSIDE_PRED_INSN;
 
-  now_it.state_handled = 0;
+  now_pred.state_handled = 0;
 }
 
 /* IT state FSM handling function.  */
+/* MVE instructions and non-MVE instructions are handled differently because of
+   the introduction of VPT blocks.
+   Specifications say that any non-MVE instruction inside a VPT block is
+   UNPREDICTABLE, with the exception of the BKPT instruction.  Whereas most MVE
+   instructions are deemed to be UNPREDICTABLE if inside an IT block.  For the
+   few exceptions this will be handled at their respective handler functions.
+   The error messages provided depending on the different combinations possible
+   are described in the cases below:
+   For 'most' MVE instructions:
+   1) In an IT block, with an IT code: syntax error
+   2) In an IT block, with a VPT code: error: must be in a VPT block
+   3) In an IT block, with no code: warning: UNPREDICTABLE
+   4) In a VPT block, with an IT code: syntax error
+   5) In a VPT block, with a VPT code: OK!
+   6) In a VPT block, with no code: error: missing code
+   7) Outside a pred block, with an IT code: error: syntax error
+   8) Outside a pred block, with a VPT code: error: should be in a VPT block
+   9) Outside a pred block, with no code: OK!
+   For non-MVE instructions:
+   10) In an IT block, with an IT code: OK!
+   11) In an IT block, with a VPT code: syntax error
+   12) In an IT block, with no code: error: missing code
+   13) In a VPT block, with an IT code: error: should be in an IT block
+   14) In a VPT block, with a VPT code: syntax error
+   15) In a VPT block, with no code: UNPREDICTABLE
+   16) Outside a pred block, with an IT code: error: should be in an IT block
+   17) Outside a pred block, with a VPT code: syntax error
+   18) Outside a pred block, with no code: OK!
+ */
+
 
 static int
-handle_it_state (void)
+handle_pred_state (void)
 {
-  now_it.state_handled = 1;
-  now_it.insn_cond = FALSE;
+  now_pred.state_handled = 1;
+  now_pred.insn_cond = FALSE;
 
-  switch (now_it.state)
+  switch (now_pred.state)
     {
-    case OUTSIDE_IT_BLOCK:
-      switch (inst.it_insn_type)
+    case OUTSIDE_PRED_BLOCK:
+      switch (inst.pred_insn_type)
 	{
-	case OUTSIDE_IT_INSN:
+	case MVE_OUTSIDE_PRED_INSN:
+	  if (inst.cond < COND_ALWAYS)
+	    {
+	      /* Case 7: Outside a pred block, with an IT code: error: syntax
+		 error.  */
+	      inst.error = BAD_SYNTAX;
+	      return FAIL;
+	    }
+	  /* Case 9:  Outside a pred block, with no code: OK!  */
 	  break;
+	case OUTSIDE_PRED_INSN:
+	  if (inst.cond > COND_ALWAYS)
+	    {
+	      /* Case 17:  Outside a pred block, with a VPT code: syntax error.
+	       */
+	      inst.error = BAD_SYNTAX;
+	      return FAIL;
+	    }
+	  /* Case 18: Outside a pred block, with no code: OK!  */
+	  break;
+
+	case INSIDE_VPT_INSN:
+	  /* Case 8: Outside a pred block, with a VPT code: error: should be in
+	     a VPT block.  */
+	  inst.error = BAD_OUT_VPT;
+	  return FAIL;
 
 	case INSIDE_IT_INSN:
 	case INSIDE_IT_LAST_INSN:
-	  if (thumb_mode == 0)
+	  if (inst.cond < COND_ALWAYS)
 	    {
-	      if (unified_syntax
-		  && !(implicit_it_mode & IMPLICIT_IT_MODE_ARM))
-		as_tsktsk (_("Warning: conditional outside an IT block"\
-			     " for Thumb."));
-	    }
-	  else
-	    {
-	      if ((implicit_it_mode & IMPLICIT_IT_MODE_THUMB)
-		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+	      /* Case 16: Outside a pred block, with an IT code: error: should
+		 be in an IT block.  */
+	      if (thumb_mode == 0)
 		{
-		  /* Automatically generate the IT instruction.  */
-		  new_automatic_it_block (inst.cond);
-		  if (inst.it_insn_type == INSIDE_IT_LAST_INSN)
-		    close_automatic_it_block ();
+		  if (unified_syntax
+		      && !(implicit_it_mode & IMPLICIT_IT_MODE_ARM))
+		    as_tsktsk (_("Warning: conditional outside an IT block"\
+				 " for Thumb."));
 		}
 	      else
 		{
-		  inst.error = BAD_OUT_IT;
-		  return FAIL;
+		  if ((implicit_it_mode & IMPLICIT_IT_MODE_THUMB)
+		      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+		    {
+		      /* Automatically generate the IT instruction.  */
+		      new_automatic_it_block (inst.cond);
+		      if (inst.pred_insn_type == INSIDE_IT_LAST_INSN)
+			close_automatic_it_block ();
+		    }
+		  else
+		    {
+		      inst.error = BAD_OUT_IT;
+		      return FAIL;
+		    }
 		}
+	      break;
 	    }
-	  break;
-
+	  else if (inst.cond > COND_ALWAYS)
+	    {
+	      /* Case 17: Outside a pred block, with a VPT code: syntax error.
+	       */
+	      inst.error = BAD_SYNTAX;
+	      return FAIL;
+	    }
+	  else
+	    gas_assert (0);
 	case IF_INSIDE_IT_LAST_INSN:
 	case NEUTRAL_IT_INSN:
 	  break;
 
+	case VPT_INSN:
+	  if (inst.cond != COND_ALWAYS)
+	    first_error (BAD_SYNTAX);
+	  now_pred.state = MANUAL_PRED_BLOCK;
+	  now_pred.block_length = 0;
+	  now_pred.type = VECTOR_PRED;
+	  now_pred.cc = 0;
+	  break;
 	case IT_INSN:
-	  now_it.state = MANUAL_IT_BLOCK;
-	  now_it.block_length = 0;
+	  now_pred.state = MANUAL_PRED_BLOCK;
+	  now_pred.block_length = 0;
+	  now_pred.type = SCALAR_PRED;
 	  break;
 	}
       break;
 
-    case AUTOMATIC_IT_BLOCK:
+    case AUTOMATIC_PRED_BLOCK:
       /* Three things may happen now:
 	 a) We should increment current it block size;
 	 b) We should close current it block (closing insn or 4 insns);
@@ -18954,82 +19294,211 @@ handle_it_state (void)
 	 to incompatible conditions or
 	 4 insns-length block reached).  */
 
-      switch (inst.it_insn_type)
+      switch (inst.pred_insn_type)
 	{
-	case OUTSIDE_IT_INSN:
+	case INSIDE_VPT_INSN:
+	case VPT_INSN:
+	case MVE_OUTSIDE_PRED_INSN:
+	  gas_assert (0);
+	case OUTSIDE_PRED_INSN:
 	  /* The closure of the block shall happen immediately,
-	     so any in_it_block () call reports the block as closed.  */
+	     so any in_pred_block () call reports the block as closed.  */
 	  force_automatic_it_block_close ();
 	  break;
 
 	case INSIDE_IT_INSN:
 	case INSIDE_IT_LAST_INSN:
 	case IF_INSIDE_IT_LAST_INSN:
-	  now_it.block_length++;
+	  now_pred.block_length++;
 
-	  if (now_it.block_length > 4
-	      || !now_it_compatible (inst.cond))
+	  if (now_pred.block_length > 4
+	      || !now_pred_compatible (inst.cond))
 	    {
 	      force_automatic_it_block_close ();
-	      if (inst.it_insn_type != IF_INSIDE_IT_LAST_INSN)
+	      if (inst.pred_insn_type != IF_INSIDE_IT_LAST_INSN)
 		new_automatic_it_block (inst.cond);
 	    }
 	  else
 	    {
-	      now_it.insn_cond = TRUE;
-	      now_it_add_mask (inst.cond);
+	      now_pred.insn_cond = TRUE;
+	      now_pred_add_mask (inst.cond);
 	    }
 
-	  if (now_it.state == AUTOMATIC_IT_BLOCK
-	      && (inst.it_insn_type == INSIDE_IT_LAST_INSN
-		  || inst.it_insn_type == IF_INSIDE_IT_LAST_INSN))
+	  if (now_pred.state == AUTOMATIC_PRED_BLOCK
+	      && (inst.pred_insn_type == INSIDE_IT_LAST_INSN
+		  || inst.pred_insn_type == IF_INSIDE_IT_LAST_INSN))
 	    close_automatic_it_block ();
 	  break;
 
 	case NEUTRAL_IT_INSN:
-	  now_it.block_length++;
-	  now_it.insn_cond = TRUE;
+	  now_pred.block_length++;
+	  now_pred.insn_cond = TRUE;
 
-	  if (now_it.block_length > 4)
+	  if (now_pred.block_length > 4)
 	    force_automatic_it_block_close ();
 	  else
-	    now_it_add_mask (now_it.cc & 1);
+	    now_pred_add_mask (now_pred.cc & 1);
 	  break;
 
 	case IT_INSN:
 	  close_automatic_it_block ();
-	  now_it.state = MANUAL_IT_BLOCK;
+	  now_pred.state = MANUAL_PRED_BLOCK;
 	  break;
 	}
       break;
 
-    case MANUAL_IT_BLOCK:
+    case MANUAL_PRED_BLOCK:
       {
-	/* Check conditional suffixes.  */
-	const int cond = now_it.cc ^ ((now_it.mask >> 4) & 1) ^ 1;
-	int is_last;
-	now_it.mask <<= 1;
-	now_it.mask &= 0x1f;
-	is_last = (now_it.mask == 0x10);
-	now_it.insn_cond = TRUE;
-
-	switch (inst.it_insn_type)
+	int cond, is_last;
+	if (now_pred.type == SCALAR_PRED)
 	  {
-	  case OUTSIDE_IT_INSN:
-	    inst.error = BAD_NOT_IT;
-	    return FAIL;
+	    /* Check conditional suffixes.  */
+	    cond = now_pred.cc ^ ((now_pred.mask >> 4) & 1) ^ 1;
+	    now_pred.mask <<= 1;
+	    now_pred.mask &= 0x1f;
+	    is_last = (now_pred.mask == 0x10);
+	  }
+	else
+	  {
+	    now_pred.cc ^= (now_pred.mask >> 4);
+	    cond = now_pred.cc + 0xf;
+	    now_pred.mask <<= 1;
+	    now_pred.mask &= 0x1f;
+	    is_last = now_pred.mask == 0x10;
+	  }
+	now_pred.insn_cond = TRUE;
 
-	  case INSIDE_IT_INSN:
-	    if (cond != inst.cond)
+	switch (inst.pred_insn_type)
+	  {
+	  case OUTSIDE_PRED_INSN:
+	    if (now_pred.type == SCALAR_PRED)
 	      {
-		inst.error = BAD_IT_COND;
+		if (inst.cond == COND_ALWAYS)
+		  {
+		    /* Case 12: In an IT block, with no code: error: missing
+		       code.  */
+		    inst.error = BAD_NOT_IT;
+		    return FAIL;
+		  }
+		else if (inst.cond > COND_ALWAYS)
+		  {
+		    /* Case 11: In an IT block, with a VPT code: syntax error.
+		     */
+		    inst.error = BAD_SYNTAX;
+		    return FAIL;
+		  }
+		else if (thumb_mode)
+		  {
+		    /* This is for some special cases where a non-MVE
+		       instruction is not allowed in an IT block, such as cbz,
+		       but are put into one with a condition code.
+		       You could argue this should be a syntax error, but we
+		       gave the 'not allowed in IT block' diagnostic in the
+		       past so we will keep doing so.  */
+		    inst.error = BAD_NOT_IT;
+		    return FAIL;
+		  }
+		break;
+	      }
+	    else
+	      {
+		/* Case 15: In a VPT block, with no code: UNPREDICTABLE.  */
+		as_tsktsk (MVE_NOT_VPT);
+		return SUCCESS;
+	      }
+	  case MVE_OUTSIDE_PRED_INSN:
+	    if (now_pred.type == SCALAR_PRED)
+	      {
+		if (inst.cond == COND_ALWAYS)
+		  {
+		    /* Case 3: In an IT block, with no code: warning:
+		       UNPREDICTABLE.  */
+		    as_tsktsk (MVE_NOT_IT);
+		    return SUCCESS;
+		  }
+		else if (inst.cond < COND_ALWAYS)
+		  {
+		    /* Case 1: In an IT block, with an IT code: syntax error.
+		     */
+		    inst.error = BAD_SYNTAX;
+		    return FAIL;
+		  }
+		else
+		  gas_assert (0);
+	      }
+	    else
+	      {
+		if (inst.cond < COND_ALWAYS)
+		  {
+		    /* Case 4: In a VPT block, with an IT code: syntax error.
+		     */
+		    inst.error = BAD_SYNTAX;
+		    return FAIL;
+		  }
+		else if (inst.cond == COND_ALWAYS)
+		  {
+		    /* Case 6: In a VPT block, with no code: error: missing
+		       code.  */
+		    inst.error = BAD_NOT_VPT;
+		    return FAIL;
+		  }
+		else
+		  {
+		    gas_assert (0);
+		  }
+	      }
+	  case INSIDE_IT_INSN:
+	    if (inst.cond > COND_ALWAYS)
+	      {
+		/* Case 11: In an IT block, with a VPT code: syntax error.  */
+		/* Case 14: In a VPT block, with a VPT code: syntax error.  */
+		inst.error = BAD_SYNTAX;
+		return FAIL;
+	      }
+	    else if (now_pred.type == SCALAR_PRED)
+	      {
+		/* Case 10: In an IT block, with an IT code: OK!  */
+		if (cond != inst.cond)
+		  {
+		    inst.error = now_pred.type == SCALAR_PRED ? BAD_IT_COND :
+		      BAD_VPT_COND;
+		    return FAIL;
+		  }
+	      }
+	    else
+	      {
+		/* Case 13: In a VPT block, with an IT code: error: should be
+		   in an IT block.  */
+		inst.error = BAD_OUT_IT;
 		return FAIL;
 	      }
 	    break;
 
+	  case INSIDE_VPT_INSN:
+	    if (now_pred.type == SCALAR_PRED)
+	      {
+		/* Case 2: In an IT block, with a VPT code: error: must be in a
+		   VPT block.  */
+		inst.error = BAD_OUT_VPT;
+		return FAIL;
+	      }
+	    /* Case 5:  In a VPT block, with a VPT code: OK!  */
+	    else if (cond != inst.cond)
+	      {
+		inst.error = BAD_VPT_COND;
+		return FAIL;
+	      }
+	    break;
 	  case INSIDE_IT_LAST_INSN:
 	  case IF_INSIDE_IT_LAST_INSN:
-	    if (cond != inst.cond)
+	    if (now_pred.type == VECTOR_PRED || inst.cond > COND_ALWAYS)
+	      {
+		/* Case 4: In a VPT block, with an IT code: syntax error.  */
+		/* Case 11: In an IT block, with a VPT code: syntax error.  */
+		inst.error = BAD_SYNTAX;
+		return FAIL;
+	      }
+	    else if (cond != inst.cond)
 	      {
 		inst.error = BAD_IT_COND;
 		return FAIL;
@@ -19042,14 +19511,37 @@ handle_it_state (void)
 	    break;
 
 	  case NEUTRAL_IT_INSN:
-	    /* The BKPT instruction is unconditional even in an IT block.  */
+	    /* The BKPT instruction is unconditional even in a IT or VPT
+	       block.  */
 	    break;
 
 	  case IT_INSN:
-	    inst.error = BAD_IT_IT;
-	    return FAIL;
+	    if (now_pred.type == SCALAR_PRED)
+	      {
+		inst.error = BAD_IT_IT;
+		return FAIL;
+	      }
+	    /* fall through.  */
+	  case VPT_INSN:
+	    if (inst.cond == COND_ALWAYS)
+	      {
+		/* Executing a VPT/VPST instruction inside an IT block or a
+		   VPT/VPST/IT instruction inside a VPT block is UNPREDICTABLE.
+		 */
+		if (now_pred.type == SCALAR_PRED)
+		  as_tsktsk (MVE_NOT_IT);
+		else
+		  as_tsktsk (MVE_NOT_VPT);
+		return SUCCESS;
+	      }
+	    else
+	      {
+		/* VPT/VPST do not accept condition codes.  */
+		inst.error = BAD_SYNTAX;
+		return FAIL;
+	      }
 	  }
-      }
+	}
       break;
     }
 
@@ -19083,11 +19575,11 @@ it_fsm_post_encode (void)
 {
   int is_last;
 
-  if (!now_it.state_handled)
-    handle_it_state ();
+  if (!now_pred.state_handled)
+    handle_pred_state ();
 
-  if (now_it.insn_cond
-      && !now_it.warn_deprecated
+  if (now_pred.insn_cond
+      && !now_pred.warn_deprecated
       && warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8)
       && !ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m))
@@ -19096,7 +19588,7 @@ it_fsm_post_encode (void)
 	{
 	  as_tsktsk (_("IT blocks containing 32-bit Thumb instructions are "
 		     "performance deprecated in ARMv8-A and ARMv8-R"));
-	  now_it.warn_deprecated = TRUE;
+	  now_pred.warn_deprecated = TRUE;
 	}
       else
 	{
@@ -19110,7 +19602,7 @@ it_fsm_post_encode (void)
 			       "instructions of the following class are "
 			       "performance deprecated in ARMv8-A and "
 			       "ARMv8-R: %s"), p->description);
-		  now_it.warn_deprecated = TRUE;
+		  now_pred.warn_deprecated = TRUE;
 		  break;
 		}
 
@@ -19118,41 +19610,41 @@ it_fsm_post_encode (void)
 	    }
 	}
 
-      if (now_it.block_length > 1)
+      if (now_pred.block_length > 1)
 	{
 	  as_tsktsk (_("IT blocks containing more than one conditional "
 		     "instruction are performance deprecated in ARMv8-A and "
 		     "ARMv8-R"));
-	  now_it.warn_deprecated = TRUE;
+	  now_pred.warn_deprecated = TRUE;
 	}
     }
 
-  is_last = (now_it.mask == 0x10);
-  if (is_last)
-    {
-      now_it.state = OUTSIDE_IT_BLOCK;
-      now_it.mask = 0;
-    }
+    is_last = (now_pred.mask == 0x10);
+    if (is_last)
+      {
+	now_pred.state = OUTSIDE_PRED_BLOCK;
+	now_pred.mask = 0;
+      }
 }
 
 static void
 force_automatic_it_block_close (void)
 {
-  if (now_it.state == AUTOMATIC_IT_BLOCK)
+  if (now_pred.state == AUTOMATIC_PRED_BLOCK)
     {
       close_automatic_it_block ();
-      now_it.state = OUTSIDE_IT_BLOCK;
-      now_it.mask = 0;
+      now_pred.state = OUTSIDE_PRED_BLOCK;
+      now_pred.mask = 0;
     }
 }
 
 static int
-in_it_block (void)
+in_pred_block (void)
 {
-  if (!now_it.state_handled)
-    handle_it_state ();
+  if (!now_pred.state_handled)
+    handle_pred_state ();
 
-  return now_it.state != OUTSIDE_IT_BLOCK;
+  return now_pred.state != OUTSIDE_PRED_BLOCK;
 }
 
 /* Whether OPCODE only has T32 encoding.  Since this function is only used by
@@ -19305,7 +19797,7 @@ md_assemble (char *str)
 
       if (!parse_operands (p, opcode->operands, /*thumb=*/TRUE))
 	{
-	  /* Prepare the it_insn_type for those encodings that don't set
+	  /* Prepare the pred_insn_type for those encodings that don't set
 	     it.  */
 	  it_fsm_pre_encode ();
 
@@ -19408,21 +19900,30 @@ md_assemble (char *str)
 }
 
 static void
-check_it_blocks_finished (void)
+check_pred_blocks_finished (void)
 {
 #ifdef OBJ_ELF
   asection *sect;
 
   for (sect = stdoutput->sections; sect != NULL; sect = sect->next)
-    if (seg_info (sect)->tc_segment_info_data.current_it.state
-	== MANUAL_IT_BLOCK)
+    if (seg_info (sect)->tc_segment_info_data.current_pred.state
+	== MANUAL_PRED_BLOCK)
       {
-	as_warn (_("section '%s' finished with an open IT block."),
-		 sect->name);
+	if (now_pred.type == SCALAR_PRED)
+	  as_warn (_("section '%s' finished with an open IT block."),
+		   sect->name);
+	else
+	  as_warn (_("section '%s' finished with an open VPT/VPST block."),
+		   sect->name);
       }
 #else
-  if (now_it.state == MANUAL_IT_BLOCK)
-    as_warn (_("file finished with an open IT block."));
+  if (now_pred.state == MANUAL_PRED_BLOCK)
+    {
+      if (now_pred.type == SCALAR_PRED)
+       as_warn (_("file finished with an open IT block."));
+      else
+	as_warn (_("file finished with an open VPT/VPST block."));
+    }
 #endif
 }
 
@@ -19824,7 +20325,7 @@ static struct reloc_entry reloc_names[] =
 };
 #endif
 
-/* Table of all conditional affixes.  0xF is not defined as a condition code.  */
+/* Table of all conditional affixes.  */
 static const struct asm_cond conds[] =
 {
   {"eq", 0x0},
@@ -19842,6 +20343,11 @@ static const struct asm_cond conds[] =
   {"gt", 0xc},
   {"le", 0xd},
   {"al", 0xe}
+};
+static const struct asm_cond vconds[] =
+{
+    {"t", 0xf},
+    {"e", 0x10}
 };
 
 #define UL_BARRIER(L,U,CODE,FEAT) \
@@ -19901,7 +20407,7 @@ static struct asm_barrier_opt barrier_opt_names[] =
 /* The normal sort of mnemonic; has a Thumb variant; takes a conditional suffix.  */
 #define TxCE(mnem, op, top, nops, ops, ae, te) \
   { mnem, OPS##nops ops, OT_csuffix, 0x##op, top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te, 0 }
 
 /* Two variants of the above - TCE for a numeric Thumb opcode, tCE for
    a T_MNEM_xyz enumerator.  */
@@ -19914,10 +20420,10 @@ static struct asm_barrier_opt barrier_opt_names[] =
    infix after the third character.  */
 #define TxC3(mnem, op, top, nops, ops, ae, te) \
   { mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te, 0 }
 #define TxC3w(mnem, op, top, nops, ops, ae, te) \
   { mnem, OPS##nops ops, OT_cinfix3_deprecated, 0x##op, top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te, 0 }
 #define TC3(mnem, aop, top, nops, ops, ae, te) \
       TxC3 (mnem, aop, 0x##top, nops, ops, ae, te)
 #define TC3w(mnem, aop, top, nops, ops, ae, te) \
@@ -19932,74 +20438,74 @@ static struct asm_barrier_opt barrier_opt_names[] =
    conditionally, so this is checked separately.  */
 #define TUE(mnem, op, top, nops, ops, ae, te)				\
   { mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te, 0 }
 
 /* Same as TUE but the encoding function for ARM and Thumb modes is the same.
    Used by mnemonics that have very minimal differences in the encoding for
    ARM and Thumb variants and can be handled in a common function.  */
 #define TUEc(mnem, op, top, nops, ops, en) \
   { mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##en, do_##en }
+    THUMB_VARIANT, do_##en, do_##en, 0 }
 
 /* Mnemonic that cannot be conditionalized, and bears 0xF in its ARM
    condition code field.  */
 #define TUF(mnem, op, top, nops, ops, ae, te)				\
   { mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##top, ARM_VARIANT, \
-    THUMB_VARIANT, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te, 0 }
 
 /* ARM-only variants of all the above.  */
 #define CE(mnem,  op, nops, ops, ae)	\
-  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 #define C3(mnem, op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+  { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 /* Thumb-only variants of TCE and TUE.  */
 #define ToC(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_csuffix, 0x0, 0x##top, 0, THUMB_VARIANT, NULL, \
-    do_##te }
+    do_##te, 0 }
 
 #define ToU(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_unconditional, 0x0, 0x##top, 0, THUMB_VARIANT, \
-    NULL, do_##te }
+    NULL, do_##te, 0 }
 
 /* T_MNEM_xyz enumerator variants of ToC.  */
 #define toC(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_csuffix, 0x0, T_MNEM##top, 0, THUMB_VARIANT, NULL, \
-    do_##te }
+    do_##te, 0 }
 
 /* T_MNEM_xyz enumerator variants of ToU.  */
 #define toU(mnem, top, nops, ops, te) \
   { mnem, OPS##nops ops, OT_unconditional, 0x0, T_MNEM##top, 0, THUMB_VARIANT, \
-    NULL, do_##te }
+    NULL, do_##te, 0 }
 
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
 #define CL(mnem, op, nops, ops, ae)	\
   { mnem, OPS##nops ops, OT_cinfix3_legacy, \
-    0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+    0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 /* Coprocessor instructions.  Isomorphic between Arm and Thumb-2.  */
 #define cCE(mnem,  op, nops, ops, ae)	\
-  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
+  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
 
 /* Legacy coprocessor instructions where conditional infix and conditional
    suffix are ambiguous.  For consistency this includes all FPA instructions,
    not just the potentially ambiguous ones.  */
 #define cCL(mnem, op, nops, ops, ae)	\
   { mnem, OPS##nops ops, OT_cinfix3_legacy, \
-    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
+    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
 
 /* Coprocessor, takes either a suffix or a position-3 infix
    (for an FPA corner case). */
 #define C3E(mnem, op, nops, ops, ae) \
   { mnem, OPS##nops ops, OT_csuf_or_in3, \
-    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
+    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
 
 #define xCM_(m1, m2, m3, op, nops, ops, ae)	\
   { m1 #m2 m3, OPS##nops ops, \
     sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (m1) - 1, \
-    0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+    0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 #define CM(m1, m2, op, nops, ops, ae)	\
   xCM_ (m1,   , m2, op, nops, ops, ae),	\
@@ -20023,47 +20529,83 @@ static struct asm_barrier_opt barrier_opt_names[] =
   xCM_ (m1, al, m2, op, nops, ops, ae)
 
 #define UE(mnem, op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL }
+  { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 #define UF(mnem, op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL }
+  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL, 0 }
 
 /* Neon data-processing. ARM versions are unconditional with cond=0xf.
    The Thumb and ARM variants are mostly the same (bits 0-23 and 24/28), so we
    use the same encoding function for each.  */
 #define NUF(mnem, op, nops, ops, enc)					\
   { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##op,		\
-    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 0 }
 
 /* Neon data processing, version which indirects through neon_enc_tab for
    the various overloaded versions of opcodes.  */
 #define nUF(mnem, op, nops, ops, enc)					\
   { #mnem, OPS##nops ops, OT_unconditionalF, N_MNEM##op, N_MNEM##op,	\
-    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 0 }
 
 /* Neon insn with conditional suffix for the ARM version, non-overloaded
    version.  */
-#define NCE_tag(mnem, op, nops, ops, enc, tag)				\
+#define NCE_tag(mnem, op, nops, ops, enc, tag, mve_p)				\
   { #mnem, OPS##nops ops, tag, 0x##op, 0x##op, ARM_VARIANT,		\
-    THUMB_VARIANT, do_##enc, do_##enc }
+    THUMB_VARIANT, do_##enc, do_##enc, mve_p }
 
 #define NCE(mnem, op, nops, ops, enc)					\
-   NCE_tag (mnem, op, nops, ops, enc, OT_csuffix)
+   NCE_tag (mnem, op, nops, ops, enc, OT_csuffix, 0)
 
 #define NCEF(mnem, op, nops, ops, enc)					\
-    NCE_tag (mnem, op, nops, ops, enc, OT_csuffixF)
+    NCE_tag (mnem, op, nops, ops, enc, OT_csuffixF, 0)
 
 /* Neon insn with conditional suffix for the ARM version, overloaded types.  */
-#define nCE_tag(mnem, op, nops, ops, enc, tag)				\
+#define nCE_tag(mnem, op, nops, ops, enc, tag, mve_p)				\
   { #mnem, OPS##nops ops, tag, N_MNEM##op, N_MNEM##op,		\
-    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, mve_p }
 
 #define nCE(mnem, op, nops, ops, enc)					\
-   nCE_tag (mnem, op, nops, ops, enc, OT_csuffix)
+   nCE_tag (mnem, op, nops, ops, enc, OT_csuffix, 0)
 
 #define nCEF(mnem, op, nops, ops, enc)					\
-    nCE_tag (mnem, op, nops, ops, enc, OT_csuffixF)
+    nCE_tag (mnem, op, nops, ops, enc, OT_csuffixF, 0)
 
+/*   */
+#define mCEF(mnem, op, nops, ops, enc)				\
+  { #mnem, OPS##nops ops, OT_csuffixF, 0, M_MNEM##op,		\
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 1 }
+
+
+/* nCEF but for MVE predicated instructions.  */
+#define mnCEF(mnem, op, nops, ops, enc)					\
+    nCE_tag (mnem, op, nops, ops, enc, OT_csuffixF, 1)
+
+/* nCE but for MVE predicated instructions.  */
+#define mnCE(mnem, op, nops, ops, enc)					\
+   nCE_tag (mnem, op, nops, ops, enc, OT_csuffix, 1)
+
+/* NUF but for potentially MVE predicated instructions.  */
+#define MNUF(mnem, op, nops, ops, enc)					\
+  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##op,		\
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 1 }
+
+/* nUF but for potentially MVE predicated instructions.  */
+#define mnUF(mnem, op, nops, ops, enc)					\
+  { #mnem, OPS##nops ops, OT_unconditionalF, N_MNEM##op, N_MNEM##op,	\
+    ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc, 1 }
+
+/* ToC but for potentially MVE predicated instructions.  */
+#define mToC(mnem, top, nops, ops, te) \
+  { mnem, OPS##nops ops, OT_csuffix, 0x0, 0x##top, 0, THUMB_VARIANT, NULL, \
+    do_##te, 1 }
+
+/* NCE but for MVE predicated instructions.  */
+#define MNCE(mnem, op, nops, ops, enc)					\
+   NCE_tag (mnem, op, nops, ops, enc, OT_csuffix, 1)
+
+/* NCEF but for MVE predicated instructions.  */
+#define MNCEF(mnem, op, nops, ops, enc)					\
+    NCE_tag (mnem, op, nops, ops, enc, OT_csuffixF, 1)
 #define do_0 0
 
 static const struct asm_opcode insns[] =
@@ -21367,9 +21909,6 @@ static const struct asm_opcode insns[] =
  nCEF(vmla,     _vmla,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
  nCEF(vmls,     _vmls,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
 
- nCEF(vadd,     _vadd,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
- nCEF(vsub,     _vsub,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
-
  NCEF(vabs,     1b10300, 2, (RNSDQ, RNSDQ), neon_abs_neg),
  NCEF(vneg,     1b10380, 2, (RNSDQ, RNSDQ), neon_abs_neg),
 
@@ -21462,7 +22001,6 @@ static const struct asm_opcode insns[] =
  NUF(vbif,      1300110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
  NUF(vbifq,     1300110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
   /* Int and float variants, types S8 S16 S32 U8 U16 U32 F16 F32.  */
- nUF(vabd,      _vabd,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
  nUF(vabdq,     _vabd,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
  nUF(vmax,      _vmax,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
  nUF(vmaxq,     _vmax,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
@@ -21563,9 +22101,6 @@ static const struct asm_opcode insns[] =
   /* Data processing, three registers of different lengths.  */
   /* Dyadic, long insns. Types S8 S16 S32 U8 U16 U32.  */
  NUF(vabal,     0800500, 3, (RNQ, RND, RND),  neon_abal),
- NUF(vabdl,     0800700, 3, (RNQ, RND, RND),  neon_dyadic_long),
- NUF(vaddl,     0800000, 3, (RNQ, RND, RND),  neon_dyadic_long),
- NUF(vsubl,     0800200, 3, (RNQ, RND, RND),  neon_dyadic_long),
   /* If not scalar, fall back to neon_dyadic_long.
      Vector types as above, scalar types S16 S32 U16 U32.  */
  nUF(vmlal,     _vmlal,   3, (RNQ, RND, RND_RNSC), neon_mac_maybe_scalar_long),
@@ -22080,7 +22615,40 @@ static const struct asm_opcode insns[] =
  toU("le",  _le,  2, (oLR, EXP),	 t_loloop),
 
  ToC("clrm",	e89f0000, 1, (CLRMLST),  t_clrm),
- ToC("vscclrm",	ec9f0a00, 1, (VRSDVLST), t_vscclrm)
+ ToC("vscclrm",	ec9f0a00, 1, (VRSDVLST), t_vscclrm),
+
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & mve_ext
+ ToC("vpst",	fe710f4d, 0, (), mve_vpt),
+ ToC("vpstt",	fe318f4d, 0, (), mve_vpt),
+ ToC("vpste",	fe718f4d, 0, (), mve_vpt),
+ ToC("vpsttt",	fe314f4d, 0, (), mve_vpt),
+ ToC("vpstte",	fe31cf4d, 0, (), mve_vpt),
+ ToC("vpstet",	fe71cf4d, 0, (), mve_vpt),
+ ToC("vpstee",	fe714f4d, 0, (), mve_vpt),
+ ToC("vpstttt",	fe312f4d, 0, (), mve_vpt),
+ ToC("vpsttte", fe316f4d, 0, (), mve_vpt),
+ ToC("vpsttet",	fe31ef4d, 0, (), mve_vpt),
+ ToC("vpsttee",	fe31af4d, 0, (), mve_vpt),
+ ToC("vpstett",	fe71af4d, 0, (), mve_vpt),
+ ToC("vpstete",	fe71ef4d, 0, (), mve_vpt),
+ ToC("vpsteet",	fe716f4d, 0, (), mve_vpt),
+ ToC("vpsteee",	fe712f4d, 0, (), mve_vpt),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & fpu_vfp_ext_v1xd
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
+
+ mnCEF(vadd,     _vadd,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
+ mnCEF(vsub,     _vsub,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
+
+#undef ARM_VARIANT
+#define ARM_VARIANT & fpu_neon_ext_v1
+ mnUF(vabd,      _vabd,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
+ mnUF(vabdl,     _vabdl,	  3, (RNQMQ, RNDMQ, RNDMQ),   neon_dyadic_long),
+ mnUF(vaddl,     _vaddl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
+ mnUF(vsubl,     _vsubl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -25959,8 +26527,8 @@ arm_cleanup (void)
 {
   literal_pool * pool;
 
-  /* Ensure that all the IT blocks are properly closed.  */
-  check_it_blocks_finished ();
+  /* Ensure that all the predication blocks are properly closed.  */
+  check_pred_blocks_finished ();
 
   for (pool = list_of_pools; pool; pool = pool->next)
     {
@@ -26152,6 +26720,7 @@ md_begin (void)
 
   if (	 (arm_ops_hsh = hash_new ()) == NULL
       || (arm_cond_hsh = hash_new ()) == NULL
+      || (arm_vcond_hsh = hash_new ()) == NULL
       || (arm_shift_hsh = hash_new ()) == NULL
       || (arm_psr_hsh = hash_new ()) == NULL
       || (arm_v7m_psr_hsh = hash_new ()) == NULL
@@ -26164,6 +26733,8 @@ md_begin (void)
     hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
     hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
+  for (i = 0; i < sizeof (vconds) / sizeof (struct asm_cond); i++)
+    hash_insert (arm_vcond_hsh, vconds[i].template_name, (void *) (vconds + i));
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
     hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)

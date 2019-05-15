@@ -1,5 +1,129 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum it_instruction_type): Rename to...
+	(enum pred_instruction_type): ... this. Include VPT types.
+	(it_insn_type): Rename to ...
+	(pred_insn_type): .. this.
+	(arm_it): Change comment.
+	(enum arm_reg_type): Add new value.
+	(reg_expected_msgs): New entry.
+	(asm_opcode): Add mayBeVecPred member.
+	(BAD_SYNTAX, BAD_NOT_VPT, BAD_OUT_VPT, BAD_VPT_COND, MVE_NOT_IT,
+	 MVE_NOT_VPT, MVE_BAD_PC, MVE_BAD_SP): New diagnostic MACROS.
+	(arm_vcond_hsh): New table for vector condition codes.
+	(now_it): Rename to ...
+	(now_pred): ... this.
+	(now_it_compatible): Rename to ...
+	(now_pred_compatible): ... this.
+	(in_it_block): Rename to ...
+	(in_pred_block): ... this.
+	(handle_it_state): Rename to ...
+	(handle_pred_state): ... this. And change it to accept VPT blocks.
+	(set_it_insn_type): Rename to ...
+	(set_pred_insn_type): ... this.
+	(set_it_insn_type_nonvoid): Rename to ...
+	(set_pred_insn_type_nonvoid): ... this.
+	(set_it_insn_type_last): Rename to ...
+	(set_pred_insn_type_last): ... this.
+	(record_feature_use): Moved.
+	(mark_feature_used): Likewise.
+	(parse_typed_reg_or_scalar): Add new case for REG_TYPE_MQ.
+	(emit_insn): Use renamed functions and variables.
+	(enum operand_parse_code): Add new operands.
+	(parse_operands): Handle new operands.
+	(do_scalar_fp16_v82_encode): Change predication detection.
+	(do_it): Use renamed functions and variables.
+	(do_t_add_sub): Likewise.
+	(do_t_arit3): Likewise.
+	(do_t_arit3c): Likewise.
+	(do_t_blx): Likewise.
+	(do_t_branch): Likewise.
+	(do_t_bkpt_hlt1): Likewise.
+	(do_t_branch23): Likewise.
+	(do_t_bx): Likewise.
+	(do_t_bxj): Likewise.
+	(do_t_cond): Likewise.
+	(do_t_csdb): Likewise.
+	(do_t_cps): Likewise.
+	(do_t_cpsi): Likewise.
+	(do_t_cbz): Likewise.
+	(do_t_it): Likewise.
+	(do_mve_vpt): New function to handle VPT blocks.
+	(encode_thumb2_multi): Use renamed functions and variables.
+	(do_t_ldst): Use renamed functions and variables.
+	(do_t_mov_cmp): Likewise.
+	(do_t_mvn_tst): Likewise.
+	(do_t_mul): Likewise.
+	(do_t_nop): Likewise.
+	(do_t_neg): Likewise.
+	(do_t_rsb): Likewise.
+	(do_t_setend): Likewise.
+	(do_t_shift): Likewise.
+	(do_t_smc): Likewise.
+	(do_t_tb): Likewise.
+	(do_t_udf): Likewise.
+	(do_t_loloop): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_vfp_nsyn_cvt_fpv8): Likewise.
+	(do_vsel): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(do_crypto_2op_1): Likewise.
+	(do_crypto_3op_1): Likewise.
+	(do_crc32_1): Likewise.
+	(it_fsm_pre_encode): Likewise.
+	(it_fsm_post_encode): Likewise.
+	(force_automatic_it_block_close): Likewise.
+	(check_it_blocks_finished): Likewise.
+	(check_pred_blocks_finished): Likewise.
+	(arm_cleanup): Likewise.
+	(now_it_add_mask): Rename to ...
+	(now_pred_add_mask): ... this. And use new variables and functions.
+	(NEON_ENC_TAB): Add entries for vabdl, vaddl and vsubl.
+	(N_I_MVE, N_F_MVE, N_SU_MVE): New MACROs.
+	(neon_check_type): Generalize error message.
+	(mve_encode_qqr): New MVE generic encoding function.
+	(neon_dyadic_misc): Change to accept MVE variants.
+	(do_neon_dyadic_if_su): Likewise.
+	(do_neon_addsub_if_i): Likewise.
+	(do_neon_dyadic_long): Likewise.
+	(vfp_or_neon_is_neon): Add extra checks.
+	(check_simd_pred_availability): Helper function to check SIMD
+	instruction availability with respect to predication.
+	(enum opcode_tag): New suffix value.
+	(opcode_lookup): Change to handle VPT blocks.
+	(new_automatic_it_block): Rename to ...
+	(close_automatic_it_block): ...this.
+	(TxCE, TxC3, TxC3w, TUE, TUEc, TUF, CE, C3, ToC, ToU,
+	 toC, toU, CL, cCE, cCL, C3E, xCM_, UE, UF, NUF, nUF,
+	 NCE_tag, NCE, NCEF, nCE_tag, nCE, nCEF): Add default value for new
+	field.
+	(mCEF, mnCEF, mnCE, MNUF, mnUF, mToC, MNCE, MNCEF): New MACROs.
+	(insns): Redefine vadd, vsub, cabd, vabdl, vaddl, vsubl to accept MVE
+	variants. Add entries for vscclrm, and vpst.
+	(md_begin): Add arm_vcond_hsh initialization.
+	* config/tc-arm.h (enum it_state): Rename to...
+	(enum pred_state): ...this.
+	(struct current_it): Rename to...
+	(struct current_pred): ...this.
+	(enum pred_type): New enum.
+	(struct arm_segment_info_type): Use current_pred.
+	* testsuite/gas/arm/armv8_3-a-fp-bad.l: Update error message.
+	* testsuite/gas/arm/armv8_3-a-simd-bad.l: Update error message.
+	* testsuite/gas/arm/dotprod-illegal.l: Update error message.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vaddsubabd-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vpst-bad.d: New test.
+	* testsuite/gas/arm/mve-vpst-bad.l: New test.
+	* testsuite/gas/arm/mve-vpst-bad.s: New test.
+	* testsuite/gas/arm/neon-ldst-es-bad.l: Updated error message.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (mve_ext, mve_fp_ext): New features.
 	(armv8_1m_main_ext_table): Add new extensions.
 	(aeabi_set_public_attributes): Translate new features to new build attributes.
