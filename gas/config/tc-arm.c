@@ -6776,6 +6776,7 @@ enum operand_parse_code
   OP_RNQ,	/* Neon quad precision register */
   OP_RNQMQ,	/* Neon quad or MVE vector register.  */
   OP_RVSD,	/* VFP single or double precision register */
+  OP_RVSDMQ,	/* VFP single, double precision or MVE vector register.  */
   OP_RNSD,      /* Neon single or double precision register */
   OP_RNDQ,      /* Neon double or quad precision register */
   OP_RNDQMQ,     /* Neon double, quad or MVE vector register.  */
@@ -7048,7 +7049,6 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
       if (op_parse_code >= OP_FIRST_OPTIONAL)
 	{
 	  /* Remember where we are in case we need to backtrack.  */
-	  gas_assert (!backtrack_pos);
 	  backtrack_pos = str;
 	  backtrack_error = inst.error;
 	  backtrack_index = i;
@@ -7116,6 +7116,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	try_rndq:
 	case OP_oRNDQ:
 	case OP_RNDQ:  po_reg_or_fail (REG_TYPE_NDQ);     break;
+	case OP_RVSDMQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rvsd);
+	  break;
+	try_rvsd:
 	case OP_RVSD:  po_reg_or_fail (REG_TYPE_VFSD);    break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
@@ -17032,15 +17036,64 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 
   switch (rs)
     {
-    case NS_DDI:
     case NS_QQI:
+      if (mode == neon_cvt_mode_z
+	  && (flavour == neon_cvt_flavour_f16_s16
+	      || flavour == neon_cvt_flavour_f16_u16
+	      || flavour == neon_cvt_flavour_s16_f16
+	      || flavour == neon_cvt_flavour_u16_f16
+	      || flavour == neon_cvt_flavour_f32_u32
+	      || flavour == neon_cvt_flavour_f32_s32
+	      || flavour == neon_cvt_flavour_s32_f32
+	      || flavour == neon_cvt_flavour_u32_f32))
+	{
+	  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH))
+	    return;
+	}
+      else if (mode == neon_cvt_mode_n)
+	{
+	  /* We are dealing with vcvt with the 'ne' condition.  */
+	  inst.cond = 0x1;
+	  inst.instruction = N_MNEM_vcvt;
+	  do_neon_cvt_1 (neon_cvt_mode_z);
+	  return;
+	}
+      /* fall through.  */
+    case NS_DDI:
       {
 	unsigned immbits;
 	unsigned enctab[] = {0x0000100, 0x1000100, 0x0, 0x1000000,
 			     0x0000100, 0x1000100, 0x0, 0x1000000};
 
-	if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
-	  return;
+	if ((rs != NS_QQI || !ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+	    && vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+	    return;
+
+	if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+	  {
+	    constraint (inst.operands[2].present && inst.operands[2].imm == 0,
+			_("immediate value out of range"));
+	    switch (flavour)
+	      {
+		case neon_cvt_flavour_f16_s16:
+		case neon_cvt_flavour_f16_u16:
+		case neon_cvt_flavour_s16_f16:
+		case neon_cvt_flavour_u16_f16:
+		  constraint (inst.operands[2].imm > 16,
+			      _("immediate value out of range"));
+		  break;
+		case neon_cvt_flavour_f32_u32:
+		case neon_cvt_flavour_f32_s32:
+		case neon_cvt_flavour_s32_f32:
+		case neon_cvt_flavour_u32_f32:
+		  constraint (inst.operands[2].imm > 32,
+			      _("immediate value out of range"));
+		  break;
+		default:
+		  inst.error = BAD_FPU;
+		  return;
+	      }
+	  }
 
 	/* Fixed-point conversion with #0 immediate is encoded as an
 	   integer conversion.  */
@@ -17073,14 +17126,40 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
       }
       break;
 
-    case NS_DD:
     case NS_QQ:
+      if ((mode == neon_cvt_mode_a || mode == neon_cvt_mode_n
+	   || mode == neon_cvt_mode_m || mode == neon_cvt_mode_p)
+	  && (flavour == neon_cvt_flavour_s16_f16
+	      || flavour == neon_cvt_flavour_u16_f16
+	      || flavour == neon_cvt_flavour_s32_f32
+	      || flavour == neon_cvt_flavour_u32_f32))
+	{
+	  if (check_simd_pred_availability (1,
+					    NEON_CHECK_CC | NEON_CHECK_ARCH8))
+	    return;
+	}
+      else if (mode == neon_cvt_mode_z
+	       && (flavour == neon_cvt_flavour_f16_s16
+		   || flavour == neon_cvt_flavour_f16_u16
+		   || flavour == neon_cvt_flavour_s16_f16
+		   || flavour == neon_cvt_flavour_u16_f16
+		   || flavour == neon_cvt_flavour_f32_u32
+		   || flavour == neon_cvt_flavour_f32_s32
+		   || flavour == neon_cvt_flavour_s32_f32
+		   || flavour == neon_cvt_flavour_u32_f32))
+	{
+	  if (check_simd_pred_availability (1,
+					    NEON_CHECK_CC | NEON_CHECK_ARCH))
+	    return;
+	}
+      /* fall through.  */
+    case NS_DD:
       if (mode != neon_cvt_mode_x && mode != neon_cvt_mode_z)
 	{
-	  NEON_ENCODE (FLOAT, inst);
-	  set_pred_insn_type (OUTSIDE_PRED_INSN);
 
-	  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+	  NEON_ENCODE (FLOAT, inst);
+	  if (check_simd_pred_availability (1,
+					    NEON_CHECK_CC | NEON_CHECK_ARCH8))
 	    return;
 
 	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
@@ -17110,8 +17189,11 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 
 	    NEON_ENCODE (INTEGER, inst);
 
-	    if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
-	      return;
+	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+	    {
+	      if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+		return;
+	    }
 
 	    if (flavour != neon_cvt_flavour_invalid)
 	      inst.instruction |= enctab[flavour];
@@ -17230,10 +17312,51 @@ static void
 do_neon_cvttb_1 (bfd_boolean t)
 {
   enum neon_shape rs = neon_select_shape (NS_HF, NS_HD, NS_FH, NS_FF, NS_FD,
-					  NS_DF, NS_DH, NS_NULL);
+					  NS_DF, NS_DH, NS_QQ, NS_QQI, NS_NULL);
 
   if (rs == NS_NULL)
     return;
+  else if (rs == NS_QQ || rs == NS_QQI)
+    {
+      int single_to_half = 0;
+      if (check_simd_pred_availability (1, NEON_CHECK_ARCH))
+	return;
+
+      enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
+
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+	  && (flavour ==  neon_cvt_flavour_u16_f16
+	      || flavour ==  neon_cvt_flavour_s16_f16
+	      || flavour ==  neon_cvt_flavour_f16_s16
+	      || flavour ==  neon_cvt_flavour_f16_u16
+	      || flavour ==  neon_cvt_flavour_u32_f32
+	      || flavour ==  neon_cvt_flavour_s32_f32
+	      || flavour ==  neon_cvt_flavour_f32_s32
+	      || flavour ==  neon_cvt_flavour_f32_u32))
+	{
+	  inst.cond = 0xf;
+	  inst.instruction = N_MNEM_vcvt;
+	  set_pred_insn_type (INSIDE_VPT_INSN);
+	  do_neon_cvt_1 (neon_cvt_mode_z);
+	  return;
+	}
+      else if (rs == NS_QQ && flavour == neon_cvt_flavour_f32_f16)
+	single_to_half = 1;
+      else if (rs == NS_QQ && flavour != neon_cvt_flavour_f16_f32)
+	{
+	  first_error (BAD_FPU);
+	  return;
+	}
+
+      inst.instruction = 0xee3f0e01;
+      inst.instruction |= single_to_half << 28;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 13;
+      inst.instruction |= t << 12;
+      inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+      inst.instruction |= LOW4 (inst.operands[1].reg) << 1;
+      inst.is_neon = 1;
+    }
   else if (neon_check_type (2, rs, N_F16, N_F32 | N_VFP).type != NT_invtype)
     {
       inst.error = NULL;
@@ -21848,10 +21971,6 @@ static const struct asm_opcode insns[] =
   nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vmaxnm, _vmaxnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
   nUF(vminnm, _vminnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
-  nUF(vcvta,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvta),
-  nUF(vcvtn,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtn),
-  nUF(vcvtp,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtp),
-  nUF(vcvtm,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtm),
   nCE(vrintr, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintr),
   nCE(vrintz, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintz),
   nCE(vrintx, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintx),
@@ -22512,10 +22631,10 @@ static const struct asm_opcode insns[] =
  NCE(vstmia,    c800b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vstmdb,    d000b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
 
- nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32z), neon_cvt),
+ mnCEF(vcvt,     _vcvt,   3, (RNSDQMQ, RNSDQMQ, oI32z), neon_cvt),
  nCEF(vcvtr,    _vcvt,   2, (RNSDQ, RNSDQ), neon_cvtr),
- NCEF(vcvtb,	eb20a40, 2, (RVSD, RVSD), neon_cvtb),
- NCEF(vcvtt,	eb20a40, 2, (RVSD, RVSD), neon_cvtt),
+ MNCEF(vcvtb,	eb20a40, 3, (RVSDMQ, RVSDMQ, oI32b), neon_cvtb),
+ MNCEF(vcvtt,	eb20a40, 3, (RVSDMQ, RVSDMQ, oI32b), neon_cvtt),
 
 
   /* NOTE: All VMOV encoding is special-cased!  */
@@ -23275,7 +23394,14 @@ static const struct asm_opcode insns[] =
  MNCEF(vabs,  1b10300,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
  MNCEF(vneg,  1b10380,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
 
-#undef ARM_VARIANT
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & fpu_vfp_ext_armv8xd
+ mnUF(vcvta,  _vcvta,  2, (RNSDQMQ, oRNSDQMQ),		neon_cvta),
+ mnUF(vcvtp,  _vcvta,  2, (RNSDQMQ, oRNSDQMQ),		neon_cvtp),
+ mnUF(vcvtn,  _vcvta,  3, (RNSDQMQ, oRNSDQMQ, oI32z),	neon_cvtn),
+ mnUF(vcvtm,  _vcvta,  2, (RNSDQMQ, oRNSDQMQ),		neon_cvtm),
+
+#undef	ARM_VARIANT
 #define ARM_VARIANT & fpu_neon_ext_v1
  mnUF(vabd,      _vabd,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  mnUF(vabdl,     _vabdl,	  3, (RNQMQ, RNDMQ, RNDMQ),   neon_dyadic_long),

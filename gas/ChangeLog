@@ -1,5 +1,28 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): Add new operand.
+	(parse_operands): Handle new operand.
+	(do_neon_cvt_1): Handle MVE variants.
+	(do_neon_cvttb_1): Likewise.
+	(insns): Accept MVE variants.
+	* testsuite/gas/arm/mve-vcvt-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-3.d: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-3.l: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-3.s: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-4.d: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-4.l: New test.
+	* testsuite/gas/arm/mve-vcvt-bad-4.s: New test.
+	* testsuite/gas/arm/mve-vcvt-bad.d: New test.
+	* testsuite/gas/arm/mve-vcvt-bad.l: New test.
+	* testsuite/gas/arm/mve-vcvt-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (struct arm_it): Make immisreg field larger to hold
 	type of register.
 	(enum shift_kind): Add SHIFT_UXTW shift kind.
