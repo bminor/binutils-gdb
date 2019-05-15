@@ -1,3 +1,7 @@
+2019-08-21  Jinke Fan  <fanjinke51@yeah.net>
+
+	* go32-nat.c (go32_sysinfo): Add hygon_p.
+
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-regs.h (struct tui_data_window) <last_regs_line_no,
