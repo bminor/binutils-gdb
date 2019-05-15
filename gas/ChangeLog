@@ -1,3 +1,9 @@
+2019-05-15  Alan Modra  <amodra@gmail.com>
+
+	PR 24538
+	* config/tc-tic54x.c (tic54x_start_line_hook): Do skip end of line
+	chars in setting endp.
+
 2019-05-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 24538

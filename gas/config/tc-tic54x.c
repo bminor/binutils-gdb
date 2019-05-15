@@ -4738,12 +4738,9 @@ tic54x_start_line_hook (void)
   char *replacement = NULL;
 
   /* Work with a copy of the input line, including EOL char.  */
-  for (endp = input_line_pointer; ; endp ++)
-    {
-      unsigned char c = * (unsigned char *) endp;
-      if (c == 0 || is_end_of_line [c])
-	break;
-    }
+  for (endp = input_line_pointer; *endp != 0; )
+    if (is_end_of_line[(unsigned char) *endp++])
+      break;
 
   line = xmemdup0 (input_line_pointer, endp - input_line_pointer);
 
