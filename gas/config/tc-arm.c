@@ -887,6 +887,11 @@ struct asm_opcode
 #define MVE_BAD_SP	_("Warning: instruction is UNPREDICTABLE with SP" \
 			  " operand")
 #define BAD_SIMD_TYPE	_("bad type in SIMD instruction")
+#define BAD_MVE_AUTO	\
+  _("GAS auto-detection mode and -march=all is deprecated for MVE, please" \
+    " use a valid -march or -mcpu option.")
+#define BAD_MVE_SRCDEST	_("Warning: 32-bit element size and same destination "\
+			  "and source operands makes instruction UNPREDICTABLE")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -1538,6 +1543,15 @@ record_feature_use (const arm_feature_set *feature)
 static bfd_boolean
 mark_feature_used (const arm_feature_set *feature)
 {
+
+  /* Do not support the use of MVE only instructions when in auto-detection or
+     -march=all.  */
+  if (((feature == &mve_ext) || (feature == &mve_fp_ext))
+      && ARM_CPU_IS_ANY (cpu_variant))
+    {
+      first_error (BAD_MVE_AUTO);
+      return FALSE;
+    }
   /* Ensure the option is valid on the current architecture.  */
   if (!ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
     return FALSE;
@@ -6740,6 +6754,8 @@ enum operand_parse_code
   OP_RR_RNSC,   /* ARM reg or Neon scalar.  */
   OP_RNSD_RNSC, /* Neon S or D reg, or Neon scalar.  */
   OP_RNSDQ_RNSC, /* Vector S, D or Q reg, or Neon scalar.  */
+  OP_RNSDQ_RNSC_MQ, /* Vector S, D or Q reg, Neon scalar or MVE vector register.
+		     */
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
   OP_VMOV,      /* Neon VMOV operands.  */
@@ -7091,6 +7107,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  }
 	  break;
 
+	case OP_RNSDQ_RNSC_MQ:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rnsdq_rnsc);
+	  break;
+	try_rnsdq_rnsc:
 	case OP_RNSDQ_RNSC:
 	  {
 	    po_scalar_or_goto (8, try_nsdq);
@@ -13833,6 +13853,8 @@ do_t_loloop (void)
 #define M_MNEM_vmlsdava	  0xeef00e21
 #define M_MNEM_vmlsdavx	  0xeef01e01
 #define M_MNEM_vmlsdavax  0xeef01e21
+#define M_MNEM_vmullt	0xee011e00
+#define M_MNEM_vmullb	0xee010e00
 
 /* Neon instruction encoder helpers.  */
 
@@ -15220,6 +15242,23 @@ mve_encode_rqq (unsigned bit28, unsigned size)
   inst.is_neon = 1;
 }
 
+static void
+mve_encode_qqq (int ubit, int size)
+{
+
+  inst.instruction |= (ubit != 0) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= neon_logbits (size) << 20;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[2].reg);
+
+  inst.is_neon = 1;
+}
+
+
 /* Encode insns with bit pattern:
 
   |28/24|23|22 |21 20|19 16|15 12|11    8|7|6|5|4|3  0|
@@ -15936,6 +15975,61 @@ do_neon_qdmulh (void)
       /* The U bit (rounding) comes from bit mask.  */
       neon_three_same (neon_quad (rs), 0, et.size);
     }
+}
+
+static void
+do_mve_vmull (void)
+{
+
+  enum neon_shape rs = neon_select_shape (NS_HHH, NS_FFF, NS_DDD, NS_DDS,
+					  NS_QQS, NS_QQQ, NS_QQR, NS_NULL);
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+      && inst.cond == COND_ALWAYS
+      && ((unsigned)inst.instruction) == M_MNEM_vmullt)
+    {
+      if (rs == NS_QQQ)
+	{
+
+	  struct neon_type_el et = neon_check_type (3, rs, N_EQK , N_EQK,
+						    N_SUF_32 | N_F64 | N_P8
+						    | N_P16 | N_I_MVE | N_KEY);
+	  if (((et.type == NT_poly) && et.size == 8
+	       && ARM_CPU_IS_ANY (cpu_variant))
+	      || (et.type == NT_integer) || (et.type == NT_float))
+	    goto neon_vmul;
+	}
+      else
+	goto neon_vmul;
+    }
+
+  constraint (rs != NS_QQQ, BAD_FPU);
+  struct neon_type_el et = neon_check_type (3, rs, N_EQK , N_EQK,
+					    N_SU_32 | N_P8 | N_P16 | N_KEY);
+
+  /* We are dealing with MVE's vmullt.  */
+  if (et.size == 32
+      && (inst.operands[0].reg == inst.operands[1].reg
+	  || inst.operands[0].reg == inst.operands[2].reg))
+    as_tsktsk (BAD_MVE_SRCDEST);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (et.type == NT_poly)
+    mve_encode_qqq (neon_logbits (et.size), 64);
+  else
+    mve_encode_qqq (et.type == NT_unsigned, et.size);
+
+  return;
+
+neon_vmul:
+  inst.instruction = N_MNEM_vmul;
+  inst.cond = 0xb;
+  if (thumb_mode)
+    inst.pred_insn_type = INSIDE_IT_INSN;
+  do_neon_mul ();
 }
 
 static void
@@ -22748,6 +22842,7 @@ static const struct asm_opcode insns[] =
  ToC("vpsteee",	fe712f4d, 0, (), mve_vpt),
 
  /* MVE and MVE FP only.  */
+ mCEF(vmullb,	_vmullb,    3, (RMQ, RMQ, RMQ),			  mve_vmull),
  mCEF(vabav,	_vabav,	    3, (RRnpcsp, RMQ, RMQ),		  mve_vabav),
  mCEF(vmladav,	  _vmladav,	3, (RRe, RMQ, RMQ),		mve_vmladav),
  mCEF(vmladava,	  _vmladava,	3, (RRe, RMQ, RMQ),		mve_vmladav),
@@ -22765,8 +22860,9 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- mnCEF(vadd,     _vadd,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
- mnCEF(vsub,     _vsub,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_addsub_if_i),
+ mCEF(vmullt, _vmullt,	3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ),	mve_vmull),
+ mnCEF(vadd,  _vadd,	3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR),	neon_addsub_if_i),
+ mnCEF(vsub,  _vsub,	3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR),	neon_addsub_if_i),
 
  MNCEF(vabs,  1b10300,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),
  MNCEF(vneg,  1b10380,	2, (RNSDQMQ, RNSDQMQ),	neon_abs_neg),

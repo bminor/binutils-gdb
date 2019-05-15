@@ -1,5 +1,21 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (BAD_MVE_AUTO): New error message.
+	(BAD_MVE_SRCDEST): Likewise.
+	(mark_feature_used): Diagnose MVE only instructions when in
+	auto-detection mode or -march=all.
+	(enum operand_parse_code): Define new operand.
+	(parse_operands): Handle new operand.
+	(M_MNEM_vmullt, M_MNEM_vmullb): New encodings.
+	(mve_encode_qqq): New encoding helper function.
+	(do_mve_vmull): New encoding function.
+	(insns): Handle new instructions.
+	* testsuite/gas/arm/mve-vmullbt-bad.d: New test.
+	* testsuite/gas/arm/mve-vmullbt-bad.l: New test.
+	* testsuite/gas/arm/mve-vmullbt-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (struct asm_opcode): Make avalue a full int.
 	(BAD_ODD, BAD_EVEN, BAD_SIMD_TYPE): New errors.
 	(enum operand_parse_code): Handle new operands.
