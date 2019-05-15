@@ -1,5 +1,30 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): New operands.
+	(parse_operands): Handle new operands.
+	(enum vfp_or_neon_is_neon_bits): Moved
+	(vfp_or_neon_is_neon): Moved
+	(check_simd_pred_availability): Moved.
+	(do_neon_logic): Change to accept MVE variants.
+	(insns): Changed to accept MVE variants.
+	* testsuite/gas/arm/mve-vand-bad.d: New test.
+	* testsuite/gas/arm/mve-vand-bad.l: New test.
+	* testsuite/gas/arm/mve-vand-bad.s: New test.
+	* testsuite/gas/arm/mve-vbic-bad.d: New test.
+	* testsuite/gas/arm/mve-vbic-bad.l: New test.
+	* testsuite/gas/arm/mve-vbic-bad.s: New test.
+	* testsuite/gas/arm/mve-veor-bad.d: New test.
+	* testsuite/gas/arm/mve-veor-bad.l: New test.
+	* testsuite/gas/arm/mve-veor-bad.s: New test.
+	* testsuite/gas/arm/mve-vorn-bad.d: New test.
+	* testsuite/gas/arm/mve-vorn-bad.l: New test.
+	* testsuite/gas/arm/mve-vorn-bad.s: New test.
+	* testsuite/gas/arm/mve-vorr-bad.d: New test.
+	* testsuite/gas/arm/mve-vorr-bad.l: New test.
+	* testsuite/gas/arm/mve-vorr-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vaddlv, M_MNEM_vaddlva, M_MNEM_vaddv,
 	 M_MNEM_vaddva): New instruction encodings.
 	(mve_encode_rq): New encoding helper function.

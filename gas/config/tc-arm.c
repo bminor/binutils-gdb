@@ -6954,6 +6954,8 @@ enum operand_parse_code
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
   OP_VMOV,      /* Neon VMOV operands.  */
   OP_RNDQ_Ibig,	/* Neon D or Q reg, or big immediate for logic and VMVN.  */
+  /* Neon D, Q or MVE vector register, or big immediate for logic and VMVN.  */
+  OP_RNDQMQ_Ibig,
   OP_RNDQ_I63b, /* Neon D or Q reg, or immediate for shift.  */
   OP_RIWR_I32z, /* iWMMXt wR register, or immediate 0 .. 32 for iWMMXt2.  */
   OP_VLDR,	/* VLDR operand.  */
@@ -7368,6 +7370,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_misc_or_fail (parse_neon_mov (&str, &i) == FAIL);
 	  break;
 
+	case OP_RNDQMQ_Ibig:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rndq_ibig);
+	  break;
+	try_rndq_ibig:
 	case OP_RNDQ_Ibig:
 	  {
 	    po_reg_or_goto (REG_TYPE_NDQ, try_immbig);
@@ -16002,12 +16008,104 @@ neon_cmode_for_logic_imm (unsigned immediate, unsigned *immbits, int size)
   return FAIL;
 }
 
+enum vfp_or_neon_is_neon_bits
+{
+NEON_CHECK_CC = 1,
+NEON_CHECK_ARCH = 2,
+NEON_CHECK_ARCH8 = 4
+};
+
+/* Call this function if an instruction which may have belonged to the VFP or
+ Neon instruction sets, but turned out to be a Neon instruction (due to the
+ operand types involved, etc.). We have to check and/or fix-up a couple of
+ things:
+
+   - Make sure the user hasn't attempted to make a Neon instruction
+     conditional.
+   - Alter the value in the condition code field if necessary.
+   - Make sure that the arch supports Neon instructions.
+
+ Which of these operations take place depends on bits from enum
+ vfp_or_neon_is_neon_bits.
+
+ WARNING: This function has side effects! If NEON_CHECK_CC is used and the
+ current instruction's condition is COND_ALWAYS, the condition field is
+ changed to inst.uncond_value.  This is necessary because instructions shared
+ between VFP and Neon may be conditional for the VFP variants only, and the
+ unconditional Neon version must have, e.g., 0xF in the condition field.  */
+
+static int
+vfp_or_neon_is_neon (unsigned check)
+{
+/* Conditions are always legal in Thumb mode (IT blocks).  */
+if (!thumb_mode && (check & NEON_CHECK_CC))
+  {
+    if (inst.cond != COND_ALWAYS)
+      {
+	first_error (_(BAD_COND));
+	return FAIL;
+      }
+    if (inst.uncond_value != -1)
+      inst.instruction |= inst.uncond_value << 28;
+  }
+
+
+  if (((check & NEON_CHECK_ARCH) && !mark_feature_used (&fpu_neon_ext_v1))
+      || ((check & NEON_CHECK_ARCH8)
+	  && !mark_feature_used (&fpu_neon_ext_armv8)))
+    {
+      first_error (_(BAD_FPU));
+      return FAIL;
+    }
+
+return SUCCESS;
+}
+
+static int
+check_simd_pred_availability (int fp, unsigned check)
+{
+if (inst.cond > COND_ALWAYS)
+  {
+    if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+      {
+	inst.error = BAD_FPU;
+	return 1;
+      }
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  }
+else if (inst.cond < COND_ALWAYS)
+  {
+    if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+      inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+    else if (vfp_or_neon_is_neon (check) == FAIL)
+      return 2;
+  }
+else
+  {
+    if (!ARM_CPU_HAS_FEATURE (cpu_variant, fp ? mve_fp_ext : mve_ext)
+	&& vfp_or_neon_is_neon (check) == FAIL)
+      return 3;
+
+    if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+      inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+  }
+return 0;
+}
+
 static void
 do_neon_logic (void)
 {
   if (inst.operands[2].present && inst.operands[2].isreg)
     {
       enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      if (rs == NS_QQQ
+	  && check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC)
+	  == FAIL)
+	return;
+      else if (rs != NS_QQQ
+	       && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
+	first_error (BAD_FPU);
+
       neon_check_type (3, rs, N_IGNORE_TYPE);
       /* U bit and size field were set as part of the bitmask.  */
       NEON_ENCODE (INTEGER, inst);
@@ -16021,14 +16119,29 @@ do_neon_logic (void)
       enum neon_shape rs = (three_ops_form
 			    ? neon_select_shape (NS_DDI, NS_QQI, NS_NULL)
 			    : neon_select_shape (NS_DI, NS_QI, NS_NULL));
-      struct neon_type_el et = neon_check_type (2, rs,
-	N_I8 | N_I16 | N_I32 | N_I64 | N_F32 | N_KEY, N_EQK);
+      /* Because neon_select_shape makes the second operand a copy of the first
+	 if the second operand is not present.  */
+      if (rs == NS_QQI
+	  && check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC)
+	  == FAIL)
+	return;
+      else if (rs != NS_QQI
+	       && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
+	first_error (BAD_FPU);
+
+      struct neon_type_el et;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	et = neon_check_type (2, rs, N_I32 | N_I16 | N_KEY, N_EQK);
+      else
+	et = neon_check_type (2, rs, N_I8 | N_I16 | N_I32 | N_I64 | N_F32
+			      | N_KEY, N_EQK);
+
+      if (et.type == NT_invtype)
+	return;
       enum neon_opc opcode = (enum neon_opc) inst.instruction & 0x0fffffff;
       unsigned immbits;
       int cmode;
 
-      if (et.type == NT_invtype)
-	return;
 
       if (three_ops_form)
 	constraint (inst.operands[0].reg != inst.operands[1].reg,
@@ -16136,90 +16249,6 @@ do_neon_dyadic_if_i_d (void)
   /* The "untyped" case can't happen. Do this to stop the "U" bit being
      affected if we specify unsigned args.  */
   neon_dyadic_misc (NT_untyped, N_IF_32, 0);
-}
-
-enum vfp_or_neon_is_neon_bits
-{
-  NEON_CHECK_CC = 1,
-  NEON_CHECK_ARCH = 2,
-  NEON_CHECK_ARCH8 = 4
-};
-
-/* Call this function if an instruction which may have belonged to the VFP or
-   Neon instruction sets, but turned out to be a Neon instruction (due to the
-   operand types involved, etc.). We have to check and/or fix-up a couple of
-   things:
-
-     - Make sure the user hasn't attempted to make a Neon instruction
-       conditional.
-     - Alter the value in the condition code field if necessary.
-     - Make sure that the arch supports Neon instructions.
-
-   Which of these operations take place depends on bits from enum
-   vfp_or_neon_is_neon_bits.
-
-   WARNING: This function has side effects! If NEON_CHECK_CC is used and the
-   current instruction's condition is COND_ALWAYS, the condition field is
-   changed to inst.uncond_value. This is necessary because instructions shared
-   between VFP and Neon may be conditional for the VFP variants only, and the
-   unconditional Neon version must have, e.g., 0xF in the condition field.  */
-
-static int
-vfp_or_neon_is_neon (unsigned check)
-{
-  /* Conditions are always legal in Thumb mode (IT blocks).  */
-  if (!thumb_mode && (check & NEON_CHECK_CC))
-    {
-      if (inst.cond != COND_ALWAYS)
-	{
-	  first_error (_(BAD_COND));
-	  return FAIL;
-	}
-      if (inst.uncond_value != -1)
-	inst.instruction |= inst.uncond_value << 28;
-    }
-
-
-    if (((check & NEON_CHECK_ARCH) && !mark_feature_used (&fpu_neon_ext_v1))
-	|| ((check & NEON_CHECK_ARCH8)
-	    && !mark_feature_used (&fpu_neon_ext_armv8)))
-      {
-	first_error (_(BAD_FPU));
-	return FAIL;
-      }
-
-  return SUCCESS;
-}
-
-static int
-check_simd_pred_availability (int fp, unsigned check)
-{
-  if (inst.cond > COND_ALWAYS)
-    {
-      if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
-	{
-	  inst.error = BAD_FPU;
-	  return 1;
-	}
-      inst.pred_insn_type = INSIDE_VPT_INSN;
-    }
-  else if (inst.cond < COND_ALWAYS)
-    {
-      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
-	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
-      else if (vfp_or_neon_is_neon (check) == FAIL)
-	return 2;
-    }
-  else
-    {
-      if (!ARM_CPU_HAS_FEATURE (cpu_variant, fp ? mve_fp_ext : mve_ext)
-	  && vfp_or_neon_is_neon (check) == FAIL)
-	return 3;
-
-      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
-	inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
-    }
-  return 0;
 }
 
 static void
@@ -23347,15 +23376,10 @@ static const struct asm_opcode insns[] =
  nUF(vqshl,     _vqshl,   3, (RNDQ, oRNDQ, RNDQ_I63b), neon_qshl_imm),
  nUF(vqshlq,    _vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl_imm),
   /* Logic ops, types optional & ignored.  */
- nUF(vand,      _vand,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
  nUF(vandq,     _vand,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
- nUF(vbic,      _vbic,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
  nUF(vbicq,     _vbic,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
- nUF(vorr,      _vorr,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
  nUF(vorrq,     _vorr,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
- nUF(vorn,      _vorn,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
  nUF(vornq,     _vorn,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
- nUF(veor,      _veor,    3, (RNDQ, oRNDQ, RNDQ),      neon_logic),
  nUF(veorq,     _veor,    3, (RNQ,  oRNQ,  RNQ),       neon_logic),
   /* Bitfield ops, untyped.  */
  NUF(vbsl,      1100110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
@@ -24108,10 +24132,15 @@ static const struct asm_opcode insns[] =
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & fpu_neon_ext_v1
- mnUF(vabd,      _vabd,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
+ mnUF(vabd,      _vabd,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  mnUF(vabdl,     _vabdl,	  3, (RNQMQ, RNDMQ, RNDMQ),   neon_dyadic_long),
  mnUF(vaddl,     _vaddl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
  mnUF(vsubl,     _vsubl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
+ mnUF(vand,      _vand,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
+ mnUF(vbic,      _vbic,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
+ mnUF(vorr,      _vorr,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
+ mnUF(vorn,      _vorn,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
+ mnUF(veor,      _veor,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ),      neon_logic),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
