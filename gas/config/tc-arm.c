@@ -14139,6 +14139,10 @@ do_t_loloop (void)
 #define M_MNEM_vadc	0xee300f00
 #define M_MNEM_vadci	0xee301f00
 #define M_MNEM_vbrsr	0xfe011e60
+#define M_MNEM_vaddlv	0xee890f00
+#define M_MNEM_vaddlva	0xee890f20
+#define M_MNEM_vaddv	0xeef10f00
+#define M_MNEM_vaddva	0xeef10f20
 
 /* Neon instruction encoder helpers.  */
 
@@ -14315,6 +14319,8 @@ NEON_ENC_TAB
   X(3, (D, D, S), DOUBLE),		\
   X(3, (Q, Q, S), QUAD),		\
   X(3, (Q, Q, R), QUAD),		\
+  X(3, (R, R, Q), QUAD),		\
+  X(2, (R, Q),	  QUAD),		\
   X(2, (D, D), DOUBLE),			\
   X(2, (Q, Q), QUAD),			\
   X(2, (D, S), DOUBLE),			\
@@ -15763,6 +15769,15 @@ mve_encode_qqq (int ubit, int size)
   inst.is_neon = 1;
 }
 
+static void
+mve_encode_rq (unsigned bit28, unsigned size)
+{
+  inst.instruction |= bit28 << 28;
+  inst.instruction |= neon_logbits (size) << 18;
+  inst.instruction |= inst.operands[0].reg << 12;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
+}
 
 /* Encode insns with bit pattern:
 
@@ -16487,6 +16502,30 @@ do_mve_vst_vld (void)
 }
 
 static void
+do_mve_vaddlv (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RRQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_S32 | N_U32 | N_KEY);
+
+  if (et.type == NT_invtype)
+    first_error (BAD_EL_TYPE);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  constraint (inst.operands[1].reg > 14, MVE_BAD_QREG);
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= inst.operands[1].reg << 19;
+  inst.instruction |= inst.operands[0].reg << 12;
+  inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
+static void
 do_neon_dyadic_if_su (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_QQR, NS_NULL);
@@ -16759,6 +16798,26 @@ do_neon_qdmulh (void)
       /* The U bit (rounding) comes from bit mask.  */
       neon_three_same (neon_quad (rs), 0, et.size);
     }
+}
+
+static void
+do_mve_vaddv (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (2, rs, N_EQK,  N_SU_32 | N_KEY);
+
+  if (et.type == NT_invtype)
+    first_error (BAD_EL_TYPE);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  constraint (inst.operands[1].reg > 14, MVE_BAD_QREG);
+
+  mve_encode_rq (et.type == NT_unsigned, et.size);
 }
 
 static void
@@ -23999,6 +24058,10 @@ static const struct asm_opcode insns[] =
  mCEF(vmovnt,	_vmovnt,    2, (RMQ, RMQ),			  mve_movn),
  mCEF(vmovnb,	_vmovnb,    2, (RMQ, RMQ),			  mve_movn),
  mCEF(vbrsr,	_vbrsr,     3, (RMQ, RMQ, RR),			  mve_vbrsr),
+ mCEF(vaddlv,	_vaddlv,    3, (RRe, RRo, RMQ),			  mve_vaddlv),
+ mCEF(vaddlva,	_vaddlva,   3, (RRe, RRo, RMQ),			  mve_vaddlv),
+ mCEF(vaddv,	_vaddv,	    2, (RRe, RMQ),			  mve_vaddv),
+ mCEF(vaddva,	_vaddva,    2, (RRe, RMQ),			  mve_vaddv),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1

@@ -1,5 +1,19 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vaddlv, M_MNEM_vaddlva, M_MNEM_vaddv,
+	 M_MNEM_vaddva): New instruction encodings.
+	(mve_encode_rq): New encoding helper function.
+	(do_mve_vaddlv): New encoding function.
+	(do_mve_vaddv): New encoding function.
+	* testsuite/gas/arm/mve-vaddlv-bad.d: New test.
+	* testsuite/gas/arm/mve-vaddlv-bad.l: New test.
+	* testsuite/gas/arm/mve-vaddlv-bad.s: New test.
+	* testsuite/gas/arm/mve-vaddv-bad.d: New test.
+	* testsuite/gas/arm/mve-vaddv-bad.l: New test.
+	* testsuite/gas/arm/mve-vaddv-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vadc, M_MNEM_vadci, M_MNEM_vbrsr):
 	New instruction encodings.
 	(do_mve_vadc): New encoding instruction.
