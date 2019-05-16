@@ -6923,6 +6923,7 @@ enum operand_parse_code
 		   GPR (no SP/SP)  */
   OP_RMQ,	/* MVE vector register.  */
   OP_RMQRZ,	/* MVE vector or ARM register including ZR.  */
+  OP_RMQRR,     /* MVE vector or ARM register.  */
 
   /* New operands for Armv8.1-M Mainline.  */
   OP_LR,	/* ARM LR register */
@@ -7281,6 +7282,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_reg_or_fail (REG_TYPE_NSDQ);
 	  inst.error = 0;
 	  break;
+	case OP_RMQRR:
+	  po_reg_or_goto (REG_TYPE_RN, try_rmq);
+	  break;
+	try_rmq:
 	case OP_RMQ:
 	  po_reg_or_fail (REG_TYPE_MQ);
 	  break;
@@ -17283,6 +17288,35 @@ do_mve_vhcadd (void)
 }
 
 static void
+do_mve_vqdmull (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_QQR, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_S16 | N_S32 | N_KEY);
+
+  if (et.size == 32
+      && (inst.operands[0].reg == inst.operands[1].reg
+	  || (rs == NS_QQQ && inst.operands[0].reg == inst.operands[2].reg)))
+    as_tsktsk (BAD_MVE_SRCDEST);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (rs == NS_QQQ)
+    {
+      mve_encode_qqq (et.size == 32, 64);
+      inst.instruction |= 1;
+    }
+  else
+    {
+      mve_encode_qqr (64, et.size == 32, 0);
+      inst.instruction |= 0x3 << 5;
+    }
+}
+
+static void
 do_mve_vadc (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
@@ -24838,6 +24872,8 @@ static const struct asm_opcode insns[] =
  mToC("vqdmlah",   ee000e60,	3, (RMQ, RMQ, RR),		mve_vqdmlah),
  mToC("vqdmlash",  ee001e60,	3, (RMQ, RMQ, RR),		mve_vqdmlah),
  mToC("vqrdmlash", ee001e40,	3, (RMQ, RMQ, RR),		mve_vqdmlah),
+ mToC("vqdmullt",  ee301f00,	3, (RMQ, RMQ, RMQRR),		mve_vqdmull),
+ mToC("vqdmullb",  ee300f00,	3, (RMQ, RMQ, RMQRR),		mve_vqdmull),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
