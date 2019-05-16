@@ -223,6 +223,11 @@ enum mve_instructions
   MVE_VSUB_FP_T2,
   MVE_VSUB_VEC_T1,
   MVE_VSUB_VEC_T2,
+  MVE_VAND,
+  MVE_VBRSR,
+  MVE_VCLS,
+  MVE_VCLZ,
+  MVE_VCTP,
   MVE_NONE
 };
 
@@ -2147,6 +2152,18 @@ static const struct mopcode32 mve_opcodes[] =
    0xee300f00, 0xffb10f51,
    "vadc%12I%v.i32\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
+  /* Vector VAND.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VAND,
+   0xef000150, 0xffb11f51,
+   "vand%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VBRSR register.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VBRSR,
+   0xfe011e60, 0xff811f70,
+   "vbrsr%v.%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
   /* Vector VCADD floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
    MVE_VCADD_FP,
@@ -2158,6 +2175,18 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VCADD_VEC,
    0xfe000f00, 0xff810f51,
    "vcadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%12o"},
+
+  /* Vector VCLS.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCLS,
+   0xffb00440, 0xffb31fd1,
+   "vcls%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VCLZ.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCLZ,
+   0xffb004c0, 0xffb31fd1,
+   "vclz%v.i%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCMLA.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -2273,6 +2302,12 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VCMUL_FP,
    0xee300e00, 0xefb10f50,
    "vcmul%v.f%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%0,12o"},
+
+   /* Vector VCTP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCTP,
+   0xf000e801, 0xffc0ffff,
+   "vctp%v.%20-21s\t%16-19r"},
 
   /* Vector VDUP.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -5029,6 +5064,7 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VBRSR:
     case MVE_VADD_VEC_T2:
     case MVE_VSUB_VEC_T2:
     case MVE_VABAV:
@@ -5205,6 +5241,12 @@ is_mve_encoding_conflict (unsigned long given,
 	return TRUE;
       else
 	return FALSE;
+
+    case MVE_VCTP:
+    if (arm_decode_field (given, 16, 19) == 0xf)
+      return TRUE;
+    else
+      return FALSE;
 
     default:
     case MVE_VADD_FP_T1:
@@ -5650,6 +5692,16 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	else
 	  return FALSE;
 
+    case MVE_VCLS:
+    case MVE_VCLZ:
+      if (arm_decode_field (given, 18, 19) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -5709,6 +5761,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VBRSR:
     case MVE_VADD_FP_T2:
     case MVE_VSUB_FP_T2:
     case MVE_VADD_VEC_T2:
@@ -6096,6 +6149,15 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	  return FALSE;
 
       }
+
+    case MVE_VCTP:
+      if (arm_decode_field (given, 16, 19) == 0xd)
+	{
+	  *unpredictable_code = UNPRED_R13;
+	  return TRUE;
+	}
+      else
+	return FALSE;
 
     default:
       return FALSE;
@@ -6780,13 +6842,17 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VADD_VEC_T1:
     case MVE_VADD_VEC_T2:
     case MVE_VADDV:
+    case MVE_VBRSR:
     case MVE_VCADD_VEC:
+    case MVE_VCLS:
+    case MVE_VCLZ:
     case MVE_VCMP_VEC_T1:
     case MVE_VCMP_VEC_T2:
     case MVE_VCMP_VEC_T3:
     case MVE_VCMP_VEC_T4:
     case MVE_VCMP_VEC_T5:
     case MVE_VCMP_VEC_T6:
+    case MVE_VCTP:
     case MVE_VDDUP:
     case MVE_VDWDUP:
     case MVE_VHADD_T1:
