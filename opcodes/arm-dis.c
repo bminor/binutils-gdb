@@ -112,6 +112,18 @@ enum mve_instructions
   MVE_VSTRB_T5,
   MVE_VSTRH_T6,
   MVE_VSTRW_T7,
+  MVE_VLDRB_GATHER_T1,
+  MVE_VLDRH_GATHER_T2,
+  MVE_VLDRW_GATHER_T3,
+  MVE_VLDRD_GATHER_T4,
+  MVE_VLDRW_GATHER_T5,
+  MVE_VLDRD_GATHER_T6,
+  MVE_VSTRB_SCATTER_T1,
+  MVE_VSTRH_SCATTER_T2,
+  MVE_VSTRW_SCATTER_T3,
+  MVE_VSTRD_SCATTER_T4,
+  MVE_VSTRW_SCATTER_T5,
+  MVE_VSTRD_SCATTER_T6,
   MVE_NONE
 };
 
@@ -130,6 +142,9 @@ enum mve_unpredictable
 				   vec reg start > 6 (vld2/st2).  */
   UNPRED_R13_AND_WB,		/* Unpredictable becase gp reg = r13
 				   and WB bit = 1.  */
+  UNPRED_Q_REGS_EQUAL,		/* Unpredictable because vector registers are
+				   equal.  */
+  UNPRED_OS,			/* Unpredictable because offset scaled == 1.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
@@ -138,6 +153,13 @@ enum mve_undefined
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_SIZE_LE_1,		/* undefined because size <= 1.  */
+  UNDEF_SIZE_NOT_2,		/* undefined because size != 2.  */
+  UNDEF_SIZE_NOT_3,		/* undefined because size != 3.  */
+  UNDEF_NOT_UNS_SIZE_0,		/* undefined because U == 0 and
+				   size == 0.  */
+  UNDEF_NOT_UNS_SIZE_1,		/* undefined because U == 0 and
+				   size == 1.  */
+  UNDEF_NOT_UNSIGNED,		/* undefined because U == 0.  */
   UNDEF_NONE			/* no undefined behavior.  */
 };
 
@@ -1840,6 +1862,8 @@ static const struct opcode32 neon_opcodes[] =
 
    %%			%
 
+   %a			print '+' or '-' or imm offset in vldr[bhwd] and
+			vstr[bhwd]
    %c			print condition code
    %d			print addr mode of MVE vldr[bhw] and vstr[bhw]
    %u			print 'U' (unsigned) or 'S' for various mve instructions
@@ -1847,6 +1871,7 @@ static const struct opcode32 neon_opcodes[] =
    %n			print vector comparison code for predicated instruction
    %v			print vector predicate for instruction in predicated
 			block
+   %o			print offset scaled for vldr[hwd] and vstr[hwd]
    %w			print writeback mode for MVE v{st,ld}[24]
    %B			print v{st,ld}[24] any one operands
 
@@ -1856,7 +1881,8 @@ static const struct opcode32 neon_opcodes[] =
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
 			UNPREDICTABLE
    %<bitfield>s		print size for vector predicate & non VMOV instructions
-*/
+   %<bitfield>i		print immediate for vstr/vldr reg +/- imm
+   */
 
 static const struct mopcode32 mve_opcodes[] =
 {
@@ -2037,6 +2063,42 @@ static const struct mopcode32 mve_opcodes[] =
    0xfc901e01, 0xff901e1f,
    "vld4%5-6d.%7-8s\t%B, [%16-19r]%w"},
 
+  /* Vector VLDRB gather load.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRB_GATHER_T1,
+   0xec900e00, 0xefb01e50,
+   "vldrb%v.%u%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q]"},
+
+  /* Vector VLDRH gather load.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRH_GATHER_T2,
+   0xec900e10, 0xefb01e50,
+   "vldrh%v.%u%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VLDRW gather load.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRW_GATHER_T3,
+   0xfc900f40, 0xffb01fd0,
+   "vldrw%v.u32\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VLDRD gather load.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRD_GATHER_T4,
+   0xec900fd0, 0xefb01fd0,
+   "vldrd%v.u64\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VLDRW gather load.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRW_GATHER_T5,
+   0xfd101e00, 0xff111f00,
+   "vldrw%v.u32\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
+
+  /* Vector VLDRD gather load, variant T6.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRD_GATHER_T6,
+   0xfd101f00, 0xff111f00,
+   "vldrd%v.u64\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
+
   /* Vector VLDRB.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VLDRB_T1,
@@ -2090,6 +2152,42 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VST4,
    0xfca01e01, 0xffb01e1f,
    "vst4%5-6d.%7-8s\t%B, [%16-19r]!"},
+
+  /* Vector VSTRB scatter store, T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRB_SCATTER_T1,
+   0xec800e00, 0xffb01e50,
+   "vstrb%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q]"},
+
+  /* Vector VSTRH scatter store, T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRH_SCATTER_T2,
+   0xec800e10, 0xffb01e50,
+   "vstrh%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VSTRW scatter store, T3 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRW_SCATTER_T3,
+   0xec800e40, 0xffb01e50,
+   "vstrw%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VSTRD scatter store, T4 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRD_SCATTER_T4,
+   0xec800fd0, 0xffb01fd0,
+   "vstrd%v.64\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
+
+  /* Vector VSTRW scatter store, T5 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRW_SCATTER_T5,
+   0xfd001e00, 0xff111f00,
+   "vstrw%v.32\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
+
+  /* Vector VSTRD scatter store, T6 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRD_SCATTER_T6,
+   0xfd001f00, 0xff111f00,
+   "vstrd%v.64\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
 
   /* Vector VSTRB.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -4319,6 +4417,113 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VLDRB_GATHER_T1:
+      if (arm_decode_field (given, 7, 8) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else if ((arm_decode_field (given, 28, 28) == 0)
+	       && (arm_decode_field (given, 7, 8) == 0))
+	{
+	  *undefined_code = UNDEF_NOT_UNS_SIZE_0;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VLDRH_GATHER_T2:
+      if (arm_decode_field (given, 7, 8) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else if ((arm_decode_field (given, 28, 28) == 0)
+	       && (arm_decode_field (given, 7, 8) == 1))
+	{
+	  *undefined_code = UNDEF_NOT_UNS_SIZE_1;
+	  return TRUE;
+	}
+      else if (arm_decode_field (given, 7, 8) == 0)
+	{
+	  *undefined_code = UNDEF_SIZE_0;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VLDRW_GATHER_T3:
+      if (arm_decode_field (given, 7, 8) != 2)
+	{
+	  *undefined_code = UNDEF_SIZE_NOT_2;
+	  return TRUE;
+	}
+      else if (arm_decode_field (given, 28, 28) == 0)
+	{
+	  *undefined_code = UNDEF_NOT_UNSIGNED;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VLDRD_GATHER_T4:
+      if (arm_decode_field (given, 7, 8) != 3)
+	{
+	  *undefined_code = UNDEF_SIZE_NOT_3;
+	  return TRUE;
+	}
+      else if (arm_decode_field (given, 28, 28) == 0)
+	{
+	  *undefined_code = UNDEF_NOT_UNSIGNED;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRB_SCATTER_T1:
+      if (arm_decode_field (given, 7, 8) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRH_SCATTER_T2:
+      {
+	unsigned long size = arm_decode_field (given, 7, 8);
+	if (size == 3)
+	  {
+	    *undefined_code = UNDEF_SIZE_3;
+	    return TRUE;
+	  }
+	else if (size == 0)
+	  {
+	    *undefined_code = UNDEF_SIZE_0;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VSTRW_SCATTER_T3:
+      if (arm_decode_field (given, 7, 8) != 2)
+	{
+	  *undefined_code = UNDEF_SIZE_NOT_2;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRD_SCATTER_T4:
+      if (arm_decode_field (given, 7, 8) != 3)
+	{
+	  *undefined_code = UNDEF_SIZE_NOT_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -4473,6 +4678,77 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	  return FALSE;
       }
 
+    case MVE_VLDRB_GATHER_T1:
+      if (arm_decode_field (given, 0, 0) == 1)
+	{
+	  *unpredictable_code = UNPRED_OS;
+	  return TRUE;
+	}
+
+      /*  fall through.  */
+      /* To handle common code with T2-T4 variants.  */
+    case MVE_VLDRH_GATHER_T2:
+    case MVE_VLDRW_GATHER_T3:
+    case MVE_VLDRD_GATHER_T4:
+      {
+	unsigned long qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	unsigned long qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+
+	if (qd == qm)
+	  {
+	    *unpredictable_code = UNPRED_Q_REGS_EQUAL;
+	    return TRUE;
+	  }
+
+	if (arm_decode_field (given, 16, 19) == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
+    case MVE_VLDRW_GATHER_T5:
+    case MVE_VLDRD_GATHER_T6:
+      {
+	unsigned long qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	unsigned long qm = arm_decode_field_multiple (given, 17, 19, 7, 7);
+
+	if (qd == qm)
+	  {
+	    *unpredictable_code = UNPRED_Q_REGS_EQUAL;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VSTRB_SCATTER_T1:
+      if (arm_decode_field (given, 16, 19) == 0xf)
+	{
+	  *unpredictable_code = UNPRED_R15;
+	  return TRUE;
+	}
+      else if (arm_decode_field (given, 0, 0) == 1)
+	{
+	  *unpredictable_code = UNPRED_OS;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRH_SCATTER_T2:
+    case MVE_VSTRW_SCATTER_T3:
+    case MVE_VSTRD_SCATTER_T4:
+      if (arm_decode_field (given, 16, 19) == 0xf)
+	{
+	  *unpredictable_code = UNPRED_R15;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -4499,6 +4775,26 @@ print_mve_undefined (struct disassemble_info *info,
 
     case UNDEF_SIZE_LE_1:
       func (stream, "size <= 1");
+      break;
+
+    case UNDEF_SIZE_NOT_2:
+      func (stream, "size not equal to 2");
+      break;
+
+    case UNDEF_SIZE_NOT_3:
+      func (stream, "size not equal to 3");
+      break;
+
+    case UNDEF_NOT_UNS_SIZE_0:
+      func (stream, "not unsigned and size = zero");
+      break;
+
+    case UNDEF_NOT_UNS_SIZE_1:
+      func (stream, "not unsigned and size = one");
+      break;
+
+    case UNDEF_NOT_UNSIGNED:
+      func (stream, "not unsigned");
       break;
 
     case UNDEF_NONE:
@@ -4544,6 +4840,15 @@ print_mve_unpredictable (struct disassemble_info *info,
 
     case UNPRED_R13_AND_WB:
       func (stream, "use of r13 and write back");
+      break;
+
+    case UNPRED_Q_REGS_EQUAL:
+      func (stream,
+	    "same vector register used for destination and other operand");
+      break;
+
+    case UNPRED_OS:
+      func (stream, "use of offset scaled");
       break;
 
     case UNPRED_NONE:
@@ -4623,6 +4928,10 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VHSUB_T2:
     case MVE_VLD2:
     case MVE_VLD4:
+    case MVE_VLDRB_GATHER_T1:
+    case MVE_VLDRH_GATHER_T2:
+    case MVE_VLDRW_GATHER_T3:
+    case MVE_VLDRD_GATHER_T4:
     case MVE_VLDRB_T1:
     case MVE_VLDRH_T2:
     case MVE_VPT_VEC_T1:
@@ -4634,6 +4943,9 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VRHADD:
     case MVE_VST2:
     case MVE_VST4:
+    case MVE_VSTRB_SCATTER_T1:
+    case MVE_VSTRH_SCATTER_T2:
+    case MVE_VSTRW_SCATTER_T3:
     case MVE_VSTRB_T1:
     case MVE_VSTRH_T2:
       if (size <= 3)
@@ -6117,6 +6429,12 @@ print_insn_mve (struct disassemble_info *info, long given)
 		      func (stream, "%%");
 		      break;
 
+		    case 'a':
+		      /* Don't print anything for '+' as it is implied.  */
+		      if (arm_decode_field (given, 23, 23) == 0)
+			func (stream, "-");
+		      break;
+
 		    case 'c':
 		      if (ifthen_state)
 			func (stream, "%s", arm_conditional[IFTHEN_COND]);
@@ -6137,6 +6455,17 @@ print_insn_mve (struct disassemble_info *info, long given)
 		      print_vec_condition (info, given, insn->mve_op);
 		      break;
 
+		    case 'o':
+		      if (arm_decode_field (given, 0, 0) == 1)
+			{
+			  unsigned long size
+			    = arm_decode_field (given, 4, 4)
+			      | (arm_decode_field (given, 6, 6) << 1);
+
+			  func (stream, ", uxtw #%lu", size);
+			}
+		      break;
+
 		    case 'u':
 		      {
 			if (arm_decode_field (given, 28, 28) == 0)
@@ -6144,6 +6473,7 @@ print_insn_mve (struct disassemble_info *info, long given)
 			else
 			  func (stream, "u");
 		      }
+		      break;
 
 		    case 'v':
 		      print_instruction_predicate (info);
@@ -6180,6 +6510,30 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    print_mve_size (info,
 					    value,
 					    insn->mve_op);
+			    break;
+			  case 'i':
+			    {
+			      unsigned long imm
+				= arm_decode_field (given, 0, 6);
+			      unsigned long mod_imm = imm;
+
+			      switch (insn->mve_op)
+				{
+				case MVE_VLDRW_GATHER_T5:
+				case MVE_VSTRW_SCATTER_T5:
+				  mod_imm = mod_imm << 2;
+				  break;
+				case MVE_VSTRD_SCATTER_T6:
+				case MVE_VLDRD_GATHER_T6:
+				  mod_imm = mod_imm << 3;
+				  break;
+
+				default:
+				  break;
+				}
+
+			      func (stream, "%lu", mod_imm);
+			    }
 			    break;
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);

@@ -2,6 +2,19 @@
 	    Michael Collison <michael.collison@arm.com>
 
 	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(enum mve_unpredictable): Add new reasons.
+	(enum mve_undefined): Likewise.
+	(is_mve_undefined): Handle new instructions.
+	(is_mve_unpredictable): Likewise.
+	(print_mve_undefined): Likewise.
+	(print_mve_unpredictable): Likewise.
+	(print_mve_size): Likewise.
+	(print_insn_mve): Likewise.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(enum mve_undefined): Add new reasons.
 	(insns): Add new instructions.
 	(is_mve_encoding_conflict):
