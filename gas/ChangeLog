@@ -1,5 +1,25 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_neon_sli): Accept MVE variants.
+	(do_neon_sri): Likewise.
+	(do_neon_rev): Likewise.
+	(do_neon_rshift_round_imm): Likewise.
+	(insns): Likewise.
+	* testsuite/gas/arm/mve-vrev-bad.d: New test.
+	* testsuite/gas/arm/mve-vrev-bad.l: New test.
+	* testsuite/gas/arm/mve-vrev-bad.s: New test.
+	* testsuite/gas/arm/mve-vshr-bad.d: New test.
+	* testsuite/gas/arm/mve-vshr-bad.l: New test.
+	* testsuite/gas/arm/mve-vshr-bad.s: New test.
+	* testsuite/gas/arm/mve-vsli-bad.d: New test.
+	* testsuite/gas/arm/mve-vsli-bad.l: New test.
+	* testsuite/gas/arm/mve-vsli-bad.s: New test.
+	* testsuite/gas/arm/mve-vsri-bad.d: New test.
+	* testsuite/gas/arm/mve-vsri-bad.l: New test.
+	* testsuite/gas/arm/mve-vsri-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_vrint_1): Accept MVE variants.
 	(insns): Change entries to accept MVE variants.
 	* testsuite/gas/arm/mve-vrint-bad.d: New test.

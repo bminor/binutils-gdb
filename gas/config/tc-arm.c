@@ -17873,9 +17873,23 @@ do_neon_abs_neg (void)
 static void
 do_neon_sli (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-  struct neon_type_el et = neon_check_type (2, rs,
-    N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_8 | N_16 | N_32 | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
+    }
+
+
   int imm = inst.operands[2].imm;
   constraint (imm < 0 || (unsigned)imm >= et.size,
 	      _("immediate out of range for insert"));
@@ -17885,9 +17899,22 @@ do_neon_sli (void)
 static void
 do_neon_sri (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-  struct neon_type_el et = neon_check_type (2, rs,
-    N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_8 | N_16 | N_32 | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
+    }
+
   int imm = inst.operands[2].imm;
   constraint (imm < 1 || (unsigned)imm > et.size,
 	      _("immediate out of range for insert"));
@@ -19112,14 +19139,29 @@ do_neon_ext (void)
 static void
 do_neon_rev (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+   return;
+
+  enum neon_shape rs;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    rs = neon_select_shape (NS_QQ, NS_NULL);
+  else
+    rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+
   struct neon_type_el et = neon_check_type (2, rs,
     N_EQK, N_8 | N_16 | N_32 | N_KEY);
+
   unsigned op = (inst.instruction >> 7) & 3;
   /* N (width of reversed regions) is encoded as part of the bitmask. We
      extract it here to check the elements to be reversed are smaller.
      Otherwise we'd get a reserved instruction.  */
   unsigned elsize = (op == 2) ? 16 : (op == 1) ? 32 : (op == 0) ? 64 : 0;
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext) && elsize == 64
+      && inst.operands[0].reg == inst.operands[1].reg)
+    as_tsktsk (_("Warning: 64-bit element size and same destination and source"
+		 " operands makes instruction UNPREDICTABLE"));
+
   gas_assert (elsize != 0);
   constraint (et.size >= elsize,
 	      _("elements must be smaller than reversal region"));
@@ -19663,8 +19705,22 @@ do_mve_movl (void)
 static void
 do_neon_rshift_round_imm (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-  struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+   return;
+
+  enum neon_shape rs;
+  struct neon_type_el et;
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_SU_MVE | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+    }
   int imm = inst.operands[2].imm;
 
   /* imm == 0 case is encoded as VMOV for V{R}SHR.  */
@@ -24323,18 +24379,14 @@ static const struct asm_opcode insns[] =
   /* Data processing with two registers and a shift amount.  */
   /* Right shifts, and variants with rounding.
      Types accepted S8 S16 S32 S64 U8 U16 U32 U64.  */
- NUF(vshr,      0800010, 3, (RNDQ, oRNDQ, I64z), neon_rshift_round_imm),
  NUF(vshrq,     0800010, 3, (RNQ,  oRNQ,  I64z), neon_rshift_round_imm),
- NUF(vrshr,     0800210, 3, (RNDQ, oRNDQ, I64z), neon_rshift_round_imm),
  NUF(vrshrq,    0800210, 3, (RNQ,  oRNQ,  I64z), neon_rshift_round_imm),
  NUF(vsra,      0800110, 3, (RNDQ, oRNDQ, I64),  neon_rshift_round_imm),
  NUF(vsraq,     0800110, 3, (RNQ,  oRNQ,  I64),  neon_rshift_round_imm),
  NUF(vrsra,     0800310, 3, (RNDQ, oRNDQ, I64),  neon_rshift_round_imm),
  NUF(vrsraq,    0800310, 3, (RNQ,  oRNQ,  I64),  neon_rshift_round_imm),
   /* Shift and insert. Sizes accepted 8 16 32 64.  */
- NUF(vsli,      1800510, 3, (RNDQ, oRNDQ, I63), neon_sli),
  NUF(vsliq,     1800510, 3, (RNQ,  oRNQ,  I63), neon_sli),
- NUF(vsri,      1800410, 3, (RNDQ, oRNDQ, I64), neon_sri),
  NUF(vsriq,     1800410, 3, (RNQ,  oRNQ,  I64), neon_sri),
   /* QSHL{U} immediate accepts S8 S16 S32 S64 U8 U16 U32 U64.  */
  NUF(vqshlu,    1800610, 3, (RNDQ, oRNDQ, I63), neon_qshlu_imm),
@@ -24385,11 +24437,8 @@ static const struct asm_opcode insns[] =
 
   /* Two registers, miscellaneous.  */
   /* Reverse. Sizes 8 16 32 (must be < size in opcode).  */
- NUF(vrev64,    1b00000, 2, (RNDQ, RNDQ),     neon_rev),
  NUF(vrev64q,   1b00000, 2, (RNQ,  RNQ),      neon_rev),
- NUF(vrev32,    1b00080, 2, (RNDQ, RNDQ),     neon_rev),
  NUF(vrev32q,   1b00080, 2, (RNQ,  RNQ),      neon_rev),
- NUF(vrev16,    1b00100, 2, (RNDQ, RNDQ),     neon_rev),
  NUF(vrev16q,   1b00100, 2, (RNQ,  RNQ),      neon_rev),
   /* Vector replicate. Sizes 8 16 32.  */
  nCE(vdupq,     _vdup,    2, (RNQ,  RR_RNSC),  neon_dup),
@@ -25109,6 +25158,13 @@ static const struct asm_opcode insns[] =
  mnUF(vqrdmulh,  _vqrdmulh,3, (RNDQMQ, oRNDQMQ, RNDQMQ_RNSC_RR), neon_qdmulh),
  MNUF(vqrshl,    0000510,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_rshl),
  MNUF(vrshl,     0000500,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_rshl),
+ MNUF(vshr,      0800010,  3, (RNDQMQ, oRNDQMQ, I64z), neon_rshift_round_imm),
+ MNUF(vrshr,     0800210,  3, (RNDQMQ, oRNDQMQ, I64z), neon_rshift_round_imm),
+ MNUF(vsli,      1800510,  3, (RNDQMQ, oRNDQMQ, I63),  neon_sli),
+ MNUF(vsri,      1800410,  3, (RNDQMQ, oRNDQMQ, I64z), neon_sri),
+ MNUF(vrev64,    1b00000,  2, (RNDQMQ, RNDQMQ),     neon_rev),
+ MNUF(vrev32,    1b00080,  2, (RNDQMQ, RNDQMQ),     neon_rev),
+ MNUF(vrev16,    1b00100,  2, (RNDQMQ, RNDQMQ),     neon_rev),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3
