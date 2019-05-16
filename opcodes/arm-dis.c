@@ -245,6 +245,14 @@ enum mve_instructions
   MVE_VMINV,
   MVE_VMINAV,
   MVE_VMLA,
+  MVE_VMUL_FP_T1,
+  MVE_VMUL_FP_T2,
+  MVE_VMUL_VEC_T1,
+  MVE_VMUL_VEC_T2,
+  MVE_VMULH,
+  MVE_VRMULH,
+  MVE_VNEG_FP,
+  MVE_VNEG_VEC,
   MVE_NONE
 };
 
@@ -2795,6 +2803,42 @@ static const struct mopcode32 mve_opcodes[] =
    0xfeb00a40, 0xffbf0fd0,
    "vmovx.f16\t%22,12-15F, %5,0-3F"},
 
+  /* Vector VMUL floating-point T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMUL_FP_T1,
+   0xff000d50, 0xffa11f51,
+   "vmul%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMUL floating-point T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMUL_FP_T2,
+   0xee310e60, 0xefb11f70,
+   "vmul%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VMUL T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMUL_VEC_T1,
+   0xef000950, 0xff811f51,
+   "vmul%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMUL T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMUL_VEC_T2,
+   0xee011e60, 0xff811f70,
+   "vmul%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VMULH.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMULH,
+   0xee010e01, 0xef811f51,
+   "vmulh%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VRMULH.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRMULH,
+   0xee011e01, 0xef811f51,
+   "vrmulh%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
   /* Vector VMULL integer.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VMULL_INT,
@@ -2818,6 +2862,18 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VMVN_REG,
    0xffb005c0, 0xffbf1fd1,
    "vmvn%v\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VNEG floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VNEG_FP,
+   0xffb107c0, 0xffb31fd1,
+   "vneg%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VNEG.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VNEG_VEC,
+   0xffb103c0, 0xffb31fd1,
+   "vneg%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VORN, vector bitwise or not.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -5183,6 +5239,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VMUL_VEC_T2:
+    case MVE_VMULH:
+    case MVE_VRMULH:
     case MVE_VMLA:
     case MVE_VMAX:
     case MVE_VMIN:
@@ -5480,6 +5539,7 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VMUL_VEC_T1:
     case MVE_VABD_VEC:
     case MVE_VADD_VEC_T1:
     case MVE_VSUB_VEC_T1:
@@ -5658,6 +5718,7 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VNEG_FP:
     case MVE_VABS_FP:
     case MVE_VCVT_BETWEEN_FP_INT:
     case MVE_VCVT_FROM_FP_TO_INT:
@@ -5820,6 +5881,7 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	else
 	  return FALSE;
 
+    case MVE_VNEG_VEC:
     case MVE_VCLS:
     case MVE_VCLZ:
       if (arm_decode_field (given, 18, 19) == 3)
@@ -5889,6 +5951,8 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VMUL_FP_T2:
+    case MVE_VMUL_VEC_T2:
     case MVE_VMLA:
     case MVE_VBRSR:
     case MVE_VADD_FP_T2:
@@ -7017,6 +7081,13 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VMINAV:
     case MVE_VMLA:
     case MVE_VMLAS:
+    case MVE_VMUL_VEC_T1:
+    case MVE_VMUL_VEC_T2:
+    case MVE_VMULH:
+    case MVE_VRMULH:
+    case MVE_VMULL_INT:
+    case MVE_VNEG_FP:
+    case MVE_VNEG_VEC:
     case MVE_VPT_VEC_T1:
     case MVE_VPT_VEC_T2:
     case MVE_VPT_VEC_T3:
@@ -7080,6 +7151,8 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VMINNMA_FP:
     case MVE_VMINNMV_FP:
     case MVE_VMINNMAV_FP:
+    case MVE_VMUL_FP_T1:
+    case MVE_VMUL_FP_T2:
     case MVE_VPT_FP_T1:
     case MVE_VPT_FP_T2:
       if (size == 0)
