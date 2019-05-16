@@ -1,5 +1,20 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vshrnt, M_MNEM_vshrnb, M_MNEM_vrshrnt,
+	 M_MNEM_vqshrnt, M_MNEM_vqshrnb, M_MNEM_vqshrunt, M_MNEM_vqshrunb,
+	 M_MNEM_vrshrnb, M_MNEM_vqrshrnt, M_MNEM_vqrshrnb, M_MNEM_vqrshrunt,
+	 M_MNEM_vqrshrunb): New instruction encodings.
+	(do_mve_vshrn): New encoding function.
+	(insns): Add entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-vqrshrn-bad.d: New test.
+	* testsuite/gas/arm/mve-vqrshrn-bad.l: New test.
+	* testsuite/gas/arm/mve-vqrshrn-bad.s: New test.
+	* testsuite/gas/arm/mve-vshrn-bad.d: New test.
+	* testsuite/gas/arm/mve-vshrn-bad.l: New test.
+	* testsuite/gas/arm/mve-vshrn-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vqmovnt, M_MNEM_vqmovnb,
 	 M_MNEM_vqmovunt, M_MNEM_vqmovunb): New instruction encodings.
 	(do_mve_vqmovn): New encoding function.

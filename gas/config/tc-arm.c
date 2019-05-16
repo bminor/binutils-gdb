@@ -14206,6 +14206,18 @@ do_t_loloop (void)
 #define M_MNEM_vqmovnb	  0xee330e01
 #define M_MNEM_vqmovunt	  0xee311e81
 #define M_MNEM_vqmovunb	  0xee310e81
+#define M_MNEM_vshrnt	    0xee801fc1
+#define M_MNEM_vshrnb	    0xee800fc1
+#define M_MNEM_vrshrnt	    0xfe801fc1
+#define M_MNEM_vqshrnt	    0xee801f40
+#define M_MNEM_vqshrnb	    0xee800f40
+#define M_MNEM_vqshrunt	    0xee801fc0
+#define M_MNEM_vqshrunb	    0xee800fc0
+#define M_MNEM_vrshrnb	    0xfe800fc1
+#define M_MNEM_vqrshrnt	    0xee801f41
+#define M_MNEM_vqrshrnb	    0xee800f41
+#define M_MNEM_vqrshrunt    0xfe801fc0
+#define M_MNEM_vqrshrunb    0xfe800fc0
 
 /* Neon instruction encoder helpers.  */
 
@@ -15747,6 +15759,58 @@ do_mve_vmlas (void)
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[1].reg) << 7;
   inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
+static void
+do_mve_vshrn (void)
+{
+  unsigned types;
+  switch (inst.instruction)
+    {
+    case M_MNEM_vshrnt:
+    case M_MNEM_vshrnb:
+    case M_MNEM_vrshrnt:
+    case M_MNEM_vrshrnb:
+      types = N_I16 | N_I32;
+      break;
+    case M_MNEM_vqshrnt:
+    case M_MNEM_vqshrnb:
+    case M_MNEM_vqrshrnt:
+    case M_MNEM_vqrshrnb:
+      types = N_U16 | N_U32 | N_S16 | N_S32;
+      break;
+    case M_MNEM_vqshrunt:
+    case M_MNEM_vqshrunb:
+    case M_MNEM_vqrshrunt:
+    case M_MNEM_vqrshrunb:
+      types = N_S16 | N_S32;
+      break;
+    default:
+      abort ();
+    }
+
+  struct neon_type_el et = neon_check_type (2, NS_QQI, N_EQK, types | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  unsigned Qd = inst.operands[0].reg;
+  unsigned Qm = inst.operands[1].reg;
+  unsigned imm = inst.operands[2].imm;
+  constraint (imm < 1 || ((unsigned) imm) > (et.size / 2),
+	      et.size == 16
+	      ? _("immediate operand expected in the range [1,8]")
+	      : _("immediate operand expected in the range [1,16]"));
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= HI1 (Qd) << 22;
+  inst.instruction |= (et.size - imm) << 16;
+  inst.instruction |= LOW4 (Qd) << 12;
+  inst.instruction |= HI1 (Qm) << 5;
+  inst.instruction |= LOW4 (Qm);
   inst.is_neon = 1;
 }
 
@@ -24945,6 +25009,19 @@ static const struct asm_opcode insns[] =
  mCEF(vqmovnb,	  _vqmovnb,	2, (RMQ, RMQ),			mve_vqmovn),
  mCEF(vqmovunt,	  _vqmovunt,	2, (RMQ, RMQ),			mve_vqmovn),
  mCEF(vqmovunb,	  _vqmovunb,	2, (RMQ, RMQ),			mve_vqmovn),
+
+ mCEF(vshrnt,	  _vshrnt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vshrnb,	  _vshrnb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vrshrnt,	  _vrshrnt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vrshrnb,	  _vrshrnb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqshrnt,	  _vqrshrnt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqshrnb,	  _vqrshrnb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqshrunt,	  _vqrshrunt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqshrunb,	  _vqrshrunb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqrshrnt,	  _vqrshrnt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqrshrnb,	  _vqrshrnb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqrshrunt,  _vqrshrunt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+ mCEF(vqrshrunb,  _vqrshrunb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
