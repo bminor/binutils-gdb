@@ -102,6 +102,16 @@ enum mve_instructions
   MVE_VLD4,
   MVE_VST2,
   MVE_VST4,
+  MVE_VLDRB_T1,
+  MVE_VLDRH_T2,
+  MVE_VLDRB_T5,
+  MVE_VLDRH_T6,
+  MVE_VLDRW_T7,
+  MVE_VSTRB_T1,
+  MVE_VSTRH_T2,
+  MVE_VSTRB_T5,
+  MVE_VSTRH_T6,
+  MVE_VSTRW_T7,
   MVE_NONE
 };
 
@@ -126,6 +136,8 @@ enum mve_unpredictable
 enum mve_undefined
 {
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
+  UNDEF_SIZE_3,			/* undefined because size == 3.  */
+  UNDEF_SIZE_LE_1,		/* undefined because size <= 1.  */
   UNDEF_NONE			/* no undefined behavior.  */
 };
 
@@ -1829,6 +1841,8 @@ static const struct opcode32 neon_opcodes[] =
    %%			%
 
    %c			print condition code
+   %d			print addr mode of MVE vldr[bhw] and vstr[bhw]
+   %u			print 'U' (unsigned) or 'S' for various mve instructions
    %i			print MVE predicate(s) for vpt and vpst
    %n			print vector comparison code for predicated instruction
    %v			print vector predicate for instruction in predicated
@@ -2023,6 +2037,36 @@ static const struct mopcode32 mve_opcodes[] =
    0xfc901e01, 0xff901e1f,
    "vld4%5-6d.%7-8s\t%B, [%16-19r]%w"},
 
+  /* Vector VLDRB.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRB_T1,
+   0xec100e00, 0xee581e00,
+   "vldrb%v.%u%7-8s\t%13-15Q, %d"},
+
+  /* Vector VLDRH.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRH_T2,
+   0xec180e00, 0xee581e00,
+   "vldrh%v.%u%7-8s\t%13-15Q, %d"},
+
+  /* Vector VLDRB unsigned, variant T5.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRB_T5,
+   0xec101e00, 0xfe101f80,
+   "vldrb%v.u8\t%13-15,22Q, %d"},
+
+  /* Vector VLDRH unsigned, variant T6.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRH_T6,
+   0xec101e80, 0xfe101f80,
+   "vldrh%v.u16\t%13-15,22Q, %d"},
+
+  /* Vector VLDRW unsigned, variant T7.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLDRW_T7,
+   0xec101f00, 0xfe101f80,
+   "vldrw%v.u32\t%13-15,22Q, %d"},
+
   /* Vector VST2 no writeback.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VST2,
@@ -2046,6 +2090,36 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VST4,
    0xfca01e01, 0xffb01e1f,
    "vst4%5-6d.%7-8s\t%B, [%16-19r]!"},
+
+  /* Vector VSTRB.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRB_T1,
+   0xec000e00, 0xfe581e00,
+   "vstrb%v.%7-8s\t%13-15Q, %d"},
+
+  /* Vector VSTRH.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRH_T2,
+   0xec080e00, 0xfe581e00,
+   "vstrh%v.%7-8s\t%13-15Q, %d"},
+
+  /* Vector VSTRB variant T5.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRB_T5,
+   0xec001e00, 0xfe101f80,
+   "vstrb%v.8\t%13-15,22Q, %d"},
+
+  /* Vector VSTRH variant T6.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRH_T6,
+   0xec001e80, 0xfe101f80,
+   "vstrh%v.16\t%13-15,22Q, %d"},
+
+  /* Vector VSTRW variant T7.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSTRW_T7,
+   0xec001f00, 0xfe101f80,
+   "vstrw%v.32\t%13-15,22Q, %d"},
 
   {ARM_FEATURE_CORE_LOW (0),
    MVE_NONE,
@@ -4074,10 +4148,107 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VSTRB_T1:
+    case MVE_VSTRH_T2:
+      if ((arm_decode_field (given, 24, 24) == 0)
+	  && (arm_decode_field (given, 21, 21) == 0))
+	{
+	    return TRUE;
+	}
+      else if ((arm_decode_field (given, 7, 8) == 3))
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VSTRB_T5:
+    case MVE_VSTRH_T6:
+    case MVE_VSTRW_T7:
+      if ((arm_decode_field (given, 24, 24) == 0)
+	  && (arm_decode_field (given, 21, 21) == 0))
+	{
+	    return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
 
     }
+}
+
+static void
+print_mve_vld_str_addr (struct disassemble_info *info,
+			unsigned long given,
+			enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  unsigned long p, w, gpr, imm, add, mod_imm;
+
+  imm = arm_decode_field (given, 0, 6);
+  mod_imm = imm;
+
+  switch (matched_insn)
+    {
+    case MVE_VLDRB_T1:
+    case MVE_VSTRB_T1:
+      gpr = arm_decode_field (given, 16, 18);
+      break;
+
+    case MVE_VLDRH_T2:
+    case MVE_VSTRH_T2:
+      gpr = arm_decode_field (given, 16, 18);
+      mod_imm = imm << 1;
+      break;
+
+    case MVE_VLDRH_T6:
+    case MVE_VSTRH_T6:
+      gpr = arm_decode_field (given, 16, 19);
+      mod_imm = imm << 1;
+      break;
+
+    case MVE_VLDRW_T7:
+    case MVE_VSTRW_T7:
+      gpr = arm_decode_field (given, 16, 19);
+      mod_imm = imm << 2;
+      break;
+
+    case MVE_VLDRB_T5:
+    case MVE_VSTRB_T5:
+      gpr = arm_decode_field (given, 16, 19);
+      break;
+
+    default:
+      return;
+    }
+
+  p = arm_decode_field (given, 24, 24);
+  w = arm_decode_field (given, 21, 21);
+
+  add = arm_decode_field (given, 23, 23);
+
+  char * add_sub;
+
+  /* Don't print anything for '+' as it is implied.  */
+  if (add == 1)
+    add_sub = "";
+  else
+    add_sub = "-";
+
+  if (p == 1)
+    {
+      /* Offset mode.  */
+      if (w == 0)
+	func (stream, "[%s, #%s%lu]", arm_regnames[gpr], add_sub, mod_imm);
+      /* Pre-indexed mode.  */
+      else
+	func (stream, "[%s, #%s%lu]!", arm_regnames[gpr], add_sub, mod_imm);
+    }
+  else if ((p == 0) && (w == 1))
+    /* Post-index mode.  */
+    func (stream, "[%s], #%s%lu", arm_regnames[gpr], add_sub, mod_imm);
 }
 
 /* Return FALSE if GIVEN is not an undefined encoding for MATCHED_INSN.
@@ -4107,6 +4278,42 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       if (arm_decode_field (given, 20, 21) == 3)
 	{
 	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VLDRB_T1:
+      if (arm_decode_field (given, 7, 8) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VLDRH_T2:
+      if (arm_decode_field (given, 7, 8) <= 1)
+	{
+	  *undefined_code = UNDEF_SIZE_LE_1;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRB_T1:
+      if ((arm_decode_field (given, 7, 8) == 0))
+	{
+	  *undefined_code = UNDEF_SIZE_0;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VSTRH_T2:
+      if ((arm_decode_field (given, 7, 8) <= 1))
+	{
+	  *undefined_code = UNDEF_SIZE_LE_1;
 	  return TRUE;
 	}
       else
@@ -4243,6 +4450,29 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	  return FALSE;
       }
 
+    case MVE_VLDRB_T5:
+    case MVE_VLDRH_T6:
+    case MVE_VLDRW_T7:
+    case MVE_VSTRB_T5:
+    case MVE_VSTRH_T6:
+    case MVE_VSTRW_T7:
+      {
+	unsigned long rn = arm_decode_field (given, 16, 19);
+
+	if ((rn == 0xd) && (arm_decode_field (given, 21, 21) == 1))
+	  {
+	    *unpredictable_code = UNPRED_R13_AND_WB;
+	    return TRUE;
+	  }
+	else if (rn == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -4259,8 +4489,16 @@ print_mve_undefined (struct disassemble_info *info,
 
   switch (undefined_code)
     {
+    case UNDEF_SIZE_0:
+      func (stream, "size equals zero");
+      break;
+
     case UNDEF_SIZE_3:
       func (stream, "size equals three");
+      break;
+
+    case UNDEF_SIZE_LE_1:
+      func (stream, "size <= 1");
       break;
 
     case UNDEF_NONE:
@@ -4385,6 +4623,8 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VHSUB_T2:
     case MVE_VLD2:
     case MVE_VLD4:
+    case MVE_VLDRB_T1:
+    case MVE_VLDRH_T2:
     case MVE_VPT_VEC_T1:
     case MVE_VPT_VEC_T2:
     case MVE_VPT_VEC_T3:
@@ -4394,6 +4634,8 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VRHADD:
     case MVE_VST2:
     case MVE_VST4:
+    case MVE_VSTRB_T1:
+    case MVE_VSTRH_T2:
       if (size <= 3)
 	func (stream, "%s", mve_vec_sizename[size]);
       else
@@ -4646,6 +4888,15 @@ print_insn_coprocessor (bfd_vma pc,
 	      && (cp_num == 8 || cp_num == 14 || cp_num == 15))
 	    continue;
 	}
+      else if ((insn->value == 0xec100f80      /* vldr (system register) */
+		|| insn->value == 0xec000f80)  /* vstr (system register) */
+	       && arm_decode_field (given, 24, 24) == 0
+	       && arm_decode_field (given, 21, 21) == 0)
+	/* If the P and W bits are both 0 then these encodings match the MVE
+	   VLDR and VSTR instructions, these are in a different table, so we
+	   don't let it match here.  */
+	continue;
+
 
       for (c = insn->assembler; *c; c++)
 	{
@@ -5871,6 +6122,10 @@ print_insn_mve (struct disassemble_info *info, long given)
 			func (stream, "%s", arm_conditional[IFTHEN_COND]);
 		      break;
 
+		    case 'd':
+		      print_mve_vld_str_addr (info, given, insn->mve_op);
+		      break;
+
 		    case 'i':
 		      {
 			long mve_mask = mve_extract_pred_mask (given);
@@ -5881,6 +6136,14 @@ print_insn_mve (struct disassemble_info *info, long given)
 		    case 'n':
 		      print_vec_condition (info, given, insn->mve_op);
 		      break;
+
+		    case 'u':
+		      {
+			if (arm_decode_field (given, 28, 28) == 0)
+			  func (stream, "s");
+			else
+			  func (stream, "u");
+		      }
 
 		    case 'v':
 		      print_instruction_predicate (info);

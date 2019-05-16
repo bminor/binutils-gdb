@@ -2,6 +2,21 @@
 	    Michael Collison <michael.collison@arm.com>
 
 	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(enum mve_undefined): Add new reasons.
+	(insns): Add new instructions.
+	(is_mve_encoding_conflict):
+	(print_mve_vld_str_addr): New print function.
+	(is_mve_undefined): Handle new instructions.
+	(is_mve_unpredictable): Likewise.
+	(print_mve_undefined): Likewise.
+	(print_mve_size): Likewise.
+	(print_insn_coprocessor_1): Handle MVE VLDR, VSTR instructions.
+	(print_insn_mve):  Handle new operands.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(enum mve_unpredictable): Add new reasons.
 	(is_mve_encoding_conflict): Handle new instructions.
 	(is_mve_unpredictable): Likewise.
