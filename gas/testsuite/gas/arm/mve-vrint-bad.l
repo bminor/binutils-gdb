@@ -11,7 +11,7 @@
 [^:]*:13: Error: bad type in SIMD instruction -- `vrintm.f64 q0,q1'
 [^:]*:13: Error: bad type in SIMD instruction -- `vrintp.i16 q0,q1'
 [^:]*:13: Error: bad type in SIMD instruction -- `vrintp.f64 q0,q1'
-[^:]*:14: Error: invalid rounding mode -- `vrintr.f16 q0,q1'
+[^:]*:14: Error: VFP single, double or Neon quad precision register expected -- `vrintr.f16 q0,q1'
 [^:]*:25: Warning: instruction is UNPREDICTABLE in an IT block
 [^:]*:25: Warning: instruction is UNPREDICTABLE in an IT block
 [^:]*:25: Warning: instruction is UNPREDICTABLE in an IT block

@@ -124,6 +124,11 @@ enum mve_instructions
   MVE_VSTRD_SCATTER_T4,
   MVE_VSTRW_SCATTER_T5,
   MVE_VSTRD_SCATTER_T6,
+  MVE_VCVT_FP_FIX_VEC,
+  MVE_VCVT_BETWEEN_FP_INT,
+  MVE_VCVT_FP_HALF_FP,
+  MVE_VCVT_FROM_FP_TO_INT,
+  MVE_VRINT_FP,
   MVE_NONE
 };
 
@@ -145,12 +150,14 @@ enum mve_unpredictable
   UNPRED_Q_REGS_EQUAL,		/* Unpredictable because vector registers are
 				   equal.  */
   UNPRED_OS,			/* Unpredictable because offset scaled == 1.  */
+  UNPRED_GP_REGS_EQUAL,		/* Unpredictable because gp registers are the
+				   same.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
 enum mve_undefined
 {
-  UNDEF_SIZE_3,			/* undefined because size == 3.  */
+  UNDEF_SIZE_0,			/* undefined because size == 0.  */
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_SIZE_LE_1,		/* undefined because size <= 1.  */
   UNDEF_SIZE_NOT_2,		/* undefined because size != 2.  */
@@ -160,6 +167,8 @@ enum mve_undefined
   UNDEF_NOT_UNS_SIZE_1,		/* undefined because U == 0 and
 				   size == 1.  */
   UNDEF_NOT_UNSIGNED,		/* undefined because U == 0.  */
+  UNDEF_VCVT_IMM6,		/* imm6 < 32.  */
+  UNDEF_VCVT_FSI_IMM6,		/* fsi = 0 and 32 >= imm6 <= 47.  */
   UNDEF_NONE			/* no undefined behavior.  */
 };
 
@@ -1868,7 +1877,9 @@ static const struct opcode32 neon_opcodes[] =
    %d			print addr mode of MVE vldr[bhw] and vstr[bhw]
    %u			print 'U' (unsigned) or 'S' for various mve instructions
    %i			print MVE predicate(s) for vpt and vpst
+   %m			print rounding mode for vcvt and vrint
    %n			print vector comparison code for predicated instruction
+   %s			print size for various vcvt instructions
    %v			print vector predicate for instruction in predicated
 			block
    %o			print offset scaled for vldr[hwd] and vstr[hwd]
@@ -1882,7 +1893,8 @@ static const struct opcode32 neon_opcodes[] =
 			UNPREDICTABLE
    %<bitfield>s		print size for vector predicate & non VMOV instructions
    %<bitfield>i		print immediate for vstr/vldr reg +/- imm
-   */
+   %<bitfield>k		print immediate for vector conversion instruction
+ */
 
 static const struct mopcode32 mve_opcodes[] =
 {
@@ -2051,6 +2063,36 @@ static const struct mopcode32 mve_opcodes[] =
    0xef000140, 0xef811f51,
    "vrhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
+  /* Vector VCVT.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCVT_FP_FIX_VEC,
+   0xef800c50, 0xef801cd1,
+   "vcvt%v.%s\t%13-15,22Q, %1-3,5Q, #%16-21k"},
+
+  /* Vector VCVT.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCVT_BETWEEN_FP_INT,
+   0xffb30640, 0xffb31e51,
+   "vcvt%v.%s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VCVT between single and half-precision float, bottom half.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCVT_FP_HALF_FP,
+   0xee3f0e01, 0xefbf1fd1,
+   "vcvtb%v.%s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VCVT between single and half-precision float, top half.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCVT_FP_HALF_FP,
+   0xee3f1e01, 0xefbf1fd1,
+   "vcvtt%v.%s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VCVT.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCVT_FROM_FP_TO_INT,
+   0xffb30040, 0xffb31c51,
+   "vcvt%m%v.%s\t%13-15,22Q, %1-3,5Q"},
+
   /* Vector VLD2.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VLD2,
@@ -2128,6 +2170,12 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VLDRW_T7,
    0xec101f00, 0xfe101f80,
    "vldrw%v.u32\t%13-15,22Q, %d"},
+
+  /* Vector VRINT floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VRINT_FP,
+   0xffb20440, 0xffb31c51,
+   "vrint%m%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VST2 no writeback.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -4269,6 +4317,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VCVT_FP_FIX_VEC:
+      return (arm_decode_field (given, 16, 21) & 0x38) == 0;
+
     default:
       return FALSE;
 
@@ -4524,6 +4575,43 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VCVT_FP_FIX_VEC:
+      {
+	unsigned long imm6 = arm_decode_field (given, 16, 21);
+	if ((imm6 & 0x20) == 0)
+	  {
+	    *undefined_code = UNDEF_VCVT_IMM6;
+	    return TRUE;
+	  }
+
+	if ((arm_decode_field (given, 9, 9) == 0)
+	    && ((imm6 & 0x30) == 0x20))
+	  {
+	    *undefined_code = UNDEF_VCVT_FSI_IMM6;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
+    case MVE_VCVT_BETWEEN_FP_INT:
+    case MVE_VCVT_FROM_FP_TO_INT:
+      {
+	unsigned long size = arm_decode_field (given, 18, 19);
+	if (size == 0)
+	  {
+	    *undefined_code = UNDEF_SIZE_0;
+	    return TRUE;
+	  }
+	else if (size == 3)
+	  {
+	    *undefined_code = UNDEF_SIZE_3;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -4749,6 +4837,31 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VCVT_BETWEEN_FP_INT:
+    case MVE_VCVT_FROM_FP_TO_INT:
+      {
+	unsigned long rt = arm_decode_field (given, 0, 3);
+	unsigned long rt2 = arm_decode_field (given, 16, 19);
+
+	if ((rt == 0xd) || (rt2 == 0xd))
+	  {
+	    *unpredictable_code = UNPRED_R13;
+	    return TRUE;
+	  }
+	else if ((rt == 0xf) || (rt2 == 0xf))
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+	else if (rt == rt2)
+	  {
+	    *unpredictable_code = UNPRED_GP_REGS_EQUAL;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -4795,6 +4908,14 @@ print_mve_undefined (struct disassemble_info *info,
 
     case UNDEF_NOT_UNSIGNED:
       func (stream, "not unsigned");
+      break;
+
+    case UNDEF_VCVT_IMM6:
+      func (stream, "invalid imm6");
+      break;
+
+    case UNDEF_VCVT_FSI_IMM6:
+      func (stream, "fsi = 0 and invalid imm6");
       break;
 
     case UNDEF_NONE:
@@ -4851,6 +4972,10 @@ print_mve_unpredictable (struct disassemble_info *info,
       func (stream, "use of offset scaled");
       break;
 
+    case UNPRED_GP_REGS_EQUAL:
+      func (stream, "same general-purpose register used for both operands");
+      break;
+
     case UNPRED_NONE:
       break;
     }
@@ -4887,6 +5012,234 @@ print_mve_register_blocks (struct disassemble_info *info,
 	      q_reg_start + 3);
       else
 	func (stream, "<illegal reg q%ld>", q_reg_start);
+      break;
+
+    default:
+      break;
+    }
+}
+
+static void
+print_mve_rounding_mode (struct disassemble_info *info,
+			 unsigned long given,
+			 enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  switch (matched_insn)
+    {
+    case MVE_VCVT_FROM_FP_TO_INT:
+      {
+	switch (arm_decode_field (given, 8, 9))
+	  {
+	  case 0:
+	    func (stream, "a");
+	    break;
+
+	  case 1:
+	    func (stream, "n");
+	    break;
+
+	  case 2:
+	    func (stream, "p");
+	    break;
+
+	  case 3:
+	    func (stream, "m");
+	    break;
+
+	  default:
+	    break;
+	  }
+      }
+      break;
+
+    case MVE_VRINT_FP:
+      {
+	switch (arm_decode_field (given, 7, 9))
+	  {
+	  case 0:
+	    func (stream, "n");
+	    break;
+
+	  case 1:
+	    func (stream, "x");
+	    break;
+
+	  case 2:
+	    func (stream, "a");
+	    break;
+
+	  case 3:
+	    func (stream, "z");
+	    break;
+
+	  case 5:
+	    func (stream, "m");
+	    break;
+
+	  case 7:
+	    func (stream, "p");
+
+	  case 4:
+	  case 6:
+	  default:
+	    break;
+	  }
+      }
+      break;
+
+    default:
+      break;
+    }
+}
+
+static void
+print_mve_vcvt_size (struct disassemble_info *info,
+		     unsigned long given,
+		     enum mve_instructions matched_insn)
+{
+  unsigned long mode = 0;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  switch (matched_insn)
+    {
+    case MVE_VCVT_FP_FIX_VEC:
+      {
+	mode = (((given & 0x200) >> 7)
+		| ((given & 0x10000000) >> 27)
+		| ((given & 0x100) >> 8));
+
+	switch (mode)
+	  {
+	  case 0:
+	    func (stream, "f16.s16");
+	    break;
+
+	  case 1:
+	    func (stream, "s16.f16");
+	    break;
+
+	  case 2:
+	    func (stream, "f16.u16");
+	    break;
+
+	  case 3:
+	    func (stream, "u16.f16");
+	    break;
+
+	  case 4:
+	    func (stream, "f32.s32");
+	    break;
+
+	  case 5:
+	    func (stream, "s32.f32");
+	    break;
+
+	  case 6:
+	    func (stream, "f32.u32");
+	    break;
+
+	  case 7:
+	    func (stream, "u32.f32");
+	    break;
+
+	  default:
+	    break;
+	  }
+	break;
+      }
+    case MVE_VCVT_BETWEEN_FP_INT:
+      {
+	unsigned long size = arm_decode_field (given, 18, 19);
+	unsigned long op = arm_decode_field (given, 7, 8);
+
+	if (size == 1)
+	  {
+	    switch (op)
+	      {
+	      case 0:
+		func (stream, "f16.s16");
+		break;
+
+	      case 1:
+		func (stream, "f16.u16");
+		break;
+
+	      case 2:
+		func (stream, "s16.f16");
+		break;
+
+	      case 3:
+		func (stream, "u16.f16");
+		break;
+
+	      default:
+		break;
+	      }
+	  }
+	else if (size == 2)
+	  {
+	    switch (op)
+	      {
+	      case 0:
+		func (stream, "f32.s32");
+		break;
+
+	      case 1:
+		func (stream, "f32.u32");
+		break;
+
+	      case 2:
+		func (stream, "s32.f32");
+		break;
+
+	      case 3:
+		func (stream, "u32.f32");
+		break;
+	      }
+	  }
+      }
+      break;
+
+    case MVE_VCVT_FP_HALF_FP:
+      {
+	unsigned long op = arm_decode_field (given, 28, 28);
+	if (op == 0)
+	  func (stream, "f16.f32");
+	else if (op == 1)
+	  func (stream, "f32.f16");
+      }
+      break;
+
+    case MVE_VCVT_FROM_FP_TO_INT:
+      {
+	unsigned long size = arm_decode_field_multiple (given, 7, 7, 18, 19);
+
+	switch (size)
+	  {
+	  case 2:
+	    func (stream, "s16.f16");
+	    break;
+
+	  case 3:
+	    func (stream, "u16.f16");
+	    break;
+
+	  case 4:
+	    func (stream, "s32.f32");
+	    break;
+
+	  case 5:
+	    func (stream, "u32.f32");
+	    break;
+
+	  default:
+	    break;
+	  }
+      }
       break;
 
     default:
@@ -4941,6 +5294,7 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VPT_VEC_T5:
     case MVE_VPT_VEC_T6:
     case MVE_VRHADD:
+    case MVE_VRINT_FP:
     case MVE_VST2:
     case MVE_VST4:
     case MVE_VSTRB_SCATTER_T1:
@@ -6466,6 +6820,14 @@ print_insn_mve (struct disassemble_info *info, long given)
 			}
 		      break;
 
+		    case 'm':
+		      print_mve_rounding_mode (info, given, insn->mve_op);
+		      break;
+
+		    case 's':
+		      print_mve_vcvt_size (info, given, insn->mve_op);
+		      break;
+
 		    case 'u':
 		      {
 			if (arm_decode_field (given, 28, 28) == 0)
@@ -6534,6 +6896,9 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 			      func (stream, "%lu", mod_imm);
 			    }
+			    break;
+			  case 'k':
+			    func (stream, "%lu", 64 - value);
 			    break;
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);
