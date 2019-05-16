@@ -316,8 +316,9 @@ stap_get_operator_prec (enum exp_opcode op)
     }
 }
 
-/* Given S, read the operator in it and fills the OP pointer with its code.
-   Return 1 on success, zero if the operator was not recognized.  */
+/* Given S, read the operator in it.  Return the EXP_OPCODE which
+   represents the operator detected, or throw an error if no operator
+   was found.  */
 
 static enum exp_opcode
 stap_get_opcode (const char **s)
@@ -422,7 +423,8 @@ stap_get_opcode (const char **s)
 }
 
 /* Given the bitness of the argument, represented by B, return the
-   corresponding `struct type *'.  */
+   corresponding `struct type *', or throw an error if B is
+   unknown.  */
 
 static struct type *
 stap_get_expected_argument_type (struct gdbarch *gdbarch,
@@ -1491,10 +1493,7 @@ stap_probe::gen_info_probes_table_values () const
      probe doesn't have an associated semaphore;
    - Probe's provider name;
    - Probe's name;
-   - Probe's argument format
-   
-   This function returns 1 if the handling was successful, and zero
-   otherwise.  */
+   - Probe's argument format.  */
 
 static void
 handle_stap_probe (struct objfile *objfile, struct sdt_note *el,

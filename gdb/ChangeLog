@@ -1,5 +1,11 @@
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* stap-probe.c (stap_get_opcode): Update comment.
+	(stap_get_expected_argument_type): Likewise.
+	(handle_stap_probe): Likewise.
+
+2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* i386-tdep.c (i386_stap_parse_special_token_triplet): Change
 	return type to 'bool'.  Adjust comment.  Use 'bool' when
 	appropriate.
