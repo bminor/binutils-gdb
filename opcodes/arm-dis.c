@@ -208,6 +208,21 @@ enum mve_instructions
   MVE_VSHRN,
   MVE_VSLI,
   MVE_VSRI,
+  MVE_VADC,
+  MVE_VABAV,
+  MVE_VABD_FP,
+  MVE_VABD_VEC,
+  MVE_VABS_FP,
+  MVE_VABS_VEC,
+  MVE_VADD_FP_T1,
+  MVE_VADD_FP_T2,
+  MVE_VADD_VEC_T1,
+  MVE_VADD_VEC_T2,
+  MVE_VSBC,
+  MVE_VSUB_FP_T1,
+  MVE_VSUB_FP_T2,
+  MVE_VSUB_VEC_T1,
+  MVE_VSUB_VEC_T2,
   MVE_NONE
 };
 
@@ -1990,6 +2005,7 @@ static const struct opcode32 neon_opcodes[] =
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
 			UNPREDICTABLE
    %<bitfield>s		print size for vector predicate & non VMOV instructions
+   %<bitfield>I		print carry flag or not
    %<bitfield>i		print immediate for vstr/vldr reg +/- imm
    %<bitfield>h		print high half of 64-bit destination reg
    %<bitfield>k		print immediate for vector conversion instruction
@@ -2063,6 +2079,56 @@ static const struct mopcode32 mve_opcodes[] =
    0xef100150, 0xffb11f51,
    "vbic%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
+  /* Vector VABAV.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VABAV,
+   0xee800f01, 0xefc10f51,
+   "vabav%v.%u%20-21s\t%12-15r, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VABD floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VABD_FP,
+   0xff200d40, 0xffa11f51,
+   "vabd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VABD.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VABD_VEC,
+   0xef000740, 0xef811f51,
+   "vabd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VABS floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VABS_FP,
+   0xFFB10740, 0xFFB31FD1,
+   "vabs%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
+  /* Vector VABS.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VABS_VEC,
+   0xffb10340, 0xffb31fd1,
+   "vabs%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VADD floating point T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VADD_FP_T1,
+   0xef000d40, 0xffa11f51,
+   "vadd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+  /* Vector VADD floating point T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VADD_FP_T2,
+   0xee300f40, 0xefb11f70,
+   "vadd%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+  /* Vector VADD T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VADD_VEC_T1,
+   0xef000840, 0xff811f51,
+   "vadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+  /* Vector VADD T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VADD_VEC_T2,
+   0xee010f40, 0xff811f70,
+   "vadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
   /* Vector VADDLV.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VADDLV,
@@ -2074,6 +2140,12 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VADDV,
    0xeef10f00, 0xeff31fd1,
    "vaddv%5A%v.%u%18-19s\t%13-15l, %1-3Q"},
+
+  /* Vector VADC.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VADC,
+   0xee300f00, 0xffb10f51,
+   "vadc%12I%v.i32\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VCADD floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -2785,6 +2857,12 @@ static const struct mopcode32 mve_opcodes[] =
    0xfe800fc1, 0xffa00fd1,
    "vrshrn%T%v.i%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
+  /* Vector VSBC.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSBC,
+   0xfe300f00, 0xffb10f51,
+   "vsbc%12I%v.i32\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
   /* Vector VSHL T2 Variant.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VSHL_T2,
@@ -2904,6 +2982,30 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VSTRW_T7,
    0xec001f00, 0xfe101f80,
    "vstrw%v.32\t%13-15,22Q, %d"},
+
+  /* Vector VSUB floating point T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VSUB_FP_T1,
+   0xef200d40, 0xffa11f51,
+   "vsub%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VSUB floating point T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VSUB_FP_T2,
+   0xee301f40, 0xefb11f70,
+   "vsub%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VSUB T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSUB_VEC_T1,
+   0xff000840, 0xff811f51,
+   "vsub%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VSUB T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSUB_VEC_T2,
+   0xee011f40, 0xff811f70,
+   "vsub%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   {ARM_FEATURE_CORE_LOW (0),
    MVE_NONE,
@@ -4927,6 +5029,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VADD_VEC_T2:
+    case MVE_VSUB_VEC_T2:
+    case MVE_VABAV:
     case MVE_VQRSHL_T1:
     case MVE_VQSHL_T4:
     case MVE_VRSHL_T1:
@@ -5102,6 +5207,9 @@ is_mve_encoding_conflict (unsigned long given,
 	return FALSE;
 
     default:
+    case MVE_VADD_FP_T1:
+    case MVE_VADD_FP_T2:
+    case MVE_VADD_VEC_T1:
       return FALSE;
 
     }
@@ -5202,6 +5310,9 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VABD_VEC:
+    case MVE_VADD_VEC_T1:
+    case MVE_VSUB_VEC_T1:
     case MVE_VQDMULH_T1:
     case MVE_VQRDMULH_T2:
     case MVE_VRHADD:
@@ -5377,6 +5488,7 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VABS_FP:
     case MVE_VCVT_BETWEEN_FP_INT:
     case MVE_VCVT_FROM_FP_TO_INT:
       {
@@ -5529,6 +5641,15 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VABS_VEC:
+	if (arm_decode_field (given, 18, 19) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+	else
+	  return FALSE;
+
     default:
       return FALSE;
     }
@@ -5588,6 +5709,10 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VADD_FP_T2:
+    case MVE_VSUB_FP_T2:
+    case MVE_VADD_VEC_T2:
+    case MVE_VSUB_VEC_T2:
     case MVE_VQRSHL_T2:
     case MVE_VQSHL_T1:
     case MVE_VRSHL_T2:
@@ -5793,6 +5918,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VABAV:
     case MVE_VMOV_HFP_TO_GP:
     case MVE_VMOV_GP_TO_VEC_LANE:
     case MVE_VMOV_VEC_LANE_TO_GP:
@@ -6647,6 +6773,12 @@ print_mve_size (struct disassemble_info *info,
 
   switch (matched_insn)
     {
+    case MVE_VABAV:
+    case MVE_VABD_VEC:
+    case MVE_VABS_FP:
+    case MVE_VABS_VEC:
+    case MVE_VADD_VEC_T1:
+    case MVE_VADD_VEC_T2:
     case MVE_VADDV:
     case MVE_VCADD_VEC:
     case MVE_VCMP_VEC_T1:
@@ -6709,12 +6841,19 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VSTRW_SCATTER_T3:
     case MVE_VSTRB_T1:
     case MVE_VSTRH_T2:
+    case MVE_VSUB_VEC_T1:
+    case MVE_VSUB_VEC_T2:
       if (size <= 3)
 	func (stream, "%s", mve_vec_sizename[size]);
       else
 	func (stream, "<undef size>");
       break;
 
+    case MVE_VABD_FP:
+    case MVE_VADD_FP_T1:
+    case MVE_VADD_FP_T2:
+    case MVE_VSUB_FP_T1:
+    case MVE_VSUB_FP_T2:
     case MVE_VCMP_FP_T1:
     case MVE_VCMP_FP_T2:
     case MVE_VFMA_FP_SCALAR:
@@ -8518,6 +8657,10 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    print_mve_size (info,
 					    value,
 					    insn->mve_op);
+			    break;
+			  case 'I':
+			    if (value == 1)
+			      func (stream, "i");
 			    break;
 			  case 'A':
 			    if (value == 1)
