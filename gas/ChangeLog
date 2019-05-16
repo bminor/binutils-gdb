@@ -1,5 +1,9 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* NEWS: Mention Armv8.1-M Mainline and MVE.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* testsuite/gas/arm/mve-tailpredloop.d: New test.
 	* testsuite/gas/arm/mve-tailpredloop.s: New test.
 	* testsuite/gas/arm/mve-vabav.d: New test.
