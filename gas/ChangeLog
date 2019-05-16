@@ -1,5 +1,13 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_vrint_1): Accept MVE variants.
+	(insns): Change entries to accept MVE variants.
+	* testsuite/gas/arm/mve-vrint-bad.d: New test.
+	* testsuite/gas/arm/mve-vrint-bad.l: New test.
+	* testsuite/gas/arm/mve-vrint-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vshrnt, M_MNEM_vshrnb, M_MNEM_vrshrnt,
 	 M_MNEM_vqshrnt, M_MNEM_vqshrnb, M_MNEM_vqshrunt, M_MNEM_vqshrunb,
 	 M_MNEM_vrshrnb, M_MNEM_vqrshrnt, M_MNEM_vqrshrnb, M_MNEM_vqrshrunt,

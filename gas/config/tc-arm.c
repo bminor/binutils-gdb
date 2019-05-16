@@ -20416,11 +20416,10 @@ do_vrint_1 (enum neon_cvt_mode mode)
       if (et.type == NT_invtype)
 	return;
 
-      set_pred_insn_type (OUTSIDE_PRED_INSN);
-      NEON_ENCODE (FLOAT, inst);
-
-      if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+      if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH8))
 	return;
+
+      NEON_ENCODE (FLOAT, inst);
 
       inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
       inst.instruction |= HI1 (inst.operands[0].reg) << 22;
@@ -23556,12 +23555,12 @@ static const struct asm_opcode insns[] =
   nUF(vselge, _vselge, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
   nCE(vrintr, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintr),
-  nCE(vrintz, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintz),
-  nCE(vrintx, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintx),
-  nUF(vrinta, _vrinta, 2, (RNSDQ, oRNSDQ),		vrinta),
-  nUF(vrintn, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintn),
-  nUF(vrintp, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintp),
-  nUF(vrintm, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintm),
+  mnCE(vrintz, _vrintr, 2, (RNSDQMQ, oRNSDQMQ),		vrintz),
+  mnCE(vrintx, _vrintr, 2, (RNSDQMQ, oRNSDQMQ),		vrintx),
+  mnUF(vrinta, _vrinta, 2, (RNSDQMQ, oRNSDQMQ),		vrinta),
+  mnUF(vrintn, _vrinta, 2, (RNSDQMQ, oRNSDQMQ),		vrintn),
+  mnUF(vrintp, _vrinta, 2, (RNSDQMQ, oRNSDQMQ),		vrintp),
+  mnUF(vrintm, _vrinta, 2, (RNSDQMQ, oRNSDQMQ),		vrintm),
 
   /* Crypto v1 extensions.  */
 #undef  ARM_VARIANT
