@@ -129,6 +129,21 @@ enum mve_instructions
   MVE_VCVT_FP_HALF_FP,
   MVE_VCVT_FROM_FP_TO_INT,
   MVE_VRINT_FP,
+  MVE_VMOV_HFP_TO_GP,
+  MVE_VMOV_GP_TO_VEC_LANE,
+  MVE_VMOV_IMM_TO_VEC,
+  MVE_VMOV_VEC_TO_VEC,
+  MVE_VMOV2_VEC_LANE_TO_GP,
+  MVE_VMOV2_GP_TO_VEC_LANE,
+  MVE_VMOV_VEC_LANE_TO_GP,
+  MVE_VMVN_IMM,
+  MVE_VMVN_REG,
+  MVE_VORR_IMM,
+  MVE_VORR_REG,
+  MVE_VORN,
+  MVE_VBIC_IMM,
+  MVE_VBIC_REG,
+  MVE_VMOVX,
   MVE_NONE
 };
 
@@ -152,12 +167,17 @@ enum mve_unpredictable
   UNPRED_OS,			/* Unpredictable because offset scaled == 1.  */
   UNPRED_GP_REGS_EQUAL,		/* Unpredictable because gp registers are the
 				   same.  */
+  UNPRED_Q_REGS_EQ_AND_SIZE_1,	/* Unpredictable because q regs equal and
+				   size = 1.  */
+  UNPRED_Q_REGS_EQ_AND_SIZE_2,	/* Unpredictable because q regs equal and
+				   size = 2.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
 enum mve_undefined
 {
   UNDEF_SIZE_0,			/* undefined because size == 0.  */
+  UNDEF_SIZE_2,			/* undefined because size == 2.  */
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_SIZE_LE_1,		/* undefined because size <= 1.  */
   UNDEF_SIZE_NOT_2,		/* undefined because size != 2.  */
@@ -169,6 +189,12 @@ enum mve_undefined
   UNDEF_NOT_UNSIGNED,		/* undefined because U == 0.  */
   UNDEF_VCVT_IMM6,		/* imm6 < 32.  */
   UNDEF_VCVT_FSI_IMM6,		/* fsi = 0 and 32 >= imm6 <= 47.  */
+  UNDEF_BAD_OP1_OP2,		/* undefined with op2 = 2 and
+				   op1 == (0 or 1).  */
+  UNDEF_BAD_U_OP1_OP2,		/* undefined with U = 1 and
+				   op2 == 0 and op1 == (0 or 1).  */
+  UNDEF_OP_0_BAD_CMODE,		/* undefined because op == 0 and cmode
+				   in {0xx1, x0x1}.  */
   UNDEF_NONE			/* no undefined behavior.  */
 };
 
@@ -1885,15 +1911,19 @@ static const struct opcode32 neon_opcodes[] =
    %o			print offset scaled for vldr[hwd] and vstr[hwd]
    %w			print writeback mode for MVE v{st,ld}[24]
    %B			print v{st,ld}[24] any one operands
+   %E			print vmov, vmvn, vorr, vbic encoded constant
+   %N			print generic index for vmov
 
    %<bitfield>r		print as an ARM register
    %<bitfield>d		print the bitfield in decimal
    %<bitfield>Q		print as a MVE Q register
+   %<bitfield>F		print as a MVE S register
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
 			UNPREDICTABLE
    %<bitfield>s		print size for vector predicate & non VMOV instructions
    %<bitfield>i		print immediate for vstr/vldr reg +/- imm
    %<bitfield>k		print immediate for vector conversion instruction
+   %<bitfield>x		print the bitfield in hex.
  */
 
 static const struct mopcode32 mve_opcodes[] =
@@ -1947,6 +1977,18 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VPT_VEC_T6,
    0xfe011f40, 0xff811f50,
    "vpt%i.s%20-21s\t%n, %17-19Q, %0-3Z"},
+
+  /* Vector VBIC immediate.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VBIC_IMM,
+   0xef800070, 0xefb81070,
+   "vbic%v.i%8-11s\t%13-15,22Q, %E"},
+
+  /* Vector VBIC register.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VBIC_REG,
+   0xef100150, 0xffb11f51,
+   "vbic%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VCMP floating point T1.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -2170,6 +2212,103 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VLDRW_T7,
    0xec101f00, 0xfe101f80,
    "vldrw%v.u32\t%13-15,22Q, %d"},
+
+  /* Vector VMOV between gpr and half precision register, op == 0.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMOV_HFP_TO_GP,
+   0xee000910, 0xfff00f7f,
+   "vmov.f16\t%7,16-19F, %12-15r"},
+
+  /* Vector VMOV between gpr and half precision register, op == 1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMOV_HFP_TO_GP,
+   0xee100910, 0xfff00f7f,
+   "vmov.f16\t%12-15r, %7,16-19F"},
+
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMOV_GP_TO_VEC_LANE,
+   0xee000b10, 0xff900f1f,
+   "vmov%c.%5-6,21-22s\t%17-19,7Q[%N], %12-15r"},
+
+  /* Vector VORR immediate to vector.
+     NOTE: MVE_VORR_IMM must appear in the table
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VORR_IMM,
+   0xef800050, 0xefb810f0,
+   "vorr%v.i%8-11s\t%13-15,22Q, %E"},
+
+  /* Vector VMOV immediate to vector,
+     cmode == 11x1 -> VMVN which is UNDEFINED
+     for such a cmode.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMVN_IMM, 0xef800d50, 0xefb81dd0, UNDEFINED_INSTRUCTION},
+
+  /* Vector VMOV immediate to vector.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV_IMM_TO_VEC,
+   0xef800050, 0xefb810d0,
+   "vmov%v.%5,8-11s\t%13-15,22Q, %E"},
+
+  /* Vector VMOV two 32-bit lanes to two gprs, idx = 0.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV2_VEC_LANE_TO_GP,
+   0xec000f00, 0xffb01ff0,
+   "vmov%c\t%0-3r, %16-19r, %13-15,22Q[2], %13-15,22Q[0]"},
+
+  /* Vector VMOV two 32-bit lanes to two gprs, idx = 1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV2_VEC_LANE_TO_GP,
+   0xec000f10, 0xffb01ff0,
+   "vmov%c\t%0-3r, %16-19r, %13-15,22Q[3], %13-15,22Q[1]"},
+
+  /* Vector VMOV Two gprs to two 32-bit lanes, idx = 0.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV2_GP_TO_VEC_LANE,
+   0xec100f00, 0xffb01ff0,
+   "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
+
+  /* Vector VMOV Two gprs to two 32-bit lanes, idx = 1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV2_GP_TO_VEC_LANE,
+   0xec100f10, 0xffb01ff0,
+   "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
+
+  /* Vector VMOV Vector lane to gpr.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMOV_VEC_LANE_TO_GP,
+   0xee100b10, 0xff100f1f,
+   "vmov%c.%u%5-6,21-22s\t%12-15r, %17-19,7Q[%N]"},
+
+  /* Floating point move extract.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMOVX,
+   0xfeb00a40, 0xffbf0fd0,
+   "vmovx.f16\t%22,12-15F, %5,0-3F"},
+
+  /* Vector VMVN immediate to vector.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMVN_IMM,
+   0xef800070, 0xefb810f0,
+   "vmvn%v.i%8-11s\t%13-15,22Q, %E"},
+
+  /* Vector VMVN register.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMVN_REG,
+   0xffb005c0, 0xffbf1fd1,
+   "vmvn%v\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VORN, vector bitwise or not.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VORN,
+   0xef300150, 0xffb11f51,
+   "vorn%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VORR register.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VORR_REG,
+   0xef200150, 0xffb11f51,
+   "vorr%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VRINT floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -4127,7 +4266,16 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream,
 static bfd_boolean
 is_mve_okay_in_it (enum mve_instructions matched_insn)
 {
-  return FALSE;
+  switch (matched_insn)
+    {
+    case MVE_VMOV_GP_TO_VEC_LANE:
+    case MVE_VMOV2_VEC_LANE_TO_GP:
+    case MVE_VMOV2_GP_TO_VEC_LANE:
+    case MVE_VMOV_VEC_LANE_TO_GP:
+      return TRUE;
+    default:
+      return FALSE;
+    }
 }
 
 static bfd_boolean
@@ -4319,6 +4467,40 @@ is_mve_encoding_conflict (unsigned long given,
 
     case MVE_VCVT_FP_FIX_VEC:
       return (arm_decode_field (given, 16, 21) & 0x38) == 0;
+
+    case MVE_VBIC_IMM:
+    case MVE_VORR_IMM:
+      {
+	unsigned long cmode = arm_decode_field (given, 8, 11);
+
+	if ((cmode & 1) == 0)
+	  return TRUE;
+	else if ((cmode & 0xc) == 0xc)
+	  return TRUE;
+	else
+	  return FALSE;
+      }
+
+    case MVE_VMVN_IMM:
+      {
+	unsigned long cmode = arm_decode_field (given, 8, 11);
+
+	if ((cmode & 9) == 1)
+	  return TRUE;
+	else if ((cmode & 5) == 1)
+	  return TRUE;
+	else if ((cmode & 0xe) == 0xe)
+	  return TRUE;
+	else
+	  return FALSE;
+      }
+
+    case MVE_VMOV_IMM_TO_VEC:
+      if ((arm_decode_field (given, 5, 5) == 1)
+	  && (arm_decode_field (given, 8, 11) != 0xe))
+	return TRUE;
+      else
+	return FALSE;
 
     default:
       return FALSE;
@@ -4612,6 +4794,67 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	  return FALSE;
       }
 
+    case MVE_VMOV_VEC_LANE_TO_GP:
+      {
+	unsigned long op1 = arm_decode_field (given, 21, 22);
+	unsigned long op2 = arm_decode_field (given, 5, 6);
+	unsigned long u = arm_decode_field (given, 23, 23);
+
+	if ((op2 == 0) && (u == 1))
+	  {
+	    if ((op1 == 0) || (op1 == 1))
+	      {
+		*undefined_code = UNDEF_BAD_U_OP1_OP2;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
+	  }
+	else if (op2 == 2)
+	  {
+	    if ((op1 == 0) || (op1 == 1))
+	      {
+		*undefined_code = UNDEF_BAD_OP1_OP2;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
+	  }
+
+	return FALSE;
+      }
+
+    case MVE_VMOV_GP_TO_VEC_LANE:
+      if (arm_decode_field (given, 5, 6) == 2)
+	{
+	  unsigned long op1 = arm_decode_field (given, 21, 22);
+	  if ((op1 == 0) || (op1 == 1))
+	    {
+	      *undefined_code = UNDEF_BAD_OP1_OP2;
+	      return TRUE;
+	    }
+	  else
+	    return FALSE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VMOV_IMM_TO_VEC:
+      if (arm_decode_field (given, 5, 5) == 0)
+      {
+	unsigned long cmode = arm_decode_field (given, 8, 11);
+
+	if (((cmode & 9) == 1) || ((cmode & 5) == 1))
+	  {
+	    *undefined_code = UNDEF_OP_0_BAD_CMODE;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -4837,6 +5080,8 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VMOV2_VEC_LANE_TO_GP:
+    case MVE_VMOV2_GP_TO_VEC_LANE:
     case MVE_VCVT_BETWEEN_FP_INT:
     case MVE_VCVT_FROM_FP_TO_INT:
       {
@@ -4862,9 +5107,222 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VMOV_HFP_TO_GP:
+    case MVE_VMOV_GP_TO_VEC_LANE:
+    case MVE_VMOV_VEC_LANE_TO_GP:
+      {
+	unsigned long rda = arm_decode_field (given, 12, 15);
+	if (rda == 0xd)
+	  {
+	    *unpredictable_code = UNPRED_R13;
+	    return TRUE;
+	  }
+	else if (rda == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
     default:
       return FALSE;
     }
+}
+
+static void
+print_mve_vmov_index (struct disassemble_info *info, unsigned long given)
+{
+  unsigned long op1 = arm_decode_field (given, 21, 22);
+  unsigned long op2 = arm_decode_field (given, 5, 6);
+  unsigned long h = arm_decode_field (given, 16, 16);
+  unsigned long index, esize, targetBeat, idx;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  if ((op1 & 0x2) == 0x2)
+    {
+      index = op2;
+      esize = 8;
+    }
+  else if (((op1 & 0x2) == 0x0) && ((op2 & 0x1) == 0x1))
+    {
+      index = op2  >> 1;
+      esize = 16;
+    }
+  else if (((op1 & 0x2) == 0) && ((op2 & 0x3) == 0))
+    {
+      index = 0;
+      esize = 32;
+    }
+  else
+    {
+      func (stream, "<undefined index>");
+      return;
+    }
+
+  targetBeat =  (op1 & 0x1) | (h << 1);
+  idx = index + targetBeat * (32/esize);
+
+  func (stream, "%lu", idx);
+}
+
+/* Print neon and mve 8-bit immediate that can be a 8, 16, 32, or 64-bits
+   in length and integer of floating-point type.  */
+static void
+print_simd_imm8 (struct disassemble_info *info, unsigned long given,
+		 unsigned int ibit_loc, const struct mopcode32 *insn)
+{
+  int bits = 0;
+  int cmode = (given >> 8) & 0xf;
+  int op = (given >> 5) & 0x1;
+  unsigned long value = 0, hival = 0;
+  unsigned shift;
+  int size = 0;
+  int isfloat = 0;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  /* On Neon the 'i' bit is at bit 24, on mve it is
+     at bit 28.  */
+  bits |= ((given >> ibit_loc) & 1) << 7;
+  bits |= ((given >> 16) & 7) << 4;
+  bits |= ((given >> 0) & 15) << 0;
+
+  if (cmode < 8)
+    {
+      shift = (cmode >> 1) & 3;
+      value = (unsigned long) bits << (8 * shift);
+      size = 32;
+    }
+  else if (cmode < 12)
+    {
+      shift = (cmode >> 1) & 1;
+      value = (unsigned long) bits << (8 * shift);
+      size = 16;
+    }
+  else if (cmode < 14)
+    {
+      shift = (cmode & 1) + 1;
+      value = (unsigned long) bits << (8 * shift);
+      value |= (1ul << (8 * shift)) - 1;
+      size = 32;
+    }
+  else if (cmode == 14)
+    {
+      if (op)
+	{
+	  /* Bit replication into bytes.  */
+	  int ix;
+	  unsigned long mask;
+
+	  value = 0;
+	  hival = 0;
+	  for (ix = 7; ix >= 0; ix--)
+	    {
+	      mask = ((bits >> ix) & 1) ? 0xff : 0;
+	      if (ix <= 3)
+		value = (value << 8) | mask;
+	      else
+		hival = (hival << 8) | mask;
+	    }
+	  size = 64;
+	}
+      else
+	{
+	  /* Byte replication.  */
+	  value = (unsigned long) bits;
+	  size = 8;
+	}
+    }
+  else if (!op)
+    {
+      /* Floating point encoding.  */
+      int tmp;
+
+      value = (unsigned long)  (bits & 0x7f) << 19;
+      value |= (unsigned long) (bits & 0x80) << 24;
+      tmp = bits & 0x40 ? 0x3c : 0x40;
+      value |= (unsigned long) tmp << 24;
+      size = 32;
+      isfloat = 1;
+    }
+  else
+    {
+      func (stream, "<illegal constant %.8x:%x:%x>",
+	    bits, cmode, op);
+      size = 32;
+      return;
+    }
+
+  // printU determines whether the immediate value should be printed as
+  // unsigned.
+  unsigned printU = 0;
+  switch (insn->mve_op)
+    {
+    default:
+      break;
+    // We want this for instructions that don't have a 'signed' type
+    case MVE_VBIC_IMM:
+    case MVE_VORR_IMM:
+    case MVE_VMVN_IMM:
+    case MVE_VMOV_IMM_TO_VEC:
+      printU = 1;
+      break;
+    }
+  switch (size)
+    {
+    case 8:
+      func (stream, "#%ld\t; 0x%.2lx", value, value);
+      break;
+
+    case 16:
+      func (stream,
+	    printU
+	    ? "#%lu\t; 0x%.4lx"
+	    : "#%ld\t; 0x%.4lx", value, value);
+      break;
+
+    case 32:
+      if (isfloat)
+	{
+	  unsigned char valbytes[4];
+	  double fvalue;
+
+	  /* Do this a byte at a time so we don't have to
+	     worry about the host's endianness.  */
+	  valbytes[0] = value & 0xff;
+	  valbytes[1] = (value >> 8) & 0xff;
+	  valbytes[2] = (value >> 16) & 0xff;
+	  valbytes[3] = (value >> 24) & 0xff;
+
+	  floatformat_to_double
+	    (& floatformat_ieee_single_little, valbytes,
+	     & fvalue);
+
+	  func (stream, "#%.7g\t; 0x%.8lx", fvalue,
+		value);
+	}
+      else
+	func (stream,
+	      printU
+	      ? "#%lu\t; 0x%.8lx"
+	      : "#%ld\t; 0x%.8lx",
+	      (long) (((value & 0x80000000L) != 0)
+		      && !printU
+		      ? value | ~0xffffffffL : value),
+	      value);
+      break;
+
+    case 64:
+      func (stream, "#0x%.8lx%.8lx", hival, value);
+      break;
+
+    default:
+      abort ();
+    }
+
 }
 
 static void
@@ -4880,6 +5338,10 @@ print_mve_undefined (struct disassemble_info *info,
     {
     case UNDEF_SIZE_0:
       func (stream, "size equals zero");
+      break;
+
+    case UNDEF_SIZE_2:
+      func (stream, "size equals two");
       break;
 
     case UNDEF_SIZE_3:
@@ -4916,6 +5378,18 @@ print_mve_undefined (struct disassemble_info *info,
 
     case UNDEF_VCVT_FSI_IMM6:
       func (stream, "fsi = 0 and invalid imm6");
+      break;
+
+    case UNDEF_BAD_OP1_OP2:
+      func (stream, "bad size with op2 = 2 and op1 = 0 or 1");
+      break;
+
+    case UNDEF_BAD_U_OP1_OP2:
+      func (stream, "unsigned with op2 = 0 and op1 = 0 or 1");
+      break;
+
+    case UNDEF_OP_0_BAD_CMODE:
+      func (stream, "op field equal 0 and bad cmode");
       break;
 
     case UNDEF_NONE:
@@ -4974,6 +5448,14 @@ print_mve_unpredictable (struct disassemble_info *info,
 
     case UNPRED_GP_REGS_EQUAL:
       func (stream, "same general-purpose register used for both operands");
+      break;
+
+    case UNPRED_Q_REGS_EQ_AND_SIZE_1:
+      func (stream, "use of identical q registers and size = 1");
+      break;
+
+    case UNPRED_Q_REGS_EQ_AND_SIZE_2:
+      func (stream, "use of identical q registers and size = 1");
       break;
 
     case UNPRED_NONE:
@@ -5339,6 +5821,88 @@ print_mve_size (struct disassemble_info *info,
 	}
       break;
 
+    case MVE_VMOV_GP_TO_VEC_LANE:
+    case MVE_VMOV_VEC_LANE_TO_GP:
+      switch (size)
+	{
+	case 0: case 4:
+	  func (stream, "32");
+	  break;
+
+	case 1: case 3:
+	case 5: case 7:
+	  func (stream, "16");
+	  break;
+
+	case 8: case 9: case 10: case 11:
+	case 12: case 13: case 14: case 15:
+	  func (stream, "8");
+	  break;
+
+	default:
+	  break;
+	}
+      break;
+
+    case MVE_VMOV_IMM_TO_VEC:
+      switch (size)
+	{
+	case 0: case 4: case 8:
+	case 12: case 24: case 26:
+	  func (stream, "i32");
+	  break;
+	case 16: case 20:
+	  func (stream, "i16");
+	  break;
+	case 28:
+	  func (stream, "i8");
+	  break;
+	case 29:
+	  func (stream, "i64");
+	  break;
+	case 30:
+	  func (stream, "f32");
+	  break;
+	default:
+	  break;
+	}
+      break;
+
+    case MVE_VMVN_IMM:
+      switch (size)
+	{
+	case 0: case 2: case 4:
+	case 6: case 12: case 13:
+	  func (stream, "32");
+	  break;
+
+	case 8: case 10:
+	  func (stream, "16");
+	  break;
+
+	default:
+	  break;
+	}
+      break;
+
+    case MVE_VBIC_IMM:
+    case MVE_VORR_IMM:
+      switch (size)
+	{
+	case 1: case 3:
+	case 5: case 7:
+	  func (stream, "32");
+	  break;
+
+	case 9: case 11:
+	  func (stream, "16");
+	  break;
+
+	default:
+	  break;
+	}
+      break;
+
     default:
       break;
     }
@@ -5562,7 +6126,6 @@ print_insn_coprocessor (bfd_vma pc,
 	   VLDR and VSTR instructions, these are in a different table, so we
 	   don't let it match here.  */
 	continue;
-
 
       for (c = insn->assembler; *c; c++)
 	{
@@ -6830,10 +7393,30 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 		    case 'u':
 		      {
-			if (arm_decode_field (given, 28, 28) == 0)
-			  func (stream, "s");
+			unsigned long op1 = arm_decode_field (given, 21, 22);
+
+			if ((insn->mve_op == MVE_VMOV_VEC_LANE_TO_GP))
+			  {
+			    /* Check for signed.  */
+			    if (arm_decode_field (given, 23, 23) == 0)
+			      {
+				/* We don't print 's' for S32.  */
+				if ((arm_decode_field (given, 5, 6) == 0)
+				    && ((op1 == 0) || (op1 == 1)))
+				  ;
+				else
+				  func (stream, "s");
+			      }
+			    else
+			      func (stream, "u");
+			  }
 			else
-			  func (stream, "u");
+			  {
+			    if (arm_decode_field (given, 28, 28) == 0)
+			      func (stream, "s");
+			    else
+			      func (stream, "u");
+			  }
 		      }
 		      break;
 
@@ -6848,6 +7431,16 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 		    case 'B':
 		      print_mve_register_blocks (info, given, insn->mve_op);
+		      break;
+
+		    case 'E':
+		      /* SIMD encoded constant for mov, mvn, vorr, vbic.  */
+
+		      print_simd_imm8 (info, given, 28, insn);
+		      break;
+
+		    case 'N':
+		      print_mve_vmov_index (info, given);
 		      break;
 
 		    case '0': case '1': case '2': case '3': case '4':
@@ -6907,11 +7500,17 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    func (stream, "%ld", value);
 			    value_in_comment = value;
 			    break;
+			  case 'F':
+			    func (stream, "s%ld", value);
+			    break;
 			  case 'Q':
 			    if (value & 0x8)
 			      func (stream, "<illegal reg q%ld.5>", value);
 			    else
 			      func (stream, "q%ld", value);
+			    break;
+			  case 'x':
+			    func (stream, "0x%08lx", value);
 			    break;
 			  default:
 			    abort ();
