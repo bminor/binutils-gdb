@@ -1,5 +1,13 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_mve_vmaxnmv): New encoding function.
+	(insns): Add entries for new mnemonics.
+	* testsuite/gas/arm/mve-vmaxnmv-vminnmv-bad.d: New test.
+	* testsuite/gas/arm/mve-vmaxnmv-vminnmv-bad.l: New test.
+	* testsuite/gas/arm/mve-vmaxnmv-vminnmv-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vmaxa_vmina): New encoding function.
 	(do_mve_vmaxnma_vminnma): Likewise.
 	(do_neon_dyadic_if_su): Change to support MVE variants.

@@ -17249,6 +17249,26 @@ do_mve_vmladav (void)
 }
 
 static void
+do_mve_vmaxnmv (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (2, rs, N_EQK, N_F_MVE | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (inst.operands[0].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+  else if (inst.operands[0].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+
+  mve_encode_rq (et.size == 16, 64);
+}
+
+static void
 do_neon_qrdmlah (void)
 {
   /* Check we're on the correct architecture.  */
@@ -24421,6 +24441,10 @@ static const struct asm_opcode insns[] =
  mToC("vfmas", ee311e40,   3, (RMQ, RMQ, RR),			  mve_vfmas),
  mToC("vmaxnma", ee3f0e81, 2, (RMQ, RMQ),			  mve_vmaxnma_vminnma),
  mToC("vminnma", ee3f1e81, 2, (RMQ, RMQ),			  mve_vmaxnma_vminnma),
+ mToC("vmaxnmv", eeee0f00, 2, (RR, RMQ),			  mve_vmaxnmv),
+ mToC("vmaxnmav",eeec0f00, 2, (RR, RMQ),			  mve_vmaxnmv),
+ mToC("vminnmv", eeee0f80, 2, (RR, RMQ),			  mve_vmaxnmv),
+ mToC("vminnmav",eeec0f80, 2, (RR, RMQ),			  mve_vmaxnmv),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1
