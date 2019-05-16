@@ -3731,6 +3731,13 @@ print_insn_coprocessor (bfd_vma pc,
 	{
 	  if (cp_num == 9 || cp_num == 10 || cp_num == 11)
 	    is_unpredictable = TRUE;
+
+	  /* Armv8.1-M Mainline FP & MVE instructions.  */
+	  if (ARM_CPU_HAS_FEATURE (arm_ext_v8_1m_main, allowed_arches)
+	      && !ARM_CPU_IS_ANY (allowed_arches)
+	      && (cp_num == 8 || cp_num == 14 || cp_num == 15))
+	    continue;
+
 	}
       else if (insn->value == 0x0e000000     /* cdp  */
 	       || insn->value == 0xfe000000  /* cdp2  */

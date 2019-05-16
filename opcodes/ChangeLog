@@ -1,4 +1,9 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor_1): Disable the use of coprocessors
+	8, 14 and 15 for Armv8.1-M Mainline.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 	    Michael Collison <michael.collison@arm.com>
 
 	* arm-dis.c (enum mve_instructions): New enum.
