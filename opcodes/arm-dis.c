@@ -67,9 +67,38 @@ struct arm_private_data
   bfd_vma last_mapping_addr;
 };
 
+enum mve_instructions
+{
+  MVE_NONE
+};
+
+enum mve_unpredictable
+{
+  UNPRED_IT_BLOCK,		/* Unpredictable because mve insn in it block.
+				 */
+  UNPRED_NONE			/* No unpredictable behavior.  */
+};
+
+enum mve_undefined
+{
+  UNDEF_NONE			/* no undefined behavior.  */
+};
+
 struct opcode32
 {
   arm_feature_set arch;		/* Architecture defining this insn.  */
+  unsigned long value;		/* If arch is 0 then value is a sentinel.  */
+  unsigned long mask;		/* Recognise insn if (op & mask) == value.  */
+  const char *  assembler;	/* How to disassemble this insn.  */
+};
+
+/* MVE opcodes.  */
+
+struct mopcode32
+{
+  arm_feature_set arch;		/* Architecture defining this insn.  */
+  enum mve_instructions mve_op;  /* Specific mve instruction for faster
+				    decoding.  */
   unsigned long value;		/* If arch is 0 then value is a sentinel.  */
   unsigned long mask;		/* Recognise insn if (op & mask) == value.  */
   const char *  assembler;	/* How to disassemble this insn.  */
@@ -1744,6 +1773,18 @@ static const struct opcode32 neon_opcodes[] =
     0xf4800300, 0xff900300, "v%21?ls%21?dt4%c.%10-11S2\t%B"},
 
   {ARM_FEATURE_CORE_LOW (0), 0 ,0, 0}
+};
+
+/* mve opcode table.  */
+
+/* print_insn_mve recognizes the following format control codes:
+
+   %%			%
+
+   */
+
+static const struct mopcode32 mve_opcodes[] =
+{
 };
 
 /* Opcode tables: ARM, 16-bit Thumb, 32-bit Thumb.  All three are partially
@@ -3439,6 +3480,105 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream,
     }
 }
 
+/* Return TRUE if the MATCHED_INSN can be inside an IT block.  */
+
+static bfd_boolean
+is_mve_okay_in_it (enum mve_instructions matched_insn)
+{
+  return FALSE;
+}
+
+static bfd_boolean
+is_mve_architecture (struct disassemble_info *info)
+{
+  struct arm_private_data *private_data = info->private_data;
+  arm_feature_set allowed_arches = private_data->features;
+
+  arm_feature_set arm_ext_v8_1m_main
+    = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN);
+
+  if (ARM_CPU_HAS_FEATURE (arm_ext_v8_1m_main, allowed_arches)
+      && !ARM_CPU_IS_ANY (allowed_arches))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+/* Decode a bitfield from opcode GIVEN, with starting bitfield = START
+   and ending bitfield = END.  END must be greater than START.  */
+
+static unsigned long
+arm_decode_field (unsigned long given, unsigned int start, unsigned int end)
+{
+  int bits = end - start;
+
+  if (bits < 0)
+    abort ();
+
+  return ((given >> start) & ((2ul << bits) - 1));
+}
+
+/* Decode a bitfield from opcode GIVEN, with multiple bitfields:
+   START:END and START2:END2.  END/END2 must be greater than
+   START/START2.  */
+
+static unsigned long
+arm_decode_field_multiple (unsigned long given, unsigned int start,
+			   unsigned int end, unsigned int start2,
+			   unsigned int end2)
+{
+  int bits = end - start;
+  int bits2 = end2 - start2;
+  unsigned long value = 0;
+  int width = 0;
+
+  if (bits2 < 0)
+    abort ();
+
+  value = arm_decode_field (given, start, end);
+  width += bits + 1;
+
+  value |= ((given >> start2) & ((2ul << bits2) - 1)) << width;
+  return value;
+}
+
+/* Return TRUE if the GIVEN encoding should not be decoded as MATCHED_INSN.
+   This helps us decode instructions that change mnemonic depending on specific
+   operand values/encodings.  */
+
+static bfd_boolean
+is_mve_encoding_conflict (unsigned long given,
+			  enum mve_instructions matched_insn)
+{
+  return FALSE;
+}
+
+/* Return FALSE if GIVEN is not an undefined encoding for MATCHED_INSN.
+   Otherwise, return TRUE and set UNDEFINED_CODE to give a reason as to why
+   this encoding is undefined.  */
+
+static bfd_boolean
+is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
+		  enum mve_undefined *undefined_code)
+{
+  *undefined_code = UNDEF_NONE;
+
+  return FALSE;
+}
+
+/* Return FALSE if GIVEN is not an unpredictable encoding for MATCHED_INSN.
+   Otherwise, return TRUE and set UNPREDICTABLE_CODE to give a reason as to
+   why this encoding is unpredictable.  */
+
+static bfd_boolean
+is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
+		      enum mve_unpredictable *unpredictable_code)
+{
+  *unpredictable_code = UNPRED_NONE;
+
+  return FALSE;
+}
+
 #define W_BIT 21
 #define I_BIT 22
 #define U_BIT 23
@@ -3448,6 +3588,43 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream,
 #define IMMEDIATE_BIT_SET   (given & (1 << I_BIT))
 #define NEGATIVE_BIT_SET   ((given & (1 << U_BIT)) == 0)
 #define PRE_BIT_SET         (given & (1 << P_BIT))
+
+static void
+print_mve_undefined (struct disassemble_info *info,
+		     enum mve_undefined undefined_code)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  func (stream, "\t\tundefined instruction: ");
+
+  switch (undefined_code)
+    {
+    case UNDEF_NONE:
+      break;
+    }
+
+}
+
+static void
+print_mve_unpredictable (struct disassemble_info *info,
+			 enum mve_unpredictable unpredict_code)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  func (stream, "%s: ", UNPREDICTABLE_INSTRUCTION);
+
+  switch (unpredict_code)
+    {
+    case UNPRED_IT_BLOCK:
+      func (stream, "mve instruction in it block");
+      break;
+
+    case UNPRED_NONE:
+      break;
+    }
+}
 
 /* Print one coprocessor instruction on INFO->STREAM.
    Return TRUE if the instuction matched, FALSE if this is not a
@@ -3726,7 +3903,8 @@ print_insn_coprocessor (bfd_vma pc,
 
 		case 'J':
 		  {
-		    int regno = ((given >> 19) & 0x8) | ((given >> 13) & 0x7);
+		    unsigned long regno
+		      = arm_decode_field_multiple (given, 13, 15, 22, 22);
 
 		    switch (regno)
 		      {
@@ -3749,7 +3927,7 @@ print_insn_coprocessor (bfd_vma pc,
 			func (stream, "FPCXTS");
 			break;
 		      default:
-			func (stream, "<invalid reg %d>", regno);
+			func (stream, "<invalid reg %lu>", regno);
 			break;
 		      }
 		  }
@@ -4743,6 +4921,75 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
   return FALSE;
 }
 
+/* Print one mve instruction on INFO->STREAM.
+   Return TRUE if the instuction matched, FALSE if this is not a
+   recognised mve instruction.  */
+
+static bfd_boolean
+print_insn_mve (struct disassemble_info *info, long given)
+{
+  const struct mopcode32 *insn;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  for (insn = mve_opcodes; insn->assembler; insn++)
+    {
+      if (((given & insn->mask) == insn->value)
+	  && !is_mve_encoding_conflict (given, insn->mve_op))
+	{
+	  signed long value_in_comment = 0;
+	  bfd_boolean is_unpredictable = FALSE;
+	  bfd_boolean is_undefined = FALSE;
+	  const char *c;
+	  enum mve_unpredictable unpredictable_cond = UNPRED_NONE;
+	  enum mve_undefined undefined_cond = UNDEF_NONE;
+
+	  /* Most vector mve instruction are illegal in a it block.
+	     There are a few exceptions; check for them.  */
+	  if (ifthen_state && !is_mve_okay_in_it (insn->mve_op))
+	    {
+	      is_unpredictable = TRUE;
+	      unpredictable_cond = UNPRED_IT_BLOCK;
+	    }
+	  else if (is_mve_unpredictable (given, insn->mve_op,
+					 &unpredictable_cond))
+	    is_unpredictable = TRUE;
+
+	  if (is_mve_undefined (given, insn->mve_op, &undefined_cond))
+	    is_undefined = TRUE;
+
+	  for (c = insn->assembler; *c; c++)
+	    {
+	      if (*c == '%')
+		{
+		  switch (*++c)
+		    {
+		    case '%':
+		      func (stream, "%%");
+		      break;
+
+		    }
+		}
+	      else
+		func (stream, "%c", *c);
+	    }
+
+	  if (value_in_comment > 32 || value_in_comment < -16)
+	    func (stream, "\t; 0x%lx", value_in_comment);
+
+	  if (is_unpredictable)
+	    print_mve_unpredictable (info, unpredictable_cond);
+
+	  if (is_undefined)
+	    print_mve_undefined (info, undefined_cond);
+
+	  return TRUE;
+	}
+    }
+  return FALSE;
+}
+
+
 /* Return the name of a v7A special register.  */
 
 static const char *
@@ -5653,11 +5900,15 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   const struct opcode32 *insn;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
+  bfd_boolean is_mve = is_mve_architecture (info);
 
   if (print_insn_coprocessor (pc, info, given, TRUE))
     return;
 
-  if (print_insn_neon (info, given, TRUE))
+  if ((is_mve == FALSE) && print_insn_neon (info, given, TRUE))
+    return;
+
+  if (is_mve && print_insn_mve (info, given))
     return;
 
   for (insn = thumb32_opcodes; insn->assembler; insn++)
@@ -6764,7 +7015,10 @@ select_arm_features (unsigned long mach,
     case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;
     case bfd_mach_arm_8M_BASE:	 ARM_SET_FEATURES (ARM_ARCH_V8M_BASE); break;
     case bfd_mach_arm_8M_MAIN:	 ARM_SET_FEATURES (ARM_ARCH_V8M_MAIN); break;
-    case bfd_mach_arm_8_1M_MAIN: ARM_SET_FEATURES (ARM_ARCH_V8_1M_MAIN); break;
+    case bfd_mach_arm_8_1M_MAIN:
+      ARM_SET_FEATURES (ARM_ARCH_V8_1M_MAIN);
+      force_thumb = 1;
+      break;
       /* If the machine type is unknown allow all architecture types and all
 	 extensions.  */
     case bfd_mach_arm_unknown:	 ARM_SET_FEATURES (ARM_FEATURE_ALL); break;

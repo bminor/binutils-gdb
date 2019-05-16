@@ -1,3 +1,24 @@
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): New enum.
+	(enum mve_unpredictable): Likewise.
+	(enum mve_undefined): Likewise.
+	(struct mopcode32): New struct.
+	(is_mve_okay_in_it): New function.
+	(is_mve_architecture): Likewise.
+	(arm_decode_field): Likewise.
+	(arm_decode_field_multiple): Likewise.
+	(is_mve_encoding_conflict): Likewise.
+	(is_mve_undefined): Likewise.
+	(is_mve_unpredictable): Likewise.
+	(print_mve_undefined): Likewise.
+	(print_mve_unpredictable): Likewise.
+	(print_insn_coprocessor_1): Use arm_decode_field_multiple.
+	(print_insn_mve): New function.
+	(print_insn_thumb32): Handle MVE architecture.
+	(select_arm_features): Force thumb for Armv8.1-m Mainline.
+
 2019-05-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 24538
