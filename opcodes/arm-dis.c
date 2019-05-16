@@ -144,6 +144,14 @@ enum mve_instructions
   MVE_VBIC_IMM,
   MVE_VBIC_REG,
   MVE_VMOVX,
+  MVE_VMOVL,
+  MVE_VMOVN,
+  MVE_VMULL_INT,
+  MVE_VMULL_POLY,
+  MVE_VQDMULL_T1,
+  MVE_VQDMULL_T2,
+  MVE_VQMOVN,
+  MVE_VQMOVUN,
   MVE_NONE
 };
 
@@ -1913,6 +1921,7 @@ static const struct opcode32 neon_opcodes[] =
    %B			print v{st,ld}[24] any one operands
    %E			print vmov, vmvn, vorr, vbic encoded constant
    %N			print generic index for vmov
+   %T			print bottom ('b') or top ('t') of source register
 
    %<bitfield>r		print as an ARM register
    %<bitfield>d		print the bitfield in decimal
@@ -2280,11 +2289,35 @@ static const struct mopcode32 mve_opcodes[] =
    0xee100b10, 0xff100f1f,
    "vmov%c.%u%5-6,21-22s\t%12-15r, %17-19,7Q[%N]"},
 
+  /* Vector VMOVL long.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOVL,
+   0xeea00f40, 0xefa70fd1,
+   "vmovl%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VMOV and narrow.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOVN,
+   0xfe310e81, 0xffb30fd1,
+   "vmovn%T%v.i%18-19s\t%13-15,22Q, %1-3,5Q"},
+
   /* Floating point move extract.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
    MVE_VMOVX,
    0xfeb00a40, 0xffbf0fd0,
    "vmovx.f16\t%22,12-15F, %5,0-3F"},
+
+  /* Vector VMULL integer.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMULL_INT,
+   0xee010e00, 0xef810f51,
+   "vmull%T%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMULL polynomial.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMULL_POLY,
+   0xee310e00, 0xefb10f51,
+   "vmull%T%v.%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMVN immediate to vector.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -2309,6 +2342,30 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VORR_REG,
    0xef200150, 0xffb11f51,
    "vorr%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQDMULL T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQDMULL_T1,
+   0xee300f01, 0xefb10f51,
+   "vqdmull%T%v.s%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQDMULL T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQDMULL_T2,
+   0xee300f60, 0xefb10f70,
+   "vqdmull%T%v.s%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VQMOVN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQMOVN,
+   0xee330e01, 0xefb30fd1,
+   "vqmovn%T%v.%u%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VQMOVUN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQMOVUN,
+   0xee310e81, 0xffb30fd1,
+   "vqmovun%T%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VRINT floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -4420,6 +4477,7 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VMULL_INT:
     case MVE_VHADD_T2:
     case MVE_VHSUB_T2:
     case MVE_VCMP_VEC_T1:
@@ -4498,6 +4556,23 @@ is_mve_encoding_conflict (unsigned long given,
     case MVE_VMOV_IMM_TO_VEC:
       if ((arm_decode_field (given, 5, 5) == 1)
 	  && (arm_decode_field (given, 8, 11) != 0xe))
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VMOVL:
+      {
+	unsigned long size = arm_decode_field (given, 19, 20);
+	if ((size == 0) || (size == 3))
+	  return TRUE;
+	else
+	  return FALSE;
+      }
+
+    case MVE_VMOVN:
+    case MVE_VQMOVUN:
+    case MVE_VQMOVN:
+      if (arm_decode_field (given, 18, 19) == 3)
 	return TRUE;
       else
 	return FALSE;
@@ -4855,6 +4930,15 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VMOVN:
+      if (arm_decode_field (given, 18, 19) == 2)
+	{
+	  *undefined_code = UNDEF_SIZE_2;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -5121,6 +5205,86 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	  {
 	    *unpredictable_code = UNPRED_R15;
 	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
+    case MVE_VMULL_INT:
+      {
+	unsigned long Qd;
+	unsigned long Qm;
+	unsigned long Qn;
+
+	if (arm_decode_field (given, 20, 21) == 2)
+	  {
+	    Qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	    Qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+	    Qn = arm_decode_field_multiple (given, 17, 19, 7, 7);
+
+	    if ((Qd == Qn) || (Qd == Qm))
+	      {
+		*unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_2;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VQDMULL_T1:
+      {
+	unsigned long Qd;
+	unsigned long Qm;
+	unsigned long Qn;
+
+	if (arm_decode_field (given, 28, 28) == 1)
+	  {
+	    Qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	    Qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+	    Qn = arm_decode_field_multiple (given, 17, 19, 7, 7);
+
+	    if ((Qd == Qn) || (Qd == Qm))
+	      {
+		*unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_1;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VQDMULL_T2:
+      {
+	unsigned long gpr = arm_decode_field (given, 0, 3);
+	if (gpr == 0xd)
+	  {
+	    *unpredictable_code = UNPRED_R13;
+	    return TRUE;
+	  }
+	else if (gpr == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	if (arm_decode_field (given, 28, 28) == 1)
+	  {
+	    unsigned long Qd
+	      = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	    unsigned long Qn = arm_decode_field_multiple (given, 17, 19, 7, 7);
+
+	    if ((Qd == Qn))
+	      {
+		*unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_1;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
 	  }
 
 	return FALSE;
@@ -5804,6 +5968,24 @@ print_mve_size (struct disassemble_info *info,
 	func (stream, "16");
       break;
 
+    case MVE_VMOVN:
+    case MVE_VQDMULL_T1:
+    case MVE_VQDMULL_T2:
+    case MVE_VQMOVN:
+    case MVE_VQMOVUN:
+      if (size == 0)
+	func (stream, "16");
+      else if (size == 1)
+	func (stream, "32");
+      break;
+
+    case MVE_VMOVL:
+      if (size == 1)
+	func (stream, "8");
+      else if (size == 2)
+	func (stream, "16");
+      break;
+
     case MVE_VDUP:
       switch (size)
 	{
@@ -5866,6 +6048,13 @@ print_mve_size (struct disassemble_info *info,
 	default:
 	  break;
 	}
+      break;
+
+    case MVE_VMULL_POLY:
+      if (size == 0)
+	func (stream, "p8");
+      else if (size == 1)
+	func (stream, "p16");
       break;
 
     case MVE_VMVN_IMM:
@@ -7441,6 +7630,13 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 		    case 'N':
 		      print_mve_vmov_index (info, given);
+		      break;
+
+		    case 'T':
+		      if (arm_decode_field (given, 12, 12) == 0)
+			func (stream, "b");
+		      else
+			func (stream, "t");
 		      break;
 
 		    case '0': case '1': case '2': case '3': case '4':
