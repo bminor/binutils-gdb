@@ -910,7 +910,7 @@ avr_relative_distance_considering_wrap_around (unsigned int distance)
   unsigned int wrap_around_mask = avr_pc_wrap_around - 1;
   int dist_with_wrap_around = distance & wrap_around_mask;
 
-  if (dist_with_wrap_around > ((int) (avr_pc_wrap_around >> 1)))
+  if (dist_with_wrap_around >= ((int) (avr_pc_wrap_around >> 1)))
     dist_with_wrap_around -= avr_pc_wrap_around;
 
   return dist_with_wrap_around;

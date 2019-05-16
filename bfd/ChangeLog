@@ -1,3 +1,9 @@
+2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
+	PR ld/24564
+	* bfd/elf32-avr.c (avr_relative_distance_considering_wrap_around):
+	Wrap around even if distance equals avr_pc_wrap_around.
+
 2019-05-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

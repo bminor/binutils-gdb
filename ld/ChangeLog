@@ -1,3 +1,9 @@
+2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
+	PR ld/24564
+	* testsuite/ld-avr/wraparound-range-boundary.d: New test.
+	* testsuite/ld-avr/wraparound-range-boundary.s: New test.
+
 2019-05-20  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	PR 14798
