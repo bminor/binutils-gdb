@@ -87,6 +87,17 @@ enum mve_instructions
   MVE_VCMP_VEC_T4,
   MVE_VCMP_VEC_T5,
   MVE_VCMP_VEC_T6,
+  MVE_VDUP,
+  MVE_VEOR,
+  MVE_VFMAS_FP_SCALAR,
+  MVE_VFMA_FP_SCALAR,
+  MVE_VFMA_FP,
+  MVE_VFMS_FP,
+  MVE_VHADD_T1,
+  MVE_VHADD_T2,
+  MVE_VHSUB_T1,
+  MVE_VHSUB_T2,
+  MVE_VRHADD,
   MVE_NONE
 };
 
@@ -98,11 +109,13 @@ enum mve_unpredictable
 				   fcB = 1 (vpt).  */
   UNPRED_R13,			/* Unpredictable because r13 (sp) or
 				   r15 (sp) used.  */
+  UNPRED_R15,			/* Unpredictable because r15 (pc) is used.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
 enum mve_undefined
 {
+  UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_NONE			/* no undefined behavior.  */
 };
 
@@ -539,18 +552,6 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0c900b01, 0x0f900f01, "fldmiax%c\t%16-19r%21'!, %z3\t;@ Deprecated"},
 
   /* Data transfer between ARM and NEON registers.  */
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0e800b10, 0x0ff00f70, "vdup%c.32\t%16-19,7D, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0e800b30, 0x0ff00f70, "vdup%c.16\t%16-19,7D, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ea00b10, 0x0ff00f70, "vdup%c.32\t%16-19,7Q, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ea00b30, 0x0ff00f70, "vdup%c.16\t%16-19,7Q, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ec00b10, 0x0ff00f70, "vdup%c.8\t%16-19,7D, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ee00b10, 0x0ff00f70, "vdup%c.8\t%16-19,7Q, %12-15r"},
   {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0x0c400b10, 0x0ff00fd0, "vmov%c\t%0-3,5D, %12-15r, %16-19r"},
   {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1150,6 +1151,20 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2b00000, 0xffb00810,
     "vext%c.8\t%12-15,22R, %16-19,7R, %0-3,5R, #%8-11d"},
+
+  /* Data transfer between ARM and NEON registers.  */
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0e800b10, 0x1ff00f70, "vdup%c.32\t%16-19,7D, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0e800b30, 0x1ff00f70, "vdup%c.16\t%16-19,7D, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0ea00b10, 0x1ff00f70, "vdup%c.32\t%16-19,7Q, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0ea00b30, 0x1ff00f70, "vdup%c.16\t%16-19,7Q, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0ec00b10, 0x1ff00f70, "vdup%c.8\t%16-19,7D, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
+    0x0ee00b10, 0x1ff00f70, "vdup%c.8\t%16-19,7Q, %12-15r"},
 
   /* Move data element to all lanes.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1803,10 +1818,12 @@ static const struct opcode32 neon_opcodes[] =
 
    %%			%
 
+   %c			print condition code
    %i			print MVE predicate(s) for vpt and vpst
    %n			print vector comparison code for predicated instruction
    %v			print vector predicate for instruction in predicated
 			block
+   %<bitfield>r		print as an ARM register
    %<bitfield>Q		print as a MVE Q register
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
 			UNPREDICTABLE
@@ -1907,6 +1924,78 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VCMP_VEC_T6,
    0xfe011f40, 0xffc1ff50,
    "vcmp%v.s%20-21s\t%n, %17-19Q, %0-3Z"},
+
+  /* Vector VDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VDUP,
+   0xeea00b10, 0xffb10f5f,
+   "vdup%v.%5,22s\t%17-19,7Q, %12-15r"},
+
+  /* Vector VEOR.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VEOR,
+   0xff000150, 0xffd11f51,
+   "veor%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VFMA, vector * scalar.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VFMA_FP_SCALAR,
+   0xee310e40, 0xefb11f70,
+   "vfma%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VFMA floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VFMA_FP,
+   0xef000c50, 0xffa11f51,
+   "vfma%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VFMS floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VFMS_FP,
+   0xef200c50, 0xffa11f51,
+   "vfms%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VFMAS, vector * scalar.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VFMAS_FP_SCALAR,
+   0xee311e40, 0xefb11f70,
+   "vfmas%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VHADD T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VHADD_T1,
+   0xef000040, 0xef811f51,
+   "vhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VHADD T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VHADD_T2,
+   0xee000f40, 0xef811f70,
+   "vhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VHSUB T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VHSUB_T1,
+   0xef000240, 0xef811f51,
+   "vhsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VHSUB T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VHSUB_T2,
+   0xee001f40, 0xef811f70,
+   "vhsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VDUP,
+   0xeea00b10, 0xffb10f5f,
+   "vdup%v.%5,22s\t%17-19,7Q, %12-15r"},
+
+  /* Vector VRHADD.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRHADD,
+   0xef000140, 0xef811f51,
+   "vrhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   {ARM_FEATURE_CORE_LOW (0),
    MVE_NONE,
@@ -3913,6 +4002,8 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VHADD_T2:
+    case MVE_VHSUB_T2:
     case MVE_VCMP_VEC_T1:
     case MVE_VCMP_VEC_T2:
     case MVE_VCMP_VEC_T3:
@@ -3940,7 +4031,31 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 {
   *undefined_code = UNDEF_NONE;
 
-  return FALSE;
+  switch (matched_insn)
+    {
+    case MVE_VDUP:
+      if (arm_decode_field_multiple (given, 5, 5, 22, 22) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VRHADD:
+    case MVE_VHADD_T1:
+    case MVE_VHSUB_T1:
+      if (arm_decode_field (given, 20, 21) == 3)
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    default:
+      return FALSE;
+    }
 }
 
 /* Return FALSE if GIVEN is not an unpredictable encoding for MATCHED_INSN.
@@ -3980,6 +4095,43 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VDUP:
+      {
+	unsigned long gpr = arm_decode_field (given, 12, 15);
+	if (gpr == 0xd)
+	  {
+	    *unpredictable_code = UNPRED_R13;
+	    return TRUE;
+	  }
+	else if (gpr == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
+    case MVE_VFMA_FP_SCALAR:
+    case MVE_VFMAS_FP_SCALAR:
+    case MVE_VHADD_T2:
+    case MVE_VHSUB_T2:
+      {
+	unsigned long gpr = arm_decode_field (given, 0, 3);
+	if (gpr == 0xd)
+	  {
+	    *unpredictable_code = UNPRED_R13;
+	    return TRUE;
+	  }
+	else if (gpr == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -3996,6 +4148,10 @@ print_mve_undefined (struct disassemble_info *info,
 
   switch (undefined_code)
     {
+    case UNDEF_SIZE_3:
+      func (stream, "size equals three");
+      break;
+
     case UNDEF_NONE:
       break;
     }
@@ -4023,6 +4179,10 @@ print_mve_unpredictable (struct disassemble_info *info,
 
     case UNPRED_R13:
       func (stream, "use of r13 (sp)");
+      break;
+
+    case UNPRED_R15:
+      func (stream, "use of r15 (pc)");
       break;
 
     case UNPRED_NONE:
@@ -4058,12 +4218,17 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VCMP_VEC_T4:
     case MVE_VCMP_VEC_T5:
     case MVE_VCMP_VEC_T6:
+    case MVE_VHADD_T1:
+    case MVE_VHADD_T2:
+    case MVE_VHSUB_T1:
+    case MVE_VHSUB_T2:
     case MVE_VPT_VEC_T1:
     case MVE_VPT_VEC_T2:
     case MVE_VPT_VEC_T3:
     case MVE_VPT_VEC_T4:
     case MVE_VPT_VEC_T5:
     case MVE_VPT_VEC_T6:
+    case MVE_VRHADD:
       if (size <= 3)
 	func (stream, "%s", mve_vec_sizename[size]);
       else
@@ -4072,12 +4237,33 @@ print_mve_size (struct disassemble_info *info,
 
     case MVE_VCMP_FP_T1:
     case MVE_VCMP_FP_T2:
+    case MVE_VFMA_FP_SCALAR:
+    case MVE_VFMA_FP:
+    case MVE_VFMS_FP:
+    case MVE_VFMAS_FP_SCALAR:
     case MVE_VPT_FP_T1:
     case MVE_VPT_FP_T2:
       if (size == 0)
 	func (stream, "32");
       else if (size == 1)
 	func (stream, "16");
+      break;
+
+    case MVE_VDUP:
+      switch (size)
+	{
+	case 0:
+	  func (stream, "32");
+	  break;
+	case 1:
+	  func (stream, "16");
+	  break;
+	case 2:
+	  func (stream, "8");
+	  break;
+	default:
+	  break;
+	}
       break;
 
     default:
@@ -5018,7 +5204,8 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 	}
       else if ((given & 0xff000000) == 0xf9000000)
 	given ^= 0xf9000000 ^ 0xf4000000;
-      else
+      /* vdup is also a valid neon instruction.  */
+      else if ((given & 0xff910f5f) != 0xee800b10)
 	return FALSE;
     }
 
@@ -5556,6 +5743,9 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    print_mve_size (info,
 					    value,
 					    insn->mve_op);
+			    break;
+			  case 'r':
+			    func (stream, "%s", arm_regnames[value]);
 			    break;
 			  case 'Q':
 			    if (value & 0x8)

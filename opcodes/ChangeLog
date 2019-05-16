@@ -2,6 +2,24 @@
 	    Michael Collison <michael.collison@arm.com>
 
 	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(enum mve_unpredictable): Add new reasons.
+	(enum mve_undefined): Likewise.
+	(is_mve_encoding_conflict): Handle new instructions.
+	(is_mve_undefined): Likewise.
+	(is_mve_unpredictable): Likewise.
+	(coprocessor_opcodes): Move NEON VDUP from here...
+	(neon_opcodes): ... to here.
+	(mve_opcodes): Add new instructions.
+	(print_mve_undefined):  Handle new reasons.
+	(print_mve_unpredictable): Likewise.
+	(print_mve_size): Handle new instructions.
+	(print_insn_neon): Handle vdup.
+	(print_insn_mve): Handle new operands.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(enum mve_unpredictable): Add new values.
 	(mve_opcodes): Add new instructions.
 	(vec_condnames): New array with vector conditions.
