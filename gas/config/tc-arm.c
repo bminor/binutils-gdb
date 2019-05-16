@@ -15705,6 +15705,33 @@ do_mve_viddup (void)
 }
 
 static void
+do_mve_vmlas (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+
+  if (inst.operands[2].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+  else if (inst.operands[2].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= neon_logbits (et.size) << 20;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= inst.operands[2].reg;
+  inst.is_neon = 1;
+}
+
+static void
 do_mve_vmaxnma_vminnma (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQ, NS_NULL);
@@ -17233,6 +17260,21 @@ do_mve_vsbc (void)
     inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
 
   mve_encode_qqq (1, 64);
+}
+
+static void
+do_mve_vmulh (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_qqq (et.type == NT_unsigned, et.size);
 }
 
 static void
@@ -24648,6 +24690,10 @@ static const struct asm_opcode insns[] =
  mCEF(vrmlsldavha,  _vrmlsldavha,  4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
  mCEF(vrmlsldavhx,  _vrmlsldavhx,  4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
  mCEF(vrmlsldavhax, _vrmlsldavhax, 4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+
+ mToC("vmlas",	  ee011e40,	3, (RMQ, RMQ, RR),		mve_vmlas),
+ mToC("vmulh",	  ee010e01,	3, (RMQ, RMQ, RMQ),		mve_vmulh),
+ mToC("vrmulh",	  ee011e01,	3, (RMQ, RMQ, RMQ),		mve_vmulh),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
