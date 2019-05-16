@@ -257,14 +257,14 @@ enum stap_operand_prec
   STAP_OPERAND_PREC_MUL
 };
 
-static void stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
+static void stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 				   enum stap_operand_prec prec);
 
 static void stap_parse_argument_conditionally (struct stap_parse_info *p);
 
-/* Returns 1 if *S is an operator, zero otherwise.  */
+/* Returns true if *S is an operator, false otherwise.  */
 
-static int stap_is_operator (const char *op);
+static bool stap_is_operator (const char *op);
 
 static void
 show_stapexpressiondebug (struct ui_file *file, int from_tty,
@@ -474,9 +474,9 @@ stap_get_expected_argument_type (struct gdbarch *gdbarch,
 
    This function does a case-insensitive match.
 
-   Return 1 if any prefix has been found, zero otherwise.  */
+   Return true if any prefix has been found, false otherwise.  */
 
-static int
+static bool
 stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s,
 			const char **r, const char *const *prefixes)
 {
@@ -487,7 +487,7 @@ stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s,
       if (r != NULL)
 	*r = "";
 
-      return 1;
+      return true;
     }
 
   for (p = prefixes; *p != NULL; ++p)
@@ -496,16 +496,16 @@ stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s,
 	if (r != NULL)
 	  *r = *p;
 
-	return 1;
+	return true;
       }
 
-  return 0;
+  return false;
 }
 
-/* Return 1 if S points to a register prefix, zero otherwise.  For a
-   description of the arguments, look at stap_is_generic_prefix.  */
+/* Return true if S points to a register prefix, false otherwise.  For
+   a description of the arguments, look at stap_is_generic_prefix.  */
 
-static int
+static bool
 stap_is_register_prefix (struct gdbarch *gdbarch, const char *s,
 			 const char **r)
 {
@@ -514,11 +514,11 @@ stap_is_register_prefix (struct gdbarch *gdbarch, const char *s,
   return stap_is_generic_prefix (gdbarch, s, r, t);
 }
 
-/* Return 1 if S points to a register indirection prefix, zero
+/* Return true if S points to a register indirection prefix, false
    otherwise.  For a description of the arguments, look at
    stap_is_generic_prefix.  */
 
-static int
+static bool
 stap_is_register_indirection_prefix (struct gdbarch *gdbarch, const char *s,
 				     const char **r)
 {
@@ -527,15 +527,15 @@ stap_is_register_indirection_prefix (struct gdbarch *gdbarch, const char *s,
   return stap_is_generic_prefix (gdbarch, s, r, t);
 }
 
-/* Return 1 if S points to an integer prefix, zero otherwise.  For a
-   description of the arguments, look at stap_is_generic_prefix.
+/* Return true if S points to an integer prefix, false otherwise.  For
+   a description of the arguments, look at stap_is_generic_prefix.
 
    This function takes care of analyzing whether we are dealing with
    an expected integer prefix, or, if there is no integer prefix to be
    expected, whether we are dealing with a digit.  It does a
    case-insensitive match.  */
 
-static int
+static bool
 stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s,
 			const char **r)
 {
@@ -549,7 +549,7 @@ stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s,
       if (r != NULL)
 	*r = "";
 
-      return isdigit (*s);
+      return isdigit (*s) > 0;
     }
 
   for (p = t; *p != NULL; ++p)
@@ -567,35 +567,35 @@ stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s,
 	  if (r != NULL)
 	    *r = *p;
 
-	  return 1;
+	  return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Helper function to check for a generic list of suffixes.  If we are
    not expecting any suffixes, then it just returns 1.  If we are
-   expecting at least one suffix, then it returns 1 if a suffix has
-   been found, zero otherwise.  GDBARCH is the current gdbarch being
+   expecting at least one suffix, then it returns true if a suffix has
+   been found, false otherwise.  GDBARCH is the current gdbarch being
    used.  S is the expression being analyzed.  If R is not NULL, it
    will be used to return the found suffix.  SUFFIXES is the list of
    expected suffixes.  This function does a case-insensitive
    match.  */
 
-static int
+static bool
 stap_generic_check_suffix (struct gdbarch *gdbarch, const char *s,
 			   const char **r, const char *const *suffixes)
 {
   const char *const *p;
-  int found = 0;
+  bool found = false;
 
   if (suffixes == NULL)
     {
       if (r != NULL)
 	*r = "";
 
-      return 1;
+      return true;
     }
 
   for (p = suffixes; *p != NULL; ++p)
@@ -604,18 +604,18 @@ stap_generic_check_suffix (struct gdbarch *gdbarch, const char *s,
 	if (r != NULL)
 	  *r = *p;
 
-	found = 1;
+	found = true;
 	break;
       }
 
   return found;
 }
 
-/* Return 1 if S points to an integer suffix, zero otherwise.  For a
-   description of the arguments, look at
+/* Return true if S points to an integer suffix, false otherwise.  For
+   a description of the arguments, look at
    stap_generic_check_suffix.  */
 
-static int
+static bool
 stap_check_integer_suffix (struct gdbarch *gdbarch, const char *s,
 			   const char **r)
 {
@@ -624,11 +624,11 @@ stap_check_integer_suffix (struct gdbarch *gdbarch, const char *s,
   return stap_generic_check_suffix (gdbarch, s, r, p);
 }
 
-/* Return 1 if S points to a register suffix, zero otherwise.  For a
-   description of the arguments, look at
+/* Return true if S points to a register suffix, false otherwise.  For
+   a description of the arguments, look at
    stap_generic_check_suffix.  */
 
-static int
+static bool
 stap_check_register_suffix (struct gdbarch *gdbarch, const char *s,
 			    const char **r)
 {
@@ -637,11 +637,11 @@ stap_check_register_suffix (struct gdbarch *gdbarch, const char *s,
   return stap_generic_check_suffix (gdbarch, s, r, p);
 }
 
-/* Return 1 if S points to a register indirection suffix, zero
+/* Return true if S points to a register indirection suffix, false
    otherwise.  For a description of the arguments, look at
    stap_generic_check_suffix.  */
 
-static int
+static bool
 stap_check_register_indirection_suffix (struct gdbarch *gdbarch, const char *s,
 					const char **r)
 {
@@ -674,10 +674,11 @@ stap_parse_register_operand (struct stap_parse_info *p)
 {
   /* Simple flag to indicate whether we have seen a minus signal before
      certain number.  */
-  int got_minus = 0;
+  bool got_minus = false;
   /* Flags to indicate whether this register access is being displaced and/or
      indirected.  */
-  int disp_p = 0, indirect_p = 0;
+  bool disp_p = false;
+  bool indirect_p = false;
   struct gdbarch *gdbarch = p->gdbarch;
   /* Needed to generate the register name as a part of an expression.  */
   struct stoken str;
@@ -705,7 +706,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 
   if (*p->arg == '-')
     {
-      got_minus = 1;
+      got_minus = true;
       ++p->arg;
     }
 
@@ -715,7 +716,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
       long displacement;
       char *endp;
 
-      disp_p = 1;
+      disp_p = true;
       displacement = strtol (p->arg, &endp, 10);
       p->arg = endp;
 
@@ -731,7 +732,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
   /* Getting rid of register indirection prefix.  */
   if (stap_is_register_indirection_prefix (gdbarch, p->arg, &reg_ind_prefix))
     {
-      indirect_p = 1;
+      indirect_p = true;
       p->arg += strlen (reg_ind_prefix);
     }
 
@@ -854,7 +855,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
       char c = *p->arg;
       /* We use this variable to do a lookahead.  */
       const char *tmp = p->arg;
-      int has_digit = 0;
+      bool has_digit = false;
 
       /* Skipping signal.  */
       ++tmp;
@@ -879,7 +880,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	     called below ('stap_parse_argument_conditionally' or
 	     'stap_parse_register_operand').  */
 	  ++tmp;
-	  has_digit = 1;
+	  has_digit = true;
 	}
 
       if (has_digit && stap_is_register_indirection_prefix (gdbarch, tmp,
@@ -1023,7 +1024,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
    better understand what this function does.  */
 
 static void
-stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
+stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 		       enum stap_operand_prec prec)
 {
   /* This is an operator-precedence parser.
@@ -1295,7 +1296,7 @@ stap_probe::get_argument_count (struct frame_info *frame)
 	this->parse_arguments (gdbarch);
       else
 	{
-	  static int have_warned_stap_incomplete = 0;
+	  static bool have_warned_stap_incomplete = false;
 
 	  if (!have_warned_stap_incomplete)
 	    {
@@ -1303,7 +1304,7 @@ stap_probe::get_argument_count (struct frame_info *frame)
 "The SystemTap SDT probe support is not fully implemented on this target;\n"
 "you will not be able to inspect the arguments of the probes.\n"
 "Please report a bug against GDB requesting a port to this target."));
-	      have_warned_stap_incomplete = 1;
+	      have_warned_stap_incomplete = true;
 	    }
 
 	  /* Marking the arguments as "already parsed".  */
@@ -1315,13 +1316,13 @@ stap_probe::get_argument_count (struct frame_info *frame)
   return m_parsed_args.size ();
 }
 
-/* Return 1 if OP is a valid operator inside a probe argument, or zero
-   otherwise.  */
+/* Return true if OP is a valid operator inside a probe argument, or
+   false otherwise.  */
 
-static int
+static bool
 stap_is_operator (const char *op)
 {
-  int ret = 1;
+  bool ret = true;
 
   switch (*op)
     {
@@ -1340,12 +1341,12 @@ stap_is_operator (const char *op)
 
     case '=':
       if (op[1] != '=')
-	ret = 0;
+	ret = false;
       break;
 
     default:
       /* We didn't find any operator.  */
-      ret = 0;
+      ret = false;
     }
 
   return ret;

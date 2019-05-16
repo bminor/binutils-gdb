@@ -1,3 +1,25 @@
+2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* i386-tdep.c (i386_stap_parse_special_token_triplet): Change
+	return type to 'bool'.  Adjust comment.  Use 'bool' when
+	appropriate.
+	(i386_stap_parse_special_token_three_arg_disp): Likewise.
+	* stap-probe.c (stap_parse_argument_1): Likewise.
+	(stap_is_operator): Likewise.
+	(stap_is_generic_prefix): Likewise.
+	(stap_is_register_prefix): Likewise.
+	(stap_is_register_indirection_prefix): Likewise.
+	(stap_is_integer_prefix): Likewise.
+	(stap_generic_check_suffix): Likewise.
+	(stap_check_integer_suffix): Likewise.
+	(stap_check_register_suffix): Likewise.
+	(stap_check_register_indirection_suffix): Likewise.
+	(stap_parse_register_operand): Likewise.
+	(stap_parse_single_operand): Likewise.
+	(stap_parse_argument_1): Likewise.
+	(stap_probe::get_argument_count): Likewise.
+	(stap_is_operator): Likewise.
+
 2019-05-16  Tom Tromey  <tromey@adacore.com>
 
 	* darwin-nat.c (thread_info_from_private_thread_info): Add struct

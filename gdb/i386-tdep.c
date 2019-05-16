@@ -4033,10 +4033,10 @@ i386_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
    This function parses operands of the form `-8+3+1(%rbp)', which
    must be interpreted as `*(-8 + 3 - 1 + (void *) $eax)'.
 
-   Return 1 if the operand was parsed successfully, zero
+   Return true if the operand was parsed successfully, false
    otherwise.  */
 
-static int
+static bool
 i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 				       struct stap_parse_info *p)
 {
@@ -4044,7 +4044,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 
   if (isdigit (*s) || *s == '-' || *s == '+')
     {
-      int got_minus[3];
+      bool got_minus[3];
       int i;
       long displacements[3];
       const char *start;
@@ -4053,17 +4053,17 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       struct stoken str;
       char *endp;
 
-      got_minus[0] = 0;
+      got_minus[0] = false;
       if (*s == '+')
 	++s;
       else if (*s == '-')
 	{
 	  ++s;
-	  got_minus[0] = 1;
+	  got_minus[0] = true;
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return 0;
+	return false;
 
       displacements[0] = strtol (s, &endp, 10);
       s = endp;
@@ -4071,20 +4071,20 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s != '+' && *s != '-')
 	{
 	  /* We are not dealing with a triplet.  */
-	  return 0;
+	  return false;
 	}
 
-      got_minus[1] = 0;
+      got_minus[1] = false;
       if (*s == '+')
 	++s;
       else
 	{
 	  ++s;
-	  got_minus[1] = 1;
+	  got_minus[1] = true;
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return 0;
+	return false;
 
       displacements[1] = strtol (s, &endp, 10);
       s = endp;
@@ -4092,26 +4092,26 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s != '+' && *s != '-')
 	{
 	  /* We are not dealing with a triplet.  */
-	  return 0;
+	  return false;
 	}
 
-      got_minus[2] = 0;
+      got_minus[2] = false;
       if (*s == '+')
 	++s;
       else
 	{
 	  ++s;
-	  got_minus[2] = 1;
+	  got_minus[2] = true;
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return 0;
+	return false;
 
       displacements[2] = strtol (s, &endp, 10);
       s = endp;
 
       if (*s != '(' || s[1] != '%')
-	return 0;
+	return false;
 
       s += 2;
       start = s;
@@ -4120,7 +4120,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	++s;
 
       if (*s++ != ')')
-	return 0;
+	return false;
 
       len = s - start - 1;
       regname = (char *) alloca (len + 1);
@@ -4167,10 +4167,10 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 
       p->arg = s;
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Helper function for i386_stap_parse_special_token.
@@ -4179,10 +4179,10 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
    (register index * size) + offset', as represented in
    `(%rcx,%rax,8)', or `[OFFSET](BASE_REG,INDEX_REG[,SIZE])'.
 
-   Return 1 if the operand was parsed successfully, zero
+   Return true if the operand was parsed successfully, false
    otherwise.  */
 
-static int
+static bool
 i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 					      struct stap_parse_info *p)
 {
@@ -4190,9 +4190,9 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 
   if (isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
     {
-      int offset_minus = 0;
+      bool offset_minus = false;
       long offset = 0;
-      int size_minus = 0;
+      bool size_minus = false;
       long size = 0;
       const char *start;
       char *base;
@@ -4206,11 +4206,11 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       else if (*s == '-')
 	{
 	  ++s;
-	  offset_minus = 1;
+	  offset_minus = true;
 	}
 
       if (offset_minus && !isdigit (*s))
-	return 0;
+	return false;
 
       if (isdigit (*s))
 	{
@@ -4221,7 +4221,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	}
 
       if (*s != '(' || s[1] != '%')
-	return 0;
+	return false;
 
       s += 2;
       start = s;
@@ -4230,7 +4230,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       if (*s != ',' || s[1] != '%')
-	return 0;
+	return false;
 
       len_base = s - start;
       base = (char *) alloca (len_base + 1);
@@ -4257,7 +4257,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	       index, p->saved_arg);
 
       if (*s != ',' && *s != ')')
-	return 0;
+	return false;
 
       if (*s == ',')
 	{
@@ -4269,14 +4269,14 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	  else if (*s == '-')
 	    {
 	      ++s;
-	      size_minus = 1;
+	      size_minus = true;
 	    }
 
 	  size = strtol (s, &endp, 10);
 	  s = endp;
 
 	  if (*s != ')')
-	    return 0;
+	    return false;
 	}
 
       ++s;
@@ -4330,10 +4330,10 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 
       p->arg = s;
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
