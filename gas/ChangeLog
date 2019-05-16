@@ -1,5 +1,18 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): Add new operand.
+	(parse_operands): Handle new operand.
+	(mve_encode_qqr): Handle new instructions.
+	(do_neon_qdmulh): Add support for MVE variants.
+	(do_neon_qrdmlah): Likewise.
+	(do_mve_vqdmlah): New encoding function.
+	(insns): Change entries and add new entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-vqdmulh-bad.d: New test.
+	* testsuite/gas/arm/mve-vqdmulh-bad.l: New test.
+	* testsuite/gas/arm/mve-vqdmulh-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vqdmladh): New encoding function.
 	(insns): Add entries for MVE mnemonics.
 	* testsuite/gas/arm/mve-vqdmladh-bad.d: New test.
