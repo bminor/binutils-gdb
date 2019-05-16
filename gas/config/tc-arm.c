@@ -17305,6 +17305,28 @@ do_mve_vmulh (void)
   mve_encode_qqq (et.type == NT_unsigned, et.size);
 }
 
+
+static void
+do_mve_vqdmladh (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_S8 | N_S16 | N_S32 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (et.size == 32
+      && (inst.operands[0].reg == inst.operands[1].reg
+	  || inst.operands[0].reg == inst.operands[2].reg))
+    as_tsktsk (BAD_MVE_SRCDEST);
+
+  mve_encode_qqq (0, et.size);
+}
+
+
 static void
 do_mve_vmull (void)
 {
@@ -24742,6 +24764,15 @@ static const struct asm_opcode insns[] =
  mToC("vrmulh",	  ee011e01,	3, (RMQ, RMQ, RMQ),		mve_vmulh),
  mToC("vpnot",	  fe310f4d,	0, (),				mve_vpnot),
  mToC("vpsel",	  fe310f01,	3, (RMQ, RMQ, RMQ),		mve_vpsel),
+
+ mToC("vqdmladh",  ee000e00,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqdmladhx", ee001e00,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqrdmladh", ee000e01,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqrdmladhx",ee001e01,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqdmlsdh",  fe000e00,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqdmlsdhx", fe001e00,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqrdmlsdh", fe000e01,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
+ mToC("vqrdmlsdhx",fe001e01,	3, (RMQ, RMQ, RMQ),		mve_vqdmladh),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
