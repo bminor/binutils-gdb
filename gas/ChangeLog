@@ -1,5 +1,17 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_mve_vshll): New encoding function.
+	(do_mve_vshlc): Likewise.
+	(insns): Add entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-vshlc-bad.d: New test.
+	* testsuite/gas/arm/mve-vshlc-bad.l: New test.
+	* testsuite/gas/arm/mve-vshlc-bad.s: New test.
+	* testsuite/gas/arm/mve-vshll-bad.d: New test.
+	* testsuite/gas/arm/mve-vshll-bad.l: New test.
+	* testsuite/gas/arm/mve-vshll-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum operand_parse_code): Add new operand.
 	(parse_operands): Handle new operand.
 	(do_neon_shl_imm): Accept MVE variants.

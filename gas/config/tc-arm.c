@@ -15772,6 +15772,63 @@ do_mve_vmlas (void)
 }
 
 static void
+do_mve_vshll (void)
+{
+  struct neon_type_el et
+    = neon_check_type (2, NS_QQI, N_EQK, N_S8 | N_U8 | N_S16 | N_U16 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  int imm = inst.operands[2].imm;
+  constraint (imm < 1 || (unsigned)imm > et.size,
+	      _("immediate value out of range"));
+
+  if ((unsigned)imm == et.size)
+    {
+      inst.instruction |= neon_logbits (et.size) << 18;
+      inst.instruction |= 0x110001;
+    }
+  else
+    {
+      inst.instruction |= (et.size + imm) << 16;
+      inst.instruction |= 0x800140;
+    }
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
+}
+
+static void
+do_mve_vshlc (void)
+{
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (inst.operands[1].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+  else if (inst.operands[1].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+
+  int imm = inst.operands[2].imm;
+  constraint (imm < 1 || imm > 32, _("immediate value out of range"));
+
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= (imm & 0x1f) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= inst.operands[1].reg;
+  inst.is_neon = 1;
+}
+
+static void
 do_mve_vshrn (void)
 {
   unsigned types;
@@ -25178,6 +25235,10 @@ static const struct asm_opcode insns[] =
  mCEF(vqrshrnb,	  _vqrshrnb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
  mCEF(vqrshrunt,  _vqrshrunt,	3, (RMQ, RMQ, I32z),	mve_vshrn),
  mCEF(vqrshrunb,  _vqrshrunb,	3, (RMQ, RMQ, I32z),	mve_vshrn),
+
+ mToC("vshlc",	    eea00fc0,	   3, (RMQ, RR, I32z),	    mve_vshlc),
+ mToC("vshllt",	    ee201e00,	   3, (RMQ, RMQ, I32),	    mve_vshll),
+ mToC("vshllb",	    ee200e00,	   3, (RMQ, RMQ, I32),	    mve_vshll),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
