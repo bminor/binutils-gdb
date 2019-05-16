@@ -1,5 +1,31 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vmlaldav, M_MNEM_vmlaldava,
+	 M_MNEM_vmlaldavx, M_MNEM_vmlaldavax, M_MNEM_vmlsldav,
+	 M_MNEM_vmlsldava, M_MNEM_vmlsldavx, M_MNEM_vmlsldavax,
+	 M_MNEM_vrmlaldavhx, M_MNEM_vrmlaldavhax, M_MNEM_vrmlsldavh,
+	 M_MNEM_vrmlsldavha, M_MNEM_vrmlsldavhx, M_MNEM_vrmlsldavhax): New
+	instruction encodings.
+	(NEON_SHAPE_DEF): New shape
+	(mve_encode_rrqq): New encoding helper function.
+	(do_mve_vmlaldav): New encoding function.
+	(do_mve_vrmlaldavh): New encoding function.
+	(insns): Add entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-vmlaldav-bad.d: New test.
+	* testsuite/gas/arm/mve-vmlaldav-bad.l: New test.
+	* testsuite/gas/arm/mve-vmlaldav-bad.s: New test.
+	* testsuite/gas/arm/mve-vmlalv-bad.d: New test.
+	* testsuite/gas/arm/mve-vmlalv-bad.l: New test.
+	* testsuite/gas/arm/mve-vmlalv-bad.s: New test.
+	* testsuite/gas/arm/mve-vmlsldav-bad.d: New test.
+	* testsuite/gas/arm/mve-vmlsldav-bad.l: New test.
+	* testsuite/gas/arm/mve-vmlsldav-bad.s: New test.
+	* testsuite/gas/arm/mve-vrmlaldavh-bad.d: New test.
+	* testsuite/gas/arm/mve-vrmlaldavh-bad.l: New test.
+	* testsuite/gas/arm/mve-vrmlaldavh-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vmaxv, M_MNEM_vmaxav, M_MNEM_vminv,
 	 M_MNEM_vminav): New instruction encodings.
 	(do_mve_vmaxv): New encoding function.

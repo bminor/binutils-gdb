@@ -14167,6 +14167,20 @@ do_t_loloop (void)
 #define M_MNEM_vmaxav	0xeee00f00
 #define M_MNEM_vminv	0xeee20f80
 #define M_MNEM_vminav	0xeee00f80
+#define M_MNEM_vmlaldav	  0xee800e00
+#define M_MNEM_vmlaldava  0xee800e20
+#define M_MNEM_vmlaldavx  0xee801e00
+#define M_MNEM_vmlaldavax 0xee801e20
+#define M_MNEM_vmlsldav	  0xee800e01
+#define M_MNEM_vmlsldava  0xee800e21
+#define M_MNEM_vmlsldavx  0xee801e01
+#define M_MNEM_vmlsldavax 0xee801e21
+#define M_MNEM_vrmlaldavhx  0xee801f00
+#define M_MNEM_vrmlaldavhax 0xee801f20
+#define M_MNEM_vrmlsldavh   0xfe800e01
+#define M_MNEM_vrmlsldavha  0xfe800e21
+#define M_MNEM_vrmlsldavhx  0xfe801e01
+#define M_MNEM_vrmlsldavhax 0xfe801e21
 
 /* Neon instruction encoder helpers.  */
 
@@ -14331,6 +14345,7 @@ NEON_ENC_TAB
      - a table used to drive neon_select_shape.  */
 
 #define NEON_SHAPE_DEF			\
+  X(4, (R, R, Q, Q), QUAD),		\
   X(4, (Q, R, R, I), QUAD),		\
   X(4, (R, R, S, S), QUAD),		\
   X(4, (S, S, R, R), QUAD),		\
@@ -15956,6 +15971,21 @@ mve_encode_rq (unsigned bit28, unsigned size)
   inst.is_neon = 1;
 }
 
+static void
+mve_encode_rrqq (unsigned U, unsigned size)
+{
+  constraint (inst.operands[3].reg > 14, MVE_BAD_QREG);
+
+  inst.instruction |= U << 28;
+  inst.instruction |= (inst.operands[1].reg >> 1) << 20;
+  inst.instruction |= LOW4 (inst.operands[2].reg) << 16;
+  inst.instruction |= (size == 32) << 16;
+  inst.instruction |= inst.operands[0].reg << 12;
+  inst.instruction |= HI1 (inst.operands[2].reg) << 7;
+  inst.instruction |= inst.operands[3].reg;
+  inst.is_neon = 1;
+}
+
 /* Encode insns with bit pattern:
 
   |28/24|23|22 |21 20|19 16|15 12|11    8|7|6|5|4|3  0|
@@ -17251,6 +17281,73 @@ do_mve_vmladav (void)
   mve_encode_rqq (et.type == NT_unsigned, 64);
   inst.instruction |= (et.size == 32) << 16;
 }
+
+static void
+do_mve_vmlaldav (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RRQQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (4, rs, N_EQK, N_EQK, N_EQK,
+		       N_S16 | N_S32 | N_U16 | N_U32 | N_KEY);
+
+  if (et.type == NT_unsigned
+      && (inst.instruction == M_MNEM_vmlsldav
+	  || inst.instruction == M_MNEM_vmlsldava
+	  || inst.instruction == M_MNEM_vmlsldavx
+	  || inst.instruction == M_MNEM_vmlsldavax))
+    first_error (BAD_SIMD_TYPE);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_rrqq (et.type == NT_unsigned, et.size);
+}
+
+static void
+do_mve_vrmlaldavh (void)
+{
+  struct neon_type_el et;
+  if (inst.instruction == M_MNEM_vrmlsldavh
+     || inst.instruction == M_MNEM_vrmlsldavha
+     || inst.instruction == M_MNEM_vrmlsldavhx
+     || inst.instruction == M_MNEM_vrmlsldavhax)
+    {
+      et = neon_check_type (4, NS_RRQQ, N_EQK, N_EQK, N_EQK, N_S32 | N_KEY);
+      if (inst.operands[1].reg == REG_SP)
+	as_tsktsk (MVE_BAD_SP);
+    }
+  else
+    {
+      if (inst.instruction == M_MNEM_vrmlaldavhx
+	  || inst.instruction == M_MNEM_vrmlaldavhax)
+	et = neon_check_type (4, NS_RRQQ, N_EQK, N_EQK, N_EQK, N_S32 | N_KEY);
+      else
+	et = neon_check_type (4, NS_RRQQ, N_EQK, N_EQK, N_EQK,
+			      N_U32 | N_S32 | N_KEY);
+      /* vrmlaldavh's encoding with SP as the second, odd, GPR operand may alias
+	 with vmax/min instructions, making the use of SP in assembly really
+	 nonsensical, so instead of issuing a warning like we do for other uses
+	 of SP for the odd register operand we error out.  */
+      constraint (inst.operands[1].reg == REG_SP, BAD_SP);
+    }
+
+  /* Make sure we still check the second operand is an odd one and that PC is
+     disallowed.  This because we are parsing for any GPR operand, to be able
+     to distinguish between giving a warning or an error for SP as described
+     above.  */
+  constraint ((inst.operands[1].reg % 2) != 1, BAD_EVEN);
+  constraint (inst.operands[1].reg == REG_PC, BAD_PC);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  mve_encode_rrqq (et.type == NT_unsigned, 0);
+}
+
 
 static void
 do_mve_vmaxnmv (void)
@@ -24467,6 +24564,27 @@ static const struct asm_opcode insns[] =
  mCEF(vmaxav,	_vmaxav,  2, (RR, RMQ),				  mve_vmaxv),
  mCEF(vminv,	_vminv,	  2, (RR, RMQ),				  mve_vmaxv),
  mCEF(vminav,	_vminav,  2, (RR, RMQ),				  mve_vmaxv),
+
+ mCEF(vmlaldav,	  _vmlaldav,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlaldava,  _vmlaldava,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlaldavx,  _vmlaldavx,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlaldavax, _vmlaldavax,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlalv,	  _vmlaldav,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlalva,	  _vmlaldava,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlsldav,	  _vmlsldav,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlsldava,  _vmlsldava,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlsldavx,  _vmlsldavx,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mCEF(vmlsldavax, _vmlsldavax,	4, (RRe, RRo, RMQ, RMQ),	mve_vmlaldav),
+ mToC("vrmlaldavh", ee800f00,	   4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mToC("vrmlaldavha",ee800f20,	   4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlaldavhx,  _vrmlaldavhx,  4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlaldavhax, _vrmlaldavhax, 4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mToC("vrmlalvh",   ee800f00,	   4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mToC("vrmlalvha",  ee800f20,	   4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlsldavh,   _vrmlsldavh,   4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlsldavha,  _vrmlsldavha,  4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlsldavhx,  _vrmlsldavhx,  4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
+ mCEF(vrmlsldavhax, _vrmlsldavhax, 4, (RRe, RR, RMQ, RMQ),  mve_vrmlaldavh),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
