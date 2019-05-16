@@ -1,5 +1,17 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_neon_mvn): Change to accept MVE variants.
+	(do_neon_sat_abs_neg): Likewise.
+	(insns): Likewise.
+	* testsuite/gas/arm/mve-vmvn-bad.d: New test.
+	* testsuite/gas/arm/mve-vmvn-bad.l: New test.
+	* testsuite/gas/arm/mve-vmvn-bad.s: New test.
+	* testsuite/gas/arm/mve-vqabsneg-bad.d: New test.
+	* testsuite/gas/arm/mve-vqabsneg-bad.l: New test.
+	* testsuite/gas/arm/mve-vqabsneg-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vmlas): New encoding function.
 	(do_mve_vmulh): Likewise.
 	(insns): Add entries for MVE mnemonics.

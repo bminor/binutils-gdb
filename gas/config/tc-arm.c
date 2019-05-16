@@ -18486,9 +18486,16 @@ neon_move_immediate (void)
 static void
 do_neon_mvn (void)
 {
+  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+    return;
+
   if (inst.operands[1].isreg)
     {
-      enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+      enum neon_shape rs;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	rs = neon_select_shape (NS_QQ, NS_NULL);
+      else
+	rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
 
       NEON_ENCODE (INTEGER, inst);
       inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
@@ -18504,6 +18511,13 @@ do_neon_mvn (void)
     }
 
   neon_dp_fixup (&inst);
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      constraint (!inst.operands[1].isreg && !inst.operands[0].isquad, BAD_FPU);
+      constraint ((inst.instruction & 0xd00) == 0xd00,
+		  _("immediate value out of range"));
+    }
 }
 
 /* Encode instructions of form:
@@ -19450,7 +19464,14 @@ do_neon_zip_uzp (void)
 static void
 do_neon_sat_abs_neg (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+    return;
+
+  enum neon_shape rs;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    rs = neon_select_shape (NS_QQ, NS_NULL);
+  else
+    rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
   struct neon_type_el et = neon_check_type (2, rs,
     N_EQK, N_S8 | N_S16 | N_S32 | N_KEY);
   neon_two_same (neon_quad (rs), 1, et.size);
@@ -24057,7 +24078,6 @@ static const struct asm_opcode insns[] =
   /* CVT with optional immediate for fixed-point variant.  */
  nUF(vcvtq,     _vcvt,    3, (RNQ, RNQ, oI32b), neon_cvt),
 
- nUF(vmvn,      _vmvn,    2, (RNDQ, RNDQ_Ibig), neon_mvn),
  nUF(vmvnq,     _vmvn,    2, (RNQ,  RNDQ_Ibig), neon_mvn),
 
   /* Data processing, three registers of different lengths.  */
@@ -24111,9 +24131,7 @@ static const struct asm_opcode insns[] =
  NUF(vuzp,      1b20100, 2, (RNDQ, RNDQ),     neon_zip_uzp),
  NUF(vuzpq,     1b20100, 2, (RNQ,  RNQ),      neon_zip_uzp),
   /* VQABS / VQNEG. Types S8 S16 S32.  */
- NUF(vqabs,     1b00700, 2, (RNDQ, RNDQ),     neon_sat_abs_neg),
  NUF(vqabsq,    1b00700, 2, (RNQ,  RNQ),      neon_sat_abs_neg),
- NUF(vqneg,     1b00780, 2, (RNDQ, RNDQ),     neon_sat_abs_neg),
  NUF(vqnegq,    1b00780, 2, (RNQ,  RNQ),      neon_sat_abs_neg),
   /* Pairwise, lengthening. Types S8 S16 S32 U8 U16 U32.  */
  NUF(vpadal,    1b00600, 2, (RNDQ, RNDQ),     neon_pair_long),
@@ -24774,6 +24792,9 @@ static const struct asm_opcode insns[] =
  mnUF(vmax,      _vmax,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  MNUF(vqadd,     0000010,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_dyadic_i64_su),
  MNUF(vqsub,     0000210,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_dyadic_i64_su),
+ mnUF(vmvn,      _vmvn,    2, (RNDQMQ, RNDQMQ_Ibig), neon_mvn),
+ MNUF(vqabs,     1b00700,  2, (RNDQMQ, RNDQMQ),     neon_sat_abs_neg),
+ MNUF(vqneg,     1b00780,  2, (RNDQMQ, RNDQMQ),     neon_sat_abs_neg),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3
