@@ -1,5 +1,11 @@
 2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
 
+	PR ld/24571
+	* bfd/elf32-avr.c (elf32_avr_relax_section): Adjust range check
+	when computing distance_short_enough.
+
+2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
 	PR ld/24564
 	* bfd/elf32-avr.c (avr_relative_distance_considering_wrap_around):
 	Wrap around even if distance equals avr_pc_wrap_around.

@@ -2643,16 +2643,28 @@ elf32_avr_relax_section (bfd *abfd,
 	    /* Compute the distance from this insn to the branch target.  */
 	    gap = value - dot;
 
+	    /* The ISA manual states that addressable range is PC - 2k + 1 to
+	       PC + 2k. In bytes, that would be -4094 <= PC <= 4096. The range
+	       is shifted one word to the right, because pc-relative instructions
+	       implicitly add one word i.e. rjmp 0 jumps to next insn, not the
+	       current one.
+	       Therefore, for the !shrinkable case, the range is as above.
+	       If shrinkable, then the current code only deletes bytes 3 and
+	       4 of the absolute call/jmp, so the forward jump range increases
+	       by 2 bytes, but the backward (negative) jump range remains
+	       the same. */
+
+
 	    /* Check if the gap falls in the range that can be accommodated
 	       in 13bits signed (It is 12bits when encoded, as we deal with
 	       word addressing). */
-	    if (!shrinkable && ((int) gap >= -4096 && (int) gap <= 4095))
+	    if (!shrinkable && ((int) gap >= -4094 && (int) gap <= 4096))
 	      distance_short_enough = 1;
 	    /* If shrinkable, then we can check for a range of distance which
-	       is two bytes farther on both the directions because the call
+	       is two bytes farther on the positive direction because the call
 	       or jump target will be closer by two bytes after the
 	       relaxation. */
-	    else if (shrinkable && ((int) gap >= -4094 && (int) gap <= 4097))
+	    else if (shrinkable && ((int) gap >= -4094 && (int) gap <= 4098))
 	      distance_short_enough = 1;
 
 	    /* Here we handle the wrap-around case.  E.g. for a 16k device

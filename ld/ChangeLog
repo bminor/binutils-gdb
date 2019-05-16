@@ -1,5 +1,11 @@
 2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
 
+	PR ld/24571
+	* ld/testsuite/ld-avr/relax-insn-at-range-boundary.d: New test.
+	* ld/testsuite/ld-avr/relax-insn-at-range-boundary.s: New test.
+
+2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
 	PR ld/24564
 	* testsuite/ld-avr/wraparound-range-boundary.d: New test.
 	* testsuite/ld-avr/wraparound-range-boundary.s: New test.
