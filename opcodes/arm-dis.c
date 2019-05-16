@@ -3949,13 +3949,21 @@ static const struct opcode32 thumb32_opcodes[] =
   /* Armv8.1-M Mainline and Armv8.1-M Mainline Security Extensions
      instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
-    0xf040c001, 0xfff0f001, "wls\tlr, %16-19S, %Q"},
-  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
-    0xf040e001, 0xfff0ffff, "dls\tlr, %16-19S"},
+    0xf00fe001, 0xffffffff, "lctp%c"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf02fc001, 0xfffff001, "le\t%P"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf00fc001, 0xfffff001, "le\tlr, %P"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf01fc001, 0xfffff001, "letp\tlr, %P"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf040c001, 0xfff0f001, "wls\tlr, %16-19S, %Q"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf000c001, 0xffc0f001, "wlstp.%20-21s\tlr, %16-19S, %Q"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf040e001, 0xfff0ffff, "dls\tlr, %16-19S"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf000e001, 0xffc0ffff, "dlstp.%20-21s\tlr, %16-19S"},
 
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf040e001, 0xf860f001, "bf%c\t%G, %W"},
@@ -10171,6 +10179,13 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 
 		  switch (*c)
 		    {
+		    case 's':
+		      if (val <= 3)
+			func (stream, "%s", mve_vec_sizename[val]);
+		      else
+			func (stream, "<undef size>");
+		      break;
+
 		    case 'd':
 		      func (stream, "%lu", val);
 		      value_in_comment = val;

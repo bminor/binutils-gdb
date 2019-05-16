@@ -1,6 +1,12 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 	    Michael Collison <michael.collison@arm.com>
 
+	* arm-dis.c (thumb32_opcodes): Add new instructions.
+	(print_insn_thumb32): Handle new instructions.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
 	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(enum mve_undefined): Add new reasons.
 	(is_mve_encoding_conflict): Handle new instructions.
