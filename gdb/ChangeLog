@@ -1,5 +1,10 @@
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* stap-probe.c (handle_stap_probe): Fix complaint formatting.
+	(stap_static_probe_ops::get_probes): Likewise.
+
+2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* stap-probe.c (stap_parse_register_operand): Make "if (*p->arg ==
 	'-')" and "else if".
 	(stap_parse_single_operand): Join checks for

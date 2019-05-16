@@ -1512,12 +1512,11 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   /* Making sure there is a name.  */
   if (name == NULL)
     {
-      complaint (_("corrupt probe name when "
-					"reading `%s'"),
+      complaint (_("corrupt probe name when reading `%s'"),
 		 objfile_name (objfile));
 
       /* There is no way to use a probe without a name or a provider, so
-	 returning zero here makes sense.  */
+	 returning here makes sense.  */
       return;
     }
   else
@@ -1549,11 +1548,10 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
       || (memchr (probe_args, '\0', (char *) el->data + el->size - name)
 	  != el->data + el->size - 1))
     {
-      complaint (_("corrupt probe argument when "
-					"reading `%s'"),
+      complaint (_("corrupt probe argument when reading `%s'"),
 		 objfile_name (objfile));
       /* If the argument string is NULL, it means some problem happened with
-	 it.  So we return 0.  */
+	 it.  So we return.  */
       return;
     }
 
@@ -1661,8 +1659,7 @@ stap_static_probe_ops::get_probes
     {
       /* If we are here, it means we have failed to parse every known
 	 probe.  */
-      complaint (_("could not parse SystemTap probe(s) "
-					"from inferior"));
+      complaint (_("could not parse SystemTap probe(s) from inferior"));
       return;
     }
 }
