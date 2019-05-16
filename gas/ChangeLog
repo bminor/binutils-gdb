@@ -1,5 +1,17 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_mve_vpsel): New encoding function.
+	(do_mve_vpnot): Likewise.
+	(insns): Add entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-vpnot-bad.d: New test.
+	* testsuite/gas/arm/mve-vpnot-bad.l: New test.
+	* testsuite/gas/arm/mve-vpnot-bad.s: New test.
+	* testsuite/gas/arm/mve-vpsel-bad.d: New test.
+	* testsuite/gas/arm/mve-vpsel-bad.l: New test.
+	* testsuite/gas/arm/mve-vpsel-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_neon_mvn): Change to accept MVE variants.
 	(do_neon_sat_abs_neg): Likewise.
 	(insns): Likewise.

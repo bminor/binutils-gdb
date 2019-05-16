@@ -15732,6 +15732,34 @@ do_mve_vmlas (void)
 }
 
 static void
+do_mve_vpsel (void)
+{
+  neon_select_shape (NS_QQQ, NS_NULL);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+  inst.instruction |= HI1 (inst.operands[2].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[2].reg);
+  inst.is_neon = 1;
+}
+
+static void
+do_mve_vpnot (void)
+{
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+}
+
+static void
 do_mve_vmaxnma_vminnma (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQ, NS_NULL);
@@ -24712,6 +24740,8 @@ static const struct asm_opcode insns[] =
  mToC("vmlas",	  ee011e40,	3, (RMQ, RMQ, RR),		mve_vmlas),
  mToC("vmulh",	  ee010e01,	3, (RMQ, RMQ, RMQ),		mve_vmulh),
  mToC("vrmulh",	  ee011e01,	3, (RMQ, RMQ, RMQ),		mve_vmulh),
+ mToC("vpnot",	  fe310f4d,	0, (),				mve_vpnot),
+ mToC("vpsel",	  fe310f01,	3, (RMQ, RMQ, RMQ),		mve_vpsel),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
