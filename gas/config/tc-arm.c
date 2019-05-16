@@ -6951,6 +6951,8 @@ enum operand_parse_code
   OP_RNSDQ_RNSC, /* Vector S, D or Q reg, or Neon scalar.  */
   OP_RNSDQ_RNSC_MQ, /* Vector S, D or Q reg, Neon scalar or MVE vector register.
 		     */
+  OP_RNSDQ_RNSC_MQ_RR, /* Vector S, D or Q reg, or MVE vector reg , or Neon
+			  scalar, or ARM register.  */
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
   OP_RNDQMQ_RNSC, /* Neon D, Q or MVE vector reg, or Neon scalar.  */
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
@@ -7325,6 +7327,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  }
 	  break;
 
+	case OP_RNSDQ_RNSC_MQ_RR:
+	  po_reg_or_goto (REG_TYPE_RN, try_rnsdq_rnsc_mq);
+	  break;
+	try_rnsdq_rnsc_mq:
 	case OP_RNSDQ_RNSC_MQ:
 	  po_reg_or_goto (REG_TYPE_MQ, try_rnsdq_rnsc);
 	  break;
@@ -15899,6 +15905,9 @@ mve_encode_qqr (int size, int U, int fp)
       /* vsub.  */
       else if (((unsigned)inst.instruction) == 0x200d00)
 	inst.instruction = 0xee301f40;
+      /* vmul.  */
+      else if (((unsigned)inst.instruction) == 0x1000d10)
+	inst.instruction = 0xee310e60;
 
       /* Setting size which is 1 for F16 and 0 for F32.  */
       inst.instruction |= (size == 16) << 28;
@@ -15917,6 +15926,18 @@ mve_encode_qqr (int size, int U, int fp)
       /* vhsub.  */
       else if (((unsigned)inst.instruction) == 0x200)
 	inst.instruction = 0xee001f40;
+      /* vmla.  */
+      else if (((unsigned)inst.instruction) == 0x900)
+	inst.instruction = 0xee010e40;
+      /* vmul.  */
+      else if (((unsigned)inst.instruction) == 0x910)
+	inst.instruction = 0xee011e60;
+      /* vqadd.  */
+      else if (((unsigned)inst.instruction) == 0x10)
+	inst.instruction = 0xee000f60;
+      /* vqsub.  */
+      else if (((unsigned)inst.instruction) == 0x210)
+	inst.instruction = 0xee001f60;
 
       /* Set U-bit.  */
       inst.instruction |= U << 28;
@@ -16145,10 +16166,24 @@ do_neon_dyadic_i_su (void)
 static void
 do_neon_dyadic_i64_su (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-  struct neon_type_el et = neon_check_type (3, rs,
-    N_EQK, N_EQK, N_SU_ALL | N_KEY);
-  neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+    return;
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQR, NS_QQQ, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_ALL | N_KEY);
+    }
+  if (rs == NS_QQR)
+    mve_encode_qqr (et.size, et.type == NT_unsigned, 0);
+  else
+    neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
 }
 
 static void
@@ -16442,7 +16477,7 @@ neon_dyadic_misc (enum neon_el_type ubit_meaning, unsigned types,
     {
       NEON_ENCODE (INTEGER, inst);
       if (rs == NS_QQR)
-	mve_encode_qqr (et.size, 0, 0);
+	mve_encode_qqr (et.size, et.type == ubit_meaning, 0);
       else
 	neon_three_same (neon_quad (rs), et.type == ubit_meaning, et.size);
     }
@@ -16967,19 +17002,30 @@ do_neon_mac_maybe_scalar (void)
   if (try_vfp_nsyn (3, do_vfp_nsyn_mla_mls) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (inst.operands[2].isscalar)
     {
+      constraint (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
       enum neon_shape rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
       struct neon_type_el et = neon_check_type (3, rs,
 	N_EQK, N_EQK, N_I16 | N_I32 | N_F_16_32 | N_KEY);
       NEON_ENCODE (SCALAR, inst);
       neon_mul_mac (et, neon_quad (rs));
     }
+  else if (!inst.operands[2].isvec)
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
+
+      enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
+      neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+
+      neon_dyadic_misc (NT_unsigned, N_SU_MVE, 0);
+    }
   else
     {
+      constraint (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
       /* The "untyped" case can't happen.  Do this to stop the "U" bit being
 	 affected if we specify unsigned args.  */
       neon_dyadic_misc (NT_untyped, N_IF_32, 0);
@@ -17047,13 +17093,34 @@ do_neon_mul (void)
   if (try_vfp_nsyn (3, do_vfp_nsyn_mul) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (inst.operands[2].isscalar)
-    do_neon_mac_maybe_scalar ();
+    {
+      constraint (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
+      do_neon_mac_maybe_scalar ();
+    }
   else
-    neon_dyadic_misc (NT_poly, N_I8 | N_I16 | N_I32 | N_F16 | N_F32 | N_P8, 0);
+    {
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  enum neon_shape rs = neon_select_shape (NS_QQR, NS_QQQ, NS_NULL);
+	  struct neon_type_el et
+	    = neon_check_type (3, rs, N_EQK, N_EQK, N_I_MVE | N_F_MVE | N_KEY);
+	  if (et.type == NT_float)
+	    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext),
+			BAD_FPU);
+
+	  neon_dyadic_misc (NT_float, N_I_MVE | N_F_MVE, 0);
+	}
+      else
+	{
+	  constraint (!inst.operands[2].isvec, BAD_FPU);
+	  neon_dyadic_misc (NT_poly,
+			    N_I8 | N_I16 | N_I32 | N_F16 | N_F32 | N_P8, 0);
+	}
+    }
 }
 
 static void
@@ -23776,8 +23843,6 @@ static const struct asm_opcode insns[] =
  NCE(vcvtz,     0,       2, (RVSD, RVSD),       vfp_nsyn_cvtz),
 
   /* Mnemonics shared by Neon and VFP.  */
- nCEF(vmul,     _vmul,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mul),
- nCEF(vmla,     _vmla,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
  nCEF(vmls,     _vmls,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
 
  NCE(vldm,      c900b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
@@ -23831,9 +23896,7 @@ static const struct asm_opcode insns[] =
  NUF(vrhaddq,   0000100, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i_su),
  NUF(vhsubq,    0000200, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i_su),
   /* integer ops, valid types S8 S16 S32 S64 U8 U16 U32 U64.  */
- NUF(vqadd,     0000010, 3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_i64_su),
  NUF(vqaddq,    0000010, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
- NUF(vqsub,     0000210, 3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_i64_su),
  NUF(vqsubq,    0000210, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
  NUF(vrshl,     0000500, 3, (RNDQ, oRNDQ, RNDQ), neon_rshl),
  NUF(vrshlq,    0000500, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
@@ -24601,6 +24664,8 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT  & fpu_vfp_ext_v1
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
+ mnCEF(vmla,     _vmla,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mac_maybe_scalar),
+ mnCEF(vmul,     _vmul,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mul),
 
  mcCE(fcpyd,	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
 
@@ -24661,6 +24726,8 @@ static const struct asm_opcode insns[] =
  MNUF(vhsub,     00000200,	  3, (RNDQMQ, oRNDQMQ, RNDQMQR),  neon_dyadic_i_su),
  mnUF(vmin,      _vmin,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  mnUF(vmax,      _vmax,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
+ MNUF(vqadd,     0000010,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_dyadic_i64_su),
+ MNUF(vqsub,     0000210,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_dyadic_i64_su),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3

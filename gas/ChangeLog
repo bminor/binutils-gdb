@@ -1,5 +1,28 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): New operand.
+	(parse_operands): Handle new operand.
+	(mve_encode_qqr): Handle new instructions.
+	(do_neon_dyadic_i64_su): Accept MVE variants.
+	(neon_dyadic_misc): Likewise.
+	(do_neon_mac_maybe_scalar): Likewise.
+	(do_neon_mul): Likewise.
+	(insns): Change to accept MVE variants.
+	* testsuite/gas/arm/mve-vmla-bad.d: New test.
+	* testsuite/gas/arm/mve-vmla-bad.l: New test.
+	* testsuite/gas/arm/mve-vmla-bad.s: New test.
+	* testsuite/gas/arm/mve-vmul-bad-1.d: New test.
+	* testsuite/gas/arm/mve-vmul-bad-1.l: New test.
+	* testsuite/gas/arm/mve-vmul-bad-1.s: New test.
+	* testsuite/gas/arm/mve-vmul-bad-2.d: New test.
+	* testsuite/gas/arm/mve-vmul-bad-2.l: New test.
+	* testsuite/gas/arm/mve-vmul-bad-2.s: New test.
+	* testsuite/gas/arm/mve-vqaddsub-bad.d: New test.
+	* testsuite/gas/arm/mve-vqaddsub-bad.l: New test.
+	* testsuite/gas/arm/mve-vqaddsub-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vmlaldav, M_MNEM_vmlaldava,
 	 M_MNEM_vmlaldavx, M_MNEM_vmlaldavax, M_MNEM_vmlsldav,
 	 M_MNEM_vmlsldava, M_MNEM_vmlsldavx, M_MNEM_vmlsldavax,
