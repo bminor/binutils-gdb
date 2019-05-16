@@ -1706,7 +1706,7 @@ darwin_attach_pid (struct inferior *inf)
 static struct thread_info *
 thread_info_from_private_thread_info (darwin_thread_info *pti)
 {
-  for (thread_info *it : all_threads ())
+  for (struct thread_info *it : all_threads ())
     {
       darwin_thread_info *iter_pti = get_darwin_thread_info (it);
 

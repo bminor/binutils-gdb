@@ -1,3 +1,8 @@
+2019-05-16  Tom Tromey  <tromey@adacore.com>
+
+	* darwin-nat.c (thread_info_from_private_thread_info): Add struct
+	keyword to foreach.
+
 2019-05-15  Simon Marchi  <simon.marchi@efficios.com>
 
 	* linux-thread-db.c (try_thread_db_load_1): Change return type
