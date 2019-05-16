@@ -14202,6 +14202,10 @@ do_t_loloop (void)
 #define M_MNEM_vrmlsldavha  0xfe800e21
 #define M_MNEM_vrmlsldavhx  0xfe801e01
 #define M_MNEM_vrmlsldavhax 0xfe801e21
+#define M_MNEM_vqmovnt	  0xee331e01
+#define M_MNEM_vqmovnb	  0xee330e01
+#define M_MNEM_vqmovunt	  0xee311e81
+#define M_MNEM_vqmovunb	  0xee310e81
 
 /* Neon instruction encoder helpers.  */
 
@@ -15747,6 +15751,31 @@ do_mve_vmlas (void)
 }
 
 static void
+do_mve_vqmovn (void)
+{
+  struct neon_type_el et;
+  if (inst.instruction == M_MNEM_vqmovnt
+     || inst.instruction == M_MNEM_vqmovnb)
+    et = neon_check_type (2, NS_QQ, N_EQK,
+			  N_U16 | N_U32 | N_S16 | N_S32 | N_KEY);
+  else
+    et = neon_check_type (2, NS_QQ, N_EQK, N_S16 | N_S32 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  inst.instruction |= (et.type == NT_unsigned) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= (et.size == 32) << 18;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
+}
+
+static void
 do_mve_vpsel (void)
 {
   neon_select_shape (NS_QQQ, NS_NULL);
@@ -16353,15 +16382,55 @@ do_neon_qshl_imm (void)
 static void
 do_neon_rshl (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-  struct neon_type_el et = neon_check_type (3, rs,
-    N_EQK, N_EQK, N_SU_ALL | N_KEY);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+   return;
+
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQR, NS_QQQ, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_ALL | N_KEY);
+    }
+
   unsigned int tmp;
 
-  tmp = inst.operands[2].reg;
-  inst.operands[2].reg = inst.operands[1].reg;
-  inst.operands[1].reg = tmp;
-  neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+  if (rs == NS_QQR)
+    {
+      if (inst.operands[2].reg == REG_PC)
+	as_tsktsk (MVE_BAD_PC);
+      else if (inst.operands[2].reg == REG_SP)
+	as_tsktsk (MVE_BAD_SP);
+
+      constraint (inst.operands[0].reg != inst.operands[1].reg,
+		  _("invalid instruction shape"));
+
+      if (inst.instruction == 0x0000510)
+	/* We are dealing with vqrshl.  */
+	inst.instruction = 0xee331ee0;
+      else
+	/* We are dealing with vrshl.  */
+	inst.instruction = 0xee331e60;
+
+      inst.instruction |= (et.type == NT_unsigned) << 28;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= neon_logbits (et.size) << 18;
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+      inst.instruction |= inst.operands[2].reg;
+      inst.is_neon = 1;
+    }
+  else
+    {
+      tmp = inst.operands[2].reg;
+      inst.operands[2].reg = inst.operands[1].reg;
+      inst.operands[1].reg = tmp;
+      neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+    }
 }
 
 static int
@@ -24110,9 +24179,7 @@ static const struct asm_opcode insns[] =
   /* integer ops, valid types S8 S16 S32 S64 U8 U16 U32 U64.  */
  NUF(vqaddq,    0000010, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
  NUF(vqsubq,    0000210, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
- NUF(vrshl,     0000500, 3, (RNDQ, oRNDQ, RNDQ), neon_rshl),
  NUF(vrshlq,    0000500, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
- NUF(vqrshl,    0000510, 3, (RNDQ, oRNDQ, RNDQ), neon_rshl),
  NUF(vqrshlq,   0000510, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
   /* If not immediate, fall back to neon_dyadic_i64_su.
      shl_imm should accept I8 I16 I32 I64,
@@ -24874,6 +24941,10 @@ static const struct asm_opcode insns[] =
  mToC("vqrdmlash", ee001e40,	3, (RMQ, RMQ, RR),		mve_vqdmlah),
  mToC("vqdmullt",  ee301f00,	3, (RMQ, RMQ, RMQRR),		mve_vqdmull),
  mToC("vqdmullb",  ee300f00,	3, (RMQ, RMQ, RMQRR),		mve_vqdmull),
+ mCEF(vqmovnt,	  _vqmovnt,	2, (RMQ, RMQ),			mve_vqmovn),
+ mCEF(vqmovnb,	  _vqmovnb,	2, (RMQ, RMQ),			mve_vqmovn),
+ mCEF(vqmovunt,	  _vqmovunt,	2, (RMQ, RMQ),			mve_vqmovn),
+ mCEF(vqmovunb,	  _vqmovunb,	2, (RMQ, RMQ),			mve_vqmovn),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
@@ -24960,6 +25031,8 @@ static const struct asm_opcode insns[] =
  mnUF(vqrdmlah,  _vqrdmlah,3, (RNDQMQ, oRNDQMQ, RNDQ_RNSC_RR), neon_qrdmlah),
  mnUF(vqdmulh,   _vqdmulh, 3, (RNDQMQ, oRNDQMQ, RNDQMQ_RNSC_RR), neon_qdmulh),
  mnUF(vqrdmulh,  _vqrdmulh,3, (RNDQMQ, oRNDQMQ, RNDQMQ_RNSC_RR), neon_qdmulh),
+ MNUF(vqrshl,    0000510,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_rshl),
+ MNUF(vrshl,     0000500,  3, (RNDQMQ, oRNDQMQ, RNDQMQR), neon_rshl),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3

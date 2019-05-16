@@ -1,5 +1,22 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vqmovnt, M_MNEM_vqmovnb,
+	 M_MNEM_vqmovunt, M_MNEM_vqmovunb): New instruction encodings.
+	(do_mve_vqmovn): New encoding function.
+	(do_neon_rshl): Change to accepte MVE variants.
+	(insns): Change entries and add new for MVE mnemonics.
+	* testsuite/gas/arm/mve-vqmovn-bad.d: New test.
+	* testsuite/gas/arm/mve-vqmovn-bad.l: New test.
+	* testsuite/gas/arm/mve-vqmovn-bad.s: New test.
+	* testsuite/gas/arm/mve-vqrshl-bad.d: New test.
+	* testsuite/gas/arm/mve-vqrshl-bad.l: New test.
+	* testsuite/gas/arm/mve-vqrshl-bad.s: New test.
+	* testsuite/gas/arm/mve-vrshl-bad.d: New test.
+	* testsuite/gas/arm/mve-vrshl-bad.l: New test.
+	* testsuite/gas/arm/mve-vrshl-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (enum operand_parse_code): Add new operand.
 	(parse_operands): Handle new operand.
 	(do_mve_vqdmull): New encoding function.
