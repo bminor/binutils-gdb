@@ -1,5 +1,15 @@
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* stap-probe.c (stap_parse_register_operand): Make "if (*p->arg ==
+	'-')" and "else if".
+	(stap_parse_single_operand): Join checks for
+	"gdbarch_stap_parse_special_token_p" and
+	"gdbarch_stap_parse_special_token" in the same "if" statement.
+	Invert check when verifying for operation on register
+	displacement.
+
+2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* stap-probe.c (stap_get_opcode): Update comment.
 	(stap_get_expected_argument_type): Likewise.
 	(handle_stap_probe): Likewise.

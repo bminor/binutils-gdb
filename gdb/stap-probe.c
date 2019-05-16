@@ -705,8 +705,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 	 pointer.  */
       ++p->arg;
     }
-
-  if (*p->arg == '-')
+  else if (*p->arg == '-')
     {
       got_minus = true;
       ++p->arg;
@@ -842,15 +841,15 @@ stap_parse_single_operand (struct stap_parse_info *p)
   const char *int_prefix = NULL;
 
   /* We first try to parse this token as a "special token".  */
-  if (gdbarch_stap_parse_special_token_p (gdbarch))
-    if (gdbarch_stap_parse_special_token (gdbarch, p) != 0)
-      {
-	/* If the return value of the above function is not zero,
-	   it means it successfully parsed the special token.
+  if (gdbarch_stap_parse_special_token_p (gdbarch)
+      && (gdbarch_stap_parse_special_token (gdbarch, p) != 0))
+    {
+      /* If the return value of the above function is not zero,
+	 it means it successfully parsed the special token.
 
-	   If it is NULL, we try to parse it using our method.  */
-	return;
-      }
+	 If it is NULL, we try to parse it using our method.  */
+      return;
+    }
 
   if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+')
     {
@@ -890,7 +889,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	{
 	  /* If we are here, it means it is a displacement.  The only
 	     operations allowed here are `-' and `+'.  */
-	  if (c == '~')
+	  if (c != '-' && c != '+')
 	    error (_("Invalid operator `%c' for register displacement "
 		     "on expression `%s'."), c, p->saved_arg);
 
