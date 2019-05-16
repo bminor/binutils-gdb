@@ -184,6 +184,30 @@ enum mve_instructions
   MVE_VHCADD,
   MVE_VCMLA_FP,
   MVE_VCMUL_FP,
+  MVE_VQRSHL_T1,
+  MVE_VQRSHL_T2,
+  MVE_VQRSHRN,
+  MVE_VQRSHRUN,
+  MVE_VQSHL_T1,
+  MVE_VQSHL_T2,
+  MVE_VQSHLU_T3,
+  MVE_VQSHL_T4,
+  MVE_VQSHRN,
+  MVE_VQSHRUN,
+  MVE_VRSHL_T1,
+  MVE_VRSHL_T2,
+  MVE_VRSHR,
+  MVE_VRSHRN,
+  MVE_VSHL_T1,
+  MVE_VSHL_T2,
+  MVE_VSHL_T3,
+  MVE_VSHLC,
+  MVE_VSHLL_T1,
+  MVE_VSHLL_T2,
+  MVE_VSHR,
+  MVE_VSHRN,
+  MVE_VSLI,
+  MVE_VSRI,
   MVE_NONE
 };
 
@@ -216,6 +240,7 @@ enum mve_unpredictable
 
 enum mve_undefined
 {
+  UNDEF_SIZE,			/* undefined size.  */
   UNDEF_SIZE_0,			/* undefined because size == 0.  */
   UNDEF_SIZE_2,			/* undefined because size == 2.  */
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
@@ -2420,6 +2445,63 @@ static const struct mopcode32 mve_opcodes[] =
    0xef800050, 0xefb810f0,
    "vorr%v.i%8-11s\t%13-15,22Q, %E"},
 
+  /* Vector VQSHL T2 Variant.
+     NOTE: MVE_VQSHL_T2 must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHL_T2,
+   0xef800750, 0xef801fd1,
+   "vqshl%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VQSHLU T3 Variant
+     NOTE: MVE_VQSHL_T2 must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHLU_T3,
+   0xff800650, 0xff801fd1,
+   "vqshlu%v.s%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VRSHR
+     NOTE: MVE_VRSHR must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRSHR,
+   0xef800250, 0xef801fd1,
+   "vrshr%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VSHL.
+     NOTE: MVE_VSHL must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHL_T1,
+   0xef800550, 0xff801fd1,
+   "vshl%v.i%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VSHR
+     NOTE: MVE_VSHR must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHR,
+   0xef800050, 0xef801fd1,
+   "vshr%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VSLI
+     NOTE: MVE_VSLI must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSLI,
+   0xff800550, 0xff801fd1,
+   "vsli%v.%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VSRI
+     NOTE: MVE_VSRI must appear in the table before
+     before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSRI,
+   0xff800450, 0xff801fd1,
+   "vsri%v.%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
   /* Vector VMOV immediate to vector,
      cmode == 11x1 -> VMVN which is UNDEFINED
      for such a cmode.  */
@@ -2461,6 +2543,13 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VMOV_VEC_LANE_TO_GP,
    0xee100b10, 0xff100f1f,
    "vmov%c.%u%5-6,21-22s\t%12-15r, %17-19,7Q[%N]"},
+
+  /* Vector VSHLL T1 Variant.  Note: VSHLL T1 must appear before MVE_VMOVL due
+     to instruction opcode aliasing.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHLL_T1,
+   0xeea00f40, 0xefa00fd1,
+   "vshll%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VMOVL long.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -2612,6 +2701,54 @@ static const struct mopcode32 mve_opcodes[] =
    0xfe010e60, 0xff811f70,
    "vqrdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
+  /* Vector VQRSHL T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQRSHL_T1,
+   0xef000550, 0xef811f51,
+   "vqrshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
+
+  /* Vector VQRSHL T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQRSHL_T2,
+   0xee331ee0, 0xefb31ff0,
+   "vqrshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
+
+  /* Vector VQRSHRN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQRSHRN,
+   0xee800f41, 0xefa00fd1,
+   "vqrshrn%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VQRSHRUN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQRSHRUN,
+   0xfe800fc0, 0xffa00fd1,
+   "vqrshrun%T%v.s%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VQSHL T1 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHL_T1,
+   0xee311ee0, 0xefb31ff0,
+   "vqshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
+
+  /* Vector VQSHL T4 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHL_T4,
+   0xef000450, 0xef811f51,
+   "vqshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
+
+  /* Vector VQSHRN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHRN,
+   0xee800f40, 0xefa00fd1,
+   "vqshrn%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VQSHRUN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSHRUN,
+   0xee800fc0, 0xffa00fd1,
+   "vqshrun%T%v.s%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
   /* Vector VRINT floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
    MVE_VRINT_FP,
@@ -2629,6 +2766,54 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VRMLALDAVH,
    0xee801f00, 0xef811f51,
    "vrmlaldavh%5Ax%v.%u32\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
+
+  /* Vector VRSHL T1 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRSHL_T1,
+   0xef000540, 0xef811f51,
+   "vrshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
+
+  /* Vector VRSHL T2 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRSHL_T2,
+   0xee331e60, 0xefb31ff0,
+   "vrshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
+
+  /* Vector VRSHRN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VRSHRN,
+   0xfe800fc1, 0xffa00fd1,
+   "vrshrn%T%v.i%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VSHL T2 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHL_T2,
+   0xee311e60, 0xefb31ff0,
+   "vshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
+
+  /* Vector VSHL T3 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHL_T3,
+   0xef000440, 0xef811f51,
+   "vshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
+
+  /* Vector VSHLC.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHLC,
+   0xeea00fc0, 0xffa01ff0,
+   "vshlc%v\t%13-15,22Q, %0-3r, #%16-20d"},
+
+  /* Vector VSHLL T2 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHLL_T2,
+   0xee310e01, 0xefb30fd1,
+   "vshll%T%v.%u%18-19s\t%13-15,22Q, %1-3,5Q, #%18-19d"},
+
+  /* Vector VSHRN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VSHRN,
+   0xee800fc1, 0xffa00fd1,
+   "vshrn%T%v.i%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VST2 no writeback.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -4734,6 +4919,10 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VQRSHL_T1:
+    case MVE_VQSHL_T4:
+    case MVE_VRSHL_T1:
+    case MVE_VSHL_T3:
     case MVE_VCADD_VEC:
     case MVE_VHCADD:
     case MVE_VDDUP:
@@ -4841,6 +5030,11 @@ is_mve_encoding_conflict (unsigned long given,
 	  return FALSE;
       }
 
+    case MVE_VQRSHL_T2:
+    case MVE_VQSHL_T1:
+    case MVE_VRSHL_T2:
+    case MVE_VSHL_T2:
+    case MVE_VSHLL_T2:
     case MVE_VADDV:
     case MVE_VMOVN:
     case MVE_VQMOVUN:
@@ -4869,6 +5063,32 @@ is_mve_encoding_conflict (unsigned long given,
     case MVE_VIWDUP:
       if ((arm_decode_field (given, 20, 21) == 3)
 	  || (arm_decode_field (given, 1, 3) == 7))
+	return TRUE;
+      else
+	return FALSE;
+
+
+    case MVE_VSHLL_T1:
+      if (arm_decode_field (given, 16, 18) == 0)
+	{
+	  unsigned long sz = arm_decode_field (given, 19, 20);
+
+	  if ((sz == 1) || (sz == 2))
+	    return TRUE;
+	  else
+	    return FALSE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VQSHL_T2:
+    case MVE_VQSHLU_T3:
+    case MVE_VRSHR:
+    case MVE_VSHL_T1:
+    case MVE_VSHR:
+    case MVE_VSLI:
+    case MVE_VSRI:
+      if (arm_decode_field (given, 19, 21) == 0)
 	return TRUE;
       else
 	return FALSE;
@@ -5228,6 +5448,7 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VSHLL_T2:
     case MVE_VMOVN:
       if (arm_decode_field (given, 18, 19) == 2)
 	{
@@ -5245,6 +5466,56 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	  && (arm_decode_field (given, 12, 12) == 1))
 	{
 	  *undefined_code = UNDEF_XCHG_UNS;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VQSHRN:
+    case MVE_VQSHRUN:
+    case MVE_VSHLL_T1:
+    case MVE_VSHRN:
+      {
+	unsigned long sz = arm_decode_field (given, 19, 20);
+	if (sz == 1)
+	  return FALSE;
+	else if ((sz & 2) == 2)
+	  return FALSE;
+	else
+	  {
+	    *undefined_code = UNDEF_SIZE;
+	    return TRUE;
+	  }
+      }
+      break;
+
+    case MVE_VQSHL_T2:
+    case MVE_VQSHLU_T3:
+    case MVE_VRSHR:
+    case MVE_VSHL_T1:
+    case MVE_VSHR:
+    case MVE_VSLI:
+    case MVE_VSRI:
+      {
+	unsigned long sz = arm_decode_field (given, 19, 21);
+	if ((sz & 7) == 1)
+	  return FALSE;
+	else if ((sz & 6) == 2)
+	  return FALSE;
+	else if ((sz & 4) == 4)
+	  return FALSE;
+	else
+	  {
+	    *undefined_code = UNDEF_SIZE;
+	    return TRUE;
+	  }
+      }
+
+    case MVE_VQRSHRN:
+    case MVE_VQRSHRUN:
+      if (arm_decode_field (given, 19, 20) == 0)
+	{
+	  *undefined_code = UNDEF_SIZE_0;
 	  return TRUE;
 	}
       else
@@ -5309,6 +5580,11 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VQRSHL_T2:
+    case MVE_VQSHL_T1:
+    case MVE_VRSHL_T2:
+    case MVE_VSHL_T2:
+    case MVE_VSHLC:
     case MVE_VQDMLAH:
     case MVE_VQRDMLAH:
     case MVE_VQDMLASH:
@@ -5897,6 +6173,10 @@ print_mve_undefined (struct disassemble_info *info,
 
   switch (undefined_code)
     {
+    case UNDEF_SIZE:
+      func (stream, "illegal size");
+      break;
+
     case UNDEF_SIZE_0:
       func (stream, "size equals zero");
       break;
@@ -6403,8 +6683,17 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VQRDMULH_T2:
     case MVE_VQDMULH_T3:
     case MVE_VQRDMULH_T4:
+    case MVE_VQRSHL_T1:
+    case MVE_VQRSHL_T2:
+    case MVE_VQSHL_T1:
+    case MVE_VQSHL_T4:
     case MVE_VRHADD:
     case MVE_VRINT_FP:
+    case MVE_VRSHL_T1:
+    case MVE_VRSHL_T2:
+    case MVE_VSHL_T2:
+    case MVE_VSHL_T3:
+    case MVE_VSHLL_T2:
     case MVE_VST2:
     case MVE_VST4:
     case MVE_VSTRB_SCATTER_T1:
@@ -6563,9 +6852,93 @@ print_mve_size (struct disassemble_info *info,
 	}
       break;
 
+    case MVE_VQSHRN:
+    case MVE_VQSHRUN:
+    case MVE_VQRSHRN:
+    case MVE_VQRSHRUN:
+    case MVE_VRSHRN:
+    case MVE_VSHRN:
+      {
+	switch (size)
+	{
+	case 1:
+	  func (stream, "16");
+	  break;
+
+	case 2: case 3:
+	  func (stream, "32");
+	  break;
+
+	default:
+	  break;
+	}
+      }
+      break;
+
+    case MVE_VQSHL_T2:
+    case MVE_VQSHLU_T3:
+    case MVE_VRSHR:
+    case MVE_VSHL_T1:
+    case MVE_VSHLL_T1:
+    case MVE_VSHR:
+    case MVE_VSLI:
+    case MVE_VSRI:
+      {
+	switch (size)
+	{
+	case 1:
+	  func (stream, "8");
+	  break;
+
+	case 2: case 3:
+	  func (stream, "16");
+	  break;
+
+	case 4: case 5: case 6: case 7:
+	  func (stream, "32");
+	  break;
+
+	default:
+	  break;
+	}
+      }
+      break;
+
     default:
       break;
     }
+}
+
+static void
+print_mve_shift_n (struct disassemble_info *info, long given,
+		   enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  int startAt0
+    = matched_insn == MVE_VQSHL_T2
+      || matched_insn == MVE_VQSHLU_T3
+      || matched_insn == MVE_VSHL_T1
+      || matched_insn == MVE_VSHLL_T1
+      || matched_insn == MVE_VSLI;
+
+  unsigned imm6 = (given & 0x3f0000) >> 16;
+
+  if (matched_insn == MVE_VSHLL_T1)
+    imm6 &= 0x1f;
+
+  unsigned shiftAmount = 0;
+  if ((imm6 & 0x20) != 0)
+    shiftAmount = startAt0 ? imm6 - 32 : 64 - imm6;
+  else if ((imm6 & 0x10) != 0)
+    shiftAmount = startAt0 ? imm6 - 16 : 32 - imm6;
+  else if ((imm6 & 0x08) != 0)
+    shiftAmount = startAt0 ? imm6 - 8 : 16 - imm6;
+  else
+    print_mve_undefined (info, UNDEF_SIZE_0);
+
+  func (stream, "%u", shiftAmount);
 }
 
 static void
@@ -8207,8 +8580,42 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    func (stream, "%s", arm_regnames[value]);
 			    break;
 			  case 'd':
-			    func (stream, "%ld", value);
-			    value_in_comment = value;
+			    if (insn->mve_op == MVE_VQSHL_T2
+				|| insn->mve_op == MVE_VQSHLU_T3
+				|| insn->mve_op == MVE_VRSHR
+				|| insn->mve_op == MVE_VRSHRN
+				|| insn->mve_op == MVE_VSHL_T1
+				|| insn->mve_op == MVE_VSHLL_T1
+				|| insn->mve_op == MVE_VSHR
+				|| insn->mve_op == MVE_VSHRN
+				|| insn->mve_op == MVE_VSLI
+				|| insn->mve_op == MVE_VSRI)
+			      print_mve_shift_n (info, given, insn->mve_op);
+			    else if (insn->mve_op == MVE_VSHLL_T2)
+			      {
+				switch (value)
+				  {
+				  case 0x00:
+				    func (stream, "8");
+				    break;
+				  case 0x01:
+				    func (stream, "16");
+				    break;
+				  case 0x10:
+				    print_mve_undefined (info, UNDEF_SIZE_0);
+				    break;
+				  default:
+				    assert (0);
+				    break;
+				  }
+			      }
+			    else
+			      {
+				if (insn->mve_op == MVE_VSHLC && value == 0)
+				  value = 32;
+				func (stream, "%ld", value);
+				value_in_comment = value;
+			      }
 			    break;
 			  case 'F':
 			    func (stream, "s%ld", value);
