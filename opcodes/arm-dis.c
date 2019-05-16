@@ -98,6 +98,10 @@ enum mve_instructions
   MVE_VHSUB_T1,
   MVE_VHSUB_T2,
   MVE_VRHADD,
+  MVE_VLD2,
+  MVE_VLD4,
+  MVE_VST2,
+  MVE_VST4,
   MVE_NONE
 };
 
@@ -110,6 +114,12 @@ enum mve_unpredictable
   UNPRED_R13,			/* Unpredictable because r13 (sp) or
 				   r15 (sp) used.  */
   UNPRED_R15,			/* Unpredictable because r15 (pc) is used.  */
+  UNPRED_Q_GT_4,		/* Unpredictable because
+				   vec reg start > 4 (vld4/st4).  */
+  UNPRED_Q_GT_6,		/* Unpredictable because
+				   vec reg start > 6 (vld2/st2).  */
+  UNPRED_R13_AND_WB,		/* Unpredictable becase gp reg = r13
+				   and WB bit = 1.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
@@ -1823,7 +1833,11 @@ static const struct opcode32 neon_opcodes[] =
    %n			print vector comparison code for predicated instruction
    %v			print vector predicate for instruction in predicated
 			block
+   %w			print writeback mode for MVE v{st,ld}[24]
+   %B			print v{st,ld}[24] any one operands
+
    %<bitfield>r		print as an ARM register
+   %<bitfield>d		print the bitfield in decimal
    %<bitfield>Q		print as a MVE Q register
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
 			UNPREDICTABLE
@@ -1996,6 +2010,42 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VRHADD,
    0xef000140, 0xef811f51,
    "vrhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VLD2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLD2,
+   0xfc901e00, 0xff901e5f,
+   "vld2%5d.%7-8s\t%B, [%16-19r]%w"},
+
+  /* Vector VLD4.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VLD4,
+   0xfc901e01, 0xff901e1f,
+   "vld4%5-6d.%7-8s\t%B, [%16-19r]%w"},
+
+  /* Vector VST2 no writeback.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VST2,
+   0xfc801e00, 0xffb01e5f,
+   "vst2%5d.%7-8s\t%B, [%16-19r]"},
+
+  /* Vector VST2 writeback.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VST2,
+   0xfca01e00, 0xffb01e5f,
+   "vst2%5d.%7-8s\t%B, [%16-19r]!"},
+
+  /* Vector VST4 no writeback.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VST4,
+   0xfc801e01, 0xffb01e1f,
+   "vst4%5-6d.%7-8s\t%B, [%16-19r]"},
+
+  /* Vector VST4 writeback.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VST4,
+   0xfca01e01, 0xffb01e1f,
+   "vst4%5-6d.%7-8s\t%B, [%16-19r]!"},
 
   {ARM_FEATURE_CORE_LOW (0),
    MVE_NONE,
@@ -4015,6 +4065,15 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VLD2:
+    case MVE_VLD4:
+    case MVE_VST2:
+    case MVE_VST4:
+      if (arm_decode_field (given, 7, 8) == 3)
+	return TRUE;
+      else
+	return FALSE;
+
     default:
       return FALSE;
 
@@ -4132,6 +4191,58 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VLD2:
+    case MVE_VST2:
+      {
+	unsigned long rn = arm_decode_field (given, 16, 19);
+
+	if ((rn == 0xd) && (arm_decode_field (given, 21, 21) == 1))
+	  {
+	    *unpredictable_code = UNPRED_R13_AND_WB;
+	    return TRUE;
+	  }
+
+	if (rn == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	if (arm_decode_field_multiple (given, 13, 15, 22, 22) > 6)
+	  {
+	    *unpredictable_code = UNPRED_Q_GT_6;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VLD4:
+    case MVE_VST4:
+      {
+	unsigned long rn = arm_decode_field (given, 16, 19);
+
+	if ((rn == 0xd) && (arm_decode_field (given, 21, 21) == 1))
+	  {
+	    *unpredictable_code = UNPRED_R13_AND_WB;
+	    return TRUE;
+	  }
+
+	if (rn == 0xf)
+	  {
+	    *unpredictable_code = UNPRED_R15;
+	    return TRUE;
+	  }
+
+	if (arm_decode_field_multiple (given, 13, 15, 22, 22) > 4)
+	  {
+	    *unpredictable_code = UNPRED_Q_GT_4;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -4185,7 +4296,57 @@ print_mve_unpredictable (struct disassemble_info *info,
       func (stream, "use of r15 (pc)");
       break;
 
+    case UNPRED_Q_GT_4:
+      func (stream, "start register block > r4");
+      break;
+
+    case UNPRED_Q_GT_6:
+      func (stream, "start register block > r6");
+      break;
+
+    case UNPRED_R13_AND_WB:
+      func (stream, "use of r13 and write back");
+      break;
+
     case UNPRED_NONE:
+      break;
+    }
+}
+
+/* Print register block operand for mve vld2/vld4/vst2/vld4.  */
+
+static void
+print_mve_register_blocks (struct disassemble_info *info,
+			   unsigned long given,
+			   enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  unsigned long q_reg_start = arm_decode_field_multiple (given,
+							 13, 15,
+							 22, 22);
+  switch (matched_insn)
+    {
+    case MVE_VLD2:
+    case MVE_VST2:
+      if (q_reg_start <= 6)
+	func (stream, "{q%ld, q%ld}", q_reg_start, q_reg_start + 1);
+      else
+	func (stream, "<illegal reg q%ld>", q_reg_start);
+      break;
+
+    case MVE_VLD4:
+    case MVE_VST4:
+      if (q_reg_start <= 4)
+	func (stream, "{q%ld, q%ld, q%ld, q%ld}", q_reg_start,
+	      q_reg_start + 1, q_reg_start + 2,
+	      q_reg_start + 3);
+      else
+	func (stream, "<illegal reg q%ld>", q_reg_start);
+      break;
+
+    default:
       break;
     }
 }
@@ -4222,6 +4383,8 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VHADD_T2:
     case MVE_VHSUB_T1:
     case MVE_VHSUB_T2:
+    case MVE_VLD2:
+    case MVE_VLD4:
     case MVE_VPT_VEC_T1:
     case MVE_VPT_VEC_T2:
     case MVE_VPT_VEC_T3:
@@ -4229,6 +4392,8 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VPT_VEC_T5:
     case MVE_VPT_VEC_T6:
     case MVE_VRHADD:
+    case MVE_VST2:
+    case MVE_VST4:
       if (size <= 3)
 	func (stream, "%s", mve_vec_sizename[size]);
       else
@@ -5721,6 +5886,15 @@ print_insn_mve (struct disassemble_info *info, long given)
 		      print_instruction_predicate (info);
 		      break;
 
+		    case 'w':
+		      if (arm_decode_field (given, 21, 21) == 1)
+			func (stream, "!");
+		      break;
+
+		    case 'B':
+		      print_mve_register_blocks (info, given, insn->mve_op);
+		      break;
+
 		    case '0': case '1': case '2': case '3': case '4':
 		    case '5': case '6': case '7': case '8': case '9':
 		      {
@@ -5746,6 +5920,10 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    break;
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);
+			    break;
+			  case 'd':
+			    func (stream, "%ld", value);
+			    value_in_comment = value;
 			    break;
 			  case 'Q':
 			    if (value & 0x8)

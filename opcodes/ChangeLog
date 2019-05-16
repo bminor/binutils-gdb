@@ -3,6 +3,19 @@
 
 	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(enum mve_unpredictable): Add new reasons.
+	(is_mve_encoding_conflict): Handle new instructions.
+	(is_mve_unpredictable): Likewise.
+	(mve_opcodes): Add new instructions.
+	(print_mve_unpredictable): Handle new reasons.
+	(print_mve_register_blocks): New print function.
+	(print_mve_size): Handle new instructions.
+	(print_insn_mve): Likewise.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(enum mve_unpredictable): Add new reasons.
 	(enum mve_undefined): Likewise.
 	(is_mve_encoding_conflict): Handle new instructions.
 	(is_mve_undefined): Likewise.
