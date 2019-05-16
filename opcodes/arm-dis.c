@@ -228,6 +228,23 @@ enum mve_instructions
   MVE_VCLS,
   MVE_VCLZ,
   MVE_VCTP,
+  MVE_VMAX,
+  MVE_VMAXA,
+  MVE_VMAXNM_FP,
+  MVE_VMAXNMA_FP,
+  MVE_VMAXNMV_FP,
+  MVE_VMAXNMAV_FP,
+  MVE_VMAXV,
+  MVE_VMAXAV,
+  MVE_VMIN,
+  MVE_VMINA,
+  MVE_VMINNM_FP,
+  MVE_VMINNMA_FP,
+  MVE_VMINNMV_FP,
+  MVE_VMINNMAV_FP,
+  MVE_VMINV,
+  MVE_VMINAV,
+  MVE_VMLA,
   MVE_NONE
 };
 
@@ -2458,6 +2475,108 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VLDRW_T7,
    0xec101f00, 0xfe101f80,
    "vldrw%v.u32\t%13-15,22Q, %d"},
+
+  /* Vector VMAX.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMAX,
+   0xef000640, 0xef811f51,
+   "vmax%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMAXA.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMAXA,
+   0xee330e81, 0xffb31fd1,
+   "vmaxa%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VMAXNM floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMAXNM_FP,
+   0xff000f50, 0xffa11f51,
+   "vmaxnm%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMAXNMA floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMAXNMA_FP,
+   0xee3f0e81, 0xefbf1fd1,
+   "vmaxnma%v.f%28s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VMAXNMV floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMAXNMV_FP,
+   0xeeee0f00, 0xefff0fd1,
+   "vmaxnmv%v.f%28s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMAXNMAV floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMAXNMAV_FP,
+   0xeeec0f00, 0xefff0fd1,
+   "vmaxnmav%v.f%28s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMAXV.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMAXV,
+   0xeee20f00, 0xeff30fd1,
+   "vmaxv%v.%u%18-19s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMAXAV.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMAXAV,
+   0xeee00f00, 0xfff30fd1,
+   "vmaxav%v.s%18-19s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMIN.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMIN,
+   0xef000650, 0xef811f51,
+   "vmin%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMINA.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMINA,
+   0xee331e81, 0xffb31fd1,
+   "vmina%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VMINNM floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMINNM_FP,
+   0xff200f50, 0xffa11f51,
+   "vminnm%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VMINNMA floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMINNMA_FP,
+   0xee3f1e81, 0xefbf1fd1,
+   "vminnma%v.f%28s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VMINNMV floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMINNMV_FP,
+   0xeeee0f80, 0xefff0fd1,
+   "vminnmv%v.f%28s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMINNMAV floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VMINNMAV_FP,
+   0xeeec0f80, 0xefff0fd1,
+   "vminnmav%v.f%28s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMINV.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMINV,
+   0xeee20f80, 0xeff30fd1,
+   "vminv%v.%u%18-19s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMINAV.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMINAV,
+   0xeee00f80, 0xfff30fd1,
+   "vminav%v.s%18-19s\t%12-15r, %1-3,5Q"},
+
+  /* Vector VMLA.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMLA,
+   0xee010e40, 0xef811f70,
+   "vmla%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VMLALDAV.  Note must appear before VMLADAV due to instruction
      opcode aliasing.  */
@@ -5064,6 +5183,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VMLA:
+    case MVE_VMAX:
+    case MVE_VMIN:
     case MVE_VBRSR:
     case MVE_VADD_VEC_T2:
     case MVE_VSUB_VEC_T2:
@@ -5179,6 +5301,12 @@ is_mve_encoding_conflict (unsigned long given,
 	  return FALSE;
       }
 
+    case MVE_VMAXA:
+    case MVE_VMINA:
+    case MVE_VMAXV:
+    case MVE_VMAXAV:
+    case MVE_VMINV:
+    case MVE_VMINAV:
     case MVE_VQRSHL_T2:
     case MVE_VQSHL_T1:
     case MVE_VRSHL_T2:
@@ -5761,6 +5889,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VMLA:
     case MVE_VBRSR:
     case MVE_VADD_FP_T2:
     case MVE_VSUB_FP_T2:
@@ -5971,6 +6100,14 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VMAXV:
+    case MVE_VMAXAV:
+    case MVE_VMAXNMV_FP:
+    case MVE_VMAXNMAV_FP:
+    case MVE_VMINNMV_FP:
+    case MVE_VMINNMAV_FP:
+    case MVE_VMINV:
+    case MVE_VMINAV:
     case MVE_VABAV:
     case MVE_VMOV_HFP_TO_GP:
     case MVE_VMOV_GP_TO_VEC_LANE:
@@ -6870,6 +7007,15 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VLDRD_GATHER_T4:
     case MVE_VLDRB_T1:
     case MVE_VLDRH_T2:
+    case MVE_VMAX:
+    case MVE_VMAXA:
+    case MVE_VMAXV:
+    case MVE_VMAXAV:
+    case MVE_VMIN:
+    case MVE_VMINA:
+    case MVE_VMINV:
+    case MVE_VMINAV:
+    case MVE_VMLA:
     case MVE_VMLAS:
     case MVE_VPT_VEC_T1:
     case MVE_VPT_VEC_T2:
@@ -6926,6 +7072,14 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VFMA_FP:
     case MVE_VFMS_FP:
     case MVE_VFMAS_FP_SCALAR:
+    case MVE_VMAXNM_FP:
+    case MVE_VMAXNMA_FP:
+    case MVE_VMAXNMV_FP:
+    case MVE_VMAXNMAV_FP:
+    case MVE_VMINNM_FP:
+    case MVE_VMINNMA_FP:
+    case MVE_VMINNMV_FP:
+    case MVE_VMINNMAV_FP:
     case MVE_VPT_FP_T1:
     case MVE_VPT_FP_T2:
       if (size == 0)
