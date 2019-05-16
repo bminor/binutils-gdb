@@ -15591,6 +15591,26 @@ do_mve_vcmp (void)
 }
 
 static void
+do_mve_vmaxa_vmina (void)
+{
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  enum neon_shape rs = neon_select_shape (NS_QQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (2, rs, N_EQK, N_KEY | N_S8 | N_S16 | N_S32);
+
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= neon_logbits (et.size) << 18;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.is_neon = 1;
+}
+
+static void
 do_mve_vfmas (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
@@ -15656,6 +15676,26 @@ do_mve_viddup (void)
   inst.instruction |= (imm > 2) << 7;
   inst.instruction |= Rm << 1;
   inst.instruction |= (imm == 2 || imm == 8);
+  inst.is_neon = 1;
+}
+
+static void
+do_mve_vmaxnma_vminnma (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQ, NS_NULL);
+  struct neon_type_el et
+    = neon_check_type (2, rs, N_EQK, N_F_MVE | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  inst.instruction |= (et.size == 16) << 28;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
   inst.is_neon = 1;
 }
 
@@ -16700,6 +16740,11 @@ do_neon_dyadic_if_su (void)
   enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_QQR, NS_NULL);
   struct neon_type_el et = neon_check_type (3, rs, N_EQK , N_EQK,
 					    N_SUF_32 | N_KEY);
+
+  constraint ((inst.instruction == ((unsigned) N_MNEM_vmax)
+	       || inst.instruction == ((unsigned) N_MNEM_vmin))
+	      && et.type == NT_float
+	      && !ARM_CPU_HAS_FEATURE (cpu_variant,fpu_neon_ext_v1), BAD_FPU);
 
   if (check_simd_pred_availability (et.type == NT_float,
 				    NEON_CHECK_ARCH | NEON_CHECK_CC))
@@ -19743,12 +19788,13 @@ do_vsel (void)
 static void
 do_vmaxnm (void)
 {
-  set_pred_insn_type (OUTSIDE_PRED_INSN);
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    set_pred_insn_type (OUTSIDE_PRED_INSN);
 
   if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH8))
     return;
 
   neon_dyadic_misc (NT_untyped, N_F_16_32, 0);
@@ -22951,8 +22997,6 @@ static const struct asm_opcode insns[] =
   nUF(vselvs, _vselvs, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselge, _vselge, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
-  nUF(vmaxnm, _vmaxnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
-  nUF(vminnm, _vminnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
   nCE(vrintr, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintr),
   nCE(vrintz, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintz),
   nCE(vrintx, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintx),
@@ -23671,9 +23715,7 @@ static const struct asm_opcode insns[] =
  NUF(vbifq,     1300110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
   /* Int and float variants, types S8 S16 S32 U8 U16 U32 F16 F32.  */
  nUF(vabdq,     _vabd,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
- nUF(vmax,      _vmax,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
  nUF(vmaxq,     _vmax,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
- nUF(vmin,      _vmin,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
  nUF(vminq,     _vmin,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
   /* Comparisons. Types S8 S16 S32 U8 U16 U32 F32. Non-immediate versions fall
      back to neon_dyadic_if_su.  */
@@ -24370,11 +24412,15 @@ static const struct asm_opcode insns[] =
  mCEF(vdwdup,	_vdwdup,    4, (RMQ, RRe, RR, EXPi),		  mve_viddup),
  mCEF(vidup,	_vidup,	    3, (RMQ, RRe, EXPi),		  mve_viddup),
  mCEF(viwdup,	_viwdup,    4, (RMQ, RRe, RR, EXPi),		  mve_viddup),
+ mToC("vmaxa",	ee330e81,   2, (RMQ, RMQ),			  mve_vmaxa_vmina),
+ mToC("vmina",	ee331e81,   2, (RMQ, RMQ),			  mve_vmaxa_vmina),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
  mToC("vcmul", ee300e00,   4, (RMQ, RMQ, RMQ, EXPi),		  mve_vcmul),
  mToC("vfmas", ee311e40,   3, (RMQ, RMQ, RR),			  mve_vfmas),
+ mToC("vmaxnma", ee3f0e81, 2, (RMQ, RMQ),			  mve_vmaxnma_vminnma),
+ mToC("vminnma", ee3f1e81, 2, (RMQ, RMQ),			  mve_vmaxnma_vminnma),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1
@@ -24418,6 +24464,8 @@ static const struct asm_opcode insns[] =
  mnUF(vcvtp,  _vcvta,  2, (RNSDQMQ, oRNSDQMQ),		neon_cvtp),
  mnUF(vcvtn,  _vcvta,  3, (RNSDQMQ, oRNSDQMQ, oI32z),	neon_cvtn),
  mnUF(vcvtm,  _vcvta,  2, (RNSDQMQ, oRNSDQMQ),		neon_cvtm),
+ mnUF(vmaxnm, _vmaxnm, 3, (RNSDQMQ, oRNSDQMQ, RNSDQMQ),	vmaxnm),
+ mnUF(vminnm, _vminnm, 3, (RNSDQMQ, oRNSDQMQ, RNSDQMQ),	vmaxnm),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & fpu_neon_ext_v1
@@ -24436,6 +24484,8 @@ static const struct asm_opcode insns[] =
  MNUF(vhadd,     00000000,	  3, (RNDQMQ, oRNDQMQ, RNDQMQR),  neon_dyadic_i_su),
  MNUF(vrhadd,    00000100,	  3, (RNDQMQ, oRNDQMQ, RNDQMQ),	  neon_dyadic_i_su),
  MNUF(vhsub,     00000200,	  3, (RNDQMQ, oRNDQMQ, RNDQMQR),  neon_dyadic_i_su),
+ mnUF(vmin,      _vmin,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
+ mnUF(vmax,      _vmax,    3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3
