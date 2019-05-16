@@ -1,5 +1,15 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (M_MNEM_vmaxv, M_MNEM_vmaxav, M_MNEM_vminv,
+	 M_MNEM_vminav): New instruction encodings.
+	(do_mve_vmaxv): New encoding function.
+	(insns): Add entries for new MVE mnemonics.
+	* testsuite/gas/arm/mve-vmaxv-vminv-bad.d: New test.
+	* testsuite/gas/arm/mve-vmaxv-vminv-bad.l: New test.
+	* testsuite/gas/arm/mve-vmaxv-vminv-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vmaxnmv): New encoding function.
 	(insns): Add entries for new mnemonics.
 	* testsuite/gas/arm/mve-vmaxnmv-vminnmv-bad.d: New test.

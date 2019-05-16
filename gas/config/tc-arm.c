@@ -14163,6 +14163,10 @@ do_t_loloop (void)
 #define M_MNEM_vdwdup	0xee011f60
 #define M_MNEM_vidup	0xee010f6e
 #define M_MNEM_viwdup	0xee010f60
+#define M_MNEM_vmaxv	0xeee20f00
+#define M_MNEM_vmaxav	0xeee00f00
+#define M_MNEM_vminv	0xeee20f80
+#define M_MNEM_vminav	0xeee00f80
 
 /* Neon instruction encoder helpers.  */
 
@@ -17267,6 +17271,31 @@ do_mve_vmaxnmv (void)
 
   mve_encode_rq (et.size == 16, 64);
 }
+
+static void
+do_mve_vmaxv (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_RQ, NS_NULL);
+  struct neon_type_el et;
+
+  if (inst.instruction == M_MNEM_vmaxv || inst.instruction == M_MNEM_vminv)
+    et = neon_check_type (2, rs, N_EQK, N_SU_MVE | N_KEY);
+  else
+    et = neon_check_type (2, rs, N_EQK, N_S8 | N_S16 | N_S32 | N_KEY);
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  if (inst.operands[0].reg == REG_SP)
+    as_tsktsk (MVE_BAD_SP);
+  else if (inst.operands[0].reg == REG_PC)
+    as_tsktsk (MVE_BAD_PC);
+
+  mve_encode_rq (et.type == NT_unsigned, et.size);
+}
+
 
 static void
 do_neon_qrdmlah (void)
@@ -24434,6 +24463,10 @@ static const struct asm_opcode insns[] =
  mCEF(viwdup,	_viwdup,    4, (RMQ, RRe, RR, EXPi),		  mve_viddup),
  mToC("vmaxa",	ee330e81,   2, (RMQ, RMQ),			  mve_vmaxa_vmina),
  mToC("vmina",	ee331e81,   2, (RMQ, RMQ),			  mve_vmaxa_vmina),
+ mCEF(vmaxv,	_vmaxv,	  2, (RR, RMQ),				  mve_vmaxv),
+ mCEF(vmaxav,	_vmaxav,  2, (RR, RMQ),				  mve_vmaxv),
+ mCEF(vminv,	_vminv,	  2, (RR, RMQ),				  mve_vmaxv),
+ mCEF(vminav,	_vminav,  2, (RR, RMQ),				  mve_vmaxv),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
