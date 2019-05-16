@@ -1,5 +1,22 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): Add new operand.
+	(parse_operands): Handle new operand.
+	(do_neon_shl_imm): Accept MVE variants.
+	(do_neon_shl): Likewise.
+	(do_neon_qshl_imm): Likewise.
+	(do_neon_qshl): Likewise.
+	(do_neon_qshlu_imm): Likewise.
+	(insns): Likewise.
+	* testsuite/gas/arm/mve-vqshl-bad.d: New test.
+	* testsuite/gas/arm/mve-vqshl-bad.l: New test.
+	* testsuite/gas/arm/mve-vqshl-bad.s: New test.
+	* testsuite/gas/arm/mve-vshl-bad.d: New test.
+	* testsuite/gas/arm/mve-vshl-bad.l: New test.
+	* testsuite/gas/arm/mve-vshl-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_neon_sli): Accept MVE variants.
 	(do_neon_sri): Likewise.
 	(do_neon_rev): Likewise.

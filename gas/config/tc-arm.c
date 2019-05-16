@@ -6965,6 +6965,8 @@ enum operand_parse_code
   /* Neon D, Q or MVE vector register, or big immediate for logic and VMVN.  */
   OP_RNDQMQ_Ibig,
   OP_RNDQ_I63b, /* Neon D or Q reg, or immediate for shift.  */
+  OP_RNDQMQ_I63b_RR, /* Neon D or Q reg, immediate for shift, MVE vector or
+			ARM register.  */
   OP_RIWR_I32z, /* iWMMXt wR register, or immediate 0 .. 32 for iWMMXt2.  */
   OP_VLDR,	/* VLDR operand.  */
 
@@ -7421,6 +7423,13 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  }
 	  break;
 
+	case OP_RNDQMQ_I63b_RR:
+	  po_reg_or_goto (REG_TYPE_MQ, try_rndq_i63b_rr);
+	  break;
+	try_rndq_i63b_rr:
+	  po_reg_or_goto (REG_TYPE_RN, try_rndq_i63b);
+	  break;
+	try_rndq_i63b:
 	case OP_RNDQ_I63b:
 	  {
 	    po_reg_or_goto (REG_TYPE_NDQ, try_shimm);
@@ -16378,12 +16387,25 @@ neon_imm_shift (int write_ubit, int uval, int isquad, struct neon_type_el et,
 }
 
 static void
-do_neon_shl_imm (void)
+do_neon_shl (void)
 {
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+   return;
+
   if (!inst.operands[2].isreg)
     {
-      enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-      struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_KEY | N_I_ALL);
+      enum neon_shape rs;
+      struct neon_type_el et;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  rs = neon_select_shape (NS_QQI, NS_NULL);
+	  et = neon_check_type (2, rs, N_EQK, N_KEY | N_I_MVE);
+	}
+      else
+	{
+	  rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+	  et = neon_check_type (2, rs, N_EQK, N_KEY | N_I_ALL);
+	}
       int imm = inst.operands[2].imm;
 
       constraint (imm < 0 || (unsigned)imm >= et.size,
@@ -16393,33 +16415,77 @@ do_neon_shl_imm (void)
     }
   else
     {
-      enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-      struct neon_type_el et = neon_check_type (3, rs,
-	N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
-      unsigned int tmp;
+      enum neon_shape rs;
+      struct neon_type_el et;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  rs = neon_select_shape (NS_QQQ, NS_QQR, NS_NULL);
+	  et = neon_check_type (3, rs, N_EQK, N_SU_MVE | N_KEY, N_EQK | N_EQK);
+	}
+      else
+	{
+	  rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+	  et = neon_check_type (3, rs, N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
+	}
 
-      /* VSHL/VQSHL 3-register variants have syntax such as:
-	   vshl.xx Dd, Dm, Dn
-	 whereas other 3-register operations encoded by neon_three_same have
-	 syntax like:
-	   vadd.xx Dd, Dn, Dm
-	 (i.e. with Dn & Dm reversed). Swap operands[1].reg and operands[2].reg
-	 here.  */
-      tmp = inst.operands[2].reg;
-      inst.operands[2].reg = inst.operands[1].reg;
-      inst.operands[1].reg = tmp;
-      NEON_ENCODE (INTEGER, inst);
-      neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+
+      if (rs == NS_QQR)
+	{
+	  constraint (inst.operands[0].reg != inst.operands[1].reg,
+		       _("invalid instruction shape"));
+	  if (inst.operands[2].reg == REG_SP)
+	    as_tsktsk (MVE_BAD_SP);
+	  else if (inst.operands[2].reg == REG_PC)
+	    as_tsktsk (MVE_BAD_PC);
+
+	  inst.instruction = 0xee311e60;
+	  inst.instruction |= (et.type == NT_unsigned) << 28;
+	  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+	  inst.instruction |= neon_logbits (et.size) << 18;
+	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+	  inst.instruction |= inst.operands[2].reg;
+	  inst.is_neon = 1;
+	}
+      else
+	{
+	  unsigned int tmp;
+
+	  /* VSHL/VQSHL 3-register variants have syntax such as:
+	       vshl.xx Dd, Dm, Dn
+	     whereas other 3-register operations encoded by neon_three_same have
+	     syntax like:
+	       vadd.xx Dd, Dn, Dm
+	     (i.e. with Dn & Dm reversed). Swap operands[1].reg and
+	     operands[2].reg here.  */
+	  tmp = inst.operands[2].reg;
+	  inst.operands[2].reg = inst.operands[1].reg;
+	  inst.operands[1].reg = tmp;
+	  NEON_ENCODE (INTEGER, inst);
+	  neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+	}
     }
 }
 
 static void
-do_neon_qshl_imm (void)
+do_neon_qshl (void)
 {
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+   return;
+
   if (!inst.operands[2].isreg)
     {
-      enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-      struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+      enum neon_shape rs;
+      struct neon_type_el et;
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  rs = neon_select_shape (NS_QQI, NS_NULL);
+	  et = neon_check_type (2, rs, N_EQK, N_KEY | N_SU_MVE);
+	}
+      else
+	{
+	  rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+	  et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+	}
       int imm = inst.operands[2].imm;
 
       constraint (imm < 0 || (unsigned)imm >= et.size,
@@ -16429,17 +16495,48 @@ do_neon_qshl_imm (void)
     }
   else
     {
-      enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
-      struct neon_type_el et = neon_check_type (3, rs,
-	N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
-      unsigned int tmp;
+      enum neon_shape rs;
+      struct neon_type_el et;
 
-      /* See note in do_neon_shl_imm.  */
-      tmp = inst.operands[2].reg;
-      inst.operands[2].reg = inst.operands[1].reg;
-      inst.operands[1].reg = tmp;
-      NEON_ENCODE (INTEGER, inst);
-      neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	{
+	  rs = neon_select_shape (NS_QQQ, NS_QQR, NS_NULL);
+	  et = neon_check_type (3, rs, N_EQK, N_SU_MVE | N_KEY, N_EQK | N_EQK);
+	}
+      else
+	{
+	  rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+	  et = neon_check_type (3, rs, N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
+	}
+
+      if (rs == NS_QQR)
+	{
+	  constraint (inst.operands[0].reg != inst.operands[1].reg,
+		       _("invalid instruction shape"));
+	  if (inst.operands[2].reg == REG_SP)
+	    as_tsktsk (MVE_BAD_SP);
+	  else if (inst.operands[2].reg == REG_PC)
+	    as_tsktsk (MVE_BAD_PC);
+
+	  inst.instruction = 0xee311ee0;
+	  inst.instruction |= (et.type == NT_unsigned) << 28;
+	  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+	  inst.instruction |= neon_logbits (et.size) << 18;
+	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+	  inst.instruction |= inst.operands[2].reg;
+	  inst.is_neon = 1;
+	}
+      else
+	{
+	  unsigned int tmp;
+
+	  /* See note in do_neon_shl.  */
+	  tmp = inst.operands[2].reg;
+	  inst.operands[2].reg = inst.operands[1].reg;
+	  inst.operands[1].reg = tmp;
+	  NEON_ENCODE (INTEGER, inst);
+	  neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
+	}
     }
 }
 
@@ -17924,9 +18021,23 @@ do_neon_sri (void)
 static void
 do_neon_qshlu_imm (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
-  struct neon_type_el et = neon_check_type (2, rs,
-    N_EQK | N_UNS, N_S8 | N_S16 | N_S32 | N_S64 | N_KEY);
+  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+    return;
+
+  enum neon_shape rs;
+  struct neon_type_el et;
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      rs = neon_select_shape (NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK, N_S8 | N_S16 | N_S32 | N_KEY);
+    }
+  else
+    {
+      rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK | N_UNS,
+			    N_S8 | N_S16 | N_S32 | N_S64 | N_KEY);
+    }
+
   int imm = inst.operands[2].imm;
   constraint (imm < 0 || (unsigned)imm >= et.size,
 	      _("immediate out of range for shift"));
@@ -24301,12 +24412,10 @@ static const struct asm_opcode insns[] =
  NUF(vrshlq,    0000500, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
  NUF(vqrshlq,   0000510, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
   /* If not immediate, fall back to neon_dyadic_i64_su.
-     shl_imm should accept I8 I16 I32 I64,
-     qshl_imm should accept S8 S16 S32 S64 U8 U16 U32 U64.  */
- nUF(vshl,      _vshl,    3, (RNDQ, oRNDQ, RNDQ_I63b), neon_shl_imm),
- nUF(vshlq,     _vshl,    3, (RNQ,  oRNQ,  RNDQ_I63b), neon_shl_imm),
- nUF(vqshl,     _vqshl,   3, (RNDQ, oRNDQ, RNDQ_I63b), neon_qshl_imm),
- nUF(vqshlq,    _vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl_imm),
+     shl should accept I8 I16 I32 I64,
+     qshl should accept S8 S16 S32 S64 U8 U16 U32 U64.  */
+ nUF(vshlq,     _vshl,    3, (RNQ,  oRNQ,  RNDQ_I63b), neon_shl),
+ nUF(vqshlq,    _vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl),
   /* Logic ops, types optional & ignored.  */
  nUF(vandq,     _vand,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
  nUF(vbicq,     _vbic,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
@@ -24389,7 +24498,6 @@ static const struct asm_opcode insns[] =
  NUF(vsliq,     1800510, 3, (RNQ,  oRNQ,  I63), neon_sli),
  NUF(vsriq,     1800410, 3, (RNQ,  oRNQ,  I64), neon_sri),
   /* QSHL{U} immediate accepts S8 S16 S32 S64 U8 U16 U32 U64.  */
- NUF(vqshlu,    1800610, 3, (RNDQ, oRNDQ, I63), neon_qshlu_imm),
  NUF(vqshluq,   1800610, 3, (RNQ,  oRNQ,  I63), neon_qshlu_imm),
   /* Right shift immediate, saturating & narrowing, with rounding variants.
      Types accepted S16 S32 S64 U16 U32 U64.  */
@@ -25165,6 +25273,9 @@ static const struct asm_opcode insns[] =
  MNUF(vrev64,    1b00000,  2, (RNDQMQ, RNDQMQ),     neon_rev),
  MNUF(vrev32,    1b00080,  2, (RNDQMQ, RNDQMQ),     neon_rev),
  MNUF(vrev16,    1b00100,  2, (RNDQMQ, RNDQMQ),     neon_rev),
+ mnUF(vshl,	 _vshl,    3, (RNDQMQ, oRNDQMQ, RNDQMQ_I63b_RR), neon_shl),
+ mnUF(vqshl,     _vqshl,   3, (RNDQMQ, oRNDQMQ, RNDQMQ_I63b_RR), neon_qshl),
+ MNUF(vqshlu,    1800610,  3, (RNDQMQ, oRNDQMQ, I63),		 neon_qshlu_imm),
 
 #undef	ARM_VARIANT
 #define ARM_VARIANT & arm_ext_v8_3
