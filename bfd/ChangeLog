@@ -1,3 +1,7 @@
+2019-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (elf32_arm_write_section): Revert last change.
+
 2019-05-15  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_write_section): Don't leave
