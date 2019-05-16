@@ -21,6 +21,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include <assert.h>
 
 #include "disassemble.h"
 #include "opcode/arm.h"
@@ -69,6 +70,23 @@ struct arm_private_data
 
 enum mve_instructions
 {
+  MVE_VPST,
+  MVE_VPT_FP_T1,
+  MVE_VPT_FP_T2,
+  MVE_VPT_VEC_T1,
+  MVE_VPT_VEC_T2,
+  MVE_VPT_VEC_T3,
+  MVE_VPT_VEC_T4,
+  MVE_VPT_VEC_T5,
+  MVE_VPT_VEC_T6,
+  MVE_VCMP_FP_T1,
+  MVE_VCMP_FP_T2,
+  MVE_VCMP_VEC_T1,
+  MVE_VCMP_VEC_T2,
+  MVE_VCMP_VEC_T3,
+  MVE_VCMP_VEC_T4,
+  MVE_VCMP_VEC_T5,
+  MVE_VCMP_VEC_T6,
   MVE_NONE
 };
 
@@ -76,6 +94,10 @@ enum mve_unpredictable
 {
   UNPRED_IT_BLOCK,		/* Unpredictable because mve insn in it block.
 				 */
+  UNPRED_FCA_0_FCB_1,		/* Unpredictable because fcA = 0 and
+				   fcB = 1 (vpt).  */
+  UNPRED_R13,			/* Unpredictable because r13 (sp) or
+				   r15 (sp) used.  */
   UNPRED_NONE			/* No unpredictable behavior.  */
 };
 
@@ -1781,10 +1803,114 @@ static const struct opcode32 neon_opcodes[] =
 
    %%			%
 
-   */
+   %i			print MVE predicate(s) for vpt and vpst
+   %n			print vector comparison code for predicated instruction
+   %v			print vector predicate for instruction in predicated
+			block
+   %<bitfield>Q		print as a MVE Q register
+   %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
+			UNPREDICTABLE
+   %<bitfield>s		print size for vector predicate & non VMOV instructions
+*/
 
 static const struct mopcode32 mve_opcodes[] =
 {
+  /* MVE.  */
+
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPST,
+   0xfe310f4d, 0xffbf1fff,
+   "vpst%i"
+  },
+
+  /* Floating point VPT T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VPT_FP_T1,
+   0xee310f00, 0xefb10f50,
+   "vpt%i.f%28s\t%n, %17-19Q, %1-3,5Q"},
+  /* Floating point VPT T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VPT_FP_T2,
+   0xee310f40, 0xefb10f50,
+   "vpt%i.f%28s\t%n, %17-19Q, %0-3Z"},
+
+  /* Vector VPT T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T1,
+   0xfe010f00, 0xff811f51,
+   "vpt%i.i%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VPT T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T2,
+   0xfe010f01, 0xff811f51,
+   "vpt%i.u%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VPT T3.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T3,
+   0xfe011f00, 0xff811f50,
+   "vpt%i.s%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VPT T4.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T4,
+   0xfe010f40, 0xff811f70,
+   "vpt%i.i%20-21s\t%n, %17-19Q, %0-3Z"},
+  /* Vector VPT T5.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T5,
+   0xfe010f60, 0xff811f70,
+   "vpt%i.u%20-21s\t%n, %17-19Q, %0-3Z"},
+  /* Vector VPT T6.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPT_VEC_T6,
+   0xfe011f40, 0xff811f50,
+   "vpt%i.s%20-21s\t%n, %17-19Q, %0-3Z"},
+
+  /* Vector VCMP floating point T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCMP_FP_T1,
+   0xee310f00, 0xeff1ef50,
+   "vcmp%v.f%28s\t%n, %17-19Q, %1-3,5Q"},
+
+  /* Vector VCMP floating point T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCMP_FP_T2,
+   0xee310f40, 0xeff1ef50,
+   "vcmp%v.f%28s\t%n, %17-19Q, %0-3Z"},
+
+  /* Vector VCMP T1.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T1,
+   0xfe010f00, 0xffc1ff51,
+   "vcmp%v.i%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VCMP T2.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T2,
+   0xfe010f01, 0xffc1ff51,
+   "vcmp%v.u%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VCMP T3.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T3,
+   0xfe011f00, 0xffc1ff50,
+   "vcmp%v.s%20-21s\t%n, %17-19Q, %1-3,5Q"},
+  /* Vector VCMP T4.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T4,
+   0xfe010f40, 0xffc1ff70,
+   "vcmp%v.i%20-21s\t%n, %17-19Q, %0-3Z"},
+  /* Vector VCMP T5.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T5,
+   0xfe010f60, 0xffc1ff70,
+   "vcmp%v.u%20-21s\t%n, %17-19Q, %0-3Z"},
+  /* Vector VCMP T6.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCMP_VEC_T6,
+   0xfe011f40, 0xffc1ff50,
+   "vcmp%v.s%20-21s\t%n, %17-19Q, %0-3Z"},
+
+  {ARM_FEATURE_CORE_LOW (0),
+   MVE_NONE,
+   0x00000000, 0x00000000, 0}
 };
 
 /* Opcode tables: ARM, 16-bit Thumb, 32-bit Thumb.  All three are partially
@@ -3379,6 +3505,56 @@ static const char *const iwmmxt_cregnames[] =
   "wcgr0", "wcgr1", "wcgr2", "wcgr3", "reserved", "reserved", "reserved", "reserved"
 };
 
+static const char *const vec_condnames[] =
+{ "eq", "ne", "cs", "hi", "ge", "lt", "gt", "le"
+};
+
+static const char *const mve_predicatenames[] =
+{ "", "ttt", "tt", "tte", "t", "tee", "te", "tet", "",
+  "eee", "ee", "eet", "e", "ett", "et", "ete"
+};
+
+/* Names for 2-bit size field for mve vector isntructions.  */
+static const char *const mve_vec_sizename[] =
+  { "8", "16", "32", "64"};
+
+/* Indicates whether we are processing a then predicate,
+   else predicate or none at all.  */
+enum vpt_pred_state
+{
+  PRED_NONE,
+  PRED_THEN,
+  PRED_ELSE
+};
+
+/* Information used to process a vpt block and subsequent instructions.  */
+struct vpt_block
+{
+  /* Are we in a vpt block.  */
+  bfd_boolean in_vpt_block;
+
+  /* Next predicate state if in vpt block.  */
+  enum vpt_pred_state next_pred_state;
+
+  /* Mask from vpt/vpst instruction.  */
+  long predicate_mask;
+
+  /* Instruction number in vpt block.  */
+  long current_insn_num;
+
+  /* Number of instructions in vpt block..   */
+  long num_pred_insn;
+};
+
+static struct vpt_block vpt_block_state =
+{
+  FALSE,
+  PRED_NONE,
+  0,
+  0,
+  0
+};
+
 /* Default to GCC register name set.  */
 static unsigned int regname_selected = 1;
 
@@ -3401,6 +3577,113 @@ static bfd_vma ifthen_address;
 
 
 /* Functions.  */
+/* Extract the predicate mask for a VPT or VPST instruction.
+   The mask is composed of bits 13-15 (Mkl) and bit 22 (Mkh).  */
+
+static long
+mve_extract_pred_mask (long given)
+{
+  return ((given & 0x00400000) >> 19) | ((given & 0xe000) >> 13);
+}
+
+/* Return the number of instructions in a MVE predicate block.  */
+static long
+num_instructions_vpt_block (long given)
+{
+  long mask = mve_extract_pred_mask (given);
+  if (mask == 0)
+    return 0;
+
+  if (mask == 8)
+    return 1;
+
+  if ((mask & 7) == 4)
+    return 2;
+
+  if ((mask & 3) == 2)
+    return 3;
+
+  if ((mask & 1) == 1)
+    return 4;
+
+  return 0;
+}
+
+static void
+mark_outside_vpt_block (void)
+{
+  vpt_block_state.in_vpt_block = FALSE;
+  vpt_block_state.next_pred_state = PRED_NONE;
+  vpt_block_state.predicate_mask = 0;
+  vpt_block_state.current_insn_num = 0;
+  vpt_block_state.num_pred_insn = 0;
+}
+
+static void
+mark_inside_vpt_block (long given)
+{
+  vpt_block_state.in_vpt_block = TRUE;
+  vpt_block_state.next_pred_state = PRED_THEN;
+  vpt_block_state.predicate_mask = mve_extract_pred_mask (given);
+  vpt_block_state.current_insn_num = 0;
+  vpt_block_state.num_pred_insn = num_instructions_vpt_block (given);
+  assert (vpt_block_state.num_pred_insn >= 1);
+}
+
+static enum vpt_pred_state
+invert_next_predicate_state (enum vpt_pred_state astate)
+{
+  if (astate == PRED_THEN)
+    return PRED_ELSE;
+  else if (astate == PRED_ELSE)
+    return PRED_THEN;
+  else
+    return PRED_NONE;
+}
+
+static enum vpt_pred_state
+update_next_predicate_state (void)
+{
+  long pred_mask = vpt_block_state.predicate_mask;
+  long mask_for_insn = 0;
+
+  switch (vpt_block_state.current_insn_num)
+    {
+    case 1:
+      mask_for_insn = 8;
+      break;
+
+    case 2:
+      mask_for_insn = 4;
+      break;
+
+    case 3:
+      mask_for_insn = 2;
+      break;
+
+    case 4:
+      return PRED_NONE;
+    }
+
+  if (pred_mask & mask_for_insn)
+    return invert_next_predicate_state (vpt_block_state.next_pred_state);
+  else
+    return vpt_block_state.next_pred_state;
+}
+
+static void
+update_vpt_block_state (void)
+{
+  vpt_block_state.current_insn_num++;
+  if (vpt_block_state.current_insn_num == vpt_block_state.num_pred_insn)
+    {
+      /* No more instructions to process in vpt block.  */
+      mark_outside_vpt_block ();
+      return;
+    }
+
+  vpt_block_state.next_pred_state = update_next_predicate_state ();
+}
 
 /* Decode a bitfield of the form matching regexp (N(-N)?,)*N(-N)?.
    Returns pointer to following character of the format string and
@@ -3504,6 +3787,38 @@ is_mve_architecture (struct disassemble_info *info)
     return FALSE;
 }
 
+static bfd_boolean
+is_vpt_instruction (long given)
+{
+
+  /* If mkh:mkl is '0000' then its not a vpt/vpst instruction.  */
+  if ((given & 0x0040e000) == 0)
+    return FALSE;
+
+  /* VPT floating point T1 variant.  */
+  if (((given & 0xefb10f50) == 0xee310f00 && ((given & 0x1001) != 0x1))
+  /* VPT floating point T2 variant.  */
+      || ((given & 0xefb10f50) == 0xee310f40)
+  /* VPT vector T1 variant.  */
+      || ((given & 0xff811f51) == 0xfe010f00)
+  /* VPT vector T2 variant.  */
+      || ((given & 0xff811f51) == 0xfe010f01
+	  && ((given & 0x300000) != 0x300000))
+  /* VPT vector T3 variant.  */
+      || ((given & 0xff811f50) == 0xfe011f00)
+  /* VPT vector T4 variant.  */
+      || ((given & 0xff811f70) == 0xfe010f40)
+  /* VPT vector T5 variant.  */
+      || ((given & 0xff811f70) == 0xfe010f60)
+  /* VPT vector T6 variant.  */
+      || ((given & 0xff811f50) == 0xfe011f40)
+  /* VPST vector T variant.  */
+      || ((given & 0xffbf1fff) == 0xfe310f4d))
+    return TRUE;
+  else
+    return FALSE;
+}
+
 /* Decode a bitfield from opcode GIVEN, with starting bitfield = START
    and ending bitfield = END.  END must be greater than START.  */
 
@@ -3550,7 +3865,69 @@ static bfd_boolean
 is_mve_encoding_conflict (unsigned long given,
 			  enum mve_instructions matched_insn)
 {
-  return FALSE;
+  switch (matched_insn)
+    {
+    case MVE_VPST:
+      if (arm_decode_field_multiple (given, 13, 15, 22, 22) == 0)
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VPT_FP_T1:
+      if (arm_decode_field_multiple (given, 13, 15, 22, 22) == 0)
+	return TRUE;
+      if ((arm_decode_field (given, 12, 12) == 0)
+	  && (arm_decode_field (given, 0, 0) == 1))
+	return TRUE;
+      return FALSE;
+
+    case MVE_VPT_FP_T2:
+      if (arm_decode_field_multiple (given, 13, 15, 22, 22) == 0)
+	return TRUE;
+      if (arm_decode_field (given, 0, 3) == 0xd)
+	return TRUE;
+      return FALSE;
+
+    case MVE_VPT_VEC_T1:
+    case MVE_VPT_VEC_T2:
+    case MVE_VPT_VEC_T3:
+    case MVE_VPT_VEC_T4:
+    case MVE_VPT_VEC_T5:
+    case MVE_VPT_VEC_T6:
+      if (arm_decode_field_multiple (given, 13, 15, 22, 22) == 0)
+	return TRUE;
+      if (arm_decode_field (given, 20, 21) == 3)
+	return TRUE;
+      return FALSE;
+
+    case MVE_VCMP_FP_T1:
+      if ((arm_decode_field (given, 12, 12) == 0)
+	  && (arm_decode_field (given, 0, 0) == 1))
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VCMP_FP_T2:
+      if (arm_decode_field (given, 0, 3) == 0xd)
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VCMP_VEC_T1:
+    case MVE_VCMP_VEC_T2:
+    case MVE_VCMP_VEC_T3:
+    case MVE_VCMP_VEC_T4:
+    case MVE_VCMP_VEC_T5:
+    case MVE_VCMP_VEC_T6:
+      if (arm_decode_field (given, 20, 21) == 3)
+	return TRUE;
+      else
+	return FALSE;
+
+    default:
+      return FALSE;
+
+    }
 }
 
 /* Return FALSE if GIVEN is not an undefined encoding for MATCHED_INSN.
@@ -3576,18 +3953,37 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 {
   *unpredictable_code = UNPRED_NONE;
 
-  return FALSE;
+  switch (matched_insn)
+    {
+    case MVE_VCMP_FP_T2:
+    case MVE_VPT_FP_T2:
+      if ((arm_decode_field (given, 12, 12) == 0)
+	  && (arm_decode_field (given, 5, 5) == 1))
+	{
+	  *unpredictable_code = UNPRED_FCA_0_FCB_1;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    case MVE_VPT_VEC_T4:
+    case MVE_VPT_VEC_T5:
+    case MVE_VPT_VEC_T6:
+    case MVE_VCMP_VEC_T4:
+    case MVE_VCMP_VEC_T5:
+    case MVE_VCMP_VEC_T6:
+      if (arm_decode_field (given, 0, 3) == 0xd)
+	{
+	  *unpredictable_code = UNPRED_R13;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
+    default:
+      return FALSE;
+    }
 }
-
-#define W_BIT 21
-#define I_BIT 22
-#define U_BIT 23
-#define P_BIT 24
-
-#define WRITEBACK_BIT_SET   (given & (1 << W_BIT))
-#define IMMEDIATE_BIT_SET   (given & (1 << I_BIT))
-#define NEGATIVE_BIT_SET   ((given & (1 << U_BIT)) == 0)
-#define PRE_BIT_SET         (given & (1 << P_BIT))
 
 static void
 print_mve_undefined (struct disassemble_info *info,
@@ -3621,10 +4017,153 @@ print_mve_unpredictable (struct disassemble_info *info,
       func (stream, "mve instruction in it block");
       break;
 
+    case UNPRED_FCA_0_FCB_1:
+      func (stream, "condition bits, fca = 0 and fcb = 1");
+      break;
+
+    case UNPRED_R13:
+      func (stream, "use of r13 (sp)");
+      break;
+
     case UNPRED_NONE:
       break;
     }
 }
+
+static void
+print_instruction_predicate (struct disassemble_info *info)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  if (vpt_block_state.next_pred_state == PRED_THEN)
+    func (stream, "t");
+  else if (vpt_block_state.next_pred_state == PRED_ELSE)
+    func (stream, "e");
+}
+
+static void
+print_mve_size (struct disassemble_info *info,
+		unsigned long size,
+		enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  switch (matched_insn)
+    {
+    case MVE_VCMP_VEC_T1:
+    case MVE_VCMP_VEC_T2:
+    case MVE_VCMP_VEC_T3:
+    case MVE_VCMP_VEC_T4:
+    case MVE_VCMP_VEC_T5:
+    case MVE_VCMP_VEC_T6:
+    case MVE_VPT_VEC_T1:
+    case MVE_VPT_VEC_T2:
+    case MVE_VPT_VEC_T3:
+    case MVE_VPT_VEC_T4:
+    case MVE_VPT_VEC_T5:
+    case MVE_VPT_VEC_T6:
+      if (size <= 3)
+	func (stream, "%s", mve_vec_sizename[size]);
+      else
+	func (stream, "<undef size>");
+      break;
+
+    case MVE_VCMP_FP_T1:
+    case MVE_VCMP_FP_T2:
+    case MVE_VPT_FP_T1:
+    case MVE_VPT_FP_T2:
+      if (size == 0)
+	func (stream, "32");
+      else if (size == 1)
+	func (stream, "16");
+      break;
+
+    default:
+      break;
+    }
+}
+
+static void
+print_vec_condition (struct disassemble_info *info, long given,
+		     enum mve_instructions matched_insn)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+  long vec_cond = 0;
+
+  switch (matched_insn)
+    {
+    case MVE_VPT_FP_T1:
+    case MVE_VCMP_FP_T1:
+      vec_cond = (((given & 0x1000) >> 10)
+		  | ((given & 1) << 1)
+		  | ((given & 0x0080) >> 7));
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_FP_T2:
+    case MVE_VCMP_FP_T2:
+      vec_cond = (((given & 0x1000) >> 10)
+		  | ((given & 0x0020) >> 4)
+		  | ((given & 0x0080) >> 7));
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T1:
+    case MVE_VCMP_VEC_T1:
+      vec_cond = (given & 0x0080) >> 7;
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T2:
+    case MVE_VCMP_VEC_T2:
+      vec_cond = 2 | ((given & 0x0080) >> 7);
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T3:
+    case MVE_VCMP_VEC_T3:
+      vec_cond = 4 | ((given & 1) << 1) | ((given & 0x0080) >> 7);
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T4:
+    case MVE_VCMP_VEC_T4:
+      vec_cond = (given & 0x0080) >> 7;
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T5:
+    case MVE_VCMP_VEC_T5:
+      vec_cond = 2 | ((given & 0x0080) >> 7);
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_VPT_VEC_T6:
+    case MVE_VCMP_VEC_T6:
+      vec_cond = 4 | ((given & 0x0020) >> 4) | ((given & 0x0080) >> 7);
+      func (stream, "%s",vec_condnames[vec_cond]);
+      break;
+
+    case MVE_NONE:
+    case MVE_VPST:
+    default:
+      break;
+    }
+}
+
+#define W_BIT 21
+#define I_BIT 22
+#define U_BIT 23
+#define P_BIT 24
+
+#define WRITEBACK_BIT_SET (given & (1 << W_BIT))
+#define IMMEDIATE_BIT_SET (given & (1 << I_BIT))
+#define NEGATIVE_BIT_SET  ((given & (1 << U_BIT)) == 0)
+#define PRE_BIT_SET	  (given & (1 << P_BIT))
+
 
 /* Print one coprocessor instruction on INFO->STREAM.
    Return TRUE if the instuction matched, FALSE if this is not a
@@ -4975,6 +5514,62 @@ print_insn_mve (struct disassemble_info *info, long given)
 		      func (stream, "%%");
 		      break;
 
+		    case 'c':
+		      if (ifthen_state)
+			func (stream, "%s", arm_conditional[IFTHEN_COND]);
+		      break;
+
+		    case 'i':
+		      {
+			long mve_mask = mve_extract_pred_mask (given);
+			func (stream, "%s", mve_predicatenames[mve_mask]);
+		      }
+		      break;
+
+		    case 'n':
+		      print_vec_condition (info, given, insn->mve_op);
+		      break;
+
+		    case 'v':
+		      print_instruction_predicate (info);
+		      break;
+
+		    case '0': case '1': case '2': case '3': case '4':
+		    case '5': case '6': case '7': case '8': case '9':
+		      {
+			int width;
+			unsigned long value;
+
+			c = arm_decode_bitfield (c, given, &value, &width);
+
+			switch (*c)
+			  {
+			  case 'Z':
+			    if (value == 13)
+			      is_unpredictable = TRUE;
+			    else if (value == 15)
+			      func (stream, "zr");
+			    else
+			      func (stream, "%s", arm_regnames[value]);
+			    break;
+			  case 's':
+			    print_mve_size (info,
+					    value,
+					    insn->mve_op);
+			    break;
+			  case 'Q':
+			    if (value & 0x8)
+			      func (stream, "<illegal reg q%ld.5>", value);
+			    else
+			      func (stream, "q%ld", value);
+			    break;
+			  default:
+			    abort ();
+			  }
+			break;
+		      default:
+			abort ();
+		      }
 		    }
 		}
 	      else
@@ -4989,6 +5584,13 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 	  if (is_undefined)
 	    print_mve_undefined (info, undefined_cond);
+
+	  if ((vpt_block_state.in_vpt_block == FALSE)
+	      && !ifthen_state
+	      && (is_vpt_instruction (given) == TRUE))
+	    mark_inside_vpt_block (given);
+	  else if (vpt_block_state.in_vpt_block == TRUE)
+	    update_vpt_block_state ();
 
 	  return TRUE;
 	}

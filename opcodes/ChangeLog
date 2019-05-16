@@ -1,4 +1,32 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(enum mve_unpredictable): Add new values.
+	(mve_opcodes): Add new instructions.
+	(vec_condnames): New array with vector conditions.
+	(mve_predicatenames): New array with predicate suffixes.
+	(mve_vec_sizename): New array with vector sizes.
+	(enum vpt_pred_state): New enum with vector predication states.
+	(struct vpt_block): New struct type for vpt blocks.
+	(vpt_block_state): Global struct to keep track of state.
+	(mve_extract_pred_mask): New helper function.
+	(num_instructions_vpt_block): Likewise.
+	(mark_outside_vpt_block): Likewise.
+	(mark_inside_vpt_block): Likewise.
+	(invert_next_predicate_state): Likewise.
+	(update_next_predicate_state): Likewise.
+	(update_vpt_block_state): Likewise.
+	(is_vpt_instruction): Likewise.
+	(is_mve_encoding_conflict): Add entries for new instructions.
+	(is_mve_unpredictable): Likewise.
+	(print_mve_unpredictable): Handle new cases.
+	(print_instruction_predicate): Likewise.
+	(print_mve_size): New function.
+	(print_vec_condition): New function.
+	(print_insn_mve): Handle vpt blocks and new print operands.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* arm-dis.c (print_insn_coprocessor_1): Disable the use of coprocessors
 	8, 14 and 15 for Armv8.1-M Mainline.
