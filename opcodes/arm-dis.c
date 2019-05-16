@@ -175,6 +175,10 @@ enum mve_instructions
   MVE_VQRDMULH_T2,
   MVE_VQDMULH_T3,
   MVE_VQRDMULH_T4,
+  MVE_VDDUP,
+  MVE_VDWDUP,
+  MVE_VIWDUP,
+  MVE_VIDUP,
   MVE_NONE
 };
 
@@ -1957,9 +1961,12 @@ static const struct opcode32 neon_opcodes[] =
 			UNPREDICTABLE
    %<bitfield>s		print size for vector predicate & non VMOV instructions
    %<bitfield>i		print immediate for vstr/vldr reg +/- imm
+   %<bitfield>h		print high half of 64-bit destination reg
    %<bitfield>k		print immediate for vector conversion instruction
+   %<bitfield>l		print low half of 64-bit destination reg
+   %<bitfield>u		print immediate value for vddup/vdwdup
    %<bitfield>x		print the bitfield in hex.
- */
+  */
 
 static const struct mopcode32 mve_opcodes[] =
 {
@@ -2181,6 +2188,30 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VCVT_FROM_FP_TO_INT,
    0xffb30040, 0xffb31c51,
    "vcvt%m%v.%s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VDDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VDDUP,
+   0xee011f6e, 0xff811f7e,
+   "vddup%v.u%20-21s\t%13-15,22Q, %17-19l, #%0,7u"},
+
+  /* Vector VDWDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VDWDUP,
+   0xee011f60, 0xff811f70,
+   "vdwdup%v.u%20-21s\t%13-15,22Q, %17-19l, %1-3h, #%0,7u"},
+
+  /* Vector VIWDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VIWDUP,
+   0xee010f60, 0xff811f70,
+   "viwdup%v.u%20-21s\t%13-15,22Q, %17-19l, %1-3h, #%0,7u"},
+
+  /* Vector VIDUP.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VIDUP,
+   0xee010f6e, 0xff811f7e,
+   "vidup%v.u%20-21s\t%13-15,22Q, %17-19l, #%0,7u"},
 
   /* Vector VLD2.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -4667,6 +4698,8 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VDDUP:
+    case MVE_VIDUP:
     case MVE_VQRDMLADH:
     case MVE_VQDMLAH:
     case MVE_VQRDMLAH:
@@ -4790,6 +4823,14 @@ is_mve_encoding_conflict (unsigned long given,
 
     case MVE_VRMLALDAVH:
       if ((arm_decode_field (given, 20, 22) & 6) == 6)
+	return TRUE;
+      else
+	return FALSE;
+
+    case MVE_VDWDUP:
+    case MVE_VIWDUP:
+      if ((arm_decode_field (given, 20, 21) == 3)
+	  || (arm_decode_field (given, 1, 3) == 7))
 	return TRUE;
       else
 	return FALSE;
@@ -5545,6 +5586,16 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VDWDUP:
+    case MVE_VIWDUP:
+      if (arm_decode_field (given, 1, 3) == 6)
+	{
+	  *unpredictable_code = UNPRED_R13;
+	  return TRUE;
+	}
+      else
+	return FALSE;
+
     default:
       return FALSE;
     }
@@ -6181,10 +6232,14 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VCMP_VEC_T4:
     case MVE_VCMP_VEC_T5:
     case MVE_VCMP_VEC_T6:
+    case MVE_VDDUP:
+    case MVE_VDWDUP:
     case MVE_VHADD_T1:
     case MVE_VHADD_T2:
     case MVE_VHSUB_T1:
     case MVE_VHSUB_T2:
+    case MVE_VIDUP:
+    case MVE_VIWDUP:
     case MVE_VLD2:
     case MVE_VLD4:
     case MVE_VLDRB_GATHER_T1:
@@ -7948,6 +8003,12 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    if (value == 1)
 			      func (stream, "a");
 			    break;
+			  case 'h':
+			    {
+			      unsigned int odd_reg = (value << 1) | 1;
+			      func (stream, "%s", arm_regnames[odd_reg]);
+			    }
+			    break;
 			  case 'i':
 			    {
 			      unsigned long imm
@@ -7974,6 +8035,31 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    break;
 			  case 'k':
 			    func (stream, "%lu", 64 - value);
+			    break;
+			  case 'l':
+			    {
+			      unsigned int even_reg = value << 1;
+			      func (stream, "%s", arm_regnames[even_reg]);
+			    }
+			    break;
+			  case 'u':
+			    switch (value)
+			      {
+			      case 0:
+				func (stream, "1");
+				break;
+			      case 1:
+				func (stream, "2");
+				break;
+			      case 2:
+				func (stream, "4");
+				break;
+			      case 3:
+				func (stream, "8");
+				break;
+			      default:
+				break;
+			      }
 			    break;
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);
