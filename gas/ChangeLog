@@ -1,5 +1,25 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (enum operand_parse_code): New operand.
+	(parse_operands): Handle new operand.
+	(mve_encode_qqr): Change to support new instructions.
+	(enum vfp_or_neon_is_neon_bits): Moved.
+	(vfp_or_neon_is_neon): Moved.
+	(check_simd_pred_availability): Moved.
+	(do_neon_dyadic_i_su): Changed to support MVE variants.
+	(neon_dyadic_misc): Changed mve_encode_qqr call.
+	(do_mve_vbrsr): Likewise.
+	(do_mve_vhcadd): New encoding function.
+	(insns): Change existing to accept MVE variants and add new.
+	* testsuite/gas/arm/mve-vhadd-vhsub-vrhadd-bad.d: New test.
+	* testsuite/gas/arm/mve-vhadd-vhsub-vrhadd-bad.l: New test.
+	* testsuite/gas/arm/mve-vhadd-vhsub-vrhadd-bad.s: New test.
+	* testsuite/gas/arm/mve-vhcadd-bad.d: New test.
+	* testsuite/gas/arm/mve-vhcadd-bad.l: New test.
+	* testsuite/gas/arm/mve-vhcadd-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_neon_fmac): Change to support MVE variants.
 	(insns): Change to accept MVE variants.
 	* testsuite/gas/arm/mve-vfma-vfms-bad.d: New test.
