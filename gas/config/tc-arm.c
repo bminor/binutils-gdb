@@ -11134,9 +11134,11 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_cpy,   4600, ea4f0000),			\
   X(_dec_sp,80dd, f1ad0d00),			\
   X(_dls,   0000, f040e001),			\
+  X(_dlstp, 0000, f000e001),			\
   X(_eor,   4040, ea800000),			\
   X(_eors,  4040, ea900000),			\
   X(_inc_sp,00dd, f10d0d00),			\
+  X(_lctp,  0000, f00fe001),			\
   X(_ldmia, c800, e8900000),			\
   X(_ldr,   6800, f8500000),			\
   X(_ldrb,  7800, f8100000),			\
@@ -11147,6 +11149,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_ldr_pc2,4800, f85f0000),			\
   X(_ldr_sp,9800, f85d0000),			\
   X(_le,    0000, f00fc001),			\
+  X(_letp,  0000, f01fc001),			\
   X(_lsl,   0000, fa00f000),			\
   X(_lsls,  0000, fa10f000),			\
   X(_lsr,   0800, fa20f000),			\
@@ -11189,6 +11192,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_wfe,   bf20, f3af8002),			\
   X(_wfi,   bf30, f3af8003),			\
   X(_wls,   0000, f040c001),			\
+  X(_wlstp, 0000, f000c001),			\
   X(_sev,   bf40, f3af8004),                    \
   X(_sevl,  bf50, f3af8005),			\
   X(_udf,   de00, f7f0a000)
@@ -14114,38 +14118,6 @@ v8_1_loop_reloc (int is_le)
     }
 }
 
-/* To handle the Scalar Low Overhead Loop instructions
-   in Armv8.1-M Mainline.  */
-static void
-do_t_loloop (void)
-{
-  unsigned long insn = inst.instruction;
-
-  set_pred_insn_type (OUTSIDE_PRED_INSN);
-  inst.instruction = THUMB_OP32 (inst.instruction);
-
-  switch (insn)
-    {
-    case T_MNEM_le:
-      /* le <label>.  */
-      if (!inst.operands[0].present)
-	inst.instruction |= 1 << 21;
-
-      v8_1_loop_reloc (TRUE);
-      break;
-
-    case T_MNEM_wls:
-      v8_1_loop_reloc (FALSE);
-      /* Fall through.  */
-    case T_MNEM_dls:
-      constraint (inst.operands[1].isreg != 1, BAD_ARGS);
-      inst.instruction |= (inst.operands[1].reg << 16);
-      break;
-
-    default: abort();
-    }
-}
-
 /* MVE instruction encoder helpers.  */
 #define M_MNEM_vabav	0xee800f01
 #define M_MNEM_vmladav	  0xeef00e00
@@ -14444,6 +14416,8 @@ NEON_ENC_TAB
   X(2, (R, S), SINGLE),			\
   X(2, (F, R), SINGLE),			\
   X(2, (R, F), SINGLE),			\
+/* Used for MVE tail predicated loop instructions.  */\
+  X(2, (R, R), QUAD),			\
 /* Half float shape supported so far.  */\
   X (2, (H, D), MIXED),			\
   X (2, (D, H), MIXED),			\
@@ -15984,6 +15958,66 @@ do_mve_vcmul (void)
   inst.instruction |= (rot == 90 || rot == 270);
   inst.is_neon = 1;
 }
+
+/* To handle the Low Overhead Loop instructions
+   in Armv8.1-M Mainline and MVE.  */
+static void
+do_t_loloop (void)
+{
+  unsigned long insn = inst.instruction;
+
+  inst.instruction = THUMB_OP32 (inst.instruction);
+
+  if (insn == T_MNEM_lctp)
+    return;
+
+  set_pred_insn_type (MVE_OUTSIDE_PRED_INSN);
+
+  if (insn == T_MNEM_wlstp || insn == T_MNEM_dlstp)
+    {
+      struct neon_type_el et
+       = neon_check_type (2, NS_RR, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
+      inst.instruction |= neon_logbits (et.size) << 20;
+      inst.is_neon = 1;
+    }
+
+  switch (insn)
+    {
+    case T_MNEM_letp:
+      constraint (!inst.operands[0].present,
+		  _("expected LR"));
+      /* fall through.  */
+    case T_MNEM_le:
+      /* le <label>.  */
+      if (!inst.operands[0].present)
+       inst.instruction |= 1 << 21;
+
+      v8_1_loop_reloc (TRUE);
+      break;
+
+    case T_MNEM_wls:
+    case T_MNEM_wlstp:
+      v8_1_loop_reloc (FALSE);
+      /* fall through.  */
+    case T_MNEM_dlstp:
+    case T_MNEM_dls:
+      constraint (inst.operands[1].isreg != 1, BAD_ARGS);
+
+      if (insn == T_MNEM_wlstp || insn == T_MNEM_dlstp)
+       constraint (inst.operands[1].reg == REG_PC, BAD_PC);
+      else if (inst.operands[1].reg == REG_PC)
+       as_tsktsk (MVE_BAD_PC);
+      if (inst.operands[1].reg == REG_SP)
+       as_tsktsk (MVE_BAD_SP);
+
+      inst.instruction |= (inst.operands[1].reg << 16);
+      break;
+
+    default:
+      abort ();
+    }
+}
+
 
 static void
 do_vfp_nsyn_cmp (void)
@@ -25240,6 +25274,11 @@ static const struct asm_opcode insns[] =
  mToC("vshllt",	    ee201e00,	   3, (RMQ, RMQ, I32),	    mve_vshll),
  mToC("vshllb",	    ee200e00,	   3, (RMQ, RMQ, I32),	    mve_vshll),
 
+ toU("dlstp",	_dlstp, 2, (LR, RR),      t_loloop),
+ toU("wlstp",	_wlstp, 3, (LR, RR, EXP), t_loloop),
+ toU("letp",	_letp,  2, (LR, EXP),	  t_loloop),
+ toU("lctp",	_lctp,  0, (),		  t_loloop),
+
 #undef THUMB_VARIANT
 #define THUMB_VARIANT & mve_fp_ext
  mToC("vcmul", ee300e00,   4, (RMQ, RMQ, RMQ, EXPi),		  mve_vcmul),
@@ -28641,9 +28680,10 @@ md_apply_fix (fixS *	fixP,
 	}
 
       bfd_vma insn = get_thumb32_insn (buf);
-      /* le lr, <label> or le <label> */
+      /* le lr, <label>, le <label> or letp lr, <label> */
       if (((insn & 0xffffffff) == 0xf00fc001)
-	  || ((insn & 0xffffffff) == 0xf02fc001))
+	  || ((insn & 0xffffffff) == 0xf02fc001)
+	  || ((insn & 0xffffffff) == 0xf01fc001))
 	value = -value;
 
       if (v8_1_branch_value_check (value, 12, FALSE) == FAIL)

@@ -1,5 +1,16 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (T16_32_TAB): Add new instructions.
+	(do_t_loloop): Changed to handle tail predication variants.
+	(md_apply_fix): Likewise.
+	(insns): Add entries for MVE mnemonics.
+	* testsuite/gas/arm/mve-tailpredloop-bad.d: New test.
+	* testsuite/gas/arm/mve-tailpredloop-bad.l: New test.
+	* testsuite/gas/arm/mve-tailpredloop-bad.s: New test.
+	* testsuite/gas/arm/mve-tailpredloop.d: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (do_mve_vshll): New encoding function.
 	(do_mve_vshlc): Likewise.
 	(insns): Add entries for MVE mnemonics.
