@@ -4,6 +4,16 @@
 	* arm-dis.c (enum mve_instructions): Add new instructions.
 	(is_mve_encoding_conflict): Handle new instructions.
 	(is_mve_unpredictable): Likewise.
+	(print_mve_rotate): Likewise.
+	(print_mve_size): Likewise.
+	(print_insn_mve): Likewise.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (enum mve_instructions): Add new instructions.
+	(is_mve_encoding_conflict): Handle new instructions.
+	(is_mve_unpredictable): Likewise.
 	(print_mve_size): Likewise.
 	(print_insn_mve): Likewise.
 

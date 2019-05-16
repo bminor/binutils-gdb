@@ -179,6 +179,11 @@ enum mve_instructions
   MVE_VDWDUP,
   MVE_VIWDUP,
   MVE_VIDUP,
+  MVE_VCADD_FP,
+  MVE_VCADD_VEC,
+  MVE_VHCADD,
+  MVE_VCMLA_FP,
+  MVE_VCMUL_FP,
   MVE_NONE
 };
 
@@ -1964,6 +1969,7 @@ static const struct opcode32 neon_opcodes[] =
    %<bitfield>h		print high half of 64-bit destination reg
    %<bitfield>k		print immediate for vector conversion instruction
    %<bitfield>l		print low half of 64-bit destination reg
+   %<bitfield>o		print rotate value for vcmul
    %<bitfield>u		print immediate value for vddup/vdwdup
    %<bitfield>x		print the bitfield in hex.
   */
@@ -2043,6 +2049,24 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VADDV,
    0xeef10f00, 0xeff31fd1,
    "vaddv%5A%v.%u%18-19s\t%13-15l, %1-3Q"},
+
+  /* Vector VCADD floating point.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCADD_FP,
+   0xfc800840, 0xfea11f51,
+   "vcadd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%24o"},
+
+  /* Vector VCADD.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VCADD_VEC,
+   0xfe000f00, 0xff810f51,
+   "vcadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%12o"},
+
+  /* Vector VCMLA.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCMLA_FP,
+   0xfc200840, 0xfe211f51,
+   "vcmla%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%23-24o"},
 
   /* Vector VCMP floating point T1.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -2147,6 +2171,12 @@ static const struct mopcode32 mve_opcodes[] =
    0xee001f40, 0xef811f70,
    "vhsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
+  /* Vector VCMUL.  */
+  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+   MVE_VCMUL_FP,
+   0xee300e00, 0xefb10f50,
+   "vcmul%v.f%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%0,12o"},
+
   /* Vector VDUP.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VDUP,
@@ -2200,6 +2230,12 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VDWDUP,
    0xee011f60, 0xff811f70,
    "vdwdup%v.u%20-21s\t%13-15,22Q, %17-19l, %1-3h, #%0,7u"},
+
+  /* Vector VHCADD.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VHCADD,
+   0xee000f00, 0xff810f51,
+   "vhcadd%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%12o"},
 
   /* Vector VIWDUP.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -4698,6 +4734,8 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VCADD_VEC:
+    case MVE_VHCADD:
     case MVE_VDDUP:
     case MVE_VIDUP:
     case MVE_VQRDMLADH:
@@ -5518,6 +5556,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	  return FALSE;
       }
 
+    case MVE_VCMUL_FP:
     case MVE_VQDMULL_T1:
       {
 	unsigned long Qd;
@@ -5595,6 +5634,58 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	}
       else
 	return FALSE;
+
+    case MVE_VCADD_VEC:
+    case MVE_VHCADD:
+      {
+	unsigned long Qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	unsigned long Qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+	if ((Qd == Qm) && arm_decode_field (given, 20, 21) == 2)
+	  {
+	    *unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_2;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VCADD_FP:
+      {
+	unsigned long Qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	unsigned long Qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+	if ((Qd == Qm) && arm_decode_field (given, 20, 20) == 1)
+	  {
+	    *unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_1;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VCMLA_FP:
+      {
+	unsigned long Qda;
+	unsigned long Qm;
+	unsigned long Qn;
+
+	if (arm_decode_field (given, 20, 20) == 1)
+	  {
+	    Qda = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	    Qm = arm_decode_field_multiple (given, 1, 3, 5, 5);
+	    Qn = arm_decode_field_multiple (given, 17, 19, 7, 7);
+
+	    if ((Qda == Qn) || (Qda == Qm))
+	      {
+		*unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_1;
+		return TRUE;
+	      }
+	    else
+	      return FALSE;
+	  }
+	else
+	  return FALSE;
+
+      }
 
     default:
       return FALSE;
@@ -6204,6 +6295,49 @@ print_mve_vcvt_size (struct disassemble_info *info,
 }
 
 static void
+print_mve_rotate (struct disassemble_info *info, unsigned long rot,
+		  unsigned long rot_width)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  if (rot_width == 1)
+    {
+      switch (rot)
+	{
+	case 0:
+	  func (stream, "90");
+	  break;
+	case 1:
+	  func (stream, "270");
+	  break;
+	default:
+	  break;
+	}
+    }
+  else if (rot_width == 2)
+    {
+      switch (rot)
+	{
+	case 0:
+	  func (stream, "0");
+	  break;
+	case 1:
+	  func (stream, "90");
+	  break;
+	case 2:
+	  func (stream, "180");
+	  break;
+	case 3:
+	  func (stream, "270");
+	  break;
+	default:
+	  break;
+	}
+    }
+}
+
+static void
 print_instruction_predicate (struct disassemble_info *info)
 {
   void *stream = info->stream;
@@ -6226,6 +6360,7 @@ print_mve_size (struct disassemble_info *info,
   switch (matched_insn)
     {
     case MVE_VADDV:
+    case MVE_VCADD_VEC:
     case MVE_VCMP_VEC_T1:
     case MVE_VCMP_VEC_T2:
     case MVE_VCMP_VEC_T3:
@@ -6236,6 +6371,7 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VDWDUP:
     case MVE_VHADD_T1:
     case MVE_VHADD_T2:
+    case MVE_VHCADD:
     case MVE_VHSUB_T1:
     case MVE_VHSUB_T2:
     case MVE_VIDUP:
@@ -6296,6 +6432,9 @@ print_mve_size (struct disassemble_info *info,
 	func (stream, "16");
       break;
 
+    case MVE_VCADD_FP:
+    case MVE_VCMLA_FP:
+    case MVE_VCMUL_FP:
     case MVE_VMLADAV_T1:
     case MVE_VMLALDAV:
     case MVE_VMLSDAV_T1:
@@ -8060,6 +8199,9 @@ print_insn_mve (struct disassemble_info *info, long given)
 			      default:
 				break;
 			      }
+			    break;
+			  case 'o':
+			    print_mve_rotate (info, value, width);
 			    break;
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);
