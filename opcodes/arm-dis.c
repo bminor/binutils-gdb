@@ -253,6 +253,17 @@ enum mve_instructions
   MVE_VRMULH,
   MVE_VNEG_FP,
   MVE_VNEG_VEC,
+  MVE_VPNOT,
+  MVE_VPSEL,
+  MVE_VQABS,
+  MVE_VQADD_T1,
+  MVE_VQADD_T2,
+  MVE_VQSUB_T1,
+  MVE_VQSUB_T2,
+  MVE_VQNEG,
+  MVE_VREV16,
+  MVE_VREV32,
+  MVE_VREV64,
   MVE_NONE
 };
 
@@ -290,6 +301,7 @@ enum mve_undefined
   UNDEF_SIZE_2,			/* undefined because size == 2.  */
   UNDEF_SIZE_3,			/* undefined because size == 3.  */
   UNDEF_SIZE_LE_1,		/* undefined because size <= 1.  */
+  UNDEF_SIZE_NOT_0,		/* undefined because size != 0.  */
   UNDEF_SIZE_NOT_2,		/* undefined because size != 2.  */
   UNDEF_SIZE_NOT_3,		/* undefined because size != 3.  */
   UNDEF_NOT_UNS_SIZE_0,		/* undefined because U == 0 and
@@ -2893,6 +2905,36 @@ static const struct mopcode32 mve_opcodes[] =
    0xee300f01, 0xefb10f51,
    "vqdmull%T%v.s%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
+  /* Vector VPNOT.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPNOT,
+   0xfe310f4d, 0xffffffff,
+   "vpnot%v"},
+
+  /* Vector VPSEL.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VPSEL,
+   0xfe310f01, 0xffb11f51,
+   "vpsel%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQABS.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQABS,
+   0xffb00740, 0xffb31fd1,
+   "vqabs%v.s%18-19s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQADD T1 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQADD_T1,
+   0xef000050, 0xef811f51,
+   "vqadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQADD T2 variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQADD_T2,
+   0xee000f60, 0xef811f70,
+   "vqadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
   /* Vector VQDMULL T2 variant.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQDMULL_T2,
@@ -2983,6 +3025,12 @@ static const struct mopcode32 mve_opcodes[] =
    0xfe010e60, 0xff811f70,
    "vqrdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
+  /* Vector VQNEG.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQNEG,
+   0xffb007c0, 0xffb31fd1,
+   "vqneg%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
+
   /* Vector VQRSHL T1 variant.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQRSHL_T1,
@@ -3030,6 +3078,36 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_VQSHRUN,
    0xee800fc0, 0xffa00fd1,
    "vqshrun%T%v.s%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
+
+  /* Vector VQSUB T1 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSUB_T1,
+   0xef000250, 0xef811f51,
+   "vqsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
+
+  /* Vector VQSUB T2 Variant.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VQSUB_T2,
+   0xee001f60, 0xef811f70,
+   "vqsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
+
+  /* Vector VREV16.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VREV16,
+   0xffb00140, 0xffb31fd1,
+   "vrev16%v.8\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VREV32.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VREV32,
+   0xffb000c0, 0xffb31fd1,
+   "vrev32%v.%18-19s\t%13-15,22Q, %1-3,5Q"},
+
+  /* Vector VREV64.  */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VREV64,
+   0xffb00040, 0xffb31fd1,
+   "vrev64%v.%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VRINT floating point.  */
   {ARM_FEATURE_COPROC (FPU_MVE_FP),
@@ -5239,6 +5317,8 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return FALSE;
 
+    case MVE_VQADD_T2:
+    case MVE_VQSUB_T2:
     case MVE_VMUL_VEC_T2:
     case MVE_VMULH:
     case MVE_VRMULH:
@@ -5539,6 +5619,8 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VQADD_T1:
+    case MVE_VQSUB_T1:
     case MVE_VMUL_VEC_T1:
     case MVE_VABD_VEC:
     case MVE_VADD_VEC_T1:
@@ -5881,6 +5963,8 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	else
 	  return FALSE;
 
+    case MVE_VQNEG:
+    case MVE_VQABS:
     case MVE_VNEG_VEC:
     case MVE_VCLS:
     case MVE_VCLZ:
@@ -5891,6 +5975,36 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
 	}
       else
 	return FALSE;
+
+    case MVE_VREV16:
+      if (arm_decode_field (given, 18, 19) == 0)
+	return FALSE;
+      else
+	{
+	  *undefined_code = UNDEF_SIZE_NOT_0;
+	  return TRUE;
+	}
+
+    case MVE_VREV32:
+      {
+	unsigned long size = arm_decode_field (given, 18, 19);
+	if ((size & 2) == 2)
+	  {
+	    *undefined_code = UNDEF_SIZE_2;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
+    case MVE_VREV64:
+      if (arm_decode_field (given, 18, 19) != 3)
+	return FALSE;
+      else
+	{
+	  *undefined_code = UNDEF_SIZE_3;
+	  return TRUE;
+	}
 
     default:
       return FALSE;
@@ -5951,6 +6065,8 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
+    case MVE_VQADD_T2:
+    case MVE_VQSUB_T2:
     case MVE_VMUL_FP_T2:
     case MVE_VMUL_VEC_T2:
     case MVE_VMLA:
@@ -6360,6 +6476,20 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VREV64:
+      {
+	unsigned long qd = arm_decode_field_multiple (given, 13, 15, 22, 22);
+	unsigned long qm = arm_decode_field_multiple (given, 1, 3, 6, 6);
+
+	if (qd == qm)
+	  {
+	    *unpredictable_code = UNPRED_Q_REGS_EQUAL;
+	    return TRUE;
+	  }
+	else
+	  return FALSE;
+      }
+
     default:
       return FALSE;
     }
@@ -6588,6 +6718,10 @@ print_mve_undefined (struct disassemble_info *info,
 
     case UNDEF_SIZE_LE_1:
       func (stream, "size <= 1");
+      break;
+
+    case UNDEF_SIZE_NOT_0:
+      func (stream, "size not equal to 0");
       break;
 
     case UNDEF_SIZE_NOT_2:
@@ -7094,6 +7228,9 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VPT_VEC_T4:
     case MVE_VPT_VEC_T5:
     case MVE_VPT_VEC_T6:
+    case MVE_VQABS:
+    case MVE_VQADD_T1:
+    case MVE_VQADD_T2:
     case MVE_VQDMLADH:
     case MVE_VQRDMLADH:
     case MVE_VQDMLAH:
@@ -7106,10 +7243,15 @@ print_mve_size (struct disassemble_info *info,
     case MVE_VQRDMULH_T2:
     case MVE_VQDMULH_T3:
     case MVE_VQRDMULH_T4:
+    case MVE_VQNEG:
     case MVE_VQRSHL_T1:
     case MVE_VQRSHL_T2:
     case MVE_VQSHL_T1:
     case MVE_VQSHL_T4:
+    case MVE_VQSUB_T1:
+    case MVE_VQSUB_T2:
+    case MVE_VREV32:
+    case MVE_VREV64:
     case MVE_VRHADD:
     case MVE_VRINT_FP:
     case MVE_VRSHL_T1:

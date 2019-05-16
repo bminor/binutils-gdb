@@ -3,6 +3,18 @@
 
 	* arm-dis.c (thumb32_opcodes): Add new instructions.
 	(enum mve_instructions): Likewise.
+	(enum mve_undefined): Add new reasons.
+	(is_mve_encoding_conflict): Handle new instructions.
+	(is_mve_undefined): Likewise.
+	(is_mve_unpredictable): Likewise.
+	(print_mve_undefined): Likewise.
+	(print_mve_size): Likewise.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+	    Michael Collison <michael.collison@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Add new instructions.
+	(enum mve_instructions): Likewise.
 	(is_mve_encoding_conflict): Handle new instructions.
 	(is_mve_undefined): Likewise.
 	(is_mve_unpredictable): Likewise.
