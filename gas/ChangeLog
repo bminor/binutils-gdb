@@ -1,5 +1,13 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (do_neon_fmac): Change to support MVE variants.
+	(insns): Change to accept MVE variants.
+	* testsuite/gas/arm/mve-vfma-vfms-bad.d: New test.
+	* testsuite/gas/arm/mve-vfma-vfms-bad.l: New test.
+	* testsuite/gas/arm/mve-vfma-vfms-bad.s: New test.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (M_MNEM_vddup, M_MNEM_vdwdup, M_MNEM_vidup,
 	 M_MNEM_viwdup): New instruction encodings.
 	(NEON_SHAPE_DEF): New shapes.

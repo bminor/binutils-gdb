@@ -16882,11 +16882,41 @@ do_neon_mac_maybe_scalar (void)
 static void
 do_neon_fmac (void)
 {
-  if (try_vfp_nsyn (3, do_vfp_nsyn_fma_fms) == SUCCESS)
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_fma)
+      && try_vfp_nsyn (3, do_vfp_nsyn_fma_fms) == SUCCESS)
     return;
 
-  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
+    {
+      enum neon_shape rs = neon_select_shape (NS_QQQ, NS_QQR, NS_NULL);
+      struct neon_type_el et = neon_check_type (3, rs, N_F_MVE | N_KEY, N_EQK,
+						N_EQK);
+
+      if (rs == NS_QQR)
+	{
+	  if (inst.operands[2].reg == REG_SP)
+	    as_tsktsk (MVE_BAD_SP);
+	  else if (inst.operands[2].reg == REG_PC)
+	    as_tsktsk (MVE_BAD_PC);
+
+	  inst.instruction = 0xee310e40;
+	  inst.instruction |= (et.size == 16) << 28;
+	  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+	  inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+	  inst.instruction |= HI1 (inst.operands[1].reg) << 6;
+	  inst.instruction |= inst.operands[2].reg;
+	  inst.is_neon = 1;
+	  return;
+	}
+    }
+  else
+    {
+      constraint (!inst.operands[2].isvec, BAD_FPU);
+    }
 
   neon_dyadic_misc (NT_untyped, N_IF_32, 0);
 }
@@ -23819,11 +23849,12 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT    & fpu_vfp_ext_fma
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_vfp_ext_fma
- /* Mnemonics shared by Neon and VFP.  These are included in the
+ /* Mnemonics shared by Neon, VFP and MVE.  These are included in the
     VFP FMA variant; NEON and VFP FMA always includes the NEON
     FMA instructions.  */
- nCEF(vfma,     _vfma,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_fmac),
- nCEF(vfms,     _vfms,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_fmac),
+ mnCEF(vfma,     _vfma,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQR), neon_fmac),
+ mnCEF(vfms,     _vfms,    3, (RNSDQMQ, oRNSDQMQ, RNSDQMQ),  neon_fmac),
+
  /* ffmas/ffmad/ffmss/ffmsd are dummy mnemonics to satisfy gas;
     the v form should always be used.  */
  cCE("ffmas",	ea00a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
