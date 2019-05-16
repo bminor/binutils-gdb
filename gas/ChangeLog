@@ -1,5 +1,40 @@
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (check_simd_pred_availability): Refactor.
+	(do_neon_dyadic_i_su): Refactor use of check_simd_pred_availability.
+	(do_neon_dyadic_i64_su): Likewise.
+	(do_neon_shl): Likewise.
+	(do_neon_qshl): Likewise.
+	(do_neon_rshl): Likewise.
+	(do_neon_logic): Likewise.
+	(do_neon_dyadic_if_su): Likewise.
+	(do_neon_addsub_if_i): Likewise.
+	(do_neon_mac_maybe_scalar): Likewise.
+	(do_neon_fmac): Likewise.
+	(do_neon_mul): Likewise.
+	(do_neon_qdmulh): Likewise.
+	(do_neon_qrdmlah): Likewise.
+	(do_neon_abs_neg): Likewise.
+	(do_neon_sli): Likewise.
+	(do_neon_sri): Likewise.
+	(do_neon_qshlu_imm): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_cvttb_1): Likewise.
+	(do_neon_mvn): Likewise.
+	(do_neon_rev): Likewise.
+	(do_neon_dup): Likewise.
+	(do_neon_mov): Likewise.
+	(do_neon_rshift_round_imm): Likewise.
+	(do_neon_sat_abs_neg): Likewise.
+	(do_neon_cls): Likewise.
+	(do_neon_clz): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(do_vcmla): Likewise.
+	(do_vcadd): Likewise.
+
+2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* NEWS: Mention Armv8.1-M Mainline and MVE.
 
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>

@@ -16380,7 +16380,13 @@ if (!thumb_mode && (check & NEON_CHECK_CC))
 return SUCCESS;
 }
 
-static int
+
+/* Return TRUE if the SIMD instruction is available for the current
+   cpu_variant.  FP is set to TRUE if this is a SIMD floating-point
+   instruction.  CHECK contains th.  CHECK contains the set of bits to pass to
+   vfp_or_neon_is_neon for the NEON specific checks.  */
+
+static bfd_boolean
 check_simd_pred_availability (int fp, unsigned check)
 {
 if (inst.cond > COND_ALWAYS)
@@ -16388,7 +16394,7 @@ if (inst.cond > COND_ALWAYS)
     if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
       {
 	inst.error = BAD_FPU;
-	return 1;
+	return FALSE;
       }
     inst.pred_insn_type = INSIDE_VPT_INSN;
   }
@@ -16397,18 +16403,18 @@ else if (inst.cond < COND_ALWAYS)
     if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
       inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
     else if (vfp_or_neon_is_neon (check) == FAIL)
-      return 2;
+      return FALSE;
   }
 else
   {
     if (!ARM_CPU_HAS_FEATURE (cpu_variant, fp ? mve_fp_ext : mve_ext)
 	&& vfp_or_neon_is_neon (check) == FAIL)
-      return 3;
+      return FALSE;
 
     if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
       inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
   }
-return 0;
+return TRUE;
 }
 
 /* Neon instruction encoders, in approximate order of appearance.  */
@@ -16416,7 +16422,7 @@ return 0;
 static void
 do_neon_dyadic_i_su (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   enum neon_shape rs;
@@ -16438,7 +16444,7 @@ do_neon_dyadic_i_su (void)
 static void
 do_neon_dyadic_i64_su (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
   enum neon_shape rs;
   struct neon_type_el et;
@@ -16480,7 +16486,7 @@ neon_imm_shift (int write_ubit, int uval, int isquad, struct neon_type_el et,
 static void
 do_neon_shl (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   if (!inst.operands[2].isreg)
@@ -16560,7 +16566,7 @@ do_neon_shl (void)
 static void
 do_neon_qshl (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   if (!inst.operands[2].isreg)
@@ -16634,7 +16640,7 @@ do_neon_qshl (void)
 static void
 do_neon_rshl (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   enum neon_shape rs;
@@ -16748,8 +16754,8 @@ do_neon_logic (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
       if (rs == NS_QQQ
-	  && check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC)
-	  == FAIL)
+	  && !check_simd_pred_availability (FALSE,
+					    NEON_CHECK_ARCH | NEON_CHECK_CC))
 	return;
       else if (rs != NS_QQQ
 	       && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
@@ -16771,8 +16777,8 @@ do_neon_logic (void)
       /* Because neon_select_shape makes the second operand a copy of the first
 	 if the second operand is not present.  */
       if (rs == NS_QQI
-	  && check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC)
-	  == FAIL)
+	  && !check_simd_pred_availability (FALSE,
+					    NEON_CHECK_ARCH | NEON_CHECK_CC))
 	return;
       else if (rs != NS_QQI
 	       && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
@@ -17215,8 +17221,8 @@ do_neon_dyadic_if_su (void)
 	      && et.type == NT_float
 	      && !ARM_CPU_HAS_FEATURE (cpu_variant,fpu_neon_ext_v1), BAD_FPU);
 
-  if (check_simd_pred_availability (et.type == NT_float,
-				    NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (et.type == NT_float,
+				     NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   neon_dyadic_misc (NT_unsigned, N_SUF_32, 0);
@@ -17240,8 +17246,8 @@ do_neon_addsub_if_i (void)
      they are predicated or not.  */
   if ((rs == NS_QQQ || rs == NS_QQR) && et.size != 64)
     {
-      if (check_simd_pred_availability (et.type == NT_float,
-					NEON_CHECK_ARCH | NEON_CHECK_CC))
+      if (!check_simd_pred_availability (et.type == NT_float,
+					 NEON_CHECK_ARCH | NEON_CHECK_CC))
 	return;
     }
   else
@@ -17402,7 +17408,7 @@ do_neon_mac_maybe_scalar (void)
   if (try_vfp_nsyn (3, do_vfp_nsyn_mla_mls) == SUCCESS)
     return;
 
-  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (inst.operands[2].isscalar)
@@ -17439,7 +17445,7 @@ do_neon_fmac (void)
       && try_vfp_nsyn (3, do_vfp_nsyn_fma_fms) == SUCCESS)
     return;
 
-  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (TRUE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_fp_ext))
@@ -17493,7 +17499,7 @@ do_neon_mul (void)
   if (try_vfp_nsyn (3, do_vfp_nsyn_mul) == SUCCESS)
     return;
 
-  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (inst.operands[2].isscalar)
@@ -17526,7 +17532,7 @@ do_neon_mul (void)
 static void
 do_neon_qdmulh (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   if (inst.operands[2].isscalar)
@@ -17963,7 +17969,7 @@ do_mve_vmaxv (void)
 static void
 do_neon_qrdmlah (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
   if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     {
@@ -18043,8 +18049,8 @@ do_neon_abs_neg (void)
   rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
   et = neon_check_type (2, rs, N_EQK, N_S_32 | N_F_16_32 | N_KEY);
 
-  if (check_simd_pred_availability (et.type == NT_float,
-				    NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (et.type == NT_float,
+				     NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
@@ -18061,7 +18067,7 @@ do_neon_abs_neg (void)
 static void
 do_neon_sli (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   enum neon_shape rs;
@@ -18087,7 +18093,7 @@ do_neon_sli (void)
 static void
 do_neon_sri (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   enum neon_shape rs;
@@ -18112,7 +18118,7 @@ do_neon_sri (void)
 static void
 do_neon_qshlu_imm (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   enum neon_shape rs;
@@ -18585,7 +18591,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	      || flavour == neon_cvt_flavour_s32_f32
 	      || flavour == neon_cvt_flavour_u32_f32))
 	{
-	  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH))
+	  if (!check_simd_pred_availability (TRUE,
+					     NEON_CHECK_CC | NEON_CHECK_ARCH))
 	    return;
 	}
       else if (mode == neon_cvt_mode_n)
@@ -18672,8 +18679,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	      || flavour == neon_cvt_flavour_s32_f32
 	      || flavour == neon_cvt_flavour_u32_f32))
 	{
-	  if (check_simd_pred_availability (1,
-					    NEON_CHECK_CC | NEON_CHECK_ARCH8))
+	  if (!check_simd_pred_availability (TRUE,
+					     NEON_CHECK_CC | NEON_CHECK_ARCH8))
 	    return;
 	}
       else if (mode == neon_cvt_mode_z
@@ -18686,8 +18693,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 		   || flavour == neon_cvt_flavour_s32_f32
 		   || flavour == neon_cvt_flavour_u32_f32))
 	{
-	  if (check_simd_pred_availability (1,
-					    NEON_CHECK_CC | NEON_CHECK_ARCH))
+	  if (!check_simd_pred_availability (TRUE,
+					     NEON_CHECK_CC | NEON_CHECK_ARCH))
 	    return;
 	}
       /* fall through.  */
@@ -18696,8 +18703,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	{
 
 	  NEON_ENCODE (FLOAT, inst);
-	  if (check_simd_pred_availability (1,
-					    NEON_CHECK_CC | NEON_CHECK_ARCH8))
+	  if (!check_simd_pred_availability (TRUE,
+					     NEON_CHECK_CC | NEON_CHECK_ARCH8))
 	    return;
 
 	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
@@ -18857,7 +18864,7 @@ do_neon_cvttb_1 (bfd_boolean t)
   else if (rs == NS_QQ || rs == NS_QQI)
     {
       int single_to_half = 0;
-      if (check_simd_pred_availability (1, NEON_CHECK_ARCH))
+      if (!check_simd_pred_availability (TRUE, NEON_CHECK_ARCH))
 	return;
 
       enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
@@ -18997,7 +19004,7 @@ neon_move_immediate (void)
 static void
 do_neon_mvn (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   if (inst.operands[1].isreg)
@@ -19341,7 +19348,7 @@ do_neon_ext (void)
 static void
 do_neon_rev (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   enum neon_shape rs;
@@ -19406,7 +19413,7 @@ do_neon_dup (void)
 	N_8 | N_16 | N_32 | N_KEY, N_EQK);
       if (rs == NS_QR)
 	{
-	  if (check_simd_pred_availability (0, NEON_CHECK_ARCH))
+	  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH))
 	    return;
 	}
       else
@@ -19572,7 +19579,8 @@ do_neon_mov (void)
 
     case NS_QQ:  /* case 0/1.  */
       {
-	if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+	if (!check_simd_pred_availability (FALSE,
+					   NEON_CHECK_CC | NEON_CHECK_ARCH))
 	  return;
 	/* The architecture manual I have doesn't explicitly state which
 	   value the U bit should have for register->register moves, but
@@ -19602,7 +19610,8 @@ do_neon_mov (void)
       /* fall through.  */
 
     case NS_QI:  /* case 2/3.  */
-      if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+      if (!check_simd_pred_availability (FALSE,
+					 NEON_CHECK_CC | NEON_CHECK_ARCH))
 	return;
       inst.instruction = 0x0800010;
       neon_move_immediate ();
@@ -19907,7 +19916,7 @@ do_mve_movl (void)
 static void
 do_neon_rshift_round_imm (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
    return;
 
   enum neon_shape rs;
@@ -20004,7 +20013,7 @@ do_neon_zip_uzp (void)
 static void
 do_neon_sat_abs_neg (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_CC | NEON_CHECK_ARCH))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_CC | NEON_CHECK_ARCH))
     return;
 
   enum neon_shape rs;
@@ -20040,7 +20049,7 @@ do_neon_recip_est (void)
 static void
 do_neon_cls (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   enum neon_shape rs;
@@ -20057,7 +20066,7 @@ do_neon_cls (void)
 static void
 do_neon_clz (void)
 {
-  if (check_simd_pred_availability (0, NEON_CHECK_ARCH | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (FALSE, NEON_CHECK_ARCH | NEON_CHECK_CC))
     return;
 
   enum neon_shape rs;
@@ -20610,7 +20619,7 @@ do_vmaxnm (void)
   if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) == SUCCESS)
     return;
 
-  if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH8))
+  if (!check_simd_pred_availability (TRUE, NEON_CHECK_CC | NEON_CHECK_ARCH8))
     return;
 
   neon_dyadic_misc (NT_untyped, N_F_16_32, 0);
@@ -20674,7 +20683,8 @@ do_vrint_1 (enum neon_cvt_mode mode)
       if (et.type == NT_invtype)
 	return;
 
-      if (check_simd_pred_availability (1, NEON_CHECK_CC | NEON_CHECK_ARCH8))
+      if (!check_simd_pred_availability (TRUE,
+					 NEON_CHECK_CC | NEON_CHECK_ARCH8))
 	return;
 
       NEON_ENCODE (FLOAT, inst);
@@ -20777,7 +20787,8 @@ do_vcmla (void)
 	      _("immediate out of range"));
   rot /= 90;
 
-  if (check_simd_pred_availability (1, NEON_CHECK_ARCH8 | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (TRUE,
+				     NEON_CHECK_ARCH8 | NEON_CHECK_CC))
     return;
 
   if (inst.operands[2].isscalar)
@@ -20854,8 +20865,8 @@ do_vcadd (void)
   if (et.type == NT_invtype)
     return;
 
-  if (check_simd_pred_availability (et.type == NT_float, NEON_CHECK_ARCH8
-				    | NEON_CHECK_CC))
+  if (!check_simd_pred_availability (et.type == NT_float,
+				     NEON_CHECK_ARCH8 | NEON_CHECK_CC))
     return;
 
   if (et.type == NT_float)
