@@ -1,3 +1,9 @@
+2019-05-17  Alan Modra  <amodra@gmail.com>
+
+	PR 24567
+	* plugin.c (plugin_notice): Do not let a common symbol override
+	a non-common definition in IR.
+
 2019-05-09  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* scripttempl/pru.sc (__init_array_begin, __init_array_begin):
