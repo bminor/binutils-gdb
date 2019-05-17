@@ -1,5 +1,9 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* disasm.c (set_disassembler_options): Send errors to stderr.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* cli/cli-interp.c (struct saved_output_files): Add saved entry.
 	(cli_interp_base::set_logging): Check debug_redirect.
 	* cli/cli-interp.h (set_logging): Add debug_redirect parameter.

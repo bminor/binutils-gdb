@@ -1,20 +1,43 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
-	* Makefile.in: Pass through GDB_DEBUG.
-	* README (Testsuite Parameters): Add GDB_DEBUG.
-        (gdb,debug): Add board setting.
- 	* lib/gdb.exp (default_gdb_start): Start debugging.
- 	(gdb_debug_enabled): New procedure.
- 	(gdb_debug_init): Likewise.
+	* gdb.base/breakpoint-in-ro-region.exp: Disable when debugging.
+	* gdb.base/debug-expr.exp: Likewise.
+	* gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp: Likewise.
+	* gdb.base/fork-print-inferior-events.exp: Likewise.
+	* gdb.base/gdb-sigterm.exp: Likewise.
+	* gdb.base/gdbinit-history.exp: Likewise.
+	* gdb.base/osabi.exp: Likewise.
+	* gdb.base/sss-bp-on-user-bp-2.exp: Likewise.
+	* gdb.base/ui-redirect.exp: Likewise.
+	* gdb.gdb/unittest.exp: Likewise.
+	* gdb.mi/mi-break.exp: Disable separate-mi-tty when debugging.
+	* gdb.mi/mi-watch.exp: Likewise.
+	* gdb.mi/new-ui-mi-sync.exp: Likewise.
+	* gdb.mi/user-selected-context-sync.exp: Likewise.
+	* gdb.python/python.exp: Disable debug test when debugging.
+	* gdb.threads/check-libthread-db.exp: Disable when debugging.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Likewise.
+	* gdb.threads/stepi-random-signal.exp: Likewise.
 
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* Makefile.in: Pass through GDB_DEBUG.
 	* README (Testsuite Parameters): Add GDB_DEBUG.
-        (gdb,debug): Add board setting.
- 	* lib/gdb.exp (default_gdb_start): Start debugging.
- 	(gdb_debug_enabled): New procedure.
- 	(gdb_debug_init): Likewise.
+	(gdb,debug): Add board setting.
+	* lib/gdb.exp (default_gdb_start): Start debugging.
+	(gdb_debug_enabled): New procedure.
+	(gdb_debug_init): Likewise.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+	
+	* Makefile.in: Pass through GDB_DEBUG.
+	* README (Testsuite Parameters): Add GDB_DEBUG.
+	(gdb,debug): Add board setting.
+	* lib/gdb.exp (default_gdb_start): Start debugging.
+	(gdb_debug_enabled): New procedure.
+	(gdb_debug_init): Likewise.
 
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 

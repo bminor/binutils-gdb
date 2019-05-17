@@ -29,6 +29,12 @@
 # - Thread 3 of each inferior is either stopped at /* thread loop line */, if we
 #   are using all-stop, or running, if we are using non-stop.
 
+# Do not run if gdb debug is enabled as it doesn't work for separate-mi-tty.
+if [gdb_debug_enabled] {
+    untested "debug is enabled"
+    return 0
+}
+
 load_lib mi-support.exp
 
 standard_testfile

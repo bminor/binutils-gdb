@@ -21,6 +21,12 @@
 # We cannot expect remote hosts to see environment variables set on the
 # local machine.
 
+# Do not run if gdb debug is enabled - it interferes with the command history.
+if [gdb_debug_enabled] {
+    untested "debug is enabled"
+    return 0
+}
+
 if { [is_remote host] } {
     unsupported "can't set environment variables on remote host"
     return -1

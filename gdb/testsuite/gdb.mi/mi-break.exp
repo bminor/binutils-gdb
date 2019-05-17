@@ -429,6 +429,13 @@ proc test_break {mi_mode} {
     test_explicit_breakpoints
 }
 
-foreach_with_prefix mi-mode {"main" "separate"} {
+if [gdb_debug_enabled] {
+  # gdb debug doesn't work for separate-mi-tty.
+  set modes {"main"}
+} else {
+  set modes {"main" "separate"}
+}
+
+foreach_with_prefix mi-mode $modes {
     test_break ${mi-mode}
 }

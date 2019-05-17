@@ -20,6 +20,12 @@
 # commands, MI should not process further commands until the inferior
 # stops again.  See PR gdb/20418.
 
+# Do not run if gdb debug is enabled as it doesn't work for separate-mi-tty.
+if [gdb_debug_enabled] {
+    untested "debug is enabled"
+    return 0
+}
+
 load_lib mi-support.exp
 
 standard_testfile

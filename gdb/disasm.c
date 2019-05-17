@@ -943,7 +943,7 @@ set_disassembler_options (char *prospective_options)
   valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
   if (valid_options_and_args == NULL)
     {
-      fprintf_filtered (gdb_stdlog, _("\
+      fprintf_filtered (gdb_stderr, _("\
 'set disassembler-options ...' is not supported on this architecture.\n"));
       return;
     }
@@ -979,7 +979,7 @@ set_disassembler_options (char *prospective_options)
 	  break;
       if (valid_options->name[i] == NULL)
 	{
-	  fprintf_filtered (gdb_stdlog,
+	  fprintf_filtered (gdb_stderr,
 			    _("Invalid disassembler option value: '%s'.\n"),
 			    opt);
 	  return;

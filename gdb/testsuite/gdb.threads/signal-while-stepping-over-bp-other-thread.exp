@@ -18,6 +18,12 @@
 # stop, when the thread that hit that breakpoint is not the stepped
 # thread.
 
+# Test relies on checking gdb debug output. Do not run if gdb debug is
+# enabled as any debug will be redirected to the log.
+if [gdb_debug_enabled] {
+    continue
+}
+
 standard_testfile
 set executable ${testfile}
 
