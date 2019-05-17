@@ -1,5 +1,23 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* Makefile.in: Pass through GDB_DEBUG.
+	* README (Testsuite Parameters): Add GDB_DEBUG.
+        (gdb,debug): Add board setting.
+ 	* lib/gdb.exp (default_gdb_start): Start debugging.
+ 	(gdb_debug_enabled): New procedure.
+ 	(gdb_debug_init): Likewise.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Pass through GDB_DEBUG.
+	* README (Testsuite Parameters): Add GDB_DEBUG.
+        (gdb,debug): Add board setting.
+ 	* lib/gdb.exp (default_gdb_start): Start debugging.
+ 	(gdb_debug_enabled): New procedure.
+ 	(gdb_debug_init): Likewise.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* gdb.base/ui-redirect.exp: Add debug redirect tests.
 
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>

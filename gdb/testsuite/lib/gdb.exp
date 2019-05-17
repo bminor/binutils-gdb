@@ -1746,6 +1746,8 @@ proc default_gdb_start { } {
 	    warning "Couldn't set the width to 0."
 	}
     }
+
+    gdb_debug_init
     return 0
 }
 
@@ -6407,6 +6409,58 @@ proc cd { dir } {
 proc gdb_supported_languages {} {
     return [list c objective-c c++ d go fortran modula-2 asm pascal \
 		opencl rust minimal ada]
+}
+
+# Check if debugging is enabled for gdb.
+
+proc gdb_debug_enabled { } {
+    global gdbdebug
+
+    # If not already read, get the debug setting from environment or board setting.
+    if {![info exists gdbdebug]} {
+	global env
+	if [info exists env(GDB_DEBUG)] {
+	    set gdbdebug $env(GDB_DEBUG)
+	} elseif [target_info exists gdb,debug] {
+	    set gdbdebug [target_info gdb,debug]
+	} else {
+	    return 0
+	}
+    }
+
+    # Ensure it not empty.
+    return [expr { $gdbdebug != "" }]
+}
+
+# Turn on debugging if enabled, or reset if already on.
+
+proc gdb_debug_init { } {
+
+    global gdb_prompt
+
+    if ![gdb_debug_enabled] {
+      return;
+    }
+
+    # First ensure logging is off.
+    send_gdb "set logging off\n"
+
+    set debugfile [standard_output_file gdb.debug]
+    send_gdb "set logging file $debugfile\n"
+
+    send_gdb "set logging debugredirect\n"
+
+    global gdbdebug
+    foreach entry [split $gdbdebug ,] {
+      send_gdb "set debug $entry 1\n"
+    }
+
+    # Now that everything is set, enable logging.
+    send_gdb "set logging on\n"
+    gdb_expect 10 {
+	-re "Copying output to $debugfile.*Redirecting debug output to $debugfile.*$gdb_prompt $" {}
+	timeout { warning "Couldn't set logging file" }
+    }
 }
 
 # Check if debugging is enabled for gdbserver.

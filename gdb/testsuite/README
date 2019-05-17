@@ -293,6 +293,15 @@ can do:
 
 	make check TS=1 TS_FORMAT='[%b %H:%S]'
 
+GDB_DEBUG
+
+When set gdb debug is sent to the file gdb.debug in the test output
+directory.  It should be set to a comma separated list of gdb debug
+components.
+For example, to turn on debugging for infrun and target, you can do:
+
+	make check GDB_DEBUG="infrun,target"
+
 GDBSERVER_DEBUG
 
 When set gdbserver debug is sent to the file gdbserver.debug in the test
@@ -507,6 +516,13 @@ gdb,nopie_flag
 
   The flag required to force the compiler to produce non-position-independent
   executables.
+
+gdb,debug
+
+  When set gdb debug is sent to the file gdb.debug in the test output
+  directory.  It should be set to a comma separated list of gdb debug
+  components. For example, to turn on debugging for infrun and target, set to
+  "infrun,target".
 
 gdbserver,debug
 
