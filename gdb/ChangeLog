@@ -1,5 +1,9 @@
 2019-05-17  Tom Tromey  <tromey@adacore.com>
 
+	* source.c (find_and_open_source): Remove cast.
+
+2019-05-17  Tom Tromey  <tromey@adacore.com>
+
 	* annotate.c (annotate_source): Make "filename" const.
 	* annotate.h (annotate_source): Use const.
 

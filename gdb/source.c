@@ -1009,9 +1009,7 @@ find_and_open_source (const char *filename,
       /* Replace a path entry of $cdir with the compilation directory
 	 name.  */
 #define	cdir_len	5
-      /* We cast strstr's result in case an ANSIhole has made it const,
-         which produces a "required warning" when assigned to a nonconst.  */
-      p = (char *) strstr (source_path, "$cdir");
+      p = strstr (source_path, "$cdir");
       if (p && (p == path || p[-1] == DIRNAME_SEPARATOR)
 	  && (p[cdir_len] == DIRNAME_SEPARATOR || p[cdir_len] == '\0'))
 	{
