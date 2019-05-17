@@ -88,24 +88,6 @@ pop_output_files (void)
     current_uiout->redirect (NULL);
 }
 
-/* See cli-interp.h.  */
-
-ui_file *
-make_logging_output (ui_file *curr_output, ui_file_up logfile,
-		     bool logging_redirect)
-{
-  if (logging_redirect)
-    return logfile.release ();
-  else
-    {
-      /* Note that the "tee" takes ownership of the log file.  */
-      ui_file *out = new tee_file (curr_output, false,
-				   logfile.get (), true);
-      logfile.release ();
-      return out;
-    }
-}
-
 /* This is a helper for the `set logging' command.  */
 static void
 handle_redirections (int from_tty)

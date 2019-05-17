@@ -403,7 +403,7 @@ static saved_output_files saved_output;
 void
 cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect)
 {
-  if (logfile != NULL)
+  if (logfile != nullptr)
     {
       saved_output.out = gdb_stdout;
       saved_output.err = gdb_stderr;
@@ -411,16 +411,22 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect)
       saved_output.targ = gdb_stdtarg;
       saved_output.targerr = gdb_stdtargerr;
 
-      /* A raw pointer since ownership is transferred to
-	 gdb_stdout.  */
-      ui_file *output = make_logging_output (gdb_stdout,
-					     std::move (logfile),
-					     logging_redirect);
-      gdb_stdout = output;
-      gdb_stdlog = output;
-      gdb_stderr = output;
-      gdb_stdtarg = output;
-      gdb_stdtargerr = output;
+      /* If logging is being redirected, then grab logfile.  */
+      ui_file *logfile_p = nullptr;
+      if (logging_redirect)
+	logfile_p = logfile.release ();
+
+      /* If logging is not being redirected, then a tee containing both the
+	 logfile and stdout.  */
+      ui_file *tee = nullptr;
+      if (!logging_redirect)
+	tee = new tee_file (gdb_stdout, std::move (logfile));
+
+      gdb_stdout = logging_redirect ? logfile_p : tee;
+      gdb_stdlog = logging_redirect ? logfile_p : tee;
+      gdb_stderr = logging_redirect ? logfile_p : tee;
+      gdb_stdtarg = logging_redirect ? logfile_p : tee;
+      gdb_stdtargerr = logging_redirect ? logfile_p : tee;
     }
   else
     {
@@ -434,11 +440,11 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect)
       gdb_stdtarg = saved_output.targ;
       gdb_stdtargerr = saved_output.targerr;
 
-      saved_output.out = NULL;
-      saved_output.err = NULL;
-      saved_output.log = NULL;
-      saved_output.targ = NULL;
-      saved_output.targerr = NULL;
+      saved_output.out = nullptr;
+      saved_output.err = nullptr;
+      saved_output.log = nullptr;
+      saved_output.targ = nullptr;
+      saved_output.targerr = nullptr;
     }
 }
 

@@ -336,20 +336,13 @@ stderr_file::stderr_file (FILE *stream)
 
 
 
-tee_file::tee_file (ui_file *one, bool close_one,
-		    ui_file *two, bool close_two)
+tee_file::tee_file (ui_file *one, ui_file_up &&two)
   : m_one (one),
-    m_two (two),
-    m_close_one (close_one),
-    m_close_two (close_two)
+    m_two (std::move (two))
 {}
 
 tee_file::~tee_file ()
 {
-  if (m_close_one)
-    delete m_one;
-  if (m_close_two)
-    delete m_two;
 }
 
 void

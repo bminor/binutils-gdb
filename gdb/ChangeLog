@@ -1,3 +1,16 @@
+2019-05-14  Alan Hayward  <alan.hayward@arm.com>
+	    Tom Tromey  <tromey@adacore.com>
+
+	* cli/cli-interp.c (cli_interp_base::set_logging): Create tee_file
+	directly.
+	* cli/cli-interp.h (make_logging_output): Remove declaration.
+	* cli/cli-logging.c (make_logging_output): Remove function.
+	* mi/mi-interp.c (mi_interp::set_logging): Create tee_file
+	directly.
+	* ui-file.c (tee_file::tee_file): Remove bools.
+	(tee_file::~tee_file): Remove deletes.
+	* ui-file.h (tee_file): Remove bools.
+
 2019-01-28  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* mi/mi-cmds.h (mi_cmd_complete): New function.

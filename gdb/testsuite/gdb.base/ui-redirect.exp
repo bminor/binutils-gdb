@@ -34,8 +34,28 @@ gdb_test_multiple $test $test {
 }
 gdb_test_no_output "end"
 
-gdb_test_no_output "set logging file /dev/null"
-gdb_test "set logging on" "Copying output to /dev/null\\."
-gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
-gdb_test "set logging off" "Done logging to /dev/null\\."
-gdb_test "help" "List of classes of commands:.*"
+with_test_prefix "logging" {
+    gdb_test_no_output "set logging file /dev/null"
+    gdb_test "set logging on" "Copying output to /dev/null\\."
+    gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
+    gdb_test "set logging off" "Done logging to /dev/null\\."
+    gdb_test "help" "List of classes of commands:.*"
+}
+
+with_test_prefix "redirect" {
+    gdb_test "set logging redirect on"
+    gdb_test "set logging on" "Redirecting output to /dev/null\\."
+    gdb_test_no_output "save breakpoints /dev/null"
+    gdb_test "set logging off" "Done logging to /dev/null\\."
+    gdb_test "help" "List of classes of commands:.*"
+}
+
+with_test_prefix "redirect while already logging" {
+    gdb_test_no_output "set logging redirect off"
+    gdb_test "set logging on" "Copying output to /dev/null\\."
+    gdb_test "set logging redirect on" \
+    ".*warning: Currently logging .*Turn the logging off and on to make the new setting effective.*"
+    gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
+    gdb_test "set logging off" "Done logging to /dev/null\\."
+    gdb_test "help" "List of classes of commands:.*"
+}

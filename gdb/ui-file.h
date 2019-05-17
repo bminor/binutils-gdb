@@ -267,11 +267,9 @@ public:
 class tee_file : public ui_file
 {
 public:
-  /* Create a file which writes to both ONE and TWO.  CLOSE_ONE and
-     CLOSE_TWO indicate whether the original files should be closed
-     when the new file is closed.  */
-  tee_file (ui_file *one, bool close_one,
-	    ui_file *two, bool close_two);
+  /* Create a file which writes to both ONE and TWO.  ONE will remain
+     open when this object is destroyed; but TWO will be closed.  */
+  tee_file (ui_file *one, ui_file_up &&two);
   ~tee_file () override;
 
   void write (const char *buf, long length_buf) override;
@@ -284,10 +282,9 @@ public:
   void flush () override;
 
 private:
-  /* The two underlying ui_files, and whether they should each be
-     closed on destruction.  */
-  ui_file *m_one, *m_two;
-  bool m_close_one, m_close_two;
+  /* The two underlying ui_files.  */
+  ui_file *m_one;
+  ui_file_up m_two;
 };
 
 #endif
