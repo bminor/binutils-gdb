@@ -1,3 +1,8 @@
+2019-01-28  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.mi/mi-complete.exp: New file.
+	* gdb.mi/mi-complete.cc: Likewise.
+
 2019-05-15  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/vla-sizeof.exp: Add tests of sizeof applied to

@@ -75,6 +75,7 @@ static struct mi_cmd mi_cmds[] =
                    &mi_suppress_notification.breakpoint),
   DEF_MI_CMD_MI_1 ("catch-unload", mi_cmd_catch_unload,
                    &mi_suppress_notification.breakpoint),
+  DEF_MI_CMD_MI ("complete", mi_cmd_complete),
   DEF_MI_CMD_MI ("data-disassemble", mi_cmd_disassemble),
   DEF_MI_CMD_MI ("data-evaluate-expression", mi_cmd_data_evaluate_expression),
   DEF_MI_CMD_MI ("data-list-changed-registers",

@@ -2708,6 +2708,51 @@ mi_cmd_fix_multi_location_breakpoint_output (const char *command, char **argv,
   fix_multi_location_breakpoint_output_globally = true;
 }
 
+/* Implement the "-complete" command.  */
+
+void
+mi_cmd_complete (const char *command, char **argv, int argc)
+{
+  if (argc != 1)
+    error (_("Usage: -complete COMMAND"));
+
+  if (max_completions == 0)
+    error (_("max-completions is zero, completion is disabled."));
+
+  int quote_char = '\0';
+  const char *word;
+
+  completion_result result = complete (argv[0], &word, &quote_char);
+
+  std::string arg_prefix (argv[0], word - argv[0]);
+
+  struct ui_out *uiout = current_uiout;
+
+  if (result.number_matches > 0)
+    uiout->field_fmt ("completion", "%s%s",
+                      arg_prefix.c_str (),result.match_list[0]);
+
+  {
+    ui_out_emit_list completions_emitter (uiout, "matches");
+
+    if (result.number_matches == 1)
+      uiout->field_fmt (NULL, "%s%s",
+                        arg_prefix.c_str (), result.match_list[0]);
+    else
+      {
+        result.sort_match_list ();
+        for (size_t i = 0; i < result.number_matches; i++)
+          {
+            uiout->field_fmt (NULL, "%s%s",
+                              arg_prefix.c_str (), result.match_list[i + 1]);
+          }
+      }
+  }
+  uiout->field_string ("max_completions_reached",
+                       result.number_matches == max_completions ? "1" : "0");
+}
+
+
 void
 _initialize_mi_main (void)
 {

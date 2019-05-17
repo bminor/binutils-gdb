@@ -1,3 +1,10 @@
+2019-01-28  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* mi/mi-cmds.h (mi_cmd_complete): New function.
+	* mi/mi-main.c (mi_cmd_complete): Likewise.
+	* mi/mi-cmds.c: Define new MI command -complete.
+	* NEWS: Mention new -complete command.
+
 2019-01-24  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* completer.h (complete): New function.

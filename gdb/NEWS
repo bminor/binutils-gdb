@@ -46,6 +46,13 @@ show print max-depth
   The default max-depth is 20, but this can be set to unlimited to get
   the old behavior back.
 
+* New MI commands
+
+-complete
+  This lists all the possible completions for the rest of the line, if it
+  were to be given as a command itself.  This is intended for use by MI
+  frontends in cases when separate CLI and MI channels cannot be used.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on

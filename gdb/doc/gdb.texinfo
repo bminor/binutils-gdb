@@ -34538,6 +34538,71 @@ fullname="/home/nickrob/myprog.c",line="73",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
+@subheading The @code{-complete} Command
+@findex -complete
+
+@subheading Synopsis
+
+@smallexample
+-complete @var{command}
+@end smallexample
+
+Show a list of completions for partially typed CLI @var{command}.
+
+This command is intended for @sc{gdb/mi} frontends that cannot use two separate
+CLI and MI channels - for example: because of lack of PTYs like on Windows or
+because @value{GDBN} is used remotely via a SSH connection.
+
+@subheading Result
+
+The result consists of two or three fields:
+
+@table @samp
+@item completion
+This field contains the completed @var{command}.  If @var{command}
+has no known completions, this field is omitted.
+
+@item matches
+This field contains a (possibly empty) array of matches.  It is always present.
+
+@item max_completions_reached
+This field contains @code{1} if number of known completions is above
+@code{max-completions} limit (see @ref{Completion}), otherwise it contains
+@code{0}.  It is always present.
+
+@end table
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{complete}.
+
+@subheading Example
+
+@smallexample
+(gdb)
+-complete br
+^done,completion="break",
+      matches=["break","break-range"],
+      max_completions_reached="0"
+(gdb)
+-complete "b ma"
+^done,completion="b ma",
+      matches=["b madvise","b main"],max_completions_reached="0"
+(gdb)
+-complete "b push_b"
+^done,completion="b push_back(",
+      matches=[
+       "b A::push_back(void*)",
+       "b std::string::push_back(char)",
+       "b std::vector<int, std::allocator<int> >::push_back(int&&)"],
+      max_completions_reached="0"
+(gdb)
+-complete "nonexist"
+^done,matches=[],max_completions_reached="0"
+(gdb)
+
+@end smallexample
+
 @node Annotations
 @chapter @value{GDBN} Annotations
 
