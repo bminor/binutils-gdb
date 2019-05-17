@@ -1,5 +1,23 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* lib/gdb.exp (gdb_unload): Mark Y as an answer.
+	(delete_breakpoints): Likewise.
+	(gdb_run_cmd): Likewise.
+	(gdb_start_cmd): Likewise.
+	(gdb_starti_cmd): Likewise.
+	(gdb_internal_error_resync): Likewise.
+	(gdb_test_multiple): Likewise.
+	(gdb_reinitialize_dir): Likewise.
+	(default_gdb_exit): Likewise.
+	(gdb_file_cmd): Mark kill as optional.
+	(default_gdb_start): Call gdb_stdin_log_init.
+	(send_gdb): Call gdb_stdin_log_write.
+	(rerun_to_main): Mark Y as an answer.
+	(gdb_stdin_log_init): New function.
+	(gdb_stdin_log_write): Likewise.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* gdb.base/breakpoint-in-ro-region.exp: Disable when debugging.
 	* gdb.base/debug-expr.exp: Likewise.
 	* gdb.base/foll-fork.exp: Likewise.

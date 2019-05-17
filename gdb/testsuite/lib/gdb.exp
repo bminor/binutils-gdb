@@ -167,11 +167,11 @@ proc gdb_unload {} {
 	-re "No executable file now\[^\r\n\]*\[\r\n\]" { exp_continue }
 	-re "No symbol file now\[^\r\n\]*\[\r\n\]" { exp_continue }
 	-re "A program is being debugged already.*Are you sure you want to change the file.*y or n. $" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-re "Discard symbol table from .*y or n.*$" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {}
@@ -201,7 +201,7 @@ proc delete_breakpoints {} {
     set deleted 0
     gdb_test_multiple "delete breakpoints" "$msg" {
 	-re "Delete all breakpoints.*y or n.*$" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {
@@ -307,7 +307,7 @@ proc gdb_run_cmd {args} {
 		    set start_attempt 0
 		}
 		-re "Line.* Jump anyway.*y or n. $" {
-		    send_gdb "y\n"
+		    send_gdb "y\n" answer
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
 		    if { [gdb_reload] != 0 } {
@@ -335,7 +335,7 @@ proc gdb_run_cmd {args} {
 # may test for additional start-up messages.
    gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-notransfer -re "Starting program: \[^\r\n\]*" {}
@@ -374,7 +374,7 @@ proc gdb_start_cmd {args} {
     # may test for additional start-up messages.
     gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-notransfer -re "Starting program: \[^\r\n\]*" {
@@ -411,7 +411,7 @@ proc gdb_starti_cmd {args} {
     send_gdb "starti $args\n"
     gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    exp_continue
 	}
 	-re "Starting program: \[^\r\n\]*" {
@@ -673,11 +673,11 @@ proc gdb_internal_error_resync {} {
     while {$count < 10} {
 	gdb_expect {
 	    -re "Quit this debugging session\\? \\(y or n\\) $" {
-		send_gdb "n\n"
+		send_gdb "n\n" answer
 		incr count
 	    }
 	    -re "Create a core file of GDB\\? \\(y or n\\) $" {
-		send_gdb "n\n"
+		send_gdb "n\n" answer
 		incr count
 	    }
 	    -re "$gdb_prompt $" {
@@ -971,7 +971,7 @@ proc gdb_test_multiple { command message user_code } {
 	    set result -1
 	}
 	-re "\\((y or n|y or \\\[n\\\]|\\\[y\\\] or n)\\) " {
-	    send_gdb "n\n"
+	    send_gdb "n\n" answer
 	    gdb_expect -re "$gdb_prompt $"
 	    fail "$message (got interactive prompt)"
 	    set result -1
@@ -1451,7 +1451,7 @@ proc gdb_reinitialize_dir { subdir } {
     send_gdb "dir\n"
     gdb_expect 60 {
 	-re "Reinitialize source path to empty.*y or n. " {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    gdb_expect 60 {
 		-re "Source directories searched.*$gdb_prompt $" {
 		    send_gdb "dir $subdir\n"
@@ -1511,7 +1511,7 @@ proc default_gdb_exit {} {
 	send_gdb "quit\n"
 	gdb_expect 10 {
 	    -re "y or n" {
-		send_gdb "y\n"
+		send_gdb "y\n" answer
 		exp_continue
 	    }
 	    -re "DOSEXIT code" { }
@@ -1568,11 +1568,12 @@ proc gdb_file_cmd { arg } {
     }
 
     # The file command used to kill the remote target.  For the benefit
-    # of the testsuite, preserve this behavior.
-    send_gdb "kill\n"
+    # of the testsuite, preserve this behavior.  Mark as optional so it doesn't
+    # get written to the stdin log.
+    send_gdb "kill\n" optional
     gdb_expect 120 {
 	-re "Kill the program being debugged. .y or n. $" {
-	    send_gdb "y\n"
+	    send_gdb "y\n" answer
 	    verbose "\t\tKilling previous program being debugged"
 	    exp_continue
 	}
@@ -1599,7 +1600,7 @@ proc gdb_file_cmd { arg } {
 	    return 0
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
-            send_gdb "y\n"
+            send_gdb "y\n" answer
             gdb_expect 120 {
                 -re "Reading symbols from.*$gdb_prompt $" {
                     verbose "\t\tLoaded $arg with new symbol table into $GDB"
@@ -1694,6 +1695,12 @@ proc default_gdb_start { } {
     if [info exists gdb_spawn_id] {
 	return 0
     }
+
+    # Keep track of the number of times GDB has been launched.
+    global gdb_instances
+    incr gdb_instances
+
+    gdb_stdin_log_init
 
     set res [gdb_spawn]
     if { $res != 0} {
@@ -3965,11 +3972,15 @@ proc gdb_compile_objc {source dest type options} {
     }
 }
 
-proc send_gdb { string } {
+# Send a command to GDB.
+# For options for TYPE see gdb_stdin_log_write
+
+proc send_gdb { string {type standard}} {
     global suppress_flag
     if { $suppress_flag } {
 	return "suppressed"
     }
+    gdb_stdin_log_write $string $type
     return [remote_send host "$string"]
 }
 
@@ -4635,6 +4646,20 @@ proc standard_output_file {basename} {
     return [file join $dir $basename]
 }
 
+# Turn BASENAME into a full file name in the standard output directory.  If
+# GDB has been launched more than once then append the count, starting with
+# a ".1" postfix.
+
+proc standard_output_file_with_gdb_instance {basename} {
+    global gdb_instances
+    set count [expr $gdb_instances - 1 ]
+
+    if {$count == 0} {
+      return [standard_output_file $basename]
+    }
+    return [standard_output_file ${basename}.${count}]
+}
+
 # Return the name of a file in our standard temporary directory.
 
 proc standard_temp_file {basename} {
@@ -4828,6 +4853,10 @@ proc gdb_init { test_file_name } {
     global gdbserver_reconnect_p
     set gdbserver_reconnect_p 1
     unset gdbserver_reconnect_p
+
+    # Reset GDB number of instances
+    global gdb_instances
+    set gdb_instances 0
 
     return [default_gdb_init $test_file_name]
 }
@@ -5097,7 +5126,7 @@ proc rerun_to_main {} {
     send_gdb "run\n"
     gdb_expect {
       -re "The program .* has been started already.*y or n. $" {
-	  send_gdb "y\n"
+	  send_gdb "y\n" answer
 	  exp_continue
       }
       -re "Starting program.*$gdb_prompt $"\
@@ -6468,6 +6497,47 @@ proc gdb_debug_init { } {
 proc gdbserver_debug_enabled { } {
     # Always disabled for GDB only setups.
     return 0
+}
+
+# Open the file for logging gdb input
+
+proc gdb_stdin_log_init { } {
+    global in_file
+
+    if {[info exists in_file]} {
+      # Close existing file.
+      catch "close $in_file"
+    }
+
+    set logfile [standard_output_file_with_gdb_instance gdb.in]
+    set in_file [open $logfile w]
+}
+
+# Write to the file for logging gdb input.
+# TYPE can be one of the following:
+# "standard" : Default. Standard message written to the log
+# "answer" : Answer to a question (eg "Y"). Not written the log.
+# "optional" : Optional message. Not written to the log.
+
+proc gdb_stdin_log_write { message {type standard} } {
+
+    global in_file
+    if {![info exists in_file]} {
+      return
+    }
+
+    # Check message types.
+    switch -regexp -- $type {
+        "answer" {
+            return
+        }
+        "optional" {
+            return
+        }
+    }
+
+    #Write to the log
+    puts -nonewline $in_file "$message"
 }
 
 # Always load compatibility stuff.
