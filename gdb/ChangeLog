@@ -1,3 +1,10 @@
+2019-01-24  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* completer.h (complete): New function.
+	* completer.c (complete): Likewise.
+	* cli/cli-cmds.c: (complete_command): Update to use new complete()
+	function defined in completer.h.
+
 2019-05-17  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
        * MAINTAINERS (Write After Approval): Add myself.

@@ -1613,6 +1613,41 @@ make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
   return gdb::unique_xmalloc_ptr<char> (newobj);
 }
 
+/* See complete.h.  */
+
+completion_result
+complete (const char *line, char const **word, int *quote_char)
+{
+  completion_tracker tracker_handle_brkchars;
+  completion_tracker tracker_handle_completions;
+  completion_tracker *tracker;
+
+  try
+    {
+      *word = completion_find_completion_word (tracker_handle_brkchars,
+					      line, quote_char);
+
+      /* Completers that provide a custom word point in the
+	 handle_brkchars phase also compute their completions then.
+	 Completers that leave the completion word handling to readline
+	 must be called twice.  */
+      if (tracker_handle_brkchars.use_custom_word_point ())
+	tracker = &tracker_handle_brkchars;
+      else
+	{
+	  complete_line (tracker_handle_completions, *word, line, strlen (line));
+	  tracker = &tracker_handle_completions;
+	}
+    }
+  catch (const gdb_exception &ex)
+    {
+      return {};
+    }
+
+  return tracker->build_completion_result (*word, *word - line, strlen (line));
+}
+
+
 /* Generate completions all at once.  Does nothing if max_completions
    is 0.  If max_completions is non-negative, this will collect at
    most max_completions strings.
