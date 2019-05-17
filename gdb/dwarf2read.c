@@ -1514,10 +1514,18 @@ struct cu_partial_die_info
   struct dwarf2_cu *cu;
   /* A partial_die_info.  */
   struct partial_die_info *pdi;
+
+  cu_partial_die_info (struct dwarf2_cu *cu, struct partial_die_info *pdi)
+    : cu (cu),
+      pdi (pdi)
+  { /* Nothhing.  */ }
+
+private:
+  cu_partial_die_info () = delete;
 };
 
-static struct cu_partial_die_info find_partial_die (sect_offset, int,
-						    struct dwarf2_cu *);
+static const struct cu_partial_die_info find_partial_die (sect_offset, int,
+							  struct dwarf2_cu *);
 
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
 				       struct attribute *, struct attr_abbrev *,
@@ -8763,7 +8771,6 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 {
   const char *grandparent_scope;
   struct partial_die_info *parent, *real_pdi;
-  struct cu_partial_die_info res;
 
   /* We need to look at our parent DIE; if we have a DW_AT_specification,
      then this means the parent of the specification DIE.  */
@@ -8771,8 +8778,8 @@ partial_die_parent_scope (struct partial_die_info *pdi,
   real_pdi = pdi;
   while (real_pdi->has_specification)
     {
-      res = find_partial_die (real_pdi->spec_offset,
-			      real_pdi->spec_is_dwz, cu);
+      auto res = find_partial_die (real_pdi->spec_offset,
+				   real_pdi->spec_is_dwz, cu);
       real_pdi = res.pdi;
       cu = res.cu;
     }
@@ -18919,7 +18926,7 @@ dwarf2_cu::find_partial_die (sect_offset sect_off)
    outside their CU (they do however referencing other types via
    DW_FORM_ref_sig8).  */
 
-static struct cu_partial_die_info
+static const struct cu_partial_die_info
 find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
@@ -19000,7 +19007,6 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 
   struct partial_die_info *real_pdi;
   struct partial_die_info *child_pdi;
-  struct cu_partial_die_info res;
 
   /* If this DIE (this DIE's specification, if any) has a parent, then
      we should not do this.  We'll prepend the parent's fully qualified
@@ -19009,8 +19015,8 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
   real_pdi = struct_pdi;
   while (real_pdi->has_specification)
     {
-      res = find_partial_die (real_pdi->spec_offset,
-			      real_pdi->spec_is_dwz, cu);
+      auto res = find_partial_die (real_pdi->spec_offset,
+				   real_pdi->spec_is_dwz, cu);
       real_pdi = res.pdi;
       cu = res.cu;
     }
@@ -19058,9 +19064,8 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
   if (name == NULL && has_specification)
     {
       struct partial_die_info *spec_die;
-      struct cu_partial_die_info res;
 
-      res = find_partial_die (spec_offset, spec_is_dwz, cu);
+      auto res = find_partial_die (spec_offset, spec_is_dwz, cu);
       spec_die = res.pdi;
       cu = res.cu;
 
