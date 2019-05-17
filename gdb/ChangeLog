@@ -1,3 +1,11 @@
+2019-05-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24094
+	* dwarf2read.c (struct cu_partial_die_info): New struct.
+	(find_partial_die): Return cu_partial_die_info.
+	(partial_die_parent_scope, guess_partial_die_structure_name)
+	(partial_die_info::fixup): Handle new return type of find_partial_die.
+
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* stap-probe.c (stap_parse_register_operand): Make "regname" an
