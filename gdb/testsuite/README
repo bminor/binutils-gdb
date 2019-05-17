@@ -13,14 +13,14 @@ There are two ways to run the testsuite and pass additional parameters
 to DejaGnu.  The first is to do `make check' in the main build
 directory and specifying the makefile variable `RUNTESTFLAGS':
 
-	 make check RUNTESTFLAGS='TRANSCRIPT=y gdb.base/a2-run.exp'
+	 make check RUNTESTFLAGS='GDB=/usr/bin/gdb gdb.base/a2-run.exp'
 
 The second is to cd to the testsuite directory and invoke the DejaGnu
 `runtest' command directly.
 
 	cd testsuite
 	make site.exp
-	runtest TRANSCRIPT=y
+	runtest GDB=/usr/bin/gdb
 
 (The `site.exp' file contains a handful of useful variables like host
 and target triplets, and pathnames.)
@@ -123,25 +123,6 @@ Testsuite Parameters
 
 The following parameters are DejaGNU variables that you can set to
 affect the testsuite run globally.
-
-TRANSCRIPT
-
-You may find it useful to have a transcript of the commands that the
-testsuite sends to GDB, for instance if GDB crashes during the run,
-and you want to reconstruct the sequence of commands.
-
-If the DejaGNU variable TRANSCRIPT is set (to any value), each
-invocation of GDB during the test run will get a transcript file
-written into the DejaGNU output directory.  The file will have the
-name transcript.<n>, where <n> is an integer.  The first line of the
-file shows the invocation command with all the options passed to it,
-while subsequent lines are the GDB commands.  A `make check' might
-look like this:
-
-      make check RUNTESTFLAGS=TRANSCRIPT=y
-
-The transcript may not be complete, as for instance tests of command
-completion may show only partial command lines.
 
 GDB
 

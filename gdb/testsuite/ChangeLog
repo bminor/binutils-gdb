@@ -1,5 +1,11 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* README (Running the Testsuite): Change example.
+	(Testsuite Parameters): Remove TRANSCRIPT.
+	* lib/gdb.exp: Remove TRANSCRIPT check.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* README (Testsuite Parameters): Add replay logging to
 	GDBSERVER_DEBUG.
 	(gdbserver,debug): Refer to GDBSERVER_DEBUG.
