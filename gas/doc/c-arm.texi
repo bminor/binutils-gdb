@@ -152,7 +152,7 @@ recognized:
 @code{xgene2},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
 @code{i80200} (Intel XScale processor)
-@code{iwmmxt} (Intel(r) XScale processor with Wireless MMX(tm) technology coprocessor)
+@code{iwmmxt} (Intel XScale processor with Wireless MMX technology coprocessor)
 and
 @code{xscale}.
 The special name @code{all} may be used to allow the

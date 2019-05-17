@@ -236,7 +236,7 @@ floating point libraries.
 
 @item Blackfin Opcodes
 For detailed information on the Blackfin machine instruction set, see
-the Blackfin(r) Processor Instruction Set Reference.
+the Blackfin Processor Instruction Set Reference.
 
 @end table
 

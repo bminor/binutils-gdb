@@ -1,3 +1,8 @@
+2019-05-17  John Darrington  <john@darrington.wattle.id.au>
+
+	* doc/c-arm.texi (ARM Options): Remove "(r)" and "(tm)"
+	* doc/c-bfin.texi (Blackfin Syntax): Remove "(r)"
+
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (check_simd_pred_availability): Refactor.
