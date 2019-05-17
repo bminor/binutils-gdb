@@ -87,7 +87,7 @@ struct annotate_arg_emitter
   DISABLE_COPY_AND_ASSIGN (annotate_arg_emitter);
 };
 
-extern void annotate_source (char *, int, int, int,
+extern void annotate_source (const char *, int, int, int,
 			     struct gdbarch *, CORE_ADDR);
 
 extern void annotate_frame_begin (int, struct gdbarch *, CORE_ADDR);

@@ -1,3 +1,8 @@
+2019-05-17  Tom Tromey  <tromey@adacore.com>
+
+	* annotate.c (annotate_source): Make "filename" const.
+	* annotate.h (annotate_source): Use const.
+
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* disasm.c (set_disassembler_options): Send errors to stderr.
