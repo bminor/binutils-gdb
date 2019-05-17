@@ -1,5 +1,13 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* lib/gdb.exp (default_gdb_spawn): Call gdb_write_cmd_file.
+	(gdb_write_cmd_file): New procedure.
+	* lib/gdbserver-support.exp (gdbserver_start): Call
+	gdbserver_write_cmd_file.
+	(gdbserver_write_cmd_file): New procedure.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* lib/gdb.exp (gdb_unload): Mark Y as an answer.
 	(delete_breakpoints): Likewise.
 	(gdb_run_cmd): Likewise.

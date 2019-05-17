@@ -1664,6 +1664,7 @@ proc default_gdb_spawn { } {
     set use_gdb_stub [target_info exists use_gdb_stub]
 
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
+    gdb_write_cmd_file "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
 	return 0
@@ -6538,6 +6539,15 @@ proc gdb_stdin_log_write { message {type standard} } {
 
     #Write to the log
     puts -nonewline $in_file "$message"
+}
+
+# Write the command line used to invocate gdb to the cmd file.
+
+proc gdb_write_cmd_file { cmdline } {
+    set logfile [standard_output_file_with_gdb_instance gdb.cmd]
+    set cmd_file [open $logfile w]
+    puts $cmd_file $cmdline
+    catch "close $cmd_file"
 }
 
 # Always load compatibility stuff.

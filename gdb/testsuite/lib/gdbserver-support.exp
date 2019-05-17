@@ -319,6 +319,8 @@ proc gdbserver_start { options arguments } {
 	    append gdbserver_command " $arguments"
 	}
 
+	gdbserver_write_cmd_file $gdbserver_command
+
 	global server_spawn_id
 	set server_spawn_id [remote_spawn target $gdbserver_command]
 
@@ -596,4 +598,13 @@ proc gdbserver_debug_enabled { } {
     # Only return success on valid values.
     return [expr { $gdbserverdebug == "debug" || $gdbserverdebug == "remote"
 		   || $gdbserverdebug == "all" }]
+}
+
+# Write the command line used to invocate gdbserver to the cmd file.
+
+proc gdbserver_write_cmd_file { cmdline } {
+    set logfile [standard_output_file_with_gdb_instance gdbserver.cmd]
+    set cmd_file [open $logfile w]
+    puts $cmd_file $cmdline
+    catch "close $cmd_file"
 }
