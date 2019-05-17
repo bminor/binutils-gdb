@@ -1,4 +1,21 @@
-2019-05-14  Alan Hayward  <alan.hayward@arm.com>
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* cli/cli-interp.c (struct saved_output_files): Add saved entry.
+	(cli_interp_base::set_logging): Check debug_redirect.
+	* cli/cli-interp.h (set_logging): Add debug_redirect parameter.
+	* cli/cli-logging.c (debug_redirect): Add static variable.
+	(pop_output_files): Add default param.
+	(handle_redirections): Print debug setting.
+	(show_logging_command): Likewise.
+	(_initialize_cli_logging): Add debugredirect command.
+	* interps.c (current_interp_set_logging): Add debug_redirect
+	parameter.
+	* interps.h (set_logging): Add debug_redirect parameter.
+	(current_interp_set_logging): Likewise.
+	* mi/mi-common.h: Likewise.
+	* mi/mi-interp.c (mi_interp::set_logging): Likewise.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 	    Tom Tromey  <tromey@adacore.com>
 
 	* cli/cli-interp.c (cli_interp_base::set_logging): Create tee_file

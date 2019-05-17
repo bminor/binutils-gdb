@@ -255,13 +255,13 @@ set_top_level_interpreter (const char *name)
 }
 
 void
-current_interp_set_logging (ui_file_up logfile,
-			    bool logging_redirect)
+current_interp_set_logging (ui_file_up logfile, bool logging_redirect,
+			    bool debug_redirect)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *interp = ui_interp->current_interpreter;
 
-  interp->set_logging (std::move (logfile), logging_redirect);
+  interp->set_logging (std::move (logfile), logging_redirect, debug_redirect);
 }
 
 /* Temporarily overrides the current interpreter.  */

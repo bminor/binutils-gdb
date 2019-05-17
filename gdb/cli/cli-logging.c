@@ -62,6 +62,7 @@ show_logging_overwrite (struct ui_file *file, int from_tty,
 
 /* Value as configured by the user.  */
 static int logging_redirect;
+static int debug_redirect;
 
 static void
 set_logging_redirect (const char *args,
@@ -81,7 +82,7 @@ show_logging_redirect (struct ui_file *file, int from_tty,
 static void
 pop_output_files (void)
 {
-  current_interp_set_logging (NULL, false);
+  current_interp_set_logging (NULL, false, false);
 
   /* Stay consistent with handle_redirections.  */
   if (!current_uiout->is_mi_like_p ())
@@ -112,12 +113,20 @@ handle_redirections (int from_tty)
       else
 	fprintf_unfiltered (gdb_stdout, "Redirecting output to %s.\n",
 			    logging_filename);
+
+      if (!debug_redirect)
+	fprintf_unfiltered (gdb_stdout, "Copying debug output to %s.\n",
+			    logging_filename);
+      else
+	fprintf_unfiltered (gdb_stdout, "Redirecting debug output to %s.\n",
+			    logging_filename);
     }
 
   saved_filename = xstrdup (logging_filename);
 
   /* Let the interpreter do anything it needs.  */
-  current_interp_set_logging (std::move (log), logging_redirect);
+  current_interp_set_logging (std::move (log), logging_redirect,
+			      debug_redirect);
 
   /* Redirect the current ui-out object's output to the log.  Use
      gdb_stdout, not log, since the interpreter may have created a tee
@@ -185,6 +194,11 @@ show_logging_command (const char *args, int from_tty)
     printf_unfiltered (_("Output will be sent only to the log file.\n"));
   else
     printf_unfiltered (_("Output will be logged and displayed.\n"));
+
+  if (debug_redirect)
+    printf_unfiltered (_("Debug output will be sent only to the log file.\n"));
+  else
+    printf_unfiltered (_("Debug output will be logged and displayed.\n"));
 }
 
 void
@@ -210,6 +224,15 @@ Set the logging output mode."), _("\
 Show the logging output mode."), _("\
 If redirect is off, output will go to both the screen and the log file.\n\
 If redirect is on, output will go only to the log file."),
+			   set_logging_redirect,
+			   show_logging_redirect,
+			   &set_logging_cmdlist, &show_logging_cmdlist);
+  add_setshow_boolean_cmd ("debugredirect", class_support,
+			   &debug_redirect, _("\
+Set the logging debug output mode."), _("\
+Show the logging debug output mode."), _("\
+If debug redirect is off, debug will go to both the screen and the log file.\n\
+If debug redirect is on, debug will go only to the log file."),
 			   set_logging_redirect,
 			   show_logging_redirect,
 			   &set_logging_cmdlist, &show_logging_cmdlist);

@@ -61,7 +61,8 @@ public:
   /* Provides a hook for interpreters to do any additional
      setup/cleanup that they might need when logging is enabled or
      disabled.  */
-  virtual void set_logging (ui_file_up logfile, bool logging_redirect) = 0;
+  virtual void set_logging (ui_file_up logfile, bool logging_redirect,
+			    bool debug_redirect) = 0;
 
   /* Called before starting an event loop, to give the interpreter a
      chance to e.g., print a prompt.  */
@@ -141,9 +142,12 @@ extern int current_interp_named_p (const char *name);
    interpreter should configure the output streams to send output only
    to the logfile.  If false, the interpreter should configure the
    output streams to send output to both the current output stream
-   (i.e., the terminal) and the log file.  */
+   (i.e., the terminal) and the log file.  DEBUG_REDIRECT is same as
+   LOGGING_REDIRECT, but for the value of "set logging debugredirect"
+   instead.  */
 extern void current_interp_set_logging (ui_file_up logfile,
-					bool logging_redirect);
+					bool logging_redirect,
+					bool debug_redirect);
 
 /* Returns the top-level interpreter.  */
 extern struct interp *top_level_interpreter (void);

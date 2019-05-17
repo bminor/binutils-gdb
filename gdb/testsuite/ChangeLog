@@ -1,5 +1,9 @@
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* gdb.base/ui-redirect.exp: Add debug redirect tests.
+
+2019-05-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* gdb.base/ui-redirect.exp: Test redirection.
 
 2019-01-28  Jan Vrany  <jan.vrany@fit.cvut.cz>
