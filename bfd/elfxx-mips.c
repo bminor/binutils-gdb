@@ -9102,6 +9102,18 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  switch (r_type)
 	    {
+	    case R_MIPS_TLS_TPREL_HI16:
+	    case R_MIPS16_TLS_TPREL_HI16:
+	    case R_MICROMIPS_TLS_TPREL_HI16:
+	    case R_MIPS_TLS_TPREL_LO16:
+	    case R_MIPS16_TLS_TPREL_LO16:
+	    case R_MICROMIPS_TLS_TPREL_LO16:
+	      /* These are okay in PIE, but not in a shared library.  */
+	      if (bfd_link_executable (info))
+		break;
+
+	      /* FALLTHROUGH */
+
 	    case R_MIPS16_HI16:
 	    case R_MIPS_HI16:
 	    case R_MIPS_HIGHER:

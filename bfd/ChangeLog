@@ -1,5 +1,10 @@
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Generate error
+	for TLS_TPREL_HI16(/LO16) relocations in shared library.
+
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Add NULL pointer
 	checks.  Search the RELA table for n64 relocations.
 

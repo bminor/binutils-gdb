@@ -1,5 +1,15 @@
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
+	* testsuite/ld-mips-elf/pic-reloc-5.s: Add tests for
+	%tprel_hi and %tprel_lo relocations.
+	* testsuite/ld-mips-elf/pic-reloc-6.s: Likewise.
+	* testsuite/ld-mips-elf/pic-reloc-5.d: Update accordingly.
+	* testsuite/ld-mips-elf/pic-reloc-6.d: Likewise.
+	* testsuite/ld-mips-elf/pic-reloc-tls.ld: New test linker
+	script file.
+
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
 	* testsuite/ld-mips-elf/pic-reloc-5.d: New test.
 	* testsuite/ld-mips-elf/pic-reloc-6.d: New test.
 	* testsuite/ld-mips-elf/pic-reloc-7.d: New test.
