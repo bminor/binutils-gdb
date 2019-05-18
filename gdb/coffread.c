@@ -2019,9 +2019,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name
-	    = (const char *) obstack_copy0 (&objfile->objfile_obstack,
-					    name, strlen (name));
+	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
 	  SET_FIELD_BITPOS (list->field, 8 * ms->c_value);
@@ -2037,9 +2035,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name
-	    = (const char *) obstack_copy0 (&objfile->objfile_obstack,
-					    name, strlen (name));
+	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
 	  SET_FIELD_BITPOS (list->field, ms->c_value);
@@ -2109,8 +2105,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	case C_MOE:
 	  sym = allocate_symbol (objfile);
 
-	  name = (char *) obstack_copy0 (&objfile->objfile_obstack, name,
-					 strlen (name));
+	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  SYMBOL_SET_LINKAGE_NAME (sym, name);
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;

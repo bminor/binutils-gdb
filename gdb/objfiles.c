@@ -166,8 +166,7 @@ set_objfile_main_name (struct objfile *objfile,
   if (objfile->per_bfd->name_of_main == NULL
       || strcmp (objfile->per_bfd->name_of_main, name) != 0)
     objfile->per_bfd->name_of_main
-      = (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack, name,
-				      strlen (name));
+      = obstack_strdup (&objfile->per_bfd->storage_obstack, name);
   objfile->per_bfd->language_of_main = lang;
 }
 
@@ -356,10 +355,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
       name_holder = gdb_abspath (name);
       expanded_name = name_holder.get ();
     }
-  original_name
-    = (char *) obstack_copy0 (&objfile_obstack,
-			      expanded_name,
-			      strlen (expanded_name));
+  original_name = obstack_strdup (&objfile_obstack, expanded_name);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data

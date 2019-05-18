@@ -4293,8 +4293,7 @@ common_block_start (const char *name, struct objfile *objfile)
     }
   common_block = *get_local_symbols ();
   common_block_i = common_block ? common_block->nsyms : 0;
-  common_block_name = (char *) obstack_copy0 (&objfile->objfile_obstack, name,
-					      strlen (name));
+  common_block_name = obstack_strdup (&objfile->objfile_obstack, name);
 }
 
 /* Process a N_ECOMM symbol.  */

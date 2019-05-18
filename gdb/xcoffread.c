@@ -1539,8 +1539,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
 
 #define	SYMNAME_ALLOC(NAME, ALLOCED)	\
-  ((ALLOCED) ? (NAME) : obstack_copy0 (&objfile->objfile_obstack, \
-				       (NAME), strlen (NAME)))
+  ((ALLOCED) ? (NAME) : obstack_strdup (&objfile->objfile_obstack, \
+					(NAME)))
 
 
 /* process one xcoff symbol.  */
@@ -1586,8 +1586,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
          will be patched with the type from its stab entry later on in
          patch_block_stabs (), unless the file was compiled without -g.  */
 
-      SYMBOL_SET_LINKAGE_NAME (sym, ((const char *)
-				     SYMNAME_ALLOC (name, symname_alloced)));
+      SYMBOL_SET_LINKAGE_NAME (sym, SYMNAME_ALLOC (name, symname_alloced));
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
       SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;

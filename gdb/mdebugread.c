@@ -1066,8 +1066,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym = allocate_symbol (mdebugread_objfile);
 		SYMBOL_SET_LINKAGE_NAME
 		  (enum_sym,
-		   (char *) obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-					   f->name, strlen (f->name)));
+		   obstack_strdup (&mdebugread_objfile->objfile_obstack,
+				   f->name));
 		SYMBOL_ACLASS_INDEX (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
@@ -1688,9 +1688,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (TYPE_NAME (tp) == NULL
 		   || strcmp (TYPE_NAME (tp), name) != 0)
 	    TYPE_NAME (tp)
-	      = ((const char *)
-		 obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-				name, strlen (name)));
+	      = obstack_strdup (&mdebugread_objfile->objfile_obstack, name);
 	}
     }
 
@@ -1726,9 +1724,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  if (TYPE_NAME (tp) == NULL
 	      || strcmp (TYPE_NAME (tp), name) != 0)
 	    TYPE_NAME (tp)
-	      = ((const char *)
-		 obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-				name, strlen (name)));
+	      = obstack_strdup (&mdebugread_objfile->objfile_obstack, name);
 	}
     }
   if (t->bt == btTypedef)

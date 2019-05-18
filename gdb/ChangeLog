@@ -1,3 +1,26 @@
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (SYMNAME_ALLOC, process_xcoff_symbol): Use
+	obstack_strdup.
+	* typeprint.c (typedef_hash_table::find_global_typedef): Use
+	obstack_strdup.
+	* symfile.c (allocate_compunit_symtab): Use obstack_strdup.
+	* stabsread.c (common_block_start): Use obstack_strdup.
+	* objfiles.c (set_objfile_main_name, objfile): Use
+	obstack_strdup.
+	* namespace.c (add_using_directive): Use obstack_strdup.
+	* mdebugread.c (parse_symbol, parse_type): Use obstack_strdup.
+	* jit.c (finalize_symtab): Use obstack_strdup.
+	* dwarf2read.c (fixup_go_packaging, dwarf2_physname)
+	(guess_partial_die_structure_name, partial_die_info::fixup)
+	(dwarf2_name): Use obstack_strdup.
+	* coffread.c (coff_read_struct_type, coff_read_enum_type): Use
+	obstack_strdup.
+	* c-exp.y (scan_macro_expansion): Use obstack_strdup.
+	* buildsym.c (buildsym_compunit::end_symtab_with_blockvector): Use
+	obstack_strdup.
+	* ada-lang.c (ada_decode_symbol): Use obstack_strdup.
+
 2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* unittests/help-doc-selftests.c: New file.

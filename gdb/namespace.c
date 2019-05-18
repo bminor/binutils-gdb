@@ -87,10 +87,8 @@ add_using_directive (struct using_direct **using_directives,
 
   if (copy_names)
     {
-      newobj->import_src
-	= (const char *) obstack_copy0 (obstack, src, strlen (src));
-      newobj->import_dest
-	= (const char *) obstack_copy0 (obstack, dest, strlen (dest));
+      newobj->import_src = obstack_strdup (obstack, src);
+      newobj->import_dest = obstack_strdup (obstack, dest);
     }
   else
     {
@@ -99,15 +97,12 @@ add_using_directive (struct using_direct **using_directives,
     }
 
   if (alias != NULL && copy_names)
-    newobj->alias
-      = (const char *) obstack_copy0 (obstack, alias, strlen (alias));
+    newobj->alias = obstack_strdup (obstack, alias);
   else
     newobj->alias = alias;
 
   if (declaration != NULL && copy_names)
-    newobj->declaration
-      = (const char *) obstack_copy0 (obstack, declaration,
-				      strlen (declaration));
+    newobj->declaration = obstack_strdup (obstack, declaration);
   else
     newobj->declaration = declaration;
 

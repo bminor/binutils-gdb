@@ -2490,15 +2490,14 @@ static const struct token ident_tokens[] =
 static void
 scan_macro_expansion (char *expansion)
 {
-  char *copy;
+  const char *copy;
 
   /* We'd better not be trying to push the stack twice.  */
   gdb_assert (! cpstate->macro_original_text);
 
   /* Copy to the obstack, and then free the intermediate
      expansion.  */
-  copy = (char *) obstack_copy0 (&cpstate->expansion_obstack, expansion,
-				 strlen (expansion));
+  copy = obstack_strdup (&cpstate->expansion_obstack, expansion);
   xfree (expansion);
 
   /* Save the old lexptr value, so we can return to it when we're done

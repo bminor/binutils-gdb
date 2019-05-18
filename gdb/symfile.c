@@ -2882,9 +2882,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
      Just save the basename to avoid path issues (too long for display,
      relative vs absolute, etc.).  */
   saved_name = lbasename (name);
-  cu->name
-    = (const char *) obstack_copy0 (&objfile->objfile_obstack, saved_name,
-				    strlen (saved_name));
+  cu->name = obstack_strdup (&objfile->objfile_obstack, saved_name);
 
   COMPUNIT_DEBUGFORMAT (cu) = "unknown";
 

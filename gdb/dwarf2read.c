@@ -9806,9 +9806,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     {
       struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
       const char *saved_package_name
-	= (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack,
-					package_name,
-					strlen (package_name));
+	= obstack_strdup (&objfile->per_bfd->storage_obstack, package_name);
       struct type *type = init_type (objfile, TYPE_CODE_MODULE, 0,
 				     saved_package_name);
       struct symbol *sym;
@@ -11070,9 +11068,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = ((const char *)
-	      obstack_copy0 (&objfile->per_bfd->storage_obstack,
-			     retval, strlen (retval)));
+    retval = obstack_strdup (&objfile->per_bfd->storage_obstack, retval);
 
   return retval;
 }
@@ -18982,10 +18978,8 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	    {
 	      struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
 	      struct_pdi->name
-		= ((const char *)
-		   obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				  actual_class_name,
-				  strlen (actual_class_name)));
+		= obstack_strdup (&objfile->per_bfd->storage_obstack,
+				  actual_class_name);
 	      xfree (actual_class_name);
 	    }
 	  break;
@@ -19067,10 +19061,7 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 	    base = demangled;
 
 	  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-	  name
-	    = ((const char *)
-	       obstack_copy0 (&objfile->per_bfd->storage_obstack,
-			      base, strlen (base)));
+	  name = obstack_strdup (&objfile->per_bfd->storage_obstack, base);
 	  xfree (demangled);
 	}
     }
@@ -22725,9 +22716,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
 	      /* FIXME: we already did this for the partial symbol... */
 	      DW_STRING (attr)
-		= ((const char *)
-		   obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				  demangled, strlen (demangled)));
+		= obstack_strdup (&objfile->per_bfd->storage_obstack,
+				  demangled);
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	      xfree (demangled);
 

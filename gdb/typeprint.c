@@ -325,9 +325,8 @@ typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
 
   if (applied != NULL)
     {
-      new_tf->name
-	= (const char *) obstack_copy0 (&flags->global_typedefs->m_storage,
-					applied, strlen (applied));
+      new_tf->name = obstack_strdup (&flags->global_typedefs->m_storage,
+				     applied);
       xfree (applied);
     }
 

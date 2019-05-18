@@ -1395,8 +1395,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
       gsymbol->ada_mangled = 1;
 
       if (obstack != NULL)
-	*resultp
-	  = (const char *) obstack_copy0 (obstack, decoded, strlen (decoded));
+	*resultp = obstack_strdup (obstack, decoded);
       else
         {
 	  /* Sometimes, we can't find a corresponding objfile, in
