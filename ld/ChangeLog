@@ -1,3 +1,13 @@
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* testsuite/ld-mips-elf/pic-reloc-5.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-6.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-7.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-5.s: New test source.
+	* testsuite/ld-mips-elf/pic-reloc-6.s: New test source.
+	* testsuite/ld-mips-elf/pic-reloc-7.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2019-05-21  Matthew Fortune  <matthew.fortune@mips.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 

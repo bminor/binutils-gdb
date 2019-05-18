@@ -1,3 +1,8 @@
+2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Add NULL pointer
+	checks.  Search the RELA table for n64 relocations.
+
 2019-05-21  Matthew Fortune  <matthew.fortune@mips.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 

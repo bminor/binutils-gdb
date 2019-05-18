@@ -1649,3 +1649,10 @@ run_dump_test "pic-reloc-1"
 run_dump_test "pic-reloc-2"
 run_dump_test "pic-reloc-3"
 run_dump_test "pic-reloc-4"
+run_dump_test_o32 "pic-reloc-5"
+run_dump_test_o32 "pic-reloc-5" [list [list name (microMIPS)] \
+				      [list as "-mmicromips"]]
+run_dump_test_o32 "pic-reloc-6"
+run_dump_test_n64 "pic-reloc-7"
+run_dump_test_n64 "pic-reloc-7" [list [list name (microMIPS)] \
+				      [list as "-mmicromips"]]
