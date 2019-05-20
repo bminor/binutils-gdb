@@ -178,6 +178,8 @@ md_begin (void)
 
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_mt, mt_mach);
+
+  literal_prefix_dollar_hex = TRUE;
 }
 
 void

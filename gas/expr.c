@@ -35,6 +35,8 @@
 #define CHAR_BIT 8
 #endif
 
+bfd_boolean literal_prefix_dollar_hex = FALSE;
+
 static void floating_constant (expressionS * expressionP);
 static valueT generic_bignum_to_int32 (void);
 #ifdef BFD64
@@ -778,14 +780,19 @@ operand (expressionS *expressionP, enum expr_mode mode)
 			expressionP);
       break;
 
-#ifdef LITERAL_PREFIXDOLLAR_HEX
     case '$':
-      /* $L is the start of a local label, not a hex constant.  */
-      if (* input_line_pointer == 'L')
-      goto isname;
-      integer_constant (16, expressionP);
+      if (literal_prefix_dollar_hex)
+        {
+          /* $L is the start of a local label, not a hex constant.  */
+          if (* input_line_pointer == 'L')
+            goto isname;
+          integer_constant (16, expressionP);
+        }
+      else
+        {
+          goto isname;
+        }
       break;
-#endif
 
 #ifdef LITERAL_PREFIXPERCENT_BIN
     case '%':

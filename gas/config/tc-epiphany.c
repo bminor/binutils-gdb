@@ -145,6 +145,8 @@ md_begin (void)
 
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_epiphany, bfd_mach_epiphany32);
+
+  literal_prefix_dollar_hex = TRUE;
 }
 
 valueT

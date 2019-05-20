@@ -41,7 +41,6 @@
 /* All mt instructions are multiples of 32 bits.  */
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 
-#define LITERAL_PREFIXDOLLAR_HEX
 #define LITERAL_PREFIXPERCENT_BIN
 
 #define md_apply_fix mt_apply_fix
