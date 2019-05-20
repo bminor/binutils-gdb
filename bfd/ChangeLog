@@ -1,3 +1,7 @@
+2019-05-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add case for Tag_MVE_arch.

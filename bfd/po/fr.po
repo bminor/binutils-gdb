@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd-2.31.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2019-01-19 16:30+0000\n"
-"PO-Revision-Date: 2019-01-21 20:51+0100\n"
+"PO-Revision-Date: 2019-05-15 05:58+0200\n"
 "Last-Translator: Frédéric Marchal <fmarchal@perso.be>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -4313,7 +4313,7 @@ msgstr "%H: %s vers « %pT »: erreur %d\n"
 #: elf64-s390.c:2576
 #, c-format
 msgid "%pB: `%s' non-PLT reloc for symbol defined in shared library and accessed from executable (rebuild file with -fPIC ?)"
-msgstr "%pB: réadressage non-PLT « %s » pour le symbole défini dans une bibliothèque partagée et accédé depuis l'exécutable (recompiler le fichier avec -fPIC ?)"
+msgstr "%pB: réadressage non-PLT « %s » pour le symbole défini dans une bibliothèque partagée et accédé depuis l'exécutable (recompilez le fichier avec -fPIC ?)"
 
 #: elf64-sparc.c:109 elfcode.h:1471
 #, c-format
@@ -4363,7 +4363,7 @@ msgstr "symbole "
 
 #: elf64-x86-64.c:1425 elf64-x86-64.c:1435
 msgid "; recompile with -fPIC"
-msgstr "; recompilé avec -fPIC"
+msgstr "; recompilez avec -fPIC"
 
 #: elf64-x86-64.c:1430
 msgid "undefined "
