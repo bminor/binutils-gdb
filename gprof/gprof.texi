@@ -110,7 +110,7 @@ in the section entitled ``GNU Free Documentation License''.
 
 @smallexample
 @c man begin SYNOPSIS
-gprof [ -[abcDhilLrsTvwxyz] ] [ -[ACeEfFJnNOpPqQZ][@var{name}] ]
+gprof [ -[abcDhilLrsTvwxyz] ] [ -[ACeEfFJnNOpPqQRStZ][@var{name}] ]
  [ -I @var{dirs} ] [ -d[@var{num}] ] [ -k @var{from/to} ]
  [ -m @var{min-count} ] [ -R @var{map_file} ] [ -t @var{table-length} ]
  [ --[no-]annotated-source[=@var{name}] ]

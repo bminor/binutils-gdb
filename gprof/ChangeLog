@@ -1,5 +1,13 @@
 2019-05-20  Nick Clifton  <nickc@redhat.com>
 
+	PR 24569
+	* gprof.c (usage): Restore alphabetical sorting to short options
+	list.  Add -r, -R and -t short options to the list.
+	(main): Add comment about -g and -G possibly being deprecated.
+	* gprof.texi: Update usage example in line with changes above.
+
+2019-05-20  Nick Clifton  <nickc@redhat.com>
+
 	* po/de.po: Updated German translation.
 
 2019-05-08  Alan Modra  <amodra@gmail.com>
