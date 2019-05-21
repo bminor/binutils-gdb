@@ -1,3 +1,9 @@
+2019-05-21  Tamar Christina  <tamar.christina@arm.com>
+
+	* dwarf.c (dwarf_regnames_aarch64): Add SVE registers.
+	* testsuite/binutils-all/aarch64/sve-dwarf-registers.d: New test.
+	* testsuite/binutils-all/aarch64/sve-dwarf-registers.s: New test.
+
 2019-05-20  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	PR 14798
