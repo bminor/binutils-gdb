@@ -1,3 +1,22 @@
+2019-05-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24373
+	* bfd-in.h (enum erratum_84319_opts): New
+	(bfd_elf64_aarch64_set_options, bfd_elf32_aarch64_set_options): Change
+	int to enum erratum_84319_opts.
+	* bfd-in2.h: Regenerate.
+	* elfnn-aarch64.c (struct elf_aarch64_link_hash_table): Change
+	fix_erratum_843419 to use new enum, remove fix_erratum_843419_adr.
+	(_bfd_aarch64_add_stub_entry_after): Conditionally create erratum stub.
+	(aarch64_size_one_stub): Conditionally size erratum 843419 stubs.
+	(_bfd_aarch64_resize_stubs): Amend comment.
+	(elfNN_aarch64_size_stubs): Don't generate stubs when no workaround
+	requested.
+	(bfd_elfNN_aarch64_set_options): Use new fix_erratum_843419 enum.
+	(_bfd_aarch64_erratum_843419_branch_to_stub): Implement selection of
+	erratum workaround.
+	(clear_erratum_843419_entry): Update erratum conditional.
+
 2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
 
 	PR ld/24571

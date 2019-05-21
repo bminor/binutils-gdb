@@ -1,3 +1,21 @@
+2019-05-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24373
+	* emultempl/aarch64elf.em (PARSE_AND_LIST_LONGOPTS): Add optional args
+	to flags.
+	* NEWS: Add changes to flag.
+	(PARSE_AND_LIST_OPTIONS): Update help descriptions.
+	(PARSE_AND_LIST_ARGS_CASES): Add new options to parser.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new run_dump_tests.
+	* testsuite/ld-aarch64/erratum843419-adr.d: New test.
+	* testsuite/ld-aarch64/erratum843419-adrp.d: New test.
+	* testsuite/ld-aarch64/erratum843419-far-adr.d: New test.
+	* testsuite/ld-aarch64/erratum843419-far-full.d: New test.
+	* testsuite/ld-aarch64/erratum843419-far.s: New test.
+	* testsuite/ld-aarch64/erratum843419-full.d: New test.
+	* testsuite/ld-aarch64/erratum843419-near.s: New test.
+	* testsuite/ld-aarch64/erratum843419-no-args.d: New test.
+
 2019-05-21  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
 
 	PR ld/24571

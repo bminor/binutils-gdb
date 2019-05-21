@@ -1027,12 +1027,21 @@ typedef struct
   aarch64_enable_bti_type bti_type;
 } aarch64_bti_pac_info;
 
+/* An enum to define what kind of erratum fixes we should apply.  This gives the
+   user a bit more control over the sequences we generate.  */
+typedef enum
+{
+  ERRAT_NONE  = (1 << 0),  /* No erratum workarounds allowed.  */
+  ERRAT_ADR   = (1 << 1),  /* Erratum workarounds using ADR allowed.  */
+  ERRAT_ADRP  = (1 << 2),  /* Erratum workarounds using ADRP are allowed.  */
+} erratum_84319_opts;
+
 extern void bfd_elf64_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int, int, int,
+  (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
    aarch64_bti_pac_info);
 
 extern void bfd_elf32_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int, int, int,
+  (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
    aarch64_bti_pac_info);
 
 /* ELF AArch64 mapping symbol support.  */

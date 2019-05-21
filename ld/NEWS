@@ -2,6 +2,12 @@
 
 * Add command-line option --no-print-map-discarded.
 
+* The Cortex-A53 Erratum 843419 workaround now supports a choice of which
+  workaround to use.  The option --fix-cortex-a53-843419 now takes an
+  optional argument --fix-cortex-a53-843419[=full|adr|adrp] which can be
+  used to force a particular workaround to be used.  See --help for AArch64
+  for more details.
+
 Changes in 2.33:
 
 * Add target handlers for AArch64 for ELF GNU program properties.
