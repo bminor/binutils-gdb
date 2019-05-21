@@ -728,8 +728,16 @@ build_fortran_types (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
 		       "real*8", gdbarch_double_format (gdbarch));
   auto fmt = gdbarch_floatformat_for_type (gdbarch, "real(kind=16)", 128);
-  builtin_f_type->builtin_real_s16
-    = arch_float_type (gdbarch, 128, "real*16", fmt);
+  if (fmt != nullptr)
+    builtin_f_type->builtin_real_s16
+      = arch_float_type (gdbarch, 128, "real*16", fmt);
+  else if (gdbarch_long_double_bit (gdbarch) == 128)
+    builtin_f_type->builtin_real_s16
+      = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+			 "real*16", gdbarch_long_double_format (gdbarch));
+  else
+    builtin_f_type->builtin_real_s16
+      = arch_type (gdbarch, TYPE_CODE_ERROR, 128, "real*16");
 
   builtin_f_type->builtin_complex_s8
     = arch_complex_type (gdbarch, "complex*8",

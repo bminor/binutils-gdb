@@ -1,3 +1,9 @@
+2019-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/18644:
+	* f-lang.c (build_fortran_types): Handle the case where
+	gdbarch_floatformat_for_type returns a nullptr.
+
 2019-05-21  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/24587
