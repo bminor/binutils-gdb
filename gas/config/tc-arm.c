@@ -1009,6 +1009,9 @@ static void it_fsm_post_encode (void);
     }							\
   while (0)
 
+/* Toggle value[pos].  */
+#define TOGGLE_BIT(value, pos) (value ^ (1 << pos))
+
 /* Pure syntax.	 */
 
 /* This array holds the chars that always start a comment.  If the
@@ -6930,6 +6933,7 @@ enum operand_parse_code
   OP_RRe,	/* ARM register, only even numbered.  */
   OP_RRo,	/* ARM register, only odd numbered, not r13 or r15.  */
   OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
+  OP_RR_ZR,	/* ARM register or ZR but no PC */
 
   OP_REGLST,	/* ARM register list */
   OP_CLRMLST,	/* CLRM register list */
@@ -7793,6 +7797,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_oRMQRZ:
 	  po_reg_or_goto (REG_TYPE_MQ, try_rr_zr);
 	  break;
+
+	case OP_RR_ZR:
 	try_rr_zr:
 	  po_reg_or_goto (REG_TYPE_RN, ZR);
 	  break;
@@ -7880,6 +7886,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_RMQRZ:
 	case OP_oRMQRZ:
+	case OP_RR_ZR:
 	  if (!inst.operands[i].iszr && inst.operands[i].reg == REG_PC)
 	    inst.error = BAD_PC;
 	  break;
@@ -11107,7 +11114,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
     inst.error = _("instruction does not accept unindexed addressing");
 }
 
-/* Table of Thumb instructions which exist in both 16- and 32-bit
+/* Table of Thumb instructions which exist in 16- and/or 32-bit
    encodings (the latter only in post-V6T2 cores).  The index is the
    value used in the insns table below.  When there is more than one
    possible 16-bit encoding for the instruction, this table always
@@ -11136,11 +11143,20 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_bflx,  0000, f070e001),			\
   X(_bic,   4380, ea200000),			\
   X(_bics,  4380, ea300000),			\
+  X(_cinc,  0000, ea509000),			\
+  X(_cinv,  0000, ea50a000),			\
   X(_cmn,   42c0, eb100f00),			\
   X(_cmp,   2800, ebb00f00),			\
+  X(_cneg,  0000, ea50b000),			\
   X(_cpsie, b660, f3af8400),			\
   X(_cpsid, b670, f3af8600),			\
   X(_cpy,   4600, ea4f0000),			\
+  X(_csel,  0000, ea508000),			\
+  X(_cset,  0000, ea5f900f),			\
+  X(_csetm, 0000, ea5fa00f),			\
+  X(_csinc, 0000, ea509000),			\
+  X(_csinv, 0000, ea50a000),			\
+  X(_csneg, 0000, ea50b000),			\
   X(_dec_sp,80dd, f1ad0d00),			\
   X(_dls,   0000, f040e001),			\
   X(_dlstp, 0000, f000e001),			\
@@ -11953,6 +11969,60 @@ do_t_clz (void)
   inst.instruction |= Rd << 8;
   inst.instruction |= Rm << 16;
   inst.instruction |= Rm;
+}
+
+/* For the Armv8.1-M conditional instructions.  */
+static void
+do_t_cond (void)
+{
+  unsigned Rd, Rn, Rm;
+  signed int cond;
+
+  constraint (inst.cond != COND_ALWAYS, BAD_COND);
+
+  Rd = inst.operands[0].reg;
+  switch (inst.instruction)
+    {
+      case T_MNEM_csinc:
+      case T_MNEM_csinv:
+      case T_MNEM_csneg:
+      case T_MNEM_csel:
+	Rn = inst.operands[1].reg;
+	Rm = inst.operands[2].reg;
+	cond = inst.operands[3].imm;
+	constraint (Rn == REG_SP, BAD_SP);
+	constraint (Rm == REG_SP, BAD_SP);
+	break;
+
+      case T_MNEM_cinc:
+      case T_MNEM_cinv:
+      case T_MNEM_cneg:
+	Rn = inst.operands[1].reg;
+	cond = inst.operands[2].imm;
+	/* Invert the last bit to invert the cond.  */
+	cond = TOGGLE_BIT (cond, 0);
+	constraint (Rn == REG_SP, BAD_SP);
+	Rm = Rn;
+	break;
+
+      case T_MNEM_csetm:
+      case T_MNEM_cset:
+	cond = inst.operands[1].imm;
+	/* Invert the last bit to invert the cond.  */
+	cond = TOGGLE_BIT (cond, 0);
+	Rn = REG_PC;
+	Rm = REG_PC;
+	break;
+
+      default: abort ();
+    }
+
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
+  inst.instruction = THUMB_OP32 (inst.instruction);
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
+  inst.instruction |= cond << 4;
 }
 
 static void
@@ -25157,6 +25227,16 @@ static const struct asm_opcode insns[] =
  /* Armv8.1-M Mainline instructions.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
+ toU("cinc",  _cinc,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
+ toU("cinv",  _cinv,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
+ toU("cneg",  _cneg,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
+ toU("csel",  _csel,  4, (RRnpcsp, RR_ZR, RR_ZR, COND),	t_cond),
+ toU("csetm", _csetm, 2, (RRnpcsp, COND),		t_cond),
+ toU("cset",  _cset,  2, (RRnpcsp, COND),		t_cond),
+ toU("csinc", _csinc, 4, (RRnpcsp, RR_ZR, RR_ZR, COND),	t_cond),
+ toU("csinv", _csinv, 4, (RRnpcsp, RR_ZR, RR_ZR, COND),	t_cond),
+ toU("csneg", _csneg, 4, (RRnpcsp, RR_ZR, RR_ZR, COND),	t_cond),
+
  toC("bf",     _bf,	2, (EXPs, EXPs),	     t_branch_future),
  toU("bfcsel", _bfcsel,	4, (EXPs, EXPs, EXPs, COND), t_branch_future),
  toC("bfx",    _bfx,	2, (EXPs, RRnpcsp),	     t_branch_future),

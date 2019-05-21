@@ -1,5 +1,21 @@
 2019-05-21  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (TOGGLE_BIT): New.
+	(T16_32_TAB): New entries for cinc, cinv, cneg, csinc,
+	csinv, csneg, cset, csetm and csel.
+	(operand_parse_code): New OP_RR_ZR.
+	(parse_operand): Handle case for OP_RR_ZR.
+	(do_t_cond): New.
+	(insns): New instructions for cinc, cinv, cneg, csinc,
+	csinv, csneg, cset, csetm, csel.
+	* testsuite/gas/arm/armv8_1-m-cond-bad.d: New test.
+	* testsuite/gas/arm/armv8_1-m-cond-bad.l: New test.
+	* testsuite/gas/arm/armv8_1-m-cond-bad.s: New test.
+	* testsuite/gas/arm/armv8_1-m-cond.d: New test.
+	* testsuite/gas/arm/armv8_1-m-cond.s: New test.
+
+2019-05-21  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (operand_parse_code): New entries for
 	OP_RRnpcsp_I32 (register or integer operands).
 	(do_mve_scalar_shift): New.

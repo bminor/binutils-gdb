@@ -281,6 +281,15 @@ enum mve_instructions
   MVE_SRSHR,
   MVE_SQSHLL,
   MVE_SQSHL,
+  MVE_CINC,
+  MVE_CINV,
+  MVE_CNEG,
+  MVE_CSINC,
+  MVE_CSINV,
+  MVE_CSET,
+  MVE_CSETM,
+  MVE_CSNEG,
+  MVE_CSEL,
   MVE_NONE
 };
 
@@ -2060,6 +2069,8 @@ static const struct opcode32 neon_opcodes[] =
    %<bitfield>r		print as an ARM register
    %<bitfield>d		print the bitfield in decimal
    %<bitfield>A		print accumulate or not
+   %<bitfield>c		print bitfield as a condition code
+   %<bitfield>C		print bitfield as an inverted condition code
    %<bitfield>Q		print as a MVE Q register
    %<bitfield>F		print as a MVE S register
    %<bitfield>Z		as %<>r but r15 is ZR instead of PC and r13 is
@@ -3399,6 +3410,51 @@ static const struct mopcode32 mve_opcodes[] =
    MVE_URSHR,
    0xea500f1f, 0xfff08f3f,
    "urshr%c\t%16-19S, %j"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSINC,
+   0xea509000, 0xfff0f000,
+   "csinc\t%8-11S, %16-19Z, %0-3Z, %4-7c"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSINV,
+   0xea50a000, 0xfff0f000,
+   "csinv\t%8-11S, %16-19Z, %0-3Z, %4-7c"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSET,
+   0xea5f900f, 0xfffff00f,
+   "cset\t%8-11S, %4-7C"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSETM,
+   0xea5fa00f, 0xfffff00f,
+   "csetm\t%8-11S, %4-7C"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSEL,
+   0xea508000, 0xfff0f000,
+   "csel\t%8-11S, %16-19Z, %0-3Z, %4-7c"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CSNEG,
+   0xea50b000, 0xfff0f000,
+   "csneg\t%8-11S, %16-19Z, %0-3Z, %4-7c"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CINC,
+   0xea509000, 0xfff0f000,
+   "cinc\t%8-11S, %16-19Z, %4-7C"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CINV,
+   0xea50a000, 0xfff0f000,
+   "cinv\t%8-11S, %16-19Z, %4-7C"},
+
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   MVE_CNEG,
+   0xea50b000, 0xfff0f000,
+   "cneg\t%8-11S, %16-19Z, %4-7C"},
 
   {ARM_FEATURE_CORE_LOW (0),
    MVE_NONE,
@@ -5652,6 +5708,30 @@ is_mve_encoding_conflict (unsigned long given,
 	return TRUE;
       else
 	return FALSE;
+
+    case MVE_CSINC:
+    case MVE_CSINV:
+      {
+	unsigned long rm, rn;
+	rm = arm_decode_field (given, 0, 3);
+	rn = arm_decode_field (given, 16, 19);
+	/* CSET/CSETM.  */
+	if (rm == 0xf && rn == 0xf)
+	  return TRUE;
+	/* CINC/CINV.  */
+	else if (rn == rm && rn != 0xf)
+	  return TRUE;
+      }
+    /* Fall through.  */
+    case MVE_CSEL:
+    case MVE_CSNEG:
+      if (arm_decode_field (given, 0, 3) == 0xd)
+	return TRUE;
+      /* CNEG.  */
+      else if (matched_insn == MVE_CSNEG)
+	if (arm_decode_field (given, 0, 3) == arm_decode_field (given, 16, 19))
+	  return TRUE;
+      return FALSE;
 
     default:
     case MVE_VADD_FP_T1:
@@ -9262,6 +9342,15 @@ print_insn_mve (struct disassemble_info *info, long given)
 			      func (stream, "zr");
 			    else
 			      func (stream, "%s", arm_regnames[value]);
+			    break;
+
+			  case 'c':
+			    func (stream, "%s", arm_conditional[value]);
+			    break;
+
+			  case 'C':
+			    value ^= 1;
+			    func (stream, "%s", arm_conditional[value]);
 			    break;
 
 			  case 'S':
