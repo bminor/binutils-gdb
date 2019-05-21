@@ -1,3 +1,12 @@
+2019-05-21  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.arch/amd64-eval.exp: Require c++11.
+	* gdb.base/max-depth.exp: Same.
+	* gdb.compile/compile-cplus-array-decay.exp: Same.
+	* gdb.cp/meth-typedefs.exp: Same.
+	* gdb.cp/subtypes.exp: Same.
+	* gdb.cp/temargs.exp: Same.
+
 2019-05-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* lib/gdbserver-support.exp (gdbserver_run): Mark kill as optional.

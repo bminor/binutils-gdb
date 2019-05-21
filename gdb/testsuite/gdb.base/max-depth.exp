@@ -39,6 +39,9 @@ proc compile_and_run_tests { lang } {
     # Create the additional flags.
     set flags "debug"
     lappend flags $lang
+    if { "$lang" == "c++" } {
+	lappend flags "additional_flags=-std=c++11"
+    }
 
     set dir "$lang"
     set binfile [standard_output_file ${dir}/${testfile}]

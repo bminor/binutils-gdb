@@ -35,7 +35,8 @@ if {[skip_cplus_tests]} { continue }
 # Tests for c++/12266 et al
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {c++ debug}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {c++ debug additional_flags=-std=c++11}]} {
     return -1
 }
 
