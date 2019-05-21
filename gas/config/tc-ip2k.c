@@ -160,6 +160,8 @@ md_begin (void)
 
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_ip2k, ip2k_mach);
+
+  literal_prefix_dollar_hex = TRUE;
 }
 
 

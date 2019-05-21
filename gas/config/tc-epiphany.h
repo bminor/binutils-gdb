@@ -37,7 +37,6 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define LITERAL_PREFIXDOLLAR_HEX
 #define LITERAL_PREFIXPERCENT_BIN
 #define DOUBLESLASH_LINE_COMMENTS
 

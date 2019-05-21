@@ -1,3 +1,17 @@
+2019-05-21  John Darrington <john@darrington.wattle.id.au>
+
+	* expr.c (literal_prefix_dollar_hex): New variable.
+	(operand)[case '$']: Use the new variable instead of the old macro.
+	Also, move this instance of "case '$'" next to the other one, and
+	enable it only in the complementary proprocessor case.
+	* expr.h (literal_prefix_dollar_hex): Declare it.
+	* config/tc-epiphany.c (md_begin): Assign literal_prefix_dollar_hex.
+	* config/tc-ip2k.c:      ditto
+	* config/tc-mt.c:        ditto
+	* config/tc-epiphany.h (LITERAL_PREFIXDOLLAR_HEX): Remove macro definition.
+	* config/tc-ip2k.h:      ditto
+	* config/tc-mt.h:        ditto
+
 2019-05-20  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	PR 14798
