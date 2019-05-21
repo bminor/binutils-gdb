@@ -1,3 +1,16 @@
+2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline
+	2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR24559
+	* config/tc-arm.c (move_or_literal_pool): Set size_req to 0 for MOVW
+	replacement.
+	* testsuite/gas/arm/load-pseudo.s: New test input.
+	* testsuite/gas/arm/m0-load-pseudo.d: New test.
+	* testsuite/gas/arm/m23-load-pseudo.d: New test.
+	* testsuite/gas/arm/m33-load-pseudo.d: New test.
+
 2019-04-16  Sudakshina Das  <sudi.das@arm.com>
 
 	Backport from mainline

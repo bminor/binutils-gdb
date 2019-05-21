@@ -8082,6 +8082,11 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		      inst.instruction |= (imm & 0x0800) << 15;
 		      inst.instruction |= (imm & 0x0700) << 4;
 		      inst.instruction |= (imm & 0x00ff);
+		      /*  In case this replacement is being done on Armv8-M
+			  Baseline we need to make sure to disable the
+			  instruction size check, as otherwise GAS will reject
+			  the use of this T32 instruction.  */
+		      inst.size_req = 0;
 		      return TRUE;
 		    }
 		}
