@@ -248,10 +248,10 @@ complete_command (const char *arg, int from_tty)
 
   completion_result result = complete (arg, &word, &quote_char);
 
-  std::string arg_prefix (arg, word - arg);
-
   if (result.number_matches != 0)
     {
+      std::string arg_prefix (arg, word - arg);
+
       if (result.number_matches == 1)
 	printf_unfiltered ("%s%s\n", arg_prefix.c_str (), result.match_list[0]);
       else
