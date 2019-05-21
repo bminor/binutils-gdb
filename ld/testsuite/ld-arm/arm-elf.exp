@@ -42,6 +42,11 @@ if {[istarget "arm-*-vxworks"]} {
 	 "" {vxworks2.s}
 	 {{readelf --segments vxworks2-static.sd}}
 	 "vxworks2"}
+	{"Branch future relocations for armv8.1-m.main target"
+	  "-static -T arm.ld"
+	  "" "" {bfs-0.s bfs-1.s}
+	  {{objdump -dw branch-futures.d}}
+	 "branch-futures"}
     }
     run_ld_link_tests $armvxworkstests
     run_dump_test "vxworks1-static"
@@ -260,6 +265,10 @@ set armelftests_common_3 {
     {"ADDS thumb1 relocations for armv7-m target" "-static -T arm.ld" "" "" {thumb1-adds-armv7-m.s}
      {{objdump -dw thumb1-adds.d}}
      "thumb1-adds"}
+    {"Branch future relocations for armv8.1-m.main target" "-static -T arm.ld"
+      "" "" {bfs-0.s bfs-1.s}
+      {{objdump -dw branch-futures.d}}
+     "branch-futures"}
 }
 
 run_ld_link_tests $armelftests_common_1

@@ -10293,59 +10293,6 @@ identify_add_or_sub (bfd_vma insn)
   return 0;
 }
 
-/* Helper function to compute the Addend for Armv8.1-M Mainline relocations.  */
-static bfd_vma
-get_value_helper (bfd_vma plt_offset,
-		  asection *splt,
-		  asection *input_section,
-		  asection *sym_sec,
-		  struct elf_link_hash_entry * h,
-		  struct bfd_link_info *info,
-		  bfd *input_bfd,
-		  Elf_Internal_Rela *rel,
-		  const char *sym_name,
-		  unsigned char st_type,
-		  struct elf32_arm_link_hash_table *globals,
-		  bfd_boolean *unresolved_reloc_p)
-{
-  bfd_vma value = 0;
-  enum arm_st_branch_type branch_type;
-  enum elf32_arm_stub_type stub_type = arm_stub_none;
-  struct elf32_arm_stub_hash_entry *stub_entry;
-  struct elf32_arm_link_hash_entry *hash
-    = (struct elf32_arm_link_hash_entry *)h;
-
-
-  if (plt_offset != (bfd_vma) -1)
-    {
-      value = (splt->output_section->vma
-	       + splt->output_offset
-	       + plt_offset);
-      value -= PLT_THUMB_STUB_SIZE;
-      *unresolved_reloc_p = FALSE;
-    }
-
-  stub_type = arm_type_of_stub (info, input_section, rel,
-				st_type, &branch_type,
-				hash, value, sym_sec,
-				input_bfd, sym_name);
-
-  if (stub_type != arm_stub_none)
-    {
-      stub_entry = elf32_arm_get_stub_entry (input_section,
-					     sym_sec, h,
-					     rel, globals,
-					     stub_type);
-	    if (stub_entry != NULL)
-	      {
-		value = (stub_entry->stub_offset
-			 + stub_entry->stub_sec->output_offset
-			 + stub_entry->stub_sec->output_section->vma);
-	      }
-	  }
-  return value;
-}
-
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -12968,14 +12915,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	    addend |= (immC << 1);
 	    addend |= 1;
 	    /* Sign extend.  */
-	    addend = (addend & 0x10000) ? addend - (1 << 17) : addend;
+	    signed_addend = (addend & 0x10000) ? addend - (1 << 17) : addend;
 	  }
 
-	value = get_value_helper (plt_offset, splt, input_section, sym_sec, h,
-				  info, input_bfd, rel, sym_name, st_type,
-				  globals, unresolved_reloc_p);
-
-	relocation  = value + addend;
+	relocation  = value + signed_addend;
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
@@ -13014,13 +12957,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	    addend |= 1;
 	    /* Sign extend.  */
 	    addend = (addend & 0x1000) ? addend - (1 << 13) : addend;
+	    signed_addend = addend;
 	  }
 
-	value = get_value_helper (plt_offset, splt, input_section, sym_sec, h,
-				  info, input_bfd, rel, sym_name, st_type,
-				  globals, unresolved_reloc_p);
-
-	relocation  = value + addend;
+	relocation  = value + signed_addend;
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
@@ -13059,13 +12999,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	    addend |= 1;
 	    /* Sign extend.  */
 	    addend = (addend & 0x40000) ? addend - (1 << 19) : addend;
+	    signed_addend = addend;
 	  }
 
-	value = get_value_helper (plt_offset, splt, input_section, sym_sec, h,
-				  info, input_bfd, rel, sym_name, st_type,
-				  globals, unresolved_reloc_p);
-
-	relocation  = value + addend;
+	relocation  = value + signed_addend;
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);

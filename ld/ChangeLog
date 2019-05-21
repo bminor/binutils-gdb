@@ -1,3 +1,10 @@
+2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Add tests
+	* testsuite/ld-arm/bfs-0.s: New test.
+	* testsuite/ld-arm/bfs-1.s: New test.
+	* testsuite/ld-arm/branch-futures.d: New test.
+
 2019-05-21  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/24373

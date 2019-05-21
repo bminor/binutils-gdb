@@ -1,3 +1,15 @@
+2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/gas/arm/armv8_1-m-bf.d: Allow different branch target naming
+	conventions.
+	* testsuite/gas/arm/armv8_1-m-bfl.d: Likewise.
+	* testsuite/gas/arm/armv8_1-m-bfcsel.d: Likewise.
+	* testsuite/gas/arm/armv8_1-m-loloop.d: Likewise.
+	* testsuite/gas/arm/armv8_1-m-bf-rel.d: Skip for vxworks.
+	* testsuite/gas/arm/armv8_1-m-bf-rela.d: New test.
+	* testsuite/gas/arm/armv8_1-m-bfl-rel.d: Skip for vxworks.
+	* testsuite/gas/arm/armv8_1-m-bfl-rela.d: New test.
+
 2019-05-21  John Darrington <john@darrington.wattle.id.au>
 
 	* expr.c (literal_prefix_dollar_hex): New variable.

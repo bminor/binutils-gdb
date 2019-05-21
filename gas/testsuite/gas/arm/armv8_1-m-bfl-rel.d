@@ -1,7 +1,7 @@
-#name: Valid Armv8.1-M Mainline BFL instruction with relocation
+#name: Valid Armv8.1-M Mainline BFL instruction with REL
 #as: -march=armv8.1-m.main
 #objdump: -dr --prefix-addresses --show-raw-insn
-#skip: *-*-pe *-wince-*
+#skip: *-*-pe *-wince-* *-vxworks
 
 .*: +file format .*arm.*
 

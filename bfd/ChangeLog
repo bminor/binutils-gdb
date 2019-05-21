@@ -1,3 +1,9 @@
+2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 24460
+	* elf32-arm.c (get_value_helper): Remove.
+	(elf32_arm_final_link_relocate): Fix branch future relocations.
+
 2019-05-21  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/24373
