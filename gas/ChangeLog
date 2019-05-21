@@ -1,3 +1,16 @@
+2019-05-21  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (operand_parse_code): New entries for
+	OP_RRnpcsp_I32 (register or integer operands).
+	(do_mve_scalar_shift): New.
+	(insns): New instructions for asrl, lsll, lsrl, sqrshrl, sqrshr, sqshl
+	sqshll, srshr, srshrl, uqrshll, uqrshl, uqshll, uqshl, urshrl and urshr.
+	* testsuite/gas/arm/mve-shift.d: New.
+	* testsuite/gas/arm/mve-shift.s: New.
+	* testsuite/gas/arm/mve-shift-bad.d: New.
+	* testsuite/gas/arm/mve-shift-bad.s: New.
+	* testsuite/gas/arm/mve-shift-bad.l: New.
+
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* testsuite/gas/mips/r6-branch-constraints.s: Rename to ...

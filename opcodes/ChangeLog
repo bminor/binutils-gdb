@@ -1,3 +1,14 @@
+2019-05-21  Sudakshina Das  <sudi.das@arm.com>
+
+	* arm-dis.c (emun mve_instructions): Updated for new instructions.
+	(mve_opcodes): New instructions for asrl, lsll, lsrl, sqrshrl,
+	sqrshr, sqshl, sqshll, srshr, srshrl, uqrshll, uqrshl, uqshll,
+	uqshl, urshrl and urshr.
+	(is_mve_okay_in_it): Add new instructions to TRUE list.
+	(is_mve_unpredictable): Add cases for UNPRED_R13 and UNPRED_R15.
+	(print_insn_mve): Updated to accept new %j,
+	%<bitfield>m and %<bitfield>n patterns.
+
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Change source register

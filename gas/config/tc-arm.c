@@ -7559,6 +7559,9 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RRnpc_I0: po_reg_or_goto (REG_TYPE_RN, I0);   break;
 	I0:		  po_imm_or_fail (0, 0, FALSE);	      break;
 
+	case OP_RRnpcsp_I32: po_reg_or_goto (REG_TYPE_RN, I32);	break;
+	I32:		     po_imm_or_fail (1, 32, FALSE);	break;
+
 	case OP_RF_IF:    po_reg_or_goto (REG_TYPE_FN, IF);   break;
 	IF:
 	  if (!is_immediate_prefix (*str))
@@ -7818,6 +7821,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	case OP_oRRnpcsp:
 	case OP_RRnpcsp:
+	case OP_RRnpcsp_I32:
 	  if (inst.operands[i].isreg)
 	    {
 	      if (inst.operands[i].reg == REG_PC)
@@ -14120,6 +14124,37 @@ v8_1_loop_reloc (int is_le)
     {
       inst.relocs[0].type = BFD_RELOC_ARM_THUMB_LOOP12;
       inst.relocs[0].pc_rel = 1;
+    }
+}
+
+/* For shifts in MVE.  */
+static void
+do_mve_scalar_shift (void)
+{
+  if (!inst.operands[2].present)
+    {
+      inst.operands[2] = inst.operands[1];
+      inst.operands[1].reg = 0xf;
+    }
+
+  inst.instruction |= inst.operands[0].reg << 16;
+  inst.instruction |= inst.operands[1].reg << 8;
+
+  if (inst.operands[2].isreg)
+    {
+      /* Assuming Rm is already checked not to be 11x1.  */
+      constraint (inst.operands[2].reg == inst.operands[0].reg, BAD_OVERLAP);
+      constraint (inst.operands[2].reg == inst.operands[1].reg, BAD_OVERLAP);
+      inst.instruction |= inst.operands[2].reg << 12;
+    }
+  else
+    {
+      /* Assuming imm is already checked as [1,32].  */
+      unsigned int value = inst.operands[2].imm;
+      inst.instruction |= (value & 0x1c) << 10;
+      inst.instruction |= (value & 0x03) << 6;
+      /* Change last 4 bits from 0xd to 0xf.  */
+      inst.instruction |= 0x2;
     }
 }
 
@@ -25137,6 +25172,21 @@ static const struct asm_opcode insns[] =
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & mve_ext
+ ToC("lsll",	ea50010d, 3, (RRe, RRo, RRnpcsp_I32), mve_scalar_shift),
+ ToC("lsrl",	ea50011f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
+ ToC("asrl",	ea50012d, 3, (RRe, RRo, RRnpcsp_I32), mve_scalar_shift),
+ ToC("uqrshll",	ea51010d, 3, (RRe, RRo, RRnpcsp),     mve_scalar_shift),
+ ToC("sqrshrl",	ea51012d, 3, (RRe, RRo, RRnpcsp),     mve_scalar_shift),
+ ToC("uqshll",	ea51010f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
+ ToC("urshrl",	ea51011f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
+ ToC("srshrl",	ea51012f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
+ ToC("sqshll",	ea51013f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
+ ToC("uqrshl",	ea500f0d, 2, (RRnpcsp, RRnpcsp),      mve_scalar_shift),
+ ToC("sqrshr",	ea500f2d, 2, (RRnpcsp, RRnpcsp),      mve_scalar_shift),
+ ToC("uqshl",	ea500f0f, 2, (RRnpcsp, I32),	      mve_scalar_shift),
+ ToC("urshr",	ea500f1f, 2, (RRnpcsp, I32),	      mve_scalar_shift),
+ ToC("srshr",	ea500f2f, 2, (RRnpcsp, I32),	      mve_scalar_shift),
+ ToC("sqshl",	ea500f3f, 2, (RRnpcsp, I32),	      mve_scalar_shift),
 
  ToC("vpt",	ee410f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
  ToC("vptt",	ee018f00, 3, (COND, RMQ, RMQRZ), mve_vpt),
