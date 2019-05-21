@@ -1,5 +1,10 @@
 2019-05-21  Sudakshina Das  <sudi.das@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): New instructions for VMRS
+	and VMSR with the new operands.
+
+2019-05-21  Sudakshina Das  <sudi.das@arm.com>
+
 	* arm-dis.c (enum mve_instructions): New enum
 	for csinc, csinv, csneg, csel, cset, csetm, cinv, cinv
 	and cneg.

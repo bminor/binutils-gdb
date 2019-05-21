@@ -7236,7 +7236,20 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 	  /* Also accept generic coprocessor regs for unknown registers.  */
 	  coproc_reg:
-	  po_reg_or_fail (REG_TYPE_CN);
+	  po_reg_or_goto (REG_TYPE_CN, vpr_po);
+	  break;
+	  /* Also accept P0 or p0 for VPR.P0.  Since P0 is already an
+	     existing register with a value of 0, this seems like the
+	     best way to parse P0.  */
+	  vpr_po:
+	  if (strncasecmp (str, "P0", 2) == 0)
+	    {
+	      str += 2;
+	      inst.operands[i].isreg = 1;
+	      inst.operands[i].reg = 13;
+	    }
+	  else
+	    goto failure;
 	  break;
 	case OP_RMF:   po_reg_or_fail (REG_TYPE_MVF);	  break;
 	case OP_RMD:   po_reg_or_fail (REG_TYPE_MVD);	  break;
@@ -9836,10 +9849,42 @@ do_vmrs (void)
       return;
     }
 
-  /* MVFR2 is only valid at ARMv8-A.  */
-  if (inst.operands[1].reg == 5)
-    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
-		_(BAD_FPU));
+  switch (inst.operands[1].reg)
+    {
+    /* MVFR2 is only valid for Armv8-A.  */
+    case 5:
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+      break;
+
+    /* Check for new Armv8.1-M Mainline changes to <spec_reg>.  */
+    case 1: /* fpscr.  */
+      constraint (!(ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		    || ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)),
+		  _(BAD_FPU));
+      break;
+
+    case 14: /* fpcxt_ns.  */
+    case 15: /* fpcxt_s.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main),
+		  _("selected processor does not support instruction"));
+      break;
+
+    case  2: /* fpscr_nzcvqc.  */
+    case 12: /* vpr.  */
+    case 13: /* p0.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main)
+		  || (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		      && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)),
+		  _("selected processor does not support instruction"));
+      if (inst.operands[0].reg != 2
+	  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	as_warn (_("accessing MVE system register without MVE is UNPREDICTABLE"));
+      break;
+
+    default:
+      break;
+    }
 
   /* APSR_ sets isvec. All other refs to PC are illegal.  */
   if (!inst.operands[0].isvec && Rt == REG_PC)
@@ -9867,10 +9912,42 @@ do_vmsr (void)
       return;
     }
 
-  /* MVFR2 is only valid for ARMv8-A.  */
-  if (inst.operands[0].reg == 5)
-    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
-		_(BAD_FPU));
+  switch (inst.operands[0].reg)
+    {
+    /* MVFR2 is only valid for Armv8-A.  */
+    case 5:
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		  _(BAD_FPU));
+      break;
+
+    /* Check for new Armv8.1-M Mainline changes to <spec_reg>.  */
+    case  1: /* fpcr.  */
+      constraint (!(ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		    || ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)),
+		  _(BAD_FPU));
+      break;
+
+    case 14: /* fpcxt_ns.  */
+    case 15: /* fpcxt_s.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main),
+		  _("selected processor does not support instruction"));
+      break;
+
+    case  2: /* fpscr_nzcvqc.  */
+    case 12: /* vpr.  */
+    case 13: /* p0.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main)
+		  || (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
+		      && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd)),
+		  _("selected processor does not support instruction"));
+      if (inst.operands[0].reg != 2
+	  && !ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+	as_warn (_("accessing MVE system register without MVE is UNPREDICTABLE"));
+      break;
+
+    default:
+      break;
+    }
 
   /* If we get through parsing the register name, we just insert the number
      generated into the instruction without further validation.  */
@@ -22813,6 +22890,10 @@ static const struct reg_entry reg_names[] =
   REGDEF(mvfr0,7,VFC), REGDEF(mvfr1,6,VFC),
   REGDEF(MVFR0,7,VFC), REGDEF(MVFR1,6,VFC),
   REGDEF(mvfr2,5,VFC), REGDEF(MVFR2,5,VFC),
+  REGDEF(fpscr_nzcvqc,2,VFC), REGDEF(FPSCR_nzcvqc,2,VFC),
+  REGDEF(vpr,12,VFC), REGDEF(VPR,12,VFC),
+  REGDEF(fpcxt_ns,14,VFC), REGDEF(FPCXT_NS,14,VFC),
+  REGDEF(fpcxt_s,15,VFC), REGDEF(FPCXT_S,15,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
@@ -24440,11 +24521,14 @@ static const struct asm_opcode insns[] =
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd  /* VFP V1xD (single precision).  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
+ mcCE(vmrs,	ef00a10, 2, (APSR_RR, RVC),   vmrs),
+ mcCE(vmsr,	ee00a10, 2, (RVC, RR),        vmsr),
+#undef THUMB_VARIANT
 
   /* Moves and type conversions.  */
  cCE("fmstat",	ef1fa10, 0, (),		      noargs),
- cCE("vmrs",	ef00a10, 2, (APSR_RR, RVC),   vmrs),
- cCE("vmsr",	ee00a10, 2, (RVC, RR),        vmsr),
  cCE("fsitos",	eb80ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("fuitos",	eb80a40, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("ftosis",	ebd0a40, 2, (RVS, RVS),	      vfp_sp_monadic),

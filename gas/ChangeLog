@@ -1,5 +1,25 @@
 2019-05-21  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (parse_operands): Update case OP_RVC to
+	parse p0 and P0.
+	(do_vmrs): Add checks for valid operands with respect to
+	cpu and fpu options.
+	(do_vmsr): Likewise.
+	(reg_names): New reg_names for FPSCR_nzcvqc, VPR, FPCXT_NS
+	and FPCXT_S.
+	* testsuite/gas/arm/armv8_1-m-spec-reg.d: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg.s: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad1.d: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad2.d: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad3.d: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad1.l: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad2.l: New.
+	* testsuite/gas/arm/armv8_1-m-spec-reg-bad3.l: New.
+	* testsuite/gas/arm/vfp1xD.d: Updated to allow new valid values.
+	* testsuite/gas/arm/vfp1xD_t2.d: Likewise.
+
+2019-05-21  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (TOGGLE_BIT): New.
 	(T16_32_TAB): New entries for cinc, cinv, cneg, csinc,
 	csinv, csneg, cset, csetm and csel.
