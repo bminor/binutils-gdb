@@ -1,3 +1,9 @@
+2019-05-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24373
+	* elfnn-aarch64.c (_bfd_aarch64_erratum_843419_branch_to_stub):
+	Fix print formatter.
+
 2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR 24460

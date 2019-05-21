@@ -5309,7 +5309,7 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
     {
       abfd = stub_entry->target_section->owner;
       _bfd_error_handler
-	(_("%pB: error: erratum 843419 immediate 0x%lx "
+	(_("%pB: error: erratum 843419 immediate 0x%" BFD_VMA_FMT "x "
 	   "out of range for ADR (input file too large) and "
 	   "--fix-cortex-a53-843419=adr used.  Run the linker with "
 	   "--fix-cortex-a53-843419=full instead"), abfd, imm);
