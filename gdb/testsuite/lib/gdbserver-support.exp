@@ -484,7 +484,7 @@ proc gdbserver_run { child_args } {
     # Kill anything running before we try to start gdbserver, in case
     # we are sharing a serial connection.
     global gdb_prompt
-    send_gdb "kill\n"
+    send_gdb "kill\n" optional
     gdb_expect 120 {
 	-re "Kill the program being debugged. .y or n. $" {
 	    send_gdb "y\n"
