@@ -3094,7 +3094,21 @@ riscv_gdbarch_init (struct gdbarch_info info,
       valid_p &= riscv_check_tdesc_feature (tdesc_data, feature_fpu,
                                             &riscv_freg_feature);
 
-      int bitsize = tdesc_register_bitsize (feature_fpu, "ft0");
+      /* Search for the first floating point register (by any alias), to
+         determine the bitsize.  */
+      int bitsize = -1;
+      const auto &fp0 = riscv_freg_feature.registers[0];
+
+      for (const char *name : fp0.names)
+	{
+	  if (tdesc_unnumbered_register (feature_fpu, name))
+	    {
+	      bitsize = tdesc_register_bitsize (feature_fpu, name);
+	      break;
+	    }
+	}
+
+      gdb_assert (bitsize != -1);
       features.flen = (bitsize / 8);
 
       if (riscv_debug_gdbarch)

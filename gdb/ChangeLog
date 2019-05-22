@@ -1,3 +1,9 @@
+2019-05-22  Simon Cook  <simon.cook@embecosm.com>
+
+	* riscv-tdep.c (riscv_gdbarch_init): Support determining flen from
+	target descriptions using exclusively floating point register name
+	aliases.
+
 2019-05-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/18644:
