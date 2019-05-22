@@ -95,6 +95,27 @@ example:
 
 The script will output its analysis report to the standard output.
 
+Re-running Tests Outside The Testsuite
+**************************************
+
+When running a test, the arguments used to run GDB are saved to gdb.cmd and
+all commands sent to GDB are saved to gdb.in.  As well as being a reference
+of the commands run, they can be used to manually re-run a test by using
+the gdb.in file as a batch file to a GDB launched with the arguments in the
+gdb.cmd file, for example:
+	$(cat outputs/gdb.base/store/gdb.cmd) -x outputs/gdb.base/store/gdb.in
+
+Tests that run GDB multiple times will append .1, .2, .3 etc to the end
+of each .cmd and .in file.
+
+When gdbserver is launched as part of a test, a gdbserver.cmd will be created.
+To re-run these tests, run the contents of gdbserver.cmd in a separate
+terminal before running gdb, for example:
+	$(cat outputs/gdb.base/store/gdbserver.cmd)
+Alternatively, if the test is run with GDBSERVER_DEBUG="replay", then this
+will create a gdbserver.replay file which can be used with the gdbreplay tool,
+instead of launching gdbserver.
+
 Running the Performance Tests
 *****************************
 

@@ -1477,6 +1477,9 @@ you want @code{set logging on} to overwrite the logfile instead.
 @item set logging redirect [on|off]
 By default, @value{GDBN} output will go to both the terminal and the logfile.
 Set @code{redirect} if you want output to go only to the log file.
+@item set logging debugredirect [on|off]
+By default, @value{GDBN} debug output will go to both the terminal and the logfile.
+Set @code{debugredirect} if you want debug output to go only to the log file.
 @kindex show logging
 @item show logging
 Show the current values of the logging settings.

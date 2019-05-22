@@ -1,3 +1,7 @@
+2019-05-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* README (Re-running Tests Outside The Testsuite): New section.
+
 2019-05-21  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.arch/amd64-eval.exp: Require c++11.
