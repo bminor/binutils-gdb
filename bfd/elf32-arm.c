@@ -7222,7 +7222,7 @@ arm_allocate_glue_section_space (bfd * abfd, bfd_size_type size, const char * na
   s = bfd_get_linker_section (abfd, name);
   BFD_ASSERT (s != NULL);
 
-  contents = (bfd_byte *) bfd_alloc (abfd, size);
+  contents = (bfd_byte *) bfd_zalloc (abfd, size);
 
   BFD_ASSERT (s->size == size);
   s->contents = contents;

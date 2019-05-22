@@ -1,5 +1,10 @@
 2019-05-22  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c (arm_allocate_glue_section_space): Clear section
+	contents.
+
+2019-05-22  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (_bfd_vms_write_etir): Don't attempt further
 	processing on "size error in section".
 
