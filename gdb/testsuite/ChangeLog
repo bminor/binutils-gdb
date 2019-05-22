@@ -1,3 +1,9 @@
+2019-05-22  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24586
+	* gdb.python/py-mi-var-info-path-expression.exp: Call
+	mi_skip_python_tests to check if python is supported.
+
 2019-05-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.arch/aarch64-pauth.c: New test.
