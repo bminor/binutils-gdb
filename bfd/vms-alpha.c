@@ -4094,7 +4094,10 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	    {
 	      /* Output rest of section.  */
 	      if (curr_addr > section->size)
-		_bfd_error_handler (_("size error in section %pA"), section);
+		{
+		  _bfd_error_handler (_("size error in section %pA"), section);
+		  return FALSE;
+		}
 	      size = section->size - curr_addr;
 	      sto_imm (abfd, section, size, curr_data, curr_addr);
 	      curr_data += size;

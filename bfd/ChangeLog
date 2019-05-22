@@ -1,5 +1,10 @@
 2019-05-22  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (_bfd_vms_write_etir): Don't attempt further
+	processing on "size error in section".
+
+2019-05-22  Alan Modra  <amodra@gmail.com>
+
 	* som.c (som_bfd_free_cached_info): Call
 	_bfd_generic_close_and_cleanup.
 
