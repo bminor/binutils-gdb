@@ -6695,25 +6695,25 @@ som_write_armap (bfd *abfd,
 static bfd_boolean
 som_bfd_free_cached_info (bfd *abfd)
 {
-  asection *o;
-
-  if (bfd_get_format (abfd) != bfd_object)
-    return TRUE;
+  if (bfd_get_format (abfd) == bfd_object)
+    {
+      asection *o;
 
 #define FREE(x) if (x != NULL) { free (x); x = NULL; }
-  /* Free the native string and symbol tables.  */
-  FREE (obj_som_symtab (abfd));
-  FREE (obj_som_stringtab (abfd));
-  for (o = abfd->sections; o != NULL; o = o->next)
-    {
-      /* Free the native relocations.  */
-      o->reloc_count = (unsigned) -1;
-      FREE (som_section_data (o)->reloc_stream);
-      /* Do not free the generic relocations as they are objalloc'ed.  */
-    }
+      /* Free the native string and symbol tables.  */
+      FREE (obj_som_symtab (abfd));
+      FREE (obj_som_stringtab (abfd));
+      for (o = abfd->sections; o != NULL; o = o->next)
+	{
+	  /* Free the native relocations.  */
+	  o->reloc_count = (unsigned) -1;
+	  FREE (som_section_data (o)->reloc_stream);
+	  /* Do not free the generic relocations as they are objalloc'ed.  */
+	}
 #undef FREE
+    }
 
-  return TRUE;
+  return _bfd_generic_close_and_cleanup (abfd);
 }
 
 /* End of miscellaneous support functions.  */

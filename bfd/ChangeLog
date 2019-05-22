@@ -1,3 +1,8 @@
+2019-05-22  Alan Modra  <amodra@gmail.com>
+
+	* som.c (som_bfd_free_cached_info): Call
+	_bfd_generic_close_and_cleanup.
+
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Generate error
