@@ -39,6 +39,50 @@ const char FLT_CHARS[] = "dD";
 
 static char *fail_line_pointer;
 
+/* A wrapper around the standard library's strtol.
+   It converts STR into an integral value.
+   This wrapper deals with literal_prefix_dollar_hex.  */
+static long
+s12z_strtol (const char *str, char ** endptr)
+{
+  int base = 0;
+  bool negative = false;
+
+  long result = 0;
+
+  char *start = (char *) str;
+
+  /* In the case where literal_prefix_dollar_hex is TRUE the sign has
+  to be handled explicitly.  Otherwise the string will not be
+  recognised as an integer.  */
+  if (str[0] == '-')
+    {
+      negative = true;
+      ++str;
+    }
+  else if (str[0] == '+')
+    {
+      ++str;
+    }
+
+  if (literal_prefix_dollar_hex && (str[0] == '$'))
+    {
+      base = 16;
+      str++;
+    }
+
+  result = strtol (str, endptr, base);
+  if (*endptr == str)
+    {
+      *endptr = start;
+    }
+  if (negative)
+    result = -result;
+
+  return result;
+}
+
+
 
 /* Options and initialization.  */
 
@@ -46,7 +90,10 @@ const char *md_shortopts = "";
 
 struct option md_longopts[] =
   {
-   {"mreg-prefix", required_argument, NULL, OPTION_MD_BASE},
+#define OPTION_REG_PREFIX (OPTION_MD_BASE)
+   {"mreg-prefix", required_argument, NULL, OPTION_REG_PREFIX},
+#define OPTION_DOLLAR_HEX (OPTION_MD_BASE + 1)
+   {"mdollar-hex", no_argument, NULL, OPTION_DOLLAR_HEX},
    {NULL, no_argument, NULL, 0}
   };
 
@@ -98,10 +145,9 @@ s12z_listing_header (void)
 void
 md_show_usage (FILE *stream)
 {
-  fprintf (stream,
-      _("\ns12z options:\n"
-	"  -mreg-prefix=PREFIX     set a prefix used to indicate register names (default none)"
-        "\n"));
+  fputs (_("\ns12z options:\n"), stream);
+  fputs (_("  -mreg-prefix=PREFIX     set a prefix used to indicate register names (default none)\n"), stream);
+  fputs (_("  -mdollar-hex            the prefix '$' instead of '0x' is used to indicate literal hexadecimal constants\n"), stream);
 }
 
 void
@@ -114,8 +160,11 @@ md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
-    case OPTION_MD_BASE:
+    case OPTION_REG_PREFIX:
       register_prefix = xstrdup (arg);
+      break;
+    case OPTION_DOLLAR_HEX:
+      literal_prefix_dollar_hex = TRUE;
       break;
     default:
       return 0;
@@ -150,6 +199,8 @@ md_begin (void)
 void
 s12z_init_after_args (void)
 {
+  if (flag_traditional_format)
+    literal_prefix_dollar_hex = TRUE;
 }
 
 /* Builtin help.  */
@@ -198,7 +249,7 @@ lex_constant (long *v)
     }
 
   errno = 0;
-  *v = strtol (p, &end, 0);
+  *v = s12z_strtol (p, &end);
   if (errno == 0 && end != p)
     {
       input_line_pointer = end;
@@ -716,7 +767,7 @@ lex_offset (long *val)
   p++;
 
   errno = 0;
-  *val = strtol (p, &end, 0);
+  *val = s12z_strtol (p, &end);
   if (errno == 0)
     {
       if (negative)

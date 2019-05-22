@@ -1,3 +1,13 @@
+2019-05-22  John Darrington <john@darrington.wattle.id.au>
+
+	* config/tc-s12z.c (s12z_strtol): New function. (md_show_usage): Update.
+	(md_parse_option): new case OPTION_DOLLAR_HEX. (s12z_init_after_args):
+	(<global>): Use s12z_strtol instead of strtol.
+	* doc/c-s12z.texi (S12Z Options): Document new option -mdollar-hex.
+	* testsuite/gas/s12z/dollar-hex.d: New file.
+	* testsuite/gas/s12z/dollar-hex.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+
 2019-05-21  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-arm.c (parse_operands): Update case OP_RVC to

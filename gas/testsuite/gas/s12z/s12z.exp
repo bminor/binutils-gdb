@@ -142,3 +142,4 @@ run_dump_test imm-dest
 # Miscellaneous
 
 run_dump_test reg-prefix
+run_dump_test dollar-hex

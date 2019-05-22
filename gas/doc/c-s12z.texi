@@ -38,6 +38,19 @@ string @var{pfx}.
 
 For an explanation of what this means and why it might be needed,
 see @ref{S12Z Register Notation}.
+
+
+@item -mdollar-hex
+@cindex @samp{-mdollar-hex} option, dollar-hex
+@cindex hexadecimal prefix, S12Z
+The @samp{-mdollar-hex} option affects the way that literal hexadecimal constants
+are represented.  When this option is specified, the assembler will consider
+the @samp{$} character as the start of a hexadecimal integer constant.  Without
+this option, the standard value of @samp{0x} is expected.
+
+If you use this option, then you cannot have symbol names starting with @samp{$}.
+@samp{-mdollar-hex} is implied if the @samp{--traditional-format}
+(@pxref{traditional-format}) is used.
 @end table
 
 @node S12Z Syntax
