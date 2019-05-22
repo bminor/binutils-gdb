@@ -1,5 +1,10 @@
 2019-05-22  Alan Hayward  <alan.hayward@arm.com>
 
+	* gdb.arch/aarch64-pauth.c: New test.
+	* gdb.arch/aarch64-pauth.exp: New file.
+
+2019-05-22  Alan Hayward  <alan.hayward@arm.com>
+
 	* README (Re-running Tests Outside The Testsuite): New section.
 
 2019-05-21  Tom de Vries  <tdevries@suse.de>

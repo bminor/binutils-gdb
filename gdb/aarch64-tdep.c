@@ -1180,8 +1180,12 @@ aarch64_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct dwarf2_frame_state_reg *ra_state;
 
-  if (tdep->has_pauth () && op == DW_CFA_AARCH64_negate_ra_state)
+  if (op == DW_CFA_AARCH64_negate_ra_state)
     {
+      /* On systems without pauth, treat as a nop.  */
+      if (!tdep->has_pauth ())
+	return true;
+
       /* Allocate RA_STATE column if it's not allocated yet.  */
       fs->regs.alloc_regs (AARCH64_DWARF_PAUTH_RA_STATE + 1);
 

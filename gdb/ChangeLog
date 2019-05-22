@@ -1,5 +1,10 @@
 2019-05-22  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-tdep.c (aarch64_execute_dwarf_cfa_vendor_op): Treat
+	DW_CFA_AARCH64_negate_ra_state as nop on non pauth targets.
+
+2019-05-22  Alan Hayward  <alan.hayward@arm.com>
+
 	* NEWS: Add debugredirect and testsuite sections.
 
 2019-05-22  Simon Cook  <simon.cook@embecosm.com>
