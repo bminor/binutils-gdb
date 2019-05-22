@@ -186,7 +186,7 @@ ldfile_try_open_bfd (const char *attempt,
 		  extern FILE *yyin;
 
 		  /* Try to interpret the file as a linker script.  */
-		  ldfile_open_command_file (attempt);
+		  ldfile_open_script_file (attempt);
 
 		  ldfile_assumed_script = TRUE;
 		  parser_input = input_selected;
@@ -588,10 +588,38 @@ ldfile_find_command_file (const char *name,
 /* Open command file NAME.  */
 
 static void
-ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
+ldfile_open_command_file_1 (const char *name,
+			    bfd_boolean default_only,
+			    bfd_boolean is_script)
 {
   FILE *ldlex_input_stack;
   bfd_boolean sysrooted;
+
+  if (is_script)
+    {
+      static struct name_list *processed_scripts = NULL;
+      struct name_list *script;
+
+      /* PR 24576: Catch the case where the user has accidentally included
+	 the same linker script twice.  */
+      for (script = processed_scripts; script != NULL; script = script->next)
+	{
+	  if (strcmp (name, script->name) == 0)
+	    {
+	      einfo (_("%F%P: error: linker script file '%s' appears multiple times\n"),
+		     name);
+	      return;
+	    }
+	}
+
+      /* FIXME: This memory is never freed, but that should not really matter.
+	 It will be released when the linker exits, and it is unlikely to ever
+	 be more than a few tens of bytes.  */
+      script = xmalloc (sizeof (name_list));
+      script->name = strdup (name);
+      script->next = processed_scripts;
+      processed_scripts = script;
+    }
 
   ldlex_input_stack = ldfile_find_command_file (name, default_only, &sysrooted);
 
@@ -615,7 +643,13 @@ ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
 void
 ldfile_open_command_file (const char *name)
 {
-  ldfile_open_command_file_1 (name, FALSE);
+  ldfile_open_command_file_1 (name, FALSE, FALSE);
+}
+
+void
+ldfile_open_script_file (const char *name)
+{
+  ldfile_open_command_file_1 (name, FALSE, TRUE);
 }
 
 /* Open command file NAME at the default script location.  */
@@ -623,7 +657,7 @@ ldfile_open_command_file (const char *name)
 void
 ldfile_open_default_command_file (const char *name)
 {
-  ldfile_open_command_file_1 (name, TRUE);
+  ldfile_open_command_file_1 (name, TRUE, TRUE);
 }
 
 void

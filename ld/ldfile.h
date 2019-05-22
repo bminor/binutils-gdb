@@ -46,6 +46,8 @@ extern void ldfile_add_library_path
   (const char *, bfd_boolean cmdline);
 extern void ldfile_open_command_file
   (const char *name);
+extern void ldfile_open_script_file
+  (const char *name);
 extern void ldfile_open_default_command_file
   (const char *name);
 extern void ldfile_open_file

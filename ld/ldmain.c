@@ -329,7 +329,7 @@ main (int argc, char **argv)
   if (saved_script_handle == NULL
       && command_line.default_script != NULL)
     {
-      ldfile_open_command_file (command_line.default_script);
+      ldfile_open_script_file (command_line.default_script);
       parser_input = input_script;
       yyparse ();
     }

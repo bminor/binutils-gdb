@@ -1,3 +1,18 @@
+2019-05-22  Julius Werner  <jwerner@chromium.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 24576
+	* ld/ldfile.c: (ldfile_open_command_file_1): Add new parameter -
+	is_script.  If true check that the file has not already been
+	parsed as a linker script.
+	(ldfile_open_script_file): New function.
+	(ldfile_try_open_bfd): Use the new function in place of
+	ldfile_open_command_line.
+	* ldmain.c (main): Likewise.
+	* lexsup.c (parse_args): Use the new function for opening linker
+	scripts with the -T option.
+	* ldfile.h (ldfile_open_script_file): Add prototype.
+
 2019-05-21  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* testsuite/ld-mips-elf/pic-reloc-5.s: Add tests for
