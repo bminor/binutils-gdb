@@ -8831,8 +8831,9 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       /* FIXME drow/2004-04-01: What should we be doing with
 	 function-local names?  For partial symbols, we should probably be
 	 ignoring them.  */
-      complaint (_("unhandled containing DIE tag %d for DIE at %s"),
-		 parent->tag, sect_offset_str (pdi->sect_off));
+      complaint (_("unhandled containing DIE tag %s for DIE at %s"),
+		 dwarf_tag_name (parent->tag),
+		 sect_offset_str (pdi->sect_off));
       parent->scope = grandparent_scope;
     }
 
@@ -22829,6 +22830,18 @@ dwarf2_extension (struct die_info *die, struct dwarf2_cu **ext_cu)
   return follow_die_ref (die, attr, ext_cu);
 }
 
+/* A convenience function that returns an "unknown" DWARF name,
+   including the value of V.  STR is the name of the entity being
+   printed, e.g., "TAG".  */
+
+static const char *
+dwarf_unknown (const char *str, unsigned v)
+{
+  char *cell = get_print_cell ();
+  xsnprintf (cell, PRINT_CELL_SIZE, "DW_%s_<unknown: %u>", str, v);
+  return cell;
+}
+
 /* Convert a DIE tag into its string name.  */
 
 static const char *
@@ -22837,7 +22850,7 @@ dwarf_tag_name (unsigned tag)
   const char *name = get_DW_TAG_name (tag);
 
   if (name == NULL)
-    return "DW_TAG_<unknown>";
+    return dwarf_unknown ("TAG", tag);
 
   return name;
 }
@@ -22860,7 +22873,7 @@ dwarf_attr_name (unsigned attr)
   name = get_DW_AT_name (attr);
 
   if (name == NULL)
-    return "DW_AT_<unknown>";
+    return dwarf_unknown ("AT", attr);
 
   return name;
 }
@@ -22873,7 +22886,7 @@ dwarf_form_name (unsigned form)
   const char *name = get_DW_FORM_name (form);
 
   if (name == NULL)
-    return "DW_FORM_<unknown>";
+    return dwarf_unknown ("FORM", form);
 
   return name;
 }
@@ -22895,7 +22908,7 @@ dwarf_type_encoding_name (unsigned enc)
   const char *name = get_DW_ATE_name (enc);
 
   if (name == NULL)
-    return "DW_ATE_<unknown>";
+    return dwarf_unknown ("ATE", enc);
 
   return name;
 }
