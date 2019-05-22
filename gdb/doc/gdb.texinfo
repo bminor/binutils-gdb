@@ -34550,7 +34550,7 @@ fullname="/home/nickrob/myprog.c",line="73",arch="i386:x86_64"@}
 Show a list of completions for partially typed CLI @var{command}.
 
 This command is intended for @sc{gdb/mi} frontends that cannot use two separate
-CLI and MI channels - for example: because of lack of PTYs like on Windows or
+CLI and MI channels --- for example: because of lack of PTYs like on Windows or
 because @value{GDBN} is used remotely via a SSH connection.
 
 @subheading Result
@@ -34567,7 +34567,7 @@ This field contains a (possibly empty) array of matches.  It is always present.
 
 @item max_completions_reached
 This field contains @code{1} if number of known completions is above
-@code{max-completions} limit (see @ref{Completion}), otherwise it contains
+@code{max-completions} limit (@pxref{Completion}), otherwise it contains
 @code{0}.  It is always present.
 
 @end table
