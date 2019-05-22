@@ -667,7 +667,7 @@ public:
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
   int follow_fork (int, int) override;
-  void follow_exec (struct inferior *, char *) override;
+  void follow_exec (struct inferior *, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
   int insert_vfork_catchpoint (int) override;
@@ -5751,7 +5751,7 @@ remote_target::follow_fork (int follow_child, int detach_fork)
    follow-exec-mode is "new".  */
 
 void
-remote_target::follow_exec (struct inferior *inf, char *execd_pathname)
+remote_target::follow_exec (struct inferior *inf, const char *execd_pathname)
 {
   /* We know that this is a target file name, so if it has the "target:"
      prefix we strip it off before saving it in the program space.  */

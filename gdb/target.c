@@ -2175,7 +2175,7 @@ target_follow_fork (int follow_child, int detach_fork)
 /* Target wrapper for follow exec hook.  */
 
 void
-target_follow_exec (struct inferior *inf, char *execd_pathname)
+target_follow_exec (struct inferior *inf, const char *execd_pathname)
 {
   current_top_target ()->follow_exec (inf, execd_pathname);
 }

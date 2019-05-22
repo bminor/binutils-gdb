@@ -622,7 +622,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
-    virtual void follow_exec (struct inferior *, char *)
+    virtual void follow_exec (struct inferior *, const char *)
       TARGET_DEFAULT_IGNORE ();
     virtual int set_syscall_catchpoint (int, bool, int,
 					gdb::array_view<const int>)
@@ -1637,7 +1637,7 @@ int target_follow_fork (int follow_child, int detach_fork);
 /* Handle the target-specific bookkeeping required when the inferior
    makes an exec call.  INF is the exec'd inferior.  */
 
-void target_follow_exec (struct inferior *inf, char *execd_pathname);
+void target_follow_exec (struct inferior *inf, const char *execd_pathname);
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created

@@ -1,3 +1,12 @@
+2019-05-22  Tom Tromey  <tromey@adacore.com>
+
+	* target.c (target_follow_exec): Constify parameter.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_target::follow_exec): Constify parameter.
+	* infrun.c (follow_exec): Constify parameter.
+	* target.h (struct target_ops) <follow_exec>: Constify parameter.
+	(target_follow_exec): Likewise.
+
 2019-05-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_execute_dwarf_cfa_vendor_op): Treat

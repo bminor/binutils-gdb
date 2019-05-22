@@ -1078,7 +1078,7 @@ show_follow_exec_mode_string (struct ui_file *file, int from_tty,
 /* EXEC_FILE_TARGET is assumed to be non-NULL.  */
 
 static void
-follow_exec (ptid_t ptid, char *exec_file_target)
+follow_exec (ptid_t ptid, const char *exec_file_target)
 {
   struct inferior *inf = current_inferior ();
   int pid = ptid.pid ();
