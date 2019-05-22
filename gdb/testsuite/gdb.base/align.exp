@@ -135,8 +135,12 @@ proc run_alignment_test { lang } {
 
     set filename [prepare_test_source_file $lang]
 
+    set flags {debug}
+    if { "$lang" == "c++" } {
+	lappend flags "additional_flags=-std=c++11"
+    }
     standard_testfile $filename
-    if {[prepare_for_testing "failed to prepare" "$lang/$testfile" $srcfile {debug}]} {
+    if {[prepare_for_testing "failed to prepare" "$lang/$testfile" $srcfile $flags]} {
 	return -1
     }
 
