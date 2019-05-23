@@ -37,6 +37,7 @@
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_dlx
+#define ARCH_bpf
 #define ARCH_epiphany
 #define ARCH_fr30
 #define ARCH_frv
@@ -105,6 +106,23 @@
 #ifdef ARCH_m32c
 #include "m32c-desc.h"
 #endif
+
+#ifdef ARCH_bpf
+/* XXX this should be including bpf-desc.h instead of this hackery,
+   but at the moment it is not possible to include several CGEN
+   generated *-desc.h files simultaneously.  To be fixed in
+   CGEN...  */
+
+# ifdef ARCH_m32c
+enum epbf_isa_attr
+{
+ ISA_EBPFLE, ISA_EBPFBE, ISA_EBPFMAX
+};
+# else
+#  include "bpf-desc.h"
+#  define ISA_EBPFMAX ISA_MAX
+# endif
+#endif /* ARCH_bpf */
 
 disassembler_ftype
 disassembler (enum bfd_architecture a,
@@ -222,6 +240,11 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_ip2k
     case bfd_arch_ip2k:
       disassemble = print_insn_ip2k;
+      break;
+#endif
+#ifdef ARCH_bpf
+    case bfd_arch_bpf:
+      disassemble = print_insn_bpf;
       break;
 #endif
 #ifdef ARCH_epiphany
@@ -639,6 +662,18 @@ disassemble_init_for_target (struct disassemble_info * info)
 	  else
 	    cgen_bitset_set (info->insn_sets, ISA_M32C);
 	}
+      break;
+#endif
+#ifdef ARCH_bpf
+    case bfd_arch_bpf:
+      if (!info->insn_sets)
+        {
+          info->insn_sets = cgen_bitset_create (ISA_EBPFMAX);
+          if (info->endian == BFD_ENDIAN_BIG)
+            cgen_bitset_set (info->insn_sets, ISA_EBPFBE);
+          else
+            cgen_bitset_set (info->insn_sets, ISA_EBPFLE);
+        }
       break;
 #endif
 #ifdef ARCH_pru

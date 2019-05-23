@@ -1,3 +1,27 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac (SHARED_DEPENDENCIES): Add case for bfd_bpf_arch.
+	* configure: Regenerated.
+	* Makefile.am: Add rules for the files generated from cpu/bpf.cpu
+	and cpu/bpf.opc.
+	(HFILES): Add bpf-desc.h and bpf-opc.h.
+	(TARGET_LIBOPCODES_CFILES): Add bpf-asm.c, bpf-desc.c, bpf-dis.c,
+	bpf-ibld.c and bpf-opc.c.
+	(BPF_DEPS): Define.
+	* Makefile.in: Regenerated.
+	* disassemble.c (ARCH_bpf): Define.
+	(disassembler): Add case for bfd_arch_bpf.
+	(disassemble_init_for_target): Likewise.
+	(enum epbf_isa_attr): Define.
+	* disassemble.h: extern print_insn_bpf.
+	* bpf-asm.c: Generated.
+	* bpf-opc.h: Likewise.
+	* bpf-opc.c: Likewise.
+	* bpf-ibld.c: Likewise.
+	* bpf-dis.c: Likewise.
+	* bpf-desc.h: Likewise.
+	* bpf-desc.c: Likewise.
+
 2019-05-21  Sudakshina Das  <sudi.das@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): New instructions for VMRS
