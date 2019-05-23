@@ -1,6 +1,12 @@
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
-	* configure.ac: Add bpf_elf64_le_vec and bpf_elf64_be_vec.
+	* config.bfd (targ_cpu): Process bpf-*-none only if BFD64.
+	* configure.ac: Set target_size=64 for bpf_elf64_le_vec and
+	bpf_elf64_be_vec.
+	* configure: Regenerate.
+
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* configure: Regenerated.
 	* Makefile.am (ALL_MACHINES): Add cpu-bpf.lo.
 	(ALL_MACHINES_CFILES): Add cpu-bpf.c.
