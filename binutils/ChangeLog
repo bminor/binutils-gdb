@@ -1,5 +1,9 @@
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* MAINTAINERS: Add myself as the maintainer for BPF.
+
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* readelf.c: Include elf/bpf.h.
 	(guess_is_rela): Hanle EM_BPF.
 	(dump_relocations): Likewise.
