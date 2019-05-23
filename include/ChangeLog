@@ -1,3 +1,7 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf/bpf.h: New file.
+
 2019-05-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* elf/arm.h (Tag_MVE_arch): Define new enum value.
