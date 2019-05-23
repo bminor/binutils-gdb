@@ -1,3 +1,13 @@
+2019-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 24576
+	* ldfile.c (enum script_open_style): New.
+	(struct script_name_list): New.
+	(ldfile_open_command_file_1): Take a script_open_style param
+	rather than booleans.  Adjust callers.  Only fail when -T or
+	default -T script is invoked twice.
+	(ldfile_try_open_bfd): Revert last change.
+
 2019-05-22  Julius Werner  <jwerner@chromium.org>
 	    Nick Clifton  <nickc@redhat.com>
 
