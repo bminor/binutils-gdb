@@ -1229,19 +1229,6 @@ write_var_or_type (struct parser_state *par_state,
 					  VAR_DOMAIN, &syms);
 	  encoded_name[tail_index] = terminator;
 
-	  /* A single symbol may rename a package or object. */
-
-	  /* This should go away when we move entirely to new version.
-	     FIXME pnh 7/20/2007. */
-	  if (nsyms == 1)
-	    {
-	      struct symbol *ren_sym =
-		ada_find_renaming_symbol (syms[0].symbol, syms[0].block);
-
-	      if (ren_sym != NULL)
-		syms[0].symbol = ren_sym;
-	    }
-
 	  type_sym = select_possible_type_sym (syms);
 
 	  if (type_sym != NULL)

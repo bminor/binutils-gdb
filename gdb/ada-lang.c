@@ -146,14 +146,6 @@ static int scalar_type_p (struct type *);
 
 static int discrete_type_p (struct type *);
 
-static enum ada_renaming_category parse_old_style_renaming (struct type *,
-							    const char **,
-							    int *,
-							    const char **);
-
-static struct symbol *find_old_style_renaming_symbol (const char *,
-						      const struct block *);
-
 static struct type *ada_lookup_struct_elt_type (struct type *, const char *,
                                                 int, int);
 
@@ -1110,26 +1102,6 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
       && encoded[*len - 1] == 'N'
       && (isdigit (encoded[*len - 2]) || islower (encoded[*len - 2])))
     *len = *len - 1;
-}
-
-/* Remove trailing X[bn]* suffixes (indicating names in package bodies).  */
-
-static void
-ada_remove_Xbn_suffix (const char *encoded, int *len)
-{
-  int i = *len - 1;
-
-  while (i > 0 && (encoded[i] == 'b' || encoded[i] == 'n'))
-    i--;
-
-  if (encoded[i] != 'X')
-    return;
-
-  if (i == 0)
-    return;
-
-  if (isalnum (encoded[i-1]))
-    *len = i;
 }
 
 /* If ENCODED follows the GNAT entity encoding conventions, then return
@@ -4301,9 +4273,6 @@ ada_parse_renaming (struct symbol *sym,
     {
     default:
       return ADA_NOT_RENAMING;
-    case LOC_TYPEDEF:
-      return parse_old_style_renaming (SYMBOL_TYPE (sym), 
-				       renamed_entity, len, renaming_expr);
     case LOC_LOCAL:
     case LOC_STATIC:
     case LOC_COMPUTED:
@@ -4344,65 +4313,6 @@ ada_parse_renaming (struct symbol *sym,
   suffix += 5;
   if (renaming_expr != NULL)
     *renaming_expr = suffix;
-  return kind;
-}
-
-/* Assuming TYPE encodes a renaming according to the old encoding in
-   exp_dbug.ads, returns details of that renaming in *RENAMED_ENTITY,
-   *LEN, and *RENAMING_EXPR, as for ada_parse_renaming, above.  Returns
-   ADA_NOT_RENAMING otherwise.  */
-static enum ada_renaming_category
-parse_old_style_renaming (struct type *type,
-			  const char **renamed_entity, int *len, 
-			  const char **renaming_expr)
-{
-  enum ada_renaming_category kind;
-  const char *name;
-  const char *info;
-  const char *suffix;
-
-  if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM 
-      || TYPE_NFIELDS (type) != 1)
-    return ADA_NOT_RENAMING;
-
-  name = TYPE_NAME (type);
-  if (name == NULL)
-    return ADA_NOT_RENAMING;
-  
-  name = strstr (name, "___XR");
-  if (name == NULL)
-    return ADA_NOT_RENAMING;
-  switch (name[5])
-    {
-    case '\0':
-    case '_':
-      kind = ADA_OBJECT_RENAMING;
-      break;
-    case 'E':
-      kind = ADA_EXCEPTION_RENAMING;
-      break;
-    case 'P':
-      kind = ADA_PACKAGE_RENAMING;
-      break;
-    case 'S':
-      kind = ADA_SUBPROGRAM_RENAMING;
-      break;
-    default:
-      return ADA_NOT_RENAMING;
-    }
-
-  info = TYPE_FIELD_NAME (type, 0);
-  if (info == NULL)
-    return ADA_NOT_RENAMING;
-  if (renamed_entity != NULL)
-    *renamed_entity = info;
-  suffix = strstr (info, "___XE");
-  if (renaming_expr != NULL)
-    *renaming_expr = suffix + 5;
-  if (suffix == NULL || suffix == info)
-    return ADA_NOT_RENAMING;
-  if (len != NULL)
-    *len = suffix - info;
   return kind;
 }
 
@@ -7986,80 +7896,11 @@ ada_find_any_type (const char *name)
    symbols whose name is that of NAME_SYM suffixed with  "___XR".
    Return symbol if found, and NULL otherwise.  */
 
-struct symbol *
-ada_find_renaming_symbol (struct symbol *name_sym, const struct block *block)
+static bool
+ada_is_renaming_symbol (struct symbol *name_sym)
 {
   const char *name = SYMBOL_LINKAGE_NAME (name_sym);
-  struct symbol *sym;
-
-  if (strstr (name, "___XR") != NULL)
-     return name_sym;
-
-  sym = find_old_style_renaming_symbol (name, block);
-
-  if (sym != NULL)
-    return sym;
-
-  /* Not right yet.  FIXME pnh 7/20/2007.  */
-  sym = ada_find_any_type_symbol (name);
-  if (sym != NULL && strstr (SYMBOL_LINKAGE_NAME (sym), "___XR") != NULL)
-    return sym;
-  else
-    return NULL;
-}
-
-static struct symbol *
-find_old_style_renaming_symbol (const char *name, const struct block *block)
-{
-  const struct symbol *function_sym = block_linkage_function (block);
-  char *rename;
-
-  if (function_sym != NULL)
-    {
-      /* If the symbol is defined inside a function, NAME is not fully
-         qualified.  This means we need to prepend the function name
-         as well as adding the ``___XR'' suffix to build the name of
-         the associated renaming symbol.  */
-      const char *function_name = SYMBOL_LINKAGE_NAME (function_sym);
-      /* Function names sometimes contain suffixes used
-         for instance to qualify nested subprograms.  When building
-         the XR type name, we need to make sure that this suffix is
-         not included.  So do not include any suffix in the function
-         name length below.  */
-      int function_name_len = ada_name_prefix_len (function_name);
-      const int rename_len = function_name_len + 2      /*  "__" */
-        + strlen (name) + 6 /* "___XR\0" */ ;
-
-      /* Strip the suffix if necessary.  */
-      ada_remove_trailing_digits (function_name, &function_name_len);
-      ada_remove_po_subprogram_suffix (function_name, &function_name_len);
-      ada_remove_Xbn_suffix (function_name, &function_name_len);
-
-      /* Library-level functions are a special case, as GNAT adds
-         a ``_ada_'' prefix to the function name to avoid namespace
-         pollution.  However, the renaming symbols themselves do not
-         have this prefix, so we need to skip this prefix if present.  */
-      if (function_name_len > 5 /* "_ada_" */
-          && strstr (function_name, "_ada_") == function_name)
-        {
-	  function_name += 5;
-	  function_name_len -= 5;
-        }
-
-      rename = (char *) alloca (rename_len * sizeof (char));
-      strncpy (rename, function_name, function_name_len);
-      xsnprintf (rename + function_name_len, rename_len - function_name_len,
-		 "__%s___XR", name);
-    }
-  else
-    {
-      const int rename_len = strlen (name) + 6;
-
-      rename = (char *) alloca (rename_len * sizeof (char));
-      xsnprintf (rename, rename_len * sizeof (char), "%s___XR", name);
-    }
-
-  return ada_find_any_type_symbol (rename);
+  return strstr (name, "___XR") != NULL;
 }
 
 /* Because of GNAT encoding conventions, several GDB symbols may match a
@@ -14375,17 +14216,14 @@ static struct value *
 ada_read_var_value (struct symbol *var, const struct block *var_block,
 		    struct frame_info *frame)
 {
-  const struct block *frame_block = NULL;
-  struct symbol *renaming_sym = NULL;
-
   /* The only case where default_read_var_value is not sufficient
      is when VAR is a renaming...  */
-  if (frame)
-    frame_block = get_frame_block (frame, NULL);
-  if (frame_block)
-    renaming_sym = ada_find_renaming_symbol (var, frame_block);
-  if (renaming_sym != NULL)
-    return ada_read_renaming_var_value (renaming_sym, frame_block);
+  if (frame != nullptr)
+    {
+      const struct block *frame_block = get_frame_block (frame, NULL);
+      if (frame_block != nullptr && ada_is_renaming_symbol (var))
+	return ada_read_renaming_var_value (var, frame_block);
+    }
 
   /* This is a typical case where we expect the default_read_var_value
      function to work.  */

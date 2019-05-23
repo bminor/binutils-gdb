@@ -343,9 +343,6 @@ extern struct type *ada_find_parallel_type (struct type *,
 
 extern bool get_int_var_value (const char *, LONGEST &value);
 
-extern struct symbol *ada_find_renaming_symbol (struct symbol *name_sym,
-                                                const struct block *block);
-
 extern int ada_prefer_type (struct type *, struct type *);
 
 extern struct type *ada_get_base_type (struct type *);
