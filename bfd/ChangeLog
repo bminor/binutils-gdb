@@ -1,3 +1,23 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac: Add bpf_elf64_le_vec and bpf_elf64_be_vec.
+	* configure: Regenerated.
+	* Makefile.am (ALL_MACHINES): Add cpu-bpf.lo.
+	(ALL_MACHINES_CFILES): Add cpu-bpf.c.
+	(BFD64_BACKENDS): Add elf64-bpf.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-bpf.c.
+	* Makefile.in (SOURCE_HFILES): Regenerate.
+	* config.bfd (targ_cpu): Handle bpf-*-* targets.
+	* cpu-bpf.c: New file.
+	* elf64-bpf.c: Likewise.
+	* targets.c (_bfd_target_vector): Add bpf_elf64_be_vec and
+	bpf_elf64_le_vec.
+	* archures.c: Define architecture bfd_arch_bpf and machine
+	bfd_arch_bpf.
+	* reloc.c: Define BFD relocations used by the BPF target.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
 2019-05-22  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (arm_allocate_glue_section_space): Clear section

@@ -2357,6 +2357,8 @@ enum bfd_architecture
  bfd_arch_iq2000,     /* Vitesse IQ2000.  */
 #define bfd_mach_iq2000        1
 #define bfd_mach_iq10          2
+  bfd_arch_bpf,       /* Linux eBPF.  */
+#define bfd_mach_bpf           1
   bfd_arch_epiphany,  /* Adapteva EPIPHANY.  */
 #define bfd_mach_epiphany16    1
 #define bfd_mach_epiphany32    2
@@ -6650,6 +6652,13 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_TILEGX_IMM8_X1_TLS_ADD,
   BFD_RELOC_TILEGX_IMM8_Y0_TLS_ADD,
   BFD_RELOC_TILEGX_IMM8_Y1_TLS_ADD,
+
+/* Linux eBPF relocations.  */
+  BFD_RELOC_BPF_64,
+  BFD_RELOC_BPF_32,
+  BFD_RELOC_BPF_16,
+  BFD_RELOC_BPF_DISP16,
+  BFD_RELOC_BPF_DISP32,
 
 /* Adapteva EPIPHANY - 8 bit signed pc-relative displacement  */
   BFD_RELOC_EPIPHANY_SIMM8,

@@ -639,6 +639,8 @@ extern const bfd_target elf32_be_vec;
 extern const bfd_target elf32_le_vec;
 extern const bfd_target elf64_be_vec;
 extern const bfd_target elf64_le_vec;
+extern const bfd_target bpf_elf64_le_vec;
+extern const bfd_target bpf_elf64_be_vec;
 extern const bfd_target epiphany_elf32_vec;
 extern const bfd_target fr30_elf32_vec;
 extern const bfd_target frv_elf32_vec;
@@ -1019,6 +1021,11 @@ static const bfd_target * const _bfd_target_vector[] =
 	&i386_pei_vec,
 
 	&iamcu_elf32_vec,
+
+#ifdef BFD64
+	&bpf_elf64_be_vec,
+	&bpf_elf64_le_vec,
+#endif
 
 #ifdef BFD64
 #if 0

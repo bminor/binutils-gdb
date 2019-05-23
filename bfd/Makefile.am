@@ -96,6 +96,7 @@ ALL_MACHINES = \
 	cpu-arm.lo \
 	cpu-avr.lo \
 	cpu-bfin.lo \
+	cpu-bpf.lo \
 	cpu-cr16.lo \
 	cpu-cr16c.lo \
 	cpu-cris.lo \
@@ -182,6 +183,7 @@ ALL_MACHINES_CFILES = \
 	cpu-arm.c \
 	cpu-avr.c \
 	cpu-bfin.c \
+	cpu-bpf.c \
 	cpu-cr16.c \
 	cpu-cr16c.c \
 	cpu-cris.c \
@@ -574,6 +576,7 @@ BFD64_BACKENDS = \
 	elf64-tilegx.lo \
 	elf64-x86-64.lo \
 	elfxx-x86.lo \
+	elf64-bpf.lo \
 	elf64.lo \
 	mach-o-aarch64.lo \
 	mach-o-x86-64.lo \
@@ -607,6 +610,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-tilegx.c \
 	elf64-x86-64.c \
 	elfxx-x86.c \
+	elf64-bpf.c \
 	elf64.c \
 	elfn32-mips.c \
 	elfxx-aarch64.c \

@@ -480,6 +480,12 @@ case "${targ}" in
     targ_defvec=d30v_elf32_vec
     ;;
 
+  bpf-*-none)
+    targ_defvec=bpf_elf64_le_vec
+    targ_selvecs=bpf_elf64_be_vec
+    targ_underscore=yes
+    ;;
+
   epiphany-*-*)
     targ_defvec=epiphany_elf32_vec
     targ_underscore=yes
@@ -1420,6 +1426,12 @@ case "${targ}" in
     ;;
 
 # END OF targmatch.h
+  bpf-*-*)
+    echo "*** Configuration $targ is not fully supported." >&2
+    echo "*** Use bpf or bpf-*-none as the target instead." >&2
+    exit 1
+    ;;
+
   *)
     echo 1>&2 "*** BFD does not support target ${targ}."
     echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
