@@ -27,6 +27,9 @@
      'array_indexes', 'symbols', 'unions', 'deref_refs', 'actual_objects',
      'static_members', 'max_elements', 'repeat_threshold', and 'format'.
 
+  ** gdb.Type has a new property 'objfile' which returns the objfile the
+     type was defined in.
+
 * New built-in convenience variables $_shell_exitcode and $_shell_exitsignal
   provide the exitcode or exit status of the shell commands launched by
   GDB commands such as "shell", "pipe" and "make".

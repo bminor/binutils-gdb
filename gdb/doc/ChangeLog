@@ -1,3 +1,7 @@
+2019-06-04  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdb/doc/python.texi: Document new gdb.Type.objfile property.
+
 2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Help): Document the new -v apropos flag.

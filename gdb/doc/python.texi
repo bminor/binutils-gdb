@@ -1087,6 +1087,11 @@ languages have this concept.  If this type has no tag name, then
 @code{None} is returned.
 @end defvar
 
+@defvar Type.objfile
+The @code{gdb.Objfile} that this type was defined in, or @code{None} if
+there is no associated objfile.
+@end defvar
+
 The following methods are provided:
 
 @defun Type.fields ()

@@ -413,6 +413,18 @@ typy_get_tag (PyObject *self, void *closure)
   return PyString_FromString (tagname);
 }
 
+/* Return the type's objfile, or None.  */
+static PyObject *
+typy_get_objfile (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+  struct objfile *objfile = TYPE_OBJFILE (type);
+
+  if (objfile == nullptr)
+    Py_RETURN_NONE;
+  return objfile_to_objfile_object (objfile).release ();
+}
+
 /* Return the type, stripped of typedefs. */
 static PyObject *
 typy_strip_typedefs (PyObject *self, PyObject *args)
@@ -1419,6 +1431,8 @@ static gdb_PyGetSetDef type_object_getset[] =
     "The size of this type, in bytes.", NULL },
   { "tag", typy_get_tag, NULL,
     "The tag name for this type, or None.", NULL },
+  { "objfile", typy_get_objfile, NULL,
+    "The objfile this type was defined in, or None.", NULL },
   { NULL }
 };
 
