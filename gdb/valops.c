@@ -3801,6 +3801,11 @@ value_slice (struct value *array, int lowbound, int length)
       && TYPE_CODE (array_type) != TYPE_CODE_STRING)
     error (_("cannot take slice of non-array"));
 
+  if (type_not_allocated (array_type))
+    error (_("array not allocated"));
+  if (type_not_associated (array_type))
+    error (_("array not associated"));
+
   range_type = TYPE_INDEX_TYPE (array_type);
   if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
     error (_("slice from bad array or bitstring"));

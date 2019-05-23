@@ -32,7 +32,7 @@ gdb_test "print sizeof(vla1)" " = 0" "print sizeof non-allocated vla1"
 gdb_test "print sizeof(vla1(3,2,1))" \
     "no such vector element \\(vector not allocated\\)" \
     "print sizeof non-allocated indexed vla1"
-gdb_test "print sizeof(vla1(3:4,2,1))" "slice out of range" \
+gdb_test "print sizeof(vla1(3:4,2,1))" "array not allocated" \
     "print sizeof non-allocated sliced vla1"
 
 # Try to access value in allocated VLA
@@ -49,7 +49,7 @@ gdb_test "print sizeof(pvla)" " = 0" "print sizeof non-associated pvla"
 gdb_test "print sizeof(pvla(3,2,1))" \
     "no such vector element \\(vector not associated\\)" \
     "print sizeof non-associated indexed pvla"
-gdb_test "print sizeof(pvla(3:4,2,1))" "slice out of range" \
+gdb_test "print sizeof(pvla(3:4,2,1))" "array not associated" \
     "print sizeof non-associated sliced pvla"
 
 # Try to access values in pointer to VLA and compare them

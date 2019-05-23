@@ -1,3 +1,7 @@
+2019-06-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/vla-sizeof.exp: Update expected results.
+
 2019-06-06  Amos Bird  <amosbird@gmail.com>
 
 	* gdb.base/annota1.exp (thread_switch): Add test for
