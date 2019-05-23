@@ -1,3 +1,8 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu: New file.
+	* bpf.opc: Likewise.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	2.32 branch created.
