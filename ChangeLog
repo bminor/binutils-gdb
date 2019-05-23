@@ -1,3 +1,10 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config.guess: Synchronize with config project master sources.
+	* config.sub: Likewise.
+	* readline/support/config.guess: Likewise.
+	* readline/support/config.sub: Likewise.
+
 2019-04-10  Nick Clifton  <nickc@redhat.com>
 
 	* libiberty: Sync with gcc.  Bring in:
