@@ -52,6 +52,7 @@ CPU_DOCS = \
 	c-arm.texi \
 	c-avr.texi \
 	c-bfin.texi \
+	c-bpf.texi \
 	c-cr16.texi \
 	c-cris.texi \
 	c-csky.texi \

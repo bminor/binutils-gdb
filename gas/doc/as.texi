@@ -40,6 +40,9 @@
 @ifset Blackfin
 @set Blackfin
 @end ifset
+@ifset BPF
+@set BPF
+@end ifset
 @ifset H8/300
 @set H8
 @end ifset
@@ -295,6 +298,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mfdpic}]
    [@b{-mno-fdpic}]
    [@b{-mnopic}]
+@end ifset
+@ifset BPF
+
+@emph{Target BPF options:}
+   [@b{-EL}] [@b{-EB}]
 @end ifset
 @ifset CRIS
 
@@ -996,6 +1004,25 @@ the Blackfin processor family.
 @c man end
 @c man begin INCLUDE
 @include c-bfin.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@ifset BPF
+
+@ifclear man
+@xref{BPF Options}, for the options available when @value{AS} is
+configured for the Linux kernel BPF processor family.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for
+the Linux kernel BPF processor family.
+@c man end
+@c man begin INCLUDE
+@include c-bpf.texi
 @c ended inside the included file
 @end ifset
 
@@ -7615,6 +7642,9 @@ subject, see the hardware manufacturer's manual.
 @ifset Blackfin
 * Blackfin-Dependent::		Blackfin Dependent Features
 @end ifset
+@ifset BPF
+* BPF-Dependent::		BPF Dependent Features
+@end ifset
 @ifset CR16
 * CR16-Dependent::              CR16 Dependent Features
 @end ifset
@@ -7800,6 +7830,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset Blackfin
 @include c-bfin.texi
+@end ifset
+
+@ifset BPF
+@include c-bpf.texi
 @end ifset
 
 @ifset CR16

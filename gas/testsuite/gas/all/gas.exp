@@ -427,6 +427,9 @@ dg-finish
 
 # Set $nop_type appropriately to indicate the NOP instruction mnemonic.
 case $target_triplet in {
+    { "bpf-*-*" } {
+        set nop_type 6
+    }
     { "mmix-*-*" } {
 	set nop_type 5
     }

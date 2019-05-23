@@ -30,6 +30,7 @@
 @set ARM
 @set AVR
 @set Blackfin
+@set BPF
 @set CR16
 @set CRIS
 @set CSKY

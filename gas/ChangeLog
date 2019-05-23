@@ -1,3 +1,48 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac: Handle bpf-*-* targets.
+	* configure.tgt (generic_target): Likewise.
+	* configure: Regenerate.
+	* Makefile.am (TARGET_CPU_CFILES): Add tc-bpf.c.
+	(TARGET_CPU_HFILES): Add tc-bpf.h.
+	* Makefile.in: Regenerated.
+	* config/tc-bpf.c: New file.
+	* config/tc-bpf.h: Likewise.
+	* doc/Makefile.am (CPU_DOCS): Add c-bpf.texi.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: set BPF.
+	* doc/as.texi: Add eBPF contents.
+	* doc/c-bpf.texi: New file.
+	* testsuite/gas/bpf/alu.d: New file.
+	* testsuite/gas/bpf/mem-be.d: Likewise.
+	* testsuite/gas/bpf/mem.s: Likewise.
+	* testsuite/gas/bpf/mem.d: Likewise.
+	* testsuite/gas/bpf/lddw-be.d: Likewise.
+	* testsuite/gas/bpf/lddw.s: Likewise.
+	* testsuite/gas/bpf/lddw.d: Likewise.
+	* testsuite/gas/bpf/jump-be.d: Likewise.
+	* testsuite/gas/bpf/jump.s: Likewise.
+	* testsuite/gas/bpf/jump.d: Likewise.
+	* testsuite/gas/bpf/exit-be.d: Likewise.
+	* testsuite/gas/bpf/exit.s: Likewise.
+	* testsuite/gas/bpf/exit.d: Likewise.
+	* testsuite/gas/bpf/call-be.d: Likewise.
+	* testsuite/gas/bpf/call.s: Likewise.
+	* testsuite/gas/bpf/call.d: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Likewise.
+	* testsuite/gas/bpf/atomic-be.d: Likewise.
+	* testsuite/gas/bpf/atomic.s: Likewise.
+	* testsuite/gas/bpf/atomic.d: Likewise.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu32-be.d: Likewise.
+	* testsuite/gas/bpf/alu32.s: Likewise.
+	* testsuite/gas/bpf/alu32.d: Likewise.
+	* testsuite/gas/bpf/alu.s: Likewise.
+	* testsuite/gas/all/gas.exp: Introduce a nop_type for eBPF.
+	* testsuite/gas/all/org-1.s: Support nop_type 6.
+	* testsuite/gas/all/org-1.l: Updated to reflect changes in
+	org-1.s.
+
 2019-05-22  John Darrington <john@darrington.wattle.id.au>
 
 	* config/tc-s12z.c (s12z_strtol): New function. (md_show_usage): Update.
