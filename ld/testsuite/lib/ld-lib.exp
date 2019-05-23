@@ -1045,6 +1045,7 @@ proc check_gc_sections_available { } {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
 	if {   [istarget alpha-*-*]
+            || [istarget bpf-*-*]
 	    || [istarget d30v-*-*]
 	    || [istarget dlx-*-*]
 	    || [istarget hppa*64-*-*]

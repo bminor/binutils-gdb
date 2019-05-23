@@ -1,3 +1,18 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64bpf.c.
+	* Makefile.in (prefix): Regenerate.
+	* configure.tgt (targ_extra_ofiles): Add case for bpf-*-* targets.
+	* emulparams/elf64bpf.sh: New file.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Add
+	bpf-*-* to the list of targets not supporting gc-sections.
+	* testsuite/ld-bpf/bar.s: New file.
+	* testsuite/ld-bpf/jump-1.d: Likewise.
+	* testsuite/ld-bpf/foo.s: Likewise.
+	* testsuite/ld-bpf/call-1.d: Likewise.
+	* testsuite/ld-bpf/bpf.exp: Likewise.
+	* testsuite/ld-bpf/baz.s: Likewise.
+
 2019-05-23  Alan Modra  <amodra@gmail.com>
 
 	PR 24576
