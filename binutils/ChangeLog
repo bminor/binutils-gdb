@@ -1,3 +1,12 @@
+2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* readelf.c: Include elf/bpf.h.
+	(guess_is_rela): Hanle EM_BPF.
+	(dump_relocations): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	* testsuite/binutils-all/nm.exp: Add bpf-*-* to the list of
+	ELF targets.
+
 2019-05-21  Tamar Christina  <tamar.christina@arm.com>
 
 	* dwarf.c (dwarf_regnames_aarch64): Add SVE registers.

@@ -102,6 +102,7 @@
 #include "elf/d10v.h"
 #include "elf/d30v.h"
 #include "elf/dlx.h"
+#include "elf/bpf.h"
 #include "elf/epiphany.h"
 #include "elf/fr30.h"
 #include "elf/frv.h"
@@ -781,6 +782,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_SCORE:
     case EM_XGATE:
     case EM_NFP:
+    case EM_BPF:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
@@ -1481,6 +1483,10 @@ dump_relocations (Filedata *          filedata,
 	case EM_VISIUM:
 	  rtype = elf_visium_reloc_type (type);
 	  break;
+
+        case EM_BPF:
+          rtype = elf_bpf_reloc_type (type);
+          break;
 
 	case EM_ADAPTEVA_EPIPHANY:
 	  rtype = elf_epiphany_reloc_type (type);
@@ -12410,6 +12416,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_AARCH64:
       return (reloc_type == 258
 	      || reloc_type == 1); /* R_AARCH64_ABS32 || R_AARCH64_P32_ABS32 */
+    case EM_BPF:
+      return reloc_type == 11; /* R_BPF_DATA_32 */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 3;
     case EM_ALPHA:
