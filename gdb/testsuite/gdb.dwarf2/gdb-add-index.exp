@@ -1,0 +1,74 @@
+# Copyright 2019 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2.
+if {![dwarf2_support]} {
+    return 0
+}
+
+standard_testfile main.c
+
+if { [prepare_for_testing "failed to prepare" "${testfile}" \
+	  [list ${srcfile}]] } {
+    return -1
+}
+
+# Add a .gdb_index section to PROGRAM.
+# PROGRAM is assumed to be the output of standard_output_file.
+# Returns the 0 if there is a failure, otherwise 1.
+
+proc add_gdb_index { program } {
+    global srcdir GDB env BUILD_DATA_DIRECTORY
+    set contrib_dir "$srcdir/../contrib"
+    set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
+    set result [catch "exec $contrib_dir/gdb-add-index.sh $program" output]
+    if { $result != 0 } {
+	verbose -log "result is $result"
+	verbose -log "output is $output"
+	return 0
+    }
+
+    return 1
+}
+
+# Build a copy of the program with an index (.gdb_index/.debug_names).
+# But only if the toolchain didn't already create one: gdb doesn't support
+# building an index from a program already using one.
+
+set test "check if index present"
+gdb_test_multiple "mt print objfiles ${testfile}" $test {
+    -re "gdb_index.*${gdb_prompt} $" {
+	set binfile_with_index $binfile
+    }
+    -re "debug_names.*${gdb_prompt} $" {
+	set binfile_with_index $binfile
+    }
+    -re "Psymtabs.*${gdb_prompt} $" {
+	if { [add_gdb_index $binfile] != "1" } {
+	    return -1
+	}
+	set binfile_with_index $binfile
+    }
+}
+
+# Ok, we have a copy of $binfile with an index.
+# Restart gdb and verify the index was used.
+
+clean_restart ${binfile_with_index}
+gdb_test "mt print objfiles ${testfile}" \
+    "(gdb_index|debug_names).*" \
+    "index used"
