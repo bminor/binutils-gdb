@@ -1,5 +1,9 @@
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
+	* po/SRC-POTFILES.in: Regenerate.
+
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c: Comment on powerxx _notoc stub variants.
 	(LI_R11_0, LIS_R11, ORI_R11_R11_0, SLDI_R11_R11_34): Define.
 	(PADDI_R12_PC, PLD_R12_PC, D34, HA34): Define.

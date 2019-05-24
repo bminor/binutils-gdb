@@ -48,6 +48,8 @@ config/tc-avr.c
 config/tc-avr.h
 config/tc-bfin.c
 config/tc-bfin.h
+config/tc-bpf.c
+config/tc-bpf.h
 config/tc-cr16.c
 config/tc-cr16.h
 config/tc-cris.c

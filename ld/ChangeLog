@@ -1,5 +1,9 @@
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
+	* po/BLD-POTFILES.in: Regenerate.
+
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/notoc2.d,
 	* testsuite/ld-powerpc/notoc2.s: New test.
 	* testsuite/ld-powerpc/powerpc.exp: Run it.

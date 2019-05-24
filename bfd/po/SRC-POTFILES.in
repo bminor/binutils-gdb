@@ -45,6 +45,7 @@ cpu-arc.c
 cpu-arm.c
 cpu-avr.c
 cpu-bfin.c
+cpu-bpf.c
 cpu-cr16.c
 cpu-cr16c.c
 cpu-cris.c
@@ -208,6 +209,7 @@ elf32-xstormy16.c
 elf32-xtensa.c
 elf32.c
 elf64-alpha.c
+elf64-bpf.c
 elf64-gen.c
 elf64-hppa.c
 elf64-hppa.h

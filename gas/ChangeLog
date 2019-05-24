@@ -1,5 +1,9 @@
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
+	* po/POTFILES.in: Regenerate.
+
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_elf_suffix): Support @pcrel, @got@pcrel,
 	@plt@pcrel, @higher34, @highera34, @highest34, and @highesta34.
 	(fixup_size): Handle new powerxx relocs.
