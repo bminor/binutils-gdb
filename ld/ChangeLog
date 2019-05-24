@@ -1,3 +1,13 @@
+2019-05-28  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* testsuite/ld-mips-elf/undefweak-overflow.s: Remove test case
+	for pcrel_hi/pcrel_lo.
+	* testsuite/ld-mips-elf/undefweak-overflow.d: Update to match.
+	* testsuite/ld-mips-elf/reloc-pcrel-r6.s: New test source.
+	* testsuite/ld-mips-elf/reloc-pcrel-r6.d: New test linker script.
+	* testsuite/ld-mips-elf/reloc-pcrel-r6.ld: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596

@@ -6326,8 +6326,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
     case R_MIPS_PCHI16:
       value = mips_elf_high (symbol + addend - p);
-      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
-	overflowed_p = mips_elf_overflow_p (value, 16);
       value &= howto->dst_mask;
       break;
 

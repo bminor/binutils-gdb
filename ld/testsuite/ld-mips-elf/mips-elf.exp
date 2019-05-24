@@ -1656,3 +1656,5 @@ run_dump_test_o32 "pic-reloc-6"
 run_dump_test_n64 "pic-reloc-7"
 run_dump_test_n64 "pic-reloc-7" [list [list name (microMIPS)] \
 				      [list as "-mmicromips"]]
+
+run_dump_test_o32 "reloc-pcrel-r6"
