@@ -6875,7 +6875,7 @@ process_section_groups (Filedata * filedata)
 		     printable_section_name (filedata, section),
 		     (unsigned long) section->sh_entsize,
 		     (unsigned long) section->sh_size);
-	      break;
+	      continue;
 	    }
 
 	  start = (unsigned char *) get_data (NULL, filedata, section->sh_offset,

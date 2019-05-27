@@ -1,3 +1,8 @@
+2019-05-27  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_section_groups): Continue processing groups
+	when sh_entsize exceeds group size.
+
 2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* readelf.c (get_aarch64_dynamic_type): Handle DT_AARCH64_VARIANT_PCS.
