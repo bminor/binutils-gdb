@@ -16,7 +16,7 @@
 
 * Support for Pointer Authentication on AArch64 Linux.
 
-* Two new convernience functions $_cimag and $_creal that extract the
+* Two new convenience functions $_cimag and $_creal that extract the
   imaginary and real parts respectively from complex numbers.
 
 * Python API
