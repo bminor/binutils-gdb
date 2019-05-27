@@ -22,6 +22,15 @@ if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000-*-*"] } then {
     return
 }
 
+proc supports_ppc64 { } {
+    global AS
+    if { [catch "exec $AS -a64 < /dev/null"] } then {
+	return 0
+    } else {
+	return 1
+    }
+}
+
 run_dump_test "bcyerr"
 run_dump_test "bcy"
 run_dump_test "bcaterr"
@@ -116,4 +125,6 @@ run_dump_test "htm"
 run_dump_test "titan"
 run_dump_test "prefix-align"
 run_dump_test "prefix-pcrel"
-run_dump_test "prefix-reloc"
+if { [supports_ppc64] } then {
+    run_dump_test "prefix-reloc"
+}

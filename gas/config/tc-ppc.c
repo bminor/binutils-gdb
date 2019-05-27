@@ -1320,76 +1320,146 @@ md_parse_option (int c, const char *arg)
   return 1;
 }
 
+static int
+is_ppc64_target (const bfd_target *targ, void *data ATTRIBUTE_UNUSED)
+{
+  switch (targ->flavour)
+    {
+#ifdef OBJ_ELF
+    case bfd_target_elf_flavour:
+      return strncmp (targ->name, "elf64-powerpc", 13) == 0;
+#endif
+#ifdef OBJ_XCOFF
+    case bfd_target_xcoff_flavour:
+      return (strcmp (targ->name, "aixcoff64-rs6000") == 0
+	      || strcmp (targ->name, "aix5coff64-rs6000") == 0);
+#endif
+    default:
+      return 0;
+    }
+}
+
 void
 md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
-PowerPC options:\n\
--a32                    generate ELF32/XCOFF32\n\
--a64                    generate ELF64/XCOFF64\n\
--u                      ignored\n\
--mpwrx, -mpwr2          generate code for POWER/2 (RIOS2)\n\
--mpwr                   generate code for POWER (RIOS1)\n\
--m601                   generate code for PowerPC 601\n\
+PowerPC options:\n"));
+  fprintf (stream, _("\
+-a32                    generate ELF32/XCOFF32\n"));
+  if (bfd_iterate_over_targets (is_ppc64_target, NULL))
+    fprintf (stream, _("\
+-a64                    generate ELF64/XCOFF64\n"));
+  fprintf (stream, _("\
+-u                      ignored\n"));
+  fprintf (stream, _("\
+-mpwrx, -mpwr2          generate code for POWER/2 (RIOS2)\n"));
+  fprintf (stream, _("\
+-mpwr                   generate code for POWER (RIOS1)\n"));
+  fprintf (stream, _("\
+-m601                   generate code for PowerPC 601\n"));
+  fprintf (stream, _("\
 -mppc, -mppc32, -m603, -m604\n\
-                        generate code for PowerPC 603/604\n\
--m403                   generate code for PowerPC 403\n\
--m405                   generate code for PowerPC 405\n\
--m440                   generate code for PowerPC 440\n\
--m464                   generate code for PowerPC 464\n\
--m476                   generate code for PowerPC 476\n\
+                        generate code for PowerPC 603/604\n"));
+  fprintf (stream, _("\
+-m403                   generate code for PowerPC 403\n"));
+  fprintf (stream, _("\
+-m405                   generate code for PowerPC 405\n"));
+  fprintf (stream, _("\
+-m440                   generate code for PowerPC 440\n"));
+  fprintf (stream, _("\
+-m464                   generate code for PowerPC 464\n"));
+  fprintf (stream, _("\
+-m476                   generate code for PowerPC 476\n"));
+  fprintf (stream, _("\
 -m7400, -m7410, -m7450, -m7455\n\
-                        generate code for PowerPC 7400/7410/7450/7455\n\
+                        generate code for PowerPC 7400/7410/7450/7455\n"));
+  fprintf (stream, _("\
 -m750cl, -mgekko, -mbroadway\n\
-                        generate code for PowerPC 750cl/Gekko/Broadway\n\
+                        generate code for PowerPC 750cl/Gekko/Broadway\n"));
+  fprintf (stream, _("\
 -m821, -m850, -m860     generate code for PowerPC 821/850/860\n"));
   fprintf (stream, _("\
--mppc64, -m620          generate code for PowerPC 620/625/630\n\
--mppc64bridge           generate code for PowerPC 64, including bridge insns\n\
--mbooke                 generate code for 32-bit PowerPC BookE\n\
--ma2                    generate code for A2 architecture\n\
--mpower4, -mpwr4        generate code for Power4 architecture\n\
+-mppc64, -m620          generate code for PowerPC 620/625/630\n"));
+  fprintf (stream, _("\
+-mppc64bridge           generate code for PowerPC 64, including bridge insns\n"));
+  fprintf (stream, _("\
+-mbooke                 generate code for 32-bit PowerPC BookE\n"));
+  fprintf (stream, _("\
+-ma2                    generate code for A2 architecture\n"));
+  fprintf (stream, _("\
+-mpower4, -mpwr4        generate code for Power4 architecture\n"));
+  fprintf (stream, _("\
 -mpower5, -mpwr5, -mpwr5x\n\
-                        generate code for Power5 architecture\n\
--mpower6, -mpwr6        generate code for Power6 architecture\n\
--mpower7, -mpwr7        generate code for Power7 architecture\n\
--mpower8, -mpwr8        generate code for Power8 architecture\n\
--mpower9, -mpwr9        generate code for Power9 architecture\n\
--mcell                  generate code for Cell Broadband Engine architecture\n\
--mcom                   generate code for Power/PowerPC common instructions\n\
+                        generate code for Power5 architecture\n"));
+  fprintf (stream, _("\
+-mpower6, -mpwr6        generate code for Power6 architecture\n"));
+  fprintf (stream, _("\
+-mpower7, -mpwr7        generate code for Power7 architecture\n"));
+  fprintf (stream, _("\
+-mpower8, -mpwr8        generate code for Power8 architecture\n"));
+  fprintf (stream, _("\
+-mpower9, -mpwr9        generate code for Power9 architecture\n"));
+  fprintf (stream, _("\
+-mcell                  generate code for Cell Broadband Engine architecture\n"));
+  fprintf (stream, _("\
+-mcom                   generate code for Power/PowerPC common instructions\n"));
+  fprintf (stream, _("\
 -many                   generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
--maltivec               generate code for AltiVec\n\
--mvsx                   generate code for Vector-Scalar (VSX) instructions\n\
--me300                  generate code for PowerPC e300 family\n\
--me500, -me500x2        generate code for Motorola e500 core complex\n\
--me500mc,               generate code for Freescale e500mc core complex\n\
--me500mc64,             generate code for Freescale e500mc64 core complex\n\
--me5500,                generate code for Freescale e5500 core complex\n\
--me6500,                generate code for Freescale e6500 core complex\n\
--mspe                   generate code for Motorola SPE instructions\n\
--mspe2                  generate code for Freescale SPE2 instructions\n\
--mvle                   generate code for Freescale VLE instructions\n\
--mtitan                 generate code for AppliedMicro Titan core complex\n\
--mregnames              Allow symbolic names for registers\n\
+-maltivec               generate code for AltiVec\n"));
+  fprintf (stream, _("\
+-mvsx                   generate code for Vector-Scalar (VSX) instructions\n"));
+  fprintf (stream, _("\
+-me300                  generate code for PowerPC e300 family\n"));
+  fprintf (stream, _("\
+-me500, -me500x2        generate code for Motorola e500 core complex\n"));
+  fprintf (stream, _("\
+-me500mc,               generate code for Freescale e500mc core complex\n"));
+  fprintf (stream, _("\
+-me500mc64,             generate code for Freescale e500mc64 core complex\n"));
+  fprintf (stream, _("\
+-me5500,                generate code for Freescale e5500 core complex\n"));
+  fprintf (stream, _("\
+-me6500,                generate code for Freescale e6500 core complex\n"));
+  fprintf (stream, _("\
+-mspe                   generate code for Motorola SPE instructions\n"));
+  fprintf (stream, _("\
+-mspe2                  generate code for Freescale SPE2 instructions\n"));
+  fprintf (stream, _("\
+-mvle                   generate code for Freescale VLE instructions\n"));
+  fprintf (stream, _("\
+-mtitan                 generate code for AppliedMicro Titan core complex\n"));
+  fprintf (stream, _("\
+-mregnames              Allow symbolic names for registers\n"));
+  fprintf (stream, _("\
 -mno-regnames           Do not allow symbolic names for registers\n"));
 #ifdef OBJ_ELF
   fprintf (stream, _("\
--mrelocatable           support for GCC's -mrelocatble option\n\
--mrelocatable-lib       support for GCC's -mrelocatble-lib option\n\
--memb                   set PPC_EMB bit in ELF flags\n\
+-mrelocatable           support for GCC's -mrelocatble option\n"));
+  fprintf (stream, _("\
+-mrelocatable-lib       support for GCC's -mrelocatble-lib option\n"));
+  fprintf (stream, _("\
+-memb                   set PPC_EMB bit in ELF flags\n"));
+  fprintf (stream, _("\
 -mlittle, -mlittle-endian, -le\n\
-                        generate code for a little endian machine\n\
+                        generate code for a little endian machine\n"));
+  fprintf (stream, _("\
 -mbig, -mbig-endian, -be\n\
-                        generate code for a big endian machine\n\
--msolaris               generate code for Solaris\n\
--mno-solaris            do not generate code for Solaris\n\
--K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n\
--V                      print assembler version number\n\
+                        generate code for a big endian machine\n"));
+  fprintf (stream, _("\
+-msolaris               generate code for Solaris\n"));
+  fprintf (stream, _("\
+-mno-solaris            do not generate code for Solaris\n"));
+  fprintf (stream, _("\
+-K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n"));
+  fprintf (stream, _("\
+-V                      print assembler version number\n"));
+  fprintf (stream, _("\
 -Qy, -Qn                ignored\n"));
 #endif
   fprintf (stream, _("\
--nops=count             when aligning, more than COUNT nops uses a branch\n\
+-nops=count             when aligning, more than COUNT nops uses a branch\n"));
+  fprintf (stream, _("\
 -ppc476-workaround      warn if emitting data to code sections\n"));
 }
 

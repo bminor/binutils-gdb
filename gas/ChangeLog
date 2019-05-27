@@ -1,3 +1,11 @@
+2019-05-27  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (is_ppc64_target): New function.
+	(md_show_usage): Split up usage message.  Don't show -a64 when
+	unsupported.
+	testsuite/gas/ppc/ppc.exp (supports_ppc64): New.
+	(prefix-reloc): Only run for ppc64.
+
 2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-aarch64.c (aarch64_elf_copy_symbol_attributes): Define.
