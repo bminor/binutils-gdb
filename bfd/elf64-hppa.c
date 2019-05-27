@@ -2011,7 +2011,7 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 	 in the output_offset of the PLT section.  */
 
       bfd_put_64 (splt->owner, value, splt->contents + hh->plt_offset);
-      value = _bfd_get_gp_value (splt->output_section->owner);
+      value = _bfd_get_gp_value (info->output_bfd);
       bfd_put_64 (splt->owner, value, splt->contents + hh->plt_offset + 0x8);
 
       /* Create a dynamic IPLT relocation for this entry.
@@ -2027,7 +2027,7 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 
       loc = spltrel->contents;
       loc += spltrel->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (splt->output_section->owner, &rel, loc);
+      bfd_elf64_swap_reloca_out (info->output_bfd, &rel, loc);
     }
 
   /* Initialize an external call stub entry if requested.  */
@@ -2143,7 +2143,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
       bfd_put_64 (sopd->owner, value, sopd->contents + hh->opd_offset + 16);
 
       /* The last word is our local __gp value.  */
-      value = _bfd_get_gp_value (sopd->output_section->owner);
+      value = _bfd_get_gp_value (info->output_bfd);
       bfd_put_64 (sopd->owner, value, sopd->contents + hh->opd_offset + 24);
     }
 
@@ -2220,7 +2220,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 
       loc = sopdrel->contents;
       loc += sopdrel->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (sopd->output_section->owner, &rel, loc);
+      bfd_elf64_swap_reloca_out (info->output_bfd, &rel, loc);
     }
   return TRUE;
 }
@@ -2315,7 +2315,7 @@ elf64_hppa_finalize_dlt (struct elf_link_hash_entry *eh, void *data)
 
       loc = sdltrel->contents;
       loc += sdltrel->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (sdlt->output_section->owner, &rel, loc);
+      bfd_elf64_swap_reloca_out (info->output_bfd, &rel, loc);
     }
   return TRUE;
 }
@@ -2431,8 +2431,7 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	  loc = hppa_info->other_rel_sec->contents;
 	  loc += (hppa_info->other_rel_sec->reloc_count++
 		  * sizeof (Elf64_External_Rela));
-	  bfd_elf64_swap_reloca_out (hppa_info->other_rel_sec->output_section->owner,
-				     &rel, loc);
+	  bfd_elf64_swap_reloca_out (info->output_bfd, &rel, loc);
 	}
     }
 
@@ -3381,8 +3380,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 				(hppa_info->opd_sec->contents + off + 16));
 
 		    /* The last word is our local __gp value.  */
-		    value = _bfd_get_gp_value
-			      (hppa_info->opd_sec->output_section->owner);
+		    value = _bfd_get_gp_value (info->output_bfd);
 		    bfd_put_64 (hppa_info->opd_sec->owner, value,
 				(hppa_info->opd_sec->contents + off + 24));
 		  }
@@ -3591,8 +3589,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 			 + hh->opd_offset + 16));
 
 	    /* The last word is our local __gp value.  */
-	    value = _bfd_get_gp_value
-		      (hppa_info->opd_sec->output_section->owner);
+	    value = _bfd_get_gp_value (info->output_bfd);
 	    bfd_put_64 (hppa_info->opd_sec->owner, value,
 			hppa_info->opd_sec->contents + hh->opd_offset + 24);
 
@@ -3718,8 +3715,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 			    (hppa_info->opd_sec->contents + off + 16));
 
 		/* The last word is our local __gp value.  */
-		value = _bfd_get_gp_value
-			  (hppa_info->opd_sec->output_section->owner);
+		value = _bfd_get_gp_value (info->output_bfd);
 		bfd_put_64 (hppa_info->opd_sec->owner, value,
 			    hppa_info->opd_sec->contents + off + 24);
 	      }

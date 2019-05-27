@@ -1,6 +1,14 @@
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596
+	* elf64-hppa.c (elf64_hppa_finalize_dynreloc): Get the output bfd
+	from bfd_link_info, not an output section owner.
+	(elf64_hppa_finish_dynamic_symbol, elf64_hppa_finalize_opd): Likewise.
+	(elf_hppa_final_link_relocate): Likewise.
+
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
 	* aout-tic30.c (MY_bfd_final_link): Don't segfault on missing
 	create_object_symbols_section, obj_textsec, obj_datasec or
 	obj_bsssec.  Fix other errors in placement.
