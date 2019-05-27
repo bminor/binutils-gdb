@@ -1,3 +1,8 @@
+2019-05-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
+	* linker.c (_bfd_generic_link_output_symbols): Heed BSF_KEEP.
+
 2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_merge_symbol_attribute): New function.

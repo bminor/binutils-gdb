@@ -45,7 +45,9 @@ gld${EMULATION_NAME}_after_open (void)
 	  if ((sec->flags & (SEC_GROUP | SEC_LINKER_CREATED)) == SEC_GROUP)
 	    {
 	      struct bfd_elf_section_data *sec_data = elf_section_data (sec);
-	      elf_group_id (sec) = syms[sec_data->this_hdr.sh_info - 1];
+	      struct bfd_symbol *sym = syms[sec_data->this_hdr.sh_info - 1];
+	      elf_group_id (sec) = sym;
+	      sym->flags |= BSF_KEEP;
 	    }
 }
 

@@ -2112,12 +2112,11 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	    }
 	}
 
-      /* This switch is straight from the old code in
-	 write_file_locals in ldsym.c.  */
-      if (info->strip == strip_all
-	  || (info->strip == strip_some
-	      && bfd_hash_lookup (info->keep_hash, bfd_asymbol_name (sym),
-				  FALSE, FALSE) == NULL))
+      if ((sym->flags & BSF_KEEP) == 0
+	  && (info->strip == strip_all
+	      || (info->strip == strip_some
+		  && bfd_hash_lookup (info->keep_hash, bfd_asymbol_name (sym),
+				      FALSE, FALSE) == NULL)))
 	output = FALSE;
       else if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE)) != 0)
 	{
@@ -2131,6 +2130,8 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	  else
 	    output = FALSE;
 	}
+      else if ((sym->flags & BSF_KEEP) != 0)
+	output = TRUE;
       else if (bfd_is_ind_section (sym->section))
 	output = FALSE;
       else if ((sym->flags & BSF_DEBUGGING) != 0)
