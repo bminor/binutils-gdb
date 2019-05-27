@@ -1,6 +1,14 @@
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596
+	* aout-tic30.c (MY_bfd_final_link): Don't segfault on missing
+	create_object_symbols_section, obj_textsec, obj_datasec or
+	obj_bsssec.  Fix other errors in placement.
+	* config.bfd: Obsolete tic30-aout.
+
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
 	* dwarf2.c (save_section_vma, section_vma_same): Check for NULL
 	end of section list as well as section_count.
 	* xcofflink.c (xcoff_link_add_symbols): Fix temporarily changed
