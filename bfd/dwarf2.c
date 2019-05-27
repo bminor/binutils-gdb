@@ -4272,7 +4272,9 @@ save_section_vma (const bfd *abfd, struct dwarf2_debug *stash)
   if (stash->sec_vma == NULL)
     return FALSE;
   stash->sec_vma_count = abfd->section_count;
-  for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
+  for (i = 0, s = abfd->sections;
+       s != NULL && i < abfd->section_count;
+       i++, s = s->next)
     {
       if (s->output_section != NULL)
 	stash->sec_vma[i] = s->output_section->vma + s->output_offset;
@@ -4301,7 +4303,9 @@ section_vma_same (const bfd *abfd, const struct dwarf2_debug *stash)
   if (abfd->section_count != stash->sec_vma_count)
     return FALSE;
 
-  for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
+  for (i = 0, s = abfd->sections;
+       s != NULL && i < abfd->section_count;
+       i++, s = s->next)
     {
       bfd_vma vma;
 

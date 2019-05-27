@@ -1,3 +1,11 @@
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
+	* dwarf2.c (save_section_vma, section_vma_same): Check for NULL
+	end of section list as well as section_count.
+	* xcofflink.c (xcoff_link_add_symbols): Fix temporarily changed
+	section list before returning error.
+
 2019-05-27  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (bfd_elf_set_group_contents): Exit on zero size section.

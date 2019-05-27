@@ -1882,7 +1882,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       if (EXTERN_SYM_P (sym.n_sclass))
 	{
-	  bfd_boolean copy;
+	  bfd_boolean copy, ok;
 	  flagword flags;
 
 	  BFD_ASSERT (section != NULL);
@@ -2022,12 +2022,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  BFD_ASSERT (last_real->next == first_csect);
 	  last_real->next = NULL;
 	  flags = (sym.n_sclass == C_EXT ? BSF_GLOBAL : BSF_WEAK);
-	  if (! (_bfd_generic_link_add_one_symbol
-		 (info, abfd, name, flags, section, value,
-		  NULL, copy, TRUE,
-		  (struct bfd_link_hash_entry **) sym_hash)))
-	    goto error_return;
+	  ok = (_bfd_generic_link_add_one_symbol
+		(info, abfd, name, flags, section, value, NULL, copy, TRUE,
+		 (struct bfd_link_hash_entry **) sym_hash));
 	  last_real->next = first_csect;
+	  if (!ok)
+	    goto error_return;
 
 	  if (smtyp == XTY_CM)
 	    {
