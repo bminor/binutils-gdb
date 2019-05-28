@@ -1,6 +1,13 @@
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596
+	* elf32-lm32.c (lm32_elf_finish_dynamic_sections): Don't segfault
+	on NULL output_section.
+	* elflink.c (elf_final_link_free): Don't free -1 symshndxbuf.
+
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
 	* elf32-m68k.c (elf_m68k_get_got_entry): Don't create a new
 	entry when MUST_FIND.  Abort when MUST_FIND not found.
 	(elf_m68k_get_bfd2got_entry): Likewise.
