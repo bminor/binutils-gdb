@@ -4724,7 +4724,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 		  if (r_type == R_ALPHA_GOTDTPREL)
 		    value -= dtp_base;
-		  else if (!bfd_link_pic (info))
+		  else if (bfd_link_executable (info))
 		    value -= tp_base;
 		  else
 		    {
