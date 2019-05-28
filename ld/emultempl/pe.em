@@ -1360,7 +1360,8 @@ gld_${EMULATION_NAME}_after_open (void)
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
 
-  if (coff_data (link_info.output_bfd) == NULL
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_coff_flavour
+      || coff_data (link_info.output_bfd) == NULL
       || coff_data (link_info.output_bfd)->pe == 0)
     einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'\n"),
 	   link_info.output_bfd);

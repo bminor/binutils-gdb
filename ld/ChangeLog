@@ -1,3 +1,10 @@
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Check that
+	the output is coff before accessing coff tdata.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_open): Likewise.
+
 2019-05-28  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* testsuite/ld-aarch64/variant_pcs-now.d: Use --hash-style=sysv.
