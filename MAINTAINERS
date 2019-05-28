@@ -14,7 +14,7 @@ Makefile.*; configure; configure.ac; src-release
 		gdb-patches@sourceware.org
 
 bfd/; binutils/; elfcpp/; gas/; gold/; gprof/; ld/; opcodes/; cpu/;
-BFD's part of include/
+libctf/; BFD's and libctf's parts of include/
 
 	binutils: http://sourceware.org/binutils/
 	Patches to binutils@sourceware.org.

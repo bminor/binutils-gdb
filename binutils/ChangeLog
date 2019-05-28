@@ -1,5 +1,9 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* MAINTAINERS: Add myself as CTF maintainer.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (ctf-api.h): New include.
 	(dump_ctf_section_info): New variable.
 	(dump_ctf_section_name): Likewise.

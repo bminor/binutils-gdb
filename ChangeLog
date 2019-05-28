@@ -1,5 +1,9 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* MAINTAINERS: Add libctf.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* Makefile.def (host_modules): Add libctf.
 	* Makefile.def (dependencies): Likewise.
 	libctf depends on zlib, libiberty, and bfd.
