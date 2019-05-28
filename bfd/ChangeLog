@@ -1,6 +1,12 @@
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Don't
+	attempt to set sh_entsize for excluded PLT section.
+
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
 	* elf64-alpha.c (elf64_alpha_relocate_section): Don't attempt
 	to emit R_ALPHA_GOTTPREL in PIEs, for which no space is
 	allocated in alpha_dynamic_entries_for_reloc.

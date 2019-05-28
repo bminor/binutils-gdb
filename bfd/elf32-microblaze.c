@@ -3455,9 +3455,10 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
 	  memset (splt->contents, 0, PLT_ENTRY_SIZE);
 	  bfd_put_32 (output_bfd, (bfd_vma) 0x80000000 /* nop.  */,
 		      splt->contents + splt->size - 4);
-	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
+	  if (splt->output_section != bfd_abs_section_ptr)
+	    elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
+	}
     }
 
   /* Set the first entry in the global offset table to the address of
