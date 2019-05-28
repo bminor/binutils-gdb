@@ -1,6 +1,12 @@
 2019-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24596
+	* cofflink.c (coff_link_check_archive_element): Don't assume
+	element is a coff object file after calling add_archive_element.
+
+2019-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24596
 	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Don't
 	attempt to set sh_entsize for excluded PLT section.
 

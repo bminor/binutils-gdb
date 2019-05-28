@@ -221,7 +221,7 @@ coff_link_check_archive_element (bfd *abfd,
     return TRUE;
   *pneeded = TRUE;
 
-  return coff_link_add_object_symbols (abfd, info);
+  return bfd_link_add_symbols (abfd, info);
 }
 
 /* Add all the symbols from an object file to the hash table.  */
