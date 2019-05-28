@@ -1,5 +1,10 @@
 2019-05-29  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/complete.exp (test_gdb_no_completion): Add "/" and "-"
+	to "break complete ada" test case's regexp.
+
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
 	PR c++/20020:
 	* gdb.cp/constexpr-field.exp: New file.
 	* gdb.cp/constexpr-field.cc: New file.
