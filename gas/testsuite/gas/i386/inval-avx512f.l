@@ -211,6 +211,8 @@
 .*:304: Error: .*masking.*vscatterpf1dps.*
 .*:305: Error: .*masking.*vscatterpf1qpd.*
 .*:306: Error: .*masking.*vscatterpf1qps.*
+.*:308: Error: .*unsupported broadcast for `vdpbf16ps'
+.*:309: Error: .*unsupported broadcast for `vcvtne2ps2bf16'
 GAS LISTING .*
 
 
@@ -546,3 +548,6 @@ GAS LISTING .*
 [ 	]*304[ 	]+vscatterpf1dps \(%eax,%zmm1\)\{%k1\}\{z\}
 [ 	]*305[ 	]+vscatterpf1qpd \(%eax,%zmm1\)\{%k1\}\{z\}
 [ 	]*306[ 	]+vscatterpf1qps \(%eax,%zmm1\)\{%k1\}\{z\}
+[ 	]*307[ 	]*
+[ 	]*308[ 	]+vdpbf16ps 8\(%eax\)\{1to8\}, %zmm2, %zmm2
+[ 	]*309[ 	]+vcvtne2ps2bf16 8\(%eax\)\{1to8\}, %zmm2, %zmm2

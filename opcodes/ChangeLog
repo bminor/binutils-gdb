@@ -1,3 +1,10 @@
+2019-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24625
+	* i386-opc.tbl: Add CheckRegSize to AVX512_BF16 instructions with
+	Disp8ShiftVL.
+	* i386-tbl.h: Regenerated.
+
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

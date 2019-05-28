@@ -304,3 +304,6 @@ _start:
 	vscatterpf1dps (%eax,%zmm1){%k1}{z}
 	vscatterpf1qpd (%eax,%zmm1){%k1}{z}
 	vscatterpf1qps (%eax,%zmm1){%k1}{z}
+
+	vdpbf16ps 8(%eax){1to8}, %zmm2, %zmm2
+	vcvtne2ps2bf16 8(%eax){1to8}, %zmm2, %zmm2

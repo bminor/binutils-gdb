@@ -56,3 +56,7 @@ _start:
 	vaddps zmm2{z}, zmm1, zmm0
 
 	vcvtps2qq xmm0, DWORD PTR [rax]
+
+	.att_syntax prefix
+	vdpbf16ps 8(%rax){1to8}, %zmm2, %zmm2
+	vcvtne2ps2bf16 8(%rax){1to8}, %zmm2, %zmm2
