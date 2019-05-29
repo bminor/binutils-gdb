@@ -1,3 +1,11 @@
+2019-05-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1708192
+	Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1715008
+	* dwarf2read.c (dwarf_decode_macro_bytes): Move check to see if
+	'body' is NULL to the outter 'if', protecting the '!is_define'
+	situation as well.
+
 2019-05-29  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2read.c (partial_die_parent_scope): Call dwarf_tag_name.
