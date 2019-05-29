@@ -23,6 +23,11 @@ procedure Vla is
       I3 : Integer;
    end record;
 
+   -- Some versions of GCC emit the members in the incorrect order.
+   -- Since this isn't relevant to the bug at hand, disable
+   -- reordering to get consistent results.
+   pragma No_Component_Reordering (Record_Type);
+
    procedure Process (R : Record_Type) is
    begin
       null;

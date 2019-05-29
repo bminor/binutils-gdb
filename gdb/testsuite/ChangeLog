@@ -1,3 +1,10 @@
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/24539:
+	* gdb.ada/vla.exp: Update tests.
+	* gdb.ada/vla/vla.adb (Record_Type): Use No_Component_Reordering
+	pragma.
+
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/settings.exp (test-integer): Test junk after
