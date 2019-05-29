@@ -636,6 +636,7 @@ LTLIBOBJS
 LIBOBJS
 EMULATION_VECTOR
 EMULATION
+LIBCTF
 OBJDUMP_PRIVATE_OFILES
 OBJDUMP_DEFS
 BUILD_INSTALL_MISC
@@ -11523,7 +11524,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11526 "configure"
+#line 11527 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11629,7 +11630,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11632 "configure"
+#line 11633 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15082,6 +15083,64 @@ do
     fi
 done
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libctf support" >&5
+$as_echo_n "checking for libctf support... " >&6; }
+case "${target}" in
+  *-*-pe | *-*-*vms* | *-*-darwin | *-*-*coff* | *-*-wince | *-*-mingw*)
+    if ${bu_cv_libctf_support+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  bu_cv_libctf_support=no
+fi
+
+    ;;
+  *-*-aout | *-*-osf* | *-*-go32 | *-*-macos* | *-*-rhapsody*)
+    if ${bu_cv_libctf_support+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  bu_cv_libctf_support=no
+fi
+
+    ;;
+  *-*-netbsdpe | *-*-cygwin* | *-*-pep | *-*-msdos | *-*-winnt)
+    if ${bu_cv_libctf_support+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  bu_cv_libctf_support=no
+fi
+
+    ;;
+  ns32k-*-* | pdp11-*-* | *-*-aix* | *-*-netbsdaout)
+    if ${bu_cv_libctf_support+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  bu_cv_libctf_support=no
+fi
+
+    ;;
+  *)
+    if ${bu_cv_libctf_support+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  bu_cv_libctf_support=yes
+fi
+
+  ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $bu_cv_libctf_support" >&5
+$as_echo "$bu_cv_libctf_support" >&6; }
+if test $bu_cv_libctf_support = yes; then
+
+$as_echo "#define HAVE_LIBCTF 1" >>confdefs.h
+
+fi
+LIBCTF=
+if test $bu_cv_libctf_support = yes; then
+  LIBCTF=../libctf/libctf.a
+fi
+
+
 # Uniq objdump private vector, build objdump target ofiles.
 od_files=
 f=""
@@ -15127,6 +15186,7 @@ if test "${with_windmc+set}" = set; then
 fi
 
 OBJDUMP_DEFS="${OBJDUMP_DEFS} -DOBJDUMP_PRIVATE_VECTORS=\"${OBJDUMP_PRIVATE_VECTORS}\""
+
 
 
 

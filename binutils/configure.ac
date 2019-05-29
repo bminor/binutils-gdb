@@ -393,6 +393,35 @@ changequote([,])dnl
     fi
 done
 
+
+AC_MSG_CHECKING([for libctf support])
+case "${target}" in
+  *-*-pe | *-*-*vms* | *-*-darwin | *-*-*coff* | *-*-wince | *-*-mingw*)
+    AC_CACHE_VAL(bu_cv_libctf_support, bu_cv_libctf_support=no)
+    ;;
+  *-*-aout | *-*-osf* | *-*-go32 | *-*-macos* | *-*-rhapsody*)
+    AC_CACHE_VAL(bu_cv_libctf_support, bu_cv_libctf_support=no)
+    ;;
+  *-*-netbsdpe | *-*-cygwin* | *-*-pep | *-*-msdos | *-*-winnt)
+    AC_CACHE_VAL(bu_cv_libctf_support, bu_cv_libctf_support=no)
+    ;;
+  ns32k-*-* | pdp11-*-* | *-*-aix* | *-*-netbsdaout)
+    AC_CACHE_VAL(bu_cv_libctf_support, bu_cv_libctf_support=no)
+    ;;
+  *)
+    AC_CACHE_VAL(bu_cv_libctf_support, bu_cv_libctf_support=yes)
+  ;;      
+esac
+AC_MSG_RESULT($bu_cv_libctf_support)
+if test $bu_cv_libctf_support = yes; then
+  AC_DEFINE(HAVE_LIBCTF, 1, [Is libctf available?])
+fi
+LIBCTF=
+if test $bu_cv_libctf_support = yes; then
+  LIBCTF=../libctf/libctf.a
+fi
+
+
 # Uniq objdump private vector, build objdump target ofiles.
 od_files=
 f=""
@@ -449,6 +478,7 @@ AC_SUBST(BUILD_MISC)
 AC_SUBST(BUILD_INSTALL_MISC)
 AC_SUBST(OBJDUMP_DEFS)
 AC_SUBST(OBJDUMP_PRIVATE_OFILES)
+AC_SUBST(LIBCTF)
 
 AC_DEFINE_UNQUOTED(TARGET, "${target}", [Configured target name.])
 

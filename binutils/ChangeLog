@@ -1,3 +1,16 @@
+2019-05-29  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (LIBCTF): Export.  Set to empty for non-ELF based
+	targets.
+	(HAVE_LIBCTF): Define if libctf support is available.
+	* Makefile.am (LIBCTF): Set value to @LIBCTF@.
+	* objdump.c: Make CTF code conditional upon HAVE_LIBCTF being
+	defined.
+	* readelf.c: Likewise.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* MAINTAINERS: Add myself as CTF maintainer.
