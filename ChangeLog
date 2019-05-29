@@ -1,5 +1,10 @@
 2019-05-29  Nick Clifton  <nickc@redhat.com>
 
+	* src-release.sh (do_proto_toplev): Add libctf to list of
+	directories that can be disabled.
+
+2019-05-29  Nick Clifton  <nickc@redhat.com>
+
 	Import this patch from gcc mainline:
 	2018-10-28  Iain Buclaw  <ibuclaw@gdcproject.org>
 

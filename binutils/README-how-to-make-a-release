@@ -30,7 +30,7 @@ How to perform a release.
      the NEWS files in gas, ld, gold and binutils.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, opcodes and toplevel.
+     elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
 

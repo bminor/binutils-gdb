@@ -1,5 +1,10 @@
 2019-05-29  Nick Clifton  <nickc@redhat.com>
 
+	* README-how-to-make-a-release: Add libctf to list of directories
+	that need updates in their ChangeLogs.
+
+2019-05-29  Nick Clifton  <nickc@redhat.com>
+
 	* configure.ac (LIBCTF): Export.  Set to empty for non-ELF based
 	targets.
 	(HAVE_LIBCTF): Define if libctf support is available.
