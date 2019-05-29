@@ -197,6 +197,7 @@ SFILES = \
 	$(srcdir)/arch/arm-get-next-pcs.c \
 	$(srcdir)/arch/arm-linux.c \
 	$(srcdir)/arch/ppc-linux-common.c \
+	$(srcdir)/../alloc.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/buffer.c \
 	$(srcdir)/common/cleanups.c \
@@ -238,6 +239,7 @@ SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = \
+	alloc.o \
 	ax.o \
 	common/agent.o \
 	common/btrace-common.o \
@@ -414,6 +416,7 @@ gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY)
 		$(LIBIBERTY)
 
 IPA_OBJS = \
+	alloc-ipa.o \
 	ax-ipa.o \
 	common/common-utils-ipa.o \
 	common/errors-ipa.o \
@@ -569,6 +572,10 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
+alloc-ipa.o: ../alloc.c
+	$(IPAGENT_COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
+	$(POSTCOMPILE)
+
 # Rules for objects that go in the in-process agent.
 
 arch/%-ipa.o: ../arch/%.c
@@ -621,6 +628,10 @@ common/%.o: ../common/%.c
 	$(POSTCOMPILE)
 
 %.o: ../target/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ../%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

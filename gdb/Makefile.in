@@ -924,6 +924,7 @@ COMMON_SFILES = \
 	ada-varobj.c \
 	addrmap.c \
 	agent.c \
+	alloc.c \
 	annotate.c \
 	arch-utils.c \
 	auto-load.c \

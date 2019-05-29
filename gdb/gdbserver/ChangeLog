@@ -1,3 +1,11 @@
+2019-06-11  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (SFILES): Add alloc.c.
+	(OBS): Add alloc.o.
+	(IPA_OBJS): Add alloc-ipa.o.
+	(alloc-ipa.o): New target.
+	(%.o: ../%.c): New pattern rule.
+
 2019-06-10  Tom Tromey  <tromey@adacore.com>
 
 	* remote-utils.c (look_up_one_symbol, relocate_instruction): Don't

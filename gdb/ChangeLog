@@ -1,5 +1,12 @@
 2019-06-11  Tom Tromey  <tom@tromey.com>
 
+	* common/common-utils.c (xmalloc, xrealloc, xcalloc)
+	(xmalloc_failed): Move to alloc.c.
+	* alloc.c: New file.
+	* Makefile.in (COMMON_SFILES): Add alloc.c.
+
+2019-06-11  Tom Tromey  <tom@tromey.com>
+
 	* nat/linux-waitpid.c: Don't include server.h.
 	(linux_debug): Remove.
 	(my_waitpid): Update.
