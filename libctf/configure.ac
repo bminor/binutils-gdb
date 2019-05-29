@@ -55,6 +55,37 @@ AM_MAINTAINER_MODE
 ACX_PROG_CC_WARNING_OPTS([-Wall], [ac_libctf_warn_cflags])
 
 AC_FUNC_MMAP
+AC_SEARCH_LIBS(dlopen, dl)
+
+# Similar to GDB_AC_CHECK_BFD.
+OLD_CFLAGS=$CFLAGS
+OLD_LDFLAGS=$LDFLAGS
+OLD_LIBS=$LIBS
+# Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
+# points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
+# always want our bfd.
+CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
+ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
+LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+LIBS="-lbfd -liberty -lz $intl $LIBS"
+AC_CACHE_CHECK([for ELF support in BFD], ac_cv_libctf_bfd_elf,
+[AC_TRY_LINK([#include <stdlib.h>
+	     #include "bfd.h"
+	     #include "elf-bfd.h"],
+	    [(void) bfd_section_from_elf_index (NULL, 0);
+	     return 0;],
+	    [ac_cv_libctf_bfd_elf=yes],
+	    [ac_cv_libctf_bfd_elf=no])])
+CFLAGS=$OLD_CFLAGS
+LDFLAGS=$OLD_LDFLAGS
+LIBS=$OLD_LIBS
+
+if test $ac_cv_libctf_bfd_elf = yes; then
+  AC_DEFINE([HAVE_BFD_ELF], 1,
+	    [Whether libbfd was configured for an ELF target.])
+fi
+
 AC_CHECK_HEADERS(byteswap.h)
 AC_CHECK_FUNCS(pread)
 

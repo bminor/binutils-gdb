@@ -1,5 +1,11 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* Makefile.def (dependencies): configure-libctf depends on all-bfd
+	and all its deps.
+	* Makefile.in: Regenerated.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* MAINTAINERS: Add libctf.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
