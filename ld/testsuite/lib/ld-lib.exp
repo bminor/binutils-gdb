@@ -1113,6 +1113,7 @@ proc uses_genelf { } {
 	 || [istarget "msp430-*-*"]
 	 || [istarget "mt-*-*"]
 	 || [istarget "pj*-*-*"]
+	 || [istarget "s12z-*-*"]
 	 || [istarget "xgate-*-*"] } {
 	return 1
     }

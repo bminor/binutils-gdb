@@ -1,5 +1,10 @@
 2019-05-30  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/binutils-common.exp (supports_gnu_unique): Add
+	s12z to targets not supporting this feature.
+
+2019-05-30  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/binutils-common.exp (run_dump_test): Support
 	tcl procedures for xfail args.
 

@@ -1,5 +1,12 @@
 2019-05-30  Alan Modra  <amodra@gmail.com>
 
+	PR 24596
+	* emulparams/m9s12zelf.sh (TEMPLATE_NAME): Set to generic.
+	(EXTRA_EM_FILE): Define to genelf.
+	* testsuite/lib/ld-lib.exp (uses_genelf): Add s12z.
+
+2019-05-30  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Support procedure
 	calls in optional "xfail" args.
 	(run_ld_link_exec_tests): Likewise.
