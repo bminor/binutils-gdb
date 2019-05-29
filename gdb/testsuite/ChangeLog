@@ -1,5 +1,11 @@
 2019-05-29  Tom Tromey  <tromey@adacore.com>
 
+	PR c++/20020:
+	* gdb.cp/constexpr-field.exp: New file.
+	* gdb.cp/constexpr-field.cc: New file.
+
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.base/finish.exp (finish_no_print): New proc.
 	(finish_tests): Call it.
 

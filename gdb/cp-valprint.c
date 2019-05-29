@@ -329,22 +329,20 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  struct value *v = NULL;
-
 		  try
 		    {
-		      v = value_static_field (type, i);
-		    }
+		      struct value *v = value_static_field (type, i);
 
+		      cp_print_static_field (TYPE_FIELD_TYPE (type, i),
+					     v, stream, recurse + 1,
+					     options);
+		    }
 		  catch (const gdb_exception_error &ex)
 		    {
 		      fprintf_filtered (stream,
 					_("<error reading variable: %s>"),
 					ex.what ());
 		    }
-
-		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
-					 v, stream, recurse + 1, opts);
 		}
 	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
