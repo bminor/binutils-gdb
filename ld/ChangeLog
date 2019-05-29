@@ -1,3 +1,66 @@
+2019-05-30  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Support procedure
+	calls in optional "xfail" args.
+	(run_ld_link_exec_tests): Likewise.
+	(is_generic): New.
+	(uses_genelf): Rename from is_generic_elf.  Delete bogus semicolons.
+	* testsuite/ld-scripts/align.exp: Rename is_generic_elf call.
+	* testsuite/ld-elf/elf.exp: Use is_generic and uses_genelf.  Delete
+	xfail_implib var.
+	* testsuite/ld-elf/sec64k.exp: Use is_generic.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-discard/extern.d: Use is_generic in xfail.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/attributes.d: Likewise.
+	* testsuite/ld-elf/group1.d: Likewise.
+	* testsuite/ld-elf/group3b.d: Likewise.
+	* testsuite/ld-elf/group8a.d: Likewise.
+	* testsuite/ld-elf/group8b.d: Likewise.
+	* testsuite/ld-elf/group9a.d: Likewise.
+	* testsuite/ld-elf/group9b.d: Likewise.
+	* testsuite/ld-elf/linkonce2.d: Likewise.
+	* testsuite/ld-elf/merge2.d: Likewise.
+	* testsuite/ld-elf/merge3.d: Likewise.
+	* testsuite/ld-elf/pr12851.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr17550c.d: Likewise.
+	* testsuite/ld-elf/pr17550d.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr22677.d: Likewise.
+	* testsuite/ld-elf/pr22836-1a.d: Likewise.
+	* testsuite/ld-elf/pr22836-1b.d: Likewise.
+	* testsuite/ld-elf/warn3.d: Likewise.
+	* testsuite/ld-elf/warn1.d: Likewise and xfail sparc solaris
+	targets rather than notarget.
+	* testsuite/ld-elf/compressed1d.d: Use uses_genelf in xfail.
+	* testsuite/ld-elf/orphan-10.d: Likewise.
+	* testsuite/ld-elf/orphan-9.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.d: Likewise.
+	* testsuite/ld-elf/orphan3.d: Likewise.
+	* testsuite/ld-elf/pr20528a.d: Likewise.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+	* testsuite/ld-elf/pr23658-1a.d: Likewise.
+	* testsuite/ld-elf/pr23658-1b.d: Likewise.
+	* testsuite/ld-elf/pr349.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise and xfail sparc solaris
+	targets rather than notarget.
+	* testsuite/ld-elf/merge.d: Correct ms1-*-* to mt-*-*.
+
 2019-05-28  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* testsuite/ld-mips-elf/undefweak-overflow.s: Remove test case

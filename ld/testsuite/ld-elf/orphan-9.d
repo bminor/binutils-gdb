@@ -1,8 +1,7 @@
 #source: orphan-9.s
 #ld: -N -T orphan-9.ld
 #objdump: -h
-#xfail: d30v-* dlx-* fr30-* frv-*-elf ft32-* iq2000-*
-#xfail: mn10200-* moxie-* ms1-* msp430-* mt-* pj-* xgate-*
+#xfail: [uses_genelf]
 
 #...
   . \.text         0+(08|10)  [0-9a-f]+  0+200 .*

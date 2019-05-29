@@ -29,19 +29,15 @@ if ![is_elf_format] {
 
 # Targets using _bfd_generic_final_link don't sort section symbols
 # before local symbols, so don't bother testing them.
-if { [istarget "d30v-*-*"]
-     || [istarget "dlx-*-*"]
-     || [istarget "pj*-*-*"] } {
+if { [is_generic] } {
     return
 }
 
-# ft32, h8300, ip2k, m68hc11, m68hc12 and xgate run out of address space.
+# ft32, h8300, ip2k, m68hc11 and m68hc12 run out of address space.
 if {[istarget "ft32-*-*"]
     || [istarget "h8300-*-*"]
     || [istarget "ip2k-*-*"]
-    || [istarget "m68hc1*-*"]
-    || [istarget "s12z-*"]
-    || [istarget "xgate-*"] } {
+    || [istarget "m68hc1*-*"] } {
     return
 }
 

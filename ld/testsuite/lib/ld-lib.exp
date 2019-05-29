@@ -479,7 +479,10 @@ proc run_ld_link_tests { ldtests args } {
 	}
 
 	foreach target $args {
-	    setup_xfail $target
+	    if [match_target $target] {
+		setup_xfail "*-*-*"
+		break
+	    }
 	}
 
 	set ld_options [lindex $testitem 1]
@@ -672,9 +675,6 @@ proc run_ld_link_exec_tests { ldtests args } {
     }
 
     foreach testitem $ldtests {
-	foreach target $args {
-	    setup_xfail $target
-	}
 	set testname [lindex $testitem 0]
 	set ld_options [lindex $testitem 1]
 	set as_options [lindex $testitem 2]
@@ -691,6 +691,13 @@ proc run_ld_link_exec_tests { ldtests args } {
 	if { ![check_compiler_available] } {
 	    unsupported $testname
 	    continue
+	}
+
+	foreach target $args {
+	    if [match_target $target] {
+		setup_xfail "*-*-*"
+		break
+	    }
 	}
 
 #	verbose -log "Testname is $testname"
@@ -1081,8 +1088,20 @@ proc check_gc_sections_available { } {
     return $gc_sections_available_saved
 }
 
-# Return true if target uses genelf.em (assuming it is ELF).
-proc is_generic_elf { } {
+# Return true if target uses the generic_link_hash_table linker.
+proc is_generic { } {
+    if { [istarget "d30v-*-*"]
+	 || [istarget "dlx-*-*"]
+	 || [istarget "pj*-*-*"]
+	 || [istarget "s12z-*-*"]
+	 || [istarget "xgate-*-*"] } {
+	return 1
+    }
+    return 0
+}
+
+# Return true if target uses genelf.em.
+proc uses_genelf { } {
     if { [istarget "d30v-*-*"]
 	 || [istarget "dlx-*-*"]
 	 || [istarget "fr30-*-*"]
@@ -1095,9 +1114,9 @@ proc is_generic_elf { } {
 	 || [istarget "mt-*-*"]
 	 || [istarget "pj*-*-*"]
 	 || [istarget "xgate-*-*"] } {
-	return 1;
+	return 1
     }
-    return 0;
+    return 0
 }
 
 proc is_underscore_target { } {

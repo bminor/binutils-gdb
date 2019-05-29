@@ -6,8 +6,8 @@
 #source: orphan3f.s
 #ld:
 #readelf: -S --wide
-#xfail: d30v-*-* dlx-*-* fr30-*-* frv-*-elf ft32-*-* iq2000-*-*
-#xfail: mn10200-*-* msp430-*-* mt-*-* pj-*-* xgate-*-* xstormy16-*-*
+#xfail: [uses_genelf]
+#xfail: xstormy16-*-*
 
 #...
   \[[ 0-9]+\] \.foo +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +0+20 +0+ +A +0 +0 +[0-9]+

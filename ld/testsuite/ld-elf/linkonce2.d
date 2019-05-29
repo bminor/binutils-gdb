@@ -2,7 +2,7 @@
 #source: linkonce1b.s
 #ld: -emit-relocs
 #objdump: -r
-#xfail: d30v-*-* dlx-*-* pj*-*-* xgate-*-*
+#xfail: [is_generic]
 # generic elf targets don't emit relocs
 
 .*:     file format .*

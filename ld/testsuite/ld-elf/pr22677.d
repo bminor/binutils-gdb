@@ -2,8 +2,7 @@
 #readelf: -S --wide
 # generic linker targets don't support --gc-sections, nor do a bunch of
 # others.
-#xfail: d30v-*-* dlx-*-* hppa64-*-*
-#xfail: mep-*-* mn10200-*-* pj*-*-* pru-*-* xgate-*-*
+#xfail: [is_generic] hppa64-*-* mep-*-* mn10200-*-* pru-*-*
 
 #...
   \[[ 0-9]+\] \.preinit_array\.01000[ \t]+PREINIT_ARRAY[ \t0-9a-f]+WA?.*

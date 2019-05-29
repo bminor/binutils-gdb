@@ -7,8 +7,8 @@
 #readelf: -l --wide
 # Since generic linker targets don't place SHT_NOTE sections as orphan,
 # SHT_NOTE sections aren't grouped nor sorted.
-#xfail: d30v-* dlx-* fr30-* frv-*-elf ft32-* iq2000-*
-#xfail: m68hc12-* mn10200-* moxie-* mt-* msp430-* pj-* xgate-*
+#xfail: [uses_genelf]
+#xfail: m68hc12-*
 # The following targets don't support --build-id.
 #xfail: cr16-* crx-* visium-* xc16x-*
 # The following targets place .note.gnu.build-id in unusual places.

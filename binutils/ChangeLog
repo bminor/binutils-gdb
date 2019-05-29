@@ -1,3 +1,8 @@
+2019-05-30  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (run_dump_test): Support
+	tcl procedures for xfail args.
+
 2019-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add libctf to list of directories

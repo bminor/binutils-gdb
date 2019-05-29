@@ -974,7 +974,10 @@ proc run_dump_test { name {extra_options {}} } {
 
     # Time to setup xfailures.
     foreach targ $opts(xfail) {
-	setup_xfail $targ
+	if [match_target $targ] {
+	    setup_xfail "*-*-*"
+	    break
+	}
     }
 
     foreach as_flags $as_final_flags {

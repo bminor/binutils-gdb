@@ -4,7 +4,7 @@
 #xfail: bfin-*-* cr16-*-* cris*-*-* crx-*-* d10v-*-* d30v-*-* dlx-*-*
 #xfail: fr30-*-* frv-*-* ft32-*-* h8300-*-* hppa*64*-*-* ip2k-*-* iq2000-*-*
 #xfail: lm32-*-* m68hc11-*-* mcore-*-* mep-*-* metag-*-* mn102*-*-* moxie-*-*
-#xfail: ms1-*-* nds32*-*-* nios2-*-* or32-*-* pj-*-* pru-*-* s12z-*-* score-*-*
+#xfail: mt-*-* nds32*-*-* nios2-*-* or32-*-* pj-*-* pru-*-* s12z-*-* score-*-*
 #xfail: tic6x-*-* vax-*-* xgate-*-* xstormy16-*-* xtensa*-*-*
 
 .*:     file format .*elf.*
