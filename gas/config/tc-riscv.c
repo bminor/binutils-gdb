@@ -1952,9 +1952,11 @@ branch:
 
 	    case 'u':		/* Upper 20 bits.  */
 	      p = percent_op_utype;
-	      if (!my_getSmallExpression (imm_expr, imm_reloc, s, p)
-		  && imm_expr->X_op == O_constant)
+	      if (!my_getSmallExpression (imm_expr, imm_reloc, s, p))
 		{
+		  if (imm_expr->X_op != O_constant)
+		    break;
+
 		  if (imm_expr->X_add_number < 0
 		      || imm_expr->X_add_number >= (signed)RISCV_BIGIMM_REACH)
 		    as_bad (_("lui expression not in range 0..1048575"));
@@ -1962,9 +1964,6 @@ branch:
 		  *imm_reloc = BFD_RELOC_RISCV_HI20;
 		  imm_expr->X_add_number <<= RISCV_IMM_BITS;
 		}
-	      /* The 'u' format specifier must be a symbol or a constant.  */
-	      if (imm_expr->X_op != O_symbol && imm_expr->X_op != O_constant)
-	        break;
 	      s = expr_end;
 	      continue;
 

@@ -1,3 +1,10 @@
+2019-05-30  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (riscv_ip) <'u'>: Move O_constant check inside if
+	statement.  Delete O_symbol and O_constant check after if statement.
+	* testsuite/gas/riscv/auipc-parsing.s: Test lui with missing %hi.
+	* testsuite/gas/riscv/auipc-parsing.l: Update.
+
 2019-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24625
