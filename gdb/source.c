@@ -987,7 +987,10 @@ find_and_open_source (const char *filename,
       result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
       if (result >= 0)
 	{
-	  *fullname = gdb_realpath (fullname->get ());
+	  if (basenames_may_differ)
+	    *fullname = gdb_realpath (fullname->get ());
+	  else
+	    *fullname = gdb_abspath (fullname->get ());
 	  return scoped_fd (result);
 	}
 
@@ -1031,15 +1034,16 @@ find_and_open_source (const char *filename,
   if (rewritten_filename != NULL)
     filename = rewritten_filename.get ();
 
-  result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
-		  OPEN_MODE, fullname);
+  openp_flags flags = OPF_SEARCH_IN_PATH;
+  if (basenames_may_differ)
+    flags |= OPF_RETURN_REALPATH;
+  result = openp (path, flags, filename, OPEN_MODE, fullname);
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename.  */
       p = lbasename (filename);
       if (p != filename)
-	result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, p,
-			OPEN_MODE, fullname);
+	result = openp (path, flags, p, OPEN_MODE, fullname);
     }
 
   return scoped_fd (result);

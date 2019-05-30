@@ -1,5 +1,9 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.base/annotate-symlink.exp: New file.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/set_wstr.exp: Add reassignment test.
 
 2019-06-14  Tom Tromey  <tromey@adacore.com>
