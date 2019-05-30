@@ -1622,6 +1622,13 @@ complete (const char *line, char const **word, int *quote_char)
   completion_tracker tracker_handle_completions;
   completion_tracker *tracker;
 
+  /* The WORD should be set to the end of word to complete.  We initialize
+     to the completion point which is assumed to be at the end of LINE.
+     This leaves WORD to be initialized to a sensible value in cases
+     completion_find_completion_word() fails i.e., throws an exception.
+     See bug 24587. */
+  *word = line + strlen (line);
+
   try
     {
       *word = completion_find_completion_word (tracker_handle_brkchars,

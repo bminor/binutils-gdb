@@ -1,3 +1,8 @@
+2019-05-30  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	PR cli/24587
+	* completer.c (complete): Initialize variable word.
+
 2019-05-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1708192
