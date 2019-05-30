@@ -11055,8 +11055,34 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
         if (noside == EVAL_SKIP)
           goto nosideret;
+	else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  {
+	    if (type_arg == NULL)
+	      type_arg = value_type (arg1);
 
-        if (type_arg == NULL)
+            if (ada_is_constrained_packed_array_type (type_arg))
+	      type_arg = decode_constrained_packed_array_type (type_arg);
+
+	    if (!discrete_type_p (type_arg))
+	      {
+		switch (op)
+		  {
+		  default:          /* Should never happen.  */
+		    error (_("unexpected attribute encountered"));
+		  case OP_ATR_FIRST:
+		  case OP_ATR_LAST:
+		    type_arg = ada_index_type (type_arg, tem,
+					       ada_attribute_name (op));
+		    break;
+		  case OP_ATR_LENGTH:
+		    type_arg = builtin_type (exp->gdbarch)->builtin_int;
+		    break;
+		  }
+	      }
+
+	    return value_zero (type_arg, not_lval);
+	  }
+        else if (type_arg == NULL)
           {
             arg1 = ada_coerce_ref (arg1);
 
@@ -11072,9 +11098,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		if (type == NULL)
 		  type = builtin_type (exp->gdbarch)->builtin_int;
 	      }
-
-            if (noside == EVAL_AVOID_SIDE_EFFECTS)
-              return allocate_value (type);
 
             switch (op)
               {
@@ -11132,9 +11155,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		if (type == NULL)
 		  type = builtin_type (exp->gdbarch)->builtin_int;
 	      }
-
-            if (noside == EVAL_AVOID_SIDE_EFFECTS)
-              return allocate_value (type);
 
             switch (op)
               {

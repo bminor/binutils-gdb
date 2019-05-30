@@ -1,3 +1,10 @@
+2019-06-19  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/length_cond.exp: New file.
+	* gdb.ada/length_cond/length_cond.adb: New file.
+	* gdb.ada/length_cond/pck.adb: New file.
+	* gdb.ada/length_cond/pck.ads: New file.
+
 2019-06-18  Tom de Vries  <tdevries@suse.de>
 
 	* boards/fission.exp (debug_flags): Add "-fuse-ld=gold".
