@@ -1,3 +1,8 @@
+2019-05-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 24627
+	* testsuite/ld-elf/ver_def.vd: Update expected output.
+
 2019-05-30  Alan Modra  <amodra@gmail.com>
 
 	PR 24596

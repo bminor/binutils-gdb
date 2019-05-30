@@ -1,3 +1,9 @@
+2019-05-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 24627
+	* readelf.c (process_version_sections): Add 0x prefix to address
+	display.  Correct indentation.
+
 2019-05-30  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (supports_gnu_unique): Add
