@@ -619,7 +619,7 @@ struct range_bounds
   struct dynamic_prop high;
 
   /* True if HIGH range bound contains the number of elements in the
-     subrange. This affects how the final hight bound is computed.  */
+     subrange.  This affects how the final high bound is computed.  */
 
   int flag_upper_bound_is_count : 1;
 
@@ -1369,7 +1369,8 @@ extern bool set_type_align (struct type *, ULONGEST);
   dynprop->kind
 
 
-/* Moto-specific stuff for FORTRAN arrays.  */
+/* Accessors for struct range_bounds data attached to an array type's
+   index type.  */
 
 #define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
    TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
