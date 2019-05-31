@@ -1869,6 +1869,42 @@ fputs_styled (const char *linebuffer, const ui_file_style &style,
     }
 }
 
+/* See utils.h.  */
+
+void
+fputs_highlighted (const char *str, const compiled_regex &highlight,
+		   struct ui_file *stream)
+{
+  regmatch_t pmatch;
+
+  while (*str && highlight.exec (str, 1, &pmatch, 0) == 0)
+    {
+      size_t n_highlight = pmatch.rm_eo - pmatch.rm_so;
+
+      /* Output the part before pmatch with current style.  */
+      while (pmatch.rm_so > 0)
+	{
+	  fputc_filtered (*str, stream);
+	  pmatch.rm_so--;
+	  str++;
+	}
+
+      /* Output pmatch with the highlight style.  */
+      set_output_style (stream, highlight_style.style ());
+      while (n_highlight > 0)
+	{
+	  fputc_filtered (*str, stream);
+	  n_highlight--;
+	  str++;
+	}
+      set_output_style (stream, ui_file_style ());
+    }
+
+  /* Output the trailing part of STR not matching HIGHLIGHT.  */
+  if (*str)
+    fputs_filtered (str, stream);
+}
+
 int
 putchar_unfiltered (int c)
 {

@@ -28,15 +28,20 @@ class cli_style_option
 public:
 
   /* Construct a CLI style option with a foreground color.  */
-  cli_style_option (ui_file_style::basic_color fg);
+  cli_style_option (const char *name, ui_file_style::basic_color fg);
+
+  /* Construct a CLI style option with an intensity.  */
+  cli_style_option (const char *name, ui_file_style::intensity i);
 
   /* Return a ui_file_style corresponding to the settings in this CLI
      style.  */
   ui_file_style style () const;
 
+  /* Return the style name.  */
+  const char *name () { return m_name; };
+
   /* Call once to register this CLI style with the CLI engine.  */
-  void add_setshow_commands (const char *name,
-			     enum command_class theclass,
+  void add_setshow_commands (enum command_class theclass,
 			     const char *prefix_doc,
 			     struct cmd_list_element **set_list,
 			     void (*do_set) (const char *args, int from_tty),
@@ -51,6 +56,9 @@ public:
   struct cmd_list_element *show_list () { return m_show_list; };
 
 private:
+
+  /* The style name.  */
+  const char *m_name;
 
   /* The foreground.  */
   const char *m_foreground;
@@ -92,6 +100,13 @@ extern cli_style_option variable_name_style;
 
 /* The address style.  */
 extern cli_style_option address_style;
+
+/* The highlight style.  */
+extern cli_style_option highlight_style;
+
+/* The title style.  */
+extern cli_style_option title_style;
+
 
 /* True if source styling is enabled.  */
 extern int source_styling;

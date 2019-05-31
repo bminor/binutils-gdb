@@ -1,3 +1,18 @@
+2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-style.h (cli_style_option): Add name in constructor,
+	add m_name class member, add constructor with intensity,
+	add name class function.
+	(cli_style_option::add_setshow_commands): Remove name argument.
+	(highlight_style, title_style): New styles.
+	* cli/cli-style.c (do_show): New function that shows a style
+	characteristic styling the style name with itself.
+	(set_style_name): New function.
+	(STYLE_ADD_SETSHOW_COMMANDS): Remove NAME arguments.
+	Update all callers according to the changes in cli/cli-style.h.
+	* utils.h (fputs_highlighted): New function.
+	* utils.c (fputs_highlighted): Likewise.
+
 2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention new pipe command and new convenience variables.
