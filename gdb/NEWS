@@ -34,6 +34,9 @@
 
 * GDB can now be compiled with Python 3 on Windows.
 
+* New convenience variable $_ada_exception holds the address of the
+  Ada exception being thrown.  This is set by Ada-related catchpoints.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a

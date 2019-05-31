@@ -1,3 +1,7 @@
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/catch_ex_std.exp: Add $_ada_exception test.
+
 2019-10-02  Pedro Alves  <palves@redhat.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

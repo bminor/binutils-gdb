@@ -4788,9 +4788,16 @@ called @code{Constraint_Error} is defined in package @code{Pck}, then
 the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
 
+@vindex $_ada_exception@r{, convenience variable}
+The convenience variable @code{$_ada_exception} holds the address of
+the exception being thrown.  This can be useful when setting a
+condition for such a catchpoint.
+
 @item exception unhandled
 @kindex catch exception unhandled
-An exception that was raised but is not handled by the program.
+An exception that was raised but is not handled by the program.  The
+convenience variable @code{$_ada_exception} is set as for @code{catch
+exception}.
 
 @item handlers @r{[}@var{name}@r{]}
 @kindex catch handlers
@@ -4812,9 +4819,13 @@ user-defined one.  For instance, assuming an exception called
 command to use to catch such exceptions handling is
 @kbd{catch handlers Pck.Constraint_Error}.
 
+The convenience variable @code{$_ada_exception} is set as for
+@code{catch exception}.
+
 @item assert
 @kindex catch assert
-A failed Ada assertion.
+A failed Ada assertion.  Note that the convenience variable
+@code{$_ada_exception} is @emph{not} set by this catchpoint.
 
 @item exec
 @kindex catch exec
@@ -11822,6 +11833,11 @@ The program has exited
 @item $_exception
 The variable @code{$_exception} is set to the exception object being
 thrown at an exception-related catchpoint.  @xref{Set Catchpoints}.
+
+@item $_ada_exception
+The variable @code{$_ada_exception} is set to the address of the
+exception being caught or thrown at an Ada exception-related
+catchpoint.  @xref{Set Catchpoints}.
 
 @item $_probe_argc
 @itemx $_probe_arg0@dots{}$_probe_arg11

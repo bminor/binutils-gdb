@@ -1,3 +1,8 @@
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints, Convenience Vars): Document
+	$_ada_exception.
+
 2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* doc/gdb.texinfo (Remote Configuration): Remove documentation for
