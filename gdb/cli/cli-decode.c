@@ -23,6 +23,7 @@
 #include "ui-out.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-style.h"
 #include "common/gdb_optional.h"
 
 /* Prototypes for local functions.  */
@@ -937,14 +938,42 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 					&cmdlist, suppress_notification);
 }
 
+/* If VERBOSE, print the full help for command C and highlight the
+   documentation parts matching HIGHLIGHT,
+   otherwise print only one-line help for command C.  */
+
+static void
+print_doc_of_command (struct cmd_list_element *c, const char *prefix,
+		      bool verbose, compiled_regex &highlight,
+		      struct ui_file *stream)
+{
+  /* When printing the full documentation, add a line to separate
+     this documentation from the previous command help, in the likely
+     case that apropos finds several commands.  */
+  if (verbose)
+    fputs_filtered ("\n", stream);
+
+  fprintf_styled (stream, title_style.style (),
+		  "%s%s", prefix, c->name);
+  fputs_filtered (" -- ", stream);
+  if (verbose)
+    fputs_highlighted (c->doc, highlight, stream);
+  else
+    print_doc_line (stream, c->doc);
+  fputs_filtered ("\n", stream);
+}
+
 /* Recursively walk the commandlist structures, and print out the
    documentation of commands that match our regex in either their
    name, or their documentation.
+   If VERBOSE, prints the complete documentation and highlight the
+   documentation parts matching REGEX, otherwise prints only
+   the first line.
 */
-void 
-apropos_cmd (struct ui_file *stream, 
+void
+apropos_cmd (struct ui_file *stream,
 	     struct cmd_list_element *commandlist,
-	     compiled_regex &regex, const char *prefix)
+	     bool verbose, compiled_regex &regex, const char *prefix)
 {
   struct cmd_list_element *c;
   int returnvalue;
@@ -960,10 +989,7 @@ apropos_cmd (struct ui_file *stream,
 	  /* Try to match against the name.  */
 	  returnvalue = regex.search (c->name, name_len, 0, name_len, NULL);
 	  if (returnvalue >= 0)
-	    {
-	      print_help_for_command (c, prefix, 
-				      0 /* don't recurse */, stream);
-	    }
+	    print_doc_of_command (c, prefix, verbose, regex, stream);
 	}
       if (c->doc != NULL && returnvalue < 0)
 	{
@@ -971,10 +997,7 @@ apropos_cmd (struct ui_file *stream,
 
 	  /* Try to match against documentation.  */
 	  if (regex.search (c->doc, doc_len, 0, doc_len, NULL) >= 0)
-	    {
-	      print_help_for_command (c, prefix, 
-				      0 /* don't recurse */, stream);
-	    }
+	    print_doc_of_command (c, prefix, verbose, regex, stream);
 	}
       /* Check if this command has subcommands and is not an
 	 abbreviation.  We skip listing subcommands of abbreviations
@@ -983,7 +1006,7 @@ apropos_cmd (struct ui_file *stream,
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  apropos_cmd (stream,*c->prefixlist,regex,c->prefixname);
+	  apropos_cmd (stream, *c->prefixlist, verbose, regex, c->prefixname);
 	}
     }
 }
@@ -1126,6 +1149,9 @@ Type \"help all\" for the list of all commands.");
   fputs_filtered ("documentation.\n", stream);
   fputs_filtered ("Type \"apropos word\" to search "
 		  "for commands related to \"word\".\n", stream);
+  fputs_filtered ("Type \"apropos -v word\" for full documentation", stream);
+  wrap_here ("");
+  fputs_filtered (" of commands related to \"word\".\n", stream);
   fputs_filtered ("Command name abbreviations are allowed if unambiguous.\n",
 		  stream);
 }
@@ -1212,10 +1238,12 @@ static void
 print_help_for_command (struct cmd_list_element *c, const char *prefix,
 			int recurse, struct ui_file *stream)
 {
-  fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
+  fprintf_styled (stream, title_style.style (),
+		  "%s%s", prefix, c->name);
+  fputs_filtered (" -- ", stream);
   print_doc_line (stream, c->doc);
   fputs_filtered ("\n", stream);
-  
+
   if (recurse
       && c->prefixlist != 0
       && c->abbrev_flag == 0)

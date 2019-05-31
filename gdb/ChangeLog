@@ -1,5 +1,16 @@
 2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-decode.h (apropos_cmd): Add verbose argument.
+	* cli/cli-decode.c (apropos_cmd): Likewise.  Use print_doc_of_command
+	instead of print_help_for_command.
+	(print_doc_of_command): New function.
+	(help_list): Add 'apropos -v word' suggestion.
+	(print_help_for_command): Style the command name using title style.
+	* cli/cli-cmds.c (apropos_command): Parse optional -v flag.
+	(_initialize_cli_cmds): Describe -v in apropos_command help.
+
+2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-style.h (cli_style_option): Add name in constructor,
 	add m_name class member, add constructor with intensity,
 	add name class function.

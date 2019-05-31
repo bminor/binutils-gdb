@@ -1376,16 +1376,21 @@ show_user (const char *args, int from_tty)
 /* Search through names of commands and documentations for a certain
    regular expression.  */
 
-static void 
-apropos_command (const char *searchstr, int from_tty)
+static void
+apropos_command (const char *arg, int from_tty)
 {
-  if (searchstr == NULL)
+  bool verbose = arg && check_for_argument (&arg, "-v", 2);
+
+  if (verbose)
+    arg = skip_spaces (arg);
+
+  if (arg == NULL || *arg == '\0')
     error (_("REGEXP string is empty"));
 
-  compiled_regex pattern (searchstr, REG_ICASE,
+  compiled_regex pattern (arg, REG_ICASE,
 			  _("Error in regular expression"));
 
-  apropos_cmd (gdb_stdout, cmdlist, pattern, "");
+  apropos_cmd (gdb_stdout, cmdlist, verbose, pattern, "");
 }
 
 /* Subroutine of alias_command to simplify it.
@@ -1981,8 +1986,11 @@ Run the ``make'' program using the rest of the line as arguments."));
 Show definitions of non-python/scheme user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands."), &showlist);
-  add_com ("apropos", class_support, apropos_command,
-	   _("Search for commands matching a REGEXP"));
+  add_com ("apropos", class_support, apropos_command, _("\
+Search for commands matching a REGEXP\n\
+Usage: apropos [-v] REGEXP\n\
+Flag -v indicates to produce a verbose output, showing full documentation\n\
+of the matching commands."));
 
   add_setshow_uinteger_cmd ("max-user-call-depth", no_class,
 			   &max_user_call_depth, _("\
