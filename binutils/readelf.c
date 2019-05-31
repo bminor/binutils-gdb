@@ -13829,11 +13829,8 @@ static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
   buf->cts_name = SECTION_NAME (shdr);
-  buf->cts_type = shdr->sh_type;
-  buf->cts_flags = shdr->sh_flags;
   buf->cts_size = shdr->sh_size;
   buf->cts_entsize = shdr->sh_entsize;
-  buf->cts_offset = (off64_t) shdr->sh_offset;
 
   return buf;
 }

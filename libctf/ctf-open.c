@@ -503,7 +503,7 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
 	case CTF_K_UNION:
 	case CTF_K_ENUM:
 	case CTF_K_UNKNOWN:
-	  if (size <= CTF_MAX_SIZE)
+	  if ((size_t) size <= CTF_MAX_SIZE)
 	    t2p->ctt_size = size;
 	  else
 	    {
@@ -1170,10 +1170,7 @@ ctf_file_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
   ctf_sect_t *strsectp = NULL;
 
   skeleton.cts_name = _CTF_SECTION;
-  skeleton.cts_type = SHT_PROGBITS;
-  skeleton.cts_flags = 0;
   skeleton.cts_entsize = 1;
-  skeleton.cts_offset = 0;
 
   if (ctfsect)
     {
@@ -1317,7 +1314,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (hp.cth_flags & CTF_F_COMPRESS)
     {
-      size_t srclen, dstlen;
+      size_t srclen;
+      uLongf dstlen;
       const void *src;
       int rc = Z_OK;
 
@@ -1339,7 +1337,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  return (ctf_set_open_errno (errp, ECTF_DECOMPRESS));
 	}
 
-      if (dstlen != size)
+      if ((size_t) dstlen != size)
 	{
 	  ctf_dprintf ("zlib inflate short -- got %lu of %lu "
 		       "bytes\n", (unsigned long) dstlen, (unsigned long) size);
@@ -1678,12 +1676,15 @@ ctf_getmodel (ctf_file_t *fp)
   return fp->ctf_dmodel->ctd_code;
 }
 
+/* The caller can hang an arbitrary pointer off each ctf_file_t using this
+   function.  */
 void
 ctf_setspecific (ctf_file_t *fp, void *data)
 {
   fp->ctf_specific = data;
 }
 
+/* Retrieve the arbitrary pointer again.  */
 void *
 ctf_getspecific (ctf_file_t *fp)
 {

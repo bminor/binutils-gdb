@@ -21,11 +21,18 @@ ACLOCAL_AMFLAGS = -I .. -I ../config
 
 AUTOMAKE_OPTIONS = foreign no-texinfo.tex
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
+
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(top_srcdir) -I$(top_srcdir)/../include -I$(top_srcdir)/../bfd -I../bfd
-AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@
+AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
 
 noinst_LIBRARIES = libctf.a
 
 libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
 		   ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c ctf-open-bfd.c \
 		   ctf-subr.c ctf-types.c ctf-util.c
+libctf_a_LIBADD = $(LIBOBJS)

@@ -43,7 +43,7 @@ ctf_label_topmost (ctf_file_t *fp)
   const char *s;
   uint32_t num_labels = 0;
 
-  if (extract_label_info (fp, &ctlp, &num_labels) == CTF_ERR)
+  if (extract_label_info (fp, &ctlp, &num_labels) < 0)
     return NULL;				/* errno is set for us.  */
 
   if (num_labels == 0)
@@ -70,8 +70,8 @@ ctf_label_iter (ctf_file_t *fp, ctf_label_f *func, void *arg)
   const char *lname;
   int rc;
 
-  if (extract_label_info (fp, &ctlp, &num_labels) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+  if (extract_label_info (fp, &ctlp, &num_labels) < 0)
+    return -1;			/* errno is set for us.  */
 
   if (num_labels == 0)
     return (ctf_set_errno (fp, ECTF_NOLABELDATA));
@@ -128,7 +128,7 @@ ctf_label_info (ctf_file_t *fp, const char *lname, ctf_lblinfo_t *linfo)
   cb_arg.lca_name = lname;
   cb_arg.lca_info = linfo;
 
-  if ((rc = ctf_label_iter (fp, label_info_cb, &cb_arg)) == CTF_ERR)
+  if ((rc = ctf_label_iter (fp, label_info_cb, &cb_arg)) < 0)
     return rc;
 
   if (rc != 1)

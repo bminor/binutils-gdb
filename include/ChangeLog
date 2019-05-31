@@ -1,3 +1,10 @@
+2019-05-29  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_sect_t): Drop cts_type, cts_flags, and cts_offset.
+	(ctf_id_t): This is now an unsigned type.
+	(CTF_ERR): Cast it to ctf_id_t.  Note that it should only be used
+	for ctf_id_t-returning functions.
+
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_dump_decorate_f): New.

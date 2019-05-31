@@ -1,3 +1,70 @@
+2019-05-29  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.am (ZLIB): New.
+	(ZLIBINC): Likewise.
+	(AM_CFLAGS): Use them.
+	(libctf_a_LIBADD): New, for LIBOBJS.
+	* configure.ac: Check for zlib, endian.h, and qsort_r.
+	* ctf-endian.h: New, providing htole64 and le64toh.
+	* swap.h: Code style fixes.
+	(bswap_identity_64): New.
+	* qsort_r.c: New, from gnulib (with one added #include).
+	* ctf-decls.h: New, providing a conditional qsort_r declaration,
+	and unconditional definitions of MIN and MAX.
+	* ctf-impl.h: Use it.  Do not use <sys/errno.h>.
+	(ctf_set_errno): Now returns unsigned long.
+	* ctf-util.c (ctf_set_errno): Adjust here too.
+	* ctf-archive.c: Use ctf-endian.h.
+	(ctf_arc_open_by_offset): Use memset, not bzero.  Drop cts_type,
+	cts_flags and cts_offset.
+	(ctf_arc_write): Drop debugging dependent on the size of off_t.
+	* ctf-create.c: Provide a definition of roundup if not defined.
+	(ctf_create): Drop cts_type, cts_flags and cts_offset.
+	(ctf_add_reftype): Do not check if type IDs are below zero.
+	(ctf_add_slice): Likewise.
+	(ctf_add_typedef): Likewise.
+	(ctf_add_member_offset): Cast error-returning ssize_t's to size_t
+	when known error-free.  Drop CTF_ERR usage for functions returning
+	int.
+	(ctf_add_member_encoded): Drop CTF_ERR usage for functions returning
+	int.
+	(ctf_add_variable): Likewise.
+	(enumcmp): Likewise.
+	(enumadd): Likewise.
+	(membcmp): Likewise.
+	(ctf_add_type): Likewise.  Cast error-returning ssize_t's to size_t
+	when known error-free.
+	* ctf-dump.c (ctf_is_slice): Drop CTF_ERR usage for functions
+	returning int: use CTF_ERR for functions returning ctf_type_id.
+	(ctf_dump_label): Likewise.
+	(ctf_dump_objts): Likewise.
+	* ctf-labels.c (ctf_label_topmost): Likewise.
+	(ctf_label_iter): Likewise.
+	(ctf_label_info): Likewise.
+	* ctf-lookup.c (ctf_func_args): Likewise.
+	* ctf-open.c (upgrade_types): Cast to size_t where appropriate.
+	(ctf_bufopen): Likewise.  Use zlib types as needed.
+	* ctf-types.c (ctf_member_iter): Drop CTF_ERR usage for functions
+	returning int.
+	(ctf_enum_iter): Likewise.
+	(ctf_type_size): Likewise.
+	(ctf_type_align): Likewise.  Cast to size_t where appropriate.
+	(ctf_type_kind_unsliced): Likewise.
+	(ctf_type_kind): Likewise.
+	(ctf_type_encoding): Likewise.
+	(ctf_member_info): Likewise.
+	(ctf_array_info): Likewise.
+	(ctf_enum_value): Likewise.
+	(ctf_type_rvisit): Likewise.
+	* ctf-open-bfd.c (ctf_bfdopen): Drop cts_type, cts_flags and
+	cts_offset.
+	(ctf_simple_open): Likewise.
+	(ctf_bfdopen_ctfsect): Likewise.  Set cts_size properly.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* config.h: Likewise.
+	* configure: Likewise.
+
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.in: Check for bfd_section_from_elf_index.

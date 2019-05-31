@@ -88,7 +88,7 @@ ctf_is_slice (ctf_file_t *fp, ctf_id_t id, ctf_encoding_t *enc)
   return (((kind == CTF_K_INTEGER) || (kind == CTF_K_ENUM)
 	   || (kind == CTF_K_FLOAT))
 	  && ctf_type_reference (fp, id) != CTF_ERR
-	  && ctf_type_encoding (fp, id, enc) != CTF_ERR);
+	  && ctf_type_encoding (fp, id, enc) == 0);
 }
 
 /* Return a dump for a single type, without member info: but do show the
@@ -168,7 +168,7 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
   if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type)) == NULL)
     {
       free (str);
-      return CTF_ERR;			/* errno is set for us.  */
+      return -1;			/* errno is set for us.  */
     }
 
   str = ctf_str_append (str, typestr);
@@ -194,14 +194,14 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
       const char *sym_name;
       ctf_id_t type;
 
-      if ((type = ctf_lookup_by_symbol (state->cds_fp, i)) < 0)
+      if ((type = ctf_lookup_by_symbol (state->cds_fp, i)) == CTF_ERR)
 	switch (ctf_errno (state->cds_fp))
 	  {
 	    /* Most errors are just an indication that this symbol is not a data
 	       symbol, but this one indicates that we were called wrong, on a
 	       CTF file with no associated symbol table.  */
 	  case ECTF_NOSYMTAB:
-	    return CTF_ERR;
+	    return -1;
 	  case ECTF_NOTDATA:
 	  case ECTF_NOTYPEDAT:
 	    continue;
@@ -224,7 +224,7 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
       if ((typestr = ctf_dump_format_type (state->cds_fp, type)) == NULL)
 	{
 	  free (str);
-	  return CTF_ERR;		/* errno is set for us.  */
+	  return -1;			/* errno is set for us.  */
 	}
 
       str = ctf_str_append (str, typestr);
@@ -253,14 +253,14 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
       size_t j;
       ctf_id_t *args;
 
-      if ((type = ctf_func_info (state->cds_fp, i, &fi)) < 0)
+      if ((type = ctf_func_info (state->cds_fp, i, &fi)) == CTF_ERR)
 	switch (ctf_errno (state->cds_fp))
 	  {
 	    /* Most errors are just an indication that this symbol is not a data
 	       symbol, but this one indicates that we were called wrong, on a
 	       CTF file with no associated symbol table.  */
 	  case ECTF_NOSYMTAB:
-	    return CTF_ERR;
+	    return -1;
 	  case ECTF_NOTDATA:
 	  case ECTF_NOTYPEDAT:
 	    continue;
@@ -321,7 +321,7 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
     err:
       free (args);
       free (str);
-      return CTF_ERR;		/* errno is set for us.  */
+      return -1;		/* errno is set for us.  */
     }
   return 0;
 }
@@ -340,7 +340,7 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
   if ((typestr = ctf_dump_format_type (state->cds_fp, type)) == NULL)
     {
       free (str);
-      return CTF_ERR;			/* errno is set for us.  */
+      return -1;			/* errno is set for us.  */
     }
 
   str = ctf_str_append (str, typestr);
@@ -426,7 +426,7 @@ ctf_dump_type (ctf_id_t id, void *arg)
 
  err:
   free (str);
-  return CTF_ERR;			/* errno is set for us.  */
+  return -1;				/* errno is set for us.  */
 }
 
 /* Dump the string table into the cds_items.  */

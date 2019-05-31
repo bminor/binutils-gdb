@@ -3240,10 +3240,7 @@ make_ctfsect (const char *name, bfd_byte *data,
   ctf_sect_t ctfsect;
 
   ctfsect.cts_name = name;
-  ctfsect.cts_type = SHT_PROGBITS;
-  ctfsect.cts_flags = 0;
   ctfsect.cts_entsize = 1;
-  ctfsect.cts_offset = 0;
   ctfsect.cts_size = size;
   ctfsect.cts_data = data;
 

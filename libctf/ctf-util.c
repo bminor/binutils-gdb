@@ -166,9 +166,9 @@ ctf_set_open_errno (int *errp, int error)
 }
 
 /* Store the specified error code into the CTF container, and then return
-   CTF_ERR for the benefit of the caller. */
+   CTF_ERR / -1 for the benefit of the caller. */
 
-long
+unsigned long
 ctf_set_errno (ctf_file_t * fp, int err)
 {
   fp->ctf_errno = err;

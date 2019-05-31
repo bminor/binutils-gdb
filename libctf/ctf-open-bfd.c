@@ -97,10 +97,7 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
     }
 
   ctfsect.cts_name = _CTF_SECTION;
-  ctfsect.cts_type = SHT_PROGBITS;
-  ctfsect.cts_flags = 0;
   ctfsect.cts_entsize = 1;
-  ctfsect.cts_offset = 0;
   ctfsect.cts_size = bfd_section_size (abfd, ctf_asect);
   ctfsect.cts_data = contents;
 
@@ -158,10 +155,8 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 	    }
 	  strsect.cts_data = contents;
 	  strsect.cts_name = (char *) strsect.cts_data + strhdr->sh_name;
-	  strsect.cts_type = strhdr->sh_type;
-	  strsect.cts_flags = strhdr->sh_flags;
+	  strsect.cts_size = bfd_section_size (abfd, str_asect);
 	  strsect.cts_entsize = strhdr->sh_size;
-	  strsect.cts_offset = strhdr->sh_offset;
 	  strsectp = &strsect;
 
 	  if (!bfd_malloc_and_get_section (abfd, sym_asect, &contents))
@@ -172,11 +167,9 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 	    }
 
 	  symsect.cts_name = (char *) strsect.cts_data + symhdr->sh_name;
-	  symsect.cts_type = symhdr->sh_type;
-	  symsect.cts_flags = symhdr->sh_flags;
 	  symsect.cts_entsize = symhdr->sh_size;
+	  symsect.cts_size = bfd_section_size (abfd, sym_asect);
 	  symsect.cts_data = contents;
-	  symsect.cts_offset = symhdr->sh_offset;
 	  symsectp = &symsect;
 	}
     }

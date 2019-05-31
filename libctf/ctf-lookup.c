@@ -412,8 +412,8 @@ ctf_func_args (ctf_file_t * fp, unsigned long symidx, uint32_t argc,
   const uint32_t *dp;
   ctf_funcinfo_t f;
 
-  if (ctf_func_info (fp, symidx, &f) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+  if (ctf_func_info (fp, symidx, &f) < 0)
+    return -1;			/* errno is set for us.  */
 
   /* The argument data is two uint32_t's past the translation table
      offset: one for the function info, and one for the return type. */

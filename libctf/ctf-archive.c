@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <elf.h>
-#include <endian.h>
+#include "ctf-endian.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -150,7 +150,6 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
       strcpy (&nametbl[namesz], names[i]);
 
       off = arc_write_one_ctf (ctf_files[i], fd, threshold);
-      ctf_dprintf ("Written %s, offset now %zi\n", names[i], off);
       if ((off < 0) && (off > -ECTF_BASE))
 	{
 	  errmsg = "ctf_arc_write(): Cannot determine file "
@@ -512,16 +511,13 @@ ctf_arc_open_by_offset (const struct ctf_archive *arc,
 
   ctf_dprintf ("ctf_arc_open_by_offset(%zi): opening\n", offset);
 
-  bzero (&ctfsect, sizeof (ctf_sect_t));
+  memset (&ctfsect, 0, sizeof (ctf_sect_t));
 
   offset += le64toh (arc->ctfa_ctfs);
 
   ctfsect.cts_name = _CTF_SECTION;
-  ctfsect.cts_type = SHT_PROGBITS;
-  ctfsect.cts_flags = SHF_ALLOC;
   ctfsect.cts_size = le64toh (*((uint64_t *) ((char *) arc + offset)));
   ctfsect.cts_entsize = 1;
-  ctfsect.cts_offset = 0;
   ctfsect.cts_data = (void *) ((char *) arc + offset + sizeof (uint64_t));
   fp = ctf_bufopen (&ctfsect, symsect, strsect, errp);
   if (fp)

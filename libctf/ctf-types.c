@@ -47,10 +47,10 @@ ctf_member_iter (ctf_file_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
   int rc;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   (void) ctf_get_ctt_size (fp, tp, &size, &increment);
   kind = LCTF_INFO_KIND (fp, tp->ctt_info);
@@ -102,10 +102,10 @@ ctf_enum_iter (ctf_file_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
   int rc;
 
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
     return (ctf_set_errno (ofp, ECTF_NOTENUM));
@@ -406,8 +406,8 @@ ctf_type_size (ctf_file_t *fp, ctf_id_t type)
       if ((size = ctf_get_ctt_size (fp, tp, NULL, NULL)) > 0)
 	return size;
 
-      if (ctf_array_info (fp, type, &ar) == CTF_ERR
-	  || (size = ctf_type_size (fp, ar.ctr_contents)) == CTF_ERR)
+      if (ctf_array_info (fp, type, &ar) < 0
+	  || (size = ctf_type_size (fp, ar.ctr_contents)) < 0)
 	return -1;		/* errno is set for us.  */
 
       return size * ar.ctr_nelems;
@@ -445,7 +445,7 @@ ctf_type_align (ctf_file_t *fp, ctf_id_t type)
     case CTF_K_ARRAY:
       {
 	ctf_arinfo_t r;
-	if (ctf_array_info (fp, type, &r) == CTF_ERR)
+	if (ctf_array_info (fp, type, &r) < 0)
 	  return -1;		/* errno is set for us.  */
 	return (ctf_type_align (fp, r.ctr_contents));
       }
@@ -474,7 +474,7 @@ ctf_type_align (ctf_file_t *fp, ctf_id_t type)
 		for (; n != 0; n--, mp++)
 		  {
 		    ssize_t am = ctf_type_align (fp, mp->ctm_type);
-		    align = MAX (align, am);
+		    align = MAX (align, (size_t) am);
 		  }
 	      }
 	    else
@@ -483,7 +483,7 @@ ctf_type_align (ctf_file_t *fp, ctf_id_t type)
 		for (; n != 0; n--, lmp++)
 		  {
 		    ssize_t am = ctf_type_align (fp, lmp->ctlm_type);
-		    align = MAX (align, am);
+		    align = MAX (align, (size_t) am);
 		  }
 	      }
 	  }
@@ -495,7 +495,7 @@ ctf_type_align (ctf_file_t *fp, ctf_id_t type)
 		   dmd != NULL; dmd = ctf_list_next (dmd))
 		{
 		  ssize_t am = ctf_type_align (fp, dmd->dmd_type);
-		  align = MAX (align, am);
+		  align = MAX (align, (size_t) am);
 		  if (kind == CTF_K_STRUCT)
 		    break;
 		}
@@ -520,7 +520,7 @@ ctf_type_kind_unsliced (ctf_file_t *fp, ctf_id_t type)
   const ctf_type_t *tp;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   return (LCTF_INFO_KIND (fp, tp->ctt_info));
 }
@@ -533,13 +533,13 @@ ctf_type_kind (ctf_file_t *fp, ctf_id_t type)
 {
   int kind;
 
-  if ((kind = ctf_type_kind_unsliced (fp, type)) == CTF_ERR)
-    return CTF_ERR;
+  if ((kind = ctf_type_kind_unsliced (fp, type)) < 0)
+    return -1;
 
   if (kind == CTF_K_SLICE)
     {
       if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
-	return CTF_ERR;
+	return -1;
       kind = ctf_type_kind_unsliced (fp, type);
     }
 
@@ -624,7 +624,7 @@ ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
   uint32_t data;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
     {
@@ -790,10 +790,10 @@ ctf_member_info (ctf_file_t *fp, ctf_id_t type, const char *name,
   uint32_t kind, n;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   (void) ctf_get_ctt_size (fp, tp, &size, &increment);
   kind = LCTF_INFO_KIND (fp, tp->ctt_info);
@@ -847,7 +847,7 @@ ctf_array_info (ctf_file_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
   ssize_t increment;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ARRAY)
     return (ctf_set_errno (ofp, ECTF_NOTARRAY));
@@ -919,15 +919,15 @@ ctf_enum_value (ctf_file_t * fp, ctf_id_t type, const char *name, int *valp)
   uint32_t n;
 
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
     {
       (void) ctf_set_errno (ofp, ECTF_NOTENUM);
-      return CTF_ERR;
+      return -1;
     }
 
   (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
@@ -945,7 +945,7 @@ ctf_enum_value (ctf_file_t * fp, ctf_id_t type, const char *name, int *valp)
     }
 
   (void) ctf_set_errno (ofp, ECTF_NOENUMNAM);
-  return CTF_ERR;
+  return -1;
 }
 
 /* Recursively visit the members of any type.  This function is used as the
@@ -965,10 +965,10 @@ ctf_type_rvisit (ctf_file_t *fp, ctf_id_t type, ctf_visit_f *func,
   int rc;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((rc = func (name, otype, offset, depth, arg)) != 0)
     return rc;

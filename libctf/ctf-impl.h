@@ -21,7 +21,8 @@
 #define	_CTF_IMPL_H
 
 #include "config.h"
-#include <sys/errno.h>
+#include <errno.h>
+#include "ctf-decls.h"
 #include <ctf-api.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -339,7 +340,7 @@ extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
 extern struct ctf_archive *ctf_arc_bufopen (const void *, size_t, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern void *ctf_set_open_errno (int *, int);
-extern long ctf_set_errno (ctf_file_t *, int);
+extern unsigned long ctf_set_errno (ctf_file_t *, int);
 
 _libctf_malloc_
 extern void *ctf_data_alloc (size_t);

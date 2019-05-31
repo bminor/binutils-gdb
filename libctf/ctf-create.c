@@ -23,6 +23,10 @@
 #include <string.h>
 #include <zlib.h>
 
+#ifndef roundup
+#define roundup(x, y)  ((((x) + ((y) - 1)) / (y)) * (y))
+#endif
+
 /* To create an empty CTF container, we just declare a zeroed header and call
    ctf_bufopen() on it.  If ctf_bufopen succeeds, we mark the new container r/w
    and initialize the dynamic members.  We set dtvstrlen to 1 to reserve the
@@ -67,12 +71,9 @@ ctf_create (int *errp)
     }
 
   cts.cts_name = _CTF_SECTION;
-  cts.cts_type = SHT_PROGBITS;
-  cts.cts_flags = 0;
   cts.cts_data = &hdr;
   cts.cts_size = sizeof (hdr);
   cts.cts_entsize = 1;
-  cts.cts_offset = 0;
 
   if ((fp = ctf_bufopen (&cts, NULL, NULL, errp)) == NULL)
       goto err_dtbyname;
@@ -812,7 +813,7 @@ ctf_add_reftype (ctf_file_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   ctf_id_t type;
   ctf_file_t *tmp = fp;
 
-  if (ref == CTF_ERR || ref < 0 || ref > CTF_MAX_TYPE)
+  if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
   if (ctf_lookup_by_id (&tmp, ref) == NULL)
@@ -843,7 +844,7 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
   if ((ep->cte_bits > 255) || (ep->cte_offset > 255))
     return (ctf_set_errno (fp, ECTF_SLICEOVERFLOW));
 
-  if (ref == CTF_ERR || ref < 0 || ref > CTF_MAX_TYPE)
+  if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
   if ((tp = ctf_lookup_by_id (&tmp, ref)) == NULL)
@@ -1175,7 +1176,7 @@ ctf_add_typedef (ctf_file_t *fp, uint32_t flag, const char *name,
   ctf_id_t type;
   ctf_file_t *tmp = fp;
 
-  if (ref == CTF_ERR || ref < 0 || ref > CTF_MAX_TYPE)
+  if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
   if (ctf_lookup_by_id (&tmp, ref) == NULL)
@@ -1304,9 +1305,9 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 	}
     }
 
-  if ((msize = ctf_type_size (fp, type)) == CTF_ERR ||
-      (malign = ctf_type_align (fp, type)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+  if ((msize = ctf_type_size (fp, type)) < 0 ||
+      (malign = ctf_type_align (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
 
   if ((dmd = ctf_alloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
@@ -1334,9 +1335,9 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 	  ctf_encoding_t linfo;
 	  ssize_t lsize;
 
-	  if (ctf_type_encoding (fp, ltype, &linfo) != CTF_ERR)
+	  if (ctf_type_encoding (fp, ltype, &linfo) == 0)
 	    off += linfo.cte_bits;
-	  else if ((lsize = ctf_type_size (fp, ltype)) != CTF_ERR)
+	  else if ((lsize = ctf_type_size (fp, ltype)) > 0)
 	    off += lsize * NBBY;
 
 	  /* Round up the offset of the end of the last member to
@@ -1359,7 +1360,7 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 
 	  dmd->dmd_offset = bit_offset;
 	  ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
-	  ssize = MAX (ssize, (bit_offset / NBBY) + msize);
+	  ssize = MAX (ssize, ((signed) bit_offset / NBBY) + msize);
 	}
     }
   else
@@ -1369,7 +1370,7 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
       ssize = MAX (ssize, msize);
     }
 
-  if (ssize > CTF_MAX_SIZE)
+  if ((size_t) ssize > CTF_MAX_SIZE)
     {
       dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
       dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (ssize);
@@ -1401,7 +1402,7 @@ ctf_add_member_encoded (ctf_file_t *fp, ctf_id_t souid, const char *name,
     return (ctf_set_errno (fp, ECTF_NOTINTFP));
 
   if ((type = ctf_add_slice (fp, CTF_ADD_NONROOT, otype, &encoding)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   return ctf_add_member_offset (fp, souid, name, type, bit_offset);
 }
@@ -1426,7 +1427,7 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
     return (ctf_set_errno (fp, ECTF_DUPLICATE));
 
   if (ctf_lookup_by_id (&tmp, ref) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   if ((dvd = ctf_alloc (sizeof (ctf_dvdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
@@ -1452,7 +1453,7 @@ enumcmp (const char *name, int value, void *arg)
   ctf_bundle_t *ctb = arg;
   int bvalue;
 
-  if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) == CTF_ERR)
+  if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) < 0)
     {
       ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
       return 1;
@@ -1472,7 +1473,7 @@ enumadd (const char *name, int value, void *arg)
   ctf_bundle_t *ctb = arg;
 
   return (ctf_add_enumerator (ctb->ctb_file, ctb->ctb_type,
-			      name, value) == CTF_ERR);
+			      name, value) < 0);
 }
 
 static int
@@ -1482,7 +1483,7 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
   ctf_bundle_t *ctb = arg;
   ctf_membinfo_t ctm;
 
-  if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) == CTF_ERR)
+  if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) < 0)
     {
       ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
       return 1;
@@ -1550,7 +1551,6 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
   ctf_dtdef_t *dtd;
   ctf_funcinfo_t ctc;
-  ssize_t size;
 
   ctf_hash_t *hp;
 
@@ -1756,7 +1756,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       break;
 
     case CTF_K_ARRAY:
-      if (ctf_array_info (src_fp, src_type, &src_ar) == CTF_ERR)
+      if (ctf_array_info (src_fp, src_type, &src_ar) != 0)
 	return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
 
       src_ar.ctr_contents =
@@ -1803,6 +1803,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       {
 	ctf_dmdef_t *dmd;
 	int errs = 0;
+	size_t size;
+	ssize_t ssize;
 
 	/* Technically to match a struct or union we need to check both
 	   ways (src members vs. dst, dst members vs. src) but we make
@@ -1818,7 +1820,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 		ctf_type_size (dst_fp, dst_type))
 	      {
 		ctf_dprintf ("Conflict for type %s against ID %lx: "
-			     "union size differs, old %li, new %li\n",
+			     "union size differs, old %zi, new %zi\n",
 			     name, dst_type, ctf_type_size (src_fp, src_type),
 			     ctf_type_size (dst_fp, dst_type));
 		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
@@ -1848,7 +1850,11 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	if (ctf_member_iter (src_fp, src_type, membadd, &dst) != 0)
 	  errs++;	       /* Increment errs and fail at bottom of case.  */
 
-	if ((size = ctf_type_size (src_fp, src_type)) > CTF_MAX_SIZE)
+	if ((ssize = ctf_type_size (src_fp, src_type)) < 0)
+	  return CTF_ERR;			/* errno is set for us.  */
+
+	size = (size_t) ssize;
+	if (size > CTF_MAX_SIZE)
 	  {
 	    dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
 	    dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);

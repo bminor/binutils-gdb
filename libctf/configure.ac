@@ -56,6 +56,7 @@ ACX_PROG_CC_WARNING_OPTS([-Wall], [ac_libctf_warn_cflags])
 
 AC_FUNC_MMAP
 AC_SEARCH_LIBS(dlopen, dl)
+AM_ZLIB
 
 # Similar to GDB_AC_CHECK_BFD.
 OLD_CFLAGS=$CFLAGS
@@ -86,8 +87,11 @@ if test $ac_cv_libctf_bfd_elf = yes; then
 	    [Whether libbfd was configured for an ELF target.])
 fi
 
-AC_CHECK_HEADERS(byteswap.h)
+AC_C_BIGENDIAN
+AC_CHECK_HEADERS(byteswap.h endian.h)
 AC_CHECK_FUNCS(pread)
+AC_CHECK_DECLS([qsort_r])
+AC_LIBOBJ([qsort_r])
 
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_HEADERS(config.h)

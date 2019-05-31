@@ -1,3 +1,9 @@
+2019-05-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (make_ctfsect): Drop cts_type, cts_flags, and
+	cts_offset.
+	* readelf.c (shdr_to_ctf_sect): Likewise.
+
 2019-05-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 24627
