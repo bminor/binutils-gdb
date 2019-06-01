@@ -49,6 +49,7 @@
 #endif
 
 #include "common/netstuff.h"
+#include "common/rsp-low.h"
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -286,26 +287,6 @@ remote_open (char *name)
 
   fprintf (stderr, "Replay logfile using %s\n", name);
   fflush (stderr);
-}
-
-static int
-fromhex (int ch)
-{
-  if (ch >= '0' && ch <= '9')
-    {
-      return (ch - '0');
-    }
-  if (ch >= 'A' && ch <= 'F')
-    {
-      return (ch - 'A' + 10);
-    }
-  if (ch >= 'a' && ch <= 'f')
-    {
-      return (ch - 'a' + 10);
-    }
-  fprintf (stderr, "\nInvalid hex digit '%c'\n", ch);
-  fflush (stderr);
-  exit (1);
 }
 
 static int

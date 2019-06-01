@@ -291,6 +291,7 @@ GDBREPLAY_OBS = \
 	common/cleanups.o \
 	common/common-exceptions.o \
 	common/common-utils.o \
+	common/rsp-low.o \
 	common/errors.o \
 	common/netstuff.o \
 	common/print-utils.o \
