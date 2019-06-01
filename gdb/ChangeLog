@@ -15,6 +15,13 @@
 	Restrict cases in which use of minimal symbol is preferred to that
 	of a found symbol.  Update comments.
 
+	* dwarf2-frame.c (dwarf2_frame_cache): Don't decode FDE instructions
+	for entry pc when entry pc is out of range for that FDE.
+
+	* printcmd.c (print_address_symbolic): Print negative offsets.
+	(build_address_symbolic): Force signed arithmetic when computing
+	offset.
+
 2019-07-26  Brian Callahan  <bcallah@openbsd.org>
 
 	PR gdb/24839:

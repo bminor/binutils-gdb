@@ -1023,7 +1023,13 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
 
-  if (get_frame_func_if_available (this_frame, &entry_pc))
+  /* Fetching the entry pc for THIS_FRAME won't necessarily result
+     in an address that's within the range of FDE locations.  This
+     is due to the possibility of the function occupying non-contiguous
+     ranges.  */
+  if (get_frame_func_if_available (this_frame, &entry_pc)
+      && fde->initial_location <= entry_pc
+      && entry_pc < fde->initial_location + fde->address_range)
     {
       /* Decode the insns in the FDE up to the entry PC.  */
       instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
