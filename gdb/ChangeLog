@@ -1,5 +1,9 @@
 2019-06-10  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (_initialize_ada_language): Update help text.
+
+2019-06-10  Tom Tromey  <tromey@adacore.com>
+
 	* m32c-tdep.c (m32c_m16c_address_to_pointer): Don't end warning
 	with a newline.
 	* guile/guile.c (handle_boot_error): Don't end warning with a

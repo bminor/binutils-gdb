@@ -14407,14 +14407,15 @@ overloads selection menu is activated"),
 
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\
-Usage: catch exception [ ARG ]\n\
-\n\
+Usage: catch exception [ARG] [if CONDITION]\n\
 Without any argument, stop when any Ada exception is raised.\n\
 If ARG is \"unhandled\" (without the quotes), only stop when the exception\n\
 being raised does not have a handler (and will therefore lead to the task's\n\
 termination).\n\
 Otherwise, the catchpoint only stops when the name of the exception being\n\
-raised is the same as ARG."),
+raised is the same as ARG.\n\
+CONDITION is a boolean expression that is evaluated to see whether the\n\
+exception should cause a stop."),
 		     catch_ada_exception_command,
 		     catch_ada_completer,
 		     CATCH_PERMANENT,
@@ -14422,14 +14423,20 @@ raised is the same as ARG."),
 
   add_catch_command ("handlers", _("\
 Catch Ada exceptions, when handled.\n\
-With an argument, catch only exceptions with the given name."),
+Usage: catch handlers [ARG] [if CONDITION]\n\
+Without any argument, stop when any Ada exception is handled.\n\
+With an argument, catch only exceptions with the given name.\n\
+CONDITION is a boolean expression that is evaluated to see whether the\n\
+exception should cause a stop."),
 		     catch_ada_handlers_command,
                      catch_ada_completer,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("assert", _("\
 Catch failed Ada assertions, when raised.\n\
-With an argument, catch only exceptions with the given name."),
+Usage: catch assert [if CONDITION]\n\
+CONDITION is a boolean expression that is evaluated to see whether the\n\
+exception should cause a stop."),
 		     catch_assert_command,
                      NULL,
 		     CATCH_PERMANENT,
@@ -14447,6 +14454,7 @@ and exceeds this limit will cause an error."),
   add_info ("exceptions", info_exceptions_command,
 	    _("\
 List all Ada exception names.\n\
+Usage: info exceptions [REGEXP]\n\
 If a regular expression is passed as an argument, only those matching\n\
 the regular expression are listed."));
 
