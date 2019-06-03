@@ -1,5 +1,27 @@
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc): Add powerxx_stubs_ and accessor
+	functions.
+	(Target_powerpc::maybe_skip_tls_get_addr_call): Handle PLT_PCREL34
+	and PLT_PCREL34_NOTOC relocs.
+	(Powerpc_relocate_functions): Add addr34, addr34_hi, addr34_ha,
+	addr28, addr16_higher34, addr16_highera34, addr16_highest34,
+	addr16_highest34a functions.
+	(li_11_0, ori_11_11_0, sldi_11_11_34): Define.
+	(paddi_12_pc, pld_12_pc, pnop): Define.
+	(d34, ha34): New inline functions.
+	(Stub_table::add_plt_call_entry): Handle powerxx_stubs.
+	(Stub_table::add_eh_frame): Likewise.
+	(build_powerxx_offset): New function.
+	(Stub_table::plt_call_size): Handle powerxx_stubs.
+	(Stub_table::branch_stub_size): Likewise.
+	(Stub_table::do_write): Likewise.
+	(Target_powerpc::Scan::get_reference_flags): Handle new relocs.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc: Likewise.
+	(Target_powerpc::Scan::local, global, relocate): Likewise.
+
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
 	* ehframe.cc (Fde::operator==): Delete.
 	(Cie::remove_fde): Delete.
 	(Eh_frame::remove_ehframe_for_plt): Delete fde_data and fde_length
