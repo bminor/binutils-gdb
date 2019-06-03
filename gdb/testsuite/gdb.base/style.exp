@@ -90,6 +90,39 @@ save_vars { env(TERM) } {
     gdb_test "" "${vers}.*" \
 	"version is styled"
 
+    set address_style_expr [style "\"address\" style" address]
+    gdb_test "show style address foreground" \
+	"The ${address_style_expr} foreground color is: blue" \
+	"style name and style word styled using its own style in show style"
+
+    set aliases_expr [style "aliases" title]
+    set breakpoints_expr [style "breakpoints" title]
+    gdb_test "help" \
+	[multi_line \
+	     "List of classes of commands:" \
+	     "" \
+	     "${aliases_expr} -- Aliases of other commands" \
+	     "${breakpoints_expr} -- Making program stop at certain points" \
+	     ".*" \
+	    ] \
+	"help classes of commands styled with title"
+
+    set taas_expr  [style "taas" title]
+    set tfaas_expr  [style "tfaas" title]
+    set cut_for_thre_expr [style "cut for 'thre" highlight]
+    gdb_test "apropos -v cut for 'thre" \
+	[multi_line \
+	     "" \
+	     "${taas_expr} --.*" \
+	     "Usage:.*" \
+	     "short${cut_for_thre_expr}ad apply.*" \
+	     "" \
+	     "${tfaas_expr} --.*" \
+	     "Usage:.*" \
+	     "short${cut_for_thre_expr}ad apply.*" \
+	    ] \
+	"apropos -v cut for 'thre"
+
     set quoted [string_to_regexp $binfile]
     gdb_test "file $binfile" \
 	"Reading symbols from [style $quoted file]..." \

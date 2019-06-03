@@ -5550,34 +5550,63 @@ proc gdb_gnu_strip_debug { dest args } {
 # Test the output of GDB_COMMAND matches the pattern obtained
 # by concatenating all elements of EXPECTED_LINES.  This makes
 # it possible to split otherwise very long string into pieces.
-# If third argument is not empty, it's used as the name of the
+# If third argument TESTNAME is not empty, it's used as the name of the
 # test to be printed on pass/fail.
-proc help_test_raw { gdb_command expected_lines args } {
-    set message $gdb_command
-    if [llength $args]>0 then {
-	set message [lindex $args 0]
-    } 
+proc help_test_raw { gdb_command expected_lines {testname {}} } {
+    if {$testname == {}} {
+	set message $gdb_command
+    } else {
+	set message $testname
+    }
     set expected_output [join $expected_lines ""]
     gdb_test "${gdb_command}" "${expected_output}" $message
 }
 
-# Test the output of "help COMMAND_CLASS". EXPECTED_INITIAL_LINES
+# A regexp that matches the end of help CLASS|PREFIX_COMMAND
+set help_list_trailer {
+    "Type \"apropos word\" to search for commands related to \"word\"\.[\r\n]+"
+    "Type \"apropos -v word\" for full documentation of commands related to \"word\"\.[\r\n]+"
+    "Command name abbreviations are allowed if unambiguous\."
+}
+
+# Test the output of "help COMMAND_CLASS".  EXPECTED_INITIAL_LINES
 # are regular expressions that should match the beginning of output,
-# before the list of commands in that class.  The presence of 
-# command list and standard epilogue will be tested automatically.
+# before the list of commands in that class.
+# LIST_OF_COMMANDS are regular expressions that should match the
+# list of commands in that class.  If empty, the command list will be
+# matched automatically.  The presence of standard epilogue will be tested
+# automatically.
+# If last argument TESTNAME is not empty, it's used as the name of the
+# test to be printed on pass/fail.
 # Notice that the '[' and ']' characters don't need to be escaped for strings
 # wrapped in {} braces.
-proc test_class_help { command_class expected_initial_lines args } {
-    set l_stock_body {
-        "List of commands\:.*[\r\n]+"
-        "Type \"help\" followed by command name for full documentation\.[\r\n]+"
-        "Type \"apropos word\" to search for commands related to \"word\"\.[\r\n]+"
-        "Command name abbreviations are allowed if unambiguous\." 
+proc test_class_help { command_class expected_initial_lines {list_of_commands {}} {testname {}} } {
+    global help_list_trailer
+    if {[llength $list_of_commands]>0} {
+	set l_list_of_commands {"List of commands:[\r\n]+[\r\n]+"}
+        set l_list_of_commands [concat $l_list_of_commands $list_of_commands]
+	set l_list_of_commands [concat $l_list_of_commands {"[\r\n]+[\r\n]+"}]
+    } else {
+        set l_list_of_commands {"List of commands\:.*[\r\n]+"}
     }
-    set l_entire_body [concat $expected_initial_lines $l_stock_body]
+    set l_stock_body {
+        "Type \"help\" followed by command name for full documentation\.[\r\n]+"
+    }
+    set l_entire_body [concat $expected_initial_lines $l_list_of_commands \
+		       $l_stock_body $help_list_trailer]
 
-    eval [list help_test_raw "help ${command_class}" $l_entire_body] $args
+    help_test_raw "help ${command_class}" $l_entire_body $testname
 }
+
+# Like test_class_help but specialised to test "help user-defined".
+proc test_user_defined_class_help { {list_of_commands {}} {testname {}} } {
+    test_class_help "user-defined" {
+	"User-defined commands\.[\r\n]+"
+	"The commands in this class are those defined by the user\.[\r\n]+"
+	"Use the \"define\" command to define a command\.[\r\n]+"
+    } $list_of_commands $testname
+}
+
 
 # COMMAND_LIST should have either one element -- command to test, or
 # two elements -- abbreviated command to test, and full command the first
@@ -5587,6 +5616,7 @@ proc test_class_help { command_class expected_initial_lines args } {
 # before the list of subcommands.  The presence of 
 # subcommand list and standard epilogue will be tested automatically.
 proc test_prefix_command_help { command_list expected_initial_lines args } {
+    global help_list_trailer
     set command [lindex $command_list 0]   
     if {[llength $command_list]>1} {        
         set full_command [lindex $command_list 1]
@@ -5597,10 +5627,8 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
     # be expanded in this list.
     set l_stock_body [list\
          "List of $full_command subcommands\:.*\[\r\n\]+"\
-         "Type \"help $full_command\" followed by $full_command subcommand name for full documentation\.\[\r\n\]+"\
-         "Type \"apropos word\" to search for commands related to \"word\"\.\[\r\n\]+"\
-         "Command name abbreviations are allowed if unambiguous\."]
-    set l_entire_body [concat $expected_initial_lines $l_stock_body]
+         "Type \"help $full_command\" followed by $full_command subcommand name for full documentation\.\[\r\n\]+"]
+    set l_entire_body [concat $expected_initial_lines $l_stock_body $help_list_trailer]
     if {[llength $args]>0} {
         help_test_raw "help ${command}" $l_entire_body [lindex $args 0]
     } else {

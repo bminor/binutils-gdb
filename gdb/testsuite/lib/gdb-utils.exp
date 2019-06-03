@@ -48,8 +48,10 @@ proc string_to_regexp {str} {
 
 proc style {str style} {
     switch -exact -- $style {
+	title { set style 1 }
 	file { set style 32 }
 	function { set style 33 }
+	highlight { set style 31 }
 	variable { set style 36 }
 	address { set style 34 }
     }

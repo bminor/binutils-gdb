@@ -1,3 +1,18 @@
+2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* lib/gdb.exp (help_list_trailer): New regexp variable
+	factorizing the help trailer message.
+	(test_class_help): Use help_list_trailer.  Add LIST_OF_COMMANDS
+	arg to allow to better factorize various tests.
+	(test_user_defined_class_help): Factorizes testing 'help user-defined'.
+	(test_prefix_command_help): Use help_list_trailer.
+	* gdb.python/py-cmd.exp: Use test_user_defined_class_help.
+	* gdb.guile/scm-cmd.exp: Likewise.
+	* gdb.trace/tracecmd.exp: Update caller of test_class_help.
+	* gdb.base/help.exp: Use test_user_defined_class_help.
+	* gdb.base/style.exp: Add tests for styling of help and apropos.
+	* lib/gdb-utils.exp (style): Add title and highlight styles.
+
 2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/shell.exp: Test pipe command, $_shell_exitcode,

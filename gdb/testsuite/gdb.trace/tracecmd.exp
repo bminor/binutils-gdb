@@ -55,7 +55,7 @@ set testline2 [expr $baseline + 3]
 set helpcnt 0
 test_class_help "tracepoints" {
     "Tracing of program execution without stopping the program\.[\r\n\]+" 
-} "1.0: help tracepoints"
+} {} "1.0: help tracepoints"
 
 #
 # test trace command:

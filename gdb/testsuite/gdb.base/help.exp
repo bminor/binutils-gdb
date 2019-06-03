@@ -51,11 +51,8 @@ test_class_help "support" {"Support facilities\.\[\r\n\]+"}
 test_class_help "tracepoints" {
     "Tracing of program execution without stopping the program\.\[\r\n\]+"
 }
-test_class_help "user-defined" {
-    "User-defined commands\.\[\r\n\]+"
-    "The commands in this class are those defined by the user\.\[\r\n\]+"
-    "Use the \"define\" command to define a command\.\[\r\n\]+"
-}
+
+test_user_defined_class_help
 
 # Test help of an abbreviated command.  "break" is picked at random.
 set help_breakpoint_text "Set breakpoint at specified location\..*"
