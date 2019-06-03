@@ -1,3 +1,18 @@
+2019-07-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges-func.c: Rename to...
+	* gdb.dwarf2/dw2-ranges-func-lo-cold.c: ...this.
+	* gdb.dwarf2/dw2-ranges-func-lo-cold.c (foo_low): Change name to
+	foo_cold.  Revise comments to match.
+	* gdb.dwarf2/dw2-ranges-func-hi-cold.c: New file.
+	* gdb.dwarf2/dw2-ranges-func.exp (do_test): New proc. Existing tests
+	were wrapped into this proc; Call do_test in loop from outermost
+	level.
+	(foo_low): Rename all occurrences to "foo_cold".
+	(backtrace from baz): New test.
+	(x2/i foo_cold): New test.
+	(info line *foo_cold): New test.
+
 2019-07-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.arch/i386-pkru.exp: Fix unterminated string.

@@ -16,7 +16,7 @@
 /* The idea here is to, via use of the dwarf assembler, create a function
    which occupies two non-contiguous address ranges.
 
-   foo_low and foo will be combined into a single function foo with a
+   foo_cold and foo will be combined into a single function foo with a
    function bar in between these two ranges.
 
    This test case was motivated by a bug in which a function which
@@ -37,19 +37,19 @@
 
 volatile int e = 0;
 
-void
-baz (void)
-{
-  asm ("baz_label: .globl baz_label");
-}						/* baz end */
+void bar (void);
+void foo_cold (void);
+void baz (void);
 
 void
-foo_low (void)
-{						/* foo_low prologue */
-  asm ("foo_low_label: .globl foo_low_label");
-  baz ();					/* foo_low baz call */
-  asm ("foo_low_label2: .globl foo_low_label2");
-}						/* foo_low end */
+foo (void)
+{						/* foo prologue */
+  asm ("foo_label: .globl foo_label");
+  bar ();					/* foo bar call */
+  asm ("foo_label2: .globl foo_label2");
+  if (e) foo_cold ();				/* foo foo_cold call */
+  asm ("foo_label3: .globl foo_label3");
+}						/* foo end */
 
 void
 bar (void)
@@ -58,14 +58,18 @@ bar (void)
 }						/* bar end */
 
 void
-foo (void)
-{						/* foo prologue */
-  asm ("foo_label: .globl foo_label");
-  bar ();					/* foo bar call */
-  asm ("foo_label2: .globl foo_label2");
-  if (e) foo_low ();				/* foo foo_low call */
-  asm ("foo_label3: .globl foo_label3");
-}						/* foo end */
+foo_cold (void)
+{						/* foo_cold prologue */
+  asm ("foo_cold_label: .globl foo_cold_label");
+  baz ();					/* foo_cold baz call */
+  asm ("foo_cold_label2: .globl foo_cold_label2");
+}						/* foo_cold end */
+
+void
+baz (void)
+{
+  asm ("baz_label: .globl baz_label");
+}						/* baz end */
 
 int
 main (void)
