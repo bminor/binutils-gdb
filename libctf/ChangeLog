@@ -1,3 +1,7 @@
+2019-06-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-dump.c (ctf_dump_funcs): Free in the right place.
+
 2019-05-29  Nick Alcock  <nick.alcock@oracle.com>
 
 	* Makefile.am (ZLIB): New.
