@@ -30,7 +30,7 @@
 #include "ctf-decls.h"
 
 #ifndef _LIBC
-# define _quicksort qsort_r
+# define _quicksort ctf_qsort_r
 # define __compar_d_fn_t compar_d_fn_t
 typedef int (*compar_d_fn_t) (const void *, const void *, void *);
 #endif

@@ -35,4 +35,6 @@ noinst_LIBRARIES = libctf.a
 libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
 		   ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c ctf-open-bfd.c \
 		   ctf-subr.c ctf-types.c ctf-util.c
-libctf_a_LIBADD = $(LIBOBJS)
+if NEED_CTF_QSORT_R
+libctf_a_SOURCES += ctf-qsort_r.c
+endif

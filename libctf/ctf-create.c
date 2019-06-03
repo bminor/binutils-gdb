@@ -344,7 +344,7 @@ ctf_update (ctf_file_t *fp)
     }
   assert (i == nvars);
 
-  qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var, s0);
+  ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var, s0);
   t += sizeof (ctf_varent_t) * nvars;
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_typeoff);

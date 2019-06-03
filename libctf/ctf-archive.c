@@ -169,10 +169,11 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
       modent++;
     }
 
-  qsort_r ((ctf_archive_modent_t *) ((char *) archdr
-				     + sizeof (struct ctf_archive)),
-	   le64toh (archdr->ctfa_nfiles),
-	   sizeof (struct ctf_archive_modent), sort_modent_by_name, nametbl);
+  ctf_qsort_r ((ctf_archive_modent_t *) ((char *) archdr
+					 + sizeof (struct ctf_archive)),
+	       le64toh (archdr->ctfa_nfiles),
+	       sizeof (struct ctf_archive_modent), sort_modent_by_name,
+	       nametbl);
 
    /* Now the name table.  */
 

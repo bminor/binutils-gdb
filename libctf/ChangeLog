@@ -1,3 +1,21 @@
+2019-06-04  Nick Alcock  <nick.alcock@oracle.com>
+
+	* qsort_r.c: Rename to...
+	* ctf-qsort_r.c: ... this.
+	(_quicksort): Define to ctf_qsort_r.
+	* ctf-decls.h (qsort_r): Remove.
+	(ctf_qsort_r): Add.
+	(struct ctf_qsort_arg): New, transport the real ARG and COMPAR.
+	(ctf_qsort_compar_thunk): Rearrange the arguments to COMPAR.
+	* Makefile.am (libctf_a_LIBADD): Remove.
+	(libctf_a_SOURCES): New, add ctf-qsort_r.c.
+	* ctf-archive.c (ctf_arc_write): Call ctf_qsort_r, not qsort_r.
+	* ctf-create.c (ctf_update): Likewise.
+	* configure.ac: Check for BSD versus GNU qsort_r signature.
+	* Makefile.in: Regenerate.
+	* config.h.in: Likewise.
+	* configure: Likewise.
+
 2019-06-03  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-dump.c (ctf_dump_funcs): Free in the right place.

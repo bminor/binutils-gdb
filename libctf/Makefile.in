@@ -104,6 +104,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+@NEED_CTF_QSORT_R_TRUE@am__append_1 = ctf-qsort_r.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -128,12 +129,17 @@ am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libctf_a_AR = $(AR) $(ARFLAGS)
-libctf_a_DEPENDENCIES = $(LIBOBJS)
+libctf_a_LIBADD =
+am__libctf_a_SOURCES_DIST = ctf-archive.c ctf-dump.c ctf-create.c \
+	ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c ctf-lookup.c \
+	ctf-open.c ctf-open-bfd.c ctf-subr.c ctf-types.c ctf-util.c \
+	ctf-qsort_r.c
+@NEED_CTF_QSORT_R_TRUE@am__objects_1 = ctf-qsort_r.$(OBJEXT)
 am_libctf_a_OBJECTS = ctf-archive.$(OBJEXT) ctf-dump.$(OBJEXT) \
 	ctf-create.$(OBJEXT) ctf-decl.$(OBJEXT) ctf-error.$(OBJEXT) \
 	ctf-hash.$(OBJEXT) ctf-labels.$(OBJEXT) ctf-lookup.$(OBJEXT) \
 	ctf-open.$(OBJEXT) ctf-open-bfd.$(OBJEXT) ctf-subr.$(OBJEXT) \
-	ctf-types.$(OBJEXT) ctf-util.$(OBJEXT)
+	ctf-types.$(OBJEXT) ctf-util.$(OBJEXT) $(am__objects_1)
 libctf_a_OBJECTS = $(am_libctf_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -164,7 +170,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libctf_a_SOURCES)
-DIST_SOURCES = $(libctf_a_SOURCES)
+DIST_SOURCES = $(am__libctf_a_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -196,7 +202,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/../ar-lib $(top_srcdir)/../compile \
 	$(top_srcdir)/../depcomp $(top_srcdir)/../install-sh \
 	$(top_srcdir)/../missing $(top_srcdir)/../mkinstalldirs \
-	ChangeLog qsort_r.c
+	ChangeLog
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -323,11 +329,10 @@ ZLIBINC = @zlibinc@
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(top_srcdir) -I$(top_srcdir)/../include -I$(top_srcdir)/../bfd -I../bfd
 AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
 noinst_LIBRARIES = libctf.a
-libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
-		   ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c ctf-open-bfd.c \
-		   ctf-subr.c ctf-types.c ctf-util.c
-
-libctf_a_LIBADD = $(LIBOBJS)
+libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c \
+	ctf-error.c ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c \
+	ctf-open-bfd.c ctf-subr.c ctf-types.c ctf-util.c \
+	$(am__append_1)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -396,7 +401,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/qsort_r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-create.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-decl.Po@am__quote@
@@ -407,6 +411,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-lookup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-open-bfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-open.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-qsort_r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-subr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-types.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-util.Po@am__quote@
@@ -687,7 +692,7 @@ clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf $(DEPDIR) ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -735,7 +740,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf $(DEPDIR) ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

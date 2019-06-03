@@ -620,10 +620,13 @@ ac_includes_default="\
 #endif"
 
 ac_header_list=
+ac_func_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+NEED_CTF_QSORT_R_FALSE
+NEED_CTF_QSORT_R_TRUE
 zlibinc
 zlibdir
 ac_libctf_warn_cflags
@@ -1809,52 +1812,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_func
-
-# ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
-# ---------------------------------------------
-# Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
-# accordingly.
-ac_fn_c_check_decl ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  as_decl_name=`echo $2|sed 's/ *(.*//'`
-  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
-$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main ()
-{
-#ifndef $as_decl_name
-#ifdef __cplusplus
-  (void) $as_decl_use;
-#else
-  (void) $as_decl_name;
-#endif
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$3=yes"
-else
-  eval "$3=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_decl
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -2142,6 +2099,7 @@ fi
 as_fn_append ac_header_list " stdlib.h"
 as_fn_append ac_header_list " unistd.h"
 as_fn_append ac_header_list " sys/param.h"
+as_fn_append ac_func_list " qsort_r"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -6401,22 +6359,107 @@ _ACEOF
 fi
 done
 
-ac_fn_c_check_decl "$LINENO" "qsort_r" "ac_cv_have_decl_qsort_r" "$ac_includes_default"
-if test "x$ac_cv_have_decl_qsort_r" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_QSORT_R $ac_have_decl
+
+
+
+  for ac_func in $ac_func_list
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
-case " $LIBOBJS " in
-  *" qsort_r.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS qsort_r.$ac_objext"
- ;;
+fi
+done
+
+
+
+
+if test $ac_cv_func_qsort_r = yes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for qsort_r signature" >&5
+$as_echo_n "checking for qsort_r signature... " >&6; }
+if ${ac_cv_libctf_qsort_r_signature+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#undef qsort_r
+                          #include <stdlib.h>
+                          void qsort_r (void *, size_t, size_t,
+                                        int (*) (void const *, void const *,
+                                                 void *),
+                                        void *);
+                          void (*p) (void *, size_t, size_t,
+                                     int (*) (void const *, void const *,
+                                              void *),
+                                     void *) = qsort_r;
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_libctf_qsort_r_signature=GNU
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#undef qsort_r
+	                     #include <stdlib.h>
+                             void qsort_r (void *, size_t, size_t, void *,
+                                           int (*) (void *,
+                                                    void const *,
+                                                    void const *));
+                             void (*p) (void *, size_t, size_t, void *,
+                                        int (*) (void *, void const *,
+                                                 void const *)) = qsort_r;
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_libctf_qsort_r_signature=BSD
+else
+  ac_cv_libctf_qsort_r_signature=unknown
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_libctf_qsort_r_signature" >&5
+$as_echo "$ac_cv_libctf_qsort_r_signature" >&6; }
+fi
+
+case x$ac_cv_libctf_qsort_r_signature in
+  xGNU)
+$as_echo "#define HAVE_QSORT_R_ARG_LAST 1" >>confdefs.h
+;;
+  xBSD)
+$as_echo "#define HAVE_QSORT_R_COMPAR_LAST 1" >>confdefs.h
+;;
+  *) ac_cv_libctf_qsort_r_signature=unknown;;
 esac
+
+ if test "${ac_cv_libctf_qsort_r_signature}" = unknown; then
+  NEED_CTF_QSORT_R_TRUE=
+  NEED_CTF_QSORT_R_FALSE='#'
+else
+  NEED_CTF_QSORT_R_TRUE='#'
+  NEED_CTF_QSORT_R_FALSE=
+fi
 
 
 ac_config_files="$ac_config_files Makefile"
@@ -6561,6 +6604,10 @@ if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
+if test -z "${NEED_CTF_QSORT_R_TRUE}" && test -z "${NEED_CTF_QSORT_R_FALSE}"; then
+  as_fn_error $? "conditional \"NEED_CTF_QSORT_R\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0

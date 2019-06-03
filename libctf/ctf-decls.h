@@ -22,12 +22,45 @@
 
 #include "config.h"
 
-#if !HAVE_DECL_QSORT_R
 #include <stddef.h>
-void qsort_r (void *base, size_t nmemb, size_t size,
+#include <stdlib.h>
+
+#if HAVE_QSORT_R_ARG_LAST
+static inline void
+ctf_qsort_r (void *base, size_t nmemb, size_t size,
+	     int (*compar)(const void *, const void *, void *),
+	     void *arg)
+{
+  qsort_r (base, nmemb, size, compar, arg);
+}
+#elif HAVE_QSORT_R_COMPAR_LAST
+struct ctf_qsort_arg
+{
+  int (*compar) (const void *, const void *, void *);
+  void *arg;
+};
+
+static int
+ctf_qsort_compar_thunk (void *arg, const void *a, const void *b)
+{
+  struct ctf_qsort_arg *qsort_arg = (struct ctf_qsort_arg *) arg;
+
+  return qsort_arg->compar (a, b, arg);
+}
+
+static inline void
+ctf_qsort_r (void *base, size_t nmemb, size_t size,
+	     int (*compar)(const void *, const void *, void *),
+	     void *arg)
+{
+  struct ctf_qsort_arg thunk = { compar, arg };
+  qsort_r (base, nmemb, size, &thunk, ctf_qsort_compar_thunk);
+}
+#else
+void ctf_qsort_r (void *base, size_t nmemb, size_t size,
 	      int (*compar)(const void *, const void *, void *),
 	      void *arg);
-#endif /* !HAVE_DECL_QSORT_R */
+#endif
 
 #undef MAX
 #undef MIN

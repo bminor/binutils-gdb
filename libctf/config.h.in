@@ -9,10 +9,6 @@
 /* Define to 1 if you have the <byteswap.h> header file. */
 #undef HAVE_BYTESWAP_H
 
-/* Define to 1 if you have the declaration of `qsort_r', and to 0 if you
-   don't. */
-#undef HAVE_DECL_QSORT_R
-
 /* Define to 1 if you have the <endian.h> header file. */
 #undef HAVE_ENDIAN_H
 
@@ -30,6 +26,15 @@
 
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
+
+/* Define to 1 if you have the `qsort_r' function. */
+#undef HAVE_QSORT_R
+
+/* Whether a qsort_r exists with a void *arg as its last arg. */
+#undef HAVE_QSORT_R_ARG_LAST
+
+/* Whether a qsort_r exists with the compar function as its last arg. */
+#undef HAVE_QSORT_R_COMPAR_LAST
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
