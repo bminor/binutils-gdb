@@ -69,6 +69,36 @@ set logging debugredirect [on|off]
   By default, GDB debug output will go to both the terminal and the logfile.
   Set if you want debug output to go only to the log file.
 
+set style title foreground COLOR
+set style title background COLOR
+set style title intensity VALUE
+  Control the styling of titles.
+
+set style highlight foreground COLOR
+set style highlight background COLOR
+set style highlight intensity VALUE
+  Control the styling of highlightings.
+
+* Changed commands
+
+help
+  The "help" command uses the title style to enhance the
+  readibility of its output by styling the classes and
+  command names.
+
+apropos [-v] REGEXP
+  Similarly to "help", the "apropos" command also uses the
+  title style for the command names.  "apropos" accepts now
+  a flag "-v" (verbose) to show the full documentation
+  of matching commands and to use the highlight style to mark
+  the documentation parts matching REGEXP.
+
+show style
+  The "show style" and its subcommands are now styling
+  a style name in their output using its own style, to help
+  the user visualize the different styles.
+
+
 * New MI commands
 
 -complete

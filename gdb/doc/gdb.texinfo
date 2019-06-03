@@ -1895,10 +1895,13 @@ With a command name as @code{help} argument, @value{GDBN} displays a
 short paragraph on how to use that command.
 
 @kindex apropos
-@item apropos @var{args}
+@item apropos [-v] @var{regexp}
 The @code{apropos} command searches through all of the @value{GDBN}
 commands, and their documentation, for the regular expression specified in
-@var{args}.  It prints out all matches found.  For example:
+@var{args}.  It prints out all matches found.  The optional flag  @samp{-v},
+which stands for @samp{verbose}, indicates to output the full documentation
+of the matching commands and highlight the parts of the documentation
+matching @var{regexp}.  For example:
 
 @smallexample
 apropos alias
@@ -1908,13 +1911,38 @@ apropos alias
 results in:
 
 @smallexample
-@c @group
+@group
 alias -- Define a new command that is an alias of an existing command
 aliases -- Aliases of other commands
 d -- Delete some breakpoints or auto-display expressions
 del -- Delete some breakpoints or auto-display expressions
 delete -- Delete some breakpoints or auto-display expressions
-@c @end group
+@end group
+@end smallexample
+
+@noindent
+while
+
+@smallexample
+apropos -v cut.*thread apply
+@end smallexample
+
+@noindent
+results in the below output, where @samp{cut for 'thread apply}
+is highlighted if styling is enabled.
+
+@smallexample
+@group
+taas -- Apply a command to all threads (ignoring errors
+and empty output).
+Usage: taas COMMAND
+shortcut for 'thread apply all -s COMMAND'
+
+tfaas -- Apply a command to all frames of all threads
+(ignoring errors and empty output).
+Usage: tfaas COMMAND
+shortcut for 'thread apply all -s frame apply all -s COMMAND'
+@end group
 @end smallexample
 
 @kindex complete
@@ -24784,6 +24812,11 @@ Set the intensity to @var{value}.  Valid intensities are @samp{normal}
 (the default), @samp{bold}, and @samp{dim}.
 @end table
 
+The @code{show style} command and its subcommands are styling
+a style name in their output using its own style.
+So, use @command{show style} to see the complete list of styles,
+their characteristics and the visual aspect of each style.
+
 The style-able objects are:
 @table @code
 @item filename
@@ -24804,6 +24837,23 @@ foreground color is cyan.
 Control the styling of addresses.  These are managed with the
 @code{set style address} family of commands.  By default, this style's
 foreground color is blue.
+
+@item title
+Control the styling of titles.  These are managed with the
+@code{set style title} family of commands.  By default, this style's
+intensity is bold.  Commands are using the title style to improve
+the readibility of large output.  For example, the commands
+@command{apropos} and @command{help} are using the title style
+for the command names.
+
+@item highlight
+Control the styling of highlightings.  These are managed with the
+@code{set style highlight} family of commands.  By default, this style's
+foreground color is red.  Commands are using the highlight style to draw
+the user attention to some specific parts of their output.  For example,
+the command @command{apropos -v REGEXP} uses the highlight style to
+mark the documentation parts matching @var{regexp}.
+
 @end table
 
 @node Numbers
