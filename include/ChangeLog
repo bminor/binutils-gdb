@@ -1,3 +1,7 @@
+2019-06-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf.h (ctf_enum.cte_value): Fix type to int32_t.
+
 2019-05-29  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_sect_t): Drop cts_type, cts_flags, and cts_offset.

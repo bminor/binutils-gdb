@@ -507,7 +507,7 @@ typedef struct ctf_lmember_v2
 typedef struct ctf_enum
 {
   uint32_t cte_name;		/* Reference to name in string table.  */
-  int cte_value;		/* Value associated with this name.  */
+  int32_t cte_value;		/* Value associated with this name.  */
 } ctf_enum_t;
 
 /* The ctf_archive is a collection of ctf_file_t's stored together. The format
