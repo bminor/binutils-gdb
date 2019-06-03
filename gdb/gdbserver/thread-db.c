@@ -227,7 +227,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
     {
       std::string reason = linux_ptrace_attach_fail_reason_string (ptid, err);
 
-      warning ("Could not attach to thread %ld (LWP %d): %s\n",
+      warning ("Could not attach to thread %ld (LWP %d): %s",
 	       (unsigned long) ti_p->ti_tid, ti_p->ti_lid, reason.c_str ());
 
       return 0;
@@ -907,5 +907,5 @@ thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid)
     = make_scoped_restore (&current_thread, parent_thr);
 
   if (!find_one_thread (child_ptid))
-    warning ("Cannot find thread after clone.\n");
+    warning ("Cannot find thread after clone.");
 }

@@ -2452,7 +2452,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 		   "couldn't find trampoline named '%s.plt'.\n"
 		   "Returning pointer value %s instead; this may produce\n"
 		   "a useful result if converted back into an address by GDB,\n"
-		   "but will most likely not be useful otherwise.\n"),
+		   "but will most likely not be useful otherwise."),
 		   paddress (gdbarch, addr), func_name,
 		   paddress (gdbarch, ptrval));
 

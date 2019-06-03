@@ -686,7 +686,7 @@ exit_status_set_internal_vars (int exit_status)
   else if (WIFSIGNALED (exit_status))
     set_internalvar_integer (var_signal, WTERMSIG (exit_status));
   else
-    warning (_("unexpected shell command exit status %d\n"), exit_status);
+    warning (_("unexpected shell command exit status %d"), exit_status);
 }
 
 static void

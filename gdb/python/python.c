@@ -1876,7 +1876,7 @@ do_finish_initialization (const struct extension_language_defn *extlang)
       warning (_("\n"
 		 "Could not load the Python gdb module from `%s'.\n"
 		 "Limited Python support is available from the _gdb module.\n"
-		 "Suggest passing --data-directory=/path/to/gdb/data-directory.\n"),
+		 "Suggest passing --data-directory=/path/to/gdb/data-directory."),
 	       gdb_pythondir.c_str ());
       /* We return "success" here as we've already emitted the
 	 warning.  */

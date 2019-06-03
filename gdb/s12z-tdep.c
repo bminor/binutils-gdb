@@ -90,8 +90,8 @@ s12z_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
         return prologue_end;
     }
 
-  warning (_("%s Failed to find end of prologue PC = %08x\n"),
-                      __FUNCTION__, (unsigned int) pc);
+  warning (_("%s Failed to find end of prologue PC = %08x"),
+	   __FUNCTION__, (unsigned int) pc);
 
   return pc;
 }
@@ -296,7 +296,7 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
   /* Return early if GDB couldn't find the function.  */
   if (start_addr == 0)
     {
-      warning (_("Couldn't find function including address %s SP is %s\n"),
+      warning (_("Couldn't find function including address %s SP is %s"),
                paddress (gdbarch, this_pc),
                paddress (gdbarch, this_sp));
 

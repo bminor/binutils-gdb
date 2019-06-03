@@ -115,7 +115,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
       /* Try to create the containing directory.  */
       if (!mkdir_recursive (m_dir.c_str ()))
 	{
-	  warning (_("index cache: could not make cache directory: %s\n"),
+	  warning (_("index cache: could not make cache directory: %s"),
 		   safe_strerror (errno));
 	  return;
 	}

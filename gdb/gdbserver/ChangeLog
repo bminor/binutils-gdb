@@ -1,3 +1,16 @@
+2019-06-10  Tom Tromey  <tromey@adacore.com>
+
+	* remote-utils.c (look_up_one_symbol, relocate_instruction): Don't
+	end warning with a newline.
+	* linux-s390-low.c (s390_get_wordsize): Don't end warning with a
+	newline.
+	* thread-db.c (attach_thread): Don't end warning with a newline.
+	(thread_db_notice_clone): Likewise.
+	* tracepoint.c (gdb_agent_helper_thread): Don't end warning with a
+	newline.
+	* linux-x86-low.c (x86_get_min_fast_tracepoint_insn_len): Don't
+	end warning with a newline.
+
 2019-06-04  Pedro Alves  <palves@redhat.com>
 
 	* server.c (captured_main): Use make_unique_xstrdup.

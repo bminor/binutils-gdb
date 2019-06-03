@@ -1,3 +1,23 @@
+2019-06-10  Tom Tromey  <tromey@adacore.com>
+
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Don't end warning
+	with a newline.
+	* guile/guile.c (handle_boot_error): Don't end warning with a
+	newline.
+	* cli/cli-cmds.c (exit_status_set_internal_vars): Don't end
+	warning with a newline.
+	* s12z-tdep.c (s12z_skip_prologue): Don't end warning with a
+	newline.
+	(s12z_frame_cache): Likewise.
+	* dwarf-index-cache.c (index_cache::store): Don't end warning with
+	a newline.
+	* solib-svr4.c (disable_probes_interface): Don't end warning with
+	a newline.
+	* nat/fork-inferior.c (fork_inferior): Don't end warning with a
+	newline.
+	* python/python.c (do_finish_initialization): Don't end warning
+	with a newline.
+
 2019-06-10  Tom Tromey  <tom@tromey.com>
 
 	* python/py-breakpoint.c (gdbpy_breakpoint_created)

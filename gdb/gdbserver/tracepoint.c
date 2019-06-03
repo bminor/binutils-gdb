@@ -7194,7 +7194,7 @@ gdb_agent_helper_thread (void *arg)
 
       if (listen_fd == -1)
 	{
-	  warning ("could not create sync socket\n");
+	  warning ("could not create sync socket");
 	  break;
 	}
 
@@ -7218,7 +7218,7 @@ gdb_agent_helper_thread (void *arg)
 
 	  if (fd < 0)
 	    {
-	      warning ("Accept returned %d, error: %s\n",
+	      warning ("Accept returned %d, error: %s",
 		       fd, strerror (errno));
 	      break;
 	    }

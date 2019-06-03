@@ -425,7 +425,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
       for (i = 1; argv[i] != NULL; i++)
 	warning (" %s", argv[i]);
 
-      warning ("Error: %s\n", safe_strerror (save_errno));
+      warning ("Error: %s", safe_strerror (save_errno));
 
       _exit (0177);
     }

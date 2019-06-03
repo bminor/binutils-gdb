@@ -1858,7 +1858,7 @@ static void
 disable_probes_interface (svr4_info *info)
 {
   warning (_("Probes-based dynamic linker interface failed.\n"
-	     "Reverting to original interface.\n"));
+	     "Reverting to original interface."));
 
   free_probes_table (info);
   free_solib_list (info);

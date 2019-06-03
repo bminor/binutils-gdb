@@ -479,7 +479,7 @@ s390_get_wordsize (int pid)
 				  (PTRACE_TYPE_ARG4) 0);
   if (errno != 0)
     {
-      warning (_("Couldn't determine word size, assuming 64-bit.\n"));
+      warning (_("Couldn't determine word size, assuming 64-bit."));
       return 8;
     }
   /* Derive word size from extended addressing mode (PSW bit 31).  */
