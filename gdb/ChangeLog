@@ -1,3 +1,9 @@
+2019-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* printcmd.c (print_address_symbolic): Print negative offsets.
+	(build_address_symbolic): Force signed arithmetic when computing
+	offset.
+
 2019-07-30  Christian Biesinger  <cbiesinger@google.com>
 
 	PR/24474: Add a function to lookup static variables.
@@ -83,10 +89,6 @@
 
 	* dwarf2-frame.c (dwarf2_frame_cache): Don't decode FDE instructions
 	for entry pc when entry pc is out of range for that FDE.
-
-	* printcmd.c (print_address_symbolic): Print negative offsets.
-	(build_address_symbolic): Force signed arithmetic when computing
-	offset.
 
 2019-07-26  Brian Callahan  <bcallah@openbsd.org>
 

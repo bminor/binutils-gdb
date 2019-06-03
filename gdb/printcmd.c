@@ -540,7 +540,7 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
     fputs_filtered ("<", stream);
   fputs_styled (name.c_str (), function_name_style.style (), stream);
   if (offset != 0)
-    fprintf_filtered (stream, "+%u", (unsigned int) offset);
+    fprintf_filtered (stream, "%+d", offset);
 
   /* Append source filename and line number if desired.  Give specific
      line # of this addr, if we have it; else line # of the nearest symbol.  */
@@ -680,7 +680,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
       && name_location + max_symbolic_offset > name_location)
     return 1;
 
-  *offset = addr - name_location;
+  *offset = (LONGEST) addr - name_location;
 
   *name = name_temp;
 
