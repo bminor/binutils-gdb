@@ -56,9 +56,7 @@
 #include "bucomm.h"
 #include "elfcomm.h"
 #include "dwarf.h"
-#ifdef HAVE_LIBCTF
 #include "ctf-api.h"
-#endif
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -101,11 +99,9 @@ static bfd_boolean with_source_code;	/* -S */
 static int show_raw_insn;		/* --show-raw-insn */
 static int dump_dwarf_section_info;	/* --dwarf */
 static int dump_stab_section_info;	/* --stabs */
-#ifdef HAVE_LIBCTF
 static int dump_ctf_section_info;       /* --ctf */
 static char *dump_ctf_section_name;
 static char *dump_ctf_parent_name;	/* --ctf-parent */
-#endif
 static int do_demangle;			/* -C, --demangle */
 static bfd_boolean disassemble;		/* -d */
 static bfd_boolean disassemble_all;	/* -D */
@@ -232,12 +228,8 @@ usage (FILE *stream, int status)
           =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
           =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
           =addr,=cu_index,=links,=follow-links]\n\
-                           Display DWARF info in the file\n"));
-#ifdef HAVE_LIBCTF
-  fprintf (stream, _("\
-  --ctf=SECTION            Display CTF info from SECTION\n"));
-#endif
-  fprintf (stream, _("\
+                           Display DWARF info in the file\n\
+  --ctf=SECTION            Display CTF info from SECTION\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
@@ -286,11 +278,8 @@ usage (FILE *stream, int status)
       --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
                              or deeper\n\
       --dwarf-check          Make additional dwarf internal consistency checks.\
-      \n"));
-#ifdef HAVE_LIBCTF
-      fprintf (stream, _("\
+      \n\
       --ctf-parent=SECTION     Use SECTION as the CTF parent\n\n"));
-#endif
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
 
@@ -325,11 +314,9 @@ enum option_values
     OPTION_DWARF_START,
     OPTION_RECURSE_LIMIT,
     OPTION_NO_RECURSE_LIMIT,
-#ifdef HAVE_LIBCTF
+    OPTION_INLINES,
     OPTION_CTF,
-    OPTION_CTF_PARENT,
-#endif
-    OPTION_INLINES
+    OPTION_CTF_PARENT
   };
 
 static struct option long_options[]=
@@ -372,10 +359,8 @@ static struct option long_options[]=
   {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
   {"dwarf", optional_argument, NULL, OPTION_DWARF},
-#ifdef HAVE_LIBCTF
   {"ctf", required_argument, NULL, OPTION_CTF},
   {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
-#endif
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
@@ -3214,7 +3199,6 @@ dump_bfd_header (bfd *abfd)
 }
 
 
-#ifdef HAVE_LIBCTF
 /* Formatting callback function passed to ctf_dump.  Returns either the pointer
    it is passed, or a pointer to newly-allocated storage, in which case
    dump_ctf() will free it when it no longer needs it.  */
@@ -3232,7 +3216,6 @@ dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
 }
 
 /* Make a ctfsect suitable for ctf_bfdopen_ctfsect().  */
-
 static ctf_sect_t
 make_ctfsect (const char *name, bfd_byte *data,
 	      bfd_size_type size)
@@ -3345,8 +3328,8 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   free (parentdata);
   free (ctfdata);
 }
-#endif /* HAVE_LIBCTF */
 
+
 static void
 dump_bfd_private_header (bfd *abfd)
 {
@@ -4057,10 +4040,8 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
     dump_symbols (abfd, TRUE);
   if (dump_dwarf_section_info)
     dump_dwarf (abfd);
-#ifdef HAVE_LIBCTF
   if (dump_ctf_section_info)
     dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
-#endif
   if (dump_stab_section_info)
     dump_stabs (abfd);
   if (dump_reloc_info && ! disassemble)
@@ -4500,7 +4481,6 @@ main (int argc, char **argv)
 	case OPTION_DWARF_CHECK:
 	  dwarf_check = TRUE;
 	  break;
-#ifdef HAVE_LIBCTF
         case OPTION_CTF:
           dump_ctf_section_info = TRUE;
           dump_ctf_section_name = xstrdup (optarg);
@@ -4509,7 +4489,6 @@ main (int argc, char **argv)
 	case OPTION_CTF_PARENT:
 	  dump_ctf_parent_name = xstrdup (optarg);
 	  break;
-#endif
 	case 'G':
 	  dump_stab_section_info = TRUE;
 	  seenflag = TRUE;
@@ -4569,10 +4548,9 @@ main (int argc, char **argv)
     }
 
   free_only_list ();
-#ifdef HAVE_LIBCTF
   free (dump_ctf_section_name);
   free (dump_ctf_parent_name);
-#endif
+
   END_PROGRESS (program_name);
 
   return exit_status;

@@ -901,22 +901,6 @@ case "${target}" in
     ;;
 esac
 
-# Targets that do not use the ELF file format cannot support libctf.
-case "${target}" in
-  *-*-pe | *-*-*vms* | *-*-darwin | *-*-*coff* | *-*-wince | *-*-mingw*)
-    noconfigdirs="$noconfigdirs libctf"
-    ;;
-  *-*-aout | *-*-osf* | *-*-go32 | *-*-macos* | *-*-rhapsody*)
-    noconfigdirs="$noconfigdirs libctf"
-    ;;
-  *-*-netbsdpe | *-*-cygwin* | *-*-pep | *-*-msdos | *-*-winnt)
-    noconfigdirs="$noconfigdirs libctf"
-    ;;
-  ns32k-*-* | pdp11-*-* | *-*-aix* | *-*-netbsdaout)
-    noconfigdirs="$noconfigdirs libctf"
-    ;;
-esac
-
 case "${target}" in
   *-*-chorusos)
     ;;

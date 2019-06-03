@@ -1,3 +1,12 @@
+2019-06-03  Nick Clifton  <nickc@redhat.com>
+
+	Revert:
+	2019-05-29  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (noconfigdirs): Add libctf if the target does not use
+	the ELF file format.
+	* configure: Regenerate.
+
 2019-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* src-release.sh (do_proto_toplev): Add libctf to list of
