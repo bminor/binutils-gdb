@@ -382,7 +382,7 @@ powerpc_init_dialect (struct disassemble_info *info)
 #define PPC_OPCD_SEGS (1 + PPC_OP (-1))
 static unsigned short powerpc_opcd_indices[PPC_OPCD_SEGS + 1];
 #define PREFIX_OPCD_SEGS (1 + PPC_PREFIX_SEG (-1))
-static unsigned short prefix_opcd_indices[PPC_OPCD_SEGS+1];
+static unsigned short prefix_opcd_indices[PREFIX_OPCD_SEGS + 1];
 #define VLE_OPCD_SEGS (1 + VLE_OP_TO_SEG (VLE_OP (-1, 0xffff)))
 static unsigned short vle_opcd_indices[VLE_OPCD_SEGS + 1];
 #define SPE2_OPCD_SEGS (1 + SPE2_XOP_TO_SEG (SPE2_XOP (-1)))

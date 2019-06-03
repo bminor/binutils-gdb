@@ -1,3 +1,7 @@
+2019-06-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (prefix_opcd_indices): Correct size.
+
 2019-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24625
