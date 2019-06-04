@@ -91,5 +91,5 @@ gdb_tilde_expand_up (const char *dir)
   gdb_assert (glob.pathc () > 0);
   /* "glob" may return more than one match to the path provided by the
      user, but we are only interested in the first match.  */
-  return gdb::unique_xmalloc_ptr<char> (xstrdup (glob.pathv ()[0]));
+  return make_unique_xstrdup (glob.pathv ()[0]);
 }

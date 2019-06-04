@@ -3877,7 +3877,7 @@ test_set_ext_lang_command ()
   SELF_CHECK (lang == language_unknown);
 
   /* Test adding a new extension using the CLI command.  */
-  gdb::unique_xmalloc_ptr<char> args_holder (xstrdup (".hello rust"));
+  auto args_holder = make_unique_xstrdup (".hello rust");
   ext_args = args_holder.get ();
   set_ext_lang_command (NULL, 1, NULL);
 

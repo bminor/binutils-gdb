@@ -37,7 +37,7 @@ static gdb::unique_xmalloc_ptr<char>
 scan_expression (const char **cmd, const char *def)
 {
   if ((*cmd) == NULL || (**cmd) == '\0')
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (def));
+    return make_unique_xstrdup (def);
   else
     {
       char *exp;

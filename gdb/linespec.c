@@ -555,7 +555,7 @@ copy_token_string (linespec_token token)
   const char *str, *s;
 
   if (token.type == LSTOKEN_KEYWORD)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (LS_TOKEN_KEYWORD (token)));
+    return make_unique_xstrdup (LS_TOKEN_KEYWORD (token));
 
   str = LS_TOKEN_STOKEN (token).ptr;
   s = remove_trailing_whitespace (str, str + LS_TOKEN_STOKEN (token).length);

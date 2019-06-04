@@ -65,7 +65,7 @@ compile_cplus_instance::decl_name (const char *natural)
   if (name != nullptr)
     return name;
 
-  return gdb::unique_xmalloc_ptr<char> (xstrdup (natural));
+  return make_unique_xstrdup (natural);
 }
 
 /* Get the access flag for the NUM'th field of TYPE.  */

@@ -13195,8 +13195,7 @@ catch_ada_completer (struct cmd_list_element *cmd, completion_tracker &tracker,
   for (const ada_exc_info &info : exceptions)
     {
       if (startswith (info.name, word))
-	tracker.add_completion
-	  (gdb::unique_xmalloc_ptr<char> (xstrdup (info.name)));
+	tracker.add_completion (make_unique_xstrdup (info.name));
     }
 }
 

@@ -941,10 +941,7 @@ condition_completer (struct cmd_list_element *cmd,
 	  xsnprintf (number, sizeof (number), "%d", b->number);
 
 	  if (strncmp (number, text, len) == 0)
-	    {
-	      gdb::unique_xmalloc_ptr<char> copy (xstrdup (number));
-	      tracker.add_completion (std::move (copy));
-	    }
+	    tracker.add_completion (make_unique_xstrdup (number));
 	}
 
       return;

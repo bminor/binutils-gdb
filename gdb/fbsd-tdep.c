@@ -1266,7 +1266,7 @@ fbsd_core_vnode_path (struct gdbarch *gdbarch, int fd)
 	  && bfd_get_signed_32 (core_bfd, descdata + KF_FD) == fd)
 	{
 	  char *path = (char *) descdata + KF_PATH;
-	  return gdb::unique_xmalloc_ptr<char> (xstrdup (path));
+	  return make_unique_xstrdup (path);
 	}
 
       descdata += structsize;

@@ -908,7 +908,7 @@ cp_remove_params_if_any (const char *demangled_name, bool completion_mode)
      we're completing / matching everything, avoid returning NULL
      which would make callers interpret the result as an error.  */
   if (demangled_name[0] == '\0' && completion_mode)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
+    return make_unique_xstrdup ("");
 
   gdb::unique_xmalloc_ptr<char> without_params
     = cp_remove_params_1 (demangled_name, false);

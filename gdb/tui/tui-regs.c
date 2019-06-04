@@ -676,7 +676,7 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
   for (tmp = extra; *tmp != NULL; ++tmp)
     {
       if (strncmp (word, *tmp, len) == 0)
-	tracker.add_completion (gdb::unique_xmalloc_ptr<char> (xstrdup (*tmp)));
+	tracker.add_completion (make_unique_xstrdup (*tmp));
     }
 }
 

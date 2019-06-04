@@ -56,4 +56,12 @@ struct noop_deleter
 
 } /* namespace gdb */
 
+/* Dup STR and return a unique_xmalloc_ptr for the result.  */
+
+static inline gdb::unique_xmalloc_ptr<char>
+make_unique_xstrdup (const char *str)
+{
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (str));
+}
+
 #endif /* COMMON_GDB_UNIQUE_PTR_H */

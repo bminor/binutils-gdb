@@ -2014,11 +2014,7 @@ complete_internalvar (completion_tracker &tracker, const char *name)
 
   for (var = internalvars; var; var = var->next)
     if (strncmp (var->name, name, len) == 0)
-      {
-	gdb::unique_xmalloc_ptr<char> copy (xstrdup (var->name));
-
-	tracker.add_completion (std::move (copy));
-      }
+      tracker.add_completion (make_unique_xstrdup (var->name));
 }
 
 /* Create an internal variable with name NAME and with a void value.

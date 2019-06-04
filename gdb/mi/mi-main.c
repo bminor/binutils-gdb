@@ -695,7 +695,7 @@ static void
 output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 {
   ui_out_emit_list list_emitter (uiout, field_name);
-  gdb::unique_xmalloc_ptr<char> cores (xstrdup (xcores));
+  auto cores = make_unique_xstrdup (xcores);
   char *p = cores.get ();
 
   for (p = strtok (p, ","); p;  p = strtok (NULL, ","))

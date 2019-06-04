@@ -647,7 +647,7 @@ psymtab_search_name (const char *name)
       break;
     }
 
-  return gdb::unique_xmalloc_ptr<char> (xstrdup (name));
+  return make_unique_xstrdup (name);
 }
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.

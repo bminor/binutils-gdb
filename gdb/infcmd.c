@@ -421,7 +421,7 @@ strip_bg_char (const char *args, int *bg_char_p)
     }
 
   *bg_char_p = 0;
-  return gdb::unique_xmalloc_ptr<char> (xstrdup (args));
+  return make_unique_xstrdup (args);
 }
 
 /* Common actions to take after creating any sort of inferior, by any

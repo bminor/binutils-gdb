@@ -1,3 +1,30 @@
+2019-06-04  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_unique_ptr.h (make_unique_xstrdup): New.
+
+	* ada-lang.c (catch_ada_completer): Use make_unique_xstrdup.
+	* breakpoint.c (condition_completer): Likewise.
+	* cli/cli-dump.c (scan_expression): Likewise.
+	* common/filestuff.c (mkdir_recursive): Likewise.
+	* common/gdb_tilde_expand.c (gdb_tilde_expand_up)
+	* common/pathstuff.c (gdb_realpath, gdb_realpath_keepfile)
+	(gdb_abspath): Likewise.
+	* compile/compile-cplus-types.c
+	(compile_cplus_instance::decl_name): Likewise.
+	* completer.c (complete_explicit_location):
+	(signal_completer, reg_or_group_completer_1): Likewise.
+	* cp-support.c (cp_remove_params_if_any): Likewise.
+	* fbsd-tdep.c (fbsd_core_vnode_path): Likewise.
+	* guile/scm-safe-call.c (gdbscm_safe_eval_string): Likewise.
+	* infcmd.c (strip_bg_char): Likewise.
+	* linespec.c (copy_token_string): Likewise.
+	* mi/mi-main.c (output_cores): Likewise.
+	* psymtab.c (psymtab_search_name):
+	* symfile.c (test_set_ext_lang_command): Likewise.
+	* target.c (target_fileio_read_stralloc): Likewise.
+	* tui/tui-regs.c (tui_reggroup_completer): Likewise.
+	* value.c (complete_internalvar): Likewise.
+
 2019-06-04  Christian Biesinger  <cbiesinger@google.com>
 
 	Add objfile property to gdb.Type.

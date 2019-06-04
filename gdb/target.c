@@ -3106,7 +3106,7 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
     return gdb::unique_xmalloc_ptr<char> (nullptr);
 
   if (transferred == 0)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
+    return make_unique_xstrdup ("");
 
   bufstr[transferred] = 0;
 

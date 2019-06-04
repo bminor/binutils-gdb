@@ -462,7 +462,7 @@ is_regular_file (const char *name, int *errno_ptr)
 bool
 mkdir_recursive (const char *dir)
 {
-  gdb::unique_xmalloc_ptr<char> holder (xstrdup (dir));
+  auto holder = make_unique_xstrdup (dir);
   char * const start = holder.get ();
   char *component_start = start;
   char *component_end = start;

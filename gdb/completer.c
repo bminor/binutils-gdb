@@ -798,9 +798,7 @@ complete_explicit_location (completion_tracker &tracker,
 		   before: "b -function 'not_loaded_function_yet()'"
 		   after:  "b -function 'not_loaded_function_yet()' "
 	      */
-	      gdb::unique_xmalloc_ptr<char> text_copy
-		(xstrdup (text));
-	      tracker.add_completion (std::move (text_copy));
+	      tracker.add_completion (make_unique_xstrdup (text));
 	    }
 	  else if (quoted_arg_end[1] == ' ')
 	    {
@@ -1723,10 +1721,7 @@ signal_completer (struct cmd_list_element *ignore,
 	continue;
 
       if (strncasecmp (signame, word, len) == 0)
-	{
-	  gdb::unique_xmalloc_ptr<char> copy (xstrdup (signame));
-	  tracker.add_completion (std::move (copy));
-	}
+	tracker.add_completion (make_unique_xstrdup (signame));
     }
 }
 
@@ -1765,10 +1760,7 @@ reg_or_group_completer_1 (completion_tracker &tracker,
 	   i++)
 	{
 	  if (*name != '\0' && strncmp (word, name, len) == 0)
-	    {
-	      gdb::unique_xmalloc_ptr<char> copy (xstrdup (name));
-	      tracker.add_completion (std::move (copy));
-	    }
+	    tracker.add_completion (make_unique_xstrdup (name));
 	}
     }
 
@@ -1782,10 +1774,7 @@ reg_or_group_completer_1 (completion_tracker &tracker,
 	{
 	  name = reggroup_name (group);
 	  if (strncmp (word, name, len) == 0)
-	    {
-	      gdb::unique_xmalloc_ptr<char> copy (xstrdup (name));
-	      tracker.add_completion (std::move (copy));
-	    }
+	    tracker.add_completion (make_unique_xstrdup (name));
 	}
     }
 }

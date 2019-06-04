@@ -404,7 +404,7 @@ gdbscm_safe_eval_string (const char *string, int display_result)
   result = gdbscm_with_guile (scscm_eval_scheme_string, (void *) &data);
 
   if (result != NULL)
-    return gdb::unique_xmalloc_ptr<char> (xstrdup (result));
+    return make_unique_xstrdup (result);
   return NULL;
 }
 

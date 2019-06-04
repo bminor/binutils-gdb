@@ -3802,7 +3802,7 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_path.set (gdb::unique_xmalloc_ptr<char> (xstrdup (next_arg[0])));
+      program_path.set (make_unique_xstrdup (next_arg[0]));
       for (i = 1; i < n; i++)
 	program_args.push_back (xstrdup (next_arg[i]));
       program_args.push_back (NULL);
