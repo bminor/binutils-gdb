@@ -800,7 +800,8 @@ ctf_add_encoded (ctf_file_t *fp, uint32_t flag,
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, 0);
-  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, NBBY) / NBBY);
+  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
+				 / CHAR_BIT);
   dtd->dtd_u.dtu_enc = *ep;
 
   return type;
@@ -859,7 +860,8 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_SLICE, flag, 0);
-  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, NBBY) / NBBY);
+  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
+				 / CHAR_BIT);
   dtd->dtd_u.dtu_slice.cts_type = ref;
   dtd->dtd_u.dtu_slice.cts_bits = ep->cte_bits;
   dtd->dtd_u.dtu_slice.cts_offset = ep->cte_offset;
@@ -1338,7 +1340,7 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 	  if (ctf_type_encoding (fp, ltype, &linfo) == 0)
 	    off += linfo.cte_bits;
 	  else if ((lsize = ctf_type_size (fp, ltype)) > 0)
-	    off += lsize * NBBY;
+	    off += lsize * CHAR_BIT;
 
 	  /* Round up the offset of the end of the last member to
 	     the next byte boundary, convert 'off' to bytes, and
@@ -1349,9 +1351,9 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 	     packing if the new member is a bit-field, but we're
 	     the "compiler" and ANSI says we can do as we choose.  */
 
-	  off = roundup (off, NBBY) / NBBY;
+	  off = roundup (off, CHAR_BIT) / CHAR_BIT;
 	  off = roundup (off, MAX (malign, 1));
-	  dmd->dmd_offset = off * NBBY;
+	  dmd->dmd_offset = off * CHAR_BIT;
 	  ssize = off + msize;
 	}
       else
@@ -1360,7 +1362,7 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 
 	  dmd->dmd_offset = bit_offset;
 	  ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
-	  ssize = MAX (ssize, ((signed) bit_offset / NBBY) + msize);
+	  ssize = MAX (ssize, ((signed) bit_offset / CHAR_BIT) + msize);
 	}
     }
   else
