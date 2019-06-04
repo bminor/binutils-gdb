@@ -2211,12 +2211,6 @@ set_objfile_default_section_offset (struct objfile *objf,
 
 /* This function allows the addition of incrementally linked object files.
    It does not modify any state in the target, only in the debugger.  */
-/* Note: ezannoni 2000-04-13 This function/command used to have a
-   special case syntax for the rombug target (Rombug is the boot
-   monitor for Microware's OS-9 / OS-9000, see remote-os9k.c). In the
-   rombug case, the user doesn't need to supply a text address,
-   instead a call to target_link() (in target.c) would supply the
-   value to use.  We are now discontinuing this type of ad hoc syntax.  */
 
 static void
 add_symbol_file_command (const char *args, int from_tty)
@@ -2358,6 +2352,9 @@ add_symbol_file_command (const char *args, int from_tty)
 
   objf = symbol_file_add (filename.get (), add_flags, &section_addrs,
 			  flags);
+  if (!objfile_has_symbols (objf) && objf->per_bfd->minimal_symbol_count <= 0)
+    warning (_("newly-added symbol file \"%s\" does not provide any symbols"),
+	     filename.get ());
 
   if (seen_offset)
     set_objfile_default_section_offset (objf, section_addrs, offset);

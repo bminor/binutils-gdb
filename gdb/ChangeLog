@@ -1,5 +1,10 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	* symfile.c (add_symbol_file_command): Remove obsolete comment.
+	Warn if symbol file does not provide any symbols.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	* source.c (find_and_open_source): Respect basenames_may_differ.
 
 2019-06-14  Andrew Burgess  <andrew.burgess@embecosm.com>
