@@ -1385,10 +1385,12 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	m_opcode = OTHER;
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("unable to decode %d byte instructions in "
-		      "prologue at %s"), m_length,
-		    core_addr_to_string (pc));
+    {
+      /* This must be a 6 or 8 byte instruction, we don't currently decode
+	 any of these, so just ignore it.  */
+      gdb_assert (m_length == 6 || m_length == 8);
+      m_opcode = OTHER;
+    }
 }
 
 /* The prologue scanner.  This is currently only used for skipping the

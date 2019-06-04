@@ -1,3 +1,10 @@
+2019-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-unwind-long-insn-6.s: New file.
+	* gdb.arch/riscv-unwind-long-insn-8.s: New file.
+	* gdb.arch/riscv-unwind-long-insn.c: New file.
+	* gdb.arch/riscv-unwind-long-insn.exp: New file.
+
 2019-06-04  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdb.python/py-type.exp: Test for new gdb.Type.objfile property.

@@ -1,3 +1,8 @@
+2019-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_insn::decode): Gracefully ignore
+	instructions of lengths 6 or 8 bytes.
+
 2019-06-04  Pedro Alves  <palves@redhat.com>
 
 	* common/gdb_unique_ptr.h (make_unique_xstrdup): New.
