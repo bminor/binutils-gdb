@@ -6619,7 +6619,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	      = arm_decode_field_multiple (given, 13, 15, 22, 22);
 	    unsigned long Qn = arm_decode_field_multiple (given, 17, 19, 7, 7);
 
-	    if ((Qd == Qn))
+	    if (Qd == Qn)
 	      {
 		*unpredictable_code = UNPRED_Q_REGS_EQ_AND_SIZE_1;
 		return TRUE;

@@ -1,3 +1,7 @@
+2019-06-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* arm-dis.c (is_mve_unpredictable): Remove spurious paranthesis.
+
 2019-06-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (prefix_opcd_indices): Correct size.
