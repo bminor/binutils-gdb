@@ -6462,6 +6462,43 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for O_CLOEXEC" >&5
+$as_echo_n "checking for O_CLOEXEC... " >&6; }
+if ${ac_cv_libctf_macro_O_CLOEXEC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <fcntl.h>
+                       #ifndef O_CLOEXEC
+                         choke me;
+                       #endif
+
+int
+main ()
+{
+return O_CLOEXEC;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_libctf_macro_O_CLOEXEC=yes
+else
+  ac_cv_libctf_macro_O_CLOEXEC=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_libctf_macro_O_CLOEXEC" >&5
+$as_echo "$ac_cv_libctf_macro_O_CLOEXEC" >&6; }
+
+if test $ac_cv_libctf_macro_O_CLOEXEC = yes; then
+
+$as_echo "#define HAVE_O_CLOEXEC 1" >>confdefs.h
+
+fi
+
 ac_config_files="$ac_config_files Makefile"
 
 ac_config_headers="$ac_config_headers config.h"

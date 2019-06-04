@@ -24,6 +24,9 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
+/* Whether the platform has a definition of O_CLOEXEC. */
+#undef HAVE_O_CLOEXEC
+
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 

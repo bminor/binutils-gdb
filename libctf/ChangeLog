@@ -1,5 +1,12 @@
 2019-06-04  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure.ac: Check for O_CLOEXEC.
+	* ctf-decls.h (O_CLOEXEC): Define (to 0), if need be.
+	* config.h.in: Regenerate.
+	* configure: Likewise.
+
+2019-06-04  Nick Alcock  <nick.alcock@oracle.com>
+
 	* qsort_r.c: Rename to...
 	* ctf-qsort_r.c: ... this.
 	(_quicksort): Define to ctf_qsort_r.

@@ -133,6 +133,22 @@ esac
 
 AM_CONDITIONAL(NEED_CTF_QSORT_R, test "${ac_cv_libctf_qsort_r_signature}" = unknown)
 
+AC_CACHE_CHECK([for O_CLOEXEC], [ac_cv_libctf_macro_O_CLOEXEC],
+  [AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([[#include <fcntl.h>
+                       #ifndef O_CLOEXEC
+                         choke me;
+                       #endif
+                     ]],
+                     [[return O_CLOEXEC;]])],
+    [ac_cv_libctf_macro_O_CLOEXEC=yes],
+    [ac_cv_libctf_macro_O_CLOEXEC=no])])
+
+if test $ac_cv_libctf_macro_O_CLOEXEC = yes; then
+  AC_DEFINE([HAVE_O_CLOEXEC], 1,
+	    [Whether the platform has a definition of O_CLOEXEC.])
+fi
+
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT

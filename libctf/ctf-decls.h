@@ -62,6 +62,10 @@ void ctf_qsort_r (void *base, size_t nmemb, size_t size,
 	      void *arg);
 #endif
 
+#ifndef HAVE_O_CLOEXEC
+# define O_CLOEXEC 0
+#endif
+
 #undef MAX
 #undef MIN
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
