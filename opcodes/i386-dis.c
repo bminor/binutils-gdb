@@ -12155,6 +12155,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
     }
 
+  /* If VEX.vvvv and EVEX.vvvv are unused, they must be all 1s, which
+     are all 0s in inverted form.  */
+  if (need_vex && vex.register_specifier != 0)
+    {
+      (*info->fprintf_func) (info->stream, "(bad)");
+      return end_codep - priv.the_buffer;
+    }
+
   /* Check if the REX prefix is used.  */
   if (rex_ignored == 0 && (rex ^ rex_used) == 0 && last_rex_prefix >= 0)
     all_prefixes[last_rex_prefix] = 0;
@@ -15921,6 +15929,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     return;
 
   reg = vex.register_specifier;
+  vex.register_specifier = 0;
   if (address_mode != mode_64bit)
     reg &= 7;
   else if (vex.evex && !vex.v)
@@ -16204,6 +16213,7 @@ OP_Vex_2src_1 (int bytemode, int sizeflag)
   if (vex.w)
     {
       unsigned int reg = vex.register_specifier;
+      vex.register_specifier = 0;
 
       if (address_mode != mode_64bit)
 	reg &= 7;
@@ -16221,6 +16231,7 @@ OP_Vex_2src_2 (int bytemode, int sizeflag)
   else
     {
       unsigned int reg = vex.register_specifier;
+      vex.register_specifier = 0;
 
       if (address_mode != mode_64bit)
 	reg &= 7;
@@ -16298,11 +16309,7 @@ static void
 OP_EX_Vex (int bytemode, int sizeflag)
 {
   if (modrm.mod != 3)
-    {
-      if (vex.register_specifier != 0)
-	BadOp ();
-      need_vex_reg = 0;
-    }
+    need_vex_reg = 0;
   OP_EX (bytemode, sizeflag);
 }
 
@@ -16310,11 +16317,7 @@ static void
 OP_XMM_Vex (int bytemode, int sizeflag)
 {
   if (modrm.mod != 3)
-    {
-      if (vex.register_specifier != 0)
-	BadOp ();
-      need_vex_reg = 0;
-    }
+    need_vex_reg = 0;
   OP_XMM (bytemode, sizeflag);
 }
 
@@ -16594,6 +16597,7 @@ OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   const char **names;
   unsigned int reg = vex.register_specifier;
+  vex.register_specifier = 0;
 
   if (rex & REX_W)
     names = names64;

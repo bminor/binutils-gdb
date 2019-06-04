@@ -1,3 +1,16 @@
+2019-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/24626
+	* i386-dis.c (print_insn): Check for unused VEX.vvvv and
+	EVEX.vvvv when disassembling VEX and EVEX instructions.
+	(OP_VEX): Set vex.register_specifier to 0 after readding
+	vex.register_specifier.
+	(OP_Vex_2src_1): Likewise.
+	(OP_Vex_2src_2): Likewise.
+	(OP_LWP_E): Likewise.
+	(OP_EX_Vex): Don't check vex.register_specifier.
+	(OP_XMM_Vex): Likewise.
+
 2019-06-04  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 	    Lili Cui  <lili.cui@intel.com>
 

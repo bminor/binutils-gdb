@@ -1,3 +1,12 @@
+2019-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/24626
+	* testsuite/gas/i386/disassem.s: Add tests for reserved VEX.vvvv
+	and EVEX.vvvv.
+	* testsuite/gas/i386/x86-64-disassem.s: Likewise.
+	* testsuite/gas/i386/disassem.d: Updated.
+	* testsuite/gas/i386/x86-64-disassem.d: Likewise.
+
 2019-06-04  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 	    Lili Cui  <lili.cui@intel.com>
 
