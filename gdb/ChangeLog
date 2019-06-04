@@ -1,8 +1,8 @@
 2019-06-04  Christian Biesinger  <cbiesinger@google.com>
 
 	Add objfile property to gdb.Type.
-	* gdb/NEWS: Mention Python API addition.
-	* gdb/python/py-type.c (typy_get_objfile): New method.
+	* NEWS: Mention Python API addition.
+	* python/py-type.c (typy_get_objfile): New method.
 
 2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 

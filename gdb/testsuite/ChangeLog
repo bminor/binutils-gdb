@@ -1,7 +1,6 @@
 2019-06-04  Christian Biesinger  <cbiesinger@google.com>
 
-	* gdb/testsuite/gdb.python/py-type.exp: Test for new
-	  gdb.Type.objfile property.
+	* gdb.python/py-type.exp: Test for new gdb.Type.objfile property.
 
 2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
