@@ -845,7 +845,9 @@ enum
   MOD_0F382A_PREFIX_2,
   MOD_0F38F5_PREFIX_2,
   MOD_0F38F6_PREFIX_0,
+  MOD_0F38F8_PREFIX_1,
   MOD_0F38F8_PREFIX_2,
+  MOD_0F38F8_PREFIX_3,
   MOD_0F38F9_PREFIX_0,
   MOD_62_32BIT,
   MOD_C4_32BIT,
@@ -4444,8 +4446,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F38F8 */
   {
     { Bad_Opcode },
-    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38F8_PREFIX_1) },
     { MOD_TABLE (MOD_0F38F8_PREFIX_2) },
+    { MOD_TABLE (MOD_0F38F8_PREFIX_3) },
   },
 
   /* PREFIX_0F38F9 */
@@ -10520,8 +10523,16 @@ static const struct dis386 mod_table[][2] = {
     { "wrssK",		{ M, Gdq }, PREFIX_OPCODE },
   },
   {
+    /* MOD_0F38F8_PREFIX_1 */
+    { "enqcmds",	{ Gva, M }, PREFIX_OPCODE },
+  },
+  {
     /* MOD_0F38F8_PREFIX_2 */
     { "movdir64b",	{ Gva, M }, PREFIX_OPCODE },
+  },
+  {
+    /* MOD_0F38F8_PREFIX_3 */
+    { "enqcmd",		{ Gva, M }, PREFIX_OPCODE },
   },
   {
     /* MOD_0F38F9_PREFIX_0 */

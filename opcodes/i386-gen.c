@@ -295,6 +295,8 @@ static initializer cpu_flag_init[] =
     "CpuMOVDIRI" },
   { "CPU_MOVDIR64B_FLAGS",
     "CpuMOVDIR64B" },
+  { "CPU_ENQCMD_FLAGS",
+    "CpuENQCMD" },
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -365,6 +367,8 @@ static initializer cpu_flag_init[] =
     "CpuMOVDIRI" },
   { "CPU_ANY_MOVDIR64B_FLAGS",
     "CpuMOVDIR64B" },
+  { "CPU_ANY_ENQCMD_FLAGS",
+    "CpuENQCMD" },
 };
 
 static const initializer operand_type_shorthands[] =
@@ -599,6 +603,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuCLDEMOTE),
   BITFIELD (CpuMOVDIRI),
   BITFIELD (CpuMOVDIR64B),
+  BITFIELD (CpuENQCMD),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

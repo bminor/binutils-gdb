@@ -239,6 +239,8 @@ enum
   CpuMOVDIRI,
   /* MOVDIRR64B instruction required */
   CpuMOVDIR64B,
+  /* ENQCMD instruction required */
+  CpuENQCMD,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -366,6 +368,7 @@ typedef union i386_cpu_flags
       unsigned int cpucldemote:1;
       unsigned int cpumovdiri:1;
       unsigned int cpumovdir64b:1;
+      unsigned int cpuenqcmd:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

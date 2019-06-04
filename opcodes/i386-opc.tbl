@@ -4725,3 +4725,12 @@ vcvtneps2bf16y, 2, 0xf372, None, 1, CpuAVX512_BF16|CpuAVX512VL, Modrm|VexOpcode|
 vdpbf16ps, 3, 0xf352, None, 1, CpuAVX512_BF16, Modrm|VexOpcode|VexVVVV|Masking=3|VexW0|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // AVX512_BF16 instructions end.
+
+// ENQCMD instructions.
+
+enqcmd, 2, 0xf20f38f8, None, 3, CpuENQCMD|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg16|Reg32 }
+enqcmd, 2, 0xf20f38f8, None, 3, CpuENQCMD|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg32|Reg64 }
+enqcmds, 2, 0xf30f38f8, None, 3, CpuENQCMD|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg16|Reg32 }
+enqcmds, 2, 0xf30f38f8, None, 3, CpuENQCMD|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg32|Reg64 }
+
+// ENQCMD instructions end.
