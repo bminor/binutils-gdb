@@ -15114,7 +15114,7 @@ functions in all scopes.  For C++, this means in all namespaces and\n\
 classes.  For Ada, this means in all packages.  E.g., in C++,\n\
 \"func()\" matches \"A::func()\", \"A::B::func()\", etc.  The\n\
 \"-qualified\" flag overrides this behavior, making GDB interpret the\n\
-specified name as a complete fully-qualified name instead.\n"
+specified name as a complete fully-qualified name instead."
 
 /* This help string is used for the break, hbreak, tbreak and thbreak
    commands.  It is defined as a macro to prevent duplication.
@@ -15135,7 +15135,7 @@ stack frame.  This is useful for breaking on return to a stack frame.\n\
 \n\
 THREADNUM is the number from \"info threads\".\n\
 CONDITION is a boolean expression.\n\
-\n" LOCATION_HELP_STRING "\n\
+\n" LOCATION_HELP_STRING "\n\n\
 Multiple breakpoints at one place are permitted, and useful if their\n\
 conditions are different.\n\
 \n\
@@ -15507,7 +15507,7 @@ With a subcommand you can enable temporarily."),
 Enable some breakpoints.\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
-May be abbreviated to simply \"enable\".\n"),
+May be abbreviated to simply \"enable\"."),
 		   &enablebreaklist, "enable breakpoints ", 1, &enablelist);
 
   add_cmd ("once", no_class, enable_once_command, _("\
@@ -15583,7 +15583,7 @@ Argument may be a linespec, explicit, or address location as described below.\n\
 \n\
 With no argument, clears all breakpoints in the line that the selected frame\n\
 is executing in.\n"
-"\n" LOCATION_HELP_STRING "\n\
+"\n" LOCATION_HELP_STRING "\n\n\
 See also the \"delete\" command which clears breakpoints by number."));
   add_com_alias ("cl", "clear", class_breakpoint, 1);
 
@@ -15783,7 +15783,7 @@ tracing library.  You can inspect it when analyzing the trace buffer,\n\
 by printing the $_sdata variable like any other convenience variable.\n\
 \n\
 CONDITION is a boolean expression.\n\
-\n" LOCATION_HELP_STRING "\n\
+\n" LOCATION_HELP_STRING "\n\n\
 Multiple tracepoints at one place are permitted, and useful if their\n\
 conditions are different.\n\
 \n\

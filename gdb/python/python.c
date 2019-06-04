@@ -1759,8 +1759,7 @@ argument, and if the command is an expression, the result will be\n\
 printed.  For example:\n\
 \n\
     (gdb) python-interactive 2 + 3\n\
-    5\n\
-")
+    5")
 #else /* HAVE_PYTHON */
 	   _("\
 Start a Python interactive prompt.\n\

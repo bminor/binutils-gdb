@@ -1666,47 +1666,47 @@ _initialize_tui_win (void)
 		  0 /* allow-unknown */, &showlist);
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
-           _("Refresh the terminal display.\n"));
+           _("Refresh the terminal display."));
 
   cmd = add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
 Set the width (in characters) of tab stops.\n\
-Usage: tabset N\n"));
+Usage: tabset N"));
   deprecate_cmd (cmd, "set tui tab-width");
 
   cmd = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
 Set or modify the height of a specified window.\n"
 WIN_HEIGHT_USAGE
 "Window names are:\n\
-src  : the source window\n\
-cmd  : the command window\n\
-asm  : the disassembly window\n\
-regs : the register display\n"));
+   src  : the source window\n\
+   cmd  : the command window\n\
+   asm  : the disassembly window\n\
+   regs : the register display"));
   add_com_alias ("wh", "winheight", class_tui, 0);
   set_cmd_completer (cmd, winheight_completer);
   add_info ("win", tui_all_windows_info,
-	    _("List of all displayed windows.\n"));
+	    _("List of all displayed windows."));
   cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n"
 FOCUS_USAGE
 "Valid Window names are:\n\
-src  : the source window\n\
-asm  : the disassembly window\n\
-regs : the register display\n\
-cmd  : the command window\n"));
+   src  : the source window\n\
+   asm  : the disassembly window\n\
+   regs : the register display\n\
+   cmd  : the command window"));
   add_com_alias ("fs", "focus", class_tui, 0);
   set_cmd_completer (cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\
 Scroll window forward.\n\
-Usage: + [WIN] [N]\n"));
+Usage: + [WIN] [N]"));
   add_com ("-", class_tui, tui_scroll_backward_command, _("\
 Scroll window backward.\n\
-Usage: - [WIN] [N]\n"));
+Usage: - [WIN] [N]"));
   add_com ("<", class_tui, tui_scroll_left_command, _("\
 Scroll window text to the left.\n\
-Usage: < [WIN] [N]\n"));
+Usage: < [WIN] [N]"));
   add_com (">", class_tui, tui_scroll_right_command, _("\
 Scroll window text to the right.\n\
-Usage: > [WIN] [N]\n"));
+Usage: > [WIN] [N]"));
 
   /* Define the tui control variables.  */
   add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,
@@ -1714,9 +1714,9 @@ Usage: > [WIN] [N]\n"));
 Set the kind of border for TUI windows."), _("\
 Show the kind of border for TUI windows."), _("\
 This variable controls the border of TUI windows:\n\
-space           use a white space\n\
-ascii           use ascii characters + - | for the border\n\
-acs             use the Alternate Character Set"),
+   space           use a white space\n\
+   ascii           use ascii characters + - | for the border\n\
+   acs             use the Alternate Character Set"),
 			tui_set_var_cmd,
 			show_tui_border_kind,
 			&tui_setlist, &tui_showlist);
@@ -1726,13 +1726,13 @@ acs             use the Alternate Character Set"),
 Set the attribute mode to use for the TUI window borders."), _("\
 Show the attribute mode to use for the TUI window borders."), _("\
 This variable controls the attributes to use for the window borders:\n\
-normal          normal display\n\
-standout        use highlight mode of terminal\n\
-reverse         use reverse video mode\n\
-half            use half bright\n\
-half-standout   use half bright and standout mode\n\
-bold            use extra bright or bold\n\
-bold-standout   use extra bright or bold with standout mode"),
+   normal          normal display\n\
+   standout        use highlight mode of terminal\n\
+   reverse         use reverse video mode\n\
+   half            use half bright\n\
+   half-standout   use half bright and standout mode\n\
+   bold            use extra bright or bold\n\
+   bold-standout   use extra bright or bold with standout mode"),
 			tui_set_var_cmd,
 			show_tui_border_mode,
 			&tui_setlist, &tui_showlist);
@@ -1742,13 +1742,13 @@ bold-standout   use extra bright or bold with standout mode"),
 Set the attribute mode to use for the active TUI window border."), _("\
 Show the attribute mode to use for the active TUI window border."), _("\
 This variable controls the attributes to use for the active window border:\n\
-normal          normal display\n\
-standout        use highlight mode of terminal\n\
-reverse         use reverse video mode\n\
-half            use half bright\n\
-half-standout   use half bright and standout mode\n\
-bold            use extra bright or bold\n\
-bold-standout   use extra bright or bold with standout mode"),
+   normal          normal display\n\
+   standout        use highlight mode of terminal\n\
+   reverse         use reverse video mode\n\
+   half            use half bright\n\
+   half-standout   use half bright and standout mode\n\
+   bold            use extra bright or bold\n\
+   bold-standout   use extra bright or bold with standout mode"),
 			tui_set_var_cmd,
 			show_tui_active_border_mode,
 			&tui_setlist, &tui_showlist);

@@ -1136,7 +1136,7 @@ _initialize_disasm (void)
 					 &prospective_options, _("\
 Set the disassembler options.\n\
 Usage: set disassembler-options OPTION [,OPTION]...\n\n\
-See: 'show disassembler-options' for valid option values.\n"), _("\
+See: 'show disassembler-options' for valid option values."), _("\
 Show the disassembler options."), NULL,
 					 set_disassembler_options_sfunc,
 					 show_disassembler_options_sfunc,

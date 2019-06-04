@@ -1395,7 +1395,7 @@ function.  However, some older debug info formats do not provide enough\n\
 information to determine that a function is prototyped.  If this flag is\n\
 set, GDB will perform the conversion for a function it considers\n\
 unprototyped.\n\
-The default is to perform the conversion.\n"),
+The default is to perform the conversion."),
 			   NULL,
 			   show_coerce_float_to_double_p,
 			   &setlist, &showlist);

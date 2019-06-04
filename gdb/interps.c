@@ -447,8 +447,9 @@ _initialize_interpreter (void)
 
   c = add_cmd ("interpreter-exec", class_support,
 	       interpreter_exec_cmd, _("\
-Execute a command in an interpreter.  It takes two arguments:\n\
+Execute a command in an interpreter.\n\
+It takes two arguments:\n\
 The first argument is the name of the interpreter to use.\n\
-The second argument is the command to execute.\n"), &cmdlist);
+The second argument is the command to execute."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
 }

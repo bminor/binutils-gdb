@@ -559,7 +559,7 @@ add_set_language_command ()
 
   doc.printf (_("Set the current source language.\n"
 		"The currently understood settings are:\n\nlocal or "
-		"auto    Automatic setting based on source file\n"));
+		"auto    Automatic setting based on source file"));
 
   for (const auto &lang : languages)
     {
@@ -570,7 +570,9 @@ add_set_language_command ()
 
       /* FIXME: i18n: for now assume that the human-readable name is
 	 just a capitalization of the internal name.  */
-      doc.printf ("%-16s Use the %c%s language\n",
+      /* Note that we add the newline at the front, so we don't wind
+	 up with a trailing newline.  */
+      doc.printf ("\n%-16s Use the %c%s language",
 		  lang->la_name,
 		  /* Capitalize first letter of language name.  */
 		  toupper (lang->la_name[0]),

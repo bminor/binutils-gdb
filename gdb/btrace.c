@@ -3528,21 +3528,19 @@ One argument specifies the starting packet of a ten-line print.\n\
 Two arguments with comma between specify starting and ending packets to \
 print.\n\
 Preceded with '+'/'-' the second argument specifies the distance from the \
-first.\n"),
+first."),
 	   &maint_btrace_cmdlist);
 
   add_cmd ("clear-packet-history", class_maintenance,
 	   maint_btrace_clear_packet_history_cmd,
 	   _("Clears the branch tracing packet history.\n\
-Discards the raw branch tracing data but not the execution history data.\n\
-"),
+Discards the raw branch tracing data but not the execution history data."),
 	   &maint_btrace_cmdlist);
 
   add_cmd ("clear", class_maintenance, maint_btrace_clear_cmd,
 	   _("Clears the branch tracing data.\n\
 Discards the raw branch tracing data and the execution history data.\n\
-The next 'record' command will fetch the branch tracing data anew.\n\
-"),
+The next 'record' command will fetch the branch tracing data anew."),
 	   &maint_btrace_cmdlist);
 
 }

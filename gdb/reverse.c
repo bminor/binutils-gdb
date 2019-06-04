@@ -373,12 +373,12 @@ session."));
   add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _("\
 Delete a bookmark from the bookmark list.\n\
 Argument is a bookmark number or numbers,\n\
- or no argument to delete all bookmarks.\n"),
+ or no argument to delete all bookmarks."),
 	   &deletelist);
   add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _("\
 Go to an earlier-bookmarked point in the program's execution history.\n\
 Argument is the bookmark number of a bookmark saved earlier by using \n\
 the 'bookmark' command, or the special arguments:\n\
   start (beginning of recording)\n\
-  end   (end of recording)\n"));
+  end   (end of recording)"));
 }

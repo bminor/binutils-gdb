@@ -2818,18 +2818,18 @@ Use \"off\" to never automatically flush the software-managed cache."),
 
   /* Add various "info spu" commands.  */
   add_cmd ("event", class_info, info_spu_event_command,
-	   _("Display SPU event facility status.\n"),
+	   _("Display SPU event facility status."),
 	   &infospucmdlist);
   add_cmd ("signal", class_info, info_spu_signal_command,
-	   _("Display SPU signal notification facility status.\n"),
+	   _("Display SPU signal notification facility status."),
 	   &infospucmdlist);
   add_cmd ("mailbox", class_info, info_spu_mailbox_command,
-	   _("Display SPU mailbox facility status.\n"),
+	   _("Display SPU mailbox facility status."),
 	   &infospucmdlist);
   add_cmd ("dma", class_info, info_spu_dma_command,
-	   _("Display MFC DMA status.\n"),
+	   _("Display MFC DMA status."),
 	   &infospucmdlist);
   add_cmd ("proxydma", class_info, info_spu_proxydma_command,
-	   _("Display MFC Proxy-DMA status.\n"),
+	   _("Display MFC Proxy-DMA status."),
 	   &infospucmdlist);
 }

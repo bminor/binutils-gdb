@@ -240,6 +240,6 @@ _initialize_user_regs (void)
 
   add_cmd ("user-registers", class_maintenance,
 	   maintenance_print_user_registers,
-	   _("List the names of the current user registers.\n"),
+	   _("List the names of the current user registers."),
 	   &maintenanceprintlist);
 }

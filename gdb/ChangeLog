@@ -1,5 +1,41 @@
 2019-06-11  Tom Tromey  <tromey@adacore.com>
 
+	* infcall.c (_initialize_infcall): Remove trailing newline from
+	help.
+	* user-regs.c (_initialize_user_regs): Remove trailing newline
+	from help.
+	* typeprint.c (_initialize_typeprint): Remove trailing newline
+	from help.
+	* reverse.c (_initialize_reverse): Remove trailing newlines from
+	help.
+	* tracepoint.c (_initialize_tracepoint): Remove trailing newlines
+	from help.
+	* language.c (add_set_language_command): Remove trailing newline
+	from help.
+	* infcmd.c (_initialize_infcmd): Remove trailing newlines from
+	help.
+	* disasm.c (_initialize_disasm): Remove trailing newline from
+	help.
+	* top.c (init_main): Remove trailing newline from help.
+	* interps.c (_initialize_interpreter): Remove trailing newline
+	from help.
+	* btrace.c (_initialize_btrace): Remove trailing newlines from
+	help.
+	* breakpoint.c (_initialize_breakpoint): Remove trailing newline
+	from help.
+	* python/python.c (_initialize_python): Remove trailing newline
+	from help.
+	* spu-tdep.c (_initialize_spu_tdep): Remove trailing newlines from
+	help.
+	* tui/tui-win.c (_initialize_tui_win): Remove trailing newlines
+	from help.  Reformat some text.
+	* tui/tui-stack.c (_initialize_tui_stack): Remove trailing newline
+	from help.
+	* tui/tui-layout.c (_initialize_tui_layout): Remove trailing
+	newline from help.
+
+2019-06-11  Tom Tromey  <tromey@adacore.com>
+
 	* darwin-nat.c (darwin_decode_exception_message)
 	(darwin_decode_message, darwin_nat_target::kill): Fix shadowing.
 

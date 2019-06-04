@@ -4024,13 +4024,11 @@ If no arguments are supplied, delete all variables."), &deletelist);
   /* FIXME add a trace variable completer.  */
 
   add_info ("tvariables", info_tvariables_command, _("\
-Status of trace state variables and their values.\n\
-"));
+Status of trace state variables and their values."));
 
   add_info ("static-tracepoint-markers",
 	    info_static_tracepoint_markers_command, _("\
-List target static tracepoints markers.\n\
-"));
+List target static tracepoints markers."));
 
   add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
 Select a trace frame;\n\

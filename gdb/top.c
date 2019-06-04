@@ -2230,7 +2230,7 @@ input settings."),
   c = add_cmd ("new-ui", class_support, new_ui_command, _("\
 Create a new UI.  It takes two arguments:\n\
 The first argument is the name of the interpreter to run.\n\
-The second argument is the terminal the UI runs on.\n"), &cmdlist);
+The second argument is the terminal the UI runs on."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
 }
 

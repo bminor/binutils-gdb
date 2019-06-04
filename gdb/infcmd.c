@@ -3394,10 +3394,10 @@ in the named register groups."));
 	    _("Execution status of the program."));
 
   add_info ("float", info_float_command,
-	    _("Print the status of the floating point unit\n"));
+	    _("Print the status of the floating point unit"));
 
   add_info ("vector", info_vector_command,
-	    _("Print the status of the vector unit\n"));
+	    _("Print the status of the vector unit"));
 
   add_prefix_cmd ("proc", class_info, info_proc_cmd,
 		  _("\
