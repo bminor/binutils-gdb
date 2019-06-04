@@ -1,3 +1,21 @@
+2019-06-04  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+	    Lili Cui  <lili.cui@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vp2intersect.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document avx512_vp2intersect.
+	* testsuite/gas/i386/i386.exp: Run vp2intersect tests.
+	* testsuite/gas/i386/vp2intersect-intel.d: New test.
+	* testsuite/gas/i386/vp2intersect.d: Likewise.
+	* testsuite/gas/i386/vp2intersect.s: Likewise.
+	* testsuite/gas/i386/vp2intersect-inval-bcast.l: Likewise.
+	* testsuite/gas/i386/vp2intersect-inval-bcast.s: Likewise.
+	* testsuite/gas/i386/x86-64-vp2intersect-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-vp2intersect.d: Likewise.
+	* testsuite/gas/i386/x86-64-vp2intersect.s: Likewise.
+	* testsuite/gas/i386/x86-64-vp2intersect-inval-bcast.l: Likewise.
+	* testsuite/gas/i386/x86-64-vp2intersect-inval-bcast.s: Likewise.
+
 2019-06-04  Xuepeng Guo  <xuepeng.guo@intel.com>
 	    Lili Cui  <lili.cui@intel.com>
 

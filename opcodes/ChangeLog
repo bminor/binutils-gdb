@@ -1,3 +1,18 @@
+2019-06-04  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+	    Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3868, EVEX_W_0F3868_P_3.
+	* i386-dis-evex.h (evex_table): Add AVX512_VP2INTERSECT
+	instructions.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_VP2INTERSECT_FLAGS,
+	CPU_ANY_AVX512_VP2INTERSECT_FLAGS.
+	(cpu_flags): Add CpuAVX512_VP2INTERSECT.
+	* i386-opc.h (enum): Add CpuAVX512_VP2INTERSECT.
+	(i386_cpu_flags): Add cpuavx512_vp2intersect.
+	* i386-opc.tbl: Add AVX512_VP2INTERSECT insns.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2019-06-04  Xuepeng Guo  <xuepeng.guo@intel.com>
 	    Lili Cui  <lili.cui@intel.com>
 
