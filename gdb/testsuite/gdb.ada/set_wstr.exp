@@ -72,3 +72,8 @@ gdb_test "print rws" \
 
 gdb_test "set variable www := \"1#2#3#4#5#\"" \
          "cannot assign arrays of different length"
+
+# However, reassigning an array of a different length should work when
+# the LHS is a convenience variable.
+gdb_test_no_output "set variable \$str := \"1234\""
+gdb_test_no_output "set variable \$str := \"12345\""

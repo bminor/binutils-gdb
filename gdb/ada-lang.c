@@ -10486,7 +10486,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (type, exp, pos, noside);
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
         return arg1;
-      if (ada_is_fixed_point_type (value_type (arg1)))
+      if (VALUE_LVAL (arg1) == lval_internalvar)
+	{
+	  /* Nothing.  */
+	}
+      else if (ada_is_fixed_point_type (value_type (arg1)))
         arg2 = cast_to_fixed (value_type (arg1), arg2);
       else if (ada_is_fixed_point_type (value_type (arg2)))
         error

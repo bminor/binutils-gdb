@@ -1,5 +1,10 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) <case BINOP_ASSIGN>: Always
+	allow assignment to an internalvar.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lex.l: Allow "_" in attribute names.
 
 2019-06-14  Tom Tromey  <tromey@adacore.com>
