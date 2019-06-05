@@ -1,3 +1,9 @@
+2019-06-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-archive.c (ctf_arc_write): Eschew %zi format specifier.
+	(ctf_arc_open_by_offset): Likewise.
+	* ctf-create.c (ctf_add_type): Likewise.
+
 2019-06-04  Tom Tromey  <tromey@adacore.com>
 
 	* ctf-create.c (ctf_add_encoded, ctf_add_slice)

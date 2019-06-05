@@ -1822,9 +1822,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 		ctf_type_size (dst_fp, dst_type))
 	      {
 		ctf_dprintf ("Conflict for type %s against ID %lx: "
-			     "union size differs, old %zi, new %zi\n",
-			     name, dst_type, ctf_type_size (src_fp, src_type),
-			     ctf_type_size (dst_fp, dst_type));
+			     "union size differs, old %li, new %li\n",
+			     name, dst_type,
+			     (long) ctf_type_size (src_fp, src_type),
+			     (long) ctf_type_size (dst_fp, dst_type));
 		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	      }
 

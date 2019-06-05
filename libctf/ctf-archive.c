@@ -68,7 +68,8 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
   off_t nameoffs;
   struct ctf_archive_modent *modent;
 
-  ctf_dprintf ("Writing archive %s with %zi files\n", file, ctf_file_cnt);
+  ctf_dprintf ("Writing archive %s with %lu files\n", file,
+	       (unsigned long) ctf_file_cnt);
 
   if ((fd = open (file, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0666)) < 0)
     {
@@ -82,7 +83,7 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
      uint64_t's.  */
   headersz = sizeof (struct ctf_archive)
     + (ctf_file_cnt * sizeof (uint64_t) * 2);
-  ctf_dprintf ("headersz is %zi\n", headersz);
+  ctf_dprintf ("headersz is %lu\n", (unsigned long) headersz);
 
   /* From now on we work in two pieces: an mmap()ed region from zero up to the
      headersz, and a region updated via write() starting after that, containing
@@ -510,7 +511,7 @@ ctf_arc_open_by_offset (const struct ctf_archive *arc,
   ctf_sect_t ctfsect;
   ctf_file_t *fp;
 
-  ctf_dprintf ("ctf_arc_open_by_offset(%zi): opening\n", offset);
+  ctf_dprintf ("ctf_arc_open_by_offset(%lu): opening\n", (unsigned long) offset);
 
   memset (&ctfsect, 0, sizeof (ctf_sect_t));
 
