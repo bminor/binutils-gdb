@@ -3912,23 +3912,23 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F3A18_P_2 */
   {
-    { "vinsertf32x4",	{ XM, Vex, EXxmm, Ib }, 0 },
-    { "vinsertf64x2",	{ XM, Vex, EXxmm, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A18_P_2_W_0) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A18_P_2_W_1) },
   },
   /* EVEX_W_0F3A19_P_2 */
   {
-    { "vextractf32x4",	{ EXxmm, XM, Ib }, 0 },
-    { "vextractf64x2",	{ EXxmm, XM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A19_P_2_W_0) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A19_P_2_W_1) },
   },
   /* EVEX_W_0F3A1A_P_2 */
   {
-    { "vinsertf32x8",	{ XM, Vex, EXxmmq, Ib }, 0 },
-    { "vinsertf64x4",	{ XM, Vex, EXxmmq, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A1A_P_2_W_0) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A1A_P_2_W_1) },
   },
   /* EVEX_W_0F3A1B_P_2 */
   {
-    { "vextractf32x8",	{ EXxmmq, XM, Ib }, 0 },
-    { "vextractf64x4",	{ EXxmmq, XM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A1B_P_2_W_0) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A1B_P_2_W_1) },
   },
   /* EVEX_W_0F3A1D_P_2 */
   {
@@ -4127,6 +4127,62 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_LEN_0FD6_P_2 */
   {
     { VEX_W_TABLE (EVEX_W_0FD6_P_2) },
+  },
+
+  /* EVEX_LEN_0F3A18_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { "vinsertf32x4",	{ XM, Vex, EXxmm, Ib }, 0 },
+    { "vinsertf32x4",	{ XM, Vex, EXxmm, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A18_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { "vinsertf64x2",	{ XM, Vex, EXxmm, Ib }, 0 },
+    { "vinsertf64x2",	{ XM, Vex, EXxmm, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A19_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { "vextractf32x4",	{ EXxmm, XM, Ib }, 0 },
+    { "vextractf32x4",	{ EXxmm, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A19_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { "vextractf64x2",	{ EXxmm, XM, Ib }, 0 },
+    { "vextractf64x2",	{ EXxmm, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A1A_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vinsertf32x8",	{ XM, Vex, EXxmmq, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A1A_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vinsertf64x4",	{ XM, Vex, EXxmmq, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A1B_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vextractf32x8",	{ EXxmmq, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A1B_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vextractf64x4",	{ EXxmmq, XM, Ib }, 0 },
   },
 
 #endif /* NEED_EVEX_LEN_TABLE */
