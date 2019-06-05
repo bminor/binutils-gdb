@@ -52,7 +52,7 @@ tui_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
 void
 tui_ui_out::do_field_string (int fldno, int width, ui_align align,
 			     const char *fldname, const char *string,
-			     ui_out_style_kind style)
+			     const ui_file_style &style)
 {
   if (suppress_output ())
     return;

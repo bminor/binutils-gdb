@@ -73,7 +73,7 @@ cli_ui_out::do_table_header (int width, ui_align alignment,
     return;
 
   do_field_string (0, width, alignment, 0, col_hdr.c_str (),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* Mark beginning of a list */
@@ -100,7 +100,7 @@ cli_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
     return;
 
   do_field_string (fldno, width, alignment, fldname, plongest (value),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* output an unsigned field */
@@ -113,7 +113,7 @@ cli_ui_out::do_field_unsigned (int fldno, int width, ui_align alignment,
     return;
 
   do_field_string (fldno, width, alignment, fldname, pulongest (value),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* used to omit a field */
@@ -126,7 +126,7 @@ cli_ui_out::do_field_skip (int fldno, int width, ui_align alignment,
     return;
 
   do_field_string (fldno, width, alignment, fldname, "",
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* other specific cli_field_* end up here so alignment and field
@@ -135,7 +135,7 @@ cli_ui_out::do_field_skip (int fldno, int width, ui_align alignment,
 void
 cli_ui_out::do_field_string (int fldno, int width, ui_align align,
 			     const char *fldname, const char *string,
-			     ui_out_style_kind style)
+			     const ui_file_style &style)
 {
   int before = 0;
   int after = 0;
@@ -170,31 +170,7 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
     spaces (before);
 
   if (string)
-    {
-      ui_file_style fstyle;
-      switch (style)
-	{
-	case ui_out_style_kind::DEFAULT:
-	  /* Nothing.  */
-	  break;
-	case ui_out_style_kind::FILE:
-	  /* Nothing.  */
-	  fstyle = file_name_style.style ();
-	  break;
-	case ui_out_style_kind::FUNCTION:
-	  fstyle = function_name_style.style ();
-	  break;
-	case ui_out_style_kind::VARIABLE:
-	  fstyle = variable_name_style.style ();
-	  break;
-	case ui_out_style_kind::ADDRESS:
-	  fstyle = address_style.style ();
-	  break;
-	default:
-	  gdb_assert_not_reached ("missing case");
-	}
-      fputs_styled (string, fstyle, m_streams.back ());
-    }
+    fputs_styled (string, style, m_streams.back ());
 
   if (after)
     spaces (after);
@@ -216,7 +192,7 @@ cli_ui_out::do_field_fmt (int fldno, int width, ui_align align,
   std::string str = string_vprintf (format, args);
 
   do_field_string (fldno, width, align, fldname, str.c_str (),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 void

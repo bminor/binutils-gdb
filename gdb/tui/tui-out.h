@@ -35,7 +35,7 @@ protected:
   void do_field_signed (int fldno, int width, ui_align align, const char *fldname,
 			LONGEST value) override;
   void do_field_string (int fldno, int width, ui_align align, const char *fldname,
-			const char *string, ui_out_style_kind style) override;
+			const char *string, const ui_file_style &style) override;
   void do_field_fmt (int fldno, int width, ui_align align, const char *fldname,
 		  const char *format, va_list args) override
     ATTRIBUTE_PRINTF (6,0);

@@ -36,6 +36,7 @@
 #include "gdb_regex.h"
 #include "gdbsupport/gdb_optional.h"
 #include <list>
+#include "cli/cli-style.h"
 
 /* True if we want to print debug printouts related to file/function
    skipping. */
@@ -414,7 +415,7 @@ info_skip_command (const char *arg, int from_tty)
       current_uiout->field_string ("file",
 				   e.file ().empty () ? "<none>"
 				   : e.file ().c_str (),
-				   ui_out_style_kind::FILE); /* 4 */
+				   file_name_style.style ()); /* 4 */
       if (e.function_is_regexp ())
 	current_uiout->field_string ("regexp", "y"); /* 5 */
       else
@@ -423,7 +424,7 @@ info_skip_command (const char *arg, int from_tty)
       current_uiout->field_string ("function",
 				   e.function ().empty () ? "<none>"
 				   : e.function ().c_str (),
-				   ui_out_style_kind::FUNCTION); /* 6 */
+				   function_name_style.style ()); /* 6 */
 
       current_uiout->text ("\n");
     }

@@ -31,6 +31,7 @@
 #include <algorithm>
 #include "gdbsupport/gdb_optional.h"
 #include "valprint.h"
+#include "cli/cli-style.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -245,7 +246,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	m_uiout->text (" <");
 	if (!omit_fname)
 	  m_uiout->field_string ("func-name", name.c_str (),
-				 ui_out_style_kind::FUNCTION);
+				 function_name_style.style ());
 	/* For negative offsets, avoid displaying them as +-N; the sign of
 	   the offset takes the place of the "+" here.  */
 	if (offset >= 0)

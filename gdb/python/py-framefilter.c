@@ -33,6 +33,7 @@
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
 #include "gdbsupport/gdb_optional.h"
+#include "cli/cli-style.h"
 
 enum mi_print_types
 {
@@ -947,7 +948,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	  if (function == NULL)
 	    out->field_skip ("func");
 	  else
-	    out->field_string ("func", function, ui_out_style_kind::FUNCTION);
+	    out->field_string ("func", function, function_name_style.style ());
 	}
     }
 
@@ -987,7 +988,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	      out->text (" at ");
 	      annotate_frame_source_file ();
 	      out->field_string ("file", filename.get (),
-				 ui_out_style_kind::FILE);
+				 file_name_style.style ());
 	      annotate_frame_source_file_end ();
 	    }
 	}

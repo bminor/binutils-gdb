@@ -54,6 +54,7 @@
 #include "observable.h"
 #include "gdbsupport/def-vector.h"
 #include "cli/cli-option.h"
+#include "cli/cli-style.h"
 
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
@@ -381,7 +382,7 @@ print_frame_arg (const frame_print_options &fp_opts,
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
     stb.puts ("@entry");
-  uiout->field_stream ("name", stb, ui_out_style_kind::VARIABLE);
+  uiout->field_stream ("name", stb, variable_name_style.style ());
   annotate_arg_name_end ();
   uiout->text ("=");
 
@@ -1005,18 +1006,18 @@ print_frame_info (const frame_print_options &fp_opts,
         {
           annotate_function_call ();
           uiout->field_string ("func", "<function called from gdb>",
-			       ui_out_style_kind::FUNCTION);
+			       function_name_style.style ());
 	}
       else if (get_frame_type (frame) == SIGTRAMP_FRAME)
         {
 	  annotate_signal_handler_caller ();
           uiout->field_string ("func", "<signal handler called>",
-			       ui_out_style_kind::FUNCTION);
+			       function_name_style.style ());
         }
       else if (get_frame_type (frame) == ARCH_FRAME)
         {
           uiout->field_string ("func", "<cross-architecture call>",
-			       ui_out_style_kind::FUNCTION);
+			       function_name_style.style ());
 	}
       uiout->text ("\n");
       annotate_frame_end ();
@@ -1310,7 +1311,7 @@ print_frame (const frame_print_options &fp_opts,
 	    print_pc (uiout, gdbarch, frame, pc);
 	  else
 	    uiout->field_string ("addr", "<unavailable>",
-				 ui_out_style_kind::ADDRESS);
+				 address_style.style ());
 	  annotate_frame_address_end ();
 	  uiout->text (" in ");
 	}
@@ -1319,7 +1320,7 @@ print_frame (const frame_print_options &fp_opts,
     string_file stb;
     fprintf_symbol_filtered (&stb, funname ? funname.get () : "??",
 			     funlang, DMGL_ANSI);
-    uiout->field_stream ("func", stb, ui_out_style_kind::FUNCTION);
+    uiout->field_stream ("func", stb, function_name_style.style ());
     uiout->wrap_hint ("   ");
     annotate_frame_args ();
 
@@ -1361,7 +1362,8 @@ print_frame (const frame_print_options &fp_opts,
 	uiout->wrap_hint ("   ");
 	uiout->text (" at ");
 	annotate_frame_source_file ();
-	uiout->field_string ("file", filename_display, ui_out_style_kind::FILE);
+	uiout->field_string ("file", filename_display,
+			     file_name_style.style ());
 	if (uiout->is_mi_like_p ())
 	  {
 	    const char *fullname = symtab_to_fullname (sal.symtab);

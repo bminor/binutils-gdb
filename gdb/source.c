@@ -46,6 +46,7 @@
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "source-cache.h"
+#include "cli/cli-style.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -1235,7 +1236,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	     not for TUI.  */
 	  if (uiout->is_mi_like_p () || uiout->test_flags (ui_source_list))
 	    uiout->field_string ("file", symtab_to_filename_for_display (s),
-				 ui_out_style_kind::FILE);
+				 file_name_style.style ());
 	  if (uiout->is_mi_like_p () || !uiout->test_flags (ui_source_list))
  	    {
 	      const char *s_fullname = symtab_to_fullname (s);

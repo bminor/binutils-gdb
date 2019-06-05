@@ -70,9 +70,9 @@ mi_ui_out::do_table_header (int width, ui_align alignment,
   do_field_signed (0, 0, ui_center, "width", width);
   do_field_signed (0, 0, ui_center, "alignment", alignment);
   do_field_string (0, 0, ui_center, "col_name", col_name.c_str (),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
   do_field_string (0, width, alignment, "colhdr", col_hdr.c_str (),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
   close (ui_out_type_tuple);
 }
 
@@ -99,7 +99,7 @@ mi_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
 			    const char *fldname, LONGEST value)
 {
   do_field_string (fldno, width, alignment, fldname, plongest (value),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* Output an unsigned field.  */
@@ -109,7 +109,7 @@ mi_ui_out::do_field_unsigned (int fldno, int width, ui_align alignment,
 			      const char *fldname, ULONGEST value)
 {
   do_field_string (fldno, width, alignment, fldname, pulongest (value),
-		   ui_out_style_kind::DEFAULT);
+		   ui_file_style ());
 }
 
 /* Used to omit a field.  */
@@ -126,7 +126,7 @@ mi_ui_out::do_field_skip (int fldno, int width, ui_align alignment,
 void
 mi_ui_out::do_field_string (int fldno, int width, ui_align align,
 			    const char *fldname, const char *string,
-			    ui_out_style_kind style)
+			    const ui_file_style &style)
 {
   ui_file *stream = m_streams.back ();
   field_separator ();

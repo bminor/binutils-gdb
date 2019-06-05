@@ -47,6 +47,7 @@
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
 #include "source.h"
+#include "cli/cli-style.h"
 
 /* Architecture-specific operations.  */
 
@@ -1104,7 +1105,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	else
 	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-	uiout->field_string ("name", so->so_name, ui_out_style_kind::FILE);
+	uiout->field_string ("name", so->so_name, file_name_style.style ());
 
 	uiout->text ("\n");
       }

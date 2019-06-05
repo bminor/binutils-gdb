@@ -1,3 +1,38 @@
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.h (enum class ui_out_style_kind): Remove.
+	(class ui_out) <field_string, field_stsream, do_field_string>:
+	Change type of "style".
+	* ui-out.c (ui_out::field_core_addr, ui_out::field_stream)
+	(ui_out::field_string): Update.
+	* tui/tui-out.h (class tui_ui_out) <do_field_string>: Change type
+	of "style".
+	* tui/tui-out.c (tui_ui_out::do_field_string): Update.
+	* tracepoint.c (print_one_static_tracepoint_marker): Update.
+	* stack.c (print_frame_arg, print_frame_info, print_frame):
+	Update.
+	* source.c (print_source_lines_base): Update.
+	* solib.c (info_sharedlibrary_command): Update.
+	* skip.c (info_skip_command): Update.
+	* record-btrace.c (btrace_call_history_src_line)
+	(btrace_call_history): Update.
+	* python/py-framefilter.c (py_print_frame): Update.
+	* mi/mi-out.h (class mi_ui_out) <do_field_string>: Change type of
+	"style".
+	* mi/mi-out.c (mi_ui_out::do_table_header)
+	(mi_ui_out::do_field_signed, mi_ui_out::do_field_unsigned)
+	(mi_ui_out::do_field_string): Update.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Update.
+	* cli-out.h (class cli_ui_out) <do_field_string>: Change type of
+	"style".
+	* cli-out.c (cli_ui_out::do_table_header)
+	(cli_ui_out::do_field_signed, cli_ui_out::do_field_unsigned)
+	(cli_ui_out::do_field_skip, cli_ui_out::do_field_string)
+	(cli_ui_out::do_field_fmt): Update.
+	* breakpoint.c (print_breakpoint_location): Update.
+	(update_static_tracepoint): Update.
+
 2019-10-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* main.c (relocate_gdbinit_path_maybe_in_datadir): Remove std::string

@@ -24,6 +24,8 @@
 #include "expression.h"		/* For language.h */
 #include "language.h"
 #include "ui-out.h"
+#include "gdbsupport/format.h"
+#include "cli/cli-style.h"
 
 #include <vector>
 #include <memory>
@@ -483,12 +485,12 @@ ui_out::field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 			 CORE_ADDR address)
 {
   field_string (fldname, print_core_address (gdbarch, address),
-		ui_out_style_kind::ADDRESS);
+		address_style.style ());
 }
 
 void
 ui_out::field_stream (const char *fldname, string_file &stream,
-		      ui_out_style_kind style)
+		      const ui_file_style &style)
 {
   if (!stream.empty ())
     field_string (fldname, stream.c_str (), style);
@@ -513,7 +515,7 @@ ui_out::field_skip (const char *fldname)
 
 void
 ui_out::field_string (const char *fldname, const char *string,
-		      ui_out_style_kind style)
+		      const ui_file_style &style)
 {
   int fldno;
   int width;
