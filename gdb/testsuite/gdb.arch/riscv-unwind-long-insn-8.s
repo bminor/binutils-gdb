@@ -29,7 +29,7 @@ bar:
 func:
         /* A fake 8 byte instruction.  This is never executed, but the
 	   prologue scanner will try to decode it.  These long
-	   instructions are ISA extensions, I use .byte rather than an
+	   instructions are ISA extensions, use .byte rather than an
 	   actual instruction mnemonic so that the test can be compiled
 	   with a toolchain that doesn't include any long instruction
 	   extensions.  */

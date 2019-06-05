@@ -1,5 +1,11 @@
 2019-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.arch/riscv-unwind-long-insn-6.s: Remove use of 'I' in
+	comment.
+	* gdb.arch/riscv-unwind-long-insn-8.s: Likewise.
+
+2019-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/riscv-unwind-long-insn-6.s: New file.
 	* gdb.arch/riscv-unwind-long-insn-8.s: New file.
 	* gdb.arch/riscv-unwind-long-insn.c: New file.
