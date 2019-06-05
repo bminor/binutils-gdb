@@ -1,5 +1,9 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Test "pwd".
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Update tests.
 
 2019-10-01  Andreas Arnez  <arnez@linux.ibm.com>

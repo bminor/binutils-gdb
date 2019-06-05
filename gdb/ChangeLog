@@ -1,3 +1,7 @@
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (pwd_command): Style output.
+
 2019-10-01  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 

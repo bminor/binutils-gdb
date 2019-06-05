@@ -49,6 +49,7 @@
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "cli/cli-utils.h"
 
 #include "extension.h"
@@ -451,10 +452,14 @@ pwd_command (const char *args, int from_tty)
            safe_strerror (errno));
 
   if (strcmp (cwd.get (), current_directory) != 0)
-    printf_unfiltered (_("Working directory %s\n (canonically %s).\n"),
-		       current_directory, cwd.get ());
+    printf_unfiltered (_("Working directory %ps\n (canonically %ps).\n"),
+		       styled_string (file_name_style.style (),
+				      current_directory),
+		       styled_string (file_name_style.style (), cwd.get ()));
   else
-    printf_unfiltered (_("Working directory %s.\n"), current_directory);
+    printf_unfiltered (_("Working directory %ps.\n"),
+		       styled_string (file_name_style.style (),
+				      current_directory));
 }
 
 void

@@ -131,4 +131,6 @@ save_vars { env(TERM) } {
     gdb_test "file $binfile" \
 	"Reading symbols from [style $quoted file]..." \
 	"filename is styled when loading symbol file"
+
+    gdb_test "pwd" "Working directory [style .*? file].*"
 }
