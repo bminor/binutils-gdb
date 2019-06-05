@@ -27,9 +27,10 @@ namespace format_pieces {
 /* Verify that parsing STR gives pieces equal to EXPECTED_PIECES.  */
 
 static void
-check (const char *str, const std::vector<format_piece> &expected_pieces)
+check (const char *str, const std::vector<format_piece> &expected_pieces,
+       bool gdb_format = false)
 {
-  ::format_pieces pieces (&str);
+  ::format_pieces pieces (&str, gdb_format);
 
   SELF_CHECK ((pieces.end () - pieces.begin ()) == expected_pieces.size ());
   SELF_CHECK (std::equal (pieces.begin (), pieces.end (),
@@ -41,7 +42,7 @@ test_escape_sequences ()
 {
   check ("This is an escape sequence: \\e",
     {
-      format_piece ("This is an escape sequence: \e", literal_piece),
+      format_piece ("This is an escape sequence: \e", literal_piece, 0),
     });
 }
 
@@ -50,14 +51,29 @@ test_format_specifier ()
 {
   /* The format string here ends with a % sequence, to ensure we don't
      see a trailing empty literal piece.  */
-  check ("Hello %d%llx%%d%d", /* ARI: %ll */
+  check ("Hello\\t %d%llx%%d%d", /* ARI: %ll */
     {
-      format_piece ("Hello ", literal_piece),
-      format_piece ("%d", int_arg),
-      format_piece ("%llx", long_long_arg), /* ARI: %ll */
-      format_piece ("%%d", literal_piece),
-      format_piece ("%d", int_arg),
+      format_piece ("Hello\t ", literal_piece, 0),
+      format_piece ("%d", int_arg, 0),
+      format_piece ("%llx", long_long_arg, 0), /* ARI: %ll */
+      format_piece ("%%d", literal_piece, 0),
+      format_piece ("%d", int_arg, 0),
     });
+}
+
+static void
+test_gdb_formats ()
+{
+  check ("Hello\\t \"%p[%pF%ps%*.*d%p]\"",
+    {
+      format_piece ("Hello\\t \"", literal_piece, 0),
+      format_piece ("%p[", ptr_arg, 0),
+      format_piece ("%pF", ptr_arg, 0),
+      format_piece ("%ps", ptr_arg, 0),
+      format_piece ("%*.*d", int_arg, 2),
+      format_piece ("%p]", ptr_arg, 0),
+      format_piece ("\"", literal_piece, 0),
+    }, true);
 }
 
 static void
@@ -65,6 +81,7 @@ run_tests ()
 {
   test_escape_sequences ();
   test_format_specifier ();
+  test_gdb_formats ();
 }
 
 } /* namespace format_pieces */

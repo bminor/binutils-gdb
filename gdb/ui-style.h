@@ -223,6 +223,12 @@ struct ui_file_style
      BUF.  */
   bool parse (const char *buf, size_t *n_read);
 
+  /* We need this because we can't pass a reference via va_args.  */
+  const ui_file_style *ptr () const
+  {
+    return this;
+  }
+
 private:
 
   color m_foreground = NONE;

@@ -1,3 +1,50 @@
+2019-10-01  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* unittests/format_pieces-selftests.c: Add gdb_format parameter.
+	(test_gdb_formats): New function.
+	(run_tests): Call it.
+	(test_format_specifier): Update.
+	* utils.h (fputs_filtered): Update comment.
+	(vfprintf_styled, vfprintf_styled_no_gdbfmt)
+	(fputs_styled_unfiltered): Declare.
+	* utils.c (fputs_styled_unfiltered): New function.
+	(vfprintf_maybe_filtered): Add gdbfmt parameter.
+	(vfprintf_filtered): Update.
+	(vfprintf_unfiltered, vprintf_filtered): Update.
+	(vfprintf_styled, vfprintf_styled_no_gdbfmt): New functions.
+	* ui-out.h (enum ui_out_flag) <unfiltered_output,
+	disallow_ui_out_field>: New constants.
+	(enum class field_kind): New.
+	(struct base_field_s, struct signed_field_s): New.
+	(signed_field): New function.
+	(struct string_field_s): New.
+	(string_field): New function.
+	(struct styled_string_s): New.
+	(styled_string): New function.
+	(class ui_out) <message>: Add comment.
+	<vmessage, call_do_message>: New methods.
+	<do_message>: Add style parameter.
+	* ui-out.c (ui_out::call_do_message, ui_out::vmessage): New
+	methods.
+	(ui_out::message): Rewrite.
+	* mi/mi-out.h (class mi_ui_out) <do_message>: Add style
+	parameter.
+	* mi/mi-out.c (mi_ui_out::do_message): Add style parameter.
+	* gdbsupport/format.h (class format_pieces) <format_pieces>: Add
+	gdb_extensions parameter.
+	(class format_piece): Add parameter to constructor.
+	(n_int_args): New field.
+	* gdbsupport/format.c (format_pieces::format_pieces): Add
+	gdb_extensions parameter.  Handle '*'.
+	* cli-out.h (class cli_ui_out) <do_message>: Add style parameter.
+	* cli-out.c (cli_ui_out::do_message): Add style parameter.  Call
+	vfprintf_styled_no_gdbfmt.
+	(cli_ui_out::do_field_string, cli_ui_out::do_spaces)
+	(cli_ui_out::do_text, cli_ui_out::field_separator): Allow
+	unfiltered output.
+	* ui-style.h (struct ui_file_style) <ptr>: New method.
+
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
 	* unittests/format_pieces-selftests.c: Update.  Add final format.

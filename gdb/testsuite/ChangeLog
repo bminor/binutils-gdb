@@ -1,3 +1,7 @@
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/style.exp: Update tests.
+
 2019-10-01  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* gdb.base/pretty-print.c (struct s1_t): Change fields 'three' and

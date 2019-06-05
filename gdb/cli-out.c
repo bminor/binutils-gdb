@@ -170,7 +170,12 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
     spaces (before);
 
   if (string)
-    fputs_styled (string, style, m_streams.back ());
+    {
+      if (test_flags (unfiltered_output))
+	fputs_styled_unfiltered (string, style, m_streams.back ());
+      else
+	fputs_styled (string, style, m_streams.back ());
+    }
 
   if (after)
     spaces (after);
@@ -201,7 +206,10 @@ cli_ui_out::do_spaces (int numspaces)
   if (m_suppress_output)
     return;
 
-  print_spaces_filtered (numspaces, m_streams.back ());
+  if (test_flags (unfiltered_output))
+    print_spaces (numspaces, m_streams.back ());
+  else
+    print_spaces_filtered (numspaces, m_streams.back ());
 }
 
 void
@@ -210,16 +218,24 @@ cli_ui_out::do_text (const char *string)
   if (m_suppress_output)
     return;
 
-  fputs_filtered (string, m_streams.back ());
+  if (test_flags (unfiltered_output))
+    fputs_unfiltered (string, m_streams.back ());
+  else
+    fputs_filtered (string, m_streams.back ());
 }
 
 void
-cli_ui_out::do_message (const char *format, va_list args)
+cli_ui_out::do_message (const ui_file_style &style,
+			const char *format, va_list args)
 {
   if (m_suppress_output)
     return;
 
-  vfprintf_unfiltered (m_streams.back (), format, args);
+  /* Use the "no_gdbfmt" variant here to avoid recursion.
+     vfprintf_styled calls into cli_ui_out::message to handle the
+     gdb-specific printf formats.  */
+  vfprintf_styled_no_gdbfmt (m_streams.back (), style,
+			     !test_flags (unfiltered_output), format, args);
 }
 
 void
@@ -255,7 +271,10 @@ cli_ui_out::do_redirect (ui_file *outstream)
 void
 cli_ui_out::field_separator ()
 {
-  fputc_filtered (' ', m_streams.back ());
+  if (test_flags (unfiltered_output))
+    fputc_unfiltered (' ', m_streams.back ());
+  else
+    fputc_filtered (' ', m_streams.back ());
 }
 
 /* Constructor for cli_ui_out.  */

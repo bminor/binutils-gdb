@@ -50,9 +50,10 @@ enum argclass
 
 struct format_piece
 {
-  format_piece (const char *str, enum argclass argc)
+  format_piece (const char *str, enum argclass argc, int n)
     : string (str),
-      argclass (argc)
+      argclass (argc),
+      n_int_args (n)
   {
   }
 
@@ -64,13 +65,17 @@ struct format_piece
 
   const char *string;
   enum argclass argclass;
+  /* Count the number of preceding 'int' arguments that must be passed
+     along.  This is used for a width or precision of '*'.  Note that
+     this feature is only available in "gdb_extensions" mode.  */
+  int n_int_args;
 };
 
 class format_pieces
 {
 public:
 
-  format_pieces (const char **arg);
+  format_pieces (const char **arg, bool gdb_extensions = false);
   ~format_pieces () = default;
 
   DISABLE_COPY_AND_ASSIGN (format_pieces);

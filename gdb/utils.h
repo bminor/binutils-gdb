@@ -350,7 +350,10 @@ extern struct ui_file *gdb_stdtargin;
 extern void set_screen_width_and_height (int width, int height);
 
 /* More generic printf like operations.  Filtered versions may return
-   non-locally on error.  */
+   non-locally on error.  As an extension over plain printf, these
+   support some GDB-specific format specifiers.  Particularly useful
+   here are the styling formatters: '%p[', '%p]' and '%ps'.  See
+   ui_out::message for details.  */
 
 extern void fputs_filtered (const char *, struct ui_file *);
 
@@ -430,12 +433,32 @@ extern void fprintf_styled (struct ui_file *stream,
 			    ...)
   ATTRIBUTE_PRINTF (3, 4);
 
+extern void vfprintf_styled (struct ui_file *stream,
+			     const ui_file_style &style,
+			     const char *fmt,
+			     va_list args)
+  ATTRIBUTE_PRINTF (3, 0);
+
+/* Like vfprintf_styled, but do not process gdb-specific format
+   specifiers.  */
+extern void vfprintf_styled_no_gdbfmt (struct ui_file *stream,
+				       const ui_file_style &style,
+				       bool filter,
+				       const char *fmt, va_list args)
+  ATTRIBUTE_PRINTF (4, 0);
+
 /* Like fputs_filtered, but styles the output according to STYLE, when
    appropriate.  */
 
 extern void fputs_styled (const char *linebuffer,
 			  const ui_file_style &style,
 			  struct ui_file *stream);
+
+/* Unfiltered variant of fputs_styled.  */
+
+extern void fputs_styled_unfiltered (const char *linebuffer,
+				     const ui_file_style &style,
+				     struct ui_file *stream);
 
 /* Like fputs_styled, but uses highlight_style to highlight the
    parts of STR that match HIGHLIGHT.  */

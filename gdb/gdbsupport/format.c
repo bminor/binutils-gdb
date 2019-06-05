@@ -20,10 +20,10 @@
 #include "common-defs.h"
 #include "format.h"
 
-format_pieces::format_pieces (const char **arg)
+format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 {
   const char *s;
-  char *f, *string;
+  const char *string;
   const char *prev_start;
   const char *percent_loc;
   char *sub_start, *current_substring;
@@ -31,70 +31,79 @@ format_pieces::format_pieces (const char **arg)
 
   s = *arg;
 
-  /* Parse the format-control string and copy it into the string STRING,
-     processing some kinds of escape sequence.  */
-
-  f = string = (char *) alloca (strlen (s) + 1);
-
-  while (*s != '"' && *s != '\0')
+  if (gdb_extensions)
     {
-      int c = *s++;
-      switch (c)
-	{
-	case '\0':
-	  continue;
-
-	case '\\':
-	  switch (c = *s++)
-	    {
-	    case '\\':
-	      *f++ = '\\';
-	      break;
-	    case 'a':
-	      *f++ = '\a';
-	      break;
-	    case 'b':
-	      *f++ = '\b';
-	      break;
-	    case 'e':
-	      *f++ = '\e';
-	      break;
-	    case 'f':
-	      *f++ = '\f';
-	      break;
-	    case 'n':
-	      *f++ = '\n';
-	      break;
-	    case 'r':
-	      *f++ = '\r';
-	      break;
-	    case 't':
-	      *f++ = '\t';
-	      break;
-	    case 'v':
-	      *f++ = '\v';
-	      break;
-	    case '"':
-	      *f++ = '"';
-	      break;
-	    default:
-	      /* ??? TODO: handle other escape sequences.  */
-	      error (_("Unrecognized escape character \\%c in format string."),
-		     c);
-	    }
-	  break;
-
-	default:
-	  *f++ = c;
-	}
+      string = *arg;
+      *arg += strlen (*arg);
     }
+  else
+    {
+      /* Parse the format-control string and copy it into the string STRING,
+	 processing some kinds of escape sequence.  */
 
-  /* Terminate our escape-processed copy.  */
-  *f++ = '\0';
+      char *f = (char *) alloca (strlen (s) + 1);
+      string = f;
 
-  /* Whether the format string ended with double-quote or zero, we're
-     done with it; it's up to callers to complain about syntax.  */
-  *arg = s;
+      while ((gdb_extensions || *s != '"') && *s != '\0')
+	{
+	  int c = *s++;
+	  switch (c)
+	    {
+	    case '\0':
+	      continue;
+
+	    case '\\':
+	      switch (c = *s++)
+		{
+		case '\\':
+		  *f++ = '\\';
+		  break;
+		case 'a':
+		  *f++ = '\a';
+		  break;
+		case 'b':
+		  *f++ = '\b';
+		  break;
+		case 'e':
+		  *f++ = '\e';
+		  break;
+		case 'f':
+		  *f++ = '\f';
+		  break;
+		case 'n':
+		  *f++ = '\n';
+		  break;
+		case 'r':
+		  *f++ = '\r';
+		  break;
+		case 't':
+		  *f++ = '\t';
+		  break;
+		case 'v':
+		  *f++ = '\v';
+		  break;
+		case '"':
+		  *f++ = '"';
+		  break;
+		default:
+		  /* ??? TODO: handle other escape sequences.  */
+		  error (_("Unrecognized escape character \\%c in format string."),
+			 c);
+		}
+	      break;
+
+	    default:
+	      *f++ = c;
+	    }
+	}
+
+      /* Terminate our escape-processed copy.  */
+      *f++ = '\0';
+
+      /* Whether the format string ended with double-quote or zero, we're
+	 done with it; it's up to callers to complain about syntax.  */
+      *arg = s;
+    }
 
   /* Need extra space for the '\0's.  Doubling the size is sufficient.  */
 
@@ -105,7 +114,7 @@ format_pieces::format_pieces (const char **arg)
      argclass classifies the %-specs so we can give printf-type functions
      something of the right size.  */
 
-  f = string;
+  const char *f = string;
   prev_start = string;
   while (*f)
     if (*f++ == '%')
@@ -115,6 +124,7 @@ format_pieces::format_pieces (const char **arg)
 	int seen_big_l = 0, seen_h = 0, seen_big_h = 0;
 	int seen_big_d = 0, seen_double_big_d = 0;
 	int bad = 0;
+	int n_int_args = 0;
 
 	/* Skip over "%%", it will become part of a literal piece.  */
 	if (*f == '%')
@@ -130,7 +140,7 @@ format_pieces::format_pieces (const char **arg)
 	*current_substring++ = '\0';
 
 	if (*sub_start != '\0')
-	  m_pieces.emplace_back (sub_start, literal_piece);
+	  m_pieces.emplace_back (sub_start, literal_piece, 0);
 
 	percent_loc = f - 1;
 
@@ -155,16 +165,32 @@ format_pieces::format_pieces (const char **arg)
 	  }
 
 	/* The next part of a format specifier is a width.  */
-	while (*f != '\0' && strchr ("0123456789", *f))
-	  f++;
+	if (gdb_extensions && *f == '*')
+	  {
+	    ++f;
+	    ++n_int_args;
+	  }
+	else
+	  {
+	    while (*f != '\0' && strchr ("0123456789", *f))
+	      f++;
+	  }
 
 	/* The next part of a format specifier is a precision.  */
 	if (*f == '.')
 	  {
 	    seen_prec = 1;
 	    f++;
-	    while (*f != '\0' && strchr ("0123456789", *f))
-	      f++;
+	    if (gdb_extensions && *f == '*')
+	      {
+		++f;
+		++n_int_args;
+	      }
+	    else
+	      {
+		while (*f != '\0' && strchr ("0123456789", *f))
+		  f++;
+	      }
 	  }
 
 	/* The next part of a format specifier is a length modifier.  */
@@ -252,6 +278,20 @@ format_pieces::format_pieces (const char **arg)
 	      bad = 1;
 	    if (seen_hash || seen_zero || seen_space || seen_plus)
 	      bad = 1;
+
+	    if (gdb_extensions)
+	      {
+		switch (f[1])
+		  {
+		  case 's':
+		  case 'F':
+		  case '[':
+		  case ']':
+		    f++;
+		    break;
+		  }
+	      }
+
 	    break;
 
 	  case 's':
@@ -336,7 +376,7 @@ format_pieces::format_pieces (const char **arg)
 
 	prev_start = f;
 
-	m_pieces.emplace_back (sub_start, this_argclass);
+	m_pieces.emplace_back (sub_start, this_argclass, n_int_args);
       }
 
   /* Record the remainder of the string.  */
@@ -349,6 +389,6 @@ format_pieces::format_pieces (const char **arg)
       current_substring += f - prev_start;
       *current_substring++ = '\0';
 
-      m_pieces.emplace_back (sub_start, literal_piece);
+      m_pieces.emplace_back (sub_start, literal_piece, 0);
     }
 }

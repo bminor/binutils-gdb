@@ -73,13 +73,15 @@
 #include "cli/cli-style.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
+#include "cli-out.h"
 
 void (*deprecated_error_begin_hook) (void);
 
 /* Prototypes for local functions */
 
 static void vfprintf_maybe_filtered (struct ui_file *, const char *,
-				     va_list, int) ATTRIBUTE_PRINTF (2, 0);
+				     va_list, bool, bool)
+  ATTRIBUTE_PRINTF (2, 0);
 
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
@@ -1855,6 +1857,24 @@ fputs_styled (const char *linebuffer, const ui_file_style &style,
 /* See utils.h.  */
 
 void
+fputs_styled_unfiltered (const char *linebuffer, const ui_file_style &style,
+			 struct ui_file *stream)
+{
+  /* This just makes it so we emit somewhat fewer escape
+     sequences.  */
+  if (style.is_default ())
+    fputs_maybe_filtered (linebuffer, stream, 0);
+  else
+    {
+      set_output_style (stream, style);
+      fputs_maybe_filtered (linebuffer, stream, 0);
+      set_output_style (stream, ui_file_style ());
+    }
+}
+
+/* See utils.h.  */
+
+void
 fputs_highlighted (const char *str, const compiled_regex &highlight,
 		   struct ui_file *stream)
 {
@@ -2021,33 +2041,45 @@ puts_debug (char *prefix, char *string, char *suffix)
    We implement three variants, vfprintf (takes a vararg list and stream),
    fprintf (takes a stream to write on), and printf (the usual).
 
-   Note also that a longjmp to top level may occur in this routine
-   (since prompt_for_continue may do so) so this routine should not be
-   called when cleanups are not in place.  */
+   Note also that this may throw a quit (since prompt_for_continue may
+   do so).  */
 
 static void
 vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
-			 va_list args, int filter)
+			 va_list args, bool filter, bool gdbfmt)
 {
-  std::string linebuffer = string_vprintf (format, args);
-  fputs_maybe_filtered (linebuffer.c_str (), stream, filter);
+  if (gdbfmt)
+    {
+      ui_out_flags flags = disallow_ui_out_field;
+      if (!filter)
+	flags |= unfiltered_output;
+      cli_ui_out (stream, flags).vmessage (applied_style, format, args);
+    }
+  else
+    {
+      std::string str = string_vprintf (format, args);
+      fputs_maybe_filtered (str.c_str (), stream, filter);
+    }
 }
 
 
 void
 vfprintf_filtered (struct ui_file *stream, const char *format, va_list args)
 {
-  vfprintf_maybe_filtered (stream, format, args, 1);
+  vfprintf_maybe_filtered (stream, format, args, true, true);
 }
 
 void
 vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 {
-  std::string linebuffer = string_vprintf (format, args);
   if (debug_timestamp && stream == gdb_stdlog)
     {
       using namespace std::chrono;
       int len, need_nl;
+
+      string_file sfile;
+      cli_ui_out (&sfile, 0).vmessage (ui_file_style (), format, args);
+      std::string linebuffer = std::move (sfile.string ());
 
       steady_clock::time_point now = steady_clock::now ();
       seconds s = duration_cast<seconds> (now.time_since_epoch ());
@@ -2064,13 +2096,13 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
       fputs_unfiltered (timestamp.c_str (), stream);
     }
   else
-    fputs_unfiltered (linebuffer.c_str (), stream);
+    vfprintf_maybe_filtered (stream, format, args, false, true);
 }
 
 void
 vprintf_filtered (const char *format, va_list args)
 {
-  vfprintf_maybe_filtered (gdb_stdout, format, args, 1);
+  vfprintf_maybe_filtered (gdb_stdout, format, args, true, false);
 }
 
 void
@@ -2130,6 +2162,33 @@ fprintf_styled (struct ui_file *stream, const ui_file_style &style,
   set_output_style (stream, ui_file_style ());
 }
 
+/* See utils.h.  */
+
+void
+vfprintf_styled (struct ui_file *stream, const ui_file_style &style,
+		 const char *format, va_list args)
+{
+  set_output_style (stream, style);
+  vfprintf_filtered (stream, format, args);
+  set_output_style (stream, ui_file_style ());
+}
+
+/* See utils.h.  */
+
+void
+vfprintf_styled_no_gdbfmt (struct ui_file *stream, const ui_file_style &style,
+			   bool filter, const char *format, va_list args)
+{
+  std::string str = string_vprintf (format, args);
+  if (!str.empty ())
+    {
+      if (!style.is_default ())
+	set_output_style (stream, style);
+      fputs_maybe_filtered (str.c_str (), stream, filter);
+      if (!style.is_default ())
+	set_output_style (stream, ui_file_style ());
+    }
+}
 
 void
 printf_filtered (const char *format, ...)

@@ -53,6 +53,12 @@ enum ui_out_flag
 {
   ui_source_list = (1 << 0),
   fix_multi_location_breakpoint_output = (1 << 1),
+  /* For CLI output, this flag is set if unfiltered output is desired.
+     This should only be used by low-level formatting functions.  */
+  unfiltered_output = (1 << 2),
+  /* This indicates that %pF should be disallowed in a printf format
+     string.  */
+  disallow_ui_out_field = (1 << 3)
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
@@ -67,6 +73,87 @@ enum ui_out_type
     ui_out_type_tuple,
     ui_out_type_list
   };
+
+/* The possible kinds of fields.  */
+enum class field_kind
+  {
+    SIGNED,
+    STRING,
+  };
+
+/* The base type of all fields that can be emitted using %pF.  */
+
+struct base_field_s
+{
+  const char *name;
+  field_kind kind;
+};
+
+/* A signed integer field, to be passed to %pF in format strings.  */
+
+struct signed_field_s : base_field_s
+{
+  LONGEST val;
+};
+
+/* Construct a temporary signed_field_s on the caller's stack and
+   return a pointer to the constructed object.  We use this because
+   it's not possible to pass a reference via va_args.  */
+
+static inline signed_field_s *
+signed_field (const char *name, LONGEST val,
+	      signed_field_s &&tmp = {})
+{
+  tmp.name = name;
+  tmp.kind = field_kind::SIGNED;
+  tmp.val = val;
+  return &tmp;
+}
+
+/* A string field, to be passed to %pF in format strings.  */
+
+struct string_field_s : base_field_s
+{
+  const char *str;
+};
+
+/* Construct a temporary string_field_s on the caller's stack and
+   return a pointer to the constructed object.  We use this because
+   it's not possible to pass a reference via va_args.  */
+
+static inline string_field_s *
+string_field (const char *name, const char *str,
+	      string_field_s &&tmp = {})
+{
+  tmp.name = name;
+  tmp.kind = field_kind::STRING;
+  tmp.str = str;
+  return &tmp;
+}
+
+/* A styled string.  */
+
+struct styled_string_s
+{
+  /* The style.  */
+  ui_file_style style;
+
+  /* The string.  */
+  const char *str;
+};
+
+/* Construct a temporary styled_string_s on the caller's stack and
+   return a pointer to the constructed object.  We use this because
+   it's not possible to pass a reference via va_args.  */
+
+static inline styled_string_s *
+styled_string (const ui_file_style &style, const char *str,
+	       styled_string_s &&tmp = {})
+{
+  tmp.style = style;
+  tmp.str = str;
+  return &tmp;
+}
 
 class ui_out
 {
@@ -110,7 +197,55 @@ class ui_out
 
   void spaces (int numspaces);
   void text (const char *string);
+
+  /* Output a printf-style formatted string.  In addition to the usual
+     printf format specs, this supports a few GDB-specific
+     formatters:
+
+     - '%pF' - output a field.
+
+       The argument is a field, wrapped in any of the base_field_s
+       subclasses.  signed_field for integer fields, string_field for
+       string fields.  This is preferred over separate
+       uiout->field_signed(), uiout_>field_string() etc. calls when
+       the formatted message is translatable.  E.g.:
+
+         uiout->message (_("\nWatchpoint %pF deleted because the program has "
+                         "left the block in\n"
+                         "which its expression is valid.\n"),
+                         signed_field ("wpnum", b->number));
+
+     - '%p[' - output the following text in a specified style.
+       '%p]' - output the following text in the default style.
+
+       The argument to '%p[' is a ui_file_style pointer.  The argument
+       to '%p]' must be nullptr.
+
+       This is useful when you want to output some portion of a string
+       literal in some style.  E.g.:
+
+	 uiout->message (_(" %p[<repeats %u times>%p]"),
+			 metadata_style.style ().ptr (),
+			 reps, repeats, nullptr);
+
+     - '%ps' - output a styled string.
+
+       The argument is the result of a call to styled_string.  This is
+       useful when you want to output some runtime-generated string in
+       some style.  E.g.:
+
+	 uiout->message (_("this is a target address %ps.\n"),
+			 styled_string (address_style.style (),
+					paddress (gdbarch, pc)));
+
+     Note that these all "abuse" the %p printf format spec, in order
+     to be compatible with GCC's printf format checking.  This is OK
+     because code in GDB that wants to print a host address should use
+     host_address_to_string instead of %p.  */
   void message (const char *format, ...) ATTRIBUTE_PRINTF (2, 3);
+  void vmessage (const ui_file_style &in_style,
+		 const char *format, va_list args) ATTRIBUTE_PRINTF (3, 0);
+
   void wrap_hint (const char *identstring);
 
   void flush ();
@@ -161,8 +296,9 @@ class ui_out
     ATTRIBUTE_PRINTF (6,0) = 0;
   virtual void do_spaces (int numspaces) = 0;
   virtual void do_text (const char *string) = 0;
-  virtual void do_message (const char *format, va_list args)
-    ATTRIBUTE_PRINTF (2,0) = 0;
+  virtual void do_message (const ui_file_style &style,
+			   const char *format, va_list args)
+    ATTRIBUTE_PRINTF (3,0) = 0;
   virtual void do_wrap_hint (const char *identstring) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
@@ -174,6 +310,8 @@ class ui_out
   { return false; }
 
  private:
+  void call_do_message (const ui_file_style &style, const char *format,
+			...);
 
   ui_out_flags m_flags;
 

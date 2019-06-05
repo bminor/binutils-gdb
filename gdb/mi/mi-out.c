@@ -166,7 +166,8 @@ mi_ui_out::do_text (const char *string)
 }
 
 void
-mi_ui_out::do_message (const char *format, va_list args)
+mi_ui_out::do_message (const ui_file_style &style,
+		       const char *format, va_list args)
 {
 }
 
