@@ -1,6 +1,6 @@
 #source: bti-plt-1.s
 #as: -mabi=lp64
-#ld: -shared --force-bti --pac-plt -T bti-plt.ld
+#ld: -shared -z force-bti -z pac-plt -T bti-plt.ld
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64

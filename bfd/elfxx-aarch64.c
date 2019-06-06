@@ -721,7 +721,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 				    4);
       if (gnu_prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI
 	  && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	    _bfd_error_handler (_("%pB: warning: BTI turned on by --force-bti "
+	    _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti "
 				  "when all inputs do not have BTI in NOTE "
 				  "section."), ebfd);
       prop->u.number |= gnu_prop;

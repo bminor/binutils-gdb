@@ -1,5 +1,5 @@
 #source: tls-desc-ie.s
-#ld: -shared --pac-plt -T bti-plt.ld
+#ld: -shared -z pac-plt -T bti-plt.ld
 #objdump: -dr -j .plt
 #...
 Disassembly of section .plt:

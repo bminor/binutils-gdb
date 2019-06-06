@@ -1,3 +1,24 @@
+2019-06-06  Sudakshina Das  <sudi.das@arm.com>
+
+	* NEWS: Update options names.
+	* emultempl/aarch64elf.em (OPTION_FORCE_BTI, OPTION_PAC_PLT): Remove.
+	(PARSE_AND_LIST_LONGOPTS): Remove force-bti and pac-plt.
+	(PARSE_AND_LIST_OPTIONS): Update to -z.
+	(PARSE_AND_LIST_ARGS_CASE_Z_AARCH64): New.
+	(PARSE_AND_LIST_ARGS_CASE_Z): Add PARSE_AND_LIST_ARGS_CASE_Z_AARCH64.
+	(PARSE_AND_LIST_ARGS_CASES): Move cases for these options.
+	* testsuite/ld-aarch64/bti-pac-plt-1.d: Update option.
+	* testsuite/ld-aarch64/bti-pac-plt-2.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-1.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-2.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-3.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-4.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-6.d: Likewise.
+	* testsuite/ld-aarch64/bti-plt-7.d: Likewise.
+	* testsuite/ld-aarch64/bti-warn.d: Likewise.
+	* testsuite/ld-aarch64/pac-plt-1.d: Likewise.
+	* testsuite/ld-aarch64/pac-plt-2.d: Likewise.
+
 2019-05-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 24627

@@ -1,7 +1,7 @@
-#name: Check --force-bti emits BTI PLT (exec)
+#name: Check -z force-bti emits BTI PLT (exec)
 #source: bti-plt-1.s
 #as: -mabi=lp64
-#ld: --force-bti -e _start -T bti-plt.ld -L./tmpdir -lbti-plt-so
+#ld: -z force-bti -e _start -T bti-plt.ld -L./tmpdir -lbti-plt-so
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64

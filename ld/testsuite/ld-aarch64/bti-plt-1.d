@@ -1,7 +1,7 @@
-#name: Check --force-bti emits BTI PLT (shared)
+#name: Check -z force-bti emits BTI PLT (shared)
 #source: bti-plt-1.s
 #as: -mabi=lp64
-#ld: -shared --force-bti -T bti-plt.ld
+#ld: -shared -z force-bti -T bti-plt.ld
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64

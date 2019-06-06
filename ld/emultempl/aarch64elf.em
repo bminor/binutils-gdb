@@ -372,8 +372,6 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_FIX_ERRATUM_835769	313
 #define OPTION_FIX_ERRATUM_843419	314
 #define OPTION_NO_APPLY_DYNAMIC_RELOCS	315
-#define OPTION_FORCE_BTI		316
-#define OPTION_PAC_PLT			317
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -387,8 +385,6 @@ PARSE_AND_LIST_LONGOPTS='
   { "fix-cortex-a53-835769", no_argument, NULL, OPTION_FIX_ERRATUM_835769},
   { "fix-cortex-a53-843419", optional_argument, NULL, OPTION_FIX_ERRATUM_843419},
   { "no-apply-dynamic-relocs", no_argument, NULL, OPTION_NO_APPLY_DYNAMIC_RELOCS},
-  { "force-bti", no_argument, NULL, OPTION_FORCE_BTI},
-  { "pac-plt", no_argument, NULL, OPTION_PAC_PLT},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -419,9 +415,20 @@ PARSE_AND_LIST_OPTIONS='
                                                  instruction into an ADR.  As such the workaround will always use a\n\
                                                  veneer and this will give you both a performance and size overhead.\n"));
   fprintf (file, _("  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"));
-  fprintf (file, _("  --force-bti                  Turn on Branch Target Identification mechanism and generate PLTs with BTI. Generate warnings for missing BTI on inputs\n"));
-  fprintf (file, _("  --pac-plt                    Protect PLTs with Pointer Authentication.\n"));
+  fprintf (file, _("  -z force-bti                  Turn on Branch Target Identification mechanism and generate PLTs with BTI. Generate warnings for missing BTI on inputs\n"));
+  fprintf (file, _("  -z pac-plt                    Protect PLTs with Pointer Authentication.\n"));
 '
+
+PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
+      else if (strcmp (optarg, "force-bti") == 0)
+	{
+	  plt_type |= PLT_BTI;
+	  bti_type = BTI_WARN;
+	}
+      else if (strcmp (optarg, "pac-plt") == 0)
+	plt_type |= PLT_PAC;
+'
+PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_AARCH64"
 
 PARSE_AND_LIST_ARGS_CASES='
     case '\'p\'':
@@ -462,15 +469,6 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_APPLY_DYNAMIC_RELOCS:
       no_apply_dynamic_relocs = 1;
-      break;
-
-    case OPTION_FORCE_BTI:
-      plt_type |= PLT_BTI;
-      bti_type = BTI_WARN;
-      break;
-
-    case OPTION_PAC_PLT:
-      plt_type |= PLT_PAC;
       break;
 
     case OPTION_STUBGROUP_SIZE:

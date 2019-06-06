@@ -1021,7 +1021,7 @@ typedef enum
 typedef enum
 {
   BTI_NONE	= 0,  /* BTI is not enabled.  */
-  BTI_WARN	= 1,  /* BTI is enabled with --force-bti.  */
+  BTI_WARN	= 1,  /* BTI is enabled with -z force-bti.  */
 } aarch64_enable_bti_type;
 
 /* A structure to encompass all information coming from BTI or PAC

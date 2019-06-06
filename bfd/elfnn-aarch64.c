@@ -10010,14 +10010,14 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
       if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	   || !aprop)
 	{
-	  _bfd_error_handler (_("%pB: warning: BTI turned on by --force-bti when "
+	  _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti when "
 				"all inputs do not have BTI in NOTE section."),
 			      abfd);
 	}
       if ((bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	   || !bprop)
 	{
-	  _bfd_error_handler (_("%pB: warning: BTI turned on by --force-bti when "
+	  _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti when "
 				"all inputs do not have BTI in NOTE section."),
 			      bbfd);
 	}

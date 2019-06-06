@@ -2,9 +2,9 @@
 #source: property-bti-pac2.s
 #source: plt_mapping_symbol.s
 #as: -mabi=lp64
-#ld: -shared --force-bti
-#warning: .*plt_mapping_symbol.*: warning: BTI turned on by --force-bti.*
-#warning: .*property-bti-pac2.*: warning: BTI turned on by --force-bti.*
+#ld: -shared -z force-bti
+#warning: .*plt_mapping_symbol.*: warning: BTI turned on by -z force-bti.*
+#warning: .*property-bti-pac2.*: warning: BTI turned on by -z force-bti.*
 #readelf: -n
 
 # Should warn about the missing input BTI NOTE but should

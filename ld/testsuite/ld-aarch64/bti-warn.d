@@ -2,9 +2,9 @@
 #source: property-bti-pac2.s
 #source: bti-plt-1.s
 #as: -mabi=lp64 --defsym __guard_property_bti__=1 --defsym __property_pac__=1
-#ld: -shared --force-bti
-#warning: .*property-bti-pac2.*: warning: BTI turned on by --force-bti.*
-#warning: .*bti-plt-1.*: warning: BTI turned on by --force-bti.*
+#ld: -shared -z force-bti
+#warning: .*property-bti-pac2.*: warning: BTI turned on by -z force-bti.*
+#warning: .*bti-plt-1.*: warning: BTI turned on by -z force-bti.*
 #readelf: -n
 
 # Should warn about the missing input BTI NOTE but should

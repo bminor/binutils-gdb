@@ -1,6 +1,6 @@
 #source: bti-plt-1.s
 #as: -mabi=lp64 --defsym __guard_property_bti__=1
-#ld: -shared --pac-plt -T bti-plt.ld
+#ld: -shared -z pac-plt -T bti-plt.ld
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64

@@ -1,8 +1,8 @@
-#name: Check --force-bti emits BTI feature (shared)
+#name: Check -z force-bti emits BTI feature (shared)
 #source: bti-plt-1.s
 #source: bti-plt-2.s
 #as: -mabi=lp64
-#ld: -shared --force-bti -T bti-plt.ld
+#ld: -shared -z force-bti -T bti-plt.ld
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property
