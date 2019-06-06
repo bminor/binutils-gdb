@@ -381,6 +381,8 @@ run_dump_test_lp64 "pie-bind-locally"
 run_dump_test "property-bti-pac1"
 run_dump_test "property-bti-pac2"
 run_dump_test "property-bti-pac3"
+run_dump_test "property-bti-pac4-a"
+run_dump_test "property-bti-pac4-b"
 run_dump_test "bti-plt-1"
 run_dump_test "bti-plt-2"
 

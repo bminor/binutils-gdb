@@ -1,5 +1,10 @@
 2019-06-06  Sudakshina Das  <sudi.das@arm.com>
 
+	* elfxx-aarch64.c (_bfd_aarch64_elf_link_setup_gnu_properties): Set
+	alignment of the new gnu property section.
+
+2019-06-06  Sudakshina Das  <sudi.das@arm.com>
+
 	* bfd-in.h: Change comment.
 	* bfd-in2.h: Regenerate.
 	* elfnn-aarch64.c (elfNN_aarch64_merge_gnu_properties): Update warning.

@@ -1,5 +1,12 @@
 2019-06-06  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.
+	* testsuite/ld-aarch64/property-bti-pac4-a.d: New test.
+	* testsuite/ld-aarch64/property-bti-pac4-b.d: New test.
+	* testsuite/ld-aarch64/property-bti-pac4.s: New test.
+
+2019-06-06  Sudakshina Das  <sudi.das@arm.com>
+
 	* NEWS: Update options names.
 	* emultempl/aarch64elf.em (OPTION_FORCE_BTI, OPTION_PAC_PLT): Remove.
 	(PARSE_AND_LIST_LONGOPTS): Remove force-bti and pac-plt.

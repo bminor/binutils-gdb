@@ -695,6 +695,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
   bfd *pbfd;
   bfd *ebfd = NULL;
   elf_property *prop;
+  unsigned align;
 
   uint32_t gnu_prop = *gprop;
 
@@ -742,6 +743,13 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	  if (sec == NULL)
 	    info->callbacks->einfo (
 	      _("%F%P: failed to create GNU property section\n"));
+
+          align = (bfd_get_mach (ebfd) & bfd_mach_aarch64_ilp32) ? 2 : 3;
+          if (!bfd_set_section_alignment (ebfd, sec, align))
+            {
+              info->callbacks->einfo (_("%F%pA: failed to align section\n"),
+                                      sec);
+            }
 
 	  elf_section_type (sec) = SHT_NOTE;
 	}
