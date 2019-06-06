@@ -1,5 +1,13 @@
 2019-06-06  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_format_type): Cast size_t's used in printf()s.
+	(ctf_dump_objts): Likewise.
+	(ctf_dump_funcs): Likewise.
+	(ctf_dump_member): Likewise.
+	(ctf_dump_str): Likewise.
+
+2019-06-06  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (arc_mmap_header): Mark fd as potentially unused.
 	* ctf-subr.c (ctf_data_protect): Mark both args as potentially unused.
 

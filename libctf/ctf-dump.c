@@ -122,7 +122,8 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
       else
 	{
 	  if (asprintf (&bit, " %lx: %s (size %lx)", id, buf[0] == '\0' ?
-			"(nameless)" : buf, ctf_type_size (fp, id)) < 0)
+			"(nameless)" : buf,
+			(unsigned long) ctf_type_size (fp, id)) < 0)
 	    goto oom;
 	}
       free (buf);
@@ -211,12 +212,12 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
       sym_name = ctf_lookup_symbol_name (fp, i);
       if (sym_name[0] == '\0')
 	{
-	  if (asprintf (&str, "%lx -> ", i) < 0)
+	  if (asprintf (&str, "%lx -> ", (unsigned long) i) < 0)
 	    return (ctf_set_errno (fp, ENOMEM));
 	}
       else
 	{
-	  if (asprintf (&str, "%s (%lx) -> ", sym_name, i) < 0)
+	  if (asprintf (&str, "%s (%lx) -> ", sym_name, (unsigned long) i) < 0)
 	    return (ctf_set_errno (fp, ENOMEM));
 	}
 
@@ -279,12 +280,12 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
       sym_name = ctf_lookup_symbol_name (fp, i);
       if (sym_name[0] == '\0')
 	{
-	  if (asprintf (&bit, "%lx ", i) < 0)
+	  if (asprintf (&bit, "%lx ", (unsigned long) i) < 0)
 	    goto oom;
 	}
       else
 	{
-	  if (asprintf (&bit, "%s (%lx) ", sym_name, i) < 0)
+	  if (asprintf (&bit, "%s (%lx) ", sym_name, (unsigned long) i) < 0)
 	    goto oom;
 	}
       str = ctf_str_append (str, bit);
@@ -369,7 +370,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
 
   if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s %s (aligned at 0x%lx",
 		offset, id, ctf_type_kind (state->cdm_fp, id), typestr, name,
-		ctf_type_align (state->cdm_fp, id)) < 0)
+		(unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
     goto oom;
   *state->cdm_str = ctf_str_append (*state->cdm_str, bit);
   free (typestr);
@@ -440,7 +441,8 @@ ctf_dump_str (ctf_file_t *fp, ctf_dump_state_t *state)
 	 fp->ctf_str[CTF_STRTAB_0].cts_len;)
     {
       char *str;
-      if (asprintf (&str, "%lx: %s", s - fp->ctf_str[CTF_STRTAB_0].cts_strs,
+      if (asprintf (&str, "%lx: %s",
+		    (unsigned long) (s - fp->ctf_str[CTF_STRTAB_0].cts_strs),
 		    s) < 0)
 	return (ctf_set_errno (fp, ENOMEM));
       ctf_dump_append (state, str);
