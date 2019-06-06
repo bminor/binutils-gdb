@@ -1,3 +1,8 @@
+2019-04-26  Amos Bird  <amosbird@gmail.com>
+
+	* annotate.c (annotate_thread_exited): Add "thread-exited"
+	annotation.
+
 2019-06-06  Tom Tromey  <tromey@adacore.com>
 
 	* maint.h (class scoped_command_stats): Use

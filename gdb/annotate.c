@@ -241,6 +241,19 @@ annotate_thread_changed (void)
     }
 }
 
+/* Emit notification on thread exit.  */
+
+static void
+annotate_thread_exited (struct thread_info *t, int silent)
+{
+  if (annotation_level > 1)
+    {
+      printf_filtered(("\n\032\032thread-exited,"
+                       "id=\"%d\",group-id=\"i%d\"\n"),
+                      t->global_num, t->inf->num);
+    }
+}
+
 void
 annotate_field_begin (struct type *type)
 {
@@ -595,4 +608,5 @@ _initialize_annotate (void)
   gdb::observers::breakpoint_created.attach (breakpoint_changed);
   gdb::observers::breakpoint_deleted.attach (breakpoint_changed);
   gdb::observers::breakpoint_modified.attach (breakpoint_changed);
+  gdb::observers::thread_exit.attach (annotate_thread_exited);
 }

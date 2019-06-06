@@ -3,6 +3,8 @@
 
 *** Changes since GDB 8.3
 
+* 'thread-exited' event is now available in the annotations interface.
+
 * New built-in convenience variables $_gdb_major and $_gdb_minor
   provide the GDB version.  They are handy for conditionally using
   features available only in or since specific GDB versions, in

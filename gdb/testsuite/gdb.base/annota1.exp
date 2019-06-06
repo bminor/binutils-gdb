@@ -428,7 +428,7 @@ if [target_info exists gdb,nosignals] {
     unsupported "signal sent"
 } else {
     gdb_test_multiple "signal SIGTRAP" "signal sent" {
-	-re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
+	-re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032thread-exited,id=\"${decimal}\",group-id=\"i${decimal}\"\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
 	    pass "signal sent"
 	}
     }
@@ -450,6 +450,7 @@ if { [remote_file host exists core] } {
 proc thread_test {} {
     global subdir srcdir testfile srcfile binfile
     global gdb_prompt old_gdb_prompt
+    global decimal
     set srcfile watch_thread_num.c
     set binfile [standard_output_file ${testfile}-watch_thread_num]
     set gdb_prompt $old_gdb_prompt
@@ -468,6 +469,9 @@ proc thread_test {} {
 	set linenum [gdb_get_line_number "all threads started"]
 	gdb_breakpoint "$linenum"
 
+	set linenum [gdb_get_line_number "first child thread exited"]
+	gdb_breakpoint "$linenum"
+
 	set gdb_prompt \
 	    "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
 
@@ -481,6 +485,12 @@ proc thread_test {} {
 		pass "new thread"
 	    }
 	}
+
+    gdb_test_multiple "continue" "thread exit" {
+	    -re "\032\032thread-exited,id=\"${decimal}\",group-id=\"i${decimal}\".*\r\n$gdb_prompt$" {
+		pass "thread exit"
+	    }
+    }
     }
 }
 

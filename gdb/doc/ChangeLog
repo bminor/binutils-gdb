@@ -1,3 +1,8 @@
+2019-06-06  Amos Bird  <amosbird@gmail.com>
+
+	* annotate.texinfo (Multi-threaded Apps): Add entry for thread-exited
+	annotation.
+
 2019-06-04  Christian Biesinger  <cbiesinger@google.com>
 
 	* python.texi: Document new gdb.Type.objfile property.

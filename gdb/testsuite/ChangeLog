@@ -1,3 +1,8 @@
+2019-06-06  Amos Bird  <amosbird@gmail.com>
+
+	* gdb.base/annota1.exp (thread_switch): Add test for
+	thread-exited annotation.
+
 2019-06-06  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/maint.exp: Expect command started/finished output.

@@ -836,6 +836,13 @@ The selected thread has changed.  This may occur at the request of the
 user with the @code{thread} command, or as a result of execution,
 e.g., another thread hits a breakpoint.
 
+@findex thread-exited@r{, annotation}
+@item ^Z^Zthread-exited,id="@var{id}",group-id="@var{gid}"
+
+This annotation is issued once for each thread that exits.  The @var{id}
+field contains the global @value{GDBN} identifier of the thread.  The
+@var{gid} field identifies the thread group this thread belongs to.
+
 @end table
 
 @node GNU Free Documentation License
