@@ -1,3 +1,7 @@
+2019-07-30  Tom Tromey  <tromey@adacore.com>
+
+	* block.c (contained_in): Remove BLOCK_FUNCTION check.
+
 2019-07-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* printcmd.c (print_address_symbolic): Print negative offsets.
