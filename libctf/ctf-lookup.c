@@ -153,7 +153,7 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 	      else
 		{
 		  free (fp->ctf_tmp_typeslice);
-		  fp->ctf_tmp_typeslice = strndup (p, (size_t) (q - p));
+		  fp->ctf_tmp_typeslice = xstrndup (p, (size_t) (q - p));
 		  if (fp->ctf_tmp_typeslice == NULL)
 		    {
 		      (void) ctf_set_errno (fp, ENOMEM);

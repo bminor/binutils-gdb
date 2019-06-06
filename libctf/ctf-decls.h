@@ -24,6 +24,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include "libiberty.h"
 
 #if HAVE_QSORT_R_ARG_LAST
 static inline void
