@@ -106,7 +106,7 @@ ctf_munmap (void *buf, size_t length _libctf_unused_)
 }
 
 void
-ctf_data_protect (void *buf, size_t size)
+ctf_data_protect (void *buf _libctf_unused_, size_t size _libctf_unused_)
 {
 #ifdef HAVE_MMAP
   /* Must be the same as the check in ctf_data_alloc().  */

@@ -681,7 +681,7 @@ static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg)
 }
 #else
 /* Map the header in.  Only used on new, empty files.  */
-static void *arc_mmap_header (int fd, size_t headersz)
+static void *arc_mmap_header (int fd _libctf_unused_, size_t headersz)
 {
   void *hdr;
   if ((hdr = malloc (headersz)) == NULL)

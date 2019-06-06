@@ -1,3 +1,8 @@
+2019-06-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-archive.c (arc_mmap_header): Mark fd as potentially unused.
+	* ctf-subr.c (ctf_data_protect): Mark both args as potentially unused.
+
 2019-06-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-archive.c (ctf_arc_write): Eschew %zi format specifier.
