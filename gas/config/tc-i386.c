@@ -1084,6 +1084,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_BF16_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512_vp2intersect"), PROCESSOR_UNKNOWN,
     CPU_AVX512_VP2INTERSECT_FLAGS, 0 },
+  { STRING_COMMA_LEN (".enqcmd"), PROCESSOR_UNKNOWN,
+    CPU_ENQCMD_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1125,6 +1127,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("nomovdir64b"), CPU_ANY_MOVDIR64B_FLAGS },
   { STRING_COMMA_LEN ("noavx512_bf16"), CPU_ANY_AVX512_BF16_FLAGS },
   { STRING_COMMA_LEN ("noavx512_vp2intersect"), CPU_ANY_SHSTK_FLAGS },
+  { STRING_COMMA_LEN ("noenqcmd"), CPU_ANY_ENQCMD_FLAGS },
 };
 
 #ifdef I386COFF
