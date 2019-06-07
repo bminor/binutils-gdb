@@ -24,6 +24,7 @@
 #define GOLD_ERRORS_H
 
 #include <cstdarg>
+#include <string>
 
 #include "gold-threads.h"
 

@@ -1,3 +1,7 @@
+2019-06-10  Martin Liska  <mliska@suse.cz>
+
+	* errors.h: Include string.
+
 2019-05-10  Joshua Oreman  <oremanj@hudson-trading.com>
 
 	PR gold/21066
