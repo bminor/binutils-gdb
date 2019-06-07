@@ -2951,6 +2951,10 @@ coffstab_build_psymtabs (struct objfile *objfile,
   char *name = bfd_get_filename (sym_bfd);
   unsigned int stabsize;
 
+  /* Allocate struct to keep track of stab reading.  */
+  struct dbx_symfile_info *dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
+
   DBX_TEXT_ADDR (objfile) = textaddr;
   DBX_TEXT_SIZE (objfile) = textsize;
 
@@ -3033,6 +3037,12 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
+
+  stabsread_new_init ();
+
+  /* Allocate struct to keep track of stab reading.  */
+  struct dbx_symfile_info *dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
 
   /* Find the first and last text address.  dbx_symfile_read seems to
      want this.  */

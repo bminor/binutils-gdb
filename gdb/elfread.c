@@ -29,7 +29,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "stabsread.h"
-#include "gdb-stabs.h"
 #include "complaints.h"
 #include "demangle.h"
 #include "psympriv.h"
@@ -1039,7 +1038,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;
-  struct dbx_symfile_info *dbx;
 
   if (symtab_create_debug)
     {
@@ -1064,10 +1062,6 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
     }
 
   minimal_symbol_reader reader (objfile);
-
-  /* Allocate struct to keep track of the symfile.  */
-  dbx = XCNEW (struct dbx_symfile_info);
-  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
 
   /* Process the normal ELF symbol table first.  */
 
@@ -1316,15 +1310,11 @@ read_psyms (struct objfile *objfile)
 
 /* Initialize anything that needs initializing when a completely new symbol
    file is specified (not just adding some symbols from another file, e.g. a
-   shared library).
-
-   We reinitialize buildsym, since we may be reading stabs from an ELF
-   file.  */
+   shared library).  */
 
 static void
 elf_new_init (struct objfile *ignore)
 {
-  stabsread_new_init ();
 }
 
 /* Perform any local cleanups required when we are done with a particular

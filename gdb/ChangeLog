@@ -1,3 +1,12 @@
+2019-06-10  Tom Tromey  <tromey@adacore.com>
+
+	* elfread.c (elf_read_minimal_symbols): Don't set the dbx objfile
+	data.
+	(elf_new_init): Don't call stabsread_new_init.
+	* dbxread.c (coffstab_build_psymtabs): Set dbx objfile data.
+	(elfstab_build_psymtabs): Likewise.  Call stabsread_new_init.
+	* coffread.c (coff_symfile_init): Don't set the dbx objfile data.
+
 2019-06-10  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/16264
