@@ -1,3 +1,9 @@
+2019-06-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (gdbpy_breakpoint_created)
+	(gdbpy_breakpoint_deleted, gdbpy_breakpoint_modified): Use
+	gdbpy_enter.
+
 2019-06-10  Tom Tromey  <tromey@adacore.com>
 
 	* elfread.c (elf_read_minimal_symbols): Don't set the dbx objfile
