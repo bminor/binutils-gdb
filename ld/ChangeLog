@@ -1,3 +1,8 @@
+2019-06-07  Maciej W. Rozycki  <macro@wdc.com>
+
+	* ld.texi (Options): Also document `-rpath' option restrictions
+	in the description of the option itself.
+
 2019-06-06  Sudakshina Das  <sudi.das@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.

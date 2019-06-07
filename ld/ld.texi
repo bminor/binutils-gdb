@@ -1958,12 +1958,17 @@ line.  It overrides @samp{-s} and @samp{-S}.
 Add a directory to the runtime library search path.  This is used when
 linking an ELF executable with shared objects.  All @option{-rpath}
 arguments are concatenated and passed to the runtime linker, which uses
-them to locate shared objects at runtime.  The @option{-rpath} option is
-also used when locating shared objects which are needed by shared
-objects explicitly included in the link; see the description of the
-@option{-rpath-link} option.  If @option{-rpath} is not used when linking an
-ELF executable, the contents of the environment variable
-@code{LD_RUN_PATH} will be used if it is defined.
+them to locate shared objects at runtime.
+
+The @option{-rpath} option is also used when locating shared objects which
+are needed by shared objects explicitly included in the link; see the
+description of the @option{-rpath-link} option.  Searching @option{-rpath}
+in this way is only supported by native linkers and cross linkers which
+have been configured with the @option{--with-sysroot} option.
+
+If @option{-rpath} is not used when linking an ELF executable, the
+contents of the environment variable @code{LD_RUN_PATH} will be used if it
+is defined.
 
 The @option{-rpath} option may also be used on SunOS.  By default, on
 SunOS, the linker will form a runtime search path out of all the
