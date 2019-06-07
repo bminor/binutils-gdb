@@ -216,7 +216,7 @@ false		{ return FALSEKEYWORD; }
 
         /* ATTRIBUTES */
 
-{TICK}[a-zA-Z][a-zA-Z]+ { BEGIN INITIAL; return processAttribute (yytext+1); }
+{TICK}[a-zA-Z][a-zA-Z_]+ { BEGIN INITIAL; return processAttribute (yytext+1); }
 
 	/* PUNCTUATION */
 

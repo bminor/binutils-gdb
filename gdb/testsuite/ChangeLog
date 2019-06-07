@@ -1,5 +1,10 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/formatted_ref.exp (test_p_x_addr): Check
+	'unchecked_access and 'unrestricted_access as well.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	PR ada/24539:
 	* gdb.ada/vla.exp: Update tests.
 	* gdb.ada/vla/vla.adb (Record_Type): Use No_Component_Reordering

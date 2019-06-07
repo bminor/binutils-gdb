@@ -1,5 +1,9 @@
 2019-06-14  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lex.l: Allow "_" in attribute names.
+
+2019-06-14  Tom Tromey  <tromey@adacore.com>
+
 	PR gdb/24653:
 	* regcache.c (registers_changed): Don't call alloca.
 	* top.c (execute_command): Don't call alloca.
