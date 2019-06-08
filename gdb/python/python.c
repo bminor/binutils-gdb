@@ -28,7 +28,6 @@
 #include "value.h"
 #include "language.h"
 #include "event-loop.h"
-#include "serial.h"
 #include "readline/tilde.h"
 #include "python.h"
 #include "extension-priv.h"
@@ -940,63 +939,81 @@ gdbpy_source_script (const struct extension_language_defn *extlang,
 
 /* Posting and handling events.  */
 
+/* A helper class to save and restore the GIL, but without touching
+   the other globals that are handled by gdbpy_enter.  */
+
+class gdbpy_gil
+{
+public:
+
+  gdbpy_gil ()
+    : m_state (PyGILState_Ensure ())
+  {
+  }
+
+  ~gdbpy_gil ()
+  {
+    PyGILState_Release (m_state);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (gdbpy_gil);
+
+private:
+
+  PyGILState_STATE m_state;
+};
+
 /* A single event.  */
 struct gdbpy_event
 {
-  /* The Python event.  This is just a callable object.  */
-  PyObject *event;
-  /* The next event.  */
-  struct gdbpy_event *next;
+  gdbpy_event (gdbpy_ref<> &&func)
+    : m_func (func.release ())
+  {
+  }
+
+  gdbpy_event (gdbpy_event &&other)
+    : m_func (other.m_func)
+  {
+    other.m_func = nullptr;
+  }
+
+  gdbpy_event (const gdbpy_event &other)
+    : m_func (other.m_func)
+  {
+    gdbpy_gil gil;
+    Py_XINCREF (m_func);
+  }
+
+  ~gdbpy_event ()
+  {
+    gdbpy_gil gil;
+    Py_XDECREF (m_func);
+  }
+
+  gdbpy_event &operator= (const gdbpy_event &other) = delete;
+
+  void operator() ()
+  {
+    gdbpy_enter enter_py (get_current_arch (), current_language);
+
+    gdbpy_ref<> call_result (PyObject_CallObject (m_func, NULL));
+    if (call_result == NULL)
+      gdbpy_print_stack ();
+  }
+
+private:
+
+  /* The Python event.  This is just a callable object.  Note that
+     this is not a gdbpy_ref<>, because we have to take particular
+     care to only destroy the reference when holding the GIL. */
+  PyObject *m_func;
 };
-
-/* All pending events.  */
-static struct gdbpy_event *gdbpy_event_list;
-/* The final link of the event list.  */
-static struct gdbpy_event **gdbpy_event_list_end;
-
-/* So that we can wake up the main thread even when it is blocked in
-   poll().  */
-static struct serial_event *gdbpy_serial_event;
-
-/* The file handler callback.  This reads from the internal pipe, and
-   then processes the Python event queue.  This will always be run in
-   the main gdb thread.  */
-
-static void
-gdbpy_run_events (int error, gdb_client_data client_data)
-{
-  gdbpy_enter enter_py (get_current_arch (), current_language);
-
-  /* Clear the event fd.  Do this before flushing the events list, so
-     that any new event post afterwards is sure to re-awake the event
-     loop.  */
-  serial_event_clear (gdbpy_serial_event);
-
-  while (gdbpy_event_list)
-    {
-      /* Dispatching the event might push a new element onto the event
-	 loop, so we update here "atomically enough".  */
-      struct gdbpy_event *item = gdbpy_event_list;
-      gdbpy_event_list = gdbpy_event_list->next;
-      if (gdbpy_event_list == NULL)
-	gdbpy_event_list_end = &gdbpy_event_list;
-
-      gdbpy_ref<> call_result (PyObject_CallObject (item->event, NULL));
-      if (call_result == NULL)
-	gdbpy_print_stack ();
-
-      Py_DECREF (item->event);
-      xfree (item);
-    }
-}
 
 /* Submit an event to the gdb thread.  */
 static PyObject *
 gdbpy_post_event (PyObject *self, PyObject *args)
 {
-  struct gdbpy_event *event;
   PyObject *func;
-  int wakeup;
 
   if (!PyArg_ParseTuple (args, "O", &func))
     return NULL;
@@ -1010,34 +1027,11 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 
   Py_INCREF (func);
 
-  /* From here until the end of the function, we have the GIL, so we
-     can operate on our global data structures without worrying.  */
-  wakeup = gdbpy_event_list == NULL;
-
-  event = XNEW (struct gdbpy_event);
-  event->event = func;
-  event->next = NULL;
-  *gdbpy_event_list_end = event;
-  gdbpy_event_list_end = &event->next;
-
-  /* Wake up gdb when needed.  */
-  if (wakeup)
-    serial_event_set (gdbpy_serial_event);
+  gdbpy_ref<> func_ref = gdbpy_ref<>::new_reference (func);
+  gdbpy_event event (std::move (func_ref));
+  run_on_main_thread (event);
 
   Py_RETURN_NONE;
-}
-
-/* Initialize the Python event handler.  */
-static int
-gdbpy_initialize_events (void)
-{
-  gdbpy_event_list_end = &gdbpy_event_list;
-
-  gdbpy_serial_event = make_serial_event ();
-  add_file_handler (serial_event_fd (gdbpy_serial_event),
-		    gdbpy_run_events, NULL);
-
-  return 0;
 }
 
 
@@ -1704,7 +1698,6 @@ do_start_initialization ()
       || gdbpy_initialize_linetable () < 0
       || gdbpy_initialize_thread () < 0
       || gdbpy_initialize_inferior () < 0
-      || gdbpy_initialize_events () < 0
       || gdbpy_initialize_eventregistry () < 0
       || gdbpy_initialize_py_events () < 0
       || gdbpy_initialize_event () < 0

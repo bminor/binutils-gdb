@@ -1,5 +1,13 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (class gdbpy_gil): New.
+	(struct gdbpy_event): Add constructor, destructor, operator().
+	(gdbpy_post_event): Use run_on_main_thread.
+	(gdbpy_initialize_events): Remove.
+	(do_start_initialization): Update.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Add entry.
 	* maint.c (_initialize_maint_cmds): Add "max-worker-threads" maint
 	commands.
