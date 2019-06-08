@@ -1,3 +1,8 @@
+2019-09-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Ada Tasks): Tell the task name is printed, update
+	examples.
+
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Index Files): Update Ada text.

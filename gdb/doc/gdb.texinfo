@@ -17751,10 +17751,10 @@ the following example:
 *  2   807c468    1  15 Runnable               task_1
 (@value{GDBP}) info task 2
 Ada Task: 0x807c468
-Name: task_1
+Name: "task_1"
 Thread: 0
 LWP: 0x1fac
-Parent: 1 (main_task)
+Parent: 1 ("main_task")
 Base Priority: 15
 State: Runnable
 @end smallexample
@@ -17762,7 +17762,7 @@ State: Runnable
 @item task
 @kindex task@r{ (Ada)}
 @cindex current Ada task ID
-This command prints the ID of the current task.
+This command prints the ID and name of the current task.
 
 @smallexample
 @iftex
@@ -17771,9 +17771,9 @@ This command prints the ID of the current task.
 (@value{GDBP}) info tasks
   ID       TID P-ID Pri State                  Name
    1   8077870    0  15 Child Activation Wait  main_task
-*  2   807c458    1  15 Runnable               t
+*  2   807c458    1  15 Runnable               some_task
 (@value{GDBP}) task
-[Current task is 2]
+[Current task is 2 "some_task"]
 @end smallexample
 
 @item task @var{taskno}
@@ -17789,9 +17789,9 @@ from the current task to the given task.
 (@value{GDBP}) info tasks
   ID       TID P-ID Pri State                  Name
    1   8077870    0  15 Child Activation Wait  main_task
-*  2   807c458    1  15 Runnable               t
+*  2   807c458    1  15 Runnable               some_task
 (@value{GDBP}) task 1
-[Switching to task 1]
+[Switching to task 1 "main_task"]
 #0  0x8067726 in pthread_cond_wait ()
 (@value{GDBP}) bt
 #0  0x8067726 in pthread_cond_wait ()

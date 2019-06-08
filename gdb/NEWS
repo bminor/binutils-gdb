@@ -29,6 +29,9 @@
 
 * The RX port now supports XML target descriptions.
 
+* GDB now shows the Ada task names at more places, e.g. in task switching
+  messages.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a

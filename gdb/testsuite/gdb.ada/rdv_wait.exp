@@ -31,5 +31,5 @@ runto "break_me"
 # Switch to task 2, and verify that GDB is able to unwind all the way
 # to foo.T.
 gdb_test "task 2" \
-         [join {"\\\[Switching to task 2\\\].*" \
+         [join {"\\\[Switching to task 2 \"mit\"\\\].*" \
                 ".*foo\\.t \\(.*\\).*foo\\.adb:.*"} ""]

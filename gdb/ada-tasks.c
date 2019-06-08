@@ -240,6 +240,18 @@ struct ada_tasks_inferior_data
 static const struct inferior_key<ada_tasks_inferior_data>
   ada_tasks_inferior_data_handle;
 
+/* Return a string with TASKNO followed by the task name if TASK_INFO
+   contains a name.  */
+
+static std::string
+task_to_str (int taskno, const ada_task_info *task_info)
+{
+  if (task_info->name[0] == '\0')
+    return string_printf ("%d", taskno);
+  else
+    return string_printf ("%d \"%s\"", taskno, task_info->name);
+}
+
 /* Return the ada-tasks module's data for the given program space (PSPACE).
    If none is found, add a zero'ed one now.
 
@@ -1047,7 +1059,26 @@ print_ada_task_info (struct ui_out *uiout,
   ui_out_emit_table table_emitter (uiout, nb_columns, nb_tasks, "tasks");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (3, ui_right, "id", "ID");
-  uiout->table_header (9, ui_right, "task-id", "TID");
+  {
+    size_t tid_width = 9;
+    /* Grown below in case the largest entry is bigger.  */
+
+    if (!uiout->is_mi_like_p ())
+      {
+	for (taskno = 1; taskno <= data->task_list.size (); taskno++)
+	  {
+	    const struct ada_task_info *const task_info
+	      = &data->task_list[taskno - 1];
+
+	    gdb_assert (task_info != NULL);
+
+	    tid_width = std::max (tid_width,
+				  1 + strlen (phex_nz (task_info->task_id,
+						       sizeof (CORE_ADDR))));
+	  }
+      }
+    uiout->table_header (tid_width, ui_right, "task-id", "TID");
+  }
   /* The following column is provided in GDB/MI mode only because
      it is only really useful in that mode, and also because it
      allows us to keep the CLI output shorter and more compact.  */
@@ -1129,10 +1160,12 @@ print_ada_task_info (struct ui_out *uiout,
       else
 	uiout->field_string ("state", task_states[task_info->state]);
 
-      /* Finally, print the task name.  */
+      /* Finally, print the task name, without quotes around it, as mi like
+	 is not expecting quotes, and in non mi-like no need for quotes
+         as there is a specific column for the name.  */
       uiout->field_string ("name",
-			   task_info->name[0] != '\0' ? task_info->name
-			   : _("<no name>"));
+                          task_info->name[0] != '\0' ? task_info->name
+                          : _("<no name>"));
 
       uiout->text ("\n");
     }
@@ -1166,7 +1199,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 
   /* Print the name of the task.  */
   if (task_info->name[0] != '\0')
-    printf_filtered (_("Name: %s\n"), task_info->name);
+    printf_filtered (_("Name: \"%s\"\n"), task_info->name);
   else
     printf_filtered (_("<no name>\n"));
 
@@ -1187,7 +1220,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 
       printf_filtered (_("Parent: %d"), parent_taskno);
       if (parent->name[0] != '\0')
-        printf_filtered (" (%s)", parent->name);
+        printf_filtered (" (\"%s\")", parent->name);
       printf_filtered ("\n");
     }
   else
@@ -1220,7 +1253,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
         ada_task_info *target_task_info = &data->task_list[target_taskno - 1];
 
         if (target_task_info->name[0] != '\0')
-          printf_filtered (" (%s)", target_task_info->name);
+          printf_filtered (" (\"%s\")", target_task_info->name);
       }
 
     printf_filtered ("\n");
@@ -1255,7 +1288,14 @@ display_current_task_id (void)
   if (current_task == 0)
     printf_filtered (_("[Current task is unknown]\n"));
   else
-    printf_filtered (_("[Current task is %d]\n"), current_task);
+    {
+      struct ada_tasks_inferior_data *data
+	= get_ada_tasks_inferior_data (current_inferior ());
+      struct ada_task_info *task_info = &data->task_list[current_task - 1];
+
+      printf_filtered (_("[Current task is %s]\n"),
+		       task_to_str (current_task, task_info).c_str ());
+    }
 }
 
 /* Parse and evaluate TIDSTR into a task id, and try to switch to
@@ -1274,7 +1314,8 @@ task_command_1 (const char *taskno_str, int from_tty, struct inferior *inf)
   task_info = &data->task_list[taskno - 1];
 
   if (!ada_task_is_alive (task_info))
-    error (_("Cannot switch to task %d: Task is no longer running"), taskno);
+    error (_("Cannot switch to task %s: Task is no longer running"),
+	   task_to_str (taskno, task_info).c_str ());
    
   /* On some platforms, the thread list is not updated until the user
      performs a thread-related operation (by using the "info threads"
@@ -1295,13 +1336,14 @@ task_command_1 (const char *taskno_str, int from_tty, struct inferior *inf)
      it's nicer for the user to just refuse to perform the task switch.  */
   thread_info *tp = find_thread_ptid (task_info->ptid);
   if (tp == NULL)
-    error (_("Unable to compute thread ID for task %d.\n"
+    error (_("Unable to compute thread ID for task %s.\n"
              "Cannot switch to this task."),
-           taskno);
+           task_to_str (taskno, task_info).c_str ());
 
   switch_to_thread (tp);
   ada_find_printable_frame (get_selected_frame (NULL));
-  printf_filtered (_("[Switching to task %d]\n"), taskno);
+  printf_filtered (_("[Switching to task %s]\n"),
+		   task_to_str (taskno, task_info).c_str ());
   print_stack_frame (get_selected_frame (NULL),
                      frame_relative_level (get_selected_frame (NULL)),
 		     SRC_AND_LOC, 1);

@@ -1,3 +1,13 @@
+2019-09-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Announce that Ada task names are now shown at more places,
+	and between quotes (except in info task output).
+	* gdb/ada-tasks.c (task_to_str): New function.
+	(display_current_task_id): Call task_to_str.
+	(task_command_1): Likewise.
+	(print_ada_task_info): In non-mi mode, Properly align headers and data
+	when task-id length is > 9 (9 is the default for a 32 bits CORE_ADDR).
+
 2019-09-12  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* procfs.c (procfs_target::wait) <PR_FAULTED>: Get signal from
