@@ -30,6 +30,7 @@
 #include "sparc64-tdep.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
+#include "gdbarch.h"
 
 /* From <machine/reg.h>.  */
 const struct sparc_gregmap sparc64fbsd_gregmap =

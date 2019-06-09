@@ -25,6 +25,7 @@
 #include "regcache.h"
 #include "linux-tdep.h"
 #include "alpha-tdep.h"
+#include "gdbarch.h"
 
 /* This enum represents the signals' numbers on the Alpha
    architecture.  It just contains the signal definitions which are

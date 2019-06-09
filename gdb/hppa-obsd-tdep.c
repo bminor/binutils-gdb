@@ -24,6 +24,7 @@
 
 #include "hppa-tdep.h"
 #include "hppa-bsd-tdep.h"
+#include "gdbarch.h"
 
 /* Core file support.  */
 

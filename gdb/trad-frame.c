@@ -24,6 +24,7 @@
 #include "frame-unwind.h"
 #include "target.h"
 #include "value.h"
+#include "gdbarch.h"
 
 struct trad_frame_cache
 {

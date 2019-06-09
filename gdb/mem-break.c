@@ -24,6 +24,8 @@
 #include "breakpoint.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdbarch.h"
+
 /* Insert a breakpoint on targets that don't have any better
    breakpoint support.  We read the contents of the target location
    and stash it, then overwrite it with a breakpoint instruction.

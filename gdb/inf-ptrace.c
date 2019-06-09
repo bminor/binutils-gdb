@@ -33,6 +33,7 @@
 #include "gdbthread.h"
 #include "nat/fork-inferior.h"
 #include "utils.h"
+#include "gdbarch.h"
 
 
 

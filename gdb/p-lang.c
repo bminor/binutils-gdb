@@ -31,6 +31,7 @@
 #include "value.h"
 #include <ctype.h>
 #include "c-lang.h"
+#include "gdbarch.h"
 
 /* All GPC versions until now (2007-09-27) also define a symbol called
    '_p_initialize'.  Check for the presence of this symbol first.  */

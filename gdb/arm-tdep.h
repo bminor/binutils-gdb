@@ -20,13 +20,13 @@
 #define ARM_TDEP_H
 
 /* Forward declarations.  */
-struct gdbarch;
 struct regset;
 struct address_space;
 struct get_next_pcs;
 struct arm_get_next_pcs;
 struct gdb_get_next_pcs;
 
+#include "gdbarch.h"
 #include "arch/arm.h"
 #include "infrun.h"
 

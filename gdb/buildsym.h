@@ -19,6 +19,8 @@
 #if !defined (BUILDSYM_H)
 #define BUILDSYM_H 1
 
+#include "gdb_obstack.h"
+
 struct objfile;
 struct symbol;
 struct addrmap;

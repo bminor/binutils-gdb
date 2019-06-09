@@ -23,6 +23,7 @@
 #include "osabi.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
+#include "gdbarch.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
 

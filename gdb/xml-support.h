@@ -25,6 +25,7 @@
 #include "gdbsupport/vec.h"
 #include "gdbsupport/xml-utils.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/gdb_optional.h"
 
 struct gdb_xml_parser;
 struct gdb_xml_element;

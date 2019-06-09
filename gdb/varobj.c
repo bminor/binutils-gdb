@@ -31,6 +31,7 @@
 #include "inferior.h"
 #include "varobj-iter.h"
 #include "parser-defs.h"
+#include "gdbarch.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"

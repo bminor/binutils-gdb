@@ -21,7 +21,7 @@
 #include "gdbtypes.h"
 #include "floatformat.h"
 #include "target-float.h"
-
+#include "gdbarch.h"
 
 /* Target floating-point operations.
 

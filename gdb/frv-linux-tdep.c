@@ -31,6 +31,7 @@
 #include "frame-unwind.h"
 #include "regset.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */
 static const int frv_instr_size = 4;

@@ -20,7 +20,8 @@
 #ifndef ARCH_UTILS_H
 #define ARCH_UTILS_H
 
-struct gdbarch;
+#include "gdbarch.h"
+
 struct frame_info;
 struct minimal_symbol;
 struct type;

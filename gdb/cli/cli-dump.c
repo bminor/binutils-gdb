@@ -32,6 +32,7 @@
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbarch.h"
 
 static gdb::unique_xmalloc_ptr<char>
 scan_expression (const char **cmd, const char *def)

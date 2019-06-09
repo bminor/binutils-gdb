@@ -26,6 +26,7 @@
 #include "tramp-frame.h"
 #include "elf-bfd.h"
 #include "elf/tic6x.h"
+#include "gdbarch.h"
 
 /* The offset from rt_sigframe pointer to SP register.  */
 #define TIC6X_SP_RT_SIGFRAME 8

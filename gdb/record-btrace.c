@@ -41,6 +41,7 @@
 #include "gdbsupport/vec.h"
 #include "inferior.h"
 #include <algorithm>
+#include "gdbarch.h"
 
 static const target_info record_btrace_target_info = {
   "record-btrace",

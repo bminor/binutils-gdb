@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
+#include "gdbarch.h"
 
 struct sparc_ravenscar_ops : public ravenscar_arch_ops
 {

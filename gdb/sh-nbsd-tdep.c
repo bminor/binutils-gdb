@@ -27,6 +27,7 @@
 
 #include "sh-tdep.h"
 #include "solib-svr4.h"
+#include "gdbarch.h"
 
 /* Convert a register number into an offset into a ptrace
    register structure.  */

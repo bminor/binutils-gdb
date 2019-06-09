@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "osabi.h"
 #include "dicos-tdep.h"
+#include "gdbarch.h"
 
 static void
 i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

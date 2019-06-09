@@ -29,6 +29,7 @@
 #include "linux-tdep.h"
 #include "glibc-tdep.h"
 #include "nios2-tdep.h"
+#include "gdbarch.h"
 
 /* Core file and register set support.  */
 

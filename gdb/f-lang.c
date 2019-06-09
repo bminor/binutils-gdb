@@ -35,6 +35,7 @@
 #include "charset.h"
 #include "c-lang.h"
 #include "target-float.h"
+#include "gdbarch.h"
 
 #include <math.h>
 

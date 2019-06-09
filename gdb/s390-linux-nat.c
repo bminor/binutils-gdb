@@ -43,6 +43,7 @@
 #include <algorithm>
 #include "inf-ptrace.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 /* Per-thread arch-specific data.  */
 

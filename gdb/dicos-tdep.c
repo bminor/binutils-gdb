@@ -23,6 +23,7 @@
 #include "solib-target.h"
 #include "inferior.h"
 #include "dicos-tdep.h"
+#include "gdbarch.h"
 
 void
 dicos_init_abi (struct gdbarch *gdbarch)

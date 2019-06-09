@@ -40,6 +40,7 @@
 #include "go-lang.h"
 #include "c-lang.h"
 #include "parser-defs.h"
+#include "gdbarch.h"
 
 #include <ctype.h>
 

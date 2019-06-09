@@ -27,6 +27,7 @@
 
 #include "alpha-tdep.h"
 #include "mdebugread.h"
+#include "gdbarch.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips.  */
 

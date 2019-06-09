@@ -24,6 +24,7 @@
 #include "record.h"
 #include "record-full.h"
 #include "linux-record.h"
+#include "gdbarch.h"
 
 /* These macros are the values of the first argument of system call
    "sys_ptrace".  The values of these macros were obtained from Linux

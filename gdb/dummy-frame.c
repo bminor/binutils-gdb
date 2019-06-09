@@ -29,6 +29,7 @@
 #include "observable.h"
 #include "gdbthread.h"
 #include "infcall.h"
+#include "gdbarch.h"
 
 struct dummy_frame_id
 {

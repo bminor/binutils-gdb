@@ -19,6 +19,7 @@
 
 #include "gdbsupport/enum-flags.h"
 #include "gcc-cp-plugin.h"
+#include "symtab.h"
 
 struct type;
 struct block;

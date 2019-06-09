@@ -20,6 +20,7 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
+#include "gdbarch.h"
 #include "infrun.h"
 
 struct frame_info;

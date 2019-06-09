@@ -50,7 +50,6 @@
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
-#include "gdbarch.h"
 
 /* Forward declarations for prototypes.  */
 struct field;

@@ -25,6 +25,7 @@
 #include "command.h"
 #include "gdb_regex.h"
 #include "cli-script.h"
+#include "completer.h"
 
 #if 0
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum

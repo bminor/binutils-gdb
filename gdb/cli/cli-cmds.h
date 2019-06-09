@@ -19,6 +19,7 @@
 
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/gdb_optional.h"
+#include "completer.h"
 
 /* Chain containing all defined commands.  */
 

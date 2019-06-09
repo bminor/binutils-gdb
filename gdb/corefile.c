@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "observable.h"
 #include "cli/cli-utils.h"
+#include "gdbarch.h"
 
 /* You can have any number of hooks for `exec_file_command' command to
    call.  If there's only one hook, it is set in exec_file_display

@@ -21,12 +21,14 @@
 #define REGCACHE_H
 
 #include "gdbsupport/common-regcache.h"
+#include "gdbsupport/function-view.h"
 #include <forward_list>
 
 struct regcache;
 struct regset;
 struct gdbarch;
 struct address_space;
+class thread_info;
 
 extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (ptid_t ptid);

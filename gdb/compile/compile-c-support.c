@@ -29,6 +29,7 @@
 #include "regcache.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/preprocessor.h"
+#include "gdbarch.h"
 
 /* See compile-internal.h.  */
 

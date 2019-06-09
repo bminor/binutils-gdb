@@ -73,6 +73,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
 #include "gdbsupport/scope-exit.h"
+#include "gdbarch.h"
 
 void (*deprecated_error_begin_hook) (void);
 

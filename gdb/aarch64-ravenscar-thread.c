@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "ravenscar-thread.h"
 #include "aarch64-ravenscar-thread.h"
+#include "gdbarch.h"
 
 #define NO_OFFSET -1
 

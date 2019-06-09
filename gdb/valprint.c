@@ -37,6 +37,7 @@
 #include <algorithm>
 #include "gdbsupport/byte-vector.h"
 #include "cli/cli-option.h"
+#include "gdbarch.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4

@@ -1,3 +1,34 @@
+2019-07-10  Tom Tromey  <tom@tromey.com>
+
+	* defs.h: Don't include gdbarch.h.
+	* aarch64-ravenscar-thread.c, aarch64-tdep.c, alpha-bsd-tdep.h,
+	alpha-linux-tdep.c, alpha-mdebug-tdep.c, arch-utils.h, arm-tdep.h,
+	ax-general.c, btrace.c, buildsym-legacy.c, buildsym.h, c-lang.c,
+	cli/cli-decode.h, cli/cli-dump.c, cli/cli-script.h,
+	cli/cli-style.h, coff-pe-read.h, compile/compile-c-support.c,
+	compile/compile-cplus.h, compile/compile-loc2c.c, corefile.c,
+	cp-valprint.c, cris-linux-tdep.c, ctf.c, d-lang.c, d-namespace.c,
+	dcache.c, dicos-tdep.c, dictionary.c, disasm-selftests.c,
+	dummy-frame.c, dummy-frame.h, dwarf2-frame-tailcall.c,
+	dwarf2expr.c, expression.h, f-lang.c, frame-base.c,
+	frame-unwind.c, frv-linux-tdep.c, gdbarch-selftests.c, gdbtypes.h,
+	go-lang.c, hppa-nbsd-tdep.c, hppa-obsd-tdep.c, i386-dicos-tdep.c,
+	i386-tdep.h, ia64-vms-tdep.c, interps.h, language.c,
+	linux-record.c, location.h, m2-lang.c, m32r-linux-tdep.c,
+	mem-break.c, memattr.c, mn10300-linux-tdep.c, nios2-linux-tdep.c,
+	objfiles.h, opencl-lang.c, or1k-linux-tdep.c, p-lang.c,
+	parser-defs.h, ppc-tdep.h, probe.h, python/py-record-btrace.c,
+	record-btrace.c, record.h, regcache-dump.c, regcache.h,
+	riscv-fbsd-tdep.c, riscv-linux-tdep.c, rust-exp.y,
+	sh-linux-tdep.c, sh-nbsd-tdep.c, source-cache.c,
+	sparc-nbsd-tdep.c, sparc-obsd-tdep.c, sparc-ravenscar-thread.c,
+	sparc64-fbsd-tdep.c, std-regs.c, target-descriptions.h,
+	target-float.c, tic6x-linux-tdep.c, tilegx-linux-tdep.c, top.c,
+	tracefile.c, trad-frame.c, type-stack.h, ui-style.c, utils.c,
+	utils.h, valarith.c, valprint.c, varobj.c, x86-tdep.c,
+	xml-support.h, xtensa-linux-tdep.c, cli/cli-cmds.h: Update.
+	* s390-linux-nat.c, procfs.c, inf-ptrace.c: Likewise.
+
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.h (is_ada_exception_catchpoint): Declare.

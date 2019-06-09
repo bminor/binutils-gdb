@@ -20,6 +20,7 @@
 #ifndef TYPE_STACK_H
 #define TYPE_STACK_H
 
+#include "gdbtypes.h"
 #include <vector>
 
 struct type;

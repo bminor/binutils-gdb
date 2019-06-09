@@ -23,6 +23,7 @@
 #include "remote.h"
 #include "reggroups.h"
 #include "target.h"
+#include "gdbarch.h"
 
 /* Dump registers from regcache, used for dumping raw registers and
    cooked registers.  */

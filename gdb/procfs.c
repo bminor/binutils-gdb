@@ -31,7 +31,7 @@
 #include "regcache.h"
 #include "inf-child.h"
 #include "nat/fork-inferior.h"
-#include "gdbsupport/filestuff.h"
+#include "gdbarch.h"
 
 #define _STRUCTURED_PROC 1	/* Should be done by configure script.  */
 

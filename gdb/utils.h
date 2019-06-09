@@ -25,6 +25,9 @@
 #include "gdbsupport/scoped_restore.h"
 #include <chrono>
 
+struct completion_match_for_lcd;
+class compiled_regex;
+
 extern void initialize_utils (void);
 
 /* String utilities.  */

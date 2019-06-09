@@ -24,6 +24,8 @@
 #include "frame.h"
 #include "gdbtypes.h"
 #include "value.h"
+#include "gdbarch.h"
+
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 {

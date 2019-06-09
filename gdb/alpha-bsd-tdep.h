@@ -20,6 +20,8 @@
 #ifndef ALPHA_BSD_TDEP_H
 #define ALPHA_BSD_TDEP_H
 
+#include "gdbarch.h"
+
 struct regcache;
 
 void alphabsd_supply_reg (struct regcache *, const char *, int);

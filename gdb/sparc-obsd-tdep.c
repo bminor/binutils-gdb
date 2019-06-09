@@ -30,6 +30,7 @@
 #include "sparc-tdep.h"
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
+#include "gdbarch.h"
 
 /* Signal trampolines.  */
 

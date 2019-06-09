@@ -26,6 +26,7 @@
 #include "linux-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
+#include "gdbarch.h"
 
 #include "cris-tdep.h"
 

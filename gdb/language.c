@@ -45,6 +45,7 @@
 #include "frame.h"
 #include "c-lang.h"
 #include <algorithm>
+#include "gdbarch.h"
 
 static int unk_lang_parser (struct parser_state *);
 

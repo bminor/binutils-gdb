@@ -24,6 +24,7 @@
 #include "target-dcache.h"
 #include "inferior.h"
 #include "splay-tree.h"
+#include "gdbarch.h"
 
 /* Commands with a prefix of `{set,show} dcache'.  */
 static struct cmd_list_element *dcache_set_list = NULL;

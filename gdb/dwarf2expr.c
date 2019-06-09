@@ -28,6 +28,7 @@
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
 #include "gdbsupport/underlying.h"
+#include "gdbarch.h"
 
 /* Cookie for gdbarch data.  */
 

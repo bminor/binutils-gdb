@@ -25,6 +25,7 @@
 #include "regset.h"
 #include "tramp-frame.h"
 #include "trad-frame.h"
+#include "gdbarch.h"
 
 /* Define the general register mapping.  The kernel puts the PC at offset 0,
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.

@@ -26,6 +26,7 @@
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"
+#include "gdbarch.h"
 
 /* This macro generates enum values from a given type.  */
 

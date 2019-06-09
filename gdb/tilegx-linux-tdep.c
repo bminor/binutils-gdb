@@ -28,6 +28,7 @@
 #include "tramp-frame.h"
 #include "trad-frame.h"
 #include "tilegx-tdep.h"
+#include "gdbarch.h"
 
 /* Signal trampoline support.  */
 

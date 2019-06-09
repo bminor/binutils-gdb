@@ -20,6 +20,8 @@
 #if !defined (PROBE_H)
 #define PROBE_H 1
 
+#include "symtab.h"
+
 struct event_location;
 struct linespec_result;
 

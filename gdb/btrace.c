@@ -34,6 +34,7 @@
 #include "gdbsupport/rsp-low.h"
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
+#include "gdbarch.h"
 
 /* For maintenance commands.  */
 #include "record-btrace.h"

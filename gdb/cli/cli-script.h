@@ -17,6 +17,8 @@
 #ifndef CLI_CLI_SCRIPT_H
 #define CLI_CLI_SCRIPT_H
 
+#include "gdbsupport/function-view.h"
+
 struct ui_file;
 struct cmd_list_element;
 

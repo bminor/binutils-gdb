@@ -53,6 +53,7 @@
 #include "gdbsupport/buffer.h"
 #include "gdb_select.h"
 #include "gdbsupport/scope-exit.h"
+#include "gdbarch.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

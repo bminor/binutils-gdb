@@ -19,6 +19,8 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
+#include "symtab.h"
+
 struct language_defn;
 struct event_location;
 

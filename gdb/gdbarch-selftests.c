@@ -27,6 +27,7 @@
 #include "test-target.h"
 #include "target-float.h"
 #include "gdbsupport/def-vector.h"
+#include "gdbarch.h"
 
 namespace selftests {
 

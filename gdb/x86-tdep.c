@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "x86-tdep.h"
+#include "symtab.h"
 
 
 /* Check whether NAME is included in NAMES[LO] (inclusive) to NAMES[HI]

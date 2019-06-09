@@ -27,6 +27,7 @@
 #include "m2-lang.h"
 #include "c-lang.h"
 #include "valprint.h"
+#include "gdbarch.h"
 
 static void m2_printchar (int, struct type *, struct ui_file *);
 static void m2_emit_char (int, struct type *, struct ui_file *, int);

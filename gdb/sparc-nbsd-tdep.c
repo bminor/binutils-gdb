@@ -29,6 +29,7 @@
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "trad-frame.h"
+#include "gdbarch.h"
 
 #include "sparc-tdep.h"
 #include "nbsd-tdep.h"

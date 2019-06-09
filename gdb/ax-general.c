@@ -23,6 +23,7 @@
 
 #include "defs.h"
 #include "ax.h"
+#include "gdbarch.h"
 
 #include "value.h"
 #include "user-regs.h"

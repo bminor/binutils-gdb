@@ -25,6 +25,7 @@
 struct ui_out;
 struct interp;
 struct ui;
+class completion_tracker;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
 

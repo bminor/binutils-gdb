@@ -24,6 +24,7 @@
 #include "namespace.h"
 #include "d-lang.h"
 #include "gdb_obstack.h"
+#include "gdbarch.h"
 
 /* This returns the length of first component of NAME, which should be
    the demangled name of a D variable/function/method/etc.

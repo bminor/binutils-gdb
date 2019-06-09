@@ -27,6 +27,7 @@
 
 #include "hppa-tdep.h"
 #include "hppa-bsd-tdep.h"
+#include "gdbarch.h"
 
 /* From <machine/mcontext.h>.  */
 static int hppanbsd_mc_reg_offset[] =

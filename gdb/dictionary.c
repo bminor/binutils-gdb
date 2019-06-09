@@ -28,6 +28,7 @@
 #include "dictionary.h"
 #include "safe-ctype.h"
 #include <unordered_map>
+#include "language.h"
 
 /* This file implements dictionaries, which are tables that associate
    symbols to names.  They are represented by an opaque type 'struct

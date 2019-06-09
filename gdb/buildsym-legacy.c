@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "buildsym-legacy.h"
+#include "symtab.h"
 
 /* The work-in-progress of the compunit we are building.
    This is created first, before any subfiles by start_symtab.  */

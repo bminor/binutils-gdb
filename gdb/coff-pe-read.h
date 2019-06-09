@@ -22,6 +22,7 @@
 #if !defined (COFF_PE_READ_H)
 #define COFF_PE_READ_H
 
+class minimal_symbol_reader;
 struct objfile;
 struct bfd;
 

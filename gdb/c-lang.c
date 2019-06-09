@@ -35,6 +35,7 @@
 #include "gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
+#include "gdbarch.h"
 
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */

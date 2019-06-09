@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "ui-style.h"
+#include "gdb_regex.h"
 
 /* A regular expression that is used for matching ANSI terminal escape
    sequences.  */

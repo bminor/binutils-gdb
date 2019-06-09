@@ -33,6 +33,7 @@
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "bcache.h"
+#include "gdbarch.h"
 
 struct htab;
 struct objfile_data;

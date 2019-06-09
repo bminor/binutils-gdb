@@ -21,6 +21,7 @@
 #include "frame-base.h"
 #include "frame.h"
 #include "gdb_obstack.h"
+#include "gdbarch.h"
 
 /* A default frame base implementations.  If it wasn't for the old
    DEPRECATED_FRAME_LOCALS_ADDRESS and DEPRECATED_FRAME_ARGS_ADDRESS,

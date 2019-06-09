@@ -28,6 +28,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "dwarf2-frame.h"
+#include "gdbarch.h"
 
 /* Contains struct tailcall_cache indexed by next_bottom_frame.  */
 static htab_t cache_htab;

@@ -23,6 +23,7 @@
 #include "linux-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
+#include "gdbarch.h"
 
 /* This enum represents the signals' numbers on the Xtensa
    architecture.  It just contains the signal definitions which are

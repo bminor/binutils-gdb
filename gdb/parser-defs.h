@@ -25,6 +25,7 @@
 
 #include "gdbsupport/vec.h"
 #include "expression.h"
+#include "symtab.h"
 
 struct block;
 struct language_defn;

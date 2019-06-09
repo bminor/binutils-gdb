@@ -23,6 +23,7 @@
 #include "exec.h"
 #include "regcache.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbarch.h"
 
 /* Helper macros.  */
 

@@ -519,9 +519,6 @@ enum symbol_needs_kind
   SYMBOL_NEEDS_FRAME
 };
 
-/* Dynamic target-system-dependent parameters for GDB.  */
-#include "gdbarch.h"
-
 /* In findvar.c.  */
 
 template<typename T, typename = RequireLongest<T>>

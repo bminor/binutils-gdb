@@ -29,6 +29,7 @@
 #include "glibc-tdep.h"
 #include "sh-tdep.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 #define REGSx16(base) \
   {(base),      0}, \

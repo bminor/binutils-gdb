@@ -21,6 +21,7 @@
 #define CLI_CLI_STYLE_H
 
 #include "ui-file.h"
+#include "command.h"
 
 /* A single CLI style option.  */
 class cli_style_option

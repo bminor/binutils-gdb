@@ -26,6 +26,7 @@
 #include "py-record-btrace.h"
 #include "record-btrace.h"
 #include "disasm.h"
+#include "gdbarch.h"
 
 #if defined (IS_PY3K)
 

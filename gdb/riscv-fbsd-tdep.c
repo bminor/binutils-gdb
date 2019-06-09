@@ -25,6 +25,7 @@
 #include "target.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "gdbarch.h"
 
 /* Register maps.  */
 

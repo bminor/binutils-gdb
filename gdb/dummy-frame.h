@@ -24,6 +24,7 @@
 
 struct infcall_suspend_state;
 struct frame_unwind;
+class thread_info;
 
 /* Push the information needed to identify, and unwind from, a dummy
    frame onto the dummy frame stack.  */

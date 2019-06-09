@@ -23,6 +23,7 @@
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
 #include "gdbsupport/enum-flags.h"
 
+struct address_space;
 struct cmd_list_element;
 struct inferior;
 

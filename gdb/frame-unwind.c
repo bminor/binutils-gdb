@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "gdb_obstack.h"
 #include "target.h"
+#include "gdbarch.h"
 
 static struct gdbarch_data *frame_unwind_data;
 

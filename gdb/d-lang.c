@@ -25,6 +25,7 @@
 #include "c-lang.h"
 #include "demangle.h"
 #include "cp-support.h"
+#include "gdbarch.h"
 
 /* The name of the symbol to use to get the name of the main subprogram.  */
 static const char D_MAIN[] = "D main";

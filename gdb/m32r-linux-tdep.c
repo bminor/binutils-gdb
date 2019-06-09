@@ -36,6 +36,7 @@
 
 #include "m32r-tdep.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 
 
