@@ -1825,10 +1825,10 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 
   config->name = name;
   config->title = title;
-  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
+  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet.",
 			name, title);
   show_doc = xstrprintf ("Show current use of remote "
-			 "protocol `%s' (%s) packet",
+			 "protocol `%s' (%s) packet.",
 			 name, title);
   /* set/show TITLE-packet {auto,on,off} */
   cmd_name = xstrprintf ("%s-packet", title);
@@ -11386,15 +11386,15 @@ init_remote_threadtests (void)
 {
   add_com ("tlist", class_obscure, threadlist_test_cmd,
 	   _("Fetch and print the remote list of "
-	     "thread identifiers, one pkt only"));
+	     "thread identifiers, one pkt only."));
   add_com ("tinfo", class_obscure, threadinfo_test_cmd,
-	   _("Fetch and display info about one thread"));
+	   _("Fetch and display info about one thread."));
   add_com ("tset", class_obscure, threadset_test_cmd,
-	   _("Test setting to a different thread"));
+	   _("Test setting to a different thread."));
   add_com ("tupd", class_obscure, threadlist_update_test_cmd,
-	   _("Iterate through updating all remote thread info"));
+	   _("Iterate through updating all remote thread info."));
   add_com ("talive", class_obscure, threadalive_test,
-	   _(" Remote thread alive test "));
+	   _("Remote thread alive test."));
 }
 
 #endif /* 0 */
@@ -14278,15 +14278,15 @@ _initialize_remote (void)
   /* set/show remote ...  */
 
   add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, _("\
-Remote protocol specific variables\n\
+Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
-the packets being used"),
+the packets being used."),
 		  &remote_set_cmdlist, "set remote ",
 		  0 /* allow-unknown */, &setlist);
   add_prefix_cmd ("remote", class_maintenance, show_remote_cmd, _("\
-Remote protocol specific variables\n\
+Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
-the packets being used"),
+the packets being used."),
 		  &remote_show_cmdlist, "show remote ",
 		  0 /* allow-unknown */, &showlist);
 
@@ -14330,8 +14330,8 @@ Valid value is \"Ctrl-C\", \"BREAK\" or \"BREAK-g\". The default is \"Ctrl-C\"."
 
   add_setshow_boolean_cmd ("interrupt-on-connect", class_support,
 			   &interrupt_on_connect, _("\
-Set whether interrupt-sequence is sent to remote target when gdb connects to."), _("		\
-Show whether interrupt-sequence is sent to remote target when gdb connects to."), _("		\
+Set whether interrupt-sequence is sent to remote target when gdb connects to."), _("\
+Show whether interrupt-sequence is sent to remote target when gdb connects to."), _("\
 If set, interrupt sequence is sent to remote target."),
 			   NULL, NULL,
 			   &remote_set_cmdlist, &remote_show_cmdlist);
@@ -14699,8 +14699,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
      documentation).  */
   add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
 				&remote_Z_packet_detect, _("\
-Set use of remote protocol `Z' packets"), _("\
-Show use of remote protocol `Z' packets "), _("\
+Set use of remote protocol `Z' packets."), _("\
+Show use of remote protocol `Z' packets."), _("\
 When set, GDB will attempt to use the remote breakpoint and watchpoint\n\
 packets."),
 				set_remote_protocol_Z_packet_cmd,
@@ -14710,7 +14710,7 @@ packets."),
 				&remote_set_cmdlist, &remote_show_cmdlist);
 
   add_prefix_cmd ("remote", class_files, remote_command, _("\
-Manipulate files on the remote system\n\
+Manipulate files on the remote system.\n\
 Transfer files to and from the remote target system."),
 		  &remote_cmdlist, "remote ",
 		  0 /* allow-unknown */, &cmdlist);
@@ -14729,8 +14729,8 @@ Transfer files to and from the remote target system."),
 
   add_setshow_string_noescape_cmd ("exec-file", class_files,
 				   &remote_exec_file_var, _("\
-Set the remote pathname for \"run\""), _("\
-Show the remote pathname for \"run\""), NULL,
+Set the remote pathname for \"run\"."), _("\
+Show the remote pathname for \"run\"."), NULL,
 				   set_remote_exec_file,
 				   show_remote_exec_file,
 				   &remote_set_cmdlist,

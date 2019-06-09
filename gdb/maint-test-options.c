@@ -444,8 +444,8 @@ Command used for testing options processing.\n\
 Usage: maint test-options require-delimiter [[OPTION]... --] [OPERAND]...\n\
 \n\
 Options:\n\
-\n\
 %OPTIONS%\n\
+\n\
 If you specify any command option, you must use a double dash (\"--\")\n\
 to mark the end of option processing."),
 			       def_group);
@@ -456,7 +456,6 @@ Command used for testing options processing.\n\
 Usage: maint test-options unknown-is-error [OPTION]... [OPERAND]...\n\
 \n\
 Options:\n\
-\n\
 %OPTIONS%"),
 			       def_group);
 
@@ -466,7 +465,6 @@ Command used for testing options processing.\n\
 Usage: maint test-options unknown-is-operand [OPTION]... [OPERAND]...\n\
 \n\
 Options:\n\
-\n\
 %OPTIONS%"),
 			       def_group);
 

@@ -105,8 +105,8 @@ save_vars { env(TERM) } {
 	[multi_line \
 	     "List of classes of commands:" \
 	     "" \
-	     "${aliases_expr} -- Aliases of other commands" \
-	     "${breakpoints_expr} -- Making program stop at certain points" \
+	     "${aliases_expr} -- Aliases of other commands\." \
+	     "${breakpoints_expr} -- Making program stop at certain points\." \
 	     ".*" \
 	    ] \
 	"help classes of commands styled with title"

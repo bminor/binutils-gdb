@@ -3319,6 +3319,7 @@ reason)."));
   add_com_alias ("s", "step", class_run, 1);
 
   c = add_com ("until", class_run, until_command, _("\
+Execute until past the current line or past a LOCATION.\n\
 Execute until the program reaches a source line greater than the current\n\
 or a specified location (same args as break command) within the current \
 frame."));
@@ -3394,10 +3395,10 @@ in the named register groups."));
 	    _("Execution status of the program."));
 
   add_info ("float", info_float_command,
-	    _("Print the status of the floating point unit"));
+	    _("Print the status of the floating point unit."));
 
   add_info ("vector", info_vector_command,
-	    _("Print the status of the vector unit"));
+	    _("Print the status of the vector unit."));
 
   add_prefix_cmd ("proc", class_info, info_proc_cmd,
 		  _("\

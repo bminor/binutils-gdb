@@ -1,3 +1,77 @@
+2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.h (print_doc_line): Add for_value_prefix argument.
+	* cli/cli-decode.c (print_doc_line): Likewise.  It now prints
+	the full first line, except when FOR_VALUE_PREFIX.  In this case,
+	the trailing '.' is not output, and the first character is uppercased.
+	(print_help_for_command): Update call to print_doc_line.
+	(print_doc_of_command): Likewise.
+	* cli/cli-setshow.c (deprecated_show_value_hack): Likewise.
+	* cli/cli-option.c (append_indented_doc): Do not append newline.
+	(build_help_option): Append newline after first appended_indented_doc
+	only if a second call is done.
+	(build_help): Append 2 new lines before each option, except the first
+	one.
+	* compile/compile.c (_initialize_compile): Add new lines after
+	%OPTIONS%, when not at the end of the help.
+	Change help doc or code
+	producing the help doc to respect the invariants.
+	* maint-test-options.c (_initialize_maint_test_options): Likewise.
+	Also removed the new line after 'Options:', as all other commands
+	do not put an empty line between 'Options:' and the first option.
+	* printcmd.c (_initialize_printcmd): Likewise.
+	* stack.c (_initialize_stack): Likewise.
+	* interps.c (interpreter_exec_cmd): Fix "Usage:" line that was
+	incorrectly telling COMMAND is optional.
+	* ada-lang.c (_initialize_ada_language): Change help doc or code
+	producing the help doc to respect the invariants.
+	* ada-tasks.c (_initialize_ada_tasks): Likewise.
+	* breakpoint.c (_initialize_breakpoint): Likewise.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Likewise.
+	* cli/cli-logging.c (_initialize_cli_logging): Likewise.
+	* cli/cli-setshow.c (_initialize_cli_setshow): Likewise.
+	* cli/cli-style.c (cli_style_option::add_setshow_commands,
+	_initialize_cli_style): Likewise.
+	* corelow.c (core_target_info): Likewise.
+	* dwarf-index-cache.c (_initialize_index_cache): Likewise.
+	* dwarf2read.c (_initialize_dwarf2_read): Likewise.
+	* filesystem.c (_initialize_filesystem): Likewise.
+	* frame.c (_initialize_frame): Likewise.
+	* gnu-nat.c (add_task_commands): Likewise.
+	* infcall.c (_initialize_infcall): Likewise.
+	* infcmd.c (_initialize_infcmd): Likewise.
+	* interps.c (_initialize_interpreter): Likewise.
+	* language.c (_initialize_language): Likewise.
+	* linux-fork.c (_initialize_linux_fork): Likewise.
+	* maint-test-settings.c (_initialize_maint_test_settings): Likewise.
+	* maint.c (_initialize_maint_cmds): Likewise.
+	* memattr.c (_initialize_mem): Likewise.
+	* printcmd.c (_initialize_printcmd): Likewise.
+	* python/lib/gdb/function/strfns.py (_MemEq, _StrLen, _StrEq,
+	_RegEx): Likewise.
+	* ravenscar-thread.c (_initialize_ravenscar): Likewise.
+	* record-btrace.c (_initialize_record_btrace): Likewise.
+	* record-full.c (_initialize_record_full): Likewise.
+	* record.c (_initialize_record): Likewise.
+	* regcache-dump.c (_initialize_regcache_dump): Likewise.
+	* regcache.c (_initialize_regcache): Likewise.
+	* remote.c (add_packet_config_cmd, init_remote_threadtests,
+	_initialize_remote): Likewise.
+	* ser-tcp.c (_initialize_ser_tcp): Likewise.
+	* serial.c (_initialize_serial): Likewise.
+	* skip.c (_initialize_step_skip): Likewise.
+	* source.c (_initialize_source): Likewise.
+	* stack.c (_initialize_stack): Likewise.
+	* symfile.c (_initialize_symfile): Likewise.
+	* symtab.c (_initialize_symtab): Likewise.
+	* target-descriptions.c (_initialize_target_descriptions): Likewise.
+	* top.c (init_main): Likewise.
+	* tracefile-tfile.c (tfile_target_info): Likewise.
+	* tracepoint.c (_initialize_tracepoint): Likewise.
+	* tui/tui-win.c (_initialize_tui_win): Likewise.
+	* utils.c (add_internal_problem_command): Likewise.
+	* valprint.c (value_print_option_defs): Likewise.
+
 2019-08-06  Frank Ch. Eigler  <fche@redhat.com>
 
 	PR build/24886

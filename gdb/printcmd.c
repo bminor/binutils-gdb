@@ -2800,7 +2800,7 @@ Usage: output EXP\n\
 This is useful in user-defined commands."));
 
   add_prefix_cmd ("set", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR\n\
+Evaluate expression EXP and assign result to variable VAR.\n\
 Usage: set VAR = EXP\n\
 This uses assignment syntax appropriate for the current language\n\
 (VAR = EXP or VAR := EXP for example).\n\
@@ -2814,7 +2814,7 @@ You can see these environment settings with the \"show\" command."),
 		  &setlist, "set ", 1, &cmdlist);
   if (dbx_commands)
     add_com ("assign", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR\n\
+Evaluate expression EXP and assign result to variable VAR.\n\
 Usage: assign VAR = EXP\n\
 This uses assignment syntax appropriate for the current language\n\
 (VAR = EXP or VAR := EXP for example).\n\
@@ -2835,7 +2835,7 @@ history, if it is not void."));
   set_cmd_completer_handle_brkchars (c, print_command_completer);
 
   add_cmd ("variable", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR\n\
+Evaluate expression EXP and assign result to variable VAR.\n\
 Usage: set variable VAR = EXP\n\
 This uses assignment syntax appropriate for the current language\n\
 (VAR = EXP or VAR := EXP for example).\n\
@@ -2853,7 +2853,8 @@ Print value of expression EXP.\n\
 Usage: print [[OPTION]... --] [/FMT] [EXP]\n\
 \n\
 Options:\n\
-%OPTIONS%\
+%OPTIONS%\n\
+\n\
 Note: because this command accepts arbitrary expressions, if you\n\
 specify any command option, you must use a double dash (\"--\")\n\
 to mark the end of option processing.  E.g.: \"print -o -- myobj\".\n\

@@ -1813,7 +1813,7 @@ _initialize_regcache (void)
     (regcache::regcache_thread_ptid_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
-	   _("Force gdb to flush its register cache (maintainer command)"));
+	   _("Force gdb to flush its register cache (maintainer command)."));
 
 #if GDB_SELF_TEST
   selftests::register_test ("current_regcache", selftests::current_regcache_test);

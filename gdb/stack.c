@@ -139,8 +139,8 @@ static const gdb::option::option_def frame_print_option_defs[] = {
     print_entry_values_choices,
     [] (frame_print_options *opt) { return &opt->print_entry_values; },
     NULL, /* show_cmd_cb */
-    N_("Set printing of function arguments at function entry"),
-    N_("Show printing of function arguments at function entry"),
+    N_("Set printing of function arguments at function entry."),
+    N_("Show printing of function arguments at function entry."),
     N_("GDB can sometimes determine the values of function arguments at entry,\n\
 in addition to their current values.  This option tells GDB whether\n\
 to print the current value, the value at entry (marked as val@entry),\n\
@@ -152,8 +152,8 @@ or both.  Note that one or both of these values may be <optimized out>."),
     print_frame_arguments_choices,
     [] (frame_print_options *opt) { return &opt->print_frame_arguments; },
     NULL, /* show_cmd_cb */
-    N_("Set printing of non-scalar frame arguments"),
-    N_("Show printing of non-scalar frame arguments"),
+    N_("Set printing of non-scalar frame arguments."),
+    N_("Show printing of non-scalar frame arguments."),
     NULL /* help_doc */
   },
 
@@ -3330,7 +3330,7 @@ A single numerical argument specifies the frame to select."),
 
   add_cmd ("address", class_stack, &frame_cmd.address,
 	   _("\
-Select and print a stack frame by stack address\n\
+Select and print a stack frame by stack address.\n\
 \n\
 Usage: frame address STACK-ADDRESS"),
 	   &frame_cmd_list);
@@ -3412,7 +3412,8 @@ Print backtrace of all stack frames, or innermost COUNT frames.\n\
 Usage: backtrace [OPTION]... [QUALIFIER]... [COUNT | -COUNT]\n\
 \n\
 Options:\n\
-%OPTIONS%\
+%OPTIONS%\n\
+\n\
 For backward compatibility, the following qualifiers are supported:\n\
 \n\
    full       - same as -full option.\n\

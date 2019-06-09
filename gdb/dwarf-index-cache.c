@@ -340,12 +340,12 @@ _initialize_index_cache ()
 
   /* set index-cache */
   add_prefix_cmd ("index-cache", class_files, set_index_cache_command,
-		  _("Set index-cache options"), &set_index_cache_prefix_list,
+		  _("Set index-cache options."), &set_index_cache_prefix_list,
 		  "set index-cache ", false, &setlist);
 
   /* show index-cache */
   add_prefix_cmd ("index-cache", class_files, show_index_cache_command,
-		  _("Show index-cache options"), &show_index_cache_prefix_list,
+		  _("Show index-cache options."), &show_index_cache_prefix_list,
 		  "show index-cache ", false, &showlist);
 
   /* set index-cache on */

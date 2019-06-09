@@ -14449,7 +14449,7 @@ _initialize_ada_language (void)
   initialize_ada_catchpoint_ops ();
 
   add_prefix_cmd ("ada", no_class, set_ada_command,
-                  _("Prefix command for changing Ada-specific settings"),
+                  _("Prefix command for changing Ada-specific settings."),
                   &set_ada_list, "set ada ", 0, &setlist);
 
   add_prefix_cmd ("ada", no_class, show_ada_command,
@@ -14458,8 +14458,8 @@ _initialize_ada_language (void)
 
   add_setshow_boolean_cmd ("trust-PAD-over-XVS", class_obscure,
                            &trust_pad_over_xvs, _("\
-Enable or disable an optimization trusting PAD types over XVS types"), _("\
-Show whether an optimization trusting PAD types over XVS types is activated"),
+Enable or disable an optimization trusting PAD types over XVS types."), _("\
+Show whether an optimization trusting PAD types over XVS types is activated."),
                            _("\
 This is related to the encoding used by the GNAT compiler.  The debugger\n\
 should normally trust the contents of PAD types, but certain older versions\n\
@@ -14473,9 +14473,9 @@ this option to \"off\" unless necessary."),
   add_setshow_boolean_cmd ("print-signatures", class_vars,
 			   &print_signatures, _("\
 Enable or disable the output of formal and return types for functions in the \
-overloads selection menu"), _("\
+overloads selection menu."), _("\
 Show whether the output of formal and return types for functions in the \
-overloads selection menu is activated"),
+overloads selection menu is activated."),
 			   NULL, NULL, NULL, &set_ada_list, &show_ada_list);
 
   add_catch_command ("exception", _("\
@@ -14537,7 +14537,7 @@ the regular expression are listed."));
                   0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_prefix_cmd ("ada", class_maintenance, maint_show_ada_cmd,
-		  _("Show Ada maintenance-related variables"),
+		  _("Show Ada maintenance-related variables."),
                   &maint_show_ada_cmdlist, "maintenance show ada ",
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 

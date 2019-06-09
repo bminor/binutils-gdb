@@ -1388,7 +1388,7 @@ will result in an error."),
   add_setshow_boolean_cmd ("coerce-float-to-double", class_obscure,
 			   &coerce_float_to_double_p, _("\
 Set coercion of floats to doubles when calling functions."), _("\
-Show coercion of floats to doubles when calling functions"), _("\
+Show coercion of floats to doubles when calling functions."), _("\
 Variables of type float should generally be converted to doubles before\n\
 calling an unprototyped function, and left alone when calling a prototyped\n\
 function.  However, some older debug info formats do not provide enough\n\

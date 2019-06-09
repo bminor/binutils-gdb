@@ -696,41 +696,45 @@ If no function name is given, skip the current function."),
   set_cmd_completer (c, location_completer);
 
   c = add_cmd ("enable", class_breakpoint, skip_enable_command, _("\
-Enable skip entries.  You can specify numbers (e.g. \"skip enable 1 3\"), \
+Enable skip entries.\n\
+Usage: skip enable [NUMBER | RANGE]...\n\
+You can specify numbers (e.g. \"skip enable 1 3\"),\n\
 ranges (e.g. \"skip enable 4-8\"), or both (e.g. \"skip enable 1 3 4-8\").\n\n\
-If you don't specify any numbers or ranges, we'll enable all skip entries.\n\n\
-Usage: skip enable [NUMBER | RANGE]..."),
+If you don't specify any numbers or ranges, we'll enable all skip entries."),
 	       &skiplist);
   set_cmd_completer (c, complete_skip_number);
 
   c = add_cmd ("disable", class_breakpoint, skip_disable_command, _("\
-Disable skip entries.  You can specify numbers (e.g. \"skip disable 1 3\"), \
+Disable skip entries.\n\
+Usage: skip disable [NUMBER | RANGE]...\n\
+You can specify numbers (e.g. \"skip disable 1 3\"),\n\
 ranges (e.g. \"skip disable 4-8\"), or both (e.g. \"skip disable 1 3 4-8\").\n\n\
-If you don't specify any numbers or ranges, we'll disable all skip entries.\n\n\
-Usage: skip disable [NUMBER | RANGE]..."),
+If you don't specify any numbers or ranges, we'll disable all skip entries."),
 	       &skiplist);
   set_cmd_completer (c, complete_skip_number);
 
   c = add_cmd ("delete", class_breakpoint, skip_delete_command, _("\
-Delete skip entries.  You can specify numbers (e.g. \"skip delete 1 3\"), \
+Delete skip entries.\n\
+Usage: skip delete [NUMBER | RANGES]...\n\
+You can specify numbers (e.g. \"skip delete 1 3\"),\n\
 ranges (e.g. \"skip delete 4-8\"), or both (e.g. \"skip delete 1 3 4-8\").\n\n\
-If you don't specify any numbers or ranges, we'll delete all skip entries.\n\n\
-Usage: skip delete [NUMBER | RANGES]..."),
+If you don't specify any numbers or ranges, we'll delete all skip entries."),
 	       &skiplist);
   set_cmd_completer (c, complete_skip_number);
 
   add_info ("skip", info_skip_command, _("\
-Display the status of skips.  You can specify numbers (e.g. \"info skip 1 3\"), \
+Display the status of skips.\n\
+Usage: info skip [NUMBER | RANGES]...\n\
+You can specify numbers (e.g. \"info skip 1 3\"), \n\
 ranges (e.g. \"info skip 4-8\"), or both (e.g. \"info skip 1 3 4-8\").\n\n\
-If you don't specify any numbers or ranges, we'll show all skips.\n\n\
-Usage: info skip [NUMBER | RANGES]..."));
+If you don't specify any numbers or ranges, we'll show all skips."));
   set_cmd_completer (c, complete_skip_number);
 
   add_setshow_boolean_cmd ("skip", class_maintenance,
 			   &debug_skip, _("\
 Set whether to print the debug output about skipping files and functions."),
 			   _("\
-Show whether the debug output about skipping files and functions is printed"),
+Show whether the debug output about skipping files and functions is printed."),
 			   _("\
 When non-zero, debug output about skipping files and functions is displayed."),
 			   NULL, NULL,

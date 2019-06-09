@@ -808,15 +808,15 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 
   add_com_alias ("rec", "record", class_obscure, 1);
   add_prefix_cmd ("record", class_support, set_record_command,
-		  _("Set record options"), &set_record_cmdlist,
+		  _("Set record options."), &set_record_cmdlist,
 		  "set record ", 0, &setlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &setlist);
   add_prefix_cmd ("record", class_support, show_record_command,
-		  _("Show record options"), &show_record_cmdlist,
+		  _("Show record options."), &show_record_cmdlist,
 		  "show record ", 0, &showlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &showlist);
   add_prefix_cmd ("record", class_support, info_record_command,
-		  _("Info record options"), &info_record_cmdlist,
+		  _("Info record options."), &info_record_cmdlist,
 		  "info record ", 0, &infolist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &infolist);
 

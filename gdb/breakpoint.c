@@ -15451,7 +15451,8 @@ BREAK_ARGS_HELP ("thbreak")));
   set_cmd_completer (c, location_completer);
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command, _("\
-Enable some breakpoints.\n\
+Enable all or some breakpoints.\n\
+Usage: enable [BREAKPOINTNUM]...\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
@@ -15461,46 +15462,54 @@ With a subcommand you can enable temporarily."),
   add_com_alias ("en", "enable", class_breakpoint, 1);
 
   add_prefix_cmd ("breakpoints", class_breakpoint, enable_command, _("\
-Enable some breakpoints.\n\
+Enable all or some breakpoints.\n\
+Usage: enable breakpoints [BREAKPOINTNUM]...\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 May be abbreviated to simply \"enable\"."),
 		   &enablebreaklist, "enable breakpoints ", 1, &enablelist);
 
   add_cmd ("once", no_class, enable_once_command, _("\
-Enable breakpoints for one hit.  Give breakpoint numbers.\n\
+Enable some breakpoints for one hit.\n\
+Usage: enable breakpoints once BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 	   &enablebreaklist);
 
   add_cmd ("delete", no_class, enable_delete_command, _("\
-Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
+Enable some breakpoints and delete when hit.\n\
+Usage: enable breakpoints delete BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion, it is deleted."),
 	   &enablebreaklist);
 
   add_cmd ("count", no_class, enable_count_command, _("\
-Enable breakpoints for COUNT hits.  Give count and then breakpoint numbers.\n\
+Enable some breakpoints for COUNT hits.\n\
+Usage: enable breakpoints count COUNT BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion,\n\
 the count is decremented; when it reaches zero, the breakpoint is disabled."),
 	   &enablebreaklist);
 
   add_cmd ("delete", no_class, enable_delete_command, _("\
-Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
+Enable some breakpoints and delete when hit.\n\
+Usage: enable delete BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion, it is deleted."),
 	   &enablelist);
 
   add_cmd ("once", no_class, enable_once_command, _("\
-Enable breakpoints for one hit.  Give breakpoint numbers.\n\
+Enable some breakpoints for one hit.\n\
+Usage: enable once BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 	   &enablelist);
 
   add_cmd ("count", no_class, enable_count_command, _("\
-Enable breakpoints for COUNT hits.  Give count and then breakpoint numbers.\n\
+Enable some breakpoints for COUNT hits.\n\
+Usage: enable count COUNT BREAKPOINTNUM...\n\
 If a breakpoint is hit while enabled in this fashion,\n\
 the count is decremented; when it reaches zero, the breakpoint is disabled."),
 	   &enablelist);
 
   add_prefix_cmd ("disable", class_breakpoint, disable_command, _("\
-Disable some breakpoints.\n\
+Disable all or some breakpoints.\n\
+Usage: disable [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
@@ -15509,7 +15518,8 @@ A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
   add_com_alias ("disa", "disable", class_breakpoint, 1);
 
   add_cmd ("breakpoints", class_alias, disable_command, _("\
-Disable some breakpoints.\n\
+Disable all or some breakpoints.\n\
+Usage: disable breakpoints [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until re-enabled.\n\
@@ -15517,18 +15527,19 @@ This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
   add_prefix_cmd ("delete", class_breakpoint, delete_command, _("\
-Delete some breakpoints or auto-display expressions.\n\
+Delete all or some breakpoints.\n\
+Usage: delete [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 \n\
-Also a prefix command for deletion of other GDB objects.\n\
-The \"unset\" command is also an alias for \"delete\"."),
+Also a prefix command for deletion of other GDB objects."),
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
   add_com_alias ("del", "delete", class_breakpoint, 1);
 
   add_cmd ("breakpoints", class_alias, delete_command, _("\
-Delete some breakpoints or auto-display expressions.\n\
+Delete all or some breakpoints or auto-display expressions.\n\
+Usage: delete breakpoints [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 This command may be abbreviated \"delete\"."),
@@ -15805,15 +15816,15 @@ Use the 'source' command in another debug session to restore them."),
   deprecate_cmd (c, "save tracepoints");
 
   add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, _("\
-Breakpoint specific settings\n\
+Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
-pending breakpoint behavior"),
+pending breakpoint behavior."),
 		  &breakpoint_set_cmdlist, "set breakpoint ",
 		  0/*allow-unknown*/, &setlist);
   add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, _("\
-Breakpoint specific settings\n\
+Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
-pending breakpoint behavior"),
+pending breakpoint behavior."),
 		  &breakpoint_show_cmdlist, "show breakpoint ",
 		  0/*allow-unknown*/, &showlist);
 
@@ -15914,16 +15925,16 @@ output stream by setting dprintf-function and dprintf-channel."),
   dprintf_function = xstrdup ("printf");
   add_setshow_string_cmd ("dprintf-function", class_support,
 			  &dprintf_function, _("\
-Set the function to use for dynamic printf"), _("\
-Show the function to use for dynamic printf"), NULL,
+Set the function to use for dynamic printf."), _("\
+Show the function to use for dynamic printf."), NULL,
 			  update_dprintf_commands, NULL,
 			  &setlist, &showlist);
 
   dprintf_channel = xstrdup ("");
   add_setshow_string_cmd ("dprintf-channel", class_support,
 			  &dprintf_channel, _("\
-Set the channel to use for dynamic printf"), _("\
-Show the channel to use for dynamic printf"), NULL,
+Set the channel to use for dynamic printf."), _("\
+Show the channel to use for dynamic printf."), NULL,
 			  update_dprintf_commands, NULL,
 			  &setlist, &showlist);
 
@@ -15938,8 +15949,10 @@ even if GDB disconnects or detaches from the target."),
 			   &setlist, &showlist);
 
   add_com ("agent-printf", class_vars, agent_printf_command, _("\
-agent-printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
-(target agent only) This is useful for formatted output in user-defined commands."));
+Target agent only formatted printing, like the C \"printf\" function.\n\
+Usage: agent-printf \"format string\", ARG1, ARG2, ARG3, ..., ARGN\n\
+This supports most C printf format specifications, like %s, %d, etc.\n\
+This is useful for formatted output in user-defined commands."));
 
   automatic_hardware_breakpoints = 1;
 

@@ -601,17 +601,17 @@ _initialize_ravenscar ()
   gdb::observers::inferior_created.attach (ravenscar_inferior_created);
 
   add_prefix_cmd ("ravenscar", no_class, set_ravenscar_command,
-                  _("Prefix command for changing Ravenscar-specific settings"),
+                  _("Prefix command for changing Ravenscar-specific settings."),
                   &set_ravenscar_list, "set ravenscar ", 0, &setlist);
 
   add_prefix_cmd ("ravenscar", no_class, show_ravenscar_command,
-                  _("Prefix command for showing Ravenscar-specific settings"),
+                  _("Prefix command for showing Ravenscar-specific settings."),
                   &show_ravenscar_list, "show ravenscar ", 0, &showlist);
 
   add_setshow_boolean_cmd ("task-switching", class_obscure,
                            &ravenscar_task_support, _("\
-Enable or disable support for GNAT Ravenscar tasks"), _("\
-Show whether support for GNAT Ravenscar tasks is enabled"),
+Enable or disable support for GNAT Ravenscar tasks."), _("\
+Show whether support for GNAT Ravenscar tasks is enabled."),
                            _("\
 Enable or disable support for task/thread switching with the GNAT\n\
 Ravenscar run-time library for bareboard configuration."),

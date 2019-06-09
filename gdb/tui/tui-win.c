@@ -1414,11 +1414,11 @@ _initialize_tui_win (void)
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
   add_prefix_cmd ("tui", class_tui, set_tui_cmd,
-                  _("TUI configuration variables"),
+                  _("TUI configuration variables."),
 		  &tui_setlist, "set tui ",
 		  0 /* allow-unknown */, &setlist);
   add_prefix_cmd ("tui", class_tui, show_tui_cmd,
-                  _("TUI configuration variables"),
+                  _("TUI configuration variables."),
 		  &tui_showlist, "show tui ",
 		  0 /* allow-unknown */, &showlist);
 
@@ -1513,7 +1513,7 @@ This variable controls the attributes to use for the active window border:\n\
   add_setshow_zuinteger_cmd ("tab-width", no_class,
 			     &internal_tab_width, _("\
 Set the tab width, in characters, for the TUI."), _("\
-Show the tab witdh, in characters, for the TUI"), _("\
+Show the tab witdh, in characters, for the TUI."), _("\
 This variable controls how many spaces are used to display a tab character."),
 			     tui_set_tab_width, tui_show_tab_width,
 			     &tui_setlist, &tui_showlist);

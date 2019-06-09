@@ -122,8 +122,8 @@ Show GDB internal variables used for set/show command infrastructure testing."),
 
   add_setshow_boolean_cmd ("boolean", class_maintenance,
 			   &maintenance_test_settings_boolean, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			   nullptr, /* help_doc */
 			   nullptr, /* set_cmd */
 			   maintenance_show_test_settings_value_cmd,
@@ -132,8 +132,8 @@ command used for internal testing"),
 
   add_setshow_auto_boolean_cmd ("auto-boolean", class_maintenance,
 				&maintenance_test_settings_auto_boolean, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 				nullptr, /* help_doc */
 				nullptr, /* set_cmd */
 				maintenance_show_test_settings_value_cmd,
@@ -142,8 +142,8 @@ command used for internal testing"),
 
   add_setshow_uinteger_cmd ("uinteger", class_maintenance,
 			   &maintenance_test_settings_uinteger, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			    nullptr, /* help_doc */
 			    nullptr, /* set_cmd */
 			    maintenance_show_test_settings_value_cmd,
@@ -152,8 +152,8 @@ command used for internal testing"),
 
   add_setshow_integer_cmd ("integer", class_maintenance,
 			   &maintenance_test_settings_integer, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			   nullptr, /* help_doc */
 			   nullptr, /* set_cmd */
 			   maintenance_show_test_settings_value_cmd,
@@ -162,8 +162,8 @@ command used for internal testing"),
 
   add_setshow_string_cmd ("string", class_maintenance,
      &maintenance_test_settings_string, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
      nullptr, /* help_doc */
      nullptr, /* set_cmd */
 			  maintenance_show_test_settings_value_cmd,
@@ -173,8 +173,8 @@ command used for internal testing"),
   add_setshow_string_noescape_cmd
     ("string-noescape", class_maintenance,
      &maintenance_test_settings_string_noescape, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
      nullptr, /* help_doc */
      nullptr, /* set_cmd */
      maintenance_show_test_settings_value_cmd,
@@ -184,8 +184,8 @@ command used for internal testing"),
   add_setshow_optional_filename_cmd
     ("optional-filename", class_maintenance,
      &maintenance_test_settings_optional_filename, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
      nullptr, /* help_doc */
      nullptr, /* set_cmd */
      maintenance_show_test_settings_value_cmd,
@@ -194,8 +194,8 @@ command used for internal testing"),
 
   add_setshow_filename_cmd ("filename", class_maintenance,
 			    &maintenance_test_settings_filename, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			    nullptr, /* help_doc */
 			    nullptr, /* set_cmd */
 			    maintenance_show_test_settings_value_cmd,
@@ -204,8 +204,8 @@ command used for internal testing"),
 
   add_setshow_zinteger_cmd ("zinteger", class_maintenance,
 			    &maintenance_test_settings_zinteger, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			    nullptr, /* help_doc */
 			    nullptr, /* set_cmd */
 			    maintenance_show_test_settings_value_cmd,
@@ -214,8 +214,8 @@ command used for internal testing"),
 
   add_setshow_zuinteger_cmd ("zuinteger", class_maintenance,
 			     &maintenance_test_settings_zuinteger, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			     nullptr, /* help_doc */
 			     nullptr, /* set_cmd */
 			     maintenance_show_test_settings_value_cmd,
@@ -225,8 +225,8 @@ command used for internal testing"),
   add_setshow_zuinteger_unlimited_cmd
     ("zuinteger-unlimited", class_maintenance,
      &maintenance_test_settings_zuinteger_unlimited, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
      nullptr, /* help_doc */
      nullptr, /* set_cmd */
      maintenance_show_test_settings_value_cmd,
@@ -236,8 +236,8 @@ command used for internal testing"),
   add_setshow_enum_cmd ("enum", class_maintenance,
 			maintenance_test_settings_enums,
 			&maintenance_test_settings_enum, _("\
-command used for internal testing"), _("\
-command used for internal testing"),
+command used for internal testing."), _("\
+command used for internal testing."),
 			nullptr, /* help_doc */
 			nullptr, /* set_cmd */
 			maintenance_show_test_settings_value_cmd,

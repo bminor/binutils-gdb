@@ -377,7 +377,7 @@ interpreter_exec_cmd (const char *args, int from_tty)
   nrules = prules.count ();
 
   if (nrules < 2)
-    error (_("Usage: interpreter-exec INTERPRETER [ COMMAND... ]"));
+    error (_("Usage: interpreter-exec INTERPRETER COMMAND..."));
 
   old_interp = ui_interp->current_interpreter;
 
@@ -447,8 +447,11 @@ _initialize_interpreter (void)
   c = add_cmd ("interpreter-exec", class_support,
 	       interpreter_exec_cmd, _("\
 Execute a command in an interpreter.\n\
-It takes two arguments:\n\
+Usage: interpreter-exec INTERPRETER COMMAND...\n\
 The first argument is the name of the interpreter to use.\n\
-The second argument is the command to execute."), &cmdlist);
+The following arguments are the commands to execute.\n\
+A command can have arguments, separated by spaces.\n\
+These spaces must be escaped using \\ or the command\n\
+and its arguments must be enclosed in double quotes."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
 }

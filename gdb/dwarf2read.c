@@ -25759,13 +25759,13 @@ _initialize_dwarf2_read (void)
 {
   add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
 Set DWARF specific variables.\n\
-Configure DWARF variables such as the cache size"),
+Configure DWARF variables such as the cache size."),
                   &set_dwarf_cmdlist, "maintenance set dwarf ",
                   0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_prefix_cmd ("dwarf", class_maintenance, show_dwarf_cmd, _("\
-Show DWARF specific variables\n\
-Show DWARF variables such as the cache size"),
+Show DWARF specific variables.\n\
+Show DWARF variables such as the cache size."),
                   &show_dwarf_cmdlist, "maintenance show dwarf ",
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 

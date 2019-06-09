@@ -258,9 +258,14 @@ extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
 
 extern void not_just_help_class_command (const char *arg, int from_tty);
 
-/* Exported to cli/cli-setshow.c */
+/* Print only the first line of STR on STREAM.
+   FOR_VALUE_PREFIX true indicates that the first line is output
+   to be a prefix to show a value (see deprecated_show_value_hack):
+   the first character is printed in uppercase, and the trailing
+   dot character is not printed.  */
 
-extern void print_doc_line (struct ui_file *, const char *);
+extern void print_doc_line (struct ui_file *stream, const char *str,
+			    bool for_value_prefix);
 
 /* The enums of boolean commands.  */
 extern const char * const boolean_enums[];

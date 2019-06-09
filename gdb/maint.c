@@ -1012,7 +1012,7 @@ Commands for showing internal info about the program being debugged."),
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("sections", class_maintenance, maintenance_info_sections, _("\
-List the BFD sections of the exec and core files. \n\
+List the BFD sections of the exec and core files.\n\
 Arguments may be any combination of:\n\
 	[one or more section names]\n\
 	ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
@@ -1165,21 +1165,22 @@ Commands for checking internal gdb state."),
 	   &maintenancelist);
 
   add_cmd ("deprecate", class_maintenance, maintenance_deprecate, _("\
-Deprecate a command.  Note that this is just in here so the \n\
-testsuite can check the command deprecator. You probably shouldn't use this,\n\
-rather you should use the C function deprecate_cmd().  If you decide you \n\
-want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\
-replacement is optional."), &maintenancelist);
+Deprecate a command (for testing purposes).\n\
+Usage: maintenance deprecate COMMANDNAME [\"REPLACEMENT\"]\n\
+This is used by the testsuite to check the command deprecator.\n\
+You probably shouldn't use this,\n\
+rather you should use the C function deprecate_cmd()."), &maintenancelist);
 
   add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate, _("\
-Undeprecate a command.  Note that this is just in here so the \n\
-testsuite can check the command deprecator. You probably shouldn't use this,\n\
-If you decide you want to use it: maintenance undeprecate 'commandname'"),
+Undeprecate a command (for testing purposes).\n\
+Usage: maintenance undeprecate COMMANDNAME\n\
+This is used by the testsuite to check the command deprecator.\n\
+You probably shouldn't use this."),
 	   &maintenancelist);
 
   add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
 Run gdb's unit tests.\n\
-Usage: maintenance selftest [filter]\n\
+Usage: maintenance selftest [FILTER]\n\
 This will run any unit tests that were built in to gdb.\n\
 If a filter is given, only the tests with that value in their name will ran."),
 	   &maintenancelist);

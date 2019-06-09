@@ -329,8 +329,8 @@ _initialize_regcache_dump (void)
 	   &maintenanceprintlist);
   add_cmd ("remote-registers", class_maintenance,
 	   maintenance_print_remote_registers, _("\
-Print the internal register configuration including each register's\n\
-remote register number and buffer offset in the g/G packets.\n\
+Print the internal register configuration including remote register number "
+"and g/G packets offset.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
 }

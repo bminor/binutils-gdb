@@ -1844,24 +1844,28 @@ A value of \"unlimited\", or zero, means there's no limit."),
 
   add_cmd ("substitute-path", class_files, set_substitute_path_command,
            _("\
+Add a substitution rule to rewrite the source directories.\n\
 Usage: set substitute-path FROM TO\n\
-Add a substitution rule replacing FROM into TO in source file names.\n\
+The rule is applied only if the directory name starts with FROM\n\
+directly followed by a directory separator.\n\
 If a substitution rule was previously set for FROM, the old rule\n\
 is replaced by the new one."),
            &setlist);
 
   add_cmd ("substitute-path", class_files, unset_substitute_path_command,
            _("\
+Delete one or all substitution rules rewriting the source directories.\n\
 Usage: unset substitute-path [FROM]\n\
-Delete the rule for substituting FROM in source file names.  If FROM\n\
+Delete the rule for substituting FROM in source directories.  If FROM\n\
 is not specified, all substituting rules are deleted.\n\
 If the debugger cannot find a rule for FROM, it will display a warning."),
            &unsetlist);
 
   add_cmd ("substitute-path", class_files, show_substitute_path_command,
            _("\
+Show one or all substitution rules rewriting the source directories.\n\
 Usage: show substitute-path [FROM]\n\
-Print the rule for substituting FROM in source file names. If FROM\n\
+Print the rule for substituting FROM in source directories. If FROM\n\
 is not specified, print all substitution rules."),
            &showlist);
 

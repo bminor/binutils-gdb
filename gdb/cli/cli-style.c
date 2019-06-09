@@ -206,24 +206,24 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 
   add_setshow_enum_cmd ("foreground", theclass, cli_colors,
 			&m_foreground,
-			_("Set the foreground color for this property"),
-			_("Show the foreground color for this property"),
+			_("Set the foreground color for this property."),
+			_("Show the foreground color for this property."),
 			nullptr,
 			nullptr,
 			do_show_foreground,
 			&m_set_list, &m_show_list, (void *) this);
   add_setshow_enum_cmd ("background", theclass, cli_colors,
 			&m_background,
-			_("Set the background color for this property"),
-			_("Show the background color for this property"),
+			_("Set the background color for this property."),
+			_("Show the background color for this property."),
 			nullptr,
 			nullptr,
 			do_show_background,
 			&m_set_list, &m_show_list, (void *) this);
   add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
 			&m_intensity,
-			_("Set the display intensity for this property"),
-			_("Show the display intensity for this property"),
+			_("Set the display intensity for this property."),
+			_("Show the display intensity for this property."),
 			nullptr,
 			nullptr,
 			do_show_intensity,
@@ -290,11 +290,11 @@ void
 _initialize_cli_style ()
 {
   add_prefix_cmd ("style", no_class, set_style, _("\
-Style-specific settings\n\
+Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
 		  &style_set_list, "set style ", 0, &setlist);
   add_prefix_cmd ("style", no_class, show_style, _("\
-Style-specific settings\n\
+Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
 		  &style_show_list, "show style ", 0, &showlist);
 
@@ -341,34 +341,34 @@ it was not linked against GNU Source Highlight."
 
   STYLE_ADD_SETSHOW_COMMANDS (file_name_style,
 			      _("\
-Filename display styling\n\
+Filename display styling.\n\
 Configure filename colors and display intensity."));
 
   STYLE_ADD_SETSHOW_COMMANDS (function_name_style,
 			      _("\
-Function name display styling\n\
+Function name display styling.\n\
 Configure function name colors and display intensity"));
 
   STYLE_ADD_SETSHOW_COMMANDS (variable_name_style,
 			      _("\
-Variable name display styling\n\
+Variable name display styling.\n\
 Configure variable name colors and display intensity"));
 
   STYLE_ADD_SETSHOW_COMMANDS (address_style,
 			      _("\
-Address display styling\n\
+Address display styling.\n\
 Configure address colors and display intensity"));
 
   STYLE_ADD_SETSHOW_COMMANDS (title_style,
 			      _("\
-Title display styling\n\
+Title display styling.\n\
 Configure title colors and display intensity\n\
 Some commands (such as \"apropos -v REGEXP\") use the title style to improve\n\
 readability."));
 
   STYLE_ADD_SETSHOW_COMMANDS (highlight_style,
 			      _("\
-Highlight display styling\n\
+Highlight display styling.\n\
 Configure highlight colors and display intensity\n\
 Some commands use the highlight style to draw the attention to a part\n\
 of their output."));

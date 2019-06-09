@@ -1173,16 +1173,16 @@ _initialize_language (void)
 
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,
-			_("Set range checking.  (on/warn/off/auto)"),
-			_("Show range checking.  (on/warn/off/auto)"),
+			_("Set range checking (on/warn/off/auto)."),
+			_("Show range checking (on/warn/off/auto)."),
 			NULL, set_range_command,
 			show_range_command,
 			&setchecklist, &showchecklist);
 
   add_setshow_enum_cmd ("case-sensitive", class_support, case_sensitive_names,
 			&case_sensitive, _("\
-Set case sensitivity in name search.  (on/off/auto)"), _("\
-Show case sensitivity in name search.  (on/off/auto)"), _("\
+Set case sensitivity in name search (on/off/auto)."), _("\
+Show case sensitivity in name search (on/off/auto)."), _("\
 For Fortran the default is off; for other languages the default is on."),
 			set_case_command,
 			show_case_command,

@@ -1413,9 +1413,9 @@ _initialize_tasks (void)
 
   /* Some new commands provided by this module.  */
   add_info ("tasks", info_tasks_command,
-            _("Provide information about all known Ada tasks"));
+            _("Provide information about all known Ada tasks."));
   add_cmd ("task", class_run, task_command,
            _("Use this command to switch between Ada tasks.\n\
-Without argument, this command simply prints the current task ID"),
+Without argument, this command simply prints the current task ID."),
            &cmdlist);
 }

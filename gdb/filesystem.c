@@ -83,8 +83,8 @@ _initialize_filesystem (void)
 			class_files,
 			target_file_system_kinds,
 			&target_file_system_kind, _("\
-Set assumed file system kind for target reported file names"), _("\
-Show assumed file system kind for target reported file names"),
+Set assumed file system kind for target reported file names."), _("\
+Show assumed file system kind for target reported file names."),
 			_("\
 If `unix', target file names (e.g., loaded shared library file names)\n\
 starting the forward slash (`/') character are considered absolute,\n\

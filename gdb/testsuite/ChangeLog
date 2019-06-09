@@ -1,3 +1,8 @@
+2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/style.exp: Update tests for help doc new invariants.
+	* gdb.base/help.exp: Likewise.
+
 2019-08-06  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/style.exp: Add disassemble test.

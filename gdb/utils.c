@@ -531,10 +531,10 @@ add_internal_problem_command (struct internal_problem *problem)
   if (problem->user_settable_should_quit)
     {
       set_doc = xstrprintf (_("Set whether GDB should quit "
-			      "when an %s is detected"),
+			      "when an %s is detected."),
 			    problem->name);
       show_doc = xstrprintf (_("Show whether GDB will quit "
-			       "when an %s is detected"),
+			       "when an %s is detected."),
 			     problem->name);
       add_setshow_enum_cmd ("quit", class_maintenance,
 			    internal_problem_modes,
@@ -554,10 +554,10 @@ add_internal_problem_command (struct internal_problem *problem)
   if (problem->user_settable_should_dump_core)
     {
       set_doc = xstrprintf (_("Set whether GDB should create a core "
-			      "file of GDB when %s is detected"),
+			      "file of GDB when %s is detected."),
 			    problem->name);
       show_doc = xstrprintf (_("Show whether GDB will create a core "
-			       "file of GDB when %s is detected"),
+			       "file of GDB when %s is detected."),
 			     problem->name);
       add_setshow_enum_cmd ("corefile", class_maintenance,
 			    internal_problem_modes,

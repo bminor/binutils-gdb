@@ -599,8 +599,8 @@ void
 _initialize_mem (void)
 {
   add_com ("mem", class_vars, mem_command, _("\
-Define attributes for memory region or reset memory region handling to\n\
-target-based.\n\
+Define attributes for memory region or reset memory region handling to "
+"target-based.\n\
 Usage: mem auto\n\
        mem LOW HIGH [MODE WIDTH CACHE],\n\
 where MODE  may be rw (read/write), ro (read-only) or wo (write-only),\n\
@@ -626,14 +626,14 @@ Usage: delete mem [ID]...\n\
 Do \"info mem\" to see current list of IDs."), &deletelist);
 
   add_info ("mem", info_mem_command,
-	    _("Memory region attributes"));
+	    _("Memory region attributes."));
 
   add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
-Memory regions settings"),
+Memory regions settings."),
 		  &mem_set_cmdlist, "set mem ",
 		  0/* allow-unknown */, &setlist);
   add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
-Memory regions settings"),
+Memory regions settings."),
 		  &mem_show_cmdlist, "show mem  ",
 		  0/* allow-unknown */, &showlist);
 

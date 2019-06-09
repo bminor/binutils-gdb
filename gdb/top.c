@@ -2093,8 +2093,8 @@ init_main (void)
 
   add_setshow_string_cmd ("prompt", class_support,
 			  &top_prompt,
-			  _("Set gdb's prompt"),
-			  _("Show gdb's prompt"),
+			  _("Set gdb's prompt."),
+			  _("Show gdb's prompt."),
 			  NULL, NULL,
 			  show_prompt,
 			  &setlist, &showlist);
@@ -2126,9 +2126,9 @@ Without an argument, saving is enabled."),
 
   add_setshow_zuinteger_unlimited_cmd ("size", no_class,
 				       &history_size_setshow_var, _("\
-Set the size of the command history,"), _("\
-Show the size of the command history,"), _("\
-ie. the number of previous commands to keep a record of.\n\
+Set the size of the command history."), _("\
+Show the size of the command history."), _("\
+This is the number of previous commands to keep a record of.\n\
 If set to \"unlimited\", the number of commands kept in the history\n\
 list is unlimited.  This defaults to the value of the environment\n\
 variable \"GDBHISTSIZE\", or to 256 if this variable is not set."),
@@ -2152,8 +2152,8 @@ By default this option is set to 0."),
 			   &sethistlist, &showhistlist);
 
   add_setshow_filename_cmd ("filename", no_class, &history_filename, _("\
-Set the filename in which to record the command history"), _("\
-Show the filename in which to record the command history"), _("\
+Set the filename in which to record the command history."), _("\
+Show the filename in which to record the command history."), _("\
 (the list of previous commands of which a record is kept)."),
 			    set_history_filename,
 			    show_history_filename,
@@ -2208,7 +2208,8 @@ input settings."),
                         &setlist, &showlist);
 
   c = add_cmd ("new-ui", class_support, new_ui_command, _("\
-Create a new UI.  It takes two arguments:\n\
+Create a new UI.\n\
+Usage: new-ui INTERPRETER TTY\n\
 The first argument is the name of the interpreter to run.\n\
 The second argument is the terminal the UI runs on."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);

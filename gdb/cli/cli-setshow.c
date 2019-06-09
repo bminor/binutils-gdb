@@ -130,8 +130,9 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
   /* If there's no command or value, don't try to print it out.  */
   if (c == NULL || value == NULL)
     return;
-  /* Print doc minus "show" at start.  */
-  print_doc_line (gdb_stdout, c->doc + 5);
+  /* Print doc minus "Show " at start.  Tell print_doc_line that
+     this is for a 'show value' prefix.  */
+  print_doc_line (gdb_stdout, c->doc + 5, true);
   switch (c->var_type)
     {
     case var_string:

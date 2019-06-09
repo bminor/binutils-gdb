@@ -765,7 +765,8 @@ Fork a duplicate process (experimental)."));
      process.  */
 
   add_com ("restart", class_obscure, restart_command, _("\
-restart N: restore program context from a checkpoint.\n\
+Restore program context from a checkpoint.\n\
+Usage: restart N\n\
 Argument N is checkpoint ID, as displayed by 'info checkpoints'."));
 
   /* Delete checkpoint command: kill the process and remove it from

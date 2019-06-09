@@ -4001,7 +4001,7 @@ _initialize_tracepoint (void)
   tracepoint_number = -1;
 
   add_info ("scope", info_scope_command,
-	    _("List the variables local to a scope"));
+	    _("List the variables local to a scope."));
 
   add_cmd ("tracepoints", class_trace,
 	   _("Tracing of program execution without stopping the program."),
@@ -4031,7 +4031,7 @@ Status of trace state variables and their values."));
 List target static tracepoints markers."));
 
   add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
-Select a trace frame;\n\
+Select a trace frame.\n\
 No argument means forward by one frame; '-' means backward by one frame."),
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
@@ -4132,8 +4132,8 @@ depending on target's capabilities."));
   default_collect = xstrdup ("");
   add_setshow_string_cmd ("default-collect", class_trace,
 			  &default_collect, _("\
-Set the list of expressions to collect by default"), _("\
-Show the list of expressions to collect by default"), NULL,
+Set the list of expressions to collect by default."), _("\
+Show the list of expressions to collect by default."), NULL,
 			  NULL, NULL,
 			  &setlist, &showlist);
 
@@ -4173,22 +4173,22 @@ disables any attempt to set the buffer size and lets the target choose."),
 
   add_setshow_string_cmd ("trace-user", class_trace,
 			  &trace_user, _("\
-Set the user name to use for current and future trace runs"), _("\
-Show the user name to use for current and future trace runs"), NULL,
+Set the user name to use for current and future trace runs."), _("\
+Show the user name to use for current and future trace runs."), NULL,
 			  set_trace_user, NULL,
 			  &setlist, &showlist);
 
   add_setshow_string_cmd ("trace-notes", class_trace,
 			  &trace_notes, _("\
-Set notes string to use for current and future trace runs"), _("\
-Show the notes string to use for current and future trace runs"), NULL,
+Set notes string to use for current and future trace runs."), _("\
+Show the notes string to use for current and future trace runs."), NULL,
 			  set_trace_notes, NULL,
 			  &setlist, &showlist);
 
   add_setshow_string_cmd ("trace-stop-notes", class_trace,
 			  &trace_stop_notes, _("\
-Set notes string to use for future tstop commands"), _("\
-Show the notes string to use for future tstop commands"), NULL,
+Set notes string to use for future tstop commands."), _("\
+Show the notes string to use for future tstop commands."), NULL,
 			  set_trace_stop_notes, NULL,
 			  &setlist, &showlist);
 }

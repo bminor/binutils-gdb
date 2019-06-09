@@ -978,6 +978,7 @@ Usage: compile code [OPTION]... [CODE]\n\
 \n\
 Options:\n\
 %OPTIONS%\n\
+\n\
 The source code may be specified as a simple one line expression, e.g.:\n\
 \n\
     compile code printf(\"Hello world\\n\");\n\
@@ -1017,7 +1018,8 @@ Evaluate EXPR by using the compiler and print result.\n\
 Usage: compile print [[OPTION]... --] [/FMT] [EXPR]\n\
 \n\
 Options:\n\
-%OPTIONS%\
+%OPTIONS%\n\
+\n\
 Note: because this command accepts arbitrary expressions, if you\n\
 specify any command option, you must use a double dash (\"--\")\n\
 to mark the end of option processing.  E.g.: \"compile print -o -- myobj\".\n\
@@ -1049,8 +1051,8 @@ When on, compile command debugging is enabled."),
 
   add_setshow_string_cmd ("compile-args", class_support,
 			  &compile_args,
-			  _("Set compile command GCC command-line arguments"),
-			  _("Show compile command GCC command-line arguments"),
+			  _("Set compile command GCC command-line arguments."),
+			  _("Show compile command GCC command-line arguments."),
 			  _("\
 Use options like -I (include file directory) or ABI settings.\n\
 String quoting is parsed like in shell, for example:\n\
@@ -1078,9 +1080,9 @@ String quoting is parsed like in shell, for example:\n\
   add_setshow_optional_filename_cmd ("compile-gcc", class_support,
 				     &compile_gcc,
 				     _("Set compile command "
-				       "GCC driver filename"),
+				       "GCC driver filename."),
 				     _("Show compile command "
-				       "GCC driver filename"),
+				       "GCC driver filename."),
 				     _("\
 It should be absolute filename of the gcc executable.\n\
 If empty the default target triplet will be searched in $PATH."),

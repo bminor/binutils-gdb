@@ -3141,7 +3141,7 @@ static const gdb::option::option_def value_print_option_defs[] = {
     [] (value_print_options *opt) { return &opt->print_array_indexes; },
     show_print_array_indexes, /* show_cmd_cb */
     N_("Set printing of array indexes."),
-    N_("Show printing of array indexes"),
+    N_("Show printing of array indexes."),
     NULL, /* help_doc */
   },
 

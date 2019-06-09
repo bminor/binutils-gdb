@@ -6265,8 +6265,7 @@ Options:\n\
   add_setshow_enum_cmd ("multiple-symbols", no_class,
                         multiple_symbols_modes, &multiple_symbols_mode,
                         _("\
-Set the debugger behavior when more than one symbol are possible matches\n\
-in an expression."), _("\
+Set how the debugger handles ambiguities in expressions."), _("\
 Show how the debugger handles ambiguities in expressions."), _("\
 Valid values are \"ask\", \"all\", \"cancel\", and the default is \"all\"."),
                         NULL, NULL, &setlist, &showlist);

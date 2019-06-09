@@ -56,7 +56,8 @@ static core_fns *sniff_core_bfd (gdbarch *core_gdbarch,
 static const target_info core_target_info = {
   "core",
   N_("Local core dump file"),
-  N_("Use a core file as a target.  Specify the filename of the core file.")
+  N_("Use a core file as a target.\n\
+Specify the filename of the core file.")
 };
 
 class core_target final : public process_stratum_target

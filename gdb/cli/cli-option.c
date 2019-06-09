@@ -703,7 +703,6 @@ append_indented_doc (const char *doc, std::string &help)
     }
   help += "    ";
   help += p;
-  help += '\n';
 }
 
 /* Fill HELP with an auto-generated "help" string fragment for
@@ -732,8 +731,10 @@ build_help_option (gdb::array_view<const option_def> options,
       help += "\n";
       append_indented_doc (o.set_doc, help);
       if (o.help_doc != nullptr)
-	append_indented_doc (o.help_doc, help);
-      help += '\n';
+	{
+	  help += "\n";
+	  append_indented_doc (o.help_doc, help);
+	}
     }
 }
 
@@ -743,6 +744,7 @@ std::string
 build_help (const char *help_tmpl,
 	    gdb::array_view<const option_def_group> options_group)
 {
+  bool need_newlines = false;
   std::string help_str;
 
   const char *p = strstr (help_tmpl, "%OPTIONS%");
@@ -750,7 +752,13 @@ build_help (const char *help_tmpl,
 
   for (const auto &grp : options_group)
     for (const auto &opt : grp.options)
-      build_help_option (opt, help_str);
+      {
+	if (need_newlines)
+	  help_str += "\n\n";
+	else
+	  need_newlines = true;
+	build_help_option (opt, help_str);
+      }
 
   p += strlen ("%OPTIONS%");
   help_str.append (p);

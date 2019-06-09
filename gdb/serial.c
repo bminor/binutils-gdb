@@ -706,8 +706,8 @@ using remote targets."),
 
   add_setshow_enum_cmd ("parity", no_class, parity_enums,
                         &parity, _("\
-Set parity for remote serial I/O"), _("\
-Show parity for remote serial I/O"), NULL,
+Set parity for remote serial I/O."), _("\
+Show parity for remote serial I/O."), NULL,
                         set_parity,
                         NULL, /* FIXME: i18n: */
                         &serial_set_cmdlist, &serial_show_cmdlist);
@@ -723,8 +723,8 @@ by gdbserver."),
 
   add_setshow_enum_cmd ("remotelogbase", no_class, logbase_enums,
 			&serial_logbase, _("\
-Set numerical base for remote session logging"), _("\
-Show numerical base for remote session logging"), NULL,
+Set numerical base for remote session logging."), _("\
+Show numerical base for remote session logging."), NULL,
 			NULL,
 			NULL, /* FIXME: i18n: */
 			&setlist, &showlist);

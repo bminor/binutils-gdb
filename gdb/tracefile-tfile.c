@@ -43,7 +43,8 @@
 static const target_info tfile_target_info = {
   "tfile",
   N_("Local trace dump file"),
-  N_("Use a trace file as a target.  Specify the filename of the trace file.")
+  N_("Use a trace file as a target.\n\
+Specify the filename of the trace file.")
 };
 
 class tfile_target final : public tracefile_target
