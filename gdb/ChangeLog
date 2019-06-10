@@ -1,5 +1,11 @@
 2019-06-10  Tom de Vries  <tdevries@suse.de>
 
+	PR gdb/24611
+	* linespec.c (linespec_lexer_lex_string): Remove incorrect
+	"++(PARSER_STREAM (parser))" for "[abi"-prefixed colon.  Add assert.
+
+2019-06-10  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/24545
 	* symtab.c (struct demangled_name_entry): Add language field.
 	(symbol_set_names):  Revert "[gdb/symtab] Fix language of duplicate

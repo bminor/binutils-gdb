@@ -760,7 +760,9 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	      /* Do not tokenize ABI tags such as "[abi:cxx11]".  */
 	      else if (PARSER_STREAM (parser) - start > 4
 		       && startswith (PARSER_STREAM (parser) - 4, "[abi"))
-		++(PARSER_STREAM (parser));
+		{
+		  /* Nothing.  */
+		}
 
 	      /* Do not tokenify if the input length so far is one
 		 (i.e, a single-letter drive name) and the next character
@@ -861,6 +863,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    }
 
 	  /* Advance the stream.  */
+	  gdb_assert (*(PARSER_STREAM (parser)) != '\0');
 	  ++(PARSER_STREAM (parser));
 	}
     }
