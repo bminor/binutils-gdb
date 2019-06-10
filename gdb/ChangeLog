@@ -1,5 +1,12 @@
 2019-06-10  Tom de Vries  <tdevries@suse.de>
 
+	PR gdb/24618
+	* dwarf2read.c (struct mapped_index::symbol_name_slot_invalid): Make
+	sure an empty slot (defined by a 32-bit zero pair) is recognized as
+	invalid.
+
+2019-06-10  Tom de Vries  <tdevries@suse.de>
+
 	PR gdb/24611
 	* linespec.c (linespec_lexer_lex_string): Remove incorrect
 	"++(PARSER_STREAM (parser))" for "[abi"-prefixed colon.  Add assert.

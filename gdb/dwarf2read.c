@@ -212,7 +212,7 @@ struct mapped_index final : public mapped_index_base
   bool symbol_name_slot_invalid (offset_type idx) const override
   {
     const auto &bucket = this->symbol_table[idx];
-    return bucket.name == 0 && bucket.vec;
+    return bucket.name == 0 && bucket.vec == 0;
   }
 
   /* Convenience method to get at the name of the symbol at IDX in the
