@@ -1,3 +1,9 @@
+2019-07-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/printcmds.exp: Test printing C string and
+	C wide string convenience vars without transiting via the inferior.
+	Also make test names unique.
+
 2019-07-08  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.base/break-idempotent.exp: Test both PIE and non PIE.

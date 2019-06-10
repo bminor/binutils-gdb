@@ -118,6 +118,13 @@ apropos [-v] REGEXP
   of matching commands and to use the highlight style to mark
   the documentation parts matching REGEXP.
 
+printf
+eval
+  The GDB printf and eval commands can now print C-style and Ada-style
+  string convenience variables without calling functions in the program.
+  This allows to do formatted printing of strings without having
+  a running inferior, or when debugging a core dump.
+
 show style
   The "show style" and its subcommands are now styling
   a style name in their output using its own style, to help

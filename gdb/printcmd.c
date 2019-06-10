@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "language.h"
+#include "c-lang.h"
 #include "expression.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
@@ -2222,42 +2223,64 @@ print_variable_and_value (const char *name, struct symbol *var,
 
 /* Subroutine of ui_printf to simplify it.
    Print VALUE to STREAM using FORMAT.
-   VALUE is a C-style string on the target.  */
+   VALUE is a C-style string either on the target or
+   in a GDB internal variable.  */
 
 static void
 printf_c_string (struct ui_file *stream, const char *format,
 		 struct value *value)
 {
-  gdb_byte *str;
-  CORE_ADDR tem;
-  int j;
+  const gdb_byte *str;
 
-  tem = value_as_address (value);
-  if (tem == 0)
+  if (VALUE_LVAL (value) == lval_internalvar
+      && c_is_string_type_p (value_type (value)))
     {
-      DIAGNOSTIC_PUSH
-      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-      fprintf_filtered (stream, format, "(null)");
-      DIAGNOSTIC_POP
-      return;
-    }
+      size_t len = TYPE_LENGTH (value_type (value));
 
-  /* This is a %s argument.  Find the length of the string.  */
-  for (j = 0;; j++)
+      /* Copy the internal var value to TEM_STR and append a terminating null
+	 character.  This protects against corrupted C-style strings that lack
+	 the terminating null char.  It also allows Ada-style strings (not
+	 null terminated) to be printed without problems.  */
+      gdb_byte *tem_str = (gdb_byte *) alloca (len + 1);
+
+      memcpy (tem_str, value_contents (value), len);
+      tem_str [len] = 0;
+      str = tem_str;
+    }
+  else
     {
-      gdb_byte c;
+      CORE_ADDR tem = value_as_address (value);;
 
-      QUIT;
-      read_memory (tem + j, &c, 1);
-      if (c == 0)
-	break;
+      if (tem == 0)
+	{
+	  DIAGNOSTIC_PUSH
+	  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
+	  fprintf_filtered (stream, format, "(null)");
+	  DIAGNOSTIC_POP
+	  return;
+	}
+
+      /* This is a %s argument.  Find the length of the string.  */
+      size_t len;
+
+      for (len = 0;; len++)
+	{
+	  gdb_byte c;
+
+	  QUIT;
+	  read_memory (tem + len, &c, 1);
+	  if (c == 0)
+	    break;
+	}
+
+      /* Copy the string contents into a string inside GDB.  */
+      gdb_byte *tem_str = (gdb_byte *) alloca (len + 1);
+
+      if (len != 0)
+	read_memory (tem, tem_str, len);
+      tem_str[len] = 0;
+      str = tem_str;
     }
-
-  /* Copy the string contents into a string inside GDB.  */
-  str = (gdb_byte *) alloca (j + 1);
-  if (j != 0)
-    read_memory (tem, str, j);
-  str[j] = 0;
 
   DIAGNOSTIC_PUSH
   DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
@@ -2267,52 +2290,65 @@ printf_c_string (struct ui_file *stream, const char *format,
 
 /* Subroutine of ui_printf to simplify it.
    Print VALUE to STREAM using FORMAT.
-   VALUE is a wide C-style string on the target.  */
+   VALUE is a wide C-style string on the target or
+   in a GDB internal variable.  */
 
 static void
 printf_wide_c_string (struct ui_file *stream, const char *format,
 		      struct value *value)
 {
-  gdb_byte *str;
-  CORE_ADDR tem;
-  int j;
+  const gdb_byte *str;
+  size_t len;
   struct gdbarch *gdbarch = get_type_arch (value_type (value));
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *wctype = lookup_typename (current_language, gdbarch,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
-  gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
 
-  tem = value_as_address (value);
-  if (tem == 0)
+  if (VALUE_LVAL (value) == lval_internalvar
+      && c_is_string_type_p (value_type (value)))
     {
-      DIAGNOSTIC_PUSH
-      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-      fprintf_filtered (stream, format, "(null)");
-      DIAGNOSTIC_POP
-      return;
+      str = value_contents (value);
+      len = TYPE_LENGTH (value_type (value));
     }
-
-  /* This is a %s argument.  Find the length of the string.  */
-  for (j = 0;; j += wcwidth)
+  else
     {
-      QUIT;
-      read_memory (tem + j, buf, wcwidth);
-      if (extract_unsigned_integer (buf, wcwidth, byte_order) == 0)
-	break;
-    }
+      CORE_ADDR tem = value_as_address (value);
 
-  /* Copy the string contents into a string inside GDB.  */
-  str = (gdb_byte *) alloca (j + wcwidth);
-  if (j != 0)
-    read_memory (tem, str, j);
-  memset (&str[j], 0, wcwidth);
+      if (tem == 0)
+	{
+	  DIAGNOSTIC_PUSH
+	  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
+	  fprintf_filtered (stream, format, "(null)");
+	  DIAGNOSTIC_POP
+	  return;
+	}
+
+      /* This is a %s argument.  Find the length of the string.  */
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
+
+      for (len = 0;; len += wcwidth)
+	{
+	  QUIT;
+	  read_memory (tem + len, buf, wcwidth);
+	  if (extract_unsigned_integer (buf, wcwidth, byte_order) == 0)
+	    break;
+	}
+
+      /* Copy the string contents into a string inside GDB.  */
+      gdb_byte *tem_str = (gdb_byte *) alloca (len + wcwidth);
+
+      if (len != 0)
+	read_memory (tem, tem_str, len);
+      memset (&tem_str[len], 0, wcwidth);
+      str = tem_str;
+    }
 
   auto_obstack output;
 
   convert_between_encodings (target_wide_charset (gdbarch),
 			     host_charset (),
-			     str, j, wcwidth,
+			     str, len, wcwidth,
 			     &output, translit_char);
   obstack_grow_str0 (&output, "");
 

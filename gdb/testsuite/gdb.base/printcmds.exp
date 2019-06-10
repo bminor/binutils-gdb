@@ -438,7 +438,7 @@ proc test_print_repeats_10 {} {
     global gdb_prompt decimal
 
     for { set x 1 } { $x <= 16 } { incr x } {
-	gdb_test_no_output "set print elements $x"
+	gdb_test_no_output "set print elements $x" "elements $x repeats"
 	for { set e 1 } { $e <= 16 } {incr e } {
 	    set v [expr $e - 1]
 	    set command "p &ctable2\[${v}*16\]"
@@ -596,7 +596,7 @@ proc test_print_strings {} {
 proc test_print_int_arrays {} {
     global gdb_prompt
 
-    gdb_test_no_output "set print elements 24"
+    gdb_test_no_output "set print elements 24" "elements 24 int arrays"
 
     gdb_test_escape_braces "p int1dim" \
 	" = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}"
@@ -621,7 +621,7 @@ proc test_print_int_arrays {} {
 proc test_print_typedef_arrays {} {
     global gdb_prompt
 
-    gdb_test_no_output "set print elements 24"
+    gdb_test_no_output "set print elements 24" "elements 24 typedef_arrays"
 
     gdb_test_escape_braces "p a1" \
 	" = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}"
@@ -666,7 +666,7 @@ proc test_print_char_arrays {} {
     global gdb_prompt
     global hex decimal
 
-    gdb_test_no_output "set print elements 24"
+    gdb_test_no_output "set print elements 24" "elements 24 char_arrays"
     gdb_test_no_output "set print address on"
 
     gdb_test "p arrays" \
@@ -684,7 +684,7 @@ proc test_print_char_arrays {} {
     gdb_test "p parrays->array5"	" = \"hij\""
     gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex <arrays\\+$decimal>"
 
-    gdb_test_no_output "set print address off"
+    gdb_test_no_output "set print address off" "address off char arrays"
 }
 
 proc test_print_string_constants {} {
@@ -932,6 +932,42 @@ proc test_repeat_bytes {} {
     }
 }
 
+# Test printf of convenience variables.
+# These tests can be done with or without a running inferior.
+# PREFIX ensures uniqueness of test names.
+# DO_WSTRING 1 tells to test printf of wide strings.  Wide strings tests
+# must be skipped (DO_WSTRING 0) if the wchar_t type is not yet known by
+# GDB, as this type is needed to create wide strings.
+
+proc test_printf_convenience_var {prefix do_wstring} {
+
+    with_test_prefix "conv var: $prefix" {
+	gdb_test_no_output "set var \$cstr = \"abcde\"" "set \$cstr"
+	gdb_test "printf \"cstr val = %s\\n\", \$cstr" "cstr val = abcde" \
+	    "printf \$cstr"
+	gdb_test_no_output "set var \$abcde = \"ABCDE\"" "set \$abcde"
+	gdb_test "eval \"print \$%s\\n\", \$cstr" "= \"ABCDE\"" \
+	    "indirect print abcde"
+	# Without a target, the below produces no output
+	# but with a target, it gives a warning.
+	# So, use gdb_test expecting ".*" instead of gdb_test_no_output.
+	gdb_test "set language ada" ".*" "set language ada"
+	gdb_test_no_output "set var \$astr := \"fghij\"" "set \$astr"
+	gdb_test "printf \"astr val = %s\\n\", \$astr" "astr val = fghij" \
+	    "printf \$astr"
+	gdb_test_no_output "set language auto" "set language auto"
+	gdb_test "printf \"astr val = %s\\n\", \$astr" "astr val = fghij" \
+	    "printf \$astr, auto language"
+	if {$do_wstring} {
+	    gdb_test_no_output "set var \$wstr = L\"facile\"" \
+		"set \$wstr"
+	    gdb_test "printf \"wstr val = %ls\\n\", \$wstr" \
+		"wstr val = facile" "printf \$wstr"
+	}
+    }
+}
+
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -947,6 +983,11 @@ gdb_test "print sizeof (\"abc\")" " = 4"
 gdb_test "ptype \"abc\"" " = char \\\[4\\\]"
 gdb_test "print \$cvar = \"abc\"" " = \"abc\""
 gdb_test "print sizeof (\$cvar)" " = 4"
+
+# Similarly, printf of a string convenience var should work without a target.
+# At this point, we cannot create a wide string convenience var, as the
+# wchar_t type is not yet known, so skip the wide string tests.
+test_printf_convenience_var "no target" 0
 
 # GDB used to complete the explicit location options even when
 # printing expressions.
@@ -976,6 +1017,14 @@ if ![runto_main] then {
     fail "can't run to main"
     return 0
 }
+
+# With a running target, printf convenience vars should of course work.
+test_printf_convenience_var "with target" 1
+
+# It should also work when inferior function calls are forbidden.
+gdb_test_no_output "set may-call-functions off"
+test_printf_convenience_var "with target, may-call-functions off" 1
+gdb_test_no_output "set may-call-functions on"
 
 test_integer_literals_accepted
 test_integer_literals_rejected

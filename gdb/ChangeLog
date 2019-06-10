@@ -1,4 +1,13 @@
-2019-08-04  Alan Hayward  <alan.hayward@arm.com>
+2019-07-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Mention that GDB printf and eval commands can now print
+	C-style and Ada-style convenience var strings without
+	calling the inferior.
+	* printcmd.c (printf_c_string): Locally print GDB internal var
+	instead of transiting via the inferior.
+	(printf_wide_c_string): Likewise.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* symfile.c (symbol_file_command): Call solib_create_inferior_hook.
 
