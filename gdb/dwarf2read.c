@@ -13746,6 +13746,10 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   newobj->name = new_symbol (die, read_type_die (die, cu), cu,
 			     (struct symbol *) templ_func);
 
+  if (dwarf2_flag_true_p (die, DW_AT_main_subprogram, cu))
+    set_objfile_main_name (objfile, SYMBOL_LINKAGE_NAME (newobj->name),
+			   cu->language);
+
   /* If there is a location expression for DW_AT_frame_base, record
      it.  */
   attr = dwarf2_attr (die, DW_AT_frame_base, cu);

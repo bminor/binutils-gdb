@@ -1,3 +1,9 @@
+2019-06-10  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/16264
+	PR symtab/24517
+	* dwarf2read.c (read_func_scope): Handle DW_AT_main_subprogram.
+
 2019-06-06  Руслан Ижбулатов <lrn1986@gmail.com>
 
 	* source.c (find_and_open_source): Also rewrite relative file
