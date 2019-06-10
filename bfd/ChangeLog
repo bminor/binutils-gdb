@@ -1,3 +1,9 @@
+2019-06-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_local_dynrelocs): Remove.
+	(elfNN_aarch64_size_dynamic_sections): Remove loc_hash_table traversal
+	with elfNN_aarch64_allocate_local_dynrelocs.
+
 2019-06-14  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* elfnn-aarch64.c: Enable MOVW_PREL relocs for ELF32.

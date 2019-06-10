@@ -8861,25 +8861,6 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
-   local dynamic relocs.  */
-
-static bfd_boolean
-elfNN_aarch64_allocate_local_dynrelocs (void **slot, void *inf)
-{
-  struct elf_link_hash_entry *h
-    = (struct elf_link_hash_entry *) *slot;
-
-  if (h->type != STT_GNU_IFUNC
-      || !h->def_regular
-      || !h->ref_regular
-      || !h->forced_local
-      || h->root.type != bfd_link_hash_defined)
-    abort ();
-
-  return elfNN_aarch64_allocate_dynrelocs (h, inf);
-}
-
-/* Allocate space in .plt, .got and associated reloc sections for
    local ifunc dynamic relocs.  */
 
 static bfd_boolean
@@ -9065,11 +9046,6 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      ifunc sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->root, elfNN_aarch64_allocate_ifunc_dynrelocs,
 			  info);
-
-  /* Allocate .plt and .got entries, and space for local symbols.  */
-  htab_traverse (htab->loc_hash_table,
-		 elfNN_aarch64_allocate_local_dynrelocs,
-		 info);
 
   /* Allocate .plt and .got entries, and space for local ifunc symbols.  */
   htab_traverse (htab->loc_hash_table,
