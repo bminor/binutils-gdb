@@ -687,7 +687,6 @@ darwin_decode_exception_message (mach_msg_header_t *hdr,
       /* Not a known inferior.  This could happen if the child fork, as
 	 the created process will inherit its exception port.
 	 FIXME: should the exception port be restored ?  */
-      kern_return_t kret;
       mig_reply_error_t reply;
 
       inferior_debug
@@ -1125,14 +1124,14 @@ darwin_decode_message (mach_msg_header_t *hdr,
 
 	  if (!priv->no_ptrace)
 	    {
-	      pid_t res;
+	      pid_t res_pid;
 	      int wstatus;
 
-	      res = wait4 (inf->pid, &wstatus, 0, NULL);
-	      if (res < 0 || res != inf->pid)
+	      res_pid = wait4 (inf->pid, &wstatus, 0, NULL);
+	      if (res_pid < 0 || res_pid != inf->pid)
 		{
 		  printf_unfiltered (_("wait4: res=%d: %s\n"),
-				     res, safe_strerror (errno));
+				     res_pid, safe_strerror (errno));
 		  status->kind = TARGET_WAITKIND_IGNORE;
 		  return minus_one_ptid;
 		}
@@ -1148,7 +1147,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 		}
 
 	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
-			      res, wstatus);
+			      res_pid, wstatus);
 
 	      /* Looks necessary on Leopard and harmless...  */
 	      wait4 (inf->pid, &wstatus, 0, NULL);
@@ -1559,7 +1558,6 @@ darwin_nat_target::kill ()
          signaled thus darwin_decode_message function knows that the kill
          signal was sent by gdb and will take the appropriate action
          (cancel signal and reply to the signal message).  */
-      darwin_inferior *priv = get_darwin_inferior (inf);
       for (darwin_thread_t *thread : priv->threads)
         thread->signaled = 1;
 

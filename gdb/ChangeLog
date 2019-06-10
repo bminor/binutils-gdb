@@ -1,3 +1,8 @@
+2019-06-11  Tom Tromey  <tromey@adacore.com>
+
+	* darwin-nat.c (darwin_decode_exception_message)
+	(darwin_decode_message, darwin_nat_target::kill): Fix shadowing.
+
 2019-06-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* valops.c (value_slice): Check for not allocated or not
