@@ -1,3 +1,9 @@
+2019-06-10  Christos Zoulas  <christos@zoulas.com>
+
+	PR 24649
+	* arsup.c (ar_open): Use asprintf in place of xmalloc and
+	sprintf.
+
 2019-06-03  Nick Clifton  <nickc@redhat.com>
 
 	Revert:
