@@ -1,5 +1,11 @@
 2019-06-10  Christos Zoulas  <christos@zoulas.com>
 
+	PR 24651
+	* strings.c (print_strings): Use %u to print unsigned values in
+	decimal.
+
+2019-06-10  Christos Zoulas  <christos@zoulas.com>
+
 	PR 24649
 	* arsup.c (ar_open): Use asprintf in place of xmalloc and
 	sprintf.

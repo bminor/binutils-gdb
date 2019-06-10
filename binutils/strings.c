@@ -633,7 +633,7 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    if (sizeof (start) > sizeof (long))
 	      {
 # ifndef __MSVCRT__
-		printf ("%7lld ", (unsigned long long) start);
+		printf ("%7llu ", (unsigned long long) start);
 # else
 		printf ("%7I64d ", (unsigned long long) start);
 # endif
@@ -641,7 +641,7 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    else
 #elif !BFD_HOST_64BIT_LONG
 	      if (start != (unsigned long) start)
-		printf ("++%7ld ", (unsigned long) start);
+		printf ("++%7lu ", (unsigned long) start);
 	      else
 #endif
 		printf ("%7ld ", (long) start);
