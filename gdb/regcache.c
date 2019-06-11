@@ -454,13 +454,6 @@ void
 registers_changed (void)
 {
   registers_changed_ptid (minus_one_ptid);
-
-  /* Force cleanup of any alloca areas if using C alloca instead of
-     a builtin alloca.  This particular call is used to clean up
-     areas allocated by low level target code which may build up
-     during lengthy interactions between gdb and the target before
-     gdb gives control to the user (ie watchpoints).  */
-  alloca (0);
 }
 
 void

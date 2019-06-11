@@ -560,10 +560,6 @@ execute_command (const char *p, int from_tty)
   auto cleanup_if_error = make_scope_exit (bpstat_clear_actions);
   scoped_value_mark cleanup = prepare_execute_command ();
 
-  /* Force cleanup of any alloca areas if using C alloca instead of
-     a builtin alloca.  */
-  alloca (0);
-
   /* This can happen when command_line_input hits end of file.  */
   if (p == NULL)
     {
