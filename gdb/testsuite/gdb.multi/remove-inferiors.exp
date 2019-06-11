@@ -49,8 +49,9 @@ proc test_remove_inferiors { } {
     # Load binfile and start the inferior.
     set binfile_re [string_to_regexp ${binfile}]
     gdb_test "file ${binfile}" \
-	     "Reading symbols from ${binfile_re}..." \
-	     "load binary"
+	[multi_line "Reading symbols from ${binfile_re}\.\.\.(" \
+	     "Expanding full symbols from ${binfile_re}\.\.\.)?" ] \
+	"load binary"
 
     if {![runto_main]} {
 	fail "couldn't run to main."

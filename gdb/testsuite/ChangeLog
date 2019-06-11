@@ -1,6 +1,12 @@
 2019-06-11  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24521
+	* gdb.multi/remove-inferiors.exp: Allow "Expanding full symbols"
+	message.
+
+2019-06-11  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24521
 	* gdb.dwarf2/nonvar-access.exp: Fix main high_pc.
 
 2019-06-11  Tom de Vries  <tdevries@suse.de>
