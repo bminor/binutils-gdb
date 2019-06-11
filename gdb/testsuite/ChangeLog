@@ -1,3 +1,7 @@
+2019-06-11  Tom de Vries  <tdevries@suse.de>
+
+	* boards/readnow.exp: New file.
+
 2019-06-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/vla-sizeof.exp: Update expected results.
