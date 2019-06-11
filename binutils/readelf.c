@@ -11135,6 +11135,19 @@ get_symbol_visibility (unsigned int visibility)
 }
 
 static const char *
+get_alpha_symbol_other (unsigned int other)
+{   
+  switch (other)
+    {
+    case STO_ALPHA_NOPV:       return "NOPV";
+    case STO_ALPHA_STD_GPLOAD: return "STD GPLOAD";
+    default:
+      error (_("Unrecognized alpah specific other value: %u"), other);
+      return _("<unknown>");
+    } 
+}
+
+static const char *
 get_solaris_symbol_visibility (unsigned int visibility)
 {
   switch (visibility)
@@ -11273,6 +11286,9 @@ get_symbol_other (Filedata * filedata, unsigned int other)
 
   switch (filedata->file_header.e_machine)
     {
+    case EM_ALPHA:
+      result = get_alpha_symbol_other (other);
+      break;
     case EM_AARCH64:
       result = get_aarch64_symbol_other (other);
       break;
@@ -12722,6 +12738,8 @@ is_32bit_pcrel_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_L1OM:
     case EM_K1OM:
       return reloc_type == 2;  /* R_X86_64_PC32.  */
+    case EM_VAX:
+      return reloc_type == 4;  /* R_VAX_PCREL32.  */
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return reloc_type == 14; /* R_XTENSA_32_PCREL.  */

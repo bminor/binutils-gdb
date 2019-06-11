@@ -1,5 +1,12 @@
 2019-06-11  Christos Zoulas  <christos@zoulas.com>
 
+	PR 24662
+	* readelf.c (get_alpha_symbol_other): New function.
+	(get_symbol_other): Use for Alpha symbols.
+	(is_32bit_pcrel_reloc): Add R_VAX_PCREL32.
+
+2019-06-11  Christos Zoulas  <christos@zoulas.com>
+
 	PR 24661
 	* readelf.c (decode_arm_unwind): Ensure that the local variable
 	'addr' is always initialised.
