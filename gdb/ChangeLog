@@ -1,5 +1,15 @@
 2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linespec.c (decode_digits_list_mode): Set explicit_line to a
+	bool value.
+	(decode_digits_ordinary): Set explicit_line field in sal.
+	* symtab.c (skip_prologue_sal): Don't skip prologue for a
+	symtab_and_line that was set on an explicit line number in
+	assembler code.  Do always update the recorded symtab and line if
+	we do skip the prologue.
+
+2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (set_breakpoint_location_function): Remove
 	explicit_loc parameter.
 	(momentary_breakpoint_from_master): Update call to

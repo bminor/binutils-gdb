@@ -3673,8 +3673,10 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
 
 /* Adjust SAL to the first instruction past the function prologue.
    If the PC was explicitly specified, the SAL is not changed.
-   If the line number was explicitly specified, at most the SAL's PC
-   is updated.  If SAL is already past the prologue, then do nothing.  */
+   If the line number was explicitly specified then the SAL can still be
+   updated, unless the language for SAL is assembler, in which case the SAL
+   will be left unchanged.
+   If SAL is already past the prologue, then do nothing.  */
 
 void
 skip_prologue_sal (struct symtab_and_line *sal)
@@ -3691,6 +3693,15 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   /* Do not change the SAL if PC was specified explicitly.  */
   if (sal->explicit_pc)
+    return;
+
+  /* In assembly code, if the user asks for a specific line then we should
+     not adjust the SAL.  The user already has instruction level
+     visibility in this case, so selecting a line other than one requested
+     is likely to be the wrong choice.  */
+  if (sal->symtab != nullptr
+      && sal->explicit_line
+      && SYMTAB_LANGUAGE (sal->symtab) == language_asm)
     return;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
@@ -3812,12 +3823,6 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   sal->pc = pc;
   sal->section = section;
-
-  /* Unless the explicit_line flag was set, update the SAL line
-     and symtab to correspond to the modified PC location.  */
-  if (sal->explicit_line)
-    return;
-
   sal->symtab = start_sal.symtab;
   sal->line = start_sal.line;
   sal->end = start_sal.end;

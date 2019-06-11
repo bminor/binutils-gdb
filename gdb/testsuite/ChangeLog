@@ -1,3 +1,8 @@
+2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/amd64-break-on-asm-line.S: New file.
+	* gdb.arch/amd64-break-on-asm-line.exp: New file.
+
 2019-07-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/printcmds.exp: Test printing C string and
