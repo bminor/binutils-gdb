@@ -9029,6 +9029,11 @@ decode_arm_unwind (Filedata *                 filedata,
 
       remaining = 4;
     }
+  else
+    {
+      addr.section = SHN_UNDEF;
+      addr.offset = 0;
+    }
 
   if ((word & 0x80000000) == 0)
     {
