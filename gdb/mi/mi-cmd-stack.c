@@ -39,7 +39,8 @@
 
 enum what_to_list { locals, arguments, all };
 
-static void list_args_or_locals (enum what_to_list what,
+static void list_args_or_locals (const frame_print_options &fp_opts,
+				 enum what_to_list what,
 				 enum print_values values,
 				 struct frame_info *fi,
 				 int skip_unavailable);
@@ -175,7 +176,8 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 	  QUIT;
 	  /* Print the location and the address always, even for level 0.
 	     If args is 0, don't print the arguments.  */
-	  print_frame_info (fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
+	  print_frame_info (user_frame_print_options,
+			    fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
 	}
     }
 }
@@ -275,7 +277,8 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
       if "--no-frame-filters" has been specified from the command.  */
    if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
      {
-       list_args_or_locals (locals, print_value, frame,
+       list_args_or_locals (user_frame_print_options,
+			    locals, print_value, frame,
 			    skip_unavailable);
      }
 }
@@ -389,7 +392,8 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 	  QUIT;
 	  ui_out_emit_tuple tuple_emitter (uiout, "frame");
 	  uiout->field_int ("level", i);
-	  list_args_or_locals (arguments, print_values, fi, skip_unavailable);
+	  list_args_or_locals (user_frame_print_options,
+			       arguments, print_values, fi, skip_unavailable);
 	}
     }
 }
@@ -465,7 +469,8 @@ mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
       if "--no-frame-filters" has been specified from the command.  */
    if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
      {
-       list_args_or_locals (all, print_value, frame,
+       list_args_or_locals (user_frame_print_options,
+			    all, print_value, frame,
 			    skip_unavailable);
      }
 }
@@ -557,7 +562,8 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
    are available.  */
 
 static void
-list_args_or_locals (enum what_to_list what, enum print_values values,
+list_args_or_locals (const frame_print_options &fp_opts,
+		     enum what_to_list what, enum print_values values,
 		     struct frame_info *fi, int skip_unavailable)
 {
   const struct block *block;
@@ -652,7 +658,7 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 		    {
 		case PRINT_ALL_VALUES:
 		  if (SYMBOL_IS_ARGUMENT (sym))
-		    read_frame_arg (sym2, fi, &arg, &entryarg);
+		    read_frame_arg (fp_opts, sym2, fi, &arg, &entryarg);
 		  else
 		    read_frame_local (sym2, fi, &arg);
 		    }
@@ -764,5 +770,6 @@ mi_cmd_stack_info_frame (const char *command, char **argv, int argc)
   if (argc > 0)
     error (_("-stack-info-frame: No arguments allowed"));
 
-  print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0, 1);
+  print_frame_info (user_frame_print_options,
+		    get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0, 1);
 }

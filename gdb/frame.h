@@ -70,6 +70,7 @@
    */
 
 #include "language.h"
+#include "cli/cli-option.h"
 
 struct symtab_and_line;
 struct frame_unwind;
@@ -78,6 +79,7 @@ struct block;
 struct gdbarch;
 struct ui_file;
 struct ui_out;
+struct frame_print_options;
 
 /* Status of a given frame's stack.  */
 
@@ -753,7 +755,8 @@ extern void print_stack_frame (struct frame_info *, int print_level,
 			       enum print_what print_what,
 			       int set_current_sal);
 
-extern void print_frame_info (struct frame_info *, int print_level,
+extern void print_frame_info (const frame_print_options &fp_opts,
+			      struct frame_info *, int print_level,
 			      enum print_what print_what, int args,
 			      int set_current_sal);
 
@@ -764,6 +767,12 @@ extern int deprecated_frame_register_read (struct frame_info *frame, int regnum,
 
 /* From stack.c.  */
 
+/* The possible choices of "set print frame-arguments".  */
+extern const char print_frame_arguments_all[];
+extern const char print_frame_arguments_scalars[];
+extern const char print_frame_arguments_none[];
+
+/* The possible choices of "set print entry-values".  */
 extern const char print_entry_values_no[];
 extern const char print_entry_values_only[];
 extern const char print_entry_values_preferred[];
@@ -771,7 +780,22 @@ extern const char print_entry_values_if_needed[];
 extern const char print_entry_values_both[];
 extern const char print_entry_values_compact[];
 extern const char print_entry_values_default[];
-extern const char *print_entry_values;
+
+/* Data for the frame-printing "set print" settings exposed as command
+   options.  */
+
+struct frame_print_options
+{
+  const char *print_frame_arguments = print_frame_arguments_scalars;
+  const char *print_entry_values = print_entry_values_default;
+
+  /* If non-zero, don't invoke pretty-printers for frame
+     arguments.  */
+  int print_raw_frame_arguments;
+};
+
+/* The values behind the global "set print ..." settings.  */
+extern frame_print_options user_frame_print_options;
 
 /* Inferior function parameter value read in from a frame.  */
 
@@ -800,7 +824,8 @@ struct frame_arg
   const char *entry_kind;
 };
 
-extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
+extern void read_frame_arg (const frame_print_options &fp_opts,
+			    symbol *sym, frame_info *frame,
 			    struct frame_arg *argp,
 			    struct frame_arg *entryargp);
 extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
@@ -880,5 +905,29 @@ extern struct frame_info *skip_tailcall_frames (struct frame_info *frame);
    writable.  */
 
 extern struct frame_info *skip_unwritable_frames (struct frame_info *frame);
+
+/* Data for the "set backtrace" settings.  */
+
+struct set_backtrace_options
+{
+  /* Flag to indicate whether backtraces should continue past
+     main.  */
+  int backtrace_past_main = 0;
+
+  /* Flag to indicate whether backtraces should continue past
+     entry.  */
+  int backtrace_past_entry = 0;
+
+  /* Upper bound on the number of backtrace levels.  Note this is not
+     exposed as a command option, because "backtrace" and "frame
+     apply" already have other means to set a frame count limit.  */
+  unsigned int backtrace_limit = UINT_MAX;
+};
+
+/* The corresponding option definitions.  */
+extern const gdb::option::option_def set_backtrace_option_defs[2];
+
+/* The values behind the global "set backtrace ..." settings.  */
+extern set_backtrace_options user_set_backtrace_options;
 
 #endif /* !defined (FRAME_H)  */

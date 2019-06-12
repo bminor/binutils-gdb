@@ -1,5 +1,57 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* frame.c: Include "cli/cli-option.h.
+	(user_set_backtrace_options): New.
+	(backtrace_past_main, backtrace_past_entry, backtrace_limit):
+	Delete.
+	(get_prev_frame): Adjust.
+	(boolean_option_def, uinteger_option_def)
+	(set_backtrace_option_defs): New.
+	(_initialize_frame): Adjust and use
+	gdb::option::add_setshow_cmds_for_options to install "set
+	backtrace past-main" and "set backtrace past-entry".
+	* frame.h: Include "cli/cli-option.h".
+	(struct frame_print_options): Forward declare.
+	(print_frame_arguments_all, print_frame_arguments_scalars)
+	(print_frame_arguments_none): Declare.
+	(print_entry_values): Delete declaration.
+	(struct frame_print_options, user_frame_print_options): New.
+	(struct set_backtrace_options): New.
+	(set_backtrace_option_defs, user_set_backtrace_options): Declare.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_list_locals, mi_cmd_stack_list_args)
+	(mi_cmd_stack_list_variables): Pass down USER_FRAME_PRINT_OPTIONS.
+	(list_args_or_locals): Add frame_print_options parameter.
+	(mi_cmd_stack_info_frame): Pass down USER_FRAME_PRINT_OPTIONS.
+	* python/py-framefilter.c (enumerate_args): Pass down
+	USER_FRAME_PRINT_OPTIONS.
+	* stack.c: Include "cli/cli-option.h".
+	(print_frame_arguments_all, print_frame_arguments_scalars)
+	(print_frame_arguments_none): Declare.
+	(print_raw_frame_arguments, print_entry_values): Delete.
+	(user_frame_print_options): New.
+	(boolean_option_def, enum_option_def, frame_print_option_defs):
+	New.
+	(struct backtrace_cmd_options): New.
+	(bt_flag_option_def): New.
+	(backtrace_command_option_defs): New.
+	(print_stack_frame): Pass down USER_FRAME_PRINT_OPTIONS.
+	(print_frame_arg, read_frame_arg, print_frame_args)
+	(print_frame_info, print_frame): Add frame_print_options parameter
+	and use it.
+	(info_frame_command_core): Pass down USER_FRAME_PRINT_OPTIONS.
+	(backtrace_command_1): Add frame_print_options and
+	backtrace_cmd_options parameters and use them.
+	(make_backtrace_options_def_group): New.
+	(backtrace_command): Process command options with
+	gdb::option::process_options.
+	(backtrace_command_completer): New.
+	(_initialize_stack): Extend "backtrace"'s help to mention
+	supported options.  Install completer for "backtrace".
+	Install some settings commands with add_setshow_cmds_for_options.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (Changed commands): Mention set/show print raw-frame-arguments,
 	and that "set/show print raw frame-arguments" are now deprecated.
 

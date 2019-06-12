@@ -481,7 +481,8 @@ enumerate_args (PyObject *iter,
 	      return EXT_LANG_BT_ERROR;
 	    }
 
-	  read_frame_arg (sym, frame, &arg, &entryarg);
+	  read_frame_arg (user_frame_print_options,
+			  sym, frame, &arg, &entryarg);
 
 	  gdb::unique_xmalloc_ptr<char> arg_holder (arg.error);
 	  gdb::unique_xmalloc_ptr<char> entry_holder (entryarg.error);

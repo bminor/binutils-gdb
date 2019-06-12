@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (test-backtrace): New.
+	(top level): Call it.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.guile/scm-frame-args.exp: Use "set print
 	raw-frame-arguments" instead of "set print raw frame-arguments".
 	* gdb.python/py-frame-args.exp: Likewise.

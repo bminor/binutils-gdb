@@ -42,6 +42,7 @@
 #include "tracepoint.h"
 #include "hashtab.h"
 #include "valprint.h"
+#include "cli/cli-option.h"
 
 /* The sentinel frame terminates the innermost end of the frame chain.
    If unwound, it returns the information needed to construct an
@@ -51,6 +52,9 @@
    sentinel_frame->prev.  */
 
 static struct frame_info *sentinel_frame;
+
+/* The values behind the global "set backtrace ..." settings.  */
+set_backtrace_options user_set_backtrace_options;
 
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
 static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
@@ -295,9 +299,8 @@ show_frame_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Frame debugging is %s.\n"), value);
 }
 
-/* Flag to indicate whether backtraces should stop at main et.al.  */
+/* Implementation of "show backtrace past-main".  */
 
-static int backtrace_past_main;
 static void
 show_backtrace_past_main (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
@@ -308,7 +311,8 @@ show_backtrace_past_main (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int backtrace_past_entry;
+/* Implementation of "show backtrace past-entry".  */
+
 static void
 show_backtrace_past_entry (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
@@ -318,7 +322,8 @@ show_backtrace_past_entry (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static unsigned int backtrace_limit = UINT_MAX;
+/* Implementation of "show backtrace limit".  */
+
 static void
 show_backtrace_limit (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -2276,7 +2281,7 @@ get_prev_frame (struct frame_info *this_frame)
      point inside the main function.  */
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
-      && !backtrace_past_main
+      && !user_set_backtrace_options.backtrace_past_main
       && frame_pc_p
       && inside_main_func (this_frame))
     /* Don't unwind past main().  Note, this is done _before_ the
@@ -2293,7 +2298,7 @@ get_prev_frame (struct frame_info *this_frame)
      being 1-based and the level being 0-based, and the other accounts for
      the level of the new frame instead of the level of the current
      frame.  */
-  if (this_frame->level + 2 > backtrace_limit)
+  if (this_frame->level + 2 > user_set_backtrace_options.backtrace_limit)
     {
       frame_debug_got_null_frame (this_frame, "backtrace limit exceeded");
       return NULL;
@@ -2323,7 +2328,7 @@ get_prev_frame (struct frame_info *this_frame)
      application.  */
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
-      && !backtrace_past_entry
+      && !user_set_backtrace_options.backtrace_past_entry
       && frame_pc_p
       && inside_entry_func (this_frame))
     {
@@ -2896,6 +2901,39 @@ show_backtrace_cmd (const char *args, int from_tty)
   cmd_show_list (show_backtrace_cmdlist, from_tty, "");
 }
 
+/* Definition of the "set backtrace" settings that are exposed as
+   "backtrace" command options.  */
+
+using boolean_option_def
+  = gdb::option::boolean_option_def<set_backtrace_options>;
+using uinteger_option_def
+  = gdb::option::uinteger_option_def<set_backtrace_options>;
+
+const gdb::option::option_def set_backtrace_option_defs[] = {
+
+  boolean_option_def {
+    "past-main",
+    [] (set_backtrace_options *opt) { return &opt->backtrace_past_main; },
+    show_backtrace_past_main, /* show_cmd_cb */
+    N_("Set whether backtraces should continue past \"main\"."),
+    N_("Show whether backtraces should continue past \"main\"."),
+    N_("Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this if you need to see the rest\n\
+of the stack trace."),
+  },
+
+  boolean_option_def {
+    "past-entry",
+    [] (set_backtrace_options *opt) { return &opt->backtrace_past_entry; },
+    show_backtrace_past_entry, /* show_cmd_cb */
+    N_("Set whether backtraces should continue past the entry point of a program."),
+    N_("Show whether backtraces should continue past the entry point of a program."),
+    N_("Normally there are no callers beyond the entry point of a program, so GDB\n\
+will terminate the backtrace there.  Set this if you need to see\n\
+the rest of the stack trace."),
+  },
+};
+
 void
 _initialize_frame (void)
 {
@@ -2916,34 +2954,8 @@ Show backtrace variables such as the backtrace limit"),
 		  &show_backtrace_cmdlist, "show backtrace ",
 		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_boolean_cmd ("past-main", class_obscure,
-			   &backtrace_past_main, _("\
-Set whether backtraces should continue past \"main\"."), _("\
-Show whether backtraces should continue past \"main\"."), _("\
-Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
-the backtrace at \"main\".  Set this variable if you need to see the rest\n\
-of the stack trace."),
-			   NULL,
-			   show_backtrace_past_main,
-			   &set_backtrace_cmdlist,
-			   &show_backtrace_cmdlist);
-
-  add_setshow_boolean_cmd ("past-entry", class_obscure,
-			   &backtrace_past_entry, _("\
-Set whether backtraces should continue past the entry point of a program."),
-			   _("\
-Show whether backtraces should continue past the entry point of a program."),
-			   _("\
-Normally there are no callers beyond the entry point of a program, so GDB\n\
-will terminate the backtrace there.  Set this variable if you need to see\n\
-the rest of the stack trace."),
-			   NULL,
-			   show_backtrace_past_entry,
-			   &set_backtrace_cmdlist,
-			   &show_backtrace_cmdlist);
-
   add_setshow_uinteger_cmd ("limit", class_obscure,
-			    &backtrace_limit, _("\
+			    &user_set_backtrace_options.backtrace_limit, _("\
 Set an upper bound on the number of backtrace levels."), _("\
 Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
@@ -2952,6 +2964,10 @@ Literal \"unlimited\" or zero means no limit."),
 			    show_backtrace_limit,
 			    &set_backtrace_cmdlist,
 			    &show_backtrace_cmdlist);
+
+  gdb::option::add_setshow_cmds_for_options
+    (class_stack, &user_set_backtrace_options,
+     set_backtrace_option_defs, &set_backtrace_cmdlist, &show_backtrace_cmdlist);
 
   /* Debug this files internals.  */
   add_setshow_zuinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
