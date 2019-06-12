@@ -1,5 +1,9 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (test-backtrace): Test completing qualifiers.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.exp (test-backtrace): New.
 	(top level): Call it.
 

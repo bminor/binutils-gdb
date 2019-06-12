@@ -256,6 +256,17 @@ proc_with_prefix test-backtrace {} {
 	"-raw-frame-arguments"
     }
 
+    # Test that we complete the qualifiers, if there's any.
+    test_gdb_complete_unique \
+	"backtrace ful" \
+	"backtrace full"
+    test_gdb_complete_unique \
+	"backtrace hid" \
+	"backtrace hide"
+    test_gdb_complete_unique \
+	"backtrace no-fil" \
+	"backtrace no-filters"
+
     global binfile
     clean_restart $binfile
 

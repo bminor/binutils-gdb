@@ -2027,6 +2027,45 @@ make_backtrace_options_def_group (frame_print_options *fp_opts,
   }};
 }
 
+/* Parse the backtrace command's qualifiers.  Returns ARG advanced
+   past the qualifiers, if any.  BT_CMD_OPTS, if not null, is used to
+   store the parsed qualifiers.  */
+
+static const char *
+parse_backtrace_qualifiers (const char *arg,
+			    backtrace_cmd_options *bt_cmd_opts = nullptr)
+{
+  while (true)
+    {
+      const char *save_arg = arg;
+      std::string this_arg = extract_arg (&arg);
+
+      if (this_arg.empty ())
+	return arg;
+
+      if (subset_compare (this_arg.c_str (), "no-filters"))
+	{
+	  if (bt_cmd_opts != nullptr)
+	    bt_cmd_opts->no_filters = true;
+	}
+      else if (subset_compare (this_arg.c_str (), "full"))
+	{
+	  if (bt_cmd_opts != nullptr)
+	    bt_cmd_opts->full = true;
+	}
+      else if (subset_compare (this_arg.c_str (), "hide"))
+	{
+	  if (bt_cmd_opts != nullptr)
+	    bt_cmd_opts->hide = true;
+	}
+      else
+	{
+	  /* Not a recognized qualifier, so stop.  */
+	  return save_arg;
+	}
+    }
+}
+
 static void
 backtrace_command (const char *arg, int from_tty)
 {
@@ -2043,28 +2082,7 @@ backtrace_command (const char *arg, int from_tty)
      compatibility.  */
   if (arg != NULL)
     {
-      while (true)
-	{
-	  const char *save_arg = arg;
-	  std::string this_arg = extract_arg (&arg);
-
-	  if (this_arg.empty ())
-	    break;
-
-	  if (subset_compare (this_arg.c_str (), "no-filters"))
-	    bt_cmd_opts.no_filters = true;
-	  else if (subset_compare (this_arg.c_str (), "full"))
-	    bt_cmd_opts.full = true;
-	  else if (subset_compare (this_arg.c_str (), "hide"))
-	    bt_cmd_opts.hide = true;
-	  else
-	    {
-	      /* Not a recognized argument, so stop.  */
-	      arg = save_arg;
-	      break;
-	    }
-	}
-
+      arg = parse_backtrace_qualifiers (arg, &bt_cmd_opts);
       if (*arg == '\0')
 	arg = NULL;
     }
@@ -2089,6 +2107,28 @@ backtrace_command_completer (struct cmd_list_element *ignore,
   if (gdb::option::complete_options
       (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
     return;
+
+  if (*text != '\0')
+    {
+      const char *p = skip_to_space (text);
+      if (*p == '\0')
+	{
+	  static const char *const backtrace_cmd_qualifier_choices[] = {
+	    "full", "no-filters", "hide", nullptr,
+	  };
+	  complete_on_enum (tracker, backtrace_cmd_qualifier_choices,
+			    text, text);
+
+	  if (tracker.have_completions ())
+	    return;
+	}
+      else
+	{
+	  const char *cmd = parse_backtrace_qualifiers (text);
+	  tracker.advance_custom_word_point_by (cmd - text);
+	  text = cmd;
+	}
+    }
 
   const char *word = advance_to_expression_complete_word_point (tracker, text);
   expression_completer (ignore, tracker, text, word);

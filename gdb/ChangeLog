@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* stack.c (parse_backtrace_qualifiers): New.
+	(backtrace_command): Use it.
+	(backtrace_command_completer): Complete on qualifiers.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* frame.c: Include "cli/cli-option.h.
 	(user_set_backtrace_options): New.
 	(backtrace_past_main, backtrace_past_entry, backtrace_limit):
