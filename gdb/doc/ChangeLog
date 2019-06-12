@@ -1,5 +1,21 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Command Completion): Mention command options too.
+	(Command Options): New node.
+	(Threads): Add anchors.  Extend descriptions of the "taas" and
+	"tfaas" commands.
+	(Backtrace): Describe new options of the "backtrace" command.  Add
+	anchors.
+	(Frame Apply): Describe new options of the "frame apply" and
+	"faas" commands.  Add anchors.
+	(Data): Describe new options of the "print" command.  Add anchors.
+	(Compiling and Injecting Code): Mention options of the "compile
+	print" command.
+	(Maintenance Commands): Mention "maint test-options" subcommands
+	and the "maint show test-options-completion-result" command.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Print Settings): Document "set/show print
 	raw-frame-arguments" instead of "set/show print raw
 	frame-arguments".

@@ -115,6 +115,97 @@ show print raw-frame-arguments
   old commands are now deprecated and may be removed in a future
   release.
 
+maint test-options require-delimiter
+maint test-options unknown-is-error
+maint test-options unknown-is-operand
+maint show test-options-completion-result
+  Commands used by the testsuite to validate the command options
+  framework.
+
+* New command options, command completion
+
+  GDB now has a standard infrastructure to support dash-style command
+  options ('-OPT').  One benefit is that commands that use it can
+  easily support completion of command line arguments.  Try "CMD
+  -[TAB]" or "help CMD" to find options supported by a command.  Over
+  time, we intend to migrate most commands to this infrastructure.  A
+  number of commands got support for new command options in this
+  release:
+
+  ** The "print" and "compile print" commands now support a number of
+     options that allow overriding relevant global print settings as
+     set by "set print" subcommands:
+
+      -address [on|off]
+      -array [on|off]
+      -array-indexes [on|off]
+      -elements NUMBER|unlimited
+      -null-stop [on|off]
+      -object [on|off]
+      -pretty [on|off]
+      -repeats NUMBER|unlimited
+      -static-members [on|off]
+      -symbol [on|off]
+      -union [on|off]
+      -vtbl [on|off]
+
+     Note that because the "print"/"compile print" commands accept
+     arbitrary expressions which may look like options (including
+     abbreviations), if you specify any command option, then you must
+     use a double dash ("--") to mark the end of argument processing.
+
+  ** The "backtrace" command now supports a number of options that
+     allow overriding relevant global print settings as set by "set
+     backtrace" and "set print" subcommands:
+
+      -entry-values no|only|preferred|if-needed|both|compact|default
+      -frame-arguments all|scalars|none
+      -raw-frame-arguments [on|off]
+      -past-main [on|off]
+      -past-entry [on|off]
+
+     In addition, the full/no-filters/hide qualifiers are now also
+     exposed as command options too:
+
+      -full
+      -no-filters
+      -hide
+
+  ** The "frame apply", "tfaas" and "faas" commands similarly now
+     support the following options:
+
+      -past-main [on|off]
+      -past-entry [on|off]
+
+   All options above can also be abbreviated.  The argument of boolean
+   (on/off) options can be 0/1 too, and also the argument is assumed
+   "on" if omitted.  This allows writing compact command invocations,
+   like for example:
+
+    (gdb) p -r -p -o 0 -- *myptr
+
+   The above is equivalent to:
+
+    (gdb) print -raw -pretty -object off -- *myptr
+
+* Completion improvements
+
+  ** GDB can now complete the options of the "thread apply all" and
+     "taas" commands, and their "-ascending" option can now be
+     abbreviated.
+
+  ** GDB can now complete the options of the "compile file" and
+     "compile code" commands.  The "compile file" command now
+     completes on filenames.
+
+  ** GDB can now complete the backtrace command's
+     "full/no-filters/hide" qualifiers.
+
+* In settings, you can now abbreviate "unlimited".
+
+  E.g., "set print elements u" is now equivalent to "set print
+  elements unlimited".
+
 * New MI commands
 
 -complete

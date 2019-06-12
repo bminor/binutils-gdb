@@ -1561,6 +1561,7 @@ show you the alternatives available, if there is more than one possibility).
 @menu
 * Command Syntax::              How to give commands to @value{GDBN}
 * Completion::                  Command completion
+* Command Options::             Command options
 * Help::                        How to ask @value{GDBN} for help
 @end menu
 
@@ -1623,7 +1624,8 @@ for editing.
 @value{GDBN} can fill in the rest of a word in a command for you, if there is
 only one possibility; it can also show you what the valid possibilities
 are for the next word in a command, at any time.  This works for @value{GDBN}
-commands, @value{GDBN} subcommands, and the names of symbols in your program.
+commands, @value{GDBN} subcommands, command options, and the names of symbols
+in your program.
 
 Press the @key{TAB} key whenever you want @value{GDBN} to fill out the rest
 of a word.  If there is only one possibility, @value{GDBN} fills in the
@@ -1823,6 +1825,70 @@ struct ui_file
 @}
 @end smallexample
 
+@node Command Options
+@section Command options
+
+@cindex command options
+Some commands accept options starting with a leading dash.  For
+example, @code{print -pretty}.  Similarly to command names, you can
+abbreviate a @value{GDBN} option to the first few letters of the
+option name, if that abbreviation is unambiguous, and you can also use
+the @key{TAB} key to get @value{GDBN} to fill out the rest of a word
+in an option (or to show you the alternatives available, if there is
+more than one possibility).
+
+@cindex command options, raw input
+Some commands take raw input as argument.  For example, the print
+command processes arbitrary expressions in any of the languages
+supported by @value{GDBN}.  With such commands, because raw input may
+start with a leading dash that would be confused with an option or any
+of its abbreviations, e.g.@: @code{print -r} (short for @code{print
+-raw} or printing negative @code{r}?), if you specify any command
+option, then you must use a double-dash (@code{--}) delimiter to
+indicate the end of options.
+
+@cindex command options, boolean
+
+Some options are described as accepting an argument which can be
+either @code{on} or @code{off}.  These are known as @dfn{boolean
+options}.  Similarly to boolean settings commands---@code{on} and
+@code{off} are the typical values, but any of @code{1}, @code{yes} and
+@code{enable} can also be used as ``true'' value, and any of @code{0},
+@code{no} and @code{disable} can also be used as ``false'' value.  You
+can also omit a ``true'' value, as it is implied by default.
+
+For example, these are equivalent:
+
+@smallexample
+(@value{GDBP}) print -object on -pretty off -element unlimited -- *myptr
+(@value{GDBP}) p -o -p 0 -e u -- *myptr
+@end smallexample
+
+You can discover the set of options some command accepts by completing
+on @code{-} after the command name.  For example:
+
+@smallexample
+(@value{GDBP}) print -@key{TAB}@key{TAB}
+-address         -max-depth       -repeats         -vtbl
+-array           -null-stop       -static-members
+-array-indexes   -object          -symbol
+-elements        -pretty          -union
+@end smallexample
+
+Completion will in some cases guide you with a suggestion of what kind
+of argument an option expects.  For example:
+
+@smallexample
+(@value{GDBP}) print -elements @key{TAB}@key{TAB}
+NUMBER     unlimited
+@end smallexample
+
+Here, the option expects a number (e.g., @code{100}), not literal
+@code{NUMBER}.  Such metasyntactical arguments are always presented in
+uppercase.
+
+(For more on using the @code{print} command, see @ref{Data, ,Examining
+Data}.)
 
 @node Help
 @section Getting Help
@@ -3272,6 +3338,7 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 @samp{Switching to} depends on your system's conventions for identifying
 threads.
 
+@anchor{thread apply all}
 @kindex thread apply
 @cindex apply command to several threads
 @item thread apply [@var{thread-id-list} | all [-ascending]] [@var{flag}]@dots{} @var{command}
@@ -3313,14 +3380,17 @@ Flags @code{-c} and @code{-s} cannot be used together.
 
 @kindex taas
 @cindex apply command to all threads (ignoring errors and empty output)
-@item taas @var{command}
-Shortcut for @code{thread apply all -s @var{command}}.
+@item taas [@var{option}]@dots{} @var{command}
+Shortcut for @code{thread apply all -s [@var{option}]@dots{} @var{command}}.
 Applies @var{command} on all threads, ignoring errors and empty output.
+
+The @code{taas} command accepts the same options as the @code{thread
+apply all} command.  @xref{thread apply all}.
 
 @kindex tfaas
 @cindex apply a command to all frames of all threads (ignoring errors and empty output)
-@item tfaas @var{command}
-Shortcut for @code{thread apply all -s frame apply all -s @var{command}}.
+@item tfaas [@var{option}]@dots{} @var{command}
+Shortcut for @code{thread apply all -s -- frame apply all -s [@var{option}]@dots{} @var{command}}.
 Applies @var{command} on all frames of all threads, ignoring errors
 and empty output.  Note that the flag @code{-s} is specified twice:
 The first @code{-s} ensures that @code{thread apply} only shows the thread
@@ -3336,6 +3406,8 @@ is, using:
 (@value{GDBP}) tfaas p some_local_var_i_do_not_remember_where_it_is
 @end smallexample
 
+The @code{tfaas} command accepts the same options as the @code{frame
+apply} command.  @xref{frame apply}.
 
 @kindex thread name
 @cindex name a thread
@@ -7577,10 +7649,11 @@ printed.  You can stop the backtrace at any time by typing the system
 interrupt character, normally @kbd{Ctrl-c}.
 
 @table @code
-@item backtrace [@var{args}@dots{}]
-@itemx bt [@var{args}@dots{}]
-Print the backtrace of the entire stack.  The optional @var{args} can
-be one of the following:
+@item backtrace [@var{option}]@dots{} [@var{qualifier}]@dots{} [@var{count}]
+@itemx bt [@var{option}]@dots{} [@var{qualifier}]@dots{} [@var{count}]
+Print the backtrace of the entire stack.
+
+The optional @var{count} can be one of the following:
 
 @table @code
 @item @var{n}
@@ -7592,24 +7665,69 @@ number.
 @itemx -@var{n}
 Print only the outermost @var{n} frames, where @var{n} is a positive
 number.
+@end table
 
-@item full
+Options:
+
+@table @code
+@item -full
 Print the values of the local variables also.  This can be combined
-with a number to limit the number of frames shown.
+with the optional @var{count} to limit the number of frames shown.
 
-@item no-filters
+@item -no-filters
 Do not run Python frame filters on this backtrace.  @xref{Frame
 Filter API}, for more information.  Additionally use @ref{disable
 frame-filter all} to turn off all frame filters.  This is only
 relevant when @value{GDBN} has been configured with @code{Python}
 support.
 
-@item hide
+@item -hide
 A Python frame filter might decide to ``elide'' some frames.  Normally
 such elided frames are still printed, but they are indented relative
-to the filtered frames that cause them to be elided.  The @code{hide}
+to the filtered frames that cause them to be elided.  The @code{-hide}
 option causes elided frames to not be printed at all.
 @end table
+
+The @code{backtrace} command also supports a number of options that
+allow overriding relevant global print settings as set by @code{set
+backtrace} and @code{set print} subcommands:
+
+@table @code
+@item -past-main [@code{on}|@code{off}]
+Set whether backtraces should continue past @code{main}.  Related setting:
+@ref{set backtrace past-main}.
+
+@item -past-entry [@code{on}|@code{off}]
+Set whether backtraces should continue past the entry point of a program.
+Related setting: @ref{set backtrace past-entry}.
+
+@item -entry-values @code{no}|@code{only}|@code{preferred}|@code{if-needed}|@code{both}|@code{compact}|@code{default}
+Set printing of function arguments at function entry.
+Related setting: @ref{set print entry-values}.
+
+@item -frame-arguments @code{all}|@code{scalars}|@code{none}
+Set printing of non-scalar frame arguments.
+Related setting: @ref{set print frame-arguments}.
+
+@item -raw-frame-arguments [@code{on}|@code{off}]
+Set whether to print frame arguments in raw form.
+Related setting: @ref{set print raw-frame-arguments}.
+@end table
+
+The optional @var{qualifier} is maintained for backward compatibility.
+It can be one of the following:
+
+@table @code
+@item full
+Equivalent to the @code{-full} option.
+
+@item no-filters
+Equivalent to the @code{-no-filters} option.
+
+@item hide
+Equivalent to the @code{-hide} option.
+@end table
+
 @end table
 
 @kindex where
@@ -7707,6 +7825,7 @@ in a backtrace, you can change this behavior:
 @table @code
 @item set backtrace past-main
 @itemx set backtrace past-main on
+@anchor{set backtrace past-main}
 @kindex set backtrace
 Backtraces will continue past the user entry point.
 
@@ -7720,6 +7839,7 @@ Display the current user entry point backtrace policy.
 
 @item set backtrace past-entry
 @itemx set backtrace past-entry on
+@anchor{set backtrace past-entry}
 Backtraces will continue past the internal entry point of an application.
 This entry point is encoded by the linker when the application is built,
 and is likely before the user entry point @code{main} (or equivalent) is called.
@@ -7734,6 +7854,7 @@ Display the current internal entry point backtrace policy.
 @item set backtrace limit @var{n}
 @itemx set backtrace limit 0
 @itemx set backtrace limit unlimited
+@anchor{set backtrace limit}
 @cindex backtrace limit
 Limit the backtrace to @var{n} levels.  A value of @code{unlimited}
 or zero means unlimited levels.
@@ -8027,10 +8148,11 @@ tfaas i lo -q -t lock_something_t
 
 @node Frame Apply
 @section Applying a Command to Several Frames.
+@anchor{frame apply}
 @kindex frame apply
 @cindex apply command to several frames
 @table @code
-@item frame apply [all | @var{count} | @var{-count} | level @var{level}@dots{}] [@var{flag}]@dots{} @var{command}
+@item frame apply [all | @var{count} | @var{-count} | level @var{level}@dots{}] [@var{option}]@dots{} @var{command}
 The @code{frame apply} command allows you to apply the named
 @var{command} to one or more frames.
 
@@ -8056,23 +8178,28 @@ at levels 2, 3, 4, 6, 7, 8, and then again on frame at level 3.
 
 @end table
 
-@end table
-
 Note that the frames on which @code{frame apply} applies a command are
 also influenced by the @code{set backtrace} settings such as @code{set
-backtrace past-main} and @code{set backtrace limit N}.  See
+backtrace past-main} and @code{set backtrace limit N}.
 @xref{Backtrace,,Backtraces}.
 
-The @var{flag} arguments control what output to produce and how to handle
-errors raised when applying @var{command} to a frame.  @var{flag}
-must start with a @code{-} directly followed by one letter in
-@code{qcs}.  If several flags are provided, they must be given
-individually, such as @code{-c -q}.
+The @code{frame apply} command also supports a number of options that
+allow overriding relevant @code{set backtrace} settings:
+
+@table @code
+@item -past-main [@code{on}|@code{off}]
+Whether backtraces should continue past @code{main}.
+Related setting: @ref{set backtrace past-main}.
+
+@item -past-entry [@code{on}|@code{off}]
+Whether backtraces should continue past the entry point of a program.
+Related setting: @ref{set backtrace past-entry}.
+@end table
 
 By default, @value{GDBN} displays some frame information before the
 output produced by @var{command}, and an error raised during the
 execution of a @var{command} will abort @code{frame apply}.  The
-following flags can be used to fine-tune this behavior:
+following options can be used to fine-tune these behaviors:
 
 @table @code
 @item -c
@@ -8125,7 +8252,7 @@ $5 = (void *) 0xffffd1f0
 @end group
 @end smallexample
 
-If flag @code{-q} is given, no frame information is printed:
+If the flag @code{-q} is given, no frame information is printed:
 @smallexample
 @group
 (gdb) frame apply all -q p $sp
@@ -8134,6 +8261,8 @@ $13 = (void *) 0xffffd1f0
 (gdb)
 @end group
 @end smallexample
+
+@end table
 
 @table @code
 
@@ -8149,6 +8278,9 @@ is, using:
 @smallexample
 (@value{GDBP}) faas p some_local_var_i_do_not_remember_where_it_is
 @end smallexample
+
+The @code{faas} command accepts the same options as the @code{frame
+apply} command.  @xref{frame apply}.
 
 Note that the command @code{tfaas @var{command}} applies @var{command}
 on all frames of all threads.  See @xref{Threads,,Threads}.
@@ -9262,16 +9394,111 @@ Different Languages}).  It may also print the expression using a
 Python-based pretty-printer (@pxref{Pretty Printing}).
 
 @table @code
-@item print @var{expr}
-@itemx print /@var{f} @var{expr}
+@item print [[@var{options}] --] @var{expr}
+@itemx print [[@var{options}] --] /@var{f} @var{expr}
 @var{expr} is an expression (in the source language).  By default the
 value of @var{expr} is printed in a format appropriate to its data type;
 you can choose a different format by specifying @samp{/@var{f}}, where
 @var{f} is a letter specifying the format; see @ref{Output Formats,,Output
 Formats}.
 
-@item print
-@itemx print /@var{f}
+@anchor{print options}
+The @code{print} command supports a number of options that allow
+overriding relevant global print settings as set by @code{set print}
+subcommands:
+
+@table @code
+@item -address [@code{on}|@code{off}]
+Set printing of addresses.
+Related setting: @ref{set print address}.
+
+@item -array [@code{on}|@code{off}]
+Pretty formatting of arrays.
+Related setting: @ref{set print array}.
+
+@item -array-indexes [@code{on}|@code{off}]
+Set printing of array indexes.
+Related setting: @ref{set print array-indexes}.
+
+@item -elements @var{number-of-elements}|@code{unlimited}
+Set limit on string chars or array elements to print.  The value
+@code{unlimited} causes there to be no limit.  Related setting:
+@ref{set print elements}.
+
+@item -max-depth @var{depth}|@code{unlimited}
+Set the threshold after which nested structures are replaced with
+ellipsis.  Related setting: @ref{set print max-depth}.
+
+@item -null-stop [@code{on}|@code{off}]
+Set printing of char arrays to stop at first null char.  Related
+setting: @ref{set print null-stop}.
+
+@item -object [@code{on}|@code{off}]
+Set printing C@t{++} virtual function tables.  Related setting:
+@ref{set print object}.
+
+@item -pretty [@code{on}|@code{off}]
+Set pretty formatting of structures.  Related setting: @ref{set print
+pretty}.
+
+@item -repeats @var{number-of-repeats}|@code{unlimited}
+Set threshold for repeated print elements.  @code{unlimited} causes
+all elements to be individually printed.  Related setting: @ref{set
+print repeats}.
+
+@item -static-members [@code{on}|@code{off}]
+Set printing C@t{++} static members.  Related setting: @ref{set print
+static-members}.
+
+@item -symbol [@code{on}|@code{off}]
+Set printing of symbol names when printing pointers.  Related setting:
+@ref{set print symbol}.
+
+@item -union [@code{on}|@code{off}]
+Set printing of unions interior to structures.  Related setting:
+@ref{set print union}.
+
+@item -vtbl [@code{on}|@code{off}]
+Set printing of C++ virtual function tables.  Related setting:
+@ref{set print vtbl}.
+@end table
+
+Because the @code{print} command accepts arbitrary expressions which
+may look like options (including abbreviations), if you specify any
+command option, then you must use a double dash (@code{--}) to mark
+the end of option processing.
+
+For example, this prints the value of the @code{-r} expression:
+
+@smallexample
+(@value{GDBP}) print -r
+@end smallexample
+
+While this repeats the last value in the value history (see below)
+with the @code{-raw} option in effect:
+
+@smallexample
+(@value{GDBP}) print -r --
+@end smallexample
+
+Here is an example including both on option and an expression:
+
+@smallexample
+@group
+(@value{GDBP}) print -pretty -- *myptr
+$1 = @{
+  next = 0x0,
+  flags = @{
+    sweet = 1,
+    sour = 1
+  @},
+  meat = 0x54 "Pork"
+@}
+@end group
+@end smallexample
+
+@item print [@var{options}]
+@itemx print [@var{options}] /@var{f}
 @cindex reprint the last value
 If you omit @var{expr}, @value{GDBN} displays the last value again (from the
 @dfn{value history}; @pxref{Value History, ,Value History}).  This allows you to
@@ -10312,6 +10539,7 @@ These settings are useful for debugging programs in any language:
 
 @table @code
 @kindex set print
+@anchor{set print address}
 @item set print address
 @itemx set print address on
 @cindex print/don't print memory addresses
@@ -10423,6 +10651,7 @@ the appropriate @code{set print} options turned on.
 You can also enable @samp{/a}-like formatting all the time using
 @samp{set print symbol on}:
 
+@anchor{set print symbol}
 @table @code
 @item set print symbol on
 Tell @value{GDBN} to print the symbol corresponding to an address, if
@@ -10441,6 +10670,7 @@ address.
 Other settings control how different kinds of objects are printed:
 
 @table @code
+@anchor{set print array}
 @item set print array
 @itemx set print array on
 @cindex pretty print arrays
@@ -10455,6 +10685,7 @@ Show whether compressed or pretty format is selected for displaying
 arrays.
 
 @cindex print array indexes
+@anchor{set print array-indexes}
 @item set print array-indexes
 @itemx set print array-indexes on
 Print the index of each element when displaying arrays.  May be more
@@ -10468,6 +10699,7 @@ Stop printing element indexes when displaying arrays.
 Show whether the index of each element is printed when displaying
 arrays.
 
+@anchor{set print elements}
 @item set print elements @var{number-of-elements}
 @itemx set print elements unlimited
 @cindex number of array elements to print
@@ -10484,6 +10716,7 @@ that the number of elements to print is unlimited.
 Display the number of elements of a large array that @value{GDBN} will print.
 If the number is 0, then the printing is unlimited.
 
+@anchor{set print frame-arguments}
 @item set print frame-arguments @var{value}
 @kindex set print frame-arguments
 @cindex printing frame argument values
@@ -10533,6 +10766,7 @@ thus speeding up the display of each Ada frame.
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
 
+@anchor{set print raw-frame-arguments}
 @item set print raw-frame-arguments on
 Print frame arguments in raw, non pretty-printed, form.
 
@@ -10660,6 +10894,7 @@ entry resolution see @ref{set debug entry-values}.
 Show the method being used for printing of frame argument values at function
 entry.
 
+@anchor{set print repeats}
 @item set print repeats @var{number-of-repeats}
 @itemx set print repeats unlimited
 @cindex repeated array elements
@@ -10676,6 +10911,7 @@ is 10.
 Display the current threshold for printing repeated identical
 elements.
 
+@anchor{set print max-depth}
 @item set print max-depth @var{depth}
 @item set print max-depth unlimited
 @cindex printing nested structures
@@ -10734,6 +10970,7 @@ language, for most languages @code{@{...@}} is used, but Fortran uses
 Display the current threshold after which nested structures are
 replaces with ellipsis.
 
+@anchor{set print null-stop}
 @item set print null-stop
 @cindex @sc{null} elements in arrays
 Cause @value{GDBN} to stop printing the characters of an array when the first
@@ -10745,6 +10982,7 @@ The default is off.
 Show whether @value{GDBN} stops printing an array on the first
 @sc{null} character.
 
+@anchor{set print pretty}
 @item set print pretty on
 @cindex print structures in indented form
 @cindex indentation in structure display
@@ -10796,6 +11034,7 @@ international character sets, and is the default.
 @item show print sevenbit-strings
 Show whether or not @value{GDBN} is printing only seven-bit characters.
 
+@anchor{set print union}
 @item set print union on
 @cindex unions in structures, printing
 Tell @value{GDBN} to print unions which are contained in structures
@@ -10885,6 +11124,7 @@ decoding style by inspecting your program.
 @item show demangle-style
 Display the encoding style currently in use for decoding C@t{++} symbols.
 
+@anchor{set print object}
 @item set print object
 @itemx set print object on
 @cindex derived type of an object, printing
@@ -10904,6 +11144,7 @@ virtual function table.  This is the default setting.
 @item show print object
 Show whether actual, or declared, object types are displayed.
 
+@anchor{set print static-members}
 @item set print static-members
 @itemx set print static-members on
 @cindex static members of C@t{++} objects
@@ -10928,6 +11169,7 @@ Do not print static members when displaying a Pascal object.
 Show whether Pascal static members are printed or not.
 
 @c These don't work with HP ANSI C++ yet.
+@anchor{set print vtbl}
 @item set print vtbl
 @itemx set print vtbl on
 @cindex pretty print C@t{++} virtual function tables
@@ -19073,17 +19315,18 @@ compile file /home/user/example.c
 @end table
 
 @table @code
-@item compile print @var{expr}
-@itemx compile print /@var{f} @var{expr}
+@item compile print [[@var{options}] --] @var{expr}
+@itemx compile print [[@var{options}] --] /@var{f} @var{expr}
 Compile and execute @var{expr} with the compiler language found as the
 current language in @value{GDBN} (@pxref{Languages}).  By default the
 value of @var{expr} is printed in a format appropriate to its data type;
 you can choose a different format by specifying @samp{/@var{f}}, where
 @var{f} is a letter specifying the format; see @ref{Output Formats,,Output
-Formats}.
+Formats}.  The @code{compile print} command accepts the same options
+as the @code{print} command; see @ref{print options}.
 
-@item compile print
-@itemx compile print /@var{f}
+@item compile print [[@var{options}] --]
+@itemx compile print [[@var{options}] --] /@var{f}
 @cindex reprint the last value
 Alternatively you can enter the expression (source code producing it) as
 multiple lines of text.  To enter this mode, invoke the @samp{compile print}
@@ -37221,6 +37464,27 @@ command also allows to find symbols in other sections.
 If section was not specified, the section in which the symbol was found
 is also printed.  For dynamically linked executables, the name of
 executable or shared library containing the symbol is printed as well.
+
+@kindex maint test-options
+@item maint test-options require-delimiter
+@itemx maint test-options unknown-is-error
+@itemx maint test-options unknown-is-operand
+These commands are used by the testsuite to validate the command
+options framework.  The @code{require-delimiter} variant requires a
+double-dash delimiter to indicate end of options.  The
+@code{unknown-is-error} and @code{unknown-is-operand} do not.  The
+@code{unknown-is-error} variant throws an error on unknown option,
+while @code{unknown-is-operand} treats unknown options as the start of
+the command's operands.  When run, the commands output the result of
+the processed options.  When completed, the commands store the
+internal result of completion in a variable exposed by the @code{maint
+show test-options-completion-result} command.
+
+@kindex maint show test-options-completion-result
+@item maint show test-options-completion-result
+Shows the result of completing the @code{maint test-options}
+subcommands.  This is used by the testsuite to validate completion
+support in the command options framework.
 
 @kindex maint test-settings
 @item maint test-settings set @var{kind}

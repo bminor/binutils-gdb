@@ -1,5 +1,15 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New commands): Mention "maint test-options
+	require-delimiter", "maint test-options unknown-is-error", "maint
+	test-options unknown-is-operand" and "maint show
+	test-options-completion-result".
+	(New command options, command completion): New section.
+	(Completion improvements): New section.
+	Mention that you can abbreviate "unlimited".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-utils.c (parse_flags, parse_flags_qcs): Delete.
 	* cli/cli-utils.h (parse_flags, parse_flags_qcs): Delete.
 	* unittests/cli-utils-selftests.c (test_parse_flags)
