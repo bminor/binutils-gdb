@@ -423,6 +423,39 @@ completion_tracker::completes_to_completion_word (const char *word)
   return false;
 }
 
+/* See completer.h.  */
+
+void
+complete_nested_command_line (completion_tracker &tracker, const char *text)
+{
+  /* Must be called from a custom-word-point completer.  */
+  gdb_assert (tracker.use_custom_word_point ());
+
+  /* Disable the custom word point temporarily, because we want to
+     probe whether the command we're completing itself uses a custom
+     word point.  */
+  tracker.set_use_custom_word_point (false);
+  size_t save_custom_word_point = tracker.custom_word_point ();
+
+  int quote_char = '\0';
+  const char *word = completion_find_completion_word (tracker, text,
+						      &quote_char);
+
+  if (tracker.use_custom_word_point ())
+    {
+      /* The command we're completing uses a custom word point, so the
+	 tracker already contains the matches.  We're done.  */
+      return;
+    }
+
+  /* Restore the custom word point settings.  */
+  tracker.set_custom_word_point (save_custom_word_point);
+  tracker.set_use_custom_word_point (true);
+
+  /* Run the handle_completions completer phase.  */
+  complete_line (tracker, word, text, strlen (text));
+}
+
 /* Complete on linespecs, which might be of two possible forms:
 
        file:line
@@ -1894,6 +1927,9 @@ gdb_completion_word_break_characters_throw ()
     {
       gdb_assert (tracker.custom_word_point () > 0);
       rl_point = tracker.custom_word_point () - 1;
+
+      gdb_assert (rl_point >= 0 && rl_point < strlen (rl_line_buffer));
+
       gdb_custom_word_point_brkchars[0] = rl_line_buffer[rl_point];
       rl_completer_word_break_characters = gdb_custom_word_point_brkchars;
       rl_completer_quote_characters = NULL;

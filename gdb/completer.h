@@ -611,6 +611,18 @@ extern completion_list complete_source_filenames (const char *text);
 extern void complete_expression (completion_tracker &tracker,
 				 const char *text, const char *word);
 
+/* Called by custom word point completers that want to recurse into
+   the completion machinery to complete a command.  Used to complete
+   COMMAND in "thread apply all COMMAND", for example.  Note that
+   unlike command_completer, this fully recurses into the proper
+   completer for COMMAND, so that e.g.,
+
+     (gdb) thread apply all print -[TAB]
+
+   does the right thing and show the print options.  */
+extern void complete_nested_command_line (completion_tracker &tracker,
+					  const char *text);
+
 extern const char *skip_quoted_chars (const char *, const char *,
 				      const char *);
 

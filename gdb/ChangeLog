@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (complete_nested_command_line): New.
+	(gdb_completion_word_break_characters_throw): Add assertion.
+	* completer.h (complete_nested_command_line): Declare.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* stack.c (parse_backtrace_qualifiers): New.
 	(backtrace_command): Use it.
 	(backtrace_command_completer): Complete on qualifiers.
