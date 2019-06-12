@@ -433,7 +433,7 @@
            )
   )
 
-(dni l-adrp "adrp reg/disp21"
+(dni l-adrp "load pc-relative page address"
     ((MACH ORBIS-MACHS))
     "l.adrp $rD,${disp21}"
     (+ OPC_ADRP rD disp21)
