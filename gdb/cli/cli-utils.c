@@ -139,7 +139,6 @@ extract_info_print_args (const char **args,
   /* Check for NAMEREGEXP or -- NAMEREGEXP.  */
   if (**args != '-' || check_for_argument (args, "--", 2))
     {
-      *args = skip_spaces (*args);
       *regexp = *args;
       *args = NULL;
       return true;
@@ -155,7 +154,6 @@ extract_info_print_args (const char **args,
   if (check_for_argument (args, "-q", 2))
     {
       *quiet = true;
-      *args = skip_spaces (*args);
       return true;
     }
 
@@ -459,6 +457,7 @@ check_for_argument (const char **str, const char *arg, int arg_len)
       && ((*str)[arg_len] == '\0' || isspace ((*str)[arg_len])))
     {
       *str += arg_len;
+      *str = skip_spaces (*str);
       return 1;
     }
   return 0;

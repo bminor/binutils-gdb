@@ -1,3 +1,13 @@
+2019-06-13  Pedro Alves <palves@redhat.com>
+
+	* ax-gdb.c (agent_command_1): Remove skip_spaces call.
+	* breakpoint.c (watch_maybe_just_location): Remove skip_spaces
+	call.
+	* cli/cli-cmds.c (apropos_command): Remove skip_spaces call.
+	* cli/cli-utils.c (extract_info_print_args): Remove skip_spaces
+	calls.
+	(check_for_argument): Skip spaces after argument.
+
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
 	* thread.c (thread_apply_command): Adjust TID parsing.

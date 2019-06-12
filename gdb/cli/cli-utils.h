@@ -188,7 +188,9 @@ extern std::string extract_arg (const char **arg);
 /* A helper function that looks for an argument at the start of a
    string.  The argument must also either be at the end of the string,
    or be followed by whitespace.  Returns 1 if it finds the argument,
-   0 otherwise.  If the argument is found, it updates *STR.  */
+   0 otherwise.  If the argument is found, it updates *STR to point
+   past the argument and past any whitespace following the
+   argument.  */
 extern int check_for_argument (const char **str, const char *arg, int arg_len);
 
 /* Same, for non-const STR.  */

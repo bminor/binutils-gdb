@@ -1381,9 +1381,6 @@ apropos_command (const char *arg, int from_tty)
 {
   bool verbose = arg && check_for_argument (&arg, "-v", 2);
 
-  if (verbose)
-    arg = skip_spaces (arg);
-
   if (arg == NULL || *arg == '\0')
     error (_("REGEXP string is empty"));
 

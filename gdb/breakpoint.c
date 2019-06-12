@@ -10896,10 +10896,7 @@ watch_maybe_just_location (const char *arg, int accessflag, int from_tty)
   if (arg
       && (check_for_argument (&arg, "-location", sizeof ("-location") - 1)
 	  || check_for_argument (&arg, "-l", sizeof ("-l") - 1)))
-    {
-      arg = skip_spaces (arg);
-      just_location = 1;
-    }
+    just_location = 1;
 
   watch_command_1 (arg, accessflag, from_tty, just_location, 0);
 }
