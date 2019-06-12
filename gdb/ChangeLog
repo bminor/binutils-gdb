@@ -1,3 +1,7 @@
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-setshow.c (is_unlimited_literal): Allow abbreviations.
+
 2019-06-13  Pedro Alves <palves@redhat.com>
 
 	* ax-gdb.c (agent_command_1): Remove skip_spaces call.

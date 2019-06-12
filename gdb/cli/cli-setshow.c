@@ -132,12 +132,16 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
 static int
 is_unlimited_literal (const char *arg)
 {
-  size_t len = sizeof ("unlimited") - 1;
-
   arg = skip_spaces (arg);
 
-  return (strncmp (arg, "unlimited", len) == 0
-	  && (isspace (arg[len]) || arg[len] == '\0'));
+  const char *p = skip_to_space (arg);
+
+  size_t len = p - arg;
+
+  if (len > 0 && strncmp ("unlimited", arg, len) == 0)
+    return true;
+
+  return false;
 }
 
 
