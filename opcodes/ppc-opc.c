@@ -6082,8 +6082,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mfvsrld",	X(31,307),	XX1RB_MASK,  PPCVSX3,	0,		{RA, XS6}},
 
-{"ldmx",	X(31,309),	X_MASK,	     POWER9,	0,		{RT, RA0, RB}},
-
 {"eciwx",	X(31,310),	X_MASK,	     PPC,	E500|TITAN,	{RT, RA0, RB}},
 
 {"lhzux",	X(31,311),	X_MASK,	     COM,	0,		{RT, RAL, RB}},

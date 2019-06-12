@@ -358,8 +358,6 @@ Disassembly of section \.text:
 .*:	(7e ed e5 8c|8c e5 ed 7e) 	stwat   r23,r13,28
 .*:	(4c 00 02 64|64 02 00 4c) 	urfid
 .*:	(7c 00 f6 e4|e4 f6 00 7c) 	rmieg   r30
-.*:	(7d 40 7a 6a|6a 7a 40 7d) 	ldmx    r10,0,r15
-.*:	(7d 43 7a 6a|6a 7a 43 7d) 	ldmx    r10,r3,r15
 .*:	(4c 00 02 e4|e4 02 00 4c) 	stop
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait
 .*:	(7c 00 00 3c|3c 00 00 7c) 	wait
