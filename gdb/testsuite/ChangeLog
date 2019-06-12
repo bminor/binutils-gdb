@@ -1,5 +1,12 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp: Build executable.
+	(test-print): New procedure.
+	(top level): Call it, once for "print" and another for "compile
+	print".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.c: New file.
 	* gdb.base/options.exp: New file.
 

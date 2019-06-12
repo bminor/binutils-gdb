@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include "common/byte-vector.h"
+#include "cli/cli-option.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -3069,7 +3070,181 @@ show_print_raw (const char *args, int from_tty)
   cmd_show_list (showprintrawlist, from_tty, "");
 }
 
+/* Controls printing of vtbl's.  */
+static void
+show_vtblprint (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of C++ virtual function tables is %s.\n"),
+		    value);
+}
+
+/* Controls looking up an object's derived type using what we find in
+   its vtables.  */
+static void
+show_objectprint (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c,
+		  const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of object's derived type based on vtable info is %s.\n"),
+		    value);
+}
+
+static void
+show_static_field_print (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c,
+			 const char *value)
+{
+  fprintf_filtered (file,
+		    _("Printing of C++ static members is %s.\n"),
+		    value);
+}
+
 
+
+/* A couple typedefs to make writing the options a bit more
+   convenient.  */
+using boolean_option_def
+  = gdb::option::boolean_option_def<value_print_options>;
+using uinteger_option_def
+  = gdb::option::uinteger_option_def<value_print_options>;
+using zuinteger_unlimited_option_def
+  = gdb::option::zuinteger_unlimited_option_def<value_print_options>;
+
+/* Definions of options for the "print" and "compile print"
+   commands.  */
+static const gdb::option::option_def value_print_option_defs[] = {
+
+  boolean_option_def {
+    "address",
+    [] (value_print_options *opt) { return &opt->addressprint; },
+    show_addressprint, /* show_cmd_cb */
+    N_("Set printing of addresses."),
+    N_("Show printing of addresses."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "array",
+    [] (value_print_options *opt) { return &opt->prettyformat_arrays; },
+    show_prettyformat_arrays, /* show_cmd_cb */
+    N_("Set pretty formatting of arrays."),
+    N_("Show pretty formatting of arrays."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "array-indexes",
+    [] (value_print_options *opt) { return &opt->print_array_indexes; },
+    show_print_array_indexes, /* show_cmd_cb */
+    N_("Set printing of array indexes."),
+    N_("Show printing of array indexes"),
+    NULL, /* help_doc */
+  },
+
+  uinteger_option_def {
+    "elements",
+    [] (value_print_options *opt) { return &opt->print_max; },
+    show_print_max, /* show_cmd_cb */
+    N_("Set limit on string chars or array elements to print."),
+    N_("Show limit on string chars or array elements to print."),
+    N_("\"unlimited\" causes there to be no limit."),
+  },
+
+  zuinteger_unlimited_option_def {
+    "max-depth",
+    [] (value_print_options *opt) { return &opt->max_depth; },
+    show_print_max_depth, /* show_cmd_cb */
+    N_("Set maximum print depth for nested structures, unions and arrays."),
+    N_("Show maximum print depth for nested structures, unions, and arrays."),
+    N_("When structures, unions, or arrays are nested beyond this depth then they\n\
+will be replaced with either '{...}' or '(...)' depending on the language.\n\
+Use \"unlimited\" to print the complete structure.")
+  },
+
+  boolean_option_def {
+    "null-stop",
+    [] (value_print_options *opt) { return &opt->stop_print_at_null; },
+    show_stop_print_at_null, /* show_cmd_cb */
+    N_("Set printing of char arrays to stop at first null char."),
+    N_("Show printing of char arrays to stop at first null char."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "object",
+    [] (value_print_options *opt) { return &opt->objectprint; },
+    show_objectprint, /* show_cmd_cb */
+    _("Set printing of C++ virtual function tables."),
+    _("Show printing of C++ virtual function tables."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "pretty",
+    [] (value_print_options *opt) { return &opt->prettyformat_structs; },
+    show_prettyformat_structs, /* show_cmd_cb */
+    N_("Set pretty formatting of structures."),
+    N_("Show pretty formatting of structures."),
+    NULL, /* help_doc */
+  },
+
+  uinteger_option_def {
+    "repeats",
+    [] (value_print_options *opt) { return &opt->repeat_count_threshold; },
+    show_repeat_count_threshold, /* show_cmd_cb */
+    N_("Set threshold for repeated print elements."),
+    N_("Show threshold for repeated print elements."),
+    N_("\"unlimited\" causes all elements to be individually printed."),
+  },
+
+  boolean_option_def {
+    "static-members",
+    [] (value_print_options *opt) { return &opt->static_field_print; },
+    show_static_field_print, /* show_cmd_cb */
+    N_("Set printing of C++ static members."),
+    N_("Show printing of C++ static members."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "symbol",
+    [] (value_print_options *opt) { return &opt->symbol_print; },
+    show_symbol_print, /* show_cmd_cb */
+    N_("Set printing of symbol names when printing pointers."),
+    N_("Show printing of symbol names when printing pointers."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "union",
+    [] (value_print_options *opt) { return &opt->unionprint; },
+    show_unionprint, /* show_cmd_cb */
+    N_("Set printing of unions interior to structures."),
+    N_("Show printing of unions interior to structures."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "vtbl",
+    [] (value_print_options *opt) { return &opt->vtblprint; },
+    show_vtblprint, /* show_cmd_cb */
+    N_("Set printing of C++ virtual function tables."),
+    N_("Show printing of C++ virtual function tables."),
+    NULL, /* help_doc */
+  },
+};
+
+/* See valprint.h.  */
+
+gdb::option::option_def_group
+make_value_print_options_def_group (value_print_options *opts)
+{
+  return {{value_print_option_defs}, opts};
+}
+
 void
 _initialize_valprint (void)
 {
@@ -3094,71 +3269,9 @@ Generic command for setting what things to print in \"raw\" mode."),
 		  _("Generic command for showing \"print raw\" settings."),
 		  &showprintrawlist, "show print raw ", 0, &showprintlist);
 
-  add_setshow_uinteger_cmd ("elements", no_class,
-			    &user_print_options.print_max, _("\
-Set limit on string chars or array elements to print."), _("\
-Show limit on string chars or array elements to print."), _("\
-\"set print elements unlimited\" causes there to be no limit."),
-			    NULL,
-			    show_print_max,
-			    &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("null-stop", no_class,
-			   &user_print_options.stop_print_at_null, _("\
-Set printing of char arrays to stop at first null char."), _("\
-Show printing of char arrays to stop at first null char."), NULL,
-			   NULL,
-			   show_stop_print_at_null,
-			   &setprintlist, &showprintlist);
-
-  add_setshow_uinteger_cmd ("repeats", no_class,
-			    &user_print_options.repeat_count_threshold, _("\
-Set threshold for repeated print elements."), _("\
-Show threshold for repeated print elements."), _("\
-\"set print repeats unlimited\" causes all elements to be individually printed."),
-			    NULL,
-			    show_repeat_count_threshold,
-			    &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("pretty", class_support,
-			   &user_print_options.prettyformat_structs, _("\
-Set pretty formatting of structures."), _("\
-Show pretty formatting of structures."), NULL,
-			   NULL,
-			   show_prettyformat_structs,
-			   &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("union", class_support,
-			   &user_print_options.unionprint, _("\
-Set printing of unions interior to structures."), _("\
-Show printing of unions interior to structures."), NULL,
-			   NULL,
-			   show_unionprint,
-			   &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("array", class_support,
-			   &user_print_options.prettyformat_arrays, _("\
-Set pretty formatting of arrays."), _("\
-Show pretty formatting of arrays."), NULL,
-			   NULL,
-			   show_prettyformat_arrays,
-			   &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("address", class_support,
-			   &user_print_options.addressprint, _("\
-Set printing of addresses."), _("\
-Show printing of addresses."), NULL,
-			   NULL,
-			   show_addressprint,
-			   &setprintlist, &showprintlist);
-
-  add_setshow_boolean_cmd ("symbol", class_support,
-			   &user_print_options.symbol_print, _("\
-Set printing of symbol names when printing pointers."), _("\
-Show printing of symbol names when printing pointers."),
-			   NULL, NULL,
-			   show_symbol_print,
-			   &setprintlist, &showprintlist);
+  gdb::option::add_setshow_cmds_for_options
+    (class_support, &user_print_options, value_print_option_defs,
+     &setprintlist, &showprintlist);
 
   add_setshow_zuinteger_cmd ("input-radix", class_support, &input_radix_1,
 			     _("\
@@ -3192,20 +3305,4 @@ Without an argument, sets both radices back to the default value of 10."),
 Show the default input and output number radices.\n\
 Use 'show input-radix' or 'show output-radix' to independently show each."),
 	   &showlist);
-
-  add_setshow_boolean_cmd ("array-indexes", class_support,
-                           &user_print_options.print_array_indexes, _("\
-Set printing of array indexes."), _("\
-Show printing of array indexes"), NULL, NULL, show_print_array_indexes,
-                           &setprintlist, &showprintlist);
-
-  add_setshow_zuinteger_unlimited_cmd ("max-depth", class_support,
-                            &user_print_options.max_depth, _("\
-Set maximum print depth for nested structures, unions and arrays."), _("\
-Show maximum print depth for nested structures, unions, and arrays."), _("\
-When structures, unions, or arrays are nested beyond this depth then they\n\
-will be replaced with either '{...}' or '(...)' depending on the language.\n\
-Use 'set print max-depth unlimited' to print the complete structure."),
-				       NULL, show_print_max_depth,
-				       &setprintlist, &showprintlist);
 }

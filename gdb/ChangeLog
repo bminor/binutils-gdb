@@ -1,5 +1,45 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* compile/compile.c: Include "cli/cli-option.h".
+	(compile_print_value): Scope data pointer is now a
+	value_print_options pointer; adjust.
+	(compile_print_command): Process options.  Scope data pointer is
+	now a value_print_options pointer; adjust.
+	(_initialize_compile): Update "compile print"'s help to include
+	supported options.  Install a completer for "compile print".
+	* cp-valprint.c (show_vtblprint, show_objectprint)
+	(show_static_field_print): Delete.
+	(_initialize_cp_valprint): Don't install "set print
+	static-members", "set print vtbl", "set print object" here.
+	* printcmd.c: Include "cli/cli-option.h" and
+	"common/gdb_optional.h".
+	(print_command_parse_format): Rework to fill in a
+	value_print_options instead of a format_data.
+	(print_value): Change parameter type from format_data pointer to
+	value_print_options reference.  Adjust.
+	(print_command_1): Process options.  Adjust to pass down a
+	value_print_options.
+	(print_command_completer): New.
+	(_initialize_printcmd): Install print_command_completer as
+	handle_brkchars completer for the "print" command.  Update
+	"print"'s help to include supported options.
+	* valprint.c: Include "cli/cli-option.h".
+	(show_vtblprint, show_objectprint, show_static_field_print): Moved
+	here from cp-valprint.c.
+	(boolean_option_def, uinteger_option_def)
+	(value_print_option_defs, make_value_print_options_def_group):
+	New.  Use gdb::option::add_setshow_cmds_for_options to install
+	"set print elements", "set print null-stop", "set print repeats",
+	"set print pretty", "set print union", "set print array", "set
+	print address", "set print symbol", "set print array-indexes".
+	* valprint.h: Include <string> and "cli/cli-option.h".
+	(make_value_print_options_def_group): Declare.
+	(print_value): Change parameter type from format_data pointer to
+	value_print_options reference.
+	(print_command_completer): Declare.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_CLI_SRCS): Add cli/cli-option.c.
 	(COMMON_SFILES): Add maint-test-settings.c.
 	* cli/cli-decode.c (boolean_enums): New global, factored out from

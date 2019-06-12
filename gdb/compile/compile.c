@@ -23,6 +23,7 @@
 #include "command.h"
 #include "cli/cli-script.h"
 #include "cli/cli-utils.h"
+#include "cli/cli-option.h"
 #include "completer.h"
 #include "gdbcmd.h"
 #include "compile.h"
@@ -328,9 +329,9 @@ compile_code_command (const char *arg, int from_tty)
 void
 compile_print_value (struct value *val, void *data_voidp)
 {
-  const struct format_data *fmtp = (const struct format_data *) data_voidp;
+  const value_print_options *print_opts = (value_print_options *) data_voidp;
 
-  print_value (val, fmtp);
+  print_value (val, *print_opts);
 }
 
 /* Handle the input from the 'compile print' command.  The "compile
@@ -342,22 +343,30 @@ static void
 compile_print_command (const char *arg, int from_tty)
 {
   enum compile_i_scope_types scope = COMPILE_I_PRINT_ADDRESS_SCOPE;
-  struct format_data fmt;
+  value_print_options print_opts;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  /* Passing &FMT as SCOPE_DATA is safe as do_module_cleanup will not
-     touch the stale pointer if compile_object_run has already quit.  */
-  print_command_parse_format (&arg, "compile print", &fmt);
+  get_user_print_options (&print_opts);
+  /* Override global settings with explicit options, if any.  */
+  auto group = make_value_print_options_def_group (&print_opts);
+  gdb::option::process_options
+    (&arg, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER, group);
+
+  print_command_parse_format (&arg, "compile print", &print_opts);
+
+  /* Passing &PRINT_OPTS as SCOPE_DATA is safe as do_module_cleanup
+     will not touch the stale pointer if compile_object_run has
+     already quit.  */
 
   if (arg && *arg)
-    eval_compile_command (NULL, arg, scope, &fmt);
+    eval_compile_command (NULL, arg, scope, &print_opts);
   else
     {
       counted_command_line l = get_command_line (compile_control, "");
 
       l->control_u.compile.scope = scope;
-      l->control_u.compile.scope_data = &fmt;
+      l->control_u.compile.scope_data = &print_opts;
       execute_control_command_untraced (l.get ());
     }
 }
@@ -946,11 +955,19 @@ Usage: compile file [-r|-raw] [FILENAME]\n\
 	       &compile_command_list);
   set_cmd_completer (c, filename_completer);
 
-  add_cmd ("print", class_obscure, compile_print_command,
-	   _("\
+  const auto compile_print_opts = make_value_print_options_def_group (nullptr);
+
+  static const std::string compile_print_help
+    = gdb::option::build_help (N_("\
 Evaluate EXPR by using the compiler and print result.\n\
 \n\
-Usage: compile print[/FMT] [EXPR]\n\
+Usage: compile print [[OPTION]... --] [/FMT] [EXPR]\n\
+\n\
+Options:\n\
+%OPTIONS%\
+Note: because this command accepts arbitrary expressions, if you\n\
+specify any command option, you must use a double dash (\"--\")\n\
+to mark the end of option processing.  E.g.: \"compile print -o -- myobj\".\n\
 \n\
 The expression may be specified on the same line as the command, e.g.:\n\
 \n\
@@ -963,7 +980,12 @@ indicate the end of the expression.\n\
 \n\
 EXPR may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."),
-	   &compile_command_list);
+			       compile_print_opts);
+
+  c = add_cmd ("print", class_obscure, compile_print_command,
+	       compile_print_help.c_str (),
+	       &compile_command_list);
+  set_cmd_completer_handle_brkchars (c, print_command_completer);
 
   add_setshow_boolean_cmd ("compile", class_maintenance, &compile_debug, _("\
 Set compile command debugging."), _("\
