@@ -1,5 +1,12 @@
 2019-06-12  Christos Zoulas  <christos@zoulas.com>
 
+	PR 24663
+	* readelf.c (process_netbsd_elf_note): Add support for
+	NT_NETBSD_PAX.
+	(process_note): Add support for PaX notes.
+
+2019-06-12  Christos Zoulas  <christos@zoulas.com>
+
 	PR 24665
 	* readelf.c (get_netbsd_elfcore_note_type): Add support for SH
 	core notes.
