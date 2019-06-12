@@ -1,5 +1,12 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (thread_apply_command): Adjust TID parsing.
+	* tid-parse.c (tid_range_parser::finished): Ensure parsing end is
+	detected before end of string.
+	(tid_is_in_list): Error out if LIST is invalid.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* completer.c (complete_line_internal_1): Rewind completion word
 	point.
 	(completion_tracker::advance_custom_word_point_by): Change

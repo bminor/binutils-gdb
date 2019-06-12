@@ -1,3 +1,8 @@
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp: Adjust expected output.  Add "thread apply 1
+	foo --1" test.
+
 2019-06-11  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/block-data.f: New.

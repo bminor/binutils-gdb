@@ -350,8 +350,13 @@ with_test_prefix "two inferiors" {
 	thr_apply_info_thr_error "${prefix}1-" "inverted range"
 	thr_apply_info_thr_error "${prefix}2-1" "inverted range"
 	thr_apply_info_thr_error "${prefix}2-\$one" "inverted range"
-	thr_apply_info_thr_error "${prefix}-1" "negative value"
-	thr_apply_info_thr_error "${prefix}-\$one" "negative value"
+	if {$prefix == ""} {
+	    thr_apply_info_thr_error "${prefix}-1" "Invalid thread ID: -1"
+	    thr_apply_info_thr_error "${prefix}-\$one" "Invalid thread ID: -\\\$one"
+	} else {
+	    thr_apply_info_thr_error "${prefix}-1" "negative value"
+	    thr_apply_info_thr_error "${prefix}-\$one" "negative value"
+	}
 	thr_apply_info_thr_error "${prefix}\$minus_one" \
 	    "negative value: ${prefix_re}\\\$minus_one"
 
@@ -373,6 +378,13 @@ with_test_prefix "two inferiors" {
 	gdb_test "thread apply $thr" $output
 	gdb_test "thread apply 1.*" $output
     }
+
+    # Check that thread ID list parsing stops at the non-number token
+    # "foo" in a corner case where the "foo" is followed by hyphens.
+    # In this corner case, GDB used to skip past "foo", and then parse
+    # "--1" as a tid range for the current inferior.
+    gdb_test "thread apply 1 foo --1" \
+	"Undefined command: \"foo\".  Try \"help\"\\."
 
     # Check that we do parse the inferior number and don't confuse it.
     gdb_test "info threads 3.1" \

@@ -1560,7 +1560,6 @@ thread_apply_command (const char *tidlist, int from_tty)
 {
   qcs_flags flags;
   const char *cmd = NULL;
-  const char *cmd_or_flags;
   tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
@@ -1572,17 +1571,15 @@ thread_apply_command (const char *tidlist, int from_tty)
       int inf_num, thr_start, thr_end;
 
       if (!parser.get_tid_range (&inf_num, &thr_start, &thr_end))
-	{
-	  cmd = parser.cur_tok ();
-	  break;
-	}
+	break;
     }
 
-  cmd_or_flags = cmd;
-  while (cmd != NULL && parse_flags_qcs ("thread apply", &cmd, &flags))
+  cmd = parser.cur_tok ();
+
+  while (parse_flags_qcs ("thread apply", &cmd, &flags))
     ;
 
-  if (cmd == NULL)
+  if (*cmd == '\0')
     error (_("Please specify a command following the thread ID list"));
 
   if (tidlist == cmd || !isalpha (cmd[0]))
@@ -1591,7 +1588,7 @@ thread_apply_command (const char *tidlist, int from_tty)
   scoped_restore_current_thread restore_thread;
 
   parser.init (tidlist, current_inferior ()->num);
-  while (!parser.finished () && parser.cur_tok () < cmd_or_flags)
+  while (!parser.finished ())
     {
       struct thread_info *tp = NULL;
       struct inferior *inf;

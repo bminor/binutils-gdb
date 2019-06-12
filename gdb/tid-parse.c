@@ -139,7 +139,13 @@ tid_range_parser::finished () const
   switch (m_state)
     {
     case STATE_INFERIOR:
-      return *m_cur_tok == '\0';
+      /* Parsing is finished when at end of string or null string,
+	 or we are not in a range and not in front of an integer, negative
+	 integer, convenience var or negative convenience var.  */
+      return (*m_cur_tok == '\0'
+	      || !(isdigit (*m_cur_tok)
+		   || *m_cur_tok == '$'
+		   || *m_cur_tok == '*'));
     case STATE_THREAD_RANGE:
     case STATE_STAR_RANGE:
       return m_range_parser.finished ();
@@ -311,6 +317,8 @@ tid_is_in_list (const char *list, int default_inferior,
     return 1;
 
   tid_range_parser parser (list, default_inferior);
+  if (parser.finished ())
+    invalid_thread_id_error (parser.cur_tok ());
   while (!parser.finished ())
     {
       int tmp_inf, tmp_thr_start, tmp_thr_end;
