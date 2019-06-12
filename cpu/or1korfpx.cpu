@@ -268,7 +268,7 @@
 
 (define-pmacro (float-setflag-insn-base mnemonic rtx-mnemonic symantics)
   (begin
-    (dni (.sym lf- mnemonic -s)
+    (dni (.sym lf-sf mnemonic -s)
          (.str "lf.sf" mnemonic ".s reg/reg")
          ((MACH ORFPX32-MACHS))
          (.str "lf.sf" mnemonic ".s $rASF,$rBSF")
@@ -276,7 +276,7 @@
          (symantics rtx-mnemonic SF rASF rBSF)
          ()
          )
-    (dni (.sym lf- mnemonic -d)
+    (dni (.sym lf-sf mnemonic -d)
          (.str "lf.sf" mnemonic ".d reg/reg")
          ((MACH ORFPX64-MACHS))
          (.str "lf.sf" mnemonic ".d $rADF,$rBDF")
@@ -284,7 +284,7 @@
          (symantics rtx-mnemonic DF rADF rBDF)
          ()
          )
-    (dni (.sym lf- mnemonic -d32)
+    (dni (.sym lf-sf mnemonic -d32)
          (.str "lf.sf" mnemonic ".d regpair/regpair")
          ((MACH ORFPX64A32-MACHS))
          (.str "lf.sf" mnemonic ".d $rAD32F,$rBD32F")

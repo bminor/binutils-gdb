@@ -1,5 +1,9 @@
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
+	* or1korfpx.cpu (float-setflag-insn-base): Add 'sf' to symbol.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
 	* or1k.cpu (or64nd, or32nd, or1200nd): Update comment.a
 	(l-adrp): Improve comment.
 
