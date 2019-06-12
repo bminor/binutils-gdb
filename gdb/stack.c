@@ -47,6 +47,7 @@
 #include "linespec.h"
 #include "cli/cli-utils.h"
 #include "objfiles.h"
+#include "annotate.h"
 
 #include "symfile.h"
 #include "extension.h"
@@ -962,13 +963,11 @@ print_frame_info (const frame_print_options &fp_opts,
 
   if (source_print && sal.symtab)
     {
-      int done = 0;
       int mid_statement = ((print_what == SRC_LINE)
 			   && frame_show_address (frame, sal));
+      bool done = annotate_source_line (sal.symtab, sal.line, mid_statement,
+					get_frame_pc (frame));
 
-      if (annotation_level)
-	done = identify_source_line (sal.symtab, sal.line, mid_statement,
-				     get_frame_pc (frame));
       if (!done)
 	{
 	  if (deprecated_print_frame_info_listing_hook)

@@ -26,6 +26,8 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "top.h"
+#include "source.h"
+#include "objfiles.h"
 
 
 /* Prototypes for local functions.  */
@@ -417,7 +419,7 @@ annotate_arg_end (void)
     printf_filtered (("\n\032\032arg-end\n"));
 }
 
-void
+static void
 annotate_source (const char *filename, int line, int character, int mid,
 		 struct gdbarch *gdbarch, CORE_ADDR pc)
 {
@@ -429,6 +431,31 @@ annotate_source (const char *filename, int line, int character, int mid,
   printf_filtered (("%s:%d:%d:%s:%s\n"), filename, line, character,
 		   mid ? "middle" : "beg", paddress (gdbarch, pc));
 }
+
+/* See annotate.h.  */
+
+bool
+annotate_source_line (struct symtab *s, int line, int mid_statement,
+		      CORE_ADDR pc)
+{
+  if (annotation_level > 0)
+    {
+      if (s->line_charpos == nullptr)
+	open_source_file_with_line_charpos (s);
+      if (s->fullname == nullptr)
+	return false;
+      /* Don't index off the end of the line_charpos array.  */
+      if (line > s->nlines)
+	return false;
+
+      annotate_source (s->fullname, line, s->line_charpos[line - 1],
+		       mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)),
+		       pc);
+      return true;
+    }
+  return false;
+}
+
 
 void
 annotate_frame_begin (int level, struct gdbarch *gdbarch, CORE_ADDR pc)

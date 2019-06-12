@@ -87,8 +87,17 @@ struct annotate_arg_emitter
   DISABLE_COPY_AND_ASSIGN (annotate_arg_emitter);
 };
 
-extern void annotate_source (const char *, int, int, int,
-			     struct gdbarch *, CORE_ADDR);
+/* If annotations are turned on then print annotation describing the full
+   name of the source file S and the line number LINE and its corresponding
+   character position.
+
+   MID_STATEMENT is nonzero if the PC is not at the beginning of that
+   line.
+
+   Return true if successful, false if the file could not be found or
+   annotations are turned off.  */
+extern bool annotate_source_line (struct symtab *s, int line,
+				  int mid_statement, CORE_ADDR pc);
 
 extern void annotate_frame_begin (int, struct gdbarch *, CORE_ADDR);
 extern void annotate_function_call (void);

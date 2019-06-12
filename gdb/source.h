@@ -127,17 +127,6 @@ extern void clear_current_source_symtab_and_line (void);
 /* Add a source path substitution rule.  */
 extern void add_substitute_path_rule (char *, char *);
 
-/* Print text describing the full name of the source file S
-   and the line number LINE and its corresponding character position.
-   The text starts with two Ctrl-z so that the Emacs-GDB interface
-   can easily find it.
-
-   MID_STATEMENT is nonzero if the PC is not at the beginning of that line.
-
-   Return 1 if successful, 0 if could not find the file.  */
-extern int identify_source_line (struct symtab *s, int line,
-				 int mid_statement, CORE_ADDR pc);
-
 /* Flags passed as 4th argument to print_source_lines.  */
 enum print_source_lines_flag
   {

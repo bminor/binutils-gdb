@@ -1,5 +1,23 @@
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* annotate.c: Add 'source.h' and 'objfiles.h' includes.
+	(annotate_source): Make static.
+	(annotate_source_line): Moved from source.c and renamed from
+	identify_source_line.  Update the return type.
+	* annotate.h (annotate_source): Delete declaration.
+	(annotate_source_line): Declaration moved from source.h, and
+	renamed from identify_source_line.  Return type updated.
+	* source.c (identify_source_line): Moved to annotate.c and renamed
+	to annotate_source_line.
+	(info_line_command): Remove check of annotation_level.
+	* source.h (identify_source_line): Move declaration to annotate.h
+	and rename to annotate_source_line.
+	* stack.c: Add 'annotate.h' include.
+	(print_frame_info): Remove check of annotation_level before
+	calling annotate_source_line.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* source-cache.c (source_cache::get_plain_source_lines): Use
 	open_source_file_with_line_charpos instead of just
 	open_source_file, remove call to find_source_lines.

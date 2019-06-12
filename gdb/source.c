@@ -1212,29 +1212,6 @@ open_source_file_with_line_charpos (struct symtab *s)
 
 
 
-/* See source.h.  */
-
-int
-identify_source_line (struct symtab *s, int line, int mid_statement,
-		      CORE_ADDR pc)
-{
-  if (s->line_charpos == nullptr)
-    open_source_file_with_line_charpos (s);
-  if (s->fullname == 0)
-    return 0;
-  if (line > s->nlines)
-    /* Don't index off the end of the line_charpos array.  */
-    return 0;
-  annotate_source (s->fullname, line, s->line_charpos[line - 1],
-		   mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)), pc);
-
-  current_source_line = line;
-  current_source_symtab = s;
-  clear_lines_listed_range ();
-  return 1;
-}
-
-
 /* Print source lines from the file of symtab S,
    starting with line number LINE and stopping before line number STOPLINE.  */
 
@@ -1519,8 +1496,8 @@ info_line_command (const char *arg, int from_tty)
 
 	  /* If this is the only line, show the source code.  If it could
 	     not find the file, don't do anything special.  */
-	  if (annotation_level && sals.size () == 1)
-	    identify_source_line (sal.symtab, sal.line, 0, start_pc);
+	  if (sals.size () == 1)
+	    annotate_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else
 	/* Is there any case in which we get here, and have an address
