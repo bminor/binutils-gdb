@@ -1,5 +1,11 @@
 2019-06-12  Christos Zoulas  <christos@zoulas.com>
 
+	PR 24665
+	* readelf.c (get_netbsd_elfcore_note_type): Add support for SH
+	core notes.
+
+2019-06-12  Christos Zoulas  <christos@zoulas.com>
+
 	PR 24664
 	* readelf.c (get_netbsd_elfcore_note_type): Add support for NetBSD
 	auxv notes.
