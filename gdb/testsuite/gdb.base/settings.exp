@@ -194,13 +194,16 @@ proc_with_prefix test-boolean {} {
     gdb_test "$set_cmd auto" \
 	"\"on\" or \"off\" expected\\."
 
+    # "o" is ambiguous.
+    gdb_test "$set_cmd o" \
+	"\"on\" or \"off\" expected\\."
+
     # Various valid values.  Test both full value names and
     # abbreviations.
 
     # Note that unlike with auto-bool, empty value implies "on".
     foreach_with_prefix value {
 	""
-	"o"
 	"on"
 	"1"
 	"y"
@@ -278,11 +281,14 @@ proc_with_prefix test-auto-boolean {} {
     gdb_test "$set_cmd on 1" \
 	"\"on\", \"off\" or \"auto\" expected\\."
 
+    # "o" is ambiguous.
+    gdb_test "$set_cmd o" \
+	"\"on\", \"off\" or \"auto\" expected\\."
+
     # Various valid values.  Test both full value names and
     # abbreviations.
 
     foreach_with_prefix value {
-	"o"
 	"on"
 	"1"
 	"y"

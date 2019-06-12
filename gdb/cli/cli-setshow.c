@@ -54,18 +54,21 @@ parse_auto_binary_operation (const char *arg)
 
       while (isspace (arg[length - 1]) && length > 0)
 	length--;
-      if (strncmp (arg, "on", length) == 0
+
+      /* Note that "o" is ambiguous.  */
+
+      if ((length == 2 && strncmp (arg, "on", length) == 0)
 	  || strncmp (arg, "1", length) == 0
 	  || strncmp (arg, "yes", length) == 0
 	  || strncmp (arg, "enable", length) == 0)
 	return AUTO_BOOLEAN_TRUE;
-      else if (strncmp (arg, "off", length) == 0
+      else if ((length >= 2 && strncmp (arg, "off", length) == 0)
 	       || strncmp (arg, "0", length) == 0
 	       || strncmp (arg, "no", length) == 0
 	       || strncmp (arg, "disable", length) == 0)
 	return AUTO_BOOLEAN_FALSE;
       else if (strncmp (arg, "auto", length) == 0
-	       || (strncmp (arg, "-1", length) == 0 && length > 1))
+	       || (length > 1 && strncmp (arg, "-1", length) == 0))
 	return AUTO_BOOLEAN_AUTO;
     }
   error (_("\"on\", \"off\" or \"auto\" expected."));
@@ -87,12 +90,14 @@ parse_cli_boolean_value (const char *arg)
   while (arg[length - 1] == ' ' || arg[length - 1] == '\t')
     length--;
 
-  if (strncmp (arg, "on", length) == 0
+  /* Note that "o" is ambiguous.  */
+
+  if ((length == 2 && strncmp (arg, "on", length) == 0)
       || strncmp (arg, "1", length) == 0
       || strncmp (arg, "yes", length) == 0
       || strncmp (arg, "enable", length) == 0)
     return 1;
-  else if (strncmp (arg, "off", length) == 0
+  else if ((length >= 2 && strncmp (arg, "off", length) == 0)
 	   || strncmp (arg, "0", length) == 0
 	   || strncmp (arg, "no", length) == 0
 	   || strncmp (arg, "disable", length) == 0)

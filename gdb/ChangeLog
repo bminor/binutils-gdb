@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-setshow.c (parse_auto_binary_operation)
+	(parse_cli_boolean_value): Don't allow "o".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_SFILES): Add maint-test-settings.c.
 	* NEWS: Mention maint test-settings KIND.
 	* maint-test-settings.c: New file.
