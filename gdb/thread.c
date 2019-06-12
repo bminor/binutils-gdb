@@ -1583,7 +1583,7 @@ thread_apply_command (const char *tidlist, int from_tty)
   if (*cmd == '\0')
     error (_("Please specify a command following the thread ID list"));
 
-  if (tidlist == cmd || !isalpha (cmd[0]))
+  if (tidlist == cmd || isdigit (cmd[0]))
     invalid_thread_id_error (cmd);
 
   scoped_restore_current_thread restore_thread;

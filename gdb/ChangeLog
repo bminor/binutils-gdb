@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (thread_apply_command): Check for invalid TID with
+	isdigit instead of !isalpha.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-utils.c (parse_flags_qcs): Use validate_flags_qcs.
 	(validate_flags_qcs): New.
 	* cli/cli-utils.h (struct qcs_flags): Change field types to int.
