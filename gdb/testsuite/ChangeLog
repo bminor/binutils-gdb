@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.c: New file.
+	* gdb.base/options.exp: New file.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/settings.exp (test-boolean, test-auto-boolean): Check
 	that "o" is ambiguous.
 

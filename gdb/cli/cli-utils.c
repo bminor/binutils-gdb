@@ -27,6 +27,57 @@ static std::string extract_arg_maybe_quoted (const char **arg);
 
 /* See documentation in cli-utils.h.  */
 
+ULONGEST
+get_ulongest (const char **pp, int trailer)
+{
+  LONGEST retval = 0;	/* default */
+  const char *p = *pp;
+
+  if (*p == '$')
+    {
+      value *val = value_from_history_ref (p, &p);
+
+      if (val != NULL)	/* Value history reference */
+	{
+	  if (TYPE_CODE (value_type (val)) == TYPE_CODE_INT)
+	    retval = value_as_long (val);
+	  else
+	    error (_("History value must have integer type."));
+	}
+      else	/* Convenience variable */
+	{
+	  /* Internal variable.  Make a copy of the name, so we can
+	     null-terminate it to pass to lookup_internalvar().  */
+	  const char *start = ++p;
+	  while (isalnum (*p) || *p == '_')
+	    p++;
+	  std::string varname (start, p - start);
+	  if (!get_internalvar_integer (lookup_internalvar (varname.c_str ()),
+				       &retval))
+	    error (_("Convenience variable $%s does not have integer value."),
+		   varname.c_str ());
+	}
+    }
+  else
+    {
+      retval = strtoulst (p, pp, 0);
+      if (p == *pp)
+	{
+	  /* There is no number here.  (e.g. "cond a == b").  */
+	  error (_("Expected integer at: %s"), p);
+	}
+      p = *pp;
+    }
+
+  if (!(isspace (*p) || *p == '\0' || *p == trailer))
+    error (_("Trailing junk at: %s"), p);
+  p = skip_spaces (p);
+  *pp = p;
+  return retval;
+}
+
+/* See documentation in cli-utils.h.  */
+
 int
 get_number_trailer (const char **pp, int trailer)
 {

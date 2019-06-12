@@ -39,6 +39,10 @@ extern int get_number (const char **);
 
 extern int get_number (char **);
 
+/* Like get_number_trailer, but works with ULONGEST, and throws on
+   error instead of returning 0.  */
+extern ULONGEST get_ulongest (const char **pp, int trailer = '\0');
+
 /* Extract from ARGS the arguments [-q] [-t TYPEREGEXP] [--] NAMEREGEXP.
 
    The caller is responsible to initialize *QUIET to false, *REGEXP
@@ -193,6 +197,14 @@ extern std::string extract_arg (const char **arg);
    argument.  */
 extern int check_for_argument (const char **str, const char *arg, int arg_len);
 
+/* Same as above, but ARG's length is computed.  */
+
+static inline int
+check_for_argument (const char **str, const char *arg)
+{
+  return check_for_argument (str, arg, strlen (arg));
+}
+
 /* Same, for non-const STR.  */
 
 static inline int
@@ -200,6 +212,12 @@ check_for_argument (char **str, const char *arg, int arg_len)
 {
   return check_for_argument (const_cast<const char **> (str),
 			     arg, arg_len);
+}
+
+static inline int
+check_for_argument (char **str, const char *arg)
+{
+  return check_for_argument (str, arg, strlen (arg));
 }
 
 /* A helper function that looks for a set of flags at the start of a

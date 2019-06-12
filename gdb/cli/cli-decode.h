@@ -261,6 +261,10 @@ extern void not_just_help_class_command (const char *arg, int from_tty);
 
 extern void print_doc_line (struct ui_file *, const char *);
 
+/* The enums of boolean commands.  */
+extern const char * const boolean_enums[];
+
+/* The enums of auto-boolean commands.  */
 extern const char * const auto_boolean_enums[];
 
 /* Verify whether a given cmd_list_element is a user-defined command.

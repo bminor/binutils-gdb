@@ -1,5 +1,32 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_CLI_SRCS): Add cli/cli-option.c.
+	(COMMON_SFILES): Add maint-test-settings.c.
+	* cli/cli-decode.c (boolean_enums): New global, factored out from
+	...
+	(add_setshow_boolean_cmd): ... here.
+	* cli/cli-decode.h (boolean_enums): Declare.
+	* cli/cli-option.c: New file.
+	* cli/cli-option.h: New file.
+	* cli/cli-setshow.c (parse_cli_boolean_value(const char **)): New,
+	factored out from ...
+	(parse_cli_boolean_value(const char *)): ... this.
+	(is_unlimited_literal): Change parameter type to pointer to
+	pointer.  Adjust and advance ARG pointer.
+	(parse_cli_var_uinteger, parse_cli_var_zuinteger_unlimited)
+	(parse_cli_var_enum): New, factored out from ...
+	(do_set_command): ... this.  Adjust.
+	* cli/cli-setshow.h (parse_cli_boolean_value)
+	(parse_cli_var_uinteger, parse_cli_var_zuinteger_unlimited)
+	(parse_cli_var_enum): Declare.
+	* cli/cli-utils.c: Include "cli/cli-option.h".
+	(get_ulongest): New.
+	* cli/cli-utils.h (get_ulongest): Declare.
+	(check_for_argument): New overloads.
+	* maint-test-options.c: New file.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-utils.c (number_or_range_parser::get_number): Do not
 	parse a range if "-" is at the end of the string.
 

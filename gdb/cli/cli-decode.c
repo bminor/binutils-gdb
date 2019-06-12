@@ -551,6 +551,7 @@ add_setshow_enum_cmd (const char *name,
   set_cmd_context (show, context);
 }
 
+/* See cli-decode.h.  */
 const char * const auto_boolean_enums[] = { "on", "off", "auto", NULL };
 
 /* Add an auto-boolean command named NAME to both the set and show
@@ -578,6 +579,9 @@ add_setshow_auto_boolean_cmd (const char *name,
   c->enums = auto_boolean_enums;
 }
 
+/* See cli-decode.h.  */
+const char * const boolean_enums[] = { "on", "off", NULL };
+
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
@@ -591,7 +595,6 @@ add_setshow_boolean_cmd (const char *name, enum command_class theclass, int *var
 			 struct cmd_list_element **set_list,
 			 struct cmd_list_element **show_list)
 {
-  static const char *boolean_enums[] = { "on", "off", NULL };
   struct cmd_list_element *c;
 
   add_setshow_cmd_full (name, theclass, var_boolean, var,
