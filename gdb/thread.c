@@ -46,6 +46,7 @@
 #include <algorithm>
 #include "common/gdb_optional.h"
 #include "inline-frame.h"
+#include "stack.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
@@ -1653,7 +1654,7 @@ static void
 tfaas_command (const char *cmd, int from_tty)
 {
   std::string expanded
-    = std::string ("thread apply all -s frame apply all -s ") + cmd;
+    = std::string ("thread apply all -s -- frame apply all -s ") + cmd;
   execute_command (expanded.c_str (), from_tty);
 }
 
@@ -1938,6 +1939,7 @@ void
 _initialize_thread (void)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
+  cmd_list_element *c;
 
   add_info ("threads", info_threads_command,
 	    _("Display currently known threads.\n\
@@ -1983,10 +1985,12 @@ Apply a command to all threads (ignoring errors and empty output).\n\
 Usage: taas COMMAND\n\
 shortcut for 'thread apply all -s COMMAND'"));
 
-  add_com ("tfaas", class_run, tfaas_command, _("\
+  c = add_com ("tfaas", class_run, tfaas_command, _("\
 Apply a command to all frames of all threads (ignoring errors and empty output).\n\
-Usage: tfaas COMMAND\n\
-shortcut for 'thread apply all -s frame apply all -s COMMAND'"));
+Usage: tfaas [OPTION]... COMMAND\n\
+shortcut for 'thread apply all -s -- frame apply all -s [OPTION]... COMMAND'\n\
+See \"help frame apply all\" for available options."));
+  set_cmd_completer_handle_brkchars (c, frame_apply_all_cmd_completer);
 
   add_cmd ("name", class_run, thread_name_command,
 	   _("Set the current thread's name.\n\

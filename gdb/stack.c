@@ -2823,6 +2823,42 @@ func_command (const char *arg, int from_tty)
     }
 }
 
+/* The qcs command line flags for the "frame apply" commands.  Keep
+   this in sync with the "thread apply" commands.  */
+
+using qcs_flag_option_def
+  = gdb::option::flag_option_def<qcs_flags>;
+
+static const gdb::option::option_def fr_qcs_flags_option_defs[] = {
+  qcs_flag_option_def {
+    "q", [] (qcs_flags *opt) { return &opt->quiet; },
+    N_("Disables printing the frame location information."),
+  },
+
+  qcs_flag_option_def {
+    "c", [] (qcs_flags *opt) { return &opt->cont; },
+    N_("Print any error raised by COMMAND and continue."),
+  },
+
+  qcs_flag_option_def {
+    "s", [] (qcs_flags *opt) { return &opt->silent; },
+    N_("Silently ignore any errors or empty output produced by COMMAND."),
+  },
+};
+
+/* Create an option_def_group array for all the "frame apply" options,
+   with FLAGS and SET_BT_OPTS as context.  */
+
+static inline std::array<gdb::option::option_def_group, 2>
+make_frame_apply_options_def_group (qcs_flags *flags,
+				    set_backtrace_options *set_bt_opts)
+{
+  return {{
+    { {fr_qcs_flags_option_defs}, flags },
+    { {set_backtrace_option_defs}, set_bt_opts },
+  }};
+}
+
 /* Apply a GDB command to all stack frames, or a set of identified frames,
    or innermost COUNT frames.
    With a negative COUNT, apply command on outermost -COUNT frames.
@@ -2852,10 +2888,13 @@ frame_apply_command_count (const char *which_command,
 			   struct frame_info *trailing, int count)
 {
   qcs_flags flags;
-  struct frame_info *fi;
+  set_backtrace_options set_bt_opts = user_set_backtrace_options;
 
-  while (cmd != NULL && parse_flags_qcs (which_command, &cmd, &flags))
-    ;
+  auto group = make_frame_apply_options_def_group (&flags, &set_bt_opts);
+  gdb::option::process_options
+    (&cmd, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group);
+
+  validate_flags_qcs (which_command, &flags);
 
   if (cmd == NULL || *cmd == '\0')
     error (_("Please specify a command to apply on the selected frames"));
@@ -2866,7 +2905,12 @@ frame_apply_command_count (const char *which_command,
      these also.  */
   scoped_restore_current_thread restore_thread;
 
-  for (fi = trailing; fi && count--; fi = get_prev_frame (fi))
+  /* These options are handled quite deep in the unwind machinery, so
+     we get to pass them down by swapping globals.  */
+  scoped_restore restore_set_backtrace_options
+    = make_scoped_restore (&user_set_backtrace_options, set_bt_opts);
+
+  for (frame_info *fi = trailing; fi && count--; fi = get_prev_frame (fi))
     {
       QUIT;
 
@@ -2907,6 +2951,104 @@ frame_apply_command_count (const char *which_command,
 	    }
 	}
     }
+}
+
+/* Completer for the "frame apply ..." commands.  */
+
+static void
+frame_apply_completer (completion_tracker &tracker, const char *text)
+{
+  const auto group = make_frame_apply_options_def_group (nullptr, nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+
+  complete_nested_command_line (tracker, text);
+}
+
+/* Completer for the "frame apply" commands.  */
+
+static void
+frame_apply_level_cmd_completer (struct cmd_list_element *ignore,
+				 completion_tracker &tracker,
+				 const char *text, const char */*word*/)
+{
+  /* Do this explicitly because there's an early return below.  */
+  tracker.set_use_custom_word_point (true);
+
+  number_or_range_parser levels (text);
+
+  /* Skip the LEVEL list to find the options and command args.  */
+  try
+    {
+      while (!levels.finished ())
+	{
+	  /* Call for effect.  */
+	  levels.get_number ();
+
+	  if (levels.in_range ())
+	    levels.skip_range ();
+	}
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      /* get_number throws if it parses a negative number, for
+	 example.  But a seemingly negative number may be the start of
+	 an option instead.  */
+    }
+
+  const char *cmd = levels.cur_tok ();
+
+  if (cmd == text)
+    {
+      /* No level list yet.  */
+      return;
+    }
+
+  /* Check if we're past a valid LEVEL already.  */
+  if (levels.finished ()
+      && cmd > text && !isspace (cmd[-1]))
+    return;
+
+  /* We're past LEVELs, advance word point.  */
+  tracker.advance_custom_word_point_by (cmd - text);
+  text = cmd;
+
+  frame_apply_completer (tracker, text);
+}
+
+/* Completer for the "frame apply all" command.  */
+
+void
+frame_apply_all_cmd_completer (struct cmd_list_element *ignore,
+			       completion_tracker &tracker,
+			       const char *text, const char */*word*/)
+{
+  frame_apply_completer (tracker, text);
+}
+
+/* Completer for the "frame apply COUNT" command.  */
+
+static void
+frame_apply_cmd_completer (struct cmd_list_element *ignore,
+			   completion_tracker &tracker,
+			   const char *text, const char */*word*/)
+{
+  const char *cmd = text;
+
+  int count = get_number_trailer (&cmd, 0);
+  if (count == 0)
+    return;
+
+  /* Check if we're past a valid COUNT already.  */
+  if (cmd > text && !isspace (cmd[-1]))
+    return;
+
+  /* We're past COUNT, advance word point.  */
+  tracker.advance_custom_word_point_by (cmd - text);
+  text = cmd;
+
+  frame_apply_completer (tracker, text);
 }
 
 /* Implementation of the "frame apply level" command.  */
@@ -3095,44 +3237,62 @@ A single numerical argument specifies the frame to select."),
 
   add_com_alias ("f", "frame", class_stack, 1);
 
-#define FRAME_APPLY_FLAGS_HELP "\
+#define FRAME_APPLY_OPTION_HELP "\
 Prints the frame location information followed by COMMAND output.\n\
-FLAG arguments are -q (quiet), -c (continue), -s (silent).\n\
-Flag -q disables printing the frame location information.\n\
-By default, if a COMMAND raises an error, frame apply is aborted.\n\
-Flag -c indicates to print the error and continue.\n\
-Flag -s indicates to silently ignore a COMMAND that raises an error\n\
-or produces no output."
+\n\
+By default, an error raised during the execution of COMMAND\n\
+aborts \"frame apply\".\n\
+\n\
+Options:\n\
+%OPTIONS%"
 
-  add_prefix_cmd ("apply", class_stack, frame_apply_command,
-		  _("Apply a command to a number of frames.\n\
-Usage: frame apply COUNT [FLAG]... COMMAND\n\
+  const auto frame_apply_opts
+    = make_frame_apply_options_def_group (nullptr, nullptr);
+
+  static std::string frame_apply_cmd_help = gdb::option::build_help (N_("\
+Apply a command to a number of frames.\n\
+Usage: frame apply COUNT [OPTION]... COMMAND\n\
 With a negative COUNT argument, applies the command on outermost -COUNT frames.\n"
-FRAME_APPLY_FLAGS_HELP),
-		  &frame_apply_cmd_list, "frame apply ", 1, &frame_cmd_list);
+				  FRAME_APPLY_OPTION_HELP),
+			       frame_apply_opts);
 
-  add_cmd ("all", class_stack, frame_apply_all_command,
-	   _("\
+  cmd = add_prefix_cmd ("apply", class_stack, frame_apply_command,
+			frame_apply_cmd_help.c_str (),
+			&frame_apply_cmd_list, "frame apply ", 1,
+			&frame_cmd_list);
+  set_cmd_completer_handle_brkchars (cmd, frame_apply_cmd_completer);
+
+  static std::string frame_apply_all_cmd_help = gdb::option::build_help (N_("\
 Apply a command to all frames.\n\
 \n\
-Usage: frame apply all [FLAG]... COMMAND\n"
-FRAME_APPLY_FLAGS_HELP),
-	   &frame_apply_cmd_list);
+Usage: frame apply all [OPTION]... COMMAND\n"
+				  FRAME_APPLY_OPTION_HELP),
+			       frame_apply_opts);
 
-  add_cmd ("level", class_stack, frame_apply_level_command,
-	   _("\
+  cmd = add_cmd ("all", class_stack, frame_apply_all_command,
+		 frame_apply_all_cmd_help.c_str (),
+		 &frame_apply_cmd_list);
+  set_cmd_completer_handle_brkchars (cmd, frame_apply_all_cmd_completer);
+
+  static std::string frame_apply_level_cmd_help = gdb::option::build_help (N_("\
 Apply a command to a list of frames.\n\
 \n\
-Usage: frame apply level LEVEL... [FLAG]... COMMAND\n\
-ID is a space-separated list of LEVELs of frames to apply COMMAND on.\n"
-FRAME_APPLY_FLAGS_HELP),
+Usage: frame apply level LEVEL... [OPTION]... COMMAND\n\
+LEVEL is a space-separated list of levels of frames to apply COMMAND on.\n"
+				  FRAME_APPLY_OPTION_HELP),
+			       frame_apply_opts);
+
+  cmd = add_cmd ("level", class_stack, frame_apply_level_command,
+	   frame_apply_level_cmd_help.c_str (),
 	   &frame_apply_cmd_list);
+  set_cmd_completer_handle_brkchars (cmd, frame_apply_level_cmd_completer);
 
-  add_com ("faas", class_stack, faas_command, _("\
+  cmd = add_com ("faas", class_stack, faas_command, _("\
 Apply a command to all frames (ignoring errors and empty output).\n\
-Usage: faas COMMAND\n\
-shortcut for 'frame apply all -s COMMAND'"));
-
+Usage: faas [OPTION]... COMMAND\n\
+shortcut for 'frame apply all -s [OPTION]... COMMAND'\n\
+See \"help frame apply all\" for available options."));
+  set_cmd_completer_handle_brkchars (cmd, frame_apply_all_cmd_completer);
 
   add_prefix_cmd ("frame", class_stack,
 		  &frame_cmd.base_command, _("\

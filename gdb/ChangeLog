@@ -1,5 +1,27 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-utils.c (parse_flags_qcs): Use validate_flags_qcs.
+	(validate_flags_qcs): New.
+	* cli/cli-utils.h (struct qcs_flags): Change field types to int.
+	(validate_flags_qcs): Declare.
+	* stack.c (qcs_flag_option_def, fr_qcs_flags_option_defs): New.
+	(make_frame_apply_options_def_group): New.
+	(frame_apply_command_count): Process options with
+	gdb::option::process_options.
+	(frame_apply_completer): New.
+	(frame_apply_level_completer, frame_apply_all_completer)
+	(frame_apply_completer): New.
+	(_initialize_stack): Update help of "frame apply", "frame apply
+	level", "frame apply all" and "faas" to mention supported options
+	and install command completers.
+	* stack.h (frame_apply_all_completer): Declare.
+	* thread.c: Include "stack.h".
+	(tfaas_command): Add "--".
+	(_initialize_thread): Update help "tfaas" to mention supported
+	options and install command completer.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* completer.c (complete_nested_command_line): New.
 	(gdb_completion_word_break_characters_throw): Add assertion.
 	* completer.h (complete_nested_command_line): Declare.

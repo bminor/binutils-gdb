@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (test-frame-apply): New.
+	(top level): Test print commands with different "frame apply"
+	prefixes.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
         * lib/completion-support.exp (test_gdb_complete_tab_multiple)
 	(test_gdb_complete_cmd_multiple, test_gdb_complete_multiple): Add
 	'max_completions' parameter and handle it.

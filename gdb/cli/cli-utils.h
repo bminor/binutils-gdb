@@ -229,13 +229,14 @@ check_for_argument (char **str, const char *arg)
    such that FLAGS [N - 1] is the valid found flag.  */
 extern int parse_flags (const char **str, const char *flags);
 
-/* qcs_flags struct regroups the flags parsed by parse_flags_qcs.  */
+/* qcs_flags struct groups the -q, -c, and -s flags parsed by "thread
+   apply" and "frame apply" commands */
 
 struct qcs_flags
 {
-  bool quiet = false;
-  bool cont = false;
-  bool silent = false;
+  int quiet = false;
+  int cont = false;
+  int silent = false;
 };
 
 /* A helper function that uses parse_flags to handle the flags qcs :
@@ -258,5 +259,10 @@ struct qcs_flags
 
 extern bool parse_flags_qcs (const char *which_command, const char **str,
 			     qcs_flags *flags);
+
+/* Validate FLAGS.  Throws an error if both FLAGS->CONT and
+   FLAGS->SILENT are true.  WHICH_COMMAND is included in the error
+   message.  */
+extern void validate_flags_qcs (const char *which_command, qcs_flags *flags);
 
 #endif /* CLI_CLI_UTILS_H */

@@ -25,6 +25,9 @@
 #  - print
 #  - compile print
 #  - backtrace
+#  - frame apply
+#  - faas
+#  - tfaas
 
 load_lib completion-support.exp
 
@@ -293,6 +296,79 @@ proc_with_prefix test-backtrace {} {
     test_gdb_complete_unique \
 	"backtrace (1 + xxx" \
 	"backtrace (1 + xxx1"
+}
+
+# Basic option-machinery + "frame apply" command integration tests.
+proc_with_prefix test-frame-apply {} {
+    test_gdb_complete_unique "frame apply all" "frame apply all"
+
+    gdb_test "frame apply level 0-" \
+	"Please specify a command to apply on the selected frames"
+    test_gdb_complete_none "frame apply level 0-"
+
+    foreach cmd {
+	"frame apply all"
+	"frame apply 1"
+	"frame apply level 0"
+	"faas"
+	"tfaas"
+    } {
+	test_gdb_completion_offers_commands "$cmd "
+
+	# tfaas is silent on command error by design.  This procedure
+	# hides that aspect.  EXPECTED_RE is only considered when not
+	# testing with "faas"/"tfaas".
+	proc test_error_cmd {cmd arg expected_re} {
+	    if {$cmd == "tfaas"} {
+		gdb_test_no_output "$cmd$arg"
+	    } else {
+		gdb_test "$cmd$arg" $expected_re
+	    }
+	}
+	# Same, but for tests where both "faas" and "tfaas" are
+	# expected to be silent.
+	proc test_error_cmd2 {cmd arg expected_re} {
+	    if {$cmd == "tfaas" || $cmd == "faas"} {
+		gdb_test_no_output "$cmd$arg"
+	    } else {
+		gdb_test "$cmd$arg" $expected_re
+	    }
+	}
+
+	test_error_cmd $cmd " -" "Ambiguous option at: -"
+	test_gdb_complete_multiple "$cmd " "-" "" {
+	    "-c"
+	    "-past-entry"
+	    "-past-main"
+	    "-q"
+	    "-s"
+	}
+
+	with_test_prefix "no-trailing-space" {
+	    test_error_cmd $cmd " --" \
+		"Please specify a command to apply on the selected frames"
+	    test_gdb_complete_unique "$cmd --" "$cmd --"
+	}
+
+	with_test_prefix "trailing-space" {
+	    test_error_cmd $cmd " -- " \
+		"Please specify a command to apply on the selected frames"
+	    test_gdb_completion_offers_commands "$cmd -- "
+	}
+
+	# '-' is a valid TUI command.
+	test_error_cmd2 $cmd " -- -" \
+	    "Cannot enable the TUI when output is not a terminal"
+	test_gdb_complete_unique \
+	    "$cmd -- -" \
+	    "$cmd -- -"
+
+	test_error_cmd2 $cmd " -foo" \
+	    "Undefined command: \"-foo\".  Try \"help\"\\."
+	test_gdb_complete_none "$cmd -foo"
+
+	test_gdb_completion_offers_commands "$cmd -s "
+    }
 }
 
 # Miscellaneous tests.
@@ -731,13 +807,28 @@ foreach_with_prefix cmd {
     test-enum $cmd
 }
 
-# Run the print integration tests.
-test-print ""
+# Run the print integration tests, both as "standalone", and under
+# "frame apply".  The latter checks that the "frame apply ... COMMAND"
+# commands recurse the completion machinery for COMMAND completion
+# correctly.
+foreach prefix {
+    ""
+    "frame apply all "
+    "frame apply 1 "
+    "frame apply level 0 "
+} {
+    test-print $prefix
+}
 
-# Same for "compile print".
+# Same for "compile print".  Not really a wrapper prefix command like
+# "frame apply", but similar enough that we test pretty much the same
+# things.
 if ![skip_compile_feature_tests] {
     test-print "compile "
 }
 
 # Basic "backtrace" integration tests.
 test-backtrace
+
+# Basic "frame apply" integration tests.
+test-frame-apply

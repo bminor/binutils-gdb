@@ -573,8 +573,18 @@ parse_flags_qcs (const char *which_command, const char **str,
       gdb_assert_not_reached ("int qcs flag out of bound");
     }
 
-  if (flags->cont && flags->silent)
-    error (_("%s: -c and -s are mutually exclusive"), which_command);
+  validate_flags_qcs (which_command, flags);
 
   return true;
 }
+
+/* See documentation in cli-utils.h.  */
+
+void
+validate_flags_qcs (const char *which_command, qcs_flags *flags)
+{
+  if (flags->cont && flags->silent)
+    error (_("%s: -c and -s are mutually exclusive"), which_command);
+}
+
+/* See documentation in cli-utils.h.  */

@@ -52,4 +52,9 @@ struct symtab* get_last_displayed_symtab (void);
 int get_last_displayed_line (void);
 symtab_and_line get_last_displayed_sal ();
 
+/* Completer for the "frame apply all" command.  */
+void frame_apply_all_cmd_completer (struct cmd_list_element *ignore,
+				    completion_tracker &tracker,
+				    const char *text, const char */*word*/);
+
 #endif /* #ifndef STACK_H */
