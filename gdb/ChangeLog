@@ -1,5 +1,13 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-utils.c (parse_flags, parse_flags_qcs): Delete.
+	* cli/cli-utils.h (parse_flags, parse_flags_qcs): Delete.
+	* unittests/cli-utils-selftests.c (test_parse_flags)
+	(test_parse_flags_qcs): Delete.
+	(test_cli_utils): Don't call deleted functions.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* thread.c: Include "cli/cli-option.h".
 	(tp_array_compar_ascending): Global.
 	(tp_array_compar): Delete function.

@@ -220,15 +220,6 @@ check_for_argument (char **str, const char *arg)
   return check_for_argument (str, arg, strlen (arg));
 }
 
-/* A helper function that looks for a set of flags at the start of a
-   string.  The possible flags are given as a null terminated string.
-   A flag in STR must either be at the end of the string,
-   or be followed by whitespace.
-   Returns 0 if no valid flag is found at the start of STR.
-   Otherwise updates *STR, and returns N (which is > 0),
-   such that FLAGS [N - 1] is the valid found flag.  */
-extern int parse_flags (const char **str, const char *flags);
-
 /* qcs_flags struct groups the -q, -c, and -s flags parsed by "thread
    apply" and "frame apply" commands */
 
@@ -238,27 +229,6 @@ struct qcs_flags
   int cont = false;
   int silent = false;
 };
-
-/* A helper function that uses parse_flags to handle the flags qcs :
-     A flag -q sets FLAGS->QUIET to true.
-     A flag -c sets FLAGS->CONT to true.
-     A flag -s sets FLAGS->SILENT to true.
-
-   The caller is responsible to initialize *FLAGS to false before the (first)
-   call to parse_flags_qcs.
-   parse_flags_qcs can then be called iteratively to search for more
-   valid flags, as part of a 'main parsing loop' searching for -q/-c/-s
-   flags together with other flags and options.
-
-   Returns true and updates *STR and one of FLAGS->QUIET, FLAGS->CONT,
-   FLAGS->SILENT if it finds a valid flag.
-   Returns false if no valid flag is found at the beginning of STR.
-
-   Throws an error if a flag is found such that both FLAGS->CONT and
-   FLAGS->SILENT are true.  */
-
-extern bool parse_flags_qcs (const char *which_command, const char **str,
-			     qcs_flags *flags);
 
 /* Validate FLAGS.  Throws an error if both FLAGS->CONT and
    FLAGS->SILENT are true.  WHICH_COMMAND is included in the error

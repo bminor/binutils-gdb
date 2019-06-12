@@ -524,62 +524,6 @@ check_for_argument (const char **str, const char *arg, int arg_len)
 
 /* See documentation in cli-utils.h.  */
 
-int
-parse_flags (const char **str, const char *flags)
-{
-  const char *p = skip_spaces (*str);
-
-  if (p[0] == '-'
-      && isalpha (p[1])
-      && (p[2] == '\0' || isspace (p[2])))
-    {
-      const char pf = p[1];
-      const char *f = flags;
-
-      while (*f != '\0')
-	{
-	  if (*f == pf)
-	    {
-	      *str = skip_spaces (p + 2);
-	      return f - flags + 1;
-	    }
-	  f++;
-	}
-    }
-
-  return 0;
-}
-
-/* See documentation in cli-utils.h.  */
-
-bool
-parse_flags_qcs (const char *which_command, const char **str,
-		 qcs_flags *flags)
-{
-  switch (parse_flags (str, "qcs"))
-    {
-    case 0:
-      return false;
-    case 1:
-      flags->quiet = true;
-      break;
-    case 2:
-      flags->cont = true;
-      break;
-    case 3:
-      flags->silent = true;
-      break;
-    default:
-      gdb_assert_not_reached ("int qcs flag out of bound");
-    }
-
-  validate_flags_qcs (which_command, flags);
-
-  return true;
-}
-
-/* See documentation in cli-utils.h.  */
-
 void
 validate_flags_qcs (const char *which_command, qcs_flags *flags)
 {
