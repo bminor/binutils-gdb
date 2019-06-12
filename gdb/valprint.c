@@ -3248,6 +3248,8 @@ make_value_print_options_def_group (value_print_options *opts)
 void
 _initialize_valprint (void)
 {
+  cmd_list_element *cmd;
+
   add_prefix_cmd ("print", no_class, set_print,
 		  _("Generic command for setting how things print."),
 		  &setprintlist, "set print ", 0, &setlist);
@@ -3261,13 +3263,18 @@ _initialize_valprint (void)
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
-  add_prefix_cmd ("raw", no_class, set_print_raw,
-		  _("\
+  cmd = add_prefix_cmd ("raw", no_class, set_print_raw,
+			_("\
 Generic command for setting what things to print in \"raw\" mode."),
-		  &setprintrawlist, "set print raw ", 0, &setprintlist);
-  add_prefix_cmd ("raw", no_class, show_print_raw,
-		  _("Generic command for showing \"print raw\" settings."),
-		  &showprintrawlist, "show print raw ", 0, &showprintlist);
+			&setprintrawlist, "set print raw ", 0,
+			&setprintlist);
+  deprecate_cmd (cmd, nullptr);
+
+  cmd = add_prefix_cmd ("raw", no_class, show_print_raw,
+			_("Generic command for showing \"print raw\" settings."),
+			&showprintrawlist, "show print raw ", 0,
+			&showprintlist);
+  deprecate_cmd (cmd, nullptr);
 
   gdb::option::add_setshow_cmds_for_options
     (class_support, &user_print_options, value_print_option_defs,

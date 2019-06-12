@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.guile/scm-frame-args.exp: Use "set print
+	raw-frame-arguments" instead of "set print raw frame-arguments".
+	* gdb.python/py-frame-args.exp: Likewise.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.compile/compile.exp: Adjust expected output to option
 	processing changes.
 

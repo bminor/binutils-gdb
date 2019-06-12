@@ -585,8 +585,10 @@ const char * const boolean_enums[] = { "on", "off", NULL };
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
-   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
-void
+   value.  SET_DOC and SHOW_DOC are the documentation strings.
+   Returns the new command element.  */
+
+cmd_list_element *
 add_setshow_boolean_cmd (const char *name, enum command_class theclass, int *var,
 			 const char *set_doc, const char *show_doc,
 			 const char *help_doc,
@@ -603,6 +605,8 @@ add_setshow_boolean_cmd (const char *name, enum command_class theclass, int *var
 			set_list, show_list,
 			&c, NULL);
   c->enums = boolean_enums;
+
+  return c;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the

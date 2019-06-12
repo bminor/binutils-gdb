@@ -3106,14 +3106,26 @@ Usage: func NAME"));
 			_("Show printing of non-scalar frame arguments"),
 			NULL, NULL, NULL, &setprintlist, &showprintlist);
 
-  add_setshow_boolean_cmd ("frame-arguments", no_class,
+  /* Install "set print raw frame-arguments", a deprecated spelling of
+     "set print raw-frame-arguments".  */
+  cmd = add_setshow_boolean_cmd ("frame-arguments", no_class,
+				 &print_raw_frame_arguments, _("\
+Set whether to print frame arguments in raw form."), _("\
+Show whether to print frame arguments in raw form."), _("\
+If set, frame arguments are printed in raw form, bypassing any\n\
+pretty-printers for that value."),
+				 NULL, NULL,
+				 &setprintrawlist, &showprintrawlist);
+  deprecate_cmd (cmd, "set print raw-frame-arguments");
+
+  add_setshow_boolean_cmd ("raw-frame-arguments", no_class,
 			   &print_raw_frame_arguments, _("\
 Set whether to print frame arguments in raw form."), _("\
 Show whether to print frame arguments in raw form."), _("\
 If set, frame arguments are printed in raw form, bypassing any\n\
 pretty-printers for that value."),
 			   NULL, NULL,
-			   &setprintrawlist, &showprintrawlist);
+			   &setprintlist, &showprintlist);
 
   add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
 			        &disassemble_next_line, _("\

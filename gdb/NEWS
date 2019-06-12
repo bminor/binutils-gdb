@@ -107,6 +107,13 @@ show style
   a style name in their output using its own style, to help
   the user visualize the different styles.
 
+set print raw-frame-arguments
+show print raw-frame-arguments
+
+  These commands replace the similarly-named "set/show print raw
+  frame-arguments" commands (now with a dash instead of a space).  The
+  old commands are now deprecated and may be removed in a future
+  release.
 
 * New MI commands
 

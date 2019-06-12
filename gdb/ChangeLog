@@ -1,5 +1,19 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (Changed commands): Mention set/show print raw-frame-arguments,
+	and that "set/show print raw frame-arguments" are now deprecated.
+
+	* cli/cli-decode.c (add_setshow_boolean_cmd): Now returns the
+	command.
+	* command.h (add_setshow_boolean_cmd): Return cmd_list_element *.
+	* stack.c (_initialize_stack): Install "set/show print
+	raw-frame-arguments", and deprecate "set/show print raw
+	frame-arguments".
+	* valprint.c (_initialize_valprint): Deprecate "set/show print
+	raw".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* compile/compile.c (struct compile_options): New.
 	(compile_flag_option_def, compile_command_option_defs)
 	(make_compile_options_def_group): New.

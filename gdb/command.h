@@ -328,15 +328,16 @@ extern void add_setshow_auto_boolean_cmd (const char *name,
 					  struct cmd_list_element **set_list,
 					  struct cmd_list_element **show_list);
 
-extern void add_setshow_boolean_cmd (const char *name,
-				     enum command_class theclass,
-				     int *var,
-				     const char *set_doc, const char *show_doc,
-				     const char *help_doc,
-				     cmd_const_sfunc_ftype *set_func,
-				     show_value_ftype *show_func,
-				     struct cmd_list_element **set_list,
-				     struct cmd_list_element **show_list);
+extern cmd_list_element *
+  add_setshow_boolean_cmd (const char *name,
+			   enum command_class theclass,
+			   int *var,
+			   const char *set_doc, const char *show_doc,
+			   const char *help_doc,
+			   cmd_const_sfunc_ftype *set_func,
+			   show_value_ftype *show_func,
+			   struct cmd_list_element **set_list,
+			   struct cmd_list_element **show_list);
 
 extern void add_setshow_filename_cmd (const char *name,
 				      enum command_class theclass,

@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Print Settings): Document "set/show print
+	raw-frame-arguments" instead of "set/show print raw
+	frame-arguments".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Maintenance Commands): Document "maint
 	test-settings" commands.
 
