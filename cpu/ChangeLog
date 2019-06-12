@@ -1,3 +1,15 @@
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
+	* or1korfpx.cpu (insn-opcode-float-regreg): Add SFUEQ_S, SFUNE_S,
+	SFUGT_S, SFUGE_S, SFULT_S, SFULE_S, SFUN_S, SFUEQ_D, SFUNE_D, SFUGT_D,
+	SFUGE_D, SFULT_D, SFULE_D, SFUN_D opcodes.
+	(float-setflag-insn-base): New pmacro based on float-setflag-insn.
+	(float-setflag-symantics, float-setflag-unordered-cmp-symantics,
+	float-setflag-unordered-symantics): New pmacro for instruction
+	symantics.
+	(float-setflag-insn): Update to use float-setflag-insn-base.
+	(float-setflag-unordered-insn): New pmacro for generating instructions.
+
 2019-06-13  Andrey Bacherov  <avbacherov@opencores.org>
 	    Stafford Horne  <shorne@gmail.com>
 
