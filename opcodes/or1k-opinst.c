@@ -461,6 +461,13 @@ static const CGEN_OPINST sfmt_lf_add_d_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
+static const CGEN_OPINST sfmt_lf_add_d32_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "rAD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RAD32F), 0, 0 },
+  { INPUT, "rBD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RBD32F), 0, 0 },
+  { OUTPUT, "rDD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RDD32F), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
 static const CGEN_OPINST sfmt_lf_itof_s_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "rA", HW_H_GPR, CGEN_MODE_UDI, OP_ENT (RA), 0, 0 },
   { INPUT, "sys_fpcsr_rm", HW_H_SYS_FPCSR_RM, CGEN_MODE_UDI, 0, 0, 0 },
@@ -472,6 +479,13 @@ static const CGEN_OPINST sfmt_lf_itof_d_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "rA", HW_H_GPR, CGEN_MODE_UDI, OP_ENT (RA), 0, 0 },
   { INPUT, "sys_fpcsr_rm", HW_H_SYS_FPCSR_RM, CGEN_MODE_UDI, 0, 0, 0 },
   { OUTPUT, "rDDF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RDDF), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
+static const CGEN_OPINST sfmt_lf_itof_d32_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "rADI", HW_H_I64R, CGEN_MODE_DI, OP_ENT (RADI), 0, 0 },
+  { INPUT, "sys_fpcsr_rm", HW_H_SYS_FPCSR_RM, CGEN_MODE_UDI, 0, 0, 0 },
+  { OUTPUT, "rDD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RDD32F), 0, 0 },
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
@@ -489,16 +503,30 @@ static const CGEN_OPINST sfmt_lf_ftoi_d_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
-static const CGEN_OPINST sfmt_lf_eq_s_ops[] ATTRIBUTE_UNUSED = {
+static const CGEN_OPINST sfmt_lf_ftoi_d32_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "rAD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RAD32F), 0, 0 },
+  { INPUT, "sys_fpcsr_rm", HW_H_SYS_FPCSR_RM, CGEN_MODE_UDI, 0, 0, 0 },
+  { OUTPUT, "rDDI", HW_H_I64R, CGEN_MODE_DI, OP_ENT (RDDI), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
+static const CGEN_OPINST sfmt_lf_sfeq_s_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "rASF", HW_H_FSR, CGEN_MODE_SF, OP_ENT (RASF), 0, 0 },
   { INPUT, "rBSF", HW_H_FSR, CGEN_MODE_SF, OP_ENT (RBSF), 0, 0 },
   { OUTPUT, "sys_sr_f", HW_H_SYS_SR_F, CGEN_MODE_UDI, 0, 0, 0 },
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
-static const CGEN_OPINST sfmt_lf_eq_d_ops[] ATTRIBUTE_UNUSED = {
+static const CGEN_OPINST sfmt_lf_sfeq_d_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "rADF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RADF), 0, 0 },
   { INPUT, "rBDF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RBDF), 0, 0 },
+  { OUTPUT, "sys_sr_f", HW_H_SYS_SR_F, CGEN_MODE_UDI, 0, 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
+static const CGEN_OPINST sfmt_lf_sfeq_d32_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "rAD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RAD32F), 0, 0 },
+  { INPUT, "rBD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RBD32F), 0, 0 },
   { OUTPUT, "sys_sr_f", HW_H_SYS_SR_F, CGEN_MODE_UDI, 0, 0, 0 },
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
@@ -516,6 +544,14 @@ static const CGEN_OPINST sfmt_lf_madd_d_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "rBDF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RBDF), 0, 0 },
   { INPUT, "rDDF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RDDF), 0, 0 },
   { OUTPUT, "rDDF", HW_H_FDR, CGEN_MODE_DF, OP_ENT (RDDF), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
+static const CGEN_OPINST sfmt_lf_madd_d32_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "rAD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RAD32F), 0, 0 },
+  { INPUT, "rBD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RBD32F), 0, 0 },
+  { INPUT, "rDD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RDD32F), 0, 0 },
+  { OUTPUT, "rDD32F", HW_H_FD32R, CGEN_MODE_DF, OP_ENT (RDD32F), 0, 0 },
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
@@ -629,32 +665,68 @@ static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_l_msync_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
+  & sfmt_lf_add_d32_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
+  & sfmt_lf_add_d32_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
+  & sfmt_lf_add_d32_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
+  & sfmt_lf_add_d32_ops[0],
   & sfmt_lf_add_s_ops[0],
   & sfmt_lf_add_d_ops[0],
+  & sfmt_lf_add_d32_ops[0],
   & sfmt_lf_itof_s_ops[0],
   & sfmt_lf_itof_d_ops[0],
+  & sfmt_lf_itof_d32_ops[0],
   & sfmt_lf_ftoi_s_ops[0],
   & sfmt_lf_ftoi_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
-  & sfmt_lf_eq_s_ops[0],
-  & sfmt_lf_eq_d_ops[0],
+  & sfmt_lf_ftoi_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
+  & sfmt_lf_sfeq_s_ops[0],
+  & sfmt_lf_sfeq_d_ops[0],
+  & sfmt_lf_sfeq_d32_ops[0],
   & sfmt_lf_madd_s_ops[0],
   & sfmt_lf_madd_d_ops[0],
+  & sfmt_lf_madd_d32_ops[0],
+  & sfmt_l_msync_ops[0],
   & sfmt_l_msync_ops[0],
   & sfmt_l_msync_ops[0],
 };
