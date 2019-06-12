@@ -1403,6 +1403,9 @@ complete_line_internal_1 (completion_tracker &tracker,
 		    break;
 		}
 
+	      /* Move the custom word point back too.  */
+	      tracker.advance_custom_word_point_by (q - p);
+
 	      if (reason != handle_brkchars)
 		complete_on_cmdlist (result_list, tracker, q, word,
 				     ignore_help_classes);
@@ -1972,7 +1975,7 @@ completion_tracker::recompute_lowest_common_denominator
 /* See completer.h.  */
 
 void
-completion_tracker::advance_custom_word_point_by (size_t len)
+completion_tracker::advance_custom_word_point_by (int len)
 {
   m_custom_word_point += len;
 }

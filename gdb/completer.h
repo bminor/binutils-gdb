@@ -357,7 +357,7 @@ public:
   { m_custom_word_point = point; }
 
   /* Advance the custom word point by LEN.  */
-  void advance_custom_word_point_by (size_t len);
+  void advance_custom_word_point_by (int len);
 
   /* Whether to tell readline to skip appending a whitespace after the
      completion.  See m_suppress_append_ws.  */
