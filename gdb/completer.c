@@ -365,10 +365,17 @@ advance_to_expression_complete_word_point (completion_tracker &tracker,
   info.quote_characters = gdb_completer_quote_characters;
   info.basic_quote_characters = rl_basic_quote_characters;
 
+  int delimiter;
   const char *start
-    = gdb_rl_find_completion_word (&info, NULL, NULL, text);
+    = gdb_rl_find_completion_word (&info, NULL, &delimiter, text);
 
   tracker.advance_custom_word_point_by (start - text);
+
+  if (delimiter)
+    {
+      tracker.set_quote_char (delimiter);
+      tracker.set_suppress_append_ws (true);
+    }
 
   return start;
 }

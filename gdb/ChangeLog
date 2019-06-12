@@ -1,3 +1,7 @@
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (advance_to_completion_word): Handle delimiters.
+
 2019-06-11  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* dwarf2read.c (add_partial_symbol): Skip nameless modules.
