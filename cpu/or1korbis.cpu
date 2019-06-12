@@ -61,6 +61,7 @@
 (dnf f-resv-10-7   "resv-10-7"                 ((MACH ORBIS-MACHS) RESERVED) 10 7)
 (dnf f-resv-10-3   "resv-10-3"                 ((MACH ORBIS-MACHS) RESERVED) 10 3)
 (dnf f-resv-10-1   "resv-10-1"                 ((MACH ORBIS-MACHS) RESERVED) 10 1)
+(dnf f-resv-8-1    "resv-8-1"                  ((MACH ORBIS-MACHS) RESERVED) 8 1)
 (dnf f-resv-7-4    "resv-7-4"                  ((MACH ORBIS-MACHS) RESERVED) 7 4)
 (dnf f-resv-5-2    "resv-5-2"                  ((MACH ORBIS-MACHS) RESERVED) 5 2)
 

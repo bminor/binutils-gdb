@@ -1,3 +1,38 @@
+2019-06-13  Andrey Bacherov  <avbacherov@opencores.org>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* or1k.cpu (ORFPX64A32-MACHS): New pmacro.
+	(ORFPX-MACHS): Removed pmacro.
+	* or1k.opc (or1k_cgen_insn_supported): New function.
+	(CGEN_VALIDATE_INSN_SUPPORTED): Define macro.
+	(parse_regpair, print_regpair): New functions.
+	* or1kcommon.cpu (h-spr, spr-shift, spr-address, h-gpr): Reorder
+	and add comments.
+	(h-fdr): Update comment to indicate or64.
+	(reg-pair-reg-lo, reg-pair-reg-hi): New pmacros for register pairs.
+	(h-fd32r): New hardware for 64-bit fpu registers.
+	(h-i64r): New hardware for 64-bit int registers.
+	* or1korbis.cpu (f-resv-8-1): New field.
+	* or1korfpx.cpu (rDSF, rASF, rBSF): Update attribute to ORFPX32-MACHS.
+	(rDDF, rADF, rBDF): Update operand comment to indicate or64.
+	(f-rdoff-10-1, f-raoff-9-1, f-rboff-8-1): New fields.
+	(h-roff1): New hardware.
+	(double-field-and-ops mnemonic): New pmacro to generate operations
+	rDD32F, rAD32F, rBD32F, rDDI and rADI.
+	(float-regreg-insn): Update single precision generator to MACH
+	ORFPX32-MACHS.  Add generator for or32 64-bit instructions.
+	(float-setflag-insn): Update single precision generator to MACH
+	ORFPX32-MACHS.  Fix double instructions from single to double
+	precision.  Add generator for or32 64-bit instructions.
+	(float-cust-insn cust-num): Update single precision generator to MACH
+	ORFPX32-MACHS.  Add generator for or32 64-bit instructions.
+	(lf-rem-s, lf-itof-s, lf-ftoi-s, lf-madd-s): Update MACH to
+	ORFPX32-MACHS.
+	(lf-rem-d): Fix operation from mod to rem.
+	(lf-rem-d32, lf-itof-d32, lf-ftoi-d32, lf-madd-d32): New instruction.
+	(lf-itof-d): Fix operands from single to double.
+	(lf-ftoi-d): Update operand mode from DI to WI.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu: New file.
