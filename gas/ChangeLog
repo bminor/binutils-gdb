@@ -1,3 +1,8 @@
+2019-06-12  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power9.d: Delete ldmx tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
 2019-06-06  Lili Cui  <lili.cui@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .enqcmd.
