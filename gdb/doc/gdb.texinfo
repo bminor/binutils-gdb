@@ -37222,6 +37222,12 @@ If section was not specified, the section in which the symbol was found
 is also printed.  For dynamically linked executables, the name of
 executable or shared library containing the symbol is printed as well.
 
+@kindex maint test-settings
+@item maint test-settings set @var{kind}
+@itemx maint test-settings show @var{kind}
+These are representative commands for each @var{kind} of setting type
+@value{GDBN} supports.  They are used by the testsuite for exercising
+the settings infrastructure.
 @end table
 
 The following command is useful for non-interactive invocations of

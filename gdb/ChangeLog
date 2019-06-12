@@ -1,5 +1,11 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_SFILES): Add maint-test-settings.c.
+	* NEWS: Mention maint test-settings KIND.
+	* maint-test-settings.c: New file.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-decode.c (add_setshow_cmd_full): Remove "show"
 	completer.
 	(add_setshow_string_cmd, add_setshow_string_noescape_cmd): Remove

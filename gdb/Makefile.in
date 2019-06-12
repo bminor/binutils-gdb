@@ -1063,6 +1063,7 @@ COMMON_SFILES = \
 	macrotab.c \
 	main.c \
 	maint.c \
+	maint-test-settings.c \
 	mdebugread.c \
 	mem-break.c \
 	memattr.c \

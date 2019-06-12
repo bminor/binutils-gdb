@@ -84,6 +84,10 @@ set style highlight background COLOR
 set style highlight intensity VALUE
   Control the styling of highlightings.
 
+maint test-settings KIND
+  A set of commands used by the testsuite for exercising the settings
+  infrastructure.
+
 * Changed commands
 
 help
