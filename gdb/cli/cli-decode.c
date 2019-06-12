@@ -509,6 +509,9 @@ add_setshow_cmd_full (const char *name,
 			      full_show_doc, show_list);
   show->doc_allocated = 1;
   show->show_value_func = show_func;
+  /* Disable the default symbol completer.  Doesn't make much sense
+     for the "show" command to complete on anything.  */
+  set_cmd_completer (show, nullptr);
 
   if (set_result != NULL)
     *set_result = set;
@@ -633,11 +636,16 @@ add_setshow_string_cmd (const char *name, enum command_class theclass,
 			struct cmd_list_element **set_list,
 			struct cmd_list_element **show_list)
 {
+  cmd_list_element *set_cmd;
+
   add_setshow_cmd_full (name, theclass, var_string, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set_cmd, NULL);
+
+  /* Disable the default symbol completer.  */
+  set_cmd_completer (set_cmd, nullptr);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
@@ -659,6 +667,10 @@ add_setshow_string_noescape_cmd (const char *name, enum command_class theclass,
 			set_func, show_func,
 			set_list, show_list,
 			&set_cmd, NULL);
+
+  /* Disable the default symbol completer.  */
+  set_cmd_completer (set_cmd, nullptr);
+
   return set_cmd;
 }
 

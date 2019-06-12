@@ -1,5 +1,12 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-decode.c (add_setshow_cmd_full): Remove "show"
+	completer.
+	(add_setshow_string_cmd, add_setshow_string_noescape_cmd): Remove
+	"set" completers.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-setshow.c (do_set_command) <var_enum>: Detect junk
 	after item.
 
