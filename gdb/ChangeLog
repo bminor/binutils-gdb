@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-setshow.c (do_set_command) <var_enum>: Detect junk
+	after item.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-setshow.c (is_unlimited_literal): Allow abbreviations.
 
 2019-06-13  Pedro Alves <palves@redhat.com>
