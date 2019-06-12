@@ -352,16 +352,18 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
   return line_buffer + point;
 }
 
-/* See completer.h.  */
+/* Find the completion word point for TEXT, emulating the algorithm
+   readline uses to find the word point, using WORD_BREAK_CHARACTERS
+   as word break characters.  */
 
-const char *
-advance_to_expression_complete_word_point (completion_tracker &tracker,
-					   const char *text)
+static const char *
+advance_to_completion_word (completion_tracker &tracker,
+			    const char *word_break_characters,
+			    const char *text)
 {
   gdb_rl_completion_word_info info;
 
-  info.word_break_characters
-    = current_language->la_word_break_characters ();
+  info.word_break_characters = word_break_characters;
   info.quote_characters = gdb_completer_quote_characters;
   info.basic_quote_characters = rl_basic_quote_characters;
 
@@ -378,6 +380,26 @@ advance_to_expression_complete_word_point (completion_tracker &tracker,
     }
 
   return start;
+}
+
+/* See completer.h.  */
+
+const char *
+advance_to_expression_complete_word_point (completion_tracker &tracker,
+					   const char *text)
+{
+  const char *brk_chars = current_language->la_word_break_characters ();
+  return advance_to_completion_word (tracker, brk_chars, text);
+}
+
+/* See completer.h.  */
+
+const char *
+advance_to_filename_complete_word_point (completion_tracker &tracker,
+					 const char *text)
+{
+  const char *brk_chars = gdb_completer_file_name_break_characters;
+  return advance_to_completion_word (tracker, brk_chars, text);
 }
 
 /* See completer.h.  */

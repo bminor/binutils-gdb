@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.compile/compile.exp: Adjust expected output to option
+	processing changes.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.exp: Build executable.
 	(test-print): New procedure.
 	(top level): Call it, once for "print" and another for "compile

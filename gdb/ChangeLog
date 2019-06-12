@@ -1,5 +1,26 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* compile/compile.c (struct compile_options): New.
+	(compile_flag_option_def, compile_command_option_defs)
+	(make_compile_options_def_group): New.
+	(compile_file_command): Handle options with
+	gdb::option::process_options.
+	(compile_file_command_completer): New function.
+	(compile_code_command): Handle options with
+	gdb::option::process_options.
+	(compile_code_command_completer): New function.
+	(_initialize_compiler): Install completers for "compile code" and
+	"compile file".  Mention available options in "compile code" and
+	"compile code"'s help.
+	* completer.c (advance_to_completion_word): New, factored out from
+	...
+	(advance_to_expression_complete_word_point): ... this.
+	(advance_to_filename_complete_word_point): New.
+	* completer.h (advance_to_filename_complete_word_point): New
+	declaration.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* compile/compile.c: Include "cli/cli-option.h".
 	(compile_print_value): Scope data pointer is now a
 	value_print_options pointer; adjust.

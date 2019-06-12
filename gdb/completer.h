@@ -532,8 +532,13 @@ extern const char *completion_find_completion_word (completion_tracker &tracker,
    completion word point for TEXT, emulating the algorithm readline
    uses to find the word point, using the current language's word
    break characters.  */
-
 const char *advance_to_expression_complete_word_point
+  (completion_tracker &tracker, const char *text);
+
+/* Assuming TEXT is an filename, find the completion word point for
+   TEXT, emulating the algorithm readline uses to find the word
+   point.  */
+extern const char *advance_to_filename_complete_word_point
   (completion_tracker &tracker, const char *text);
 
 extern char **gdb_rl_attempted_completion_function (const char *text,

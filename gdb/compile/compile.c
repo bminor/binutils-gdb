@@ -236,19 +236,34 @@ show_compile_debug (struct ui_file *file, int from_tty,
 
 
 
-/* Check *ARG for a "-raw" or "-r" argument.  Return 0 if not seen.
-   Return 1 if seen and update *ARG.  */
+/* Options for the compile command.  */
 
-static int
-check_raw_argument (const char **arg)
+struct compile_options
 {
-  *arg = skip_spaces (*arg);
+  /* For -raw.  */
+  int raw = false;
+};
 
-  if (arg != NULL
-      && (check_for_argument (arg, "-raw", sizeof ("-raw") - 1)
-	  || check_for_argument (arg, "-r", sizeof ("-r") - 1)))
-      return 1;
-  return 0;
+using compile_flag_option_def
+  = gdb::option::flag_option_def<compile_options>;
+
+static const gdb::option::option_def compile_command_option_defs[] = {
+
+  compile_flag_option_def {
+    "raw",
+    [] (compile_options *opts) { return &opts->raw; },
+    N_("Suppress automatic 'void _gdb_expr () { CODE }' wrapping."),
+  },
+
+};
+
+/* Create an option_def_group for the "compile" command's options,
+   with OPTS as context.  */
+
+static gdb::option::option_def_group
+make_compile_options_def_group (compile_options *opts)
+{
+  return {compile_command_option_defs, opts};
 }
 
 /* Handle the input from the 'compile file' command.  The "compile
@@ -256,35 +271,50 @@ check_raw_argument (const char **arg)
    that may contain calls to the GCC compiler.  */
 
 static void
-compile_file_command (const char *arg, int from_tty)
+compile_file_command (const char *args, int from_tty)
 {
-  enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
-
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  /* Check the user did not just <enter> after command.  */
-  if (arg == NULL)
+  /* Check if a -raw option is provided.  */
+
+  compile_options options;
+
+  const gdb::option::option_def_group group
+    = make_compile_options_def_group (&options);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR,
+     group);
+
+  enum compile_i_scope_types scope
+    = options.raw ? COMPILE_I_RAW_SCOPE : COMPILE_I_SIMPLE_SCOPE;
+
+  args = skip_spaces (args);
+
+  /* After processing options, check whether we have a filename.  */
+  if (args == nullptr || args[0] == '\0')
     error (_("You must provide a filename for this command."));
 
-  /* Check if a raw (-r|-raw) argument is provided.  */
-  if (arg != NULL && check_raw_argument (&arg))
-    {
-      scope = COMPILE_I_RAW_SCOPE;
-      arg = skip_spaces (arg);
-    }
-
-  /* After processing arguments, check there is a filename at the end
-     of the command.  */
-  if (arg[0] == '\0')
-    error (_("You must provide a filename with the raw option set."));
-
-  if (arg[0] == '-')
-    error (_("Unknown argument specified."));
-
-  arg = skip_spaces (arg);
-  gdb::unique_xmalloc_ptr<char> abspath = gdb_abspath (arg);
+  args = skip_spaces (args);
+  gdb::unique_xmalloc_ptr<char> abspath = gdb_abspath (args);
   std::string buffer = string_printf ("#include \"%s\"\n", abspath.get ());
   eval_compile_command (NULL, buffer.c_str (), scope, NULL);
+}
+
+/* Completer for the "compile file" command.  */
+
+static void
+compile_file_command_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char *word)
+{
+  const gdb::option::option_def_group group
+    = make_compile_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
+    return;
+
+  word = advance_to_filename_complete_word_point (tracker, text);
+  filename_completer (ignore, tracker, text, word);
 }
 
 /* Handle the input from the 'compile code' command.  The
@@ -293,28 +323,22 @@ compile_file_command (const char *arg, int from_tty)
    compile command is the language currently set in GDB.  */
 
 static void
-compile_code_command (const char *arg, int from_tty)
+compile_code_command (const char *args, int from_tty)
 {
-  enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
-
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  if (arg != NULL && check_raw_argument (&arg))
-    {
-      scope = COMPILE_I_RAW_SCOPE;
-      arg = skip_spaces (arg);
-    }
+  compile_options options;
 
-  arg = skip_spaces (arg);
+  const gdb::option::option_def_group group
+    = make_compile_options_def_group (&options);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
 
-  if (arg != NULL && !check_for_argument (&arg, "--", sizeof ("--") - 1))
-    {
-      if (arg[0] == '-')
-	error (_("Unknown argument specified."));
-    }
+  enum compile_i_scope_types scope
+    = options.raw ? COMPILE_I_RAW_SCOPE : COMPILE_I_SIMPLE_SCOPE;
 
-  if (arg && *arg)
-    eval_compile_command (NULL, arg, scope, NULL);
+  if (args && *args)
+    eval_compile_command (NULL, args, scope, NULL);
   else
     {
       counted_command_line l = get_command_line (compile_control, "");
@@ -322,6 +346,23 @@ compile_code_command (const char *arg, int from_tty)
       l->control_u.compile.scope = scope;
       execute_control_command_untraced (l.get ());
     }
+}
+
+/* Completer for the "compile code" command.  */
+
+static void
+compile_code_command_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char *word)
+{
+  const gdb::option::option_def_group group
+    = make_compile_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
+    return;
+
+  word = advance_to_expression_complete_word_point (tracker, text);
+  symbol_completer (ignore, tracker, text, word);
 }
 
 /* Callback for compile_print_command.  */
@@ -927,15 +968,16 @@ Command to compile source code and inject it into the inferior."),
 		  &compile_command_list, "compile ", 1, &cmdlist);
   add_com_alias ("expression", "compile", class_obscure, 0);
 
-  add_cmd ("code", class_obscure, compile_code_command,
-	   _("\
+  const auto compile_opts = make_compile_options_def_group (nullptr);
+
+  static const std::string compile_code_help
+    = gdb::option::build_help (N_("\
 Compile, inject, and execute code.\n\
 \n\
-Usage: compile code [-r|-raw] [--] [CODE]\n\
--r|-raw: Suppress automatic 'void _gdb_expr () { CODE }' wrapping.\n\
---: Do not parse any options beyond this delimiter.  All text to the\n\
-    right will be treated as source code.\n\
+Usage: compile code [OPTION]... [CODE]\n\
 \n\
+Options:\n\
+%OPTIONS%\n\
 The source code may be specified as a simple one line expression, e.g.:\n\
 \n\
     compile code printf(\"Hello world\\n\");\n\
@@ -944,16 +986,27 @@ Alternatively, you can type a multiline expression by invoking\n\
 this command with no argument.  GDB will then prompt for the\n\
 expression interactively; type a line containing \"end\" to\n\
 indicate the end of the expression."),
-	   &compile_command_list);
+			       compile_opts);
 
-  c = add_cmd ("file", class_obscure, compile_file_command,
-	       _("\
+  c = add_cmd ("code", class_obscure, compile_code_command,
+	       compile_code_help.c_str (),
+	       &compile_command_list);
+  set_cmd_completer_handle_brkchars (c, compile_code_command_completer);
+
+static const std::string compile_file_help
+    = gdb::option::build_help (N_("\
 Evaluate a file containing source code.\n\
 \n\
-Usage: compile file [-r|-raw] [FILENAME]\n\
--r|-raw: Suppress automatic 'void _gdb_expr () { CODE }' wrapping."),
+Usage: compile file [OPTION].. [FILENAME]\n\
+\n\
+Options:\n\
+%OPTIONS%"),
+			       compile_opts);
+
+  c = add_cmd ("file", class_obscure, compile_file_command,
+	       compile_file_help.c_str (),
 	       &compile_command_list);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer_handle_brkchars (c, compile_file_command_completer);
 
   const auto compile_print_opts = make_value_print_options_def_group (nullptr);
 
