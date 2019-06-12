@@ -1,5 +1,9 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/completion.exp: Fix comment typo.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/tids.exp: Adjust expected output.  Add "thread apply 1
 	foo --1" test.
 

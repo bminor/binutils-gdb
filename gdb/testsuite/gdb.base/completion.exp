@@ -665,7 +665,7 @@ gdb_test "complete whatis &values\[0\]->z" \
 # strategy on Tuesdays to get the cursor in the right place, that's
 # not something the testsuite should care about.
 #
-# So, we avoid long lines.  We `cd' to ${objdir} first, and then do
+# So, we avoid long lines.  We `cd' to ${srcdir} first, and then do
 # the completion relative to the current directory.
 
 # ${srcdir} may be a relative path.  We want to make sure we end up
