@@ -28,6 +28,8 @@
 #  - frame apply
 #  - faas
 #  - tfaas
+#  - thread apply
+#  - taas
 
 load_lib completion-support.exp
 
@@ -368,6 +370,87 @@ proc_with_prefix test-frame-apply {} {
 	test_gdb_complete_none "$cmd -foo"
 
 	test_gdb_completion_offers_commands "$cmd -s "
+    }
+}
+
+# Basic option-machinery + "thread apply" command integration tests.
+proc_with_prefix test-thread-apply {} {
+
+    test_gdb_complete_unique "thread apply all" "thread apply all"
+    test_gdb_complete_unique "taas" "taas"
+
+    gdb_test "thread apply 1-" \
+	"inverted range"
+    test_gdb_complete_none "frame apply level 1-"
+
+    foreach cmd {
+	"thread apply all"
+	"thread apply 1"
+	"taas"
+    } {
+	test_gdb_completion_offers_commands "$cmd "
+
+	# taas is silent on command error by design.  This procedure
+	# hides the difference.  EXPECTED_RE is only considered when
+	# not testing with "taas".
+	proc test_invalid_cmd {cmd arg expected_re} {
+	    if {$cmd != "taas"} {
+		gdb_test "$cmd$arg" $expected_re
+	    } else {
+		gdb_test_no_output "$cmd$arg"
+	    }
+	}
+
+	gdb_test "$cmd -" "Ambiguous option at: -"
+
+	if {$cmd != "thread apply 1"} {
+	    test_gdb_complete_multiple "$cmd " "-" "" {
+		"-ascending"
+		"-c"
+		"-q"
+		"-s"
+	    }
+	} else {
+	    # "-ascending" only works with "all".
+	    test_gdb_complete_multiple "$cmd " "-" "" {
+		"-c"
+		"-q"
+		"-s"
+	    }
+	}
+
+	if {$cmd == "thread apply all" || $cmd == "taas"} {
+	    set errmsg \
+		"Please specify a command at the end of 'thread apply all'"
+	} elseif {$cmd == "thread apply 1"} {
+	    set errmsg \
+		"Please specify a command following the thread ID list"
+	} else {
+	    error "unexpected cmd: $cmd"
+	}
+
+	with_test_prefix "no-trailing-space" {
+	    gdb_test "$cmd --" $errmsg
+	    test_gdb_complete_unique "$cmd --" "$cmd --"
+	}
+
+	with_test_prefix "trailing-space" {
+	    gdb_test "$cmd -- " $errmsg
+	    test_gdb_completion_offers_commands "$cmd -- "
+	}
+
+	# '-' is a valid TUI command.
+	test_invalid_cmd "$cmd" " -- -" \
+	    "Cannot enable the TUI when output is not a terminal"
+	test_gdb_complete_unique \
+	    "$cmd -- -" \
+	    "$cmd -- -"
+
+	test_invalid_cmd $cmd " -foo" \
+	    "Undefined command: \"-foo\".  Try \"help\"\\."
+	test_gdb_complete_none "$cmd -foo"
+
+	test_gdb_completion_offers_commands "$cmd -c "
     }
 }
 
@@ -808,14 +891,17 @@ foreach_with_prefix cmd {
 }
 
 # Run the print integration tests, both as "standalone", and under
-# "frame apply".  The latter checks that the "frame apply ... COMMAND"
-# commands recurse the completion machinery for COMMAND completion
-# correctly.
+# "frame/thread apply".  The latter checks that the "frame/thread
+# apply ... COMMAND" commands recurse the completion machinery for
+# COMMAND completion correctly.
 foreach prefix {
     ""
     "frame apply all "
     "frame apply 1 "
     "frame apply level 0 "
+    "thread apply all "
+    "thread apply 1 "
+    "thread apply 1 frame apply 1 "
 } {
     test-print $prefix
 }
@@ -832,3 +918,6 @@ test-backtrace
 
 # Basic "frame apply" integration tests.
 test-frame-apply
+
+# Basic "thread apply" integration tests.
+test-thread-apply

@@ -307,6 +307,12 @@ tid_range_parser::in_star_range () const
   return m_state == STATE_STAR_RANGE;
 }
 
+bool
+tid_range_parser::in_thread_range () const
+{
+  return m_state == STATE_THREAD_RANGE;
+}
+
 /* See tid-parse.h.  */
 
 int

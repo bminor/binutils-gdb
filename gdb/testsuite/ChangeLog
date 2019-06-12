@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (test-thread-apply): New.
+	(top level): Call it.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.exp (test-frame-apply): New.
 	(top level): Test print commands with different "frame apply"
 	prefixes.

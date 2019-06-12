@@ -1,5 +1,26 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* thread.c: Include "cli/cli-option.h".
+	(tp_array_compar_ascending): Global.
+	(tp_array_compar): Delete function.
+	(tp_array_compar_ascending, tp_array_compar_descending): New
+	functions.
+	(ascending_option_def, qcs_flag_option_def)
+	(thr_qcs_flags_option_defs)
+	(make_thread_apply_all_options_def_group)
+	(make_thread_apply_options_def_group): New.
+	(thread_apply_all_command): Use gdb::option::process_options.
+	(thread_apply_command_completer)
+	(thread_apply_all_command_completer): New.
+	(thread_apply_command): Use gdb::option::process_options.
+	(_initialize_thread): Delete THREAD_APPLY_FLAGS_HELP, replace it
+	with a new THREAD_APPLY_OPTION_HELP.  Use gdb::option::build_help
+	to generate help text of "thread apply".  Adjust "taas"'s help.
+	* tid-parse.c (tid_range_parser::in_thread_range): New method.
+	* tid-parse.h (tid_range_parser::in_thread_range): New method.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (thread_apply_command): Check for invalid TID with
 	isdigit instead of !isalpha.
 
