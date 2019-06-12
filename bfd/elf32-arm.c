@@ -15983,12 +15983,12 @@ elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
 					 BFD_ARM_SPECIAL_SYM_TYPE_ANY);
 }
 
-/* This is a copy of elf_find_function() from elf.c except that
+/* This is a version of _bfd_elf_find_function() from dwarf2.c except that
    ARM mapping symbols are ignored when looking for function names
    and STT_ARM_TFUNC is considered to a function type.  */
 
 static bfd_boolean
-arm_elf_find_function (bfd *	     abfd ATTRIBUTE_UNUSED,
+arm_elf_find_function (bfd *	     abfd,
 		       asymbol **    symbols,
 		       asection *    section,
 		       bfd_vma	     offset,
@@ -15999,6 +15999,12 @@ arm_elf_find_function (bfd *	     abfd ATTRIBUTE_UNUSED,
   asymbol * func = NULL;
   bfd_vma low_func = 0;
   asymbol ** p;
+
+  if (symbols == NULL)
+    return FALSE;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return FALSE;
 
   for (p = symbols; *p != NULL; p++)
     {

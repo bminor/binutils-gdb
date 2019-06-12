@@ -1,3 +1,10 @@
+2019-06-12  Adam Lackorzymski  <adam@os.inf.tu-dresden.de>
+
+	PR 24643
+	* elf32-arm.c (arm_elf_find_function): Fail if the symol table is
+	absent, or the bfd is not in the ELF formart.
+	* elfnn-aarch64.c (aarch64_elf_find_function): Likewise.
+
 2019-06-10  Christos Zoulas  <christos@zoulas.com>
 
 	PR 24650

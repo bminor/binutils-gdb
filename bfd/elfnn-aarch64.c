@@ -7956,21 +7956,27 @@ elfNN_aarch64_is_target_special_symbol (bfd *abfd ATTRIBUTE_UNUSED,
 					     BFD_AARCH64_SPECIAL_SYM_TYPE_ANY);
 }
 
-/* This is a copy of elf_find_function () from elf.c except that
+/* This is a version of _bfd_elf_find_function() from dwarf2.c except that
    AArch64 mapping symbols are ignored when looking for function names.  */
 
 static bfd_boolean
-aarch64_elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
-			   asymbol **symbols,
-			   asection *section,
-			   bfd_vma offset,
-			   const char **filename_ptr,
-			   const char **functionname_ptr)
+aarch64_elf_find_function (bfd *          abfd,
+			   asymbol **     symbols,
+			   asection *     section,
+			   bfd_vma        offset,
+			   const char **  filename_ptr,
+			   const char **  functionname_ptr)
 {
   const char *filename = NULL;
   asymbol *func = NULL;
   bfd_vma low_func = 0;
   asymbol **p;
+
+  if (symbols == NULL)
+    return FALSE;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return FALSE;
 
   for (p = symbols; *p != NULL; p++)
     {
