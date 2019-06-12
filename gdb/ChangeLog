@@ -1,5 +1,10 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-utils.c (number_or_range_parser::get_number): Do not
+	parse a range if "-" is at the end of the string.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-setshow.c (parse_auto_binary_operation)
 	(parse_cli_boolean_value): Don't allow "o".
 

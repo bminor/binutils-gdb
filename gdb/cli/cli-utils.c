@@ -233,10 +233,18 @@ number_or_range_parser::get_number ()
       /* Default case: state->m_cur_tok is pointing either to a solo
 	 number, or to the first number of a range.  */
       m_last_retval = get_number_trailer (&m_cur_tok, '-');
-      /* If get_number_trailer has found a -, it might be the start
-	 of a command option.  So, do not parse a range if the - is
-	 followed by an alpha.  */
-      if (*m_cur_tok == '-' && !isalpha (*(m_cur_tok + 1)))
+      /* If get_number_trailer has found a '-' preceded by a space, it
+	 might be the start of a command option.  So, do not parse a
+	 range if the '-' is followed by an alpha or another '-'.  We
+	 might also be completing something like
+	 "frame apply level 0 -" and we prefer treating that "-" as an
+	 option rather than an incomplete range, so check for end of
+	 string as well.  */
+      if (m_cur_tok[0] == '-'
+	  && !(isspace (m_cur_tok[-1])
+	       && (isalpha (m_cur_tok[1])
+		   || m_cur_tok[1] == '-'
+		   || m_cur_tok[1] == '\0')))
 	{
 	  const char **temp;
 
