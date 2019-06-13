@@ -1,5 +1,12 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* compile/compile.c (make_compile_options_def_group): Add braces
+	around array_view initializer.
+	* thread.c (make_thread_apply_all_options_def_group)
+	(make_thread_apply_all_options_def_group): Likewise.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (New commands): Mention "maint test-options
 	require-delimiter", "maint test-options unknown-is-error", "maint
 	test-options unknown-is-operand" and "maint show

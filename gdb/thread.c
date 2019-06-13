@@ -1531,8 +1531,8 @@ make_thread_apply_all_options_def_group (int *ascending,
 					 qcs_flags *flags)
 {
   return {{
-    { ascending_option_def.def (), ascending},
-    { thr_qcs_flags_option_defs, flags },
+    { {ascending_option_def.def ()}, ascending},
+    { {thr_qcs_flags_option_defs}, flags },
   }};
 }
 
@@ -1542,7 +1542,7 @@ make_thread_apply_all_options_def_group (int *ascending,
 static inline gdb::option::option_def_group
 make_thread_apply_options_def_group (qcs_flags *flags)
 {
-  return {thr_qcs_flags_option_defs, flags};
+  return {{thr_qcs_flags_option_defs}, flags};
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace

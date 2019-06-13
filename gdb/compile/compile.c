@@ -263,7 +263,7 @@ static const gdb::option::option_def compile_command_option_defs[] = {
 static gdb::option::option_def_group
 make_compile_options_def_group (compile_options *opts)
 {
-  return {compile_command_option_defs, opts};
+  return {{compile_command_option_defs}, opts};
 }
 
 /* Handle the input from the 'compile file' command.  The "compile
