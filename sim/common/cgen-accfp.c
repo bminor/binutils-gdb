@@ -349,6 +349,17 @@ floatsidf (CGEN_FPU* fpu, int how UNUSED, SI x)
   return res;
 }
 
+static DF
+floatdidf (CGEN_FPU* fpu, int how UNUSED, DI x)
+{
+  sim_fpu ans;
+  unsigned64 res;
+
+  sim_fpu_i64to (&ans, x, sim_fpu_round_near);
+  sim_fpu_to64 (&res, &ans);
+  return res;
+}
+
 static SF
 ufloatsisf (CGEN_FPU* fpu, int how UNUSED, USI x)
 {
@@ -379,6 +390,17 @@ fixdfsi (CGEN_FPU* fpu, int how UNUSED, DF x)
 
   sim_fpu_64to (&op1, x);
   sim_fpu_to32i (&res, &op1, sim_fpu_round_near);
+  return res;
+}
+
+static DI
+fixdfdi (CGEN_FPU* fpu, int how UNUSED, DF x)
+{
+  sim_fpu op1;
+  unsigned64 res;
+
+  sim_fpu_64to (&op1, x);
+  sim_fpu_to64i (&res, &op1, sim_fpu_round_near);
   return res;
 }
 
@@ -739,8 +761,10 @@ cgen_init_accurate_fpu (SIM_CPU* cpu, CGEN_FPU* fpu, CGEN_FPU_ERROR_FN* error)
   o->ftruncdfsf = ftruncdfsf;
   o->floatsisf = floatsisf;
   o->floatsidf = floatsidf;
+  o->floatdidf = floatdidf;
   o->ufloatsisf = ufloatsisf;
   o->fixsfsi = fixsfsi;
   o->fixdfsi = fixdfsi;
+  o->fixdfdi = fixdfdi;
   o->ufixsfsi = ufixsfsi;
 }
