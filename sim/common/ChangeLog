@@ -1,5 +1,11 @@
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
+	* cgen-accfp.c (unorderedsf, unordereddf): New functions.
+	(cgen_init_accurate_fpu): Wire up unorderedsf and unordereddf.
+	* cgen-fpu.h (cgen_fp_ops): Define fields unorderedsf and unordereddf.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
 	* cgen-accfp.c (floatdidf, fixdfdi): New functions.
 	(cgen_init_accurate_fpu): Add floatdidf and fixdfdi.
 

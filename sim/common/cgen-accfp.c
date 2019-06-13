@@ -303,6 +303,18 @@ gesf (CGEN_FPU* fpu, SF x, SF y)
   return sim_fpu_is_ge (&op1, &op2);
 }
 
+static int
+unorderedsf (CGEN_FPU* fpu, SF x, SF y)
+{
+  sim_fpu op1;
+  sim_fpu op2;
+
+  sim_fpu_32to (&op1, x);
+  sim_fpu_32to (&op2, y);
+  return sim_fpu_is_nan (&op1) || sim_fpu_is_nan (&op2);
+}
+
+
 static DF
 fextsfdf (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
@@ -703,6 +715,17 @@ gedf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu_64to (&op2, y);
   return sim_fpu_is_ge (&op1, &op2);
 }
+
+static int
+unordereddf (CGEN_FPU* fpu, DF x, DF y)
+{
+  sim_fpu op1;
+  sim_fpu op2;
+
+  sim_fpu_64to (&op1, x);
+  sim_fpu_64to (&op2, y);
+  return sim_fpu_is_nan (&op1) || sim_fpu_is_nan (&op2);
+}
 
 /* Initialize FP_OPS to use accurate library.  */
 
@@ -738,6 +761,7 @@ cgen_init_accurate_fpu (SIM_CPU* cpu, CGEN_FPU* fpu, CGEN_FPU_ERROR_FN* error)
   o->lesf = lesf;
   o->gtsf = gtsf;
   o->gesf = gesf;
+  o->unorderedsf = unorderedsf;
 
   o->adddf = adddf;
   o->subdf = subdf;
@@ -757,6 +781,7 @@ cgen_init_accurate_fpu (SIM_CPU* cpu, CGEN_FPU* fpu, CGEN_FPU_ERROR_FN* error)
   o->ledf = ledf;
   o->gtdf = gtdf;
   o->gedf = gedf;
+  o->unordereddf = unordereddf;
   o->fextsfdf = fextsfdf;
   o->ftruncdfsf = ftruncdfsf;
   o->floatsisf = floatsisf;
