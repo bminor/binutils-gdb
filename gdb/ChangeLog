@@ -1,5 +1,13 @@
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-setshow.c (cli/cli-setshow.c): New parameter
+	'expression'.  When parsing an expression, error out if there's
+	junk after "unlimited".
+	(parse_cli_var_uinteger, parse_cli_var_zuinteger_unlimited)
+	(do_set_command): Adjust calls to is_unlimited_literal.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
 	* compile/compile.c (make_compile_options_def_group): Add braces
 	around array_view initializer.
 	* thread.c (make_thread_apply_all_options_def_group)

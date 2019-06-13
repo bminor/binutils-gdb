@@ -141,7 +141,18 @@ proc test-integer {variant} {
 	    "$set_cmd unlimited"
     }
 
+    # Check junk after "unlimited".
     gdb_test "$set_cmd unlimitedu" "No symbol table is loaded.*"
+
+    if {$variant == "zinteger" || $variant == "zuinteger"} {
+	gdb_test "$set_cmd unlimited u" "No symbol table is loaded.*"
+	gdb_test "$set_cmd unlimited 1" "No symbol table is loaded.*"
+	gdb_test "$set_cmd unlimited -1" "No symbol table is loaded.*"
+    } else {
+	gdb_test "$set_cmd unlimited u" "Junk after \"unlimited\": u"
+	gdb_test "$set_cmd unlimited 1" "Junk after \"unlimited\": 1"
+	gdb_test "$set_cmd unlimited -1" "Junk after \"unlimited\": -1"
+    }
 
     test_gdb_complete_none "$set_cmd unlimited "
     test_gdb_complete_none "$set_cmd unlimitedu"

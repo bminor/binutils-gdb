@@ -150,9 +150,11 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
 /* Returns true if ARG is "unlimited".  */
 
 static bool
-is_unlimited_literal (const char **arg)
+is_unlimited_literal (const char **arg, bool expression)
 {
   *arg = skip_spaces (*arg);
+
+  const char *unl_start = *arg;
 
   const char *p = skip_to_space (*arg);
 
@@ -161,6 +163,19 @@ is_unlimited_literal (const char **arg)
   if (len > 0 && strncmp ("unlimited", *arg, len) == 0)
     {
       *arg += len;
+
+      /* If parsing an expression (i.e., parsing for a "set" command),
+	 anything after "unlimited" is junk.  For options, anything
+	 after "unlimited" might be a command argument or another
+	 option.  */
+      if (expression)
+	{
+	  const char *after = skip_spaces (*arg);
+	  if (*after != '\0')
+	    error (_("Junk after \"%.*s\": %s"),
+		   (int) len, unl_start, after);
+	}
+
       return true;
     }
 
@@ -183,7 +198,7 @@ parse_cli_var_uinteger (var_types var_type, const char **arg,
 	error_no_arg (_("integer to set it to."));
     }
 
-  if (var_type == var_uinteger && is_unlimited_literal (arg))
+  if (var_type == var_uinteger && is_unlimited_literal (arg, expression))
     val = 0;
   else if (expression)
     val = parse_and_eval_long (*arg);
@@ -213,7 +228,7 @@ parse_cli_var_zuinteger_unlimited (const char **arg, bool expression)
   if (*arg == nullptr)
     error_no_arg (_("integer to set it to, or \"unlimited\"."));
 
-  if (is_unlimited_literal (arg))
+  if (is_unlimited_literal (arg, expression))
     val = -1;
   else if (expression)
     val = parse_and_eval_long (*arg);
@@ -448,7 +463,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	      error_no_arg (_("integer to set it to."));
 	  }
 
-	if (c->var_type == var_integer && is_unlimited_literal (&arg))
+	if (c->var_type == var_integer && is_unlimited_literal (&arg, true))
 	  val = 0;
 	else
 	  val = parse_and_eval_long (arg);
