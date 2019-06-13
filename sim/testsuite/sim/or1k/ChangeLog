@@ -1,5 +1,9 @@
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
+	* adrp.S: New file.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
 	* fpu64a32.S: New file.
 
 2018-10-05  Stafford Horne  <shorne@gmail.com>
