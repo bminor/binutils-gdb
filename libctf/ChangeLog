@@ -1,3 +1,7 @@
+2019-06-14  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2019-06-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-decls.h: Include <libiberty.h>.

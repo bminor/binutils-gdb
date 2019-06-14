@@ -1,3 +1,9 @@
+2019-06-14  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2019-06-12  Christos Zoulas  <christos@zoulas.com>
 
 	PR 24663
