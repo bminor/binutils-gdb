@@ -1129,7 +1129,7 @@ symtab_to_filename_for_display (struct symtab *symtab)
    to be open on descriptor DESC.
    All set S->nlines to the number of such lines.  */
 
-void
+static void
 find_source_lines (struct symtab *s, int desc)
 {
   struct stat st;
@@ -1196,19 +1196,21 @@ find_source_lines (struct symtab *s, int desc)
 
 
 
-/* Get full pathname and line number positions for a symtab.
-   Set *FULLNAME to actual name of the file as found by `openp',
-   or to 0 if the file is not found.  */
+/* See source.h.  */
 
-static void
-get_filename_and_charpos (struct symtab *s)
+scoped_fd
+open_source_file_with_line_charpos (struct symtab *s)
 {
-  scoped_fd desc = open_source_file (s);
-  if (desc.get () < 0)
-    return;
-  if (s->line_charpos == 0)
-    find_source_lines (s, desc.get ());
+  scoped_fd fd (open_source_file (s));
+  if (fd.get () < 0)
+    return fd;
+
+  if (s->line_charpos == nullptr)
+    find_source_lines (s, fd.get ());
+  return fd;
 }
+
+
 
 /* See source.h.  */
 
@@ -1216,8 +1218,8 @@ int
 identify_source_line (struct symtab *s, int line, int mid_statement,
 		      CORE_ADDR pc)
 {
-  if (s->line_charpos == 0)
-    get_filename_and_charpos (s);
+  if (s->line_charpos == nullptr)
+    open_source_file_with_line_charpos (s);
   if (s->fullname == 0)
     return 0;
   if (line > s->nlines)
@@ -1545,12 +1547,9 @@ search_command_helper (const char *regex, int from_tty, bool forward)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  scoped_fd desc = open_source_file (current_source_symtab);
+  scoped_fd desc (open_source_file_with_line_charpos (current_source_symtab));
   if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
-
-  if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc.get ());
 
   int line = (forward
 	      ? last_line_listed + 1

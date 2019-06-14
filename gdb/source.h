@@ -76,6 +76,11 @@ extern scoped_fd find_and_open_source (const char *filename,
    negative number for error.  */
 extern scoped_fd open_source_file (struct symtab *s);
 
+/* Open a source file given a symtab S (by calling open_source_file), then
+   ensure the line_charpos data is initialised for symtab S before
+   returning.  */
+extern scoped_fd open_source_file_with_line_charpos (struct symtab *s);
+
 extern gdb::unique_xmalloc_ptr<char> rewrite_source_path (const char *path);
 
 extern const char *symtab_to_fullname (struct symtab *s);
@@ -83,12 +88,6 @@ extern const char *symtab_to_fullname (struct symtab *s);
 /* Returns filename without the compile directory part, basename or absolute
    filename.  It depends on 'set filename-display' value.  */
 extern const char *symtab_to_filename_for_display (struct symtab *symtab);
-
-/* Create and initialize the table S->line_charpos that records the
-   positions of the lines in the source file, which is assumed to be
-   open on descriptor DESC.  All set S->nlines to the number of such
-   lines.  */
-extern void find_source_lines (struct symtab *s, int desc);
 
 /* Return the first line listed by print_source_lines.  Used by
    command interpreters to request listing from a previous point.  If

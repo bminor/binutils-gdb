@@ -49,12 +49,9 @@ bool
 source_cache::get_plain_source_lines (struct symtab *s, int first_line,
 				      int last_line, std::string *lines)
 {
-  scoped_fd desc (open_source_file (s));
+  scoped_fd desc (open_source_file_with_line_charpos (s));
   if (desc.get () < 0)
     return false;
-
-  if (s->line_charpos == 0)
-    find_source_lines (s, desc.get ());
 
   if (first_line < 1 || first_line > s->nlines || last_line < 1)
     return false;
@@ -202,10 +199,9 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	    {
 	      if (s->line_charpos == 0)
 		{
-		  scoped_fd desc = open_source_file (s);
+		  scoped_fd desc (open_source_file_with_line_charpos (s));
 		  if (desc.get () < 0)
 		    return false;
-		  find_source_lines (s, desc.get ());
 
 		  /* FULLNAME points to a value owned by the symtab
 		     (symtab::fullname).  Calling open_source_file reallocates
