@@ -44,7 +44,8 @@ save_vars { env(TERM) } {
     gdb_test_no_output "set style enabled on"
 
     set log_name [standard_output_file log.txt]
-    gdb_test_no_output "set logging file $log_name"
+    gdb_test_no_output "set logging file $log_name" \
+	"set logging filename"
     gdb_test_no_output "set logging overwrite on"
     gdb_test "set logging on" "Copying output to .*"
 
