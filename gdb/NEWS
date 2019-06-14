@@ -21,6 +21,10 @@
 * Two new convenience functions $_cimag and $_creal that extract the
   imaginary and real parts respectively from complex numbers.
 
+* New built-in convenience variables $_shell_exitcode and $_shell_exitsignal
+  provide the exitcode or exit status of the shell commands launched by
+  GDB commands such as "shell", "pipe" and "make".
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
@@ -31,10 +35,6 @@
 
   ** gdb.Type has a new property 'objfile' which returns the objfile the
      type was defined in.
-
-* New built-in convenience variables $_shell_exitcode and $_shell_exitsignal
-  provide the exitcode or exit status of the shell commands launched by
-  GDB commands such as "shell", "pipe" and "make".
 
 * New commands
 
