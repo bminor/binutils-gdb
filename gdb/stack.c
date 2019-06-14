@@ -965,44 +965,40 @@ print_frame_info (const frame_print_options &fp_opts,
     {
       int mid_statement = ((print_what == SRC_LINE)
 			   && frame_show_address (frame, sal));
-      bool done = annotate_source_line (sal.symtab, sal.line, mid_statement,
-					get_frame_pc (frame));
+      annotate_source_line (sal.symtab, sal.line, mid_statement,
+			    get_frame_pc (frame));
 
-      if (!done)
+      if (deprecated_print_frame_info_listing_hook)
+	deprecated_print_frame_info_listing_hook (sal.symtab, sal.line,
+						  sal.line + 1, 0);
+      else
 	{
-	  if (deprecated_print_frame_info_listing_hook)
-	    deprecated_print_frame_info_listing_hook (sal.symtab, 
-						      sal.line, 
-						      sal.line + 1, 0);
-	  else
+	  struct value_print_options opts;
+
+	  get_user_print_options (&opts);
+	  /* We used to do this earlier, but that is clearly
+	     wrong.  This function is used by many different
+	     parts of gdb, including normal_stop in infrun.c,
+	     which uses this to print out the current PC
+	     when we stepi/nexti into the middle of a source
+	     line.  Only the command line really wants this
+	     behavior.  Other UIs probably would like the
+	     ability to decide for themselves if it is desired.  */
+	  if (opts.addressprint && mid_statement)
 	    {
-	      struct value_print_options opts;
-
-	      get_user_print_options (&opts);
-	      /* We used to do this earlier, but that is clearly
-		 wrong.  This function is used by many different
-		 parts of gdb, including normal_stop in infrun.c,
-		 which uses this to print out the current PC
-		 when we stepi/nexti into the middle of a source
-		 line.  Only the command line really wants this
-		 behavior.  Other UIs probably would like the
-		 ability to decide for themselves if it is desired.  */
-	      if (opts.addressprint && mid_statement)
-		{
-		  uiout->field_core_addr ("addr",
-					  gdbarch, get_frame_pc (frame));
-		  uiout->text ("\t");
-		}
-
-	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+	      uiout->field_core_addr ("addr",
+				      gdbarch, get_frame_pc (frame));
+	      uiout->text ("\t");
 	    }
-	}
 
-      /* If disassemble-next-line is set to on and there is line debug
-         messages, output assembly codes for next line.  */
-      if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
-	do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
+	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+	}
     }
+
+  /* If disassemble-next-line is set to on and there is line debug
+     messages, output assembly codes for next line.  */
+  if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
+    do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
 
   if (set_current_sal)
     {

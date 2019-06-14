@@ -1,5 +1,11 @@
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/annota1.exp: Update expected results.
+	* gdb.cp/annota2.exp: Likewise.
+	* gdb.cp/annota3.exp: Likewise.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/style-logging.exp: Remove path from test name.
 
 2019-06-14  Tom Tromey  <tromey@adacore.com>

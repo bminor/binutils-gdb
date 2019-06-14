@@ -243,6 +243,7 @@ set pat [multi_line "" \
 	     "" \
 	     "" \
 	     "\032\032source .*$srcfile.*beg:$hex" \
+	     "$decimal\[^\r\n\]+" \
 	     "" \
 	     "\032\032frame-end" \
 	     "" \

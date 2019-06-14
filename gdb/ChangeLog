@@ -1,5 +1,14 @@
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* annotate.c (annotate_source_line): Change return type to void,
+	update implementation to match.
+	* annotate.h (annotate_source_line): Change return type to void,
+	update header comment.
+	* stack.c (print_frame_info): Don't change what frame information
+	is printed based on whether annotations are on or not.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* annotate.c: Add 'source.h' and 'objfiles.h' includes.
 	(annotate_source): Make static.
 	(annotate_source_line): Moved from source.c and renamed from

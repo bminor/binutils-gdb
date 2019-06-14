@@ -92,11 +92,8 @@ struct annotate_arg_emitter
    character position.
 
    MID_STATEMENT is nonzero if the PC is not at the beginning of that
-   line.
-
-   Return true if successful, false if the file could not be found or
-   annotations are turned off.  */
-extern bool annotate_source_line (struct symtab *s, int line,
+   line.  */
+extern void annotate_source_line (struct symtab *s, int line,
 				  int mid_statement, CORE_ADDR pc);
 
 extern void annotate_frame_begin (int, struct gdbarch *, CORE_ADDR);

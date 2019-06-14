@@ -434,7 +434,7 @@ annotate_source (const char *filename, int line, int character, int mid,
 
 /* See annotate.h.  */
 
-bool
+void
 annotate_source_line (struct symtab *s, int line, int mid_statement,
 		      CORE_ADDR pc)
 {
@@ -443,17 +443,15 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
       if (s->line_charpos == nullptr)
 	open_source_file_with_line_charpos (s);
       if (s->fullname == nullptr)
-	return false;
+	return;
       /* Don't index off the end of the line_charpos array.  */
       if (line > s->nlines)
-	return false;
+	return;
 
       annotate_source (s->fullname, line, s->line_charpos[line - 1],
 		       mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)),
 		       pc);
-      return true;
     }
-  return false;
 }
 
 
