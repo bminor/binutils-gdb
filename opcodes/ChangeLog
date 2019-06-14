@@ -1,3 +1,7 @@
+2019-06-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po; Updated French translation.
+
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
 	* or1k-asm.c: Regenerated.

@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: opcodes 2.31.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2019-01-19 16:32+0000\n"
-"PO-Revision-Date: 2019-05-12 14:47+0200\n"
+"PO-Revision-Date: 2019-05-21 20:13+0200\n"
 "Last-Translator: Stéphane Aulery <lkppo@free.fr>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -26,11 +26,11 @@ msgstr ""
 
 #: aarch64-asm.c:819
 msgid "specified register cannot be read from"
-msgstr ""
+msgstr "le registre spécifié ne peut pas être lu depuis"
 
 #: aarch64-asm.c:828
 msgid "specified register cannot be written to"
-msgstr ""
+msgstr "le registre spécifié ne peut pas être écrit vers"
 
 #. Invalid option.
 #: aarch64-dis.c:92 arc-dis.c:782 arm-dis.c:6174
@@ -306,55 +306,55 @@ msgstr "opérateur ROR interdit"
 
 #: aarch64-opc.c:3671
 msgid "reading from a write-only register"
-msgstr ""
+msgstr "lecture depuis un registre en lecture / écriture"
 
 #: aarch64-opc.c:3673
 msgid "writing to a read-only register"
-msgstr ""
+msgstr "écriture depuis un registre en lecture / écriture"
 
 #: aarch64-opc.c:4815
 msgid "instruction opens new dependency sequence without ending previous one"
-msgstr ""
+msgstr "l'instruction ouvre une nouvelle séquence de dépendance sans mettre fin à la précédente"
 
 #: aarch64-opc.c:4835
 msgid "previous `movprfx' sequence not closed"
-msgstr ""
+msgstr "la précédente séquence \"movprfx\" n'est pas terminée"
 
 #: aarch64-opc.c:4852
 msgid "SVE instruction expected after `movprfx'"
-msgstr ""
+msgstr "instruction SVE attendue après \"movprfx\""
 
 #: aarch64-opc.c:4865
 msgid "SVE `movprfx' compatible instruction expected"
-msgstr ""
+msgstr "instruction compatible \"movprfx\" SVE attendue"
 
 #: aarch64-opc.c:4956
 msgid "predicated instruction expected after `movprfx'"
-msgstr ""
+msgstr "instuction prédite attendue après \"movprfx\""
 
 #: aarch64-opc.c:4968
 msgid "merging predicate expected due to preceding `movprfx'"
-msgstr ""
+msgstr "prédiction de fusion attendue en raison de l'instruction précédente \"movprfx\""
 
 #: aarch64-opc.c:4980
 msgid "predicate register differs from that in preceding `movprfx'"
-msgstr ""
+msgstr "registre prédit différent de celui de l'instruction précédente \"movprfx\""
 
 #: aarch64-opc.c:4999
 msgid "output register of preceding `movprfx' not used in current instruction"
-msgstr ""
+msgstr "registre de sortie de l'instruction précédente \"movprfx\" non utilisé par l'instruction courante"
 
 #: aarch64-opc.c:5012
 msgid "output register of preceding `movprfx' expected as output"
-msgstr ""
+msgstr "registre de sortie de l'instruction précédente \"movprfx\" attendu comme sortie"
 
 #: aarch64-opc.c:5024
 msgid "output register of preceding `movprfx' used as input"
-msgstr ""
+msgstr "registre de sortie de l'instruction précédente \"movprfx\" utilisé comme entrée"
 
 #: aarch64-opc.c:5040
 msgid "register size not compatible with previous `movprfx'"
-msgstr ""
+msgstr "taille de registre incompatible avec l'instruction précédente \"movprfx\""
 
 #: alpha-opc.c:154
 msgid "branch operand unaligned"
@@ -431,7 +431,7 @@ msgstr "  fpud            Reconnaissance des instructions FPU double précision.
 #: arc-dis.c:1413
 #, c-format
 msgid "  hex             Use only hexadecimal number to print immediates.\n"
-msgstr ""
+msgstr "  hex             Utilise seulement la notation héxadécimale pour l'affichage.\n"
 
 #: arc-opc.c:41 arc-opc.c:64 arc-opc.c:90
 msgid "LP_COUNT register cannot be used as destination register"
@@ -810,17 +810,17 @@ msgstr "instruction « %.50s » erronée"
 #: epiphany-desc.c:2109
 #, c-format
 msgid "internal error: epiphany_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : epiphany_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: epiphany-desc.c:2192
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : epiphany_cgen_cpu_open : argument %d non pris en charge"
 
 #: epiphany-desc.c:2211
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : epiphany_cgen_cpu_open : boutisme non défini"
 
 #. Default text to print if an instruction isn't recognized.
 #: epiphany-dis.c:41 fr30-dis.c:41 frv-dis.c:41 ip2k-dis.c:41 iq2000-dis.c:41
@@ -920,17 +920,17 @@ msgstr "Liste de registres invalide"
 #: fr30-desc.c:1586
 #, c-format
 msgid "internal error: fr30_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : fr30_cgen_rebuild_tables : confit de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: fr30-desc.c:1669
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : fr30_cgen_cpu_open : argument %d non pris en charge"
 
 #: fr30-desc.c:1688
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : fr30_cgen_cpu_open : boutisme non défini"
 
 #: frv-asm.c:608
 msgid "missing `]'"
@@ -951,22 +951,22 @@ msgstr "Le numéro de registre doit être pair"
 #: frv-desc.c:6326
 #, c-format
 msgid "internal error: frv_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : frv_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: frv-desc.c:6409
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : frv_cgen_cpu_open : argument %d non pris en charge"
 
 #: frv-desc.c:6428
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : frv_cgen_cpu_open : boutisme non défini"
 
 #: frv-opc.c:459
 #, c-format
 msgid "internal error: bad vliw->next_slot value"
-msgstr ""
+msgstr "erreur interne : vliw->next_slota une mauvaise valeur"
 
 #: frv-opc.c:769
 #, c-format
@@ -1320,17 +1320,17 @@ msgstr "Tentative de repérage d’un index de bit de 0"
 #: ip2k-desc.c:1015
 #, c-format
 msgid "internal error: ip2k_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : ip2k_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: ip2k-desc.c:1098
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : ip2k_cgen_cpu_open : argument %d non pris en charge"
 
 #: ip2k-desc.c:1117
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : ip2k_cgen_cpu_open : boutisme non défini"
 
 #: iq2000-asm.c:112 iq2000-asm.c:142
 msgid "immediate value cannot be register"
@@ -1347,17 +1347,17 @@ msgstr "décalage de 21 bits hors intervalle"
 #: iq2000-desc.c:2020
 #, c-format
 msgid "internal error: iq2000_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : iq2000_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: iq2000-desc.c:2103
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : iq2000_cgen_cpu_open : argument %d non pris en charge"
 
 #: iq2000-desc.c:2122
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : iq2000_cgen_cpu_open : boutisme non défini"
 
 #: lm32-asm.c:166
 msgid "expecting gp relative address: gp(symbol)"
@@ -1378,17 +1378,17 @@ msgstr "adresse relative GOT attendue : gotofflo16(symbole)"
 #: lm32-desc.c:1002
 #, c-format
 msgid "internal error: lm32_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : lm32_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: lm32-desc.c:1085
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : lm32_cgen_cpu_open : argument %d non pris en charge"
 
 #: lm32-desc.c:1104
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : lm32_cgen_cpu_open : boutisme non défini"
 
 #: m10200-dis.c:157 m10300-dis.c:580
 #, c-format
@@ -1477,32 +1477,32 @@ msgstr "Indicateur de taille invalide"
 #: m32c-desc.c:63033
 #, c-format
 msgid "internal error: m32c_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : m32c_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: m32c-desc.c:63116
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : m32c_cgen_cpu_open : argument %d non pris en charge"
 
 #: m32c-desc.c:63135
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : m32c_cgen_cpu_open : boutisme non défini"
 
 #: m32r-desc.c:1365
 #, c-format
 msgid "internal error: m32r_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : m32r_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: m32r-desc.c:1448
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : m32r_cgen_cpu_open : argument %d non pris en charge"
 
 #: m32r-desc.c:1467
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : m32r_cgen_cpu_open : boutisme non défini"
 
 #: m68k-dis.c:1292
 #, c-format
@@ -1550,17 +1550,17 @@ msgstr "Valeur mal alignée"
 #: mep-desc.c:6226
 #, c-format
 msgid "internal error: mep_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : mep_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: mep-desc.c:6309
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : mep_cgen_cpu_open : argument %d non pris en charge"
 
 #: mep-desc.c:6328
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : mep_cgen_cpu_open : boutisme non défini"
 
 #: mips-dis.c:1800 mips-dis.c:2026
 #, c-format
@@ -1589,23 +1589,23 @@ msgstr ""
 
 #: mips-dis.c:2624
 msgid "Recognize the Global INValidate (GINV) ASE instructions.\n"
-msgstr ""
+msgstr "Reconnaissance du jeu d'instructions Global INValidate (GINV) ASE.\n"
 
 #: mips-dis.c:2628
 msgid "Recognize the Loongson MultiMedia extensions Instructions (MMI) ASE instructions.\n"
-msgstr ""
+msgstr "Reconnaissance du jeu d'instructions Loongson MultiMedia extensions Instructions (MMI) ASE.\n"
 
 #: mips-dis.c:2632
 msgid "Recognize the Loongson Content Address Memory (CAM)  instructions.\n"
-msgstr ""
+msgstr "Reconnaissance du jeu d'instructions Loongson Content Address Memory (CAM).\n"
 
 #: mips-dis.c:2636
 msgid "Recognize the Loongson EXTensions (EXT)  instructions.\n"
-msgstr ""
+msgstr "Reconnaissance du jeu d'instructions Loongson EXTensions (EXT).\n"
 
 #: mips-dis.c:2640
 msgid "Recognize the Loongson EXTensions R2 (EXT2)  instructions.\n"
-msgstr ""
+msgstr "Reconnaissance du jeu d'instructions Loongson EXTensions R2 (EXT2).\n"
 
 #: mips-dis.c:2643
 msgid ""
@@ -1698,7 +1698,7 @@ msgstr "*type d’opérande inconnu : %d*"
 #: msp430-decode.opc:145 rl78-decode.opc:106
 #, c-format
 msgid "internal error: immediate() called with invalid byte count %d"
-msgstr ""
+msgstr "erreur interne : immediate() appelée avec un nombre d'octets invalide (%d)"
 
 #: msp430-dis.c:59
 #, c-format
@@ -1747,17 +1747,17 @@ msgstr "opérande invalide. Type doit être 0, 1 ou 2 seulement."
 #: mt-desc.c:1146
 #, c-format
 msgid "internal error: mt_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : mt_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: mt-desc.c:1229
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : mt_cgen_cpu_open : argument %d non pris en charge"
 
 #: mt-desc.c:1248
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : mt_cgen_cpu_open : boutisme non défini"
 
 #: nds32-asm.c:1760
 #, c-format
@@ -1767,12 +1767,12 @@ msgstr "erreur interne : opérande « %s » inconnu"
 #: nds32-asm.c:2396
 #, c-format
 msgid "internal error: don't know how to handle parsing results"
-msgstr ""
+msgstr "erreur interne : pas de méthode connue pour analyser les résultats"
 
 #: nds32-asm.c:2404
 #, c-format
 msgid "internal error: unknown hardware resource"
-msgstr ""
+msgstr "erreur interne : ressource matérielle inconnue"
 
 #: nfp-dis.c:927
 msgid "<invalid_instruction>:"
@@ -1780,7 +1780,7 @@ msgstr "<instruction_invalide>"
 
 #: nfp-dis.c:1331
 msgid ", <invalid CRC operator>, "
-msgstr "<opérateur CRC invalide"
+msgstr "<opérateur CRC invalide>"
 
 #: nfp-dis.c:1683
 msgid "<invalid branch>["
@@ -1789,30 +1789,30 @@ msgstr "<branche invalide>"
 #: nfp-dis.c:2052 nfp-dis.c:2323
 #, c-format
 msgid "<invalid cmd target %d:%d:%d>[]"
-msgstr ""
+msgstr "<cible cmd invalide %d:%d:%d>["
 
 #: nfp-dis.c:2063 nfp-dis.c:2334
 #, c-format
 msgid "<invalid cmd action %d:%d:%d>[]"
-msgstr ""
+msgstr "<action cmd invalide %d:%d:%d>[]"
 
 #: nfp-dis.c:2555
 msgid "File has no ME-Config section."
-msgstr ""
+msgstr "Le fichier n'a pas de section ME-Config."
 
 #: nfp-dis.c:2569
 msgid "File has invalid ME-Config section."
-msgstr ""
+msgstr "Le fichier a une section ME-Config invalide."
 
 #: nfp-dis.c:2711
 #, c-format
 msgid "Error processing section %u "
-msgstr ""
+msgstr "Echec de traitement de la section %u "
 
 #: nfp-dis.c:2740
 #, c-format
 msgid "Invalid NFP option: %s"
-msgstr ""
+msgstr "Option NFP invalide : %s"
 
 #: nfp-dis.c:2972
 #, c-format
@@ -1834,11 +1834,15 @@ msgid ""
 "  ctx4\t\t    Force disassembly using 4-context mode.\n"
 "  ctx8\t\t    Force 8-context mode, takes precedence."
 msgstr ""
+"\n"
+"  no-pc   Ne pas afficher le préfixe de compteur de programme.\n"
+"  ctx4    Forcer le désassemblage en mode 4-context.\n"
+"  ctx8    Forcer le mode 8-context, a la préséance."
 
 #: nios2-dis.c:135
 #, c-format
 msgid "out of memory"
-msgstr ""
+msgstr "mémoire saturée"
 
 #: nios2-dis.c:263
 #, c-format
@@ -1857,26 +1861,26 @@ msgstr "$<non défini>"
 
 #: or1k-asm.c:55
 msgid "relocation invalid for store"
-msgstr ""
+msgstr "repositionnement invalide du magasin"
 
 #: or1k-asm.c:56
 msgid "internal relocation type invalid"
-msgstr ""
+msgstr "repositionnement interne de type invalide"
 
 #: or1k-desc.c:1978
 #, c-format
 msgid "internal error: or1k_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : or1k_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: or1k-desc.c:2061
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : or1k_cgen_cpu_open : argument %d non pris en charge"
 
 #: or1k-desc.c:2080
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : or1k_cgen_cpu_open : boutisme non défini"
 
 #: ppc-dis.c:370
 #, c-format
@@ -1968,15 +1972,15 @@ msgstr "constante invalide"
 
 #: ppc-opc.c:1474 ppc-opc.c:1497 ppc-opc.c:1520 ppc-opc.c:1543
 msgid "UIMM = 00000 is illegal"
-msgstr ""
+msgstr "UIMM = 00000 est illégal."
 
 #: ppc-opc.c:1566
 msgid "UIMM values >7 are illegal"
-msgstr ""
+msgstr "UIMM values >7 est illégal."
 
 #: ppc-opc.c:1589
 msgid "UIMM values >15 are illegal"
-msgstr ""
+msgstr "UIMM values >15 est illégal."
 
 #: ppc-opc.c:1612
 msgid "GPR odd is illegal"
@@ -2204,17 +2208,17 @@ msgstr "Préfixe « seg: » manquant"
 #: xc16x-desc.c:3349
 #, c-format
 msgid "internal error: xc16x_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : xc16x_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: xc16x-desc.c:3432
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : xc16x_cgen_cpu_open : argument %d non pris en charge"
 
 #: xc16x-desc.c:3451
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : xc16x_cgen_cpu_open : boutisme non défini"
 
 #: xstormy16-asm.c:71
 msgid "Bad register in preincrement"
@@ -2259,14 +2263,14 @@ msgstr "Erreur de syntaxe : pas de « ) » en suffixe"
 #: xstormy16-desc.c:1317
 #, c-format
 msgid "internal error: xstormy16_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
-msgstr ""
+msgstr "erreur interne : xstormy16_cgen_rebuild_tables : confilt de valeurs insn-chunk-bitsize : \"%d\" vs. \"%d\""
 
 #: xstormy16-desc.c:1400
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: unsupported argument `%d'"
-msgstr ""
+msgstr "erreur interne : xstormy16_cgen_cpu_open : argument %d non pris en charge"
 
 #: xstormy16-desc.c:1419
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: no endianness specified"
-msgstr ""
+msgstr "erreur interne : xstormy16_cgen_cpu_open : boutisme non défini"
