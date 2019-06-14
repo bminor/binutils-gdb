@@ -1,5 +1,11 @@
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_lookup_simple_minsyms): Remove.
+	(create_excep_cond_exprs): Simplify exception string computation.
+	(ada_exception_catchpoint_cond_string): Likewise.
+
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
 	* symmisc.c (dump_msymbols): Don't use MSYMBOL_VALUE_ADDRESS.
 	* ada-lang.c (lesseq_defined_than): Handle
 	LOC_STATIC.
