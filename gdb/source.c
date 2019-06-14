@@ -1201,17 +1201,11 @@ find_source_lines (struct symtab *s, int desc)
    or to 0 if the file is not found.  */
 
 static void
-get_filename_and_charpos (struct symtab *s, char **fullname)
+get_filename_and_charpos (struct symtab *s)
 {
   scoped_fd desc = open_source_file (s);
   if (desc.get () < 0)
-    {
-      if (fullname)
-	*fullname = NULL;
-      return;
-    }
-  if (fullname)
-    *fullname = s->fullname;
+    return;
   if (s->line_charpos == 0)
     find_source_lines (s, desc.get ());
 }
@@ -1223,7 +1217,7 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
 		      CORE_ADDR pc)
 {
   if (s->line_charpos == 0)
-    get_filename_and_charpos (s, (char **) NULL);
+    get_filename_and_charpos (s);
   if (s->fullname == 0)
     return 0;
   if (line > s->nlines)
