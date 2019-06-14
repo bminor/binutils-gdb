@@ -1,3 +1,7 @@
+2019-06-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Fix comments involving paddi.
+
 2019-06-12  Adam Lackorzymski  <adam@os.inf.tu-dresden.de>
 
 	PR 24643

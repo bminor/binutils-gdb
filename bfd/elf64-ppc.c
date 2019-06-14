@@ -2849,13 +2849,13 @@ must_be_dyn_reloc (struct bfd_link_info *info,
 
    There are also ELFv1 powerxx variants of these stubs.
    ppc_stub_long_branch_notoc:
-   .	paddi	%r12,dest@pcrel
+   .	pla	%r12,dest@pcrel
    .	b	dest
    ppc_stub_plt_branch_notoc:
    .	lis	%r11,(dest-1f)@highesta34
    .	ori	%r11,%r11,(dest-1f)@highera34
    .	sldi	%r11,%r11,34
-   . 1: paddi	%r12,dest@pcrel
+   . 1: pla	%r12,dest@pcrel
    .	add	%r12,%r11,%r12
    .	mtctr	%r12
    .	bctr
@@ -2863,7 +2863,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    .	lis	%r11,(xxx-1f)@highesta34
    .	ori	%r11,%r11,(xxx-1f)@highera34
    .	sldi	%r11,%r11,34
-   . 1: paddi	%r12,xxx@pcrel
+   . 1: pla	%r12,xxx@pcrel
    .	ldx	%r12,%r11,%r12
    .	mtctr	%r12
    .	bctr
@@ -8191,7 +8191,7 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
      pld ra,symbol@got@pcrel
      load/store rt,0(ra)
    or
-     paddi ra,symbol@pcrel
+     pla ra,symbol@pcrel
      load/store rt,0(ra)
    may be translated to
      pload/pstore rt,symbol@pcrel
@@ -8200,7 +8200,7 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
    the prefix insn in *PINSN1 and a NOP in *PINSN2.
 
    On entry to this function, the linker has already determined that
-   the pld can be replaced with paddi: *PINSN1 is that paddi insn,
+   the pld can be replaced with pla: *PINSN1 is that pla insn,
    while *PINSN2 is the second instruction.  */
 
 static bfd_boolean
