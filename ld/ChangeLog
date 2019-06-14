@@ -1,3 +1,10 @@
+2019-06-14  Alan Modra  <amodra@gmail.com>
+
+	PR 24662
+	* testsuite/ld-alpha/tlsbin.rd: Update.
+	* testsuite/ld-alpha/tlsbinr.rd: Update.
+	* testsuite/ld-alpha/tlspic.rd: Update.
+
 2019-06-07  Maciej W. Rozycki  <macro@wdc.com>
 
 	* ld.texi (Options): Also document `-rpath' option restrictions
