@@ -424,8 +424,7 @@ tui_alloc_generic_win_info (void)
 {
   struct tui_gen_win_info *win = XNEW (struct tui_gen_win_info);
 
-  if (win != NULL)
-    tui_init_generic_part (win);
+  tui_init_generic_part (win);
 
   return win;
 }
@@ -537,11 +536,8 @@ tui_alloc_win_info (enum tui_win_type type)
 {
   struct tui_win_info *win_info = XNEW (struct tui_win_info);
 
-  if (win_info != NULL)
-    {
-      win_info->generic.type = type;
-      init_win_info (win_info);
-    }
+  win_info->generic.type = type;
+  init_win_info (win_info);
 
   return win_info;
 }
@@ -602,15 +598,9 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
       for (i = index_start; (i < num_elements + index_start); i++)
 	{
 	  element_ptr = XNEW (struct tui_win_element);
-	  if (element_ptr != NULL)
-	    {
-	      win_info->content[i] = element_ptr;
-	      init_content_element (element_ptr, win_info->type);
-	      win_info->content_size++;
-	    }
-	  else	/* Things must be really hosed now!  We ran out of
-		   memory!?  */
-	    return (-1);
+	  win_info->content[i] = element_ptr;
+	  init_content_element (element_ptr, win_info->type);
+	  win_info->content_size++;
 	}
     }
 
