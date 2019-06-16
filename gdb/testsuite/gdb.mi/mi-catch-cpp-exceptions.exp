@@ -141,6 +141,9 @@ with_test_prefix "all with invalid regexp" {
 	-re "could not find minimal symbol for typeinfo address.*$mi_gdb_prompt$" {
 	    kfail "gdb/24541" "${testname}"
 	}
+	-re "\\*stopped,bkptno=\"$decimal\",reason=\"breakpoint-hit\",disp=\"keep\".*func=\"__cxa_throw\".*$mi_gdb_prompt$" {
+	    kfail "gdb/24541" "${testname}"
+	}
 	-re "\\*stopped,reason=\"breakpoint-hit\".*func=\"main\".*line=\"${main_lineno}\".*$mi_gdb_prompt$" {
 	    pass "${testname}"
 	}
