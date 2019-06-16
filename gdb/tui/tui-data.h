@@ -304,6 +304,13 @@ public:
   void make_visible (bool visible) override;
   void refresh () override;
 
+  /* Refill the source window's source cache and update it.  If this
+     is a disassembly window, then just update it.  */
+  void refill ();
+
+  /* Set the location of the execution point.  */
+  void set_is_exec_point_at (struct tui_line_or_address l);
+
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
@@ -451,10 +458,10 @@ extern void tui_set_term_width_to (int);
 extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
 extern struct tui_gen_win_info *tui_source_exec_info_win_ptr (void);
 extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
-extern std::vector<tui_win_info *> &tui_source_windows ();
+extern std::vector<tui_source_window_base *> &tui_source_windows ();
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
-extern void tui_add_to_source_windows (struct tui_win_info *);
+extern void tui_add_to_source_windows (struct tui_source_window_base *);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
 extern struct tui_layout_def *tui_layout_def (void);
@@ -463,8 +470,6 @@ extern void tui_set_win_resized_to (int);
 
 extern struct tui_win_info *tui_next_win (struct tui_win_info *);
 extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
-
-extern void tui_add_to_source_windows (struct tui_win_info *);
 
 extern unsigned int tui_tab_width;
 

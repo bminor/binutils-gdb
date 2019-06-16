@@ -212,7 +212,7 @@ tui_redisplay_source ()
   if (tui_is_window_visible (SRC_WIN))
     {
       /* Force redisplay.  */
-      tui_refill_source_window (tui_win_list[SRC_WIN]);
+      TUI_SRC_WIN->refill ();
     }
 }
 

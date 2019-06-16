@@ -1,5 +1,29 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_refill_source_window)
+	(tui_set_is_exec_point_at): Don't declare.
+	* tui/tui-winsource.c (tui_update_source_windows_with_addr)
+	(tui_source_window_base::refill): Rename from
+	tui_refill_source_window.
+	(tui_source_window_base::do_scroll_horizontal): Update.
+	(tui_source_window_base::set_is_exec_point_at): Rename from
+	tui_set_is_exec_point_at.
+	(tui_update_all_breakpoint_info): Update.
+	* tui/tui-stack.c (tui_show_frame_info): Update.
+	* tui/tui-layout.c (show_data): Add cast.
+	* tui/tui-hooks.c (tui_redisplay_source): Call refill method.
+	* tui/tui-data.h (struct tui_source_window_base) <refill,
+	set_is_exec_point_at>: New methods.
+	(tui_source_windows, tui_add_to_source_windows): Update types.
+	(tui_add_to_source_windows): Remove redundant declaration.
+	* tui/tui-data.c (source_windows): Store tui_source_window_base.
+	(tui_source_windows): Change return type.
+	(tui_clear_source_windows_detail): Update.
+	(tui_add_to_source_windows): Change type of parameter.
+	(tui_free_all_source_wins_content): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_win_info::refresh)
 	(tui_source_window_base::refresh): New methods.
 	(tui_refresh_all): Call the refresh method.

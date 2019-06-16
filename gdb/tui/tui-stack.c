@@ -396,7 +396,7 @@ tui_show_frame_info (struct frame_info *fi)
 
       tui_show_locator_content ();
       start_line = 0;
-      for (struct tui_win_info *win_info : tui_source_windows ())
+      for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  union tui_which_element *item;
 
@@ -436,7 +436,7 @@ tui_show_frame_info (struct frame_info *fi)
 	      else
 		{
 		  l.u.line_no = item->locator.line_no;
-		  tui_set_is_exec_point_at (l, win_info);
+		  win_info->set_is_exec_point_at (l);
 		}
 	    }
 	  else
@@ -454,7 +454,7 @@ tui_show_frame_info (struct frame_info *fi)
 		  else
 		    {
 		      a.u.addr = item->locator.addr;
-		      tui_set_is_exec_point_at (a, win_info);
+		      win_info->set_is_exec_point_at (a);
 		    }
 		}
 	    }
@@ -472,7 +472,7 @@ tui_show_frame_info (struct frame_info *fi)
 	return 0;
 
       tui_show_locator_content ();
-      for (struct tui_win_info *win_info : tui_source_windows ())
+      for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (win_info);

@@ -160,7 +160,7 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
     }
   else
     {
-      for (struct tui_win_info *win_info : tui_source_windows ())
+      for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_clear_exec_info_content (win_info);
@@ -309,15 +309,14 @@ tui_show_source_content (struct tui_win_info *win_info)
   win_info->generic.content_in_use = TRUE;
 }
 
-/* Refill the source window's source cache and update it.  If WIN_INFO
-   is a disassembly window, then just update it.  */
+/* See tui-data.h.  */
 
 void
-tui_refill_source_window (struct tui_win_info *win_info)
+tui_source_window_base::refill ()
 {
   symtab *s = nullptr;
 
-  if (win_info->generic.type == SRC_WIN)
+  if (generic.type == SRC_WIN)
     {
       symtab_and_line cursal = get_current_source_symtab_and_line ();
       s = (cursal.symtab == NULL
@@ -325,11 +324,8 @@ tui_refill_source_window (struct tui_win_info *win_info)
 	   : cursal.symtab);
     }
 
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  tui_update_source_window_as_is (win_info,
-				  base->gdbarch,
-				  s,
-				  win_info->generic.content[0]
+  tui_update_source_window_as_is (this, gdbarch, s,
+				  generic.content[0]
 				    ->which_element.source.line_or_addr,
 				  FALSE);
 }
@@ -353,7 +349,7 @@ tui_source_window_base::do_scroll_horizontal
 	    offset = 0;
 	}
       horizontal_offset = offset;
-      tui_refill_source_window (this);
+      refill ();
     }
 }
 
@@ -362,15 +358,14 @@ tui_source_window_base::do_scroll_horizontal
    line_no.  */
 
 void
-tui_set_is_exec_point_at (struct tui_line_or_address l, 
-			  struct tui_win_info *win_info)
+tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
 {
   int changed = 0;
   int i;
-  tui_win_content content = win_info->generic.content;
+  tui_win_content content = generic.content;
 
   i = 0;
-  while (i < win_info->generic.content_size)
+  while (i < generic.content_size)
     {
       int new_state;
       struct tui_line_or_address content_loa =
@@ -389,12 +384,12 @@ tui_set_is_exec_point_at (struct tui_line_or_address l,
         {
           changed++;
           content[i]->which_element.source.is_exec_point = new_state;
-          tui_show_source_line (win_info, i + 1);
+          tui_show_source_line (this, i + 1);
         }
       i++;
     }
   if (changed)
-    tui_refill_source_window (win_info);
+    refill ();
 }
 
 /* Update the execution windows to show the active breakpoints.
@@ -403,7 +398,7 @@ tui_set_is_exec_point_at (struct tui_line_or_address l,
 void
 tui_update_all_breakpoint_info ()
 {
-  for (tui_win_info *win : tui_source_windows ())
+  for (tui_source_window_base *win : tui_source_windows ())
     {
       if (tui_update_breakpoint_info (win, FALSE))
         {

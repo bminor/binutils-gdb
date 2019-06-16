@@ -776,7 +776,8 @@ show_data (enum tui_layout_type new_layout)
   base->m_has_locator = true;
   tui_make_visible (locator);
   tui_show_locator_content ();
-  tui_add_to_source_windows (tui_win_list[win_type]);
+  tui_add_to_source_windows
+    ((tui_source_window_base *) tui_win_list[win_type]);
   tui_set_current_layout_to (new_layout);
 }
 
