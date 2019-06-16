@@ -49,12 +49,11 @@ static void init_gen_win_info (struct tui_gen_win_info *,
 static void *init_and_make_win (void *, enum tui_win_type, 
 				int, int, int, int, int);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
-static void make_source_or_disasm_window (struct tui_win_info **, 
-					  enum tui_win_type, 
-					  int, int);
+static struct tui_win_info *make_source_or_disasm_window (enum tui_win_type, 
+							  int, int);
 static struct tui_win_info *make_command_window (int, int);
-static void make_source_window (struct tui_win_info **, int, int);
-static void make_disasm_window (struct tui_win_info **, int, int);
+static struct tui_win_info *make_source_window (int, int);
+static struct tui_win_info *make_disasm_window (int, int);
 static void make_data_window (struct tui_win_info **, int, int);
 static void show_source_command (void);
 static void show_disasm_command (void);
@@ -558,25 +557,19 @@ make_command_window (int height, int origin_y)
 
 /* make_source_window().
  */
-static void
-make_source_window (struct tui_win_info **win_info_ptr, 
-		    int height, int origin_y)
+static struct tui_win_info *
+make_source_window (int height, int origin_y)
 {
-  make_source_or_disasm_window (win_info_ptr, SRC_WIN, height, origin_y);
-
-  return;
+  return make_source_or_disasm_window (SRC_WIN, height, origin_y);
 }				/* make_source_window */
 
 
 /* make_disasm_window().
  */
-static void
-make_disasm_window (struct tui_win_info **win_info_ptr, 
-		    int height, int origin_y)
+static struct tui_win_info *
+make_disasm_window (int height, int origin_y)
 {
-  make_source_or_disasm_window (win_info_ptr, DISASSEM_WIN, height, origin_y);
-
-  return;
+  return make_source_or_disasm_window (DISASSEM_WIN, height, origin_y);
 }				/* make_disasm_window */
 
 
@@ -629,7 +622,7 @@ show_source_disasm_command (void)
       asm_height = tui_term_height () - (src_height + cmd_height);
 
       if (TUI_SRC_WIN == NULL)
-	make_source_window (&TUI_SRC_WIN, src_height, 0);
+	TUI_SRC_WIN = make_source_window (src_height, 0);
       else
 	{
 	  init_gen_win_info (&TUI_SRC_WIN->generic,
@@ -655,7 +648,7 @@ show_source_disasm_command (void)
       tui_show_source_content (TUI_SRC_WIN);
       if (TUI_DISASM_WIN == NULL)
 	{
-	  make_disasm_window (&TUI_DISASM_WIN, asm_height, src_height - 1);
+	  TUI_DISASM_WIN = make_disasm_window (asm_height, src_height - 1);
 	  locator
 	    = ((struct tui_gen_win_info *)
 	       init_and_make_win (locator,
@@ -741,9 +734,11 @@ show_data (enum tui_layout_type new_layout)
   if (tui_win_list[win_type] == NULL)
     {
       if (win_type == SRC_WIN)
-	make_source_window (&tui_win_list[win_type], src_height, data_height - 1);
+	tui_win_list[win_type]
+	  = make_source_window (src_height, data_height - 1);
       else
-	make_disasm_window (&tui_win_list[win_type], src_height, data_height - 1);
+	tui_win_list[win_type]
+	  = make_disasm_window (src_height, data_height - 1);
       locator
 	= ((struct tui_gen_win_info *)
 	   init_and_make_win (locator,
@@ -848,9 +843,8 @@ init_and_make_win (void *opaque_win_info,
 }
 
 
-static void
-make_source_or_disasm_window (struct tui_win_info **win_info_ptr, 
-			      enum tui_win_type type,
+static struct tui_win_info *
+make_source_or_disasm_window (enum tui_win_type type,
 			      int height, int origin_y)
 {
   struct tui_gen_win_info *execution_info = NULL;
@@ -871,17 +865,17 @@ make_source_or_disasm_window (struct tui_win_info **win_info_ptr,
 			  DONT_BOX_WINDOW));
 
   /* Now create the source window.  */
-  *win_info_ptr
+  struct tui_win_info *result
     = ((struct tui_win_info *)
-       init_and_make_win (*win_info_ptr,
+       init_and_make_win (NULL,
 			  type,
 			  height,
 			  tui_term_width () - execution_info->width,
 			  execution_info->width,
 			  origin_y,
 			  BOX_WINDOW));
-
-  (*win_info_ptr)->detail.source_info.execution_info = execution_info;
+  result->detail.source_info.execution_info = execution_info;
+  return result;
 }
 
 
@@ -909,9 +903,9 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
       if ((*win_info_ptr) == NULL)
 	{
 	  if (layout_type == SRC_COMMAND)
-	    make_source_window (win_info_ptr, src_height - 1, 0);
+	    *win_info_ptr = make_source_window (src_height - 1, 0);
 	  else
-	    make_disasm_window (win_info_ptr, src_height - 1, 0);
+	    *win_info_ptr = make_disasm_window (src_height - 1, 0);
 	  locator
 	    = ((struct tui_gen_win_info *)
 	       init_and_make_win (locator,
