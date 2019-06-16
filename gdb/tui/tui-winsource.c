@@ -69,14 +69,13 @@ tui_display_main ()
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_update_source_window (struct tui_win_info *win_info,
+tui_update_source_window (struct tui_source_window_base *win_info,
 			  struct gdbarch *gdbarch,
 			  struct symtab *s,
 			  struct tui_line_or_address line_or_addr,
 			  int noerror)
 {
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  base->horizontal_offset = 0;
+  win_info->horizontal_offset = 0;
   tui_update_source_window_as_is (win_info, gdbarch, s, line_or_addr, noerror);
 
   return;
@@ -86,7 +85,7 @@ tui_update_source_window (struct tui_win_info *win_info,
 /* Function to display source in the source/asm window.  This function
    shows the source as specified by the horizontal offset.  */
 void
-tui_update_source_window_as_is (struct tui_win_info *win_info, 
+tui_update_source_window_as_is (struct tui_source_window_base *win_info, 
 				struct gdbarch *gdbarch,
 				struct symtab *s,
 				struct tui_line_or_address line_or_addr, 
