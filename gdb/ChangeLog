@@ -1,5 +1,10 @@
 2019-06-16  Tom Tromey  <tom@tromey.com>
 
+	* coffread.c (process_coff_symbol): Use xstrdup.
+	* value.c (create_internalvar): Use xstrdup.
+
+2019-06-16  Tom Tromey  <tom@tromey.com>
+
 	* valops.c (value_cast, value_slice): Remove unnecessary cast.
 	* breakpoint.c (stopin_command, stopat_command)
 	(until_break_command, decode_location_default): Remove unnecessary

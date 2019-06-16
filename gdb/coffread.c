@@ -1728,7 +1728,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		&& *SYMBOL_LINKAGE_NAME (sym) != '~'
 		&& *SYMBOL_LINKAGE_NAME (sym) != '.')
 	      TYPE_NAME (SYMBOL_TYPE (sym)) =
-		concat (SYMBOL_LINKAGE_NAME (sym), (char *)NULL);
+		xstrdup (SYMBOL_LINKAGE_NAME (sym));
 
 	  add_symbol_to_list (sym, get_file_symbols ());
 	  break;

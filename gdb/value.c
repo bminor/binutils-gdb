@@ -2025,7 +2025,7 @@ create_internalvar (const char *name)
 {
   struct internalvar *var = XNEW (struct internalvar);
 
-  var->name = concat (name, (char *)NULL);
+  var->name = xstrdup (name);
   var->kind = INTERNALVAR_VOID;
   var->next = internalvars;
   internalvars = var;
