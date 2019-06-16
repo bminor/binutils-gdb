@@ -294,6 +294,7 @@ public:
 struct tui_source_window : public tui_win_info
 {
   explicit tui_source_window (enum tui_win_type type);
+  ~tui_source_window () override;
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
   void clear_detail () override;
@@ -302,6 +303,7 @@ struct tui_source_window : public tui_win_info
 struct tui_data_window : public tui_win_info
 {
   tui_data_window ();
+  ~tui_data_window () override;
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
   void clear_detail () override;

@@ -617,47 +617,43 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
   return index_start;
 }
 
+tui_source_window::~tui_source_window ()
+{
+  if (detail.source_info.fullname)
+    {
+      xfree (detail.source_info.fullname);
+      detail.source_info.fullname = NULL;
+    }
+  struct tui_gen_win_info *generic_win = detail.source_info.execution_info;
+  if (generic_win != NULL)
+    {
+      tui_delete_win (generic_win->handle);
+      generic_win->handle = NULL;
+      tui_free_win_content (generic_win);
+    }
+}  
+
+tui_data_window::~tui_data_window ()
+{
+  if (generic.content != NULL)
+    {
+      tui_free_data_content (detail.data_display_info.regs_content,
+			     detail.data_display_info.regs_content_count);
+      detail.data_display_info.regs_content = NULL;
+      detail.data_display_info.regs_content_count = 0;
+      tui_free_data_content (detail.data_display_info.data_content,
+			     detail.data_display_info.data_content_count);
+      detail.data_display_info.data_content = NULL;
+      detail.data_display_info.data_content_count = 0;
+      detail.data_display_info.regs_column_count = 1;
+      detail.data_display_info.display_regs = FALSE;
+      generic.content = NULL;
+      generic.content_size = 0;
+    }
+}  
+
 tui_win_info::~tui_win_info ()
 {
-  struct tui_gen_win_info *generic_win;
-
-  switch (generic.type)
-    {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      if (detail.source_info.fullname)
-        {
-          xfree (detail.source_info.fullname);
-          detail.source_info.fullname = NULL;
-        }
-      generic_win = detail.source_info.execution_info;
-      if (generic_win != NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = NULL;
-	  tui_free_win_content (generic_win);
-	}
-      break;
-    case DATA_WIN:
-      if (generic.content != NULL)
-	{
-	  tui_free_data_content (detail.data_display_info.regs_content,
-				 detail.data_display_info.regs_content_count);
-	  detail.data_display_info.regs_content = NULL;
-	  detail.data_display_info.regs_content_count = 0;
-	  tui_free_data_content (detail.data_display_info.data_content,
-				 detail.data_display_info.data_content_count);
-	  detail.data_display_info.data_content = NULL;
-	  detail.data_display_info.data_content_count = 0;
-	  detail.data_display_info.regs_column_count = 1;
-	  detail.data_display_info.display_regs = FALSE;
-	  generic.content = NULL;
-	  generic.content_size = 0;
-	}
-      break;
-    default:
-      break;
-    }
   if (generic.handle != NULL)
     {
       tui_delete_win (generic.handle);

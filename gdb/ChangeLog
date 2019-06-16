@@ -1,5 +1,13 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_source_window)
+	(struct tui_data_window): Declare destructors.
+	* tui/tui-data.c (~tui_source_window, ~tui_data_window): New
+	destructors.
+	(tui_win_info): Simplify.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_display_main)
 	(tui_update_source_windows_with_addr)
 	(tui_update_all_breakpoint_info): Update.
