@@ -256,6 +256,25 @@ tui_make_all_invisible (void)
   make_all_visible (false);
 }
 
+/* See tui-data.h.  */
+
+void
+tui_win_info::refresh ()
+{
+  touchwin (generic.handle);
+  tui_refresh_win (&generic);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::refresh ()
+{
+  touchwin (execution_info->handle);
+  tui_refresh_win (execution_info);
+  tui_win_info::refresh ();
+}
+
 /* Function to refresh all the windows currently displayed.  */
 
 void
@@ -267,17 +286,7 @@ tui_refresh_all (struct tui_win_info **list)
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {
       if (list[type] && list[type]->generic.is_visible)
-	{
-	  if (type == SRC_WIN || type == DISASSEM_WIN)
-	    {
-	      tui_source_window_base *base
-		= (tui_source_window_base *) list[type];
-	      touchwin (base->execution_info->handle);
-	      tui_refresh_win (base->execution_info);
-	    }
-	  touchwin (list[type]->generic.handle);
-	  tui_refresh_win (&list[type]->generic);
-	}
+	list[type]->refresh ();
     }
   if (locator->is_visible)
     {

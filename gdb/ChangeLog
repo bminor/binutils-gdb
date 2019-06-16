@@ -1,5 +1,13 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_win_info::refresh)
+	(tui_source_window_base::refresh): New methods.
+	(tui_refresh_all): Call the refresh method.
+	* tui/tui-data.h (struct tui_win_info)
+	(struct tui_source_window_base) <refresh>: New method.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (tui_is_window_visible): Return bool.
 	* tui/tui.c (tui_is_window_visible): Return bool.
 	* tui/tui-wingeneral.c (tui_make_window, make_visible)

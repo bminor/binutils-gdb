@@ -258,6 +258,9 @@ public:
   /* Make this window visible or invisible.  */
   virtual void make_visible (bool visible);
 
+  /* Refresh this window and any associated windows.  */
+  virtual void refresh ();
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -299,6 +302,7 @@ public:
   }
 
   void make_visible (bool visible) override;
+  void refresh () override;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
