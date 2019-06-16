@@ -1,3 +1,11 @@
+2019-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/24669
+	* gdb.base/index-cache.exp (uses_readnow,
+	expecting_index_cache_use): Define global variable.
+	(test_cache_enabled_miss, test_cache_enabled_hit): Use
+	expecting_index_cache_use.
+
 2019-06-16  Bernhard Heckel  <bernhard.heckel@intel.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
