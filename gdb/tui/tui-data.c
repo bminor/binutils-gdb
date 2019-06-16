@@ -159,7 +159,7 @@ void
 tui_clear_source_windows_detail ()
 {
   for (tui_win_info *win : tui_source_windows ())
-    tui_clear_win_detail (win);
+    win->clear_detail ();
 }
 
 
@@ -204,15 +204,6 @@ tui_data_window::clear_detail ()
   detail.data_display_info.regs_column_count = 1;
   detail.data_display_info.display_regs = FALSE;
 }
-
-/* Clear the pertinant detail in the windows.  */
-void
-tui_clear_win_detail (struct tui_win_info *win_info)
-{
-  if (win_info != NULL)
-    win_info->clear_detail ();
-}
-
 
 /* Accessor for the source execution info ptr.  */
 struct tui_gen_win_info *

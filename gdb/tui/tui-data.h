@@ -439,7 +439,6 @@ extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
 extern std::vector<tui_win_info *> &tui_source_windows ();
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
-extern void tui_clear_win_detail (struct tui_win_info *);
 extern void tui_add_to_source_windows (struct tui_win_info *);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
