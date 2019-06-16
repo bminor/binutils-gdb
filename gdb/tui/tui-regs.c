@@ -534,7 +534,7 @@ tui_display_register (struct tui_data_element *data,
 	   to code that causes the compiler to generate an unused-value
 	   warning.  */
 	(void) wstandend (win_info->handle);
-      tui_refresh_win (win_info);
+      win_info->refresh_window ();
     }
 }
 

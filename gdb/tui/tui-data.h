@@ -48,6 +48,9 @@ struct tui_gen_win_info
   {
   }
 
+  /* Call to refresh this window.  */
+  virtual void refresh_window ();
+
   /* Window handle.  */
   WINDOW *handle = nullptr;
   /* Type of window.  */
@@ -418,6 +421,8 @@ struct tui_data_window : public tui_win_info
 
   void set_new_height (int height) override;
 
+  void refresh_window () override;
+
   /* Start of data display content.  */
   tui_win_content data_content = NULL;
   int data_content_count = 0;
@@ -455,6 +460,10 @@ struct tui_cmd_window : public tui_win_info
   }
 
   int max_height () const override;
+
+  void refresh_window () override
+  {
+  }
 
   int start_line = 0;
 

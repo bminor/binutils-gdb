@@ -31,37 +31,35 @@
 ** PUBLIC FUNCTIONS
 ***********************/
 
-/* Refresh the window.  */
-void
-tui_refresh_win (struct tui_gen_win_info *win_info)
-{
-  if (win_info->type == DATA_WIN && win_info->content_size > 0)
-    {
-      int i;
+/* See tui-data.h.  */
 
-      for (i = 0; (i < win_info->content_size); i++)
+void
+tui_gen_win_info::refresh_window ()
+{
+  if (handle != NULL)
+    wrefresh (handle);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_data_window::refresh_window ()
+{
+  if (content_size > 0)
+    {
+      for (int i = 0; i < content_size; i++)
 	{
 	  struct tui_gen_win_info *data_item_win_ptr;
 
-	  data_item_win_ptr = win_info->content[i]->which_element.data_window;
+	  data_item_win_ptr = content[i]->which_element.data_window;
 	  if (data_item_win_ptr != NULL
 	      && data_item_win_ptr->handle != NULL)
 	    wrefresh (data_item_win_ptr->handle);
 	}
     }
-  else if (win_info->type == CMD_WIN)
-    {
-      /* Do nothing.  */
-    }
   else
-    {
-      if (win_info->handle != NULL)
-	wrefresh (win_info->handle);
-    }
-
-  return;
+    tui_gen_win_info::refresh_window ();
 }
-
 
 /* Function to delete the curses window, checking for NULL.  */
 void
@@ -260,7 +258,7 @@ void
 tui_win_info::refresh ()
 {
   touchwin (handle);
-  tui_refresh_win (this);
+  refresh_window ();
 }
 
 /* See tui-data.h.  */
@@ -269,7 +267,7 @@ void
 tui_source_window_base::refresh ()
 {
   touchwin (execution_info->handle);
-  tui_refresh_win (execution_info);
+  execution_info->refresh_window ();
   tui_win_info::refresh ();
 }
 
@@ -289,7 +287,7 @@ tui_refresh_all (struct tui_win_info **list)
   if (locator->is_visible)
     {
       touchwin (locator->handle);
-      tui_refresh_win (locator);
+      locator->refresh_window ();
     }
 }
 

@@ -267,7 +267,7 @@ tui_show_locator_content (void)
       waddstr (locator->handle, string);
       wclrtoeol (locator->handle);
       (void) wstandend (locator->handle);
-      tui_refresh_win (locator);
+      locator->refresh_window ();
       wmove (locator->handle, 0, 0);
       xfree (string);
       locator->content_in_use = TRUE;

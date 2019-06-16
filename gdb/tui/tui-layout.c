@@ -701,7 +701,7 @@ show_source_disasm_command (void)
 	  TUI_CMD_WIN->can_highlight = false;
 	  tui_make_visible (TUI_CMD_WIN);
 	}
-      tui_refresh_win (TUI_CMD_WIN);
+      TUI_CMD_WIN->refresh_window ();
       tui_set_current_layout_to (SRC_DISASSEM_COMMAND);
     }
 }
@@ -956,7 +956,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 	{
 	  tui_win_list[CMD_WIN] = make_command_window (cmd_height,
 						       src_height);
-	  tui_refresh_win (TUI_CMD_WIN);
+	  TUI_CMD_WIN->refresh_window ();
 	}
       else
 	{

@@ -260,7 +260,7 @@ tui_erase_source_content (struct tui_win_info *win_info,
 
 	  tui_set_source_content_nil (win_info, no_src_str);
 	}
-      tui_refresh_win (win_info);
+      win_info->refresh_window ();
     }
 }
 
@@ -305,7 +305,7 @@ tui_show_source_content (struct tui_win_info *win_info)
     tui_erase_source_content (win_info, TRUE);
 
   tui_check_and_display_highlight_if_needed (win_info);
-  tui_refresh_win (win_info);
+  win_info->refresh_window ();
   win_info->content_in_use = TRUE;
 }
 
@@ -550,14 +550,14 @@ tui_show_exec_info_content (struct tui_win_info *win_info)
   int cur_line;
 
   werase (exec_info->handle);
-  tui_refresh_win (exec_info);
+  exec_info->refresh_window ();
   for (cur_line = 1; (cur_line <= exec_info->content_size); cur_line++)
     mvwaddstr (exec_info->handle,
 	       cur_line,
 	       0,
 	       (char *) exec_info->content[cur_line - 1]
 			  ->which_element.simple_string);
-  tui_refresh_win (exec_info);
+  exec_info->refresh_window ();
   exec_info->content_in_use = TRUE;
 }
 
@@ -569,7 +569,7 @@ tui_erase_exec_info_content (struct tui_win_info *win_info)
   struct tui_gen_win_info *exec_info = base->execution_info;
 
   werase (exec_info->handle);
-  tui_refresh_win (exec_info);
+  exec_info->refresh_window ();
 }
 
 void
