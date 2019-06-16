@@ -2084,7 +2084,7 @@
 2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* regcache.c (get_thread_regcache): Guard calls to "memset"
-          with "!VEC_empty".
+	with "!VEC_empty".
 
 2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
@@ -2533,9 +2533,9 @@
 
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
-        * remote-utils.c (remote_prepare, remote_open): Constify.
-        * remote-utils.h (remote_prepare, remote_open): Constify.
-        * server.c (captured_main): Constify 'port' handling.
+	* remote-utils.c (remote_prepare, remote_open): Constify.
+	* remote-utils.h (remote_prepare, remote_open): Constify.
+	* server.c (captured_main): Constify 'port' handling.
 
 2017-04-04  Simon Marchi  <simon.marchi@ericsson.com>
 

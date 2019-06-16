@@ -81,7 +81,7 @@
 
 2019-06-13  Pedro Alves  <palves@redhat.com>
 
-        * lib/completion-support.exp (test_gdb_complete_tab_multiple)
+	* lib/completion-support.exp (test_gdb_complete_tab_multiple)
 	(test_gdb_complete_cmd_multiple, test_gdb_complete_multiple): Add
 	'max_completions' parameter and handle it.
 	(test_gdb_completion_offers_commands): New.
@@ -350,7 +350,7 @@
 	(gdb_debug_init): Likewise.
 
 2019-05-17  Alan Hayward  <alan.hayward@arm.com>
-	
+
 	* Makefile.in: Pass through GDB_DEBUG.
 	* README (Testsuite Parameters): Add GDB_DEBUG.
 	(gdb,debug): Add board setting.
@@ -593,12 +593,12 @@
 
 2019-04-25  Alan Hayward  <alan.hayward@arm.com>
 
-        * Makefile.in: Pass through GDBSERVER_DEBUG.
-        * README (Testsuite Parameters): Add GDBSERVER_DEBUG.
-        (gdbserver,debug): Add board setting.
-        * gdb.trace/tspeed.exp: Skip when debugging.
-        * lib/gdb.exp (gdbserver_debug_enabled): New procedure.
-        * lib/gdbserver-support.exp: Likewise
+	* Makefile.in: Pass through GDBSERVER_DEBUG.
+	* README (Testsuite Parameters): Add GDBSERVER_DEBUG.
+	(gdbserver,debug): Add board setting.
+	* gdb.trace/tspeed.exp: Skip when debugging.
+	* lib/gdb.exp (gdbserver_debug_enabled): New procedure.
+	* lib/gdbserver-support.exp: Likewise
 
 2019-04-24  Tom Tromey  <tromey@adacore.com>
 
@@ -3377,7 +3377,7 @@
 
 2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
 
-       * gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Add new
+	* gdb.python/py-breakpoint.exp (test_bkpt_explicit_loc): Add new
 	tests for explicit locations.
 
 2017-12-06  Pedro Alves  <palves@redhat.com>
@@ -4250,8 +4250,8 @@
 	* gdb.mi/mi-vla-fortran.exp: Likewise.
 
 2017-09-08  Frank Penczek  <frank.penczek@intel.com>
-            Christoph Weinmann  <christoph.t.weinmann@intel.com>
-            Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Christoph Weinmann  <christoph.t.weinmann@intel.com>
+	    Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/ptr-indentation.f90: New file.
 	* gdb.fortran/ptr-indentation.exp: New file.

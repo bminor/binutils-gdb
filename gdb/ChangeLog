@@ -901,7 +901,7 @@
 
 2019-05-17  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
-       * MAINTAINERS (Write After Approval): Add myself.
+	* MAINTAINERS (Write After Approval): Add myself.
 
 2019-05-17  Tom de Vries  <tdevries@suse.de>
 
@@ -3798,15 +3798,15 @@
 
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
-        * ppc-linux-nat.c: Add include.
+	* ppc-linux-nat.c: Add include.
 
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
-        * NEWS: Mention AArch64 Pointer Authentication.
+	* NEWS: Mention AArch64 Pointer Authentication.
 
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
-        * arm-linux-nat.c: Add include.
+	* arm-linux-nat.c: Add include.
 
 2019-03-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
