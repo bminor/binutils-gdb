@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_or_disasm_and_command): Remove
+	NULL check.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_data_window, struct tui_cmd_window):
 	Inline constructor.  Add initializers for members.
 	* tui/tui-data.c (tui_data_window, tui_cmd_window): Remove
