@@ -1,3 +1,8 @@
+2019-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-nat.c (normal_mask): Delete.
+	(_initialize_linux_nat): Don't initialise normal_mask.
+
 2019-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/24445

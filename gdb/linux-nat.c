@@ -748,9 +748,6 @@ lwp_list_remove (struct lwp_info *lp)
 
 
 
-/* Original signal mask.  */
-static sigset_t normal_mask;
-
 /* Signal mask for use with sigsuspend in linux_nat_wait, initialized in
    _initialize_linux_nat.  */
 static sigset_t suspend_mask;
@@ -4683,9 +4680,6 @@ Enables printf debugging output."),
 			   NULL,
 			   NULL,
 			   &setdebuglist, &showdebuglist);
-
-  /* Save this mask as the default.  */
-  sigprocmask (SIG_SETMASK, NULL, &normal_mask);
 
   /* Install a SIGCHLD handler.  */
   sigchld_action.sa_handler = sigchld_handler;
