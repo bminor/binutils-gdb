@@ -1377,6 +1377,22 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 }
 
 
+/* See tui-data.h.  */
+
+int
+tui_win_info::max_height () const
+{
+  return tui_term_height () - 2;
+}
+
+/* See tui-data.h.  */
+
+int
+tui_cmd_window::max_height () const
+{
+  return tui_term_height () - 4;
+}
+
 static int
 new_height_ok (struct tui_win_info *primary_win_info, 
 	       int new_height)
@@ -1391,12 +1407,8 @@ new_height_ok (struct tui_win_info *primary_win_info,
       diff = (new_height - primary_win_info->generic.height) * (-1);
       if (cur_layout == SRC_COMMAND || cur_layout == DISASSEM_COMMAND)
 	{
-	  ok = ((primary_win_info->generic.type == CMD_WIN 
-		 && new_height <= (tui_term_height () - 4) 
-		 && new_height >= MIN_CMD_WIN_HEIGHT) 
-		|| (primary_win_info->generic.type != CMD_WIN 
-		    && new_height <= (tui_term_height () - 2) 
-		    && new_height >= MIN_WIN_HEIGHT));
+	  ok = (new_height <= primary_win_info->max_height ()
+		&& new_height >= MIN_CMD_WIN_HEIGHT);
 	  if (ok)
 	    {			/* Check the total height.  */
 	      struct tui_win_info *win_info;

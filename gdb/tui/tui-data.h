@@ -273,6 +273,9 @@ public:
   {
   }
 
+  /* Compute the maximum height of this window.  */
+  virtual int max_height () const;
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -425,6 +428,8 @@ struct tui_cmd_window : public tui_win_info
   void make_visible (bool visible) override
   {
   }
+
+  int max_height () const override;
 
   int start_line = 0;
 
