@@ -589,7 +589,7 @@ tui_update_exec_info (struct tui_win_info *win_info)
   tui_show_exec_info_content (win_info);
 }
 
-enum tui_status
+void
 tui_alloc_source_buffer (struct tui_win_info *win_info)
 {
   int i, line_width, max_lines;
@@ -608,8 +608,6 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 	win_info->content[i]->which_element.source.line
 	  = (char *) xmalloc (line_width);
     }
-
-  return TUI_SUCCESS;
 }
 
 

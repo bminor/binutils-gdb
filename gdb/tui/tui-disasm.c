@@ -165,7 +165,6 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 enum tui_status
 tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  enum tui_status ret = TUI_FAILURE;
   int i;
   int offset = TUI_DISASM_WIN->horizontal_offset;
   int max_lines, line_width;
@@ -180,9 +179,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (pc == 0)
     return TUI_FAILURE;
 
-  ret = tui_alloc_source_buffer (TUI_DISASM_WIN);
-  if (ret != TUI_SUCCESS)
-    return ret;
+  tui_alloc_source_buffer (TUI_DISASM_WIN);
 
   tui_source_window_base *base = TUI_DISASM_WIN;
   base->gdbarch = gdbarch;

@@ -133,86 +133,85 @@ tui_set_source_content (struct symtab *s,
     {
       int line_width, nlines;
 
-      if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
+      ret = TUI_SUCCESS;
+      tui_alloc_source_buffer (TUI_SRC_WIN);
+      line_width = TUI_SRC_WIN->width - 1;
+      /* Take hilite (window border) into account, when
+	 calculating the number of lines.  */
+      nlines = (line_no + (TUI_SRC_WIN->height - 2)) - line_no;
+
+      std::string srclines;
+      if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
+					    &srclines))
 	{
-	  line_width = TUI_SRC_WIN->width - 1;
-	  /* Take hilite (window border) into account, when
-	     calculating the number of lines.  */
-	  nlines = (line_no + (TUI_SRC_WIN->height - 2)) - line_no;
-
-	  std::string srclines;
-	  if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
-						&srclines))
+	  if (!noerror)
 	    {
-	      if (!noerror)
-		{
-		  const char *filename = symtab_to_filename_for_display (s);
-		  char *name = (char *) alloca (strlen (filename) + 100);
+	      const char *filename = symtab_to_filename_for_display (s);
+	      char *name = (char *) alloca (strlen (filename) + 100);
 
-		  sprintf (name, "%s:%d", filename, line_no);
-		  print_sys_errmsg (name, errno);
-		}
-	      ret = TUI_FAILURE;
+	      sprintf (name, "%s:%d", filename, line_no);
+	      print_sys_errmsg (name, errno);
 	    }
-	  else
+	  ret = TUI_FAILURE;
+	}
+      else
+	{
+	  int cur_line_no, cur_line;
+	  struct tui_gen_win_info *locator
+	    = tui_locator_win_info_ptr ();
+	  struct tui_source_window_base *src
+	    = (struct tui_source_window_base *) TUI_SRC_WIN;
+	  const char *s_filename = symtab_to_filename_for_display (s);
+
+	  if (TUI_SRC_WIN->title)
+	    xfree (TUI_SRC_WIN->title);
+	  TUI_SRC_WIN->title = xstrdup (s_filename);
+
+	  xfree (src->fullname);
+	  src->fullname = xstrdup (symtab_to_fullname (s));
+
+	  cur_line = 0;
+	  src->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+	  src->start_line_or_addr.loa = LOA_LINE;
+	  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
+
+	  const char *iter = srclines.c_str ();
+	  while (cur_line < nlines)
 	    {
-	      int cur_line_no, cur_line;
-	      struct tui_gen_win_info *locator
-		= tui_locator_win_info_ptr ();
-	      struct tui_source_window_base *src
-		= (struct tui_source_window_base *) TUI_SRC_WIN;
-	      const char *s_filename = symtab_to_filename_for_display (s);
+	      struct tui_win_element *element
+		= TUI_SRC_WIN->content[cur_line];
 
-	      if (TUI_SRC_WIN->title)
-		xfree (TUI_SRC_WIN->title);
-	      TUI_SRC_WIN->title = xstrdup (s_filename);
+	      std::string text;
+	      if (*iter != '\0')
+		text = copy_source_line (&iter, cur_line_no,
+					 src->horizontal_offset,
+					 line_width);
 
-	      xfree (src->fullname);
-	      src->fullname = xstrdup (symtab_to_fullname (s));
+	      /* Set whether element is the execution point
+		 and whether there is a break point on it.  */
+	      element->which_element.source.line_or_addr.loa =
+		LOA_LINE;
+	      element->which_element.source.line_or_addr.u.line_no =
+		cur_line_no;
+	      element->which_element.source.is_exec_point =
+		(filename_cmp (locator->content[0]
+			       ->which_element.locator.full_name,
+			       symtab_to_fullname (s)) == 0
+		 && cur_line_no
+		 == locator->content[0]
+		 ->which_element.locator.line_no);
 
-	      cur_line = 0;
-	      src->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-	      src->start_line_or_addr.loa = LOA_LINE;
-	      cur_line_no = src->start_line_or_addr.u.line_no = line_no;
+	      xfree (TUI_SRC_WIN->content[cur_line]
+		     ->which_element.source.line);
+	      TUI_SRC_WIN->content[cur_line]
+		->which_element.source.line
+		= xstrdup (text.c_str ());
 
-	      const char *iter = srclines.c_str ();
-	      while (cur_line < nlines)
-		{
-		  struct tui_win_element *element
-		    = TUI_SRC_WIN->content[cur_line];
-
-		  std::string text;
-		  if (*iter != '\0')
-		    text = copy_source_line (&iter, cur_line_no,
-					     src->horizontal_offset,
-					     line_width);
-
-		  /* Set whether element is the execution point
-		     and whether there is a break point on it.  */
-		  element->which_element.source.line_or_addr.loa =
-		    LOA_LINE;
-		  element->which_element.source.line_or_addr.u.line_no =
-		    cur_line_no;
-		  element->which_element.source.is_exec_point =
-		    (filename_cmp (locator->content[0]
-				   ->which_element.locator.full_name,
-				   symtab_to_fullname (s)) == 0
-		     && cur_line_no
-		     == locator->content[0]
-		     ->which_element.locator.line_no);
-
-		  xfree (TUI_SRC_WIN->content[cur_line]
-			 ->which_element.source.line);
-		  TUI_SRC_WIN->content[cur_line]
-		    ->which_element.source.line
-		    = xstrdup (text.c_str ());
-
-		  cur_line++;
-		  cur_line_no++;
-		}
-	      TUI_SRC_WIN->content_size = nlines;
-	      ret = TUI_SUCCESS;
+	      cur_line++;
+	      cur_line_no++;
 	    }
+	  TUI_SRC_WIN->content_size = nlines;
+	  ret = TUI_SUCCESS;
 	}
     }
   return ret;
