@@ -238,23 +238,6 @@ struct tui_data_info
 };
 
 
-struct tui_source_info
-{
-  /* Does the locator belong to this window?  */
-  bool has_locator;
-  /* Execution information window.  */
-  struct tui_gen_win_info *execution_info;
-  int horizontal_offset;	/* Used for horizontal scroll.  */
-  struct tui_line_or_address start_line_or_addr;
-
-  /* It is the resolved form as returned by symtab_to_fullname.  */
-  char *fullname;
-
-  /* Architecture associated with code at this location.  */
-  struct gdbarch *gdbarch;
-};
-
-
 struct tui_command_info
 {
   int start_line;
@@ -303,7 +286,6 @@ public:
   struct tui_gen_win_info generic;	/* General window information.  */
   union
   {
-    struct tui_source_info source_info;
     struct tui_data_info data_display_info;
     struct tui_command_info command_info;
   }
@@ -334,7 +316,24 @@ public:
   void clear_detail () override;
 
   /* Return true if this window has the locator.  */
-  bool has_locator () const override;
+  bool has_locator () const override
+  {
+    return m_has_locator;
+  }
+
+  /* Does the locator belong to this window?  */
+  bool m_has_locator = false;
+  /* Execution information window.  */
+  struct tui_gen_win_info *execution_info = nullptr;
+  /* Used for horizontal scroll.  */
+  int horizontal_offset = 0;
+  struct tui_line_or_address start_line_or_addr;
+
+  /* It is the resolved form as returned by symtab_to_fullname.  */
+  char *fullname = nullptr;
+
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *gdbarch = nullptr;
 };
 
 /* A TUI source window.  */
@@ -418,8 +417,8 @@ extern void tui_set_win_highlight (struct tui_win_info *win_info,
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-#define TUI_SRC_WIN     tui_win_list[SRC_WIN]
-#define TUI_DISASM_WIN	tui_win_list[DISASSEM_WIN]
+#define TUI_SRC_WIN     ((tui_source_window_base *) tui_win_list[SRC_WIN])
+#define TUI_DISASM_WIN	((tui_source_window_base *) tui_win_list[DISASSEM_WIN])
 #define TUI_DATA_WIN    tui_win_list[DATA_WIN]
 #define TUI_CMD_WIN     tui_win_list[CMD_WIN]
 

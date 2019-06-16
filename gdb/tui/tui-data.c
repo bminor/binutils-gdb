@@ -75,14 +75,6 @@ tui_win_is_auxillary (enum tui_win_type win_type)
   return (win_type > MAX_MAJOR_WINDOWS);
 }
 
-/* See tui-data.h.  */
-
-bool
-tui_source_window_base::has_locator () const
-{
-  return detail.source_info.has_locator;
-}
-
 void
 tui_set_win_highlight (struct tui_win_info *win_info, 
 		       int highlight)
@@ -179,10 +171,10 @@ tui_add_to_source_windows (struct tui_win_info *win_info)
 void
 tui_source_window_base::clear_detail ()
 {
-  detail.source_info.gdbarch = NULL;
-  detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
-  detail.source_info.start_line_or_addr.u.addr = 0;
-  detail.source_info.horizontal_offset = 0;
+  gdbarch = NULL;
+  start_line_or_addr.loa = LOA_ADDRESS;
+  start_line_or_addr.u.addr = 0;
+  horizontal_offset = 0;
 }
 
 /* See tui-data.h.  */
@@ -499,13 +491,8 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   : tui_win_info (type)
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
-  detail.source_info.execution_info = NULL;
-  detail.source_info.has_locator = false;
-  detail.source_info.horizontal_offset = 0;
-  detail.source_info.gdbarch = NULL;
-  detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
-  detail.source_info.start_line_or_addr.u.addr = 0;
-  detail.source_info.fullname = NULL;
+  start_line_or_addr.loa = LOA_ADDRESS;
+  start_line_or_addr.u.addr = 0;
 }
 
 tui_data_window::tui_data_window ()
@@ -613,12 +600,8 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
 
 tui_source_window_base::~tui_source_window_base ()
 {
-  if (detail.source_info.fullname)
-    {
-      xfree (detail.source_info.fullname);
-      detail.source_info.fullname = NULL;
-    }
-  struct tui_gen_win_info *generic_win = detail.source_info.execution_info;
+  xfree (fullname);
+  struct tui_gen_win_info *generic_win = execution_info;
   if (generic_win != NULL)
     {
       tui_delete_win (generic_win->handle);
@@ -665,7 +648,8 @@ tui_free_all_source_wins_content ()
   for (tui_win_info *win_info : tui_source_windows ())
     {
       tui_free_win_content (&(win_info->generic));
-      tui_free_win_content (win_info->detail.source_info.execution_info);
+      tui_source_window_base *base = (tui_source_window_base *) win_info;
+      tui_free_win_content (base->execution_info);
     }
 }
 

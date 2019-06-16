@@ -1,5 +1,40 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_window)
+	(tui_refill_source_window)
+	(tui_source_window_base::do_scroll_horizontal)
+	(tui_update_breakpoint_info, tui_set_exec_info_content)
+	(tui_show_exec_info_content, tui_erase_exec_info_content)
+	(tui_clear_exec_info_content): Update.
+	* tui/tui-wingeneral.c (make_all_visible, tui_refresh_all):
+	Update.
+	* tui/tui-win.c (make_invisible_and_set_new_height)
+	(make_visible_with_new_height): Update.
+	* tui/tui-source.c (tui_set_source_content)
+	(tui_show_symtab_source): Update.
+	* tui/tui-layout.c (extract_display_start_addr)
+	(show_source_disasm_command, show_data)
+	(make_source_or_disasm_window)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content): Simplify.
+	(tui_disasm_window::do_scroll_vertical): Remove shadowing
+	"gdbarch".
+	* tui/tui-data.h (struct tui_source_info): Remove.  Move contents
+	to tui_source_window_base.
+	(struct tui_win_info) <detail>: Remove source_info member.
+	(struct tui_source_window_base) <has_locator>: Inline.
+	Move contents from tui_source_info; rename has_locator member to
+	m_has_locator.
+	(TUI_SRC_WIN, TUI_DISASM_WIN): Add casts.
+	* tui/tui-data.c (tui_source_window_base::has_locator): Move to
+	header file.
+	(tui_source_window_base::clear_detail, ~tui_source_window_base):
+	Simplify.
+	(tui_free_all_source_wins_content): Cast to
+	tui_source_window_base.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (make_invisible_and_set_new_height)
 	(make_visible_with_new_height): Call has_locator method.
 	* tui/tui-layout.c (show_source_disasm_command, show_data)

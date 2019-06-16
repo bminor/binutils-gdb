@@ -1268,11 +1268,13 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
     win_info->generic.viewport_height--;
 
   /* Now deal with the auxillary windows associated with win_info.  */
+  tui_source_window_base *base;
   switch (win_info->generic.type)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      gen_win_info = win_info->detail.source_info.execution_info;
+      base = (tui_source_window_base *) win_info;
+      gen_win_info = base->execution_info;
       tui_make_invisible (gen_win_info);
       gen_win_info->height = height;
       gen_win_info->origin.y = win_info->generic.origin.y;
@@ -1316,20 +1318,22 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 
   tui_make_visible (&win_info->generic);
   tui_check_and_display_highlight_if_needed (win_info);
+  tui_source_window_base *base;
   switch (win_info->generic.type)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      tui_free_win_content (win_info->detail.source_info.execution_info);
-      tui_make_visible (win_info->detail.source_info.execution_info);
+      base = (tui_source_window_base *) win_info;
+      tui_free_win_content (base->execution_info);
+      tui_make_visible (base->execution_info);
       if (win_info->generic.content != NULL)
 	{
-	  struct gdbarch *gdbarch = win_info->detail.source_info.gdbarch;
+	  struct gdbarch *gdbarch = base->gdbarch;
 	  struct tui_line_or_address line_or_addr;
 	  struct symtab_and_line cursal
 	    = get_current_source_symtab_and_line ();
 
-	  line_or_addr = win_info->detail.source_info.start_line_or_addr;
+	  line_or_addr = base->start_line_or_addr;
 	  tui_free_win_content (&win_info->generic);
 	  tui_update_source_window (win_info, gdbarch,
 				    cursal.symtab, line_or_addr, TRUE);

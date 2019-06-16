@@ -225,8 +225,11 @@ make_all_visible (int visible)
 	  && ((tui_win_list[i])->generic.type) != CMD_WIN)
 	{
 	  if (tui_win_is_source_type ((tui_win_list[i])->generic.type))
-	    make_visible ((tui_win_list[i])->detail.source_info.execution_info,
-			  visible);
+	    {
+	      tui_source_window_base *base
+		= (tui_source_window_base *) tui_win_list[i];
+	      make_visible (base->execution_info, visible);
+	    }
 	  make_visible (&tui_win_list[i]->generic, visible);
 	}
     }
@@ -260,8 +263,10 @@ tui_refresh_all (struct tui_win_info **list)
 	{
 	  if (type == SRC_WIN || type == DISASSEM_WIN)
 	    {
-	      touchwin (list[type]->detail.source_info.execution_info->handle);
-	      tui_refresh_win (list[type]->detail.source_info.execution_info);
+	      tui_source_window_base *base
+		= (tui_source_window_base *) list[type];
+	      touchwin (base->execution_info->handle);
+	      tui_refresh_win (base->execution_info);
 	    }
 	  touchwin (list[type]->generic.handle);
 	  tui_refresh_win (&list[type]->generic);

@@ -75,7 +75,8 @@ tui_update_source_window (struct tui_win_info *win_info,
 			  struct tui_line_or_address line_or_addr,
 			  int noerror)
 {
-  win_info->detail.source_info.horizontal_offset = 0;
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
+  base->horizontal_offset = 0;
   tui_update_source_window_as_is (win_info, gdbarch, s, line_or_addr, noerror);
 
   return;
@@ -324,8 +325,9 @@ tui_refill_source_window (struct tui_win_info *win_info)
 	   : cursal.symtab);
     }
 
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
   tui_update_source_window_as_is (win_info,
-				  win_info->detail.source_info.gdbarch,
+				  base->gdbarch,
 				  s,
 				  win_info->generic.content[0]
 				    ->which_element.source.line_or_addr,
@@ -343,16 +345,14 @@ tui_source_window_base::do_scroll_horizontal
       int offset;
 
       if (direction == LEFT_SCROLL)
-	offset = detail.source_info.horizontal_offset
-	  + num_to_scroll;
+	offset = horizontal_offset + num_to_scroll;
       else
 	{
-	  offset = detail.source_info.horizontal_offset
-	    - num_to_scroll;
+	  offset = horizontal_offset - num_to_scroll;
 	  if (offset < 0)
 	    offset = 0;
 	}
-      detail.source_info.horizontal_offset = offset;
+      horizontal_offset = offset;
       tui_refill_source_window (this);
     }
 }
@@ -425,7 +425,7 @@ tui_update_breakpoint_info (struct tui_win_info *win,
 {
   int i;
   int need_refresh = 0;
-  struct tui_source_info *src = &win->detail.source_info;
+  tui_source_window_base *src = (tui_source_window_base *) win;
 
   for (i = 0; i < win->generic.content_size; i++)
     {
@@ -494,10 +494,10 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 {
   enum tui_status ret = TUI_SUCCESS;
 
-  if (win_info->detail.source_info.execution_info != NULL)
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
+  if (base->execution_info != NULL)
     {
-      struct tui_gen_win_info *exec_info_ptr
-	= win_info->detail.source_info.execution_info;
+      struct tui_gen_win_info *exec_info_ptr = base->execution_info;
 
       if (exec_info_ptr->content == NULL)
 	exec_info_ptr->content =
@@ -551,8 +551,8 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 void
 tui_show_exec_info_content (struct tui_win_info *win_info)
 {
-  struct tui_gen_win_info *exec_info
-    = win_info->detail.source_info.execution_info;
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
+  struct tui_gen_win_info *exec_info = base->execution_info;
   int cur_line;
 
   werase (exec_info->handle);
@@ -571,8 +571,8 @@ tui_show_exec_info_content (struct tui_win_info *win_info)
 void
 tui_erase_exec_info_content (struct tui_win_info *win_info)
 {
-  struct tui_gen_win_info *exec_info
-    = win_info->detail.source_info.execution_info;
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
+  struct tui_gen_win_info *exec_info = base->execution_info;
 
   werase (exec_info->handle);
   tui_refresh_win (exec_info);
@@ -581,7 +581,8 @@ tui_erase_exec_info_content (struct tui_win_info *win_info)
 void
 tui_clear_exec_info_content (struct tui_win_info *win_info)
 {
-  win_info->detail.source_info.execution_info->content_in_use = FALSE;
+  tui_source_window_base *base = (tui_source_window_base *) win_info;
+  base->execution_info->content_in_use = FALSE;
   tui_erase_exec_info_content (win_info);
 
   return;

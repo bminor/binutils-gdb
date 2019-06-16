@@ -167,7 +167,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum tui_status ret = TUI_FAILURE;
   int i;
-  int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
+  int offset = TUI_DISASM_WIN->horizontal_offset;
   int max_lines, line_width;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
@@ -184,9 +184,10 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (ret != TUI_SUCCESS)
     return ret;
 
-  TUI_DISASM_WIN->detail.source_info.gdbarch = gdbarch;
-  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
-  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr = pc;
+  tui_source_window_base *base = TUI_DISASM_WIN;
+  base->gdbarch = gdbarch;
+  base->start_line_or_addr.loa = LOA_ADDRESS;
+  base->start_line_or_addr.u.addr = pc;
   cur_pc = locator->content[0]->which_element.locator.addr;
 
   /* Window size, excluding highlight box.  */
@@ -378,7 +379,6 @@ tui_disasm_window::do_scroll_vertical
 {
   if (generic.content != NULL)
     {
-      struct gdbarch *gdbarch = detail.source_info.gdbarch;
       CORE_ADDR pc;
       tui_win_content content;
       struct tui_line_or_address val;

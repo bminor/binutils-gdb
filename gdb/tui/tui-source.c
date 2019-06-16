@@ -159,8 +159,8 @@ tui_set_source_content (struct symtab *s,
 	      int cur_line_no, cur_line;
 	      struct tui_gen_win_info *locator
 		= tui_locator_win_info_ptr ();
-	      struct tui_source_info *src
-		= &TUI_SRC_WIN->detail.source_info;
+	      struct tui_source_window_base *src
+		= (struct tui_source_window_base *) TUI_SRC_WIN;
 	      const char *s_filename = symtab_to_filename_for_display (s);
 
 	      if (TUI_SRC_WIN->generic.title)
@@ -289,7 +289,7 @@ tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
 			struct tui_line_or_address line, 
 			int noerror)
 {
-  TUI_SRC_WIN->detail.source_info.horizontal_offset = 0;
+  TUI_SRC_WIN->horizontal_offset = 0;
   tui_update_source_window_as_is (TUI_SRC_WIN, gdbarch, s, line, noerror);
 }
 
