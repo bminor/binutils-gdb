@@ -309,14 +309,14 @@ tui_source_is_displayed (const char *fullname)
 
 /* Scroll the source forward or backward vertically.  */
 void
-tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
-			    int num_to_scroll)
+tui_source_window::do_scroll_vertical
+  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
-  if (TUI_SRC_WIN->generic.content != NULL)
+  if (generic.content != NULL)
     {
       struct tui_line_or_address l;
       struct symtab *s;
-      tui_win_content content = TUI_SRC_WIN->generic.content;
+      tui_win_content content = generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == NULL)

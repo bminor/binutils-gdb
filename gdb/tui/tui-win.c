@@ -470,125 +470,41 @@ tui_set_win_focus_to (struct tui_win_info *win_info)
 
 
 void
-tui_scroll_forward (struct tui_win_info *win_to_scroll, 
-		    int num_to_scroll)
+tui_win_info::forward_scroll (int num_to_scroll)
 {
-  if (win_to_scroll != TUI_CMD_WIN)
-    {
-      int _num_to_scroll = num_to_scroll;
+  if (num_to_scroll == 0)
+    num_to_scroll = generic.height - 3;
 
-      if (num_to_scroll == 0)
-	_num_to_scroll = win_to_scroll->generic.height - 3;
-
-      /* If we are scrolling the source or disassembly window, do a
-         "psuedo" scroll since not all of the source is in memory,
-         only what is in the viewport.  If win_to_scroll is the
-         command window do nothing since the term should handle
-         it.  */
-      if (win_to_scroll == TUI_SRC_WIN)
-	tui_vertical_source_scroll (FORWARD_SCROLL, _num_to_scroll);
-      else if (win_to_scroll == TUI_DISASM_WIN)
-	tui_vertical_disassem_scroll (FORWARD_SCROLL, _num_to_scroll);
-      else if (win_to_scroll == TUI_DATA_WIN)
-	tui_vertical_data_scroll (FORWARD_SCROLL, _num_to_scroll);
-    }
+  do_scroll_vertical (FORWARD_SCROLL, num_to_scroll);
 }
 
 void
-tui_scroll_backward (struct tui_win_info *win_to_scroll, 
-		     int num_to_scroll)
+tui_win_info::backward_scroll (int num_to_scroll)
 {
-  if (win_to_scroll != TUI_CMD_WIN)
-    {
-      int _num_to_scroll = num_to_scroll;
+  if (num_to_scroll == 0)
+    num_to_scroll = generic.height - 3;
 
-      if (num_to_scroll == 0)
-	_num_to_scroll = win_to_scroll->generic.height - 3;
-
-      /* If we are scrolling the source or disassembly window, do a
-         "psuedo" scroll since not all of the source is in memory,
-         only what is in the viewport.  If win_to_scroll is the
-         command window do nothing since the term should handle
-         it.  */
-      if (win_to_scroll == TUI_SRC_WIN)
-	tui_vertical_source_scroll (BACKWARD_SCROLL, _num_to_scroll);
-      else if (win_to_scroll == TUI_DISASM_WIN)
-	tui_vertical_disassem_scroll (BACKWARD_SCROLL, _num_to_scroll);
-      else if (win_to_scroll == TUI_DATA_WIN)
-	tui_vertical_data_scroll (BACKWARD_SCROLL, _num_to_scroll);
-    }
+  do_scroll_vertical (BACKWARD_SCROLL, num_to_scroll);
 }
 
 
 void
-tui_scroll_left (struct tui_win_info *win_to_scroll,
-		 int num_to_scroll)
+tui_win_info::left_scroll (int num_to_scroll)
 {
-  if (win_to_scroll != TUI_CMD_WIN)
-    {
-      int _num_to_scroll = num_to_scroll;
+  if (num_to_scroll == 0)
+    num_to_scroll = 1;
 
-      if (_num_to_scroll == 0)
-	_num_to_scroll = 1;
-
-      /* If we are scrolling the source or disassembly window, do a
-         "psuedo" scroll since not all of the source is in memory,
-         only what is in the viewport. If win_to_scroll is the command
-         window do nothing since the term should handle it.  */
-      if (win_to_scroll == TUI_SRC_WIN
-	  || win_to_scroll == TUI_DISASM_WIN)
-	tui_horizontal_source_scroll (win_to_scroll, LEFT_SCROLL,
-				      _num_to_scroll);
-    }
+  do_scroll_horizontal (LEFT_SCROLL, num_to_scroll);
 }
 
 
 void
-tui_scroll_right (struct tui_win_info *win_to_scroll, 
-		  int num_to_scroll)
+tui_win_info::right_scroll (int num_to_scroll)
 {
-  if (win_to_scroll != TUI_CMD_WIN)
-    {
-      int _num_to_scroll = num_to_scroll;
+  if (num_to_scroll == 0)
+    num_to_scroll = 1;
 
-      if (_num_to_scroll == 0)
-	_num_to_scroll = 1;
-
-      /* If we are scrolling the source or disassembly window, do a
-         "psuedo" scroll since not all of the source is in memory,
-         only what is in the viewport. If win_to_scroll is the command
-         window do nothing since the term should handle it.  */
-      if (win_to_scroll == TUI_SRC_WIN
-	  || win_to_scroll == TUI_DISASM_WIN)
-	tui_horizontal_source_scroll (win_to_scroll, RIGHT_SCROLL,
-				      _num_to_scroll);
-    }
-}
-
-
-/* Scroll a window.  Arguments are passed through a va_list.  */
-void
-tui_scroll (enum tui_scroll_direction direction,
-	    struct tui_win_info *win_to_scroll,
-	    int num_to_scroll)
-{
-  switch (direction)
-    {
-    case FORWARD_SCROLL:
-      tui_scroll_forward (win_to_scroll, num_to_scroll);
-      break;
-    case BACKWARD_SCROLL:
-      tui_scroll_backward (win_to_scroll, num_to_scroll);
-      break;
-    case LEFT_SCROLL:
-      tui_scroll_left (win_to_scroll, num_to_scroll);
-      break;
-    case RIGHT_SCROLL:
-      tui_scroll_right (win_to_scroll, num_to_scroll);
-      break;
-    default:
-      break;
-    }
+  do_scroll_horizontal (RIGHT_SCROLL, num_to_scroll);
 }
 
 
@@ -880,7 +796,7 @@ tui_scroll_forward_command (const char *arg, int from_tty)
     parse_scrolling_args (arg, &win_to_scroll, NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
-  tui_scroll (FORWARD_SCROLL, win_to_scroll, num_to_scroll);
+  win_to_scroll->forward_scroll (num_to_scroll);
 }
 
 
@@ -896,7 +812,7 @@ tui_scroll_backward_command (const char *arg, int from_tty)
     parse_scrolling_args (arg, &win_to_scroll, NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
-  tui_scroll (BACKWARD_SCROLL, win_to_scroll, num_to_scroll);
+  win_to_scroll->backward_scroll (num_to_scroll);
 }
 
 
@@ -909,7 +825,7 @@ tui_scroll_left_command (const char *arg, int from_tty)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
-  tui_scroll (LEFT_SCROLL, win_to_scroll, num_to_scroll);
+  win_to_scroll->left_scroll (num_to_scroll);
 }
 
 
@@ -922,7 +838,7 @@ tui_scroll_right_command (const char *arg, int from_tty)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
-  tui_scroll (RIGHT_SCROLL, win_to_scroll, num_to_scroll);
+  win_to_scroll->right_scroll (num_to_scroll);
 }
 
 

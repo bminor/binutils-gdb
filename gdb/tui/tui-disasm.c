@@ -373,18 +373,18 @@ tui_get_low_disassembly_address (struct gdbarch *gdbarch,
 
 /* Scroll the disassembly forward or backward vertically.  */
 void
-tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
-			      int num_to_scroll)
+tui_disasm_window::do_scroll_vertical
+  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
-  if (TUI_DISASM_WIN->generic.content != NULL)
+  if (generic.content != NULL)
     {
-      struct gdbarch *gdbarch = TUI_DISASM_WIN->detail.source_info.gdbarch;
+      struct gdbarch *gdbarch = detail.source_info.gdbarch;
       CORE_ADDR pc;
       tui_win_content content;
       struct tui_line_or_address val;
       int dir;
 
-      content = TUI_DISASM_WIN->generic.content;
+      content = generic.content;
 
       pc = content[0]->which_element.source.line_or_addr.u.addr;
       num_to_scroll++;

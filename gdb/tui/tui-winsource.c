@@ -335,26 +335,25 @@ tui_refill_source_window (struct tui_win_info *win_info)
 /* Scroll the source forward or backward horizontally.  */
 
 void
-tui_horizontal_source_scroll (struct tui_win_info *win_info,
-			      enum tui_scroll_direction direction,
-			      int num_to_scroll)
+tui_source_window_base::do_scroll_horizontal
+  (enum tui_scroll_direction direction, int num_to_scroll)
 {
-  if (win_info->generic.content != NULL)
+  if (generic.content != NULL)
     {
       int offset;
 
       if (direction == LEFT_SCROLL)
-	offset = win_info->detail.source_info.horizontal_offset
+	offset = detail.source_info.horizontal_offset
 	  + num_to_scroll;
       else
 	{
-	  offset = win_info->detail.source_info.horizontal_offset
+	  offset = detail.source_info.horizontal_offset
 	    - num_to_scroll;
 	  if (offset < 0)
 	    offset = 0;
 	}
-      win_info->detail.source_info.horizontal_offset = offset;
-      tui_refill_source_window (win_info);
+      detail.source_info.horizontal_offset = offset;
+      tui_refill_source_window (this);
     }
 }
 

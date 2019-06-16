@@ -245,15 +245,15 @@ tui_check_data_values (struct frame_info *frame)
 
 /* Scroll the data window vertically forward or backward.  */
 void
-tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction,
-			  int num_to_scroll)
+tui_data_window::do_scroll_vertical
+  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
   int first_element_no;
   int first_line = (-1);
 
   first_element_no = tui_first_data_item_displayed ();
   if (first_element_no 
-      < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
+      < detail.data_display_info.regs_content_count)
     first_line = tui_line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in

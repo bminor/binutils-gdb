@@ -1,5 +1,39 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_horizontal_source_scroll):  Don't
+	declare.
+	* tui/tui-winsource.c
+	(tui_source_window_base::do_scroll_horizontal): Rename from
+	tui_horizontal_source_scroll.
+	* tui/tui-windata.h (tui_vertical_data_scroll): Don't declare.
+	* tui/tui-windata.c (tui_data_window::do_scroll_vertical): Rename
+	from tui_vertical_data_scroll.
+	* tui/tui-win.h (tui_scroll): Don't declare.
+	* tui/tui-win.c (tui_win_info::forward_scroll)
+	(tui_win_info::backward_scroll, tui_win_info::left_scroll)
+	(tui_win_info::right_scroll): Rename and update.
+	(tui_scroll_forward_command, tui_scroll_backward_command)
+	(tui_scroll_left_command, tui_scroll_right_command): Update.
+	(tui_scroll): Remove.
+	* tui/tui-source.h: Don't declare tui_vertical_source_scroll.
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Rename
+	from tui_vertical_source_scroll.
+	* tui/tui-disasm.h (tui_vertical_disassem_scroll): Don't declare.
+	* tui/tui-disasm.c (tui_disasm_window::do_scroll_vertical): Rename
+	from tui_vertical_disassem_scroll.
+	* tui/tui-data.h (struct tui_win_info) <do_scroll_vertical,
+	do_scroll_horizontal>: New methods.
+	<forward_scroll, backward_scroll, left_scroll, right_scroll>:
+	Likewise.
+	(struct tui_source_window_base): Add do_scroll_horizontal.
+	(struct tui_source_window, struct tui_disasm_window): Add
+	do_scroll_vertical.
+	(struct tui_data_window, struct tui_cmd_window): Add
+	do_scroll_horizontal and do_scroll_vertical.
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Use method calls.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_source_window_base): New struct.
 	(struct tui_source_window): Derive from tui_source_window_base.
 	(struct tui_disasm_window): New struct.

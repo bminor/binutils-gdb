@@ -57,24 +57,24 @@ tui_dispatch_ctrl_char (unsigned int ch)
   switch (ch)
     {
     case KEY_NPAGE:
-      tui_scroll_forward (win_info, 0);
+      win_info->forward_scroll (0);
       break;
     case KEY_PPAGE:
-      tui_scroll_backward (win_info, 0);
+      win_info->backward_scroll (0);
       break;
     case KEY_DOWN:
     case KEY_SF:
-      tui_scroll_forward (win_info, 1);
+      win_info->forward_scroll (1);
       break;
     case KEY_UP:
     case KEY_SR:
-      tui_scroll_backward (win_info, 1);
+      win_info->backward_scroll (1);
       break;
     case KEY_RIGHT:
-      tui_scroll_left (win_info, 1);
+      win_info->left_scroll (1);
       break;
     case KEY_LEFT:
-      tui_scroll_right (win_info, 1);
+      win_info->right_scroll (1);
       break;
     case '\f':
       break;

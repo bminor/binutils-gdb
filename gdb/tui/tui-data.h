@@ -268,12 +268,30 @@ protected:
   explicit tui_win_info (enum tui_win_type type);
   DISABLE_COPY_AND_ASSIGN (tui_win_info);
 
+  /* Scroll the contents vertically.  This is only called via
+     forward_scroll and backward_scroll.  */
+  virtual void do_scroll_vertical (enum tui_scroll_direction,
+				   int num_to_scroll) = 0;
+
+  /* Scroll the contents horizontally.  This is only called via
+     left_scroll and right_scroll.  */
+  virtual void do_scroll_horizontal (enum tui_scroll_direction,
+				     int num_to_scroll) = 0;
+
 public:
 
   virtual ~tui_win_info ();
 
   /* Clear the pertinent detail in the window.  */
   virtual void clear_detail () = 0;
+
+  /* Methods to scroll the contents of this window.  Note that they
+     are named with "_scroll" coming at the end because the more
+     obvious "scroll_forward" is defined as a macro in term.h.  */
+  void forward_scroll (int num_to_scroll);
+  void backward_scroll (int num_to_scroll);
+  void left_scroll (int num_to_scroll);
+  void right_scroll (int num_to_scroll);
 
   struct tui_gen_win_info generic;	/* General window information.  */
   union
@@ -301,6 +319,9 @@ protected:
   ~tui_source_window_base () override;
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
+  void do_scroll_horizontal (enum tui_scroll_direction,
+			     int num_to_scroll) override;
+
 public:
 
   void clear_detail () override;
@@ -316,6 +337,11 @@ struct tui_source_window : public tui_source_window_base
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
+
+protected:
+
+  void do_scroll_vertical (enum tui_scroll_direction,
+			   int num_to_scroll) override;
 };
 
 /* A TUI disassembly window.  */
@@ -328,6 +354,11 @@ struct tui_disasm_window : public tui_source_window_base
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
+
+protected:
+
+  void do_scroll_vertical (enum tui_scroll_direction,
+			   int num_to_scroll) override;
 };
 
 struct tui_data_window : public tui_win_info
@@ -337,6 +368,15 @@ struct tui_data_window : public tui_win_info
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
   void clear_detail () override;
+
+protected:
+
+  void do_scroll_vertical (enum tui_scroll_direction,
+			   int num_to_scroll) override;
+  void do_scroll_horizontal (enum tui_scroll_direction,
+			     int num_to_scroll) override
+  {
+  }
 };
 
 struct tui_cmd_window : public tui_win_info
@@ -345,6 +385,18 @@ struct tui_cmd_window : public tui_win_info
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 
   void clear_detail () override;
+
+protected:
+
+  void do_scroll_vertical (enum tui_scroll_direction,
+			   int num_to_scroll) override
+  {
+  }
+
+  void do_scroll_horizontal (enum tui_scroll_direction,
+			     int num_to_scroll) override
+  {
+  }
 };
 
 extern int tui_win_is_source_type (enum tui_win_type win_type);
