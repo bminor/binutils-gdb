@@ -1,5 +1,14 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all): Use delete.
+	* tui/tui-data.h (struct tui_win_info) <~tui_win_info>: Declare
+	destructor.
+	(tui_free_window): Don't declare.
+	* tui/tui-data.c (~tui_win_info): Rename from tui_free_window.
+	Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_win_info): Add constructor.
 	* tui/tui-data.c (tui_alloc_win_info): Use new.
 	(tui_free_window): Use delete.

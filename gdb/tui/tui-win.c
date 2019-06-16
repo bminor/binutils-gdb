@@ -785,7 +785,7 @@ tui_resize_all (void)
 	      && (tui_win_list[win_type] != NULL)
 	      && !tui_win_list[win_type]->generic.is_visible)
 	    {
-	      tui_free_window (tui_win_list[win_type]);
+	      delete tui_win_list[win_type];
 	      tui_win_list[win_type] = NULL;
 	    }
 	}
