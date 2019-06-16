@@ -39,18 +39,39 @@ typedef struct tui_win_element **tui_win_content;
 /* Generic window information.  */
 struct tui_gen_win_info
 {
-  WINDOW *handle;	    /* Window handle.  */
-  enum tui_win_type type;   /* Type of window.  */
-  int width;		    /* Window width.  */
-  int height;		    /* Window height.  */
-  struct tui_point origin;  /* Origin of window.  */
-  tui_win_content content;  /* Content of window.  */
-  int content_size;	    /* Size of content (# of elements).  */
-  int content_in_use;	    /* Can it be used, or is it already used?  */
-  int viewport_height;	    /* Viewport height.  */
-  int last_visible_line;    /* Index of last visible line.  */
-  bool is_visible;	    /* Whether the window is visible or not.  */
-  char *title;              /* Window title to display.  */
+  explicit tui_gen_win_info (enum tui_win_type t)
+    : type (t)
+  {
+  }
+
+  ~tui_gen_win_info ()
+  {
+  }
+
+  /* Window handle.  */
+  WINDOW *handle = nullptr;
+  /* Type of window.  */
+  enum tui_win_type type;
+  /* Window width.  */
+  int width = 0;
+  /* Window height.  */
+  int height = 0;
+  /* Origin of window.  */
+  struct tui_point origin = {0, 0};
+  /* Content of window.  */
+  tui_win_content content = nullptr;
+  /* Size of content (# of elements).  */
+  int content_size = 0;
+  /* Can it be used, or is it already used?  */
+  int content_in_use = FALSE;
+  /* Viewport height.  */
+  int viewport_height = 0;
+  /* Index of last visible line.  */
+  int last_visible_line = 0;
+  /* Whether the window is visible or not.  */
+  bool is_visible = false;
+  /* Window title to display.  */
+  char *title = nullptr;
 };
 
 /* Constant definitions.  */
@@ -465,7 +486,6 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 /* Data Manipulation Functions.  */
 extern void tui_initialize_static_data (void);
-extern struct tui_gen_win_info *tui_alloc_generic_win_info (void);
 extern struct tui_win_info *tui_alloc_win_info (enum tui_win_type);
 extern void tui_init_generic_part (struct tui_gen_win_info *);
 extern tui_win_content tui_alloc_content (int, enum tui_win_type);

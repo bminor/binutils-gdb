@@ -1,5 +1,21 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (init_and_make_win): Use new.
+	* tui/tui-data.h (struct tui_gen_win_info): Add constructor,
+	destructor, initializers.
+	(tui_alloc_generic_win_info): Don't declare.
+	* tui/tui-data.c (_locator): Add argument to constructor.
+	(source_win, disasm_win): New globals.
+	(exec_info): Remove.
+	(tui_source_exec_info_win_ptr, tui_disassem_exec_info_win_ptr):
+	Update.
+	(tui_alloc_generic_win_info): Remove.
+	(init_content_element): Use new.
+	(tui_win_info::tui_win_info): Update.
+	(free_content_elements) <case DATA_WIN>: Use delete.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_refresh_win): Update.
 	* tui/tui-windata.c (tui_first_data_item_displayed)
 	(tui_delete_data_content_windows): Update.

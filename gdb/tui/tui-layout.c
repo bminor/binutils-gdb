@@ -822,7 +822,7 @@ init_and_make_win (void *opaque_win_info,
   if (opaque_win_info == NULL)
     {
       if (tui_win_is_auxillary (win_type))
-	opaque_win_info = (void *) tui_alloc_generic_win_info ();
+	opaque_win_info = (void *) new tui_gen_win_info (win_type);
       else
 	opaque_win_info = (void *) tui_alloc_win_info (win_type);
     }

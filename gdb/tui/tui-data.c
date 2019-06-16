@@ -36,8 +36,9 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 ****************************/
 static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 static int term_height, term_width;
-static struct tui_gen_win_info _locator;
-static struct tui_gen_win_info exec_info[2];
+static struct tui_gen_win_info _locator (LOCATOR_WIN);
+static struct tui_gen_win_info source_win (EXEC_INFO_WIN);
+static struct tui_gen_win_info disasm_win (EXEC_INFO_WIN);
 static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 static struct tui_layout_def layout_def = {
@@ -188,7 +189,7 @@ tui_data_window::clear_detail ()
 struct tui_gen_win_info *
 tui_source_exec_info_win_ptr (void)
 {
-  return &exec_info[0];
+  return &source_win;
 }
 
 
@@ -196,7 +197,7 @@ tui_source_exec_info_win_ptr (void)
 struct tui_gen_win_info *
 tui_disassem_exec_info_win_ptr (void)
 {
-  return &exec_info[1];
+  return &disasm_win;
 }
 
 
@@ -389,17 +390,6 @@ tui_initialize_static_data (void)
 }
 
 
-struct tui_gen_win_info *
-tui_alloc_generic_win_info (void)
-{
-  struct tui_gen_win_info *win = XNEW (struct tui_gen_win_info);
-
-  tui_init_generic_part (win);
-
-  return win;
-}
-
-
 void
 tui_init_generic_part (struct tui_gen_win_info *win)
 {
@@ -435,9 +425,7 @@ init_content_element (struct tui_win_element *element,
       element->which_element.source.has_break = FALSE;
       break;
     case DATA_WIN:
-      element->which_element.data_window = XNEW (struct tui_gen_win_info);
-      tui_init_generic_part (element->which_element.data_window);
-      element->which_element.data_window->type = DATA_ITEM_WIN;
+      element->which_element.data_window = new struct tui_gen_win_info (DATA_ITEM_WIN);
       element->which_element.data_window->content =
 	tui_alloc_content (1, DATA_ITEM_WIN);
       element->which_element.data_window->content_size = 1;
@@ -469,9 +457,8 @@ init_content_element (struct tui_win_element *element,
 }
 
 tui_win_info::tui_win_info (enum tui_win_type type)
+  : generic (type)
 {
-  generic.type = type;
-  tui_init_generic_part (&generic);
 }
 
 tui_source_window_base::tui_source_window_base (enum tui_win_type type)
@@ -711,7 +698,7 @@ free_content_elements (tui_win_content content,
 		      xfree (element->which_element.source.line);
 		      break;
 		    case DATA_WIN:
-		      xfree (element->which_element.data_window);
+		      delete element->which_element.data_window;
 		      xfree (element);
 		      break;
 		    case DATA_ITEM_WIN:
