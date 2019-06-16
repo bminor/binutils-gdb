@@ -604,59 +604,6 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
   return index_start;
 }
 
-
-/* Delete all curses windows associated with win_info, leaving
-   everything else intact.  */
-void
-tui_del_window (struct tui_win_info *win_info)
-{
-  struct tui_gen_win_info *generic_win;
-
-  switch (win_info->generic.type)
-    {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      generic_win = tui_locator_win_info_ptr ();
-      if (generic_win != NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = NULL;
-	  generic_win->is_visible = FALSE;
-	}
-      if (win_info->detail.source_info.fullname)
-        {
-          xfree (win_info->detail.source_info.fullname);
-          win_info->detail.source_info.fullname = NULL;
-        }
-      generic_win = win_info->detail.source_info.execution_info;
-      if (generic_win != NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = NULL;
-	  generic_win->is_visible = FALSE;
-	}
-      break;
-    case DATA_WIN:
-      if (win_info->generic.content != NULL)
-	{
-	  tui_del_data_windows (win_info->detail.data_display_info.regs_content,
-				win_info->detail.data_display_info.regs_content_count);
-	  tui_del_data_windows (win_info->detail.data_display_info.data_content,
-				win_info->detail.data_display_info.data_content_count);
-	}
-      break;
-    default:
-      break;
-    }
-  if (win_info->generic.handle != NULL)
-    {
-      tui_delete_win (win_info->generic.handle);
-      win_info->generic.handle = NULL;
-      win_info->generic.is_visible = FALSE;
-    }
-}
-
-
 void
 tui_free_window (struct tui_win_info *win_info)
 {
@@ -740,30 +687,6 @@ tui_free_win_content (struct tui_gen_win_info *win_info)
       win_info->content = NULL;
     }
   win_info->content_size = 0;
-}
-
-
-void
-tui_del_data_windows (tui_win_content content, 
-		      int content_size)
-{
-  int i;
-
-  /* Remember that data window content elements are of type struct
-     tui_gen_win_info *, each of which whose single element is a data
-     element.  */
-  for (i = 0; i < content_size; i++)
-    {
-      struct tui_gen_win_info *generic_win
-	= &content[i]->which_element.data_window;
-
-      if (generic_win != NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = NULL;
-	  generic_win->is_visible = FALSE;
-	}
-    }
 }
 
 

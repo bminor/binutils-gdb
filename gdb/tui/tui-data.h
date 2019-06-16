@@ -310,8 +310,6 @@ extern void tui_free_window (struct tui_win_info *);
 extern void tui_free_win_content (struct tui_gen_win_info *);
 extern void tui_free_data_content (tui_win_content, int);
 extern void tui_free_all_source_wins_content (void);
-extern void tui_del_window (struct tui_win_info *);
-extern void tui_del_data_windows (tui_win_content, int);
 extern struct tui_win_info *tui_partial_win_by_name (const char *);
 extern const char *tui_win_name (const struct tui_gen_win_info *);
 extern enum tui_layout_type tui_current_layout (void);
