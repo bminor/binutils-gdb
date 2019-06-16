@@ -2178,7 +2178,7 @@ path_command (const char *dirname, int from_tty)
   current_inferior ()->environment.set (path_var_name, exec_path);
   xfree (exec_path);
   if (from_tty)
-    path_info ((char *) NULL, from_tty);
+    path_info (NULL, from_tty);
 }
 
 

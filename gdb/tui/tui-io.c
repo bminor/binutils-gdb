@@ -878,7 +878,7 @@ tui_initialize_io (void)
   if (tui_rl_outstream == 0)
     error (_("Cannot redirect readline output"));
 
-  setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
+  setvbuf (tui_rl_outstream, NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);

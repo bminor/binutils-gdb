@@ -129,7 +129,7 @@ tui_set_source_content (struct symtab *s,
 {
   enum tui_status ret = TUI_FAILURE;
 
-  if (s != (struct symtab *) NULL)
+  if (s != NULL)
     {
       int line_width, nlines;
 
@@ -319,7 +319,7 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
       tui_win_content content = TUI_SRC_WIN->generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      if (cursal.symtab == (struct symtab *) NULL)
+      if (cursal.symtab == NULL)
 	s = find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)));
       else
 	s = cursal.symtab;

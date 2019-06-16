@@ -877,7 +877,7 @@ tui_scroll_forward_command (const char *arg, int from_tty)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   if (arg == NULL)
-    parse_scrolling_args (arg, &win_to_scroll, (int *) NULL);
+    parse_scrolling_args (arg, &win_to_scroll, NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
   tui_scroll (FORWARD_SCROLL, win_to_scroll, num_to_scroll);
@@ -893,7 +893,7 @@ tui_scroll_backward_command (const char *arg, int from_tty)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   if (arg == NULL)
-    parse_scrolling_args (arg, &win_to_scroll, (int *) NULL);
+    parse_scrolling_args (arg, &win_to_scroll, NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
   tui_scroll (BACKWARD_SCROLL, win_to_scroll, num_to_scroll);
@@ -946,8 +946,7 @@ tui_set_focus (const char *arg, int from_tty)
       else
 	win_info = tui_partial_win_by_name (buf_ptr);
 
-      if (win_info == (struct tui_win_info *) NULL
-	  || !win_info->generic.is_visible)
+      if (win_info == NULL || !win_info->generic.is_visible)
 	warning (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
       else
@@ -1116,8 +1115,7 @@ tui_set_win_height (const char *arg, int from_tty)
 	    wname[i] = tolower (wname[i]);
 	  win_info = tui_partial_win_by_name (wname);
 
-	  if (win_info == (struct tui_win_info *) NULL
-	      || !win_info->generic.is_visible)
+	  if (win_info == NULL || !win_info->generic.is_visible)
 	    warning (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
 	  else
@@ -1634,7 +1632,7 @@ parse_scrolling_args (const char *arg,
 	  
 	  *win_to_scroll = tui_partial_win_by_name (wname);
 
-	  if (*win_to_scroll == (struct tui_win_info *) NULL
+	  if (*win_to_scroll == NULL
 	      || !(*win_to_scroll)->generic.is_visible)
 	    error (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));

@@ -55,7 +55,7 @@ tui_first_data_item_displayed (void)
 
       data_item_win
 	= &TUI_DATA_WIN->generic.content[i]->which_element.data_window;
-      if (data_item_win->handle != (WINDOW *) NULL 
+      if (data_item_win->handle != NULL 
 	  && data_item_win->is_visible)
 	element_no = i;
     }

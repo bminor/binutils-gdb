@@ -3321,8 +3321,7 @@ decode_line_with_last_displayed (const char *string, int flags)
        ? decode_line_1 (location.get (), flags, NULL,
 			get_last_displayed_symtab (),
 			get_last_displayed_line ())
-       : decode_line_1 (location.get (), flags, NULL,
-			(struct symtab *) NULL, 0));
+       : decode_line_1 (location.get (), flags, NULL, NULL, 0));
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);

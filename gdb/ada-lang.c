@@ -872,8 +872,7 @@ ada_get_decoded_type (struct type *type)
 enum language
 ada_update_initial_language (enum language lang)
 {
-  if (lookup_minimal_symbol ("adainit", (const char *) NULL,
-                             (struct objfile *) NULL).minsym != NULL)
+  if (lookup_minimal_symbol ("adainit", NULL, NULL).minsym != NULL)
     return language_ada;
 
   return lang;

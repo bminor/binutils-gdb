@@ -348,7 +348,7 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
   init_header_files ();
         
   /* Make sure all the FDR information is swapped in.  */
-  if (info->fdr == (FDR *) NULL)
+  if (info->fdr == NULL)
     {
       char *fdr_src;
       char *fdr_end;
@@ -593,7 +593,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   long svalue = sh->value;
   int bitsize;
 
-  if (ext_sh == (char *) NULL)
+  if (ext_sh == NULL)
     name = debug_info->ssext + sh->iss;
   else
     name = debug_info->ss + cur_fdr->issBase + sh->iss;
@@ -1005,7 +1005,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	/* Create a new type or use the pending type.  */
 	pend = is_pending_symbol (cur_fdr, ext_sh);
-	if (pend == (struct mdebug_pending *) NULL)
+	if (pend == NULL)
 	  {
 	    t = new_type (NULL);
 	    add_pending (cur_fdr, ext_sh, t);
@@ -1267,9 +1267,9 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* Parse the type or use the pending type.  */
       pend = is_pending_symbol (cur_fdr, ext_sh);
-      if (pend == (struct mdebug_pending *) NULL)
+      if (pend == NULL)
 	{
-	  t = parse_type (cur_fd, ax, sh->index, (int *) NULL, bigend, name);
+	  t = parse_type (cur_fd, ax, sh->index, NULL, bigend, name);
 	  add_pending (cur_fdr, ext_sh, t);
 	}
       else
@@ -1579,7 +1579,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       int width = AUX_GET_WIDTH (bigend, ax);
 
       /* Inhibit core dumps if TIR is corrupted.  */
-      if (bs == (int *) NULL)
+      if (bs == NULL)
 	{
 	  /* Alpha cc -migrate encodes char and unsigned char types
 	     as short and unsigned short types with a field width of 8.
@@ -1626,7 +1626,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       xref_fh = get_rfd (fd, rf);
       xref_fd = xref_fh - debug_info->fdr;
       tp = parse_type (xref_fd, debug_info->external_aux + xref_fh->iauxBase,
-		    rn->index, (int *) NULL, xref_fh->fBigendian, sym_name);
+		    rn->index, NULL, xref_fh->fBigendian, sym_name);
     }
 
   /* All these types really point to some (common) MIPS type
@@ -1644,7 +1644,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
-      if (tp == (struct type *) NULL)
+      if (tp == NULL)
 	tp = init_type (mdebugread_objfile, type_code, 0, NULL);
 
       /* DEC c89 produces cross references to qualified aggregate types,
@@ -1704,7 +1704,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
-      if (tp == (struct type *) NULL)
+      if (tp == NULL)
 	tp = init_type (mdebugread_objfile, type_code, 0, NULL);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
@@ -1737,7 +1737,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* Try to cross reference this type, it should succeed.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
-      if (tp == (struct type *) NULL)
+      if (tp == NULL)
 	{
 	  complaint (_("unable to cross ref btTypedef for %s"), sym_name);
 	  tp = basic_type (btInt, mdebugread_objfile);
@@ -1841,7 +1841,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
       indx = parse_type (fh - debug_info->fdr,
 			 debug_info->external_aux + fh->iauxBase,
-			 id, (int *) NULL, bigend, sym_name);
+			 id, NULL, bigend, sym_name);
 
       /* The bounds type should be an integer type, but might be anything
          else due to corrupt aux entries.  */
@@ -1860,10 +1860,9 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       ax++;
       rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
 
-      range = create_static_range_type ((struct type *) NULL, indx,
-					lower, upper);
+      range = create_static_range_type (NULL, indx, lower, upper);
 
-      t = create_array_type ((struct type *) NULL, *tpp, range);
+      t = create_array_type (NULL, *tpp, range);
 
       /* We used to fill in the supplied array element bitsize
          here if the TYPE_LENGTH of the target type was zero.
@@ -2144,7 +2143,7 @@ parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
 
       /* Note that the case of a symbol with indexNil must be handled
          anyways by parse_symbol().  */
-      parse_symbol (&es->asym, ax, (char *) NULL,
+      parse_symbol (&es->asym, ax, NULL,
 		    bigend, section_offsets, objfile);
       break;
     default:
@@ -3704,7 +3703,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       fh = f_idx + debug_info->fdr;
       pst = fdr_to_pst[f_idx].pst;
 
-      if (pst == (struct partial_symtab *) NULL)
+      if (pst == NULL)
 	continue;
 
       /* This should catch stabs-in-ecoff.  */
@@ -3735,7 +3734,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	    continue;
 
 	  /* Do not add to dependeny list if psymtab was empty.  */
-	  if (fdr_to_pst[rh].pst == (struct partial_symtab *) NULL)
+	  if (fdr_to_pst[rh].pst == NULL)
 	    continue;
 	  pst->dependencies[pst->number_of_dependencies++]
 	    = fdr_to_pst[rh].pst;
@@ -3909,13 +3908,13 @@ psymtab_to_symtab_1 (struct objfile *objfile,
   mdebugread_objfile = objfile;
   cur_fd = FDR_IDX (pst);
   fh = ((cur_fd == -1)
-	? (FDR *) NULL
+	? NULL
 	: debug_info->fdr + cur_fd);
   cur_fdr = fh;
 
   /* See comment in parse_partial_symbols about the @stabs sentinel.  */
   processing_gcc_compilation = 0;
-  if (fh != (FDR *) NULL && fh->csym >= 2)
+  if (fh != NULL && fh->csym >= 2)
     {
       SYMR sh;
 
@@ -4425,7 +4424,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	      *tpp = parse_type (xref_fd,
 				 debug_info->external_aux + fh->iauxBase,
 				 sh.index,
-				 (int *) NULL,
+				 NULL,
 				 fh->fBigendian,
 				 debug_info->ss + fh->issBase + sh.iss);
 	      add_pending (fh, esh, *tpp);
@@ -4451,7 +4450,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	  *tpp = parse_type (xref_fd,
 			     debug_info->external_aux + fh->iauxBase,
 			     sh.index,
-			     (int *) NULL,
+			     NULL,
 			     fh->fBigendian,
 			     debug_info->ss + fh->issBase + sh.iss);
 	}

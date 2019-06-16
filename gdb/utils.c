@@ -2771,7 +2771,7 @@ subset_compare (const char *string_to_compare, const char *template_string)
 {
   int match;
 
-  if (template_string != (char *) NULL && string_to_compare != (char *) NULL
+  if (template_string != NULL && string_to_compare != NULL
       && strlen (string_to_compare) <= strlen (template_string))
     match =
       (startswith (template_string, string_to_compare));

@@ -1,5 +1,53 @@
 2019-06-16  Tom Tromey  <tom@tromey.com>
 
+	* valops.c (value_cast, value_slice): Remove unnecessary cast.
+	* breakpoint.c (stopin_command, stopat_command)
+	(until_break_command, decode_location_default): Remove unnecessary
+	cast.
+	* utils.c (subset_compare): Remove unnecessary cast.
+	* ada-lang.c (ada_update_initial_language): Remove unnecessary
+	cast.
+	* linespec.c (decode_line_with_last_displayed): Remove unnecessary
+	cast.
+	* infcmd.c (path_command): Remove unnecessary cast.
+	* coffread.c (decode_type): Remove unnecessary cast.
+	* xcoffread.c (read_xcoff_symtab): Remove unnecessary cast.
+	* mipsread.c (mipscoff_symfile_read): Remove unnecessary cast.
+	* tui/tui-stack.c (tui_show_locator_content)
+	(tui_show_frame_info): Remove unnecessary cast.
+	* tui/tui-win.c (tui_scroll_forward_command)
+	(tui_scroll_backward_command, tui_set_focus, tui_set_win_height)
+	(parse_scrolling_args): Remove unnecessary cast.
+	* tui/tui-data.c (init_win_info, tui_del_window)
+	(tui_free_window, tui_del_data_windows, tui_free_data_content)
+	(free_content_elements): Remove unnecessary cast.
+	* tui/tui-windata.c (tui_first_data_item_displayed): Remove
+	unnecessary cast.
+	* tui/tui-source.c (tui_set_source_content)
+	(tui_vertical_source_scroll): Remove unnecessary cast.
+	* tui/tui-layout.c (tui_default_win_height): Remove unnecessary
+	cast.
+	* tui/tui-io.c (tui_initialize_io): Remove unnecessary cast.
+	* tui/tui-regs.c (tui_display_registers_from)
+	(tui_display_register): Remove unnecessary cast.
+	* tui/tui-wingeneral.c (tui_refresh_win, tui_delete_win)
+	(tui_unhighlight_win, tui_highlight_win, tui_make_window)
+	(make_visible): Remove unnecessary cast.
+	* tui/tui-winsource.c (tui_erase_source_content)
+	(tui_update_breakpoint_info, tui_set_exec_info_content): Remove
+	unnecessary cast.
+	* ax-gdb.c (agent_command_1): Remove unnecessary cast.
+	* cli/cli-setshow.c (cmd_show_list): Remove unnecessary cast.
+	* stabsread.c (read_type, read_array_type, read_range_type):
+	Remove unnecessary cast.
+	* mdebugread.c (mdebug_build_psymtabs): Remove unnecessary cast.
+	(parse_symbol, parse_type, upgrade_type, parse_external)
+	(parse_partial_symbols, psymtab_to_symtab_1, cross_ref): Remove
+	unnecessary cast.
+	* gdb_bfd.c (gdb_bfd_map_section): Remove unnecessary cast.
+
+2019-06-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.c (tui_alloc_generic_win_info)
 	(tui_alloc_win_info, tui_add_content_elements): Remove NULL
 	checks.

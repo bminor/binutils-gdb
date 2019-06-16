@@ -250,7 +250,7 @@ tui_show_locator_content (void)
 
   locator = tui_locator_win_info_ptr ();
 
-  if (locator != NULL && locator->handle != (WINDOW *) NULL)
+  if (locator != NULL && locator->handle != NULL)
     {
       struct tui_win_element *element;
 
@@ -414,8 +414,7 @@ tui_show_frame_info (struct frame_info *fi)
 	  else
 	    {
 	      if (find_pc_partial_function (get_frame_pc (fi),
-					    (const char **) NULL,
-					    &low, NULL) == 0)
+					    NULL, &low, NULL) == 0)
 		{
 		  /* There is no symbol available for current PC.  There is no
 		     safe way how to "disassemble backwards".  */

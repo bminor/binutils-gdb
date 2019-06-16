@@ -358,7 +358,7 @@ tui_display_registers_from (int start_element_no)
 	      data_item_win = &display_info->regs_content[i]
                 ->which_element.data_window;
 	      data_element_ptr = &data_item_win->content[0]->which_element.data;
-              if (data_item_win->handle != (WINDOW*) NULL
+              if (data_item_win->handle != NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
                       || data_item_win->origin.x != (item_win_width * j) + 1
@@ -368,7 +368,7 @@ tui_display_registers_from (int start_element_no)
                   data_item_win->handle = 0;
                 }
                   
-	      if (data_item_win->handle == (WINDOW *) NULL)
+	      if (data_item_win->handle == NULL)
 		{
 		  data_item_win->height = 1;
 		  data_item_win->width = item_win_width;
@@ -520,7 +520,7 @@ static void
 tui_display_register (struct tui_data_element *data,
                       struct tui_gen_win_info *win_info)
 {
-  if (win_info->handle != (WINDOW *) NULL)
+  if (win_info->handle != NULL)
     {
       int i;
 

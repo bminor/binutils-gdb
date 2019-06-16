@@ -300,7 +300,7 @@ tui_default_win_height (enum tui_win_type type,
 {
   int h;
 
-  if (tui_win_list[type] != (struct tui_win_info *) NULL)
+  if (tui_win_list[type] != NULL)
     h = tui_win_list[type]->generic.height;
   else
     {

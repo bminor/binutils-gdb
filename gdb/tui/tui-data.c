@@ -507,8 +507,7 @@ init_win_info (struct tui_win_info *win_info)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      win_info->detail.source_info.execution_info
-	= (struct tui_gen_win_info *) NULL;
+      win_info->detail.source_info.execution_info = NULL;
       win_info->detail.source_info.has_locator = FALSE;
       win_info->detail.source_info.horizontal_offset = 0;
       win_info->detail.source_info.gdbarch = NULL;
@@ -620,7 +619,7 @@ tui_del_window (struct tui_win_info *win_info)
     case SRC_WIN:
     case DISASSEM_WIN:
       generic_win = tui_locator_win_info_ptr ();
-      if (generic_win != (struct tui_gen_win_info *) NULL)
+      if (generic_win != NULL)
 	{
 	  tui_delete_win (generic_win->handle);
 	  generic_win->handle = NULL;
@@ -632,7 +631,7 @@ tui_del_window (struct tui_win_info *win_info)
           win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
-      if (generic_win != (struct tui_gen_win_info *) NULL)
+      if (generic_win != NULL)
 	{
 	  tui_delete_win (generic_win->handle);
 	  generic_win->handle = NULL;
@@ -651,7 +650,7 @@ tui_del_window (struct tui_win_info *win_info)
     default:
       break;
     }
-  if (win_info->generic.handle != (WINDOW *) NULL)
+  if (win_info->generic.handle != NULL)
     {
       tui_delete_win (win_info->generic.handle);
       win_info->generic.handle = NULL;
@@ -675,7 +674,7 @@ tui_free_window (struct tui_win_info *win_info)
           win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
-      if (generic_win != (struct tui_gen_win_info *) NULL)
+      if (generic_win != NULL)
 	{
 	  tui_delete_win (generic_win->handle);
 	  generic_win->handle = NULL;
@@ -704,7 +703,7 @@ tui_free_window (struct tui_win_info *win_info)
     default:
       break;
     }
-  if (win_info->generic.handle != (WINDOW *) NULL)
+  if (win_info->generic.handle != NULL)
     {
       tui_delete_win (win_info->generic.handle);
       win_info->generic.handle = NULL;
@@ -762,7 +761,7 @@ tui_del_data_windows (tui_win_content content,
       struct tui_gen_win_info *generic_win
 	= &content[i]->which_element.data_window;
 
-      if (generic_win != (struct tui_gen_win_info *) NULL)
+      if (generic_win != NULL)
 	{
 	  tui_delete_win (generic_win->handle);
 	  generic_win->handle = NULL;
@@ -786,7 +785,7 @@ tui_free_data_content (tui_win_content content,
       struct tui_gen_win_info *generic_win
 	= &content[i]->which_element.data_window;
 
-      if (generic_win != (struct tui_gen_win_info *) NULL)
+      if (generic_win != NULL)
 	{
 	  tui_delete_win (generic_win->handle);
 	  generic_win->handle = NULL;
@@ -840,7 +839,7 @@ free_content_elements (tui_win_content content,
 	      struct tui_win_element *element;
 
 	      element = content[i];
-	      if (element != (struct tui_win_element *) NULL)
+	      if (element != NULL)
 		{
 		  switch (type)
 		    {

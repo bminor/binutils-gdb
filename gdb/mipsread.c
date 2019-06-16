@@ -76,7 +76,7 @@ mipscoff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      process it and define symbols accordingly.  */
 
   if (!((*ecoff_backend (abfd)->debug_swap.read_debug_info)
-	(abfd, (asection *) NULL, &ecoff_data (abfd)->debug_info)))
+	(abfd, NULL, &ecoff_data (abfd)->debug_info)))
     error (_("Error reading symbol table: %s"), bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (reader, objfile, &ecoff_backend (abfd)->debug_swap,

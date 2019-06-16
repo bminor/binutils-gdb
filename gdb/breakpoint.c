@@ -9493,7 +9493,7 @@ stopin_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
-  if (arg == (char *) NULL)
+  if (arg == NULL)
     badInput = 1;
   else if (*arg != '*')
     {
@@ -9526,7 +9526,7 @@ stopat_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
-  if (arg == (char *) NULL || *arg == '*')	/* no line number */
+  if (arg == NULL || *arg == '*')	/* no line number */
     badInput = 1;
   else
     {
@@ -11015,7 +11015,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 			get_last_displayed_symtab (),
 			get_last_displayed_line ())
        : decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
-			NULL, (struct symtab *) NULL, 0));
+			NULL, NULL, 0));
 
   if (sals.size () != 1)
     error (_("Couldn't get information on specified line."));
@@ -13730,8 +13730,7 @@ decode_location_default (struct breakpoint *b,
   struct linespec_result canonical;
 
   decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, search_pspace,
-		    (struct symtab *) NULL, 0,
-		    &canonical, multiple_symbols_all,
+		    NULL, 0, &canonical, multiple_symbols_all,
 		    b->filter);
 
   /* We should get 0 or 1 resulting SALs.  */

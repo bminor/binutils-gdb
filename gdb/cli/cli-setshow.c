@@ -756,7 +756,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 	      uiout->field_string ("name", list->name);
 	      uiout->text (":  ");
 	      if (list->type == show_cmd)
-		do_show_command ((char *) NULL, from_tty, list);
+		do_show_command (NULL, from_tty, list);
 	      else
 		cmd_func (list, NULL, from_tty);
 	    }

@@ -709,7 +709,7 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
       /* Set size to 0 to prevent further attempts to read the invalid
 	 section.  */
       *size = 0;
-      return (const gdb_byte *) NULL;
+      return NULL;
     }
   descriptor->data = data;
 

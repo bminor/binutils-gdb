@@ -45,7 +45,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
 
 	  data_item_win_ptr = &win_info->content[i]->which_element.data_window;
 	  if (data_item_win_ptr != NULL
-	      && data_item_win_ptr->handle != (WINDOW *) NULL)
+	      && data_item_win_ptr->handle != NULL)
 	    wrefresh (data_item_win_ptr->handle);
 	}
     }
@@ -55,7 +55,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
     }
   else
     {
-      if (win_info->handle != (WINDOW *) NULL)
+      if (win_info->handle != NULL)
 	wrefresh (win_info->handle);
     }
 
@@ -67,7 +67,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
 void
 tui_delete_win (WINDOW *window)
 {
-  if (window != (WINDOW *) NULL)
+  if (window != NULL)
     delwin (window);
 
   return;
@@ -110,7 +110,7 @@ void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL 
-      && win_info->generic.handle != (WINDOW *) NULL)
+      && win_info->generic.handle != NULL)
     {
       box_win ((struct tui_gen_win_info *) win_info, NO_HILITE);
       wrefresh (win_info->generic.handle);
@@ -124,7 +124,7 @@ tui_highlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL
       && win_info->can_highlight
-      && win_info->generic.handle != (WINDOW *) NULL)
+      && win_info->generic.handle != NULL)
     {
       box_win ((struct tui_gen_win_info *) win_info, HILITE);
       wrefresh (win_info->generic.handle);
@@ -157,7 +157,7 @@ tui_make_window (struct tui_gen_win_info *win_info, int box_it)
 		   win_info->origin.y,
 		   win_info->origin.x);
   win_info->handle = handle;
-  if (handle != (WINDOW *) NULL)
+  if (handle != NULL)
     {
       if (box_it == BOX_WINDOW)
 	box_win (win_info, NO_HILITE);
@@ -189,7 +189,7 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
     }
   else if (!visible
 	   && win_info->is_visible
-	   && win_info->handle != (WINDOW *) NULL)
+	   && win_info->handle != NULL)
     {
       win_info->is_visible = FALSE;
       tui_delete_win (win_info->handle);

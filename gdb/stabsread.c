@@ -2048,7 +2048,7 @@ again:
 
     case 'S':			/* Set type */
       type1 = read_type (pp, objfile);
-      type = create_set_type ((struct type *) NULL, type1);
+      type = create_set_type (NULL, type1);
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums, objfile) = type;
       break;
@@ -3585,7 +3585,7 @@ read_array_type (const char **pp, struct type *type,
     }
 
   range_type =
-    create_static_range_type ((struct type *) NULL, index_type, lower, upper);
+    create_static_range_type (NULL, index_type, lower, upper);
   type = create_array_type (type, element_type, range_type);
 
   return type;
@@ -4212,7 +4212,7 @@ handle_true_range:
     }
 
   result_type
-    = create_static_range_type ((struct type *) NULL, index_type, n2, n3);
+    = create_static_range_type (NULL, index_type, n2, n3);
   return (result_type);
 }
 

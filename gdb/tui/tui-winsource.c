@@ -235,7 +235,7 @@ tui_erase_source_content (struct tui_win_info *win_info,
   int x_pos;
   int half_width = (win_info->generic.width - 2) / 2;
 
-  if (win_info->generic.handle != (WINDOW *) NULL)
+  if (win_info->generic.handle != NULL)
     {
       werase (win_info->generic.handle);
       tui_check_and_display_highlight_if_needed (win_info);
@@ -453,7 +453,7 @@ tui_update_breakpoint_info (struct tui_win_info *win,
          those that we already hit.  */
       mode = 0;
       for (bp = breakpoint_chain;
-           bp != (struct breakpoint *) NULL;
+           bp != NULL;
            bp = bp->next)
         {
 	  struct bp_location *loc;
@@ -504,8 +504,7 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 {
   enum tui_status ret = TUI_SUCCESS;
 
-  if (win_info->detail.source_info.execution_info
-      != (struct tui_gen_win_info *) NULL)
+  if (win_info->detail.source_info.execution_info != NULL)
     {
       struct tui_gen_win_info *exec_info_ptr
 	= win_info->detail.source_info.execution_info;
