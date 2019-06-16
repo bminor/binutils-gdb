@@ -1289,15 +1289,81 @@ psyms_seen_size (struct dwarf2_per_objfile *dwarf2_per_objfile)
   return psyms_count / 4;
 }
 
-/* Write new .gdb_index section for OBJFILE into OUT_FILE.
-   Return how many bytes were expected to be written into OUT_FILE.  */
+/* Assert that FILE's size is EXPECTED_SIZE.  Assumes file's seek
+   position is at the end of the file.  */
 
-static size_t
-write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
+static void
+assert_file_size (FILE *file, size_t expected_size)
+{
+  const auto file_size = ftell (file);
+  if (file_size == -1)
+    perror_with_name (("ftell"));
+  gdb_assert (file_size == expected_size);
+}
+
+/* Write a gdb index file to OUT_FILE from all the sections passed as
+   arguments.  */
+
+static void
+write_gdbindex_1 (FILE *out_file,
+		  const data_buf &cu_list,
+		  const data_buf &types_cu_list,
+		  const data_buf &addr_vec,
+		  const data_buf &symtab_vec,
+		  const data_buf &constant_pool)
+{
+  data_buf contents;
+  const offset_type size_of_header = 6 * sizeof (offset_type);
+  offset_type total_len = size_of_header;
+
+  /* The version number.  */
+  contents.append_data (MAYBE_SWAP (8));
+
+  /* The offset of the CU list from the start of the file.  */
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += cu_list.size ();
+
+  /* The offset of the types CU list from the start of the file.  */
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += types_cu_list.size ();
+
+  /* The offset of the address table from the start of the file.  */
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += addr_vec.size ();
+
+  /* The offset of the symbol table from the start of the file.  */
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += symtab_vec.size ();
+
+  /* The offset of the constant pool from the start of the file.  */
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += constant_pool.size ();
+
+  gdb_assert (contents.size () == size_of_header);
+
+  contents.file_write (out_file);
+  cu_list.file_write (out_file);
+  types_cu_list.file_write (out_file);
+  addr_vec.file_write (out_file);
+  symtab_vec.file_write (out_file);
+  constant_pool.file_write (out_file);
+
+  assert_file_size (out_file, total_len);
+}
+
+/* Write contents of a .gdb_index section for OBJFILE into OUT_FILE.
+   If OBJFILE has an associated dwz file, write contents of a .gdb_index
+   section for that dwz file into DWZ_OUT_FILE.  If OBJFILE does not have an
+   associated dwz file, DWZ_OUT_FILE must be NULL.  */
+
+static void
+write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
+		FILE *dwz_out_file)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   mapped_symtab symtab;
-  data_buf cu_list;
+  data_buf objfile_cu_list;
+  data_buf dwz_cu_list;
 
   /* While we're scanning CU's create a table that maps a psymtab pointer
      (which is what addrmap records) to its index (which is what is recorded
@@ -1331,6 +1397,10 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
       const auto insertpair = cu_index_htab.emplace (psymtab, i);
       gdb_assert (insertpair.second);
 
+      /* The all_comp_units list contains CUs read from the objfile as well as
+	 from the eventual dwz file.  We need to place the entry in the
+	 corresponding index.  */
+      data_buf &cu_list = per_cu->is_dwz ? dwz_cu_list : objfile_cu_list;
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
 			   to_underlying (per_cu->sect_off));
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
@@ -1361,43 +1431,13 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file)
   data_buf symtab_vec, constant_pool;
   write_hash_table (&symtab, symtab_vec, constant_pool);
 
-  data_buf contents;
-  const offset_type size_of_contents = 6 * sizeof (offset_type);
-  offset_type total_len = size_of_contents;
+  write_gdbindex_1(out_file, objfile_cu_list, types_cu_list, addr_vec,
+		   symtab_vec, constant_pool);
 
-  /* The version number.  */
-  contents.append_data (MAYBE_SWAP (8));
-
-  /* The offset of the CU list from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
-  total_len += cu_list.size ();
-
-  /* The offset of the types CU list from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
-  total_len += types_cu_list.size ();
-
-  /* The offset of the address table from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
-  total_len += addr_vec.size ();
-
-  /* The offset of the symbol table from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
-  total_len += symtab_vec.size ();
-
-  /* The offset of the constant pool from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
-  total_len += constant_pool.size ();
-
-  gdb_assert (contents.size () == size_of_contents);
-
-  contents.file_write (out_file);
-  cu_list.file_write (out_file);
-  types_cu_list.file_write (out_file);
-  addr_vec.file_write (out_file);
-  symtab_vec.file_write (out_file);
-  constant_pool.file_write (out_file);
-
-  return total_len;
+  if (dwz_out_file != NULL)
+    write_gdbindex_1 (dwz_out_file, dwz_cu_list, {}, {}, {}, {});
+  else
+    gdb_assert (dwz_cu_list.empty ());
 }
 
 /* DWARF-5 augmentation string for GDB's DW_IDX_GNU_* extension.  */
@@ -1407,7 +1447,7 @@ static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
    needed addition to .debug_str section to OUT_FILE_STR.  Return how
    many bytes were expected to be written into OUT_FILE.  */
 
-static size_t
+static void
 write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		   FILE *out_file, FILE *out_file_str)
 {
@@ -1528,26 +1568,69 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   types_cu_list.file_write (out_file);
   nametable.file_write (out_file, out_file_str);
 
-  return expected_bytes;
+  assert_file_size (out_file, expected_bytes);
 }
 
-/* Assert that FILE's size is EXPECTED_SIZE.  Assumes file's seek
-   position is at the end of the file.  */
+/* This represents an index file being written (work-in-progress).
 
-static void
-assert_file_size (FILE *file, const char *filename, size_t expected_size)
+   The data is initially written to a temporary file.  When the finalize method
+   is called, the file is closed and moved to its final location.
+
+   On failure (if this object is being destroyed with having called finalize),
+   the temporary file is closed and deleted.  */
+
+struct index_wip_file
 {
-  const auto file_size = ftell (file);
-  if (file_size == -1)
-    error (_("Can't get `%s' size"), filename);
-  gdb_assert (file_size == expected_size);
-}
+  index_wip_file (const char *dir, const char *basename,
+		  const char *suffix)
+  {
+    filename = (std::string (dir) + SLASH_STRING + basename
+    		+ suffix);
+
+    filename_temp = make_temp_filename (filename);
+
+    scoped_fd out_file_fd (gdb_mkostemp_cloexec (filename_temp.data (),
+						 O_BINARY));
+    if (out_file_fd.get () == -1)
+      perror_with_name (("mkstemp"));
+
+    out_file = out_file_fd.to_file ("wb");
+
+    if (out_file == nullptr)
+      error (_("Can't open `%s' for writing"), filename_temp.data ());
+
+    unlink_file.emplace (filename_temp.data ());
+  }
+
+  void finalize ()
+  {
+    /* We want to keep the file.  */
+    unlink_file->keep ();
+
+    /* Close and move the str file in place.  */
+    unlink_file.reset ();
+    if (rename (filename_temp.data (), filename.c_str ()) != 0)
+      perror_with_name (("rename"));
+  }
+
+  std::string filename;
+  gdb::char_vector filename_temp;
+
+  /* Order matters here; we want FILE to be closed before
+     FILENAME_TEMP is unlinked, because on MS-Windows one cannot
+     delete a file that is still open.  So, we wrap the unlinker in an
+     optional and emplace it once we know the file name.  */
+  gdb::optional<gdb::unlinker> unlink_file;
+
+  gdb_file_up out_file;
+};
 
 /* See dwarf-index-write.h.  */
 
 void
 write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			 const char *dir, const char *basename,
+			 const char *dwz_basename,
 			 dw_index_kind index_kind)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -1566,74 +1649,33 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   if (stat (objfile_name (objfile), &st) < 0)
     perror_with_name (objfile_name (objfile));
 
-  std::string filename (std::string (dir) + SLASH_STRING + basename
-			+ (index_kind == dw_index_kind::DEBUG_NAMES
-			   ? INDEX5_SUFFIX : INDEX4_SUFFIX));
-  gdb::char_vector filename_temp = make_temp_filename (filename);
+  const char *index_suffix = (index_kind == dw_index_kind::DEBUG_NAMES
+			      ? INDEX5_SUFFIX : INDEX4_SUFFIX);
 
-  /* Order matters here; we want FILE to be closed before
-     FILENAME_TEMP is unlinked, because on MS-Windows one cannot
-     delete a file that is still open.  So, we wrap the unlinker in an
-     optional and emplace it once we know the file name.  */
-  gdb::optional<gdb::unlinker> unlink_file;
-  scoped_fd out_file_fd (gdb_mkostemp_cloexec (filename_temp.data (),
-					       O_BINARY));
-  if (out_file_fd.get () == -1)
-    perror_with_name (("mkstemp"));
+  index_wip_file objfile_index_wip (dir, basename, index_suffix);
+  gdb::optional<index_wip_file> dwz_index_wip;
 
-  gdb_file_up out_file = out_file_fd.to_file ("wb");
-  if (out_file == nullptr)
-    error (_("Can't open `%s' for writing"), filename_temp.data ());
-
-  unlink_file.emplace (filename_temp.data ());
+  if (dwz_basename != NULL)
+      dwz_index_wip.emplace (dir, dwz_basename, index_suffix);
 
   if (index_kind == dw_index_kind::DEBUG_NAMES)
     {
-      std::string filename_str (std::string (dir) + SLASH_STRING
-				+ basename + DEBUG_STR_SUFFIX);
-      gdb::char_vector filename_str_temp = make_temp_filename (filename_str);
+      index_wip_file str_wip_file (dir, basename, DEBUG_STR_SUFFIX);
 
-      /* As above, arrange to unlink the file only after the file
-	 descriptor has been closed.  */
-      gdb::optional<gdb::unlinker> unlink_file_str;
-      scoped_fd out_file_str_fd
-	(gdb_mkostemp_cloexec (filename_str_temp.data (), O_BINARY));
-      if (out_file_str_fd.get () == -1)
-        perror_with_name (("mkstemp"));
+      write_debug_names (dwarf2_per_objfile, objfile_index_wip.out_file.get (),
+			 str_wip_file.out_file.get ());
 
-      gdb_file_up out_file_str = out_file_str_fd.to_file ("wb");
-      if (out_file_str == nullptr)
-	error (_("Can't open `%s' for writing"), filename_str_temp.data ());
-
-      unlink_file_str.emplace (filename_str_temp.data ());
-
-      const size_t total_len
-	= write_debug_names (dwarf2_per_objfile, out_file.get (),
-			     out_file_str.get ());
-      assert_file_size (out_file.get (), filename_temp.data (), total_len);
-
-      /* We want to keep the file .debug_str file too.  */
-      unlink_file_str->keep ();
-
-      /* Close and move the str file in place.  */
-      out_file_str.reset ();
-      if (rename (filename_str_temp.data (), filename_str.c_str ()) != 0)
-	perror_with_name (("rename"));
+      str_wip_file.finalize ();
     }
   else
-    {
-      const size_t total_len
-	= write_gdbindex (dwarf2_per_objfile, out_file.get ());
-      assert_file_size (out_file.get (), filename_temp.data (), total_len);
-    }
+    write_gdbindex (dwarf2_per_objfile, objfile_index_wip.out_file.get (),
+		    (dwz_index_wip.has_value ()
+		     ? dwz_index_wip->out_file.get () : NULL));
 
-  /* We want to keep the file.  */
-  unlink_file->keep ();
+  objfile_index_wip.finalize ();
 
-  /* Close and move the file in place.  */
-  out_file.reset ();
-  if (rename (filename_temp.data (), filename.c_str ()) != 0)
-	perror_with_name (("rename"));
+  if (dwz_index_wip.has_value ())
+    dwz_index_wip->finalize ();
 }
 
 /* Implementation of the `save gdb-index' command.
@@ -1678,8 +1720,14 @@ save_gdb_index_command (const char *arg, int from_tty)
 	  try
 	    {
 	      const char *basename = lbasename (objfile_name (objfile));
+	      const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+	      const char *dwz_basename = NULL;
+
+	      if (dwz != NULL)
+		dwz_basename = lbasename (dwz->filename ());
+
 	      write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
-				       index_kind);
+				       dwz_basename, index_kind);
 	    }
 	  catch (const gdb_exception_error &except)
 	    {

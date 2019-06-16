@@ -93,6 +93,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (!enabled ())
     return;
 
+  /* Get build id of objfile.  */
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
   if (build_id == nullptr)
     {
@@ -102,13 +103,34 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
       return;
     }
 
+  std::string build_id_str = build_id_to_string (build_id);
+
+  /* Get build id of dwz file, if present.  */
+  gdb::optional<std::string> dwz_build_id_str;
+  const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  const char *dwz_build_id_ptr = NULL;
+
+  if (dwz != nullptr)
+    {
+      const bfd_build_id *dwz_build_id = build_id_bfd_get (dwz->dwz_bfd.get ());
+
+      if (dwz_build_id == nullptr)
+	{
+	  if (debug_index_cache)
+	    printf_unfiltered ("index cache: dwz objfile %s has no build id\n",
+			       dwz->filename ());
+	  return;
+	}
+
+      dwz_build_id_str = build_id_to_string (dwz_build_id);
+      dwz_build_id_ptr = dwz_build_id_str->c_str ();
+    }
+
   if (m_dir.empty ())
     {
       warning (_("The index cache directory name is empty, skipping store."));
       return;
     }
-
-  std::string build_id_str = build_id_to_string (build_id);
 
   try
     {
@@ -122,12 +144,13 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
       if (debug_index_cache)
         printf_unfiltered ("index cache: writing index cache for objfile %s\n",
-			 objfile_name (obj));
+			   objfile_name (obj));
 
       /* Write the index itself to the directory, using the build id as the
          filename.  */
       write_psymtabs_to_index (dwarf2_per_objfile, m_dir.c_str (),
-			       build_id_str.c_str (), dw_index_kind::GDB_INDEX);
+			       build_id_str.c_str (), dwz_build_id_ptr,
+			       dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {

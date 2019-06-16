@@ -1,3 +1,26 @@
+2019-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/24445
+	* dwarf-index-write.h (write_psymtabs_to_index): Add
+	dwz_basename parameter.
+	* dwarf-index-write.c (write_gdbindex): Move file writing to
+	write_gdbindex_1.  Change return type void.
+	(assert_file_size): Move up, remove filename parameter.
+	(write_gdbindex_1): New function.
+	(write_debug_names): Change return type to void, call
+	assert_file_size.
+	(struct index_wip_file): New struct.
+	(write_psymtabs_to_index): Add dwz_basename parameter.  Move
+	file logic to index_wip_file.  Write index for dwz file if
+	needed.
+	(save_gdb_index_command): Pass basename of dwz file, if present.
+	* dwarf-index-cache.c (index_cache::store): Obtain and pass
+	build-id of dwz file, if present.
+	* dwarf2read.c (struct dwz_file): Move to dwarf2read.h.
+	(dwarf2_get_dwz_file): Likewise.
+	* dwarf2read.h (struct dwz_file): Move from dwarf2read.c.
+	(dwarf2_get_dwz_file): Likewise.
+
 2019-06-16  Tom Tromey  <tom@tromey.com>
 
 	* coffread.c (process_coff_symbol): Use xstrdup.

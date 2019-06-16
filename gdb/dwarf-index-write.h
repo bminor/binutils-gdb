@@ -23,12 +23,17 @@
 #include "symfile.h"
 #include "dwarf2read.h"
 
-/* Create an index file for OBJFILE in the directory DIR.  BASENAME is the
-   desired filename, minus the extension, which gets added by this function
-   based on INDEX_KIND.  */
+/* Create index files for OBJFILE in the directory DIR.
+
+   An index file is created for OBJFILE itself, and is created for its
+   associated dwz file, if it has one.
+
+   BASENAME is the desired filename base for OBJFILE's index.  An extension
+   derived from INDEX_KIND is added to this base name.  DWZ_BASENAME is the
+   same, but for the dwz file's index.  */
 
 extern void write_psymtabs_to_index
   (struct dwarf2_per_objfile *dwarf2_per_objfile, const char *dir,
-   const char *basename, dw_index_kind index_kind);
+   const char *basename, const char *dwz_basename, dw_index_kind index_kind);
 
 #endif /* DWARF_INDEX_WRITE_H */

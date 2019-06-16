@@ -875,32 +875,6 @@ struct dwp_file
   asection **elf_sections = nullptr;
 };
 
-/* This represents a '.dwz' file.  */
-
-struct dwz_file
-{
-  dwz_file (gdb_bfd_ref_ptr &&bfd)
-    : dwz_bfd (std::move (bfd))
-  {
-  }
-
-  /* A dwz file can only contain a few sections.  */
-  struct dwarf2_section_info abbrev {};
-  struct dwarf2_section_info info {};
-  struct dwarf2_section_info str {};
-  struct dwarf2_section_info line {};
-  struct dwarf2_section_info macro {};
-  struct dwarf2_section_info gdb_index {};
-  struct dwarf2_section_info debug_names {};
-
-  /* The dwz's BFD.  */
-  gdb_bfd_ref_ptr dwz_bfd;
-
-  /* If we loaded the index from an external file, this contains the
-     resources associated to the open file, memory mapping, etc.  */
-  std::unique_ptr<index_cache_resource> index_cache_res;
-};
-
 /* Struct used to pass misc. parameters to read_die_and_children, et
    al.  which are used for both .debug_info and .debug_types dies.
    All parameters here are unchanging for the life of the call.  This
@@ -2668,11 +2642,9 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
     }
 }
 
-/* Open the separate '.dwz' debug file, if needed.  Return NULL if
-   there is no .gnu_debugaltlink section in the file.  Error if there
-   is such a section but the file cannot be found.  */
+/* See dwarf2read.h.  */
 
-static struct dwz_file *
+struct dwz_file *
 dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
   const char *filename;
