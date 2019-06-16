@@ -271,14 +271,14 @@ struct tui_command_info
 /* This defines information about each logical window.  */
 struct tui_win_info
 {
-  explicit tui_win_info (enum tui_win_type type)
-  {
-    generic.type = type;
-  }
+protected:
 
-  ~tui_win_info ();
-
+  explicit tui_win_info (enum tui_win_type type);
   DISABLE_COPY_AND_ASSIGN (tui_win_info);
+
+public:
+
+  virtual ~tui_win_info ();
 
   struct tui_gen_win_info generic;	/* General window information.  */
   union
@@ -288,8 +288,30 @@ struct tui_win_info
     struct tui_command_info command_info;
   }
   detail;
-  int can_highlight;	/* Can this window ever be highlighted?  */
-  int is_highlighted;	/* Is this window highlighted?  */
+
+  /* Can this window ever be highlighted?  */
+  int can_highlight = 0;
+
+  /* Is this window highlighted?  */
+  int is_highlighted = 0;
+};
+
+struct tui_source_window : public tui_win_info
+{
+  explicit tui_source_window (enum tui_win_type type);
+  DISABLE_COPY_AND_ASSIGN (tui_source_window);
+};
+
+struct tui_data_window : public tui_win_info
+{
+  tui_data_window ();
+  DISABLE_COPY_AND_ASSIGN (tui_data_window);
+};
+
+struct tui_cmd_window : public tui_win_info
+{
+  tui_cmd_window ();
+  DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 };
 
 extern int tui_win_is_source_type (enum tui_win_type win_type);

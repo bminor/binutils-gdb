@@ -495,47 +495,59 @@ init_content_element (struct tui_win_element *element,
     }
 }
 
-static void
-init_win_info (struct tui_win_info *win_info)
+tui_win_info::tui_win_info (enum tui_win_type type)
 {
-  tui_init_generic_part (&win_info->generic);
-  win_info->can_highlight =
-    win_info->is_highlighted = FALSE;
-  switch (win_info->generic.type)
-    {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      win_info->detail.source_info.execution_info = NULL;
-      win_info->detail.source_info.has_locator = FALSE;
-      win_info->detail.source_info.horizontal_offset = 0;
-      win_info->detail.source_info.gdbarch = NULL;
-      win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
-      win_info->detail.source_info.start_line_or_addr.u.addr = 0;
-      win_info->detail.source_info.fullname = NULL;
-      break;
-    case DATA_WIN:
-      win_info->detail.data_display_info.data_content = NULL;
-      win_info->detail.data_display_info.data_content_count = 0;
-      win_info->detail.data_display_info.regs_content = NULL;
-      win_info->detail.data_display_info.regs_content_count = 0;
-      win_info->detail.data_display_info.regs_column_count = 1;
-      win_info->detail.data_display_info.display_regs = FALSE;
-      win_info->detail.data_display_info.current_group = 0;
-      break;
-    case CMD_WIN:
-      break;
-    }
+  generic.type = type;
+  tui_init_generic_part (&generic);
 }
 
+tui_source_window::tui_source_window (enum tui_win_type type)
+  : tui_win_info (type)
+{
+  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
+  detail.source_info.execution_info = NULL;
+  detail.source_info.has_locator = FALSE;
+  detail.source_info.horizontal_offset = 0;
+  detail.source_info.gdbarch = NULL;
+  detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
+  detail.source_info.start_line_or_addr.u.addr = 0;
+  detail.source_info.fullname = NULL;
+}
+
+tui_data_window::tui_data_window ()
+  : tui_win_info (DATA_WIN)
+{
+  detail.data_display_info.data_content = (tui_win_content) NULL;
+  detail.data_display_info.data_content_count = 0;
+  detail.data_display_info.regs_content = (tui_win_content) NULL;
+  detail.data_display_info.regs_content_count = 0;
+  detail.data_display_info.regs_column_count = 1;
+  detail.data_display_info.display_regs = FALSE;
+  detail.data_display_info.current_group = 0;
+}
+
+tui_cmd_window::tui_cmd_window ()
+  : tui_win_info (CMD_WIN)
+{
+}
 
 struct tui_win_info *
 tui_alloc_win_info (enum tui_win_type type)
 {
-  struct tui_win_info *win_info = new struct tui_win_info (type);
+  switch (type)
+    {
+    case SRC_WIN:
+    case DISASSEM_WIN:
+      return new tui_source_window (type);
 
-  init_win_info (win_info);
+    case DATA_WIN:
+      return new tui_data_window ();
 
-  return win_info;
+    case CMD_WIN:
+      return new tui_cmd_window ();
+    }
+
+  gdb_assert_not_reached (_("Unhandled window type"));
 }
 
 

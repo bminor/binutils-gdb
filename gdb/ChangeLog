@@ -1,5 +1,17 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_win_info): Make constructor
+	protected.  Make destructor virtual.  Add initializers.
+	(tui_source_window, tui_data_window, tui_cmd_window): New
+	classes.
+	* tui/tui-data.c (tui_win_info): Rename from init_win_info.  Now a
+	constructor.  Add "type" parameter.
+	(tui_source_window, tui_data_window, tui_cmd_window): New
+	constructors.
+	(tui_alloc_win_info): Instantiate the appropriate subclass.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_resize_all): Use delete.
 	* tui/tui-data.h (struct tui_win_info) <~tui_win_info>: Declare
 	destructor.
