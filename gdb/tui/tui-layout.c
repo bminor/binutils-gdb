@@ -842,18 +842,16 @@ init_and_make_win (void *opaque_win_info,
   else
     generic = &((struct tui_win_info *) opaque_win_info)->generic;
 
-  if (opaque_win_info != NULL)
+  init_gen_win_info (generic, win_type, height, width, origin_x, origin_y);
+  if (!tui_win_is_auxillary (win_type))
     {
-      init_gen_win_info (generic, win_type, height, width, origin_x, origin_y);
-      if (!tui_win_is_auxillary (win_type))
-	{
-	  if (generic->type == CMD_WIN)
-	    ((struct tui_win_info *) opaque_win_info)->can_highlight = FALSE;
-	  else
-	    ((struct tui_win_info *) opaque_win_info)->can_highlight = TRUE;
-	}
-      tui_make_window (generic, box_it);
+      if (generic->type == CMD_WIN)
+	((struct tui_win_info *) opaque_win_info)->can_highlight = FALSE;
+      else
+	((struct tui_win_info *) opaque_win_info)->can_highlight = TRUE;
     }
+  tui_make_window (generic, box_it);
+
   return opaque_win_info;
 }
 

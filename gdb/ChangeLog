@@ -1,5 +1,9 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (init_and_make_win): Remove NULL check.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_win_info): Make constructor
 	protected.  Make destructor virtual.  Add initializers.
 	(tui_source_window, tui_data_window, tui_cmd_window): New
