@@ -357,7 +357,7 @@ struct tui_data_window : public tui_win_info
   tui_win_content regs_content;	/* Start of regs display content.  */
   int regs_content_count;
   int regs_column_count;
-  int display_regs;		/* Should regs be displayed at all?  */
+  bool display_regs;		/* Should regs be displayed at all?  */
   struct reggroup *current_group;
 
 protected:

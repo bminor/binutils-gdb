@@ -1,5 +1,13 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_show_registers): Update.
+	* tui/tui-data.h (struct tui_data_window) <display_regs>: Now
+	bool.
+	* tui/tui-data.c (tui_data_window::clear_detail)
+	(tui_data_window): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.c (tui_display_all_data)
 	(tui_display_data_from_line, tui_display_data_from)
 	(tui_check_data_values, tui_data_window::do_scroll_vertical):

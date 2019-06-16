@@ -143,7 +143,7 @@ tui_show_registers (struct reggroup *group)
 
   /* Say that registers should be displayed, even if there is a
      problem.  */
-  TUI_DATA_WIN->display_regs = TRUE;
+  TUI_DATA_WIN->display_regs = true;
 
   if (target_has_registers && target_has_stack && target_has_memory)
     {

@@ -195,7 +195,7 @@ tui_data_window::clear_detail ()
   regs_content = NULL;
   regs_content_count = 0;
   regs_column_count = 1;
-  display_regs = FALSE;
+  display_regs = false;
 }
 
 /* Accessor for the source execution info ptr.  */
@@ -503,7 +503,7 @@ tui_data_window::tui_data_window ()
   regs_content = NULL;
   regs_content_count = 0;
   regs_column_count = 1;
-  display_regs = FALSE;
+  display_regs = false;
   current_group = 0;
 }
 
@@ -621,7 +621,7 @@ tui_data_window::~tui_data_window ()
       data_content = NULL;
       data_content_count = 0;
       regs_column_count = 1;
-      display_regs = FALSE;
+      display_regs = false;
       generic.content = NULL;
       generic.content_size = 0;
     }
