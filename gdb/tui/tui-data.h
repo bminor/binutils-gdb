@@ -346,19 +346,26 @@ protected:
 
 struct tui_data_window : public tui_win_info
 {
-  tui_data_window ();
+  tui_data_window ()
+    : tui_win_info (DATA_WIN)
+  {
+  }
+
   ~tui_data_window () override;
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
   void clear_detail () override;
 
-  tui_win_content data_content;	/* Start of data display content.  */
-  int data_content_count;
-  tui_win_content regs_content;	/* Start of regs display content.  */
-  int regs_content_count;
-  int regs_column_count;
-  bool display_regs;		/* Should regs be displayed at all?  */
-  struct reggroup *current_group;
+  /* Start of data display content.  */
+  tui_win_content data_content = NULL;
+  int data_content_count = 0;
+  /* Start of regs display content.  */
+  tui_win_content regs_content = NULL;
+  int regs_content_count = 0;
+  int regs_column_count = 0;
+  /* Should regs be displayed at all?  */
+  bool display_regs = false;
+  struct reggroup *current_group = nullptr;
 
 protected:
 
@@ -372,12 +379,16 @@ protected:
 
 struct tui_cmd_window : public tui_win_info
 {
-  tui_cmd_window ();
+  tui_cmd_window ()
+    : tui_win_info (CMD_WIN)
+  {
+  }
+
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 
   void clear_detail () override;
 
-  int start_line;
+  int start_line = 0;
 
 protected:
 

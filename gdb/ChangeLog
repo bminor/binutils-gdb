@@ -1,5 +1,12 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_data_window, struct tui_cmd_window):
+	Inline constructor.  Add initializers for members.
+	* tui/tui-data.c (tui_data_window, tui_cmd_window): Remove
+	constructors; now inline in class.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_show_registers): Update.
 	* tui/tui-data.h (struct tui_data_window) <display_regs>: Now
 	bool.

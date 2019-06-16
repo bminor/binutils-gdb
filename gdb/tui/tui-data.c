@@ -495,23 +495,6 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   start_line_or_addr.u.addr = 0;
 }
 
-tui_data_window::tui_data_window ()
-  : tui_win_info (DATA_WIN)
-{
-  data_content = NULL;
-  data_content_count = 0;
-  regs_content = NULL;
-  regs_content_count = 0;
-  regs_column_count = 1;
-  display_regs = false;
-  current_group = 0;
-}
-
-tui_cmd_window::tui_cmd_window ()
-  : tui_win_info (CMD_WIN)
-{
-}
-
 struct tui_win_info *
 tui_alloc_win_info (enum tui_win_type type)
 {
