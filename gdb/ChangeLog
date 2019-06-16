@@ -1,3 +1,7 @@
+2019-06-19  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (tui_init_win_info): Don't declare.
+
 2019-06-19  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2read.h (abstract_to_concrete): Change type to

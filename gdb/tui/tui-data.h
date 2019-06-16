@@ -303,7 +303,6 @@ extern void tui_initialize_static_data (void);
 extern struct tui_gen_win_info *tui_alloc_generic_win_info (void);
 extern struct tui_win_info *tui_alloc_win_info (enum tui_win_type);
 extern void tui_init_generic_part (struct tui_gen_win_info *);
-extern void tui_init_win_info (struct tui_win_info *);
 extern tui_win_content tui_alloc_content (int, enum tui_win_type);
 extern int tui_add_content_elements (struct tui_gen_win_info *, 
 				     int);
