@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_set_exec_info_content): Remove NULL
+	check.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_alloc_source_buffer): Change return
 	type to void.
 	* tui/tui-winsource.c (tui_alloc_source_buffer): Change return

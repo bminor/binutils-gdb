@@ -495,46 +495,40 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
       if (exec_info_ptr->content == NULL)
 	exec_info_ptr->content =
 	  tui_alloc_content (win_info->height, exec_info_ptr->type);
-      if (exec_info_ptr->content != NULL)
+
+      tui_update_breakpoint_info (win_info, 1);
+      for (int i = 0; i < win_info->content_size; i++)
 	{
-	  int i;
+	  struct tui_win_element *element;
+	  struct tui_win_element *src_element;
+	  int mode;
 
-          tui_update_breakpoint_info (win_info, 1);
-	  for (i = 0; i < win_info->content_size; i++)
-	    {
-	      struct tui_win_element *element;
-	      struct tui_win_element *src_element;
-              int mode;
+	  element = exec_info_ptr->content[i];
+	  src_element = win_info->content[i];
 
-	      element = exec_info_ptr->content[i];
-	      src_element = win_info->content[i];
+	  memset(element->which_element.simple_string, ' ',
+		 sizeof(element->which_element.simple_string));
+	  element->which_element.simple_string[TUI_EXECINFO_SIZE - 1] = 0;
 
-              memset(element->which_element.simple_string, ' ',
-                     sizeof(element->which_element.simple_string));
-              element->which_element.simple_string[TUI_EXECINFO_SIZE - 1] = 0;
+	  /* Now update the exec info content based upon the state
+	     of each line as indicated by the source content.  */
+	  mode = src_element->which_element.source.has_break;
+	  if (mode & TUI_BP_HIT)
+	    element->which_element.simple_string[TUI_BP_HIT_POS] =
+	      (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
+	  else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))
+	    element->which_element.simple_string[TUI_BP_HIT_POS] =
+	      (mode & TUI_BP_HARDWARE) ? 'h' : 'b';
 
-	      /* Now update the exec info content based upon the state
-                 of each line as indicated by the source content.  */
-              mode = src_element->which_element.source.has_break;
-              if (mode & TUI_BP_HIT)
-                element->which_element.simple_string[TUI_BP_HIT_POS] =
-                  (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
-              else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))
-                element->which_element.simple_string[TUI_BP_HIT_POS] =
-                  (mode & TUI_BP_HARDWARE) ? 'h' : 'b';
+	  if (mode & TUI_BP_ENABLED)
+	    element->which_element.simple_string[TUI_BP_BREAK_POS] = '+';
+	  else if (mode & TUI_BP_DISABLED)
+	    element->which_element.simple_string[TUI_BP_BREAK_POS] = '-';
 
-              if (mode & TUI_BP_ENABLED)
-                element->which_element.simple_string[TUI_BP_BREAK_POS] = '+';
-              else if (mode & TUI_BP_DISABLED)
-                element->which_element.simple_string[TUI_BP_BREAK_POS] = '-';
-
-              if (src_element->which_element.source.is_exec_point)
-                element->which_element.simple_string[TUI_EXEC_POS] = '>';
-	    }
-	  exec_info_ptr->content_size = win_info->content_size;
+	  if (src_element->which_element.source.is_exec_point)
+	    element->which_element.simple_string[TUI_EXEC_POS] = '>';
 	}
-      else
-	ret = TUI_FAILURE;
+      exec_info_ptr->content_size = win_info->content_size;
     }
 
   return ret;
