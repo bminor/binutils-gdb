@@ -1,5 +1,16 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_source_window_base): New struct.
+	(struct tui_source_window): Derive from tui_source_window_base.
+	(struct tui_disasm_window): New struct.
+	* tui/tui-data.c (tui_source_window_base::clear_detail): Rename
+	from tui_source_window::clear_detail.
+	(tui_source_window_base): Rename from tui_source_window.
+	(~tui_source_window_base): Rename from ~tui_source_window.
+	(tui_alloc_win_info): Create a tui_disasm_window.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_source_window)
 	(struct tui_data_window): Declare destructors.
 	* tui/tui-data.c (~tui_source_window, ~tui_data_window): New

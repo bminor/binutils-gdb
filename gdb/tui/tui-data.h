@@ -291,13 +291,43 @@ public:
   int is_highlighted = 0;
 };
 
-struct tui_source_window : public tui_win_info
+/* The base class for all source-like windows, namely the source and
+   disassembly windows.  */
+
+struct tui_source_window_base : public tui_win_info
 {
-  explicit tui_source_window (enum tui_win_type type);
-  ~tui_source_window () override;
-  DISABLE_COPY_AND_ASSIGN (tui_source_window);
+protected:
+  explicit tui_source_window_base (enum tui_win_type type);
+  ~tui_source_window_base () override;
+  DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
+
+public:
 
   void clear_detail () override;
+};
+
+/* A TUI source window.  */
+
+struct tui_source_window : public tui_source_window_base
+{
+  tui_source_window ()
+    : tui_source_window_base (SRC_WIN)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (tui_source_window);
+};
+
+/* A TUI disassembly window.  */
+
+struct tui_disasm_window : public tui_source_window_base
+{
+  tui_disasm_window ()
+    : tui_source_window_base (DISASSEM_WIN)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
 };
 
 struct tui_data_window : public tui_win_info

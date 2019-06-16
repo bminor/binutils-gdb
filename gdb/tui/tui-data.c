@@ -176,7 +176,7 @@ tui_add_to_source_windows (struct tui_win_info *win_info)
 /* See tui-data.h.  */
 
 void
-tui_source_window::clear_detail ()
+tui_source_window_base::clear_detail ()
 {
   detail.source_info.gdbarch = NULL;
   detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
@@ -503,7 +503,7 @@ tui_win_info::tui_win_info (enum tui_win_type type)
   tui_init_generic_part (&generic);
 }
 
-tui_source_window::tui_source_window (enum tui_win_type type)
+tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   : tui_win_info (type)
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
@@ -539,8 +539,10 @@ tui_alloc_win_info (enum tui_win_type type)
   switch (type)
     {
     case SRC_WIN:
+      return new tui_source_window ();
+
     case DISASSEM_WIN:
-      return new tui_source_window (type);
+      return new tui_disasm_window ();
 
     case DATA_WIN:
       return new tui_data_window ();
@@ -617,7 +619,7 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
   return index_start;
 }
 
-tui_source_window::~tui_source_window ()
+tui_source_window_base::~tui_source_window_base ()
 {
   if (detail.source_info.fullname)
     {
