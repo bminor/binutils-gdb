@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (make_visible): Remove check of window
+	type.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_win_info::max_height)
 	(tui_cmd_window::max_height): New methods.
 	(new_height_ok): Call max_height.

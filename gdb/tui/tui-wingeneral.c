@@ -181,9 +181,7 @@ make_visible (struct tui_gen_win_info *win_info, bool visible)
     {
       if (!win_info->is_visible)
 	{
-	  tui_make_window (win_info,
-			   (win_info->type != CMD_WIN
-			    && !tui_win_is_auxillary (win_info->type)));
+	  tui_make_window (win_info, !tui_win_is_auxillary (win_info->type));
 	  win_info->is_visible = true;
 	}
     }
