@@ -1,5 +1,21 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_display_main)
+	(tui_update_source_windows_with_addr)
+	(tui_update_all_breakpoint_info): Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights)
+	(new_height_ok, parse_scrolling_args): Update.
+	* tui/tui-stack.c (tui_show_frame_info): Update.
+	* tui/tui-data.h (struct tui_list): Remove.
+	(tui_source_windows): Return a reference to a std::vector.
+	* tui/tui-data.c (source_windows): Now a std::vector.
+	(tui_source_windows): Change return type.
+	(tui_clear_source_windows): Rewrite.
+	(tui_clear_source_windows_detail, tui_add_to_source_windows)
+	(tui_free_all_source_wins_content): Rewrite.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_win_info, struct tui_source_window)
 	(struct tui_data_window, struct tui_cmd_window): Declare
 	clear_detail method.

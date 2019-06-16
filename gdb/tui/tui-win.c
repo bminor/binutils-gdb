@@ -686,7 +686,7 @@ tui_resize_all (void)
        {
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
-	  first_win = tui_source_windows ()->list[0];
+	  first_win = tui_source_windows ()[0];
 	  first_win->generic.width += width_diff;
 	  locator->width += width_diff;
 	  /* Check for invalid heights.  */
@@ -723,7 +723,7 @@ tui_resize_all (void)
 	    {
 	      first_win = TUI_DATA_WIN;
 	      first_win->generic.width += width_diff;
-	      second_win = tui_source_windows ()->list[0];
+	      second_win = tui_source_windows ()[0];
 	      second_win->generic.width += width_diff;
 	    }
 	  /* Change the first window's height/width.  */
@@ -1204,7 +1204,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      make_invisible_and_set_new_height (primary_win_info, new_height);
 	      if (primary_win_info->generic.type == CMD_WIN)
 		{
-		  win_info = (tui_source_windows ())->list[0];
+		  win_info = tui_source_windows ()[0];
 		  src_win_info = win_info;
 		}
 	      else
@@ -1233,7 +1233,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      else
 		{
 		  first_win = TUI_DATA_WIN;
-		  second_win = (tui_source_windows ())->list[0];
+		  second_win = tui_source_windows ()[0];
 		}
 	      if (primary_win_info == TUI_CMD_WIN)
 		{ /* Split the change in height accross the 1st & 2nd
@@ -1490,7 +1490,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	      struct tui_win_info *win_info;
 
 	      if (primary_win_info == TUI_CMD_WIN)
-		win_info = (tui_source_windows ())->list[0];
+		win_info = tui_source_windows ()[0];
 	      else
 		win_info = TUI_CMD_WIN;
 	      ok = ((new_height +
@@ -1511,7 +1511,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	  else
 	    {
 	      first_win = TUI_DATA_WIN;
-	      second_win = (tui_source_windows ())->list[0];
+	      second_win = tui_source_windows ()[0];
 	    }
 	  /* We could simply add all the heights to obtain the same
 	     result but below is more explicit since we subtract 1 for
@@ -1637,7 +1637,7 @@ parse_scrolling_args (const char *arg,
 	    error (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
-	    *win_to_scroll = (tui_source_windows ())->list[0];
+	    *win_to_scroll = tui_source_windows ()[0];
 	}
     }
 }

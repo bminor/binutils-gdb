@@ -42,9 +42,9 @@
 
 /* Function to display the "main" routine.  */
 void
-tui_display_main (void)
+tui_display_main ()
 {
-  if ((tui_source_windows ())->count > 0)
+  if (!tui_source_windows ().empty ())
     {
       struct gdbarch *gdbarch;
       CORE_ADDR addr;
@@ -159,12 +159,8 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
     }
   else
     {
-      int i;
-
-      for (i = 0; i < (tui_source_windows ())->count; i++)
+      for (struct tui_win_info *win_info : tui_source_windows ())
 	{
-	  struct tui_win_info *win_info = (tui_source_windows ())->list[i];
-
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_clear_exec_info_content (win_info);
 	}
@@ -406,15 +402,10 @@ tui_set_is_exec_point_at (struct tui_line_or_address l,
    This is called whenever a breakpoint is inserted, removed or
    has its state changed.  */
 void
-tui_update_all_breakpoint_info (void)
+tui_update_all_breakpoint_info ()
 {
-  struct tui_list *list = tui_source_windows ();
-  int i;
-
-  for (i = 0; i < list->count; i++)
+  for (tui_win_info *win : tui_source_windows ())
     {
-      struct tui_win_info *win = list->list[i];
-
       if (tui_update_breakpoint_info (win, FALSE))
         {
           tui_update_exec_info (win);

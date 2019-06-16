@@ -360,12 +360,11 @@ tui_update_locator_fullname (const char *fullname)
 int
 tui_show_frame_info (struct frame_info *fi)
 {
-  struct tui_win_info *win_info;
   int locator_changed_p;
 
   if (fi)
     {
-      int start_line, i;
+      int start_line;
       CORE_ADDR low;
       struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
       int source_already_displayed;
@@ -397,11 +396,9 @@ tui_show_frame_info (struct frame_info *fi)
 
       tui_show_locator_content ();
       start_line = 0;
-      for (i = 0; i < (tui_source_windows ())->count; i++)
+      for (struct tui_win_info *win_info : tui_source_windows ())
 	{
 	  union tui_which_element *item;
-
-	  win_info = (tui_source_windows ())->list[i];
 
 	  item = &locator->content[0]->which_element;
 	  if (win_info == TUI_SRC_WIN)
@@ -475,9 +472,8 @@ tui_show_frame_info (struct frame_info *fi)
 	return 0;
 
       tui_show_locator_content ();
-      for (int i = 0; i < (tui_source_windows ())->count; i++)
+      for (struct tui_win_info *win_info : tui_source_windows ())
 	{
-	  win_info = (tui_source_windows ())->list[i];
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (win_info);
 	}

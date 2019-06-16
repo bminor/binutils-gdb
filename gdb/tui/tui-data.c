@@ -38,8 +38,7 @@ static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 static int term_height, term_width;
 static struct tui_gen_win_info _locator;
 static struct tui_gen_win_info exec_info[2];
-static struct tui_win_info *src_win_list[2];
-static struct tui_list source_windows = {src_win_list, 0};
+static std::vector<tui_win_info *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 static struct tui_layout_def layout_def = {
   SRC_WIN,			/* DISPLAY_MODE */
@@ -138,10 +137,10 @@ tui_set_win_with_focus (struct tui_win_info *win_info)
 /* Accessor for the current source window.  Usually there is only one
    source window (either source or disassembly), but both can be
    displayed at the same time.  */
-struct tui_list *
-tui_source_windows (void)
+std::vector<tui_win_info *> &
+tui_source_windows ()
 {
-  return &source_windows;
+  return source_windows;
 }
 
 
@@ -149,22 +148,18 @@ tui_source_windows (void)
    window (either source or disassembly), but both can be displayed at
    the same time.  */
 void
-tui_clear_source_windows (void)
+tui_clear_source_windows ()
 {
-  source_windows.list[0] = NULL;
-  source_windows.list[1] = NULL;
-  source_windows.count = 0;
+  source_windows.clear ();
 }
 
 
 /* Clear the pertinant detail in the source windows.  */
 void
-tui_clear_source_windows_detail (void)
+tui_clear_source_windows_detail ()
 {
-  int i;
-
-  for (i = 0; i < (tui_source_windows ())->count; i++)
-    tui_clear_win_detail ((tui_source_windows ())->list[i]);
+  for (tui_win_info *win : tui_source_windows ())
+    tui_clear_win_detail (win);
 }
 
 
@@ -174,8 +169,8 @@ tui_clear_source_windows_detail (void)
 void
 tui_add_to_source_windows (struct tui_win_info *win_info)
 {
-  if (source_windows.count < 2)
-    source_windows.list[source_windows.count++] = win_info;
+  if (source_windows.size () < 2)
+    source_windows.push_back (win_info);
 }
 
 /* See tui-data.h.  */
@@ -675,19 +670,12 @@ tui_win_info::~tui_win_info ()
 
 
 void
-tui_free_all_source_wins_content (void)
+tui_free_all_source_wins_content ()
 {
-  int i;
-
-  for (i = 0; i < (tui_source_windows ())->count; i++)
+  for (tui_win_info *win_info : tui_source_windows ())
     {
-      struct tui_win_info *win_info = (tui_source_windows ())->list[i];
-
-      if (win_info != NULL)
-	{
-	  tui_free_win_content (&(win_info->generic));
-	  tui_free_win_content (win_info->detail.source_info.execution_info);
-	}
+      tui_free_win_content (&(win_info->generic));
+      tui_free_win_content (win_info->detail.source_info.execution_info);
     }
 }
 

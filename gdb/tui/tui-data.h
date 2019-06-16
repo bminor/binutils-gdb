@@ -102,14 +102,6 @@ enum tui_scroll_direction
 };
 
 
-/* General list struct.  */
-struct tui_list
-{
-  struct tui_win_info **list;
-  int count;
-};
-
-
 /* The kinds of layouts available.  */
 enum tui_layout_type
 {
@@ -360,7 +352,7 @@ extern void tui_set_term_width_to (int);
 extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
 extern struct tui_gen_win_info *tui_source_exec_info_win_ptr (void);
 extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
-extern struct tui_list *tui_source_windows (void);
+extern std::vector<tui_win_info *> &tui_source_windows ();
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
 extern void tui_clear_win_detail (struct tui_win_info *);
