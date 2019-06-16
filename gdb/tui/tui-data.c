@@ -531,9 +531,8 @@ init_win_info (struct tui_win_info *win_info)
 struct tui_win_info *
 tui_alloc_win_info (enum tui_win_type type)
 {
-  struct tui_win_info *win_info = XNEW (struct tui_win_info);
+  struct tui_win_info *win_info = new struct tui_win_info (type);
 
-  win_info->generic.type = type;
   init_win_info (win_info);
 
   return win_info;
@@ -654,7 +653,7 @@ tui_free_window (struct tui_win_info *win_info)
     }
   if (win_info->generic.title)
     xfree (win_info->generic.title);
-  xfree (win_info);
+  delete win_info;
 }
 
 

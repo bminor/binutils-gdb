@@ -271,6 +271,13 @@ struct tui_command_info
 /* This defines information about each logical window.  */
 struct tui_win_info
 {
+  explicit tui_win_info (enum tui_win_type type)
+  {
+    generic.type = type;
+  }
+
+  DISABLE_COPY_AND_ASSIGN (tui_win_info);
+
   struct tui_gen_win_info generic;	/* General window information.  */
   union
   {
