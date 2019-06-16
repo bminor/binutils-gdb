@@ -193,10 +193,10 @@ tui_display_data_from (int element_no, int reuse_windows)
 
 /* Function to redisplay the contents of the data window.  */
 void
-tui_refresh_data_win (void)
+tui_data_window::refresh_all ()
 {
   tui_erase_data_content (NULL);
-  if (TUI_DATA_WIN->generic.content_size > 0)
+  if (generic.content_size > 0)
     {
       int first_element = tui_first_data_item_displayed ();
 

@@ -508,6 +508,17 @@ tui_win_info::right_scroll (int num_to_scroll)
 }
 
 
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::refresh_all ()
+{
+  tui_show_source_content (this);
+  tui_check_and_display_highlight_if_needed (this);
+  tui_erase_exec_info_content (this);
+  tui_update_exec_info (this);
+}
+
 void
 tui_refresh_all_win (void)
 {
@@ -517,25 +528,8 @@ tui_refresh_all_win (void)
   tui_refresh_all (tui_win_list);
   for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
     {
-      if (tui_win_list[type] 
-	  && tui_win_list[type]->generic.is_visible)
-	{
-	  switch (type)
-	    {
-	    case SRC_WIN:
-	    case DISASSEM_WIN:
-	      tui_show_source_content (tui_win_list[type]);
-	      tui_check_and_display_highlight_if_needed (tui_win_list[type]);
-	      tui_erase_exec_info_content (tui_win_list[type]);
-	      tui_update_exec_info (tui_win_list[type]);
-	      break;
-	    case DATA_WIN:
-	      tui_refresh_data_win ();
-	      break;
-	    default:
-	      break;
-	    }
-	}
+      if (tui_win_list[type] && tui_win_list[type]->generic.is_visible)
+	tui_win_list[type]->refresh_all ();
     }
   tui_show_locator_content ();
 }
@@ -872,7 +866,7 @@ The window name specified must be valid and visible.\n"));
 	}
 
       if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
-	tui_refresh_data_win ();
+	TUI_DATA_WIN->refresh_all ();
       xfree (buf_ptr);
       printf_filtered (_("Focus set to %s window.\n"),
 		       tui_win_name (&tui_win_with_focus ()->generic));

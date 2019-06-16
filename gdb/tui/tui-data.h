@@ -261,6 +261,12 @@ public:
   /* Refresh this window and any associated windows.  */
   virtual void refresh ();
 
+  /* Called after all the TUI windows are refreshed, to let this
+     window have a chance to update itself further.  */
+  virtual void refresh_all ()
+  {
+  }
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -303,6 +309,7 @@ public:
 
   void make_visible (bool visible) override;
   void refresh () override;
+  void refresh_all () override;
 
   /* Refill the source window's source cache and update it.  If this
      is a disassembly window, then just update it.  */
@@ -371,6 +378,7 @@ struct tui_data_window : public tui_win_info
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
   void clear_detail () override;
+  void refresh_all () override;
 
   /* Start of data display content.  */
   tui_win_content data_content = NULL;

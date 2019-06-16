@@ -1,5 +1,18 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_rl_other_window): Call the refresh_all method.
+	* tui/tui-windata.c (tui_data_window::refresh_all): Rename from
+	tui_refresh_data_win.
+	* tui/tui-win.c (tui_source_window_base::refresh_all): New
+	method.
+	(tui_refresh_all_win): Call the refresh_all method.
+	(tui_set_focus): Likewise.
+	* tui/tui-data.h (struct tui_win_info) <refresh_all>: New method.
+	(struct tui_source_window_base, struct tui_data_window) <refresh>:
+	Likewise.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_refill_source_window)
 	(tui_set_is_exec_point_at): Don't declare.
 	* tui/tui-winsource.c (tui_update_source_windows_with_addr)

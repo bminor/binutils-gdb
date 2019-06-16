@@ -237,7 +237,7 @@ tui_rl_other_window (int count, int key)
     {
       tui_set_win_focus_to (win_info);
       if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
-        tui_refresh_data_win ();
+	TUI_DATA_WIN->refresh_all ();
       keypad (TUI_CMD_WIN->generic.handle, (win_info != TUI_CMD_WIN));
     }
   return 0;
