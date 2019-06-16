@@ -1,5 +1,10 @@
 2019-06-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_unhighlight_win, tui_highlight_win)
+	(make_all_visible): Use address of member.
+
+2019-06-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.c (tui_clear_win_detail, init_win_info)
 	(tui_free_window, free_content, free_content_elements): Remove
 	unnecessary cast.

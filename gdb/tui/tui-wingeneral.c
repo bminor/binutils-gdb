@@ -112,7 +112,7 @@ tui_unhighlight_win (struct tui_win_info *win_info)
   if (win_info != NULL 
       && win_info->generic.handle != NULL)
     {
-      box_win ((struct tui_gen_win_info *) win_info, NO_HILITE);
+      box_win (&win_info->generic, NO_HILITE);
       wrefresh (win_info->generic.handle);
       tui_set_win_highlight (win_info, 0);
     }
@@ -126,7 +126,7 @@ tui_highlight_win (struct tui_win_info *win_info)
       && win_info->can_highlight
       && win_info->generic.handle != NULL)
     {
-      box_win ((struct tui_gen_win_info *) win_info, HILITE);
+      box_win (&win_info->generic, HILITE);
       wrefresh (win_info->generic.handle);
       tui_set_win_highlight (win_info, 1);
     }
@@ -227,7 +227,7 @@ make_all_visible (int visible)
 	  if (tui_win_is_source_type ((tui_win_list[i])->generic.type))
 	    make_visible ((tui_win_list[i])->detail.source_info.execution_info,
 			  visible);
-	  make_visible ((struct tui_gen_win_info *) tui_win_list[i], visible);
+	  make_visible (&tui_win_list[i]->generic, visible);
 	}
     }
 
