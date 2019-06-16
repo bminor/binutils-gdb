@@ -49,7 +49,7 @@ struct tui_gen_win_info
   int content_in_use;	    /* Can it be used, or is it already used?  */
   int viewport_height;	    /* Viewport height.  */
   int last_visible_line;    /* Index of last visible line.  */
-  int is_visible;	    /* Whether the window is visible or not.  */
+  bool is_visible;	    /* Whether the window is visible or not.  */
   char *title;              /* Window title to display.  */
 };
 
@@ -256,7 +256,7 @@ public:
   }
 
   /* Make this window visible or invisible.  */
-  virtual void make_visible (int visible);
+  virtual void make_visible (bool visible);
 
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
@@ -298,7 +298,7 @@ public:
     return m_has_locator;
   }
 
-  void make_visible (int visible) override;
+  void make_visible (bool visible) override;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
@@ -393,7 +393,7 @@ struct tui_cmd_window : public tui_win_info
 
   void clear_detail () override;
 
-  void make_visible (int visible) override
+  void make_visible (bool visible) override
   {
   }
 

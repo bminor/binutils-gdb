@@ -1,5 +1,21 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (tui_is_window_visible): Return bool.
+	* tui/tui.c (tui_is_window_visible): Return bool.
+	* tui/tui-wingeneral.c (tui_make_window, make_visible)
+	(tui_make_visible, tui_make_invisible)
+	(tui_win_info::make_visible)
+	(tui_source_window_base::make_visible, make_all_visible)
+	(tui_make_all_visible, tui_make_all_invisible): Update.
+	* tui/tui-windata.c (tui_delete_data_content_windows): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <is_visible>: Now
+	bool.
+	(struct tui_win_info, struct tui_source_window_base)
+	(struct tui_cmd_window) <make_visible>: Change parameter to bool.
+	* tui/tui-data.c (tui_init_generic_part): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_win_info::make_visible)
 	(tui_source_window_base::make_visible): New methods.
 	(make_all_visible): Make method call.

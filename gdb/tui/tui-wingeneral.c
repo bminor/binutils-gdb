@@ -161,7 +161,7 @@ tui_make_window (struct tui_gen_win_info *win_info, int box_it)
     {
       if (box_it == BOX_WINDOW)
 	box_win (win_info, NO_HILITE);
-      win_info->is_visible = TRUE;
+      win_info->is_visible = true;
       scrollok (handle, TRUE);
     }
 }
@@ -171,7 +171,7 @@ tui_make_window (struct tui_gen_win_info *win_info, int box_it)
    delete the entire window when making it visible, and create it
    again when making it visible.  */
 static void
-make_visible (struct tui_gen_win_info *win_info, int visible)
+make_visible (struct tui_gen_win_info *win_info, bool visible)
 {
   /* Don't tear down/recreate command window.  */
   if (win_info->type == CMD_WIN)
@@ -184,14 +184,14 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
 	  tui_make_window (win_info,
 			   (win_info->type != CMD_WIN
 			    && !tui_win_is_auxillary (win_info->type)));
-	  win_info->is_visible = TRUE;
+	  win_info->is_visible = true;
 	}
     }
   else if (!visible
 	   && win_info->is_visible
 	   && win_info->handle != NULL)
     {
-      win_info->is_visible = FALSE;
+      win_info->is_visible = false;
       tui_delete_win (win_info->handle);
       win_info->handle = NULL;
     }
@@ -202,19 +202,19 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
 void
 tui_make_visible (struct tui_gen_win_info *win_info)
 {
-  make_visible (win_info, 1);
+  make_visible (win_info, true);
 }
 
 void
 tui_make_invisible (struct tui_gen_win_info *win_info)
 {
-  make_visible (win_info, 0);
+  make_visible (win_info, false);
 }
 
 /* See tui-data.h.  */
 
 void
-tui_win_info::make_visible (int visible)
+tui_win_info::make_visible (bool visible)
 {
   ::make_visible (&generic, visible);
 }
@@ -222,7 +222,7 @@ tui_win_info::make_visible (int visible)
 /* See tui-data.h.  */
 
 void
-tui_source_window_base::make_visible (int visible)
+tui_source_window_base::make_visible (bool visible)
 {
   ::make_visible (execution_info, visible);
   tui_win_info::make_visible (visible);
@@ -231,7 +231,7 @@ tui_source_window_base::make_visible (int visible)
 /* Makes all windows invisible (except the command and locator
    windows).  */
 static void
-make_all_visible (int visible)
+make_all_visible (bool visible)
 {
   int i;
 
@@ -247,13 +247,13 @@ make_all_visible (int visible)
 void
 tui_make_all_visible (void)
 {
-  make_all_visible (1);
+  make_all_visible (true);
 }
 
 void
 tui_make_all_invisible (void)
 {
-  make_all_visible (0);
+  make_all_visible (false);
 }
 
 /* Function to refresh all the windows currently displayed.  */

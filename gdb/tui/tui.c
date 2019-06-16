@@ -655,14 +655,14 @@ tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr)
   tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
-int
+bool
 tui_is_window_visible (enum tui_win_type type)
 {
   if (tui_active == 0)
-    return 0;
+    return false;
 
   if (tui_win_list[type] == 0)
-    return 0;
+    return false;
   
   return tui_win_list[type]->generic.is_visible;
 }

@@ -420,8 +420,8 @@ tui_init_generic_part (struct tui_gen_win_info *win)
     win->last_visible_line = 0;
   win->handle = NULL;
   win->content = NULL;
-  win->content_in_use =
-    win->is_visible = FALSE;
+  win->content_in_use = FALSE;
+  win->is_visible = false;
   win->title = 0;
 }
 

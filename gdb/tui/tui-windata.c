@@ -78,7 +78,7 @@ tui_delete_data_content_windows (void)
 	= &TUI_DATA_WIN->generic.content[i]->which_element.data_window;
       tui_delete_win (data_item_win_ptr->handle);
       data_item_win_ptr->handle = NULL;
-      data_item_win_ptr->is_visible = FALSE;
+      data_item_win_ptr->is_visible = false;
     }
 }
 
