@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_set_exec_info_content): Return void.
+	* tui/tui-winsource.c (tui_set_exec_info_content): Return void.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_set_exec_info_content): Remove NULL
 	check.
 

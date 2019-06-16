@@ -53,7 +53,7 @@ extern void tui_update_source_windows_with_line (struct symtab *,
 extern void tui_clear_source_content (struct tui_win_info *, int);
 extern void tui_erase_source_content (struct tui_win_info *, int);
 extern void tui_show_source_content (struct tui_win_info *);
-extern enum tui_status tui_set_exec_info_content (struct tui_win_info *);
+extern void tui_set_exec_info_content (struct tui_win_info *);
 extern void tui_show_exec_info_content (struct tui_win_info *);
 extern void tui_erase_exec_info_content (struct tui_win_info *);
 extern void tui_clear_exec_info_content (struct tui_win_info *);

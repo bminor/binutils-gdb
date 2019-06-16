@@ -482,11 +482,9 @@ tui_update_breakpoint_info (struct tui_win_info *win,
 /* Function to initialize the content of the execution info window,
    based upon the input window which is either the source or
    disassembly window.  */
-enum tui_status
+void
 tui_set_exec_info_content (struct tui_win_info *win_info)
 {
-  enum tui_status ret = TUI_SUCCESS;
-
   tui_source_window_base *base = (tui_source_window_base *) win_info;
   if (base->execution_info != NULL)
     {
@@ -530,8 +528,6 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 	}
       exec_info_ptr->content_size = win_info->content_size;
     }
-
-  return ret;
 }
 
 
