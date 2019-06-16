@@ -69,14 +69,6 @@ tui_win_is_auxillary (enum tui_win_type win_type)
   return (win_type > MAX_MAJOR_WINDOWS);
 }
 
-void
-tui_set_win_highlight (struct tui_win_info *win_info, 
-		       int highlight)
-{
-  if (win_info != NULL)
-    win_info->is_highlighted = highlight;
-}
-
 /******************************************
 ** ACCESSORS & MUTATORS FOR PRIVATE DATA
 ******************************************/

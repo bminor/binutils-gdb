@@ -546,7 +546,7 @@ make_command_window (int height, int origin_y)
 						 0,
 						 origin_y,
 						 DONT_BOX_WINDOW);
-  result->can_highlight = FALSE;
+  result->can_highlight = false;
   return result;
 }
 
@@ -627,7 +627,7 @@ show_source_disasm_command (void)
 			     TUI_SRC_WIN->generic.width,
 			     TUI_SRC_WIN->execution_info->width,
 			     0);
-	  TUI_SRC_WIN->can_highlight = TRUE;
+	  TUI_SRC_WIN->can_highlight = true;
 	  init_gen_win_info (TUI_SRC_WIN->execution_info,
 			     EXEC_INFO_WIN,
 			     src_height,
@@ -677,7 +677,7 @@ show_source_disasm_command (void)
 			     3,
 			     0,
 			     src_height - 1);
-	  TUI_DISASM_WIN->can_highlight = TRUE;
+	  TUI_DISASM_WIN->can_highlight = true;
 	  tui_make_visible (&TUI_DISASM_WIN->generic);
 	  tui_make_visible (TUI_DISASM_WIN->execution_info);
 	}
@@ -698,7 +698,7 @@ show_source_disasm_command (void)
 			     TUI_CMD_WIN->generic.width,
 			     0,
 			     TUI_CMD_WIN->generic.origin.y);
-	  TUI_CMD_WIN->can_highlight = FALSE;
+	  TUI_CMD_WIN->can_highlight = false;
 	  tui_make_visible (&TUI_CMD_WIN->generic);
 	}
       tui_refresh_win (&TUI_CMD_WIN->generic);
@@ -723,7 +723,7 @@ show_data (enum tui_layout_type new_layout)
   tui_make_all_invisible ();
   tui_make_invisible (locator);
   make_data_window (&tui_win_list[DATA_WIN], data_height, 0);
-  TUI_DATA_WIN->can_highlight = TRUE;
+  TUI_DATA_WIN->can_highlight = true;
   if (new_layout == SRC_DATA_COMMAND)
     win_type = SRC_WIN;
   else
@@ -835,9 +835,9 @@ init_and_make_win (void *opaque_win_info,
   if (!tui_win_is_auxillary (win_type))
     {
       if (generic->type == CMD_WIN)
-	((struct tui_win_info *) opaque_win_info)->can_highlight = FALSE;
+	((struct tui_win_info *) opaque_win_info)->can_highlight = false;
       else
-	((struct tui_win_info *) opaque_win_info)->can_highlight = TRUE;
+	((struct tui_win_info *) opaque_win_info)->can_highlight = true;
     }
   tui_make_window (generic, box_it);
 
@@ -942,7 +942,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 			     3,
 			     0,
 			     0);
-	  base->can_highlight = TRUE;
+	  base->can_highlight = true;
 	  tui_make_visible (&(*win_info_ptr)->generic);
 	  tui_make_visible (base->execution_info);
 	}
@@ -966,7 +966,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 			     TUI_CMD_WIN->generic.width,
 			     TUI_CMD_WIN->generic.origin.x,
 			     TUI_CMD_WIN->generic.origin.y);
-	  TUI_CMD_WIN->can_highlight = FALSE;
+	  TUI_CMD_WIN->can_highlight = false;
 	  tui_make_visible (&TUI_CMD_WIN->generic);
 	}
       tui_set_current_layout_to (layout_type);

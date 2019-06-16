@@ -1,5 +1,18 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_unhighlight_win, tui_highlight_win):
+	Update.
+	* tui/tui-layout.c (make_command_window)
+	(show_source_disasm_command, show_data, init_and_make_win)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-data.h (struct tui_win_info) <set_highlight>: New
+	method.
+	<can_highight, is_highlighted>: Now bool.
+	(tui_set_win_highlight): Don't declare.
+	* tui/tui-data.c (tui_set_win_highlight): Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (make_visible): Remove check of window
 	type.
 

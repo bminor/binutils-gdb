@@ -114,7 +114,7 @@ tui_unhighlight_win (struct tui_win_info *win_info)
     {
       box_win (&win_info->generic, NO_HILITE);
       wrefresh (win_info->generic.handle);
-      tui_set_win_highlight (win_info, 0);
+      win_info->set_highlight (false);
     }
 }
 
@@ -128,7 +128,7 @@ tui_highlight_win (struct tui_win_info *win_info)
     {
       box_win (&win_info->generic, HILITE);
       wrefresh (win_info->generic.handle);
-      tui_set_win_highlight (win_info, 1);
+      win_info->set_highlight (true);
     }
 }
 

@@ -276,6 +276,12 @@ public:
   /* Compute the maximum height of this window.  */
   virtual int max_height () const;
 
+  /* Set whether this window is highglighted.  */
+  void set_highlight (bool highlight)
+  {
+    is_highlighted = highlight;
+  }
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -287,10 +293,10 @@ public:
   struct tui_gen_win_info generic;	/* General window information.  */
 
   /* Can this window ever be highlighted?  */
-  int can_highlight = 0;
+  bool can_highlight = false;
 
   /* Is this window highlighted?  */
-  int is_highlighted = 0;
+  bool is_highlighted = false;
 };
 
 /* The base class for all source-like windows, namely the source and
@@ -447,8 +453,6 @@ protected:
 };
 
 extern int tui_win_is_auxillary (enum tui_win_type win_type);
-extern void tui_set_win_highlight (struct tui_win_info *win_info,
-				   int highlight);
 
 
 /* Global Data.  */
