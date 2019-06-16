@@ -1,5 +1,19 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (make_invisible_and_set_new_height)
+	(make_visible_with_new_height): Call has_locator method.
+	* tui/tui-layout.c (show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Update for bool change.
+	* tui/tui-data.h (struct tui_source_info) <has_locator>: Now bool.
+	(tui_win_info) <has_locator>: New method.
+	(struct tui_source_window_base) <has_locator>: New method.
+	(tui_win_has_locator): Don't declare.
+	* tui/tui-data.c (tui_source_window_base::has_locator): Rename
+	from tui_win_has_locator.
+	(tui_source_window_base): Use false, not FALSE.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (tui_clear_win_detail): Don't declare.
 	* tui/tui-data.c (tui_clear_source_windows_detail): Call the
 	clear_detail method directly.

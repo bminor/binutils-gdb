@@ -75,11 +75,12 @@ tui_win_is_auxillary (enum tui_win_type win_type)
   return (win_type > MAX_MAJOR_WINDOWS);
 }
 
-int
-tui_win_has_locator (struct tui_win_info *win_info)
+/* See tui-data.h.  */
+
+bool
+tui_source_window_base::has_locator () const
 {
-  return (win_info != NULL 
-	  && win_info->detail.source_info.has_locator);
+  return detail.source_info.has_locator;
 }
 
 void
@@ -499,7 +500,7 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
   detail.source_info.execution_info = NULL;
-  detail.source_info.has_locator = FALSE;
+  detail.source_info.has_locator = false;
   detail.source_info.horizontal_offset = 0;
   detail.source_info.gdbarch = NULL;
   detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;

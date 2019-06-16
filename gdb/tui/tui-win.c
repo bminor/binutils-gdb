@@ -1283,7 +1283,7 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
       if (win_info != TUI_CMD_WIN)
 	gen_win_info->viewport_height--;
 
-      if (tui_win_has_locator (win_info))
+      if (win_info->has_locator ())
 	{
 	  gen_win_info = tui_locator_win_info_ptr ();
 	  tui_make_invisible (gen_win_info);
@@ -1355,7 +1355,7 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 	    }
 	  tui_update_source_window (win_info, gdbarch, s, line, TRUE);
 	}
-      if (tui_win_has_locator (win_info))
+      if (win_info->has_locator ())
 	{
 	  tui_make_visible (tui_locator_win_info_ptr ());
 	  tui_show_locator_content ();

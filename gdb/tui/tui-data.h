@@ -240,7 +240,8 @@ struct tui_data_info
 
 struct tui_source_info
 {
-  int has_locator;		/* Does locator belongs to this window?  */
+  /* Does the locator belong to this window?  */
+  bool has_locator;
   /* Execution information window.  */
   struct tui_gen_win_info *execution_info;
   int horizontal_offset;	/* Used for horizontal scroll.  */
@@ -285,6 +286,12 @@ public:
   /* Clear the pertinent detail in the window.  */
   virtual void clear_detail () = 0;
 
+  /* Return true if this window has the locator.  */
+  virtual bool has_locator () const
+  {
+    return false;
+  }
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -325,6 +332,9 @@ protected:
 public:
 
   void clear_detail () override;
+
+  /* Return true if this window has the locator.  */
+  bool has_locator () const override;
 };
 
 /* A TUI source window.  */
@@ -401,7 +411,6 @@ protected:
 
 extern int tui_win_is_source_type (enum tui_win_type win_type);
 extern int tui_win_is_auxillary (enum tui_win_type win_type);
-extern int tui_win_has_locator (struct tui_win_info *win_info);
 extern void tui_set_win_highlight (struct tui_win_info *win_info,
 				   int highlight);
 

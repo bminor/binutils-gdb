@@ -640,7 +640,7 @@ show_source_disasm_command (void)
 			     0);
 	  tui_make_visible (&TUI_SRC_WIN->generic);
 	  tui_make_visible (TUI_SRC_WIN->detail.source_info.execution_info);
-	  TUI_SRC_WIN->detail.source_info.has_locator = FALSE;;
+	  TUI_SRC_WIN->detail.source_info.has_locator = false;
 	}
 
       struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
@@ -667,7 +667,7 @@ show_source_disasm_command (void)
 			     tui_term_width (),
 			     0,
 			     (src_height + asm_height) - 1);
-	  TUI_DISASM_WIN->detail.source_info.has_locator = TRUE;
+	  TUI_DISASM_WIN->detail.source_info.has_locator = true;
 	  init_gen_win_info (&TUI_DISASM_WIN->generic,
 			     TUI_DISASM_WIN->generic.type,
 			     asm_height,
@@ -684,8 +684,8 @@ show_source_disasm_command (void)
 	  tui_make_visible (&TUI_DISASM_WIN->generic);
 	  tui_make_visible (TUI_DISASM_WIN->detail.source_info.execution_info);
 	}
-      TUI_SRC_WIN->detail.source_info.has_locator = FALSE;
-      TUI_DISASM_WIN->detail.source_info.has_locator = TRUE;
+      TUI_SRC_WIN->detail.source_info.has_locator = false;
+      TUI_DISASM_WIN->detail.source_info.has_locator = true;
       tui_make_visible (locator);
       tui_show_locator_content ();
       tui_show_source_content (TUI_DISASM_WIN);
@@ -772,7 +772,7 @@ show_data (enum tui_layout_type new_layout)
 			 0,
 			 total_height - 1);
     }
-  tui_win_list[win_type]->detail.source_info.has_locator = TRUE;
+  tui_win_list[win_type]->detail.source_info.has_locator = true;
   tui_make_visible (locator);
   tui_show_locator_content ();
   tui_add_to_source_windows (tui_win_list[win_type]);
@@ -924,7 +924,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 			     tui_term_width (),
 			     0,
 			     src_height - 1);
-	  (*win_info_ptr)->detail.source_info.has_locator = TRUE;
+	  (*win_info_ptr)->detail.source_info.has_locator = true;
 	  init_gen_win_info (&(*win_info_ptr)->generic,
 			     (*win_info_ptr)->generic.type,
 			     src_height - 1,
@@ -943,7 +943,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 	}
       if ((*win_info_ptr) != NULL)
 	{
-	  (*win_info_ptr)->detail.source_info.has_locator = TRUE;
+	  (*win_info_ptr)->detail.source_info.has_locator = true;
 	  tui_make_visible (locator);
 	  tui_show_locator_content ();
 	  tui_show_source_content (*win_info_ptr);
