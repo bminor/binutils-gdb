@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-disasm.c (tui_disasm_window::do_scroll_vertical): Use
+	"this", not TUI_DISASM_WIN.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_horizontal_source_scroll):  Don't
 	declare.
 	* tui/tui-winsource.c
