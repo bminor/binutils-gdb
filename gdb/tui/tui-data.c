@@ -435,11 +435,12 @@ init_content_element (struct tui_win_element *element,
       element->which_element.source.has_break = FALSE;
       break;
     case DATA_WIN:
-      tui_init_generic_part (&element->which_element.data_window);
-      element->which_element.data_window.type = DATA_ITEM_WIN;
-      element->which_element.data_window.content =
+      element->which_element.data_window = XNEW (struct tui_gen_win_info);
+      tui_init_generic_part (element->which_element.data_window);
+      element->which_element.data_window->type = DATA_ITEM_WIN;
+      element->which_element.data_window->content =
 	tui_alloc_content (1, DATA_ITEM_WIN);
-      element->which_element.data_window.content_size = 1;
+      element->which_element.data_window->content_size = 1;
       break;
     case CMD_WIN:
       element->which_element.command.line = NULL;
@@ -646,7 +647,7 @@ tui_free_data_content (tui_win_content content,
   for (i = 0; i < content_size; i++)
     {
       struct tui_gen_win_info *generic_win
-	= &content[i]->which_element.data_window;
+	= content[i]->which_element.data_window;
 
       if (generic_win != NULL)
 	{
@@ -710,6 +711,7 @@ free_content_elements (tui_win_content content,
 		      xfree (element->which_element.source.line);
 		      break;
 		    case DATA_WIN:
+		      xfree (element->which_element.data_window);
 		      xfree (element);
 		      break;
 		    case DATA_ITEM_WIN:

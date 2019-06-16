@@ -1,5 +1,20 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_refresh_win): Update.
+	* tui/tui-windata.c (tui_first_data_item_displayed)
+	(tui_delete_data_content_windows): Update.
+	* tui/tui-win.c (tui_data_window::set_new_height): Update.
+	* tui/tui-regs.c (tui_show_registers, tui_show_register_group)
+	(tui_display_registers_from, tui_check_register_values): Update.
+	* tui/tui-data.h (union tui_which_element) <data_window>: Now a
+	pointer.
+	* tui/tui-data.c (init_content_element): Update.  Allocate the new
+	window.
+	(tui_free_data_content): Update.
+	(free_content_elements) <case DATA_WIN>: Free the window.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_unhighlight_win, tui_highlight_win):
 	Update.
 	* tui/tui-layout.c (make_command_window)

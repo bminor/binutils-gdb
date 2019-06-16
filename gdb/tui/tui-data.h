@@ -212,7 +212,7 @@ typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
 union tui_which_element
 {
   struct tui_source_element source;	/* The source elements.  */
-  struct tui_gen_win_info data_window;	/* Data display elements.  */
+  struct tui_gen_win_info *data_window;	/* Data display elements.  */
   struct tui_data_element data;		/* Elements of data_window.  */
   struct tui_command_element command;	/* Command elements.  */
   struct tui_locator_element locator;	/* Locator elements.  */

@@ -1273,7 +1273,7 @@ tui_data_window::set_new_height (int height)
   for (int i = 0; i < generic.content_size; i++)
     {
       struct tui_gen_win_info *gen_win_info
-	= &generic.content[i]->which_element.data_window;
+	= generic.content[i]->which_element.data_window;
       tui_delete_win (gen_win_info->handle);
       gen_win_info->handle = NULL;
     }

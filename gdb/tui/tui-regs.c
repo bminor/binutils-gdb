@@ -165,7 +165,7 @@ tui_show_registers (struct reggroup *group)
 	  struct tui_gen_win_info *data_item_win;
           struct tui_win_element *win;
 
-	  data_item_win = &TUI_DATA_WIN->regs_content[i]
+	  data_item_win = TUI_DATA_WIN->regs_content[i]
             ->which_element.data_window;
           win = data_item_win->content[0];
           win->which_element.data.highlight = FALSE;
@@ -261,7 +261,7 @@ tui_show_register_group (struct reggroup *group,
 	    continue;
 
 	  data_item_win =
-            &TUI_DATA_WIN->regs_content[pos]->which_element.data_window;
+            TUI_DATA_WIN->regs_content[pos]->which_element.data_window;
           data = &data_item_win->content[0]->which_element.data;
           if (data)
             {
@@ -306,7 +306,7 @@ tui_display_registers_from (int start_element_no)
           int len;
 
           data_item_win
-	    = &TUI_DATA_WIN->regs_content[i]->which_element.data_window;
+	    = TUI_DATA_WIN->regs_content[i]->which_element.data_window;
           data = &data_item_win->content[0]->which_element.data;
           len = 0;
           p = data->content;
@@ -347,7 +347,7 @@ tui_display_registers_from (int start_element_no)
 	      struct tui_data_element *data_element_ptr;
 
 	      /* Create the window if necessary.  */
-	      data_item_win = &TUI_DATA_WIN->regs_content[i]
+	      data_item_win = TUI_DATA_WIN->regs_content[i]
                 ->which_element.data_window;
 	      data_element_ptr = &data_item_win->content[0]->which_element.data;
               if (data_item_win->handle != NULL
@@ -485,7 +485,7 @@ tui_check_register_values (struct frame_info *frame)
 	      struct tui_gen_win_info *data_item_win_ptr;
 	      int was_hilighted;
 
-	      data_item_win_ptr = &TUI_DATA_WIN->regs_content[i]->
+	      data_item_win_ptr = TUI_DATA_WIN->regs_content[i]->
                 which_element.data_window;
 	      data = &data_item_win_ptr->content[0]->which_element.data;
 	      was_hilighted = data->highlight;

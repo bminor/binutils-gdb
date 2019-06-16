@@ -43,7 +43,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
 	{
 	  struct tui_gen_win_info *data_item_win_ptr;
 
-	  data_item_win_ptr = &win_info->content[i]->which_element.data_window;
+	  data_item_win_ptr = win_info->content[i]->which_element.data_window;
 	  if (data_item_win_ptr != NULL
 	      && data_item_win_ptr->handle != NULL)
 	    wrefresh (data_item_win_ptr->handle);
