@@ -1,3 +1,14 @@
+2019-06-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.c (tui_clear_win_detail, init_win_info)
+	(tui_free_window, free_content, free_content_elements): Remove
+	unnecessary cast.
+	* tui/tui-windata.c (tui_display_all_data): Remove unnecessary
+	cast.
+	* tui/tui-regs.c (tui_show_register_group)
+	(tui_display_registers_from, tui_display_reg_element_at_line):
+	Remove unnecessary cast.
+
 2019-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-nat.c (normal_mask): Delete.

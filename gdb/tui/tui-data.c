@@ -198,11 +198,9 @@ tui_clear_win_detail (struct tui_win_info *win_info)
 	  wmove (win_info->generic.handle, 0, 0);
 	  break;
 	case DATA_WIN:
-	  win_info->detail.data_display_info.data_content =
-	    (tui_win_content) NULL;
+	  win_info->detail.data_display_info.data_content = NULL;
 	  win_info->detail.data_display_info.data_content_count = 0;
-	  win_info->detail.data_display_info.regs_content =
-	    (tui_win_content) NULL;
+	  win_info->detail.data_display_info.regs_content = NULL;
 	  win_info->detail.data_display_info.regs_content_count = 0;
 	  win_info->detail.data_display_info.regs_column_count = 1;
 	  win_info->detail.data_display_info.display_regs = FALSE;
@@ -516,9 +514,9 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.source_info.fullname = NULL;
       break;
     case DATA_WIN:
-      win_info->detail.data_display_info.data_content = (tui_win_content) NULL;
+      win_info->detail.data_display_info.data_content = NULL;
       win_info->detail.data_display_info.data_content_count = 0;
-      win_info->detail.data_display_info.regs_content = (tui_win_content) NULL;
+      win_info->detail.data_display_info.regs_content = NULL;
       win_info->detail.data_display_info.regs_content_count = 0;
       win_info->detail.data_display_info.regs_column_count = 1;
       win_info->detail.data_display_info.display_regs = FALSE;
@@ -686,13 +684,11 @@ tui_free_window (struct tui_win_info *win_info)
 	{
 	  tui_free_data_content (win_info->detail.data_display_info.regs_content,
 				 win_info->detail.data_display_info.regs_content_count);
-	  win_info->detail.data_display_info.regs_content =
-	    (tui_win_content) NULL;
+	  win_info->detail.data_display_info.regs_content = NULL;
 	  win_info->detail.data_display_info.regs_content_count = 0;
 	  tui_free_data_content (win_info->detail.data_display_info.data_content,
 				 win_info->detail.data_display_info.data_content_count);
-	  win_info->detail.data_display_info.data_content =
-	    (tui_win_content) NULL;
+	  win_info->detail.data_display_info.data_content = NULL;
 	  win_info->detail.data_display_info.data_content_count = 0;
 	  win_info->detail.data_display_info.regs_column_count = 1;
 	  win_info->detail.data_display_info.display_regs = FALSE;
@@ -808,7 +804,7 @@ free_content (tui_win_content content,
 	      int content_size, 
 	      enum tui_win_type win_type)
 {
-  if (content != (tui_win_content) NULL)
+  if (content != NULL)
     {
       free_content_elements (content, content_size, win_type);
       xfree (content);
@@ -823,7 +819,7 @@ free_content_elements (tui_win_content content,
 		       int content_size, 
 		       enum tui_win_type type)
 {
-  if (content != (tui_win_content) NULL)
+  if (content != NULL)
     {
       int i;
 

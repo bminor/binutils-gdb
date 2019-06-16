@@ -237,7 +237,7 @@ tui_show_register_group (struct reggroup *group,
       refresh_values_only = FALSE;
     }
 
-  if (display_info->regs_content != (tui_win_content) NULL)
+  if (display_info->regs_content != NULL)
     {
       if (!refresh_values_only || allocated_here)
 	{
@@ -299,7 +299,7 @@ tui_display_registers_from (int start_element_no)
 {
   struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
 
-  if (display_info->regs_content != (tui_win_content) NULL 
+  if (display_info->regs_content != NULL
       && display_info->regs_content_count > 0)
     {
       int i = start_element_no;
@@ -398,8 +398,7 @@ static void
 tui_display_reg_element_at_line (int start_element_no,
 				 int start_line_no)
 {
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content
-      != (tui_win_content) NULL
+  if (TUI_DATA_WIN->detail.data_display_info.regs_content != NULL
       && TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
       int element_no = start_element_no;

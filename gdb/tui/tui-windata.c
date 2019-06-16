@@ -55,7 +55,7 @@ tui_first_data_item_displayed (void)
 
       data_item_win
 	= &TUI_DATA_WIN->generic.content[i]->which_element.data_window;
-      if (data_item_win->handle != NULL 
+      if (data_item_win->handle != NULL
 	  && data_item_win->is_visible)
 	element_no = i;
     }
@@ -138,8 +138,7 @@ tui_display_all_data (void)
       tui_display_registers_from (0);
 
       /* Then display the other data.  */
-      if (TUI_DATA_WIN->detail.data_display_info.data_content !=
-	  (tui_win_content) NULL 
+      if (TUI_DATA_WIN->detail.data_display_info.data_content != NULL
 	  && TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
 	{
 	}
