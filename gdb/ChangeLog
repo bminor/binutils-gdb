@@ -1,5 +1,14 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_source_window_base::set_new_height)
+	(tui_data_window::set_new_height): New methods.
+	(make_invisible_and_set_new_height): Call set_new_height method.
+	* tui/tui-data.h (struct tui_win_info)
+	(struct tui_source_window_base, struct tui_data_window)
+	<set_new_height>: New method.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_rl_other_window): Call the refresh_all method.
 	* tui/tui-windata.c (tui_data_window::refresh_all): Rename from
 	tui_refresh_data_win.

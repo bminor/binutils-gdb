@@ -267,6 +267,12 @@ public:
   {
   }
 
+  /* Called after a TUI window is given a new height; this updates any
+     related auxiliary windows.  */
+  virtual void set_new_height (int height)
+  {
+  }
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -317,6 +323,8 @@ public:
 
   /* Set the location of the execution point.  */
   void set_is_exec_point_at (struct tui_line_or_address l);
+
+  void set_new_height (int height) override;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
@@ -379,6 +387,8 @@ struct tui_data_window : public tui_win_info
 
   void clear_detail () override;
   void refresh_all () override;
+
+  void set_new_height (int height) override;
 
   /* Start of data display content.  */
   tui_win_content data_content = NULL;

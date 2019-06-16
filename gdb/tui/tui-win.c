@@ -1242,6 +1242,43 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 }
 
 
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::set_new_height (int height)
+{
+  tui_make_invisible (execution_info);
+  execution_info->height = height;
+  execution_info->origin.y = generic.origin.y;
+  if (height > 1)
+    execution_info->viewport_height = height - 1;
+  else
+    execution_info->viewport_height = height;
+  execution_info->viewport_height--;
+
+  if (has_locator ())
+    {
+      tui_gen_win_info *gen_win_info = tui_locator_win_info_ptr ();
+      tui_make_invisible (gen_win_info);
+      gen_win_info->origin.y = generic.origin.y + height;
+    }
+}
+
+/* See tui-data.h.  */
+
+void
+tui_data_window::set_new_height (int height)
+{
+  /* Delete all data item windows.  */
+  for (int i = 0; i < generic.content_size; i++)
+    {
+      struct tui_gen_win_info *gen_win_info
+	= &generic.content[i]->which_element.data_window;
+      tui_delete_win (gen_win_info->handle);
+      gen_win_info->handle = NULL;
+    }
+}
+
 /* Function make the target window (and auxillary windows associated
    with the targer) invisible, and set the new height and
    location.  */
@@ -1249,9 +1286,6 @@ static void
 make_invisible_and_set_new_height (struct tui_win_info *win_info, 
 				   int height)
 {
-  int i;
-  struct tui_gen_win_info *gen_win_info;
-
   tui_make_invisible (&win_info->generic);
   win_info->generic.height = height;
   if (height > 1)
@@ -1262,43 +1296,7 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
     win_info->generic.viewport_height--;
 
   /* Now deal with the auxillary windows associated with win_info.  */
-  tui_source_window_base *base;
-  switch (win_info->generic.type)
-    {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      base = (tui_source_window_base *) win_info;
-      gen_win_info = base->execution_info;
-      tui_make_invisible (gen_win_info);
-      gen_win_info->height = height;
-      gen_win_info->origin.y = win_info->generic.origin.y;
-      if (height > 1)
-	gen_win_info->viewport_height = height - 1;
-      else
-	gen_win_info->viewport_height = height;
-      if (win_info != TUI_CMD_WIN)
-	gen_win_info->viewport_height--;
-
-      if (win_info->has_locator ())
-	{
-	  gen_win_info = tui_locator_win_info_ptr ();
-	  tui_make_invisible (gen_win_info);
-	  gen_win_info->origin.y = win_info->generic.origin.y + height;
-	}
-      break;
-    case DATA_WIN:
-      /* Delete all data item windows.  */
-      for (i = 0; i < win_info->generic.content_size; i++)
-	{
-	  gen_win_info
-	    = &win_info->generic.content[i]->which_element.data_window;
-	  tui_delete_win (gen_win_info->handle);
-	  gen_win_info->handle = NULL;
-	}
-      break;
-    default:
-      break;
-    }
+  win_info->set_new_height (height);
 }
 
 
