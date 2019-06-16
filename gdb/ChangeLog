@@ -1,5 +1,26 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.c (tui_display_all_data)
+	(tui_display_data_from_line, tui_display_data_from)
+	(tui_check_data_values, tui_data_window::do_scroll_vertical):
+	Update.
+	* tui/tui-regs.c (tui_last_regs_line_no)
+	(tui_line_from_reg_element_no, tui_first_reg_element_no_inline)
+	(tui_show_registers, tui_show_register_group)
+	(tui_display_registers_from, tui_display_reg_element_at_line)
+	(tui_display_registers_from_line, tui_check_register_values)
+	(tui_reg_next, tui_reg_prev): Update.
+	* tui/tui-layout.c (tui_set_layout, show_data): Update.
+	* tui/tui-data.h (struct tui_data_info): Remove.  Move contents to
+	tui_data_window.
+	(struct tui_win_info) <detail>: Remove.  Add new fields from
+	tui_data_info.
+	(TUI_DATA_WIN): Add cast.
+	* tui/tui-data.c (tui_data_window::clear_detail, tui_data_window)
+	(~tui_data_window): Simplify.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_disasm_command)
 	(show_source_or_disasm_and_command): Update.
 	* tui/tui-io.c (update_cmdwin_start_line)

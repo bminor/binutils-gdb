@@ -224,20 +224,6 @@ struct tui_win_element
   union tui_which_element which_element;
 };
 
-/* This struct defines the specific information about a data display
-   window.  */
-struct tui_data_info
-{
-  tui_win_content data_content;	/* Start of data display content.  */
-  int data_content_count;
-  tui_win_content regs_content;	/* Start of regs display content.  */
-  int regs_content_count;
-  int regs_column_count;
-  int display_regs;		/* Should regs be displayed at all?  */
-  struct reggroup *current_group;
-};
-
-
 /* This defines information about each logical window.  */
 struct tui_win_info
 {
@@ -278,11 +264,6 @@ public:
   void right_scroll (int num_to_scroll);
 
   struct tui_gen_win_info generic;	/* General window information.  */
-  union
-  {
-    struct tui_data_info data_display_info;
-  }
-  detail;
 
   /* Can this window ever be highlighted?  */
   int can_highlight = 0;
@@ -371,6 +352,14 @@ struct tui_data_window : public tui_win_info
 
   void clear_detail () override;
 
+  tui_win_content data_content;	/* Start of data display content.  */
+  int data_content_count;
+  tui_win_content regs_content;	/* Start of regs display content.  */
+  int regs_content_count;
+  int regs_column_count;
+  int display_regs;		/* Should regs be displayed at all?  */
+  struct reggroup *current_group;
+
 protected:
 
   void do_scroll_vertical (enum tui_scroll_direction,
@@ -414,7 +403,7 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 #define TUI_SRC_WIN     ((tui_source_window_base *) tui_win_list[SRC_WIN])
 #define TUI_DISASM_WIN	((tui_source_window_base *) tui_win_list[DISASSEM_WIN])
-#define TUI_DATA_WIN    tui_win_list[DATA_WIN]
+#define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
 #define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
 
 /* Data Manipulation Functions.  */

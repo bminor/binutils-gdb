@@ -227,11 +227,7 @@ tui_set_layout (enum tui_layout_type layout_type)
 	  tui_update_source_windows_with_addr (gdbarch, addr);
 
 	  if (regs_populate)
-	    {
-	      struct reggroup *group =
-		TUI_DATA_WIN->detail.data_display_info.current_group;
-	      tui_show_registers (group);
-	    }
+	    tui_show_registers (TUI_DATA_WIN->current_group);
 	}
     }
   else
@@ -726,7 +722,7 @@ show_data (enum tui_layout_type new_layout)
   src_height = total_height - data_height;
   tui_make_all_invisible ();
   tui_make_invisible (locator);
-  make_data_window (&TUI_DATA_WIN, data_height, 0);
+  make_data_window (&tui_win_list[DATA_WIN], data_height, 0);
   TUI_DATA_WIN->can_highlight = TRUE;
   if (new_layout == SRC_DATA_COMMAND)
     win_type = SRC_WIN;

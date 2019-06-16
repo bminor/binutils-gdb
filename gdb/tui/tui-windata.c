@@ -121,8 +121,8 @@ tui_display_all_data (void)
       tui_display_registers_from (0);
 
       /* Then display the other data.  */
-      if (TUI_DATA_WIN->detail.data_display_info.data_content != NULL
-	  && TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
+      if (TUI_DATA_WIN->data_content != NULL
+	  && TUI_DATA_WIN->data_content_count > 0)
 	{
 	}
     }
@@ -143,7 +143,7 @@ tui_display_data_from_line (int line_no)
 
   /* There is no general data, force regs to display (if there are
      any).  */
-  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0)
+  if (TUI_DATA_WIN->data_content_count <= 0)
     tui_display_registers_from_line (_line_no, TRUE);
   else
     {
@@ -175,7 +175,7 @@ tui_display_data_from (int element_no, int reuse_windows)
 {
   int first_line = (-1);
 
-  if (element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
+  if (element_no < TUI_DATA_WIN->regs_content_count)
     first_line = tui_line_from_reg_element_no (element_no);
   else
     { /* Calculate the first_line from the element number.  */
@@ -218,16 +218,14 @@ tui_check_data_values (struct frame_info *frame)
     {
       int i;
 
-      for (i = 0; 
-	   TUI_DATA_WIN->detail.data_display_info.data_content_count; 
-	   i++)
+      for (i = 0; TUI_DATA_WIN->data_content_count; i++)
 	{
 #ifdef LATER
 	  tui_data_element_ptr data_element_ptr;
 	  struct tui_gen_win_info *data_item_win_ptr;
 	  Opaque new_value;
 
-	  data_item_ptr = &TUI_DATA_WIN->detail.data_display_info.
+	  data_item_ptr = &TUI_DATA_WIN->
 	    data_content[i]->which_element.data_window;
 	  data_element_ptr = &((tui_win_content)
 			       data_item_win_ptr->content)[0]->which_element.data;
@@ -252,8 +250,7 @@ tui_data_window::do_scroll_vertical
   int first_line = (-1);
 
   first_element_no = tui_first_data_item_displayed ();
-  if (first_element_no 
-      < detail.data_display_info.regs_content_count)
+  if (first_element_no < regs_content_count)
     first_line = tui_line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in

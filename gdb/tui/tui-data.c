@@ -190,12 +190,12 @@ tui_cmd_window::clear_detail ()
 void
 tui_data_window::clear_detail ()
 {
-  detail.data_display_info.data_content = NULL;
-  detail.data_display_info.data_content_count = 0;
-  detail.data_display_info.regs_content = NULL;
-  detail.data_display_info.regs_content_count = 0;
-  detail.data_display_info.regs_column_count = 1;
-  detail.data_display_info.display_regs = FALSE;
+  data_content = NULL;
+  data_content_count = 0;
+  regs_content = NULL;
+  regs_content_count = 0;
+  regs_column_count = 1;
+  display_regs = FALSE;
 }
 
 /* Accessor for the source execution info ptr.  */
@@ -498,13 +498,13 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 tui_data_window::tui_data_window ()
   : tui_win_info (DATA_WIN)
 {
-  detail.data_display_info.data_content = (tui_win_content) NULL;
-  detail.data_display_info.data_content_count = 0;
-  detail.data_display_info.regs_content = (tui_win_content) NULL;
-  detail.data_display_info.regs_content_count = 0;
-  detail.data_display_info.regs_column_count = 1;
-  detail.data_display_info.display_regs = FALSE;
-  detail.data_display_info.current_group = 0;
+  data_content = NULL;
+  data_content_count = 0;
+  regs_content = NULL;
+  regs_content_count = 0;
+  regs_column_count = 1;
+  display_regs = FALSE;
+  current_group = 0;
 }
 
 tui_cmd_window::tui_cmd_window ()
@@ -614,16 +614,14 @@ tui_data_window::~tui_data_window ()
 {
   if (generic.content != NULL)
     {
-      tui_free_data_content (detail.data_display_info.regs_content,
-			     detail.data_display_info.regs_content_count);
-      detail.data_display_info.regs_content = NULL;
-      detail.data_display_info.regs_content_count = 0;
-      tui_free_data_content (detail.data_display_info.data_content,
-			     detail.data_display_info.data_content_count);
-      detail.data_display_info.data_content = NULL;
-      detail.data_display_info.data_content_count = 0;
-      detail.data_display_info.regs_column_count = 1;
-      detail.data_display_info.display_regs = FALSE;
+      tui_free_data_content (regs_content, regs_content_count);
+      regs_content = NULL;
+      regs_content_count = 0;
+      tui_free_data_content (data_content, data_content_count);
+      data_content = NULL;
+      data_content_count = 0;
+      regs_column_count = 1;
+      display_regs = FALSE;
       generic.content = NULL;
       generic.content_size = 0;
     }
