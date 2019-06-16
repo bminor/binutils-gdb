@@ -51,6 +51,12 @@ struct tui_gen_win_info
   /* Call to refresh this window.  */
   virtual void refresh_window ();
 
+  /* Return the name of this type of window.  */
+  virtual const char *name () const
+  {
+    return "";
+  }
+
   /* Window handle.  */
   WINDOW *handle = nullptr;
   /* Type of window.  */
@@ -383,6 +389,11 @@ struct tui_source_window : public tui_source_window_base
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
+  const char *name () const override
+  {
+    return SRC_NAME;
+  }
+
 protected:
 
   void do_scroll_vertical (enum tui_scroll_direction,
@@ -399,6 +410,11 @@ struct tui_disasm_window : public tui_source_window_base
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
+
+  const char *name () const override
+  {
+    return DISASSEM_NAME;
+  }
 
 protected:
 
@@ -422,6 +438,11 @@ struct tui_data_window : public tui_win_info
   void set_new_height (int height) override;
 
   void refresh_window () override;
+
+  const char *name () const override
+  {
+    return DATA_NAME;
+  }
 
   /* Start of data display content.  */
   tui_win_content data_content = NULL;
@@ -465,6 +486,11 @@ struct tui_cmd_window : public tui_win_info
   {
   }
 
+  const char *name () const override
+  {
+    return CMD_NAME;
+  }
+
   int start_line = 0;
 
 protected:
@@ -502,7 +528,6 @@ extern void tui_free_win_content (struct tui_gen_win_info *);
 extern void tui_free_data_content (tui_win_content, int);
 extern void tui_free_all_source_wins_content (void);
 extern struct tui_win_info *tui_partial_win_by_name (const char *);
-extern const char *tui_win_name (const struct tui_gen_win_info *);
 extern enum tui_layout_type tui_current_layout (void);
 extern void tui_set_current_layout_to (enum tui_layout_type);
 extern int tui_term_height (void);

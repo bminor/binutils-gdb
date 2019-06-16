@@ -376,7 +376,7 @@ window_name_completer (completion_tracker &tracker,
 	  || !tui_win_list[win_type]->is_visible)
 	continue;
 
-      completion_name = tui_win_name (tui_win_list [win_type]);
+      completion_name = tui_win_list[win_type]->name ();
       gdb_assert (completion_name != NULL);
       completion_name_vec.push_back (completion_name);
     }
@@ -869,7 +869,7 @@ The window name specified must be valid and visible.\n"));
 	TUI_DATA_WIN->refresh_all ();
       xfree (buf_ptr);
       printf_filtered (_("Focus set to %s window.\n"),
-		       tui_win_name (tui_win_with_focus ()));
+		       tui_win_with_focus ()->name ());
     }
   else
     warning (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
@@ -896,11 +896,11 @@ tui_all_windows_info (const char *arg, int from_tty)
       {
 	if (win_with_focus == tui_win_list[type])
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
-			   tui_win_name (tui_win_list[type]),
+			   tui_win_list[type]->name (),
 			   tui_win_list[type]->height);
 	else
 	  printf_filtered ("        %s\t(%d lines)\n",
-			   tui_win_name (tui_win_list[type]),
+			   tui_win_list[type]->name (),
 			   tui_win_list[type]->height);
       }
 }

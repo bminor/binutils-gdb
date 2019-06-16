@@ -337,7 +337,7 @@ tui_partial_win_by_name (const char *name)
 	{
           if (tui_win_list[i] != 0)
             {
-              const char *cur_name = tui_win_name (tui_win_list[i]);
+              const char *cur_name = tui_win_list[i]->name ();
 
               if (strlen (name) <= strlen (cur_name)
 		  && startswith (cur_name, name))
@@ -348,35 +348,6 @@ tui_partial_win_by_name (const char *name)
     }
 
   return win_info;
-}
-
-
-/* Answer the name of the window.  */
-const char *
-tui_win_name (const struct tui_gen_win_info *win_info)
-{
-  const char *name = NULL;
-
-  switch (win_info->type)
-    {
-    case SRC_WIN:
-      name = SRC_NAME;
-      break;
-    case CMD_WIN:
-      name = CMD_NAME;
-      break;
-    case DISASSEM_WIN:
-      name = DISASSEM_NAME;
-      break;
-    case DATA_WIN:
-      name = DATA_NAME;
-      break;
-    default:
-      name = "";
-      break;
-    }
-
-  return name;
 }
 
 

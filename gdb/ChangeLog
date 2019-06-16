@@ -1,5 +1,17 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (window_name_completer, tui_set_focus)
+	(tui_all_windows_info): Use name method.
+	* tui/tui-data.h (struct tui_gen_win_info)
+	(struct tui_source_window, struct tui_disasm_window)
+	(struct tui_data_window, struct tui_cmd_window) <name>: New
+	method.
+	(tui_win_name): Don't declare.
+	* tui/tui-data.c (tui_partial_win_by_name): Use name method.
+	(tui_win_name): Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_update_source_window)
 	(tui_update_source_window_as_is): Change parameter type.
 	* tui/tui-winsource.c (tui_update_source_window): Change win_info
