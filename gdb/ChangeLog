@@ -1,5 +1,16 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_win_info::make_visible)
+	(tui_source_window_base::make_visible): New methods.
+	(make_all_visible): Make method call.
+	* tui/tui-data.h (struct tui_win_info) <make_visible>: New method.
+	(struct tui_source_window_base, struct tui_cmd_window): Override
+	make_visible.
+	(tui_win_is_source_type): Don't declare.
+	* tui/tui-data.c (tui_win_is_source_type): Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_or_disasm_and_command): Remove
 	NULL check.
 

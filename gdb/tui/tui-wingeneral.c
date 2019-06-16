@@ -211,6 +211,22 @@ tui_make_invisible (struct tui_gen_win_info *win_info)
   make_visible (win_info, 0);
 }
 
+/* See tui-data.h.  */
+
+void
+tui_win_info::make_visible (int visible)
+{
+  ::make_visible (&generic, visible);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::make_visible (int visible)
+{
+  ::make_visible (execution_info, visible);
+  tui_win_info::make_visible (visible);
+}
 
 /* Makes all windows invisible (except the command and locator
    windows).  */
@@ -221,17 +237,8 @@ make_all_visible (int visible)
 
   for (i = 0; i < MAX_MAJOR_WINDOWS; i++)
     {
-      if (tui_win_list[i] != NULL
-	  && ((tui_win_list[i])->generic.type) != CMD_WIN)
-	{
-	  if (tui_win_is_source_type ((tui_win_list[i])->generic.type))
-	    {
-	      tui_source_window_base *base
-		= (tui_source_window_base *) tui_win_list[i];
-	      make_visible (base->execution_info, visible);
-	    }
-	  make_visible (&tui_win_list[i]->generic, visible);
-	}
+      if (tui_win_list[i] != NULL)
+	tui_win_list[i]->make_visible (visible);
     }
 
   return;

@@ -255,6 +255,9 @@ public:
     return false;
   }
 
+  /* Make this window visible or invisible.  */
+  virtual void make_visible (int visible);
+
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
      obvious "scroll_forward" is defined as a macro in term.h.  */
@@ -294,6 +297,8 @@ public:
   {
     return m_has_locator;
   }
+
+  void make_visible (int visible) override;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
@@ -388,6 +393,10 @@ struct tui_cmd_window : public tui_win_info
 
   void clear_detail () override;
 
+  void make_visible (int visible) override
+  {
+  }
+
   int start_line = 0;
 
 protected:
@@ -403,7 +412,6 @@ protected:
   }
 };
 
-extern int tui_win_is_source_type (enum tui_win_type win_type);
 extern int tui_win_is_auxillary (enum tui_win_type win_type);
 extern void tui_set_win_highlight (struct tui_win_info *win_info,
 				   int highlight);
