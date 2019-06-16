@@ -94,7 +94,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
 void
 tui_refresh_cmd_win (void)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  WINDOW *w = TUI_CMD_WIN->handle;
 
   wrefresh (w);
 

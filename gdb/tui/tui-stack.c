@@ -404,7 +404,7 @@ tui_show_frame_info (struct frame_info *fi)
 	  if (win_info == TUI_SRC_WIN)
 	    {
 	      start_line = (item->locator.line_no -
-			   (win_info->generic.viewport_height / 2)) + 1;
+			   (win_info->viewport_height / 2)) + 1;
 	      if (start_line <= 0)
 		start_line = 1;
 	    }

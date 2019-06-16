@@ -169,7 +169,7 @@ tui_source_window_base::clear_detail ()
 void
 tui_cmd_window::clear_detail ()
 {
-  wmove (generic.handle, 0, 0);
+  wmove (handle, 0, 0);
 }
 
 /* See tui-data.h.  */
@@ -268,17 +268,17 @@ tui_set_current_layout_to (enum tui_layout_type new_layout)
 struct tui_win_info *
 tui_next_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->generic.type;
+  int type = cur_win->type;
   struct tui_win_info *next_win = NULL;
 
-  if (cur_win->generic.type == CMD_WIN)
+  if (cur_win->type == CMD_WIN)
     type = SRC_WIN;
   else
-    type = cur_win->generic.type + 1;
-  while (type != cur_win->generic.type && (next_win == NULL))
+    type = cur_win->type + 1;
+  while (type != cur_win->type && (next_win == NULL))
     {
       if (tui_win_list[type]
-	  && tui_win_list[type]->generic.is_visible)
+	  && tui_win_list[type]->is_visible)
 	next_win = tui_win_list[type];
       else
 	{
@@ -298,17 +298,17 @@ tui_next_win (struct tui_win_info *cur_win)
 struct tui_win_info *
 tui_prev_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->generic.type;
+  int type = cur_win->type;
   struct tui_win_info *prev = NULL;
 
-  if (cur_win->generic.type == SRC_WIN)
+  if (cur_win->type == SRC_WIN)
     type = CMD_WIN;
   else
-    type = cur_win->generic.type - 1;
-  while (type != cur_win->generic.type && (prev == NULL))
+    type = cur_win->type - 1;
+  while (type != cur_win->type && (prev == NULL))
     {
       if (tui_win_list[type]
-	  && tui_win_list[type]->generic.is_visible)
+	  && tui_win_list[type]->is_visible)
 	prev = tui_win_list[type];
       else
 	{
@@ -337,8 +337,7 @@ tui_partial_win_by_name (const char *name)
 	{
           if (tui_win_list[i] != 0)
             {
-              const char *cur_name =
-		tui_win_name (&tui_win_list[i]->generic);
+              const char *cur_name = tui_win_name (tui_win_list[i]);
 
               if (strlen (name) <= strlen (cur_name)
 		  && startswith (cur_name, name))
@@ -457,7 +456,7 @@ init_content_element (struct tui_win_element *element,
 }
 
 tui_win_info::tui_win_info (enum tui_win_type type)
-  : generic (type)
+  : tui_gen_win_info (type)
 {
 }
 
@@ -569,7 +568,7 @@ tui_source_window_base::~tui_source_window_base ()
 
 tui_data_window::~tui_data_window ()
 {
-  if (generic.content != NULL)
+  if (content != NULL)
     {
       tui_free_data_content (regs_content, regs_content_count);
       regs_content = NULL;
@@ -579,21 +578,21 @@ tui_data_window::~tui_data_window ()
       data_content_count = 0;
       regs_column_count = 1;
       display_regs = false;
-      generic.content = NULL;
-      generic.content_size = 0;
+      content = NULL;
+      content_size = 0;
     }
 }  
 
 tui_win_info::~tui_win_info ()
 {
-  if (generic.handle != NULL)
+  if (handle != NULL)
     {
-      tui_delete_win (generic.handle);
-      generic.handle = NULL;
-      tui_free_win_content (&generic);
+      tui_delete_win (handle);
+      handle = NULL;
+      tui_free_win_content (this);
     }
-  if (generic.title)
-    xfree (generic.title);
+  if (title)
+    xfree (title);
 }
 
 
@@ -602,7 +601,7 @@ tui_free_all_source_wins_content ()
 {
   for (tui_source_window_base *win_info : tui_source_windows ())
     {
-      tui_free_win_content (&(win_info->generic));
+      tui_free_win_content (win_info);
       tui_free_win_content (win_info->execution_info);
     }
 }

@@ -135,10 +135,10 @@ tui_set_source_content (struct symtab *s,
 
       if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
 	{
-	  line_width = TUI_SRC_WIN->generic.width - 1;
+	  line_width = TUI_SRC_WIN->width - 1;
 	  /* Take hilite (window border) into account, when
 	     calculating the number of lines.  */
-	  nlines = (line_no + (TUI_SRC_WIN->generic.height - 2)) - line_no;
+	  nlines = (line_no + (TUI_SRC_WIN->height - 2)) - line_no;
 
 	  std::string srclines;
 	  if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
@@ -163,9 +163,9 @@ tui_set_source_content (struct symtab *s,
 		= (struct tui_source_window_base *) TUI_SRC_WIN;
 	      const char *s_filename = symtab_to_filename_for_display (s);
 
-	      if (TUI_SRC_WIN->generic.title)
-		xfree (TUI_SRC_WIN->generic.title);
-	      TUI_SRC_WIN->generic.title = xstrdup (s_filename);
+	      if (TUI_SRC_WIN->title)
+		xfree (TUI_SRC_WIN->title);
+	      TUI_SRC_WIN->title = xstrdup (s_filename);
 
 	      xfree (src->fullname);
 	      src->fullname = xstrdup (symtab_to_fullname (s));
@@ -179,7 +179,7 @@ tui_set_source_content (struct symtab *s,
 	      while (cur_line < nlines)
 		{
 		  struct tui_win_element *element
-		    = TUI_SRC_WIN->generic.content[cur_line];
+		    = TUI_SRC_WIN->content[cur_line];
 
 		  std::string text;
 		  if (*iter != '\0')
@@ -201,16 +201,16 @@ tui_set_source_content (struct symtab *s,
 		     == locator->content[0]
 		     ->which_element.locator.line_no);
 
-		  xfree (TUI_SRC_WIN->generic.content[cur_line]
+		  xfree (TUI_SRC_WIN->content[cur_line]
 			 ->which_element.source.line);
-		  TUI_SRC_WIN->generic.content[cur_line]
+		  TUI_SRC_WIN->content[cur_line]
 		    ->which_element.source.line
 		    = xstrdup (text.c_str ());
 
 		  cur_line++;
 		  cur_line_no++;
 		}
-	      TUI_SRC_WIN->generic.content_size = nlines;
+	      TUI_SRC_WIN->content_size = nlines;
 	      ret = TUI_SUCCESS;
 	    }
 	}
@@ -233,18 +233,18 @@ tui_set_source_content_nil (struct tui_win_info *win_info,
   int n_lines;
   int curr_line = 0;
 
-  line_width = win_info->generic.width - 1;
-  n_lines = win_info->generic.height - 2;
+  line_width = win_info->width - 1;
+  n_lines = win_info->height - 2;
 
   /* Set to empty each line in the window, except for the one which
      contains the message.  */
-  while (curr_line < win_info->generic.content_size)
+  while (curr_line < win_info->content_size)
     {
       /* Set the information related to each displayed line to null:
          i.e. the line number is 0, there is no bp, it is not where
          the program is stopped.  */
 
-      struct tui_win_element *element = win_info->generic.content[curr_line];
+      struct tui_win_element *element = win_info->content[curr_line];
 
       element->which_element.source.line_or_addr.loa = LOA_LINE;
       element->which_element.source.line_or_addr.u.line_no = 0;
@@ -300,7 +300,7 @@ int
 tui_source_is_displayed (const char *fullname)
 {
   return (TUI_SRC_WIN != NULL
-	  && TUI_SRC_WIN->generic.content_in_use 
+	  && TUI_SRC_WIN->content_in_use 
 	  && (filename_cmp (tui_locator_win_info_ptr ()->content[0]
 			      ->which_element.locator.full_name,
 			    fullname) == 0));
@@ -312,11 +312,10 @@ void
 tui_source_window::do_scroll_vertical
   (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
-  if (generic.content != NULL)
+  if (content != NULL)
     {
       struct tui_line_or_address l;
       struct symtab *s;
-      tui_win_content content = generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == NULL)
@@ -330,7 +329,7 @@ tui_source_window::do_scroll_vertical
 	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
 	    + num_to_scroll;
 	  if (l.u.line_no > s->nlines)
-	    /* line = s->nlines - win_info->generic.content_size + 1; */
+	    /* line = s->nlines - win_info->content_size + 1; */
 	    /* elz: fix for dts 23398.  */
 	    l.u.line_no
 	      = content[0]->which_element.source.line_or_addr.u.line_no;

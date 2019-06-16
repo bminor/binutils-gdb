@@ -191,8 +191,8 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   cur_pc = locator->content[0]->which_element.locator.addr;
 
   /* Window size, excluding highlight box.  */
-  max_lines = TUI_DISASM_WIN->generic.height - 2;
-  line_width = TUI_DISASM_WIN->generic.width - 2;
+  max_lines = TUI_DISASM_WIN->height - 2;
+  line_width = TUI_DISASM_WIN->width - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = XALLOCAVEC (struct tui_asm_line, max_lines);
@@ -228,7 +228,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       struct tui_source_element *src;
       int cur_len;
 
-      element = TUI_DISASM_WIN->generic.content[i];
+      element = TUI_DISASM_WIN->content[i];
       src = &element->which_element.source;
       strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
@@ -257,7 +257,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       xfree (asm_lines[i].addr_string);
       xfree (asm_lines[i].insn);
     }
-  TUI_DISASM_WIN->generic.content_size = i;
+  TUI_DISASM_WIN->content_size = i;
   return TUI_SUCCESS;
 }
 
@@ -377,14 +377,11 @@ void
 tui_disasm_window::do_scroll_vertical
   (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
-  if (generic.content != NULL)
+  if (content != NULL)
     {
       CORE_ADDR pc;
-      tui_win_content content;
       struct tui_line_or_address val;
       int dir;
-
-      content = generic.content;
 
       pc = content[0]->which_element.source.line_or_addr.u.addr;
       num_to_scroll++;

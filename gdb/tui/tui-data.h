@@ -44,7 +44,7 @@ struct tui_gen_win_info
   {
   }
 
-  ~tui_gen_win_info ()
+  virtual ~tui_gen_win_info ()
   {
   }
 
@@ -246,7 +246,7 @@ struct tui_win_element
 };
 
 /* This defines information about each logical window.  */
-struct tui_win_info
+struct tui_win_info : public tui_gen_win_info
 {
 protected:
 
@@ -265,7 +265,7 @@ protected:
 
 public:
 
-  virtual ~tui_win_info ();
+  ~tui_win_info () override;
 
   /* Clear the pertinent detail in the window.  */
   virtual void clear_detail () = 0;
@@ -310,8 +310,6 @@ public:
   void backward_scroll (int num_to_scroll);
   void left_scroll (int num_to_scroll);
   void right_scroll (int num_to_scroll);
-
-  struct tui_gen_win_info generic;	/* General window information.  */
 
   /* Can this window ever be highlighted?  */
   bool can_highlight = false;

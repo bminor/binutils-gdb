@@ -135,7 +135,7 @@ tui_show_registers (struct reggroup *group)
 
   /* Make sure the register window is visible.  If not, select an
      appropriate layout.  */
-  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible)
+  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible)
     tui_set_layout_by_name (DATA_NAME);
 
   if (group == 0)
@@ -195,8 +195,8 @@ tui_show_register_group (struct reggroup *group,
   /* Make a new title showing which group we display.  */
   snprintf (title, sizeof (title) - 1, "Register group: %s",
             reggroup_name (group));
-  xfree (TUI_DATA_WIN->generic.title);
-  TUI_DATA_WIN->generic.title = xstrdup (title);
+  xfree (TUI_DATA_WIN->title);
+  TUI_DATA_WIN->title = xstrdup (title);
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
@@ -235,10 +235,10 @@ tui_show_register_group (struct reggroup *group,
     {
       if (!refresh_values_only || allocated_here)
 	{
-	  TUI_DATA_WIN->generic.content = NULL;
-	  TUI_DATA_WIN->generic.content_size = 0;
-	  tui_add_content_elements (&TUI_DATA_WIN->generic, nr_regs);
-	  TUI_DATA_WIN->regs_content = TUI_DATA_WIN->generic.content;
+	  TUI_DATA_WIN->content = NULL;
+	  TUI_DATA_WIN->content_size = 0;
+	  tui_add_content_elements (TUI_DATA_WIN, nr_regs);
+	  TUI_DATA_WIN->regs_content = TUI_DATA_WIN->content;
 	  TUI_DATA_WIN->regs_content_count = nr_regs;
 	}
 
@@ -276,7 +276,7 @@ tui_show_register_group (struct reggroup *group,
           pos++;
 	}
 
-      TUI_DATA_WIN->generic.content_size =
+      TUI_DATA_WIN->content_size =
 	TUI_DATA_WIN->regs_content_count + TUI_DATA_WIN->data_content_count;
       ret = TUI_SUCCESS;
     }
@@ -326,17 +326,17 @@ tui_display_registers_from (int start_element_no)
       i = start_element_no;
 
       TUI_DATA_WIN->regs_column_count =
-        (TUI_DATA_WIN->generic.width - 2) / item_win_width;
+        (TUI_DATA_WIN->width - 2) / item_win_width;
       if (TUI_DATA_WIN->regs_column_count == 0)
         TUI_DATA_WIN->regs_column_count = 1;
       item_win_width =
-        (TUI_DATA_WIN->generic.width - 2) / TUI_DATA_WIN->regs_column_count;
+        (TUI_DATA_WIN->width - 2) / TUI_DATA_WIN->regs_column_count;
 
       /* Now create each data "sub" window, and write the display into
 	 it.  */
       cur_y = 1;
       while (i < TUI_DATA_WIN->regs_content_count 
-	     && cur_y <= TUI_DATA_WIN->generic.viewport_height)
+	     && cur_y <= TUI_DATA_WIN->viewport_height)
 	{
 	  for (j = 0;
 	       j < TUI_DATA_WIN->regs_column_count
@@ -401,7 +401,7 @@ tui_display_reg_element_at_line (int start_element_no,
 
 	  last_line_no = tui_last_regs_line_no ();
 	  first_line_on_last_page
-	    = last_line_no - (TUI_DATA_WIN->generic.height - 2);
+	    = last_line_no - (TUI_DATA_WIN->height - 2);
 	  if (first_line_on_last_page < 0)
 	    first_line_on_last_page = 0;
 
@@ -470,7 +470,7 @@ void
 tui_check_register_values (struct frame_info *frame)
 {
   if (TUI_DATA_WIN != NULL
-      && TUI_DATA_WIN->generic.is_visible)
+      && TUI_DATA_WIN->is_visible)
     {
       if (TUI_DATA_WIN->regs_content_count <= 0 
 	  && TUI_DATA_WIN->display_regs)
@@ -596,7 +596,7 @@ tui_reg_command (const char *args, int from_tty)
       /* Make sure the register window is visible.  If not, select an
 	 appropriate layout.  We need to do this before trying to run the
 	 'next' or 'prev' commands.  */
-      if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible)
+      if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible)
 	tui_set_layout_by_name (DATA_NAME);
 
       if (strncmp (args, "next", len) == 0)

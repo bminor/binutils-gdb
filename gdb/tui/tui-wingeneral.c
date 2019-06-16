@@ -110,10 +110,10 @@ void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL 
-      && win_info->generic.handle != NULL)
+      && win_info->handle != NULL)
     {
-      box_win (&win_info->generic, NO_HILITE);
-      wrefresh (win_info->generic.handle);
+      box_win (win_info, NO_HILITE);
+      wrefresh (win_info->handle);
       win_info->set_highlight (false);
     }
 }
@@ -124,10 +124,10 @@ tui_highlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL
       && win_info->can_highlight
-      && win_info->generic.handle != NULL)
+      && win_info->handle != NULL)
     {
-      box_win (&win_info->generic, HILITE);
-      wrefresh (win_info->generic.handle);
+      box_win (win_info, HILITE);
+      wrefresh (win_info->handle);
       win_info->set_highlight (true);
     }
 }
@@ -135,7 +135,7 @@ tui_highlight_win (struct tui_win_info *win_info)
 void
 tui_check_and_display_highlight_if_needed (struct tui_win_info *win_info)
 {
-  if (win_info != NULL && win_info->generic.type != CMD_WIN)
+  if (win_info != NULL && win_info->type != CMD_WIN)
     {
       if (win_info->is_highlighted)
 	tui_highlight_win (win_info);
@@ -214,7 +214,7 @@ tui_make_invisible (struct tui_gen_win_info *win_info)
 void
 tui_win_info::make_visible (bool visible)
 {
-  ::make_visible (&generic, visible);
+  ::make_visible (this, visible);
 }
 
 /* See tui-data.h.  */
@@ -259,8 +259,8 @@ tui_make_all_invisible (void)
 void
 tui_win_info::refresh ()
 {
-  touchwin (generic.handle);
-  tui_refresh_win (&generic);
+  touchwin (handle);
+  tui_refresh_win (this);
 }
 
 /* See tui-data.h.  */
@@ -283,7 +283,7 @@ tui_refresh_all (struct tui_win_info **list)
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {
-      if (list[type] && list[type]->generic.is_visible)
+      if (list[type] && list[type]->is_visible)
 	list[type]->refresh ();
     }
   if (locator->is_visible)

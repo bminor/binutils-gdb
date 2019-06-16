@@ -48,13 +48,13 @@ tui_first_data_item_displayed (void)
   int i;
 
   for (i = 0; 
-       i < TUI_DATA_WIN->generic.content_size && element_no < 0;
+       i < TUI_DATA_WIN->content_size && element_no < 0;
        i++)
     {
       struct tui_gen_win_info *data_item_win;
 
       data_item_win
-	= TUI_DATA_WIN->generic.content[i]->which_element.data_window;
+	= TUI_DATA_WIN->content[i]->which_element.data_window;
       if (data_item_win->handle != NULL
 	  && data_item_win->is_visible)
 	element_no = i;
@@ -72,10 +72,10 @@ tui_delete_data_content_windows (void)
   int i;
   struct tui_gen_win_info *data_item_win_ptr;
 
-  for (i = 0; (i < TUI_DATA_WIN->generic.content_size); i++)
+  for (i = 0; (i < TUI_DATA_WIN->content_size); i++)
     {
       data_item_win_ptr
-	= TUI_DATA_WIN->generic.content[i]->which_element.data_window;
+	= TUI_DATA_WIN->content[i]->which_element.data_window;
       tui_delete_win (data_item_win_ptr->handle);
       data_item_win_ptr->handle = NULL;
       data_item_win_ptr->is_visible = false;
@@ -86,23 +86,23 @@ tui_delete_data_content_windows (void)
 void
 tui_erase_data_content (const char *prompt)
 {
-  werase (TUI_DATA_WIN->generic.handle);
+  werase (TUI_DATA_WIN->handle);
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
   if (prompt != NULL)
     {
-      int half_width = (TUI_DATA_WIN->generic.width - 2) / 2;
+      int half_width = (TUI_DATA_WIN->width - 2) / 2;
       int x_pos;
 
       if (strlen (prompt) >= half_width)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (prompt);
-      mvwaddstr (TUI_DATA_WIN->generic.handle,
-		 (TUI_DATA_WIN->generic.height / 2),
+      mvwaddstr (TUI_DATA_WIN->handle,
+		 (TUI_DATA_WIN->height / 2),
 		 x_pos,
 		 (char *) prompt);
     }
-  wrefresh (TUI_DATA_WIN->generic.handle);
+  wrefresh (TUI_DATA_WIN->handle);
 }
 
 
@@ -111,7 +111,7 @@ tui_erase_data_content (const char *prompt)
 void
 tui_display_all_data (void)
 {
-  if (TUI_DATA_WIN->generic.content_size <= 0)
+  if (TUI_DATA_WIN->content_size <= 0)
     tui_erase_data_content (NO_DATA_STRING);
   else
     {
@@ -196,7 +196,7 @@ void
 tui_data_window::refresh_all ()
 {
   tui_erase_data_content (NULL);
-  if (generic.content_size > 0)
+  if (content_size > 0)
     {
       int first_element = tui_first_data_item_displayed ();
 
@@ -214,7 +214,7 @@ tui_check_data_values (struct frame_info *frame)
   tui_check_register_values (frame);
 
   /* Now check any other data values that there are.  */
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
+  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->is_visible)
     {
       int i;
 

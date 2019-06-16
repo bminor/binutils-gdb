@@ -180,7 +180,7 @@ static void
 update_cmdwin_start_line ()
 {
   TUI_CMD_WIN->start_line
-    = getcury (TUI_CMD_WIN->generic.handle);
+    = getcury (TUI_CMD_WIN->handle);
 }
 
 /* Print a character in the curses command window.  The output is
@@ -190,7 +190,7 @@ update_cmdwin_start_line ()
 static void
 tui_putc (char c)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  WINDOW *w = TUI_CMD_WIN->handle;
 
   do_tui_putc (w, c);
   update_cmdwin_start_line ();
@@ -502,7 +502,7 @@ void
 tui_puts (const char *string, WINDOW *w)
 {
   if (w == nullptr)
-    w = TUI_CMD_WIN->generic.handle;
+    w = TUI_CMD_WIN->handle;
   tui_puts_internal (w, string, nullptr);
 }
 
@@ -538,13 +538,13 @@ tui_redisplay_readline (void)
   
   c_pos = -1;
   c_line = -1;
-  w = TUI_CMD_WIN->generic.handle;
+  w = TUI_CMD_WIN->handle;
   start_line = TUI_CMD_WIN->start_line;
   wmove (w, start_line, 0);
   prev_col = 0;
   height = 1;
   if (prompt != nullptr)
-    tui_puts_internal (TUI_CMD_WIN->generic.handle, prompt, &height);
+    tui_puts_internal (TUI_CMD_WIN->handle, prompt, &height);
 
   prev_col = getcurx (w);
   for (in = 0; in <= rl_end; in++)
@@ -663,7 +663,7 @@ tui_mld_puts (const struct match_list_displayer *displayer, const char *s)
 static void
 tui_mld_flush (const struct match_list_displayer *displayer)
 {
-  wrefresh (TUI_CMD_WIN->generic.handle);
+  wrefresh (TUI_CMD_WIN->handle);
 }
 
 /* TUI version of displayer.erase_entire_line.  */
@@ -671,7 +671,7 @@ tui_mld_flush (const struct match_list_displayer *displayer)
 static void
 tui_mld_erase_entire_line (const struct match_list_displayer *displayer)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  WINDOW *w = TUI_CMD_WIN->handle;
   int cur_y = getcury (w);
 
   wmove (w, cur_y, 0);
@@ -709,7 +709,7 @@ gdb_wgetch (WINDOW *win)
 static int
 tui_mld_getc (FILE *fp)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  WINDOW *w = TUI_CMD_WIN->handle;
   int c = gdb_wgetch (w);
 
   return c;
@@ -845,7 +845,7 @@ tui_cont_sig (int sig)
       /* Force a refresh of the screen.  */
       tui_refresh_all_win ();
 
-      wrefresh (TUI_CMD_WIN->generic.handle);
+      wrefresh (TUI_CMD_WIN->handle);
     }
   signal (sig, tui_cont_sig);
 }
@@ -914,7 +914,7 @@ tui_getc (FILE *fp)
   int ch;
   WINDOW *w;
 
-  w = TUI_CMD_WIN->generic.handle;
+  w = TUI_CMD_WIN->handle;
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Flush readline output.  */
@@ -950,8 +950,8 @@ tui_getc (FILE *fp)
 	  int px, py;
 	  getyx (w, py, px);
 	  px += rl_end - rl_point;
-	  py += px / TUI_CMD_WIN->generic.width;
-	  px %= TUI_CMD_WIN->generic.width;
+	  py += px / TUI_CMD_WIN->width;
+	  px %= TUI_CMD_WIN->width;
 	  wmove (w, py, px);
 	  tui_putc ('\n');
         }

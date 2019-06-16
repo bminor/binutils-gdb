@@ -1,5 +1,62 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_rl_other_window, tui_enable)
+	(tui_is_window_visible, tui_get_command_dimension): Update.
+	* tui/tui-winsource.c (tui_update_source_window_as_is)
+	(tui_clear_source_content, tui_erase_source_content)
+	(tui_show_source_line, tui_source_window_base::refill)
+	(tui_source_window_base::do_scroll_horizontal)
+	(tui_source_window_base::set_is_exec_point_at)
+	(tui_update_breakpoint_info, tui_set_exec_info_content)
+	(tui_alloc_source_buffer, tui_line_is_displayed)
+	(tui_addr_is_displayed): Update.
+	* tui/tui-wingeneral.c (tui_unhighlight_win, tui_highlight_win)
+	(tui_check_and_display_highlight_if_needed)
+	(tui_win_info::make_visible, tui_win_info::refresh)
+	(tui_refresh_all): Update.
+	* tui/tui-windata.c (tui_first_data_item_displayed)
+	(tui_delete_data_content_windows, tui_erase_data_content)
+	(tui_display_all_data, tui_data_window::refresh_all)
+	(tui_check_data_values): Update.
+	* tui/tui-win.c (window_name_completer, tui_update_gdb_sizes)
+	(tui_set_win_focus_to, tui_win_info::forward_scroll)
+	(tui_win_info::backward_scroll, tui_refresh_all_win)
+	(tui_resize_all, tui_set_focus, tui_all_windows_info)
+	(update_tab_width, tui_set_win_height, tui_adjust_win_heights)
+	(tui_source_window_base::set_new_height)
+	(tui_data_window::set_new_height)
+	(make_invisible_and_set_new_height)
+	(make_visible_with_new_height, new_height_ok)
+	(parse_scrolling_args): Update.
+	* tui/tui-stack.c (tui_show_frame_info): Update.
+	* tui/tui-source.c (tui_set_source_content)
+	(tui_set_source_content_nil, tui_source_is_displayed)
+	(tui_source_window::do_scroll_vertical): Update.
+	* tui/tui-regs.c (tui_show_registers, tui_show_register_group)
+	(tui_display_registers_from, tui_display_reg_element_at_line)
+	(tui_check_register_values, tui_reg_command): Update.
+	* tui/tui-layout.c (tui_default_win_height)
+	(show_source_disasm_command, show_data, init_and_make_win)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-io.c (update_cmdwin_start_line, tui_putc, tui_puts)
+	(tui_redisplay_readline, tui_mld_flush)
+	(tui_mld_erase_entire_line, tui_mld_getc, tui_cont_sig)
+	(tui_getc): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content)
+	(tui_disasm_window::do_scroll_vertical): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <~tui_gen_win_info>:
+	Now virtual.
+	(struct tui_win_info): Derive from tui_gen_win_info.
+	<~tui_win_info>: Mark as override.
+	<generic>: Remove member.
+	* tui/tui-data.c (tui_cmd_window::clear_detail, tui_next_win)
+	(tui_prev_win, tui_partial_win_by_name, tui_win_info)
+	(~tui_data_window, ~tui_win_info)
+	(tui_free_all_source_wins_content): Update.
+	* tui/tui-command.c (tui_refresh_cmd_win): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (init_and_make_win): Use new.
 	* tui/tui-data.h (struct tui_gen_win_info): Add constructor,
 	destructor, initializers.
