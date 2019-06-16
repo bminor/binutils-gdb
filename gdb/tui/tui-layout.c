@@ -692,8 +692,8 @@ show_source_disasm_command (void)
       tui_show_source_content (TUI_DISASM_WIN);
 
       if (TUI_CMD_WIN == NULL)
-	TUI_CMD_WIN = make_command_window (cmd_height,
-					   tui_term_height () - cmd_height);
+	tui_win_list[CMD_WIN]
+	  = make_command_window (cmd_height, tui_term_height () - cmd_height);
       else
 	{
 	  init_gen_win_info (&TUI_CMD_WIN->generic,
@@ -958,7 +958,8 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 
 	  if (TUI_CMD_WIN == NULL)
 	    {
-	      TUI_CMD_WIN = make_command_window (cmd_height, src_height);
+	      tui_win_list[CMD_WIN] = make_command_window (cmd_height,
+							   src_height);
 	      tui_refresh_win (&TUI_CMD_WIN->generic);
 	    }
 	  else

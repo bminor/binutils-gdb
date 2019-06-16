@@ -1,5 +1,17 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-io.c (update_cmdwin_start_line)
+	(tui_redisplay_readline): Update.
+	* tui/tui-data.h (struct tui_command_info): Remove.
+	(struct tui_win_info) <detail>: Remove command_info member.
+	(struct tui_data_window) <start_line>: New member, from
+	tui_command_info.
+	(TUI_CMD_WIN): Add casts.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_source_window)
 	(tui_refill_source_window)
 	(tui_source_window_base::do_scroll_horizontal)

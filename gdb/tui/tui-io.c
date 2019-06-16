@@ -179,7 +179,7 @@ do_tui_putc (WINDOW *w, char c)
 static void
 update_cmdwin_start_line ()
 {
-  TUI_CMD_WIN->detail.command_info.start_line
+  TUI_CMD_WIN->start_line
     = getcury (TUI_CMD_WIN->generic.handle);
 }
 
@@ -539,7 +539,7 @@ tui_redisplay_readline (void)
   c_pos = -1;
   c_line = -1;
   w = TUI_CMD_WIN->generic.handle;
-  start_line = TUI_CMD_WIN->detail.command_info.start_line;
+  start_line = TUI_CMD_WIN->start_line;
   wmove (w, start_line, 0);
   prev_col = 0;
   height = 1;
@@ -580,17 +580,17 @@ tui_redisplay_readline (void)
           waddch (w, c);
 	}
       if (c == '\n')
-	TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
+	TUI_CMD_WIN->start_line = getcury (w);
       col = getcurx (w);
       if (col < prev_col)
         height++;
       prev_col = col;
     }
   wclrtobot (w);
-  TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
+  TUI_CMD_WIN->start_line = getcury (w);
   if (c_line >= 0)
     wmove (w, c_line, c_pos);
-  TUI_CMD_WIN->detail.command_info.start_line -= height - 1;
+  TUI_CMD_WIN->start_line -= height - 1;
 
   wrefresh (w);
   fflush(stdout);

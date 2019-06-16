@@ -238,12 +238,6 @@ struct tui_data_info
 };
 
 
-struct tui_command_info
-{
-  int start_line;
-};
-
-
 /* This defines information about each logical window.  */
 struct tui_win_info
 {
@@ -287,7 +281,6 @@ public:
   union
   {
     struct tui_data_info data_display_info;
-    struct tui_command_info command_info;
   }
   detail;
 
@@ -395,6 +388,8 @@ struct tui_cmd_window : public tui_win_info
 
   void clear_detail () override;
 
+  int start_line;
+
 protected:
 
   void do_scroll_vertical (enum tui_scroll_direction,
@@ -420,7 +415,7 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 #define TUI_SRC_WIN     ((tui_source_window_base *) tui_win_list[SRC_WIN])
 #define TUI_DISASM_WIN	((tui_source_window_base *) tui_win_list[DISASSEM_WIN])
 #define TUI_DATA_WIN    tui_win_list[DATA_WIN]
-#define TUI_CMD_WIN     tui_win_list[CMD_WIN]
+#define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
 
 /* Data Manipulation Functions.  */
 extern void tui_initialize_static_data (void);
