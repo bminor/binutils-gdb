@@ -280,6 +280,9 @@ public:
 
   virtual ~tui_win_info ();
 
+  /* Clear the pertinent detail in the window.  */
+  virtual void clear_detail () = 0;
+
   struct tui_gen_win_info generic;	/* General window information.  */
   union
   {
@@ -300,18 +303,24 @@ struct tui_source_window : public tui_win_info
 {
   explicit tui_source_window (enum tui_win_type type);
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
+
+  void clear_detail () override;
 };
 
 struct tui_data_window : public tui_win_info
 {
   tui_data_window ();
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
+
+  void clear_detail () override;
 };
 
 struct tui_cmd_window : public tui_win_info
 {
   tui_cmd_window ();
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
+
+  void clear_detail () override;
 };
 
 extern int tui_win_is_source_type (enum tui_win_type win_type);

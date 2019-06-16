@@ -178,37 +178,44 @@ tui_add_to_source_windows (struct tui_win_info *win_info)
     source_windows.list[source_windows.count++] = win_info;
 }
 
+/* See tui-data.h.  */
+
+void
+tui_source_window::clear_detail ()
+{
+  detail.source_info.gdbarch = NULL;
+  detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
+  detail.source_info.start_line_or_addr.u.addr = 0;
+  detail.source_info.horizontal_offset = 0;
+}
+
+/* See tui-data.h.  */
+
+void
+tui_cmd_window::clear_detail ()
+{
+  wmove (generic.handle, 0, 0);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_data_window::clear_detail ()
+{
+  detail.data_display_info.data_content = NULL;
+  detail.data_display_info.data_content_count = 0;
+  detail.data_display_info.regs_content = NULL;
+  detail.data_display_info.regs_content_count = 0;
+  detail.data_display_info.regs_column_count = 1;
+  detail.data_display_info.display_regs = FALSE;
+}
 
 /* Clear the pertinant detail in the windows.  */
 void
 tui_clear_win_detail (struct tui_win_info *win_info)
 {
   if (win_info != NULL)
-    {
-      switch (win_info->generic.type)
-	{
-	case SRC_WIN:
-	case DISASSEM_WIN:
-	  win_info->detail.source_info.gdbarch = NULL;
-	  win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
-	  win_info->detail.source_info.start_line_or_addr.u.addr = 0;
-	  win_info->detail.source_info.horizontal_offset = 0;
-	  break;
-	case CMD_WIN:
-	  wmove (win_info->generic.handle, 0, 0);
-	  break;
-	case DATA_WIN:
-	  win_info->detail.data_display_info.data_content = NULL;
-	  win_info->detail.data_display_info.data_content_count = 0;
-	  win_info->detail.data_display_info.regs_content = NULL;
-	  win_info->detail.data_display_info.regs_content_count = 0;
-	  win_info->detail.data_display_info.regs_column_count = 1;
-	  win_info->detail.data_display_info.display_regs = FALSE;
-	  break;
-	default:
-	  break;
-	}
-    }
+    win_info->clear_detail ();
 }
 
 

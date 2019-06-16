@@ -1,5 +1,15 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_win_info, struct tui_source_window)
+	(struct tui_data_window, struct tui_cmd_window): Declare
+	clear_detail method.
+	* tui/tui-data.c (tui_source_window::clear_detail)
+	(tui_cmd_window::clear_detail, tui_data_window::clear_detail): New
+	methods.
+	(tui_clear_win_detail): Simplify.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_source_window, make_disasm_window)
 	(make_source_or_disasm_window): Remove win_info_ptr parameter.
 	Return the new window.
