@@ -1,3 +1,9 @@
+2019-06-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/24364
+	* gdb/dtrace-probe.c (dtrace_static_probe_ops::get_probe): Don't
+	call dtrace_process_dof with NULL dof.
+
 2019-06-16  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24445

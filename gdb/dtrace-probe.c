@@ -856,13 +856,14 @@ dtrace_static_probe_ops::get_probes
 
 	  /* Read the contents of the DOF section and then process it to
 	     extract the information of any probe defined into it.  */
-	  if (!bfd_malloc_and_get_section (abfd, sect, &dof))
+	  if (bfd_malloc_and_get_section (abfd, sect, &dof) && dof != NULL)
+	    dtrace_process_dof (sect, objfile, probesp,
+			        (struct dtrace_dof_hdr *) dof);
+         else
 	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       sect->name, abfd->filename);
-      
-	  dtrace_process_dof (sect, objfile, probesp,
-			      (struct dtrace_dof_hdr *) dof);
+
 	  xfree (dof);
 	}
     }
