@@ -1,5 +1,22 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (make_source_or_disasm_window): Always use
+	init_and_make_win for EXEC_INFO_WIN.
+	* tui/tui-data.h (struct tui_gen_win_info) <~tui_gen_win_info>: No
+	longer inline.
+	(struct tui_win_info) <~tui_win_info>: Inline.
+	(tui_source_exec_info_win_ptr, tui_disassem_exec_info_win_ptr):
+	Don't declare.
+	* tui/tui-data.c (source_win, disasm_win): Remove globals.
+	(tui_source_exec_info_win_ptr, tui_disassem_exec_info_win_ptr):
+	Remove.
+	(tui_initialize_static_data): Update.
+	(~tui_gen_win_info): Handle more cleanup here.
+	(~tui_source_window_base): Delete "execution_info".
+	(~tui_win_info): Move code to ~tui_gen_win_info; remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_command_window): Don't set
 	can_highlight.
 	(show_source_disasm_command): Call the reset method.

@@ -814,22 +814,14 @@ static struct tui_win_info *
 make_source_or_disasm_window (enum tui_win_type type,
 			      int height, int origin_y)
 {
-  struct tui_gen_win_info *execution_info = NULL;
-
-  /* Create the exeuction info window.  */
-  if (type == SRC_WIN)
-    execution_info = tui_source_exec_info_win_ptr ();
-  else
-    execution_info = tui_disassem_exec_info_win_ptr ();
-  execution_info
-    = ((struct tui_gen_win_info *)
-       init_and_make_win (execution_info,
-			  EXEC_INFO_WIN,
-			  height,
-			  3,
-			  0,
-			  origin_y,
-			  DONT_BOX_WINDOW));
+  struct tui_gen_win_info *execution_info
+    = init_and_make_win (nullptr,
+			 EXEC_INFO_WIN,
+			 height,
+			 3,
+			 0,
+			 origin_y,
+			 DONT_BOX_WINDOW);
 
   /* Now create the source window.  */
   struct tui_source_window_base *result

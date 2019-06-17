@@ -37,8 +37,6 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 static int term_height, term_width;
 static struct tui_gen_win_info _locator (LOCATOR_WIN);
-static struct tui_gen_win_info source_win (EXEC_INFO_WIN);
-static struct tui_gen_win_info disasm_win (EXEC_INFO_WIN);
 static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 static struct tui_layout_def layout_def = {
@@ -184,22 +182,6 @@ tui_data_window::clear_detail ()
   regs_column_count = 1;
   display_regs = false;
 }
-
-/* Accessor for the source execution info ptr.  */
-struct tui_gen_win_info *
-tui_source_exec_info_win_ptr (void)
-{
-  return &source_win;
-}
-
-
-/* Accessor for the disassem execution info ptr.  */
-struct tui_gen_win_info *
-tui_disassem_exec_info_win_ptr (void)
-{
-  return &disasm_win;
-}
-
 
 /* Accessor for the locator win info.  Answers a pointer to the static
    locator win info struct.  */
@@ -354,8 +336,6 @@ tui_partial_win_by_name (const char *name)
 void
 tui_initialize_static_data (void)
 {
-  tui_init_generic_part (tui_source_exec_info_win_ptr ());
-  tui_init_generic_part (tui_disassem_exec_info_win_ptr ());
   tui_init_generic_part (tui_locator_win_info_ptr ());
 }
 
@@ -525,16 +505,21 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
   return index_start;
 }
 
+tui_gen_win_info::~tui_gen_win_info ()
+{
+  if (handle != NULL)
+    {
+      tui_delete_win (handle);
+      handle = NULL;
+      tui_free_win_content (this);
+    }
+  xfree (title);
+}
+
 tui_source_window_base::~tui_source_window_base ()
 {
   xfree (fullname);
-  struct tui_gen_win_info *generic_win = execution_info;
-  if (generic_win != NULL)
-    {
-      tui_delete_win (generic_win->handle);
-      generic_win->handle = NULL;
-      tui_free_win_content (generic_win);
-    }
+  delete execution_info;
 }  
 
 tui_data_window::~tui_data_window ()
@@ -553,19 +538,6 @@ tui_data_window::~tui_data_window ()
       content_size = 0;
     }
 }  
-
-tui_win_info::~tui_win_info ()
-{
-  if (handle != NULL)
-    {
-      tui_delete_win (handle);
-      handle = NULL;
-      tui_free_win_content (this);
-    }
-  if (title)
-    xfree (title);
-}
-
 
 void
 tui_free_all_source_wins_content ()

@@ -44,9 +44,7 @@ struct tui_gen_win_info
   {
   }
 
-  virtual ~tui_gen_win_info ()
-  {
-  }
+  virtual ~tui_gen_win_info ();
 
   /* Call to refresh this window.  */
   virtual void refresh_window ();
@@ -272,7 +270,9 @@ protected:
 
 public:
 
-  ~tui_win_info () override;
+  ~tui_win_info () override
+  {
+  }
 
   /* Clear the pertinent detail in the window.  */
   virtual void clear_detail () = 0;
@@ -524,8 +524,6 @@ extern void tui_set_term_height_to (int);
 extern int tui_term_width (void);
 extern void tui_set_term_width_to (int);
 extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
-extern struct tui_gen_win_info *tui_source_exec_info_win_ptr (void);
-extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
 extern std::vector<tui_source_window_base *> &tui_source_windows ();
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
