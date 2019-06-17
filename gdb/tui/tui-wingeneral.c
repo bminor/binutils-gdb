@@ -168,51 +168,37 @@ tui_make_window (struct tui_gen_win_info *win_info, int box_it)
 /* We can't really make windows visible, or invisible.  So we have to
    delete the entire window when making it visible, and create it
    again when making it visible.  */
-static void
-make_visible (struct tui_gen_win_info *win_info, bool visible)
+void
+tui_gen_win_info::make_visible (bool visible)
 {
-  /* Don't tear down/recreate command window.  */
-  if (win_info->type == CMD_WIN)
-    return;
-
   if (visible)
     {
-      if (!win_info->is_visible)
+      if (!is_visible)
 	{
-	  tui_make_window (win_info, !tui_win_is_auxillary (win_info->type));
-	  win_info->is_visible = true;
+	  tui_make_window (this, !tui_win_is_auxillary (type));
+	  is_visible = true;
 	}
     }
   else if (!visible
-	   && win_info->is_visible
-	   && win_info->handle != NULL)
+	   && is_visible
+	   && handle != NULL)
     {
-      win_info->is_visible = false;
-      tui_delete_win (win_info->handle);
-      win_info->handle = NULL;
+      is_visible = false;
+      tui_delete_win (handle);
+      handle = NULL;
     }
-
-  return;
 }
 
 void
 tui_make_visible (struct tui_gen_win_info *win_info)
 {
-  make_visible (win_info, true);
+  win_info->make_visible (true);
 }
 
 void
 tui_make_invisible (struct tui_gen_win_info *win_info)
 {
-  make_visible (win_info, false);
-}
-
-/* See tui-data.h.  */
-
-void
-tui_win_info::make_visible (bool visible)
-{
-  ::make_visible (this, visible);
+  win_info->make_visible (false);
 }
 
 /* See tui-data.h.  */
@@ -220,7 +206,8 @@ tui_win_info::make_visible (bool visible)
 void
 tui_source_window_base::make_visible (bool visible)
 {
-  ::make_visible (execution_info, visible);
+  if (execution_info != nullptr)
+    execution_info->make_visible (visible);
   tui_win_info::make_visible (visible);
 }
 

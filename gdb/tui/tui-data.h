@@ -51,6 +51,9 @@ struct tui_gen_win_info
   /* Call to refresh this window.  */
   virtual void refresh_window ();
 
+  /* Make this window visible or invisible.  */
+  virtual void make_visible (bool visible);
+
   /* Return the name of this type of window.  */
   virtual const char *name () const
   {
@@ -272,9 +275,6 @@ public:
   {
     return false;
   }
-
-  /* Make this window visible or invisible.  */
-  virtual void make_visible (bool visible);
 
   /* Refresh this window and any associated windows.  */
   virtual void refresh ();
