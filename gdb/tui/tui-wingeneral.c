@@ -146,7 +146,7 @@ tui_check_and_display_highlight_if_needed (struct tui_win_info *win_info)
 
 
 void
-tui_make_window (struct tui_gen_win_info *win_info, int box_it)
+tui_make_window (struct tui_gen_win_info *win_info, enum tui_box box_it)
 {
   WINDOW *handle;
 
@@ -175,7 +175,8 @@ tui_gen_win_info::make_visible (bool visible)
     {
       if (!is_visible)
 	{
-	  tui_make_window (this, !tui_win_is_auxillary (type));
+	  tui_make_window (this, (tui_win_is_auxillary (type)
+				  ? DONT_BOX_WINDOW : BOX_WINDOW));
 	  is_visible = true;
 	}
     }

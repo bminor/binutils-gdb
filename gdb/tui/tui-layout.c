@@ -45,7 +45,8 @@
 static void show_layout (enum tui_layout_type);
 static tui_gen_win_info *init_and_make_win (tui_gen_win_info *,
 					    enum tui_win_type,
-					    int, int, int, int, int);
+					    int, int, int, int,
+					    enum tui_box);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
 static struct tui_win_info *make_source_or_disasm_window (enum tui_win_type, 
 							  int, int);
@@ -793,7 +794,7 @@ init_and_make_win (tui_gen_win_info *win_info,
 		   enum tui_win_type win_type,
 		   int height, int width, 
 		   int origin_x, int origin_y,
-		   int box_it)
+		   enum tui_box box_it)
 {
   if (win_info == NULL)
     {

@@ -91,6 +91,13 @@ struct tui_gen_win_info
   char *title = nullptr;
 };
 
+/* Whether or not a window should be drawn with a box.  */
+enum tui_box
+{
+  DONT_BOX_WINDOW = 0,
+  BOX_WINDOW
+};
+
 /* Constant definitions.  */
 #define DEFAULT_TAB_LEN         8
 #define NO_SRC_STRING           "[ No Source Available ]"
@@ -104,8 +111,6 @@ struct tui_gen_win_info
 #define DISASSEM_NAME           "asm"
 #define TUI_NULL_STR            ""
 #define DEFAULT_HISTORY_COUNT	25
-#define BOX_WINDOW              TRUE
-#define DONT_BOX_WINDOW         FALSE
 #define HILITE                  TRUE
 #define NO_HILITE               FALSE
 #define WITH_LOCATOR            TRUE

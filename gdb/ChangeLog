@@ -1,5 +1,17 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_make_window): Change type of "box_it"
+	parameter.
+	* tui/tui-wingeneral.c (tui_make_window): Change type of "box_it"
+	parameter.
+	(tui_gen_win_info::make_visible): Update.
+	* tui/tui-layout.c (init_and_make_win): Change type of "box_it"
+	parameter.
+	* tui/tui-data.h (enum tui_box): New enum.
+	(BOX_WINDOW, DONT_BOX_WINDOW): Remove defines.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_source_or_disasm_window): Always use
 	init_and_make_win for EXEC_INFO_WIN.
 	* tui/tui-data.h (struct tui_gen_win_info) <~tui_gen_win_info>: No
