@@ -1,3 +1,29 @@
+2019-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/24691
+	* i386-dis-evex.h (evex_table): Update EVEX_W_0F3A23_P_2,
+	EVEX_W_0F3A38_P_2, EVEX_W_0F3A39_P_2, EVEX_W_0F3A3A_P_2,
+	EVEX_W_0F3A3B_P_2 and EVEX_W_0F3A43_P_2.
+	(evex_len_table): Add EVEX_LEN_0F3A23_P_2_W_0,
+	EVEX_LEN_0F3A23_P_2_W_1, EVEX_LEN_0F3A38_P_2_W_0,
+	EVEX_LEN_0F3A38_P_2_W_1, EVEX_LEN_0F3A39_P_2_W_0,
+	EVEX_LEN_0F3A39_P_2_W_1, EVEX_LEN_0F3A3A_P_2_W_0,
+	EVEX_LEN_0F3A3A_P_2_W_1, EVEX_LEN_0F3A3B_P_2_W_0,
+	EVEX_LEN_0F3A3B_P_2_W_1, EVEX_LEN_0F3A43_P_2_W_0 and
+	EVEX_LEN_0F3A43_P_2_W_1.
+	* i386-dis.c (EVEX_LEN_0F3A23_P_2_W_0): New enum.
+	(EVEX_LEN_0F3A23_P_2_W_1): Likewise.
+	(EVEX_LEN_0F3A38_P_2_W_0): Likewise.
+	(EVEX_LEN_0F3A38_P_2_W_1): Likewise.
+	(EVEX_LEN_0F3A39_P_2_W_0): Likewise.
+	(EVEX_LEN_0F3A39_P_2_W_1): Likewise.
+	(EVEX_LEN_0F3A3A_P_2_W_0): Likewise.
+	(EVEX_LEN_0F3A3A_P_2_W_1): Likewise.
+	(EVEX_LEN_0F3A3B_P_2_W_0): Likewise.
+	(EVEX_LEN_0F3A3B_P_2_W_1): Likewise.
+	(EVEX_LEN_0F3A43_P_2_W_0): Likewise.
+	(EVEX_LEN_0F3A43_P_2_W_1): Likewise.
+
 2019-06-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po; Updated French translation.
