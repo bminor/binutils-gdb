@@ -60,6 +60,13 @@ struct tui_gen_win_info
     return "";
   }
 
+  /* Reset this window.  WIN_TYPE must match the existing type of this
+     window (it is only passed for self-test purposes).  The other
+     parameters are used to set the window's size and position.  */
+  void reset (enum tui_win_type win_type,
+	      int height, int width,
+	      int origin_x, int origin_y);
+
   /* Window handle.  */
   WINDOW *handle = nullptr;
   /* Type of window.  */
@@ -309,7 +316,7 @@ public:
   void right_scroll (int num_to_scroll);
 
   /* Can this window ever be highlighted?  */
-  bool can_highlight = false;
+  bool can_highlight = true;
 
   /* Is this window highlighted?  */
   bool is_highlighted = false;
@@ -453,6 +460,7 @@ struct tui_cmd_window : public tui_win_info
   tui_cmd_window ()
     : tui_win_info (CMD_WIN)
   {
+    can_highlight = false;
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);

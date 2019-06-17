@@ -1,5 +1,17 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (make_command_window): Don't set
+	can_highlight.
+	(show_source_disasm_command): Call the reset method.
+	(show_data): Don't set can_highlight.  Call the reset method.
+	(tui_gen_win_info::reset): Rename from init_gen_win_info
+	(init_and_make_win): Simplify.  Return tui_gen_win_info.
+	(show_source_or_disasm_and_command): Call the reset method.
+	* tui/tui-data.h (struct tui_gen_win_info) <reset>: New method.
+	(struct tui_cmd_window): Set can_highlight.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_gen_win_info::make_visible): Rename
 	from make_visible.
 	(tui_make_visible, tui_make_invisible): Rewrite.
