@@ -483,12 +483,11 @@ tui_update_breakpoint_info (struct tui_win_info *win,
    based upon the input window which is either the source or
    disassembly window.  */
 void
-tui_set_exec_info_content (struct tui_win_info *win_info)
+tui_set_exec_info_content (struct tui_source_window_base *win_info)
 {
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  if (base->execution_info != NULL)
+  if (win_info->execution_info != NULL)
     {
-      struct tui_gen_win_info *exec_info_ptr = base->execution_info;
+      struct tui_gen_win_info *exec_info_ptr = win_info->execution_info;
 
       if (exec_info_ptr->content == NULL)
 	exec_info_ptr->content =
@@ -532,10 +531,9 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 
 
 void
-tui_show_exec_info_content (struct tui_win_info *win_info)
+tui_show_exec_info_content (struct tui_source_window_base *win_info)
 {
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  struct tui_gen_win_info *exec_info = base->execution_info;
+  struct tui_gen_win_info *exec_info = win_info->execution_info;
   int cur_line;
 
   werase (exec_info->handle);
@@ -552,28 +550,24 @@ tui_show_exec_info_content (struct tui_win_info *win_info)
 
 
 void
-tui_erase_exec_info_content (struct tui_win_info *win_info)
+tui_erase_exec_info_content (struct tui_source_window_base *win_info)
 {
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  struct tui_gen_win_info *exec_info = base->execution_info;
+  struct tui_gen_win_info *exec_info = win_info->execution_info;
 
   werase (exec_info->handle);
   exec_info->refresh_window ();
 }
 
 void
-tui_clear_exec_info_content (struct tui_win_info *win_info)
+tui_clear_exec_info_content (struct tui_source_window_base *win_info)
 {
-  tui_source_window_base *base = (tui_source_window_base *) win_info;
-  base->execution_info->content_in_use = FALSE;
+  win_info->execution_info->content_in_use = FALSE;
   tui_erase_exec_info_content (win_info);
-
-  return;
 }
 
 /* Function to update the execution info window.  */
 void
-tui_update_exec_info (struct tui_win_info *win_info)
+tui_update_exec_info (struct tui_source_window_base *win_info)
 {
   tui_set_exec_info_content (win_info);
   tui_show_exec_info_content (win_info);

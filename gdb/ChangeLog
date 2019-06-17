@@ -1,5 +1,16 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_set_exec_info_content)
+	(tui_show_exec_info_content, tui_erase_exec_info_content)
+	(tui_clear_exec_info_content, tui_update_exec_info): Change
+	argument to tui_source_window_base.
+	* tui/tui-winsource.c (tui_set_exec_info_content)
+	(tui_show_exec_info_content, tui_erase_exec_info_content)
+	(tui_clear_exec_info_content, tui_update_exec_info): Change
+	argument to tui_source_window_base.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_set_exec_info_content): Return void.
 	* tui/tui-winsource.c (tui_set_exec_info_content): Return void.
 
