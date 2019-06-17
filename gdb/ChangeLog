@@ -1,3 +1,9 @@
+2019-06-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24617
+	* common/pathstuff.c (child_path): Make sure parent_len > 0 before
+	accessing parent[parent_len - 1].
+
 2019-06-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/24364

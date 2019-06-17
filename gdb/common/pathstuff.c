@@ -158,7 +158,7 @@ child_path (const char *parent, const char *child)
   /* The parent path must be a directory and the child must contain at
      least one component underneath the parent.  */
   const char *child_component;
-  if (IS_DIR_SEPARATOR (parent[parent_len - 1]))
+  if (parent_len > 0 && IS_DIR_SEPARATOR (parent[parent_len - 1]))
     {
       /* The parent path ends in a directory separator, so it is a
 	 directory.  The first child component starts after the common
