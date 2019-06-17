@@ -475,7 +475,7 @@ tui_win_info::forward_scroll (int num_to_scroll)
   if (num_to_scroll == 0)
     num_to_scroll = height - 3;
 
-  do_scroll_vertical (FORWARD_SCROLL, num_to_scroll);
+  do_scroll_vertical (num_to_scroll);
 }
 
 void
@@ -484,7 +484,7 @@ tui_win_info::backward_scroll (int num_to_scroll)
   if (num_to_scroll == 0)
     num_to_scroll = height - 3;
 
-  do_scroll_vertical (BACKWARD_SCROLL, num_to_scroll);
+  do_scroll_vertical (-num_to_scroll);
 }
 
 
@@ -494,7 +494,7 @@ tui_win_info::left_scroll (int num_to_scroll)
   if (num_to_scroll == 0)
     num_to_scroll = 1;
 
-  do_scroll_horizontal (LEFT_SCROLL, num_to_scroll);
+  do_scroll_horizontal (num_to_scroll);
 }
 
 
@@ -504,7 +504,7 @@ tui_win_info::right_scroll (int num_to_scroll)
   if (num_to_scroll == 0)
     num_to_scroll = 1;
 
-  do_scroll_horizontal (RIGHT_SCROLL, num_to_scroll);
+  do_scroll_horizontal (-num_to_scroll);
 }
 
 

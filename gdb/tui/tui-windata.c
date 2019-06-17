@@ -243,8 +243,7 @@ tui_check_data_values (struct frame_info *frame)
 
 /* Scroll the data window vertically forward or backward.  */
 void
-tui_data_window::do_scroll_vertical
-  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
+tui_data_window::do_scroll_vertical (int num_to_scroll)
 {
   int first_element_no;
   int first_line = (-1);
@@ -259,10 +258,7 @@ tui_data_window::do_scroll_vertical
 
   if (first_line >= 0)
     {
-      if (scroll_direction == FORWARD_SCROLL)
-	first_line += num_to_scroll;
-      else
-	first_line -= num_to_scroll;
+      first_line += num_to_scroll;
       tui_erase_data_content (NULL);
       tui_delete_data_content_windows ();
       tui_display_data_from_line (first_line);

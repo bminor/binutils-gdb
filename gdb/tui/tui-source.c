@@ -308,8 +308,7 @@ tui_source_is_displayed (const char *fullname)
 
 /* Scroll the source forward or backward vertically.  */
 void
-tui_source_window::do_scroll_vertical
-  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
+tui_source_window::do_scroll_vertical (int num_to_scroll)
 {
   if (content != NULL)
     {
@@ -323,23 +322,15 @@ tui_source_window::do_scroll_vertical
 	s = cursal.symtab;
 
       l.loa = LOA_LINE;
-      if (scroll_direction == FORWARD_SCROLL)
-	{
-	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
-	    + num_to_scroll;
-	  if (l.u.line_no > s->nlines)
-	    /* line = s->nlines - win_info->content_size + 1; */
-	    /* elz: fix for dts 23398.  */
-	    l.u.line_no
-	      = content[0]->which_element.source.line_or_addr.u.line_no;
-	}
-      else
-	{
-	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
-	    - num_to_scroll;
-	  if (l.u.line_no <= 0)
-	    l.u.line_no = 1;
-	}
+      l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
+	+ num_to_scroll;
+      if (l.u.line_no > s->nlines)
+	/* line = s->nlines - win_info->content_size + 1; */
+	/* elz: fix for dts 23398.  */
+	l.u.line_no
+	  = content[0]->which_element.source.line_or_addr.u.line_no;
+      if (l.u.line_no <= 0)
+	l.u.line_no = 1;
 
       print_source_lines (s, l.u.line_no, l.u.line_no + 1, 0);
     }

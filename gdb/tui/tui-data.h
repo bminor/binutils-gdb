@@ -122,16 +122,6 @@ struct tui_gen_win_info
 #define MAX_TARGET_WIDTH  10
 #define MAX_PID_WIDTH     19
 
-/* Scroll direction enum.  */
-enum tui_scroll_direction
-{
-  FORWARD_SCROLL,
-  BACKWARD_SCROLL,
-  LEFT_SCROLL,
-  RIGHT_SCROLL
-};
-
-
 /* The kinds of layouts available.  */
 enum tui_layout_type
 {
@@ -264,13 +254,11 @@ protected:
 
   /* Scroll the contents vertically.  This is only called via
      forward_scroll and backward_scroll.  */
-  virtual void do_scroll_vertical (enum tui_scroll_direction,
-				   int num_to_scroll) = 0;
+  virtual void do_scroll_vertical (int num_to_scroll) = 0;
 
   /* Scroll the contents horizontally.  This is only called via
      left_scroll and right_scroll.  */
-  virtual void do_scroll_horizontal (enum tui_scroll_direction,
-				     int num_to_scroll) = 0;
+  virtual void do_scroll_horizontal (int num_to_scroll) = 0;
 
 public:
 
@@ -337,8 +325,7 @@ protected:
   ~tui_source_window_base () override;
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
-  void do_scroll_horizontal (enum tui_scroll_direction,
-			     int num_to_scroll) override;
+  void do_scroll_horizontal (int num_to_scroll) override;
 
 public:
 
@@ -396,8 +383,7 @@ struct tui_source_window : public tui_source_window_base
 
 protected:
 
-  void do_scroll_vertical (enum tui_scroll_direction,
-			   int num_to_scroll) override;
+  void do_scroll_vertical (int num_to_scroll) override;
 };
 
 /* A TUI disassembly window.  */
@@ -418,8 +404,7 @@ struct tui_disasm_window : public tui_source_window_base
 
 protected:
 
-  void do_scroll_vertical (enum tui_scroll_direction,
-			   int num_to_scroll) override;
+  void do_scroll_vertical (int num_to_scroll) override;
 };
 
 struct tui_data_window : public tui_win_info
@@ -457,10 +442,8 @@ struct tui_data_window : public tui_win_info
 
 protected:
 
-  void do_scroll_vertical (enum tui_scroll_direction,
-			   int num_to_scroll) override;
-  void do_scroll_horizontal (enum tui_scroll_direction,
-			     int num_to_scroll) override
+  void do_scroll_vertical (int num_to_scroll) override;
+  void do_scroll_horizontal (int num_to_scroll) override
   {
   }
 };
@@ -495,13 +478,11 @@ struct tui_cmd_window : public tui_win_info
 
 protected:
 
-  void do_scroll_vertical (enum tui_scroll_direction,
-			   int num_to_scroll) override
+  void do_scroll_vertical (int num_to_scroll) override
   {
   }
 
-  void do_scroll_horizontal (enum tui_scroll_direction,
-			     int num_to_scroll) override
+  void do_scroll_horizontal (int num_to_scroll) override
   {
   }
 };

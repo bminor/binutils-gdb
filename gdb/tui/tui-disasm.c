@@ -371,22 +371,21 @@ tui_get_low_disassembly_address (struct gdbarch *gdbarch,
 
 /* Scroll the disassembly forward or backward vertically.  */
 void
-tui_disasm_window::do_scroll_vertical
-  (enum tui_scroll_direction scroll_direction, int num_to_scroll)
+tui_disasm_window::do_scroll_vertical (int num_to_scroll)
 {
   if (content != NULL)
     {
       CORE_ADDR pc;
       struct tui_line_or_address val;
-      int dir;
 
       pc = content[0]->which_element.source.line_or_addr.u.addr;
-      num_to_scroll++;
-      dir = (scroll_direction == FORWARD_SCROLL)
-	? num_to_scroll : -num_to_scroll;
+      if (num_to_scroll >= 0)
+	num_to_scroll++;
+      else
+	--num_to_scroll;
 
       val.loa = LOA_ADDRESS;
-      val.u.addr = tui_find_disassembly_address (gdbarch, pc, dir);
+      val.u.addr = tui_find_disassembly_address (gdbarch, pc, num_to_scroll);
       tui_update_source_window_as_is (this, gdbarch,
 				      NULL, val, FALSE);
     }

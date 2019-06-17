@@ -332,21 +332,13 @@ tui_source_window_base::refill ()
 /* Scroll the source forward or backward horizontally.  */
 
 void
-tui_source_window_base::do_scroll_horizontal
-  (enum tui_scroll_direction direction, int num_to_scroll)
+tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
 {
   if (content != NULL)
     {
-      int offset;
-
-      if (direction == LEFT_SCROLL)
-	offset = horizontal_offset + num_to_scroll;
-      else
-	{
-	  offset = horizontal_offset - num_to_scroll;
-	  if (offset < 0)
-	    offset = 0;
-	}
+      int offset = horizontal_offset + num_to_scroll;
+      if (offset < 0)
+	offset = 0;
       horizontal_offset = offset;
       refill ();
     }

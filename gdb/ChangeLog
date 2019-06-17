@@ -1,5 +1,26 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c
+	(tui_source_window_base::do_scroll_horizontal): Remove direction
+	parameter.
+	* tui/tui-windata.c (tui_data_window::do_scroll_vertical): Remove
+	direction parameter.
+	* tui/tui-win.c (tui_win_info::forward_scroll)
+	(tui_win_info::backward_scroll, tui_win_info::left_scroll)
+	(tui_win_info::right_scroll): Update.
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Remove
+	direction parameter.
+	* tui/tui-disasm.c (tui_disasm_window::do_scroll_vertical): Remove
+	direction parameter.
+	* tui/tui-data.h (enum tui_scroll_direction): Remove.
+	(struct tui_win_info) <do_scroll_vertical, do_scroll_horizontal>:
+	Remove direction parameter.
+	(struct tui_source_window_base, struct tui_source_window)
+	(struct tui_disasm_window, struct tui_data_window)
+	(struct tui_cmd_window): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_set_exec_info_content)
 	(tui_show_exec_info_content, tui_erase_exec_info_content)
 	(tui_clear_exec_info_content, tui_update_exec_info): Change
