@@ -1,3 +1,7 @@
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
+	* valops.c (value_cast): Specialize error message for Ada.
+
 2019-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.c (breakpoint_1): Update doc and parameter names.
