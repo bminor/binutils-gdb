@@ -194,6 +194,8 @@ maint show test-options-completion-result
      "taas" commands, and their "-ascending" option can now be
      abbreviated.
 
+  ** GDB can now complete the options of the "info threads" command.
+
   ** GDB can now complete the options of the "compile file" and
      "compile code" commands.  The "compile file" command now
      completes on filenames.

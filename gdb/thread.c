@@ -1199,6 +1199,33 @@ print_thread_info (struct ui_out *uiout, const char *requested_threads,
   print_thread_info_1 (uiout, requested_threads, 1, pid, 0);
 }
 
+/* The options for the "info threads" command.  */
+
+struct info_threads_opts
+{
+  /* For "-gid".  */
+  int show_global_ids = 0;
+};
+
+static const gdb::option::option_def info_threads_option_defs[] = {
+
+  gdb::option::flag_option_def<info_threads_opts> {
+    "gid",
+    [] (info_threads_opts *opts) { return &opts->show_global_ids; },
+    N_("Show global thread IDs."),
+  },
+
+};
+
+/* Create an option_def_group for the "info threads" options, with
+   IT_OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_info_threads_options_def_group (info_threads_opts *it_opts)
+{
+  return {{info_threads_option_defs}, it_opts};
+}
+
 /* Implementation of the "info threads" command.
 
    Note: this has the drawback that it _really_ switches
@@ -1208,16 +1235,36 @@ print_thread_info (struct ui_out *uiout, const char *requested_threads,
 static void
 info_threads_command (const char *arg, int from_tty)
 {
-  int show_global_ids = 0;
+  info_threads_opts it_opts;
 
-  if (arg != NULL
-      && check_for_argument (&arg, "-gid", sizeof ("-gid") - 1))
+  auto grp = make_info_threads_options_def_group (&it_opts);
+  gdb::option::process_options
+    (&arg, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
+
+  print_thread_info_1 (current_uiout, arg, 0, -1, it_opts.show_global_ids);
+}
+
+/* Completer for the "info threads" command.  */
+
+static void
+info_threads_command_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char *word_ignored)
+{
+  const auto grp = make_info_threads_options_def_group (nullptr);
+
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  /* Convenience to let the user know what the option can accept.  */
+  if (*text == '\0')
     {
-      arg = skip_spaces (arg);
-      show_global_ids = 1;
+      gdb::option::complete_on_all_options (tracker, grp);
+      /* Keep this "ID" in sync with what "help info threads"
+	 says.  */
+      tracker.add_completion (make_unique_xstrdup ("ID"));
     }
-
-  print_thread_info_1 (current_uiout, arg, 0, -1, show_global_ids);
 }
 
 /* See gdbthread.h.  */
@@ -2068,12 +2115,23 @@ _initialize_thread (void)
   static struct cmd_list_element *thread_apply_list = NULL;
   cmd_list_element *c;
 
-  add_info ("threads", info_threads_command,
-	    _("Display currently known threads.\n\
-Usage: info threads [-gid] [ID]...\n\
--gid: Show global thread IDs.\n\
+  const auto info_threads_opts = make_info_threads_options_def_group (nullptr);
+
+  /* Note: keep this "ID" in sync with what "info threads [TAB]"
+     suggests.  */
+  static std::string info_threads_help
+    = gdb::option::build_help (_("\
+Display currently known threads.\n\
+Usage: info threads [OPTION]... [ID]...\n\
+\n\
+Options:\n\
+%OPTIONS%\
 If ID is given, it is a space-separated list of IDs of threads to display.\n\
-Otherwise, all threads are displayed."));
+Otherwise, all threads are displayed."),
+			       info_threads_opts);
+
+  c = add_info ("threads", info_threads_command, info_threads_help.c_str ());
+  set_cmd_completer_handle_brkchars (c, info_threads_command_completer);
 
   add_prefix_cmd ("thread", class_run, thread_command, _("\
 Use this command to switch between threads.\n\
