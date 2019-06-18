@@ -197,6 +197,13 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	  std::ifstream input (fullname);
 	  if (input.is_open ())
 	    {
+	      /* The global source highlight object, or null if one
+		 was never constructed.  This is stored here rather
+		 than in the class so that we don't need to include
+		 anything or do conditional compilation in
+		 source-cache.h.  */
+	      static srchilite::SourceHighlight *highlighter;
+
 	      if (s->line_charpos == 0)
 		{
 		  scoped_fd desc (open_source_file_with_line_charpos (s));
@@ -209,11 +216,15 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 		     use-after-free.  */
 		  fullname = symtab_to_fullname (s);
 		}
-	      srchilite::SourceHighlight highlighter ("esc.outlang");
-	      highlighter.setStyleFile("esc.style");
+
+	      if (highlighter == nullptr)
+		{
+		  highlighter = new srchilite::SourceHighlight ("esc.outlang");
+		  highlighter->setStyleFile ("esc.style");
+		}
 
 	      std::ostringstream output;
-	      highlighter.highlight (input, output, lang_name, fullname);
+	      highlighter->highlight (input, output, lang_name, fullname);
 
 	      source_text result = { fullname, output.str () };
 	      m_source_map.push_back (std::move (result));

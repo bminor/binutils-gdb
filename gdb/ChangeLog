@@ -1,3 +1,8 @@
+2019-06-19  Tom Tromey  <tromey@adacore.com>
+
+	* source-cache.c (highlighter): New global.
+	(source_cache::get_source_lines): Create a highlighter on demand.
+
 2019-06-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* defs.h (deprecated_interactive_hook): Delete declaration.
