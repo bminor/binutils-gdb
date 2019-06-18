@@ -1,3 +1,9 @@
+2019-06-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_inline_plt): Correct st_other test for
+	functions that require r2 valid to use local entry.
+	(ppc64_elf_size_stubs, ppc64_elf_relocate_section): Likewise.
+
 2019-06-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_allocate_local_dynrelocs): Remove.

@@ -7445,7 +7445,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 			&& !(r_type == R_PPC64_PLTCALL_NOTOC
 			     && (((h ? h->other : sym->st_other)
 				  & STO_PPC64_LOCAL_MASK)
-				 != 1 << STO_PPC64_LOCAL_BIT)))
+				 > 1 << STO_PPC64_LOCAL_BIT)))
 		      *tls_maskp &= ~PLT_KEEP;
 		  }
 	      }
@@ -12897,7 +12897,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 				   && code_sec->output_section != NULL
 				   && (((hash ? hash->elf.other : sym->st_other)
 					& STO_PPC64_LOCAL_MASK)
-				       != 1 << STO_PPC64_LOCAL_BIT)))
+				       > 1 << STO_PPC64_LOCAL_BIT)))
 			stub_type = ppc_stub_long_branch_notoc;
 		    }
 		  else if (stub_type != ppc_stub_plt_call)
@@ -15056,7 +15056,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  || stub_entry->stub_type == ppc_stub_plt_branch_both)
 	      && (r_type != R_PPC64_REL24_NOTOC
 		  || ((fdh ? fdh->elf.other : sym->st_other)
-		      & STO_PPC64_LOCAL_MASK) == 1 << STO_PPC64_LOCAL_BIT)
+		      & STO_PPC64_LOCAL_MASK) <= 1 << STO_PPC64_LOCAL_BIT)
 	      && (relocation + addend - from + max_br_offset
 		  < 2 * max_br_offset))
 	    stub_entry = NULL;
