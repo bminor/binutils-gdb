@@ -678,9 +678,6 @@ maybe_quit (void)
     quit ();
 
   quit_handler ();
-
-  if (deprecated_interactive_hook)
-    deprecated_interactive_hook ();
 }
 
 

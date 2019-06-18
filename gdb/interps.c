@@ -353,7 +353,6 @@ clear_interpreter_hooks (void)
   /*print_frame_more_info_hook = 0; */
   deprecated_query_hook = 0;
   deprecated_warning_hook = 0;
-  deprecated_interactive_hook = 0;
   deprecated_readline_begin_hook = 0;
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;

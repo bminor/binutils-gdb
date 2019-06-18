@@ -1,3 +1,11 @@
+2019-06-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* defs.h (deprecated_interactive_hook): Delete declaration.
+	* interps.c (clear_interpreter_hooks): Remove use of
+	deprecated_interactive_hook.
+	* top.c (deprecated_interactive_hook): Delete definition.
+	* utils.c (maybe_quit): Remove use of deprecated_interactive_hook.
+
 2019-06-18  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24515

@@ -240,11 +240,6 @@ void (*deprecated_readline_end_hook) (void);
 void (*deprecated_attach_hook) (void);
 void (*deprecated_detach_hook) (void);
 
-/* Called during long calculations to allow GUI to repair window
-   damage, and to check for stop buttons, etc...  */
-
-void (*deprecated_interactive_hook) (void);
-
 /* Called when going to wait for the target.  Usually allows the GUI
    to run while waiting for target events.  */
 
