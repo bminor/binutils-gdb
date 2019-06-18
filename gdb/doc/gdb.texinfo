@@ -874,16 +874,17 @@ specified:
 @value{GDBP} @var{program} @var{core}
 @end smallexample
 
-You can, instead, specify a process ID as a second argument, if you want
-to debug a running process:
+You can, instead, specify a process ID as a second argument or use option
+@code{-p}, if you want to debug a running process:
 
 @smallexample
 @value{GDBP} @var{program} 1234
+@value{GDBP} -p 1234
 @end smallexample
 
 @noindent
-would attach @value{GDBN} to process @code{1234} (unless you also have a file
-named @file{1234}; @value{GDBN} does check for a core file first).
+would attach @value{GDBN} to process @code{1234}.  With option @option{-p} you
+can omit the @var{program} filename.
 
 Taking advantage of the second command-line argument requires a fairly
 complete operating system; when you use @value{GDBN} as a remote
@@ -44863,8 +44864,8 @@ You can also start with both an executable program and a core file specified:
 gdb program core
 @end smallexample
 
-You can, instead, specify a process ID as a second argument, if you want
-to debug a running process:
+You can, instead, specify a process ID as a second argument or use option
+@code{-p}, if you want to debug a running process:
 
 @smallexample
 gdb program 1234
@@ -44872,9 +44873,8 @@ gdb -p 1234
 @end smallexample
 
 @noindent
-would attach @value{GDBN} to process @code{1234} (unless you also have a file
-named @file{1234}; @value{GDBN} does check for a core file first).
-With option @option{-p} you can omit the @var{program} filename.
+would attach @value{GDBN} to process @code{1234}.  With option @option{-p} you
+can omit the @var{program} filename.
 
 Here are some of the most frequently needed @value{GDBN} commands:
 

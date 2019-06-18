@@ -1,3 +1,10 @@
+2019-06-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.texinfo (Invoking GDB): Remove sentence about how GDB
+	deals with a file that has the same name as the specified pid to
+	attach to.  Add example using -p option.
+	(gdb man): Remove same sentence as in previous item.
+
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (GDB/MI Catchpoint Commands): Add menu entry to new
