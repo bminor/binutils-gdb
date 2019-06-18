@@ -1,3 +1,7 @@
+2019-06-18  Tom de Vries  <tdevries@suse.de>
+
+	* boards/fission.exp (debug_flags): Add "-fuse-ld=gold".
+
 2019-06-18  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/list0.h: Add comment explaining control character.
