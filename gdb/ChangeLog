@@ -1,3 +1,8 @@
+2019-06-27  Tom Tromey  <tromey@adacore.com>
+
+	* cp-valprint.c (cp_print_value_fields): Pass opts, not options,
+	to cp_print_static_field.
+
 2019-06-26  Tom Tromey  <tromey@adacore.com>
 
 	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Remove.

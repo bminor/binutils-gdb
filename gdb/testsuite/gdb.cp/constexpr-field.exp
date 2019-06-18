@@ -31,6 +31,7 @@ if {![runto_main]} {
 
 # "x" sometimes isn't available due to
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90526
-gdb_test "print x" " = {static f = .*}"
+setup_xfail *-*-* gcc/90526
+gdb_test "print x" " = {static f = true}"
 
 gdb_test "print y" " = {static f = true}"
