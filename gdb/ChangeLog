@@ -1,3 +1,12 @@
+2019-06-18  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24515
+	* dwarf2read.h (abstract_to_concrete): Change type from
+	std::unordered_map<die_info_ptr, std::vector<die_info_ptr>> to
+	std::unordered_map<sect_offset, std::vector<sect_offset>>.
+	* dwarf2read.c (read_variable): Update.
+	(dwarf2_fetch_die_loc_sect_off): Update.
+
 2019-06-17  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24617

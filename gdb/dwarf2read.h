@@ -256,7 +256,7 @@ public:
 
   /* Mapping from abstract origin DIE to concrete DIEs that reference it as
      DW_AT_abstract_origin.  */
-  std::unordered_map<die_info_ptr, std::vector<die_info_ptr>>
+  std::unordered_map<sect_offset, std::vector<sect_offset>>
     abstract_to_concrete;
 };
 

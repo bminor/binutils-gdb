@@ -14288,7 +14288,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
       struct die_info *origin_die
 	= follow_die_ref (die, abstract_origin, &origin_cu);
       dwarf2_per_objfile *dpo = cu->per_cu->dwarf2_per_objfile;
-      dpo->abstract_to_concrete[origin_die].push_back (die);
+      dpo->abstract_to_concrete[origin_die->sect_off].push_back (die->sect_off);
     }
 }
 
@@ -23256,14 +23256,19 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 
   attr = dwarf2_attr (die, DW_AT_location, cu);
   if (!attr && resolve_abstract_p
-      && (dwarf2_per_objfile->abstract_to_concrete.find (die)
+      && (dwarf2_per_objfile->abstract_to_concrete.find (die->sect_off)
 	  != dwarf2_per_objfile->abstract_to_concrete.end ()))
     {
       CORE_ADDR pc = (*get_frame_pc) (baton);
 
-      for (const auto &cand : dwarf2_per_objfile->abstract_to_concrete[die])
+      for (const auto &cand_off
+	     : dwarf2_per_objfile->abstract_to_concrete[die->sect_off])
 	{
-	  if (!cand->parent
+	  struct dwarf2_cu *cand_cu = cu;
+	  struct die_info *cand
+	    = follow_die_offset (cand_off, per_cu->is_dwz, &cand_cu);
+	  if (!cand
+	      || !cand->parent
 	      || cand->parent->tag != DW_TAG_subprogram)
 	    continue;
 
