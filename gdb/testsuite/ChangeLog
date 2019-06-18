@@ -1,3 +1,7 @@
+2019-06-18  Tom de Vries  <tdevries@suse.de>
+
+	* boards/fission.exp: Break up long debug_flags line.
+
 2019-06-16  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24445
