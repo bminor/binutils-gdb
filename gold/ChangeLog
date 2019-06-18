@@ -1,3 +1,40 @@
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::maybe_skip_tls_get_addr_call): Handle
+	notoc calls.
+	(is_branch_reloc): Template on size.  Return true for REL24_NOTOC.
+	Update all callers.
+	(max_branch_delta): Likewise.
+	(Target_powerpc::Branch_info::make_stub): Add a stub for notoc
+	calls to functions needing a valid toc pointer.
+	(Target_powerpc::do_relax): Layout stubs again if any need resize.
+	(add_12_11_12, addi_12_11, addis_12_11, ldx_12_11_12, ori_12_12_0),
+	(oris_12_12_0, sldi_12_12_32): Define.
+	(Stub_table::Plt_stub_ent): Add notoc_ and iter_ fields.
+	(Stub_table::Branch_stub_key, Branch_stub_key_hash): Rename from
+	Branch_stub_ent and Branch_stub_ent hash.  Remove save_res_ from key.
+	(Stub_table::Branch_stub_ent): New struct.
+	(class Stub_table): Add need_resize and resizing vars.
+	(Stub_table::need_resize, branch_size): New accessors.
+	(Stub_table::set_resizing): New function.
+	(Stub_table::add_plt_call_entry): Handle notoc calls and resizing
+	on seeing such or a tocsave stubs after a normal stub using the
+	same sym.
+	(Stub_table::add_long_branch_entry): Similarly.
+	(Stub_table::find_long_branch_entry): Return a Branch_stub_ent*.
+	(Stub_table::define_stub_syms): Adjust
+	(Stub_table::build_tls_opt_head, build_tls_opt_tail): New functions.
+	(build_notoc_offset): New function.
+	(Stub_table::plt_call_size): Move out of line.  Handle notoc calls.
+	(Stub_table::branch_stub_size): Similarly.
+	(Stub_table::do_write): Separate loop for ELFv2 stubs, handling
+	notoc calls.  Simplify ELFv1 loop.  Output notoc branch stubs.
+	Use build_tls_opt_head and build_tls_opt_tail.
+	(Target_powerpc::Scan::get_reference_flags): Handle REL24_NOTOC.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Likewise,
+	and PLTSEQ_NOTOC and PLTCALL_NOTOC.
+	(Target_powerpc::Scan::local, global, relocate): Likewise.
+
 2019-06-28  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't look

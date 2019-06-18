@@ -1,3 +1,7 @@
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.h (R_PPC64_PLTSEQ_NOTOC, R_PPC64_PLTCALL_NOTOC): Define.
+
 2019-06-28  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.h (R_PPC64_REL16_HIGH, R_PPC64_REL16_HIGHA),
