@@ -37626,9 +37626,10 @@ Shows the result of completing the @code{maint test-options}
 subcommands.  This is used by the testsuite to validate completion
 support in the command options framework.
 
-@kindex maint test-settings
-@item maint test-settings set @var{kind}
-@itemx maint test-settings show @var{kind}
+@kindex maint set test-settings
+@kindex maint show test-settings
+@item maint set test-settings @var{kind}
+@itemx maint show test-settings @var{kind}
 These are representative commands for each @var{kind} of setting type
 @value{GDBN} supports.  They are used by the testsuite for exercising
 the settings infrastructure.
