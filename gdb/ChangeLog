@@ -1,5 +1,23 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_source_window_base::update_tab_width): Call
+	make_visible_with_new_height method.
+	(tui_win_info::make_visible_with_new_height): New method.
+	(tui_source_window_base::do_make_visible_with_new_height)
+	(tui_data_window::do_make_visible_with_new_height)
+	(tui_cmd_window::do_make_visible_with_new_height): New methods.
+	(make_visible_with_new_height): Remove.
+	(tui_resize_all, tui_adjust_win_heights): Use
+	make_visible_with_new_height method.
+	* tui/tui-data.h (struct tui_win_info)
+	<do_make_visible_with_new_height, make_visible_with_new_height>:
+	New methods.
+	(struct tui_source_window_base, struct tui_data_window)
+	(struct tui_cmd_window) <do_make_visible_with_new_height>: New
+	methods.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_source_window_base::update_tab_width): New
 	method.
 	(update_tab_width): Call update_tab_width method.

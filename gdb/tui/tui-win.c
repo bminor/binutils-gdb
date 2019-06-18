@@ -55,7 +55,6 @@
 /*******************************
 ** Static Local Decls
 ********************************/
-static void make_visible_with_new_height (struct tui_win_info *);
 static void make_invisible_and_set_new_height (struct tui_win_info *, 
 					       int);
 static enum tui_status tui_adjust_win_heights (struct tui_win_info *, 
@@ -616,8 +615,8 @@ tui_resize_all (void)
 	  TUI_CMD_WIN->width += width_diff;
 	  new_height = screenheight - TUI_CMD_WIN->origin.y;
 	  make_invisible_and_set_new_height (TUI_CMD_WIN, new_height);
-	  make_visible_with_new_height (first_win);
-	  make_visible_with_new_height (TUI_CMD_WIN);
+	  first_win->make_visible_with_new_height ();
+	  TUI_CMD_WIN->make_visible_with_new_height ();
 	  if (first_win->content_size <= 0)
 	    tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
 	  break;
@@ -678,9 +677,9 @@ tui_resize_all (void)
 	  make_invisible_and_set_new_height (TUI_CMD_WIN,
 					     TUI_CMD_WIN->height
 					     + cmd_split_diff);
-	  make_visible_with_new_height (first_win);
-	  make_visible_with_new_height (second_win);
-	  make_visible_with_new_height (TUI_CMD_WIN);
+	  first_win->make_visible_with_new_height ();
+	  second_win->make_visible_with_new_height ();
+	  TUI_CMD_WIN->make_visible_with_new_height ();
 	  if (first_win->content_size <= 0)
 	    tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
 	  if (second_win->content_size <= 0)
@@ -933,7 +932,7 @@ tui_source_window_base::update_tab_width ()
      and redisplay of the window's contents, which will take
      the new tab width into account.  */
   make_invisible_and_set_new_height (this, height);
-  make_visible_with_new_height (this);
+  make_visible_with_new_height ();
 }
 
 /* After the tab width is set, call this to update the relevant
@@ -1126,8 +1125,8 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      make_invisible_and_set_new_height (win_info,
 					     win_info->height + diff);
 	      TUI_CMD_WIN->origin.y = locator->origin.y + 1;
-	      make_visible_with_new_height (win_info);
-	      make_visible_with_new_height (primary_win_info);
+	      win_info->make_visible_with_new_height ();
+	      primary_win_info->make_visible_with_new_height ();
 	      if (src_win_info->content_size <= 0)
 		tui_erase_source_content (src_win_info, EMPTY_SOURCE_PROMPT);
 	    }
@@ -1228,9 +1227,9 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		    make_invisible_and_set_new_height (TUI_CMD_WIN,
 						       TUI_CMD_WIN->height + diff);
 		}
-	      make_visible_with_new_height (TUI_CMD_WIN);
-	      make_visible_with_new_height (second_win);
-	      make_visible_with_new_height (first_win);
+	      TUI_CMD_WIN->make_visible_with_new_height ();
+	      second_win->make_visible_with_new_height ();
+	      first_win->make_visible_with_new_height ();
 	      if (first_win->content_size <= 0)
 		tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
 	      if (second_win->content_size <= 0)
@@ -1301,82 +1300,81 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
 }
 
 
-/* Function to make the windows with new heights visible.  This means
-   re-creating the windows' content since the window had to be
-   destroyed to be made invisible.  */
-static void
-make_visible_with_new_height (struct tui_win_info *win_info)
+/* See tui-data.h.  */
+
+void
+tui_win_info::make_visible_with_new_height ()
 {
-  struct symtab *s;
+  make_visible (true);
+  tui_check_and_display_highlight_if_needed (this);
+  do_make_visible_with_new_height ();
+}
 
-  tui_make_visible (win_info);
-  tui_check_and_display_highlight_if_needed (win_info);
-  tui_source_window_base *base;
-  switch (win_info->type)
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::do_make_visible_with_new_height ()
+{
+  tui_free_win_content (execution_info);
+  tui_make_visible (execution_info);
+  if (content != NULL)
     {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      base = (tui_source_window_base *) win_info;
-      tui_free_win_content (base->execution_info);
-      tui_make_visible (base->execution_info);
-      if (win_info->content != NULL)
-	{
-	  struct gdbarch *gdbarch = base->gdbarch;
-	  struct tui_line_or_address line_or_addr;
-	  struct symtab_and_line cursal
-	    = get_current_source_symtab_and_line ();
+      struct tui_line_or_address line_or_addr;
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
 
-	  line_or_addr = base->start_line_or_addr;
-	  tui_free_win_content (win_info);
-	  tui_update_source_window (base, gdbarch,
-				    cursal.symtab, line_or_addr, TRUE);
-	}
-      else if (deprecated_safe_get_selected_frame () != NULL)
-	{
-	  struct tui_line_or_address line;
-	  struct symtab_and_line cursal
-	    = get_current_source_symtab_and_line ();
-	  struct frame_info *frame = deprecated_safe_get_selected_frame ();
-	  struct gdbarch *gdbarch = get_frame_arch (frame);
+      line_or_addr = start_line_or_addr;
+      tui_free_win_content (this);
+      tui_update_source_window (this, gdbarch,
+				cursal.symtab, line_or_addr, TRUE);
+    }
+  else if (deprecated_safe_get_selected_frame () != NULL)
+    {
+      struct tui_line_or_address line;
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
+      struct frame_info *frame = deprecated_safe_get_selected_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
 
-	  s = find_pc_line_symtab (get_frame_pc (frame));
-	  if (win_info->type == SRC_WIN)
-	    {
-	      line.loa = LOA_LINE;
-	      line.u.line_no = cursal.line;
-	    }
-	  else
-	    {
-	      line.loa = LOA_ADDRESS;
-	      find_line_pc (s, cursal.line, &line.u.addr);
-	    }
-	  tui_update_source_window (base, gdbarch, s, line, TRUE);
-	}
-      if (win_info->has_locator ())
+      struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
+      if (type == SRC_WIN)
 	{
-	  tui_make_visible (tui_locator_win_info_ptr ());
-	  tui_show_locator_content ();
+	  line.loa = LOA_LINE;
+	  line.u.line_no = cursal.line;
 	}
-      break;
-    case DATA_WIN:
-      tui_display_all_data ();
-      break;
-    case CMD_WIN:
-#ifdef HAVE_WRESIZE
-      wresize (TUI_CMD_WIN->handle,
-	       TUI_CMD_WIN->height,
-	       TUI_CMD_WIN->width);
-#endif
-      mvwin (TUI_CMD_WIN->handle,
-	     TUI_CMD_WIN->origin.y,
-	     TUI_CMD_WIN->origin.x);
-      wmove (win_info->handle, 0, 0);
-      break;
-    default:
-      break;
+      else
+	{
+	  line.loa = LOA_ADDRESS;
+	  find_line_pc (s, cursal.line, &line.u.addr);
+	}
+      tui_update_source_window (this, gdbarch, s, line, TRUE);
+    }
+  if (has_locator ())
+    {
+      tui_make_visible (tui_locator_win_info_ptr ());
+      tui_show_locator_content ();
     }
 }
 
+/* See tui-data.h.  */
+
+void
+tui_data_window::do_make_visible_with_new_height ()
+{
+  tui_display_all_data ();
+}
+
+/* See tui-data.h.  */
+
+void
+tui_cmd_window::do_make_visible_with_new_height ()
+{
+#ifdef HAVE_WRESIZE
+  wresize (handle, height, width);
+#endif
+  mvwin (handle, origin.y, origin.x);
+  wmove (handle, 0, 0);
+}
 
 /* See tui-data.h.  */
 

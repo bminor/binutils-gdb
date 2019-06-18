@@ -273,6 +273,10 @@ protected:
      left_scroll and right_scroll.  */
   virtual void do_scroll_horizontal (int num_to_scroll) = 0;
 
+  /* Called after make_visible_with_new_height sets the new height.
+     Should update the window.  */
+  virtual void do_make_visible_with_new_height () = 0;
+
 public:
 
   ~tui_win_info () override
@@ -311,6 +315,9 @@ public:
   {
   }
 
+  /* Make the window visible after the height has been changed.  */
+  void make_visible_with_new_height ();
+
   /* Set whether this window is highglighted.  */
   void set_highlight (bool highlight)
   {
@@ -343,6 +350,7 @@ protected:
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
   void do_scroll_horizontal (int num_to_scroll) override;
+  void do_make_visible_with_new_height () override;
 
 public:
 
@@ -465,6 +473,7 @@ protected:
   void do_scroll_horizontal (int num_to_scroll) override
   {
   }
+  void do_make_visible_with_new_height () override;
 };
 
 struct tui_cmd_window : public tui_win_info
@@ -505,6 +514,8 @@ protected:
   void do_scroll_horizontal (int num_to_scroll) override
   {
   }
+
+  void do_make_visible_with_new_height () override;
 };
 
 extern int tui_win_is_auxillary (enum tui_win_type win_type);
