@@ -1,4 +1,4 @@
-/* Support for GDB maintenance commands.
+/* Maintenance commands for testing the settings framework.
 
    Copyright (C) 2019 Free Software Foundation, Inc.
 
@@ -28,7 +28,7 @@ static cmd_list_element *maintenance_test_settings_list;
 static cmd_list_element *maintenance_test_settings_set_list;
 static cmd_list_element *maintenance_test_settings_show_list;
 
-/* The "maintenance test-options" prefix command.  */
+/* The "maintenance test-settings" prefix command.  */
 
 static void
 maintenance_test_settings_cmd (const char *arg, int from_tty)
@@ -40,7 +40,7 @@ maintenance_test_settings_cmd (const char *arg, int from_tty)
 	     all_commands, gdb_stdout);
 }
 
-/* The "maintenance test-options set" prefix command.  */
+/* The "maintenance test-settings set" prefix command.  */
 
 static void
 maintenance_test_settings_set_cmd (const char *args, int from_tty)
@@ -52,7 +52,7 @@ maintenance_test_settings_set_cmd (const char *args, int from_tty)
 	     all_commands, gdb_stdout);
 }
 
-/* The "maintenance test-options show" prefix command.  */
+/* The "maintenance test-settings show" prefix command.  */
 
 static void
 maintenance_test_settings_show_cmd (const char *args, int from_tty)
@@ -60,7 +60,7 @@ maintenance_test_settings_show_cmd (const char *args, int from_tty)
   cmd_show_list (maintenance_test_settings_show_list, from_tty, "");
 }
 
-/* Control variables for all the "maintenance test-options set/show
+/* Control variables for all the "maintenance test-settings set/show
    xxx" commands.  */
 
 static int maintenance_test_settings_boolean;
@@ -101,7 +101,7 @@ static const char *const maintenance_test_settings_enums[] = {
 static const char *maintenance_test_settings_enum
   = maintenance_test_settings_xxx;
 
-/* The "maintenance test-options show xxx" commands.  */
+/* The "maintenance test-settings show xxx" commands.  */
 
 static void
 maintenance_test_settings_show_value_cmd
