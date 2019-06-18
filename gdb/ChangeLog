@@ -1,5 +1,13 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_source_window_base::update_tab_width): New
+	method.
+	(update_tab_width): Call update_tab_width method.
+	* tui/tui-data.h (struct tui_win_info)
+	(struct tui_source_window_base) <update_tab_width>: New methods.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_window): Change type of "box_it"
 	parameter.
 	* tui/tui-wingeneral.c (tui_make_window): Change type of "box_it"

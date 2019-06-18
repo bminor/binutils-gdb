@@ -923,29 +923,30 @@ unsigned int tui_tab_width = DEFAULT_TAB_LEN;
 
 static unsigned int internal_tab_width = DEFAULT_TAB_LEN;
 
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::update_tab_width ()
+{
+  /* We don't really change the height of any windows, but
+     calling these 2 functions causes a complete regeneration
+     and redisplay of the window's contents, which will take
+     the new tab width into account.  */
+  make_invisible_and_set_new_height (this, height);
+  make_visible_with_new_height (this);
+}
+
 /* After the tab width is set, call this to update the relevant
    windows.  */
 
 static void
 update_tab_width ()
 {
-  /* We don't really change the height of any windows, but
-     calling these 2 functions causes a complete regeneration
-     and redisplay of the window's contents, which will take
-     the new tab width into account.  */
-  if (tui_win_list[SRC_WIN]
-      && tui_win_list[SRC_WIN]->is_visible)
+  for (int win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
     {
-      make_invisible_and_set_new_height (TUI_SRC_WIN,
-					 TUI_SRC_WIN->height);
-      make_visible_with_new_height (TUI_SRC_WIN);
-    }
-  if (tui_win_list[DISASSEM_WIN]
-      && tui_win_list[DISASSEM_WIN]->is_visible)
-    {
-      make_invisible_and_set_new_height (TUI_DISASM_WIN,
-					 TUI_DISASM_WIN->height);
-      make_visible_with_new_height (TUI_DISASM_WIN);
+      if (tui_win_list[win_type] != NULL
+	  && tui_win_list[win_type]->is_visible)
+	tui_win_list[win_type]->update_tab_width ();
     }
 }
 

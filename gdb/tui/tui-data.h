@@ -306,6 +306,11 @@ public:
   /* Compute the maximum height of this window.  */
   virtual int max_height () const;
 
+  /* Called after the tab width has been changed.  */
+  virtual void update_tab_width ()
+  {
+  }
+
   /* Set whether this window is highglighted.  */
   void set_highlight (bool highlight)
   {
@@ -361,6 +366,8 @@ public:
   void set_is_exec_point_at (struct tui_line_or_address l);
 
   void set_new_height (int height) override;
+
+  void update_tab_width () override;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
