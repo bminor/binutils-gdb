@@ -337,7 +337,7 @@ add_alias_cmd (const char *name, const char *oldname,
   struct cmd_list_element *old;
 
   tmp = oldname;
-  old = lookup_cmd (&tmp, *list, "", 1, 1);
+  old = lookup_cmd (&tmp, *list, "", NULL, 1, 1);
 
   return add_alias_cmd (name, old, theclass, abbrev_flag, list);
 }
@@ -1040,6 +1040,40 @@ fput_command_name_styled (struct cmd_list_element *c, struct ui_file *stream)
   fprintf_styled (stream, title_style.style (), "%s%s", prefixname, c->name);
 }
 
+/* Print the definition of alias C using title style for alias
+   and aliased command.  */
+
+static void
+fput_alias_definition_styled (struct cmd_list_element *c,
+			      struct ui_file *stream)
+{
+  gdb_assert (c->cmd_pointer != nullptr);
+  fputs_filtered ("  alias ", stream);
+  fput_command_name_styled (c, stream);
+  fprintf_filtered (stream, " = ");
+  fput_command_name_styled (c->cmd_pointer, stream);
+  fprintf_filtered (stream, " %s\n", c->default_args.c_str ());
+}
+
+/* Print the definition of the aliases of CMD that have default args.  */
+
+static void
+fput_aliases_definition_styled (struct cmd_list_element *cmd,
+				struct ui_file *stream)
+{
+  if (cmd->aliases != nullptr)
+    {
+      for (cmd_list_element *iter = cmd->aliases;
+	   iter;
+	   iter = iter->alias_chain)
+	{
+	  if (!iter->default_args.empty ())
+	    fput_alias_definition_styled (iter, stream);
+	}
+    }
+}
+
+
 /* If C has one or more aliases, style print the name of C and
    the name of its aliases, separated by commas.
    If ALWAYS_FPUT_C_NAME, print the name of C even if it has no aliases.
@@ -1081,12 +1115,21 @@ print_doc_of_command (struct cmd_list_element *c, const char *prefix,
   if (verbose)
     fputs_filtered ("\n", stream);
 
-  fput_command_names_styled (c, true, " -- ", stream);
+  fput_command_names_styled (c, true,
+			     verbose ? "" : " -- ", stream);
   if (verbose)
-    fputs_highlighted (c->doc, highlight, stream);
+    {
+      fputs_filtered ("\n", stream);
+      fput_aliases_definition_styled (c, stream);
+      fputs_highlighted (c->doc, highlight, stream);
+      fputs_filtered ("\n", stream);
+    }
   else
-    print_doc_line (stream, c->doc, false);
-  fputs_filtered ("\n", stream);
+    {
+      print_doc_line (stream, c->doc, false);
+      fputs_filtered ("\n", stream);
+      fput_aliases_definition_styled (c, stream);
+    }
 }
 
 /* Recursively walk the commandlist structures, and print out the
@@ -1183,7 +1226,7 @@ help_cmd (const char *command, struct ui_file *stream)
     }
 
   const char *orig_command = command;
-  c = lookup_cmd (&command, cmdlist, "", 0, 0);
+  c = lookup_cmd (&command, cmdlist, "", NULL, 0, 0);
 
   if (c == 0)
     return;
@@ -1205,6 +1248,7 @@ help_cmd (const char *command, struct ui_file *stream)
   /* If the user asked 'help somecommand' and there is no alias,
      the false indicates to not output the (single) command name.  */
   fput_command_names_styled (c, false, "\n", stream);
+  fput_aliases_definition_styled (c, stream);
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
@@ -1341,7 +1385,7 @@ help_all (struct ui_file *stream)
 	      fprintf_filtered (stream, "\nUnclassified commands\n\n");
 	      seen_unclassified = 1;
 	    }
-	  print_help_for_command (c, 1, stream);
+	  print_help_for_command (c, true, stream);
 	}
     }
 
@@ -1399,6 +1443,9 @@ print_help_for_command (struct cmd_list_element *c,
   fput_command_names_styled (c, true, " -- ", stream);
   print_doc_line (stream, c->doc, false);
   fputs_filtered ("\n", stream);
+  if (!c->default_args.empty ())
+    fput_alias_definition_styled (c, stream);
+  fput_aliases_definition_styled (c, stream);
 
   if (recurse
       && c->prefixlist != 0
@@ -1582,8 +1629,12 @@ valid_user_defined_cmd_name_p (const char *name)
    the list in which there are ambiguous choices (and *TEXT will be set to
    the ambiguous text string).
 
+   if DEFAULT_ARGS is not null, *DEFAULT_ARGS is set to the found command
+   default args (possibly empty).
+
    If the located command was an abbreviation, this routine returns the base
-   command of the abbreviation.
+   command of the abbreviation.  Note that *DEFAULT_ARGS will contain the
+   default args defined for the alias.
 
    It does no error reporting whatsoever; control will always return
    to the superior routine.
@@ -1610,11 +1661,13 @@ valid_user_defined_cmd_name_p (const char *name)
 
 struct cmd_list_element *
 lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
-	      struct cmd_list_element **result_list, int ignore_help_classes)
+	      struct cmd_list_element **result_list, std::string *default_args,
+	      int ignore_help_classes)
 {
   char *command;
   int len, nfound;
   struct cmd_list_element *found, *c;
+  bool found_alias = false;
   const char *line = *text;
 
   while (**text == ' ' || **text == '\t')
@@ -1646,10 +1699,12 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 
   if (nfound > 1)
     {
-      if (result_list != NULL)
+      if (result_list != nullptr)
 	/* Will be modified in calling routine
 	   if we know what the prefix command is.  */
 	*result_list = 0;
+      if (default_args != nullptr)
+	*default_args = std::string ();
       return CMD_LIST_AMBIGUOUS;	/* Ambiguous.  */
     }
 
@@ -1665,22 +1720,30 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
        are warning about the alias, we may also warn about the command
        itself and we will adjust the appropriate DEPRECATED_WARN_USER
        flags.  */
-      
+
       if (found->deprecated_warn_user)
 	deprecated_cmd_warning (line);
+
+      /* Return the default_args of the alias, not the default_args
+	 of the command it is pointing to.  */
+      if (default_args != nullptr)
+	*default_args = found->default_args;
       found = found->cmd_pointer;
+      found_alias = true;
     }
   /* If we found a prefix command, keep looking.  */
 
   if (found->prefixlist)
     {
       c = lookup_cmd_1 (text, *found->prefixlist, result_list,
-			ignore_help_classes);
+			default_args, ignore_help_classes);
       if (!c)
 	{
 	  /* Didn't find anything; this is as far as we got.  */
-	  if (result_list != NULL)
+	  if (result_list != nullptr)
 	    *result_list = clist;
+	  if (!found_alias && default_args != nullptr)
+	    *default_args = found->default_args;
 	  return found;
 	}
       else if (c == CMD_LIST_AMBIGUOUS)
@@ -1688,13 +1751,16 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	  /* We've gotten this far properly, but the next step is
 	     ambiguous.  We need to set the result list to the best
 	     we've found (if an inferior hasn't already set it).  */
-	  if (result_list != NULL)
+	  if (result_list != nullptr)
 	    if (!*result_list)
 	      /* This used to say *result_list = *found->prefixlist.
 	         If that was correct, need to modify the documentation
 	         at the top of this function to clarify what is
 	         supposed to be going on.  */
 	      *result_list = found;
+	  /* For ambiguous commands, do not return any default_args args.  */
+	  if (default_args != nullptr)
+	    *default_args = std::string ();
 	  return c;
 	}
       else
@@ -1705,8 +1771,10 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
     }
   else
     {
-      if (result_list != NULL)
+      if (result_list != nullptr)
 	*result_list = clist;
+      if (!found_alias && default_args != nullptr)
+	*default_args = found->default_args;
       return found;
     }
 }
@@ -1726,8 +1794,13 @@ undef_cmd_error (const char *cmdtype, const char *q)
 
 /* Look up the contents of *LINE as a command in the command list LIST.
    LIST is a chain of struct cmd_list_element's.
-   If it is found, return the struct cmd_list_element for that command
-   and update *LINE to point after the command name, at the first argument.
+   If it is found, return the struct cmd_list_element for that command,
+   update *LINE to point after the command name, at the first argument
+   and update *DEFAULT_ARGS (if DEFAULT_ARGS is not null) to the default
+   args to prepend to the user provided args when running the command.
+   Note that if the found cmd_list_element is found via an alias,
+   the default args of the alias are returned.
+
    If not found, call error if ALLOW_UNKNOWN is zero
    otherwise (or if error returns) return zero.
    Call error if specified command is ambiguous,
@@ -1741,6 +1814,7 @@ undef_cmd_error (const char *cmdtype, const char *q)
 struct cmd_list_element *
 lookup_cmd (const char **line, struct cmd_list_element *list,
 	    const char *cmdtype,
+	    std::string *default_args,
 	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
@@ -1752,7 +1826,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   if (!*line)
     error (_("Lack of needed %scommand"), cmdtype);
 
-  c = lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
+  c = lookup_cmd_1 (line, list, &last_list, default_args, ignore_help_classes);
 
   if (!c)
     {

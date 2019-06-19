@@ -291,11 +291,13 @@ extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 extern struct cmd_list_element *lookup_cmd (const char **,
 					    struct cmd_list_element *,
 					    const char *,
+					    std::string *,
 					    int, int);
 
 extern struct cmd_list_element *lookup_cmd_1 (const char **,
 					      struct cmd_list_element *,
 					      struct cmd_list_element **,
+					      std::string *,
 					      int);
 
 extern struct cmd_list_element *deprecate_cmd (struct cmd_list_element *,

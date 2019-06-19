@@ -3052,7 +3052,7 @@ is restored."),
 				     show_inferior_tty_command,
 				     &setlist, &showlist);
   cmd_name = "inferior-tty";
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
 
@@ -3065,7 +3065,7 @@ Follow this command with any number of args, to be passed to the program."),
 				   set_args_command,
 				   show_args_command,
 				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   set_cmd_completer (c, filename_completer);
 
@@ -3084,7 +3084,7 @@ working directory."),
 				   set_cwd_command,
 				   show_cwd_command,
 				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   set_cmd_completer (c, filename_completer);
 

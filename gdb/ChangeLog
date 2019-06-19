@@ -1,3 +1,47 @@
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (lookup_cmd_for_default_args)
+	(alias_command_completer)
+	(make_alias_options_def_group): New functions.
+	(alias_opts, alias_option_defs): New struct and array.
+	(alias_usage_error): Update usage.
+	(alias_command): Handles optional DEFAULT-ARGS... arguments.
+	Use option framework.
+	(_initialize_cli_cmds): Update alias command help.
+	Update aliases command help.
+	(show_user):
+	Add NULL for new default_args lookup_cmd argument.
+	(valid_command_p): Rename to validate_aliased_command.
+	Add NULL for new default_args lookup_cmd argument.  Verify that the
+	aliased_command has no default args.
+	* cli/cli-decode.c (help_cmd): Show aliases definitions.
+	(lookup_cmd_1, lookup_cmd): New argument default_args.
+	(add_alias_cmd):
+	Add NULL for new default_args lookup_cmd argument.
+	(print_help_for_command): Show default args under the layout
+	 alias some_alias = some_aliased_cmd some_alias_default_arg.
+	* cli/cli-decode.h (struct cmd_list_element): New member default_args.
+	xfree default_args in destructor.
+	* cli/cli-script.c (process_next_line, do_define_command):
+	Add NULL for new default_args lookup_cmd argument.
+	* command.h: Declare new default_args argument in lookup_cmd
+	and lookup_cmd_1.
+	* completer.c (complete_line_internal_1):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	* guile/scm-param.c (add_setshow_generic, pascm_parameter_defined_p):
+	Likewise.
+	* infcmd.c (_initialize_infcmd): Likewise.
+	* python/py-auto-load.c (gdbpy_initialize_auto_load): Likewise.
+	* python/py-cmd.c (gdbpy_parse_command_name): Likewise.
+	* python/py-param.c (add_setshow_generic): Likewise.
+	* remote.c (_initialize_remote): Likewise.
+	* top.c (execute_command): Prepend default_args if command has some.
+	(set_verbose):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+	* tracepoint.c (validate_actionline, encode_actions_1):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+
 2020-06-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* jit.c (jit_read_descriptor): Use bool as the return type.

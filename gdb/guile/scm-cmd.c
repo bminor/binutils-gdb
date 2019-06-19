@@ -512,7 +512,7 @@ gdbscm_parse_command_name (const char *name,
   prefix_text[i + 1] = '\0';
 
   prefix_text2 = prefix_text;
-  elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, 1);
+  elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, NULL, 1);
   if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
     {
       msg = xstrprintf (_("could not find command prefix '%s'"), prefix_text);

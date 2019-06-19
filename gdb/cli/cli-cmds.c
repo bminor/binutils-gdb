@@ -50,6 +50,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
 #include "cli/cli-utils.h"
+#include "cli/cli-style.h"
 
 #include "extension.h"
 #include "gdbsupport/pathstuff.h"
@@ -221,6 +222,7 @@ with_command_1 (const char *set_cmd_prefix,
     nested_cmd = repeat_previous ();
 
   cmd_list_element *set_cmd = lookup_cmd (&args, setlist, set_cmd_prefix,
+					  nullptr,
 					  /*allow_unknown=*/ 0,
 					  /*ignore_help_classes=*/ 1);
   gdb_assert (set_cmd != nullptr);
@@ -315,7 +317,54 @@ with_command_completer (struct cmd_list_element *ignore,
   with_command_completer_1 ("set ", tracker,  text);
 }
 
-
+/* Look up the contents of TEXT as a command usable with default args.
+   Throws an error if no such command is found.
+   Return the found command and advances TEXT past the found command.
+   If the found command is a postfix command, set *PREFIX_CMD to its
+   prefix command.  */
+
+static struct cmd_list_element *
+lookup_cmd_for_default_args (const char **text,
+			     struct cmd_list_element **prefix_cmd)
+{
+  const char *orig_text = *text;
+  struct cmd_list_element *lcmd;
+
+  if (*text == nullptr || skip_spaces (*text) == nullptr)
+    error (_("ALIAS missing."));
+
+  /* We first use lookup_cmd to verify TEXT unambiguously identifies
+     a command.  */
+  lcmd = lookup_cmd (text, cmdlist, "", NULL,
+		     /*allow_unknown=*/ 0,
+		     /*ignore_help_classes=*/ 1);
+
+  /* Note that we accept default args for prefix commands,
+     as a prefix command can also be a valid usable
+     command accepting some arguments.
+     For example, "thread apply" applies a command to a
+     list of thread ids, and is also the prefix command for
+     thread apply all.  */
+
+  /* We have an unambiguous command for which default args
+     can be specified.  What remains after having found LCMD
+     is either spaces, or the default args character.  */
+
+  /* We then use lookup_cmd_composition to detect if the user
+     has specified an alias, and find the possible prefix_cmd
+     of cmd.  */
+  struct cmd_list_element *alias, *cmd;
+  lookup_cmd_composition
+    (std::string (orig_text, *text - orig_text).c_str (),
+     &alias, prefix_cmd, &cmd);
+  gdb_assert (cmd != nullptr);
+  gdb_assert (cmd == lcmd);
+  if (alias != nullptr)
+    cmd = alias;
+
+  return cmd;
+}
+
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
 
@@ -1541,7 +1590,7 @@ show_user (const char *args, int from_tty)
     {
       const char *comname = args;
 
-      c = lookup_cmd (&comname, cmdlist, "", 0, 1);
+      c = lookup_cmd (&comname, cmdlist, "", NULL, 0, 1);
       if (!cli_user_command_p (c))
 	error (_("Not a user command."));
       show_user_1 (c, "", args, gdb_stdout);
@@ -1573,6 +1622,71 @@ apropos_command (const char *arg, int from_tty)
   apropos_cmd (gdb_stdout, cmdlist, verbose, pattern, "");
 }
 
+/* The options for the "alias" command.  */
+
+struct alias_opts
+{
+  /* For "-a".  */
+  bool abbrev_flag = false;
+};
+
+static const gdb::option::option_def alias_option_defs[] = {
+
+  gdb::option::flag_option_def<alias_opts> {
+    "a",
+    [] (alias_opts *opts) { return &opts->abbrev_flag; },
+    N_("Specify that ALIAS is an abbreviation of COMMAND.\n\
+Abbreviations are not used in command completion."),
+  },
+
+};
+
+/* Create an option_def_group for the "alias" options, with
+   A_OPTS as context.  */
+
+static gdb::option::option_def_group
+make_alias_options_def_group (alias_opts *a_opts)
+{
+  return {{alias_option_defs}, a_opts};
+}
+
+/* Completer for the "alias_command".  */
+
+static void
+alias_command_completer (struct cmd_list_element *ignore,
+			 completion_tracker &tracker,
+			 const char *text, const char *word)
+{
+  const auto grp = make_alias_options_def_group (nullptr);
+
+  tracker.set_use_custom_word_point (true);
+
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  const char *delim = strchr (text, '=');
+
+  /* If we're past the "=" delimiter, complete the
+     "alias ALIAS = COMMAND [DEFAULT-ARGS...]" as if the user is
+     typing COMMAND DEFAULT-ARGS...  */
+  if (delim != text
+      && delim != nullptr
+      && isspace (delim[-1])
+      && (isspace (delim[1]) || delim[1] == '\0'))
+    {
+      std::string new_text = std::string (delim + 1);
+
+      tracker.advance_custom_word_point_by (delim + 1 - text);
+      complete_nested_command_line (tracker, new_text.c_str ());
+      return;
+    }
+
+  /* We're not yet past the "=" delimiter.  Complete a command, as
+     the user might type an alias following a prefix command.  */
+  complete_nested_command_line (tracker, text);
+}
+
 /* Subroutine of alias_command to simplify it.
    Return the first N elements of ARGV flattened back to a string
    with a space separating each element.
@@ -1600,24 +1714,29 @@ argv_to_string (char **argv, int n)
 }
 
 /* Subroutine of alias_command to simplify it.
-   Return true if COMMAND exists, unambiguously.  Otherwise false.  */
+   Verifies that COMMAND can have an alias:
+      COMMAND must exist.
+      COMMAND must not have default args.
+   This last condition is to avoid the following:
+     alias aaa = backtrace -full
+     alias bbb = aaa -past-main
+   as (at least currently), alias default args are not cumulative
+   and the user would expect bbb to execute 'backtrace -full -past-main'
+   while it will execute 'backtrace -past-main'.  */
 
-static bool
-valid_command_p (const char *command)
+static void
+validate_aliased_command (const char *command)
 {
   struct cmd_list_element *c;
+  std::string default_args;
 
-  c = lookup_cmd_1 (& command, cmdlist, NULL, 1);
+  c = lookup_cmd_1 (& command, cmdlist, NULL, &default_args, 1);
 
   if (c == NULL || c == (struct cmd_list_element *) -1)
-    return false;
+    error (_("Invalid command to alias to: %s"), command);
 
-  /* This is the slightly tricky part.
-     lookup_cmd_1 will return a pointer to the last part of COMMAND
-     to match, leaving COMMAND pointing at the remainder.  */
-  while (*command == ' ' || *command == '\t')
-    ++command;
-  return *command == '\0';
+  if (!default_args.empty ())
+    error (_("Cannot define an alias of an alias that has default args"));
 }
 
 /* Called when "alias" was incorrectly used.  */
@@ -1625,7 +1744,7 @@ valid_command_p (const char *command)
 static void
 alias_usage_error (void)
 {
-  error (_("Usage: alias [-a] [--] ALIAS = COMMAND"));
+  error (_("Usage: alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]"));
 }
 
 /* Make an alias of an existing command.  */
@@ -1633,8 +1752,13 @@ alias_usage_error (void)
 static void
 alias_command (const char *args, int from_tty)
 {
+  alias_opts a_opts;
+
+  auto grp = make_alias_options_def_group (&a_opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
+
   int i, alias_argc, command_argc;
-  int abbrev_flag = 0;
   const char *equals;
   const char *alias, *command;
 
@@ -1645,24 +1769,18 @@ alias_command (const char *args, int from_tty)
   std::string args2 (args, equals - args);
 
   gdb_argv built_alias_argv (args2.c_str ());
-  gdb_argv command_argv (equals + 1);
+
+  const char *default_args = equals + 1;
+  struct cmd_list_element *c_command_prefix;
+
+  lookup_cmd_for_default_args (&default_args, &c_command_prefix);
+  std::string command_argv_str (equals + 1,
+				default_args == nullptr
+				? strlen (equals + 1)
+				: default_args - equals - 1);
+  gdb_argv command_argv (command_argv_str.c_str ());
 
   char **alias_argv = built_alias_argv.get ();
-  while (alias_argv[0] != NULL)
-    {
-      if (strcmp (alias_argv[0], "-a") == 0)
-	{
-	  ++alias_argv;
-	  abbrev_flag = 1;
-	}
-      else if (strcmp (alias_argv[0], "--") == 0)
-	{
-	  ++alias_argv;
-	  break;
-	}
-      else
-	break;
-    }
 
   if (alias_argv[0] == NULL || command_argv[0] == NULL
       || *alias_argv[0] == '\0' || *command_argv[0] == '\0')
@@ -1682,14 +1800,13 @@ alias_command (const char *args, int from_tty)
   alias_argc = countargv (alias_argv);
   command_argc = command_argv.count ();
 
-  /* COMMAND must exist.
+  /* COMMAND must exist, and cannot have default args.
      Reconstruct the command to remove any extraneous spaces,
      for better error messages.  */
   std::string command_string (argv_to_string (command_argv.get (),
 					      command_argc));
   command = command_string.c_str ();
-  if (! valid_command_p (command))
-    error (_("Invalid command to alias to: %s"), command);
+  validate_aliased_command (command);
 
   /* ALIAS must not exist.  */
   std::string alias_string (argv_to_string (alias_argv, alias_argc));
@@ -1718,6 +1835,8 @@ alias_command (const char *args, int from_tty)
   }
 
 
+  struct cmd_list_element *alias_cmd;
+
   /* If ALIAS is one word, it is an alias for the entire COMMAND.
      Example: alias spe = set print elements
 
@@ -1730,8 +1849,8 @@ alias_command (const char *args, int from_tty)
   if (alias_argc == 1)
     {
       /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
-      add_com_alias (xstrdup (alias_argv[0]), command, class_alias,
-		     abbrev_flag);
+      alias_cmd = add_com_alias (xstrdup (alias_argv[0]), command, class_alias,
+				 a_opts.abbrev_flag);
     }
   else
     {
@@ -1751,19 +1870,29 @@ alias_command (const char *args, int from_tty)
       alias_prefix = alias_prefix_string.c_str ();
       command_prefix = command_prefix_string.c_str ();
 
-      c_command = lookup_cmd_1 (& command_prefix, cmdlist, NULL, 1);
+      c_command = lookup_cmd_1 (& command_prefix, cmdlist, NULL, NULL, 1);
       /* We've already tried to look up COMMAND.  */
       gdb_assert (c_command != NULL
 		  && c_command != (struct cmd_list_element *) -1);
       gdb_assert (c_command->prefixlist != NULL);
-      c_alias = lookup_cmd_1 (& alias_prefix, cmdlist, NULL, 1);
+      c_alias = lookup_cmd_1 (& alias_prefix, cmdlist, NULL, NULL, 1);
       if (c_alias != c_command)
 	error (_("ALIAS and COMMAND prefixes do not match."));
 
       /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
-      add_alias_cmd (xstrdup (alias_argv[alias_argc - 1]),
-		     command_argv[command_argc - 1],
-		     class_alias, abbrev_flag, c_command->prefixlist);
+      alias_cmd = add_alias_cmd (xstrdup (alias_argv[alias_argc - 1]),
+				 command_argv[command_argc - 1],
+				 class_alias, a_opts.abbrev_flag,
+				 c_command->prefixlist);
+    }
+
+  gdb_assert (alias_cmd != nullptr);
+  gdb_assert (alias_cmd->default_args.empty ());
+  if (default_args != nullptr)
+    {
+      default_args = skip_spaces (default_args);
+
+      alias_cmd->default_args = default_args;
     }
 }
 
@@ -1938,7 +2067,7 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
     error (_("First argument of %s must be a string."), fnname);
 
   const char *a0 = (const char *) value_contents (argv[0]);
-  cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", -1, 0);
+  cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", NULL, -1, 0);
 
   if (cmd == nullptr || cmd_type (cmd) != show_cmd)
     error (_("First argument of %s must be a "
@@ -2128,7 +2257,7 @@ well documented as user commands."),
 	   &cmdlist);
   add_cmd ("obscure", class_obscure, _("Obscure features."), &cmdlist);
   add_cmd ("aliases", class_alias,
-	   _("Aliases of other commands."), &cmdlist);
+	   _("User-defined aliases of other commands."), &cmdlist);
   add_cmd ("user-defined", class_user, _("\
 User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
@@ -2454,19 +2583,37 @@ When 'on', each command is displayed as it is executed."),
 			   NULL,
 			   &setlist, &showlist);
 
-  c = add_com ("alias", class_support, alias_command, _("\
+  const auto alias_opts = make_alias_options_def_group (nullptr);
+
+  static std::string alias_help
+    = gdb::option::build_help (_("\
 Define a new command that is an alias of an existing command.\n\
-Usage: alias [-a] [--] ALIAS = COMMAND\n\
+Usage: alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]\n\
 ALIAS is the name of the alias command to create.\n\
 COMMAND is the command being aliased to.\n\
-If \"-a\" is specified, the command is an abbreviation,\n\
-and will not be used in command completion.\n\
+\n\
+Options:\n\
+%OPTIONS%\n\
+\n\
+GDB will automatically prepend the provided DEFAULT-ARGS to the list\n\
+of arguments explicitly provided when using ALIAS.\n\
+Use \"help aliases\" to list all user defined aliases and their default args.\n\
 \n\
 Examples:\n\
 Make \"spe\" an alias of \"set print elements\":\n\
-  alias spe = set print elements\n\
+  alias spe set print elements\n\
 Make \"elms\" an alias of \"elements\" in the \"set print\" command:\n\
-  alias -a set print elms = set print elements"));
+  alias -a set print elms set print elements\n\
+Make \"btf\" an alias of \"backtrace -full -past-entry -past-main\" :\n\
+  alias btf = backtrace -full -past-entry -past-main\n\
+Make \"wLapPeu\" an alias of 2 nested \"with\":\n\
+  alias wLapPeu = with language pascal -- with print elements unlimited --"),
+			       alias_opts);
+
+  c = add_com ("alias", class_support, alias_command,
+	       alias_help.c_str ());
+
+  set_cmd_completer_handle_brkchars (c, alias_command_completer);
 
   const char *source_help_text = xstrprintf (_("\
 Read commands from a file named FILE.\n\

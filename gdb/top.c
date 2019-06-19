@@ -579,6 +579,8 @@ execute_command (const char *p, int from_tty)
     {
       const char *cmd = p;
       const char *arg;
+      std::string default_args;
+      std::string default_args_and_arg;
       int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       line = p;
@@ -586,15 +588,26 @@ execute_command (const char *p, int from_tty)
       /* If trace-commands is set then this will print this command.  */
       print_command_trace ("%s", p);
 
-      c = lookup_cmd (&cmd, cmdlist, "", 0, 1);
+      c = lookup_cmd (&cmd, cmdlist, "", &default_args, 0, 1);
       p = cmd;
 
       scoped_restore save_repeat_args
 	= make_scoped_restore (&repeat_arguments, nullptr);
       const char *args_pointer = p;
 
-      /* Pass null arg rather than an empty one.  */
-      arg = *p ? p : 0;
+      if (!default_args.empty ())
+	{
+	  if (*p != '\0')
+	    default_args_and_arg = default_args + ' ' + p;
+	  else
+	    default_args_and_arg = default_args;
+	  arg = default_args_and_arg.c_str ();
+	}
+      else
+	{
+	  /* Pass null arg rather than an empty one.  */
+	  arg = *p == '\0' ? nullptr : p;
+	}
 
       /* FIXME: cagney/2002-02-02: The c->type test is pretty dodgy
          while the is_complete_command(cfunc) test is just plain
@@ -1957,7 +1970,7 @@ set_verbose (const char *args, int from_tty, struct cmd_list_element *c)
   const char *cmdname = "verbose";
   struct cmd_list_element *showcmd;
 
-  showcmd = lookup_cmd_1 (&cmdname, showlist, NULL, 1);
+  showcmd = lookup_cmd_1 (&cmdname, showlist, NULL, NULL, 1);
   gdb_assert (showcmd != NULL && showcmd != CMD_LIST_AMBIGUOUS);
 
   if (c->doc && c->doc_allocated)

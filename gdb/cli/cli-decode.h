@@ -183,6 +183,10 @@ struct cmd_list_element
     /* Hook for another command to be executed after this command.  */
     struct cmd_list_element *hook_post = nullptr;
 
+    /* Default arguments to automatically prepend to the user
+       provided arguments when running this command or alias.  */
+    std::string default_args;
+
     /* Nonzero identifies a prefix command.  For them, the address
        of the variable containing the list of subcommands.  */
     struct cmd_list_element **prefixlist = nullptr;

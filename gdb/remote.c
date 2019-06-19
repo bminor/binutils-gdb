@@ -14424,10 +14424,10 @@ If set, a break, instead of a cntrl-c, is sent to the remote target."),
 			   set_remotebreak, show_remotebreak,
 			   &setlist, &showlist);
   cmd_name = "remotebreak";
-  cmd = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "set remote interrupt-sequence");
   cmd_name = "remotebreak"; /* needed because lookup_cmd updates the pointer */
-  cmd = lookup_cmd (&cmd_name, showlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, showlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "show remote interrupt-sequence");
 
   add_setshow_enum_cmd ("interrupt-sequence", class_support,

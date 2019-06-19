@@ -466,13 +466,13 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
   /* Lookup created parameter, and register Scheme object against the
      parameter context.  Perform this task against both lists.  */
   tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *show_list, "", 0, 1);
+  param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
   gdb_assert (param != NULL);
   set_cmd_context (param, self);
   *set_cmd = param;
 
   tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *set_list, "", 0, 1);
+  param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
   gdb_assert (param != NULL);
   set_cmd_context (param, self);
   *show_cmd = param;
@@ -969,7 +969,7 @@ pascm_parameter_defined_p (const char *name, struct cmd_list_element *list)
 {
   struct cmd_list_element *c;
 
-  c = lookup_cmd_1 (&name, list, NULL, 1);
+  c = lookup_cmd_1 (&name, list, NULL, NULL, 1);
 
   /* If the name is ambiguous that's ok, it's a new parameter still.  */
   return c != NULL && c != CMD_LIST_AMBIGUOUS;

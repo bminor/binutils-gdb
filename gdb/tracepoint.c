@@ -651,7 +651,7 @@ validate_actionline (const char *line, struct breakpoint *b)
   if (*p == '#')		/* comment line */
     return;
 
-  c = lookup_cmd (&p, cmdlist, "", -1, 1);
+  c = lookup_cmd (&p, cmdlist, "", NULL, -1, 1);
   if (c == 0)
     error (_("`%s' is not a tracepoint action, or is ambiguous."), p);
 
@@ -1303,7 +1303,7 @@ encode_actions_1 (struct command_line *action,
       action_exp = action->line;
       action_exp = skip_spaces (action_exp);
 
-      cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
+      cmd = lookup_cmd (&action_exp, cmdlist, "", NULL, -1, 1);
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
@@ -2673,7 +2673,7 @@ trace_dump_actions (struct command_line *action,
       if (*action_exp == '#')	/* comment line */
 	continue;
 
-      cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
+      cmd = lookup_cmd (&action_exp, cmdlist, "", NULL, -1, 1);
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
