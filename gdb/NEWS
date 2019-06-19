@@ -46,6 +46,21 @@ pipe -d DELIM COMMAND DELIM SHELL_COMMAND
   With no COMMAND, repeat the last executed command
   and send its output to SHELL_COMMAND.
 
+with SETTING [VALUE] [-- COMMAND]
+w SETTING [VALUE] [-- COMMAND]
+  Temporarily set SETTING, run COMMAND, and restore SETTING.
+  Usage: with SETTING -- COMMAND
+  With no COMMAND, repeats the last executed command.
+  SETTING is any GDB setting you can change with the "set"
+  subcommands.  For example, 'with language c -- print someobj'
+  temporarily switches to the C language in order to print someobj.
+  Settings can be combined: 'w lang c -- w print elements unlimited --
+  usercmd' switches to the C language and runs usercmd with no limit
+  of array elements to print.
+
+maint with SETTING [VALUE] [-- COMMAND]
+  Like "with", but works with "maintenance set" settings.
+
 set may-call-functions [on|off]
 show may-call-functions
   This controls whether GDB will attempt to call functions in

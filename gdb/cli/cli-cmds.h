@@ -142,4 +142,19 @@ extern gdb::optional<open_script>
 extern int source_verbose;
 extern int trace_commands;
 
+/* Common code for the "with" and "maintenance with" commands.
+   SET_CMD_PREFIX is the spelling of the corresponding "set" command
+   prefix: i.e., "set " or "maintenance set ".  SETLIST is the command
+   element for the same "set" command prefix.  */
+extern void with_command_1 (const char *set_cmd_prefix,
+			    cmd_list_element *setlist,
+			    const char *args, int from_tty);
+
+/* Common code for the completers of the "with" and "maintenance with"
+   commands.  SET_CMD_PREFIX is the spelling of the corresponding
+   "set" command prefix: i.e., "set " or "maintenance set ".  */
+extern void with_command_completer_1 (const char *set_cmd_prefix,
+				      completion_tracker &tracker,
+				      const char *text);
+
 #endif /* CLI_CLI_CMDS_H */

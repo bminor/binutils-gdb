@@ -43,6 +43,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-cmds.h"
 
 static void maintenance_do_deprecate (const char *, int);
 
@@ -634,6 +635,24 @@ maintenance_show_cmd (const char *args, int from_tty)
   cmd_show_list (maintenance_show_cmdlist, from_tty, "");
 }
 
+/* "maintenance with" command.  */
+
+static void
+maintenance_with_cmd (const char *args, int from_tty)
+{
+  with_command_1 ("maintenance set ", maintenance_set_cmdlist, args, from_tty);
+}
+
+/* "maintenance with" command completer.  */
+
+static void
+maintenance_with_cmd_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char * /*word*/)
+{
+  with_command_completer_1 ("maintenance set ", tracker,  text);
+}
+
 /* Profiling support.  */
 
 static int maintenance_profile_p;
@@ -1022,6 +1041,15 @@ Configure variables internal to GDB that aid in GDB's maintenance"),
 		  &maintenance_show_cmdlist, "maintenance show ",
 		  0/*allow-unknown*/,
 		  &maintenancelist);
+
+  cmd = add_cmd ("with", class_maintenance, maintenance_with_cmd, _("\
+Like \"with\", but works with \"maintenance set\" variables.\n\
+Usage: maintenance with SETTING [VALUE] [-- COMMAND]\n\
+With no COMMAND, repeats the last executed command.\n\
+SETTING is any setting you can change with the \"maintenance set\"\n\
+subcommands."),
+		 &maintenancelist);
+  set_cmd_completer_handle_brkchars (cmd, maintenance_with_cmd_completer);
 
 #ifndef _WIN32
   add_cmd ("dump-me", class_maintenance, maintenance_dump_me, _("\

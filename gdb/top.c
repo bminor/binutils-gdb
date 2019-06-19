@@ -735,7 +735,7 @@ dont_repeat (void)
 
 /* See command.h  */
 
-void
+const char *
 repeat_previous ()
 {
   /* Do not repeat this command, as this command is a repeating command.  */
@@ -745,6 +745,11 @@ repeat_previous ()
      so swap it with previous_saved_command_line.  */
   std::swap (previous_saved_command_line, saved_command_line);
   std::swap (previous_repeat_arguments, repeat_arguments);
+
+  const char *prev = skip_spaces (get_saved_command_line ());
+  if (*prev == '\0')
+    error (_("No previous command to relaunch"));
+  return prev;
 }
 
 /* See command.h.  */
