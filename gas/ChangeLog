@@ -1,3 +1,14 @@
+2019-06-25  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* config/tc-mips.c (macro) <M_LI>: Re-order MTHC1 with
+	respect to MTC1 and use $0 for either part where possible.
+	* testsuite/gas/mips/li-d.s: Add test cases for non-zero
+	words in double precision constants.
+	* testsuite/gas/mips/li-d.d: Update reference output.
+	* testsuite/gas/mips/micromips@isa-override-1.d: Likewise.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: Likewise.
+	* testsuite/gas/mips/mips64r2@isa-override-1.d: Likewise.
+
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
 	* tc-i386.c (acc32, acc64): Delete.

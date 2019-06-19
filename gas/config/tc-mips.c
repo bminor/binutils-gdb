@@ -12780,20 +12780,28 @@ macro (struct mips_cl_insn *ip, char *str)
          OFFSET_EXPR.  */
       if (imm_expr.X_op == O_constant)
 	{
-	  used_at = 1;
-	  load_register (AT, &imm_expr, FPR_SIZE == 64);
+	  tempreg = ZERO;
+	  if (((FPR_SIZE == 64 && GPR_SIZE == 64)
+	       || !ISA_HAS_MXHC1 (mips_opts.isa))
+	      && imm_expr.X_add_number != 0)
+	    {
+	      used_at = 1;
+	      tempreg = AT;
+	      load_register (AT, &imm_expr, FPR_SIZE == 64);
+	    }
 	  if (FPR_SIZE == 64 && GPR_SIZE == 64)
-	    macro_build (NULL, "dmtc1", "t,S", AT, op[0]);
+	    macro_build (NULL, "dmtc1", "t,S", tempreg, op[0]);
 	  else
 	    {
-	      if (ISA_HAS_MXHC1 (mips_opts.isa))
-	        macro_build (NULL, "mthc1", "t,G", AT, op[0]);
-	      else if (FPR_SIZE != 32)
-		as_bad (_("Unable to generate `%s' compliant code "
-			  "without mthc1"),
-			(FPR_SIZE == 64) ? "fp64" : "fpxx");
-	      else
-		macro_build (NULL, "mtc1", "t,G", AT, op[0] + 1);
+	      if (!ISA_HAS_MXHC1 (mips_opts.isa))
+		{
+		  if (FPR_SIZE != 32)
+		    as_bad (_("Unable to generate `%s' compliant code "
+			      "without mthc1"),
+			    (FPR_SIZE == 64) ? "fp64" : "fpxx");
+		  else
+		    macro_build (NULL, "mtc1", "t,G", tempreg, op[0] + 1);
+		}
 	      if (offset_expr.X_op == O_absent)
 		macro_build (NULL, "mtc1", "t,G", 0, op[0]);
 	      else
@@ -12801,6 +12809,16 @@ macro (struct mips_cl_insn *ip, char *str)
 		  gas_assert (offset_expr.X_op == O_constant);
 		  load_register (AT, &offset_expr, 0);
 		  macro_build (NULL, "mtc1", "t,G", AT, op[0]);
+		}
+	      if (ISA_HAS_MXHC1 (mips_opts.isa))
+		{
+		  if (imm_expr.X_add_number != 0)
+		    {
+		      used_at = 1;
+		      tempreg = AT;
+		      load_register (AT, &imm_expr, 0);
+		    }
+		  macro_build (NULL, "mthc1", "t,G", tempreg, op[0]);
 		}
 	    }
 	  break;
