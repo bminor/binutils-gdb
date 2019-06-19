@@ -1,5 +1,13 @@
 2019-06-19  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-open-bfd.c: Add swap.h and ctf-endian.h.
+	(ctf_fdopen): Check for endian-swapped raw CTF magic, and
+	little-endian CTF archive magic.  Do not check the CTF version:
+	ctf_simple_open does that in endian-safe ways.  Do not dereference
+	null pointers on open failure.
+
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-open.c (get_vbytes_common): Return the new slice size.
 	(ctf_bufopen): Flip the endianness of the CTF-section header copy.
 	Remember to copy in the CTF data when opening an uncompressed

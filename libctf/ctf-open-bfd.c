@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #include <elf.h>
 #include <bfd.h>
+#include "swap.h"
+#include "ctf-endian.h"
 
 #include "elf-bfd.h"
 
@@ -243,24 +245,27 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
   if ((nbytes = ctf_pread (fd, &ctfhdr, sizeof (ctfhdr), 0)) <= 0)
     return (ctf_set_open_errno (errp, nbytes < 0 ? errno : ECTF_FMT));
 
-  /* If we have read enough bytes to form a CTF header and the magic
-     string matches, attempt to interpret the file as raw CTF.  */
+  /* If we have read enough bytes to form a CTF header and the magic string
+     matches, in either endianness, attempt to interpret the file as raw
+     CTF.  */
 
-  if ((size_t) nbytes >= sizeof (ctf_preamble_t) &&
-      ctfhdr.ctp_magic == CTF_MAGIC)
+  if ((size_t) nbytes >= sizeof (ctf_preamble_t)
+      && (ctfhdr.ctp_magic == CTF_MAGIC
+	  || ctfhdr.ctp_magic == bswap_16 (CTF_MAGIC)))
     {
       ctf_file_t *fp = NULL;
       void *data;
-
-      if (ctfhdr.ctp_version > CTF_VERSION)
-	return (ctf_set_open_errno (errp, ECTF_CTFVERS));
 
       if ((data = ctf_mmap (st.st_size, 0, fd)) == NULL)
 	return (ctf_set_open_errno (errp, errno));
 
       if ((fp = ctf_simple_open (data, (size_t) st.st_size, NULL, 0, 0,
 				 NULL, 0, errp)) == NULL)
-	ctf_munmap (data, (size_t) st.st_size);
+	{
+	  ctf_munmap (data, (size_t) st.st_size);
+	  return NULL;			/* errno is set for us.  */
+	}
+
       fp->ctf_data_mmapped = data;
       fp->ctf_data_mmapped_len = (size_t) st.st_size;
 
@@ -270,7 +275,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
   if ((nbytes = ctf_pread (fd, &arc_magic, sizeof (arc_magic), 0)) <= 0)
     return (ctf_set_open_errno (errp, nbytes < 0 ? errno : ECTF_FMT));
 
-  if ((size_t) nbytes >= sizeof (uint64_t) && arc_magic == CTFA_MAGIC)
+  if ((size_t) nbytes >= sizeof (uint64_t) && le64toh (arc_magic) == CTFA_MAGIC)
     {
       struct ctf_archive *arc;
 
