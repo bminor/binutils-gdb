@@ -1275,6 +1275,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (foreign_endian)
     flip_header (&hp);
 
+  ctf_dprintf ("header offsets: %x/%x/%x/%x/%x/%x/%x\n",
+	       hp.cth_lbloff, hp.cth_objtoff, hp.cth_funcoff, hp.cth_varoff,
+	       hp.cth_typeoff, hp.cth_stroff, hp.cth_strlen);
   hdrsz = sizeof (ctf_header_t);
 
   size = hp.cth_stroff + hp.cth_strlen;
