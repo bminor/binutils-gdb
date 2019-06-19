@@ -430,13 +430,17 @@ union
    ctt_type, which must be a type which has an encoding (fp, int, or enum).  We
    also store the referenced type in here, because it is easier to keep the
    ctt_size correct for the slice than to shuffle the size into here and keep
-   the ctt_type where it is for other types.  */
+   the ctt_type where it is for other types.
+
+   In a future version, where we loosen requirements on alignment in the CTF
+   file, the cts_offset and cts_bits will be chars: but for now they must be
+   shorts or everything after a slice will become unaligned.  */
 
 typedef struct ctf_slice
 {
   uint32_t cts_type;
-  unsigned char cts_offset;
-  unsigned char cts_bits;
+  unsigned short cts_offset;
+  unsigned short cts_bits;
 } ctf_slice_t;
 
 typedef struct ctf_array_v1

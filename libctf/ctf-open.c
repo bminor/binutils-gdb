@@ -150,8 +150,7 @@ get_vbytes_common (unsigned short kind, ssize_t size _libctf_unused_,
     case CTF_K_FLOAT:
       return (sizeof (uint32_t));
     case CTF_K_SLICE:
-      return (offsetof (ctf_slice_t, cts_bits) +
-	      sizeof (((ctf_slice_t *)0)->cts_bits));
+      return (sizeof (ctf_slice_t));
     case CTF_K_ENUM:
       return (sizeof (ctf_enum_t) * vlen);
     case CTF_K_FORWARD:
@@ -1208,7 +1207,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   const ctf_preamble_t *pp;
   ctf_header_t hp;
   ctf_file_t *fp;
-  void *buf, *base;
+  void *base;
   size_t size, hdrsz;
   int foreign_endian = 0;
   int err;
@@ -1317,6 +1316,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       uLongf dstlen;
       const void *src;
       int rc = Z_OK;
+      void *buf;
 
       if ((base = ctf_alloc (size + hdrsz)) == NULL)
 	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
@@ -1349,12 +1349,16 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     {
       if ((base = ctf_alloc (size + hdrsz)) == NULL)
 	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
+      memcpy (base, ctfsect->cts_data, size + hdrsz);
     }
   else
-    {
-      base = (void *) ctfsect->cts_data;
-      buf = (unsigned char *) base + hdrsz;
-    }
+    base = (void *) ctfsect->cts_data;
+
+  /* Flip the endianness of the copy of the header in the section, to avoid
+     ending up with a partially-endian-flipped file.  */
+
+  if (foreign_endian)
+    flip_header ((ctf_header_t *) base);
 
   /* Once we have uncompressed and validated the CTF data buffer, we can
      proceed with allocating a ctf_file_t and initializing it.

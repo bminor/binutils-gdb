@@ -1,3 +1,8 @@
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
+	* ctf.h (ctf_slice_t): Make cts_offset and cts_bits unsigned
+	short, so following structures are properly aligned.
+
 2019-06-14  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* elf/aarch64.h (R_AARCH64_P32_MOVW_PREL_G0): Define.

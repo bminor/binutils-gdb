@@ -1,5 +1,12 @@
 2019-06-19  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-open.c (get_vbytes_common): Return the new slice size.
+	(ctf_bufopen): Flip the endianness of the CTF-section header copy.
+	Remember to copy in the CTF data when opening an uncompressed
+	foreign-endian CTF file.  Prune useless variable manipulation.
+
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-open.c (ctf_types): Fail when unidentified type kinds are
 	seen.
 
