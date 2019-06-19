@@ -1,5 +1,10 @@
 2019-06-19  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-open.c (ctf_types): Fail when unidentified type kinds are
+	seen.
+
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-open.c (ctf_bufopen): Dump header offsets into the debugging
 	output.
 

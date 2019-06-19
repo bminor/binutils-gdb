@@ -856,6 +856,10 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  if (err != 0 && err != ECTF_STRTAB)
 	    return err;
 	  break;
+	default:
+	  ctf_dprintf ("unhandled CTF kind in endianness conversion -- %x\n",
+		       kind);
+	  return ECTF_CORRUPT;
 	}
 
       *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
