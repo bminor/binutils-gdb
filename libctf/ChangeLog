@@ -1,5 +1,21 @@
 2019-06-19  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-subr.c (_PAGESIZE): Remove.
+	(ctf_data_alloc): Likewise.
+	(ctf_data_free): Likewise.
+	(ctf_data_protect): Likewise.
+	* ctf-impl.h: Remove declarations.
+	* ctf-create.c (ctf_update): No longer call ctf_data_protect: use
+	ctf_free, not ctf_data_free.
+	(ctf_compress_write): Use ctf_data_alloc, not ctf_alloc.  Free
+	the buffer again on compression error.
+	* ctf-open.c (ctf_set_base): No longer track the size: call
+	ctf_free, not ctf_data_free.
+	(upgrade_types): Likewise.  Call ctf_alloc, not ctf_data_alloc.
+	(ctf_bufopen): Likewise.  No longer call ctf_data_protect.
+
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_dtd_insert): Pass on error returns from
 	ctf_dynhash_insert.
 	(ctf_dvd_insert): Likewise.

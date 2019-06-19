@@ -345,24 +345,17 @@ ctf_set_base (ctf_file_t *fp, const ctf_header_t *hp, void *base)
 
 /* Free a ctf_base pointer: the pointer passed, or (if NULL) fp->ctf_base.  */
 static void
-ctf_free_base (ctf_file_t *fp, unsigned char *ctf_base, size_t ctf_size)
+ctf_free_base (ctf_file_t *fp, unsigned char *ctf_base)
 {
   unsigned char *base;
-  size_t size;
 
   if (ctf_base)
-    {
       base = ctf_base;
-      size = ctf_size;
-    }
   else
-    {
       base = (unsigned char *) fp->ctf_base;
-      size = fp->ctf_size;
-    }
 
   if (base != fp->ctf_data.cts_data && base != NULL)
-    ctf_data_free (base, size);
+    ctf_free (base);
 }
 
 /* Set the version of the CTF file. */
@@ -392,7 +385,6 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
   const ctf_type_v1_t *tbuf;
   const ctf_type_v1_t *tend;
   unsigned char *ctf_base, *old_ctf_base = (unsigned char *) fp->ctf_base;
-  size_t old_ctf_size = fp->ctf_size;
   ctf_type_t *t2buf;
 
   ssize_t increase = 0, size, increment, v2increment, vbytes, v2bytes;
@@ -439,7 +431,7 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
      version number unchanged, so that LCTF_INFO_* still works on the
      as-yet-untranslated type info.  */
 
-  if ((ctf_base = ctf_data_alloc (fp->ctf_size + increase)) == NULL)
+  if ((ctf_base = ctf_alloc (fp->ctf_size + increase)) == NULL)
     return ECTF_ZALLOC;
 
   memcpy (ctf_base, fp->ctf_base, sizeof (ctf_header_t) + cth->cth_typeoff);
@@ -608,7 +600,7 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
   assert ((size_t) t2p - (size_t) fp->ctf_buf == new_cth->cth_stroff);
 
   ctf_set_version (fp, (ctf_header_t *) ctf_base, CTF_VERSION_1_UPGRADED_3);
-  ctf_free_base (fp, old_ctf_base, old_ctf_size);
+  ctf_free_base (fp, old_ctf_base);
   memcpy (cth, new_cth, sizeof (ctf_header_t));
 
   return 0;
@@ -1319,7 +1311,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       const void *src;
       int rc = Z_OK;
 
-      if ((base = ctf_data_alloc (size + hdrsz)) == NULL)
+      if ((base = ctf_alloc (size + hdrsz)) == NULL)
 	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
 
       memcpy (base, ctfsect->cts_data, hdrsz);
@@ -1333,7 +1325,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       if ((rc = uncompress (buf, &dstlen, src, srclen)) != Z_OK)
 	{
 	  ctf_dprintf ("zlib inflate err: %s\n", zError (rc));
-	  ctf_data_free (base, size + hdrsz);
+	  free (base);
 	  return (ctf_set_open_errno (errp, ECTF_DECOMPRESS));
 	}
 
@@ -1341,14 +1333,14 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	{
 	  ctf_dprintf ("zlib inflate short -- got %lu of %lu "
 		       "bytes\n", (unsigned long) dstlen, (unsigned long) size);
-	  ctf_data_free (base, size + hdrsz);
+	  free (base);
 	  return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 	}
 
     }
   else if (foreign_endian)
     {
-      if ((base = ctf_data_alloc (size + hdrsz)) == NULL)
+      if ((base = ctf_alloc (size + hdrsz)) == NULL)
 	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
     }
   else
@@ -1424,14 +1416,6 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       (void) ctf_set_open_errno (errp, err);
       goto bad;
     }
-
-  /* The ctf region may have been reallocated by init_types(), but now
-     that is done, it will not move again, so we can protect it, as long
-     as it didn't come from the ctfsect, which might have been allocated
-     with malloc().  */
-
-  if (fp->ctf_base != (void *) ctfsect->cts_data)
-    ctf_data_protect ((void *) fp->ctf_base, fp->ctf_size);
 
   /* If we have a symbol table section, allocate and initialize
      the symtab translation table, pointed to by ctf_sxlate.  */
@@ -1551,7 +1535,7 @@ ctf_file_close (ctf_file_t *fp)
   else if (fp->ctf_data_mmapped)
     ctf_munmap (fp->ctf_data_mmapped, fp->ctf_data_mmapped_len);
 
-  ctf_free_base (fp, NULL, 0);
+  ctf_free_base (fp, NULL);
 
   if (fp->ctf_sxlate != NULL)
     ctf_free (fp->ctf_sxlate);

@@ -26,48 +26,8 @@
 #include <string.h>
 #include <unistd.h>
 
-static size_t _PAGESIZE _libctf_unused_;
 int _libctf_version = CTF_VERSION;	      /* Library client version.  */
 int _libctf_debug = 0;			      /* Debugging messages enabled.  */
-
-_libctf_malloc_ void *
-ctf_data_alloc (size_t size)
-{
-  void *ret;
-
-#ifdef HAVE_MMAP
-  if (_PAGESIZE == 0)
-    _PAGESIZE = sysconf(_SC_PAGESIZE);
-
-  if (size > _PAGESIZE)
-    {
-      ret = mmap (NULL, size, PROT_READ | PROT_WRITE,
-		  MAP_PRIVATE | MAP_ANON, -1, 0);
-      if (ret == MAP_FAILED)
-	ret = NULL;
-    }
-  else
-    ret = calloc (1, size);
-#else
-  ret = calloc (1, size);
-#endif
-  return ret;
-}
-
-void
-ctf_data_free (void *buf, size_t size _libctf_unused_)
-{
-#ifdef HAVE_MMAP
-  /* Must be the same as the check in ctf_data_alloc().  */
-
-  if (size > _PAGESIZE)
-    (void) munmap (buf, size);
-  else
-    free (buf);
-#else
-  free (buf);
-#endif
-}
 
 /* Private, read-only mmap from a file, with fallback to copying.
 
@@ -102,17 +62,6 @@ ctf_munmap (void *buf, size_t length _libctf_unused_)
   (void) munmap (buf, length);
 #else
   free (buf);
-#endif
-}
-
-void
-ctf_data_protect (void *buf _libctf_unused_, size_t size _libctf_unused_)
-{
-#ifdef HAVE_MMAP
-  /* Must be the same as the check in ctf_data_alloc().  */
-
-  if (size > _PAGESIZE)
-    (void) mprotect (buf, size, PROT_READ);
 #endif
 }
 

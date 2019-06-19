@@ -343,11 +343,6 @@ extern void *ctf_set_open_errno (int *, int);
 extern unsigned long ctf_set_errno (ctf_file_t *, int);
 
 _libctf_malloc_
-extern void *ctf_data_alloc (size_t);
-extern void ctf_data_free (void *, size_t);
-extern void ctf_data_protect (void *, size_t);
-
-_libctf_malloc_
 extern void *ctf_mmap (size_t length, size_t offset, int fd);
 extern void ctf_munmap (void *, size_t);
 extern ssize_t ctf_pread (int fd, void *buf, ssize_t count, off_t offset);

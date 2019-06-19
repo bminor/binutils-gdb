@@ -310,7 +310,7 @@ ctf_update (ctf_file_t *fp)
 
   buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
 
-  if ((buf = ctf_data_alloc (buf_size)) == NULL)
+  if ((buf = malloc (buf_size)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
   memcpy (buf, &hdr, sizeof (ctf_header_t));
@@ -449,11 +449,9 @@ ctf_update (ctf_file_t *fp)
   /* Finally, we are ready to ctf_simple_open() the new container.  If this
      is successful, we then switch nfp and fp and free the old container.  */
 
-  ctf_data_protect (buf, buf_size);
-
   if ((nfp = ctf_simple_open (buf, buf_size, NULL, 0, 0, NULL, 0, &err)) == NULL)
     {
-      ctf_data_free (buf, buf_size);
+      ctf_free (buf);
       return (ctf_set_errno (fp, err));
     }
 
@@ -462,7 +460,7 @@ ctf_update (ctf_file_t *fp)
 
   nfp->ctf_refcnt = fp->ctf_refcnt;
   nfp->ctf_flags |= fp->ctf_flags & ~LCTF_DIRTY;
-  nfp->ctf_data.cts_data = NULL;	/* Force ctf_data_free() on close.  */
+  nfp->ctf_data.cts_data = NULL;	/* Force ctf_free() on close.  */
   nfp->ctf_dthash = fp->ctf_dthash;
   nfp->ctf_dtdefs = fp->ctf_dtdefs;
   nfp->ctf_dtbyname = fp->ctf_dtbyname;
@@ -1993,16 +1991,17 @@ ctf_compress_write (ctf_file_t *fp, int fd)
   memcpy (hp, fp->ctf_base, header_len);
   hp->cth_flags |= CTF_F_COMPRESS;
 
-  if ((buf = ctf_data_alloc (max_compress_len)) == NULL)
+  if ((buf = ctf_alloc (max_compress_len)) == NULL)
     return (ctf_set_errno (fp, ECTF_ZALLOC));
 
   compress_len = max_compress_len;
-  if ((rc = compress (buf, (uLongf *) & compress_len,
+  if ((rc = compress (buf, (uLongf *) &compress_len,
 		      fp->ctf_base + header_len,
 		      fp->ctf_size - header_len)) != Z_OK)
     {
       ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
       err = ctf_set_errno (fp, ECTF_COMPRESS);
+      ctf_free (buf);
       goto ret;
     }
 
@@ -2030,7 +2029,7 @@ ctf_compress_write (ctf_file_t *fp, int fd)
     }
 
 ret:
-  ctf_data_free (buf, max_compress_len);
+  ctf_free (buf);
   return err;
 }
 
