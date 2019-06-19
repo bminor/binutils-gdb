@@ -133,7 +133,7 @@ do_debug_exit (const char *function_name)
 
 /* See debug.h.  */
 
-size_t
+ssize_t
 debug_write (const void *buf, size_t nbyte)
 {
   int fd = fileno (debug_file);
