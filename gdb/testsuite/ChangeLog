@@ -1,5 +1,9 @@
 2019-06-19  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/length_cond.exp: Add intro comment.
+
+2019-06-19  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/length_cond.exp: New file.
 	* gdb.ada/length_cond/length_cond.adb: New file.
 	* gdb.ada/length_cond/pck.adb: New file.
