@@ -1,3 +1,12 @@
+2019-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/24700
+	* testsuite/gas/i386/disassem.s: Add test for vbroadcasti32x8
+	with invalid vector length.
+	* testsuite/gas/i386/x86-64-disassem.s: Likewise.
+	* testsuite/gas/i386/disassem.d: Updated.
+	* testsuite/gas/i386/x86-64-disassem.d: Likewise.
+
 2019-06-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/24691
