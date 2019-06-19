@@ -8654,6 +8654,19 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		addend -= SYM_VAL (sda);
 	      }
 
+	    if (r_type == R_PPC_EMB_RELSDA)
+	      break;
+
+	    /* The PowerPC Embedded Application Binary Interface
+	       version 1.0 insanely chose to specify R_PPC_EMB_SDA21
+	       operating on a 24-bit field at r_offset.  GNU as and
+	       GNU ld have always assumed R_PPC_EMB_SDA21 operates on
+	       a 32-bit bit insn at r_offset.  Cope with object file
+	       producers that possibly comply with the EABI in
+	       generating an odd r_offset for big-endian objects.  */
+	    if (r_type == R_PPC_EMB_SDA21)
+	      rel->r_offset &= ~1;
+
 	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	    if (reg == 0
 		&& (r_type == R_PPC_VLE_SDA21
@@ -8681,13 +8694,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  goto overflow;
 		goto copy_reloc;
 	      }
-	    else if (r_type == R_PPC_EMB_SDA21
-		     || r_type == R_PPC_VLE_SDA21
-		     || r_type == R_PPC_VLE_SDA21_LO)
-	      {
-		/* Fill in register field.  */
-		insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
-	      }
+	    /* Fill in register field.  */
+	    insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
 	    bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 	  }
 	  break;
