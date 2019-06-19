@@ -1,3 +1,12 @@
+2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+
+	* ctf-create.c (ctf_dtd_insert): Pass on error returns from
+	ctf_dynhash_insert.
+	(ctf_dvd_insert): Likewise.
+	(ctf_add_generic): Likewise.
+	(ctf_add_variable): Likewise.
+	* ctf-impl.h: Adjust declarations.
+
 2019-06-14  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

@@ -526,18 +526,22 @@ ctf_prefixed_name (int kind, const char *name)
   return prefixed;
 }
 
-void
+int
 ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd)
 {
-  ctf_dynhash_insert (fp->ctf_dthash, (void *) dtd->dtd_type, dtd);
-  ctf_list_append (&fp->ctf_dtdefs, dtd);
+  if (ctf_dynhash_insert (fp->ctf_dthash, (void *) dtd->dtd_type, dtd) < 0)
+    return -1;
+
   if (dtd->dtd_name)
     {
       int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      ctf_dynhash_insert (fp->ctf_dtbyname, ctf_prefixed_name (kind,
-							       dtd->dtd_name),
-			  dtd);
+      if (ctf_dynhash_insert (fp->ctf_dtbyname,
+			      ctf_prefixed_name (kind, dtd->dtd_name),
+			      dtd) < 0)
+	return -1;
     }
+  ctf_list_append (&fp->ctf_dtdefs, dtd);
+  return 0;
 }
 
 void
@@ -623,11 +627,13 @@ ctf_dynamic_type (const ctf_file_t *fp, ctf_id_t id)
   return NULL;
 }
 
-void
+int
 ctf_dvd_insert (ctf_file_t *fp, ctf_dvdef_t *dvd)
 {
-  ctf_dynhash_insert (fp->ctf_dvhash, dvd->dvd_name, dvd);
+  if (ctf_dynhash_insert (fp->ctf_dvhash, dvd->dvd_name, dvd) < 0)
+    return -1;
   ctf_list_append (&fp->ctf_dvdefs, dvd);
+  return 0;
 }
 
 void
@@ -762,7 +768,11 @@ ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name,
   if (s != NULL)
     fp->ctf_dtvstrlen += strlen (s) + 1;
 
-  ctf_dtd_insert (fp, dtd);
+  if (ctf_dtd_insert (fp, dtd) < 0)
+    {
+      ctf_free (dtd);
+      return CTF_ERR;			/* errno is set for us.  */
+    }
   fp->ctf_flags |= LCTF_DIRTY;
 
   *rp = dtd;
@@ -1442,7 +1452,11 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
   dvd->dvd_type = ref;
   dvd->dvd_snapshots = fp->ctf_snapshots;
 
-  ctf_dvd_insert (fp, dvd);
+  if (ctf_dvd_insert (fp, dvd) < 0)
+    {
+      ctf_free (dvd);
+      return -1;			/* errno is set for us.  */
+    }
 
   fp->ctf_dtvstrlen += strlen (name) + 1;
   fp->ctf_flags |= LCTF_DIRTY;

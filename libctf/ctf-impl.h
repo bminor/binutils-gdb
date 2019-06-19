@@ -316,12 +316,12 @@ extern void ctf_list_append (ctf_list_t *, void *);
 extern void ctf_list_prepend (ctf_list_t *, void *);
 extern void ctf_list_delete (ctf_list_t *, void *);
 
-extern void ctf_dtd_insert (ctf_file_t *, ctf_dtdef_t *);
+extern int ctf_dtd_insert (ctf_file_t *, ctf_dtdef_t *);
 extern void ctf_dtd_delete (ctf_file_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_file_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_file_t *, ctf_id_t);
 
-extern void ctf_dvd_insert (ctf_file_t *, ctf_dvdef_t *);
+extern int ctf_dvd_insert (ctf_file_t *, ctf_dvdef_t *);
 extern void ctf_dvd_delete (ctf_file_t *, ctf_dvdef_t *);
 extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_file_t *, const char *);
 
