@@ -1,3 +1,9 @@
+2019-06-19  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2read.h (abstract_to_concrete): Change type to
+	std::unordered_map<sect_offset, std::vector<sect_offset>,
+	gdb::hash_enum<sect_offset>>.
+
 2019-06-19  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) <case OP_ATR_FIRST>: Handle

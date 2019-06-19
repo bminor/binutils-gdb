@@ -24,6 +24,7 @@
 #include "dwarf-index-cache.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
+#include "common/hash_enum.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;
@@ -256,7 +257,8 @@ public:
 
   /* Mapping from abstract origin DIE to concrete DIEs that reference it as
      DW_AT_abstract_origin.  */
-  std::unordered_map<sect_offset, std::vector<sect_offset>>
+  std::unordered_map<sect_offset, std::vector<sect_offset>, \
+		     gdb::hash_enum<sect_offset>> \
     abstract_to_concrete;
 };
 
