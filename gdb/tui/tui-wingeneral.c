@@ -108,6 +108,7 @@ void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL 
+      && win_info->can_highlight
       && win_info->handle != NULL)
     {
       box_win (win_info, NO_HILITE);

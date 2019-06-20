@@ -1,5 +1,11 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_win_focus_to): Don't check window type.
+	* tui/tui-wingeneral.c (tui_unhighlight_win): Check
+	can_highlight.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_source_window_base::update_tab_width): Call
 	make_visible_with_new_height method.
 	(tui_win_info::make_visible_with_new_height): New method.

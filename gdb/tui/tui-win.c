@@ -458,12 +458,9 @@ tui_set_win_focus_to (struct tui_win_info *win_info)
     {
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
-      if (win_with_focus != NULL
-	  && win_with_focus->type != CMD_WIN)
-	tui_unhighlight_win (win_with_focus);
+      tui_unhighlight_win (win_with_focus);
       tui_set_win_with_focus (win_info);
-      if (win_info->type != CMD_WIN)
-	tui_highlight_win (win_info);
+      tui_highlight_win (win_info);
     }
 }
 
