@@ -368,7 +368,7 @@ get_ipa_tdesc (int idx)
       SET_REGMAP(s390_te_linux64_ft_collect_regmap, 0);
       return tdesc_s390_tevx_linux64;
     case S390_TDESC_GS:
-      SET_REGMAP(s390_te_ft_collect_regmap, 0);
+      SET_REGMAP(s390_te_linux64_ft_collect_regmap, 0);
       return tdesc_s390_gs_linux64;
 #endif
     default:

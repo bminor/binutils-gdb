@@ -1,3 +1,8 @@
+2019-06-20  Tom de Vries  <tdevries@suse.de>
+
+	* linux-s390-ipa.c (get_ipa_tdesc)[!__s390x__]: Use
+	s390_te_linux64_ft_collect_regmap for S390_TDESC_GS.
+
 2019-06-19  Tom de Vries  <tdevries@suse.de>
 
 	* debug.h (debug_write): Change return type to ssize_t.
