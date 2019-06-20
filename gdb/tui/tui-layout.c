@@ -798,10 +798,29 @@ init_and_make_win (tui_gen_win_info *win_info,
 {
   if (win_info == NULL)
     {
-      if (tui_win_is_auxillary (win_type))
-	win_info = new tui_gen_win_info (win_type);
-      else
-	win_info = tui_alloc_win_info (win_type);
+      switch (win_type)
+	{
+	case SRC_WIN:
+	  win_info = new tui_source_window ();
+	  break;
+
+	case DISASSEM_WIN:
+	  win_info = new tui_disasm_window ();
+	  break;
+
+	case DATA_WIN:
+	  win_info = new tui_data_window ();
+	  break;
+
+	case CMD_WIN:
+	  win_info = new tui_cmd_window ();
+	  break;
+
+	default:
+	  gdb_assert (tui_win_is_auxillary (win_type));
+	  win_info = new tui_gen_win_info (win_type);
+	  break;
+	}
     }
 
   win_info->reset (win_type, height, width, origin_x, origin_y);

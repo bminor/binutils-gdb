@@ -419,28 +419,6 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   start_line_or_addr.u.addr = 0;
 }
 
-struct tui_win_info *
-tui_alloc_win_info (enum tui_win_type type)
-{
-  switch (type)
-    {
-    case SRC_WIN:
-      return new tui_source_window ();
-
-    case DISASSEM_WIN:
-      return new tui_disasm_window ();
-
-    case DATA_WIN:
-      return new tui_data_window ();
-
-    case CMD_WIN:
-      return new tui_cmd_window ();
-    }
-
-  gdb_assert_not_reached (_("Unhandled window type"));
-}
-
-
 /* Allocates the content and elements in a block.  */
 tui_win_content
 tui_alloc_content (int num_elements, enum tui_win_type type)

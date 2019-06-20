@@ -1,5 +1,11 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (tui_alloc_win_info): Don't declare.
+	* tui/tui-layout.c (init_and_make_win): Use "new" directly.
+	* tui/tui-data.c (tui_alloc_win_info): Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_set_win_focus_to): Don't check window type.
 	* tui/tui-wingeneral.c (tui_unhighlight_win): Check
 	can_highlight.
