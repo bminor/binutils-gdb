@@ -38,11 +38,12 @@
 #
 #   make GDB=/path/to/gdb clean-cfiles cfiles
 #
-# To generate specific C files, you can override the XMLTOC make
-# variable:
+# To generate specific C files, you can override the XMLTOC and
+# FEATURE_XMLFILES make variables:
 #
-#   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
+#   make GDB=/path/to/gdb XMLTOC="xml files" FEATURE_XMLFILES="xml files" cfiles
 
+# List of .dat files to create in ../regformats/
 WHICH = arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
 	arm/arm-with-neon \
 	mips-linux mips-dsp-linux \
@@ -103,20 +104,14 @@ XSLTPROC = xsltproc
 outdir = ../regformats
 OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 
-# The set of xml files we'll generate .c files for GDB from.  By
+# For targets without feature based target descriptions,
+# the set of xml files we'll generate .c files for GDB from.  By
 # default we'll build all .c files, which requires an
 # --enable-targets=all GDB.  You can override this by passing XMLTOC
 # to make on the command line.
 XMLTOC = \
 	arc-v2.xml \
 	arc-arcompact.xml \
-	arm/arm-with-iwmmxt.xml \
-	arm/arm-with-m-fpa-layout.xml \
-	arm/arm-with-m-vfp-d16.xml \
-	arm/arm-with-m.xml \
-	arm/arm-with-neon.xml \
-	arm/arm-with-vfpv2.xml \
-	arm/arm-with-vfpv3.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \
@@ -189,6 +184,7 @@ GDB = false
 
 #Targets which use feature based target descriptions.
 aarch64-feature = 1
+arm-feature = 1
 i386-feature = 1
 riscv-feature = 1
 tic6x-feature = 1
@@ -208,9 +204,18 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
 
+# For targets with feature based target descriptions,
+# the set of xml files we'll generate .c files for GDB from.
 FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
+	arm/arm-core.xml \
+	arm/arm-fpa.xml \
+	arm/arm-m-profile.xml \
+	arm/arm-m-profile-with-fpa.xml \
+	arm/arm-vfpv2.xml \
+	arm/arm-vfpv3.xml \
+	arm/xscale-iwmmxt.xml \
 	i386/32bit-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \
@@ -262,9 +267,6 @@ $(FEATURE_CFILES): %.c: %.xml.tmp
 	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@.tmp
 	echo "</target>" >> $@.tmp
 	sh ../../move-if-change $@.tmp $@
-
-# Other dependencies.
-$(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
 
 # Regenerate RISC-V CSR feature lists.
 riscv/32bit-csr.xml riscv/64bit-csr.xml: ../../include/opcode/riscv-opc.h

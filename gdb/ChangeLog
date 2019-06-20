@@ -1,5 +1,17 @@
 2019-07-10  Alan Hayward  <alan.hayward@arm.com>
 
+	* features/Makefile: Use feature target descriptions for Arm.
+	* features/arm/arm-core.c: Generate new file.
+	* features/arm/arm-fpa.c: Likewise.
+	* features/arm/arm-m-profile-with-fpa.xml: Likewise.
+	* features/arm/arm-m-profile.c: Likewise.
+	* features/arm/arm-vfpv2.c: Likewise.
+	* features/arm/arm-vfpv3.c: Likewise.
+	* features/arm/xscale-iwmmxt.c: Likewise.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Add Arm.
+
+2019-07-10  Alan Hayward  <alan.hayward@arm.com>
+
 	* arm-linux-nat.c (arm_linux_nat_target::read_description): Check
 	ptrace earlier.
 
