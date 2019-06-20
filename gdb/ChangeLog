@@ -1,3 +1,8 @@
+2019-06-28  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.c (partial_die_info::read): Prefer the linkage name
+	for Ada.
+
 2019-06-27  Tom Tromey  <tromey@adacore.com>
 
 	* arm-tdep.c (arm_objfile_data_key): Move lower.  Change type to

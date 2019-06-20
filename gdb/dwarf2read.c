@@ -18653,8 +18653,6 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  /* Note that both forms of linkage name might appear.  We
 	     assume they will be the same, and we only store the last
 	     one we see.  */
-	  if (cu->language == language_ada)
-	    name = DW_STRING (&attr);
 	  linkage_name = DW_STRING (&attr);
 	  break;
 	case DW_AT_low_pc:
@@ -18786,6 +18784,14 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  break;
 	}
     }
+
+  /* For Ada, if both the name and the linkage name appear, we prefer
+     the latter.  This lets "catch exception" work better, regardless
+     of the order in which the name and linkage name were emitted.
+     Really, though, this is just a workaround for the fact that gdb
+     doesn't store both the name and the linkage name.  */
+  if (cu->language == language_ada && linkage_name != nullptr)
+    name = linkage_name;
 
   if (high_pc_relative)
     highpc += lowpc;
