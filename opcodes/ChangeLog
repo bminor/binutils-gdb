@@ -1,3 +1,15 @@
+2019-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis-evex.h: Break into ...
+	* i386-dis-evex-len.h: New file.
+	* i386-dis-evex-mod.h: Likewise.
+	* i386-dis-evex-prefix.h: Likewise.
+	* i386-dis-evex-reg.h: Likewise.
+	* i386-dis-evex-w.h: Likewise.
+	* i386-dis.c: Include i386-dis-evex-reg.h, i386-dis-evex-prefix.h,
+	i386-dis-evex.h, i386-dis-evex-len.h, i386-dis-evex-w.h and
+	i386-dis-evex-mod.h.
+
 2019-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/24700

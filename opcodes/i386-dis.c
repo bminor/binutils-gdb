@@ -3625,9 +3625,8 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "blci",	{ { OP_LWP_E, 0 }, Ev }, 0 },
   },
-#define NEED_REG_TABLE
-#include "i386-dis-evex.h"
-#undef NEED_REG_TABLE
+
+#include "i386-dis-evex-reg.h"
 };
 
 static const struct dis386 prefix_table[][4] = {
@@ -6793,9 +6792,7 @@ static const struct dis386 prefix_table[][4] = {
     { VEX_LEN_TABLE (VEX_LEN_0F3AF0_P_3) },
   },
 
-#define NEED_PREFIX_TABLE
-#include "i386-dis-evex.h"
-#undef NEED_PREFIX_TABLE
+#include "i386-dis-evex-prefix.h"
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -9306,9 +9303,8 @@ static const struct dis386 vex_table[][256] = {
   },
 };
 
-#define NEED_OPCODE_TABLE
 #include "i386-dis-evex.h"
-#undef NEED_OPCODE_TABLE
+
 static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F12_P_0_M_0 */
   {
@@ -9917,11 +9913,7 @@ static const struct dis386 vex_len_table[][2] = {
   },
 };
 
-static const struct dis386 evex_len_table[][3] = {
-#define NEED_EVEX_LEN_TABLE
-#include "i386-dis-evex.h"
-#undef NEED_EVEX_LEN_TABLE
-};
+#include "i386-dis-evex-len.h"
 
 static const struct dis386 vex_w_table[][2] = {
   {
@@ -10237,9 +10229,8 @@ static const struct dis386 vex_w_table[][2] = {
     { Bad_Opcode },
     { "vgf2p8affineinvqb",  { XM, Vex, EXx, Ib }, 0 },
   },
-#define NEED_VEX_W_TABLE
-#include "i386-dis-evex.h"
-#undef NEED_VEX_W_TABLE
+
+#include "i386-dis-evex-w.h"
 };
 
 static const struct dis386 mod_table[][2] = {
@@ -11004,9 +10995,8 @@ static const struct dis386 mod_table[][2] = {
     { Bad_Opcode },
     { "kshiftlq",       { MaskG, MaskR, Ib }, 0 },
   },
-#define NEED_MOD_TABLE
-#include "i386-dis-evex.h"
-#undef NEED_MOD_TABLE
+
+#include "i386-dis-evex-mod.h"
 };
 
 static const struct dis386 rm_table[][8] = {
