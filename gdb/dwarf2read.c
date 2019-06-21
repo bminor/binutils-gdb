@@ -655,7 +655,7 @@ struct dwo_sections
   struct dwarf2_section_info str_offsets;
   /* In the case of a virtual DWO file, these two are unused.  */
   struct dwarf2_section_info info;
-  VEC (dwarf2_section_info_def) *types;
+  std::vector<dwarf2_section_info> types;
 };
 
 /* CUs/TUs in DWP/DWO files.  */
@@ -705,11 +705,6 @@ struct dwo_file
 {
   dwo_file () = default;
   DISABLE_COPY_AND_ASSIGN (dwo_file);
-
-  ~dwo_file ()
-  {
-    VEC_free (dwarf2_section_info_def, sections.types);
-  }
 
   /* The DW_AT_GNU_dwo_name attribute.
      For virtual DWO files the name is constructed from the section offsets
@@ -2160,8 +2155,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   for (signatured_type *sig_type : all_type_units)
     VEC_free (dwarf2_per_cu_ptr, sig_type->per_cu.imported_symtabs);
 
-  VEC_free (dwarf2_section_info_def, types);
-
   /* Everything else should be on the objfile obstack.  */
 }
 
@@ -2418,8 +2411,7 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
       type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
 
-      VEC_safe_push (dwarf2_section_info_def, this->types,
-		     &type_section);
+      this->types.push_back (type_section);
     }
   else if (section_is_p (sectp->name, &names.gdb_index))
     {
@@ -3592,15 +3584,12 @@ dwarf2_read_gdb_index
 
   if (types_list_elements)
     {
-      struct dwarf2_section_info *section;
-
       /* We can only handle a single .debug_types when we have an
 	 index.  */
-      if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) != 1)
+      if (dwarf2_per_objfile->types.size () != 1)
 	return 0;
 
-      section = VEC_index (dwarf2_section_info_def,
-			   dwarf2_per_objfile->types, 0);
+      dwarf2_section_info *section = &dwarf2_per_objfile->types[0];
 
       create_signatured_type_table_from_index (dwarf2_per_objfile, section,
 					       types_list, types_list_elements);
@@ -5636,11 +5625,10 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
     {
       /* We can only handle a single .debug_types when we have an
 	 index.  */
-      if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) != 1)
+      if (dwarf2_per_objfile->types.size () != 1)
 	return false;
 
-      dwarf2_section_info *section = VEC_index (dwarf2_section_info_def,
-						dwarf2_per_objfile->types, 0);
+      dwarf2_section_info *section = &dwarf2_per_objfile->types[0];
 
       create_signatured_type_table_from_debug_names
 	(dwarf2_per_objfile, *map, section, &dwarf2_per_objfile->abbrev);
@@ -6817,19 +6805,11 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 static void
 create_debug_types_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			       struct dwo_file *dwo_file,
-			       VEC (dwarf2_section_info_def) *types,
+			       gdb::array_view<dwarf2_section_info> type_sections,
 			       htab_t &types_htab)
 {
-  int ix;
-  struct dwarf2_section_info *section;
-
-  if (VEC_empty (dwarf2_section_info_def, types))
-    return;
-
-  for (ix = 0;
-       VEC_iterate (dwarf2_section_info_def, types, ix, section);
-       ++ix)
-    create_debug_type_hash_table (dwarf2_per_objfile, dwo_file, section,
+  for (dwarf2_section_info &section : type_sections)
+    create_debug_type_hash_table (dwarf2_per_objfile, dwo_file, &section,
 				  types_htab, rcuh_kind::TYPE);
 }
 
@@ -12943,8 +12923,7 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
       memset (&type_section, 0, sizeof (type_section));
       type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
-      VEC_safe_push (dwarf2_section_info_def, dwo_sections->types,
-		     &type_section);
+      dwo_sections->types.push_back (type_section);
     }
 }
 
@@ -19030,8 +19009,7 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
      children, see if we can determine the namespace from their linkage
      name.  */
   if (cu->language == language_cplus
-      && !VEC_empty (dwarf2_section_info_def,
-		     cu->per_cu->dwarf2_per_objfile->types)
+      && !cu->per_cu->dwarf2_per_objfile->types.empty ()
       && die_parent == NULL
       && has_children
       && (tag == DW_TAG_class_type
@@ -22533,7 +22511,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
       case DW_TAG_partial_unit:
 	/* gcc-4.5 -gdwarf-4 can drop the enclosing namespace.  Cope.  */
 	if (cu->language == language_cplus
-	    && !VEC_empty (dwarf2_section_info_def, dwarf2_per_objfile->types)
+	    && !dwarf2_per_objfile->types.empty ()
 	    && die->child != NULL
 	    && (die->tag == DW_TAG_class_type
 		|| die->tag == DW_TAG_structure_type

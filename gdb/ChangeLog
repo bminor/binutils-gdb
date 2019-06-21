@@ -1,3 +1,21 @@
+2019-06-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2read.h (dwarf2_section_info_def): Remove.
+	(DEF_VEC_O (dwarf2_section_info_def)): Remove.
+	* dwarf2read.c (struct dwo_sections) <types>: Change type to
+	std::vector<dwarf2_section_info>.
+	(struct dwo_file) <~dwo_file>: Remove.
+	(dwarf2_per_objfile::~dwarf2_per_objfile): Don't manually free
+	types field.
+	(dwarf2_per_objfile::locate_sections): Adjust to std::vector.
+	(dwarf2_read_debug_names): Likewise.
+	(create_debug_types_hash_table): Change parameter type to
+	array_view, adjust code accordingly.
+	(dwarf2_locate_dwo_sections): Adjust to std::vector.
+	(partial_die_info::fixup): Likewise.
+	(determine_prefix): Likewise.
+	* dwarf-index-write.c (write_psymtabs_to_index): Adjust.
+
 2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2read.c (struct dwo_file) <dbfd>: Change type to

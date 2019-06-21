@@ -73,9 +73,6 @@ struct dwarf2_section_info
   bool is_virtual;
 };
 
-typedef struct dwarf2_section_info dwarf2_section_info_def;
-DEF_VEC_O (dwarf2_section_info_def);
-
 /* Read the contents of the section INFO.
    OBJFILE is the main object file, but not necessarily the file where
    the section comes from.  E.g., for DWO files the bfd of INFO is the bfd
@@ -167,7 +164,7 @@ public:
   dwarf2_section_info debug_names {};
   dwarf2_section_info debug_aranges {};
 
-  VEC (dwarf2_section_info_def) *types = NULL;
+  std::vector<dwarf2_section_info> types;
 
   /* Back link.  */
   struct objfile *objfile = NULL;
