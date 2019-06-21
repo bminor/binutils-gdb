@@ -1,3 +1,7 @@
+2019-06-21  Gary Benson  <gbenson@redhat.com>
+
+	* update-gnulib.sh: Adjust paths.
+
 2019-06-14  Tom Tromey  <tom@tromey.com>
 
 	* update-gnulib.sh: Adjust paths.

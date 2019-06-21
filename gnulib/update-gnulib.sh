@@ -100,9 +100,9 @@ if [ "$gnulib_head_sha1" != "$GNULIB_COMMIT_SHA1" ]; then
    exit 1
 fi
 
-# Verify that we are in the gdb/ subdirectory.
-if [ ! -f ../main.c -o ! -d import ]; then
-   echo "Error: This script should be called from the gdb/gnulib subdirectory."
+# Verify that we are in the correct directory.
+if [ ! -f ../gdb/main.c -o ! -d import ]; then
+   echo "Error: This script should be called from the gnulib subdirectory."
    echo "Aborting."
    exit 1
 fi
@@ -191,5 +191,5 @@ $(find import/m4 -type f -name "*.m4" | LC_COLLATE=C sort | \
   sed 's/^/	/; s/$/ \\/; $s/ \\//g')
 EOF
 
-../../move-if-change ${ACLOCAL_M4_DEPS_FILE}.tmp ${ACLOCAL_M4_DEPS_FILE}
+../move-if-change ${ACLOCAL_M4_DEPS_FILE}.tmp ${ACLOCAL_M4_DEPS_FILE}
 rm -f ${ACLOCAL_M4_DEPS_FILE}.tmp
