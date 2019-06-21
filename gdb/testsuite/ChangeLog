@@ -1,5 +1,9 @@
 2019-06-21  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/index-cache.exp: Add additional_flags=-Wl,--build-id.
+
+2019-06-21  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24518
 	PR ada/24713
 	* gdb.ada/ptype_union.exp: Mark as unsupported if executable contains

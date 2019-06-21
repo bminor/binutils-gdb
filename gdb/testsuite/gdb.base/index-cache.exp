@@ -18,7 +18,8 @@
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
+	  {additional_flags=-Wl,--build-id}] } {
     return
 }
 
