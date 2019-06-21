@@ -703,33 +703,43 @@ enum dwp_v2_section_ids
 
 struct dwo_file
 {
+  dwo_file () = default;
+  DISABLE_COPY_AND_ASSIGN (dwo_file);
+
+  ~dwo_file ()
+  {
+    gdb_bfd_unref (dbfd);
+
+    VEC_free (dwarf2_section_info_def, sections.types);
+  }
+
   /* The DW_AT_GNU_dwo_name attribute.
      For virtual DWO files the name is constructed from the section offsets
      of abbrev,line,loc,str_offsets so that we combine virtual DWO files
      from related CU+TUs.  */
-  const char *dwo_name;
+  const char *dwo_name = nullptr;
 
   /* The DW_AT_comp_dir attribute.  */
-  const char *comp_dir;
+  const char *comp_dir = nullptr;
 
   /* The bfd, when the file is open.  Otherwise this is NULL.
      This is unused(NULL) for virtual DWO files where we use dwp_file.dbfd.  */
-  bfd *dbfd;
+  bfd *dbfd = nullptr;
 
   /* The sections that make up this DWO file.
      Remember that for virtual DWO files in DWP V2, these are virtual
      sections (for lack of a better name).  */
-  struct dwo_sections sections;
+  struct dwo_sections sections {};
 
   /* The CUs in the file.
      Each element is a struct dwo_unit. Multiple CUs per DWO are supported as
      an extension to handle LLVM's Link Time Optimization output (where
      multiple source files may be compiled into a single object/dwo pair). */
-  htab_t cus;
+  htab_t cus {};
 
   /* Table of TUs in the file.
      Each element is a struct dwo_unit.  */
-  htab_t tus;
+  htab_t tus {};
 };
 
 /* These sections are what may appear in a DWP file.  */
@@ -1988,21 +1998,9 @@ static struct dwo_unit *lookup_dwo_type_unit
 
 static void queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *);
 
-static void free_dwo_file (struct dwo_file *);
-
-/* A unique_ptr helper to free a dwo_file.  */
-
-struct dwo_file_deleter
-{
-  void operator() (struct dwo_file *df) const
-  {
-    free_dwo_file (df);
-  }
-};
-
 /* A unique pointer to a dwo_file.  */
 
-typedef std::unique_ptr<struct dwo_file, dwo_file_deleter> dwo_file_up;
+typedef std::unique_ptr<struct dwo_file> dwo_file_up;
 
 static void process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
@@ -2147,8 +2145,6 @@ dwarf2_per_objfile::dwarf2_per_objfile (struct objfile *objfile_,
     locate_sections (obfd, sec, *names);
 }
 
-static void free_dwo_files (htab_t dwo_files, struct objfile *objfile);
-
 dwarf2_per_objfile::~dwarf2_per_objfile ()
 {
   /* Cached DIE trees use xmalloc and the comp_unit_obstack.  */
@@ -2167,9 +2163,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
     VEC_free (dwarf2_per_cu_ptr, sig_type->per_cu.imported_symtabs);
 
   VEC_free (dwarf2_section_info_def, types);
-
-  if (dwo_files != NULL)
-    free_dwo_files (dwo_files, objfile);
 
   /* Everything else should be on the objfile obstack.  */
 }
@@ -8407,7 +8400,7 @@ process_skeletonless_type_units (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (get_dwp_file (dwarf2_per_objfile) == NULL
       && dwarf2_per_objfile->dwo_files != NULL)
     {
-      htab_traverse_noresize (dwarf2_per_objfile->dwo_files,
+      htab_traverse_noresize (dwarf2_per_objfile->dwo_files.get (),
 			      process_dwo_file_for_skeletonless_type_units,
 			      dwarf2_per_objfile);
     }
@@ -11775,16 +11768,23 @@ eq_dwo_file (const void *item_lhs, const void *item_rhs)
 
 /* Allocate a hash table for DWO files.  */
 
-static htab_t
+static htab_up
 allocate_dwo_file_hash_table (struct objfile *objfile)
 {
-  return htab_create_alloc_ex (41,
-			       hash_dwo_file,
-			       eq_dwo_file,
-			       NULL,
-			       &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  auto delete_dwo_file = [] (void *item)
+    {
+      struct dwo_file *dwo_file = (struct dwo_file *) item;
+
+      delete dwo_file;
+    };
+
+  return htab_up (htab_create_alloc_ex (41,
+					hash_dwo_file,
+					eq_dwo_file,
+					delete_dwo_file,
+					&objfile->objfile_obstack,
+					hashtab_obstack_allocate,
+					dummy_obstack_deallocate));
 }
 
 /* Lookup DWO file DWO_NAME.  */
@@ -11801,10 +11801,10 @@ lookup_dwo_file_slot (struct dwarf2_per_objfile *dwarf2_per_objfile,
     dwarf2_per_objfile->dwo_files
       = allocate_dwo_file_hash_table (dwarf2_per_objfile->objfile);
 
-  memset (&find_entry, 0, sizeof (find_entry));
   find_entry.dwo_name = dwo_name;
   find_entry.comp_dir = comp_dir;
-  slot = htab_find_slot (dwarf2_per_objfile->dwo_files, &find_entry, INSERT);
+  slot = htab_find_slot (dwarf2_per_objfile->dwo_files.get (), &find_entry,
+			 INSERT);
 
   return slot;
 }
@@ -12451,7 +12451,7 @@ create_dwo_unit_in_dwp_v1 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
 			      virtual_dwo_name.c_str ());
 	}
-      dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
+      dwo_file = new struct dwo_file;
       dwo_file->dwo_name
 	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
 					virtual_dwo_name.c_str (),
@@ -12649,7 +12649,7 @@ create_dwo_unit_in_dwp_v2 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
 			      virtual_dwo_name.c_str ());
 	}
-      dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
+      dwo_file = new struct dwo_file;
       dwo_file->dwo_name
 	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
 					virtual_dwo_name.c_str (),
@@ -12959,7 +12959,6 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 			const char *dwo_name, const char *comp_dir)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   gdb_bfd_ref_ptr dbfd (open_dwo_file (dwarf2_per_objfile, dwo_name, comp_dir));
   if (dbfd == NULL)
@@ -12969,10 +12968,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
       return NULL;
     }
 
-  /* We use a unique pointer here, despite the obstack allocation,
-     because a dwo_file needs some cleanup if it is abandoned.  */
-  dwo_file_up dwo_file (OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					struct dwo_file));
+  dwo_file_up dwo_file (new struct dwo_file);
   dwo_file->dwo_name = dwo_name;
   dwo_file->comp_dir = comp_dir;
   dwo_file->dbfd = dbfd.release ();
@@ -13486,38 +13482,6 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
     htab_traverse_noresize (dwo_file->tus, queue_and_load_dwo_tu, per_cu);
 }
 
-/* Free all resources associated with DWO_FILE.
-   Close the DWO file and munmap the sections.  */
-
-static void
-free_dwo_file (struct dwo_file *dwo_file)
-{
-  /* Note: dbfd is NULL for virtual DWO files.  */
-  gdb_bfd_unref (dwo_file->dbfd);
-
-  VEC_free (dwarf2_section_info_def, dwo_file->sections.types);
-}
-
-/* Traversal function for free_dwo_files.  */
-
-static int
-free_dwo_file_from_slot (void **slot, void *info)
-{
-  struct dwo_file *dwo_file = (struct dwo_file *) *slot;
-
-  free_dwo_file (dwo_file);
-
-  return 1;
-}
-
-/* Free all resources associated with DWO_FILES.  */
-
-static void
-free_dwo_files (htab_t dwo_files, struct objfile *objfile)
-{
-  htab_traverse_noresize (dwo_files, free_dwo_file_from_slot, objfile);
-}
-
 /* Read in various DIEs.  */
 
 /* DW_AT_abstract_origin inherits whole DIEs (not just their attributes).

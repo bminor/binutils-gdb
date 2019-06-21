@@ -1,5 +1,27 @@
 2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.h (struct dwarf2_per_objfile) <dwo_files>: Change
+	type to htab_up.
+	* dwarf2read.c (struct dwo_file): Initialize fields.
+	<~dwo_file>: New.
+	(free_dwo_file): Remove, move content to ~dwo_file.
+	(struct dwo_file_deleter): Remove.
+	(dwo_file_up>: Remove custom deleter.
+	(free_dwo_files): Remove.
+	(dwarf2_per_objfile::~dwarf2_per_objfile): Don't explicitly free
+	dwo_files.
+	(process_skeletonless_type_units): Call unique_ptr::get.
+	(allocate_dwo_file_hash_table): Add deleter to created hash
+	table.  Change return type to htab_up.
+	(lookup_dwo_file_slot): Don't memset dwo_file, call
+	unique_ptr::get.
+	(create_dwo_unit_in_dwp_v1): Allocate dwo_file with new.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(open_and_init_dwo_file): Likewise.
+	(free_dwo_file_from_slot): Remove.
+
+2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.h (struct dwarf2_section_info) <readin,
 	is_virtual>: Change type to bool.
 	* dwarf2read.c (dwarf2_read_section, create_dwp_v2_section): Use

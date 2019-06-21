@@ -197,7 +197,7 @@ public:
 
   /* A table mapping DW_AT_dwo_name values to struct dwo_file objects.
      This is NULL if the table hasn't been allocated yet.  */
-  htab_t dwo_files {};
+  htab_up dwo_files;
 
   /* True if we've checked for whether there is a DWP file.  */
   bool dwp_checked = false;
