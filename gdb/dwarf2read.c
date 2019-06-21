@@ -2474,7 +2474,7 @@ dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
   if (info->readin)
     return;
   info->buffer = NULL;
-  info->readin = 1;
+  info->readin = true;
 
   if (dwarf2_section_empty_p (info))
     return;
@@ -12513,7 +12513,7 @@ create_dwp_v2_section (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   memset (&result, 0, sizeof (result));
   result.s.containing_section = section;
-  result.is_virtual = 1;
+  result.is_virtual = true;
 
   if (size == 0)
     return result;

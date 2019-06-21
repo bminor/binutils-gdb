@@ -1,3 +1,10 @@
+2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2read.h (struct dwarf2_section_info) <readin,
+	is_virtual>: Change type to bool.
+	* dwarf2read.c (dwarf2_read_section, create_dwp_v2_section): Use
+	true instead of 1.
+
 2019-06-19  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-data.h (tui_init_content_element): Don't declare.

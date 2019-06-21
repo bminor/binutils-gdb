@@ -67,10 +67,10 @@ struct dwarf2_section_info
      Only valid if is_virtual.  */
   bfd_size_type virtual_offset;
   /* True if we have tried to read this section.  */
-  char readin;
+  bool readin;
   /* True if this is a virtual section, False otherwise.
      This specifies which of s.section and s.containing_section to use.  */
-  char is_virtual;
+  bool is_virtual;
 };
 
 typedef struct dwarf2_section_info dwarf2_section_info_def;
