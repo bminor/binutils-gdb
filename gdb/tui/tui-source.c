@@ -157,7 +157,7 @@ tui_set_source_content (struct symtab *s,
       else
 	{
 	  int cur_line_no, cur_line;
-	  struct tui_gen_win_info *locator
+	  struct tui_locator_window *locator
 	    = tui_locator_win_info_ptr ();
 	  struct tui_source_window_base *src
 	    = (struct tui_source_window_base *) TUI_SRC_WIN;
@@ -194,12 +194,9 @@ tui_set_source_content (struct symtab *s,
 	      element->which_element.source.line_or_addr.u.line_no =
 		cur_line_no;
 	      element->which_element.source.is_exec_point =
-		(filename_cmp (locator->content[0]
-			       ->which_element.locator.full_name,
+		(filename_cmp (locator->full_name,
 			       symtab_to_fullname (s)) == 0
-		 && cur_line_no
-		 == locator->content[0]
-		 ->which_element.locator.line_no);
+		 && cur_line_no == locator->line_no);
 
 	      xfree (TUI_SRC_WIN->content[cur_line]
 		     ->which_element.source.line);
@@ -300,8 +297,7 @@ tui_source_is_displayed (const char *fullname)
 {
   return (TUI_SRC_WIN != NULL
 	  && TUI_SRC_WIN->content_in_use 
-	  && (filename_cmp (tui_locator_win_info_ptr ()->content[0]
-			      ->which_element.locator.full_name,
+	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name,
 			    fullname) == 0));
 }
 

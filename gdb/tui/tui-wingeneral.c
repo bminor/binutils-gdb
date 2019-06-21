@@ -266,7 +266,7 @@ void
 tui_refresh_all (struct tui_win_info **list)
 {
   int type;
-  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {

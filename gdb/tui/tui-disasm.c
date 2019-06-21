@@ -169,7 +169,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   int offset = TUI_DISASM_WIN->horizontal_offset;
   int max_lines, line_width;
   CORE_ADDR cur_pc;
-  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_tab_width;
   struct tui_asm_line *asm_lines;
   int insn_pos;
@@ -185,7 +185,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   base->gdbarch = gdbarch;
   base->start_line_or_addr.loa = LOA_ADDRESS;
   base->start_line_or_addr.u.addr = pc;
-  cur_pc = locator->content[0]->which_element.locator.addr;
+  cur_pc = locator->addr;
 
   /* Window size, excluding highlight box.  */
   max_lines = TUI_DISASM_WIN->height - 2;
@@ -316,15 +316,13 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
 void
 tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
-  struct tui_gen_win_info *locator;
-  struct tui_locator_element *element;
+  struct tui_locator_window *locator;
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
 
   locator = tui_locator_win_info_ptr ();
-  element = &locator->content[0]->which_element.locator;
 
-  if (element->addr == 0)
+  if (locator->addr == 0)
     {
       struct bound_minimal_symbol main_symbol;
 
@@ -342,8 +340,8 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
     }
   else				/* The target is executing.  */
     {
-      gdbarch = element->gdbarch;
-      addr = element->addr;
+      gdbarch = locator->gdbarch;
+      addr = locator->addr;
     }
 
   *gdbarch_p = gdbarch;

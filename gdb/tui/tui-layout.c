@@ -634,21 +634,21 @@ show_source_disasm_command (void)
 	  TUI_SRC_WIN->m_has_locator = false;
 	}
 
-      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+      gdb_assert (locator != nullptr);
 
       tui_show_source_content (TUI_SRC_WIN);
       if (TUI_DISASM_WIN == NULL)
 	{
 	  tui_win_list[DISASSEM_WIN]
 	    = make_disasm_window (asm_height, src_height - 1);
-	  locator
-	    = init_and_make_win (locator,
-				 LOCATOR_WIN,
-				 2 /* 1 */ ,
-				 tui_term_width (),
-				 0,
-				 (src_height + asm_height) - 1,
-				 DONT_BOX_WINDOW);
+	  init_and_make_win (locator,
+			     LOCATOR_WIN,
+			     2 /* 1 */ ,
+			     tui_term_width (),
+			     0,
+			     (src_height + asm_height) - 1,
+			     DONT_BOX_WINDOW);
 	}
       else
 	{
@@ -703,8 +703,9 @@ show_data (enum tui_layout_type new_layout)
   int total_height = (tui_term_height () - TUI_CMD_WIN->height);
   int src_height, data_height;
   enum tui_win_type win_type;
-  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
 
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+  gdb_assert (locator != nullptr);
 
   data_height = total_height / 2;
   src_height = total_height - data_height;
@@ -725,8 +726,7 @@ show_data (enum tui_layout_type new_layout)
       else
 	tui_win_list[win_type]
 	  = make_disasm_window (src_height, data_height - 1);
-      locator
-	= init_and_make_win (locator,
+      init_and_make_win (locator,
 			     LOCATOR_WIN,
 			     2 /* 1 */ ,
 			     tui_term_width (),
@@ -870,7 +870,8 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
     {
       struct tui_win_info **win_info_ptr;
       int src_height, cmd_height;
-      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+      gdb_assert (locator != nullptr);
 
       if (TUI_CMD_WIN != NULL)
 	cmd_height = TUI_CMD_WIN->height;
@@ -890,14 +891,13 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 	    *win_info_ptr = make_source_window (src_height - 1, 0);
 	  else
 	    *win_info_ptr = make_disasm_window (src_height - 1, 0);
-	  locator
-	    = init_and_make_win (locator,
-				 LOCATOR_WIN,
-				 2 /* 1 */ ,
-				 tui_term_width (),
-				 0,
-				 src_height - 1,
-				 DONT_BOX_WINDOW);
+	  init_and_make_win (locator,
+			     LOCATOR_WIN,
+			     2 /* 1 */ ,
+			     tui_term_width (),
+			     0,
+			     src_height - 1,
+			     DONT_BOX_WINDOW);
 	  base = (tui_source_window_base *) *win_info_ptr;
 	}
       else

@@ -1,5 +1,29 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_refresh_all): Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights)
+	(tui_source_window_base::set_new_height): Update.
+	* tui/tui-stack.c (tui_make_status_line): Change parameter type.
+	Update.
+	(tui_set_locator_fullname, tui_set_locator_info)
+	(tui_show_frame_info): Update.
+	* tui/tui-source.c (tui_set_source_content)
+	(tui_source_is_displayed): Update.
+	* tui/tui-layout.c (show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content)
+	(tui_get_begin_asm_address): Update.
+	* tui/tui-data.h (struct tui_locator_element): Remove.
+	(union tui_which_element) <locator>: Remove.
+	(struct tui_locator_window): New.
+	(tui_locator_win_info_ptr): Change return type.
+	* tui/tui-data.c (_locator): Change type.
+	(tui_locator_win_info_ptr): Change return type.
+	(init_content_element): Remove LOCATOR_WIN case.  Add assert.
+	(tui_alloc_content): Add assert.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c
 	(tui_exec_info_window::maybe_allocate_content): New method.
 	(tui_set_exec_info_content, tui_show_exec_info_content): Update.

@@ -214,18 +214,6 @@ struct tui_command_element
 # define MAX_LOCATOR_ELEMENT_LEN        1024
 #endif
 
-/* Elements in the locator window content.  */
-struct tui_locator_element
-{
-  /* Resolved absolute filename as returned by symtab_to_fullname.  */
-  char full_name[MAX_LOCATOR_ELEMENT_LEN];
-  char proc_name[MAX_LOCATOR_ELEMENT_LEN];
-  int line_no;
-  CORE_ADDR addr;
-  /* Architecture associated with code at this location.  */
-  struct gdbarch *gdbarch;
-};
-
 /* Flags to tell what kind of breakpoint is at current line.  */
 #define TUI_BP_ENABLED      0x01
 #define TUI_BP_DISABLED     0x02
@@ -248,7 +236,6 @@ union tui_which_element
   struct tui_gen_win_info *data_window;	/* Data display elements.  */
   struct tui_data_element data;		/* Elements of data_window.  */
   struct tui_command_element command;	/* Command elements.  */
-  struct tui_locator_element locator;	/* Locator elements.  */
 };
 
 struct tui_win_element
@@ -282,6 +269,25 @@ struct tui_exec_info_window : public tui_gen_win_info
 private:
 
   tui_exec_info_content *m_content = nullptr;
+};
+
+/* Locator window class.  */
+
+struct tui_locator_window : public tui_gen_win_info
+{
+  tui_locator_window ()
+    : tui_gen_win_info (LOCATOR_WIN)
+  {
+    full_name[0] = 0;
+    proc_name[0] = 0;
+  }
+
+  char full_name[MAX_LOCATOR_ELEMENT_LEN];
+  char proc_name[MAX_LOCATOR_ELEMENT_LEN];
+  int line_no = 0;
+  CORE_ADDR addr = 0;
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *gdbarch = nullptr;
 };
 
 /* This defines information about each logical window.  */
@@ -572,7 +578,7 @@ extern int tui_term_height (void);
 extern void tui_set_term_height_to (int);
 extern int tui_term_width (void);
 extern void tui_set_term_width_to (int);
-extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
+extern struct tui_locator_window *tui_locator_win_info_ptr (void);
 extern std::vector<tui_source_window_base *> &tui_source_windows ();
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);

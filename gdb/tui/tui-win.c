@@ -556,7 +556,7 @@ tui_resize_all (void)
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
       struct tui_win_info *first_win;
       struct tui_win_info *second_win;
-      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
       int win_type;
       int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
 
@@ -1099,7 +1099,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	{
 	  int diff;
 	  struct tui_win_info *win_info;
-	  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+	  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 	  enum tui_layout_type cur_layout = tui_current_layout ();
 
 	  diff = (new_height - primary_win_info->height) * (-1);
@@ -1255,7 +1255,7 @@ tui_source_window_base::set_new_height (int height)
 
   if (has_locator ())
     {
-      tui_gen_win_info *gen_win_info = tui_locator_win_info_ptr ();
+      tui_locator_window *gen_win_info = tui_locator_win_info_ptr ();
       tui_make_invisible (gen_win_info);
       gen_win_info->origin.y = origin.y + height;
     }

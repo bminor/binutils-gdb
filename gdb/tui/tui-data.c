@@ -36,7 +36,7 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 ****************************/
 static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 static int term_height, term_width;
-static struct tui_gen_win_info _locator (LOCATOR_WIN);
+static struct tui_locator_window _locator;
 static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 static struct tui_layout_def layout_def = {
@@ -185,7 +185,7 @@ tui_data_window::clear_detail ()
 
 /* Accessor for the locator win info.  Answers a pointer to the static
    locator win info struct.  */
-struct tui_gen_win_info *
+struct tui_locator_window *
 tui_locator_win_info_ptr (void)
 {
   return &_locator;
@@ -365,6 +365,7 @@ init_content_element (struct tui_win_element *element,
 		      enum tui_win_type type)
 {
   gdb_assert (type != EXEC_INFO_WIN);
+  gdb_assert (type != LOCATOR_WIN);
 
   switch (type)
     {
@@ -393,12 +394,6 @@ init_content_element (struct tui_win_element *element,
       element->which_element.data.highlight = FALSE;
       element->which_element.data.content = NULL;
       break;
-    case LOCATOR_WIN:
-      element->which_element.locator.full_name[0] =
-	element->which_element.locator.proc_name[0] = (char) 0;
-      element->which_element.locator.line_no = 0;
-      element->which_element.locator.addr = 0;
-      break;
     default:
       break;
     }
@@ -426,6 +421,7 @@ tui_alloc_content (int num_elements, enum tui_win_type type)
   int i;
 
   gdb_assert (type != EXEC_INFO_WIN);
+  gdb_assert (type != LOCATOR_WIN);
 
   content = XNEWVEC (struct tui_win_element *, num_elements);
 
