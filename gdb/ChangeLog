@@ -1,5 +1,13 @@
 2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2read.c (struct dwo_file) <dbfd>: Change type to
+	gdb_bfd_ref_ptr.
+	<~dwo_file>: Remove call to gdb_bfd_unref.
+	(open_and_init_dwo_file): Move gdb_bfd_ref_ptr into dbfd field. Call
+	gdb_bfd_ref_ptr::get.
+
+2019-06-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.h (struct dwarf2_per_objfile) <dwo_files>: Change
 	type to htab_up.
 	* dwarf2read.c (struct dwo_file): Initialize fields.

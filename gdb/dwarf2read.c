@@ -708,8 +708,6 @@ struct dwo_file
 
   ~dwo_file ()
   {
-    gdb_bfd_unref (dbfd);
-
     VEC_free (dwarf2_section_info_def, sections.types);
   }
 
@@ -724,7 +722,7 @@ struct dwo_file
 
   /* The bfd, when the file is open.  Otherwise this is NULL.
      This is unused(NULL) for virtual DWO files where we use dwp_file.dbfd.  */
-  bfd *dbfd = nullptr;
+  gdb_bfd_ref_ptr dbfd;
 
   /* The sections that make up this DWO file.
      Remember that for virtual DWO files in DWP V2, these are virtual
@@ -12960,7 +12958,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
 
-  gdb_bfd_ref_ptr dbfd (open_dwo_file (dwarf2_per_objfile, dwo_name, comp_dir));
+  gdb_bfd_ref_ptr dbfd = open_dwo_file (dwarf2_per_objfile, dwo_name, comp_dir);
   if (dbfd == NULL)
     {
       if (dwarf_read_debug)
@@ -12971,9 +12969,9 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   dwo_file_up dwo_file (new struct dwo_file);
   dwo_file->dwo_name = dwo_name;
   dwo_file->comp_dir = comp_dir;
-  dwo_file->dbfd = dbfd.release ();
+  dwo_file->dbfd = std::move (dbfd);
 
-  bfd_map_over_sections (dwo_file->dbfd, dwarf2_locate_dwo_sections,
+  bfd_map_over_sections (dwo_file->dbfd.get (), dwarf2_locate_dwo_sections,
 			 &dwo_file->sections);
 
   create_cus_hash_table (dwarf2_per_objfile, *dwo_file, dwo_file->sections.info,
