@@ -1,3 +1,8 @@
+2019-06-21  Alan Modra  <amodra@gmail.com>
+
+	PR 24689
+	* elfcode.h (elf_object_p): Check type of e_shstrndx section.
+
 2019-06-19  Alan Modra  <amodra@gmail.com>
 
 	PR 24697
