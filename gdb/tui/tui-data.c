@@ -41,7 +41,7 @@ static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 static struct tui_layout_def layout_def = {
   SRC_WIN,			/* DISPLAY_MODE */
-  FALSE};			/* SPLIT */
+};
 
 static int win_resized = FALSE;
 

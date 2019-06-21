@@ -1,5 +1,11 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (tui_set_layout): Update.
+	* tui/tui-data.h (struct tui_layout_def) <split>: Remove.
+	* tui/tui-data.c (layout_def): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_refresh_all): Update.
 	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights)
 	(tui_source_window_base::set_new_height): Update.

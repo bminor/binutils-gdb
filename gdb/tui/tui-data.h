@@ -176,7 +176,6 @@ struct tui_line_or_address
 struct tui_layout_def
 {
   enum tui_win_type display_mode;
-  int split;
 };
 
 /* Elements in the Source/Disassembly Window.  */

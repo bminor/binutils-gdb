@@ -154,7 +154,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		case SRC_COMMAND:
 		  tui_set_win_focus_to (TUI_SRC_WIN);
 		  layout_def->display_mode = SRC_WIN;
-		  layout_def->split = FALSE;
 		  break;
 		case DISASSEM_COMMAND:
 		  /* The previous layout was not showing code.
@@ -168,7 +167,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		  tui_get_begin_asm_address (&gdbarch, &addr);
 		  tui_set_win_focus_to (TUI_DISASM_WIN);
 		  layout_def->display_mode = DISASSEM_WIN;
-		  layout_def->split = FALSE;
 		  break;
 		case SRC_DISASSEM_COMMAND:
 		  /* The previous layout was not showing code.
@@ -184,7 +182,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		    tui_set_win_focus_to (TUI_SRC_WIN);
 		  else
 		    tui_set_win_focus_to (TUI_DISASM_WIN);
-		  layout_def->split = TRUE;
 		  break;
 		case SRC_DATA_COMMAND:
 		  if (win_with_focus != TUI_DATA_WIN)
@@ -192,7 +189,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		  else
 		    tui_set_win_focus_to (TUI_DATA_WIN);
 		  layout_def->display_mode = SRC_WIN;
-		  layout_def->split = FALSE;
 		  break;
 		case DISASSEM_DATA_COMMAND:
 		  /* The previous layout was not showing code.
@@ -209,7 +205,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		  else
 		    tui_set_win_focus_to (TUI_DATA_WIN);
 		  layout_def->display_mode = DISASSEM_WIN;
-		  layout_def->split = FALSE;
 		  break;
 		default:
 		  break;
