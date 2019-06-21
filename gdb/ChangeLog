@@ -1,5 +1,20 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c
+	(tui_exec_info_window::maybe_allocate_content): New method.
+	(tui_set_exec_info_content, tui_show_exec_info_content): Update.
+	* tui/tui-layout.c (init_and_make_win): Add EXEC_INFO_WIN case.
+	(make_source_or_disasm_window): Add cast.
+	* tui/tui-data.h (union tui_which_element) <simple_string>:
+	Remove.
+	(struct tui_source_info): New.
+	(struct tui_source_window_base) <execution_info>: Change type.
+	* tui/tui-data.c (init_content_element): Remove EXEC_INFO_WIN
+	case, and add assert.
+	(tui_alloc_content): Add assert.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (tui_alloc_win_info): Don't declare.
 	* tui/tui-layout.c (init_and_make_win): Use "new" directly.
 	* tui/tui-data.c (tui_alloc_win_info): Remove.

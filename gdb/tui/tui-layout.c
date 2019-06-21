@@ -816,6 +816,10 @@ init_and_make_win (tui_gen_win_info *win_info,
 	  win_info = new tui_cmd_window ();
 	  break;
 
+	case EXEC_INFO_WIN:
+	  win_info = new tui_exec_info_window ();
+	  break;
+
 	default:
 	  gdb_assert (tui_win_is_auxillary (win_type));
 	  win_info = new tui_gen_win_info (win_type);
@@ -834,14 +838,14 @@ static struct tui_win_info *
 make_source_or_disasm_window (enum tui_win_type type,
 			      int height, int origin_y)
 {
-  struct tui_gen_win_info *execution_info
-    = init_and_make_win (nullptr,
-			 EXEC_INFO_WIN,
-			 height,
-			 3,
-			 0,
-			 origin_y,
-			 DONT_BOX_WINDOW);
+  struct tui_exec_info_window *execution_info
+    = (tui_exec_info_window *) init_and_make_win (nullptr,
+						  EXEC_INFO_WIN,
+						  height,
+						  3,
+						  0,
+						  origin_y,
+						  DONT_BOX_WINDOW);
 
   /* Now create the source window.  */
   struct tui_source_window_base *result

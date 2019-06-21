@@ -470,6 +470,16 @@ tui_update_breakpoint_info (struct tui_win_info *win,
   return need_refresh;
 }
 
+/* See tui-data.h.  */
+
+tui_exec_info_content *
+tui_exec_info_window::maybe_allocate_content (int n_elements)
+{
+  if (m_content == nullptr)
+    m_content = XNEWVEC (tui_exec_info_content, n_elements);
+  return m_content;
+}
+
 
 /* Function to initialize the content of the execution info window,
    based upon the input window which is either the source or
@@ -479,45 +489,37 @@ tui_set_exec_info_content (struct tui_source_window_base *win_info)
 {
   if (win_info->execution_info != NULL)
     {
-      struct tui_gen_win_info *exec_info_ptr = win_info->execution_info;
-
-      if (exec_info_ptr->content == NULL)
-	exec_info_ptr->content =
-	  tui_alloc_content (win_info->height, exec_info_ptr->type);
+      tui_exec_info_content *content
+	= win_info->execution_info->maybe_allocate_content (win_info->height);
 
       tui_update_breakpoint_info (win_info, 1);
       for (int i = 0; i < win_info->content_size; i++)
 	{
-	  struct tui_win_element *element;
+	  tui_exec_info_content &element = content[i];
 	  struct tui_win_element *src_element;
 	  int mode;
 
-	  element = exec_info_ptr->content[i];
 	  src_element = win_info->content[i];
 
-	  memset(element->which_element.simple_string, ' ',
-		 sizeof(element->which_element.simple_string));
-	  element->which_element.simple_string[TUI_EXECINFO_SIZE - 1] = 0;
+	  memset (element, ' ', sizeof (tui_exec_info_content));
+	  element[TUI_EXECINFO_SIZE - 1] = 0;
 
 	  /* Now update the exec info content based upon the state
 	     of each line as indicated by the source content.  */
 	  mode = src_element->which_element.source.has_break;
 	  if (mode & TUI_BP_HIT)
-	    element->which_element.simple_string[TUI_BP_HIT_POS] =
-	      (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
+	    element[TUI_BP_HIT_POS] = (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
 	  else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))
-	    element->which_element.simple_string[TUI_BP_HIT_POS] =
-	      (mode & TUI_BP_HARDWARE) ? 'h' : 'b';
+	    element[TUI_BP_HIT_POS] = (mode & TUI_BP_HARDWARE) ? 'h' : 'b';
 
 	  if (mode & TUI_BP_ENABLED)
-	    element->which_element.simple_string[TUI_BP_BREAK_POS] = '+';
+	    element[TUI_BP_BREAK_POS] = '+';
 	  else if (mode & TUI_BP_DISABLED)
-	    element->which_element.simple_string[TUI_BP_BREAK_POS] = '-';
+	    element[TUI_BP_BREAK_POS] = '-';
 
 	  if (src_element->which_element.source.is_exec_point)
-	    element->which_element.simple_string[TUI_EXEC_POS] = '>';
+	    element[TUI_EXEC_POS] = '>';
 	}
-      exec_info_ptr->content_size = win_info->content_size;
     }
 }
 
@@ -525,17 +527,16 @@ tui_set_exec_info_content (struct tui_source_window_base *win_info)
 void
 tui_show_exec_info_content (struct tui_source_window_base *win_info)
 {
-  struct tui_gen_win_info *exec_info = win_info->execution_info;
-  int cur_line;
+  struct tui_exec_info_window *exec_info = win_info->execution_info;
+  const tui_exec_info_content *content = exec_info->get_content ();
 
   werase (exec_info->handle);
   exec_info->refresh_window ();
-  for (cur_line = 1; (cur_line <= exec_info->content_size); cur_line++)
+  for (int cur_line = 1; (cur_line <= win_info->content_size); cur_line++)
     mvwaddstr (exec_info->handle,
 	       cur_line,
 	       0,
-	       (char *) exec_info->content[cur_line - 1]
-			  ->which_element.simple_string);
+	       content[cur_line - 1]);
   exec_info->refresh_window ();
   exec_info->content_in_use = TRUE;
 }

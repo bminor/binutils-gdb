@@ -364,6 +364,8 @@ static void
 init_content_element (struct tui_win_element *element, 
 		      enum tui_win_type type)
 {
+  gdb_assert (type != EXEC_INFO_WIN);
+
   switch (type)
     {
     case SRC_WIN:
@@ -397,10 +399,6 @@ init_content_element (struct tui_win_element *element,
       element->which_element.locator.line_no = 0;
       element->which_element.locator.addr = 0;
       break;
-    case EXEC_INFO_WIN:
-      memset(element->which_element.simple_string, ' ',
-             sizeof(element->which_element.simple_string));
-      break;
     default:
       break;
     }
@@ -426,6 +424,8 @@ tui_alloc_content (int num_elements, enum tui_win_type type)
   tui_win_content content;
   struct tui_win_element *element_block_ptr;
   int i;
+
+  gdb_assert (type != EXEC_INFO_WIN);
 
   content = XNEWVEC (struct tui_win_element *, num_elements);
 

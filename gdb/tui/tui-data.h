@@ -249,12 +249,39 @@ union tui_which_element
   struct tui_data_element data;		/* Elements of data_window.  */
   struct tui_command_element command;	/* Command elements.  */
   struct tui_locator_element locator;	/* Locator elements.  */
-  tui_exec_info_content simple_string;	/* Simple char based elements.  */
 };
 
 struct tui_win_element
 {
   union tui_which_element which_element;
+};
+
+/* Execution info window class.  */
+
+struct tui_exec_info_window : public tui_gen_win_info
+{
+  tui_exec_info_window ()
+    : tui_gen_win_info (EXEC_INFO_WIN)
+  {
+  }
+
+  ~tui_exec_info_window () override
+  {
+    xfree (m_content);
+  }
+
+  /* Get or allocate contents.  */
+  tui_exec_info_content *maybe_allocate_content (int n_elements);
+
+  /* Return the contents.  */
+  const tui_exec_info_content *get_content () const
+  {
+    return m_content;
+  }
+
+private:
+
+  tui_exec_info_content *m_content = nullptr;
 };
 
 /* This defines information about each logical window.  */
@@ -380,7 +407,7 @@ public:
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
-  struct tui_gen_win_info *execution_info = nullptr;
+  struct tui_exec_info_window *execution_info = nullptr;
   /* Used for horizontal scroll.  */
   int horizontal_offset = 0;
   struct tui_line_or_address start_line_or_addr;
