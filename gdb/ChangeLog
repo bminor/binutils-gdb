@@ -1,5 +1,13 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_command_element): Remove.
+	(union tui_which_element) <command>: Remove.
+	* tui/tui-data.c (init_content_element): Remove CMD_WIN case.  Add
+	assert.
+	(free_content_elements): Remove CMD_WIN case.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (tui_set_layout): Update.
 	* tui/tui-data.h (struct tui_layout_def) <split>: Remove.
 	* tui/tui-data.c (layout_def): Update.

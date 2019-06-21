@@ -201,12 +201,6 @@ struct tui_data_element
 };
 
 
-/* Elements in the command window content.  */
-struct tui_command_element
-{
-  char *line;
-};
-
 #ifdef PATH_MAX
 # define MAX_LOCATOR_ELEMENT_LEN        PATH_MAX
 #else
@@ -234,7 +228,6 @@ union tui_which_element
   struct tui_source_element source;	/* The source elements.  */
   struct tui_gen_win_info *data_window;	/* Data display elements.  */
   struct tui_data_element data;		/* Elements of data_window.  */
-  struct tui_command_element command;	/* Command elements.  */
 };
 
 struct tui_win_element

@@ -366,6 +366,7 @@ init_content_element (struct tui_win_element *element,
 {
   gdb_assert (type != EXEC_INFO_WIN);
   gdb_assert (type != LOCATOR_WIN);
+  gdb_assert (type != CMD_WIN);
 
   switch (type)
     {
@@ -382,9 +383,6 @@ init_content_element (struct tui_win_element *element,
       element->which_element.data_window->content =
 	tui_alloc_content (1, DATA_ITEM_WIN);
       element->which_element.data_window->content_size = 1;
-      break;
-    case CMD_WIN:
-      element->which_element.command.line = NULL;
       break;
     case DATA_ITEM_WIN:
       element->which_element.data.name = NULL;
@@ -626,9 +624,6 @@ free_content_elements (tui_win_content content,
 		      xfree (element->which_element.data.value);
                       xfree (element->which_element.data.content);
 		      xfree (element);
-		      break;
-		    case CMD_WIN:
-		      xfree (element->which_element.command.line);
 		      break;
 		    default:
 		      break;
