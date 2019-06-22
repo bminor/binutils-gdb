@@ -270,8 +270,7 @@ tui_show_register_group (struct reggroup *group,
           pos++;
 	}
 
-      TUI_DATA_WIN->content_size =
-	TUI_DATA_WIN->regs_content_count + TUI_DATA_WIN->data_content_count;
+      TUI_DATA_WIN->content_size = TUI_DATA_WIN->regs_content_count;
       ret = TUI_SUCCESS;
     }
 
@@ -395,12 +394,10 @@ tui_display_reg_element_at_line (int start_element_no,
 	  if (first_line_on_last_page < 0)
 	    first_line_on_last_page = 0;
 
-	  /* If there is no other data displayed except registers, and
-	     the element_no causes us to scroll past the end of the
+	  /* If the element_no causes us to scroll past the end of the
 	     registers, adjust what element to really start the
 	     display at.  */
-	  if (TUI_DATA_WIN->data_content_count <= 0
-	      && start_line_no > first_line_on_last_page)
+	  if (start_line_no > first_line_on_last_page)
 	    element_no
 	      = tui_first_reg_element_no_inline (first_line_on_last_page);
 	}

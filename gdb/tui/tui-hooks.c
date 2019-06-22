@@ -81,7 +81,7 @@ tui_register_changed (struct frame_info *frame, int regno)
   if (tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
-      tui_check_data_values (fi);
+      tui_check_register_values (fi);
       tui_refreshing_registers = 0;
     }
 }
@@ -153,7 +153,7 @@ tui_refresh_frame_and_register_information (int registers_too_p)
       && (frame_info_changed_p || registers_too_p))
     {
       tui_refreshing_registers = 1;
-      tui_check_data_values (fi);
+      tui_check_register_values (fi);
       tui_refreshing_registers = 0;
     }
 }

@@ -146,15 +146,6 @@ enum tui_layout_type
   UNDEFINED_LAYOUT
 };
 
-/* Basic data types that can be displayed in the data window.  */
-enum tui_data_type
-{
-  TUI_REGISTER,
-  TUI_SCALAR,
-  TUI_COMPLEX,
-  TUI_STRUCT
-};
-
 enum tui_line_or_address_kind
 {
   LOA_LINE,
@@ -282,7 +273,6 @@ struct tui_data_item_window : public tui_gen_win_info
   const char *name = nullptr;
   /* The register number, or data display number.  */
   int item_no = UNDEFINED_ITEM;
-  enum tui_data_type data_type = TUI_REGISTER;
   void *value = nullptr;
   bool highlight = false;
   char *content = nullptr;
@@ -487,9 +477,6 @@ struct tui_data_window : public tui_win_info
     return DATA_NAME;
   }
 
-  /* Start of data display content.  */
-  tui_win_content data_content = NULL;
-  int data_content_count = 0;
   /* Start of regs display content.  */
   tui_win_content regs_content = NULL;
   int regs_content_count = 0;

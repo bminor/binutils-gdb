@@ -26,7 +26,6 @@
 
 extern void tui_erase_data_content (const char *);
 extern void tui_display_all_data (void);
-extern void tui_check_data_values (struct frame_info *);
 extern void tui_display_data_from_line (int);
 extern void tui_delete_data_content_windows (void);
 extern void tui_refresh_data_win (void);

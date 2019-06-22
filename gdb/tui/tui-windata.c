@@ -112,12 +112,6 @@ tui_display_all_data (void)
       tui_delete_data_content_windows ();
       tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
       tui_display_registers_from (0);
-
-      /* Then display the other data.  */
-      if (TUI_DATA_WIN->data_content != NULL
-	  && TUI_DATA_WIN->data_content_count > 0)
-	{
-	}
     }
 }
 
@@ -134,31 +128,7 @@ tui_display_data_from_line (int line_no)
 
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
 
-  /* There is no general data, force regs to display (if there are
-     any).  */
-  if (TUI_DATA_WIN->data_content_count <= 0)
-    tui_display_registers_from_line (_line_no, TRUE);
-  else
-    {
-      int regs_last_line = tui_last_regs_line_no ();
-
-
-      /* Display regs if we can.  */
-      if (tui_display_registers_from_line (_line_no, FALSE) < 0)
-	{ /* _line_no is past the regs display, so calc where the
-	     start data element is.  */
-	  if (regs_last_line < _line_no)
-	    { /* Figure out how many lines each element is to obtain
-		 the start element_no.  */
-	    }
-	}
-      else
-	{ /* Calculate the starting element of the data display, given
-	     regs_last_line and how many lines each element is, up to
-	     _line_no.  */
-	}
-      /* Now display the data , starting at element_no.  */
-    }
+  tui_display_registers_from_line (_line_no, TRUE);
 }
 
 
@@ -195,41 +165,6 @@ tui_data_window::refresh_all ()
 
       if (first_element >= 0)	/* Re-use existing windows.  */
 	tui_display_data_from (first_element, TRUE);
-    }
-}
-
-
-/* Function to check the data values and hilite any that have
-   changed.  */
-void
-tui_check_data_values (struct frame_info *frame)
-{
-  tui_check_register_values (frame);
-
-  /* Now check any other data values that there are.  */
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->is_visible)
-    {
-      int i;
-
-      for (i = 0; TUI_DATA_WIN->data_content_count; i++)
-	{
-#ifdef LATER
-	  tui_data_element_ptr data_element_ptr;
-	  struct tui_gen_win_info *data_item_win_ptr;
-	  Opaque new_value;
-
-	  data_item_ptr = &TUI_DATA_WIN->
-	    data_content[i]->which_element.data_window;
-	  data_element_ptr = &((tui_win_content)
-			       data_item_win_ptr->content)[0]->which_element.data;
-	  if value
-	    has changed (data_element_ptr, frame, &new_value)
-	    {
-	      data_element_ptr->value = new_value;
-	      update the display with the newobj value, hiliting it.
-	    }
-#endif
-	}
     }
 }
 

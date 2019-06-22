@@ -1,5 +1,24 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.c (tui_data_item_window): Update.
+	* tui/tui-windata.h (tui_check_data_values): Don't declare.
+	* tui/tui-windata.c (tui_display_all_data)
+	(tui_display_data_from_line): Update.
+	(tui_check_data_values): Remove.
+	* tui/tui-regs.c (tui_show_register_group)
+	(tui_display_reg_element_at_line): Update.
+	* tui/tui-hooks.c (tui_register_changed)
+	(tui_refresh_frame_and_register_information): Call
+	tui_check_register_values.
+	* tui/tui-data.h (struct tui_data_window) <data_content,
+	data_content_count, data_type>: Remove.
+	(enum tui_data_type): Remove.
+
+	* tui/tui-data.c (tui_data_window::clear_detail)
+	(~tui_data_window): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_first_data_item_displayed): Don't
 	declare.
 	* tui/tui-windata.c (tui_data_window::first_data_item_displayed):

@@ -175,8 +175,6 @@ tui_cmd_window::clear_detail ()
 void
 tui_data_window::clear_detail ()
 {
-  data_content = NULL;
-  data_content_count = 0;
   regs_content = NULL;
   regs_content_count = 0;
   regs_column_count = 1;
@@ -485,9 +483,6 @@ tui_data_window::~tui_data_window ()
       tui_free_data_content (regs_content, regs_content_count);
       regs_content = NULL;
       regs_content_count = 0;
-      tui_free_data_content (data_content, data_content_count);
-      data_content = NULL;
-      data_content_count = 0;
       regs_column_count = 1;
       display_regs = false;
       content = NULL;
@@ -567,8 +562,6 @@ free_content (tui_win_content content,
 
 tui_data_item_window::~tui_data_item_window ()
 {
-  if (data_type != TUI_REGISTER)
-    xfree ((void *) name);
   xfree (value);
   xfree (content);
 }
