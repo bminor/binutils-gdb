@@ -367,6 +367,7 @@ init_content_element (struct tui_win_element *element,
   gdb_assert (type != EXEC_INFO_WIN);
   gdb_assert (type != LOCATOR_WIN);
   gdb_assert (type != CMD_WIN);
+  gdb_assert (type != DATA_ITEM_WIN);
 
   switch (type)
     {
@@ -379,18 +380,7 @@ init_content_element (struct tui_win_element *element,
       element->which_element.source.has_break = FALSE;
       break;
     case DATA_WIN:
-      element->which_element.data_window = new struct tui_gen_win_info (DATA_ITEM_WIN);
-      element->which_element.data_window->content =
-	tui_alloc_content (1, DATA_ITEM_WIN);
-      element->which_element.data_window->content_size = 1;
-      break;
-    case DATA_ITEM_WIN:
-      element->which_element.data.name = NULL;
-      element->which_element.data.type = TUI_REGISTER;
-      element->which_element.data.item_no = UNDEFINED_ITEM;
-      element->which_element.data.value = NULL;
-      element->which_element.data.highlight = FALSE;
-      element->which_element.data.content = NULL;
+      element->which_element.data_window = new tui_data_item_window ();
       break;
     default:
       break;
@@ -581,6 +571,14 @@ free_content (tui_win_content content,
 }
 
 
+tui_data_item_window::~tui_data_item_window ()
+{
+  if (data_type != TUI_REGISTER)
+    xfree ((void *) name);
+  xfree (value);
+  xfree (content);
+}
+
 /* free_content_elements().
  */
 static void
@@ -613,16 +611,6 @@ free_content_elements (tui_win_content content,
 		      break;
 		    case DATA_WIN:
 		      delete element->which_element.data_window;
-		      xfree (element);
-		      break;
-		    case DATA_ITEM_WIN:
-		      /* Note that data elements are not allocated in
-		         a single block, but individually, as
-		         needed.  */
-		      if (element->which_element.data.type != TUI_REGISTER)
-			xfree ((void *)element->which_element.data.name);
-		      xfree (element->which_element.data.value);
-                      xfree (element->which_element.data.content);
 		      xfree (element);
 		      break;
 		    default:

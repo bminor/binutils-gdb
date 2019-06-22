@@ -188,19 +188,6 @@ struct tui_source_element
 };
 
 
-/* Elements in the data display window content.  */
-struct tui_data_element
-{
-  const char *name;
-  int item_no;		/* The register number, or data display
-			   number.  */
-  enum tui_data_type type;
-  void *value;
-  int highlight;
-  char *content;
-};
-
-
 #ifdef PATH_MAX
 # define MAX_LOCATOR_ELEMENT_LEN        PATH_MAX
 #else
@@ -226,8 +213,7 @@ typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
 union tui_which_element
 {
   struct tui_source_element source;	/* The source elements.  */
-  struct tui_gen_win_info *data_window;	/* Data display elements.  */
-  struct tui_data_element data;		/* Elements of data_window.  */
+  struct tui_data_item_window *data_window;	/* Data display elements.  */
 };
 
 struct tui_win_element
@@ -280,6 +266,26 @@ struct tui_locator_window : public tui_gen_win_info
   CORE_ADDR addr = 0;
   /* Architecture associated with code at this location.  */
   struct gdbarch *gdbarch = nullptr;
+};
+
+/* A data item window.  */
+
+struct tui_data_item_window : public tui_gen_win_info
+{
+  tui_data_item_window ()
+    : tui_gen_win_info (DATA_ITEM_WIN)
+  {
+  }
+
+  ~tui_data_item_window () override;
+
+  const char *name = nullptr;
+  /* The register number, or data display number.  */
+  int item_no = UNDEFINED_ITEM;
+  enum tui_data_type data_type = TUI_REGISTER;
+  void *value = nullptr;
+  bool highlight = false;
+  char *content = nullptr;
 };
 
 /* This defines information about each logical window.  */

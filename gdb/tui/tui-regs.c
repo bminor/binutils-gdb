@@ -47,17 +47,15 @@
 /*****************************************
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
-static void
-tui_display_register (struct tui_data_element *data,
-                      struct tui_gen_win_info *win_info);
+static void tui_display_register (struct tui_data_item_window *data);
 
 static enum tui_status tui_show_register_group (struct reggroup *group,
 						struct frame_info *frame,
 						int refresh_values_only);
 
 static enum tui_status tui_get_register (struct frame_info *frame,
-					 struct tui_data_element *data,
-					 int regnum, int *changedp);
+					 struct tui_data_item_window *data,
+					 int regnum, bool *changedp);
 
 
 
@@ -162,13 +160,11 @@ tui_show_registers (struct reggroup *group)
       /* Clear all notation of changed values.  */
       for (i = 0; i < TUI_DATA_WIN->regs_content_count; i++)
 	{
-	  struct tui_gen_win_info *data_item_win;
-          struct tui_win_element *win;
+	  struct tui_data_item_window *data_item_win;
 
 	  data_item_win = TUI_DATA_WIN->regs_content[i]
             ->which_element.data_window;
-          win = data_item_win->content[0];
-          win->which_element.data.highlight = FALSE;
+	  data_item_win->highlight = false;
 	}
       TUI_DATA_WIN->current_group = group;
       tui_display_all_data ();
@@ -246,8 +242,7 @@ tui_show_register_group (struct reggroup *group,
       pos = 0;
       for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
         {
-	  struct tui_gen_win_info *data_item_win;
-          struct tui_data_element *data;
+	  struct tui_data_item_window *data_item_win;
           const char *name;
 
           /* Must be in the group.  */
@@ -262,16 +257,15 @@ tui_show_register_group (struct reggroup *group,
 
 	  data_item_win =
             TUI_DATA_WIN->regs_content[pos]->which_element.data_window;
-          data = &data_item_win->content[0]->which_element.data;
-          if (data)
+          if (data_item_win)
             {
               if (!refresh_values_only)
                 {
-                  data->item_no = regnum;
-                  data->name = name;
-                  data->highlight = FALSE;
+                  data_item_win->item_no = regnum;
+                  data_item_win->name = name;
+                  data_item_win->highlight = false;
                 }
-              tui_get_register (frame, data, regnum, 0);
+              tui_get_register (frame, data_item_win, regnum, 0);
             }
           pos++;
 	}
@@ -300,16 +294,14 @@ tui_display_registers_from (int start_element_no)
       int max_len = 0;
       for (i = 0; i < TUI_DATA_WIN->regs_content_count; i++)
         {
-          struct tui_data_element *data;
-          struct tui_gen_win_info *data_item_win;
+          struct tui_data_item_window *data_item_win;
           char *p;
           int len;
 
           data_item_win
 	    = TUI_DATA_WIN->regs_content[i]->which_element.data_window;
-          data = &data_item_win->content[0]->which_element.data;
           len = 0;
-          p = data->content;
+          p = data_item_win->content;
           if (p != 0)
             while (*p)
               {
@@ -343,13 +335,11 @@ tui_display_registers_from (int start_element_no)
 		 && i < TUI_DATA_WIN->regs_content_count;
 	       j++)
 	    {
-	      struct tui_gen_win_info *data_item_win;
-	      struct tui_data_element *data_element_ptr;
+	      struct tui_data_item_window *data_item_win;
 
 	      /* Create the window if necessary.  */
 	      data_item_win = TUI_DATA_WIN->regs_content[i]
                 ->which_element.data_window;
-	      data_element_ptr = &data_item_win->content[0]->which_element.data;
               if (data_item_win->handle != NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
@@ -373,7 +363,7 @@ tui_display_registers_from (int start_element_no)
 
 	      /* Get the printable representation of the register
                  and display it.  */
-              tui_display_register (data_element_ptr, data_item_win);
+              tui_display_register (data_item_win);
 	      i++;		/* Next register.  */
 	    }
 	  cur_y++;		/* Next row.  */
@@ -481,21 +471,20 @@ tui_check_register_values (struct frame_info *frame)
 
 	  for (i = 0; (i < TUI_DATA_WIN->regs_content_count); i++)
 	    {
-	      struct tui_data_element *data;
-	      struct tui_gen_win_info *data_item_win_ptr;
+	      struct tui_data_item_window *data_item_win_ptr;
 	      int was_hilighted;
 
 	      data_item_win_ptr = TUI_DATA_WIN->regs_content[i]->
                 which_element.data_window;
-	      data = &data_item_win_ptr->content[0]->which_element.data;
-	      was_hilighted = data->highlight;
+	      was_hilighted = data_item_win_ptr->highlight;
 
-              tui_get_register (frame, data,
-                                data->item_no, &data->highlight);
+              tui_get_register (frame, data_item_win_ptr,
+                                data_item_win_ptr->item_no,
+				&data_item_win_ptr->highlight);
 
-	      if (data->highlight || was_hilighted)
+	      if (data_item_win_ptr->highlight || was_hilighted)
 		{
-                  tui_display_register (data, data_item_win_ptr);
+                  tui_display_register (data_item_win_ptr);
 		}
 	    }
 	}
@@ -505,10 +494,9 @@ tui_check_register_values (struct frame_info *frame)
 /* Display a register in a window.  If hilite is TRUE, then the value
    will be displayed in reverse video.  */
 static void
-tui_display_register (struct tui_data_element *data,
-                      struct tui_gen_win_info *win_info)
+tui_display_register (struct tui_data_item_window *data)
 {
-  if (win_info->handle != NULL)
+  if (data->handle != NULL)
     {
       int i;
 
@@ -518,14 +506,14 @@ tui_display_register (struct tui_data_element *data,
 	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
 	   to code that causes the compiler to generate an unused-value
 	   warning.  */
-	(void) wstandout (win_info->handle);
+	(void) wstandout (data->handle);
       
-      wmove (win_info->handle, 0, 0);
-      for (i = 1; i < win_info->width; i++)
-        waddch (win_info->handle, ' ');
-      wmove (win_info->handle, 0, 0);
+      wmove (data->handle, 0, 0);
+      for (i = 1; i < data->width; i++)
+        waddch (data->handle, ' ');
+      wmove (data->handle, 0, 0);
       if (data->content)
-        waddstr (win_info->handle, data->content);
+        waddstr (data->handle, data->content);
 
       if (data->highlight)
 	/* We ignore the return value, casting it to void in order to avoid
@@ -533,8 +521,8 @@ tui_display_register (struct tui_data_element *data,
 	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
 	   to code that causes the compiler to generate an unused-value
 	   warning.  */
-	(void) wstandend (win_info->handle);
-      win_info->refresh_window ();
+	(void) wstandend (data->handle);
+      data->refresh_window ();
     }
 }
 
@@ -716,13 +704,13 @@ tui_register_format (struct frame_info *frame, int regnum)
    changed with respect to the previous call.  */
 static enum tui_status
 tui_get_register (struct frame_info *frame,
-                  struct tui_data_element *data, 
-		  int regnum, int *changedp)
+                  struct tui_data_item_window *data, 
+		  int regnum, bool *changedp)
 {
   enum tui_status ret = TUI_FAILURE;
 
   if (changedp)
-    *changedp = FALSE;
+    *changedp = false;
   if (target_has_registers)
     {
       char *prev_content = data->content;
@@ -731,7 +719,7 @@ tui_get_register (struct frame_info *frame,
 
       if (changedp != NULL
 	  && strcmp (prev_content, data->content) != 0)
-	*changedp = 1;
+	*changedp = true;
 
       xfree (prev_content);
 

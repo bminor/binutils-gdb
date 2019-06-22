@@ -1,5 +1,20 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_show_registers, tui_show_register_group)
+	(tui_display_registers_from, tui_check_register_values): Update.
+	(tui_display_register): Remove win_info parameter; update.
+	(tui_get_register): Change type of parameters.
+	* tui/tui-data.h (struct tui_data_element): Remove.
+	(union tui_which_element) <data>: Remove.
+	<data_window>: Change type.
+	(struct tui_data_item_window): New.
+	* tui/tui-data.c (init_content_element): Remove DATA_ITEM_WIN
+	case.  Add assert.
+	(~tui_data_item_window): New destructor.
+	(free_content_elements): Remove DATA_ITEM_WIN case.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (enum tui_win_type) <MAX_WINDOWS, UNDEFINED_WIN>:
 	Remove.
 
