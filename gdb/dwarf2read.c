@@ -3229,10 +3229,11 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
       const uint8_t offset_size = dwarf5_is_dwarf64 ? 8 : 4;
       if (addr + entry_length > section->buffer + section->size)
 	{
-	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	  warning (_("Section .debug_aranges in %s entry at offset %s "
 	             "length %s exceeds section length %s, "
 		     "ignoring .debug_aranges."),
-		   objfile_name (objfile), entry_addr - section->buffer,
+		   objfile_name (objfile),
+		   plongest (entry_addr - section->buffer),
 		   plongest (bytes_read + entry_length),
 		   pulongest (section->size));
 	  return;
@@ -3243,10 +3244,10 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
       addr += 2;
       if (version != 2)
 	{
-	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	  warning (_("Section .debug_aranges in %s entry at offset %s "
 		     "has unsupported version %d, ignoring .debug_aranges."),
-		   objfile_name (objfile), entry_addr - section->buffer,
-		   version);
+		   objfile_name (objfile),
+		   plongest (entry_addr - section->buffer), version);
 	  return;
 	}
 
@@ -3257,10 +3258,11 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	= debug_info_offset_to_per_cu.find (sect_offset (debug_info_offset));
       if (per_cu_it == debug_info_offset_to_per_cu.cend ())
 	{
-	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	  warning (_("Section .debug_aranges in %s entry at offset %s "
 		     "debug_info_offset %s does not exists, "
 		     "ignoring .debug_aranges."),
-		   objfile_name (objfile), entry_addr - section->buffer,
+		   objfile_name (objfile),
+		   plongest (entry_addr - section->buffer),
 		   pulongest (debug_info_offset));
 	  return;
 	}
@@ -3269,20 +3271,21 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
       const uint8_t address_size = *addr++;
       if (address_size < 1 || address_size > 8)
 	{
-	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	  warning (_("Section .debug_aranges in %s entry at offset %s "
 		     "address_size %u is invalid, ignoring .debug_aranges."),
-		   objfile_name (objfile), entry_addr - section->buffer,
-		   address_size);
+		   objfile_name (objfile),
+		   plongest (entry_addr - section->buffer), address_size);
 	  return;
 	}
 
       const uint8_t segment_selector_size = *addr++;
       if (segment_selector_size != 0)
 	{
-	  warning (_("Section .debug_aranges in %s entry at offset %zu "
+	  warning (_("Section .debug_aranges in %s entry at offset %s "
 		     "segment_selector_size %u is not supported, "
 		     "ignoring .debug_aranges."),
-		   objfile_name (objfile), entry_addr - section->buffer,
+		   objfile_name (objfile),
+		   plongest (entry_addr - section->buffer),
 		   segment_selector_size);
 	  return;
 	}
@@ -3295,9 +3298,10 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
            padding > 0; padding--)
 	if (*addr++ != 0)
 	  {
-	    warning (_("Section .debug_aranges in %s entry at offset %zu "
+	    warning (_("Section .debug_aranges in %s entry at offset %s "
 		       "padding is not zero, ignoring .debug_aranges."),
-		     objfile_name (objfile), entry_addr - section->buffer);
+		     objfile_name (objfile),
+		     plongest (entry_addr - section->buffer));
 	    return;
 	  }
 
@@ -3305,10 +3309,11 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	{
 	  if (addr + 2 * address_size > entry_end)
 	    {
-	      warning (_("Section .debug_aranges in %s entry at offset %zu "
+	      warning (_("Section .debug_aranges in %s entry at offset %s "
 			 "address list is not properly terminated, "
 			 "ignoring .debug_aranges."),
-		       objfile_name (objfile), entry_addr - section->buffer);
+		       objfile_name (objfile),
+		       plongest (entry_addr - section->buffer));
 	      return;
 	    }
 	  ULONGEST start = extract_unsigned_integer (addr, address_size,
@@ -5517,8 +5522,9 @@ read_debug_names_from_section (struct objfile *objfile,
   if (addr != abbrev_table_start + abbrev_table_size)
     {
       warning (_("Section .debug_names in %s has abbreviation_table "
-                 "of size %zu vs. written as %u, ignoring .debug_names."),
-	       filename, addr - abbrev_table_start, abbrev_table_size);
+		 "of size %s vs. written as %u, ignoring .debug_names."),
+	       filename, plongest (addr - abbrev_table_start),
+	       abbrev_table_size);
       return false;
     }
   map.entry_pool = addr;
