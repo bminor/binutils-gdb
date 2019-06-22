@@ -45,10 +45,7 @@ enum tui_win_type
   /* Auxillary windows.  */
   LOCATOR_WIN,
   EXEC_INFO_WIN,
-  DATA_ITEM_WIN,
-  /* This must ALWAYS be next to last.  */
-  MAX_WINDOWS,
-  UNDEFINED_WIN		/* LAST */
+  DATA_ITEM_WIN
 };
 
 /* GENERAL TUI FUNCTIONS */

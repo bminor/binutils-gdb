@@ -1,5 +1,10 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (enum tui_win_type) <MAX_WINDOWS, UNDEFINED_WIN>:
+	Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_command_element): Remove.
 	(union tui_which_element) <command>: Remove.
 	* tui/tui-data.c (init_content_element): Remove CMD_WIN case.  Add
