@@ -1,5 +1,32 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_data_window::refresh_window): Update.
+	* tui/tui-windata.c (tui_data_window::first_data_item_displayed)
+	(tui_delete_data_content_windows, tui_display_all_data)
+	(tui_data_window::do_scroll_vertical, tui_display_data_from):
+	Update.
+	* tui/tui-win.c (tui_data_window::set_new_height): Simplify.
+	* tui/tui-regs.c (tui_last_regs_line_no)
+	(tui_line_from_reg_element_no, tui_first_reg_element_no_inline)
+	(tui_show_registers): Update.
+	(tui_show_register_group): Return void.  Update.
+	(tui_display_registers_from, tui_display_reg_element_at_line)
+	(tui_display_registers_from_line, tui_check_register_values):
+	Update.
+	* tui/tui-data.h (union tui_which_element) <data_window>: Remove
+	member.
+	(struct tui_data_window) <regs_content>: Now a std::vector.
+	<regs_content_count>: Remove.
+	(tui_add_content_elements, tui_free_data_content): Don't declare.
+	* tui/tui-data.c (tui_data_window::clear_detail): Update.
+	(init_content_element): Remove DATA_WIN case.  Add assert.
+	(tui_add_content_elements): Remove.
+	(tui_data_window): Update.
+	(tui_free_data_content): Remove.
+	(free_content_elements): Remove DATA_WIN case.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.c (tui_data_item_window): Update.
 	* tui/tui-windata.h (tui_check_data_values): Don't declare.
 	* tui/tui-windata.c (tui_display_all_data)

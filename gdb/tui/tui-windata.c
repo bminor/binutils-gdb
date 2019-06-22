@@ -44,11 +44,11 @@
 int
 tui_data_window::first_data_item_displayed ()
 {
-  for (int i = 0; i < content_size; i++)
+  for (int i = 0; i < regs_content.size (); i++)
     {
       struct tui_gen_win_info *data_item_win;
 
-      data_item_win = content[i]->which_element.data_window;
+      data_item_win = regs_content[i].get ();
       if (data_item_win->handle != NULL && data_item_win->is_visible)
 	return i;
     }
@@ -62,16 +62,11 @@ tui_data_window::first_data_item_displayed ()
 void
 tui_delete_data_content_windows (void)
 {
-  int i;
-  struct tui_gen_win_info *data_item_win_ptr;
-
-  for (i = 0; (i < TUI_DATA_WIN->content_size); i++)
+  for (auto &&win : TUI_DATA_WIN->regs_content)
     {
-      data_item_win_ptr
-	= TUI_DATA_WIN->content[i]->which_element.data_window;
-      tui_delete_win (data_item_win_ptr->handle);
-      data_item_win_ptr->handle = NULL;
-      data_item_win_ptr->is_visible = false;
+      tui_delete_win (win->handle);
+      win->handle = NULL;
+      win->is_visible = false;
     }
 }
 
@@ -104,7 +99,7 @@ tui_erase_data_content (const char *prompt)
 void
 tui_display_all_data (void)
 {
-  if (TUI_DATA_WIN->content_size <= 0)
+  if (TUI_DATA_WIN->regs_content.empty ())
     tui_erase_data_content (NO_DATA_STRING);
   else
     {
@@ -138,7 +133,7 @@ tui_display_data_from (int element_no, int reuse_windows)
 {
   int first_line = (-1);
 
-  if (element_no < TUI_DATA_WIN->regs_content_count)
+  if (element_no < TUI_DATA_WIN->regs_content.size ())
     first_line = tui_line_from_reg_element_no (element_no);
   else
     { /* Calculate the first_line from the element number.  */
@@ -159,7 +154,7 @@ void
 tui_data_window::refresh_all ()
 {
   tui_erase_data_content (NULL);
-  if (content_size > 0)
+  if (!regs_content.empty ())
     {
       int first_element = first_data_item_displayed ();
 
@@ -177,7 +172,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
   int first_line = (-1);
 
   first_element_no = first_data_item_displayed ();
-  if (first_element_no < regs_content_count)
+  if (first_element_no < regs_content.size ())
     first_line = tui_line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in

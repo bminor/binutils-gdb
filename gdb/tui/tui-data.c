@@ -175,8 +175,7 @@ tui_cmd_window::clear_detail ()
 void
 tui_data_window::clear_detail ()
 {
-  regs_content = NULL;
-  regs_content_count = 0;
+  regs_content.clear ();
   regs_column_count = 1;
   display_regs = false;
 }
@@ -360,6 +359,7 @@ init_content_element (struct tui_win_element *element,
   gdb_assert (type != LOCATOR_WIN);
   gdb_assert (type != CMD_WIN);
   gdb_assert (type != DATA_ITEM_WIN);
+  gdb_assert (type != DATA_WIN);
 
   switch (type)
     {
@@ -370,9 +370,6 @@ init_content_element (struct tui_win_element *element,
       element->which_element.source.line_or_addr.u.line_no = 0;
       element->which_element.source.is_exec_point = FALSE;
       element->which_element.source.has_break = FALSE;
-      break;
-    case DATA_WIN:
-      element->which_element.data_window = new tui_data_item_window ();
       break;
     default:
       break;
@@ -426,39 +423,6 @@ tui_alloc_content (int num_elements, enum tui_win_type type)
 }
 
 
-/* Adds the input number of elements to the windows's content.  If no
-   content has been allocated yet, alloc_content() is called to do
-   this.  The index of the first element added is returned, unless
-   there is a memory allocation error, in which case, (-1) is
-   returned.  */
-int
-tui_add_content_elements (struct tui_gen_win_info *win_info, 
-			  int num_elements)
-{
-  struct tui_win_element *element_ptr;
-  int i, index_start;
-
-  if (win_info->content == NULL)
-    {
-      win_info->content = tui_alloc_content (num_elements, win_info->type);
-      index_start = 0;
-    }
-  else
-    index_start = win_info->content_size;
-  if (win_info->content != NULL)
-    {
-      for (i = index_start; (i < num_elements + index_start); i++)
-	{
-	  element_ptr = XNEW (struct tui_win_element);
-	  win_info->content[i] = element_ptr;
-	  init_content_element (element_ptr, win_info->type);
-	  win_info->content_size++;
-	}
-    }
-
-  return index_start;
-}
-
 tui_gen_win_info::~tui_gen_win_info ()
 {
   if (handle != NULL)
@@ -480,9 +444,6 @@ tui_data_window::~tui_data_window ()
 {
   if (content != NULL)
     {
-      tui_free_data_content (regs_content, regs_content_count);
-      regs_content = NULL;
-      regs_content_count = 0;
       regs_column_count = 1;
       display_regs = false;
       content = NULL;
@@ -512,33 +473,6 @@ tui_free_win_content (struct tui_gen_win_info *win_info)
       win_info->content = NULL;
     }
   win_info->content_size = 0;
-}
-
-
-void
-tui_free_data_content (tui_win_content content, 
-		       int content_size)
-{
-  int i;
-
-  /* Remember that data window content elements are of type struct
-     tui_gen_win_info *, each of which whose single element is a data
-     element.  */
-  for (i = 0; i < content_size; i++)
-    {
-      struct tui_gen_win_info *generic_win
-	= content[i]->which_element.data_window;
-
-      if (generic_win != NULL)
-	{
-	  tui_delete_win (generic_win->handle);
-	  generic_win->handle = NULL;
-	  tui_free_win_content (generic_win);
-	}
-    }
-  free_content (content,
-		content_size,
-		DATA_WIN);
 }
 
 
@@ -595,10 +529,6 @@ free_content_elements (tui_win_content content,
 		    {
 		    case SRC_WIN:
 		      xfree (element->which_element.source.line);
-		      break;
-		    case DATA_WIN:
-		      delete element->which_element.data_window;
-		      xfree (element);
 		      break;
 		    default:
 		      break;

@@ -204,7 +204,6 @@ typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
 union tui_which_element
 {
   struct tui_source_element source;	/* The source elements.  */
-  struct tui_data_item_window *data_window;	/* Data display elements.  */
 };
 
 struct tui_win_element
@@ -477,9 +476,8 @@ struct tui_data_window : public tui_win_info
     return DATA_NAME;
   }
 
-  /* Start of regs display content.  */
-  tui_win_content regs_content = NULL;
-  int regs_content_count = 0;
+  /* Windows that are used to display registers.  */
+  std::vector<std::unique_ptr<tui_data_item_window>> regs_content;
   int regs_column_count = 0;
   /* Should regs be displayed at all?  */
   bool display_regs = false;
@@ -554,10 +552,7 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 /* Data Manipulation Functions.  */
 extern void tui_initialize_static_data (void);
 extern tui_win_content tui_alloc_content (int, enum tui_win_type);
-extern int tui_add_content_elements (struct tui_gen_win_info *, 
-				     int);
 extern void tui_free_win_content (struct tui_gen_win_info *);
-extern void tui_free_data_content (tui_win_content, int);
 extern void tui_free_all_source_wins_content (void);
 extern struct tui_win_info *tui_partial_win_by_name (const char *);
 extern enum tui_layout_type tui_current_layout (void);

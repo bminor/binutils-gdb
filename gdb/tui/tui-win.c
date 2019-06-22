@@ -1267,12 +1267,10 @@ void
 tui_data_window::set_new_height (int height)
 {
   /* Delete all data item windows.  */
-  for (int i = 0; i < content_size; i++)
+  for (auto &&win : regs_content)
     {
-      struct tui_gen_win_info *gen_win_info
-	= content[i]->which_element.data_window;
-      tui_delete_win (gen_win_info->handle);
-      gen_win_info->handle = NULL;
+      tui_delete_win (win->handle);
+      win->handle = NULL;
     }
 }
 

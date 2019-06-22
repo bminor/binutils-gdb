@@ -45,16 +45,12 @@ tui_gen_win_info::refresh_window ()
 void
 tui_data_window::refresh_window ()
 {
-  if (content_size > 0)
+  if (!regs_content.empty ())
     {
-      for (int i = 0; i < content_size; i++)
+      for (auto &&win : regs_content)
 	{
-	  struct tui_gen_win_info *data_item_win_ptr;
-
-	  data_item_win_ptr = content[i]->which_element.data_window;
-	  if (data_item_win_ptr != NULL
-	      && data_item_win_ptr->handle != NULL)
-	    wrefresh (data_item_win_ptr->handle);
+	  if (win != NULL && win->handle != NULL)
+	    wrefresh (win->handle);
 	}
     }
   else
