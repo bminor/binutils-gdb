@@ -1,5 +1,12 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (tui_init_generic_part): Don't declare.
+	* tui/tui-data.c (tui_init_generic_part): Remove, moving
+	contents...
+	(tui_initialize_static_data): ...here.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_show_registers, tui_show_register_group)
 	(tui_display_registers_from, tui_check_register_values): Update.
 	(tui_display_register): Remove win_info parameter; update.

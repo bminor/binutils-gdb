@@ -334,15 +334,9 @@ tui_partial_win_by_name (const char *name)
 
 
 void
-tui_initialize_static_data (void)
+tui_initialize_static_data ()
 {
-  tui_init_generic_part (tui_locator_win_info_ptr ());
-}
-
-
-void
-tui_init_generic_part (struct tui_gen_win_info *win)
-{
+  tui_gen_win_info *win = tui_locator_win_info_ptr ();
   win->width =
     win->height =
     win->origin.x =

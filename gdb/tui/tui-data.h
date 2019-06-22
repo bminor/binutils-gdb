@@ -562,7 +562,6 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 /* Data Manipulation Functions.  */
 extern void tui_initialize_static_data (void);
-extern void tui_init_generic_part (struct tui_gen_win_info *);
 extern tui_win_content tui_alloc_content (int, enum tui_win_type);
 extern int tui_add_content_elements (struct tui_gen_win_info *, 
 				     int);
