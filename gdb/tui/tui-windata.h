@@ -29,7 +29,6 @@ extern void tui_display_all_data (void);
 extern void tui_check_data_values (struct frame_info *);
 extern void tui_display_data_from_line (int);
 extern int tui_first_data_item_displayed (void);
-extern int tui_first_data_element_no_in_line (int);
 extern void tui_delete_data_content_windows (void);
 extern void tui_refresh_data_win (void);
 extern void tui_display_data_from (int, int);

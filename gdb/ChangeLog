@@ -1,5 +1,11 @@
 2019-06-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_first_data_element_no_in_line): Don't
+	declare.
+	* tui/tui-windata.c (tui_first_data_element_no_in_line): Remove.
+
+2019-06-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (tui_del_window, tui_del_data_windows): Don't
 	declare.
 	* tui/tui-data.c (tui_del_window, tui_del_data_windows): Remove.
