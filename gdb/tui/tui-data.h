@@ -505,6 +505,10 @@ protected:
   {
   }
   void do_make_visible_with_new_height () override;
+
+  /* Return the index of the first element displayed.  If none are
+     displayed, then return -1.  */
+  int first_data_item_displayed ();
 };
 
 struct tui_cmd_window : public tui_win_info

@@ -1,5 +1,16 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_first_data_item_displayed): Don't
+	declare.
+	* tui/tui-windata.c (tui_data_window::first_data_item_displayed):
+	Rename from tui_first_data_item_displayed.  Update.
+	(tui_data_window::refresh_all)
+	(tui_data_window::do_scroll_vertical): Update.
+	* tui/tui-data.h (struct tui_data_window)
+	<first_data_item_displayed>: Declare new method.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (tui_init_generic_part): Don't declare.
 	* tui/tui-data.c (tui_init_generic_part): Remove, moving
 	contents...

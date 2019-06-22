@@ -42,25 +42,18 @@
 /* Answer the index first element displayed.  If none are displayed,
    then return (-1).  */
 int
-tui_first_data_item_displayed (void)
+tui_data_window::first_data_item_displayed ()
 {
-  int element_no = (-1);
-  int i;
-
-  for (i = 0; 
-       i < TUI_DATA_WIN->content_size && element_no < 0;
-       i++)
+  for (int i = 0; i < content_size; i++)
     {
       struct tui_gen_win_info *data_item_win;
 
-      data_item_win
-	= TUI_DATA_WIN->content[i]->which_element.data_window;
-      if (data_item_win->handle != NULL
-	  && data_item_win->is_visible)
-	element_no = i;
+      data_item_win = content[i]->which_element.data_window;
+      if (data_item_win->handle != NULL && data_item_win->is_visible)
+	return i;
     }
 
-  return element_no;
+  return -1;
 }
 
 
@@ -198,7 +191,7 @@ tui_data_window::refresh_all ()
   tui_erase_data_content (NULL);
   if (content_size > 0)
     {
-      int first_element = tui_first_data_item_displayed ();
+      int first_element = first_data_item_displayed ();
 
       if (first_element >= 0)	/* Re-use existing windows.  */
 	tui_display_data_from (first_element, TRUE);
@@ -248,7 +241,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
   int first_element_no;
   int first_line = (-1);
 
-  first_element_no = tui_first_data_item_displayed ();
+  first_element_no = first_data_item_displayed ();
   if (first_element_no < regs_content_count)
     first_line = tui_line_from_reg_element_no (first_element_no);
   else
