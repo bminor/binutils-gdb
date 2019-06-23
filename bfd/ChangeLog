@@ -1,3 +1,8 @@
+2019-06-23  Alan Modra  <amodra@gmail.com>
+
+	PR 24689
+	* elfcode.h (elf_object_p): Warning fix.
+
 2019-06-21  Alan Modra  <amodra@gmail.com>
 
 	PR 24689
