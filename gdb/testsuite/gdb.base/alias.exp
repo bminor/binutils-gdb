@@ -66,3 +66,53 @@ gdb_test_no_output "alias set pr elms = set p elem"
 gdb_test_no_output "set pr elms 51"
 gdb_test "show print elements" "Limit .* is 51\[.\]" "verify set pr elms"
 gdb_test "help set print" "set print elms .*"
+
+# Verify alias command detects a non existing prefix.
+gdb_test "alias assigne imprime limite-elements = set print elements" \
+    "ALIAS and COMMAND prefixes do not match\." \
+    "assigne imprime prefix not defined"
+
+gdb_test "alias set imprime limite-elements = set print elements" \
+    "ALIAS and COMMAND prefixes do not match\." \
+    "set imprime prefix not defined"
+
+# Verify alias command detects a non matching prefix.
+gdb_test "alias set ada limite-elements = set print elements" \
+    "ALIAS and COMMAND prefixes do not match\." \
+    "mismatched prefix"
+
+# Verify alias command detects a non matching prefix due to length.
+gdb_test "alias set imprime-limite-elements = set print elements" \
+    "Mismatched command length between ALIAS and COMMAND\." \
+    "mismatched length"
+
+
+# Gradually define the prefixes and the limite-elements command.
+gdb_test_no_output "alias assigne = set" "alias assigne"
+gdb_test_no_output "alias assigne imprime = set print" "alias assigne imprime"
+gdb_test_no_output "alias assigne imprime limite-elements = set print elements" \
+    "alias assigne imprime limite-elements"
+
+# Define an alias using the command prefix with a command using an alias prefix.
+gdb_test_no_output "alias set print max-elements = assigne imprime elements" \
+    "alias set print max-elements using assigne imprime"
+
+
+# Tests the resulting prefixes and commands.
+gdb_test_no_output "assigne print elements 52"
+gdb_test "show print elements" "Limit .* is 52\[.\]" "verify 52"
+
+gdb_test_no_output "assigne imprime elements 53"
+gdb_test "show print elements" "Limit .* is 53\[.\]" "verify 53"
+
+gdb_test_no_output "assigne imprime limite-elements 54"
+gdb_test "show print elements" "Limit .* is 54\[.\]" "verify 54"
+
+gdb_test_no_output "set imprime elements 55"
+gdb_test "show print elements" "Limit .* is 55\[.\]" "verify 55"
+
+gdb_test_no_output "set print limite-elements 56"
+gdb_test "show print elements" "Limit .* is 56\[.\]" "verify 56"
+
+gdb_test_no_output "set print max-elements 57"
+gdb_test "show print elements" "Limit .* is 57\[.\]" "verify 57"

@@ -1518,8 +1518,8 @@ alias_command (const char *args, int from_tty)
      Example: alias spe = set print elements
 
      Otherwise ALIAS and COMMAND must have the same number of words,
-     and every word except the last must match; and the last word of
-     ALIAS is made an alias of the last word of COMMAND.
+     and every word except the last must identify the same prefix command;
+     and the last word of ALIAS is made an alias of the last word of COMMAND.
      Example: alias set print elms = set pr elem
      Note that unambiguous abbreviations are allowed.  */
 
@@ -1538,10 +1538,11 @@ alias_command (const char *args, int from_tty)
 	error (_("Mismatched command length between ALIAS and COMMAND."));
 
       /* Create copies of ALIAS and COMMAND without the last word,
-	 and use that to verify the leading elements match.  */
+	 and use that to verify the leading elements give the same
+	 prefix command.  */
       std::string alias_prefix_string (argv_to_string (alias_argv,
 						       alias_argc - 1));
-      std::string command_prefix_string (argv_to_string (alias_argv,
+      std::string command_prefix_string (argv_to_string (command_argv.get (),
 							 command_argc - 1));
       alias_prefix = alias_prefix_string.c_str ();
       command_prefix = command_prefix_string.c_str ();
