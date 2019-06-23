@@ -1,5 +1,12 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (init_and_make_win): Assert on unrecognized
+	type.
+	* tui/tui-data.h (struct tui_gen_win_info): Make constructor
+	protected.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c
 	(tui_source_window_base::set_is_exec_point_at): Add check against
 	LOA_ADDRESS.

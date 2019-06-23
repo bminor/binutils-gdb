@@ -34,10 +34,14 @@ struct tui_point
 /* Generic window information.  */
 struct tui_gen_win_info
 {
+protected:
+
   explicit tui_gen_win_info (enum tui_win_type t)
     : type (t)
   {
   }
+
+public:
 
   virtual ~tui_gen_win_info ();
 
