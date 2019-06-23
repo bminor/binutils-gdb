@@ -120,7 +120,7 @@ save_vars { env(TERM) } {
 	[multi_line \
 	     "List of classes of commands:" \
 	     "" \
-	     "${aliases_expr} -- Aliases of other commands\." \
+	     "${aliases_expr} -- User-defined aliases of other commands\." \
 	     "${breakpoints_expr} -- Making program stop at certain points\." \
 	     ".*" \
 	    ] \
@@ -132,11 +132,13 @@ save_vars { env(TERM) } {
     gdb_test "apropos -v cut for 'thre" \
 	[multi_line \
 	     "" \
-	     "${taas_expr} --.*" \
+	     "${taas_expr}" \
+	     "Apply a command to all .*" \
 	     "Usage:.*" \
 	     "short${cut_for_thre_expr}ad apply.*" \
 	     "" \
-	     "${tfaas_expr} --.*" \
+	     "${tfaas_expr}" \
+	     "Apply a command to all .*" \
 	     "Usage:.*" \
 	     "short${cut_for_thre_expr}ad apply.*" \
 	    ]

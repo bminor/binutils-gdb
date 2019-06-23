@@ -1,3 +1,15 @@
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/default-args.exp: New test.
+	* gdb.base/default-args.c: New file.
+	* gdb.base/alias.exp: Update expected error msg for alias foo=bar.
+	* gdb.base/default.exp: Update to new help text.
+	* gdb.base/help.exp: Likewise.
+	* gdb.base/page.exp: Likewise.
+	* gdb.base/style.exp: Likewise.
+	* gdb.guile/guile.exp: Likewise.
+	* gdb.python/python.exp: Likewise.
+
 2020-06-22  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/source-dir.exp (test_truncated_comp_dir): Skip on

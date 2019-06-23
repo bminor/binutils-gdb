@@ -187,7 +187,7 @@ gdb_test_no_output "set height 0"
 
 gdb_test_no_output "python a = gdb.execute('help', to_string=True)" "collect help from uiout"
 
-gdb_test "python print (a)" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
+gdb_test "python print (a)" ".*aliases -- User-defined aliases of other commands.*" "verify help to uiout"
 
 # Test PR 12212, using InfThread.selected_thread() when no inferior is
 # loaded.

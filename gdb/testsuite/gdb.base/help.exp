@@ -25,7 +25,7 @@ gdb_start
 gdb_test_no_output "set height 0" "disable pagination"
 
 # Test all the help classes.
-test_class_help "aliases" {"Aliases of other commands\.\[\r\n\]+"}
+test_class_help "aliases" {"User-defined aliases of other commands\.\[\r\n\]+"}
 test_class_help "breakpoints" {
     "Making program stop at certain points\.\[\r\n\]+"
 }
