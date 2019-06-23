@@ -1,5 +1,16 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_gen_win_info::make_visible): Update.
+	* tui/tui-win.c (make_invisible_and_set_new_height): Update.
+	* tui/tui-layout.c (init_and_make_win): Update.
+	* tui/tui.h (enum tui_win_type): Update.
+	* tui/tui-data.h (tui_win_is_auxiliary): Rename from
+	tui_win_is_auxillary.
+	* tui/tui-data.c (tui_win_is_auxiliary): Rename from
+	tui_win_is_auxillary.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_data_window::refresh_window): Update.
 	* tui/tui-windata.c (tui_data_window::first_data_item_displayed)
 	(tui_delete_data_content_windows, tui_display_all_data)

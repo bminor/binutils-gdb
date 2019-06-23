@@ -63,7 +63,7 @@ static void free_content_elements (tui_win_content,
 **********************************/
 
 int
-tui_win_is_auxillary (enum tui_win_type win_type)
+tui_win_is_auxiliary (enum tui_win_type win_type)
 {
   return (win_type > MAX_MAJOR_WINDOWS);
 }

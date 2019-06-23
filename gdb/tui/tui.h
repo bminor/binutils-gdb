@@ -42,7 +42,7 @@ enum tui_win_type
   CMD_WIN,
   /* This must ALWAYS be AFTER the major windows last.  */
   MAX_MAJOR_WINDOWS,
-  /* Auxillary windows.  */
+  /* Auxiliary windows.  */
   LOCATOR_WIN,
   EXEC_INFO_WIN,
   DATA_ITEM_WIN

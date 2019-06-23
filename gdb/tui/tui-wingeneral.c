@@ -172,7 +172,7 @@ tui_gen_win_info::make_visible (bool visible)
     {
       if (!is_visible)
 	{
-	  tui_make_window (this, (tui_win_is_auxillary (type)
+	  tui_make_window (this, (tui_win_is_auxiliary (type)
 				  ? DONT_BOX_WINDOW : BOX_WINDOW));
 	  is_visible = true;
 	}

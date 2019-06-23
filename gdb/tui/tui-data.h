@@ -538,7 +538,7 @@ protected:
   void do_make_visible_with_new_height () override;
 };
 
-extern int tui_win_is_auxillary (enum tui_win_type win_type);
+extern int tui_win_is_auxiliary (enum tui_win_type win_type);
 
 
 /* Global Data.  */

@@ -1274,7 +1274,7 @@ tui_data_window::set_new_height (int height)
     }
 }
 
-/* Function make the target window (and auxillary windows associated
+/* Function make the target window (and auxiliary windows associated
    with the targer) invisible, and set the new height and
    location.  */
 static void
@@ -1290,7 +1290,7 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
   if (win_info != TUI_CMD_WIN)
     win_info->viewport_height--;
 
-  /* Now deal with the auxillary windows associated with win_info.  */
+  /* Now deal with the auxiliary windows associated with win_info.  */
   win_info->set_new_height (height);
 }
 

@@ -816,7 +816,7 @@ init_and_make_win (tui_gen_win_info *win_info,
 	  break;
 
 	default:
-	  gdb_assert (tui_win_is_auxillary (win_type));
+	  gdb_assert (tui_win_is_auxiliary (win_type));
 	  win_info = new tui_gen_win_info (win_type);
 	  break;
 	}
