@@ -174,7 +174,7 @@ struct tui_source_element
 {
   char *line;
   struct tui_line_or_address line_or_addr;
-  int is_exec_point;
+  bool is_exec_point;
   int has_break;
 };
 

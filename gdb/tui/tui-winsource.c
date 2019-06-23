@@ -218,7 +218,7 @@ tui_clear_source_content (struct tui_win_info *win_info,
 	  struct tui_win_element *element = win_info->content[i];
 
 	  element->which_element.source.has_break = FALSE;
-	  element->which_element.source.is_exec_point = FALSE;
+	  element->which_element.source.is_exec_point = false;
 	}
     }
 }
@@ -351,13 +351,13 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
 void
 tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
 {
-  int changed = 0;
+  bool changed = false;
   int i;
 
   i = 0;
   while (i < content_size)
     {
-      int new_state;
+      bool new_state;
       struct tui_line_or_address content_loa =
 	content[i]->which_element.source.line_or_addr;
 
@@ -367,12 +367,12 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
               || (content_loa.u.addr == l.u.addr)))
-        new_state = TRUE;
+        new_state = true;
       else
-	new_state = FALSE;
+	new_state = false;
       if (new_state != content[i]->which_element.source.is_exec_point)
         {
-          changed++;
+          changed = true;
           content[i]->which_element.source.is_exec_point = new_state;
           tui_show_source_line (this, i + 1);
         }

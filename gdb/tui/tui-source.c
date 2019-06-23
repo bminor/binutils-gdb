@@ -244,7 +244,7 @@ tui_set_source_content_nil (struct tui_win_info *win_info,
 
       element->which_element.source.line_or_addr.loa = LOA_LINE;
       element->which_element.source.line_or_addr.u.line_no = 0;
-      element->which_element.source.is_exec_point = FALSE;
+      element->which_element.source.is_exec_point = false;
       element->which_element.source.has_break = FALSE;
 
       /* Set the contents of the line to blank.  */

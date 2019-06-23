@@ -368,7 +368,7 @@ init_content_element (struct tui_win_element *element,
       element->which_element.source.line = NULL;
       element->which_element.source.line_or_addr.loa = LOA_LINE;
       element->which_element.source.line_or_addr.u.line_no = 0;
-      element->which_element.source.is_exec_point = FALSE;
+      element->which_element.source.is_exec_point = false;
       element->which_element.source.has_break = FALSE;
       break;
     default:
