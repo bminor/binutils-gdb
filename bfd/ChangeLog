@@ -1,5 +1,12 @@
 2019-06-23  Alan Modra  <amodra@gmail.com>
 
+	PR 24704
+	* elf64-ppc.c (R_PPC64_GOT16_DS): Don't set has_gotrel.
+	(ppc64_elf_edit_toc): Don't remove R_PPC64_GOT16_DS got entries.
+	Reduce range of offsets allowed for other GOT relocs.
+
+2019-06-23  Alan Modra  <amodra@gmail.com>
+
 	PR 24689
 	* elfcode.h (elf_object_p): Warning fix.
 

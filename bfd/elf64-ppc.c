@@ -4610,7 +4610,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  sec->has_tls_reloc = 1;
 	  goto dogot;
 
-	case R_PPC64_GOT16_DS:
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_GOT16_LO_DS:
 	case R_PPC64_GOT_PCREL34:
@@ -4618,6 +4617,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  ppc64_elf_section_data (sec)->has_gotrel = 1;
 	  /* Fall through.  */
 
+	case R_PPC64_GOT16_DS:
 	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_HI:
 	case R_PPC64_GOT16_LO:
@@ -9010,10 +9010,15 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      r_type = ELF64_R_TYPE (rel->r_info);
 	      switch (r_type)
 		{
+		/* Note that we don't delete GOT entries for
+		   R_PPC64_GOT16_DS since we'd need a lot more
+		   analysis.  For starters, the preliminary layout is
+		   before the GOT, PLT, dynamic sections and stubs are
+		   laid out.  Then we'd need to allow for changes in
+		   distance between sections caused by alignment.  */
 		default:
 		  continue;
 
-		case R_PPC64_GOT16_DS:
 		case R_PPC64_GOT16_HA:
 		case R_PPC64_GOT16_LO_DS:
 		  sym_addend = rel->r_addend;
@@ -9039,24 +9044,18 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      val += sym_addend;
 	      val += sym_sec->output_section->vma + sym_sec->output_offset;
 
+/* Fudge factor to allow for the fact that the preliminary layout
+   isn't exact.  Reduce limits by this factor.  */
+#define LIMIT_ADJUST(LIMIT) ((LIMIT) - (LIMIT) / 16)
+
 	      switch (r_type)
 		{
 		default:
 		  continue;
 
-		case R_PPC64_GOT16_DS:
-		  if (val - got + 0x8000 >= 0x10000)
-		    continue;
-		  if (!bfd_get_section_contents (ibfd, sec, buf,
-						 rel->r_offset & ~3, 4))
-		    goto got_error_ret;
-		  insn = bfd_get_32 (ibfd, buf);
-		  if ((insn & (0x3f << 26 | 0x3)) != 58u << 26 /* ld */)
-		    continue;
-		  break;
-
 		case R_PPC64_GOT16_HA:
-		  if (val - got + 0x80008000ULL >= 0x100000000ULL)
+		  if (val - got + LIMIT_ADJUST (0x80008000ULL)
+		      >= LIMIT_ADJUST (0x100000000ULL))
 		    continue;
 
 		  if (!bfd_get_section_contents (ibfd, sec, buf,
@@ -9069,7 +9068,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  break;
 
 		case R_PPC64_GOT16_LO_DS:
-		  if (val - got + 0x80008000ULL >= 0x100000000ULL)
+		  if (val - got + LIMIT_ADJUST (0x80008000ULL)
+		      >= LIMIT_ADJUST (0x100000000ULL))
 		    continue;
 		  if (!bfd_get_section_contents (ibfd, sec, buf,
 						 rel->r_offset & ~3, 4))
@@ -9082,7 +9082,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		case R_PPC64_GOT_PCREL34:
 		  pc = rel->r_offset;
 		  pc += sec->output_section->vma + sec->output_offset;
-		  if (val - pc + (1ULL << 33) >= 1ULL << 34)
+		  if (val - pc + LIMIT_ADJUST (1ULL << 33)
+		      >= LIMIT_ADJUST (1ULL << 34))
 		    continue;
 		  if (!bfd_get_section_contents (ibfd, sec, buf,
 						 rel->r_offset & ~3, 8))
@@ -9095,6 +9096,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		    continue;
 		  break;
 		}
+#undef LIMIT_ADJUST
 
 	      if (h != NULL)
 		ent = h->got.glist;
