@@ -365,7 +365,7 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
 		  || content_loa.loa == LOA_ADDRESS);
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
-              || (content_loa.u.addr == l.u.addr)))
+              || (l.loa == LOA_ADDRESS && content_loa.u.addr == l.u.addr)))
         new_state = true;
       else
 	new_state = false;

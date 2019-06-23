@@ -1,5 +1,11 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c
+	(tui_source_window_base::set_is_exec_point_at): Add check against
+	LOA_ADDRESS.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.c (tui_set_source_content): Don't check before
 	xfree.
 	* tui/tui-disasm.c (tui_disassemble): Don't check before xfree.
