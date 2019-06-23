@@ -59,10 +59,8 @@ tui_disassemble (struct gdbarch *gdbarch, struct tui_asm_line *asm_lines,
   /* Now construct each line.  */
   for (; count > 0; count--, asm_lines++)
     {
-      if (asm_lines->addr_string)
-        xfree (asm_lines->addr_string);
-      if (asm_lines->insn)
-        xfree (asm_lines->insn);
+      xfree (asm_lines->addr_string);
+      xfree (asm_lines->insn);
       
       print_address (gdbarch, pc, &gdb_dis_out);
       asm_lines->addr = pc;

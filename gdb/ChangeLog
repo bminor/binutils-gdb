@@ -1,5 +1,11 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.c (tui_set_source_content): Don't check before
+	xfree.
+	* tui/tui-disasm.c (tui_disassemble): Don't check before xfree.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_update_source_window_as_is)
 	(tui_alloc_source_buffer, tui_line_is_displayed)
 	(tui_addr_is_displayed): Change type of win_info.

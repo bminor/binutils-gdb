@@ -163,8 +163,7 @@ tui_set_source_content (struct symtab *s,
 	    = (struct tui_source_window_base *) TUI_SRC_WIN;
 	  const char *s_filename = symtab_to_filename_for_display (s);
 
-	  if (TUI_SRC_WIN->title)
-	    xfree (TUI_SRC_WIN->title);
+	  xfree (TUI_SRC_WIN->title);
 	  TUI_SRC_WIN->title = xstrdup (s_filename);
 
 	  xfree (src->fullname);
