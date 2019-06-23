@@ -350,11 +350,7 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 
 tui_gen_win_info::~tui_gen_win_info ()
 {
-  if (handle != NULL)
-    {
-      tui_delete_win (handle);
-      handle = NULL;
-    }
+  tui_delete_win (handle);
   xfree (title);
 }
 

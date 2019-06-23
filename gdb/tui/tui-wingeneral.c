@@ -63,8 +63,6 @@ tui_delete_win (WINDOW *window)
 {
   if (window != NULL)
     delwin (window);
-
-  return;
 }
 
 
