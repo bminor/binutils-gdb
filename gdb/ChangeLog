@@ -1,5 +1,42 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_update_source_window_as_is)
+	(tui_alloc_source_buffer, tui_line_is_displayed)
+	(tui_addr_is_displayed): Change type of win_info.
+	* tui/tui-winsource.c (tui_update_source_window_as_is)
+	(tui_clear_source_content, tui_show_source_line)
+	(tui_show_source_content, tui_source_window_base::refill)
+	(tui_source_window_base::set_is_exec_point_at)
+	(tui_source_window_base::set_is_exec_point_at)
+	(tui_update_breakpoint_info, tui_set_exec_info_content): Update.
+	(tui_alloc_source_buffer, tui_line_is_displayed)
+	(tui_addr_is_displayed): Change type of win_info.  Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights)
+	(tui_source_window_base::do_make_visible_with_new_height):
+	Update.
+	* tui/tui-source.c (tui_set_source_content)
+	(tui_set_source_content_nil)
+	(tui_source_window::do_scroll_vertical): Update.
+	* tui/tui-layout.c (show_layout): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content)
+	(tui_disasm_window::do_scroll_vertical): Update.
+	* tui/tui-data.h (tui_win_content): Remove.
+	(struct tui_gen_win_info) <content, content_size>: Remove.
+	(struct tui_source_element): Add initializers and destructor.
+	(union tui_which_element, struct tui_win_element): Remove.
+	(struct tui_source_window_base) <content>: New field.
+	(struct tui_data_window): Remove destructor.
+	(tui_alloc_content, tui_free_win_content)
+	(tui_free_all_source_wins_content): Don't declare.
+	* tui/tui-data.c (tui_initialize_static_data): Update.
+	(init_content_element, tui_alloc_content): Remove.
+	(~tui_gen_win_info): Update.
+	(~tui_data_window, tui_free_all_source_wins_content)
+	(tui_free_win_content, free_content, free_content_elements):
+	Remove.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_clear_source_content)
 	(tui_erase_source_content, tui_show_source_content): Change type
 	of win_info.

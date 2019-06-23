@@ -176,10 +176,11 @@ tui_set_source_content (struct symtab *s,
 	  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
 
 	  const char *iter = srclines.c_str ();
+	  TUI_SRC_WIN->content.resize (nlines);
 	  while (cur_line < nlines)
 	    {
-	      struct tui_win_element *element
-		= TUI_SRC_WIN->content[cur_line];
+	      struct tui_source_element *element
+		= &TUI_SRC_WIN->content[cur_line];
 
 	      std::string text;
 	      if (*iter != '\0')
@@ -189,25 +190,20 @@ tui_set_source_content (struct symtab *s,
 
 	      /* Set whether element is the execution point
 		 and whether there is a break point on it.  */
-	      element->which_element.source.line_or_addr.loa =
-		LOA_LINE;
-	      element->which_element.source.line_or_addr.u.line_no =
-		cur_line_no;
-	      element->which_element.source.is_exec_point =
-		(filename_cmp (locator->full_name,
-			       symtab_to_fullname (s)) == 0
-		 && cur_line_no == locator->line_no);
+	      element->line_or_addr.loa = LOA_LINE;
+	      element->line_or_addr.u.line_no = cur_line_no;
+	      element->is_exec_point
+		= (filename_cmp (locator->full_name,
+				 symtab_to_fullname (s)) == 0
+		   && cur_line_no == locator->line_no);
 
-	      xfree (TUI_SRC_WIN->content[cur_line]
-		     ->which_element.source.line);
-	      TUI_SRC_WIN->content[cur_line]
-		->which_element.source.line
+	      xfree (TUI_SRC_WIN->content[cur_line].line);
+	      TUI_SRC_WIN->content[cur_line].line
 		= xstrdup (text.c_str ());
 
 	      cur_line++;
 	      cur_line_no++;
 	    }
-	  TUI_SRC_WIN->content_size = nlines;
 	  ret = TUI_SUCCESS;
 	}
     }
@@ -234,21 +230,21 @@ tui_set_source_content_nil (struct tui_source_window_base *win_info,
 
   /* Set to empty each line in the window, except for the one which
      contains the message.  */
-  while (curr_line < win_info->content_size)
+  while (curr_line < win_info->content.size ())
     {
       /* Set the information related to each displayed line to null:
          i.e. the line number is 0, there is no bp, it is not where
          the program is stopped.  */
 
-      struct tui_win_element *element = win_info->content[curr_line];
+      struct tui_source_element *element = &win_info->content[curr_line];
 
-      element->which_element.source.line_or_addr.loa = LOA_LINE;
-      element->which_element.source.line_or_addr.u.line_no = 0;
-      element->which_element.source.is_exec_point = false;
-      element->which_element.source.has_break = FALSE;
+      element->line_or_addr.loa = LOA_LINE;
+      element->line_or_addr.u.line_no = 0;
+      element->is_exec_point = false;
+      element->has_break = FALSE;
 
       /* Set the contents of the line to blank.  */
-      element->which_element.source.line[0] = (char) 0;
+      element->line[0] = (char) 0;
 
       /* If the current line is in the middle of the screen, then we
          want to display the 'no source available' message in it.
@@ -269,8 +265,8 @@ tui_set_source_content_nil (struct tui_source_window_base *win_info,
 	    xpos = (line_width - 1) / 2 - warning_length;
 
 	  src_line = xstrprintf ("%s%s", n_spaces (xpos), warning_string);
-	  xfree (element->which_element.source.line);
-	  element->which_element.source.line = src_line;
+	  xfree (element->line);
+	  element->line = src_line;
 	}
 
       curr_line++;
@@ -306,7 +302,7 @@ tui_source_is_displayed (const char *fullname)
 void
 tui_source_window::do_scroll_vertical (int num_to_scroll)
 {
-  if (content != NULL)
+  if (!content.empty ())
     {
       struct tui_line_or_address l;
       struct symtab *s;
@@ -318,13 +314,12 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 	s = cursal.symtab;
 
       l.loa = LOA_LINE;
-      l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
+      l.u.line_no = content[0].line_or_addr.u.line_no
 	+ num_to_scroll;
       if (l.u.line_no > s->nlines)
 	/* line = s->nlines - win_info->content_size + 1; */
 	/* elz: fix for dts 23398.  */
-	l.u.line_no
-	  = content[0]->which_element.source.line_or_addr.u.line_no;
+	l.u.line_no = content[0].line_or_addr.u.line_no;
       if (l.u.line_no <= 0)
 	l.u.line_no = 1;
 

@@ -81,7 +81,6 @@ show_layout (enum tui_layout_type layout)
       /* Since the new layout may cause changes in window size, we
          should free the content and reallocate on next display of
          source/asm.  */
-      tui_free_all_source_wins_content ();
       tui_clear_source_windows ();
       if (layout == SRC_DATA_COMMAND 
 	  || layout == DISASSEM_DATA_COMMAND)

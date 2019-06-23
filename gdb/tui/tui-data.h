@@ -31,11 +31,6 @@ struct tui_point
   int x, y;
 };
 
-struct tui_win_element;
-
-/* This describes the content of the window.  */
-typedef struct tui_win_element **tui_win_content;
-
 /* Generic window information.  */
 struct tui_gen_win_info
 {
@@ -75,10 +70,6 @@ struct tui_gen_win_info
   int height = 0;
   /* Origin of window.  */
   struct tui_point origin = {0, 0};
-  /* Content of window.  */
-  tui_win_content content = nullptr;
-  /* Size of content (# of elements).  */
-  int content_size = 0;
   /* Can it be used, or is it already used?  */
   int content_in_use = FALSE;
   /* Viewport height.  */
@@ -172,10 +163,21 @@ struct tui_layout_def
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
 {
-  char *line;
+  tui_source_element ()
+  {
+    line_or_addr.loa = LOA_LINE;
+    line_or_addr.u.line_no = 0;
+  }
+
+  ~tui_source_element ()
+  {
+    xfree (line);
+  }
+
+  char *line = nullptr;
   struct tui_line_or_address line_or_addr;
-  bool is_exec_point;
-  int has_break;
+  bool is_exec_point = false;
+  int has_break = 0;
 };
 
 
@@ -199,17 +201,6 @@ struct tui_source_element
 #define TUI_EXECINFO_SIZE   4
 
 typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
-
-/* An content element in a window.  */
-union tui_which_element
-{
-  struct tui_source_element source;	/* The source elements.  */
-};
-
-struct tui_win_element
-{
-  union tui_which_element which_element;
-};
 
 /* Execution info window class.  */
 
@@ -410,6 +401,8 @@ public:
 
   /* Architecture associated with code at this location.  */
   struct gdbarch *gdbarch = nullptr;
+
+  std::vector<tui_source_element> content;
 };
 
 /* A TUI source window.  */
@@ -461,7 +454,6 @@ struct tui_data_window : public tui_win_info
   {
   }
 
-  ~tui_data_window () override;
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
   void clear_detail () override;
@@ -551,9 +543,6 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 /* Data Manipulation Functions.  */
 extern void tui_initialize_static_data (void);
-extern tui_win_content tui_alloc_content (int, enum tui_win_type);
-extern void tui_free_win_content (struct tui_gen_win_info *);
-extern void tui_free_all_source_wins_content (void);
 extern struct tui_win_info *tui_partial_win_by_name (const char *);
 extern enum tui_layout_type tui_current_layout (void);
 extern void tui_set_current_layout_to (enum tui_layout_type);

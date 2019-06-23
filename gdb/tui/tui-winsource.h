@@ -34,7 +34,7 @@ extern void tui_update_all_breakpoint_info (void);
 /* Scan the source window and the breakpoints to update the hasBreak
    information for each line.  Returns 1 if something changed and the
    execution window must be refreshed.  */
-extern int tui_update_breakpoint_info (struct tui_win_info *win,
+extern int tui_update_breakpoint_info (struct tui_source_window_base *win,
 				       int current_only);
 
 /* Function to display the "main" routine.  */
@@ -59,12 +59,12 @@ extern void tui_erase_exec_info_content (struct tui_source_window_base *);
 extern void tui_clear_exec_info_content (struct tui_source_window_base *);
 extern void tui_update_exec_info (struct tui_source_window_base *);
 
-extern void tui_alloc_source_buffer (struct tui_win_info *);
-extern int tui_line_is_displayed (int, 
-				  struct tui_win_info *, 
+extern void tui_alloc_source_buffer (struct tui_source_window_base *);
+extern int tui_line_is_displayed (int,
+				  struct tui_source_window_base *,
 				  int);
-extern int tui_addr_is_displayed (CORE_ADDR, 
-				  struct tui_win_info *, 
+extern int tui_addr_is_displayed (CORE_ADDR,
+				  struct tui_source_window_base *,
 				  int);
 
 

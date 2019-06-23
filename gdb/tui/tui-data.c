@@ -47,18 +47,6 @@ static int win_resized = FALSE;
 
 
 /*********************************
-** Static function forward decls
-**********************************/
-static void free_content (tui_win_content, 
-			  int, 
-			  enum tui_win_type);
-static void free_content_elements (tui_win_content, 
-				   int, 
-				   enum tui_win_type);
-
-
-
-/*********************************
 ** PUBLIC FUNCTIONS
 **********************************/
 
@@ -339,42 +327,13 @@ tui_initialize_static_data ()
     win->origin.x =
     win->origin.y =
     win->viewport_height =
-    win->content_size =
     win->last_visible_line = 0;
   win->handle = NULL;
-  win->content = NULL;
   win->content_in_use = FALSE;
   win->is_visible = false;
   win->title = 0;
 }
 
-
-/* init_content_element().
- */
-static void
-init_content_element (struct tui_win_element *element, 
-		      enum tui_win_type type)
-{
-  gdb_assert (type != EXEC_INFO_WIN);
-  gdb_assert (type != LOCATOR_WIN);
-  gdb_assert (type != CMD_WIN);
-  gdb_assert (type != DATA_ITEM_WIN);
-  gdb_assert (type != DATA_WIN);
-
-  switch (type)
-    {
-    case SRC_WIN:
-    case DISASSEM_WIN:
-      element->which_element.source.line = NULL;
-      element->which_element.source.line_or_addr.loa = LOA_LINE;
-      element->which_element.source.line_or_addr.u.line_no = 0;
-      element->which_element.source.is_exec_point = false;
-      element->which_element.source.has_break = FALSE;
-      break;
-    default:
-      break;
-    }
-}
 
 tui_win_info::tui_win_info (enum tui_win_type type)
   : tui_gen_win_info (type)
@@ -389,47 +348,12 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   start_line_or_addr.u.addr = 0;
 }
 
-/* Allocates the content and elements in a block.  */
-tui_win_content
-tui_alloc_content (int num_elements, enum tui_win_type type)
-{
-  tui_win_content content;
-  struct tui_win_element *element_block_ptr;
-  int i;
-
-  gdb_assert (type != EXEC_INFO_WIN);
-  gdb_assert (type != LOCATOR_WIN);
-
-  content = XNEWVEC (struct tui_win_element *, num_elements);
-
-  /*
-   * All windows, except the data window, can allocate the
-   * elements in a chunk.  The data window cannot because items
-   * can be added/removed from the data display by the user at any
-   * time.
-   */
-  if (type != DATA_WIN)
-    {
-      element_block_ptr = XNEWVEC (struct tui_win_element, num_elements);
-      for (i = 0; i < num_elements; i++)
-	{
-	  content[i] = element_block_ptr;
-	  init_content_element (content[i], type);
-	  element_block_ptr++;
-	}
-    }
-
-  return content;
-}
-
-
 tui_gen_win_info::~tui_gen_win_info ()
 {
   if (handle != NULL)
     {
       tui_delete_win (handle);
       handle = NULL;
-      tui_free_win_content (this);
     }
   xfree (title);
 }
@@ -440,103 +364,13 @@ tui_source_window_base::~tui_source_window_base ()
   delete execution_info;
 }  
 
-tui_data_window::~tui_data_window ()
-{
-  if (content != NULL)
-    {
-      regs_column_count = 1;
-      display_regs = false;
-      content = NULL;
-      content_size = 0;
-    }
-}  
-
-void
-tui_free_all_source_wins_content ()
-{
-  for (tui_source_window_base *win_info : tui_source_windows ())
-    {
-      tui_free_win_content (win_info);
-      tui_free_win_content (win_info->execution_info);
-    }
-}
-
-
-void
-tui_free_win_content (struct tui_gen_win_info *win_info)
-{
-  if (win_info->content != NULL)
-    {
-      free_content (win_info->content,
-		   win_info->content_size,
-		   win_info->type);
-      win_info->content = NULL;
-    }
-  win_info->content_size = 0;
-}
-
-
 /**********************************
 ** LOCAL STATIC FUNCTIONS        **
 **********************************/
-
-
-static void
-free_content (tui_win_content content, 
-	      int content_size, 
-	      enum tui_win_type win_type)
-{
-  if (content != NULL)
-    {
-      free_content_elements (content, content_size, win_type);
-      xfree (content);
-    }
-}
 
 
 tui_data_item_window::~tui_data_item_window ()
 {
   xfree (value);
   xfree (content);
-}
-
-/* free_content_elements().
- */
-static void
-free_content_elements (tui_win_content content, 
-		       int content_size, 
-		       enum tui_win_type type)
-{
-  if (content != NULL)
-    {
-      int i;
-
-      if (type == DISASSEM_WIN)
-	{
-	  /* Free whole source block.  */
-	  xfree (content[0]->which_element.source.line);
-	}
-      else
-	{
-	  for (i = 0; i < content_size; i++)
-	    {
-	      struct tui_win_element *element;
-
-	      element = content[i];
-	      if (element != NULL)
-		{
-		  switch (type)
-		    {
-		    case SRC_WIN:
-		      xfree (element->which_element.source.line);
-		      break;
-		    default:
-		      break;
-		    }
-		}
-	    }
-	}
-      if (type != DATA_WIN && type != DATA_ITEM_WIN)
-	xfree (content[0]);	/* Free the element block.  */
-    }
 }

@@ -616,7 +616,7 @@ tui_resize_all (void)
 	  make_invisible_and_set_new_height (TUI_CMD_WIN, new_height);
 	  first_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (src_win->content_size <= 0)
+	  if (src_win->content.empty ())
 	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
 	  break;
 	default:
@@ -681,7 +681,7 @@ tui_resize_all (void)
 	  first_win->make_visible_with_new_height ();
 	  second_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (src_win->content_size <= 0)
+	  if (src_win->content.empty ())
 	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
 	  break;
 	}
@@ -1127,11 +1127,14 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      win_info->make_visible_with_new_height ();
 	      primary_win_info->make_visible_with_new_height ();
 	      if ((src_win_info->type == SRC_WIN
-		   || src_win_info->type == DISASSEM_WIN)
-		  && src_win_info->content_size <= 0)
-		tui_erase_source_content
-		  ((tui_source_window_base *) src_win_info,
-		   EMPTY_SOURCE_PROMPT);
+		   || src_win_info->type == DISASSEM_WIN))
+		{
+		  tui_source_window_base *src_base
+		    = (tui_source_window_base *) src_win_info;
+		  if (src_base->content.empty ())
+		    tui_erase_source_content (src_base,
+					      EMPTY_SOURCE_PROMPT);
+		}
 	    }
 	  else
 	    {
@@ -1236,9 +1239,9 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      TUI_CMD_WIN->make_visible_with_new_height ();
 	      second_win->make_visible_with_new_height ();
 	      first_win->make_visible_with_new_height ();
-	      if (src1 != nullptr && src1->content_size <= 0)
+	      if (src1 != nullptr && src1->content.empty ())
 		tui_erase_source_content (src1, EMPTY_SOURCE_PROMPT);
-	      if (second_win->content_size <= 0)
+	      if (second_win->content.empty ())
 		tui_erase_source_content (second_win, EMPTY_SOURCE_PROMPT);
 	    }
 	}
@@ -1319,16 +1322,14 @@ tui_win_info::make_visible_with_new_height ()
 void
 tui_source_window_base::do_make_visible_with_new_height ()
 {
-  tui_free_win_content (execution_info);
   tui_make_visible (execution_info);
-  if (content != NULL)
+  if (!content.empty ())
     {
       struct tui_line_or_address line_or_addr;
       struct symtab_and_line cursal
 	= get_current_source_symtab_and_line ();
 
       line_or_addr = start_line_or_addr;
-      tui_free_win_content (this);
       tui_update_source_window (this, gdbarch,
 				cursal.symtab, line_or_addr, TRUE);
     }
