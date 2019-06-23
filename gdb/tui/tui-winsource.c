@@ -204,7 +204,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 }
 
 void
-tui_clear_source_content (struct tui_win_info *win_info, 
+tui_clear_source_content (struct tui_source_window_base *win_info,
 			  int display_prompt)
 {
   if (win_info != NULL)
@@ -225,7 +225,7 @@ tui_clear_source_content (struct tui_win_info *win_info,
 
 
 void
-tui_erase_source_content (struct tui_win_info *win_info, 
+tui_erase_source_content (struct tui_source_window_base *win_info,
 			  int display_prompt)
 {
   int x_pos;
@@ -291,7 +291,7 @@ tui_show_source_line (struct tui_win_info *win_info, int lineno)
 }
 
 void
-tui_show_source_content (struct tui_win_info *win_info)
+tui_show_source_content (struct tui_source_window_base *win_info)
 {
   if (win_info->content_size > 0)
     {

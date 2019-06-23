@@ -556,6 +556,7 @@ tui_resize_all (void)
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
       struct tui_win_info *first_win;
       struct tui_win_info *second_win;
+      tui_source_window_base *src_win;
       struct tui_locator_window *locator = tui_locator_win_info_ptr ();
       int win_type;
       int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
@@ -592,7 +593,8 @@ tui_resize_all (void)
        {
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
-	  first_win = tui_source_windows ()[0];
+	  src_win = tui_source_windows ()[0];
+	  first_win = src_win;
 	  first_win->width += width_diff;
 	  locator->width += width_diff;
 	  /* Check for invalid heights.  */
@@ -614,13 +616,14 @@ tui_resize_all (void)
 	  make_invisible_and_set_new_height (TUI_CMD_WIN, new_height);
 	  first_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (first_win->content_size <= 0)
-	    tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
+	  if (src_win->content_size <= 0)
+	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
 	  break;
 	default:
 	  if (cur_layout == SRC_DISASSEM_COMMAND)
 	    {
-	      first_win = TUI_SRC_WIN;
+	      src_win = TUI_SRC_WIN;
+	      first_win = src_win;
 	      first_win->width += width_diff;
 	      second_win = TUI_DISASM_WIN;
 	      second_win->width += width_diff;
@@ -629,7 +632,8 @@ tui_resize_all (void)
 	    {
 	      first_win = TUI_DATA_WIN;
 	      first_win->width += width_diff;
-	      second_win = tui_source_windows ()[0];
+	      src_win = tui_source_windows ()[0];
+	      second_win = src_win;
 	      second_win->width += width_diff;
 	    }
 	  /* Change the first window's height/width.  */
@@ -677,10 +681,8 @@ tui_resize_all (void)
 	  first_win->make_visible_with_new_height ();
 	  second_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (first_win->content_size <= 0)
-	    tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
-	  if (second_win->content_size <= 0)
-	    tui_erase_source_content (second_win, EMPTY_SOURCE_PROMPT);
+	  if (src_win->content_size <= 0)
+	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
 	  break;
 	}
       /* Now remove all invisible windows, and their content so that
@@ -1124,21 +1126,28 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      TUI_CMD_WIN->origin.y = locator->origin.y + 1;
 	      win_info->make_visible_with_new_height ();
 	      primary_win_info->make_visible_with_new_height ();
-	      if (src_win_info->content_size <= 0)
-		tui_erase_source_content (src_win_info, EMPTY_SOURCE_PROMPT);
+	      if ((src_win_info->type == SRC_WIN
+		   || src_win_info->type == DISASSEM_WIN)
+		  && src_win_info->content_size <= 0)
+		tui_erase_source_content
+		  ((tui_source_window_base *) src_win_info,
+		   EMPTY_SOURCE_PROMPT);
 	    }
 	  else
 	    {
 	      struct tui_win_info *first_win;
-	      struct tui_win_info *second_win;
+	      struct tui_source_window_base *second_win;
+	      tui_source_window_base *src1;
 
 	      if (cur_layout == SRC_DISASSEM_COMMAND)
 		{
-		  first_win = TUI_SRC_WIN;
+		  src1 = TUI_SRC_WIN;
+		  first_win = src1;
 		  second_win = TUI_DISASM_WIN;
 		}
 	      else
 		{
+		  src1 = nullptr;
 		  first_win = TUI_DATA_WIN;
 		  second_win = tui_source_windows ()[0];
 		}
@@ -1227,8 +1236,8 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      TUI_CMD_WIN->make_visible_with_new_height ();
 	      second_win->make_visible_with_new_height ();
 	      first_win->make_visible_with_new_height ();
-	      if (first_win->content_size <= 0)
-		tui_erase_source_content (first_win, EMPTY_SOURCE_PROMPT);
+	      if (src1 != nullptr && src1->content_size <= 0)
+		tui_erase_source_content (src1, EMPTY_SOURCE_PROMPT);
 	      if (second_win->content_size <= 0)
 		tui_erase_source_content (second_win, EMPTY_SOURCE_PROMPT);
 	    }

@@ -27,7 +27,7 @@
 struct symtab;
 struct tui_win_info;
 
-extern void tui_set_source_content_nil (struct tui_win_info *, 
+extern void tui_set_source_content_nil (struct tui_source_window_base *,
 					const char *);
 
 extern enum tui_status tui_set_source_content (struct symtab *, 

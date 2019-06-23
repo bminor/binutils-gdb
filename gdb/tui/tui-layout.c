@@ -921,7 +921,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
       base->m_has_locator = true;
       tui_make_visible (locator);
       tui_show_locator_content ();
-      tui_show_source_content (*win_info_ptr);
+      tui_show_source_content (base);
 
       if (TUI_CMD_WIN == NULL)
 	{

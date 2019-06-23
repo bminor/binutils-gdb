@@ -1,5 +1,20 @@
 2019-06-25  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_clear_source_content)
+	(tui_erase_source_content, tui_show_source_content): Change type
+	of win_info.
+	* tui/tui-winsource.c (tui_clear_source_content)
+	(tui_erase_source_content, tui_show_source_content): Change type
+	of win_info.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Update.
+	* tui/tui-source.h (tui_set_source_content_nil): Change type of
+	win_info.
+	* tui/tui-source.c (tui_set_source_content_nil): Change type of
+	win_info.
+	* tui/tui-layout.c (show_source_or_disasm_and_command): Update.
+
+2019-06-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_clear_source_content)
 	(tui_source_window_base::set_is_exec_point_at): Update.
 	* tui/tui-source.c (tui_set_source_content_nil): Update.

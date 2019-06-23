@@ -222,7 +222,7 @@ tui_set_source_content (struct symtab *s,
    source files cannot be accessed.  */
 
 void
-tui_set_source_content_nil (struct tui_win_info *win_info, 
+tui_set_source_content_nil (struct tui_source_window_base *win_info,
 			    const char *warning_string)
 {
   int line_width;
