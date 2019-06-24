@@ -1,5 +1,9 @@
 2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention change to the alias command.
+
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-cmds.c (lookup_cmd_for_default_args)
 	(alias_command_completer)
 	(make_alias_options_def_group): New functions.

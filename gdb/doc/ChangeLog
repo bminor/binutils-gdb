@@ -1,3 +1,11 @@
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command aliases default args): New node documenting
+	how to use default args for a command using aliases.
+	(Aliases): Document the new 'DEFAULT-ARGS...' option.
+	(Help): Update help aliases text and describe when full alias
+	definition is provided.
+
 2020-06-11  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Index Files): Reword.  Remove Ada limitation.

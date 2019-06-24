@@ -79,6 +79,21 @@ tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...
   Define a new TUI layout, specifying its name and the windows that
   will be displayed.
 
+* Changed commands
+
+alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
+  The alias command can now specify default args for an alias.
+  GDB automatically prepends the alias default args to the argument list
+  provided explicitly by the user.
+  For example, to have a backtrace with full details, you can define
+  an alias 'bt_ALL' as
+  'alias bt_ALL = backtrace -entry-values both -frame-arg all
+     -past-main -past-entry -full'.
+  Alias default arguments can also use a set of nested 'with' commands,
+  e.g. 'alias pp10 = with print pretty -- with print elem 10 -- print'
+  defines the alias pp10 that will pretty print a maximum of 10 elements
+  of the given expression (if the expression is an array).
+
 * New targets
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*

@@ -1577,6 +1577,7 @@ show you the alternatives available, if there is more than one possibility).
 * Command Settings::            How to change default behavior of commands
 * Completion::                  Command completion
 * Command Options::             Command options
+* Command aliases default args::        Automatically prepend default arguments to user-defined aliases
 * Help::                        How to ask @value{GDBN} for help
 @end menu
 
@@ -1997,6 +1998,89 @@ uppercase.
 (For more on using the @code{print} command, see @ref{Data, ,Examining
 Data}.)
 
+@node Command aliases default args
+@section Automatically prepend default arguments to user-defined aliases
+
+You can tell @value{GDBN} to always prepend some default arguments to
+the list of arguments provided explicitly by the user when using a
+user-defined alias.
+
+If you repeatedly use the same arguments or options for a command, you
+can define an alias for this command and tell @value{GDBN} to
+automatically prepend these arguments or options to the list of
+arguments you type explicitly when using the alias@footnote{@value{GDBN}
+could easily accept default arguments for pre-defined commands and aliases,
+but it was deemed this would be confusing, and so is not allowed.}.
+
+For example, if you often use the command @code{thread apply all}
+specifying to work on the threads in ascending order and to continue in case it
+encounters an error, you can tell @value{GDBN} to automatically preprend
+the @code{-ascending} and @code{-c} options by using:
+
+@smallexample
+(@value{GDBP}) alias thread apply asc-all = thread apply all -ascending -c
+@end smallexample
+
+Once you have defined this alias with its default args, any time you type
+the @code{thread apply asc-all} followed by @code{some arguments},
+@value{GDBN} will execute  @code{thread apply all -ascending -c some arguments}.
+
+To have even less to type, you can also define a one word alias:
+@smallexample
+(@value{GDBP}) alias t_a_c = thread apply all -ascending -c
+@end smallexample
+
+As usual, unambiguous abbreviations can be used for @var{alias}
+and @var{default-args}.
+
+The different aliases of a command do not share their default args.
+For example, you define a new alias @code{bt_ALL} showing all possible
+information and another alias @code{bt_SMALL} showing very limited information
+using:
+@smallexample
+(@value{GDBP}) alias bt_ALL = backtrace -entry-values both -frame-arg all \
+   -past-main -past-entry -full
+(@value{GDBP}) alias bt_SMALL = backtrace -entry-values no -frame-arg none \
+   -past-main off -past-entry off
+@end smallexample
+
+(For more on using the @code{alias} command, see @ref{Aliases}.)
+
+Default args are not limited to the arguments and options of @var{command},
+but can specify nested commands if @var{command} accepts such a nested command
+as argument.
+For example, the below defines @code{faalocalsoftype} that lists the
+frames having locals of a certain type, together with the matching
+local vars:
+@smallexample
+(@value{GDBP}) alias faalocalsoftype = frame apply all info locals -q -t
+(@value{GDBP}) faalocalsoftype int
+#1  0x55554f5e in sleeper_or_burner (v=0xdf50) at sleepers.c:86
+i = 0
+ret = 21845
+@end smallexample
+
+This is also very useful to define an alias for a set of nested @code{with}
+commands to have a particular combination of temporary settings.  For example,
+the below defines the alias @code{pp10} that pretty prints an expression
+argument, with a maximum of 10 elements if the expression is a string or
+an array:
+@smallexample
+(@value{GDBP}) alias pp10 = with print pretty -- with print elements 10 -- print
+@end smallexample
+This defines the alias  @code{pp10} as being a sequence of 3 commands.
+The first part @code{with print pretty --} temporarily activates the setting
+@code{set print pretty}, then launches the command that follows the separator
+@code{--}.
+The command following the first part is also a @code{with} command that
+temporarily changes the setting @code{set print elements} to 10, then
+launches the command that follows the second separator @code{--}.
+The third part @code{print} is the command the @code{pp10} alias will launch,
+using the temporary values of the settings and the arguments explicitly given
+by the user.
+For more information about the @code{with} command usage,
+see @ref{Command Settings}.
+
 @node Help
 @section Getting Help
 @cindex online documentation
@@ -2016,7 +2100,7 @@ display a short list of named classes of commands:
 (@value{GDBP}) help
 List of classes of commands:
 
-aliases -- Aliases of other commands
+aliases -- User-defined aliases of other commands
 breakpoints -- Making program stop at certain points
 data -- Examining data
 files -- Specifying and examining files
@@ -2043,8 +2127,9 @@ Command name abbreviations are allowed if unambiguous.
 Using one of the general help classes as an argument, you can get a
 list of the individual commands in that class.  If a command has
 aliases, the aliases are given after the command name, separated by
-commas.  For example, here is the help display for the class
-@code{status}:
+commas.  If an alias has default arguments, the full definition of
+the alias is given after the first line.
+For example, here is the help display for the class @code{status}:
 
 @smallexample
 (@value{GDBP}) help status
@@ -2056,7 +2141,10 @@ List of commands:
 @c to fit in smallbook page size.
 info, inf, i -- Generic command for showing things
         about the program being debugged
-info address -- Describe where symbol SYM is stored.
+info address, iamain  -- Describe where symbol SYM is stored.
+  alias iamain = info address main
+info all-registers -- List of all registers and their contents,
+        for selected stack frame.
 ...
 show, info set -- Generic command for showing things
         about the debugger
@@ -2072,6 +2160,8 @@ With a command name as @code{help} argument, @value{GDBN} displays a
 short paragraph on how to use that command.  If that command has
 one or more aliases, @value{GDBN} will display a first line with
 the command name and all its aliases separated by commas.
+This first line will be followed by the full definition of all aliases
+having default arguments.
 
 @kindex apropos
 @item apropos [-v] @var{regexp}
@@ -2092,7 +2182,7 @@ results in:
 @smallexample
 @group
 alias -- Define a new command that is an alias of an existing command
-aliases -- Aliases of other commands
+aliases -- User-defined aliases of other commands
 @end group
 @end smallexample
 
@@ -27502,7 +27592,7 @@ You can define a new alias with the @samp{alias} command.
 @table @code
 
 @kindex alias
-@item alias [-a] [--] @var{ALIAS} = @var{COMMAND}
+@item alias [-a] [--] @var{ALIAS} = @var{COMMAND} [DEFAULT-ARGS...]
 
 @end table
 
@@ -27513,11 +27603,27 @@ underscores.
 @var{COMMAND} specifies the name of an existing command
 that is being aliased.
 
+@var{COMMAND} can also be the name of an existing alias.  In this case,
+@var{COMMAND} cannot be an alias that has default arguments.
+
 The @samp{-a} option specifies that the new alias is an abbreviation
 of the command.  Abbreviations are not used in command completion.
 
 The @samp{--} option specifies the end of options,
 and is useful when @var{ALIAS} begins with a dash.
+
+You can specify @var{default-args} for your alias.
+These @var{default-args} will be automatically added before the alias
+arguments typed explicitly on the command line.
+
+For example, the below defines an alias @code{btfullall} that shows all local
+variables and all frame arguments:
+@smallexample
+(@value{GDBP}) alias btfullall = backtrace -full -frame-arguments all
+@end smallexample
+
+For more information about @var{default-args}, see @ref{Command aliases default args,
+,Automatically prepend default arguments to user-defined aliases}.
 
 Here is a simple example showing how to make an abbreviation
 of a command so that there is less to type.
