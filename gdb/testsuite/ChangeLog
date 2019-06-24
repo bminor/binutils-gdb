@@ -1,3 +1,7 @@
+2019-06-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/inlined_subroutine-inheritance.exp:
+
 2019-06-21  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/index-cache.exp: Add additional_flags=-Wl,--build-id.
