@@ -1,5 +1,15 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_window_as_is)
+	(tui_update_source_windows_with_addr): Update.
+	* tui/tui-source.h (tui_set_source_content)
+	(tui_show_symtab_source): Add "win_info" parameter.
+	* tui/tui-source.c (tui_set_source_content): Add "win_info"
+	parameter.
+	(tui_show_symtab_source): Likewise.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c
 	(tui_check_and_display_highlight_if_needed): Check can_highlight.
 

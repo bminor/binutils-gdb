@@ -94,7 +94,8 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
   enum tui_status ret;
 
   if (win_info->type == SRC_WIN)
-    ret = tui_set_source_content (s, line_or_addr.u.line_no, noerror);
+    ret = tui_set_source_content (win_info, s, line_or_addr.u.line_no,
+				  noerror);
   else
     ret = tui_set_disassem_content (gdbarch, line_or_addr.u.addr);
 
@@ -121,7 +122,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
 	     we don't have a split layout.  */
 	  if (tui_win_with_focus () == TUI_DISASM_WIN
 	      && tui_current_layout () != SRC_DISASSEM_COMMAND)
-	    tui_set_win_focus_to (TUI_SRC_WIN);
+	    tui_set_win_focus_to (win_info);
 	}
     }
 
@@ -153,7 +154,7 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 	  sal = find_pc_line (addr, 0);
 	  l.loa = LOA_LINE;
 	  l.u.line_no = sal.line;
-	  tui_show_symtab_source (gdbarch, sal.symtab, l, FALSE);
+	  tui_show_symtab_source (TUI_SRC_WIN, gdbarch, sal.symtab, l, FALSE);
 	  break;
 	}
     }
@@ -191,7 +192,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
     default:
       l.loa = LOA_LINE;
       l.u.line_no = line;
-      tui_show_symtab_source (gdbarch, s, l, FALSE);
+      tui_show_symtab_source (TUI_SRC_WIN, gdbarch, s, l, FALSE);
       if (tui_current_layout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);

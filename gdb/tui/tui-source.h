@@ -30,9 +30,11 @@ struct tui_win_info;
 extern void tui_set_source_content_nil (struct tui_source_window_base *,
 					const char *);
 
-extern enum tui_status tui_set_source_content (struct symtab *, 
+extern enum tui_status tui_set_source_content (tui_source_window_base *,
+					       struct symtab *, 
 					       int, int);
-extern void tui_show_symtab_source (struct gdbarch *, struct symtab *,
+extern void tui_show_symtab_source (tui_source_window_base *,
+				    struct gdbarch *, struct symtab *,
 				    struct tui_line_or_address,
 				    int);
 extern int tui_source_is_displayed (const char *);

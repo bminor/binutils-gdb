@@ -123,7 +123,8 @@ copy_source_line (const char **ptr, int line_no, int first_col,
 
 /* Function to display source in the source window.  */
 enum tui_status
-tui_set_source_content (struct symtab *s, 
+tui_set_source_content (tui_source_window_base *win_info,
+			struct symtab *s, 
 			int line_no,
 			int noerror)
 {
@@ -134,11 +135,11 @@ tui_set_source_content (struct symtab *s,
       int line_width, nlines;
 
       ret = TUI_SUCCESS;
-      tui_alloc_source_buffer (TUI_SRC_WIN);
-      line_width = TUI_SRC_WIN->width - 1;
+      tui_alloc_source_buffer (win_info);
+      line_width = win_info->width - 1;
       /* Take hilite (window border) into account, when
 	 calculating the number of lines.  */
-      nlines = (line_no + (TUI_SRC_WIN->height - 2)) - line_no;
+      nlines = (line_no + (win_info->height - 2)) - line_no;
 
       std::string srclines;
       if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
@@ -159,32 +160,30 @@ tui_set_source_content (struct symtab *s,
 	  int cur_line_no, cur_line;
 	  struct tui_locator_window *locator
 	    = tui_locator_win_info_ptr ();
-	  struct tui_source_window_base *src
-	    = (struct tui_source_window_base *) TUI_SRC_WIN;
 	  const char *s_filename = symtab_to_filename_for_display (s);
 
-	  xfree (TUI_SRC_WIN->title);
-	  TUI_SRC_WIN->title = xstrdup (s_filename);
+	  xfree (win_info->title);
+	  win_info->title = xstrdup (s_filename);
 
-	  xfree (src->fullname);
-	  src->fullname = xstrdup (symtab_to_fullname (s));
+	  xfree (win_info->fullname);
+	  win_info->fullname = xstrdup (symtab_to_fullname (s));
 
 	  cur_line = 0;
-	  src->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-	  src->start_line_or_addr.loa = LOA_LINE;
-	  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
+	  win_info->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+	  win_info->start_line_or_addr.loa = LOA_LINE;
+	  cur_line_no = win_info->start_line_or_addr.u.line_no = line_no;
 
 	  const char *iter = srclines.c_str ();
-	  TUI_SRC_WIN->content.resize (nlines);
+	  win_info->content.resize (nlines);
 	  while (cur_line < nlines)
 	    {
 	      struct tui_source_element *element
-		= &TUI_SRC_WIN->content[cur_line];
+		= &win_info->content[cur_line];
 
 	      std::string text;
 	      if (*iter != '\0')
 		text = copy_source_line (&iter, cur_line_no,
-					 src->horizontal_offset,
+					 win_info->horizontal_offset,
 					 line_width);
 
 	      /* Set whether element is the execution point
@@ -196,8 +195,8 @@ tui_set_source_content (struct symtab *s,
 				 symtab_to_fullname (s)) == 0
 		   && cur_line_no == locator->line_no);
 
-	      xfree (TUI_SRC_WIN->content[cur_line].line);
-	      TUI_SRC_WIN->content[cur_line].line
+	      xfree (win_info->content[cur_line].line);
+	      win_info->content[cur_line].line
 		= xstrdup (text.c_str ());
 
 	      cur_line++;
@@ -276,12 +275,13 @@ tui_set_source_content_nil (struct tui_source_window_base *win_info,
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
+tui_show_symtab_source (tui_source_window_base *win_info,
+			struct gdbarch *gdbarch, struct symtab *s,
 			struct tui_line_or_address line, 
 			int noerror)
 {
-  TUI_SRC_WIN->horizontal_offset = 0;
-  tui_update_source_window_as_is (TUI_SRC_WIN, gdbarch, s, line, noerror);
+  win_info->horizontal_offset = 0;
+  tui_update_source_window_as_is (win_info, gdbarch, s, line, noerror);
 }
 
 
