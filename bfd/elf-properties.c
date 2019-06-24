@@ -322,12 +322,10 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
 			 (bfd_vma) p->property.pr_type, first_pbfd, abfd);
 		  }
 	      }
-	    else
-	      {
-		/* Remove this property.  */
-		*lastp = p->next;
-		continue;
-	      }
+
+	    /* Remove this property.  */
+	    *lastp = p->next;
+	    continue;
 	  }
 	else if (number_p)
 	  {

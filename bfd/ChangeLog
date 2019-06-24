@@ -1,3 +1,9 @@
+2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24721
+	* elf-properties.c (elf_merge_gnu_property_list): Remove the
+	property after reporting property removal.
+
 2019-06-23  Alan Modra  <amodra@gmail.com>
 
 	PR 24704

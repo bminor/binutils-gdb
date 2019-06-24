@@ -1,3 +1,13 @@
+2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24721
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/24721 tests.
+	* testsuite/ld-x86-64/pr24721-x32.d: New file.
+	* testsuite/ld-x86-64/pr24721.d: Likewise.
+	* testsuite/ld-x86-64/pr24721.map: Likewise.
+	* testsuite/ld-x86-64/pr24721a.s: Likewise.
+	* testsuite/ld-x86-64/pr24721b.s: Likewise.
+
 2019-06-23  Alan Modra  <amodra@gmail.com>
 
 	PR 24704
