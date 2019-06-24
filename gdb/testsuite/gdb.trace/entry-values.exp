@@ -109,7 +109,7 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    foo_label: subprogram {
-		{decl_file 1 sdata}
+		{decl_file 0 udata}
 		{MACRO_AT_func { foo ${srcdir}/${subdir}/${srcfile} }}
 	    } {
 		formal_parameter {
@@ -126,7 +126,7 @@ Dwarf::assemble $asm_file {
 
 	    subprogram {
 		{name bar}
-		{decl_file 1 sdata}
+		{decl_file 0 udata}
 		{low_pc $bar_start addr}
 		{high_pc "$bar_start + $bar_length" addr}
 		{GNU_all_call_sites 1 sdata}
