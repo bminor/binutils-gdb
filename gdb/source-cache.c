@@ -135,8 +135,7 @@ get_language_name (enum language lang)
       break;
 
     case language_rust:
-      /* Not handled by Source Highlight.  */
-      break;
+      return "rust.lang";
 
     case language_ada:
       return "ada.lang";
@@ -197,11 +196,22 @@ source_cache::ensure (struct symtab *s)
 	      highlighter->setStyleFile ("esc.style");
 	    }
 
-	  std::istringstream input (contents);
-	  std::ostringstream output;
-	  highlighter->highlight (input, output, lang_name, fullname);
-
-	  contents = output.str ();
+	  try
+	    {
+	      std::istringstream input (contents);
+	      std::ostringstream output;
+	      highlighter->highlight (input, output, lang_name, fullname);
+	      contents = output.str ();
+	    }
+	  catch (...)
+	    {
+	      /* Source Highlight will throw an exception if
+		 highlighting fails.  One possible reason it can fail
+		 is if the language is unknown -- which matters to gdb
+		 because Rust support wasn't added until after 3.1.8.
+		 Ignore exceptions here and fall back to
+		 un-highlighted text. */
+	    }
 	}
     }
 #endif /* HAVE_SOURCE_HIGHLIGHT */
