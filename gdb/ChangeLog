@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c
+	(tui_check_and_display_highlight_if_needed): Check can_highlight.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (struct tui_win_info) <can_scroll>: New method.
 	(struct tui_cmd_window) <can_scroll>: New method.
 	* tui/tui-command.c (tui_dispatch_ctrl_char): Use can_scroll

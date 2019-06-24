@@ -128,7 +128,7 @@ tui_highlight_win (struct tui_win_info *win_info)
 void
 tui_check_and_display_highlight_if_needed (struct tui_win_info *win_info)
 {
-  if (win_info != NULL && win_info->type != CMD_WIN)
+  if (win_info != NULL && win_info->can_highlight)
     {
       if (win_info->is_highlighted)
 	tui_highlight_win (win_info);
