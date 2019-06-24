@@ -1,5 +1,9 @@
 2019-06-24  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/implptr-64bit.exp: Fix intra-CU '%' label reference.
+
+2019-06-24  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.trace/entry-values.exp: Use DW_FORM_udata instead of
 	DW_FOR_sdata for DW_AT_decl_file.  Use 0 for DW_AT_decl_file.
 	* gdb.trace/unavailable-dwarf-piece.exp: Same.
