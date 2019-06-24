@@ -106,7 +106,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
     }
   else
     {
-      tui_update_breakpoint_info (win_info, 0);
+      tui_update_breakpoint_info (win_info, nullptr, false);
       tui_show_source_content (win_info);
       tui_update_exec_info (win_info);
       if (win_info->type == SRC_WIN)
@@ -382,15 +382,14 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
     refill ();
 }
 
-/* Update the execution windows to show the active breakpoints.
-   This is called whenever a breakpoint is inserted, removed or
-   has its state changed.  */
+/* See tui-winsource.h.  */
+
 void
-tui_update_all_breakpoint_info ()
+tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
 {
   for (tui_source_window_base *win : tui_source_windows ())
     {
-      if (tui_update_breakpoint_info (win, FALSE))
+      if (tui_update_breakpoint_info (win, being_deleted, false))
         {
           tui_update_exec_info (win);
         }
@@ -398,18 +397,19 @@ tui_update_all_breakpoint_info ()
 }
 
 
-/* Scan the source window and the breakpoints to update the has_break
+/* Scan the source window and the breakpoints to update the break_mode
    information for each line.
 
-   Returns 1 if something changed and the execution window must be
+   Returns true if something changed and the execution window must be
    refreshed.  */
 
-int
-tui_update_breakpoint_info (struct tui_source_window_base *win, 
-			    int current_only)
+bool
+tui_update_breakpoint_info (struct tui_source_window_base *win,
+			    struct breakpoint *being_deleted,
+			    bool current_only)
 {
   int i;
-  int need_refresh = 0;
+  bool need_refresh = false;
   tui_source_window_base *src = (tui_source_window_base *) win;
 
   for (i = 0; i < win->content.size (); i++)
@@ -434,6 +434,9 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
 
 	  gdb_assert (line->line_or_addr.loa == LOA_LINE
 		      || line->line_or_addr.loa == LOA_ADDRESS);
+
+	  if (bp == being_deleted)
+	    continue;
 
 	  for (loc = bp->loc; loc != NULL; loc = loc->next)
 	    {
@@ -491,7 +494,7 @@ tui_set_exec_info_content (struct tui_source_window_base *win_info)
       tui_exec_info_content *content
 	= win_info->execution_info->maybe_allocate_content (win_info->height);
 
-      tui_update_breakpoint_info (win_info, 1);
+      tui_update_breakpoint_info (win_info, nullptr, true);
       for (int i = 0; i < win_info->content.size (); i++)
 	{
 	  tui_exec_info_content &element = content[i];

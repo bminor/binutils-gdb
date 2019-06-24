@@ -1,5 +1,17 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	PR tui/24722:
+	* tui/tui-winsource.h (tui_update_all_breakpoint_info)
+	(tui_update_breakpoint_info): Add "being_deleted" parameter.
+	* tui/tui-winsource.c (tui_update_source_window_as_is): Update.
+	(tui_update_all_breakpoint_info): Add "being_deleted" parameter.
+	(tui_update_breakpoint_info): Likewise.
+	* tui/tui-hooks.c (tui_event_create_breakpoint)
+	(tui_event_delete_breakpoint, tui_event_modify_breakpoint):
+	Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_show_frame_info): Consolidate "if"s.
 
 2019-07-17  Tom Tromey  <tom@tromey.com>

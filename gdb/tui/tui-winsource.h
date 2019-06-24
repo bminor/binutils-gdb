@@ -28,14 +28,21 @@ struct tui_win_info;
 
 /* Update the execution windows to show the active breakpoints.  This
    is called whenever a breakpoint is inserted, removed or has its
-   state changed.  */
-extern void tui_update_all_breakpoint_info (void);
+   state changed.  Normally BEING_DELETED is nullptr; if not nullptr,
+   it indicates a breakpoint that is in the process of being deleted,
+   and which should therefore be ignored by the update.  This is done
+   because the relevant observer is notified before the breakpoint is
+   removed from the list of breakpoints.  */
+extern void tui_update_all_breakpoint_info (struct breakpoint *being_deleted);
 
 /* Scan the source window and the breakpoints to update the break_mode
-   information for each line.  Returns 1 if something changed and the
-   execution window must be refreshed.  */
-extern int tui_update_breakpoint_info (struct tui_source_window_base *win,
-				       int current_only);
+   information for each line.  Returns true if something changed and
+   the execution window must be refreshed.  See
+   tui_update_all_breakpoint_info for a description of
+   BEING_DELETED.  */
+extern bool tui_update_breakpoint_info (struct tui_source_window_base *win,
+					struct breakpoint *being_deleted,
+					bool current_only);
 
 /* Function to display the "main" routine.  */
 extern void tui_display_main (void);
