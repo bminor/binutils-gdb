@@ -1,3 +1,12 @@
+2019-06-24  Ilia Diachkov  <ilia.diachkov@optimitech.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_lui): Delete early exit when
+	SEC_MERGE or SEC_CODE flags are set.
+	(_bfd_riscv_relax_section): New local symtype.  Set sym_sec and
+	symtype consistently.  Don't include sec_addr (sym_sec) in symval.
+	Add check for SEC_INFO_TYPE_MERGE and call _bfd_merged_section_offset.
+	Add sec_addr (sym_sec) after handling merge sections.
+
 2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24721

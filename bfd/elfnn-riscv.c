@@ -3517,10 +3517,6 @@ _bfd_riscv_relax_lui (bfd *abfd,
   bfd_vma gp = riscv_global_pointer_value (link_info);
   int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
-  /* Mergeable symbols and code might later move out of range.  */
-  if (sym_sec->flags & (SEC_MERGE | SEC_CODE))
-    return TRUE;
-
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
   if (gp)
@@ -3881,6 +3877,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       relax_func_t relax_func;
       int type = ELFNN_R_TYPE (rel->r_info);
       bfd_vma symval;
+      char symtype;
 
       relax_func = NULL;
       if (info->relax_pass == 0)
@@ -3946,7 +3943,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    ? 0 : isym->st_size - rel->r_addend;
 
 	  if (isym->st_shndx == SHN_UNDEF)
-	    sym_sec = sec, symval = sec_addr (sec) + rel->r_offset;
+	    sym_sec = sec, symval = rel->r_offset;
 	  else
 	    {
 	      BFD_ASSERT (isym->st_shndx < elf_numsections (abfd));
@@ -3959,8 +3956,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      if (sec_addr (sym_sec) == 0)
 		continue;
 #endif
-	      symval = sec_addr (sym_sec) + isym->st_value;
+	      symval = isym->st_value;
 	    }
+	  symtype = ELF_ST_TYPE (isym->st_info);
 	}
       else
 	{
@@ -3975,21 +3973,59 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  if (h->plt.offset != MINUS_ONE)
-	    symval = sec_addr (htab->elf.splt) + h->plt.offset;
+	    {
+	      sym_sec = htab->elf.splt;
+	      symval = h->plt.offset;
+	    }
 	  else if (h->root.u.def.section->output_section == NULL
 		   || (h->root.type != bfd_link_hash_defined
 		       && h->root.type != bfd_link_hash_defweak))
 	    continue;
 	  else
-	    symval = sec_addr (h->root.u.def.section) + h->root.u.def.value;
+	    {
+	      symval = h->root.u.def.value;
+	      sym_sec = h->root.u.def.section;
+	    }
 
 	  if (h->type != STT_FUNC)
 	    reserve_size =
 	      (h->size - rel->r_addend) > h->size ? 0 : h->size - rel->r_addend;
-	  sym_sec = h->root.u.def.section;
+	  symtype = h->type;
 	}
 
-      symval += rel->r_addend;
+      if (sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE
+          && (sym_sec->flags & SEC_MERGE))
+	{
+	  /* At this stage in linking, no SEC_MERGE symbol has been
+	     adjusted, so all references to such symbols need to be
+	     passed through _bfd_merged_section_offset.  (Later, in
+	     relocate_section, all SEC_MERGE symbols *except* for
+	     section symbols have been adjusted.)
+
+	     gas may reduce relocations against symbols in SEC_MERGE
+	     sections to a relocation against the section symbol when
+	     the original addend was zero.  When the reloc is against
+	     a section symbol we should include the addend in the
+	     offset passed to _bfd_merged_section_offset, since the
+	     location of interest is the original symbol.  On the
+	     other hand, an access to "sym+addend" where "sym" is not
+	     a section symbol should not include the addend;  Such an
+	     access is presumed to be an offset from "sym";  The
+	     location of interest is just "sym".  */
+	   if (symtype == STT_SECTION)
+	     symval += rel->r_addend;
+
+	   symval = _bfd_merged_section_offset (abfd, &sym_sec,
+						elf_section_data (sym_sec)->sec_info,
+						symval);
+
+	   if (symtype != STT_SECTION)
+	     symval += rel->r_addend;
+	}
+      else
+	symval += rel->r_addend;
+
+      symval += sec_addr (sym_sec);
 
       if (!relax_func (abfd, sec, sym_sec, info, rel, symval,
 		       max_alignment, reserve_size, again,
