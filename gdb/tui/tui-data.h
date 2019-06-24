@@ -352,6 +352,12 @@ public:
   void left_scroll (int num_to_scroll);
   void right_scroll (int num_to_scroll);
 
+  /* Return true if this window can be scrolled, false otherwise.  */
+  virtual bool can_scroll () const
+  {
+    return true;
+  }
+
   /* Can this window ever be highlighted?  */
   bool can_highlight = true;
 
@@ -522,6 +528,11 @@ struct tui_cmd_window : public tui_win_info
   const char *name () const override
   {
     return CMD_NAME;
+  }
+
+  bool can_scroll () const override
+  {
+    return false;
   }
 
   int start_line = 0;

@@ -1,3 +1,10 @@
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (struct tui_win_info) <can_scroll>: New method.
+	(struct tui_cmd_window) <can_scroll>: New method.
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Use can_scroll
+	method.
+
 2019-07-17  Tom Tromey  <tromey@adacore.com>
 
 	* ui-out.h (class ui_out) <field_signed, field_fmt_signed,

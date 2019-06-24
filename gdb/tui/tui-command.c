@@ -48,10 +48,9 @@ tui_dispatch_ctrl_char (unsigned int ch)
   if (ch == '\f')
     tui_refresh_all_win ();
 
-  /* If the command window has the logical focus, or no-one does
-     assume it is the command window; in this case, pass the character
-     on through and do nothing here.  */
-  if (win_info == NULL || win_info == TUI_CMD_WIN)
+  /* If no window has the focus, or if the focus window can't scroll,
+     just pass the character through.  */
+  if (win_info == NULL || !win_info->can_scroll ())
     return ch;
 
   switch (ch)
