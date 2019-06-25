@@ -1,5 +1,11 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/sse2-16bit.d,
+	testsuite/gas/i386/sse2-16bit.s: New.
+	testsuite/gas/i386/i386.exp: Run new test.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Also handle ANDQ with
 	immediatie fitting in 7 bits.
 	* testsuite/gas/i386/x86-64-optimize-1.s: Add ANDQ cases with

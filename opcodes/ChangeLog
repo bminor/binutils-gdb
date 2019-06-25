@@ -1,5 +1,13 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (prefix_table): Use Edq for cvtsi2ss and cvtsi2sd.
+	Use Gdq for cvttss2si, cvttsd2si, cvtss2si, and cvtsd2si, and
+	movnti.
+	* i386-opc.tbl (movnti): Add IgnoreSize. 
+	* i386-tbl.h: Re-generate.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (and): Mark Imm8S form for optimization.
 	* i386-tbl.h: Re-generate.
 

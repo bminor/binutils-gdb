@@ -3728,9 +3728,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F2A */
   {
     { "cvtpi2ps", { XM, EMCq }, PREFIX_OPCODE },
-    { "cvtsi2ss%LQ", { XM, Ev }, PREFIX_OPCODE },
+    { "cvtsi2ss%LQ", { XM, Edq }, PREFIX_OPCODE },
     { "cvtpi2pd", { XM, EMCq }, PREFIX_OPCODE },
-    { "cvtsi2sd%LQ", { XM, Ev }, 0 },
+    { "cvtsi2sd%LQ", { XM, Edq }, 0 },
   },
 
   /* PREFIX_0F2B */
@@ -3744,17 +3744,17 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F2C */
   {
     { "cvttps2pi", { MXC, EXq }, PREFIX_OPCODE },
-    { "cvttss2si", { Gv, EXd }, PREFIX_OPCODE },
+    { "cvttss2si", { Gdq, EXd }, PREFIX_OPCODE },
     { "cvttpd2pi", { MXC, EXx }, PREFIX_OPCODE },
-    { "cvttsd2si", { Gv, EXq }, PREFIX_OPCODE },
+    { "cvttsd2si", { Gdq, EXq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2D */
   {
     { "cvtps2pi", { MXC, EXq }, PREFIX_OPCODE },
-    { "cvtss2si", { Gv, EXd }, PREFIX_OPCODE },
+    { "cvtss2si", { Gdq, EXd }, PREFIX_OPCODE },
     { "cvtpd2pi", { MXC, EXx }, PREFIX_OPCODE },
-    { "cvtsd2si", { Gv, EXq }, PREFIX_OPCODE },
+    { "cvtsd2si", { Gdq, EXq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2E */
@@ -4063,7 +4063,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_MOD_0_0FC3 */
   {
-    { "movntiS", { Ev, Gv }, PREFIX_OPCODE },
+    { "movntiS", { Edq, Gdq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_MOD_0_0FC7_REG_6 */

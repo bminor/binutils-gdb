@@ -945,7 +945,7 @@ fucompi, 1, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 
 // Pentium4 extensions.
 
-movnti, 2, 0xfc3, None, 2, CpuSSE2, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoAVX, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+movnti, 2, 0xfc3, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoAVX, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
 lfence, 0, 0xfae, 0xe8, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
 mfence, 0, 0xfae, 0xf0, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
