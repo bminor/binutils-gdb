@@ -1,3 +1,10 @@
+2019-07-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-arm-low.c (arm_fill_wmmxregset, arm_store_wmmxregset):
+	Move counter inside for.
+	(arm_read_description): Check ptrace earlier.
+	(arm_arch_setup): Call arm_linux_init_hwbp_cap here.
+
 2019-07-09  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

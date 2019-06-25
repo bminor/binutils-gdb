@@ -1,5 +1,10 @@
 2019-07-10  Alan Hayward  <alan.hayward@arm.com>
 
+	* arm-linux-nat.c (arm_linux_nat_target::read_description): Check
+	ptrace earlier.
+
+2019-07-10  Alan Hayward  <alan.hayward@arm.com>
+
 	* features/aarch64-pauth.c: Regenerate.
 
 2019-07-09  Simon Marchi  <simon.marchi@polymtl.ca>

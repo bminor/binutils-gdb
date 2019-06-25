@@ -175,16 +175,14 @@ arm_cannot_fetch_register (int regno)
 static void
 arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 {
-  int i;
-
   if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
-  for (i = 0; i < 16; i++)
+  for (int i = 0; i < 16; i++)
     collect_register (regcache, arm_num_regs + i, (char *) buf + i * 8);
 
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
-  for (i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++)
     collect_register (regcache, arm_num_regs + i + 16,
 		      (char *) buf + 16 * 8 + i * 4);
 }
@@ -192,16 +190,14 @@ arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 static void
 arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 {
-  int i;
-
   if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
-  for (i = 0; i < 16; i++)
+  for (int i = 0; i < 16; i++)
     supply_register (regcache, arm_num_regs + i, (char *) buf + i * 8);
 
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
-  for (i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++)
     supply_register (regcache, arm_num_regs + i + 16,
 		     (char *) buf + 16 * 8 + i * 4);
 }
@@ -850,40 +846,29 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 static const struct target_desc *
 arm_read_description (void)
 {
-  int pid = lwpid_of (current_thread);
   unsigned long arm_hwcap = linux_get_hwcap (4);
-
-  /* Query hardware watchpoint/breakpoint capabilities.  */
-  arm_linux_init_hwbp_cap (pid);
 
   if (arm_hwcap & HWCAP_IWMMXT)
     return tdesc_arm_with_iwmmxt;
 
   if (arm_hwcap & HWCAP_VFP)
     {
-      const struct target_desc *result;
-      char *buf;
+      /* Make sure that the kernel supports reading VFP registers.  Support was
+	 added in 2.6.30.  */
+      int pid = lwpid_of (current_thread);
+      errno = 0;
+      char *buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
+      if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0 && errno == EIO)
+	return tdesc_arm;
 
       /* NEON implies either no VFP, or VFPv3-D32.  We only support
 	 it with VFP.  */
       if (arm_hwcap & HWCAP_NEON)
-	result = tdesc_arm_with_neon;
+	return tdesc_arm_with_neon;
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	result = tdesc_arm_with_vfpv3;
+	return tdesc_arm_with_vfpv3;
       else
-	result = tdesc_arm_with_vfpv2;
-
-      /* Now make sure that the kernel supports reading these
-	 registers.  Support was added in 2.6.30.  */
-      errno = 0;
-      buf = (char *) xmalloc (ARM_VFP3_REGS_SIZE);
-      if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
-	  && errno == EIO)
-	result = tdesc_arm;
-
-      free (buf);
-
-      return result;
+	return tdesc_arm_with_vfpv2;
     }
 
   /* The default configuration uses legacy FPA registers, probably
@@ -897,6 +882,9 @@ arm_arch_setup (void)
   int tid = lwpid_of (current_thread);
   int gpregs[18];
   struct iovec iov;
+
+  /* Query hardware watchpoint/breakpoint capabilities.  */
+  arm_linux_init_hwbp_cap (tid);
 
   current_process ()->tdesc = arm_read_description ();
 

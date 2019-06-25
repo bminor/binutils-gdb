@@ -555,29 +555,22 @@ arm_linux_nat_target::read_description ()
 
   if (arm_hwcap & HWCAP_VFP)
     {
-      int pid;
-      char *buf;
-      const struct target_desc * result = NULL;
+      /* Make sure that the kernel supports reading VFP registers.  Support was
+	 added in 2.6.30.  */
+      int pid = inferior_ptid.lwp ();
+      errno = 0;
+      char *buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
+      if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0 && errno == EIO)
+	return nullptr;
 
       /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
 	 Neon with VFPv3-D32.  */
       if (arm_hwcap & HWCAP_NEON)
-	result = tdesc_arm_with_neon;
+	return tdesc_arm_with_neon;
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	result = tdesc_arm_with_vfpv3;
+	return tdesc_arm_with_vfpv3;
       else
-	result = tdesc_arm_with_vfpv2;
-
-      /* Now make sure that the kernel supports reading these
-	 registers.  Support was added in 2.6.30.  */
-      pid = inferior_ptid.lwp ();
-      errno = 0;
-      buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
-      if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
-	  && errno == EIO)
-	result = NULL;
-
-      return result;
+	return tdesc_arm_with_vfpv2;
     }
 
   return this->beneath ()->read_description ();
