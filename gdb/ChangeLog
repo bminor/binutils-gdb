@@ -1,5 +1,14 @@
 2019-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arm-tdep.c (struct arm_per_objfile) <section_maps_sorted>: New
+	field.
+	(arm_find_mapping_symbol): Sort mapping symbol vectors on first
+	use.
+	(arm_record_special_symbol): Don't insert new symbol in sorted
+	position, push it at the end.
+
+2019-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* arm-tdep.c (struct arm_mapping_symbol) (operator <): New.
 	(arm_mapping_symbol_s): Remove.
 	(DEF_VEC_O(arm_mapping_symbol_s)): Remove.

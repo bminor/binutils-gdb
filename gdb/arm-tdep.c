@@ -105,7 +105,8 @@ typedef std::vector<arm_mapping_symbol> arm_mapping_symbol_vec;
 struct arm_per_objfile
 {
   explicit arm_per_objfile (size_t num_sections)
-  : section_maps (new arm_mapping_symbol_vec[num_sections])
+  : section_maps (new arm_mapping_symbol_vec[num_sections]),
+    section_maps_sorted (new bool[num_sections] ())
   {}
 
   DISABLE_COPY_AND_ASSIGN (arm_per_objfile);
@@ -119,6 +120,10 @@ struct arm_per_objfile
      For each section, the vector of arm_mapping_symbol is sorted by
      symbol value (address).  */
   std::unique_ptr<arm_mapping_symbol_vec[]> section_maps;
+
+  /* For each corresponding element of section_maps above, is this vector
+     sorted.  */
+  std::unique_ptr<bool[]> section_maps_sorted;
 };
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
@@ -356,10 +361,19 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 						   arm_objfile_data_key);
       if (data != NULL)
 	{
+	  unsigned int section_idx = sec->the_bfd_section->index;
+	  arm_mapping_symbol_vec &map
+	    = data->section_maps[section_idx];
+
+	  /* Sort the vector on first use.  */
+	  if (!data->section_maps_sorted[section_idx])
+	    {
+	      std::sort (map.begin (), map.end ());
+	      data->section_maps_sorted[section_idx] = true;
+	    }
+
 	  struct arm_mapping_symbol map_key
 	    = { memaddr - obj_section_addr (sec), 0 };
-	  const arm_mapping_symbol_vec &map
-	    = data->section_maps[sec->the_bfd_section->index];
 	  arm_mapping_symbol_vec::const_iterator it
 	    = std::lower_bound (map.begin (), map.end (), map_key);
 
@@ -8547,12 +8561,8 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   new_map_sym.value = sym->value;
   new_map_sym.type = name[1];
 
-  /* Assume that most mapping symbols appear in order of increasing
-     value.  If they were randomly distributed, it would be faster to
-     always push here and then sort at first use.  */
-  arm_mapping_symbol_vec::iterator it
-    = std::lower_bound (map.begin (), map.end (), new_map_sym);
-  map.insert (it, new_map_sym);
+  /* Insert at the end, the vector will be sorted on first use.  */
+  map.push_back (new_map_sym);
 }
 
 static void
