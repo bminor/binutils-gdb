@@ -2138,8 +2138,10 @@ attr_value_as_address (struct attribute *attr)
 /* See declaration.  */
 
 dwarf2_per_objfile::dwarf2_per_objfile (struct objfile *objfile_,
-					const dwarf2_debug_sections *names)
-  : objfile (objfile_)
+					const dwarf2_debug_sections *names,
+					bool can_copy_)
+  : objfile (objfile_),
+    can_copy (can_copy_)
 {
   if (names == NULL)
     names = &dwarf2_elf_names;
@@ -2214,11 +2216,14 @@ private:
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.
    NAMES points to the dwarf2 section names, or is NULL if the standard
-   ELF names are used.  */
+   ELF names are used.  CAN_COPY is true for formats where symbol
+   interposition is possible and so symbol values must follow copy
+   relocation rules.  */
 
 int
 dwarf2_has_info (struct objfile *objfile,
-                 const struct dwarf2_debug_sections *names)
+                 const struct dwarf2_debug_sections *names,
+		 bool can_copy)
 {
   if (objfile->flags & OBJF_READNEVER)
     return 0;
@@ -2228,7 +2233,8 @@ dwarf2_has_info (struct objfile *objfile,
 
   if (dwarf2_per_objfile == NULL)
     dwarf2_per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile,
-							  names);
+							  names,
+							  can_copy);
 
   return (!dwarf2_per_objfile->info.is_virtual
 	  && dwarf2_per_objfile->info.s.section != NULL
@@ -21715,19 +21721,21 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		}
 	      else if (attr2 && (DW_UNSND (attr2) != 0))
 		{
-		  /* Workaround gfortran PR debug/40040 - it uses
-		     DW_AT_location for variables in -fPIC libraries which may
-		     get overriden by other libraries/executable and get
-		     a different address.  Resolve it by the minimal symbol
-		     which may come from inferior's executable using copy
-		     relocation.  Make this workaround only for gfortran as for
-		     other compilers GDB cannot guess the minimal symbol
-		     Fortran mangling kind.  */
-		  if (cu->language == language_fortran && die->parent
-		      && die->parent->tag == DW_TAG_module
-		      && cu->producer
-		      && startswith (cu->producer, "GNU Fortran"))
-		    SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
+		  if (SYMBOL_CLASS (sym) == LOC_STATIC
+		      && (objfile->flags & OBJF_MAINLINE) == 0
+		      && dwarf2_per_objfile->can_copy)
+		    {
+		      /* A global static variable might be subject to
+			 copy relocation.  We first check for a local
+			 minsym, though, because maybe the symbol was
+			 marked hidden, in which case this would not
+			 apply.  */
+		      bound_minimal_symbol found
+			= (lookup_minimal_symbol_linkage
+			   (SYMBOL_LINKAGE_NAME (sym), objfile));
+		      if (found.minsym != nullptr)
+			sym->maybe_copied = 1;
+		    }
 
 		  /* A variable with DW_AT_external is never static,
 		     but it may be block-scoped.  */

@@ -454,6 +454,14 @@ extern const char *symbol_get_demangled_name
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
+/* Return the address of SYM.  The MAYBE_COPIED flag must be set on
+   SYM.  If SYM appears in the main program's minimal symbols, then
+   that minsym's address is returned; otherwise, SYM's address is
+   returned.  This should generally only be used via the
+   SYMBOL_VALUE_ADDRESS macro.  */
+
+extern CORE_ADDR get_symbol_address (const struct symbol *sym);
+
 /* Note that all the following SYMBOL_* macros are used with the
    SYMBOL argument being either a partial symbol or
    a full symbol.  Both types have a ginfo field.  In particular
@@ -463,7 +471,9 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
    field only, instead of the SYMBOL parameter.  */
 
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
-#define SYMBOL_VALUE_ADDRESS(symbol)	((symbol)->ginfo.value.address + 0)
+#define SYMBOL_VALUE_ADDRESS(symbol)			      \
+  (((symbol)->maybe_copied) ? get_symbol_address (symbol)     \
+   : ((symbol)->ginfo.value.address))
 #define SET_SYMBOL_VALUE_ADDRESS(symbol, new_value)	\
   ((symbol)->ginfo.value.address = (new_value))
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -671,6 +681,14 @@ struct minimal_symbol : public general_symbol_info
      the object file format may not carry that piece of information.  */
   unsigned int has_size : 1;
 
+  /* For data symbols only, if this is set, then the symbol might be
+     subject to copy relocation.  In this case, a minimal symbol
+     matching the symbol's linkage name is first looked for in the
+     main objfile.  If found, then that address is used; otherwise the
+     address in this symbol is used.  */
+
+  unsigned maybe_copied : 1;
+
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
 
@@ -690,6 +708,15 @@ struct minimal_symbol : public general_symbol_info
   bool text_p () const;
 };
 
+/* Return the address of MINSYM, which comes from OBJF.  The
+   MAYBE_COPIED flag must be set on MINSYM.  If MINSYM appears in the
+   main program's minimal symbols, then that minsym's address is
+   returned; otherwise, MINSYM's address is returned.  This should
+   generally only be used via the MSYMBOL_VALUE_ADDRESS macro.  */
+
+extern CORE_ADDR get_msymbol_address (struct objfile *objf,
+				      const struct minimal_symbol *minsym);
+
 #define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
 #define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
 #define MSYMBOL_SIZE(msymbol)		((msymbol)->size + 0)
@@ -708,8 +735,9 @@ struct minimal_symbol : public general_symbol_info
 /* The relocated address of the minimal symbol, using the section
    offsets from OBJFILE.  */
 #define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
-  ((symbol)->value.address					\
-   + ANOFFSET ((objfile)->section_offsets, ((symbol)->section)))
+  (((symbol)->maybe_copied) ? get_msymbol_address (objfile, symbol)	\
+   : ((symbol)->value.address						\
+      + ANOFFSET ((objfile)->section_offsets, ((symbol)->section))))
 /* For a bound minsym, we can easily compute the address directly.  */
 #define BMSYMBOL_VALUE_ADDRESS(symbol) \
   MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
@@ -1111,6 +1139,14 @@ struct symbol
 
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
   unsigned is_inlined : 1;
+
+  /* For LOC_STATIC only, if this is set, then the symbol might be
+     subject to copy relocation.  In this case, a minimal symbol
+     matching the symbol's linkage name is first looked for in the
+     main objfile.  If found, then that address is used; otherwise the
+     address in this symbol is used.  */
+
+  unsigned maybe_copied : 1;
 
   /* The concrete type of this symbol.  */
 

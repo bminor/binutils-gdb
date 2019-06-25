@@ -205,6 +205,17 @@ struct bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
 struct bound_minimal_symbol lookup_minimal_symbol_text (const char *,
 							struct objfile *);
 
+/* Look through the minimal symbols in OBJF (and its separate debug
+   objfiles) for a global (not file-local) minsym whose linkage name
+   is NAME.  This is somewhat similar to lookup_minimal_symbol_text,
+   only data symbols (not text symbols) are considered, and a non-NULL
+   objfile is not accepted.  Returns a bound minimal symbol that
+   matches, or an "empty" bound minimal symbol otherwise.  */
+
+extern struct bound_minimal_symbol lookup_minimal_symbol_linkage
+  (const char *name, struct objfile *objf)
+  ATTRIBUTE_NONNULL (1) ATTRIBUTE_NONNULL (2);
+
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and PC.  If OBJF is non-NULL,
    limit the search to that objfile.  Returns a pointer to the minimal

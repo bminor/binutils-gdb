@@ -203,10 +203,16 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       || ms_type == mst_text_gnu_ifunc)
     address = gdbarch_addr_bits_remove (gdbarch, address);
 
-  return reader.record_full (name, name_len, copy_name, address,
-			     ms_type,
-			     gdb_bfd_section_index (objfile->obfd,
-						    bfd_section));
+  struct minimal_symbol *result
+    = reader.record_full (name, name_len, copy_name, address,
+			  ms_type,
+			  gdb_bfd_section_index (objfile->obfd,
+						 bfd_section));
+  if ((objfile->flags & OBJF_MAINLINE) == 0
+      && (ms_type == mst_data || ms_type == mst_bss))
+    result->maybe_copied = 1;
+
+  return result;
 }
 
 /* Read the symbol table of an ELF file.
@@ -1239,7 +1245,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				bfd_section_size (str_sect));
     }
 
-  if (dwarf2_has_info (objfile, NULL))
+  if (dwarf2_has_info (objfile, NULL, true))
     {
       dw_index_kind index_kind;
 

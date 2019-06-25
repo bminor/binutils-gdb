@@ -519,6 +519,29 @@ iterate_over_minimal_symbols
 
 /* See minsyms.h.  */
 
+bound_minimal_symbol
+lookup_minimal_symbol_linkage (const char *name, struct objfile *objf)
+{
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+
+  for (objfile *objfile : objf->separate_debug_objfiles ())
+    {
+      for (minimal_symbol *msymbol = objfile->per_bfd->msymbol_hash[hash];
+	   msymbol != NULL;
+	   msymbol = msymbol->hash_next)
+	{
+	  if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0
+	      && (MSYMBOL_TYPE (msymbol) == mst_data
+		  || MSYMBOL_TYPE (msymbol) == mst_bss))
+	    return {msymbol, objfile};
+	}
+    }
+
+  return {};
+}
+
+/* See minsyms.h.  */
+
 struct bound_minimal_symbol
 lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {

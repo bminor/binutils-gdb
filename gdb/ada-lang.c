@@ -4724,6 +4724,15 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
     case LOC_CONST:
       return SYMBOL_VALUE (sym0) == SYMBOL_VALUE (sym1)
         && equiv_types (SYMBOL_TYPE (sym0), SYMBOL_TYPE (sym1));
+
+    case LOC_STATIC:
+      {
+        const char *name0 = SYMBOL_LINKAGE_NAME (sym0);
+        const char *name1 = SYMBOL_LINKAGE_NAME (sym1);
+        return (strcmp (name0, name1) == 0
+                && SYMBOL_VALUE_ADDRESS (sym0) == SYMBOL_VALUE_ADDRESS (sym1));
+      }
+
     default:
       return 0;
     }

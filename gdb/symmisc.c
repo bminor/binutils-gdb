@@ -236,9 +236,13 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  break;
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
-      fputs_filtered (paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (objfile,
-								msymbol)),
-		      outfile);
+
+      /* Use the relocated address as shown in the symbol here -- do
+	 not try to respect copy relocations.  */
+      CORE_ADDR addr = (msymbol->value.address
+			+ ANOFFSET (objfile->section_offsets,
+				    msymbol->section));
+      fputs_filtered (paddress (gdbarch, addr), outfile);
       fprintf_filtered (outfile, " %s", MSYMBOL_LINKAGE_NAME (msymbol));
       if (section)
 	{

@@ -106,9 +106,12 @@ struct dwarf2_per_objfile
 {
   /* Construct a dwarf2_per_objfile for OBJFILE.  NAMES points to the
      dwarf2 section names, or is NULL if the standard ELF names are
-     used.  */
+     used.  CAN_COPY is true for formats where symbol
+     interposition is possible and so symbol values must follow copy
+     relocation rules.  */
   dwarf2_per_objfile (struct objfile *objfile,
-		      const dwarf2_debug_sections *names);
+		      const dwarf2_debug_sections *names,
+		      bool can_copy);
 
   ~dwarf2_per_objfile ();
 
@@ -207,6 +210,9 @@ public:
   /* The shared '.dwz' file, if one exists.  This is used when the
      original data was compressed using 'dwz -m'.  */
   std::unique_ptr<struct dwz_file> dwz_file;
+
+  /* Whether copy relocations are supported by this object format.  */
+  bool can_copy;
 
   /* A flag indicating whether this objfile has a section loaded at a
      VMA of 0.  */

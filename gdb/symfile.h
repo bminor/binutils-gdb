@@ -585,7 +585,8 @@ struct dwarf2_debug_sections {
 };
 
 extern int dwarf2_has_info (struct objfile *,
-                            const struct dwarf2_debug_sections *);
+                            const struct dwarf2_debug_sections *,
+			    bool = false);
 
 /* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
 enum dwarf2_section_enum {

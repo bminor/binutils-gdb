@@ -1,5 +1,33 @@
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
+	* symmisc.c (dump_msymbols): Don't use MSYMBOL_VALUE_ADDRESS.
+	* ada-lang.c (lesseq_defined_than): Handle
+	LOC_STATIC.
+	* dwarf2read.c (dwarf2_per_objfile): Add can_copy
+	parameter.
+	(dwarf2_has_info): Likewise.
+	(new_symbol): Set maybe_copied on symbol when
+	appropriate.
+	* dwarf2read.h (dwarf2_per_objfile): Add can_copy
+	parameter.
+	<can_copy>: New member.
+	* elfread.c (record_minimal_symbol): Set maybe_copied
+	on symbol when appropriate.
+	(elf_symfile_read): Update call to dwarf2_has_info.
+	* minsyms.c (lookup_minimal_symbol_linkage): New
+	function.
+	* minsyms.h (lookup_minimal_symbol_linkage): Declare.
+	* symtab.c (get_symbol_address, get_msymbol_address):
+	New functions.
+	* symtab.h (get_symbol_address, get_msymbol_address):
+	Declare.
+	(SYMBOL_VALUE_ADDRESS, MSYMBOL_VALUE_ADDRESS): Handle
+	maybe_copied.
+	(struct symbol, struct minimal_symbol) <maybe_copied>:
+	New member.
+
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
 	* source.c (struct current_source_location): New.
 	(current_source_key): New global.
 	(current_source_symtab, current_source_line)

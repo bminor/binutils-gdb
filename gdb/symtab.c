@@ -6261,6 +6261,50 @@ symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
   symbol->owner.symtab = symtab;
 }
 
+/* See symtab.h.  */
+
+CORE_ADDR
+get_symbol_address (const struct symbol *sym)
+{
+  gdb_assert (sym->maybe_copied);
+  gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
+
+  const char *linkage_name = SYMBOL_LINKAGE_NAME (sym);
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol_linkage (linkage_name, objfile);
+      if (minsym.minsym != nullptr)
+	return BMSYMBOL_VALUE_ADDRESS (minsym);
+    }
+  return sym->ginfo.value.address;
+}
+
+/* See symtab.h.  */
+
+CORE_ADDR
+get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
+{
+  gdb_assert (minsym->maybe_copied);
+  gdb_assert ((objf->flags & OBJF_MAINLINE) == 0);
+
+  const char *linkage_name = MSYMBOL_LINKAGE_NAME (minsym);
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      if ((objfile->flags & OBJF_MAINLINE) != 0)
+	{
+	  bound_minimal_symbol found
+	    = lookup_minimal_symbol_linkage (linkage_name, objfile);
+	  if (found.minsym != nullptr)
+	    return BMSYMBOL_VALUE_ADDRESS (found);
+	}
+    }
+  return (minsym->value.address
+	  + ANOFFSET (objf->section_offsets, minsym->section));
+}
+
 
 
 void
