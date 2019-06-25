@@ -18,11 +18,6 @@
 #ifndef AARCH32_LINUX_NAT_H
 #define AARCH32_LINUX_NAT_H
 
-/* Fetch and store VFP Registers.  The kernel object has space for 32
-   64-bit registers, and the FPSCR.  This is even when on a VFPv2 or
-   VFPv3D16 target.  */
-#define VFP_REGS_SIZE (32 * 8 + 4)
-
 void aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
 				 int arm_apcs_32);
 

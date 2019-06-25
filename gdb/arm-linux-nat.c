@@ -276,8 +276,6 @@ store_regs (const struct regcache *regcache)
 /* Fetch all WMMX registers of the process and store into
    regcache.  */
 
-#define IWMMXT_REGS_SIZE (16 * 8 + 6 * 4)
-
 static void
 fetch_wmmx_regs (struct regcache *regcache)
 {
@@ -339,7 +337,7 @@ store_wmmx_regs (const struct regcache *regcache)
 static void
 fetch_vfp_regs (struct regcache *regcache)
 {
-  gdb_byte regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[ARM_VFP3_REGS_SIZE];
   int ret, tid;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -352,7 +350,7 @@ fetch_vfp_regs (struct regcache *regcache)
       struct iovec iov;
 
       iov.iov_base = regbuf;
-      iov.iov_len = VFP_REGS_SIZE;
+      iov.iov_len = ARM_VFP3_REGS_SIZE;
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iov);
     }
   else
@@ -368,7 +366,7 @@ fetch_vfp_regs (struct regcache *regcache)
 static void
 store_vfp_regs (const struct regcache *regcache)
 {
-  gdb_byte regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[ARM_VFP3_REGS_SIZE];
   int ret, tid;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -381,7 +379,7 @@ store_vfp_regs (const struct regcache *regcache)
       struct iovec iov;
 
       iov.iov_base = regbuf;
-      iov.iov_len = VFP_REGS_SIZE;
+      iov.iov_len = ARM_VFP3_REGS_SIZE;
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iov);
     }
   else
@@ -398,7 +396,7 @@ store_vfp_regs (const struct regcache *regcache)
       struct iovec iov;
 
       iov.iov_base = regbuf;
-      iov.iov_len = VFP_REGS_SIZE;
+      iov.iov_len = ARM_VFP3_REGS_SIZE;
       ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_VFP, &iov);
     }
   else
@@ -574,7 +572,7 @@ arm_linux_nat_target::read_description ()
 	 registers.  Support was added in 2.6.30.  */
       pid = inferior_ptid.lwp ();
       errno = 0;
-      buf = (char *) alloca (VFP_REGS_SIZE);
+      buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
 	result = NULL;

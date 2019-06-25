@@ -1,5 +1,11 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* linux-aarch32-low.c (arm_read_description, arm_regsets): Use new
+	defines.
+	* linux-arm-low.c (arm_read_description, arm_regsets): Likewise.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* configure.srv: Remove legacy xml.
 	* linux-aarch64-low.c (initialize_low_arch): Remove
 	initialize_low_tdesc call.

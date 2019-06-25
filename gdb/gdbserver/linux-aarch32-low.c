@@ -143,10 +143,10 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
 /* Register sets with using PTRACE_GETREGSET.  */
 
 static struct regset_info aarch32_regsets[] = {
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, 18 * 4,
-    GENERAL_REGS,
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
+    ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
     arm_fill_gregset, arm_store_gregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, 32 * 8 + 4,
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, ARM_VFP3_REGS_SIZE,
     EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
   NULL_REGSET

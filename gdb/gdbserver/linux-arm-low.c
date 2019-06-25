@@ -876,7 +876,7 @@ arm_read_description (void)
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */
       errno = 0;
-      buf = (char *) xmalloc (32 * 8 + 4);
+      buf = (char *) xmalloc (ARM_VFP3_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
 	result = tdesc_arm;
@@ -973,14 +973,12 @@ arm_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
 /* Register sets without using PTRACE_GETREGSET.  */
 
 static struct regset_info arm_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, 0, 18 * 4,
-    GENERAL_REGS,
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0,
+    ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
     arm_fill_gregset, arm_store_gregset },
-  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 0, 16 * 8 + 6 * 4,
-    EXTENDED_REGS,
+  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 0, IWMMXT_REGS_SIZE, EXTENDED_REGS,
     arm_fill_wmmxregset, arm_store_wmmxregset },
-  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, 32 * 8 + 4,
-    EXTENDED_REGS,
+  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, ARM_VFP3_REGS_SIZE, EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
   NULL_REGSET
 };

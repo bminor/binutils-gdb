@@ -8781,25 +8781,16 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 	 cater for remote targets whose register set layout is the
 	 same as the FPA layout.  */
       register_remote_g_packet_guess (gdbarch,
-				      /* r0-r12,sp,lr,pc; f0-f7; fps,xpsr */
-				      (16 * ARM_INT_REGISTER_SIZE)
-				      + (8 * ARM_FP_REGISTER_SIZE)
-				      + (2 * ARM_INT_REGISTER_SIZE),
+				      ARM_CORE_REGS_SIZE + ARM_FP_REGS_SIZE,
 				      tdesc_arm_with_m_fpa_layout);
 
       /* The regular M-profile layout.  */
-      register_remote_g_packet_guess (gdbarch,
-				      /* r0-r12,sp,lr,pc; xpsr */
-				      (16 * ARM_INT_REGISTER_SIZE)
-				      + ARM_INT_REGISTER_SIZE,
+      register_remote_g_packet_guess (gdbarch, ARM_CORE_REGS_SIZE,
 				      tdesc_arm_with_m);
 
       /* M-profile plus M4F VFP.  */
       register_remote_g_packet_guess (gdbarch,
-				      /* r0-r12,sp,lr,pc; d0-d15; fpscr,xpsr */
-				      (16 * ARM_INT_REGISTER_SIZE)
-				      + (16 * ARM_VFP_REGISTER_SIZE)
-				      + (2 * ARM_INT_REGISTER_SIZE),
+				      ARM_CORE_REGS_SIZE + ARM_VFP2_REGS_SIZE,
 				      tdesc_arm_with_m_vfp_d16);
     }
 

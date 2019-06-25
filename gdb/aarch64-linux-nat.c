@@ -30,6 +30,7 @@
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"
 #include "aarch32-linux-nat.h"
+#include "arch/arm.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
@@ -294,7 +295,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
+  gdb_static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
 
   tid = regcache->ptid ().lwp ();
 
@@ -302,7 +303,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
     {
-      iovec.iov_len = VFP_REGS_SIZE;
+      iovec.iov_len = ARM_VFP3_REGS_SIZE;
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
       if (ret < 0)
@@ -341,14 +342,14 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
+  gdb_static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
   tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
 
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
     {
-      iovec.iov_len = VFP_REGS_SIZE;
+      iovec.iov_len = ARM_VFP3_REGS_SIZE;
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
       if (ret < 0)
@@ -638,13 +639,13 @@ const struct target_desc *
 aarch64_linux_nat_target::read_description ()
 {
   int ret, tid;
-  gdb_byte regbuf[VFP_REGS_SIZE];
+  gdb_byte regbuf[ARM_VFP3_REGS_SIZE];
   struct iovec iovec;
 
   tid = inferior_ptid.lwp ();
 
   iovec.iov_base = regbuf;
-  iovec.iov_len = VFP_REGS_SIZE;
+  iovec.iov_len = ARM_VFP3_REGS_SIZE;
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
   if (ret == 0)

@@ -99,6 +99,21 @@ enum arm_breakpoint_kinds
 /* IEEE extended doubles are 80 bits.  DWORD aligned they use 96 bits.  */
 #define ARM_FP_REGISTER_SIZE		12
 #define ARM_VFP_REGISTER_SIZE		8
+#define IWMMXT_VEC_REGISTER_SIZE	8
+
+/* Size of register sets.  */
+
+/* r0-r12,sp,lr,pc,cpsr.  */
+#define ARM_CORE_REGS_SIZE (17 * ARM_INT_REGISTER_SIZE)
+/* f0-f8,fps.  */
+#define ARM_FP_REGS_SIZE (8 * ARM_FP_REGISTER_SIZE + ARM_INT_REGISTER_SIZE)
+/* d0-d15,fpscr.  */
+#define ARM_VFP2_REGS_SIZE (16 * ARM_VFP_REGISTER_SIZE + ARM_INT_REGISTER_SIZE)
+/* d0-d31,fpscr.  */
+#define ARM_VFP3_REGS_SIZE (32 * ARM_VFP_REGISTER_SIZE + ARM_INT_REGISTER_SIZE)
+/* wR0-wR15,fpscr.  */
+#define IWMMXT_REGS_SIZE (16 * IWMMXT_VEC_REGISTER_SIZE \
+			  + 6 * ARM_INT_REGISTER_SIZE)
 
 /* Addresses for calling Thumb functions have the bit 0 set.
    Here are some macros to test, set, or clear bit 0 of addresses.  */

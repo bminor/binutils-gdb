@@ -1,5 +1,19 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch32-linux-nat.h (VFP_REGS_SIZE): Remove define.
+	* aarch64-linux-nat.c (fetch_fpregs_from_thread)
+	(store_fpregs_to_thread)
+	(aarch64_linux_nat_target::read_description): Use ARM_VFP3_REGS_SIZE.
+	* arch/arm.h (IWMMXT_VEC_REGISTER_SIZE, ARM_CORE_REGS_SIZE)
+	(ARM_FP_REGS_SIZE, ARM_VFP2_REGS_SIZE, ARM_VFP3_REGS_SIZE)
+	(IWMMXT_REGS_SIZE): Add define.
+	* arm-linux-nat.c (IWMMXT_REGS_SIZE): Remove define.
+	(fetch_vfp_regs, store_vfp_regs)
+	(arm_linux_nat_target::read_description): Use ARM_VFP3_REGS_SIZE.
+	* arm-tdep.c (arm_register_g_packet_guesses): Use new defines.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
         * arch/arm-get-next-pcs.c (thumb_get_next_pcs_raw): Use ARM_
         defines.
         * arch/arm-linux.c (arm_linux_sigreturn_next_pc_offset): Likewise.
