@@ -13848,10 +13848,10 @@ shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 static char *dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
 				    char *s, void *arg)
 {
-  char *spaces = arg;
+  const char *blanks = arg;
   char *new_s;
 
-  if (asprintf (&new_s, "%s%s", spaces, s) < 0)
+  if (asprintf (&new_s, "%s%s", blanks, s) < 0)
     return s;
   return new_s;
 }
