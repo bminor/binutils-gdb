@@ -82,6 +82,9 @@ extern const char *ppc_target_format (void);
   if ((FRAGP)->fr_type == rs_align_code)				\
     ppc_handle_align (FRAGP);
 
+extern unsigned int ppc_nop_select (void);
+#define NOP_OPCODE ppc_nop_select ()
+
 extern void ppc_handle_align (struct frag *);
 extern void ppc_frag_check (struct frag *);
 

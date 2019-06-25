@@ -51,6 +51,7 @@ if { [istarget "*-*-aix*"]
     run_dump_test "test2xcoff32"
     run_dump_test "altivec_xcoff"
     run_dump_test "altivec_xcoff64"
+    run_dump_test "groupnop"
 }
 
 # These tests are currently ELF specific, only because nobody has
@@ -105,6 +106,7 @@ run_dump_test "altivec2"
 run_dump_test "altivec3"
 run_dump_test "broadway"
 run_dump_test "booke"
+run_dump_test "groupnop"
 run_dump_test "e500"
 run_list_test "e500-ill" "-me500"
 run_dump_test "ppc750ps"

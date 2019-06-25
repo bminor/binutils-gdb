@@ -1,3 +1,15 @@
+2019-06-25  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.h (ppc_nop_select): Declare.
+	(NOP_OPCODE): Define.
+	* config/tc-ppc.c (ppc_elf_end, ppc_xcoff_end): Zero ppc_cpu.
+	(ppc_nop_encoding_for_rs_align_code): New enum.
+	(ppc_nop_select): New function.
+	(ppc_handle_align): Don't use ppc_cpu here.  Get nop type from frag.
+	* testsuite/gas/ppc/groupnop.d,
+	* testsuite/gas/ppc/groupnop.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
 2019-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/24700
