@@ -7122,7 +7122,7 @@ ppc_handle_align (struct frag *fragP)
      with nops but odd counts indicate data in an executable section
      so padding with zeros is most appropriate.  */
   if (count == 0
-      || nop_select == PPC_NOP_VLE ? (count & 1) != 0 : (count & 3) != 0)
+      || (nop_select == PPC_NOP_VLE ? (count & 1) != 0 : (count & 3) != 0))
     {
       *dest = 0;
       return;

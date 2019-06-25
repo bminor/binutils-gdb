@@ -1,5 +1,9 @@
 2019-06-25  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (ppc_handle_align): Add parentheses.
+
+2019-06-25  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.h (ppc_nop_select): Declare.
 	(NOP_OPCODE): Define.
 	* config/tc-ppc.c (ppc_elf_end, ppc_xcoff_end): Zero ppc_cpu.
