@@ -1,3 +1,18 @@
+2019-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-tdep.c (struct arm_mapping_symbol) (operator <): New.
+	(arm_mapping_symbol_s): Remove.
+	(DEF_VEC_O(arm_mapping_symbol_s)): Remove.
+	(arm_mapping_symbol_vec): New typedef.
+	(struct arm_per_objfile): Add constructor.
+	<section_maps>: Change type to
+	std::unique_ptr<arm_mapping_symbol_vec[]>.
+	(arm_compare_mapping_symbols): Remove.
+	(arm_find_mapping_symbol): Adjust to section_maps type change.
+	(arm_objfile_data_free): Call delete on arm_per_objfile.
+	(arm_record_special_symbol): Adjust to section_maps type change.
+	Allocate arm_per_objfile with new.
+
 2019-06-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* cli/cli-cmds.c (alias_command): Compare the alias prefix

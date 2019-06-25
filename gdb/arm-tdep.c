@@ -95,13 +95,30 @@ struct arm_mapping_symbol
 {
   bfd_vma value;
   char type;
+
+  bool operator< (const arm_mapping_symbol &other) const
+  { return this->value < other.value; }
 };
-typedef struct arm_mapping_symbol arm_mapping_symbol_s;
-DEF_VEC_O(arm_mapping_symbol_s);
+
+typedef std::vector<arm_mapping_symbol> arm_mapping_symbol_vec;
 
 struct arm_per_objfile
 {
-  VEC(arm_mapping_symbol_s) **section_maps;
+  explicit arm_per_objfile (size_t num_sections)
+  : section_maps (new arm_mapping_symbol_vec[num_sections])
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (arm_per_objfile);
+
+  /* Information about mapping symbols ($a, $d, $t) in the objfile.
+
+     The format is an array of vectors of arm_mapping_symbols, there is one
+     vector for each section of the objfile (the array is index by BFD section
+     index).
+
+     For each section, the vector of arm_mapping_symbol is sorted by
+     symbol value (address).  */
+  std::unique_ptr<arm_mapping_symbol_vec[]> section_maps;
 };
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
@@ -321,15 +338,6 @@ arm_frame_is_thumb (struct frame_info *frame)
   return (cpsr & t_bit) != 0;
 }
 
-/* Callback for VEC_lower_bound.  */
-
-static inline int
-arm_compare_mapping_symbols (const struct arm_mapping_symbol *lhs,
-			     const struct arm_mapping_symbol *rhs)
-{
-  return lhs->value < rhs->value;
-}
-
 /* Search for the mapping symbol covering MEMADDR.  If one is found,
    return its type.  Otherwise, return 0.  If START is non-NULL,
    set *START to the location of the mapping symbol.  */
@@ -343,46 +351,40 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   sec = find_pc_section (memaddr);
   if (sec != NULL)
     {
-      struct arm_per_objfile *data;
-      VEC(arm_mapping_symbol_s) *map;
-      struct arm_mapping_symbol map_key = { memaddr - obj_section_addr (sec),
-					    0 };
-      unsigned int idx;
-
-      data = (struct arm_per_objfile *) objfile_data (sec->objfile,
-						      arm_objfile_data_key);
+      arm_per_objfile *data
+	= (struct arm_per_objfile *) objfile_data (sec->objfile,
+						   arm_objfile_data_key);
       if (data != NULL)
 	{
-	  map = data->section_maps[sec->the_bfd_section->index];
-	  if (!VEC_empty (arm_mapping_symbol_s, map))
+	  struct arm_mapping_symbol map_key
+	    = { memaddr - obj_section_addr (sec), 0 };
+	  const arm_mapping_symbol_vec &map
+	    = data->section_maps[sec->the_bfd_section->index];
+	  arm_mapping_symbol_vec::const_iterator it
+	    = std::lower_bound (map.begin (), map.end (), map_key);
+
+	  /* std::lower_bound finds the earliest ordered insertion
+	     point.  If the symbol at this position starts at this exact
+	     address, we use that; otherwise, the preceding
+	     mapping symbol covers this address.  */
+	  if (it < map.end ())
 	    {
-	      struct arm_mapping_symbol *map_sym;
-
-	      idx = VEC_lower_bound (arm_mapping_symbol_s, map, &map_key,
-				     arm_compare_mapping_symbols);
-
-	      /* VEC_lower_bound finds the earliest ordered insertion
-		 point.  If the following symbol starts at this exact
-		 address, we use that; otherwise, the preceding
-		 mapping symbol covers this address.  */
-	      if (idx < VEC_length (arm_mapping_symbol_s, map))
+	      if (it->value == map_key.value)
 		{
-		  map_sym = VEC_index (arm_mapping_symbol_s, map, idx);
-		  if (map_sym->value == map_key.value)
-		    {
-		      if (start)
-			*start = map_sym->value + obj_section_addr (sec);
-		      return map_sym->type;
-		    }
-		}
-
-	      if (idx > 0)
-		{
-		  map_sym = VEC_index (arm_mapping_symbol_s, map, idx - 1);
 		  if (start)
-		    *start = map_sym->value + obj_section_addr (sec);
-		  return map_sym->type;
+		    *start = it->value + obj_section_addr (sec);
+		  return it->type;
 		}
+	    }
+
+	  if (it > map.begin ())
+	    {
+	      arm_mapping_symbol_vec::const_iterator prev_it
+		= it - 1;
+
+	      if (start)
+		*start = prev_it->value + obj_section_addr (sec);
+	      return prev_it->type;
 	    }
 	}
     }
@@ -8516,10 +8518,8 @@ static void
 arm_objfile_data_free (struct objfile *objfile, void *arg)
 {
   struct arm_per_objfile *data = (struct arm_per_objfile *) arg;
-  unsigned int i;
 
-  for (i = 0; i < objfile->obfd->section_count; i++)
-    VEC_free (arm_mapping_symbol_s, data->section_maps[i]);
+  delete data;
 }
 
 static void
@@ -8528,7 +8528,6 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 {
   const char *name = bfd_asymbol_name (sym);
   struct arm_per_objfile *data;
-  VEC(arm_mapping_symbol_s) **map_p;
   struct arm_mapping_symbol new_map_sym;
 
   gdb_assert (name[0] == '$');
@@ -8539,14 +8538,11 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 						  arm_objfile_data_key);
   if (data == NULL)
     {
-      data = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-			     struct arm_per_objfile);
+      data = new arm_per_objfile (objfile->obfd->section_count);
       set_objfile_data (objfile, arm_objfile_data_key, data);
-      data->section_maps = OBSTACK_CALLOC (&objfile->objfile_obstack,
-					   objfile->obfd->section_count,
-					   VEC(arm_mapping_symbol_s) *);
     }
-  map_p = &data->section_maps[bfd_get_section (sym)->index];
+  arm_mapping_symbol_vec &map
+    = data->section_maps[bfd_get_section (sym)->index];
 
   new_map_sym.value = sym->value;
   new_map_sym.type = name[1];
@@ -8554,22 +8550,9 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   /* Assume that most mapping symbols appear in order of increasing
      value.  If they were randomly distributed, it would be faster to
      always push here and then sort at first use.  */
-  if (!VEC_empty (arm_mapping_symbol_s, *map_p))
-    {
-      struct arm_mapping_symbol *prev_map_sym;
-
-      prev_map_sym = VEC_last (arm_mapping_symbol_s, *map_p);
-      if (prev_map_sym->value >= sym->value)
-	{
-	  unsigned int idx;
-	  idx = VEC_lower_bound (arm_mapping_symbol_s, *map_p, &new_map_sym,
-				 arm_compare_mapping_symbols);
-	  VEC_safe_insert (arm_mapping_symbol_s, *map_p, idx, &new_map_sym);
-	  return;
-	}
-    }
-
-  VEC_safe_push (arm_mapping_symbol_s, *map_p, &new_map_sym);
+  arm_mapping_symbol_vec::iterator it
+    = std::lower_bound (map.begin (), map.end (), new_map_sym);
+  map.insert (it, new_map_sym);
 }
 
 static void
