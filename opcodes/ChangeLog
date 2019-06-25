@@ -1,3 +1,8 @@
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (and): Mark Imm8S form for optimization.
+	* i386-tbl.h: Re-generate.
+
 2019-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis-evex.h: Break into ...
