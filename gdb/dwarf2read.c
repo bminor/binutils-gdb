@@ -21495,15 +21495,20 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       unsigned int dummy;
 
       if (DW_BLOCK (attr)->data[0] == DW_OP_addr)
-	SYMBOL_VALUE_ADDRESS (sym) =
-	  read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu, &dummy);
+	SET_SYMBOL_VALUE_ADDRESS (sym,
+				  read_address (objfile->obfd,
+						DW_BLOCK (attr)->data + 1,
+						cu, &dummy));
       else
-	SYMBOL_VALUE_ADDRESS (sym) =
-	  read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1, &dummy);
+	SET_SYMBOL_VALUE_ADDRESS
+	  (sym, read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1,
+					     &dummy));
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       fixup_symbol_section (sym, objfile);
-      SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
-					      SYMBOL_SECTION (sym));
+      SET_SYMBOL_VALUE_ADDRESS (sym,
+				SYMBOL_VALUE_ADDRESS (sym)
+				+ ANOFFSET (objfile->section_offsets,
+					    SYMBOL_SECTION (sym)));
       return;
     }
 
@@ -21617,7 +21622,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
 	      addr = attr_value_as_address (attr);
 	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
-	      SYMBOL_VALUE_ADDRESS (sym) = addr;
+	      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
 	    }
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;

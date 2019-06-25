@@ -1,3 +1,15 @@
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* coffread.c (process_coff_symbol): Update.
+	* dwarf2read.c (var_decode_location, new_symbol): Update.
+	* mdebugread.c (parse_symbol): Update.
+	* objfiles.c (relocate_one_symbol): Update.
+	* stabsread.c (define_symbol, fix_common_block)
+	(scan_file_globals): Update.
+	* symtab.h (SYMBOL_VALUE_ADDRESS): Expand to an rvalue.
+	(SET_SYMBOL_VALUE_ADDRESS): New macro.
+	* xcoffread.c (process_xcoff_symbol): Update.
+
 2019-10-02  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* MAINTAINERS: Update my email address.
