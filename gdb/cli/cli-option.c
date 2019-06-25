@@ -58,6 +58,8 @@ struct option_def_and_value
   gdb::optional<option_value> value;
 };
 
+static void save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov);
+
 /* Info passed around when handling completion.  */
 struct parse_option_completion_info
 {
@@ -456,6 +458,11 @@ complete_options (completion_tracker &tracker,
 		    (*args - text);
 		  return true;
 		}
+
+	      /* If the caller passed in a context, then it is
+		 interested in the option argument values.  */
+	      if (ov && ov->ctx != nullptr)
+		save_option_value_in_ctx (ov);
 	    }
 	  else
 	    {
@@ -499,6 +506,36 @@ complete_options (completion_tracker &tracker,
   return false;
 }
 
+/* Save the parsed value in the option's context.  */
+
+static void
+save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov)
+{
+  switch (ov->option.type)
+    {
+    case var_boolean:
+      {
+	bool value = ov->value.has_value () ? ov->value->boolean : true;
+	*ov->option.var_address.boolean (ov->option, ov->ctx) = value;
+      }
+      break;
+    case var_uinteger:
+      *ov->option.var_address.uinteger (ov->option, ov->ctx)
+	= ov->value->uinteger;
+      break;
+    case var_zuinteger_unlimited:
+      *ov->option.var_address.integer (ov->option, ov->ctx)
+	= ov->value->integer;
+      break;
+    case var_enum:
+      *ov->option.var_address.enumeration (ov->option, ov->ctx)
+	= ov->value->enumeration;
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled option type");
+    }
+}
+
 /* See cli-option.h.  */
 
 bool
@@ -534,29 +571,7 @@ process_options (const char **args,
 
       processed_any = true;
 
-      switch (ov->option.type)
-	{
-	case var_boolean:
-	  {
-	    bool value = ov->value.has_value () ? ov->value->boolean : true;
-	    *ov->option.var_address.boolean (ov->option, ov->ctx) = value;
-	  }
-	  break;
-	case var_uinteger:
-	  *ov->option.var_address.uinteger (ov->option, ov->ctx)
-	    = ov->value->uinteger;
-	  break;
-	case var_zuinteger_unlimited:
-	  *ov->option.var_address.integer (ov->option, ov->ctx)
-	    = ov->value->integer;
-	  break;
-	case var_enum:
-	  *ov->option.var_address.enumeration (ov->option, ov->ctx)
-	    = ov->value->enumeration;
-	  break;
-	default:
-	  gdb_assert_not_reached ("unhandled option type");
-	}
+      save_option_value_in_ctx (ov);
     }
 }
 
