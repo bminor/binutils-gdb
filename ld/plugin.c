@@ -659,9 +659,9 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
   return FALSE;
 }
 
-/* Return LTO kind string name that corresponds to INDEX enum value.  */
+/* Return LTO kind string name that corresponds to IDX enum value.  */
 static const char *
-get_lto_kind (unsigned int index)
+get_lto_kind (unsigned int idx)
 {
   static char buffer[64];
   const char *lto_kind_str[5] =
@@ -673,16 +673,16 @@ get_lto_kind (unsigned int index)
     "COMMON"
   };
 
-  if (index < ARRAY_SIZE (lto_kind_str))
-    return lto_kind_str [index];
+  if (idx < ARRAY_SIZE (lto_kind_str))
+    return lto_kind_str [idx];
 
-  sprintf (buffer, _("unknown LTO kind value %x"), index);
+  sprintf (buffer, _("unknown LTO kind value %x"), idx);
   return buffer;
 }
 
-/* Return LTO resolution string name that corresponds to INDEX enum value.  */
+/* Return LTO resolution string name that corresponds to IDX enum value.  */
 static const char *
-get_lto_resolution (unsigned int index)
+get_lto_resolution (unsigned int idx)
 {
   static char buffer[64];
   static const char *lto_resolution_str[10] =
@@ -699,16 +699,16 @@ get_lto_resolution (unsigned int index)
     "PREVAILING_DEF_IRONLY_EXP",
   };
 
-  if (index < ARRAY_SIZE (lto_resolution_str))
-    return lto_resolution_str [index];
+  if (idx < ARRAY_SIZE (lto_resolution_str))
+    return lto_resolution_str [idx];
 
-  sprintf (buffer, _("unknown LTO resolution value %x"), index);
+  sprintf (buffer, _("unknown LTO resolution value %x"), idx);
   return buffer;
 }
 
-/* Return LTO visibility string name that corresponds to INDEX enum value.  */
+/* Return LTO visibility string name that corresponds to IDX enum value.  */
 static const char *
-get_lto_visibility (unsigned int index)
+get_lto_visibility (unsigned int idx)
 {
   static char buffer[64];
   const char *lto_visibility_str[4] =
@@ -719,10 +719,10 @@ get_lto_visibility (unsigned int index)
     "HIDDEN"
   };
 
-  if (index < ARRAY_SIZE (lto_visibility_str))
-    return lto_visibility_str [index];
+  if (idx < ARRAY_SIZE (lto_visibility_str))
+    return lto_visibility_str [idx];
 
-  sprintf (buffer, _("unknown LTO visibility value %x"), index);
+  sprintf (buffer, _("unknown LTO visibility value %x"), idx);
   return buffer;
 }
 

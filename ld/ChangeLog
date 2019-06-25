@@ -1,3 +1,8 @@
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* plugin.c (get_lto_kind, get_lto_resolution,
+	get_lto_visibility): Rename "index" to "idx".
+
 2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24721
