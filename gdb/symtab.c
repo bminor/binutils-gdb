@@ -2224,15 +2224,18 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 
 struct block_symbol
 lookup_global_symbol_from_objfile (struct objfile *main_objfile,
+				   enum block_enum block_index,
 				   const char *name,
 				   const domain_enum domain)
 {
+  gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
+
   for (objfile *objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result
-        = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK, name, domain);
+        = lookup_symbol_in_objfile (objfile, block_index, name, domain);
 
-      if (result.symbol != NULL)
+      if (result.symbol != nullptr)
 	return result;
     }
 

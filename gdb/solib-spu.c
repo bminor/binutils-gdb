@@ -392,7 +392,8 @@ spu_lookup_lib_symbol (struct objfile *objfile,
 		       const domain_enum domain)
 {
   if (bfd_get_arch (objfile->obfd) == bfd_arch_spu)
-    return lookup_global_symbol_from_objfile (objfile, name, domain);
+    return lookup_global_symbol_from_objfile (objfile, GLOBAL_BLOCK, name,
+					      domain);
 
   if (svr4_so_ops.lookup_lib_global_symbol != NULL)
     return svr4_so_ops.lookup_lib_global_symbol (objfile, name, domain);

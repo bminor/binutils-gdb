@@ -639,6 +639,7 @@ compile_object_load (const compile_file_names &file_names,
   objfile = objfile_holder.get ();
 
   func_sym = lookup_global_symbol_from_objfile (objfile,
+						GLOBAL_BLOCK,
 						GCC_FE_WRAPPER_FUNCTION,
 						VAR_DOMAIN).symbol;
   if (func_sym == NULL)

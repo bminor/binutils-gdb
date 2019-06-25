@@ -2045,13 +2045,16 @@ extern bool treg_matches_sym_type_name (const compiled_regex &treg,
 extern const char *main_name ();
 extern enum language main_language (void);
 
-/* Lookup symbol NAME from DOMAIN in MAIN_OBJFILE's global blocks.
+/* Lookup symbol NAME from DOMAIN in MAIN_OBJFILE's global or static blocks,
+   as specified by BLOCK_INDEX.
    This searches MAIN_OBJFILE as well as any associated separate debug info
    objfiles of MAIN_OBJFILE.
+   BLOCK_INDEX can be GLOBAL_BLOCK or STATIC_BLOCK.
    Upon success fixes up the symbol's section if necessary.  */
 
 extern struct block_symbol
   lookup_global_symbol_from_objfile (struct objfile *main_objfile,
+				     enum block_enum block_index,
 				     const char *name,
 				     const domain_enum domain);
 

@@ -1,3 +1,12 @@
+2019-07-22  Christian Biesinger  <cbiesinger@google.com>
+
+	* compile/compile-object-load.c (compile_object_load): Pass GLOBAL_SCOPE.
+	* solib-spu.c (spu_lookup_lib_symbol): Pass GLOBAL_SCOPE.
+	* solib-svr4.c (elf_lookup_lib_symbol): Pass GLOBAL_SCOPE.
+	* symtab.c (lookup_global_symbol_from_objfile): Add a scope parameter.
+	* symtab.h (lookup_global_symbol_from_objfile): Likewise.
+
+
 2019-07-24  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* h8300-tdep.c (h8300_register_name_common): New.
