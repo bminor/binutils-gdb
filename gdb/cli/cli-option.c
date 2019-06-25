@@ -43,6 +43,9 @@ union option_value
 
   /* For var_enum options.  */
   const char *enumeration;
+
+  /* For var_string options.  This is malloc-allocated.  */
+  char *string;
 };
 
 /* Holds an options definition and its value.  */
@@ -56,6 +59,53 @@ struct option_def_and_value
 
   /* The option's value, if any.  */
   gdb::optional<option_value> value;
+
+  option_def_and_value (const option_def &option_, void *ctx_,
+			gdb::optional<option_value> &&value_)
+    : option (option_),
+      ctx (ctx_),
+      value (std::move (value_))
+  {
+    clear_value (option_, value_);
+  }
+
+  option_def_and_value (const option_def &option_, void *ctx_)
+    : option (option_),
+      ctx (ctx_)
+  {
+  }
+
+  option_def_and_value (option_def_and_value &&rval)
+    : option (rval.option),
+      ctx (rval.ctx),
+      value (std::move (rval.value))
+  {
+    clear_value (rval.option, rval.value);
+  }
+
+  ~option_def_and_value ()
+  {
+    if (value.has_value ())
+      {
+	if (option.type == var_string)
+	  xfree (value->string);
+      }
+  }
+
+private:
+
+  /* Clear the option_value, without releasing it.  This is used after
+     the value has been moved to some other option_def_and_value
+     instance.  */
+  static void clear_value (const option_def &option,
+			   gdb::optional<option_value> &value)
+  {
+    if (value.has_value ())
+      {
+	if (option.type == var_string)
+	  value->string = nullptr;
+      }
+  }
 };
 
 static void save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov);
@@ -372,6 +422,25 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	val.enumeration = parse_cli_var_enum (args, match->enums);
 	return option_def_and_value {*match, match_ctx, val};
       }
+    case var_string:
+      {
+	if (check_for_argument (args, "--"))
+	  {
+	    /* Treat e.g., "pipe -d --" as if there was no argument
+	       after "-d".  */
+	    error (_("-%s requires an argument"), match->name);
+	  }
+
+	const char *arg_start = *args;
+	*args = skip_to_space (*args);
+
+	if (*args == arg_start)
+	  error (_("-%s requires an argument"), match->name);
+
+	option_value val;
+	val.string = savestring (arg_start, *args - arg_start);
+	return option_def_and_value {*match, match_ctx, val};
+      }
 
     default:
       /* Not yet.  */
@@ -531,6 +600,11 @@ save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov)
       *ov->option.var_address.enumeration (ov->option, ov->ctx)
 	= ov->value->enumeration;
       break;
+    case var_string:
+      *ov->option.var_address.string (ov->option, ov->ctx)
+	= ov->value->string;
+      ov->value->string = nullptr;
+      break;
     default:
       gdb_assert_not_reached ("unhandled option type");
     }
@@ -603,6 +677,8 @@ get_val_type_str (const option_def &opt, std::string &buffer)
 	  }
 	return buffer.c_str ();
       }
+    case var_string:
+      return "STRING";
     default:
       return nullptr;
     }
@@ -729,6 +805,15 @@ add_setshow_cmds_for_options (command_class cmd_class,
 				option.help_doc,
 				nullptr, option.show_cmd_cb,
 				set_list, show_list);
+	}
+      else if (option.type == var_string)
+	{
+	  add_setshow_string_cmd (option.name, cmd_class,
+				  option.var_address.string (option, data),
+				  option.set_doc, option.show_doc,
+				  option.help_doc,
+				  nullptr, option.show_cmd_cb,
+				  set_list, show_list);
 	}
       else
 	gdb_assert_not_reached (_("option type not handled"));

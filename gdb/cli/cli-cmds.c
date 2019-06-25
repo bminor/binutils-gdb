@@ -960,32 +960,68 @@ edit_command (const char *arg, int from_tty)
   xfree (p);
 }
 
+/* The options for the "pipe" command.  */
+
+struct pipe_cmd_opts
+{
+  /* For "-d".  */
+  char *delimiter = nullptr;
+
+  ~pipe_cmd_opts ()
+  {
+    xfree (delimiter);
+  }
+};
+
+static const gdb::option::option_def pipe_cmd_option_defs[] = {
+
+  gdb::option::string_option_def<pipe_cmd_opts> {
+    "d",
+    [] (pipe_cmd_opts *opts) { return &opts->delimiter; },
+    nullptr,
+    N_("Indicates to use the specified delimiter string to separate\n\
+COMMAND from SHELL_COMMAND, in alternative to |.  This is useful in\n\
+case COMMAND contains a | character."),
+  },
+
+};
+
+/* Create an option_def_group for the "pipe" command's options, with
+   OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_pipe_cmd_options_def_group (pipe_cmd_opts *opts)
+{
+  return {{pipe_cmd_option_defs}, opts};
+}
+
 /* Implementation of the "pipe" command.  */
 
 static void
 pipe_command (const char *arg, int from_tty)
 {
-  std::string delim ("|");
+  pipe_cmd_opts opts;
 
-  if (arg != nullptr && check_for_argument (&arg, "-d", 2))
-    {
-      delim = extract_arg (&arg);
-      if (delim.empty ())
-	error (_("Missing delimiter DELIM after -d"));
-    }
+  auto grp = make_pipe_cmd_options_def_group (&opts);
+  gdb::option::process_options
+    (&arg, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+
+  const char *delim = "|";
+  if (opts.delimiter != nullptr)
+    delim = opts.delimiter;
 
   const char *command = arg;
   if (command == nullptr)
     error (_("Missing COMMAND"));
 
-  arg = strstr (arg, delim.c_str ());
+  arg = strstr (arg, delim);
 
   if (arg == nullptr)
     error (_("Missing delimiter before SHELL_COMMAND"));
 
   std::string gdb_cmd (command, arg - command);
 
-  arg += delim.length (); /* Skip the delimiter.  */
+  arg += strlen (delim); /* Skip the delimiter.  */
 
   if (gdb_cmd.empty ())
     gdb_cmd = repeat_previous ();
@@ -1017,6 +1053,43 @@ pipe_command (const char *arg, int from_tty)
     error (_("shell command \"%s\" failed: %s"), shell_command,
            safe_strerror (errno));
   exit_status_set_internal_vars (exit_status);
+}
+
+/* Completer for the pipe command.  */
+
+static void
+pipe_command_completer (struct cmd_list_element *ignore,
+			completion_tracker &tracker,
+			const char *text, const char *word_ignored)
+{
+  pipe_cmd_opts opts;
+
+  const char *org_text = text;
+  auto grp = make_pipe_cmd_options_def_group (&opts);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp))
+    return;
+
+  const char *delimiter = "|";
+  if (opts.delimiter != nullptr)
+    delimiter = opts.delimiter;
+
+  /* Check if we're past option values already.  */
+  if (text > org_text && !isspace (text[-1]))
+    return;
+
+  const char *delim = strstr (text, delimiter);
+
+  /* If we're still not past the delimiter, complete the gdb
+     command.  */
+  if (delim == nullptr || delim == text)
+    {
+      complete_nested_command_line (tracker, text);
+      return;
+    }
+
+  /* We're past the delimiter.  What follows is a shell command, which
+     we don't know how to complete.  */
 }
 
 static void
@@ -2029,7 +2102,10 @@ Uses EDITOR environment variable contents as editor (or ex as default)."));
 
   c->completer = location_completer;
 
-  c = add_com ("pipe", class_support, pipe_command, _("\
+  const auto pipe_cmd_opts = make_pipe_cmd_options_def_group (nullptr);
+
+  static std::string pipe_cmd_help
+    = gdb::option::build_help (_("\
 Send the output of a gdb command to a shell command.\n\
 Usage: | [COMMAND] | SHELL_COMMAND\n\
 Usage: | -d DELIM COMMAND DELIM SHELL_COMMAND\n\
@@ -2038,12 +2114,15 @@ Usage: pipe -d DELIM COMMAND DELIM SHELL_COMMAND\n\
 \n\
 Executes COMMAND and sends its output to SHELL_COMMAND.\n\
 \n\
-The -d option indicates to use the string DELIM to separate COMMAND\n\
-from SHELL_COMMAND, in alternative to |.  This is useful in\n\
-case COMMAND contains a | character.\n\
-\n\
+Options:\n\
+%OPTIONS%\
 With no COMMAND, repeat the last executed command\n\
-and send its output to SHELL_COMMAND."));
+and send its output to SHELL_COMMAND."),
+			       pipe_cmd_opts);
+
+  c = add_com ("pipe", class_support, pipe_command,
+	       pipe_cmd_help.c_str ());
+  set_cmd_completer_handle_brkchars (c, pipe_command_completer);
   add_com_alias ("|", "pipe", class_support, 0);
 
   add_com ("list", class_files, list_command, _("\
