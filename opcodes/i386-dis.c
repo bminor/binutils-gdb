@@ -14788,53 +14788,16 @@ OP_I (int bytemode, int sizeflag)
 static void
 OP_I64 (int bytemode, int sizeflag)
 {
-  bfd_signed_vma op;
-  bfd_signed_vma mask = -1;
-
-  if (address_mode != mode_64bit)
+  if (bytemode != v_mode || address_mode != mode_64bit || !(rex & REX_W))
     {
       OP_I (bytemode, sizeflag);
       return;
     }
 
-  switch (bytemode)
-    {
-    case b_mode:
-      FETCH_DATA (the_info, codep + 1);
-      op = *codep++;
-      mask = 0xff;
-      break;
-    case v_mode:
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	op = get64 ();
-      else
-	{
-	  if (sizeflag & DFLAG)
-	    {
-	      op = get32 ();
-	      mask = 0xffffffff;
-	    }
-	  else
-	    {
-	      op = get16 ();
-	      mask = 0xfffff;
-	    }
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      break;
-    case w_mode:
-      mask = 0xfffff;
-      op = get16 ();
-      break;
-    default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      return;
-    }
+  USED_REX (REX_W);
 
-  op &= mask;
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + 1, 1, op);
+  print_operand_value (scratchbuf + 1, 1, get64 ());
   oappend_maybe_intel (scratchbuf);
   scratchbuf[0] = '\0';
 }

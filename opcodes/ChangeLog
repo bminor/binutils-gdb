@@ -1,5 +1,10 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_I64): Forword more cases to OP_I(). Drop local
+	variables.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (prefix_table): Use Edq for cvtsi2ss and cvtsi2sd.
 	Use Gdq for cvttss2si, cvttsd2si, cvtss2si, and cvtsd2si, and
 	movnti.
