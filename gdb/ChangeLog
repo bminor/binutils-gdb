@@ -1,3 +1,10 @@
+2019-07-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* NEWS: Mention new functions Objfile.lookup_{global,static}_symbol.
+	* python/py-objfile.c (objfpy_lookup_global_symbol): New function.
+	(objfpy_lookup_static_symbol): New function.
+	(objfile_object_methods): Add new functions.
+
 2019-07-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention 'set|show print frame-info'.  Mention new

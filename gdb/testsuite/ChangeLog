@@ -1,3 +1,9 @@
+2019-07-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdb.python/py-objfile.c: Add global and static vars.
+	* gdb.python/py-objfile.exp: Test new functions Objfile.
+	  lookup_global_symbol and lookup_static_symbol.
+
 2019-07-29  Tom Tromey  <tom@tromey.com>
 
 	* lib/tuiterm.exp (Term::_csi_@): New proc.

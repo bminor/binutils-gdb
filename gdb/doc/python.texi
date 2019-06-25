@@ -4441,6 +4441,23 @@ searches then this function can be used to add a debug info file
 from a different place.
 @end defun
 
+@defun Objfile.lookup_global_symbol (name @r{[}, domain@r{]})
+Search for a global symbol named @var{name} in this objfile.  Optionally, the
+search scope can be restricted with the @var{domain} argument.
+The @var{domain} argument must be a domain constant defined in the @code{gdb}
+module and described in @ref{Symbols In Python}.  This function is similar to
+@code{gdb.lookup_global_symbol}, except that the search is limited to this
+objfile.
+
+The result is a @code{gdb.Symbol} object or @code{None} if the symbol
+is not found.
+@end defun
+
+@defun Objfile.lookup_static_symbol (name @r{[}, domain@r{]})
+Like @code{Objfile.lookup_global_symbol}, but searches for a global
+symbol with static linkage named @var{name} in this objfile.
+@end defun
+
 @node Frames In Python
 @subsubsection Accessing inferior stack frames from Python
 
