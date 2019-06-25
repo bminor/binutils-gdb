@@ -240,7 +240,7 @@ tui_set_source_content_nil (struct tui_source_window_base *win_info,
       element->line_or_addr.loa = LOA_LINE;
       element->line_or_addr.u.line_no = 0;
       element->is_exec_point = false;
-      element->has_break = FALSE;
+      element->break_mode = 0;
 
       /* Set the contents of the line to blank.  */
       element->line[0] = (char) 0;

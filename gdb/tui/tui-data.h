@@ -164,6 +164,18 @@ struct tui_layout_def
   enum tui_win_type display_mode;
 };
 
+/* Flags to tell what kind of breakpoint is at current line.  */
+enum tui_bp_flag
+{
+  TUI_BP_ENABLED = 0x01,
+  TUI_BP_DISABLED = 0x02,
+  TUI_BP_HIT = 0x04,
+  TUI_BP_CONDITIONAL = 0x08,
+  TUI_BP_HARDWARE = 0x10
+};
+
+DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
+
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
 {
@@ -181,7 +193,7 @@ struct tui_source_element
   char *line = nullptr;
   struct tui_line_or_address line_or_addr;
   bool is_exec_point = false;
-  int has_break = 0;
+  tui_bp_flags break_mode = 0;
 };
 
 
@@ -190,13 +202,6 @@ struct tui_source_element
 #else
 # define MAX_LOCATOR_ELEMENT_LEN        1024
 #endif
-
-/* Flags to tell what kind of breakpoint is at current line.  */
-#define TUI_BP_ENABLED      0x01
-#define TUI_BP_DISABLED     0x02
-#define TUI_BP_HIT          0x04
-#define TUI_BP_CONDITIONAL  0x08
-#define TUI_BP_HARDWARE     0x10
 
 /* Position of breakpoint markers in the exec info string.  */
 #define TUI_BP_HIT_POS      0

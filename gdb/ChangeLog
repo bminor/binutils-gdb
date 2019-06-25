@@ -1,3 +1,22 @@
+2019-07-04  Tom Tromey  <tom@tromey.com>
+
+	PR tui/24724:
+	* tui/tui-winsource.c (tui_clear_source_content): Update.
+	(tui_source_window_base::set_is_exec_point_at): Fix comment.
+	(tui_update_breakpoint_info): Update.
+	(tui_set_exec_info_content): Update.
+	* tui/tui-source.c (tui_set_source_content_nil): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content): Don't set
+	has_break.
+	* tui/tui-data.h (enum tui_bp_flag): New.
+	(tui_bp_flags): New enum flags type.
+	(struct tui_source_element) <break_mode>: Change type.  Rename
+	from has_break.
+	(TUI_BP_ENABLED, TUI_BP_DISABLED, TUI_BP_HIT)
+	(TUI_BP_CONDITIONAL, TUI_BP_HARDWARE): Don't define.  Now enum
+	constants.
+	* tui/tui-winsource.h: Fix comment.
+
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch32-linux-nat.h (VFP_REGS_SIZE): Remove define.

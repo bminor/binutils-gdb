@@ -217,7 +217,7 @@ tui_clear_source_content (struct tui_source_window_base *win_info,
 	{
 	  struct tui_source_element *element = &win_info->content[i];
 
-	  element->has_break = FALSE;
+	  element->break_mode = 0;
 	  element->is_exec_point = false;
 	}
     }
@@ -344,7 +344,7 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
 }
 
 
-/* Set or clear the has_break flag in the line whose line is
+/* Set or clear the is_exec_point flag in the line whose line is
    line_no.  */
 
 void
@@ -415,7 +415,6 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
     {
       struct breakpoint *bp;
       extern struct breakpoint *breakpoint_chain;
-      int mode;
       struct tui_source_element *line;
 
       line = &win->content[i];
@@ -425,7 +424,7 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
       /* Scan each breakpoint to see if the current line has something to
          do with it.  Identify enable/disabled breakpoints as well as
          those that we already hit.  */
-      mode = 0;
+      tui_bp_flags mode = 0;
       for (bp = breakpoint_chain;
            bp != NULL;
            bp = bp->next)
@@ -460,10 +459,10 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
 		}
 	    }
         }
-      if (line->has_break != mode)
+      if (line->break_mode != mode)
         {
-          line->has_break = mode;
-          need_refresh = 1;
+          line->break_mode = mode;
+          need_refresh = true;
         }
     }
   return need_refresh;
@@ -496,7 +495,7 @@ tui_set_exec_info_content (struct tui_source_window_base *win_info)
 	{
 	  tui_exec_info_content &element = content[i];
 	  struct tui_source_element *src_element;
-	  int mode;
+	  tui_bp_flags mode;
 
 	  src_element = &win_info->content[i];
 
@@ -505,7 +504,7 @@ tui_set_exec_info_content (struct tui_source_window_base *win_info)
 
 	  /* Now update the exec info content based upon the state
 	     of each line as indicated by the source content.  */
-	  mode = src_element->has_break;
+	  mode = src_element->break_mode;
 	  if (mode & TUI_BP_HIT)
 	    element[TUI_BP_HIT_POS] = (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
 	  else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))

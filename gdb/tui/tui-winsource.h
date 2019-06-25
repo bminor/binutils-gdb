@@ -31,7 +31,7 @@ struct tui_win_info;
    state changed.  */
 extern void tui_update_all_breakpoint_info (void);
 
-/* Scan the source window and the breakpoints to update the hasBreak
+/* Scan the source window and the breakpoints to update the break_mode
    information for each line.  Returns 1 if something changed and the
    execution window must be refreshed.  */
 extern int tui_update_breakpoint_info (struct tui_source_window_base *win,
