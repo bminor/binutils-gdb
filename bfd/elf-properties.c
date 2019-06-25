@@ -236,12 +236,12 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
   return FALSE;
 }
 
-/* Return the property of TYPE on *LISTP and remove it from *LISTP.
-   Return NULL if not found.  */
+/* Return the property of TYPE on *LISTP and remove it from *LISTP if RM is
+   true.  Return NULL if not found.  */
 
 static elf_property *
 elf_find_and_remove_property (elf_property_list **listp,
-			      unsigned int type, bfd_boolean remove)
+			      unsigned int type, bfd_boolean rm)
 {
   elf_property_list *list;
 
@@ -250,7 +250,7 @@ elf_find_and_remove_property (elf_property_list **listp,
       if (type == list->property.pr_type)
 	{
 	  /* Remove this property.  */
-	  if (remove)
+	  if (rm)
 	    *listp = list->next;
 	  return &list->property;
 	}

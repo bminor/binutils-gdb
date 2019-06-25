@@ -1,3 +1,8 @@
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* elf-properties.c (elf_find_and_remove_property): Rename last
+	parameter. Mention it in comment.
+
 2019-06-24  Ilia Diachkov  <ilia.diachkov@optimitech.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_lui): Delete early exit when
