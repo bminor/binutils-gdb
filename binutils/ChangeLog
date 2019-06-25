@@ -1,3 +1,8 @@
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* objdump.c (dump_ctf_indent_lines): Rename local variable
+	"spaces" to "blanks".
+
 2019-06-14  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
