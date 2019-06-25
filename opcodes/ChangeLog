@@ -1,5 +1,13 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Correct OPERAND_TYPE_DEBUG
+	entry. Drop OPERAND_TYPE_ACC entry. Add OPERAND_TYPE_ACC8 and
+	OPERAND_TYPE_ACC16 entries. Adjust OPERAND_TYPE_ACC32 and
+	OPERAND_TYPE_ACC64 entries.
+	* i386-init.h: Re-generate.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (Edqa, dqa_mode, EVEX_W_0F2A_P_1, EVEX_W_0F7B_P_1):
 	Delete.
 	(intel_operand_size, OP_E_register, OP_E_memory): Drop handling

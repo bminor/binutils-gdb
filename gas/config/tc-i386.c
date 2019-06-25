@@ -1895,8 +1895,6 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
   return x;
 }
 
-static const i386_operand_type acc32 = OPERAND_TYPE_ACC32;
-static const i386_operand_type acc64 = OPERAND_TYPE_ACC64;
 static const i386_operand_type disp16 = OPERAND_TYPE_DISP16;
 static const i386_operand_type disp32 = OPERAND_TYPE_DISP32;
 static const i386_operand_type disp32s = OPERAND_TYPE_DISP32S;
@@ -3004,7 +3002,7 @@ static void pe (expressionS *);
 static void ps (symbolS *);
 
 static void
-pi (char *line, i386_insn *x)
+pi (const char *line, i386_insn *x)
 {
   unsigned int j;
 
@@ -3105,6 +3103,10 @@ const type_names[] =
   { OPERAND_TYPE_REG16, "r16" },
   { OPERAND_TYPE_REG32, "r32" },
   { OPERAND_TYPE_REG64, "r64" },
+  { OPERAND_TYPE_ACC8, "acc8" },
+  { OPERAND_TYPE_ACC16, "acc16" },
+  { OPERAND_TYPE_ACC32, "acc32" },
+  { OPERAND_TYPE_ACC64, "acc64" },
   { OPERAND_TYPE_IMM8, "i8" },
   { OPERAND_TYPE_IMM8, "i8s" },
   { OPERAND_TYPE_IMM16, "i16" },
@@ -3127,7 +3129,6 @@ const type_names[] =
   { OPERAND_TYPE_FLOATACC, "FAcc" },
   { OPERAND_TYPE_SREG2, "SReg2" },
   { OPERAND_TYPE_SREG3, "SReg3" },
-  { OPERAND_TYPE_ACC, "Acc" },
   { OPERAND_TYPE_JUMPABSOLUTE, "Jump Absolute" },
   { OPERAND_TYPE_REGMMX, "rMMX" },
   { OPERAND_TYPE_REGXMM, "rXMM" },
@@ -3146,7 +3147,7 @@ pt (i386_operand_type t)
   for (j = 0; j < ARRAY_SIZE (type_names); j++)
     {
       a = operand_type_and (t, type_names[j].mask);
-      if (!operand_type_all_zero (&a))
+      if (operand_type_equal (&a, &type_names[j].mask))
 	fprintf (stdout, "%s, ",  type_names[j].name);
     }
   fflush (stdout);
@@ -5814,8 +5815,8 @@ match_template (char mnem_suffix)
 	     zero-extend %eax to %rax.  */
 	  if (flag_code == CODE_64BIT
 	      && t->base_opcode == 0x90
-	      && operand_type_equal (&i.types [0], &acc32)
-	      && operand_type_equal (&i.types [1], &acc32))
+	      && i.types[0].bitfield.acc && i.types[0].bitfield.dword
+	      && i.types[1].bitfield.acc && i.types[1].bitfield.dword)
 	    continue;
 	  /* xrelease mov %eax, <disp> is another special case. It must not
 	     match the accumulator-only encoding of mov.  */
@@ -6409,8 +6410,8 @@ process_suffix (void)
 	  && ! (i.operands == 2
 		&& i.tm.base_opcode == 0x90
 		&& i.tm.extension_opcode == None
-		&& operand_type_equal (&i.types [0], &acc64)
-		&& operand_type_equal (&i.types [1], &acc64)))
+		&& i.types[0].bitfield.acc && i.types[0].bitfield.qword
+		&& i.types[1].bitfield.acc && i.types[1].bitfield.qword))
 	i.rex |= REX_W;
 
       break;

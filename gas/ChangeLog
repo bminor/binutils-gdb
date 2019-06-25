@@ -1,5 +1,14 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* tc-i386.c (acc32, acc64): Delete.
+	(pi): Make first parameter pinter-to-const.
+	(type_names): Remove Acc. Add acc8, acc16, acc32, and acc64.
+	(pt): Use operand_type_equal().
+	(match_template): Replace use of acc32.
+	(process_suffix): Replace use of acc64.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* doc/c-i386.texi: Mark -mavxscalar= and -mvexwig as dangrous to
 	use.
 
