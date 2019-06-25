@@ -1,3 +1,8 @@
+2019-06-25  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24727
+	* gdb.dwarf2/dw2-restrict.S: Regenerate using clang 5.0.1.
+
 2019-06-24  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/implptr-64bit.exp: Fix intra-CU '%' label reference.
