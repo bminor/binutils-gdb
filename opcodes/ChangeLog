@@ -1,5 +1,16 @@
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (Edqa, dqa_mode, EVEX_W_0F2A_P_1, EVEX_W_0F7B_P_1):
+	Delete.
+	(intel_operand_size, OP_E_register, OP_E_memory): Drop handling
+	of dqa_mode.
+	* i386-dis-evex-prefix.h: Move vcvtsi2ss and vcvtusi2ss leaf
+	entries here.
+	* i386-dis-evex-w.h: Drop EVEX_W_0F2A_P_1 and EVEX_W_0F7B_P_1
+	entries. Use Edq for vcvtsi2sd and vcvtusi2sd.
+
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_I64): Forword more cases to OP_I(). Drop local
 	variables.
 
