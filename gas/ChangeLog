@@ -1,3 +1,9 @@
+2019-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/xmmword.s: Add cvtps2pi and cvttps2pi
+	tests.
+	* testsuite/gas/i386/xmmword.l: Adjust expectations.
+
 2019-06-25  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_handle_align): Add parentheses.

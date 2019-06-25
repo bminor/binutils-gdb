@@ -109,3 +109,5 @@
 .*:140: Error: .* `movq'
 .*:141: Error: .* `vmovq'
 .*:142: Error: .* `vmovq'
+.*:144: Error: .* `cvtps2pi'
+.*:146: Error: .* `cvttps2pi'
