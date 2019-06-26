@@ -103,16 +103,13 @@ tui_data_window::line_from_reg_element_no (int element_no) const
     return (-1);
 }
 
+/* See tui-data.h.  */
 
-/* Answer the index of the first element in line_no.  If line_no is
-   past the register area (-1) is returned.  */
 int
-tui_first_reg_element_no_inline (int line_no)
+tui_data_window::first_reg_element_no_inline (int line_no) const
 {
-  if ((line_no * TUI_DATA_WIN->regs_column_count)
-      <= TUI_DATA_WIN->regs_content.size ())
-    return (((line_no + 1) * TUI_DATA_WIN->regs_column_count) 
-	    - TUI_DATA_WIN->regs_column_count);
+  if (line_no * regs_column_count <= regs_content.size ())
+    return ((line_no + 1) * regs_column_count) - regs_column_count;
   else
     return (-1);
 }
@@ -362,7 +359,8 @@ tui_display_reg_element_at_line (int start_element_no,
 	     display at.  */
 	  if (start_line_no > first_line_on_last_page)
 	    element_no
-	      = tui_first_reg_element_no_inline (first_line_on_last_page);
+	      = (TUI_DATA_WIN->first_reg_element_no_inline
+		 (first_line_on_last_page));
 	}
       tui_display_registers_from (element_no);
     }
@@ -399,7 +397,7 @@ tui_display_registers_from_line (int line_no,
       else
 	line = line_no;
 
-      element_no = tui_first_reg_element_no_inline (line);
+      element_no = TUI_DATA_WIN->first_reg_element_no_inline (line);
       if (element_no < TUI_DATA_WIN->regs_content.size ())
 	tui_display_reg_element_at_line (element_no, line);
       else

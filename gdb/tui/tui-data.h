@@ -499,6 +499,10 @@ struct tui_data_window : public tui_win_info
      elements there are, -1 is returned.  */
   int line_from_reg_element_no (int element_no) const;
 
+  /* Answer the index of the first element in line_no.  If line_no is
+     past the register area (-1) is returned.  */
+  int first_reg_element_no_inline (int line_no) const;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

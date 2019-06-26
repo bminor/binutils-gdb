@@ -1,5 +1,16 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (tui_first_reg_element_no_inline): Don't
+	declare.
+	* tui/tui-regs.c (tui_data_window::first_reg_element_no_inline):
+	Rename from tui_first_reg_element_no_inline.
+	(tui_display_reg_element_at_line)
+	(tui_display_registers_from_line): Update.
+	* tui/tui-data.h (struct tui_data_window)
+	<first_reg_element_no_inline>: New method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.c (tui_display_data_from)
 	(tui_data_window::do_scroll_vertical): Update.
 	* tui/tui-regs.h (tui_line_from_reg_element_no): Don't declare.
