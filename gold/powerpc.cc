@@ -249,6 +249,12 @@ public:
   make_toc_relative(Target_powerpc<size, big_endian>* target,
 		    Address* value);
 
+  bool
+  make_got_relative(Target_powerpc<size, big_endian>* target,
+		    const Symbol_value<size>* psymval,
+		    Address addend,
+		    Address* value);
+
   // Perform the Sized_relobj_file method, then set up opd info from
   // .opd relocs.
   void
@@ -2381,6 +2387,25 @@ Powerpc_relobj<size, big_endian>::make_toc_relative(
 		      + this->toc_base_offset());
   addr -= got_base;
   if (addr + (uint64_t) 0x80008000 >= (uint64_t) 1 << 32)
+    return false;
+
+  *value = addr;
+  return true;
+}
+
+template<int size, bool big_endian>
+bool
+Powerpc_relobj<size, big_endian>::make_got_relative(
+    Target_powerpc<size, big_endian>* target,
+    const Symbol_value<size>* psymval,
+    Address addend,
+    Address* value)
+{
+  Address addr = psymval->value(this, addend);
+  Address got_base = (target->got_section()->output_section()->address()
+		      + this->toc_base_offset());
+  addr -= got_base;
+  if (addr + 0x80008000 > 0xffffffff)
     return false;
 
   *value = addr;
@@ -9660,6 +9685,37 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   return true;
 }
 
+template<int size>
+static bool
+relative_value_is_known(const Sized_symbol<size>* gsym)
+{
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC)
+    return false;
+
+  if (gsym->is_from_dynobj()
+      || gsym->is_undefined()
+      || gsym->is_preemptible())
+    return false;
+
+  if (gsym->is_absolute())
+    return !parameters->options().output_is_position_independent();
+
+  return true;
+}
+
+template<int size>
+static bool
+relative_value_is_known(const Symbol_value<size>* psymval)
+{
+  if (psymval->is_ifunc_symbol())
+    return false;
+
+  bool is_ordinary;
+  unsigned int shndx = psymval->input_shndx(&is_ordinary);
+
+  return is_ordinary && shndx != elfcpp::SHN_UNDEF;
+}
+
 // Perform a relocation.
 
 template<int size, bool big_endian>
@@ -10446,7 +10502,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
     }
 
-  if (size == 64)
+  if (size == 64
+      && (gsym
+	  ? relative_value_is_known(gsym)
+	  : relative_value_is_known(psymval)))
     {
       switch (r_type)
 	{
@@ -10460,12 +10519,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  // and
 	  //     addis ra,r2,0; addi rb,ra,x@toc@l;
 	  // to  nop;           addi rb,r2,x@toc;
-	  // FIXME: the @got sequence shown above is not yet
-	  // optimized.  Note that gcc as of 2017-01-07 doesn't use
-	  // the ELF @got relocs except for TLS, instead using the
-	  // PowerOpen variant of a compiler managed GOT (called TOC).
-	  // The PowerOpen TOC sequence equivalent to the first
-	  // example is optimized.
 	case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
 	case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
 	case elfcpp::R_POWERPC_GOT_TPREL16_HA:
@@ -10476,8 +10529,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
-	      if (r_type == elfcpp::R_PPC64_TOC16_HA
-		  && object->make_toc_relative(target, &value))
+	      if ((r_type == elfcpp::R_PPC64_TOC16_HA
+		   && object->make_toc_relative(target, &value))
+		  || (r_type == elfcpp::R_POWERPC_GOT16_HA
+		      && object->make_got_relative(target, psymval,
+						   rela.get_r_addend(),
+						   &value)))
 		{
 		  gold_assert((insn & ((0x3f << 26) | 0x1f << 16))
 			      == ((15u << 26) | (2 << 16)));
@@ -10505,8 +10562,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      bool changed = false;
-	      if (r_type == elfcpp::R_PPC64_TOC16_LO_DS
-		  && object->make_toc_relative(target, &value))
+	      if ((r_type == elfcpp::R_PPC64_TOC16_LO_DS
+		   && object->make_toc_relative(target, &value))
+		  || (r_type == elfcpp::R_PPC64_GOT16_LO_DS
+		      && object->make_got_relative(target, psymval,
+						   rela.get_r_addend(),
+						   &value)))
 		{
 		  gold_assert ((insn & (0x3f << 26)) == 58u << 26 /* ld */);
 		  insn ^= (14u << 26) ^ (58u << 26);
@@ -10531,6 +10592,31 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		}
 	      if (changed)
 		elfcpp::Swap<32, big_endian>::writeval(iview, insn);
+	    }
+	  break;
+
+	case elfcpp::R_PPC64_GOT_PCREL34:
+	  if (parameters->options().toc_optimize())
+	    {
+	      Insn* iview = reinterpret_cast<Insn*>(view);
+	      uint64_t insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      insn <<= 32;
+	      insn |= elfcpp::Swap<32, big_endian>::readval(iview + 1);
+	      if ((insn & ((-1ULL << 50) | (63ULL << 26)))
+		   != ((1ULL << 58) | (1ULL << 52) | (57ULL << 26) /* pld */))
+		break;
+
+	      Address relval = psymval->value(object, rela.get_r_addend());
+	      relval -= address;
+	      if (relval + (1ULL << 33) < 1ULL << 34)
+		{
+		  value = relval;
+		  // Replace with paddi
+		  insn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
+		  elfcpp::Swap<32, big_endian>::writeval(iview, insn >> 32);
+		  elfcpp::Swap<32, big_endian>::writeval(iview + 1,
+							 insn & 0xffffffff);
+		}
 	    }
 	  break;
 

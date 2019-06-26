@@ -1,5 +1,12 @@
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relobj::make_got_relative): New function.
+	(relative_value_is_known): New functions.
+	(Target_powerpc::Relocate::relocate): Edit code using
+	GOT16_HA, GOT16_LO_DS, and GOT_PCREL34 relocs.
+
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc): Add powerxx_stubs_ and accessor
 	functions.
 	(Target_powerpc::maybe_skip_tls_get_addr_call): Handle PLT_PCREL34
