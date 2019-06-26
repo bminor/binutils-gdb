@@ -1,5 +1,9 @@
 2019-06-26  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/varval.exp: Compile twice, once without bad DWARF.
+
+2019-06-26  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/index-cache.exp: Add back missing debug option.
 
 2019-06-23  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
