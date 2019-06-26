@@ -8831,7 +8831,17 @@ arm_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
     return 1;
 }
 
-
+/* Implement gdbarch_gnu_triplet_regexp.  If the arch name is arm then allow it
+   to be postfixed by a version (eg armv7hl).  */
+
+static const char *
+arm_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  if (strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name, "arm") == 0)
+    return "arm(v[^- ]*)?";
+  return gdbarch_bfd_arch_info (gdbarch)->arch_name;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -9432,6 +9442,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_disassembler_options (gdbarch, &arm_disassembler_options);
   set_gdbarch_valid_disassembler_options (gdbarch, disassembler_options_arm ());
+
+  set_gdbarch_gnu_triplet_regexp (gdbarch, arm_gnu_triplet_regexp);
 
   return gdbarch;
 }

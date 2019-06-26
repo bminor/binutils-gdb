@@ -1,3 +1,8 @@
+2019-06-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* arm-tdep.c (arm_gnu_triplet_regexp): New function.
+	(arm_gdbarch_init): Add arm_gnu_triplet_regexp.
+
 2019-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arm-tdep.c (struct arm_per_objfile) <section_maps_sorted>: New
