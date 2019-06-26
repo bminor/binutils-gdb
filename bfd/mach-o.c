@@ -1501,7 +1501,11 @@ bfd_mach_o_canonicalize_non_scattered_reloc (bfd *abfd,
     {
       /* PR 17512: file: 006-2964-0.004.  */
       if (num > mdata->nsects)
-	return FALSE;
+	{
+	  _bfd_error_handler (_("\
+malformed mach-o reloc: section index is greater than the number of sections"));
+	  return FALSE;
+	}
 
       /* A section number.  */
       sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
@@ -1609,7 +1613,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
 {
   bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
   unsigned long i;
-  struct mach_o_reloc_info_external *native_relocs;
+  struct mach_o_reloc_info_external *native_relocs = NULL;
   bfd_size_type native_size;
 
   /* Allocate and read relocs.  */
@@ -1617,7 +1621,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
 
   /* PR 17512: file: 09477b57.  */
   if (native_size < count)
-    return -1;
+    goto err;
 
   native_relocs =
     (struct mach_o_reloc_info_external *) bfd_malloc (native_size);
@@ -1636,8 +1640,11 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
     }
   free (native_relocs);
   return i;
+
  err:
   free (native_relocs);
+  if (bfd_get_error () == bfd_error_no_error)
+    bfd_set_error (bfd_error_invalid_operation);
   return -1;
 }
 

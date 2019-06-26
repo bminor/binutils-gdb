@@ -44,8 +44,12 @@ void
 bfd_nonfatal (const char *string)
 {
   const char *errmsg;
+  enum bfd_error err = bfd_get_error ();
 
-  errmsg = bfd_errmsg (bfd_get_error ());
+  if (err == bfd_error_no_error)
+    errmsg = _("cause of error unknown");
+  else
+    errmsg = bfd_errmsg (err);
   fflush (stdout);
   if (string)
     fprintf (stderr, "%s: %s: %s\n", program_name, string, errmsg);
@@ -74,8 +78,12 @@ bfd_nonfatal_message (const char *filename,
   const char *errmsg;
   const char *section_name;
   va_list args;
+  enum bfd_error err = bfd_get_error ();
 
-  errmsg = bfd_errmsg (bfd_get_error ());
+  if (err == bfd_error_no_error)
+    errmsg = _("cause of error unknown");
+  else
+    errmsg = bfd_errmsg (err);
   fflush (stdout);
   section_name = NULL;
   va_start (args, format);

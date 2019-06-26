@@ -1,3 +1,10 @@
+2019-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 24703
+	* bucomm.c (bfd_nonfatal): If no bfd error code has been set then
+	indicate this in the output.
+	(bfd_nonfatal_message): Likewise.
+
 2019-06-25  Jan Beulich  <jbeulich@suse.com>
 
 	* readelf.c (dump_ctf_indent_lines): Rename local variable
