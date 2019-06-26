@@ -1,5 +1,11 @@
 2019-06-26  Alan Hayward  <alan.hayward@arm.com>
 
+	* features/aarch64-core.c (create_feature_aarch64_core):
+	Regenerate.
+	* features/aarch64-core.xml: Add cpsr flags.
+
+2019-06-26  Alan Hayward  <alan.hayward@arm.com>
+
 	* arm-tdep.c (arm_gnu_triplet_regexp): New function.
 	(arm_gdbarch_init): Add arm_gnu_triplet_regexp.
 
