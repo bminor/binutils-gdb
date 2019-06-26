@@ -50,8 +50,6 @@ static const char *const jit_break_name = "__jit_debug_register_code";
 
 static const char *const jit_descriptor_name = "__jit_debug_descriptor";
 
-static const struct program_space_data *jit_program_space_data = NULL;
-
 static void jit_inferior_init (struct gdbarch *gdbarch);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
@@ -249,19 +247,21 @@ struct jit_program_space_data
   /* The objfile.  This is NULL if no objfile holds the JIT
      symbols.  */
 
-  struct objfile *objfile;
+  struct objfile *objfile = nullptr;
 
   /* If this program space has __jit_debug_register_code, this is the
      cached address from the minimal symbol.  This is used to detect
      relocations requiring the breakpoint to be re-created.  */
 
-  CORE_ADDR cached_code_address;
+  CORE_ADDR cached_code_address = 0;
 
   /* This is the JIT event breakpoint, or NULL if it has not been
      set.  */
 
-  struct breakpoint *jit_breakpoint;
+  struct breakpoint *jit_breakpoint = nullptr;
 };
+
+static program_space_key<jit_program_space_data> jit_program_space_key;
 
 /* Per-objfile structure recording the addresses in the program space.
    This object serves two purposes: for ordinary objfiles, it may
@@ -316,27 +316,14 @@ add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
    if not already present.  */
 
 static struct jit_program_space_data *
-get_jit_program_space_data (void)
+get_jit_program_space_data ()
 {
   struct jit_program_space_data *ps_data;
 
-  ps_data
-    = ((struct jit_program_space_data *)
-       program_space_data (current_program_space, jit_program_space_data));
+  ps_data = jit_program_space_key.get (current_program_space);
   if (ps_data == NULL)
-    {
-      ps_data = XCNEW (struct jit_program_space_data);
-      set_program_space_data (current_program_space, jit_program_space_data,
-			      ps_data);
-    }
-
+    ps_data = jit_program_space_key.emplace (current_program_space);
   return ps_data;
-}
-
-static void
-jit_program_space_data_cleanup (struct program_space *ps, void *arg)
-{
-  xfree (arg);
 }
 
 /* Helper function for reading the global JIT descriptor from remote
@@ -1008,8 +995,7 @@ jit_breakpoint_deleted (struct breakpoint *b)
     {
       struct jit_program_space_data *ps_data;
 
-      ps_data = ((struct jit_program_space_data *)
-		 program_space_data (iter->pspace, jit_program_space_data));
+      ps_data = jit_program_space_key.get (iter->pspace);
       if (ps_data != NULL && ps_data->jit_breakpoint == iter->owner)
 	{
 	  ps_data->cached_code_address = 0;
@@ -1448,9 +1434,7 @@ free_objfile_data (struct objfile *objfile, void *data)
     {
       struct jit_program_space_data *ps_data;
 
-      ps_data
-	= ((struct jit_program_space_data *)
-	   program_space_data (objfile->pspace, jit_program_space_data));
+      ps_data = jit_program_space_key.get (objfile->pspace);
       if (ps_data != NULL && ps_data->objfile == objfile)
 	{
 	  ps_data->objfile = NULL;
@@ -1496,9 +1480,6 @@ _initialize_jit (void)
 
   jit_objfile_data =
     register_objfile_data_with_cleanup (NULL, free_objfile_data);
-  jit_program_space_data =
-    register_program_space_data_with_cleanup (NULL,
-					      jit_program_space_data_cleanup);
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {

@@ -1,5 +1,14 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* jit.c (jit_program_space_key): Change type.  Move lower.
+	(get_jit_program_space_data): Update.
+	(jit_program_space_data_cleanup): Remove.
+	(jit_breakpoint_deleted, free_objfile_data, _initialize_jit):
+	Update.
+	(struct jit_program_space_data): Add initializers.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* solib-darwin.c (struct darwin_info): Add initializers.
 	(solib_darwin_pspace_data): Change type.
 	(darwin_pspace_data_cleanup): Remove.
