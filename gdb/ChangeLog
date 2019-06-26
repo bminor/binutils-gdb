@@ -1,5 +1,15 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_display_data_from_line): Don't declare.
+	* tui/tui-windata.c (tui_display_data_from_line): Remove.
+	(tui_display_data_from, tui_data_window::do_scroll_vertical): Call
+	tui_display_registers_from_line.
+	* tui/tui-regs.h (tui_display_registers_from_line): Update.
+	* tui/tui-regs.c (tui_display_registers_from_line): Remove
+	"force_display" parameter.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (tui_first_reg_element_no_inline): Don't
 	declare.
 	* tui/tui-regs.c (tui_data_window::first_reg_element_no_inline):

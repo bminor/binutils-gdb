@@ -111,22 +111,6 @@ tui_display_all_data (void)
 }
 
 
-/* Function to display the data starting at line, line_no, in the data
-   window.  */
-void
-tui_display_data_from_line (int line_no)
-{
-  int _line_no = line_no;
-
-  if (line_no < 0)
-    _line_no = 0;
-
-  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
-
-  tui_display_registers_from_line (_line_no, TRUE);
-}
-
-
 /* Display data starting at element element_no.  */
 void
 tui_display_data_from (int element_no, int reuse_windows)
@@ -144,7 +128,7 @@ tui_display_data_from (int element_no, int reuse_windows)
       tui_erase_data_content (NULL);
       if (!reuse_windows)
 	tui_delete_data_content_windows ();
-      tui_display_data_from_line (first_line);
+      tui_display_registers_from_line (first_line);
     }
 }
 
@@ -184,7 +168,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
       first_line += num_to_scroll;
       tui_erase_data_content (NULL);
       tui_delete_data_content_windows ();
-      tui_display_data_from_line (first_line);
+      tui_display_registers_from_line (first_line);
     }
 }
 

@@ -372,38 +372,34 @@ tui_display_reg_element_at_line (int start_element_no,
    data window.  Answers the line number that the display actually
    started from.  If nothing is displayed (-1) is returned.  */
 int
-tui_display_registers_from_line (int line_no, 
-				 int force_display)
+tui_display_registers_from_line (int line_no)
 {
+  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
   if (!TUI_DATA_WIN->regs_content.empty ())
     {
-      int line, element_no;
+      int element_no;
 
       if (line_no < 0)
-	line = 0;
-      else if (force_display)
-	{ /* If we must display regs (force_display is true), then
-	     make sure that we don't display off the end of the
+	line_no = 0;
+      else
+	{
+	  /* Make sure that we don't display off the end of the
 	     registers.  */
 	  if (line_no >= TUI_DATA_WIN->last_regs_line_no ())
 	    {
-	      if ((line = TUI_DATA_WIN->line_from_reg_element_no (
+	      if ((line_no = TUI_DATA_WIN->line_from_reg_element_no (
 		 TUI_DATA_WIN->regs_content.size () - 1)) < 0)
-		line = 0;
+		line_no = 0;
 	    }
-	  else
-	    line = line_no;
 	}
-      else
-	line = line_no;
 
-      element_no = TUI_DATA_WIN->first_reg_element_no_inline (line);
+      element_no = TUI_DATA_WIN->first_reg_element_no_inline (line_no);
       if (element_no < TUI_DATA_WIN->regs_content.size ())
-	tui_display_reg_element_at_line (element_no, line);
+	tui_display_reg_element_at_line (element_no, line_no);
       else
-	line = (-1);
+	line_no = (-1);
 
-      return line;
+      return line_no;
     }
 
   return (-1);			/* Nothing was displayed.  */
