@@ -1,5 +1,17 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* gdb-stabs.h (struct dbx_symfile_info): Add initializers and
+	destructor.
+	(dbx_objfile_data_key): Change type and declare later.
+	(DBX_SYMFILE_INFO): Rewrite.
+	* dbxread.c (dbx_objfile_data_key): Change type.
+	(dbx_symfile_init): Update.
+	(~dbx_symfile_info): Rename from dbx_free_symfile_info.  Update.
+	(coffstab_build_psymtabs, elfstab_build_psymtabs)
+	(stabsect_build_psymtabs, _initialize_dbxread): Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* jit.c (jit_program_space_key): Change type.  Move lower.
 	(get_jit_program_space_data): Update.
 	(jit_program_space_data_cleanup): Remove.
