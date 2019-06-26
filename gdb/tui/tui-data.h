@@ -494,6 +494,11 @@ struct tui_data_window : public tui_win_info
      are no registers (-1) is returned.  */
   int last_regs_line_no () const;
 
+  /* Answer the line number that the register element at element_no is
+     on.  If element_no is greater than the number of register
+     elements there are, -1 is returned.  */
+  int line_from_reg_element_no (int element_no) const;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

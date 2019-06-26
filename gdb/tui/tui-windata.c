@@ -134,7 +134,7 @@ tui_display_data_from (int element_no, int reuse_windows)
   int first_line = (-1);
 
   if (element_no < TUI_DATA_WIN->regs_content.size ())
-    first_line = tui_line_from_reg_element_no (element_no);
+    first_line = TUI_DATA_WIN->line_from_reg_element_no (element_no);
   else
     { /* Calculate the first_line from the element number.  */
     }
@@ -173,7 +173,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
 
   first_element_no = first_data_item_displayed ();
   if (first_element_no < regs_content.size ())
-    first_line = tui_line_from_reg_element_no (first_element_no);
+    first_line = line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in
         the general data content.  */

@@ -79,21 +79,19 @@ tui_data_window::last_regs_line_no () const
   return num_lines;
 }
 
+/* See tui-data.h.  */
 
-/* Answer the line number that the register element at element_no is
-   on.  If element_no is greater than the number of register elements
-   there are, -1 is returned.  */
 int
-tui_line_from_reg_element_no (int element_no)
+tui_data_window::line_from_reg_element_no (int element_no) const
 {
-  if (element_no < TUI_DATA_WIN->regs_content.size ())
+  if (element_no < regs_content.size ())
     {
       int i, line = (-1);
 
       i = 1;
       while (line == (-1))
 	{
-	  if (element_no < TUI_DATA_WIN->regs_column_count * i)
+	  if (element_no < regs_column_count * i)
 	    line = i - 1;
 	  else
 	    i++;
@@ -391,7 +389,7 @@ tui_display_registers_from_line (int line_no,
 	     registers.  */
 	  if (line_no >= TUI_DATA_WIN->last_regs_line_no ())
 	    {
-	      if ((line = tui_line_from_reg_element_no (
+	      if ((line = TUI_DATA_WIN->line_from_reg_element_no (
 		 TUI_DATA_WIN->regs_content.size () - 1)) < 0)
 		line = 0;
 	    }
