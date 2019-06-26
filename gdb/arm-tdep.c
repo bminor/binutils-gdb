@@ -88,9 +88,6 @@ static int arm_debug;
 #define MSYMBOL_IS_SPECIAL(msym)				\
 	MSYMBOL_TARGET_FLAG_1 (msym)
 
-/* Per-objfile data used for mapping symbols.  */
-static const struct objfile_data *arm_objfile_data_key;
-
 struct arm_mapping_symbol
 {
   bfd_vma value;
@@ -125,6 +122,9 @@ struct arm_per_objfile
      sorted.  */
   std::unique_ptr<bool[]> section_maps_sorted;
 };
+
+/* Per-objfile data used for mapping symbols.  */
+static objfile_key<arm_per_objfile> arm_objfile_data_key;
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;
@@ -356,9 +356,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   sec = find_pc_section (memaddr);
   if (sec != NULL)
     {
-      arm_per_objfile *data
-	= (struct arm_per_objfile *) objfile_data (sec->objfile,
-						   arm_objfile_data_key);
+      arm_per_objfile *data = arm_objfile_data_key.get (sec->objfile);
       if (data != NULL)
 	{
 	  unsigned int section_idx = sec->the_bfd_section->index;
@@ -8529,14 +8527,6 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 }
 
 static void
-arm_objfile_data_free (struct objfile *objfile, void *arg)
-{
-  struct arm_per_objfile *data = (struct arm_per_objfile *) arg;
-
-  delete data;
-}
-
-static void
 arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 			   asymbol *sym)
 {
@@ -8548,13 +8538,10 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
     return;
 
-  data = (struct arm_per_objfile *) objfile_data (objfile,
-						  arm_objfile_data_key);
+  data = arm_objfile_data_key.get (objfile);
   if (data == NULL)
-    {
-      data = new arm_per_objfile (objfile->obfd->section_count);
-      set_objfile_data (objfile, arm_objfile_data_key, data);
-    }
+    data = arm_objfile_data_key.emplace (objfile,
+					 objfile->obfd->section_count);
   arm_mapping_symbol_vec &map
     = data->section_maps[bfd_get_section (sym)->index];
 
@@ -9476,9 +9463,6 @@ _initialize_arm_tdep (void)
   size_t rest = sizeof (regdesc);
 
   gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
-
-  arm_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, arm_objfile_data_free);
 
   /* Add ourselves to objfile event chain.  */
   gdb::observers::new_objfile.attach (arm_exidx_new_objfile);

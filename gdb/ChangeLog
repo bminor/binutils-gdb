@@ -1,5 +1,13 @@
 2019-06-27  Tom Tromey  <tromey@adacore.com>
 
+	* arm-tdep.c (arm_objfile_data_key): Move lower.  Change type to
+	objfile_key.
+	(arm_find_mapping_symbol, arm_record_special_symbol)
+	(_initialize_arm_tdep): Update.
+	(arm_objfile_data_free): Remove.
+
+2019-06-27  Tom Tromey  <tromey@adacore.com>
+
 	* cp-valprint.c (cp_print_value_fields): Pass opts, not options,
 	to cp_print_static_field.
 
