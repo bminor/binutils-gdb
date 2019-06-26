@@ -205,18 +205,6 @@ struct bound_minimal_symbol lookup_minimal_symbol_text (const char *,
 							struct objfile *);
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME and is a solib trampoline.
-   If OBJF is non-NULL, limit the search to that objfile.  Returns a
-   pointer to the minimal symbol that matches, or NULL if no match is
-   found.
-
-   This function only searches the mangled (linkage) names.  */
-
-struct bound_minimal_symbol lookup_minimal_symbol_solib_trampoline
-    (const char *,
-     struct objfile *);
-
-/* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and PC.  If OBJF is non-NULL,
    limit the search to that objfile.  Returns a pointer to the minimal
    symbol that matches, or NULL if no match is found.  */

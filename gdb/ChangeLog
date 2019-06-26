@@ -1,3 +1,9 @@
+2019-06-26  Tom Tromey  <tromey@adacore.com>
+
+	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Remove.
+	* minsyms.h (lookup_minimal_symbol_solib_trampoline): Don't
+	declare.
+
 2019-06-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* features/aarch64-core.c (create_feature_aarch64_core):

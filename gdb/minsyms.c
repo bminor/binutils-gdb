@@ -597,40 +597,6 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
   return NULL;
 }
 
-/* See minsyms.h.  */
-
-struct bound_minimal_symbol
-lookup_minimal_symbol_solib_trampoline (const char *name,
-					struct objfile *objf)
-{
-  struct minimal_symbol *msymbol;
-  struct bound_minimal_symbol found_symbol = { NULL, NULL };
-
-  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
-	{
-	  for (msymbol = objfile->per_bfd->msymbol_hash[hash];
-	       msymbol != NULL;
-	       msymbol = msymbol->hash_next)
-	    {
-	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
-		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
-		{
-		  found_symbol.objfile = objfile;
-		  found_symbol.minsym = msymbol;
-		  return found_symbol;
-		}
-	    }
-	}
-    }
-
-  return found_symbol;
-}
-
 /* A helper function that makes *PC section-relative.  This searches
    the sections of OBJFILE and if *PC is in a section, it subtracts
    the section offset and returns true.  Otherwise it returns
