@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_show_registers): Update.
+	(tui_show_register_group): Add win_info parameter.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::display_reg_element_at_line):
 	Rename from tui_display_reg_element_at_line.
 	(tui_data_window::display_registers_from_line): Update.

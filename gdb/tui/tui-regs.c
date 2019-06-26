@@ -49,7 +49,8 @@
 ******************************************/
 static void tui_display_register (struct tui_data_item_window *data);
 
-static void tui_show_register_group (struct reggroup *group,
+static void tui_show_register_group (tui_data_window *win_info,
+				     struct reggroup *group,
 				     struct frame_info *frame,
 				     int refresh_values_only);
 
@@ -139,7 +140,7 @@ tui_show_registers (struct reggroup *group)
 
   if (target_has_registers && target_has_stack && target_has_memory)
     {
-      tui_show_register_group (group, get_selected_frame (NULL),
+      tui_show_register_group (TUI_DATA_WIN, group, get_selected_frame (NULL),
 			       group == TUI_DATA_WIN->current_group);
       ret = TUI_SUCCESS;
     }
@@ -167,7 +168,8 @@ tui_show_registers (struct reggroup *group)
    refresh_values_only is TRUE.  */
 
 static void
-tui_show_register_group (struct reggroup *group,
+tui_show_register_group (tui_data_window *win_info,
+			 struct reggroup *group,
                          struct frame_info *frame, 
 			 int refresh_values_only)
 {
@@ -179,8 +181,8 @@ tui_show_register_group (struct reggroup *group,
   /* Make a new title showing which group we display.  */
   snprintf (title, sizeof (title) - 1, "Register group: %s",
             reggroup_name (group));
-  xfree (TUI_DATA_WIN->title);
-  TUI_DATA_WIN->title = xstrdup (title);
+  xfree (win_info->title);
+  win_info->title = xstrdup (title);
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
@@ -202,14 +204,14 @@ tui_show_register_group (struct reggroup *group,
     }
 
   if (!refresh_values_only)
-    TUI_DATA_WIN->regs_content.clear ();
+    win_info->regs_content.clear ();
 
-  if (nr_regs < TUI_DATA_WIN->regs_content.size ())
-    TUI_DATA_WIN->regs_content.resize (nr_regs);
+  if (nr_regs < win_info->regs_content.size ())
+    win_info->regs_content.resize (nr_regs);
   else
     {
-      for (int i = TUI_DATA_WIN->regs_content.size (); i < nr_regs; ++i)
-	TUI_DATA_WIN->regs_content.emplace_back (new tui_data_item_window ());
+      for (int i = win_info->regs_content.size (); i < nr_regs; ++i)
+	win_info->regs_content.emplace_back (new tui_data_item_window ());
     }
 
   /* Now set the register names and values.  */
@@ -229,7 +231,7 @@ tui_show_register_group (struct reggroup *group,
       if (name == 0 || *name == '\0')
 	continue;
 
-      data_item_win = TUI_DATA_WIN->regs_content[pos].get ();
+      data_item_win = win_info->regs_content[pos].get ();
       if (data_item_win)
 	{
 	  if (!refresh_values_only)
