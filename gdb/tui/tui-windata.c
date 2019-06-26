@@ -111,28 +111,6 @@ tui_display_all_data (void)
 }
 
 
-/* Display data starting at element element_no.  */
-void
-tui_display_data_from (int element_no, int reuse_windows)
-{
-  int first_line = (-1);
-
-  if (element_no < TUI_DATA_WIN->regs_content.size ())
-    first_line = TUI_DATA_WIN->line_from_reg_element_no (element_no);
-  else
-    { /* Calculate the first_line from the element number.  */
-    }
-
-  if (first_line >= 0)
-    {
-      tui_erase_data_content (NULL);
-      if (!reuse_windows)
-	tui_delete_data_content_windows ();
-      tui_display_registers_from_line (first_line);
-    }
-}
-
-
 /* Function to redisplay the contents of the data window.  */
 void
 tui_data_window::refresh_all ()
@@ -143,7 +121,18 @@ tui_data_window::refresh_all ()
       int first_element = first_data_item_displayed ();
 
       if (first_element >= 0)	/* Re-use existing windows.  */
-	tui_display_data_from (first_element, TRUE);
+	{
+	  int first_line = (-1);
+
+	  if (first_element < regs_content.size ())
+	    first_line = line_from_reg_element_no (first_element);
+
+	  if (first_line >= 0)
+	    {
+	      tui_erase_data_content (NULL);
+	      tui_display_registers_from_line (first_line);
+	    }
+	}
     }
 }
 

@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_display_data_from): Don't declare.
+	* tui/tui-windata.c (tui_display_data_from): Remove.
+	(tui_data_window::refresh_all): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_display_data_from_line): Don't declare.
 	* tui/tui-windata.c (tui_display_data_from_line): Remove.
 	(tui_display_data_from, tui_data_window::do_scroll_vertical): Call
