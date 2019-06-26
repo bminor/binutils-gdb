@@ -1,5 +1,17 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_erase_data_content): Don't declare.
+	* tui/tui-windata.c (tui_data_window::erase_data_content): Rename
+	from tui_erase_data_content.
+	(tui_data_window::display_all_data)
+	(tui_data_window::refresh_all)
+	(tui_data_window::do_scroll_vertical): Update.
+	* tui/tui-regs.c (tui_show_registers): Update.
+	* tui/tui-data.h (struct tui_data_window) <erase_data_content>:
+	New method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_delete_data_content_windows): Don't
 	declare.
 	* tui/tui-windata.c

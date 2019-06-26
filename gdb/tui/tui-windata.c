@@ -71,25 +71,22 @@ tui_data_window::delete_data_content_windows ()
 
 
 void
-tui_erase_data_content (const char *prompt)
+tui_data_window::erase_data_content (const char *prompt)
 {
-  werase (TUI_DATA_WIN->handle);
-  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
+  werase (handle);
+  tui_check_and_display_highlight_if_needed (this);
   if (prompt != NULL)
     {
-      int half_width = (TUI_DATA_WIN->width - 2) / 2;
+      int half_width = (width - 2) / 2;
       int x_pos;
 
       if (strlen (prompt) >= half_width)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (prompt);
-      mvwaddstr (TUI_DATA_WIN->handle,
-		 (TUI_DATA_WIN->height / 2),
-		 x_pos,
-		 (char *) prompt);
+      mvwaddstr (handle, (height / 2), x_pos, (char *) prompt);
     }
-  wrefresh (TUI_DATA_WIN->handle);
+  wrefresh (handle);
 }
 
 /* See tui-data.h.  */
@@ -98,10 +95,10 @@ void
 tui_data_window::display_all_data ()
 {
   if (regs_content.empty ())
-    tui_erase_data_content (NO_DATA_STRING);
+    erase_data_content (NO_DATA_STRING);
   else
     {
-      tui_erase_data_content (NULL);
+      erase_data_content (NULL);
       delete_data_content_windows ();
       tui_check_and_display_highlight_if_needed (this);
       tui_display_registers_from (0);
@@ -113,7 +110,7 @@ tui_data_window::display_all_data ()
 void
 tui_data_window::refresh_all ()
 {
-  tui_erase_data_content (NULL);
+  erase_data_content (NULL);
   if (!regs_content.empty ())
     {
       int first_element = first_data_item_displayed ();
@@ -127,7 +124,7 @@ tui_data_window::refresh_all ()
 
 	  if (first_line >= 0)
 	    {
-	      tui_erase_data_content (NULL);
+	      erase_data_content (NULL);
 	      tui_display_registers_from_line (first_line);
 	    }
 	}
@@ -153,7 +150,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
   if (first_line >= 0)
     {
       first_line += num_to_scroll;
-      tui_erase_data_content (NULL);
+      erase_data_content (NULL);
       delete_data_content_windows ();
       tui_display_registers_from_line (first_line);
     }

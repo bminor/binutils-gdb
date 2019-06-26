@@ -146,7 +146,7 @@ tui_show_registers (struct reggroup *group)
   if (ret == TUI_FAILURE)
     {
       TUI_DATA_WIN->current_group = 0;
-      tui_erase_data_content (NO_REGS_STRING);
+      TUI_DATA_WIN->erase_data_content (NO_REGS_STRING);
     }
   else
     {

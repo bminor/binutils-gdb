@@ -511,6 +511,8 @@ struct tui_data_window : public tui_win_info
      done when the data window is scrolled.  */
   void delete_data_content_windows ();
 
+  void erase_data_content (const char *prompt);
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
