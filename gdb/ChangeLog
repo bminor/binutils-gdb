@@ -1,5 +1,11 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* spu-tdep.c (spu_overlay_data): Change type.
+	(spu_get_overlay_table, spu_overlay_new_objfile)
+	(_initialize_spu_tdep): Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* gdb-stabs.h (struct dbx_symfile_info): Add initializers and
 	destructor.
 	(dbx_objfile_data_key): Change type and declare later.
