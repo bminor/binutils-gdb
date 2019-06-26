@@ -326,16 +326,13 @@ tui_data_window::display_registers_from (int start_element_no)
     }
 }
 
+/* See tui-data.h.  */
 
-/* Function to display the registers in the content from
-   'start_element_no' on 'start_line_no' until the end of the register
-   content or the end of the display height.  This function checks
-   that we won't display off the end of the register display.  */
-static void
-tui_display_reg_element_at_line (int start_element_no,
-				 int start_line_no)
+void
+tui_data_window::display_reg_element_at_line (int start_element_no,
+					      int start_line_no)
 {
-  if (!TUI_DATA_WIN->regs_content.empty ())
+  if (!regs_content.empty ())
     {
       int element_no = start_element_no;
 
@@ -343,9 +340,8 @@ tui_display_reg_element_at_line (int start_element_no,
 	{
 	  int last_line_no, first_line_on_last_page;
 
-	  last_line_no = TUI_DATA_WIN->last_regs_line_no ();
-	  first_line_on_last_page
-	    = last_line_no - (TUI_DATA_WIN->height - 2);
+	  last_line_no = last_regs_line_no ();
+	  first_line_on_last_page = last_line_no - (height - 2);
 	  if (first_line_on_last_page < 0)
 	    first_line_on_last_page = 0;
 
@@ -353,11 +349,9 @@ tui_display_reg_element_at_line (int start_element_no,
 	     registers, adjust what element to really start the
 	     display at.  */
 	  if (start_line_no > first_line_on_last_page)
-	    element_no
-	      = (TUI_DATA_WIN->first_reg_element_no_inline
-		 (first_line_on_last_page));
+	    element_no = first_reg_element_no_inline (first_line_on_last_page);
 	}
-      TUI_DATA_WIN->display_registers_from (element_no);
+      display_registers_from (element_no);
     }
 }
 
@@ -387,7 +381,7 @@ tui_data_window::display_registers_from_line (int line_no)
 
       element_no = first_reg_element_no_inline (line_no);
       if (element_no < regs_content.size ())
-	tui_display_reg_element_at_line (element_no, line_no);
+	display_reg_element_at_line (element_no, line_no);
       else
 	line_no = (-1);
 

@@ -1,5 +1,13 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::display_reg_element_at_line):
+	Rename from tui_display_reg_element_at_line.
+	(tui_data_window::display_registers_from_line): Update.
+	* tui/tui-data.h (struct tui_data_window)
+	<display_reg_element_at_line>: New method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (tui_display_registers_from)
 	(tui_display_registers_from_line): Don't declare.
 	* tui/tui-windata.c (tui_data_window::display_all_data)

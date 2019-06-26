@@ -535,6 +535,12 @@ protected:
   /* Return the index of the first element displayed.  If none are
      displayed, then return -1.  */
   int first_data_item_displayed ();
+
+  /* Display the registers in the content from 'start_element_no' on
+     'start_line_no' until the end of the register content or the end
+     of the display height.  This function checks that we won't
+     display off the end of the register display.  */
+  void display_reg_element_at_line (int start_element_no, int start_line_no);
 };
 
 struct tui_cmd_window : public tui_win_info
