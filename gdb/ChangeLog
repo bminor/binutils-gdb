@@ -1,5 +1,9 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_show_registers): Simplify.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_show_registers): Update.
 	(tui_show_register_group): Add win_info parameter.
 

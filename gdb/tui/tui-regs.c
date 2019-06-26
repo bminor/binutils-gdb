@@ -121,8 +121,6 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 void
 tui_show_registers (struct reggroup *group)
 {
-  enum tui_status ret = TUI_FAILURE;
-
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
 
@@ -142,15 +140,7 @@ tui_show_registers (struct reggroup *group)
     {
       tui_show_register_group (TUI_DATA_WIN, group, get_selected_frame (NULL),
 			       group == TUI_DATA_WIN->current_group);
-      ret = TUI_SUCCESS;
-    }
-  if (ret == TUI_FAILURE)
-    {
-      TUI_DATA_WIN->current_group = 0;
-      TUI_DATA_WIN->erase_data_content (NO_REGS_STRING);
-    }
-  else
-    {
+
       /* Clear all notation of changed values.  */
       for (auto &&data_item_win : TUI_DATA_WIN->regs_content)
 	{
@@ -159,6 +149,11 @@ tui_show_registers (struct reggroup *group)
 	}
       TUI_DATA_WIN->current_group = group;
       TUI_DATA_WIN->display_all_data ();
+    }
+  else
+    {
+      TUI_DATA_WIN->current_group = 0;
+      TUI_DATA_WIN->erase_data_content (NO_REGS_STRING);
     }
 }
 
