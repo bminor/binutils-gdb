@@ -157,7 +157,7 @@ tui_show_registers (struct reggroup *group)
 	    data_item_win->highlight = false;
 	}
       TUI_DATA_WIN->current_group = group;
-      tui_display_all_data ();
+      TUI_DATA_WIN->display_all_data ();
     }
 }
 

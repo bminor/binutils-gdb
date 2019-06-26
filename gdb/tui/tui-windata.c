@@ -93,19 +93,18 @@ tui_erase_data_content (const char *prompt)
   wrefresh (TUI_DATA_WIN->handle);
 }
 
+/* See tui-data.h.  */
 
-/* This function displays the data that is in the data window's
-   content.  It does not set the content.  */
 void
-tui_display_all_data (void)
+tui_data_window::display_all_data ()
 {
-  if (TUI_DATA_WIN->regs_content.empty ())
+  if (regs_content.empty ())
     tui_erase_data_content (NO_DATA_STRING);
   else
     {
       tui_erase_data_content (NULL);
       tui_delete_data_content_windows ();
-      tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
+      tui_check_and_display_highlight_if_needed (this);
       tui_display_registers_from (0);
     }
 }

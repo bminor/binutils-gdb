@@ -503,6 +503,10 @@ struct tui_data_window : public tui_win_info
      past the register area (-1) is returned.  */
   int first_reg_element_no_inline (int line_no) const;
 
+  /* Displays the data that is in the data window's content.  It does
+     not set the content.  */
+  void display_all_data ();
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

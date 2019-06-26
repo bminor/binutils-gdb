@@ -1,5 +1,17 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_display_all_data): Don't declare.
+	* tui/tui-windata.c (tui_data_window::display_all_data): Rename
+	from tui_display_all_data.
+	* tui/tui-win.c
+	(tui_data_window::do_make_visible_with_new_height): Update.
+	* tui/tui-regs.c (tui_show_registers): Update.
+	* tui/tui-layout.c (tui_set_layout): Update.
+	* tui/tui-data.h (struct tui_data_window) <display_all_data>: New
+	method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_display_data_from): Don't declare.
 	* tui/tui-windata.c (tui_display_data_from): Remove.
 	(tui_data_window::refresh_all): Update.

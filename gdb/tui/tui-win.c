@@ -1366,7 +1366,7 @@ tui_source_window_base::do_make_visible_with_new_height ()
 void
 tui_data_window::do_make_visible_with_new_height ()
 {
-  tui_display_all_data ();
+  display_all_data ();
 }
 
 /* See tui-data.h.  */
