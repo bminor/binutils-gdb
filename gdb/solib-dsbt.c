@@ -142,35 +142,29 @@ struct dsbt_info
      of loaded shared objects.  ``main_executable_lm_info'' provides
      a way to get at this information so that it doesn't need to be
      frequently recomputed.  Initialized by dsbt_relocate_main_executable.  */
-  struct lm_info_dsbt *main_executable_lm_info;
+  struct lm_info_dsbt *main_executable_lm_info = nullptr;
 
   /* Load maps for the main executable and the interpreter.  These are obtained
      from ptrace.  They are the starting point for getting into the program,
      and are required to find the solib list with the individual load maps for
      each module.  */
-  struct int_elf32_dsbt_loadmap *exec_loadmap;
-  struct int_elf32_dsbt_loadmap *interp_loadmap;
+  struct int_elf32_dsbt_loadmap *exec_loadmap = nullptr;
+  struct int_elf32_dsbt_loadmap *interp_loadmap = nullptr;
 
   /* Cached value for lm_base, below.  */
-  CORE_ADDR lm_base_cache;
+  CORE_ADDR lm_base_cache = 0;
 
   /* Link map address for main module.  */
-  CORE_ADDR main_lm_addr;
+  CORE_ADDR main_lm_addr = 0;
 
-  CORE_ADDR interp_text_sect_low;
-  CORE_ADDR interp_text_sect_high;
-  CORE_ADDR interp_plt_sect_low;
-  CORE_ADDR interp_plt_sect_high;
+  CORE_ADDR interp_text_sect_low = 0;
+  CORE_ADDR interp_text_sect_high = 0;
+  CORE_ADDR interp_plt_sect_low = 0;
+  CORE_ADDR interp_plt_sect_high = 0;
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_data *solib_dsbt_pspace_data;
-
-static void
-dsbt_pspace_data_cleanup (struct program_space *pspace, void *arg)
-{
-  xfree (arg);
-}
+static program_space_key<dsbt_info> solib_dsbt_pspace_data;
 
 /* Get the current dsbt data.  If none is found yet, add it now.  This
    function always returns a valid object.  */
@@ -180,18 +174,11 @@ get_dsbt_info (void)
 {
   struct dsbt_info *info;
 
-  info = (struct dsbt_info *) program_space_data (current_program_space,
-						  solib_dsbt_pspace_data);
+  info = solib_dsbt_pspace_data.get (current_program_space);
   if (info != NULL)
     return info;
 
-  info = XCNEW (struct dsbt_info);
-  set_program_space_data (current_program_space, solib_dsbt_pspace_data, info);
-
-  info->lm_base_cache = 0;
-  info->main_lm_addr = 0;
-
-  return info;
+  return solib_dsbt_pspace_data.emplace (current_program_space);
 }
 
 
@@ -1043,9 +1030,6 @@ struct target_so_ops dsbt_so_ops;
 void
 _initialize_dsbt_solib (void)
 {
-  solib_dsbt_pspace_data
-    = register_program_space_data_with_cleanup (NULL, dsbt_pspace_data_cleanup);
-
   dsbt_so_ops.relocate_section_addresses = dsbt_relocate_section_addresses;
   dsbt_so_ops.free_so = dsbt_free_so;
   dsbt_so_ops.clear_solib = dsbt_clear_solib;

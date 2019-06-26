@@ -1,5 +1,12 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* solib-dsbt.c (struct dsbt_info): Add initializers.
+	(solib_dsbt_pspace_data): Change type.
+	(dsbt_pspace_data_cleanup): Remove.
+	(get_dsbt_info, _initialize_dsbt_solib): Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* spu-tdep.c (spu_overlay_data): Change type.
 	(spu_get_overlay_table, spu_overlay_new_objfile)
 	(_initialize_spu_tdep): Update.
