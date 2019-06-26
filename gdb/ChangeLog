@@ -1,5 +1,18 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* remote-sim.c (struct sim_inferior_data): Add initializers,
+	constructor, and destructor.
+	(sim_inferior_data_key): Change type.  Move lower.
+	(check_for_duplicate_sim_descriptor): Update.
+	(get_sim_inferior_data): Use new.  Update.
+	(~sim_inferior_data_cleanup): Rename from
+	sim_inferior_data_cleanup.  Simplify.
+	(gdbsim_close_inferior, simulator_command)
+	(sim_command_completer, _initialize_remote_sim): Update.
+	(next_pid, INITIAL_PID): Move earlier.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* python/python-internal.h (create_thread_object): Return
 	gdbpy_ref.
 	* python/py-infthread.c (create_thread_object): Return gdbpy_ref.
