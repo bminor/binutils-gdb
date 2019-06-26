@@ -73,20 +73,14 @@ struct gdb_dyld_all_image_infos
 struct darwin_info
 {
   /* Address of structure dyld_all_image_infos in inferior.  */
-  CORE_ADDR all_image_addr;
+  CORE_ADDR all_image_addr = 0;
 
   /* Gdb copy of dyld_all_info_infos.  */
-  struct gdb_dyld_all_image_infos all_image;
+  struct gdb_dyld_all_image_infos all_image {};
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_data *solib_darwin_pspace_data;
-
-static void
-darwin_pspace_data_cleanup (struct program_space *pspace, void *arg)
-{
-  xfree (arg);
-}
+static program_space_key<darwin_info> solib_darwin_pspace_data;
 
 /* Get the current darwin data.  If none is found yet, add it now.  This
    function always returns a valid object.  */
@@ -96,15 +90,11 @@ get_darwin_info (void)
 {
   struct darwin_info *info;
 
-  info = (struct darwin_info *) program_space_data (current_program_space,
-						    solib_darwin_pspace_data);
+  info = solib_darwin_pspace_data.get (current_program_space);
   if (info != NULL)
     return info;
 
-  info = XCNEW (struct darwin_info);
-  set_program_space_data (current_program_space,
-			  solib_darwin_pspace_data, info);
-  return info;
+  return solib_darwin_pspace_data.emplace (current_program_space);
 }
 
 /* Return non-zero if the version in dyld_all_image is known.  */
@@ -691,10 +681,6 @@ struct target_so_ops darwin_so_ops;
 void
 _initialize_darwin_solib (void)
 {
-  solib_darwin_pspace_data
-    = register_program_space_data_with_cleanup (NULL,
-						darwin_pspace_data_cleanup);
-
   darwin_so_ops.relocate_section_addresses = darwin_relocate_section_addresses;
   darwin_so_ops.free_so = darwin_free_so;
   darwin_so_ops.clear_solib = darwin_clear_solib;

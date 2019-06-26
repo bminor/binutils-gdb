@@ -1,5 +1,12 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* solib-darwin.c (struct darwin_info): Add initializers.
+	(solib_darwin_pspace_data): Change type.
+	(darwin_pspace_data_cleanup): Remove.
+	(get_darwin_info, _initialize_darwin_solib): Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* remote-sim.c (struct sim_inferior_data): Add initializers,
 	constructor, and destructor.
 	(sim_inferior_data_key): Change type.  Move lower.
