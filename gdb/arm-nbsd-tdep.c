@@ -26,7 +26,7 @@
 
 /* Description of the longjmp buffer.  */
 #define ARM_NBSD_JB_PC 24
-#define ARM_NBSD_JB_ELEMENT_SIZE INT_REGISTER_SIZE
+#define ARM_NBSD_JB_ELEMENT_SIZE ARM_INT_REGISTER_SIZE
 
 /* For compatibility with previous implemenations of GDB on arm/NetBSD,
    override the default little-endian breakpoint.  */

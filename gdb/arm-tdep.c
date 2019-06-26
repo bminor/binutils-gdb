@@ -3694,18 +3694,19 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       align = type_align (arg_type);
       /* Round alignment up to a whole number of words.  */
-      align = (align + INT_REGISTER_SIZE - 1) & ~(INT_REGISTER_SIZE - 1);
+      align = (align + ARM_INT_REGISTER_SIZE - 1)
+		& ~(ARM_INT_REGISTER_SIZE - 1);
       /* Different ABIs have different maximum alignments.  */
       if (gdbarch_tdep (gdbarch)->arm_abi == ARM_ABI_APCS)
 	{
 	  /* The APCS ABI only requires word alignment.  */
-	  align = INT_REGISTER_SIZE;
+	  align = ARM_INT_REGISTER_SIZE;
 	}
       else
 	{
 	  /* The AAPCS requires at most doubleword alignment.  */
-	  if (align > INT_REGISTER_SIZE * 2)
-	    align = INT_REGISTER_SIZE * 2;
+	  if (align > ARM_INT_REGISTER_SIZE * 2)
+	    align = ARM_INT_REGISTER_SIZE * 2;
 	}
 
       if (use_vfp_abi
@@ -3770,14 +3771,14 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Push stack padding for dowubleword alignment.  */
       if (nstack & (align - 1))
 	{
-	  si = push_stack_item (si, val, INT_REGISTER_SIZE);
-	  nstack += INT_REGISTER_SIZE;
+	  si = push_stack_item (si, val, ARM_INT_REGISTER_SIZE);
+	  nstack += ARM_INT_REGISTER_SIZE;
 	}
       
       /* Doubleword aligned quantities must go in even register pairs.  */
       if (may_use_core_reg
 	  && argreg <= ARM_LAST_ARG_REGNUM
-	  && align > INT_REGISTER_SIZE
+	  && align > ARM_INT_REGISTER_SIZE
 	  && argreg & 1)
 	argreg++;
 
@@ -3803,7 +3804,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 registers and stack.  */
       while (len > 0)
 	{
-	  int partial_len = len < INT_REGISTER_SIZE ? len : INT_REGISTER_SIZE;
+	  int partial_len = len < ARM_INT_REGISTER_SIZE
+			    ? len : ARM_INT_REGISTER_SIZE;
 	  CORE_ADDR regval
 	    = extract_unsigned_integer (val, partial_len, byte_order);
 
@@ -3812,19 +3814,19 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* The argument is being passed in a general purpose
 		 register.  */
 	      if (byte_order == BFD_ENDIAN_BIG)
-		regval <<= (INT_REGISTER_SIZE - partial_len) * 8;
+		regval <<= (ARM_INT_REGISTER_SIZE - partial_len) * 8;
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
 				    argnum,
 				    gdbarch_register_name
 				      (gdbarch, argreg),
-				    phex (regval, INT_REGISTER_SIZE));
+				    phex (regval, ARM_INT_REGISTER_SIZE));
 	      regcache_cooked_write_unsigned (regcache, argreg, regval);
 	      argreg++;
 	    }
 	  else
 	    {
-	      gdb_byte buf[INT_REGISTER_SIZE];
+	      gdb_byte buf[ARM_INT_REGISTER_SIZE];
 
 	      memset (buf, 0, sizeof (buf));
 	      store_unsigned_integer (buf, partial_len, byte_order, regval);
@@ -3833,8 +3835,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d @ sp + %d\n",
 				    argnum, nstack);
-	      si = push_stack_item (si, buf, INT_REGISTER_SIZE);
-	      nstack += INT_REGISTER_SIZE;
+	      si = push_stack_item (si, buf, ARM_INT_REGISTER_SIZE);
+	      nstack += ARM_INT_REGISTER_SIZE;
 	    }
 	      
 	  len -= partial_len;
@@ -7840,7 +7842,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	    /* The value is in register F0 in internal format.  We need to
 	       extract the raw value and then convert it to the desired
 	       internal type.  */
-	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
+	    bfd_byte tmpbuf[ARM_FP_REGISTER_SIZE];
 
 	    regs->cooked_read (ARM_F0_REGNUM, tmpbuf);
 	    target_float_convert (tmpbuf, arm_ext_type (gdbarch),
@@ -7855,7 +7857,8 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	case ARM_FLOAT_VFP:
 	  regs->cooked_read (ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
-	    regs->cooked_read (ARM_A1_REGNUM + 1, valbuf + INT_REGISTER_SIZE);
+	    regs->cooked_read (ARM_A1_REGNUM + 1,
+			       valbuf + ARM_INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -7885,11 +7888,11 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	     anything special for small big-endian values.  */
 	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
 	  store_unsigned_integer (valbuf, 
-				  (len > INT_REGISTER_SIZE
-				   ? INT_REGISTER_SIZE : len),
+				  (len > ARM_INT_REGISTER_SIZE
+				   ? ARM_INT_REGISTER_SIZE : len),
 				  byte_order, tmp);
-	  len -= INT_REGISTER_SIZE;
-	  valbuf += INT_REGISTER_SIZE;
+	  len -= ARM_INT_REGISTER_SIZE;
+	  valbuf += ARM_INT_REGISTER_SIZE;
 	}
     }
   else
@@ -7899,15 +7902,15 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_SIZE];
+      bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  regs->cooked_read (regno++, tmpbuf);
 	  memcpy (valbuf, tmpbuf,
-		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
-	  len -= INT_REGISTER_SIZE;
-	  valbuf += INT_REGISTER_SIZE;
+		  len > ARM_INT_REGISTER_SIZE ? ARM_INT_REGISTER_SIZE : len);
+	  len -= ARM_INT_REGISTER_SIZE;
+	  valbuf += ARM_INT_REGISTER_SIZE;
 	}
     }
 }
@@ -7942,7 +7945,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
     {
       /* The AAPCS says all aggregates not larger than a word are returned
 	 in a register.  */
-      if (TYPE_LENGTH (type) <= INT_REGISTER_SIZE)
+      if (TYPE_LENGTH (type) <= ARM_INT_REGISTER_SIZE)
 	return 0;
 
       return 1;
@@ -7953,12 +7956,12 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 
       /* All aggregate types that won't fit in a register must be returned
 	 in memory.  */
-      if (TYPE_LENGTH (type) > INT_REGISTER_SIZE)
+      if (TYPE_LENGTH (type) > ARM_INT_REGISTER_SIZE)
 	return 1;
 
       /* In the ARM ABI, "integer" like aggregate types are returned in
 	 registers.  For an aggregate type to be integer like, its size
-	 must be less than or equal to INT_REGISTER_SIZE and the
+	 must be less than or equal to ARM_INT_REGISTER_SIZE and the
 	 offset of each addressable subfield must be zero.  Note that bit
 	 fields are not addressable, and all addressable subfields of
 	 unions always start at offset zero.
@@ -7982,7 +7985,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 	  int i;
 	  /* Need to check if this struct/union is "integer" like.  For
 	     this to be true, its size must be less than or equal to
-	     INT_REGISTER_SIZE and the offset of each addressable
+	     ARM_INT_REGISTER_SIZE and the offset of each addressable
 	     subfield must be zero.  Note that bit fields are not
 	     addressable, and unions always start at offset zero.  If any
 	     of the subfields is a floating point type, the struct/union
@@ -8041,7 +8044,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      gdb_byte buf[FP_REGISTER_SIZE];
+      gdb_byte buf[ARM_FP_REGISTER_SIZE];
 
       switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
@@ -8058,7 +8061,8 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	case ARM_FLOAT_VFP:
 	  regs->cooked_write (ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
-	    regs->cooked_write (ARM_A1_REGNUM + 1, valbuf + INT_REGISTER_SIZE);
+	    regs->cooked_write (ARM_A1_REGNUM + 1,
+				valbuf + ARM_INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -8079,10 +8083,10 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
-	  bfd_byte tmpbuf[INT_REGISTER_SIZE];
+	  bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
 	  LONGEST val = unpack_long (type, valbuf);
 
-	  store_signed_integer (tmpbuf, INT_REGISTER_SIZE, byte_order, val);
+	  store_signed_integer (tmpbuf, ARM_INT_REGISTER_SIZE, byte_order, val);
 	  regs->cooked_write (ARM_A1_REGNUM, tmpbuf);
 	}
       else
@@ -8096,8 +8100,8 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  while (len > 0)
 	    {
 	      regs->cooked_write (regno++, valbuf);
-	      len -= INT_REGISTER_SIZE;
-	      valbuf += INT_REGISTER_SIZE;
+	      len -= ARM_INT_REGISTER_SIZE;
+	      valbuf += ARM_INT_REGISTER_SIZE;
 	    }
 	}
     }
@@ -8108,15 +8112,15 @@ arm_store_return_value (struct type *type, struct regcache *regs,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_SIZE];
+      bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  memcpy (tmpbuf, valbuf,
-		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
+		  len > ARM_INT_REGISTER_SIZE ? ARM_INT_REGISTER_SIZE : len);
 	  regs->cooked_write (regno++, tmpbuf);
-	  len -= INT_REGISTER_SIZE;
-	  valbuf += INT_REGISTER_SIZE;
+	  len -= ARM_INT_REGISTER_SIZE;
+	  valbuf += ARM_INT_REGISTER_SIZE;
 	}
     }
 }
@@ -8200,15 +8204,15 @@ arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
-  gdb_byte buf[INT_REGISTER_SIZE];
+  gdb_byte buf[ARM_INT_REGISTER_SIZE];
   
   jb_addr = get_frame_register_unsigned (frame, ARM_A1_REGNUM);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
-			  INT_REGISTER_SIZE))
+			  ARM_INT_REGISTER_SIZE))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, INT_REGISTER_SIZE, byte_order);
+  *pc = extract_unsigned_integer (buf, ARM_INT_REGISTER_SIZE, byte_order);
   return 1;
 }
 
@@ -8778,24 +8782,24 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 	 same as the FPA layout.  */
       register_remote_g_packet_guess (gdbarch,
 				      /* r0-r12,sp,lr,pc; f0-f7; fps,xpsr */
-				      (16 * INT_REGISTER_SIZE)
-				      + (8 * FP_REGISTER_SIZE)
-				      + (2 * INT_REGISTER_SIZE),
+				      (16 * ARM_INT_REGISTER_SIZE)
+				      + (8 * ARM_FP_REGISTER_SIZE)
+				      + (2 * ARM_INT_REGISTER_SIZE),
 				      tdesc_arm_with_m_fpa_layout);
 
       /* The regular M-profile layout.  */
       register_remote_g_packet_guess (gdbarch,
 				      /* r0-r12,sp,lr,pc; xpsr */
-				      (16 * INT_REGISTER_SIZE)
-				      + INT_REGISTER_SIZE,
+				      (16 * ARM_INT_REGISTER_SIZE)
+				      + ARM_INT_REGISTER_SIZE,
 				      tdesc_arm_with_m);
 
       /* M-profile plus M4F VFP.  */
       register_remote_g_packet_guess (gdbarch,
 				      /* r0-r12,sp,lr,pc; d0-d15; fpscr,xpsr */
-				      (16 * INT_REGISTER_SIZE)
-				      + (16 * VFP_REGISTER_SIZE)
-				      + (2 * INT_REGISTER_SIZE),
+				      (16 * ARM_INT_REGISTER_SIZE)
+				      + (16 * ARM_VFP_REGISTER_SIZE)
+				      + (2 * ARM_INT_REGISTER_SIZE),
 				      tdesc_arm_with_m_vfp_d16);
     }
 
@@ -10976,7 +10980,7 @@ arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
 	  /* STMDA (STMED): Decrement after.  */
 	  case 0:
 	  record_buf_mem[1] = (uint32_t) u_regval
-			      - register_count * INT_REGISTER_SIZE + 4;
+			      - register_count * ARM_INT_REGISTER_SIZE + 4;
 	  break;
 	  /* STM (STMIA, STMEA): Increment after.  */
 	  case 1:
@@ -10985,18 +10989,18 @@ arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
 	  /* STMDB (STMFD): Decrement before.  */
 	  case 2:
 	  record_buf_mem[1] = (uint32_t) u_regval
-			      - register_count * INT_REGISTER_SIZE;
+			      - register_count * ARM_INT_REGISTER_SIZE;
 	  break;
 	  /* STMIB (STMFA): Increment before.  */
 	  case 3:
-	  record_buf_mem[1] = (uint32_t) u_regval + INT_REGISTER_SIZE;
+	  record_buf_mem[1] = (uint32_t) u_regval + ARM_INT_REGISTER_SIZE;
 	  break;
 	  default:
 	    gdb_assert_not_reached ("no decoding pattern found");
 	  break;
 	}
 
-      record_buf_mem[0] = register_count * INT_REGISTER_SIZE;
+      record_buf_mem[0] = register_count * ARM_INT_REGISTER_SIZE;
       arm_insn_r->mem_rec_count = 1;
 
       /* If wback is true, also save the base register, which is going to be

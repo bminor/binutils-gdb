@@ -408,7 +408,8 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
-      unsigned long offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
+      unsigned long offset = bitcount (bits (inst1, 0, 7))
+			     * ARM_INT_REGISTER_SIZE;
       sp = regcache_raw_get_unsigned (regcache, ARM_SP_REGNUM);
       nextpc = self->ops->read_mem_uint (sp + offset, 4, byte_order);
     }

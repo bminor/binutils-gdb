@@ -103,7 +103,7 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
    SoftVFP or VFP (which implies EABI) then the PC is at offset 9 in the 
    buffer.  This is also true for the SoftFPA model.  However, for the FPA 
    model the PC is at offset 21 in the buffer.  */
-#define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
+#define ARM_LINUX_JB_ELEMENT_SIZE	ARM_INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC_FPA		21
 #define ARM_LINUX_JB_PC_EABI		9
 
@@ -471,7 +471,7 @@ static struct tramp_frame arm_kernel_linux_restart_syscall_tramp_frame = {
 
 /* Core file and register set support.  */
 
-#define ARM_LINUX_SIZEOF_GREGSET (18 * INT_REGISTER_SIZE)
+#define ARM_LINUX_SIZEOF_GREGSET (18 * ARM_INT_REGISTER_SIZE)
 
 void
 arm_linux_supply_gregset (const struct regset *regset,
@@ -483,29 +483,30 @@ arm_linux_supply_gregset (const struct regset *regset,
   const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
   CORE_ADDR reg_pc;
-  gdb_byte pc_buf[INT_REGISTER_SIZE];
+  gdb_byte pc_buf[ARM_INT_REGISTER_SIZE];
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
-      regcache->raw_supply (regno, gregs + INT_REGISTER_SIZE * regno);
+      regcache->raw_supply (regno, gregs + ARM_INT_REGISTER_SIZE * regno);
 
   if (regnum == ARM_PS_REGNUM || regnum == -1)
     {
       if (arm_apcs_32)
 	regcache->raw_supply (ARM_PS_REGNUM,
-			      gregs + INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
+			      gregs + ARM_INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
       else
 	regcache->raw_supply (ARM_PS_REGNUM,
-			     gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+			     gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
     }
 
   if (regnum == ARM_PC_REGNUM || regnum == -1)
     {
-      reg_pc = extract_unsigned_integer (gregs
-					 + INT_REGISTER_SIZE * ARM_PC_REGNUM,
-					 INT_REGISTER_SIZE, byte_order);
+      reg_pc = extract_unsigned_integer (
+		 gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM,
+		 ARM_INT_REGISTER_SIZE, byte_order);
       reg_pc = gdbarch_addr_bits_remove (gdbarch, reg_pc);
-      store_unsigned_integer (pc_buf, INT_REGISTER_SIZE, byte_order, reg_pc);
+      store_unsigned_integer (pc_buf, ARM_INT_REGISTER_SIZE, byte_order,
+			      reg_pc);
       regcache->raw_supply (ARM_PC_REGNUM, pc_buf);
     }
 }
@@ -521,21 +522,21 @@ arm_linux_collect_gregset (const struct regset *regset,
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
       regcache->raw_collect (regno,
-			    gregs + INT_REGISTER_SIZE * regno);
+			    gregs + ARM_INT_REGISTER_SIZE * regno);
 
   if (regnum == ARM_PS_REGNUM || regnum == -1)
     {
       if (arm_apcs_32)
 	regcache->raw_collect (ARM_PS_REGNUM,
-			      gregs + INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
+			      gregs + ARM_INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
       else
 	regcache->raw_collect (ARM_PS_REGNUM,
-			      gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+			      gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
     }
 
   if (regnum == ARM_PC_REGNUM || regnum == -1)
     regcache->raw_collect (ARM_PC_REGNUM,
-			   gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+			   gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
 }
 
 /* Support for register format used by the NWFPE FPA emulator.  */
@@ -551,11 +552,11 @@ supply_nwfpe_register (struct regcache *regcache, int regno,
 {
   const gdb_byte *reg_data;
   gdb_byte reg_tag;
-  gdb_byte buf[FP_REGISTER_SIZE];
+  gdb_byte buf[ARM_FP_REGISTER_SIZE];
 
-  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_data = regs + (regno - ARM_F0_REGNUM) * ARM_FP_REGISTER_SIZE;
   reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
-  memset (buf, 0, FP_REGISTER_SIZE);
+  memset (buf, 0, ARM_FP_REGISTER_SIZE);
 
   switch (reg_tag)
     {
@@ -586,7 +587,7 @@ collect_nwfpe_register (const struct regcache *regcache, int regno,
 {
   gdb_byte *reg_data;
   gdb_byte reg_tag;
-  gdb_byte buf[FP_REGISTER_SIZE];
+  gdb_byte buf[ARM_FP_REGISTER_SIZE];
 
   regcache->raw_collect (regno, buf);
 
@@ -595,7 +596,7 @@ collect_nwfpe_register (const struct regcache *regcache, int regno,
      from the native file to the target file.  But this doesn't
      always make sense.  */
 
-  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_data = regs + (regno - ARM_F0_REGNUM) * ARM_FP_REGISTER_SIZE;
   reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
 
   switch (reg_tag)
@@ -648,7 +649,7 @@ arm_linux_collect_nwfpe (const struct regset *regset,
 
   if (regnum == ARM_FPS_REGNUM || regnum == -1)
     regcache->raw_collect (ARM_FPS_REGNUM,
-			   regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
+			   regs + ARM_INT_REGISTER_SIZE * ARM_FPS_REGNUM);
 }
 
 /* Support VFP register format.  */

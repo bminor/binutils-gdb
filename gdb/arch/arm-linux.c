@@ -53,7 +53,7 @@ arm_linux_sigreturn_next_pc_offset (unsigned long sp,
       r0_offset += ARM_UCONTEXT_SIGCONTEXT + ARM_SIGCONTEXT_R0;
     }
 
-  pc_offset = r0_offset + INT_REGISTER_SIZE * ARM_PC_REGNUM;
+  pc_offset = r0_offset + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM;
 
   return pc_offset;
 }

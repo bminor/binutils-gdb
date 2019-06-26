@@ -32,7 +32,7 @@ static const gdb_byte arm_wince_le_breakpoint[] = { 0x10, 0x00, 0x00, 0xe6 };
 static const gdb_byte arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 
 /* Description of the longjmp buffer.  */
-#define ARM_WINCE_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
+#define ARM_WINCE_JB_ELEMENT_SIZE	ARM_INT_REGISTER_SIZE
 #define ARM_WINCE_JB_PC			10
 
 static CORE_ADDR

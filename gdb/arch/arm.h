@@ -93,8 +93,12 @@ enum arm_breakpoint_kinds
 
 #define XPSR_T		0x01000000
 
-/* Size of integer registers.  */
-#define INT_REGISTER_SIZE		4
+/* Size of registers.  */
+
+#define ARM_INT_REGISTER_SIZE		4
+/* IEEE extended doubles are 80 bits.  DWORD aligned they use 96 bits.  */
+#define ARM_FP_REGISTER_SIZE		12
+#define ARM_VFP_REGISTER_SIZE		8
 
 /* Addresses for calling Thumb functions have the bit 0 set.
    Here are some macros to test, set, or clear bit 0 of addresses.  */

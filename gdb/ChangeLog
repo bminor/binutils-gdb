@@ -1,5 +1,28 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+        * arch/arm-get-next-pcs.c (thumb_get_next_pcs_raw): Use ARM_
+        defines.
+        * arch/arm-linux.c (arm_linux_sigreturn_next_pc_offset): Likewise.
+        * arch/arm.h (INT_REGISTER_SIZE) Rename from...
+        (ARM_INT_REGISTER_SIZE): ...to this.
+        (ARM_FP_REGISTER_SIZE) (ARM_VFP_REGISTER_SIZE): Add define.
+        * arm-linux-tdep.c (ARM_LINUX_JB_ELEMENT_SIZE)
+        (ARM_LINUX_SIZEOF_GREGSET, arm_linux_supply_gregset)
+        (arm_linux_collect_gregset, supply_nwfpe_register)
+        (collect_nwfpe_register, arm_linux_collect_nwfpe): Use ARM_
+        defines.
+        * arm-linux-tdep.h (ARM_LINUX_SIZEOF_NWFPE, NWFPE_FPSR_OFFSET)
+        (NWFPE_FPCR_OFFSET, NWFPE_TAGS_OFFSET): Likewise
+        * arm-nbsd-tdep.c (ARM_NBSD_JB_ELEMENT_SIZE): Likewise.
+        * arm-tdep.c (arm_push_dummy_call, arm_extract_return_value)
+        (arm_return_in_memory, arm_store_return_value)
+        (arm_get_longjmp_target, arm_register_g_packet_guesses)
+        (arm_record_ld_st_multiple): Likewise.
+        * arm-tdep.h (FP_REGISTER_SIZE, VFP_REGISTER_SIZE): Remove.
+        * arm-wince-tdep.c (ARM_WINCE_JB_ELEMENT_SIZE): Use ARM_ defines.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Use
 	AARCH64_DISPLACED_MODIFIED_INSNS.
 	* aarch64-tdep.c (struct aarch64_displaced_step_data)
