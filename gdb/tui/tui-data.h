@@ -513,6 +513,17 @@ struct tui_data_window : public tui_win_info
 
   void erase_data_content (const char *prompt);
 
+  /* Display the registers in the content from 'start_element_no'
+     until the end of the register content or the end of the display
+     height.  No checking for displaying past the end of the registers
+     is done here.  */
+  void display_registers_from (int start_element_no);
+
+  /* Display the registers starting at line line_no in the data
+     window.  Answers the line number that the display actually
+     started from.  If nothing is displayed (-1) is returned.  */
+  int display_registers_from_line (int line_no);
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

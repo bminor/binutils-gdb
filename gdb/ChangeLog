@@ -1,5 +1,20 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (tui_display_registers_from)
+	(tui_display_registers_from_line): Don't declare.
+	* tui/tui-windata.c (tui_data_window::display_all_data)
+	(tui_data_window::refresh_all)
+	(tui_data_window::do_scroll_vertical): Update.
+	* tui/tui-regs.c (tui_data_window::display_registers_from): Rename
+	from tui_display_registers_from.
+	(tui_display_reg_element_at_line): Update.
+	(tui_data_window::display_registers_from_line): Rename from
+	tui_display_registers_from_line.
+	* tui/tui-data.h (struct tui_data_window) <display_registers_from,
+	display_registers_from_line>: New methods.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_erase_data_content): Don't declare.
 	* tui/tui-windata.c (tui_data_window::erase_data_content): Rename
 	from tui_erase_data_content.

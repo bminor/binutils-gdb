@@ -244,19 +244,17 @@ tui_show_register_group (struct reggroup *group,
     }
 }
 
-/* Function to display the registers in the content from
-   'start_element_no' until the end of the register content or the end
-   of the display height.  No checking for displaying past the end of
-   the registers is done here.  */
+/* See tui-data.h.  */
+
 void
-tui_display_registers_from (int start_element_no)
+tui_data_window::display_registers_from (int start_element_no)
 {
-  if (!TUI_DATA_WIN->regs_content.empty ())
+  if (!regs_content.empty ())
     {
       int j, item_win_width, cur_y;
 
       int max_len = 0;
-      for (auto &&data_item_win : TUI_DATA_WIN->regs_content)
+      for (auto &&data_item_win : regs_content)
         {
           char *p;
           int len;
@@ -278,28 +276,25 @@ tui_display_registers_from (int start_element_no)
       item_win_width = max_len + 1;
       int i = start_element_no;
 
-      TUI_DATA_WIN->regs_column_count =
-        (TUI_DATA_WIN->width - 2) / item_win_width;
-      if (TUI_DATA_WIN->regs_column_count == 0)
-        TUI_DATA_WIN->regs_column_count = 1;
-      item_win_width =
-        (TUI_DATA_WIN->width - 2) / TUI_DATA_WIN->regs_column_count;
+      regs_column_count = (width - 2) / item_win_width;
+      if (regs_column_count == 0)
+        regs_column_count = 1;
+      item_win_width = (width - 2) / regs_column_count;
 
       /* Now create each data "sub" window, and write the display into
 	 it.  */
       cur_y = 1;
-      while (i < TUI_DATA_WIN->regs_content.size ()
-	     && cur_y <= TUI_DATA_WIN->viewport_height)
+      while (i < regs_content.size ()
+	     && cur_y <= viewport_height)
 	{
 	  for (j = 0;
-	       j < TUI_DATA_WIN->regs_column_count
-		 && i < TUI_DATA_WIN->regs_content.size ();
+	       j < regs_column_count && i < regs_content.size ();
 	       j++)
 	    {
 	      struct tui_data_item_window *data_item_win;
 
 	      /* Create the window if necessary.  */
-	      data_item_win = TUI_DATA_WIN->regs_content[i].get ();
+	      data_item_win = regs_content[i].get ();
               if (data_item_win->handle != NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
@@ -362,20 +357,17 @@ tui_display_reg_element_at_line (int start_element_no,
 	      = (TUI_DATA_WIN->first_reg_element_no_inline
 		 (first_line_on_last_page));
 	}
-      tui_display_registers_from (element_no);
+      TUI_DATA_WIN->display_registers_from (element_no);
     }
 }
 
+/* See tui-data.h.  */
 
-
-/* Function to display the registers starting at line line_no in the
-   data window.  Answers the line number that the display actually
-   started from.  If nothing is displayed (-1) is returned.  */
 int
-tui_display_registers_from_line (int line_no)
+tui_data_window::display_registers_from_line (int line_no)
 {
-  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
-  if (!TUI_DATA_WIN->regs_content.empty ())
+  tui_check_and_display_highlight_if_needed (this);
+  if (!regs_content.empty ())
     {
       int element_no;
 
@@ -385,16 +377,16 @@ tui_display_registers_from_line (int line_no)
 	{
 	  /* Make sure that we don't display off the end of the
 	     registers.  */
-	  if (line_no >= TUI_DATA_WIN->last_regs_line_no ())
+	  if (line_no >= last_regs_line_no ())
 	    {
-	      if ((line_no = TUI_DATA_WIN->line_from_reg_element_no (
-		 TUI_DATA_WIN->regs_content.size () - 1)) < 0)
+	      line_no = line_from_reg_element_no (regs_content.size () - 1);
+	      if (line_no < 0)
 		line_no = 0;
 	    }
 	}
 
-      element_no = TUI_DATA_WIN->first_reg_element_no_inline (line_no);
-      if (element_no < TUI_DATA_WIN->regs_content.size ())
+      element_no = first_reg_element_no_inline (line_no);
+      if (element_no < regs_content.size ())
 	tui_display_reg_element_at_line (element_no, line_no);
       else
 	line_no = (-1);

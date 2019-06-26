@@ -101,7 +101,7 @@ tui_data_window::display_all_data ()
       erase_data_content (NULL);
       delete_data_content_windows ();
       tui_check_and_display_highlight_if_needed (this);
-      tui_display_registers_from (0);
+      display_registers_from (0);
     }
 }
 
@@ -125,7 +125,7 @@ tui_data_window::refresh_all ()
 	  if (first_line >= 0)
 	    {
 	      erase_data_content (NULL);
-	      tui_display_registers_from_line (first_line);
+	      display_registers_from_line (first_line);
 	    }
 	}
     }
@@ -152,7 +152,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
       first_line += num_to_scroll;
       erase_data_content (NULL);
       delete_data_content_windows ();
-      tui_display_registers_from_line (first_line);
+      display_registers_from_line (first_line);
     }
 }
 
