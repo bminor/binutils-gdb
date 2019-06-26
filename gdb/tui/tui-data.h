@@ -507,6 +507,10 @@ struct tui_data_window : public tui_win_info
      not set the content.  */
   void display_all_data ();
 
+  /* Delete all the item windows in the data window.  This is usually
+     done when the data window is scrolled.  */
+  void delete_data_content_windows ();
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

@@ -25,6 +25,5 @@
 #include "tui/tui-data.h"
 
 extern void tui_erase_data_content (const char *);
-extern void tui_delete_data_content_windows (void);
 
 #endif /* TUI_TUI_WINDATA_H */

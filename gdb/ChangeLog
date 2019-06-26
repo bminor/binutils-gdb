@@ -1,5 +1,17 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_delete_data_content_windows): Don't
+	declare.
+	* tui/tui-windata.c
+	(tui_data_window::delete_data_content_windows): Rename from
+	tui_delete_data_content_windows.
+	(tui_data_window::display_all_data)
+	(tui_data_window::do_scroll_vertical): Update.
+	* tui/tui-data.h (struct tui_data_window)
+	<delete_data_content_windows>: New method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_refresh_data_win): Don't declare.
 	* tui/tui-regs.h (tui_first_reg_element_inline): Don't declare.
 

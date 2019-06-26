@@ -56,13 +56,12 @@ tui_data_window::first_data_item_displayed ()
   return -1;
 }
 
+/* See tui-data.h.  */
 
-/* Function to delete all the item windows in the data window.  This
-   is usually done when the data window is scrolled.  */
 void
-tui_delete_data_content_windows (void)
+tui_data_window::delete_data_content_windows ()
 {
-  for (auto &&win : TUI_DATA_WIN->regs_content)
+  for (auto &&win : regs_content)
     {
       tui_delete_win (win->handle);
       win->handle = NULL;
@@ -103,7 +102,7 @@ tui_data_window::display_all_data ()
   else
     {
       tui_erase_data_content (NULL);
-      tui_delete_data_content_windows ();
+      delete_data_content_windows ();
       tui_check_and_display_highlight_if_needed (this);
       tui_display_registers_from (0);
     }
@@ -155,7 +154,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     {
       first_line += num_to_scroll;
       tui_erase_data_content (NULL);
-      tui_delete_data_content_windows ();
+      delete_data_content_windows ();
       tui_display_registers_from_line (first_line);
     }
 }
