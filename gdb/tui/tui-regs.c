@@ -63,18 +63,17 @@ static enum tui_status tui_get_register (struct frame_info *frame,
 ** PUBLIC FUNCTIONS                     **
 ******************************************/
 
-/* Answer the number of the last line in the regs display.  If there
-   are no registers (-1) is returned.  */
+/* See tui-data.h.  */
+
 int
-tui_last_regs_line_no (void)
+tui_data_window::last_regs_line_no () const
 {
   int num_lines = (-1);
 
-  if (!TUI_DATA_WIN->regs_content.empty ())
+  if (!regs_content.empty ())
     {
-      num_lines = (TUI_DATA_WIN->regs_content.size ()
-		   / TUI_DATA_WIN->regs_column_count);
-      if (TUI_DATA_WIN->regs_content.size () % TUI_DATA_WIN->regs_column_count)
+      num_lines = regs_content.size () / regs_column_count;
+      if (regs_content.size () % regs_column_count)
 	num_lines++;
     }
   return num_lines;
@@ -354,7 +353,7 @@ tui_display_reg_element_at_line (int start_element_no,
 	{
 	  int last_line_no, first_line_on_last_page;
 
-	  last_line_no = tui_last_regs_line_no ();
+	  last_line_no = TUI_DATA_WIN->last_regs_line_no ();
 	  first_line_on_last_page
 	    = last_line_no - (TUI_DATA_WIN->height - 2);
 	  if (first_line_on_last_page < 0)
@@ -390,7 +389,7 @@ tui_display_registers_from_line (int line_no,
 	{ /* If we must display regs (force_display is true), then
 	     make sure that we don't display off the end of the
 	     registers.  */
-	  if (line_no >= tui_last_regs_line_no ())
+	  if (line_no >= TUI_DATA_WIN->last_regs_line_no ())
 	    {
 	      if ((line = tui_line_from_reg_element_no (
 		 TUI_DATA_WIN->regs_content.size () - 1)) < 0)

@@ -1,5 +1,15 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (tui_last_regs_line_no): Don't declare.
+	* tui/tui-regs.c (tui_data_window::last_regs_line_no): Rename from
+	tui_last_regs_line_no.
+	(tui_display_reg_element_at_line)
+	(tui_display_registers_from_line): Update.
+	* tui/tui-data.h (struct tui_data_window) <last_regs_line_no>: New
+	method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	PR tui/24722:
 	* tui/tui-winsource.h (tui_update_all_breakpoint_info)
 	(tui_update_breakpoint_info): Add "being_deleted" parameter.

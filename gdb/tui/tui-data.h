@@ -490,6 +490,10 @@ struct tui_data_window : public tui_win_info
   bool display_regs = false;
   struct reggroup *current_group = nullptr;
 
+  /* Answer the number of the last line in the regs display.  If there
+     are no registers (-1) is returned.  */
+  int last_regs_line_no () const;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
