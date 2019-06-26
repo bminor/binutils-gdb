@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-windata.h (tui_refresh_data_win): Don't declare.
+	* tui/tui-regs.h (tui_first_reg_element_inline): Don't declare.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-windata.h (tui_display_all_data): Don't declare.
 	* tui/tui-windata.c (tui_data_window::display_all_data): Rename
 	from tui_display_all_data.

@@ -28,6 +28,5 @@ extern void tui_check_register_values (struct frame_info *);
 extern void tui_show_registers (struct reggroup *group);
 extern void tui_display_registers_from (int);
 extern int tui_display_registers_from_line (int);
-extern int tui_first_reg_element_inline (int);
 
 #endif /* TUI_TUI_REGS_H */
