@@ -121,7 +121,7 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
 	}
       else
 	{
-	  if (asprintf (&bit, " %lx: %s (size %lx)", id, buf[0] == '\0' ?
+	  if (asprintf (&bit, " %lx: %s (size 0x%lx)", id, buf[0] == '\0' ?
 			"(nameless)" : buf,
 			(unsigned long) ctf_type_size (fp, id)) < 0)
 	    goto oom;
@@ -280,12 +280,12 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
       sym_name = ctf_lookup_symbol_name (fp, i);
       if (sym_name[0] == '\0')
 	{
-	  if (asprintf (&bit, "%lx ", (unsigned long) i) < 0)
+	  if (asprintf (&bit, "0x%lx ", (unsigned long) i) < 0)
 	    goto oom;
 	}
       else
 	{
-	  if (asprintf (&bit, "%s (%lx) ", sym_name, (unsigned long) i) < 0)
+	  if (asprintf (&bit, "%s (0x%lx) ", sym_name, (unsigned long) i) < 0)
 	    goto oom;
 	}
       str = ctf_str_append (str, bit);

@@ -1,3 +1,8 @@
+2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+
+	* ctf-dump.c (ctf_dump_format_type): Prefix hex strings with 0x.
+	(ctf_dump_funcs): Likewise.
+
 2019-06-19  Nick Alcock <nick.alcock@oracle.com>
 
 	* ctf-open-bfd.c: Add swap.h and ctf-endian.h.
