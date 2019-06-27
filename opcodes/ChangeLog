@@ -1,5 +1,14 @@
 2019-06-27  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VEX_LEN_0F2A_P_1, VEX_LEN_0F2A_P_3,
+	VEX_LEN_0F2C_P_1, VEX_LEN_0F2C_P_3, VEX_LEN_0F2D_P_1,
+	VEX_LEN_0F2D_P_3): Delete.
+	(vex_len_table): Move vcvtsi2ss, vcvtsi2sd, vcvttss2si,
+	vcvttsd2si, vcvtss2si, and vcvtsd2si leaf entries ...
+	(prefix_table): ... here.
+
+2019-06-27  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (Iq): Delete.
 	(Id): New.
 	(reg_table): Use it for lwpins, lwpval, and bextr. Use Edq for

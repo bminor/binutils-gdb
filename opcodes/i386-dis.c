@@ -1818,12 +1818,6 @@ enum
   VEX_LEN_0F16_P_0_M_1,
   VEX_LEN_0F16_P_2,
   VEX_LEN_0F17_M_0,
-  VEX_LEN_0F2A_P_1,
-  VEX_LEN_0F2A_P_3,
-  VEX_LEN_0F2C_P_1,
-  VEX_LEN_0F2C_P_3,
-  VEX_LEN_0F2D_P_1,
-  VEX_LEN_0F2D_P_3,
   VEX_LEN_0F41_P_0,
   VEX_LEN_0F41_P_2,
   VEX_LEN_0F42_P_0,
@@ -4696,25 +4690,25 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F2A */
   {
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2A_P_1) },
+    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2A_P_3) },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
   },
 
   /* PREFIX_VEX_0F2C */
   {
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2C_P_1) },
+    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2C_P_3) },
+    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
   },
 
   /* PREFIX_VEX_0F2D */
   {
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2D_P_1) },
+    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F2D_P_3) },
+    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
   },
 
   /* PREFIX_VEX_0F2E */
@@ -9339,42 +9333,6 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F17_M_0 */
   {
     { "vmovhpX",	{ EXq, XM }, 0 },
-  },
-
-  /* VEX_LEN_0F2A_P_1 */
-  {
-    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
-    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
-  },
-
-  /* VEX_LEN_0F2A_P_3 */
-  {
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
-  },
-
-  /* VEX_LEN_0F2C_P_1 */
-  {
-    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
-    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
-  },
-
-  /* VEX_LEN_0F2C_P_3 */
-  {
-    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
-    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
-  },
-
-  /* VEX_LEN_0F2D_P_1 */
-  {
-    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
-    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
-  },
-
-  /* VEX_LEN_0F2D_P_3 */
-  {
-    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
-    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
   },
 
   /* VEX_LEN_0F41_P_0 */
