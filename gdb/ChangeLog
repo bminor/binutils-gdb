@@ -1,5 +1,19 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* solib-aix.c (lm_info_aix_p): Remove typedef.  Don't define VEC.
+	(struct solib_aix_inferior_data) <library_list>: Change type.
+	(solib_aix_inferior_data_handle): Change type.
+	(get_solib_aix_inferior_data): Update.
+	(solib_aix_free_library_list): Remove.
+	(library_list_start_library): Update.
+	(solib_aix_parse_libraries, solib_aix_get_library_list): Change
+	return type.
+	(solib_aix_get_library_list)
+	(solib_aix_solib_create_inferior_hook, solib_aix_current_sos)
+	(solib_aix_normal_stop_observer, _initialize_solib_aix): Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* solib-dsbt.c (struct dsbt_info): Add initializers.
 	(solib_dsbt_pspace_data): Change type.
 	(dsbt_pspace_data_cleanup): Remove.
