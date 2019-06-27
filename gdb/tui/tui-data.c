@@ -120,7 +120,7 @@ tui_clear_source_windows ()
 }
 
 
-/* Clear the pertinant detail in the source windows.  */
+/* Clear the pertinent detail in the source windows.  */
 void
 tui_clear_source_windows_detail ()
 {

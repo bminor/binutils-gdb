@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.c (tui_clear_source_windows_detail): Fix typo.
+	* tui/tui-win.c (tui_resize_all): Fix typo.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_refresh_all): Update.
 	* tui/tui-wingeneral.c (make_all_visible): Use foreach.
 	(tui_refresh_all): Remove "list" parameter.  Use foreach.
