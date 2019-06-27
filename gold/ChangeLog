@@ -1,5 +1,11 @@
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (xlate_pcrel_opt): New function.
+	(Target_powerpc::Relocate::relocate): Optimise PCREL34 and
+	GOT_PCREL34 sequences marked with PCREL_OPT.
+
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relobj::make_got_relative): New function.
 	(relative_value_is_known): New functions.
 	(Target_powerpc::Relocate::relocate): Edit code using

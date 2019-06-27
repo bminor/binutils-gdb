@@ -9716,6 +9716,114 @@ relative_value_is_known(const Symbol_value<size>* psymval)
   return is_ordinary && shndx != elfcpp::SHN_UNDEF;
 }
 
+// PCREL_OPT in one instance flags to the linker that a pair of insns:
+//   pld ra,symbol@got@pcrel
+//   load/store rt,0(ra)
+// or
+//   pla ra,symbol@pcrel
+//   load/store rt,0(ra)
+// may be translated to
+//   pload/pstore rt,symbol@pcrel
+//   nop.
+// This function returns true if the optimization is possible, placing
+// the prefix insn in *PINSN1 and a NOP in *PINSN2.
+//
+// On entry to this function, the linker has already determined that
+// the pld can be replaced with pla: *PINSN1 is that pla insn,
+// while *PINSN2 is the second instruction.
+
+inline bool
+xlate_pcrel_opt(uint64_t *pinsn1, uint64_t *pinsn2)
+{
+  uint32_t insn2 = *pinsn2 >> 32;
+  uint64_t i1new;
+
+  // Check that regs match.
+  if (((insn2 >> 16) & 31) != ((*pinsn1 >> 21) & 31))
+    return false;
+
+  switch ((insn2 >> 26) & 63)
+    {
+    default:
+      return false;
+
+    case 32: // lwz
+    case 34: // lbz
+    case 36: // stw
+    case 38: // stb
+    case 40: // lhz
+    case 42: // lha
+    case 44: // sth
+    case 48: // lfs
+    case 50: // lfd
+    case 52: // stfs
+    case 54: // stfd
+      // These are the PMLS cases, where we just need to tack a prefix
+      // on the insn.  Check that the D field is zero.
+      if ((insn2 & 0xffff) != 0)
+	return false;
+      i1new = ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
+	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      break;
+
+    case 58: // lwa, ld
+      if ((insn2 & 0xfffd) != 0)
+	return false;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | (insn2 & 2 ? 41ULL << 26 : 57ULL << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+
+    case 57: // lxsd, lxssp
+      if ((insn2 & 0xfffc) != 0 || (insn2 & 3) < 2)
+	return false;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | ((40ULL | (insn2 & 3)) << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+
+    case 61: // stxsd, stxssp, lxv, stxv
+      if ((insn2 & 3) == 0)
+	return false;
+      else if ((insn2 & 3) >= 2)
+	{
+	  if ((insn2 & 0xfffc) != 0)
+	    return false;
+	  i1new = ((1ULL << 58) | (1ULL << 52)
+		   | ((44ULL | (insn2 & 3)) << 26)
+		   | (insn2 & (31ULL << 21)));
+	}
+      else
+	{
+	  if ((insn2 & 0xfff0) != 0)
+	    return false;
+	  i1new = ((1ULL << 58) | (1ULL << 52)
+		   | ((50ULL | (insn2 & 4) | ((insn2 & 8) >> 3)) << 26)
+		   | (insn2 & (31ULL << 21)));
+	}
+      break;
+
+    case 56: // lq
+      if ((insn2 & 0xffff) != 0)
+	return false;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      break;
+
+    case 62: // std, stq
+      if ((insn2 & 0xfffd) != 0)
+	return false;
+      i1new = ((1ULL << 58) | (1ULL << 52)
+	       | ((insn2 & 2) == 0 ? 61ULL << 26 : 60ULL << 26)
+	       | (insn2 & (31ULL << 21)));
+      break;
+    }
+
+  *pinsn1 = i1new;
+  *pinsn2 = (uint64_t) nop << 32;
+  return true;
+}
+
 // Perform a relocation.
 
 template<int size, bool big_endian>
@@ -10507,6 +10615,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  ? relative_value_is_known(gsym)
 	  : relative_value_is_known(psymval)))
     {
+      Insn* iview;
+      Insn* iview2;
+      Insn insn;
+      uint64_t pinsn, pinsn2;
+
       switch (r_type)
 	{
 	default:
@@ -10527,8 +10640,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_TOC16_HA:
 	  if (parameters->options().toc_optimize())
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
-	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      iview = reinterpret_cast<Insn*>(view - d_offset);
+	      insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      if ((r_type == elfcpp::R_PPC64_TOC16_HA
 		   && object->make_toc_relative(target, &value))
 		  || (r_type == elfcpp::R_POWERPC_GOT16_HA
@@ -10559,8 +10672,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_TOC16_LO_DS:
 	  if (parameters->options().toc_optimize())
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
-	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      iview = reinterpret_cast<Insn*>(view - d_offset);
+	      insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      bool changed = false;
 	      if ((r_type == elfcpp::R_PPC64_TOC16_LO_DS
 		   && object->make_toc_relative(target, &value))
@@ -10598,11 +10711,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_GOT_PCREL34:
 	  if (parameters->options().toc_optimize())
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view);
-	      uint64_t insn = elfcpp::Swap<32, big_endian>::readval(iview);
-	      insn <<= 32;
-	      insn |= elfcpp::Swap<32, big_endian>::readval(iview + 1);
-	      if ((insn & ((-1ULL << 50) | (63ULL << 26)))
+	      iview = reinterpret_cast<Insn*>(view);
+	      pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      pinsn <<= 32;
+	      pinsn |= elfcpp::Swap<32, big_endian>::readval(iview + 1);
+	      if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
 		   != ((1ULL << 58) | (1ULL << 52) | (57ULL << 26) /* pld */))
 		break;
 
@@ -10612,12 +10725,58 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		{
 		  value = relval;
 		  // Replace with paddi
-		  insn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
-		  elfcpp::Swap<32, big_endian>::writeval(iview, insn >> 32);
+		  pinsn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
+		  elfcpp::Swap<32, big_endian>::writeval(iview, pinsn >> 32);
 		  elfcpp::Swap<32, big_endian>::writeval(iview + 1,
-							 insn & 0xffffffff);
+							 pinsn & 0xffffffff);
+		  goto pcrelopt;
 		}
 	    }
+	  break;
+
+	case elfcpp::R_PPC64_PCREL34:
+	  {
+	    iview = reinterpret_cast<Insn*>(view);
+	    pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
+	    pinsn <<= 32;
+	    pinsn |= elfcpp::Swap<32, big_endian>::readval(iview + 1);
+	    if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
+		!= ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
+		    | (14ULL << 26) /* paddi */))
+	      break;
+
+	  pcrelopt:
+	    const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
+	    elfcpp::Shdr<size, big_endian> shdr(relinfo->reloc_shdr);
+	    size_t reloc_count = shdr.get_sh_size() / reloc_size;
+	    if (relnum >= reloc_count - 1)
+	      break;
+
+	    Reltype next_rela(preloc + reloc_size);
+	    if ((elfcpp::elf_r_type<size>(next_rela.get_r_info())
+		 != elfcpp::R_PPC64_PCREL_OPT)
+		|| next_rela.get_r_offset() != rela.get_r_offset())
+	      break;
+
+	    Address off = next_rela.get_r_addend();
+	    if (off == 0)
+	      off = 8; // zero means next insn.
+	    if (off + rela.get_r_offset() + 4 > view_size)
+	      break;
+
+	    iview2 = reinterpret_cast<Insn*>(view + off);
+	    pinsn2 = elfcpp::Swap<32, big_endian>::readval(iview2);
+	    pinsn2 <<= 32;
+	    if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
+	      break;
+	    if (xlate_pcrel_opt(&pinsn, &pinsn2))
+	      {
+		elfcpp::Swap<32, big_endian>::writeval(iview, pinsn >> 32);
+		elfcpp::Swap<32, big_endian>::writeval(iview + 1,
+						       pinsn & 0xffffffff);
+		elfcpp::Swap<32, big_endian>::writeval(iview2, pinsn2 >> 32);
+	      }
+	  }
 	  break;
 
 	case elfcpp::R_POWERPC_TPREL16_HA:
