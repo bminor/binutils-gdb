@@ -1,3 +1,9 @@
+2019-06-26  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/gas/xstormy16/allinsn.sh: Change first line to
+	#!/bin/bash and make it executable.
+	* testsuite/gas/xstormy16/gcc.sh: Likewise.
+
 2019-06-26  Lili Cui  <lili.cui@intel.com>
 
 	* doc/c-i386.texi: Document x/y/z instruction sufffixes in AT&T
