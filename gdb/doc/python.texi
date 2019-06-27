@@ -90,8 +90,6 @@ containing @code{end}.  For example:
 
 @smallexample
 (@value{GDBP}) python
-Type python script
-End with a line saying just "end".
 >print 23
 >end
 23

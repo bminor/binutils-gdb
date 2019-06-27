@@ -1,3 +1,8 @@
+2019-07-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (python command): Revise example to match
+	command behavior.
+
 2019-07-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (C++ Exception GDB/MI Catchpoint Commands): Adjust
