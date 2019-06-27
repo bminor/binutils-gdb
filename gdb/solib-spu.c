@@ -94,7 +94,8 @@ spu_skip_standalone_loader (void)
     }
 }
 
-static const struct objfile_data *ocl_program_data_key;
+static objfile_key<CORE_ADDR, gdb::noop_deleter<CORE_ADDR>>
+  ocl_program_data_key;
 
 /* Appends OpenCL programs to the list of `struct so_list' objects.  */
 static void
@@ -104,8 +105,7 @@ append_ocl_sos (struct so_list **link_ptr)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      ocl_program_addr_base
-	= (CORE_ADDR *) objfile_data (objfile, ocl_program_data_key);
+      ocl_program_addr_base = ocl_program_data_key.get (objfile);
       if (ocl_program_addr_base != NULL)
         {
 	  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?
@@ -448,15 +448,14 @@ ocl_enable_break (struct objfile *objfile)
 
       /* Store the address of the symbol that will point to OpenCL program
          using the per-objfile private data mechanism.  */
-      if (objfile_data (objfile, ocl_program_data_key) == NULL)
+      if (ocl_program_data_key.get (objfile) == NULL)
         {
           CORE_ADDR *ocl_program_addr_base = OBSTACK_CALLOC (
 		  &objfile->objfile_obstack,
 		  objfile->sections_end - objfile->sections,
 		  CORE_ADDR);
 	  *ocl_program_addr_base = BMSYMBOL_VALUE_ADDRESS (addr_sym);
-	  set_objfile_data (objfile, ocl_program_data_key,
-			    ocl_program_addr_base);
+	  ocl_program_data_key.set (objfile, ocl_program_addr_base);
         }
     }
 }
@@ -544,6 +543,5 @@ void
 _initialize_spu_solib (void)
 {
   gdb::observers::solib_loaded.attach (spu_solib_loaded);
-  ocl_program_data_key = register_objfile_data ();
 }
 

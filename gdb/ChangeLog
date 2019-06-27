@@ -1,5 +1,11 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* solib-spu.c (ocl_program_data_key): Change type.
+	(append_ocl_sos, ocl_enable_break, _initialize_spu_solib):
+	Update.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* solib-aix.c (lm_info_aix_p): Remove typedef.  Don't define VEC.
 	(struct solib_aix_inferior_data) <library_list>: Change type.
 	(solib_aix_inferior_data_handle): Change type.
