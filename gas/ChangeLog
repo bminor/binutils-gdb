@@ -1,3 +1,17 @@
+2019-06-27  Barnaby Wilk  s<barnaby.wilks@arm.com>
+
+	* config/tc-arm.c (do_smc): Add range check for immediate operand.
+	(do_t_smc): Add range check for immediate operand. Remove
+	obsolete immediate encoding.
+	(md_apply_fix): Fix range check. Remove obsolete immediate encoding.
+	* testsuite/gas/arm/arch6zk.d: Fix test.
+	* testsuite/gas/arm/arch6zk.s: Fix test.
+	* testsuite/gas/arm/smc-bad.d: New test.
+	* testsuite/gas/arm/smc-bad.l: New test.
+	* testsuite/gas/arm/smc-bad.s: New test.
+	* testsuite/gas/arm/thumb32.d: Fix test.
+	* testsuite/gas/arm/thumb32.s: Fix test.
+
 2019-06-27  Jan Beulich  <jbeulich@suse.com>
 
 	config/tc-i386.c (md_assemble): Check for protected mode

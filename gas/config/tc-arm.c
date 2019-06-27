@@ -10247,6 +10247,9 @@ do_shift (void)
 static void
 do_smc (void)
 {
+  unsigned int value = inst.relocs[0].exp.X_add_number;
+  constraint (value > 0xf, _("immediate too large (bigger than 0xF)"));
+
   inst.relocs[0].type = BFD_RELOC_ARM_SMC;
   inst.relocs[0].pc_rel = 0;
 }
@@ -13877,10 +13880,11 @@ do_t_smc (void)
 	      _("SMC is not permitted on this architecture"));
   constraint (inst.relocs[0].exp.X_op != O_constant,
 	      _("expression too complex"));
+  constraint (value > 0xf, _("immediate too large (bigger than 0xF)"));
+
   inst.relocs[0].type = BFD_RELOC_UNUSED;
-  inst.instruction |= (value & 0xf000) >> 12;
-  inst.instruction |= (value & 0x0ff0);
   inst.instruction |= (value & 0x000f) << 16;
+
   /* PR gas/15623: SMC instructions must be last in an IT block.  */
   set_pred_insn_type_last ();
 }
@@ -27765,11 +27769,12 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_SMC:
-      if (((unsigned long) value) > 0xffff)
+      if (((unsigned long) value) > 0xf)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid smc expression"));
+
       newval = md_chars_to_number (buf, INSN_SIZE);
-      newval |= (value & 0xf) | ((value & 0xfff0) << 4);
+      newval |= (value & 0xf);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
