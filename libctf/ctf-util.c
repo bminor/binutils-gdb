@@ -95,28 +95,6 @@ ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst)
   return dst;
 }
 
-/* Convert an encoded CTF string name into a pointer to a C string by looking
-  up the appropriate string table buffer and then adding the offset.  */
-
-const char *
-ctf_strraw (ctf_file_t *fp, uint32_t name)
-{
-  ctf_strs_t *ctsp = &fp->ctf_str[CTF_NAME_STID (name)];
-
-  if (ctsp->cts_strs != NULL && CTF_NAME_OFFSET (name) < ctsp->cts_len)
-    return (ctsp->cts_strs + CTF_NAME_OFFSET (name));
-
-  /* String table not loaded or corrupt offset.  */
-  return NULL;
-}
-
-const char *
-ctf_strptr (ctf_file_t *fp, uint32_t name)
-{
-  const char *s = ctf_strraw (fp, name);
-  return (s != NULL ? s : "(?)");
-}
-
 /* Same as strdup(3C), but use ctf_alloc() to do the memory allocation. */
 
 _libctf_malloc_ char *
@@ -152,6 +130,19 @@ ctf_str_append (char *s, const char *append)
   s[s_len + append_len] = '\0';
 
   return s;
+}
+
+/* A realloc() that fails noisily if called with any ctf_str_num_users.  */
+void *
+ctf_realloc (ctf_file_t *fp, void *ptr, size_t size)
+{
+  if (fp->ctf_str_num_refs > 0)
+    {
+      ctf_dprintf ("%p: attempt to realloc() string table with %lu active refs\n",
+		   (void *) fp, (unsigned long) fp->ctf_str_num_refs);
+      return NULL;
+    }
+  return realloc (ptr, size);
 }
 
 /* Store the specified error code into errp if it is non-NULL, and then

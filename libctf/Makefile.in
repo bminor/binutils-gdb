@@ -132,14 +132,15 @@ libctf_a_AR = $(AR) $(ARFLAGS)
 libctf_a_LIBADD =
 am__libctf_a_SOURCES_DIST = ctf-archive.c ctf-dump.c ctf-create.c \
 	ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c ctf-lookup.c \
-	ctf-open.c ctf-open-bfd.c ctf-subr.c ctf-types.c ctf-util.c \
-	ctf-qsort_r.c
+	ctf-open.c ctf-open-bfd.c ctf-string.c ctf-subr.c ctf-types.c \
+	ctf-util.c ctf-qsort_r.c
 @NEED_CTF_QSORT_R_TRUE@am__objects_1 = ctf-qsort_r.$(OBJEXT)
 am_libctf_a_OBJECTS = ctf-archive.$(OBJEXT) ctf-dump.$(OBJEXT) \
 	ctf-create.$(OBJEXT) ctf-decl.$(OBJEXT) ctf-error.$(OBJEXT) \
 	ctf-hash.$(OBJEXT) ctf-labels.$(OBJEXT) ctf-lookup.$(OBJEXT) \
-	ctf-open.$(OBJEXT) ctf-open-bfd.$(OBJEXT) ctf-subr.$(OBJEXT) \
-	ctf-types.$(OBJEXT) ctf-util.$(OBJEXT) $(am__objects_1)
+	ctf-open.$(OBJEXT) ctf-open-bfd.$(OBJEXT) ctf-string.$(OBJEXT) \
+	ctf-subr.$(OBJEXT) ctf-types.$(OBJEXT) ctf-util.$(OBJEXT) \
+	$(am__objects_1)
 libctf_a_OBJECTS = $(am_libctf_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -331,7 +332,7 @@ AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @
 noinst_LIBRARIES = libctf.a
 libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c \
 	ctf-error.c ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c \
-	ctf-open-bfd.c ctf-subr.c ctf-types.c ctf-util.c \
+	ctf-open-bfd.c ctf-string.c ctf-subr.c ctf-types.c ctf-util.c \
 	$(am__append_1)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -412,6 +413,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-open-bfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-open.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-qsort_r.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-subr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-types.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ctf-util.Po@am__quote@

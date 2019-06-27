@@ -1373,6 +1373,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   memset (fp, 0, sizeof (ctf_file_t));
   ctf_set_version (fp, &hp, hp.cth_version);
+  ctf_str_create_atoms (fp);
 
   if (_libctf_unlikely_ (hp.cth_version < CTF_VERSION_2))
     fp->ctf_parmax = CTF_MAX_PTYPE_V1;
@@ -1528,6 +1529,7 @@ ctf_file_close (ctf_file_t *fp)
       ctf_dvd_delete (fp, dvd);
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
+  ctf_str_free_atoms (fp);
 
   ctf_free (fp->ctf_tmp_typeslice);
 

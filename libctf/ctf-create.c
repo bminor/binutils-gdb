@@ -29,10 +29,8 @@
 
 /* To create an empty CTF container, we just declare a zeroed header and call
    ctf_bufopen() on it.  If ctf_bufopen succeeds, we mark the new container r/w
-   and initialize the dynamic members.  We set dtvstrlen to 1 to reserve the
-   first byte of the string table for a \0 byte, and we start assigning type
-   IDs at 1 because type ID 0 is used as a sentinel and a not-found
-   indicator.  */
+   and initialize the dynamic members.  We start assigning type IDs at 1 because
+   type ID 0 is used as a sentinel and a not-found indicator.  */
 
 ctf_file_t *
 ctf_create (int *errp)
@@ -82,7 +80,6 @@ ctf_create (int *errp)
   fp->ctf_dtbyname = dtbyname;
   fp->ctf_dthash = dthash;
   fp->ctf_dvhash = dvhash;
-  fp->ctf_dtvstrlen = 1;
   fp->ctf_dtnextid = 1;
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshots = 0;
@@ -101,25 +98,24 @@ ctf_create (int *errp)
 }
 
 static unsigned char *
-ctf_copy_smembers (ctf_dtdef_t *dtd, uint32_t soff, unsigned char *t)
+ctf_copy_smembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_member_t ctm;
 
   for (; dmd != NULL; dmd = ctf_list_next (dmd))
     {
-      if (dmd->dmd_name)
-	{
-	  ctm.ctm_name = soff;
-	  soff += strlen (dmd->dmd_name) + 1;
-	}
-      else
-	ctm.ctm_name = 0;
+      ctf_member_t *copied;
 
+      ctm.ctm_name = 0;
       ctm.ctm_type = (uint32_t) dmd->dmd_type;
       ctm.ctm_offset = (uint32_t) dmd->dmd_offset;
 
       memcpy (t, &ctm, sizeof (ctm));
+      copied = (ctf_member_t *) t;
+      if (dmd->dmd_name)
+	ctf_str_add_ref (fp, dmd->dmd_name, &copied->ctm_name);
+
       t += sizeof (ctm);
     }
 
@@ -127,26 +123,25 @@ ctf_copy_smembers (ctf_dtdef_t *dtd, uint32_t soff, unsigned char *t)
 }
 
 static unsigned char *
-ctf_copy_lmembers (ctf_dtdef_t *dtd, uint32_t soff, unsigned char *t)
+ctf_copy_lmembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_lmember_t ctlm;
 
   for (; dmd != NULL; dmd = ctf_list_next (dmd))
     {
-      if (dmd->dmd_name)
-	{
-	  ctlm.ctlm_name = soff;
-	  soff += strlen (dmd->dmd_name) + 1;
-	}
-      else
-	ctlm.ctlm_name = 0;
+      ctf_lmember_t *copied;
 
+      ctlm.ctlm_name = 0;
       ctlm.ctlm_type = (uint32_t) dmd->dmd_type;
       ctlm.ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (dmd->dmd_offset);
       ctlm.ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (dmd->dmd_offset);
 
       memcpy (t, &ctlm, sizeof (ctlm));
+      copied = (ctf_lmember_t *) t;
+      if (dmd->dmd_name)
+	ctf_str_add_ref (fp, dmd->dmd_name, &copied->ctlm_name);
+
       t += sizeof (ctlm);
     }
 
@@ -154,39 +149,23 @@ ctf_copy_lmembers (ctf_dtdef_t *dtd, uint32_t soff, unsigned char *t)
 }
 
 static unsigned char *
-ctf_copy_emembers (ctf_dtdef_t *dtd, uint32_t soff, unsigned char *t)
+ctf_copy_emembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_enum_t cte;
 
   for (; dmd != NULL; dmd = ctf_list_next (dmd))
     {
-      cte.cte_name = soff;
+      ctf_enum_t *copied;
+
       cte.cte_value = dmd->dmd_value;
-      soff += strlen (dmd->dmd_name) + 1;
       memcpy (t, &cte, sizeof (cte));
+      copied = (ctf_enum_t *) t;
+      ctf_str_add_ref (fp, dmd->dmd_name, &copied->cte_name);
       t += sizeof (cte);
     }
 
   return t;
-}
-
-static unsigned char *
-ctf_copy_membnames (ctf_dtdef_t *dtd, unsigned char *s)
-{
-  ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-  size_t len;
-
-  for (; dmd != NULL; dmd = ctf_list_next (dmd))
-    {
-      if (dmd->dmd_name == NULL)
-	continue;			/* Skip anonymous members.  */
-      len = strlen (dmd->dmd_name) + 1;
-      memcpy (s, dmd->dmd_name, len);
-      s += len;
-    }
-
-  return s;
 }
 
 /* Sort a newly-constructed static variable array.  */
@@ -220,15 +199,16 @@ int
 ctf_update (ctf_file_t *fp)
 {
   ctf_file_t ofp, *nfp;
-  ctf_header_t hdr;
+  ctf_header_t hdr, *hdrp;
   ctf_dtdef_t *dtd;
   ctf_dvdef_t *dvd;
   ctf_varent_t *dvarents;
+  ctf_strs_writable_t strtab;
 
-  unsigned char *s, *s0, *t;
+  unsigned char *t;
   unsigned long i;
   size_t buf_size, type_size, nvars;
-  void *buf;
+  unsigned char *buf, *newbuf;
   int err;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
@@ -246,9 +226,6 @@ ctf_update (ctf_file_t *fp)
   memset (&hdr, 0, sizeof (hdr));
   hdr.cth_magic = CTF_MAGIC;
   hdr.cth_version = CTF_VERSION;
-
-  if (fp->ctf_flags & LCTF_CHILD)
-    hdr.cth_parname = 1;		/* parname added just below.  */
 
   /* Iterate through the dynamic type definition list and compute the
      size of the CTF type section we will need to generate.  */
@@ -298,15 +275,13 @@ ctf_update (ctf_file_t *fp)
   for (nvars = 0, dvd = ctf_list_next (&fp->ctf_dvdefs);
        dvd != NULL; dvd = ctf_list_next (dvd), nvars++);
 
-  /* Fill in the string table and type offset and size, compute the size
-     of the entire CTF buffer we need, and then allocate a new buffer and
-     memcpy the finished header to the start of the buffer.  */
+  /* Compute the size of the CTF buffer we need, sans only the string table,
+     then allocate a new buffer and memcpy the finished header to the start of
+     the buffer.  (We will adjust this later with strtab length info.)  */
 
   hdr.cth_typeoff = hdr.cth_varoff + (nvars * sizeof (ctf_varent_t));
   hdr.cth_stroff = hdr.cth_typeoff + type_size;
-  hdr.cth_strlen = fp->ctf_dtvstrlen;
-  if (fp->ctf_parname != NULL)
-    hdr.cth_strlen += strlen (fp->ctf_parname) + 1;
+  hdr.cth_strlen = 0;
 
   buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
 
@@ -315,63 +290,45 @@ ctf_update (ctf_file_t *fp)
 
   memcpy (buf, &hdr, sizeof (ctf_header_t));
   t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_varoff;
-  s = s0 = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff;
 
-  s[0] = '\0';
-  s++;
+  hdrp = (ctf_header_t *) buf;
+  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parname != NULL))
+    ctf_str_add_ref (fp, fp->ctf_parname, &hdrp->cth_parname);
 
-  if (fp->ctf_parname != NULL)
-    {
-      memcpy (s, fp->ctf_parname, strlen (fp->ctf_parname) + 1);
-      s += strlen (fp->ctf_parname) + 1;
-    }
-
-  /* Work over the variable list, translating everything into
-     ctf_varent_t's and filling out the string table, then sort the buffer
-     of ctf_varent_t's.  */
+  /* Work over the variable list, translating everything into ctf_varent_t's and
+     prepping the string table.  */
 
   dvarents = (ctf_varent_t *) t;
   for (i = 0, dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL;
        dvd = ctf_list_next (dvd), i++)
     {
       ctf_varent_t *var = &dvarents[i];
-      size_t len = strlen (dvd->dvd_name) + 1;
 
-      var->ctv_name = (uint32_t) (s - s0);
+      ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
       var->ctv_type = dvd->dvd_type;
-      memcpy (s, dvd->dvd_name, len);
-      s += len;
     }
   assert (i == nvars);
 
-  ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var, s0);
   t += sizeof (ctf_varent_t) * nvars;
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_typeoff);
 
-  /* We now take a final lap through the dynamic type definition list and
-     copy the appropriate type records and strings to the output buffer.  */
+  /* We now take a final lap through the dynamic type definition list and copy
+     the appropriate type records to the output buffer, noting down the
+     strings as we go.  */
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
-
       uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
 
       ctf_array_t cta;
       uint32_t encoding;
       size_t len;
+      ctf_stype_t *copied;
 
-      if (dtd->dtd_name != NULL)
-	{
-	  dtd->dtd_data.ctt_name = (uint32_t) (s - s0);
-	  len = strlen (dtd->dtd_name) + 1;
-	  memcpy (s, dtd->dtd_name, len);
-	  s += len;
-	}
-      else
-	dtd->dtd_data.ctt_name = 0;
+      dtd->dtd_data.ctt_name = 0;
 
       if (dtd->dtd_data.ctt_size != CTF_LSIZE_SENT)
 	len = sizeof (ctf_stype_t);
@@ -379,6 +336,9 @@ ctf_update (ctf_file_t *fp)
 	len = sizeof (ctf_type_t);
 
       memcpy (t, &dtd->dtd_data, len);
+      copied = (ctf_stype_t *) t;  /* name is at the start: constant offset.  */
+      if (dtd->dtd_name)
+	ctf_str_add_ref (fp, dtd->dtd_name, &copied->ctt_name);
       t += len;
 
       switch (kind)
@@ -432,24 +392,47 @@ ctf_update (ctf_file_t *fp)
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
 	  if (dtd->dtd_data.ctt_size < CTF_LSTRUCT_THRESH)
-	    t = ctf_copy_smembers (dtd, (uint32_t) (s - s0), t);
+	    t = ctf_copy_smembers (fp, dtd, t);
 	  else
-	    t = ctf_copy_lmembers (dtd, (uint32_t) (s - s0), t);
-	  s = ctf_copy_membnames (dtd, s);
+	    t = ctf_copy_lmembers (fp, dtd, t);
 	  break;
 
 	case CTF_K_ENUM:
-	  t = ctf_copy_emembers (dtd, (uint32_t) (s - s0), t);
-	  s = ctf_copy_membnames (dtd, s);
+	  t = ctf_copy_emembers (fp, dtd, t);
 	  break;
 	}
     }
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
+  /* Construct the final string table and fill out all the string refs with the
+     final offsets.  Then purge the refs list, because we're about to move this
+     strtab onto the end of the buf, invalidating all the offsets.  */
+  strtab = ctf_str_write_strtab (fp);
+  ctf_str_purge_refs (fp);
+
+  /* Now the string table is constructed, we can sort the buffer of
+     ctf_varent_t's.  */
+  ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var,
+	       strtab.cts_strs);
+
+  if ((newbuf = ctf_realloc (fp, buf, buf_size + strtab.cts_len)) == NULL)
+    {
+      ctf_free (buf);
+      ctf_free (strtab.cts_strs);
+      return (ctf_set_errno (fp, EAGAIN));
+    }
+  buf = newbuf;
+  memcpy (buf + buf_size, strtab.cts_strs, strtab.cts_len);
+  hdrp = (ctf_header_t *) buf;
+  hdrp->cth_strlen = strtab.cts_len;
+  buf_size += hdrp->cth_strlen;
+  ctf_free (strtab.cts_strs);
+
   /* Finally, we are ready to ctf_simple_open() the new container.  If this
      is successful, we then switch nfp and fp and free the old container.  */
 
-  if ((nfp = ctf_simple_open (buf, buf_size, NULL, 0, 0, NULL, 0, &err)) == NULL)
+  if ((nfp = ctf_simple_open ((char *) buf, buf_size, NULL, 0, 0, NULL,
+			      0, &err)) == NULL)
     {
       ctf_free (buf);
       return (ctf_set_errno (fp, err));
@@ -466,7 +449,6 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_dtbyname = fp->ctf_dtbyname;
   nfp->ctf_dvhash = fp->ctf_dvhash;
   nfp->ctf_dvdefs = fp->ctf_dvdefs;
-  nfp->ctf_dtvstrlen = fp->ctf_dtvstrlen;
   nfp->ctf_dtnextid = fp->ctf_dtnextid;
   nfp->ctf_dtoldid = fp->ctf_dtnextid - 1;
   nfp->ctf_snapshots = fp->ctf_snapshots + 1;
@@ -476,6 +458,9 @@ ctf_update (ctf_file_t *fp)
 
   fp->ctf_dtbyname = NULL;
   fp->ctf_dthash = NULL;
+  ctf_str_free_atoms (nfp);
+  nfp->ctf_str_atoms = fp->ctf_str_atoms;
+  fp->ctf_str_atoms = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
 
   fp->ctf_dvhash = NULL;
@@ -559,10 +544,7 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
 	   dmd != NULL; dmd = nmd)
 	{
 	  if (dmd->dmd_name != NULL)
-	    {
-	      fp->ctf_dtvstrlen -= strlen (dmd->dmd_name) + 1;
 	      ctf_free (dmd->dmd_name);
-	    }
 	  nmd = ctf_list_next (dmd);
 	  ctf_free (dmd);
 	}
@@ -579,8 +561,6 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
       name = ctf_prefixed_name (kind, dtd->dtd_name);
       ctf_dynhash_remove (fp->ctf_dtbyname, name);
       free (name);
-
-      fp->ctf_dtvstrlen -= strlen (dtd->dtd_name) + 1;
       ctf_free (dtd->dtd_name);
     }
 
@@ -638,8 +618,6 @@ void
 ctf_dvd_delete (ctf_file_t *fp, ctf_dvdef_t *dvd)
 {
   ctf_dynhash_remove (fp->ctf_dvhash, dvd->dvd_name);
-
-  fp->ctf_dtvstrlen -= strlen (dvd->dvd_name) + 1;
   ctf_free (dvd->dvd_name);
 
   ctf_list_delete (&fp->ctf_dvdefs, dvd);
@@ -762,9 +740,6 @@ ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name,
   memset (dtd, 0, sizeof (ctf_dtdef_t));
   dtd->dtd_name = s;
   dtd->dtd_type = type;
-
-  if (s != NULL)
-    fp->ctf_dtvstrlen += strlen (s) + 1;
 
   if (ctf_dtd_insert (fp, dtd) < 0)
     {
@@ -1272,7 +1247,6 @@ ctf_add_enumerator (ctf_file_t *fp, ctf_id_t enid, const char *name,
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
   ctf_list_append (&dtd->dtd_u.dtu_members, dmd);
 
-  fp->ctf_dtvstrlen += strlen (s) + 1;
   fp->ctf_flags |= LCTF_DIRTY;
 
   return 0;
@@ -1392,9 +1366,6 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
   ctf_list_append (&dtd->dtd_u.dtu_members, dmd);
 
-  if (s != NULL)
-    fp->ctf_dtvstrlen += strlen (s) + 1;
-
   fp->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
@@ -1456,7 +1427,6 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
       return -1;			/* errno is set for us.  */
     }
 
-  fp->ctf_dtvstrlen += strlen (name) + 1;
   fp->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
@@ -1535,9 +1505,6 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
   dmd->dmd_value = -1;
 
   ctf_list_append (&ctb->ctb_dtd->dtd_u.dtu_members, dmd);
-
-  if (s != NULL)
-    ctb->ctb_file->ctf_dtvstrlen += strlen (s) + 1;
 
   ctb->ctb_file->ctf_flags |= LCTF_DIRTY;
   return 0;

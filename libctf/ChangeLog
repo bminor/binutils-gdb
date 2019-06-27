@@ -1,5 +1,56 @@
 2019-06-28  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-impl.h: (struct ctf_strs_writable): New, non-const version of
+	struct ctf_strs.
+	(struct ctf_dtdef): Note that dtd_data.ctt_name is unpopulated.
+	(struct ctf_str_atom): New, disambiguated single string.
+	(struct ctf_str_atom_ref): New, points to some other location that
+	references this string's offset.
+	(struct ctf_file): New members ctf_str_atoms and ctf_str_num_refs.
+	Remove member ctf_dtvstrlen: we no longer track the total strlen
+	as we add strings.
+	(ctf_str_create_atoms): Declare new function in ctf-string.c.
+	(ctf_str_free_atoms): Likewise.
+	(ctf_str_add): Likewise.
+	(ctf_str_add_ref): Likewise.
+	(ctf_str_rollback): Likewise.
+	(ctf_str_purge_refs): Likewise.
+	(ctf_str_write_strtab): Likewise.
+	(ctf_realloc): Declare new function in ctf-util.c.
+
+	* ctf-open.c (ctf_bufopen): Create the atoms table.
+	(ctf_file_close): Destroy it.
+	* ctf-create.c (ctf_update): Copy-and-free it on update.  No longer
+	special-case the position of the parname string.  Construct the
+	strtab by calling ctf_str_add_ref and ctf_str_write_strtab after the
+	rest of each buffer element is constructed, not via open-coding:
+	realloc the CTF buffer and append the strtab to it.  No longer
+	maintain ctf_dtvstrlen.  Sort the variable entry table later, after
+	strtab construction.
+	(ctf_copy_membnames): Remove: integrated into ctf_copy_{s,l,e}members.
+	(ctf_copy_smembers): Drop the string offset: call ctf_str_add_ref
+	after buffer element construction instead.
+	(ctf_copy_lmembers): Likewise.
+	(ctf_copy_emembers): Likewise.
+	(ctf_create): No longer maintain the ctf_dtvstrlen.
+	(ctf_dtd_delete): Likewise.
+	(ctf_dvd_delete): Likewise.
+	(ctf_add_generic): Likewise.
+	(ctf_add_enumerator): Likewise.
+	(ctf_add_member_offset): Likewise.
+	(ctf_add_variable): Likewise.
+	(membadd): Likewise.
+	* ctf-util.c (ctf_realloc): New, wrapper around realloc that aborts
+	if there are active ctf_str_num_refs.
+	(ctf_strraw): Move to ctf-string.c.
+	(ctf_strptr): Likewise.
+	* ctf-string.c: New file, strtab manipulation.
+
+	* Makefile.am (libctf_a_SOURCES): Add it.
+	* Makefile.in: Regenerate.
+
+2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_hash_iter_f): New.
 	(ctf_dynhash_iter): New declaration.
 	(ctf_dynhash_iter_remove): New declaration.
