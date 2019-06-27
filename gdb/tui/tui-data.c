@@ -294,27 +294,19 @@ tui_prev_win (struct tui_win_info *cur_win)
 struct tui_win_info *
 tui_partial_win_by_name (const char *name)
 {
-  struct tui_win_info *win_info = NULL;
-
   if (name != NULL)
     {
-      int i = 0;
-
-      while (i < MAX_MAJOR_WINDOWS && win_info == NULL)
+      for (tui_win_info *item : all_tui_windows ())
 	{
-          if (tui_win_list[i] != 0)
-            {
-              const char *cur_name = tui_win_list[i]->name ();
+	  const char *cur_name = item->name ();
 
-              if (strlen (name) <= strlen (cur_name)
-		  && startswith (cur_name, name))
-                win_info = tui_win_list[i];
-            }
-	  i++;
+	  if (strlen (name) <= strlen (cur_name)
+	      && startswith (cur_name, name))
+	    return item;
 	}
     }
 
-  return win_info;
+  return NULL;
 }
 
 

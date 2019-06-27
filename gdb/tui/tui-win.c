@@ -364,18 +364,16 @@ window_name_completer (completion_tracker &tracker,
 		       const char *text, const char *word)
 {
   std::vector<const char *> completion_name_vec;
-  int win_type;
 
-  for (win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
+  for (tui_win_info *win_info : all_tui_windows ())
     {
       const char *completion_name = NULL;
 
       /* We can't focus on an invisible window.  */
-      if (tui_win_list[win_type] == NULL
-	  || !tui_win_list[win_type]->is_visible)
+      if (!win_info->is_visible)
 	continue;
 
-      completion_name = tui_win_list[win_type]->name ();
+      completion_name = win_info->name ();
       gdb_assert (completion_name != NULL);
       completion_name_vec.push_back (completion_name);
     }
@@ -518,14 +516,12 @@ tui_source_window_base::refresh_all ()
 void
 tui_refresh_all_win (void)
 {
-  int type;
-
   clearok (curscr, TRUE);
-  tui_refresh_all (tui_win_list);
-  for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
+  tui_refresh_all ();
+  for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (tui_win_list[type] && tui_win_list[type]->is_visible)
-	tui_win_list[type]->refresh_all ();
+      if (win_info->is_visible)
+	win_info->refresh_all ();
     }
   tui_show_locator_content ();
 }
@@ -533,10 +529,8 @@ tui_refresh_all_win (void)
 void
 tui_rehighlight_all (void)
 {
-  int type;
-
-  for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
-    tui_check_and_display_highlight_if_needed (tui_win_list[type]);
+  for (tui_win_info *win_info : all_tui_windows ())
+    tui_check_and_display_highlight_if_needed (win_info);
 }
 
 /* Resize all the windows based on the terminal size.  This function
@@ -885,21 +879,19 @@ tui_set_focus_command (const char *arg, int from_tty)
 static void
 tui_all_windows_info (const char *arg, int from_tty)
 {
-  int type;
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
-  for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
-    if (tui_win_list[type] 
-	&& tui_win_list[type]->is_visible)
+  for (tui_win_info *win_info : all_tui_windows ())
+    if (win_info->is_visible)
       {
-	if (win_with_focus == tui_win_list[type])
+	if (win_with_focus == win_info)
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
-			   tui_win_list[type]->name (),
-			   tui_win_list[type]->height);
+			   win_info->name (),
+			   win_info->height);
 	else
 	  printf_filtered ("        %s\t(%d lines)\n",
-			   tui_win_list[type]->name (),
-			   tui_win_list[type]->height);
+			   win_info->name (),
+			   win_info->height);
       }
 }
 
@@ -940,11 +932,10 @@ tui_source_window_base::update_tab_width ()
 static void
 update_tab_width ()
 {
-  for (int win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
+  for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (tui_win_list[win_type] != NULL
-	  && tui_win_list[win_type]->is_visible)
-	tui_win_list[win_type]->update_tab_width ();
+      if (win_info->is_visible)
+	win_info->update_tab_width ();
     }
 }
 

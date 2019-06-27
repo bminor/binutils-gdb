@@ -86,7 +86,7 @@ show_layout (enum tui_layout_type layout)
 	  || layout == DISASSEM_DATA_COMMAND)
 	{
 	  show_data (layout);
-	  tui_refresh_all (tui_win_list);
+	  tui_refresh_all ();
 	}
       else
 	{

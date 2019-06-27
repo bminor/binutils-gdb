@@ -1,5 +1,18 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_refresh_all): Update.
+	* tui/tui-wingeneral.c (make_all_visible): Use foreach.
+	(tui_refresh_all): Remove "list" parameter.  Use foreach.
+	* tui/tui-win.c (window_name_completer): Use foreach.
+	(tui_refresh_all_win, tui_rehighlight_all, tui_all_windows_info)
+	(update_tab_width): Likewise.
+	* tui/tui-layout.c (show_layout): Update.
+	* tui/tui-data.h (class tui_window_iterator): New.
+	(struct all_tui_windows): New.
+	* tui/tui-data.c (tui_partial_win_by_name): Use foreach.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reg_next, tui_reg_prev): Add "current_group"
 	parameter.  Don't reference globals.
 	(tui_reg_command): Update.

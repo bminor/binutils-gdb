@@ -212,15 +212,8 @@ tui_source_window_base::make_visible (bool visible)
 static void
 make_all_visible (bool visible)
 {
-  int i;
-
-  for (i = 0; i < MAX_MAJOR_WINDOWS; i++)
-    {
-      if (tui_win_list[i] != NULL)
-	tui_win_list[i]->make_visible (visible);
-    }
-
-  return;
+  for (tui_win_info *win_info : all_tui_windows ())
+    win_info->make_visible (visible);
 }
 
 void
@@ -257,15 +250,14 @@ tui_source_window_base::refresh ()
 /* Function to refresh all the windows currently displayed.  */
 
 void
-tui_refresh_all (struct tui_win_info **list)
+tui_refresh_all ()
 {
-  int type;
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
-  for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
+  for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (list[type] && list[type]->is_visible)
-	list[type]->refresh ();
+      if (win_info->is_visible)
+	win_info->refresh ();
     }
   if (locator->is_visible)
     {
