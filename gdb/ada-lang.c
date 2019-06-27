@@ -5778,22 +5778,18 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   std::string verbatim = std::string ("<") + name + '>';
 
   gdb_assert (info != NULL);
-  *info = ada_lookup_symbol (verbatim.c_str (), block, domain, NULL);
+  *info = ada_lookup_symbol (verbatim.c_str (), block, domain);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
    scope and in global scopes, or NULL if none.  NAME is folded and
    encoded first.  Otherwise, the result is as for ada_lookup_symbol_list,
-   choosing the first symbol if there are multiple choices.
-   If IS_A_FIELD_OF_THIS is not NULL, it is set to zero.  */
+   choosing the first symbol if there are multiple choices.  */
 
 struct block_symbol
 ada_lookup_symbol (const char *name, const struct block *block0,
-                   domain_enum domain, int *is_a_field_of_this)
+                   domain_enum domain)
 {
-  if (is_a_field_of_this != NULL)
-    *is_a_field_of_this = 0;
-
   std::vector<struct block_symbol> candidates;
   int n_candidates;
 
@@ -5815,7 +5811,7 @@ ada_lookup_symbol_nonlocal (const struct language_defn *langdef,
 {
   struct block_symbol sym;
 
-  sym = ada_lookup_symbol (name, block_static_block (block), domain, NULL);
+  sym = ada_lookup_symbol (name, block_static_block (block), domain);
   if (sym.symbol != NULL)
     return sym;
 

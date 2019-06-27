@@ -1,3 +1,11 @@
+2019-07-01  Tom Tromey  <tromey@adacore.com>
+
+	* ada-exp.y (find_primitive_type): Update.
+	* ada-lang.h (ada_lookup_symbol): Update.
+	* ada-lang.c (ada_lookup_symbol): Remove "is_a_field_of_this"
+	parameter.
+	(ada_lookup_encoded_symbol, ada_lookup_symbol_nonlocal): Update.
+
 2019-06-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/24541

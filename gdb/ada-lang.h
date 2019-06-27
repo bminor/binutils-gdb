@@ -239,7 +239,7 @@ extern char *ada_fold_name (const char *);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
 					      const struct block *,
-					      domain_enum, int *);
+					      domain_enum);
 
 extern void ada_lookup_encoded_symbol
   (const char *name, const struct block *block, domain_enum domain,
