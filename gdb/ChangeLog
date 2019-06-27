@@ -1,3 +1,10 @@
+2019-06-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR python/24742
+	https://bugzilla.redhat.com/show_bug.cgi?id=1723564
+	* python/python.c (do_start_initialization): Use 'xmalloc'
+	instead of 'PyMem_Malloc'.
+
 2019-06-28  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2read.c (partial_die_info::read): Prefer the linkage name
