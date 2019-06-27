@@ -1,5 +1,17 @@
 2019-06-28  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_hash_iter_f): New.
+	(ctf_dynhash_iter): New declaration.
+	(ctf_dynhash_iter_remove): New declaration.
+	* ctf-hash.c (ctf_dynhash_iter): Define.
+	(ctf_dynhash_iter_remove): Likewise.
+	(ctf_hashtab_traverse): New.
+	(ctf_hashtab_traverse_remove): Likewise.
+	(struct ctf_traverse_cb_arg): Likewise.
+	(struct ctf_traverse_remove_cb_arg): Likewise.
+
+2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_dynhash_remove): Call with a mocked-up element.
 
 2019-06-28  Nick Alcock <nick.alcock@oracle.com>
