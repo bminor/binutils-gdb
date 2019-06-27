@@ -1,3 +1,15 @@
+2019-06-27  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (Iq): Delete.
+	(Id): New.
+	(reg_table): Use it for lwpins, lwpval, and bextr. Use Edq for
+	TBM insns.
+	(vex_len_table): Use Edq for vcvtsi2ss, vcvtsi2sd. Use Gdq for
+	vcvttss2si, vcvttsd2si, vcvtss2si, and vcvtsd2si.
+	(OP_E_memory): Also honor needindex when deciding whether an
+	address size prefix needs printing.
+	(OP_I): Remove handling of q_mode. Add handling of d_mode.
+
 2019-06-26  Jim Wilson  <jimw@sifive.com>
 
 	PR binutils/24739

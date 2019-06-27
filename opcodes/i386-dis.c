@@ -291,8 +291,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define sIbT { OP_sI, b_T_mode } /* sign extened byte like 'T' */
 #define Iv { OP_I, v_mode }
 #define sIv { OP_sI, v_mode }
-#define Iq { OP_I, q_mode }
 #define Iv64 { OP_I64, v_mode }
+#define Id { OP_I, d_mode }
 #define Iw { OP_I, w_mode }
 #define I1 { OP_I, const_1_mode }
 #define Jb { OP_J, b_mode }
@@ -3596,29 +3596,29 @@ static const struct dis386 reg_table[][8] = {
   },
   /* REG_XOP_LWP */
   {
-    { "lwpins", { { OP_LWP_E, 0 }, Ed, Iq }, 0 },
-    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, Iq }, 0 },
+    { "lwpins", { { OP_LWP_E, 0 }, Ed, Id }, 0 },
+    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, Id }, 0 },
   },
   /* REG_XOP_TBM_01 */
   {
     { Bad_Opcode },
-    { "blcfill",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "blsfill",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "blcs",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "tzmsk",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "blcic",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "blsic",	{ { OP_LWP_E, 0 }, Ev }, 0 },
-    { "t1mskc",	{ { OP_LWP_E, 0 }, Ev }, 0 },
+    { "blcfill",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "blsfill",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "blcs",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "tzmsk",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "blcic",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "blsic",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "t1mskc",	{ { OP_LWP_E, 0 }, Edq }, 0 },
   },
   /* REG_XOP_TBM_02 */
   {
     { Bad_Opcode },
-    { "blcmsk",	{ { OP_LWP_E, 0 }, Ev }, 0 },
+    { "blcmsk",	{ { OP_LWP_E, 0 }, Edq }, 0 },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "blci",	{ { OP_LWP_E, 0 }, Ev }, 0 },
+    { "blci",	{ { OP_LWP_E, 0 }, Edq }, 0 },
   },
 
 #include "i386-dis-evex-reg.h"
@@ -8150,7 +8150,7 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 10 */
-    { "bextr",	{ Gv, Ev, Iq }, 0 },
+    { "bextrS",	{ Gdq, Edq, Id }, 0 },
     { Bad_Opcode },
     { REG_TABLE (REG_XOP_LWP) },
     { Bad_Opcode },
@@ -9343,38 +9343,38 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F2A_P_1 */
   {
-    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Ev }, 0 },
-    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Ev }, 0 },
+    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
+    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
   },
 
   /* VEX_LEN_0F2A_P_3 */
   {
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Ev }, 0 },
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Ev }, 0 },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
   },
 
   /* VEX_LEN_0F2C_P_1 */
   {
-    { "vcvttss2si",	{ Gv, EXdScalar }, 0 },
-    { "vcvttss2si",	{ Gv, EXdScalar }, 0 },
+    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
+    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
   },
 
   /* VEX_LEN_0F2C_P_3 */
   {
-    { "vcvttsd2si",	{ Gv, EXqScalar }, 0 },
-    { "vcvttsd2si",	{ Gv, EXqScalar }, 0 },
+    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
+    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
   },
 
   /* VEX_LEN_0F2D_P_1 */
   {
-    { "vcvtss2si",	{ Gv, EXdScalar }, 0 },
-    { "vcvtss2si",	{ Gv, EXdScalar }, 0 },
+    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
+    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
   },
 
   /* VEX_LEN_0F2D_P_3 */
   {
-    { "vcvtsd2si",	{ Gv, EXqScalar }, 0 },
-    { "vcvtsd2si",	{ Gv, EXqScalar }, 0 },
+    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
+    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
   },
 
   /* VEX_LEN_0F41_P_0 */
@@ -14203,7 +14203,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      }
 	  }
 
-      if ((havebase || haveindex || needaddr32 || riprel)
+      if ((havebase || haveindex || needindex || needaddr32 || riprel)
 	  && (bytemode != v_bnd_mode)
 	  && (bytemode != v_bndmk_mode)
 	  && (bytemode != bnd_mode)
@@ -14729,13 +14729,6 @@ OP_I (int bytemode, int sizeflag)
       op = *codep++;
       mask = 0xff;
       break;
-    case q_mode:
-      if (address_mode == mode_64bit)
-	{
-	  op = get32s ();
-	  break;
-	}
-      /* Fall through.  */
     case v_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
@@ -14754,6 +14747,10 @@ OP_I (int bytemode, int sizeflag)
 	    }
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	}
+      break;
+    case d_mode:
+      mask = 0xffffffff;
+      op = get32 ();
       break;
     case w_mode:
       mask = 0xfffff;
