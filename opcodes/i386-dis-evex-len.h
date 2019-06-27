@@ -89,6 +89,90 @@ static const struct dis386 evex_len_table[][3] = {
     { "vbroadcasti64x4",	{ XM, EXymm }, 0 },
   },
 
+  /* EVEX_LEN_0F38C6_REG_1_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf0dp%XW",  { MVexVSIBDWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C6_REG_2_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf1dp%XW",  { MVexVSIBDWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C6_REG_5_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf0dp%XW",  { MVexVSIBDWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C6_REG_6_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf1dp%XW",  { MVexVSIBDWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_1_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf0qps",  { MVexVSIBDQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_1_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf0qpd",  { MVexVSIBQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_2_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf1qps",  { MVexVSIBDQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_2_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vgatherpf1qpd",  { MVexVSIBQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_5_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf0qps",  { MVexVSIBDQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_5_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf0qpd",  { MVexVSIBQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_6_P_2_W_0 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf1qps",  { MVexVSIBDQWpX }, 0 },
+  },
+
+  /* EVEX_LEN_0F38C7_R_6_P_2_W_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vscatterpf1qpd",  { MVexVSIBQWpX }, 0 },
+  },
+
   /* EVEX_LEN_0F3A18_P_2_W_0 */
   {
     { Bad_Opcode },

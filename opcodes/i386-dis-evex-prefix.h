@@ -1557,25 +1557,25 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vgatherpf0dp%XW",  { MVexVSIBDWpX }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C6_REG_1_PREFIX_2) },
   },
   /* PREFIX_EVEX_0F38C6_REG_2 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vgatherpf1dp%XW",  { MVexVSIBDWpX }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C6_REG_2_PREFIX_2) },
   },
   /* PREFIX_EVEX_0F38C6_REG_5 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vscatterpf0dp%XW",  { MVexVSIBDWpX }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C6_REG_5_PREFIX_2) },
   },
   /* PREFIX_EVEX_0F38C6_REG_6 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vscatterpf1dp%XW",  { MVexVSIBDWpX }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C6_REG_6_PREFIX_2) },
   },
   /* PREFIX_EVEX_0F38C7_REG_1 */
   {
