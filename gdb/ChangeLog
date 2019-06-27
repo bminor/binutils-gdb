@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_reg_next, tui_reg_prev): Add "current_group"
+	parameter.  Don't reference globals.
+	(tui_reg_command): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_show_registers): Simplify.
 
 2019-07-17  Tom Tromey  <tom@tromey.com>

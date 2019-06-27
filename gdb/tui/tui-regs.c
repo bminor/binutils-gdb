@@ -460,14 +460,13 @@ tui_display_register (struct tui_data_item_window *data)
    register window is not currently being displayed.  */
 
 static struct reggroup *
-tui_reg_next (struct gdbarch *gdbarch)
+tui_reg_next (struct reggroup *current_group, struct gdbarch *gdbarch)
 {
   struct reggroup *group = NULL;
 
-  if (TUI_DATA_WIN != NULL)
+  if (current_group != NULL)
     {
-      group = TUI_DATA_WIN->current_group;
-      group = reggroup_next (gdbarch, group);
+      group = reggroup_next (gdbarch, current_group);
       if (group == NULL)
         group = reggroup_next (gdbarch, NULL);
     }
@@ -479,14 +478,13 @@ tui_reg_next (struct gdbarch *gdbarch)
    register window is not currently being displayed.  */
 
 static struct reggroup *
-tui_reg_prev (struct gdbarch *gdbarch)
+tui_reg_prev (struct reggroup *current_group, struct gdbarch *gdbarch)
 {
   struct reggroup *group = NULL;
 
-  if (TUI_DATA_WIN != NULL)
+  if (current_group != NULL)
     {
-      group = TUI_DATA_WIN->current_group;
-      group = reggroup_prev (gdbarch, group);
+      group = reggroup_prev (gdbarch, current_group);
       if (group == NULL)
 	group = reggroup_prev (gdbarch, NULL);
     }
@@ -516,10 +514,13 @@ tui_reg_command (const char *args, int from_tty)
       if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible)
 	tui_set_layout_by_name (DATA_NAME);
 
+      struct reggroup *current_group = NULL;
+      if (TUI_DATA_WIN != NULL)
+	current_group = TUI_DATA_WIN->current_group;
       if (strncmp (args, "next", len) == 0)
-	match = tui_reg_next (gdbarch);
+	match = tui_reg_next (current_group, gdbarch);
       else if (strncmp (args, "prev", len) == 0)
-	match = tui_reg_prev (gdbarch);
+	match = tui_reg_prev (current_group, gdbarch);
 
       /* This loop matches on the initial part of a register group
 	 name.  If this initial part in ARGS matches only one register
