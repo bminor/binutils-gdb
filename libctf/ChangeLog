@@ -1,5 +1,9 @@
 2019-06-28  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_create): Fix off-by-one error.
+
+2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-impl.h: (struct ctf_strs_writable): New, non-const version of
 	struct ctf_strs.
 	(struct ctf_dtdef): Note that dtd_data.ctt_name is unpopulated.

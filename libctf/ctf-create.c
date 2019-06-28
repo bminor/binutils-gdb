@@ -82,7 +82,7 @@ ctf_create (int *errp)
   fp->ctf_dvhash = dvhash;
   fp->ctf_dtnextid = 1;
   fp->ctf_dtoldid = 0;
-  fp->ctf_snapshots = 0;
+  fp->ctf_snapshots = 1;
   fp->ctf_snapshot_lu = 0;
 
   return fp;
