@@ -1,3 +1,11 @@
+2019-06-28  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): Handle
+	REL16_HIGH* relocs.
+	(Target_powerpc::Scan::local): Likewise.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
 2019-06-10  Martin Liska  <mliska@suse.cz>
 
 	* errors.h: Include string.

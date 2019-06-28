@@ -6464,6 +6464,12 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
+    case elfcpp::R_PPC64_REL16_HIGH:
+    case elfcpp::R_PPC64_REL16_HIGHA:
+    case elfcpp::R_PPC64_REL16_HIGHER:
+    case elfcpp::R_PPC64_REL16_HIGHERA:
+    case elfcpp::R_PPC64_REL16_HIGHEST:
+    case elfcpp::R_PPC64_REL16_HIGHESTA:
       ref = Symbol::RELATIVE_REF;
       break;
 
@@ -6964,6 +6970,12 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_POWERPC_REL16DX_HA:
+    case elfcpp::R_PPC64_REL16_HIGH:
+    case elfcpp::R_PPC64_REL16_HIGHA:
+    case elfcpp::R_PPC64_REL16_HIGHER:
+    case elfcpp::R_PPC64_REL16_HIGHERA:
+    case elfcpp::R_PPC64_REL16_HIGHEST:
+    case elfcpp::R_PPC64_REL16_HIGHESTA:
     case elfcpp::R_POWERPC_SECTOFF:
     case elfcpp::R_POWERPC_SECTOFF_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
@@ -7604,6 +7616,12 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_POWERPC_REL16DX_HA:
+    case elfcpp::R_PPC64_REL16_HIGH:
+    case elfcpp::R_PPC64_REL16_HIGHA:
+    case elfcpp::R_PPC64_REL16_HIGHER:
+    case elfcpp::R_PPC64_REL16_HIGHERA:
+    case elfcpp::R_PPC64_REL16_HIGHEST:
+    case elfcpp::R_PPC64_REL16_HIGHESTA:
     case elfcpp::R_POWERPC_SECTOFF:
     case elfcpp::R_POWERPC_SECTOFF_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
@@ -9411,6 +9429,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_POWERPC_REL16DX_HA:
+    case elfcpp::R_PPC64_REL16_HIGH:
+    case elfcpp::R_PPC64_REL16_HIGHA:
+    case elfcpp::R_PPC64_REL16_HIGHER:
+    case elfcpp::R_PPC64_REL16_HIGHERA:
+    case elfcpp::R_PPC64_REL16_HIGHEST:
+    case elfcpp::R_PPC64_REL16_HIGHESTA:
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
@@ -9973,6 +9997,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_REL16_HI:
+    case elfcpp::R_PPC64_REL16_HIGH:
     case elfcpp::R_PPC64_TOC16_HI:
     case elfcpp::R_POWERPC_GOT16_HI:
     case elfcpp::R_POWERPC_PLT16_HI:
@@ -9995,6 +10020,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_REL16_HA:
+    case elfcpp::R_PPC64_REL16_HIGHA:
     case elfcpp::R_PPC64_TOC16_HA:
     case elfcpp::R_POWERPC_GOT16_HA:
     case elfcpp::R_POWERPC_PLT16_HA:
@@ -10018,6 +10044,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	goto unsupp;
       // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHER:
+    case elfcpp::R_PPC64_REL16_HIGHER:
     case elfcpp::R_PPC64_TPREL16_HIGHER:
       Reloc::addr16_hi2(view, value);
       break;
@@ -10028,6 +10055,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	goto unsupp;
       // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHERA:
+    case elfcpp::R_PPC64_REL16_HIGHERA:
     case elfcpp::R_PPC64_TPREL16_HIGHERA:
       Reloc::addr16_ha2(view, value);
       break;
@@ -10038,6 +10066,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	goto unsupp;
       // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHEST:
+    case elfcpp::R_PPC64_REL16_HIGHEST:
     case elfcpp::R_PPC64_TPREL16_HIGHEST:
       Reloc::addr16_hi3(view, value);
       break;
@@ -10048,6 +10077,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	goto unsupp;
       // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHESTA:
+    case elfcpp::R_PPC64_REL16_HIGHESTA:
     case elfcpp::R_PPC64_TPREL16_HIGHESTA:
       Reloc::addr16_ha3(view, value);
       break;
