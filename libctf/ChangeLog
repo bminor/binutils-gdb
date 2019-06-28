@@ -1,5 +1,9 @@
 2019-06-28  Nick Alcock <nick.alcock@oracle.com>
 
+	* ctf-hash.c (ctf_dynhash_remove): Call with a mocked-up element.
+
+2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_format_type): Prefix hex strings with 0x.
 	(ctf_dump_funcs): Likewise.
 

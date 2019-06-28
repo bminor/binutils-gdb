@@ -176,7 +176,8 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 void
 ctf_dynhash_remove (ctf_dynhash_t *hp, const void *key)
 {
-  htab_remove_elt (hp->htab, (void *) key);
+  ctf_helem_t hep = { (void *) key, NULL, NULL, NULL };
+  htab_remove_elt (hp->htab, &hep);
 }
 
 void *
