@@ -161,10 +161,11 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 
 /* Function to set the disassembly window's content.  */
 enum tui_status
-tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
+tui_set_disassem_content (tui_source_window_base *win_info,
+			  struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int i;
-  int offset = TUI_DISASM_WIN->horizontal_offset;
+  int offset = win_info->horizontal_offset;
   int max_lines, line_width;
   CORE_ADDR cur_pc;
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
@@ -177,17 +178,16 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (pc == 0)
     return TUI_FAILURE;
 
-  tui_alloc_source_buffer (TUI_DISASM_WIN);
+  tui_alloc_source_buffer (win_info);
 
-  tui_source_window_base *base = TUI_DISASM_WIN;
-  base->gdbarch = gdbarch;
-  base->start_line_or_addr.loa = LOA_ADDRESS;
-  base->start_line_or_addr.u.addr = pc;
+  win_info->gdbarch = gdbarch;
+  win_info->start_line_or_addr.loa = LOA_ADDRESS;
+  win_info->start_line_or_addr.u.addr = pc;
   cur_pc = locator->addr;
 
   /* Window size, excluding highlight box.  */
-  max_lines = TUI_DISASM_WIN->height - 2;
-  line_width = TUI_DISASM_WIN->width - 2;
+  max_lines = win_info->height - 2;
+  line_width = win_info->width - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = XALLOCAVEC (struct tui_asm_line, max_lines);
@@ -217,12 +217,12 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   line = (char*) alloca (insn_pos + insn_size + 1);
 
   /* Now construct each line.  */
-  TUI_DISASM_WIN->content.resize (max_lines);
+  win_info->content.resize (max_lines);
   for (i = 0; i < max_lines; i++)
     {
       int cur_len;
 
-      tui_source_element *src = &TUI_DISASM_WIN->content[i];
+      tui_source_element *src = &win_info->content[i];
       strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
       memset (line + cur_len, ' ', insn_pos - cur_len);

@@ -25,7 +25,8 @@
 #include "tui/tui.h"		/* For enum tui_status.  */
 #include "tui/tui-data.h"	/* For enum tui_scroll_direction.  */
 
-extern enum tui_status tui_set_disassem_content (struct gdbarch *, CORE_ADDR);
+extern enum tui_status tui_set_disassem_content (tui_source_window_base *,
+						 struct gdbarch *, CORE_ADDR);
 extern void tui_show_disassem (struct gdbarch *, CORE_ADDR);
 extern void tui_show_disassem_and_update_source (struct gdbarch *, CORE_ADDR);
 extern void tui_get_begin_asm_address (struct gdbarch **, CORE_ADDR *);

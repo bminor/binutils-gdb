@@ -1,5 +1,13 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_window_as_is): Update.
+	* tui/tui-disasm.h (tui_set_disassem_content): Add win_info
+	parameter.
+	* tui/tui-disasm.c (tui_set_disassem_content): Add win_info
+	parameter.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_clear_source_content)
 	(tui_show_source_content, tui_show_exec_info_content)
 	(tui_clear_exec_info_content): Update.

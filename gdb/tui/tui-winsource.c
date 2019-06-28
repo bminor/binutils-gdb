@@ -97,7 +97,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
     ret = tui_set_source_content (win_info, s, line_or_addr.u.line_no,
 				  noerror);
   else
-    ret = tui_set_disassem_content (gdbarch, line_or_addr.u.addr);
+    ret = tui_set_disassem_content (win_info, gdbarch, line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
     {
