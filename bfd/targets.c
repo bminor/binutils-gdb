@@ -1149,10 +1149,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&pj_elf32_vec,
 	&pj_elf32_le_vec,
 
-#if BFD_SUPPORTS_PLUGINS
-	&plugin_vec,
-#endif
-
 	&powerpc_boot_vec,
 	&powerpc_elf32_vec,
 	&powerpc_elf32_le_vec,
@@ -1304,6 +1300,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&binary_vec,
 /* Likewise for ihex.  */
 	&ihex_vec,
+
+#if BFD_SUPPORTS_PLUGINS
+	&plugin_vec,
+#endif
 
 /* Add any required traditional-core-file-handler.  */
 

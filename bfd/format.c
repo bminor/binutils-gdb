@@ -290,8 +290,15 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     {
       const bfd_target *temp;
 
-      /* Don't check the default target twice.  */
+      /* The binary target matches anything, so don't return it when
+	 searching.  Don't match the plugin target if we have another
+	 alternative since we want to properly set the input format
+	 before allowing a plugin to claim the file.  Also, don't
+	 check the default target twice.  */
       if (*target == &binary_vec
+#if BFD_SUPPORTS_PLUGINS
+	  || (match_count != 0 && *target == &plugin_vec)
+#endif
 	  || (!abfd->target_defaulted && *target == save_targ))
 	continue;
 

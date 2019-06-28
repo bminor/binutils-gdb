@@ -1,3 +1,14 @@
+2019-06-28  Alan Modra  <amodra@gmail.com>
+
+	* format.c (bfd_check_format_matches): Don't match plugin target
+	if another target matches.  Expand comment.
+	* targets.c (_bfd_target_vector): Move plugin_vec after all other
+	non-corefile targets, outside !SELECT_VECS.
+	* config.bfd: Don't handle targ=plugin here.
+	* configure.ac: Don't add plugin to enable_targets or handle in
+	target loop setting selvecs and other target vars.
+	* configure: Regenerate.
+
 2019-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 24703

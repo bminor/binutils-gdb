@@ -218,11 +218,6 @@ esac
 #  convention, else the table becomes a real mess to understand and maintain.
 
 case "${targ}" in
-  plugin)
-    targ_defvec=plugin_vec
-    targ_selvecs="plugin_vec"
-    ;;
-
 # START OF targmatch.h
 #ifdef BFD64
   aarch64-*-darwin*)
