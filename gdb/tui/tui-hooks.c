@@ -204,18 +204,6 @@ tui_normal_stop (struct bpstats *bs, int print_frame)
   tui_refresh_frame_and_register_information (/*registers_too_p=*/1);
 }
 
-/* Observer for source_cache_cleared.  */
-
-static void
-tui_redisplay_source ()
-{
-  if (tui_is_window_visible (SRC_WIN))
-    {
-      /* Force redisplay.  */
-      TUI_SRC_WIN->refill ();
-    }
-}
-
 /* Token associated with observers registered while TUI hooks are
    installed.  */
 static const gdb::observers::token tui_observers_token {};
@@ -251,8 +239,6 @@ tui_attach_detach_observers (bool attach)
 		    tui_normal_stop, attach);
   attach_or_detach (gdb::observers::register_changed,
 		    tui_register_changed, attach);
-  attach_or_detach (gdb::observers::source_styling_changed,
-		    tui_redisplay_source, attach);
 }
 
 /* Install the TUI specific hooks.  */

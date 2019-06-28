@@ -1,5 +1,18 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.c (tui_source_window): New constructor.  Add
+	observer.
+	(~tui_source_window): New destructor.
+	(tui_source_window::style_changed): New method.
+	* tui/tui-hooks.c (tui_redisplay_source): Remove.
+	(tui_attach_detach_observers): Update.
+	* tui/tui-data.h (struct tui_source_window): Make constructor not
+	inline.  Add destructor.
+	(struct tui_source_window) <style_changed>: New method.
+	<m_observable>: New member.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.c (tui_clear_source_windows_detail): Fix typo.
 	* tui/tui-win.c (tui_resize_all): Fix typo.
 

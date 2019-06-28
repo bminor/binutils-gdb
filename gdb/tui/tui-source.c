@@ -325,3 +325,23 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
       print_source_lines (s, l.u.line_no, l.u.line_no + 1, 0);
     }
 }
+
+tui_source_window::tui_source_window ()
+  : tui_source_window_base (SRC_WIN)
+{
+  gdb::observers::source_styling_changed.attach
+    (std::bind (&tui_source_window::style_changed, this),
+     m_observable);
+}
+
+tui_source_window::~tui_source_window ()
+{
+  gdb::observers::source_styling_changed.detach (m_observable);
+}
+
+void
+tui_source_window::style_changed ()
+{
+  if (tui_active && is_visible)
+    refill ();
+}

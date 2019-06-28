@@ -24,6 +24,7 @@
 
 #include "tui/tui.h"	/* For enum tui_win_type.  */
 #include "gdb_curses.h"	/* For WINDOW.  */
+#include "observable.h"
 
 /* This is a point definition.  */
 struct tui_point
@@ -424,10 +425,8 @@ public:
 
 struct tui_source_window : public tui_source_window_base
 {
-  tui_source_window ()
-    : tui_source_window_base (SRC_WIN)
-  {
-  }
+  tui_source_window ();
+  ~tui_source_window ();
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
@@ -439,6 +438,13 @@ struct tui_source_window : public tui_source_window_base
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
+
+private:
+
+  void style_changed ();
+
+  /* A token used to register and unregister an observer.  */
+  gdb::observers::token m_observable;
 };
 
 /* A TUI disassembly window.  */
