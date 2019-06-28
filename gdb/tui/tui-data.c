@@ -321,7 +321,6 @@ tui_initialize_static_data ()
     win->viewport_height =
     win->last_visible_line = 0;
   win->handle = NULL;
-  win->content_in_use = FALSE;
   win->is_visible = false;
   win->title = 0;
 }

@@ -1,5 +1,23 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_clear_source_content)
+	(tui_show_source_content, tui_show_exec_info_content)
+	(tui_clear_exec_info_content): Update.
+	* tui/tui-stack.c (tui_show_locator_content): Update.
+	(tui_show_frame_info): Update.
+	* tui/tui-source.h (tui_source_window): Don't declare.
+	* tui/tui-source.c (tui_source_window::showing_source_p): Rename
+	from tui_source_is_displayed.
+	* tui/tui-data.h (struct tui_gen_win_info) <content_in_use>:
+	Remove field.
+	(struct tui_source_window_base) <content_in_use>: New field.  Now
+	bool.
+	(struct tui_source_window) <showing_source_p>: New method.
+	(TUI_SRC_WIN): Change cast.
+	* tui/tui-data.c (tui_initialize_static_data): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_breakpoint_info): Use
 	location_matches_p.
 	* tui/tui-source.c (tui_source_window::location_matches_p): New

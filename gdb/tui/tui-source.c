@@ -287,11 +287,10 @@ tui_show_symtab_source (tui_source_window_base *win_info,
 
 /* Answer whether the source is currently displayed in the source
    window.  */
-int
-tui_source_is_displayed (const char *fullname)
+bool
+tui_source_window::showing_source_p (const char *fullname) const
 {
-  return (TUI_SRC_WIN != NULL
-	  && TUI_SRC_WIN->content_in_use 
+  return (content_in_use 
 	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name,
 			    fullname) == 0));
 }

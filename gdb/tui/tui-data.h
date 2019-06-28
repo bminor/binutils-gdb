@@ -75,8 +75,6 @@ public:
   int height = 0;
   /* Origin of window.  */
   struct tui_point origin = {0, 0};
-  /* Can it be used, or is it already used?  */
-  int content_in_use = FALSE;
   /* Viewport height.  */
   int viewport_height = 0;
   /* Index of last visible line.  */
@@ -408,6 +406,8 @@ public:
      LINE_NO in this source window; false otherwise.  */
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
+  /* Can it be used, or is it already used?  */
+  bool content_in_use = false;
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
@@ -440,6 +440,8 @@ struct tui_source_window : public tui_source_window_base
   }
 
   bool location_matches_p (struct bp_location *loc, int line_no) override;
+
+  bool showing_source_p (const char *filename) const;
 
 protected:
 
@@ -610,7 +612,7 @@ extern int tui_win_is_auxiliary (enum tui_win_type win_type);
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-#define TUI_SRC_WIN     ((tui_source_window_base *) tui_win_list[SRC_WIN])
+#define TUI_SRC_WIN     ((tui_source_window *) tui_win_list[SRC_WIN])
 #define TUI_DISASM_WIN	((tui_source_window_base *) tui_win_list[DISASSEM_WIN])
 #define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
 #define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])

@@ -212,7 +212,7 @@ tui_clear_source_content (struct tui_source_window_base *win_info,
     {
       int i;
 
-      win_info->content_in_use = FALSE;
+      win_info->content_in_use = false;
       tui_erase_source_content (win_info, display_prompt);
       for (i = 0; i < win_info->content.size (); i++)
 	{
@@ -306,7 +306,7 @@ tui_show_source_content (struct tui_source_window_base *win_info)
 
   tui_check_and_display_highlight_if_needed (win_info);
   win_info->refresh_window ();
-  win_info->content_in_use = TRUE;
+  win_info->content_in_use = true;
 }
 
 /* See tui-data.h.  */
@@ -531,7 +531,6 @@ tui_show_exec_info_content (struct tui_source_window_base *win_info)
 	       0,
 	       content[cur_line - 1]);
   exec_info->refresh_window ();
-  exec_info->content_in_use = TRUE;
 }
 
 
@@ -547,7 +546,6 @@ tui_erase_exec_info_content (struct tui_source_window_base *win_info)
 void
 tui_clear_exec_info_content (struct tui_source_window_base *win_info)
 {
-  win_info->execution_info->content_in_use = FALSE;
   tui_erase_exec_info_content (win_info);
 }
 

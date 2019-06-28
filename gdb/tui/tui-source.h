@@ -37,6 +37,5 @@ extern void tui_show_symtab_source (tui_source_window_base *,
 				    struct gdbarch *, struct symtab *,
 				    struct tui_line_or_address,
 				    int);
-extern int tui_source_is_displayed (const char *);
 
 #endif /* TUI_TUI_SOURCE_H */
