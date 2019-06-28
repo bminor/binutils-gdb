@@ -410,7 +410,6 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
 {
   int i;
   bool need_refresh = false;
-  tui_source_window_base *src = (tui_source_window_base *) win;
 
   for (i = 0; i < win->content.size (); i++)
     {
@@ -440,15 +439,7 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
 
 	  for (loc = bp->loc; loc != NULL; loc = loc->next)
 	    {
-	      if ((win == TUI_SRC_WIN
-		   && loc->symtab != NULL
-		   && filename_cmp (src->fullname,
-				    symtab_to_fullname (loc->symtab)) == 0
-		   && line->line_or_addr.loa == LOA_LINE
-		   && loc->line_number == line->line_or_addr.u.line_no)
-		  || (win == TUI_DISASM_WIN
-		      && line->line_or_addr.loa == LOA_ADDRESS
-		      && loc->address == line->line_or_addr.u.addr))
+	      if (win->location_matches_p (loc, i))
 		{
 		  if (bp->enable_state == bp_disabled)
 		    mode |= TUI_BP_DISABLED;

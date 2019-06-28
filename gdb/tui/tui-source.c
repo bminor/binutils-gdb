@@ -345,3 +345,13 @@ tui_source_window::style_changed ()
   if (tui_active && is_visible)
     refill ();
 }
+
+bool
+tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
+{
+  return (content[line_no].line_or_addr.loa == LOA_LINE
+	  && content[line_no].line_or_addr.u.line_no == loc->line_number
+	  && loc->symtab != NULL
+	  && filename_cmp (fullname,
+			   symtab_to_fullname (loc->symtab)) == 0);
+}

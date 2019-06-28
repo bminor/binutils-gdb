@@ -404,6 +404,10 @@ public:
 
   void update_tab_width () override;
 
+  /* Return true if the location LOC corresponds to the line number
+     LINE_NO in this source window; false otherwise.  */
+  virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
+
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
@@ -435,6 +439,8 @@ struct tui_source_window : public tui_source_window_base
     return SRC_NAME;
   }
 
+  bool location_matches_p (struct bp_location *loc, int line_no) override;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
@@ -462,6 +468,8 @@ struct tui_disasm_window : public tui_source_window_base
   {
     return DISASSEM_NAME;
   }
+
+  bool location_matches_p (struct bp_location *loc, int line_no) override;
 
 protected:
 

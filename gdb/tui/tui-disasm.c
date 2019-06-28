@@ -375,3 +375,10 @@ tui_disasm_window::do_scroll_vertical (int num_to_scroll)
 				      NULL, val, FALSE);
     }
 }
+
+bool
+tui_disasm_window::location_matches_p (struct bp_location *loc, int line_no)
+{
+  return (content[line_no].line_or_addr.loa == LOA_ADDRESS
+	  && content[line_no].line_or_addr.u.addr == loc->address);
+}
