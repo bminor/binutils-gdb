@@ -2,7 +2,8 @@
 
 	PR 24707
 	* objdump.c (slurp_symtab): Fail with a helpful error message if
-	the symbol table is too large.
+	the symbol table is too large.  Skip this check for MMO format
+	files.
 
 2019-06-26  Nick Clifton  <nickc@redhat.com>
 

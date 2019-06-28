@@ -250,6 +250,23 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     case COMPRESS_SECTION_NONE:
       if (p == NULL)
 	{
+	  ufile_ptr filesize = bfd_get_file_size (abfd);
+	  if (filesize > 0
+	      && filesize < sz
+	      /* The MMO file format supports its own special compression
+		 technique, but it uses COMPRESS_SECTION_NONE when loading
+		 a section's contents.  */
+	      && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)
+	    {
+	      /* PR 24708: Avoid attempts to allocate a ridiculous amount
+		 of memory.  */
+	      bfd_set_error (bfd_error_no_memory);
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("error: %pB(%pA) section size (%#" PRIx64 " bytes) is larger than file size (%#" PRIx64 " bytes)"),
+		 abfd, sec, (uint64_t) sz, (uint64_t) filesize);
+	      return FALSE;
+	    }
 	  p = (bfd_byte *) bfd_malloc (sz);
 	  if (p == NULL)
 	    {

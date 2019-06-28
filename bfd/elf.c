@@ -8443,6 +8443,18 @@ error_return_verref:
 	  goto error_return;
 	}
 
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize > 0 && filesize < hdr->sh_size)
+	{
+	  /* PR 24708: Avoid attempts to allocate a ridiculous amount
+	     of memory.  */
+	  bfd_set_error (bfd_error_no_memory);
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("error: %pB version reference section is too large (%#" PRIx64 " bytes)"),
+	     abfd, (uint64_t) hdr->sh_size);
+	  goto error_return_verref;
+	}
       contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
       if (contents == NULL)
 	goto error_return_verref;

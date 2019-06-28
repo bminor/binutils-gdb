@@ -1,3 +1,11 @@
+2019-06-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 24708
+	* elf.c (_bfd_elf_slurp_version_tables): Check for an excessively
+	large version reference section.
+	* compress.c (bfd_get_full_section_contents): Check for an
+	uncompressed section whose size is larger than the file size.
+
 2019-06-28  Alan Modra  <amodra@gmail.com>
 
 	* format.c (bfd_check_format_matches): Don't match plugin target

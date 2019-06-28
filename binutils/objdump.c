@@ -708,7 +708,11 @@ slurp_symtab (bfd *abfd)
       off_t filesize = bfd_get_file_size (abfd);
 
       /* qv PR 24707.  */
-      if (filesize > 0 && filesize < storage)
+      if (filesize > 0
+	  && filesize < storage
+	  /* The MMO file format supports its own special compression
+	     technique, so its sections can be larger than the file size.  */
+	  && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)	  
 	{
 	  bfd_nonfatal_message (bfd_get_filename (abfd), abfd, NULL,
 				_("error: symbol table size (%#lx) is larger than filesize (%#lx)"),
