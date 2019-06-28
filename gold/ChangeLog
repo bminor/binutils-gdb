@@ -1,5 +1,10 @@
 2019-06-28  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't look
+	at next/previous reloc when relnum is -1.
+
+2019-06-28  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Stub_table::plt_error): New function.
 	(Stub_table::do_write): Use it.
 	(Output_data_glink::do_write): Don't segfault emitting linkage

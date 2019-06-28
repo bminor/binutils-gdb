@@ -8986,7 +8986,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  size_t reloc_count = shdr.get_sh_size() / reloc_size;
 		  if (size == 64
 		      && ent->r2save_
-		      && relnum + 1 < reloc_count)
+		      && relnum < reloc_count - 1)
 		    {
 		      Reltype next_rela(preloc + reloc_size);
 		      if (elfcpp::elf_r_type<size>(next_rela.get_r_info())
@@ -9757,7 +9757,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  //		addi 2,2,.TOC.@l
 	  // if .TOC. is in range.  */
 	  if (value + address - 4 + 0x80008000 <= 0xffffffff
-	      && relnum != 0
+	      && relnum + 1 > 1
 	      && preloc != NULL
 	      && target->abiversion() >= 2
 	      && !parameters->options().output_is_position_independent()
