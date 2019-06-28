@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_win_height_command): Rename from
+	tui_set_win_height.
+	(tui_set_win_height_command): Remove.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.c (tui_source_window): New constructor.  Add
 	observer.
 	(~tui_source_window): New destructor.

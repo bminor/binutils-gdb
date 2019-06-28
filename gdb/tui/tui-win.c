@@ -62,7 +62,6 @@ static enum tui_status tui_adjust_win_heights (struct tui_win_info *,
 static int new_height_ok (struct tui_win_info *, int);
 static void tui_set_tab_width_command (const char *, int);
 static void tui_refresh_all_command (const char *, int);
-static void tui_set_win_height_command (const char *, int);
 static void tui_all_windows_info (const char *, int);
 static void tui_set_focus_command (const char *, int);
 static void tui_scroll_forward_command (const char *, int);
@@ -991,7 +990,7 @@ tui_set_tab_width_command (const char *arg, int from_tty)
 
 /* Set the height of the specified window.  */
 static void
-tui_set_win_height (const char *arg, int from_tty)
+tui_set_win_height_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1067,15 +1066,6 @@ The window name specified must be valid and visible.\n"));
     }
   else
     printf_filtered (WIN_HEIGHT_USAGE);
-}
-
-/* Set the height of the specified window, with va_list.  */
-static void
-tui_set_win_height_command (const char *arg, int from_tty)
-{
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-  tui_set_win_height (arg, from_tty);
 }
 
 /* Function to adjust all window heights around the primary.   */
