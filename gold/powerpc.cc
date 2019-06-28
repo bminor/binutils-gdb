@@ -4733,6 +4733,9 @@ class Stub_table : public Output_relaxed_input_section
     return bytes;
   }
 
+  void
+  plt_error(const Plt_stub_key& p);
+
   // Write out stubs.
   void
   do_write(Output_file*);
@@ -5384,6 +5387,19 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
     }
 }
 
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::plt_error(const Plt_stub_key& p)
+{
+  if (p.sym_)
+    gold_error(_("linkage table error against `%s'"),
+	       p.sym_->demangled_name().c_str());
+  else
+    gold_error(_("linkage table error against `%s:[local %u]'"),
+	       p.object_->name().c_str(),
+	       p.locsym_);
+}
+
 // Write out plt and long branch stub code.
 
 template<int size, bool big_endian>
@@ -5424,9 +5440,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      Address off = plt_addr - got_addr;
 
 	      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
-		gold_error(_("%s: linkage table error against `%s'"),
-			   cs->first.object_->name().c_str(),
-			   cs->first.sym_->demangled_name().c_str());
+		this->plt_error(cs->first);
 
 	      bool plt_load_toc = this->targ_->abiversion() < 2;
 	      bool static_chain
@@ -5871,8 +5885,7 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	  Address off = plt_addr - my_addr;
 
 	  if (off + 0x80008000 > 0xffffffff || (off & 3) != 0)
-	    gold_error(_("%s: linkage table error against `%s'"),
-		       ge->first->object()->name().c_str(),
+	    gold_error(_("linkage table error against `%s'"),
 		       ge->first->demangled_name().c_str());
 
 	  write_insn<big_endian>(p, addis_12_12 + ha(off)),	p += 4;
