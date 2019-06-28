@@ -36,17 +36,17 @@ extern PyTypeObject thread_object_type
       }								\
   } while (0)
 
-thread_object *
+gdbpy_ref<thread_object>
 create_thread_object (struct thread_info *tp)
 {
-  thread_object *thread_obj;
+  gdbpy_ref<thread_object> thread_obj;
 
   gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (tp->inf);
   if (inf_obj == NULL)
     return NULL;
 
-  thread_obj = PyObject_New (thread_object, &thread_object_type);
-  if (!thread_obj)
+  thread_obj.reset (PyObject_New (thread_object, &thread_object_type));
+  if (thread_obj == NULL)
     return NULL;
 
   thread_obj->thread = tp;

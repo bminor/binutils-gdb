@@ -468,7 +468,7 @@ PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
-thread_object *create_thread_object (struct thread_info *tp);
+gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
 gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
 

@@ -1,5 +1,20 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* python/python-internal.h (create_thread_object): Return
+	gdbpy_ref.
+	* python/py-infthread.c (create_thread_object): Return gdbpy_ref.
+	* python/py-inferior.c (struct threadlist_entry): Add
+	constructor.
+	<thread_obj>: Now a gdbpy_ref.
+	(thread_to_thread_object): Update.
+	(add_thread_object): Use new.
+	(delete_thread_object): Use delete.
+	(infpy_threads): Update.
+	(py_free_inferior): Update.  Construct "inf_obj" after acquiring
+	GIL.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* valops.c (value_cast): Specialize error message for Ada.
 
 2019-07-10  Simon Marchi  <simon.marchi@polymtl.ca>

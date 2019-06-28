@@ -30,8 +30,14 @@
 #include "py-event.h"
 #include "py-stopevent.h"
 
-struct threadlist_entry {
-  thread_object *thread_obj;
+struct threadlist_entry
+{
+  threadlist_entry (gdbpy_ref<thread_object> &&ref)
+    : thread_obj (std::move (ref))
+  {
+  }
+
+  gdbpy_ref<thread_object> thread_obj;
   struct threadlist_entry *next;
 };
 
@@ -301,7 +307,7 @@ thread_to_thread_object (thread_info *thr)
        thread != NULL;
        thread = thread->next)
     if (thread->thread_obj->thread == thr)
-      return gdbpy_ref<>::new_reference ((PyObject *) thread->thread_obj);
+      return gdbpy_ref<>::new_reference ((PyObject *) thread->thread_obj.get ());
 
   PyErr_SetString (PyExc_SystemError,
 		   _("could not find gdb thread object"));
@@ -311,7 +317,6 @@ thread_to_thread_object (thread_info *thr)
 static void
 add_thread_object (struct thread_info *tp)
 {
-  thread_object *thread_obj;
   inferior_object *inf_obj;
   struct threadlist_entry *entry;
 
@@ -320,8 +325,8 @@ add_thread_object (struct thread_info *tp)
 
   gdbpy_enter enter_py (python_gdbarch, python_language);
 
-  thread_obj = create_thread_object (tp);
-  if (!thread_obj)
+  gdbpy_ref<thread_object> thread_obj = create_thread_object (tp);
+  if (thread_obj == NULL)
     {
       gdbpy_print_stack ();
       return;
@@ -329,8 +334,7 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj = (inferior_object *) thread_obj->inf_obj;
 
-  entry = XNEW (struct threadlist_entry);
-  entry->thread_obj = thread_obj;
+  entry = new threadlist_entry (std::move (thread_obj));
   entry->next = inf_obj->threads;
 
   inf_obj->threads = entry;
@@ -340,7 +344,7 @@ add_thread_object (struct thread_info *tp)
     return;
 
   gdbpy_ref<> event = create_thread_event_object (&new_thread_event_object_type,
-						  (PyObject *) thread_obj);
+						  (PyObject *) thread_obj.get ());
   if (event == NULL
       || evpy_emit_event (event.get (), gdb_py_events.new_thread) < 0)
     gdbpy_print_stack ();
@@ -375,8 +379,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
   *entry = (*entry)->next;
   inf_obj->nthreads--;
 
-  Py_DECREF (tmp->thread_obj);
-  xfree (tmp);
+  delete tmp;
 }
 
 static PyObject *
@@ -405,8 +408,9 @@ infpy_threads (PyObject *self, PyObject *args)
   for (i = 0, entry = inf_obj->threads; i < inf_obj->nthreads;
        i++, entry = entry->next)
     {
-      Py_INCREF (entry->thread_obj);
-      PyTuple_SET_ITEM (tuple, i, (PyObject *) entry->thread_obj);
+      PyObject *thr = (PyObject *) entry->thread_obj.get ();
+      Py_INCREF (thr);
+      PyTuple_SET_ITEM (tuple, i, thr);
     }
 
   return tuple;
@@ -859,24 +863,22 @@ infpy_dealloc (PyObject *obj)
 static void
 py_free_inferior (struct inferior *inf, void *datum)
 {
-  gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
   struct threadlist_entry *th_entry, *th_tmp;
 
   if (!gdb_python_initialized)
     return;
 
   gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
 
   inf_obj->inferior = NULL;
 
   /* Deallocate threads list.  */
   for (th_entry = inf_obj->threads; th_entry != NULL;)
     {
-      Py_DECREF (th_entry->thread_obj);
-
       th_tmp = th_entry;
       th_entry = th_entry->next;
-      xfree (th_tmp);
+      delete th_tmp;
     }
 
   inf_obj->nthreads = 0;
