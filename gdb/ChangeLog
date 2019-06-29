@@ -1,5 +1,27 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_set_exec_info_content): Remove
+	condition.
+	* tui/tui-wingeneral.c (tui_source_window_base::make_visible):
+	Remove condition.
+	* tui/tui-source.c (tui_source_window_base::reset): New method.
+	* tui/tui-layout.c (make_command_window): Don't call
+	init_and_make_win.
+	(make_source_window, make_disasm_window): Don't call
+	make_source_or_disasm_window.
+	(make_data_window): Don't call init_and_make_win.  Change calling
+	convention.
+	(show_source_disasm_command, show_data): Simplify.
+	(make_source_or_disasm_window): Remove.
+	(show_source_or_disasm_and_command): Simplify.
+	* tui/tui-data.h (struct tui_gen_win_info) <reset>: Now virtual.
+	(struct tui_source_window_base) <reset>: Likewise.
+	<execution_info>: Remove initializer.
+	* tui/tui-data.c (tui_source_window_base): Initialize
+	execution_info.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (tui_set_layout): Remove regs_populate
 	variable.
 

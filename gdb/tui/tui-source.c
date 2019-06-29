@@ -291,3 +291,13 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 	  && filename_cmp (fullname,
 			   symtab_to_fullname (loc->symtab)) == 0);
 }
+
+void
+tui_source_window_base::reset (enum tui_win_type win_type,
+			       int height, int width,
+			       int origin_x, int origin_y)
+{
+  tui_gen_win_info::reset (win_type, height, width - 3,
+			   origin_x + 3, origin_y);
+  execution_info->reset (EXEC_INFO_WIN, height, 3, origin_x, origin_y);
+}

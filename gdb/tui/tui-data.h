@@ -61,9 +61,9 @@ public:
   /* Reset this window.  WIN_TYPE must match the existing type of this
      window (it is only passed for self-test purposes).  The other
      parameters are used to set the window's size and position.  */
-  void reset (enum tui_win_type win_type,
-	      int height, int width,
-	      int origin_x, int origin_y);
+  virtual void reset (enum tui_win_type win_type,
+		      int height, int width,
+		      int origin_x, int origin_y);
 
   /* Window handle.  */
   WINDOW *handle = nullptr;
@@ -395,10 +395,14 @@ public:
      LINE_NO in this source window; false otherwise.  */
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
+  void reset (enum tui_win_type win_type,
+	      int height, int width,
+	      int origin_x, int origin_y) override;
+
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
-  struct tui_exec_info_window *execution_info = nullptr;
+  struct tui_exec_info_window *execution_info;
   /* Used for horizontal scroll.  */
   int horizontal_offset = 0;
   struct tui_line_or_address start_line_or_addr;

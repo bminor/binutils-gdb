@@ -332,7 +332,8 @@ tui_win_info::tui_win_info (enum tui_win_type type)
 }
 
 tui_source_window_base::tui_source_window_base (enum tui_win_type type)
-  : tui_win_info (type)
+  : tui_win_info (type),
+    execution_info (new tui_exec_info_window ())
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
   start_line_or_addr.loa = LOA_ADDRESS;

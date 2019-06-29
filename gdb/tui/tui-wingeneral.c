@@ -201,8 +201,7 @@ tui_make_invisible (struct tui_gen_win_info *win_info)
 void
 tui_source_window_base::make_visible (bool visible)
 {
-  if (execution_info != nullptr)
-    execution_info->make_visible (visible);
+  execution_info->make_visible (visible);
   tui_win_info::make_visible (visible);
 }
 
