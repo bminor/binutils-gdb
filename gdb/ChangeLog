@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (MAX_CONTENT_COUNT, TUI_NULL_STR)
+	(DEFAULT_HISTORY_COUNT, WITH_LOCATOR, NO_LOCATOR): Remove
+	defines.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_erase_source_content)
 	(tui_clear_source_content): Remove "display_prompt" parameter.
 	* tui/tui-winsource.c (tui_update_source_window_as_is)

@@ -98,17 +98,12 @@ enum tui_box
 #define NO_DISASSEM_STRING      "[ No Assembly Available ]"
 #define NO_REGS_STRING          "[ Register Values Unavailable ]"
 #define NO_DATA_STRING          "[ No Data Values Displayed ]"
-#define MAX_CONTENT_COUNT       100
 #define SRC_NAME                "src"
 #define CMD_NAME                "cmd"
 #define DATA_NAME               "regs"
 #define DISASSEM_NAME           "asm"
-#define TUI_NULL_STR            ""
-#define DEFAULT_HISTORY_COUNT	25
 #define HILITE                  TRUE
 #define NO_HILITE               FALSE
-#define WITH_LOCATOR            TRUE
-#define NO_LOCATOR              FALSE
 #define UNDEFINED_ITEM          -1
 #define MIN_WIN_HEIGHT          3
 #define MIN_CMD_WIN_HEIGHT      3
