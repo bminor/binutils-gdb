@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_focus_command): Rename from
+	tui_set_focus.  Call tui_enable.
+	(tui_set_focus_command): Remove.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_show_exec_info_content): Don't call
 	refresh_window.
 	* tui/tui-wingeneral.c (tui_gen_win_info::refresh_window): Call

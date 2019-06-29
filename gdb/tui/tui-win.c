@@ -63,7 +63,6 @@ static int new_height_ok (struct tui_win_info *, int);
 static void tui_set_tab_width_command (const char *, int);
 static void tui_refresh_all_command (const char *, int);
 static void tui_all_windows_info (const char *, int);
-static void tui_set_focus_command (const char *, int);
 static void tui_scroll_forward_command (const char *, int);
 static void tui_scroll_backward_command (const char *, int);
 static void tui_scroll_left_command (const char *, int);
@@ -829,8 +828,10 @@ tui_scroll_right_command (const char *arg, int from_tty)
 
 /* Set focus to the window named by 'arg'.  */
 static void
-tui_set_focus (const char *arg, int from_tty)
+tui_set_focus_command (const char *arg, int from_tty)
 {
+  tui_enable ();
+
   if (arg != NULL)
     {
       char *buf_ptr = xstrdup (arg);
@@ -865,15 +866,6 @@ The window name specified must be valid and visible.\n"));
   else
     warning (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
 }
-
-static void
-tui_set_focus_command (const char *arg, int from_tty)
-{
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-  tui_set_focus (arg, from_tty);
-}
-
 
 static void
 tui_all_windows_info (const char *arg, int from_tty)
