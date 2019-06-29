@@ -250,13 +250,7 @@ tui_erase_source_content (struct tui_source_window_base *win_info)
 		 x_pos,
 		 (char *) no_src_str);
 
-      /* elz: Added this function call to set the real contents of
-	 the window to what is on the screen, so that later calls
-	 to refresh, do display the correct stuff, and not the old
-	 image.  */
-
-      tui_set_source_content_nil (win_info, no_src_str);
-
+      win_info->content.clear ();
       win_info->refresh_window ();
     }
 }

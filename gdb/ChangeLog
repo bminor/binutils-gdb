@@ -1,5 +1,12 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_erase_source_content): Clear the
+	window's contents.
+	* tui/tui-source.h (tui_set_source_content_nil): Don't declare.
+	* tui/tui-source.c (tui_set_source_content_nil): Remove.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (UNDEFINED_ITEM): Remove define.
 	(struct tui_data_item_window): Update.
 

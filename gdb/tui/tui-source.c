@@ -209,69 +209,6 @@ tui_set_source_content (tui_source_window_base *win_info,
 }
 
 
-/* elz: This function sets the contents of the source window to empty
-   except for a line in the middle with a warning message about the
-   source not being available.  This function is called by
-   tui_erase_source_contents(), which in turn is invoked when the
-   source files cannot be accessed.  */
-
-void
-tui_set_source_content_nil (struct tui_source_window_base *win_info,
-			    const char *warning_string)
-{
-  int line_width;
-  int n_lines;
-  int curr_line = 0;
-
-  line_width = win_info->width - 1;
-  n_lines = win_info->height - 2;
-
-  /* Set to empty each line in the window, except for the one which
-     contains the message.  */
-  while (curr_line < win_info->content.size ())
-    {
-      /* Set the information related to each displayed line to null:
-         i.e. the line number is 0, there is no bp, it is not where
-         the program is stopped.  */
-
-      struct tui_source_element *element = &win_info->content[curr_line];
-
-      element->line_or_addr.loa = LOA_LINE;
-      element->line_or_addr.u.line_no = 0;
-      element->is_exec_point = false;
-      element->break_mode = 0;
-
-      /* Set the contents of the line to blank.  */
-      element->line[0] = (char) 0;
-
-      /* If the current line is in the middle of the screen, then we
-         want to display the 'no source available' message in it.
-         Note: the 'weird' arithmetic with the line width and height
-         comes from the function tui_erase_source_content().  We need
-         to keep the screen and the window's actual contents in
-         synch.  */
-
-      if (curr_line == (n_lines / 2 + 1))
-	{
-	  int xpos;
-	  int warning_length = strlen (warning_string);
-	  char *src_line;
-
-	  if (warning_length >= ((line_width - 1) / 2))
-	    xpos = 1;
-	  else
-	    xpos = (line_width - 1) / 2 - warning_length;
-
-	  src_line = xstrprintf ("%s%s", n_spaces (xpos), warning_string);
-	  xfree (element->line);
-	  element->line = src_line;
-	}
-
-      curr_line++;
-    }
-}
-
-
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
