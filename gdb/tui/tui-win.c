@@ -857,8 +857,6 @@ The window name specified must be valid and visible.\n"));
 	  keypad (TUI_CMD_WIN->handle, (win_info != TUI_CMD_WIN));
 	}
 
-      if (TUI_DATA_WIN && TUI_DATA_WIN->is_visible)
-	TUI_DATA_WIN->refresh_all ();
       xfree (buf_ptr);
       printf_filtered (_("Focus set to %s window.\n"),
 		       tui_win_with_focus ()->name ());

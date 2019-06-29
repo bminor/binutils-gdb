@@ -1,5 +1,14 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_rl_other_window): Update.
+	* tui/tui-wingeneral.c (tui_data_window::refresh_window): Call
+	superclass method first.  Always iterate over regs_content.
+	(tui_unhighlight_win, tui_highlight_win): Use refresh_window
+	method.
+	* tui/tui-win.c (tui_set_focus_command): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_set_focus_command): Rename from
 	tui_set_focus.  Call tui_enable.
 	(tui_set_focus_command): Remove.

@@ -48,15 +48,12 @@ tui_gen_win_info::refresh_window ()
 void
 tui_data_window::refresh_window ()
 {
-  if (!regs_content.empty ())
-    {
-      for (auto &&win : regs_content)
-	{
-	  if (win != NULL)
-	    win->refresh_window ();
-	}
-    }
   tui_gen_win_info::refresh_window ();
+  for (auto &&win : regs_content)
+    {
+      if (win != NULL)
+	win->refresh_window ();
+    }
 }
 
 /* Function to delete the curses window, checking for NULL.  */
@@ -108,7 +105,7 @@ tui_unhighlight_win (struct tui_win_info *win_info)
       && win_info->handle != NULL)
     {
       box_win (win_info, NO_HILITE);
-      wrefresh (win_info->handle);
+      win_info->refresh_window ();
       win_info->set_highlight (false);
     }
 }
@@ -122,7 +119,7 @@ tui_highlight_win (struct tui_win_info *win_info)
       && win_info->handle != NULL)
     {
       box_win (win_info, HILITE);
-      wrefresh (win_info->handle);
+      win_info->refresh_window ();
       win_info->set_highlight (true);
     }
 }
