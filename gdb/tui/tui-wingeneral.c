@@ -37,7 +37,10 @@ void
 tui_gen_win_info::refresh_window ()
 {
   if (handle != NULL)
-    wrefresh (handle);
+    {
+      touchwin (handle);
+      wrefresh (handle);
+    }
 }
 
 /* See tui-data.h.  */
@@ -49,12 +52,11 @@ tui_data_window::refresh_window ()
     {
       for (auto &&win : regs_content)
 	{
-	  if (win != NULL && win->handle != NULL)
-	    wrefresh (win->handle);
+	  if (win != NULL)
+	    win->refresh_window ();
 	}
     }
-  else
-    tui_gen_win_info::refresh_window ();
+  tui_gen_win_info::refresh_window ();
 }
 
 /* Function to delete the curses window, checking for NULL.  */
@@ -231,20 +233,10 @@ tui_make_all_invisible (void)
 /* See tui-data.h.  */
 
 void
-tui_win_info::refresh ()
+tui_source_window_base::refresh_window ()
 {
-  touchwin (handle);
-  refresh_window ();
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::refresh ()
-{
-  touchwin (execution_info->handle);
   execution_info->refresh_window ();
-  tui_win_info::refresh ();
+  tui_win_info::refresh_window ();
 }
 
 /* Function to refresh all the windows currently displayed.  */
@@ -257,13 +249,10 @@ tui_refresh_all ()
   for (tui_win_info *win_info : all_tui_windows ())
     {
       if (win_info->is_visible)
-	win_info->refresh ();
+	win_info->refresh_window ();
     }
   if (locator->is_visible)
-    {
-      touchwin (locator->handle);
-      locator->refresh_window ();
-    }
+    locator->refresh_window ();
 }
 
 

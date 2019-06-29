@@ -513,7 +513,6 @@ tui_show_exec_info_content (struct tui_source_window_base *win_info)
   const tui_exec_info_content *content = exec_info->get_content ();
 
   werase (exec_info->handle);
-  exec_info->refresh_window ();
   for (int cur_line = 1; cur_line <= win_info->content.size (); cur_line++)
     mvwaddstr (exec_info->handle,
 	       cur_line,

@@ -303,9 +303,6 @@ public:
     return false;
   }
 
-  /* Refresh this window and any associated windows.  */
-  virtual void refresh ();
-
   /* Called after all the TUI windows are refreshed, to let this
      window have a chance to update itself further.  */
   virtual void refresh_all ()
@@ -380,7 +377,7 @@ public:
   }
 
   void make_visible (bool visible) override;
-  void refresh () override;
+  void refresh_window () override;
   void refresh_all () override;
 
   /* Refill the source window's source cache and update it.  If this
