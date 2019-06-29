@@ -398,8 +398,6 @@ public:
      LINE_NO in this source window; false otherwise.  */
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
-  /* Can it be used, or is it already used?  */
-  bool content_in_use = false;
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */

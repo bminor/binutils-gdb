@@ -1,5 +1,14 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_clear_source_content)
+	(tui_show_source_content): Update.
+	* tui/tui-source.c (tui_source_window::showing_source_p): Check
+	whether content is empty.
+	* tui/tui-data.h (struct tui_source_window_base) <content_in_use>:
+	Remove.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_erase_source_content): Clear the
 	window's contents.
 	* tui/tui-source.h (tui_set_source_content_nil): Don't declare.

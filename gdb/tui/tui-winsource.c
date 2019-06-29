@@ -211,7 +211,6 @@ tui_clear_source_content (struct tui_source_window_base *win_info)
     {
       int i;
 
-      win_info->content_in_use = false;
       tui_erase_source_content (win_info);
       for (i = 0; i < win_info->content.size (); i++)
 	{
@@ -297,7 +296,6 @@ tui_show_source_content (struct tui_source_window_base *win_info)
 
   tui_check_and_display_highlight_if_needed (win_info);
   win_info->refresh_window ();
-  win_info->content_in_use = true;
 }
 
 /* See tui-data.h.  */

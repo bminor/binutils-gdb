@@ -227,7 +227,7 @@ tui_show_symtab_source (tui_source_window_base *win_info,
 bool
 tui_source_window::showing_source_p (const char *fullname) const
 {
-  return (content_in_use 
+  return (!content.empty ()
 	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name,
 			    fullname) == 0));
 }
