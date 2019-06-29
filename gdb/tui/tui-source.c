@@ -293,11 +293,10 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 }
 
 void
-tui_source_window_base::reset (enum tui_win_type win_type,
-			       int height, int width,
+tui_source_window_base::reset (int height, int width,
 			       int origin_x, int origin_y)
 {
-  tui_gen_win_info::reset (win_type, height, width - 3,
+  tui_gen_win_info::reset (height, width - 3,
 			   origin_x + 3, origin_y);
-  execution_info->reset (EXEC_INFO_WIN, height, 3, origin_x, origin_y);
+  execution_info->reset (height, 3, origin_x, origin_y);
 }

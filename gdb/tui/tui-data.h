@@ -58,11 +58,9 @@ public:
     return "";
   }
 
-  /* Reset this window.  WIN_TYPE must match the existing type of this
-     window (it is only passed for self-test purposes).  The other
-     parameters are used to set the window's size and position.  */
-  virtual void reset (enum tui_win_type win_type,
-		      int height, int width,
+  /* Reset this window.  The parameters are used to set the window's
+     size and position.  */
+  virtual void reset (int height, int width,
 		      int origin_x, int origin_y);
 
   /* Window handle.  */
@@ -395,8 +393,7 @@ public:
      LINE_NO in this source window; false otherwise.  */
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
-  void reset (enum tui_win_type win_type,
-	      int height, int width,
+  void reset (int height, int width,
 	      int origin_x, int origin_y) override;
 
   /* Does the locator belong to this window?  */

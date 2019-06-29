@@ -1,5 +1,17 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.c (tui_source_window_base::reset): Remove
+	win_type parameter.
+	* tui/tui-layout.c (make_command_window, make_source_window)
+	(make_disasm_window, make_data_window)
+	(show_source_disasm_command, show_data, tui_gen_win_info::reset)
+	(reset_locator, show_source_or_disasm_and_command): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <reset>: Remove
+	win_type parameter.
+	(struct tui_source_window_base) <reset>: Likewise.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_disasm_command): Use
 	reset_locator.
 	(reset_locator): New function.
