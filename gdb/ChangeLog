@@ -1,5 +1,19 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_erase_source_content)
+	(tui_clear_source_content): Remove "display_prompt" parameter.
+	* tui/tui-winsource.c (tui_update_source_window_as_is)
+	(tui_update_source_windows_with_addr): Update.
+	(tui_clear_source_content): Remove "display_prompt" parameter.
+	(tui_erase_source_content): Likewise.  Simplify.
+	(tui_show_source_content): Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Update.
+	* tui/tui-stack.c (tui_show_frame_info): Update.
+	* tui/tui-data.h (EMPTY_SOURCE_PROMPT, NO_EMPTY_SOURCE_PROMPT):
+	Remove defines.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_source_window_as_is): Update.
 	* tui/tui-disasm.h (tui_set_disassem_content): Add win_info
 	parameter.

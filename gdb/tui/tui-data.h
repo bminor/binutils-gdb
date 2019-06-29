@@ -109,8 +109,6 @@ enum tui_box
 #define NO_HILITE               FALSE
 #define WITH_LOCATOR            TRUE
 #define NO_LOCATOR              FALSE
-#define EMPTY_SOURCE_PROMPT     TRUE
-#define NO_EMPTY_SOURCE_PROMPT  FALSE
 #define UNDEFINED_ITEM          -1
 #define MIN_WIN_HEIGHT          3
 #define MIN_CMD_WIN_HEIGHT      3

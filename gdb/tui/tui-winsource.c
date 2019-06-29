@@ -101,7 +101,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
 
   if (ret == TUI_FAILURE)
     {
-      tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
+      tui_clear_source_content (win_info);
       tui_clear_exec_info_content (win_info);
     }
   else
@@ -162,7 +162,7 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
     {
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
-	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
+	  tui_clear_source_content (win_info);
 	  tui_clear_exec_info_content (win_info);
 	}
     }
@@ -205,15 +205,14 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 }
 
 void
-tui_clear_source_content (struct tui_source_window_base *win_info,
-			  int display_prompt)
+tui_clear_source_content (struct tui_source_window_base *win_info)
 {
   if (win_info != NULL)
     {
       int i;
 
       win_info->content_in_use = false;
-      tui_erase_source_content (win_info, display_prompt);
+      tui_erase_source_content (win_info);
       for (i = 0; i < win_info->content.size (); i++)
 	{
 	  struct tui_source_element *element = &win_info->content[i];
@@ -226,8 +225,7 @@ tui_clear_source_content (struct tui_source_window_base *win_info,
 
 
 void
-tui_erase_source_content (struct tui_source_window_base *win_info,
-			  int display_prompt)
+tui_erase_source_content (struct tui_source_window_base *win_info)
 {
   int x_pos;
   int half_width = (win_info->width - 2) / 2;
@@ -236,30 +234,29 @@ tui_erase_source_content (struct tui_source_window_base *win_info,
     {
       werase (win_info->handle);
       tui_check_and_display_highlight_if_needed (win_info);
-      if (display_prompt == EMPTY_SOURCE_PROMPT)
-	{
-	  const char *no_src_str;
 
-	  if (win_info->type == SRC_WIN)
-	    no_src_str = NO_SRC_STRING;
-	  else
-	    no_src_str = NO_DISASSEM_STRING;
-	  if (strlen (no_src_str) >= half_width)
-	    x_pos = 1;
-	  else
-	    x_pos = half_width - strlen (no_src_str);
-	  mvwaddstr (win_info->handle,
-		     (win_info->height / 2),
-		     x_pos,
-		     (char *) no_src_str);
+      const char *no_src_str;
 
-	  /* elz: Added this function call to set the real contents of
-	     the window to what is on the screen, so that later calls
-	     to refresh, do display the correct stuff, and not the old
-	     image.  */
+      if (win_info->type == SRC_WIN)
+	no_src_str = NO_SRC_STRING;
+      else
+	no_src_str = NO_DISASSEM_STRING;
+      if (strlen (no_src_str) >= half_width)
+	x_pos = 1;
+      else
+	x_pos = half_width - strlen (no_src_str);
+      mvwaddstr (win_info->handle,
+		 (win_info->height / 2),
+		 x_pos,
+		 (char *) no_src_str);
 
-	  tui_set_source_content_nil (win_info, no_src_str);
-	}
+      /* elz: Added this function call to set the real contents of
+	 the window to what is on the screen, so that later calls
+	 to refresh, do display the correct stuff, and not the old
+	 image.  */
+
+      tui_set_source_content_nil (win_info, no_src_str);
+
       win_info->refresh_window ();
     }
 }
@@ -302,7 +299,7 @@ tui_show_source_content (struct tui_source_window_base *win_info)
         tui_show_source_line (win_info, lineno);
     }
   else
-    tui_erase_source_content (win_info, TRUE);
+    tui_erase_source_content (win_info);
 
   tui_check_and_display_highlight_if_needed (win_info);
   win_info->refresh_window ();

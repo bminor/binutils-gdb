@@ -610,7 +610,7 @@ tui_resize_all (void)
 	  first_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
 	  if (src_win->content.empty ())
-	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
+	    tui_erase_source_content (src_win);
 	  break;
 	default:
 	  if (cur_layout == SRC_DISASSEM_COMMAND)
@@ -675,7 +675,7 @@ tui_resize_all (void)
 	  second_win->make_visible_with_new_height ();
 	  TUI_CMD_WIN->make_visible_with_new_height ();
 	  if (src_win->content.empty ())
-	    tui_erase_source_content (src_win, EMPTY_SOURCE_PROMPT);
+	    tui_erase_source_content (src_win);
 	  break;
 	}
       /* Now remove all invisible windows, and their content so that
@@ -1113,8 +1113,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  tui_source_window_base *src_base
 		    = (tui_source_window_base *) src_win_info;
 		  if (src_base->content.empty ())
-		    tui_erase_source_content (src_base,
-					      EMPTY_SOURCE_PROMPT);
+		    tui_erase_source_content (src_base);
 		}
 	    }
 	  else
@@ -1221,9 +1220,9 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      second_win->make_visible_with_new_height ();
 	      first_win->make_visible_with_new_height ();
 	      if (src1 != nullptr && src1->content.empty ())
-		tui_erase_source_content (src1, EMPTY_SOURCE_PROMPT);
+		tui_erase_source_content (src1);
 	      if (second_win->content.empty ())
-		tui_erase_source_content (second_win, EMPTY_SOURCE_PROMPT);
+		tui_erase_source_content (second_win);
 	    }
 	}
     }
