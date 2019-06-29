@@ -1,5 +1,13 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command): Use
+	reset_locator.
+	(reset_locator): New function.
+	(init_and_make_win): Remove.
+	(show_source_or_disasm_and_command): Use reset_locator.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_set_exec_info_content): Remove
 	condition.
 	* tui/tui-wingeneral.c (tui_source_window_base::make_visible):

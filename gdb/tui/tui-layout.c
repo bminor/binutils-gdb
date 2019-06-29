@@ -43,10 +43,8 @@
 ** Static Local Decls
 ********************************/
 static void show_layout (enum tui_layout_type);
-static tui_gen_win_info *init_and_make_win (tui_gen_win_info *,
-					    enum tui_win_type,
-					    int, int, int, int,
-					    enum tui_box);
+static void reset_locator (tui_gen_win_info *,
+			   int, int, int, int);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
 static struct tui_win_info *make_command_window (int, int);
 static struct tui_win_info *make_source_window (int, int);
@@ -614,13 +612,11 @@ show_source_disasm_command (void)
 	{
 	  tui_win_list[DISASSEM_WIN]
 	    = make_disasm_window (asm_height, src_height - 1);
-	  init_and_make_win (locator,
-			     LOCATOR_WIN,
-			     2 /* 1 */ ,
-			     tui_term_width (),
-			     0,
-			     (src_height + asm_height) - 1,
-			     DONT_BOX_WINDOW);
+	  reset_locator (locator,
+			 2 /* 1 */ ,
+			 tui_term_width (),
+			 0,
+			 (src_height + asm_height) - 1);
 	}
       else
 	{
@@ -696,13 +692,11 @@ show_data (enum tui_layout_type new_layout)
       else
 	tui_win_list[win_type]
 	  = make_disasm_window (src_height, data_height - 1);
-      init_and_make_win (locator,
-			     LOCATOR_WIN,
-			     2 /* 1 */ ,
-			     tui_term_width (),
-			     0,
-			     total_height - 1,
-			     DONT_BOX_WINDOW);
+      reset_locator (locator,
+		     2 /* 1 */ ,
+		     tui_term_width (),
+		     0,
+		     total_height - 1);
       base = (tui_source_window_base *) tui_win_list[win_type];
     }
   else
@@ -751,48 +745,13 @@ tui_gen_win_info::reset (enum tui_win_type win_type,
   origin.y = origin_y_;
 }
 
-/* init_and_make_win().
- */
-static tui_gen_win_info *
-init_and_make_win (tui_gen_win_info *win_info, 
-		   enum tui_win_type win_type,
-		   int height, int width, 
-		   int origin_x, int origin_y,
-		   enum tui_box box_it)
+static void
+reset_locator (tui_gen_win_info *win_info, 
+	       int height, int width, 
+	       int origin_x, int origin_y)
 {
-  if (win_info == NULL)
-    {
-      switch (win_type)
-	{
-	case SRC_WIN:
-	  win_info = new tui_source_window ();
-	  break;
-
-	case DISASSEM_WIN:
-	  win_info = new tui_disasm_window ();
-	  break;
-
-	case DATA_WIN:
-	  win_info = new tui_data_window ();
-	  break;
-
-	case CMD_WIN:
-	  win_info = new tui_cmd_window ();
-	  break;
-
-	case EXEC_INFO_WIN:
-	  win_info = new tui_exec_info_window ();
-	  break;
-
-	default:
-	  gdb_assert_not_reached (_("unhandled window type"));
-	}
-    }
-
-  win_info->reset (win_type, height, width, origin_x, origin_y);
-  tui_make_window (win_info, box_it);
-
-  return win_info;
+  win_info->reset (LOCATOR_WIN, height, width, origin_x, origin_y);
+  tui_make_window (win_info, DONT_BOX_WINDOW);
 }
 
 
@@ -825,13 +784,11 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 	    *win_info_ptr = make_source_window (src_height - 1, 0);
 	  else
 	    *win_info_ptr = make_disasm_window (src_height - 1, 0);
-	  init_and_make_win (locator,
-			     LOCATOR_WIN,
-			     2 /* 1 */ ,
-			     tui_term_width (),
-			     0,
-			     src_height - 1,
-			     DONT_BOX_WINDOW);
+	  reset_locator (locator,
+			 2 /* 1 */ ,
+			 tui_term_width (),
+			 0,
+			 src_height - 1);
 	  base = (tui_source_window_base *) *win_info_ptr;
 	}
       else
