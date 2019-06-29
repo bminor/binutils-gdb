@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (UNDEFINED_ITEM): Remove define.
+	(struct tui_data_item_window): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (MAX_CONTENT_COUNT, TUI_NULL_STR)
 	(DEFAULT_HISTORY_COUNT, WITH_LOCATOR, NO_LOCATOR): Remove
 	defines.

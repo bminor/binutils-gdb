@@ -104,7 +104,6 @@ enum tui_box
 #define DISASSEM_NAME           "asm"
 #define HILITE                  TRUE
 #define NO_HILITE               FALSE
-#define UNDEFINED_ITEM          -1
 #define MIN_WIN_HEIGHT          3
 #define MIN_CMD_WIN_HEIGHT      3
 
@@ -263,7 +262,7 @@ struct tui_data_item_window : public tui_gen_win_info
 
   const char *name = nullptr;
   /* The register number, or data display number.  */
-  int item_no = UNDEFINED_ITEM;
+  int item_no = -1;
   void *value = nullptr;
   bool highlight = false;
   char *content = nullptr;
