@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (tui_set_layout): Remove regs_populate
+	variable.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_rl_other_window): Update.
 	* tui/tui-wingeneral.c (tui_data_window::refresh_window): Call
 	superclass method first.  Always iterate over regs_content.

@@ -127,9 +127,7 @@ tui_set_layout (enum tui_layout_type layout_type)
 
   if (layout_type != UNDEFINED_LAYOUT)
     {
-      enum tui_layout_type cur_layout = tui_current_layout (),
-	new_layout = UNDEFINED_LAYOUT;
-      int regs_populate = FALSE;
+      enum tui_layout_type cur_layout = tui_current_layout ();
       struct gdbarch *gdbarch;
       CORE_ADDR addr;
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
@@ -137,10 +135,8 @@ tui_set_layout (enum tui_layout_type layout_type)
 
       extract_display_start_addr (&gdbarch, &addr);
 
-      new_layout = layout_type;
+      enum tui_layout_type new_layout = layout_type;
 
-      regs_populate = (new_layout == SRC_DATA_COMMAND
-		       || new_layout == DISASSEM_DATA_COMMAND);
       if (new_layout != cur_layout)
 	{
 	  show_layout (new_layout);
@@ -212,14 +208,9 @@ tui_set_layout (enum tui_layout_type layout_type)
 	  /*
 	   * Now update the window content.
 	   */
-	  if (!regs_populate
-	      && (new_layout == SRC_DATA_COMMAND
-		  || new_layout == DISASSEM_DATA_COMMAND))
-	    TUI_DATA_WIN->display_all_data ();
-
 	  tui_update_source_windows_with_addr (gdbarch, addr);
-
-	  if (regs_populate)
+	  if (new_layout == SRC_DATA_COMMAND
+	      || new_layout == DISASSEM_DATA_COMMAND)
 	    tui_show_registers (TUI_DATA_WIN->current_group);
 	}
     }
