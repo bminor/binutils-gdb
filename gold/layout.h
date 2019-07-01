@@ -666,12 +666,10 @@ class Layout
 		       size_t cie_length, const unsigned char* fde_data,
 		       size_t fde_length);
 
-  // Remove .eh_frame information for a PLT.  FDEs using the CIE must
-  // be removed in reverse order to the order they were added.
+  // Remove all post-map .eh_frame information for a PLT.
   void
   remove_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
-			  size_t cie_length, const unsigned char* fde_data,
-			  size_t fde_length);
+			  size_t cie_length);
 
   // Scan a .debug_info or .debug_types section, and add summary
   // information to the .gdb_index section.

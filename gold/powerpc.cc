@@ -4542,7 +4542,7 @@ class Stub_table : public Output_relaxed_input_section
       plt_size_(0), last_plt_size_(0),
       branch_size_(0), last_branch_size_(0), min_size_threshold_(0),
       need_save_res_(false), need_resize_(false), resizing_(false),
-      uniq_(id), tls_get_addr_opt_bctrl_(-1u), plt_fde_len_(0)
+      uniq_(id)
   {
     this->set_output_section(output_section);
 
@@ -4723,10 +4723,6 @@ class Stub_table : public Output_relaxed_input_section
       }
     return false;
   }
-
-  // Generate a suitable FDE to describe code in this stub group.
-  void
-  init_plt_fde();
 
   // Add .eh_frame info for this stub section.
   void
@@ -4932,11 +4928,6 @@ class Stub_table : public Output_relaxed_input_section
   bool resizing_;
   // Per stub table unique identifier.
   uint32_t uniq_;
-  // The bctrl in the __tls_get_addr_opt stub, if present.
-  unsigned int tls_get_addr_opt_bctrl_;
-  // FDE unwind info for this stub group.
-  unsigned int plt_fde_len_;
-  unsigned char plt_fde_[20];
 };
 
 // Add a plt call stub, if we do not already have one for this
@@ -4986,10 +4977,7 @@ Stub_table<size, big_endian>::add_plt_call_entry(
 	}
       this->plt_size_ += this->plt_call_size(p.first);
       if (this->targ_->is_tls_get_addr_opt(gsym))
-	{
-	  this->targ_->set_has_tls_get_addr_opt();
-	  this->tls_get_addr_opt_bctrl_ = this->plt_size_ - 5 * 4;
-	}
+	this->targ_->set_has_tls_get_addr_opt();
       this->plt_size_ = this->plt_call_align(this->plt_size_);
     }
   return this->can_reach_stub(from, p.first->second.off_, r_type);
@@ -5159,48 +5147,39 @@ Stub_table<size, big_endian>::find_long_branch_entry(
   return &p->second;
 }
 
-// Generate a suitable FDE to describe code in this stub group.
-// The __tls_get_addr_opt call stub needs to describe where it saves
-// LR, to support exceptions that might be thrown from __tls_get_addr.
-
-template<int size, bool big_endian>
-void
-Stub_table<size, big_endian>::init_plt_fde()
+template<bool big_endian>
+static void
+eh_advance (std::vector<unsigned char>& fde, unsigned int delta)
 {
-  unsigned char* p = this->plt_fde_;
-  // offset pcrel sdata4, size udata4, and augmentation size byte.
-  memset (p, 0, 9);
-  p += 9;
-  if (this->tls_get_addr_opt_bctrl_ != -1u)
+  delta /= 4;
+  if (delta < 64)
+    fde.push_back(elfcpp::DW_CFA_advance_loc + delta);
+  else if (delta < 256)
     {
-      unsigned int to_bctrl = this->tls_get_addr_opt_bctrl_ / 4;
-      if (to_bctrl < 64)
-	*p++ = elfcpp::DW_CFA_advance_loc + to_bctrl;
-      else if (to_bctrl < 256)
-	{
-	  *p++ = elfcpp::DW_CFA_advance_loc1;
-	  *p++ = to_bctrl;
-	}
-      else if (to_bctrl < 65536)
-	{
-	  *p++ = elfcpp::DW_CFA_advance_loc2;
-	  elfcpp::Swap<16, big_endian>::writeval(p, to_bctrl);
-	  p += 2;
-	}
-      else
-	{
-	  *p++ = elfcpp::DW_CFA_advance_loc4;
-	  elfcpp::Swap<32, big_endian>::writeval(p, to_bctrl);
-	  p += 4;
-	}
-      *p++ = elfcpp::DW_CFA_offset_extended_sf;
-      *p++ = 65;
-      *p++ = -(this->targ_->stk_linker() / 8) & 0x7f;
-      *p++ = elfcpp::DW_CFA_advance_loc + 4;
-      *p++ = elfcpp::DW_CFA_restore_extended;
-      *p++ = 65;
+      fde.push_back(elfcpp::DW_CFA_advance_loc1);
+      fde.push_back(delta);
     }
-  this->plt_fde_len_ = p - this->plt_fde_;
+  else if (delta < 65536)
+    {
+      fde.resize(fde.size() + 3);
+      unsigned char *p = &*fde.end() - 3;
+      *p++ = elfcpp::DW_CFA_advance_loc2;
+      elfcpp::Swap<16, big_endian>::writeval(p, delta);
+    }
+  else
+    {
+      fde.resize(fde.size() + 5);
+      unsigned char *p = &*fde.end() - 5;
+      *p++ = elfcpp::DW_CFA_advance_loc4;
+      elfcpp::Swap<32, big_endian>::writeval(p, delta);
+    }
+}
+
+template<typename T>
+static bool
+stub_sort(T s1, T s2)
+{
+  return s1->second.off_ < s2->second.off_;
 }
 
 // Add .eh_frame info for this stub section.  Unlike other linker
@@ -5212,7 +5191,8 @@ template<int size, bool big_endian>
 void
 Stub_table<size, big_endian>::add_eh_frame(Layout* layout)
 {
-  if (!parameters->options().ld_generated_unwind_info())
+  if (size != 64
+      || !parameters->options().ld_generated_unwind_info())
     return;
 
   // Since we add stub .eh_frame info late, it must be placed
@@ -5223,28 +5203,115 @@ Stub_table<size, big_endian>::add_eh_frame(Layout* layout)
   if (!this->targ_->has_glink())
     return;
 
-  if (this->plt_size_ + this->branch_size_ + this->need_save_res_ == 0)
+  typedef typename Plt_stub_entries::const_iterator plt_iter;
+  std::vector<plt_iter> calls;
+  if (!this->plt_call_stubs_.empty())
+    for (plt_iter cs = this->plt_call_stubs_.begin();
+	 cs != this->plt_call_stubs_.end();
+	 ++cs)
+      if ((this->targ_->is_tls_get_addr_opt(cs->first.sym_)
+	   && cs->second.r2save_
+	   && !cs->second.localentry0_)
+	  || cs->second.notoc_)
+	calls.push_back(cs);
+  if (calls.size() > 1)
+    std::stable_sort(calls.begin(), calls.end(),
+		     stub_sort<plt_iter>);
+
+  typedef typename Branch_stub_entries::const_iterator branch_iter;
+  std::vector<branch_iter> branches;
+  if (!this->long_branch_stubs_.empty())
+    for (branch_iter bs = this->long_branch_stubs_.begin();
+	 bs != this->long_branch_stubs_.end();
+	 ++bs)
+      if (bs->second.notoc_)
+	branches.push_back(bs);
+  if (branches.size() > 1)
+    std::stable_sort(branches.begin(), branches.end(),
+		     stub_sort<branch_iter>);
+
+  if (calls.empty() && branches.empty())
     return;
 
-  this->init_plt_fde();
+  unsigned int last_eh_loc = 0;
+  // offset pcrel sdata4, size udata4, and augmentation size byte.
+  std::vector<unsigned char> fde(9, 0);
+
+  for (unsigned int i = 0; i < calls.size(); i++)
+    {
+      plt_iter cs = calls[i];
+      unsigned int off = cs->second.off_;
+      // The __tls_get_addr_opt call stub needs to describe where
+      // it saves LR, to support exceptions that might be thrown
+      // from __tls_get_addr, and to support asynchronous exceptions.
+      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+	{
+	  off += 7 * 4;
+	  if (cs->second.r2save_
+	      && !cs->second.localentry0_)
+	    {
+	      off += 2 * 4;
+	      eh_advance<big_endian>(fde, off - last_eh_loc);
+	      fde.resize(fde.size() + 6);
+	      unsigned char* p = &*fde.end() - 6;
+	      *p++ = elfcpp::DW_CFA_offset_extended_sf;
+	      *p++ = 65;
+	      *p++ = -(this->targ_->stk_linker() / 8) & 0x7f;
+	      unsigned int delta = this->plt_call_size(cs) - 4 - 9 * 4;
+	      *p++ = elfcpp::DW_CFA_advance_loc + delta / 4;
+	      *p++ = elfcpp::DW_CFA_restore_extended;
+	      *p++ = 65;
+	      last_eh_loc = off + delta;
+	      continue;
+	    }
+	}
+      // notoc stubs also should describe LR changes, to support
+      // asynchronous exceptions.
+      off += (cs->second.r2save_ ? 4 : 0) + 8;
+      eh_advance<big_endian>(fde, off - last_eh_loc);
+      fde.resize(fde.size() + 6);
+      unsigned char* p = &*fde.end() - 6;
+      *p++ = elfcpp::DW_CFA_register;
+      *p++ = 65;
+      *p++ = 12;
+      *p++ = elfcpp::DW_CFA_advance_loc + 8 / 4;
+      *p++ = elfcpp::DW_CFA_restore_extended;
+      *p++ = 65;
+      last_eh_loc = off + 8;
+    }
+
+  for (unsigned int i = 0; i < branches.size(); i++)
+    {
+      branch_iter bs = branches[i];
+      unsigned int off = bs->second.off_ + 8;
+      eh_advance<big_endian>(fde, off - last_eh_loc);
+      fde.resize(fde.size() + 6);
+      unsigned char* p = &*fde.end() - 6;
+      *p++ = elfcpp::DW_CFA_register;
+      *p++ = 65;
+      *p++ = 12;
+      *p++ = elfcpp::DW_CFA_advance_loc + 8 / 4;
+      *p++ = elfcpp::DW_CFA_restore_extended;
+      *p++ = 65;
+      last_eh_loc = off + 8;
+    }
+
   layout->add_eh_frame_for_plt(this,
 			       Eh_cie<size>::eh_frame_cie,
 			       sizeof (Eh_cie<size>::eh_frame_cie),
-			       this->plt_fde_, this->plt_fde_len_);
+			       &*fde.begin(), fde.size());
 }
 
 template<int size, bool big_endian>
 void
 Stub_table<size, big_endian>::remove_eh_frame(Layout* layout)
 {
-  if (this->plt_fde_len_ != 0)
-    {
-      layout->remove_eh_frame_for_plt(this,
-				      Eh_cie<size>::eh_frame_cie,
-				      sizeof (Eh_cie<size>::eh_frame_cie),
-				      this->plt_fde_, this->plt_fde_len_);
-      this->plt_fde_len_ = 0;
-    }
+  if (size == 64
+      && parameters->options().ld_generated_unwind_info()
+      && this->targ_->has_glink())
+    layout->remove_eh_frame_for_plt(this,
+				    Eh_cie<size>::eh_frame_cie,
+				    sizeof (Eh_cie<size>::eh_frame_cie));
 }
 
 // A class to handle .glink.

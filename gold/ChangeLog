@@ -1,5 +1,28 @@
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
+	* ehframe.cc (Fde::operator==): Delete.
+	(Cie::remove_fde): Delete.
+	(Eh_frame::remove_ehframe_for_plt): Delete fde_data and fde_length
+	parameters.  Remove all post-map plt FDEs.
+	* ehframe.h (Fde:post_map): Make const, add variant to compare plt.
+	(Fde::operator==): Delete.
+	(Cie::remove_fde): Implement here.
+	(Cie::last_fde): New accessor.
+	(Eh_frame::remove_ehframe_for_plt): Update prototype.
+	* layout.cc (Layout::remove_eh_frame_for_plt): Delete fde_data and
+	fde_length parameters.
+	* layout.h (Layout::remove_eh_frame_for_plt): Update prototype.
+	* powerpc.cc (Stub_table::tls_get_addr_opt_bctrl_): Delete.
+	(Stub_table::plt_fde_len_, plt_fde_, init_plt_fde): Delete.
+	(Stub_table::add_plt_call_entry): Don't set tls_get_addr_opt_bctrl_.
+	(eh_advance): New function.
+	(stub_sort): New function.
+	(Stub_table::add_eh_frame): Emit eh_frame for notoc plt calls and
+	branches as well as __tls_get_addr_opt plt call stub.
+	(Stub_table::remove_eh_frame): Update to suit.
+
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::maybe_skip_tls_get_addr_call): Handle
 	notoc calls.
 	(is_branch_reloc): Template on size.  Return true for REL24_NOTOC.

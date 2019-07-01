@@ -1604,21 +1604,18 @@ Layout::add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
     }
 }
 
-// Remove .eh_frame information for a PLT.  FDEs using the CIE must
-// be removed in reverse order to the order they were added.
+// Remove all post-map .eh_frame information for a PLT.
 
 void
 Layout::remove_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
-				size_t cie_length, const unsigned char* fde_data,
-				size_t fde_length)
+				size_t cie_length)
 {
   if (parameters->incremental())
     {
       // FIXME: Maybe this could work some day....
       return;
     }
-  this->eh_frame_data_->remove_ehframe_for_plt(plt, cie_data, cie_length,
-					       fde_data, fde_length);
+  this->eh_frame_data_->remove_ehframe_for_plt(plt, cie_data, cie_length);
 }
 
 // Scan a .debug_info or .debug_types section, and add summary
