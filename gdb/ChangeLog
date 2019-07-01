@@ -1,3 +1,12 @@
+2019-07-15  Tom Tromey  <tromey@adacore.com>
+
+	* target.c (flash_erase_command): Use field_core_addr.
+	* symfile.c (generic_load): Use field_core_addr.
+	* sparc64-linux-tdep.c (sparc64_linux_handle_segmentation_fault):
+	Use field_core_addr.
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault): Use
+	field_core_addr.
+
 2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_property): Sign extend property

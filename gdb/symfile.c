@@ -2095,7 +2095,7 @@ generic_load (const char *args, int from_tty)
   CORE_ADDR entry = bfd_get_start_address (loadfile_bfd.get ());
   entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
   uiout->text ("Start address ");
-  uiout->field_fmt ("address", "%s", paddress (target_gdbarch (), entry));
+  uiout->field_core_addr ("address", target_gdbarch (), entry);
   uiout->text (", load size ");
   uiout->field_fmt ("load-size", "%lu", total_progress.data_count);
   uiout->text ("\n");

@@ -432,13 +432,13 @@ i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
     uiout->field_string ("sigcode-meaning", _("Lower bound violation"));
 
   uiout->text (_(" while accessing address "));
-  uiout->field_fmt ("bound-access", "%s", paddress (gdbarch, access));
+  uiout->field_core_addr ("bound-access", gdbarch, access);
 
   uiout->text (_("\nBounds: [lower = "));
-  uiout->field_fmt ("lower-bound", "%s", paddress (gdbarch, lower_bound));
+  uiout->field_core_addr ("lower-bound", gdbarch, lower_bound);
 
   uiout->text (_(", upper = "));
-  uiout->field_fmt ("upper-bound", "%s", paddress (gdbarch, upper_bound));
+  uiout->field_core_addr ("upper-bound", gdbarch, upper_bound);
 
   uiout->text (_("]"));
 }

@@ -150,19 +150,19 @@ sparc64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
       uiout->text ("\n");
       uiout->field_string ("sigcode-meaning", _("ADI disabled"));
       uiout->text (_(" while accessing address "));
-      uiout->field_fmt ("bound-access", "%s", paddress (gdbarch, addr));
+      uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
     case SEGV_ADIDERR:	/* disrupting mismatch */
       uiout->text ("\n");
       uiout->field_string ("sigcode-meaning", _("ADI deferred mismatch"));
       uiout->text (_(" while accessing address "));
-      uiout->field_fmt ("bound-access", "%s", paddress (gdbarch, addr));
+      uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
     case SEGV_ADIPERR:	/* precise mismatch */
       uiout->text ("\n");
       uiout->field_string ("sigcode-meaning", _("ADI precise mismatch"));
       uiout->text (_(" while accessing address "));
-      uiout->field_fmt ("bound-access", "%s", paddress (gdbarch, addr));
+      uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
     default:
       break;
