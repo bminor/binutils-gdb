@@ -1,3 +1,10 @@
+2019-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 24737
+	* doc/as.texi (Align): Add missing word to description of
+	pseudo-op.
+	(P2align): Likewise.
+
 2019-06-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 24735
