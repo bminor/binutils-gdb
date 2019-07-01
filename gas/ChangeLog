@@ -1,3 +1,12 @@
+2019-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 24748
+	* write.c (create_note_reloc): Add desc2_offset parameter.  Change
+	name of offset parameter to note_offset.  Only use desc2_offset
+	when placing addend into REL reloc's address space.
+	(maybe_generate_build_notes): Update parameters passed to
+	create_note_reloc.
+
 2019-07-01  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/gas/aarch64/illegal-sve2-aes.d: Update tests.

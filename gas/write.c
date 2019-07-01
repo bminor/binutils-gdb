@@ -1240,6 +1240,7 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* Extract relocs for this section from reloc_list.  */
   rp = &reloc_list;
+
   my_reloc_list = NULL;
   while ((r = *rp) != NULL)
     {
@@ -1889,7 +1890,8 @@ create_obj_attrs_section (void)
 static void
 create_note_reloc (segT           sec,
 		   symbolS *      sym,
-		   bfd_size_type  offset,
+		   bfd_size_type  note_offset,
+		   bfd_size_type  desc2_offset,
 		   int            reloc_type,
 		   bfd_vma        addend,
 		   char *         note)
@@ -1899,10 +1901,10 @@ create_note_reloc (segT           sec,
   reloc = XNEW (struct reloc_list);
 
   /* We create a .b type reloc as resolve_reloc_expr_symbols() has already been called.  */
-  reloc->u.b.sec   = sec;
-  reloc->u.b.s     = symbol_get_bfdsym (sym);
+  reloc->u.b.sec           = sec;
+  reloc->u.b.s             = symbol_get_bfdsym (sym);
   reloc->u.b.r.sym_ptr_ptr = & reloc->u.b.s;
-  reloc->u.b.r.address     = offset;
+  reloc->u.b.r.address     = note_offset + desc2_offset;
   reloc->u.b.r.addend      = addend;
   reloc->u.b.r.howto       = bfd_reloc_type_lookup (stdoutput, reloc_type);
 
@@ -1927,12 +1929,12 @@ create_note_reloc (segT           sec,
       if (target_big_endian)
 	{
 	  if (bfd_arch_bits_per_address (stdoutput) <= 32)
-	    note[offset + 3] = addend;
+	    note[desc2_offset + 3] = addend;
 	  else
-	    note[offset + 7] = addend;
+	    note[desc2_offset + 7] = addend;
 	}
       else
-	note[offset] = addend;
+	note[desc2_offset] = addend;
     }
 }
 
@@ -2035,10 +2037,10 @@ maybe_generate_build_notes (void)
 	memcpy (note + 12, "GA$3a1", 8);
 
 	/* Create a relocation to install the start address of the note...  */
-	create_note_reloc (sec, sym, total_size + 20, desc_reloc, 0, note);
+	create_note_reloc (sec, sym, total_size, 20, desc_reloc, 0, note);
 
 	/* ...and another one to install the end address.  */
-	create_note_reloc (sec, sym, total_size + desc2_offset, desc_reloc,
+	create_note_reloc (sec, sym, total_size, desc2_offset, desc_reloc,
 			   bfd_get_section_size (bsym->section),
 			   note);
 
@@ -2269,7 +2271,7 @@ write_object_file (void)
   if (IS_ELF)
     maybe_generate_build_notes ();
 #endif
-  
+
   PROGRESS (1);
 
 #ifdef tc_frob_file_before_adjust
