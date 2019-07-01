@@ -7381,7 +7381,7 @@ assembly language programmers.
 @cindex filling memory with zero bytes
 This directive emits @var{size} 0-valued bytes.  @var{size} must be an absolute
 expression.  This directive is actually an alias for the @samp{.skip} directive
-so in can take an optional second argument of the value to store in the bytes
+so it can take an optional second argument of the value to store in the bytes
 instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @end ifclear
 
