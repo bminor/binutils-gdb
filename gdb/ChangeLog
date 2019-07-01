@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_or_disasm_and_command): Unify
+	creation and re-initialization cases.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_get_register): Return void.
 
 2019-07-17  Tom Tromey  <tom@tromey.com>

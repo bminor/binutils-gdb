@@ -693,7 +693,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 {
   if (tui_current_layout () != layout_type)
     {
-      struct tui_win_info **win_info_ptr;
+      struct tui_source_window_base *win_info;
       int src_height, cmd_height;
       struct tui_locator_window *locator = tui_locator_win_info_ptr ();
       gdb_assert (locator != nullptr);
@@ -705,42 +705,33 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
       src_height = tui_term_height () - cmd_height;
 
       if (layout_type == SRC_COMMAND)
-	win_info_ptr = &tui_win_list[SRC_WIN];
-      else
-	win_info_ptr = &tui_win_list[DISASSEM_WIN];
-
-      tui_source_window_base *base;
-      if ((*win_info_ptr) == NULL)
 	{
-	  if (layout_type == SRC_COMMAND)
-	    *win_info_ptr = make_source_window (src_height - 1, 0);
-	  else
-	    *win_info_ptr = make_disasm_window (src_height - 1, 0);
-	  locator->reset (2 /* 1 */ ,
-			  tui_term_width (),
-			  0,
-			  src_height - 1);
-	  base = (tui_source_window_base *) *win_info_ptr;
+	  if (tui_win_list[SRC_WIN] == nullptr)
+	    tui_win_list[SRC_WIN] = new tui_source_window ();
+	  win_info = TUI_SRC_WIN;
 	}
       else
 	{
-	  base = (tui_source_window_base *) *win_info_ptr;
-	  locator->reset (2 /* 1 */ ,
-			  tui_term_width (),
-			  0,
-			  src_height - 1);
-	  base->m_has_locator = true;
-	  (*win_info_ptr)->reset (src_height - 1,
-				  tui_term_width (),
-				  0,
-				  0);
-	  tui_make_visible (*win_info_ptr);
+	  if (tui_win_list[DISASSEM_WIN] == nullptr)
+	    tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
+	  win_info = TUI_DISASM_WIN;
 	}
 
-      base->m_has_locator = true;
+      locator->reset (2 /* 1 */ ,
+		      tui_term_width (),
+		      0,
+		      src_height - 1);
+      win_info->reset (src_height - 1,
+		       tui_term_width (),
+		       0,
+		       0);
+      tui_make_visible (win_info);
+
+
+      win_info->m_has_locator = true;
       tui_make_visible (locator);
       tui_show_locator_content ();
-      tui_show_source_content (base);
+      tui_show_source_content (win_info);
 
       if (TUI_CMD_WIN == NULL)
 	{
