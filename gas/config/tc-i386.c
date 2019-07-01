@@ -3557,7 +3557,7 @@ is_evex_encoding (const insn_template *t)
 {
   return t->opcode_modifier.evex || t->opcode_modifier.disp8memshift
 	 || t->opcode_modifier.broadcast || t->opcode_modifier.masking
-	 || t->opcode_modifier.staticrounding || t->opcode_modifier.sae;
+	 || t->opcode_modifier.sae;
 }
 
 static INLINE bfd_boolean
@@ -5469,11 +5469,8 @@ check_VecOperands (const insn_template *t)
   /* Check RC/SAE.  */
   if (i.rounding)
     {
-      if ((i.rounding->type != saeonly
-	   && !t->opcode_modifier.staticrounding)
-	  || (i.rounding->type == saeonly
-	      && (t->opcode_modifier.staticrounding
-		  || !t->opcode_modifier.sae)))
+      if (!t->opcode_modifier.sae
+	  || (i.rounding->type != saeonly && !t->opcode_modifier.staticrounding))
 	{
 	  i.error = unsupported_rc_sae;
 	  return 1;

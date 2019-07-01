@@ -1,5 +1,10 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (is_evex_encoding): Don't check for SAE.
+	(check_VecOperands): Simplify static rounding / SAE checking.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Make j unsigned.  Handle
 	vpand{d,q}, vpandn{d,q}, vpor{d,q}, and vpxor{d,q}.  Also check/
 	clear broadcast.  Eliminate a loop.
