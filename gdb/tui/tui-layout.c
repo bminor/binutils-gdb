@@ -113,104 +113,97 @@ show_layout (enum tui_layout_type layout)
 
 /* Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
    SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.  */
-enum tui_status
+void
 tui_set_layout (enum tui_layout_type layout_type)
 {
-  enum tui_status status = TUI_SUCCESS;
+  gdb_assert (layout_type != UNDEFINED_LAYOUT);
 
-  if (layout_type != UNDEFINED_LAYOUT)
+  enum tui_layout_type cur_layout = tui_current_layout ();
+  struct gdbarch *gdbarch;
+  CORE_ADDR addr;
+  struct tui_win_info *win_with_focus = tui_win_with_focus ();
+  struct tui_layout_def *layout_def = tui_layout_def ();
+
+  extract_display_start_addr (&gdbarch, &addr);
+
+  enum tui_layout_type new_layout = layout_type;
+
+  if (new_layout != cur_layout)
     {
-      enum tui_layout_type cur_layout = tui_current_layout ();
-      struct gdbarch *gdbarch;
-      CORE_ADDR addr;
-      struct tui_win_info *win_with_focus = tui_win_with_focus ();
-      struct tui_layout_def *layout_def = tui_layout_def ();
+      show_layout (new_layout);
 
-      extract_display_start_addr (&gdbarch, &addr);
-
-      enum tui_layout_type new_layout = layout_type;
-
-      if (new_layout != cur_layout)
+      /* Now determine where focus should be.  */
+      if (win_with_focus != TUI_CMD_WIN)
 	{
-	  show_layout (new_layout);
-
-	  /* Now determine where focus should be.  */
-	  if (win_with_focus != TUI_CMD_WIN)
+	  switch (new_layout)
 	    {
-	      switch (new_layout)
-		{
-		case SRC_COMMAND:
-		  tui_set_win_focus_to (TUI_SRC_WIN);
-		  layout_def->display_mode = SRC_WIN;
-		  break;
-		case DISASSEM_COMMAND:
-		  /* The previous layout was not showing code.
-		     This can happen if there is no source
-		     available:
+	    case SRC_COMMAND:
+	      tui_set_win_focus_to (TUI_SRC_WIN);
+	      layout_def->display_mode = SRC_WIN;
+	      break;
+	    case DISASSEM_COMMAND:
+	      /* The previous layout was not showing code.
+		 This can happen if there is no source
+		 available:
 
-		     1. if the source file is in another dir OR
-		     2. if target was compiled without -g
-		     We still want to show the assembly though!  */
+		 1. if the source file is in another dir OR
+		 2. if target was compiled without -g
+		 We still want to show the assembly though!  */
 
-		  tui_get_begin_asm_address (&gdbarch, &addr);
-		  tui_set_win_focus_to (TUI_DISASM_WIN);
-		  layout_def->display_mode = DISASSEM_WIN;
-		  break;
-		case SRC_DISASSEM_COMMAND:
-		  /* The previous layout was not showing code.
-		     This can happen if there is no source
-		     available:
+	      tui_get_begin_asm_address (&gdbarch, &addr);
+	      tui_set_win_focus_to (TUI_DISASM_WIN);
+	      layout_def->display_mode = DISASSEM_WIN;
+	      break;
+	    case SRC_DISASSEM_COMMAND:
+	      /* The previous layout was not showing code.
+		 This can happen if there is no source
+		 available:
 
-		     1. if the source file is in another dir OR
-		     2. if target was compiled without -g
-		     We still want to show the assembly though!  */
+		 1. if the source file is in another dir OR
+		 2. if target was compiled without -g
+		 We still want to show the assembly though!  */
 
-		  tui_get_begin_asm_address (&gdbarch, &addr);
-		  if (win_with_focus == TUI_SRC_WIN)
-		    tui_set_win_focus_to (TUI_SRC_WIN);
-		  else
-		    tui_set_win_focus_to (TUI_DISASM_WIN);
-		  break;
-		case SRC_DATA_COMMAND:
-		  if (win_with_focus != TUI_DATA_WIN)
-		    tui_set_win_focus_to (TUI_SRC_WIN);
-		  else
-		    tui_set_win_focus_to (TUI_DATA_WIN);
-		  layout_def->display_mode = SRC_WIN;
-		  break;
-		case DISASSEM_DATA_COMMAND:
-		  /* The previous layout was not showing code.
-		     This can happen if there is no source
-		     available:
+	      tui_get_begin_asm_address (&gdbarch, &addr);
+	      if (win_with_focus == TUI_SRC_WIN)
+		tui_set_win_focus_to (TUI_SRC_WIN);
+	      else
+		tui_set_win_focus_to (TUI_DISASM_WIN);
+	      break;
+	    case SRC_DATA_COMMAND:
+	      if (win_with_focus != TUI_DATA_WIN)
+		tui_set_win_focus_to (TUI_SRC_WIN);
+	      else
+		tui_set_win_focus_to (TUI_DATA_WIN);
+	      layout_def->display_mode = SRC_WIN;
+	      break;
+	    case DISASSEM_DATA_COMMAND:
+	      /* The previous layout was not showing code.
+		 This can happen if there is no source
+		 available:
 
-		     1. if the source file is in another dir OR
-		     2. if target was compiled without -g
-		     We still want to show the assembly though!  */
+		 1. if the source file is in another dir OR
+		 2. if target was compiled without -g
+		 We still want to show the assembly though!  */
 
-		  tui_get_begin_asm_address (&gdbarch, &addr);
-		  if (win_with_focus != TUI_DATA_WIN)
-		    tui_set_win_focus_to (TUI_DISASM_WIN);
-		  else
-		    tui_set_win_focus_to (TUI_DATA_WIN);
-		  layout_def->display_mode = DISASSEM_WIN;
-		  break;
-		default:
-		  break;
-		}
+	      tui_get_begin_asm_address (&gdbarch, &addr);
+	      if (win_with_focus != TUI_DATA_WIN)
+		tui_set_win_focus_to (TUI_DISASM_WIN);
+	      else
+		tui_set_win_focus_to (TUI_DATA_WIN);
+	      layout_def->display_mode = DISASSEM_WIN;
+	      break;
+	    default:
+	      break;
 	    }
-	  /*
-	   * Now update the window content.
-	   */
-	  tui_update_source_windows_with_addr (gdbarch, addr);
-	  if (new_layout == SRC_DATA_COMMAND
-	      || new_layout == DISASSEM_DATA_COMMAND)
-	    tui_show_registers (TUI_DATA_WIN->current_group);
 	}
+      /*
+       * Now update the window content.
+       */
+      tui_update_source_windows_with_addr (gdbarch, addr);
+      if (new_layout == SRC_DATA_COMMAND
+	  || new_layout == DISASSEM_DATA_COMMAND)
+	tui_show_registers (TUI_DATA_WIN->current_group);
     }
-  else
-    status = TUI_FAILURE;
-
-  return status;
 }
 
 /* Add the specified window to the layout in a logical way.  This

@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (tui/tui-layout): Return void.
+	* tui/tui-layout.c (tui_set_layout): Return void.  Add assert.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_disasm_command, show_data):
 	Update.
 	(reset_locator): Remove.
