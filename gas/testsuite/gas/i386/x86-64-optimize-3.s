@@ -20,6 +20,16 @@ _start:
 	test	$0x7f, %r9w
 	test	$0x7f, %r9b
 
+	and	%cl, %cl
+	and	%dx, %dx
+	and	%ebx, %ebx
+	and	%rsp, %rsp
+
+	or	%bpl, %bpl
+	or	%si, %si
+	or	%edi, %edi
+	or	%r8, %r8
+
 	vandnpd	%zmm1, %zmm1, %zmm5
 
 	vmovdqa32	%xmm1, %xmm2

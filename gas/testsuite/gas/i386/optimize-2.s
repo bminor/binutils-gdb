@@ -12,6 +12,14 @@ _start:
 	test	$0x7f, %edi
 	test	$0x7f, %di
 
+	and	%cl, %cl
+	and	%dx, %dx
+	and	%ebx, %ebx
+
+	or	%ah, %ah
+	or	%bp, %bp
+	or	%esi, %esi
+
 	vandnpd	%zmm1, %zmm1, %zmm5
 
 	vmovdqa32	%xmm1, %xmm2

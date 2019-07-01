@@ -1,6 +1,7 @@
-#as: -Os
+#source: optimize-2.s
+#as: -O2
 #objdump: -drw
-#name: optimized encoding 2 with -Os
+#name: optimized encoding 2 with -O2
 
 .*: +file format .*
 
@@ -8,20 +9,20 @@
 Disassembly of section .text:
 
 0+ <_start>:
+ +[a-f0-9]+:	a9 7f 00 00 00       	test   \$0x7f,%eax
+ +[a-f0-9]+:	66 a9 7f 00          	test   \$0x7f,%ax
  +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
- +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
+ +[a-f0-9]+:	f7 c3 7f 00 00 00    	test   \$0x7f,%ebx
+ +[a-f0-9]+:	66 f7 c3 7f 00       	test   \$0x7f,%bx
  +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
  +[a-f0-9]+:	f7 c7 7f 00 00 00    	test   \$0x7f,%edi
  +[a-f0-9]+:	66 f7 c7 7f 00       	test   \$0x7f,%di
- +[a-f0-9]+:	20 c9                	and    %cl,%cl
- +[a-f0-9]+:	66 21 d2             	and    %dx,%dx
- +[a-f0-9]+:	21 db                	and    %ebx,%ebx
- +[a-f0-9]+:	08 e4                	or     %ah,%ah
- +[a-f0-9]+:	66 09 ed             	or     %bp,%bp
- +[a-f0-9]+:	09 f6                	or     %esi,%esi
+ +[a-f0-9]+:	84 c9                	test   %cl,%cl
+ +[a-f0-9]+:	66 85 d2             	test   %dx,%dx
+ +[a-f0-9]+:	85 db                	test   %ebx,%ebx
+ +[a-f0-9]+:	84 e4                	test   %ah,%ah
+ +[a-f0-9]+:	66 85 ed             	test   %bp,%bp
+ +[a-f0-9]+:	85 f6                	test   %esi,%esi
  +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2

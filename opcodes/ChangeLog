@@ -1,5 +1,11 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (and, or): Add Optimize to forms allowing two
+	register operands.
+	* i386-tbl.h: Re-generate.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (C): New.
 	(paddb, paddw, paddd, paddq, paddsb, paddsw, paddusb, paddusw,
 	pand, pcmpeqb, pcmpeqw, pcmpeqd, pmaddwd, pmulhw, pmullw,

@@ -4040,6 +4040,29 @@ optimize_encoding (void)
 	    }
 	}
     }
+  else if (optimize > 1
+	   && !optimize_for_space
+	   && i.reg_operands == 2
+	   && i.op[0].regs == i.op[1].regs
+	   && ((i.tm.base_opcode & ~(Opcode_D | 1)) == 0x8
+	       || (i.tm.base_opcode & ~(Opcode_D | 1)) == 0x20)
+	   && (flag_code != CODE_64BIT || !i.types[0].bitfield.dword))
+    {
+      /* Optimize: -O2:
+	   andb %rN, %rN  -> testb %rN, %rN
+	   andw %rN, %rN  -> testw %rN, %rN
+	   andq %rN, %rN  -> testq %rN, %rN
+	   orb %rN, %rN   -> testb %rN, %rN
+	   orw %rN, %rN   -> testw %rN, %rN
+	   orq %rN, %rN   -> testq %rN, %rN
+
+	   and outside of 64-bit mode
+
+	   andl %rN, %rN  -> testl %rN, %rN
+	   orl %rN, %rN   -> testl %rN, %rN
+       */
+      i.tm.base_opcode = 0x84 | (i.tm.base_opcode & 1);
+    }
   else if (i.reg_operands == 3
 	   && i.op[0].regs == i.op[1].regs
 	   && !i.types[2].bitfield.xmmword

@@ -1,6 +1,7 @@
-#as: -Os
+#source: x86-64-optimize-3.s
+#as: -O2
 #objdump: -drw
-#name: x86-64 optimized encoding 3 with -Os
+#name: x86-64 optimized encoding 3 with -O2
 
 .*: +file format .*
 
@@ -8,30 +9,30 @@
 Disassembly of section .text:
 
 0+ <_start>:
+ +[a-f0-9]+:	a9 7f 00 00 00       	test   \$0x7f,%eax
+ +[a-f0-9]+:	a9 7f 00 00 00       	test   \$0x7f,%eax
+ +[a-f0-9]+:	66 a9 7f 00          	test   \$0x7f,%ax
  +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
- +[a-f0-9]+:	a8 7f                	test   \$0x7f,%al
+ +[a-f0-9]+:	f7 c3 7f 00 00 00    	test   \$0x7f,%ebx
+ +[a-f0-9]+:	f7 c3 7f 00 00 00    	test   \$0x7f,%ebx
+ +[a-f0-9]+:	66 f7 c3 7f 00       	test   \$0x7f,%bx
  +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
- +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
- +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
- +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
+ +[a-f0-9]+:	f7 c7 7f 00 00 00    	test   \$0x7f,%edi
+ +[a-f0-9]+:	f7 c7 7f 00 00 00    	test   \$0x7f,%edi
+ +[a-f0-9]+:	66 f7 c7 7f 00       	test   \$0x7f,%di
  +[a-f0-9]+:	40 f6 c7 7f          	test   \$0x7f,%dil
- +[a-f0-9]+:	40 f6 c7 7f          	test   \$0x7f,%dil
- +[a-f0-9]+:	40 f6 c7 7f          	test   \$0x7f,%dil
- +[a-f0-9]+:	40 f6 c7 7f          	test   \$0x7f,%dil
+ +[a-f0-9]+:	41 f7 c1 7f 00 00 00 	test   \$0x7f,%r9d
+ +[a-f0-9]+:	41 f7 c1 7f 00 00 00 	test   \$0x7f,%r9d
+ +[a-f0-9]+:	66 41 f7 c1 7f 00    	test   \$0x7f,%r9w
  +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
- +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
- +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
- +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
- +[a-f0-9]+:	20 c9                	and    %cl,%cl
- +[a-f0-9]+:	66 21 d2             	and    %dx,%dx
+ +[a-f0-9]+:	84 c9                	test   %cl,%cl
+ +[a-f0-9]+:	66 85 d2             	test   %dx,%dx
  +[a-f0-9]+:	21 db                	and    %ebx,%ebx
- +[a-f0-9]+:	48 21 e4             	and    %rsp,%rsp
- +[a-f0-9]+:	40 08 ed             	or     %bpl,%bpl
- +[a-f0-9]+:	66 09 f6             	or     %si,%si
+ +[a-f0-9]+:	48 85 e4             	test   %rsp,%rsp
+ +[a-f0-9]+:	40 84 ed             	test   %bpl,%bpl
+ +[a-f0-9]+:	66 85 f6             	test   %si,%si
  +[a-f0-9]+:	09 ff                	or     %edi,%edi
- +[a-f0-9]+:	4d 09 c0             	or     %r8,%r8
+ +[a-f0-9]+:	4d 85 c0             	test   %r8,%r8
  +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2

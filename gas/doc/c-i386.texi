@@ -477,7 +477,8 @@ instructions with 128-bit/256-bit VEX packed integer logical.
 EVEX vector register clearing instructions.  In 64-bit mode VEX encoded
 instructions with commutative source operands will also have their
 source operands swapped if this allows using the 2-byte VEX prefix form
-instead of the 3-byte one.
+instead of the 3-byte one.  Certain forms of AND as well as OR with the
+same (register) operand specified twice will also be changed to TEST.
 
 @samp{-Os} includes @samp{-O2} optimization plus encodes 16-bit, 32-bit
 and 64-bit register tests with immediate as 8-bit register test with
