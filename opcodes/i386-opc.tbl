@@ -2859,6 +2859,10 @@ sha256msg2, 2, 0xf38cd, None, 3, CpuSHA, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 // VPCLMULQDQ instructions
 
 vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexWIG|VexVVVV=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmullqlqdq, 3, 0x6644, 0x00, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexWIG|VexVVVV=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmulhqlqdq, 3, 0x6644, 0x01, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexWIG|VexVVVV=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmullqhqdq, 3, 0x6644, 0x10, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexWIG|VexVVVV=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmulhqhqdq, 3, 0x6644, 0x11, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexWIG|VexVVVV=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 
 // VPCLMULQDQ instructions end
 
@@ -4608,6 +4612,10 @@ vaesenclast, 3, 0x66dd, None, 1, CpuVAES|CpuAVX512F, Modrm|VexOpcode=1|VexWIG|Ve
 // AVX512 + VPCLMULQDQ instructions
 
 vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|VexOpcode=2|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmullqlqdq, 3, 0x6644, 0x00, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|VexOpcode=2|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmulhqlqdq, 3, 0x6644, 0x01, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|VexOpcode=2|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmullqhqdq, 3, 0x6644, 0x10, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|VexOpcode=2|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmulhqhqdq, 3, 0x6644, 0x11, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|VexOpcode=2|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // AVX512 + VPCLMULQDQ instructions end
 

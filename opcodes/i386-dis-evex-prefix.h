@@ -1881,7 +1881,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpclmulqdq",	{ XM, Vex, EXx, Ib }, 0 },
+    { "vpclmulqdq",	{ XM, Vex, EXx, PCLMUL }, 0 },
   },
   /* PREFIX_EVEX_0F3A50 */
   {
