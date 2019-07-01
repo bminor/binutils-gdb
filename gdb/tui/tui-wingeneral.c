@@ -179,18 +179,6 @@ tui_gen_win_info::make_visible (bool visible)
     }
 }
 
-void
-tui_make_visible (struct tui_gen_win_info *win_info)
-{
-  win_info->make_visible (true);
-}
-
-void
-tui_make_invisible (struct tui_gen_win_info *win_info)
-{
-  win_info->make_visible (false);
-}
-
 /* See tui-data.h.  */
 
 void

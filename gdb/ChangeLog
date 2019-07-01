@@ -1,5 +1,21 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_make_visible, tui_make_invisible):
+	Don't declare.
+	* tui/tui-wingeneral.c (tui_make_visible, tui_make_invisible):
+	Remove.
+	* tui/tui-win.c (tui_source_window_base::set_new_height)
+	(tui_source_window_base::set_new_height)
+	(make_invisible_and_set_new_height)
+	(tui_source_window_base::do_make_visible_with_new_height)
+	(tui_source_window_base::do_make_visible_with_new_height):
+	Update.
+	* tui/tui-layout.c (show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-layout.c (show_layout): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_data_window): Remove.
 	(show_data): Unify creation and re-initialization cases.
 

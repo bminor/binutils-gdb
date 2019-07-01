@@ -1226,7 +1226,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 void
 tui_source_window_base::set_new_height (int height)
 {
-  tui_make_invisible (execution_info);
+  execution_info->make_visible (false);
   execution_info->height = height;
   execution_info->origin.y = origin.y;
   if (height > 1)
@@ -1238,7 +1238,7 @@ tui_source_window_base::set_new_height (int height)
   if (has_locator ())
     {
       tui_locator_window *gen_win_info = tui_locator_win_info_ptr ();
-      tui_make_invisible (gen_win_info);
+      gen_win_info->make_visible (false);
       gen_win_info->origin.y = origin.y + height;
     }
 }
@@ -1263,7 +1263,7 @@ static void
 make_invisible_and_set_new_height (struct tui_win_info *win_info, 
 				   int height)
 {
-  tui_make_invisible (win_info);
+  win_info->make_visible (false);
   win_info->height = height;
   if (height > 1)
     win_info->viewport_height = height - 1;
@@ -1292,7 +1292,7 @@ tui_win_info::make_visible_with_new_height ()
 void
 tui_source_window_base::do_make_visible_with_new_height ()
 {
-  tui_make_visible (execution_info);
+  execution_info->make_visible (true);
   if (!content.empty ())
     {
       struct tui_line_or_address line_or_addr;
@@ -1326,7 +1326,7 @@ tui_source_window_base::do_make_visible_with_new_height ()
     }
   if (has_locator ())
     {
-      tui_make_visible (tui_locator_win_info_ptr ());
+      tui_locator_win_info_ptr ()->make_visible (true);
       tui_show_locator_content ();
     }
 }

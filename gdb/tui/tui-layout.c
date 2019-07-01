@@ -80,7 +80,7 @@ show_layout (enum tui_layout_type layout)
 	{
 	  /* First make the current layout be invisible.  */
 	  tui_make_all_invisible ();
-	  tui_make_invisible (tui_locator_win_info_ptr ());
+	  tui_locator_win_info_ptr ()->make_visible (false);
 
 	  switch (layout)
 	    {
@@ -514,7 +514,7 @@ show_source_disasm_command (void)
 			  tui_term_width (),
 			  0,
 			  0);
-      tui_make_visible (TUI_SRC_WIN);
+      TUI_SRC_WIN->make_visible (true);
       TUI_SRC_WIN->m_has_locator = false;
 
       struct tui_locator_window *locator = tui_locator_win_info_ptr ();
@@ -527,14 +527,14 @@ show_source_disasm_command (void)
 			     tui_term_width (),
 			     0,
 			     src_height - 1);
-      tui_make_visible (TUI_DISASM_WIN);
+      TUI_DISASM_WIN->make_visible (true);
       locator->reset (2 /* 1 */ ,
 		      tui_term_width (),
 		      0,
 		      (src_height + asm_height) - 1);
       TUI_SRC_WIN->m_has_locator = false;
       TUI_DISASM_WIN->m_has_locator = true;
-      tui_make_visible (locator);
+      locator->make_visible (true);
       tui_show_locator_content ();
       tui_show_source_content (TUI_DISASM_WIN);
 
@@ -567,7 +567,7 @@ show_data (enum tui_layout_type new_layout)
   data_height = total_height / 2;
   src_height = total_height - data_height;
   tui_make_all_invisible ();
-  tui_make_invisible (locator);
+  locator->make_visible (false);
   if (tui_win_list[DATA_WIN] == nullptr)
     tui_win_list[DATA_WIN] = new tui_data_window ();
   tui_win_list[DATA_WIN]->reset (data_height, tui_term_width (), 0, 0);
@@ -598,7 +598,7 @@ show_data (enum tui_layout_type new_layout)
 		  total_height - 1);
   base->make_visible (true);
   base->m_has_locator = true;
-  tui_make_visible (locator);
+  locator->make_visible (true);
   tui_show_locator_content ();
   tui_add_to_source_windows (base);
   tui_set_current_layout_to (new_layout);
@@ -662,11 +662,11 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		       tui_term_width (),
 		       0,
 		       0);
-      tui_make_visible (win_info);
+      win_info->make_visible (true);
 
 
       win_info->m_has_locator = true;
-      tui_make_visible (locator);
+      locator->make_visible (true);
       tui_show_locator_content ();
       tui_show_source_content (win_info);
 
