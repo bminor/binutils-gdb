@@ -1,5 +1,11 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vextractps, vpextrw, vpinsrw): Remove
+	Disp8MemShift from register only templates.
+	* i386-tbl.h: Re-generate.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EXdScalarS, MOD_EVEX_0F10_PREFIX_1,
 	MOD_EVEX_0F10_PREFIX_3, MOD_EVEX_0F11_PREFIX_1,
 	MOD_EVEX_0F11_PREFIX_3, EVEX_W_0F10_P_1_M_0,
