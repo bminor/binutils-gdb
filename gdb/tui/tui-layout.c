@@ -44,7 +44,6 @@
 ********************************/
 static void show_layout (enum tui_layout_type);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
-static struct tui_win_info *make_command_window (int, int);
 static struct tui_win_info *make_source_window (int, int);
 static struct tui_win_info *make_disasm_window (int, int);
 static void show_source_command (void);
@@ -480,17 +479,6 @@ prev_layout (void)
 }
 
 
-
-static struct tui_win_info *
-make_command_window (int height, int origin_y)
-{
-  struct tui_win_info *result = new tui_cmd_window ();
-  result->reset (height, tui_term_width (), 0, origin_y);
-  tui_make_window (result, DONT_BOX_WINDOW);
-  return result;
-}
-
-
 /* make_source_window().
  */
 static struct tui_win_info *
@@ -589,16 +577,14 @@ show_source_disasm_command (void)
       tui_show_source_content (TUI_DISASM_WIN);
 
       if (TUI_CMD_WIN == NULL)
-	tui_win_list[CMD_WIN]
-	  = make_command_window (cmd_height, tui_term_height () - cmd_height);
-      else
-	{
-	  TUI_CMD_WIN->reset (TUI_CMD_WIN->height,
-			      TUI_CMD_WIN->width,
-			      0,
-			      TUI_CMD_WIN->origin.y);
-	  tui_make_visible (TUI_CMD_WIN);
-	}
+	tui_win_list[CMD_WIN] = new tui_cmd_window ();
+      TUI_CMD_WIN->reset (cmd_height,
+			  tui_term_width (),
+			  0,
+			  tui_term_height () - cmd_height);
+      /* FIXME tui_cmd_window won't recreate the handle on
+	 make_visible, so we need this instead.  */
+      tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
       tui_set_current_layout_to (SRC_DISASSEM_COMMAND);
     }
 }
@@ -734,18 +720,14 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
       tui_show_source_content (win_info);
 
       if (TUI_CMD_WIN == NULL)
-	{
-	  tui_win_list[CMD_WIN] = make_command_window (cmd_height,
-						       src_height);
-	}
-      else
-	{
-	  TUI_CMD_WIN->reset (TUI_CMD_WIN->height,
-			      TUI_CMD_WIN->width,
-			      TUI_CMD_WIN->origin.x,
-			      TUI_CMD_WIN->origin.y);
-	  tui_make_visible (TUI_CMD_WIN);
-	}
+	tui_win_list[CMD_WIN] = new tui_cmd_window ();
+      TUI_CMD_WIN->reset (cmd_height,
+			  tui_term_width (),
+			  0,
+			  src_height);
+      /* FIXME tui_cmd_window won't recreate the handle on
+	 make_visible, so we need this instead.  */
+      tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
       tui_set_current_layout_to (layout_type);
     }
 }

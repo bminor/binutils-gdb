@@ -1,5 +1,11 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (make_command_window): Remove.
+	(show_source_disasm_command, show_source_or_disasm_and_command):
+	Unify creation and re-initialization cases.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_or_disasm_and_command): Unify
 	creation and re-initialization cases.
 
