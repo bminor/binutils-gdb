@@ -1,5 +1,11 @@
 2019-07-01  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2read.c
+	(dw2_debug_names_iterator::find_vec_in_debug_names): Hoist
+	declaration of without_params.  Fix formatting.
+
+2019-07-01  Tom Tromey  <tromey@adacore.com>
+
 	* ada-exp.y (find_primitive_type): Update.
 	* ada-lang.h (ada_lookup_symbol): Update.
 	* ada-lang.c (ada_lookup_symbol): Remove "is_a_field_of_this"

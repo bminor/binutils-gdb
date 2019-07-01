@@ -5726,6 +5726,7 @@ dw2_debug_names_iterator::find_vec_in_debug_names
 {
   int (*cmp) (const char *, const char *);
 
+  gdb::unique_xmalloc_ptr<char> without_params;
   if (current_language->la_language == language_cplus
       || current_language->la_language == language_fortran
       || current_language->la_language == language_d)
@@ -5735,13 +5736,9 @@ dw2_debug_names_iterator::find_vec_in_debug_names
 
       if (strchr (name, '(') != NULL)
 	{
-	  gdb::unique_xmalloc_ptr<char> without_params
-	    = cp_remove_params (name);
-
+	  without_params = cp_remove_params (name);
 	  if (without_params != NULL)
-	    {
-	      name = without_params.get();
-	    }
+	    name = without_params.get ();
 	}
     }
 
