@@ -1,5 +1,12 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (output_insn): Adjust recognition of xFENCE
+	insns. Move PadLock special case of prefix emission to 3-byte
+	long base opcode handling.
+	(i386_index_check): Check for CpuPadLock instead of ImmExt.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Handle AND / OR with
 	both operands being the same register.
 	* doc/c-i386.texi: Update -O2 documentation.

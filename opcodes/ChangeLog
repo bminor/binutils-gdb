@@ -1,5 +1,15 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (lfence, mfence, sfence, monitor, mwait, vmcall,
+	vmlaunch, vmresume, vmxoff, vmfunc, xgetbv, xsetbv, swapgs,
+	rdtscp, clgi, invlpga, skinit, stgi, vmload, vmmcall, vmrun,
+	vmsave, montmul, xsha1, xsha256, xstorerng, xcryptecb,
+	xcryptcbc, xcryptctr, xcryptcfb, xcryptofb, xstore, clac, stac,
+	monitorx, mwaitx): Drop ImmExt from operand-less forms.
+	* i386-tbl.h: Re-generate.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (and, or): Add Optimize to forms allowing two
 	register operands.
 	* i386-tbl.h: Re-generate.
