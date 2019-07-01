@@ -165,20 +165,15 @@ tui_make_window (struct tui_gen_win_info *win_info, enum tui_box box_it)
 void
 tui_gen_win_info::make_visible (bool visible)
 {
+  if (is_visible == visible)
+    return;
+  is_visible = visible;
+
   if (visible)
+    tui_make_window (this, (tui_win_is_auxiliary (type)
+			    ? DONT_BOX_WINDOW : BOX_WINDOW));
+  else
     {
-      if (!is_visible)
-	{
-	  tui_make_window (this, (tui_win_is_auxiliary (type)
-				  ? DONT_BOX_WINDOW : BOX_WINDOW));
-	  is_visible = true;
-	}
-    }
-  else if (!visible
-	   && is_visible
-	   && handle != NULL)
-    {
-      is_visible = false;
       tui_delete_win (handle);
       handle = NULL;
     }
