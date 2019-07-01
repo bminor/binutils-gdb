@@ -425,17 +425,12 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Vex128 { OP_VEX, vex128_mode }
 #define Vex256 { OP_VEX, vex256_mode }
 #define VexGdq { OP_VEX, dq_mode }
-#define EXdVex { OP_EX_Vex, d_mode }
-#define EXdVexS { OP_EX_Vex, d_swap_mode }
 #define EXdVexScalarS { OP_EX_Vex, d_scalar_swap_mode }
-#define EXqVex { OP_EX_Vex, q_mode }
-#define EXqVexS { OP_EX_Vex, q_swap_mode }
 #define EXqVexScalarS { OP_EX_Vex, q_scalar_swap_mode }
 #define EXVexW { OP_EX_VexW, x_mode }
 #define EXdVexW { OP_EX_VexW, d_mode }
 #define EXqVexW { OP_EX_VexW, q_mode }
 #define EXVexImmW { OP_EX_VexImmW, x_mode }
-#define XMVex { OP_XMM_Vex, 0 }
 #define XMVexScalar { OP_XMM_Vex, scalar_mode }
 #define XMVexW { OP_XMM_VexW, 0 }
 #define XMVexI4 { OP_REG_VexI4, x_mode }
