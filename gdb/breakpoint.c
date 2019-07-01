@@ -7095,12 +7095,10 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   return add_to_breakpoint_chain (std::move (b));
 }
 
-/* Initialize loc->function_name.  EXPLICIT_LOC says no indirect function
-   resolutions should be made as the user specified the location explicitly
-   enough.  */
+/* Initialize loc->function_name.  */
 
 static void
-set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
+set_breakpoint_location_function (struct bp_location *loc)
 {
   gdb_assert (loc->owner != NULL);
 
@@ -7112,8 +7110,7 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 
       if (loc->msymbol != NULL
 	  && (MSYMBOL_TYPE (loc->msymbol) == mst_text_gnu_ifunc
-	      || MSYMBOL_TYPE (loc->msymbol) == mst_data_gnu_ifunc)
-	  && !explicit_loc)
+	      || MSYMBOL_TYPE (loc->msymbol) == mst_data_gnu_ifunc))
 	{
 	  struct breakpoint *b = loc->owner;
 
@@ -8481,7 +8478,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
 
   copy = set_raw_breakpoint_without_location (orig->gdbarch, type, ops);
   copy->loc = allocate_bp_location (copy);
-  set_breakpoint_location_function (copy->loc, 1);
+  set_breakpoint_location_function (copy->loc);
 
   copy->loc->gdbarch = orig->loc->gdbarch;
   copy->loc->requested_address = orig->loc->requested_address;
@@ -8586,8 +8583,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->msymbol = sal->msymbol;
   loc->objfile = sal->objfile;
 
-  set_breakpoint_location_function (loc,
-				    sal->explicit_pc || sal->explicit_line);
+  set_breakpoint_location_function (loc);
 
   /* While by definition, permanent breakpoints are already present in the
      code, we don't mark the location as inserted.  Normally one would expect

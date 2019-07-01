@@ -1,5 +1,13 @@
 2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* breakpoint.c (set_breakpoint_location_function): Remove
+	explicit_loc parameter.
+	(momentary_breakpoint_from_master): Update call to
+	set_breakpoint_location_function.
+	(add_location_to_breakpoint): Likewise.
+
+2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_features_from_gdbarch_info): Don't modify
 	required features based on default bfd type when no specific bfd
 	is present.
