@@ -105,6 +105,19 @@ cli_ui_out::do_field_int (int fldno, int width, ui_align alignment,
 		   ui_out_style_kind::DEFAULT);
 }
 
+/* output an unsigned field */
+
+void
+cli_ui_out::do_field_unsigned (int fldno, int width, ui_align alignment,
+			       const char *fldname, ULONGEST value)
+{
+  if (m_suppress_output)
+    return;
+
+  do_field_string (fldno, width, alignment, fldname, pulongest (value),
+		   ui_out_style_kind::DEFAULT);
+}
+
 /* used to omit a field */
 
 void

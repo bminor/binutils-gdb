@@ -462,6 +462,20 @@ ui_out::field_fmt_int (int input_width, ui_align input_align,
   do_field_int (fldno, input_width, input_align, fldname, value);
 }
 
+/* See ui-out.h.  */
+
+void
+ui_out::field_unsigned (const char *fldname, ULONGEST value)
+{
+  int fldno;
+  int width;
+  ui_align align;
+
+  verify_field (&fldno, &width, &align);
+
+  do_field_unsigned (fldno, width, align, fldname, value);
+}
+
 /* Documented in ui-out.h.  */
 
 void

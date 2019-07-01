@@ -209,7 +209,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 
     if (insn->number != 0)
       {
-	uiout->field_fmt ("insn-number", "%u", insn->number);
+	uiout->field_unsigned ("insn-number", insn->number);
 	uiout->text ("\t");
       }
 

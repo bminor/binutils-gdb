@@ -54,6 +54,9 @@ protected:
   virtual void do_end (ui_out_type type) override;
   virtual void do_field_int (int fldno, int width, ui_align align,
 			  const char *fldname, int value) override;
+  virtual void do_field_unsigned (int fldno, int width, ui_align align,
+				  const char *fldname, ULONGEST value)
+    override;
   virtual void do_field_skip (int fldno, int width, ui_align align,
 			   const char *fldname) override;
   virtual void do_field_string (int fldno, int width, ui_align align,

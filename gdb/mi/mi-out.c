@@ -105,6 +105,16 @@ mi_ui_out::do_field_int (int fldno, int width, ui_align alignment,
 		   ui_out_style_kind::DEFAULT);
 }
 
+/* Output an unsigned field.  */
+
+void
+mi_ui_out::do_field_unsigned (int fldno, int width, ui_align alignment,
+			      const char *fldname, ULONGEST value)
+{
+  do_field_string (fldno, width, alignment, fldname, pulongest (value),
+		   ui_out_style_kind::DEFAULT);
+}
+
 /* Used to omit a field.  */
 
 void

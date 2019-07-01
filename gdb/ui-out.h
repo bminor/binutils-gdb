@@ -110,6 +110,8 @@ class ui_out
   void field_int (const char *fldname, int value);
   void field_fmt_int (int width, ui_align align, const char *fldname,
 		      int value);
+  /* Like field_int, but print an unsigned value.  */
+  void field_unsigned (const char *fldname, ULONGEST value);
   void field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 			CORE_ADDR address);
   void field_string (const char *fldname, const char *string,
@@ -157,6 +159,8 @@ class ui_out
   virtual void do_end (ui_out_type type) = 0;
   virtual void do_field_int (int fldno, int width, ui_align align,
 			     const char *fldname, int value) = 0;
+  virtual void do_field_unsigned (int fldno, int width, ui_align align,
+				  const char *fldname, ULONGEST value) = 0;
   virtual void do_field_skip (int fldno, int width, ui_align align,
 			      const char *fldname) = 0;
   virtual void do_field_string (int fldno, int width, ui_align align,

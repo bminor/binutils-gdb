@@ -1,5 +1,22 @@
 2019-07-15  Tom Tromey  <tromey@adacore.com>
 
+	* mi/mi-out.h (class mi_ui_out) <do_field_unsigned>: Declare.
+	* mi/mi-out.c (mi_ui_out::do_field_unsigned): New method.
+	* cli-out.h (class cli_ui_out) <do_field_unsigned>: Declare.
+	* cli-out.c (cli_ui_out::do_field_int): New method.
+	* ui-out.c (ui_out::field_unsigned): New method.
+	* symfile.c (generic_load): Use field_unsigned.
+	(print_transfer_performance): Likewise.
+	* record-btrace.c (ui_out_field_uint): Remove.
+	(btrace_call_history_insn_range, btrace_call_history): Use
+	field_unsigned.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn): Use
+	field_unsigned.
+	* ui-out.h (class ui_out) <field_unsigned>: New method.
+	<do_field_unsigned>: Likewise.
+
+2019-07-15  Tom Tromey  <tromey@adacore.com>
+
 	* mi/mi-main.c (list_available_thread_groups): Use field_string.
 	* mi/mi-interp.c (mi_memory_changed): Use field_string.
 	* target.c (flash_erase_command): Use field_string.

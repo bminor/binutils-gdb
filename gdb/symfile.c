@@ -2097,7 +2097,7 @@ generic_load (const char *args, int from_tty)
   uiout->text ("Start address ");
   uiout->field_core_addr ("address", target_gdbarch (), entry);
   uiout->text (", load size ");
-  uiout->field_fmt ("load-size", "%lu", total_progress.data_count);
+  uiout->field_unsigned ("load-size", total_progress.data_count);
   uiout->text ("\n");
   regcache_write_pc (get_current_regcache (), entry);
 
@@ -2140,29 +2140,29 @@ print_transfer_performance (struct ui_file *stream,
 
       if (uiout->is_mi_like_p ())
 	{
-	  uiout->field_fmt ("transfer-rate", "%lu", rate * 8);
+	  uiout->field_unsigned ("transfer-rate", rate * 8);
 	  uiout->text (" bits/sec");
 	}
       else if (rate < 1024)
 	{
-	  uiout->field_fmt ("transfer-rate", "%lu", rate);
+	  uiout->field_unsigned ("transfer-rate", rate);
 	  uiout->text (" bytes/sec");
 	}
       else
 	{
-	  uiout->field_fmt ("transfer-rate", "%lu", rate / 1024);
+	  uiout->field_unsigned ("transfer-rate", rate / 1024);
 	  uiout->text (" KB/sec");
 	}
     }
   else
     {
-      uiout->field_fmt ("transferred-bits", "%lu", (data_count * 8));
+      uiout->field_unsigned ("transferred-bits", (data_count * 8));
       uiout->text (" bits in <1 sec");
     }
   if (write_count > 0)
     {
       uiout->text (", ");
-      uiout->field_fmt ("write-rate", "%lu", data_count / write_count);
+      uiout->field_unsigned ("write-rate", data_count / write_count);
       uiout->text (" bytes/write");
     }
   uiout->text (".\n");

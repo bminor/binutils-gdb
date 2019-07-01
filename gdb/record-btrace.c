@@ -624,14 +624,6 @@ btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
   uiout->text (_("]\n"));
 }
 
-/* Print an unsigned int.  */
-
-static void
-ui_out_field_uint (struct ui_out *uiout, const char *fld, unsigned int val)
-{
-  uiout->field_fmt (fld, "%u", val);
-}
-
 /* A range of source lines.  */
 
 struct btrace_line_range
@@ -1033,9 +1025,9 @@ btrace_call_history_insn_range (struct ui_out *uiout,
   begin = bfun->insn_offset;
   end = begin + size - 1;
 
-  ui_out_field_uint (uiout, "insn begin", begin);
+  uiout->field_unsigned ("insn begin", begin);
   uiout->text (",");
-  ui_out_field_uint (uiout, "insn end", end);
+  uiout->field_unsigned ("insn end", end);
 }
 
 /* Compute the lowest and highest source line for the instructions in BFUN
@@ -1156,7 +1148,7 @@ btrace_call_history (struct ui_out *uiout,
       msym = bfun->msym;
 
       /* Print the function index.  */
-      ui_out_field_uint (uiout, "index", bfun->number);
+      uiout->field_unsigned ("index", bfun->number);
       uiout->text ("\t");
 
       /* Indicate gaps in the trace.  */
