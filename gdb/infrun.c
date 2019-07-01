@@ -7690,13 +7690,13 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
       const char *name;
 
       uiout->text ("\nThread ");
-      uiout->field_fmt ("thread-id", "%s", print_thread_id (thr));
+      uiout->field_string ("thread-id", print_thread_id (thr));
 
       name = thr->name != NULL ? thr->name : target_thread_name (thr);
       if (name != NULL)
 	{
 	  uiout->text (" \"");
-	  uiout->field_fmt ("name", "%s", name);
+	  uiout->field_string ("name", name);
 	  uiout->text ("\"");
 	}
     }

@@ -746,7 +746,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      uiout->field_fmt ("id", "%s", pid->c_str ());
+      uiout->field_string ("id", pid->c_str ());
       uiout->field_string ("type", "process");
       if (cmd)
 	uiout->field_string ("description", cmd->c_str ());

@@ -1,5 +1,16 @@
 2019-07-15  Tom Tromey  <tromey@adacore.com>
 
+	* mi/mi-main.c (list_available_thread_groups): Use field_string.
+	* mi/mi-interp.c (mi_memory_changed): Use field_string.
+	* target.c (flash_erase_command): Use field_string.
+	* infrun.c (print_signal_received_reason): Use field_string.
+	* i386-tdep.c (i386_mpx_print_bounds): Use field_string.
+	* breakpoint.c (maybe_print_thread_hit_breakpoint): Use
+	field_string.
+	* ada-tasks.c (print_ada_task_info): Use field_string.
+
+2019-07-15  Tom Tromey  <tromey@adacore.com>
+
 	* target.c (flash_erase_command): Use field_core_addr.
 	* symfile.c (generic_load): Use field_core_addr.
 	* sparc64-linux-tdep.c (sparc64_linux_handle_segmentation_fault):

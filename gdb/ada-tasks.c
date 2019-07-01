@@ -1089,7 +1089,8 @@ print_ada_task_info (struct ui_out *uiout,
       uiout->field_int ("id", taskno);
 
       /* Print the Task ID.  */
-      uiout->field_fmt ("task-id", "%9lx", (long) task_info->task_id);
+      uiout->field_string ("task-id", phex_nz (task_info->task_id,
+					       sizeof (CORE_ADDR)));
 
       /* Print the associated Thread ID.  */
       if (uiout->is_mi_like_p ())
@@ -1129,10 +1130,9 @@ print_ada_task_info (struct ui_out *uiout,
 	uiout->field_string ("state", task_states[task_info->state]);
 
       /* Finally, print the task name.  */
-      uiout->field_fmt ("name",
-			"%s",
-			task_info->name[0] != '\0' ? task_info->name
-						   : _("<no name>"));
+      uiout->field_string ("name",
+			   task_info->name[0] != '\0' ? task_info->name
+			   : _("<no name>"));
 
       uiout->text ("\n");
     }

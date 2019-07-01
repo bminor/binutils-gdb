@@ -4483,13 +4483,13 @@ maybe_print_thread_hit_breakpoint (struct ui_out *uiout)
       struct thread_info *thr = inferior_thread ();
 
       uiout->text ("Thread ");
-      uiout->field_fmt ("thread-id", "%s", print_thread_id (thr));
+      uiout->field_string ("thread-id", print_thread_id (thr));
 
       name = thr->name != NULL ? thr->name : target_thread_name (thr);
       if (name != NULL)
 	{
 	  uiout->text (" \"");
-	  uiout->field_fmt ("name", "%s", name);
+	  uiout->field_string ("name", name);
 	  uiout->text ("\"");
 	}
 

@@ -8914,7 +8914,7 @@ i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 
       size = (size > -1 ? size + 1 : size);
       uiout->text (", size = ");
-      uiout->field_fmt ("size", "%s", plongest (size));
+      uiout->field_string ("size", plongest (size));
 
       uiout->text (", metadata = ");
       uiout->field_core_addr ("metadata", gdbarch, bt_entry[3]);
