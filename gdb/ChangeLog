@@ -1,5 +1,9 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_get_register): Return void.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_gen_win_info::make_visible):
 	Simplify.
 

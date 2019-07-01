@@ -54,9 +54,9 @@ static void tui_show_register_group (tui_data_window *win_info,
 				     struct frame_info *frame,
 				     int refresh_values_only);
 
-static enum tui_status tui_get_register (struct frame_info *frame,
-					 struct tui_data_item_window *data,
-					 int regnum, bool *changedp);
+static void tui_get_register (struct frame_info *frame,
+			      struct tui_data_item_window *data,
+			      int regnum, bool *changedp);
 
 
 
@@ -646,13 +646,11 @@ tui_register_format (struct frame_info *frame, int regnum)
 /* Get the register value from the given frame and format it for the
    display.  When changep is set, check if the new register value has
    changed with respect to the previous call.  */
-static enum tui_status
+static void
 tui_get_register (struct frame_info *frame,
                   struct tui_data_item_window *data, 
 		  int regnum, bool *changedp)
 {
-  enum tui_status ret = TUI_FAILURE;
-
   if (changedp)
     *changedp = false;
   if (target_has_registers)
@@ -666,8 +664,5 @@ tui_get_register (struct frame_info *frame,
 	*changedp = true;
 
       xfree (prev_content);
-
-      ret = TUI_SUCCESS;
     }
-  return ret;
 }
