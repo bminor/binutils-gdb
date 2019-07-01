@@ -1,5 +1,13 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (vec_imm4): Delete.
+	(VEX_check_operands): Replace Vec_Imm4 check by CpuXOP with five
+	operands one.  Clear Imm<N> by different means.
+	(build_modrm_byte): Adjust comment.  Remove dead code.  Add and
+	adjust assertions.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (output_insn): Adjust recognition of xFENCE
 	insns. Move PadLock special case of prefix emission to 3-byte
 	long base opcode handling.

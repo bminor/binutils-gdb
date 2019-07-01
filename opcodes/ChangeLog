@@ -1,5 +1,15 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-gen.c (operand_type_init): Remove
+	OPERAND_TYPE_VEC_IMM4 entry.
+	(operand_types): Remove Vec_Imm4.
+	* opcodes/i386-opc.h (Vec_Imm4): Delete.
+	(union i386_operand_type): Remove vec_imm4.
+	* i386-opc.tbl (vpermil2pd, vpermil2ps): Remove Vec_Imm4.
+	* opcodes/i386-init.h, i386-tbl.h: Re-generate.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (lfence, mfence, sfence, monitor, mwait, vmcall,
 	vmlaunch, vmresume, vmxoff, vmfunc, xgetbv, xsetbv, swapgs,
 	rdtscp, clgi, invlpga, skinit, stgi, vmload, vmmcall, vmrun,

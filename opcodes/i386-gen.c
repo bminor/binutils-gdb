@@ -486,8 +486,6 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32" },
   { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
-  { "OPERAND_TYPE_VEC_IMM4",
-    "Vec_Imm4" },
   { "OPERAND_TYPE_REGBND",
     "RegBND" },
 };
@@ -721,7 +719,6 @@ static bitfield operand_types[] =
   BITFIELD (Zmmword),
   BITFIELD (Unspecified),
   BITFIELD (Anysize),
-  BITFIELD (Vec_Imm4),
   BITFIELD (RegBND),
 #ifdef OTUnused
   BITFIELD (OTUnused),

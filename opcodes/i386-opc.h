@@ -784,9 +784,6 @@ enum
   /* Any memory size.  */
   Anysize,
 
-  /* Vector 4 bit immediate.  */
-  Vec_Imm4,
-
   /* Bound register.  */
   RegBND,
 
@@ -846,7 +843,6 @@ typedef union i386_operand_type
       unsigned int zmmword:1;
       unsigned int unspecified:1;
       unsigned int anysize:1;
-      unsigned int vec_imm4:1;
       unsigned int regbnd:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
