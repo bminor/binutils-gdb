@@ -44,8 +44,6 @@
 ********************************/
 static void show_layout (enum tui_layout_type);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
-static struct tui_win_info *make_source_window (int, int);
-static struct tui_win_info *make_disasm_window (int, int);
 static void show_source_command (void);
 static void show_disasm_command (void);
 static void show_source_disasm_command (void);
@@ -479,30 +477,6 @@ prev_layout (void)
 }
 
 
-/* make_source_window().
- */
-static struct tui_win_info *
-make_source_window (int height, int origin_y)
-{
-  tui_win_info *result = new tui_source_window ();
-  result->reset (height, tui_term_width (), 0, origin_y);
-  result->make_visible (true);
-  return result;
-}
-
-
-/* make_disasm_window().
- */
-static struct tui_win_info *
-make_disasm_window (int height, int origin_y)
-{
-  tui_win_info *result = new tui_disasm_window ();
-  result->reset (height, tui_term_width (), 0, origin_y);
-  result->make_visible (true);
-  return result;
-}
-
-
 static tui_win_info *
 make_data_window (int height, int origin_y)
 {
@@ -617,39 +591,29 @@ show_data (enum tui_layout_type new_layout)
   else
     win_type = DISASSEM_WIN;
 
-  tui_source_window_base *base;
   if (tui_win_list[win_type] == NULL)
     {
       if (win_type == SRC_WIN)
-	tui_win_list[win_type]
-	  = make_source_window (src_height, data_height - 1);
+	tui_win_list[win_type] = new tui_source_window ();
       else
-	tui_win_list[win_type]
-	  = make_disasm_window (src_height, data_height - 1);
-      locator->reset (2 /* 1 */ ,
-		      tui_term_width (),
-		      0,
-		      total_height - 1);
-      base = (tui_source_window_base *) tui_win_list[win_type];
+	tui_win_list[win_type] = new tui_disasm_window ();
     }
-  else
-    {
-      base = (tui_source_window_base *) tui_win_list[win_type];
-      tui_win_list[win_type]->reset (src_height,
-				     tui_term_width (),
-				     0,
-				     data_height - 1);
-      tui_make_visible (tui_win_list[win_type]);
-      locator->reset (2 /* 1 */ ,
-		      tui_term_width (),
-		      0,
-		      total_height - 1);
-    }
+
+  tui_source_window_base *base
+    = (tui_source_window_base *) tui_win_list[win_type];
+  tui_win_list[win_type]->reset (src_height,
+				 tui_term_width (),
+				 0,
+				 data_height - 1);
+  locator->reset (2 /* 1 */ ,
+		  tui_term_width (),
+		  0,
+		  total_height - 1);
+  base->make_visible (true);
   base->m_has_locator = true;
   tui_make_visible (locator);
   tui_show_locator_content ();
-  tui_add_to_source_windows
-    ((tui_source_window_base *) tui_win_list[win_type]);
+  tui_add_to_source_windows (base);
   tui_set_current_layout_to (new_layout);
 }
 
