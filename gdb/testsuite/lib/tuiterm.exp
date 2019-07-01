@@ -1,0 +1,526 @@
+# Copyright 2019 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# An ANSI terminal emulator for expect.
+
+namespace eval Term {
+    variable _rows
+    variable _cols
+    variable _chars
+
+    variable _cur_x
+    variable _cur_y
+
+    variable _attrs
+
+    variable _last_char
+
+    # If ARG is empty, return DEF: otherwise ARG.  This is useful for
+    # defaulting arguments in CSIs.
+    proc _default {arg def} {
+	if {$arg == ""} {
+	    return $def
+	}
+	return $arg
+    }
+
+    # Erase in the line Y from SX to just before EX.
+    proc _clear_in_line {sx ex y} {
+	variable _attrs
+	variable _chars
+	set lattr [array get _attrs]
+	while {$sx < $ex} {
+	    set _chars($sx,$y) [list " " $lattr]
+	    incr sx
+	}
+    }
+
+    # Erase the lines from SY to just before EY.
+    proc _clear_lines {sy ey} {
+	variable _cols
+	while {$sy < $ey} {
+	    _clear_in_line 0 $_cols $sy
+	    incr sy
+	}
+    }
+
+    # Beep.
+    proc _ctl_0x07 {} {
+    }
+
+    # Backspace.
+    proc _ctl_0x08 {} {
+	variable _cur_x
+	incr _cur_x -1
+	if {$_cur_x < 0} {
+	    variable _cur_y
+	    variable _cols
+	    set _cur_x [expr {$_cols - 1}]
+	    incr _cur_y -1
+	    if {$_cur_y < 0} {
+		set _cur_y 0
+	    }
+	}
+    }
+
+    # Linefeed.
+    proc _ctl_0x0a {} {
+	variable _cur_y
+	variable _rows
+	incr _cur_y 1
+	if {$_cur_y >= $_rows} {
+	    error "FIXME scroll"
+	}
+    }
+
+    # Carriage return.
+    proc _ctl_0x0d {} {
+	variable _cur_x
+	set _cur_x 0
+    }
+
+    # Cursor Up.
+    proc _csi_A {args} {
+	variable _cur_y
+	set arg [_default [lindex $args 0] 1]
+	set _cur_y [expr {max ($_cur_y - $arg, 0)}]
+    }
+
+    # Cursor Down.
+    proc _csi_B {args} {
+	variable _cur_y
+	variable _rows
+	set arg [_default [lindex $args 0] 1]
+	set _cur_y [expr {min ($_cur_y + $arg, $_rows)}]
+    }
+
+    # Cursor Forward.
+    proc _csi_C {args} {
+	variable _cur_x
+	variable _cols
+	set arg [_default [lindex $args 0] 1]
+	set _cur_x [expr {min ($_cur_x + $arg, $_cols)}]
+    }
+
+    # Cursor Back.
+    proc _csi_D {args} {
+	variable _cur_x
+	set arg [_default [lindex $args 0] 1]
+	set _cur_x [expr {max ($_cur_x - $arg, 0)}]
+    }
+
+    # Cursor Next Line.
+    proc _csi_E {args} {
+	variable _cur_x
+	variable _cur_y
+	variable _rows
+	set arg [_default [lindex $args 0] 1]
+	set _cur_x 0
+	set _cur_y [expr {min ($_cur_y + $arg, $_rows)}]
+    }
+
+    # Cursor Previous Line.
+    proc _csi_F {args} {
+	variable _cur_x
+	variable _cur_y
+	variable _rows
+	set arg [_default [lindex $args 0] 1]
+	set _cur_x 0
+	set _cur_y [expr {max ($_cur_y - $arg, 0)}]
+    }
+
+    # Cursor Horizontal Absolute.
+    proc _csi_G {args} {
+	variable _cur_x
+	variable _cols
+	set arg [_default [lindex $args 0] 1]
+	set _cur_x [expr {min ($arg - 1, $_cols)}]
+    }
+
+    # Move cursor (don't know the official name of this one).
+    proc _csi_H {args} {
+	variable _cur_x
+	variable _cur_y
+	set _cur_y [expr {[_default [lindex $args 0] 1] - 1}]
+	set _cur_x [expr {[_default [lindex $args 1] 1] - 1}]
+    }
+
+    # Cursor Forward Tabulation.
+    proc _csi_I {args} {
+	set n [_default [lindex $args 0] 1]
+	variable _cur_x
+	variable _cols
+	incr _cur_x [expr {$n * 8 - $_cur_x % 8}]
+	if {$_cur_x >= $_cols} {
+	    set _cur_x [expr {$_cols - 1}]
+	}
+    }
+
+    # Erase.
+    proc _csi_J {args} {
+	variable _cur_x
+	variable _cur_y
+	variable _rows
+	variable _cols
+	set arg [_default [lindex $args 0] 0]
+	if {$arg == 0} {
+	    _clear_in_line $_cur_x $_cols $_cur_y
+	    _clear_lines [expr {$_cur_y + 1}] $_rows
+	} elseif {$arg == 1} {
+	    _clear_lines 0 [expr {$_cur_y - 1}]
+	    _clear_in_line 0 $_cur_x $_cur_y
+	} elseif {$arg == 2} {
+	    _clear_lines 0 $_rows
+	}
+    }
+
+    # Erase Line.
+    proc _csi_K {args} {
+	variable _cur_x
+	variable _cur_y
+	variable _cols
+	set arg [_default [lindex $args 0] 0]
+	if {$arg == 0} {
+	    # From cursor to end.
+	    _clear_in_line $_cur_x $_cols $_cur_y
+	} elseif {$arg == 1} {
+	    _clear_in_line 0 $_cur_x $_cur_y
+	} elseif {$arg == 2} {
+	    _clear_in_line 0 $_cols $_cur_y
+	}
+    }
+
+    # Delete lines.
+    proc _csi_M {args} {
+	variable _cur_y
+	variable _rows
+	variable _cols
+	variable _chars
+	set count [_default [lindex $args 0] 1]
+	set y $_cur_y
+	set next_y [expr {$y + 1}]
+	while {$count > 0 && $next_y < $_rows} {
+	    for {set x 0} {$x < $_cols} {incr x} {
+		set _chars($x,$y) $_chars($x,$next_y)
+	    }
+	    incr y
+	    incr next_y
+	    incr count -1
+	}
+	_clear_lines $next_y $_rows
+    }
+
+    # Erase chars.
+    proc _csi_X {args} {
+	set n [_default [lindex $args 0] 1]
+	_insert [string repeat " " $n]
+    }
+
+    # Repeat.
+    proc _csi_b {args} {
+	variable _last_char
+	set n [_default [lindex $args 0] 1]
+	_insert [string repeat $_last_char $n]
+    }
+
+    # Line Position Absolute.
+    proc _csi_d {args} {
+	variable _cur_y
+	set _cur_y [expr {[_default [lindex $args 0] 1] - 1}]
+    }
+
+    # Select Graphic Rendition.
+    proc _csi_m {args} {
+	variable _attrs
+	foreach item $args {
+	    switch -exact -- $item {
+		"" - 0 {
+		    set _attrs(intensity) normal
+		    set _attrs(fg) default
+		    set _attrs(bg) default
+		    set _attrs(underline) 0
+		    set _attrs(reverse) 0
+		}
+		1 {
+		    set _attrs(intensity) bold
+		}
+		2 {
+		    set _attrs(intensity) dim
+		}
+		4 {
+		    set _attrs(underline) 1
+		}
+		7 {
+		    set _attrs(reverse) 1
+		}
+		22 {
+		    set _attrs(intensity) normal
+		}
+		24 {
+		    set _attrs(underline) 0
+		}
+		27 {
+		    set _attrs(reverse) 1
+		}
+		30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
+		    set _attrs(fg) $item
+		}
+		39 {
+		    set _attrs(fg) default
+		}
+		40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
+		    set _attrs(bg) $item
+		}
+		49 {
+		    set _attrs(bg) default
+		}
+	    }
+	}
+    }
+
+    # Insert string at the cursor location.
+    proc _insert {str} {
+	verbose "INSERT <<$str>>"
+	variable _cur_x
+	variable _cur_y
+	variable _rows
+	variable _cols
+	variable _attrs
+	variable _chars
+	set lattr [array get _attrs]
+	foreach char [split $str {}] {
+	    set _chars($_cur_x,$_cur_y) [list $char $lattr]
+	    incr _cur_x
+	    if {$_cur_x >= $_cols} {
+		set _cur_x 0
+		incr _cur_y
+		if {$_cur_y >= $_rows} {
+		    error "FIXME scroll"
+		}
+	    }
+	}
+    }
+
+    # Initialize.
+    proc _setup {rows cols} {
+	global stty_init
+	set stty_init "rows $rows columns $cols"
+
+	variable _rows
+	variable _cols
+	variable _cur_x
+	variable _cur_y
+	variable _attrs
+
+	set _rows $rows
+	set _cols $cols
+	set _cur_x 0
+	set _cur_y 0
+	array set _attrs {
+	    intensity normal
+	    fg default
+	    bg default
+	    underline 0
+	    reverse 0
+	}
+
+	_clear_lines 0 $_rows
+    }
+
+    # Accept some output from gdb and update the screen.
+    proc _accept {} {
+	global expect_out
+	gdb_expect {
+	    -re "^\[\x07\x08\x0a\x0d\]" {
+		scan $expect_out(0,string) %c val
+		set hexval [format "%02x" $val]
+		verbose "+++ _ctl_0x${hexval}"
+		_ctl_0x${hexval}
+		exp_continue
+	    }
+	    -re "^\x1b(\[0-9a-zA-Z\])" {
+		verbose "+++ unsupported escape"
+		error "unsupported escape"
+	    }
+	    -re "^\x1b\\\[(\[0-9;\]*)(\[0-9a-zA-Z@\])" {
+		set cmd $expect_out(2,string)
+		set params [split $expect_out(1,string) ";"]
+		verbose "+++ _csi_$cmd <<<$expect_out(1,string)>>>"
+		eval _csi_$cmd $params
+		exp_continue
+	    }
+	    -re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
+		_insert $expect_out(0,string)
+		variable _last_char
+		set _last_char [string index $expect_out(0,string) end]
+		# If the prompt was just inserted, return.
+		variable _cur_x
+		variable _cur_y
+		global gdb_prompt
+		set prev [get_line $_cur_y $_cur_x]
+		if {![regexp -- "$gdb_prompt \$" $prev]} {
+		    exp_continue
+		}
+	    }
+	}
+    }
+
+    # Like ::clean_restart, but ensures that gdb starts in an
+    # environment where the TUI can work.  ROWS and COLS are the size
+    # of the terminal.  EXECUTABLE is passed to clean_restart.
+    proc clean_restart {rows cols executable} {
+	global env stty_init
+	save_vars {env(TERM) stty_init} {
+	    setenv TERM ansi
+	    _setup $rows $cols
+	    ::clean_restart $executable
+	}
+    }
+
+    # Start the TUI.  Returns 1 on success, 0 if TUI tests should be
+    # skipped.
+    proc enter_tui {} {
+	if {[skip_tui_tests]} {
+	    return 0
+	}
+
+	gdb_test_no_output "set tui border-kind ascii"
+	command "tui enable"
+	return 1
+    }
+
+    # Send the command CMD to gdb, then wait for a gdb prompt to be
+    # seen in the TUI.  CMD should not end with a newline -- that will
+    # be supplied by this function.
+    proc command {cmd} {
+	send_gdb "$cmd\n"
+	_accept
+    }
+
+    # Return the text of screen line N, without attributes.  Lines are
+    # 0-based.  If C is given, stop before column C.  Columns are also
+    # zero-based.
+    proc get_line {n {c ""}} {
+	set result ""
+	variable _cols
+	variable _chars
+	set c [_default $c $_cols]
+	set x 0
+	while {$x < $c} {
+	    append result [lindex $_chars($x,$n) 0]
+	    incr x
+	}
+	return $result
+    }
+
+    # Get just the character at (X, Y).
+    proc get_char {x y} {
+	variable _chars
+	return [lindex $_chars($x,$y) 0]
+    }
+
+    # Get the entire screen as a string.
+    proc get_all_lines {} {
+	variable _rows
+	variable _cols
+	variable _chars
+
+	set result ""
+	for {set y 0} {$y < $_rows} {incr y} {
+	    for {set x 0} {$x < $_cols} {incr x} {
+		append result [lindex $_chars($x,$y) 0]
+	    }
+	    append result "\n"
+	}
+
+	return $result
+    }
+
+    # Get the text just before the cursor.
+    proc get_current_line {} {
+	variable _cur_x
+	variable _cur_y
+	return [get_line $_cur_y $_cur_x]
+    }
+
+    # Helper function for check_box.  Returns empty string if the box
+    # is found, description of why not otherwise.
+    proc _check_box {x y width height} {
+	set x2 [expr {$x + $width - 1}]
+	set y2 [expr {$y + $height - 1}]
+
+	if {[get_char $x $y] != "+"} {
+	    return "ul corner"
+	}
+	if {[get_char $x $y2] != "+"} {
+	    return "ll corner"
+	}
+	if {[get_char $x2 $y] != "+"} {
+	    return "ur corner"
+	}
+	if {[get_char $x2 $y2] != "+"} {
+	    return "lr corner"
+	}
+
+	for {set i [expr {$x + 1}]} {$i < $x2 - 1} {incr i} {
+	    # Note we do not check the top border of the box, because
+	    # it will contain a title.
+	    if {[get_char $i $y2] != "-"} {
+		return "bottom border $i"
+	    }
+	}
+	for {set i [expr {$y + 1}]} {$i < $y2 - 1} {incr i} {
+	    if {[get_char $x $i] != "|"} {
+		return "left side $i"
+	    }
+	    if {[get_char $x2 $i] != "|"} {
+		return "right side $i"
+	    }
+	}
+
+	return ""
+    }
+
+    # Check for a box at the given coordinates.
+    proc check_box {test_name x y width height} {
+	set why [_check_box $x $y $width $height]
+	if {$why == ""} {
+	    pass $test_name
+	} else {
+	    dump_screen
+	    fail "$test_name ($why)"
+	}
+    }
+
+    # Check whether the text contents of the terminal match the
+    # regular expression.  Note that text styling is not considered.
+    proc check_contents {test_name regexp} {
+	set contents [get_all_lines]
+	if {![gdb_assert {[regexp -- $regexp $contents]} $test_name]} {
+	    dump_screen
+	}
+    }
+
+    # A debugging function to dump the current screen, with line
+    # numbers.
+    proc dump_screen {} {
+	variable _rows
+	verbose "Screen Dump:"
+	for {set y 0} {$y < $_rows} {incr y} {
+	    set fmt [format %5d $y]
+	    verbose "$fmt [get_line $y]"
+	}
+    }
+}
