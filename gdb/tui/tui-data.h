@@ -295,12 +295,6 @@ public:
   /* Clear the pertinent detail in the window.  */
   virtual void clear_detail () = 0;
 
-  /* Return true if this window has the locator.  */
-  virtual bool has_locator () const
-  {
-    return false;
-  }
-
   /* Called after all the TUI windows are refreshed, to let this
      window have a chance to update itself further.  */
   virtual void refresh_all ()
@@ -367,12 +361,6 @@ protected:
 public:
 
   void clear_detail () override;
-
-  /* Return true if this window has the locator.  */
-  bool has_locator () const override
-  {
-    return m_has_locator;
-  }
 
   void make_visible (bool visible) override;
   void refresh_window () override;

@@ -1235,7 +1235,7 @@ tui_source_window_base::set_new_height (int height)
     execution_info->viewport_height = height;
   execution_info->viewport_height--;
 
-  if (has_locator ())
+  if (m_has_locator)
     {
       tui_locator_window *gen_win_info = tui_locator_win_info_ptr ();
       gen_win_info->make_visible (false);
@@ -1324,7 +1324,7 @@ tui_source_window_base::do_make_visible_with_new_height ()
 	}
       tui_update_source_window (this, gdbarch, s, line, TRUE);
     }
-  if (has_locator ())
+  if (m_has_locator)
     {
       tui_locator_win_info_ptr ()->make_visible (true);
       tui_show_locator_content ();

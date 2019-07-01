@@ -1,5 +1,14 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_source_window_base::set_new_height)
+	(tui_source_window_base::do_make_visible_with_new_height): Use
+	m_has_locator field directly.
+	* tui/tui-data.h (struct tui_win_info) <has_locator>: Remove
+	method.
+	(struct tui_source_window_base) <has_locator>: Likewise.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_visible, tui_make_invisible):
 	Don't declare.
 	* tui/tui-wingeneral.c (tui_make_visible, tui_make_invisible):
