@@ -43,8 +43,6 @@
 ** Static Local Decls
 ********************************/
 static void show_layout (enum tui_layout_type);
-static void reset_locator (tui_gen_win_info *,
-			   int, int, int, int);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
 static struct tui_win_info *make_command_window (int, int);
 static struct tui_win_info *make_source_window (int, int);
@@ -611,11 +609,10 @@ show_source_disasm_command (void)
 	{
 	  tui_win_list[DISASSEM_WIN]
 	    = make_disasm_window (asm_height, src_height - 1);
-	  reset_locator (locator,
-			 2 /* 1 */ ,
-			 tui_term_width (),
-			 0,
-			 (src_height + asm_height) - 1);
+	  locator->reset (2 /* 1 */ ,
+			  tui_term_width (),
+			  0,
+			  (src_height + asm_height) - 1);
 	}
       else
 	{
@@ -688,11 +685,10 @@ show_data (enum tui_layout_type new_layout)
       else
 	tui_win_list[win_type]
 	  = make_disasm_window (src_height, data_height - 1);
-      reset_locator (locator,
-		     2 /* 1 */ ,
-		     tui_term_width (),
-		     0,
-		     total_height - 1);
+      locator->reset (2 /* 1 */ ,
+		      tui_term_width (),
+		      0,
+		      total_height - 1);
       base = (tui_source_window_base *) tui_win_list[win_type];
     }
   else
@@ -736,16 +732,6 @@ tui_gen_win_info::reset (int height_, int width_,
   origin.y = origin_y_;
 }
 
-static void
-reset_locator (tui_gen_win_info *win_info, 
-	       int height, int width, 
-	       int origin_x, int origin_y)
-{
-  win_info->reset (height, width, origin_x, origin_y);
-  tui_make_window (win_info, DONT_BOX_WINDOW);
-}
-
-
 /* Show the Source/Command or the Disassem layout.  */
 static void
 show_source_or_disasm_and_command (enum tui_layout_type layout_type)
@@ -775,11 +761,10 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 	    *win_info_ptr = make_source_window (src_height - 1, 0);
 	  else
 	    *win_info_ptr = make_disasm_window (src_height - 1, 0);
-	  reset_locator (locator,
-			 2 /* 1 */ ,
-			 tui_term_width (),
-			 0,
-			 src_height - 1);
+	  locator->reset (2 /* 1 */ ,
+			  tui_term_width (),
+			  0,
+			  src_height - 1);
 	  base = (tui_source_window_base *) *win_info_ptr;
 	}
       else

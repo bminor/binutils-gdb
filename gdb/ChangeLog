@@ -1,5 +1,12 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command, show_data):
+	Update.
+	(reset_locator): Remove.
+	(show_source_or_disasm_and_command): Update.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.c (tui_source_window_base::reset): Remove
 	win_type parameter.
 	* tui/tui-layout.c (make_command_window, make_source_window)
