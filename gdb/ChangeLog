@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command): Simplify window
+	resetting.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (tui_set_layout_by_name): Don't declare.
 	* tui/tui-regs.c (tui_reg_layout): New function.
 	(tui_show_registers, tui_reg_command): Use it.
