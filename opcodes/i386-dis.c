@@ -385,7 +385,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXd { OP_EX, d_mode }
 #define EXdScalar { OP_EX, d_scalar_mode }
 #define EXdS { OP_EX, d_swap_mode }
-#define EXdScalarS { OP_EX, d_scalar_swap_mode }
 #define EXq { OP_EX, q_mode }
 #define EXqScalar { OP_EX, q_scalar_mode }
 #define EXqScalarS { OP_EX, q_scalar_swap_mode }
@@ -932,10 +931,6 @@ enum
   MOD_VEX_W_0_0F3A33_P_2_LEN_0,
   MOD_VEX_W_1_0F3A33_P_2_LEN_0,
 
-  MOD_EVEX_0F10_PREFIX_1,
-  MOD_EVEX_0F10_PREFIX_3,
-  MOD_EVEX_0F11_PREFIX_1,
-  MOD_EVEX_0F11_PREFIX_3,
   MOD_EVEX_0F12_PREFIX_0,
   MOD_EVEX_0F16_PREFIX_0,
   MOD_EVEX_0F38C6_REG_1,
@@ -2042,17 +2037,13 @@ enum
   VEX_W_0F3ACF_P_2,
 
   EVEX_W_0F10_P_0,
-  EVEX_W_0F10_P_1_M_0,
-  EVEX_W_0F10_P_1_M_1,
+  EVEX_W_0F10_P_1,
   EVEX_W_0F10_P_2,
-  EVEX_W_0F10_P_3_M_0,
-  EVEX_W_0F10_P_3_M_1,
+  EVEX_W_0F10_P_3,
   EVEX_W_0F11_P_0,
-  EVEX_W_0F11_P_1_M_0,
-  EVEX_W_0F11_P_1_M_1,
+  EVEX_W_0F11_P_1,
   EVEX_W_0F11_P_2,
-  EVEX_W_0F11_P_3_M_0,
-  EVEX_W_0F11_P_3_M_1,
+  EVEX_W_0F11_P_3,
   EVEX_W_0F12_P_0_M_0,
   EVEX_W_0F12_P_0_M_1,
   EVEX_W_0F12_P_1,

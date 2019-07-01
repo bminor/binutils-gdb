@@ -1,5 +1,24 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EXdScalarS, MOD_EVEX_0F10_PREFIX_1,
+	MOD_EVEX_0F10_PREFIX_3, MOD_EVEX_0F11_PREFIX_1,
+	MOD_EVEX_0F11_PREFIX_3, EVEX_W_0F10_P_1_M_0,
+	EVEX_W_0F10_P_1_M_1, EVEX_W_0F10_P_3_M_0, EVEX_W_0F10_P_3_M_1,
+	EVEX_W_0F11_P_1_M_0, EVEX_W_0F11_P_1_M_1, EVEX_W_0F11_P_3_M_0,
+	EVEX_W_0F11_P_3_M_1): Delete.
+	(EVEX_W_0F10_P_1, EVEX_W_0F10_P_3, EVEX_W_0F11_P_1,
+	EVEX_W_0F11_P_3): New.
+	* i386-dis-evex-mod.h: Remove MOD_EVEX_0F10_PREFIX_1,
+	MOD_EVEX_0F10_PREFIX_3, MOD_EVEX_0F11_PREFIX_1, and
+	MOD_EVEX_0F11_PREFIX_3 table entries.
+	* i386-dis-evex-prefix.h: Adjust PREFIX_EVEX_0F10 and
+	PREFIX_EVEX_0F11 table entries.
+	* i386-dis-evex-w.h: Replace EVEX_W_0F10_P_1_M_{0,1},
+	EVEX_W_0F10_P_3_M_{0,1}, EVEX_W_0F11_P_1_M_{0,1}, and
+	EVEX_W_0F11_P_3_M_{0,1} table entries.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EXdVex, EXdVexS, EXqVex, EXqVexS, XMVex):
 	Delete.
 
