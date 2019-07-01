@@ -1,3 +1,9 @@
+2019-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 23839
+	* elf32-arm.c (elf32_arm_update_relocs): Do not include the
+	section VMA in the offset used to update exidx relocs.
+
 2019-06-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 24708

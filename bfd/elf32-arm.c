@@ -15790,7 +15790,7 @@ elf32_arm_update_relocs (asection *o,
 	  eadi = get_arm_elf_section_data (i);
 	  edit_list = eadi->u.exidx.unwind_edit_list;
 	  edit_tail = eadi->u.exidx.unwind_edit_tail;
-	  offset = o->vma + i->output_offset;
+	  offset = i->output_offset;
 
 	  if (eadi->elf.rel.hdr &&
 	      eadi->elf.rel.hdr->sh_entsize == rel_hdr->sh_entsize)
