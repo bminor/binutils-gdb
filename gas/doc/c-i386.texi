@@ -474,7 +474,10 @@ instructions with 128-bit/256-bit VEX packed integer logical.
 
 @samp{-O2} includes @samp{-O1} optimization plus encodes
 256-bit/512-bit EVEX vector register clearing instructions with 128-bit
-EVEX vector register clearing instructions.
+EVEX vector register clearing instructions.  In 64-bit mode VEX encoded
+instructions with commutative source operands will also have their
+source operands swapped if this allows using the 2-byte VEX prefix form
+instead of the 3-byte one.
 
 @samp{-Os} includes @samp{-O2} optimization plus encodes 16-bit, 32-bit
 and 64-bit register tests with immediate as 8-bit register test with

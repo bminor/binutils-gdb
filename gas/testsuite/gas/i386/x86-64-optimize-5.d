@@ -156,19 +156,19 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 fe 28 7f 48 04 	vmovdqu64 %ymm1,0x80\(%rax\)
  +[a-f0-9]+:	62 f1 7d 48 6f 10    	vmovdqa32 \(%rax\),%zmm2
  +[a-f0-9]+:	c5 .*	vpand  %xmm2,%xmm3,%xmm4
- +[a-f0-9]+:	c4 .*	vpand  %xmm12,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpand  %xmm3,%xmm12,%xmm4
  +[a-f0-9]+:	c5 .*	vpandn %xmm2,%xmm13,%xmm4
  +[a-f0-9]+:	c5 .*	vpandn %xmm2,%xmm3,%xmm14
  +[a-f0-9]+:	c5 .*	vpor   %xmm2,%xmm3,%xmm4
- +[a-f0-9]+:	c4 .*	vpor   %xmm12,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpor   %xmm3,%xmm12,%xmm4
  +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm13,%xmm4
  +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm3,%xmm14
  +[a-f0-9]+:	c5 .*	vpand  %ymm2,%ymm3,%ymm4
- +[a-f0-9]+:	c4 .*	vpand  %ymm12,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpand  %ymm3,%ymm12,%ymm4
  +[a-f0-9]+:	c5 .*	vpandn %ymm2,%ymm13,%ymm4
  +[a-f0-9]+:	c5 .*	vpandn %ymm2,%ymm3,%ymm14
  +[a-f0-9]+:	c5 .*	vpor   %ymm2,%ymm3,%ymm4
- +[a-f0-9]+:	c4 .*	vpor   %ymm12,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpor   %ymm3,%ymm12,%ymm4
  +[a-f0-9]+:	c5 .*	vpxor  %ymm2,%ymm13,%ymm4
  +[a-f0-9]+:	c5 .*	vpxor  %ymm2,%ymm3,%ymm14
  +[a-f0-9]+:	c5 .*	vpand  0x70\(%rax\),%xmm2,%xmm3

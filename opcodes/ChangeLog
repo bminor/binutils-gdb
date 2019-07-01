@@ -1,5 +1,37 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (C): New.
+	(paddb, paddw, paddd, paddq, paddsb, paddsw, paddusb, paddusw,
+	pand, pcmpeqb, pcmpeqw, pcmpeqd, pmaddwd, pmulhw, pmullw,
+	por, pxor, andps, cmpeqps, cmpeqss, cmpneqps, cmpneqss,
+	cmpordps, cmpordss, cmpunordps, cmpunordss, orps, pavgb, pavgw,
+	pmaxsw, pmaxub, pminsw, pminub, pmulhuw, xorps, andpd, cmpeqpd,
+	cmpeqsd, cmpneqpd, cmpneqsd, cmpordpd, cmpordsd, cmpunordpd,
+	cmpunordsd, orpd, xorpd, pmuludq, vandpd, vandps, vcmpeq_ospd,
+	vcmpeq_osps, vcmpeq_ossd, vcmpeq_osss, vcmpeqpd, vcmpeqps,
+	vcmpeqsd, vcmpeqss, vcmpeq_uqpd, vcmpeq_uqps, vcmpeq_uqsd,
+	vcmpeq_uqss, vcmpeq_uspd, vcmpeq_usps, vcmpeq_ussd,
+	vcmpeq_usss, vcmpfalse_ospd, vcmpfalse_osps, vcmpfalse_ossd,
+	vcmpfalse_osss, vcmpfalsepd, vcmpfalseps, vcmpfalsesd,
+	vcmpfalsess, vcmpneq_oqpd, vcmpneq_oqps, vcmpneq_oqsd,
+	vcmpneq_oqss, vcmpneq_ospd, vcmpneq_osps, vcmpneq_ossd,
+	vcmpneq_osss, vcmpneqpd, vcmpneqps, vcmpneqsd, vcmpneqss,
+	vcmpneq_uspd, vcmpneq_usps, vcmpneq_ussd, vcmpneq_usss,
+	vcmpordpd, vcmpordps, vcmpordsd, vcmpord_spd, vcmpord_sps,
+	vcmpordss, vcmpord_ssd, vcmpord_sss, vcmptruepd, vcmptrueps,
+	vcmptruesd, vcmptruess, vcmptrue_uspd, vcmptrue_usps,
+	vcmptrue_ussd, vcmptrue_usss, vcmpunordpd, vcmpunordps,
+	vcmpunordsd, vcmpunord_spd, vcmpunord_sps, vcmpunordss,
+	vcmpunord_ssd, vcmpunord_sss, vorpd, vorps, vpaddsb, vpaddsw,
+	vpaddb, vpaddd, vpaddq, vpaddw, vpaddusb, vpaddusw, vpand,
+	vpavgb, vpavgw, vpcmpeqb, vpcmpeqd, vpcmpeqw, vpmaddwd,
+	vpmaxsw, vpmaxub, vpminsw, vpminub, vpmulhuw, vpmulhw, vpmullw,
+	vpmuludq, vpor, vpxor, vxorpd, vxorps): Add C to VEX-encoded
+	flavors.
+	* i386-tbl.h: Re-generate.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (and, or): Add Optimize to forms allowing two
 	register operands.
 	* i386-tbl.h: Re-generate.
