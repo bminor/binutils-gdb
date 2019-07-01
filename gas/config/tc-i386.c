@@ -3897,7 +3897,7 @@ check_hle (void)
 static void
 optimize_encoding (void)
 {
-  int j;
+  unsigned int j;
 
   if (optimize_for_space
       && i.reg_operands == 1
@@ -4095,10 +4095,13 @@ optimize_encoding (void)
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask
+	   && !i.broadcast
 	   && is_evex_encoding (&i.tm)
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x666f
 	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf36f
-	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f)
+	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f
+	       || (i.tm.base_opcode & ~4) == 0x66db
+	       || (i.tm.base_opcode & ~4) == 0x66eb)
 	   && i.tm.extension_opcode == None)
     {
       /* Optimize: -O1:
@@ -4116,8 +4119,17 @@ optimize_encoding (void)
 	       -> VEX mvmovdqa|vmovdquem, %xmmN (N < 16)
 	     EVEX VOP mem, %ymmN
 	       -> VEX vmovdqa|vmovdqu mem, %ymmN (N < 16)
+	   VOP, one of vpand, vpandn, vpor, vpxor:
+	     EVEX VOP{d,q} %xmmL, %xmmM, %xmmN
+	       -> VEX VOP %xmmL, %xmmM, %xmmN (L, M, and N < 16)
+	     EVEX VOP{d,q} %ymmL, %ymmM, %ymmN
+	       -> VEX VOP %ymmL, %ymmM, %ymmN (L, M, and N < 16)
+	     EVEX VOP{d,q} mem, %xmmM, %xmmN
+	       -> VEX VOP mem, %xmmM, %xmmN (M and N < 16)
+	     EVEX VOP{d,q} mem, %ymmM, %ymmN
+	       -> VEX VOP mem, %ymmM, %ymmN (M and N < 16)
        */
-      for (j = 0; j < 2; j++)
+      for (j = 0; j < i.operands; j++)
 	if (operand_type_check (i.types[j], disp)
 	    && i.op[j].disps->X_op == O_constant)
 	  {
@@ -4147,16 +4159,12 @@ optimize_encoding (void)
       i.tm.opcode_modifier.vexw = VEXW0;
       i.tm.opcode_modifier.evex = 0;
       i.tm.opcode_modifier.masking = 0;
+      i.tm.opcode_modifier.broadcast = 0;
       i.tm.opcode_modifier.disp8memshift = 0;
       i.memshift = 0;
-      for (j = 0; j < 2; j++)
-	if (operand_type_check (i.types[j], disp)
-	    && i.op[j].disps->X_op == O_constant)
-	  {
-	    i.types[j].bitfield.disp8
-	      = fits_in_disp8 (i.op[j].disps->X_add_number);
-	    break;
-	  }
+      if (j < i.operands)
+	i.types[j].bitfield.disp8
+	  = fits_in_disp8 (i.op[j].disps->X_add_number);
     }
 }
 

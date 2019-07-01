@@ -97,3 +97,75 @@ _start:
 	vmovdqu16	%xmm1, %xmm2{%k1}{z}
 	vmovdqu32	%xmm1, %xmm2{%k1}{z}
 	vmovdqu64	%xmm1, %xmm2{%k1}{z}
+
+	vpandd		%xmm2, %xmm3, %xmm4
+	vpandq		%xmm2, %xmm3, %xmm4
+	vpandnd		%xmm2, %xmm3, %xmm4
+	vpandnq		%xmm2, %xmm3, %xmm4
+	vpord		%xmm2, %xmm3, %xmm4
+	vporq		%xmm2, %xmm3, %xmm4
+	vpxord		%xmm2, %xmm3, %xmm4
+	vpxorq		%xmm2, %xmm3, %xmm4
+
+	vpandd		%ymm2, %ymm3, %ymm4
+	vpandq		%ymm2, %ymm3, %ymm4
+	vpandnd		%ymm2, %ymm3, %ymm4
+	vpandnq		%ymm2, %ymm3, %ymm4
+	vpord		%ymm2, %ymm3, %ymm4
+	vporq		%ymm2, %ymm3, %ymm4
+	vpxord		%ymm2, %ymm3, %ymm4
+	vpxorq		%ymm2, %ymm3, %ymm4
+
+	vpandd		112(%eax), %xmm2, %xmm3
+	vpandq		112(%eax), %xmm2, %xmm3
+	vpandnd		112(%eax), %xmm2, %xmm3
+	vpandnq		112(%eax), %xmm2, %xmm3
+	vpord		112(%eax), %xmm2, %xmm3
+	vporq		112(%eax), %xmm2, %xmm3
+	vpxord		112(%eax), %xmm2, %xmm3
+	vpxorq		112(%eax), %xmm2, %xmm3
+
+	vpandd		128(%eax), %xmm2, %xmm3
+	vpandq		128(%eax), %xmm2, %xmm3
+	vpandnd		128(%eax), %xmm2, %xmm3
+	vpandnq		128(%eax), %xmm2, %xmm3
+	vpord		128(%eax), %xmm2, %xmm3
+	vporq		128(%eax), %xmm2, %xmm3
+	vpxord		128(%eax), %xmm2, %xmm3
+	vpxorq		128(%eax), %xmm2, %xmm3
+
+	vpandd		96(%eax), %ymm2, %ymm3
+	vpandq		96(%eax), %ymm2, %ymm3
+	vpandnd		96(%eax), %ymm2, %ymm3
+	vpandnq		96(%eax), %ymm2, %ymm3
+	vpord		96(%eax), %ymm2, %ymm3
+	vporq		96(%eax), %ymm2, %ymm3
+	vpxord		96(%eax), %ymm2, %ymm3
+	vpxorq		96(%eax), %ymm2, %ymm3
+
+	vpandd		128(%eax), %ymm2, %ymm3
+	vpandq		128(%eax), %ymm2, %ymm3
+	vpandnd		128(%eax), %ymm2, %ymm3
+	vpandnq		128(%eax), %ymm2, %ymm3
+	vpord		128(%eax), %ymm2, %ymm3
+	vporq		128(%eax), %ymm2, %ymm3
+	vpxord		128(%eax), %ymm2, %ymm3
+	vpxorq		128(%eax), %ymm2, %ymm3
+
+	vpandd		%xmm2, %xmm3, %xmm4{%k5}
+	vpandq		%ymm2, %ymm3, %ymm4{%k5}
+	vpandnd		%ymm2, %ymm3, %ymm4{%k5}
+	vpandnq		%xmm2, %xmm3, %xmm4{%k5}
+	vpord		%xmm2, %xmm3, %xmm4{%k5}
+	vporq		%ymm2, %ymm3, %ymm4{%k5}
+	vpxord		%ymm2, %ymm3, %ymm4{%k5}
+	vpxorq		%xmm2, %xmm3, %xmm4{%k5}
+
+	vpandd		(%eax){1to8}, %ymm2, %ymm3
+	vpandq		(%eax){1to2}, %xmm2, %xmm3
+	vpandnd		(%eax){1to4}, %xmm2, %xmm3
+	vpandnq		(%eax){1to4}, %ymm2, %ymm3
+	vpord		(%eax){1to8}, %ymm2, %ymm3
+	vporq		(%eax){1to2}, %xmm2, %xmm3
+	vpxord		(%eax){1to4}, %xmm2, %xmm3
+	vpxorq		(%eax){1to4}, %ymm2, %ymm3

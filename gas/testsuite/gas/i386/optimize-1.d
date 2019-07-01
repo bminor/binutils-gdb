@@ -99,4 +99,52 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 7e 28 7f 48 04 	vmovdqu32 %ymm1,0x80\(%eax\)
  +[a-f0-9]+:	62 f1 fe 28 7f 48 04 	vmovdqu64 %ymm1,0x80\(%eax\)
  +[a-f0-9]+:	62 f1 7d 48 6f 10    	vmovdqa32 \(%eax\),%zmm2
+ +[a-f0-9]+:	c5 .*	vpand  %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpand  %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpandn %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpandn %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpor   %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpor   %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	c5 .*	vpand  %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpand  %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpandn %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpandn %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpor   %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpor   %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpxor  %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpxor  %ymm2,%ymm3,%ymm4
+ +[a-f0-9]+:	c5 .*	vpand  0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpand  0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpandn 0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpandn 0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpor   0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpor   0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpxor  0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpxor  0x70\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpandd 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpandq 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpandnd 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpandnq 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpord  0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vporq  0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpxord 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpxorq 0x80\(%eax\),%xmm2,%xmm3
+ +[a-f0-9]+:	c5 .*	vpand  0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpand  0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpandn 0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpandn 0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpor   0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpor   0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpxor  0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	c5 .*	vpxor  0x60\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpandd 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpandq 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpandnd 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpandnq 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpord  0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vporq  0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpxord 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpxorq 0x80\(%eax\),%ymm2,%ymm3
 #pass

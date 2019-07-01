@@ -15,4 +15,12 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 ff 08 6f d1    	vmovdqu16 %xmm1,%xmm2
  +[a-f0-9]+:	62 f1 7e 08 6f d1    	vmovdqu32 %xmm1,%xmm2
  +[a-f0-9]+:	62 f1 fe 08 6f d1    	vmovdqu64 %xmm1,%xmm2
+ +[a-f0-9]+:	62 .*	vpandd %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	62 .*	vpandq %ymm12,%ymm3,%ymm4
+ +[a-f0-9]+:	62 .*	vpandnd %ymm2,%ymm13,%ymm4
+ +[a-f0-9]+:	62 .*	vpandnq %xmm2,%xmm3,%xmm14
+ +[a-f0-9]+:	62 .*	vpord  %xmm2,%xmm3,%xmm4
+ +[a-f0-9]+:	62 .*	vporq  %ymm12,%ymm3,%ymm4
+ +[a-f0-9]+:	62 .*	vpxord %ymm2,%ymm13,%ymm4
+ +[a-f0-9]+:	62 .*	vpxorq %xmm2,%xmm3,%xmm14
 #pass

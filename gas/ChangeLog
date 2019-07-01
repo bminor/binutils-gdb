@@ -1,5 +1,34 @@
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_encoding): Make j unsigned.  Handle
+	vpand{d,q}, vpandn{d,q}, vpor{d,q}, and vpxor{d,q}.  Also check/
+	clear broadcast.  Eliminate a loop.
+	* doc/c-i386.texi: Update -O1 documentation.
+	* testsuite/gas/i386/optimize-1.s,
+	testsuite/gas/i386/optimize-2.s,
+	testsuite/gas/i386/optimize-3.s,
+	testsuite/gas/i386/optimize-5.s,
+	testsuite/gas/i386/x86-64-optimize-2.s,
+	testsuite/gas/i386/x86-64-optimize-3.s,
+	testsuite/gas/i386/x86-64-optimize-4.s,
+	testsuite/gas/i386/x86-64-optimize-6.s: Add vpand{d,q},
+	vpandn{d,q}, vpor{d,q}, and vpxor{d,q} cases.
+	testsuite/gas/i386/optimize-1.d,
+	testsuite/gas/i386/optimize-1a.d,
+	testsuite/gas/i386/optimize-2.d,
+	testsuite/gas/i386/optimize-3.d,
+	testsuite/gas/i386/optimize-4.d,
+	testsuite/gas/i386/optimize-5.d,
+	testsuite/gas/i386/x86-64-optimize-2.d,
+	testsuite/gas/i386/x86-64-optimize-2a.d,
+	testsuite/gas/i386/x86-64-optimize-2b.d,
+	testsuite/gas/i386/x86-64-optimize-3.d,
+	testsuite/gas/i386/x86-64-optimize-4.d,
+	testsuite/gas/i386/x86-64-optimize-5.d,
+	testsuite/gas/i386/x86-64-optimize-6.d: Adjust expectations.
+
+2019-07-01  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx512f_vpclmulqdq.s,
 	testsuite/gas/i386/avx512vl_vpclmulqdq.s,
 	testsuite/gas/i386/vpclmulqdq.s,

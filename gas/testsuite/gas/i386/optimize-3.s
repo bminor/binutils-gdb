@@ -11,3 +11,12 @@ _start:
 	{nooptimize} vmovdqu16	%xmm1, %xmm2
 	{nooptimize} vmovdqu32	%xmm1, %xmm2
 	{nooptimize} vmovdqu64	%xmm1, %xmm2
+
+	{nooptimize} vpandd	%xmm2, %xmm3, %xmm4
+	{nooptimize} vpandq	%ymm2, %ymm3, %ymm4
+	{nooptimize} vpandnd	%ymm2, %ymm3, %ymm4
+	{nooptimize} vpandnq	%xmm2, %xmm3, %xmm4
+	{nooptimize} vpord	%xmm2, %xmm3, %xmm4
+	{nooptimize} vporq	%ymm2, %ymm3, %ymm4
+	{nooptimize} vpxord	%ymm2, %ymm3, %ymm4
+	{nooptimize} vpxorq	%xmm2, %xmm3, %xmm4

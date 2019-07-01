@@ -13,3 +13,12 @@
 	{evex} vmovdqu16	%xmm1, %xmm2
 	{evex} vmovdqu32	%xmm1, %xmm2
 	{evex} vmovdqu64	%xmm1, %xmm2
+
+	{evex} vpandd	%xmm2, %xmm3, %xmm4
+	{evex} vpandq	%ymm12, %ymm3, %ymm4
+	{evex} vpandnd	%ymm2, %ymm13, %ymm4
+	{evex} vpandnq	%xmm2, %xmm3, %xmm14
+	{evex} vpord	%xmm2, %xmm3, %xmm4
+	{evex} vporq	%ymm12, %ymm3, %ymm4
+	{evex} vpxord	%ymm2, %ymm13, %ymm4
+	{evex} vpxorq	%xmm2, %xmm3, %xmm14
