@@ -1,5 +1,11 @@
 2019-07-01  Nick Clifton  <nickc@redhat.com>
 
+	PR 24738
+	* doc/c-i386.texi (i386-Directives): Add a description of the
+	Value directive.
+
+2019-07-01  Nick Clifton  <nickc@redhat.com>
+
 	PR 24737
 	* doc/as.texi (Align): Add missing word to description of
 	pseudo-op.

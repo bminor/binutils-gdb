@@ -516,6 +516,12 @@ The directive is intended to be used for data which requires a large
 amount of space, and it is only available for ELF based x86_64
 targets.
 
+@cindex @code{value} directive
+@item .value @var{expression} [, @var{expression}]
+This directive behaves in the same way as the @code{.short} directive,
+taking a series of comma separated expressions and storing them as
+two-byte wide values into the current section.
+
 @c FIXME: Document other x86 specific directives ?  Eg: .code16gcc,
 
 @end table
