@@ -90,7 +90,4 @@ extern int tui_active;
 
 extern void tui_show_source (const char *fullname, int line);
 
-/* tui-layout.c */
-extern enum tui_status tui_set_layout_by_name (const char *);
-
 #endif /* TUI_TUI_H */

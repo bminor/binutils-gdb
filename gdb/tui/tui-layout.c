@@ -61,8 +61,6 @@ static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 ** DEFINITIONS
 ***************************************/
 
-#define LAYOUT_USAGE     "Usage: layout prev | next | <layout_name> \n"
-
 /* Show the screen layout defined.  */
 static void
 show_layout (enum tui_layout_type layout)
@@ -361,63 +359,49 @@ Layout names are:\n\
 
 /* Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, or
    REGS. */
-enum tui_status
-tui_set_layout_by_name (const char *layout_name)
+static void
+tui_layout_command (const char *layout_name, int from_tty)
 {
-  enum tui_status status = TUI_SUCCESS;
+  int i;
+  enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
+  enum tui_layout_type cur_layout = tui_current_layout ();
 
-  if (layout_name != NULL)
+  if (layout_name == NULL)
+    error (_("Usage: layout prev | next | LAYOUT-NAME"));
+
+  std::string copy = layout_name;
+  for (i = 0; i < copy.size (); i++)
+    copy[i] = toupper (copy[i]);
+  const char *buf_ptr = copy.c_str ();
+
+  /* First check for ambiguous input.  */
+  if (strlen (buf_ptr) <= 1 && *buf_ptr == 'S')
+    error (_("Ambiguous command input."));
+
+  if (subset_compare (buf_ptr, "SRC"))
+    new_layout = SRC_COMMAND;
+  else if (subset_compare (buf_ptr, "ASM"))
+    new_layout = DISASSEM_COMMAND;
+  else if (subset_compare (buf_ptr, "SPLIT"))
+    new_layout = SRC_DISASSEM_COMMAND;
+  else if (subset_compare (buf_ptr, "REGS"))
     {
-      int i;
-      enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
-      enum tui_layout_type cur_layout = tui_current_layout ();
-
-      std::string copy = layout_name;
-      for (i = 0; i < copy.size (); i++)
-	copy[i] = toupper (copy[i]);
-      const char *buf_ptr = copy.c_str ();
-
-      /* First check for ambiguous input.  */
-      if (strlen (buf_ptr) <= 1 && *buf_ptr == 'S')
-	{
-	  warning (_("Ambiguous command input."));
-	  status = TUI_FAILURE;
-	}
+      if (cur_layout == SRC_COMMAND
+	  || cur_layout == SRC_DATA_COMMAND)
+	new_layout = SRC_DATA_COMMAND;
       else
-	{
-	  if (subset_compare (buf_ptr, "SRC"))
-	    new_layout = SRC_COMMAND;
-	  else if (subset_compare (buf_ptr, "ASM"))
-	    new_layout = DISASSEM_COMMAND;
-	  else if (subset_compare (buf_ptr, "SPLIT"))
-	    new_layout = SRC_DISASSEM_COMMAND;
-	  else if (subset_compare (buf_ptr, "REGS"))
-	    {
-	      if (cur_layout == SRC_COMMAND
-		  || cur_layout == SRC_DATA_COMMAND)
-		new_layout = SRC_DATA_COMMAND;
-	      else
-		new_layout = DISASSEM_DATA_COMMAND;
-	    }
-	  else if (subset_compare (buf_ptr, "NEXT"))
-	    new_layout = next_layout ();
-	  else if (subset_compare (buf_ptr, "PREV"))
-	    new_layout = prev_layout ();
-	  else
-	    status = TUI_FAILURE;
-
-	  if (status == TUI_SUCCESS)
-	    {
-	      /* Make sure the curses mode is enabled.  */
-	      tui_enable ();
-	      tui_set_layout (new_layout);
-	    }
-	}
+	new_layout = DISASSEM_DATA_COMMAND;
     }
+  else if (subset_compare (buf_ptr, "NEXT"))
+    new_layout = next_layout ();
+  else if (subset_compare (buf_ptr, "PREV"))
+    new_layout = prev_layout ();
   else
-    status = TUI_FAILURE;
+    error (_("Unrecognized layout: %s"), layout_name);
 
-  return status;
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
+  tui_set_layout (new_layout);
 }
 
 
@@ -455,14 +439,6 @@ extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
   *addr_p = addr;
 }
 
-
-static void
-tui_layout_command (const char *arg, int from_tty)
-{
-  /* Switch to the selected layout.  */
-  if (tui_set_layout_by_name (arg) != TUI_SUCCESS)
-    warning (_("Invalid layout specified.\n%s"), LAYOUT_USAGE);
-}
 
 /* Answer the previous layout to cycle to.  */
 static enum tui_layout_type
