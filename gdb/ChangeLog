@@ -1,5 +1,10 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (make_data_window): Remove.
+	(show_data): Unify creation and re-initialization cases.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_source_window, make_disasm_window):
 	Remove.
 	(show_data): Unify creation and re-initialization cases.

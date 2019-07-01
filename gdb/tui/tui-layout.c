@@ -476,18 +476,6 @@ prev_layout (void)
   return (enum tui_layout_type) new_layout;
 }
 
-
-static tui_win_info *
-make_data_window (int height, int origin_y)
-{
-  tui_win_info *result = new tui_data_window ();
-  result->reset (height, tui_term_width (), 0, origin_y);
-  result->make_visible (true);
-  return result;
-}
-
-
-
 /* Show the Source/Command layout.  */
 static void
 show_source_command (void)
@@ -581,9 +569,8 @@ show_data (enum tui_layout_type new_layout)
   tui_make_all_invisible ();
   tui_make_invisible (locator);
   if (tui_win_list[DATA_WIN] == nullptr)
-    tui_win_list[DATA_WIN] = make_data_window (data_height, 0);
-  else
-    tui_win_list[DATA_WIN]->reset (data_height, tui_term_width (), 0, 0);
+    tui_win_list[DATA_WIN] = new tui_data_window ();
+  tui_win_list[DATA_WIN]->reset (data_height, tui_term_width (), 0, 0);
   tui_win_list[DATA_WIN]->make_visible (true);
 
   if (new_layout == SRC_DATA_COMMAND)
