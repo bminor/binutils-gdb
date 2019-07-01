@@ -1,3 +1,16 @@
+2019-07-01  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/gas/aarch64/illegal-sve2-aes.d: Update tests.
+	* testsuite/gas/aarch64/illegal-sve2.l: Update tests.
+	* doc/c-aarch64.texi: Add special note of pmull{t,b}
+	instructions under the sve2-aes architecture extension.
+	* testsuite/gas/aarch64/illegal-sve2.s: Add small size
+	pmull{t,b} instructions.
+	* testsuite/gas/aarch64/sve2.d: Add small size pmull{t,b}
+	disassembly.
+	* testsuite/gas/aarch64/sve2.s: Add small size pmull{t,b}
+	instructions.
+
 2019-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 24738

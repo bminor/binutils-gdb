@@ -338,11 +338,15 @@ pmul z0.b, z0.b, z0.b
 
 pmullb z17.q, z21.d, z27.d
 pmullb z0.q, z0.d, z0.d
+
+pmullb z17.h, z21.b, z27.b
 pmullb z0.h, z0.b, z0.b
 pmullb z0.d, z0.s, z0.s
 
 pmullt z17.q, z21.d, z27.d
 pmullt z0.q, z0.d, z0.d
+
+pmullt z17.h, z21.b, z27.b
 pmullt z0.h, z0.b, z0.b
 pmullt z0.d, z0.s, z0.s
 

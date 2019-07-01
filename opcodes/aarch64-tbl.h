@@ -1958,15 +1958,18 @@
 {                                                       \
   QLF3(S_S,S_S,S_S),                                    \
 }
+#define OP_SVE_VVV_HD_BS				\
+{                                                       \
+  QLF3(S_H,S_B,S_B),                                    \
+  QLF3(S_D,S_S,S_S),                                    \
+}
 #define OP_SVE_VVV_S_B                                  \
 {                                                       \
   QLF3(S_S,S_B,S_B),                                    \
 }
-#define OP_SVE_VVV_QHD_DBS                              \
+#define OP_SVE_VVV_Q_D					\
 {                                                       \
   QLF3(S_Q,S_D,S_D),                                    \
-  QLF3(S_H,S_B,S_B),                                    \
-  QLF3(S_D,S_S,S_S),                                    \
 }
 #define OP_SVE_VVV_HSD_BHS                              \
 {                                                       \
@@ -4673,6 +4676,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SVE2_INSNC ("nbsl", 0x04e03c00, 0xffe0fc00, sve_misc, 0, OP4 (SVE_Zd, SVE_Zd, SVE_Zm_16, SVE_Zn), OP_SVE_DDDD, 0, C_SCAN_MOVPRFX, 1),
   SVE2_INSN ("nmatch", 0x45208010, 0xffa0e010,  sve_size_bh, 0, OP4 (SVE_Pd, SVE_Pg3, SVE_Zn, SVE_Zm_16), OP_SVE_VZVV_BH, 0, 0),
   SVE2_INSN ("pmul", 0x04206400, 0xffe0fc00,  sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_BBB, 0, 0),
+  SVE2_INSN ("pmullb", 0x45406800, 0xff60fc00, sve_size_13, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_HD_BS, 0, 0),
+  SVE2_INSN ("pmullt", 0x45406c00, 0xff60fc00, sve_size_13, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_HD_BS, 0, 0),
   SVE2_INSN ("raddhnb", 0x45206800, 0xff20fc00,  sve_size_hsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHS_HSD, 0, 0),
   SVE2_INSN ("raddhnt", 0x45206c00, 0xff20fc00,  sve_size_hsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHS_HSD, 0, 0),
   SVE2_INSN ("rshrnb", 0x45201800, 0xffa0fc00,  sve_shift_tsz_hsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_SHRIMM_UNPRED_22), OP_SVE_VVU_BHS_HSD, 0, 0),
@@ -4892,8 +4897,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SVE2AES_INSN ("aese", 0x4522e000, 0xfffffc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zd, SVE_Zn), OP_SVE_BBB, 0, 1),
   SVE2AES_INSN ("aesimc", 0x4520e400, 0xffffffe0, sve_misc, 0, OP2 (SVE_Zd, SVE_Zd), OP_SVE_BB, 0, 1),
   SVE2AES_INSN ("aesmc", 0x4520e000, 0xffffffe0, sve_misc, 0, OP2 (SVE_Zd, SVE_Zd), OP_SVE_BB, 0, 1),
-  SVE2AES_INSN ("pmullb", 0x45006800, 0xff20fc00,  sve_size_013, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_QHD_DBS, 0, 0),
-  SVE2AES_INSN ("pmullt", 0x45006c00, 0xff20fc00,  sve_size_013, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_QHD_DBS, 0, 0),
+  SVE2AES_INSN ("pmullb", 0x45006800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_Q_D, 0, 0),
+  SVE2AES_INSN ("pmullt", 0x45006c00, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_Q_D, 0, 0),
   /* SVE2_SHA3 instructions.  */
   SVE2SHA3_INSN ("rax1", 0x4520f400, 0xffe0fc00,  sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_DDD, 0, 0),
   /* SVE2_BITPERM instructions. */

@@ -264,10 +264,12 @@ Disassembly of section \.text:
  *[0-9a-f]+:	04206400 	pmul	z0\.b, z0\.b, z0\.b
  *[0-9a-f]+:	451b6ab1 	pmullb	z17\.q, z21\.d, z27\.d
  *[0-9a-f]+:	45006800 	pmullb	z0\.q, z0\.d, z0\.d
+ *[0-9a-f]+:	455b6ab1 	pmullb	z17\.h, z21\.b, z27\.b
  *[0-9a-f]+:	45406800 	pmullb	z0\.h, z0\.b, z0\.b
  *[0-9a-f]+:	45c06800 	pmullb	z0\.d, z0\.s, z0\.s
  *[0-9a-f]+:	451b6eb1 	pmullt	z17\.q, z21\.d, z27\.d
  *[0-9a-f]+:	45006c00 	pmullt	z0\.q, z0\.d, z0\.d
+ *[0-9a-f]+:	455b6eb1 	pmullt	z17\.h, z21\.b, z27\.b
  *[0-9a-f]+:	45406c00 	pmullt	z0\.h, z0\.b, z0\.b
  *[0-9a-f]+:	45c06c00 	pmullt	z0\.d, z0\.s, z0\.s
  *[0-9a-f]+:	457b6ab1 	raddhnb	z17\.b, z21\.h, z27\.h

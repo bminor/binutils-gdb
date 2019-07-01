@@ -2822,14 +2822,11 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       variant = i - 1;
       break;
 
-    case sve_size_013:
-      i = extract_field (FLD_size, inst->value, 0);
-      if (i == 2)
-	return FALSE;
-      if (i == 3)
-	variant = 2;
-      else
-	variant = i;
+    case sve_size_13:
+      /* Ignore low bit of this field since that is set in the opcode for
+	 instructions of this iclass.  */
+      i = (extract_field (FLD_size, inst->value, 0) & 2);
+      variant = (i >> 1);
       break;
 
     case sve_shift_tsz_bhsd:

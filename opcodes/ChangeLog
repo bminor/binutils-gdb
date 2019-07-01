@@ -1,3 +1,18 @@
+2019-07-01  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Use new
+	sve_size_13 icode to account for variant behaviour of
+	pmull{t,b}.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Use new
+	sve_size_13 icode to account for variant behaviour of
+	pmull{t,b}.
+	* aarch64-tbl.h (OP_SVE_VVV_HD_BS): Add new qualifier.
+	(OP_SVE_VVV_Q_D): Add new qualifier.
+	(OP_SVE_VVV_QHD_DBS): Remove now unused qualifier.
+	(struct aarch64_opcode): Split pmull{t,b} into those requiring
+	AES and those not.
+
 2019-07-01  Jan Beulich  <jbeulich@suse.com>
 
 	* opcodes/i386-gen.c (operand_type_init): Remove

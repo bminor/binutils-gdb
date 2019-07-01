@@ -203,7 +203,8 @@ automatically cause those extensions to be disabled.
 @item @code{sve2-sm4} @tab ARMv8-A @tab No
  @tab Enable SVE2 SM4 Extension.
 @item @code{sve2-aes} @tab ARMv8-A @tab No
- @tab Enable SVE2 AES Extension.
+ @tab Enable SVE2 AES Extension.  This also enables the .Q->.B form of the
+ @code{pmullt} and @code{pmullb} instructions.
 @item @code{sve2-sha3} @tab ARMv8-A @tab No
  @tab Enable SVE2 SHA3 Extension.
 @end multitable

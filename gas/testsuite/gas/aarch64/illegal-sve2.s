@@ -519,10 +519,20 @@ pmullb z0.q, z32.d, z0.d
 pmullb z0.q, z0.d, z32.d
 pmullb z0.d, z0.d, z0.d
 
+pmullb z32.h, z0.b, z0.b
+pmullb z0.h, z32.b, z0.b
+pmullb z0.h, z0.b, z32.b
+pmullb z0.b, z0.b, z0.b
+
 pmullt z32.q, z0.d, z0.d
 pmullt z0.q, z32.d, z0.d
 pmullt z0.q, z0.d, z32.d
 pmullt z0.d, z0.d, z0.d
+
+pmullt z32.h, z0.b, z0.b
+pmullt z0.h, z32.b, z0.b
+pmullt z0.h, z0.b, z32.b
+pmullt z0.b, z0.b, z0.b
 
 raddhnb z0.h, z0.h, z0.h
 raddhnb z32.b, z0.h, z0.h
