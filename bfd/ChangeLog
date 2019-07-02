@@ -1,3 +1,10 @@
+2019-07-02  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* bfd/elf32-arm.c (CMSE_STUB_NAME): New define.
+	(elf32_arm_get_stub_entry): Do not try to emit long-branch stubs
+	for CMSE stubs.
+	(arm_dedicated_stub_output_section_name): Use CMSE_STUB_NAME.
+
 2019-07-02  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Mark debug
