@@ -1,5 +1,17 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* arm-tdep.c (arm_exidx_entry_s): Remove typedef.  Don't define
+	VEC.
+	(struct arm_exidx_entry): New method operator<.
+	(struct arm_exidx_data) <section_maps>: Change type.
+	(arm_exidx_data_free): Remove.
+	(arm_exidx_data_key): Change type.  Move lower.
+	(arm_exidx_new_objfile): Update.
+	(arm_compare_exidx_entries): Remove.
+	(arm_find_exidx_entry, _initialize_arm_tdep)
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* solib-spu.c (ocl_program_data_key): Change type.
 	(append_ocl_sos, ocl_enable_break, _initialize_spu_solib):
 	Update.

@@ -1989,37 +1989,23 @@ struct frame_unwind arm_prologue_unwind = {
    personality routines; the cache will contain only the frame unwinding
    instructions associated with the entry (not the descriptors).  */
 
-static const struct objfile_data *arm_exidx_data_key;
-
 struct arm_exidx_entry
 {
   bfd_vma addr;
   gdb_byte *entry;
+
+  bool operator< (const arm_exidx_entry &other) const
+  {
+    return addr < other.addr;
+  }
 };
-typedef struct arm_exidx_entry arm_exidx_entry_s;
-DEF_VEC_O(arm_exidx_entry_s);
 
 struct arm_exidx_data
 {
-  VEC(arm_exidx_entry_s) **section_maps;
+  std::vector<std::vector<arm_exidx_entry>> section_maps;
 };
 
-static void
-arm_exidx_data_free (struct objfile *objfile, void *arg)
-{
-  struct arm_exidx_data *data = (struct arm_exidx_data *) arg;
-  unsigned int i;
-
-  for (i = 0; i < objfile->obfd->section_count; i++)
-    VEC_free (arm_exidx_entry_s, data->section_maps[i]);
-}
-
-static inline int
-arm_compare_exidx_entries (const struct arm_exidx_entry *lhs,
-			   const struct arm_exidx_entry *rhs)
-{
-  return lhs->addr < rhs->addr;
-}
+static const struct objfile_key<arm_exidx_data> arm_exidx_data_key;
 
 static struct obj_section *
 arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
@@ -2064,7 +2050,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   LONGEST i;
 
   /* If we've already touched this file, do nothing.  */
-  if (!objfile || objfile_data (objfile, arm_exidx_data_key) != NULL)
+  if (!objfile || arm_exidx_data_key.get (objfile) != NULL)
     return;
 
   /* Read contents of exception table and index.  */
@@ -2095,11 +2081,8 @@ arm_exidx_new_objfile (struct objfile *objfile)
     }
 
   /* Allocate exception table data structure.  */
-  data = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct arm_exidx_data);
-  set_objfile_data (objfile, arm_exidx_data_key, data);
-  data->section_maps = OBSTACK_CALLOC (&objfile->objfile_obstack,
-				       objfile->obfd->section_count,
-				       VEC(arm_exidx_entry_s) *);
+  data = arm_exidx_data_key.emplace (objfile);
+  data->section_maps.resize (objfile->obfd->section_count);
 
   /* Fill in exception table.  */
   for (i = 0; i < exidx_data.size () / 8; i++)
@@ -2250,9 +2233,8 @@ arm_exidx_new_objfile (struct objfile *objfile)
 	 appear in order of increasing addresses.  */
       new_exidx_entry.addr = idx;
       new_exidx_entry.entry = entry;
-      VEC_safe_push (arm_exidx_entry_s,
-		     data->section_maps[sec->the_bfd_section->index],
-		     &new_exidx_entry);
+      data->section_maps[sec->the_bfd_section->index].push_back
+	(new_exidx_entry);
     }
 }
 
@@ -2269,43 +2251,37 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
   if (sec != NULL)
     {
       struct arm_exidx_data *data;
-      VEC(arm_exidx_entry_s) *map;
       struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
-      unsigned int idx;
 
-      data = ((struct arm_exidx_data *)
-	      objfile_data (sec->objfile, arm_exidx_data_key));
+      data = arm_exidx_data_key.get (sec->objfile);
       if (data != NULL)
 	{
-	  map = data->section_maps[sec->the_bfd_section->index];
-	  if (!VEC_empty (arm_exidx_entry_s, map))
+	  std::vector<arm_exidx_entry> &map
+	    = data->section_maps[sec->the_bfd_section->index];
+	  if (!map.empty ())
 	    {
-	      struct arm_exidx_entry *map_sym;
+	      auto idx = std::lower_bound (map.begin (), map.end (), map_key);
 
-	      idx = VEC_lower_bound (arm_exidx_entry_s, map, &map_key,
-				     arm_compare_exidx_entries);
-
-	      /* VEC_lower_bound finds the earliest ordered insertion
+	      /* std::lower_bound finds the earliest ordered insertion
 		 point.  If the following symbol starts at this exact
 		 address, we use that; otherwise, the preceding
 		 exception table entry covers this address.  */
-	      if (idx < VEC_length (arm_exidx_entry_s, map))
+	      if (idx < map.end ())
 		{
-		  map_sym = VEC_index (arm_exidx_entry_s, map, idx);
-		  if (map_sym->addr == map_key.addr)
+		  if (idx->addr == map_key.addr)
 		    {
 		      if (start)
-			*start = map_sym->addr + obj_section_addr (sec);
-		      return map_sym->entry;
+			*start = idx->addr + obj_section_addr (sec);
+		      return idx->entry;
 		    }
 		}
 
-	      if (idx > 0)
+	      if (idx > map.begin ())
 		{
-		  map_sym = VEC_index (arm_exidx_entry_s, map, idx - 1);
+		  idx = idx - 1;
 		  if (start)
-		    *start = map_sym->addr + obj_section_addr (sec);
-		  return map_sym->entry;
+		    *start = idx->addr + obj_section_addr (sec);
+		  return idx->entry;
 		}
 	    }
 	}
@@ -9461,8 +9437,6 @@ _initialize_arm_tdep (void)
 
   /* Add ourselves to objfile event chain.  */
   gdb::observers::new_objfile.attach (arm_exidx_new_objfile);
-  arm_exidx_data_key
-    = register_objfile_data_with_cleanup (NULL, arm_exidx_data_free);
 
   /* Register an ELF OS ABI sniffer for ARM binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
