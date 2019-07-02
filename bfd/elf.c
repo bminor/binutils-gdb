@@ -5810,6 +5810,35 @@ assign_file_positions_for_load_sections (bfd *abfd,
   return TRUE;
 }
 
+/* Determine if a bfd is a debuginfo file.  Unfortunately there
+   is no defined method for detecting such files, so we have to
+   use heuristics instead.  */
+
+bfd_boolean
+is_debuginfo_file (bfd *abfd)
+{
+  if (abfd == NULL || bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return FALSE;
+
+  Elf_Internal_Shdr **start_headers = elf_elfsections (abfd);
+  Elf_Internal_Shdr **end_headers = start_headers + elf_numsections (abfd);
+  Elf_Internal_Shdr **headerp;
+
+  for (headerp = start_headers; headerp < end_headers; headerp ++)
+    {
+      Elf_Internal_Shdr *header = * headerp;
+
+      /* Debuginfo files do not have any allocated SHT_PROGBITS sections.
+	 The only allocated sections are SHT_NOBITS or SHT_NOTES.  */
+      if ((header->sh_flags & SHF_ALLOC) == SHF_ALLOC
+	  && header->sh_type != SHT_NOBITS
+	  && header->sh_type != SHT_NOTE)
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
 /* Assign file positions for the other sections.  */
 
 static bfd_boolean
@@ -5843,7 +5872,13 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	BFD_ASSERT (hdr->sh_offset == hdr->bfd_section->filepos);
       else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	{
-	  if (hdr->sh_size != 0)
+	  if (hdr->sh_size != 0
+	      /* PR 24717 - debuginfo files are known to be not strictly
+		 compliant with the ELF standard.  In particular they often
+		 have .note.gnu.property sections that are outside of any
+		 loadable segment.  This is not a problem for such files,
+		 so do not warn about them.  */
+	      && ! is_debuginfo_file (abfd))
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%pB: warning: allocated section `%s' not in segment"),

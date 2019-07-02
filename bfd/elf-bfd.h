@@ -2751,6 +2751,8 @@ extern bfd_vma elf64_r_sym (bfd_vma);
 extern bfd_vma elf32_r_info (bfd_vma, bfd_vma);
 extern bfd_vma elf32_r_sym (bfd_vma);
 
+extern bfd_boolean is_debuginfo_file (bfd *);
+
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
 

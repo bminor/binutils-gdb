@@ -1,5 +1,14 @@
 2019-07-02  Nick Clifton  <nickc@redhat.com>
 
+	PR 24717
+	* elf.c (is_debuginfo_file): New function.
+	(assign_file_positions_for_non_load_sections): Do not warn about
+	allocated sections outside of loadable segments if they are found
+	in a debuginfo file.
+	* elf-bfd.h (is_debuginfo_file): Prototype.
+
+2019-07-02  Nick Clifton  <nickc@redhat.com>
+
 	PR 24753
 	* compress.c (bfd_get_full_section_contents): Do not complain
 	about linker created sections that are larger than the file size.
