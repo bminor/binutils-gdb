@@ -43,7 +43,6 @@
 #include "tui/tui-disasm.h"
 #include "tui/tui-source.h"
 #include "tui/tui-winsource.h"
-#include "tui/tui-windata.h"
 #include "tui/tui-win.h"
 
 #include "gdb_curses.h"
@@ -1243,19 +1242,6 @@ tui_source_window_base::set_new_height (int height)
     }
 }
 
-/* See tui-data.h.  */
-
-void
-tui_data_window::set_new_height (int height)
-{
-  /* Delete all data item windows.  */
-  for (auto &&win : regs_content)
-    {
-      tui_delete_win (win->handle);
-      win->handle = NULL;
-    }
-}
-
 /* Function make the target window (and auxiliary windows associated
    with the targer) invisible, and set the new height and
    location.  */
@@ -1329,14 +1315,6 @@ tui_source_window_base::do_make_visible_with_new_height ()
       tui_locator_win_info_ptr ()->make_visible (true);
       tui_show_locator_content ();
     }
-}
-
-/* See tui-data.h.  */
-
-void
-tui_data_window::do_make_visible_with_new_height ()
-{
-  display_all_data ();
 }
 
 /* See tui-data.h.  */

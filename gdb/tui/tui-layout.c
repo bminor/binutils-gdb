@@ -29,7 +29,6 @@
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
-#include "tui/tui-windata.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-stack.h"
 #include "tui/tui-regs.h"

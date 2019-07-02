@@ -158,16 +158,6 @@ tui_cmd_window::clear_detail ()
   wmove (handle, 0, 0);
 }
 
-/* See tui-data.h.  */
-
-void
-tui_data_window::clear_detail ()
-{
-  regs_content.clear ();
-  regs_column_count = 1;
-  display_regs = false;
-}
-
 /* Accessor for the locator win info.  Answers a pointer to the static
    locator win info struct.  */
 struct tui_locator_window *

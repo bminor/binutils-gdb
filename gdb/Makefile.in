@@ -291,7 +291,6 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-source.c \
 	tui/tui-stack.c \
 	tui/tui-win.c \
-	tui/tui-windata.c \
 	tui/tui-wingeneral.c \
 	tui/tui-winsource.c
 

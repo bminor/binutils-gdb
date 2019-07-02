@@ -43,19 +43,6 @@ tui_gen_win_info::refresh_window ()
     }
 }
 
-/* See tui-data.h.  */
-
-void
-tui_data_window::refresh_window ()
-{
-  tui_gen_win_info::refresh_window ();
-  for (auto &&win : regs_content)
-    {
-      if (win != NULL)
-	win->refresh_window ();
-    }
-}
-
 /* Function to delete the curses window, checking for NULL.  */
 void
 tui_delete_win (WINDOW *window)

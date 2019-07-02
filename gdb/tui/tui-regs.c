@@ -32,7 +32,6 @@
 #include "target.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-win.h"
-#include "tui/tui-windata.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
 #include "tui/tui-regs.h"
@@ -43,10 +42,6 @@
 
 #include "gdb_curses.h"
 
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
 static void tui_display_register (struct tui_data_item_window *data);
 
 static void tui_show_register_group (tui_data_window *win_info,
@@ -58,13 +53,7 @@ static void tui_get_register (struct frame_info *frame,
 			      struct tui_data_item_window *data,
 			      int regnum, bool *changedp);
 
-
-
-/*****************************************
-** PUBLIC FUNCTIONS                     **
-******************************************/
-
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 int
 tui_data_window::last_regs_line_no () const
@@ -80,7 +69,7 @@ tui_data_window::last_regs_line_no () const
   return num_lines;
 }
 
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 int
 tui_data_window::line_from_reg_element_no (int element_no) const
@@ -104,7 +93,7 @@ tui_data_window::line_from_reg_element_no (int element_no) const
     return (-1);
 }
 
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 int
 tui_data_window::first_reg_element_no_inline (int line_no) const
@@ -255,7 +244,7 @@ tui_show_register_group (tui_data_window *win_info,
     }
 }
 
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 void
 tui_data_window::display_registers_from (int start_element_no)
@@ -337,7 +326,7 @@ tui_data_window::display_registers_from (int start_element_no)
     }
 }
 
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 void
 tui_data_window::display_reg_element_at_line (int start_element_no,
@@ -366,7 +355,7 @@ tui_data_window::display_reg_element_at_line (int start_element_no,
     }
 }
 
-/* See tui-data.h.  */
+/* See tui-regs.h.  */
 
 int
 tui_data_window::display_registers_from_line (int line_no)
@@ -402,6 +391,167 @@ tui_data_window::display_registers_from_line (int line_no)
   return (-1);			/* Nothing was displayed.  */
 }
 
+
+/* Answer the index first element displayed.  If none are displayed,
+   then return (-1).  */
+int
+tui_data_window::first_data_item_displayed ()
+{
+  for (int i = 0; i < regs_content.size (); i++)
+    {
+      struct tui_gen_win_info *data_item_win;
+
+      data_item_win = regs_content[i].get ();
+      if (data_item_win->handle != NULL && data_item_win->is_visible)
+	return i;
+    }
+
+  return -1;
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::delete_data_content_windows ()
+{
+  for (auto &&win : regs_content)
+    {
+      tui_delete_win (win->handle);
+      win->handle = NULL;
+      win->is_visible = false;
+    }
+}
+
+
+void
+tui_data_window::erase_data_content (const char *prompt)
+{
+  werase (handle);
+  tui_check_and_display_highlight_if_needed (this);
+  if (prompt != NULL)
+    {
+      int half_width = (width - 2) / 2;
+      int x_pos;
+
+      if (strlen (prompt) >= half_width)
+	x_pos = 1;
+      else
+	x_pos = half_width - strlen (prompt);
+      mvwaddstr (handle, (height / 2), x_pos, (char *) prompt);
+    }
+  wrefresh (handle);
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::display_all_data ()
+{
+  if (regs_content.empty ())
+    erase_data_content (NO_DATA_STRING);
+  else
+    {
+      erase_data_content (NULL);
+      delete_data_content_windows ();
+      tui_check_and_display_highlight_if_needed (this);
+      display_registers_from (0);
+    }
+}
+
+
+/* Function to redisplay the contents of the data window.  */
+void
+tui_data_window::refresh_all ()
+{
+  erase_data_content (NULL);
+  if (!regs_content.empty ())
+    {
+      int first_element = first_data_item_displayed ();
+
+      if (first_element >= 0)	/* Re-use existing windows.  */
+	{
+	  int first_line = (-1);
+
+	  if (first_element < regs_content.size ())
+	    first_line = line_from_reg_element_no (first_element);
+
+	  if (first_line >= 0)
+	    {
+	      erase_data_content (NULL);
+	      display_registers_from_line (first_line);
+	    }
+	}
+    }
+}
+
+
+/* Scroll the data window vertically forward or backward.  */
+void
+tui_data_window::do_scroll_vertical (int num_to_scroll)
+{
+  int first_element_no;
+  int first_line = (-1);
+
+  first_element_no = first_data_item_displayed ();
+  if (first_element_no < regs_content.size ())
+    first_line = line_from_reg_element_no (first_element_no);
+  else
+    { /* Calculate the first line from the element number which is in
+        the general data content.  */
+    }
+
+  if (first_line >= 0)
+    {
+      first_line += num_to_scroll;
+      erase_data_content (NULL);
+      delete_data_content_windows ();
+      display_registers_from_line (first_line);
+    }
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::clear_detail ()
+{
+  regs_content.clear ();
+  regs_column_count = 1;
+  display_regs = false;
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::set_new_height (int height)
+{
+  /* Delete all data item windows.  */
+  for (auto &&win : regs_content)
+    {
+      tui_delete_win (win->handle);
+      win->handle = NULL;
+    }
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::do_make_visible_with_new_height ()
+{
+  display_all_data ();
+}
+
+/* See tui-regs.h.  */
+
+void
+tui_data_window::refresh_window ()
+{
+  tui_gen_win_info::refresh_window ();
+  for (auto &&win : regs_content)
+    {
+      if (win != NULL)
+	win->refresh_window ();
+    }
+}
 
 /* This function check all displayed registers for changes in values,
    given a particular frame.  If the values have changed, they are
@@ -600,23 +750,6 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
     }
 }
 
-void
-_initialize_tui_regs (void)
-{
-  struct cmd_list_element **tuicmd, *cmd;
-
-  tuicmd = tui_get_cmd_list ();
-
-  cmd = add_cmd ("reg", class_tui, tui_reg_command, _("\
-TUI command to control the register window."), tuicmd);
-  set_cmd_completer (cmd, tui_reggroup_completer);
-}
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS                 **
-******************************************/
-
 /* Get the register from the frame and return a printable
    representation of it.  */
 
@@ -665,4 +798,16 @@ tui_get_register (struct frame_info *frame,
 
       xfree (prev_content);
     }
+}
+
+void
+_initialize_tui_regs (void)
+{
+  struct cmd_list_element **tuicmd, *cmd;
+
+  tuicmd = tui_get_cmd_list ();
+
+  cmd = add_cmd ("reg", class_tui, tui_reg_command, _("\
+TUI command to control the register window."), tuicmd);
+  set_cmd_completer (cmd, tui_reggroup_completer);
 }
