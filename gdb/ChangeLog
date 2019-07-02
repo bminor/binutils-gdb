@@ -1,3 +1,13 @@
+2019-07-02  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Completion improvements): Mention "info threads".
+	* thread.c (struct info_threads_opts, info_threads_option_defs)
+	(make_info_threads_options_def_group): New.
+	(info_threads_command): Use gdb::option::process_options.
+	(info_threads_command_completer): New.
+	(_initialize_thread): Use gdb::option::build_help to build the
+	help text for "info threads".
+
 2019-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* defs.h (generic_load): Move from here...

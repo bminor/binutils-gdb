@@ -454,6 +454,21 @@ proc_with_prefix test-thread-apply {} {
     }
 }
 
+# Basic option-machinery + "info threads" command integration tests.
+proc_with_prefix test-info-threads {} {
+    test_gdb_complete_multiple "info threads " "" "" {
+	"-gid"
+	"ID"
+    }
+
+    test_gdb_complete_unique \
+	"info threads -" \
+	"info threads -gid"
+
+    # "ID" isn't really something the user can type.
+    test_gdb_complete_none "info threads I"
+}
+
 # Miscellaneous tests.
 proc_with_prefix test-misc {variant} {
     global all_options
@@ -921,3 +936,6 @@ test-frame-apply
 
 # Basic "thread apply" integration tests.
 test-thread-apply
+
+# Basic "info threads" integration tests.
+test-info-threads

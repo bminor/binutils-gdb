@@ -1,3 +1,8 @@
+2019-07-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/options.exp (test-info-threads): New procedure.
+	(top level): Call it.
+
 2019-06-28  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.dwarf2/ada-linkage-name.c: New file.
