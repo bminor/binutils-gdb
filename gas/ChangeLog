@@ -1,5 +1,10 @@
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* testsuite/gas/aarch64/sve-movprfx_27.s,
+	* testsuite/gas/aarch64/sve-movprfx_27.d: New test.
+
+2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* testsuite/gas/aarch64/sve-movprfx_26.s: Also test FCVTZS, FCVTZU,
 	SCVTF, UCVTF, LSR and ASR.
 	* testsuite/gas/aarch64/sve-movprfx_26.d: Update accordingly.

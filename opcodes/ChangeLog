@@ -1,5 +1,10 @@
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (aarch64_opcode): Set C_SCAN_MOVPRFX for the
+	SVE FMOV alias of FCPY.
+
+2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (aarch64_opcode_table): Add C_MAX_ELEM flags
 	to SVE fcvtzs, fcvtzu, scvtf and ucvtf entries.
 
