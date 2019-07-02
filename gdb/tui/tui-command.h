@@ -22,8 +22,6 @@
 #ifndef TUI_TUI_COMMAND_H
 #define TUI_TUI_COMMAND_H
 
-extern unsigned int tui_dispatch_ctrl_char (unsigned int);
-
 /* Refresh the command window.  */
 extern void tui_refresh_cmd_win (void);
 

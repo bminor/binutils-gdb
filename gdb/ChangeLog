@@ -1,5 +1,12 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-io.c (tui_dispatch_ctrl_char): Move from tui-command.c.
+	Now static.
+	* tui/tui-command.h (tui_dispatch_ctrl_char): Don't declare.
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Move to tui-io.c.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c: Update.
 	* tui/tui-wingeneral.c (tui_data_window::refresh_window): Move to
 	tui-regs.c.
