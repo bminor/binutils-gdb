@@ -1,5 +1,9 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (parse_scrolling_args): Throw separate errors.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_exec_info_window)
 	(struct tui_source_window_base): Move from tui-data.h.
 	* tui/tui-winsource.c: Move many method definitions from
