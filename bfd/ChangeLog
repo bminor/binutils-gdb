@@ -1,3 +1,9 @@
+2019-07-02  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Mark debug
+	sections when .text section contain secure entry functions
+	is marked.
+
 2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24721

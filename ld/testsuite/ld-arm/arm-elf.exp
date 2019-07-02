@@ -768,6 +768,12 @@ set armeabitests_nonacl {
      {cmse-implib.s}
      {{ld cmse-new-wrong-implib.out}}
      "cmse-new-wrong-implib"}
+    {"Secure gateway veneers:cmse functions debug information missing"
+      "--section-start .gnu.sgstubs=0x190000 --gc-sections -e0" ""
+      "-march=armv8-m.main -mthumb"
+      {cmse_main.s cmse_sec_debug.s}
+      {{objdump --dwarf=info cmse_main_sec_debug.d}}
+      "cmse_main_sec_debug"}
 
     {"R_ARM_THM_JUMP19 Relocation veneers: Short"
      "--section-start destsect=0x000108002 --section-start .text=0x8000" ""

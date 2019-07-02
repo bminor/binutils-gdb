@@ -1,3 +1,10 @@
+2019-07-02  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Add tests.
+	* testsuite/ld-arm/cmse_main.s: New test.
+	* testsuite/ld-arm/cmse_main_sec_debug.d: Likewise.
+	* testsuite/ld-arm/cmse_sec_debug.s: Likewise.
+
 2019-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24721
