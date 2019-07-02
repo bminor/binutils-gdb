@@ -461,9 +461,13 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
 {
   char c;
   int prev_col = 0;
+  bool saw_nl = false;
 
   while ((c = *string++) != 0)
     {
+      if (c == '\n')
+	saw_nl = true;
+
       if (c == '\1' || c == '\2')
 	{
 	  /* Ignore these, they are readline escape-marking
@@ -492,6 +496,8 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
 	}
     }
   update_cmdwin_start_line ();
+  if (saw_nl)
+    wrefresh (w);
 }
 
 /* Print a string in the curses command window.  The output is
