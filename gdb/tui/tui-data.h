@@ -27,6 +27,7 @@
 #include "observable.h"
 
 struct tui_cmd_window;
+struct tui_source_window;
 
 /* This is a point definition.  */
 struct tui_point
@@ -382,36 +383,6 @@ public:
   struct gdbarch *gdbarch = nullptr;
 
   std::vector<tui_source_element> content;
-};
-
-/* A TUI source window.  */
-
-struct tui_source_window : public tui_source_window_base
-{
-  tui_source_window ();
-  ~tui_source_window ();
-
-  DISABLE_COPY_AND_ASSIGN (tui_source_window);
-
-  const char *name () const override
-  {
-    return SRC_NAME;
-  }
-
-  bool location_matches_p (struct bp_location *loc, int line_no) override;
-
-  bool showing_source_p (const char *filename) const;
-
-protected:
-
-  void do_scroll_vertical (int num_to_scroll) override;
-
-private:
-
-  void style_changed ();
-
-  /* A token used to register and unregister an observer.  */
-  gdb::observers::token m_observable;
 };
 
 extern int tui_win_is_auxiliary (enum tui_win_type win_type);

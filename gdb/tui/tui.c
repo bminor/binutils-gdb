@@ -31,6 +31,7 @@
 #include "tui/tui-stack.h"
 #include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
+#include "tui/tui-source.h"
 #include "target.h"
 #include "frame.h"
 #include "breakpoint.h"

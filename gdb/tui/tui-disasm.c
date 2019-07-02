@@ -35,6 +35,7 @@
 #include "tui/tui-stack.h"
 #include "tui/tui-file.h"
 #include "tui/tui-disasm.h"
+#include "tui/tui-source.h"
 #include "progspace.h"
 #include "objfiles.h"
 

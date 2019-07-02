@@ -1,5 +1,15 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c: Update.
+	* tui/tui-source.h (struct tui_source_window): Move from
+	tui-data.h.
+	* tui/tui-layout.c: Update.
+	* tui/tui-disasm.c: Update.
+	* tui/tui-data.h (struct tui_source_window): Move to
+	tui-source.h.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.h (struct tui_disasm_window): Move from
 	tui-data.h.
 	* tui/tui-data.h (struct tui_disasm_window): Move to
