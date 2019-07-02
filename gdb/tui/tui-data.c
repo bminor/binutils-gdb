@@ -333,14 +333,3 @@ tui_source_window_base::~tui_source_window_base ()
   xfree (fullname);
   delete execution_info;
 }  
-
-/**********************************
-** LOCAL STATIC FUNCTIONS        **
-**********************************/
-
-
-tui_data_item_window::~tui_data_item_window ()
-{
-  xfree (value);
-  xfree (content);
-}

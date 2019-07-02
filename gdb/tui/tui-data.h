@@ -249,25 +249,6 @@ struct tui_locator_window : public tui_gen_win_info
   struct gdbarch *gdbarch = nullptr;
 };
 
-/* A data item window.  */
-
-struct tui_data_item_window : public tui_gen_win_info
-{
-  tui_data_item_window ()
-    : tui_gen_win_info (DATA_ITEM_WIN)
-  {
-  }
-
-  ~tui_data_item_window () override;
-
-  const char *name = nullptr;
-  /* The register number, or data display number.  */
-  int item_no = -1;
-  void *value = nullptr;
-  bool highlight = false;
-  char *content = nullptr;
-};
-
 /* This defines information about each logical window.  */
 struct tui_win_info : public tui_gen_win_info
 {

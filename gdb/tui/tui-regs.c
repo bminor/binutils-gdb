@@ -53,6 +53,15 @@ static void tui_get_register (struct frame_info *frame,
 			      struct tui_data_item_window *data,
 			      int regnum, bool *changedp);
 
+
+/* See tui-regs.h.  */
+
+tui_data_item_window::~tui_data_item_window ()
+{
+  xfree (value);
+  xfree (content);
+}
+
 /* See tui-regs.h.  */
 
 int

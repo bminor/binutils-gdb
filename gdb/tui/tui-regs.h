@@ -24,6 +24,25 @@
 
 #include "tui/tui-data.h"
 
+/* A data item window.  */
+
+struct tui_data_item_window : public tui_gen_win_info
+{
+  tui_data_item_window ()
+    : tui_gen_win_info (DATA_ITEM_WIN)
+  {
+  }
+
+  ~tui_data_item_window () override;
+
+  const char *name = nullptr;
+  /* The register number, or data display number.  */
+  int item_no = -1;
+  void *value = nullptr;
+  bool highlight = false;
+  char *content = nullptr;
+};
+
 /* The TUI registers window.  */
 struct tui_data_window : public tui_win_info
 {
