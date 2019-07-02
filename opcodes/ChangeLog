@@ -1,3 +1,8 @@
+2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (verify_constraints): Skip GPRs when scanning the
+	registers in an instruction prefixed by MOVPRFX.
+
 2019-07-01  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* aarch64-asm.c (aarch64_encode_variant_using_iclass): Use new

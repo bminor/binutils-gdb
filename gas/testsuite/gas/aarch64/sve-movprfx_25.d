@@ -21,7 +21,7 @@ Disassembly of section .*:
 [^:]+:	04d12461 	movprfx	z1.d, p1/m, z3.d
 [^:]+:	05e8a441 	mov	z1.d, p1/m, x2
 [^:]+:	04d12461 	movprfx	z1.d, p1/m, z3.d
-[^:]+:	05e8a421 	mov	z1.d, p1/m, x1  // note: output register of preceding `movprfx' used as input at operand 3
+[^:]+:	05e8a421 	mov	z1.d, p1/m, x1
 [^:]+:	04d12461 	movprfx	z1.d, p1/m, z3.d
 [^:]+:	05e08441 	mov	z1.d, p1/m, d2
 [^:]+:	04d12461 	movprfx	z1.d, p1/m, z3.d

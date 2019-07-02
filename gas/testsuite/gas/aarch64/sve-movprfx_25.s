@@ -29,7 +29,7 @@ f:
    movprfx z1.d, p1/m, z3.d
    cpy z1.d, p1/m, x2
 
-   /* Not OK, scalar but register z1 and x1 are architecturally the same.  */
+   /* OK, scalar predicated, alias mov.  */
    movprfx z1.d, p1/m, z3.d
    cpy z1.d, p1/m, x1
 
