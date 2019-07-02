@@ -23,6 +23,7 @@
 #define TUI_TUI_SOURCE_H
 
 #include "tui/tui-data.h"
+#include "tui-winsource.h"
 
 struct symtab;
 
@@ -40,6 +41,8 @@ struct tui_source_window : public tui_source_window_base
     return SRC_NAME;
   }
 
+  /* Return true if the location LOC corresponds to the line number
+     LINE_NO in this source window; false otherwise.  */
   bool location_matches_p (struct bp_location *loc, int line_no) override;
 
   bool showing_source_p (const char *filename) const;

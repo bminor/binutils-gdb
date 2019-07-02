@@ -166,15 +166,6 @@ tui_gen_win_info::make_visible (bool visible)
     }
 }
 
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::make_visible (bool visible)
-{
-  execution_info->make_visible (visible);
-  tui_win_info::make_visible (visible);
-}
-
 /* Makes all windows invisible (except the command and locator
    windows).  */
 static void
@@ -194,15 +185,6 @@ void
 tui_make_all_invisible (void)
 {
   make_all_visible (false);
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::refresh_window ()
-{
-  execution_info->refresh_window ();
-  tui_win_info::refresh_window ();
 }
 
 /* Function to refresh all the windows currently displayed.  */

@@ -1,5 +1,30 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_exec_info_window)
+	(struct tui_source_window_base): Move from tui-data.h.
+	* tui/tui-winsource.c: Move many method definitions from
+	elsewhere.  Remove "structuring" comments.
+	* tui/tui-wingeneral.c (tui_source_window_base::make_visible)
+	(tui_source_window_base::refresh_window): Move to
+	tui-winsource.c.
+	* tui/tui-win.c (tui_source_window_base::refresh_all)
+	(tui_source_window_base::update_tab_width)
+	(tui_source_window_base::set_new_height)
+	(tui_source_window_base::do_make_visible_with_new_height): Move to
+	tui-winsource.c.
+	* tui/tui-source.h: Update.
+	* tui/tui-source.c (tui_source_window_base::reset): Move to
+	tui-winsource.c.
+	* tui/tui-disasm.h: Update.
+	* tui/tui-data.h (struct tui_exec_info_window): Move to
+	tui-winsource.h.
+	(struct tui_source_window_base): Likewise.
+	* tui/tui-data.c (tui_source_window_base::clear_detail)
+	(tui_source_window_base, ~tui_source_window_base): Move to
+	tui-winsource.c.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_resize_all)
 	(tui_source_window_base::update_tab_width)
 	(tui_adjust_win_heights): Update.

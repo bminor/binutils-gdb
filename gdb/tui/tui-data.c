@@ -24,6 +24,7 @@
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
+#include "tui/tui-winsource.h"
 #include "gdb_curses.h"
 
 /****************************
@@ -137,17 +138,6 @@ tui_add_to_source_windows (struct tui_source_window_base *win_info)
 {
   if (source_windows.size () < 2)
     source_windows.push_back (win_info);
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::clear_detail ()
-{
-  gdbarch = NULL;
-  start_line_or_addr.loa = LOA_ADDRESS;
-  start_line_or_addr.u.addr = 0;
-  horizontal_offset = 0;
 }
 
 /* Accessor for the locator win info.  Answers a pointer to the static
@@ -313,23 +303,8 @@ tui_win_info::tui_win_info (enum tui_win_type type)
 {
 }
 
-tui_source_window_base::tui_source_window_base (enum tui_win_type type)
-  : tui_win_info (type),
-    execution_info (new tui_exec_info_window ())
-{
-  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
-  start_line_or_addr.loa = LOA_ADDRESS;
-  start_line_or_addr.u.addr = 0;
-}
-
 tui_gen_win_info::~tui_gen_win_info ()
 {
   tui_delete_win (handle);
   xfree (title);
 }
-
-tui_source_window_base::~tui_source_window_base ()
-{
-  xfree (fullname);
-  delete execution_info;
-}  

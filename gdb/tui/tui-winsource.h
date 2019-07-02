@@ -24,7 +24,87 @@
 
 #include "tui/tui-data.h"
 
-struct tui_win_info;
+/* Execution info window class.  */
+
+struct tui_exec_info_window : public tui_gen_win_info
+{
+  tui_exec_info_window ()
+    : tui_gen_win_info (EXEC_INFO_WIN)
+  {
+  }
+
+  ~tui_exec_info_window () override
+  {
+    xfree (m_content);
+  }
+
+  /* Get or allocate contents.  */
+  tui_exec_info_content *maybe_allocate_content (int n_elements);
+
+  /* Return the contents.  */
+  const tui_exec_info_content *get_content () const
+  {
+    return m_content;
+  }
+
+private:
+
+  tui_exec_info_content *m_content = nullptr;
+};
+
+/* The base class for all source-like windows, namely the source and
+   disassembly windows.  */
+
+struct tui_source_window_base : public tui_win_info
+{
+protected:
+  explicit tui_source_window_base (enum tui_win_type type);
+  ~tui_source_window_base () override;
+  DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
+
+  void do_scroll_horizontal (int num_to_scroll) override;
+  void do_make_visible_with_new_height () override;
+
+public:
+
+  void clear_detail () override;
+
+  void make_visible (bool visible) override;
+  void refresh_window () override;
+  void refresh_all () override;
+
+  /* Refill the source window's source cache and update it.  If this
+     is a disassembly window, then just update it.  */
+  void refill ();
+
+  /* Set the location of the execution point.  */
+  void set_is_exec_point_at (struct tui_line_or_address l);
+
+  void set_new_height (int height) override;
+
+  void update_tab_width () override;
+
+  virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
+
+  void reset (int height, int width,
+	      int origin_x, int origin_y) override;
+
+  /* Does the locator belong to this window?  */
+  bool m_has_locator = false;
+  /* Execution information window.  */
+  struct tui_exec_info_window *execution_info;
+  /* Used for horizontal scroll.  */
+  int horizontal_offset = 0;
+  struct tui_line_or_address start_line_or_addr;
+
+  /* It is the resolved form as returned by symtab_to_fullname.  */
+  char *fullname = nullptr;
+
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *gdbarch = nullptr;
+
+  std::vector<tui_source_element> content;
+};
 
 /* Update the execution windows to show the active breakpoints.  This
    is called whenever a breakpoint is inserted, removed or has its

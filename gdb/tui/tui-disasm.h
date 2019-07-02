@@ -24,6 +24,7 @@
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "tui-winsource.h"
 
 /* A TUI disassembly window.  */
 

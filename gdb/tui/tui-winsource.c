@@ -301,6 +301,150 @@ tui_show_source_content (struct tui_source_window_base *win_info)
 /* See tui-data.h.  */
 
 void
+tui_source_window_base::clear_detail ()
+{
+  gdbarch = NULL;
+  start_line_or_addr.loa = LOA_ADDRESS;
+  start_line_or_addr.u.addr = 0;
+  horizontal_offset = 0;
+}
+
+tui_source_window_base::tui_source_window_base (enum tui_win_type type)
+  : tui_win_info (type),
+    execution_info (new tui_exec_info_window ())
+{
+  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
+  start_line_or_addr.loa = LOA_ADDRESS;
+  start_line_or_addr.u.addr = 0;
+}
+
+
+tui_source_window_base::~tui_source_window_base ()
+{
+  xfree (fullname);
+  delete execution_info;
+}  
+
+void
+tui_source_window_base::reset (int height, int width,
+			       int origin_x, int origin_y)
+{
+  tui_gen_win_info::reset (height, width - 3,
+			   origin_x + 3, origin_y);
+  execution_info->reset (height, 3, origin_x, origin_y);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::refresh_all ()
+{
+  tui_show_source_content (this);
+  tui_check_and_display_highlight_if_needed (this);
+  tui_erase_exec_info_content (this);
+  tui_update_exec_info (this);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::update_tab_width ()
+{
+  /* We don't really change the height of any windows, but
+     calling these 2 functions causes a complete regeneration
+     and redisplay of the window's contents, which will take
+     the new tab width into account.  */
+  make_invisible_and_set_new_height (height);
+  make_visible_with_new_height ();
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::set_new_height (int height)
+{
+  execution_info->make_visible (false);
+  execution_info->height = height;
+  execution_info->origin.y = origin.y;
+  if (height > 1)
+    execution_info->viewport_height = height - 1;
+  else
+    execution_info->viewport_height = height;
+  execution_info->viewport_height--;
+
+  if (m_has_locator)
+    {
+      tui_locator_window *gen_win_info = tui_locator_win_info_ptr ();
+      gen_win_info->make_visible (false);
+      gen_win_info->origin.y = origin.y + height;
+    }
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::do_make_visible_with_new_height ()
+{
+  execution_info->make_visible (true);
+  if (!content.empty ())
+    {
+      struct tui_line_or_address line_or_addr;
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
+
+      line_or_addr = start_line_or_addr;
+      tui_update_source_window (this, gdbarch,
+				cursal.symtab, line_or_addr, TRUE);
+    }
+  else if (deprecated_safe_get_selected_frame () != NULL)
+    {
+      struct tui_line_or_address line;
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
+      struct frame_info *frame = deprecated_safe_get_selected_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+
+      struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
+      if (type == SRC_WIN)
+	{
+	  line.loa = LOA_LINE;
+	  line.u.line_no = cursal.line;
+	}
+      else
+	{
+	  line.loa = LOA_ADDRESS;
+	  find_line_pc (s, cursal.line, &line.u.addr);
+	}
+      tui_update_source_window (this, gdbarch, s, line, TRUE);
+    }
+  if (m_has_locator)
+    {
+      tui_locator_win_info_ptr ()->make_visible (true);
+      tui_show_locator_content ();
+    }
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::make_visible (bool visible)
+{
+  execution_info->make_visible (visible);
+  tui_win_info::make_visible (visible);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_source_window_base::refresh_window ()
+{
+  execution_info->refresh_window ();
+  tui_win_info::refresh_window ();
+}
+
+/* See tui-data.h.  */
+
+void
 tui_source_window_base::refill ()
 {
   symtab *s = nullptr;
@@ -616,8 +760,3 @@ tui_addr_is_displayed (CORE_ADDR addr,
 
   return is_displayed;
 }
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS               **
-******************************************/
