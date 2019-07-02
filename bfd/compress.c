@@ -253,6 +253,9 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	  ufile_ptr filesize = bfd_get_file_size (abfd);
 	  if (filesize > 0
 	      && filesize < sz
+	      /* PR 24753: Linker created sections can be larger than
+		 the file size, eg if they are being used to hold stubs.  */
+	      && (bfd_get_section_flags (abfd, sec) & SEC_LINKER_CREATED) == 0
 	      /* The MMO file format supports its own special compression
 		 technique, but it uses COMPRESS_SECTION_NONE when loading
 		 a section's contents.  */
