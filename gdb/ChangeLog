@@ -1,5 +1,9 @@
 2019-07-15  Tom Tromey  <tromey@adacore.com>
 
+	* mi/mi-out.c (mi_ui_out::do_field_int): Use plongest.
+
+2019-07-15  Tom Tromey  <tromey@adacore.com>
+
 	* mi/mi-out.h (class mi_ui_out) <do_field_unsigned>: Declare.
 	* mi/mi-out.c (mi_ui_out::do_field_unsigned): New method.
 	* cli-out.h (class cli_ui_out) <do_field_unsigned>: Declare.
