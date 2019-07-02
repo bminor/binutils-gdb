@@ -1053,7 +1053,7 @@ M;int;stap_parse_special_token;struct stap_parse_info *p;p
 # replace the register name from %ax to %eax.
 #
 # The rationale for this can be found at PR breakpoints/24541.
-M;void;stap_adjust_register;struct stap_parse_info *p, std::string \&regname, int regnum;p, regname, regnum
+M;std::string;stap_adjust_register;struct stap_parse_info *p, const std::string \&regname, int regnum;p, regname, regnum
 
 # DTrace related functions.
 

@@ -774,23 +774,24 @@ stap_parse_register_operand (struct stap_parse_info *p)
      code would like to perform on the register name.  */
   if (gdbarch_stap_adjust_register_p (gdbarch))
     {
-      std::string oldregname = regname;
+      std::string newregname
+	= gdbarch_stap_adjust_register (gdbarch, p, regname, regnum);
 
-      gdbarch_stap_adjust_register (gdbarch, p, regname, regnum);
-
-      if (regname != oldregname)
+      if (regname != newregname)
 	{
 	  /* This is just a check we perform to make sure that the
 	     arch-dependent code has provided us with a valid
 	     register name.  */
-	  regnum = user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
-						regname.size ());
+	  regnum = user_reg_map_name_to_regnum (gdbarch, newregname.c_str (),
+						newregname.size ());
 
 	  if (regnum == -1)
 	    internal_error (__FILE__, __LINE__,
 			    _("Invalid register name '%s' after replacing it"
 			      " (previous name was '%s')"),
-			    regname.c_str (), oldregname.c_str ());
+			    newregname.c_str (), regname.c_str ());
+
+	  regname = newregname;
 	}
     }
 

@@ -4530,14 +4530,14 @@ gdbarch_stap_adjust_register_p (struct gdbarch *gdbarch)
   return gdbarch->stap_adjust_register != NULL;
 }
 
-void
-gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum)
+std::string
+gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, const std::string &regname, int regnum)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->stap_adjust_register != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_adjust_register called\n");
-  gdbarch->stap_adjust_register (gdbarch, p, regname, regnum);
+  return gdbarch->stap_adjust_register (gdbarch, p, regname, regnum);
 }
 
 void

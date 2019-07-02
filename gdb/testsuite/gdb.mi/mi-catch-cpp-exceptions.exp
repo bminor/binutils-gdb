@@ -130,27 +130,7 @@ with_test_prefix "all with invalid regexp" {
     setup_catchpoint "throw" "-r blahblah"
     setup_catchpoint "rethrow" "-r woofwoof"
     setup_catchpoint "catch" "-r miowmiow"
-
-    # Would like to use 'continue_to_breakpoint_in_main' here, if
-    # there wasn't a bug that requires a use of kfail.
-
-    mi_send_resuming_command "exec-continue" \
-	"exec-continue"
-    set testname "run until breakpoint in main"
-    gdb_expect {
-	-re "could not find minimal symbol for typeinfo address.*$mi_gdb_prompt$" {
-	    kfail "gdb/24541" "${testname}"
-	}
-	-re "\\*stopped,bkptno=\"$decimal\",reason=\"breakpoint-hit\",disp=\"keep\".*func=\"__cxa_throw\".*$mi_gdb_prompt$" {
-	    kfail "gdb/24541" "${testname}"
-	}
-	-re "\\*stopped,reason=\"breakpoint-hit\".*func=\"main\".*line=\"${main_lineno}\".*$mi_gdb_prompt$" {
-	    pass "${testname}"
-	}
-	timeout {
-	    fail "${testname} (timeout)"
-	}
-    }
+    continue_to_breakpoint_in_main
 }
 
 # Now check that all of the commands with a regexp that does match,

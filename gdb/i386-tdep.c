@@ -4389,27 +4389,24 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 /* Implementation of 'gdbarch_stap_adjust_register', as defined in
    gdbarch.h.  */
 
-static void
+static std::string
 i386_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p,
-			   std::string &regname, int regnum)
+			   const std::string &regname, int regnum)
 {
   static const std::unordered_set<std::string> reg_assoc
     = { "ax", "bx", "cx", "dx",
 	"si", "di", "bp", "sp" };
 
-  if (register_size (gdbarch, regnum) >= TYPE_LENGTH (p->arg_type))
-    {
-      /* If we're dealing with a register whose size is greater or
-	 equal than the size specified by the "[-]N@" prefix, then we
-	 don't need to do anything.  */
-      return;
-    }
+  /* If we are dealing with a register whose size is less than the size
+     specified by the "[-]N@" prefix, and it is one of the registers that
+     we know has an extended variant available, then use the extended
+     version of the register instead.  */
+  if (register_size (gdbarch, regnum) < TYPE_LENGTH (p->arg_type)
+      && reg_assoc.find (regname) != reg_assoc.end ())
+    return "e" + regname;
 
-  if (reg_assoc.find (regname) != reg_assoc.end ())
-    {
-      /* Use the extended version of the register.  */
-      regname = "e" + regname;
-    }
+  /* Otherwise, just use the requested register.  */
+  return regname;
 }
 
 

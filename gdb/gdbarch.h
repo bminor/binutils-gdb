@@ -1376,8 +1376,8 @@ extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbar
 
 extern int gdbarch_stap_adjust_register_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_stap_adjust_register_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum);
-extern void gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum);
+typedef std::string (gdbarch_stap_adjust_register_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p, const std::string &regname, int regnum);
+extern std::string gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, const std::string &regname, int regnum);
 extern void set_gdbarch_stap_adjust_register (struct gdbarch *gdbarch, gdbarch_stap_adjust_register_ftype *stap_adjust_register);
 
 /* DTrace related functions.

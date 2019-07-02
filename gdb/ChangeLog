@@ -1,3 +1,15 @@
+2019-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR breakpoints/24541
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh: Adjust return type and parameter types for
+	'stap_adjust_register'.
+	(i386_stap_adjust_register): Adjust signature and return new
+	register name.
+	* stap-probe.c (stap_parse_register_operand): Adjust use of
+	'gdbarch_stap_adjust_register'.
+
 2019-07-17  Tom Tromey  <tromey@adacore.com>
 
 	* s390-linux-nat.c (s390_watch_area): Remove typedef.  Don't
