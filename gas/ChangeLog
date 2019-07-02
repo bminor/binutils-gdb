@@ -1,3 +1,11 @@
+2019-07-02  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Add error check.
+	* testsuite/gas/aarch64/diagnostic.l: New test.
+	* testsuite/gas/aarch64/diagnostic.s: New test.
+	* testsuite/gas/aarch64/illegal.l: New tests.
+	* testsuite/gas/aarch64/illegal.s: New tests.
+
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* testsuite/gas/aarch64/sve-movprfx_27.s,

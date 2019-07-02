@@ -5733,11 +5733,20 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      val = parse_vector_reg_list (&str, reg_type, &vectype);
 	      if (val == PARSE_FAIL)
 		goto failure;
+
 	      if (! reg_list_valid_p (val, /* accept_alternate */ 0))
 		{
 		  set_fatal_syntax_error (_("invalid register list"));
 		  goto failure;
 		}
+
+	      if (vectype.width != 0 && *str != ',')
+		{
+		  set_fatal_syntax_error
+		    (_("expected element type rather than vector type"));
+		  goto failure;
+		}
+
 	      info->reglist.first_regno = (val >> 2) & 0x1f;
 	      info->reglist.num_regs = (val & 0x3) + 1;
 	    }
