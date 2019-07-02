@@ -414,29 +414,6 @@ private:
   gdb::observers::token m_observable;
 };
 
-/* A TUI disassembly window.  */
-
-struct tui_disasm_window : public tui_source_window_base
-{
-  tui_disasm_window ()
-    : tui_source_window_base (DISASSEM_WIN)
-  {
-  }
-
-  DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
-
-  const char *name () const override
-  {
-    return DISASSEM_NAME;
-  }
-
-  bool location_matches_p (struct bp_location *loc, int line_no) override;
-
-protected:
-
-  void do_scroll_vertical (int num_to_scroll) override;
-};
-
 extern int tui_win_is_auxiliary (enum tui_win_type win_type);
 
 
