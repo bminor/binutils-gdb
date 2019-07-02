@@ -1,3 +1,10 @@
+2019-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* defs.h (generic_load): Move from here...
+	* symfile.h (generic_load): ... to here.  Rename name parameter
+	to args.
+	* symfile.c (generic_load): Add comment.
+
 2019-07-01  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2read.c

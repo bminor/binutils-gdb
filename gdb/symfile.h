@@ -532,6 +532,12 @@ void expand_symtabs_matching
 void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 			   int need_fullname);
 
+/* Target-agnostic function to load the sections of an executable into memory.
+
+   ARGS should be in the form "EXECUTABLE [OFFSET]", where OFFSET is an
+   optional offset to apply to each section.  */
+extern void generic_load (const char *args, int from_tty);
+
 /* From dwarf2read.c */
 
 /* Names for a dwarf2 debugging section.  The field NORMAL is the normal

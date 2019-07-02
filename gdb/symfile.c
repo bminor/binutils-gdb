@@ -2023,6 +2023,8 @@ static void print_transfer_performance (struct ui_file *stream,
 					unsigned long write_count,
 				        std::chrono::steady_clock::duration d);
 
+/* See symfile.h.  */
+
 void
 generic_load (const char *args, int from_tty)
 {
