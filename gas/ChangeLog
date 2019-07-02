@@ -1,3 +1,10 @@
+2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/sve-movprfx_25.s: Allow CPY Z1.D.P1/M,X1
+	to be prefixed by MOVPRFX.
+	* testsuite/gas/aarch64/sve-movprfx_25.d: Update accordingly.
+	* testsuite/gas/aarch64/sve-movprfx_25.l: Likewise.
+
 2019-05-21  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	Backport from mainline
