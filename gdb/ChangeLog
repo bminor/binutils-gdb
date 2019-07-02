@@ -1,5 +1,15 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all)
+	(tui_source_window_base::update_tab_width)
+	(tui_adjust_win_heights): Update.
+	(tui_win_info::make_invisible_and_set_new_height): Rename from
+	make_invisible_and_set_new_height.
+	* tui/tui-data.h (struct tui_win_info)
+	<make_invisible_and_set_new_height>: New method.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c: Update.
 	* tui/tui-source.h (struct tui_source_window): Move from
 	tui-data.h.

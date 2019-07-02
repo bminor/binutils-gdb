@@ -299,6 +299,11 @@ public:
   {
   }
 
+  /* Function make the target window (and auxiliary windows associated
+     with the target) invisible, and set the new height and
+     location.  */
+  void make_invisible_and_set_new_height (int height);
+
   /* Make the window visible after the height has been changed.  */
   void make_visible_with_new_height ();
 
