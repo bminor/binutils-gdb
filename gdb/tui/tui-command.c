@@ -27,15 +27,34 @@
 #include "tui/tui-command.h"
 
 #include "gdb_curses.h"
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
 
+/* See tui-command.h.  */
 
+void
+tui_cmd_window::clear_detail ()
+{
+  wmove (handle, 0, 0);
+}
 
-/*****************************************
-** PUBLIC FUNCTIONS                        **
-******************************************/
+/* See tui-command.h.  */
+
+void
+tui_cmd_window::do_make_visible_with_new_height ()
+{
+#ifdef HAVE_WRESIZE
+  wresize (handle, height, width);
+#endif
+  mvwin (handle, origin.y, origin.x);
+  wmove (handle, 0, 0);
+}
+
+/* See tui-command.h.  */
+
+int
+tui_cmd_window::max_height () const
+{
+  return tui_term_height () - 4;
+}
 
 /* See tui-command.h.  */
 

@@ -36,6 +36,7 @@
 
 #include "tui/tui.h"
 #include "tui/tui-io.h"
+#include "tui/tui-command.h"
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-stack.h"
@@ -1319,30 +1320,10 @@ tui_source_window_base::do_make_visible_with_new_height ()
 
 /* See tui-data.h.  */
 
-void
-tui_cmd_window::do_make_visible_with_new_height ()
-{
-#ifdef HAVE_WRESIZE
-  wresize (handle, height, width);
-#endif
-  mvwin (handle, origin.y, origin.x);
-  wmove (handle, 0, 0);
-}
-
-/* See tui-data.h.  */
-
 int
 tui_win_info::max_height () const
 {
   return tui_term_height () - 2;
-}
-
-/* See tui-data.h.  */
-
-int
-tui_cmd_window::max_height () const
-{
-  return tui_term_height () - 4;
 }
 
 static int

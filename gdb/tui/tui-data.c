@@ -150,14 +150,6 @@ tui_source_window_base::clear_detail ()
   horizontal_offset = 0;
 }
 
-/* See tui-data.h.  */
-
-void
-tui_cmd_window::clear_detail ()
-{
-  wmove (handle, 0, 0);
-}
-
 /* Accessor for the locator win info.  Answers a pointer to the static
    locator win info struct.  */
 struct tui_locator_window *

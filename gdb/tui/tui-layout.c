@@ -28,6 +28,7 @@
 #include <ctype.h>
 
 #include "tui/tui.h"
+#include "tui/tui-command.h"
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-stack.h"

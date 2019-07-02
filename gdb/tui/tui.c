@@ -23,6 +23,7 @@
 #include "gdbcmd.h"
 #include "tui/tui.h"
 #include "tui/tui-hooks.h"
+#include "tui/tui-command.h"
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"

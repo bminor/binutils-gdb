@@ -1,5 +1,21 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c: Update.
+	* tui/tui-win.c (tui_cmd_window::do_make_visible_with_new_height)
+	(tui_cmd_window::max_height): Move to tui-command.c.
+	* tui/tui-layout.c: Update.
+	* tui/tui-data.h (struct tui_cmd_window): Move to tui-command.h.
+	* tui/tui-data.c (tui_cmd_window::clear_detail): Move to
+	tui-command.c.
+	* tui/tui-command.h (struct tui_cmd_window): Move from
+	tui-data.h.
+	* tui/tui-command.c: Remove "structuring" comments.
+	(tui_cmd_window::clear_detail)
+	(tui_cmd_window::do_make_visible_with_new_height)
+	(tui_cmd_window::max_height): Move from elsewhere.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-io.c (tui_dispatch_ctrl_char): Move from tui-command.c.
 	Now static.
 	* tui/tui-command.h (tui_dispatch_ctrl_char): Don't declare.
