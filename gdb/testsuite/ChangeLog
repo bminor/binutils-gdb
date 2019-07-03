@@ -1,5 +1,10 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* lib/completion-support.exp (test_gdb_complete_tab_multiple):
+	Split one gdb_test_multiple call in two to avoid a race.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/with.c: New file.
 	* gdb.base/with.exp: New file.
 

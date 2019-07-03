@@ -151,8 +151,12 @@ proc test_gdb_complete_tab_multiple { input_line add_completed_line \
 		set maybe_bell ""
 	    }
 	    gdb_test_multiple "" "$test (second tab)" {
-		-re "^${maybe_bell}\r\n$expected_re\r\n$gdb_prompt $input_line_re$add_completed_line_re$" {
-		    pass "$test"
+		-re "^${maybe_bell}\r\n$expected_re\r\n$gdb_prompt " {
+		    gdb_test_multiple "" "$test (second tab)" {
+			-re "^$input_line_re$add_completed_line_re$" {
+			    pass "$test"
+			}
+		    }
 		}
 	    }
 	}
