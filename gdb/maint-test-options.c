@@ -58,10 +58,10 @@
    readline, for proper testing of TAB completion.
 
    These maintenance commands support options of all the different
-   available kinds of commands (boolean, enum, flag, uinteger):
+   available kinds of commands (boolean, enum, flag, string, uinteger):
 
     (gdb) maint test-options require-delimiter -[TAB]
-    -bool      -enum      -flag      -uinteger   -xx1       -xx2
+    -bool      -enum      -flag      -string     -uinteger   -xx1       -xx2
 
     (gdb) maint test-options require-delimiter -bool o[TAB]
     off  on
@@ -133,6 +133,16 @@ struct test_options_opts
   const char *enum_opt = test_options_enum_values_xxx;
   unsigned int uint_opt = 0;
   int zuint_unl_opt = 0;
+  char *string_opt = nullptr;
+
+  test_options_opts () = default;
+
+  DISABLE_COPY_AND_ASSIGN (test_options_opts);
+
+  ~test_options_opts ()
+  {
+    xfree (string_opt);
+  }
 
   /* Dump the options to FILE.  ARGS is the remainder unprocessed
      arguments.  */
@@ -140,7 +150,7 @@ struct test_options_opts
   {
     fprintf_unfiltered (file,
 			_("-flag %d -xx1 %d -xx2 %d -bool %d "
-			  "-enum %s -uint %s -zuint-unl %s -- %s\n"),
+			  "-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
 			flag_opt,
 			xx1_opt,
 			xx2_opt,
@@ -152,6 +162,9 @@ struct test_options_opts
 			(zuint_unl_opt == -1
 			 ? "unlimited"
 			 : plongest (zuint_unl_opt)),
+			(string_opt != nullptr
+			 ? string_opt
+			 : ""),
 			args);
   }
 };
@@ -215,6 +228,14 @@ static const gdb::option::option_def test_options_option_defs[] = {
     N_("A zuinteger-unlimited option."),
     nullptr, /* show_doc */
     nullptr, /* help_doc */
+  },
+
+  /* A string option.  */
+  gdb::option::string_option_def<test_options_opts> {
+    "string",
+    [] (test_options_opts *opts) { return &opts->string_opt; },
+    nullptr, /* show_cmd_cb */
+    N_("A string option."),
   },
 };
 

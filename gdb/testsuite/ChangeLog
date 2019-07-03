@@ -1,5 +1,15 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (expect_none, expect_flag, expect_bool)
+	(expect_integer): Adjust to expect "-string".
+	(expect_string): New.
+	(all_options): Expect "-string".
+	(test-flag, test-boolean): Adjust to expect "-string".
+	(test-string): New proc.
+	(top level): Call it.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.exp (test-misc, test-flag, test-boolean)
 	(test-uinteger, test-enum): Adjust res_test_gdb_... calls to pass
 	the expected output in the success.

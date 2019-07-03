@@ -1,5 +1,23 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-option.c (union option_value) <string>: New field.
+	(struct option_def_and_value): Add ctor, move ctor, dtor and
+	use DISABLE_COPY_AND_ASSIGN.
+	(option_def_and_value::clear_value): New.
+	(parse_option, save_option_value_in_ctx, get_val_type_str)
+	(add_setshow_cmds_for_options): Handle var_string.
+	* cli-option.h (union option_def::var_address) <string>: New
+	field.
+	(struct string_option_def): New.
+	* maint-test-options.c (struct test_options_opts): Add default
+	ctor and use DISABLE_COPY_AND_ASSIGN.
+	<string_opt>: New field.
+	(test_options_opts::~test_options_opts): New.
+	(test_options_opts::dump): Also dump "-string".
+	(test_options_option_defs): Install "string.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-option.c (parse_option) <var_enum>: Don't return an
 	option_value with a null enumeration.
 	(complete_options): Save the option values in the context.
