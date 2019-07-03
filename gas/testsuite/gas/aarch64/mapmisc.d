@@ -1,4 +1,4 @@
-#as: -EL -I$srcdir/$subdir 
+#as: -EL -I$srcdir/$subdir --generate-missing-build-notes=no
 #objdump: --syms --special-syms -d
 #name: AArch64 Mapping Symbols for miscellaneous directives
 #source: mapmisc.s

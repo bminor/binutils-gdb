@@ -179,20 +179,19 @@ if { [is_elf_format] } then {
     run_dump_test "pseudo"
     run_dump_test "section0"
     run_dump_test "section1"
+    # The h8300 port issues a warning message for
+    # new sections created without atrributes.
     if {! [istarget "h8300-*-*"]} then {
-	# The h8300 port issues a warning message for
-	# new sections created without atrributes.
+	set as_flags "-al --generate-missing-build-notes=no"
 	case $target_triplet in {
 	    { i*86-*-* x86_64-*-* } {
-		run_elf_list_test "section2" "$target_machine" "-al -mx86-used-note=no" "-s" ""
+		set as_flags "$as_flags -mx86-used-note=no"
 	    }
 	    { riscv*-*-* } {
-		run_elf_list_test "section2" "$target_machine" "-al -march-attr" "-s" ""
-	    }
-	    default {
-		run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
+		set as_flags "$as_flags -march-attr"
 	    }
 	}
+	run_elf_list_test "section2" "$target_machine" "$as_flags" "-s" ""
     }
     run_dump_test "section3"
     run_dump_test "section4"

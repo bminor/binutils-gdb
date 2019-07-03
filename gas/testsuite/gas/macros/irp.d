@@ -13,3 +13,4 @@ OFFSET[ 	]+TYPE[ 	]+VALUE.*
 0+0c[ 	]+[a-zA-Z0-9_]+[ 	]+bar1
 0+10[ 	]+[a-zA-Z0-9_]+[ 	]+bar2
 0+14[ 	]+[a-zA-Z0-9_]+[ 	]+bar3
+#pass

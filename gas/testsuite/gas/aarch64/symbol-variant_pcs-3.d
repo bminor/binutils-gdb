@@ -1,4 +1,5 @@
 #objdump: -t
+#as:  --generate-missing-build-notes=no
 
 .*:     file format .*
 

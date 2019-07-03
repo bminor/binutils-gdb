@@ -1,6 +1,6 @@
 #name: x86-64 property 2
 #source: property-2.s
-#as: -mx86-used-note=yes
+#as: -mx86-used-note=yes --generate-missing-build-notes=no
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property

@@ -1,5 +1,5 @@
 #objdump: -drx -Mpower4
-#as: -mpower4
+#as: -mpower4 --generate-missing-build-notes=no
 #name: Power4 instructions
 
 .*

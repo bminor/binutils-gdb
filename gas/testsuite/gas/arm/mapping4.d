@@ -1,4 +1,5 @@
 #objdump: --syms --special-syms
+#as:  --generate-missing-build-notes=no
 #name: ARM Mapping Symbols Test 4
 # This test is only valid on ELF based ports.
 #notarget: *-*-pe *-*-wince

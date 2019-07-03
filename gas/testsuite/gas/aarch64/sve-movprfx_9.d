@@ -1,6 +1,6 @@
 #source: sve-movprfx_9.s
 #warning_output: sve-movprfx_9.l
-#as: -march=armv8-a+sve -I$srcdir/$subdir
+#as: -march=armv8-a+sve -I$srcdir/$subdir --generate-missing-build-notes=no
 #objdump: -Dr -M notes
 
 .* file format .*

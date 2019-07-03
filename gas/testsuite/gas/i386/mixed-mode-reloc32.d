@@ -1,4 +1,4 @@
-#as: -mrelax-relocations=yes
+#as: -mrelax-relocations=yes --generate-missing-build-notes=no
 #objdump: -r
 #source: mixed-mode-reloc.s
 #name: x86 mixed mode relocs (32-bit object)

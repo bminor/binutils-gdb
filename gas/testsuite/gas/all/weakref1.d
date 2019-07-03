@@ -96,3 +96,4 @@ OFFSET +TYPE +VALUE *
 [0-9a-f]+ [^ ]*  +(ld8|\.text|\$CODE\$)(\+0x[0-9a-f]+)?
 [0-9a-f]+ [^ ]*  +(ld9|\.text|\$CODE\$)(\+0x[0-9a-f]+)?
 [0-9a-f]+ [^ ]*  +(ld9|\.text|\$CODE\$)(\+0x[0-9a-f]+)?
+#pass
