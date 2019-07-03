@@ -1,5 +1,11 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* maint-test-settings.c: Fix file's intro comment.  Replace all
+	references to "test-options" with references to "test-settings",
+	in comments.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* maint-test-settings.c (maintenance_test_settings_xxx)
 	(maintenance_test_settings_yyy, maintenance_test_settings_zzz):
 	New.
