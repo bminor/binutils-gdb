@@ -15,6 +15,8 @@
 
 # Test that the "shell", "!", "|" and "pipe" commands work.
 
+load_lib completion-support.exp
+
 gdb_exit
 gdb_start
 
@@ -92,8 +94,8 @@ gdb_test "p \$_shell_exitsignal" " = 2" "pipe interrupt exitsignal"
 
 # Error handling verifications.
 gdb_test "|" "Missing COMMAND" "all missing"
-gdb_test "|-d" "Missing delimiter DELIM after -d" "-d value missing"
-gdb_test "|-d    " "Missing delimiter DELIM after -d" "-d spaces value missing"
+gdb_test "|-d" "-d requires an argument" "-d value missing"
+gdb_test "|-d    " "-d requires an argument" "-d spaces value missing"
 gdb_test "| echo coucou" \
     "Missing delimiter before SHELL_COMMAND" \
     "| delimiter missing"
@@ -110,3 +112,44 @@ gdb_test "|-d! echo coucou ! wc" \
     "Missing delimiter before SHELL_COMMAND" \
     "delimiter missing due to missing space"
 
+# Completion tests.
+
+test_gdb_complete_unique \
+    "pipe" \
+    "pipe"
+
+# Note that unlike "pipe", "|" doesn't require a space.  This checks
+# that completion behaves that way too.
+foreach cmd {"pipe " "| " "|"} {
+    test_gdb_completion_offers_commands "$cmd"
+
+    # There's only one option.
+    test_gdb_complete_unique \
+	"${cmd}-" \
+	"${cmd}-d"
+
+    # Cannot complete "-d"'s argument.
+    test_gdb_complete_none "${cmd}-d "
+    test_gdb_complete_none "${cmd}-d main"
+
+    # Check completing a GDB command, with and without -d.
+    test_gdb_complete_unique \
+	"${cmd}maint set test-se" \
+	"${cmd}maint set test-settings"
+    test_gdb_complete_unique \
+	"${cmd}-d XXX maint set test-se" \
+	"${cmd}-d XXX maint set test-settings"
+
+    # Check that GDB doesn't try to complete the shell command.
+    test_gdb_complete_none \
+	"${cmd}print 1 | "
+
+    # Same, while making sure that the completer understands "-d".
+    test_gdb_complete_unique \
+	"${cmd}-d XXX maint set" \
+	"${cmd}-d XXX maint set"
+    test_gdb_complete_none \
+	"${cmd}-d set maint set"
+    test_gdb_complete_none \
+	"${cmd}-d set maint set "
+}

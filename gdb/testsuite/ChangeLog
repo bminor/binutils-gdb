@@ -1,5 +1,11 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	PR cli/24732
+	* gdb.base/shell.exp: Load completion-support.exp.
+	Adjust expected error output.  Add completion tests.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* lib/completion-support.exp (test_gdb_complete_cmd_multiple): Use
 	string_to_regexp.
 

@@ -1,5 +1,15 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	PR cli/24732
+	* cli/cli-cmds.c (struct pipe_cmd_opts): New.
+	(pipe_cmd_option_defs): New.
+	(make_pipe_cmd_options_def_group): New.
+	(pipe_command): Use gdb::option::process_options.
+	(pipe_command_completer): New function.
+	(_initialize_cli_cmds): Install completer for "pipe" command.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-option.c (union option_value) <string>: New field.
 	(struct option_def_and_value): Add ctor, move ctor, dtor and
 	use DISABLE_COPY_AND_ASSIGN.
