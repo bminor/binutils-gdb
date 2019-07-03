@@ -85,13 +85,21 @@ static char *maintenance_test_settings_optional_filename;
 
 static char *maintenance_test_settings_filename;
 
-static const char *maintenance_test_settings_enum;
-
 /* Enum values for the "maintenance test-settings set/show boolean"
    commands.  */
+static const char maintenance_test_settings_xxx[] = "xxx";
+static const char maintenance_test_settings_yyy[] = "yyy";
+static const char maintenance_test_settings_zzz[] = "zzz";
+
 static const char *const maintenance_test_settings_enums[] = {
-  "xxx", "yyy", "zzz", nullptr
+  maintenance_test_settings_xxx,
+  maintenance_test_settings_yyy,
+  maintenance_test_settings_zzz,
+  nullptr
 };
+
+static const char *maintenance_test_settings_enum
+  = maintenance_test_settings_xxx;
 
 /* The "maintenance test-options show xxx" commands.  */
 
@@ -107,6 +115,8 @@ maintenance_test_settings_show_value_cmd
 void
 _initialize_maint_test_settings (void)
 {
+  maintenance_test_settings_filename = xstrdup ("/foo/bar");
+
   add_prefix_cmd ("test-settings", no_class,
 		  maintenance_test_settings_cmd,
 		  _("\

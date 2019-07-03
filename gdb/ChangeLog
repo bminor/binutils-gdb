@@ -1,3 +1,14 @@
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
+	* maint-test-settings.c (maintenance_test_settings_xxx)
+	(maintenance_test_settings_yyy, maintenance_test_settings_zzz):
+	New.
+	(maintenance_test_settings_enums): Use them.
+	(maintenance_test_settings_enum): Default to
+	maintenance_test_settings_xxx.
+	(_initialize_maint_test_settings): Initialize
+	MAINTENANCE_TEST_SETTINGS_FILENAME.
+
 2019-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.h (remove_breakpoints_inf): Change return type to
