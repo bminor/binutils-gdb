@@ -1,3 +1,10 @@
+2019-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.h (remove_breakpoints_inf): Change return type to
+	void, move function documentation here.
+	* breakpoint.c (remove_breakpoints_inf): Change return type to
+	void, move function documentation to header.
+
 2019-07-02  Pedro Alves  <palves@redhat.com>
 
 	* NEWS (Completion improvements): Mention "info threads".

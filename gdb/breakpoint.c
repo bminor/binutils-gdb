@@ -3049,9 +3049,9 @@ Thread-specific breakpoint %d deleted - thread %s no longer in the thread list.\
     }
 }
 
-/* Remove breakpoints of inferior INF.  */
+/* See breakpoint.h.  */
 
-int
+void
 remove_breakpoints_inf (inferior *inf)
 {
   struct bp_location *bl, **blp_tmp;
@@ -3066,10 +3066,9 @@ remove_breakpoints_inf (inferior *inf)
       {
 	val = remove_breakpoint (bl);
 	if (val != 0)
-	  return val;
+	  return;
       }
   }
-  return 0;
 }
 
 static int internal_breakpoint_number = -1;

@@ -1390,7 +1390,9 @@ extern void insert_breakpoints (void);
 
 extern int remove_breakpoints (void);
 
-extern int remove_breakpoints_inf (inferior *inf);
+/* Remove breakpoints of inferior INF.  */
+
+extern void remove_breakpoints_inf (inferior *inf);
 
 /* This function can be used to update the breakpoint package's state
    after an exec() system call has been executed.
