@@ -1,5 +1,11 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/options.exp (test-misc, test-flag, test-boolean)
+	(test-uinteger, test-enum): Adjust res_test_gdb_... calls to pass
+	the expected output in the success.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* lib/completion-support.exp (test_gdb_complete_tab_multiple):
 	Split one gdb_test_multiple call in two to avoid a race.
 

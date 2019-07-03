@@ -1,5 +1,29 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-option.c (parse_option) <var_enum>: Don't return an
+	option_value with a null enumeration.
+	(complete_options): Save the option values in the context.
+	(save_option_value_in_ctx): New, factored out from ...
+	(process_options): ... here.
+	* cli/cli-utils.c (get_ulongest): Don't advance PP until the end
+	of the function.
+	* maint-test-options.c (test_options_opts::dump): New, factored
+	out from ...
+	(maintenance_test_options_command_mode): ... here.
+	(maintenance_test_options_command_completion_result): Delete.
+	(maintenance_test_options_command_completion_text): Update
+	comment.
+	(maintenance_show_test_options_completion_result): Change
+	prototype.  Just print
+	maintenance_test_options_command_completion_text.
+	(save_completion_result): New.
+	(maintenance_test_options_completer_mode): Pass options context to
+	complete_options, and then save a dump.
+	(_initialize_maint_test_options): Use add_cmd to install "maint
+	show test-options-completion-result".
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (New commands): Mention "with" and "maint with".
 	* cli/cli-cmds.c (with_command_1, with_command_completer_1)
 	(with_command, with_command_completer): New.

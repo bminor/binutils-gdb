@@ -133,6 +133,27 @@ struct test_options_opts
   const char *enum_opt = test_options_enum_values_xxx;
   unsigned int uint_opt = 0;
   int zuint_unl_opt = 0;
+
+  /* Dump the options to FILE.  ARGS is the remainder unprocessed
+     arguments.  */
+  void dump (ui_file *file, const char *args) const
+  {
+    fprintf_unfiltered (file,
+			_("-flag %d -xx1 %d -xx2 %d -bool %d "
+			  "-enum %s -uint %s -zuint-unl %s -- %s\n"),
+			flag_opt,
+			xx1_opt,
+			xx2_opt,
+			boolean_opt,
+			enum_opt,
+			(uint_opt == UINT_MAX
+			 ? "unlimited"
+			 : pulongest (uint_opt)),
+			(zuint_unl_opt == -1
+			 ? "unlimited"
+			 : plongest (zuint_unl_opt)),
+			args);
+  }
 };
 
 /* Option definitions for the "maintenance test-options" commands.  */
@@ -226,46 +247,48 @@ maintenance_test_options_command_mode (const char *args,
   else
     args = skip_spaces (args);
 
-  printf_unfiltered (_("-flag %d -xx1 %d -xx2 %d -bool %d "
-		       "-enum %s -uint %s -zuint-unl %s -- %s\n"),
-		     opts.flag_opt,
-		     opts.xx1_opt,
-		     opts.xx2_opt,
-		     opts.boolean_opt,
-		     opts.enum_opt,
-		     (opts.uint_opt == UINT_MAX
-		      ? "unlimited"
-		      : pulongest (opts.uint_opt)),
-		     (opts.zuint_unl_opt == -1
-		      ? "unlimited"
-		      : plongest (opts.zuint_unl_opt)),
-		     args);
+  opts.dump (gdb_stdout, args);
 }
 
-/* Variables used by the "maintenance show
-   test-options-completion-result" command.  These variables are
-   stored by the completer of the "maint test-options"
-   subcommands.  */
+/* Variable used by the "maintenance show
+   test-options-completion-result" command.  This variable is stored
+   by the completer of the "maint test-options" subcommands.
 
-/* The result of gdb::option::complete_options.  */
-static int maintenance_test_options_command_completion_result;
-/* The text at the word point after gdb::option::complete_options
-   returns.  */
+   If the completer returned false, this includes the text at the word
+   point after gdb::option::complete_options returns.  If true, then
+   this includes a dump of the processed options.  */
 static std::string maintenance_test_options_command_completion_text;
 
 /* The "maintenance show test-options-completion-result" command.  */
 
 static void
-maintenance_show_test_options_completion_result
-  (struct ui_file *file, int from_tty,
-   struct cmd_list_element *c, const char *value)
+maintenance_show_test_options_completion_result (const char *args,
+						 int from_tty)
 {
-  if (maintenance_test_options_command_completion_result)
-    fprintf_filtered (file, "1\n");
+  puts_filtered (maintenance_test_options_command_completion_text.c_str ());
+}
+
+/* Save the completion result in the global variables read by the
+   "maintenance test-options require-delimiter" command.  */
+
+static void
+save_completion_result (const test_options_opts &opts, bool res,
+			const char *text)
+{
+  if (res)
+    {
+      string_file stream;
+
+      stream.puts ("1 ");
+      opts.dump (&stream, text);
+      maintenance_test_options_command_completion_text
+	= std::move (stream.string ());
+    }
   else
-    fprintf_filtered
-      (file, _("0 %s\n"),
-       maintenance_test_options_command_completion_text.c_str ());
+    {
+      maintenance_test_options_command_completion_text
+	= string_printf ("0 %s\n", text);
+    }
 }
 
 /* Implementation of completer for the "maintenance test-options
@@ -278,17 +301,19 @@ maintenance_test_options_completer_mode (completion_tracker &tracker,
 					 const char *text,
 					 gdb::option::process_options_mode mode)
 {
+  test_options_opts opts;
+
   try
     {
-      maintenance_test_options_command_completion_result
-	= gdb::option::complete_options
-	   (tracker, &text, mode,
-	    make_test_options_options_def_group (nullptr));
-      maintenance_test_options_command_completion_text = text;
+      bool res = (gdb::option::complete_options
+		  (tracker, &text, mode,
+		   make_test_options_options_def_group (&opts)));
+
+      save_completion_result (opts, res, text);
     }
   catch (const gdb_exception_error &ex)
     {
-      maintenance_test_options_command_completion_result = 1;
+      save_completion_result (opts, true, text);
       throw;
     }
 }
@@ -445,17 +470,13 @@ Options:\n\
   set_cmd_completer_handle_brkchars
     (cmd, maintenance_test_options_unknown_is_operand_command_completer);
 
-  add_setshow_zinteger_cmd ("test-options-completion-result", class_maintenance,
-			    &maintenance_test_options_command_completion_result,
-			    _("\
-Set maintenance test-options completion result."), _("\
-Show maintenance test-options completion result."), _("\
-Show the results of completing\n\
+  add_cmd ("test-options-completion-result", class_maintenance,
+	   maintenance_show_test_options_completion_result,
+	   _("\
+Show maintenance test-options completion result.\n\
+Shows the results of completing\n\
 \"maint test-options require-delimiter\",\n\
 \"maint test-options unknown-is-error\", or\n\
 \"maint test-options unknown-is-operand\"."),
-			    NULL,
-			    maintenance_show_test_options_completion_result,
-			    &maintenance_set_cmdlist,
-			    &maintenance_show_cmdlist);
+	   &maintenance_show_cmdlist);
 }

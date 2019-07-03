@@ -60,13 +60,14 @@ get_ulongest (const char **pp, int trailer)
     }
   else
     {
-      retval = strtoulst (p, pp, 0);
-      if (p == *pp)
+      const char *end = p;
+      retval = strtoulst (p, &end, 0);
+      if (p == end)
 	{
 	  /* There is no number here.  (e.g. "cond a == b").  */
 	  error (_("Expected integer at: %s"), p);
 	}
-      p = *pp;
+      p = end;
     }
 
   if (!(isspace (*p) || *p == '\0' || *p == trailer))
