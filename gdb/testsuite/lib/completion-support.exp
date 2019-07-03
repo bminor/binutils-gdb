@@ -200,8 +200,9 @@ proc test_gdb_complete_cmd_multiple { cmd_prefix completion_word completion_list
     set expected_re [make_cmd_completion_list_re $cmd_prefix $completion_list $start_quote_char $end_quote_char]
 
     if {$max_completions} {
+	set cmd_prefix_re [string_to_regexp $cmd_prefix]
 	append expected_re \
-	    "$cmd_prefix \\*\\*\\* List may be truncated, max-completions reached\\. \\*\\*\\*.*\r\n"
+	    "$cmd_prefix_re \\*\\*\\* List may be truncated, max-completions reached\\. \\*\\*\\*.*\r\n"
     }
 
     set cmd_re [string_to_regexp "complete $cmd_prefix$completion_word"]

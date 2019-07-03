@@ -1,5 +1,10 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* lib/completion-support.exp (test_gdb_complete_cmd_multiple): Use
+	string_to_regexp.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/options.exp (expect_none, expect_flag, expect_bool)
 	(expect_integer): Adjust to expect "-string".
 	(expect_string): New.
