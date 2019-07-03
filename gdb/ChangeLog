@@ -1,5 +1,32 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New commands): Mention "with" and "maint with".
+	* cli/cli-cmds.c (with_command_1, with_command_completer_1)
+	(with_command, with_command_completer): New.
+	(pipe_command): Adjust to new repeat_previous
+	interface.
+	(_initialize_cli_cmds): Install the "with" command and its "w"
+	alias.
+	* cli/cli-cmds.h (with_command_1, with_command_completer_1): New
+	declarations.
+	* cli/cli-setshow.c (parse_cli_var_uinteger)
+	(parse_cli_var_zuinteger_unlimited, do_set_command): Handle empty
+	argument strings for all var_types.
+	(get_setshow_command_value_string): New, factored out from ...
+	(do_show_command): ... this.
+	* cli/cli-setshow.h: Include <string>.
+	(get_setshow_command_value_string): Declare.
+	* command.h (repeat_previous): Now returns const char *.  Adjust
+	comment.
+	* maint.c: Include "cli/cli-cmds.h".
+	(maintenance_with_cmd, maintenance_with_cmd_completer): New.
+	(_initialize_maint_cmds): Register the "maintenance with" command.
+	* top.c (repeat_previous): Move bits from pipe_command here:
+	Return the saved command line, if any; error out if there's no
+	command to relaunch.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (New commands): Mention "maint set/show test-settings"
 	instead of "maint test-settings".
 	* maint-test-settings.c (maintenance_test_settings_list): Delete.

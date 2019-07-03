@@ -1,4 +1,12 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command Settings): New node documenting the general
+	concept of settings, how to change them, and the new "with"
+	command.
+	(Maintenance Commands): Document "maint with".
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Document "maint set/show
 	test-settings" instead of "maint test-settings set/show".

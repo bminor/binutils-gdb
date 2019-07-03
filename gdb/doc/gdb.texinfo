@@ -1561,6 +1561,7 @@ show you the alternatives available, if there is more than one possibility).
 
 @menu
 * Command Syntax::              How to give commands to @value{GDBN}
+* Command Settings::            How to change default behavior of commands
 * Completion::                  Command completion
 * Command Options::             Command options
 * Help::                        How to ask @value{GDBN} for help
@@ -1616,6 +1617,98 @@ The @kbd{Ctrl-o} binding is useful for repeating a complex sequence of
 commands.  This command accepts the current line, like @key{RET}, and
 then fetches the next line relative to the current line from the history
 for editing.
+
+
+@node Command Settings
+@section Command Settings
+@cindex default behavior of commands, changing
+@cindex default settings, changing
+
+Many commands change their behavior according to command-specific
+variables or settings.  These settings can be changed with the
+@code{set} subcommands.  For example, the @code{print} command
+(@pxref{Data, ,Examining Data}) prints arrays differently depending on
+settings changeable with the commands @code{set print elements
+NUMBER-OF-ELEMENTS} and @code{set print array-indexes}, among others.
+
+You can change these settings to your preference in the gdbinit files
+loaded at @value{GDBN} startup.  @xref{Startup}.
+
+The settings can also be changed interactively during the debugging
+session.  For example, to change the limit of array elements to print,
+you can do the following:
+@smallexample
+(@value{GDBN}) set print elements 10
+(@value{GDBN}) print some_array
+$1 = @{0, 10, 20, 30, 40, 50, 60, 70, 80, 90...@}
+@end smallexample
+
+The above @code{set print elements 10} command changes the number of
+elements to print from the default of 200 to 10.  If you only intend
+this limit of 10 to be used for printing @code{some_array}, then you
+must restore the limit back to 200, with @code{set print elements
+200}.
+
+Some commands allow overriding settings with command options.  For
+example, the @code{print} command supports a number of options that
+allow overriding relevant global print settings as set by @code{set
+print} subcommands.  @xref{print options}.  The example above could be
+rewritten as:
+@smallexample
+(@value{GDBN}) print -elements 10 -- some_array
+$1 = @{0, 10, 20, 30, 40, 50, 60, 70, 80, 90...@}
+@end smallexample
+
+Alternatively, you can use the @code{with} command to change a setting
+temporarily, for the duration of a command invocation.
+
+@table @code
+@kindex with command
+@kindex w @r{(@code{with})}
+@cindex settings
+@cindex temporarily change settings
+@item with @var{setting} [@var{value}] [-- @var{command}]
+@itemx w @var{setting} [@var{value}] [-- @var{command}]
+Temporarily set @var{setting} to @var{value} for the duration of
+@var{command}.
+
+@var{setting} is any setting you can change with the @code{set}
+subcommands.  @var{value} is the value to assign to @code{setting}
+while running @code{command}.
+
+If no @var{command} is provided, the last command executed is
+repeated.
+
+If a @var{command} is provided, it must be preceded by a double dash
+(@code{--}) separator.  This is required because some settings accept
+free-form arguments, such as expressions or filenames.
+
+For example, the command
+@smallexample
+(@value{GDBN}) with print array on -- print some_array
+@end smallexample
+@noindent
+is equivalent to the following 3 commands:
+@smallexample
+(@value{GDBN}) set print array on
+(@value{GDBN}) print some_array
+(@value{GDBN}) set print array off
+@end smallexample
+
+The @code{with} command is particularly useful when you want to
+override a setting while running user-defined commands, or commands
+defined in Python or Guile.  @xref{Extending GDB,, Extending GDB}.
+
+@smallexample
+(@value{GDBN}) with print pretty on -- my_complex_command
+@end smallexample
+
+To change several settings for the same command, you can nest
+@code{with} commands.  For example, @code{with language ada -- with
+print elements 10} temporarily changes the language to Ada and sets a
+limit of 10 elements to print for arrays and strings.
+
+@end table
 
 @node Completion
 @section Command Completion
@@ -37634,6 +37727,13 @@ support in the command options framework.
 These are representative commands for each @var{kind} of setting type
 @value{GDBN} supports.  They are used by the testsuite for exercising
 the settings infrastructure.
+
+@kindex maint with
+@item maint with @var{setting} [@var{value}] [-- @var{command}]
+Like the @code{with} command, but works with @code{maintenance set}
+variables.  This is used by the testsuite to exercise the @code{with}
+command's infrastructure.
+
 @end table
 
 The following command is useful for non-interactive invocations of

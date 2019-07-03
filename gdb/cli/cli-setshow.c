@@ -190,7 +190,7 @@ parse_cli_var_uinteger (var_types var_type, const char **arg,
 {
   LONGEST val;
 
-  if (*arg == nullptr)
+  if (*arg == nullptr || **arg == '\0')
     {
       if (var_type == var_uinteger)
 	error_no_arg (_("integer to set it to, or \"unlimited\"."));
@@ -225,7 +225,7 @@ parse_cli_var_zuinteger_unlimited (const char **arg, bool expression)
 {
   LONGEST val;
 
-  if (*arg == nullptr)
+  if (*arg == nullptr || **arg == '\0')
     error_no_arg (_("integer to set it to, or \"unlimited\"."));
 
   if (is_unlimited_literal (arg, expression))
@@ -308,6 +308,9 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 
   gdb_assert (c->type == set_cmd);
 
+  if (arg == NULL)
+    arg = "";
+
   switch (c->var_type)
     {
     case var_string:
@@ -317,8 +320,6 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	char *q;
 	int ch;
 
-	if (arg == NULL)
-	  arg = "";
 	newobj = (char *) xmalloc (strlen (arg) + 2);
 	p = arg;
 	q = newobj;
@@ -364,9 +365,6 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
       }
       break;
     case var_string_noescape:
-      if (arg == NULL)
-	arg = "";
-
       if (*(char **) c->var == NULL || strcmp (*(char **) c->var, arg) != 0)
 	{
 	  xfree (*(char **) c->var);
@@ -376,14 +374,14 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	}
       break;
     case var_filename:
-      if (arg == NULL)
+      if (*arg == '\0')
 	error_no_arg (_("filename to set it to."));
       /* FALLTHROUGH */
     case var_optional_filename:
       {
 	char *val = NULL;
 
-	if (arg != NULL)
+	if (*arg != '\0')
 	  {
 	    /* Clear trailing whitespace of filename.  */
 	    const char *ptr = arg + strlen (arg) - 1;
@@ -455,7 +453,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
       {
 	LONGEST val;
 
-	if (arg == NULL)
+	if (*arg == '\0')
 	  {
 	    if (c->var_type == var_integer)
 	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
@@ -625,23 +623,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* Do a "show" command.  ARG is NULL if no argument, or the
-   text of the argument, and FROM_TTY is nonzero if this command is
-   being entered directly by the user (i.e. these are just like any
-   other command).  C is the command list element for the command.  */
+/* See cli/cli-setshow.h.  */
 
-void
-do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
+std::string
+get_setshow_command_value_string (cmd_list_element *c)
 {
-  struct ui_out *uiout = current_uiout;
-
-  gdb_assert (c->type == show_cmd);
-
   string_file stb;
-
-  /* Possibly call the pre hook.  */
-  if (c->pre_show_hook)
-    (c->pre_show_hook) (c);
 
   switch (c->var_type)
     {
@@ -672,9 +659,7 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	  stb.puts ("auto");
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("do_show_command: "
-			    "invalid var_auto_boolean"));
+	  gdb_assert_not_reached ("invalid var_auto_boolean");
 	  break;
 	}
       break;
@@ -703,23 +688,42 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
       }
       break;
     default:
-      error (_("gdb internal error: bad var_type in do_show_command"));
+      gdb_assert_not_reached ("bad var_type");
     }
 
+  return std::move (stb.string ());
+}
 
-  /* FIXME: cagney/2005-02-10: Need to split this in half: code to
-     convert the value into a string (esentially the above); and
-     code to print the value out.  For the latter there should be
-     MI and CLI specific versions.  */
+
+/* Do a "show" command.  ARG is NULL if no argument, or the
+   text of the argument, and FROM_TTY is nonzero if this command is
+   being entered directly by the user (i.e. these are just like any
+   other command).  C is the command list element for the command.  */
+
+void
+do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
+{
+  struct ui_out *uiout = current_uiout;
+
+  gdb_assert (c->type == show_cmd);
+
+  /* Possibly call the pre hook.  */
+  if (c->pre_show_hook)
+    (c->pre_show_hook) (c);
+
+  std::string val = get_setshow_command_value_string (c);
+
+  /* FIXME: cagney/2005-02-10: There should be MI and CLI specific
+     versions of code to print the value out.  */
 
   if (uiout->is_mi_like_p ())
-    uiout->field_stream ("value", stb);
+    uiout->field_string ("value", val.c_str ());
   else
     {
       if (c->show_value_func != NULL)
-	c->show_value_func (gdb_stdout, from_tty, c, stb.c_str ());
+	c->show_value_func (gdb_stdout, from_tty, c, val.c_str ());
       else
-	deprecated_show_value_hack (gdb_stdout, from_tty, c, stb.c_str ());
+	deprecated_show_value_hack (gdb_stdout, from_tty, c, val.c_str ());
     }
 
   c->func (c, NULL, from_tty);

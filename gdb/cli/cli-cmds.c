@@ -211,6 +211,116 @@ show_command (const char *arg, int from_tty)
   cmd_show_list (showlist, from_tty, "");
 }
 
+/* See cli/cli-cmds.h.  */
+
+void
+with_command_1 (const char *set_cmd_prefix,
+		cmd_list_element *setlist, const char *args, int from_tty)
+{
+  const char *delim = strstr (args, "--");
+  const char *nested_cmd = nullptr;
+
+  if (delim == args)
+    error (_("Missing setting before '--' delimiter"));
+
+  if (delim == nullptr || *skip_spaces (&delim[2]) == '\0')
+    nested_cmd = repeat_previous ();
+
+  cmd_list_element *set_cmd = lookup_cmd (&args, setlist, set_cmd_prefix,
+					  /*allow_unknown=*/ 0,
+					  /*ignore_help_classes=*/ 1);
+  gdb_assert (set_cmd != nullptr);
+
+  if (set_cmd->var == nullptr)
+    error (_("Cannot use this setting with the \"with\" command"));
+
+  std::string temp_value
+    = (delim == nullptr ? args : std::string (args, delim - args));
+
+  if (nested_cmd == nullptr)
+    nested_cmd = skip_spaces (delim + 2);
+
+  std::string org_value = get_setshow_command_value_string (set_cmd);
+
+  /* Tweak the setting to the new temporary value.  */
+  do_set_command (temp_value.c_str (), from_tty, set_cmd);
+
+  try
+    {
+      scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+
+      /* Execute the nested command.  */
+      execute_command (nested_cmd, from_tty);
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* Restore the setting and rethrow.  If restoring the setting
+	 throws, swallow the new exception and warn.  There's nothing
+	 else we can reasonably do.  */
+      try
+	{
+	  do_set_command (org_value.c_str (), from_tty, set_cmd);
+	}
+      catch (const gdb_exception &ex2)
+	{
+	  warning (_("Couldn't restore setting: %s"), ex2.what ());
+	}
+
+      throw;
+    }
+
+  /* Restore the setting.  */
+  do_set_command (org_value.c_str (), from_tty, set_cmd);
+}
+
+/* See cli/cli-cmds.h.  */
+
+void
+with_command_completer_1 (const char *set_cmd_prefix,
+			  completion_tracker &tracker,
+			  const char *text)
+{
+  tracker.set_use_custom_word_point (true);
+
+  const char *delim = strstr (text, "--");
+
+  /* If we're still not past the "--" delimiter, complete the "with"
+     command as if it was a "set" command.  */
+  if (delim == text
+      || delim == nullptr
+      || !isspace (delim[-1])
+      || !(isspace (delim[2]) || delim[2] == '\0'))
+    {
+      std::string new_text = std::string (set_cmd_prefix) + text;
+      tracker.advance_custom_word_point_by (-(int) strlen (set_cmd_prefix));
+      complete_nested_command_line (tracker, new_text.c_str ());
+      return;
+    }
+
+  /* We're past the "--" delimiter.  Complete on the sub command.  */
+  const char *nested_cmd = skip_spaces (delim + 2);
+  tracker.advance_custom_word_point_by (nested_cmd - text);
+  complete_nested_command_line (tracker, nested_cmd);
+}
+
+/* The "with" command.  */
+
+static void
+with_command (const char *args, int from_tty)
+{
+  with_command_1 ("set ", setlist, args, from_tty);
+}
+
+/* "with" command completer.  */
+
+static void
+with_command_completer (struct cmd_list_element *ignore,
+			completion_tracker &tracker,
+			const char *text, const char * /*word*/)
+{
+  with_command_completer_1 ("set ", tracker,  text);
+}
+
 
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
@@ -878,12 +988,7 @@ pipe_command (const char *arg, int from_tty)
   arg += delim.length (); /* Skip the delimiter.  */
 
   if (gdb_cmd.empty ())
-    {
-      repeat_previous ();
-      gdb_cmd = skip_spaces (get_saved_command_line ());
-      if (gdb_cmd.empty ())
-	error (_("No previous command to relaunch"));
-    }
+    gdb_cmd = repeat_previous ();
 
   const char *shell_command = skip_spaces (arg);
   if (*shell_command == '\0')
@@ -1849,6 +1954,23 @@ Generic command for showing things about the debugger."),
 		  &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, _("Show all GDB settings."));
+
+  c = add_com ("with", class_vars, with_command, _("\
+Temporarily set SETTING to VALUE, run COMMAND, and restore SETTING.\n\
+Usage: with SETTING [VALUE] [-- COMMAND]\n\
+Usage: w SETTING [VALUE] [-- COMMAND]\n\
+With no COMMAND, repeats the last executed command.\n\
+\n\
+SETTING is any setting you can change with the \"set\" subcommands.\n\
+E.g.:\n\
+  with language pascal -- print obj\n\
+  with print elements unlimited -- print obj\n\
+\n\
+You can change multiple settings using nested with, and use\n\
+abbreviations for commands and/or values.  E.g.:\n\
+  w la p -- w p el u -- p obj"));
+  set_cmd_completer_handle_brkchars (c, with_command_completer);
+  add_com_alias ("w", "with", class_vars, 1);
 
   add_cmd ("commands", no_set_class, show_commands, _("\
 Show the history of commands you typed.\n\

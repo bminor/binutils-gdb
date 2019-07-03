@@ -1,5 +1,10 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/with.c: New file.
+	* gdb.base/with.exp: New file.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/settings.exp: Replace all references to "maint
 	test-settings set" with references to "maint set test-settings",
 	and all references to "maint test-settings show" with references
