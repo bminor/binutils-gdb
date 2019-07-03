@@ -45,8 +45,8 @@ proc show_setting {show_cmd expected_re} {
 # var_Xinteger tests.  VARIANT determines which command/variant to
 # exercise.
 proc test-integer {variant} {
-    set set_cmd "maint test-settings set $variant"
-    set show_cmd "maint test-settings show $variant"
+    set set_cmd "maint set test-settings $variant"
+    set show_cmd "maint show test-settings $variant"
 
     # A bogus value.
     gdb_test "$set_cmd bogus" \
@@ -122,7 +122,7 @@ proc test-integer {variant} {
     }
 
     if {$variant == "zuinteger"} {
-	test_gdb_complete_multiple "maint test-settings set " "zuinteger" "" {
+	test_gdb_complete_multiple "maint set test-settings " "zuinteger" "" {
 	    "zuinteger"
 	    "zuinteger-unlimited"
 	}
@@ -166,7 +166,7 @@ proc test-integer {variant} {
 
     # Check show command completion.
     if {$variant == "zuinteger"} {
-	test_gdb_complete_multiple "maintenance test-settings show " "zuinteger" "" {
+	test_gdb_complete_multiple "maintenance show test-settings " "zuinteger" "" {
 	    "zuinteger"
 	    "zuinteger-unlimited"
 	}
@@ -182,8 +182,8 @@ proc test-integer {variant} {
 proc_with_prefix test-boolean {} {
     # Use these variables to make sure we don't call the wrong command
     # by mistake.
-    set set_cmd "maint test-settings set boolean"
-    set show_cmd "maint test-settings show boolean"
+    set set_cmd "maint set test-settings boolean"
+    set show_cmd "maint show test-settings boolean"
 
     # A bogus value.
     gdb_test "$set_cmd bogus" \
@@ -277,8 +277,8 @@ proc_with_prefix test-boolean {} {
 proc_with_prefix test-auto-boolean {} {
     # Use these variables to make sure we don't call the wrong command
     # by mistake.
-    set set_cmd "maint test-settings set auto-boolean"
-    set show_cmd "maint test-settings show auto-boolean"
+    set set_cmd "maint set test-settings auto-boolean"
+    set show_cmd "maint show test-settings auto-boolean"
 
     # A bogus value.
     gdb_test "$set_cmd bogus" \
@@ -381,8 +381,8 @@ proc_with_prefix test-auto-boolean {} {
 proc_with_prefix test-enum {} {
     # Use these variables to make sure we don't call the wrong command
     # by mistake.
-    set set_cmd "maint test-settings set enum"
-    set show_cmd "maint test-settings show enum"
+    set set_cmd "maint set test-settings enum"
+    set show_cmd "maint show test-settings enum"
 
     # Missing value.
     gdb_test "$set_cmd" \
@@ -444,8 +444,8 @@ proc test-string {variant} {
 
     # Use these variables to make sure we don't call the wrong command
     # by mistake.
-    set set_cmd "maint test-settings set $variant"
-    set show_cmd "maint test-settings show $variant"
+    set set_cmd "maint set test-settings $variant"
+    set show_cmd "maint show test-settings $variant"
 
     # Checks that gdb doesn't crash if we haven't set the string yet.
     if {$variant != "filename"} {
@@ -519,7 +519,7 @@ proc test-string {variant} {
 
     # Check show command completion.
     if {$variant == "string"} {
-	test_gdb_complete_multiple "maint test-settings show " "string" "" {
+	test_gdb_complete_multiple "maint show test-settings " "string" "" {
 	    "string"
 	    "string-noescape"
 	}

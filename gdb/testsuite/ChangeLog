@@ -1,5 +1,12 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/settings.exp: Replace all references to "maint
+	test-settings set" with references to "maint set test-settings",
+	and all references to "maint test-settings show" with references
+	to "maint show test-settings".
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/settings.exp (test-string): Adjust expected out when
 	testing "maint test-settings show filename"
 

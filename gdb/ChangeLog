@@ -1,5 +1,26 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New commands): Mention "maint set/show test-settings"
+	instead of "maint test-settings".
+	* maint-test-settings.c (maintenance_test_settings_list): Delete.
+	(maintenance_test_settings_set_list): Rename to ...
+	(maintenance_set_test_settings_list): ... this.
+	(maintenance_test_settings_show_list): Rename to  ...
+	(maintenance_show_test_settings_list): ... this.
+	(maintenance_test_settings_cmd): Delete.
+	(maintenance_test_settings_set_cmd): ...
+	(maintenance_set_test_settings_cmd): ... this.
+	(maintenance_test_settings_show_cmd): ...
+	(maintenance_show_test_settings_cmd): ... this.
+	(maintenance_test_settings_show_value_cmd):
+	(maintenance_show_test_settings_value_cmd): ... this.
+	(_initialize_maint_test_settings): No longer install the "maint
+	test-settings" prefix command.  Rename "maint test-settings set"
+	to "maint set test-settings", and "maint test-settings show" to
+	"maint show test-settings".  Adjust all subcommands.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	* maint-test-settings.c: Fix file's intro comment.  Replace all
 	references to "test-options" with references to "test-settings",
 	in comments.

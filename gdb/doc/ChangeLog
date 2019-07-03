@@ -1,3 +1,8 @@
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint set/show
+	test-settings" instead of "maint test-settings set/show".
+
 2019-06-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.texinfo (Invoking GDB): Remove sentence about how GDB
