@@ -2025,7 +2025,14 @@ proc foreach_with_prefix {var list body} {
     upvar 1 $var myvar
     foreach myvar $list {
 	with_test_prefix "$var=$myvar" {
-	    uplevel 1 $body
+	    set code [catch {uplevel 1 $body} result]
+	}
+
+	if {$code == 1} {
+	    global errorInfo errorCode
+	    return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+	} else {
+	    return -code $code $result
 	}
     }
 }

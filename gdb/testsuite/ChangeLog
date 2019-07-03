@@ -1,5 +1,10 @@
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (foreach_with_prefix): Use "catch" and
+	"return -code".
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
 	PR cli/24732
 	* gdb.base/shell.exp: Load completion-support.exp.
 	Adjust expected error output.  Add completion tests.
