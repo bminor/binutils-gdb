@@ -1,3 +1,9 @@
+2019-07-04  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (foreach_with_prefix): Don't return early if
+	body returned ok(0), break(3) or continue(4).
+	* gdb.testsuite/foreach_with_prefix.exp: New file.
+
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.server/unittest.exp: Allow 0 unit tests to run.

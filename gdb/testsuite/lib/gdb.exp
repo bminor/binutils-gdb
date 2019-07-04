@@ -2031,7 +2031,9 @@ proc foreach_with_prefix {var list body} {
 	if {$code == 1} {
 	    global errorInfo errorCode
 	    return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
-	} else {
+	} elseif {$code == 3} {
+	    break
+	} elseif {$code == 2} {
 	    return -code $code $result
 	}
     }
