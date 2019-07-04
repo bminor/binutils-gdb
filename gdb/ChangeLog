@@ -1,5 +1,27 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* regformats/aarch64.dat: Remove.
+	* regformats/i386/amd64-avx-avx512-linux.dat: Remove.
+	* regformats/i386/amd64-avx-linux.dat: Remove.
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Remove.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Remove.
+	* regformats/i386/amd64-linux.dat: Remove.
+	* regformats/i386/amd64-mpx-linux.dat: Remove.
+	* regformats/i386/amd64.dat: Remove.
+	* regformats/i386/i386-avx-avx512-linux.dat: Remove.
+	* regformats/i386/i386-avx-linux.dat: Remove.
+	* regformats/i386/i386-avx-mpx-avx512-pku-linux.dat: Remove.
+	* regformats/i386/i386-avx-mpx-linux.dat: Remove.
+	* regformats/i386/i386-linux.dat: Remove.
+	* regformats/i386/i386-mmx-linux.dat: Remove.
+	* regformats/i386/i386-mpx-linux.dat: Remove.
+	* regformats/i386/i386.dat: Remove.
+	* regformats/i386/x32-avx-avx512-linux.dat: Remove.
+	* regformats/i386/x32-avx-linux.dat: Remove.
+	* regformats/i386/x32-linux.dat: Remove.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c: Remove xml self tests.
 	* amd64-linux-tdep.c: Likewise.
 	* amd64-tdep.c: Likewise.
