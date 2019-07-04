@@ -2911,10 +2911,6 @@ initialize_low_arch (void)
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
 
-#if GDB_SELF_TEST
-  initialize_low_tdesc ();
-#endif
-
   tdesc_i386_linux_no_xml = allocate_target_description ();
   copy_target_description (tdesc_i386_linux_no_xml,
 			   i386_linux_read_description (X86_XSTATE_SSE_MASK));

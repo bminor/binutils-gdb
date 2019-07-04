@@ -3430,8 +3430,6 @@ When on, AArch64 specific debugging is enabled."),
 			    selftests::aarch64_analyze_prologue_test);
   selftests::register_test ("aarch64-process-record",
 			    selftests::aarch64_process_record_test);
-  selftests::record_xml_tdesc ("aarch64.xml",
-			       aarch64_create_target_description (0, false));
 #endif
 }
 

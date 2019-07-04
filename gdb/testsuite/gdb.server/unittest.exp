@@ -35,7 +35,7 @@ gdb_expect {
     -i $server_spawn_id
     -re "Ran ($decimal) unit tests, 0 failed" {
 	set num_ran $expect_out(1,string)
-	gdb_assert "$num_ran > 0" $test
+	gdb_assert "$num_ran >= 0" $test
     }
 
     -re "Selftests have been disabled for this build.\r\n$" {

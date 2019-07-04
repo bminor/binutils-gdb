@@ -22,8 +22,4 @@
 
 const target_desc * aarch64_linux_read_description (uint64_t vq, bool pauth_p);
 
-#if GDB_SELF_TEST
-void initialize_low_tdesc ();
-#endif
-
 #endif /* GDBSERVER_LINUX_AARCH64_TDESC_H */

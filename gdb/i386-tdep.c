@@ -9098,28 +9098,4 @@ Show Intel Memory Protection Extensions specific variables."),
 
   /* Tell remote stub that we support XML target description.  */
   register_remote_support_xml ("i386");
-
-#if GDB_SELF_TEST
-  struct
-  {
-    const char *xml;
-    uint64_t mask;
-  } xml_masks[] = {
-    { "i386/i386.xml", X86_XSTATE_SSE_MASK },
-    { "i386/i386-mmx.xml", X86_XSTATE_X87_MASK },
-    { "i386/i386-avx.xml", X86_XSTATE_AVX_MASK },
-    { "i386/i386-mpx.xml", X86_XSTATE_MPX_MASK },
-    { "i386/i386-avx-mpx.xml", X86_XSTATE_AVX_MPX_MASK },
-    { "i386/i386-avx-avx512.xml", X86_XSTATE_AVX_AVX512_MASK },
-    { "i386/i386-avx-mpx-avx512-pku.xml",
-      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
-  };
-
-  for (auto &a : xml_masks)
-    {
-      auto tdesc = i386_target_description (a.mask, false);
-
-      selftests::record_xml_tdesc (a.xml, tdesc);
-    }
-#endif /* GDB_SELF_TEST */
 }

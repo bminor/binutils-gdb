@@ -1,3 +1,11 @@
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c: Remove xml self tests.
+	* amd64-linux-tdep.c: Likewise.
+	* amd64-tdep.c: Likewise.
+	* i386-linux-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
 	PR cli/24732

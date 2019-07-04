@@ -3097,8 +3097,4 @@ initialize_low_arch (void)
 
   initialize_regsets_info (&aarch64_regsets_info);
   initialize_regsets_info (&aarch64_sve_regsets_info);
-
-#if GDB_SELF_TEST
-  initialize_low_tdesc ();
-#endif
 }

@@ -3318,29 +3318,6 @@ _initialize_amd64_tdep (void)
  			  amd64_none_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32, GDB_OSABI_NONE,
  			  amd64_x32_none_init_abi);
-
-#if GDB_SELF_TEST
-  struct
-  {
-    const char *xml;
-    uint64_t mask;
-  } xml_masks[] = {
-    { "i386/amd64.xml", X86_XSTATE_SSE_MASK },
-    { "i386/amd64-avx.xml", X86_XSTATE_AVX_MASK },
-    { "i386/amd64-mpx.xml", X86_XSTATE_MPX_MASK },
-    { "i386/amd64-avx-mpx.xml", X86_XSTATE_AVX_MPX_MASK },
-    { "i386/amd64-avx-avx512.xml", X86_XSTATE_AVX_AVX512_MASK },
-    { "i386/amd64-avx-mpx-avx512-pku.xml",
-      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
-  };
-
-  for (auto &a : xml_masks)
-    {
-      auto tdesc = amd64_target_description (a.mask, true);
-
-      selftests::record_xml_tdesc (a.xml, tdesc);
-    }
-#endif /* GDB_SELF_TEST */
 }
 
 

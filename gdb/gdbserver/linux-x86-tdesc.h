@@ -53,6 +53,4 @@ const struct target_desc *amd64_linux_read_description (uint64_t xcr0,
 
 const struct target_desc *i386_linux_read_description (uint64_t xcr0);
 
-void initialize_low_tdesc ();
-
 #endif /* GDBSERVER_LINUX_X86_TDESC_H */

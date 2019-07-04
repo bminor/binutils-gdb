@@ -2279,32 +2279,4 @@ _initialize_amd64_linux_tdep (void)
 			  GDB_OSABI_LINUX, amd64_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32,
 			  GDB_OSABI_LINUX, amd64_x32_linux_init_abi);
-
-#if GDB_SELF_TEST
-  struct
-  {
-    const char *xml;
-    uint64_t mask;
-  } xml_masks[] = {
-    { "i386/amd64-linux.xml", X86_XSTATE_SSE_MASK },
-    { "i386/amd64-avx-linux.xml", X86_XSTATE_AVX_MASK },
-    { "i386/amd64-mpx-linux.xml", X86_XSTATE_MPX_MASK },
-    { "i386/amd64-avx-mpx-linux.xml", X86_XSTATE_AVX_MPX_MASK },
-    { "i386/amd64-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
-    { "i386/amd64-avx-mpx-avx512-pku-linux.xml",
-      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
-    { "i386/x32-linux.xml", X86_XSTATE_SSE_MASK },
-    { "i386/x32-avx-linux.xml", X86_XSTATE_AVX_MASK },
-    { "i386/x32-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
-  };
-
-  for (auto &a : xml_masks)
-    {
-      auto tdesc = amd64_linux_read_description (a.mask,
-						 startswith (a.xml,
-							     "i386/x32"));
-
-      selftests::record_xml_tdesc (a.xml, tdesc);
-    }
-#endif /* GDB_SELF_TEST */
 }

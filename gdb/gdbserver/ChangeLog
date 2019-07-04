@@ -1,3 +1,15 @@
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* configure.srv: Remove legacy xml.
+	* linux-aarch64-low.c (initialize_low_arch): Remove
+	initialize_low_tdesc call.
+	* linux-aarch64-tdesc-selftest.c: Remove file.
+	* linux-aarch64-tdesc.h (initialize_low_tdesc): Remove.
+	* linux-x86-low.c (initialize_low_arch): Remove
+	initialize_low_tdesc call.
+	* linux-x86-tdesc-selftest.c: Remove file.
+	* linux-x86-tdesc.h (initialize_low_tdesc): Remove.
+
 2019-06-20  Tom de Vries  <tdevries@suse.de>
 
 	* linux-s390-ipa.c (get_ipa_tdesc)[!__s390x__]: Use

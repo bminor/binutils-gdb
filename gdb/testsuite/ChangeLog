@@ -1,3 +1,7 @@
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.server/unittest.exp: Allow 0 unit tests to run.
+
 2019-07-03  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (foreach_with_prefix): Use "catch" and
