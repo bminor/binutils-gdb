@@ -4401,6 +4401,12 @@ error_free_dyn:
       goto error_free_vers;
     }
 
+  if (abfd->lto_slim_object)
+    {
+      _bfd_error_handler
+	(_("%pB: plugin needed to handle lto object"), abfd);
+    }
+
   for (isym = isymbuf, isymend = isymbuf + extsymcount;
        isym < isymend;
        isym++, sym_hash++, ever = (ever != NULL ? ever + 1 : NULL))

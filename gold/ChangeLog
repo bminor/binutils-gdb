@@ -1,3 +1,14 @@
+2019-07-29  Martin Liska  <mliska@suse.cz>
+
+	PR 24768
+	* layout.h (class Layout): Add is_lto_slim_object and
+	set_lto_slim_object.
+	* object.cc (struct lto_section): Add lto_slim_object_.
+	(big_endian>::do_layout): Parse content of
+	.gnu_lto_.lto section.
+	(big_endian>::do_add_symbols): Report error for a missing
+	LTO plugin.
+
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (xlate_pcrel_opt): New function.

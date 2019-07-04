@@ -999,6 +999,18 @@ convert_zdebug_to_debug (bfd *abfd, const char *name)
   return new_name;
 }
 
+/* This a copy of lto_section defined in GCC (lto-streamer.h).  */
+
+struct lto_section
+{
+  int16_t major_version;
+  int16_t minor_version;
+  unsigned char slim_object;
+
+  /* Flags is a private field that is not defined publicly.  */
+  uint16_t flags;
+};
+
 /* Make a BFD section from an ELF section.  We store a pointer to the
    BFD section in the bfd_section field of the header.  */
 
@@ -1273,6 +1285,17 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	/* For objdump, don't rename the section.  For objcopy, delay
 	   section rename to elf_fake_sections.  */
 	newsect->flags |= SEC_ELF_RENAME;
+    }
+
+  /* GCC uses .gnu.lto_.lto.<some_hash> as a LTO bytecode information
+     section.  */
+  const char *lto_section_name = ".gnu.lto_.lto.";
+  if (strncmp (name, lto_section_name, strlen (lto_section_name)) == 0)
+    {
+      struct lto_section lsection;
+      if (bfd_get_section_contents (abfd, newsect, &lsection, 0,
+				    sizeof (struct lto_section)))
+	abfd->lto_slim_object = lsection.slim_object;
     }
 
   return TRUE;

@@ -1,3 +1,15 @@
+2019-07-29  Martin Liska  <mliska@suse.cz>
+
+	PR 24768
+	* archive.c (_bfd_compute_and_write_armap): Come up with
+	report_plugin_err variable.
+	* bfd-in2.h (struct bfd): Add lto_slim_object flag.
+	* elf.c (struct lto_section): New.
+	(_bfd_elf_make_section_from_shdr): Parse content of
+	.gnu_lto_.lto section.
+	* elflink.c: Report error for a missing LTO plugin.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
 2019-07-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24857

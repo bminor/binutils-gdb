@@ -438,6 +438,10 @@ print_symdef_entry (bfd *abfd)
     }
 }
 
+
+/* True when we can report missing plugin error.  */
+bfd_boolean report_plugin_err = TRUE;
+
 /* Choose which symbol entries to print;
    compact them downward to get rid of the rest.
    Return the number of symbols to be printed.  */
@@ -470,9 +474,13 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 
       if (sym->name[0] == '_'
 	  && sym->name[1] == '_'
-	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0)
-	non_fatal (_("%s: plugin needed to handle lto object"),
-		   bfd_get_filename (abfd));
+	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0
+	  && report_plugin_err)
+	{
+	  report_plugin_err = FALSE;
+	  non_fatal (_("%s: plugin needed to handle lto object"),
+		     bfd_get_filename (abfd));
+	}
 
       if (undefined_only)
 	keep = bfd_is_und_section (sym->section);
@@ -1162,6 +1170,15 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	  *symp = 0;
 	  symcount += synth_count;
 	}
+    }
+
+  /* lto_slim_object is set to false when a bfd is loaded with a compiler
+     LTO plugin.  */
+  if (abfd->lto_slim_object)
+    {
+      report_plugin_err = FALSE;
+      non_fatal (_("%s: plugin needed to handle lto object"),
+		 bfd_get_filename (abfd));
     }
 
   /* Discard the symbols we don't want to print.

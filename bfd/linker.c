@@ -1421,12 +1421,24 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   else if (bfd_is_com_section (section))
     {
       row = COMMON_ROW;
-      if (!bfd_link_relocatable (info)
-	  && name[0] == '_'
-	  && name[1] == '_'
-	  && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)
-	_bfd_error_handler
-	  (_("%pB: plugin needed to handle lto object"), abfd);
+      static bfd_boolean report_plugin_err = TRUE;
+      if (!bfd_link_relocatable (info) && report_plugin_err)
+	{
+	  if (abfd->lto_slim_object)
+	    {
+	      report_plugin_err = FALSE;
+	      _bfd_error_handler
+		(_("%pB: plugin needed to handle lto object"), abfd);
+	    }
+	  else if (name[0] == '_'
+		   && name[1] == '_'
+		   && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)
+	    {
+	      report_plugin_err = FALSE;
+	      _bfd_error_handler
+		(_("%pB: plugin needed to handle lto object"), abfd);
+	    }
+	}
     }
   else
     row = DEF_ROW;

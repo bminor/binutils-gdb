@@ -593,6 +593,14 @@ class Layout
   set_unique_segment_for_sections_specified()
   { this->unique_segment_for_sections_specified_ = true; }
 
+  bool
+  is_lto_slim_object () const
+  { return this->lto_slim_object_; }
+
+  void
+  set_lto_slim_object ()
+  { this->lto_slim_object_ = true; }
+
   // For incremental updates, allocate a block of memory from the
   // free list.  Find a block starting at or after MINOFF.
   off_t
@@ -1480,6 +1488,8 @@ class Layout
   Incremental_inputs* incremental_inputs_;
   // Whether we record output section data created in script
   bool record_output_section_data_from_script_;
+  // Set if this is a slim LTO object not loaded with a compiler plugin
+  bool lto_slim_object_;
   // List of output data that needs to be removed at relaxation clean up.
   Output_section_data_list script_output_section_data_list_;
   // Structure to save segment states before entering the relaxation loop.

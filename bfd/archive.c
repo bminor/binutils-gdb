@@ -2236,6 +2236,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   long syms_max = 0;
   bfd_boolean ret;
   bfd_size_type amt;
+  static bfd_boolean report_plugin_err = TRUE;
 
   /* Dunno if this is the best place for this info...  */
   if (elength != 0)
@@ -2269,6 +2270,14 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 	  long storage;
 	  long symcount;
 	  long src_count;
+
+	  if (current->lto_slim_object && report_plugin_err)
+	    {
+	      report_plugin_err = FALSE;
+	      _bfd_error_handler
+		(_("%pB: plugin needed to handle lto object"),
+		 current);
+	    }
 
 	  storage = bfd_get_symtab_upper_bound (current);
 	  if (storage < 0)
@@ -2322,10 +2331,14 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 			  && syms[src_count]->name[1] == '_'
 			  && strcmp (syms[src_count]->name
 				     + (syms[src_count]->name[2] == '_'),
-				     "__gnu_lto_slim") == 0)
-			_bfd_error_handler
-			  (_("%pB: plugin needed to handle lto object"),
-			   current);
+				     "__gnu_lto_slim") == 0
+			  && report_plugin_err)
+			{
+			  report_plugin_err = FALSE;
+			  _bfd_error_handler
+			    (_("%pB: plugin needed to handle lto object"),
+			     current);
+			}
 		      namelen = strlen (syms[src_count]->name);
 		      amt = sizeof (char *);
 		      map[orl_count].name = (char **) bfd_alloc (arch, amt);
