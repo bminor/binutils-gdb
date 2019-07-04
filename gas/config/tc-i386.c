@@ -11141,6 +11141,8 @@ md_parse_option (int c, const char *arg)
       /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
 	 should be emitted or not.  FIXME: Not implemented.  */
     case 'Q':
+      if ((arg[0] != 'y' && arg[0] != 'n') || arg[1])
+	return 0;
       break;
 
       /* -V: SVR4 argument to print version ID.  */
@@ -11643,7 +11645,7 @@ md_show_usage (FILE *stream)
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   fprintf (stream, _("\
-  -Q                      ignored\n\
+  -Qy, -Qn                ignored\n\
   -V                      print assembler version number\n\
   -k                      ignored\n"));
 #endif

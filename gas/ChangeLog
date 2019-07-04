@@ -1,5 +1,11 @@
 2019-07-04  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_parse_option): Don't blindly accept all
+	-Q options.
+	(md_show_usage): Correctly name the ignored -Q option flavors.
+
+2019-07-04  Jan Beulich  <jbeulich@suse.com>
+
 	* config/obj-elf.c (obj_elf_type): Check for conflicts between
 	old and new types.
 	* config/tc-hppa.h (md_elf_symbol_type_change): New.
