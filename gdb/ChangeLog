@@ -3,6 +3,18 @@
 	* stack.c (find_frame_funname): Remove code which preferred
 	minsym over symtab sym in "certain pathological cases".
 
+	* valprint.h (build_address_symbolic): Add "prefer_sym_over_minsym"
+	parameter.  Change type of "do_demangle" to bool.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Pass suitable "prefer_sym_over_minsym" flag to
+	build_address_symbolic().  Don't output "+" for negative offsets.
+	* printcmd.c (print_address_symbolic): Update invocation of
+	build_address_symbolic to include a "prefer_sym_over_minsym"
+	flag.
+	(build_address_symbolic): Add "prefer_sym_over_minsym" parameter.
+	Restrict cases in which use of minimal symbol is preferred to that
+	of a found symbol.  Update comments.
+
 2019-07-26  Brian Callahan  <bcallah@openbsd.org>
 
 	PR gdb/24839:

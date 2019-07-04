@@ -529,8 +529,8 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
   int offset = 0;
   int line = 0;
 
-  if (build_address_symbolic (gdbarch, addr, do_demangle, &name, &offset,
-			      &filename, &line, &unmapped))
+  if (build_address_symbolic (gdbarch, addr, do_demangle, false, &name,
+                              &offset, &filename, &line, &unmapped))
     return 0;
 
   fputs_filtered (leadin, stream);
@@ -564,7 +564,8 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 int
 build_address_symbolic (struct gdbarch *gdbarch,
 			CORE_ADDR addr,  /* IN */
-			int do_demangle, /* IN */
+			bool do_demangle, /* IN */
+			bool prefer_sym_over_minsym, /* IN */
 			std::string *name, /* OUT */
 			int *offset,     /* OUT */
 			std::string *filename, /* OUT */
@@ -592,8 +593,10 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	}
     }
 
-  /* First try to find the address in the symbol table, then
-     in the minsyms.  Take the closest one.  */
+  /* Try to find the address in both the symbol table and the minsyms. 
+     In most cases, we'll prefer to use the symbol instead of the
+     minsym.  However, there are cases (see below) where we'll choose
+     to use the minsym instead.  */
 
   /* This is defective in the sense that it only finds text symbols.  So
      really this is kind of pointless--we should make sure that the
@@ -630,7 +633,19 @@ build_address_symbolic (struct gdbarch *gdbarch,
 
   if (msymbol.minsym != NULL)
     {
-      if (BMSYMBOL_VALUE_ADDRESS (msymbol) > name_location || symbol == NULL)
+      /* Use the minsym if no symbol is found.
+      
+	 Additionally, use the minsym instead of a (found) symbol if
+	 the following conditions all hold:
+	   1) The prefer_sym_over_minsym flag is false.
+	   2) The minsym address is identical to that of the address under
+	      consideration.
+	   3) The symbol address is not identical to that of the address
+	      under consideration.  */
+      if (symbol == NULL ||
+           (!prefer_sym_over_minsym
+	    && BMSYMBOL_VALUE_ADDRESS (msymbol) == addr
+	    && name_location != addr))
 	{
 	  /* If this is a function (i.e. a code address), strip out any
 	     non-address bits.  For instance, display a pointer to the
@@ -643,8 +658,6 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	      || MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
 	    addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
-	  /* The msymbol is closer to the address than the symbol;
-	     use the msymbol instead.  */
 	  symbol = 0;
 	  name_location = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  if (do_demangle || asm_demangle)

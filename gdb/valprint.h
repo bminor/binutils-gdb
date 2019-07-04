@@ -255,13 +255,18 @@ extern void print_command_completer (struct cmd_list_element *ignore,
 /* Given an address ADDR return all the elements needed to print the
    address in a symbolic form.  NAME can be mangled or not depending
    on DO_DEMANGLE (and also on the asm_demangle global variable,
-   manipulated via ''set print asm-demangle'').  Return 0 in case of
-   success, when all the info in the OUT paramters is valid.  Return 1
-   otherwise.  */
+   manipulated via ''set print asm-demangle'').  When
+   PREFER_SYM_OVER_MINSYM is true, names (and offsets) from minimal
+   symbols won't be used except in instances where no symbol was
+   found; otherwise, a minsym might be used in some instances (mostly
+   involving function with non-contiguous address ranges).  Return
+   0 in case of success, when all the info in the OUT paramters is
+   valid.  Return 1 otherwise.  */
 
 extern int build_address_symbolic (struct gdbarch *,
 				   CORE_ADDR addr,
-				   int do_demangle,
+				   bool do_demangle,
+				   bool prefer_sym_over_minsym,
 				   std::string *name,
 				   int *offset,
 				   std::string *filename,

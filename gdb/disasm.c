@@ -237,16 +237,20 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
     uiout->field_core_addr ("address", gdbarch, pc);
 
     std::string name, filename;
-    if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
-				 &line, &unmapped))
+    bool omit_fname = ((flags & DISASSEMBLY_OMIT_FNAME) != 0);
+    if (!build_address_symbolic (gdbarch, pc, false, omit_fname, &name,
+                                 &offset, &filename, &line, &unmapped))
       {
 	/* We don't care now about line, filename and unmapped.  But we might in
 	   the future.  */
 	uiout->text (" <");
-	if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
+	if (!omit_fname)
 	  uiout->field_string ("func-name", name.c_str (),
 			       ui_out_style_kind::FUNCTION);
-	uiout->text ("+");
+	/* For negative offsets, avoid displaying them as +-N; the sign of
+	   the offset takes the place of the "+" here.  */
+	if (offset >= 0)
+	  uiout->text ("+");
 	uiout->field_signed ("offset", offset);
 	uiout->text (">:\t");
       }
