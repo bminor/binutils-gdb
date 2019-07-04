@@ -1,5 +1,39 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* features/Makefile: Remove unused xml files.
+	* features/aarch64.xml: Remove.
+	* features/i386/amd64-avx-avx512-linux.xml: Remove.
+	* features/i386/amd64-avx-avx512.xml: Remove.
+	* features/i386/amd64-avx-linux.xml: Remove.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.xml: Remove.
+	* features/i386/amd64-avx-mpx-avx512-pku.xml: Remove.
+	* features/i386/amd64-avx-mpx-linux.xml: Remove.
+	* features/i386/amd64-avx-mpx.xml: Remove.
+	* features/i386/amd64-avx.xml: Remove.
+	* features/i386/amd64-linux.xml: Remove.
+	* features/i386/amd64-mpx-linux.xml: Remove.
+	* features/i386/amd64-mpx.xml: Remove.
+	* features/i386/amd64.xml: Remove.
+	* features/i386/i386-avx-avx512-linux.xml: Remove.
+	* features/i386/i386-avx-avx512.xml: Remove.
+	* features/i386/i386-avx-linux.xml: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.xml: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku.xml: Remove.
+	* features/i386/i386-avx-mpx-linux.xml: Remove.
+	* features/i386/i386-avx-mpx.xml: Remove.
+	* features/i386/i386-avx.xml: Remove.
+	* features/i386/i386-linux.xml: Remove.
+	* features/i386/i386-mmx-linux.xml: Remove.
+	* features/i386/i386-mmx.xml: Remove.
+	* features/i386/i386-mpx-linux.xml: Remove.
+	* features/i386/i386-mpx.xml: Remove.
+	* features/i386/i386.xml: Remove.
+	* features/i386/x32-avx-avx512-linux.xml: Remove.
+	* features/i386/x32-avx-linux.xml: Remove.
+	* features/i386/x32-linux.xml: Remove.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* regformats/aarch64.dat: Remove.
 	* regformats/i386/amd64-avx-avx512-linux.dat: Remove.
 	* regformats/i386/amd64-avx-linux.dat: Remove.

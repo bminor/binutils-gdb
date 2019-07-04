@@ -43,25 +43,8 @@
 #
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
-WHICH = aarch64 \
-	arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
+WHICH = arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
 	arm/arm-with-neon \
-	i386/i386 i386/i386-linux \
-	i386/i386-mmx-linux \
-	i386/amd64 i386/amd64-linux \
-	i386/i386-avx-linux \
-	i386/i386-mpx-linux \
-	i386/i386-avx-mpx-linux \
-	i386/i386-avx-avx512-linux \
-	i386/i386-avx-mpx-avx512-pku-linux \
-	i386/amd64-avx-linux \
-	i386/amd64-mpx-linux \
-	i386/amd64-avx-mpx-linux \
-	i386/amd64-avx-avx512-linux \
-	i386/amd64-avx-mpx-avx512-pku-linux \
-	i386/x32-linux \
-	i386/x32-avx-linux \
-	i386/x32-avx-avx512-linux \
 	mips-linux mips-dsp-linux \
 	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
@@ -282,70 +265,6 @@ $(FEATURE_CFILES): %.c: %.xml.tmp
 
 # Other dependencies.
 $(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
-$(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
-$(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
-			       i386/32bit-linux.xml
-$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml \
-			       i386/64bit-segments.xml
-$(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml
-$(outdir)/i386/i386-avx.dat: i386/32bit-core.xml i386/32bit-avx.xml
-$(outdir)/i386/i386-avx-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
-			       i386/32bit-linux.xml
-$(outdir)/i386/i386-mpx.dat: i386/32bit-core.xml i386/32bit-avx.xml \
-			       i386/32bit-mpx.xml
-$(outdir)/i386/i386-mpx-linux.dat: i386/32bit-core.xml 	i386/32bit-avx.xml \
-			       i386/32bit-linux.xml i386/32bit-mpx.xml
-$(outdir)/i386/i386-mpx-linux.dat: i386/32bit-core.xml \
-			       i386/32bit-linux.xml i386/32bit-mpx.xml
-$(outdir)/i386/i386-avx-mpx-linux.dat: i386/32bit-core.xml \
-			       i386/32bit-linux.xml i386/32bit-mpx.xml
-$(outdir)/i386/i386-avx-avx512.dat: i386/32bit-core.xml i386/32bit-avx.xml \
-			       i386/32bit-avx512.xml
-$(outdir)/i386/i386-avx-avx512-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
-			       i386/32bit-linux.xml i386/32bit-avx512.xml
-$(outdir)/i386/i386-avx-mpx-avx512-pku.dat: i386/32bit-core.xml \
-			       i386/32bit-avx.xml i386/32bit-mpx.xml i386/32bit-avx512.xml \
-			       i386/32bit-pkeys.xml
-$(outdir)/i386/i386-avx-mpx-avx512-pku-linux.dat: i386/32bit-core.xml \
-			       i386/32bit-avx.xml i386/32bit-mpx.xml i386/32bit-avx512.xml \
-			       i386/32bit-pkeys.xml i386/32bit-linux.xml
-$(outdir)/i386/i386-mmx.dat: i386/32bit-core.xml 
-$(outdir)/i386/i386-mmx-linux.dat: i386/32bit-core.xml i386/32bit-linux.xml
-$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-segments.xml
-$(outdir)/i386/amd64-avx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml
-$(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
-$(outdir)/i386/amd64-avx-mpx-linux.dat: i386/64bit-core.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
-$(outdir)/i386/amd64-mpx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-segments.xml i386/64bit-mpx.xml
-$(outdir)/i386/amd64-avx-mpx.dat: i386/64bit-core.xml \
-			       i386/64bit-segments.xml i386/64bit-mpx.xml
-$(outdir)/i386/amd64-avx-avx512.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml i386/64bit-segments.xml
-$(outdir)/i386/amd64-avx-avx512-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml i386/64bit-linux.xml
-$(outdir)/i386/amd64-avx-mpx-avx512-pku.dat: i386/64bit-core.xml \
-			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
-			       i386/64bit-pkeys.xml i386/64bit-segments.xml
-$(outdir)/i386/amd64-avx-mpx-avx512-pku-linux.dat: i386/64bit-core.xml \
-			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml \
-			       i386/64bit-pkeys.xml
-$(outdir)/i386/x32.dat: i386/x32-core.xml i386/64bit-sse.xml
-$(outdir)/i386/x32-linux.dat: i386/x32-core.xml i386/64bit-sse.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml
-$(outdir)/i386/x32-avx.dat: i386/x32-core.xml i386/64bit-avx.xml
-$(outdir)/i386/x32-avx-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
-			       i386/64bit-linux.xml i386/64bit-segments.xml
-$(outdir)/i386/x32-avx-avx512.dat: i386/x32-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml
-$(outdir)/i386/x32-avx-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml i386/64bit-linux.xml \
-			       i386/64bit-segments.xml
 
 # Regenerate RISC-V CSR feature lists.
 riscv/32bit-csr.xml riscv/64bit-csr.xml: ../../include/opcode/riscv-opc.h
