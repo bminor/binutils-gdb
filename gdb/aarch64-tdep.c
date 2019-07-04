@@ -2756,7 +2756,7 @@ struct aarch64_displaced_step_data
   /* The address where the instruction will be executed at.  */
   CORE_ADDR new_addr;
   /* Buffer of instructions to be copied to NEW_ADDR to execute.  */
-  uint32_t insn_buf[DISPLACED_MODIFIED_INSNS];
+  uint32_t insn_buf[AARCH64_DISPLACED_MODIFIED_INSNS];
   /* Number of instructions in INSN_BUF.  */
   unsigned insn_count;
   /* Registers when doing displaced stepping.  */
@@ -3000,7 +3000,7 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   dsd.insn_count = 0;
   aarch64_relocate_instruction (insn, &visitor,
 				(struct aarch64_insn_data *) &dsd);
-  gdb_assert (dsd.insn_count <= DISPLACED_MODIFIED_INSNS);
+  gdb_assert (dsd.insn_count <= AARCH64_DISPLACED_MODIFIED_INSNS);
 
   if (dsd.insn_count != 0)
     {

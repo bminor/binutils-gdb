@@ -56,7 +56,7 @@ struct regset;
 
 /* The maximum number of modified instructions generated for one
    single-stepped instruction.  */
-#define DISPLACED_MODIFIED_INSNS 1
+#define AARCH64_DISPLACED_MODIFIED_INSNS 1
 
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep

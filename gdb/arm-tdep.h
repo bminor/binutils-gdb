@@ -152,7 +152,7 @@ struct gdbarch_tdep
 /* The maximum number of modified instructions generated for one single-stepped
    instruction, including the breakpoint (usually at the end of the instruction
    sequence) and any scratch words, etc.  */
-#define DISPLACED_MODIFIED_INSNS	8
+#define ARM_DISPLACED_MODIFIED_INSNS	8
 
 struct arm_displaced_step_closure : public displaced_step_closure
 {
@@ -215,7 +215,7 @@ struct arm_displaced_step_closure : public displaced_step_closure
      - ARM instruction occupies one slot,
      - Thumb 16 bit instruction occupies one slot,
      - Thumb 32-bit instruction occupies *two* slots, one part for each.  */
-  unsigned long modinsn[DISPLACED_MODIFIED_INSNS];
+  unsigned long modinsn[ARM_DISPLACED_MODIFIED_INSNS];
   int numinsns;
   CORE_ADDR insn_addr;
   CORE_ADDR scratch_base;

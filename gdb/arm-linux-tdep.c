@@ -954,7 +954,7 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 
   within_scratch = (apparent_pc >= dsc->scratch_base
 		    && apparent_pc < (dsc->scratch_base
-				      + DISPLACED_MODIFIED_INSNS * 4 + 4));
+				      + ARM_DISPLACED_MODIFIED_INSNS * 4 + 4));
 
   if (debug_displaced)
     {

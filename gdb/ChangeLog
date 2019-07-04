@@ -1,5 +1,21 @@
 2019-07-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Use
+	AARCH64_DISPLACED_MODIFIED_INSNS.
+	* aarch64-tdep.c (struct aarch64_displaced_step_data)
+	(aarch64_displaced_step_copy_insn): Likewise.
+	* aarch64-tdep.h (DISPLACED_MODIFIED_INSNS): Rename from..
+	(AARCH64_DISPLACED_MODIFIED_INSNS): ...to this.
+	* arm-linux-tdep.c (arm_linux_cleanup_svc): Use
+	ARM_DISPLACED_MODIFIED_INSNS.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+	* arm-tdep.h (DISPLACED_MODIFIED_INSNS): Rename from..
+	(ARM_DISPLACED_MODIFIED_INSNS): ...to this.
+	(struct arm_displaced_step_closure): Use
+	ARM_DISPLACED_MODIFIED_INSNS.
+
+2019-07-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* features/Makefile: Remove unused xml files.
 	* features/aarch64.xml: Remove.
 	* features/i386/amd64-avx-avx512-linux.xml: Remove.
