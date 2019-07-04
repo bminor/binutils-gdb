@@ -1,3 +1,8 @@
+2019-07-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* stack.c (find_frame_funname): Remove code which preferred
+	minsym over symtab sym in "certain pathological cases".
+
 2019-07-26  Brian Callahan  <bcallah@openbsd.org>
 
 	PR gdb/24839:

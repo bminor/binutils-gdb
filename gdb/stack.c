@@ -1135,66 +1135,25 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
   func = get_frame_function (frame);
   if (func)
     {
-      /* In certain pathological cases, the symtabs give the wrong
-         function (when we are in the first function in a file which
-         is compiled without debugging symbols, the previous function
-         is compiled with debugging symbols, and the "foo.o" symbol
-         that is supposed to tell us where the file with debugging
-         symbols ends has been truncated by ar because it is longer
-         than 15 characters).  This also occurs if the user uses asm()
-         to create a function but not stabs for it (in a file compiled
-         with -g).
+      const char *print_name = SYMBOL_PRINT_NAME (func);
 
-         So look in the minimal symbol tables as well, and if it comes
-         up with a larger address for the function use that instead.
-         I don't think this can ever cause any problems; there
-         shouldn't be any minimal symbols in the middle of a function;
-         if this is ever changed many parts of GDB will need to be
-         changed (and we'll create a find_pc_minimal_function or some
-         such).  */
-
-      struct bound_minimal_symbol msymbol;
-
-      /* Don't attempt to do this for inlined functions, which do not
-	 have a corresponding minimal symbol.  */
-      if (!block_inlined_p (SYMBOL_BLOCK_VALUE (func)))
-	msymbol
-	  = lookup_minimal_symbol_by_pc (get_frame_address_in_block (frame));
-      else
-	memset (&msymbol, 0, sizeof (msymbol));
-
-      if (msymbol.minsym != NULL
-	  && (BMSYMBOL_VALUE_ADDRESS (msymbol)
-	      > BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func))))
+      *funlang = SYMBOL_LANGUAGE (func);
+      if (funcp)
+	*funcp = func;
+      if (*funlang == language_cplus)
 	{
-	  /* We also don't know anything about the function besides
-	     its address and name.  */
-	  func = 0;
-	  funname.reset (xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym)));
-	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
+	  /* It seems appropriate to use SYMBOL_PRINT_NAME() here,
+	     to display the demangled name that we already have
+	     stored in the symbol table, but we stored a version
+	     with DMGL_PARAMS turned on, and here we don't want to
+	     display parameters.  So remove the parameters.  */
+	  funname = cp_remove_params (print_name);
 	}
-      else
-	{
-	  const char *print_name = SYMBOL_PRINT_NAME (func);
 
-	  *funlang = SYMBOL_LANGUAGE (func);
-	  if (funcp)
-	    *funcp = func;
-	  if (*funlang == language_cplus)
-	    {
-	      /* It seems appropriate to use SYMBOL_PRINT_NAME() here,
-		 to display the demangled name that we already have
-		 stored in the symbol table, but we stored a version
-		 with DMGL_PARAMS turned on, and here we don't want to
-		 display parameters.  So remove the parameters.  */
-	      funname = cp_remove_params (print_name);
-	    }
-
-	  /* If we didn't hit the C++ case above, set *funname
-	     here.  */
-	  if (funname == NULL)
-	    funname.reset (xstrdup (print_name));
-	}
+      /* If we didn't hit the C++ case above, set *funname
+	 here.  */
+      if (funname == NULL)
+	funname.reset (xstrdup (print_name));
     }
   else
     {
