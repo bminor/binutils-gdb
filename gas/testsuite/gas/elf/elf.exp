@@ -229,6 +229,7 @@ if { [is_elf_format] } then {
     } else {
 	run_dump_test ifunc-1
 	run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
+	run_elf_list_test "type-2" "" "--warn" "-s" "| grep \"0 *\\\[FIONT\\\]\""
     }
 
     run_dump_test "section6"

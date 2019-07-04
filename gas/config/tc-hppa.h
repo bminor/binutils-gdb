@@ -177,6 +177,14 @@ int hppa_fix_adjustable (struct fix *);
        ), BSF_FUNCTION)							\
    : -1)
 
+/* Handle type change from .type pseudo: Zap STT_PARISC_MILLI when
+   switching to a non-function type.  */
+#define md_elf_symbol_type_change(sym, elf, type)			\
+  ((type) != BSF_FUNCTION						\
+   && (((elf)->internal_elf_sym.st_info = 				\
+	ELF_ST_INFO (ELF_ST_BIND ((elf)->internal_elf_sym.st_info),	\
+		     STT_NOTYPE)), 0))
+
 #define tc_frob_symbol(sym,punt) \
   { \
     if ((S_GET_SEGMENT (sym) == bfd_und_section_ptr \

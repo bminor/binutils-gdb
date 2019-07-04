@@ -1,3 +1,14 @@
+2019-07-04  Jan Beulich  <jbeulich@suse.com>
+
+	* config/obj-elf.c (obj_elf_type): Check for conflicts between
+	old and new types.
+	* config/tc-hppa.h (md_elf_symbol_type_change): New.
+	* doc/as.texi: Mention warning behavior for the ELF flavor of
+	.type.
+	* testsuite/gas/elf/type-2.e, testsuite/gas/elf/type-2.l,
+	testsuite/gas/elf/type-2.s: New.
+	* testsuite/gas/elf/elf.exp: Run new test.
+
 2019-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/aarch64/codealign.d: Update to work with a

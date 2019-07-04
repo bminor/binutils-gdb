@@ -7215,6 +7215,10 @@ systems).
 
 @end table
 
+Changing between incompatible types other than from/to STT_NOTYPE will
+result in a diagnostic.  An intermediate change to STT_NOTYPE will silence
+this.
+
 Note: Some targets support extra types in addition to those listed above.
 
 @end ifset

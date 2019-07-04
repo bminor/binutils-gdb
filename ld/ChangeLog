@@ -1,3 +1,7 @@
+2019-07-04  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-elf/group9.s: Correct argument of .type.
+
 2019-07-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 24753
