@@ -2917,18 +2917,6 @@ riscv_features_from_gdbarch_info (const struct gdbarch_info info)
       else if (e_flags & EF_RISCV_FLOAT_ABI_SINGLE)
 	features.flen = 4;
     }
-  else
-    {
-      const struct bfd_arch_info *binfo = info.bfd_arch_info;
-
-      if (binfo->bits_per_word == 32)
-	features.xlen = 4;
-      else if (binfo->bits_per_word == 64)
-	features.xlen = 8;
-      else
-	internal_error (__FILE__, __LINE__, _("unknown bits_per_word %d"),
-			binfo->bits_per_word);
-    }
 
   return features;
 }
