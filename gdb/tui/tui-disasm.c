@@ -265,8 +265,6 @@ tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
   if (tui_current_layout () != SRC_DISASSEM_COMMAND 
       && win_with_focus == TUI_SRC_WIN)
     tui_set_win_focus_to (TUI_DISASM_WIN);
-
-  return;
 }
 
 
@@ -297,8 +295,6 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
       else
 	tui_update_locator_fullname ("?");
     }
-
-  return;
 }
 
 void

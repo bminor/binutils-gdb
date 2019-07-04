@@ -1,5 +1,16 @@
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_window)
+	(tui_update_source_window_as_is)
+	(tui_update_source_windows_with_line): Remove return.
+	* tui/tui-disasm.c (tui_show_disassem)
+	(tui_show_disassem_and_update_source): Remove return.
+	* tui/tui.c (tui_reset): Remove return.
+	* tui/tui-wingeneral.c
+	(tui_check_and_display_highlight_if_needed): Remove return.
+
+2019-07-17  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (parse_scrolling_args): Throw separate errors.
 
 2019-07-17  Tom Tromey  <tom@tromey.com>

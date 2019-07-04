@@ -77,8 +77,6 @@ tui_update_source_window (struct tui_source_window_base *win_info,
 {
   win_info->horizontal_offset = 0;
   tui_update_source_window_as_is (win_info, gdbarch, s, line_or_addr, noerror);
-
-  return;
 }
 
 
@@ -125,9 +123,6 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
 	    tui_set_win_focus_to (win_info);
 	}
     }
-
-
-  return;
 }
 
 
@@ -200,8 +195,6 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 	}
       break;
     }
-
-  return;
 }
 
 void

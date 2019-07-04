@@ -630,8 +630,6 @@ tui_reset (void)
 #endif /* CBREAK */
 		     | VTDELAY | ALLDELAY);
   mode.sg_flags |= XTABS | ECHO | CRMOD | ANYP;
-
-  return;
 }
 #endif
 

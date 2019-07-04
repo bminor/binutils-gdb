@@ -122,7 +122,6 @@ tui_check_and_display_highlight_if_needed (struct tui_win_info *win_info)
 	tui_unhighlight_win (win_info);
 
     }
-  return;
 }
 
 
