@@ -286,7 +286,7 @@ Opcode space for msub instruction.
 @item AMO
 Opcode space for atomic memory operation instructions.
 
-@item MISC_IMM
+@item MISC_MEM
 Opcode space for misc instructions.
 
 @item SYSTEM
@@ -318,6 +318,7 @@ with the @samp{.insn} pseudo directive:
 @end verbatim
 
 @item R type with 4 register operands: .insn r opcode, func3, func2, rd, rs1, rs2, rs3
+@itemx R4 type: .insn r4 opcode, func3, func2, rd, rs1, rs2, rs3
 @verbatim
 +-----+-------+-----+-----+-------+----+-------------+
 | rs3 | func2 | rs2 | rs1 | func3 | rd |      opcode |
@@ -343,11 +344,13 @@ with the @samp{.insn} pseudo directive:
 
 @item SB type: .insn sb opcode, func3, rd, rs1, symbol
 @itemx SB type: .insn sb opcode, func3, rd, simm12(rs1)
+@itemx B type: .insn s opcode, func3, rd, rs1, symbol
+@itemx B type: .insn s opcode, func3, rd, simm12(rs1)
 @verbatim
-+--------------+-----+-----+-------+-------------+-------------+
-| simm21[11:5] | rs2 | rs1 | func3 | simm12[4:0] |      opcode |
-+--------------+-----+-----+-------+-------------+-------------+
-31             25    20    15      12            7             0
++------------+--------------+-----+-----+-------+-------------+-------------+--------+
+| simm12[12] | simm12[10:5] | rs2 | rs1 | func3 | simm12[4:1] | simm12[11]] | opcode |
++------------+--------------+-----+-----+-------+-------------+-------------+--------+
+31          30            25    20    15      12           7            0
 @end verbatim
 
 @item U type: .insn u opcode, rd, simm20
@@ -359,6 +362,7 @@ with the @samp{.insn} pseudo directive:
 @end verbatim
 
 @item UJ type: .insn uj opcode, rd, symbol
+@itemx J type: .insn j opcode, rd, symbol
 @verbatim
 +------------+--------------+------------+---------------+----+-------------+
 | simm20[20] | simm20[10:1] | simm20[11] | simm20[19:12] | rd |      opcode |

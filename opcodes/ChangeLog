@@ -1,3 +1,12 @@
+2019-07-05  Kito Cheng <kito.cheng@sifive.com>
+
+	* riscv-opc.c (riscv_insn_types): Add r4 type.
+
+	* riscv-opc.c (riscv_insn_types): Add b and j type.
+
+	* opcodes/riscv-opc.c (riscv_insn_types): Remove incorrect
+	format for sb type and correct s type.
+
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode): Set C_SCAN_MOVPRFX for the

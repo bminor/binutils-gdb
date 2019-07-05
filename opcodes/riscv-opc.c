@@ -812,6 +812,23 @@ const struct riscv_opcode riscv_insn_types[] =
 {"r",       0, {"I", 0},  "O4,F3,F2,d,S,T,R",   0,    0,  match_opcode, 0 },
 {"r",       0, {"I", 0},  "O4,F3,F2,D,S,T,R",   0,    0,  match_opcode, 0 },
 
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,s,t,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,s,t,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,S,t,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,S,t,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,s,T,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,s,T,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,S,T,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,S,T,r",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,s,t,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,s,t,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,S,t,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,S,t,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,s,T,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,s,T,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,d,S,T,R",   0,    0,  match_opcode, 0 },
+{"r4",      0, {"I", 0},  "O4,F3,F2,D,S,T,R",   0,    0,  match_opcode, 0 },
+
 {"i",       0, {"I", 0},  "O4,F3,d,s,j",        0,    0,  match_opcode, 0 },
 {"i",       0, {"I", 0},  "O4,F3,D,s,j",        0,    0,  match_opcode, 0 },
 {"i",       0, {"I", 0},  "O4,F3,d,S,j",        0,    0,  match_opcode, 0 },
@@ -820,22 +837,27 @@ const struct riscv_opcode riscv_insn_types[] =
 {"i",       0, {"I", 0},  "O4,F3,d,o(s)",       0,    0,  match_opcode, 0 },
 {"i",       0, {"I", 0},  "O4,F3,D,o(s)",       0,    0,  match_opcode, 0 },
 
-{"s",       0, {"I", 0},  "O4,F3,d,o(s)",       0,    0,  match_opcode, 0 },
-{"s",       0, {"I", 0},  "O4,F3,D,o(s)",       0,    0,  match_opcode, 0 },
+{"s",       0, {"I", 0},  "O4,F3,t,q(s)",       0,    0,  match_opcode, 0 },
+{"s",       0, {"I", 0},  "O4,F3,T,q(s)",       0,    0,  match_opcode, 0 },
 
 {"sb",      0, {"I", 0},  "O4,F3,s,t,p",        0,    0,  match_opcode, 0 },
 {"sb",      0, {"I", 0},  "O4,F3,S,t,p",        0,    0,  match_opcode, 0 },
 {"sb",      0, {"I", 0},  "O4,F3,s,T,p",        0,    0,  match_opcode, 0 },
 {"sb",      0, {"I", 0},  "O4,F3,S,T,p",        0,    0,  match_opcode, 0 },
 
-{"sb",      0, {"I", 0},  "O4,F3,t,q(s)",       0,    0,  match_opcode, 0 },
-{"sb",      0, {"I", 0},  "O4,F3,T,q(s)",       0,    0,  match_opcode, 0 },
+{"b",      0, {"I", 0},  "O4,F3,s,t,p",        0,    0,  match_opcode, 0 },
+{"b",      0, {"I", 0},  "O4,F3,S,t,p",        0,    0,  match_opcode, 0 },
+{"b",      0, {"I", 0},  "O4,F3,s,T,p",        0,    0,  match_opcode, 0 },
+{"b",      0, {"I", 0},  "O4,F3,S,T,p",        0,    0,  match_opcode, 0 },
 
 {"u",       0, {"I", 0},  "O4,d,u",             0,    0,  match_opcode, 0 },
 {"u",       0, {"I", 0},  "O4,D,u",             0,    0,  match_opcode, 0 },
 
 {"uj",      0, {"I", 0},  "O4,d,a",             0,    0,  match_opcode, 0 },
 {"uj",      0, {"I", 0},  "O4,D,a",             0,    0,  match_opcode, 0 },
+
+{"j",      0, {"I", 0},  "O4,d,a",             0,    0,  match_opcode, 0 },
+{"j",      0, {"I", 0},  "O4,D,a",             0,    0,  match_opcode, 0 },
 
 {"cr",      0, {"C", 0},  "O2,CF4,d,CV",        0,    0,  match_opcode, 0 },
 {"cr",      0, {"C", 0},  "O2,CF4,D,CV",        0,    0,  match_opcode, 0 },

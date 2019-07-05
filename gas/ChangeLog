@@ -1,3 +1,22 @@
+2019-07-05  Kito Cheng <kito.cheng@sifive.com>
+
+	* doc/c-riscv.texi (Instruction Formats): Add r4 type.
+	* testsuite/gas/riscv/insn.d: Add testcase for r4 type.
+	* testsuite/gas/riscv/insn.s: Ditto.
+
+	* doc/c-riscv.texi (Instruction Formats): Add b and j type.
+	* testsuite/gas/riscv/insn.d: Add test case for b and j type.
+	* testsuite/gas/riscv/insn.s: Ditto.
+
+	* testsuite/gas/riscv/insn.s: Correct instruction type for load
+	and store.
+
+	* testsuite/gas/riscv/insn.d: Using regular expression to match
+	address.
+
+	* doc/c-riscv.texi (Instruction Formats): Fix encoding table for SB
+	type and fix typo.
+
 2019-07-04  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (md_parse_option): Don't blindly accept all
