@@ -604,19 +604,19 @@ tui_exec_info_window::maybe_allocate_content (int n_elements)
    based upon the input window which is either the source or
    disassembly window.  */
 void
-tui_set_exec_info_content (struct tui_source_window_base *win_info)
+tui_source_window_base::set_exec_info_content ()
 {
-  tui_exec_info_content *content
-    = win_info->execution_info->maybe_allocate_content (win_info->height);
+  tui_exec_info_content *exec_content
+    = execution_info->maybe_allocate_content (height);
 
-  tui_update_breakpoint_info (win_info, nullptr, true);
-  for (int i = 0; i < win_info->content.size (); i++)
+  tui_update_breakpoint_info (this, nullptr, true);
+  for (int i = 0; i < content.size (); i++)
     {
-      tui_exec_info_content &element = content[i];
+      tui_exec_info_content &element = exec_content[i];
       struct tui_source_element *src_element;
       tui_bp_flags mode;
 
-      src_element = &win_info->content[i];
+      src_element = &content[i];
 
       memset (element, ' ', sizeof (tui_exec_info_content));
       element[TUI_EXECINFO_SIZE - 1] = 0;
@@ -675,7 +675,7 @@ tui_clear_exec_info_content (struct tui_source_window_base *win_info)
 void
 tui_update_exec_info (struct tui_source_window_base *win_info)
 {
-  tui_set_exec_info_content (win_info);
+  win_info->set_exec_info_content ();
   tui_show_exec_info_content (win_info);
 }
 

@@ -1,6 +1,16 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.h (struct tui_source_window_base)
+	<set_exec_info_content>: Declare.
+	(tui_set_exec_info_content): Don't declare.
+	* tui/tui-winsource.c
+	(tui_source_window_base::set_exec_info_content): Rename from
+	tui_set_exec_info_content.
+	(tui_update_exec_info): Update.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
 	<show_source_content>: Declare.
 	(tui_show_source_content): Don't declare.
 	* tui/tui-winsource.c (tui_update_source_window_as_is): Update.
