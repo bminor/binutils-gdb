@@ -80,6 +80,9 @@ show_layout (enum tui_layout_type layout)
          should free the content and reallocate on next display of
          source/asm.  */
       tui_clear_source_windows ();
+      /* First make the current layout be invisible.  */
+      tui_make_all_invisible ();
+      tui_locator_win_info_ptr ()->make_visible (false);
       if (layout == SRC_DATA_COMMAND 
 	  || layout == DISASSEM_DATA_COMMAND)
 	{
@@ -88,10 +91,6 @@ show_layout (enum tui_layout_type layout)
 	}
       else
 	{
-	  /* First make the current layout be invisible.  */
-	  tui_make_all_invisible ();
-	  tui_locator_win_info_ptr ()->make_visible (false);
-
 	  switch (layout)
 	    {
 	      /* Now show the new layout.  */
@@ -571,8 +570,6 @@ show_data (enum tui_layout_type new_layout)
 
   data_height = total_height / 2;
   src_height = total_height - data_height;
-  tui_make_all_invisible ();
-  locator->make_visible (false);
   if (tui_win_list[DATA_WIN] == nullptr)
     tui_win_list[DATA_WIN] = new tui_data_window ();
   tui_win_list[DATA_WIN]->reset (data_height, tui_term_width (), 0, 0);

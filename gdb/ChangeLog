@@ -1,5 +1,14 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (make_all_visible): Remove.
+	(tui_make_all_invisible): Simplify.
+	* tui/tui-layout.c (tui_make_all_invisible): Move from
+	tui-wingeneral.c; simplify.
+	(show_layout): Hoist call to tui_make_all_invisible.
+	(show_data): Don't call tui_make_all_invisible.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_all_visible): Don't declare.
 	* tui/tui-wingeneral.c (tui_make_all_visible): Remove.
 

@@ -165,19 +165,13 @@ tui_gen_win_info::make_visible (bool visible)
     }
 }
 
-/* Makes all windows invisible (except the command and locator
-   windows).  */
-static void
-make_all_visible (bool visible)
-{
-  for (tui_win_info *win_info : all_tui_windows ())
-    win_info->make_visible (visible);
-}
+/* See tui-wingeneral.h.  */
 
 void
 tui_make_all_invisible (void)
 {
-  make_all_visible (false);
+  for (tui_win_info *win_info : all_tui_windows ())
+    win_info->make_visible (false);
 }
 
 /* Function to refresh all the windows currently displayed.  */
