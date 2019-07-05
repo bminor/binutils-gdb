@@ -118,7 +118,6 @@ tui_set_layout (enum tui_layout_type layout_type)
   struct gdbarch *gdbarch;
   CORE_ADDR addr;
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
-  struct tui_layout_def *layout_def = tui_layout_def ();
 
   extract_display_start_addr (&gdbarch, &addr);
 
@@ -135,7 +134,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 	    {
 	    case SRC_COMMAND:
 	      tui_set_win_focus_to (TUI_SRC_WIN);
-	      layout_def->display_mode = SRC_WIN;
 	      break;
 	    case DISASSEM_COMMAND:
 	      /* The previous layout was not showing code.
@@ -148,7 +146,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 
 	      tui_get_begin_asm_address (&gdbarch, &addr);
 	      tui_set_win_focus_to (TUI_DISASM_WIN);
-	      layout_def->display_mode = DISASSEM_WIN;
 	      break;
 	    case SRC_DISASSEM_COMMAND:
 	      /* The previous layout was not showing code.
@@ -170,7 +167,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		tui_set_win_focus_to (TUI_SRC_WIN);
 	      else
 		tui_set_win_focus_to (TUI_DATA_WIN);
-	      layout_def->display_mode = SRC_WIN;
 	      break;
 	    case DISASSEM_DATA_COMMAND:
 	      /* The previous layout was not showing code.
@@ -186,7 +182,6 @@ tui_set_layout (enum tui_layout_type layout_type)
 		tui_set_win_focus_to (TUI_DISASM_WIN);
 	      else
 		tui_set_win_focus_to (TUI_DATA_WIN);
-	      layout_def->display_mode = DISASSEM_WIN;
 	      break;
 	    default:
 	      break;

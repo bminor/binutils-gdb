@@ -40,9 +40,6 @@ static int term_height, term_width;
 static struct tui_locator_window _locator;
 static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
-static struct tui_layout_def layout_def = {
-  SRC_WIN,			/* DISPLAY_MODE */
-};
 
 static int win_resized = FALSE;
 
@@ -74,14 +71,6 @@ void
 tui_set_win_resized_to (int resized)
 {
   win_resized = resized;
-}
-
-
-/* Answer a pointer to the current layout definition.  */
-struct tui_layout_def *
-tui_layout_def (void)
-{
-  return &layout_def;
 }
 
 

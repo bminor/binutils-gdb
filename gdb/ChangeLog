@@ -1,5 +1,13 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (tui_set_layout): Update.
+	* tui/tui-data.h (struct tui_layout_def): Remove.
+	(tui_layout_def): Don't declare.
+	* tui/tui-data.c (layout_def): Remove.
+	(tui_layout_def): Remove.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<clear_detail>: No longer "override".
 	* tui/tui-regs.h (struct tui_data_window) <clear_detail>: Remove.

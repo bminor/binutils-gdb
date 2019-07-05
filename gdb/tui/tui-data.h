@@ -151,12 +151,6 @@ struct tui_line_or_address
     } u;
 };
 
-/* Current Layout definition.  */
-struct tui_layout_def
-{
-  enum tui_win_type display_mode;
-};
-
 /* Flags to tell what kind of breakpoint is at current line.  */
 enum tui_bp_flag
 {
@@ -400,7 +394,6 @@ extern void tui_clear_source_windows_detail (void);
 extern void tui_add_to_source_windows (struct tui_source_window_base *);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
-extern struct tui_layout_def *tui_layout_def (void);
 extern int tui_win_resized (void);
 extern void tui_set_win_resized_to (int);
 
