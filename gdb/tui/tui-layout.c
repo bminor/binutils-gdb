@@ -55,6 +55,15 @@ static void tui_layout_command (const char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
 
+static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
+
+/* Accessor for the current layout.  */
+enum tui_layout_type
+tui_current_layout (void)
+{
+  return current_layout;
+}
+
 /***************************************
 ** DEFINITIONS
 ***************************************/
@@ -543,7 +552,7 @@ show_source_disasm_command (void)
       /* FIXME tui_cmd_window won't recreate the handle on
 	 make_visible, so we need this instead.  */
       tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
-      tui_set_current_layout_to (SRC_DISASSEM_COMMAND);
+      current_layout = SRC_DISASSEM_COMMAND;
     }
 }
 
@@ -597,7 +606,7 @@ show_data (enum tui_layout_type new_layout)
   locator->make_visible (true);
   tui_show_locator_content ();
   tui_add_to_source_windows (base);
-  tui_set_current_layout_to (new_layout);
+  current_layout = new_layout;
 }
 
 void
@@ -675,6 +684,6 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
       /* FIXME tui_cmd_window won't recreate the handle on
 	 make_visible, so we need this instead.  */
       tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
-      tui_set_current_layout_to (layout_type);
+      current_layout = layout_type;
     }
 }

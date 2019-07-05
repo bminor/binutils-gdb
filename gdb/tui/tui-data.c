@@ -35,7 +35,6 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 /***************************
 ** Private data
 ****************************/
-static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 static int term_height, term_width;
 static struct tui_locator_window _locator;
 static std::vector<tui_source_window_base *> source_windows;
@@ -167,22 +166,6 @@ void
 tui_set_term_width_to (int w)
 {
   term_width = w;
-}
-
-
-/* Accessor for the current layout.  */
-enum tui_layout_type
-tui_current_layout (void)
-{
-  return current_layout;
-}
-
-
-/* Mutator for the current layout.  */
-void
-tui_set_current_layout_to (enum tui_layout_type new_layout)
-{
-  current_layout = new_layout;
 }
 
 

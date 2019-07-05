@@ -1,5 +1,17 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (current_layout, tui_current_layout): Move from
+	tui-data.c.
+	(show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Don't use
+	tui_set_current_layout_to.
+	* tui/tui-data.h (tui_set_current_layout_to): Don't declare.
+	* tui/tui-data.c (current_layout, tui_current_layout): Move to
+	tui-layout.c.
+	(tui_set_current_layout_to): Remove.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (tui_set_layout): Update.
 	* tui/tui-data.h (struct tui_layout_def): Remove.
 	(tui_layout_def): Don't declare.
