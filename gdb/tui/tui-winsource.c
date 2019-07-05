@@ -334,7 +334,6 @@ tui_source_window_base::refresh_all ()
 {
   show_source_content ();
   check_and_display_highlight_if_needed ();
-  tui_erase_exec_info_content (this);
   update_exec_info ();
 }
 
@@ -657,18 +656,12 @@ tui_source_window_base::show_exec_info_content ()
 
 
 void
-tui_erase_exec_info_content (struct tui_source_window_base *win_info)
+tui_clear_exec_info_content (struct tui_source_window_base *win_info)
 {
   struct tui_gen_win_info *exec_info = win_info->execution_info;
 
   werase (exec_info->handle);
   exec_info->refresh_window ();
-}
-
-void
-tui_clear_exec_info_content (struct tui_source_window_base *win_info)
-{
-  tui_erase_exec_info_content (win_info);
 }
 
 /* Function to update the execution info window.  */

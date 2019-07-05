@@ -1,5 +1,15 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_erase_exec_info_content): Don't
+	declare.
+	* tui/tui-winsource.c (tui_source_window_base::refresh_all): Don't
+	call tui_erase_exec_info_content.
+	(tui_clear_exec_info_content): Rename from
+	tui_erase_exec_info_content.
+	(tui_clear_exec_info_content): Delete.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<show_exec_info_content>: Declare.
 	(tui_show_exec_info_content): Don't declare.
