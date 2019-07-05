@@ -255,9 +255,10 @@ tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct tui_line_or_address val;
 
+  gdb_assert (TUI_DISASM_WIN != nullptr && TUI_DISASM_WIN->is_visible);
+
   val.loa = LOA_ADDRESS;
   val.u.addr = start_addr;
-  tui_add_win_to_layout (DISASSEM_WIN);
   tui_update_source_window (TUI_DISASM_WIN, gdbarch, s, val, FALSE);
 
   /* If the focus was in the src win, put it in the asm win, if the

@@ -1,5 +1,10 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-disasm.c (tui_show_disassem): Add assertion.  Don't call
+	tui_add_win_to_layout.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (tui_default_win_height): Don't declare.
 	* tui/tui-layout.c (tui_default_win_height): Now static.
 
