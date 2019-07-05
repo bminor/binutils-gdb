@@ -112,15 +112,14 @@ tui_highlight_win (struct tui_win_info *win_info)
 }
 
 void
-tui_check_and_display_highlight_if_needed (struct tui_win_info *win_info)
+tui_win_info::check_and_display_highlight_if_needed ()
 {
-  if (win_info != NULL && win_info->can_highlight)
+  if (can_highlight)
     {
-      if (win_info->is_highlighted)
-	tui_highlight_win (win_info);
+      if (is_highlighted)
+	tui_highlight_win (this);
       else
-	tui_unhighlight_win (win_info);
-
+	tui_unhighlight_win (this);
     }
 }
 

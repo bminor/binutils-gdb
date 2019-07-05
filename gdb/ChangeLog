@@ -1,5 +1,23 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_erase_source_content)
+	(tui_show_source_content, tui_source_window_base::refresh_all):
+	Update.
+	* tui/tui-wingeneral.h
+	(tui_check_and_display_highlight_if_needed): Don't declare.
+	* tui/tui-wingeneral.c
+	(tui_win_info::check_and_display_highlight_if_needed): Rename from
+	check_and_display_highlight_if_needed.
+	* tui/tui-win.c (tui_rehighlight_all)
+	(tui_win_info::make_visible_with_new_height): Update.
+	* tui/tui-regs.c (tui_data_window::display_registers_from_line)
+	(tui_data_window::erase_data_content)
+	(tui_data_window::display_all_data): Update.
+	* tui/tui-data.h (struct tui_win_info)
+	<check_and_display_highlight_if_needed>: Declare.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_resize_all): Call
 	tui_delete_invisible_windows.
 	* tui/tui-layout.c (show_layout): Call

@@ -291,6 +291,8 @@ public:
     return true;
   }
 
+  void check_and_display_highlight_if_needed ();
+
   /* Can this window ever be highlighted?  */
   bool can_highlight = true;
 

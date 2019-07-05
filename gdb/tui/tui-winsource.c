@@ -225,7 +225,7 @@ tui_erase_source_content (struct tui_source_window_base *win_info)
   if (win_info->handle != NULL)
     {
       werase (win_info->handle);
-      tui_check_and_display_highlight_if_needed (win_info);
+      win_info->check_and_display_highlight_if_needed ();
 
       const char *no_src_str;
 
@@ -287,7 +287,7 @@ tui_show_source_content (struct tui_source_window_base *win_info)
   else
     tui_erase_source_content (win_info);
 
-  tui_check_and_display_highlight_if_needed (win_info);
+  win_info->check_and_display_highlight_if_needed ();
   win_info->refresh_window ();
 }
 
@@ -333,7 +333,7 @@ void
 tui_source_window_base::refresh_all ()
 {
   tui_show_source_content (this);
-  tui_check_and_display_highlight_if_needed (this);
+  check_and_display_highlight_if_needed ();
   tui_erase_exec_info_content (this);
   tui_update_exec_info (this);
 }

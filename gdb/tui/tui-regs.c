@@ -369,7 +369,7 @@ tui_data_window::display_reg_element_at_line (int start_element_no,
 int
 tui_data_window::display_registers_from_line (int line_no)
 {
-  tui_check_and_display_highlight_if_needed (this);
+  check_and_display_highlight_if_needed ();
   if (!regs_content.empty ())
     {
       int element_no;
@@ -436,7 +436,7 @@ void
 tui_data_window::erase_data_content (const char *prompt)
 {
   werase (handle);
-  tui_check_and_display_highlight_if_needed (this);
+  check_and_display_highlight_if_needed ();
   if (prompt != NULL)
     {
       int half_width = (width - 2) / 2;
@@ -462,7 +462,7 @@ tui_data_window::display_all_data ()
     {
       erase_data_content (NULL);
       delete_data_content_windows ();
-      tui_check_and_display_highlight_if_needed (this);
+      check_and_display_highlight_if_needed ();
       display_registers_from (0);
     }
 }

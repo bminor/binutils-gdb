@@ -515,7 +515,7 @@ void
 tui_rehighlight_all (void)
 {
   for (tui_win_info *win_info : all_tui_windows ())
-    tui_check_and_display_highlight_if_needed (win_info);
+    win_info->check_and_display_highlight_if_needed ();
 }
 
 /* Resize all the windows based on the terminal size.  This function
@@ -1205,7 +1205,7 @@ void
 tui_win_info::make_visible_with_new_height ()
 {
   make_visible (true);
-  tui_check_and_display_highlight_if_needed (this);
+  check_and_display_highlight_if_needed ();
   do_make_visible_with_new_height ();
 }
 
