@@ -1,5 +1,14 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all): Call
+	tui_delete_invisible_windows.
+	* tui/tui-layout.c (show_layout): Call
+	tui_delete_invisible_windows.
+	* tui/tui-data.h (tui_delete_invisible_windows): Declare.
+	* tui/tui-data.c (tui_delete_invisible_windows): New function.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.c (tui_show_disassem): Add assertion.  Don't call
 	tui_add_win_to_layout.
 

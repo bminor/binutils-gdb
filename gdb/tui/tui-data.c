@@ -269,6 +269,28 @@ tui_initialize_static_data ()
   win->title = 0;
 }
 
+/* See tui-data.h.  */
+
+void
+tui_delete_invisible_windows ()
+{
+  for (int win_type = SRC_WIN; (win_type < MAX_MAJOR_WINDOWS); win_type++)
+    {
+      if (tui_win_list[win_type] != NULL
+	  && !tui_win_list[win_type]->is_visible)
+	{
+	  /* This should always be made visible before a call to this
+	     function.  */
+	  gdb_assert (win_type != CMD_WIN);
+
+	  if (win_with_focus == tui_win_list[win_type])
+	    win_with_focus = nullptr;
+
+	  delete tui_win_list[win_type];
+	  tui_win_list[win_type] = NULL;
+	}
+    }
+}
 
 tui_win_info::tui_win_info (enum tui_win_type type)
   : tui_gen_win_info (type)

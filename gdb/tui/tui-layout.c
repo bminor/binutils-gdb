@@ -107,6 +107,8 @@ show_layout (enum tui_layout_type layout)
 	default:
 	  break;
 	}
+
+      tui_delete_invisible_windows ();
     }
 }
 
@@ -596,6 +598,7 @@ show_data (enum tui_layout_type new_layout)
   locator->make_visible (true);
   tui_show_locator_content ();
   tui_add_to_source_windows (base);
+  TUI_CMD_WIN->make_visible (true);
   current_layout = new_layout;
 }
 

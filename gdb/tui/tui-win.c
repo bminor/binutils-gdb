@@ -537,7 +537,6 @@ tui_resize_all (void)
       struct tui_win_info *second_win;
       tui_source_window_base *src_win;
       struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-      int win_type;
       int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
 
 #ifdef HAVE_RESIZE_TERM
@@ -663,18 +662,8 @@ tui_resize_all (void)
 	    tui_erase_source_content (src_win);
 	  break;
 	}
-      /* Now remove all invisible windows, and their content so that
-         they get created again when called for with the new size.  */
-      for (win_type = SRC_WIN; (win_type < MAX_MAJOR_WINDOWS); win_type++)
-	{
-	  if (win_type != CMD_WIN 
-	      && (tui_win_list[win_type] != NULL)
-	      && !tui_win_list[win_type]->is_visible)
-	    {
-	      delete tui_win_list[win_type];
-	      tui_win_list[win_type] = NULL;
-	    }
-	}
+
+      tui_delete_invisible_windows ();
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
       if (win_with_focus != TUI_CMD_WIN)
