@@ -1,5 +1,12 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_layout): Unify all layout cases into a
+	single switch.
+	(show_source_disasm_command, show_source_or_disasm_and_command):
+	Don't check current layout.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (make_all_visible): Remove.
 	(tui_make_all_invisible): Simplify.
 	* tui/tui-layout.c (tui_make_all_invisible): Move from

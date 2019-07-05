@@ -83,33 +83,29 @@ show_layout (enum tui_layout_type layout)
       /* First make the current layout be invisible.  */
       tui_make_all_invisible ();
       tui_locator_win_info_ptr ()->make_visible (false);
-      if (layout == SRC_DATA_COMMAND 
-	  || layout == DISASSEM_DATA_COMMAND)
+      switch (layout)
 	{
+	case SRC_DATA_COMMAND:
+	case DISASSEM_DATA_COMMAND:
 	  show_data (layout);
 	  tui_refresh_all ();
-	}
-      else
-	{
-	  switch (layout)
-	    {
-	      /* Now show the new layout.  */
-	    case SRC_COMMAND:
-	      show_source_command ();
-	      tui_add_to_source_windows (TUI_SRC_WIN);
-	      break;
-	    case DISASSEM_COMMAND:
-	      show_disasm_command ();
-	      tui_add_to_source_windows (TUI_DISASM_WIN);
-	      break;
-	    case SRC_DISASSEM_COMMAND:
-	      show_source_disasm_command ();
-	      tui_add_to_source_windows (TUI_SRC_WIN);
-	      tui_add_to_source_windows (TUI_DISASM_WIN);
-	      break;
-	    default:
-	      break;
-	    }
+	  break;
+	  /* Now show the new layout.  */
+	case SRC_COMMAND:
+	  show_source_command ();
+	  tui_add_to_source_windows (TUI_SRC_WIN);
+	  break;
+	case DISASSEM_COMMAND:
+	  show_disasm_command ();
+	  tui_add_to_source_windows (TUI_DISASM_WIN);
+	  break;
+	case SRC_DISASSEM_COMMAND:
+	  show_source_disasm_command ();
+	  tui_add_to_source_windows (TUI_SRC_WIN);
+	  tui_add_to_source_windows (TUI_DISASM_WIN);
+	  break;
+	default:
+	  break;
 	}
     }
 }
@@ -500,59 +496,56 @@ show_disasm_command (void)
 static void
 show_source_disasm_command (void)
 {
-  if (tui_current_layout () != SRC_DISASSEM_COMMAND)
-    {
-      int cmd_height, src_height, asm_height;
+  int cmd_height, src_height, asm_height;
 
-      if (TUI_CMD_WIN != NULL)
-	cmd_height = TUI_CMD_WIN->height;
-      else
-	cmd_height = tui_term_height () / 3;
+  if (TUI_CMD_WIN != NULL)
+    cmd_height = TUI_CMD_WIN->height;
+  else
+    cmd_height = tui_term_height () / 3;
 
-      src_height = (tui_term_height () - cmd_height) / 2;
-      asm_height = tui_term_height () - (src_height + cmd_height);
+  src_height = (tui_term_height () - cmd_height) / 2;
+  asm_height = tui_term_height () - (src_height + cmd_height);
 
-      if (TUI_SRC_WIN == NULL)
-	tui_win_list[SRC_WIN] = new tui_source_window ();
-      TUI_SRC_WIN->reset (src_height,
-			  tui_term_width (),
-			  0,
-			  0);
-      TUI_SRC_WIN->make_visible (true);
-      TUI_SRC_WIN->m_has_locator = false;
-
-      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-      gdb_assert (locator != nullptr);
-
-      tui_show_source_content (TUI_SRC_WIN);
-      if (TUI_DISASM_WIN == NULL)
-	tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
-      TUI_DISASM_WIN->reset (asm_height,
-			     tui_term_width (),
-			     0,
-			     src_height - 1);
-      TUI_DISASM_WIN->make_visible (true);
-      locator->reset (2 /* 1 */ ,
+  if (TUI_SRC_WIN == NULL)
+    tui_win_list[SRC_WIN] = new tui_source_window ();
+  TUI_SRC_WIN->reset (src_height,
 		      tui_term_width (),
 		      0,
-		      (src_height + asm_height) - 1);
-      TUI_SRC_WIN->m_has_locator = false;
-      TUI_DISASM_WIN->m_has_locator = true;
-      locator->make_visible (true);
-      tui_show_locator_content ();
-      tui_show_source_content (TUI_DISASM_WIN);
+		      0);
+  TUI_SRC_WIN->make_visible (true);
+  TUI_SRC_WIN->m_has_locator = false;
 
-      if (TUI_CMD_WIN == NULL)
-	tui_win_list[CMD_WIN] = new tui_cmd_window ();
-      TUI_CMD_WIN->reset (cmd_height,
-			  tui_term_width (),
-			  0,
-			  tui_term_height () - cmd_height);
-      /* FIXME tui_cmd_window won't recreate the handle on
-	 make_visible, so we need this instead.  */
-      tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
-      current_layout = SRC_DISASSEM_COMMAND;
-    }
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+  gdb_assert (locator != nullptr);
+
+  tui_show_source_content (TUI_SRC_WIN);
+  if (TUI_DISASM_WIN == NULL)
+    tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
+  TUI_DISASM_WIN->reset (asm_height,
+			 tui_term_width (),
+			 0,
+			 src_height - 1);
+  TUI_DISASM_WIN->make_visible (true);
+  locator->reset (2 /* 1 */ ,
+		  tui_term_width (),
+		  0,
+		  (src_height + asm_height) - 1);
+  TUI_SRC_WIN->m_has_locator = false;
+  TUI_DISASM_WIN->m_has_locator = true;
+  locator->make_visible (true);
+  tui_show_locator_content ();
+  tui_show_source_content (TUI_DISASM_WIN);
+
+  if (TUI_CMD_WIN == NULL)
+    tui_win_list[CMD_WIN] = new tui_cmd_window ();
+  TUI_CMD_WIN->reset (cmd_height,
+		      tui_term_width (),
+		      0,
+		      tui_term_height () - cmd_height);
+  /* FIXME tui_cmd_window won't recreate the handle on
+     make_visible, so we need this instead.  */
+  tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
+  current_layout = SRC_DISASSEM_COMMAND;
 }
 
 
@@ -630,57 +623,54 @@ tui_gen_win_info::reset (int height_, int width_,
 static void
 show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 {
-  if (tui_current_layout () != layout_type)
+  struct tui_source_window_base *win_info;
+  int src_height, cmd_height;
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+  gdb_assert (locator != nullptr);
+
+  if (TUI_CMD_WIN != NULL)
+    cmd_height = TUI_CMD_WIN->height;
+  else
+    cmd_height = tui_term_height () / 3;
+  src_height = tui_term_height () - cmd_height;
+
+  if (layout_type == SRC_COMMAND)
     {
-      struct tui_source_window_base *win_info;
-      int src_height, cmd_height;
-      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-      gdb_assert (locator != nullptr);
+      if (tui_win_list[SRC_WIN] == nullptr)
+	tui_win_list[SRC_WIN] = new tui_source_window ();
+      win_info = TUI_SRC_WIN;
+    }
+  else
+    {
+      if (tui_win_list[DISASSEM_WIN] == nullptr)
+	tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
+      win_info = TUI_DISASM_WIN;
+    }
 
-      if (TUI_CMD_WIN != NULL)
-	cmd_height = TUI_CMD_WIN->height;
-      else
-	cmd_height = tui_term_height () / 3;
-      src_height = tui_term_height () - cmd_height;
+  locator->reset (2 /* 1 */ ,
+		  tui_term_width (),
+		  0,
+		  src_height - 1);
+  win_info->reset (src_height - 1,
+		   tui_term_width (),
+		   0,
+		   0);
+  win_info->make_visible (true);
 
-      if (layout_type == SRC_COMMAND)
-	{
-	  if (tui_win_list[SRC_WIN] == nullptr)
-	    tui_win_list[SRC_WIN] = new tui_source_window ();
-	  win_info = TUI_SRC_WIN;
-	}
-      else
-	{
-	  if (tui_win_list[DISASSEM_WIN] == nullptr)
-	    tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
-	  win_info = TUI_DISASM_WIN;
-	}
 
-      locator->reset (2 /* 1 */ ,
+  win_info->m_has_locator = true;
+  locator->make_visible (true);
+  tui_show_locator_content ();
+  tui_show_source_content (win_info);
+
+  if (TUI_CMD_WIN == NULL)
+    tui_win_list[CMD_WIN] = new tui_cmd_window ();
+  TUI_CMD_WIN->reset (cmd_height,
 		      tui_term_width (),
 		      0,
-		      src_height - 1);
-      win_info->reset (src_height - 1,
-		       tui_term_width (),
-		       0,
-		       0);
-      win_info->make_visible (true);
-
-
-      win_info->m_has_locator = true;
-      locator->make_visible (true);
-      tui_show_locator_content ();
-      tui_show_source_content (win_info);
-
-      if (TUI_CMD_WIN == NULL)
-	tui_win_list[CMD_WIN] = new tui_cmd_window ();
-      TUI_CMD_WIN->reset (cmd_height,
-			  tui_term_width (),
-			  0,
-			  src_height);
-      /* FIXME tui_cmd_window won't recreate the handle on
-	 make_visible, so we need this instead.  */
-      tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
-      current_layout = layout_type;
-    }
+		      src_height);
+  /* FIXME tui_cmd_window won't recreate the handle on
+     make_visible, so we need this instead.  */
+  tui_make_window (TUI_CMD_WIN, DONT_BOX_WINDOW);
+  current_layout = layout_type;
 }
