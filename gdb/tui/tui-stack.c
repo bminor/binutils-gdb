@@ -428,7 +428,7 @@ tui_show_frame_info (struct frame_info *fi)
 		}
 	    }
 
-	  tui_update_exec_info (win_info);
+	  win_info->update_exec_info ();
 	}
 
       return 1;
@@ -445,7 +445,7 @@ tui_show_frame_info (struct frame_info *fi)
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  tui_clear_source_content (win_info);
-	  tui_update_exec_info (win_info);
+	  win_info->update_exec_info ();
 	}
 
       return 1;

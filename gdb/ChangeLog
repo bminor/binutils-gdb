@@ -1,6 +1,18 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.h (struct tui_source_window_base)
+	<update_exec_info>: Declare.
+	(tui_update_exec_info): Don't declare.
+	* tui/tui-winsource.c (tui_update_source_window_as_is)
+	(tui_source_window_base::refresh_all)
+	(tui_update_all_breakpoint_info): Update.
+	(tui_source_window_base::update_exec_info): Rename from
+	tui_update_exec_info.
+	* tui/tui-stack.c (tui_show_frame_info): Update.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
 	<set_exec_info_content>: Declare.
 	(tui_set_exec_info_content): Don't declare.
 	* tui/tui-winsource.c

@@ -106,7 +106,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
     {
       tui_update_breakpoint_info (win_info, nullptr, false);
       win_info->show_source_content ();
-      tui_update_exec_info (win_info);
+      win_info->update_exec_info ();
       if (win_info->type == SRC_WIN)
 	{
 	  symtab_and_line sal;
@@ -335,7 +335,7 @@ tui_source_window_base::refresh_all ()
   show_source_content ();
   check_and_display_highlight_if_needed ();
   tui_erase_exec_info_content (this);
-  tui_update_exec_info (this);
+  update_exec_info ();
 }
 
 /* See tui-data.h.  */
@@ -517,7 +517,7 @@ tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
     {
       if (tui_update_breakpoint_info (win, being_deleted, false))
         {
-          tui_update_exec_info (win);
+          win->update_exec_info ();
         }
     }
 }
@@ -673,10 +673,10 @@ tui_clear_exec_info_content (struct tui_source_window_base *win_info)
 
 /* Function to update the execution info window.  */
 void
-tui_update_exec_info (struct tui_source_window_base *win_info)
+tui_source_window_base::update_exec_info ()
 {
-  win_info->set_exec_info_content ();
-  tui_show_exec_info_content (win_info);
+  set_exec_info_content ();
+  tui_show_exec_info_content (this);
 }
 
 void
