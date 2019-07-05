@@ -28,7 +28,6 @@ struct tui_win_info;
 struct tui_gen_win_info;
 
 extern void tui_unhighlight_win (struct tui_win_info *);
-extern void tui_make_all_visible (void);
 extern void tui_make_all_invisible (void);
 extern void tui_make_window (struct tui_gen_win_info *, enum tui_box);
 extern void tui_highlight_win (struct tui_win_info *);

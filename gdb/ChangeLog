@@ -1,5 +1,10 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_make_all_visible): Don't declare.
+	* tui/tui-wingeneral.c (tui_make_all_visible): Remove.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (current_layout, tui_current_layout): Move from
 	tui-data.c.
 	(show_source_disasm_command, show_data)

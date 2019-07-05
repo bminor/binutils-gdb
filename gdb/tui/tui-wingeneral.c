@@ -175,12 +175,6 @@ make_all_visible (bool visible)
 }
 
 void
-tui_make_all_visible (void)
-{
-  make_all_visible (true);
-}
-
-void
 tui_make_all_invisible (void)
 {
   make_all_visible (false);
