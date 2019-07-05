@@ -24,6 +24,26 @@
 
 #include "tui/tui-data.h"
 
+/* Flags to tell what kind of breakpoint is at current line.  */
+enum tui_bp_flag
+{
+  TUI_BP_ENABLED = 0x01,
+  TUI_BP_DISABLED = 0x02,
+  TUI_BP_HIT = 0x04,
+  TUI_BP_CONDITIONAL = 0x08,
+  TUI_BP_HARDWARE = 0x10
+};
+
+DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
+
+/* Position of breakpoint markers in the exec info string.  */
+#define TUI_BP_HIT_POS      0
+#define TUI_BP_BREAK_POS    1
+#define TUI_EXEC_POS        2
+#define TUI_EXECINFO_SIZE   4
+
+typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
+
 /* Execution info window class.  */
 
 struct tui_exec_info_window : public tui_gen_win_info
@@ -51,6 +71,27 @@ private:
 
   tui_exec_info_content *m_content = nullptr;
 };
+
+/* Elements in the Source/Disassembly Window.  */
+struct tui_source_element
+{
+  tui_source_element ()
+  {
+    line_or_addr.loa = LOA_LINE;
+    line_or_addr.u.line_no = 0;
+  }
+
+  ~tui_source_element ()
+  {
+    xfree (line);
+  }
+
+  char *line = nullptr;
+  struct tui_line_or_address line_or_addr;
+  bool is_exec_point = false;
+  tui_bp_flags break_mode = 0;
+};
+
 
 /* The base class for all source-like windows, namely the source and
    disassembly windows.  */

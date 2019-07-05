@@ -1,5 +1,15 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (enum tui_bp_flag, tui_bp_flags, struct tui_source_element)
+	(TUI_BP_HIT_POS, TUI_BP_BREAK_POS, TUI_EXEC_POS)
+	(TUI_EXECINFO_SIZE, tui_exec_info_content): Move ...
+	* tui/tui-winsource.h (enum tui_bp_flag, tui_bp_flags, struct
+	tui_source_element, TUI_BP_HIT_POS, TUI_BP_BREAK_POS)
+	(TUI_EXEC_POS, TUI_EXECINFO_SIZE, tui_exec_info_content):
+	... here.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<update_exec_info>: Declare.
 	(tui_update_exec_info): Don't declare.
