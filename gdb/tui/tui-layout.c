@@ -254,7 +254,7 @@ tui_add_win_to_layout (enum tui_win_type type)
 /* Answer the height of a window.  If it hasn't been created yet,
    answer what the height of a window would be based upon its type and
    the layout.  */
-int
+static int
 tui_default_win_height (enum tui_win_type type, 
 			enum tui_layout_type layout)
 {

@@ -1,5 +1,10 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (tui_default_win_height): Don't declare.
+	* tui/tui-layout.c (tui_default_win_height): Now static.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_layout): Unify all layout cases into a
 	single switch.
 	(show_source_disasm_command, show_source_or_disasm_and_command):
