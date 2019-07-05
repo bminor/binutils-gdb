@@ -641,17 +641,17 @@ tui_source_window_base::set_exec_info_content ()
 
 
 void
-tui_show_exec_info_content (struct tui_source_window_base *win_info)
+tui_source_window_base::show_exec_info_content ()
 {
-  struct tui_exec_info_window *exec_info = win_info->execution_info;
-  const tui_exec_info_content *content = exec_info->get_content ();
+  struct tui_exec_info_window *exec_info = execution_info;
+  const tui_exec_info_content *exec_content = exec_info->get_content ();
 
   werase (exec_info->handle);
-  for (int cur_line = 1; cur_line <= win_info->content.size (); cur_line++)
+  for (int cur_line = 1; cur_line <= content.size (); cur_line++)
     mvwaddstr (exec_info->handle,
 	       cur_line,
 	       0,
-	       content[cur_line - 1]);
+	       exec_content[cur_line - 1]);
   exec_info->refresh_window ();
 }
 
@@ -676,7 +676,7 @@ void
 tui_source_window_base::update_exec_info ()
 {
   set_exec_info_content ();
-  tui_show_exec_info_content (this);
+  show_exec_info_content ();
 }
 
 void
