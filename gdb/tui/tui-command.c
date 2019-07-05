@@ -31,14 +31,6 @@
 /* See tui-command.h.  */
 
 void
-tui_cmd_window::clear_detail ()
-{
-  wmove (handle, 0, 0);
-}
-
-/* See tui-command.h.  */
-
-void
 tui_cmd_window::do_make_visible_with_new_height ()
 {
 #ifdef HAVE_WRESIZE

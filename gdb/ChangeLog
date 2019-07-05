@@ -1,3 +1,14 @@
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<clear_detail>: No longer "override".
+	* tui/tui-regs.h (struct tui_data_window) <clear_detail>: Remove.
+	* tui/tui-regs.c (tui_data_window::clear_detail): Remove.
+	* tui/tui-data.h (struct tui_win_info) <clear_detail>: Remove.
+	* tui/tui-command.h (struct tui_cmd_window) <clear_detail>:
+	Remove.
+	* tui/tui-command.c (tui_cmd_window::clear_detail): Remove.
+
 2019-08-13  Tom Tromey  <tromey@adacore.com>
 
 	* tracepoint.c: Don't include readline.h or history.h.

@@ -249,9 +249,6 @@ public:
   {
   }
 
-  /* Clear the pertinent detail in the window.  */
-  virtual void clear_detail () = 0;
-
   /* Called after all the TUI windows are refreshed, to let this
      window have a chance to update itself further.  */
   virtual void refresh_all ()

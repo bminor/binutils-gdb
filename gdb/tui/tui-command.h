@@ -35,8 +35,6 @@ struct tui_cmd_window : public tui_win_info
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 
-  void clear_detail () override;
-
   void make_visible (bool visible) override
   {
   }

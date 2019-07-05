@@ -521,16 +521,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
 /* See tui-regs.h.  */
 
 void
-tui_data_window::clear_detail ()
-{
-  regs_content.clear ();
-  regs_column_count = 1;
-  display_regs = false;
-}
-
-/* See tui-regs.h.  */
-
-void
 tui_data_window::set_new_height (int height)
 {
   /* Delete all data item windows.  */

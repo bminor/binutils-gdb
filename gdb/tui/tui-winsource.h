@@ -67,7 +67,7 @@ protected:
 
 public:
 
-  void clear_detail () override;
+  void clear_detail ();
 
   void make_visible (bool visible) override;
   void refresh_window () override;
