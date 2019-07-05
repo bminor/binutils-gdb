@@ -105,7 +105,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
   else
     {
       tui_update_breakpoint_info (win_info, nullptr, false);
-      tui_show_source_content (win_info);
+      win_info->show_source_content ();
       tui_update_exec_info (win_info);
       if (win_info->type == SRC_WIN)
 	{
@@ -275,20 +275,20 @@ tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
 }
 
 void
-tui_show_source_content (struct tui_source_window_base *win_info)
+tui_source_window_base::show_source_content ()
 {
-  if (!win_info->content.empty ())
+  if (!content.empty ())
     {
       int lineno;
 
-      for (lineno = 1; lineno <= win_info->content.size (); lineno++)
-        tui_show_source_line (win_info, lineno);
+      for (lineno = 1; lineno <= content.size (); lineno++)
+        tui_show_source_line (this, lineno);
     }
   else
-    tui_erase_source_content (win_info);
+    tui_erase_source_content (this);
 
-  win_info->check_and_display_highlight_if_needed ();
-  win_info->refresh_window ();
+  check_and_display_highlight_if_needed ();
+  refresh_window ();
 }
 
 /* See tui-data.h.  */
@@ -332,7 +332,7 @@ tui_source_window_base::reset (int height, int width,
 void
 tui_source_window_base::refresh_all ()
 {
-  tui_show_source_content (this);
+  show_source_content ();
   check_and_display_highlight_if_needed ();
   tui_erase_exec_info_content (this);
   tui_update_exec_info (this);

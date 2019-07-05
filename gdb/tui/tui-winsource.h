@@ -89,6 +89,8 @@ public:
   void reset (int height, int width,
 	      int origin_x, int origin_y) override;
 
+  void show_source_content ();
+
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
   /* Execution information window.  */
@@ -139,7 +141,6 @@ extern void tui_update_source_windows_with_line (struct symtab *,
 						 int);
 extern void tui_clear_source_content (struct tui_source_window_base *);
 extern void tui_erase_source_content (struct tui_source_window_base *);
-extern void tui_show_source_content (struct tui_source_window_base *);
 extern void tui_set_exec_info_content (struct tui_source_window_base *);
 extern void tui_show_exec_info_content (struct tui_source_window_base *);
 extern void tui_erase_exec_info_content (struct tui_source_window_base *);

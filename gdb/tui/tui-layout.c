@@ -520,7 +520,7 @@ show_source_disasm_command (void)
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   gdb_assert (locator != nullptr);
 
-  tui_show_source_content (TUI_SRC_WIN);
+  TUI_SRC_WIN->show_source_content ();
   if (TUI_DISASM_WIN == NULL)
     tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
   TUI_DISASM_WIN->reset (asm_height,
@@ -536,7 +536,7 @@ show_source_disasm_command (void)
   TUI_DISASM_WIN->m_has_locator = true;
   locator->make_visible (true);
   tui_show_locator_content ();
-  tui_show_source_content (TUI_DISASM_WIN);
+  TUI_DISASM_WIN->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)
     tui_win_list[CMD_WIN] = new tui_cmd_window ();
@@ -664,7 +664,7 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
   win_info->m_has_locator = true;
   locator->make_visible (true);
   tui_show_locator_content ();
-  tui_show_source_content (win_info);
+  win_info->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)
     tui_win_list[CMD_WIN] = new tui_cmd_window ();
