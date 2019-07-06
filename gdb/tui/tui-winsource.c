@@ -98,7 +98,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
     ret = tui_set_disassem_content (win_info, gdbarch, line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
-    tui_clear_source_content (win_info);
+    win_info->erase_source_content ();
   else
     {
       tui_update_breakpoint_info (win_info, nullptr, false);
@@ -153,7 +153,7 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
   else
     {
       for (struct tui_source_window_base *win_info : tui_source_windows ())
-	tui_clear_source_content (win_info);
+	win_info->erase_source_content ();
     }
 }
 
@@ -192,30 +192,12 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 }
 
 void
-tui_clear_source_content (struct tui_source_window_base *win_info)
-{
-  if (win_info != NULL)
-    {
-      int i;
-
-      win_info->erase_source_content ();
-      for (i = 0; i < win_info->content.size (); i++)
-	{
-	  struct tui_source_element *element = &win_info->content[i];
-
-	  element->break_mode = 0;
-	  element->is_exec_point = false;
-	}
-    }
-}
-
-
-void
 tui_source_window_base::do_erase_source_content (const char *str)
 {
   int x_pos;
   int half_width = (width - 2) / 2;
 
+  content.clear ();
   if (handle != NULL)
     {
       werase (handle);
@@ -230,7 +212,6 @@ tui_source_window_base::do_erase_source_content (const char *str)
 		 x_pos,
 		 (char *) str);
 
-      content.clear ();
       refresh_window ();
 
       werase (execution_info->handle);

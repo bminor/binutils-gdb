@@ -411,7 +411,7 @@ tui_show_frame_info (struct frame_info *fi)
       tui_show_locator_content ();
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
-	  tui_clear_source_content (win_info);
+	  win_info->erase_source_content ();
 	  win_info->update_exec_info ();
 	}
 

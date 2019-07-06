@@ -187,7 +187,6 @@ extern void tui_update_source_window_as_is (struct tui_source_window_base *,
 extern void tui_update_source_windows_with_addr (struct gdbarch *, CORE_ADDR);
 extern void tui_update_source_windows_with_line (struct symtab *, 
 						 int);
-extern void tui_clear_source_content (struct tui_source_window_base *);
 
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */
