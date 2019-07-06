@@ -1,3 +1,8 @@
+2019-07-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.h (tui_copy_win, tui_box_win): Don't
+	declare.
+
 2019-07-30  Tom Tromey  <tromey@adacore.com>
 
 	* block.c (contained_in): Remove BLOCK_FUNCTION check.
