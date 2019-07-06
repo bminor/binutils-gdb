@@ -1,5 +1,21 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<do_erase_source_content>: New method.
+	<erase_source_content>: New method.
+	(tui_erase_source_content): Don't declare.
+	* tui/tui-winsource.c (tui_clear_source_content): Update.
+	(tui_source_window_base::do_erase_source_content): Rename from
+	tui_erase_source_content.
+	(tui_source_window_base::show_source_content): Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Update.
+	* tui/tui-source.h (struct tui_source_window)
+	<erase_source_content>: New method.
+	* tui/tui-disasm.h (struct tui_disasm_window)
+	<erase_source_content>: New method.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_alloc_source_buffer): Don't declare.
 	(struct tui_source_element): Add DISABLE_COPY_AND_ASSIGN, and move
 	constructor.

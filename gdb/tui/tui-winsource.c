@@ -198,7 +198,7 @@ tui_clear_source_content (struct tui_source_window_base *win_info)
     {
       int i;
 
-      tui_erase_source_content (win_info);
+      win_info->erase_source_content ();
       for (i = 0; i < win_info->content.size (); i++)
 	{
 	  struct tui_source_element *element = &win_info->content[i];
@@ -211,38 +211,30 @@ tui_clear_source_content (struct tui_source_window_base *win_info)
 
 
 void
-tui_erase_source_content (struct tui_source_window_base *win_info)
+tui_source_window_base::do_erase_source_content (const char *str)
 {
   int x_pos;
-  int half_width = (win_info->width - 2) / 2;
+  int half_width = (width - 2) / 2;
 
-  if (win_info->handle != NULL)
+  if (handle != NULL)
     {
-      werase (win_info->handle);
-      win_info->check_and_display_highlight_if_needed ();
+      werase (handle);
+      check_and_display_highlight_if_needed ();
 
-      const char *no_src_str;
-
-      if (win_info->type == SRC_WIN)
-	no_src_str = NO_SRC_STRING;
-      else
-	no_src_str = NO_DISASSEM_STRING;
-      if (strlen (no_src_str) >= half_width)
+      if (strlen (str) >= half_width)
 	x_pos = 1;
       else
-	x_pos = half_width - strlen (no_src_str);
-      mvwaddstr (win_info->handle,
-		 (win_info->height / 2),
+	x_pos = half_width - strlen (str);
+      mvwaddstr (handle,
+		 (height / 2),
 		 x_pos,
-		 (char *) no_src_str);
+		 (char *) str);
 
-      win_info->content.clear ();
-      win_info->refresh_window ();
+      content.clear ();
+      refresh_window ();
 
-      struct tui_gen_win_info *exec_info = win_info->execution_info;
-
-      werase (exec_info->handle);
-      exec_info->refresh_window ();
+      werase (execution_info->handle);
+      execution_info->refresh_window ();
     }
 }
 
@@ -284,7 +276,7 @@ tui_source_window_base::show_source_content ()
         tui_show_source_line (this, lineno);
     }
   else
-    tui_erase_source_content (this);
+    erase_source_content ();
 
   check_and_display_highlight_if_needed ();
   refresh_window ();

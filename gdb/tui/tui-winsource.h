@@ -100,6 +100,9 @@ protected:
   void do_scroll_horizontal (int num_to_scroll) override;
   void do_make_visible_with_new_height () override;
 
+  /* Erase the content and display STRING.  */
+  void do_erase_source_content (const char *string);
+
 public:
 
   void clear_detail ();
@@ -132,6 +135,9 @@ public:
      the location is already displayed.  */
   virtual void maybe_update (struct frame_info *fi, symtab_and_line sal,
 			     int line_no, CORE_ADDR addr) = 0;
+
+  /* Erase the source content.  */
+  virtual void erase_source_content () = 0;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;
@@ -182,7 +188,6 @@ extern void tui_update_source_windows_with_addr (struct gdbarch *, CORE_ADDR);
 extern void tui_update_source_windows_with_line (struct symtab *, 
 						 int);
 extern void tui_clear_source_content (struct tui_source_window_base *);
-extern void tui_erase_source_content (struct tui_source_window_base *);
 
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */

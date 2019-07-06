@@ -48,6 +48,11 @@ struct tui_disasm_window : public tui_source_window_base
 		     int line_no, CORE_ADDR addr)
     override;
 
+  void erase_source_content () override
+  {
+    do_erase_source_content (NO_DISASSEM_STRING);
+  }
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
