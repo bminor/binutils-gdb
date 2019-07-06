@@ -67,6 +67,12 @@ public:
   virtual void reset (int height, int width,
 		      int origin_x, int origin_y);
 
+  /* Return true if this can be boxed.  */
+  virtual bool can_box () const
+  {
+    return false;
+  }
+
   /* Window handle.  */
   WINDOW *handle = nullptr;
   /* Type of window.  */
@@ -83,13 +89,6 @@ public:
   bool is_visible = false;
   /* Window title to display.  */
   char *title = nullptr;
-};
-
-/* Whether or not a window should be drawn with a box.  */
-enum tui_box
-{
-  DONT_BOX_WINDOW = 0,
-  BOX_WINDOW
 };
 
 /* Constant definitions.  */
@@ -244,6 +243,11 @@ public:
 
   /* Return true if this window can be scrolled, false otherwise.  */
   virtual bool can_scroll () const
+  {
+    return true;
+  }
+
+  bool can_box () const override
   {
     return true;
   }

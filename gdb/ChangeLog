@@ -1,3 +1,19 @@
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.h (tui_make_window): Update.
+	* tui/tui-wingeneral.c (tui_make_window): Remove "box_it"
+	parameter.
+	(tui_gen_win_info::make_visible): Update.
+	* tui/tui-regs.c (tui_data_window::display_registers_from):
+	Update.
+	* tui/tui-layout.c (show_source_disasm_command)
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <can_box>: New method.
+	(enum tui_box): Remove.
+	(struct tui_win_info) <can_box>: New method.
+	* tui/tui-command.h (struct tui_cmd_window) <can_box>: New
+	method.
+
 2019-08-15  Tom de Vries  <tdevries@suse.de>
 
 	* linux-nat-trad.c: Include gdbarch.h.

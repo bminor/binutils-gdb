@@ -125,7 +125,7 @@ tui_win_info::check_and_display_highlight_if_needed ()
 
 
 void
-tui_make_window (struct tui_gen_win_info *win_info, enum tui_box box_it)
+tui_make_window (struct tui_gen_win_info *win_info)
 {
   WINDOW *handle;
 
@@ -136,7 +136,7 @@ tui_make_window (struct tui_gen_win_info *win_info, enum tui_box box_it)
   win_info->handle = handle;
   if (handle != NULL)
     {
-      if (box_it == BOX_WINDOW)
+      if (win_info->can_box ())
 	box_win (win_info, NO_HILITE);
       win_info->is_visible = true;
       scrollok (handle, TRUE);
@@ -155,8 +155,7 @@ tui_gen_win_info::make_visible (bool visible)
   is_visible = visible;
 
   if (visible)
-    tui_make_window (this, (tui_win_is_auxiliary (type)
-			    ? DONT_BOX_WINDOW : BOX_WINDOW));
+    tui_make_window (this);
   else
     {
       tui_delete_win (handle);

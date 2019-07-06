@@ -55,6 +55,11 @@ struct tui_cmd_window : public tui_win_info
     return false;
   }
 
+  bool can_box () const override
+  {
+    return false;
+  }
+
   int start_line = 0;
 
 protected:
