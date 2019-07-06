@@ -124,8 +124,8 @@ public:
 
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
-  void reset (int height, int width,
-	      int origin_x, int origin_y) override;
+  void resize (int height, int width,
+	       int origin_x, int origin_y) override;
 
   void show_source_content ();
 

@@ -1,5 +1,17 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base) <resize>:
+	Rename from reset.
+	* tui/tui-winsource.c (tui_source_window_base::resize): Rename.
+	* tui/tui-layout.c (show_source_disasm_command, show_data):
+	Update.
+	(tui_gen_win_info::resize): Rename.
+	(show_source_or_disasm_and_command): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <resize>: Rename from
+	reset.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_initialize_static_data): Remove.
 	* tui/tui-interp.c (tui_interp::init): Don't call
 	tui_initialize_static_data.

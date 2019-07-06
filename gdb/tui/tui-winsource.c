@@ -291,12 +291,12 @@ tui_source_window_base::~tui_source_window_base ()
 }  
 
 void
-tui_source_window_base::reset (int height, int width,
-			       int origin_x, int origin_y)
+tui_source_window_base::resize (int height, int width,
+				int origin_x, int origin_y)
 {
-  tui_gen_win_info::reset (height, width - 3,
-			   origin_x + 3, origin_y);
-  execution_info->reset (height, 3, origin_x, origin_y);
+  tui_gen_win_info::resize (height, width - 3,
+			    origin_x + 3, origin_y);
+  execution_info->resize (height, 3, origin_x, origin_y);
 }
 
 /* See tui-data.h.  */

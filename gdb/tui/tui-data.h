@@ -62,10 +62,10 @@ public:
     return "";
   }
 
-  /* Reset this window.  The parameters are used to set the window's
+  /* Resize this window.  The parameters are used to set the window's
      size and position.  */
-  virtual void reset (int height, int width,
-		      int origin_x, int origin_y);
+  virtual void resize (int height, int width,
+		       int origin_x, int origin_y);
 
   /* Return true if this can be boxed.  */
   virtual bool can_box () const
