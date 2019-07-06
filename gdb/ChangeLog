@@ -1,5 +1,18 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<maybe_update>: Declare.
+	* tui/tui-stack.c (tui_show_frame_info): Call maybe_update
+	method.
+	* tui/tui-source.h (struct tui_source_window) <maybe_update>:
+	Declare.
+	* tui/tui-source.c (tui_source_window::maybe_update): New method.
+	* tui/tui-disasm.h (struct tui_disasm_window) <maybe_update>:
+	Declare.
+	* tui/tui-disasm.c (tui_disasm_window::maybe_update): New method.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_make_status_line): Use string constructor.
 
 2019-08-15  Tom Tromey  <tom@tromey.com>

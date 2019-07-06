@@ -47,6 +47,10 @@ struct tui_source_window : public tui_source_window_base
 
   bool showing_source_p (const char *filename) const;
 
+  void maybe_update (struct frame_info *fi, symtab_and_line sal,
+		     int line_no, CORE_ADDR addr)
+    override;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;

@@ -23,6 +23,7 @@
 #define TUI_TUI_WINSOURCE_H
 
 #include "tui/tui-data.h"
+#include "symtab.h"
 
 /* Flags to tell what kind of breakpoint is at current line.  */
 enum tui_bp_flag
@@ -115,6 +116,11 @@ public:
   void show_source_content ();
 
   void update_exec_info ();
+
+  /* Update the window to display the given location.  Does nothing if
+     the location is already displayed.  */
+  virtual void maybe_update (struct frame_info *fi, symtab_and_line sal,
+			     int line_no, CORE_ADDR addr) = 0;
 
   /* Does the locator belong to this window?  */
   bool m_has_locator = false;

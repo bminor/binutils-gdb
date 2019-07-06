@@ -293,3 +293,29 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 	  && filename_cmp (fullname,
 			   symtab_to_fullname (loc->symtab)) == 0);
 }
+
+void
+tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
+				 int line_no, CORE_ADDR addr)
+{
+  int start_line = (line_no - (viewport_height / 2)) + 1;
+  if (start_line <= 0)
+    start_line = 1;
+
+  bool source_already_displayed = (sal.symtab != 0
+				   && showing_source_p (fullname));
+
+  struct tui_line_or_address l;
+
+  l.loa = LOA_LINE;
+  l.u.line_no = start_line;
+  if (!(source_already_displayed
+	&& tui_line_is_displayed (line_no, this, TRUE)))
+    tui_update_source_window (this, get_frame_arch (fi),
+			      sal.symtab, l, TRUE);
+  else
+    {
+      l.u.line_no = line_no;
+      set_is_exec_point_at (l);
+    }
+}

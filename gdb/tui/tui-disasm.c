@@ -380,3 +380,34 @@ tui_disasm_window::location_matches_p (struct bp_location *loc, int line_no)
   return (content[line_no].line_or_addr.loa == LOA_ADDRESS
 	  && content[line_no].line_or_addr.u.addr == loc->address);
 }
+
+void
+tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
+				 int line_no, CORE_ADDR addr)
+{
+  CORE_ADDR low;
+
+  if (find_pc_partial_function (get_frame_pc (fi),
+				NULL, &low, NULL) == 0)
+    {
+      /* There is no symbol available for current PC.  There is no
+	 safe way how to "disassemble backwards".  */
+      low = get_frame_pc (fi);
+    }
+  else
+    low = tui_get_low_disassembly_address (get_frame_arch (fi),
+					   low, get_frame_pc (fi));
+
+  struct tui_line_or_address a;
+
+  a.loa = LOA_ADDRESS;
+  a.u.addr = low;
+  if (!tui_addr_is_displayed (addr, this, TRUE))
+    tui_update_source_window (this, get_frame_arch (fi),
+			      sal.symtab, a, TRUE);
+  else
+    {
+      a.u.addr = addr;
+      set_is_exec_point_at (a);
+    }
+}
