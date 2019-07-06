@@ -304,7 +304,7 @@ tui_default_win_viewport_height (enum tui_win_type type,
 
   h = tui_default_win_height (type, layout);
 
-  if (tui_win_list[type] == TUI_CMD_WIN)
+  if (type == CMD_WIN)
     h -= 1;
   else
     h -= 2;
