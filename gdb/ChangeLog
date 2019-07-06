@@ -1,5 +1,13 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command)
+	(show_source_or_disasm_and_command): Use make_visible method, not
+	tui_make_window.
+	* tui/tui-command.h (struct tui_cmd_window) <make_visible>:
+	Remove.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_window): Update.
 	* tui/tui-wingeneral.c (tui_make_window): Remove "box_it"
 	parameter.

@@ -544,9 +544,7 @@ show_source_disasm_command (void)
 		      tui_term_width (),
 		      0,
 		      tui_term_height () - cmd_height);
-  /* FIXME tui_cmd_window won't recreate the handle on
-     make_visible, so we need this instead.  */
-  tui_make_window (TUI_CMD_WIN);
+  TUI_CMD_WIN->make_visible (true);
   current_layout = SRC_DISASSEM_COMMAND;
 }
 
@@ -672,8 +670,6 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		      tui_term_width (),
 		      0,
 		      src_height);
-  /* FIXME tui_cmd_window won't recreate the handle on
-     make_visible, so we need this instead.  */
-  tui_make_window (TUI_CMD_WIN);
+  TUI_CMD_WIN->make_visible (true);
   current_layout = layout_type;
 }
