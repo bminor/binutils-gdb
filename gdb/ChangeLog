@@ -1,5 +1,17 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c: Include tui-stack.h.
+	* tui/tui-stack.h (MAX_LOCATOR_ELEMENT_LEN)
+	(struct tui_locator_window): Move from tui-data.h.
+	* tui/tui-stack.c (_locator, tui_locator_win_info_ptr)
+	(tui_initialize_static_data): Move from tui-data.c.
+	* tui/tui-data.h (MAX_LOCATOR_ELEMENT_LEN)
+	(struct tui_locator_window): Move to tui-stack.c.
+	* tui/tui-data.c (_locator, tui_locator_win_info_ptr)
+	(tui_initialize_static_data): Move to tui-stack.c.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_disasm_command)
 	(show_source_or_disasm_and_command): Use make_visible method, not
 	tui_make_window.

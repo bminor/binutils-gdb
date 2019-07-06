@@ -36,7 +36,6 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 ** Private data
 ****************************/
 static int term_height, term_width;
-static struct tui_locator_window _locator;
 static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 
@@ -127,15 +126,6 @@ tui_add_to_source_windows (struct tui_source_window_base *win_info)
   if (source_windows.size () < 2)
     source_windows.push_back (win_info);
 }
-
-/* Accessor for the locator win info.  Answers a pointer to the static
-   locator win info struct.  */
-struct tui_locator_window *
-tui_locator_win_info_ptr (void)
-{
-  return &_locator;
-}
-
 
 /* Accessor for the term_height.  */
 int
@@ -251,21 +241,6 @@ tui_partial_win_by_name (const char *name)
     }
 
   return NULL;
-}
-
-
-void
-tui_initialize_static_data ()
-{
-  tui_gen_win_info *win = tui_locator_win_info_ptr ();
-  win->width =
-    win->height =
-    win->origin.x =
-    win->origin.y =
-    win->viewport_height = 0;
-  win->handle = NULL;
-  win->is_visible = false;
-  win->title = 0;
 }
 
 /* See tui-data.h.  */
