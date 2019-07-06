@@ -242,8 +242,6 @@ tui_interp::init (bool top_level)
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
 
-  tui_initialize_static_data ();
-
   tui_initialize_io ();
   tui_initialize_win ();
   if (ui_file_isatty (gdb_stdout))

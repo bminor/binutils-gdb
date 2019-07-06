@@ -1,5 +1,12 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (tui_initialize_static_data): Remove.
+	* tui/tui-interp.c (tui_interp::init): Don't call
+	tui_initialize_static_data.
+	* tui/tui-data.h (tui_initialize_static_data): Don't declare.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (tui_default_win_viewport_height): Don't
 	examine tui_win_list.
 

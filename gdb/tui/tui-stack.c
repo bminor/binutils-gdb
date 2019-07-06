@@ -66,21 +66,6 @@ tui_locator_win_info_ptr (void)
   return &_locator;
 }
 
-void
-tui_initialize_static_data ()
-{
-  tui_gen_win_info *win = tui_locator_win_info_ptr ();
-  win->width =
-    win->height =
-    win->origin.x =
-    win->origin.y =
-    win->viewport_height = 0;
-  win->handle = NULL;
-  win->is_visible = false;
-  win->title = 0;
-}
-
-
 /* Create the status line to display as much information as we can on
    this single line: target name, process number, current function,
    current line, current PC, SingleKey mode.  */
