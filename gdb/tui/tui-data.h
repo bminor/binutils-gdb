@@ -79,8 +79,6 @@ public:
   struct tui_point origin = {0, 0};
   /* Viewport height.  */
   int viewport_height = 0;
-  /* Index of last visible line.  */
-  int last_visible_line = 0;
   /* Whether the window is visible or not.  */
   bool is_visible = false;
   /* Window title to display.  */

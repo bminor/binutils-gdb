@@ -1,5 +1,11 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_gen_win_info) <last_visible_line>:
+	Remove.
+	* tui/tui-data.c (tui_initialize_static_data): Update.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_exec_info_window)
 	<~tui_exec_info_window, maybe_allocate_content, get_content,
 	m_content>: Remove.

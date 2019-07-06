@@ -262,8 +262,7 @@ tui_initialize_static_data ()
     win->height =
     win->origin.x =
     win->origin.y =
-    win->viewport_height =
-    win->last_visible_line = 0;
+    win->viewport_height = 0;
   win->handle = NULL;
   win->is_visible = false;
   win->title = 0;
