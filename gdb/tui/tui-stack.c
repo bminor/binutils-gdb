@@ -128,11 +128,9 @@ tui_make_status_line (struct tui_locator_window *loc)
     line_width = MIN_LINE_WIDTH;
 
   /* Translate PC address.  */
-  string_file pc_out;
-
-  fputs_filtered (loc->gdbarch? paddress (loc->gdbarch, loc->addr) : "??",
-		  &pc_out);
-
+  std::string pc_out (loc->gdbarch
+		      ? paddress (loc->gdbarch, loc->addr)
+		      : "??");
   const char *pc_buf = pc_out.c_str ();
   int pc_width = pc_out.size ();
 

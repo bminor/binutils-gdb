@@ -1,5 +1,9 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (tui_make_status_line): Use string constructor.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c: Include tui-stack.h.
 	* tui/tui-stack.h (MAX_LOCATOR_ELEMENT_LEN)
 	(struct tui_locator_window): Move from tui-data.h.
