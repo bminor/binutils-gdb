@@ -309,14 +309,18 @@ init_symtab (ctf_file_t *fp, const ctf_header_t *hp,
   return 0;
 }
 
-/* Set the CTF base pointer and derive the buf pointer from it, initializing
-   everything in the ctf_file that depends on the base or buf pointers.  */
+/* Reset the CTF base pointer and derive the buf pointer from it, initializing
+   everything in the ctf_file that depends on the base or buf pointers.
+
+   The original gap between the buf and base pointers, if any -- the original,
+   unconverted CTF header -- is kept, but its contents are not specified and are
+   never used.  */
 
 static void
-ctf_set_base (ctf_file_t *fp, const ctf_header_t *hp, void *base)
+ctf_set_base (ctf_file_t *fp, const ctf_header_t *hp, unsigned char *base)
 {
+  fp->ctf_buf = base + (fp->ctf_buf - fp->ctf_base);
   fp->ctf_base = base;
-  fp->ctf_buf = fp->ctf_base + sizeof (ctf_header_t);
   fp->ctf_vars = (ctf_varent_t *) ((const char *) fp->ctf_buf +
 				   hp->cth_varoff);
   fp->ctf_nvars = (hp->cth_typeoff - hp->cth_varoff) / sizeof (ctf_varent_t);
@@ -336,25 +340,15 @@ ctf_set_base (ctf_file_t *fp, const ctf_header_t *hp, void *base)
     fp->ctf_parlabel = ctf_strptr (fp, hp->cth_parlabel);
   if (hp->cth_parname != 0)
     fp->ctf_parname = ctf_strptr (fp, hp->cth_parname);
+  if (hp->cth_cuname != 0)
+    fp->ctf_cuname = ctf_strptr (fp, hp->cth_cuname);
 
-  ctf_dprintf ("ctf_set_base: parent name %s (label %s)\n",
-	       fp->ctf_parname ? fp->ctf_parname : "<NULL>",
+  if (fp->ctf_cuname)
+    ctf_dprintf ("ctf_set_base: CU name %s\n", fp->ctf_cuname);
+  if (fp->ctf_parname)
+    ctf_dprintf ("ctf_set_base: parent name %s (label %s)\n",
+	       fp->ctf_parname,
 	       fp->ctf_parlabel ? fp->ctf_parlabel : "<NULL>");
-}
-
-/* Free a ctf_base pointer: the pointer passed, or (if NULL) fp->ctf_base.  */
-static void
-ctf_free_base (ctf_file_t *fp, unsigned char *ctf_base)
-{
-  unsigned char *base;
-
-  if (ctf_base)
-      base = ctf_base;
-  else
-      base = (unsigned char *) fp->ctf_base;
-
-  if (base != fp->ctf_data.cts_data && base != NULL)
-    ctf_free (base);
 }
 
 /* Set the version of the CTF file. */
@@ -364,14 +358,32 @@ ctf_free_base (ctf_file_t *fp, unsigned char *ctf_base)
    caller must ensure this has been done in advance.  */
 
 static void
-ctf_set_version (ctf_file_t * fp, ctf_header_t * cth, int ctf_version)
+ctf_set_version (ctf_file_t *fp, ctf_header_t *cth, int ctf_version)
 {
   fp->ctf_version = ctf_version;
   cth->cth_version = ctf_version;
   fp->ctf_fileops = &ctf_fileops[ctf_version];
 }
 
-/* Upgrade the type table to CTF_VERSION_3 (really CTF_VERSION_1_UPGRADED_3).
+
+/* Upgrade the header to CTF_VERSION_3.  The upgrade is done in-place.  */
+static void
+upgrade_header (ctf_header_t *hp)
+{
+  ctf_header_v2_t *oldhp = (ctf_header_v2_t *) hp;
+
+  hp->cth_strlen = oldhp->cth_strlen;
+  hp->cth_stroff = oldhp->cth_stroff;
+  hp->cth_typeoff = oldhp->cth_typeoff;
+  hp->cth_varoff = oldhp->cth_varoff;
+  hp->cth_funcoff = oldhp->cth_funcoff;
+  hp->cth_objtoff = oldhp->cth_objtoff;
+  hp->cth_lbloff = oldhp->cth_lbloff;
+  hp->cth_cuname = 0;				/* No CU name.  */
+}
+
+/* Upgrade the type table to CTF_VERSION_3 (really CTF_VERSION_1_UPGRADED_3)
+   from CTF_VERSION_1.
 
    The upgrade is not done in-place: the ctf_base is moved.  ctf_strptr() must
    not be called before reallocation is complete.
@@ -379,17 +391,16 @@ ctf_set_version (ctf_file_t * fp, ctf_header_t * cth, int ctf_version)
    Type kinds not checked here due to nonexistence in older formats:
       CTF_K_SLICE.  */
 static int
-upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
+upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
 {
   const ctf_type_v1_t *tbuf;
   const ctf_type_v1_t *tend;
-  unsigned char *ctf_base, *old_ctf_base = (unsigned char *) fp->ctf_base;
+  unsigned char *ctf_base, *old_ctf_base = (unsigned char *) fp->ctf_dynbase;
   ctf_type_t *t2buf;
 
   ssize_t increase = 0, size, increment, v2increment, vbytes, v2bytes;
   const ctf_type_v1_t *tp;
   ctf_type_t *t2p;
-  ctf_header_t *new_cth;
 
   tbuf = (ctf_type_v1_t *) (fp->ctf_buf + cth->cth_typeoff);
   tend = (ctf_type_v1_t *) (fp->ctf_buf + cth->cth_stroff);
@@ -425,35 +436,33 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
       increase += v2bytes - vbytes;
     }
 
-  /* Allocate enough room for the new buffer, then copy everything but the
-     type section into place, and reset the base accordingly.  Leave the
-     version number unchanged, so that LCTF_INFO_* still works on the
+  /* Allocate enough room for the new buffer, then copy everything but the type
+     section into place, and reset the base accordingly.  Leave the version
+     number unchanged, so that LCTF_INFO_* still works on the
      as-yet-untranslated type info.  */
 
   if ((ctf_base = ctf_alloc (fp->ctf_size + increase)) == NULL)
     return ECTF_ZALLOC;
 
-  memcpy (ctf_base, fp->ctf_base, sizeof (ctf_header_t) + cth->cth_typeoff);
-  memcpy (ctf_base + sizeof (ctf_header_t) + cth->cth_stroff + increase,
-	  fp->ctf_base + sizeof (ctf_header_t) + cth->cth_stroff,
-	  cth->cth_strlen);
+  /* Start at ctf_buf, not ctf_base, to squeeze out the original header: we
+     never use it and it is unconverted.  */
 
-  memset (ctf_base + sizeof (ctf_header_t) + cth->cth_typeoff, 0,
-	 cth->cth_stroff - cth->cth_typeoff + increase);
+  memcpy (ctf_base, fp->ctf_buf, cth->cth_typeoff);
+  memcpy (ctf_base + cth->cth_stroff + increase,
+	  fp->ctf_buf + cth->cth_stroff, cth->cth_strlen);
 
-  /* The cth here is an automatic variable in ctf_bufopen(), and transient
-     (a copy maintained because at that stage the header read out of the
-     ctf file may be read-only). We make all modifications in the
-     canonical copy at ctf_base (by now, writable), then copy it back into
-     cth at the end.  */
+  memset (ctf_base + cth->cth_typeoff, 0, cth->cth_stroff - cth->cth_typeoff
+	  + increase);
 
-  new_cth = (ctf_header_t *) ctf_base;
-  new_cth->cth_stroff += increase;
+  cth->cth_stroff += increase;
   fp->ctf_size += increase;
-  assert (new_cth->cth_stroff >= new_cth->cth_typeoff);
-  ctf_set_base (fp, new_cth, ctf_base);
+  assert (cth->cth_stroff >= cth->cth_typeoff);
+  fp->ctf_base = ctf_base;
+  fp->ctf_buf = ctf_base;
+  fp->ctf_dynbase = ctf_base;
+  ctf_set_base (fp, cth, ctf_base);
 
-  t2buf = (ctf_type_t *) (fp->ctf_buf + new_cth->cth_typeoff);
+  t2buf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
 
   /* Iterate through all the types again, upgrading them.
 
@@ -596,12 +605,35 @@ upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
      converting too much, or too little (leading to a buffer overrun either here
      or at read time, in init_types().) */
 
-  assert ((size_t) t2p - (size_t) fp->ctf_buf == new_cth->cth_stroff);
+  assert ((size_t) t2p - (size_t) fp->ctf_buf == cth->cth_stroff);
 
-  ctf_set_version (fp, (ctf_header_t *) ctf_base, CTF_VERSION_1_UPGRADED_3);
-  ctf_free_base (fp, old_ctf_base);
-  memcpy (cth, new_cth, sizeof (ctf_header_t));
+  ctf_set_version (fp, cth, CTF_VERSION_1_UPGRADED_3);
+  ctf_free (old_ctf_base);
 
+  return 0;
+}
+
+/* Upgrade from any earlier version.  */
+static int
+upgrade_types (ctf_file_t *fp, ctf_header_t *cth)
+{
+  switch (cth->cth_version)
+    {
+      /* v1 requires a full pass and reformatting.  */
+    case CTF_VERSION_1:
+      upgrade_types_v1 (fp, cth);
+      /* FALLTHRU */
+      /* Already-converted v1 is just like later versions except that its
+	 parent/child boundary is unchanged (and much lower).  */
+
+    case CTF_VERSION_1_UPGRADED_3:
+      fp->ctf_parmax = CTF_MAX_PTYPE_V1;
+
+      /* v2 is just the same as v3 except for new types and sections:
+	 no upgrading required. */
+    case CTF_VERSION_2: ;
+      /* FALLTHRU */
+    }
   return 0;
 }
 
@@ -932,6 +964,7 @@ flip_header (ctf_header_t *cth)
   swap_thing (cth->cth_preamble.ctp_flags);
   swap_thing (cth->cth_parlabel);
   swap_thing (cth->cth_parname);
+  swap_thing (cth->cth_cuname);
   swap_thing (cth->cth_objtoff);
   swap_thing (cth->cth_funcoff);
   swap_thing (cth->cth_varoff);
@@ -1131,7 +1164,7 @@ flip_types (void *start, size_t len)
   return 0;
 }
 
-/* Flip the endianness of BASE, given the offsets in the (already endian-
+/* Flip the endianness of BUF, given the offsets in the (already endian-
    converted) CTH.
 
    All of this stuff happens before the header is fully initialized, so the
@@ -1139,15 +1172,13 @@ flip_types (void *start, size_t len)
    data, this is no real loss.  */
 
 static int
-flip_ctf (ctf_header_t *cth, unsigned char *base)
+flip_ctf (ctf_header_t *cth, unsigned char *buf)
 {
-  base += sizeof (ctf_header_t);
-
-  flip_lbls (base + cth->cth_lbloff, cth->cth_objtoff - cth->cth_lbloff);
-  flip_objts (base + cth->cth_objtoff, cth->cth_funcoff - cth->cth_objtoff);
-  flip_objts (base + cth->cth_funcoff, cth->cth_varoff - cth->cth_funcoff);
-  flip_vars (base + cth->cth_varoff, cth->cth_typeoff - cth->cth_varoff);
-  return flip_types (base + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
+  flip_lbls (buf + cth->cth_lbloff, cth->cth_objtoff - cth->cth_lbloff);
+  flip_objts (buf + cth->cth_objtoff, cth->cth_funcoff - cth->cth_objtoff);
+  flip_objts (buf + cth->cth_funcoff, cth->cth_varoff - cth->cth_funcoff);
+  flip_vars (buf + cth->cth_varoff, cth->cth_typeoff - cth->cth_varoff);
+  return flip_types (buf + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
@@ -1205,10 +1236,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
   const ctf_preamble_t *pp;
-  ctf_header_t hp;
+  size_t hdrsz = sizeof (ctf_header_t);
+  ctf_header_t *hp;
   ctf_file_t *fp;
-  void *base;
-  size_t size, hdrsz;
   int foreign_endian = 0;
   int err;
 
@@ -1270,36 +1300,55 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       return (ctf_set_open_errno (errp, ECTF_NOTSUP));
     }
 
-  if (ctfsect->cts_size < sizeof (ctf_header_t))
+  if (pp->ctp_version < CTF_VERSION_3)
+    hdrsz = sizeof (ctf_header_v2_t);
+
+  if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
 
-  memcpy (&hp, ctfsect->cts_data, sizeof (hp));
+  if ((fp = ctf_alloc (sizeof (ctf_file_t))) == NULL)
+    return (ctf_set_open_errno (errp, ENOMEM));
+
+  memset (fp, 0, sizeof (ctf_file_t));
+
+  if ((fp->ctf_header = ctf_alloc (sizeof (struct ctf_header))) == NULL)
+    {
+      ctf_free (fp);
+      return (ctf_set_open_errno (errp, ENOMEM));
+    }
+  hp = fp->ctf_header;
+  memcpy (hp, ctfsect->cts_data, hdrsz);
+  if (pp->ctp_version < CTF_VERSION_3)
+    upgrade_header (hp);
 
   if (foreign_endian)
-    flip_header (&hp);
+    flip_header (hp);
 
   ctf_dprintf ("header offsets: %x/%x/%x/%x/%x/%x/%x\n",
-	       hp.cth_lbloff, hp.cth_objtoff, hp.cth_funcoff, hp.cth_varoff,
-	       hp.cth_typeoff, hp.cth_stroff, hp.cth_strlen);
-  hdrsz = sizeof (ctf_header_t);
+	       hp->cth_lbloff, hp->cth_objtoff, hp->cth_funcoff,
+	       hp->cth_varoff, hp->cth_typeoff, hp->cth_stroff,
+               hp->cth_strlen);
 
-  size = hp.cth_stroff + hp.cth_strlen;
+  fp->ctf_size = hp->cth_stroff + hp->cth_strlen;
 
-  ctf_dprintf ("ctf_bufopen: uncompressed size=%lu\n", (unsigned long) size);
+  ctf_dprintf ("ctf_bufopen: uncompressed size=%lu\n",
+	       (unsigned long) fp->ctf_size);
 
-  if (hp.cth_lbloff > size || hp.cth_objtoff > size
-      || hp.cth_funcoff > size || hp.cth_typeoff > size || hp.cth_stroff > size)
+  if (hp->cth_lbloff > fp->ctf_size || hp->cth_objtoff > fp->ctf_size
+      || hp->cth_funcoff > fp->ctf_size || hp->cth_typeoff > fp->ctf_size
+      || hp->cth_stroff > fp->ctf_size)
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 
-  if (hp.cth_lbloff > hp.cth_objtoff
-      || hp.cth_objtoff > hp.cth_funcoff
-      || hp.cth_funcoff > hp.cth_typeoff
-      || hp.cth_funcoff > hp.cth_varoff
-      || hp.cth_varoff > hp.cth_typeoff || hp.cth_typeoff > hp.cth_stroff)
+  if (hp->cth_lbloff > hp->cth_objtoff
+      || hp->cth_objtoff > hp->cth_funcoff
+      || hp->cth_funcoff > hp->cth_typeoff
+      || hp->cth_funcoff > hp->cth_varoff
+      || hp->cth_varoff > hp->cth_typeoff || hp->cth_typeoff > hp->cth_stroff)
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 
-  if ((hp.cth_lbloff & 3) || (hp.cth_objtoff & 1)
-      || (hp.cth_funcoff & 1) || (hp.cth_varoff & 3) || (hp.cth_typeoff & 3))
+  if ((hp->cth_lbloff & 3) || (hp->cth_objtoff & 2)
+      || (hp->cth_funcoff & 2) || (hp->cth_varoff & 3)
+      || (hp->cth_typeoff & 3))
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 
   /* Once everything is determined to be valid, attempt to decompress the CTF
@@ -1310,76 +1359,78 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   /* Note: if this is a v1 buffer, it will be reallocated and expanded by
      init_types().  */
 
-  if (hp.cth_flags & CTF_F_COMPRESS)
+  if (hp->cth_flags & CTF_F_COMPRESS)
     {
       size_t srclen;
       uLongf dstlen;
       const void *src;
       int rc = Z_OK;
-      void *buf;
 
-      if ((base = ctf_alloc (size + hdrsz)) == NULL)
-	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
+      /* We are allocating this ourselves, so we can drop the ctf header
+	 copy in favour of ctf->ctf_header.  */
 
-      memcpy (base, ctfsect->cts_data, hdrsz);
-      ((ctf_preamble_t *) base)->ctp_flags &= ~CTF_F_COMPRESS;
-      buf = (unsigned char *) base + hdrsz;
+      if ((fp->ctf_base = ctf_alloc (fp->ctf_size)) == NULL)
+	{
+	  err = ECTF_ZALLOC;
+	  goto bad;
+	}
+      fp->ctf_dynbase = fp->ctf_base;
+      hp->cth_flags &= ~CTF_F_COMPRESS;
 
       src = (unsigned char *) ctfsect->cts_data + hdrsz;
       srclen = ctfsect->cts_size - hdrsz;
-      dstlen = size;
+      dstlen = fp->ctf_size;
+      fp->ctf_buf = fp->ctf_base;
 
-      if ((rc = uncompress (buf, &dstlen, src, srclen)) != Z_OK)
+      if ((rc = uncompress (fp->ctf_base, &dstlen, src, srclen)) != Z_OK)
 	{
 	  ctf_dprintf ("zlib inflate err: %s\n", zError (rc));
-	  free (base);
-	  return (ctf_set_open_errno (errp, ECTF_DECOMPRESS));
+	  err = ECTF_DECOMPRESS;
+	  goto bad;
 	}
 
-      if ((size_t) dstlen != size)
+      if ((size_t) dstlen != fp->ctf_size)
 	{
 	  ctf_dprintf ("zlib inflate short -- got %lu of %lu "
-		       "bytes\n", (unsigned long) dstlen, (unsigned long) size);
-	  free (base);
-	  return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+		       "bytes\n", (unsigned long) dstlen,
+		       (unsigned long) fp->ctf_size);
+	  err = ECTF_CORRUPT;
+	  goto bad;
 	}
-
     }
   else if (foreign_endian)
     {
-      if ((base = ctf_alloc (size + hdrsz)) == NULL)
-	return (ctf_set_open_errno (errp, ECTF_ZALLOC));
-      memcpy (base, ctfsect->cts_data, size + hdrsz);
+      if ((fp->ctf_base = ctf_alloc (fp->ctf_size)) == NULL)
+	{
+	  err = ECTF_ZALLOC;
+	  goto bad;
+	}
+      fp->ctf_dynbase = fp->ctf_base;
+      memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data) + hdrsz,
+	      fp->ctf_size);
+      fp->ctf_buf = fp->ctf_base;
     }
   else
-    base = (void *) ctfsect->cts_data;
-
-  /* Flip the endianness of the copy of the header in the section, to avoid
-     ending up with a partially-endian-flipped file.  */
-
-  if (foreign_endian)
-    flip_header ((ctf_header_t *) base);
+    {
+      /* We are just using the section passed in -- but its header may be an old
+	 version.  Point ctf_buf past the old header, and never touch it
+	 again.  */
+      fp->ctf_base = (unsigned char *) ctfsect->cts_data;
+      fp->ctf_dynbase = NULL;
+      fp->ctf_buf = fp->ctf_base + hdrsz;
+    }
 
   /* Once we have uncompressed and validated the CTF data buffer, we can
-     proceed with allocating a ctf_file_t and initializing it.
+     proceed with initializing the ctf_file_t we allocated above.
 
      Nothing that depends on buf or base should be set directly in this function
      before the init_types() call, because it may be reallocated during
      transparent upgrade if this recension of libctf is so configured: see
-     ctf_set_base() and ctf_realloc_base().  */
+     ctf_set_base().  */
 
-  if ((fp = ctf_alloc (sizeof (ctf_file_t))) == NULL)
-    return (ctf_set_open_errno (errp, ENOMEM));
-
-  memset (fp, 0, sizeof (ctf_file_t));
-  ctf_set_version (fp, &hp, hp.cth_version);
+  ctf_set_version (fp, hp, hp->cth_version);
   ctf_str_create_atoms (fp);
-
-  if (_libctf_unlikely_ (hp.cth_version < CTF_VERSION_2))
-    fp->ctf_parmax = CTF_MAX_PTYPE_V1;
-  else
-    fp->ctf_parmax = CTF_MAX_PTYPE;
-
+  fp->ctf_parmax = CTF_MAX_PTYPE;
   memcpy (&fp->ctf_data, ctfsect, sizeof (ctf_sect_t));
 
   if (symsect != NULL)
@@ -1409,28 +1460,25 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (foreign_endian &&
-      (err = flip_ctf (&hp, base)) != 0)
+      (err = flip_ctf (hp, fp->ctf_buf)) != 0)
     {
       /* We can be certain that flip_ctf() will have endian-flipped everything
          other than the types table when we return.  In particular the header
          is fine, so set it, to allow freeing to use the usual code path.  */
 
-      (void) ctf_set_open_errno (errp, err);
-      ctf_set_base (fp, &hp, base);
+      ctf_set_base (fp, hp, fp->ctf_base);
       goto bad;
     }
 
-  ctf_set_base (fp, &hp, base);
-  fp->ctf_size = size + hdrsz;
+  ctf_set_base (fp, hp, fp->ctf_base);
 
-  if ((err = init_types (fp, &hp)) != 0)
-    {
-      (void) ctf_set_open_errno (errp, err);
-      goto bad;
-    }
+  if ((err = init_types (fp, hp)) != 0)
+    goto bad;
 
   /* If we have a symbol table section, allocate and initialize
-     the symtab translation table, pointed to by ctf_sxlate.  */
+     the symtab translation table, pointed to by ctf_sxlate.  This table may be
+     too large for the actual size of the object and function info sections: if
+     so, ctf_nsyms will be adjusted and the excess will never be used.  */
 
   if (symsect != NULL)
     {
@@ -1439,15 +1487,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
       if (fp->ctf_sxlate == NULL)
 	{
-	  (void) ctf_set_open_errno (errp, ENOMEM);
+	  err = ENOMEM;
 	  goto bad;
 	}
 
-      if ((err = init_symtab (fp, &hp, symsect, strsect)) != 0)
-	{
-	  (void) ctf_set_open_errno (errp, err);
-	  goto bad;
-	}
+      if ((err = init_symtab (fp, hp, symsect, strsect)) != 0)
+	goto bad;
     }
 
   /* Initialize the ctf_lookup_by_name top-level dictionary.  We keep an
@@ -1483,6 +1528,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   return fp;
 
 bad:
+  ctf_set_open_errno (errp, err);
   ctf_file_close (fp);
   return NULL;
 }
@@ -1509,11 +1555,9 @@ ctf_file_close (ctf_file_t *fp)
       return;
     }
 
-  if (fp->ctf_dynparname != NULL)
-    ctf_free (fp->ctf_dynparname);
-
-  if (fp->ctf_parent != NULL)
-    ctf_file_close (fp->ctf_parent);
+  ctf_free (fp->ctf_dyncuname);
+  ctf_free (fp->ctf_dynparname);
+  ctf_file_close (fp->ctf_parent);
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
@@ -1530,40 +1574,32 @@ ctf_file_close (ctf_file_t *fp)
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
   ctf_str_free_atoms (fp);
-
   ctf_free (fp->ctf_tmp_typeslice);
 
-  if (fp->ctf_data.cts_name != _CTF_NULLSTR &&
-      fp->ctf_data.cts_name != NULL)
+  if (fp->ctf_data.cts_name != _CTF_NULLSTR)
     ctf_free ((char *) fp->ctf_data.cts_name);
 
-  if (fp->ctf_symtab.cts_name != _CTF_NULLSTR &&
-      fp->ctf_symtab.cts_name != NULL)
+  if (fp->ctf_symtab.cts_name != _CTF_NULLSTR)
     ctf_free ((char *) fp->ctf_symtab.cts_name);
 
-  if (fp->ctf_strtab.cts_name != _CTF_NULLSTR &&
-      fp->ctf_strtab.cts_name != NULL)
+  if (fp->ctf_strtab.cts_name != _CTF_NULLSTR)
     ctf_free ((char *) fp->ctf_strtab.cts_name);
 
   else if (fp->ctf_data_mmapped)
     ctf_munmap (fp->ctf_data_mmapped, fp->ctf_data_mmapped_len);
 
-  ctf_free_base (fp, NULL);
+  ctf_free (fp->ctf_dynbase);
 
-  if (fp->ctf_sxlate != NULL)
-    ctf_free (fp->ctf_sxlate);
-
-  if (fp->ctf_txlate != NULL)
-    ctf_free (fp->ctf_txlate);
-
-  if (fp->ctf_ptrtab != NULL)
-    ctf_free (fp->ctf_ptrtab);
+  ctf_free (fp->ctf_sxlate);
+  ctf_free (fp->ctf_txlate);
+  ctf_free (fp->ctf_ptrtab);
 
   ctf_hash_destroy (fp->ctf_structs);
   ctf_hash_destroy (fp->ctf_unions);
   ctf_hash_destroy (fp->ctf_enums);
   ctf_hash_destroy (fp->ctf_names);
 
+  ctf_free (fp->ctf_header);
   ctf_free (fp);
 }
 
@@ -1619,6 +1655,25 @@ ctf_parent_name_set (ctf_file_t *fp, const char *name)
 
   fp->ctf_dynparname = ctf_strdup (name);
   fp->ctf_parname = fp->ctf_dynparname;
+}
+
+/* Return the name of the compilation unit this CTF file applies to.  Usually
+   non-NULL only for non-parent containers.  */
+const char *
+ctf_cuname (ctf_file_t *fp)
+{
+  return fp->ctf_cuname;
+}
+
+/* Set the compilation unit name.  */
+void
+ctf_cuname_set (ctf_file_t *fp, const char *name)
+{
+  if (fp->ctf_dyncuname != NULL)
+    ctf_free (fp->ctf_dyncuname);
+
+  fp->ctf_dyncuname = ctf_strdup (name);
+  fp->ctf_cuname = fp->ctf_dyncuname;
 }
 
 /* Import the types from the specified parent container by storing a pointer

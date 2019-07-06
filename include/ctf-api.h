@@ -258,6 +258,8 @@ extern void ctf_file_close (ctf_file_t *);
 extern int ctf_arc_write (const char *, ctf_file_t **, size_t,
 			  const char **, size_t);
 
+extern const char *ctf_cuname (ctf_file_t *);
+extern void ctf_cuname_set (ctf_file_t *, const char *);
 extern ctf_file_t *ctf_parent_file (ctf_file_t *);
 extern const char *ctf_parent_name (ctf_file_t *);
 extern void ctf_parent_name_set (ctf_file_t *, const char *);

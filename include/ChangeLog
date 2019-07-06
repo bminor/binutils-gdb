@@ -1,3 +1,14 @@
+2019-07-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_cuname): New function.
+	(ctf_cuname_set): Likewise.
+	* ctf.h: Improve comment around upgrading, no longer
+	implying that v2 is the target of upgrades (it is v3 now).
+	(ctf_header_v2_t): New, old-format header for backward
+	compatibility.
+	(ctf_header_t): Add cth_cuname: this is the first of several
+	header changes in format v3.
+
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_section_already_linked): Forward declare.
