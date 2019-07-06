@@ -126,11 +126,26 @@ typedef struct ctf_preamble
   unsigned char ctp_flags;	/* Flags (see below).  */
 } ctf_preamble_t;
 
+typedef struct ctf_header_v2
+{
+  ctf_preamble_t cth_preamble;
+  uint32_t cth_parlabel;	/* Ref to name of parent lbl uniq'd against.  */
+  uint32_t cth_parname;		/* Ref to basename of parent.  */
+  uint32_t cth_lbloff;		/* Offset of label section.  */
+  uint32_t cth_objtoff;		/* Offset of object section.  */
+  uint32_t cth_funcoff;		/* Offset of function section.  */
+  uint32_t cth_varoff;		/* Offset of variable section.  */
+  uint32_t cth_typeoff;		/* Offset of type section.  */
+  uint32_t cth_stroff;		/* Offset of string section.  */
+  uint32_t cth_strlen;		/* Length of string section in bytes.  */
+} ctf_header_v2_t;
+
 typedef struct ctf_header
 {
   ctf_preamble_t cth_preamble;
   uint32_t cth_parlabel;	/* Ref to name of parent lbl uniq'd against.  */
   uint32_t cth_parname;		/* Ref to basename of parent.  */
+  uint32_t cth_cuname;		/* Ref to CU name (may be 0).  */
   uint32_t cth_lbloff;		/* Offset of label section.  */
   uint32_t cth_objtoff;		/* Offset of object section.  */
   uint32_t cth_funcoff;		/* Offset of function section.  */
@@ -148,13 +163,14 @@ typedef struct ctf_header
 
 /* Data format version number.  */
 
-/* v1 upgraded to v2 is not quite the same as native v2 (the boundary between
-   parent and child types is different), and you can write it out again via
-   ctf_compress_write(), so we must track whether the thing was originally v1 or
-   not.  If we were writing the header from scratch, we would add a *pair* of
-   version number fields to allow for this, but this will do for now.  (A flag
-   will not do, because we need to encode both the version we came from and the
-   version we went to, not just "we were upgraded".) */
+/* v1 upgraded to a later version is not quite the same as the native form,
+   because the boundary between parent and child types is different but not
+   recorded anywhere, and you can write it out again via ctf_compress_write(),
+   so we must track whether the thing was originally v1 or not.  If we were
+   writing the header from scratch, we would add a *pair* of version number
+   fields to allow for this, but this will do for now.  (A flag will not do,
+   because we need to encode both the version we came from and the version we
+   went to, not just "we were upgraded".) */
 
 # define CTF_VERSION_1 1
 # define CTF_VERSION_1_UPGRADED_3 2

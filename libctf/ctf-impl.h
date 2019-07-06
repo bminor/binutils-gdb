@@ -217,6 +217,7 @@ typedef struct ctf_str_atom_ref
 struct ctf_file
 {
   const ctf_fileops_t *ctf_fileops; /* Version-specific file operations.  */
+  struct ctf_header *ctf_header;    /* The header from this CTF file.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
@@ -230,8 +231,9 @@ struct ctf_file
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
   uint64_t ctf_str_num_refs;	  /* Number of refs to cts_str_atoms.  */
-  const unsigned char *ctf_base;  /* Base of CTF header + uncompressed buffer.  */
-  const unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
+  unsigned char *ctf_base;	  /* CTF file pointer.  */
+  unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
+  unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   uint32_t *ctf_sxlate;		  /* Translation table for symtab entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
@@ -241,6 +243,8 @@ struct ctf_file
   unsigned long ctf_nvars;	  /* Number of variables in ctf_vars.  */
   unsigned long ctf_typemax;	  /* Maximum valid type ID number.  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
+  const char *ctf_cuname;	  /* Compilation unit name (if any).  */
+  char *ctf_dyncuname;		  /* Dynamically allocated name of CU.  */
   struct ctf_file *ctf_parent;	  /* Parent CTF container (if any).  */
   const char *ctf_parlabel;	  /* Label in parent container (if any).  */
   const char *ctf_parname;	  /* Basename of parent (if any).  */
