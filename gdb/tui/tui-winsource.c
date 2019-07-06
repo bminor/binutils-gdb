@@ -98,10 +98,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
     ret = tui_set_disassem_content (win_info, gdbarch, line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
-    {
-      tui_clear_source_content (win_info);
-      tui_clear_exec_info_content (win_info);
-    }
+    tui_clear_source_content (win_info);
   else
     {
       tui_update_breakpoint_info (win_info, nullptr, false);
@@ -156,10 +153,7 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
   else
     {
       for (struct tui_source_window_base *win_info : tui_source_windows ())
-	{
-	  tui_clear_source_content (win_info);
-	  tui_clear_exec_info_content (win_info);
-	}
+	tui_clear_source_content (win_info);
     }
 }
 
@@ -244,6 +238,11 @@ tui_erase_source_content (struct tui_source_window_base *win_info)
 
       win_info->content.clear ();
       win_info->refresh_window ();
+
+      struct tui_gen_win_info *exec_info = win_info->execution_info;
+
+      werase (exec_info->handle);
+      exec_info->refresh_window ();
     }
 }
 
@@ -654,15 +653,6 @@ tui_source_window_base::show_exec_info_content ()
   exec_info->refresh_window ();
 }
 
-
-void
-tui_clear_exec_info_content (struct tui_source_window_base *win_info)
-{
-  struct tui_gen_win_info *exec_info = win_info->execution_info;
-
-  werase (exec_info->handle);
-  exec_info->refresh_window ();
-}
 
 /* Function to update the execution info window.  */
 void
