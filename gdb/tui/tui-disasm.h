@@ -51,6 +51,11 @@ struct tui_disasm_window : public tui_source_window_base
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
+
+private:
+  /* Answer whether a particular line number or address is displayed
+     in the current source window.  */
+  bool addr_is_displayed (CORE_ADDR addr) const;
 };
 
 extern enum tui_status tui_set_disassem_content (tui_source_window_base *,

@@ -177,9 +177,6 @@ extern void tui_alloc_source_buffer (struct tui_source_window_base *);
 extern int tui_line_is_displayed (int,
 				  struct tui_source_window_base *,
 				  int);
-extern int tui_addr_is_displayed (CORE_ADDR,
-				  struct tui_source_window_base *,
-				  int);
 
 
 /* Constant definitions. */

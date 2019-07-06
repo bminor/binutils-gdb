@@ -668,31 +668,3 @@ tui_line_is_displayed (int line,
 
   return is_displayed;
 }
-
-
-/* Answer whether a particular line number or address is displayed
-   in the current source window.  */
-int
-tui_addr_is_displayed (CORE_ADDR addr, 
-		       struct tui_source_window_base *win_info,
-		       int check_threshold)
-{
-  int is_displayed = FALSE;
-  int i, threshold;
-
-  if (check_threshold)
-    threshold = SCROLL_THRESHOLD;
-  else
-    threshold = 0;
-  i = 0;
-  while (i < win_info->content.size () - threshold
-	 && !is_displayed)
-    {
-      is_displayed
-	= win_info->content[i].line_or_addr.loa == LOA_ADDRESS
-	  && win_info->content[i].line_or_addr.u.addr == addr;
-      i++;
-    }
-
-  return is_displayed;
-}

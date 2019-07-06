@@ -381,6 +381,24 @@ tui_disasm_window::location_matches_p (struct bp_location *loc, int line_no)
 	  && content[line_no].line_or_addr.u.addr == loc->address);
 }
 
+bool
+tui_disasm_window::addr_is_displayed (CORE_ADDR addr) const
+{
+  bool is_displayed = false;
+  int threshold = SCROLL_THRESHOLD;
+
+  int i = 0;
+  while (i < content.size () - threshold && !is_displayed)
+    {
+      is_displayed
+	= (content[i].line_or_addr.loa == LOA_ADDRESS
+	   && content[i].line_or_addr.u.addr == addr);
+      i++;
+    }
+
+  return is_displayed;
+}
+
 void
 tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
 				 int line_no, CORE_ADDR addr)
@@ -402,7 +420,7 @@ tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
 
   a.loa = LOA_ADDRESS;
   a.u.addr = low;
-  if (!tui_addr_is_displayed (addr, this, TRUE))
+  if (!addr_is_displayed (addr))
     tui_update_source_window (this, get_frame_arch (fi),
 			      sal.symtab, a, TRUE);
   else
