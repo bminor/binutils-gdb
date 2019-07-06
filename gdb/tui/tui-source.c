@@ -294,6 +294,25 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 			   symtab_to_fullname (loc->symtab)) == 0);
 }
 
+/* See tui-source.h.  */
+
+bool
+tui_source_window::line_is_displayed (int line) const
+{
+  bool is_displayed = false;
+  int threshold = SCROLL_THRESHOLD;
+  int i = 0;
+  while (i < content.size () - threshold && !is_displayed)
+    {
+      is_displayed
+	= (content[i].line_or_addr.loa == LOA_LINE
+	   && content[i].line_or_addr.u.line_no == line);
+      i++;
+    }
+
+  return is_displayed;
+}
+
 void
 tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
 				 int line_no, CORE_ADDR addr)
@@ -310,7 +329,7 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
   l.loa = LOA_LINE;
   l.u.line_no = start_line;
   if (!(source_already_displayed
-	&& tui_line_is_displayed (line_no, this, TRUE)))
+	&& line_is_displayed (line_no)))
     tui_update_source_window (this, get_frame_arch (fi),
 			      sal.symtab, l, TRUE);
   else

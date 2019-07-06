@@ -1,5 +1,16 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_line_is_displayed): Don't declare.
+	* tui/tui-winsource.c (tui_line_is_displayed): Move to
+	tui-source.c.
+	* tui/tui-source.h (struct tui_source_window) <line_is_displayed>:
+	Declare.
+	* tui/tui-source.c (tui_source_window::line_is_displayed): New
+	method.
+	(tui_source_window::maybe_update): Update.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_addr_is_displayed): Don't declare.
 	* tui/tui-winsource.c (tui_addr_is_displayed): Move to
 	tui-disasm.c.

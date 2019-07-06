@@ -174,9 +174,6 @@ extern void tui_clear_source_content (struct tui_source_window_base *);
 extern void tui_erase_source_content (struct tui_source_window_base *);
 
 extern void tui_alloc_source_buffer (struct tui_source_window_base *);
-extern int tui_line_is_displayed (int,
-				  struct tui_source_window_base *,
-				  int);
 
 
 /* Constant definitions. */

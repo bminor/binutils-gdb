@@ -59,6 +59,10 @@ private:
 
   void style_changed ();
 
+  /* Answer whether a particular line number or address is displayed
+     in the current source window.  */
+  bool line_is_displayed (int line) const;
+
   /* A token used to register and unregister an observer.  */
   gdb::observers::token m_observable;
 };

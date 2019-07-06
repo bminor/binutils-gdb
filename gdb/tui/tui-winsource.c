@@ -640,31 +640,3 @@ tui_alloc_source_buffer (struct tui_source_window_base *win_info)
 	win_info->content[i].line = (char *) xmalloc (line_width);
     }
 }
-
-
-/* Answer whether a particular line number or address is displayed
-   in the current source window.  */
-int
-tui_line_is_displayed (int line, 
-		       struct tui_source_window_base *win_info,
-		       int check_threshold)
-{
-  int is_displayed = FALSE;
-  int i, threshold;
-
-  if (check_threshold)
-    threshold = SCROLL_THRESHOLD;
-  else
-    threshold = 0;
-  i = 0;
-  while (i < win_info->content.size () - threshold
-	 && !is_displayed)
-    {
-      is_displayed
-	= win_info->content[i].line_or_addr.loa == LOA_LINE
-	  && win_info->content[i].line_or_addr.u.line_no == line;
-      i++;
-    }
-
-  return is_displayed;
-}
