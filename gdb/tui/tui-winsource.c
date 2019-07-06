@@ -587,41 +587,22 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
   return need_refresh;
 }
 
-/* See tui-data.h.  */
-
-tui_exec_info_content *
-tui_exec_info_window::maybe_allocate_content (int n_elements)
-{
-  if (m_content == nullptr)
-    m_content = XNEWVEC (tui_exec_info_content, n_elements);
-  return m_content;
-}
-
-
 /* Function to initialize the content of the execution info window,
    based upon the input window which is either the source or
    disassembly window.  */
 void
-tui_source_window_base::set_exec_info_content ()
+tui_source_window_base::update_exec_info ()
 {
-  tui_exec_info_content *exec_content
-    = execution_info->maybe_allocate_content (height);
-
+  werase (execution_info->handle);
   tui_update_breakpoint_info (this, nullptr, true);
   for (int i = 0; i < content.size (); i++)
     {
-      tui_exec_info_content &element = exec_content[i];
-      struct tui_source_element *src_element;
-      tui_bp_flags mode;
-
-      src_element = &content[i];
-
-      memset (element, ' ', sizeof (tui_exec_info_content));
-      element[TUI_EXECINFO_SIZE - 1] = 0;
+      struct tui_source_element *src_element = &content[i];
+      char element[TUI_EXECINFO_SIZE] = "   ";
 
       /* Now update the exec info content based upon the state
 	 of each line as indicated by the source content.  */
-      mode = src_element->break_mode;
+      tui_bp_flags mode = src_element->break_mode;
       if (mode & TUI_BP_HIT)
 	element[TUI_BP_HIT_POS] = (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
       else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))
@@ -634,33 +615,12 @@ tui_source_window_base::set_exec_info_content ()
 
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
+
+      mvwaddstr (execution_info->handle, i + 1, 0, element);
     }
+  execution_info->refresh_window ();
 }
 
-
-void
-tui_source_window_base::show_exec_info_content ()
-{
-  struct tui_exec_info_window *exec_info = execution_info;
-  const tui_exec_info_content *exec_content = exec_info->get_content ();
-
-  werase (exec_info->handle);
-  for (int cur_line = 1; cur_line <= content.size (); cur_line++)
-    mvwaddstr (exec_info->handle,
-	       cur_line,
-	       0,
-	       exec_content[cur_line - 1]);
-  exec_info->refresh_window ();
-}
-
-
-/* Function to update the execution info window.  */
-void
-tui_source_window_base::update_exec_info ()
-{
-  set_exec_info_content ();
-  show_exec_info_content ();
-}
 
 void
 tui_alloc_source_buffer (struct tui_source_window_base *win_info)

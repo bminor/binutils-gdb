@@ -1,5 +1,19 @@
 2019-08-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_exec_info_window)
+	<~tui_exec_info_window, maybe_allocate_content, get_content,
+	m_content>: Remove.
+	(struct tui_source_window_base) <set_exec_info_content,
+	show_exec_info_content>: Don't declare.
+	* tui/tui-winsource.c
+	(tui_exec_info_window::maybe_allocate_content): Remove.
+	(tui_source_window_base::update_exec_info): Rename from
+	set_exec_info_content.
+	(tui_source_window_base::show_exec_info_content)
+	(tui_source_window_base::update_exec_info): Remove.
+
+2019-08-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_clear_exec_info_content): Don't
 	declare.
 	* tui/tui-winsource.c (tui_update_source_window_as_is)

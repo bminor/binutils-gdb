@@ -52,24 +52,6 @@ struct tui_exec_info_window : public tui_gen_win_info
     : tui_gen_win_info (EXEC_INFO_WIN)
   {
   }
-
-  ~tui_exec_info_window () override
-  {
-    xfree (m_content);
-  }
-
-  /* Get or allocate contents.  */
-  tui_exec_info_content *maybe_allocate_content (int n_elements);
-
-  /* Return the contents.  */
-  const tui_exec_info_content *get_content () const
-  {
-    return m_content;
-  }
-
-private:
-
-  tui_exec_info_content *m_content = nullptr;
 };
 
 /* Elements in the Source/Disassembly Window.  */
@@ -132,7 +114,6 @@ public:
 
   void show_source_content ();
 
-  void set_exec_info_content ();
   void update_exec_info ();
 
   /* Does the locator belong to this window?  */
@@ -150,9 +131,6 @@ public:
   struct gdbarch *gdbarch = nullptr;
 
   std::vector<tui_source_element> content;
-
-private:
-  void show_exec_info_content ();
 };
 
 /* Update the execution windows to show the active breakpoints.  This
