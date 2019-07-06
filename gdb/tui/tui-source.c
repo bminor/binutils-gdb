@@ -135,7 +135,6 @@ tui_set_source_content (tui_source_window_base *win_info,
       int line_width, nlines;
 
       ret = TUI_SUCCESS;
-      tui_alloc_source_buffer (win_info);
       line_width = win_info->width - 1;
       /* Take hilite (window border) into account, when
 	 calculating the number of lines.  */

@@ -179,8 +179,6 @@ tui_set_disassem_content (tui_source_window_base *win_info,
   if (pc == 0)
     return TUI_FAILURE;
 
-  tui_alloc_source_buffer (win_info);
-
   win_info->gdbarch = gdbarch;
   win_info->start_line_or_addr.loa = LOA_ADDRESS;
   win_info->start_line_or_addr.u.addr = pc;

@@ -1,5 +1,14 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_alloc_source_buffer): Don't declare.
+	(struct tui_source_element): Add DISABLE_COPY_AND_ASSIGN, and move
+	constructor.
+	* tui/tui-winsource.c (tui_alloc_source_buffer): Remove.
+	* tui/tui-source.c (tui_set_source_content): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content): Update.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_line_is_displayed): Don't declare.
 	* tui/tui-winsource.c (tui_line_is_displayed): Move to
 	tui-source.c.

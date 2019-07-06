@@ -69,6 +69,17 @@ struct tui_source_element
     xfree (line);
   }
 
+  DISABLE_COPY_AND_ASSIGN (tui_source_element);
+
+  tui_source_element (tui_source_element &&other)
+    : line (other.line),
+      line_or_addr (other.line_or_addr),
+      is_exec_point (other.is_exec_point),
+      break_mode (other.break_mode)
+  {
+    other.line = nullptr;
+  }
+
   char *line = nullptr;
   struct tui_line_or_address line_or_addr;
   bool is_exec_point = false;
@@ -172,9 +183,6 @@ extern void tui_update_source_windows_with_line (struct symtab *,
 						 int);
 extern void tui_clear_source_content (struct tui_source_window_base *);
 extern void tui_erase_source_content (struct tui_source_window_base *);
-
-extern void tui_alloc_source_buffer (struct tui_source_window_base *);
-
 
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */

@@ -620,23 +620,3 @@ tui_source_window_base::update_exec_info ()
     }
   execution_info->refresh_window ();
 }
-
-
-void
-tui_alloc_source_buffer (struct tui_source_window_base *win_info)
-{
-  int i, line_width, max_lines;
-
-  /* The window width/height includes the highlight box.  Determine actual
-     content dimensions, including string null-terminators.  */
-  max_lines = win_info->height - 2;
-  line_width = win_info->width - 2 + 1;
-
-  /* Allocate the buffer for the source lines.  */
-  win_info->content.resize (max_lines);
-  for (i = 0; i < max_lines; i++)
-    {
-      if (win_info->content[i].line == nullptr)
-	win_info->content[i].line = (char *) xmalloc (line_width);
-    }
-}
