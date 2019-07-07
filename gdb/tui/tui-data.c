@@ -36,7 +36,6 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 ** Private data
 ****************************/
 static int term_height, term_width;
-static std::vector<tui_source_window_base *> source_windows;
 static struct tui_win_info *win_with_focus = NULL;
 
 static int win_resized = FALSE;
@@ -88,26 +87,6 @@ tui_set_win_with_focus (struct tui_win_info *win_info)
 }
 
 
-/* Accessor for the current source window.  Usually there is only one
-   source window (either source or disassembly), but both can be
-   displayed at the same time.  */
-std::vector<tui_source_window_base *> &
-tui_source_windows ()
-{
-  return source_windows;
-}
-
-
-/* Clear the list of source windows.  Usually there is only one source
-   window (either source or disassembly), but both can be displayed at
-   the same time.  */
-void
-tui_clear_source_windows ()
-{
-  source_windows.clear ();
-}
-
-
 /* Clear the pertinent detail in the source windows.  */
 void
 tui_clear_source_windows_detail ()
@@ -116,16 +95,6 @@ tui_clear_source_windows_detail ()
     win->clear_detail ();
 }
 
-
-/* Add a window to the list of source windows.  Usually there is only
-   one source window (either source or disassembly), but both can be
-   displayed at the same time.  */
-void
-tui_add_to_source_windows (struct tui_source_window_base *win_info)
-{
-  if (source_windows.size () < 2)
-    source_windows.push_back (win_info);
-}
 
 /* Accessor for the term_height.  */
 int

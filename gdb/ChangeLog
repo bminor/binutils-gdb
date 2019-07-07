@@ -1,5 +1,18 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_iterator): New.
+	(struct tui_source_windows): New.
+	* tui/tui-winsource.c (tui_display_main): Update.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights)
+	(new_height_ok, parse_scrolling_args): Update.
+	* tui/tui-layout.c (show_layout, show_data): Update.
+	* tui/tui-data.h (tui_source_windows, tui_clear_source_windows)
+	(tui_add_to_source_windows): Don't declare.
+	* tui/tui-data.c (source_windows, tui_source_windows)
+	(tui_clear_source_windows, tui_add_to_source_windows): Remove.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base) <resize>:
 	Rename from reset.
 	* tui/tui-winsource.c (tui_source_window_base::resize): Rename.

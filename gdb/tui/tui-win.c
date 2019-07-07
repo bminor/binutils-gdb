@@ -571,7 +571,7 @@ tui_resize_all (void)
        {
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
-	  src_win = tui_source_windows ()[0];
+	  src_win = *(tui_source_windows ().begin ());
 	  first_win = src_win;
 	  first_win->width += width_diff;
 	  locator->width += width_diff;
@@ -610,7 +610,7 @@ tui_resize_all (void)
 	    {
 	      first_win = TUI_DATA_WIN;
 	      first_win->width += width_diff;
-	      src_win = tui_source_windows ()[0];
+	      src_win = *(tui_source_windows ().begin ());
 	      second_win = src_win;
 	      second_win->width += width_diff;
 	    }
@@ -1046,7 +1046,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      primary_win_info->make_invisible_and_set_new_height (new_height);
 	      if (primary_win_info->type == CMD_WIN)
 		{
-		  win_info = tui_source_windows ()[0];
+		  win_info = *(tui_source_windows ().begin ());
 		  src_win_info = win_info;
 		}
 	      else
@@ -1084,7 +1084,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		{
 		  src1 = nullptr;
 		  first_win = TUI_DATA_WIN;
-		  second_win = tui_source_windows ()[0];
+		  second_win = *(tui_source_windows ().begin ());
 		}
 	      if (primary_win_info == TUI_CMD_WIN)
 		{ /* Split the change in height accross the 1st & 2nd
@@ -1238,7 +1238,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	      struct tui_win_info *win_info;
 
 	      if (primary_win_info == TUI_CMD_WIN)
-		win_info = tui_source_windows ()[0];
+		win_info = *(tui_source_windows ().begin ());
 	      else
 		win_info = TUI_CMD_WIN;
 	      ok = ((new_height +
@@ -1259,7 +1259,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	  else
 	    {
 	      first_win = TUI_DATA_WIN;
-	      second_win = tui_source_windows ()[0];
+	      second_win = *(tui_source_windows ().begin ());
 	    }
 	  /* We could simply add all the heights to obtain the same
 	     result but below is more explicit since we subtract 1 for
@@ -1385,7 +1385,7 @@ parse_scrolling_args (const char *arg,
 	  if (!(*win_to_scroll)->is_visible)
 	    error (_("Window is not visible"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
-	    *win_to_scroll = tui_source_windows ()[0];
+	    *win_to_scroll = *(tui_source_windows ().begin ());
 	}
     }
 }

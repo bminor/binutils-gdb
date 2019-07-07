@@ -156,6 +156,76 @@ public:
   std::vector<tui_source_element> content;
 };
 
+
+/* A wrapper for a TUI window iterator that only iterates over source
+   windows.  */
+
+struct tui_source_window_iterator
+{
+public:
+
+  typedef tui_source_window_iterator self_type;
+  typedef struct tui_source_window_base *value_type;
+  typedef struct tui_source_window_base *&reference;
+  typedef struct tui_source_window_base **pointer;
+  typedef std::forward_iterator_tag iterator_category;
+  typedef int difference_type;
+
+  explicit tui_source_window_iterator (bool dummy)
+    : m_iter (SRC_WIN)
+  {
+    advance ();
+  }
+
+  tui_source_window_iterator ()
+    : m_iter (tui_win_type (DISASSEM_WIN + 1))
+  {
+  }
+
+  bool operator!= (const self_type &other) const
+  {
+    return m_iter != other.m_iter;
+  }
+
+  value_type operator* () const
+  {
+    return (value_type) *m_iter;
+  }
+
+  self_type &operator++ ()
+  {
+    ++m_iter;
+    advance ();
+    return *this;
+  }
+
+private:
+
+  void advance ()
+  {
+    tui_window_iterator end;
+    while (m_iter != end && *m_iter == nullptr)
+      ++m_iter;
+  }
+
+  tui_window_iterator m_iter;
+};
+
+/* A range adapter for source windows.  */
+
+struct tui_source_windows
+{
+  tui_source_window_iterator begin () const
+  {
+    return tui_source_window_iterator (true);
+  }
+
+  tui_source_window_iterator end () const
+  {
+    return tui_source_window_iterator ();
+  }
+};
+
 /* Update the execution windows to show the active breakpoints.  This
    is called whenever a breakpoint is inserted, removed or has its
    state changed.  Normally BEING_DELETED is nullptr; if not nullptr,

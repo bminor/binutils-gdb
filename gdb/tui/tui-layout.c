@@ -76,10 +76,6 @@ show_layout (enum tui_layout_type layout)
 
   if (layout != cur_layout)
     {
-      /* Since the new layout may cause changes in window size, we
-         should free the content and reallocate on next display of
-         source/asm.  */
-      tui_clear_source_windows ();
       /* First make the current layout be invisible.  */
       tui_make_all_invisible ();
       tui_locator_win_info_ptr ()->make_visible (false);
@@ -93,16 +89,12 @@ show_layout (enum tui_layout_type layout)
 	  /* Now show the new layout.  */
 	case SRC_COMMAND:
 	  show_source_command ();
-	  tui_add_to_source_windows (TUI_SRC_WIN);
 	  break;
 	case DISASSEM_COMMAND:
 	  show_disasm_command ();
-	  tui_add_to_source_windows (TUI_DISASM_WIN);
 	  break;
 	case SRC_DISASSEM_COMMAND:
 	  show_source_disasm_command ();
-	  tui_add_to_source_windows (TUI_SRC_WIN);
-	  tui_add_to_source_windows (TUI_DISASM_WIN);
 	  break;
 	default:
 	  break;
@@ -595,7 +587,6 @@ show_data (enum tui_layout_type new_layout)
   base->m_has_locator = true;
   locator->make_visible (true);
   tui_show_locator_content ();
-  tui_add_to_source_windows (base);
   TUI_CMD_WIN->make_visible (true);
   current_layout = new_layout;
 }

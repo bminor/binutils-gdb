@@ -44,7 +44,8 @@
 void
 tui_display_main ()
 {
-  if (!tui_source_windows ().empty ())
+  auto adapter = tui_source_windows ();
+  if (adapter.begin () != adapter.end ())
     {
       struct gdbarch *gdbarch;
       CORE_ADDR addr;
