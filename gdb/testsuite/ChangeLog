@@ -1,3 +1,7 @@
+2019-07-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.base/break-idempotent.exp: Test both PIE and non PIE.
+
 2019-07-04  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (foreach_with_prefix): Don't return early if
