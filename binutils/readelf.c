@@ -2180,6 +2180,9 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
 
 	  switch (filedata->file_header.e_machine)
 	    {
+	    case EM_AARCH64:
+	      result = get_aarch64_dynamic_type (type);
+	      break;
 	    case EM_MIPS:
 	    case EM_MIPS_RS3_LE:
 	      result = get_mips_dynamic_type (type);
