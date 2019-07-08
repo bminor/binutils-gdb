@@ -1,3 +1,8 @@
+2019-07-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/callstub-1.d: Pass -melf64ppc to ld.
+	* testsuite/ld-powerpc/callstub-2.d: Likewise.
+
 2019-07-04  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-elf/group9.s: Correct argument of .type.

@@ -1,5 +1,5 @@
 #as: -a64
-#ld: -shared --plt-align=0 --hash-style=gnu
+#ld: -melf64ppc -shared --plt-align=0 --hash-style=gnu
 #objdump: -dr
 
 .*
