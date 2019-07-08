@@ -179,7 +179,8 @@ struct mapped_index_base
      vector.  */
   std::pair<std::vector<name_component>::const_iterator,
 	    std::vector<name_component>::const_iterator>
-    find_name_components_bounds (const lookup_name_info &ln_no_params) const;
+    find_name_components_bounds (const lookup_name_info &ln_no_params,
+				 enum language lang) const;
 
   /* Prevent deleting/destroying via a base class pointer.  */
 protected:
@@ -4202,93 +4203,6 @@ dw2_map_matching_symbols
      does not look for non-Ada symbols this function should just return.  */
 }
 
-/* Symbol name matcher for .gdb_index names.
-
-   Symbol names in .gdb_index have a few particularities:
-
-   - There's no indication of which is the language of each symbol.
-
-     Since each language has its own symbol name matching algorithm,
-     and we don't know which language is the right one, we must match
-     each symbol against all languages.  This would be a potential
-     performance problem if it were not mitigated by the
-     mapped_index::name_components lookup table, which significantly
-     reduces the number of times we need to call into this matcher,
-     making it a non-issue.
-
-   - Symbol names in the index have no overload (parameter)
-     information.  I.e., in C++, "foo(int)" and "foo(long)" both
-     appear as "foo" in the index, for example.
-
-     This means that the lookup names passed to the symbol name
-     matcher functions must have no parameter information either
-     because (e.g.) symbol search name "foo" does not match
-     lookup-name "foo(int)" [while swapping search name for lookup
-     name would match].
-*/
-class gdb_index_symbol_name_matcher
-{
-public:
-  /* Prepares the vector of comparison functions for LOOKUP_NAME.  */
-  gdb_index_symbol_name_matcher (const lookup_name_info &lookup_name);
-
-  /* Walk all the matcher routines and match SYMBOL_NAME against them.
-     Returns true if any matcher matches.  */
-  bool matches (const char *symbol_name);
-
-private:
-  /* A reference to the lookup name we're matching against.  */
-  const lookup_name_info &m_lookup_name;
-
-  /* A vector holding all the different symbol name matchers, for all
-     languages.  */
-  std::vector<symbol_name_matcher_ftype *> m_symbol_name_matcher_funcs;
-};
-
-gdb_index_symbol_name_matcher::gdb_index_symbol_name_matcher
-  (const lookup_name_info &lookup_name)
-    : m_lookup_name (lookup_name)
-{
-  /* Prepare the vector of comparison functions upfront, to avoid
-     doing the same work for each symbol.  Care is taken to avoid
-     matching with the same matcher more than once if/when multiple
-     languages use the same matcher function.  */
-  auto &matchers = m_symbol_name_matcher_funcs;
-  matchers.reserve (nr_languages);
-
-  matchers.push_back (default_symbol_name_matcher);
-
-  for (int i = 0; i < nr_languages; i++)
-    {
-      const language_defn *lang = language_def ((enum language) i);
-      symbol_name_matcher_ftype *name_matcher
-	= get_symbol_name_matcher (lang, m_lookup_name);
-
-      /* Don't insert the same comparison routine more than once.
-	 Note that we do this linear walk instead of a seemingly
-	 cheaper sorted insert, or use a std::set or something like
-	 that, because relative order of function addresses is not
-	 stable.  This is not a problem in practice because the number
-	 of supported languages is low, and the cost here is tiny
-	 compared to the number of searches we'll do afterwards using
-	 this object.  */
-      if (name_matcher != default_symbol_name_matcher
-	  && (std::find (matchers.begin (), matchers.end (), name_matcher)
-	      == matchers.end ()))
-	matchers.push_back (name_matcher);
-    }
-}
-
-bool
-gdb_index_symbol_name_matcher::matches (const char *symbol_name)
-{
-  for (auto matches_name : m_symbol_name_matcher_funcs)
-    if (matches_name (symbol_name, m_lookup_name, NULL))
-      return true;
-
-  return false;
-}
-
 /* Starting from a search name, return the string that finds the upper
    bound of all strings that start with SEARCH_NAME in a sorted name
    list.  Returns the empty string to indicate that the upper bound is
@@ -4367,13 +4281,13 @@ make_sort_after_prefix_name (const char *search_name)
 std::pair<std::vector<name_component>::const_iterator,
 	  std::vector<name_component>::const_iterator>
 mapped_index_base::find_name_components_bounds
-  (const lookup_name_info &lookup_name_without_params) const
+  (const lookup_name_info &lookup_name_without_params, language lang) const
 {
   auto *name_cmp
     = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
 
-  const char *cplus
-    = lookup_name_without_params.cplus ().lookup_name ().c_str ();
+  const char *lang_name
+    = lookup_name_without_params.language_lookup_name (lang).c_str ();
 
   /* Comparison function object for lower_bound that matches against a
      given symbol name.  */
@@ -4401,10 +4315,10 @@ mapped_index_base::find_name_components_bounds
   /* Find the lower bound.  */
   auto lower = [&] ()
     {
-      if (lookup_name_without_params.completion_mode () && cplus[0] == '\0')
+      if (lookup_name_without_params.completion_mode () && lang_name[0] == '\0')
 	return begin;
       else
-	return std::lower_bound (begin, end, cplus, lookup_compare_lower);
+	return std::lower_bound (begin, end, lang_name, lookup_compare_lower);
     } ();
 
   /* Find the upper bound.  */
@@ -4423,14 +4337,14 @@ mapped_index_base::find_name_components_bounds
 	     We find the upper bound by looking for the insertion
 	     point of "func"-with-last-character-incremented,
 	     i.e. "fund".  */
-	  std::string after = make_sort_after_prefix_name (cplus);
+	  std::string after = make_sort_after_prefix_name (lang_name);
 	  if (after.empty ())
 	    return end;
 	  return std::lower_bound (lower, end, after.c_str (),
 				   lookup_compare_lower);
 	}
       else
-	return std::upper_bound (lower, end, cplus, lookup_compare_upper);
+	return std::upper_bound (lower, end, lang_name, lookup_compare_upper);
     } ();
 
   return {lower, upper};
@@ -4450,11 +4364,7 @@ mapped_index_base::build_name_components ()
 
   /* The code below only knows how to break apart components of C++
      symbol names (and other languages that use '::' as
-     namespace/module separator).  If we add support for wild matching
-     to some language that uses some other operator (E.g., Ada, Go and
-     D use '.'), then we'll need to try splitting the symbol name
-     according to that language too.  Note that Ada does support wild
-     matching, but doesn't currently support .gdb_index.  */
+     namespace/module separator) and Ada symbol names.  */
   auto count = this->symbol_name_count ();
   for (offset_type idx = 0; idx < count; idx++)
     {
@@ -4465,16 +4375,33 @@ mapped_index_base::build_name_components ()
 
       /* Add each name component to the name component table.  */
       unsigned int previous_len = 0;
-      for (unsigned int current_len = cp_find_first_component (name);
-	   name[current_len] != '\0';
-	   current_len += cp_find_first_component (name + current_len))
+
+      if (strstr (name, "::") != nullptr)
 	{
-	  gdb_assert (name[current_len] == ':');
-	  this->name_components.push_back ({previous_len, idx});
-	  /* Skip the '::'.  */
-	  current_len += 2;
-	  previous_len = current_len;
+	  for (unsigned int current_len = cp_find_first_component (name);
+	       name[current_len] != '\0';
+	       current_len += cp_find_first_component (name + current_len))
+	    {
+	      gdb_assert (name[current_len] == ':');
+	      this->name_components.push_back ({previous_len, idx});
+	      /* Skip the '::'.  */
+	      current_len += 2;
+	      previous_len = current_len;
+	    }
 	}
+      else
+	{
+	  /* Handle the Ada encoded (aka mangled) form here.  */
+	  for (const char *iter = strstr (name, "__");
+	       iter != nullptr;
+	       iter = strstr (iter, "__"))
+	    {
+	      this->name_components.push_back ({previous_len, idx});
+	      iter += 2;
+	      previous_len = iter - name;
+	    }
+	}
+
       this->name_components.push_back ({previous_len, idx});
     }
 
@@ -4509,21 +4436,14 @@ dw2_expand_symtabs_matching_symbol
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    enum search_domain kind,
-   gdb::function_view<void (offset_type)> match_callback)
+   gdb::function_view<bool (offset_type)> match_callback)
 {
   lookup_name_info lookup_name_without_params
     = lookup_name_in.make_ignore_params ();
-  gdb_index_symbol_name_matcher lookup_name_matcher
-    (lookup_name_without_params);
 
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
   index.build_name_components ();
-
-  auto bounds = index.find_name_components_bounds (lookup_name_without_params);
-
-  /* Now for each symbol name in range, check to see if we have a name
-     match, and if so, call the MATCH_CALLBACK callback.  */
 
   /* The same symbol may appear more than once in the range though.
      E.g., if we're looking for symbols that complete "w", and we have
@@ -4533,17 +4453,61 @@ dw2_expand_symtabs_matching_symbol
      indexes that matched in a temporary vector and ignore
      duplicates.  */
   std::vector<offset_type> matches;
-  matches.reserve (std::distance (bounds.first, bounds.second));
 
-  for (; bounds.first != bounds.second; ++bounds.first)
+  struct name_and_matcher
+  {
+    symbol_name_matcher_ftype *matcher;
+    const std::string &name;
+
+    bool operator== (const name_and_matcher &other) const
     {
-      const char *qualified = index.symbol_name_at (bounds.first->idx);
+      return matcher == other.matcher && name == other.name;
+    }
+  };
 
-      if (!lookup_name_matcher.matches (qualified)
-	  || (symbol_matcher != NULL && !symbol_matcher (qualified)))
+  /* A vector holding all the different symbol name matchers, for all
+     languages.  */
+  std::vector<name_and_matcher> matchers;
+
+  for (int i = 0; i < nr_languages; i++)
+    {
+      enum language lang_e = (enum language) i;
+
+      const language_defn *lang = language_def (lang_e);
+      symbol_name_matcher_ftype *name_matcher
+	= get_symbol_name_matcher (lang, lookup_name_without_params);
+
+      name_and_matcher key {
+         name_matcher,
+	 lookup_name_without_params.language_lookup_name (lang_e)
+      };
+
+      /* Don't insert the same comparison routine more than once.
+	 Note that we do this linear walk.  This is not a problem in
+	 practice because the number of supported languages is
+	 low.  */
+      if (std::find (matchers.begin (), matchers.end (), key)
+	  != matchers.end ())
 	continue;
+      matchers.push_back (std::move (key));
 
-      matches.push_back (bounds.first->idx);
+      auto bounds
+	= index.find_name_components_bounds (lookup_name_without_params,
+					     lang_e);
+
+      /* Now for each symbol name in range, check to see if we have a name
+	 match, and if so, call the MATCH_CALLBACK callback.  */
+
+      for (; bounds.first != bounds.second; ++bounds.first)
+	{
+	  const char *qualified = index.symbol_name_at (bounds.first->idx);
+
+	  if (!name_matcher (qualified, lookup_name_without_params, NULL)
+	      || (symbol_matcher != NULL && !symbol_matcher (qualified)))
+	    continue;
+
+	  matches.push_back (bounds.first->idx);
+	}
     }
 
   std::sort (matches.begin (), matches.end ());
@@ -4554,7 +4518,8 @@ dw2_expand_symtabs_matching_symbol
     {
       if (prev != idx)
 	{
-	  match_callback (idx);
+	  if (!match_callback (idx))
+	    break;
 	  prev = idx;
 	}
     }
@@ -4649,6 +4614,7 @@ check_match (const char *file, int line,
 
     if (expected_str == NULL || strcmp (expected_str, matched_name) != 0)
       mismatch (expected_str, matched_name);
+    return true;
   });
 
   const char *expected_str
@@ -4715,7 +4681,8 @@ check_find_bounds_finds (mapped_index_base &index,
   lookup_name_info lookup_name (search_name,
 				symbol_name_match_type::FULL, true);
 
-  auto bounds = index.find_name_components_bounds (lookup_name);
+  auto bounds = index.find_name_components_bounds (lookup_name,
+						   language_cplus);
 
   size_t distance = std::distance (bounds.first, bounds.second);
   if (distance != expected_syms.size ())
@@ -5200,6 +5167,7 @@ dw2_expand_symtabs_matching
     {
       dw2_expand_marked_cus (dwarf2_per_objfile, idx, file_matcher,
 			     expansion_notify, kind);
+      return true;
     });
 }
 
@@ -5684,6 +5652,13 @@ public:
       m_addr (find_vec_in_debug_names (map, namei))
   {}
 
+  dw2_debug_names_iterator (const mapped_debug_names &map,
+			    block_enum block_index, domain_enum domain,
+			    uint32_t namei)
+    : m_map (map), m_block_index (block_index), m_domain (domain),
+      m_addr (find_vec_in_debug_names (map, namei))
+  {}
+
   /* Return the next matching CU or NULL if there are no more.  */
   dwarf2_per_cu_data *next ();
 
@@ -6102,6 +6077,63 @@ dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
 }
 
 static void
+dw2_debug_names_map_matching_symbols
+  (struct objfile *objfile,
+   const lookup_name_info &name, domain_enum domain,
+   int global,
+   gdb::function_view<symbol_found_callback_ftype> callback,
+   symbol_compare_ftype *ordered_compare)
+{
+  struct dwarf2_per_objfile *dwarf2_per_objfile
+    = get_dwarf2_per_objfile (objfile);
+
+  /* debug_names_table is NULL if OBJF_READNOW.  */
+  if (!dwarf2_per_objfile->debug_names_table)
+    return;
+
+  mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
+  const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+
+  const char *match_name = name.ada ().lookup_name ().c_str ();
+  auto matcher = [&] (const char *symname)
+    {
+      if (ordered_compare == nullptr)
+	return true;
+      return ordered_compare (symname, match_name) == 0;
+    };
+
+  dw2_expand_symtabs_matching_symbol (map, name, matcher, ALL_DOMAIN,
+				      [&] (offset_type namei)
+    {
+      /* The name was matched, now expand corresponding CUs that were
+	 marked.  */
+      dw2_debug_names_iterator iter (map, block_kind, domain, namei);
+
+      struct dwarf2_per_cu_data *per_cu;
+      while ((per_cu = iter.next ()) != NULL)
+	dw2_expand_symtabs_matching_one (per_cu, nullptr, nullptr);
+      return true;
+    });
+
+  /* It's a shame we couldn't do this inside the
+     dw2_expand_symtabs_matching_symbol callback, but that skips CUs
+     that have already been expanded.  Instead, this loop matches what
+     the psymtab code does.  */
+  for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
+    {
+      struct compunit_symtab *cust = per_cu->v.quick->compunit_symtab;
+      if (cust != nullptr)
+	{
+	  const struct block *block
+	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
+	  if (!iterate_over_symbols_terminated (block, name,
+						domain, callback))
+	    break;
+	}
+    }
+}
+
+static void
 dw2_debug_names_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -6133,6 +6165,7 @@ dw2_debug_names_expand_symtabs_matching
       while ((per_cu = iter.next ()) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, file_matcher,
 					 expansion_notify);
+      return true;
     });
 }
 
@@ -6148,7 +6181,7 @@ const struct quick_symbol_functions dwarf2_debug_names_functions =
   dw2_debug_names_expand_symtabs_for_function,
   dw2_expand_all_symtabs,
   dw2_expand_symtabs_with_fullname,
-  dw2_map_matching_symbols,
+  dw2_debug_names_map_matching_symbols,
   dw2_debug_names_expand_symtabs_matching,
   dw2_find_pc_sect_compunit_symtab,
   NULL,

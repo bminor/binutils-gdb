@@ -1,5 +1,27 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf-index-write.c (write_psymbols): Extend error message.
+	(debug_names::insert): Add Ada code.
+	(debug_names::write_psymbols): Remove Ada check.
+	(debug_names) <m_string_obstack>: New member.
+	* dwarf2read.c (gdb_index_symbol_name_matcher): Remove.
+	(gdb_index_symbol_name_matcher::matches): Remove.
+	(mapped_index_base::find_name_components_bounds): Add "lang"
+	parameter.
+	(mapped_index_base::build_name_components): Also split names
+	according to Ada syntax.
+	(dw2_expand_symtabs_matching_symbol): Loop over languages.  Change
+	type of "match_callback".
+	(check_match, check_find_bounds_finds)
+	(dw2_expand_symtabs_matching): Update.
+	(dw2_debug_names_iterator): Add new constructor.
+	(dw2_debug_names_map_matching_symbols): New function.
+	(dw2_debug_names_expand_symtabs_matching): Update.
+	(dwarf2_debug_names_functions): Use
+	dw2_debug_names_map_matching_symbols.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (dw2_get_file_names_reader): Add the
 	CU's file name to the results.
 

@@ -34,6 +34,7 @@
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "psympriv.h"
+#include "ada-lang.h"
 
 #include <algorithm>
 #include <cmath>
@@ -541,7 +542,8 @@ write_psymbols (struct mapped_symtab *symtab,
       struct partial_symbol *psym = *psymp;
 
       if (psym->ginfo.language == language_ada)
-	error (_("Ada is not currently supported by the index"));
+	error (_("Ada is not currently supported by the index; "
+		 "use the DWARF 5 index instead"));
 
       /* Only add a given psymbol once.  */
       if (psyms_seen.insert (psym).second)
@@ -684,7 +686,43 @@ public:
     const int dwarf_tag = psymbol_tag (psym);
     if (dwarf_tag == 0)
       return;
-    const char *const name = symbol_search_name (&psym->ginfo);
+    const char *name = symbol_search_name (&psym->ginfo);
+
+    if (psym->ginfo.language == language_ada)
+      {
+	/* We want to ensure that the Ada main function's name appears
+	   verbatim in the index.  However, this name will be of the
+	   form "_ada_mumble", and will be rewritten by ada_decode.
+	   So, recognize it specially here and add it to the index by
+	   hand.  */
+	if (strcmp (main_name (), name) == 0)
+	  {
+	    const auto insertpair
+	      = m_name_to_value_set.emplace (c_str_view (name),
+					     std::set<symbol_value> ());
+	    std::set<symbol_value> &value_set = insertpair.first->second;
+	    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static,
+					     kind));
+	  }
+
+	/* In order for the index to work when read back into gdb, it
+	   has to supply a funny form of the name: it should be the
+	   encoded name, with any suffixes stripped.  Using the
+	   ordinary encoded name will not work properly with the
+	   searching logic in find_name_components_bounds; nor will
+	   using the decoded name.  Furthermore, an Ada "verbatim"
+	   name (of the form "<MumBle>") must be entered without the
+	   angle brackets.  Note that the current index is unusual,
+	   see PR symtab/24820 for details.  */
+	const char *decoded = ada_decode (name);
+	if (decoded[0] == '<')
+	  name = (char *) obstack_copy0 (&m_string_obstack,
+					 decoded + 1,
+					 strlen (decoded + 1) - 1);
+	else
+	  name = obstack_strdup (&m_string_obstack, ada_encode (decoded));
+      }
+
     const auto insertpair
       = m_name_to_value_set.emplace (c_str_view (name),
 				     std::set<symbol_value> ());
@@ -1181,9 +1219,6 @@ private:
       {
 	struct partial_symbol *psym = *psymp;
 
-	if (psym->ginfo.language == language_ada)
-	  error (_("Ada is not currently supported by the index"));
-
 	/* Only add a given psymbol once.  */
 	if (psyms_seen.insert (psym).second)
 	  insert (psym, cu_index, is_static, kind);
@@ -1244,6 +1279,9 @@ private:
 
   /* .debug_names entry pool.  */
   data_buf m_entry_pool;
+
+  /* Temporary storage for Ada names.  */
+  auto_obstack m_string_obstack;
 };
 
 /* Return iff any of the needed offsets does not fit into 32-bit
