@@ -3282,8 +3282,9 @@ static int
 dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 {
   ctf_file_t *parent = (ctf_file_t *) arg;
-  const char *things[] = {"Labels", "Data objects", "Function objects",
-			  "Variables", "Types", "Strings", ""};
+  const char *things[] = {"Header", "Labels", "Data objects",
+                          "Function objects", "Variables", "Types", "Strings",
+                          ""};
   const char **thing;
   size_t i;
 
@@ -3294,7 +3295,7 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
     printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
 
   ctf_import (ctf, parent);
-  for (i = 1, thing = things; *thing[0]; thing++, i++)
+  for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
       ctf_dump_state_t *s = NULL;
       char *item;

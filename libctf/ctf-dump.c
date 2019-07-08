@@ -153,6 +153,132 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
   return NULL;
 }
 
+/* Dump one string field from the file header into the cds_items.  */
+static int
+ctf_dump_header_strfield (ctf_file_t *fp, ctf_dump_state_t *state,
+			  const char *name, uint32_t value)
+{
+  char *str;
+  if (value)
+    {
+      if (asprintf (&str, "%s: %s\n", name, ctf_strptr (fp, value)) < 0)
+	goto err;
+      ctf_dump_append (state, str);
+    }
+  return 0;
+
+ err:
+  return (ctf_set_errno (fp, -ENOMEM));
+}
+
+/* Dump one section-offset field from the file header into the cds_items.  */
+static int
+ctf_dump_header_sectfield (ctf_file_t *fp, ctf_dump_state_t *state,
+			   const char *sect, uint32_t off, uint32_t nextoff)
+{
+  char *str;
+  if (nextoff - off)
+    {
+      if (asprintf (&str, "%s:\t0x%lx -- 0x%lx (0x%lx bytes)\n", sect,
+		    (unsigned long) off, (unsigned long) (nextoff - 1),
+		    (unsigned long) (nextoff - off)) < 0)
+	goto err;
+      ctf_dump_append (state, str);
+    }
+  return 0;
+
+ err:
+  return (ctf_set_errno (fp, -ENOMEM));
+}
+
+/* Dump the file header into the cds_items.  */
+static int
+ctf_dump_header (ctf_file_t *fp, ctf_dump_state_t *state)
+{
+  char *str;
+  const ctf_header_t *hp = fp->ctf_header;
+  const char *vertab[] =
+    {
+     NULL, "CTF_VERSION_1",
+     "CTF_VERSION_1_UPGRADED_3 (latest format, version 1 type "
+     "boundaries)",
+     "CTF_VERSION_2",
+     "CTF_VERSION_3", NULL
+    };
+  const char *verstr = NULL;
+
+  if (asprintf (&str, "Magic number: %x\n", hp->cth_magic) < 0)
+      goto err;
+  ctf_dump_append (state, str);
+
+  if (hp->cth_version <= CTF_VERSION)
+    verstr = vertab[hp->cth_version];
+
+  if (verstr == NULL)
+    verstr = "(not a valid version)";
+
+  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_version,
+		verstr) < 0)
+    goto err;
+  ctf_dump_append (state, str);
+
+  /* Everything else is only printed if present.  */
+
+  /* The flags are unusual in that they represent the ctf_file_t *in memory*:
+     flags representing compression, etc, are turned off as the file is
+     decompressed.  So we store a copy of the flags before they are changed, for
+     the dumper.  */
+
+  if (fp->ctf_openflags > 0)
+    {
+      if (fp->ctf_openflags)
+	if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags,
+		      fp->ctf_openflags & CTF_F_COMPRESS ? "CTF_F_COMPRESS"
+		                                         : "") < 0)
+	goto err;
+      ctf_dump_append (state, str);
+    }
+
+  if (ctf_dump_header_strfield (fp, state, "Parent label",
+				hp->cth_parlabel) < 0)
+    goto err;
+
+  if (ctf_dump_header_strfield (fp, state, "Parent name", hp->cth_parname) < 0)
+    goto err;
+
+  if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
+				hp->cth_cuname) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Label section", hp->cth_lbloff,
+				 hp->cth_objtoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Data object section",
+				 hp->cth_objtoff, hp->cth_funcoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Function info section",
+				 hp->cth_funcoff, hp->cth_varoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Variable section",
+				 hp->cth_varoff, hp->cth_typeoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Type section",
+				 hp->cth_typeoff, hp->cth_stroff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "String section", hp->cth_stroff,
+				 hp->cth_stroff + hp->cth_strlen + 1) < 0)
+    goto err;
+
+  return 0;
+ err:
+  return (ctf_set_errno (fp, -ENOMEM));
+}
+
 /* Dump a single label into the cds_items.  */
 
 static int
@@ -492,8 +618,7 @@ ctf_dump (ctf_file_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
       switch (sect)
 	{
 	case CTF_SECT_HEADER:
-	  /* Nothing doable (yet): entire header is discarded after read-phase.  */
-	  str = strdup ("");
+	  ctf_dump_header (fp, state);
 	  break;
 	case CTF_SECT_LABEL:
 	  if (ctf_label_iter (fp, ctf_dump_label, state) < 0)

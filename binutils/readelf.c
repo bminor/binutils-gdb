@@ -13932,8 +13932,9 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctf_file_t *         ctf = NULL;
   ctf_file_t *         parent = NULL;
 
-  const char *things[] = {"Labels", "Data objects", "Function objects",
-			  "Variables", "Types", "Strings", ""};
+  const char *things[] = {"Header", "Labels", "Data objects",
+                          "Function objects", "Variables", "Types", "Strings",
+                          ""};
   const char **thing;
   int err;
   bfd_boolean ret = FALSE;
@@ -14014,7 +14015,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   printf (_("\nDump of CTF section '%s':\n"),
 	  printable_section_name (filedata, section));
 
-  for (i = 1, thing = things; *thing[0]; thing++, i++)
+  for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
       ctf_dump_state_t *s = NULL;
       char *item;

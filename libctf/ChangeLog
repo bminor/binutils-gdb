@@ -1,3 +1,12 @@
+2019-07-08  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_file_t): New field ctf_openflags.
+	* ctf-open.c (ctf_bufopen): Set it.  No longer dump header offsets.
+	* ctf-dump.c (dump_header): New function, dump the CTF header.
+	(ctf_dump): Call it.
+	(ctf_dump_header_strfield): New function.
+	(ctf_dump_header_sectfield): Likewise.
+
 2019-07-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_file_t): New fields ctf_header, ctf_dynbase,
