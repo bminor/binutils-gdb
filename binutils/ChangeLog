@@ -1,3 +1,8 @@
+2019-07-08  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (dump_ctf_archive_member): Dump the CTF header.
+	* readelf.c (dump_section_as_ctf): Likewise.
+
 2019-10-02  Niklas Gürtler  <profclonk@gmail.com>
 
 	PR 24942

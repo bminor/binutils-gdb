@@ -218,6 +218,7 @@ struct ctf_file
 {
   const ctf_fileops_t *ctf_fileops; /* Version-specific file operations.  */
   struct ctf_header *ctf_header;    /* The header from this CTF file.  */
+  unsigned char ctf_openflags;	    /* Flags the file had when opened.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */

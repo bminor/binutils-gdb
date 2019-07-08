@@ -1323,12 +1323,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (foreign_endian)
     flip_header (hp);
-
-  ctf_dprintf ("header offsets: %x/%x/%x/%x/%x/%x/%x\n",
-	       hp->cth_lbloff, hp->cth_objtoff, hp->cth_funcoff,
-	       hp->cth_varoff, hp->cth_typeoff, hp->cth_stroff,
-	       hp->cth_strlen);
-
+  fp->ctf_openflags = hp->cth_flags;
   fp->ctf_size = hp->cth_stroff + hp->cth_strlen;
 
   ctf_dprintf ("ctf_bufopen: uncompressed size=%lu\n",
