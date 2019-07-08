@@ -1077,7 +1077,9 @@ _bfd_elf_ppc_set_arch (bfd *abfd)
   if (mach == 0)
     {
       s = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
-      if (s != NULL && bfd_malloc_and_get_section (abfd, s, &contents))
+      if (s != NULL
+	  && s->size >= 24
+	  && bfd_malloc_and_get_section (abfd, s, &contents))
 	{
 	  unsigned int apuinfo_size = bfd_get_32 (abfd, contents + 4);
 	  unsigned int i;

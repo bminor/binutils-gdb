@@ -1,3 +1,9 @@
+2019-07-08  Alan Modra  <amodra@gmail.com>
+
+	PR 24785
+	* elf32-ppc.c (_bfd_elf_ppc_set_arch): Sanity check .PPC.EMB.apuinfo
+	size before reading first word.
+
 2019-07-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 24717
