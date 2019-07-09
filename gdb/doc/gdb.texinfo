@@ -18886,6 +18886,16 @@ If both @var{regexp} and @var{type_regexp} are provided, an argument
 is printed only if its name matches @var{regexp} and its type matches
 @var{type_regexp}.
 
+@kindex info modules
+@cindex modules
+@item info modules @r{[}-q@r{]} @r{[}@var{regexp}@r{]}
+List all Fortran modules in the program, or all modules matching the
+optional regular expression @var{regexp}.
+
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no modules
+have been printed.
+
 @kindex info classes
 @cindex Objective-C, classes and selectors
 @item info classes

@@ -299,6 +299,7 @@ search_domain_name (enum search_domain e)
     case VARIABLES_DOMAIN: return "VARIABLES_DOMAIN";
     case FUNCTIONS_DOMAIN: return "FUNCTIONS_DOMAIN";
     case TYPES_DOMAIN: return "TYPES_DOMAIN";
+    case MODULES_DOMAIN: return "MODULES_DOMAIN";
     case ALL_DOMAIN: return "ALL_DOMAIN";
     default: gdb_assert_not_reached ("bad search_domain");
     }
@@ -4482,7 +4483,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   gdb::optional<compiled_regex> preg;
   gdb::optional<compiled_regex> treg;
 
-  gdb_assert (kind <= TYPES_DOMAIN);
+  gdb_assert (kind != ALL_DOMAIN);
 
   ourtype = types[kind];
   ourtype2 = types2[kind];
@@ -4656,7 +4657,10 @@ search_symbols (const char *regexp, enum search_domain kind,
 								     sym)))
 			      || (kind == TYPES_DOMAIN
 				  && SYMBOL_CLASS (sym) == LOC_TYPEDEF
-				  && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN))))
+				  && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN)
+			      || (kind == MODULES_DOMAIN
+				  && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
+				  && SYMBOL_LINE (sym) != 0))))
 		    {
 		      /* match */
 		      result.emplace_back (i, sym);
@@ -4787,6 +4791,11 @@ print_symbol_info (enum search_domain kind,
 
       printf_filtered (";\n");
     }
+  /* Printing of modules is currently done here, maybe at some future
+     point we might want a language specific method to print the module
+     symbol so that we can customise the output more.  */
+  else if (kind == MODULES_DOMAIN)
+    printf_filtered ("%s\n", SYMBOL_PRINT_NAME (sym));
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -4827,11 +4836,11 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
 		    const char *t_regexp, int from_tty)
 {
   static const char * const classnames[] =
-    {"variable", "function", "type"};
+    {"variable", "function", "type", "module"};
   const char *last_filename = "";
   int first = 1;
 
-  gdb_assert (kind <= TYPES_DOMAIN);
+  gdb_assert (kind != ALL_DOMAIN);
 
   if (regexp != nullptr && *regexp == '\0')
     regexp = nullptr;
@@ -5048,6 +5057,22 @@ info_types_command_completer (struct cmd_list_element *ignore,
 
   const char *word = advance_to_expression_complete_word_point (tracker, text);
   symbol_completer (ignore, tracker, text, word);
+}
+
+/* Implement the 'info modules' command.  */
+
+static void
+info_modules_command (const char *args, int from_tty)
+{
+  info_types_options opts;
+
+  auto grp = make_info_types_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
+  symtab_symbol_info (opts.quiet, true, args, MODULES_DOMAIN, NULL,
+		      from_tty);
 }
 
 /* Breakpoint all functions matching regular expression.  */
@@ -6372,6 +6397,10 @@ Options:\n\
 
   c = add_info ("sources", info_sources_command, info_sources_help.c_str ());
   set_cmd_completer_handle_brkchars (c, info_sources_command_completer);
+
+  c = add_info ("modules", info_modules_command,
+		_("All module names, or those matching REGEXP."));
+  set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
   add_com ("rbreak", class_breakpoint, rbreak_command,
 	   _("Set a breakpoint for all functions matching REGEXP."));

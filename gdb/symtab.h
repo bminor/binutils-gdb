@@ -831,8 +831,11 @@ enum search_domain
   /* All defined types */
   TYPES_DOMAIN = 2,
 
+  /* All modules.  */
+  MODULES_DOMAIN = 3,
+
   /* Any type.  */
-  ALL_DOMAIN = 3
+  ALL_DOMAIN = 4
 };
 
 extern const char *search_domain_name (enum search_domain);

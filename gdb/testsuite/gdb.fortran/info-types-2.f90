@@ -13,25 +13,8 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module mod1
-  type :: m1t1
-     integer :: b
-  end type m1t1
-end module mod1
-
-program info_types_test
-  use mod1
-  use mod2
-
-  type :: s1
-     integer :: a
-  end type s1
-
-  logical :: l
-  type (s1) :: var_a
-  type (m1t1) :: var_b
-
-  var_a%a = 1 + mod2_var_1
-  var_b%b = 2
-  l = .FALSE.
-end program info_types_test
+! Comment just to change the line number on which
+! mod2 is defined.
+module mod2
+  integer :: mod2_var_1 = 123
+end module mod2

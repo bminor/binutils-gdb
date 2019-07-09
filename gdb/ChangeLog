@@ -1,3 +1,22 @@
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (dw2_symtab_iter_next): Handle MODULE_DOMAIN.
+	(dw2_expand_marked_cus): Handle MODULES_DOMAIN.
+	(dw2_debug_names_iterator::next): Handle MODULE_DOMAIN and
+	MODULES_DOMAIN.
+	(scan_partial_symbols): Only create partial module symbols for non
+	declarations.
+	* psymtab.c (recursively_search_psymtabs): Handle MODULE_DOMAIN
+	and MODULES_DOMAIN.
+	* symtab.c (search_domain_name): Likewise.
+	(search_symbols): Likewise.
+	(print_symbol_info): Likewise.
+	(symtab_symbol_info): Likewise.
+	(info_modules_command): New function.
+	(_initialize_symtab): Register 'info modules' command.
+	* symtab.h (enum search_domain): Add MODULES_DOMAIN.
+	* NEWS: Mention new 'info modules' command.
+
 2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention $_gdb_setting, $_gdb_setting_str, $_gdb_maint_setting

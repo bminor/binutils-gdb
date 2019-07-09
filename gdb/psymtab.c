@@ -1272,6 +1272,8 @@ recursively_search_psymtabs
 	  QUIT;
 
 	  if ((domain == ALL_DOMAIN
+	       || (domain == MODULES_DOMAIN
+		   && (*psym)->domain == MODULE_DOMAIN)
 	       || (domain == VARIABLES_DOMAIN
 		   && (*psym)->aclass != LOC_TYPEDEF
 		   && (*psym)->aclass != LOC_BLOCK)

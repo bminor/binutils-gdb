@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file tests 'info types' for some Fortran types.
+# This file tests 'info modules'.
 
 load_lib "fortran.exp"
 
@@ -22,7 +22,7 @@ if { [skip_fortran_tests] } { continue }
 standard_testfile info-types.f90 info-types-2.f90
 
 if { [prepare_for_testing "failed to prepare" $testfile \
-	  [list $srcfile2 $srcfile] {debug f90}] } {
+	  [list $srcfile $srcfile2] {debug f90}] } {
     return -1
 }
 
@@ -31,21 +31,36 @@ if { ![runto MAIN__] } {
     continue
 }
 
-set integer4 [fortran_int4]
-set integer8 [fortran_int8]
-set logical4 [fortran_logical4]
-set character1 [fortran_character1]
-
-gdb_test "info types" \
+gdb_test "info modules" \
     [multi_line \
-	 "All defined types:" \
+	 "All defined modules:" \
 	 "" \
-	 "File .*:" \
-	 "\[\t \]+${character1}" \
-	 "\[\t \]+${integer4}" \
-	 "(\[\t \]+${integer8}" \
-	 ")?\[\t \]+${logical4}" \
-	 "(20:\[\t \]+Type __vtype_mod1_M1t1;" \
-	 ")?$decimal:\[\t \]+Type m1t1;" \
-	 "22:\[\t \]+Type s1;(" \
-	 ".*)?"]
+	 "File .*${srcfile2}:" \
+	 "18:\[\t \]+mod2" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "16:\[\t \]+mod1" ]
+
+gdb_test "info modules 1" \
+    [multi_line \
+	 "All modules matching regular expression \"1\":" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "16:\[\t \]+mod1" ]
+
+gdb_test "info modules 2" \
+    [multi_line \
+	 "All modules matching regular expression \"2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "18:\[\t \]+mod2" ]
+
+gdb_test "info modules mod" \
+    [multi_line \
+	 "All modules matching regular expression \"mod\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "18:\[\t \]+mod2" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "16:\[\t \]+mod1" ]

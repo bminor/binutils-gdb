@@ -4042,6 +4042,10 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
 		continue;
 	      break;
+	    case MODULE_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
+		continue;
+	      break;
 	    default:
 	      break;
 	    }
@@ -5064,6 +5068,10 @@ dw2_expand_marked_cus
 	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
 		continue;
 	      break;
+	    case MODULES_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
+		continue;
+	      break;
 	    default:
 	      break;
 	    }
@@ -5970,6 +5978,15 @@ dw2_debug_names_iterator::next ()
 	  goto again;
 	}
       break;
+    case MODULE_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_module:
+	  break;
+	default:
+	  goto again;
+	}
+      break;
     default:
       break;
     }
@@ -6006,6 +6023,14 @@ dw2_debug_names_iterator::next ()
 	  goto again;
 	}
       break;
+    case MODULES_DOMAIN:
+      switch (indexval.dwarf_tag)
+	{
+	case DW_TAG_module:
+	  break;
+	default:
+	  goto again;
+	}
     default:
       break;
     }
@@ -8733,7 +8758,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	      add_partial_namespace (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_module:
-	      add_partial_module (pdi, lowpc, highpc, set_addrmap, cu);
+	      if (!pdi->is_declaration)
+		add_partial_module (pdi, lowpc, highpc, set_addrmap, cu);
 	      break;
 	    case DW_TAG_imported_unit:
 	      {

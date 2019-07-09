@@ -1,3 +1,7 @@
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document new 'info modules' command.
+
 2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Convenience Funs): Document the new
