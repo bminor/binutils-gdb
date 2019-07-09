@@ -1,3 +1,9 @@
+2019-07-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/printcmds.exp (test_printf_convenience_var): Set
+	language to "c++" before dealing with wchar_t.  Remove DO_WSTRING
+	argument and update callers.
+
 2019-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-break-on-asm-line.S: New file.

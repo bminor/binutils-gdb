@@ -935,11 +935,8 @@ proc test_repeat_bytes {} {
 # Test printf of convenience variables.
 # These tests can be done with or without a running inferior.
 # PREFIX ensures uniqueness of test names.
-# DO_WSTRING 1 tells to test printf of wide strings.  Wide strings tests
-# must be skipped (DO_WSTRING 0) if the wchar_t type is not yet known by
-# GDB, as this type is needed to create wide strings.
 
-proc test_printf_convenience_var {prefix do_wstring} {
+proc test_printf_convenience_var {prefix} {
 
     with_test_prefix "conv var: $prefix" {
 	gdb_test_no_output "set var \$cstr = \"abcde\"" "set \$cstr"
@@ -958,12 +955,16 @@ proc test_printf_convenience_var {prefix do_wstring} {
 	gdb_test_no_output "set language auto" "set language auto"
 	gdb_test "printf \"astr val = %s\\n\", \$astr" "astr val = fghij" \
 	    "printf \$astr, auto language"
-	if {$do_wstring} {
-	    gdb_test_no_output "set var \$wstr = L\"facile\"" \
-		"set \$wstr"
-	    gdb_test "printf \"wstr val = %ls\\n\", \$wstr" \
-		"wstr val = facile" "printf \$wstr"
-	}
+	# Wide strings can only be created when wchar_t type is known.
+	# Switch to c++ for the wide strings tests, as wchar_t is predefined
+	# when current language is c++.
+	# See above "set language ada" about why we use gdb_test.
+	gdb_test "set language c++" ".*" "set language c++"
+	gdb_test_no_output "set var \$wstr = L\"facile\"" \
+	    "set \$wstr"
+	gdb_test "printf \"wstr val = %ls\\n\", \$wstr" \
+	    "wstr val = facile" "printf \$wstr"
+	gdb_test_no_output "set language auto" "set language auto, wstring"
     }
 }
 
@@ -985,9 +986,7 @@ gdb_test "print \$cvar = \"abc\"" " = \"abc\""
 gdb_test "print sizeof (\$cvar)" " = 4"
 
 # Similarly, printf of a string convenience var should work without a target.
-# At this point, we cannot create a wide string convenience var, as the
-# wchar_t type is not yet known, so skip the wide string tests.
-test_printf_convenience_var "no target" 0
+test_printf_convenience_var "no target"
 
 # GDB used to complete the explicit location options even when
 # printing expressions.
@@ -1019,11 +1018,11 @@ if ![runto_main] then {
 }
 
 # With a running target, printf convenience vars should of course work.
-test_printf_convenience_var "with target" 1
+test_printf_convenience_var "with target"
 
 # It should also work when inferior function calls are forbidden.
 gdb_test_no_output "set may-call-functions off"
-test_printf_convenience_var "with target, may-call-functions off" 1
+test_printf_convenience_var "with target, may-call-functions off"
 gdb_test_no_output "set may-call-functions on"
 
 test_integer_literals_accepted
