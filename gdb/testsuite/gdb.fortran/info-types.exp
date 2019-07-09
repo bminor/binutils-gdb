@@ -42,4 +42,6 @@ gdb_test "info types" \
 	 "\[\t \]+${character1}" \
 	 "\[\t \]+${integer4}" \
 	 "\[\t \]+${logical4}" \
-	 "16:\[\t \]+Type s1;" ]
+	 "20:\[\t \]+Type __vtype_mod1_M1t1;" \
+	 "17:\[\t \]+Type m1t1;" \
+	 "22:\[\t \]+Type s1;" ]

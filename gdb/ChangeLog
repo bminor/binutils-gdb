@@ -1,5 +1,10 @@
 2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (search_symbols): Don't include MODULE_DOMAIN symbols
+	when searching for types.
+
+2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-lang.c (f_language_defn): Use f_print_typedef.
 	* f-lang.h (f_print_typedef): Declare.
 	* f-typeprint.c (f_print_typedef): Define.

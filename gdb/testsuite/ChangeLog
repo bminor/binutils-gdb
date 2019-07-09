@@ -1,5 +1,10 @@
 2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/info-types.exp: Add module.
+	* gdb.fortran/info-types.f90: Update expected results.
+
+2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/info-types.exp: New file.
 	* gdb.fortran/info-types.f90: New file.
 	* lib/fortran.exp (fortran_character1): New proc.

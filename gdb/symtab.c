@@ -4659,7 +4659,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 				      || treg_matches_sym_type_name (*treg,
 								     sym)))
 			      || (kind == TYPES_DOMAIN
-				  && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
+				  && SYMBOL_CLASS (sym) == LOC_TYPEDEF
+				  && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN))))
 		    {
 		      /* match */
 		      result.emplace_back (i, sym);
