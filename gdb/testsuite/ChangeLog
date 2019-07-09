@@ -1,3 +1,8 @@
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/info-types.c: New file.
+	* gdb.base/info-types.exp: New file.
+
 2019-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-bp-infcall.c: New file.

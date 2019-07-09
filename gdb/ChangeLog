@@ -1,5 +1,14 @@
 2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (search_symbols): Adjust msymbol matching type arrays
+	so that GDB doesn't match any msymbols when searching in the
+	TYPES_DOMAIN.
+	(print_symbol_info): Print using typedef_print or type_print based
+	on the type of the symbol.  Add updated FIXME comment moved from...
+	(_initialize_symtab): ... move and update FIXME comment to above.
+
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention adding -q option to "info types".
 	* symtab.c (struct info_types_options): New struct.
 	(info_types_options_defs): New variable.

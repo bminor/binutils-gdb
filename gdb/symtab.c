@@ -4343,13 +4343,13 @@ search_symbols (const char *regexp, enum search_domain kind,
   struct symbol *sym;
   int found_misc = 0;
   static const enum minimal_symbol_type types[]
-    = {mst_data, mst_text, mst_abs};
+    = {mst_data, mst_text, mst_unknown};
   static const enum minimal_symbol_type types2[]
-    = {mst_bss, mst_file_text, mst_abs};
+    = {mst_bss, mst_file_text, mst_unknown};
   static const enum minimal_symbol_type types3[]
-    = {mst_file_data, mst_solib_trampoline, mst_abs};
+    = {mst_file_data, mst_solib_trampoline, mst_unknown};
   static const enum minimal_symbol_type types4[]
-    = {mst_file_bss, mst_text_gnu_ifunc, mst_abs};
+    = {mst_file_bss, mst_text_gnu_ifunc, mst_unknown};
   enum minimal_symbol_type ourtype;
   enum minimal_symbol_type ourtype2;
   enum minimal_symbol_type ourtype3;
@@ -4632,7 +4632,23 @@ print_symbol_info (enum search_domain kind,
   /* Typedef that is not a C++ class.  */
   if (kind == TYPES_DOMAIN
       && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
-    typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
+    {
+      /* FIXME: For C (and C++) we end up with a difference in output here
+	 between how a typedef is printed, and non-typedefs are printed.
+	 The TYPEDEF_PRINT code places a ";" at the end in an attempt to
+	 appear C-like, while TYPE_PRINT doesn't.
+
+	 For the struct printing case below, things are worse, we force
+	 printing of the ";" in this function, which is going to be wrong
+	 for languages that don't require a ";" between statements.  */
+      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
+	typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
+      else
+	{
+	  type_print (SYMBOL_TYPE (sym), "", gdb_stdout, -1);
+	  printf_filtered ("\n");
+	}
+    }
   /* variable, func, or typedef-that-is-c++-class.  */
   else if (kind < TYPES_DOMAIN
 	   || (kind == TYPES_DOMAIN
@@ -6084,14 +6100,6 @@ Prints the functions.\n"),
 				  _("functions")));
   set_cmd_completer_handle_brkchars (c, info_print_command_completer);
 
-  /* FIXME:  This command has at least the following problems:
-     1.  It prints builtin types (in a very strange and confusing fashion).
-     2.  It doesn't print right, e.g. with
-     typedef struct foo *FOO
-     type_print prints "FOO" when we want to make it (in this situation)
-     print "struct foo *".
-     I also think "ptype" or "whatis" is more likely to be useful (but if
-     there is much disagreement "info types" can be fixed).  */
   c = add_info ("types", info_types_command, _("\
 All type names, or those matching REGEXP.\n\
 Usage: info types [-q] [REGEXP]\n\
