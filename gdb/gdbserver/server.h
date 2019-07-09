@@ -21,6 +21,14 @@
 
 #include "gdbsupport/common-defs.h"
 
+#undef PACKAGE
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+
+#include <config.h>
+
 gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #ifdef __MINGW32CE__

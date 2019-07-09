@@ -238,6 +238,10 @@ GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
 
+SUPPORT = ../gdbsupport
+LIBSUPPORT = $(SUPPORT)/libgdbsupport.a
+INCSUPPORT = -I$(srcdir)/.. -I..
+
 #
 # CLI sub directory definitons
 #
@@ -547,7 +551,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi gdbsupport compile tui unittests guile python \
+CONFIG_SRC_SUBDIR = arch cli mi compile tui unittests guile python \
 	target nat
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
@@ -586,8 +590,8 @@ INTERNAL_CFLAGS_BASE = \
 	$(CXXFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) \
-	$(SRCHIGH_CFLAGS) $(TOP_CFLAGS) $(PTHREAD_CFLAGS)
+	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(ENABLE_CFLAGS) \
+	$(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) $(TOP_CFLAGS) $(PTHREAD_CFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -607,14 +611,15 @@ INTERNAL_LDFLAGS = \
 # XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(LIBCTF) $(ZLIB) \
-        $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
+        $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(GDBTKLIBS) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
-	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) $(LIBMPFR) \
-	$(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS)
+	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
+	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(LIBCTF) \
-	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
+	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
+	$(LIBSUPPORT)
 
 DIST = gdb
 
@@ -968,39 +973,6 @@ COMMON_SFILES = \
 	cli-out.c \
 	coff-pe-read.c \
 	coffread.c \
-	gdbsupport/agent.c \
-	gdbsupport/btrace-common.c \
-	gdbsupport/buffer.c \
-	gdbsupport/cleanups.c \
-	gdbsupport/common-debug.c \
-	gdbsupport/common-exceptions.c \
-	gdbsupport/common-inferior.c \
-	gdbsupport/common-regcache.c \
-	gdbsupport/common-utils.c \
-	gdbsupport/errors.c \
-	gdbsupport/environ.c \
-	gdbsupport/fileio.c \
-	gdbsupport/filestuff.c \
-	gdbsupport/format.c \
-	gdbsupport/job-control.c \
-	gdbsupport/gdb-dlfcn.c \
-	gdbsupport/gdb_tilde_expand.c \
-	gdbsupport/gdb_vecs.c \
-	gdbsupport/gdb_wait.c \
-	gdbsupport/netstuff.c \
-	gdbsupport/new-op.c \
-	gdbsupport/pathstuff.c \
-	gdbsupport/print-utils.c \
-	gdbsupport/ptid.c \
-	gdbsupport/rsp-low.c \
-	gdbsupport/run-time-clock.c \
-	gdbsupport/safe-strerror.c \
-	gdbsupport/scoped_mmap.c \
-	gdbsupport/signals.c \
-	gdbsupport/signals-state-save-restore.c \
-	gdbsupport/tdesc.c \
-	gdbsupport/thread-pool.c \
-	gdbsupport/xml-utils.c \
 	complaints.c \
 	completer.c \
 	continuations.c \
@@ -1468,49 +1440,6 @@ HFILES_NO_SRCDIR = \
 	cli/cli-setshow.h \
 	cli/cli-style.h \
 	cli/cli-utils.h \
-	gdbsupport/buffer.h \
-	gdbsupport/cleanups.h \
-	gdbsupport/common-debug.h \
-	gdbsupport/common-defs.h \
-	gdbsupport/common-exceptions.h \
-	gdbsupport/common-gdbthread.h \
-	gdbsupport/common-regcache.h \
-	gdbsupport/common-types.h \
-	gdbsupport/common-utils.h \
-	gdbsupport/job-control.h \
-	gdbsupport/errors.h \
-	gdbsupport/environ.h \
-	gdbsupport/fileio.h \
-	gdbsupport/format.h \
-	gdbsupport/gdb-dlfcn.h \
-	gdbsupport/gdb-sigmask.h \
-	gdbsupport/gdb_assert.h \
-	gdbsupport/gdb_binary_search.h \
-	gdbsupport/gdb_tilde_expand.h \
-	gdbsupport/gdb_locale.h \
-	gdbsupport/gdb_proc_service.h \
-	gdbsupport/gdb_setjmp.h \
-	gdbsupport/gdb_signals.h \
-	gdbsupport/gdb_sys_time.h \
-	gdbsupport/gdb_vecs.h \
-	gdbsupport/gdb_wait.h \
-	gdbsupport/common-inferior.h \
-	gdbsupport/netstuff.h \
-	gdbsupport/host-defs.h \
-	gdbsupport/parallel-for.h \
-	gdbsupport/pathstuff.h \
-	gdbsupport/print-utils.h \
-	gdbsupport/ptid.h \
-	gdbsupport/queue.h \
-	gdbsupport/rsp-low.h \
-	gdbsupport/run-time-clock.h \
-	gdbsupport/signals-state-save-restore.h \
-	gdbsupport/symbol.h \
-	gdbsupport/tdesc.h \
-	gdbsupport/thread-pool.h \
-	gdbsupport/version.h \
-	gdbsupport/x86-xstate.h \
-	gdbsupport/xml-utils.h \
 	compile/compile.h \
 	compile/compile-c.h \
 	compile/compile-cplus.h \
@@ -2131,8 +2060,8 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 version.c: stamp-version; @true
 # Note that the obvious names for the temp file are taken by
 # create-version.sh.
-stamp-version: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/gdbsupport/create-version.sh
-	$(ECHO_GEN) $(SHELL) $(srcdir)/gdbsupport/create-version.sh $(srcdir) \
+stamp-version: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/../gdbsupport/create-version.sh
+	$(ECHO_GEN) $(SHELL) $(srcdir)/../gdbsupport/create-version.sh $(srcdir) \
 	    $(host_alias) $(target_alias) version-t.t
 	@$(SHELL) $(srcdir)/../move-if-change version-t.t version.c
 	@echo stamp > stamp-version

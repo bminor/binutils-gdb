@@ -1,0 +1,7 @@
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* common-defs.h: Add GDBSERVER case.  Update includes.
+	* acinclude.m4, aclocal.m4, config.in, configure, configure.ac,
+	Makefile.am, Makefile.in, README: New files.
+	* Moved from ../gdb/gdbsupport/
+

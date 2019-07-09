@@ -943,6 +943,7 @@ configure-host:  \
     maybe-configure-texinfo \
     maybe-configure-zlib \
     maybe-configure-gnulib \
+    maybe-configure-gdbsupport \
     maybe-configure-gdb \
     maybe-configure-expect \
     maybe-configure-guile \
@@ -1097,6 +1098,7 @@ all-host: maybe-all-texinfo
 all-host: maybe-all-zlib
 @endif zlib-no-bootstrap
 all-host: maybe-all-gnulib
+all-host: maybe-all-gdbsupport
 all-host: maybe-all-gdb
 all-host: maybe-all-expect
 all-host: maybe-all-guile
@@ -1205,6 +1207,7 @@ info-host: maybe-info-sim
 info-host: maybe-info-texinfo
 info-host: maybe-info-zlib
 info-host: maybe-info-gnulib
+info-host: maybe-info-gdbsupport
 info-host: maybe-info-gdb
 info-host: maybe-info-expect
 info-host: maybe-info-guile
@@ -1292,6 +1295,7 @@ dvi-host: maybe-dvi-sim
 dvi-host: maybe-dvi-texinfo
 dvi-host: maybe-dvi-zlib
 dvi-host: maybe-dvi-gnulib
+dvi-host: maybe-dvi-gdbsupport
 dvi-host: maybe-dvi-gdb
 dvi-host: maybe-dvi-expect
 dvi-host: maybe-dvi-guile
@@ -1379,6 +1383,7 @@ pdf-host: maybe-pdf-sim
 pdf-host: maybe-pdf-texinfo
 pdf-host: maybe-pdf-zlib
 pdf-host: maybe-pdf-gnulib
+pdf-host: maybe-pdf-gdbsupport
 pdf-host: maybe-pdf-gdb
 pdf-host: maybe-pdf-expect
 pdf-host: maybe-pdf-guile
@@ -1466,6 +1471,7 @@ html-host: maybe-html-sim
 html-host: maybe-html-texinfo
 html-host: maybe-html-zlib
 html-host: maybe-html-gnulib
+html-host: maybe-html-gdbsupport
 html-host: maybe-html-gdb
 html-host: maybe-html-expect
 html-host: maybe-html-guile
@@ -1553,6 +1559,7 @@ TAGS-host: maybe-TAGS-sim
 TAGS-host: maybe-TAGS-texinfo
 TAGS-host: maybe-TAGS-zlib
 TAGS-host: maybe-TAGS-gnulib
+TAGS-host: maybe-TAGS-gdbsupport
 TAGS-host: maybe-TAGS-gdb
 TAGS-host: maybe-TAGS-expect
 TAGS-host: maybe-TAGS-guile
@@ -1640,6 +1647,7 @@ install-info-host: maybe-install-info-sim
 install-info-host: maybe-install-info-texinfo
 install-info-host: maybe-install-info-zlib
 install-info-host: maybe-install-info-gnulib
+install-info-host: maybe-install-info-gdbsupport
 install-info-host: maybe-install-info-gdb
 install-info-host: maybe-install-info-expect
 install-info-host: maybe-install-info-guile
@@ -1727,6 +1735,7 @@ install-pdf-host: maybe-install-pdf-sim
 install-pdf-host: maybe-install-pdf-texinfo
 install-pdf-host: maybe-install-pdf-zlib
 install-pdf-host: maybe-install-pdf-gnulib
+install-pdf-host: maybe-install-pdf-gdbsupport
 install-pdf-host: maybe-install-pdf-gdb
 install-pdf-host: maybe-install-pdf-expect
 install-pdf-host: maybe-install-pdf-guile
@@ -1814,6 +1823,7 @@ install-html-host: maybe-install-html-sim
 install-html-host: maybe-install-html-texinfo
 install-html-host: maybe-install-html-zlib
 install-html-host: maybe-install-html-gnulib
+install-html-host: maybe-install-html-gdbsupport
 install-html-host: maybe-install-html-gdb
 install-html-host: maybe-install-html-expect
 install-html-host: maybe-install-html-guile
@@ -1901,6 +1911,7 @@ installcheck-host: maybe-installcheck-sim
 installcheck-host: maybe-installcheck-texinfo
 installcheck-host: maybe-installcheck-zlib
 installcheck-host: maybe-installcheck-gnulib
+installcheck-host: maybe-installcheck-gdbsupport
 installcheck-host: maybe-installcheck-gdb
 installcheck-host: maybe-installcheck-expect
 installcheck-host: maybe-installcheck-guile
@@ -1988,6 +1999,7 @@ mostlyclean-host: maybe-mostlyclean-sim
 mostlyclean-host: maybe-mostlyclean-texinfo
 mostlyclean-host: maybe-mostlyclean-zlib
 mostlyclean-host: maybe-mostlyclean-gnulib
+mostlyclean-host: maybe-mostlyclean-gdbsupport
 mostlyclean-host: maybe-mostlyclean-gdb
 mostlyclean-host: maybe-mostlyclean-expect
 mostlyclean-host: maybe-mostlyclean-guile
@@ -2075,6 +2087,7 @@ clean-host: maybe-clean-sim
 clean-host: maybe-clean-texinfo
 clean-host: maybe-clean-zlib
 clean-host: maybe-clean-gnulib
+clean-host: maybe-clean-gdbsupport
 clean-host: maybe-clean-gdb
 clean-host: maybe-clean-expect
 clean-host: maybe-clean-guile
@@ -2162,6 +2175,7 @@ distclean-host: maybe-distclean-sim
 distclean-host: maybe-distclean-texinfo
 distclean-host: maybe-distclean-zlib
 distclean-host: maybe-distclean-gnulib
+distclean-host: maybe-distclean-gdbsupport
 distclean-host: maybe-distclean-gdb
 distclean-host: maybe-distclean-expect
 distclean-host: maybe-distclean-guile
@@ -2249,6 +2263,7 @@ maintainer-clean-host: maybe-maintainer-clean-sim
 maintainer-clean-host: maybe-maintainer-clean-texinfo
 maintainer-clean-host: maybe-maintainer-clean-zlib
 maintainer-clean-host: maybe-maintainer-clean-gnulib
+maintainer-clean-host: maybe-maintainer-clean-gdbsupport
 maintainer-clean-host: maybe-maintainer-clean-gdb
 maintainer-clean-host: maybe-maintainer-clean-expect
 maintainer-clean-host: maybe-maintainer-clean-guile
@@ -2392,6 +2407,7 @@ check-host:  \
     maybe-check-texinfo \
     maybe-check-zlib \
     maybe-check-gnulib \
+    maybe-check-gdbsupport \
     maybe-check-gdb \
     maybe-check-expect \
     maybe-check-guile \
@@ -2526,6 +2542,7 @@ install-host-nogcc:  \
     maybe-install-texinfo \
     maybe-install-zlib \
     maybe-install-gnulib \
+    maybe-install-gdbsupport \
     maybe-install-gdb \
     maybe-install-expect \
     maybe-install-guile \
@@ -2577,6 +2594,7 @@ install-host:  \
     maybe-install-texinfo \
     maybe-install-zlib \
     maybe-install-gnulib \
+    maybe-install-gdbsupport \
     maybe-install-gdb \
     maybe-install-expect \
     maybe-install-guile \
@@ -2684,6 +2702,7 @@ install-strip-host:  \
     maybe-install-strip-texinfo \
     maybe-install-strip-zlib \
     maybe-install-strip-gnulib \
+    maybe-install-strip-gdbsupport \
     maybe-install-strip-gdb \
     maybe-install-strip-expect \
     maybe-install-strip-guile \
@@ -28545,6 +28564,447 @@ maintainer-clean-gnulib:
 
 
 
+.PHONY: configure-gdbsupport maybe-configure-gdbsupport
+maybe-configure-gdbsupport:
+@if gcc-bootstrap
+configure-gdbsupport: stage_current
+@endif gcc-bootstrap
+@if gdbsupport
+maybe-configure-gdbsupport: configure-gdbsupport
+configure-gdbsupport: 
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	test ! -f $(HOST_SUBDIR)/gdbsupport/Makefile || exit 0; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/gdbsupport; \
+	$(HOST_EXPORTS)  \
+	echo Configuring in $(HOST_SUBDIR)/gdbsupport; \
+	cd "$(HOST_SUBDIR)/gdbsupport" || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/gdbsupport/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=gdbsupport; \
+	$(SHELL) \
+	  $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias}  \
+	  || exit 1
+@endif gdbsupport
+
+
+
+
+
+.PHONY: all-gdbsupport maybe-all-gdbsupport
+maybe-all-gdbsupport:
+@if gcc-bootstrap
+all-gdbsupport: stage_current
+@endif gcc-bootstrap
+@if gdbsupport
+TARGET-gdbsupport=all
+maybe-all-gdbsupport: all-gdbsupport
+all-gdbsupport: configure-gdbsupport
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS)  \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
+		$(TARGET-gdbsupport))
+@endif gdbsupport
+
+
+
+
+.PHONY: check-gdbsupport maybe-check-gdbsupport
+maybe-check-gdbsupport:
+@if gdbsupport
+maybe-check-gdbsupport: check-gdbsupport
+
+check-gdbsupport:
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS)  \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(FLAGS_TO_PASS)  check)
+
+@endif gdbsupport
+
+.PHONY: install-gdbsupport maybe-install-gdbsupport
+maybe-install-gdbsupport:
+@if gdbsupport
+maybe-install-gdbsupport: install-gdbsupport
+
+install-gdbsupport: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(FLAGS_TO_PASS)  install)
+
+@endif gdbsupport
+
+.PHONY: install-strip-gdbsupport maybe-install-strip-gdbsupport
+maybe-install-strip-gdbsupport:
+@if gdbsupport
+maybe-install-strip-gdbsupport: install-strip-gdbsupport
+
+install-strip-gdbsupport: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
+
+@endif gdbsupport
+
+# Other targets (info, dvi, pdf, etc.)
+
+.PHONY: maybe-info-gdbsupport info-gdbsupport
+maybe-info-gdbsupport:
+@if gdbsupport
+maybe-info-gdbsupport: info-gdbsupport
+
+info-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing info in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          info) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-dvi-gdbsupport dvi-gdbsupport
+maybe-dvi-gdbsupport:
+@if gdbsupport
+maybe-dvi-gdbsupport: dvi-gdbsupport
+
+dvi-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing dvi in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          dvi) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-pdf-gdbsupport pdf-gdbsupport
+maybe-pdf-gdbsupport:
+@if gdbsupport
+maybe-pdf-gdbsupport: pdf-gdbsupport
+
+pdf-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing pdf in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          pdf) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-html-gdbsupport html-gdbsupport
+maybe-html-gdbsupport:
+@if gdbsupport
+maybe-html-gdbsupport: html-gdbsupport
+
+html-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing html in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          html) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-TAGS-gdbsupport TAGS-gdbsupport
+maybe-TAGS-gdbsupport:
+@if gdbsupport
+maybe-TAGS-gdbsupport: TAGS-gdbsupport
+
+TAGS-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing TAGS in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          TAGS) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-install-info-gdbsupport install-info-gdbsupport
+maybe-install-info-gdbsupport:
+@if gdbsupport
+maybe-install-info-gdbsupport: install-info-gdbsupport
+
+install-info-gdbsupport: \
+    configure-gdbsupport \
+    info-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-info in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-info) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-install-pdf-gdbsupport install-pdf-gdbsupport
+maybe-install-pdf-gdbsupport:
+@if gdbsupport
+maybe-install-pdf-gdbsupport: install-pdf-gdbsupport
+
+install-pdf-gdbsupport: \
+    configure-gdbsupport \
+    pdf-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-pdf in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-pdf) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-install-html-gdbsupport install-html-gdbsupport
+maybe-install-html-gdbsupport:
+@if gdbsupport
+maybe-install-html-gdbsupport: install-html-gdbsupport
+
+install-html-gdbsupport: \
+    configure-gdbsupport \
+    html-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-html in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-html) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-installcheck-gdbsupport installcheck-gdbsupport
+maybe-installcheck-gdbsupport:
+@if gdbsupport
+maybe-installcheck-gdbsupport: installcheck-gdbsupport
+
+installcheck-gdbsupport: \
+    configure-gdbsupport 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing installcheck in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          installcheck) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-mostlyclean-gdbsupport mostlyclean-gdbsupport
+maybe-mostlyclean-gdbsupport:
+@if gdbsupport
+maybe-mostlyclean-gdbsupport: mostlyclean-gdbsupport
+
+mostlyclean-gdbsupport: 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing mostlyclean in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          mostlyclean) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-clean-gdbsupport clean-gdbsupport
+maybe-clean-gdbsupport:
+@if gdbsupport
+maybe-clean-gdbsupport: clean-gdbsupport
+
+clean-gdbsupport: 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing clean in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          clean) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-distclean-gdbsupport distclean-gdbsupport
+maybe-distclean-gdbsupport:
+@if gdbsupport
+maybe-distclean-gdbsupport: distclean-gdbsupport
+
+distclean-gdbsupport: 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing distclean in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          distclean) \
+	  || exit 1
+
+@endif gdbsupport
+
+.PHONY: maybe-maintainer-clean-gdbsupport maintainer-clean-gdbsupport
+maybe-maintainer-clean-gdbsupport:
+@if gdbsupport
+maybe-maintainer-clean-gdbsupport: maintainer-clean-gdbsupport
+
+maintainer-clean-gdbsupport: 
+	@: $(MAKE); $(unstage)
+	@[ -f ./gdbsupport/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing maintainer-clean in gdbsupport"; \
+	(cd $(HOST_SUBDIR)/gdbsupport && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          maintainer-clean) \
+	  || exit 1
+
+@endif gdbsupport
+
+
+
 .PHONY: configure-gdb maybe-configure-gdb
 maybe-configure-gdb:
 @if gcc-bootstrap
@@ -51049,7 +51509,9 @@ all-stageprofile-intl: maybe-all-stageprofile-libiconv
 all-stagefeedback-intl: maybe-all-stagefeedback-libiconv
 configure-gdb: maybe-configure-sim
 configure-gdb: maybe-all-gnulib
+configure-gdb: maybe-all-gdbsupport
 all-gdb: maybe-all-gnulib
+all-gdb: maybe-all-gdbsupport
 all-gdb: maybe-all-readline
 all-gdb: maybe-all-build-bison
 all-gdb: maybe-all-sim
@@ -51059,6 +51521,8 @@ configure-libgui: maybe-configure-tk
 all-libgui: maybe-all-tcl
 all-libgui: maybe-all-tk
 all-libgui: maybe-all-itcl
+configure-gdbsupport: maybe-configure-gnulib
+all-gdbsupport: maybe-all-gnulib
 configure-bfd: configure-libiberty
 configure-stage1-bfd: configure-stage1-libiberty
 configure-stage2-bfd: configure-stage2-libiberty
@@ -51503,6 +51967,7 @@ configure-gnattools: stage_last
 configure-libcc1: stage_last
 configure-utils: stage_last
 configure-gdb: stage_last
+configure-gdbsupport: stage_last
 configure-gprof: stage_last
 configure-sid: stage_last
 configure-sim: stage_last
@@ -51525,6 +51990,7 @@ all-gdb: maybe-all-libiconv
 all-gdb: maybe-all-opcodes
 all-gdb: maybe-all-libdecnumber
 all-gdb: maybe-all-libctf
+configure-gdbsupport: maybe-configure-bfd
 configure-gprof: maybe-configure-intl
 all-gprof: maybe-all-libiberty
 all-gprof: maybe-all-bfd

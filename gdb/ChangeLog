@@ -1,5 +1,25 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* nat/x86-linux-dregs.c: Include configh.h.
+	* nat/linux-ptrace.c: Include configh.h.
+	* nat/linux-btrace.c: Include configh.h.
+	* defs.h: Include config.h, bfd.h.
+	* configure.ac: Don't source common.host.
+	(CONFIG_OBS, CONFIG_SRCS): Remove gdbsupport files.
+	* configure: Rebuild.
+	* acinclude.m4: Update path.
+	* Makefile.in (SUPPORT, LIBSUPPORT, INCSUPPORT): New variables.
+	(CONFIG_SRC_SUBDIR): Remove gdbsupport.
+	(INTERNAL_CFLAGS_BASE): Add INCSUPPORT.
+	(CLIBS): Add LIBSUPPORT.
+	(CDEPS): Likewise.
+	(COMMON_SFILES): Remove gdbsupport files.
+	(HFILES_NO_SRCDIR): Likewise.
+	(stamp-version): Update path to create-version.sh.
+	(ALLDEPFILES): Remove gdbsupport files.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/common.m4 (GDB_AC_COMMON): Define WIN32APILIBS and
 	USE_WIN32API when needed.
 	* configure.ac (USE_WIN32API): Don't define.

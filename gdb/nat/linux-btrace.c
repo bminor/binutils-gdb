@@ -20,6 +20,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "gdbsupport/common-defs.h"
+
+#undef PACKAGE
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+
+#include <config.h>
 #include "linux-btrace.h"
 #include "gdbsupport/common-regcache.h"
 #include "gdbsupport/gdb_wait.h"

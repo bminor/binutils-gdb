@@ -41,7 +41,7 @@ config.guess; config.sub; readline/support/config.{sub,guess}
 depcomp; mkinstalldirs
         Send bug reports and patches to bug-automake@gnu.org.
 
-gdb/; gnulib/; readline/; sim/; GDB's part of include/
+gdb/; gdbsupport/; gnulib/; readline/; sim/; GDB's part of include/
 	GDB: http://www.gnu.org/software/gdb/
 	Patches to gdb-patches@sourceware.org.
 	See also gdb/MAINTAINERS and sim/MAINTAINERS.

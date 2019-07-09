@@ -1,5 +1,18 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* server.h: Include config.h.
+	* gdbreplay.c: Include config.h.
+	* configure: Rebuild.
+	* configure.ac: Don't source common.host.
+	* acinclude.m4: Update path.
+	* Makefile.in (INCSUPPORT): New variable.
+	(INCLUDE_CFLAGS): Add INCSUPPORT.
+	(SFILES): Update paths.
+	(version-generated.c): Update path to create-version.sh.
+	(gdbsupport/%-ipa.o, gdbsupport/%.o): Update paths.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* configure.ac (LIBS): Use WIN32APILIBS.
 	(USE_WIN32API): Don't define.
 	* configure: Rebuild.

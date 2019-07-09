@@ -63,7 +63,7 @@ m4_include([../config/iconv.m4])
 
 m4_include([../config/zlib.m4])
 
-m4_include([gdbsupport/common.m4])
+m4_include([../gdbsupport/common.m4])
 
 dnl For libiberty_INIT.
 m4_include(libiberty.m4)

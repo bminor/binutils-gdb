@@ -109,6 +109,8 @@ INCGNU = -I$(srcdir)/../../gnulib/import -I$(GNULIB_BUILDDIR)/import
 # so that they are generated before other files are compiled.
 GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 
+INCSUPPORT = -I$(srcdir)/../.. -I../..
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} for our headers.
@@ -120,7 +122,7 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 #
 INCLUDE_CFLAGS = -I. -I${srcdir} \
 	-I$(srcdir)/../regformats -I$(srcdir)/.. -I$(INCLUDE_DIR) \
-	$(INCGNU)
+	$(INCGNU) $(INCSUPPORT)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -201,32 +203,32 @@ SFILES = \
 	$(srcdir)/arch/arm-linux.c \
 	$(srcdir)/arch/ppc-linux-common.c \
 	$(srcdir)/../alloc.c \
-	$(srcdir)/gdbsupport/btrace-common.c \
-	$(srcdir)/gdbsupport/buffer.c \
-	$(srcdir)/gdbsupport/cleanups.c \
-	$(srcdir)/gdbsupport/common-debug.c \
-	$(srcdir)/gdbsupport/common-exceptions.c \
-	$(srcdir)/gdbsupport/common-inferior.c \
-	$(srcdir)/gdbsupport/common-regcache.c \
-	$(srcdir)/gdbsupport/common-utils.c \
-	$(srcdir)/gdbsupport/errors.c \
-	$(srcdir)/gdbsupport/environ.c \
-	$(srcdir)/gdbsupport/fileio.c \
-	$(srcdir)/gdbsupport/filestuff.c \
-	$(srcdir)/gdbsupport/job-control.c \
-	$(srcdir)/gdbsupport/gdb-dlfcn.c \
-	$(srcdir)/gdbsupport/gdb_tilde_expand.c \
-	$(srcdir)/gdbsupport/gdb_vecs.c \
-	$(srcdir)/gdbsupport/gdb_wait.c \
-	$(srcdir)/gdbsupport/netstuff.c \
-	$(srcdir)/gdbsupport/new-op.c \
-	$(srcdir)/gdbsupport/pathstuff.c \
-	$(srcdir)/gdbsupport/print-utils.c \
-	$(srcdir)/gdbsupport/ptid.c \
-	$(srcdir)/gdbsupport/rsp-low.c \
-	$(srcdir)/gdbsupport/safe-strerror.c \
-	$(srcdir)/gdbsupport/tdesc.c \
-	$(srcdir)/gdbsupport/xml-utils.c \
+	$(srcdir)/../../gdbsupport/btrace-common.c \
+	$(srcdir)/../../gdbsupport/buffer.c \
+	$(srcdir)/../../gdbsupport/cleanups.c \
+	$(srcdir)/../../gdbsupport/common-debug.c \
+	$(srcdir)/../../gdbsupport/common-exceptions.c \
+	$(srcdir)/../../gdbsupport/common-inferior.c \
+	$(srcdir)/../../gdbsupport/common-regcache.c \
+	$(srcdir)/../../gdbsupport/common-utils.c \
+	$(srcdir)/../../gdbsupport/errors.c \
+	$(srcdir)/../../gdbsupport/environ.c \
+	$(srcdir)/../../gdbsupport/fileio.c \
+	$(srcdir)/../../gdbsupport/filestuff.c \
+	$(srcdir)/../../gdbsupport/job-control.c \
+	$(srcdir)/../../gdbsupport/gdb-dlfcn.c \
+	$(srcdir)/../../gdbsupport/gdb_tilde_expand.c \
+	$(srcdir)/../../gdbsupport/gdb_vecs.c \
+	$(srcdir)/../../gdbsupport/gdb_wait.c \
+	$(srcdir)/../../gdbsupport/netstuff.c \
+	$(srcdir)/../../gdbsupport/new-op.c \
+	$(srcdir)/../../gdbsupport/pathstuff.c \
+	$(srcdir)/../../gdbsupport/print-utils.c \
+	$(srcdir)/../../gdbsupport/ptid.c \
+	$(srcdir)/../../gdbsupport/rsp-low.c \
+	$(srcdir)/../../gdbsupport/safe-strerror.c \
+	$(srcdir)/../../gdbsupport/tdesc.c \
+	$(srcdir)/../../gdbsupport/xml-utils.c \
 	$(srcdir)/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/nat/linux-btrace.c \
 	$(srcdir)/nat/linux-namespaces.c \
@@ -529,8 +531,8 @@ am--refresh:
 
 force:
 
-version-generated.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../gdbsupport/create-version.sh
-	$(ECHO_GEN) $(SHELL) $(srcdir)/../gdbsupport/create-version.sh $(srcdir)/.. \
+version-generated.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../../gdbsupport/create-version.sh
+	$(ECHO_GEN) $(SHELL) $(srcdir)/../../gdbsupport/create-version.sh $(srcdir)/.. \
 		$(host_alias) $(target_alias) $@
 
 xml-builtin-generated.c: stamp-xml; @true
@@ -588,7 +590,7 @@ arch/%-ipa.o: ../arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%-ipa.o: ../gdbsupport/%.c
+gdbsupport/%-ipa.o: ../../gdbsupport/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -621,7 +623,7 @@ arch/%.o: ../arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%.o: ../gdbsupport/%.c
+gdbsupport/%.o: ../../gdbsupport/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
