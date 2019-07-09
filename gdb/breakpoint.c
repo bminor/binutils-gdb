@@ -5974,14 +5974,18 @@ output_thread_groups (struct ui_out *uiout,
     }
 }
 
-/* Print B to gdb_stdout.  */
+/* Print B to gdb_stdout.  If RAW_LOC, print raw breakpoint locations
+   instead of going via breakpoint_ops::print_one.  This makes "maint
+   info breakpoints" show the software breakpoint locations of
+   catchpoints, which are considered internal implementation
+   detail.  */
 
 static void
 print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
 			       struct bp_location **last_loc,
-			       int allflag)
+			       int allflag, bool raw_loc)
 {
   struct command_line *l;
   static char bpenables[] = "nynny";
@@ -6034,20 +6038,11 @@ print_one_breakpoint_location (struct breakpoint *b,
     uiout->field_fmt ("enabled", "%c", bpenables[(int) b->enable_state]);
 
   /* 5 and 6 */
-  if (b->ops != NULL && b->ops->print_one != NULL)
+  if (!raw_loc && b->ops != NULL && b->ops->print_one != NULL)
     b->ops->print_one (b, last_loc);
   else
-    switch (b->type)
-      {
-      case bp_none:
-	internal_error (__FILE__, __LINE__,
-			_("print_one_breakpoint: bp_none encountered\n"));
-	break;
-
-      case bp_watchpoint:
-      case bp_hardware_watchpoint:
-      case bp_read_watchpoint:
-      case bp_access_watchpoint:
+    {
+      if (is_watchpoint (b))
 	{
 	  struct watchpoint *w = (struct watchpoint *) b;
 
@@ -6059,55 +6054,26 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  annotate_field (5);
 	  uiout->field_string ("what", w->exp_string);
 	}
-	break;
-
-      case bp_breakpoint:
-      case bp_hardware_breakpoint:
-      case bp_single_step:
-      case bp_until:
-      case bp_finish:
-      case bp_longjmp:
-      case bp_longjmp_resume:
-      case bp_longjmp_call_dummy:
-      case bp_exception:
-      case bp_exception_resume:
-      case bp_step_resume:
-      case bp_hp_step_resume:
-      case bp_watchpoint_scope:
-      case bp_call_dummy:
-      case bp_std_terminate:
-      case bp_shlib_event:
-      case bp_thread_event:
-      case bp_overlay_event:
-      case bp_longjmp_master:
-      case bp_std_terminate_master:
-      case bp_exception_master:
-      case bp_tracepoint:
-      case bp_fast_tracepoint:
-      case bp_static_tracepoint:
-      case bp_dprintf:
-      case bp_jit_event:
-      case bp_gnu_ifunc_resolver:
-      case bp_gnu_ifunc_resolver_return:
-	if (opts.addressprint)
-	  {
-	    annotate_field (4);
-	    if (header_of_multiple)
-	      uiout->field_string ("addr", "<MULTIPLE>");
-	    else if (b->loc == NULL || loc->shlib_disabled)
-	      uiout->field_string ("addr", "<PENDING>");
-	    else
-	      uiout->field_core_addr ("addr",
-				      loc->gdbarch, loc->address);
-	  }
-	annotate_field (5);
-	if (!header_of_multiple)
-	  print_breakpoint_location (b, loc);
-	if (b->loc)
-	  *last_loc = b->loc;
-	break;
-      }
-
+      else if (!is_catchpoint (b) || is_exception_catchpoint (b))
+	{
+	  if (opts.addressprint)
+	    {
+	      annotate_field (4);
+	      if (header_of_multiple)
+		uiout->field_string ("addr", "<MULTIPLE>");
+	      else if (b->loc == NULL || loc->shlib_disabled)
+		uiout->field_string ("addr", "<PENDING>");
+	      else
+		uiout->field_core_addr ("addr",
+					loc->gdbarch, loc->address);
+	    }
+	  annotate_field (5);
+	  if (!header_of_multiple)
+	    print_breakpoint_location (b, loc);
+	  if (b->loc)
+	    *last_loc = b->loc;
+	}
+    }
 
   if (loc != NULL && !header_of_multiple)
     {
@@ -6336,7 +6302,7 @@ print_one_breakpoint (struct breakpoint *b,
        || fix_multi_location_breakpoint_output_globally);
 
   gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
-  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
+  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag, false);
 
   /* The mi2 broken format: the main breakpoint tuple ends here, the locations
      are outside.  */
@@ -6346,7 +6312,9 @@ print_one_breakpoint (struct breakpoint *b,
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
      locations, if any.  */
-  if (b->ops == NULL || b->ops->print_one == NULL)
+  if (b->ops == NULL
+      || b->ops->print_one == NULL
+      || allflag)
     {
       /* If breakpoint has a single location that is disabled, we
 	 print it as if it had several locations, since otherwise it's
@@ -6354,10 +6322,16 @@ print_one_breakpoint (struct breakpoint *b,
 	 situation.
 
 	 Note that while hardware watchpoints have several locations
-	 internally, that's not a property exposed to user.  */
-      if (b->loc 
-	  && !is_hardware_watchpoint (b)
-	  && (b->loc->next || !b->loc->enabled))
+	 internally, that's not a property exposed to users.
+
+	 Likewise, while catchpoints may be implemented with
+	 breakpoints (e.g., catch throw), that's not a property
+	 exposed to users.  We do however display the internal
+	 breakpoint locations with "maint info breakpoints".  */
+      if (!is_hardware_watchpoint (b)
+	  && (!is_catchpoint (b) || is_exception_catchpoint (b))
+	  && (allflag
+	      || (b->loc && (b->loc->next || !b->loc->enabled))))
 	{
 	  gdb::optional<ui_out_emit_list> locations_list;
 
@@ -6371,7 +6345,8 @@ print_one_breakpoint (struct breakpoint *b,
 	  for (bp_location *loc = b->loc; loc != NULL; loc = loc->next, ++n)
 	    {
 	      ui_out_emit_tuple loc_tuple_emitter (uiout, NULL);
-	      print_one_breakpoint_location (b, loc, n, last_loc, allflag);
+	      print_one_breakpoint_location (b, loc, n, last_loc,
+					     allflag, allflag);
 	    }
 	}
     }

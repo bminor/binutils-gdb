@@ -872,6 +872,11 @@ extern int is_breakpoint (const struct breakpoint *bpt);
 
 extern int is_watchpoint (const struct breakpoint *bpt);
 
+/* Return true if BPT is a C++ exception catchpoint (catch
+   catch/throw/rethrow).  */
+
+extern bool is_exception_catchpoint (breakpoint *bp);
+
 /* An instance of this type is used to represent all kinds of
    tracepoints.  */
 

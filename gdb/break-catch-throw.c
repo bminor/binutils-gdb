@@ -83,6 +83,14 @@ struct exception_catchpoint : public breakpoint
   std::unique_ptr<compiled_regex> pattern;
 };
 
+/* See breakpoint.h.  */
+
+bool
+is_exception_catchpoint (breakpoint *bp)
+{
+  return bp->ops == &gnu_v3_exception_catchpoint_ops;
+}
+
 
 
 /* A helper function that fetches exception probe arguments.  This
