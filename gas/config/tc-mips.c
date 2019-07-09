@@ -16461,7 +16461,6 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
   char *name;
   int c;
   symbolS *symbolP;
-  flagword flag;
 
   do
     {
@@ -16471,14 +16470,6 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 
       *input_line_pointer = c;
       SKIP_WHITESPACE_AFTER_NAME ();
-
-#ifdef TE_IRIX
-      /* On Irix 5, every global symbol that is not explicitly labelled as
-         being a function is apparently labelled as being an object.  */
-      flag = BSF_OBJECT;
-#else
-      flag = BSF_NO_FLAGS;
-#endif
 
       if (!is_end_of_line[(unsigned char) *input_line_pointer]
 	  && (*input_line_pointer != ','))
@@ -16493,10 +16484,8 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 	  (void) restore_line_pointer (c);
 
 	  if (sec != NULL && (sec->flags & SEC_CODE) != 0)
-	    flag = BSF_FUNCTION;
+	    symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 	}
-
-      symbol_get_bfdsym (symbolP)->flags |= flag;
 
       c = *input_line_pointer;
       if (c == ',')
@@ -16511,6 +16500,23 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 }
+
+#ifdef TE_IRIX
+/* The Irix 5 and 6 assemblers set the type of any common symbol and
+   any undefined non-function symbol to STT_OBJECT.  We try to be
+   compatible, since newer Irix 5 and 6 linkers care.  */
+
+void
+mips_frob_symbol (symbolS *symp ATTRIBUTE_UNUSED)
+{
+  /* This late in assembly we can set BSF_OBJECT indiscriminately
+     and let elf.c:swap_out_syms sort out the symbol type.  */
+  flagword *flags = &symbol_get_bfdsym (symp)->flags;
+  if ((*flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+      || !S_IS_DEFINED (symp))
+    *flags |= BSF_OBJECT;
+}
+#endif
 
 static void
 s_option (int x ATTRIBUTE_UNUSED)

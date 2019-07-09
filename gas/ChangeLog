@@ -1,3 +1,12 @@
+2019-07-09  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Remove mips hacks.
+	* config/tc-mips.h (tc_frob_symbol): Define.
+	(mips_frob_symbol): Declare.
+	* config/tc-mips.c (s_mips_globl): Don't set BSF_OBJECT for irix.
+	(mips_frob_symbol): Fudge symbols for irix here.
+	* testsuite/gas/elf/type-2.e: Allow random target symbols.
+
 2019-07-05  Kito Cheng <kito.cheng@sifive.com>
 
 	* doc/c-riscv.texi (Instruction Formats): Add r4 type.

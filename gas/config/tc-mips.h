@@ -126,6 +126,11 @@ extern void mips_frob_file (void);
 extern void mips_frob_file_after_relocs (void);
 #endif
 
+#ifdef TE_IRIX
+#define tc_frob_symbol(sym, punt) mips_frob_symbol (sym)
+extern void mips_frob_symbol (symbolS *);
+#endif
+
 #define tc_fix_adjustable(fixp) mips_fix_adjustable (fixp)
 extern int mips_fix_adjustable (struct fix *);
 
