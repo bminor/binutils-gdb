@@ -245,3 +245,9 @@ tui_gen_win_info::~tui_gen_win_info ()
   tui_delete_win (handle);
   xfree (title);
 }
+
+void
+tui_win_info::rerender ()
+{
+  check_and_display_highlight_if_needed ();
+}

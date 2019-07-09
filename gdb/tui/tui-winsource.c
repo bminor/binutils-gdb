@@ -315,42 +315,13 @@ tui_source_window_base::refresh_all ()
 void
 tui_source_window_base::update_tab_width ()
 {
-  /* We don't really change the height of any windows, but
-     calling these 2 functions causes a complete regeneration
-     and redisplay of the window's contents, which will take
-     the new tab width into account.  */
-  make_invisible_and_set_new_height (height);
-  make_visible_with_new_height ();
+  werase (handle);
+  rerender ();
 }
 
-/* See tui-data.h.  */
-
 void
-tui_source_window_base::set_new_height (int height)
+tui_source_window_base::rerender ()
 {
-  execution_info->make_visible (false);
-  execution_info->height = height;
-  execution_info->origin.y = origin.y;
-  if (height > 1)
-    execution_info->viewport_height = height - 1;
-  else
-    execution_info->viewport_height = height;
-  execution_info->viewport_height--;
-
-  if (m_has_locator)
-    {
-      tui_locator_window *gen_win_info = tui_locator_win_info_ptr ();
-      gen_win_info->make_visible (false);
-      gen_win_info->origin.y = origin.y + height;
-    }
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::do_make_visible_with_new_height ()
-{
-  execution_info->make_visible (true);
   if (!content.empty ())
     {
       struct tui_line_or_address line_or_addr;
@@ -382,11 +353,8 @@ tui_source_window_base::do_make_visible_with_new_height ()
 	}
       tui_update_source_window (this, gdbarch, s, line, TRUE);
     }
-  if (m_has_locator)
-    {
-      tui_locator_win_info_ptr ()->make_visible (true);
-      tui_show_locator_content ();
-    }
+  else
+    erase_source_content ();
 }
 
 /* See tui-data.h.  */

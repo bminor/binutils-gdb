@@ -31,18 +31,6 @@
 
 /* See tui-command.h.  */
 
-void
-tui_cmd_window::do_make_visible_with_new_height ()
-{
-#ifdef HAVE_WRESIZE
-  wresize (handle, height, width);
-#endif
-  mvwin (handle, origin.y, origin.x);
-  wmove (handle, 0, 0);
-}
-
-/* See tui-command.h.  */
-
 int
 tui_cmd_window::max_height () const
 {

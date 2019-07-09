@@ -1,3 +1,7 @@
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/empty.exp: Enable resizing tests.
+
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/char_enum.exp: Add regression tests.

@@ -43,6 +43,8 @@ struct tui_locator_window : public tui_gen_win_info
     proc_name[0] = 0;
   }
 
+  void rerender () override;
+
   char full_name[MAX_LOCATOR_ELEMENT_LEN];
   char proc_name[MAX_LOCATOR_ELEMENT_LEN];
   int line_no = 0;

@@ -74,8 +74,6 @@ protected:
   void do_scroll_horizontal (int num_to_scroll) override
   {
   }
-
-  void do_make_visible_with_new_height () override;
 };
 
 /* Refresh the command window.  */

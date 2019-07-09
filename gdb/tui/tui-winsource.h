@@ -98,10 +98,11 @@ protected:
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
   void do_scroll_horizontal (int num_to_scroll) override;
-  void do_make_visible_with_new_height () override;
 
   /* Erase the content and display STRING.  */
   void do_erase_source_content (const char *string);
+
+  void rerender () override;
 
 public:
 
@@ -117,8 +118,6 @@ public:
 
   /* Set the location of the execution point.  */
   void set_is_exec_point_at (struct tui_line_or_address l);
-
-  void set_new_height (int height) override;
 
   void update_tab_width () override;
 

@@ -55,8 +55,6 @@ struct tui_data_window : public tui_win_info
 
   void refresh_all () override;
 
-  void set_new_height (int height) override;
-
   void refresh_window () override;
 
   const char *name () const override
@@ -111,7 +109,6 @@ protected:
   void do_scroll_horizontal (int num_to_scroll) override
   {
   }
-  void do_make_visible_with_new_height () override;
 
   /* Return the index of the first element displayed.  If none are
      displayed, then return -1.  */
@@ -122,6 +119,8 @@ protected:
      of the display height.  This function checks that we won't
      display off the end of the register display.  */
   void display_reg_element_at_line (int start_element_no, int start_line_no);
+
+  void rerender () override;
 };
 
 extern void tui_check_register_values (struct frame_info *);

@@ -39,14 +39,14 @@ set layouts {
 	    {"no source" "No Source Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {asm asm {{3 0 77 15}} {{3 0 87 24}}
+    {asm asm {{3 0 77 15}} {{3 0 87 23}}
 	{"no asm" "No Assembly Available"}}
     {regs asm-regs {{0 0 80 8} {3 7 77 9}} {{0 0 90 13} {3 13 87 14}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {split split {{3 0 77 8} {3 7 77 9}} {{3 0 87 14} {3 14 87 14}}
+    {split split {{3 0 77 8} {3 7 77 9}} {{3 0 87 13} {3 13 87 14}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no asm" "No Assembly Available"}
@@ -91,13 +91,11 @@ foreach layout $layouts {
 	    check_text $text_list
 	}
 
-	# FIXME: resizing is broken enough that we don't test it for
-	# now.
-	# Term::resize 40 90
-	# with_test_prefix 90x40 {
-	#     check_boxes $large_boxes
-	#     check_text $text_list
-	# }
-	# Term::resize 24 80
+	Term::resize 40 90
+	with_test_prefix 90x40 {
+	    check_boxes $large_boxes
+	    check_text $text_list
+	}
+	Term::resize 24 80
     }
 }

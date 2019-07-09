@@ -46,6 +46,12 @@ protected:
   {
   }
 
+  /* This is called after the window is resized, and should update the
+     window's contents.  */
+  virtual void rerender ()
+  {
+  }
+
 public:
 
   virtual ~tui_gen_win_info ();
@@ -164,9 +170,7 @@ protected:
      left_scroll and right_scroll.  */
   virtual void do_scroll_horizontal (int num_to_scroll) = 0;
 
-  /* Called after make_visible_with_new_height sets the new height.
-     Should update the window.  */
-  virtual void do_make_visible_with_new_height () = 0;
+  void rerender () override;
 
 public:
 
@@ -180,12 +184,6 @@ public:
   {
   }
 
-  /* Called after a TUI window is given a new height; this updates any
-     related auxiliary windows.  */
-  virtual void set_new_height (int height)
-  {
-  }
-
   /* Compute the maximum height of this window.  */
   virtual int max_height () const;
 
@@ -193,14 +191,6 @@ public:
   virtual void update_tab_width ()
   {
   }
-
-  /* Function make the target window (and auxiliary windows associated
-     with the target) invisible, and set the new height and
-     location.  */
-  void make_invisible_and_set_new_height (int height);
-
-  /* Make the window visible after the height has been changed.  */
-  void make_visible_with_new_height ();
 
   /* Set whether this window is highglighted.  */
   void set_highlight (bool highlight)

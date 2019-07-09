@@ -277,6 +277,11 @@ tui_show_locator_content (void)
     }
 }
 
+void
+tui_locator_window::rerender ()
+{
+  tui_show_locator_content ();
+}
 
 /* Set the filename portion of the locator.  */
 static void

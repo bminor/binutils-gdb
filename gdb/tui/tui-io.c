@@ -495,7 +495,8 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
 	    }
 	}
     }
-  update_cmdwin_start_line ();
+  if (TUI_CMD_WIN != nullptr && w == TUI_CMD_WIN->handle)
+    update_cmdwin_start_line ();
   if (saw_nl)
     wrefresh (w);
 }

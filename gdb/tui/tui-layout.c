@@ -522,7 +522,6 @@ show_source_disasm_command (void)
 		   (src_height + asm_height) - 1);
   TUI_SRC_WIN->m_has_locator = false;
   TUI_DISASM_WIN->m_has_locator = true;
-  tui_show_locator_content ();
   TUI_DISASM_WIN->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)
@@ -580,7 +579,6 @@ show_data (enum tui_layout_type new_layout)
 		       0, total_height);
 
   base->m_has_locator = true;
-  tui_show_locator_content ();
   current_layout = new_layout;
 }
 
@@ -611,6 +609,8 @@ tui_gen_win_info::resize (int height_, int width_,
 
   if (handle == nullptr)
     tui_make_window (this);
+
+  rerender ();
 }
 
 /* Show the Source/Command or the Disassem layout.  */
@@ -651,7 +651,6 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		    0);
 
   win_info->m_has_locator = true;
-  tui_show_locator_content ();
   win_info->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)

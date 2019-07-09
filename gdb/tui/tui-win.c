@@ -38,6 +38,7 @@
 #include "tui/tui-io.h"
 #include "tui/tui-command.h"
 #include "tui/tui-data.h"
+#include "tui/tui-layout.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-stack.h"
 #include "tui/tui-regs.h"
@@ -572,47 +573,38 @@ tui_resize_all (void)
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
 	  src_win = *(tui_source_windows ().begin ());
-	  first_win = src_win;
-	  first_win->width += width_diff;
-	  locator->width += width_diff;
 	  /* Check for invalid heights.  */
 	  if (height_diff == 0)
-	    new_height = first_win->height;
-	  else if ((first_win->height + split_diff) >=
+	    new_height = src_win->height;
+	  else if ((src_win->height + split_diff) >=
 		   (screenheight - MIN_CMD_WIN_HEIGHT - 1))
 	    new_height = screenheight - MIN_CMD_WIN_HEIGHT - 1;
-	  else if ((first_win->height + split_diff) <= 0)
+	  else if ((src_win->height + split_diff) <= 0)
 	    new_height = MIN_WIN_HEIGHT;
 	  else
-	    new_height = first_win->height + split_diff;
+	    new_height = src_win->height + split_diff;
 
-	  locator->origin.y = new_height + 1;
-	  first_win->make_invisible_and_set_new_height (new_height);
-	  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
-	  TUI_CMD_WIN->width += width_diff;
-	  new_height = screenheight - TUI_CMD_WIN->origin.y;
-	  TUI_CMD_WIN->make_invisible_and_set_new_height (new_height);
-	  first_win->make_visible_with_new_height ();
-	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (src_win->content.empty ())
-	    src_win->erase_source_content ();
+	  src_win->resize (new_height, screenwidth, 0, 0);
+
+	  locator->resize (2 /* 1 */, screenwidth,
+			   0, new_height);
+
+	  new_height = screenheight - (new_height + 1);
+	  TUI_CMD_WIN->resize (new_height, screenwidth,
+			       0, locator->origin.y + 1);
 	  break;
 	default:
 	  if (cur_layout == SRC_DISASSEM_COMMAND)
 	    {
 	      src_win = TUI_SRC_WIN;
 	      first_win = src_win;
-	      first_win->width += width_diff;
 	      second_win = TUI_DISASM_WIN;
-	      second_win->width += width_diff;
 	    }
 	  else
 	    {
 	      first_win = TUI_DATA_WIN;
-	      first_win->width += width_diff;
 	      src_win = *(tui_source_windows ().begin ());
 	      second_win = src_win;
-	      second_win->width += width_diff;
 	    }
 	  /* Change the first window's height/width.  */
 	  /* Check for invalid heights.  */
@@ -626,9 +618,8 @@ tui_resize_all (void)
 	    new_height = MIN_WIN_HEIGHT;
 	  else
 	    new_height = first_win->height + split_diff;
-	  first_win->make_invisible_and_set_new_height (new_height);
 
-	  locator->width += width_diff;
+	  first_win->resize (new_height, screenwidth, 0, 0);
 
 	  /* Change the second window's height/width.  */
 	  /* Check for invalid heights.  */
@@ -648,18 +639,17 @@ tui_resize_all (void)
 	    new_height = MIN_WIN_HEIGHT;
 	  else
 	    new_height = second_win->height + split_diff;
-	  second_win->origin.y = first_win->height - 1;
-	  second_win->make_invisible_and_set_new_height (new_height);
+
+	  second_win->resize (new_height, screenwidth,
+			      0, first_win->height - 1);
+
+	  locator->resize (2 /* 1 */, screenwidth,
+			   0, second_win->origin.y + new_height);
 
 	  /* Change the command window's height/width.  */
-	  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
-	  TUI_CMD_WIN->make_invisible_and_set_new_height (TUI_CMD_WIN->height
-							  + cmd_split_diff);
-	  first_win->make_visible_with_new_height ();
-	  second_win->make_visible_with_new_height ();
-	  TUI_CMD_WIN->make_visible_with_new_height ();
-	  if (src_win->content.empty ())
-	    src_win->erase_source_content ();
+	  new_height = screenheight - (locator->origin.y + 1);
+	  TUI_CMD_WIN->resize (new_height, screenwidth,
+			       0, locator->origin.y + 1);
 	  break;
 	}
 
@@ -1036,6 +1026,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	  struct tui_win_info *win_info;
 	  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 	  enum tui_layout_type cur_layout = tui_current_layout ();
+	  int width = tui_term_width ();
 
 	  diff = (new_height - primary_win_info->height) * (-1);
 	  if (cur_layout == SRC_COMMAND 
@@ -1043,7 +1034,8 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	    {
 	      struct tui_win_info *src_win_info;
 
-	      primary_win_info->make_invisible_and_set_new_height (new_height);
+	      primary_win_info->resize (new_height, width,
+					0, primary_win_info->origin.y);
 	      if (primary_win_info->type == CMD_WIN)
 		{
 		  win_info = *(tui_source_windows ().begin ());
@@ -1054,11 +1046,9 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  win_info = tui_win_list[CMD_WIN];
 		  src_win_info = primary_win_info;
 		}
-	      win_info->make_invisible_and_set_new_height
-		(win_info->height + diff);
+	      win_info->resize (win_info->height + diff, width,
+				0, win_info->origin.y);
 	      TUI_CMD_WIN->origin.y = locator->origin.y + 1;
-	      win_info->make_visible_with_new_height ();
-	      primary_win_info->make_visible_with_new_height ();
 	      if ((src_win_info->type == SRC_WIN
 		   || src_win_info->type == DISASSEM_WIN))
 		{
@@ -1121,13 +1111,18 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		      second_split_diff++;
 		      first_split_diff--;
 		    }
-		  first_win->make_invisible_and_set_new_height
-		    (first_win->height + first_split_diff);
-		  second_win->origin.y = first_win->height - 1;
-		  second_win->make_invisible_and_set_new_height
-		    (second_win->height + second_split_diff);
-		  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
-		  TUI_CMD_WIN->make_invisible_and_set_new_height (new_height);
+		  first_win->resize (first_win->height + first_split_diff,
+				     width,
+				     0, first_win->origin.y);
+		  second_win->resize (second_win->height + second_split_diff,
+				      width,
+				      0, first_win->height - 1);
+		  locator->resize (2 /* 1 */, width,
+				   0, (second_win->origin.y
+				       + second_win->height + 1));
+
+		  TUI_CMD_WIN->resize (new_height, width,
+				       0, locator->origin.y + 1);
 		}
 	      else
 		{
@@ -1148,26 +1143,26 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 			}
 		    }
 		  if (primary_win_info == first_win)
-		    first_win->make_invisible_and_set_new_height (new_height);
+		    first_win->resize (new_height, width, 0, 0);
 		  else
-		    first_win->make_invisible_and_set_new_height
-		      (first_win->height);
+		    first_win->resize (first_win->height, width, 0, 0);
 		  second_win->origin.y = first_win->height - 1;
 		  if (primary_win_info == second_win)
-		    second_win->make_invisible_and_set_new_height (new_height);
+		    second_win->resize (new_height, width,
+					0, first_win->height - 1);
 		  else
-		    second_win->make_invisible_and_set_new_height
-		      (second_win->height);
+		    second_win->resize (second_win->height, width,
+					0, first_win->height - 1);
+		  locator->resize (2 /* 1 */, width,
+				   0, (second_win->origin.y
+				       + second_win->height + 1));
 		  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
 		  if ((TUI_CMD_WIN->height + diff) < 1)
-		    TUI_CMD_WIN->make_invisible_and_set_new_height (1);
+		    TUI_CMD_WIN->resize (1, width, 0, locator->origin.y + 1);
 		  else
-		    TUI_CMD_WIN->make_invisible_and_set_new_height
-		      (TUI_CMD_WIN->height + diff);
+		    TUI_CMD_WIN->resize (TUI_CMD_WIN->height + diff, width,
+					 0, locator->origin.y + 1);
 		}
-	      TUI_CMD_WIN->make_visible_with_new_height ();
-	      second_win->make_visible_with_new_height ();
-	      first_win->make_visible_with_new_height ();
 	      if (src1 != nullptr && src1->content.empty ())
 		src1->erase_source_content ();
 	      if (second_win->content.empty ())
@@ -1177,36 +1172,6 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
     }
 
   return status;
-}
-
-
-/* See tui-data.h.  */
-
-void
-tui_win_info::make_invisible_and_set_new_height (int height_)
-{
-  make_visible (false);
-  height = height_;
-  if (height > 1)
-    viewport_height = height - 1;
-  else
-    viewport_height = height;
-  if (this != TUI_CMD_WIN)
-    viewport_height--;
-
-  /* Now deal with the auxiliary windows associated with win_info.  */
-  set_new_height (height);
-}
-
-
-/* See tui-data.h.  */
-
-void
-tui_win_info::make_visible_with_new_height ()
-{
-  make_visible (true);
-  check_and_display_highlight_if_needed ();
-  do_make_visible_with_new_height ();
 }
 
 /* See tui-data.h.  */

@@ -521,7 +521,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
 /* See tui-regs.h.  */
 
 void
-tui_data_window::set_new_height (int height)
+tui_data_window::rerender ()
 {
   /* Delete all data item windows.  */
   for (auto &&win : regs_content)
@@ -529,13 +529,6 @@ tui_data_window::set_new_height (int height)
       tui_delete_win (win->handle);
       win->handle = NULL;
     }
-}
-
-/* See tui-regs.h.  */
-
-void
-tui_data_window::do_make_visible_with_new_height ()
-{
   display_all_data ();
 }
 

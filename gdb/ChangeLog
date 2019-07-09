@@ -1,3 +1,44 @@
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-io.c (tui_puts_internal): Check TUI_CMD_WIN before
+	calling update_cmdwin_start_line.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<do_make_visible_with_new_height, set_new_height>: Don't declare.
+	<rerender>: Declare.
+	* tui/tui-winsource.c (tui_source_window_base::update_tab_width):
+	Call rerender.
+	(tui_source_window_base::set_new_height): Remove.
+	(tui_source_window_base::rerender): Rename from
+	do_make_visible_with_new_height.
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Use
+	resize method.
+	(tui_win_info::make_invisible_and_set_new_height)
+	(tui_win_info::make_visible_with_new_height): Remove.
+	* tui/tui-stack.h (struct tui_locator_window) <rerender>:
+	Declare.
+	* tui/tui-stack.c (tui_locator_window::rerender): New method.
+	* tui/tui-regs.h (struct tui_data_window) <set_new_height,
+	do_make_visible_with_new_height>: Don't declare.
+	<rerender>: Declare.
+	* tui/tui-regs.c (tui_data_window::rerender): Rename from
+	set_new_height.
+	(tui_data_window::do_make_visible_with_new_height): Remove.
+	* tui/tui-layout.c (show_source_disasm_command, show_data): Don't
+	call tui_show_locator_content.
+	(tui_gen_win_info::resize): Call rerender.
+	(show_source_or_disasm_and_command): Don't call
+	tui_show_locator_content.
+	* tui/tui-data.h (struct tui_gen_win_info) <rerender>: New
+	method.
+	(struct tui_win_info) <rerender>: Declare.
+	<set_new_height, make_invisible_and_set_new_height,
+	make_visible_with_new_height>: Don't declare.
+	* tui/tui-data.c (tui_win_list::rerender): New method.
+	* tui/tui-command.h (struct tui_cmd_window)
+	<do_make_visible_with_new_height>: Don't declare.
+	* tui/tui-command.c
+	(tui_cmd_window::do_make_visible_with_new_height): Remove.
+
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
 	* ada-exp.y (convert_char_literal): Handle "Q%c" encoding.
