@@ -56,6 +56,13 @@ struct tui_cmd_window : public tui_win_info
     return false;
   }
 
+  void resize (int height, int width, int origin_x, int origin_y) override;
+
+  void make_visible (bool visible) override
+  {
+    /* The command window can't be made invisible.  */
+  }
+
   int start_line = 0;
 
 protected:

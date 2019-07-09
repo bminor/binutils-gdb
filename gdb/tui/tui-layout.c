@@ -76,9 +76,7 @@ show_layout (enum tui_layout_type layout)
 
   if (layout != cur_layout)
     {
-      /* First make the current layout be invisible.  */
       tui_make_all_invisible ();
-      tui_locator_win_info_ptr ()->make_visible (false);
       switch (layout)
 	{
 	case SRC_DATA_COMMAND:
@@ -506,7 +504,6 @@ show_source_disasm_command (void)
 		       tui_term_width (),
 		       0,
 		       0);
-  TUI_SRC_WIN->make_visible (true);
   TUI_SRC_WIN->m_has_locator = false;
 
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
@@ -519,14 +516,12 @@ show_source_disasm_command (void)
 			  tui_term_width (),
 			  0,
 			  src_height - 1);
-  TUI_DISASM_WIN->make_visible (true);
   locator->resize (2 /* 1 */ ,
 		   tui_term_width (),
 		   0,
 		   (src_height + asm_height) - 1);
   TUI_SRC_WIN->m_has_locator = false;
   TUI_DISASM_WIN->m_has_locator = true;
-  locator->make_visible (true);
   tui_show_locator_content ();
   TUI_DISASM_WIN->show_source_content ();
 
@@ -536,7 +531,6 @@ show_source_disasm_command (void)
 		       tui_term_width (),
 		       0,
 		       tui_term_height () - cmd_height);
-  TUI_CMD_WIN->make_visible (true);
   current_layout = SRC_DISASSEM_COMMAND;
 }
 
@@ -558,7 +552,6 @@ show_data (enum tui_layout_type new_layout)
   if (tui_win_list[DATA_WIN] == nullptr)
     tui_win_list[DATA_WIN] = new tui_data_window ();
   tui_win_list[DATA_WIN]->resize (data_height, tui_term_width (), 0, 0);
-  tui_win_list[DATA_WIN]->make_visible (true);
 
   if (new_layout == SRC_DATA_COMMAND)
     win_type = SRC_WIN;
@@ -583,11 +576,11 @@ show_data (enum tui_layout_type new_layout)
 		   tui_term_width (),
 		   0,
 		   total_height - 1);
-  base->make_visible (true);
+  TUI_CMD_WIN->resize (TUI_CMD_WIN->height, tui_term_width (),
+		       0, total_height);
+
   base->m_has_locator = true;
-  locator->make_visible (true);
   tui_show_locator_content ();
-  TUI_CMD_WIN->make_visible (true);
   current_layout = new_layout;
 }
 
@@ -595,20 +588,29 @@ void
 tui_gen_win_info::resize (int height_, int width_,
 			  int origin_x_, int origin_y_)
 {
-  int h = height_;
-
   width = width_;
-  height = h;
-  if (h > 1)
-    {
-      viewport_height = h - 1;
-      if (type != CMD_WIN)
-	viewport_height--;
-    }
+  height = height_;
+  if (height > 1)
+    viewport_height = height - 2;
   else
     viewport_height = 1;
   origin.x = origin_x_;
   origin.y = origin_y_;
+
+  if (handle != nullptr)
+    {
+#ifdef HAVE_WRESIZE
+      wresize (handle, height, width);
+      mvwin (handle, origin.y, origin.x);
+      wmove (handle, 0, 0);
+#else
+      tui_delete_win (handle);
+      handle = NULL;
+#endif
+    }
+
+  if (handle == nullptr)
+    tui_make_window (this);
 }
 
 /* Show the Source/Command or the Disassem layout.  */
@@ -647,11 +649,8 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		    tui_term_width (),
 		    0,
 		    0);
-  win_info->make_visible (true);
-
 
   win_info->m_has_locator = true;
-  locator->make_visible (true);
   tui_show_locator_content ();
   win_info->show_source_content ();
 
@@ -661,6 +660,5 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		       tui_term_width (),
 		       0,
 		       src_height);
-  TUI_CMD_WIN->make_visible (true);
   current_layout = layout_type;
 }

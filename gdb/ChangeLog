@@ -1,5 +1,17 @@
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_layout, show_source_disasm_command)
+	(show_data): Don't change window visibility.
+	(tui_gen_win_info::resize): Remove special case for command
+	window.  Use wresize, when available.
+	(show_source_or_disasm_and_command): Don't change window
+	visibility.
+	* tui/tui-command.h (struct tui_cmd_window) <resize>: Declare.
+	<make_visible>: New method.
+	* tui/tui-command.c (tui_cmd_window::resize): New method.
+
+2019-08-15  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_iterator): New.
 	(struct tui_source_windows): New.
 	* tui/tui-winsource.c (tui_display_main): Update.

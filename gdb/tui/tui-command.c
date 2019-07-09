@@ -25,6 +25,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-io.h"
 #include "tui/tui-command.h"
+#include "tui/tui-wingeneral.h"
 
 #include "gdb_curses.h"
 
@@ -46,6 +47,40 @@ int
 tui_cmd_window::max_height () const
 {
   return tui_term_height () - 4;
+}
+
+void
+tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
+{
+  width = width_;
+  height = height_;
+  if (height > 1)
+    {
+      /* Note this differs from the base class implementation, because
+	 this window can't be boxed.  */
+      viewport_height = height - 1;
+    }
+  else
+    viewport_height = 1;
+  origin.x = origin_x;
+  origin.y = origin_y;
+
+  if (handle == nullptr)
+    tui_make_window (this);
+  else
+    {
+      /* Another reason we don't call the base class method here is
+	 that for the command window in particular, we want to avoid
+	 destroying the underlying handle.  We don't currently track
+	 the contents of this window, and so have no way to re-render
+	 it.  However we can at least move it and keep the old size if
+	 wresize isn't available.  */
+#ifdef HAVE_WRESIZE
+      wresize (handle, height, width);
+#endif
+      mvwin (handle, origin.y, origin.x);
+      wmove (handle, 0, 0);
+    }
 }
 
 /* See tui-command.h.  */
