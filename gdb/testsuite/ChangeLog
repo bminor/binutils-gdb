@@ -1,5 +1,9 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* boards/cc-with-tweaks.exp: Set GNATMAKE_FOR_TARGET.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/dgopt.exp: New file.
 	* gdb.ada/dgopt/x.adb: New file.
 
