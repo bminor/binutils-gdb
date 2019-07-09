@@ -62,16 +62,10 @@ gdb_test "catch rethrow" "Catchpoint \[0-9\]+ \\(rethrow\\)" \
     "catch rethrow (before inferior run)"
 
 
-# The catchpoints should be listed in the list of breakpoints.
-# In case of a statically linked test, we won't have a pending breakpoint.
-# Hence we allow for both an address or "<PENDING>". If we ever become able
-# to tell whether the target is linked statically or not, we can be more
-# precise and require exact output.
-set addr "\(<PENDING>|$hex\)"
 set re_head	"Num${ws}Type${ws}Disp${ws}Enb${ws}Address${ws}What"
-set re_2_bp	"1${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception catch"
-set re_3_bp	"2${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception throw"
-set re_4_bp   "3${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception rethrow"
+set re_2_bp	"1${ws}catchpoint${ws}keep${ws}y${ws}exception catch"
+set re_3_bp	"2${ws}catchpoint${ws}keep${ws}y${ws}exception throw"
+set re_4_bp	"3${ws}catchpoint${ws}keep${ws}y${ws}exception rethrow"
 
 set name "info breakpoints (before inferior run)"
 gdb_test_multiple "info breakpoints" $name {
@@ -99,12 +93,6 @@ gdb_test_multiple "" "run to main" {
 if { !$ok } {
     continue
 }
-
-set addr "$hex"
-set re_head	"Num${ws}Type${ws}Disp${ws}Enb${ws}Address${ws}What"
-set re_2_bp	"1${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception catch"
-set re_3_bp	"2${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception throw"
-set re_4_bp   "3${ws}breakpoint${ws}keep${ws}y${ws}$addr${ws}exception rethrow"
 
 set name "info breakpoints (after inferior run)"
 gdb_test_multiple "info breakpoints" $name {

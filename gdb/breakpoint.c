@@ -5603,8 +5603,10 @@ bpstat_what (bpstat bs_head)
 	    }
 	  else
 	    {
-	      /* There was a catchpoint, but we're not stopping.
-		 This requires no further action.  */
+	      /* Some catchpoints are implemented with breakpoints.
+		 For those, we need to step over the breakpoint.  */
+	      if (bs->bp_location_at->loc_type != bp_loc_other)
+		this_action = BPSTAT_WHAT_SINGLE;
 	    }
 	  break;
 	case bp_jit_event:
@@ -6686,27 +6688,21 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 }
 
 
-/* Return true iff it is meaningful to use the address member of
-   BPT locations.  For some breakpoint types, the locations' address members
-   are irrelevant and it makes no sense to attempt to compare them to other
-   addresses (or use them for any other purpose either).
+/* Return true iff it is meaningful to use the address member of LOC.
+   For some breakpoint types, the locations' address members are
+   irrelevant and it makes no sense to attempt to compare them to
+   other addresses (or use them for any other purpose either).
 
-   More specifically, each of the following breakpoint types will
-   always have a zero valued location address and we don't want to mark
-   breakpoints of any of these types to be a duplicate of an actual
-   breakpoint location at address zero:
+   More specifically, software watchpoints and catchpoints that are
+   not backed by breakpoints always have a zero valued location
+   address and we don't want to mark breakpoints of any of these types
+   to be a duplicate of an actual breakpoint location at address
+   zero.  */
 
-      bp_watchpoint
-      bp_catchpoint
-
-*/
-
-static int
-breakpoint_address_is_meaningful (struct breakpoint *bpt)
+static bool
+bl_address_is_meaningful (bp_location *loc)
 {
-  enum bptype type = bpt->type;
-
-  return (type != bp_watchpoint && type != bp_catchpoint);
+  return loc->loc_type != bp_loc_other;
 }
 
 /* Assuming LOC1 and LOC2's owners are hardware watchpoints, returns
@@ -6838,8 +6834,8 @@ tracepoint_locations_match (struct bp_location *loc1,
 }
 
 /* Assuming LOC1 and LOC2's types' have meaningful target addresses
-   (breakpoint_address_is_meaningful), returns true if LOC1 and LOC2
-   represent the same location.  */
+   (bl_address_is_meaningful), returns true if LOC1 and LOC2 represent
+   the same location.  */
 
 static int
 breakpoint_locations_match (struct bp_location *loc1, 
@@ -6937,16 +6933,10 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
 }
 
-bp_location::bp_location (breakpoint *owner)
+static bp_loc_type
+bp_location_from_bp_type (bptype type)
 {
-  bp_location *loc = this;
-
-  loc->owner = owner;
-  loc->cond_bytecode = NULL;
-  loc->shlib_disabled = 0;
-  loc->enabled = 1;
-
-  switch (owner->type)
+  switch (type)
     {
     case bp_breakpoint:
     case bp_single_step:
@@ -6972,30 +6962,44 @@ bp_location::bp_location (breakpoint *owner)
     case bp_gnu_ifunc_resolver:
     case bp_gnu_ifunc_resolver_return:
     case bp_dprintf:
-      loc->loc_type = bp_loc_software_breakpoint;
-      mark_breakpoint_location_modified (loc);
-      break;
+      return bp_loc_software_breakpoint;
     case bp_hardware_breakpoint:
-      loc->loc_type = bp_loc_hardware_breakpoint;
-      mark_breakpoint_location_modified (loc);
-      break;
+      return bp_loc_hardware_breakpoint;
     case bp_hardware_watchpoint:
     case bp_read_watchpoint:
     case bp_access_watchpoint:
-      loc->loc_type = bp_loc_hardware_watchpoint;
-      break;
+      return bp_loc_hardware_watchpoint;
     case bp_watchpoint:
     case bp_catchpoint:
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
-      loc->loc_type = bp_loc_other;
-      break;
+      return bp_loc_other;
     default:
       internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
     }
+}
 
-  loc->refc = 1;
+bp_location::bp_location (breakpoint *owner, bp_loc_type type)
+{
+  this->owner = owner;
+  this->cond_bytecode = NULL;
+  this->shlib_disabled = 0;
+  this->enabled = 1;
+
+  this->loc_type = type;
+
+  if (this->loc_type == bp_loc_software_breakpoint
+      || this->loc_type == bp_loc_hardware_breakpoint)
+    mark_breakpoint_location_modified (this);
+
+  this->refc = 1;
+}
+
+bp_location::bp_location (breakpoint *owner)
+  : bp_location::bp_location (owner,
+			      bp_location_from_bp_type (owner->type))
+{
 }
 
 /* Allocate a struct bp_location.  */
@@ -8639,11 +8643,12 @@ bp_loc_is_permanent (struct bp_location *loc)
 {
   gdb_assert (loc != NULL);
 
-  /* If we have a catchpoint or a watchpoint, just return 0.  We should not
-     attempt to read from the addresses the locations of these breakpoint types
-     point to.  program_breakpoint_here_p, below, will attempt to read
+  /* If we have a non-breakpoint-backed catchpoint or a software
+     watchpoint, just return 0.  We should not attempt to read from
+     the addresses the locations of these breakpoint types point to.
+     program_breakpoint_here_p, below, will attempt to read
      memory.  */
-  if (!breakpoint_address_is_meaningful (loc->owner))
+  if (!bl_address_is_meaningful (loc))
     return 0;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
@@ -11451,10 +11456,9 @@ breakpoint_auto_delete (bpstat bs)
 
 /* A comparison function for bp_location AP and BP being interfaced to
    qsort.  Sort elements primarily by their ADDRESS (no matter what
-   does breakpoint_address_is_meaningful say for its OWNER),
-   secondarily by ordering first permanent elements and
-   terciarily just ensuring the array is sorted stable way despite
-   qsort being an unstable algorithm.  */
+   bl_address_is_meaningful says), secondarily by ordering first
+   permanent elements and terciarily just ensuring the array is sorted
+   stable way despite qsort being an unstable algorithm.  */
 
 static int
 bp_locations_compare (const void *ap, const void *bp)
@@ -11794,7 +11798,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 		 this one from the target.  */
 
 	      /* OLD_LOC comes from existing struct breakpoint.  */
-	      if (breakpoint_address_is_meaningful (old_loc->owner))
+	      if (bl_address_is_meaningful (old_loc))
 		{
 		  for (loc2p = locp;
 		       (loc2p < bp_locations + bp_locations_count
@@ -11934,7 +11938,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
       b = loc->owner;
 
       if (!unduplicated_should_be_inserted (loc)
-	  || !breakpoint_address_is_meaningful (b)
+	  || !bl_address_is_meaningful (loc)
 	  /* Don't detect duplicate for tracepoint locations because they are
 	   never duplicated.  See the comments in field `duplicate' of
 	   `struct bp_location'.  */

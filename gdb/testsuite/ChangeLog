@@ -1,5 +1,15 @@
 2019-07-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.cp/catch-multi-stdlib.exp: Adjust expected "info
+	breakpoints" output.
+	* gdb.cp/exception.exp: Adjust expected "info breakpoints" output.
+	* gdb.python/py-breakpoint.exp: No longer expect that "catch
+	throw" creates breakpoint.
+	* gdb.mi/mi-catch-cpp-exceptions.exp (setup_catchpoint): Expect
+	'type="catchpoint"'.
+
+2019-07-09  Pedro Alves  <palves@redhat.com>
+
 	PR c++/15468
 	* gdb.cp/except-multi-location-lib.cc: New.
 	* gdb.cp/except-multi-location-main.cc: New.

@@ -379,7 +379,6 @@ bppy_set_hit_count (PyObject *self, PyObject *newvalue, void *closure)
 static PyObject *
 bppy_get_location (PyObject *self, void *closure)
 {
-  const char *str;
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
 
   BPPY_REQUIRE_VALID (obj);
@@ -387,12 +386,7 @@ bppy_get_location (PyObject *self, void *closure)
   if (obj->bp->type != bp_breakpoint)
     Py_RETURN_NONE;
 
-  struct event_location *location = obj->bp->location.get ();
-  /* "catch throw" makes a breakpoint of type bp_breakpoint that does
-     not have a location.  */
-  if (location == nullptr)
-    Py_RETURN_NONE;
-  str = event_location_to_string (location);
+  const char *str = event_location_to_string (obj->bp->location.get ());
   if (! str)
     str = "";
   return host_string_to_python_string (str).release ();

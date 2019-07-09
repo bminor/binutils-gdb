@@ -316,7 +316,12 @@ class bp_location
 public:
   bp_location () = default;
 
-  bp_location (breakpoint *owner);
+  /* Construct a bp_location with the type inferred from OWNER's
+     type.  */
+  explicit bp_location (breakpoint *owner);
+
+  /* Construct a bp_location with type TYPE.  */
+  bp_location (breakpoint *owner, bp_loc_type type);
 
   virtual ~bp_location ();
 

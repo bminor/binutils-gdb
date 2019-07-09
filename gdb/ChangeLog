@@ -1,5 +1,36 @@
 2019-07-09  Pedro Alves  <palves@redhat.com>
 
+	* break-catch-throw.c (print_one_exception_catchpoint): Skip the
+	"addr" field.
+	(allocate_location_exception_catchpoint): New.
+	(handle_gnu_v3_exceptions): Don't reset 'type' to bp_breakpoint.
+	(initialize_throw_catchpoint_ops): Install
+	allocate_location_exception_catchpoint as allocate_location
+	method.
+	* breakpoint.c (bpstat_what) <bp_catch>: Set action to
+	BPSTAT_WHAT_SINGLE if not stopping and the location's type is not
+	bp_loc_other.
+	(breakpoint_address_is_meaningful): Delete.
+	(bl_address_is_meaningful): New.
+	(breakpoint_locations_match): Adjust comment.
+	(bp_location_from_bp_type): New, factored out of...
+	(bp_location::bp_location(breakpoint *)): ... this.
+	(bp_location::bp_location(breakpoint *, bp_loc_type)): New,
+	factored out of...
+	(bp_location::bp_location(breakpoint *)): ... this.  Reimplement.
+	(bp_loc_is_permanent): Use bl_address_is_meaningful instead of
+	breakpoint_address_is_meaningful.
+	(bp_locations_compare): Adjust comment.
+	(update_global_location_list): Use bl_address_is_meaningful
+	instead of breakpoint_address_is_meaningful.
+	* breakpoint.h (bp_location::bp_location(breakpoint *)): New
+	explicit.
+	(bp_location::bp_location(breakpoint *, bp_loc_type)): Declare.
+	* python/py-breakpoint.c (bppy_get_location): No longer check
+	whether location is null.
+
+2019-07-09  Pedro Alves  <palves@redhat.com>
+
 	PR c++/15468
 	* breakpoint.c (print_one_breakpoint_location): Remove
 	single-location assert.

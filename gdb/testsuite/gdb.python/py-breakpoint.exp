@@ -619,8 +619,9 @@ proc_with_prefix test_bkpt_explicit_loc {} {
 
     delete_breakpoints
     gdb_test "catch throw" "Catchpoint .* \\(throw\\)"
-    gdb_test "python print (gdb.breakpoints()\[0\].location)" None \
-	"Examine location of catchpoint"
+    gdb_test "python print (gdb.breakpoints())" \
+	"\(\)" \
+	"catch throw is not a breakpoint"
 }
 
 proc_with_prefix test_bkpt_qualified {} {

@@ -74,9 +74,9 @@ proc test_multi_libstdcpp {static_bin static_lib} {
     set ws "\[ \t\]*"
     gdb_test "info breakpoints" \
 	[multi_line \
-	     "${decimal}${ws}breakpoint${ws}keep${ws}y${ws}${hex}${ws}exception catch" \
-	     "${decimal}${ws}breakpoint${ws}keep${ws}y${ws}${hex}${ws}exception throw" \
-	     "${decimal}${ws}breakpoint${ws}keep${ws}y${ws}${hex}${ws}exception rethrow"]
+	     "${decimal}${ws}catchpoint${ws}keep${ws}y${ws}exception catch" \
+	     "${decimal}${ws}catchpoint${ws}keep${ws}y${ws}exception throw" \
+	     "${decimal}${ws}catchpoint${ws}keep${ws}y${ws}exception rethrow"]
 }
 
 # Try different static/not-static combinations.

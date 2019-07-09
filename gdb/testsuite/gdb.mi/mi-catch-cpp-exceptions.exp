@@ -85,7 +85,7 @@ proc continue_to_breakpoint_in_main {} {
 proc setup_catchpoint {type {extra ""}} {
     global decimal
     mi_gdb_test "-catch-${type} ${extra}" \
-	"\\^done,bkpt=\{number=\"$decimal\".*what=\"exception ${type}\",catch-type=\"${type}\".*\}" \
+	"\\^done,bkpt=\{number=\"$decimal\",type=\"catchpoint\".*what=\"exception ${type}\",catch-type=\"${type}\".*\}" \
 	"Setup -catch-${type}"
 }
 

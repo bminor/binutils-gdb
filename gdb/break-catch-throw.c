@@ -249,18 +249,10 @@ print_one_exception_catchpoint (struct breakpoint *b,
   enum exception_event_kind kind = classify_exception_breakpoint (b);
 
   get_user_print_options (&opts);
+
   if (opts.addressprint)
-    {
-      annotate_field (4);
-      if (b->loc == NULL || b->loc->shlib_disabled)
-	uiout->field_string ("addr", "<PENDING>");
-      else
-	uiout->field_core_addr ("addr",
-				b->loc->gdbarch, b->loc->address);
-    }
+    uiout->field_skip ("addr");
   annotate_field (5);
-  if (b->loc)
-    *last_loc = b->loc;
 
   switch (kind)
     {
@@ -344,6 +336,15 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
   print_recreate_thread (b, fp);
 }
 
+/* Implement the "allocate_location" breakpoint_ops method for throw
+   and catch catchpoints.  */
+
+static bp_location *
+allocate_location_exception_catchpoint (breakpoint *self)
+{
+  return new bp_location (self, bp_loc_software_breakpoint);
+}
+
 static void
 handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 			  const char *cond_string,
@@ -361,9 +362,6 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 
   init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
-  /* We need to reset 'type' in order for code in breakpoint.c to do
-     the right thing.  */
-  cp->type = bp_breakpoint;
   cp->kind = ex_event;
   cp->exception_rx = std::move (except_rx);
   cp->pattern = std::move (pattern);
@@ -521,6 +519,7 @@ initialize_throw_catchpoint_ops (void)
   ops->print_recreate = print_recreate_exception_catchpoint;
   ops->print_one_detail = print_one_detail_exception_catchpoint;
   ops->check_status = check_status_exception_catchpoint;
+  ops->allocate_location = allocate_location_exception_catchpoint;
 }
 
 void

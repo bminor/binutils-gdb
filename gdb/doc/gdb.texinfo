@@ -30120,9 +30120,9 @@ and @samp{tcatch throw} (@pxref{Set Catchpoints}).
 
 @smallexample
 -catch-throw -r exception_type
-^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-  addr="0x00000000004006c0",what="exception throw",
-  catch-type="throw",thread-groups=["i1"],
+^done,bkpt=@{number="1",type="catchpoint",disp="keep",enabled="y",
+  what="exception throw",catch-type="throw",
+  thread-groups=["i1"],
   regexp="exception_type",times="0"@}
 (gdb)
 -exec-run
@@ -30164,9 +30164,9 @@ and @samp{tcatch rethrow} (@pxref{Set Catchpoints}).
 
 @smallexample
 -catch-rethrow -r exception_type
-^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-  addr="0x00000000004006c0",what="exception rethrow",
-  catch-type="rethrow",thread-groups=["i1"],
+^done,bkpt=@{number="1",type="catchpoint",disp="keep",enabled="y",
+  what="exception rethrow",catch-type="rethrow",
+  thread-groups=["i1"],
   regexp="exception_type",times="0"@}
 (gdb)
 -exec-run
@@ -30208,9 +30208,9 @@ and @samp{tcatch catch} (@pxref{Set Catchpoints}).
 
 @smallexample
 -catch-catch -r exception_type
-^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-  addr="0x00000000004006c0",what="exception catch",
-  catch-type="catch",thread-groups=["i1"],
+^done,bkpt=@{number="1",type="catchpoint",disp="keep",enabled="y",
+  what="exception catch",catch-type="catch",
+  thread-groups=["i1"],
   regexp="exception_type",times="0"@}
 (gdb)
 -exec-run
