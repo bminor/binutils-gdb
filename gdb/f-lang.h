@@ -28,6 +28,11 @@ struct parser_state;
 
 extern int f_parse (struct parser_state *);
 
+/* Implement the la_print_typedef language method for Fortran.  */
+
+extern void f_print_typedef (struct type *type, struct symbol *new_symbol,
+			     struct ui_file *stream);
+
 extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 			  int, const struct type_print_options *);
 

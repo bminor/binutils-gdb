@@ -1,3 +1,9 @@
+2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/info-types.exp: New file.
+	* gdb.fortran/info-types.f90: New file.
+	* lib/fortran.exp (fortran_character1): New proc.
+
 2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/info-fun.exp: Extend to test the -n flag for 'info

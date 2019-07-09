@@ -88,3 +88,15 @@ proc fortran_logical4 {} {
 	return "unknown"
     }
 }
+
+proc fortran_character1 {} {
+    if {[test_compiler_info {gcc-4-[012]-*}]} {
+	return "character1"
+    } elseif {[test_compiler_info {gcc-*}]} {
+	return "character\\(kind=1\\)"
+    } elseif {[test_compiler_info {icc-*}]} {
+	return "CHARACTER\\(1\\)"
+    } else {
+	return "unknown"
+    }
+}

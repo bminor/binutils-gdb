@@ -45,6 +45,17 @@ void f_type_print_varspec_prefix (struct type *, struct ui_file *,
 void f_type_print_base (struct type *, struct ui_file *, int, int);
 
 
+/* See documentation in f-lang.h.  */
+
+void
+f_print_typedef (struct type *type, struct symbol *new_symbol,
+		 struct ui_file *stream)
+{
+  type = check_typedef (type);
+  f_print_type (type, "", stream, 0, 0, &type_print_raw_options);
+  fprintf_filtered (stream, "\n");
+}
+
 /* LEVEL is the depth to indent lines by.  */
 
 void
