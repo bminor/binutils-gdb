@@ -1,3 +1,9 @@
+2019-07-09  Pedro Alves  <palves@redhat.com>
+
+	PR c++/15468
+	* breakpoint.c (print_one_breakpoint_location): Remove
+	single-location assert.
+
 2019-07-09  Tom Tromey  <tom@tromey.com>
 
 	* contrib/ari/gdb_ari.sh: Change common to gdbsupport.

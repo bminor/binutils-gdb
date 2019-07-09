@@ -6033,13 +6033,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   /* 5 and 6 */
   if (b->ops != NULL && b->ops->print_one != NULL)
-    {
-      /* Although the print_one can possibly print all locations,
-	 calling it here is not likely to get any nice result.  So,
-	 make sure there's just one location.  */
-      gdb_assert (b->loc == NULL || b->loc->next == NULL);
-      b->ops->print_one (b, last_loc);
-    }
+    b->ops->print_one (b, last_loc);
   else
     switch (b->type)
       {
