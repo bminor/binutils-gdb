@@ -1,5 +1,14 @@
 2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/info-modules.exp: Update expected results, and add
+	additional tests for 'info module functinos', and 'info module
+	variables'.
+	* gdb.fortran/info-types.exp: Update expected results.
+	* gdb.fortran/info-types.f90: Extend testcase with additional
+	module variables and functions.
+
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/info-modules.exp: New file.
 	* gdb.fortran/info-types.exp: Build with new file.
 	* gdb.fortran/info-types.f90: Include and use new module.

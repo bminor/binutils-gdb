@@ -6340,6 +6340,315 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
 
 
 
+/* Hold the sub-commands of 'info module'.  */
+
+static struct cmd_list_element *info_module_cmdlist = NULL;
+
+/* Implement the 'info module' command, just displays some help text for
+   the available sub-commands.  */
+
+static void
+info_module_command (const char *args, int from_tty)
+{
+  help_list (info_module_cmdlist, "info module ", class_info, gdb_stdout);
+}
+
+/* See symtab.h.  */
+
+std::vector<module_symbol_search>
+search_module_symbols (const char *module_regexp, const char *regexp,
+		       const char *type_regexp, search_domain kind)
+{
+  std::vector<module_symbol_search> results;
+
+  /* Search for all modules matching MODULE_REGEXP.  */
+  std::vector<symbol_search> modules = search_symbols (module_regexp,
+						       MODULES_DOMAIN,
+						       NULL, 0, NULL,
+						       true);
+
+  /* Now search for all symbols of the required KIND matching the required
+     regular expressions.  We figure out which ones are in which modules
+     below.  */
+  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
+						       type_regexp, 0,
+						       NULL, true);
+
+  /* Now iterate over all MODULES, checking to see which items from
+     SYMBOLS are in each module.  */
+  for (const symbol_search &p : modules)
+    {
+      QUIT;
+
+      /* This is a module.  */
+      gdb_assert (p.symbol != nullptr);
+
+      std::string prefix = SYMBOL_PRINT_NAME (p.symbol);
+      prefix += "::";
+
+      for (const symbol_search &q : symbols)
+	{
+	  if (q.symbol == nullptr)
+	    continue;
+
+	  if (strncmp (SYMBOL_PRINT_NAME (q.symbol), prefix.c_str (),
+		       prefix.size ()) != 0)
+	    continue;
+
+	  results.push_back ({p, q});
+	}
+    }
+
+  return results;
+}
+
+/* Implement the core of both 'info module functions' and 'info module
+   variables'.  */
+
+static void
+info_module_subcommand (bool quiet, const char *module_regexp,
+			const char *regexp, const char *type_regexp,
+			search_domain kind)
+{
+  /* Print a header line.  Don't build the header line bit by bit as this
+     prevents internationalisation.  */
+  if (!quiet)
+    {
+      if (module_regexp == nullptr)
+	{
+	  if (type_regexp == nullptr)
+	    {
+	      if (regexp == nullptr)
+		printf_filtered ((kind == VARIABLES_DOMAIN
+				  ? _("All variables in all modules:")
+				  : _("All functions in all modules:")));
+	      else
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables matching regular expression"
+			" \"%s\" in all modules:")
+		    : _("All functions matching regular expression"
+			" \"%s\" in all modules:")),
+		   regexp);
+	    }
+	  else
+	    {
+	      if (regexp == nullptr)
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables with type matching regular "
+			"expression \"%s\" in all modules:")
+		    : _("All functions with type matching regular "
+			"expression \"%s\" in all modules:")),
+		   type_regexp);
+	      else
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables matching regular expression "
+			"\"%s\",\n\twith type matching regular "
+			"expression \"%s\" in all modules:")
+		    : _("All functions matching regular expression "
+			"\"%s\",\n\twith type matching regular "
+			"expression \"%s\" in all modules:")),
+		   regexp, type_regexp);
+	    }
+	}
+      else
+	{
+	  if (type_regexp == nullptr)
+	    {
+	      if (regexp == nullptr)
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables in all modules matching regular "
+			"expression \"%s\":")
+		    : _("All functions in all modules matching regular "
+			"expression \"%s\":")),
+		   module_regexp);
+	      else
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables matching regular expression "
+			"\"%s\",\n\tin all modules matching regular "
+			"expression \"%s\":")
+		    : _("All functions matching regular expression "
+			"\"%s\",\n\tin all modules matching regular "
+			"expression \"%s\":")),
+		   regexp, module_regexp);
+	    }
+	  else
+	    {
+	      if (regexp == nullptr)
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables with type matching regular "
+			"expression \"%s\"\n\tin all modules matching "
+			"regular expression \"%s\":")
+		    : _("All functions with type matching regular "
+			"expression \"%s\"\n\tin all modules matching "
+			"regular expression \"%s\":")),
+		   type_regexp, module_regexp);
+	      else
+		printf_filtered
+		  ((kind == VARIABLES_DOMAIN
+		    ? _("All variables matching regular expression "
+			"\"%s\",\n\twith type matching regular expression "
+			"\"%s\",\n\tin all modules matching regular "
+			"expression \"%s\":")
+		    : _("All functions matching regular expression "
+			"\"%s\",\n\twith type matching regular expression "
+			"\"%s\",\n\tin all modules matching regular "
+			"expression \"%s\":")),
+		   regexp, type_regexp, module_regexp);
+	    }
+	}
+      printf_filtered ("\n");
+    }
+
+  /* Find all symbols of type KIND matching the given regular expressions
+     along with the symbols for the modules in which those symbols
+     reside.  */
+  std::vector<module_symbol_search> module_symbols
+    = search_module_symbols (module_regexp, regexp, type_regexp, kind);
+
+  std::sort (module_symbols.begin (), module_symbols.end (),
+	     [] (const module_symbol_search &a, const module_symbol_search &b)
+	     {
+	       if (a.first < b.first)
+		 return true;
+	       else if (a.first == b.first)
+		 return a.second < b.second;
+	       else
+		 return false;
+	     });
+
+  const char *last_filename = "";
+  const symbol *last_module_symbol = nullptr;
+  for (const module_symbol_search &ms : module_symbols)
+    {
+      const symbol_search &p = ms.first;
+      const symbol_search &q = ms.second;
+
+      gdb_assert (q.symbol != nullptr);
+
+      if (last_module_symbol != p.symbol)
+	{
+	  printf_filtered ("\n");
+	  printf_filtered (_("Module \"%s\":\n"),
+			   SYMBOL_PRINT_NAME (p.symbol));
+	  last_module_symbol = p.symbol;
+	  last_filename = "";
+	}
+
+      print_symbol_info (FUNCTIONS_DOMAIN, q.symbol, q.block,
+			 last_filename);
+      last_filename
+	= symtab_to_filename_for_display (symbol_symtab (q.symbol));
+    }
+}
+
+/* Hold the option values for the 'info module .....' sub-commands.  */
+
+struct info_modules_var_func_options
+{
+  bool quiet = false;
+  char *type_regexp = nullptr;
+  char *module_regexp = nullptr;
+
+  ~info_modules_var_func_options ()
+  {
+    xfree (type_regexp);
+    xfree (module_regexp);
+  }
+};
+
+/* The options used by 'info module variables' and 'info module functions'
+   commands.  */
+
+static const gdb::option::option_def info_modules_var_func_options_defs [] = {
+  gdb::option::boolean_option_def<info_modules_var_func_options> {
+    "q",
+    [] (info_modules_var_func_options *opt) { return &opt->quiet; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::string_option_def<info_modules_var_func_options> {
+    "t",
+    [] (info_modules_var_func_options *opt) { return &opt->type_regexp; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::string_option_def<info_modules_var_func_options> {
+    "m",
+    [] (info_modules_var_func_options *opt) { return &opt->module_regexp; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Return the option group used by the 'info module ...' sub-commands.  */
+
+static inline gdb::option::option_def_group
+make_info_modules_var_func_options_def_group
+	(info_modules_var_func_options *opts)
+{
+  return {{info_modules_var_func_options_defs}, opts};
+}
+
+/* Implements the 'info module functions' command.  */
+
+static void
+info_module_functions_command (const char *args, int from_tty)
+{
+  info_modules_var_func_options opts;
+  auto grp = make_info_modules_var_func_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
+
+  info_module_subcommand (opts.quiet, opts.module_regexp, args,
+			  opts.type_regexp, FUNCTIONS_DOMAIN);
+}
+
+/* Implements the 'info module variables' command.  */
+
+static void
+info_module_variables_command (const char *args, int from_tty)
+{
+  info_modules_var_func_options opts;
+  auto grp = make_info_modules_var_func_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
+
+  info_module_subcommand (opts.quiet, opts.module_regexp, args,
+			  opts.type_regexp, VARIABLES_DOMAIN);
+}
+
+/* Command completer for 'info module ...' sub-commands.  */
+
+static void
+info_module_var_func_command_completer (struct cmd_list_element *ignore,
+					completion_tracker &tracker,
+					const char *text,
+					const char * /* word */)
+{
+
+  const auto group = make_info_modules_var_func_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+  symbol_completer (ignore, tracker, text, word);
+}
+
+
+
 void
 _initialize_symtab (void)
 {
@@ -6401,6 +6710,45 @@ Options:\n\
   c = add_info ("modules", info_modules_command,
 		_("All module names, or those matching REGEXP."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
+
+  add_prefix_cmd ("module", class_info, info_module_command, _("\
+Print information about modules."),
+		  &info_module_cmdlist, "info module ",
+		  0, &infolist);
+
+  c = add_cmd ("functions", class_info, info_module_functions_command, _("\
+Display functions arranged by modules.\n\
+Usage: info module functions [-q] [-m MODREGEXP] [-t TYPEREGEXP] [REGEXP]\n\
+Print a summary of all functions within each Fortran module, grouped by\n\
+module and file.  For each function the line on which the function is\n\
+defined is given along with the type signature and name of the function.\n\
+\n\
+If REGEXP is provided then only functions whose name matches REGEXP are\n\
+listed.  If MODREGEXP is provided then only functions in modules matching\n\
+MODREGEXP are listed.  If TYPEREGEXP is given then only functions whose\n\
+type signature matches TYPEREGEXP are listed.\n\
+\n\
+The -q flag suppresses printing some header information."),
+	       &info_module_cmdlist);
+  set_cmd_completer_handle_brkchars
+    (c, info_module_var_func_command_completer);
+
+  c = add_cmd ("variables", class_info, info_module_variables_command, _("\
+Display variables arranged by modules.\n\
+Usage: info module variables [-q] [-m MODREGEXP] [-t TYPEREGEXP] [REGEXP]\n\
+Print a summary of all variables within each Fortran module, grouped by\n\
+module and file.  For each variable the line on which the variable is\n\
+defined is given along with the type and name of the variable.\n\
+\n\
+If REGEXP is provided then only variables whose name matches REGEXP are\n\
+listed.  If MODREGEXP is provided then only variables in modules matching\n\
+MODREGEXP are listed.  If TYPEREGEXP is given then only variables whose\n\
+type matches TYPEREGEXP are listed.\n\
+\n\
+The -q flag suppresses printing some header information."),
+	       &info_module_cmdlist);
+  set_cmd_completer_handle_brkchars
+    (c, info_module_var_func_command_completer);
 
   add_com ("rbreak", class_breakpoint, rbreak_command,
 	   _("Set a breakpoint for all functions matching REGEXP."));

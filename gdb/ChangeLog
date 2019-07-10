@@ -1,5 +1,23 @@
 2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (info_module_cmdlist): New variable.
+	(info_module_command): New function.
+	(search_module_symbols): New function.
+	(info_module_subcommand): New function.
+	(struct info_modules_var_func_options): New struct.
+	(info_modules_var_func_options_defs): New variable.
+	(make_info_modules_var_func_options_def_group): New function.
+	(info_module_functions_command): New function.
+	(info_module_variables_command): New function.
+	(info_module_var_func_command_completer): New function.
+	(_initialize_symtab): Register new 'info module functions' and
+	'info module variables' commands.
+	* symtab.h (typedef symbol_search_in_module): New typedef.
+	(search_module_symbols): Declare new function.
+	* NEWS: Mention new commands.
+
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (dw2_symtab_iter_next): Handle MODULE_DOMAIN.
 	(dw2_expand_marked_cus): Handle MODULES_DOMAIN.
 	(dw2_debug_names_iterator::next): Handle MODULE_DOMAIN and

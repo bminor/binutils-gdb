@@ -35,6 +35,7 @@ set integer4 [fortran_int4]
 set integer8 [fortran_int8]
 set logical4 [fortran_logical4]
 set character1 [fortran_character1]
+set real4 [fortran_real4]
 
 gdb_test "info types" \
     [multi_line \
@@ -45,7 +46,8 @@ gdb_test "info types" \
 	 "\[\t \]+${integer4}" \
 	 "(\[\t \]+${integer8}" \
 	 ")?\[\t \]+${logical4}" \
-	 "(20:\[\t \]+Type __vtype_mod1_M1t1;" \
+	 "(35:\[\t \]+Type __vtype_mod1_M1t1;" \
 	 ")?$decimal:\[\t \]+Type m1t1;" \
-	 "22:\[\t \]+Type s1;(" \
+	 "\[\t \]+${real4}" \
+	 "37:\[\t \]+Type s1;(" \
 	 ".*)?"]

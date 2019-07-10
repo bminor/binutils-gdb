@@ -17,4 +17,20 @@
 ! mod2 is defined.
 module mod2
   integer :: mod2_var_1 = 123
+  real, parameter :: mod2_var_2 = 0.5
+contains
+  subroutine sub_m2_a(a, b)
+    integer :: a
+    logical :: b
+    print*, "sub_m2_a = ", abc
+    print*, "a = ", a
+    print*, "b = ", b
+  end subroutine sub_m2_a
+
+  logical function sub_m2_b(x)
+    real :: x
+    print*, "sub_m2_b = ", cde
+    print*, "x = ", x
+    sub_m2_b = .true.
+  end function sub_m2_b
 end module mod2

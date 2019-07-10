@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file tests 'info modules'.
+# This file tests 'info modules', 'info module functions', and 'info
+# module variables'.
 
 load_lib "fortran.exp"
 
@@ -30,6 +31,12 @@ if { ![runto MAIN__] } {
     perror "Could not run to breakpoint `MAIN__'."
     continue
 }
+
+set logical4 [fortran_logical4]
+set integer4 [fortran_int4]
+set real4 [fortran_real4]
+
+# Test 'info modules' command.
 
 gdb_test "info modules" \
     [multi_line \
@@ -64,3 +71,117 @@ gdb_test "info modules mod" \
 	 "" \
 	 "File .*${srcfile}:" \
 	 "16:\[\t \]+mod1" ]
+
+# Test 'info module functions'.
+
+gdb_test "info module functions" \
+    [multi_line \
+	 "All functions in all modules:" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "22:\[\t \]+void mod2::sub_m2_a\\(${integer4}, ${logical4}\\);" \
+	 "30:\[\t \]+${logical4} mod2::sub_m2_b\\(${real4}\\);" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "35:\[\t \]+void mod1::__copy_mod1_M1t1\\(Type m1t1, Type m1t1\\);" \
+	 "25:\[\t \]+void mod1::sub_m1_a\\(${integer4}\\);" \
+	 "31:\[\t \]+${integer4} mod1::sub_m1_b\\(void\\);" ]
+
+gdb_test "info module functions -m mod1" \
+    [multi_line \
+	 "All functions in all modules matching regular expression \"mod1\":" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*:" \
+	 "35:\[\t \]+void mod1::__copy_mod1_M1t1\\(Type m1t1, Type m1t1\\);" \
+	 "25:\[\t \]+void mod1::sub_m1_a\\(${integer4}\\);" \
+	 "31:\[\t \]+${integer4} mod1::sub_m1_b\\(void\\);" ]
+
+gdb_test "info module functions -t integer" \
+    [multi_line \
+	 "All functions with type matching regular expression \"integer\" in all modules:" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "22:\[\t \]+void mod2::sub_m2_a\\(${integer4}, ${logical4}\\);" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "25:\[\t \]+void mod1::sub_m1_a\\(${integer4}\\);" \
+	 "31:\[\t \]+${integer4} mod1::sub_m1_b\\(void\\);" ]
+
+# Test 'info module variables'.
+
+gdb_test "info module variables" \
+    [multi_line \
+	 "All variables in all modules:" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "19:\[\t \]+${integer4} mod2::mod2_var_1;" \
+	 "20:\[\t \]+${real4} mod2::mod2_var_2;" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*${srcfile}:" \
+	 "35:\[\t \]+Type m1t1 mod1::__def_init_mod1_M1t1;" \
+	 "35:\[\t \]+Type __vtype_mod1_M1t1 mod1::__vtab_mod1_M1t1;" \
+	 "21:\[\t \]+${real4} mod1::mod1_var_1;" \
+	 "22:\[\t \]+${integer4} mod1::mod1_var_2;" ]
+
+gdb_test "info module variables -t real" \
+    [multi_line \
+	 "All variables with type matching regular expression \"real\" in all modules:" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*:" \
+	 "20:\[\t \]+${real4} mod2::mod2_var_2;" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*:" \
+	 "21:\[\t \]+${real4} mod1::mod1_var_1;" ]
+
+gdb_test "info module variables -m mod2" \
+    [multi_line \
+	 "All variables in all modules matching regular expression \"mod2\":" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "19:\[\t \]+${integer4} mod2::mod2_var_1;" \
+	 "20:\[\t \]+${real4} mod2::mod2_var_2;" ]
+
+gdb_test "info module variables -m mod2 -t real" \
+    [multi_line \
+	 "All variables with type matching regular expression \"real\"" \
+	 "	in all modules matching regular expression \"mod2\":" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*${srcfile2}:" \
+	 "20:\[\t \]+${real4} mod2::mod2_var_2;" ]
+
+gdb_test "info module variables _1" \
+    [multi_line \
+	 "All variables matching regular expression \"_1\" in all modules:" \
+	 "" \
+	 "Module \"mod2\":" \
+	 "" \
+	 "File .*:" \
+	 "19:\[\t \]+${integer4} mod2::mod2_var_1;" \
+	 "" \
+	 "Module \"mod1\":" \
+	 "" \
+	 "File .*:" \
+	 "21:\[\t \]+${real4} mod1::mod1_var_1;" ]
+

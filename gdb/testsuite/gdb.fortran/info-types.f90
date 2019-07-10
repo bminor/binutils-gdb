@@ -17,6 +17,21 @@ module mod1
   type :: m1t1
      integer :: b
   end type m1t1
+
+  real :: mod1_var_1 = 1.0
+  integer, parameter :: mod1_var_2 = 456
+
+contains
+  subroutine sub_m1_a(arg)
+    integer :: arg
+    print*, "sub_m1_a"
+    print*, "arg = ", arg
+  end subroutine sub_m1_a
+
+  integer function sub_m1_b()
+    print*, "sub_m1_b"
+    sub_m1_b = 3
+  end function sub_m1_b
 end module mod1
 
 program info_types_test

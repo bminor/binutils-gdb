@@ -18896,6 +18896,25 @@ The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no modules
 have been printed.
 
+@kindex info module
+@cindex Fortran modules, information about
+@cindex functions and variables by Fortran module
+@cindex module functions and variables
+@item info module functions @r{[}-q@r{]} @r{[}-m @var{module-regexp}@r{]} @r{[}-t @var{type-regexp}@r{]} @r{[}@var{regexp}@r{]}
+@itemx info module variables @r{[}-q@r{]} @r{[}-m @var{module-regexp}@r{]} @r{[}-t @var{type-regexp}@r{]} @r{[}@var{regexp}@r{]}
+List all functions or variables within all Fortran modules.  The set
+of functions or variables listed can be limited by providing some or
+all of the optional regular expressions.  If @var{module-regexp} is
+provided, then only Fortran modules matching @var{module-regexp} will
+be searched.  Only functions or variables whose type matches the
+optional regular expression @var{type-regexp} will be listed.  And
+only functions or variables whose name matches the optional regular
+expression @var{regexp} will be listed.
+
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no functions
+or variables have been printed.
+
 @kindex info classes
 @cindex Objective-C, classes and selectors
 @item info classes

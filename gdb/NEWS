@@ -163,6 +163,20 @@ info modules [-q] [REGEXP]
   Return a list of Fortran modules matching REGEXP, or all modules if
   no REGEXP is given.
 
+info module functions [-q] [-m MODULE_REGEXP] [-t TYPE_REGEXP] [REGEXP]
+  Return a list of functions within all modules, grouped by module.
+  The list of functions can be restricted with the optional regular
+  expressions.  MODULE_REGEXP matches against the module name,
+  TYPE_REGEXP matches against the function type signature, and REGEXP
+  matches against the function name.
+
+info module variables [-q] [-m MODULE_REGEXP] [-t TYPE_REGEXP] [REGEXP]
+  Return a list of variables within all modules, grouped by module.
+  The list of variables can be restricted with the optional regular
+  expressions.  MODULE_REGEXP matches against the module name,
+  TYPE_REGEXP matches against the variable type, and REGEXP matches
+  against the variable name.
+
 * Changed commands
 
 help
