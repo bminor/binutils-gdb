@@ -6767,23 +6767,23 @@ print_mve_vmov_index (struct disassemble_info *info, unsigned long given)
   unsigned long op1 = arm_decode_field (given, 21, 22);
   unsigned long op2 = arm_decode_field (given, 5, 6);
   unsigned long h = arm_decode_field (given, 16, 16);
-  unsigned long index, esize, targetBeat, idx;
+  unsigned long index_operand, esize, targetBeat, idx;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
   if ((op1 & 0x2) == 0x2)
     {
-      index = op2;
+      index_operand = op2;
       esize = 8;
     }
   else if (((op1 & 0x2) == 0x0) && ((op2 & 0x1) == 0x1))
     {
-      index = op2  >> 1;
+      index_operand = op2  >> 1;
       esize = 16;
     }
   else if (((op1 & 0x2) == 0) && ((op2 & 0x3) == 0))
     {
-      index = 0;
+      index_operand = 0;
       esize = 32;
     }
   else
@@ -6793,7 +6793,7 @@ print_mve_vmov_index (struct disassemble_info *info, unsigned long given)
     }
 
   targetBeat =  (op1 & 0x1) | (h << 1);
-  idx = index + targetBeat * (32/esize);
+  idx = index_operand + targetBeat * (32/esize);
 
   func (stream, "%lu", idx);
 }

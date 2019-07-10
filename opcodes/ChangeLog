@@ -1,3 +1,8 @@
+2019-07-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* arm-dis.c (print_insn_coprocessor): Rename index to
+	index_operand.
+
 2019-07-05  Kito Cheng <kito.cheng@sifive.com>
 
 	* riscv-opc.c (riscv_insn_types): Add r4 type.
