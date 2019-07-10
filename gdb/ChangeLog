@@ -1,3 +1,7 @@
+2019-07-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* features/aarch64-pauth.c: Regenerate.
+
 2019-07-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.h (struct bpstat_what) <is_longjmp>: Change type to
