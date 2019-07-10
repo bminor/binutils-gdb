@@ -1,3 +1,14 @@
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/mi_ex_cond.exp: Update expected results.
+	* gdb.ada/mi_catch_ex_hand.exp: Update expected results.
+	* gdb.ada/mi_catch_ex.exp: Update expected results.
+	* gdb.ada/mi_catch_assert.exp: Update expected results.
+	* gdb.ada/catch_ex.exp (catch_exception_info)
+	(catch_exception_entry, catch_assert_entry)
+	(catch_unhandled_entry): Update.
+	* gdb.ada/catch_assert_if.exp: Update expected results.
+
 2019-07-10  Richard Bunt  <richard.bunt@arm.com>
 	Stephen Roberts  <stephen.roberts@arm.com>
 

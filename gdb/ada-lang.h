@@ -378,6 +378,10 @@ extern void create_ada_exception_catchpoint
    const std::string &excep_string, const std::string &cond_string, int tempflag,
    int disabled, int from_tty);
 
+/* Return true if BP is an Ada catchpoint.  */
+
+extern bool is_ada_exception_catchpoint (breakpoint *bp);
+
 /* Some information about a given Ada exception.  */
 
 struct ada_exc_info

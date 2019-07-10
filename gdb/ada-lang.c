@@ -12283,7 +12283,7 @@ class ada_catchpoint_location : public bp_location
 {
 public:
   ada_catchpoint_location (breakpoint *owner)
-    : bp_location (owner)
+    : bp_location (owner, bp_loc_software_breakpoint)
   {}
 
   /* The condition that checks whether the exception that was raised
@@ -12546,14 +12546,11 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
   struct value_print_options opts;
 
   get_user_print_options (&opts);
+
   if (opts.addressprint)
-    {
-      annotate_field (4);
-      uiout->field_core_addr ("addr", b->loc->gdbarch, b->loc->address);
-    }
+    uiout->field_skip ("addr");
 
   annotate_field (5);
-  *last_loc = b->loc;
   switch (ex)
     {
       case ada_catch_exception:
@@ -12870,6 +12867,17 @@ print_recreate_catch_handlers (struct breakpoint *b,
 }
 
 static struct breakpoint_ops catch_handlers_breakpoint_ops;
+
+/* See ada-lang.h.  */
+
+bool
+is_ada_exception_catchpoint (breakpoint *bp)
+{
+  return (bp->ops == &catch_exception_breakpoint_ops
+	  || bp->ops == &catch_exception_unhandled_breakpoint_ops
+	  || bp->ops == &catch_assert_breakpoint_ops
+	  || bp->ops == &catch_handlers_breakpoint_ops);
+}
 
 /* Split the arguments specified in a "catch exception" command.  
    Set EX to the appropriate catchpoint type.

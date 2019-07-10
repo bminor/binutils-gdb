@@ -70,7 +70,7 @@ gdb_test "catch assert if Global_Var = 2" \
 
 # Check that condition is stored and properly displayed.
 
-set exp_bp ".*$decimal${sp}breakpoint${sp}keep${sp}y${sp}$hex failed Ada assertions$eol${sp}stop only if Global_Var = 2.*"
+set exp_bp ".*$decimal${sp}catchpoint${sp}keep${sp}y${sp}failed Ada assertions$eol${sp}stop only if Global_Var = 2.*"
 gdb_test "info breakpoint" $exp_bp "Check catch assertions with condition"
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/bla.adb]

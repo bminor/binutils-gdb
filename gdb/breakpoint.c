@@ -6054,7 +6054,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  annotate_field (5);
 	  uiout->field_string ("what", w->exp_string);
 	}
-      else if (!is_catchpoint (b) || is_exception_catchpoint (b))
+      else if (!is_catchpoint (b) || is_exception_catchpoint (b)
+	       || is_ada_exception_catchpoint (b))
 	{
 	  if (opts.addressprint)
 	    {
@@ -6329,7 +6330,8 @@ print_one_breakpoint (struct breakpoint *b,
 	 exposed to users.  We do however display the internal
 	 breakpoint locations with "maint info breakpoints".  */
       if (!is_hardware_watchpoint (b)
-	  && (!is_catchpoint (b) || is_exception_catchpoint (b))
+	  && (!is_catchpoint (b) || is_exception_catchpoint (b)
+	      || is_ada_exception_catchpoint (b))
 	  && (allflag
 	      || (b->loc && (b->loc->next || !b->loc->enabled))))
 	{
@@ -11212,7 +11214,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
          enough for now, though.  */
     }
 
-  init_raw_breakpoint (b, gdbarch, sal, bp_breakpoint, ops);
+  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint, ops);
 
   b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;

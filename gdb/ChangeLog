@@ -1,5 +1,16 @@
 2019-07-10  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.h (is_ada_exception_catchpoint): Declare.
+	* breakpoint.c (init_ada_exception_breakpoint): Register as
+	bp_catchpoint.
+	(print_one_breakpoint_location, print_one_breakpoint): Use
+	is_ada_exception_catchpoint.
+	* ada-lang.c (class ada_catchpoint_location): Pass
+	bp_loc_software_breakpoint to bp_location constructor.
+	(is_ada_exception_catchpoint): New function.
+
+2019-07-10  Tom Tromey  <tromey@adacore.com>
+
 	* arm-tdep.c (arm_exidx_entry_s): Remove typedef.  Don't define
 	VEC.
 	(struct arm_exidx_entry): New method operator<.
