@@ -283,6 +283,15 @@ gdb_test_multiple "define target hookpost-testsuite" "" {
 
 gdb_test "target testsuite" "one\r\nhello\r\ntwo" "target testsuite with hooks"
 
+# Save the GDB prompt so it can be restored to the original value later.
+set prior_prompt ""
+gdb_test_multiple "show prompt" "save gdb_prompt" {
+    -re "Gdb's prompt is \"($gdb_prompt) \"\.\[\r\n\]*$gdb_prompt $" {
+	set prior_prompt $expect_out(1,string)
+	pass "save gdb_prompt"
+    }
+}
+
 # This is a quasi-define command: Verify that the user can redefine
 # GDB's gdb_prompt.
 #
@@ -292,7 +301,7 @@ gdb_test_multiple "set prompt \\(blah\\) " "set gdb_prompt" {
     }
 }
 
-gdb_test_multiple "set prompt \\(gdb\\) " "reset gdb_prompt" {
+gdb_test_multiple "set prompt $prior_prompt " "reset gdb_prompt" {
     -re "$gdb_prompt $" {
 	pass "reset gdb_prompt"
     }
