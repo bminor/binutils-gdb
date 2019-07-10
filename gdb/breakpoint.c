@@ -6401,15 +6401,21 @@ pending_breakpoint_p (struct breakpoint *b)
   return b->loc == NULL;
 }
 
-/* Print information on user settable breakpoint (watchpoint, etc)
-   number BNUM.  If BNUM is -1 print all user-settable breakpoints.
-   If ALLFLAG is non-zero, include non-user-settable breakpoints.  If
-   FILTER is non-NULL, call it on each breakpoint and only include the
-   ones for which it returns non-zero.  Return the total number of
-   breakpoints listed.  */
+/* Print information on breakpoints (including watchpoints and tracepoints).
+
+   If non-NULL, BP_NUM_LIST is a list of numbers and number ranges as
+   understood by number_or_range_parser.  Only breakpoints included in this
+   list are then printed.
+
+   If SHOW_INTERNAL is true, print internal breakpoints.
+
+   If FILTER is non-NULL, call it on each breakpoint and only include the
+   ones for which it returns true.
+
+   Return the total number of breakpoints listed.  */
 
 static int
-breakpoint_1 (const char *args, int allflag, 
+breakpoint_1 (const char *bp_num_list, bool show_internal,
 	      int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
@@ -6431,17 +6437,17 @@ breakpoint_1 (const char *args, int allflag,
       if (filter && !filter (b))
 	continue;
 
-      /* If we have an "args" string, it is a list of breakpoints to 
+      /* If we have a BP_NUM_LIST string, it is a list of breakpoints to
 	 accept.  Skip the others.  */
-      if (args != NULL && *args != '\0')
+      if (bp_num_list != NULL && *bp_num_list != '\0')
 	{
-	  if (allflag && parse_and_eval_long (args) != b->number)
+	  if (show_internal && parse_and_eval_long (bp_num_list) != b->number)
 	    continue;
-	  if (!allflag && !number_is_in_list (args, b->number))
+	  if (!show_internal && !number_is_in_list (bp_num_list, b->number))
 	    continue;
 	}
 
-      if (allflag || user_breakpoint_p (b))
+      if (show_internal || user_breakpoint_p (b))
 	{
 	  int addr_bit, type_len;
 
@@ -6500,26 +6506,26 @@ breakpoint_1 (const char *args, int allflag,
 	if (filter && !filter (b))
 	  continue;
 
-	/* If we have an "args" string, it is a list of breakpoints to 
+	/* If we have a BP_NUM_LIST string, it is a list of breakpoints to
 	   accept.  Skip the others.  */
 
-	if (args != NULL && *args != '\0')
+	if (bp_num_list != NULL && *bp_num_list != '\0')
 	  {
-	    if (allflag)	/* maintenance info breakpoint */
+	    if (show_internal)	/* maintenance info breakpoint */
 	      {
-		if (parse_and_eval_long (args) != b->number)
+		if (parse_and_eval_long (bp_num_list) != b->number)
 		  continue;
 	      }
 	    else		/* all others */
 	      {
-		if (!number_is_in_list (args, b->number))
+		if (!number_is_in_list (bp_num_list, b->number))
 		  continue;
 	      }
 	  }
 	/* We only print out user settable breakpoints unless the
-	   allflag is set.  */
-	if (allflag || user_breakpoint_p (b))
-	  print_one_breakpoint (b, &last_loc, allflag);
+	   show_internal is set.  */
+	if (show_internal || user_breakpoint_p (b))
+	  print_one_breakpoint (b, &last_loc, show_internal);
       }
   }
 
@@ -6529,11 +6535,11 @@ breakpoint_1 (const char *args, int allflag,
 	 empty list.  */
       if (!filter)
 	{
-	  if (args == NULL || *args == '\0')
+	  if (bp_num_list == NULL || *bp_num_list == '\0')
 	    uiout->message ("No breakpoints or watchpoints.\n");
 	  else
 	    uiout->message ("No breakpoint or watchpoint matching '%s'.\n",
-			    args);
+			    bp_num_list);
 	}
     }
   else
@@ -6573,7 +6579,7 @@ default_collect_info (void)
 static void
 info_breakpoints_command (const char *args, int from_tty)
 {
-  breakpoint_1 (args, 0, NULL);
+  breakpoint_1 (args, false, NULL);
 
   default_collect_info ();
 }
@@ -6581,7 +6587,7 @@ info_breakpoints_command (const char *args, int from_tty)
 static void
 info_watchpoints_command (const char *args, int from_tty)
 {
-  int num_printed = breakpoint_1 (args, 0, is_watchpoint);
+  int num_printed = breakpoint_1 (args, false, is_watchpoint);
   struct ui_out *uiout = current_uiout;
 
   if (num_printed == 0)
@@ -6596,7 +6602,7 @@ info_watchpoints_command (const char *args, int from_tty)
 static void
 maintenance_info_breakpoints (const char *args, int from_tty)
 {
-  breakpoint_1 (args, 1, NULL);
+  breakpoint_1 (args, true, NULL);
 
   default_collect_info ();
 }
@@ -14673,7 +14679,7 @@ info_tracepoints_command (const char *args, int from_tty)
   struct ui_out *uiout = current_uiout;
   int num_printed;
 
-  num_printed = breakpoint_1 (args, 0, is_tracepoint);
+  num_printed = breakpoint_1 (args, false, is_tracepoint);
 
   if (num_printed == 0)
     {
