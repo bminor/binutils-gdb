@@ -1048,7 +1048,7 @@ struct bpstat_what
     /* Used for BPSTAT_WHAT_SET_LONGJMP_RESUME and
        BPSTAT_WHAT_CLEAR_LONGJMP_RESUME.  True if we are handling a
        longjmp, false if we are handling an exception.  */
-    int is_longjmp;
+    bool is_longjmp;
   };
 
 /* Tell what to do about this bpstat.  */

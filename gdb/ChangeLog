@@ -1,3 +1,9 @@
+2019-07-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.h (struct bpstat_what) <is_longjmp>: Change type to
+	bool.
+	(bpstat_what): Use false instead of 0.
+
 2019-07-09  Pedro Alves  <palves@redhat.com>
 
 	* break-catch-throw.c (is_exception_catchpoint): New.

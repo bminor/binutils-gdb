@@ -5491,7 +5491,7 @@ bpstat_what (bpstat bs_head)
 
   retval.main_action = BPSTAT_WHAT_KEEP_CHECKING;
   retval.call_dummy = STOP_NONE;
-  retval.is_longjmp = 0;
+  retval.is_longjmp = false;
 
   for (bs = bs_head; bs != NULL; bs = bs->next)
     {
