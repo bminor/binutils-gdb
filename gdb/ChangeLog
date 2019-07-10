@@ -1,3 +1,10 @@
+2019-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.h (bpstat_explains_signal, bpstat_causes_stop,
+	bpstat_should_step): Return bool, adjust comments.
+	* breakpoint.c (bpstat_explains_signal, bpstat_causes_stop,
+	bpstat_should_step): Likewise.
+
 2019-07-10  Alan Hayward  <alan.hayward@arm.com>
 
 	* features/Makefile: Use feature target descriptions for Arm.

@@ -4231,7 +4231,7 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 
 /* See breakpoint.h.  */
 
-int
+bool
 bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 {
   for (; bsp != NULL; bsp = bsp->next)
@@ -4241,17 +4241,17 @@ bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 	  /* A moribund location can never explain a signal other than
 	     GDB_SIGNAL_TRAP.  */
 	  if (sig == GDB_SIGNAL_TRAP)
-	    return 1;
+	    return true;
 	}
       else
 	{
 	  if (bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
 							sig))
-	    return 1;
+	    return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
@@ -5687,29 +5687,29 @@ bpstat_run_callbacks (bpstat bs_head)
     }
 }
 
-/* Nonzero if we should step constantly (e.g. watchpoints on machines
-   without hardware support).  This isn't related to a specific bpstat,
-   just to things like whether watchpoints are set.  */
+/* See breakpoint.h.  */
 
-int
-bpstat_should_step (void)
+bool
+bpstat_should_step ()
 {
   struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (breakpoint_enabled (b) && b->type == bp_watchpoint && b->loc != NULL)
-      return 1;
-  return 0;
+      return true;
+  return false;
 }
 
-int
+/* See breakpoint.h.  */
+
+bool
 bpstat_causes_stop (bpstat bs)
 {
   for (; bs != NULL; bs = bs->next)
     if (bs->stop)
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 

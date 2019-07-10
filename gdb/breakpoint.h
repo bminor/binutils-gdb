@@ -1061,18 +1061,18 @@ extern void bpstat_run_callbacks (bpstat bs_head);
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
 bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 
-/* Nonzero if a signal that we got in target_wait() was due to
+/* True if a signal that we got in target_wait() was due to
    circumstances explained by the bpstat; the signal is therefore not
    random.  */
-extern int bpstat_explains_signal (bpstat, enum gdb_signal);
+extern bool bpstat_explains_signal (bpstat, enum gdb_signal);
 
-/* Nonzero is this bpstat causes a stop.  */
-extern int bpstat_causes_stop (bpstat);
+/* True if this bpstat causes a stop.  */
+extern bool bpstat_causes_stop (bpstat);
 
-/* Nonzero if we should step constantly (e.g. watchpoints on machines
+/* True if we should step constantly (e.g. watchpoints on machines
    without hardware support).  This isn't related to a specific bpstat,
    just to things like whether watchpoints are set.  */
-extern int bpstat_should_step (void);
+extern bool bpstat_should_step ();
 
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
