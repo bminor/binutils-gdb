@@ -32,6 +32,7 @@
 #include "xml-tdesc.h"
 #include "target-descriptions.h"
 #include "gdbsupport/buffer.h"
+#include "gdbsupport/pathstuff.h"
 #include <algorithm>
 
 #ifndef O_LARGEFILE
@@ -470,8 +471,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
   if (!IS_ABSOLUTE_PATH (filename.get ()))
-    filename.reset (concat (current_directory, "/", filename.get (),
-			    (char *) NULL));
+    filename = gdb_abspath (filename.get ());
 
   flags = O_BINARY | O_LARGEFILE;
   flags |= O_RDONLY;

@@ -44,7 +44,10 @@ extern gdb::unique_xmalloc_ptr<char>
 
    Contrary to "gdb_realpath", this function uses CURRENT_DIRECTORY
    for the path expansion.  This may lead to scenarios the current
-   working directory (CWD) is different than CURRENT_DIRECTORY.  */
+   working directory (CWD) is different than CURRENT_DIRECTORY.
+
+   If CURRENT_DIRECTORY is NULL, this function returns a copy of
+   PATH.  */
 
 extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
 

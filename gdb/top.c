@@ -54,6 +54,7 @@
 #include "gdb_select.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
+#include "gdbsupport/pathstuff.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -1994,12 +1995,13 @@ init_history (void)
          that was read.  */
 #ifdef __MSDOS__
       /* No leading dots in file names are allowed on MSDOS.  */
-      history_filename = concat (current_directory, "/_gdb_history",
-				 (char *)NULL);
+      const char *fname = "_gdb_history";
 #else
-      history_filename = concat (current_directory, "/.gdb_history",
-				 (char *)NULL);
+      const char *fname = ".gdb_history";
 #endif
+
+      gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (fname));
+      history_filename = temp.release ();
     }
   read_history (history_filename);
 }
@@ -2077,8 +2079,12 @@ set_history_filename (const char *args,
      directories the file written will be the same as the one
      that was read.  */
   if (!IS_ABSOLUTE_PATH (history_filename))
-    history_filename = reconcat (history_filename, current_directory, "/", 
-				 history_filename, (char *) NULL);
+    {
+      gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (history_filename));
+
+      xfree (history_filename);
+      history_filename = temp.release ();
+    }
 }
 
 static void

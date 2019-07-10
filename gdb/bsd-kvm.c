@@ -114,14 +114,13 @@ bsd_kvm_target_open (const char *arg, int from_tty)
 
   if (arg)
     {
-      char *temp;
-
       filename = tilde_expand (arg);
       if (filename[0] != '/')
 	{
-	  temp = concat (current_directory, "/", filename, (char *)NULL);
+	  gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (filename));
+
 	  xfree (filename);
-	  filename = temp;
+	  filename = temp.release ();
 	}
     }
 

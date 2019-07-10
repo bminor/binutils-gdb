@@ -507,7 +507,8 @@ go32_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
     }
 
   getcwd (child_cwd, sizeof (child_cwd)); /* in case it has changed */
-  chdir (current_directory);
+  if (current_directory != NULL)
+    chdir (current_directory);
 
   if (a_tss.tss_irqn == 0x21)
     {

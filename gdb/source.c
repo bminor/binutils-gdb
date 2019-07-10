@@ -540,8 +540,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	new_name_holder.reset (concat (name, ".", (char *) NULL));
 #endif
       else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
-	new_name_holder.reset (concat (current_directory, SLASH_STRING, name,
-				       (char *) NULL));
+	new_name_holder = gdb_abspath (name);
       else
 	new_name_holder.reset (savestring (name, p - name));
       name = new_name_holder.get ();

@@ -1,3 +1,23 @@
+2019-12-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	https://bugzilla.redhat.com/show_bug.cgi?id=1728147
+	PR gdb/23613
+	* bsd-kvm.c (bsd_kvm_target_open): Use 'gdb_abspath'.
+	* corelow.c: Include 'gdbsupport/pathstuff.h'.
+	(core_target_open): Use 'gdb_abspath'.
+	* gdbsupport/pathstuff.c (gdb_abspath): Guard against
+	'current_directory == NULL' case.
+	* gdbsupport/pathstuff.h (gdb_abspath): Expand comment and
+	explain what happens when 'current_directory' is NULL.
+	* go32-nat.c (go32_nat_target::wait): Check if
+	'current_directory' is NULL before call to 'chdir'.
+	* source.c (add_path): Use 'gdb_abspath'.
+	* top.c: Include 'gdbsupport/pathstuff.h'.
+	(init_history): Use 'gdb_abspath'.
+	(set_history_filename): Likewise.
+	* tracefile-tfile.c: Include 'gdbsupport/pathstuff.h'.
+	(tfile_target_open): Use 'gdb_abspath'.
+
 2019-12-13  Tom Tromey  <tromey@adacore.com>
 
 	* contrib/ari/gdb_ari.sh: Remove check for multiple calls to
