@@ -138,8 +138,6 @@ public:
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
-  /* Does the locator belong to this window?  */
-  bool m_has_locator = false;
   /* Execution information window.  */
   struct tui_exec_info_window *execution_info;
   /* Used for horizontal scroll.  */

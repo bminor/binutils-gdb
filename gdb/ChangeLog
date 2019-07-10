@@ -1,3 +1,10 @@
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<m_has_locator>: Remove.
+	* tui/tui-layout.c (show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Update.
+
 2019-08-16  Alan Hayward  <alan.hayward@arm.com>
 
 	* NEWS (Other MI changes): New subsection.

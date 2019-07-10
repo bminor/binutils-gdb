@@ -504,7 +504,6 @@ show_source_disasm_command (void)
 		       tui_term_width (),
 		       0,
 		       0);
-  TUI_SRC_WIN->m_has_locator = false;
 
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   gdb_assert (locator != nullptr);
@@ -520,8 +519,6 @@ show_source_disasm_command (void)
 		   tui_term_width (),
 		   0,
 		   (src_height + asm_height) - 1);
-  TUI_SRC_WIN->m_has_locator = false;
-  TUI_DISASM_WIN->m_has_locator = true;
   TUI_DISASM_WIN->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)
@@ -565,8 +562,6 @@ show_data (enum tui_layout_type new_layout)
 	tui_win_list[win_type] = new tui_disasm_window ();
     }
 
-  tui_source_window_base *base
-    = (tui_source_window_base *) tui_win_list[win_type];
   tui_win_list[win_type]->resize (src_height,
 				  tui_term_width (),
 				  0,
@@ -578,7 +573,6 @@ show_data (enum tui_layout_type new_layout)
   TUI_CMD_WIN->resize (TUI_CMD_WIN->height, tui_term_width (),
 		       0, total_height);
 
-  base->m_has_locator = true;
   current_layout = new_layout;
 }
 
@@ -650,7 +644,6 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		    0,
 		    0);
 
-  win_info->m_has_locator = true;
   win_info->show_source_content ();
 
   if (TUI_CMD_WIN == NULL)
