@@ -1,3 +1,12 @@
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
+	PR 24786
+	* ldlang.h (enum section_type): Add first_overlay_section.
+	* ldlang.c (lang_add_section): Adjust switch statement.
+	(map_input_to_output_sections): Likewise.
+	(lang_size_sections_1): Always set last_os for first overlay section.
+	(lang_leave_overlay): Set sectype to first_overlay_section.
+
 2019-07-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/callstub-1.d: Pass -melf64ppc to ld.

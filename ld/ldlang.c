@@ -2579,6 +2579,7 @@ lang_add_section (lang_statement_list_type *ptr,
     {
     case normal_section:
     case overlay_section:
+    case first_overlay_section:
       break;
     case noalloc_section:
       flags &= ~SEC_ALLOC;
@@ -3846,6 +3847,7 @@ map_input_to_output_sections
 	    {
 	    case normal_section:
 	    case overlay_section:
+	    case first_overlay_section:
 	      break;
 	    case noalloc_section:
 	      flags = SEC_HAS_CONTENTS;
@@ -5493,13 +5495,14 @@ lang_size_sections_1
 	       important, if an orphan section is placed after an
 	       otherwise empty output section that has an explicit lma
 	       set, we want that lma reflected in the orphans lma.  */
-	    if (!IGNORE_SECTION (os->bfd_section)
-		&& (os->bfd_section->size != 0
-		    || (r->last_os == NULL
-			&& os->bfd_section->vma != os->bfd_section->lma)
-		    || (r->last_os != NULL
-			&& dot >= (r->last_os->output_section_statement
-				   .bfd_section->vma)))
+	    if (((!IGNORE_SECTION (os->bfd_section)
+		  && (os->bfd_section->size != 0
+		      || (r->last_os == NULL
+			  && os->bfd_section->vma != os->bfd_section->lma)
+		      || (r->last_os != NULL
+			  && dot >= (r->last_os->output_section_statement
+				     .bfd_section->vma))))
+		 || os->sectype == first_overlay_section)
 		&& os->lma_region == NULL
 		&& !bfd_link_relocatable (&link_info))
 	      r->last_os = s;
@@ -8292,7 +8295,7 @@ lang_leave_overlay (etree_type *lma_expr,
       if (l->next == 0)
 	{
 	  l->os->load_base = lma_expr;
-	  l->os->sectype = normal_section;
+	  l->os->sectype = first_overlay_section;
 	}
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;

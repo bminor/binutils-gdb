@@ -116,6 +116,7 @@ typedef struct lang_output_statement_struct
 enum section_type
 {
   normal_section,
+  first_overlay_section,
   overlay_section,
   noload_section,
   noalloc_section
