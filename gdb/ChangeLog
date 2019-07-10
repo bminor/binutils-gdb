@@ -1,5 +1,21 @@
 2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-utils.c (extract_info_print_args): Delete.
+	(extract_arg_maybe_quoted): Delete.
+	(info_print_options_defs): New variable.
+	(make_info_print_options_def_group): New function.
+	(extract_info_print_options): Define new function.
+	* cli/cli-utils.h (extract_info_print_args): Delete.
+	(struct info_print_options): New structure.
+	(extract_info_print_options): Declare new function.
+	* stack.c (info_locals_command): Update to use new
+	extract_info_print_options, also add a header comment.
+	(info_args_command): Likewise.
+	* symtab.c (info_variables_command): Likewise.
+	(info_functions_command): Likewise.
+
+2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-option.c (parse_option): Use extract_string_maybe_quoted
 	to extract string arguments.
 	* common/common-utils.c (extract_string_maybe_quoted): New function.

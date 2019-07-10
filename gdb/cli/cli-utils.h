@@ -43,22 +43,28 @@ extern int get_number (char **);
    error instead of returning 0.  */
 extern ULONGEST get_ulongest (const char **pp, int trailer = '\0');
 
-/* Extract from ARGS the arguments [-q] [-t TYPEREGEXP] [--] NAMEREGEXP.
+/* Structure to hold the values of the options used by the 'info
+   variables' command and other similar commands.  These correspond to the
+   -q and -t options.  */
 
-   The caller is responsible to initialize *QUIET to false, *REGEXP
-   and *T_REGEXP to "".
-   extract_info_print_args can then be called iteratively to search
-   for valid arguments, as part of a 'main parsing loop' searching for
-   -q/-t/-- arguments together with other flags and options.
+struct info_print_options
+{
+  int quiet = false;
+  char *type_regexp = nullptr;
 
-   Returns true and updates *ARGS + one of *QUIET, *REGEXP, *T_REGEXP if
-   it finds a valid argument.
-   Returns false if no valid argument is found at the beginning of ARGS.  */
+  ~info_print_options ()
+  {
+    xfree (type_regexp);
+  }
+};
 
-extern bool extract_info_print_args (const char **args,
-				     bool *quiet,
-				     std::string *regexp,
-				     std::string *t_regexp);
+/* Extract options from ARGS for commands like 'info variables', placing
+   the options into OPTS.  ARGS is updated to point to the first character
+   after the options, or, if there is nothing after the options, then ARGS
+   is set to nullptr.  */
+
+extern void extract_info_print_options (info_print_options *opts,
+					const char **args);
 
 /* Throws an error telling the user that ARGS starts with an option
    unrecognized by COMMAND.  */

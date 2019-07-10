@@ -2359,24 +2359,16 @@ print_frame_local_vars (struct frame_info *frame,
     }
 }
 
+/* Implement the 'info locals' command.  */
+
 void
 info_locals_command (const char *args, int from_tty)
 {
-  std::string regexp;
-  std::string t_regexp;
-  bool quiet = false;
-
-  while (args != NULL
-	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
-    ;
-
-  if (args != NULL)
-    report_unrecognized_option_error ("info locals", args);
+  info_print_options opts;
+  extract_info_print_options (&opts, &args);
 
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
-			  quiet,
-			  regexp.empty () ? NULL : regexp.c_str (),
-			  t_regexp.empty () ? NULL : t_regexp.c_str (),
+			  opts.quiet, args, opts.type_regexp,
 			  0, gdb_stdout);
 }
 
@@ -2474,26 +2466,16 @@ print_frame_arg_vars (struct frame_info *frame,
     }
 }
 
+/* Implement the 'info args' command.  */
+
 void
 info_args_command (const char *args, int from_tty)
 {
-  std::string regexp;
-  std::string t_regexp;
-  bool quiet = false;
-
-  while (args != NULL
-	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
-    ;
-
-  if (args != NULL)
-    report_unrecognized_option_error ("info args", args);
-
+  info_print_options opts;
+  extract_info_print_options (&opts, &args);
 
   print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
-			quiet,
-			regexp.empty () ? NULL : regexp.c_str (),
-			t_regexp.empty () ? NULL : t_regexp.c_str (),
-			gdb_stdout);
+			opts.quiet, args, opts.type_regexp, gdb_stdout);
 }
 
 /* Return the symbol-block in which the selected frame is executing.

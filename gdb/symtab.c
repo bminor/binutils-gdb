@@ -4687,6 +4687,9 @@ symtab_symbol_info (bool quiet,
 
   gdb_assert (kind <= TYPES_DOMAIN);
 
+  if (regexp != nullptr && *regexp == '\0')
+    regexp = nullptr;
+
   /* Must make sure that if we're interrupted, symbols gets freed.  */
   std::vector<symbol_search> symbols = search_symbols (regexp, kind,
 						       t_regexp, 0, NULL);
@@ -4742,47 +4745,28 @@ symtab_symbol_info (bool quiet,
     }
 }
 
+/* Implement the 'info variables' command.  */
+
 static void
 info_variables_command (const char *args, int from_tty)
 {
-  std::string regexp;
-  std::string t_regexp;
-  bool quiet = false;
+  info_print_options opts;
+  extract_info_print_options (&opts, &args);
 
-  while (args != NULL
-	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
-    ;
-
-  if (args != NULL)
-    report_unrecognized_option_error ("info variables", args);
-
-  symtab_symbol_info (quiet,
-		      regexp.empty () ? NULL : regexp.c_str (),
-		      VARIABLES_DOMAIN,
-		      t_regexp.empty () ? NULL : t_regexp.c_str (),
-		      from_tty);
+  symtab_symbol_info (opts.quiet, args, VARIABLES_DOMAIN,
+		      opts.type_regexp, from_tty);
 }
 
+/* Implement the 'info functions' command.  */
 
 static void
 info_functions_command (const char *args, int from_tty)
 {
-  std::string regexp;
-  std::string t_regexp;
-  bool quiet = false;
+  info_print_options opts;
+  extract_info_print_options (&opts, &args);
 
-  while (args != NULL
-	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
-    ;
-
-  if (args != NULL)
-    report_unrecognized_option_error ("info functions", args);
-
-  symtab_symbol_info (quiet,
-		      regexp.empty () ? NULL : regexp.c_str (),
-		      FUNCTIONS_DOMAIN,
-		      t_regexp.empty () ? NULL : t_regexp.c_str (),
-		      from_tty);
+  symtab_symbol_info (opts.quiet, args, FUNCTIONS_DOMAIN,
+		      opts.type_regexp, from_tty);
 }
 
 

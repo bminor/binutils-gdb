@@ -23,8 +23,6 @@
 
 #include <ctype.h>
 
-static std::string extract_arg_maybe_quoted (const char **arg);
-
 /* See documentation in cli-utils.h.  */
 
 ULONGEST
@@ -178,38 +176,6 @@ get_number (char **pp)
   result = get_number_trailer (&p, '\0');
   *pp = (char *) p;
   return result;
-}
-
-/* See documentation in cli-utils.h.  */
-
-bool
-extract_info_print_args (const char **args,
-			 bool *quiet,
-			 std::string *regexp,
-			 std::string *t_regexp)
-{
-  /* Check for NAMEREGEXP or -- NAMEREGEXP.  */
-  if (**args != '-' || check_for_argument (args, "--", 2))
-    {
-      *regexp = *args;
-      *args = NULL;
-      return true;
-    }
-
-  if (check_for_argument (args, "-t", 2))
-    {
-      *t_regexp = extract_arg_maybe_quoted (args);
-      *args = skip_spaces (*args);
-      return true;
-    }
-
-  if (check_for_argument (args, "-q", 2))
-    {
-      *quiet = true;
-      return true;
-    }
-
-  return false;
 }
 
 /* See documentation in cli-utils.h.  */
@@ -407,69 +373,6 @@ remove_trailing_whitespace (const char *start, const char *s)
   return s;
 }
 
-/* A helper function to extract an argument from *ARG.  An argument is
-   delimited by whitespace, but it can also be optionally quoted.
-   The quoting and special characters are handled similarly to
-   the parsing done by gdb_argv.
-   The return value is empty if no argument was found.  */
-
-static std::string
-extract_arg_maybe_quoted (const char **arg)
-{
-  bool squote = false;
-  bool dquote = false;
-  bool bsquote = false;
-  std::string result;
-  const char *p = *arg;
-
-  /* Find the start of the argument.  */
-  p = skip_spaces (p);
-
-  /* Parse p similarly to gdb_argv buildargv function.  */
-  while (*p != '\0')
-    {
-      if (isspace (*p) && !squote && !dquote && !bsquote)
-	  break;
-      else
-	{
-	  if (bsquote)
-	    {
-	      bsquote = false;
-	      result += *p;
-	    }
-	  else if (*p == '\\')
-	      bsquote = true;
-	  else if (squote)
-	    {
-	      if (*p == '\'')
-		  squote = false;
-	      else
-		  result += *p;
-	    }
-	  else if (dquote)
-	    {
-	      if (*p == '"')
-		  dquote = false;
-	      else
-		  result += *p;
-	    }
-	  else
-	    {
-	      if (*p == '\'')
-		  squote = true;
-	      else if (*p == '"')
-		  dquote = true;
-	      else
-		  result += *p;
-	    }
-	  p++;
-	}
-    }
-
-  *arg = p;
-  return result;
-}
-
 /* See documentation in cli-utils.h.  */
 
 std::string
@@ -532,4 +435,41 @@ validate_flags_qcs (const char *which_command, qcs_flags *flags)
     error (_("%s: -c and -s are mutually exclusive"), which_command);
 }
 
+/* The options used by the 'info variables' commands and similar.  */
+
+static const gdb::option::option_def info_print_options_defs[] = {
+  gdb::option::boolean_option_def<info_print_options> {
+    "q",
+    [] (info_print_options *opt) { return &opt->quiet; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::string_option_def<info_print_options> {
+    "t",
+    [] (info_print_options *opt) { return &opt->type_regexp; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Returns the option group used by 'info variables' and similar.  */
+
+static gdb::option::option_def_group
+make_info_print_options_def_group (info_print_options *opts)
+{
+  return {{info_print_options_defs}, opts};
+}
+
 /* See documentation in cli-utils.h.  */
+
+void
+extract_info_print_options (info_print_options *opts,
+			    const char **args)
+{
+  auto grp = make_info_print_options_def_group (opts);
+  gdb::option::process_options
+    (args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (*args != nullptr && **args == '\0')
+    *args = nullptr;
+}
