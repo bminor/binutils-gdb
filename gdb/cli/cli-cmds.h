@@ -105,8 +105,6 @@ extern struct cmd_list_element *showchecklist;
 
 void init_cmd_lists (void);
 
-void init_cli_cmds (void);
-
 int is_complete_command (struct cmd_list_element *cmd);
 
 /* Exported to gdb/main.c */

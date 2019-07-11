@@ -1,5 +1,17 @@
 2019-07-11  Tom Tromey  <tromey@adacore.com>
 
+	* main.c (get_init_files): Use GDBINIT, not gdbinit.
+	* auto-load.c (file_is_auto_load_safe): Use GDBINIT, not gdbinit.
+	* top.h (gdbinit): Don't declare.
+	* cli/cli-cmds.c (init_cli_cmds): Remove, merging contents
+	into...
+	(_initialize_cli_cmds): ...here.  Use GDBINIT, not gdbinit.
+	* top.c (gdb_init): Don't call init_cli_cmds.
+	(gdbinit): Remove.
+	* cli/cli-cmds.h (init_cli_cmds): Don't declare.
+
+2019-07-11  Tom Tromey  <tromey@adacore.com>
+
 	* python/py-inferior.c (add_thread_object): Don't use thread_obj
 	after it has been moved.
 

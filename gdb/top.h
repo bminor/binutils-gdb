@@ -219,7 +219,6 @@ extern void ui_unregister_input_event_handler (struct ui *ui);
 /* From top.c.  */
 extern int confirm;
 extern int inhibit_gdbinit;
-extern const char gdbinit[];
 
 /* Print the GDB version banner to STREAM.  If INTERACTIVE is false,
    then information referring to commands (e.g., "show configuration")

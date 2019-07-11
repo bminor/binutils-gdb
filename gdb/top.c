@@ -108,10 +108,6 @@ gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stderr)
 gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdlog)
 gen_ret_current_ui_field_ptr (struct ui_out *, current_uiout)
 
-/* Initialization file name for gdb.  This is host-dependent.  */
-
-const char gdbinit[] = GDBINIT;
-
 int inhibit_gdbinit = 0;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
@@ -2265,7 +2261,6 @@ gdb_init (char *argv0)
   initialize_progspace ();
   initialize_inferiors ();
   initialize_current_architecture ();
-  init_cli_cmds();
   init_main ();			/* But that omits this file!  Do it now.  */
 
   initialize_stdin_serial ();
