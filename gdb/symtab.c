@@ -5997,28 +5997,35 @@ symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
 void
 _initialize_symtab (void)
 {
+  cmd_list_element *c;
+
   initialize_ordinary_address_classes ();
 
-  add_info ("variables", info_variables_command,
-	    info_print_args_help (_("\
+  c = add_info ("variables", info_variables_command,
+		info_print_args_help (_("\
 All global and static variable names or those matching REGEXPs.\n\
 Usage: info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
 				  _("global and static variables")));
+  set_cmd_completer_handle_brkchars (c, info_print_command_completer);
   if (dbx_commands)
-    add_com ("whereis", class_info, info_variables_command,
-	     info_print_args_help (_("\
+    {
+      c = add_com ("whereis", class_info, info_variables_command,
+		   info_print_args_help (_("\
 All global and static variable names, or those matching REGEXPs.\n\
 Usage: whereis [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
 				   _("global and static variables")));
+      set_cmd_completer_handle_brkchars (c, info_print_command_completer);
+    }
 
-  add_info ("functions", info_functions_command,
-	    info_print_args_help (_("\
+  c = add_info ("functions", info_functions_command,
+		info_print_args_help (_("\
 All function names or those matching REGEXPs.\n\
 Usage: info functions [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the functions.\n"),
 				  _("functions")));
+  set_cmd_completer_handle_brkchars (c, info_print_command_completer);
 
   /* FIXME:  This command has at least the following problems:
      1.  It prints builtin types (in a very strange and confusing fashion).

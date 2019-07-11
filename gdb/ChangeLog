@@ -1,5 +1,17 @@
 2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-utils.c (info_print_command_completer): New function.
+	* cli/cli-utils.h: Add 'completer.h' include, and forward
+	declaration for 'struct cmd_list_element'.
+	(info_print_command_completer): Declare.
+	* stack.c (_initialize_stack): Add completer for 'info locals' and
+	'info args'.
+	* symtab.c (_initialize_symtab): Add completer for 'info
+	variables' and 'info functions'.
+	* NEWS: Mention completion for additional info commands.
+
+2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-utils.c (extract_info_print_args): Delete.
 	(extract_arg_maybe_quoted): Delete.
 	(info_print_options_defs): New variable.

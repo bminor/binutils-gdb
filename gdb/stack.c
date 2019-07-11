@@ -3423,18 +3423,20 @@ Print information about a stack frame selected by level.\n\
 Usage: info frame level LEVEL"),
 	   &info_frame_cmd_list);
 
-  add_info ("locals", info_locals_command,
-	    info_print_args_help (_("\
+  cmd = add_info ("locals", info_locals_command,
+		  info_print_args_help (_("\
 All local variables of current stack frame or those matching REGEXPs.\n\
 Usage: info locals [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the local variables of the current stack frame.\n"),
 				  _("local variables")));
-  add_info ("args", info_args_command,
-	    info_print_args_help (_("\
+  set_cmd_completer_handle_brkchars (cmd, info_print_command_completer);
+  cmd = add_info ("args", info_args_command,
+		  info_print_args_help (_("\
 All argument variables of current stack frame or those matching REGEXPs.\n\
 Usage: info args [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the argument variables of the current stack frame.\n"),
 				  _("argument variables")));
+  set_cmd_completer_handle_brkchars (cmd, info_print_command_completer);
 
   if (dbx_commands)
     add_com ("func", class_stack, func_command, _("\

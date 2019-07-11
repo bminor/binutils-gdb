@@ -20,6 +20,10 @@
 #ifndef CLI_CLI_UTILS_H
 #define CLI_CLI_UTILS_H
 
+#include "completer.h"
+
+struct cmd_list_element;
+
 /* *PP is a string denoting a number.  Get the number.  Advance *PP
    after the string and any trailing whitespace.
 
@@ -65,6 +69,15 @@ struct info_print_options
 
 extern void extract_info_print_options (info_print_options *opts,
 					const char **args);
+
+/* Function that can be used as a command completer for 'info variable'
+   and friends.  This offers command option completion as well as symbol
+   completion.  At the moment all symbols are offered for all commands.  */
+
+extern void info_print_command_completer (struct cmd_list_element *ignore,
+					  completion_tracker &tracker,
+					  const char *text,
+					  const char * /* word */);
 
 /* Throws an error telling the user that ARGS starts with an option
    unrecognized by COMMAND.  */
