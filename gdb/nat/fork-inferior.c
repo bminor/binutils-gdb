@@ -28,6 +28,7 @@
 #include "signals-state-save-restore.h"
 #include "gdb_tilde_expand.h"
 #include <vector>
+#include "nat/linux-ptrace.h"
 
 extern char **environ;
 

@@ -8925,6 +8925,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
   int i, is_m = 0;
+  int is_fdpic = 0;
   int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
   int have_wmmx_registers = 0;
   int have_neon = 0;
@@ -8957,9 +8958,12 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 anyway, so assume APCS.  */
 	      arm_abi = ARM_ABI_APCS;
 	    }
-	  else if (ei_osabi == ELFOSABI_NONE || ei_osabi == ELFOSABI_GNU)
+	  else if (ei_osabi == ELFOSABI_NONE || ei_osabi == ELFOSABI_GNU || ei_osabi == ELFOSABI_ARM_FDPIC)
 	    {
 	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
+
+	      if (ei_osabi == ELFOSABI_ARM_FDPIC)
+		is_fdpic = 1;
 
 	      switch (eabi_ver)
 		{
@@ -9296,6 +9300,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
+  tdep->is_fdpic = is_fdpic;
   tdep->have_fpa_registers = have_fpa_registers;
   tdep->have_wmmx_registers = have_wmmx_registers;
   gdb_assert (vfp_register_count == 0

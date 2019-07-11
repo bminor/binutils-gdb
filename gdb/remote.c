@@ -1920,6 +1920,9 @@ packet_ok (const char *buf, struct packet_config *config)
 {
   enum packet_result result;
 
+  fprintf (stderr,
+	   "GDB: %s Packet %s (%s)\n", __FUNCTION__,
+	   config->name, config->title);
   if (config->detect != AUTO_BOOLEAN_TRUE
       && config->support == PACKET_DISABLE)
     internal_error (__FILE__, __LINE__,
@@ -4570,6 +4573,7 @@ remote_target::start_remote (int from_tty, int extended_p)
   {
     const char v_mustreplyempty[] = "vMustReplyEmpty";
 
+    fprintf(stderr, "GDB: %s 'v' must-reply-empty\n", __FUNCTION__);
     putpkt (v_mustreplyempty);
     getpkt (&rs->buf, &rs->buf_size, 0);
     if (strcmp (rs->buf, "OK") == 0)
@@ -5374,6 +5378,8 @@ remote_target::remote_query_supported ()
 	}
 
       for (i = 0; i < ARRAY_SIZE (remote_protocol_features); i++)
+	{
+	  //	fprintf(stderr, "GDB: %s comparing %s with %s\n", __FUNCTION__, remote_protocol_features[i].name, p);
 	if (strcmp (remote_protocol_features[i].name, p) == 0)
 	  {
 	    const struct protocol_feature *feature;
@@ -5383,6 +5389,7 @@ remote_target::remote_query_supported ()
 	    feature->func (this, feature, is_supported, value);
 	    break;
 	  }
+      }
     }
 
   /* If we increased the packet size, make sure to increase the global
@@ -10798,6 +10805,10 @@ remote_target::remote_read_qxfer (const char *object_name,
   struct remote_state *rs = get_remote_state ();
   LONGEST i, n, packet_len;
 
+  if (!strcmp(object_name, "fdpic")) {
+  if (packet_config_support (packet) == PACKET_DISABLE)
+    fprintf(stderr, "GDB: %s DISABLED\n", __FUNCTION__);
+  }
   if (packet_config_support (packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
@@ -10837,6 +10848,9 @@ remote_target::remote_read_qxfer (const char *object_name,
   if (packet_len < 0 || packet_ok (rs->buf, packet) != PACKET_OK)
     return TARGET_XFER_E_IO;
 
+  if (!strcmp(object_name, "fdpic")) {
+    fprintf(stderr, "GDB: %s apres getpkt fdpic packet_len %ld\n", __FUNCTION__, packet_len);
+  }
   if (rs->buf[0] != 'l' && rs->buf[0] != 'm')
     error (_("Unknown remote qXfer reply: %s"), rs->buf);
 

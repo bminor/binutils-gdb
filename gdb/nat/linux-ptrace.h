@@ -24,7 +24,7 @@ struct buffer;
 #include "gdb_wait.h"
 
 #ifdef __UCLIBC__
-#if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
+#if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_USE_MMU__))
 /* PTRACE_TEXT_ADDR and friends.  */
 #include <asm/ptrace.h>
 #define HAS_NOMMU
@@ -83,7 +83,8 @@ struct buffer;
 #define PTRACE_O_EXITKILL	0x00100000
 #endif
 
-#if (defined __bfin__ || defined __frv__ || defined __sh__) \
+#if (defined __bfin__ || defined __frv__ || defined __sh__ \
+     || defined __arm__ )				   \
     && !defined PTRACE_GETFDPIC
 #define PTRACE_GETFDPIC		31
 #define PTRACE_GETFDPIC_EXEC	0

@@ -221,6 +221,7 @@ handle_accept_event (int err, gdb_client_data client_data)
      threads' status ('?').  */
   target_async (0);
 
+  //  fprintf(stderr, "GDBSERVER: %s returns 0\n", __FUNCTION__);
   return 0;
 }
 
@@ -325,6 +326,7 @@ remote_prepare (const char *name)
   cs.transport_is_reliable = 1;
 }
 
+void my_read_loadmap(const char*);
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
@@ -334,6 +336,7 @@ remote_open (const char *name)
   const char *port_str;
 
   port_str = strchr (name, ':');
+  fprintf(stderr, "GDBSERVER: %s name |%s| port_str %s\n", __FUNCTION__, name, port_str);
 #ifdef USE_WIN32API
   if (port_str == NULL)
     error ("Only HOST:PORT is supported on this platform.");
@@ -413,12 +416,14 @@ remote_open (const char *name)
 		 gai_strerror (r));
       else
 	fprintf (stderr, _("Listening on port %s\n"), listen_port);
+      my_read_loadmap(__FUNCTION__);
 
       fflush (stderr);
 
       /* Register the event loop handler.  */
       add_file_handler (listen_desc, handle_accept_event, NULL);
     }
+  //  fprintf(stderr, "GDBSERVER: %s returns\n", __FUNCTION__);
 }
 
 void
@@ -957,6 +962,7 @@ process_remaining (void *context)
   else
     res = 0;
 
+  //  fprintf(stderr, "GDBSERVER: %s returns %d\n", __FUNCTION__, res);
   return res;
 }
 

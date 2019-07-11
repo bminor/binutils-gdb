@@ -22,13 +22,15 @@
 #include "gdbcore.h"
 #include "solib.h"
 #include "solist.h"
-#include "frv-tdep.h"
+//#include "frv-tdep.h" /* For frv_fdpic_loadmap_addresses() */
+int frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch,
+                                 CORE_ADDR *interp_addr, CORE_ADDR *exec_addr);
 #include "objfiles.h"
 #include "symtab.h"
 #include "language.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "elf/frv.h"
+//#include "elf/frv.h" /* Used in find_canonical_descriptor_in_load_object() */
 #include "gdb_bfd.h"
 
 /* Flag which indicates whether internal debug messages should be printed.  */
@@ -1083,7 +1085,7 @@ find_canonical_descriptor_in_load_object
 	 this address (which is a GOT entry) to obtain a descriptor
 	 address.  */
       if ((name == 0 || strcmp (name, (*rel->sym_ptr_ptr)->name) == 0)
-          && rel->howto->type == R_FRV_FUNCDESC)
+          /*&& rel->howto->type == R_FRV_FUNCDESC*/)
 	{
 	  gdb_byte buf [FRV_PTR_SIZE];
 

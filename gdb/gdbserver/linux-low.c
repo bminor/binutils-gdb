@@ -995,6 +995,7 @@ linux_ptrace_fun ()
    PROGRAM is the name of the program to be started, and PROGRAM_ARGS
    are its arguments.  */
 
+void my_read_loadmap(const char* fnname);
 static int
 linux_create_inferior (const char *program,
 		       const std::vector<char *> &program_args)
@@ -1004,6 +1005,8 @@ linux_create_inferior (const char *program,
   int pid;
   ptid_t ptid;
 
+  fprintf(stderr, "GDBSERVER: %s before fork_inferior\n", __FUNCTION__);
+  my_read_loadmap(__FUNCTION__);
   {
     maybe_disable_address_space_randomization restore_personality
       (cs.disable_randomization);
@@ -1015,6 +1018,8 @@ linux_create_inferior (const char *program,
 			 NULL, NULL, NULL, NULL);
   }
 
+  fprintf(stderr, "GDBSERVER: %s after fork_inferior\n", __FUNCTION__);
+  my_read_loadmap(__FUNCTION__);
   linux_add_process (pid, 0);
 
   ptid = ptid_t (pid, pid, 0);
@@ -6517,6 +6522,30 @@ struct target_loadmap
 #  define LINUX_LOADMAP_INTERP	PTRACE_GETFDPIC_INTERP
 # endif
 
+void my_read_loadmap(const char* fnname)
+{
+#if 0
+  struct target_loadmap *data = (struct target_loadmap *)0x7dffff38;
+#ifdef __FDPIC__
+  fprintf(stderr, "GDBSERVER: %s from %s data forced %p version %d, nsegs=%d\n", __FUNCTION__, fnname, data, data->version, data->nsegs);
+#else
+  fprintf(stderr, "GDBSERVER: %s from %s data forced %p, version/nsegs disabled\n", __FUNCTION__, fnname, data);
+#endif
+#endif
+}
+void my_hack_loadmap(const char* fnname)
+{
+#if 0
+  struct target_loadmap *data = (struct target_loadmap *)0x7dffff38;
+#ifdef __FDPIC__
+  data->version = 1;
+  data->nsegs = 1;
+  fprintf(stderr, "GDBSERVER: %s from %s data forced %p version %d, nsegs=%d\n", __FUNCTION__, fnname, data, data->version, data->nsegs);
+#else
+  fprintf(stderr, "GDBSERVER: %s from %s data forced %p disabled\n", __FUNCTION__, fnname, data);
+#endif
+#endif
+}
 static int
 linux_read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len)
@@ -6533,20 +6562,25 @@ linux_read_loadmap (const char *annex, CORE_ADDR offset,
   else
     return -1;
 
+  fprintf(stderr, "GDBSERVER: %s before ptrace %s\n", __FUNCTION__, annex);
   if (ptrace (LINUX_LOADMAP, pid, addr, &data) != 0)
     return -1;
 
+  fprintf(stderr, "GDBSERVER: %s ptrace OK data %p\n", __FUNCTION__, data);
   if (data == NULL)
     return -1;
 
+  fprintf(stderr, "GDBSERVER: %s data OK, data %p version %d, nsegs=%d\n", __FUNCTION__, data, data->version, data->nsegs);
   actual_length = sizeof (struct target_loadmap)
     + sizeof (struct target_loadseg) * data->nsegs;
 
   if (offset < 0 || offset > actual_length)
     return -1;
 
+  fprintf(stderr, "GDBSERVER: %s actual_length %d\n", __FUNCTION__, actual_length);
   copy_length = actual_length - offset < len ? actual_length - offset : len;
   memcpy (myaddr, (char *) data + offset, copy_length);
+  fprintf(stderr, "GDBSERVER: %s copy_length=%d\n", __FUNCTION__, copy_length);
   return copy_length;
 }
 #else

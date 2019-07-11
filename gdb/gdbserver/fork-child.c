@@ -94,6 +94,8 @@ gdb_flush_out_err ()
 
 /* See server.h.  */
 
+void my_read_loadmap(const char*);
+void my_hack_loadmap(const char*);
 void
 post_fork_inferior (int pid, const char *program)
 {
@@ -107,12 +109,19 @@ post_fork_inferior (int pid, const char *program)
   atexit (restore_old_foreground_pgrp);
 #endif
 
+  fprintf(stderr, "GDBSERVER: %s before startup_inferior %s PID %d\n", __FUNCTION__, program, pid);
+  my_read_loadmap(__FUNCTION__);
+  my_hack_loadmap(__FUNCTION__);
   startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED,
 		    &cs.last_status, &cs.last_ptid);
+  fprintf(stderr, "GDBSERVER: %s after startup_inferior\n", __FUNCTION__);
+  my_read_loadmap(__FUNCTION__);
   current_thread->last_resume_kind = resume_stop;
   current_thread->last_status = cs.last_status;
   signal_pid = pid;
   target_post_create_inferior ();
+  fprintf(stderr, "GDBSERVER: %s after post_create_inferior\n", __FUNCTION__);
+  my_read_loadmap(__FUNCTION__);
   fprintf (stderr, "Process %s created; pid = %d\n", program, pid);
   fflush (stderr);
 }

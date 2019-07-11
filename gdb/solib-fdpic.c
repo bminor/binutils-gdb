@@ -89,6 +89,33 @@ struct int_elf32_fdpic_loadmap {
   struct int_elf32_fdpic_loadseg segs[1 /* nsegs, actually */];
 };
 
+/* CLYON */
+static void
+fdpic_print_loadmap (struct int_elf32_fdpic_loadmap *map)
+{
+  int i;
+
+  if (map == NULL)
+    printf_filtered ("(null)\n");
+  else if (map->version != 0)
+    printf_filtered (_("Unsupported map version: %d\n"), map->version);
+  else
+    {
+      printf_filtered ("version %d\n", map->version);
+
+      for (i = 0; i < map->nsegs; i++)
+	printf_filtered ("%s:%s -> %s:%s\n",
+			 print_core_address (target_gdbarch (),
+					     map->segs[i].p_vaddr),
+			 print_core_address (target_gdbarch (),
+					     map->segs[i].p_vaddr
+					     + map->segs[i].p_memsz),
+			 print_core_address (target_gdbarch (), map->segs[i].addr),
+			 print_core_address (target_gdbarch (), map->segs[i].addr
+					     + map->segs[i].p_memsz));
+    }
+}
+
 /* Given address LDMADDR, fetch and decode the loadmap at that address.
    Return NULL if there is a problem reading the target memory or if
    there doesn't appear to be a loadmap at the given address.  The
@@ -175,6 +202,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
     }
 
   xfree (ext_ldmbuf);
+  fdpic_print_loadmap (int_ldmbuf);
   return int_ldmbuf;
 }
 
@@ -776,19 +804,43 @@ fdpic_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
   else
     {
 #endif
+#if 0
+  if (exec_addr != NULL)
+    *exec_addr = 0xfffde6b8;
+  if (interp_addr != NULL)
+    *interp_addr = 0xfffde69c;
+  return 0;
+#endif
+#if 1
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-      gdb::optional<gdb::byte_vector> buf
-	= target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
-      /* CHECK BUF CF solib-dsbt.c */
 
-      if (exec_addr != NULL)
-	*exec_addr = extract_unsigned_integer (buf->data (), 4 /*FIXME*/, byte_order);
+  gdb::optional<gdb::byte_vector> buf
+    = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
+  /* CHECK BUF CF solib-dsbt.c */
+
+  if (!buf || buf->empty ())
+    {
+      //      info->exec_loadmap = NULL;
+      error (_("Error reading FDPIC exec loadmap"));
+    }
+
+  if (exec_addr != NULL)
+    *exec_addr = extract_unsigned_integer (buf->data (), 4 /*FIXME*/, byte_order);
+
+  fprintf(stderr, "GDB: %s got exec_addr: %lx\n", __FUNCTION__, *exec_addr);
   
-      buf = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "interp");
-      if (interp_addr != NULL)
-	*interp_addr = extract_unsigned_integer (buf->data (), 4 /*FIXME*/, byte_order);
+  buf = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "interp");
+  if (!buf || buf->empty ())
+    {
+      //      info->exec_loadmap = NULL;
+      error (_("Error reading FDPIC interp loadmap"));
+    }
+  if (interp_addr != NULL)
+    *interp_addr = extract_unsigned_integer (buf->data (), 4 /*FIXME*/, byte_order);
+  fprintf(stderr, "GDB: %s got interp_addr: %lx\n", __FUNCTION__, *interp_addr);
 
-      return 0; /* FIXME */
+  return 0; /* FIXME */
+#endif
 #if 0
       struct regcache *regcache = get_current_regcache ();
 
@@ -796,14 +848,14 @@ fdpic_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
 	{
 	  ULONGEST val;
 	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_interp_regnum, &val);
+					 9/*FIXME fdpic_loadmap_interp_regnum*/, &val);
 	  *interp_addr = val;
 	}
       if (exec_addr != NULL)
 	{
 	  ULONGEST val;
 	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_exec_regnum, &val);
+					 9/*fdpic_loadmap_exec_regnum*/, &val);
 	  *exec_addr = val;
 	}
       return 0;

@@ -120,11 +120,13 @@ struct arch_lwp_info
 };
 
 /* These are in <asm/elf.h> in current kernels.  */
+#ifndef __FDPIC__
 #define HWCAP_VFP       64
 #define HWCAP_IWMMXT    512
 #define HWCAP_NEON      4096
 #define HWCAP_VFPv3     8192
 #define HWCAP_VFPv3D16  16384
+#endif
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>

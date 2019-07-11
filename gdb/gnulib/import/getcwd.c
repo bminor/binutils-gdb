@@ -66,6 +66,7 @@
 #endif
 
 #include "pathmax.h"
+#include <stdio.h>
 
 /* In this file, PATH_MAX only serves as a threshold for choosing among two
    algorithms.  */
@@ -212,6 +213,8 @@ __getcwd (char *buf, size_t size)
   rootdev = st.st_dev;
   rootino = st.st_ino;
 
+  //  printf("TOTO GDB: thisdev %d thisino %d\n", thisdev, thisino);
+  //  printf("TOTO GDB: rootdev %d rootino %d\n", rootdev, rootino);
   while (!(thisdev == rootdev && thisino == rootino))
     {
       struct dirent *d;
@@ -223,6 +226,7 @@ __getcwd (char *buf, size_t size)
       size_t namlen;
       bool use_d_ino = true;
 
+      //      printf("TOTO GDB: going up\n");
       /* Look at the parent directory.  */
 #if HAVE_OPENAT_SUPPORT
       fd = openat (fd, "..", O_RDONLY);
@@ -249,6 +253,7 @@ __getcwd (char *buf, size_t size)
       dotdev = st.st_dev;
       dotino = st.st_ino;
       mount_point = dotdev != thisdev;
+      //      printf("TOTO GDB: mount_point: %d dotdev %d dotino %d\n", mount_point, dotdev, dotino);
 
       /* Search for the last directory.  */
 #if HAVE_OPENAT_SUPPORT
@@ -267,6 +272,7 @@ __getcwd (char *buf, size_t size)
           /* Clear errno to distinguish EOF from error if readdir returns
              NULL.  */
           __set_errno (0);
+	  //	  printf("TOTO GDB before readdir\n");
           d = __readdir (dirstream);
 
           /* When we've iterated through all directory entries without finding
@@ -278,11 +284,13 @@ __getcwd (char *buf, size_t size)
              via lstat.  */
           if (d == NULL && errno == 0 && use_d_ino)
             {
+	      //	      printf("TOTO GDB weird: d=%p errno=%d\n", d, errno);
               use_d_ino = false;
               rewinddir (dirstream);
               d = __readdir (dirstream);
             }
 
+	  //	  printf("TOTO GDB: d=%p errno=%d name %s\n", d, errno, d != NULL ? d->d_name : "null");
           if (d == NULL)
             {
               if (errno == 0)

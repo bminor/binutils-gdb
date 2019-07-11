@@ -2057,6 +2057,7 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
 		*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
 
 	      free (data);
+	      //	      fprintf(stderr, "GDBSERVER: %s packet size n %d\n", __FUNCTION__, n);
 	      return 1;
 	    }
 	  else if (strcmp (rw, "write") == 0)
@@ -3577,7 +3578,9 @@ captured_main (int argc, char *argv[])
   const char *selftest_filter = NULL;
 #endif
 
+  //  printf("GDBSERVER HELLO\n");
   current_directory = getcwd (NULL, 0);
+  //  printf("GDBSERVER HELLO2 CWD=%s\n", current_directory);
   client_state &cs = get_client_state ();
 
   if (current_directory == NULL)
@@ -3588,6 +3591,7 @@ captured_main (int argc, char *argv[])
 
   while (*next_arg != NULL && **next_arg == '-')
     {
+      fprintf(stderr, "GDBSERVER: %s next_arg %s\n", __FUNCTION__, *next_arg);
       if (strcmp (*next_arg, "--version") == 0)
 	{
 	  gdbserver_version ();
@@ -3725,6 +3729,7 @@ captured_main (int argc, char *argv[])
   if (port == NULL)
     {
       port = *next_arg;
+      fprintf(stderr, "GDBSERVER: %s port %s\n", __FUNCTION__, port);
       next_arg++;
     }
   if ((port == NULL || (!attach && !multi_mode && *next_arg == NULL))
@@ -3746,6 +3751,7 @@ captured_main (int argc, char *argv[])
      start_inferior.  */
   if (port != NULL)
     remote_prepare (port);
+  fprintf(stderr, "GDBSERVER: %s port after remote_prepare %s\n", __FUNCTION__, port);
 
   bad_attach = 0;
   pid = 0;
@@ -3805,6 +3811,7 @@ captured_main (int argc, char *argv[])
 	program_args.push_back (xstrdup (next_arg[i]));
       program_args.push_back (NULL);
 
+      fprintf(stderr, "GDBSERVER: %s port before create_inferior %s\n", __FUNCTION__, port);
       /* Wait till we are at first instruction in program.  */
       create_inferior (program_path.get (), program_args);
 
@@ -3841,6 +3848,7 @@ captured_main (int argc, char *argv[])
   if (!was_running && !multi_mode)
     error ("No program to debug");
 
+  fprintf(stderr, "GDBSERVER: %s port before remote_open %s\n", __FUNCTION__, port);
   while (1)
     {
       cs.noack_mode = 0;
@@ -4378,6 +4386,7 @@ process_serial_event (void)
   if (exit_requested)
     return -1;
 
+  //  fprintf(stderr, "GDBSERVER: %s returns 0\n", __FUNCTION__);
   return 0;
 }
 

@@ -62,7 +62,7 @@ case "${target}" in
 			ipa_obj="${ipa_obj} linux-aarch64-tdesc-ipa.o"
 			ipa_obj="${ipa_obj} arch/aarch64-ipa.o"
 			;;
-  arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
+  arm*-*-linux*|arm*-*uclinuxfdpiceabi)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv2.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv3.o"
 			srv_regobj="${srv_regobj} arm-with-neon.o"
