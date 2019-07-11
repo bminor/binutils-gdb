@@ -2051,6 +2051,7 @@ extern char *bfd_elf_string_from_elf_section
 extern Elf_Internal_Sym *bfd_elf_get_elf_syms
   (bfd *, Elf_Internal_Shdr *, size_t, size_t, Elf_Internal_Sym *, void *,
    Elf_External_Sym_Shndx *);
+extern char * bfd_elf_get_str_section (bfd *, unsigned int);
 extern const char *bfd_elf_sym_name
   (bfd *, Elf_Internal_Shdr *, Elf_Internal_Sym *, asection *);
 

@@ -1244,7 +1244,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   libctf_init_debug();
 
-  if (ctfsect == NULL || ((symsect == NULL) != (strsect == NULL)))
+  if ((ctfsect == NULL) || ((symsect != NULL) && (strsect == NULL)))
     return (ctf_set_open_errno (errp, EINVAL));
 
   if (symsect != NULL && symsect->cts_entsize != sizeof (Elf32_Sym) &&

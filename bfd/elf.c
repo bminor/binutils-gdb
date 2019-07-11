@@ -275,7 +275,7 @@ bfd_elf_mkcorefile (bfd *abfd)
   return elf_tdata (abfd)->core != NULL;
 }
 
-static char *
+char *
 bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 {
   Elf_Internal_Shdr **i_shdrp;
