@@ -1,3 +1,10 @@
+2019-07-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ctf-endian.h: Don't assume htole64 and le64toh are always
+	present if HAVE_ENDIAN_H; also check if htole64 is defined.
+	[!WORDS_BIGENDIAN] (htole64, le64toh): Define as identity,
+	not bswap_identity_64.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* ctf-open-bfd.c: Update throughout for bfd section macro changes.
