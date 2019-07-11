@@ -793,7 +793,10 @@ extern struct value *value_ptradd (struct value *arg1, LONGEST arg2);
 
 extern LONGEST value_ptrdiff (struct value *arg1, struct value *arg2);
 
-extern int value_must_coerce_to_target (struct value *arg1);
+/* Return true if VAL does not live in target memory, but should in order
+   to operate on it.  Otherwise return false.  */
+
+extern bool value_must_coerce_to_target (struct value *arg1);
 
 extern struct value *value_coerce_to_target (struct value *arg1);
 

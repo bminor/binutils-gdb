@@ -1,3 +1,9 @@
+2019-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* valops.c (value_must_coerce_to_target): Change return type to
+	bool.
+	* value.h (value_must_coerce_to_target): Likewise.
+
 2019-07-10  Simon Marchi  <simon.marchi@efficios.com>
 
 	* breakpoint.c (is_hardware_watchpoint): Remove
