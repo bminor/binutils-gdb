@@ -15891,21 +15891,38 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			}
 		      else
 			{
-			  asection *osec;
+			  asection *osec = sec->output_section;
 
-			  osec = sec->output_section;
-			  indx = elf_section_data (osec)->dynindx;
-
-			  if (indx == 0)
+			  if ((osec->flags & SEC_THREAD_LOCAL) != 0)
 			    {
-			      if ((osec->flags & SEC_READONLY) == 0
-				  && htab->elf.data_index_section != NULL)
-				osec = htab->elf.data_index_section;
-			      else
-				osec = htab->elf.text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
+			      /* TLS symbol values are relative to the
+				 TLS segment.  Dynamic relocations for
+				 local TLS symbols therefore can't be
+				 reduced to a relocation against their
+				 section symbol because it holds the
+				 address of the section, not a value
+				 relative to the TLS segment.  We could
+				 change the .tdata dynamic section symbol
+				 to be zero value but STN_UNDEF works
+				 and is used elsewhere, eg. for TPREL64
+				 GOT relocs against local TLS symbols.  */
+			      osec = htab->elf.tls_sec;
+			      indx = 0;
 			    }
-			  BFD_ASSERT (indx != 0);
+			  else
+			    {
+			      indx = elf_section_data (osec)->dynindx;
+			      if (indx == 0)
+				{
+				  if ((osec->flags & SEC_READONLY) == 0
+				      && htab->elf.data_index_section != NULL)
+				    osec = htab->elf.data_index_section;
+				  else
+				    osec = htab->elf.text_index_section;
+				  indx = elf_section_data (osec)->dynindx;
+				}
+			      BFD_ASSERT (indx != 0);
+			    }
 
 			  /* We are turning this relocation into one
 			     against a section symbol, so subtract out

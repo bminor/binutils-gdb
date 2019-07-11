@@ -1,3 +1,15 @@
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_omit_section_dynsym_default): Don't keep
+	tls_sec.
+	(_bfd_elf_init_1_index_section): Prefer not using TLS sections.
+	(_bfd_elf_init_2_index_sections): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): When emitting dynamic
+	relocations for local TLS symbols, use STN_UNDEF as the relocation
+	symbol.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise, and don't
+	leave TLS symbol value in the addend.
+
 2019-07-08  Alan Modra  <amodra@gmail.com>
 
 	PR 24785

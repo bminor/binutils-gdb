@@ -8209,19 +8209,27 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     but ld.so expects buggy relocs.
 			     FIXME: Why not always use a zero index?  */
 			  osec = sec->output_section;
-			  indx = elf_section_data (osec)->dynindx;
-			  if (indx == 0)
+			  if ((osec->flags & SEC_THREAD_LOCAL) != 0)
 			    {
-			      osec = htab->elf.text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
+			      osec = htab->elf.tls_sec;
+			      indx = 0;
 			    }
-			  BFD_ASSERT (indx != 0);
-#ifdef DEBUG
-			  if (indx == 0)
-			    printf ("indx=%ld section=%s flags=%08x name=%s\n",
-				    indx, osec->name, osec->flags,
-				    h->root.root.string);
-#endif
+			  else
+			    {
+			      indx = elf_section_data (osec)->dynindx;
+			      if (indx == 0)
+				{
+				  osec = htab->elf.text_index_section;
+				  indx = elf_section_data (osec)->dynindx;
+				}
+			      BFD_ASSERT (indx != 0);
+			    }
+
+			  /* ld.so doesn't expect buggy TLS relocs.
+			     Don't leave the symbol value in the
+			     addend for them.  */
+			  if (IS_PPC_TLS_RELOC (r_type))
+			    outrel.r_addend -= osec->vma;
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);

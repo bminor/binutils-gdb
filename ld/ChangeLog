@@ -1,5 +1,53 @@
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tlsso.r: Update.
+	* testsuite/ld-powerpc/tlsso32.g: Update.
+	* testsuite/ld-powerpc/tlsso32.r: Update.
+	* testsuite/ld-powerpc/tlstocso.r: Update.
+	* testsuite/ld-cris/tls-dso-dtpoffd2.d: Update.
+	* testsuite/ld-cris/tls-dso-dtpoffd4.d: Update.
+	* testsuite/ld-cris/tls-dso-tpoffgotcomm1.d: Update.
+	* testsuite/ld-cris/tls-gd-1.d: Update.
+	* testsuite/ld-cris/tls-gd-1h.d: Update.
+	* testsuite/ld-cris/tls-gd-2.d: Update.
+	* testsuite/ld-cris/tls-gd-2h.d: Update.
+	* testsuite/ld-cris/tls-ie-10.d: Update.
+	* testsuite/ld-cris/tls-ie-11.d: Update.
+	* testsuite/ld-cris/tls-ie-8.d: Update.
+	* testsuite/ld-cris/tls-ie-9.d: Update.
+	* testsuite/ld-cris/tls-js1.d: Update.
+	* testsuite/ld-cris/tls-ld-4.d: Update.
+	* testsuite/ld-cris/tls-ld-5.d: Update.
+	* testsuite/ld-cris/tls-ld-6.d: Update.
+	* testsuite/ld-cris/tls-ld-7.d: Update.
+	* testsuite/ld-cris/tls-ldgd-14.d: Update.
+	* testsuite/ld-cris/tls-ldgd-15.d: Update.
+	* testsuite/ld-cris/tls-ldgdx-14.d: Update.
+	* testsuite/ld-cris/tls-ldgdx-15.d: Update.
+	* testsuite/ld-cris/tls-local-54.d: Update.
+	* testsuite/ld-cris/tls-local-60.d: Update.
+	* testsuite/ld-cris/tls-local-61.d: Update.
+	* testsuite/ld-cris/tls-local-63.d: Update.
+	* testsuite/ld-cris/tls-local-64.d: Update.
+	* testsuite/ld-cris/tls-ok-30.d: Update.
+	* testsuite/ld-cris/tls-ok-32.d: Update.
+	* testsuite/ld-cris/tls-ok-34.d: Update.
+	* testsuite/ld-mips-elf/tls-multi-got-1.got: Update.
+	* testsuite/ld-mips-elf/tls-multi-got-1.r: Update.
+	* testsuite/ld-mips-elf/tlsdyn-pie-o32.d: Update.
+	* testsuite/ld-mips-elf/tlsdyn-pie-o32.got: Update.
+	* testsuite/ld-mips-elf/tlslib-o32-hidden.got: Update.
+	* testsuite/ld-mips-elf/tlslib-o32-ver.got: Update.
+	* testsuite/ld-mips-elf/tlslib-o32.got: Update.
+	* testsuite/ld-s390/tlspic.rd: Update.
+	* testsuite/ld-s390/tlspic_64.rd: Update.
+	* testsuite/ld-sparc/tlssunnopic32.rd: Update.
+	* testsuite/ld-sparc/tlssunnopic64.rd: Update.
+	* testsuite/ld-sparc/tlssunpic32.rd: Update.
+	* testsuite/ld-sparc/tlssunpic64.rd: Update.
+
+2019-07-13  Alan Modra  <amodra@gmail.com>
+
 	PR 24786
 	* ldlang.h (enum section_type): Add first_overlay_section.
 	* ldlang.c (lang_add_section): Adjust switch statement.
