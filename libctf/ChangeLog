@@ -1,3 +1,13 @@
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open-bfd.c: Add <assert.h>.
+	(ctf_bfdopen_ctfsect): Open string and symbol tables using
+	techniques borrowed from bfd_elf_sym_name.
+	(ctf_new_archive_internal): Improve comment.
+	* ctf-archive.c (ctf_arc_close): Do not free the ctfi_strsect.
+	* ctf-open.c (ctf_bufopen): Allow opening with a string section but
+	no symbol section, but not vice versa.
+
 2019-07-08  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_file_t): New field ctf_openflags.

@@ -405,7 +405,7 @@ ctf_arc_close (ctf_archive_t *arc)
   else
     ctf_file_close (arc->ctfi_file);
   free ((void *) arc->ctfi_symsect.cts_data);
-  free ((void *) arc->ctfi_strsect.cts_data);
+  /* Do not free the ctfi_strsect: it is bound to the bfd.  */
   free (arc->ctfi_data);
   free (arc);
 }
