@@ -1,3 +1,10 @@
+2019-07-11  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf.h: Add object index and function index sections.  Describe
+	them. Improve the description of the variable section and clarify
+	the constraints on backward-pointing type nodes.
+	(ctf_header): Add cth_objtidxoff, cth_funcidxoff.
+
 2019-07-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_cuname): New function.

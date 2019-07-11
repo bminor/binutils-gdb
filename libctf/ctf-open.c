@@ -278,7 +278,7 @@ init_symtab (ctf_file_t *fp, const ctf_header_t *hp,
 	  break;
 
 	case STT_FUNC:
-	  if (funcoff >= hp->cth_typeoff)
+	  if (funcoff >= hp->cth_objtidxoff)
 	    {
 	      *xp = -1u;
 	      break;
@@ -376,6 +376,8 @@ upgrade_header (ctf_header_t *hp)
   hp->cth_stroff = oldhp->cth_stroff;
   hp->cth_typeoff = oldhp->cth_typeoff;
   hp->cth_varoff = oldhp->cth_varoff;
+  hp->cth_funcidxoff = hp->cth_varoff;		/* No index sections.  */
+  hp->cth_objtidxoff = hp->cth_funcidxoff;
   hp->cth_funcoff = oldhp->cth_funcoff;
   hp->cth_objtoff = oldhp->cth_objtoff;
   hp->cth_lbloff = oldhp->cth_lbloff;
@@ -387,6 +389,9 @@ upgrade_header (ctf_header_t *hp)
 
    The upgrade is not done in-place: the ctf_base is moved.  ctf_strptr() must
    not be called before reallocation is complete.
+
+   Sections not checked here due to nonexistence or nonpopulated state in older
+   formats: objtidx, funcidx.
 
    Type kinds not checked here due to nonexistence in older formats:
       CTF_K_SLICE.  */
@@ -967,6 +972,8 @@ flip_header (ctf_header_t *cth)
   swap_thing (cth->cth_cuname);
   swap_thing (cth->cth_objtoff);
   swap_thing (cth->cth_funcoff);
+  swap_thing (cth->cth_objtidxoff);
+  swap_thing (cth->cth_funcidxoff);
   swap_thing (cth->cth_varoff);
   swap_thing (cth->cth_typeoff);
   swap_thing (cth->cth_stroff);
@@ -987,10 +994,10 @@ flip_lbls (void *start, size_t len)
     }
 }
 
-/* Flip the endianness of the data-object or function sections, an array of
-   uint32_t.  (The function section has more internal structure, but that
-   structure is an array of uint32_t, so can be treated as one big array for
-   byte-swapping.)  */
+/* Flip the endianness of the data-object or function sections or their indexes,
+   all arrays of uint32_t.  (The function section has more internal structure,
+   but that structure is an array of uint32_t, so can be treated as one big
+   array for byte-swapping.)  */
 
 static void
 flip_objts (void *start, size_t len)
@@ -1176,7 +1183,9 @@ flip_ctf (ctf_header_t *cth, unsigned char *buf)
 {
   flip_lbls (buf + cth->cth_lbloff, cth->cth_objtoff - cth->cth_lbloff);
   flip_objts (buf + cth->cth_objtoff, cth->cth_funcoff - cth->cth_objtoff);
-  flip_objts (buf + cth->cth_funcoff, cth->cth_varoff - cth->cth_funcoff);
+  flip_objts (buf + cth->cth_funcoff, cth->cth_objtidxoff - cth->cth_funcoff);
+  flip_objts (buf + cth->cth_objtidxoff, cth->cth_funcidxoff - cth->cth_objtidxoff);
+  flip_objts (buf + cth->cth_funcidxoff, cth->cth_varoff - cth->cth_funcidxoff);
   flip_vars (buf + cth->cth_varoff, cth->cth_typeoff - cth->cth_varoff);
   return flip_types (buf + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
 }
@@ -1331,19 +1340,23 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	       (unsigned long) fp->ctf_size);
 
   if (hp->cth_lbloff > fp->ctf_size || hp->cth_objtoff > fp->ctf_size
-      || hp->cth_funcoff > fp->ctf_size || hp->cth_typeoff > fp->ctf_size
+      || hp->cth_funcoff > fp->ctf_size || hp->cth_objtidxoff > fp->ctf_size
+      || hp->cth_funcidxoff > fp->ctf_size || hp->cth_typeoff > fp->ctf_size
       || hp->cth_stroff > fp->ctf_size)
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 
   if (hp->cth_lbloff > hp->cth_objtoff
       || hp->cth_objtoff > hp->cth_funcoff
       || hp->cth_funcoff > hp->cth_typeoff
-      || hp->cth_funcoff > hp->cth_varoff
+      || hp->cth_funcoff > hp->cth_objtidxoff
+      || hp->cth_objtidxoff > hp->cth_funcidxoff
+      || hp->cth_funcidxoff > hp->cth_varoff
       || hp->cth_varoff > hp->cth_typeoff || hp->cth_typeoff > hp->cth_stroff)
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 
   if ((hp->cth_lbloff & 3) || (hp->cth_objtoff & 2)
-      || (hp->cth_funcoff & 2) || (hp->cth_varoff & 3)
+      || (hp->cth_funcoff & 2) || (hp->cth_objtidxoff & 2)
+      || (hp->cth_funcidxoff & 2) || (hp->cth_varoff & 3)
       || (hp->cth_typeoff & 3))
     return (ctf_set_open_errno (errp, ECTF_CORRUPT));
 

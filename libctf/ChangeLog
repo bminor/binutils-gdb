@@ -1,5 +1,16 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (init_symtab): Check for overflow against the right
+	section.
+	(upgrade_header): Set cth_objtidxoff, cth_funcidxoff to zero-length.
+	(upgrade_types_v1): Note that these sections are not checked.
+	(flip_header): Endian-swap the header fields.
+	(flip_ctf): Endian-swap the sections.
+	(flip_objts): Update comment.
+	(ctf_bufopen): Check header offsets and alignment for validity.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open-bfd.c: Add <assert.h>.
 	(ctf_bfdopen_ctfsect): Open string and symbol tables using
 	techniques borrowed from bfd_elf_sym_name.
