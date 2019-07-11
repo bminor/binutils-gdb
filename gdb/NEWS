@@ -188,6 +188,14 @@ show print frame-info
   'frame', 'stepi'.  The python frame filtering also respect this setting.
   The 'backtrace' '-frame-info' option can override this global setting.
 
+set tui compact-source
+show tui compact-source
+
+  Enable the "compact" display mode for the TUI source window.  The
+  compact display uses only as much space as is needed for the line
+  numbers in the current file, and only a single space to separate the
+  line numbers from the source.
+
 info modules [-q] [REGEXP]
   Return a list of Fortran modules matching REGEXP, or all modules if
   no REGEXP is given.

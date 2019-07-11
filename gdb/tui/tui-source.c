@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include <math.h>
 #include <ctype.h>
 #include "symtab.h"
 #include "frame.h"
@@ -33,6 +34,7 @@
 #include "tui/tui-data.h"
 #include "tui/tui-io.h"
 #include "tui/tui-stack.h"
+#include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
@@ -59,8 +61,10 @@ tui_source_window::set_contents (struct gdbarch *arch,
       nlines = (line_no + (height - 2)) - line_no;
 
       std::string srclines;
+      const std::vector<off_t> *offsets;
       if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
-					    &srclines))
+					    &srclines)
+	  || !g_source_cache.get_line_charpos (s, &offsets))
 	ret = TUI_FAILURE;
       else
 	{
@@ -78,6 +82,13 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	  start_line_or_addr.loa = LOA_LINE;
 	  cur_line_no = start_line_or_addr.u.line_no = line_no;
 
+	  int digits = 0;
+	  if (compact_source)
+	    {
+	      double l = log10 (offsets->size ());
+	      digits = 1 + (int) l;
+	    }
+
 	  const char *iter = srclines.c_str ();
 	  content.resize (nlines);
 	  while (cur_line < nlines)
@@ -89,7 +100,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	      if (*iter != '\0')
 		text = tui_copy_source_line (&iter, cur_line_no,
 					     horizontal_offset,
-					     line_width);
+					     line_width, digits);
 
 	      /* Set whether element is the execution point
 		 and whether there is a break point on it.  */

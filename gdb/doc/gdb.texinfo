@@ -28017,6 +28017,14 @@ Use extra bright or bold and standout mode.
 Set the width of tab stops to be @var{nchars} characters.  This
 setting affects the display of TAB characters in the source and
 assembly windows.
+
+@item set tui compact-source @r{[}on@r{|}off@r{]}
+@kindex set tui compact-source
+Set whether the TUI source window is displayed in ``compact'' form.
+The default display uses more space for line numbers and starts the
+source text at the next tab stop; the compact display uses only as
+much space as is needed for the line numbers in the current file, and
+only a single space to separate the line numbers from the source.
 @end table
 
 @node Emacs

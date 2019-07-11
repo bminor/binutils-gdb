@@ -1,3 +1,18 @@
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (tui_copy_source_line): Add "ndigits"
+	parameter.
+	* tui/tui-winsource.c (tui_copy_source_line): Add "ndigits"
+	parameter.
+	* tui/tui-win.h (compact_source): Declare.
+	* tui/tui-win.c (compact_source): New global.
+	(tui_set_compact_source, tui_show_compact_source): New functions.
+	(_initialize_tui_win): Add "compact-source" setting.
+	* tui/tui-source.c (tui_source_window::set_contents): Handle
+	compact_source setting.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Update.
+	* NEWS: Document new setting.
+
 2019-11-30  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (dwarf2_add_field): Include field offset when

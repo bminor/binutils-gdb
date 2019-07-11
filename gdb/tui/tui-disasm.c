@@ -245,7 +245,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 	   + asm_lines[i].insn);
 
       const char *ptr = line.c_str ();
-      src->line = tui_copy_source_line (&ptr, -1, offset, line_width);
+      src->line = tui_copy_source_line (&ptr, -1, offset, line_width, 0);
 
       src->line_or_addr.loa = LOA_ADDRESS;
       src->line_or_addr.u.addr = asm_lines[i].addr;

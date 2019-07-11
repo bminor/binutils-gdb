@@ -1,3 +1,7 @@
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Configuration): Document new setting.
+
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Define): Indicate that user-defined prefix can

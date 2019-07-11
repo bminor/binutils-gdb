@@ -69,7 +69,7 @@ tui_display_main ()
 
 std::string
 tui_copy_source_line (const char **ptr, int line_no, int first_col,
-		      int line_width)
+		      int line_width, int ndigits)
 {
   const char *lineptr = *ptr;
 
@@ -78,10 +78,15 @@ tui_copy_source_line (const char **ptr, int line_no, int first_col,
 
   if (line_no > 0)
     {
-      result = string_printf ("%-6d", line_no);
-      int len = result.size ();
-      len = len - ((len / tui_tab_width) * tui_tab_width);
-      result.append (len, ' ');
+      if (ndigits > 0)
+	result = string_printf ("%*d ", ndigits, line_no);
+      else
+	{
+	  result = string_printf ("%-6d", line_no);
+	  int len = result.size ();
+	  len = len - ((len / tui_tab_width) * tui_tab_width);
+	  result.append (len, ' ');
+	}
     }
 
   int column = 0;

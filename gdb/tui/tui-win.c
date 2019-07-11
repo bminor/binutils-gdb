@@ -927,6 +927,29 @@ tui_show_tab_width (struct ui_file *file, int from_tty,
 
 }
 
+/* See tui-win.h.  */
+
+bool compact_source = false;
+
+/* Callback for "set tui compact-source".  */
+
+static void
+tui_set_compact_source (const char *ignore, int from_tty,
+			struct cmd_list_element *c)
+{
+  if (TUI_SRC_WIN != nullptr)
+    TUI_SRC_WIN->refill ();
+}
+
+/* Callback for "show tui compact-source".  */
+
+static void
+tui_show_compact_source (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  printf_filtered (_("TUI source window compactness is %s.\n"), value);
+}
+
 /* Set the tab width of the specified window.  */
 static void
 tui_set_tab_width_command (const char *arg, int from_tty)
@@ -1484,4 +1507,14 @@ When enabled GDB will print a message when the terminal is resized."),
 			   show_tui_resize_message,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  add_setshow_boolean_cmd ("compact-source", class_tui,
+			   &compact_source, _("\
+Set whether the TUI source window is compact."), _("\
+Show whether the TUI source window is compact."), _("\
+This variable controls whether the TUI source window is shown\n\
+in a compact form.  The compact form puts the source closer to\n\
+the line numbers and uses less horizontal space."),
+			   tui_set_compact_source, tui_show_compact_source,
+			   &tui_setlist, &tui_showlist);
 }
