@@ -52,10 +52,15 @@ extern "C"
 
    The CTF file or section itself has the following structure:
 
-   +--------+--------+---------+----------+----------+-------+--------+
-   |  file  |  type  |  data   | function | variable | data  | string |
-   | header | labels | objects |   info   |   info   | types | table  |
-   +--------+--------+---------+----------+----------+-------+--------+
+   +--------+--------+---------+----------+--------+----------+...
+   |  file  |  type  |  data   | function | object | function |...
+   | header | labels | objects |   info   | index  |  index   |...
+   +--------+--------+---------+----------+--------+----------+...
+
+   ...+----------+-------+--------+
+   ...| variable | data  | string |
+   ...|   info   | types | table  |
+      +----------+-------+--------+
 
    The file header stores a magic number and version information, encoding
    flags, and the byte offset of each of the sections relative to the end of the
@@ -74,14 +79,27 @@ extern "C"
    For each data object, the type ID (a small integer) is recorded.  For each
    function, the type ID of the return type and argument types is recorded.
 
+   For situations in which the order of the symbols in the symtab is not known,
+   a pair of optional indexes follow the data object and function info sections:
+   each of these is an array of strtab indexes, mapped 1:1 to the corresponding
+   data object / function info section, giving each entry in those sections a
+   name so that the linker can correlate them with final symtab entries and
+   reorder them accordingly (dropping the indexes in the process).
+
    Variable records (as distinct from data objects) provide a modicum of support
    for non-ELF systems, mapping a variable name to a CTF type ID.  The variable
-   names are sorted into ASCIIbetical order, permitting binary searching.
+   names are sorted into ASCIIbetical order, permitting binary searching.  We do
+   not define how the consumer maps these variable names to addresses or
+   anything else, or indeed what these names represent: they might be names
+   looked up at runtime via dlsym() or names extracted at runtime by a debugger
+   or anything else the consumer likes.
 
    The data types section is a list of variable size records that represent each
    type, in order by their ID.  The types themselves form a directed graph,
    where each node may contain one or more outgoing edges to other type nodes,
-   denoted by their ID.
+   denoted by their ID.  Most type nodes are standalone or point backwards to
+   earlier nodes, but this is not required: nodes can point to later nodes,
+   particularly structure and union members.
 
    Strings are recorded as a string table ID (0 or 1) and a byte offset into the
    string table.  String table 0 is the internal CTF string table.  String table
@@ -149,6 +167,8 @@ typedef struct ctf_header
   uint32_t cth_lbloff;		/* Offset of label section.  */
   uint32_t cth_objtoff;		/* Offset of object section.  */
   uint32_t cth_funcoff;		/* Offset of function section.  */
+  uint32_t cth_objtidxoff;	/* Offset of object index section.  */
+  uint32_t cth_funcidxoff;	/* Offset of function index section.  */
   uint32_t cth_varoff;		/* Offset of variable section.  */
   uint32_t cth_typeoff;		/* Offset of type section.  */
   uint32_t cth_stroff;		/* Offset of string section.  */
