@@ -434,13 +434,12 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	  }
 
 	const char *arg_start = *args;
-	*args = skip_to_space (*args);
-
+	std::string str = extract_string_maybe_quoted (args);
 	if (*args == arg_start)
 	  error (_("-%s requires an argument"), match->name);
 
 	option_value val;
-	val.string = savestring (arg_start, *args - arg_start);
+	val.string = xstrdup (str.c_str ());
 	return option_def_and_value {*match, match_ctx, val};
       }
 

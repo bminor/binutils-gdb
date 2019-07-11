@@ -1,3 +1,10 @@
+2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-option.c (parse_option): Use extract_string_maybe_quoted
+	to extract string arguments.
+	* common/common-utils.c (extract_string_maybe_quoted): New function.
+	* common/common-utils.h (extract_string_maybe_quoted): Declare.
+
 2019-07-11  Tom Tromey  <tromey@adacore.com>
 
 	* main.c (get_init_files): Use GDBINIT, not gdbinit.

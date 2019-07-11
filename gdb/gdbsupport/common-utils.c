@@ -160,6 +160,65 @@ savestring (const char *ptr, size_t len)
   return p;
 }
 
+/* See documentation in common-utils.h.  */
+
+std::string
+extract_string_maybe_quoted (const char **arg)
+{
+  bool squote = false;
+  bool dquote = false;
+  bool bsquote = false;
+  std::string result;
+  const char *p = *arg;
+
+  /* Find the start of the argument.  */
+  p = skip_spaces (p);
+
+  /* Parse p similarly to gdb_argv buildargv function.  */
+  while (*p != '\0')
+    {
+      if (isspace (*p) && !squote && !dquote && !bsquote)
+	break;
+      else
+	{
+	  if (bsquote)
+	    {
+	      bsquote = false;
+	      result += *p;
+	    }
+	  else if (*p == '\\')
+	    bsquote = true;
+	  else if (squote)
+	    {
+	      if (*p == '\'')
+		squote = false;
+	      else
+		result += *p;
+	    }
+	  else if (dquote)
+	    {
+	      if (*p == '"')
+		dquote = false;
+	      else
+		result += *p;
+	    }
+	  else
+	    {
+	      if (*p == '\'')
+		squote = true;
+	      else if (*p == '"')
+		dquote = true;
+	      else
+		result += *p;
+	    }
+	  p++;
+	}
+    }
+
+  *arg = p;
+  return result;
+}
+
 /* The bit offset of the highest byte in a ULONGEST, for overflow
    checking.  */
 

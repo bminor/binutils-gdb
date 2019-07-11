@@ -128,6 +128,13 @@ proc expect_integer {option val operand} {
 # test-options xxx", with -string set to $STR.  OPERAND is the
 # expected operand.
 proc expect_string {str operand} {
+    # Dequote the string in the expected output.
+    if { ( [string range $str 0 0] == "\""
+	   && [string range $str end end] == "\"")
+	 || ([string range $str 0 0] == "'"
+	     && [string range $str end end] == "'")} {
+	set str [string range $str 1 end-1]
+    }
     return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint 0 -zuint-unl 0 -string '$str' -- $operand"
 }
 
@@ -967,26 +974,41 @@ proc_with_prefix test-string {variant} {
 	    "-string requires an argument"
     }
 
-    res_test_gdb_complete_none \
-	"1 [expect_none ""]" \
-	"$cmd -string STR"
-    gdb_test "$cmd -string STR --" [expect_string "STR" ""]
-
-    # Completing at "-" after parsing STR should list all options.
-    res_test_gdb_complete_multiple \
-	"1 [expect_string "STR" "-"]" \
-	"$cmd -string STR " "-" "" $all_options
-
-    # Check that only FOO is considered part of the string's value.
-    # I.e., that we stop parsing the string at the first whitespace.
-    if {$variant == "require-delimiter"} {
+    foreach_with_prefix str {
+	"STR"
+	"\"STR\""
+	"\\\"STR"
+	"'STR'"
+	"\\'STR"
+	"\"STR AAA\""
+	"'STR BBB'"
+	"\"STR 'CCC' DDD\""
+	"'STR \"EEE\" FFF'"
+	"\"STR \\\"GGG\\\" HHH\""
+	"'STR \\\'III\\\' JJJ'"
+    } {
 	res_test_gdb_complete_none \
-	    "1 [expect_string "FOO" "BAR"]" \
-	    "$cmd -string FOO BAR"
-    } else {
-	res_test_gdb_complete_none "0 BAR" "$cmd -string FOO BAR"
+	    "1 [expect_none ""]" \
+	    "$cmd -string ${str}"
+	gdb_test "$cmd -string ${str} --" [expect_string "${str}" ""]
+
+	# Completing at "-" after parsing STR should list all options.
+	res_test_gdb_complete_multiple \
+	    "1 [expect_string "${str}" "-"]" \
+	    "$cmd -string ${str} " "-" "" $all_options
+
+	# Check that only $STR is considered part of the string's value.
+	# I.e., that we stop parsing the string at the first
+	# whitespace or after the closing quote of $STR.
+	if {$variant == "require-delimiter"} {
+	    res_test_gdb_complete_none \
+		"1 [expect_string "${str}" "BAR"]" \
+		"$cmd -string ${str} BAR"
+	} else {
+	    res_test_gdb_complete_none "0 BAR" "$cmd -string ${str} BAR"
+	}
+	gdb_test "$cmd -string ${str} BAR --" "Unrecognized option at: BAR --"
     }
-    gdb_test "$cmd -string FOO BAR --" "Unrecognized option at: BAR --"
 }
 
 # Run the options framework tests first.

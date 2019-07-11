@@ -94,6 +94,16 @@ void string_vappendf (std::string &dest, const char* fmt, va_list args)
 
 char *savestring (const char *ptr, size_t len);
 
+/* Extract the next word from ARG.  The next word is defined as either,
+   everything up to the next space, or, if the next word starts with either
+   a single or double quote, then everything up to the closing quote.  The
+   enclosing quotes are not returned in the result string.  The pointer in
+   ARG is updated to point to the first character after the end of the
+   word, or, for quoted words, the first character after the closing
+   quote.  */
+
+std::string extract_string_maybe_quoted (const char **arg);
+
 /* The strerror() function can return NULL for errno values that are
    out of range.  Provide a "safe" version that always returns a
    printable string.  */
