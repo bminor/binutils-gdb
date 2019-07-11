@@ -1,3 +1,8 @@
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Add information about -q flag to "info
+	types".
+
 2019-07-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* python.texi (python command): Revise example to match

@@ -1,3 +1,14 @@
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention adding -q option to "info types".
+	* symtab.c (struct info_types_options): New struct.
+	(info_types_options_defs): New variable.
+	(make_info_types_options_def_group): New function.
+	(info_types_command): Use gdb::option framework to parse options.
+	(info_types_command_completer): New function.
+	(_initialize_symtab): Extend the help text on "info types" and
+	register command completer.
+
 2019-07-21  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.c (lookup_symbol_in_objfile_symtabs): Change int to block_enum.

@@ -4773,11 +4773,62 @@ info_functions_command (const char *args, int from_tty)
 		      opts.type_regexp, from_tty);
 }
 
+/* Holds the -q option for the 'info types' command.  */
+
+struct info_types_options
+{
+  int quiet = false;
+};
+
+/* The options used by the 'info types' command.  */
+
+static const gdb::option::option_def info_types_options_defs[] = {
+  gdb::option::boolean_option_def<info_types_options> {
+    "q",
+    [] (info_types_options *opt) { return &opt->quiet; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Returns the option group used by 'info types'.  */
+
+static gdb::option::option_def_group
+make_info_types_options_def_group (info_types_options *opts)
+{
+  return {{info_types_options_defs}, opts};
+}
+
+/* Implement the 'info types' command.  */
 
 static void
-info_types_command (const char *regexp, int from_tty)
+info_types_command (const char *args, int from_tty)
 {
-  symtab_symbol_info (false, regexp, TYPES_DOMAIN, NULL, from_tty);
+  info_types_options opts;
+
+  auto grp = make_info_types_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
+  symtab_symbol_info (opts.quiet, args, TYPES_DOMAIN, NULL, from_tty);
+}
+
+/* Command completer for 'info types' command.  */
+
+static void
+info_types_command_completer (struct cmd_list_element *ignore,
+			      completion_tracker &tracker,
+			      const char *text, const char * /* word */)
+{
+  const auto group
+    = make_info_types_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+  symbol_completer (ignore, tracker, text, word);
 }
 
 /* Breakpoint all functions matching regular expression.  */
@@ -6041,8 +6092,12 @@ Prints the functions.\n"),
      print "struct foo *".
      I also think "ptype" or "whatis" is more likely to be useful (but if
      there is much disagreement "info types" can be fixed).  */
-  add_info ("types", info_types_command,
-	    _("All type names, or those matching REGEXP."));
+  c = add_info ("types", info_types_command, _("\
+All type names, or those matching REGEXP.\n\
+Usage: info types [-q] [REGEXP]\n\
+Print information about all types matching REGEXP, or all types if no\n\
+REGEXP is given.  The optional flag -q disables printing of headers."));
+  set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
   add_info ("sources", info_sources_command,
 	    _("Source files in the program."));

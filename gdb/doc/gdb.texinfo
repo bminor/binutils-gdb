@@ -18428,8 +18428,7 @@ information.  Inspecting the type of a (global) variable for which
 of such variables.
 
 @kindex info types
-@item info types @var{regexp}
-@itemx info types
+@item info types [-q] [@var{regexp}]
 Print a brief description of all types whose names match the regular
 expression @var{regexp} (or all types in your program, if you supply
 no argument).  Each complete typename is matched as though it were a
@@ -18448,6 +18447,11 @@ the manually specified language (see @ref{Manually, ,Set Language Manually}).
 This command differs from @code{ptype} in two ways: first, like
 @code{whatis}, it does not print a detailed description; second, it
 lists all source files and line numbers where a type is defined.
+
+The output from @samp{into types} is proceeded with a header line
+describing what types are being listed.  The optional flag @samp{-q},
+which stands for @samp{quiet}, disables printing this header
+information.
 
 @kindex info type-printers
 @item info type-printers
