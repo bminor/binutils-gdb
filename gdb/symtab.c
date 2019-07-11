@@ -92,7 +92,8 @@ struct block_symbol lookup_local_symbol (const char *name,
 					 enum language language);
 
 static struct block_symbol
-  lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
+  lookup_symbol_in_objfile (struct objfile *objfile,
+			    enum block_enum block_index,
 			    const char *name, const domain_enum domain);
 
 /* Type of the data stored on the program space.  */
@@ -2244,8 +2245,9 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
    static symbols.  */
 
 static struct block_symbol
-lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
-				  const char *name, const domain_enum domain)
+lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
+				  enum block_enum block_index, const char *name,
+				  const domain_enum domain)
 {
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
@@ -2516,10 +2518,12 @@ lookup_symbol_in_static_block (const char *name,
    BLOCK_INDEX is one of GLOBAL_BLOCK or STATIC_BLOCK.  */
 
 static struct block_symbol
-lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
+lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 			  const char *name, const domain_enum domain)
 {
   struct block_symbol result;
+
+  gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
   if (symbol_lookup_debug)
     {
