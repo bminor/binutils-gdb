@@ -1,3 +1,8 @@
+2019-07-11  Tom Tromey  <tromey@adacore.com>
+
+	* python/py-inferior.c (add_thread_object): Don't use thread_obj
+	after it has been moved.
+
 2019-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* valops.c (value_must_coerce_to_target): Change return type to
