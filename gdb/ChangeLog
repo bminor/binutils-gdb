@@ -1,3 +1,22 @@
+2019-07-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* breakpoint.c (is_hardware_watchpoint): Remove
+	forward-declaration.
+	(is_masked_watchpoint): Change return type to bool.
+	(is_tracepoint): Likewise.
+	(is_breakpoint): Likewise.
+	(is_hardware_watchpoint): Likewise.
+	(is_watchpoint): Likewise.
+	(is_no_memory_software_watchpoint): Likewise.
+	(is_catchpoint): Likewise.
+	(breakpoint_1): Make FILTER parameter's return type bool.
+	is_masked_watchpoint): Change return type to bool.
+	(save_breakpoints): Make FILTER parameter's return type bool.
+	* breakpoint.h (is_breakpoint): Change return type to bool.
+	(is_watchpoint): Likewise.
+	(is_catchpoint): Likewise.
+	(is_tracepoint): Likewise.
+
 2019-07-10  Tom Tromey  <tom@tromey.com>
 
 	* defs.h: Don't include gdbarch.h.

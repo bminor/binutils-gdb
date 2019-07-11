@@ -866,11 +866,12 @@ extern struct breakpoint *breakpoint_find_if
 /* Return true if BPT is either a software breakpoint or a hardware
    breakpoint.  */
 
-extern int is_breakpoint (const struct breakpoint *bpt);
+extern bool is_breakpoint (const struct breakpoint *bpt);
 
-/* Returns true if BPT is really a watchpoint.  */
+/* Return true if BPT is of any watchpoint kind, hardware or
+   software.  */
 
-extern int is_watchpoint (const struct breakpoint *bpt);
+extern bool is_watchpoint (const struct breakpoint *bpt);
 
 /* Return true if BPT is a C++ exception catchpoint (catch
    catch/throw/rethrow).  */
@@ -1554,8 +1555,9 @@ extern void remove_solib_event_breakpoints_at_next_stop (void);
 
 extern void disable_breakpoints_in_shlibs (void);
 
-/* This function returns TRUE if ep is a catchpoint.  */
-extern int is_catchpoint (struct breakpoint *);
+/* This function returns true if B is a catchpoint.  */
+
+extern bool is_catchpoint (struct breakpoint *b);
 
 /* Shared helper function (MI and CLI) for creating and installing
    a shared object event catchpoint.  */
@@ -1634,7 +1636,9 @@ extern struct tracepoint *
 /* Return a vector of all tracepoints currently defined.  */
 extern std::vector<breakpoint *> all_tracepoints (void);
 
-extern int is_tracepoint (const struct breakpoint *b);
+/* Return true if B is of tracepoint kind.  */
+
+extern bool is_tracepoint (const struct breakpoint *b);
 
 /* Return a vector of all static tracepoints defined at ADDR.  */
 extern std::vector<breakpoint *> static_tracepoints_here (CORE_ADDR addr);

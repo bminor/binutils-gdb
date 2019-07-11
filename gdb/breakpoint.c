@@ -217,15 +217,13 @@ static void update_global_location_list (enum ugll_insert_mode);
 
 static void update_global_location_list_nothrow (enum ugll_insert_mode);
 
-static int is_hardware_watchpoint (const struct breakpoint *bpt);
-
 static void insert_breakpoint_locations (void);
 
 static void trace_pass_command (const char *, int);
 
 static void set_tracepoint_count (int num);
 
-static int is_masked_watchpoint (const struct breakpoint *b);
+static bool is_masked_watchpoint (const struct breakpoint *b);
 
 static struct bp_location **get_first_locp_gte_addr (CORE_ADDR address);
 
@@ -1037,7 +1035,9 @@ is_longjmp_type (bptype type)
   return type == bp_longjmp || type == bp_exception;
 }
 
-int
+/* See breakpoint.h.  */
+
+bool
 is_tracepoint (const struct breakpoint *b)
 {
   return is_tracepoint_type (b->type);
@@ -1493,12 +1493,9 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   }
 }
 
-
+/* See breakpoint.h.  */
 
-/* Return true if BPT is either a software breakpoint or a hardware
-   breakpoint.  */
-
-int
+bool
 is_breakpoint (const struct breakpoint *bpt)
 {
   return (bpt->type == bp_breakpoint
@@ -1508,7 +1505,7 @@ is_breakpoint (const struct breakpoint *bpt)
 
 /* Return true if BPT is of any hardware watchpoint kind.  */
 
-static int
+static bool
 is_hardware_watchpoint (const struct breakpoint *bpt)
 {
   return (bpt->type == bp_hardware_watchpoint
@@ -1516,10 +1513,9 @@ is_hardware_watchpoint (const struct breakpoint *bpt)
 	  || bpt->type == bp_access_watchpoint);
 }
 
-/* Return true if BPT is of any watchpoint kind, hardware or
-   software.  */
+/* See breakpoint.h.  */
 
-int
+bool
 is_watchpoint (const struct breakpoint *bpt)
 {
   return (is_hardware_watchpoint (bpt)
@@ -1604,7 +1600,7 @@ software_watchpoint_add_no_memory_location (struct breakpoint *b,
 /* Returns true if B is a software watchpoint that is not watching any
    memory (e.g., "watch $pc").  */
 
-static int
+static bool
 is_no_memory_software_watchpoint (struct breakpoint *b)
 {
   return (b->type == bp_watchpoint
@@ -4130,15 +4126,13 @@ hardware_watchpoint_inserted_in_range (const address_space *aspace,
     }
   return 0;
 }
-
 
-/* bpstat stuff.  External routines' interfaces are documented
-   in breakpoint.h.  */
+/* See breakpoint.h.  */
 
-int
-is_catchpoint (struct breakpoint *ep)
+bool
+is_catchpoint (struct breakpoint *b)
 {
-  return (ep->type == bp_catchpoint);
+  return (b->type == bp_catchpoint);
 }
 
 /* Frees any storage that is part of a bpstat.  Does not walk the
@@ -6418,7 +6412,7 @@ pending_breakpoint_p (struct breakpoint *b)
 
 static int
 breakpoint_1 (const char *bp_num_list, bool show_internal,
-	      int (*filter) (const struct breakpoint *))
+	      bool (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
   struct bp_location *last_loc = NULL;
@@ -10437,7 +10431,7 @@ static struct breakpoint_ops masked_watchpoint_breakpoint_ops;
 
 /* Tell whether the given watchpoint is a masked hardware watchpoint.  */
 
-static int
+static bool
 is_masked_watchpoint (const struct breakpoint *b)
 {
   return b->ops == &masked_watchpoint_breakpoint_ops;
@@ -14903,11 +14897,11 @@ print_recreate_thread (struct breakpoint *b, struct ui_file *fp)
 /* Save information on user settable breakpoints (watchpoints, etc) to
    a new script file named FILENAME.  If FILTER is non-NULL, call it
    on each breakpoint and only include the ones for which it returns
-   non-zero.  */
+   true.  */
 
 static void
 save_breakpoints (const char *filename, int from_tty,
-		  int (*filter) (const struct breakpoint *))
+		  bool (*filter) (const struct breakpoint *))
 {
   struct breakpoint *tp;
   int any = 0;
