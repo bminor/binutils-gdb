@@ -1168,38 +1168,6 @@ psymtab_to_fullname (struct partial_symtab *ps)
   return ps->fullname;
 }
 
-/* For all symbols, s, in BLOCK that are in DOMAIN and match NAME
-   according to the function MATCH, call CALLBACK(BLOCK, s, DATA).
-   BLOCK is assumed to come from OBJFILE.  Returns false iff CALLBACK
-   ever returns false, and otherwise returns true.  */
-
-static bool
-map_block (const char *name, domain_enum domain, struct objfile *objfile,
-	   const struct block *block,
-	   gdb::function_view<symbol_found_callback_ftype> callback,
-	   symbol_name_match_type match)
-{
-  struct block_iterator iter;
-  struct symbol *sym;
-
-  lookup_name_info lookup_name (name, match);
-
-  for (sym = block_iter_match_first (block, lookup_name, &iter);
-       sym != NULL;
-       sym = block_iter_match_next (lookup_name, &iter))
-    {
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain))
-	{
-	  struct block_symbol block_sym = {sym, block};
-	  if (!callback (&block_sym))
-	    return false;
-	}
-    }
-
-  return true;
-}
-
 /* Psymtab version of map_matching_symbols.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
@@ -1214,6 +1182,8 @@ psym_map_matching_symbols
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
+  lookup_name_info lookup_name (name, match);
+
   for (partial_symtab *ps : require_partial_symbols (objfile, 1))
     {
       QUIT;
@@ -1227,10 +1197,8 @@ psym_map_matching_symbols
 	  if (cust == NULL)
 	    continue;
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-	  if (!map_block (name, domain, objfile, block, callback, match))
-	    return;
-	  struct block_symbol block_sym = {nullptr, block};
-	  if (!callback (&block_sym))
+	  if (!iterate_over_symbols_terminated (block, lookup_name,
+						domain, callback))
 	    return;
 	}
     }

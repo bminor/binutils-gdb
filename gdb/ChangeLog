@@ -1,5 +1,12 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* psymtab.c (map_block): Remove.
+	(psym_map_matching_symbols): Use iterate_over_symbols_terminated.
+	* symtab.c (iterate_over_symbols_terminated): New function.
+	* symtab.c (iterate_over_symbols_terminated): Declare.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_iterate_over_symbols): Return bool.
 	* language.h (struct language_defn) <la_iterate_over_symbols>:
 	Return bool.
