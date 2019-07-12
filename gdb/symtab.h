@@ -2092,7 +2092,16 @@ std::vector<CORE_ADDR> find_pcs_for_symtab_line
 
 typedef bool (symbol_found_callback_ftype) (struct block_symbol *bsym);
 
-void iterate_over_symbols (const struct block *block,
+/* Iterate over the symbols named NAME, matching DOMAIN, in BLOCK.
+
+   For each symbol that matches, CALLBACK is called.  The symbol is
+   passed to the callback.
+
+   If CALLBACK returns false, the iteration ends and this function
+   returns false.  Otherwise, the search continues, and the function
+   eventually returns true.  */
+
+bool iterate_over_symbols (const struct block *block,
 			   const lookup_name_info &name,
 			   const domain_enum domain,
 			   gdb::function_view<symbol_found_callback_ftype> callback);

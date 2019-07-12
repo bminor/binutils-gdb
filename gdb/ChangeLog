@@ -1,5 +1,13 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_iterate_over_symbols): Return bool.
+	* language.h (struct language_defn) <la_iterate_over_symbols>:
+	Return bool.
+	* symtab.c (iterate_over_symbols): Return bool.
+	* symtab.h (iterate_over_symbols): Return bool.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (aux_add_nonlocal_symbols): Change type.
 	(add_nonlocal_symbols): Update.
 	* dwarf2read.c (dw2_map_matching_symbols): Change type.

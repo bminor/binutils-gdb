@@ -2822,15 +2822,9 @@ basic_lookup_transparent_type (const char *name)
   return (struct type *) 0;
 }
 
-/* Iterate over the symbols named NAME, matching DOMAIN, in BLOCK.
+/* See symtab.h.  */
 
-   For each symbol that matches, CALLBACK is called.  The symbol is
-   passed to the callback.
-
-   If CALLBACK returns false, the iteration ends.  Otherwise, the
-   search continues.  */
-
-void
+bool
 iterate_over_symbols (const struct block *block,
 		      const lookup_name_info &name,
 		      const domain_enum domain,
@@ -2847,9 +2841,10 @@ iterate_over_symbols (const struct block *block,
 	  struct block_symbol block_sym = {sym, block};
 
 	  if (!callback (&block_sym))
-	    return;
+	    return false;
 	}
     }
+  return true;
 }
 
 /* Find the compunit symtab associated with PC and SECTION.

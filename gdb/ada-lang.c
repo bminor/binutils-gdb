@@ -5740,7 +5740,7 @@ ada_lookup_symbol_list (const char *name, const struct block *block,
 
 /* Implementation of the la_iterate_over_symbols method.  */
 
-static void
+static bool
 ada_iterate_over_symbols
   (const struct block *block, const lookup_name_info &name,
    domain_enum domain,
@@ -5754,8 +5754,10 @@ ada_iterate_over_symbols
   for (i = 0; i < ndefs; ++i)
     {
       if (!callback (&results[i]))
-	break;
+	return false;
     }
+
+  return true;
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set

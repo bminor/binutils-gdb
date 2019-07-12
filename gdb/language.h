@@ -407,7 +407,7 @@ struct language_defn
        This field may not be NULL.  If the language does not need any
        special processing here, 'iterate_over_symbols' should be
        used as the definition.  */
-    void (*la_iterate_over_symbols)
+    bool (*la_iterate_over_symbols)
       (const struct block *block, const lookup_name_info &name,
        domain_enum domain,
        gdb::function_view<symbol_found_callback_ftype> callback);
