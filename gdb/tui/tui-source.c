@@ -123,10 +123,13 @@ copy_source_line (const char **ptr, int line_no, int first_col,
 
 /* Function to display source in the source window.  */
 enum tui_status
-tui_set_source_content (tui_source_window_base *win_info,
-			struct symtab *s, 
-			int line_no)
+tui_source_window::set_contents (struct gdbarch *arch,
+				 struct symtab *s, 
+				 struct tui_line_or_address line_or_addr)
 {
+  gdb_assert (line_or_addr.loa == LOA_LINE);
+  int line_no = line_or_addr.u.line_no;
+
   enum tui_status ret = TUI_FAILURE;
 
   if (s != NULL)
@@ -134,10 +137,10 @@ tui_set_source_content (tui_source_window_base *win_info,
       int line_width, nlines;
 
       ret = TUI_SUCCESS;
-      line_width = win_info->width - 1;
+      line_width = width - 1;
       /* Take hilite (window border) into account, when
 	 calculating the number of lines.  */
-      nlines = (line_no + (win_info->height - 2)) - line_no;
+      nlines = (line_no + (height - 2)) - line_no;
 
       std::string srclines;
       if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
@@ -150,28 +153,27 @@ tui_set_source_content (tui_source_window_base *win_info,
 	    = tui_locator_win_info_ptr ();
 	  const char *s_filename = symtab_to_filename_for_display (s);
 
-	  xfree (win_info->title);
-	  win_info->title = xstrdup (s_filename);
+	  xfree (title);
+	  title = xstrdup (s_filename);
 
-	  xfree (win_info->fullname);
-	  win_info->fullname = xstrdup (symtab_to_fullname (s));
+	  xfree (fullname);
+	  fullname = xstrdup (symtab_to_fullname (s));
 
 	  cur_line = 0;
-	  win_info->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-	  win_info->start_line_or_addr.loa = LOA_LINE;
-	  cur_line_no = win_info->start_line_or_addr.u.line_no = line_no;
+	  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+	  start_line_or_addr.loa = LOA_LINE;
+	  cur_line_no = start_line_or_addr.u.line_no = line_no;
 
 	  const char *iter = srclines.c_str ();
-	  win_info->content.resize (nlines);
+	  content.resize (nlines);
 	  while (cur_line < nlines)
 	    {
 	      struct tui_source_element *element
-		= &win_info->content[cur_line];
+		= &content[cur_line];
 
 	      std::string text;
 	      if (*iter != '\0')
-		text = copy_source_line (&iter, cur_line_no,
-					 win_info->horizontal_offset,
+		text = copy_source_line (&iter, cur_line_no, horizontal_offset,
 					 line_width);
 
 	      /* Set whether element is the execution point
@@ -183,8 +185,8 @@ tui_set_source_content (tui_source_window_base *win_info,
 				 symtab_to_fullname (s)) == 0
 		   && cur_line_no == locator->line_no);
 
-	      xfree (win_info->content[cur_line].line);
-	      win_info->content[cur_line].line
+	      xfree (content[cur_line].line);
+	      content[cur_line].line
 		= xstrdup (text.c_str ());
 
 	      cur_line++;

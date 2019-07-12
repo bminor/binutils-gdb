@@ -60,6 +60,11 @@ protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
 
+  enum tui_status set_contents
+    (struct gdbarch *gdbarch,
+     struct symtab *s,
+     struct tui_line_or_address line_or_addr) override;
+
 private:
 
   void style_changed ();
@@ -72,9 +77,6 @@ private:
   gdb::observers::token m_observable;
 };
 
-extern enum tui_status tui_set_source_content (tui_source_window_base *,
-					       struct symtab *, 
-					       int);
 extern void tui_show_symtab_source (tui_source_window_base *,
 				    struct gdbarch *, struct symtab *,
 				    struct tui_line_or_address);

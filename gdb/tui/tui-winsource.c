@@ -88,12 +88,8 @@ tui_source_window_base::update_source_window_as_is
    struct symtab *s,
    struct tui_line_or_address line_or_addr)
 {
-  enum tui_status ret;
-
-  if (type == SRC_WIN)
-    ret = tui_set_source_content (this, s, line_or_addr.u.line_no);
-  else
-    ret = tui_set_disassem_content (this, gdbarch, line_or_addr.u.addr);
+  enum tui_status ret
+    = set_contents (gdbarch, s, line_or_addr);
 
   if (ret == TUI_FAILURE)
     erase_source_content ();

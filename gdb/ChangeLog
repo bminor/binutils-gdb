@@ -1,6 +1,23 @@
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.h (struct tui_source_window_base)
+	<set_contents>: Declare.
+	* tui/tui-winsource.c
+	(tui_source_window_base::update_source_window_as_is): Update.
+	* tui/tui-source.h (struct tui_source_window) <set_contents>:
+	Declare.
+	(tui_set_source_content): Don't declare.
+	* tui/tui-source.c (tui_source_window::set_contents): Rename from
+	tui_set_source_content.
+	* tui/tui-disasm.h (struct tui_disasm_window) <set_contents>:
+	Declare.
+	(tui_set_disassem_content): Don't declare.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Rename from
+	tui_set_disassem_content.
+
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
 	<update_breakpoint_info>: Declare.
 	(tui_update_breakpoint_info): Don't declare.
 	* tui/tui-winsource.c (tui_source_window_base::update_source_window_as_is)
