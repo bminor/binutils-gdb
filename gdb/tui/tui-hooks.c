@@ -260,7 +260,6 @@ void
 tui_remove_hooks (void)
 {
   deprecated_print_frame_info_listing_hook = 0;
-  deprecated_query_hook = 0;
 
   /* Remove our observers.  */
   tui_attach_detach_observers (false);
