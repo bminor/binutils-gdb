@@ -257,7 +257,7 @@ tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
 
   val.loa = LOA_ADDRESS;
   val.u.addr = start_addr;
-  tui_update_source_window (TUI_DISASM_WIN, gdbarch, s, val);
+  TUI_DISASM_WIN->update_source_window (gdbarch, s, val);
 
   /* If the focus was in the src win, put it in the asm win, if the
      source view isn't split.  */
@@ -285,7 +285,7 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
       sal = find_pc_line (start_addr, 0);
       val.loa = LOA_LINE;
       val.u.line_no = sal.line;
-      tui_update_source_window (TUI_SRC_WIN, gdbarch, sal.symtab, val);
+      TUI_SRC_WIN->update_source_window (gdbarch, sal.symtab, val);
       if (sal.symtab)
 	{
 	  set_current_source_symtab_and_line (sal);
@@ -418,8 +418,7 @@ tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
   a.loa = LOA_ADDRESS;
   a.u.addr = low;
   if (!addr_is_displayed (addr))
-    tui_update_source_window (this, get_frame_arch (fi),
-			      sal.symtab, a);
+    update_source_window (get_frame_arch (fi), sal.symtab, a);
   else
     {
       a.u.addr = addr;

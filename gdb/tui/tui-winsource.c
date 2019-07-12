@@ -70,13 +70,13 @@ tui_display_main ()
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_update_source_window (struct tui_source_window_base *win_info,
-			  struct gdbarch *gdbarch,
-			  struct symtab *s,
-			  struct tui_line_or_address line_or_addr)
+tui_source_window_base::update_source_window
+  (struct gdbarch *gdbarch,
+   struct symtab *s,
+   struct tui_line_or_address line_or_addr)
 {
-  win_info->horizontal_offset = 0;
-  win_info->update_source_window_as_is (gdbarch, s, line_or_addr);
+  horizontal_offset = 0;
+  update_source_window_as_is (gdbarch, s, line_or_addr);
 }
 
 
@@ -325,8 +325,7 @@ tui_source_window_base::rerender ()
 	= get_current_source_symtab_and_line ();
 
       line_or_addr = start_line_or_addr;
-      tui_update_source_window (this, gdbarch,
-				cursal.symtab, line_or_addr);
+      update_source_window (gdbarch, cursal.symtab, line_or_addr);
     }
   else if (deprecated_safe_get_selected_frame () != NULL)
     {
@@ -347,7 +346,7 @@ tui_source_window_base::rerender ()
 	  line.loa = LOA_ADDRESS;
 	  find_line_pc (s, cursal.line, &line.u.addr);
 	}
-      tui_update_source_window (this, gdbarch, s, line);
+      update_source_window (gdbarch, s, line);
     }
   else
     erase_source_content ();

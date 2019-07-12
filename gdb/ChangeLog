@@ -1,6 +1,20 @@
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.h (struct tui_source_window_base)
+	<update_source_window>: Declare.
+	(tui_update_source_window): Don't declare.
+	* tui/tui-winsource.c
+	(tui_source_window_base::update_source_window): Rename from
+	tui_update_source_window.
+	(tui_source_window_base::rerender): Update.
+	* tui/tui-source.c (tui_source_window::maybe_update): Update.
+	* tui/tui-disasm.c (tui_show_disassem)
+	(tui_show_disassem_and_update_source)
+	(tui_disasm_window::maybe_update): Update.
+
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_base)
 	<update_source_window_as_is>: Declare.
 	(tui_update_source_window_as_is): Don't declare.
 	* tui/tui-winsource.c (tui_update_source_window): Update

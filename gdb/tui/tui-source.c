@@ -317,8 +317,7 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
   l.u.line_no = start_line;
   if (!(source_already_displayed
 	&& line_is_displayed (line_no)))
-    tui_update_source_window (this, get_frame_arch (fi),
-			      sal.symtab, l);
+    update_source_window (get_frame_arch (fi), sal.symtab, l);
   else
     {
       l.u.line_no = line_no;
