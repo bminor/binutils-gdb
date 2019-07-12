@@ -661,7 +661,7 @@ tui_is_window_visible (enum tui_win_type type)
   if (tui_win_list[type] == 0)
     return false;
   
-  return tui_win_list[type]->is_visible;
+  return tui_win_list[type]->is_visible ();
 }
 
 int

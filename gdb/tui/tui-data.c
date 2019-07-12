@@ -148,7 +148,7 @@ tui_next_win (struct tui_win_info *cur_win)
   while (type != cur_win->type && (next_win == NULL))
     {
       if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible)
+	  && tui_win_list[type]->is_visible ())
 	next_win = tui_win_list[type];
       else
 	{
@@ -178,7 +178,7 @@ tui_prev_win (struct tui_win_info *cur_win)
   while (type != cur_win->type && (prev == NULL))
     {
       if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible)
+	  && tui_win_list[type]->is_visible ())
 	prev = tui_win_list[type];
       else
 	{
@@ -220,7 +220,7 @@ tui_delete_invisible_windows ()
   for (int win_type = SRC_WIN; (win_type < MAX_MAJOR_WINDOWS); win_type++)
     {
       if (tui_win_list[win_type] != NULL
-	  && !tui_win_list[win_type]->is_visible)
+	  && !tui_win_list[win_type]->is_visible ())
 	{
 	  /* This should always be made visible before a call to this
 	     function.  */

@@ -79,6 +79,12 @@ public:
     return false;
   }
 
+  /* Return true if this window is visible.  */
+  bool is_visible () const
+  {
+    return handle != nullptr;
+  }
+
   /* Window handle.  */
   WINDOW *handle = nullptr;
   /* Type of window.  */
@@ -91,8 +97,6 @@ public:
   struct tui_point origin = {0, 0};
   /* Viewport height.  */
   int viewport_height = 0;
-  /* Whether the window is visible or not.  */
-  bool is_visible = false;
   /* Window title to display.  */
   char *title = nullptr;
 };

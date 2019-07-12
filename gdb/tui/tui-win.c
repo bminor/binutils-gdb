@@ -367,7 +367,7 @@ window_name_completer (completion_tracker &tracker,
       const char *completion_name = NULL;
 
       /* We can't focus on an invisible window.  */
-      if (!win_info->is_visible)
+      if (!win_info->is_visible ())
 	continue;
 
       completion_name = win_info->name ();
@@ -506,7 +506,7 @@ tui_refresh_all_win (void)
   tui_refresh_all ();
   for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (win_info->is_visible)
+      if (win_info->is_visible ())
 	win_info->refresh_all ();
     }
   tui_show_locator_content ();
@@ -813,7 +813,7 @@ tui_set_focus_command (const char *arg, int from_tty)
       else
 	win_info = tui_partial_win_by_name (buf_ptr);
 
-      if (win_info == NULL || !win_info->is_visible)
+      if (win_info == NULL || !win_info->is_visible ())
 	warning (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
       else
@@ -836,7 +836,7 @@ tui_all_windows_info (const char *arg, int from_tty)
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
   for (tui_win_info *win_info : all_tui_windows ())
-    if (win_info->is_visible)
+    if (win_info->is_visible ())
       {
 	if (win_with_focus == win_info)
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
@@ -875,7 +875,7 @@ update_tab_width ()
 {
   for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (win_info->is_visible)
+      if (win_info->is_visible ())
 	win_info->update_tab_width ();
     }
 }
@@ -956,7 +956,7 @@ tui_set_win_height_command (const char *arg, int from_tty)
 	    wname[i] = tolower (wname[i]);
 	  win_info = tui_partial_win_by_name (wname);
 
-	  if (win_info == NULL || !win_info->is_visible)
+	  if (win_info == NULL || !win_info->is_visible ())
 	    warning (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
 	  else
@@ -1347,7 +1347,7 @@ parse_scrolling_args (const char *arg,
 
 	  if (*win_to_scroll == NULL)
 	    error (_("Unrecognized window `%s'"), wname);
-	  if (!(*win_to_scroll)->is_visible)
+	  if (!(*win_to_scroll)->is_visible ())
 	    error (_("Window is not visible"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = *(tui_source_windows ().begin ());

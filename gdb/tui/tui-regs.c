@@ -138,7 +138,7 @@ tui_show_registers (struct reggroup *group)
 
   /* Make sure the register window is visible.  If not, select an
      appropriate layout.  */
-  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible)
+  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
     tui_reg_layout ();
 
   if (group == 0)
@@ -411,7 +411,7 @@ tui_data_window::first_data_item_displayed ()
       struct tui_gen_win_info *data_item_win;
 
       data_item_win = regs_content[i].get ();
-      if (data_item_win->handle != NULL && data_item_win->is_visible)
+      if (data_item_win->is_visible ())
 	return i;
     }
 
@@ -427,7 +427,6 @@ tui_data_window::delete_data_content_windows ()
     {
       tui_delete_win (win->handle);
       win->handle = NULL;
-      win->is_visible = false;
     }
 }
 
@@ -552,7 +551,7 @@ void
 tui_check_register_values (struct frame_info *frame)
 {
   if (TUI_DATA_WIN != NULL
-      && TUI_DATA_WIN->is_visible)
+      && TUI_DATA_WIN->is_visible ())
     {
       if (TUI_DATA_WIN->regs_content.empty ()
 	  && TUI_DATA_WIN->display_regs)
@@ -667,7 +666,7 @@ tui_reg_command (const char *args, int from_tty)
       /* Make sure the register window is visible.  If not, select an
 	 appropriate layout.  We need to do this before trying to run the
 	 'next' or 'prev' commands.  */
-      if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible)
+      if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
 	tui_reg_layout ();
 
       struct reggroup *current_group = NULL;

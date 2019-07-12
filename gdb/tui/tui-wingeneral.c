@@ -139,7 +139,6 @@ tui_make_window (struct tui_gen_win_info *win_info)
     {
       if (win_info->can_box ())
 	box_win (win_info, NO_HILITE);
-      win_info->is_visible = true;
       scrollok (handle, TRUE);
     }
 }
@@ -151,9 +150,8 @@ tui_make_window (struct tui_gen_win_info *win_info)
 void
 tui_gen_win_info::make_visible (bool visible)
 {
-  if (is_visible == visible)
+  if (is_visible () == visible)
     return;
-  is_visible = visible;
 
   if (visible)
     tui_make_window (this);
@@ -182,10 +180,10 @@ tui_refresh_all ()
 
   for (tui_win_info *win_info : all_tui_windows ())
     {
-      if (win_info->is_visible)
+      if (win_info->is_visible ())
 	win_info->refresh_window ();
     }
-  if (locator->is_visible)
+  if (locator->is_visible ())
     locator->refresh_window ();
 }
 

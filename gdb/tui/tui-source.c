@@ -279,7 +279,7 @@ tui_source_window::~tui_source_window ()
 void
 tui_source_window::style_changed ()
 {
-  if (tui_active && is_visible)
+  if (tui_active && is_visible ())
     refill ();
 }
 
