@@ -142,6 +142,14 @@ public:
 			     struct symtab *s,
 			     struct tui_line_or_address line_or_addr);
 
+  /* Scan the source window and the breakpoints to update the
+     break_mode information for each line.  Returns true if something
+     changed and the execution window must be refreshed.  See
+     tui_update_all_breakpoint_info for a description of
+     BEING_DELETED.  */
+  bool update_breakpoint_info (struct breakpoint *being_deleted,
+			       bool current_only);
+
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
@@ -238,15 +246,6 @@ struct tui_source_windows
    because the relevant observer is notified before the breakpoint is
    removed from the list of breakpoints.  */
 extern void tui_update_all_breakpoint_info (struct breakpoint *being_deleted);
-
-/* Scan the source window and the breakpoints to update the break_mode
-   information for each line.  Returns true if something changed and
-   the execution window must be refreshed.  See
-   tui_update_all_breakpoint_info for a description of
-   BEING_DELETED.  */
-extern bool tui_update_breakpoint_info (struct tui_source_window_base *win,
-					struct breakpoint *being_deleted,
-					bool current_only);
 
 /* Function to display the "main" routine.  */
 extern void tui_display_main (void);

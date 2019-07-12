@@ -99,7 +99,7 @@ tui_source_window_base::update_source_window_as_is
     erase_source_content ();
   else
     {
-      tui_update_breakpoint_info (this, nullptr, false);
+      update_breakpoint_info (nullptr, false);
       show_source_content ();
       update_exec_info ();
       if (type == SRC_WIN)
@@ -448,10 +448,8 @@ tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
 {
   for (tui_source_window_base *win : tui_source_windows ())
     {
-      if (tui_update_breakpoint_info (win, being_deleted, false))
-        {
-          win->update_exec_info ();
-        }
+      if (win->update_breakpoint_info (being_deleted, false))
+	win->update_exec_info ();
     }
 }
 
@@ -463,20 +461,19 @@ tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
    refreshed.  */
 
 bool
-tui_update_breakpoint_info (struct tui_source_window_base *win,
-			    struct breakpoint *being_deleted,
-			    bool current_only)
+tui_source_window_base::update_breakpoint_info
+  (struct breakpoint *being_deleted, bool current_only)
 {
   int i;
   bool need_refresh = false;
 
-  for (i = 0; i < win->content.size (); i++)
+  for (i = 0; i < content.size (); i++)
     {
       struct breakpoint *bp;
       extern struct breakpoint *breakpoint_chain;
       struct tui_source_element *line;
 
-      line = &win->content[i];
+      line = &content[i];
       if (current_only && !line->is_exec_point)
          continue;
 
@@ -498,7 +495,7 @@ tui_update_breakpoint_info (struct tui_source_window_base *win,
 
 	  for (loc = bp->loc; loc != NULL; loc = loc->next)
 	    {
-	      if (win->location_matches_p (loc, i))
+	      if (location_matches_p (loc, i))
 		{
 		  if (bp->enable_state == bp_disabled)
 		    mode |= TUI_BP_DISABLED;
@@ -529,7 +526,7 @@ void
 tui_source_window_base::update_exec_info ()
 {
   werase (execution_info->handle);
-  tui_update_breakpoint_info (this, nullptr, true);
+  update_breakpoint_info (nullptr, true);
   for (int i = 0; i < content.size (); i++)
     {
       struct tui_source_element *src_element = &content[i];
