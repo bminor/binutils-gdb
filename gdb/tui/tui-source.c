@@ -202,12 +202,12 @@ tui_source_window::set_contents (struct gdbarch *arch,
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (tui_source_window_base *win_info,
-			struct gdbarch *gdbarch, struct symtab *s,
-			struct tui_line_or_address line)
+tui_source_window::show_symtab_source (struct gdbarch *gdbarch,
+				       struct symtab *s,
+				       struct tui_line_or_address line)
 {
-  win_info->horizontal_offset = 0;
-  win_info->update_source_window_as_is (gdbarch, s, line);
+  horizontal_offset = 0;
+  update_source_window_as_is (gdbarch, s, line);
 }
 
 

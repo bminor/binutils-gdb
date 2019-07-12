@@ -1,5 +1,15 @@
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_windows_with_addr)
+	(tui_update_source_windows_with_line): Update.
+	* tui/tui-source.h (struct tui_source_window)
+	<show_symtab_source>: Declare.
+	(tui_show_symtab_source): Don't declare.
+	* tui/tui-source.c (tui_show_symtab_source): Rename from
+	tui_show_symtab_source.
+
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<set_contents>: Declare.
 	* tui/tui-winsource.c
