@@ -5550,16 +5550,10 @@ add_nonlocal_symbols (struct obstack *obstackp,
     {
       data.objfile = objfile;
 
-      if (is_wild_match)
-	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
-					       domain, global, callback,
-					       symbol_name_match_type::WILD,
-					       NULL);
-      else
-	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
-					       domain, global, callback,
-					       symbol_name_match_type::FULL,
-					       compare_names);
+      objfile->sf->qf->map_matching_symbols (objfile, lookup_name,
+					     domain, global, callback,
+					     (is_wild_match
+					      ? NULL : compare_names));
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
@@ -5575,14 +5569,14 @@ add_nonlocal_symbols (struct obstack *obstackp,
   if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
     {
       const char *name = ada_lookup_name (lookup_name);
-      std::string name1 = std::string ("<_ada_") + name + '>';
+      lookup_name_info name1 (std::string ("<_ada_") + name + '>',
+			      symbol_name_match_type::FULL);
 
       for (objfile *objfile : current_program_space->objfiles ())
         {
 	  data.objfile = objfile;
-	  objfile->sf->qf->map_matching_symbols (objfile, name1.c_str (),
+	  objfile->sf->qf->map_matching_symbols (objfile, name1,
 						 domain, global, callback,
-						 symbol_name_match_type::FULL,
 						 compare_names);
 	}
     }      	

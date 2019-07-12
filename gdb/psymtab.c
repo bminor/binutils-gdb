@@ -37,13 +37,6 @@
 #include <algorithm>
 #include <set>
 
-static struct partial_symbol *match_partial_symbol (struct objfile *,
-						    struct partial_symtab *,
-						    int,
-						    const char *, domain_enum,
-						    symbol_name_match_type,
-						    symbol_compare_ftype *);
-
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
 						     const char *, int,
@@ -545,8 +538,7 @@ psymbol_name_matches (partial_symbol *psym,
 static struct partial_symbol *
 match_partial_symbol (struct objfile *objfile,
 		      struct partial_symtab *pst, int global,
-		      const char *name, domain_enum domain,
-		      symbol_name_match_type match_type,
+		      const lookup_name_info &name, domain_enum domain,
 		      symbol_compare_ftype *ordered_compare)
 {
   struct partial_symbol **start, **psym;
@@ -556,8 +548,6 @@ match_partial_symbol (struct objfile *objfile,
 
   if (length == 0)
     return NULL;
-
-  lookup_name_info lookup_name (name, match_type);
 
   start = (global ?
 	   &objfile->partial_symtabs->global_psymbols[pst->globals_offset] :
@@ -583,7 +573,7 @@ match_partial_symbol (struct objfile *objfile,
 
 	  enum language lang = (*center)->ginfo.language;
 	  const char *lang_ln
-	    = lookup_name.language_lookup_name (lang).c_str ();
+	    = name.language_lookup_name (lang).c_str ();
 
 	  if (ordered_compare (symbol_search_name (&(*center)->ginfo),
 			       lang_ln) >= 0)
@@ -594,7 +584,7 @@ match_partial_symbol (struct objfile *objfile,
       gdb_assert (top == bottom);
 
       while (top <= real_top
-	     && psymbol_name_matches (*top, lookup_name))
+	     && psymbol_name_matches (*top, name))
 	{
 	  if (symbol_matches_domain ((*top)->ginfo.language,
 				     (*top)->domain, domain))
@@ -612,7 +602,7 @@ match_partial_symbol (struct objfile *objfile,
 	{
 	  if (symbol_matches_domain ((*psym)->ginfo.language,
 				     (*psym)->domain, domain)
-	      && psymbol_name_matches (*psym, lookup_name))
+	      && psymbol_name_matches (*psym, name))
 	    return *psym;
 	}
     }
@@ -1174,21 +1164,18 @@ psymtab_to_fullname (struct partial_symtab *ps)
 static void
 psym_map_matching_symbols
   (struct objfile *objfile,
-   const char *name, domain_enum domain,
+   const lookup_name_info &name, domain_enum domain,
    int global,
    gdb::function_view<symbol_found_callback_ftype> callback,
-   symbol_name_match_type match,
    symbol_compare_ftype *ordered_compare)
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
-
-  lookup_name_info lookup_name (name, match);
 
   for (partial_symtab *ps : require_partial_symbols (objfile, 1))
     {
       QUIT;
       if (ps->readin
-	  || match_partial_symbol (objfile, ps, global, name, domain, match,
+	  || match_partial_symbol (objfile, ps, global, name, domain,
 				   ordered_compare))
 	{
 	  struct compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
@@ -1197,7 +1184,7 @@ psym_map_matching_symbols
 	  if (cust == NULL)
 	    continue;
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-	  if (!iterate_over_symbols_terminated (block, lookup_name,
+	  if (!iterate_over_symbols_terminated (block, name,
 						domain, callback))
 	    return;
 	}

@@ -1,5 +1,18 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (add_nonlocal_symbols): Combine calls to
+	map_matching_symbols.  Update.
+	* dwarf2read.c (dw2_map_matching_symbols): Update.
+	* psymtab.c (match_partial_symbol): Change type; update.
+	(psym_map_matching_symbols): Likewise.
+	* symfile-debug.c (debug_qf_map_matching_symbols): Change
+	type; update.
+	* symfile.h (struct quick_symbol_functions)
+	<map_matching_symbols>: Change "name" to be a lookup_name_info.
+	Remove "match".
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* psymtab.c (map_block): Remove.
 	(psym_map_matching_symbols): Use iterate_over_symbols_terminated.
 	* symtab.c (iterate_over_symbols_terminated): New function.

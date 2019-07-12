@@ -227,10 +227,10 @@ struct quick_symbol_functions
 
   void (*map_matching_symbols)
     (struct objfile *,
-     const char *name, domain_enum domain,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
      int global,
      gdb::function_view<symbol_found_callback_ftype> callback,
-     symbol_name_match_type match,
      symbol_compare_ftype *ordered_compare);
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
