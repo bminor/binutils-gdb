@@ -1,3 +1,12 @@
+2019-04-10  Kevin Buettner  <kevinb@redhat.com>
+
+	PR gdb/24592
+	* amd64-linux-nat.c (amd64_linux_collect_native_gregset): New
+	function.
+	(fill_gregset): Call amd64_linux_collect_native_gregset instead
+	of amd64_collect_native_gregset.
+	(amd64_linux_nat_target::store_registers): Likewise.
+
 2019-05-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.3.0.DATE-git.

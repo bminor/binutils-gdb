@@ -338,6 +338,19 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
 
   collect_register_by_name (regcache, "orig_eax",
 			    ((char *) buf) + ORIG_EAX * REGSIZE);
+
+  /* Sign extend EAX value to avoid potential syscall restart
+     problems. 
+
+     See amd64_linux_collect_native_gregset() in gdb/amd64-linux-nat.c
+     for a detailed explanation.  */
+  if (register_size (regcache->tdesc, 0) == 4)
+    {
+      void *ptr = ((gdb_byte *) buf
+                   + i386_regmap[find_regno (regcache->tdesc, "eax")]);
+
+      *(int64_t *) ptr = *(int32_t *) ptr;
+    }
 }
 
 static void
