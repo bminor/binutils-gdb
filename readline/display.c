@@ -450,6 +450,9 @@ init_line_structures (minsize)
 {
   register int n;
 
+  if (minsize <= _rl_screenwidth)	/* XXX - for gdb */
+    minsize = _rl_screenwidth + 1;
+
   if (invisible_line == 0)	/* initialize it */
     {
       if (line_size < minsize)
@@ -526,6 +529,8 @@ rl_redisplay ()
       init_line_structures (0);
       rl_on_new_line ();
     }
+  else if (line_size <= _rl_screenwidth)
+    init_line_structures (_rl_screenwidth + 1);
 
   /* Draw the line into the buffer. */
   cpos_buffer_position = -1;

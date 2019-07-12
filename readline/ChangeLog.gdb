@@ -1,3 +1,10 @@
+2019-07-12  Tom de Vries  <tdevries@suse.de>
+	    Chet Ramey  <chet.ramey@case.edu>
+
+	PR cli/24514
+	* readline/display.c (init_line_structures, rl_redisplay): Ensure
+	line_size is at	least _rl_screenwidth + 1.
+
 2019-01-31  Alan Hayward  <alan.hayward@arm.com>
 
 	* config.h.in: Add SOURCE/EXTENSION macros.
