@@ -74,10 +74,9 @@ private:
 
 extern enum tui_status tui_set_source_content (tui_source_window_base *,
 					       struct symtab *, 
-					       int, int);
+					       int);
 extern void tui_show_symtab_source (tui_source_window_base *,
 				    struct gdbarch *, struct symtab *,
-				    struct tui_line_or_address,
-				    int);
+				    struct tui_line_or_address);
 
 #endif /* TUI_TUI_SOURCE_H */

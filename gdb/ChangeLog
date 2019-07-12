@@ -1,5 +1,26 @@
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_update_source_window)
+	(tui_update_source_window_as_is): Remove "noerror" parameter.
+	* tui/tui-winsource.c (tui_update_source_window)
+	(tui_update_source_window_as_is): Remove "noerror" parameter.
+	(tui_update_source_windows_with_addr)
+	(tui_update_source_windows_with_line)
+	(tui_source_window_base::rerender)
+	(tui_source_window_base::refill): Update.
+	* tui/tui-source.h (tui_set_source_content)
+	(tui_show_symtab_source): Remove "noerror" parameter.
+	* tui/tui-source.c (tui_set_source_content): Remove "noerror"
+	parameter.
+	(tui_show_symtab_source): Likewise.
+	(tui_source_window::maybe_update): Update.
+	* tui/tui-disasm.c (tui_show_disassem)
+	(tui_show_disassem_and_update_source)
+	(tui_disasm_window::do_scroll_vertical)
+	(tui_disasm_window::maybe_update): Update.
+
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_is_window_visible): Update.
 	* tui/tui-wingeneral.c (tui_make_window)
 	(tui_gen_win_info::make_visible, tui_refresh_all): Update.

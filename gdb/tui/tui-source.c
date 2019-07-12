@@ -125,8 +125,7 @@ copy_source_line (const char **ptr, int line_no, int first_col,
 enum tui_status
 tui_set_source_content (tui_source_window_base *win_info,
 			struct symtab *s, 
-			int line_no,
-			int noerror)
+			int line_no)
 {
   enum tui_status ret = TUI_FAILURE;
 
@@ -143,17 +142,7 @@ tui_set_source_content (tui_source_window_base *win_info,
       std::string srclines;
       if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
 					    &srclines))
-	{
-	  if (!noerror)
-	    {
-	      const char *filename = symtab_to_filename_for_display (s);
-	      char *name = (char *) alloca (strlen (filename) + 100);
-
-	      sprintf (name, "%s:%d", filename, line_no);
-	      print_sys_errmsg (name, errno);
-	    }
-	  ret = TUI_FAILURE;
-	}
+	ret = TUI_FAILURE;
       else
 	{
 	  int cur_line_no, cur_line;
@@ -213,11 +202,10 @@ tui_set_source_content (tui_source_window_base *win_info,
 void
 tui_show_symtab_source (tui_source_window_base *win_info,
 			struct gdbarch *gdbarch, struct symtab *s,
-			struct tui_line_or_address line, 
-			int noerror)
+			struct tui_line_or_address line)
 {
   win_info->horizontal_offset = 0;
-  tui_update_source_window_as_is (win_info, gdbarch, s, line, noerror);
+  tui_update_source_window_as_is (win_info, gdbarch, s, line);
 }
 
 
@@ -330,7 +318,7 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
   if (!(source_already_displayed
 	&& line_is_displayed (line_no)))
     tui_update_source_window (this, get_frame_arch (fi),
-			      sal.symtab, l, TRUE);
+			      sal.symtab, l);
   else
     {
       l.u.line_no = line_no;
