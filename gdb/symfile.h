@@ -212,7 +212,7 @@ struct quick_symbol_functions
      and for which MATCH (symbol name, NAME) == 0, passing each to 
      CALLBACK, reading in partial symbol tables as needed.  Look
      through global symbols if GLOBAL and otherwise static symbols.
-     Passes NAME, NAMESPACE, and DATA to CALLBACK with each symbol
+     Passes NAME and NAMESPACE to CALLBACK with each symbol
      found.  After each block is processed, passes NULL to CALLBACK.
      MATCH must be weaker than strcmp_iw_ordered in the sense that
      strcmp_iw_ordered(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE,
@@ -222,17 +222,16 @@ struct quick_symbol_functions
      and 
             strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
      (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
-     CALLBACK returns 0 to indicate that the scan should continue, or
-     non-zero to indicate that the scan should be terminated.  */
+     CALLBACK returns true to indicate that the scan should continue, or
+     false to indicate that the scan should be terminated.  */
 
-  void (*map_matching_symbols) (struct objfile *,
-				const char *name, domain_enum domain,
-				int global,
-				int (*callback) (const struct block *,
-						 struct symbol *, void *),
-				void *data,
-				symbol_name_match_type match,
-				symbol_compare_ftype *ordered_compare);
+  void (*map_matching_symbols)
+    (struct objfile *,
+     const char *name, domain_enum domain,
+     int global,
+     gdb::function_view<symbol_found_callback_ftype> callback,
+     symbol_name_match_type match,
+     symbol_compare_ftype *ordered_compare);
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
 

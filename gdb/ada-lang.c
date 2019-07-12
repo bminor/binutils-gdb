@@ -5331,8 +5331,8 @@ struct match_data
   int found_sym;
 };
 
-/* A callback for add_nonlocal_symbols that adds SYM, found in BLOCK,
-   to a list of symbols.  DATA0 is a pointer to a struct match_data *
+/* A callback for add_nonlocal_symbols that adds symbol, found in BSYM,
+   to a list of symbols.  DATA is a pointer to a struct match_data *
    containing the obstack that collects the symbol list, the file that SYM
    must come from, a flag indicating whether a non-argument symbol has
    been found in the current block, and the last argument symbol
@@ -5340,12 +5340,13 @@ struct match_data
    marking the end of a block, the argument symbol is added if no
    other has been found.  */
 
-static int
-aux_add_nonlocal_symbols (const struct block *block, struct symbol *sym,
-			  void *data0)
+static bool
+aux_add_nonlocal_symbols (struct block_symbol *bsym,
+			  struct match_data *data)
 {
-  struct match_data *data = (struct match_data *) data0;
-  
+  const struct block *block = bsym->block;
+  struct symbol *sym = bsym->symbol;
+
   if (sym == NULL)
     {
       if (!data->found_sym && data->arg_sym != NULL) 
@@ -5358,7 +5359,7 @@ aux_add_nonlocal_symbols (const struct block *block, struct symbol *sym,
   else 
     {
       if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
-	return 0;
+	return true;
       else if (SYMBOL_IS_ARGUMENT (sym))
 	data->arg_sym = sym;
       else
@@ -5369,7 +5370,7 @@ aux_add_nonlocal_symbols (const struct block *block, struct symbol *sym,
 			   block);
 	}
     }
-  return 0;
+  return true;
 }
 
 /* Helper for add_nonlocal_symbols.  Find symbols in DOMAIN which are
@@ -5540,20 +5541,23 @@ add_nonlocal_symbols (struct obstack *obstackp,
 
   bool is_wild_match = lookup_name.ada ().wild_match_p ();
 
+  auto callback = [&] (struct block_symbol *bsym)
+    {
+      return aux_add_nonlocal_symbols (bsym, &data);
+    };
+
   for (objfile *objfile : current_program_space->objfiles ())
     {
       data.objfile = objfile;
 
       if (is_wild_match)
 	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
-					       domain, global,
-					       aux_add_nonlocal_symbols, &data,
+					       domain, global, callback,
 					       symbol_name_match_type::WILD,
 					       NULL);
       else
 	objfile->sf->qf->map_matching_symbols (objfile, lookup_name.name ().c_str (),
-					       domain, global,
-					       aux_add_nonlocal_symbols, &data,
+					       domain, global, callback,
 					       symbol_name_match_type::FULL,
 					       compare_names);
 
@@ -5577,9 +5581,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
         {
 	  data.objfile = objfile;
 	  objfile->sf->qf->map_matching_symbols (objfile, name1.c_str (),
-						 domain, global,
-						 aux_add_nonlocal_symbols,
-						 &data,
+						 domain, global, callback,
 						 symbol_name_match_type::FULL,
 						 compare_names);
 	}

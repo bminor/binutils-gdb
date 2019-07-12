@@ -1,3 +1,13 @@
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (aux_add_nonlocal_symbols): Change type.
+	(add_nonlocal_symbols): Update.
+	* dwarf2read.c (dw2_map_matching_symbols): Change type.
+	* psymtab.c (map_block, psym_map_matching_symbols): Change type.
+	* symfile-debug.c (debug_qf_map_matching_symbols): Change type.
+	* symfile.h (struct quick_symbol_functions) <map_matching_symbols>:
+	Change type of "callback".  Remove "data".
+
 
 2019-09-09  Ali Tamur  <tamur@google.com>
 

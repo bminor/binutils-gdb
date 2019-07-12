@@ -1170,14 +1170,14 @@ psymtab_to_fullname (struct partial_symtab *ps)
 
 /* For all symbols, s, in BLOCK that are in DOMAIN and match NAME
    according to the function MATCH, call CALLBACK(BLOCK, s, DATA).
-   BLOCK is assumed to come from OBJFILE.  Returns 1 iff CALLBACK
-   ever returns non-zero, and otherwise returns 0.  */
+   BLOCK is assumed to come from OBJFILE.  Returns false iff CALLBACK
+   ever returns false, and otherwise returns true.  */
 
-static int
+static bool
 map_block (const char *name, domain_enum domain, struct objfile *objfile,
 	   const struct block *block,
-	   int (*callback) (const struct block *, struct symbol *, void *),
-	   void *data, symbol_name_match_type match)
+	   gdb::function_view<symbol_found_callback_ftype> callback,
+	   symbol_name_match_type match)
 {
   struct block_iterator iter;
   struct symbol *sym;
@@ -1191,26 +1191,26 @@ map_block (const char *name, domain_enum domain, struct objfile *objfile,
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
 	{
-	  if (callback (block, sym, data))
-	    return 1;
+	  struct block_symbol block_sym = {sym, block};
+	  if (!callback (&block_sym))
+	    return false;
 	}
     }
 
-  return 0;
+  return true;
 }
 
 /* Psymtab version of map_matching_symbols.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
 static void
-psym_map_matching_symbols (struct objfile *objfile,
-			   const char *name, domain_enum domain,
-			   int global,
-			   int (*callback) (const struct block *,
-					    struct symbol *, void *),
-			   void *data,
-			   symbol_name_match_type match,
-			   symbol_compare_ftype *ordered_compare)
+psym_map_matching_symbols
+  (struct objfile *objfile,
+   const char *name, domain_enum domain,
+   int global,
+   gdb::function_view<symbol_found_callback_ftype> callback,
+   symbol_name_match_type match,
+   symbol_compare_ftype *ordered_compare)
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
@@ -1227,10 +1227,10 @@ psym_map_matching_symbols (struct objfile *objfile,
 	  if (cust == NULL)
 	    continue;
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-	  if (map_block (name, domain, objfile, block,
-			 callback, data, match))
+	  if (!map_block (name, domain, objfile, block, callback, match))
 	    return;
-	  if (callback (block, NULL, data))
+	  struct block_symbol block_sym = {nullptr, block};
+	  if (!callback (&block_sym))
 	    return;
 	}
     }

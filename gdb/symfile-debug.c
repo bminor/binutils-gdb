@@ -228,30 +228,27 @@ debug_qf_expand_symtabs_with_fullname (struct objfile *objfile,
 }
 
 static void
-debug_qf_map_matching_symbols (struct objfile *objfile,
-			       const char *name, domain_enum domain,
-			       int global,
-			       int (*callback) (const struct block *,
-						struct symbol *, void *),
-			       void *data,
-			       symbol_name_match_type match,
-			       symbol_compare_ftype *ordered_compare)
+debug_qf_map_matching_symbols
+  (struct objfile *objfile,
+   const char *name, domain_enum domain,
+   int global,
+   gdb::function_view<symbol_found_callback_ftype> callback,
+   symbol_name_match_type match,
+   symbol_compare_ftype *ordered_compare)
 {
   const struct debug_sym_fns_data *debug_data
     = symfile_debug_objfile_data_key.get (objfile);
 
   fprintf_filtered (gdb_stdlog,
-		    "qf->map_matching_symbols (%s, \"%s\", %s, %d, %s, %s, %s, %s)\n",
+		    "qf->map_matching_symbols (%s, \"%s\", %s, %d, %s, %s)\n",
 		    objfile_debug_name (objfile), name,
 		    domain_name (domain), global,
-		    host_address_to_string (callback),
-		    host_address_to_string (data),
 		    plongest ((LONGEST) match),
 		    host_address_to_string (ordered_compare));
 
   debug_data->real_sf->qf->map_matching_symbols (objfile, name,
 						 domain, global,
-						 callback, data,
+						 callback,
 						 match,
 						 ordered_compare);
 }

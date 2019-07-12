@@ -4184,13 +4184,13 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
 }
 
 static void
-dw2_map_matching_symbols (struct objfile *objfile,
-			  const char * name, domain_enum domain,
-			  int global,
-			  int (*callback) (const struct block *,
-					   struct symbol *, void *),
-			  void *data, symbol_name_match_type match,
-			  symbol_compare_ftype *ordered_compare)
+dw2_map_matching_symbols
+  (struct objfile *objfile,
+   const char * name, domain_enum domain,
+   int global,
+   gdb::function_view<symbol_found_callback_ftype> callback,
+   symbol_name_match_type match,
+   symbol_compare_ftype *ordered_compare)
 {
   /* Currently unimplemented; used for Ada.  The function can be called if the
      current language is Ada for a non-Ada objfile using GNU index.  As Ada
