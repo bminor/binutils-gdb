@@ -1,3 +1,8 @@
+2019-07-15  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_fix_symbol_flags): If the def for an
+	alias is no longer bfd_link_hash_defined, clear the alias.
+
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_omit_section_dynsym_default): Don't keep

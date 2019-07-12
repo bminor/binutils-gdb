@@ -2918,8 +2918,16 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 
       /* If the real definition is defined by a regular object file,
 	 don't do anything special.  See the longer description in
-	 _bfd_elf_adjust_dynamic_symbol, below.  */
-      if (def->def_regular)
+	 _bfd_elf_adjust_dynamic_symbol, below.  If the def is not
+	 bfd_link_hash_defined as it was when put on the alias list
+	 then it must have originally been a versioned symbol (for
+	 which a non-versioned indirect symbol is created) and later
+	 a definition for the non-versioned symbol is found.  In that
+	 case the indirection is flipped with the versioned symbol
+	 becoming an indirect pointing at the non-versioned symbol.
+	 Thus, not an alias any more.  */
+      if (def->def_regular
+	  || def->root.type != bfd_link_hash_defined)
 	{
 	  h = def;
 	  while ((h = h->u.alias) != def)
@@ -2932,7 +2940,6 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	  BFD_ASSERT (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak);
 	  BFD_ASSERT (def->def_dynamic);
-	  BFD_ASSERT (def->root.type == bfd_link_hash_defined);
 	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, def, h);
 	}
     }
