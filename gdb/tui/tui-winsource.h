@@ -135,6 +135,10 @@ public:
   virtual void maybe_update (struct frame_info *fi, symtab_and_line sal,
 			     int line_no, CORE_ADDR addr) = 0;
 
+  void update_source_window_as_is  (struct gdbarch *gdbarch,
+				    struct symtab *s,
+				    struct tui_line_or_address line_or_addr);
+
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
@@ -246,9 +250,6 @@ extern void tui_display_main (void);
 extern void tui_update_source_window (struct tui_source_window_base *, 
 				      struct gdbarch *, struct symtab *,
 				      struct tui_line_or_address);
-extern void tui_update_source_window_as_is (struct tui_source_window_base *,
-					    struct gdbarch *, struct symtab *,
-					    struct tui_line_or_address);
 extern void tui_update_source_windows_with_addr (struct gdbarch *, CORE_ADDR);
 extern void tui_update_source_windows_with_line (struct symtab *, 
 						 int);

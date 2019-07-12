@@ -76,38 +76,37 @@ tui_update_source_window (struct tui_source_window_base *win_info,
 			  struct tui_line_or_address line_or_addr)
 {
   win_info->horizontal_offset = 0;
-  tui_update_source_window_as_is (win_info, gdbarch, s, line_or_addr);
+  win_info->update_source_window_as_is (gdbarch, s, line_or_addr);
 }
 
 
 /* Function to display source in the source/asm window.  This function
    shows the source as specified by the horizontal offset.  */
 void
-tui_update_source_window_as_is (struct tui_source_window_base *win_info, 
-				struct gdbarch *gdbarch,
-				struct symtab *s,
-				struct tui_line_or_address line_or_addr)
+tui_source_window_base::update_source_window_as_is
+  (struct gdbarch *gdbarch,
+   struct symtab *s,
+   struct tui_line_or_address line_or_addr)
 {
   enum tui_status ret;
 
-  if (win_info->type == SRC_WIN)
-    ret = tui_set_source_content (win_info, s, line_or_addr.u.line_no);
+  if (type == SRC_WIN)
+    ret = tui_set_source_content (this, s, line_or_addr.u.line_no);
   else
-    ret = tui_set_disassem_content (win_info, gdbarch, line_or_addr.u.addr);
+    ret = tui_set_disassem_content (this, gdbarch, line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
-    win_info->erase_source_content ();
+    erase_source_content ();
   else
     {
-      tui_update_breakpoint_info (win_info, nullptr, false);
-      win_info->show_source_content ();
-      win_info->update_exec_info ();
-      if (win_info->type == SRC_WIN)
+      tui_update_breakpoint_info (this, nullptr, false);
+      show_source_content ();
+      update_exec_info ();
+      if (type == SRC_WIN)
 	{
 	  symtab_and_line sal;
 
-	  sal.line = line_or_addr.u.line_no +
-	    (win_info->content.size () - 2);
+	  sal.line = line_or_addr.u.line_no + (content.size () - 2);
 	  sal.symtab = s;
 	  sal.pspace = SYMTAB_PSPACE (s);
 	  set_current_source_symtab_and_line (sal);
@@ -115,7 +114,7 @@ tui_update_source_window_as_is (struct tui_source_window_base *win_info,
 	     we don't have a split layout.  */
 	  if (tui_win_with_focus () == TUI_DISASM_WIN
 	      && tui_current_layout () != SRC_DISASSEM_COMMAND)
-	    tui_set_win_focus_to (win_info);
+	    tui_set_win_focus_to (this);
 	}
     }
 }
@@ -387,8 +386,7 @@ tui_source_window_base::refill ()
 	   : cursal.symtab);
     }
 
-  tui_update_source_window_as_is (this, gdbarch, s,
-				  content[0].line_or_addr);
+  update_source_window_as_is (gdbarch, s, content[0].line_or_addr);
 }
 
 /* Scroll the source forward or backward horizontally.  */

@@ -367,8 +367,7 @@ tui_disasm_window::do_scroll_vertical (int num_to_scroll)
 
       val.loa = LOA_ADDRESS;
       val.u.addr = tui_find_disassembly_address (gdbarch, pc, num_to_scroll);
-      tui_update_source_window_as_is (this, gdbarch,
-				      NULL, val);
+      update_source_window_as_is (gdbarch, NULL, val);
     }
 }
 

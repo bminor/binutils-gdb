@@ -205,7 +205,7 @@ tui_show_symtab_source (tui_source_window_base *win_info,
 			struct tui_line_or_address line)
 {
   win_info->horizontal_offset = 0;
-  tui_update_source_window_as_is (win_info, gdbarch, s, line);
+  win_info->update_source_window_as_is (gdbarch, s, line);
 }
 
 
