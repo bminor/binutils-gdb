@@ -53,10 +53,7 @@ set func_in_c(ada_syntax)    "${decimal}:	procedure proc_in_c;"
 set func_in_ada(c_syntax)    "${decimal}:	void proc_in_ada\\\(void\\\);"
 set func_in_ada(ada_syntax)  "${decimal}:	procedure proc_in_ada;"
 
-set type_in_c(c_syntax) [multi_line \
-			    "${decimal}:	typedef struct {" \
-			    "    int some_component_in_c;" \
-			    "} some_type_in_c;" ]
+set type_in_c(c_syntax) "${decimal}:	typedef struct {\\.\\.\\.} some_type_in_c;"
 set type_in_c(ada_syntax) [multi_line \
 			      "${decimal}:	record" \
 			      "    some_component_in_c: int;" \

@@ -1,5 +1,11 @@
 2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.ada/info_auto_lang.exp: Update expected results.
+	* gdb.base/info-types.c: Add additional types to check.
+	* gdb.base/info-types.exp: Update expected results.
+
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/info-types.c: New file.
 	* gdb.base/info-types.exp: New file.
 

@@ -38,6 +38,37 @@ enum enum_t
 typedef enum enum_t my_enum_t;
 typedef my_enum_t nested_enum_t;
 
+typedef struct
+{
+  double d;
+  float f;
+} anon_struct_t;
+
+typedef anon_struct_t nested_anon_struct_t;
+
+typedef enum
+{
+ DD, EE, FF
+} anon_enum_t;
+
+typedef anon_enum_t nested_anon_enum_t;
+
+union union_t
+{
+  int i;
+  float f;
+};
+
+typedef union union_t nested_union_t;
+
+typedef union
+{
+  int i;
+  double d;
+} anon_union_t;
+
+typedef anon_union_t nested_anon_union_t;
+
 volatile int var_a;
 volatile float var_b;
 volatile my_int_t var_c;
@@ -53,6 +84,14 @@ volatile baz_ptr var_l;
 volatile enum enum_t var_m;
 volatile my_enum_t var_n;
 volatile nested_enum_t var_o;
+volatile anon_struct_t var_p;
+volatile nested_anon_struct_t var_q;
+volatile anon_enum_t var_r;
+volatile nested_anon_enum_t var_s;
+volatile union union_t var_t;
+volatile nested_union_t var_u;
+volatile anon_union_t var_v;
+volatile nested_anon_union_t var_w;
 
 #ifdef __cplusplus
 

@@ -1,5 +1,10 @@
 2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* c-typeprint.c (c_print_typedef): Pass -1 instead of 0 to
+	type_print.
+
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* symtab.c (search_symbols): Adjust msymbol matching type arrays
 	so that GDB doesn't match any msymbols when searching in the
 	TYPES_DOMAIN.

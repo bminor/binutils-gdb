@@ -205,7 +205,7 @@ c_print_typedef (struct type *type,
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "typedef ");
-  type_print (type, "", stream, 0);
+  type_print (type, "", stream, -1);
   if (TYPE_NAME ((SYMBOL_TYPE (new_symbol))) == 0
       || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
 		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0
