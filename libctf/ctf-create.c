@@ -170,31 +170,37 @@ ctf_copy_emembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 
 /* Sort a newly-constructed static variable array.  */
 
+typedef struct ctf_sort_var_arg_cb
+{
+  ctf_file_t *fp;
+  ctf_strs_t *strtab;
+} ctf_sort_var_arg_cb_t;
+
 static int
-ctf_sort_var (const void *one_, const void *two_, void *strtab_)
+ctf_sort_var (const void *one_, const void *two_, void *arg_)
 {
   const ctf_varent_t *one = one_;
   const ctf_varent_t *two = two_;
-  const char *strtab = strtab_;
-  const char *n1 = strtab + CTF_NAME_OFFSET (one->ctv_name);
-  const char *n2 = strtab + CTF_NAME_OFFSET (two->ctv_name);
+  ctf_sort_var_arg_cb_t *arg = arg_;
 
-  return (strcmp (n1, n2));
+  return (strcmp (ctf_strraw_explicit (arg->fp, one->ctv_name, arg->strtab),
+		  ctf_strraw_explicit (arg->fp, two->ctv_name, arg->strtab)));
 }
 
 /* If the specified CTF container is writable and has been modified, reload this
    container with the updated type definitions.  In order to make this code and
    the rest of libctf as simple as possible, we perform updates by taking the
    dynamic type definitions and creating an in-memory CTF file containing the
-   definitions, and then call ctf_simple_open() on it.  This not only leverages
-   ctf_simple_open(), but also avoids having to bifurcate the rest of the library
-   code with different lookup paths for static and dynamic type definitions.  We
-   are therefore optimizing greatly for lookup over update, which we assume will
-   be an uncommon operation.  We perform one extra trick here for the benefit of
-   callers and to keep our code simple: ctf_simple_open() will return a new
-   ctf_file_t, but we want to keep the fp constant for the caller, so after
-   ctf_simple_open() returns, we use memcpy to swap the interior of the old and
-   new ctf_file_t's, and then free the old.  */
+   definitions, and then call ctf_simple_open_internal() on it.  This not only
+   leverages ctf_simple_open(), but also avoids having to bifurcate the rest of
+   the library code with different lookup paths for static and dynamic type
+   definitions.  We are therefore optimizing greatly for lookup over update,
+   which we assume will be an uncommon operation.  We perform one extra trick
+   here for the benefit of callers and to keep our code simple:
+   ctf_simple_open_internal() will return a new ctf_file_t, but we want to keep
+   the fp constant for the caller, so after ctf_simple_open_internal() returns,
+   we use memcpy to swap the interior of the old and new ctf_file_t's, and then
+   free the old.  */
 int
 ctf_update (ctf_file_t *fp)
 {
@@ -412,10 +418,17 @@ ctf_update (ctf_file_t *fp)
   strtab = ctf_str_write_strtab (fp);
   ctf_str_purge_refs (fp);
 
+  if (strtab.cts_strs == NULL)
+    {
+      ctf_free (buf);
+      return (ctf_set_errno (fp, EAGAIN));
+    }
+
   /* Now the string table is constructed, we can sort the buffer of
      ctf_varent_t's.  */
+  ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) &strtab };
   ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var,
-	       strtab.cts_strs);
+               &sort_var_arg);
 
   if ((newbuf = ctf_realloc (fp, buf, buf_size + strtab.cts_len)) == NULL)
     {
@@ -433,8 +446,9 @@ ctf_update (ctf_file_t *fp)
   /* Finally, we are ready to ctf_simple_open() the new container.  If this
      is successful, we then switch nfp and fp and free the old container.  */
 
-  if ((nfp = ctf_simple_open ((char *) buf, buf_size, NULL, 0, 0, NULL,
-			      0, &err)) == NULL)
+  if ((nfp = ctf_simple_open_internal ((char *) buf, buf_size, NULL, 0,
+				       0, NULL, 0, fp->ctf_syn_ext_strtab,
+				       &err)) == NULL)
     {
       ctf_free (buf);
       return (ctf_set_errno (fp, err));
@@ -456,6 +470,7 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_dtoldid = fp->ctf_dtnextid - 1;
   nfp->ctf_snapshots = fp->ctf_snapshots + 1;
   nfp->ctf_specific = fp->ctf_specific;
+  nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
 
@@ -465,6 +480,7 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_str_atoms = fp->ctf_str_atoms;
   fp->ctf_str_atoms = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
+  fp->ctf_syn_ext_strtab = NULL;
 
   fp->ctf_dvhash = NULL;
   memset (&fp->ctf_dvdefs, 0, sizeof (ctf_list_t));

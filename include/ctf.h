@@ -353,6 +353,7 @@ union
 
 #define CTF_NAME_STID(name)		((name) >> 31)
 #define CTF_NAME_OFFSET(name)		((name) & CTF_MAX_NAME)
+#define CTF_SET_STID(name, stid)	((name) | (stid) << 31)
 
 /* V2 only. */
 #define CTF_TYPE_INFO(kind, isroot, vlen) \
