@@ -470,6 +470,8 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_dtoldid = fp->ctf_dtnextid - 1;
   nfp->ctf_snapshots = fp->ctf_snapshots + 1;
   nfp->ctf_specific = fp->ctf_specific;
+  nfp->ctf_link_inputs = fp->ctf_link_inputs;
+  nfp->ctf_link_outputs = fp->ctf_link_outputs;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
@@ -480,6 +482,8 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_str_atoms = fp->ctf_str_atoms;
   fp->ctf_str_atoms = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
+  fp->ctf_link_inputs = NULL;
+  fp->ctf_link_outputs = NULL;
   fp->ctf_syn_ext_strtab = NULL;
 
   fp->ctf_dvhash = NULL;

@@ -65,6 +65,28 @@ typedef struct ctf_sect
   size_t cts_entsize;		  /* Size of each section entry (symtab only).  */
 } ctf_sect_t;
 
+/* A minimal symbol extracted from a linker's internal symbol table
+   representation.  */
+
+typedef struct ctf_link_sym
+{
+  /* The st_name will not be accessed outside the call to
+     ctf_link_shuffle_syms().  */
+
+  const char *st_name;
+  uint32_t st_shndx;
+  uint32_t st_type;
+  uint32_t st_value;
+} ctf_link_sym_t;
+
+/* Indication of how to share types when linking.  */
+
+/* Share all types thare are not in conflict.  The default.  */
+#define CTF_LINK_SHARE_UNCONFLICTED 0x0
+
+/* Share only types that are used by multiple inputs.  Not implemented yet.  */
+#define CTF_LINK_SHARE_DUPLICATED 0x1
+
 /* Symbolic names for CTF sections.  */
 
 typedef enum ctf_sect_names
@@ -145,7 +167,7 @@ enum
    ECTF_NOSYMTAB,		/* Symbol table data is not available.  */
    ECTF_NOPARENT,		/* Parent CTF container is not available.  */
    ECTF_DMODEL,			/* Data model mismatch.  */
-   ECTF_UNUSED,			/* Unused error.  */
+   ECTF_LINKADDEDLATE,		/* File added to link too late.  */
    ECTF_ZALLOC,			/* Failed to allocate (de)compression buffer.  */
    ECTF_DECOMPRESS,		/* Failed to decompress CTF data.  */
    ECTF_STRTAB,			/* String table for this string is missing.  */
@@ -180,7 +202,8 @@ enum
    ECTF_ARNNAME,		/* Name not found in CTF archive.  */
    ECTF_SLICEOVERFLOW,		/* Overflow of type bitness or offset in slice.  */
    ECTF_DUMPSECTUNKNOWN,	/* Unknown section number in dump.  */
-   ECTF_DUMPSECTCHANGED		/* Section changed in middle of dump.  */
+   ECTF_DUMPSECTCHANGED,	/* Section changed in middle of dump.  */
+   ECTF_NOTYET			/* Feature not yet implemented.  */
   };
 
 /* The CTF data model is inferred to be the caller's data model or the data
@@ -384,6 +407,18 @@ extern int ctf_write (ctf_file_t *, int);
 extern int ctf_gzwrite (ctf_file_t *fp, gzFile fd);
 extern int ctf_compress_write (ctf_file_t * fp, int fd);
 extern unsigned char *ctf_write_mem (ctf_file_t *, size_t *, size_t threshold);
+
+extern int ctf_link_add_ctf (ctf_file_t *, ctf_archive_t *, const char *);
+extern int ctf_link (ctf_file_t *, int share_mode);
+typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
+extern int ctf_link_add_strtab (ctf_file_t *, ctf_link_strtab_string_f *,
+				void *);
+typedef ctf_link_sym_t *ctf_link_iter_symbol_f (ctf_link_sym_t *dest,
+						void *arg);
+extern int ctf_link_shuffle_syms (ctf_file_t *, ctf_link_iter_symbol_f *,
+				  void *);
+extern unsigned char *ctf_link_write (ctf_file_t *, size_t *size,
+				      size_t threshold);
 
 extern void ctf_setdebug (int debug);
 extern int ctf_getdebug (void);

@@ -1,5 +1,23 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (struct ctf_link_sym): New, a symbol in flight to the
+	libctf linking machinery.
+	(CTF_LINK_SHARE_UNCONFLICTED): New.
+	(CTF_LINK_SHARE_DUPLICATED): New.
+	(ECTF_LINKADDEDLATE): New, replacing ECTF_UNUSED.
+	(ECTF_NOTYET): New, a 'not yet implemented' message.
+	(ctf_link_add_ctf): New, add an input file's CTF to the link.
+	(ctf_link): New, merge the type and string sections.
+	(ctf_link_strtab_string_f): New, callback for feeding strtab info.
+	(ctf_link_iter_symbol_f): New, callback for feeding symtab info.
+	(ctf_link_add_strtab): New, tell the CTF linker about the ELF
+	strtab's strings.
+	(ctf_link_shuffle_syms): New, ask the CTF linker to shuffle its
+	symbols into symtab order.
+	(ctf_link_write): New, ask the CTF linker to write the CTF out.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_arc_write_fd): New.
 	(ctf_write_mem): Likewise.
 	(ctf_gzwrite): Spacing fix.
