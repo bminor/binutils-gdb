@@ -1,5 +1,18 @@
 2019-08-06  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (patch_block_stabs, read_one_struct_field)
+	(read_enum_type): Use obstack_strndup.
+	* rust-exp.y (rust_parser::copy_name): Use obstack_strndup.
+	* gdb_obstack.h (obstack_strndup): Use obstack_strndup.
+	* dwarf2read.c (guess_full_die_structure_name)
+	(anonymous_struct_prefix): Use obstack_strndup.
+	* dbxread.c (cp_set_block_scope): Use obstack_strndup.
+	* c-exp.y (yylex): Use obstack_strndup.
+	* ada-exp.y (write_object_renaming, write_ambiguous_var)
+	(write_var_or_type): Use obstack_strndup.
+
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Use obstack_strdup.
 	* stabsread.c (read_type): Use obstack_strdup.
 	* gdb_obstack.h (obstack_strdup): New overload.

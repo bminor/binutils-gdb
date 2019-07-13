@@ -1011,7 +1011,7 @@ static const struct token_info operator_tokens[] =
 const char *
 rust_parser::copy_name (const char *name, int len)
 {
-  return (const char *) obstack_copy0 (&obstack, name, len);
+  return obstack_strndup (&obstack, name, len);
 }
 
 /* Helper function to make an stoken from a C string.  */

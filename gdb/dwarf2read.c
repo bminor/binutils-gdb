@@ -22334,7 +22334,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 		      if (actual_name_len > die_name_len + 2
 			  && actual_name[actual_name_len
 					 - die_name_len - 1] == ':')
-			name = (char *) obstack_copy0 (
+			name = obstack_strndup (
 			  &objfile->per_bfd->storage_obstack,
 			  actual_name, actual_name_len - die_name_len - 2);
 		    }
@@ -22378,9 +22378,9 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
     return "";
 
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-  return (char *) obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				 DW_STRING (attr),
-				 &base[-1] - DW_STRING (attr));
+  return obstack_strndup (&objfile->per_bfd->storage_obstack,
+			  DW_STRING (attr),
+			  &base[-1] - DW_STRING (attr));
 }
 
 /* Return the name of the namespace/class that DIE is defined within,

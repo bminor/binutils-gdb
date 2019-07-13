@@ -105,6 +105,17 @@ obstack_strdup (struct obstack *obstackp, const std::string &string)
 				 string.size ());
 }
 
+/* Duplicate the first N characters of STRING, returning a
+   \0-terminated string that's allocated on the obstack OBSTACKP.
+   Note that exactly N characters are copied, even if STRING is
+   shorter.  */
+
+static inline char *
+obstack_strndup (struct obstack *obstackp, const char *string, size_t n)
+{
+  return (char *) obstack_copy0 (obstackp, string, n);
+}
+
 /* An obstack that frees itself on scope exit.  */
 struct auto_obstack : obstack
 {

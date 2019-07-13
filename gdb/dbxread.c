@@ -2354,8 +2354,7 @@ cp_set_block_scope (const struct symbol *symbol,
       const char *name = SYMBOL_DEMANGLED_NAME (symbol);
       unsigned int prefix_len = cp_entire_prefix_len (name);
 
-      block_set_scope (block,
-		       (const char *) obstack_copy0 (obstack, name, prefix_len),
+      block_set_scope (block, obstack_strndup (obstack, name, prefix_len),
 		       obstack);
     }
 }
