@@ -271,6 +271,12 @@ _bfd_elf_strtab_size (struct elf_strtab_hash *tab)
 }
 
 bfd_size_type
+_bfd_elf_strtab_len (struct elf_strtab_hash *tab)
+{
+  return tab->size;
+}
+
+bfd_size_type
 _bfd_elf_strtab_offset (struct elf_strtab_hash *tab, size_t idx)
 {
   struct elf_strtab_hash_entry *entry;
@@ -283,6 +289,19 @@ _bfd_elf_strtab_offset (struct elf_strtab_hash *tab, size_t idx)
   BFD_ASSERT (entry->refcount > 0);
   entry->refcount--;
   return tab->array[idx]->u.index;
+}
+
+const char *
+_bfd_elf_strtab_str (struct elf_strtab_hash *tab, size_t idx,
+		     bfd_size_type *offset)
+{
+  if (idx == 0)
+    return 0;
+  BFD_ASSERT (idx < tab->size);
+  BFD_ASSERT (tab->sec_size);
+  if (offset)
+    *offset = tab->array[idx]->u.index;
+  return tab->array[idx]->root.string;
 }
 
 bfd_boolean

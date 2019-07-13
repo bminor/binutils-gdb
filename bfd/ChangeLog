@@ -1,5 +1,11 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* elf-strtab.c (_bfd_elf_strtab_len): New.
+	(_bfd_elf_strtab_str): Likewise.
+	* bfd-elf.h: Declare them.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* elf-bfd.h (bfd_elf_get_str_section): Add.
 	* elf.c (bfd_elf_get_str_section): No longer static.
 

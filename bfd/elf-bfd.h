@@ -2252,8 +2252,12 @@ extern void _bfd_elf_strtab_restore
   (struct elf_strtab_hash *, void *);
 extern bfd_size_type _bfd_elf_strtab_size
   (struct elf_strtab_hash *);
+extern bfd_size_type _bfd_elf_strtab_len
+  (struct elf_strtab_hash *);
 extern bfd_size_type _bfd_elf_strtab_offset
   (struct elf_strtab_hash *, size_t);
+extern const char * _bfd_elf_strtab_str
+  (struct elf_strtab_hash *, size_t idx, size_t *offset);
 extern bfd_boolean _bfd_elf_strtab_emit
   (bfd *, struct elf_strtab_hash *);
 extern void _bfd_elf_strtab_finalize
