@@ -1,5 +1,9 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_reg_command): Remove NULL check.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.h (struct tui_source_window): Update.
 	* tui/tui-regs.c (tui_show_registers): Update.
 	* tui/tui-disasm.h (struct tui_disasm_window): Update.
