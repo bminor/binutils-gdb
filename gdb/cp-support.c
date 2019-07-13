@@ -244,7 +244,7 @@ inspect_type (struct demangle_parse_info *info,
 	    }
 
 	  len = buf.size ();
-	  name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
+	  name = obstack_strdup (&info->obstack, buf.string ());
 
 	  /* Turn the result into a new tree.  Note that this
 	     tree will contain pointers into NAME, so NAME cannot
@@ -315,9 +315,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 
 	  buf.write (d_left (comp)->u.s_name.s, d_left (comp)->u.s_name.len);
 	  newobj.type = DEMANGLE_COMPONENT_NAME;
-	  newobj.u.s_name.s
-	    = (char *) obstack_copy0 (&info->obstack,
-				      buf.c_str (), buf.size ());
+	  newobj.u.s_name.s = obstack_strdup (&info->obstack, buf.string ());
 	  newobj.u.s_name.len = buf.size ();
 	  if (inspect_type (info, &newobj, finder, data))
 	    {
@@ -379,9 +377,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	 with a DEMANGLE_COMPONENT_NAME node containing the whole
 	 name.  */
       ret_comp->type = DEMANGLE_COMPONENT_NAME;
-      ret_comp->u.s_name.s
-	= (char *) obstack_copy0 (&info->obstack,
-				  buf.c_str (), buf.size ());
+      ret_comp->u.s_name.s = obstack_strdup (&info->obstack, buf.string ());
       ret_comp->u.s_name.len = buf.size ();
       inspect_type (info, ret_comp, finder, data);
     }

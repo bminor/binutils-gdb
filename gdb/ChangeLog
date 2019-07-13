@@ -1,5 +1,17 @@
 2019-08-06  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (reread_symbols): Use obstack_strdup.
+	* stabsread.c (read_type): Use obstack_strdup.
+	* gdb_obstack.h (obstack_strdup): New overload.
+	* dwarf2read.c (dwarf2_compute_name, create_dwo_unit_in_dwp_v1)
+	(create_dwo_unit_in_dwp_v2, build_error_marker_type)
+	(dwarf2_canonicalize_name): Use obstack_strdup.
+	* dbxread.c (read_dbx_symtab): Use obstack_strdup.
+	* cp-support.c (inspect_type, replace_typedefs_qualified_name):
+	Use obstack_strdup.
+
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
 	* gdb_obstack.h (obstack_strdup): Define.
 	* gdb_obstack.c (obstack_strdup): Don't define.
 

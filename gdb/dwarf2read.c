@@ -10945,10 +10945,8 @@ dwarf2_compute_name (const char *name,
 	     INTERMEDIATE_NAME is already canonical, then we need to
 	     copy it to the appropriate obstack.  */
 	  if (canonical_name == NULL || canonical_name == intermediate_name.c_str ())
-	    name = ((const char *)
-		    obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				   intermediate_name.c_str (),
-				   intermediate_name.length ()));
+	    name = obstack_strdup (&objfile->per_bfd->storage_obstack,
+				   intermediate_name);
 	  else
 	    name = canonical_name;
 	}
@@ -12416,10 +12414,8 @@ create_dwo_unit_in_dwp_v1 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      virtual_dwo_name.c_str ());
 	}
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name
-	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
-					virtual_dwo_name.c_str (),
-					virtual_dwo_name.size ());
+      dwo_file->dwo_name = obstack_strdup (&objfile->objfile_obstack,
+					   virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev = sections.abbrev;
       dwo_file->sections.line = sections.line;
@@ -12614,10 +12610,8 @@ create_dwo_unit_in_dwp_v2 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      virtual_dwo_name.c_str ());
 	}
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name
-	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
-					virtual_dwo_name.c_str (),
-					virtual_dwo_name.size ());
+      dwo_file->dwo_name = obstack_strdup (&objfile->objfile_obstack,
+					   virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev =
 	create_dwp_v2_section (dwarf2_per_objfile, &dwp_file->sections.abbrev,
@@ -22101,8 +22095,7 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
 		     objfile_name (objfile),
 		     sect_offset_str (cu->header.sect_off),
 		     sect_offset_str (die->sect_off));
-  saved = (char *) obstack_copy0 (&objfile->objfile_obstack,
-				  message.c_str (), message.length ());
+  saved = obstack_strdup (&objfile->objfile_obstack, message);
 
   return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
 }
@@ -22638,9 +22631,7 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
       if (!canon_name.empty ())
 	{
 	  if (canon_name != name)
-	    name = (const char *) obstack_copy0 (obstack,
-						 canon_name.c_str (),
-						 canon_name.length ());
+	    name = obstack_strdup (obstack, canon_name);
 	}
     }
 

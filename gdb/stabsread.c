@@ -1654,12 +1654,8 @@ again:
 
 	      std::string new_name = cp_canonicalize_string (name);
 	      if (!new_name.empty ())
-		{
-		  type_name
-		    = (char *) obstack_copy0 (&objfile->objfile_obstack,
-					      new_name.c_str (),
-					      new_name.length ());
-		}
+		type_name = obstack_strdup (&objfile->objfile_obstack,
+					    new_name);
 	    }
 	  if (type_name == NULL)
 	    {

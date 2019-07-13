@@ -1440,9 +1440,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      if (!new_name.empty ())
 		{
 		  sym_len = new_name.length ();
-		  sym_name = (char *) obstack_copy0 (&objfile->objfile_obstack,
-						     new_name.c_str (),
-						     sym_len);
+		  sym_name = obstack_strdup (&objfile->objfile_obstack,
+					     new_name);
 		}
 	    }
 

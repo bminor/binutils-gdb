@@ -95,6 +95,16 @@ obstack_strdup (struct obstack *obstackp, const char *string)
   return (char *) obstack_copy0 (obstackp, string, strlen (string));
 }
 
+/* Duplicate STRING, returning an equivalent string that's allocated on the
+   obstack OBSTACKP.  */
+
+static inline char *
+obstack_strdup (struct obstack *obstackp, const std::string &string)
+{
+  return (char *) obstack_copy0 (obstackp, string.c_str (),
+				 string.size ());
+}
+
 /* An obstack that frees itself on scope exit.  */
 struct auto_obstack : obstack
 {
