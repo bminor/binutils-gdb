@@ -1,5 +1,17 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c: New file, linking of the string and type sections.
+	* Makefile.am (libctf_a_SOURCES): Add it.
+	* Makefile.in: Regenerate.
+
+	* ctf-impl.h (ctf_file_t): New fields ctf_link_inputs,
+	ctf_link_outputs.
+	* ctf-create.c (ctf_update): Update accordingly.
+	* ctf-open.c (ctf_file_close): Likewise.
+	* ctf-error.c (_ctf_errlist): Updated with new errors.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_funcs): Check the right error value.
 
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>

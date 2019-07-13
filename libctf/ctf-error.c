@@ -33,7 +33,7 @@ static const char *const _ctf_errlist[] = {
   "Symbol table information is not available",	     /* ECTF_NOSYMTAB */
   "Type information is in parent and unavailable",   /* ECTF_NOPARENT */
   "Cannot import types with different data model",   /* ECTF_DMODEL */
-  "Unused error",				     /* ECTF_UNUSED */
+  "File added to link too late",		     /* ECTF_LINKADDEDLATE */
   "Failed to allocate (de)compression buffer",	     /* ECTF_ZALLOC */
   "Failed to decompress CTF data",		     /* ECTF_DECOMPRESS */
   "External string table is not available",	     /* ECTF_STRTAB */
@@ -68,7 +68,8 @@ static const char *const _ctf_errlist[] = {
   "Name not found in CTF archive",		     /* ECTF_ARNNAME */
   "Overflow of type bitness or offset in slice",     /* ECTF_SLICEOVERFLOW */
   "Unknown section number in dump",		     /* ECTF_DUMPSECTUNKNOWN */
-  "Section changed in middle of dump"		     /* ECTF_DUMPSECTCHANGED */
+  "Section changed in middle of dump",		     /* ECTF_DUMPSECTCHANGED */
+  "Feature not yet implemented"			     /* ECTF_NOTYET */
 };
 
 static const int _ctf_nerr = sizeof (_ctf_errlist) / sizeof (_ctf_errlist[0]);
