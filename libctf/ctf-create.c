@@ -2029,6 +2029,57 @@ ret:
   return err;
 }
 
+/* Optionally compress the specified CTF data stream and return it as a new
+   dynamically-allocated string.  */
+unsigned char *
+ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
+{
+  unsigned char *buf;
+  unsigned char *bp;
+  ctf_header_t *hp;
+  ssize_t header_len = sizeof (ctf_header_t);
+  ssize_t compress_len;
+  size_t max_compress_len = compressBound (fp->ctf_size);
+  int rc;
+
+  if (fp->ctf_size < threshold)
+    max_compress_len = fp->ctf_size;
+  if ((buf = malloc (max_compress_len
+		     + sizeof (struct ctf_header))) == NULL)
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return NULL;
+    }
+
+  hp = (ctf_header_t *) buf;
+  memcpy (hp, fp->ctf_header, header_len);
+  bp = buf + sizeof (struct ctf_header);
+  *size = sizeof (struct ctf_header);
+
+  compress_len = max_compress_len;
+
+  if (fp->ctf_size < threshold)
+    {
+      hp->cth_flags &= ~CTF_F_COMPRESS;
+      memcpy (bp, fp->ctf_buf, fp->ctf_size);
+      *size += fp->ctf_size;
+    }
+  else
+    {
+      hp->cth_flags |= CTF_F_COMPRESS;
+      if ((rc = compress (bp, (uLongf *) &compress_len,
+			  fp->ctf_buf, fp->ctf_size)) != Z_OK)
+	{
+	  ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
+	  ctf_set_errno (fp, ECTF_COMPRESS);
+	  ctf_free (buf);
+	  return NULL;
+	}
+      *size += compress_len;
+    }
+  return buf;
+}
+
 /* Write the uncompressed CTF data stream to the specified file descriptor.  */
 int
 ctf_write (ctf_file_t *fp, int fd)
