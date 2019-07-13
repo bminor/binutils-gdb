@@ -1,5 +1,12 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_arc_write): Split off, and reimplement in terms
+	of...
+	(ctf_arc_write_fd): ... this new function.
+	* ctf-create.c (ctf_write_mem): New.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_str_atom_t) <csa_offset>: New field.
 	(ctf_file_t) <ctf_syn_ext_strtab>: Likewise.
 	(ctf_str_add_ref): Name the last arg.
