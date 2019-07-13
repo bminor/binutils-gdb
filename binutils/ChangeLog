@@ -1,3 +1,9 @@
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
+	* readelf.c (dump_ctf_symtab_name): Give default value.
+	(dump_ctf_strtab_name): Likewise.
+	(dump_section_as_ctf): Allow for the null string.
+
 2019-07-08  Nick Alcock  <nick.alcock@oracle.com>
 
 	* objdump.c (dump_ctf_archive_member): Dump the CTF header.
