@@ -1,5 +1,26 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_file_t): New field ctf_link_type_mapping.
+	(struct ctf_link_type_mapping_key): New.
+	(ctf_hash_type_mapping_key): Likewise.
+	(ctf_hash_eq_type_mapping_key): Likewise.
+	(ctf_add_type_mapping): Likewise.
+	(ctf_type_mapping): Likewise.
+	(ctf_dynhash_empty): Likewise.
+	* ctf-open.c (ctf_file_close): Update accordingly.
+	* ctf-create.c (ctf_update): Likewise.
+	(ctf_add_type): Populate the mapping.
+	* ctf-hash.c (ctf_hash_type_mapping_key): Hash a type mapping key.
+	(ctf_hash_eq_type_mapping_key): Check the key for equality.
+	(ctf_dynhash_insert): Fix comment typo.
+	(ctf_dynhash_empty): New.
+	* ctf-link.c (ctf_add_type_mapping): New.
+	(ctf_type_mapping): Likewise.
+	(empty_link_type_mapping): New.
+	(ctf_link_one_input_archive): Call it.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c: New file, linking of the string and type sections.
 	* Makefile.am (libctf_a_SOURCES): Add it.
 	* Makefile.in: Regenerate.

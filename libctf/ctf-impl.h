@@ -204,6 +204,17 @@ typedef struct ctf_str_atom_ref
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
 
+/* The structure used as the key in a ctf_link_type_mapping, which lets the
+   linker machinery determine which type IDs on the input side of a link map to
+   which types on the output side.  (The value is a ctf_id_t: another
+   index, not a type.)  */
+
+typedef struct ctf_link_type_mapping_key
+{
+  ctf_file_t *cltm_fp;
+  ctf_id_t cltm_idx;
+} ctf_link_type_mapping_key_t;
+
 /* The ctf_file is the structure used to represent a CTF container to library
    clients, who see it only as an opaque pointer.  Modifications can therefore
    be made freely to this structure without regard to client versioning.  The
@@ -269,6 +280,7 @@ struct ctf_file
   ctf_archive_t *ctf_archive;	  /* Archive this ctf_file_t came from.  */
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
+  ctf_dynhash_t *ctf_link_type_mapping; /* Map input types to output types.  */
   char *ctf_tmp_typeslice;	  /* Storage for slicing up type names.  */
   size_t ctf_tmp_typeslicelen;	  /* Size of the typeslice.  */
   void *ctf_specific;		  /* Data for ctf_get/setspecific().  */
@@ -328,10 +340,12 @@ extern const ctf_type_t *ctf_lookup_by_id (ctf_file_t **, ctf_id_t);
 typedef unsigned int (*ctf_hash_fun) (const void *ptr);
 extern unsigned int ctf_hash_integer (const void *ptr);
 extern unsigned int ctf_hash_string (const void *ptr);
+extern unsigned int ctf_hash_type_mapping_key (const void *ptr);
 
 typedef int (*ctf_hash_eq_fun) (const void *, const void *);
 extern int ctf_hash_eq_integer (const void *, const void *);
 extern int ctf_hash_eq_string (const void *, const void *);
+extern int ctf_hash_eq_type_mapping_key (const void *, const void *);
 
 typedef void (*ctf_hash_free_fun) (void *);
 
@@ -349,6 +363,7 @@ extern ctf_dynhash_t *ctf_dynhash_create (ctf_hash_fun, ctf_hash_eq_fun,
 					  ctf_hash_free_fun, ctf_hash_free_fun);
 extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
+extern void ctf_dynhash_empty (ctf_dynhash_t *);
 extern void *ctf_dynhash_lookup (ctf_dynhash_t *, const void *);
 extern void ctf_dynhash_destroy (ctf_dynhash_t *);
 extern void ctf_dynhash_iter (ctf_dynhash_t *, ctf_hash_iter_f, void *);
@@ -370,6 +385,11 @@ extern ctf_dtdef_t *ctf_dynamic_type (const ctf_file_t *, ctf_id_t);
 extern int ctf_dvd_insert (ctf_file_t *, ctf_dvdef_t *);
 extern void ctf_dvd_delete (ctf_file_t *, ctf_dvdef_t *);
 extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_file_t *, const char *);
+
+extern void ctf_add_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
+				  ctf_file_t *dst_fp, ctf_id_t dst_type);
+extern ctf_id_t ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
+				  ctf_file_t **dst_fp);
 
 extern void ctf_decl_init (ctf_decl_t *);
 extern void ctf_decl_fini (ctf_decl_t *);

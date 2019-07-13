@@ -21,6 +21,103 @@
 #include <string.h>
 
 /* Type tracking machinery.  */
+
+/* Record the correspondence between a source and ctf_add_type()-added
+   destination type: both types are translated into parent type IDs if need be,
+   so they relate to the actual container they are in.  Outside controlled
+   circumstances (like linking) it is probably not useful to do more than
+   compare these pointers, since there is nothing stopping the user closing the
+   source container whenever they want to.
+
+   Our OOM handling here is just to not do anything, because this is called deep
+   enough in the call stack that doing anything useful is painfully difficult:
+   the worst consequence if we do OOM is a bit of type duplication anyway.  */
+
+void
+ctf_add_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
+		      ctf_file_t *dst_fp, ctf_id_t dst_type)
+{
+  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
+    src_fp = src_fp->ctf_parent;
+
+  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+
+  if (LCTF_TYPE_ISPARENT (dst_fp, dst_type) && dst_fp->ctf_parent)
+    dst_fp = dst_fp->ctf_parent;
+
+  dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
+
+  /* This dynhash is a bit tricky: it has a multivalued (structural) key, so we
+     need to use the sized-hash machinery to generate key hashing and equality
+     functions.  */
+
+  if (dst_fp->ctf_link_type_mapping == NULL)
+    {
+      ctf_hash_fun f = ctf_hash_type_mapping_key;
+      ctf_hash_eq_fun e = ctf_hash_eq_type_mapping_key;
+
+      if ((dst_fp->ctf_link_type_mapping = ctf_dynhash_create (f, e, free,
+							       NULL)) == NULL)
+	return;
+    }
+
+  ctf_link_type_mapping_key_t *key;
+  key = calloc (1, sizeof (struct ctf_link_type_mapping_key));
+  if (!key)
+    return;
+
+  key->cltm_fp = src_fp;
+  key->cltm_idx = src_type;
+
+  ctf_dynhash_insert (dst_fp->ctf_link_type_mapping, key,
+		      (void *) (uintptr_t) dst_type);
+}
+
+/* Look up a type mapping: return 0 if none.  The DST_FP is modified to point to
+   the parent if need be.  The ID returned is from the dst_fp's perspective.  */
+ctf_id_t
+ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type, ctf_file_t **dst_fp)
+{
+  ctf_link_type_mapping_key_t key;
+  ctf_file_t *target_fp = *dst_fp;
+  ctf_id_t dst_type = 0;
+
+  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
+    src_fp = src_fp->ctf_parent;
+
+  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+  key.cltm_fp = src_fp;
+  key.cltm_idx = src_type;
+
+  if (target_fp->ctf_link_type_mapping)
+    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
+					       &key);
+
+  if (dst_type != 0)
+    {
+      dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
+				     target_fp->ctf_parent != NULL);
+      *dst_fp = target_fp;
+      return dst_type;
+    }
+
+  if (target_fp->ctf_parent)
+    target_fp = target_fp->ctf_parent;
+  else
+    return 0;
+
+  if (target_fp->ctf_link_type_mapping)
+    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
+					       &key);
+
+  if (dst_type)
+    dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
+				   target_fp->ctf_parent != NULL);
+
+  *dst_fp = target_fp;
+  return dst_type;
+}
+
 /* Linker machinery.
 
    CTF linking consists of adding CTF archives full of content to be merged into
@@ -231,6 +328,17 @@ ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *ar
   return 0;
 }
 
+/* Dump the unnecessary link type mapping after one input file is processed.  */
+static void
+empty_link_type_mapping (void *key _libctf_unused_, void *value,
+                         void *arg _libctf_unused_)
+{
+  ctf_file_t *fp = (ctf_file_t *) value;
+
+  if (fp->ctf_link_type_mapping)
+    ctf_dynhash_empty (fp->ctf_link_type_mapping);
+}
+
 /* Link one input file's types into the output file.  */
 static void
 ctf_link_one_input_archive (void *key, void *value, void *arg_)
@@ -269,6 +377,11 @@ ctf_link_one_input_archive (void *key, void *value, void *arg_)
       ctf_set_errno (arg->out_fp, 0);
     }
   ctf_file_close (arg->main_input_fp);
+
+  /* Discard the now-unnecessary mapping table data.  */
+  if (arg->out_fp->ctf_link_type_mapping)
+    ctf_dynhash_empty (arg->out_fp->ctf_link_type_mapping);
+  ctf_dynhash_iter (arg->out_fp->ctf_link_outputs, empty_link_type_mapping, NULL);
 }
 
 /* Merge types and variable sections in all files added to the link
