@@ -211,6 +211,7 @@ typedef int ctf_member_f (const char *name, ctf_id_t membtype,
 typedef int ctf_enum_f (const char *name, int val, void *arg);
 typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
 typedef int ctf_type_f (ctf_id_t type, void *arg);
+typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
 typedef int ctf_label_f (const char *name, const ctf_lblinfo_t *info,
 			 void *arg);
 typedef int ctf_archive_member_f (ctf_file_t *fp, const char *name, void *arg);
@@ -317,6 +318,7 @@ extern int ctf_label_info (ctf_file_t *, const char *, ctf_lblinfo_t *);
 extern int ctf_member_iter (ctf_file_t *, ctf_id_t, ctf_member_f *, void *);
 extern int ctf_enum_iter (ctf_file_t *, ctf_id_t, ctf_enum_f *, void *);
 extern int ctf_type_iter (ctf_file_t *, ctf_type_f *, void *);
+extern int ctf_type_iter_all (ctf_file_t *, ctf_type_all_f *, void *);
 extern int ctf_label_iter (ctf_file_t *, ctf_label_f *, void *);
 extern int ctf_variable_iter (ctf_file_t *, ctf_variable_f *, void *);
 extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,

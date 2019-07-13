@@ -144,6 +144,27 @@ ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
   return 0;
 }
 
+/* Iterate over every type in the given CTF container, user-visible or not.
+   We pass the type ID of each type to the specified callback function.  */
+
+int
+ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
+{
+  ctf_id_t id, max = fp->ctf_typemax;
+  int rc, child = (fp->ctf_flags & LCTF_CHILD);
+
+  for (id = 1; id <= max; id++)
+    {
+      const ctf_type_t *tp = LCTF_INDEX_TO_TYPEPTR (fp, id);
+      if ((rc = func (LCTF_INDEX_TO_TYPE (fp, id, child),
+		      LCTF_INFO_ISROOT(fp, tp->ctt_info)
+		      ? CTF_ADD_ROOT : CTF_ADD_NONROOT, arg) != 0))
+	return rc;
+    }
+
+  return 0;
+}
+
 /* Iterate over every variable in the given CTF container, in arbitrary order.
    We pass the name of each variable to the specified callback function.  */
 
