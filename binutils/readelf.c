@@ -13944,7 +13944,13 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   data = get_section_contents (section, filedata);
   ctfsect.cts_data = data;
 
-  if (dump_ctf_symtab_name)
+  if (!dump_ctf_symtab_name)
+    dump_ctf_symtab_name = strdup (".symtab");
+
+  if (!dump_ctf_strtab_name)
+    dump_ctf_strtab_name = strdup (".strtab");
+
+  if (dump_ctf_symtab_name && dump_ctf_symtab_name[0] != 0)
     {
       if ((symtab_sec = find_section (filedata, dump_ctf_symtab_name)) == NULL)
 	{
@@ -13959,7 +13965,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       symsectp = shdr_to_ctf_sect (&symsect, symtab_sec, filedata);
       symsect.cts_data = symdata;
     }
-  if (dump_ctf_strtab_name)
+  if (dump_ctf_strtab_name && dump_ctf_symtab_name[0] != 0)
     {
       if ((strtab_sec = find_section (filedata, dump_ctf_strtab_name)) == NULL)
 	{

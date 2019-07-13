@@ -4850,7 +4850,8 @@ command to @command{ar}, but without using the BFD library.  @xref{ar}.
 @item --ctf-symbols=@var{section}
 @item --ctf-strings=@var{section}
 Specify the name of another section from which the CTF file can inherit
-strings and symbols.
+strings and symbols.  By default, the @code{.symtab} and its linked
+string table are used.
 
 If either of @option{--ctf-symbols} or @option{--ctf-strings} is specified, the
 other must be specified as well.
