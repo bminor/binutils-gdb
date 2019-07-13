@@ -1,3 +1,97 @@
+2019-09-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlang.h: (struct lang_input_statement_struct): Add the_ctf.
+	(struct elf_sym_strtab): Add forward.
+	(struct elf_strtab_hash): Likewise.
+	(ldlang_ctf_apply_strsym): Declare.
+	(ldlang_write_ctf_late): Likewise.
+	* ldemul.h (ldemul_emit_ctf_early): New.
+	(ldemul_examine_strtab_for_ctf): Likewise.
+	(ld_emulation_xfer_type) <emit_ctf_early>: Likewise.
+	(ld_emulation_xfer_type) <examine_strtab_for_ctf>: Likewise.
+	* ldemul.c (ldemul_emit_ctf_early): New.
+	(ldemul_examine_strtab_for_ctf): Likewise.
+	* ldlang.c: Include ctf-api.h.
+	(CTF_COMPRESSION_THRESHOLD): New.
+	(ctf_output): New. Initialized in...
+	(ldlang_open_ctf): ... this new function.  Open all the CTF
+	sections in the input files: mark them non-loaded and empty
+	so as not to copy their contents to the output, but linker-created
+	so the section gets created in the target.
+	(ldlang_merge_ctf): New, merge types via ctf_link_add_ctf and
+	ctf_link.
+	(ldlang_ctf_apply_strsym): New, an examine_strtab callback: wrap
+	ldemul_examine_strtab_for_ctf.
+	(lang_write_ctf): New, write out the CTF section.
+	(ldlang_write_ctf_late): New, late call via bfd's emit_ctf hook.
+	(lang_process): Call ldlang_open_ctf, ldlang_merge_ctf, and
+	lang_write_ctf.
+	* ldmain.c (link_callbacks): Add ldlang_ctf_apply_strsym,
+	ldlang_write_ctf_late.
+	* emultempl/aix.em: Add ctf-api.h.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* ldcref.c: Likewise.
+	* ldctor.c: Likewise.
+	* ldelf.c: Likewise.
+	* ldelfgen.c: Likewise.
+	* ldemul.c: Likewise.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldgram.c: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* ldver.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* mri.c: Likewise.
+	* pe-dll.c: Likewise.
+	* plugin.c: Likewise.
+
+	* ldelfgen.c (ldelf_emit_ctf_early): New.
+	(ldelf_examine_strtab_for_ctf): tell libctf about the symtab and
+	strtab.
+	(struct ctf_strsym_iter_cb_arg): New, state to do so.
+	(ldelf_ctf_strtab_iter_cb): New: tell libctf about
+	each string in the strtab in turn.
+	(ldelf_ctf_symbols_iter_cb): New, tell libctf
+	about each symbol in the symtab in turn.
+	* ldelfgen.h (struct elf_sym_strtab): Add forward.
+	(struct elf_strtab_hash): Likewise.
+	(struct ctf_file): Likewise.
+	(ldelf_emit_ctf_early): Declare.
+	(ldelf_examine_strtab_for_ctf): Likewise.
+	* emultempl/elf-generic.em (LDEMUL_EMIT_CTF_EARLY): Set it.
+	(LDEMUL_EXAMINE_STRTAB_FOR_CTF): Likewise.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Add
+	emit_ctf_early and examine_strtab_for_ctf, NULL by default.
+	* emultempl/armcoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/beos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/elf.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/generic.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/linux.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/msp430.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pe.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pep.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/ticoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/vanilla.em (ld_vanilla_emulation): Likewise.
+
+	* Makefile.am: Pull in libctf (and zlib, a transitive requirement
+	for compressed CTF section emission).  Pass it on to DejaGNU.
+	* configure.ac: Add AM_ZLIB.
+	* aclocal.m4: Added zlib.m4.
+	* Makefile.in: Regenerated.
+	* testsuite/ld-bootstrap/bootstrap.exp: Use it when relinking ld.
+
 2019-10-02  Alan Modra  <amodra@gmail.com>
 
 	* ld.texi (-Bsymbolic, -Bsymbolic-functions): Don't mention PIEs.

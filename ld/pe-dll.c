@@ -25,6 +25,7 @@
 #include "libiberty.h"
 #include "filenames.h"
 #include "safe-ctype.h"
+#include "ctf-api.h"
 
 #include <time.h>
 

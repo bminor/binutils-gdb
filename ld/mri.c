@@ -26,6 +26,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "ld.h"
 #include "ldexp.h"
 #include "ldlang.h"

@@ -27,6 +27,7 @@
 #include "safe-ctype.h"
 #include "getopt.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"

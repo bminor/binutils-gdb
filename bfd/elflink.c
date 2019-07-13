@@ -9539,6 +9539,14 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 				+ elfsym->destshndx_index));
     }
 
+  /* Allow the linker to examine the strtab and symtab now they are
+     populated.  */
+
+  if (flinfo->info->callbacks->examine_strtab)
+    flinfo->info->callbacks->examine_strtab (hash_table->strtab,
+					     hash_table->strtabcount,
+					     flinfo->symstrtab);
+
   hdr = &elf_tdata (flinfo->output_bfd)->symtab_hdr;
   pos = hdr->sh_offset + hdr->sh_size;
   amt = hash_table->strtabcount * bed->s->sizeof_sym;
@@ -11810,7 +11818,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* The object attributes have been merged.  Remove the input
      sections from the link, and set the contents of the output
-     secton.  */
+     section.  */
   std_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
@@ -12032,7 +12040,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       esdo->rel.count = 0;
       esdo->rela.count = 0;
 
-      if (esdo->this_hdr.sh_offset == (file_ptr) -1)
+      if ((esdo->this_hdr.sh_offset == (file_ptr) -1)
+	  && !bfd_section_is_ctf (o))
 	{
 	  /* Cache the section contents so that they can be compressed
 	     later.  Use bfd_malloc since it will be freed by
@@ -12048,10 +12057,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  /* We have now assigned file positions for all the sections except
-     .symtab, .strtab, and non-loaded reloc sections.  We start the
-     .symtab section at the current file position, and write directly
-     to it.  We build the .strtab section in memory.  */
+  /* We have now assigned file positions for all the sections except .symtab,
+     .strtab, and non-loaded reloc and compressed debugging sections.  We start
+     the .symtab section at the current file position, and write directly to it.
+     We build the .strtab section in memory.  */
   abfd->symcount = 0;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */
@@ -12836,6 +12845,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (! _bfd_elf_write_section_eh_frame_hdr (abfd, info))
     goto error_return;
+
+  if (info->callbacks->emit_ctf)
+      info->callbacks->emit_ctf ();
 
   elf_final_link_free (abfd, &flinfo);
 

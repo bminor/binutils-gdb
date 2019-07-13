@@ -2671,6 +2671,7 @@ static const struct bfd_elf_special_section special_sections_b[] =
 static const struct bfd_elf_special_section special_sections_c[] =
 {
   { STRING_COMMA_LEN (".comment"), 0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".ctf"),	0, SHT_PROGBITS,    0 },
   { NULL,			0, 0, 0,	    0 }
 };
 
@@ -5893,7 +5894,8 @@ is_debuginfo_file (bfd *abfd)
   return TRUE;
 }
 
-/* Assign file positions for the other sections.  */
+/* Assign file positions for the other sections, except for compressed debugging
+   and other sections assigned in _bfd_elf_assign_file_positions_for_non_load().  */
 
 static bfd_boolean
 assign_file_positions_for_non_load_sections (bfd *abfd,
@@ -5952,9 +5954,12 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	}
       else if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
 		&& hdr->bfd_section == NULL)
+	       /* We don't know the offset of these sections yet: their size has
+		  not been decided.  */
 	       || (hdr->bfd_section != NULL
-		   && (hdr->bfd_section->flags & SEC_ELF_COMPRESS))
-		   /* Compress DWARF debug sections.  */
+		   && (hdr->bfd_section->flags & SEC_ELF_COMPRESS
+		       || (bfd_section_is_ctf (hdr->bfd_section)
+			   && abfd->is_linker_output)))
 	       || hdr == i_shdrpp[elf_onesymtab (abfd)]
 	       || (elf_symtab_shndx_list (abfd) != NULL
 		   && hdr == i_shdrpp[elf_symtab_shndx_list (abfd)->ndx])
@@ -6222,11 +6227,12 @@ find_section_in_list (unsigned int i, elf_section_list * list)
    VMAs must be known before this is called.
 
    Reloc sections come in two flavours: Those processed specially as
-   "side-channel" data attached to a section to which they apply, and
-   those that bfd doesn't process as relocations.  The latter sort are
-   stored in a normal bfd section by bfd_section_from_shdr.   We don't
-   consider the former sort here, unless they form part of the loadable
-   image.  Reloc sections not assigned here will be handled later by
+   "side-channel" data attached to a section to which they apply, and those that
+   bfd doesn't process as relocations.  The latter sort are stored in a normal
+   bfd section by bfd_section_from_shdr.  We don't consider the former sort
+   here, unless they form part of the loadable image.  Reloc sections not
+   assigned here (and compressed debugging sections and CTF sections which
+   nothing else in the file can rely upon) will be handled later by
    assign_file_positions_for_relocs.
 
    We also don't set the positions of the .symtab and .strtab here.  */
@@ -6261,9 +6267,12 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  hdr = *hdrpp;
 	  if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
 	       && hdr->bfd_section == NULL)
+	      /* Do not assign offsets for these sections yet: we don't know
+		 their sizes.  */
 	      || (hdr->bfd_section != NULL
-		  && (hdr->bfd_section->flags & SEC_ELF_COMPRESS))
-		  /* Compress DWARF debug sections.  */
+		  && (hdr->bfd_section->flags & SEC_ELF_COMPRESS
+		      || (bfd_section_is_ctf (hdr->bfd_section)
+			  && abfd->is_linker_output)))
 	      || i == elf_onesymtab (abfd)
 	      || (elf_symtab_shndx_list (abfd) != NULL
 		  && hdr == i_shdrpp[elf_symtab_shndx_list (abfd)->ndx])
@@ -6471,10 +6480,12 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 	  asection *sec = shdrp->bfd_section;
 	  bfd_boolean is_rel = (shdrp->sh_type == SHT_REL
 				|| shdrp->sh_type == SHT_RELA);
+	  bfd_boolean is_ctf = sec && bfd_section_is_ctf (sec);
 	  if (is_rel
+	      || is_ctf
 	      || (sec != NULL && (sec->flags & SEC_ELF_COMPRESS)))
 	    {
-	      if (!is_rel)
+	      if (!is_rel && !is_ctf)
 		{
 		  const char *name = sec->name;
 		  struct bfd_elf_section_data *d;
@@ -6520,6 +6531,13 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 		  shdrp->contents = sec->contents;
 		  shdrp->bfd_section->contents = NULL;
 		}
+	      else if (is_ctf)
+		{
+		  /* Update section size and contents.	*/
+		  shdrp->sh_size = sec->size;
+		  shdrp->contents = sec->contents;
+		}
+
 	      off = _bfd_elf_assign_file_position_for_section (shdrp,
 							       off,
 							       TRUE);
@@ -9099,6 +9117,11 @@ _bfd_elf_set_section_contents (bfd *abfd,
   hdr = &elf_section_data (section)->this_hdr;
   if (hdr->sh_offset == (file_ptr) -1)
     {
+      if (bfd_section_is_ctf (section))
+	/* Nothing to do with this section: the contents are generated
+	   later.  */
+	return TRUE;
+
       /* We must compress this section.  Write output to the buffer.  */
       unsigned char *contents = hdr->contents;
       if ((offset + count) > hdr->sh_size

@@ -34,6 +34,12 @@ LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 am__skiplex =
 am__skipyacc =
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
+
 ELF_CLFAGS=-DELF_LIST_OPTIONS=@elf_list_options@ \
 	   -DELF_SHLIB_LIST_OPTIONS=@elf_shlib_list_options@ \
 	   -DELF_PLT_UNWIND_LIST_OPTIONS=@elf_plt_unwind_list_options@
@@ -145,12 +151,13 @@ AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
-AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @zlibinc@ \
 	@INCINTL@ $(HDEFINES) $(CFLAGS) $(PLUGIN_CFLAGS) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
+LIBCTF = ../libctf/libctf.a
 
 # These all start with e so 'make clean' can find them.
 ALL_EMULATION_SOURCES = \
@@ -959,8 +966,8 @@ ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmai
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C) \
 	ldbuildid.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
-		      $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
-ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
+		      $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL_DEP)
+ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL) $(ZLIB)
 
 # Dependency tracking for the generated emulation files.
 EXTRA_ld_new_SOURCES += $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
@@ -979,7 +986,7 @@ check-DEJAGNU: site.exp
 		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS_FOR_TARGET)" \
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
-		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
+		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" CTFLIB="$(LIBCTF) $(ZLIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \
 		DO_COMPARE="`echo '$(do_compare)' | sed -e 's,\\$$,,g'`" \
 		$(RUNTESTFLAGS); \

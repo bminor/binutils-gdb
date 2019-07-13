@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "ctf-api.h"
 #include "safe-ctype.h"
 #include "filenames.h"
 #include "demangle.h"

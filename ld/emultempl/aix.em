@@ -40,6 +40,7 @@ fragment <<EOF
 #include "getopt.h"
 #include "obstack.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 
 #include "ld.h"
 #include "ldmain.h"
@@ -1560,6 +1561,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   NULL,				/* recognized_file */
   NULL,				/* find potential_libraries */
   NULL,				/* new_vers_pattern */
-  NULL				/* extra_map_file_text */
+  NULL,				/* extra_map_file_text */
+  ${LDEMUL_EMIT_CTF_EARLY-NULL},
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
 };
 EOF

@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "bfdver.h"
+#include "ctf-api.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"

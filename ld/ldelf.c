@@ -24,6 +24,7 @@
 #include "filenames.h"
 #include "safe-ctype.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"

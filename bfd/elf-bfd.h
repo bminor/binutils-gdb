@@ -2257,7 +2257,7 @@ extern bfd_size_type _bfd_elf_strtab_len
 extern bfd_size_type _bfd_elf_strtab_offset
   (struct elf_strtab_hash *, size_t);
 extern const char * _bfd_elf_strtab_str
-  (struct elf_strtab_hash *, size_t idx, size_t *offset);
+  (struct elf_strtab_hash *, size_t idx, bfd_size_type *offset);
 extern bfd_boolean _bfd_elf_strtab_emit
   (bfd *, struct elf_strtab_hash *);
 extern void _bfd_elf_strtab_finalize
@@ -2964,6 +2964,14 @@ extern asection _bfd_elf_large_com_section;
      && ((INFO)->symbolic \
 	 || (H)->start_stop \
 	 || ((INFO)->dynamic && !(H)->dynamic)))
+
+/* Determine if a section contains CTF data, using its name.  */
+static inline bfd_boolean
+bfd_section_is_ctf (const asection *sec)
+{
+  const char *name = bfd_section_name (sec);
+  return strncmp (name, ".ctf", 4) == 0 && (name[4] == 0 || name[4] == '.');
+}
 
 #ifdef __cplusplus
 }

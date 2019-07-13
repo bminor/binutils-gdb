@@ -21,6 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "safe-ctype.h"
 #include "ld.h"
 #include "ldmisc.h"
