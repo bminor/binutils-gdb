@@ -71,6 +71,9 @@ tui_register_changed (struct frame_info *frame, int regno)
 {
   struct frame_info *fi;
 
+  if (!tui_is_window_visible (DATA_WIN))
+    return;
+
   /* The frame of the register that was changed may differ from the selected
      frame, but we only want to show the register values of the selected frame.
      And even if the frames differ a register change made in one can still show
@@ -80,7 +83,7 @@ tui_register_changed (struct frame_info *frame, int regno)
   if (tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
-      tui_check_register_values (fi);
+      TUI_DATA_WIN->check_register_values (fi);
       tui_refreshing_registers = 0;
     }
 }
@@ -152,7 +155,7 @@ tui_refresh_frame_and_register_information (int registers_too_p)
       && (frame_info_changed_p || registers_too_p))
     {
       tui_refreshing_registers = 1;
-      tui_check_register_values (fi);
+      TUI_DATA_WIN->check_register_values (fi);
       tui_refreshing_registers = 0;
     }
 }

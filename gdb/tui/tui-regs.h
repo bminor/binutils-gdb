@@ -100,6 +100,8 @@ struct tui_data_window : public tui_win_info
      started from.  If nothing is displayed (-1) is returned.  */
   int display_registers_from_line (int line_no);
 
+  void check_register_values (struct frame_info *frame);
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
@@ -120,7 +122,6 @@ protected:
   void rerender () override;
 };
 
-extern void tui_check_register_values (struct frame_info *);
 extern void tui_show_registers (struct reggroup *group);
 
 #endif /* TUI_TUI_REGS_H */

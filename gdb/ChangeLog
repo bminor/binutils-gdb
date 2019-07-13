@@ -1,5 +1,14 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <check_register_values>:
+	Declare.
+	(tui_check_register_values): Don't declare.
+	* tui/tui-regs.c (tui_data_window::check_register_values): Rename
+	from tui_check_register_values.
+	* tui/tui-hooks.c (tui_register_changed): Update.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reg_layout): Move later.
 	(tui_show_registers): Don't enable TUI mode or change layout.
 

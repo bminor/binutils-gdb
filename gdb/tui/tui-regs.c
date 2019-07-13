@@ -555,29 +555,24 @@ tui_data_window::refresh_window ()
    given a particular frame.  If the values have changed, they are
    updated with the new value and highlighted.  */
 void
-tui_check_register_values (struct frame_info *frame)
+tui_data_window::check_register_values (struct frame_info *frame)
 {
-  if (TUI_DATA_WIN != NULL
-      && TUI_DATA_WIN->is_visible ())
+  if (regs_content.empty () && display_regs)
+    tui_show_registers (current_group);
+  else
     {
-      if (TUI_DATA_WIN->regs_content.empty ()
-	  && TUI_DATA_WIN->display_regs)
-	tui_show_registers (TUI_DATA_WIN->current_group);
-      else
+      for (auto &&data_item_win_ptr : regs_content)
 	{
-	  for (auto &&data_item_win_ptr : TUI_DATA_WIN->regs_content)
-	    {
-	      int was_hilighted;
+	  int was_hilighted;
 
-	      was_hilighted = data_item_win_ptr->highlight;
+	  was_hilighted = data_item_win_ptr->highlight;
 
-              tui_get_register (frame, data_item_win_ptr.get (),
-                                data_item_win_ptr->item_no,
-				&data_item_win_ptr->highlight);
+	  tui_get_register (frame, data_item_win_ptr.get (),
+			    data_item_win_ptr->item_no,
+			    &data_item_win_ptr->highlight);
 
-	      if (data_item_win_ptr->highlight || was_hilighted)
-		tui_display_register (data_item_win_ptr.get ());
-	    }
+	  if (data_item_win_ptr->highlight || was_hilighted)
+	    tui_display_register (data_item_win_ptr.get ());
 	}
     }
 }
