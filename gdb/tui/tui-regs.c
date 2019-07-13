@@ -103,7 +103,6 @@ tui_get_register (struct frame_info *frame,
 
 tui_data_item_window::~tui_data_item_window ()
 {
-  xfree (value);
   xfree (content);
 }
 
