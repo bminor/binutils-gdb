@@ -1,5 +1,12 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* bfdlink.h (elf_strtab_hash): New forward.
+	(elf_sym_strtab): Likewise.
+	(struct bfd_link_callbacks <examine_strtab>): New.
+	(struct bfd_link_callbacks <emit_ctf>): Likewise.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (includes): No longer include <sys/param.h>.
 
 2019-07-30  Nick Alcock  <nick.alcock@oracle.com>

@@ -636,6 +636,11 @@ struct bfd_link_info
   struct bfd_elf_version_tree *version_info;
 };
 
+/* Some forward-definitions used by some callbacks.  */
+
+struct elf_strtab_hash;
+struct elf_sym_strtab;
+
 /* This structures holds a set of callback functions.  These are called
    by the BFD linker routines.  */
 
@@ -757,6 +762,16 @@ struct bfd_link_callbacks
     (struct bfd_link_info *, bfd * abfd,
      asection * current_section, asection * previous_section,
      bfd_boolean new_segment);
+  /* This callback provides a chance for callers of the BFD to examine the
+     ELF string table and symbol table once they are complete and indexes and
+     offsets assigned.  */
+  void (*examine_strtab)
+    (struct elf_sym_strtab *syms, bfd_size_type symcount,
+     struct elf_strtab_hash *symstrtab);
+  /* This callback should emit the CTF section into a non-loadable section in
+     the output BFD named .ctf or a name beginning with ".ctf.".  */
+  void (*emit_ctf)
+    (void);
 };
 
 /* The linker builds link_order structures which tell the code how to

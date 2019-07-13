@@ -371,3 +371,25 @@ ldemul_extra_map_file_text (bfd *abfd, struct bfd_link_info *info, FILE *mapf)
   if (ld_emulation->extra_map_file_text)
     ld_emulation->extra_map_file_text (abfd, info, mapf);
 }
+
+int
+ldemul_emit_ctf_early (void)
+{
+  if (ld_emulation->emit_ctf_early)
+    return ld_emulation->emit_ctf_early ();
+  /* If the emulation doesn't know if it wants to emit CTF early, it is going
+     to do so.  */
+  return 1;
+}
+
+void
+ldemul_examine_strtab_for_ctf (ctf_file_t *ctf_output,
+                               struct elf_sym_strtab *syms,
+                               bfd_size_type symcount,
+                               struct elf_strtab_hash *symstrtab)
+
+{
+  if (ld_emulation->examine_strtab_for_ctf)
+    ld_emulation->examine_strtab_for_ctf (ctf_output, syms,
+                                          symcount, symstrtab);
+}

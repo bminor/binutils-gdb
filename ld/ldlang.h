@@ -21,6 +21,8 @@
 #ifndef LDLANG_H
 #define LDLANG_H
 
+#include "ctf-api.h"
+
 #define DEFAULT_MEMORY_REGION   "*default*"
 
 typedef enum
@@ -295,6 +297,8 @@ typedef struct lang_input_statement_struct
   const char *local_sym_name;
 
   bfd *the_bfd;
+
+  ctf_archive_t *the_ctf;
 
   struct flag_info *section_flag_list;
 
@@ -677,6 +681,12 @@ extern void add_excluded_libs (const char *);
 extern bfd_boolean load_symbols
   (lang_input_statement_type *, lang_statement_list_type *);
 
+struct elf_sym_strtab;
+struct elf_strtab_hash;
+extern void ldlang_ctf_apply_strsym
+  (struct elf_sym_strtab *, bfd_size_type, struct elf_strtab_hash *);
+extern void ldlang_write_ctf_late
+  (void);
 extern bfd_boolean
 ldlang_override_segment_assignment
   (struct bfd_link_info *, bfd *, asection *, asection *, bfd_boolean);

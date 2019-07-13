@@ -1,3 +1,26 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* elf-bfd.h (SECTION_IS_CTF): New macro.
+	* elf.c (special_sections_c): Add ".ctf".
+	(assign_file_positions_for_non_load_sections): Note that
+	compressed debugging sections etc are not assigned here.  Treat
+	CTF sections like SEC_ELF_COMPRESS sections when is_linker_output:
+	sh_offset -1.
+	(assign_file_positions_except_relocs): Likewise.
+	(find_section_in_list): Note that debugging and CTF sections, as
+	well as reloc sections, are assigned later.
+	(_bfd_elf_assign_file_positions_for_non_load): CTF sections get
+	their size and contents updated.
+	(_bfd_elf_set_section_contents): Skip CTF sections: unlike
+	compressed sections, they have no uncompressed content to copy at
+	this stage.
+	* elflink.c (elf_link_swap_symbols_out): Call the examine_strtab
+	callback right before the strtab is written out.
+	(bfd_elf_final_link): Don't cache the section contents of CTF
+	sections: they are not populated yet.  Call the emit_ctf callback
+	right at the end, after all the symbols and strings are flushed
+	out.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* elf-strtab.c (_bfd_elf_strtab_len): New.

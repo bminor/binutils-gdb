@@ -25,3 +25,7 @@
 fragment <<EOF
 
 EOF
+# Put these extra routines in ld${EMULATION_NAME}_emulation
+#
+LDEMUL_EMIT_CTF_EARLY=ldelf_emit_ctf_early
+LDEMUL_EXAMINE_STRTAB_FOR_CTF=ldelf_examine_strtab_for_ctf

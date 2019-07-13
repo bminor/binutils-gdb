@@ -18,4 +18,15 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
+#include "bfd.h"
+#include "ctf-api.h"
+
+struct elf_sym_strtab;
+struct elf_strtab_hash;
+
 extern void ldelf_map_segments (bfd_boolean);
+extern int ldelf_emit_ctf_early (void);
+extern void ldelf_examine_strtab_for_ctf
+  (ctf_file_t *ctf_output, struct elf_sym_strtab *syms,
+   bfd_size_type symcount, struct elf_strtab_hash *symstrtab);

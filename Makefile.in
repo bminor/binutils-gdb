@@ -51159,6 +51159,13 @@ all-stage3-binutils: maybe-all-stage3-libctf
 all-stage4-binutils: maybe-all-stage4-libctf
 all-stageprofile-binutils: maybe-all-stageprofile-libctf
 all-stagefeedback-binutils: maybe-all-stagefeedback-libctf
+all-ld: maybe-all-libctf
+all-stage1-ld: maybe-all-stage1-libctf
+all-stage2-ld: maybe-all-stage2-libctf
+all-stage3-ld: maybe-all-stage3-libctf
+all-stage4-ld: maybe-all-stage4-libctf
+all-stageprofile-ld: maybe-all-stageprofile-libctf
+all-stagefeedback-ld: maybe-all-stagefeedback-libctf
 install-binutils: maybe-install-opcodes
 install-strip-binutils: maybe-install-strip-opcodes
 install-opcodes: maybe-install-bfd
