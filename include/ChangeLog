@@ -1,3 +1,8 @@
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_type_all_f): New.
+	(ctf_type_iter_all): New.
+
 2019-07-11  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf.h: Add object index and function index sections.  Describe
