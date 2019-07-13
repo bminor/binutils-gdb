@@ -185,8 +185,7 @@ tui_data_window::show_register_group (struct reggroup *group,
   int regnum, pos;
 
   /* Make a new title showing which group we display.  */
-  xfree (title);
-  title = xstrprintf ("Register group: %s", reggroup_name (group));
+  title = string_printf ("Register group: %s", reggroup_name (group));
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
@@ -302,7 +301,7 @@ tui_data_window::display_registers_from (int start_element_no)
 		  data_item_win->width = item_win_width;
 		  data_item_win->origin.x = (item_win_width * j) + 1;
 		  data_item_win->origin.y = cur_y;
-		  tui_make_window (data_item_win);
+		  data_item_win->make_visible (true);
                   scrollok (data_item_win->handle, FALSE);
 		}
               touchwin (data_item_win->handle);

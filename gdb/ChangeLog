@@ -1,5 +1,27 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_make_window): Don't declare.
+	* tui/tui-wingeneral.c (box_win): Change type of win_info.
+	(box_win): Update.
+	(tui_gen_win_info::make_window): Rename from tui_make_window.
+	(tui_win_info::make_window): New method.
+	(tui_gen_win_info::make_visible): Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* tui/tui-regs.c (tui_data_window::show_register_group): Update.
+	(tui_data_window::display_registers_from): Update.
+	* tui/tui-layout.c (tui_gen_win_info::resize): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <make_window>:
+	Declare.
+	<can_box>: Remove.
+	<title>: Remove.
+	(struct tui_win_info) <make_window>: Declare.
+	<can_box>: Now virtual.
+	<title>: New member.
+	* tui/tui-data.c (~tui_gen_win_info): Don't free title.
+	* tui/tui-command.c (tui_cmd_window::resize): Update.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <display_regs>: Remove.
 	* tui/tui-regs.c (tui_data_window::show_registers): Update.
 	(tui_data_window::check_register_values): Update.

@@ -153,8 +153,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	    = tui_locator_win_info_ptr ();
 	  const char *s_filename = symtab_to_filename_for_display (s);
 
-	  xfree (title);
-	  title = xstrdup (s_filename);
+	  title = s_filename;
 
 	  xfree (fullname);
 	  fullname = xstrdup (symtab_to_fullname (s));

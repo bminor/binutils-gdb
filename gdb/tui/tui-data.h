@@ -52,6 +52,8 @@ protected:
   {
   }
 
+  virtual void make_window ();
+
 public:
 
   virtual ~tui_gen_win_info ();
@@ -73,12 +75,6 @@ public:
   virtual void resize (int height, int width,
 		       int origin_x, int origin_y);
 
-  /* Return true if this can be boxed.  */
-  virtual bool can_box () const
-  {
-    return false;
-  }
-
   /* Return true if this window is visible.  */
   bool is_visible () const
   {
@@ -97,8 +93,6 @@ public:
   struct tui_point origin = {0, 0};
   /* Viewport height.  */
   int viewport_height = 0;
-  /* Window title to display.  */
-  char *title = nullptr;
 };
 
 /* Constant definitions.  */
@@ -173,6 +167,8 @@ protected:
 
   void rerender () override;
 
+  void make_window () override;
+
 public:
 
   ~tui_win_info () override
@@ -213,12 +209,15 @@ public:
     return true;
   }
 
-  bool can_box () const override
+  virtual bool can_box () const
   {
     return true;
   }
 
   void check_and_display_highlight_if_needed ();
+
+  /* Window title to display.  */
+  std::string title;
 
   /* Can this window ever be highlighted?  */
   bool can_highlight = true;

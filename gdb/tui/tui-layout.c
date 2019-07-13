@@ -602,7 +602,7 @@ tui_gen_win_info::resize (int height_, int width_,
     }
 
   if (handle == nullptr)
-    tui_make_window (this);
+    make_window ();
 
   rerender ();
 }

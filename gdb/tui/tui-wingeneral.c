@@ -55,7 +55,7 @@ tui_delete_win (WINDOW *window)
 
 /* Draw a border arround the window.  */
 static void
-box_win (struct tui_gen_win_info *win_info, 
+box_win (struct tui_win_info *win_info, 
 	 int highlight_flag)
 {
   if (win_info && win_info->handle)
@@ -78,8 +78,8 @@ box_win (struct tui_gen_win_info *win_info,
 #else
       box (win, tui_border_vline, tui_border_hline);
 #endif
-      if (win_info->title)
-        mvwaddstr (win, 0, 3, win_info->title);
+      if (!win_info->title.empty ())
+        mvwaddstr (win, 0, 3, win_info->title.c_str ());
       wattroff (win, attrs);
     }
 }
@@ -126,23 +126,20 @@ tui_win_info::check_and_display_highlight_if_needed ()
 
 
 void
-tui_make_window (struct tui_gen_win_info *win_info)
+tui_gen_win_info::make_window ()
 {
-  WINDOW *handle;
-
-  handle = newwin (win_info->height,
-		   win_info->width,
-		   win_info->origin.y,
-		   win_info->origin.x);
-  win_info->handle = handle;
+  handle = newwin (height, width, origin.y, origin.x);
   if (handle != NULL)
-    {
-      if (win_info->can_box ())
-	box_win (win_info, NO_HILITE);
-      scrollok (handle, TRUE);
-    }
+    scrollok (handle, TRUE);
 }
 
+void
+tui_win_info::make_window ()
+{
+  tui_gen_win_info::make_window ();
+  if (handle != NULL && can_box ())
+    box_win (this, NO_HILITE);
+}
 
 /* We can't really make windows visible, or invisible.  So we have to
    delete the entire window when making it visible, and create it
@@ -154,7 +151,7 @@ tui_gen_win_info::make_visible (bool visible)
     return;
 
   if (visible)
-    tui_make_window (this);
+    make_window ();
   else
     {
       tui_delete_win (handle);

@@ -54,7 +54,7 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
   origin.y = origin_y;
 
   if (handle == nullptr)
-    tui_make_window (this);
+    make_window ();
   else
     {
       /* Another reason we don't call the base class method here is
