@@ -1,5 +1,11 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <display_regs>: Remove.
+	* tui/tui-regs.c (tui_data_window::show_registers): Update.
+	(tui_data_window::check_register_values): Update.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window): Use
 	DISABLE_COPY_AND_ASSIGN.
 	<regs_content>: Change type, removing unique_ptr.

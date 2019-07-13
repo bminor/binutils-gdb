@@ -152,10 +152,6 @@ tui_data_window::show_registers (struct reggroup *group)
   if (group == 0)
     group = general_reggroup;
 
-  /* Say that registers should be displayed, even if there is a
-     problem.  */
-  display_regs = true;
-
   if (target_has_registers && target_has_stack && target_has_memory)
     {
       show_register_group (group, get_selected_frame (NULL),
@@ -533,7 +529,7 @@ tui_data_window::refresh_window ()
 void
 tui_data_window::check_register_values (struct frame_info *frame)
 {
-  if (regs_content.empty () && display_regs)
+  if (regs_content.empty ())
     show_registers (current_group);
   else
     {

@@ -66,8 +66,6 @@ struct tui_data_window : public tui_win_info
   /* Windows that are used to display registers.  */
   std::vector<tui_data_item_window> regs_content;
   int regs_column_count = 0;
-  /* Should regs be displayed at all?  */
-  bool display_regs = false;
   struct reggroup *current_group = nullptr;
 
   /* Answer the number of the last line in the regs display.  If there
