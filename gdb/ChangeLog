@@ -1,5 +1,10 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_register_format, tui_get_register): Move
+	earlier.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reg_command): Remove NULL check.
 
 2019-08-20  Tom Tromey  <tom@tromey.com>

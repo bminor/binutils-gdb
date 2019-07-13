@@ -49,10 +49,55 @@ static void tui_show_register_group (tui_data_window *win_info,
 				     struct frame_info *frame,
 				     int refresh_values_only);
 
-static void tui_get_register (struct frame_info *frame,
-			      struct tui_data_item_window *data,
-			      int regnum, bool *changedp);
+/* Get the register from the frame and return a printable
+   representation of it.  */
 
+static char *
+tui_register_format (struct frame_info *frame, int regnum)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  string_file stream;
+
+  scoped_restore save_pagination
+    = make_scoped_restore (&pagination_enabled, 0);
+  scoped_restore save_stdout
+    = make_scoped_restore (&gdb_stdout, &stream);
+
+  gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
+
+  /* Remove the possible \n.  */
+  std::string &str = stream.string ();
+  if (!str.empty () && str.back () == '\n')
+    str.resize (str.size () - 1);
+
+  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
+  return tui_expand_tabs (str.c_str (), 0);
+}
+
+/* Get the register value from the given frame and format it for the
+   display.  When changep is set, check if the new register value has
+   changed with respect to the previous call.  */
+static void
+tui_get_register (struct frame_info *frame,
+                  struct tui_data_item_window *data, 
+		  int regnum, bool *changedp)
+{
+  if (changedp)
+    *changedp = false;
+  if (target_has_registers)
+    {
+      char *prev_content = data->content;
+
+      data->content = tui_register_format (frame, regnum);
+
+      if (changedp != NULL
+	  && strcmp (prev_content, data->content) != 0)
+	*changedp = true;
+
+      xfree (prev_content);
+    }
+}
 
 /* See tui-regs.h.  */
 
@@ -736,56 +781,6 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
     {
       if (strncmp (word, *tmp, len) == 0)
 	tracker.add_completion (make_unique_xstrdup (*tmp));
-    }
-}
-
-/* Get the register from the frame and return a printable
-   representation of it.  */
-
-static char *
-tui_register_format (struct frame_info *frame, int regnum)
-{
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-
-  string_file stream;
-
-  scoped_restore save_pagination
-    = make_scoped_restore (&pagination_enabled, 0);
-  scoped_restore save_stdout
-    = make_scoped_restore (&gdb_stdout, &stream);
-
-  gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
-
-  /* Remove the possible \n.  */
-  std::string &str = stream.string ();
-  if (!str.empty () && str.back () == '\n')
-    str.resize (str.size () - 1);
-
-  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  return tui_expand_tabs (str.c_str (), 0);
-}
-
-/* Get the register value from the given frame and format it for the
-   display.  When changep is set, check if the new register value has
-   changed with respect to the previous call.  */
-static void
-tui_get_register (struct frame_info *frame,
-                  struct tui_data_item_window *data, 
-		  int regnum, bool *changedp)
-{
-  if (changedp)
-    *changedp = false;
-  if (target_has_registers)
-    {
-      char *prev_content = data->content;
-
-      data->content = tui_register_format (frame, regnum);
-
-      if (changedp != NULL
-	  && strcmp (prev_content, data->content) != 0)
-	*changedp = true;
-
-      xfree (prev_content);
     }
 }
 
