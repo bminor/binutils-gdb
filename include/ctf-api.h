@@ -24,7 +24,6 @@
 #ifndef	_CTF_API_H
 #define	_CTF_API_H
 
-#include <sys/param.h>
 #include <sys/types.h>
 #include <ctf.h>
 #include <zlib.h>
