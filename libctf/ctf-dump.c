@@ -401,7 +401,8 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
 	  case ECTF_NOSYMTAB:
 	    return -1;
 	  case ECTF_NOTDATA:
-	  case ECTF_NOTYPEDAT:
+	  case ECTF_NOTFUNC:
+	  case ECTF_NOFUNCDAT:
 	    continue;
 	  }
       if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
