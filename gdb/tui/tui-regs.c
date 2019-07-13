@@ -163,10 +163,7 @@ tui_data_window::show_registers (struct reggroup *group)
 
       /* Clear all notation of changed values.  */
       for (auto &&data_item_win : regs_content)
-	{
-	  if (data_item_win != nullptr)
-	    data_item_win->highlight = false;
-	}
+	data_item_win.highlight = false;
       current_group = group;
       display_all_data ();
     }
@@ -214,16 +211,7 @@ tui_data_window::show_register_group (struct reggroup *group,
       nr_regs++;
     }
 
-  if (!refresh_values_only)
-    regs_content.clear ();
-
-  if (nr_regs < regs_content.size ())
-    regs_content.resize (nr_regs);
-  else
-    {
-      for (int i = regs_content.size (); i < nr_regs; ++i)
-	regs_content.emplace_back (new tui_data_item_window ());
-    }
+  regs_content.resize (nr_regs);
 
   /* Now set the register names and values.  */
   pos = 0;
@@ -242,7 +230,7 @@ tui_data_window::show_register_group (struct reggroup *group,
       if (name == 0 || *name == '\0')
 	continue;
 
-      data_item_win = regs_content[pos].get ();
+      data_item_win = &regs_content[pos];
       if (data_item_win)
 	{
 	  if (!refresh_values_only)
@@ -273,7 +261,7 @@ tui_data_window::display_registers_from (int start_element_no)
           int len;
 
           len = 0;
-          p = data_item_win->content.get ();
+          p = data_item_win.content.get ();
           if (p != 0)
 	    len = strlen (p);
 
@@ -301,7 +289,7 @@ tui_data_window::display_registers_from (int start_element_no)
 	      struct tui_data_item_window *data_item_win;
 
 	      /* Create the window if necessary.  */
-	      data_item_win = regs_content[i].get ();
+	      data_item_win = &regs_content[i];
               if (data_item_win->handle != NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
@@ -408,7 +396,7 @@ tui_data_window::first_data_item_displayed ()
     {
       struct tui_gen_win_info *data_item_win;
 
-      data_item_win = regs_content[i].get ();
+      data_item_win = &regs_content[i];
       if (data_item_win->is_visible ())
 	return i;
     }
@@ -423,8 +411,8 @@ tui_data_window::delete_data_content_windows ()
 {
   for (auto &&win : regs_content)
     {
-      tui_delete_win (win->handle);
-      win->handle = NULL;
+      tui_delete_win (win.handle);
+      win.handle = NULL;
     }
 }
 
@@ -523,8 +511,8 @@ tui_data_window::rerender ()
   /* Delete all data item windows.  */
   for (auto &&win : regs_content)
     {
-      tui_delete_win (win->handle);
-      win->handle = NULL;
+      tui_delete_win (win.handle);
+      win.handle = NULL;
     }
   display_all_data ();
 }
@@ -536,10 +524,7 @@ tui_data_window::refresh_window ()
 {
   tui_gen_win_info::refresh_window ();
   for (auto &&win : regs_content)
-    {
-      if (win != NULL)
-	win->refresh_window ();
-    }
+    win.refresh_window ();
 }
 
 /* This function check all displayed registers for changes in values,
@@ -552,18 +537,18 @@ tui_data_window::check_register_values (struct frame_info *frame)
     show_registers (current_group);
   else
     {
-      for (auto &&data_item_win_ptr : regs_content)
+      for (auto &&data_item_win : regs_content)
 	{
 	  int was_hilighted;
 
-	  was_hilighted = data_item_win_ptr->highlight;
+	  was_hilighted = data_item_win.highlight;
 
-	  tui_get_register (frame, data_item_win_ptr.get (),
-			    data_item_win_ptr->item_no,
-			    &data_item_win_ptr->highlight);
+	  tui_get_register (frame, &data_item_win,
+			    data_item_win.item_no,
+			    &data_item_win.highlight);
 
-	  if (data_item_win_ptr->highlight || was_hilighted)
-	    tui_display_register (data_item_win_ptr.get ());
+	  if (data_item_win.highlight || was_hilighted)
+	    tui_display_register (&data_item_win);
 	}
     }
 }

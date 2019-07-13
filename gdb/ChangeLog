@@ -1,5 +1,20 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window): Use
+	DISABLE_COPY_AND_ASSIGN.
+	<regs_content>: Change type, removing unique_ptr.
+	<tui_data_window>: Add move constructor.
+	* tui/tui-regs.c (tui_data_window::show_registers)
+	(tui_data_window::show_register_group)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::first_data_item_displayed)
+	(tui_data_window::delete_data_content_windows)
+	(tui_data_window::rerender, tui_data_window::refresh_window)
+	(tui_data_window::check_register_values): Update.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <show_registers,
 	show_register_group>: Declare.
 	(tui_show_register_group): Don't declare.

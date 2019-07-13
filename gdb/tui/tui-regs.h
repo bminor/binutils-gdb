@@ -33,6 +33,10 @@ struct tui_data_item_window : public tui_gen_win_info
   {
   }
 
+  DISABLE_COPY_AND_ASSIGN (tui_data_item_window);
+
+  tui_data_item_window (tui_data_item_window &&) = default;
+
   const char *name = nullptr;
   /* The register number, or data display number.  */
   int item_no = -1;
@@ -60,7 +64,7 @@ struct tui_data_window : public tui_win_info
   }
 
   /* Windows that are used to display registers.  */
-  std::vector<std::unique_ptr<tui_data_item_window>> regs_content;
+  std::vector<tui_data_item_window> regs_content;
   int regs_column_count = 0;
   /* Should regs be displayed at all?  */
   bool display_regs = false;
