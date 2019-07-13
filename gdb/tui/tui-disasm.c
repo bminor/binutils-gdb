@@ -189,7 +189,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
   /* Window size, excluding highlight box.  */
   max_lines = height - 2;
-  line_width = width - 2;
+  line_width = width - TUI_EXECINFO_SIZE - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = XALLOCAVEC (struct tui_asm_line, max_lines);

@@ -137,7 +137,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
       int line_width, nlines;
 
       ret = TUI_SUCCESS;
-      line_width = width - 1;
+      line_width = width - TUI_EXECINFO_SIZE - 1;
       /* Take hilite (window border) into account, when
 	 calculating the number of lines.  */
       nlines = (line_no + (height - 2)) - line_no;

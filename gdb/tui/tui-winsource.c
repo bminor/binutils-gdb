@@ -206,9 +206,6 @@ tui_source_window_base::do_erase_source_content (const char *str)
 		 (char *) str);
 
       refresh_window ();
-
-      werase (execution_info->handle);
-      execution_info->refresh_window ();
     }
 }
 
@@ -224,7 +221,7 @@ tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
   if (line->is_exec_point)
     tui_set_reverse_mode (win_info->handle, true);
 
-  wmove (win_info->handle, lineno, 1);
+  wmove (win_info->handle, lineno, TUI_EXECINFO_SIZE);
   tui_puts (line->line,
 	    win_info->handle);
   if (line->is_exec_point)
@@ -268,8 +265,7 @@ tui_source_window_base::clear_detail ()
 }
 
 tui_source_window_base::tui_source_window_base (enum tui_win_type type)
-  : tui_win_info (type),
-    execution_info (new tui_exec_info_window ())
+  : tui_win_info (type)
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
   start_line_or_addr.loa = LOA_ADDRESS;
@@ -280,17 +276,7 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 tui_source_window_base::~tui_source_window_base ()
 {
   xfree (fullname);
-  delete execution_info;
 }  
-
-void
-tui_source_window_base::resize (int height, int width,
-				int origin_x, int origin_y)
-{
-  tui_gen_win_info::resize (height, width - 3,
-			    origin_x + 3, origin_y);
-  execution_info->resize (height, 3, origin_x, origin_y);
-}
 
 /* See tui-data.h.  */
 
@@ -346,24 +332,6 @@ tui_source_window_base::rerender ()
     }
   else
     erase_source_content ();
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::make_visible (bool visible)
-{
-  execution_info->make_visible (visible);
-  tui_win_info::make_visible (visible);
-}
-
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::refresh_window ()
-{
-  execution_info->refresh_window ();
-  tui_win_info::refresh_window ();
 }
 
 /* See tui-data.h.  */
@@ -521,7 +489,6 @@ tui_source_window_base::update_breakpoint_info
 void
 tui_source_window_base::update_exec_info ()
 {
-  werase (execution_info->handle);
   update_breakpoint_info (nullptr, true);
   for (int i = 0; i < content.size (); i++)
     {
@@ -544,7 +511,7 @@ tui_source_window_base::update_exec_info ()
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
 
-      mvwaddstr (execution_info->handle, i + 1, 0, element);
+      mvwaddstr (handle, i + 1, 1, element);
     }
-  execution_info->refresh_window ();
+  refresh_window ();
 }

@@ -266,6 +266,13 @@ namespace eval Term {
 	}
     }
 
+    # Backward tab stops.
+    proc _csi_Z {args} {
+	set n [_default [lindex $args 0] 1]
+	variable _cur_x
+	set _cur_x [expr {max (int (($_cur_x - 1) / 8) * 8 - ($n - 1) * 8, 0)}]
+    }
+
     # Repeat.
     proc _csi_b {args} {
 	variable _last_char

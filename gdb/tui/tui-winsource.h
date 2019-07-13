@@ -45,16 +45,6 @@ DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
 
 typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
 
-/* Execution info window class.  */
-
-struct tui_exec_info_window : public tui_gen_win_info
-{
-  tui_exec_info_window ()
-    : tui_gen_win_info (EXEC_INFO_WIN)
-  {
-  }
-};
-
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
 {
@@ -113,8 +103,6 @@ public:
 
   void clear_detail ();
 
-  void make_visible (bool visible) override;
-  void refresh_window () override;
   void refresh_all () override;
 
   /* Refill the source window's source cache and update it.  If this
@@ -127,9 +115,6 @@ public:
   void update_tab_width () override;
 
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
-
-  void resize (int height, int width,
-	       int origin_x, int origin_y) override;
 
   void show_source_content ();
 
@@ -158,8 +143,6 @@ public:
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
-  /* Execution information window.  */
-  struct tui_exec_info_window *execution_info;
   /* Used for horizontal scroll.  */
   int horizontal_offset = 0;
   struct tui_line_or_address start_line_or_addr;

@@ -44,7 +44,6 @@ enum tui_win_type
   MAX_MAJOR_WINDOWS,
   /* Auxiliary windows.  */
   LOCATOR_WIN,
-  EXEC_INFO_WIN,
   DATA_ITEM_WIN
 };
 

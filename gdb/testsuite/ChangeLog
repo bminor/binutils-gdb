@@ -1,3 +1,9 @@
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
+	* lib/tuiterm.exp (_csi_Z): New proc.
+	* gdb.tui/basic.exp: Update window positions.
+	* gdb.tui/empty.exp: Update window positions.
+
 2019-08-15  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/examine-backward.exp: Correct regexp for

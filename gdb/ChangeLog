@@ -1,5 +1,22 @@
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (enum tui_win_type) <EXEC_INFO_WIN>: Remove.
+	* tui/tui-winsource.h (struct tui_exec_info_window): Remove.
+	(struct tui_source_window_base) <make_visible, refresh_window,
+	resize>: Remove methods.
+	<execution_info>: Remove field.
+	* tui/tui-winsource.c (tui_source_window_base::do_erase_source_content)
+	(tui_show_source_line, tui_source_window_base)
+	(~tui_source_window_base): Update.
+	(tui_source_window_base::resize)
+	(tui_source_window_base::make_visible)
+	(tui_source_window_base::refresh_window): Remove.
+	(tui_source_window_base::update_exec_info): Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Update.
+
+2019-08-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-hooks.c (tui_remove_hooks): Don't set
 	deprecated_query_hook.
 
