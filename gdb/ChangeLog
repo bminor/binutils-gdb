@@ -1,5 +1,10 @@
 2019-07-27  Kevin Buettner  <kevinb@redhat.com>
 
+	* infrun.c (fill_in_stop_func): Use find_pc_partial_function
+	instead of find_function_entry_range_from_pc.
+
+2019-07-27  Kevin Buettner  <kevinb@redhat.com>
+
 	* stack.c (find_frame_funname): Remove code which preferred
 	minsym over symtab sym in "certain pathological cases".
 

@@ -395,20 +395,31 @@ proc do_test {suffix} {
 		 "foo(_label2)? \\(\\).*foo_cold \\(\\);.*foo foo_cold call.*" \
 		 "step out of bar to foo"
 
-	# The tests in the "enable_foo_cold_stepping" section, below, work
-	# with some versions of gcc, though it's not clear that they
-	# should.  This test case causes foo_cold, originally a separate
-	# function invoked via a subroutine call, to be considered as part
-	# of foo via use of DW_AT_ranges.  Real code that I've looked at
-	# uses a branch instruction to cause code in the "cold" range to
-	# be executed. 
+	# Tests in the "enable_foo_cold_stepping" section, below, did
+	# not work prior to July, 2019.  They had been disabled via
+	# use of the "enable_foo_cold_stepping" flag.
+	# 
+	# As noted elsewhere, this test case causes foo_cold,
+	# originally a separate function invoked via a subroutine
+	# call, to be considered as part of foo via use of
+	# DW_AT_ranges.  Real code that I've looked at uses a branch
+	# instruction to cause code in the "cold" range to be
+	# executed.  These tests used to fail which is why they were
+	# disabled.
 	#
-	# For the moment though, these tests have been left in place, but
-	# disabled, in case we decide that making such a subroutine call
-	# is a reasonable thing to do that should also be supported by
-	# GDB.
+	# After adding a "hi" cold test, I found that we were able to
+	# step into foo_cold from foo for the "hi" version, but for
+	# the "lo" version, GDB would run to either the next
+	# breakpoint or until the inferior exited when there were no
+	# breakpoints.  Not being able to step is definitely a bug
+	# even if it's unlikely that this problem would ever be hit in
+	# a real program.  Therefore, the bug was fixed in GDB and
+	# these tests are now enabled.
+	#
+	# I've left in place the flag (and test) which may be used to
+	# disable these tests.
 
-	set enable_foo_cold_stepping false
+	set enable_foo_cold_stepping true
 
 	if { $enable_foo_cold_stepping } {
 	    gdb_test_no_output "set variable e=1"
@@ -422,7 +433,7 @@ proc do_test {suffix} {
 			     "step to baz call in foo_cold"
 
 		}
-		-re "foo(_low)? \\(\\).*baz \\(\\);.*foo_cold baz call.*${gdb_prompt}" {
+		-re "foo(_cold)? \\(\\).*baz \\(\\);.*foo_cold baz call.*${gdb_prompt}" {
 		    pass $test
 		}
 	    }

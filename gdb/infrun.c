@@ -4115,18 +4115,35 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 {
   if (!ecs->stop_func_filled_in)
     {
+      const block *block;
+
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      find_function_entry_range_from_pc (ecs->event_thread->suspend.stop_pc,
-				         &ecs->stop_func_name,
-				         &ecs->stop_func_start,
-					 &ecs->stop_func_end);
-      ecs->stop_func_start
-	+= gdbarch_deprecated_function_start_offset (gdbarch);
+      find_pc_partial_function (ecs->event_thread->suspend.stop_pc,
+				&ecs->stop_func_name,
+				&ecs->stop_func_start,
+				&ecs->stop_func_end,
+				&block);
 
-      if (gdbarch_skip_entrypoint_p (gdbarch))
-	ecs->stop_func_start = gdbarch_skip_entrypoint (gdbarch,
-							ecs->stop_func_start);
+      /* The call to find_pc_partial_function, above, will set
+	 stop_func_start and stop_func_end to the start and end
+	 of the range containing the stop pc.  If this range
+	 contains the entry pc for the block (which is always the
+	 case for contiguous blocks), advance stop_func_start past
+	 the function's start offset and entrypoint.  Note that
+	 stop_func_start is NOT advanced when in a range of a
+	 non-contiguous block that does not contain the entry pc.  */
+      if (block != nullptr
+	  && ecs->stop_func_start <= BLOCK_ENTRY_PC (block)
+	  && BLOCK_ENTRY_PC (block) < ecs->stop_func_end)
+	{
+	  ecs->stop_func_start
+	    += gdbarch_deprecated_function_start_offset (gdbarch);
+
+	  if (gdbarch_skip_entrypoint_p (gdbarch))
+	    ecs->stop_func_start
+	      = gdbarch_skip_entrypoint (gdbarch, ecs->stop_func_start);
+	}
 
       ecs->stop_func_filled_in = 1;
     }

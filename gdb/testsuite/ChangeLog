@@ -1,5 +1,11 @@
 2019-07-27  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.dwarf2/dw2-ranges-func.exp (enable_foo_cold_stepping):
+	Enable tests associated with this flag.  Adjust regex
+	referencing "foo_low" to now refer to "foo_cold" instead.
+
+2019-07-27  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.dwarf2/dw2-ranges-func.c: Rename to...
 	* gdb.dwarf2/dw2-ranges-func-lo-cold.c: ...this.
 	* gdb.dwarf2/dw2-ranges-func-lo-cold.c (foo_low): Change name to
