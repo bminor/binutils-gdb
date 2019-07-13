@@ -82,6 +82,28 @@ ctf_hash_eq_string (const void *a, const void *b)
   return !strcmp((const char *) hep_a->key, (const char *) hep_b->key);
 }
 
+/* Hash a type_mapping_key.  */
+unsigned int
+ctf_hash_type_mapping_key (const void *ptr)
+{
+  ctf_helem_t *hep = (ctf_helem_t *) ptr;
+  ctf_link_type_mapping_key_t *k = (ctf_link_type_mapping_key_t *) hep->key;
+
+  return htab_hash_pointer (k->cltm_fp) + 59 * htab_hash_pointer ((void *) k->cltm_idx);
+}
+
+int
+ctf_hash_eq_type_mapping_key (const void *a, const void *b)
+{
+  ctf_helem_t *hep_a = (ctf_helem_t *) a;
+  ctf_helem_t *hep_b = (ctf_helem_t *) b;
+  ctf_link_type_mapping_key_t *key_a = (ctf_link_type_mapping_key_t *) hep_a->key;
+  ctf_link_type_mapping_key_t *key_b = (ctf_link_type_mapping_key_t *) hep_b->key;
+
+  return (key_a->cltm_fp == key_b->cltm_fp)
+    && (key_a->cltm_idx == key_b->cltm_idx);
+}
+
 /* The dynhash, used for hashes whose size is not known at creation time. */
 
 /* Free a single ctf_helem.  */
@@ -164,7 +186,7 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
     return errno;
 
   /* We need to keep the key_free and value_free around in each item because the
-     del function has no visiblity into the hash as a whole, only into the
+     del function has no visibility into the hash as a whole, only into the
      individual items.  */
 
   slot->key_free = hp->key_free;
@@ -178,6 +200,12 @@ ctf_dynhash_remove (ctf_dynhash_t *hp, const void *key)
 {
   ctf_helem_t hep = { (void *) key, NULL, NULL, NULL };
   htab_remove_elt (hp->htab, &hep);
+}
+
+void
+ctf_dynhash_empty (ctf_dynhash_t *hp)
+{
+  htab_empty (hp->htab);
 }
 
 void *

@@ -473,6 +473,7 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_link_inputs = fp->ctf_link_inputs;
   nfp->ctf_link_outputs = fp->ctf_link_outputs;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
+  nfp->ctf_link_type_mapping = fp->ctf_link_type_mapping;
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
 
@@ -485,6 +486,7 @@ ctf_update (ctf_file_t *fp)
   fp->ctf_link_inputs = NULL;
   fp->ctf_link_outputs = NULL;
   fp->ctf_syn_ext_strtab = NULL;
+  fp->ctf_link_type_mapping = NULL;
 
   fp->ctf_dvhash = NULL;
   memset (&fp->ctf_dvdefs, 0, sizeof (ctf_list_t));
@@ -1557,6 +1559,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   ctf_funcinfo_t ctc;
 
   ctf_hash_t *hp;
+  ctf_id_t orig_src_type = src_type;
 
   if (!(dst_fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (dst_fp, ECTF_RDONLY));
@@ -1640,7 +1643,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	      if (memcmp (&src_en, &dst_en, sizeof (ctf_encoding_t)) == 0)
 		{
 		  if (kind != CTF_K_SLICE)
-		    return dst_type;
+		    {
+		      ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
+		      return dst_type;
+		    }
 		}
 	      else
 		  {
@@ -1679,7 +1685,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	      int match;	/* Do the encodings match?  */
 
 	      if (kind != CTF_K_INTEGER && kind != CTF_K_FLOAT && kind != CTF_K_SLICE)
-		return dtd->dtd_type;
+		{
+		  ctf_add_type_mapping (src_fp, src_type, dst_fp, dtd->dtd_type);
+		  return dtd->dtd_type;
+		}
 
 	      sroot = (flag & CTF_ADD_ROOT);
 	      droot = (LCTF_INFO_ISROOT (dst_fp,
@@ -1698,7 +1707,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	      if (match && sroot == droot)
 		{
 		  if (kind != CTF_K_SLICE)
-		    return dtd->dtd_type;
+		    {
+		      ctf_add_type_mapping (src_fp, src_type, dst_fp, dtd->dtd_type);
+		      return dtd->dtd_type;
+		    }
 		}
 	      else if (!match && sroot && droot)
 		{
@@ -1939,6 +1951,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       return (ctf_set_errno (dst_fp, ECTF_CORRUPT));
     }
 
+  if (dst_type != CTF_ERR)
+    ctf_add_type_mapping (src_fp, orig_src_type, dst_fp, dst_type);
   return dst_type;
 }
 

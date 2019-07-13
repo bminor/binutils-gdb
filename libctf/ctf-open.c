@@ -1627,6 +1627,7 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
   ctf_dynhash_destroy (fp->ctf_link_inputs);
   ctf_dynhash_destroy (fp->ctf_link_outputs);
+  ctf_dynhash_destroy (fp->ctf_link_type_mapping);
 
   ctf_free (fp->ctf_sxlate);
   ctf_free (fp->ctf_txlate);
