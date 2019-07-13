@@ -95,7 +95,7 @@ ctf_is_slice (ctf_file_t *fp, ctf_id_t id, ctf_encoding_t *enc)
    type's references.  */
 
 static char *
-ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
+ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
 {
   ctf_id_t new_id;
   char *str = NULL, *bit = NULL, *buf = NULL;
@@ -104,8 +104,16 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
   do
     {
       ctf_encoding_t enc;
+      const char *nonroot_leader = "";
+      const char *nonroot_trailer = "";
 
       id = new_id;
+      if (flag == CTF_ADD_NONROOT)
+	{
+	  nonroot_leader = "{";
+	  nonroot_trailer = "}";
+	}
+
       buf = ctf_type_aname (fp, id);
       if (!buf)
 	goto oom;
@@ -115,15 +123,17 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id)
       if (ctf_is_slice (fp, id, &enc))
 	{
 	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, " %lx: [slice 0x%x:0x%x]",
-			id, enc.cte_offset, enc.cte_bits) < 0)
+	  if (asprintf (&bit, " %s%lx: [slice 0x%x:0x%x]%s",
+			nonroot_leader, id, enc.cte_offset, enc.cte_bits,
+			nonroot_trailer) < 0)
 	    goto oom;
 	}
       else
 	{
-	  if (asprintf (&bit, " %lx: %s (size 0x%lx)", id, buf[0] == '\0' ?
-			"(nameless)" : buf,
-			(unsigned long) ctf_type_size (fp, id)) < 0)
+	  if (asprintf (&bit, " %s%lx: %s (size 0x%lx)%s", nonroot_leader,
+			id, buf[0] == '\0' ? "(nameless)" : buf,
+			(unsigned long) ctf_type_size (fp, id),
+			nonroot_trailer) < 0)
 	    goto oom;
 	}
       free (buf);
@@ -292,7 +302,8 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
   if (asprintf (&str, "%s -> ", name) < 0)
     return (ctf_set_errno (state->cds_fp, ENOMEM));
 
-  if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type)) == NULL)
+  if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type,
+				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
       return -1;			/* errno is set for us.  */
@@ -348,7 +359,8 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
 	}
 
       /* Variable type.  */
-      if ((typestr = ctf_dump_format_type (state->cds_fp, type)) == NULL)
+      if ((typestr = ctf_dump_format_type (state->cds_fp, type,
+					   CTF_ADD_ROOT)) == NULL)
 	{
 	  free (str);
 	  return -1;			/* errno is set for us.  */
@@ -464,7 +476,8 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
   if (asprintf (&str, "%s -> ", name) < 0)
     return (ctf_set_errno (state->cds_fp, ENOMEM));
 
-  if ((typestr = ctf_dump_format_type (state->cds_fp, type)) == NULL)
+  if ((typestr = ctf_dump_format_type (state->cds_fp, type,
+				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
       return -1;			/* errno is set for us.  */
@@ -529,14 +542,14 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
 /* Dump a single type into the cds_items.  */
 
 static int
-ctf_dump_type (ctf_id_t id, void *arg)
+ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
   ctf_dump_state_t *state = arg;
   ctf_dump_membstate_t membstate = { &str, state->cds_fp };
   size_t len;
 
-  if ((str = ctf_dump_format_type (state->cds_fp, id)) == NULL)
+  if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
     goto err;
 
   str = ctf_str_append (str, "\n");
@@ -641,7 +654,7 @@ ctf_dump (ctf_file_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_TYPE:
-	  if (ctf_type_iter (fp, ctf_dump_type, state) < 0)
+	  if (ctf_type_iter_all (fp, ctf_dump_type, state) < 0)
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_STR:
