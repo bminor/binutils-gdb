@@ -102,6 +102,8 @@ struct tui_data_window : public tui_win_info
 
   void check_register_values (struct frame_info *frame);
 
+  void show_registers (struct reggroup *group);
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
@@ -120,8 +122,10 @@ protected:
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
   void rerender () override;
-};
 
-extern void tui_show_registers (struct reggroup *group);
+  void show_register_group (struct reggroup *group,
+			    struct frame_info *frame,
+			    int refresh_values_only);
+};
 
 #endif /* TUI_TUI_REGS_H */

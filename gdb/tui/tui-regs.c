@@ -44,11 +44,6 @@
 
 static void tui_display_register (struct tui_data_item_window *data);
 
-static void tui_show_register_group (tui_data_window *win_info,
-				     struct reggroup *group,
-				     struct frame_info *frame,
-				     int refresh_values_only);
-
 /* Get the register from the frame and return a printable
    representation of it.  */
 
@@ -152,33 +147,33 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 /* Show the registers of the given group in the data window
    and refresh the window.  */
 void
-tui_show_registers (struct reggroup *group)
+tui_data_window::show_registers (struct reggroup *group)
 {
   if (group == 0)
     group = general_reggroup;
 
   /* Say that registers should be displayed, even if there is a
      problem.  */
-  TUI_DATA_WIN->display_regs = true;
+  display_regs = true;
 
   if (target_has_registers && target_has_stack && target_has_memory)
     {
-      tui_show_register_group (TUI_DATA_WIN, group, get_selected_frame (NULL),
-			       group == TUI_DATA_WIN->current_group);
+      show_register_group (group, get_selected_frame (NULL),
+			   group == current_group);
 
       /* Clear all notation of changed values.  */
-      for (auto &&data_item_win : TUI_DATA_WIN->regs_content)
+      for (auto &&data_item_win : regs_content)
 	{
 	  if (data_item_win != nullptr)
 	    data_item_win->highlight = false;
 	}
-      TUI_DATA_WIN->current_group = group;
-      TUI_DATA_WIN->display_all_data ();
+      current_group = group;
+      display_all_data ();
     }
   else
     {
-      TUI_DATA_WIN->current_group = 0;
-      TUI_DATA_WIN->erase_data_content (_("[ Register Values Unavailable ]"));
+      current_group = 0;
+      erase_data_content (_("[ Register Values Unavailable ]"));
     }
 }
 
@@ -187,22 +182,18 @@ tui_show_registers (struct reggroup *group)
    using the given frame.  Values are refreshed only when
    refresh_values_only is TRUE.  */
 
-static void
-tui_show_register_group (tui_data_window *win_info,
-			 struct reggroup *group,
-                         struct frame_info *frame, 
-			 int refresh_values_only)
+void
+tui_data_window::show_register_group (struct reggroup *group,
+				      struct frame_info *frame, 
+				      int refresh_values_only)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int nr_regs;
   int regnum, pos;
-  char title[80];
 
   /* Make a new title showing which group we display.  */
-  snprintf (title, sizeof (title) - 1, "Register group: %s",
-            reggroup_name (group));
-  xfree (win_info->title);
-  win_info->title = xstrdup (title);
+  xfree (title);
+  title = xstrprintf ("Register group: %s", reggroup_name (group));
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
@@ -224,14 +215,14 @@ tui_show_register_group (tui_data_window *win_info,
     }
 
   if (!refresh_values_only)
-    win_info->regs_content.clear ();
+    regs_content.clear ();
 
-  if (nr_regs < win_info->regs_content.size ())
-    win_info->regs_content.resize (nr_regs);
+  if (nr_regs < regs_content.size ())
+    regs_content.resize (nr_regs);
   else
     {
-      for (int i = win_info->regs_content.size (); i < nr_regs; ++i)
-	win_info->regs_content.emplace_back (new tui_data_item_window ());
+      for (int i = regs_content.size (); i < nr_regs; ++i)
+	regs_content.emplace_back (new tui_data_item_window ());
     }
 
   /* Now set the register names and values.  */
@@ -251,7 +242,7 @@ tui_show_register_group (tui_data_window *win_info,
       if (name == 0 || *name == '\0')
 	continue;
 
-      data_item_win = win_info->regs_content[pos].get ();
+      data_item_win = regs_content[pos].get ();
       if (data_item_win)
 	{
 	  if (!refresh_values_only)
@@ -558,7 +549,7 @@ void
 tui_data_window::check_register_values (struct frame_info *frame)
 {
   if (regs_content.empty () && display_regs)
-    tui_show_registers (current_group);
+    show_registers (current_group);
   else
     {
       for (auto &&data_item_win_ptr : regs_content)
@@ -710,7 +701,7 @@ tui_reg_command (const char *args, int from_tty)
       if (match == NULL)
 	error (_("unknown register group '%s'"), args);
 
-      tui_show_registers (match);
+      TUI_DATA_WIN->show_registers (match);
     }
   else
     {

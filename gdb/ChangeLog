@@ -1,5 +1,18 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <show_registers,
+	show_register_group>: Declare.
+	(tui_show_register_group): Don't declare.
+	* tui/tui-regs.c (tui_data_window::show_registers): Rename from
+	tui_show_registers.
+	(tui_data_window::show_register_group): Rename from
+	tui_show_register_group.
+	(tui_data_window::check_register_values, tui_reg_command):
+	Update.
+	* tui/tui-layout.c (tui_set_layout): Update.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <check_register_values>:
 	Declare.
 	(tui_check_register_values): Don't declare.
