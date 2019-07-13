@@ -175,6 +175,46 @@ ctf_link_add_ctf (ctf_file_t *fp, ctf_archive_t *ctf, const char *name)
   return (ctf_set_errno (fp, ENOMEM));
 }
 
+/* Return a per-CU output CTF dictionary suitable for the given CU, creating and
+   interning it if need be.  */
+
+static ctf_file_t *
+ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
+{
+  ctf_file_t *cu_fp;
+  char *dynname = NULL;
+
+  if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, filename)) == NULL)
+    {
+      int err;
+
+      if ((cu_fp = ctf_create (&err)) == NULL)
+	{
+	  ctf_dprintf ("Cannot create per-CU CTF archive for CU %s from "
+		       "input file %s: %s\n", cuname, filename,
+		       ctf_errmsg (err));
+	  ctf_set_errno (fp, err);
+	  return NULL;
+	}
+
+      if ((dynname = strdup (filename)) == NULL)
+	goto oom;
+      if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, cu_fp) < 0)
+	goto oom;
+
+      ctf_import (cu_fp, fp);
+      ctf_cuname_set (cu_fp, cuname);
+      ctf_parent_name_set (cu_fp, _CTF_SECTION);
+    }
+  return cu_fp;
+
+ oom:
+  free (dynname);
+  ctf_file_close (cu_fp);
+  ctf_set_errno (fp, ENOMEM);
+  return NULL;
+}
+
 typedef struct ctf_link_in_member_cb_arg
 {
   ctf_file_t *out_fp;
@@ -227,29 +267,9 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
       ctf_set_errno (arg->out_fp, 0);
     }
 
-  if ((per_cu_out_fp = ctf_dynhash_lookup (arg->out_fp->ctf_link_outputs,
-					   arg->arcname)) == NULL)
-    {
-      int err;
-
-      if ((per_cu_out_fp = ctf_create (&err)) == NULL)
-	{
-	  ctf_dprintf ("Cannot create per-CU CTF archive for member %s: %s\n",
-		       arg->arcname, ctf_errmsg (err));
-          ctf_set_errno (arg->out_fp, err);
-          return -1;
-	}
-
-      if (ctf_dynhash_insert (arg->out_fp->ctf_link_outputs, arg->arcname,
-			      per_cu_out_fp) < 0)
-        {
-          ctf_set_errno (arg->out_fp, ENOMEM);
-          return -1;
-        }
-
-      ctf_import (per_cu_out_fp, arg->out_fp);
-      ctf_cuname_set (per_cu_out_fp, arg->cu_name);
-    }
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->arcname,
+					  arg->cu_name)) == NULL)
+    return -1;	 				/* Errno is set for us.  */
 
   if (ctf_add_type (per_cu_out_fp, arg->in_fp, type) != CTF_ERR)
     return 0;
@@ -262,6 +282,95 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
       ctf_set_errno (arg->out_fp, 0);
 
   return 0;					/* As above: do not lose types.  */
+}
+
+/* Check if we can safely add a variable with the given type to this container.  */
+
+static int
+check_variable (const char *name, ctf_file_t *fp, ctf_id_t type,
+		ctf_dvdef_t **out_dvd)
+{
+  ctf_dvdef_t *dvd;
+
+  dvd = ctf_dynhash_lookup (fp->ctf_dvhash, name);
+  *out_dvd = dvd;
+  if (!dvd)
+    return 1;
+
+  if (dvd->dvd_type != type)
+    {
+      /* Variable here.  Wrong type: cannot add.  Just skip it, because there is
+         no way to express this in CTF.  (This might be the parent, in which
+         case we'll try adding in the child first, and only then give up.)  */
+      ctf_dprintf ("Inexpressible duplicate variable %s skipped.\n", name);
+    }
+
+  return 0;                                   /* Already exists.  */
+}
+
+/* Link one variable in.  */
+
+static int
+ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
+{
+  ctf_link_in_member_cb_arg_t *arg = (ctf_link_in_member_cb_arg_t *) arg_;
+  ctf_file_t *per_cu_out_fp;
+  ctf_id_t dst_type = 0;
+  ctf_file_t *check_fp;
+  ctf_dvdef_t *dvd;
+
+  /* In unconflicted link mode, if this type is mapped to a type in the parent
+     container, we want to try to add to that first: if it reports a duplicate,
+     or if the type is in a child already, add straight to the child.  */
+
+  check_fp = arg->out_fp;
+
+  dst_type = ctf_type_mapping (arg->in_fp, type, &check_fp);
+  if (dst_type != 0)
+    {
+      if (check_fp == arg->out_fp)
+        {
+          if (check_variable (name, check_fp, dst_type, &dvd))
+            {
+              /* No variable here: we can add it.  */
+              if (ctf_add_variable (check_fp, name, dst_type) < 0)
+                return (ctf_set_errno (arg->out_fp, ctf_errno (check_fp)));
+              return 0;
+            }
+
+          /* Already present?  Nothing to do.  */
+          if (dvd && dvd->dvd_type == type)
+            return 0;
+        }
+    }
+
+  /* Can't add to the parent due to a name clash, or because it references a
+     type only present in the child.  Try adding to the child, creating if need
+     be.  */
+
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->arcname,
+					  arg->cu_name)) == NULL)
+    return -1;	 				/* Errno is set for us.  */
+
+  /* If the type was not found, check for it in the child too. */
+  if (dst_type == 0)
+    {
+      check_fp = per_cu_out_fp;
+      dst_type = ctf_type_mapping (arg->in_fp, type, &check_fp);
+
+      if (dst_type == 0)
+	{
+          ctf_dprintf ("Type %lx for variable %s in input file %s not "
+                       "found: skipped.\n", type, name, arg->file_name);
+          /* Do not terminate the link: just skip the variable.  */
+          return 0;
+	}
+    }
+
+  if (check_variable (name, per_cu_out_fp, dst_type, &dvd))
+    if (ctf_add_variable (per_cu_out_fp, name, dst_type) < 0)
+      return (ctf_set_errno (arg->out_fp, ctf_errno (per_cu_out_fp)));
+  return 0;
 }
 
 /* Merge every type and variable in this archive member into the link, so we can
@@ -317,7 +426,8 @@ ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *ar
     arg->cu_name += strlen (".ctf.");
   arg->in_fp = in_fp;
 
-  err = ctf_type_iter_all (in_fp, ctf_link_one_type, arg);
+  if ((err = ctf_type_iter_all (in_fp, ctf_link_one_type, arg)) > -1)
+    err = ctf_variable_iter (in_fp, ctf_link_one_variable, arg);
 
   arg->in_input_cu_file = 0;
   free (arg->arcname);

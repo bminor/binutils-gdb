@@ -1,5 +1,14 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_create_per_cu): New, refactored out of...
+	(ctf_link_one_type): ... here, with parent-name setting added.
+	(check_variable): New.
+	(ctf_link_one_variable): Likewise.
+	(ctf_link_one_input_archive_member): Call it.
+	* ctf-error.c (_ctf_errlist): Updated with new errors.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_file_t): New field ctf_link_type_mapping.
 	(struct ctf_link_type_mapping_key): New.
 	(ctf_hash_type_mapping_key): Likewise.
