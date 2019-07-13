@@ -149,34 +149,11 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
     return (-1);
 }
 
-/* A helper function to display the register window in the appropriate
-   way.  */
-
-static void
-tui_reg_layout ()
-{
-  enum tui_layout_type cur_layout = tui_current_layout ();
-  enum tui_layout_type new_layout;
-  if (cur_layout == SRC_COMMAND || cur_layout == SRC_DATA_COMMAND)
-    new_layout = SRC_DATA_COMMAND;
-  else
-    new_layout = DISASSEM_DATA_COMMAND;
-  tui_set_layout (new_layout);
-}
-
 /* Show the registers of the given group in the data window
    and refresh the window.  */
 void
 tui_show_registers (struct reggroup *group)
 {
-  /* Make sure the curses mode is enabled.  */
-  tui_enable ();
-
-  /* Make sure the register window is visible.  If not, select an
-     appropriate layout.  */
-  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
-    tui_reg_layout ();
-
   if (group == 0)
     group = general_reggroup;
 
@@ -674,6 +651,21 @@ tui_reg_prev (struct reggroup *current_group, struct gdbarch *gdbarch)
 	group = reggroup_prev (gdbarch, NULL);
     }
   return group;
+}
+
+/* A helper function to display the register window in the appropriate
+   way.  */
+
+static void
+tui_reg_layout ()
+{
+  enum tui_layout_type cur_layout = tui_current_layout ();
+  enum tui_layout_type new_layout;
+  if (cur_layout == SRC_COMMAND || cur_layout == SRC_DATA_COMMAND)
+    new_layout = SRC_DATA_COMMAND;
+  else
+    new_layout = DISASSEM_DATA_COMMAND;
+  tui_set_layout (new_layout);
 }
 
 /* Implement the 'tui reg' command.  Changes the register group displayed
