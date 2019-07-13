@@ -1,5 +1,16 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump): Use ctf_type_iter_all to dump types, not
+	ctf_type_iter.
+	(ctf_dump_type): Pass down the flag from ctf_type_iter_all.
+	(ctf_dump_format_type): Add non-root-type { } notation.
+	Add root flag to prototype.
+	(ctf_dump_label): Adjust accordingly.
+	(ctf_dump_objts): Likewise.
+	(ctf_dump_var): Likewise.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_compress_write): Fix double-free.
 
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
