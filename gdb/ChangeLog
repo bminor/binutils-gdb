@@ -1,5 +1,20 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_item_window)
+	<~tui_data_item_window>: Remove.
+	<content>: Now a unique_xmalloc_ptr.
+	* tui/tui-regs.c (tui_register_format): Return a
+	unique_xmalloc_ptr.
+	(tui_get_register): Update.
+	(~tui_data_item_window): Remove.
+	(tui_data_window::display_registers_from, tui_display_register):
+	Update.
+	* tui/tui-io.h (tui_expand_tabs): Update.
+	* tui/tui-io.c (tui_expand_tabs): Return a unique_xmalloc_ptr.
+	Remove "col" parameter.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_item_window) <value>: Remove
 	field.
 	* tui/tui-regs.c (~tui_data_item_window): Update.

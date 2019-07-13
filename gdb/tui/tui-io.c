@@ -1050,19 +1050,17 @@ tui_getc (FILE *fp)
   return ch;
 }
 
-/* Utility function to expand TABs in a STRING into spaces.  STRING
-   will be displayed starting at column COL, and is assumed to include
-   no newlines.  The returned expanded string is malloc'ed.  */
+/* See tui-io.h.  */
 
-char *
-tui_expand_tabs (const char *string, int col)
+gdb::unique_xmalloc_ptr<char>
+tui_expand_tabs (const char *string)
 {
   int n_adjust, ncol;
   const char *s;
   char *ret, *q;
 
   /* 1. How many additional characters do we need?  */
-  for (ncol = col, n_adjust = 0, s = string; s; )
+  for (ncol = 0, n_adjust = 0, s = string; s; )
     {
       s = strpbrk (s, "\t");
       if (s)
@@ -1079,7 +1077,7 @@ tui_expand_tabs (const char *string, int col)
   ret = q = (char *) xmalloc (strlen (string) + n_adjust + 1);
 
   /* 2. Copy the original string while replacing TABs with spaces.  */
-  for (ncol = col, s = string; s; )
+  for (ncol = 0, s = string; s; )
     {
       const char *s1 = strpbrk (s, "\t");
       if (s1)
@@ -1101,5 +1099,5 @@ tui_expand_tabs (const char *string, int col)
       s = s1;
     }
 
-  return ret;
+  return gdb::unique_xmalloc_ptr<char> (ret);
 }

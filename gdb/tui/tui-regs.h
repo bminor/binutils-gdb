@@ -33,13 +33,11 @@ struct tui_data_item_window : public tui_gen_win_info
   {
   }
 
-  ~tui_data_item_window () override;
-
   const char *name = nullptr;
   /* The register number, or data display number.  */
   int item_no = -1;
   bool highlight = false;
-  char *content = nullptr;
+  gdb::unique_xmalloc_ptr<char> content;
 };
 
 /* The TUI registers window.  */

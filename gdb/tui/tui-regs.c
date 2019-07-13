@@ -52,7 +52,7 @@ static void tui_show_register_group (tui_data_window *win_info,
 /* Get the register from the frame and return a printable
    representation of it.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 tui_register_format (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -72,7 +72,7 @@ tui_register_format (struct frame_info *frame, int regnum)
     str.resize (str.size () - 1);
 
   /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  return tui_expand_tabs (str.c_str (), 0);
+  return tui_expand_tabs (str.c_str ());
 }
 
 /* Get the register value from the given frame and format it for the
@@ -87,23 +87,15 @@ tui_get_register (struct frame_info *frame,
     *changedp = false;
   if (target_has_registers)
     {
-      char *prev_content = data->content;
-
-      data->content = tui_register_format (frame, regnum);
+      gdb::unique_xmalloc_ptr<char> new_content
+	= tui_register_format (frame, regnum);
 
       if (changedp != NULL
-	  && strcmp (prev_content, data->content) != 0)
+	  && strcmp (data->content.get (), new_content.get ()) != 0)
 	*changedp = true;
 
-      xfree (prev_content);
+      data->content = std::move (new_content);
     }
-}
-
-/* See tui-regs.h.  */
-
-tui_data_item_window::~tui_data_item_window ()
-{
-  xfree (content);
 }
 
 /* See tui-regs.h.  */
@@ -309,19 +301,13 @@ tui_data_window::display_registers_from (int start_element_no)
       int max_len = 0;
       for (auto &&data_item_win : regs_content)
         {
-          char *p;
+          const char *p;
           int len;
 
           len = 0;
-          p = data_item_win->content;
+          p = data_item_win->content.get ();
           if (p != 0)
-            while (*p)
-              {
-                if (*p++ == '\t')
-                  len = 8 * ((len / 8) + 1);
-                else
-                  len++;
-              }
+	    len = strlen (p);
 
           if (len > max_len)
             max_len = len;
@@ -641,7 +627,7 @@ tui_display_register (struct tui_data_item_window *data)
         waddch (data->handle, ' ');
       wmove (data->handle, 0, 0);
       if (data->content)
-        waddstr (data->handle, data->content);
+        waddstr (data->handle, data->content.get ());
 
       if (data->highlight)
 	/* We ignore the return value, casting it to void in order to avoid
