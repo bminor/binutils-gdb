@@ -69,7 +69,8 @@ static const char *const _ctf_errlist[] = {
   "Overflow of type bitness or offset in slice",     /* ECTF_SLICEOVERFLOW */
   "Unknown section number in dump",		     /* ECTF_DUMPSECTUNKNOWN */
   "Section changed in middle of dump",		     /* ECTF_DUMPSECTCHANGED */
-  "Feature not yet implemented"			     /* ECTF_NOTYET */
+  "Feature not yet implemented",		     /* ECTF_NOTYET */
+  "Internal error in link"			     /* ECTF_INTERNAL */
 };
 
 static const int _ctf_nerr = sizeof (_ctf_errlist) / sizeof (_ctf_errlist[0]);
