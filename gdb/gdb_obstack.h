@@ -89,7 +89,11 @@ extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 /* Duplicate STRING, returning an equivalent string that's allocated on the
    obstack OBSTACKP.  */
 
-extern char *obstack_strdup (struct obstack *obstackp, const char *string);
+static inline char *
+obstack_strdup (struct obstack *obstackp, const char *string)
+{
+  return (char *) obstack_copy0 (obstackp, string, strlen (string));
+}
 
 /* An obstack that frees itself on scope exit.  */
 struct auto_obstack : obstack

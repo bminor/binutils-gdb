@@ -1,5 +1,10 @@
 2019-08-06  Tom Tromey  <tom@tromey.com>
 
+	* gdb_obstack.h (obstack_strdup): Define.
+	* gdb_obstack.c (obstack_strdup): Don't define.
+
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (SYMNAME_ALLOC, process_xcoff_symbol): Use
 	obstack_strdup.
 	* typeprint.c (typedef_hash_table::find_global_typedef): Use
