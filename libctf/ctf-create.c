@@ -1997,7 +1997,6 @@ ctf_compress_write (ctf_file_t *fp, int fd)
     {
       ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
       err = ctf_set_errno (fp, ECTF_COMPRESS);
-      ctf_free (buf);
       goto ret;
     }
 
