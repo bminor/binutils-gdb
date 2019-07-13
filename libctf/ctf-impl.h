@@ -192,6 +192,7 @@ typedef struct ctf_str_atom
 {
   const char *csa_str;		/* Backpointer to string (hash key).  */
   ctf_list_t csa_refs;		/* This string's refs.  */
+  uint32_t csa_offset;		/* External strtab offset, if any.  */
   unsigned long csa_snapshot_id; /* Snapshot ID at time of creation.  */
 } ctf_str_atom_t;
 
@@ -222,6 +223,7 @@ struct ctf_file
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
+  ctf_dynhash_t *ctf_syn_ext_strtab; /* Maps ext-strtab offsets to names.  */
   void *ctf_data_mmapped;	    /* CTF data we mmapped, to free later.  */
   size_t ctf_data_mmapped_len;	    /* Length of CTF data we mmapped.  */
   ctf_hash_t *ctf_structs;	    /* Hash table of struct types.  */
@@ -375,12 +377,15 @@ _libctf_printflike_ (2, 3)
 extern void ctf_decl_sprintf (ctf_decl_t *, const char *, ...);
 extern char *ctf_decl_buf (ctf_decl_t *cd);
 
-extern const char *ctf_strraw (ctf_file_t *, uint32_t);
 extern const char *ctf_strptr (ctf_file_t *, uint32_t);
+extern const char *ctf_strraw (ctf_file_t *, uint32_t);
+extern const char *ctf_strraw_explicit (ctf_file_t *, uint32_t,
+					ctf_strs_t *);
 extern int ctf_str_create_atoms (ctf_file_t *);
 extern void ctf_str_free_atoms (ctf_file_t *);
 extern const char *ctf_str_add (ctf_file_t *, const char *);
-extern const char *ctf_str_add_ref (ctf_file_t *, const char *, uint32_t *);
+extern const char *ctf_str_add_ref (ctf_file_t *, const char *, uint32_t *ref);
+extern const char *ctf_str_add_external (ctf_file_t *, const char *, uint32_t offset);
 extern void ctf_str_rollback (ctf_file_t *, ctf_snapshot_id_t);
 extern void ctf_str_purge_refs (ctf_file_t *);
 extern ctf_strs_writable_t ctf_str_write_strtab (ctf_file_t *);
@@ -390,6 +395,14 @@ extern struct ctf_archive *ctf_arc_bufopen (const void *, size_t, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern void *ctf_set_open_errno (int *, int);
 extern unsigned long ctf_set_errno (ctf_file_t *, int);
+
+extern ctf_file_t *ctf_simple_open_internal (const char *, size_t, const char *,
+					     size_t, size_t,
+					     const char *, size_t,
+					     ctf_dynhash_t *, int *);
+extern ctf_file_t *ctf_bufopen_internal (const ctf_sect_t *, const ctf_sect_t *,
+					 const ctf_sect_t *, ctf_dynhash_t *,
+					 int *);
 
 _libctf_malloc_
 extern void *ctf_mmap (size_t length, size_t offset, int fd);

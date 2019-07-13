@@ -785,7 +785,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	      err = ctf_hash_define_type (fp->ctf_names, fp,
 					  LCTF_INDEX_TO_TYPE (fp, id, child),
 					  tp->ctt_name);
-	      if (err != 0 && err != ECTF_STRTAB)
+	      if (err != 0)
 		return err;
 	    }
 	  break;
@@ -800,7 +800,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  err = ctf_hash_insert_type (fp->ctf_names, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 	  break;
 
@@ -809,7 +809,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 
 	  if (size >= CTF_LSTRUCT_THRESH)
@@ -821,7 +821,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 
 	  if (size >= CTF_LSTRUCT_THRESH)
@@ -833,7 +833,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 	  break;
 
@@ -841,7 +841,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  err = ctf_hash_insert_type (fp->ctf_names, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 	  break;
 
@@ -868,7 +868,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	      err = ctf_hash_insert_type (hp, fp,
 					  LCTF_INDEX_TO_TYPE (fp, id, child),
 					  tp->ctt_name);
-	      if (err != 0 && err != ECTF_STRTAB)
+	      if (err != 0)
 		return err;
 	    }
 	  break;
@@ -889,7 +889,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  err = ctf_hash_insert_type (fp->ctf_names, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
-	  if (err != 0 && err != ECTF_STRTAB)
+	  if (err != 0)
 	    return err;
 	  break;
 	default:
@@ -1191,11 +1191,26 @@ flip_ctf (ctf_header_t *cth, unsigned char *buf)
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
+
 ctf_file_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 			     const char *symsect, size_t symsect_size,
 			     size_t symsect_entsize,
 			     const char *strsect, size_t strsect_size,
 			     int *errp)
+{
+  return ctf_simple_open_internal (ctfsect, ctfsect_size, symsect, symsect_size,
+				   symsect_entsize, strsect, strsect_size, NULL,
+				   errp);
+}
+
+/* Open a CTF file, mocking up a suitable ctf_sect and overriding the external
+   strtab with a synthetic one.  */
+
+ctf_file_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
+				      const char *symsect, size_t symsect_size,
+				      size_t symsect_entsize,
+				      const char *strsect, size_t strsect_size,
+				      ctf_dynhash_t *syn_strtab, int *errp)
 {
   ctf_sect_t skeleton;
 
@@ -1232,7 +1247,7 @@ ctf_file_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
       strsectp = &str_sect;
     }
 
-  return ctf_bufopen (ctfsectp, symsectp, strsectp, errp);
+  return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab, errp);
 }
 
 /* Decode the specified CTF buffer and optional symbol table, and create a new
@@ -1244,6 +1259,16 @@ ctf_file_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
+  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, errp);
+}
+
+/* Like ctf_bufopen, but overriding the external strtab with a synthetic one.  */
+
+ctf_file_t *
+ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
+		      const ctf_sect_t *strsect, ctf_dynhash_t *syn_strtab,
+		      int *errp)
+{
   const ctf_preamble_t *pp;
   size_t hdrsz = sizeof (ctf_header_t);
   ctf_header_t *hp;
@@ -1253,7 +1278,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   libctf_init_debug();
 
-  if ((ctfsect == NULL) || ((symsect != NULL) && (strsect == NULL)))
+  if ((ctfsect == NULL) || ((symsect != NULL) &&
+			    ((strsect == NULL) && syn_strtab == NULL)))
     return (ctf_set_open_errno (errp, EINVAL));
 
   if (symsect != NULL && symsect->cts_entsize != sizeof (Elf32_Sym) &&
@@ -1466,6 +1492,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       fp->ctf_str[CTF_STRTAB_1].cts_strs = strsect->cts_data;
       fp->ctf_str[CTF_STRTAB_1].cts_len = strsect->cts_size;
     }
+  fp->ctf_syn_ext_strtab = syn_strtab;
 
   if (foreign_endian &&
       (err = flip_ctf (hp, fp->ctf_buf)) != 0)
@@ -1592,11 +1619,12 @@ ctf_file_close (ctf_file_t *fp)
 
   if (fp->ctf_strtab.cts_name != _CTF_NULLSTR)
     ctf_free ((char *) fp->ctf_strtab.cts_name);
-
   else if (fp->ctf_data_mmapped)
     ctf_munmap (fp->ctf_data_mmapped, fp->ctf_data_mmapped_len);
 
   ctf_free (fp->ctf_dynbase);
+
+  ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
 
   ctf_free (fp->ctf_sxlate);
   ctf_free (fp->ctf_txlate);

@@ -1,5 +1,44 @@
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_str_atom_t) <csa_offset>: New field.
+	(ctf_file_t) <ctf_syn_ext_strtab>: Likewise.
+	(ctf_str_add_ref): Name the last arg.
+	(ctf_str_add_external) New.
+	(ctf_str_add_strraw_explicit): Likewise.
+	(ctf_simple_open_internal): Likewise.
+	(ctf_bufopen_internal): Likewise.
+
+	* ctf-string.c (ctf_strraw_explicit): Split from...
+	(ctf_strraw): ... here, with new support for ctf_syn_ext_strtab.
+	(ctf_str_add_ref_internal): Return the atom, not the
+	string.
+	(ctf_str_add): Adjust accordingly.
+	(ctf_str_add_ref): Likewise.  Move up in the file.
+	(ctf_str_add_external): New: update the csa_offset.
+	(ctf_str_count_strtab): Only account for strings with no csa_offset
+	in the internal strtab length.
+	(ctf_str_write_strtab): If the csa_offset is set, update the
+	string's refs without writing the string out, and update the
+	ctf_syn_ext_strtab.  Make OOM handling less ugly.
+	* ctf-create.c (struct ctf_sort_var_arg_cb): New.
+	(ctf_update): Handle failure to populate the strtab.  Pass in the
+	new ctf_sort_var arg.  Adjust for ctf_syn_ext_strtab addition.
+	Call ctf_simple_open_internal, not ctf_simple_open.
+	(ctf_sort_var): Call ctf_strraw_explicit rather than looking up
+	strings by hand.
+	* ctf-hash.c (ctf_hash_insert_type): Likewise (but using
+	ctf_strraw).  Adjust to diagnose ECTF_STRTAB nonetheless.
+	* ctf-open.c (init_types): No longer filter out ECTF_STRTAB.
+	(ctf_file_close): Destroy the ctf_syn_ext_strtab.
+	(ctf_simple_open): Rename to, and reimplement as a wrapper around...
+	(ctf_simple_open_internal): ... this new function, which calls
+	ctf_bufopen_internal.
+	(ctf_bufopen): Rename to, and reimplement as a wrapper around...
+	(ctf_bufopen_internal): ... this new function, which sets
+	ctf_syn_ext_strtab.
+
+2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf_types.c (ctf_type_iter_all): New.
 
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
