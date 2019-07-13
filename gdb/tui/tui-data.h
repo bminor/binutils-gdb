@@ -103,9 +103,6 @@ public:
 
 /* Constant definitions.  */
 #define DEFAULT_TAB_LEN         8
-#define NO_SRC_STRING           "[ No Source Available ]"
-#define NO_DISASSEM_STRING      "[ No Assembly Available ]"
-#define NO_REGS_STRING          "[ Register Values Unavailable ]"
 #define NO_DATA_STRING          "[ No Data Values Displayed ]"
 #define SRC_NAME                "src"
 #define CMD_NAME                "cmd"

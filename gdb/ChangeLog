@@ -1,3 +1,11 @@
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-source.h (struct tui_source_window): Update.
+	* tui/tui-regs.c (tui_show_registers): Update.
+	* tui/tui-disasm.h (struct tui_disasm_window): Update.
+	* tui/tui-data.h (NO_SRC_STRING, NO_DISASSEM_STRING)
+	(NO_REGS_STRING): Remove defines.
+
 2019-08-20  Conrad Meyer  <cem@FreeBSD.org>
 
 	* remote.c (remote_target::remote_btrace_maybe_reopen): Avoid

@@ -53,7 +53,7 @@ struct tui_source_window : public tui_source_window_base
 
   void erase_source_content () override
   {
-    do_erase_source_content (NO_SRC_STRING);
+    do_erase_source_content (_("[ No Source Available ]"));
   }
 
   void show_symtab_source (struct gdbarch *, struct symtab *,
