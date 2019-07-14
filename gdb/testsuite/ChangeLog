@@ -1,3 +1,8 @@
+2019-07-14  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24760
+	* gdb.objc/basicclass.exp: Fix unterminated string.
+
 2019-07-12  Bernhard Heckel  <bernhard.heckel@intel.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
