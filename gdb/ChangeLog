@@ -1,5 +1,12 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (box_win): Change type of highlight_flag.
+	(tui_unhighlight_win, tui_highlight_win)
+	(tui_win_info::make_window): Update.
+	* tui/tui-data.h (HILITE, NO_HILITE): Remove.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (PROC_PREFIX, LINE_PREFIX, PC_PREFIX)
 	(MIN_LINE_WIDTH, MIN_PROC_WIDTH, MAX_TARGET_WIDTH)
 	(MAX_PID_WIDTH): Move to tui-stack.c.

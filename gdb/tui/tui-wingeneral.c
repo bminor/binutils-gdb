@@ -56,7 +56,7 @@ tui_delete_win (WINDOW *window)
 /* Draw a border arround the window.  */
 static void
 box_win (struct tui_win_info *win_info, 
-	 int highlight_flag)
+	 bool highlight_flag)
 {
   if (win_info && win_info->handle)
     {
@@ -64,7 +64,7 @@ box_win (struct tui_win_info *win_info,
       int attrs;
 
       win = win_info->handle;
-      if (highlight_flag == HILITE)
+      if (highlight_flag)
         attrs = tui_active_border_attrs;
       else
         attrs = tui_border_attrs;
@@ -92,7 +92,7 @@ tui_unhighlight_win (struct tui_win_info *win_info)
       && win_info->can_highlight
       && win_info->handle != NULL)
     {
-      box_win (win_info, NO_HILITE);
+      box_win (win_info, false);
       win_info->refresh_window ();
       win_info->set_highlight (false);
     }
@@ -106,7 +106,7 @@ tui_highlight_win (struct tui_win_info *win_info)
       && win_info->can_highlight
       && win_info->handle != NULL)
     {
-      box_win (win_info, HILITE);
+      box_win (win_info, true);
       win_info->refresh_window ();
       win_info->set_highlight (true);
     }
@@ -138,7 +138,7 @@ tui_win_info::make_window ()
 {
   tui_gen_win_info::make_window ();
   if (handle != NULL && can_box ())
-    box_win (this, NO_HILITE);
+    box_win (this, false);
 }
 
 /* We can't really make windows visible, or invisible.  So we have to
