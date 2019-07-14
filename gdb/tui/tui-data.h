@@ -108,18 +108,7 @@ public:
 #define MIN_CMD_WIN_HEIGHT      3
 
 /* Strings to display in the TUI status line.  */
-#define PROC_PREFIX             "In: "
-#define LINE_PREFIX             "L"
-#define PC_PREFIX               "PC: "
 #define SINGLE_KEY              "(SingleKey)"
-
-/* Minimum/Maximum length of some fields displayed in the TUI status
-   line.  */
-#define MIN_LINE_WIDTH     4	/* Use at least 4 digits for line
-				   numbers.  */
-#define MIN_PROC_WIDTH    12
-#define MAX_TARGET_WIDTH  10
-#define MAX_PID_WIDTH     19
 
 /* The kinds of layouts available.  */
 enum tui_layout_type

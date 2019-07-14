@@ -39,6 +39,18 @@
 
 #include "gdb_curses.h"
 
+#define PROC_PREFIX             "In: "
+#define LINE_PREFIX             "L"
+#define PC_PREFIX               "PC: "
+
+/* Minimum/Maximum length of some fields displayed in the TUI status
+   line.  */
+#define MIN_LINE_WIDTH     4	/* Use at least 4 digits for line
+				   numbers.  */
+#define MIN_PROC_WIDTH    12
+#define MAX_TARGET_WIDTH  10
+#define MAX_PID_WIDTH     19
+
 static struct tui_locator_window _locator;
 
 /* Get a printable name for the function at the address.

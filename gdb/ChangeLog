@@ -1,5 +1,14 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (PROC_PREFIX, LINE_PREFIX, PC_PREFIX)
+	(MIN_LINE_WIDTH, MIN_PROC_WIDTH, MAX_TARGET_WIDTH)
+	(MAX_PID_WIDTH): Move to tui-stack.c.
+	* tui/tui-stack.c (PROC_PREFIX, LINE_PREFIX, PC_PREFIX)
+	(MIN_LINE_WIDTH, MIN_PROC_WIDTH, MAX_TARGET_WIDTH)
+	(MAX_PID_WIDTH): Move from tui-data.h.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_window): Don't declare.
 	* tui/tui-wingeneral.c (box_win): Change type of win_info.
 	(box_win): Update.
