@@ -792,100 +792,100 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (DSTBE), ',', OP (IMM64), 0 } },
     & ifmt_lddwbe, { 0x18 }
   },
-/* ldabsw $dstle,$srcle,$imm32 */
+/* ldabsw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x20 }
   },
-/* ldabsh $dstle,$srcle,$imm32 */
+/* ldabsh $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x28 }
   },
-/* ldabsb $dstle,$srcle,$imm32 */
+/* ldabsb $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x30 }
   },
-/* ldabsdw $dstle,$srcle,$imm32 */
+/* ldabsdw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x38 }
   },
-/* ldindw $dstle,$srcle,$imm32 */
+/* ldindw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x40 }
   },
-/* ldindh $dstle,$srcle,$imm32 */
+/* ldindh $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x48 }
   },
-/* ldindb $dstle,$srcle,$imm32 */
+/* ldindb $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x50 }
   },
-/* ldinddw $dstle,$srcle,$imm32 */
+/* ldinddw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTLE), ',', OP (SRCLE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswle, { 0x58 }
   },
-/* ldabsw $dstbe,$srcbe,$imm32 */
+/* ldabsw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x20 }
   },
-/* ldabsh $dstbe,$srcbe,$imm32 */
+/* ldabsh $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x28 }
   },
-/* ldabsb $dstbe,$srcbe,$imm32 */
+/* ldabsb $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x30 }
   },
-/* ldabsdw $dstbe,$srcbe,$imm32 */
+/* ldabsdw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x38 }
   },
-/* ldindw $dstbe,$srcbe,$imm32 */
+/* ldindw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x40 }
   },
-/* ldindh $dstbe,$srcbe,$imm32 */
+/* ldindh $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x48 }
   },
-/* ldindb $dstbe,$srcbe,$imm32 */
+/* ldindb $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x50 }
   },
-/* ldinddw $dstbe,$srcbe,$imm32 */
+/* ldinddw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (DSTBE), ',', OP (SRCBE), ',', OP (IMM32), 0 } },
+    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
     & ifmt_ldabswbe, { 0x58 }
   },
 /* ldxw $dstle,[$srcle+$offset16] */

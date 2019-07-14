@@ -824,82 +824,82 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_LDDWBE, "lddwbe", "lddw", 128,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldabsw $dstle,$srcle,$imm32 */
+/* ldabsw $srcle,$imm32 */
   {
     BPF_INSN_LDABSWLE, "ldabswle", "ldabsw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldabsh $dstle,$srcle,$imm32 */
+/* ldabsh $srcle,$imm32 */
   {
     BPF_INSN_LDABSHLE, "ldabshle", "ldabsh", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldabsb $dstle,$srcle,$imm32 */
+/* ldabsb $srcle,$imm32 */
   {
     BPF_INSN_LDABSBLE, "ldabsble", "ldabsb", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldabsdw $dstle,$srcle,$imm32 */
+/* ldabsdw $srcle,$imm32 */
   {
     BPF_INSN_LDABSDWLE, "ldabsdwle", "ldabsdw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldindw $dstle,$srcle,$imm32 */
+/* ldindw $srcle,$imm32 */
   {
     BPF_INSN_LDINDWLE, "ldindwle", "ldindw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldindh $dstle,$srcle,$imm32 */
+/* ldindh $srcle,$imm32 */
   {
     BPF_INSN_LDINDHLE, "ldindhle", "ldindh", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldindb $dstle,$srcle,$imm32 */
+/* ldindb $srcle,$imm32 */
   {
     BPF_INSN_LDINDBLE, "ldindble", "ldindb", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldinddw $dstle,$srcle,$imm32 */
+/* ldinddw $srcle,$imm32 */
   {
     BPF_INSN_LDINDDWLE, "ldinddwle", "ldinddw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* ldabsw $dstbe,$srcbe,$imm32 */
+/* ldabsw $srcbe,$imm32 */
   {
     BPF_INSN_LDABSWBE, "ldabswbe", "ldabsw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldabsh $dstbe,$srcbe,$imm32 */
+/* ldabsh $srcbe,$imm32 */
   {
     BPF_INSN_LDABSHBE, "ldabshbe", "ldabsh", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldabsb $dstbe,$srcbe,$imm32 */
+/* ldabsb $srcbe,$imm32 */
   {
     BPF_INSN_LDABSBBE, "ldabsbbe", "ldabsb", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldabsdw $dstbe,$srcbe,$imm32 */
+/* ldabsdw $srcbe,$imm32 */
   {
     BPF_INSN_LDABSDWBE, "ldabsdwbe", "ldabsdw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldindw $dstbe,$srcbe,$imm32 */
+/* ldindw $srcbe,$imm32 */
   {
     BPF_INSN_LDINDWBE, "ldindwbe", "ldindw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldindh $dstbe,$srcbe,$imm32 */
+/* ldindh $srcbe,$imm32 */
   {
     BPF_INSN_LDINDHBE, "ldindhbe", "ldindh", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldindb $dstbe,$srcbe,$imm32 */
+/* ldindb $srcbe,$imm32 */
   {
     BPF_INSN_LDINDBBE, "ldindbbe", "ldindb", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldinddw $dstbe,$srcbe,$imm32 */
+/* ldinddw $srcbe,$imm32 */
   {
     BPF_INSN_LDINDDWBE, "ldinddwbe", "ldinddw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }

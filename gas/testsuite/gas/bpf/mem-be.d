@@ -8,14 +8,14 @@
 Disassembly of section .text:
 
 0+ <.text>:
-   0:	20 23 00 00 00 00 be ef 	ldabsw %r2,%r3,0xbeef
-   8:	28 45 00 00 00 00 be ef 	ldabsh %r4,%r5,0xbeef
-  10:	30 67 00 00 00 00 be ef 	ldabsb %ctx,%r7,0xbeef
-  18:	38 89 00 00 00 00 be ef 	ldabsdw %r8,%r9,0xbeef
-  20:	40 23 00 00 00 00 be ef 	ldindw %r2,%r3,0xbeef
-  28:	48 45 00 00 00 00 be ef 	ldindh %r4,%r5,0xbeef
-  30:	50 67 00 00 00 00 be ef 	ldindb %ctx,%r7,0xbeef
-  38:	58 89 00 00 00 00 be ef 	ldinddw %r8,%r9,0xbeef
+   0:	20 03 00 00 00 00 be ef 	ldabsw %r3,0xbeef
+   8:	28 05 00 00 00 00 be ef 	ldabsh %r5,0xbeef
+  10:	30 07 00 00 00 00 be ef 	ldabsb %r7,0xbeef
+  18:	38 09 00 00 00 00 be ef 	ldabsdw %r9,0xbeef
+  20:	40 03 00 00 00 00 be ef 	ldindw %r3,0xbeef
+  28:	48 05 00 00 00 00 be ef 	ldindh %r5,0xbeef
+  30:	50 07 00 00 00 00 be ef 	ldindb %r7,0xbeef
+  38:	58 09 00 00 00 00 be ef 	ldinddw %r9,0xbeef
   40:	61 21 7e ef 00 00 00 00 	ldxw %r2,\[%r1\+0x7eef\]
   48:	69 21 7e ef 00 00 00 00 	ldxh %r2,\[%r1\+0x7eef\]
   50:	71 21 7e ef 00 00 00 00 	ldxb %r2,\[%r1\+0x7eef\]

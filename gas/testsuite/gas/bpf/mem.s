@@ -2,14 +2,14 @@
 
         .text
 
- 	ldabsw %r2, %r3, 0xbeef
-	ldabsh %r4, %r5, 0xbeef
- 	ldabsb %r6, %r7, 0xbeef
- 	ldabsdw %r8, %r9, 0xbeef
-	ldindw %r2, %r3, 0xbeef
- 	ldindh %r4, %r5, 0xbeef
- 	ldindb %r6, %r7, 0xbeef
- 	ldinddw %r8, %r9, 0xbeef
+ 	ldabsw %r3, 0xbeef
+	ldabsh %r5, 0xbeef
+ 	ldabsb %r7, 0xbeef
+ 	ldabsdw %r9, 0xbeef
+	ldindw %r3, 0xbeef
+ 	ldindh %r5, 0xbeef
+ 	ldindb %r7, 0xbeef
+ 	ldinddw %r9, 0xbeef
  	ldxw %r2, [%r1+0x7eef]
  	ldxh %r2, [%r1+0x7eef]
  	ldxb %r2, [%r1+0x7eef]

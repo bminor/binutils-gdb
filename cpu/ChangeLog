@@ -1,3 +1,8 @@
+2019-07-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu (dlsi): ldabs and ldind instructions do not take an
+	explicit 'dst' argument.
+
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
 	* or1korfpx.cpu (float-setflag-insn-base): Add 'sf' to symbol.

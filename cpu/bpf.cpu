@@ -477,8 +477,8 @@
   (dni (.sym x-basename x-suffix x-endian)
        (.str x-basename x-suffix)
        ((ISA (.sym ebpf x-endian)))
-       (.str x-basename x-suffix " $dst" x-endian ",$src" x-endian ",$imm32")
-       (+ imm32 (f-offset16 0) (.sym src x-endian) (.sym dst x-endian)
+       (.str x-basename x-suffix " $src" x-endian ",$imm32")
+       (+ imm32 (f-offset16 0) ((.sym f-dst x-endian) 0) (.sym src x-endian)
           (.sym OP_CLASS_ x-class) (.sym OP_SIZE_ x-size)
           (.sym OP_MODE_ x-mode)) () ()))
 
