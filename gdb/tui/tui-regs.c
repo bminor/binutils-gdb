@@ -339,8 +339,6 @@ tui_data_window::display_reg_element_at_line (int start_element_no,
 int
 tui_data_window::display_registers_from_line (int line_no)
 {
-  check_and_display_highlight_if_needed ();
-
   int element_no;
 
   if (line_no < 0)
@@ -427,7 +425,6 @@ tui_data_window::rerender ()
     {
       erase_data_content (NULL);
       delete_data_content_windows ();
-      check_and_display_highlight_if_needed ();
       display_registers_from (0);
     }
 }
@@ -450,10 +447,7 @@ tui_data_window::refresh_all ()
 	    first_line = line_from_reg_element_no (first_element);
 
 	  if (first_line >= 0)
-	    {
-	      erase_data_content (NULL);
-	      display_registers_from_line (first_line);
-	    }
+	    display_registers_from_line (first_line);
 	}
     }
 }

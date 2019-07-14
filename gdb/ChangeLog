@@ -1,5 +1,13 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::display_registers_from_line)
+	(tui_data_window::rerender): Don't call
+	check_and_display_highlight_if_needed.
+	(tui_data_window::refresh_all): Remove call to
+	erase_data_content.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::last_regs_line_no)
 	(tui_data_window::display_registers_from)
 	(tui_data_window::display_reg_element_at_line)
