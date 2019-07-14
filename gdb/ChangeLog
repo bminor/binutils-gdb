@@ -1,5 +1,12 @@
 2019-08-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <last_regs_line_no,
+	line_from_reg_element_no, first_reg_element_no_inline,
+	display_all_data, delete_data_content_windows,
+	erase_data_content>: Now private.
+
+2019-08-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (box_win): Change type of highlight_flag.
 	(tui_unhighlight_win, tui_highlight_win)
 	(tui_win_info::make_window): Update.

@@ -68,6 +68,46 @@ struct tui_data_window : public tui_win_info
   int regs_column_count = 0;
   struct reggroup *current_group = nullptr;
 
+  void check_register_values (struct frame_info *frame);
+
+  void show_registers (struct reggroup *group);
+
+protected:
+
+  void do_scroll_vertical (int num_to_scroll) override;
+  void do_scroll_horizontal (int num_to_scroll) override
+  {
+  }
+
+  void rerender () override;
+
+private:
+
+  /* Display the registers in the content from 'start_element_no'
+     until the end of the register content or the end of the display
+     height.  No checking for displaying past the end of the registers
+     is done here.  */
+  void display_registers_from (int start_element_no);
+
+  /* Display the registers starting at line line_no in the data
+     window.  Answers the line number that the display actually
+     started from.  If nothing is displayed (-1) is returned.  */
+  int display_registers_from_line (int line_no);
+
+  /* Return the index of the first element displayed.  If none are
+     displayed, then return -1.  */
+  int first_data_item_displayed ();
+
+  /* Display the registers in the content from 'start_element_no' on
+     'start_line_no' until the end of the register content or the end
+     of the display height.  This function checks that we won't
+     display off the end of the register display.  */
+  void display_reg_element_at_line (int start_element_no, int start_line_no);
+
+  void show_register_group (struct reggroup *group,
+			    struct frame_info *frame,
+			    int refresh_values_only);
+
   /* Answer the number of the last line in the regs display.  If there
      are no registers (-1) is returned.  */
   int last_regs_line_no () const;
@@ -90,44 +130,6 @@ struct tui_data_window : public tui_win_info
   void delete_data_content_windows ();
 
   void erase_data_content (const char *prompt);
-
-  /* Display the registers in the content from 'start_element_no'
-     until the end of the register content or the end of the display
-     height.  No checking for displaying past the end of the registers
-     is done here.  */
-  void display_registers_from (int start_element_no);
-
-  /* Display the registers starting at line line_no in the data
-     window.  Answers the line number that the display actually
-     started from.  If nothing is displayed (-1) is returned.  */
-  int display_registers_from_line (int line_no);
-
-  void check_register_values (struct frame_info *frame);
-
-  void show_registers (struct reggroup *group);
-
-protected:
-
-  void do_scroll_vertical (int num_to_scroll) override;
-  void do_scroll_horizontal (int num_to_scroll) override
-  {
-  }
-
-  /* Return the index of the first element displayed.  If none are
-     displayed, then return -1.  */
-  int first_data_item_displayed ();
-
-  /* Display the registers in the content from 'start_element_no' on
-     'start_line_no' until the end of the register content or the end
-     of the display height.  This function checks that we won't
-     display off the end of the register display.  */
-  void display_reg_element_at_line (int start_element_no, int start_line_no);
-
-  void rerender () override;
-
-  void show_register_group (struct reggroup *group,
-			    struct frame_info *frame,
-			    int refresh_values_only);
 };
 
 #endif /* TUI_TUI_REGS_H */
