@@ -61,6 +61,10 @@ getver()
 	$tool/common/create-version.sh $tool 'dummy-host' 'dummy-target' VER.tmp
 	cat VER.tmp | grep 'version\[\]' | sed 's/.*"\([^"]*\)".*/\1/' | sed 's/-git$//'
         rm -f VER.tmp
+    elif test -f $tool/gdbsupport/create-version.sh; then
+	$tool/gdbsupport/create-version.sh $tool 'dummy-host' 'dummy-target' VER.tmp
+	cat VER.tmp | grep 'version\[\]' | sed 's/.*"\([^"]*\)".*/\1/' | sed 's/-git$//'
+        rm -f VER.tmp
     elif test -f $tool/version.in; then
 	head -1 $tool/version.in
     else

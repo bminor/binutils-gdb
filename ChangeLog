@@ -1,3 +1,8 @@
+2019-07-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* src-release (getver): If $tool/gdbsupport/create-version.sh
+	exists, use that to determine the version number.
+
 2019-06-21  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* src-release.sh (GDB_SUPPORT_DIRS): Add gnulib.
