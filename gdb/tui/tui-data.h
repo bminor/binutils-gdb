@@ -98,7 +98,6 @@ public:
 
 /* Constant definitions.  */
 #define DEFAULT_TAB_LEN         8
-#define NO_DATA_STRING          "[ No Data Values Displayed ]"
 #define SRC_NAME                "src"
 #define CMD_NAME                "cmd"
 #define DATA_NAME               "regs"

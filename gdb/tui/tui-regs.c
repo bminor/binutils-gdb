@@ -437,7 +437,7 @@ void
 tui_data_window::display_all_data ()
 {
   if (regs_content.empty ())
-    erase_data_content (NO_DATA_STRING);
+    erase_data_content (_("[ Register Values Unavailable ]"));
   else
     {
       erase_data_content (NULL);

@@ -1,3 +1,9 @@
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::display_all_data): Change
+	text.
+	* tui/tui-data.h (NO_DATA_STRING): Remove define.
+
 2019-08-29  Bernhard Wodok  <barto@gmx.net>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
