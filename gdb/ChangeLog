@@ -1,5 +1,13 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::last_regs_line_no)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::display_reg_element_at_line)
+	(tui_data_window::display_registers_from_line): Remove checks of
+	"empty".
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <display_all_data>:
 	Don't declare.
 	* tui/tui-regs.c (tui_data_window::show_registers): Call
