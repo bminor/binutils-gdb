@@ -161,7 +161,7 @@ tui_data_window::show_registers (struct reggroup *group)
       for (auto &&data_item_win : regs_content)
 	data_item_win.highlight = false;
       current_group = group;
-      display_all_data ();
+      rerender ();
     }
   else
     {
@@ -434,7 +434,7 @@ tui_data_window::erase_data_content (const char *prompt)
 /* See tui-regs.h.  */
 
 void
-tui_data_window::display_all_data ()
+tui_data_window::rerender ()
 {
   if (regs_content.empty ())
     erase_data_content (_("[ Register Values Unavailable ]"));
@@ -496,20 +496,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
       delete_data_content_windows ();
       display_registers_from_line (first_line);
     }
-}
-
-/* See tui-regs.h.  */
-
-void
-tui_data_window::rerender ()
-{
-  /* Delete all data item windows.  */
-  for (auto &&win : regs_content)
-    {
-      tui_delete_win (win.handle);
-      win.handle = NULL;
-    }
-  display_all_data ();
 }
 
 /* See tui-regs.h.  */

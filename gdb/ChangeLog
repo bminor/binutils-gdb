@@ -1,5 +1,14 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <display_all_data>:
+	Don't declare.
+	* tui/tui-regs.c (tui_data_window::show_registers): Call
+	rerender.
+	(tui_data_window::rerender): Rename from display_all_data.
+	(tui_data_window::rerender): Remove old implementation.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::display_all_data): Change
 	text.
 	* tui/tui-data.h (NO_DATA_STRING): Remove define.

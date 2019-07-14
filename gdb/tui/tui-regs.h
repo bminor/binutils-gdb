@@ -121,10 +121,6 @@ private:
      past the register area (-1) is returned.  */
   int first_reg_element_no_inline (int line_no) const;
 
-  /* Displays the data that is in the data window's content.  It does
-     not set the content.  */
-  void display_all_data ();
-
   /* Delete all the item windows in the data window.  This is usually
      done when the data window is scrolled.  */
   void delete_data_content_windows ();
