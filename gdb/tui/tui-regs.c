@@ -622,7 +622,7 @@ tui_reg_command (const char *args, int from_tty)
       if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
 	tui_reg_layout ();
 
-      struct reggroup *current_group = TUI_DATA_WIN->current_group;
+      struct reggroup *current_group = TUI_DATA_WIN->get_current_group ();
       if (strncmp (args, "next", len) == 0)
 	match = tui_reg_next (current_group, gdbarch);
       else if (strncmp (args, "prev", len) == 0)

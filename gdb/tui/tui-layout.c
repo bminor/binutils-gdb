@@ -189,7 +189,7 @@ tui_set_layout (enum tui_layout_type layout_type)
       tui_update_source_windows_with_addr (gdbarch, addr);
       if (new_layout == SRC_DATA_COMMAND
 	  || new_layout == DISASSEM_DATA_COMMAND)
-	TUI_DATA_WIN->show_registers (TUI_DATA_WIN->current_group);
+	TUI_DATA_WIN->show_registers (TUI_DATA_WIN->get_current_group ());
     }
 }
 

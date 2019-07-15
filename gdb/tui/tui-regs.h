@@ -63,14 +63,14 @@ struct tui_data_window : public tui_win_info
     return DATA_NAME;
   }
 
-  /* Windows that are used to display registers.  */
-  std::vector<tui_data_item_window> regs_content;
-  int regs_column_count = 0;
-  struct reggroup *current_group = nullptr;
-
   void check_register_values (struct frame_info *frame);
 
   void show_registers (struct reggroup *group);
+
+  struct reggroup *get_current_group () const
+  {
+    return current_group;
+  }
 
 protected:
 
@@ -126,6 +126,11 @@ private:
   void delete_data_content_windows ();
 
   void erase_data_content (const char *prompt);
+
+  /* Windows that are used to display registers.  */
+  std::vector<tui_data_item_window> regs_content;
+  int regs_column_count = 0;
+  struct reggroup *current_group = nullptr;
 };
 
 #endif /* TUI_TUI_REGS_H */
