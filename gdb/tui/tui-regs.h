@@ -37,6 +37,10 @@ struct tui_data_item_window : public tui_gen_win_info
 
   tui_data_item_window (tui_data_item_window &&) = default;
 
+  void rerender () override;
+
+  void refresh_window () override;
+
   const char *name = nullptr;
   /* The register number, or data display number.  */
   int item_no = -1;

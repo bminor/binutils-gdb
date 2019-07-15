@@ -580,6 +580,11 @@ void
 tui_gen_win_info::resize (int height_, int width_,
 			  int origin_x_, int origin_y_)
 {
+  if (width == width_ && height == height_
+      && origin.x == origin_x_ && origin.y == origin_y_
+      && handle != nullptr)
+    return;
+
   width = width_;
   height = height_;
   if (height > 1)

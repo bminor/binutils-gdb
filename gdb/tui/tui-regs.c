@@ -42,8 +42,6 @@
 
 #include "gdb_curses.h"
 
-static void tui_display_register (struct tui_data_item_window *data);
-
 /* Get the register from the frame and return a printable
    representation of it.  */
 
@@ -274,34 +272,9 @@ tui_data_window::display_registers_from (int start_element_no)
 	   j < regs_column_count && i < regs_content.size ();
 	   j++)
 	{
-	  struct tui_data_item_window *data_item_win;
-
 	  /* Create the window if necessary.  */
-	  data_item_win = &regs_content[i];
-	  if (data_item_win->handle != NULL
-	      && (data_item_win->height != 1
-		  || data_item_win->width != item_win_width
-		  || data_item_win->origin.x != (item_win_width * j) + 1
-		  || data_item_win->origin.y != cur_y))
-	    {
-	      tui_delete_win (data_item_win->handle);
-	      data_item_win->handle = 0;
-	    }
-                  
-	  if (data_item_win->handle == NULL)
-	    {
-	      data_item_win->height = 1;
-	      data_item_win->width = item_win_width;
-	      data_item_win->origin.x = (item_win_width * j) + 1;
-	      data_item_win->origin.y = cur_y;
-	      data_item_win->make_visible (true);
-	      scrollok (data_item_win->handle, FALSE);
-	    }
-	  touchwin (data_item_win->handle);
-
-	  /* Get the printable representation of the register
-	     and display it.  */
-	  tui_display_register (data_item_win);
+	  regs_content[i].resize (1, item_win_width,
+				  (item_win_width * j) + 1, cur_y);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */
@@ -508,43 +481,54 @@ tui_data_window::check_register_values (struct frame_info *frame)
 			    &data_item_win.highlight);
 
 	  if (data_item_win.highlight || was_hilighted)
-	    tui_display_register (&data_item_win);
+	    data_item_win.rerender ();
 	}
     }
 }
 
 /* Display a register in a window.  If hilite is TRUE, then the value
    will be displayed in reverse video.  */
-static void
-tui_display_register (struct tui_data_item_window *data)
+void
+tui_data_item_window::rerender ()
 {
-  if (data->handle != NULL)
-    {
-      int i;
+  int i;
 
-      if (data->highlight)
-	/* We ignore the return value, casting it to void in order to avoid
-	   a compiler warning.  The warning itself was introduced by a patch
-	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
-	   to code that causes the compiler to generate an unused-value
-	   warning.  */
-	(void) wstandout (data->handle);
+  scrollok (handle, FALSE);
+  if (highlight)
+    /* We ignore the return value, casting it to void in order to avoid
+       a compiler warning.  The warning itself was introduced by a patch
+       to ncurses 5.7 dated 2009-08-29, changing this macro to expand
+       to code that causes the compiler to generate an unused-value
+       warning.  */
+    (void) wstandout (handle);
       
-      wmove (data->handle, 0, 0);
-      for (i = 1; i < data->width; i++)
-        waddch (data->handle, ' ');
-      wmove (data->handle, 0, 0);
-      if (data->content)
-        waddstr (data->handle, data->content.get ());
+  wmove (handle, 0, 0);
+  for (i = 1; i < width; i++)
+    waddch (handle, ' ');
+  wmove (handle, 0, 0);
+  if (content)
+    waddstr (handle, content.get ());
 
-      if (data->highlight)
-	/* We ignore the return value, casting it to void in order to avoid
-	   a compiler warning.  The warning itself was introduced by a patch
-	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
-	   to code that causes the compiler to generate an unused-value
-	   warning.  */
-	(void) wstandend (data->handle);
-      data->refresh_window ();
+  if (highlight)
+    /* We ignore the return value, casting it to void in order to avoid
+       a compiler warning.  The warning itself was introduced by a patch
+       to ncurses 5.7 dated 2009-08-29, changing this macro to expand
+       to code that causes the compiler to generate an unused-value
+       warning.  */
+    (void) wstandend (handle);
+  refresh_window ();
+}
+
+void
+tui_data_item_window::refresh_window ()
+{
+  if (handle != nullptr)
+    {
+      /* This seems to be needed because the data items are nested
+	 windows, which according to the ncurses man pages aren't well
+	 supported.  */
+      touchwin (handle);
+      wrefresh (handle);
     }
 }
 

@@ -1,5 +1,17 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_item_window) <rerender,
+	refresh_window>: Declare.
+	* tui/tui-regs.c (tui_data_window::display_registers_from): Call
+	resize.
+	(tui_data_item_window::rerender): Rename from
+	tui_display_register.
+	(tui_data_item_window::refresh_window): New method.
+	* tui/tui-layout.c (tui_gen_win_info::resize): Do nothing on
+	no-op.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <regs_content,
 	regs_column_count, current_group>: Move later.  Now private.
 	<get_current_group>: New method.
