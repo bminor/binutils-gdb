@@ -58,30 +58,27 @@ static void
 box_win (struct tui_win_info *win_info, 
 	 bool highlight_flag)
 {
-  if (win_info && win_info->handle)
-    {
-      WINDOW *win;
-      int attrs;
+  WINDOW *win;
+  int attrs;
 
-      win = win_info->handle;
-      if (highlight_flag)
-        attrs = tui_active_border_attrs;
-      else
-        attrs = tui_border_attrs;
+  win = win_info->handle;
+  if (highlight_flag)
+    attrs = tui_active_border_attrs;
+  else
+    attrs = tui_border_attrs;
 
-      wattron (win, attrs);
+  wattron (win, attrs);
 #ifdef HAVE_WBORDER
-      wborder (win, tui_border_vline, tui_border_vline,
-               tui_border_hline, tui_border_hline,
-               tui_border_ulcorner, tui_border_urcorner,
-               tui_border_llcorner, tui_border_lrcorner);
+  wborder (win, tui_border_vline, tui_border_vline,
+	   tui_border_hline, tui_border_hline,
+	   tui_border_ulcorner, tui_border_urcorner,
+	   tui_border_llcorner, tui_border_lrcorner);
 #else
-      box (win, tui_border_vline, tui_border_hline);
+  box (win, tui_border_vline, tui_border_hline);
 #endif
-      if (!win_info->title.empty ())
-        mvwaddstr (win, 0, 3, win_info->title.c_str ());
-      wattroff (win, attrs);
-    }
+  if (!win_info->title.empty ())
+    mvwaddstr (win, 0, 3, win_info->title.c_str ());
+  wattroff (win, attrs);
 }
 
 
