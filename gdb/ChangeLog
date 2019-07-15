@@ -1,3 +1,20 @@
+2019-07-17  Tom Tromey  <tromey@adacore.com>
+
+	* s390-linux-nat.c (s390_watch_area): Remove typedef.  Don't
+	declare VEC.
+	(struct s390_debug_reg_state) <watch_areas, break_areas>: Now
+	std::vector.
+	(struct s390_process_info): Add initializers.
+	(s390_add_process): Use new.
+	(s390_linux_nat_target::low_forget_process): Use delete.
+	(s390_linux_nat_target::low_new_fork)
+	(s390_linux_nat_target::stopped_by_watchpoint)
+	(s390_linux_nat_target::low_prepare_to_resume)
+	(s390_linux_nat_target::insert_watchpoint)
+	(s390_linux_nat_target::insert_hw_breakpoint)
+	(s390_linux_nat_target::remove_watchpoint)
+	(s390_linux_nat_target::remove_hw_breakpoint): Update.
+
 2019-07-16  John Baldwin  <jhb@FreeBSD.org>
 
 	* aarch64-fbsd-nat.c: Include regcache.h.
