@@ -1,3 +1,8 @@
+2019-07-19  Tom Tromey  <tromey@adacore.com>
+
+	* contrib/ari/gdb_ari.sh: Mention C++11, not ISO C 90.
+	(ARGSUSED, PARAMS, __func__): Remove rules.
+
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>
 
 	* arm-tdep.c (_initialize_arm_tdep): Remove xml tests.

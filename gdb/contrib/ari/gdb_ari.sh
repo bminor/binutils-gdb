@@ -27,7 +27,7 @@ LC_ALL=C ; export LC_ALL
 
 # Permanent checks take the form:
 
-#     Do not use XXXX, ISO C 90 implies YYYY
+#     Do not use XXXX, C++11 implies YYYY
 #     Do not use XXXX, instead use YYYY''.
 
 # and should never be removed.
@@ -255,17 +255,6 @@ BEGIN {
 }
 
 
-# Things in comments
-
-BEGIN { doc["ARGSUSED"] = "\
-Do not use ARGSUSED, unnecessary"
-    category["ARGSUSED"] = ari_regression
-}
-/(^|[^_[:alnum:]])ARGSUSED([^_[:alnum:]]|$)/ {
-    fail("ARGSUSED")
-}
-
-
 # SNIP - Strip out comments - SNIP
 
 FNR == 1 {
@@ -433,27 +422,8 @@ FNR == 1 {
 cont_p { $0 = full_line $0; cont_p = 0; full_line = ""; }
 
 
-# GDB uses ISO C 90.  Check for any non pure ISO C 90 code
-
-BEGIN { doc["PARAMS"] = "\
-Do not use PARAMS(), ISO C 90 implies prototypes"
-    category["PARAMS"] = ari_regression
-}
-/(^|[^_[:alnum:]])PARAMS([^_[:alnum:]]|$)/ {
-    fail("PARAMS")
-}
-
-BEGIN { doc["__func__"] = "\
-Do not use __func__, ISO C 90 does not support this macro"
-    category["__func__"] = ari_regression
-    fix("__func__", "gdbsupport/gdb_assert.h", 1)
-}
-/(^|[^_[:alnum:]])__func__([^_[:alnum:]]|$)/ {
-    fail("__func__")
-}
-
 BEGIN { doc["__FUNCTION__"] = "\
-Do not use __FUNCTION__, ISO C 90 does not support this macro"
+Do not use __FUNCTION__, C++11 does not support this macro"
     category["__FUNCTION__"] = ari_regression
 }
 /(^|[^_[:alnum:]])__FUNCTION__([^_[:alnum:]]|$)/ {
@@ -470,7 +440,7 @@ autoconf tests"
 }
 
 BEGIN { doc["PTR"] = "\
-Do not use PTR, ISO C 90 implies `void *'\''"
+Do not use PTR, C++11 implies `void *'\''"
     category["PTR"] = ari_regression
     #fix("PTR", "gdb/utils.c", 6)
 }
@@ -816,7 +786,7 @@ unconditionally"
 }
 
 BEGIN { doc["bcmp"] = "\
-Do not use bcmp(), ISO C 90 implies memcmp()"
+Do not use bcmp(), C++11 implies memcmp()"
     category["bcmp"] = ari_regression
 }
 /(^|[^_[:alnum:]])bcmp[[:space:]]*\(/ {
@@ -824,7 +794,7 @@ Do not use bcmp(), ISO C 90 implies memcmp()"
 }
 
 BEGIN { doc["setlinebuf"] = "\
-Do not use setlinebuf(), ISO C 90 implies setvbuf()"
+Do not use setlinebuf(), C++11 implies setvbuf()"
     category["setlinebuf"] = ari_regression
 }
 /(^|[^_[:alnum:]])setlinebuf[[:space:]]*\(/ {
@@ -832,7 +802,7 @@ Do not use setlinebuf(), ISO C 90 implies setvbuf()"
 }
 
 BEGIN { doc["bcopy"] = "\
-Do not use bcopy(), ISO C 90 implies memcpy() and memmove()"
+Do not use bcopy(), C++11 implies memcpy() and memmove()"
     category["bcopy"] = ari_regression
 }
 /(^|[^_[:alnum:]])bcopy[[:space:]]*\(/ {
