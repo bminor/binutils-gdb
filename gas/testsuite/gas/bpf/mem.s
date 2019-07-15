@@ -2,10 +2,10 @@
 
         .text
 
- 	ldabsw %r3, 0xbeef
-	ldabsh %r5, 0xbeef
- 	ldabsb %r7, 0xbeef
- 	ldabsdw %r9, 0xbeef
+ 	ldabsw 0xbeef
+	ldabsh 0xbeef
+ 	ldabsb 0xbeef
+ 	ldabsdw 0xbeef
 	ldindw %r3, 0xbeef
  	ldindh %r5, 0xbeef
  	ldindb %r7, 0xbeef

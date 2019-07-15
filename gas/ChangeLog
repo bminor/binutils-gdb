@@ -1,3 +1,12 @@
+2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/bpf/mem.s: ldabs instructions do not take a `src'
+	register as an argument.
+	* testsuite/gas/bpf/mem.d: Updated accordingly.
+	* testsuite/gas/bpf/mem-be.d: Likewise.
+	* doc/c-bpf.texi (BPF Opcodes): Update to reflect the correct
+	explicit arguments to ldabs and ldind instructions.
+
 2019-07-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/bpf/mem.s: Do not use explicit arguments for

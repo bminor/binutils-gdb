@@ -89,11 +89,15 @@ static const CGEN_IFMT ifmt_lddwbe ATTRIBUTE_UNUSED = {
   8, 128, 0xff, { { F (F_IMM64) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_ldabswle ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_ldabsw ATTRIBUTE_UNUSED = {
+  8, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_OP_CLASS) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_ldindwle ATTRIBUTE_UNUSED = {
   8, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_ldabswbe ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_ldindwbe ATTRIBUTE_UNUSED = {
   8, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
@@ -792,101 +796,77 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (DSTBE), ',', OP (IMM64), 0 } },
     & ifmt_lddwbe, { 0x18 }
   },
-/* ldabsw $srcle,$imm32 */
+/* ldabsw $imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x20 }
+    { { MNEM, ' ', OP (IMM32), 0 } },
+    & ifmt_ldabsw, { 0x20 }
   },
-/* ldabsh $srcle,$imm32 */
+/* ldabsh $imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x28 }
+    { { MNEM, ' ', OP (IMM32), 0 } },
+    & ifmt_ldabsw, { 0x28 }
   },
-/* ldabsb $srcle,$imm32 */
+/* ldabsb $imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x30 }
+    { { MNEM, ' ', OP (IMM32), 0 } },
+    & ifmt_ldabsw, { 0x30 }
   },
-/* ldabsdw $srcle,$imm32 */
+/* ldabsdw $imm32 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x38 }
+    { { MNEM, ' ', OP (IMM32), 0 } },
+    & ifmt_ldabsw, { 0x38 }
   },
 /* ldindw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x40 }
+    & ifmt_ldindwle, { 0x40 }
   },
 /* ldindh $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x48 }
+    & ifmt_ldindwle, { 0x48 }
   },
 /* ldindb $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x50 }
+    & ifmt_ldindwle, { 0x50 }
   },
 /* ldinddw $srcle,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCLE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswle, { 0x58 }
-  },
-/* ldabsw $srcbe,$imm32 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x20 }
-  },
-/* ldabsh $srcbe,$imm32 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x28 }
-  },
-/* ldabsb $srcbe,$imm32 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x30 }
-  },
-/* ldabsdw $srcbe,$imm32 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x38 }
+    & ifmt_ldindwle, { 0x58 }
   },
 /* ldindw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x40 }
+    & ifmt_ldindwbe, { 0x40 }
   },
 /* ldindh $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x48 }
+    & ifmt_ldindwbe, { 0x48 }
   },
 /* ldindb $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x50 }
+    & ifmt_ldindwbe, { 0x50 }
   },
 /* ldinddw $srcbe,$imm32 */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (SRCBE), ',', OP (IMM32), 0 } },
-    & ifmt_ldabswbe, { 0x58 }
+    & ifmt_ldindwbe, { 0x58 }
   },
 /* ldxw $dstle,[$srcle+$offset16] */
   {

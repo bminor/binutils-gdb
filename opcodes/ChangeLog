@@ -1,3 +1,9 @@
+2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-opc.c: Likewise.
+	* bpf-opc.h: Likewise.
+
 2019-07-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-desc.c: Regenerate.

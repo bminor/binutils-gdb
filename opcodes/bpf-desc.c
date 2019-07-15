@@ -824,25 +824,25 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_LDDWBE, "lddwbe", "lddw", 128,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* ldabsw $srcle,$imm32 */
+/* ldabsw $imm32 */
   {
-    BPF_INSN_LDABSWLE, "ldabswle", "ldabsw", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    BPF_INSN_LDABSW, "ldabsw", "ldabsw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
-/* ldabsh $srcle,$imm32 */
+/* ldabsh $imm32 */
   {
-    BPF_INSN_LDABSHLE, "ldabshle", "ldabsh", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    BPF_INSN_LDABSH, "ldabsh", "ldabsh", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
-/* ldabsb $srcle,$imm32 */
+/* ldabsb $imm32 */
   {
-    BPF_INSN_LDABSBLE, "ldabsble", "ldabsb", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    BPF_INSN_LDABSB, "ldabsb", "ldabsb", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
-/* ldabsdw $srcle,$imm32 */
+/* ldabsdw $imm32 */
   {
-    BPF_INSN_LDABSDWLE, "ldabsdwle", "ldabsdw", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    BPF_INSN_LDABSDW, "ldabsdw", "ldabsdw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
 /* ldindw $srcle,$imm32 */
   {
@@ -863,26 +863,6 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
   {
     BPF_INSN_LDINDDWLE, "ldinddwle", "ldinddw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* ldabsw $srcbe,$imm32 */
-  {
-    BPF_INSN_LDABSWBE, "ldabswbe", "ldabsw", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* ldabsh $srcbe,$imm32 */
-  {
-    BPF_INSN_LDABSHBE, "ldabshbe", "ldabsh", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* ldabsb $srcbe,$imm32 */
-  {
-    BPF_INSN_LDABSBBE, "ldabsbbe", "ldabsb", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* ldabsdw $srcbe,$imm32 */
-  {
-    BPF_INSN_LDABSDWBE, "ldabsdwbe", "ldabsdw", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* ldindw $srcbe,$imm32 */
   {

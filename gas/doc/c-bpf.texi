@@ -234,26 +234,26 @@ tree for more information.
 Absolute loads:
 
 @table @code
-@item ldabsdw %d, %s, imm32
+@item ldabsdw imm32
 Absolute 64-bit load.
-@item ldabsw %d, %s, imm32
+@item ldabsw imm32
 Absolute 32-bit load.
-@item ldabsh %d, %s, imm32
+@item ldabsh imm32
 Absolute 16-bit load.
-@item ldabsb %d, %s, imm32
+@item ldabsb imm32
 Absolute 8-bit load.
 @end table
 
 Indirect loads:
 
 @table @code
-@item ldinddw %d, %s, imm32
+@item ldinddw %s, imm32
 Indirect 64-bit load.
-@item ldindw %d, %s, imm32
+@item ldindw %s, imm32
 Indirect 32-bit load.
-@item ldindh %d, %s, imm32
+@item ldindh %s, imm32
 Indirect 16-bit load.
-@item ldindb %d, %s, imm32
+@item ldindb %s, imm32
 Indirect 8-bit load.
 @end table
 

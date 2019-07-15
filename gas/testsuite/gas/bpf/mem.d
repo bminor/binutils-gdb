@@ -7,10 +7,10 @@
 Disassembly of section .text:
 
 0+ <.text>:
-   0:	20 30 00 00 ef be 00 00 	ldabsw %r3,0xbeef
-   8:	28 50 00 00 ef be 00 00 	ldabsh %r5,0xbeef
-  10:	30 70 00 00 ef be 00 00 	ldabsb %r7,0xbeef
-  18:	38 90 00 00 ef be 00 00 	ldabsdw %r9,0xbeef
+   0:	20 00 00 00 ef be 00 00 	ldabsw 0xbeef
+   8:	28 00 00 00 ef be 00 00 	ldabsh 0xbeef
+  10:	30 00 00 00 ef be 00 00 	ldabsb 0xbeef
+  18:	38 00 00 00 ef be 00 00 	ldabsdw 0xbeef
   20:	40 30 00 00 ef be 00 00 	ldindw %r3,0xbeef
   28:	48 50 00 00 ef be 00 00 	ldindh %r5,0xbeef
   30:	50 70 00 00 ef be 00 00 	ldindb %r7,0xbeef

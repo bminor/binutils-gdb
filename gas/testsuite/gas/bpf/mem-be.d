@@ -8,10 +8,10 @@
 Disassembly of section .text:
 
 0+ <.text>:
-   0:	20 03 00 00 00 00 be ef 	ldabsw %r3,0xbeef
-   8:	28 05 00 00 00 00 be ef 	ldabsh %r5,0xbeef
-  10:	30 07 00 00 00 00 be ef 	ldabsb %r7,0xbeef
-  18:	38 09 00 00 00 00 be ef 	ldabsdw %r9,0xbeef
+   0:	20 00 00 00 00 00 be ef 	ldabsw 0xbeef
+   8:	28 00 00 00 00 00 be ef 	ldabsh 0xbeef
+  10:	30 00 00 00 00 00 be ef 	ldabsb 0xbeef
+  18:	38 00 00 00 00 00 be ef 	ldabsdw 0xbeef
   20:	40 03 00 00 00 00 be ef 	ldindw %r3,0xbeef
   28:	48 05 00 00 00 00 be ef 	ldindh %r5,0xbeef
   30:	50 07 00 00 00 00 be ef 	ldindb %r7,0xbeef

@@ -466,36 +466,49 @@
 (define-lddw le)
 (define-lddw be)
 
-;; The absolute/indirect load instructions are non-generic loads
-;; designed to be used in socket filters.  They come in several
-;; variants:
+;; The absolute load instructions are non-generic loads designed to be
+;; used in socket filters.  They come in several variants:
 ;;
-;; LD{abs,ind}{w,h,b,dw}le for the little-endian ISA
-;; LD{abs,ind}[w,h,b,dw}be for the big-endian ISA
+;; LDABS{w,h,b,dw}
 
-(define-pmacro (dlsi x-basename x-suffix x-class x-size x-mode x-endian)
-  (dni (.sym x-basename x-suffix x-endian)
-       (.str x-basename x-suffix)
+(define-pmacro (dlabs x-suffix x-size)
+  (dni (.sym "ldabs" x-suffix)
+       (.str "ldabs" x-suffix)
+       (all-isas)
+       (.str "ldabs" x-suffix " $imm32")
+       (+ imm32 (f-offset16 0) (f-regs 0)
+          OP_CLASS_LD OP_MODE_ABS (.sym OP_SIZE_ x-size))
+       () ()))
+
+(dlabs "w" W)
+(dlabs "h" H)
+(dlabs "b" B)
+(dlabs "dw" DW)
+
+;; The indirect load instructions are non-generic loads designed to be
+;; used in socket filters.  They come in several variants:
+;;
+;; LDIND{w,h,b,dw}le for the little-endian ISA
+;; LDIND[w,h,b,dw}be for the big-endian ISA
+
+(define-pmacro (dlind x-suffix x-size x-endian)
+  (dni (.sym "ldind" x-suffix x-endian)
+       (.str "ldind" x-suffix)
        ((ISA (.sym ebpf x-endian)))
-       (.str x-basename x-suffix " $src" x-endian ",$imm32")
+       (.str "ldind" x-suffix " $src" x-endian ",$imm32")
        (+ imm32 (f-offset16 0) ((.sym f-dst x-endian) 0) (.sym src x-endian)
-          (.sym OP_CLASS_ x-class) (.sym OP_SIZE_ x-size)
-          (.sym OP_MODE_ x-mode)) () ()))
+          OP_CLASS_LD OP_MODE_IND (.sym OP_SIZE_ x-size))
+       () ()))
 
-(define-pmacro (define-ldabsind x-endian)
-  (begin
-    (dlsi "ldabs" "w" LD W ABS x-endian)
-    (dlsi "ldabs" "h" LD H ABS x-endian)
-    (dlsi "ldabs" "b" LD B ABS x-endian)
-    (dlsi "ldabs" "dw" LD DW ABS x-endian)
-    
-    (dlsi "ldind" "w" LD W IND x-endian)
-    (dlsi "ldind" "h" LD H IND x-endian)
-    (dlsi "ldind" "b" LD B IND x-endian)
-    (dlsi "ldind" "dw" LD DW IND x-endian)))
+(define-pmacro (define-ldind x-endian)
+  (begin    
+    (dlind "w" W x-endian)
+    (dlind "h" H x-endian)
+    (dlind "b" B x-endian)
+    (dlind "dw" DW x-endian)))
 
-(define-ldabsind le)
-(define-ldabsind be)
+(define-ldind le)
+(define-ldind be)
 
 ;; Generic load and store instructions are provided for several word
 ;; sizes.  They come in several variants:

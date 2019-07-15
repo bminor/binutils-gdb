@@ -1,3 +1,8 @@
+2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu (dlabs): New pmacro.
+	(dlind): Likewise.
+
 2019-07-14  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu (dlsi): ldabs and ldind instructions do not take an
