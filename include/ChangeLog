@@ -97,7 +97,7 @@
 	* opcode/aarch64.h (enum aarch64_insn_class): sve_size_013
 	renamed to sve_size_13.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf.h (ctf_slice_t): Make cts_offset and cts_bits unsigned
 	short, so following structures are properly aligned.
