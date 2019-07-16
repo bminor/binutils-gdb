@@ -1,5 +1,12 @@
 2019-07-16  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_template): Adjust regmem reference.
+	Adjust comment and update regmem when swapping operands.
+	(build_modrm_byte): Drop clearing of regmem and stale part of
+	comment. Correct comment. Adjust regmem reference.
+
+2019-07-16  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (type_names): Replace SReg entries.
 	(pi, check_byte_reg, build_modrm_byte, i386_att_operand,
 	parse_real_register): Switch to using sreg field.

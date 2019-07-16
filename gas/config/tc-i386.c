@@ -5911,13 +5911,13 @@ match_template (char mnem_suffix)
 	      {
 	      case dir_encoding_load:
 		if (operand_type_check (operand_types[i.operands - 1], anymem)
-		    || operand_types[i.operands - 1].bitfield.regmem)
+		    || t->opcode_modifier.regmem)
 		  goto check_reverse;
 		break;
 
 	      case dir_encoding_store:
 		if (!operand_type_check (operand_types[i.operands - 1], anymem)
-		    && !operand_types[i.operands - 1].bitfield.regmem)
+		    && !t->opcode_modifier.regmem)
 		  goto check_reverse;
 		break;
 
@@ -6167,14 +6167,22 @@ check_reverse:
 
   if (found_reverse_match)
     {
-      /* If we found a reverse match we must alter the opcode
-	 direction bit.  found_reverse_match holds bits to change
-	 (different for int & float insns).  */
+      /* If we found a reverse match we must alter the opcode direction
+	 bit and clear/flip the regmem modifier one.  found_reverse_match
+	 holds bits to change (different for int & float insns).  */
 
       i.tm.base_opcode ^= found_reverse_match;
 
       i.tm.operand_types[0] = operand_types[i.operands - 1];
       i.tm.operand_types[i.operands - 1] = operand_types[0];
+
+      /* Certain SIMD insns have their load forms specified in the opcode
+	 table, and hence we need to _set_ RegMem instead of clearing it.
+	 We need to avoid setting the bit though on insns like KMOVW.  */
+      i.tm.opcode_modifier.regmem
+	= i.tm.opcode_modifier.modrm && i.tm.opcode_modifier.d
+	  && i.tm.operands > 2U - i.tm.opcode_modifier.sse2avx
+	  && !i.tm.opcode_modifier.regmem;
     }
 
   return t;
@@ -7255,8 +7263,7 @@ build_modrm_byte (void)
 	    {
 	      /* For instructions with VexNDS, the register-only source
 		 operand must be a 32/64bit integer, XMM, YMM, ZMM, or mask
-		 register.  It is encoded in VEX prefix.  We need to
-		 clear RegMem bit before calling operand_type_equal.  */
+		 register.  It is encoded in VEX prefix.  */
 
 	      i386_operand_type op;
 	      unsigned int vvvv;
@@ -7273,7 +7280,6 @@ build_modrm_byte (void)
 		vvvv = dest;
 
 	      op = i.tm.operand_types[vvvv];
-	      op.bitfield.regmem = 0;
 	      if ((dest + 1) >= i.operands
 		  || ((!op.bitfield.reg
 		       || (!op.bitfield.dword && !op.bitfield.qword))
@@ -7286,13 +7292,13 @@ build_modrm_byte (void)
 	}
 
       i.rm.mode = 3;
-      /* One of the register operands will be encoded in the i.tm.reg
-	 field, the other in the combined i.tm.mode and i.tm.regmem
+      /* One of the register operands will be encoded in the i.rm.reg
+	 field, the other in the combined i.rm.mode and i.rm.regmem
 	 fields.  If no form of this instruction supports a memory
 	 destination operand, then we assume the source operand may
 	 sometimes be a memory operand and so we need to store the
 	 destination in the i.rm.reg field.  */
-      if (!i.tm.operand_types[dest].bitfield.regmem
+      if (!i.tm.opcode_modifier.regmem
 	  && operand_type_check (i.tm.operand_types[dest], anymem) == 0)
 	{
 	  i.rm.reg = i.op[dest].regs->reg_num;
@@ -7336,7 +7342,7 @@ build_modrm_byte (void)
 	}
       if (flag_code != CODE_64BIT && (i.rex & REX_R))
 	{
-	  if (!i.types[i.tm.operand_types[0].bitfield.regmem].bitfield.control)
+	  if (!i.types[!i.tm.opcode_modifier.regmem].bitfield.control)
 	    abort ();
 	  i.rex &= ~REX_R;
 	  add_prefix (LOCK_PREFIX_OPCODE);

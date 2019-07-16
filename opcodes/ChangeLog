@@ -1,5 +1,28 @@
 2019-07-16  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_types): Move RegMem ...
+	(opcode_modifiers): ... here.
+	* i386-opc.h (RegMem): Move to opcode modifer enum.
+	(union i386_operand_type): Move regmem field ...
+	(struct i386_opcode_modifier): ... here.
+	* i386-opc.tbl (RegMem): Define.
+	(mov, movq): Move RegMem on segment, control, debug, and test
+	register flavors.
+	(pextrb): Move RegMem on register only flavors. Add IgnoreSize
+	to non-SSE2AVX flavor.
+	(extractps, pextrw, vcvtps2ph, vextractps, vpextrb, vpextrw):
+	Move RegMem on register only flavors. Drop IgnoreSize from
+	legacy encoding flavors.
+	(movss, movsd, vmovss, vmovsd): Drop RegMem from register only
+	flavors.
+	(vpinsrb, vpinsrw): Drop IgnoreSize where still present on
+	register only flavors.
+	(vmovd): Move RegMem and drop IgnoreSize on register only
+	flavor. Change opcode and operand order to store form.
+	* opcodes/i386-init.h, i386-tbl.h: Re-generate.
+
+2019-07-16  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_init, operand_types): Replace SReg
 	entries.
 	* i386-opc.h (SReg2, SReg3): Replace by ...
