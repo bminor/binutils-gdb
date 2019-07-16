@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "regset.h"
+#include "gdbarch.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "gdbsupport/gdb_wait.h"
