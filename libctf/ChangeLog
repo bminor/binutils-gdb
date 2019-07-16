@@ -21,11 +21,11 @@
 	* ctf-error.c (_ctf_errlist): Fix description.
 	* ctf-lookup.c: Fix file description.
 
-2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+2019-06-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (ctf_create): Fix off-by-one error.
 
-2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+2019-06-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h: (struct ctf_strs_writable): New, non-const version of
 	struct ctf_strs.
@@ -76,7 +76,7 @@
 	* Makefile.am (libctf_a_SOURCES): Add it.
 	* Makefile.in: Regenerate.
 
-2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+2019-06-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_hash_iter_f): New.
 	(ctf_dynhash_iter): New declaration.
@@ -88,16 +88,16 @@
 	(struct ctf_traverse_cb_arg): Likewise.
 	(struct ctf_traverse_remove_cb_arg): Likewise.
 
-2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+2019-06-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-hash.c (ctf_dynhash_remove): Call with a mocked-up element.
 
-2019-06-28  Nick Alcock <nick.alcock@oracle.com>
+2019-06-28  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-dump.c (ctf_dump_format_type): Prefix hex strings with 0x.
 	(ctf_dump_funcs): Likewise.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-open-bfd.c: Add swap.h and ctf-endian.h.
 	(ctf_fdopen): Check for endian-swapped raw CTF magic, and
@@ -105,24 +105,24 @@
 	ctf_simple_open does that in endian-safe ways.  Do not dereference
 	null pointers on open failure.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-open.c (get_vbytes_common): Return the new slice size.
 	(ctf_bufopen): Flip the endianness of the CTF-section header copy.
 	Remember to copy in the CTF data when opening an uncompressed
 	foreign-endian CTF file.  Prune useless variable manipulation.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-open.c (ctf_types): Fail when unidentified type kinds are
 	seen.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-open.c (ctf_bufopen): Dump header offsets into the debugging
 	output.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-subr.c (_PAGESIZE): Remove.
 	(ctf_data_alloc): Likewise.
@@ -138,7 +138,7 @@
 	(upgrade_types): Likewise.  Call ctf_alloc, not ctf_data_alloc.
 	(ctf_bufopen): Likewise.  No longer call ctf_data_protect.
 
-2019-06-19  Nick Alcock <nick.alcock@oracle.com>
+2019-06-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (ctf_dtd_insert): Pass on error returns from
 	ctf_dynhash_insert.
