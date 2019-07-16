@@ -1,3 +1,7 @@
+2019-07-16  Jan Beulich  <jbeulich@suse.com>
+
+	* opcode/i386.h (POP_SEG386_SHORT): New.
+
 2019-07-01  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/aarch64.h (enum aarch64_insn_class): sve_size_013

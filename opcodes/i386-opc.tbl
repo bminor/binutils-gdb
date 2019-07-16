@@ -63,9 +63,9 @@ mov, 2, 0xb0, None, 1, Cpu64, W|ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldS
 // size prefix.  When moving to a 32 bit register, the upper 16 bits
 // are set to an implementation defined value (on the Pentium Pro, the
 // implementation defined value is zero).
-mov, 2, 0x8c, None, 1, 0, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { SReg2|SReg3, Reg16|Reg32|Reg64|RegMem }
-mov, 2, 0x8c, None, 1, 0, D|Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg2|SReg3, Word|Unspecified|BaseIndex }
-mov, 2, 0x8e, None, 1, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg16|Reg32|Reg64, SReg2|Sreg3 }
+mov, 2, 0x8c, None, 1, 0, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { SReg, Reg16|Reg32|Reg64|RegMem }
+mov, 2, 0x8c, None, 1, 0, D|Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg, Word|Unspecified|BaseIndex }
+mov, 2, 0x8e, None, 1, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg16|Reg32|Reg64, SReg }
 // Move to/from control debug registers.  In the 16 or 32bit modes
 // they are 32bit.  In the 64bit mode they are 64bit.
 mov, 2, 0xf20, None, 2, Cpu386|CpuNo64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Control, Reg32|RegMem }
@@ -113,26 +113,22 @@ push, 1, 0x50, None, 1, CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|N
 push, 1, 0xff, 0x6, 1, CpuNo64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
 push, 1, 0x6a, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8S }
 push, 1, 0x68, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16|Imm32 }
-push, 1, 0x6, None, 1, CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg2 }
-push, 1, 0xfa0, None, 2, Cpu386|CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg3 }
+push, 1, 0x6, None, 1, 0, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 push, 1, 0x50, None, 1, Cpu64, ShortForm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64 }
 push, 1, 0xff, 0x6, 1, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
 push, 1, 0x6a, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Imm8S }
 push, 1, 0x68, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Imm16|Imm32S }
-push, 1, 0xfa0, None, 2, Cpu64, ShortForm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { SReg3 }
 
 pusha, 0, 0x60, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // Pop instructions.
 pop, 1, 0x58, None, 1, CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32 }
 pop, 1, 0x8f, 0x0, 1, CpuNo64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex }
-pop, 1, 0x7, None, 1, CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg2 }
-pop, 1, 0xfa1, None, 2, Cpu386|CpuNo64, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg3 }
+pop, 1, 0x7, None, 1, 0, ShortForm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 pop, 1, 0x58, None, 1, Cpu64, ShortForm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64 }
 pop, 1, 0x8f, 0x0, 1, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex }
-pop, 1, 0xfa1, None, 2, Cpu64, ShortForm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { SReg3 }
 
 popa, 0, 0x61, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
@@ -987,7 +983,7 @@ movq, 2, 0xf6f, None, 2, CpuMMX, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_s
 movq, 2, 0xf6e, None, 2, Cpu64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
 // The segment register moves accept Reg64 so that a segment register
 // can be copied to a 64 bit register, and vice versa.
-movq, 2, 0x8c, None, 1, Cpu64, D|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg2|SReg3, Reg64|RegMem }
+movq, 2, 0x8c, None, 1, Cpu64, D|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg, Reg64|RegMem }
 // Move to/from control debug registers.  In the 16 or 32bit modes they
 // are 32bit.  In the 64bit mode they are 64bit.
 movq, 2, 0xf20, None, 2, Cpu64, D|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Control, Reg64|RegMem }

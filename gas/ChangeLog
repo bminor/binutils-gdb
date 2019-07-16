@@ -1,3 +1,17 @@
+2019-07-16  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (type_names): Replace SReg entries.
+	(pi, check_byte_reg, build_modrm_byte, i386_att_operand,
+	parse_real_register): Switch to using sreg field.
+	(process_operands): Likewise. Extend handling of PUSH/POP of
+	segment registers. Drop dead setting of REX_B.
+	* config/tc-i386-intel.c (i386_intel_simplify_register,
+	i386_intel_operand): Switch to using sreg field.
+	* testsuite/gas/i386/x86-64-opcode.s: Add PUSH/POP of %fs/%gs.
+	* testsuite/gas/i386/x86-64-opcode.d: Adjust expectations.
+	* testsuite/gas/i386/ilp32/x86-64-opcode.d: Use parent dir
+	expectations.
+
 2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/bpf/mem.s: ldabs instructions do not take a `src'

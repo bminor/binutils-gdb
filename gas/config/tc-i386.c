@@ -3031,8 +3031,7 @@ pi (const char *line, i386_insn *x)
       if (x->types[j].bitfield.reg
 	  || x->types[j].bitfield.regmmx
 	  || x->types[j].bitfield.regsimd
-	  || x->types[j].bitfield.sreg2
-	  || x->types[j].bitfield.sreg3
+	  || x->types[j].bitfield.sreg
 	  || x->types[j].bitfield.control
 	  || x->types[j].bitfield.debug
 	  || x->types[j].bitfield.test)
@@ -3129,8 +3128,7 @@ const type_names[] =
   { OPERAND_TYPE_DEBUG, "debug reg" },
   { OPERAND_TYPE_FLOATREG, "FReg" },
   { OPERAND_TYPE_FLOATACC, "FAcc" },
-  { OPERAND_TYPE_SREG2, "SReg2" },
-  { OPERAND_TYPE_SREG3, "SReg3" },
+  { OPERAND_TYPE_SREG, "SReg" },
   { OPERAND_TYPE_JUMPABSOLUTE, "Jump Absolute" },
   { OPERAND_TYPE_REGMMX, "rMMX" },
   { OPERAND_TYPE_REGXMM, "rXMM" },
@@ -6575,8 +6573,7 @@ check_byte_reg (void)
       if (i.types[op].bitfield.reg
 	  || i.types[op].bitfield.regmmx
 	  || i.types[op].bitfield.regsimd
-	  || i.types[op].bitfield.sreg2
-	  || i.types[op].bitfield.sreg3
+	  || i.types[op].bitfield.sreg
 	  || i.types[op].bitfield.control
 	  || i.types[op].bitfield.debug
 	  || i.types[op].bitfield.test)
@@ -6994,18 +6991,24 @@ duplicate:
 
   if (i.tm.opcode_modifier.shortform)
     {
-      if (i.types[0].bitfield.sreg2
-	  || i.types[0].bitfield.sreg3)
+      if (i.types[0].bitfield.sreg)
 	{
-	  if (i.tm.base_opcode == POP_SEG_SHORT
-	      && i.op[0].regs->reg_num == 1)
+	  if (flag_code != CODE_64BIT
+	      ? i.tm.base_opcode == POP_SEG_SHORT
+		&& i.op[0].regs->reg_num == 1
+	      : (i.tm.base_opcode | 1) == POP_SEG_SHORT
+		&& i.op[0].regs->reg_num < 4)
 	    {
-	      as_bad (_("you can't `pop %scs'"), register_prefix);
+	      as_bad (_("you can't `%s %s%s'"),
+		      i.tm.name, register_prefix, i.op[0].regs->reg_name);
 	      return 0;
 	    }
+	  if ( i.op[0].regs->reg_num > 3 )
+	    {
+	      i.tm.base_opcode ^= POP_SEG_SHORT ^ POP_SEG386_SHORT;
+	      i.tm.opcode_length = 2;
+	    }
 	  i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
-	  if ((i.op[0].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_B;
 	}
       else
 	{
@@ -7652,8 +7655,7 @@ build_modrm_byte (void)
 	      if (i.types[op].bitfield.reg
 		  || i.types[op].bitfield.regbnd
 		  || i.types[op].bitfield.regmask
-		  || i.types[op].bitfield.sreg2
-		  || i.types[op].bitfield.sreg3
+		  || i.types[op].bitfield.sreg
 		  || i.types[op].bitfield.control
 		  || i.types[op].bitfield.debug
 		  || i.types[op].bitfield.test)
@@ -10029,9 +10031,7 @@ i386_att_operand (char *operand_string)
       op_string = end_op;
       if (is_space_char (*op_string))
 	++op_string;
-      if (*op_string == ':'
-	  && (r->reg_type.bitfield.sreg2
-	      || r->reg_type.bitfield.sreg3))
+      if (*op_string == ':' && r->reg_type.bitfield.sreg)
 	{
 	  switch (r->reg_num)
 	    {
@@ -10894,7 +10894,7 @@ parse_real_register (char *reg_string, char **end_op)
     return (const reg_entry *) NULL;
 
   if ((r->reg_type.bitfield.dword
-       || r->reg_type.bitfield.sreg3
+       || (r->reg_type.bitfield.sreg && r->reg_num > 3)
        || r->reg_type.bitfield.control
        || r->reg_type.bitfield.debug
        || r->reg_type.bitfield.test)
@@ -10942,7 +10942,7 @@ parse_real_register (char *reg_string, char **end_op)
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.sreg3 && r->reg_num == RegFlat && !intel_syntax)
+  if (r->reg_type.bitfield.sreg && r->reg_num == RegFlat && !intel_syntax)
     return (const reg_entry *) NULL;
 
   return r;

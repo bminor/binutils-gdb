@@ -706,10 +706,8 @@ enum
   Debug,
   /* Test register */
   Test,
-  /* 2 bit segment register */
-  SReg2,
-  /* 3 bit segment register */
-  SReg3,
+  /* Segment register */
+  SReg,
   /* 1 bit immediate */
   Imm1,
   /* 8 bit immediate */
@@ -811,8 +809,7 @@ typedef union i386_operand_type
       unsigned int control:1;
       unsigned int debug:1;
       unsigned int test:1;
-      unsigned int sreg2:1;
-      unsigned int sreg3:1;
+      unsigned int sreg:1;
       unsigned int imm1:1;
       unsigned int imm8:1;
       unsigned int imm8s:1;

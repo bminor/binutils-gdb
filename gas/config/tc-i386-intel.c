@@ -283,7 +283,7 @@ i386_intel_simplify_register (expressionS *e)
 	  as_bad (_("invalid use of register"));
 	  return 0;
 	}
-      if (i386_regtab[reg_num].reg_type.bitfield.sreg3
+      if (i386_regtab[reg_num].reg_type.bitfield.sreg
 	  && i386_regtab[reg_num].reg_num == RegFlat)
 	{
 	  as_bad (_("invalid use of pseudo-register"));
@@ -984,8 +984,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      as_bad (_("segment register name expected"));
 	      return 0;
 	    }
-	  if (!i386_regtab[expP->X_add_number].reg_type.bitfield.sreg2
-	      && !i386_regtab[expP->X_add_number].reg_type.bitfield.sreg3)
+	  if (!i386_regtab[expP->X_add_number].reg_type.bitfield.sreg)
 	    {
 	      as_bad (_("invalid use of register"));
 	      return 0;

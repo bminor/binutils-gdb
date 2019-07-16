@@ -254,9 +254,13 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 7f 38             	movq   %mm7,\(%rax\)
 [ 	]*[a-f0-9]+:	41 8f 00             	popq   \(%r8\)
 [ 	]*[a-f0-9]+:	8f 00                	popq   \(%rax\)
+[ 	]*[a-f0-9]+:	0f a1                	popq   %fs
+[ 	]*[a-f0-9]+:	0f a9                	popq   %gs
 [ 	]*[a-f0-9]+:	9d                   	popfq  
 [ 	]*[a-f0-9]+:	41 ff 30             	pushq  \(%r8\)
 [ 	]*[a-f0-9]+:	ff 30                	pushq  \(%rax\)
+[ 	]*[a-f0-9]+:	0f a0                	pushq  %fs
+[ 	]*[a-f0-9]+:	0f a8                	pushq  %gs
 [ 	]*[a-f0-9]+:	9c                   	pushfq 
 [ 	]*[a-f0-9]+:	0f 77                	emms   
 [ 	]*[a-f0-9]+:	0f 0e                	femms  

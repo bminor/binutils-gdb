@@ -46,6 +46,7 @@
 
 #define MOV_AX_DISP32 0xa0
 #define POP_SEG_SHORT 0x07
+#define POP_SEG386_SHORT 0xfa1
 #define JUMP_PC_RELATIVE 0xeb
 #define INT_OPCODE  0xcd
 #define INT3_OPCODE 0xcc

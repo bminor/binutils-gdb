@@ -1,3 +1,16 @@
+2019-07-16  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init, operand_types): Replace SReg
+	entries.
+	* i386-opc.h (SReg2, SReg3): Replace by ...
+	(SReg): ... this.
+	(union i386_operand_type): Replace sreg fields.
+	* i386-opc.tbl (mov, ): Use SReg.
+	(push, pop): Likewies. Drop i386 and x86-64 specific segment
+	register flavors.
+	* i386-reg.tbl (cs, ds, es, fs, gs, ss, flat): Use SReg.
+	* opcodes/i386-init.h, i386-tbl.h: Re-generate.
+
 2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-desc.c: Regenerate.

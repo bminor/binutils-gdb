@@ -105,13 +105,13 @@ k5, RegMask, 0, 5, 98, 123
 k6, RegMask, 0, 6, 99, 124
 k7, RegMask, 0, 7, 100, 125
 // Segment registers.
-es, SReg2, 0, 0, 40, 50
-cs, SReg2, 0, 1, 41, 51
-ss, SReg2, 0, 2, 42, 52
-ds, SReg2, 0, 3, 43, 53
-fs, SReg3, 0, 4, 44, 54
-gs, SReg3, 0, 5, 45, 55
-flat, SReg3, 0, RegFlat, Dw2Inval, Dw2Inval
+es, SReg, 0, 0, 40, 50
+cs, SReg, 0, 1, 41, 51
+ss, SReg, 0, 2, 42, 52
+ds, SReg, 0, 3, 43, 53
+fs, SReg, 0, 4, 44, 54
+gs, SReg, 0, 5, 45, 55
+flat, SReg, 0, RegFlat, Dw2Inval, Dw2Inval
 // Control registers.
 cr0, Control, 0, 0, Dw2Inval, Dw2Inval
 cr1, Control, 0, 1, Dw2Inval, Dw2Inval
