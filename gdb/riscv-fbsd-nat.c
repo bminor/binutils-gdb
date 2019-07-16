@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "regcache.h"
 #include "target.h"
 
 #include <sys/types.h>
@@ -40,7 +41,7 @@ static riscv_fbsd_nat_target the_riscv_fbsd_nat_target;
 /* Determine if PT_GETREGS fetches REGNUM.  */
 
 static bool
-getregs_supplies (struct gdbarch *gdbarch, int regnum)
+getregs_supplies (int regnum)
 {
   return ((regnum >= RISCV_RA_REGNUM && regnum <= RISCV_PC_REGNUM)
 	  || regnum == RISCV_CSR_SSTATUS_REGNUM);
@@ -49,7 +50,7 @@ getregs_supplies (struct gdbarch *gdbarch, int regnum)
 /* Determine if PT_GETFPREGS fetches REGNUM.  */
 
 static bool
-getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
+getfpregs_supplies (int regnum)
 {
   return ((regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
 	  || regnum == RISCV_CSR_FCSR_REGNUM);
@@ -64,10 +65,9 @@ riscv_fbsd_nat_target::fetch_registers (struct regcache *regcache,
 {
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  struct gdbarch *gdbarch = regcache->arch ();
   if (regnum == -1 || regnum == RISCV_ZERO_REGNUM)
     regcache->raw_supply_zeroed (RISCV_ZERO_REGNUM);
-  if (regnum == -1 || getregs_supplies (gdbarch, regnum))
+  if (regnum == -1 || getregs_supplies (regnum))
     {
       struct reg regs;
 
@@ -78,7 +78,7 @@ riscv_fbsd_nat_target::fetch_registers (struct regcache *regcache,
 			       sizeof (regs));
     }
 
-  if (regnum == -1 || getfpregs_supplies (gdbarch, regnum))
+  if (regnum == -1 || getfpregs_supplies (regnum))
     {
       struct fpreg fpregs;
 
@@ -99,8 +99,7 @@ riscv_fbsd_nat_target::store_registers (struct regcache *regcache,
 {
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  struct gdbarch *gdbarch = regcache->arch ();
-  if (regnum == -1 || getregs_supplies (gdbarch, regnum))
+  if (regnum == -1 || getregs_supplies (regnum))
     {
       struct reg regs;
 
@@ -114,7 +113,7 @@ riscv_fbsd_nat_target::store_registers (struct regcache *regcache,
 	perror_with_name (_("Couldn't write registers"));
     }
 
-  if (regnum == -1 || getfpregs_supplies (gdbarch, regnum))
+  if (regnum == -1 || getfpregs_supplies (regnum))
     {
       struct fpreg fpregs;
 

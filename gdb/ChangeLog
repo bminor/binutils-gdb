@@ -1,5 +1,15 @@
 2019-07-16  John Baldwin  <jhb@FreeBSD.org>
 
+	* aarch64-fbsd-nat.c: Include regcache.h.
+	(getregs_supplies, getfpregs_supplies): Remove unused gdbarch
+	argument.
+	(aarch64_fbsd_nat_target::fetch_registers)
+	(aarch64_fbsd_nat_target::store_registers): Remove gdbarch
+	variable.
+	* arm-fbsd-nat.c, riscv-fbsd-nat.c: Likewise.
+
+2019-07-16  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c: Include gdbarch.h.
 
 2019-07-15  Tom Tromey  <tromey@adacore.com>
