@@ -17,6 +17,7 @@
 @menu
 * BPF Options::                 Options
 * BPF Syntax::		        Syntax
+* BPF Directives::		Machine Directives
 * BPF Opcodes::			Opcodes
 @end menu
 
@@ -103,6 +104,28 @@ descriptor @samp{2} in register @samp{r1} we would do:
 @smallexample
         lddw %r1, %map_fd(2)
 @end smallexample
+
+@node BPF Directives
+@section Machine Directives
+
+@cindex machine directives, BPF
+
+The BPF version of @code{@value{AS}} supports the following additional
+machine directives:
+
+@table @code
+@cindex @code{half} directive, BPF
+@item .word
+The @code{.half} directive produces a 16 bit value.
+
+@cindex @code{word} directive, BPF
+@item .word
+The @code{.word} directive produces a 32 bit value.
+
+@cindex @code{dword} directive, BPF
+@item .dword
+The @code{.dword} directive produces a 64 bit value.
+@end table
 
 @node BPF Opcodes
 @section Opcodes

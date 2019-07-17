@@ -1,3 +1,12 @@
+2019-07-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (md_pseudo_table): .half, .word and .dword.
+	* testsuite/gas/bpf/data.s: New file.
+	* testsuite/gas/bpf/data.d: Likewise.
+	* testsuite/gas/bpf/data-be.d: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Run data and data-be.
+	* doc/c-bpf.texi (BPF Directives): New section.
+
 2019-07-17  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_hle, md_assemble, check_VecOperands,
