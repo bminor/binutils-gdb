@@ -1,3 +1,11 @@
+2019-07-17  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (check_hle, md_assemble, check_VecOperands,
+	match_template, check_string, build_modrm_byte): Replace
+	operand_type_check(..., anymem) by Operand_Mem ones.
+	(process_operands): Also copy i.flags[] when copying other
+	operand properties.
+
 2019-07-16  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (match_template): Adjust regmem reference.

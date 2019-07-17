@@ -3918,8 +3918,7 @@ check_hle (void)
 		  i.tm.name);
 	  return 0;
 	}
-      if (i.mem_operands == 0
-	  || !operand_type_check (i.types[i.operands - 1], anymem))
+      if (i.mem_operands == 0 || !(i.flags[i.operands - 1] & Operand_Mem))
 	{
 	  as_bad (_("memory destination needed for instruction `%s'"
 		    " after `xrelease'"), i.tm.name);
@@ -4358,7 +4357,7 @@ md_assemble (char *line)
       && (!i.tm.opcode_modifier.islockable
 	  || i.mem_operands == 0
 	  || (i.tm.base_opcode != 0x86
-	      && !operand_type_check (i.types[i.operands - 1], anymem))))
+	      && !(i.flags[i.operands - 1] & Operand_Mem))))
     {
       as_bad (_("expecting lockable instruction after `lock'"));
       return;
@@ -5473,7 +5472,7 @@ check_VecOperands (const insn_template *t)
     {
       /* Find memory operand.  */
       for (op = 0; op < i.operands; op++)
-	if (operand_type_check (i.types[op], anymem))
+	if (i.flags[op] & Operand_Mem)
 	  break;
       gas_assert (op < i.operands);
       /* Check size of the memory operand.  */
@@ -5563,7 +5562,7 @@ check_VecOperands (const insn_template *t)
 
 	  i.memshift = 0;
 	  for (op = 0; op < i.operands; op++)
-	    if (operand_type_check (i.types[op], anymem))
+	    if (i.flags[op] & Operand_Mem)
 	      {
 		if (t->opcode_modifier.evex == EVEXLIG)
 		  i.memshift = 2 + (i.suffix == QWORD_MNEM_SUFFIX);
@@ -5892,7 +5891,7 @@ match_template (char mnem_suffix)
 	      && i.hle_prefix
 	      && t->base_opcode == 0xa0
 	      && i.types[0].bitfield.acc
-	      && operand_type_check (i.types[1], anymem))
+	      && (i.flags[1] & Operand_Mem))
 	    continue;
 	  /* Fall through.  */
 
@@ -6191,7 +6190,8 @@ check_reverse:
 static int
 check_string (void)
 {
-  int mem_op = operand_type_check (i.types[0], anymem) ? 0 : 1;
+  unsigned int mem_op = i.flags[0] & Operand_Mem ? 0 : 1;
+
   if (i.tm.operand_types[mem_op].bitfield.esseg)
     {
       if (i.seg[0] != NULL && i.seg[0] != &es)
@@ -6893,6 +6893,7 @@ process_operands (void)
 		  i.op[j - 1] = i.op[j];
 		  i.types[j - 1] = i.types[j];
 		  i.tm.operand_types[j - 1] = i.tm.operand_types[j];
+		  i.flags[j - 1] = i.flags[j];
 		}
 	    }
 	}
@@ -6909,6 +6910,7 @@ process_operands (void)
 	      i.op[j] = i.op[j - 1];
 	      i.types[j] = i.types[j - 1];
 	      i.tm.operand_types[j] = i.tm.operand_types[j - 1];
+	      i.flags[j] = i.flags[j - 1];
 	    }
 	  i.op[0].regs
 	    = (const reg_entry *) hash_find (reg_hash, "xmm0");
@@ -6924,6 +6926,7 @@ process_operands (void)
 	  i.op[dupl] = i.op[dest];
 	  i.types[dupl] = i.types[dest];
 	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
+	  i.flags[dupl] = i.flags[dest];
 	}
       else
 	{
@@ -6935,6 +6938,7 @@ duplicate:
 	  i.op[dupl] = i.op[dest];
 	  i.types[dupl] = i.types[dest];
 	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
+	  i.flags[dupl] = i.flags[dest];
 	}
 
        if (i.tm.opcode_modifier.immext)
@@ -6953,6 +6957,8 @@ duplicate:
 	  /* We need to adjust fields in i.tm since they are used by
 	     build_modrm_byte.  */
 	  i.tm.operand_types [j - 1] = i.tm.operand_types [j];
+
+	  i.flags[j - 1] = i.flags[j];
 	}
 
       i.operands--;
@@ -7358,7 +7364,7 @@ build_modrm_byte (void)
 	  unsigned int op;
 
 	  for (op = 0; op < i.operands; op++)
-	    if (operand_type_check (i.types[op], anymem))
+	    if (i.flags[op] & Operand_Mem)
 	      break;
 	  gas_assert (op < i.operands);
 
