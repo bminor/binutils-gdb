@@ -30,6 +30,10 @@
 #include <libintl.h>
 #define _(String) gettext (String)
 
+/* Build-time checks are preferrable over runtime ones.  Use this construct
+   in preference where possible.  */
+#define static_assert(e) ((void)sizeof (struct { int _:1 - 2 * !(e); }))
+
 static const char *program_name = NULL;
 static int debug = 0;
 
@@ -1665,9 +1669,13 @@ main (int argc, char **argv)
 
   /* Check the unused bitfield in i386_cpu_flags.  */
 #ifdef CpuUnused
+  static_assert (ARRAY_SIZE (cpu_flags) == CpuMax + 2);
+
   if ((cpumax - 1) != CpuMax)
     fail (_("CpuMax != %d!\n"), cpumax);
 #else
+  static_assert (ARRAY_SIZE (cpu_flags) == CpuMax + 1);
+
   if (cpumax != CpuMax)
     fail (_("CpuMax != %d!\n"), cpumax);
 
@@ -1676,8 +1684,14 @@ main (int argc, char **argv)
     fail (_("%d unused bits in i386_cpu_flags.\n"), c);
 #endif
 
+  static_assert (ARRAY_SIZE (opcode_modifiers) == Opcode_Modifier_Num);
+
   /* Check the unused bitfield in i386_operand_type.  */
-#ifndef OTUnused
+#ifdef OTUnused
+  static_assert (ARRAY_SIZE (operand_types) == OTNum + 1);
+#else
+  static_assert (ARRAY_SIZE (operand_types) == OTNum);
+
   c = OTNumOfBits - OTMax - 1;
   if (c)
     fail (_("%d unused bits in i386_operand_type.\n"), c);

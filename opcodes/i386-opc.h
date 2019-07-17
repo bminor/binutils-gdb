@@ -626,7 +626,7 @@ enum
   /* Intel64.  */
   Intel64,
   /* The last bitfield in i386_opcode_modifier.  */
-  Opcode_Modifier_Max
+  Opcode_Modifier_Num
 };
 
 typedef struct i386_opcode_modifier
@@ -757,8 +757,6 @@ enum
   JumpAbsolute,
   /* String insn operand with fixed es segment */
   EsSeg,
-  /* Memory.  */
-  Mem,
   /* BYTE size. */
   Byte,
   /* WORD size. 2 byte */

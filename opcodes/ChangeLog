@@ -1,3 +1,11 @@
+2019-07-17  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (static_assert): Define.
+	(main): Use it.
+	* i386-opc.h (Opcode_Modifier_Max): Rename to ...
+	(Opcode_Modifier_Num): ... this.
+	(Mem): Delete.
+
 2019-07-16  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_types): Move RegMem ...
