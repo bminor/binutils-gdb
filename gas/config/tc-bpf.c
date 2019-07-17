@@ -41,7 +41,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "half",      cons,              2 },
     { "word",      cons,              4 },
     { "dword",     cons,              8 },
-    { NULL,         NULL,             0 }
+    { "lcomm",	   s_lcomm,	      1 },
+    { NULL,        NULL,              0 }
 };
 
 /* ISA handling.  */
