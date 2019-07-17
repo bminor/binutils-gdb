@@ -204,7 +204,7 @@ mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     QUIT;
 
-  current_uiout->field_int ("depth", i);
+  current_uiout->field_signed ("depth", i);
 }
 
 /* Print a list of the locals for the current frame.  With argument of
@@ -391,7 +391,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 	{
 	  QUIT;
 	  ui_out_emit_tuple tuple_emitter (uiout, "frame");
-	  uiout->field_int ("level", i);
+	  uiout->field_signed ("level", i);
 	  list_args_or_locals (user_frame_print_options,
 			       arguments, print_values, fi, skip_unavailable);
 	}
@@ -521,7 +521,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   uiout->field_stream ("name", stb);
 
   if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
-    uiout->field_int ("arg", 1);
+    uiout->field_signed ("arg", 1);
 
   if (values == PRINT_SIMPLE_VALUES)
     {

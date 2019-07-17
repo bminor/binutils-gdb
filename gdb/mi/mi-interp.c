@@ -633,19 +633,19 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
       if (console_print)
 	print_stop_event (mi->cli_uiout);
 
-      mi_uiout->field_int ("thread-id", tp->global_num);
+      mi_uiout->field_signed ("thread-id", tp->global_num);
       if (non_stop)
 	{
 	  ui_out_emit_list list_emitter (mi_uiout, "stopped-threads");
 
-	  mi_uiout->field_int (NULL, tp->global_num);
+	  mi_uiout->field_signed (NULL, tp->global_num);
 	}
       else
 	mi_uiout->field_string ("stopped-threads", "all");
 
       core = target_core_of_thread (tp->ptid);
       if (core != -1)
-	mi_uiout->field_int ("core", core);
+	mi_uiout->field_signed ("core", core);
     }
   
   fputs_unfiltered ("*stopped", mi->raw_stdout);
@@ -1034,7 +1034,7 @@ mi_output_solib_attribs (ui_out *uiout, struct so_list *solib)
   uiout->field_string ("id", solib->so_original_name);
   uiout->field_string ("target-name", solib->so_original_name);
   uiout->field_string ("host-name", solib->so_name);
-  uiout->field_int ("symbols-loaded", solib->symbols_loaded);
+  uiout->field_signed ("symbols-loaded", solib->symbols_loaded);
   if (!gdbarch_has_global_solist (target_gdbarch ()))
       uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 

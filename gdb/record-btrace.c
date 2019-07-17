@@ -617,7 +617,7 @@ btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
   if (!(format == BTRACE_FORMAT_PT && errcode > 0))
     {
       uiout->text (_("decode error ("));
-      uiout->field_int ("errcode", errcode);
+      uiout->field_signed ("errcode", errcode);
       uiout->text (_("): "));
     }
   uiout->text (errstr);
@@ -1091,13 +1091,13 @@ btrace_call_history_src_line (struct ui_out *uiout,
     return;
 
   uiout->text (":");
-  uiout->field_int ("min line", begin);
+  uiout->field_signed ("min line", begin);
 
   if (end == begin)
     return;
 
   uiout->text (",");
-  uiout->field_int ("max line", end);
+  uiout->field_signed ("max line", end);
 }
 
 /* Get the name of a branch trace function.  */

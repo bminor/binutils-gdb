@@ -45,8 +45,8 @@ protected:
      zero.  */
   virtual void do_begin (ui_out_type type, const char *id) override;
   virtual void do_end (ui_out_type type) override;
-  virtual void do_field_int (int fldno, int width, ui_align align,
-			     const char *fldname, int value) override;
+  virtual void do_field_signed (int fldno, int width, ui_align align,
+				const char *fldname, LONGEST value) override;
   virtual void do_field_unsigned (int fldno, int width, ui_align align,
 				  const char *fldname, ULONGEST value)
     override;

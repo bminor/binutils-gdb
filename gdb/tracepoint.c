@@ -2000,8 +2000,8 @@ trace_status_mi (int on_stop)
 	    {
 	      uiout->field_string ("stop-reason", stop_reason);
 	      if (stopping_tracepoint != -1)
-		uiout->field_int ("stopping-tracepoint",
-				  stopping_tracepoint);
+		uiout->field_signed ("stopping-tracepoint",
+				     stopping_tracepoint);
 	      if (ts->stop_reason == tracepoint_error)
 		uiout->field_string ("error-description",
 				     ts->stop_desc);
@@ -2010,16 +2010,16 @@ trace_status_mi (int on_stop)
     }
 
   if (ts->traceframe_count != -1)
-    uiout->field_int ("frames", ts->traceframe_count);
+    uiout->field_signed ("frames", ts->traceframe_count);
   if (ts->traceframes_created != -1)
-    uiout->field_int ("frames-created", ts->traceframes_created);
+    uiout->field_signed ("frames-created", ts->traceframes_created);
   if (ts->buffer_size != -1)
-    uiout->field_int ("buffer-size", ts->buffer_size);
+    uiout->field_signed ("buffer-size", ts->buffer_size);
   if (ts->buffer_free != -1)
-    uiout->field_int ("buffer-free", ts->buffer_free);
+    uiout->field_signed ("buffer-free", ts->buffer_free);
 
-  uiout->field_int ("disconnected",  ts->disconnected_tracing);
-  uiout->field_int ("circular",  ts->circular_buffer);
+  uiout->field_signed ("disconnected",  ts->disconnected_tracing);
+  uiout->field_signed ("circular",  ts->circular_buffer);
 
   uiout->field_string ("user-name", ts->user_name);
   uiout->field_string ("notes", ts->notes);
@@ -2183,8 +2183,8 @@ tfind_1 (enum trace_find_type type, int num,
       if (uiout->is_mi_like_p ())
 	{
 	  uiout->field_string ("found", "1");
-	  uiout->field_int ("tracepoint", tracepoint_number);
-	  uiout->field_int ("traceframe", traceframe_number);
+	  uiout->field_signed ("tracepoint", tracepoint_number);
+	  uiout->field_signed ("traceframe", traceframe_number);
 	}
       else
 	{
@@ -3665,7 +3665,7 @@ print_one_static_tracepoint_marker (int count,
 
   /* A counter field to help readability.  This is not a stable
      identifier!  */
-  uiout->field_int ("count", count);
+  uiout->field_signed ("count", count);
 
   uiout->field_string ("marker-id", marker.str_id.c_str ());
 
@@ -3713,7 +3713,7 @@ print_one_static_tracepoint_marker (int count,
       else
 	uiout->field_skip ("fullname");
 
-      uiout->field_int ("line", sal.line);
+      uiout->field_signed ("line", sal.line);
     }
   else
     {
@@ -3741,12 +3741,12 @@ print_one_static_tracepoint_marker (int count,
 	    if (ix > 0)
 	      uiout->text (", ");
 	    uiout->text ("#");
-	    uiout->field_int ("tracepoint-id", tracepoints[ix]->number);
+	    uiout->field_signed ("tracepoint-id", tracepoints[ix]->number);
 	  }
       }
 
       if (uiout->is_mi_like_p ())
-	uiout->field_int ("number-of-tracepoints", tracepoints.size ());
+	uiout->field_signed ("number-of-tracepoints", tracepoints.size ());
       else
 	uiout->text ("\n");
     }

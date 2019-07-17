@@ -1,3 +1,70 @@
+2019-07-17  Tom Tromey  <tromey@adacore.com>
+
+	* ui-out.h (class ui_out) <field_signed, field_fmt_signed,
+	do_field_signed>: Rename.  Change type of "value".
+	* ui-out.c (ui_out::field_signed): Rename from field_int.
+	Change type of "value".
+	(ui_out::field_fmt_signed): Rename from field_fmt_int.  Change
+	type of "value".
+	* tui/tui-out.h (class tui_ui_out) <do_field_signed>: Rename from
+	do_field_int.  Change type of "value".
+	* tui/tui-out.c (tui_ui_out::do_field_signed): Rename from
+	do_field_int.  Change type of "value".
+	* tracepoint.c (trace_status_mi, tfind_1)
+	(print_one_static_tracepoint_marker): Update.
+	* thread.c (print_thread_info_1, print_selected_thread_frame):
+	Update.
+	* stack.c (print_frame, print_frame_info): Update.
+	* spu-tdep.c (info_spu_signal_command, info_spu_dma_cmdlist):
+	Update.
+	* source.c (print_source_lines_base): Update.
+	* skip.c (info_skip_command): Update.
+	* record-btrace.c (btrace_ui_out_decode_error)
+	(btrace_call_history_src_line): Update.
+	* python/py-framefilter.c (py_print_single_arg, py_print_frame):
+	Update.
+	* progspace.c (print_program_space): Update.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Update.
+	* mi/mi-out.h (class mi_ui_out) <do_field_signed>: Rename from
+	do_field_int.  Change type of "value".
+	* mi/mi-out.c (mi_ui_out::do_table_begin)
+	(mi_ui_out::do_table_header): Update.
+	(mi_ui_out::do_field_signed): Rename from do_field_int.  Change
+	type of "value".
+	* mi/mi-main.c (mi_cmd_thread_list_ids, print_one_inferior)
+	(mi_cmd_data_list_changed_registers, output_register)
+	(mi_cmd_data_read_memory, mi_load_progress)
+	(mi_cmd_trace_frame_collected): Update.
+	* mi/mi-interp.c (mi_on_normal_stop_1, mi_output_solib_attribs):
+	Update.
+	* mi/mi-cmd-var.c (print_varobj, mi_cmd_var_create)
+	(mi_cmd_var_delete, mi_cmd_var_info_num_children)
+	(mi_cmd_var_list_children, varobj_update_one): Update.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_info_depth)
+	(mi_cmd_stack_list_args, list_arg_or_local): Update.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file): Update.
+	* inferior.c (print_inferior): Update.
+	* gdb_bfd.c (print_one_bfd): Update.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Update.
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Update.
+	* cli-out.h (class cli_ui_out) <do_field_signed>: Rename from
+	do_field_int.  Change type of "value".
+	* cli-out.c (cli_ui_out::do_field_signed): Rename from
+	do_field_int.  Change type of "value".
+	* breakpoint.c (watchpoint_check, print_breakpoint_location)
+	(print_one_breakpoint_location, print_it_catch_fork)
+	(print_one_catch_fork, print_it_catch_vfork)
+	(print_one_catch_vfork, print_it_catch_solib)
+	(print_it_catch_exec, print_it_ranged_breakpoint)
+	(print_mention_watchpoint, print_mention_masked_watchpoint)
+	(bkpt_print_it, update_static_tracepoint): Update.
+	* break-catch-throw.c (print_it_exception_catchpoint): Update.
+	* break-catch-syscall.c (print_it_catch_syscall): Update.
+	* ada-tasks.c (print_ada_task_info): Update.
+	* ada-lang.c (print_it_exception, print_mention_exception):
+	Update.
+
 2019-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR breakpoints/24541

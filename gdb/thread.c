@@ -1114,7 +1114,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	  }
 
 	if (show_global_ids || uiout->is_mi_like_p ())
-	  uiout->field_int ("id", tp->global_num);
+	  uiout->field_signed ("id", tp->global_num);
 
 	/* For the CLI, we stuff everything into the target-id field.
 	   This is a gross hack to make the output come out looking
@@ -1167,7 +1167,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
 	core = target_core_of_thread (tp->ptid);
 	if (uiout->is_mi_like_p () && core != -1)
-	  uiout->field_int ("core", core);
+	  uiout->field_signed ("core", core);
       }
 
     /* This end scope restores the current thread and the frame
@@ -1178,7 +1178,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
   if (pid == -1 && requested_threads == NULL)
     {
       if (uiout->is_mi_like_p () && inferior_ptid != null_ptid)
-	uiout->field_int ("current-thread-id", current_thread->global_num);
+	uiout->field_signed ("current-thread-id", current_thread->global_num);
 
       if (inferior_ptid != null_ptid && current_exited)
 	uiout->message ("\n\
@@ -1990,8 +1990,8 @@ print_selected_thread_frame (struct ui_out *uiout,
     {
       if (uiout->is_mi_like_p ())
 	{
-	  uiout->field_int ("new-thread-id",
-			    inferior_thread ()->global_num);
+	  uiout->field_signed ("new-thread-id",
+			       inferior_thread ()->global_num);
 	}
       else
 	{

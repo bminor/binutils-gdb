@@ -895,8 +895,8 @@ print_frame_info (const frame_print_options &fp_opts,
       if (print_level)
         {
           uiout->text ("#");
-          uiout->field_fmt_int (2, ui_left, "level",
-				frame_relative_level (frame));
+          uiout->field_fmt_signed (2, ui_left, "level",
+				   frame_relative_level (frame));
         }
       if (uiout->is_mi_like_p ())
         {
@@ -1243,8 +1243,8 @@ print_frame (const frame_print_options &fp_opts,
     if (print_level)
       {
 	uiout->text ("#");
-	uiout->field_fmt_int (2, ui_left, "level",
-			      frame_relative_level (frame));
+	uiout->field_fmt_signed (2, ui_left, "level",
+				 frame_relative_level (frame));
       }
     get_user_print_options (&opts);
     if (opts.addressprint)
@@ -1318,7 +1318,7 @@ print_frame (const frame_print_options &fp_opts,
 	annotate_frame_source_file_end ();
 	uiout->text (":");
 	annotate_frame_source_line ();
-	uiout->field_int ("line", sal.line);
+	uiout->field_signed ("line", sal.line);
 	annotate_frame_source_end ();
       }
 

@@ -28,8 +28,8 @@
 /* Output an int field.  */
 
 void
-tui_ui_out::do_field_int (int fldno, int width, ui_align alignment,
-			  const char *fldname, int value)
+tui_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
+			     const char *fldname, LONGEST value)
 {
   if (suppress_output ())
     return;
@@ -43,7 +43,7 @@ tui_ui_out::do_field_int (int fldno, int width, ui_align alignment,
     }
   m_start_of_line++;
 
-  cli_ui_out::do_field_int (fldno, width, alignment, fldname, value);
+  cli_ui_out::do_field_signed (fldno, width, alignment, fldname, value);
 }
 
 /* Other cli_field_* end up here so alignment and field separators are

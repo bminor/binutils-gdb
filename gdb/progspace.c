@@ -272,7 +272,7 @@ print_program_space (struct ui_out *uiout, int requested)
       else
 	uiout->field_skip ("current");
 
-      uiout->field_int ("id", pspace->num);
+      uiout->field_signed ("id", pspace->num);
 
       if (pspace->pspace_exec_filename)
 	uiout->field_string ("exec", pspace->pspace_exec_filename);

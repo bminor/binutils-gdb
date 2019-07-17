@@ -247,7 +247,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 	  uiout->field_string ("func-name", name.c_str (),
 			       ui_out_style_kind::FUNCTION);
 	uiout->text ("+");
-	uiout->field_int ("offset", offset);
+	uiout->field_signed ("offset", offset);
 	uiout->text (">:\t");
       }
     else

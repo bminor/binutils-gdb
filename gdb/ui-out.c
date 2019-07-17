@@ -438,7 +438,7 @@ ui_out::end (ui_out_type type)
 }
 
 void
-ui_out::field_int (const char *fldname, int value)
+ui_out::field_signed (const char *fldname, LONGEST value)
 {
   int fldno;
   int width;
@@ -446,12 +446,12 @@ ui_out::field_int (const char *fldname, int value)
 
   verify_field (&fldno, &width, &align);
 
-  do_field_int (fldno, width, align, fldname, value);
+  do_field_signed (fldno, width, align, fldname, value);
 }
 
 void
-ui_out::field_fmt_int (int input_width, ui_align input_align,
-		       const char *fldname, int value)
+ui_out::field_fmt_signed (int input_width, ui_align input_align,
+			  const char *fldname, LONGEST value)
 {
   int fldno;
   int width;
@@ -459,7 +459,7 @@ ui_out::field_fmt_int (int input_width, ui_align input_align,
 
   verify_field (&fldno, &width, &align);
 
-  do_field_int (fldno, input_width, input_align, fldname, value);
+  do_field_signed (fldno, input_width, input_align, fldname, value);
 }
 
 /* See ui-out.h.  */

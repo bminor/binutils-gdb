@@ -399,7 +399,7 @@ info_skip_command (const char *arg, int from_tty)
 	continue;
 
       ui_out_emit_tuple tuple_emitter (current_uiout, "blklst-entry");
-      current_uiout->field_int ("number", e.number ()); /* 1 */
+      current_uiout->field_signed ("number", e.number ()); /* 1 */
 
       if (e.enabled ())
 	current_uiout->field_string ("enabled", "y"); /* 2 */

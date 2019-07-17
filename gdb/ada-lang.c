@@ -12465,7 +12465,7 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 
   uiout->text (b->disposition == disp_del
 	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the
@@ -12603,7 +12603,7 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
 
   uiout->text (b->disposition == disp_del ? _("Temporary catchpoint ")
                                                  : _("Catchpoint "));
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (": ");
 
   switch (ex)

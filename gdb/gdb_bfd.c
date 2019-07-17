@@ -940,7 +940,7 @@ print_one_bfd (void **slot, void *data)
   struct ui_out *uiout = (struct ui_out *) data;
 
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  uiout->field_int ("refcount", gdata->refc);
+  uiout->field_signed ("refcount", gdata->refc);
   uiout->field_string ("addr", host_address_to_string (abfd));
   uiout->field_string ("filename", bfd_get_filename (abfd));
   uiout->text ("\n");

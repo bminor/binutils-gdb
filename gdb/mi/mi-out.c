@@ -35,8 +35,8 @@ mi_ui_out::do_table_begin (int nr_cols, int nr_rows,
 			   const char *tblid)
 {
   open (tblid, ui_out_type_tuple);
-  do_field_int (-1, -1, ui_left, "nr_rows", nr_rows);
-  do_field_int (-1, -1, ui_left, "nr_cols", nr_cols);
+  do_field_signed (-1, -1, ui_left, "nr_rows", nr_rows);
+  do_field_signed (-1, -1, ui_left, "nr_cols", nr_cols);
   open ("hdr", ui_out_type_list);
 }
 
@@ -67,8 +67,8 @@ mi_ui_out::do_table_header (int width, ui_align alignment,
 			    const std::string &col_hdr)
 {
   open (NULL, ui_out_type_tuple);
-  do_field_int (0, 0, ui_center, "width", width);
-  do_field_int (0, 0, ui_center, "alignment", alignment);
+  do_field_signed (0, 0, ui_center, "width", width);
+  do_field_signed (0, 0, ui_center, "alignment", alignment);
   do_field_string (0, 0, ui_center, "col_name", col_name.c_str (),
 		   ui_out_style_kind::DEFAULT);
   do_field_string (0, width, alignment, "colhdr", col_hdr.c_str (),
@@ -95,8 +95,8 @@ mi_ui_out::do_end (ui_out_type type)
 /* Output an int field.  */
 
 void
-mi_ui_out::do_field_int (int fldno, int width, ui_align alignment,
-			 const char *fldname, int value)
+mi_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
+			    const char *fldname, LONGEST value)
 {
   do_field_string (fldno, width, alignment, fldname, plongest (value),
 		   ui_out_style_kind::DEFAULT);

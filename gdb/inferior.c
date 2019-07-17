@@ -481,7 +481,7 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       else
 	uiout->field_skip ("current");
 
-      uiout->field_int ("number", inf->num);
+      uiout->field_signed ("number", inf->num);
 
       uiout->field_string ("target-id", inferior_pid_to_str (inf->pid));
 
@@ -496,12 +496,12 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       if (inf->vfork_parent)
 	{
 	  uiout->text (_("\n\tis vfork child of inferior "));
-	  uiout->field_int ("vfork-parent", inf->vfork_parent->num);
+	  uiout->field_signed ("vfork-parent", inf->vfork_parent->num);
 	}
       if (inf->vfork_child)
 	{
 	  uiout->text (_("\n\tis vfork parent of inferior "));
-	  uiout->field_int ("vfork-child", inf->vfork_child->num);
+	  uiout->field_signed ("vfork-child", inf->vfork_child->num);
 	}
 
       uiout->text ("\n");

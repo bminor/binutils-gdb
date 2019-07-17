@@ -205,7 +205,7 @@ print_it_catch_syscall (bpstat bs)
 						: EXEC_ASYNC_SYSCALL_RETURN));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
 
   if (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY)
     uiout->text (" (call to syscall ");
@@ -213,7 +213,7 @@ print_it_catch_syscall (bpstat bs)
     uiout->text (" (returned from syscall ");
 
   if (s.name == NULL || uiout->is_mi_like_p ())
-    uiout->field_int ("syscall-number", last.value.syscall_number);
+    uiout->field_signed ("syscall-number", last.value.syscall_number);
   if (s.name != NULL)
     uiout->field_string ("syscall-name", s.name);
 

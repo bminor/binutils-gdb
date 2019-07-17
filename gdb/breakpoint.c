@@ -4913,7 +4913,7 @@ watchpoint_check (bpstat bs)
 	    uiout->field_string
 	      ("reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
 	  uiout->text ("\nWatchpoint ");
-	  uiout->field_int ("wpnum", b->number);
+	  uiout->field_signed ("wpnum", b->number);
 	  uiout->text (" deleted because the program has left the block in\n"
 		       "which its expression is valid.\n");
 	}
@@ -5836,7 +5836,7 @@ print_breakpoint_location (struct breakpoint *b,
       if (uiout->is_mi_like_p ())
 	uiout->field_string ("fullname", symtab_to_fullname (loc->symtab));
       
-      uiout->field_int ("line", loc->line_number);
+      uiout->field_signed ("line", loc->line_number);
     }
   else if (loc)
     {
@@ -6008,7 +6008,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (part_of_multiple)
     uiout->field_fmt ("number", "%d.%d", b->number, loc_number);
   else
-    uiout->field_int ("number", b->number);
+    uiout->field_signed ("number", b->number);
 
   /* 2 */
   annotate_field (1);
@@ -6101,12 +6101,12 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  /* FIXME: This seems to be redundant and lost here; see the
 	     "stop only in" line a little further down.  */
 	  uiout->text (" thread ");
-	  uiout->field_int ("thread", b->thread);
+	  uiout->field_signed ("thread", b->thread);
 	}
       else if (b->task != 0)
 	{
 	  uiout->text (" task ");
-	  uiout->field_int ("task", b->task);
+	  uiout->field_signed ("task", b->task);
 	}
     }
 
@@ -6154,7 +6154,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       /* FIXME should make an annotation for this.  */
       uiout->text ("\tstop only in thread ");
       if (uiout->is_mi_like_p ())
-	uiout->field_int ("thread", b->thread);
+	uiout->field_signed ("thread", b->thread);
       else
 	{
 	  struct thread_info *thr = find_thread_global_id (b->thread);
@@ -6176,7 +6176,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  else
 	    uiout->text ("\tbreakpoint");
 	  uiout->text (" already hit ");
-	  uiout->field_int ("times", b->hit_count);
+	  uiout->field_signed ("times", b->hit_count);
 	  if (b->hit_count == 1)
 	    uiout->text (" time\n");
 	  else
@@ -6186,7 +6186,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	{
 	  /* Output the count also if it is zero, but only if this is mi.  */
 	  if (uiout->is_mi_like_p ())
-	    uiout->field_int ("times", b->hit_count);
+	    uiout->field_signed ("times", b->hit_count);
 	}
     }
 
@@ -6194,7 +6194,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {
       annotate_field (8);
       uiout->text ("\tignore next ");
-      uiout->field_int ("ignore", b->ignore_count);
+      uiout->field_signed ("ignore", b->ignore_count);
       uiout->text (" hits\n");
     }
 
@@ -6211,7 +6211,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	uiout->text ("additional ");
       else
 	uiout->text ("next ");
-      uiout->field_int ("enable", b->enable_count);
+      uiout->field_signed ("enable", b->enable_count);
       uiout->text (" hits\n");
     }
 
@@ -6222,7 +6222,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       if (tp->traceframe_usage)
 	{
 	  uiout->text ("\ttrace buffer usage ");
-	  uiout->field_int ("traceframe-usage", tp->traceframe_usage);
+	  uiout->field_signed ("traceframe-usage", tp->traceframe_usage);
 	  uiout->text (" bytes\n");
 	}
     }
@@ -6243,7 +6243,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	{
 	  annotate_field (10);
 	  uiout->text ("\tpass count ");
-	  uiout->field_int ("pass", t->pass_count);
+	  uiout->field_signed ("pass", t->pass_count);
 	  uiout->text (" \n");
 	}
 
@@ -7689,9 +7689,9 @@ print_it_catch_fork (bpstat bs)
       uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_FORK));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (" (forked process ");
-  uiout->field_int ("newpid", c->forked_inferior_pid.pid ());
+  uiout->field_signed ("newpid", c->forked_inferior_pid.pid ());
   uiout->text ("), ");
   return PRINT_SRC_AND_LOC;
 }
@@ -7718,7 +7718,7 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
   if (c->forked_inferior_pid != null_ptid)
     {
       uiout->text (", process ");
-      uiout->field_int ("what", c->forked_inferior_pid.pid ());
+      uiout->field_signed ("what", c->forked_inferior_pid.pid ());
       uiout->spaces (1);
     }
 
@@ -7805,9 +7805,9 @@ print_it_catch_vfork (bpstat bs)
       uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_VFORK));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (" (vforked process ");
-  uiout->field_int ("newpid", c->forked_inferior_pid.pid ());
+  uiout->field_signed ("newpid", c->forked_inferior_pid.pid ());
   uiout->text ("), ");
   return PRINT_SRC_AND_LOC;
 }
@@ -7833,7 +7833,7 @@ print_one_catch_vfork (struct breakpoint *b, struct bp_location **last_loc)
   if (c->forked_inferior_pid != null_ptid)
     {
       uiout->text (", process ");
-      uiout->field_int ("what", c->forked_inferior_pid.pid ());
+      uiout->field_signed ("what", c->forked_inferior_pid.pid ());
       uiout->spaces (1);
     }
 
@@ -7974,7 +7974,7 @@ print_it_catch_solib (bpstat bs)
     uiout->text ("Temporary catchpoint ");
   else
     uiout->text ("Catchpoint ");
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text ("\n");
   if (uiout->is_mi_like_p ())
     uiout->field_string ("disp", bpdisp_text (b->disposition));
@@ -8224,7 +8224,7 @@ print_it_catch_exec (bpstat bs)
       uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_EXEC));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (" (exec'd ");
   uiout->field_string ("new-exec", c->exec_pathname);
   uiout->text ("), ");
@@ -9621,7 +9621,7 @@ print_it_ranged_breakpoint (bpstat bs)
 		      async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (", ");
 
   return PRINT_SRC_AND_LOC;
@@ -10197,7 +10197,7 @@ print_mention_watchpoint (struct breakpoint *b)
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
-  uiout->field_int ("number", b->number);
+  uiout->field_signed ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
 }
@@ -10390,7 +10390,7 @@ print_mention_masked_watchpoint (struct breakpoint *b)
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
-  uiout->field_int ("number", b->number);
+  uiout->field_signed ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
 }
@@ -12400,7 +12400,7 @@ bkpt_print_it (bpstat bs)
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_int ("bkptno", b->number);
+  uiout->field_signed ("bkptno", b->number);
   uiout->text (", ");
 
   return PRINT_SRC_AND_LOC;
@@ -13333,7 +13333,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	      uiout->field_string ("fullname", fullname);
 	    }
 
-	  uiout->field_int ("line", sal2.line);
+	  uiout->field_signed ("line", sal2.line);
 	  uiout->text ("\n");
 
 	  b->loc->line_number = sal2.line;

@@ -370,7 +370,7 @@ py_print_single_arg (struct ui_out *out,
   out->text ("=");
 
   if (print_args_field)
-    out->field_int ("arg", 1);
+    out->field_signed ("arg", 1);
 
   /* For MI print the type, but only for simple values.  This seems
      weird, but this is how MI choose to format the various output
@@ -839,8 +839,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	  annotate_frame_begin (print_level ? level : 0,
 				gdbarch, address);
 	  out->text ("#");
-	  out->field_fmt_int (2, ui_left, "level",
-			      level);
+	  out->field_fmt_signed (2, ui_left, "level", level);
 	}
     }
 
@@ -956,7 +955,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	      out->text (":");
 	      annotate_frame_source_line ();
-	      out->field_int ("line", line);
+	      out->field_signed ("line", line);
 	    }
 	}
       if (out->is_mi_like_p ())

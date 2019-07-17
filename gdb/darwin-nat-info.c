@@ -664,14 +664,14 @@ darwin_debug_regions_recurse (task_t task)
 			     unparse_inheritance (r_info.inheritance));
 	uiout->field_string ("share-mode",
 			     unparse_share_mode (r_info.share_mode));
-	uiout->field_int ("depth", r_depth);
+	uiout->field_signed ("depth", r_depth);
 	uiout->field_string ("submap",
 			     r_info.is_submap ? _("sm ") : _("obj"));
 	tag = unparse_user_tag (r_info.user_tag);
 	if (tag)
 	  uiout->field_string ("tag", tag);
 	else
-	  uiout->field_int ("tag", r_info.user_tag);
+	  uiout->field_signed ("tag", r_info.user_tag);
       }
 
       uiout->text ("\n");
