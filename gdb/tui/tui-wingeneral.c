@@ -38,10 +38,7 @@ void
 tui_gen_win_info::refresh_window ()
 {
   if (handle != NULL)
-    {
-      touchwin (handle);
-      wrefresh (handle);
-    }
+    wrefresh (handle);
 }
 
 /* Function to delete the curses window, checking for NULL.  */
