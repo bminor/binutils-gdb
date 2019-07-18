@@ -337,8 +337,6 @@ open_terminal_stream (const char *name)
 static void
 new_ui_command (const char *args, int from_tty)
 {
-  gdb_file_up stream[3];
-  int i;
   int argc;
   const char *interpreter_name;
   const char *tty_name;
@@ -357,13 +355,13 @@ new_ui_command (const char *args, int from_tty)
   {
     scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-    /* Open specified terminal, once for each of
-       stdin/stdout/stderr.  */
-    for (i = 0; i < 3; i++)
-      stream[i] = open_terminal_stream (tty_name);
+    /* Open specified terminal.  Note: we used to open it three times,
+       once for each of stdin/stdout/stderr, but that does not work
+       with Windows named pipes.  */
+    gdb_file_up stream = open_terminal_stream (tty_name);
 
     std::unique_ptr<ui> ui
-      (new struct ui (stream[0].get (), stream[1].get (), stream[2].get ()));
+      (new struct ui (stream.get (), stream.get (), stream.get ()));
 
     ui->async = 1;
 
@@ -373,10 +371,8 @@ new_ui_command (const char *args, int from_tty)
 
     interp_pre_command_loop (top_level_interpreter ());
 
-    /* Make sure the files are not closed.  */
-    stream[0].release ();
-    stream[1].release ();
-    stream[2].release ();
+    /* Make sure the file is not closed.  */
+    stream.release ();
 
     ui.release ();
   }
