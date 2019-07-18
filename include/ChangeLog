@@ -1,3 +1,10 @@
+2019-07-18  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NOTFUNC): Fix description.
+	(ctf_func_type_info): New.
+	(ctf_func_type_args): Likewise.
+	(ctf_type_aname_raw): Likewise.
+
 2019-07-16  Jan Beulich  <jbeulich@suse.com>
 
 	* opcode/i386.h (POP_SEG386_SHORT): New.

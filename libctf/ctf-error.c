@@ -48,7 +48,7 @@ static const char *const _ctf_errlist[] = {
   "Input buffer is too small for type name",	     /* ECTF_NAMELEN */
   "No type information available for that name",     /* ECTF_NOTYPE */
   "Syntax error in type name",			     /* ECTF_SYNTAX */
-  "Symbol table entry is not a function",	     /* ECTF_NOTFUNC */
+  "Symbol table entry or type is not a function",    /* ECTF_NOTFUNC */
   "No function information available for symbol",    /* ECTF_NOFUNCDAT */
   "Symbol table entry is not a data object",	     /* ECTF_NOTDATA */
   "No type information available for symbol",	     /* ECTF_NOTYPEDAT */

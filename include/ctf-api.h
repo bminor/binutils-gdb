@@ -160,7 +160,7 @@ enum
    ECTF_NAMELEN,		/* Buffer is too small to hold type name.  */
    ECTF_NOTYPE,			/* No type found corresponding to name.  */
    ECTF_SYNTAX,			/* Syntax error in type name.  */
-   ECTF_NOTFUNC,		/* Symtab entry does not refer to a function.  */
+   ECTF_NOTFUNC,		/* Symbol entry or type is not a function.  */
    ECTF_NOFUNCDAT,		/* No func info available for function.  */
    ECTF_NOTDATA,		/* Symtab entry does not refer to a data obj.  */
    ECTF_NOTYPEDAT,		/* No type info available for object.  */
@@ -277,6 +277,8 @@ extern int ctf_version (int);
 
 extern int ctf_func_info (ctf_file_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_file_t *, unsigned long, uint32_t, ctf_id_t *);
+extern int ctf_func_type_info (ctf_file_t *, ctf_id_t, ctf_funcinfo_t *);
+extern int ctf_func_type_args (ctf_file_t *, ctf_id_t, uint32_t, ctf_id_t *);
 
 extern ctf_id_t ctf_lookup_by_name (ctf_file_t *, const char *);
 extern ctf_id_t ctf_lookup_by_symbol (ctf_file_t *, unsigned long);
@@ -284,6 +286,7 @@ extern ctf_id_t ctf_lookup_variable (ctf_file_t *, const char *);
 
 extern ctf_id_t ctf_type_resolve (ctf_file_t *, ctf_id_t);
 extern char *ctf_type_aname (ctf_file_t *, ctf_id_t);
+extern char *ctf_type_aname_raw (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_lname (ctf_file_t *, ctf_id_t, char *, size_t);
 extern char *ctf_type_name (ctf_file_t *, ctf_id_t, char *, size_t);
 extern ssize_t ctf_type_size (ctf_file_t *, ctf_id_t);

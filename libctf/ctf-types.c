@@ -369,6 +369,23 @@ ctf_type_name (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
   return (rv >= 0 && (size_t) rv < len ? buf : NULL);
 }
 
+/* Lookup the given type ID and return its raw, unadorned, undecorated name as a
+   new dynamcally-allocated string.  */
+
+char *
+ctf_type_aname_raw (ctf_file_t *fp, ctf_id_t type)
+{
+  const ctf_type_t *tp;
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return NULL;		/* errno is set for us.  */
+
+  if (ctf_strraw (fp, tp->ctt_name) != NULL)
+    return strdup (ctf_strraw (fp, tp->ctt_name));
+
+  return NULL;
+}
+
 /* Resolve the type down to a base type node, and then return the size
    of the type storage in bytes.  */
 
@@ -946,6 +963,74 @@ ctf_enum_value (ctf_file_t * fp, ctf_id_t type, const char *name, int *valp)
 
   (void) ctf_set_errno (ofp, ECTF_NOENUMNAM);
   return -1;
+}
+
+/* Given a type ID relating to a function type, return info on return types and
+   arg counts for that function.  */
+
+int
+ctf_func_type_info (ctf_file_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
+{
+  const ctf_type_t *tp;
+  uint32_t kind;
+  const uint32_t *args;
+  ssize_t size, increment;
+
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+  kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+
+  if (kind != CTF_K_FUNCTION)
+    return (ctf_set_errno (fp, ECTF_NOTFUNC));
+
+  fip->ctc_return = tp->ctt_type;
+  fip->ctc_argc = LCTF_INFO_VLEN (fp, tp->ctt_info);
+  fip->ctc_flags = 0;
+
+  args = (uint32_t *) ((uintptr_t) tp + increment);
+
+  if (fip->ctc_argc != 0 && args[fip->ctc_argc - 1] == 0)
+    {
+      fip->ctc_flags |= CTF_FUNC_VARARG;
+      fip->ctc_argc--;
+    }
+
+  return 0;
+}
+
+/* Given a type ID relating to a function type,, return the arguments for the
+   function.  */
+
+int
+ctf_func_type_args (ctf_file_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv)
+{
+  const ctf_type_t *tp;
+  const uint32_t *args;
+  ssize_t size, increment;
+  ctf_funcinfo_t f;
+
+  if (ctf_func_type_info (fp, type, &f) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+
+  args = (uint32_t *) ((uintptr_t) tp + increment);
+
+  for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
+    *argv++ = *args++;
+
+  return 0;
 }
 
 /* Recursively visit the members of any type.  This function is used as the
