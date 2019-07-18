@@ -1,3 +1,8 @@
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/dgopt.exp: New file.
+	* gdb.ada/dgopt/x.adb: New file.
+
 2019-09-08  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/resize.exp: Remove setup_xfail.

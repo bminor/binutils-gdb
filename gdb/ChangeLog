@@ -1,5 +1,10 @@
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2read.c (dw2_get_file_names_reader): Add the
+	CU's file name to the results.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (add_nonlocal_symbols): Combine calls to
 	map_matching_symbols.  Update.
 	* dwarf2read.c (dw2_map_matching_symbols): Update.

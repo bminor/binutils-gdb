@@ -3692,11 +3692,17 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
-  qfn->num_file_names = lh->file_names.size ();
+  int offset = 0;
+  if (strcmp (fnd.name, "<unknown>") != 0)
+    ++offset;
+
+  qfn->num_file_names = offset + lh->file_names.size ();
   qfn->file_names =
-    XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->file_names.size ());
+    XOBNEWVEC (&objfile->objfile_obstack, const char *, qfn->num_file_names);
+  if (offset != 0)
+    qfn->file_names[0] = xstrdup (fnd.name);
   for (i = 0; i < lh->file_names.size (); ++i)
-    qfn->file_names[i] = file_full_name (i + 1, lh.get (), fnd.comp_dir);
+    qfn->file_names[i + offset] = file_full_name (i + 1, lh.get (), fnd.comp_dir);
   qfn->real_names = NULL;
 
   lh_cu->v.quick->file_names = qfn;
