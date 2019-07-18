@@ -1706,7 +1706,7 @@ set_initial_language (void)
 
   if (lang == language_unknown)
     {
-      char *name = main_name ();
+      const char *name = main_name ();
       struct symbol *sym = lookup_symbol (name, NULL, VAR_DOMAIN, NULL).symbol;
 
       if (sym != NULL)

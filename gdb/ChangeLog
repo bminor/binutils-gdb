@@ -1,3 +1,9 @@
+2019-07-18  Tom Tromey  <tromey@adacore.com>
+
+	* symtab.c (main_name): Constify return type.
+	* symfile.c (set_initial_language): Update.
+	* symtab.h (main_name): Constify return type.
+
 2019-07-17  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.c (tui_update_source_window)

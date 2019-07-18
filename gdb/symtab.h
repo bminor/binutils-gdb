@@ -2041,11 +2041,8 @@ extern std::vector<symbol_search> search_symbols (const char *,
 extern bool treg_matches_sym_type_name (const compiled_regex &treg,
 					const struct symbol *sym);
 
-/* The name of the ``main'' function.
-   FIXME: cagney/2001-03-20: Can't make main_name() const since some
-   of the calling code currently assumes that the string isn't
-   const.  */
-extern /*const */ char *main_name (void);
+/* The name of the ``main'' function.  */
+extern const char *main_name ();
 extern enum language main_language (void);
 
 /* Lookup symbol NAME from DOMAIN in MAIN_OBJFILE's global blocks.

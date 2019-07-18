@@ -5741,8 +5741,10 @@ find_main_name (void)
   set_main_name ("main", language_unknown);
 }
 
-char *
-main_name (void)
+/* See symtab.h.  */
+
+const char *
+main_name ()
 {
   struct main_info *info = get_main_info ();
 
