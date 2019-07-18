@@ -1,3 +1,7 @@
+2019-09-08  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.c (box_win): Truncate long window titles.
+
 2019-09-07  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2read.c (struct dw2_symtab_iterator) <block_index>:

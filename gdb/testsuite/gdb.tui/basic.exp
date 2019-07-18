@@ -35,9 +35,6 @@ gdb_assert {![string match "No Source Available" $text]} \
 Term::command "list main"
 Term::check_contents "list main" "21 *return 0"
 
-# This check fails because the file name in the title overwrites the
-# box.
-setup_xfail *-*-*
 Term::check_box "source box" 0 0 80 15
 
 Term::command "layout asm"
@@ -48,8 +45,5 @@ Term::check_box "asm box" 0 0 80 15
 Term::command "layout split"
 Term::check_contents "split layout contents" "21 *return 0.*$hex <main>"
 
-# This check fails because the file name in the title overwrites the
-# box.
-setup_xfail *-*-*
 Term::check_box "source box in split layout" 0 0 80 8
 Term::check_box "asm box in split layout" 0 7 80 8

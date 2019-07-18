@@ -37,6 +37,4 @@ if {![Term::enter_tui]} {
 Term::check_contents "source at startup" ">|21 *return 0"
 
 Term::resize 40 90
-# Resizing seems to be somewhat broken.
-setup_xfail *-*-*
 Term::check_box "source box after resize" 0 0 90 23

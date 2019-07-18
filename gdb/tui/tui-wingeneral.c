@@ -74,7 +74,21 @@ box_win (struct tui_win_info *win_info,
   box (win, tui_border_vline, tui_border_hline);
 #endif
   if (!win_info->title.empty ())
-    mvwaddstr (win, 0, 3, win_info->title.c_str ());
+    {
+      /* Emit "+-TITLE-+" -- so 2 characters on the right and 2 on
+	 the left.  */
+      int max_len = win_info->width - 2 - 2;
+
+      if (win_info->title.size () <= max_len)
+	mvwaddstr (win, 0, 3, win_info->title.c_str ());
+      else
+	{
+	  std::string truncated
+	    = "..." + win_info->title.substr (win_info->title.size ()
+					      - max_len + 3);
+	  mvwaddstr (win, 0, 3, truncated.c_str ());
+	}
+    }
   wattroff (win, attrs);
 }
 

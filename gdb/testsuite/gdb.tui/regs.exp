@@ -38,9 +38,6 @@ Term::check_contents "source at startup" ">|21 *return 0"
 
 Term::command "layout regs"
 Term::check_box "register box" 0 0 80 8
-# This check fails because the file name in the title overwrites the
-# box.
-setup_xfail *-*-*
 Term::check_box "source box in regs layout" 0 7 80 8
 
 set text [Term::get_line 1]
