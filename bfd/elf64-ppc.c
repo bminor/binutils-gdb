@@ -7734,9 +7734,8 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			{
 			  value += sym_sec->output_offset;
 			  value += sym_sec->output_section->vma;
-			  value -= htab->elf.tls_sec->vma;
-			  ok_tprel = (value + TP_OFFSET + ((bfd_vma) 1 << 31)
-				      < (bfd_vma) 1 << 32);
+			  value -= htab->elf.tls_sec->vma + TP_OFFSET;
+			  ok_tprel = value + 0x80008000ULL < 1ULL << 32;
 			}
 		    }
 
