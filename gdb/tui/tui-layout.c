@@ -82,7 +82,6 @@ show_layout (enum tui_layout_type layout)
 	case SRC_DATA_COMMAND:
 	case DISASSEM_DATA_COMMAND:
 	  show_data (layout);
-	  tui_refresh_all ();
 	  break;
 	  /* Now show the new layout.  */
 	case SRC_COMMAND:

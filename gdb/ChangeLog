@@ -1,5 +1,9 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_layout): Don't call tui_refresh_all.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_gen_win_info::refresh_window): Don't
 	call touchwin.
 
