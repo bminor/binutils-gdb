@@ -1,5 +1,9 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-io.c (tui_cont_sig): Don't call wrefresh.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (_initialize_tui_stack): Move later.
 	Remove unnecessary forward declarations.
 

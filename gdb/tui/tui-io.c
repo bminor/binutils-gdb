@@ -851,8 +851,6 @@ tui_cont_sig (int sig)
 
       /* Force a refresh of the screen.  */
       tui_refresh_all_win ();
-
-      wrefresh (TUI_CMD_WIN->handle);
     }
   signal (sig, tui_cont_sig);
 }
