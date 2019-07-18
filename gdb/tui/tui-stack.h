@@ -45,6 +45,18 @@ struct tui_locator_window : public tui_gen_win_info
 
   void rerender () override;
 
+  /* Update the locator, with the provided arguments.
+
+     Returns true if any of the locator's fields were actually
+     changed, and false otherwise.  */
+  bool set_locator_info (struct gdbarch *gdbarch,
+			 const char *fullname,
+			 const char *procname,
+			 int lineno, CORE_ADDR addr);
+
+  /* Set the full_name portion of the locator.  */
+  void set_locator_fullname (const char *fullname);
+
   char full_name[MAX_LOCATOR_ELEMENT_LEN];
   char proc_name[MAX_LOCATOR_ELEMENT_LEN];
   int line_no = 0;

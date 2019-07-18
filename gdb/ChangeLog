@@ -1,5 +1,15 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (struct tui_locator_window) <set_locator_info,
+	set_locator_fullname>: New methods.
+	* tui/tui-stack.c (tui_locator_window::set_locator_fullname):
+	Rename from tui_set_locator_fullname.
+	(tui_locator_window::set_locator_info): Rename from
+	tui_set_locator_info.  Return bool.
+	(tui_update_locator_fullname, tui_show_frame_info): Update.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_layout): Don't call tui_refresh_all.
 
 2019-08-30  Tom Tromey  <tom@tromey.com>

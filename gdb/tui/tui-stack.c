@@ -58,15 +58,6 @@ static struct tui_locator_window _locator;
    Returns a pointer to a static area holding the result.  */
 static char *tui_get_function_from_frame (struct frame_info *fi);
 
-/* Set the full_name portion of the locator.  */
-static void tui_set_locator_fullname (const char *fullname);
-
-/* Update the locator, with the provided arguments.  */
-static int tui_set_locator_info (struct gdbarch *gdbarch,
-				 const char *fullname,
-				 const char *procname,
-                                 int lineno, CORE_ADDR addr);
-
 static void tui_update_command (const char *, int);
 
 
@@ -295,9 +286,10 @@ tui_locator_window::rerender ()
   tui_show_locator_content ();
 }
 
-/* Set the filename portion of the locator.  */
-static void
-tui_set_locator_fullname (const char *fullname)
+/* See tui-stack.h.  */
+
+void
+tui_locator_window::set_locator_fullname (const char *fullname)
 {
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
@@ -305,20 +297,16 @@ tui_set_locator_fullname (const char *fullname)
   strcat_to_buf (locator->full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
 }
 
-/* Update the locator, with the provided arguments.
+/* See tui-stack.h.  */
 
-   Returns 1 if any of the locator's fields were actually changed,
-   and 0 otherwise.  */
-
-static int
-tui_set_locator_info (struct gdbarch *gdbarch,
-		      const char *fullname,
-		      const char *procname, 
-		      int lineno,
-                      CORE_ADDR addr)
+bool
+tui_locator_window::set_locator_info (struct gdbarch *gdbarch_in,
+				      const char *fullname,
+				      const char *procname, 
+				      int lineno,
+				      CORE_ADDR addr_in)
 {
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-  int locator_changed_p = 0;
+  bool locator_changed_p = false;
 
   if (procname == NULL)
     procname = "";
@@ -326,20 +314,20 @@ tui_set_locator_info (struct gdbarch *gdbarch,
   if (fullname == NULL)
     fullname = "";
 
-  locator_changed_p |= strncmp (locator->proc_name, procname,
+  locator_changed_p |= strncmp (proc_name, procname,
 				MAX_LOCATOR_ELEMENT_LEN) != 0;
-  locator_changed_p |= lineno != locator->line_no;
-  locator_changed_p |= addr != locator->addr;
-  locator_changed_p |= gdbarch != locator->gdbarch;
-  locator_changed_p |= strncmp (locator->full_name, fullname,
+  locator_changed_p |= lineno != line_no;
+  locator_changed_p |= addr_in != addr;
+  locator_changed_p |= gdbarch_in != gdbarch;
+  locator_changed_p |= strncmp (full_name, fullname,
 				MAX_LOCATOR_ELEMENT_LEN) != 0;
 
-  locator->proc_name[0] = (char) 0;
-  strcat_to_buf (locator->proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
-  locator->line_no = lineno;
-  locator->addr = addr;
-  locator->gdbarch = gdbarch;
-  tui_set_locator_fullname (fullname);
+  proc_name[0] = (char) 0;
+  strcat_to_buf (proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
+  line_no = lineno;
+  addr = addr_in;
+  gdbarch = gdbarch_in;
+  set_locator_fullname (fullname);
 
   return locator_changed_p;
 }
@@ -348,7 +336,9 @@ tui_set_locator_info (struct gdbarch *gdbarch,
 void
 tui_update_locator_fullname (const char *fullname)
 {
-  tui_set_locator_fullname (fullname);
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+
+  locator->set_locator_fullname (fullname);
   tui_show_locator_content ();
 }
 
@@ -361,11 +351,11 @@ tui_update_locator_fullname (const char *fullname)
 int
 tui_show_frame_info (struct frame_info *fi)
 {
-  int locator_changed_p;
+  bool locator_changed_p;
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
   if (fi)
     {
-      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
       CORE_ADDR pc;
 
       symtab_and_line sal = find_frame_sal (fi);
@@ -376,16 +366,16 @@ tui_show_frame_info (struct frame_info *fi)
 
       if (get_frame_pc_if_available (fi, &pc))
 	locator_changed_p
-	  = tui_set_locator_info (get_frame_arch (fi),
-				  (sal.symtab == 0
-				   ? "??" : fullname),
-				  tui_get_function_from_frame (fi),
-				  sal.line,
-				  pc);
+	  = locator->set_locator_info (get_frame_arch (fi),
+				       (sal.symtab == 0
+					? "??" : fullname),
+				       tui_get_function_from_frame (fi),
+				       sal.line,
+				       pc);
       else
 	locator_changed_p
-	  = tui_set_locator_info (get_frame_arch (fi),
-				  "??", _("<unavailable>"), sal.line, 0);
+	  = locator->set_locator_info (get_frame_arch (fi),
+				       "??", _("<unavailable>"), sal.line, 0);
 
       /* If the locator information has not changed, then frame information has
 	 not changed.  If frame information has not changed, then the windows'
@@ -405,7 +395,7 @@ tui_show_frame_info (struct frame_info *fi)
   else
     {
       locator_changed_p
-	= tui_set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
+	= locator->set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
 
       if (!locator_changed_p)
 	return 0;
