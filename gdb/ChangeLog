@@ -1,5 +1,12 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (tui_locator_window::set_locator_fullname): Call
+	rerender.
+	(tui_update_locator_fullname, tui_show_frame_info): Don't call
+	tui_show_locator_content.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_show_locator_content): Move lower.  Rewrite.
 	(tui_locator_window::rerender): Rewrite using body of previous
 	tui_show_locator_content.

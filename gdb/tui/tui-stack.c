@@ -284,6 +284,7 @@ tui_locator_window::set_locator_fullname (const char *fullname)
 
   locator->full_name[0] = 0;
   strcat_to_buf (locator->full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
+  rerender ();
 }
 
 /* See tui-stack.h.  */
@@ -328,7 +329,6 @@ tui_update_locator_fullname (const char *fullname)
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
   locator->set_locator_fullname (fullname);
-  tui_show_locator_content ();
 }
 
 /* Function to print the frame information for the TUI.  The windows are
@@ -372,7 +372,6 @@ tui_show_frame_info (struct frame_info *fi)
       if (!locator_changed_p)
 	return 0;
 
-      tui_show_locator_content ();
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  win_info->maybe_update (fi, sal, locator->line_no, locator->addr);
@@ -389,7 +388,6 @@ tui_show_frame_info (struct frame_info *fi)
       if (!locator_changed_p)
 	return 0;
 
-      tui_show_locator_content ();
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  win_info->erase_source_content ();
