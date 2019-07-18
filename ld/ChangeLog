@@ -1,3 +1,11 @@
+2019-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24819
+	* emultempl/elf32.em (elf_orphan_compatible): Return FALSE for
+	member of output section group when doing a relocatable link.
+	* testsuite/ld-elf/pr24819.d: New file.
+	* testsuite/ld-elf/pr24819.s: Likewise.
+
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsso.r: Update.
