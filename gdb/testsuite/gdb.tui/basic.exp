@@ -44,3 +44,12 @@ Term::command "layout asm"
 Term::check_contents "asm window shows main" "$hex <main>"
 
 Term::check_box "asm box" 3 0 77 15
+
+Term::command "layout split"
+Term::check_contents "split layout contents" "21 *return 0.*$hex <main>"
+
+# This check fails because the file name in the title overwrites the
+# box.
+setup_xfail *-*-*
+Term::check_box "source box in split layout" 3 0 77 8
+Term::check_box "asm box in split layout" 3 7 77 8
