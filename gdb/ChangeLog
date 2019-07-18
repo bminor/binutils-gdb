@@ -1,3 +1,7 @@
+2019-09-09  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_all_windows_info): Use ui_out.
+
 2019-09-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* python/python.c (do_start_initialization): Make progname_copy static,

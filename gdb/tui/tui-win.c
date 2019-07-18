@@ -828,18 +828,26 @@ static void
 tui_all_windows_info (const char *arg, int from_tty)
 {
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
+  struct ui_out *uiout = current_uiout;
+
+  ui_out_emit_table table_emitter (uiout, 3, -1, "tui-windows");
+  uiout->table_header (10, ui_left, "name", "Name");
+  uiout->table_header (5, ui_right, "lines", "Lines");
+  uiout->table_header (10, ui_left, "focus", "Focus");
+  uiout->table_body ();
 
   for (tui_win_info *win_info : all_tui_windows ())
     if (win_info->is_visible ())
       {
+	ui_out_emit_tuple tuple_emitter (uiout, nullptr);
+
+	uiout->field_string ("name", win_info->name ());
+	uiout->field_signed ("lines", win_info->height);
 	if (win_with_focus == win_info)
-	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
-			   win_info->name (),
-			   win_info->height);
+	  uiout->field_string ("focus", _("(has focus)"));
 	else
-	  printf_filtered ("        %s\t(%d lines)\n",
-			   win_info->name (),
-			   win_info->height);
+	  uiout->field_skip ("focus");
+	uiout->text ("\n");
       }
 }
 
