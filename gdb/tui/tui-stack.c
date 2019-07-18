@@ -254,36 +254,25 @@ tui_get_function_from_frame (struct frame_info *fi)
 }
 
 void
-tui_show_locator_content (void)
+tui_locator_window::rerender ()
 {
-  char *string;
-  struct tui_locator_window *locator;
-
-  locator = tui_locator_win_info_ptr ();
-
-  if (locator != NULL && locator->handle != NULL)
+  if (handle != NULL)
     {
-      string = tui_make_status_line (locator);
-      wmove (locator->handle, 0, 0);
+      char *string = tui_make_status_line (this);
+      wmove (handle, 0, 0);
       /* We ignore the return value from wstandout and wstandend, casting
 	 them to void in order to avoid a compiler warning.  The warning
 	 itself was introduced by a patch to ncurses 5.7 dated 2009-08-29,
 	 changing these macro to expand to code that causes the compiler
 	 to generate an unused-value warning.  */
-      (void) wstandout (locator->handle);
-      waddstr (locator->handle, string);
-      wclrtoeol (locator->handle);
-      (void) wstandend (locator->handle);
-      locator->refresh_window ();
-      wmove (locator->handle, 0, 0);
+      (void) wstandout (handle);
+      waddstr (handle, string);
+      wclrtoeol (handle);
+      (void) wstandend (handle);
+      refresh_window ();
+      wmove (handle, 0, 0);
       xfree (string);
     }
-}
-
-void
-tui_locator_window::rerender ()
-{
-  tui_show_locator_content ();
 }
 
 /* See tui-stack.h.  */
@@ -409,6 +398,13 @@ tui_show_frame_info (struct frame_info *fi)
 
       return 1;
     }
+}
+
+void
+tui_show_locator_content ()
+{
+  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+  locator->rerender ();
 }
 
 /* Function to initialize gdb commands, for tui window stack
