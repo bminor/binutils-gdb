@@ -39,3 +39,8 @@ Term::check_contents "list main" "21 *return 0"
 # box.
 setup_xfail *-*-*
 Term::check_box "source box" 3 0 77 15
+
+Term::command "layout asm"
+Term::check_contents "asm window shows main" "$hex <main>"
+
+Term::check_box "asm box" 3 0 77 15
