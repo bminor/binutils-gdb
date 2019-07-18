@@ -1,5 +1,10 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (_initialize_tui_stack): Move later.
+	Remove unnecessary forward declarations.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_locator_window::set_locator_fullname): Call
 	rerender.
 	(tui_update_locator_fullname, tui_show_frame_info): Don't call

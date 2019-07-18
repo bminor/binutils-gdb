@@ -53,12 +53,6 @@
 
 static struct tui_locator_window _locator;
 
-/* Get a printable name for the function at the address.
-   The symbol name is demangled if demangling is turned on.
-   Returns a pointer to a static area holding the result.  */
-static char *tui_get_function_from_frame (struct frame_info *fi);
-
-static void tui_update_command (const char *, int);
 
 
 /* Accessor for the locator win info.  Answers a pointer to the static
@@ -405,6 +399,13 @@ tui_show_locator_content ()
   locator->rerender ();
 }
 
+/* Command to update the display with the current execution point.  */
+static void
+tui_update_command (const char *arg, int from_tty)
+{
+  execute_command ("frame 0", from_tty);
+}
+
 /* Function to initialize gdb commands, for tui window stack
    manipulation.  */
 
@@ -414,11 +415,4 @@ _initialize_tui_stack (void)
   add_com ("update", class_tui, tui_update_command,
 	   _("Update the source window and locator to "
 	     "display the current execution point."));
-}
-
-/* Command to update the display with the current execution point.  */
-static void
-tui_update_command (const char *arg, int from_tty)
-{
-  execute_command ("frame 0", from_tty);
 }
