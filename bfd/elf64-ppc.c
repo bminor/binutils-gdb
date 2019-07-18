@@ -3048,7 +3048,7 @@ struct ppc_link_hash_entry
 #define TLS_DTPREL	16	/* DTPREL reloc, => LD. */
 #define TLS_MARK	32	/* __tls_get_addr call marked. */
 #define TLS_GDIE	64	/* GOT TPREL reloc resulting from GD->IE. */
-#define TLS_EXPLICIT   128	/* Marks TOC section TLS relocs. */
+#define TLS_EXPLICIT   256	/* TOC section TLS reloc, not stored. */
   unsigned char tls_mask;
 
   /* The above field is also used to mark function symbols.  In which
@@ -4901,7 +4901,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      struct ppc_link_hash_entry *eh;
 	      eh = (struct ppc_link_hash_entry *) h;
-	      eh->tls_mask |= tls_type;
+	      eh->tls_mask |= tls_type & 0xff;
 	    }
 	  else
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
@@ -7677,7 +7677,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		  Elf_Internal_Sym *sym;
 		  asection *sym_sec;
 		  unsigned char *tls_mask;
-		  unsigned char tls_set, tls_clear, tls_type = 0;
+		  unsigned int tls_set, tls_clear, tls_type = 0;
 		  bfd_vma value;
 		  bfd_boolean ok_tprel, is_local;
 		  long toc_ref_index = 0;
@@ -8067,7 +8067,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			}
 		    }
 
-		  *tls_mask |= tls_set;
+		  *tls_mask |= tls_set & 0xff;
 		  *tls_mask &= ~tls_clear;
 		}
 
@@ -14530,11 +14530,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  insn2 = 0x7c636a14;	/* add 3,3,13 */
 		  if (offset != (bfd_vma) -1)
 		    rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
-		  if ((tls_mask & TLS_EXPLICIT) == 0)
-		    r_type = (((r_type - (R_PPC64_GOT_TLSGD16 & 3)) & 3)
-			      + R_PPC64_GOT_TPREL16_DS);
-		  else
+		  if (r_type == R_PPC64_TOC16
+		      || r_type == R_PPC64_TOC16_LO)
 		    r_type += R_PPC64_TOC16_DS - R_PPC64_TOC16;
+		  else
+		    r_type = (((r_type - (R_PPC64_GOT_TLSGD16 & 1)) & 1)
+			      + R_PPC64_GOT_TPREL16_DS);
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		}
 	      else

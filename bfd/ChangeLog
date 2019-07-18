@@ -1,5 +1,15 @@
 2019-07-18  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (TLS_EXPLICIT): Define as 256.
+	(ppc64_elf_check_relocs): Don't store TLS_EXPLICIT even if char
+	is more than 8 bits.
+	(ppc64_elf_tls_optimize): Likewise.  Make tls_set, tls_clear, and
+	tls_type vars unsigned int.
+	(ppc64_elf_relocate_section): Use r_type rather than TLS_EXPLICIT
+	to select r_type edit.
+
+2019-07-18  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (TLS_GDIE): Rename from TLS_TPRELGD throughout file.
 	Correct comment.
 	* elf64-ppc.c (TLS_GDIE): Likewise.
