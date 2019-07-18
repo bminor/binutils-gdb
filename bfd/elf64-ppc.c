@@ -3039,9 +3039,7 @@ struct ppc_link_hash_entry
      of the other TLS bits are set.  tls_optimize clears bits when
      optimizing to indicate the corresponding GOT entry type is not
      needed.  If set, TLS_TLS is never cleared.  tls_optimize may also
-     set TLS_TPRELGD when a GD reloc turns into a TPREL one.  We use a
-     separate flag rather than setting TPREL just for convenience in
-     distinguishing the two cases.
+     set TLS_GDIE when a GD reloc turns into an IE one.
      These flags are also kept for local symbols.  */
 #define TLS_TLS		 1	/* Any TLS reloc.  */
 #define TLS_GD		 2	/* GD reloc. */
@@ -3049,7 +3047,7 @@ struct ppc_link_hash_entry
 #define TLS_TPREL	 8	/* TPREL reloc, => IE. */
 #define TLS_DTPREL	16	/* DTPREL reloc, => LD. */
 #define TLS_MARK	32	/* __tls_get_addr call marked. */
-#define TLS_TPRELGD	64	/* TPREL reloc resulting from GD->IE. */
+#define TLS_GDIE	64	/* GOT TPREL reloc resulting from GD->IE. */
 #define TLS_EXPLICIT   128	/* Marks TOC section TLS relocs. */
   unsigned char tls_mask;
 
@@ -7797,7 +7795,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			tls_set = 0;
 		      else
 			/* GD -> IE */
-			tls_set = TLS_TLS | TLS_TPRELGD;
+			tls_set = TLS_TLS | TLS_GDIE;
 		      tls_clear = TLS_GD;
 		      tls_type = TLS_TLS | TLS_GD;
 		      break;
@@ -7924,7 +7922,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			    tls_set = TLS_EXPLICIT | TLS_GD;
 			  else
 			    /* GD -> IE */
-			    tls_set = TLS_EXPLICIT | TLS_GD | TLS_TPRELGD;
+			    tls_set = TLS_EXPLICIT | TLS_GD | TLS_GDIE;
 			  tls_clear = TLS_GD;
 			}
 		      else
@@ -9239,7 +9237,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   eh = (struct ppc_link_hash_entry *) h;
   /* Run through the TLS GD got entries first if we're changing them
      to TPREL.  */
-  if ((eh->tls_mask & (TLS_TLS | TLS_TPRELGD)) == (TLS_TLS | TLS_TPRELGD))
+  if ((eh->tls_mask & (TLS_TLS | TLS_GDIE)) == (TLS_TLS | TLS_GDIE))
     for (gent = h->got.glist; gent != NULL; gent = gent->next)
       if (gent->got.refcount > 0
 	  && (gent->tls_type & TLS_GD) != 0)
@@ -14387,7 +14385,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		       doing a GD->IE transition.  */
 		    if (retval == 2)
 		      {
-			tls_gd = TLS_TPRELGD;
+			tls_gd = TLS_GDIE;
 			if ((tls_mask & TLS_TLS) != 0
 			    && (tls_mask & TLS_GD) == 0)
 			  goto tls_ldgd_opt;
@@ -14469,7 +14467,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_GOT_TLSGD16_HI:
 	case R_PPC64_GOT_TLSGD16_HA:
-	  tls_gd = TLS_TPRELGD;
+	  tls_gd = TLS_GDIE;
 	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_GD) == 0)
 	    goto tls_gdld_hi;
 	  break;
@@ -14494,7 +14492,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_GOT_TLSGD16:
 	case R_PPC64_GOT_TLSGD16_LO:
-	  tls_gd = TLS_TPRELGD;
+	  tls_gd = TLS_GDIE;
 	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_GD) == 0)
 	    goto tls_ldgd_opt;
 	  break;
@@ -14621,7 +14619,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (ELF64_R_TYPE (rel[1].r_info) == R_PPC64_PLTCALL)
 		bfd_put_32 (output_bfd, NOP, contents + offset + 4);
 
-	      if ((tls_mask & TLS_TPRELGD) != 0)
+	      if ((tls_mask & TLS_GDIE) != 0)
 		{
 		  /* IE */
 		  r_type = R_PPC64_NONE;
@@ -14644,7 +14642,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
-	      if ((tls_mask & TLS_TPRELGD) == 0 && toc_symndx != 0)
+	      if ((tls_mask & TLS_GDIE) == 0 && toc_symndx != 0)
 		goto again;
 	    }
 	  break;
@@ -14705,7 +14703,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if ((tls_mask & TLS_GD) == 0)
 		{
 		  rel[1].r_info = ELF64_R_INFO (r_symndx, R_PPC64_NONE);
-		  if ((tls_mask & TLS_TPRELGD) != 0)
+		  if ((tls_mask & TLS_GDIE) != 0)
 		    r_type = R_PPC64_TPREL64;
 		  else
 		    {

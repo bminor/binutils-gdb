@@ -1,5 +1,11 @@
 2019-07-18  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (TLS_GDIE): Rename from TLS_TPRELGD throughout file.
+	Correct comment.
+	* elf64-ppc.c (TLS_GDIE): Likewise.
+
+2019-07-18  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_tls_optimize): Correct test for allowed
 	range of tp-relative offsets.
 
