@@ -1,5 +1,11 @@
 2019-07-18  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't bother selecting
+	a TLS section symbol for edited relocs.  Tighten TLS symbol/reloc
+	match test.
+
+2019-07-18  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (TLS_EXPLICIT): Define as 256.
 	(ppc64_elf_check_relocs): Don't store TLS_EXPLICIT even if char
 	is more than 8 bits.

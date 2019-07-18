@@ -14304,10 +14304,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  && (h == NULL
 	      || h->elf.root.type == bfd_link_hash_defined
 	      || h->elf.root.type == bfd_link_hash_defweak)
-	  && (IS_PPC64_TLS_RELOC (r_type)
-	      != (sym_type == STT_TLS
-		  || (sym_type == STT_SECTION
-		      && (sec->flags & SEC_THREAD_LOCAL) != 0))))
+	  && IS_PPC64_TLS_RELOC (r_type) != (sym_type == STT_TLS))
 	{
 	  if ((tls_mask & TLS_TLS) != 0
 	      && (r_type == R_PPC64_TLS
@@ -14547,20 +14544,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (tls_gd == 0)
 		    {
 		      /* Was an LD reloc.  */
-		      if (toc_symndx)
-			sec = local_sections[toc_symndx];
-		      for (r_symndx = 0;
-			   r_symndx < symtab_hdr->sh_info;
-			   r_symndx++)
-			if (local_sections[r_symndx] == sec)
-			  break;
-		      if (r_symndx >= symtab_hdr->sh_info)
-			r_symndx = STN_UNDEF;
+		      r_symndx = STN_UNDEF;
 		      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-		      if (r_symndx != STN_UNDEF)
-			rel->r_addend -= (local_syms[r_symndx].st_value
-					  + sec->output_offset
-					  + sec->output_section->vma);
 		    }
 		  else if (toc_symndx != 0)
 		    {
@@ -14669,24 +14654,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (ELF64_R_TYPE (rel[1].r_info) == R_PPC64_PLTCALL)
 		bfd_put_32 (output_bfd, NOP, contents + offset + 4);
 
-	      if (toc_symndx)
-		sec = local_sections[toc_symndx];
-	      for (r_symndx = 0;
-		   r_symndx < symtab_hdr->sh_info;
-		   r_symndx++)
-		if (local_sections[r_symndx] == sec)
-		  break;
-	      if (r_symndx >= symtab_hdr->sh_info)
-		r_symndx = STN_UNDEF;
-	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-	      if (r_symndx != STN_UNDEF)
-		rel->r_addend -= (local_syms[r_symndx].st_value
-				  + sec->output_offset
-				  + sec->output_section->vma);
-
+	      rel->r_offset = offset + d_offset;
+	      r_symndx = STN_UNDEF;
 	      r_type = R_PPC64_TPREL16_LO;
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
-	      rel->r_offset = offset + d_offset;
+	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
