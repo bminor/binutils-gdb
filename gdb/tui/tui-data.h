@@ -162,12 +162,6 @@ public:
   {
   }
 
-  /* Called after all the TUI windows are refreshed, to let this
-     window have a chance to update itself further.  */
-  virtual void refresh_all ()
-  {
-  }
-
   /* Compute the maximum height of this window.  */
   virtual int max_height () const;
 

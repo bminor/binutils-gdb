@@ -1,5 +1,19 @@
 2019-08-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<refresh_all>: Don't declare.
+	* tui/tui-winsource.c (tui_source_window_base::refresh_all):
+	Remove.
+	* tui/tui-win.c (tui_refresh_all_win): Don't call refresh_all or
+	tui_show_locator_content.
+	* tui/tui-regs.h (struct tui_data_window) <refresh_all>: Don't
+	declare.
+	* tui/tui-regs.c (tui_data_window::refresh_all): Remove.
+	* tui/tui-data.h (struct tui_win_info) <refresh_all>: Don't
+	declare.
+
+2019-08-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-io.c (tui_cont_sig): Don't call wrefresh.
 
 2019-08-30  Tom Tromey  <tom@tromey.com>

@@ -58,8 +58,6 @@ struct tui_data_window : public tui_win_info
 
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
-  void refresh_all () override;
-
   void refresh_window () override;
 
   const char *name () const override

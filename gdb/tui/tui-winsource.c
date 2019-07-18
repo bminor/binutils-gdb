@@ -281,16 +281,6 @@ tui_source_window_base::~tui_source_window_base ()
 /* See tui-data.h.  */
 
 void
-tui_source_window_base::refresh_all ()
-{
-  show_source_content ();
-  check_and_display_highlight_if_needed ();
-  update_exec_info ();
-}
-
-/* See tui-data.h.  */
-
-void
 tui_source_window_base::update_tab_width ()
 {
   werase (handle);

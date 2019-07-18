@@ -403,29 +403,6 @@ tui_data_window::rerender ()
 }
 
 
-/* Function to redisplay the contents of the data window.  */
-void
-tui_data_window::refresh_all ()
-{
-  erase_data_content (NULL);
-  if (!regs_content.empty ())
-    {
-      int first_element = first_data_item_displayed ();
-
-      if (first_element >= 0)	/* Re-use existing windows.  */
-	{
-	  int first_line = (-1);
-
-	  if (first_element < regs_content.size ())
-	    first_line = line_from_reg_element_no (first_element);
-
-	  if (first_line >= 0)
-	    display_registers_from_line (first_line);
-	}
-    }
-}
-
-
 /* Scroll the data window vertically forward or backward.  */
 void
 tui_data_window::do_scroll_vertical (int num_to_scroll)
