@@ -1621,11 +1621,44 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 		       struct type *value_type, CORE_ADDR *real_pc,
 		       CORE_ADDR *bp_addr, struct regcache *regcache)
 {
+  /* A nop instruction is 'add x0, x0, 0'.  */
+  static const gdb_byte nop_insn[] = { 0x13, 0x00, 0x00, 0x00 };
+
   /* Allocate space for a breakpoint, and keep the stack correctly
-     aligned.  */
+     aligned.  The space allocated here must be at least big enough to
+     accommodate the NOP_INSN defined above.  */
   sp -= 16;
   *bp_addr = sp;
   *real_pc = funaddr;
+
+  /* When we insert a breakpoint we select whether to use a compressed
+     breakpoint or not based on the existing contents of the memory.
+
+     If the breakpoint is being placed onto the stack as part of setting up
+     for an inferior call from GDB, then the existing stack contents may
+     randomly appear to be a compressed instruction, causing GDB to insert
+     a compressed breakpoint.  If this happens on a target that does not
+     support compressed instructions then this could cause problems.
+
+     To prevent this issue we write an uncompressed nop onto the stack at
+     the location where the breakpoint will be inserted.  In this way we
+     ensure that we always use an uncompressed breakpoint, which should
+     work on all targets.
+
+     We call TARGET_WRITE_MEMORY here so that if the write fails we don't
+     throw an exception.  Instead we ignore the error and move on.  The
+     assumption is that either GDB will error later when actually trying to
+     insert a software breakpoint, or GDB will use hardware breakpoints and
+     there will be no need to write to memory later.  */
+  int status = target_write_memory (*bp_addr, nop_insn, sizeof (nop_insn));
+
+  if (riscv_debug_breakpoints || riscv_debug_infcall)
+    fprintf_unfiltered (gdb_stdlog,
+			"Writing %lld-byte nop instruction to %s: %s\n",
+			((unsigned long long) sizeof (nop_insn)),
+			paddress (gdbarch, *bp_addr),
+			(status == 0 ? "success" : "failed"));
+
   return sp;
 }
 

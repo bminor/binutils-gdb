@@ -1,3 +1,8 @@
+2019-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-bp-infcall.c: New file.
+	* gdb.arch/riscv-bp-infcall.exp: New file.
+
 2019-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR breakpoints/24541
