@@ -1,4 +1,4 @@
-#source: tlsld.s
+#source: tlsldopt.s
 #as: -a64
 #ld: -melf64ppc
 #objdump: -dr

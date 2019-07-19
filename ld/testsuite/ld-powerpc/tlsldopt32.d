@@ -1,4 +1,4 @@
-#source: tlsld32.s
+#source: tlsldopt32.s
 #as: -a32
 #ld: -melf32ppc
 #objdump: -dr

@@ -1,5 +1,13 @@
 2019-07-19  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tlsldopt.d: Rename from tlsld.d.
+	* testsuite/ld-powerpc/tlsldopt.s: Rename from tlsld.s.
+	* testsuite/ld-powerpc/tlsldopt32.d: Rename from tlsld32.d.
+	* testsuite/ld-powerpc/tlsldopt32.s: Rename from tlsld32.s.
+	* testsuite/ld-powerpc/powerpc.exp: Update.
+
+2019-07-19  Alan Modra  <amodra@gmail.com>
+
 	PR 24819
 	* testsuite/ld-elf/pr24819.d: xfail for genelf targets.
 
