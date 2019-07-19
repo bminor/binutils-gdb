@@ -207,7 +207,6 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  && cur_layout != SRC_DISASSEM_COMMAND
 	  && cur_layout != SRC_DATA_COMMAND)
 	{
-	  tui_clear_source_windows_detail ();
 	  if (cur_layout == DISASSEM_DATA_COMMAND)
 	    show_layout (SRC_DATA_COMMAND);
 	  else
@@ -219,7 +218,6 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  && cur_layout != SRC_DISASSEM_COMMAND
 	  && cur_layout != DISASSEM_DATA_COMMAND)
 	{
-	  tui_clear_source_windows_detail ();
 	  if (cur_layout == SRC_DATA_COMMAND)
 	    show_layout (DISASSEM_DATA_COMMAND);
 	  else

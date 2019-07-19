@@ -101,8 +101,6 @@ protected:
 
 public:
 
-  void clear_detail ();
-
   /* Refill the source window's source cache and update it.  If this
      is a disassembly window, then just update it.  */
   void refill ();

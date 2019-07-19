@@ -87,15 +87,6 @@ tui_set_win_with_focus (struct tui_win_info *win_info)
 }
 
 
-/* Clear the pertinent detail in the source windows.  */
-void
-tui_clear_source_windows_detail ()
-{
-  for (tui_source_window_base *win : tui_source_windows ())
-    win->clear_detail ();
-}
-
-
 /* Accessor for the term_height.  */
 int
 tui_term_height (void)

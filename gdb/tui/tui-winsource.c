@@ -253,17 +253,6 @@ tui_source_window_base::show_source_content ()
   refresh_window ();
 }
 
-/* See tui-data.h.  */
-
-void
-tui_source_window_base::clear_detail ()
-{
-  gdbarch = NULL;
-  start_line_or_addr.loa = LOA_ADDRESS;
-  start_line_or_addr.u.addr = 0;
-  horizontal_offset = 0;
-}
-
 tui_source_window_base::tui_source_window_base (enum tui_win_type type)
   : tui_win_info (type)
 {

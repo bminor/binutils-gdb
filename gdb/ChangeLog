@@ -1,3 +1,15 @@
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (tui_clear_source_windows_detail): Don't
+	declare.
+	* tui/tui-layout.c (tui_add_win_to_layout): Don't call
+	tui_clear_source_windows_detail.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<clear_detail>: Don't declare.
+	* tui/tui-winsource.c (tui_source_window_base::clear_detail):
+	Remove.
+	* tui/tui-data.c (tui_clear_source_windows_detail): Remove.
+
 2019-09-20  Tom Tromey  <tromey@adacore.com>
 
 	PR ada/24919:
