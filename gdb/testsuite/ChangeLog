@@ -1,3 +1,9 @@
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/style.exp: Add disassemble test.
+	* gdb.base/style.c (some_called_function): New function.
+	(main): Use it.
+
 2019-08-05  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdb.python/py-block.exp: Test dictionary access on blocks.

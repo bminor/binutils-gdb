@@ -1442,9 +1442,11 @@ set_output_style (struct ui_file *stream, const ui_file_style &style)
   if (!stream->can_emit_style_escape ())
     return;
 
-  /* Note that we don't pass STREAM here, because we want to emit to
+  /* Note that we may not pass STREAM here, when we want to emit to
      the wrap buffer, not directly to STREAM.  */
-  emit_style_escape (style);
+  if (stream == gdb_stdout)
+    stream = nullptr;
+  emit_style_escape (style, stream);
 }
 
 /* See utils.h.  */

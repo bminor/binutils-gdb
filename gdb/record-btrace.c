@@ -778,7 +778,7 @@ btrace_insn_history (struct ui_out *uiout,
   gdb::optional<ui_out_emit_tuple> src_and_asm_tuple;
   gdb::optional<ui_out_emit_list> asm_list;
 
-  gdb_pretty_print_disassembler disasm (gdbarch);
+  gdb_pretty_print_disassembler disasm (gdbarch, uiout);
 
   for (btrace_insn_iterator it = *begin; btrace_insn_cmp (&it, end) != 0;
          btrace_insn_next (&it, 1))
@@ -841,7 +841,7 @@ btrace_insn_history (struct ui_out *uiout,
 	  if ((insn->flags & BTRACE_INSN_FLAG_SPECULATIVE) != 0)
 	    dinsn.is_speculative = 1;
 
-	  disasm.pretty_print_insn (uiout, &dinsn, flags);
+	  disasm.pretty_print_insn (&dinsn, flags);
 	}
     }
 }

@@ -40,6 +40,11 @@ public:
   /* Return the version number of the current MI.  */
   int version ();
 
+  bool can_emit_style_escape () const override
+  {
+    return false;
+  }
+
 protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows, const char *tblid)

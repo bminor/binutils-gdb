@@ -316,6 +316,12 @@ cli_ui_out::set_stream (struct ui_file *stream)
   return old;
 }
 
+bool
+cli_ui_out::can_emit_style_escape () const
+{
+  return m_streams.back ()->can_emit_style_escape ();
+}
+
 /* CLI interface to display tab-completion matches.  */
 
 /* CLI version of displayer.crlf.  */

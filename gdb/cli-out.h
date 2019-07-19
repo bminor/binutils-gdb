@@ -32,6 +32,8 @@ public:
 
   ui_file *set_stream (ui_file *stream);
 
+  bool can_emit_style_escape () const override;
+
 protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows,

@@ -145,6 +145,10 @@ class ui_out
   bool query_table_field (int colno, int *width, int *alignment,
 			  const char **col_name);
 
+  /* Return true if this stream is prepared to handle style
+     escapes.  */
+  virtual bool can_emit_style_escape () const = 0;
+
  protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows, const char *tblid)

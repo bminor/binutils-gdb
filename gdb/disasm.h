@@ -112,25 +112,31 @@ extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 class gdb_pretty_print_disassembler
 {
 public:
-  explicit gdb_pretty_print_disassembler (struct gdbarch *gdbarch)
-    : m_di (gdbarch, &m_insn_stb)
+  explicit gdb_pretty_print_disassembler (struct gdbarch *gdbarch,
+					  struct ui_out *uiout)
+    : m_uiout (uiout),
+      m_insn_stb (uiout->can_emit_style_escape ()),
+      m_di (gdbarch, &m_insn_stb)
   {}
 
-  /* Prints the instruction INSN into UIOUT and returns the length of
-     the printed instruction in bytes.  */
-  int pretty_print_insn (struct ui_out *uiout, const struct disasm_insn *insn,
+  /* Prints the instruction INSN into the saved ui_out and returns the
+     length of the printed instruction in bytes.  */
+  int pretty_print_insn (const struct disasm_insn *insn,
 			 gdb_disassembly_flags flags);
 
 private:
   /* Returns the architecture used for disassembling.  */
   struct gdbarch *arch () { return m_di.arch (); }
 
-  /* The disassembler used for instruction printing.  */
-  gdb_disassembler m_di;
+  /* The ui_out that is used by pretty_print_insn.  */
+  struct ui_out *m_uiout;
 
   /* The buffer used to build the instruction string.  The
      disassembler is initialized with this stream.  */
   string_file m_insn_stb;
+
+  /* The disassembler used for instruction printing.  */
+  gdb_disassembler m_di;
 
   /* The buffer used to build the raw opcodes string.  */
   string_file m_opcode_stb;

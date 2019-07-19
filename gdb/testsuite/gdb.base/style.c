@@ -15,8 +15,13 @@
 
 #define SOME_MACRO 23
 
+int some_called_function (void)
+{
+  return 0;
+}
+
 int
 main (int argc, char **argv)
 {
-  return 0; /* break here */
+  return some_called_function (); /* break here */
 }

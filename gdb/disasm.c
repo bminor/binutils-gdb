@@ -191,8 +191,7 @@ compare_lines (const void *mle1p, const void *mle2p)
 /* See disasm.h.  */
 
 int
-gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
-						  const struct disasm_insn *insn,
+gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn,
 						  gdb_disassembly_flags flags)
 {
   /* parts of the symbolic representation of the address */
@@ -204,37 +203,37 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
   struct gdbarch *gdbarch = arch ();
 
   {
-    ui_out_emit_tuple tuple_emitter (uiout, NULL);
+    ui_out_emit_tuple tuple_emitter (m_uiout, NULL);
     pc = insn->addr;
 
     if (insn->number != 0)
       {
-	uiout->field_unsigned ("insn-number", insn->number);
-	uiout->text ("\t");
+	m_uiout->field_unsigned ("insn-number", insn->number);
+	m_uiout->text ("\t");
       }
 
     if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
       {
 	if (insn->is_speculative)
 	  {
-	    uiout->field_string ("is-speculative", "?");
+	    m_uiout->field_string ("is-speculative", "?");
 
 	    /* The speculative execution indication overwrites the first
 	       character of the PC prefix.
 	       We assume a PC prefix length of 3 characters.  */
 	    if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	      uiout->text (pc_prefix (pc) + 1);
+	      m_uiout->text (pc_prefix (pc) + 1);
 	    else
-	      uiout->text ("  ");
+	      m_uiout->text ("  ");
 	  }
 	else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	  uiout->text (pc_prefix (pc));
+	  m_uiout->text (pc_prefix (pc));
 	else
-	  uiout->text ("   ");
+	  m_uiout->text ("   ");
       }
     else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-      uiout->text (pc_prefix (pc));
-    uiout->field_core_addr ("address", gdbarch, pc);
+      m_uiout->text (pc_prefix (pc));
+    m_uiout->field_core_addr ("address", gdbarch, pc);
 
     std::string name, filename;
     bool omit_fname = ((flags & DISASSEMBLY_OMIT_FNAME) != 0);
@@ -243,19 +242,19 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
       {
 	/* We don't care now about line, filename and unmapped.  But we might in
 	   the future.  */
-	uiout->text (" <");
+	m_uiout->text (" <");
 	if (!omit_fname)
-	  uiout->field_string ("func-name", name.c_str (),
-			       ui_out_style_kind::FUNCTION);
+	  m_uiout->field_string ("func-name", name.c_str (),
+				 ui_out_style_kind::FUNCTION);
 	/* For negative offsets, avoid displaying them as +-N; the sign of
 	   the offset takes the place of the "+" here.  */
 	if (offset >= 0)
-	  uiout->text ("+");
-	uiout->field_signed ("offset", offset);
-	uiout->text (">:\t");
+	  m_uiout->text ("+");
+	m_uiout->field_signed ("offset", offset);
+	m_uiout->text (">:\t");
       }
     else
-      uiout->text (":\t");
+      m_uiout->text (":\t");
 
     m_insn_stb.clear ();
 
@@ -279,15 +278,15 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 	    spacer = " ";
 	  }
 
-	uiout->field_stream ("opcodes", m_opcode_stb);
-	uiout->text ("\t");
+	m_uiout->field_stream ("opcodes", m_opcode_stb);
+	m_uiout->text ("\t");
       }
     else
       size = m_di.print_insn (pc);
 
-    uiout->field_stream ("inst", m_insn_stb);
+    m_uiout->field_stream ("inst", m_insn_stb);
   }
-  uiout->text ("\n");
+  m_uiout->text ("\n");
 
   return size;
 }
@@ -303,13 +302,13 @@ dump_insns (struct gdbarch *gdbarch,
   memset (&insn, 0, sizeof (insn));
   insn.addr = low;
 
-  gdb_pretty_print_disassembler disasm (gdbarch);
+  gdb_pretty_print_disassembler disasm (gdbarch, uiout);
 
   while (insn.addr < high && (how_many < 0 || num_displayed < how_many))
     {
       int size;
 
-      size = disasm.pretty_print_insn (uiout, &insn, flags);
+      size = disasm.pretty_print_insn (&insn, flags);
       if (size <= 0)
 	break;
 

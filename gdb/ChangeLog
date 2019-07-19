@@ -1,3 +1,21 @@
+2019-08-06  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (set_output_style): Sometimes pass stream to
+	emit_style_escape.
+	* ui-out.h (class ui_out) <can_emit_style_escape>: Declare.
+	* record-btrace.c (btrace_insn_history): Update.
+	* mi/mi-out.h (class mi_ui_out) <can_emit_style_escape>: New
+	method.
+	* disasm.h (gdb_pretty_print_disassembler): Add uiout parameter.
+	Update initializers.
+	<m_uiout>: New field.
+	<m_di>: Move lower.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Remove "uiout" parameter.
+	(dump_insns): Update.
+	* cli-out.h (class cli_ui_out) <can_emit_style_escape>: Declare.
+	* cli-out.c (cli_ui_out::can_emit_style_escape): New method.
+
 2019-08-06  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.c (symbol_cache_lookup): Change int to enum block_enum.
