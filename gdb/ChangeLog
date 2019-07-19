@@ -1,5 +1,9 @@
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* arm-tdep.c (_initialize_arm_tdep): Add xml regression tests.
+
+2019-07-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* arch/aarch32.c (aarch32_create_target_description): Create
 	target descriptions using features.
 	* arch/arm.c (arm_create_target_description)

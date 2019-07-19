@@ -63,6 +63,7 @@
 
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
+#include "aarch32-tdep.h"
 #endif
 
 static int arm_debug;
@@ -9547,6 +9548,23 @@ vfp - VFP co-processor."),
 
 #if GDB_SELF_TEST
   selftests::register_test ("arm-record", selftests::arm_record_test);
+
+  const target_desc *tdesc;
+
+  tdesc = arm_read_description (ARM_FP_TYPE_VFPV2);
+  selftests::record_xml_tdesc ("arm/arm-with-vfpv2.xml", tdesc);
+  tdesc = arm_read_description (ARM_FP_TYPE_VFPV3);
+  selftests::record_xml_tdesc ("arm/arm-with-vfpv3.xml",tdesc);
+  tdesc = arm_read_description (ARM_FP_TYPE_IWMMXT);
+  selftests::record_xml_tdesc ("arm/arm-with-iwmmxt.xml", tdesc);
+  tdesc = arm_read_mprofile_description (ARM_M_TYPE_M_PROFILE);
+  selftests::record_xml_tdesc ("arm/arm-with-m.xml", tdesc);
+  tdesc = arm_read_mprofile_description (ARM_M_TYPE_VFP_D16);
+  selftests::record_xml_tdesc ("arm/arm-with-m-vfp-d16.xml", tdesc);
+  tdesc = arm_read_mprofile_description (ARM_M_TYPE_WITH_FPA);
+  selftests::record_xml_tdesc ("arm/arm-with-m-fpa-layout.xml", tdesc);
+  tdesc = aarch32_read_description ();
+  selftests::record_xml_tdesc ("arm/arm-with-neon.xml", tdesc);
 #endif
 
 }
