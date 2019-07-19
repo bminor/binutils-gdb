@@ -920,6 +920,24 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
   HOW (R_PPC64_PLT_PCREL34_NOTOC, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
        ppc64_elf_unhandled_reloc),
 
+  HOW (R_PPC64_TPREL34, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, signed,
+       ppc64_elf_unhandled_reloc),
+
+  HOW (R_PPC64_DTPREL34, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, signed,
+       ppc64_elf_unhandled_reloc),
+
+  HOW (R_PPC64_GOT_TLSGD34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+       ppc64_elf_unhandled_reloc),
+
+  HOW (R_PPC64_GOT_TLSLD34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+       ppc64_elf_unhandled_reloc),
+
+  HOW (R_PPC64_GOT_TPREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+       ppc64_elf_unhandled_reloc),
+
+  HOW (R_PPC64_GOT_DTPREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+       ppc64_elf_unhandled_reloc),
+
   HOW (R_PPC64_ADDR16_HIGHER34, 1, 16, 0xffff, 34, FALSE, dont,
        bfd_elf_generic_reloc),
 
@@ -1119,6 +1137,7 @@ ppc64_elf_reloc_type_lookup (bfd *abfd,
       break;
     case BFD_RELOC_PPC64_PLTGOT16_LO_DS:	r = R_PPC64_PLTGOT16_LO_DS;
       break;
+    case BFD_RELOC_PPC64_TLS_PCREL:
     case BFD_RELOC_PPC_TLS:			r = R_PPC64_TLS;
       break;
     case BFD_RELOC_PPC_TLSGD:			r = R_PPC64_TLSGD;
@@ -1252,6 +1271,18 @@ ppc64_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_PPC64_GOT_PCREL34:		r = R_PPC64_GOT_PCREL34;
       break;
     case BFD_RELOC_PPC64_PLT_PCREL34:		r = R_PPC64_PLT_PCREL34;
+      break;
+    case BFD_RELOC_PPC64_TPREL34:		r = R_PPC64_TPREL34;
+      break;
+    case BFD_RELOC_PPC64_DTPREL34:		r = R_PPC64_DTPREL34;
+      break;
+    case BFD_RELOC_PPC64_GOT_TLSGD34:		r = R_PPC64_GOT_TLSGD34;
+      break;
+    case BFD_RELOC_PPC64_GOT_TLSLD34:		r = R_PPC64_GOT_TLSLD34;
+      break;
+    case BFD_RELOC_PPC64_GOT_TPREL34:		r = R_PPC64_GOT_TPREL34;
+      break;
+    case BFD_RELOC_PPC64_GOT_DTPREL34:		r = R_PPC64_GOT_DTPREL34;
       break;
     case BFD_RELOC_PPC64_ADDR16_HIGHER34:	r = R_PPC64_ADDR16_HIGHER34;
       break;
@@ -2727,6 +2758,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     case R_PPC64_TPREL16_HIGHEST:
     case R_PPC64_TPREL16_HIGHESTA:
     case R_PPC64_TPREL64:
+    case R_PPC64_TPREL34:
       /* These relocations are relative but in a shared library the
 	 linker doesn't know the thread pointer base.  */
       return bfd_link_dll (info);
@@ -4514,6 +4546,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_D34_HI30:
 	case R_PPC64_D34_HA30:
 	case R_PPC64_D28:
+	case R_PPC64_TPREL34:
+	case R_PPC64_DTPREL34:
 	  htab->powerxx_stubs = 1;
 	  /* Fall through.  */
 	default:
@@ -4528,6 +4562,10 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_PPC64_PCREL34:
 	case R_PPC64_GOT_PCREL34:
+	case R_PPC64_GOT_TLSGD34:
+	case R_PPC64_GOT_TLSLD34:
+	case R_PPC64_GOT_TPREL34:
+	case R_PPC64_GOT_DTPREL34:
 	case R_PPC64_PLT_PCREL34:
 	case R_PPC64_PLT_PCREL34_NOTOC:
 	case R_PPC64_PCREL28:
@@ -4580,6 +4618,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT_TLSLD16_LO:
 	case R_PPC64_GOT_TLSLD16_HI:
 	case R_PPC64_GOT_TLSLD16_HA:
+	case R_PPC64_GOT_TLSLD34:
 	  tls_type = TLS_TLS | TLS_LD;
 	  goto dogottls;
 
@@ -4587,6 +4626,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT_TLSGD16_LO:
 	case R_PPC64_GOT_TLSGD16_HI:
 	case R_PPC64_GOT_TLSGD16_HA:
+	case R_PPC64_GOT_TLSGD34:
 	  tls_type = TLS_TLS | TLS_GD;
 	  goto dogottls;
 
@@ -4594,6 +4634,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT_TPREL16_LO_DS:
 	case R_PPC64_GOT_TPREL16_HI:
 	case R_PPC64_GOT_TPREL16_HA:
+	case R_PPC64_GOT_TPREL34:
 	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  tls_type = TLS_TLS | TLS_TPREL;
@@ -4603,6 +4644,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT_DTPREL16_LO_DS:
 	case R_PPC64_GOT_DTPREL16_HI:
 	case R_PPC64_GOT_DTPREL16_HA:
+	case R_PPC64_GOT_DTPREL34:
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	dogottls:
 	  sec->has_tls_reloc = 1;
@@ -4949,6 +4991,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
+	case R_PPC64_TPREL34:
 	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
@@ -6769,6 +6812,7 @@ dec_dynrel_count (bfd_vma r_info,
     case R_PPC64_TPREL16_HIGHEST:
     case R_PPC64_TPREL16_HIGHESTA:
     case R_PPC64_TPREL64:
+    case R_PPC64_TPREL34:
     case R_PPC64_DTPMOD64:
     case R_PPC64_DTPREL64:
     case R_PPC64_ADDR64:
@@ -7733,6 +7777,12 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			  value += sym_sec->output_offset;
 			  value += sym_sec->output_section->vma;
 			  value -= htab->elf.tls_sec->vma + TP_OFFSET;
+			  /* Note that even though the prefix insns
+			     allow a 1<<33 offset we use the same test
+			     as for addis;addi.  There may be a mix of
+			     pcrel and non-pcrel code and the decision
+			     to optimise is per symbol, not per TLS
+			     sequence.  */
 			  ok_tprel = value + 0x80008000ULL < 1ULL << 32;
 			}
 		    }
@@ -7764,6 +7814,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    {
 		    case R_PPC64_GOT_TLSLD16:
 		    case R_PPC64_GOT_TLSLD16_LO:
+		    case R_PPC64_GOT_TLSLD34:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
 		      /* Fall through.  */
@@ -7784,6 +7835,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 
 		    case R_PPC64_GOT_TLSGD16:
 		    case R_PPC64_GOT_TLSGD16_LO:
+		    case R_PPC64_GOT_TLSGD34:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
 		      /* Fall through. */
@@ -7800,6 +7852,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      tls_type = TLS_TLS | TLS_GD;
 		      break;
 
+		    case R_PPC64_GOT_TPREL34:
 		    case R_PPC64_GOT_TPREL16_DS:
 		    case R_PPC64_GOT_TPREL16_LO_DS:
 		    case R_PPC64_GOT_TPREL16_HI:
@@ -14436,29 +14489,72 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_PPC64_GOT_TPREL34:
+	  if ((tls_mask & TLS_TLS) != 0
+	      && (tls_mask & TLS_TPREL) == 0)
+	    {
+	      /* pld ra,sym@got@tprel@pcrel -> paddi ra,r13,sym@tprel  */
+	      pinsn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      pinsn <<= 32;
+	      pinsn |= bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+	      pinsn += ((2ULL << 56) + (-1ULL << 52)
+			+ (14ULL << 26) - (57ULL << 26) + (13ULL << 16));
+	      bfd_put_32 (input_bfd, pinsn >> 32,
+			  contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, pinsn & 0xffffffff,
+			  contents + rel->r_offset + 4);
+	      r_type = R_PPC64_TPREL34;
+	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+	    }
+	  break;
+
 	case R_PPC64_TLS:
 	  if ((tls_mask & TLS_TLS) != 0
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
-	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
 	      insn = _bfd_elf_ppc_at_tls_transform (insn, 13);
 	      if (insn == 0)
-		abort ();
-	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
-	      /* Was PPC64_TLS which sits on insn boundary, now
-		 PPC64_TPREL16_LO which is at low-order half-word.  */
-	      rel->r_offset += d_offset;
-	      r_type = R_PPC64_TPREL16_LO;
-	      if (toc_symndx != 0)
+		break;
+	      if ((rel->r_offset & 3) == 0)
 		{
-		  rel->r_info = ELF64_R_INFO (toc_symndx, r_type);
-		  rel->r_addend = toc_addend;
-		  /* We changed the symbol.  Start over in order to
-		     get h, sym, sec etc. right.  */
-		  goto again;
+		  bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		  /* Was PPC64_TLS which sits on insn boundary, now
+		     PPC64_TPREL16_LO which is at low-order half-word.  */
+		  rel->r_offset += d_offset;
+		  r_type = R_PPC64_TPREL16_LO;
+		  if (toc_symndx != 0)
+		    {
+		      rel->r_info = ELF64_R_INFO (toc_symndx, r_type);
+		      rel->r_addend = toc_addend;
+		      /* We changed the symbol.  Start over in order to
+			 get h, sym, sec etc. right.  */
+		      goto again;
+		    }
+		  else
+		    rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		}
-	      else
-		rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+	      else if ((rel->r_offset & 3) == 1)
+		{
+		  /* For pcrel IE to LE we already have the full
+		     offset and thus don't need an addi here.  A nop
+		     or mr will do.  */
+		  if ((insn & (0x3f << 26)) == 14 << 26)
+		    {
+		      /* Extract regs from addi rt,ra,si.  */
+		      unsigned int rt = (insn >> 21) & 0x1f;
+		      unsigned int ra = (insn >> 16) & 0x1f;
+		      if (rt == ra)
+			insn = NOP;
+		      else
+			{
+			  /* Build or ra,rs,rb with rb==rs, ie. mr ra,rs.  */
+			  insn = (rt << 16) | (ra << 21) | (ra << 11);
+			  insn |= (31u << 26) | (444u << 1);
+			}
+		    }
+		  bfd_put_32 (input_bfd, insn, contents + rel->r_offset - 1);
+		}
 	    }
 	  break;
 
@@ -14584,6 +14680,51 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_PPC64_GOT_TLSGD34:
+	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_GD) == 0)
+	    {
+	      pinsn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      pinsn <<= 32;
+	      pinsn |= bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+	      if ((tls_mask & TLS_GDIE) != 0)
+		{
+		  /* IE, pla -> pld  */
+		  pinsn += (-2ULL << 56) + (57ULL << 26) - (14ULL << 26);
+		  r_type = R_PPC64_GOT_TPREL34;
+		}
+	      else
+		{
+		  /* LE, pla pcrel -> paddi r13  */
+		  pinsn += (-1ULL << 52) + (13ULL << 16);
+		  r_type = R_PPC64_TPREL34;
+		}
+	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+	      bfd_put_32 (input_bfd, pinsn >> 32,
+			  contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, pinsn & 0xffffffff,
+			  contents + rel->r_offset + 4);
+	    }
+	  break;
+
+	case R_PPC64_GOT_TLSLD34:
+	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_LD) == 0)
+	    {
+	      pinsn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      pinsn <<= 32;
+	      pinsn |= bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+	      pinsn += (-1ULL << 52) + (13ULL << 16);
+	      bfd_put_32 (input_bfd, pinsn >> 32,
+			  contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, pinsn & 0xffffffff,
+			  contents + rel->r_offset + 4);
+	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+	      r_symndx = STN_UNDEF;
+	      r_type = R_PPC64_TPREL34;
+	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+	      goto again;
+	    }
+	  break;
+
 	case R_PPC64_TLSGD:
 	  if ((tls_mask & TLS_TLS) != 0 && (tls_mask & TLS_GD) == 0
 	      && rel + 1 < relend)
@@ -14619,16 +14760,27 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      r_symndx = toc_symndx;
 		      rel->r_addend = toc_addend;
 		    }
-		  r_type = R_PPC64_TPREL16_LO;
-		  rel->r_offset = offset + d_offset;
-		  insn2 = 0x38630000;	/* addi 3,3,0 */
+		  if (r_type1 == R_PPC64_REL24_NOTOC
+		      || r_type1 == R_PPC64_PLTCALL_NOTOC)
+		    {
+		      r_type = R_PPC64_NONE;
+		      insn2 = NOP;
+		    }
+		  else
+		    {
+		      rel->r_offset = offset + d_offset;
+		      r_type = R_PPC64_TPREL16_LO;
+		      insn2 = 0x38630000;	/* addi 3,3,0 */
+		    }
 		}
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
-	      if ((tls_mask & TLS_GDIE) == 0 && toc_symndx != 0)
+	      if ((tls_mask & TLS_GDIE) == 0
+		  && toc_symndx != 0
+		  && r_type != R_PPC64_NONE)
 		goto again;
 	    }
 	  break;
@@ -14654,18 +14806,27 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (ELF64_R_TYPE (rel[1].r_info) == R_PPC64_PLTCALL)
 		bfd_put_32 (output_bfd, NOP, contents + offset + 4);
 
-	      rel->r_offset = offset + d_offset;
-	      r_symndx = STN_UNDEF;
-	      r_type = R_PPC64_TPREL16_LO;
+	      if (r_type1 == R_PPC64_REL24_NOTOC
+		  || r_type1 == R_PPC64_PLTCALL_NOTOC)
+		{
+		  r_type = R_PPC64_NONE;
+		  insn2 = NOP;
+		}
+	      else
+		{
+		  rel->r_offset = offset + d_offset;
+		  r_symndx = STN_UNDEF;
+		  r_type = R_PPC64_TPREL16_LO;
+		  rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+		  insn2 = 0x38630000;	/* addi 3,3,0 */
+		}
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
-	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
-	      insn2 = 0x38630000;	/* addi 3,3,0 */
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
-	      goto again;
+	      if (r_type != R_PPC64_NONE)
+		goto again;
 	    }
 	  break;
 
@@ -15267,6 +15428,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_TLSGD16_LO:
 	case R_PPC64_GOT_TLSGD16_HI:
 	case R_PPC64_GOT_TLSGD16_HA:
+	case R_PPC64_GOT_TLSGD34:
 	  tls_type = TLS_TLS | TLS_GD;
 	  goto dogot;
 
@@ -15274,6 +15436,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_TLSLD16_LO:
 	case R_PPC64_GOT_TLSLD16_HI:
 	case R_PPC64_GOT_TLSLD16_HA:
+	case R_PPC64_GOT_TLSLD34:
 	  tls_type = TLS_TLS | TLS_LD;
 	  goto dogot;
 
@@ -15281,6 +15444,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_TPREL16_LO_DS:
 	case R_PPC64_GOT_TPREL16_HI:
 	case R_PPC64_GOT_TPREL16_HA:
+	case R_PPC64_GOT_TPREL34:
 	  tls_type = TLS_TLS | TLS_TPREL;
 	  goto dogot;
 
@@ -15288,6 +15452,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_DTPREL16_LO_DS:
 	case R_PPC64_GOT_DTPREL16_HI:
 	case R_PPC64_GOT_DTPREL16_HA:
+	case R_PPC64_GOT_DTPREL34:
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	  goto dogot;
 
@@ -15309,7 +15474,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    struct got_entry *ent;
 	    bfd_vma sym_addend = orig_rel.r_addend;
 
-	    if (r_type == R_PPC64_GOT_PCREL34)
+	    if (r_type == R_PPC64_GOT_PCREL34
+		|| r_type == R_PPC64_GOT_TLSGD34
+		|| r_type == R_PPC64_GOT_TLSLD34
+		|| r_type == R_PPC64_GOT_TPREL34
+		|| r_type == R_PPC64_GOT_DTPREL34)
 	      sym_addend = 0;
 
 	    if (tls_type == (TLS_TLS | TLS_LD)
@@ -15491,7 +15660,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      abort ();
 
 	    relocation = got->output_section->vma + got->output_offset + off;
-	    if (r_type != R_PPC64_GOT_PCREL34)
+	    if (!(r_type == R_PPC64_GOT_PCREL34
+		  || r_type == R_PPC64_GOT_TLSGD34
+		  || r_type == R_PPC64_GOT_TLSLD34
+		  || r_type == R_PPC64_GOT_TPREL34
+		  || r_type == R_PPC64_GOT_DTPREL34))
 	      addend = -(TOCstart + htab->sec_info[input_section->id].toc_off);
 	  }
 	  break;
@@ -15644,6 +15817,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
+	case R_PPC64_TPREL34:
 	  if (h != NULL
 	      && h->elf.root.type == bfd_link_hash_undefweak
 	      && h->elf.dynindx == -1)
@@ -15679,6 +15853,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
+	case R_PPC64_DTPREL34:
 	  if (htab->elf.tls_sec != NULL)
 	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  break;
@@ -16301,6 +16476,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_D34_HA30:
 	case R_PPC64_PCREL34:
 	case R_PPC64_GOT_PCREL34:
+	case R_PPC64_TPREL34:
+	case R_PPC64_DTPREL34:
+	case R_PPC64_GOT_TLSGD34:
+	case R_PPC64_GOT_TLSLD34:
+	case R_PPC64_GOT_TPREL34:
+	case R_PPC64_GOT_DTPREL34:
 	case R_PPC64_PLT_PCREL34:
 	case R_PPC64_PLT_PCREL34_NOTOC:
 	case R_PPC64_D28:

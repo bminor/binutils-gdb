@@ -1,5 +1,15 @@
 2019-07-19  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tlsgd.d,
+	* testsuite/ld-powerpc/tlsgd.s,
+	* testsuite/ld-powerpc/tlsie.d,
+	* testsuite/ld-powerpc/tlsie.s,
+	* testsuite/ld-powerpc/tlsld.d,
+	* testsuite/ld-powerpc/tlsld.s: New tests.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
+2019-07-19  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/tlsldopt.d: Rename from tlsld.d.
 	* testsuite/ld-powerpc/tlsldopt.s: Rename from tlsld.s.
 	* testsuite/ld-powerpc/tlsldopt32.d: Rename from tlsld32.d.

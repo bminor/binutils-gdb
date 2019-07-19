@@ -1,3 +1,17 @@
+2019-07-19  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (BFD_RELOC_PPC64_TPREL34, BFD_RELOC_PPC64_DTPREL34),
+	(BFD_RELOC_PPC64_GOT_TLSGD34, BFD_RELOC_PPC64_GOT_TLSLD34),
+	(BFD_RELOC_PPC64_GOT_TPREL34, BFD_RELOC_PPC64_GOT_DTPREL34),
+	(BFD_RELOC_PPC64_TLS_PCREL): New pcrel tls relocs.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add howtos for pcrel tls relocs.
+	(ppc64_elf_reloc_type_lookup): Translate pcrel tls relocs.
+	(must_be_dyn_reloc, dec_dynrel_count): Add R_PPC64_TPREL64.
+	(ppc64_elf_check_relocs): Support pcrel tls relocs.
+	(ppc64_elf_tls_optimize, ppc64_elf_relocate_section): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2019-07-18  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't bother selecting

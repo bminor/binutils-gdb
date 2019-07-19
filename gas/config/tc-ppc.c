@@ -2224,6 +2224,11 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("pcrel",		BFD_RELOC_PPC64_PCREL34),
     MAP64 ("got@pcrel",		BFD_RELOC_PPC64_GOT_PCREL34),
     MAP64 ("plt@pcrel",		BFD_RELOC_PPC64_PLT_PCREL34),
+    MAP64 ("tls@pcrel",		BFD_RELOC_PPC64_TLS_PCREL),
+    MAP64 ("got@tlsgd@pcrel",	BFD_RELOC_PPC64_GOT_TLSGD34),
+    MAP64 ("got@tlsld@pcrel",	BFD_RELOC_PPC64_GOT_TLSLD34),
+    MAP64 ("got@tprel@pcrel",	BFD_RELOC_PPC64_GOT_TPREL34),
+    MAP64 ("got@dtprel@pcrel",	BFD_RELOC_PPC64_GOT_DTPREL34),
     MAP64 ("higher34",		BFD_RELOC_PPC64_ADDR16_HIGHER34),
     MAP64 ("highera34",		BFD_RELOC_PPC64_ADDR16_HIGHERA34),
     MAP64 ("highest34",		BFD_RELOC_PPC64_ADDR16_HIGHEST34),
@@ -3155,6 +3160,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_PPC_VLE_SDAREL_HI16D:
     case BFD_RELOC_PPC_VLE_SDAREL_LO16A:
     case BFD_RELOC_PPC_VLE_SDAREL_LO16D:
+    case BFD_RELOC_PPC64_TLS_PCREL:
     case BFD_RELOC_RVA:
       size = 4;
       break;
@@ -3196,6 +3202,8 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_PPC64_D34_LO:
     case BFD_RELOC_PPC64_D34_HI30:
     case BFD_RELOC_PPC64_D34_HA30:
+    case BFD_RELOC_PPC64_TPREL34:
+    case BFD_RELOC_PPC64_DTPREL34:
     case BFD_RELOC_PPC64_TOC:
       size = 8;
       break;
@@ -3203,6 +3211,10 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_64_PCREL:
     case BFD_RELOC_64_PLT_PCREL:
     case BFD_RELOC_PPC64_GOT_PCREL34:
+    case BFD_RELOC_PPC64_GOT_TLSGD34:
+    case BFD_RELOC_PPC64_GOT_TLSLD34:
+    case BFD_RELOC_PPC64_GOT_TPREL34:
+    case BFD_RELOC_PPC64_GOT_DTPREL34:
     case BFD_RELOC_PPC64_PCREL28:
     case BFD_RELOC_PPC64_PCREL34:
     case BFD_RELOC_PPC64_PLT_PCREL34:
@@ -3744,6 +3756,7 @@ md_assemble (char *str)
 		  break;
 
 		case BFD_RELOC_PPC_TLS:
+		case BFD_RELOC_PPC64_TLS_PCREL:
 		  if (!_bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
 		    as_bad (_("@tls may not be used with \"%s\" operands"),
 			    opcode->name);
@@ -3756,13 +3769,19 @@ md_assemble (char *str)
 		  break;
 
 		  /* We'll only use the 32 (or 64) bit form of these relocations
-		     in constants.  Instructions get the 16 bit form.  */
+		     in constants.  Instructions get the 16 or 34 bit form.  */
 		case BFD_RELOC_PPC_DTPREL:
-		  reloc = BFD_RELOC_PPC_DTPREL16;
+		  if (operand->bitm == 0x3ffffffffULL)
+		    reloc = BFD_RELOC_PPC64_DTPREL34;
+		  else
+		    reloc = BFD_RELOC_PPC_DTPREL16;
 		  break;
 
 		case BFD_RELOC_PPC_TPREL:
-		  reloc = BFD_RELOC_PPC_TPREL16;
+		  if (operand->bitm == 0x3ffffffffULL)
+		    reloc = BFD_RELOC_PPC64_TPREL34;
+		  else
+		    reloc = BFD_RELOC_PPC_TPREL16;
 		  break;
 
 		case BFD_RELOC_PPC64_PCREL34:
@@ -3774,6 +3793,10 @@ md_assemble (char *str)
 		  /* Fall through.  */
 		case BFD_RELOC_PPC64_GOT_PCREL34:
 		case BFD_RELOC_PPC64_PLT_PCREL34:
+		case BFD_RELOC_PPC64_GOT_TLSGD34:
+		case BFD_RELOC_PPC64_GOT_TLSLD34:
+		case BFD_RELOC_PPC64_GOT_TPREL34:
+		case BFD_RELOC_PPC64_GOT_DTPREL34:
 		  if (operand->bitm != 0x3ffffffffULL
 		      || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		    as_warn (_("%s unsupported on this instruction"), "@pcrel");
@@ -7003,7 +7026,7 @@ ppc_force_relocation (fixS *fix)
     }
 
   if (fix->fx_r_type >= BFD_RELOC_PPC_TLS
-      && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA)
+      && fix->fx_r_type <= BFD_RELOC_PPC64_TLS_PCREL)
     return 1;
 
   return generic_force_reloc (fix);
@@ -7071,7 +7094,7 @@ ppc_fix_adjustable (fixS *fix)
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
 	  && !(fix->fx_r_type >= BFD_RELOC_PPC_TLS
-	       && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA));
+	       && fix->fx_r_type <= BFD_RELOC_PPC64_TLS_PCREL));
 }
 #endif
 
@@ -7503,6 +7526,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_DTPREL16_HIGHERA:
 	case BFD_RELOC_PPC64_DTPREL16_HIGHEST:
 	case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
+	case BFD_RELOC_PPC64_TPREL34:
+	case BFD_RELOC_PPC64_DTPREL34:
+	case BFD_RELOC_PPC64_GOT_TLSGD34:
+	case BFD_RELOC_PPC64_GOT_TLSLD34:
+	case BFD_RELOC_PPC64_GOT_TPREL34:
+	case BFD_RELOC_PPC64_GOT_DTPREL34:
 	  gas_assert (fixP->fx_addsy != NULL);
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  fieldval = 0;
@@ -7573,6 +7602,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC_TLS:
 	case BFD_RELOC_PPC_TLSGD:
 	case BFD_RELOC_PPC_TLSLD:
+	case BFD_RELOC_PPC64_TLS_PCREL:
 	  fieldval = 0;
 	  break;
 #endif
@@ -7826,6 +7856,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_TPREL16_HIGHERA:
 	case BFD_RELOC_PPC64_TPREL16_HIGHEST:
 	case BFD_RELOC_PPC64_TPREL16_HIGHESTA:
+	case BFD_RELOC_PPC64_TLS_PCREL:
 	  fixP->fx_done = 0;
 	  break;
 #endif
@@ -7918,6 +7949,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
   reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  /* BFD_RELOC_PPC64_TLS_PCREL generates R_PPC64_TLS with an odd r_offset.  */
+  if (fixp->fx_r_type == BFD_RELOC_PPC64_TLS_PCREL)
+    reloc->address++;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
     {

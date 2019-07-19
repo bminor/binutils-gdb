@@ -1,3 +1,11 @@
+2019-07-19  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Map "tls@pcrel", "got@tlsgd@pcrel",
+	"got@tlsld@pcrel", "got@tprel@pcrel", and "got@dtprel@pcrel".
+	(fixup_size, md_assemble): Handle pcrel tls relocs.
+	(ppc_force_relocation, ppc_fix_adjustable): Likewise.
+	(md_apply_fix, tc_gen_reloc): Likewise.
+
 2019-07-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-bpf.c: Make .lcomm to get a third argument with the

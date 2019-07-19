@@ -181,6 +181,12 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
   RELOC_NUMBER (R_PPC64_REL16_HIGHESTA34,  143)
   RELOC_NUMBER (R_PPC64_D28,		   144)
   RELOC_NUMBER (R_PPC64_PCREL28,	   145)
+  RELOC_NUMBER (R_PPC64_TPREL34,	   146)
+  RELOC_NUMBER (R_PPC64_DTPREL34,	   147)
+  RELOC_NUMBER (R_PPC64_GOT_TLSGD34,	   148)
+  RELOC_NUMBER (R_PPC64_GOT_TLSLD34,	   149)
+  RELOC_NUMBER (R_PPC64_GOT_TPREL34,	   150)
+  RELOC_NUMBER (R_PPC64_GOT_DTPREL34,	   151)
 
 #ifndef RELOC_MACROS_GEN_FUNC
 /* Relocation only used internally by gas or ld.  If you need to use
@@ -218,8 +224,8 @@ END_RELOC_NUMBERS (R_PPC64_max)
 
 #define IS_PPC64_TLS_RELOC(R)						\
   (((R) >= R_PPC64_TLS && (R) <= R_PPC64_DTPREL16_HIGHESTA)		\
-   || ((R) >= R_PPC64_TPREL16_HIGH && (R) <= R_PPC64_DTPREL16_HIGHA))
-
+   || ((R) >= R_PPC64_TPREL16_HIGH && (R) <= R_PPC64_DTPREL16_HIGHA)	\
+   || ((R) >= R_PPC64_TPREL34 && (R) <= R_PPC64_GOT_DTPREL34))
 
 /* e_flags bits specifying ABI.
    1 for original function descriptor using ABI,
