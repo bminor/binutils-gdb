@@ -27,6 +27,7 @@
 #include "observable.h"
 #include "gdbthread.h"
 
+#include "aarch32-tdep.h"
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
 #include "aarch32-linux-nat.h"
@@ -551,7 +552,7 @@ arm_linux_nat_target::read_description ()
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
-    return tdesc_arm_with_iwmmxt;
+    return arm_read_description (ARM_FP_TYPE_IWMMXT);
 
   if (arm_hwcap & HWCAP_VFP)
     {
@@ -566,11 +567,11 @@ arm_linux_nat_target::read_description ()
       /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
 	 Neon with VFPv3-D32.  */
       if (arm_hwcap & HWCAP_NEON)
-	return tdesc_arm_with_neon;
+	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	return tdesc_arm_with_vfpv3;
-      else
-	return tdesc_arm_with_vfpv2;
+	return arm_read_description (ARM_FP_TYPE_VFPV3);
+
+      return arm_read_description (ARM_FP_TYPE_VFPV2);
     }
 
   return this->beneath ()->read_description ();

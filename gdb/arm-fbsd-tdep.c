@@ -20,6 +20,8 @@
 #include "defs.h"
 
 #include "elf/common.h"
+#include "target-descriptions.h"
+#include "aarch32-tdep.h"
 #include "arm-tdep.h"
 #include "arm-fbsd-tdep.h"
 #include "auxv.h"
@@ -178,20 +180,20 @@ arm_fbsd_read_description_auxv (struct target_ops *target)
   CORE_ADDR arm_hwcap = 0;
 
   if (target_auxv_search (target, AT_FREEBSD_HWCAP, &arm_hwcap) != 1)
-    return NULL;
+    return nullptr;
 
   if (arm_hwcap & HWCAP_VFP)
     {
       if (arm_hwcap & HWCAP_NEON)
-	return tdesc_arm_with_neon;
+	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPD32))
 	  == (HWCAP_VFPv3 | HWCAP_VFPD32))
-	return tdesc_arm_with_vfpv3;
+	return arm_read_description (ARM_FP_TYPE_VFPV3);
       else
-	return tdesc_arm_with_vfpv2;
+      return arm_read_description (ARM_FP_TYPE_VFPV2);
     }
 
-  return NULL;
+  return nullptr;
 }
 
 /* Implement the "core_read_description" gdbarch method.  */

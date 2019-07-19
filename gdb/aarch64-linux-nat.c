@@ -30,6 +30,7 @@
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"
 #include "aarch32-linux-nat.h"
+#include "aarch32-tdep.h"
 #include "arch/arm.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
@@ -631,8 +632,6 @@ aarch64_linux_nat_target::post_attach (int pid)
   linux_nat_target::post_attach (pid);
 }
 
-extern struct target_desc *tdesc_arm_with_neon;
-
 /* Implement the "read_description" target_ops method.  */
 
 const struct target_desc *
@@ -649,7 +648,7 @@ aarch64_linux_nat_target::read_description ()
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
   if (ret == 0)
-    return tdesc_arm_with_neon;
+    return aarch32_read_description ();
 
   CORE_ADDR hwcap = linux_get_hwcap (this);
 

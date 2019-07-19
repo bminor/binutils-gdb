@@ -19,6 +19,8 @@
 #ifndef ARCH_ARM_H
 #define ARCH_ARM_H
 
+#include "gdbsupport/tdesc.h"
+
 /* Register numbers of various important registers.  */
 
 enum gdb_regnum {
@@ -64,6 +66,23 @@ enum arm_breakpoint_kinds
    ARM_BP_KIND_THUMB = 2,
    ARM_BP_KIND_THUMB2 = 3,
    ARM_BP_KIND_ARM = 4,
+};
+
+/* Supported Arm FP hardware types.  */
+enum arm_fp_type {
+   ARM_FP_TYPE_NONE = 0,
+   ARM_FP_TYPE_VFPV2,
+   ARM_FP_TYPE_VFPV3,
+   ARM_FP_TYPE_IWMMXT,
+   ARM_FP_TYPE_INVALID
+};
+
+/* Supported M-profile Arm types.  */
+enum arm_m_profile_type {
+   ARM_M_TYPE_M_PROFILE,
+   ARM_M_TYPE_VFP_D16,
+   ARM_M_TYPE_WITH_FPA,
+   ARM_M_TYPE_INVALID
 };
 
 /* Instruction condition field values.  */
@@ -164,5 +183,13 @@ unsigned long shifted_reg_val (struct regcache *regcache,
 			       int carry,
 			       unsigned long pc_val,
 			       unsigned long status_reg);
+
+/* Create an Arm target description with the given FP hardware type.  */
+
+target_desc *arm_create_target_description (arm_fp_type fp_type);
+
+/* Create an Arm M-profile target description with the given hardware type.  */
+
+target_desc *arm_create_mprofile_target_description (arm_m_profile_type m_type);
 
 #endif /* ARCH_ARM_H */

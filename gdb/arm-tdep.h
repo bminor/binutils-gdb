@@ -281,11 +281,11 @@ extern void
 				       void *cb_data,
 				       const struct regcache *regcache);
 
-/* Target descriptions.  */
-extern struct target_desc *tdesc_arm_with_m;
-extern struct target_desc *tdesc_arm_with_iwmmxt;
-extern struct target_desc *tdesc_arm_with_vfpv2;
-extern struct target_desc *tdesc_arm_with_vfpv3;
-extern struct target_desc *tdesc_arm_with_neon;
+/* Get the correct Arm target description with given FP hardware type.  */
+const target_desc *arm_read_description (arm_fp_type fp_type);
+
+/* Get the correct Arm M-Profile target description with given hardware
+   type.  */
+const target_desc *arm_read_mprofile_description (arm_m_profile_type m_type);
 
 #endif /* arm-tdep.h */

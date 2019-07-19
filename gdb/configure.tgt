@@ -48,8 +48,9 @@ amd64_tobjs="amd64-tdep.o arch/amd64.o ${x86_tobjs}"
 
 case "${targ}" in
 aarch64*-*-*)
-	cpu_obs="aarch64-tdep.o arch/aarch64-insn.o arch/aarch64.o \
-		 ravenscar-thread.o aarch64-ravenscar-thread.o";;
+	cpu_obs="aarch32-tdep.o aarch64-tdep.o arch/aarch32.o \
+		 arch/aarch64-insn.o arch/aarch64.o  ravenscar-thread.o \
+		 aarch64-ravenscar-thread.o";;
 
 alpha*-*-*)
 	# Target: Alpha
@@ -62,7 +63,8 @@ arc*-*-*)
 	;;
 
 arm*-*-*)
-	cpu_obs="arch/arm.o arch/arm-get-next-pcs.o arm-tdep.o";;
+	cpu_obs="aarch32-tdep.o arch/aarch32.o arch/arm.o \
+		 arch/arm-get-next-pcs.o arm-tdep.o";;
 
 hppa*-*-*)
 	# Target: HP PA-RISC

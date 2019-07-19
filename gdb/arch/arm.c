@@ -21,6 +21,17 @@
 #include "gdbsupport/common-regcache.h"
 #include "arm.h"
 
+extern struct target_desc *tdesc_arm_with_vfpv2;
+extern struct target_desc *tdesc_arm_with_vfpv3;
+extern struct target_desc *tdesc_arm_with_iwmmxt;
+
+/* Temporary ifdef.  Will be removed when target descriptions are switched.  */
+#ifndef GDBSERVER
+extern struct target_desc *tdesc_arm_with_m;
+extern struct target_desc *tdesc_arm_with_m_vfp_d16;
+extern struct target_desc *tdesc_arm_with_m_fpa_layout;
+#endif
+
 /* See arm.h.  */
 
 int
@@ -372,3 +383,52 @@ shifted_reg_val (struct regcache *regcache, unsigned long inst,
 
   return res & 0xffffffff;
 }
+
+/* See arch/arm.h.  */
+
+target_desc *
+arm_create_target_description (arm_fp_type fp_type)
+{
+  switch (fp_type)
+    {
+    case ARM_FP_TYPE_NONE:
+      return nullptr;
+/* Temporary ifdef.  Will be removed when target descriptions are switched.  */
+#ifndef GDBSERVER
+    case ARM_FP_TYPE_VFPV2:
+      return tdesc_arm_with_vfpv2;
+
+    case ARM_FP_TYPE_VFPV3:
+      return tdesc_arm_with_vfpv3;
+
+    case ARM_FP_TYPE_IWMMXT:
+      return tdesc_arm_with_iwmmxt;
+#endif
+    default:
+      error (_("Invalid Arm FP type: %d"), fp_type);
+    }
+}
+
+/* See arch/arm.h.  */
+
+target_desc *
+arm_create_mprofile_target_description (arm_m_profile_type m_type)
+{
+  switch (m_type)
+    {
+/* Temporary ifdef.  Will be removed when target descriptions are switched.  */
+#ifndef GDBSERVER
+    case ARM_M_TYPE_M_PROFILE:
+      return tdesc_arm_with_m;
+
+    case ARM_M_TYPE_VFP_D16:
+      return tdesc_arm_with_m_fpa_layout;
+
+    case ARM_M_TYPE_WITH_FPA:
+      return tdesc_arm_with_m_vfp_d16;
+#endif
+    default:
+      error (_("Invalid Arm M type: %d"), m_type);
+    }
+}
+

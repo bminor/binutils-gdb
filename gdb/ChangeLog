@@ -1,3 +1,30 @@
+2019-07-19  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Add new files.
+	* aarch32-tdep.c: New file.
+	* aarch32-tdep.h: New file.
+	* aarch64-linux-nat.c (aarch64_linux_nat_target::read_description):
+	Call aarch32_read_description.
+	* arch/aarch32.c: New file.
+	* arch/aarch32.h: New file.
+	* arch/arm.c (arm_create_target_description)
+	(arm_create_mprofile_target_description): New function.
+	* arch/arm.h (arm_fp_type, arm_m_profile_type): New enum.
+	(arm_create_target_description)
+	(arm_create_mprofile_target_description): New declaration.
+	* arm-fbsd-tdep.c (arm_fbsd_read_description_auxv): Call
+	read_description functions.
+	* arm-linux-nat.c (arm_linux_nat_target::read_description):
+	Likewise.
+	* arm-linux-tdep.c (arm_linux_core_read_description): Likewise.
+	* arm-tdep.c (tdesc_arm_list): New variable.
+	(arm_register_g_packet_guesses): Call create description functions.
+	(arm_read_description) (arm_read_mprofile_description): New
+	function.
+	* arm-tdep.h (arm_read_description)
+	(arm_read_mprofile_description): Add declaration.
+	* configure.tgt: Add new files.
+
 2019-07-18  Guillaume LABARTHE  <guillaume.labarthe@gmail.com>
 
 	* top.c (new_ui_command): Open specified terminal just once.

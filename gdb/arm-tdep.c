@@ -240,6 +240,10 @@ static const char **valid_disassembly_styles;
 /* Disassembly style to use. Default to "std" register names.  */
 static const char *disassembly_style;
 
+/* All possible arm target descriptors.  */
+static struct target_desc *tdesc_arm_list[ARM_FP_TYPE_INVALID];
+static struct target_desc *tdesc_arm_mprofile_list[ARM_M_TYPE_INVALID];
+
 /* This is used to keep the bfd arch_info in sync with the disassembly
    style.  */
 static void set_disassembly_style_sfunc (const char *, int,
@@ -8739,7 +8743,6 @@ arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
-
 /* For backward-compatibility we allow two 'g' packet lengths with
    the remote protocol depending on whether FPA registers are
    supplied.  M-profile targets do not have FPA registers, but some
@@ -8753,21 +8756,26 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
   if (gdbarch_tdep (gdbarch)->is_m)
     {
+      const target_desc *tdesc;
+
       /* If we know from the executable this is an M-profile target,
 	 cater for remote targets whose register set layout is the
 	 same as the FPA layout.  */
+      tdesc = arm_read_mprofile_description (ARM_M_TYPE_WITH_FPA);
       register_remote_g_packet_guess (gdbarch,
 				      ARM_CORE_REGS_SIZE + ARM_FP_REGS_SIZE,
-				      tdesc_arm_with_m_fpa_layout);
+				      tdesc);
 
       /* The regular M-profile layout.  */
+      tdesc = arm_read_mprofile_description (ARM_M_TYPE_M_PROFILE);
       register_remote_g_packet_guess (gdbarch, ARM_CORE_REGS_SIZE,
-				      tdesc_arm_with_m);
+				      tdesc);
 
       /* M-profile plus M4F VFP.  */
+      tdesc = arm_read_mprofile_description (ARM_M_TYPE_VFP_D16);
       register_remote_g_packet_guess (gdbarch,
 				      ARM_CORE_REGS_SIZE + ARM_VFP2_REGS_SIZE,
-				      tdesc_arm_with_m_vfp_d16);
+				      tdesc);
     }
 
   /* Otherwise we don't have a useful guess.  */
@@ -13309,4 +13317,36 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   deallocate_reg_mem (&arm_record);
 
   return ret;
+}
+
+/* See arm-tdep.h.  */
+
+const target_desc *
+arm_read_description (arm_fp_type fp_type)
+{
+  struct target_desc *tdesc = tdesc_arm_list[fp_type];
+
+  if (tdesc == nullptr)
+    {
+      tdesc = arm_create_target_description (fp_type);
+      tdesc_arm_list[fp_type] = tdesc;
+    }
+
+  return tdesc;
+}
+
+/* See arm-tdep.h.  */
+
+const target_desc *
+arm_read_mprofile_description (arm_m_profile_type m_type)
+{
+  struct target_desc *tdesc = tdesc_arm_mprofile_list[m_type];
+
+  if (tdesc == nullptr)
+    {
+      tdesc = arm_create_mprofile_target_description (m_type);
+      tdesc_arm_mprofile_list[m_type] = tdesc;
+    }
+
+  return tdesc;
 }
