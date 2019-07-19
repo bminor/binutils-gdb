@@ -1,5 +1,23 @@
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* arm-tdep.c (_initialize_arm_tdep): Remove xml tests.
+	* features/arm/arm-with-iwmmxt.c: Remove.
+	* features/arm/arm-with-iwmmxt.xml: Remove.
+	* features/arm/arm-with-m-fpa-layout.c: Remove.
+	* features/arm/arm-with-m-fpa-layout.xml: Remove.
+	* features/arm/arm-with-m-vfp-d16.c: Remove.
+	* features/arm/arm-with-m-vfp-d16.xml: Remove.
+	* features/arm/arm-with-m.c: Remove.
+	* features/arm/arm-with-m.xml: Remove.
+	* features/arm/arm-with-neon.c: Remove.
+	* features/arm/arm-with-neon.xml: Remove.
+	* features/arm/arm-with-vfpv2.c: Remove.
+	* features/arm/arm-with-vfpv2.xml: Remove.
+	* features/arm/arm-with-vfpv3.c: Remove.
+	* features/arm/arm-with-vfpv3.xml: Remove.
+
+2019-07-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* arm-tdep.c (_initialize_arm_tdep): Add xml regression tests.
 
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>

@@ -58,14 +58,6 @@ case "${target}" in
 			srv_tgtobj="${srv_tgtobj} arch/arm.o"
 			srv_tgtobj="${srv_tgtobj} arch/arm-linux.o"
 			srv_tgtobj="${srv_tgtobj} arch/arm-get-next-pcs.o"
-			srv_xmlfiles="arm/arm-with-iwmmxt.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-with-vfpv2.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-with-vfpv3.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-with-neon.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-core.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/xscale-iwmmxt.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-vfpv2.xml"
-			srv_xmlfiles="${srv_xmlfiles} arm/arm-vfpv3.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

@@ -1,5 +1,9 @@
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* configure.srv: Remove Arm xml files.
+
+2019-07-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* configure.srv: Add new files. Remove xml generated files.
 	* linux-aarch32-low.c (initialize_low_arch_aarch32): Don't init
 	registers.
