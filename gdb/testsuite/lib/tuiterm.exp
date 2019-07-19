@@ -15,6 +15,19 @@
 
 # An ANSI terminal emulator for expect.
 
+# The expect "spawn" function puts the tty name into the spawn_out
+# array; but dejagnu doesn't export this globally.  So, we have to
+# wrap spawn with our own function, so that we can capture this value.
+# The value is later used in calls to stty.
+rename spawn builtin_spawn
+proc spawn {args} {
+    set result [uplevel builtin_spawn $args]
+    global gdb_spawn_name
+    upvar spawn_out spawn_out
+    set gdb_spawn_name $spawn_out(slave,name)
+    return $result
+}
+
 namespace eval Term {
     variable _rows
     variable _cols
@@ -522,5 +535,37 @@ namespace eval Term {
 	    set fmt [format %5d $y]
 	    verbose "$fmt [get_line $y]"
 	}
+    }
+
+    # Resize the terminal.
+    proc resize {rows cols} {
+	variable _chars
+	variable _rows
+	variable _cols
+
+	set old_rows [expr {min ($_rows, $rows)}]
+	set old_cols [expr {min ($_cols, $cols)}]
+
+	# Copy locally.
+	array set local_chars [array get _chars]
+	unset _chars
+
+	set _rows $rows
+	set _cols $cols
+	_clear_lines 0 $_rows
+
+	for {set x 0} {$x < $old_cols} {incr x} {
+	    for {set y 0} {$y < $old_rows} {incr y} {
+		set _chars($x,$y) $local_chars($x,$y)
+	    }
+	}
+
+	global gdb_spawn_name
+	# Somehow the number of columns transmitted to gdb is one less
+	# than what we request from expect.  We hide this weird
+	# details from the caller.
+	stty rows $_rows columns [expr {$_cols + 1}] \
+	    < $gdb_spawn_name
+	_accept
     }
 }
