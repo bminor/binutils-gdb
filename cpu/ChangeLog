@@ -1,3 +1,8 @@
+2019-07-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu (h-gpr): when disassembling, use %r0 and %r6 instead of
+	%a and %ctx.
+
 2019-07-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu (dlabs): New pmacro.

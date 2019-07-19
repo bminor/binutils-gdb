@@ -156,10 +156,10 @@
            ;; XXX the frame pointer fp is read-only, so it should
            ;; go in a different hardware.
            (;; ABI names.  Take priority when disassembling.
-            (a 0) (r1 1) (r2 2) (r3 3) (r4 4) (r5 5) (ctx 6)
+            (r0 0) (r1 1) (r2 2) (r3 3) (r4 4) (r5 5) (r6 6)
             (r7 7) (r8 8) (r9 9) (fp 10)
             ;; Additional names recognized when assembling.
-            (r0 0) (r6 6) (r10 10))))
+            (a 0) (ctx 6) (r10 10))))
 
 ;; The program counter.  CGEN requires it, even if it is not visible
 ;; to eBPF programs.

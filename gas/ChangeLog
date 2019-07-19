@@ -1,5 +1,13 @@
 2019-07-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* testsuite/gas/bpf/alu.d: Use %r6 instead of %ctx.
+	* testsuite/gas/bpf/lddw-be.d: Likewise.
+	* testsuite/gas/bpf/lddw.d: Likewise.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu32.d: Likewise.
+
+2019-07-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* config/tc-bpf.c (pe_lcomm_internal): Adapted from tc-i386.c.
 	(pe_lcomm): Likewise.
 	(md_pseudo_table): Use pe_lcomm to implement .lcomm.
