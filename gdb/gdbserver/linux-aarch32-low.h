@@ -36,6 +36,4 @@ void initialize_low_arch_aarch32 (void);
 void init_registers_arm_with_neon (void);
 int arm_is_thumb_mode (void);
 
-extern const struct target_desc *tdesc_arm_with_neon;
-
 #endif /* GDBSERVER_LINUX_AARCH32_LOW_H */

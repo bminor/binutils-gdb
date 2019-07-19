@@ -39,6 +39,7 @@
 
 #include "gdb_proc_service.h"
 #include "arch/aarch64.h"
+#include "linux-aarch32-tdesc.h"
 #include "linux-aarch64-tdesc.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
 #include "tdesc.h"
@@ -527,7 +528,7 @@ aarch64_arch_setup (void)
       current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p);
     }
   else
-    current_process ()->tdesc = tdesc_arm_with_neon;
+    current_process ()->tdesc = aarch32_linux_read_description ();
 
   aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
 }

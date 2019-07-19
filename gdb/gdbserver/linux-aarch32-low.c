@@ -299,7 +299,5 @@ arm_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 void
 initialize_low_arch_aarch32 (void)
 {
-  init_registers_arm_with_neon ();
-
   initialize_regsets_info (&aarch32_regsets_info);
 }
