@@ -1,3 +1,8 @@
+2019-07-19  Alan Modra  <amodra@gmail.com>
+
+	PR 24819
+	* testsuite/ld-elf/pr24819.d: xfail for genelf targets.
+
 2019-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24819
