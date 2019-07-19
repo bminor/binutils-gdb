@@ -1,4 +1,4 @@
-#as: -march=armv8-a+sve2+sve2-aes+sve2-sm4+sve2-sha3+bitperm
+#as: -march=armv8-a+sve2+sve2-aes+sve2-sm4+sve2-sha3+sve2-bitperm
 #objdump: -dr
 
 [^:]+:     file format .*

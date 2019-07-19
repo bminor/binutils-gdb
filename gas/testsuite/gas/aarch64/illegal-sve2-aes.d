@@ -1,5 +1,5 @@
 #name: Missing SVE2 AES argument
-#as: -march=armv8-a+sve2+sve2-sm4+sve2-sha3+bitperm
+#as: -march=armv8-a+sve2+sve2-sm4+sve2-sha3+sve2-bitperm
 #source: sve2.s
 #error: [^ :]+: Assembler messages:
 #error: [^ :]+:[0-9]+: Error: selected processor does not support `aesd z17\.b,z17\.b,z21\.b'

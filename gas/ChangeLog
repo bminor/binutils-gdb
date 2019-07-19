@@ -1,3 +1,13 @@
+2019-07-19  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Remame the +bitperm extension to +sve2-bitperm.
+	* config/tc-aarch64.c (aarch64_features): Likewise.
+	* testsuite/gas/aarch64/illegal-sve2-aes.d: Update accordingly.
+	* testsuite/gas/aarch64/illegal-sve2-sha3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-sve2-sm4.d: Likewise.
+	* testsuite/gas/aarch64/illegal-sve2.d: Likewise.
+	* testsuite/gas/aarch64/sve2.d: Likewise.
+
 2019-07-19  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Map "tls@pcrel", "got@tlsgd@pcrel",
