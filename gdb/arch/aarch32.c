@@ -18,12 +18,26 @@
 #include "gdbsupport/common-defs.h"
 #include "aarch32.h"
 
-extern struct target_desc *tdesc_arm_with_neon;
+#include "../features/arm/arm-core.c"
+#include "../features/arm/arm-vfpv3.c"
 
 /* See aarch32.h.  */
 
 target_desc *
 aarch32_create_target_description ()
 {
-  return tdesc_arm_with_neon;
+  target_desc *tdesc = allocate_target_description ();
+
+#ifndef IN_PROCESS_AGENT
+  set_tdesc_architecture (tdesc, "arm");
+#endif
+
+  long regnum = 0;
+
+  regnum = create_feature_arm_arm_core (tdesc, regnum);
+  /* Create a vfpv3 feature, then a blank NEON feature.  */
+  regnum = create_feature_arm_arm_vfpv3 (tdesc, regnum);
+  tdesc_create_feature (tdesc, "org.gnu.gdb.arm.neon");
+
+  return tdesc;
 }

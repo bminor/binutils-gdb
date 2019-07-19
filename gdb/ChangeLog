@@ -1,5 +1,13 @@
 2019-07-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* arch/aarch32.c (aarch32_create_target_description): Create
+	target descriptions using features.
+	* arch/arm.c (arm_create_target_description)
+	(arm_create_mprofile_target_description): Likewise.
+	* arm-tdep.c (_initialize_arm_tdep): Remove tdesc init calls.
+
+2019-07-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* Makefile.in: Add new files.
 	* aarch32-tdep.c: New file.
 	* aarch32-tdep.h: New file.

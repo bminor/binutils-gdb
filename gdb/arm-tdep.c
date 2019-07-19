@@ -61,14 +61,6 @@
 #include "record-full.h"
 #include <algorithm>
 
-#include "features/arm/arm-with-m.c"
-#include "features/arm/arm-with-m-fpa-layout.c"
-#include "features/arm/arm-with-m-vfp-d16.c"
-#include "features/arm/arm-with-iwmmxt.c"
-#include "features/arm/arm-with-vfpv2.c"
-#include "features/arm/arm-with-vfpv3.c"
-#include "features/arm/arm-with-neon.c"
-
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #endif
@@ -9450,15 +9442,6 @@ _initialize_arm_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
 				  bfd_target_elf_flavour,
 				  arm_elf_osabi_sniffer);
-
-  /* Initialize the standard target descriptions.  */
-  initialize_tdesc_arm_with_m ();
-  initialize_tdesc_arm_with_m_fpa_layout ();
-  initialize_tdesc_arm_with_m_vfp_d16 ();
-  initialize_tdesc_arm_with_iwmmxt ();
-  initialize_tdesc_arm_with_vfpv2 ();
-  initialize_tdesc_arm_with_vfpv3 ();
-  initialize_tdesc_arm_with_neon ();
 
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
   add_prefix_cmd ("arm", no_class, set_arm_command,
