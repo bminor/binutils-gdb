@@ -35,15 +35,57 @@ const char line_separator_chars[] = "`";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "fFdD";
 
+/* Like s_lcomm_internal in gas/read.c but the alignment string
+   is allowed to be optional.  */
+
+static symbolS *
+pe_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
+{
+  addressT align = 0;
+
+  SKIP_WHITESPACE ();
+
+  if (needs_align
+      && *input_line_pointer == ',')
+    {
+      align = parse_align (needs_align - 1);
+
+      if (align == (addressT) -1)
+	return NULL;
+    }
+  else
+    {
+      if (size >= 8)
+	align = 3;
+      else if (size >= 4)
+	align = 2;
+      else if (size >= 2)
+	align = 1;
+      else
+	align = 0;
+    }
+
+  bss_alloc (symbolP, size, align);
+  return symbolP;
+}
+
+static void
+pe_lcomm (int needs_align)
+{
+  s_comm_internal (needs_align * 2, pe_lcomm_internal);
+}
+
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
     { "half",      cons,              2 },
     { "word",      cons,              4 },
     { "dword",     cons,              8 },
-    { "lcomm",	   s_lcomm,	      1 },
+    { "lcomm",	   pe_lcomm,	      1 },
     { NULL,        NULL,              0 }
 };
+
+
 
 /* ISA handling.  */
 static CGEN_BITSET *bpf_isa;

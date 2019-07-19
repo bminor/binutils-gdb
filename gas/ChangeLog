@@ -1,3 +1,9 @@
+2019-07-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (pe_lcomm_internal): Adapted from tc-i386.c.
+	(pe_lcomm): Likewise.
+	(md_pseudo_table): Use pe_lcomm to implement .lcomm.
+
 2019-07-19  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* doc/c-aarch64.texi: Remame the +bitperm extension to +sve2-bitperm.
