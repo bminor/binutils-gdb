@@ -1,5 +1,9 @@
 2019-07-27  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/regs.exp: New file.
+
+2019-07-27  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/basic.exp: Add "layout split" test.
 
 2019-07-27  Tom Tromey  <tom@tromey.com>
