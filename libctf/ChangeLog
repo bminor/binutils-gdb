@@ -1,3 +1,49 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (AC_DISABLE_SHARED): New, like opcodes/.
+	(LT_INIT): Likewise.
+	(AM_INSTALL_LIBBFD): Likewise.
+	(dlopen): Note why this is necessary in a comment.
+	(SHARED_LIBADD): Initialize for possibly-PIC libiberty: derived from
+	opcodes/.
+	(SHARED_LDFLAGS): Likewise.
+	(BFD_LIBADD): Likewise, for libbfd.
+	(BFD_DEPENDENCIES): Likewise.
+	(VERSION_FLAGS): Initialize, using a version script if ld supports
+	one, or libtool -export-symbols-regex otherwise.
+	* Makefile.am (INCDIR): New.
+	(AM_CPPFLAGS): Use $(srcdir), not $(top_srcdir).
+	(noinst_LIBRARIES): Replace with...
+	[INSTALL_LIBBFD] (lib_LTLIBRARIES): This, or...
+	[!INSTALL_LIBBFD] (noinst_LTLIBRARIES): ... this, mentioning new
+	libctf-nobfd.la as well.
+	[INSTALL_LIBCTF] (include_HEADERS): Add the CTF headers.
+	[!INSTALL_LIBCTF] (include_HEADERS): New, empty.
+	(libctf_a_SOURCES): Rename to...
+	(libctf_nobfd_la_SOURCES): ... this, all of libctf other than
+	ctf-open-bfd.c.
+	(libctf_la_SOURCES): Now derived from libctf_nobfd_la_SOURCES,
+	with ctf-open-bfd.c added.
+	(libctf_nobfd_la_LIBADD): New, using @SHARED_LIBADD@.
+	(libctf_la_LIBADD): New, using @BFD_LIBADD@ as well.
+	(libctf_la_DEPENDENCIES): New, using @BFD_DEPENDENCIES@.
+	* Makefile.am [INSTALL_LIBCTF]: Use it.
+	* aclocal.m4: Add ../bfd/acinclude.m4, ../config/acx.m4, and the
+	libtool macros.
+	* libctf.ver: New, everything is version LIBCTF_1.0 currently (even
+	the unstable components).
+	* Makefile.in: Regenerated.
+	* config.h.in: Likewise.
+	* configure: Likewise.
+
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (INSTALL_LIBCTF): New, controlled by
+	--enable-install-libctf.
+	[INSTALL_LIBCTF] (lib_LIBRARIES): Add libctf.a.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+
 2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-archive.c (ctf_arc_close): Call ctfi_bfd_close if set.

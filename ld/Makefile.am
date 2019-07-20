@@ -157,7 +157,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @zlibinc@ \
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
-LIBCTF = ../libctf/libctf.a
+LIBCTF = ../libctf/libctf.la
 
 # These all start with e so 'make clean' can find them.
 ALL_EMULATION_SOURCES = \
@@ -972,8 +972,9 @@ ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) $(LI
 # Dependency tracking for the generated emulation files.
 EXTRA_ld_new_SOURCES += $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 
-# This is the real libbfd.a created by libtool.
+# This is the real libbfd.a and libctf.a created by libtool.
 TESTBFDLIB = @TESTBFDLIB@
+TESTCTFLIB = @TESTCTFLIB@
 
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
@@ -986,7 +987,7 @@ check-DEJAGNU: site.exp
 		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS_FOR_TARGET)" \
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
-		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" CTFLIB="$(LIBCTF) $(ZLIB)" \
+		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" CTFLIB="$(TESTCTFLIB) $(ZLIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \
 		DO_COMPARE="`echo '$(do_compare)' | sed -e 's,\\$$,,g'`" \
 		$(RUNTESTFLAGS); \

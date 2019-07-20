@@ -1,3 +1,8 @@
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.def (host_modules): libctf is no longer no_install.
+	* Makefile.in: Regenerated.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* Makefile.def (dependencies): all-ld depends on all-libctf.
