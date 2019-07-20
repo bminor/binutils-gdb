@@ -1,3 +1,7 @@
+2019-07-20  Christian Biesinger  <cbiesinger@google.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2019-07-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_push_dummy_code): Write a 4-byte nop
