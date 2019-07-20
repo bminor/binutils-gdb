@@ -675,7 +675,7 @@ comment (void)
   while (1)
     {
       c = input();
-      while (c != '*' && c != EOF)
+      while (c != '*' && c != 0)
 	{
 	  if (c == '\n')
 	    lineno++;
@@ -694,7 +694,7 @@ comment (void)
       if (c == '\n')
 	lineno++;
 
-      if (c == EOF)
+      if (c == 0)
 	{
 	  einfo (_("%F%P: EOF in comment\n"));
 	  break;

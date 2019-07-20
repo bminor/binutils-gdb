@@ -1,3 +1,8 @@
+2019-07-20  Alan Modra  <amodra@gmail.com>
+
+	PR 24827
+	* ldlex.l (comment): Check for 0 return from YY_INPUT, not EOF.
+
 2019-07-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsgd.d,
