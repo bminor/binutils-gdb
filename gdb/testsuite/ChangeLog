@@ -1,5 +1,11 @@
 2019-07-27  Tom Tromey  <tom@tromey.com>
 
+	* lib/tuiterm.exp (Term::clean_restart): Make "executable"
+	optional.
+	* gdb.tui/empty.exp: New file.
+
+2019-07-27  Tom Tromey  <tom@tromey.com>
+
 	* lib/tuiterm.exp (spawn): New proc.
 	(Term::resize): New proc.
 	* gdb.tui/resize.exp: New file.
