@@ -129,7 +129,7 @@ host_modules= { module= lto-plugin; bootstrap=true;
 		extra_make_flags='@extra_linker_plugin_flags@'; };
 host_modules= { module= libcc1; extra_configure_flags=--enable-shared; };
 host_modules= { module= gotools; };
-host_modules= { module= libctf; no_install=true; no_check=true;
+host_modules= { module= libctf; no_check=true;
 		bootstrap=true; };
 
 target_modules = { module= libstdc++-v3;

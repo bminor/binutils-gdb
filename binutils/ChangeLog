@@ -1,3 +1,11 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.am (LIBCTF): Mention the .la file.
+	(LIBCTF_NOBFD): New.
+	(readelf_DEPENDENCIES): Use it.
+	(readelf_LDADD): Likewise.
+	* Makefile.in: Regenerated.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* readelf.c (dump_ctf_symtab_name): Give default value.

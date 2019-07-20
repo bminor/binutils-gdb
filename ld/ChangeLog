@@ -1,3 +1,12 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (TESTCTFLIB): Set to the .so or .a, like TESTBFDLIB.
+	* Makefile.am (TESTCTFLIB): Use it.
+	(LIBCTF): Use the .la file.
+	(check-DEJAGNU): Use it.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
 2019-09-30  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldlang.h: (struct lang_input_statement_struct): Add the_ctf.

@@ -33849,7 +33849,13 @@ maybe-install-libctf:
 @if libctf
 maybe-install-libctf: install-libctf
 
-install-libctf:
+install-libctf: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(FLAGS_TO_PASS)  install)
 
 @endif libctf
 
@@ -33858,7 +33864,13 @@ maybe-install-strip-libctf:
 @if libctf
 maybe-install-strip-libctf: install-strip-libctf
 
-install-strip-libctf:
+install-strip-libctf: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
 
 @endif libctf
 

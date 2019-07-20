@@ -634,6 +634,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+TESTCTFLIB
 TESTBFDLIB
 EMULATION_LIBPATH
 LIB_PATH
@@ -12031,7 +12032,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12034 "configure"
+#line 12035 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12137,7 +12138,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12140 "configure"
+#line 12141 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17667,9 +17668,12 @@ EMULATION_LIBPATH=$all_libpath
 
 if test x${enable_static} = xno; then
   TESTBFDLIB="-Wl,--rpath,../bfd/.libs ../bfd/.libs/libbfd.so"
+  TESTCTFLIB="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
+  TESTCTFLIB="../libctf/.libs/libctf.a"
 fi
+
 
 
 target_vendor=${target_vendor=$host_vendor}

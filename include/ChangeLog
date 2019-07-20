@@ -1,3 +1,7 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h: Note the instability of the ctf_link interfaces.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* bfdlink.h (elf_strtab_hash): New forward.
