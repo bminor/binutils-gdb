@@ -14,10 +14,19 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int this_version_id = 104;
+#include <stdio.h>
+#include "print-file-var.h"
+
+ATTRIBUTE_VISIBILITY int this_version_id = 104;
+
+START_EXTERN_C
 
 int
 get_version_1 (void)
 {
+  printf ("get_version_1: &this_version_id=%p, this_version_id=%d\n", &this_version_id, this_version_id);
+
   return this_version_id;
 }
+
+END_EXTERN_C

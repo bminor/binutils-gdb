@@ -1,3 +1,29 @@
+2019-10-02  Pedro Alves  <palves@redhat.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/print-file-var-lib1.c: Include <stdio.h> and
+	"print-file-var.h".
+	(this_version_id) Use ATTRIBUTE_VISIBILITY.
+	(get_version_1): Print this_version_id and its address.
+	Add extern "C" wrappers around interface functions.
+	* gdb.base/print-file-var-lib2.c: Include <stdio.h> and
+	"print-file-var.h".
+	(this_version_id) Use ATTRIBUTE_VISIBILITY.
+	(get_version_2): Print this_version_id and its address.
+	Add extern "C" wrappers around interface functions.
+	* gdb.base/print-file-var-main.c: Include <dlfcn.h>, <assert.h>,
+	<stddef.h> and "print-file-var.h".
+	Add extern "C" wrappers around interface functions.
+	[VERSION_ID_MAIN] (this_version_id): Define.
+	(main): Define v0.  Use dlopen if SHLIB_NAME is defined.
+	* gdb.base/print-file-var.h: Add some #defines to simplify setting
+	up extern "C" blocks.
+	* gdb.base/print-file-var.exp (test): New, factored out from top
+	level.
+	(top level): Test all combinations of attribute hidden or not,
+	dlopen or not, and this_version_id symbol in main file or not.
+	Compile tests as both C++ and C, make test names unique.
+
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/style.exp: Test "show logging filename".
