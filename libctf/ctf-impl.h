@@ -281,6 +281,10 @@ struct ctf_file
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
   ctf_dynhash_t *ctf_link_type_mapping; /* Map input types to output types.  */
+  ctf_dynhash_t *ctf_link_cu_mapping;	/* Map CU names to CTF dict names.  */
+  /* Allow the caller to Change the name of link archive members.  */
+  ctf_link_memb_name_changer_f *ctf_link_memb_name_changer;
+  void *ctf_link_memb_name_changer_arg; /* Argument for it.  */
   char *ctf_tmp_typeslice;	  /* Storage for slicing up type names.  */
   size_t ctf_tmp_typeslicelen;	  /* Size of the typeslice.  */
   void *ctf_specific;		  /* Data for ctf_get/setspecific().  */
