@@ -473,7 +473,10 @@ ctf_update (ctf_file_t *fp)
   nfp->ctf_link_inputs = fp->ctf_link_inputs;
   nfp->ctf_link_outputs = fp->ctf_link_outputs;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
+  nfp->ctf_link_cu_mapping = fp->ctf_link_cu_mapping;
   nfp->ctf_link_type_mapping = fp->ctf_link_type_mapping;
+  nfp->ctf_link_memb_name_changer = fp->ctf_link_memb_name_changer;
+  nfp->ctf_link_memb_name_changer_arg = fp->ctf_link_memb_name_changer_arg;
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
 
@@ -486,6 +489,7 @@ ctf_update (ctf_file_t *fp)
   fp->ctf_link_inputs = NULL;
   fp->ctf_link_outputs = NULL;
   fp->ctf_syn_ext_strtab = NULL;
+  fp->ctf_link_cu_mapping = NULL;
   fp->ctf_link_type_mapping = NULL;
 
   fp->ctf_dvhash = NULL;

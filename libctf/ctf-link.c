@@ -182,9 +182,26 @@ static ctf_file_t *
 ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
 {
   ctf_file_t *cu_fp;
+  const char *ctf_name = NULL;
   char *dynname = NULL;
 
-  if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, filename)) == NULL)
+  /* First, check the mapping table and translate the per-CU name we use
+     accordingly.  We check both the input filename and the CU name.  Only if
+     neither are set do we fall back to the input filename as the per-CU
+     dictionary name.  We prefer the filename because this is easier for likely
+     callers to determine.  */
+
+  if (fp->ctf_link_cu_mapping)
+    {
+      if (((ctf_name = ctf_dynhash_lookup (fp->ctf_link_cu_mapping, filename)) == NULL) &&
+	  ((ctf_name = ctf_dynhash_lookup (fp->ctf_link_cu_mapping, cuname)) == NULL))
+	ctf_name = filename;
+    }
+
+  if (ctf_name == NULL)
+    ctf_name = filename;
+
+  if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, ctf_name)) == NULL)
     {
       int err;
 
@@ -197,7 +214,7 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
 	  return NULL;
 	}
 
-      if ((dynname = strdup (filename)) == NULL)
+      if ((dynname = strdup (ctf_name)) == NULL)
 	goto oom;
       if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, cu_fp) < 0)
 	goto oom;
@@ -215,6 +232,79 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
   return NULL;
 }
 
+/* Add a mapping directing that the CU named FROM should have its
+   conflicting/non-duplicate types (depending on link mode) go into a container
+   named TO.  Many FROMs can share a TO: in this case, the effect on conflicting
+   types is not yet defined (but in time an auto-renaming algorithm will be
+   added: ugly, but there is really no right thing one can do in this
+   situation).
+
+   We forcibly add a container named TO in every case, even though it may well
+   wind up empty, because clients that use this facility usually expect to find
+   every TO container present, even if empty, and malfunction otherwise.  */
+
+int
+ctf_link_add_cu_mapping (ctf_file_t *fp, const char *from, const char *to)
+{
+  int err;
+  char *f, *t;
+
+  if (fp->ctf_link_cu_mapping == NULL)
+    fp->ctf_link_cu_mapping = ctf_dynhash_create (ctf_hash_string,
+						  ctf_hash_eq_string, free,
+						  free);
+  if (fp->ctf_link_cu_mapping == NULL)
+    return ctf_set_errno (fp, ENOMEM);
+
+  if (fp->ctf_link_outputs == NULL)
+    fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
+					       ctf_hash_eq_string, free,
+					       ctf_file_close_thunk);
+
+  if (fp->ctf_link_outputs == NULL)
+    return ctf_set_errno (fp, ENOMEM);
+
+  f = strdup (from);
+  t = strdup (to);
+  if (!f || !t)
+    goto oom;
+
+  if (ctf_create_per_cu (fp, t, t) == NULL)
+    goto oom_noerrno;				/* Errno is set for us.  */
+
+  err = ctf_dynhash_insert (fp->ctf_link_cu_mapping, f, t);
+  if (err)
+    {
+      ctf_set_errno (fp, err);
+      goto oom_noerrno;
+    }
+
+  return 0;
+
+ oom:
+  ctf_set_errno (fp, errno);
+ oom_noerrno:
+  free (f);
+  free (t);
+  return -1;
+}
+
+/* Set a function which is called to transform the names of archive members.
+   This is useful for applying regular transformations to many names, where
+   ctf_link_add_cu_mapping applies arbitrarily irregular changes to single
+   names.  The member name changer is applied at ctf_link_write time, so it
+   cannot conflate multiple CUs into one the way ctf_link_add_cu_mapping can.
+   The changer function accepts a name and should return a new
+   dynamically-allocated name, or NULL if the name should be left unchanged.  */
+void
+ctf_link_set_memb_name_changer (ctf_file_t *fp,
+				ctf_link_memb_name_changer_f *changer,
+				void *arg)
+{
+  fp->ctf_link_memb_name_changer = changer;
+  fp->ctf_link_memb_name_changer_arg = arg;
+}
+
 typedef struct ctf_link_in_member_cb_arg
 {
   ctf_file_t *out_fp;
@@ -227,7 +317,6 @@ typedef struct ctf_link_in_member_cb_arg
   int share_mode;
   int in_input_cu_file;
 } ctf_link_in_member_cb_arg_t;
-
 
 /* Link one type into the link.  We rely on ctf_add_type() to detect
    duplicates.  This is not terribly reliable yet (unnmamed types will be
@@ -267,7 +356,7 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
       ctf_set_errno (arg->out_fp, 0);
     }
 
-  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->arcname,
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->file_name,
 					  arg->cu_name)) == NULL)
     return -1;	 				/* Errno is set for us.  */
 
@@ -348,7 +437,7 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
      type only present in the child.  Try adding to the child, creating if need
      be.  */
 
-  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->arcname,
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->file_name,
 					  arg->cu_name)) == NULL)
     return -1;	 				/* Errno is set for us.  */
 
@@ -590,6 +679,8 @@ typedef struct ctf_name_list_accum_cb_arg
   ctf_file_t *fp;
   ctf_file_t **files;
   size_t i;
+  char **dynames;
+  size_t ndynames;
 } ctf_name_list_accum_cb_arg_t;
 
 /* Accumulate the names and a count of the names in the link output hash,
@@ -623,10 +714,49 @@ ctf_accumulate_archive_names (void *key, void *value, void *arg_)
       ctf_set_errno (arg->fp, ENOMEM);
       return;
     }
+
+  /* Allow the caller to get in and modify the name at the last minute.  If the
+     caller *does* modify the name, we have to stash away the new name the
+     caller returned so we can free it later on.  (The original name is the key
+     of the ctf_link_outputs hash and is freed by the dynhash machinery.)  */
+
+  if (fp->ctf_link_memb_name_changer)
+    {
+      char **dynames;
+      char *dyname;
+      void *nc_arg = fp->ctf_link_memb_name_changer_arg;
+
+      dyname = fp->ctf_link_memb_name_changer (fp, name, nc_arg);
+
+      if (dyname != NULL)
+	{
+	  if ((dynames = realloc (arg->dynames,
+				  sizeof (char *) * ++(arg->ndynames))) == NULL)
+	    {
+	      (arg->ndynames)--;
+	      ctf_set_errno (arg->fp, ENOMEM);
+	      return;
+	    }
+	    arg->dynames = dynames;
+	    name = (const char *) dyname;
+	}
+    }
+
   arg->names = names;
   arg->names[(arg->i) - 1] = (char *) name;
   arg->files = files;
   arg->files[(arg->i) - 1] = fp;
+}
+
+/* Change the name of the parent CTF section, if the name transformer has got to
+   it.  */
+static void
+ctf_change_parent_name (void *key _libctf_unused_, void *value, void *arg)
+{
+  ctf_file_t *fp = (ctf_file_t *) value;
+  const char *name = (const char *) arg;
+
+  ctf_parent_name_set (fp, name);
 }
 
 /* Write out a CTF archive (if there are per-CU CTF files) or a CTF file
@@ -637,6 +767,7 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
 {
   ctf_name_list_accum_cb_arg_t arg;
   char **names;
+  char *transformed_name = NULL;
   ctf_file_t **files;
   FILE *f = NULL;
   int err;
@@ -676,7 +807,22 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
     }
   arg.names = names;
   memmove (&(arg.names[1]), arg.names, sizeof (char *) * (arg.i));
+
   arg.names[0] = (char *) _CTF_SECTION;
+  if (fp->ctf_link_memb_name_changer)
+    {
+      void *nc_arg = fp->ctf_link_memb_name_changer_arg;
+
+      transformed_name = fp->ctf_link_memb_name_changer (fp, _CTF_SECTION,
+							 nc_arg);
+
+      if (transformed_name != NULL)
+	{
+	  arg.names[0] = transformed_name;
+	  ctf_dynhash_iter (fp->ctf_link_outputs, ctf_change_parent_name,
+			    transformed_name);
+	}
+    }
 
   if ((files = realloc (arg.files,
 			sizeof (struct ctf_file *) * (arg.i + 1))) == NULL)
@@ -737,6 +883,14 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
   *size = fsize;
   free (arg.names);
   free (arg.files);
+  free (transformed_name);
+  if (arg.ndynames)
+    {
+      size_t i;
+      for (i = 0; i < arg.ndynames; i++)
+	free (arg.dynames[i]);
+      free (arg.dynames);
+    }
   return buf;
 
  err_no:
@@ -747,6 +901,14 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
     fclose (f);
   free (arg.names);
   free (arg.files);
+  free (transformed_name);
+  if (arg.ndynames)
+    {
+      size_t i;
+      for (i = 0; i < arg.ndynames; i++)
+	free (arg.dynames[i]);
+      free (arg.dynames);
+    }
   ctf_dprintf ("Cannot write archive in link: %s failure: %s\n", errloc,
 	       ctf_errmsg (ctf_errno (fp)));
   return NULL;

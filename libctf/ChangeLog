@@ -1,3 +1,21 @@
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_file_t) <ctf_link_cu_mappping>: New.
+	<ctf_link_memb_name_changer>: Likewise.
+	<ctf_link_memb_name_changer_arg>: Likewise.
+	* ctf-create.c (ctf_update): Update accordingly.
+	* ctf-open.c (ctf_file_close): Likewise.
+	* ctf-link.c (ctf_create_per_cu): Apply the cu mapping.
+	(ctf_link_add_cu_mapping): New.
+	(ctf_link_set_memb_name_changer): Likewise.
+        (ctf_change_parent_name): New.
+	(ctf_name_list_accum_cb_arg_t) <dynames>: New, storage for names
+	allocated by the caller's ctf_link_memb_name_changer.
+	<ndynames>: Likewise.
+	(ctf_accumulate_archive_names): Call the ctf_link_memb_name_changer.
+	(ctf_link_write): Likewise (for _CTF_SECTION only): also call
+        ctf_change_parent_name.  Free any resulting names.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-link.c (ctf_create_per_cu): New, refactored out of...
