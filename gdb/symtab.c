@@ -701,6 +701,7 @@ symbol_set_language (struct general_symbol_info *gsymbol,
 struct demangled_name_entry
 {
   const char *mangled;
+  ENUM_BITFIELD(language) language : LANGUAGE_BITS;
   char demangled[1];
 };
 
@@ -841,11 +842,6 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   else
     linkage_name_copy = linkage_name;
 
-  /* Set the symbol language.  */
-  char *demangled_name_ptr
-    = symbol_find_demangled_name (gsymbol, linkage_name_copy);
-  gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
-
   entry.mangled = linkage_name_copy;
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (per_bfd->demangled_names_hash,
@@ -858,6 +854,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       || (gsymbol->language == language_go
 	  && (*slot)->demangled[0] == '\0'))
     {
+      char *demangled_name_ptr
+	= symbol_find_demangled_name (gsymbol, linkage_name_copy);
+      gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
       int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
@@ -894,12 +893,16 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  strcpy (mangled_ptr, linkage_name_copy);
 	  (*slot)->mangled = mangled_ptr;
 	}
+      (*slot)->language = gsymbol->language;
 
       if (demangled_name != NULL)
-	strcpy ((*slot)->demangled, demangled_name.get());
+	strcpy ((*slot)->demangled, demangled_name.get ());
       else
 	(*slot)->demangled[0] = '\0';
     }
+  else if (gsymbol->language == language_unknown
+	   || gsymbol->language == language_auto)
+    gsymbol->language = (*slot)->language;
 
   gsymbol->name = (*slot)->mangled;
   if ((*slot)->demangled[0] != '\0')

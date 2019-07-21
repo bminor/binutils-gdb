@@ -1,3 +1,10 @@
+2019-06-10  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/24545
+	* symtab.c (struct demangled_name_entry): Add language field.
+	(symbol_set_names):  Revert "[gdb/symtab] Fix language of duplicate
+	static minimal symbol".  Set and use language field.
+
 2019-04-10  Kevin Buettner  <kevinb@redhat.com>
 
 	PR gdb/24592
