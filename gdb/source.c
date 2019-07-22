@@ -129,7 +129,7 @@ static int first_line_listed;
    Used to prevent repeating annoying "No such file or directories" msgs.  */
 
 static struct symtab *last_source_visited = NULL;
-static int last_source_error = 0;
+static bool last_source_error = false;
 
 /* Return the first line listed by print_source_lines.
    Used by command interpreters to request listing from
@@ -1129,8 +1129,7 @@ static void
 print_source_lines_base (struct symtab *s, int line, int stopline,
 			 print_source_lines_flags flags)
 {
-  scoped_fd desc;
-  int noprint = 0;
+  bool noprint = false;
   int nlines = stopline - line;
   struct ui_out *uiout = current_uiout;
 
@@ -1144,26 +1143,27 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   if (uiout->test_flags (ui_source_list))
     {
       /* Only prints "No such file or directory" once.  */
-      if ((s != last_source_visited) || (!last_source_error))
+      if (s == last_source_visited)
 	{
-	  last_source_visited = s;
-	  desc = open_source_file (s);
-	  if (desc.get () < 0)
+	  if (last_source_error)
 	    {
-	      last_source_error = desc.get ();
-	      noprint = 1;
+	      flags |= PRINT_SOURCE_LINES_NOERROR;
+	      noprint = true;
 	    }
 	}
       else
 	{
-	  flags |= PRINT_SOURCE_LINES_NOERROR;
-	  noprint = 1;
+	  last_source_visited = s;
+	  scoped_fd desc = open_source_file (s);
+	  last_source_error = desc.get () < 0;
+	  if (last_source_error)
+	    noprint = true;
 	}
     }
   else
     {
       flags |= PRINT_SOURCE_LINES_NOERROR;
-      noprint = 1;
+      noprint = true;
     }
 
   if (noprint)
@@ -1208,8 +1208,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
       return;
     }
-
-  last_source_error = 0;
 
   /* If the user requested a sequence of lines that seems to go backward
      (from high to low line numbers) then we don't print anything.  */

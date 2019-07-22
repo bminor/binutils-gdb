@@ -1,5 +1,11 @@
 2019-08-06  Tom Tromey  <tromey@adacore.com>
 
+	* source.c (last_source_error): Now bool.
+	(print_source_lines_base): Make "noprint" bool.  Only open
+	source file when last_source_visited changes.
+
+2019-08-06  Tom Tromey  <tromey@adacore.com>
+
 	* annotate.c (annotate_source_line): Use g_source_cache.
 	* source-cache.c (source_cache::get_plain_source_lines): Change
 	parameters.  Populate m_offset_cache.
