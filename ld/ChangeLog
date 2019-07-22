@@ -1,3 +1,11 @@
+2019-07-25  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	Backport from mainline
+	2019-07-22  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* testsuite/ld-arm/cmse_main_sec_debug.d: Modify regexps to
+	allow for output from an arm-none-linux-gnueabihf target.
+
 2019-07-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	Backport from mainline.
