@@ -71,3 +71,9 @@ vqrdmlsdht.s32 q0, q1, q2
 vqrdmlsdhe.s32 q0, q1, q2
 vqrdmlsdhxt.s16 q0, q1, q2
 vqrdmlsdhxe.s16 q0, q1, q2
+vqdmlsdh.s32 q0, q0, q0
+vqrdmlsdh.s32 q0, q0, q0
+vqdmlsdh.s32 q1, q1, q2
+vqrdmlsdh.s32 q2, q2, q3
+vqdmlsdh.s32 q3, q4, q3
+vqrdmlsdh.s32 q4, q5, q4

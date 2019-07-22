@@ -1,3 +1,15 @@
+2019-07-22  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/tc-arm.c (do_mve_vqdmladh): Remove check for UNPREDICTABLE.
+	* testsuite/gas/arm/mve-vqdmladh-bad.l: Remove tests.
+	* testsuite/gas/arm/mve-vqdmladh-bad.s: Remove tests.
+	* testsuite/gas/arm/mve-vqdmladh.d: New tests.
+	* testsuite/gas/arm/mve-vqdmladh.s: New tests.
+	* testsuite/gas/arm/mve-vqdmlsdh-bad.l: Remove tests.
+	* testsuite/gas/arm/mve-vqdmlsdh-bad.s: Remove tests.
+	* testsuite/gas/arm/mve-vqdmlsdh.d: New tests.
+	* testsuite/gas/arm/mve-vqdmlsdh.s: New tests.
+
 2019-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/noextreg.d: Pass -O0 to assembler.

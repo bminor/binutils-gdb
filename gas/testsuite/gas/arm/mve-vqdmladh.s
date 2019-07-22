@@ -73,3 +73,9 @@ vqrdmladht.s32 q0, q1, q2
 vqrdmladhe.s32 q0, q1, q2
 vqrdmladhxt.s16 q0, q1, q2
 vqrdmladhxe.s16 q0, q1, q2
+vqdmladh.s32 q0, q0, q0
+vqrdmladh.s32 q0, q0, q0
+vqdmladh.s32 q0, q0, q1
+vqrdmladh.s32 q1, q1, q2
+vqdmladh.s32 q2, q3, q2
+vqrdmladh.s32 q3, q4, q3

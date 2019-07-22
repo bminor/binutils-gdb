@@ -1399,3 +1399,9 @@ Disassembly of section .text:
 [^>]*> fe22 0e05 	vqrdmlsdhe.s32	q0, q1, q2
 [^>]*> fe12 1e05 	vqrdmlsdhxt.s16	q0, q1, q2
 [^>]*> fe12 1e05 	vqrdmlsdhxe.s16	q0, q1, q2
+[^>]*> fe20 0e00 	vqdmlsdh.s32	q0, q0, q0
+[^>]*> fe20 0e01 	vqrdmlsdh.s32	q0, q0, q0
+[^>]*> fe22 2e04 	vqdmlsdh.s32	q1, q1, q2
+[^>]*> fe24 4e07 	vqrdmlsdh.s32	q2, q2, q3
+[^>]*> fe28 6e06 	vqdmlsdh.s32	q3, q4, q3
+[^>]*> fe2a 8e09 	vqrdmlsdh.s32	q4, q5, q4

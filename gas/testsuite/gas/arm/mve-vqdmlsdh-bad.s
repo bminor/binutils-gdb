@@ -9,20 +9,12 @@ it \cond
 .thumb
 vqdmlsdh.u32 q0, q1, q2
 vqdmlsdh.s64 q0, q1, q2
-vqdmlsdh.s32 q0, q0, q2
-vqdmlsdh.s32 q0, q1, q0
 vqdmlsdhx.u32 q0, q1, q2
 vqdmlsdhx.s64 q0, q1, q2
-vqdmlsdhx.s32 q0, q0, q2
-vqdmlsdhx.s32 q0, q1, q0
 vqrdmlsdh.u32 q0, q1, q2
 vqrdmlsdh.s64 q0, q1, q2
-vqrdmlsdh.s32 q0, q0, q2
-vqrdmlsdh.s32 q0, q1, q0
 vqrdmlsdhx.u32 q0, q1, q2
 vqrdmlsdhx.s64 q0, q1, q2
-vqrdmlsdhx.s32 q0, q0, q2
-vqrdmlsdhx.s32 q0, q1, q0
 cond vqdmlsdh
 cond vqdmlsdhx
 cond vqrdmlsdh

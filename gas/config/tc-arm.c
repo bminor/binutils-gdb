@@ -17922,11 +17922,6 @@ do_mve_vqdmladh (void)
   else
     inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
 
-  if (et.size == 32
-      && (inst.operands[0].reg == inst.operands[1].reg
-	  || inst.operands[0].reg == inst.operands[2].reg))
-    as_tsktsk (BAD_MVE_SRCDEST);
-
   mve_encode_qqq (0, et.size);
 }
 

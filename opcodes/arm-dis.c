@@ -6546,10 +6546,6 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	return FALSE;
       }
 
-    case MVE_VQRDMLADH:
-    case MVE_VQDMLSDH:
-    case MVE_VQRDMLSDH:
-    case MVE_VQDMLADH:
     case MVE_VMULL_INT:
       {
 	unsigned long Qd;
