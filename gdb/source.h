@@ -76,11 +76,6 @@ extern scoped_fd find_and_open_source (const char *filename,
    negative number for error.  */
 extern scoped_fd open_source_file (struct symtab *s);
 
-/* Open a source file given a symtab S (by calling open_source_file), then
-   ensure the line_charpos data is initialised for symtab S before
-   returning.  */
-extern scoped_fd open_source_file_with_line_charpos (struct symtab *s);
-
 extern gdb::unique_xmalloc_ptr<char> rewrite_source_path (const char *path);
 
 extern const char *symtab_to_fullname (struct symtab *s);

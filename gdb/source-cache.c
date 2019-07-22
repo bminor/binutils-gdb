@@ -23,6 +23,8 @@
 #include "cli/cli-style.h"
 #include "symtab.h"
 #include "gdbsupport/selftest.h"
+#include "objfiles.h"
+#include "exec.h"
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
 /* If Gnulib redirects 'open' and 'close' to its replacements
@@ -46,60 +48,50 @@ source_cache g_source_cache;
 
 /* See source-cache.h.  */
 
-bool
-source_cache::get_plain_source_lines (struct symtab *s, std::string *lines)
+std::string
+source_cache::get_plain_source_lines (struct symtab *s,
+				      const std::string &fullname)
 {
-  scoped_fd desc (open_source_file_with_line_charpos (s));
+  scoped_fd desc (open_source_file (s));
   if (desc.get () < 0)
-    return false;
+    perror_with_name (symtab_to_filename_for_display (s));
 
   struct stat st;
-
   if (fstat (desc.get (), &st) < 0)
     perror_with_name (symtab_to_filename_for_display (s));
 
-  /* We could cache this in line_charpos... */
-  lines->resize (st.st_size);
-  if (myread (desc.get (), &(*lines)[0], lines->size ()) < 0)
+  std::string lines;
+  lines.resize (st.st_size);
+  if (myread (desc.get (), &lines[0], lines.size ()) < 0)
     perror_with_name (symtab_to_filename_for_display (s));
 
-  return true;
-}
+  time_t mtime = 0;
+  if (SYMTAB_OBJFILE (s) != NULL && SYMTAB_OBJFILE (s)->obfd != NULL)
+    mtime = SYMTAB_OBJFILE (s)->mtime;
+  else if (exec_bfd)
+    mtime = exec_bfd_mtime;
 
-/* A helper function for get_plain_source_lines that extracts the
-   desired source lines from TEXT, putting them into LINES_OUT.  The
-   arguments are as for get_source_lines.  The return value is the
-   desired lines.  */
-static std::string
-extract_lines (const std::string &text, int first_line, int last_line)
-{
-  int lineno = 1;
-  std::string::size_type pos = 0;
-  std::string::size_type first_pos = std::string::npos;
+  if (mtime && mtime < st.st_mtime)
+    warning (_("Source file is more recent than executable."));
 
-  while (pos != std::string::npos && lineno <= last_line)
+  std::vector<off_t> offsets;
+  offsets.push_back (0);
+  for (size_t offset = lines.find ('\n');
+       offset != std::string::npos;
+       offset = lines.find ('\n', offset))
     {
-      std::string::size_type new_pos = text.find ('\n', pos);
-
-      if (lineno == first_line)
-	first_pos = pos;
-
-      pos = new_pos;
-      if (lineno == last_line || pos == std::string::npos)
-	{
-	  if (first_pos == std::string::npos)
-	    return {};
-	  if (pos == std::string::npos)
-	    pos = text.size ();
-	  else
-	    ++pos;
-	  return text.substr (first_pos, pos - first_pos);
-	}
-      ++lineno;
-      ++pos;
+      ++offset;
+      /* A newline at the end does not start a new line.  It would
+	 seem simpler to just strip the newline in this function, but
+	 then "list" won't print the final newline.  */
+      if (offset != lines.size ())
+	offsets.push_back (offset);
     }
 
-  return {};
+  offsets.shrink_to_fit ();
+  m_offset_cache.emplace (fullname, std::move (offsets));
+
+  return lines;
 }
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
@@ -161,26 +153,31 @@ get_language_name (enum language lang)
 /* See source-cache.h.  */
 
 bool
-source_cache::get_source_lines (struct symtab *s, int first_line,
-				int last_line, std::string *lines)
+source_cache::ensure (struct symtab *s)
 {
-  if (first_line < 1 || last_line < 1 || first_line > last_line)
-    return false;
-
   std::string fullname = symtab_to_fullname (s);
 
-  for (const auto &item : m_source_map)
+  size_t size = m_source_map.size ();
+  for (int i = 0; i < size; ++i)
     {
-      if (item.fullname == fullname)
+      if (m_source_map[i].fullname == fullname)
 	{
-	  *lines = extract_lines (item.contents, first_line, last_line);
+	  /* This should always hold, because we create the file
+	     offsets when reading the file, and never free them
+	     without also clearing the contents cache.  */
+	  gdb_assert (m_offset_cache.find (fullname)
+		      != m_offset_cache.end ());
+	  /* Not strictly LRU, but at least ensure that the most
+	     recently used entry is always the last candidate for
+	     deletion.  Note that this property is relied upon by at
+	     least one caller.  */
+	  if (i != size - 1)
+	    std::swap (m_source_map[i], m_source_map[size - 1]);
 	  return true;
 	}
     }
 
-  std::string contents;
-  if (!get_plain_source_lines (s, &contents))
-    return false;
+  std::string contents = get_plain_source_lines (s, fullname);
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
   if (source_styling && gdb_stdout->can_emit_style_escape ())
@@ -215,9 +212,85 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
   if (m_source_map.size () > MAX_ENTRIES)
     m_source_map.erase (m_source_map.begin ());
 
-  *lines = extract_lines (m_source_map.back ().contents,
-			  first_line, last_line);
   return true;
+}
+
+/* See source-cache.h.  */
+
+bool
+source_cache::get_line_charpos (struct symtab *s,
+				const std::vector<off_t> **offsets)
+{
+  std::string fullname = symtab_to_fullname (s);
+
+  auto iter = m_offset_cache.find (fullname);
+  if (iter == m_offset_cache.end ())
+    {
+      ensure (s);
+      iter = m_offset_cache.find (fullname);
+      /* cache_source_text ensured this was entered.  */
+      gdb_assert (iter != m_offset_cache.end ());
+    }
+
+  *offsets = &iter->second;
+  return true;
+}
+
+/* A helper function that extracts the desired source lines from TEXT,
+   putting them into LINES_OUT.  The arguments are as for
+   get_source_lines.  Returns true on success, false if the line
+   numbers are invalid.  */
+
+static bool
+extract_lines (const std::string &text, int first_line, int last_line,
+	       std::string *lines_out)
+{
+  int lineno = 1;
+  std::string::size_type pos = 0;
+  std::string::size_type first_pos = std::string::npos;
+
+  while (pos != std::string::npos && lineno <= last_line)
+    {
+      std::string::size_type new_pos = text.find ('\n', pos);
+
+      if (lineno == first_line)
+	first_pos = pos;
+
+      pos = new_pos;
+      if (lineno == last_line || pos == std::string::npos)
+	{
+	  /* A newline at the end does not start a new line.  */
+	  if (first_pos == std::string::npos
+	      || first_pos == text.size ())
+	    return false;
+	  if (pos == std::string::npos)
+	    pos = text.size ();
+	  else
+	    ++pos;
+	  *lines_out = text.substr (first_pos, pos - first_pos);
+	  return true;
+	}
+      ++lineno;
+      ++pos;
+    }
+
+  return false;
+}
+
+/* See source-cache.h.  */
+
+bool
+source_cache::get_source_lines (struct symtab *s, int first_line,
+				int last_line, std::string *lines)
+{
+  if (first_line < 1 || last_line < 1 || first_line > last_line)
+    return false;
+
+  if (!ensure (s))
+    return false;
+
+  return extract_lines (m_source_map.back ().contents,
+			first_line, last_line, lines);
 }
 
 #if GDB_SELF_TEST
@@ -226,11 +299,15 @@ namespace selftests
 static void extract_lines_test ()
 {
   std::string input_text = "abc\ndef\nghi\njkl\n";
+  std::string result;
 
-  SELF_CHECK (extract_lines (input_text, 1, 1) == "abc\n");
-  SELF_CHECK (extract_lines (input_text, 2, 1) == "");
-  SELF_CHECK (extract_lines (input_text, 1, 2) == "abc\ndef\n");
-  SELF_CHECK (extract_lines ("abc", 1, 1) == "abc");
+  SELF_CHECK (extract_lines (input_text, 1, 1, &result)
+	      && result == "abc\n");
+  SELF_CHECK (!extract_lines (input_text, 2, 1, &result));
+  SELF_CHECK (extract_lines (input_text, 1, 2, &result)
+	      && result == "abc\ndef\n");
+  SELF_CHECK (extract_lines ("abc", 1, 1, &result)
+	      && result == "abc");
 }
 }
 #endif

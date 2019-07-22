@@ -251,7 +251,9 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
       l.loa = LOA_LINE;
       l.u.line_no = content[0].line_or_addr.u.line_no
 	+ num_to_scroll;
-      if (l.u.line_no > s->nlines)
+      const std::vector<off_t> *offsets;
+      if (g_source_cache.get_line_charpos (s, &offsets)
+	  && l.u.line_no > offsets->size ())
 	/* line = s->nlines - win_info->content_size + 1; */
 	/* elz: fix for dts 23398.  */
 	l.u.line_no = content[0].line_or_addr.u.line_no;

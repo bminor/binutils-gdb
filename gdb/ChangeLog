@@ -1,5 +1,30 @@
 2019-08-06  Tom Tromey  <tromey@adacore.com>
 
+	* annotate.c (annotate_source_line): Use g_source_cache.
+	* source-cache.c (source_cache::get_plain_source_lines): Change
+	parameters.  Populate m_offset_cache.
+	(source_cache::ensure): New method.
+	(source_cache::get_line_charpos): New method.
+	(extract_lines): Move lower.  Change parameters.
+	(source_cache::get_source_lines): Move lower.
+	* source-cache.h (class source_cache): Update comment.
+	<get_line_charpos>: New method.
+	<get_source_lines>: Update comment.
+	<clear>: Clear m_offset_cache.
+	<get_plain_source_lines>: Change parameters.
+	<ensure>: New method
+	<m_offset_cache>: New member.
+	* source.c (forget_cached_source_info_for_objfile): Update.
+	(info_source_command): Use g_source_cache.
+	(find_source_lines, open_source_file_with_line_charpos): Remove.
+	(print_source_lines_base, search_command_helper): Use g_source_cache.
+	* source.h (open_source_file_with_line_charpos): Don't declare.
+	* symtab.h (struct symtab) <nlines, line_charpos>: Remove.
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical):
+	Use g_source_cache.
+
+2019-08-06  Tom Tromey  <tromey@adacore.com>
+
 	* source-cache.c (source_cache::get_plain_source_lines):
 	Remove "first_line" and "last_line" parameters.
 	(source_cache::get_source_lines): Cache plain text.

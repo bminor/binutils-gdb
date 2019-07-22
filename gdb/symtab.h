@@ -1321,16 +1321,6 @@ struct symtab
 
   const char *filename;
 
-  /* Total number of lines found in source file.  */
-
-  int nlines;
-
-  /* line_charpos[N] is the position of the (N-1)th line of the
-     source file.  "position" means something we can lseek() to; it
-     is not guaranteed to be useful any other way.  */
-
-  int *line_charpos;
-
   /* Language of this source file.  */
 
   enum language language;

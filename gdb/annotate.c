@@ -28,6 +28,7 @@
 #include "top.h"
 #include "source.h"
 #include "objfiles.h"
+#include "source-cache.h"
 
 
 /* Prototypes for local functions.  */
@@ -440,15 +441,15 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
 {
   if (annotation_level > 0)
     {
-      if (s->line_charpos == nullptr)
-	open_source_file_with_line_charpos (s);
-      if (s->fullname == nullptr)
-	return;
-      /* Don't index off the end of the line_charpos array.  */
-      if (line > s->nlines)
+      const std::vector<off_t> *offsets;
+      if (!g_source_cache.get_line_charpos (s, &offsets))
 	return;
 
-      annotate_source (s->fullname, line, s->line_charpos[line - 1],
+      /* Don't index off the end of the line_charpos array.  */
+      if (line > offsets->size ())
+	return;
+
+      annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
 		       mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)),
 		       pc);
     }

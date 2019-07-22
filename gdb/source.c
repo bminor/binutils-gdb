@@ -357,11 +357,6 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
     {
       for (symtab *s : compunit_filetabs (cu))
 	{
-	  if (s->line_charpos != NULL)
-	    {
-	      xfree (s->line_charpos);
-	      s->line_charpos = NULL;
-	    }
 	  if (s->fullname != NULL)
 	    {
 	      xfree (s->fullname);
@@ -642,9 +637,10 @@ info_source_command (const char *ignore, int from_tty)
     printf_filtered (_("Compilation directory is %s\n"), SYMTAB_DIRNAME (s));
   if (s->fullname)
     printf_filtered (_("Located in %s\n"), s->fullname);
-  if (s->nlines)
-    printf_filtered (_("Contains %d line%s.\n"), s->nlines,
-		     s->nlines == 1 ? "" : "s");
+  const std::vector<off_t> *offsets;
+  if (g_source_cache.get_line_charpos (s, &offsets))
+    printf_filtered (_("Contains %d line%s.\n"), (int) offsets->size (),
+		     offsets->size () == 1 ? "" : "s");
 
   printf_filtered (_("Source language is %s.\n"), language_str (s->language));
   printf_filtered (_("Producer is %s.\n"),
@@ -1123,92 +1119,6 @@ symtab_to_filename_for_display (struct symtab *symtab)
   else
     internal_error (__FILE__, __LINE__, _("invalid filename_display_string"));
 }
-
-/* Create and initialize the table S->line_charpos that records
-   the positions of the lines in the source file, which is assumed
-   to be open on descriptor DESC.
-   All set S->nlines to the number of such lines.  */
-
-static void
-find_source_lines (struct symtab *s, int desc)
-{
-  struct stat st;
-  char *p, *end;
-  int nlines = 0;
-  int lines_allocated = 1000;
-  int *line_charpos;
-  long mtime = 0;
-  int size;
-
-  gdb_assert (s);
-  line_charpos = XNEWVEC (int, lines_allocated);
-  if (fstat (desc, &st) < 0)
-    perror_with_name (symtab_to_filename_for_display (s));
-
-  if (SYMTAB_OBJFILE (s) != NULL && SYMTAB_OBJFILE (s)->obfd != NULL)
-    mtime = SYMTAB_OBJFILE (s)->mtime;
-  else if (exec_bfd)
-    mtime = exec_bfd_mtime;
-
-  if (mtime && mtime < st.st_mtime)
-    warning (_("Source file is more recent than executable."));
-
-  {
-    /* st_size might be a large type, but we only support source files whose 
-       size fits in an int.  */
-    size = (int) st.st_size;
-
-    /* Use the heap, not the stack, because this may be pretty large,
-       and we may run into various kinds of limits on stack size.  */
-    gdb::def_vector<char> data (size);
-
-    /* Reassign `size' to result of read for systems where \r\n -> \n.  */
-    size = myread (desc, data.data (), size);
-    if (size < 0)
-      perror_with_name (symtab_to_filename_for_display (s));
-    end = data.data () + size;
-    p = &data[0];
-    line_charpos[0] = 0;
-    nlines = 1;
-    while (p != end)
-      {
-	if (*p++ == '\n'
-	/* A newline at the end does not start a new line.  */
-	    && p != end)
-	  {
-	    if (nlines == lines_allocated)
-	      {
-		lines_allocated *= 2;
-		line_charpos =
-		  (int *) xrealloc ((char *) line_charpos,
-				    sizeof (int) * lines_allocated);
-	      }
-	    line_charpos[nlines++] = p - data.data ();
-	  }
-      }
-  }
-
-  s->nlines = nlines;
-  s->line_charpos =
-    (int *) xrealloc ((char *) line_charpos, nlines * sizeof (int));
-
-}
-
-
-
-/* See source.h.  */
-
-scoped_fd
-open_source_file_with_line_charpos (struct symtab *s)
-{
-  scoped_fd fd (open_source_file (s));
-  if (fd.get () < 0)
-    return fd;
-
-  if (s->line_charpos == nullptr)
-    find_source_lines (s, fd.get ());
-  return fd;
-}
 
 
 
@@ -1308,8 +1218,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   std::string lines;
   if (!g_source_cache.get_source_lines (s, line, stopline - 1, &lines))
-    error (_("Line number %d out of range; %s has %d lines."),
-	   line, symtab_to_filename_for_display (s), s->nlines);
+    {
+      const std::vector<off_t> *offsets = nullptr;
+      g_source_cache.get_line_charpos (s, &offsets);
+      error (_("Line number %d out of range; %s has %d lines."),
+	     line, symtab_to_filename_for_display (s),
+	     offsets == nullptr ? 0 : (int) offsets->size ());
+    }
 
   const char *iter = lines.c_str ();
   while (nlines-- > 0 && *iter != '\0')
@@ -1524,7 +1439,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  scoped_fd desc (open_source_file_with_line_charpos (current_source_symtab));
+  scoped_fd desc (open_source_file (current_source_symtab));
   if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
@@ -1532,11 +1447,13 @@ search_command_helper (const char *regex, int from_tty, bool forward)
 	      ? last_line_listed + 1
 	      : last_line_listed - 1);
 
-  if (line < 1 || line > current_source_symtab->nlines)
+  const std::vector<off_t> *offsets;
+  if (line < 1
+      || !g_source_cache.get_line_charpos (current_source_symtab, &offsets)
+      || line > offsets->size ())
     error (_("Expression not found"));
 
-  if (lseek (desc.get (), current_source_symtab->line_charpos[line - 1], 0)
-      < 0)
+  if (lseek (desc.get (), (*offsets)[line - 1], 0) < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
   gdb_file_up stream = desc.to_file (FDOPEN_MODE);
@@ -1585,8 +1502,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
 	  line--;
 	  if (line < 1)
 	    break;
-	  if (fseek (stream.get (),
-		     current_source_symtab->line_charpos[line - 1], 0) < 0)
+	  if (fseek (stream.get (), (*offsets)[line - 1], 0) < 0)
 	    {
 	      const char *filename
 		= symtab_to_filename_for_display (current_source_symtab);
