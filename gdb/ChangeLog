@@ -1,3 +1,8 @@
+2019-07-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_win_info::make_invisible_and_set_new_height):
+	Don't self-assign.
+
 2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* c-typeprint.c (c_print_typedef): Pass -1 instead of 0 to

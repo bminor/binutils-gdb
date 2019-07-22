@@ -1194,10 +1194,10 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 /* See tui-data.h.  */
 
 void
-tui_win_info::make_invisible_and_set_new_height (int height)
+tui_win_info::make_invisible_and_set_new_height (int height_)
 {
   make_visible (false);
-  height = height;
+  height = height_;
   if (height > 1)
     viewport_height = height - 1;
   else
