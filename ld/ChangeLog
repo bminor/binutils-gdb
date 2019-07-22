@@ -1,3 +1,8 @@
+2019-07-22  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* ld/testsuite/ld-arm/cmse_main_sec_debug.d: Modify regexps to
+	allow for output from a arm-none-linux-gnueabihf target.
+
 2019-07-20  Alan Modra  <amodra@gmail.com>
 
 	PR 24827
