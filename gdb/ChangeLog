@@ -1,5 +1,13 @@
 2019-08-06  Tom Tromey  <tromey@adacore.com>
 
+	* source-cache.c (source_cache::get_plain_source_lines):
+	Remove "first_line" and "last_line" parameters.
+	(source_cache::get_source_lines): Cache plain text.
+	* source-cache.h (class source_cache)
+	<get_plain_source_lines>: Update.
+
+2019-08-06  Tom Tromey  <tromey@adacore.com>
+
 	* source-cache.c (extract_lines): No longer a method.
 	Changed type of parameter.  Include final newline.
 	(selftests::extract_lines_test): New function.

@@ -58,11 +58,10 @@ private:
     std::string contents;
   };
 
-  /* A helper function for get_source_lines that is used when the
-     source lines are not highlighted.  The arguments and return value
-     are as for get_source_lines.  */
-  bool get_plain_source_lines (struct symtab *s, int first_line,
-			       int last_line, std::string *lines_out);
+  /* A helper function for get_source_lines reads a source file.
+     Returns false on error.  If no error, the contents of the file
+     are put into *LINES_OUT, and returns true.  */
+  bool get_plain_source_lines (struct symtab *s, std::string *lines_out);
 
   /* The contents of the cache.  */
   std::vector<source_text> m_source_map;
