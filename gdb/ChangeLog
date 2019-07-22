@@ -1,3 +1,9 @@
+2019-07-21  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (lookup_symbol_in_objfile_symtabs): Change int to block_enum.
+	(lookup_symbol_in_objfile): Change int to block_enum and add a
+	gdb_assert to make sure block_index is GLOBAL_BLOCK or STATIC_BLOCK.
+
 2019-07-20  Christian Biesinger  <cbiesinger@google.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
