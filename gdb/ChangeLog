@@ -1,3 +1,46 @@
+2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-utils.c (info_print_options_defs): Delete.
+	(make_info_print_options_def_group): Delete.
+	(extract_info_print_options): Delete.
+	(info_print_command_completer): Delete.
+	(info_print_args_help): Add extra parameter, and optionally
+	include text about -n flag.
+	* cli/cli-utils.h (struct info_print_options): Delete.
+	(extract_info_print_options): Delete declaration.
+	(info_print_command_completer): Delete declaration.
+	(info_print_args_help): Add extra parameter, extend header
+	comment.
+	* python/python.c (gdbpy_rbreak): Pass additional parameter to
+	search_symbols.
+	* stack.c (struct info_print_options): New type.
+	(info_print_options_defs): New file scoped variable.
+	(make_info_print_options_def_group): New static function.
+	(info_print_command_completer): New static function.
+	(info_locals_command): Update to use new local functions.
+	(info_args_command): Likewise.
+	(_initialize_stack): Add extra parameter to calls to
+	info_print_args_help.
+	* symtab.c (search_symbols): Add extra parameter, use this to
+	possibly excluse non-debug symbols.
+	(symtab_symbol_info): Add extra parameter, which is passed on to
+	search_symbols.
+	(struct info_print_options): New type.
+	(info_print_options_defs): New file scoped variable.
+	(make_info_print_options_def_group): New static function.
+	(info_print_command_completer): New static function.
+	(info_variables_command): Update to use local functions, and pass
+	extra parameter through to symtab_symbol_info.
+	(info_functions_command): Likewise.
+	(info_types_command): Pass additional argument through to
+	symtab_symbol_info.
+	(rbreak_command): Pass extra argument to search_symbols.
+	(_initialize_symtab): Add extra arguments for calls to
+	info_print_args_help, and update help text for 'info variables',
+	'whereis', and 'info functions' commands.
+	* symtab.h (search_symbols): Add extra argument to declaration.
+	* NEWS: Mention new flags.
+
 2019-08-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.c (lookup_static_symbol): Call the new function (and move

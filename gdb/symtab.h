@@ -2027,7 +2027,8 @@ extern std::vector<symbol_search> search_symbols (const char *,
 						  enum search_domain,
 						  const char *,
 						  int,
-						  const char **);
+						  const char **,
+						  bool);
 extern bool treg_matches_sym_type_name (const compiled_regex &treg,
 					const struct symbol *sym);
 

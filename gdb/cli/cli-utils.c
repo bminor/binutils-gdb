@@ -194,7 +194,8 @@ report_unrecognized_option_error (const char *command, const char *args)
 
 const char *
 info_print_args_help (const char *prefix,
-		      const char *entity_kind)
+		      const char *entity_kind,
+		      bool document_n_flag)
 {
   return xstrprintf (_("\
 %sIf NAMEREGEXP is provided, only prints the %s whose name\n\
@@ -204,8 +205,11 @@ matches TYPEREGEXP.  Note that the matching is done with the type\n\
 printed by the 'whatis' command.\n\
 By default, the command might produce headers and/or messages indicating\n\
 why no %s can be printed.\n\
-The flag -q disables the production of these headers and messages."),
-		     prefix, entity_kind, entity_kind, entity_kind);
+The flag -q disables the production of these headers and messages.%s"),
+		     prefix, entity_kind, entity_kind, entity_kind,
+		     (document_n_flag ? _("\n\
+By default, the command will include non-debug symbols in the output;\n\
+these can be excluded using the -n flag.") : ""));
 }
 
 /* See documentation in cli-utils.h.  */
@@ -435,58 +439,3 @@ validate_flags_qcs (const char *which_command, qcs_flags *flags)
     error (_("%s: -c and -s are mutually exclusive"), which_command);
 }
 
-/* The options used by the 'info variables' commands and similar.  */
-
-static const gdb::option::option_def info_print_options_defs[] = {
-  gdb::option::boolean_option_def<info_print_options> {
-    "q",
-    [] (info_print_options *opt) { return &opt->quiet; },
-    nullptr, /* show_cmd_cb */
-    nullptr /* set_doc */
-  },
-
-  gdb::option::string_option_def<info_print_options> {
-    "t",
-    [] (info_print_options *opt) { return &opt->type_regexp; },
-    nullptr, /* show_cmd_cb */
-    nullptr /* set_doc */
-  }
-};
-
-/* Returns the option group used by 'info variables' and similar.  */
-
-static gdb::option::option_def_group
-make_info_print_options_def_group (info_print_options *opts)
-{
-  return {{info_print_options_defs}, opts};
-}
-
-/* See documentation in cli-utils.h.  */
-
-void
-extract_info_print_options (info_print_options *opts,
-			    const char **args)
-{
-  auto grp = make_info_print_options_def_group (opts);
-  gdb::option::process_options
-    (args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
-  if (*args != nullptr && **args == '\0')
-    *args = nullptr;
-}
-
-/* See documentation in cli-utils.h.  */
-
-void
-info_print_command_completer (struct cmd_list_element *ignore,
-			      completion_tracker &tracker,
-			      const char *text, const char * /* word */)
-{
-  const auto group
-    = make_info_print_options_def_group (nullptr);
-  if (gdb::option::complete_options
-      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
-    return;
-
-  const char *word = advance_to_expression_complete_word_point (tracker, text);
-  symbol_completer (ignore, tracker, text, word);
-}

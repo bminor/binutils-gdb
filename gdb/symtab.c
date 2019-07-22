@@ -4453,12 +4453,16 @@ sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 
    Within each file the results are sorted locally; each symtab's global and
    static blocks are separately alphabetized.
-   Duplicate entries are removed.  */
+   Duplicate entries are removed.
+
+   When EXCLUDE_MINSYMS is false then matching minsyms are also returned,
+   otherwise they are excluded.  */
 
 std::vector<symbol_search>
 search_symbols (const char *regexp, enum search_domain kind,
 		const char *t_regexp,
-		int nfiles, const char *files[])
+		int nfiles, const char *files[],
+		bool exclude_minsyms)
 {
   const struct blockvector *bv;
   const struct block *b;
@@ -4674,6 +4678,7 @@ search_symbols (const char *regexp, enum search_domain kind,
      as we assume that a minimal symbol does not have a type.  */
 
   if ((found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
+      && !exclude_minsyms
       && !treg.has_value ())
     {
       for (objfile *objfile : current_program_space->objfiles ())
@@ -4820,7 +4825,7 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
    matches.  */
 
 static void
-symtab_symbol_info (bool quiet,
+symtab_symbol_info (bool quiet, bool exclude_minsyms,
 		    const char *regexp, enum search_domain kind,
 		    const char *t_regexp, int from_tty)
 {
@@ -4836,7 +4841,8 @@ symtab_symbol_info (bool quiet,
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
   std::vector<symbol_search> symbols = search_symbols (regexp, kind,
-						       t_regexp, 0, NULL);
+						       t_regexp, 0, NULL,
+						       exclude_minsyms);
 
   if (!quiet)
     {
@@ -4889,15 +4895,87 @@ symtab_symbol_info (bool quiet,
     }
 }
 
+/* Structure to hold the values of the options used by the 'info variables'
+   and 'info functions' commands.  These correspond to the -q, -t, and -n
+   options.  */
+
+struct info_print_options
+{
+  int quiet = false;
+  int exclude_minsyms = false;
+  char *type_regexp = nullptr;
+
+  ~info_print_options ()
+  {
+    xfree (type_regexp);
+  }
+};
+
+/* The options used by the 'info variables' and 'info functions'
+   commands.  */
+
+static const gdb::option::option_def info_print_options_defs[] = {
+  gdb::option::boolean_option_def<info_print_options> {
+    "q",
+    [] (info_print_options *opt) { return &opt->quiet; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::boolean_option_def<info_print_options> {
+    "n",
+    [] (info_print_options *opt) { return &opt->exclude_minsyms; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::string_option_def<info_print_options> {
+    "t",
+    [] (info_print_options *opt) { return &opt->type_regexp; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Returns the option group used by 'info variables' and 'info
+   functions'.  */
+
+static gdb::option::option_def_group
+make_info_print_options_def_group (info_print_options *opts)
+{
+  return {{info_print_options_defs}, opts};
+}
+
+/* Command completer for 'info variables' and 'info functions'.  */
+
+static void
+info_print_command_completer (struct cmd_list_element *ignore,
+			      completion_tracker &tracker,
+			      const char *text, const char * /* word */)
+{
+  const auto group
+    = make_info_print_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+  symbol_completer (ignore, tracker, text, word);
+}
+
 /* Implement the 'info variables' command.  */
 
 static void
 info_variables_command (const char *args, int from_tty)
 {
   info_print_options opts;
-  extract_info_print_options (&opts, &args);
+  auto grp = make_info_print_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
 
-  symtab_symbol_info (opts.quiet, args, VARIABLES_DOMAIN,
+  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args, VARIABLES_DOMAIN,
 		      opts.type_regexp, from_tty);
 }
 
@@ -4907,10 +4985,14 @@ static void
 info_functions_command (const char *args, int from_tty)
 {
   info_print_options opts;
-  extract_info_print_options (&opts, &args);
+  auto grp = make_info_print_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
 
-  symtab_symbol_info (opts.quiet, args, FUNCTIONS_DOMAIN,
-		      opts.type_regexp, from_tty);
+  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args,
+		      FUNCTIONS_DOMAIN, opts.type_regexp, from_tty);
 }
 
 /* Holds the -q option for the 'info types' command.  */
@@ -4951,7 +5033,7 @@ info_types_command (const char *args, int from_tty)
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
   if (args != nullptr && *args == '\0')
     args = nullptr;
-  symtab_symbol_info (opts.quiet, args, TYPES_DOMAIN, NULL, from_tty);
+  symtab_symbol_info (opts.quiet, false, args, TYPES_DOMAIN, NULL, from_tty);
 }
 
 /* Command completer for 'info types' command.  */
@@ -5012,7 +5094,8 @@ rbreak_command (const char *regexp, int from_tty)
   std::vector<symbol_search> symbols = search_symbols (regexp,
 						       FUNCTIONS_DOMAIN,
 						       NULL,
-						       nfiles, files);
+						       nfiles, files,
+						       false);
 
   scoped_rbreak_breakpoints finalize;
   for (const symbol_search &p : symbols)
@@ -6201,27 +6284,30 @@ _initialize_symtab (void)
   c = add_info ("variables", info_variables_command,
 		info_print_args_help (_("\
 All global and static variable names or those matching REGEXPs.\n\
-Usage: info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Usage: info variables [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
-				  _("global and static variables")));
+				      _("global and static variables"),
+				      true));
   set_cmd_completer_handle_brkchars (c, info_print_command_completer);
   if (dbx_commands)
     {
       c = add_com ("whereis", class_info, info_variables_command,
 		   info_print_args_help (_("\
 All global and static variable names, or those matching REGEXPs.\n\
-Usage: whereis [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Usage: whereis [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
-				   _("global and static variables")));
+					 _("global and static variables"),
+					 true));
       set_cmd_completer_handle_brkchars (c, info_print_command_completer);
     }
 
   c = add_info ("functions", info_functions_command,
 		info_print_args_help (_("\
 All function names or those matching REGEXPs.\n\
-Usage: info functions [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Usage: info functions [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the functions.\n"),
-				  _("functions")));
+				      _("functions"),
+				      true));
   set_cmd_completer_handle_brkchars (c, info_print_command_completer);
 
   c = add_info ("types", info_types_command, _("\

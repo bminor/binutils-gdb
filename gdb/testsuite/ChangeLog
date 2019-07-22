@@ -1,3 +1,12 @@
+2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/info-fun.exp: Extend to test the -n flag for 'info
+	functions'.  Reindent as needed.
+	* gdb.base/info-var-f1.c: New file.
+	* gdb.base/info-var-f2.c: New file.
+	* gdb.base/info-var.exp: New file.
+	* gdb.base/info-var.h: New file.
+
 2019-08-26  Tom de Vries  <tdevries@suse.de>
 
 	PR c++/24852

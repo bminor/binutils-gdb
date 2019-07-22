@@ -47,38 +47,6 @@ extern int get_number (char **);
    error instead of returning 0.  */
 extern ULONGEST get_ulongest (const char **pp, int trailer = '\0');
 
-/* Structure to hold the values of the options used by the 'info
-   variables' command and other similar commands.  These correspond to the
-   -q and -t options.  */
-
-struct info_print_options
-{
-  int quiet = false;
-  char *type_regexp = nullptr;
-
-  ~info_print_options ()
-  {
-    xfree (type_regexp);
-  }
-};
-
-/* Extract options from ARGS for commands like 'info variables', placing
-   the options into OPTS.  ARGS is updated to point to the first character
-   after the options, or, if there is nothing after the options, then ARGS
-   is set to nullptr.  */
-
-extern void extract_info_print_options (info_print_options *opts,
-					const char **args);
-
-/* Function that can be used as a command completer for 'info variable'
-   and friends.  This offers command option completion as well as symbol
-   completion.  At the moment all symbols are offered for all commands.  */
-
-extern void info_print_command_completer (struct cmd_list_element *ignore,
-					  completion_tracker &tracker,
-					  const char *text,
-					  const char * /* word */);
-
 /* Throws an error telling the user that ARGS starts with an option
    unrecognized by COMMAND.  */
 
@@ -87,10 +55,13 @@ extern void report_unrecognized_option_error (const char *command,
 
 
 /* Builds the help string for a command documented by PREFIX,
-   followed by the extract_info_print_args help for ENTITY_KIND.  */
+   followed by the extract_info_print_args help for ENTITY_KIND.  If
+   DOCUMENT_N_FLAG is true then help text descibing the -n flag is also
+   included.  */
 
 const char *info_print_args_help (const char *prefix,
-				  const char *entity_kind);
+				  const char *entity_kind,
+				  bool document_n_flag);
 
 /* Parse a number or a range.
    A number will be of the form handled by get_number.

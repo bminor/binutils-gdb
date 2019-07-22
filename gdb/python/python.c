@@ -739,10 +739,10 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
       const char **files = symtab_paths.vec.data ();
 
       symbols = search_symbols (regex, FUNCTIONS_DOMAIN, NULL,
-				symtab_paths.vec.size (), files);
+				symtab_paths.vec.size (), files, false);
     }
   else
-    symbols = search_symbols (regex, FUNCTIONS_DOMAIN, NULL, 0, NULL);
+    symbols = search_symbols (regex, FUNCTIONS_DOMAIN, NULL, 0, NULL, false);
 
   /* Count the number of symbols (both symbols and optionally minimal
      symbols) so we can correctly check the throttle limit.  */

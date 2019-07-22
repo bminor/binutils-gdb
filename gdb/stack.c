@@ -2417,13 +2417,76 @@ print_frame_local_vars (struct frame_info *frame,
     }
 }
 
+/* Structure to hold the values of the options used by the 'info
+   variables' command and other similar commands.  These correspond to the
+   -q and -t options.  */
+
+struct info_print_options
+{
+  int quiet = false;
+  char *type_regexp = nullptr;
+
+  ~info_print_options ()
+  {
+    xfree (type_regexp);
+  }
+};
+
+/* The options used by the 'info locals' and 'info args' commands.  */
+
+static const gdb::option::option_def info_print_options_defs[] = {
+  gdb::option::boolean_option_def<info_print_options> {
+    "q",
+    [] (info_print_options *opt) { return &opt->quiet; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  },
+
+  gdb::option::string_option_def<info_print_options> {
+    "t",
+    [] (info_print_options *opt) { return &opt->type_regexp; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Returns the option group used by 'info locals' and 'info args'
+   commands.  */
+
+static gdb::option::option_def_group
+make_info_print_options_def_group (info_print_options *opts)
+{
+  return {{info_print_options_defs}, opts};
+}
+
+/* Command completer for 'info locals' and 'info args'.  */
+
+static void
+info_print_command_completer (struct cmd_list_element *ignore,
+			      completion_tracker &tracker,
+			      const char *text, const char * /* word */)
+{
+  const auto group
+    = make_info_print_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+  symbol_completer (ignore, tracker, text, word);
+}
+
 /* Implement the 'info locals' command.  */
 
 void
 info_locals_command (const char *args, int from_tty)
 {
   info_print_options opts;
-  extract_info_print_options (&opts, &args);
+  auto grp = make_info_print_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
 
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
 			  opts.quiet, args, opts.type_regexp,
@@ -2530,7 +2593,11 @@ void
 info_args_command (const char *args, int from_tty)
 {
   info_print_options opts;
-  extract_info_print_options (&opts, &args);
+  auto grp = make_info_print_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+  if (args != nullptr && *args == '\0')
+    args = nullptr;
 
   print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
 			opts.quiet, args, opts.type_regexp, gdb_stdout);
@@ -3487,14 +3554,16 @@ Usage: info frame level LEVEL"),
 All local variables of current stack frame or those matching REGEXPs.\n\
 Usage: info locals [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the local variables of the current stack frame.\n"),
-				  _("local variables")));
+					_("local variables"),
+					false));
   set_cmd_completer_handle_brkchars (cmd, info_print_command_completer);
   cmd = add_info ("args", info_args_command,
 		  info_print_args_help (_("\
 All argument variables of current stack frame or those matching REGEXPs.\n\
 Usage: info args [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the argument variables of the current stack frame.\n"),
-				  _("argument variables")));
+					_("argument variables"),
+					false));
   set_cmd_completer_handle_brkchars (cmd, info_print_command_completer);
 
   if (dbx_commands)

@@ -18594,7 +18594,7 @@ The matching is case-sensitive, except on operating systems that
 have case-insensitive filesystem (e.g., MS-Windows).
 
 @kindex info functions
-@item info functions [-q]
+@item info functions [-q] [-n]
 Print the names and data types of all defined functions.
 Similarly to @samp{info types}, this command groups its output by source
 files and annotates each function definition with its source line
@@ -18607,11 +18607,16 @@ to print the function name and type according to the
 language of the function, other values mean to use
 the manually specified language (see @ref{Manually, ,Set Language Manually}).
 
+The @samp{-n} flag excludes @dfn{non-debugging symbols} from the
+results.  A non-debugging symbol is a symbol that comes from the
+executable's symbol table, not from the debug information (for
+example, DWARF) associated with the executable.
+
 The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no functions
 have been printed.
 
-@item info functions [-q] [-t @var{type_regexp}] [@var{regexp}]
+@item info functions [-q] [-n] [-t @var{type_regexp}] [@var{regexp}]
 Like @samp{info functions}, but only print the names and data types
 of the functions selected with the provided regexp(s).
 
@@ -18641,7 +18646,7 @@ is printed only if its name matches @var{regexp} and its type matches
 
 
 @kindex info variables
-@item info variables [-q]
+@item info variables [-q] [-n]
 Print the names and data types of all variables that are defined
 outside of functions (i.e.@: excluding local variables).
 The printed variables are grouped by source files and annotated with
@@ -18654,11 +18659,13 @@ to print the variable name and type according to the
 language of the variable, other values mean to use
 the manually specified language (see @ref{Manually, ,Set Language Manually}).
 
+The @samp{-n} flag excludes non-debugging symbols from the results.
+
 The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no variables
 have been printed.
 
-@item info variables [-q] [-t @var{type_regexp}] [@var{regexp}]
+@item info variables [-q] [-n] [-t @var{type_regexp}] [@var{regexp}]
 Like @kbd{info variables}, but only print the variables selected
 with the provided regexp(s).
 

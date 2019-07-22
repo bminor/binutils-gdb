@@ -256,6 +256,11 @@ maint show test-options-completion-result
      printing of some header information in a similar fashion to "info
      variables" and "info functions".
 
+  ** The "info variables", "info functions", and "whereis" commands
+     now take a '-n' flag that excludes non-debug symbols (symbols
+     from the symbol table, not from the debug info such as DWARF)
+     from the results.
+
 * Completion improvements
 
   ** GDB can now complete the options of the "thread apply all" and
