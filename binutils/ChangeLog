@@ -1,3 +1,11 @@
+2019-07-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 24818
+	* objdump.c (is_relocateable): Delete.
+	(load_specific_debug_section): Test the abfd for relocations
+	directly, rather than relying upon is_relocateable.
+	(dump_dwarf): Delete initlialization of is_relocateable.
+
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_parisc_segment_type): Split off hpux entries..

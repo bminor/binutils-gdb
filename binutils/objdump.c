@@ -192,8 +192,6 @@ static bfd_size_type stab_size;
 static bfd_byte *strtab;
 static bfd_size_type stabstr_size;
 
-static bfd_boolean is_relocatable = FALSE;
-
 /* Handlers for -P/--private.  */
 static const struct objdump_private_desc * const objdump_private_vectors[] =
   {
@@ -2749,7 +2747,8 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   /* Ensure any string section has a terminating NUL.  */
   section->start[section->size] = 0;
 
-  if (is_relocatable && debug_displays [debug].relocate)
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
+      && debug_displays [debug].relocate)
     {
       long         reloc_size;
       bfd_boolean  ret;
@@ -2942,8 +2941,6 @@ dump_dwarf (bfd *abfd)
 	    bfd_get_filename (abfd));
       return;
     }
-
-  is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
 
   eh_addr_size = bfd_arch_bits_per_address (abfd) / 8;
 
