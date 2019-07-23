@@ -186,6 +186,9 @@ maint show test-options-completion-result
   Commands used by the testsuite to validate the command options
   framework.
 
+focus, winheight, +, -, >, <
+  These commands are now case-sensitive.
+
 * New command options, command completion
 
   GDB now has a standard infrastructure to support dash-style command

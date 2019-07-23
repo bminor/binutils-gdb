@@ -776,35 +776,27 @@ tui_set_focus_command (const char *arg, int from_tty)
 
   if (arg != NULL)
     {
-      char *buf_ptr = xstrdup (arg);
-      int i;
       struct tui_win_info *win_info = NULL;
 
-      for (i = 0; (i < strlen (buf_ptr)); i++)
-	buf_ptr[i] = tolower (arg[i]);
-
-      if (subset_compare (buf_ptr, "next"))
+      if (subset_compare (arg, "next"))
 	win_info = tui_next_win (tui_win_with_focus ());
-      else if (subset_compare (buf_ptr, "prev"))
+      else if (subset_compare (arg, "prev"))
 	win_info = tui_prev_win (tui_win_with_focus ());
       else
-	win_info = tui_partial_win_by_name (buf_ptr);
+	win_info = tui_partial_win_by_name (arg);
 
-      if (win_info == NULL || !win_info->is_visible ())
-	warning (_("Invalid window specified. \n\
-The window name specified must be valid and visible.\n"));
-      else
-	{
-	  tui_set_win_focus_to (win_info);
-	  keypad (TUI_CMD_WIN->handle, (win_info != TUI_CMD_WIN));
-	}
+      if (win_info == NULL)
+	error (_("Unrecognized window name \"%s\""), arg);
+      if (!win_info->is_visible ())
+	error (_("Window \"%s\" is not visible"), arg);
 
-      xfree (buf_ptr);
+      tui_set_win_focus_to (win_info);
+      keypad (TUI_CMD_WIN->handle, (win_info != TUI_CMD_WIN));
       printf_filtered (_("Focus set to %s window.\n"),
 		       tui_win_with_focus ()->name ());
     }
   else
-    warning (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
+    error (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
 }
 
 static void
@@ -927,65 +919,61 @@ tui_set_win_height_command (const char *arg, int from_tty)
       char *buf = &copy[0];
       char *buf_ptr = buf;
       char *wname = NULL;
-      int new_height, i;
+      int new_height;
       struct tui_win_info *win_info;
 
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
       if (buf_ptr != NULL)
 	{
-	  *buf_ptr = (char) 0;
+	  *buf_ptr = '\0';
 
 	  /* Validate the window name.  */
-	  for (i = 0; i < strlen (wname); i++)
-	    wname[i] = tolower (wname[i]);
 	  win_info = tui_partial_win_by_name (wname);
 
-	  if (win_info == NULL || !win_info->is_visible ())
-	    warning (_("Invalid window specified. \n\
-The window name specified must be valid and visible.\n"));
-	  else
+	  if (win_info == NULL)
+	    error (_("Unrecognized window name \"%s\""), arg);
+	  if (!win_info->is_visible ())
+	    error (_("Window \"%s\" is not visible"), arg);
+
+	  /* Process the size.  */
+	  buf_ptr = skip_spaces (buf_ptr);
+
+	  if (*buf_ptr != '\0')
 	    {
-	      /* Process the size.  */
-	      while (*(++buf_ptr) == ' ')
-		;
+	      bool negate = false;
+	      bool fixed_size = true;
+	      int input_no;;
 
-	      if (*buf_ptr != (char) 0)
+	      if (*buf_ptr == '+' || *buf_ptr == '-')
 		{
-		  int negate = FALSE;
-		  int fixed_size = TRUE;
-		  int input_no;;
-
-		  if (*buf_ptr == '+' || *buf_ptr == '-')
-		    {
-		      if (*buf_ptr == '-')
-			negate = TRUE;
-		      fixed_size = FALSE;
-		      buf_ptr++;
-		    }
-		  input_no = atoi (buf_ptr);
-		  if (input_no > 0)
-		    {
-		      if (negate)
-			input_no *= (-1);
-		      if (fixed_size)
-			new_height = input_no;
-		      else
-			new_height = win_info->height + input_no;
-
-		      /* Now change the window's height, and adjust
-		         all other windows around it.  */
-		      if (tui_adjust_win_heights (win_info,
-						new_height) == TUI_FAILURE)
-			warning (_("Invalid window height specified.\n%s"),
-				 WIN_HEIGHT_USAGE);
-		      else
-                        tui_update_gdb_sizes ();
-		    }
+		  if (*buf_ptr == '-')
+		    negate = true;
+		  fixed_size = false;
+		  buf_ptr++;
+		}
+	      input_no = atoi (buf_ptr);
+	      if (input_no > 0)
+		{
+		  if (negate)
+		    input_no *= (-1);
+		  if (fixed_size)
+		    new_height = input_no;
 		  else
+		    new_height = win_info->height + input_no;
+
+		  /* Now change the window's height, and adjust
+		     all other windows around it.  */
+		  if (tui_adjust_win_heights (win_info,
+					      new_height) == TUI_FAILURE)
 		    warning (_("Invalid window height specified.\n%s"),
 			     WIN_HEIGHT_USAGE);
+		  else
+		    tui_update_gdb_sizes ();
 		}
+	      else
+		warning (_("Invalid window height specified.\n%s"),
+			 WIN_HEIGHT_USAGE);
 	    }
 	}
       else
@@ -1299,7 +1287,7 @@ parse_scrolling_args (const char *arg,
 	  buf_ptr = strchr (buf_ptr, ' ');
 	  if (buf_ptr != NULL)
 	    {
-	      *buf_ptr = (char) 0;
+	      *buf_ptr = '\0';
 	      if (num_to_scroll)
 		*num_to_scroll = atoi (num_str);
 	      buf_ptr++;
@@ -1313,29 +1301,19 @@ parse_scrolling_args (const char *arg,
 	{
 	  const char *wname;
 
-	  if (*buf_ptr == ' ')
-	    while (*(++buf_ptr) == ' ')
-	      ;
+	  wname = skip_spaces (buf_ptr);
 
-	  if (*buf_ptr != (char) 0)
+	  if (*wname != '\0')
 	    {
-	      /* Validate the window name.  */
-	      for (char *p = buf_ptr; *p != '\0'; p++)
-		*p = tolower (*p);
+	      *win_to_scroll = tui_partial_win_by_name (wname);
 
-	      wname = buf_ptr;
+	      if (*win_to_scroll == NULL)
+		error (_("Unrecognized window `%s'"), wname);
+	      if (!(*win_to_scroll)->is_visible ())
+		error (_("Window is not visible"));
+	      else if (*win_to_scroll == TUI_CMD_WIN)
+		*win_to_scroll = *(tui_source_windows ().begin ());
 	    }
-	  else
-	    wname = "?";
-	  
-	  *win_to_scroll = tui_partial_win_by_name (wname);
-
-	  if (*win_to_scroll == NULL)
-	    error (_("Unrecognized window `%s'"), wname);
-	  if (!(*win_to_scroll)->is_visible ())
-	    error (_("Window is not visible"));
-	  else if (*win_to_scroll == TUI_CMD_WIN)
-	    *win_to_scroll = *(tui_source_windows ().begin ());
 	}
     }
 }

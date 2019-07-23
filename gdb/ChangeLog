@@ -1,5 +1,12 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Mention case-sensitivity of TUI commands.
+	* tui/tui-win.c (tui_set_focus_command): Now case-sensitive.
+	(tui_set_win_height_command, parse_scrolling_args): Likewise.
+	* tui/tui-layout.c (tui_layout_command): Now case-sensitive.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.c (tui_source_window::set_contents): Use
 	make_unique_xstrdup.
 	* tui/tui-disasm.c (tui_disasm_window::set_contents): Use

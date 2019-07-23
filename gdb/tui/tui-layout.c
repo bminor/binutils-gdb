@@ -337,29 +337,23 @@ Layout names are:\n\
 static void
 tui_layout_command (const char *layout_name, int from_tty)
 {
-  int i;
   enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
   enum tui_layout_type cur_layout = tui_current_layout ();
 
-  if (layout_name == NULL)
+  if (layout_name == NULL || *layout_name == '\0')
     error (_("Usage: layout prev | next | LAYOUT-NAME"));
 
-  std::string copy = layout_name;
-  for (i = 0; i < copy.size (); i++)
-    copy[i] = toupper (copy[i]);
-  const char *buf_ptr = copy.c_str ();
-
   /* First check for ambiguous input.  */
-  if (strlen (buf_ptr) <= 1 && *buf_ptr == 'S')
+  if (strcmp (layout_name, "s") == 0)
     error (_("Ambiguous command input."));
 
-  if (subset_compare (buf_ptr, "SRC"))
+  if (subset_compare (layout_name, "src"))
     new_layout = SRC_COMMAND;
-  else if (subset_compare (buf_ptr, "ASM"))
+  else if (subset_compare (layout_name, "asm"))
     new_layout = DISASSEM_COMMAND;
-  else if (subset_compare (buf_ptr, "SPLIT"))
+  else if (subset_compare (layout_name, "split"))
     new_layout = SRC_DISASSEM_COMMAND;
-  else if (subset_compare (buf_ptr, "REGS"))
+  else if (subset_compare (layout_name, "regs"))
     {
       if (cur_layout == SRC_COMMAND
 	  || cur_layout == SRC_DATA_COMMAND)
@@ -367,9 +361,9 @@ tui_layout_command (const char *layout_name, int from_tty)
       else
 	new_layout = DISASSEM_DATA_COMMAND;
     }
-  else if (subset_compare (buf_ptr, "NEXT"))
+  else if (subset_compare (layout_name, "next"))
     new_layout = next_layout ();
-  else if (subset_compare (buf_ptr, "PREV"))
+  else if (subset_compare (layout_name, "prev"))
     new_layout = prev_layout ();
   else
     error (_("Unrecognized layout: %s"), layout_name);
