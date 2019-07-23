@@ -1,5 +1,13 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (struct tui_locator_window) <make_status_line>:
+	Declare.
+	* tui/tui-stack.c (tui_locator_window::make_status_line): Rename
+	from tui_make_status_line.
+	(tui_locator_window::rerender): Update.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_make_status_line): Return std::string.
 	(tui_locator_window::rerender): Update.
 

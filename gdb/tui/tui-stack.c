@@ -63,13 +63,10 @@ tui_locator_win_info_ptr (void)
   return &_locator;
 }
 
-/* Create the status line to display as much information as we can on
-   this single line: target name, process number, current function,
-   current line, current PC, SingleKey mode.  */
-static std::string
-tui_make_status_line (struct tui_locator_window *loc)
+std::string
+tui_locator_window::make_status_line () const
 {
-  char line_buf[50], *pname;
+  char line_buf[50];
   int status_size;
   int proc_width;
   const char *pid_name;
@@ -94,11 +91,11 @@ tui_make_status_line (struct tui_locator_window *loc)
   if (pid_width > MAX_PID_WIDTH)
     pid_width = MAX_PID_WIDTH;
 
-  status_size = tui_term_width ();
+  status_size = width;
 
   /* Translate line number and obtain its size.  */
-  if (loc->line_no > 0)
-    xsnprintf (line_buf, sizeof (line_buf), "%d", loc->line_no);
+  if (line_no > 0)
+    xsnprintf (line_buf, sizeof (line_buf), "%d", line_no);
   else
     strcpy (line_buf, "??");
   line_width = strlen (line_buf);
@@ -106,8 +103,8 @@ tui_make_status_line (struct tui_locator_window *loc)
     line_width = MIN_LINE_WIDTH;
 
   /* Translate PC address.  */
-  std::string pc_out (loc->gdbarch
-		      ? paddress (loc->gdbarch, loc->addr)
+  std::string pc_out (gdbarch
+		      ? paddress (gdbarch, addr)
 		      : "??");
   const char *pc_buf = pc_out.c_str ();
   int pc_width = pc_out.size ();
@@ -150,9 +147,6 @@ tui_make_status_line (struct tui_locator_window *loc)
         }
     }
 
-  /* Now convert elements to string form.  */
-  pname = loc->proc_name;
-
   /* Now create the locator line from the string version of the
      elements.  */
   string_file string;
@@ -172,12 +166,12 @@ tui_make_status_line (struct tui_locator_window *loc)
   /* Procedure/class name.  */
   if (proc_width > 0)
     {
-      if (strlen (pname) > proc_width)
+      if (strlen (proc_name) > proc_width)
         string.printf ("%s%*.*s* ", PROC_PREFIX,
-		       1 - proc_width, proc_width - 1, pname);
+		       1 - proc_width, proc_width - 1, proc_name);
       else
         string.printf ("%s%*.*s ", PROC_PREFIX,
-		       -proc_width, proc_width, pname);
+		       -proc_width, proc_width, proc_name);
     }
 
   if (line_width > 0)
@@ -234,7 +228,7 @@ tui_locator_window::rerender ()
 {
   if (handle != NULL)
     {
-      std::string string = tui_make_status_line (this);
+      std::string string = make_status_line ();
       wmove (handle, 0, 0);
       /* We ignore the return value from wstandout and wstandend, casting
 	 them to void in order to avoid a compiler warning.  The warning

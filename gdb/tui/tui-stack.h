@@ -63,6 +63,14 @@ struct tui_locator_window : public tui_gen_win_info
   CORE_ADDR addr = 0;
   /* Architecture associated with code at this location.  */
   struct gdbarch *gdbarch = nullptr;
+
+private:
+
+  /* Create the status line to display as much information as we can
+     on this single line: target name, process number, current
+     function, current line, current PC, SingleKey mode.  */
+
+  std::string make_status_line () const;
 };
 
 extern void tui_update_locator_fullname (const char *);
