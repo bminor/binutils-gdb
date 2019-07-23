@@ -1,3 +1,10 @@
+2019-07-22  Martin Liska  <mliska@suse.cz>
+
+	* testsuite/ld-plugin/lto-3r.d: Remove.
+	* testsuite/ld-plugin/lto-5r.d: Remove.
+	* testsuite/ld-plugin/lto.exp: Do not run lto-3r and lto-5r
+	tests.
+
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Condition
