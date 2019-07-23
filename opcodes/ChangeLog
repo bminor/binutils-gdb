@@ -1,3 +1,8 @@
+2019-07-22  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* arm-dis.c (is_mve_unpredictable): Stop marking some MVE
+	instructions as UNPREDICTABLE.
+
 2019-07-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-desc.c: Regenerated.
