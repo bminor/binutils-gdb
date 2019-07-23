@@ -654,7 +654,6 @@ static const struct bfd_elf_special_section elf32_m68hc12_special_sections[] =
 #define elf_backend_check_relocs     elf32_m68hc11_check_relocs
 #define elf_backend_relocate_section elf32_m68hc11_relocate_section
 #define elf_backend_object_p		m68hc12_elf_set_mach_from_flags
-#define elf_backend_final_write_processing	0
 #define elf_backend_can_gc_sections		1
 #define elf_backend_special_sections elf32_m68hc12_special_sections
 #define elf_backend_post_process_headers     elf32_m68hc11_post_process_headers

@@ -1017,8 +1017,7 @@ arc_elf_object_p (bfd * abfd)
    This gets the ARC architecture right based on the machine number.  */
 
 static void
-arc_elf_final_write_processing (bfd * abfd,
-				bfd_boolean linker ATTRIBUTE_UNUSED)
+arc_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long emf;
   int osver = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC,
@@ -1052,6 +1051,7 @@ arc_elf_final_write_processing (bfd * abfd,
     e_flags |= E_ARC_OSABI_V3;
 
   elf_elfheader (abfd)->e_flags |=  e_flags;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 #ifdef ARC_ENABLE_DEBUG

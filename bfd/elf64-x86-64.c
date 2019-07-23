@@ -1951,10 +1951,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
-
-	  if (h->type == STT_GNU_IFUNC)
-	    elf_tdata (info->output_bfd)->has_gnu_symbols
-	      |= elf_gnu_symbol_ifunc;
 	}
 
       converted_reloc = FALSE;

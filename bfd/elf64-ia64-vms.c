@@ -4660,8 +4660,7 @@ elf64_vms_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
    object file.  */
 
 static void
-elf64_vms_final_write_processing (bfd *abfd,
-				  bfd_boolean linker ATTRIBUTE_UNUSED)
+elf64_vms_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   Elf_Internal_Shdr *hdr;
   asection *s;
@@ -4696,6 +4695,7 @@ elf64_vms_final_write_processing (bfd *abfd,
       elf_elfheader (abfd)->e_flags = flags;
       elf_flags_init (abfd) = TRUE;
     }
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 static bfd_boolean

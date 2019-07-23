@@ -317,6 +317,5 @@ s12z_elf_set_mach_from_flags (bfd *abfd)
 #define elf_info_to_howto			NULL
 #define elf_info_to_howto_rel			s12z_info_to_howto_rel
 #define elf_backend_object_p			s12z_elf_set_mach_from_flags
-#define elf_backend_final_write_processing	NULL
 
 #include "elf32-target.h"

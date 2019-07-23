@@ -1812,13 +1812,10 @@ struct output_elf_obj_tdata
 /* Indicate if the bfd contains symbols that have the STT_GNU_IFUNC
    symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
    field in the ELF header structure.  */
-enum elf_gnu_symbols
+enum elf_gnu_osabi
 {
-  elf_gnu_symbol_none = 0,
-  elf_gnu_symbol_any = 1 << 0,
-  elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
-  elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
-  elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+  elf_gnu_osabi_ifunc = 1 << 1,
+  elf_gnu_osabi_unique = 1 << 2,
 };
 
 typedef struct elf_section_list
@@ -1939,9 +1936,8 @@ struct elf_obj_tdata
      or was found via a DT_NEEDED entry.  */
   ENUM_BITFIELD (dynamic_lib_link_class) dyn_lib_class : 4;
 
-  /* Whether if the bfd contains symbols that have the STT_GNU_IFUNC
-     symbol type or STB_GNU_UNIQUE binding.  */
-  ENUM_BITFIELD (elf_gnu_symbols) has_gnu_symbols : 3;
+  /* Whether the bfd uses OS specific bits that require ELFOSABI_GNU.  */
+  ENUM_BITFIELD (elf_gnu_osabi) has_gnu_osabi : 3;
 
   /* Whether if the bfd contains the GNU_PROPERTY_NO_COPY_ON_PROTECTED
      property.  */
@@ -2336,7 +2332,9 @@ extern bfd_boolean _bfd_elf_setup_sections
 extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
   (struct bfd_link_info *, const char *, asection *);
 
-extern void _bfd_elf_post_process_headers (bfd * , struct bfd_link_info *);
+extern void _bfd_elf_post_process_headers (bfd *, struct bfd_link_info *);
+
+extern void _bfd_elf_final_write_processing (bfd *, bfd_boolean);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);

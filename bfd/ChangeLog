@@ -1,3 +1,67 @@
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (enum elf_gnu_osabi): Rename from elf_gnu_symbols.
+	Remove none, any, all enums.
+	(struct elf_obj_tdata): Rename has_gnu_symbols field to has_gnu_osabi.
+	(_bfd_elf_final_write_processing): Declare.
+	* elf.c (_bfd_elf_write_object_contents): Unconditionally call
+	elf_backend_final_write_processing.
+	(_bfd_elf_post_process_headers): Move body of function to..
+	(_bfd_elf_final_write_processing): ..here, but set EI_OSABI byte
+	only when not already set.  Adjust for rename.
+	* elfxx-target.h (elf_backend_final_write_processing): Default to
+	_bfd_elf_final_write_processing.
+	* elf-hppa.h (elf_hppa_final_write_processing): Call
+	_bfd_elf_final_write_processing.
+	* elf-m10300.c (_bfd_mn10300_elf_final_write_processing): Likewise.
+	* elf-nacl.c (nacl_final_write_processing): Likewise.
+	* elf-vxworks.c (elf_vxworks_final_write_processing): Likewise.
+	* elf32-arc.c (arc_elf_final_write_processing): Likewise.
+	* elf32-avr.c (bfd_elf_avr_final_write_processing): Likewise.
+	* elf32-bfin.c (elf32_bfin_final_write_processing): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_final_write_processing): Likewise.
+	* elf32-cris.c (cris_elf_final_write_processing): Likewise.
+	* elf32-h8300.c (elf32_h8_final_write_processing): Likewise.
+	* elf32-lm32.c (lm32_elf_final_write_processing): Likewise.
+	* elf32-m32r.c (m32r_elf_final_write_processing): Likewise.
+	* elf32-m68k.c (elf_m68k_final_write_processing): Likewise.
+	* elf32-msp430.c (bfd_elf_msp430_final_write_processing): Likewise.
+	* elf32-nds32.c (nds32_elf_final_write_processing): Likewise.
+	* elf32-or1k.c (or1k_elf_final_write_processing): Likewise.
+	* elf32-pj.c (pj_elf_final_write_processing): Likewise.
+	* elf32-v850.c (v850_elf_final_write_processing): Likewise.
+	* elf32-xc16x.c (elf32_xc16x_final_write_processing): Likewise.
+	* elf32-xtensa.c (elf_xtensa_final_write_processing): Likewise.
+	* elf64-ia64-vms.c (elf64_vms_final_write_processing): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_final_write_processing): Likewise.
+	* elf32-arm.c (arm_final_write_processing): Split out from..
+	(elf32_arm_final_write_processing): ..here.  Call
+	_bfd_elf_final_write_processing.
+	(elf32_arm_nacl_final_write_processing): Adjust.
+	* elfxx-mips.c (_bfd_mips_final_write_processing): Split out from..
+	(_bfd_mips_elf_final_write_processing): ..here.  Call
+	_bfd_elf_final_write_processing.
+	* elfxx-mips.h (_bfd_mips_final_write_processing): Declare.
+	* elf32-mips.c (mips_vxworks_final_write_processing): Adjust.
+	* elf32-ppc.c (ppc_final_write_processing): Split out from..
+	(ppc_elf_final_write_processing): ..here.  Call
+	_bfd_elf_final_write_processing.
+	(ppc_elf_vxworks_final_write_processing): Adjust.
+	* elf32-sparc.c (sparc_final_write_processing): Split out from..
+	(elf32_sparc_final_write_processing): ..here.  Call
+	_bfd_elf_final_write_processing.
+	(elf32_sparc_vxworks_final_write_processing): Adjust.
+	* elf32-d10v.c (elf_backend_final_write_processing): Don't define.
+	* elf32-d30v.c (elf_backend_final_write_processing): Don't define.
+	* elf32-m68hc11.c (elf_backend_final_write_processing): Don't define.
+	* elf32-m68hc12.c (elf_backend_final_write_processing): Don't define.
+	* elf32-s12z.c (elf_backend_final_write_processing): Don't define.
+	* elf32-i386.c (elf_i386_check_relocs): Don't set has_gnu_symbols.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	(elf_link_output_symstrtab): Set has_gnu_osabi for symbols here
+	instead.
+
 2019-07-23  Omar Majid  <omajid@redhat.com>
 
 	* coffcode.h (coff_set_arch_mach_hook): Handle I386_APPLE_MAGIC,

@@ -12358,8 +12358,8 @@ _bfd_mips_elf_sort_relocs_p (asection *sec)
    number.  This is used by both the 32-bit and the 64-bit ABI.  */
 
 void
-_bfd_mips_elf_final_write_processing (bfd *abfd,
-				      bfd_boolean linker ATTRIBUTE_UNUSED)
+_bfd_mips_final_write_processing (bfd *abfd,
+				  bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   unsigned int i;
   Elf_Internal_Shdr **hdrpp;
@@ -12437,6 +12437,13 @@ _bfd_mips_elf_final_write_processing (bfd *abfd,
 
 	}
     }
+}
+
+void
+_bfd_mips_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+{
+  _bfd_mips_final_write_processing (abfd, linker);
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* When creating an IRIX5 executable, we need REGINFO and RTPROC

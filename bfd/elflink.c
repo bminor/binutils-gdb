@@ -4739,18 +4739,6 @@ error_free_dyn:
 	      (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_free_vers;
 
-      if ((abfd->flags & DYNAMIC) == 0
-	  && (bfd_get_flavour (info->output_bfd)
-	      == bfd_target_elf_flavour))
-	{
-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-	    elf_tdata (info->output_bfd)->has_gnu_symbols
-	      |= elf_gnu_symbol_ifunc;
-	  if ((flags & BSF_GNU_UNIQUE))
-	    elf_tdata (info->output_bfd)->has_gnu_symbols
-	      |= elf_gnu_symbol_unique;
-	}
-
       h = *sym_hash;
       /* We need to make sure that indirect symbol dynamic flags are
 	 updated.  */
@@ -9410,6 +9398,11 @@ elf_link_output_symstrtab (struct elf_final_link_info *flinfo,
       if (ret != 1)
 	return ret;
     }
+
+  if (ELF_ST_TYPE (elfsym->st_info) == STT_GNU_IFUNC)
+    elf_tdata (flinfo->output_bfd)->has_gnu_osabi |= elf_gnu_osabi_ifunc;
+  if (ELF_ST_BIND (elfsym->st_info) == STB_GNU_UNIQUE)
+    elf_tdata (flinfo->output_bfd)->has_gnu_osabi |= elf_gnu_osabi_unique;
 
   if (name == NULL
       || *name == '\0'

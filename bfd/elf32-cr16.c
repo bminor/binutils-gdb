@@ -1674,8 +1674,7 @@ elf_cr16_mach (flagword flags)
    number.  */
 
 static void
-_bfd_cr16_elf_final_write_processing (bfd *abfd,
-				      bfd_boolean linker ATTRIBUTE_UNUSED)
+_bfd_cr16_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
   switch (bfd_get_mach (abfd))
@@ -1685,9 +1684,8 @@ _bfd_cr16_elf_final_write_processing (bfd *abfd,
 	val = EM_CR16;
 	break;
     }
-
-
  elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 

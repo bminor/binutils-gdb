@@ -561,6 +561,5 @@ d30v_info_to_howto_rela (bfd *abfd,
 #define elf_info_to_howto	d30v_info_to_howto_rela
 #define elf_info_to_howto_rel	d30v_info_to_howto_rel
 #define elf_backend_object_p	0
-#define elf_backend_final_write_processing	0
 
 #include "elf32-target.h"

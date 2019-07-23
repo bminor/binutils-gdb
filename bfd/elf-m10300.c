@@ -4668,8 +4668,7 @@ elf_mn10300_mach (flagword flags)
    number.  */
 
 static void
-_bfd_mn10300_elf_final_write_processing (bfd *abfd,
-					 bfd_boolean linker ATTRIBUTE_UNUSED)
+_bfd_mn10300_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
 
@@ -4691,6 +4690,7 @@ _bfd_mn10300_elf_final_write_processing (bfd *abfd,
 
   elf_elfheader (abfd)->e_flags &= ~ (EF_MN10300_MACH);
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 static bfd_boolean

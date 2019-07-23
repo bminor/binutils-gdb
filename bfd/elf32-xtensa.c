@@ -3463,8 +3463,7 @@ elf_xtensa_object_p (bfd *abfd)
    number.  */
 
 static void
-elf_xtensa_final_write_processing (bfd *abfd,
-				   bfd_boolean linker ATTRIBUTE_UNUSED)
+elf_xtensa_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   int mach;
   unsigned long val;
@@ -3480,6 +3479,7 @@ elf_xtensa_final_write_processing (bfd *abfd,
 
   elf_elfheader (abfd)->e_flags &=  (~ EF_XTENSA_MACH);
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 

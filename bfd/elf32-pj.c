@@ -337,11 +337,11 @@ pj_elf_info_to_howto (bfd *abfd,
    e_flags field.  */
 
 static void
-pj_elf_final_write_processing (bfd *abfd,
-			       bfd_boolean linker ATTRIBUTE_UNUSED)
+pj_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   elf_elfheader (abfd)->e_flags |= EF_PICOJAVA_ARCH;
   elf_elfheader (abfd)->e_flags |= EF_PICOJAVA_GNUCALLS;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 #define TARGET_BIG_SYM		pj_elf32_vec

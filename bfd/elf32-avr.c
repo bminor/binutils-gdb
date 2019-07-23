@@ -1537,8 +1537,7 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
    number.  */
 
 static void
-bfd_elf_avr_final_write_processing (bfd *abfd,
-				    bfd_boolean linker ATTRIBUTE_UNUSED)
+bfd_elf_avr_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
 
@@ -1621,6 +1620,7 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
   elf_elfheader (abfd)->e_machine = EM_AVR;
   elf_elfheader (abfd)->e_flags &= ~ EF_AVR_MACH;
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Set the right machine number.  */

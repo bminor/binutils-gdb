@@ -924,8 +924,7 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 }
 
 static void
-elf_hppa_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+elf_hppa_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   int mach = bfd_get_mach (abfd);
 
@@ -948,6 +947,7 @@ elf_hppa_final_write_processing (bfd *abfd,
 					 a step backwards with the ELF
 					 based toolchains.  */
 				      | EF_PARISC_TRAPNIL);
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Comparison function for qsort to sort unwind section during a

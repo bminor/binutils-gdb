@@ -3830,8 +3830,7 @@ cris_elf_object_p (bfd *abfd)
    flags from mach type.  */
 
 static void
-cris_elf_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+cris_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long e_flags = elf_elfheader (abfd)->e_flags;
 
@@ -3859,6 +3858,7 @@ cris_elf_final_write_processing (bfd *abfd,
     }
 
   elf_elfheader (abfd)->e_flags = e_flags;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Set the mach type from e_flags value.  */

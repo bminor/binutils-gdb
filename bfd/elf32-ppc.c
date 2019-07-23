@@ -1705,7 +1705,7 @@ ppc_elf_write_section (bfd *abfd ATTRIBUTE_UNUSED,
 /* Finally we can generate the output section.  */
 
 static void
-ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
+ppc_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   bfd_byte *buffer;
   asection *asec;
@@ -1755,6 +1755,13 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   free (buffer);
 
   apuinfo_list_finish ();
+}
+
+static void
+ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+{
+  ppc_final_write_processing (abfd, linker);
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 static bfd_boolean
@@ -10490,7 +10497,7 @@ ppc_elf_vxworks_add_symbol_hook (bfd *abfd,
 static void
 ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
-  ppc_elf_final_write_processing (abfd, linker);
+  ppc_final_write_processing (abfd, linker);
   elf_vxworks_final_write_processing (abfd, linker);
 }
 

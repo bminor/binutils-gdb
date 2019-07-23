@@ -2719,8 +2719,7 @@ v850_elf_object_p (bfd *abfd)
 /* Store the machine number in the flags field.  */
 
 static void
-v850_elf_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+v850_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
 
@@ -2750,6 +2749,7 @@ v850_elf_final_write_processing (bfd *abfd,
     default:
       break;
     }
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Function to keep V850 specific file flags.  */

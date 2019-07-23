@@ -31,7 +31,6 @@ static bfd_boolean elf32_h8_info_to_howto
 static bfd_boolean elf32_h8_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 static unsigned long elf32_h8_mach (flagword);
-static void elf32_h8_final_write_processing (bfd *, bfd_boolean);
 static bfd_boolean elf32_h8_object_p (bfd *);
 static bfd_boolean elf32_h8_merge_private_bfd_data
   (bfd *, struct bfd_link_info *);
@@ -585,8 +584,7 @@ elf32_h8_mach (flagword flags)
    into the flags field in the object file.  */
 
 static void
-elf32_h8_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+elf32_h8_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
 
@@ -624,6 +622,7 @@ elf32_h8_final_write_processing (bfd *abfd,
 
   elf_elfheader (abfd)->e_flags &= ~ (EF_H8_MACH);
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Return nonzero if ABFD represents a valid H8 ELF object file; also

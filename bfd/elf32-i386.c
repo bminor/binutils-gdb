@@ -1575,10 +1575,6 @@ elf_i386_check_relocs (bfd *abfd,
 
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
-
-	  if (h->type == STT_GNU_IFUNC)
-	    elf_tdata (info->output_bfd)->has_gnu_symbols
-	      |= elf_gnu_symbol_ifunc;
 	}
 
       if (r_type == R_386_GOT32X

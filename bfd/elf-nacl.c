@@ -321,7 +321,7 @@ nacl_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 }
 
 void
-nacl_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
+nacl_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   struct elf_segment_map *seg;
   for (seg = elf_seg_map (abfd); seg != NULL; seg = seg->next)
@@ -354,4 +354,5 @@ nacl_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 
 	free (fill);
       }
+  _bfd_elf_final_write_processing (abfd, linker);
 }

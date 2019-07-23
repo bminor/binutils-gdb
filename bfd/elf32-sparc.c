@@ -117,8 +117,7 @@ elf32_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
    We need to set the e_machine field appropriately.  */
 
 static void
-elf32_sparc_final_write_processing (bfd *abfd,
-				    bfd_boolean linker ATTRIBUTE_UNUSED)
+sparc_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   switch (bfd_get_mach (abfd))
     {
@@ -155,6 +154,13 @@ elf32_sparc_final_write_processing (bfd *abfd,
       abort ();
       break;
     }
+}
+
+static void
+elf32_sparc_final_write_processing (bfd *abfd, bfd_boolean linker)
+{
+  sparc_final_write_processing (abfd, linker);
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -324,7 +330,7 @@ elf32_sparc_vxworks_link_hash_table_create (bfd *abfd)
 static void
 elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
-  elf32_sparc_final_write_processing (abfd, linker);
+  sparc_final_write_processing (abfd, linker);
   elf_vxworks_final_write_processing (abfd, linker);
 }
 

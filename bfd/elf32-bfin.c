@@ -1134,13 +1134,13 @@ bfd_boolean elf32_bfin_code_in_l1 = 0;
 bfd_boolean elf32_bfin_data_in_l1 = 0;
 
 static void
-elf32_bfin_final_write_processing (bfd *abfd,
-				   bfd_boolean linker ATTRIBUTE_UNUSED)
+elf32_bfin_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   if (elf32_bfin_code_in_l1)
     elf_elfheader (abfd)->e_flags |= EF_BFIN_CODE_IN_L1;
   if (elf32_bfin_data_in_l1)
     elf_elfheader (abfd)->e_flags |= EF_BFIN_DATA_IN_L1;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Return TRUE if the name is a local label.

@@ -2646,7 +2646,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 static void
 mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
-  _bfd_mips_elf_final_write_processing (abfd, linker);
+  _bfd_mips_final_write_processing (abfd, linker);
   elf_vxworks_final_write_processing (abfd, linker);
 }
 

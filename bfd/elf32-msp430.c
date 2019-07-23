@@ -1386,8 +1386,7 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
    number.  */
 
 static void
-bfd_elf_msp430_final_write_processing (bfd * abfd,
-				       bfd_boolean linker ATTRIBUTE_UNUSED)
+bfd_elf_msp430_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
 
@@ -1422,6 +1421,7 @@ bfd_elf_msp430_final_write_processing (bfd * abfd,
   elf_elfheader (abfd)->e_machine = EM_MSP430;
   elf_elfheader (abfd)->e_flags &= ~EF_MSP430_MACH;
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Set the right machine number.  */

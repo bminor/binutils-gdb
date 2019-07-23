@@ -1003,8 +1003,7 @@ elfNN_ia64_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr,
    object file.  */
 
 static void
-elfNN_ia64_final_write_processing (bfd *abfd,
-				   bfd_boolean linker ATTRIBUTE_UNUSED)
+elfNN_ia64_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   Elf_Internal_Shdr *hdr;
   asection *s;
@@ -1036,6 +1035,7 @@ elfNN_ia64_final_write_processing (bfd *abfd,
       elf_elfheader(abfd)->e_flags = flags;
       elf_flags_init (abfd) = TRUE;
     }
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Hook called by the linker routine which adds symbols from an object

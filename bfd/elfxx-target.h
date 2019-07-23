@@ -497,7 +497,7 @@
 #define elf_backend_begin_write_processing	0
 #endif
 #ifndef elf_backend_final_write_processing
-#define elf_backend_final_write_processing	0
+#define elf_backend_final_write_processing	_bfd_elf_final_write_processing
 #endif
 #ifndef elf_backend_additional_program_headers
 #define elf_backend_additional_program_headers	0

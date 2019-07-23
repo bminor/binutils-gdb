@@ -543,7 +543,6 @@ elf32_d10v_relocate_section (bfd *output_bfd,
 #define elf_info_to_howto		     NULL
 #define elf_info_to_howto_rel		     d10v_info_to_howto_rel
 #define elf_backend_object_p		     0
-#define elf_backend_final_write_processing   0
 #define elf_backend_gc_mark_hook	     elf32_d10v_gc_mark_hook
 #define elf_backend_check_relocs	     elf32_d10v_check_relocs
 #define elf_backend_relocate_section	     elf32_d10v_relocate_section

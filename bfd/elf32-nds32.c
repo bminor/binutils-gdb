@@ -6673,8 +6673,7 @@ nds32_elf_object_p (bfd *abfd)
 /* Store the machine number in the flags field.  */
 
 static void
-nds32_elf_final_write_processing (bfd *abfd,
-				  bfd_boolean linker ATTRIBUTE_UNUSED)
+nds32_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   unsigned long val;
   static unsigned int cur_mach = 0;
@@ -6711,6 +6710,7 @@ nds32_elf_final_write_processing (bfd *abfd,
 
   elf_elfheader (abfd)->e_flags &= ~EF_NDS_ARCH;
   elf_elfheader (abfd)->e_flags |= val;
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 /* Function to keep NDS32 specific file flags.  */

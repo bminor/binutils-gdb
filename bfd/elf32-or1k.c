@@ -3157,8 +3157,7 @@ or1k_elf_object_p (bfd *abfd)
 /* Store the machine number in the flags field.  */
 
 static void
-or1k_elf_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+or1k_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   switch (bfd_get_mach (abfd))
     {
@@ -3169,6 +3168,7 @@ or1k_elf_final_write_processing (bfd *abfd,
       elf_elfheader (abfd)->e_flags |= EF_OR1K_NODELAY;
       break;
     }
+  _bfd_elf_final_write_processing (abfd, linker);
 }
 
 static bfd_boolean

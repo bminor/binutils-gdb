@@ -6553,8 +6553,7 @@ _bfd_elf_write_object_contents (bfd *abfd)
 	  || !_bfd_elf_strtab_emit (abfd, elf_shstrtab (abfd))))
     return FALSE;
 
-  if (bed->elf_backend_final_write_processing)
-    (*bed->elf_backend_final_write_processing) (abfd, elf_linker (abfd));
+  (*bed->elf_backend_final_write_processing) (abfd, elf_linker (abfd));
 
   if (!bed->s->write_shdrs_and_ehdr (abfd))
     return FALSE;
@@ -12103,20 +12102,27 @@ asection _bfd_elf_large_com_section
 		      "LARGE_COMMON", 0, SEC_IS_COMMON);
 
 void
-_bfd_elf_post_process_headers (bfd * abfd,
-			       struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+_bfd_elf_post_process_headers (bfd *abfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
+}
+
+void
+_bfd_elf_final_write_processing (bfd *abfd,
+				 bfd_boolean linker ATTRIBUTE_UNUSED)
+{
+  Elf_Internal_Ehdr *i_ehdrp;	/* ELF file header, internal form.  */
 
   i_ehdrp = elf_elfheader (abfd);
 
-  i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
+  if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE)
+    i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
 
   /* To make things simpler for the loader on Linux systems we set the
      osabi field to ELFOSABI_GNU if the binary contains symbols of
      the STT_GNU_IFUNC type or STB_GNU_UNIQUE binding.  */
   if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE
-      && elf_tdata (abfd)->has_gnu_symbols)
+      && elf_tdata (abfd)->has_gnu_osabi)
     i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_GNU;
 }
 
