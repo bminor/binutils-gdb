@@ -1,3 +1,7 @@
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section12a.d: Don't skip for rx.
+
 2019-07-22  Barnaby Wilks  <barnaby.wilks@arm.com>
 
 	* config/tc-arm.c (do_mve_vqdmladh): Remove check for UNPREDICTABLE.
