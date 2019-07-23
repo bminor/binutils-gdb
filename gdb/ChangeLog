@@ -1,5 +1,11 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_source_disasm_command)
+	(show_source_or_disasm_and_command): Don't call
+	show_source_content.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window) <make_status_line>:
 	Declare.
 	* tui/tui-stack.c (tui_locator_window::make_status_line): Rename
