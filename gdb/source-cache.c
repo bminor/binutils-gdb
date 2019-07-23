@@ -22,6 +22,7 @@
 #include "source.h"
 #include "cli/cli-style.h"
 #include "symtab.h"
+#include "gdbsupport/selftest.h"
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
 /* If Gnulib redirects 'open' and 'close' to its replacements
@@ -80,11 +81,12 @@ source_cache::get_plain_source_lines (struct symtab *s, int first_line,
   return true;
 }
 
-/* See source-cache.h.  */
-
-std::string
-source_cache::extract_lines (const struct source_text &text, int first_line,
-			     int last_line)
+/* A helper function for get_plain_source_lines that extracts the
+   desired source lines from TEXT, putting them into LINES_OUT.  The
+   arguments are as for get_source_lines.  The return value is the
+   desired lines.  */
+static std::string
+extract_lines (const std::string &text, int first_line, int last_line)
 {
   int lineno = 1;
   std::string::size_type pos = 0;
@@ -92,7 +94,7 @@ source_cache::extract_lines (const struct source_text &text, int first_line,
 
   while (pos != std::string::npos && lineno <= last_line)
     {
-      std::string::size_type new_pos = text.contents.find ('\n', pos);
+      std::string::size_type new_pos = text.find ('\n', pos);
 
       if (lineno == first_line)
 	first_pos = pos;
@@ -103,8 +105,10 @@ source_cache::extract_lines (const struct source_text &text, int first_line,
 	  if (first_pos == std::string::npos)
 	    return {};
 	  if (pos == std::string::npos)
-	    pos = text.contents.size ();
-	  return text.contents.substr (first_pos, pos - first_pos);
+	    pos = text.size ();
+	  else
+	    ++pos;
+	  return text.substr (first_pos, pos - first_pos);
 	}
       ++lineno;
       ++pos;
@@ -187,7 +191,7 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	{
 	  if (item.fullname == fullname)
 	    {
-	      *lines = extract_lines (item, first_line, last_line);
+	      *lines = extract_lines (item.contents, first_line, last_line);
 	      return true;
 	    }
 	}
@@ -233,8 +237,8 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	      if (m_source_map.size () > MAX_ENTRIES)
 		m_source_map.erase (m_source_map.begin ());
 
-	      *lines = extract_lines (m_source_map.back (), first_line,
-				      last_line);
+	      *lines = extract_lines (m_source_map.back ().contents,
+				      first_line, last_line);
 	      return true;
 	    }
 	}
@@ -242,4 +246,27 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 #endif /* HAVE_SOURCE_HIGHLIGHT */
 
   return get_plain_source_lines (s, first_line, last_line, lines);
+}
+
+#if GDB_SELF_TEST
+namespace selftests
+{
+static void extract_lines_test ()
+{
+  std::string input_text = "abc\ndef\nghi\njkl\n";
+
+  SELF_CHECK (extract_lines (input_text, 1, 1) == "abc\n");
+  SELF_CHECK (extract_lines (input_text, 2, 1) == "");
+  SELF_CHECK (extract_lines (input_text, 1, 2) == "abc\ndef\n");
+  SELF_CHECK (extract_lines ("abc", 1, 1) == "abc");
+}
+}
+#endif
+
+void
+_initialize_source_cache ()
+{
+#if GDB_SELF_TEST
+  selftests::register_test ("source-cache", selftests::extract_lines_test);
+#endif
 }

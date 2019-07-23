@@ -1,5 +1,14 @@
 2019-08-06  Tom Tromey  <tromey@adacore.com>
 
+	* source-cache.c (extract_lines): No longer a method.
+	Changed type of parameter.  Include final newline.
+	(selftests::extract_lines_test): New function.
+	(_initialize_source_cache): Likewise.
+	* source-cache.h (class source_cache)
+	<extract_lines>: Don't declare.
+
+2019-08-06  Tom Tromey  <tromey@adacore.com>
+
 	* breakpoint.c (init_breakpoint_sal): Update.
 	(breakpoint): Update.
 	* breakpoint.h (struct breakpoint) <filter>: Now a
