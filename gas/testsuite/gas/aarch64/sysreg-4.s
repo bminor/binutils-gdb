@@ -24,6 +24,7 @@ func:
 	mrs x12, TFSR_EL12
 	mrs x1, rgsr_el1
 	mrs x3, gcr_el1
+	mrs x4, gmid_el1
 
 	# MSR (register)
 	msr tco, x1

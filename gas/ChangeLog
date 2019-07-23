@@ -1,3 +1,9 @@
+2019-07-23  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* testsuite/gas/aarch64/sysreg-4.s: Test gmid_el1 read.
+	* testsuite/gas/aarch64/sysreg-4.d: Update expected output.
+	* testsuite/gas/aarch64/illegal-sysreg-4.l: Likewise.
+
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Don't emit a fatal

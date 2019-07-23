@@ -1,3 +1,8 @@
+2019-07-23  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add gmid_el1 entry.
+	(aarch64_sys_reg_supported_p): Handle gmid_el1 encoding.
+
 2019-07-22  Barnaby Wilks  <barnaby.wilks@arm.com>
 
 	* arm-dis.c (is_mve_unpredictable): Stop marking some MVE
