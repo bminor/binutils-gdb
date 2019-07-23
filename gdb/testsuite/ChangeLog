@@ -1,3 +1,9 @@
+2019-07-23  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24711
+	* gdb.mi/mi-complete.exp: Wait for "set max-completions" result before
+	issuing next command.
+
 2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.ada/info_auto_lang.exp: Update expected results.

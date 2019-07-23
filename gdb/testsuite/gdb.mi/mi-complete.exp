@@ -58,14 +58,16 @@ mi_gdb_test "-info-gdb-mi-command complete" \
 
 # Limit max completions and check that max_completions_reached=\"0\" is set
 # to 1.
-send_gdb "set max-completions 1\n"
+mi_gdb_test "set max-completions 1" ".*=cmd-param-changed.*\\^done" \
+    "set max-completions 1"
 
 mi_gdb_test "2-complete br" \
             ".*2\\^done,completion=\"br\[A-Za-z0-9-\]+\",matches=\\\[\"br\[A-Za-z0-9-\]+\"\\\],max_completions_reached=\"1\"" \
             "-complete br, max-completions 1"
 
 # Disable completions and check an error is returned
-send_gdb "set max-completions 0\n"
+mi_gdb_test "set max-completions 0" ".*=cmd-param-changed.*\\^done" \
+    "set max-completions 0"
 
 mi_gdb_test "3-complete br" \
             ".*3\\^error,msg=\".*" \
