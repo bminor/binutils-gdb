@@ -13,10 +13,8 @@ SECTIONS
   .tbss : { *(.tbss) } :image : tls
   .map : {
     LONG (SIZEOF (.text))
-    LONG (SIZEOF (.data))
-    LONG (SIZEOF (.bss))
     LONG (SIZEOF (.tdata))
     LONG (SIZEOF (.tbss))
   } :image
-  /DISCARD/ : { *(.note.gnu.property) }
+  /DISCARD/ : { *(*) }
 }

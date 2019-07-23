@@ -1,3 +1,19 @@
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/size-1.d,
+	* testsuite/ld-elf/size-1.s,
+	* testsuite/ld-elf/size-1.t: New test.
+	* testsuite/ld-elf/size-2.d,
+	* testsuite/ld-elf/size-2.s,
+	* testsuite/ld-elf/size-2.t: New test.
+	* testsuite/ld-scripts/size-1.d,
+	* testsuite/ld-scripts/size-1.s,
+	* testsuite/ld-scripts/size-1.t,
+	* testsuite/ld-scripts/size-2.s,
+	* testsuite/ld-scripts/size-2.d,
+	* testsuite/ld-scripts/size-2.t,
+	* testsuite/ld-scripts/size.exp: Delete.
+
 2019-07-22  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* ld/testsuite/ld-arm/cmse_main_sec_debug.d: Modify regexps to
