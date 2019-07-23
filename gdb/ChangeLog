@@ -1,5 +1,13 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<show_source_content>: Now private.
+	* tui/tui-winsource.c
+	(tui_source_window_base::show_source_content): Don't handle empty
+	content case.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (show_source_disasm_command)
 	(show_source_or_disasm_and_command): Don't call
 	show_source_content.

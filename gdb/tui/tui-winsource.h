@@ -76,6 +76,9 @@ struct tui_source_element
 
 struct tui_source_window_base : public tui_win_info
 {
+private:
+  void show_source_content ();
+
 protected:
   explicit tui_source_window_base (enum tui_win_type type);
 
@@ -105,8 +108,6 @@ public:
   void update_tab_width () override;
 
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
-
-  void show_source_content ();
 
   void update_exec_info ();
 

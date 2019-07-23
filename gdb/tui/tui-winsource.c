@@ -238,15 +238,10 @@ tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
 void
 tui_source_window_base::show_source_content ()
 {
-  if (!content.empty ())
-    {
-      int lineno;
+  gdb_assert (!content.empty ());
 
-      for (lineno = 1; lineno <= content.size (); lineno++)
-        tui_show_source_line (this, lineno);
-    }
-  else
-    erase_source_content ();
+  for (int lineno = 1; lineno <= content.size (); lineno++)
+    tui_show_source_line (this, lineno);
 
   check_and_display_highlight_if_needed ();
   refresh_window ();
