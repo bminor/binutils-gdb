@@ -1,3 +1,10 @@
+2019-08-06  Tom Tromey  <tromey@adacore.com>
+
+	* breakpoint.c (init_breakpoint_sal): Update.
+	(breakpoint): Update.
+	* breakpoint.h (struct breakpoint) <filter>: Now a
+	unique_xmalloc_ptr.
+
 2019-08-05  Christian Biesinger  <cbiesinger@google.com>
 
 	* NEWS: Mention dictionary access on blocks.

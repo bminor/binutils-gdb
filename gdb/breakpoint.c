@@ -8850,7 +8850,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
     b->location = std::move (location);
   else
     b->location = new_address_location (b->loc->address, NULL, 0);
-  b->filter = filter.release ();
+  b->filter = std::move (filter);
 }
 
 static void
@@ -12124,7 +12124,6 @@ breakpoint::~breakpoint ()
 {
   xfree (this->cond_string);
   xfree (this->extra_string);
-  xfree (this->filter);
 }
 
 static struct bp_location *
@@ -13701,7 +13700,7 @@ decode_location_default (struct breakpoint *b,
 
   decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, search_pspace,
 		    NULL, 0, &canonical, multiple_symbols_all,
-		    b->filter);
+		    b->filter.get ());
 
   /* We should get 0 or 1 resulting SALs.  */
   gdb_assert (canonical.lsals.size () < 2);

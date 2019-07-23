@@ -734,9 +734,8 @@ struct breakpoint
   event_location_up location;
 
   /* The filter that should be passed to decode_line_full when
-     re-setting this breakpoint.  This may be NULL, but otherwise is
-     allocated with xmalloc.  */
-  char *filter = NULL;
+     re-setting this breakpoint.  This may be NULL.  */
+  gdb::unique_xmalloc_ptr<char> filter;
 
   /* For a ranged breakpoint, the location we used to find the end of
      the range.  */
