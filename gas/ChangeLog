@@ -1,5 +1,20 @@
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-elf.c (obj_elf_change_section): Don't emit a fatal
+	error for non-SHF_ALLOC SHF_GNU_MBIND here.
+	(obj_elf_parse_section_letters): Return SHF_GNU_MBIND in new
+	gnu_attr param.
+	(obj_elf_section): Adjust obj_elf_parse_section_letters call.
+	Formatting.  Set SHF_GNU_MBIND and elf_osabi from gnu_attr.
+	Emit normal error for non-SHF_ALLOC SHF_GNU_MBIND and wrong osabi.
+	(obj_elf_type): Set elf_osabi for ifunc.
+	* testsuite/gas/elf/section12a.d: xfail msp430 and hpux.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section13.d: Likewise.
+	* testsuite/gas/elf/section13.l: Adjust expected error.
+
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/elf/section12a.d: Don't skip for rx.
 
 2019-07-22  Barnaby Wilks  <barnaby.wilks@arm.com>

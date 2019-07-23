@@ -1,5 +1,17 @@
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (enum elf_gnu_osabi): Add elf_gnu_osabi_mbind.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set elf_gnu_osabi_mbind.
+	(get_program_header_size): Formatting.  Only test SH_GNU_MBIND
+	when elf_gnu_osabi_mbind is set.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	(_bfd_elf_init_private_section_data): Likewise.
+	(_bfd_elf_final_write_processing): Update comment.
+	* elf64-hppa.c (elf64_hppa_special_sections): Move .tbss entry.
+	(elf_backend_special_sections): Define without .tbss for linux.
+
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (enum elf_gnu_osabi): Rename from elf_gnu_symbols.
 	Remove none, any, all enums.
 	(struct elf_obj_tdata): Rename has_gnu_symbols field to has_gnu_osabi.

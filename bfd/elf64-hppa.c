@@ -3954,13 +3954,13 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 
 static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
 {
+  { STRING_COMMA_LEN (".tbss"),	 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_HP_TLS },
   { STRING_COMMA_LEN (".fini"),	 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".init"),	 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".plt"),	 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
   { STRING_COMMA_LEN (".dlt"),	 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
   { STRING_COMMA_LEN (".sdata"), 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
   { STRING_COMMA_LEN (".sbss"),	 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
-  { STRING_COMMA_LEN (".tbss"),	 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_HP_TLS },
   { NULL,		     0,	 0, 0,		  0 }
 };
 
@@ -4088,5 +4088,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define ELF_OSABI			ELFOSABI_GNU
 #undef elf64_bed
 #define elf64_bed			elf64_hppa_linux_bed
+#undef elf_backend_special_sections
+#define elf_backend_special_sections	(elf64_hppa_special_sections + 1)
 
 #include "elf64-target.h"

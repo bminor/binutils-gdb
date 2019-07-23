@@ -1,5 +1,10 @@
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Condition
+	SHF_GNU_MBIND on osabi.  Set output elf_gnu_osabi_mbind.
+
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/size-1.d,
 	* testsuite/ld-elf/size-1.s,
 	* testsuite/ld-elf/size-1.t: New test.

@@ -3879,22 +3879,6 @@ get_parisc_segment_type (unsigned long type)
 {
   switch (type)
     {
-    case PT_HP_TLS:		return "HP_TLS";
-    case PT_HP_CORE_NONE:	return "HP_CORE_NONE";
-    case PT_HP_CORE_VERSION:	return "HP_CORE_VERSION";
-    case PT_HP_CORE_KERNEL:	return "HP_CORE_KERNEL";
-    case PT_HP_CORE_COMM:	return "HP_CORE_COMM";
-    case PT_HP_CORE_PROC:	return "HP_CORE_PROC";
-    case PT_HP_CORE_LOADABLE:	return "HP_CORE_LOADABLE";
-    case PT_HP_CORE_STACK:	return "HP_CORE_STACK";
-    case PT_HP_CORE_SHM:	return "HP_CORE_SHM";
-    case PT_HP_CORE_MMF:	return "HP_CORE_MMF";
-    case PT_HP_PARALLEL:	return "HP_PARALLEL";
-    case PT_HP_FASTBIND:	return "HP_FASTBIND";
-    case PT_HP_OPT_ANNOT:	return "HP_OPT_ANNOT";
-    case PT_HP_HSL_ANNOT:	return "HP_HSL_ANNOT";
-    case PT_HP_STACK:		return "HP_STACK";
-    case PT_HP_CORE_UTSNAME:	return "HP_CORE_UTSNAME";
     case PT_PARISC_ARCHEXT:	return "PARISC_ARCHEXT";
     case PT_PARISC_UNWIND:	return "PARISC_UNWIND";
     case PT_PARISC_WEAKORDER:	return "PARISC_WEAKORDER";
@@ -3909,10 +3893,6 @@ get_ia64_segment_type (unsigned long type)
     {
     case PT_IA_64_ARCHEXT:	return "IA_64_ARCHEXT";
     case PT_IA_64_UNWIND:	return "IA_64_UNWIND";
-    case PT_HP_TLS:		return "HP_TLS";
-    case PT_IA_64_HP_OPT_ANOT:	return "HP_OPT_ANNOT";
-    case PT_IA_64_HP_HSL_ANOT:	return "HP_HSL_ANNOT";
-    case PT_IA_64_HP_STACK:	return "HP_STACK";
     default:                    return NULL;
     }
 }
@@ -3925,6 +3905,44 @@ get_tic6x_segment_type (unsigned long type)
     case PT_C6000_PHATTR:  return "C6000_PHATTR";
     default:               return NULL;
     }
+}
+
+static const char *
+get_hpux_segment_type (unsigned long type, unsigned e_machine)
+{
+  if (e_machine == EM_PARISC)
+    switch (type)
+      {
+      case PT_HP_TLS:		return "HP_TLS";
+      case PT_HP_CORE_NONE:	return "HP_CORE_NONE";
+      case PT_HP_CORE_VERSION:	return "HP_CORE_VERSION";
+      case PT_HP_CORE_KERNEL:	return "HP_CORE_KERNEL";
+      case PT_HP_CORE_COMM:	return "HP_CORE_COMM";
+      case PT_HP_CORE_PROC:	return "HP_CORE_PROC";
+      case PT_HP_CORE_LOADABLE:	return "HP_CORE_LOADABLE";
+      case PT_HP_CORE_STACK:	return "HP_CORE_STACK";
+      case PT_HP_CORE_SHM:	return "HP_CORE_SHM";
+      case PT_HP_CORE_MMF:	return "HP_CORE_MMF";
+      case PT_HP_PARALLEL:	return "HP_PARALLEL";
+      case PT_HP_FASTBIND:	return "HP_FASTBIND";
+      case PT_HP_OPT_ANNOT:	return "HP_OPT_ANNOT";
+      case PT_HP_HSL_ANNOT:	return "HP_HSL_ANNOT";
+      case PT_HP_STACK:		return "HP_STACK";
+      case PT_HP_CORE_UTSNAME:	return "HP_CORE_UTSNAME";
+      default:			return NULL;
+      }
+
+  if (e_machine == EM_IA_64)
+    switch (type)
+      {
+      case PT_HP_TLS:		 return "HP_TLS";
+      case PT_IA_64_HP_OPT_ANOT: return "HP_OPT_ANNOT";
+      case PT_IA_64_HP_HSL_ANOT: return "HP_HSL_ANNOT";
+      case PT_IA_64_HP_STACK:	 return "HP_STACK";
+      default:			 return NULL;
+      }
+
+  return NULL;
 }
 
 static const char *
@@ -3965,12 +3983,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_GNU_PROPERTY: return "GNU_PROPERTY";
 
     default:
-      if (p_type >= PT_GNU_MBIND_LO && p_type <= PT_GNU_MBIND_HI)
-	{
-	  sprintf (buff, "GNU_MBIND+%#lx",
-		   p_type - PT_GNU_MBIND_LO);
-	}
-      else if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
+      if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
 	  const char * result;
 
@@ -4011,24 +4024,28 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
 	}
       else if ((p_type >= PT_LOOS) && (p_type <= PT_HIOS))
 	{
-	  const char * result;
+	  const char * result = NULL;
 
-	  switch (filedata->file_header.e_machine)
+	  switch (filedata->file_header.e_ident[EI_OSABI])
 	    {
-	    case EM_PARISC:
-	      result = get_parisc_segment_type (p_type);
+	    case ELFOSABI_GNU:
+	    case ELFOSABI_FREEBSD:
+	      if (p_type >= PT_GNU_MBIND_LO && p_type <= PT_GNU_MBIND_HI)
+		{
+		  sprintf (buff, "GNU_MBIND+%#lx", p_type - PT_GNU_MBIND_LO);
+		  result = buff;
+		}
 	      break;
-	    case EM_IA_64:
-	      result = get_ia64_segment_type (p_type);
+	    case ELFOSABI_HPUX:
+	      result = get_hpux_segment_type (p_type,
+					      filedata->file_header.e_machine);
+	      break;
+	    case ELFOSABI_SOLARIS:
+	      result = get_solaris_segment_type (p_type);
 	      break;
 	    default:
-	      if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
-		result = get_solaris_segment_type (p_type);
-	      else
-		result = NULL;
 	      break;
 	    }
-
 	  if (result != NULL)
 	    return result;
 
@@ -11052,9 +11069,7 @@ get_symbol_binding (Filedata * filedata, unsigned int binding)
       else if (binding >= STB_LOOS && binding <= STB_HIOS)
 	{
 	  if (binding == STB_GNU_UNIQUE
-	      && (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_GNU
-		  /* GNU is still using the default value 0.  */
-		  || filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
+	      && filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_GNU)
 	    return "UNIQUE";
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), binding);
 	}
@@ -11106,9 +11121,7 @@ get_symbol_type (Filedata * filedata, unsigned int type)
 
 	  if (type == STT_GNU_IFUNC
 	      && (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_GNU
-		  || filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_FREEBSD
-		  /* GNU is still using the default value 0.  */
-		  || filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
+		  || filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_FREEBSD))
 	    return "IFUNC";
 
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), type);

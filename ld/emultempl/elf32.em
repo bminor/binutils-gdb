@@ -2131,6 +2131,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       && elfinput
       && elfoutput
       && (s->flags & SEC_ALLOC) != 0
+      && (elf_tdata (s->owner)->has_gnu_osabi & elf_gnu_osabi_mbind) != 0
       && (elf_section_flags (s) & SHF_GNU_MBIND) != 0)
     {
       /* Find the output mbind section with the same type, attributes
@@ -2168,6 +2169,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	secname = ".mbind.rodata";
       else
 	secname = ".mbind.text";
+      elf_tdata (link_info.output_bfd)->has_gnu_osabi |= elf_gnu_osabi_mbind;
     }
 
   /* Look through the script to see where to place this section.  The

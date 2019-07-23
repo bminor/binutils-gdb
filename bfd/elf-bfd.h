@@ -1809,11 +1809,12 @@ struct output_elf_obj_tdata
   bfd_boolean flags_init;
 };
 
-/* Indicate if the bfd contains symbols that have the STT_GNU_IFUNC
-   symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
-   field in the ELF header structure.  */
+/* Indicate if the bfd contains SHF_GNU_MBIND sections or symbols that
+   have the STT_GNU_IFUNC symbol type or STB_GNU_UNIQUE binding.  Used
+   to set the osabi field in the ELF header structure.  */
 enum elf_gnu_osabi
 {
+  elf_gnu_osabi_mbind = 1 << 0,
   elf_gnu_osabi_ifunc = 1 << 1,
   elf_gnu_osabi_unique = 1 << 2,
 };

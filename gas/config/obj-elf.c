@@ -706,9 +706,6 @@ obj_elf_change_section (const char *name,
 	attr |= ssect->attr;
     }
 
-  if ((attr & (SHF_ALLOC | SHF_GNU_MBIND)) == SHF_GNU_MBIND)
-    as_fatal (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
-
   /* Convert ELF type and flags to BFD flags.  */
   flags = (SEC_RELOC
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
@@ -785,7 +782,8 @@ obj_elf_change_section (const char *name,
 }
 
 static bfd_vma
-obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
+obj_elf_parse_section_letters (char *str, size_t len,
+			       bfd_boolean *is_clone, bfd_vma *gnu_attr)
 {
   bfd_vma attr = 0;
   *is_clone = FALSE;
@@ -819,7 +817,7 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 	  attr |= SHF_TLS;
 	  break;
 	case 'd':
-	  attr |= SHF_GNU_MBIND;
+	  *gnu_attr |= SHF_GNU_MBIND;
 	  break;
 	case '?':
 	  *is_clone = TRUE;
@@ -1011,6 +1009,7 @@ obj_elf_section (int push)
   char *beg;
   int type, dummy;
   bfd_vma attr;
+  bfd_vma gnu_attr;
   int entsize;
   int linkonce;
   subsegT new_subsection = -1;
@@ -1041,6 +1040,7 @@ obj_elf_section (int push)
     return;
   type = SHT_NULL;
   attr = 0;
+  gnu_attr = 0;
   group_name = NULL;
   entsize = 0;
   linkonce = 0;
@@ -1077,7 +1077,8 @@ obj_elf_section (int push)
 	      ignore_rest_of_line ();
 	      return;
 	    }
-	  attr |= obj_elf_parse_section_letters (beg, strlen (beg), &is_clone);
+	  attr |= obj_elf_parse_section_letters (beg, strlen (beg),
+						 &is_clone, &gnu_attr);
 
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
@@ -1103,14 +1104,14 @@ obj_elf_section (int push)
 		  ++input_line_pointer;
 
 		  if (ISDIGIT (* input_line_pointer))
-		    {
-		      type = strtoul (input_line_pointer, & input_line_pointer, 0);
-		    }
+		    type = strtoul (input_line_pointer, &input_line_pointer, 0);
 		  else
 		    {
 		      c = get_symbol_name (& beg);
 		      (void) restore_line_pointer (c);
-		      type = obj_elf_section_type (beg, input_line_pointer - beg, TRUE);
+		      type = obj_elf_section_type (beg,
+						   input_line_pointer - beg,
+						   TRUE);
 		    }
 		}
 	      else
@@ -1177,7 +1178,7 @@ obj_elf_section (int push)
 		}
 	    }
 
-	  if ((attr & SHF_GNU_MBIND) != 0 && *input_line_pointer == ',')
+	  if ((gnu_attr & SHF_GNU_MBIND) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
@@ -1211,7 +1212,8 @@ obj_elf_section (int push)
 	      c = get_symbol_name (& beg);
 	      (void) restore_line_pointer (c);
 
-	      attr |= obj_elf_section_word (beg, input_line_pointer - beg, & type);
+	      attr |= obj_elf_section_word (beg, input_line_pointer - beg,
+					    &type);
 
 	      SKIP_WHITESPACE ();
 	    }
@@ -1225,6 +1227,23 @@ done:
 
   obj_elf_change_section (name, type, info, attr, entsize, group_name,
 			  linkonce, push);
+
+  if ((gnu_attr & SHF_GNU_MBIND) != 0)
+    {
+      struct elf_backend_data *bed;
+
+      if ((attr & SHF_ALLOC) == 0)
+	as_bad (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
+
+      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
+      if (bed->elf_osabi == ELFOSABI_NONE)
+	bed->elf_osabi = ELFOSABI_GNU;
+      else if (bed->elf_osabi != ELFOSABI_GNU
+	       && bed->elf_osabi != ELFOSABI_FREEBSD)
+	as_bad (_("GNU_MBIND section is supported only by GNU "
+		  "and FreeBSD targets"));
+    }
+  elf_section_flags (now_seg) |= gnu_attr;
 
   if (push && new_subsection != -1)
     subseg_set (now_seg, new_subsection);
@@ -2032,15 +2051,15 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	   || strcmp (type_name, "10") == 0
 	   || strcmp (type_name, "STT_GNU_IFUNC") == 0)
     {
-      const struct elf_backend_data *bed;
+      struct elf_backend_data *bed;
 
-      bed = get_elf_backend_data (stdoutput);
-      if (!(bed->elf_osabi == ELFOSABI_GNU
-	    || bed->elf_osabi == ELFOSABI_FREEBSD
-	    /* GNU is still using the default value 0.  */
-	    || bed->elf_osabi == ELFOSABI_NONE))
-	as_bad (_("symbol type \"%s\" is supported only by GNU and FreeBSD targets"),
-		type_name);
+      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
+      if (bed->elf_osabi == ELFOSABI_NONE)
+	bed->elf_osabi = ELFOSABI_GNU;
+      else if (bed->elf_osabi != ELFOSABI_GNU
+	       && bed->elf_osabi != ELFOSABI_FREEBSD)
+	as_bad (_("symbol type \"%s\" is supported only by GNU "
+		  "and FreeBSD targets"), type_name);
       type = BSF_FUNCTION | BSF_GNU_INDIRECT_FUNCTION;
     }
   else if (strcmp (type_name, "gnu_unique_object") == 0)
@@ -2048,14 +2067,12 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
       struct elf_backend_data *bed;
 
       bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
-      if (!(bed->elf_osabi == ELFOSABI_GNU
-	    /* GNU is still using the default value 0.  */
-	    || bed->elf_osabi == ELFOSABI_NONE))
+      if (bed->elf_osabi == ELFOSABI_NONE)
+	bed->elf_osabi = ELFOSABI_GNU;
+      else if (bed->elf_osabi != ELFOSABI_GNU)
 	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
 		type_name);
       type = BSF_OBJECT | BSF_GNU_UNIQUE;
-      /* PR 10549: Always set OSABI field to GNU for objects containing unique symbols.  */
-      bed->elf_osabi = ELFOSABI_GNU;
     }
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (type_name, sym, elfsym)) != -1)

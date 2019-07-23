@@ -1,5 +1,15 @@
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (get_parisc_segment_type): Split off hpux entries..
+	(get_ia64_segment_type): ..and these..
+	(get_hpux_segment_type): ..to here.
+	(get_segment_type): Condition GNU_MBIND on osabi.  Use
+	get_hpux_segment_type.
+	(get_symbol_binding): Do not print UNIQUE for ELFOSABI_NONE.
+	(get_symbol_type): Do not print IFUNC for ELFOSABI_NONE.
+
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objcopy.exp (elf64): Correct object
 	file used to set this variable.
 
