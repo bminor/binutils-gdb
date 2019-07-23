@@ -148,6 +148,12 @@ if {[build_executable $testfile.exp $testfile [list $asm_file $srcfile] {}] \
 
 # We force the DIEs above to be read in via "-readnow".
 gdb_spawn_with_cmdline_opts "-readnow"
+set test "initial prompt"
+gdb_test_multiple "" $test {
+    -re ".*$gdb_prompt $" {
+	pass "$test"
+    }
+}
 gdb_load $binfile
 
 # All we need to do is check whether GDB is alive.  Without
