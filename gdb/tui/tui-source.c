@@ -184,9 +184,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 				 symtab_to_fullname (s)) == 0
 		   && cur_line_no == locator->line_no);
 
-	      xfree (content[cur_line].line);
-	      content[cur_line].line
-		= xstrdup (text.c_str ());
+	      content[cur_line].line.reset (xstrdup (text.c_str ()));
 
 	      cur_line++;
 	      cur_line_no++;

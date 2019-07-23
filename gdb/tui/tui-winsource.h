@@ -54,23 +54,17 @@ struct tui_source_element
     line_or_addr.u.line_no = 0;
   }
 
-  ~tui_source_element ()
-  {
-    xfree (line);
-  }
-
   DISABLE_COPY_AND_ASSIGN (tui_source_element);
 
   tui_source_element (tui_source_element &&other)
-    : line (other.line),
+    : line (std::move (other.line)),
       line_or_addr (other.line_or_addr),
       is_exec_point (other.is_exec_point),
       break_mode (other.break_mode)
   {
-    other.line = nullptr;
   }
 
-  char *line = nullptr;
+  gdb::unique_xmalloc_ptr<char> line;
   struct tui_line_or_address line_or_addr;
   bool is_exec_point = false;
   tui_bp_flags break_mode = 0;

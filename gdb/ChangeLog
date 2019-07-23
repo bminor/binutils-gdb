@@ -1,5 +1,14 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (~tui_source_element): Remove.
+	(tui_source_element): Update.
+	(struct tui_source_element) <line>: Now a unique_xmalloc_ptr.
+	* tui/tui-winsource.c (tui_show_source_line): Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Update.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (tui_clear_source_windows_detail): Don't
 	declare.
 	* tui/tui-layout.c (tui_add_win_to_layout): Don't call
