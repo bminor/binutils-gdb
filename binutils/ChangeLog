@@ -1,3 +1,14 @@
+2019-07-23  Omar Majid  <omajid@redhat.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Add subdir-objects
+	(GENTESTDLLSPROG): Define.
+	(TEST_PROGS): Add GENTESTDLLSPROG.
+	* Makefile.in: Regenerate.
+	* testsuite/binutils-all/objdump.exp
+	(test_objdump_dotnet_assemblies): New proc.
+	Run the new proc.
+	* testsuite/gentestdlls.c: New source file.
+
 2019-06-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 24707

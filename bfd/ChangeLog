@@ -1,3 +1,11 @@
+2019-07-23  Omar Majid  <omajid@redhat.com>
+
+	* coffcode.h (coff_set_arch_mach_hook): Handle I386_APPLE_MAGIC,
+	I386_FREEBSD_MAGIC, I386_LINUX_MAGIC, I386_NETBSD_MAGIC,
+	AMD64_APPLE_MAGIC, AMD64_FREEBSD_MAGIC, AMD64_LINUX_MAGIC,
+	AMD64_NETBSD_MAGIC.
+	* peXXigen.c: Add comment about source of .NET magic numbers.
+
 2019-07-19  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c (BFD_RELOC_PPC64_TPREL34, BFD_RELOC_PPC64_DTPREL34),

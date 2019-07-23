@@ -35,6 +35,13 @@
    "Peering Inside the PE: A Tour of the Win32 Portable Executable
    File Format", MSJ 1994, Volume 9.
 
+   The PE/PEI format is also used by .NET. ECMA-335 describes this:
+
+   "Standard ECMA-335 Common Language Infrastructure (CLI)", 6th Edition, June 2012.
+
+   This is also available at
+   https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf.
+
    The *sole* difference between the pe format and the pei format is that the
    latter has an MSDOS 2.0 .exe header on the front that prints the message
    "This app must be run under Windows." (or some such).

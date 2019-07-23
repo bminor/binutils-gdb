@@ -2107,11 +2107,19 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
     case I386PTXMAGIC:
     case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler.  */
     case LYNXCOFFMAGIC:
+    case I386_APPLE_MAGIC:
+    case I386_FREEBSD_MAGIC:
+    case I386_LINUX_MAGIC:
+    case I386_NETBSD_MAGIC:
       arch = bfd_arch_i386;
       break;
 #endif
 #ifdef AMD64MAGIC
     case AMD64MAGIC:
+    case AMD64_APPLE_MAGIC:
+    case AMD64_FREEBSD_MAGIC:
+    case AMD64_LINUX_MAGIC:
+    case AMD64_NETBSD_MAGIC:
       arch = bfd_arch_i386;
       machine = bfd_mach_x86_64;
       break;

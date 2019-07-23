@@ -732,6 +732,49 @@ if {[is_elf_format]} then {
     remote_file host delete $testfile3
 }
 
+# Test objdump on .NET assemblies (PE files)
+
+proc test_objdump_dotnet_assemblies {} {
+    global OBJDUMP
+    global base_dir
+
+    set test "dotnet-assemblies"
+
+    set got [binutils_run "$base_dir/testsuite/gentestdlls" "tmpdir"]
+    set want "wrote dotnet-linux-x86-64.dll"
+    if ![regexp $want $got] then {
+	unsupported "$test"
+    }
+
+    set test "dotnet-assemblies (32-bit)"
+    set want "file format pei-i386"
+    set got [binutils_run $OBJDUMP "-x tmpdir/simple-i386.dll"]
+    if ![regexp $want $got] then {
+	if [regexp "file format not recognized" $got] then {
+	    unsupported $test
+	} else {
+	    fail "$test"
+	}
+    } else {
+	pass $test
+    }
+
+    set test "dotnet-assemblies (64-bit)"
+    set want "file format pei-x86-64"
+    set got [binutils_run $OBJDUMP "-x tmpdir/dotnet-linux-x86-64.dll"]
+    if ![regexp $want $got] then {
+	if [regexp "file format not recognized" $got] then {
+	    unsupported $test
+	} else {
+	    fail "$test"
+	}
+    } else {
+	pass $test
+    }
+}
+
+test_objdump_dotnet_assemblies
+
 # Options which are not tested: -a -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = dejagnu no-dist foreign
+AUTOMAKE_OPTIONS = dejagnu no-dist foreign subdir-objects
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 SUBDIRS = doc po
@@ -93,8 +93,9 @@ EXTRA_SCRIPTS = embedspu
 ## Test programs.
 BFDTEST1_PROG = bfdtest1
 BFDTEST2_PROG = bfdtest2
+GENTESTDLLS_PROG = testsuite/gentestdlls
 
-TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG)
+TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG) $(GENTESTDLLS_PROG)
 
 ## We need a special rule to install the programs which are built with
 ## -new, and to rename cxxfilt to c++filt.

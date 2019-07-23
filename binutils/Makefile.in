@@ -113,7 +113,7 @@ bin_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
 	@BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ @BUILD_WINDMC@ \
 	$(am__EXEEXT_11) $(am__EXEEXT_12) $(am__EXEEXT_13) \
 	@BUILD_DLLWRAP@ $(am__empty)
-noinst_PROGRAMS = $(am__EXEEXT_17) $(am__EXEEXT_20) @BUILD_MISC@
+noinst_PROGRAMS = $(am__EXEEXT_17) $(am__EXEEXT_21) @BUILD_MISC@
 EXTRA_PROGRAMS = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4)
@@ -169,7 +169,8 @@ am__EXEEXT_16 = cxxfilt$(EXEEXT)
 am__EXEEXT_17 = $(am__EXEEXT_14) $(am__EXEEXT_15) $(am__EXEEXT_16)
 am__EXEEXT_18 = bfdtest1$(EXEEXT)
 am__EXEEXT_19 = bfdtest2$(EXEEXT)
-am__EXEEXT_20 = $(am__EXEEXT_18) $(am__EXEEXT_19)
+am__EXEEXT_20 = testsuite/gentestdlls$(EXEEXT)
+am__EXEEXT_21 = $(am__EXEEXT_18) $(am__EXEEXT_19) $(am__EXEEXT_20)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 am_addr2line_OBJECTS = addr2line.$(OBJEXT) $(am__objects_1)
@@ -243,6 +244,12 @@ strip_new_LDADD = $(LDADD)
 am_sysdump_OBJECTS = sysdump.$(OBJEXT) $(am__objects_1)
 sysdump_OBJECTS = $(am_sysdump_OBJECTS)
 sysdump_LDADD = $(LDADD)
+testsuite_gentestdlls_SOURCES = testsuite/gentestdlls.c
+am__dirstamp = $(am__leading_dot)dirstamp
+testsuite_gentestdlls_OBJECTS = testsuite/gentestdlls.$(OBJEXT)
+testsuite_gentestdlls_LDADD = $(LDADD)
+testsuite_gentestdlls_DEPENDENCIES = $(BFDLIB) $(LIBIBERTY) \
+	$(am__DEPENDENCIES_1)
 am_windmc_OBJECTS = windmc.$(OBJEXT) mcparse.$(OBJEXT) mclex.$(OBJEXT) \
 	winduni.$(OBJEXT) $(am__objects_1)
 windmc_OBJECTS = $(am_windmc_OBJECTS)
@@ -338,8 +345,8 @@ SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(EXTRA_ar_SOURCES) \
 	$(nm_new_SOURCES) $(objcopy_SOURCES) $(objdump_SOURCES) \
 	$(EXTRA_objdump_SOURCES) $(ranlib_SOURCES) $(readelf_SOURCES) \
 	$(size_SOURCES) $(srconv_SOURCES) $(strings_SOURCES) \
-	$(strip_new_SOURCES) $(sysdump_SOURCES) $(windmc_SOURCES) \
-	$(windres_SOURCES)
+	$(strip_new_SOURCES) $(sysdump_SOURCES) \
+	testsuite/gentestdlls.c $(windmc_SOURCES) $(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -548,7 +555,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 zlibdir = @zlibdir@
 zlibinc = @zlibinc@
-AUTOMAKE_OPTIONS = dejagnu no-dist foreign
+AUTOMAKE_OPTIONS = dejagnu no-dist foreign subdir-objects
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 SUBDIRS = doc po
 tooldir = $(exec_prefix)/$(target_alias)
@@ -595,7 +602,8 @@ bin_SCRIPTS = @BUILD_INSTALL_MISC@
 EXTRA_SCRIPTS = embedspu
 BFDTEST1_PROG = bfdtest1
 BFDTEST2_PROG = bfdtest2
-TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG)
+GENTESTDLLS_PROG = testsuite/gentestdlls
+TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG) $(GENTESTDLLS_PROG)
 RENAMED_PROGS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
@@ -940,6 +948,18 @@ strip-new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES) $(EXTRA_strip
 sysdump$(EXEEXT): $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES) $(EXTRA_sysdump_DEPENDENCIES) 
 	@rm -f sysdump$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(sysdump_OBJECTS) $(sysdump_LDADD) $(LIBS)
+testsuite/$(am__dirstamp):
+	@$(MKDIR_P) testsuite
+	@: > testsuite/$(am__dirstamp)
+testsuite/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) testsuite/$(DEPDIR)
+	@: > testsuite/$(DEPDIR)/$(am__dirstamp)
+testsuite/gentestdlls.$(OBJEXT): testsuite/$(am__dirstamp) \
+	testsuite/$(DEPDIR)/$(am__dirstamp)
+
+testsuite/gentestdlls$(EXEEXT): $(testsuite_gentestdlls_OBJECTS) $(testsuite_gentestdlls_DEPENDENCIES) $(EXTRA_testsuite_gentestdlls_DEPENDENCIES) testsuite/$(am__dirstamp)
+	@rm -f testsuite/gentestdlls$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testsuite_gentestdlls_OBJECTS) $(testsuite_gentestdlls_LDADD) $(LIBS)
 mcparse.h: mcparse.c
 	@if test ! -f $@; then rm -f mcparse.c; else :; fi
 	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) mcparse.c; else :; fi
@@ -992,6 +1012,7 @@ uninstall-binSCRIPTS:
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f testsuite/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1057,24 +1078,28 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/winduni.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wrstabs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/$(DEPDIR)/gentestdlls.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
@@ -1090,6 +1115,7 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf testsuite/.libs testsuite/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
@@ -1269,6 +1295,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f testsuite/$(DEPDIR)/$(am__dirstamp)
+	-rm -f testsuite/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -1292,7 +1320,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) testsuite/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
@@ -1342,7 +1370,7 @@ installcheck-am: installcheck-local
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) testsuite/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
