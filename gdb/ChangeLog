@@ -1,5 +1,10 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (tui_make_status_line): Return std::string.
+	(tui_locator_window::rerender): Update.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<~tui_source_window_base>: Don't declare.
 	<fullname>: Remove.

@@ -66,14 +66,12 @@ tui_locator_win_info_ptr (void)
 /* Create the status line to display as much information as we can on
    this single line: target name, process number, current function,
    current line, current PC, SingleKey mode.  */
-static char *
+static std::string
 tui_make_status_line (struct tui_locator_window *loc)
 {
-  char *string;
   char line_buf[50], *pname;
-  char *buf;
   int status_size;
-  int i, proc_width;
+  int proc_width;
   const char *pid_name;
   int target_width;
   int pid_width;
@@ -97,8 +95,6 @@ tui_make_status_line (struct tui_locator_window *loc)
     pid_width = MAX_PID_WIDTH;
 
   status_size = tui_term_width ();
-  string = (char *) xmalloc (status_size + 1);
-  buf = (char*) alloca (status_size + 1);
 
   /* Translate line number and obtain its size.  */
   if (loc->line_no > 0)
@@ -158,61 +154,47 @@ tui_make_status_line (struct tui_locator_window *loc)
   pname = loc->proc_name;
 
   /* Now create the locator line from the string version of the
-     elements.  We could use sprintf() here but that wouldn't ensure
-     that we don't overrun the size of the allocated buffer.
-     strcat_to_buf() will.  */
-  *string = (char) 0;
+     elements.  */
+  string_file string;
 
   if (target_width > 0)
-    {
-      sprintf (buf, "%*.*s ",
-               -target_width, target_width, target_shortname);
-      strcat_to_buf (string, status_size, buf);
-    }
+    string.printf ("%*.*s ", -target_width, target_width, target_shortname);
   if (pid_width > 0)
-    {
-      sprintf (buf, "%*.*s ",
-               -pid_width, pid_width, pid_name);
-      strcat_to_buf (string, status_size, buf);
-    }
-  
+    string.printf ("%*.*s ", -pid_width, pid_width, pid_name);
+
   /* Show whether we are in SingleKey mode.  */
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)
     {
-      strcat_to_buf (string, status_size, SINGLE_KEY);
-      strcat_to_buf (string, status_size, " ");
+      string.puts (SINGLE_KEY);
+      string.puts (" ");
     }
 
   /* Procedure/class name.  */
   if (proc_width > 0)
     {
       if (strlen (pname) > proc_width)
-        sprintf (buf, "%s%*.*s* ", PROC_PREFIX,
-                 1 - proc_width, proc_width - 1, pname);
+        string.printf ("%s%*.*s* ", PROC_PREFIX,
+		       1 - proc_width, proc_width - 1, pname);
       else
-        sprintf (buf, "%s%*.*s ", PROC_PREFIX,
-                 -proc_width, proc_width, pname);
-      strcat_to_buf (string, status_size, buf);
+        string.printf ("%s%*.*s ", PROC_PREFIX,
+		       -proc_width, proc_width, pname);
     }
 
   if (line_width > 0)
-    {
-      sprintf (buf, "%s%*.*s ", LINE_PREFIX,
-               -line_width, line_width, line_buf);
-      strcat_to_buf (string, status_size, buf);
-    }
+    string.printf ("%s%*.*s ", LINE_PREFIX,
+		   -line_width, line_width, line_buf);
   if (pc_width > 0)
     {
-      strcat_to_buf (string, status_size, PC_PREFIX);
-      strcat_to_buf (string, status_size, pc_buf);
+      string.puts (PC_PREFIX);
+      string.puts (pc_buf);
     }
-  
-  
-  for (i = strlen (string); i < status_size; i++)
-    string[i] = ' ';
-  string[status_size] = (char) 0;
 
-  return string;
+  if (string.size () < status_size)
+    string.puts (n_spaces (status_size - string.size ()));
+  else if (string.size () > status_size)
+    string.string ().erase (status_size, string.size ());
+
+  return std::move (string.string ());
 }
 
 /* Get a printable name for the function at the address.  The symbol
@@ -252,7 +234,7 @@ tui_locator_window::rerender ()
 {
   if (handle != NULL)
     {
-      char *string = tui_make_status_line (this);
+      std::string string = tui_make_status_line (this);
       wmove (handle, 0, 0);
       /* We ignore the return value from wstandout and wstandend, casting
 	 them to void in order to avoid a compiler warning.  The warning
@@ -260,12 +242,11 @@ tui_locator_window::rerender ()
 	 changing these macro to expand to code that causes the compiler
 	 to generate an unused-value warning.  */
       (void) wstandout (handle);
-      waddstr (handle, string);
+      waddstr (handle, string.c_str ());
       wclrtoeol (handle);
       (void) wstandend (handle);
       refresh_window ();
       wmove (handle, 0, 0);
-      xfree (string);
     }
 }
 
