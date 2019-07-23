@@ -261,11 +261,6 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 }
 
 
-tui_source_window_base::~tui_source_window_base ()
-{
-  xfree (fullname);
-}  
-
 /* See tui-data.h.  */
 
 void

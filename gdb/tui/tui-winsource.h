@@ -78,7 +78,7 @@ struct tui_source_window_base : public tui_win_info
 {
 protected:
   explicit tui_source_window_base (enum tui_win_type type);
-  ~tui_source_window_base () override;
+
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
   void do_scroll_horizontal (int num_to_scroll) override;
@@ -136,9 +136,6 @@ public:
   /* Used for horizontal scroll.  */
   int horizontal_offset = 0;
   struct tui_line_or_address start_line_or_addr;
-
-  /* It is the resolved form as returned by symtab_to_fullname.  */
-  char *fullname = nullptr;
 
   /* Architecture associated with code at this location.  */
   struct gdbarch *gdbarch = nullptr;
