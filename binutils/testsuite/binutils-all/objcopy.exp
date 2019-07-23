@@ -1102,8 +1102,8 @@ if [is_elf_format] {
     run_dump_test "group-7c"
     run_dump_test "copy-1"
     run_dump_test "note-1"
-    # Use bintest.o from the note-1 test to determine ELF32 or ELF64
-    if [is_elf64 tmpdir/bintest.o] {
+    # Use copytest.o from the note-1 test to determine ELF32 or ELF64
+    if [is_elf64 tmpdir/copytest.o] {
 	set elf64 "--defsym ELF64=1"
 	run_dump_test "note-2-64"
 	run_dump_test "note-3-64"

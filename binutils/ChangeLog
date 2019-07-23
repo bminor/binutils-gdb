@@ -1,3 +1,8 @@
+2019-07-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp (elf64): Correct object
+	file used to set this variable.
+
 2019-07-23  Omar Majid  <omajid@redhat.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Add subdir-objects
