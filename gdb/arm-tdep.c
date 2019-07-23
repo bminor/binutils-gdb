@@ -8187,6 +8187,56 @@ arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   *pc = extract_unsigned_integer (buf, ARM_INT_REGISTER_SIZE, byte_order);
   return 1;
 }
+/* A call to cmse secure entry function "foo" at "a" is modified by
+     GNU ld as "b".
+     a) bl xxxx <foo>
+
+     <foo>
+     xxxx:
+
+     b) bl yyyy <__acle_se_foo>
+
+     section .gnu.sgstubs:
+     <foo>
+     yyyy: sg   // secure gateway
+	   b.w xxxx <__acle_se_foo>  // original_branch_dest
+
+     <__acle_se_foo>
+     xxxx:
+
+  When the control at "b", the pc contains "yyyy" (sg address) which is a
+  trampoline and does not exist in source code.  This function returns the
+  target pc "xxxx".  For more details please refer to section 5.4
+  (Entry functions) and section 3.4.4 (C level development flow of secure code)
+  of "armv8-m-security-extensions-requirements-on-development-tools-engineering-specification"
+  document on www.developer.arm.com.  */
+
+static CORE_ADDR
+arm_skip_cmse_entry (CORE_ADDR pc, const char *name, struct objfile *objfile)
+{
+  int target_len = strlen (name) + strlen ("__acle_se_") + 1;
+  char *target_name = (char *) alloca (target_len);
+  xsnprintf (target_name, target_len, "%s%s", "__acle_se_", name);
+
+  struct bound_minimal_symbol minsym
+   = lookup_minimal_symbol (target_name, NULL, objfile);
+
+  if (minsym.minsym != nullptr)
+    return BMSYMBOL_VALUE_ADDRESS (minsym);
+
+  return 0;
+}
+
+/* Return true when SEC points to ".gnu.sgstubs" section.  */
+
+static bool
+arm_is_sgstubs_section (struct obj_section *sec)
+{
+  return (sec != nullptr
+	  && sec->the_bfd_section != nullptr
+	  && sec->the_bfd_section->name != nullptr
+	  && streq (sec->the_bfd_section->name, ".gnu.sgstubs"));
+}
 
 /* Recognize GCC and GNU ld's trampolines.  If we are in a trampoline,
    return the target PC.  Otherwise return 0.  */
@@ -8265,6 +8315,12 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       else
 	return 0;
     }
+
+  struct obj_section *section = find_pc_section (pc);
+
+  /* Check whether SECTION points to the ".gnu.sgstubs" section.  */
+  if (arm_is_sgstubs_section (section))
+    return arm_skip_cmse_entry (pc, name, section->objfile);
 
   return 0;			/* not a stub */
 }
