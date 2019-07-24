@@ -3466,7 +3466,7 @@ static void
 elf_xtensa_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
   int mach;
-  unsigned long val;
+  unsigned long val = elf_elfheader (abfd)->e_flags & EF_XTENSA_MACH;
 
   switch (mach = bfd_get_mach (abfd))
     {
@@ -3474,10 +3474,10 @@ elf_xtensa_final_write_processing (bfd *abfd, bfd_boolean linker)
       val = E_XTENSA_MACH;
       break;
     default:
-      return;
+      break;
     }
 
-  elf_elfheader (abfd)->e_flags &=  (~ EF_XTENSA_MACH);
+  elf_elfheader (abfd)->e_flags &= ~EF_XTENSA_MACH;
   elf_elfheader (abfd)->e_flags |= val;
   _bfd_elf_final_write_processing (abfd, linker);
 }

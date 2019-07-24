@@ -221,13 +221,14 @@ elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
   sec = bfd_get_section_by_name (abfd, ".rel.plt.unloaded");
   if (!sec)
     sec = bfd_get_section_by_name (abfd, ".rela.plt.unloaded");
-  if (!sec)
-    return;
-  d = elf_section_data (sec);
-  d->this_hdr.sh_link = elf_onesymtab (abfd);
-  sec = bfd_get_section_by_name (abfd, ".plt");
   if (sec)
-    d->this_hdr.sh_info = elf_section_data (sec)->this_idx;
+    {
+      d = elf_section_data (sec);
+      d->this_hdr.sh_link = elf_onesymtab (abfd);
+      sec = bfd_get_section_by_name (abfd, ".plt");
+      if (sec)
+	d->this_hdr.sh_info = elf_section_data (sec)->this_idx;
+    }
   _bfd_elf_final_write_processing (abfd, linker);
 }
 

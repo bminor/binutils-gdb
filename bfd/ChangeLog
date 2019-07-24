@@ -1,5 +1,12 @@
 2019-07-24  Alan Modra  <amodra@gmail.com>
 
+	* elf-vxworks.c (elf_vxworks_final_write_processing): Don't return
+	early.
+	* elf32-arc.c (arc_elf_final_write_processing): Likewise.
+	* elf32-xtensa.c (elf_xtensa_final_write_processing): Likewise.
+
+2019-07-24  Alan Modra  <amodra@gmail.com>
+
 	* elf32-visium.c (visium_elf_post_process_headers): Don't set
 	EI_OSABI header byte here.
 	(ELF_OSABI): Define.

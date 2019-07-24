@@ -1026,20 +1026,12 @@ arc_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 
   switch (bfd_get_mach (abfd))
     {
-    case bfd_mach_arc_arc600:
-      emf = EM_ARC_COMPACT;
-      break;
-    case bfd_mach_arc_arc601:
-      emf = EM_ARC_COMPACT;
-      break;
-    case bfd_mach_arc_arc700:
-      emf = EM_ARC_COMPACT;
-      break;
     case bfd_mach_arc_arcv2:
       emf = EM_ARC_COMPACT2;
       break;
     default:
-      return;
+      emf = EM_ARC_COMPACT;
+      break;
     }
 
   elf_elfheader (abfd)->e_machine = emf;
@@ -1050,7 +1042,7 @@ arc_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
   else
     e_flags |= E_ARC_OSABI_V3;
 
-  elf_elfheader (abfd)->e_flags |=  e_flags;
+  elf_elfheader (abfd)->e_flags |= e_flags;
   _bfd_elf_final_write_processing (abfd, linker);
 }
 
