@@ -81,11 +81,11 @@ reloc_type_to_name (unsigned int type)
 {
   switch (type)
     {
-      #include "elf/arc-reloc.def"
+#include "elf/arc-reloc.def"
 
-      default:
-	return "UNKNOWN";
-	break;
+    default:
+      return "UNKNOWN";
+      break;
     }
 }
 
@@ -96,20 +96,24 @@ reloc_type_to_name (unsigned int type)
 
 #define USE_REL 1
 
+/* Similar with bfd_get_32 but taking into account the
+   middle-endianess of the ARC CPUs.  Only to be used in code
+   sections.  */
+
 static bfd_vma
 bfd_get_32_me (bfd * abfd,const unsigned char * data)
 {
   bfd_vma value = 0;
 
-  if (bfd_big_endian(abfd)) {
+  if (bfd_big_endian (abfd))
     value = bfd_get_32 (abfd, data);
-  }
-  else {
-    value = ((bfd_get_8 (abfd, data) & 255) << 16);
-    value |= ((bfd_get_8 (abfd, data + 1) & 255) << 24);
-    value |= (bfd_get_8 (abfd, data + 2) & 255);
-    value |= ((bfd_get_8 (abfd, data + 3) & 255) << 8);
-  }
+  else
+    {
+      value = ((bfd_get_8 (abfd, data) & 255) << 16);
+      value |= ((bfd_get_8 (abfd, data + 1) & 255) << 24);
+      value |= (bfd_get_8 (abfd, data + 2) & 255);
+      value |= ((bfd_get_8 (abfd, data + 3) & 255) << 8);
+    }
 
   return value;
 }
@@ -1001,22 +1005,22 @@ arc_elf_object_p (bfd * abfd)
     {
       switch (arch)
 	{
-	  case E_ARC_MACH_ARC600:
-	    mach = bfd_mach_arc_arc600;
-	    break;
-	  case E_ARC_MACH_ARC601:
-	    mach = bfd_mach_arc_arc601;
-	    break;
-	  case E_ARC_MACH_ARC700:
-	    mach = bfd_mach_arc_arc700;
-	    break;
-	  case EF_ARC_CPU_ARCV2HS:
-	  case EF_ARC_CPU_ARCV2EM:
-	    mach = bfd_mach_arc_arcv2;
-	    break;
-	  default:
-	    mach = bfd_arc_get_mach_from_attributes (abfd);
-	    break;
+	case E_ARC_MACH_ARC600:
+	  mach = bfd_mach_arc_arc600;
+	  break;
+	case E_ARC_MACH_ARC601:
+	  mach = bfd_mach_arc_arc601;
+	  break;
+	case E_ARC_MACH_ARC700:
+	  mach = bfd_mach_arc_arc700;
+	  break;
+	case EF_ARC_CPU_ARCV2HS:
+	case EF_ARC_CPU_ARCV2EM:
+	  mach = bfd_mach_arc_arcv2;
+	  break;
+	default:
+	  mach = bfd_arc_get_mach_from_attributes (abfd);
+	  break;
 	}
     }
   else
@@ -1096,7 +1100,8 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
 	ARC_DEBUG (", output_section->vma = 0x%08x",
 		   ((unsigned int) reloc_data.sym_section->output_section->vma));
       ARC_DEBUG ("\n");
-      if (reloc_data.sym_section->owner && reloc_data.sym_section->owner->filename)
+      if (reloc_data.sym_section->owner
+	  && reloc_data.sym_section->owner->filename)
 	ARC_DEBUG ("  file: %s\n", reloc_data.sym_section->owner->filename);
     }
   else
@@ -1312,25 +1317,25 @@ arc_do_relocation (bfd_byte * contents,
 
   switch (reloc_data.howto->size)
     {
-      case 2:
-	insn = arc_bfd_get_32 (abfd,
-			       contents + reloc_data.reloc_offset,
-			       reloc_data.input_section);
-	break;
-      case 1:
-	insn = arc_bfd_get_16 (abfd,
-			       contents + reloc_data.reloc_offset,
-			       reloc_data.input_section);
-	break;
-      case 0:
-	insn = arc_bfd_get_8 (abfd,
-			       contents + reloc_data.reloc_offset,
-			       reloc_data.input_section);
-	break;
-      default:
-	insn = 0;
-	BFD_ASSERT (0);
-	break;
+    case 2:
+      insn = arc_bfd_get_32 (abfd,
+			     contents + reloc_data.reloc_offset,
+			     reloc_data.input_section);
+      break;
+    case 1:
+      insn = arc_bfd_get_16 (abfd,
+			     contents + reloc_data.reloc_offset,
+			     reloc_data.input_section);
+      break;
+    case 0:
+      insn = arc_bfd_get_8 (abfd,
+			    contents + reloc_data.reloc_offset,
+			    reloc_data.input_section);
+      break;
+    default:
+      insn = 0;
+      BFD_ASSERT (0);
+      break;
     }
 
   orig_insn = insn;
@@ -1339,9 +1344,9 @@ arc_do_relocation (bfd_byte * contents,
     {
 #include "elf/arc-reloc.def"
 
-      default:
-	BFD_ASSERT (0);
-	break;
+    default:
+      BFD_ASSERT (0);
+      break;
     }
 
   /* Check for relocation overflow.  */
@@ -1368,25 +1373,25 @@ arc_do_relocation (bfd_byte * contents,
   /* Write updated instruction back to memory.  */
   switch (reloc_data.howto->size)
     {
-      case 2:
-	arc_bfd_put_32 (abfd, insn,
-		       contents + reloc_data.reloc_offset,
-		       reloc_data.input_section);
-	break;
-      case 1:
+    case 2:
+      arc_bfd_put_32 (abfd, insn,
+		      contents + reloc_data.reloc_offset,
+		      reloc_data.input_section);
+      break;
+    case 1:
 	arc_bfd_put_16 (abfd, insn,
-		       contents + reloc_data.reloc_offset,
-		       reloc_data.input_section);
+			contents + reloc_data.reloc_offset,
+			reloc_data.input_section);
 	break;
-      case 0:
-	arc_bfd_put_8 (abfd, insn,
-		       contents + reloc_data.reloc_offset,
-		       reloc_data.input_section);
-	break;
-      default:
-	ARC_DEBUG ("size = %d\n", reloc_data.howto->size);
-	BFD_ASSERT (0);
-	break;
+    case 0:
+      arc_bfd_put_8 (abfd, insn,
+		     contents + reloc_data.reloc_offset,
+		     reloc_data.input_section);
+      break;
+    default:
+      ARC_DEBUG ("size = %d\n", reloc_data.howto->size);
+      BFD_ASSERT (0);
+      break;
     }
 
   return bfd_reloc_ok;
