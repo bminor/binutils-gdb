@@ -152,7 +152,9 @@ ctf_hashtab_lookup (struct htab *htab, const void *key, enum insert_option inser
 }
 
 static ctf_helem_t *
-ctf_hashtab_insert (struct htab *htab, void *key, void *value)
+ctf_hashtab_insert (struct htab *htab, void *key, void *value,
+                    ctf_hash_free_fun key_free,
+                    ctf_hash_free_fun value_free)
 {
   ctf_helem_t **slot;
 
@@ -169,8 +171,15 @@ ctf_hashtab_insert (struct htab *htab, void *key, void *value)
       *slot = malloc (sizeof (ctf_helem_t));
       if (!*slot)
 	return NULL;
-      (*slot)->key = key;
     }
+  else
+    {
+      if (key_free)
+          key_free ((*slot)->key);
+      if (value_free)
+          value_free ((*slot)->value);
+    }
+  (*slot)->key = key;
   (*slot)->value = value;
   return *slot;
 }
@@ -180,7 +189,8 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 {
   ctf_helem_t *slot;
 
-  slot = ctf_hashtab_insert (hp->htab, key, value);
+  slot = ctf_hashtab_insert (hp->htab, key, value,
+                             hp->key_free, hp->value_free);
 
   if (!slot)
     return errno;
@@ -317,7 +327,7 @@ ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
     return 0;		   /* Just ignore empty strings on behalf of caller.  */
 
   if (ctf_hashtab_insert ((struct htab *) hp, (char *) str,
-			  (void *) (ptrdiff_t) type) != NULL)
+			  (void *) (ptrdiff_t) type, NULL, NULL) != NULL)
     return 0;
   return errno;
 }
