@@ -1,5 +1,12 @@
 2019-07-24  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/24807
+	* gdb.objc/basicclass.m: Include stdio.h.
+	* gdb.objc/nondebug.m: Same.
+	* gdb.objc/objcdecode.m: Same.
+
+2019-07-24  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24612
 	* gdb.base/infoline-reloc-main-from-zero.exp: Add -Wl,-N to
 	additional_flags.
