@@ -1,5 +1,9 @@
 2019-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/module.exp: Extend with 'info variables' test.
+
+2019-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* boards/cc-with-tweaks.exp: Setup F90_FOR_TARGET and
 	F77_FOR_TARGET.
 
