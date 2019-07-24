@@ -28,6 +28,7 @@ Disassembly of section \.text:
 .*:	d53d660c 	mrs	x12, tfsr_el12
 .*:	d53810a1 	mrs	x1, rgsr_el1
 .*:	d53810c3 	mrs	x3, gcr_el1
+.*:	d5390084 	mrs	x4, gmid_el1
 .*:	d51b42e1 	msr	tco, x1
 .*:	d51b42e2 	msr	tco, x2
 .*:	d5186621 	msr	tfsre0_el1, x1

@@ -1,3 +1,11 @@
+2019-07-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	Backport from mainline
+	2019-07-23  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add gmid_el1 entry.
+	(aarch64_sys_reg_supported_p): Handle gmid_el1 encoding.
+
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode): Set C_SCAN_MOVPRFX for the

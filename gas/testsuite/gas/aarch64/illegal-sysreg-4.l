@@ -23,6 +23,7 @@
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'tfsr_el12'
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'rgsr_el1'
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'gcr_el1'
+[^:]*:[0-9]+: Error: selected processor does not support system register name 'gmid_el1'
 [^:]*:[0-9]+: Error: selected processor does not support PSTATE field name 'tco'
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'tco'
 [^:]*:[0-9]+: Error: selected processor does not support PSTATE field name 'tco'

@@ -3932,6 +3932,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "tfsr_el12",	CPENC(3,5,C6,C6,0), F_ARCHEXT },
   { "rgsr_el1",		CPENC(3,0,C1,C0,5), F_ARCHEXT },
   { "gcr_el1",		CPENC(3,0,C1,C0,6), F_ARCHEXT },
+  { "gmid_el1",		CPENC(3,1,C0,C0,4), F_ARCHEXT | F_REG_READ }, /* RO */
   { "tpidr_el0",        CPENC(3,3,C13,C0,2),	0 },
   { "tpidrro_el0",      CPENC(3,3,C13,C0,3),	0 }, /* RW */
   { "tpidr_el1",        CPENC(3,0,C13,C0,4),	0 },
@@ -4403,7 +4404,8 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 6, C6, C6, 0)
        || reg->value == CPENC (3, 5, C6, C6, 0)
        || reg->value == CPENC (3, 0, C1, C0, 5)
-       || reg->value == CPENC (3, 0, C1, C0, 6))
+       || reg->value == CPENC (3, 0, C1, C0, 6)
+       || reg->value == CPENC (3, 1, C0, C0, 4))
       && !(AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG)))
     return FALSE;
 
