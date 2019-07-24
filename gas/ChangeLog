@@ -1,3 +1,7 @@
+2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/nps400-6.d: Update test.
+
 2019-07-24  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (obj_elf_section, obj_elf_type): Set has_gnu_osabi.

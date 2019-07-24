@@ -181,7 +181,9 @@ skip_this_opcode (const struct arc_opcode *opcode)
 
   /* Check opcode for major 0x06, return if it is not in.  */
   if (arc_opcode_len (opcode) == 4
-      && OPCODE_32BIT_INSN (opcode->opcode) != 0x06)
+      && (OPCODE_32BIT_INSN (opcode->opcode) != 0x06
+	  /* Can be an APEX extensions.  */
+	  && OPCODE_32BIT_INSN (opcode->opcode) != 0x07))
     return FALSE;
 
   /* or not a known truble class.  */
@@ -190,6 +192,7 @@ skip_this_opcode (const struct arc_opcode *opcode)
     case FLOAT:
     case DSP:
     case ARITH:
+    case MPY:
       break;
     default:
       return FALSE;
@@ -763,6 +766,23 @@ parse_option (const char *option)
 
   else if (disassembler_options_cmp (option, "fpuda") == 0)
     add_to_decodelist (FLOAT, DPA);
+
+  else if (disassembler_options_cmp (option, "nps400") == 0)
+    {
+      add_to_decodelist (ACL, NPS400);
+      add_to_decodelist (ARITH, NPS400);
+      add_to_decodelist (BITOP, NPS400);
+      add_to_decodelist (BMU, NPS400);
+      add_to_decodelist (CONTROL, NPS400);
+      add_to_decodelist (DMA, NPS400);
+      add_to_decodelist (DPI, NPS400);
+      add_to_decodelist (MEMORY, NPS400);
+      add_to_decodelist (MISC, NPS400);
+      add_to_decodelist (NET, NPS400);
+      add_to_decodelist (PMU, NPS400);
+      add_to_decodelist (PROTOCOL_DECODE, NPS400);
+      add_to_decodelist (ULTRAIP, NPS400);
+    }
 
   else if (disassembler_options_cmp (option, "fpus") == 0)
     {
@@ -1410,6 +1430,8 @@ with -M switch (multiple options should be separated by commas):\n"));
   fpus            Recognize single precision FPU instructions.\n"));
   fprintf (stream, _("\
   fpud            Recognize double precision FPU instructions.\n"));
+  fprintf (stream, _("\
+  nps400          Recognize NPS400 instructions.\n"));
   fprintf (stream, _("\
   hex             Use only hexadecimal number to print immediates.\n"));
 }
