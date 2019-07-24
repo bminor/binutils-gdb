@@ -1,3 +1,7 @@
+2019-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/nps400-6.d: Update test.
