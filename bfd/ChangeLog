@@ -1,3 +1,10 @@
+2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf32-arc.c (bfd_get_32_me): New function.
+	(bfd_put_32_me): Likewise.
+	(arc_elf_relax_section): Likewise.
+	(bfd_elf32_bfd_relax_section): Define.
+
 2019-07-24  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data): Return bfd_boolean from

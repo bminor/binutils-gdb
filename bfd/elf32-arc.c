@@ -96,6 +96,31 @@ reloc_type_to_name (unsigned int type)
 
 #define USE_REL 1
 
+static bfd_vma
+bfd_get_32_me (bfd * abfd,const unsigned char * data)
+{
+  bfd_vma value = 0;
+
+  if (bfd_big_endian(abfd)) {
+    value = bfd_get_32 (abfd, data);
+  }
+  else {
+    value = ((bfd_get_8 (abfd, data) & 255) << 16);
+    value |= ((bfd_get_8 (abfd, data + 1) & 255) << 24);
+    value |= (bfd_get_8 (abfd, data + 2) & 255);
+    value |= ((bfd_get_8 (abfd, data + 3) & 255) << 8);
+  }
+
+  return value;
+}
+
+static void
+bfd_put_32_me (bfd *abfd, bfd_vma value,unsigned char *data)
+{
+  bfd_put_16 (abfd, (value & 0xffff0000) >> 16, data);
+  bfd_put_16 (abfd, value & 0xffff, data + 2);
+}
+
 static ATTRIBUTE_UNUSED bfd_boolean
 is_reloc_PC_relative (reloc_howto_type *howto)
 {
@@ -2968,6 +2993,156 @@ elf32_arc_section_from_shdr (bfd *abfd,
   return TRUE;
 }
 
+/* Relaxation hook.
+
+   These are the current relaxing opportunities available:
+
+   * R_ARC_GOTPC32 => R_ARC_PCREL.
+
+*/
+
+static bfd_boolean
+arc_elf_relax_section (bfd *abfd, asection *sec,
+		       struct bfd_link_info *link_info, bfd_boolean *again)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *irel, *irelend;
+  bfd_byte *contents = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
+
+  /* Assume nothing changes.  */
+  *again = FALSE;
+
+  /* We don't have to do anything for a relocatable link, if this
+     section does not have relocs, or if this is not a code
+     section.  */
+  if (bfd_link_relocatable (link_info)
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || (sec->flags & SEC_CODE) == 0)
+    return TRUE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
+                                               link_info->keep_memory);
+  if (internal_relocs == NULL)
+    goto error_return;
+
+  /* Walk through them looking for relaxing opportunities.  */
+  irelend = internal_relocs + sec->reloc_count;
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      /* If this isn't something that can be relaxed, then ignore
+         this reloc.  */
+      if (ELF32_R_TYPE (irel->r_info) != (int) R_ARC_GOTPC32)
+        continue;
+
+      /* Get the section contents if we haven't done so already.  */
+      if (contents == NULL)
+        {
+          /* Get cached copy if it exists.  */
+          if (elf_section_data (sec)->this_hdr.contents != NULL)
+            contents = elf_section_data (sec)->this_hdr.contents;
+          /* Go get them off disk.  */
+          else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+            goto error_return;
+        }
+
+      /* Read this BFD's local symbols if we haven't done so already.  */
+      if (isymbuf == NULL && symtab_hdr->sh_info != 0)
+        {
+          isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+          if (isymbuf == NULL)
+            isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+                                            symtab_hdr->sh_info, 0,
+                                            NULL, NULL, NULL);
+          if (isymbuf == NULL)
+            goto error_return;
+        }
+
+      struct elf_link_hash_entry *htop = NULL;
+
+      if (ELF32_R_SYM (irel->r_info) >= symtab_hdr->sh_info)
+	{
+	  /* An external symbol.  */
+	  unsigned int indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+	  htop = elf_sym_hashes (abfd)[indx];
+	}
+
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_ARC_GOTPC32
+	  && SYMBOL_REFERENCES_LOCAL (link_info, htop))
+	{
+	  unsigned int code;
+
+	  /* Get the opcode.  */
+	  code = bfd_get_32_me (abfd, contents + irel->r_offset - 4);
+
+	  /* Note that we've changed the relocs, section contents, etc.  */
+	  elf_section_data (sec)->relocs = internal_relocs;
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	  symtab_hdr->contents = (unsigned char *) isymbuf;
+
+	  /* Fix the relocation's type.  */
+	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info), R_ARC_PC32);
+
+	  /* ld rA,[pcl,symbol@tgot] -> add rA,pcl,symbol@pcl.  */
+	  /* 0010 0bbb aa11 0ZZX DBBB 1111 10AA AAAA.
+	           111 00    000 0111        xx xxxx*/
+	  code &= ~0x27307F80;
+	  BFD_ASSERT (code <= 62UL);
+	  code |= 0x27007F80;
+
+	  /* Write back the new instruction.  */
+	  bfd_put_32_me (abfd, code, contents + irel->r_offset - 4);
+
+	  /* The size isn't changed, don't redo.  */
+	  *again = FALSE;
+	}
+    }
+
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (unsigned char *) isymbuf)
+    {
+      if (!link_info->keep_memory)
+        free (isymbuf);
+      else
+       /* Cache the symbols for elf_link_input_bfd.  */
+       symtab_hdr->contents = (unsigned char *) isymbuf;
+    }
+
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (!link_info->keep_memory)
+        free (contents);
+      else
+       /* Cache the section contents for elf_link_input_bfd.  */
+       elf_section_data (sec)->this_hdr.contents = contents;
+    }
+
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  return TRUE;
+
+ error_return:
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  return FALSE;
+}
+
 #define TARGET_LITTLE_SYM   arc_elf32_le_vec
 #define TARGET_LITTLE_NAME  "elf32-littlearc"
 #define TARGET_BIG_SYM	    arc_elf32_be_vec
@@ -2985,6 +3160,7 @@ elf32_arc_section_from_shdr (bfd *abfd,
 #define bfd_elf32_bfd_set_private_flags		arc_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data    arc_elf_print_private_bfd_data
 #define bfd_elf32_bfd_copy_private_bfd_data     arc_elf_copy_private_bfd_data
+#define bfd_elf32_bfd_relax_section		arc_elf_relax_section
 
 #define elf_info_to_howto_rel		     arc_info_to_howto_rel
 #define elf_backend_object_p		     arc_elf_object_p
