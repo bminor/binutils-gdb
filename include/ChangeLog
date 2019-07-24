@@ -1,3 +1,8 @@
+2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* include/opcode/arc.h (FASTMATH): Add.
+	(SWITCH): Likewise.
+
 2019-07-24  Alan Modra  <amodra@gmail.com>
 
 	* elf/internal.h (ELF_SECTION_IN_SEGMENT_1): Exclude non-alloc

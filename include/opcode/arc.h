@@ -59,6 +59,7 @@ typedef enum
   EI,
   ENTER,
   FLOAT,
+  FASTMATH,
   INVALID,
   JLI,
   JUMP,
@@ -79,6 +80,7 @@ typedef enum
   SJLI,
   STORE,
   SUB,
+  SWITCH,
   ULTRAIP,
   XY
 } insn_class_t;

@@ -1,3 +1,11 @@
+2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-ext-tbl.h (bspeek): Remove it, added to main table.
+	(bspop): Likewise.
+	(modapp): Likewise.
+	* arc-opc.c (RAD_CHK): Add.
+	* arc-tbl.h: Regenerate.
+
 2019-07-23  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add gmid_el1 entry.

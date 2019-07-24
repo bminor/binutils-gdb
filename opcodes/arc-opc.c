@@ -1822,7 +1822,9 @@ const struct arc_operand arc_operands[] =
 
 #define RAD		(RBdup + 1)
   { 6, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rad, 0 },
-#define RCD		(RAD + 1)
+#define RAD_CHK		(RAD + 1)
+  { 6, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rad, 0 },
+#define RCD		(RAD_CHK + 1)
   { 6, 6, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rcd, 0 },
 
   /* The plain integer register fields.  Used by short
