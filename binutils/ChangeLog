@@ -1,3 +1,9 @@
+2019-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 13256
+	* ar.c (decode_options): Restart option scanning if no operation
+	is detected and argument remain to be scanned.
+
 2019-07-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 24818

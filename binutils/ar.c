@@ -432,9 +432,10 @@ decode_options (int argc, char **argv)
 {
   int c;
 
-  /* Convert old-style tar call by exploding option element and rearranging
+  /* Convert old-style ar call by exploding option element and rearranging
      options accordingly.  */
 
+ restart:
   if (argc > 1 && argv[1][0] != '-')
     {
       int new_argc;		/* argc value for rearranged arguments */
@@ -596,6 +597,17 @@ decode_options (int argc, char **argv)
         default:
           usage (0);
         }
+    }
+
+  /* PR 13256: Allow for the possibility that the first command line option
+     started with a dash (eg --plugin) but then the following option(s) are
+     old style, non-dash-prefixed versions.  */
+  if (operation == none && optind > 0 && optind < argc)
+    {
+      argv += (optind - 1);
+      argc -= (optind - 1);
+      optind = 0;
+      goto restart;
     }
 
   return &argv[optind];
