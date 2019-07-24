@@ -86,7 +86,9 @@ proc run_test { lang } {
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
 		 "62:\[\t \]+typedef union_t nested_union_t;" \
-		 "\[\t \]+unsigned int"]
+		 "\[\t \]+unsigned int(" \
+		 "" \
+		 "File .*:.*)?" ]
     } else {
 	set output_re \
 	    [multi_line \
@@ -116,7 +118,9 @@ proc run_test { lang } {
 		 "18:\[\t \]+typedef int nested_int_t;" \
 		 "62:\[\t \]+typedef union union_t nested_union_t;" \
 		 "56:\[\t \]+union union_t;" \
-		 "\[\t \]+unsigned int" ]
+		 "\[\t \]+unsigned int(" \
+		 "" \
+		 "File .*:.*)?" ]
     }
 
     gdb_test "info types" $output_re
