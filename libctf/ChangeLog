@@ -1,3 +1,11 @@
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-hash.c (ctf_hashtab_insert): Pass in the key and value
+	freeing functions: if set, free the key and value if the slot
+	already exists.  Always reassign the key.
+	(ctf_dynhash_insert): Adjust call appropriately.
+	(ctf_hash_insert_type): Likewise.
+
 2019-08-03  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (ctf_add_type): Look up and use the forwarded-to
