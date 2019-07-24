@@ -1,5 +1,11 @@
 2019-07-24  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/24612
+	* gdb.base/infoline-reloc-main-from-zero.exp: Add -Wl,-N to
+	additional_flags.
+
+2019-07-24  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24831
 	* gdb.multi/tids.exp: Update error messages for info threads.
 
