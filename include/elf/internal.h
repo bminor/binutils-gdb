@@ -330,8 +330,10 @@ struct elf_segment_map
 	&& ((segment)->p_type == PT_LOAD				\
 	    || (segment)->p_type == PT_DYNAMIC				\
 	    || (segment)->p_type == PT_GNU_EH_FRAME			\
+	    || (segment)->p_type == PT_GNU_STACK			\
 	    || (segment)->p_type == PT_GNU_RELRO			\
-	    || (segment)->p_type == PT_GNU_STACK))			\
+	    || ((segment)->p_type >= PT_GNU_MBIND_LO			\
+		&& (segment)->p_type <= PT_GNU_MBIND_HI)))		\
    /* Any section besides one of type SHT_NOBITS must have file		\
       offsets within the segment.  */					\
    && ((sec_hdr)->sh_type == SHT_NOBITS					\

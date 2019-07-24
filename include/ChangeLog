@@ -1,3 +1,8 @@
+2019-07-24  Alan Modra  <amodra@gmail.com>
+
+	* elf/internal.h (ELF_SECTION_IN_SEGMENT_1): Exclude non-alloc
+	sections in GNU_MBIND segments.
+
 2019-07-23  Omar Majid  <omajid@redhat.com>
 
 	* coff/i386.h (IMAGE_FILE_MACHINE_NATIVE_APPLE_OVERRIDE): Define.
