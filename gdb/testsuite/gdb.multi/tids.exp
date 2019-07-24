@@ -84,14 +84,19 @@ proc thr_apply_info_thr {tid_list info_thr {thr_apply ""}} {
     thread_apply $tid_list $thr_apply
 }
 
-# Issue both "info threads TID_LIST" and "thread apply TID_LIST" and
-# expect both commands to error out with EXP_ERROR.
-proc thr_apply_info_thr_error {tid_list exp_error}  {
+# Issue both "thread apply TID_LIST" and "info threads TID_LIST" and
+# expect commands to error out with EXP_ERROR_APPLY and EXP_ERROR_INFO.
+# If EXP_ERROR_INFO is missing, default to EXP_ERROR_APPLY.
+proc thr_apply_info_thr_error {tid_list exp_error_apply {exp_error_info ""}} {
+    if { "$exp_error_info" == "" } {
+	set exp_error_info "$exp_error_apply"
+    }
+
     gdb_test "info threads $tid_list" \
-	$exp_error
+	$exp_error_info
 
     gdb_test "thread apply $tid_list" \
-	$exp_error \
+	$exp_error_apply \
 	"thread apply $tid_list"
 }
 
@@ -351,8 +356,10 @@ with_test_prefix "two inferiors" {
 	thr_apply_info_thr_error "${prefix}2-1" "inverted range"
 	thr_apply_info_thr_error "${prefix}2-\$one" "inverted range"
 	if {$prefix == ""} {
-	    thr_apply_info_thr_error "${prefix}-1" "Invalid thread ID: -1"
-	    thr_apply_info_thr_error "${prefix}-\$one" "Invalid thread ID: -\\\$one"
+	    thr_apply_info_thr_error "${prefix}-1" "Invalid thread ID: -1" \
+		"Unrecognized option at: -1"
+	    thr_apply_info_thr_error "${prefix}-\$one" \
+		"Invalid thread ID: -\\\$one" "Unrecognized option at: -\\\$one"
 	} else {
 	    thr_apply_info_thr_error "${prefix}-1" "negative value"
 	    thr_apply_info_thr_error "${prefix}-\$one" "negative value"
