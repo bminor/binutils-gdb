@@ -1,3 +1,13 @@
+2019-07-24  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* h8300-tdep.c (h8300_register_name_common): New.
+	h8300_register_name): Use h8300_register_name_common.
+	(h8300s_register_name): Likewise.
+	(h8300sx_register_name): Likewise.
+	(h8300h_register_nam): New.
+	(h8300_gdbarch_init): Use h8300h_register_name in h8300h machine.
+
+
 2019-07-23  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* arm-tdep.c (arm_skip_cmse_entry): New function.

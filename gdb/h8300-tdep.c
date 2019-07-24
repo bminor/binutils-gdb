@@ -929,6 +929,19 @@ h8300_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 }
 
 static const char *
+h8300_register_name_common (const char *regnames[], int numregs,
+			    struct gdbarch *gdbarch, int regno)
+{
+  if (regno < 0
+      || regno >= numregs)
+    internal_error (__FILE__, __LINE__,
+		    _("h8300_register_name_common: illegal register number %d"),
+		    regno);
+  else
+    return regnames[regno];
+}
+
+static const char *
 h8300_register_name (struct gdbarch *gdbarch, int regno)
 {
   /* The register names change depending on which h8300 processor
@@ -938,13 +951,20 @@ h8300_register_name (struct gdbarch *gdbarch, int regno)
     "sp", "", "pc", "cycles", "tick", "inst",
     "ccr",			/* pseudo register */
   };
-  if (regno < 0
-      || regno >= (sizeof (register_names) / sizeof (*register_names)))
-    internal_error (__FILE__, __LINE__,
-		    _("h8300_register_name: illegal register number %d"),
-		    regno);
-  else
-    return register_names[regno];
+  return h8300_register_name_common(register_names, ARRAY_SIZE(register_names),
+				    gdbarch, regno);
+}
+
+static const char *
+h8300h_register_name (struct gdbarch *gdbarch, int regno)
+{
+  static const char *register_names[] = {
+    "er0", "er1", "er2", "er3", "er4", "er5", "er6",
+    "sp", "", "pc", "cycles", "tick", "inst",
+    "ccr",			/* pseudo register */
+  };
+  return h8300_register_name_common(register_names, ARRAY_SIZE(register_names),
+				    gdbarch, regno);
 }
 
 static const char *
@@ -956,13 +976,8 @@ h8300s_register_name (struct gdbarch *gdbarch, int regno)
     "mach", "macl",
     "ccr", "exr"		/* pseudo registers */
   };
-  if (regno < 0
-      || regno >= (sizeof (register_names) / sizeof (*register_names)))
-    internal_error (__FILE__, __LINE__,
-		    _("h8300s_register_name: illegal register number %d"),
-		    regno);
-  else
-    return register_names[regno];
+  return h8300_register_name_common(register_names, ARRAY_SIZE(register_names),
+				    gdbarch, regno);
 }
 
 static const char *
@@ -974,13 +989,8 @@ h8300sx_register_name (struct gdbarch *gdbarch, int regno)
     "mach", "macl", "sbr", "vbr",
     "ccr", "exr"		/* pseudo registers */
   };
-  if (regno < 0
-      || regno >= (sizeof (register_names) / sizeof (*register_names)))
-    internal_error (__FILE__, __LINE__,
-		    _("h8300sx_register_name: illegal register number %d"),
-		    regno);
-  else
-    return register_names[regno];
+  return h8300_register_name_common(register_names, ARRAY_SIZE(register_names),
+				    gdbarch, regno);
 }
 
 static void
@@ -1259,7 +1269,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_pseudo_regs (gdbarch, 1);
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
-      set_gdbarch_register_name (gdbarch, h8300_register_name);
+      set_gdbarch_register_name (gdbarch, h8300h_register_name);
       if (info.bfd_arch_info->mach != bfd_mach_h8300hn)
 	{
 	  set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
