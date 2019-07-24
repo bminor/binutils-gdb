@@ -6568,7 +6568,8 @@ _bfd_elf_write_object_contents (bfd *abfd)
 	  || !_bfd_elf_strtab_emit (abfd, elf_shstrtab (abfd))))
     return FALSE;
 
-  (*bed->elf_backend_final_write_processing) (abfd, elf_linker (abfd));
+  if (!(*bed->elf_backend_final_write_processing) (abfd))
+    return FALSE;
 
   if (!bed->s->write_shdrs_and_ehdr (abfd))
     return FALSE;
@@ -12123,9 +12124,8 @@ _bfd_elf_post_process_headers (bfd *abfd ATTRIBUTE_UNUSED,
 {
 }
 
-void
-_bfd_elf_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+bfd_boolean
+_bfd_elf_final_write_processing (bfd *abfd)
 {
   Elf_Internal_Ehdr *i_ehdrp;	/* ELF file header, internal form.  */
 
@@ -12137,9 +12137,24 @@ _bfd_elf_final_write_processing (bfd *abfd,
   /* Set the osabi field to ELFOSABI_GNU if the binary contains
      SHF_GNU_MBIND sections or symbols of STT_GNU_IFUNC type or
      STB_GNU_UNIQUE binding.  */
-  if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE
-      && elf_tdata (abfd)->has_gnu_osabi)
-    i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_GNU;
+  if (elf_tdata (abfd)->has_gnu_osabi != 0)
+    {
+      if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE)
+	i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_GNU;
+      else if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_GNU
+	       && i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_FREEBSD)
+	{
+	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_mbind)
+	    _bfd_error_handler (_("GNU_MBIND section is unsupported"));
+	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_ifunc)
+	    _bfd_error_handler (_("symbol type STT_GNU_IFUNC is unsupported"));
+	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_unique)
+	    _bfd_error_handler (_("symbol binding STB_GNU_UNIQUE is unsupported"));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+    }
+  return TRUE;
 }
 
 

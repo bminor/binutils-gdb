@@ -18,4 +18,4 @@
 
 bfd_boolean nacl_modify_segment_map (bfd *, struct bfd_link_info *);
 bfd_boolean nacl_modify_program_headers (bfd *, struct bfd_link_info *);
-void nacl_final_write_processing (bfd *, bfd_boolean linker);
+bfd_boolean nacl_final_write_processing (bfd *);

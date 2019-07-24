@@ -1385,8 +1385,8 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
    file.  This gets the MSP430 architecture right based on the machine
    number.  */
 
-static void
-bfd_elf_msp430_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+bfd_elf_msp430_final_write_processing (bfd *abfd)
 {
   unsigned long val;
 
@@ -1421,7 +1421,7 @@ bfd_elf_msp430_final_write_processing (bfd *abfd, bfd_boolean linker)
   elf_elfheader (abfd)->e_machine = EM_MSP430;
   elf_elfheader (abfd)->e_flags &= ~EF_MSP430_MACH;
   elf_elfheader (abfd)->e_flags |= val;
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 /* Set the right machine number.  */

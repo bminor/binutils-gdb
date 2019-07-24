@@ -4667,8 +4667,8 @@ elf_mn10300_mach (flagword flags)
    file.  This gets the MN10300 architecture right based on the machine
    number.  */
 
-static void
-_bfd_mn10300_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+_bfd_mn10300_elf_final_write_processing (bfd *abfd)
 {
   unsigned long val;
 
@@ -4690,7 +4690,7 @@ _bfd_mn10300_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
 
   elf_elfheader (abfd)->e_flags &= ~ (EF_MN10300_MACH);
   elf_elfheader (abfd)->e_flags |= val;
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 static bfd_boolean

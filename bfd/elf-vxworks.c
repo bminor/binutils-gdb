@@ -212,8 +212,8 @@ elf_vxworks_emit_relocs (bfd *output_bfd,
 
 /* Set the sh_link and sh_info fields on the static plt relocation secton.  */
 
-void
-elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
+bfd_boolean
+elf_vxworks_final_write_processing (bfd *abfd)
 {
   asection * sec;
   struct bfd_elf_section_data *d;
@@ -229,7 +229,7 @@ elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
       if (sec)
 	d->this_hdr.sh_info = elf_section_data (sec)->this_idx;
     }
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 /* Add the dynamic entries required by VxWorks.  These point to the

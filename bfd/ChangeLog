@@ -1,5 +1,54 @@
 2019-07-24  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data): Return bfd_boolean from
+	elf_backend_final_write_processing, don't pass linker arg.
+	(_bfd_elf_final_write_processing): Update prototype.
+	* elf.c (_bfd_elf_write_object_contents): Adjust call.
+	(_bfd_elf_final_write_processing): Return error on incompatible
+	OSABI and has_gnu_osabi.  Remove linker arg.
+	* elf-nacl.h (nacl_final_write_processing): Update prototype.
+	* elf-vxworks.h (elf_vxworks_final_write_processing): Likewise.
+	* elfxx-mips.h (_bfd_mips_final_write_processing): Likewise.
+	(_bfd_mips_elf_final_write_processing): Likewise.
+	* elf-hppa.h (elf_hppa_final_write_processing): Return status
+	and remove linker arg.
+	* elf-m10300.c (_bfd_mn10300_elf_final_write_processing): Likewise.
+	* elf-nacl.c (nacl_final_write_processing): Likewise.
+	* elf-vxworks.c (elf_vxworks_final_write_processing): Likewise.
+	* elf32-arc.c (arc_elf_final_write_processing): Likewise.
+	* elf32-arm.c (arm_final_write_processing): Likewise.
+	(elf32_arm_final_write_processing): Likewise.
+	(elf32_arm_nacl_final_write_processing): Likewise.
+	(elf32_arm_vxworks_final_write_processing): Likewise.
+	* elf32-avr.c (bfd_elf_avr_final_write_processing): Likewise.
+	* elf32-bfin.c (elf32_bfin_final_write_processing): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_final_write_processing): Likewise.
+	* elf32-cris.c (cris_elf_final_write_processing): Likewise.
+	* elf32-h8300.c (elf32_h8_final_write_processing): Likewise.
+	* elf32-lm32.c (lm32_elf_final_write_processing): Likewise.
+	* elf32-m32r.c (m32r_elf_final_write_processing): Likewise.
+	* elf32-m68k.c (elf_m68k_final_write_processing): Likewise.
+	* elf32-mips.c (mips_vxworks_final_write_processing): Likewise.
+	* elf32-msp430.c (bfd_elf_msp430_final_write_processing): Likewise.
+	* elf32-nds32.c (nds32_elf_final_write_processing): Likewise.
+	* elf32-or1k.c (or1k_elf_final_write_processing): Likewise.
+	* elf32-pj.c (pj_elf_final_write_processing): Likewise.
+	* elf32-ppc.c (ppc_final_write_processing): Likewise.
+	(ppc_elf_final_write_processing): Likewise.
+	(ppc_elf_vxworks_final_write_processing): Likewise.
+	* elf32-sparc.c (sparc_final_write_processing): Likewise.
+	(elf32_sparc_final_write_processing): Likewise.
+	(elf32_sparc_vxworks_final_write_processing): Likewise.
+	* elf32-v850.c (v850_elf_final_write_processing): Likewise.
+	* elf32-xc16x.c (elf32_xc16x_final_write_processing): Likewise.
+	* elf32-xtensa.c (elf_xtensa_final_write_processing): Likewise.
+	* elf64-ia64-vms.c (elf64_vms_final_write_processing): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_final_write_processing): Likewise.
+	* elfxx-mips.c (_bfd_mips_final_write_processing): Likewise.
+	(_bfd_mips_elf_final_write_processing): Likewise.
+
+2019-07-24  Alan Modra  <amodra@gmail.com>
+
 	* elf-vxworks.c (elf_vxworks_final_write_processing): Don't return
 	early.
 	* elf32-arc.c (arc_elf_final_write_processing): Likewise.

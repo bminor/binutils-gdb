@@ -3462,8 +3462,8 @@ elf_xtensa_object_p (bfd *abfd)
    file.  This gets the Xtensa architecture right based on the machine
    number.  */
 
-static void
-elf_xtensa_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+elf_xtensa_final_write_processing (bfd *abfd)
 {
   int mach;
   unsigned long val = elf_elfheader (abfd)->e_flags & EF_XTENSA_MACH;
@@ -3479,7 +3479,7 @@ elf_xtensa_final_write_processing (bfd *abfd, bfd_boolean linker)
 
   elf_elfheader (abfd)->e_flags &= ~EF_XTENSA_MACH;
   elf_elfheader (abfd)->e_flags |= val;
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 

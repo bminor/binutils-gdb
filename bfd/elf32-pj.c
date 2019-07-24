@@ -336,12 +336,12 @@ pj_elf_info_to_howto (bfd *abfd,
 /* Take this moment to fill in the special picoJava bits in the
    e_flags field.  */
 
-static void
-pj_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+pj_elf_final_write_processing (bfd *abfd)
 {
   elf_elfheader (abfd)->e_flags |= EF_PICOJAVA_ARCH;
   elf_elfheader (abfd)->e_flags |= EF_PICOJAVA_GNUCALLS;
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 #define TARGET_BIG_SYM		pj_elf32_vec

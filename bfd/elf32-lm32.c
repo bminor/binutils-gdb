@@ -555,8 +555,8 @@ lm32_elf_object_p (bfd *abfd)
 
 /* Set machine type flags just before file is written out. */
 
-static void
-lm32_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+lm32_elf_final_write_processing (bfd *abfd)
 {
   elf_elfheader (abfd)->e_machine = EM_LATTICEMICO32;
   elf_elfheader (abfd)->e_flags &=~ EF_LM32_MACH;
@@ -568,7 +568,7 @@ lm32_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
       default:
 	abort ();
     }
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 /* Set the GP value for OUTPUT_BFD.  Returns FALSE if this is a

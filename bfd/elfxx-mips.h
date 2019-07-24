@@ -70,9 +70,9 @@ extern bfd_boolean _bfd_mips_elf_finish_dynamic_sections
 extern bfd_boolean _bfd_mips_elf_sort_relocs_p
   (asection *);
 extern void _bfd_mips_final_write_processing
-  (bfd *, bfd_boolean);
-extern void _bfd_mips_elf_final_write_processing
-  (bfd *, bfd_boolean);
+  (bfd *);
+extern bfd_boolean _bfd_mips_elf_final_write_processing
+  (bfd *);
 extern int _bfd_mips_elf_additional_program_headers
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_modify_segment_map

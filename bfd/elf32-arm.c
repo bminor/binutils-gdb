@@ -17915,16 +17915,16 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 }
 
 static void
-arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
+arm_final_write_processing (bfd *abfd)
 {
   bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
 }
 
-static void
-elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+elf32_arm_final_write_processing (bfd *abfd)
 {
-  arm_final_write_processing (abfd, linker);
-  _bfd_elf_final_write_processing (abfd, linker);
+  arm_final_write_processing (abfd);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 /* Return TRUE if this is an unwinding table entry.  */
@@ -20600,11 +20600,11 @@ elf32_arm_nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	  && nacl_modify_segment_map (abfd, info));
 }
 
-static void
-elf32_arm_nacl_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+elf32_arm_nacl_final_write_processing (bfd *abfd)
 {
-  arm_final_write_processing (abfd, linker);
-  nacl_final_write_processing (abfd, linker);
+  arm_final_write_processing (abfd);
+  return nacl_final_write_processing (abfd);
 }
 
 static bfd_vma
@@ -20755,11 +20755,11 @@ elf32_arm_vxworks_link_hash_table_create (bfd *abfd)
   return ret;
 }
 
-static void
-elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+elf32_arm_vxworks_final_write_processing (bfd *abfd)
 {
-  arm_final_write_processing (abfd, linker);
-  elf_vxworks_final_write_processing (abfd, linker);
+  arm_final_write_processing (abfd);
+  return elf_vxworks_final_write_processing (abfd);
 }
 
 #undef  elf32_bed

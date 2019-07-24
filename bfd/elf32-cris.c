@@ -3829,8 +3829,8 @@ cris_elf_object_p (bfd *abfd)
 /* Mark presence or absence of leading underscore.  Set machine type
    flags from mach type.  */
 
-static void
-cris_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+cris_elf_final_write_processing (bfd *abfd)
 {
   unsigned long e_flags = elf_elfheader (abfd)->e_flags;
 
@@ -3858,7 +3858,7 @@ cris_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
     }
 
   elf_elfheader (abfd)->e_flags = e_flags;
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 /* Set the mach type from e_flags value.  */

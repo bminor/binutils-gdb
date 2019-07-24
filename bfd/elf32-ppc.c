@@ -1705,7 +1705,7 @@ ppc_elf_write_section (bfd *abfd ATTRIBUTE_UNUSED,
 /* Finally we can generate the output section.  */
 
 static void
-ppc_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
+ppc_final_write_processing (bfd *abfd)
 {
   bfd_byte *buffer;
   asection *asec;
@@ -1757,11 +1757,11 @@ ppc_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   apuinfo_list_finish ();
 }
 
-static void
-ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+ppc_elf_final_write_processing (bfd *abfd)
 {
-  ppc_final_write_processing (abfd, linker);
-  _bfd_elf_final_write_processing (abfd, linker);
+  ppc_final_write_processing (abfd);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 static bfd_boolean
@@ -10494,11 +10494,11 @@ ppc_elf_vxworks_add_symbol_hook (bfd *abfd,
   return ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp);
 }
 
-static void
-ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+ppc_elf_vxworks_final_write_processing (bfd *abfd)
 {
-  ppc_final_write_processing (abfd, linker);
-  elf_vxworks_final_write_processing (abfd, linker);
+  ppc_final_write_processing (abfd);
+  return elf_vxworks_final_write_processing (abfd);
 }
 
 /* On VxWorks, we emit relocations against _PROCEDURE_LINKAGE_TABLE_, so

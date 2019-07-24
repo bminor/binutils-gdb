@@ -28,7 +28,7 @@ bfd_boolean elf_vxworks_link_output_symbol_hook
 bfd_boolean elf_vxworks_emit_relocs
   (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
    struct elf_link_hash_entry **);
-void elf_vxworks_final_write_processing (bfd *, bfd_boolean);
+bfd_boolean elf_vxworks_final_write_processing (bfd *);
 bfd_boolean elf_vxworks_create_dynamic_sections
   (bfd *, struct bfd_link_info *, asection **);
 bfd_boolean elf_vxworks_add_dynamic_entries (bfd *, struct bfd_link_info *);

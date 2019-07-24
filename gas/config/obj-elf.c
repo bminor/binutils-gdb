@@ -1242,6 +1242,7 @@ done:
 	       && bed->elf_osabi != ELFOSABI_FREEBSD)
 	as_bad (_("GNU_MBIND section is supported only by GNU "
 		  "and FreeBSD targets"));
+      elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
     }
   elf_section_flags (now_seg) |= gnu_attr;
 
@@ -2060,6 +2061,7 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	       && bed->elf_osabi != ELFOSABI_FREEBSD)
 	as_bad (_("symbol type \"%s\" is supported only by GNU "
 		  "and FreeBSD targets"), type_name);
+      elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_ifunc;
       type = BSF_FUNCTION | BSF_GNU_INDIRECT_FUNCTION;
     }
   else if (strcmp (type_name, "gnu_unique_object") == 0)
@@ -2072,6 +2074,7 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
       else if (bed->elf_osabi != ELFOSABI_GNU)
 	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
 		type_name);
+      elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_unique;
       type = BSF_OBJECT | BSF_GNU_UNIQUE;
     }
 #ifdef md_elf_symbol_type

@@ -2643,11 +2643,11 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #include "elf32-target.h"
 /* Implement elf_backend_final_write_processing for VxWorks.  */
 
-static void
-mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+mips_vxworks_final_write_processing (bfd *abfd)
 {
-  _bfd_mips_final_write_processing (abfd, linker);
-  elf_vxworks_final_write_processing (abfd, linker);
+  _bfd_mips_final_write_processing (abfd);
+  return elf_vxworks_final_write_processing (abfd);
 }
 
 #undef TARGET_LITTLE_SYM

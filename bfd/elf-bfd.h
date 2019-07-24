@@ -1141,10 +1141,9 @@ struct elf_backend_data
     (bfd *, struct bfd_link_info *);
 
   /* A function to do any final processing needed for the ELF file
-     before writing it out.  The LINKER argument is TRUE if this BFD
-     was created by the ELF backend linker.  */
-  void (*elf_backend_final_write_processing)
-    (bfd *, bfd_boolean linker);
+     before writing it out.  */
+  bfd_boolean (*elf_backend_final_write_processing)
+    (bfd *);
 
   /* This function is called by get_program_header_size.  It should
      return the number of additional program segments which this BFD
@@ -2335,7 +2334,7 @@ extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
 
 extern void _bfd_elf_post_process_headers (bfd *, struct bfd_link_info *);
 
-extern void _bfd_elf_final_write_processing (bfd *, bfd_boolean);
+extern bfd_boolean _bfd_elf_final_write_processing (bfd *);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);

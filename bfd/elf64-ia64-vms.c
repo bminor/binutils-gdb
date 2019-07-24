@@ -4659,8 +4659,8 @@ elf64_vms_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
 /* The final processing done just before writing out a VMS IA-64 ELF
    object file.  */
 
-static void
-elf64_vms_final_write_processing (bfd *abfd, bfd_boolean linker)
+static bfd_boolean
+elf64_vms_final_write_processing (bfd *abfd)
 {
   Elf_Internal_Shdr *hdr;
   asection *s;
@@ -4695,7 +4695,7 @@ elf64_vms_final_write_processing (bfd *abfd, bfd_boolean linker)
       elf_elfheader (abfd)->e_flags = flags;
       elf_flags_init (abfd) = TRUE;
     }
-  _bfd_elf_final_write_processing (abfd, linker);
+  return _bfd_elf_final_write_processing (abfd);
 }
 
 static bfd_boolean

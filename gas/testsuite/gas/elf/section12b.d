@@ -6,7 +6,7 @@
 # expected below.
 #xfail: rx-*-*
 # A number of targets do not support SHF_GNU_MBIND
-#xfail: msp430-*-* visium-*-*
+#xfail: arm*-*-netbsdelf* arm*-*-nto* msp430-*-* visium-*-*
 #xfail: *-*-hpux* *-*-cloudabi
 
 #...
