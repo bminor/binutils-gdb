@@ -580,8 +580,7 @@ tui_resize_all (void)
 
 	  src_win->resize (new_height, screenwidth, 0, 0);
 
-	  locator->resize (2 /* 1 */, screenwidth,
-			   0, new_height);
+	  locator->resize (1, screenwidth, 0, new_height);
 
 	  new_height = screenheight - (new_height + 1);
 	  TUI_CMD_WIN->resize (new_height, screenwidth,
@@ -637,7 +636,7 @@ tui_resize_all (void)
 	  second_win->resize (new_height, screenwidth,
 			      0, first_win->height - 1);
 
-	  locator->resize (2 /* 1 */, screenwidth,
+	  locator->resize (1, screenwidth,
 			   0, second_win->origin.y + new_height);
 
 	  /* Change the command window's height/width.  */
@@ -1119,7 +1118,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  second_win->resize (second_win->height + second_split_diff,
 				      width,
 				      0, first_win->height - 1);
-		  locator->resize (2 /* 1 */, width,
+		  locator->resize (1, width,
 				   0, (second_win->origin.y
 				       + second_win->height + 1));
 
@@ -1155,7 +1154,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  else
 		    second_win->resize (second_win->height, width,
 					0, first_win->height - 1);
-		  locator->resize (2 /* 1 */, width,
+		  locator->resize (1, width,
 				   0, (second_win->origin.y
 				       + second_win->height + 1));
 		  TUI_CMD_WIN->origin.y = locator->origin.y + 1;

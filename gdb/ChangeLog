@@ -1,5 +1,13 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Use 1 as
+	height for locator.
+	* tui/tui-stack.c (tui_locator_window::rerender): Call scrollok.
+	* tui/tui-layout.c (show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Use 1 as height for locator.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable): Update.
 	* tui/tui-win.c (tui_sigwinch_handler, tui_async_resize_screen):
 	Update.

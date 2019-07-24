@@ -229,6 +229,7 @@ tui_locator_window::rerender ()
   if (handle != NULL)
     {
       std::string string = make_status_line ();
+      scrollok (handle, FALSE);
       wmove (handle, 0, 0);
       /* We ignore the return value from wstandout and wstandend, casting
 	 them to void in order to avoid a compiler warning.  The warning
