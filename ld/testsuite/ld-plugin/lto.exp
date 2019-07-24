@@ -630,6 +630,12 @@ if { [at_least_gcc_version 4 7] } {
     }
 }
 
+# Run "ld -r" to generate inputs for complex LTO tests.
+run_dump_test "lto-3r"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
+run_dump_test "lto-5r"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-5.o"
+
 run_cc_link_tests $lto_link_symbol_tests
 
 run_ld_link_tests [list \

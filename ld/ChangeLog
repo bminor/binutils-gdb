@@ -1,3 +1,10 @@
+2019-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto-3r.d: Restored.  Check foo instead
+	of __gnu_lto_v.*.
+	* testsuite/ld-plugin/lto-5r.d: Likewise.
+	* testsuite/ld-plugin/lto.exp: Run lto-3r and lto-5r tests.
+
 2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* ld-arc/relax-local-pic.d: New test.
