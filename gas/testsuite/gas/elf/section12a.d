@@ -2,8 +2,9 @@
 #as: --no-pad-sections
 #readelf: -Sg --wide
 #name: mbind sections
-# msp430 and hpux do not support SHF_GNU_MBIND
-#xfail: msp430-*-* *-*-hpux*
+# A number of targets do not support SHF_GNU_MBIND
+#xfail: msp430-*-* visium-*-*
+#xfail: *-*-hpux* *-*-cloudabi
 
 #...
   \[[ 0-9]+\] \.mbind\.data[ 	]+PROGBITS[ 	]+0+0 0+[0-9a-f]+ 0+1 00 WAD  0   0  1

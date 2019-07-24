@@ -1,3 +1,9 @@
+2019-07-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section12a.d: xfail visium and cloudabi.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section13.d: Likewise.
+
 2019-07-23  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* testsuite/gas/aarch64/sysreg-4.s: Test gmid_el1 read.

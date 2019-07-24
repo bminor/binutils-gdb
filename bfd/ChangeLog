@@ -1,3 +1,9 @@
+2019-07-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-visium.c (visium_elf_post_process_headers): Don't set
+	EI_OSABI header byte here.
+	(ELF_OSABI): Define.
+
 2019-07-23  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (enum elf_gnu_osabi): Add elf_gnu_osabi_mbind.

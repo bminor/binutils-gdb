@@ -727,7 +727,6 @@ visium_elf_post_process_headers (bfd *abfd,
 				 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_STANDALONE;
   i_ehdrp->e_ident[EI_ABIVERSION] = 1;
 }
 
@@ -852,6 +851,7 @@ visium_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 
 #define ELF_ARCH		bfd_arch_visium
 #define ELF_MACHINE_CODE	EM_VISIUM
+#define ELF_OSABI		ELFOSABI_STANDALONE
 #define ELF_MAXPAGESIZE		1
 
 #define TARGET_BIG_SYM		visium_elf32_vec
