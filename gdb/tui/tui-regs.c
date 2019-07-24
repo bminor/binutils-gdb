@@ -166,12 +166,12 @@ tui_data_window::show_registers (struct reggroup *group)
 
 /* Set the data window to display the registers of the register group
    using the given frame.  Values are refreshed only when
-   refresh_values_only is TRUE.  */
+   refresh_values_only is true.  */
 
 void
 tui_data_window::show_register_group (struct reggroup *group,
 				      struct frame_info *frame, 
-				      int refresh_values_only)
+				      bool refresh_values_only)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int nr_regs;

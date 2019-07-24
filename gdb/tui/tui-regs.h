@@ -108,7 +108,7 @@ private:
 
   void show_register_group (struct reggroup *group,
 			    struct frame_info *frame,
-			    int refresh_values_only);
+			    bool refresh_values_only);
 
   /* Answer the number of the last line in the regs display.  If there
      are no registers (-1) is returned.  */

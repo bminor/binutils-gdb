@@ -1,5 +1,12 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <show_register_group>:
+	Change type of "refresh_values_only".
+	* tui/tui-regs.c (tui_data_window::show_register_group): Change
+	type of "refresh_values_only".
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.c (struct tui_asm_line) <addr_string, insn>: Now
 	std::string.
 	(tui_disassemble): Add "pos" parameter.
