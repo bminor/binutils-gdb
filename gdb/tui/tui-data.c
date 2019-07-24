@@ -38,7 +38,7 @@ struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 static int term_height, term_width;
 static struct tui_win_info *win_with_focus = NULL;
 
-static int win_resized = FALSE;
+static bool win_resized = false;
 
 
 /*********************************
@@ -56,8 +56,8 @@ tui_win_is_auxiliary (enum tui_win_type win_type)
 ******************************************/
 
 /* Answer a whether the terminal window has been resized or not.  */
-int
-tui_win_resized (void)
+bool
+tui_win_resized ()
 {
   return win_resized;
 }
@@ -65,7 +65,7 @@ tui_win_resized (void)
 
 /* Set a whether the terminal window has been resized or not.  */
 void
-tui_set_win_resized_to (int resized)
+tui_set_win_resized_to (bool resized)
 {
   win_resized = resized;
 }

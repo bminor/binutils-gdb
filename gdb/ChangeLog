@@ -1,5 +1,16 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_enable): Update.
+	* tui/tui-win.c (tui_sigwinch_handler, tui_async_resize_screen):
+	Update.
+	* tui/tui-data.h (tui_win_resized, tui_set_win_resized_to):
+	Update.
+	* tui/tui-data.c (win_resized): Now bool.
+	(tui_win_resized): Return bool.
+	(tui_set_win_resized_to): Accept a bool.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_window) <show_register_group>:
 	Change type of "refresh_values_only".
 	* tui/tui-regs.c (tui_data_window::show_register_group): Change

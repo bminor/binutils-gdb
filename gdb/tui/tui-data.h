@@ -297,8 +297,8 @@ extern void tui_set_term_width_to (int);
 extern struct tui_locator_window *tui_locator_win_info_ptr (void);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
-extern int tui_win_resized (void);
-extern void tui_set_win_resized_to (int);
+extern bool tui_win_resized ();
+extern void tui_set_win_resized_to (bool);
 
 extern struct tui_win_info *tui_next_win (struct tui_win_info *);
 extern struct tui_win_info *tui_prev_win (struct tui_win_info *);

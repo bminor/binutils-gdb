@@ -504,7 +504,7 @@ tui_enable (void)
      window.  */
   if (tui_win_resized ())
     {
-      tui_set_win_resized_to (FALSE);
+      tui_set_win_resized_to (false);
       tui_resize_all ();
     }
 

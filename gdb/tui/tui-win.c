@@ -664,7 +664,7 @@ static void
 tui_sigwinch_handler (int signal)
 {
   mark_async_signal_handler (tui_sigwinch_token);
-  tui_set_win_resized_to (TRUE);
+  tui_set_win_resized_to (true);
 }
 
 /* Callback for asynchronously resizing TUI following a SIGWINCH signal.  */
@@ -685,7 +685,7 @@ tui_async_resize_screen (gdb_client_data arg)
     }
   else
     {
-      tui_set_win_resized_to (FALSE);
+      tui_set_win_resized_to (false);
       tui_resize_all ();
       tui_refresh_all_win ();
       tui_update_gdb_sizes ();
