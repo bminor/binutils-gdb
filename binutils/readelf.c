@@ -16473,8 +16473,6 @@ process_mips_specific (Filedata * filedata)
   if (options_offset != 0)
     {
       Elf_External_Options * eopt;
-      Elf_Internal_Options * iopt;
-      Elf_Internal_Options * option;
       size_t offset;
       int cnt;
       sect = filedata->section_headers;
@@ -16498,6 +16496,10 @@ process_mips_specific (Filedata * filedata)
                                                 sect->sh_size, _("options"));
       if (eopt)
 	{
+	  Elf_Internal_Options * iopt;
+	  Elf_Internal_Options * option;
+	  Elf_Internal_Options * iopt_end;
+
 	  iopt = (Elf_Internal_Options *)
               cmalloc ((sect->sh_size / sizeof (eopt)), sizeof (* iopt));
 	  if (iopt == NULL)
@@ -16508,7 +16510,8 @@ process_mips_specific (Filedata * filedata)
 
 	  offset = cnt = 0;
 	  option = iopt;
-
+	  iopt_end = iopt + (sect->sh_size / sizeof (eopt));
+	  
 	  while (offset <= sect->sh_size - sizeof (* eopt))
 	    {
 	      Elf_External_Options * eoption;
@@ -16551,15 +16554,25 @@ process_mips_specific (Filedata * filedata)
 		  /* This shouldn't happen.  */
 		  printf (" NULL       %d %lx", option->section, option->info);
 		  break;
+
 		case ODK_REGINFO:
 		  printf (" REGINFO    ");
 		  if (filedata->file_header.e_machine == EM_MIPS)
 		    {
-		      /* 32bit form.  */
 		      Elf32_External_RegInfo * ereg;
 		      Elf32_RegInfo reginfo;
 
+		      /* 32bit form.  */
+		      if (option + 2 > iopt_end)
+			{
+			  printf (_("<corrupt>\n"));
+			  error (_("Truncated MIPS REGINFO option\n"));
+			  cnt = 0;
+			  break;
+			}
+
 		      ereg = (Elf32_External_RegInfo *) (option + 1);
+
 		      reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
 		      reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
@@ -16580,6 +16593,14 @@ process_mips_specific (Filedata * filedata)
 		      Elf64_External_RegInfo * ereg;
 		      Elf64_Internal_RegInfo reginfo;
 
+		      if (option + 2 > iopt_end)
+			{
+			  printf (_("<corrupt>\n"));
+			  error (_("Truncated MIPS REGINFO option\n"));
+			  cnt = 0;
+			  break;
+			}
+
 		      ereg = (Elf64_External_RegInfo *) (option + 1);
 		      reginfo.ri_gprmask    = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
@@ -16599,6 +16620,7 @@ process_mips_specific (Filedata * filedata)
 		    }
 		  ++option;
 		  continue;
+
 		case ODK_EXCEPTIONS:
 		  fputs (" EXCEPTIONS fpe_min(", stdout);
 		  process_mips_fpe_exception (option->info & OEX_FPU_MIN);
@@ -16615,6 +16637,7 @@ process_mips_specific (Filedata * filedata)
 		  if (option->info & OEX_DISMISS)
 		    fputs (" DISMISS", stdout);
 		  break;
+
 		case ODK_PAD:
 		  fputs (" PAD       ", stdout);
 		  if (option->info & OPAD_PREFIX)
@@ -16624,6 +16647,7 @@ process_mips_specific (Filedata * filedata)
 		  if (option->info & OPAD_SYMBOL)
 		    fputs (" SYMBOL", stdout);
 		  break;
+
 		case ODK_HWPATCH:
 		  fputs (" HWPATCH   ", stdout);
 		  if (option->info & OHW_R4KEOP)
@@ -16635,14 +16659,17 @@ process_mips_specific (Filedata * filedata)
 		  if (option->info & OHW_R5KCVTL)
 		    fputs (" R5KCVTL", stdout);
 		  break;
+
 		case ODK_FILL:
 		  fputs (" FILL       ", stdout);
 		  /* XXX Print content of info word?  */
 		  break;
+
 		case ODK_TAGS:
 		  fputs (" TAGS       ", stdout);
 		  /* XXX Print content of info word?  */
 		  break;
+
 		case ODK_HWAND:
 		  fputs (" HWAND     ", stdout);
 		  if (option->info & OHWA0_R4KEOP_CHECKED)
@@ -16650,6 +16677,7 @@ process_mips_specific (Filedata * filedata)
 		  if (option->info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
+
 		case ODK_HWOR:
 		  fputs (" HWOR      ", stdout);
 		  if (option->info & OHWA0_R4KEOP_CHECKED)
@@ -16657,16 +16685,19 @@ process_mips_specific (Filedata * filedata)
 		  if (option->info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
+
 		case ODK_GP_GROUP:
 		  printf (" GP_GROUP  %#06lx  self-contained %#06lx",
 			  option->info & OGP_GROUP,
 			  (option->info & OGP_SELF) >> 16);
 		  break;
+
 		case ODK_IDENT:
 		  printf (" IDENT     %#06lx  self-contained %#06lx",
 			  option->info & OGP_GROUP,
 			  (option->info & OGP_SELF) >> 16);
 		  break;
+
 		default:
 		  /* This shouldn't happen.  */
 		  printf (" %3d ???     %d %lx",
