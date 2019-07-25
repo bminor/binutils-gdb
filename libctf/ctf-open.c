@@ -986,8 +986,9 @@ static void
 flip_lbls (void *start, size_t len)
 {
   ctf_lblent_t *lbl = start;
+  ssize_t i;
 
-  for (ssize_t i = len / sizeof (struct ctf_lblent); i > 0; lbl++, i--)
+  for (i = len / sizeof (struct ctf_lblent); i > 0; lbl++, i--)
     {
       swap_thing (lbl->ctl_label);
       swap_thing (lbl->ctl_type);
@@ -1003,8 +1004,9 @@ static void
 flip_objts (void *start, size_t len)
 {
   uint32_t *obj = start;
+  ssize_t i;
 
-  for (ssize_t i = len / sizeof (uint32_t); i > 0; obj++, i--)
+  for (i = len / sizeof (uint32_t); i > 0; obj++, i--)
       swap_thing (*obj);
 }
 
@@ -1014,8 +1016,9 @@ static void
 flip_vars (void *start, size_t len)
 {
   ctf_varent_t *var = start;
+  ssize_t i;
 
-  for (ssize_t i = len / sizeof (struct ctf_varent); i > 0; var++, i--)
+  for (i = len / sizeof (struct ctf_varent); i > 0; var++, i--)
     {
       swap_thing (var->ctv_name);
       swap_thing (var->ctv_type);
@@ -1080,8 +1083,9 @@ flip_types (void *start, size_t len)
 	    /* This type has a bunch of uint32_ts.  */
 
 	    uint32_t *item = (uint32_t *) t;
+	    ssize_t i;
 
-	    for (ssize_t i = vlen; i > 0; item++, i--)
+	    for (i = vlen; i > 0; item++, i--)
 	      swap_thing (*item);
 	    break;
 	  }
@@ -1125,7 +1129,8 @@ flip_types (void *start, size_t len)
 	    if (_libctf_unlikely_ (size >= CTF_LSTRUCT_THRESH))
 	      {
 		ctf_lmember_t *lm = (ctf_lmember_t *) t;
-		for (ssize_t i = vlen; i > 0; i--, lm++)
+		ssize_t i;
+		for (i = vlen; i > 0; i--, lm++)
 		  {
 		    swap_thing (lm->ctlm_name);
 		    swap_thing (lm->ctlm_offsethi);
@@ -1136,7 +1141,8 @@ flip_types (void *start, size_t len)
 	    else
 	      {
 		ctf_member_t *m = (ctf_member_t *) t;
-		for (ssize_t i = vlen; i > 0; i--, m++)
+		ssize_t i;
+		for (i = vlen; i > 0; i--, m++)
 		  {
 		    swap_thing (m->ctm_name);
 		    swap_thing (m->ctm_offset);
@@ -1151,8 +1157,9 @@ flip_types (void *start, size_t len)
 	    /* This has an array of ctf_enum_t.  */
 
 	    ctf_enum_t *item = (ctf_enum_t *) t;
+	    ssize_t i;
 
-	    for (ssize_t i = vlen; i > 0; item++, i--)
+	    for (i = vlen; i > 0; item++, i--)
 	      {
 		swap_thing (item->cte_name);
 		swap_thing (item->cte_value);
