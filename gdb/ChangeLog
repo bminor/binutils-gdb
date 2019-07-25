@@ -1,4 +1,10 @@
-2019-07-22  Christian Biesinger  <cbiesinger@google.com>
+2019-07-25  Christian Biesinger  <cbiesinger@google.com>
+
+	* python/py-objfile.c (add_separate_debug_file): Fix comment about
+	this function's Python signature.
+
+
+2019-07-24  Christian Biesinger  <cbiesinger@google.com>
 
 	* compile/compile-object-load.c (compile_object_load): Pass GLOBAL_SCOPE.
 	* solib-spu.c (spu_lookup_lib_symbol): Pass GLOBAL_SCOPE.

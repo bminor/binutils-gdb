@@ -406,7 +406,7 @@ objfpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
-/* Implementation of gdb.Objfile.add_separate_debug_file (self) -> Boolean.  */
+/* Implementation of gdb.Objfile.add_separate_debug_file (self, string). */
 
 static PyObject *
 objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
