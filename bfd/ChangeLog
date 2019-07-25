@@ -1,3 +1,9 @@
+2019-07-25  YunQiang Su  <syq@debian.org>
+
+	PR 24832
+	* elfxx-mips.c (mips_set_isa_flags): Default to MIPS 3 for 64-bit
+	mips inputs.
+
 2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* elf32-arc.c (bfd_get_32_me): Add a small description, fix

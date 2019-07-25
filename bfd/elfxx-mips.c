@@ -12193,6 +12193,12 @@ mips_set_isa_flags (bfd *abfd)
   switch (bfd_get_mach (abfd))
     {
     default:
+      if (ABI_N32_P (abfd) || ABI_64_P (abfd))
+        val = E_MIPS_ARCH_3;
+      else
+        val = E_MIPS_ARCH_1;
+      break;
+
     case bfd_mach_mips3000:
       val = E_MIPS_ARCH_1;
       break;
