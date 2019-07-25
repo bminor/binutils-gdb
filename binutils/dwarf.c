@@ -29,6 +29,7 @@
 #include "dwarf.h"
 #include "gdb/gdb-index.h"
 #include "filenames.h"
+#include "safe-ctype.h"
 #include <assert.h>
 
 #undef MAX
@@ -8543,6 +8544,8 @@ display_debug_names (struct dwarf_section *section, void *file)
       uint32_t augmentation_string_size;
       unsigned int i;
       unsigned long sec_off;
+      bfd_boolean augmentation_printable;
+      const char *augmentation_string;
 
       unit_start = hdrptr;
 
@@ -8606,15 +8609,32 @@ display_debug_names (struct dwarf_section *section, void *file)
 		augmentation_string_size);
 	  augmentation_string_size += (-augmentation_string_size) & 3;
 	}
+
       printf (_("Augmentation string:"));
+
+      augmentation_printable = TRUE;
+      augmentation_string = (const char *) hdrptr;
+
       for (i = 0; i < augmentation_string_size; i++)
 	{
 	  unsigned char uc;
 
 	  SAFE_BYTE_GET_AND_INC (uc, hdrptr, 1, unit_end);
 	  printf (" %02x", uc);
+
+	  if (uc != 0 && !ISPRINT (uc))
+	    augmentation_printable = FALSE;
 	}
-      putchar ('\n');
+
+      if (augmentation_printable)
+	{
+	  printf ("  (\"");
+	  for (i = 0;
+	       i < augmentation_string_size && augmentation_string[i];
+	       ++i)
+	    putchar (augmentation_string[i]);
+	  printf ("\")");
+	}
       putchar ('\n');
 
       printf (_("CU table:\n"));
