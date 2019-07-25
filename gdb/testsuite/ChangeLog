@@ -1,3 +1,12 @@
+2019-07-25  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24830
+	* gdb.mi/mi-catch-cpp-exceptions.exp: Call
+	mi_skip_libstdcxx_probe_tests, and skip unsupported tests.
+	* lib/gdb.exp (skip_libstdcxx_probe_tests_prompt): Factor out of ...
+	(skip_libstdcxx_probe_tests): ... here.
+	* lib/mi-support.exp (mi_skip_libstdcxx_probe_tests): New proc.
+
 2019-07-24  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24807

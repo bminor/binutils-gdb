@@ -2601,6 +2601,13 @@ proc mi_skip_python_tests {} {
     return [skip_python_tests_prompt "$mi_gdb_prompt$"]
 }
 
+# As skip_libstdcxx_probe_tests_prompt, with mi_gdb_prompt.
+
+proc mi_skip_libstdcxx_probe_tests {} {
+    global mi_gdb_prompt
+    return [skip_libstdcxx_probe_tests_prompt "$mi_gdb_prompt$"]
+}
+
 # Check whether we're testing with the remote or extended-remote
 # targets.
 

@@ -27,6 +27,17 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
+if [mi_gdb_start] {
+    continue
+}
+mi_delete_breakpoints
+mi_gdb_reinitialize_dir $srcdir/$subdir
+mi_gdb_load ${binfile}
+if {![mi_run_to_main]} {
+    return -1
+}
+set libstdcxx_probe_tests_supported [mi_skip_libstdcxx_probe_tests]
+
 # Grab some line numbers we'll need.
 set catch_1_lineno [gdb_get_line_number "Catch 1"]
 set catch_2_lineno [gdb_get_line_number "Catch 2"]
@@ -123,36 +134,44 @@ with_test_prefix "-catch-catch" {
     continue_to_breakpoint_in_main
 }
 
-# Now check that all of the command with a regexp that doesn't match,
-# don't trigger.
-with_test_prefix "all with invalid regexp" {
-    restart_for_test
-    setup_catchpoint "throw" "-r blahblah"
-    setup_catchpoint "rethrow" "-r woofwoof"
-    setup_catchpoint "catch" "-r miowmiow"
-    continue_to_breakpoint_in_main
+if { $libstdcxx_probe_tests_supported  == 1 } {
+    # Now check that all of the command with a regexp that doesn't match,
+    # don't trigger.
+    with_test_prefix "all with invalid regexp" {
+	restart_for_test
+	setup_catchpoint "throw" "-r blahblah"
+	setup_catchpoint "rethrow" "-r woofwoof"
+	setup_catchpoint "catch" "-r miowmiow"
+	continue_to_breakpoint_in_main
+    }
+} else {
+    unsupported "all with invalid regexp"
 }
 
-# Now check that all of the commands with a regexp that does match,
-# still trigger.
-with_test_prefix "all with valid regexp" {
-    restart_for_test
-    setup_catchpoint "throw" "-r my_ex"
-    setup_catchpoint "rethrow" "-r _except"
-    setup_catchpoint "catch" "-r my_exception"
-    continue_to_next_exception "bar" "${throw_1_lineno}" "throw 1"
-    continue_to_next_exception "foo" "${catch_1_lineno}" "catch 1"
-    continue_to_next_exception "bar" "${throw_1_lineno}" "throw 2"
-    continue_to_next_exception "foo" "${catch_1_lineno}" "catch 2"
-    continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 1"
-    continue_to_next_exception "main" "${catch_2_lineno}" "catch 3"
-    continue_to_next_exception "bar" "${throw_1_lineno}" "throw 3"
-    continue_to_next_exception "foo" "${catch_1_lineno}" "catch 4"
-    continue_to_next_exception "bar" "${throw_1_lineno}" "throw 4"
-    continue_to_next_exception "foo" "${catch_1_lineno}" "catch 5"
-    continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 2"
-    continue_to_next_exception "main" "${catch_2_lineno}" "catch 6"
-    continue_to_breakpoint_in_main
+if { $libstdcxx_probe_tests_supported  == 1 } {
+    # Now check that all of the commands with a regexp that does match,
+    # still trigger.
+    with_test_prefix "all with valid regexp" {
+	restart_for_test
+	setup_catchpoint "throw" "-r my_ex"
+	setup_catchpoint "rethrow" "-r _except"
+	setup_catchpoint "catch" "-r my_exception"
+	continue_to_next_exception "bar" "${throw_1_lineno}" "throw 1"
+	continue_to_next_exception "foo" "${catch_1_lineno}" "catch 1"
+	continue_to_next_exception "bar" "${throw_1_lineno}" "throw 2"
+	continue_to_next_exception "foo" "${catch_1_lineno}" "catch 2"
+	continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 1"
+	continue_to_next_exception "main" "${catch_2_lineno}" "catch 3"
+	continue_to_next_exception "bar" "${throw_1_lineno}" "throw 3"
+	continue_to_next_exception "foo" "${catch_1_lineno}" "catch 4"
+	continue_to_next_exception "bar" "${throw_1_lineno}" "throw 4"
+	continue_to_next_exception "foo" "${catch_1_lineno}" "catch 5"
+	continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 2"
+	continue_to_next_exception "main" "${catch_2_lineno}" "catch 6"
+	continue_to_breakpoint_in_main
+    }
+} else {
+    unsupported "all with valid regexp"
 }
 
 # Check that the temporary switch works on its own.
@@ -167,14 +186,18 @@ with_test_prefix "all with -t" {
     continue_to_breakpoint_in_main
 }
 
-# Check that the temporary switch works when used with a regexp.
-restart_for_test
-with_test_prefix "all with -t and regexp" {
-    setup_catchpoint "throw" "-t -r my_ex"
-    setup_catchpoint "rethrow" "-t -r _except"
-    setup_catchpoint "catch" "-t -r my_exception"
-    continue_to_next_exception "bar" "${throw_1_lineno}" "throw 1"
-    continue_to_next_exception "foo" "${catch_1_lineno}" "catch 1"
-    continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 1"
-    continue_to_breakpoint_in_main
+if { $libstdcxx_probe_tests_supported  == 1 } {
+    # Check that the temporary switch works when used with a regexp.
+    restart_for_test
+    with_test_prefix "all with -t and regexp" {
+	setup_catchpoint "throw" "-t -r my_ex"
+	setup_catchpoint "rethrow" "-t -r _except"
+	setup_catchpoint "catch" "-t -r my_exception"
+	continue_to_next_exception "bar" "${throw_1_lineno}" "throw 1"
+	continue_to_next_exception "foo" "${catch_1_lineno}" "catch 1"
+	continue_to_next_exception "foo" "${throw_2_lineno}" "rethrow 1"
+	continue_to_breakpoint_in_main
+    }
+} else {
+    unsupported "all with -t and regexp"
 }
