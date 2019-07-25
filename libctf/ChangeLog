@@ -1,5 +1,12 @@
 2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (flip_lbls): Eschew for-loop initial declarations.
+	(flip_objts): Likewise.
+	(flip_vars): Likewise.
+	(flip_types): Likewise.
+
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_hashtab_insert): Pass in the key and value
 	freeing functions: if set, free the key and value if the slot
 	already exists.  Always reassign the key.
