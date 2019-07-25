@@ -561,7 +561,6 @@ tui_resize_all (void)
          AIX 5.3 does not define clear.  */
       erase ();
       clearok (curscr, TRUE);
-      refresh ();
       switch (cur_layout)
        {
 	case SRC_COMMAND:

@@ -1,5 +1,9 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all): Don't call refresh.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_resize_all, tui_adjust_win_heights): Use 1 as
 	height for locator.
 	* tui/tui-stack.c (tui_locator_window::rerender): Call scrollok.
