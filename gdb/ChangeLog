@@ -1,5 +1,11 @@
 2019-07-27  Kevin Buettner  <kevinb@redhat.com>
 
+	* linux-thread-db.c (thread_db_target::thread_handle_to_thread_info):
+	Add case for debugging 32-bit target on 64-bit host.  Revise
+	comment.
+
+2019-07-27  Kevin Buettner  <kevinb@redhat.com>
+
 	* infrun.c (fill_in_stop_func): Use find_pc_partial_function
 	instead of find_function_entry_range_from_pc.
 

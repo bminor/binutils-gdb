@@ -1672,15 +1672,20 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
 {
   thread_t handle_tid;
 
-  /* Thread handle sizes must match in order to proceed.  We don't use an
-     assert here because the resulting internal error will cause GDB to
-     exit.  This isn't necessarily an internal error due to the possibility
-     of garbage being passed as the thread handle via the python interface.  */
-  if (handle_len != sizeof (handle_tid))
+  /* When debugging a 32-bit target from a 64-bit host, handle_len
+     will be 4 and sizeof (handle_tid) will be 8.  This requires
+     a different cast than the more straightforward case where
+     the sizes are the same.
+
+     Use "--target_board unix/-m32" from a native x86_64 linux build
+     to test the 32/64-bit case.  */
+  if (handle_len == 4 && sizeof (handle_tid) == 8)
+    handle_tid = (thread_t) * (const uint32_t *) thread_handle;
+  else if (handle_len == sizeof (handle_tid))
+    handle_tid = * (const thread_t *) thread_handle;
+  else
     error (_("Thread handle size mismatch: %d vs %zu (from libthread_db)"),
 	   handle_len, sizeof (handle_tid));
-
-  handle_tid = * (const thread_t *) thread_handle;
 
   for (thread_info *tp : inf->non_exited_threads ())
     {
