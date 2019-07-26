@@ -312,6 +312,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
 		   bfd_errmsg (bfd_get_error()));
       return (ctf_set_open_errno (errp, ECTF_FMT));
     }
+  bfd_set_cacheable (abfd, 1);
 
   if (!bfd_check_format (abfd, bfd_object))
     {
