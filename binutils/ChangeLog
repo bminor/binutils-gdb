@@ -1,3 +1,11 @@
+2019-07-26  Alan Modra  <amodra@gmail.com>
+
+	PR 24798
+	* dwarf.c (process_cu_tu_index): Avoid integer overflow on 64-bit
+	systems by casting ncols and nslots expressions to size_t.  Display
+	number of columns and slots before giving up due to buffer overflow.
+	Use %u to display unsigned ints.  Perform more pointer wrap tests.
+
 2019-07-25  Tom Tromey <tromey@adacore.com>
 
 	PR 24809

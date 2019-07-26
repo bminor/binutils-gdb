@@ -9314,33 +9314,29 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   SAFE_BYTE_GET (nslots, phdr + 12, 4, limit);
 
   phash = phdr + 16;
-  pindex = phash + nslots * 8;
-  ppool = pindex + nslots * 4;
-
-  /* PR 17531: file: 45d69832.  */
-  if (pindex < phash || ppool < phdr || (pindex == phash && nslots != 0))
-    {
-      warn (ngettext ("Section %s is too small for %d slot\n",
-		      "Section %s is too small for %d slots\n",
-		      nslots),
-	    section->name, nslots);
-      return 0;
-    }
+  pindex = phash + (size_t) nslots * 8;
+  ppool = pindex + (size_t) nslots * 4;
 
   if (do_display)
     {
       introduce (section, FALSE);
 
-      printf (_("  Version:                 %d\n"), version);
+      printf (_("  Version:                 %u\n"), version);
       if (version >= 2)
-	printf (_("  Number of columns:       %d\n"), ncols);
-      printf (_("  Number of used entries:  %d\n"), nused);
-      printf (_("  Number of slots:         %d\n\n"), nslots);
+	printf (_("  Number of columns:       %u\n"), ncols);
+      printf (_("  Number of used entries:  %u\n"), nused);
+      printf (_("  Number of slots:         %u\n\n"), nslots);
     }
 
-  if (ppool > limit || ppool < phdr)
+  /* PR 17531: file: 45d69832.  */
+  if ((size_t) nslots * 8 / 8 != nslots
+      || phash < phdr || phash > limit
+      || pindex < phash || pindex > limit
+      || ppool < pindex || ppool > limit)
     {
-      warn (_("Section %s too small for %d hash table entries\n"),
+      warn (ngettext ("Section %s is too small for %u slot\n",
+		      "Section %s is too small for %u slots\n",
+		      nslots),
 	    section->name, nslots);
       return 0;
     }
@@ -9402,9 +9398,9 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       unsigned int dw_sect;
       unsigned char *ph = phash;
       unsigned char *pi = pindex;
-      unsigned char *poffsets = ppool + ncols * 4;
-      unsigned char *psizes = poffsets + nused * ncols * 4;
-      unsigned char *pend = psizes + nused * ncols * 4;
+      unsigned char *poffsets = ppool + (size_t) ncols * 4;
+      unsigned char *psizes = poffsets + (size_t) nused * ncols * 4;
+      unsigned char *pend = psizes + (size_t) nused * ncols * 4;
       bfd_boolean is_tu_index;
       struct cu_tu_set *this_set = NULL;
       unsigned int row;
@@ -9413,14 +9409,13 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       is_tu_index = strcmp (section->name, ".debug_tu_index") == 0;
 
       /* PR 17531: file: 0dd159bf.
-	 Check for wraparound with an overlarge ncols value.  */
-      if (poffsets < ppool || (unsigned int) ((poffsets - ppool) / 4) != ncols)
-	{
-	  warn (_("Overlarge number of columns: %x\n"), ncols);
-	  return 0;
-	}
-
-      if (pend > limit)
+	 Check for integer overflow (can occur when size_t is 32-bit)
+	 with overlarge ncols or nused values.  */
+      if ((size_t) ncols * 4 / 4 != ncols
+	  || (size_t) nused * ncols * 4 / ((size_t) ncols * 4) != nused
+	  || poffsets < ppool || poffsets > limit
+	  || psizes < poffsets || psizes > limit
+	  || pend < psizes || pend > limit)
 	{
 	  warn (_("Section %s too small for offset and size tables\n"),
 		section->name);
