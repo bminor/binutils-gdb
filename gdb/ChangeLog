@@ -1,3 +1,9 @@
+2019-07-26  Brian Callahan  <bcallah@openbsd.org>
+
+	PR gdb/24839:
+	* gdb/obsd-nat.c (obsd_nat_target::pid_to_str): Fix typo in return
+	type.
+
 2019-07-25  Christian Biesinger  <cbiesinger@google.com>
 
 	* python/py-objfile.c (add_separate_debug_file): Fix comment about

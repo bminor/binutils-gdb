@@ -35,7 +35,7 @@
 
 #ifdef PT_GET_THREAD_FIRST
 
-std::sring
+std::string
 obsd_nat_target::pid_to_str (ptid_t ptid)
 {
   if (ptid.lwp () != 0)
