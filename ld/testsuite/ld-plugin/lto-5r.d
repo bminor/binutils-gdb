@@ -3,5 +3,5 @@
 #nm: -p
 
 #...
-[0-9a-f]+ T _?foo
+[0-9a-f]+ [TD] _?foo
 #pass
