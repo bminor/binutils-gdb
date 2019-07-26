@@ -1,3 +1,7 @@
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open-bfd.c (ctf_fdopen): Call bfd_set_cacheable.
+
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (includes): Include <sys/param.h> here.
