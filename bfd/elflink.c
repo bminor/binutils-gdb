@@ -12801,8 +12801,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   elf_final_link_free (abfd, &flinfo);
 
-  elf_linker (abfd) = TRUE;
-
   if (attr_section)
     {
       bfd_byte *contents = (bfd_byte *) bfd_malloc (attr_size);

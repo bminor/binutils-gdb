@@ -1,3 +1,9 @@
+2019-07-26  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct output_elf_obj_tdata): Delete "linker" field.
+	(elf_linker): Don't define.
+	* elflink.c (bfd_elf_final_link): Don't set elf_linker.
+
 2019-07-25  YunQiang Su  <syq@debian.org>
 
 	PR 24832
