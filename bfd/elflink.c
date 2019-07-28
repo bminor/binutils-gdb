@@ -4421,6 +4421,7 @@ error_free_dyn:
       bfd_boolean common;
       bfd_boolean discarded;
       unsigned int old_alignment;
+      unsigned int shindex;
       bfd *old_bfd;
       bfd_boolean matched;
 
@@ -4450,7 +4451,19 @@ error_free_dyn:
 	    continue;
 
 	  /* If we aren't prepared to handle locals within the globals
-	     then we'll likely segfault on a NULL section.  */
+	     then we'll likely segfault on a NULL symbol hash if the
+	     symbol is ever referenced in relocations.  */
+	  shindex = elf_elfheader (abfd)->e_shstrndx;
+	  name = bfd_elf_string_from_elf_section (abfd, shindex, hdr->sh_name);
+	  _bfd_error_handler (_("%pB: %s local symbol at index %lu"
+				" (>= sh_info of %lu)"),
+			      abfd, name, (long) (isym - isymbuf + extsymoff),
+			      (long) extsymoff);
+
+	  /* Dynamic object relocations are not processed by ld, so
+	     ld won't run into the problem mentioned above.  */
+	  if (dynamic)
+	    continue;
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_free_vers;
 
@@ -4550,10 +4563,7 @@ error_free_dyn:
 
       /* Sanity check that all possibilities were handled.  */
       if (sec == NULL)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  goto error_free_vers;
-	}
+	abort ();
 
       /* Silently discard TLS symbols from --just-syms.  There's
 	 no way to combine a static TLS block with a new TLS block
