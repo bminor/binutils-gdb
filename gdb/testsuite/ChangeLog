@@ -1,3 +1,8 @@
+2019-07-29  Tom Tromey  <tom@tromey.com>
+
+	* lib/tuiterm.exp (Term::_csi_@): New proc.
+	(Term::_csi_X): Don't move cursor.
+
 2019-07-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/options.exp: Update backtrace - completion to

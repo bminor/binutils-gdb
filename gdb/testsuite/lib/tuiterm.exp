@@ -104,6 +104,21 @@ namespace eval Term {
 	set _cur_x 0
     }
 
+    # Make room for characters.
+    proc _csi_@ {args} {
+	set n [_default [lindex $args 0] 1]
+	variable _cur_x
+	variable _cur_y
+	variable _chars
+	set in_x $_cur_x
+	set out_x [expr {$_cur_x + $n}]
+	for {set i 0} {$i < $n} {incr i} {
+	    set _chars($out_x,$_cur_y) $_chars($in_x,$_cur_y)
+	    incr in_x
+	    incr out_x
+	}
+    }
+
     # Cursor Up.
     proc _csi_A {args} {
 	variable _cur_y
@@ -238,7 +253,17 @@ namespace eval Term {
     # Erase chars.
     proc _csi_X {args} {
 	set n [_default [lindex $args 0] 1]
-	_insert [string repeat " " $n]
+	# Erase characters but don't move cursor.
+	variable _cur_x
+	variable _cur_y
+	variable _attrs
+	variable _chars
+	set lattr [array get _attrs]
+	set x $_cur_x
+	for {set i 0} {$i < $n} {incr i} {
+	    set _chars($x,$_cur_y) [list " " $lattr]
+	    incr x
+	}
     }
 
     # Repeat.
