@@ -66,7 +66,7 @@ ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
   return arci;
 }
 
-/* Free the BFD bits of a CTF file on ctf_file_close().  */
+/* Free the BFD bits of a CTF file on ctf_arc_close().  */
 
 static void
 ctf_bfdclose (struct ctf_archive_internal *arci)

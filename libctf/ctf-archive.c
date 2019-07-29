@@ -436,6 +436,8 @@ ctf_arc_close (ctf_archive_t *arc)
   free ((void *) arc->ctfi_symsect.cts_data);
   /* Do not free the ctfi_strsect: it is bound to the bfd.  */
   free (arc->ctfi_data);
+  if (arc->ctfi_bfd_close)
+    arc->ctfi_bfd_close (arc);
   free (arc);
 }
 
