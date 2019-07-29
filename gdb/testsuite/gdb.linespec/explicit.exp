@@ -241,20 +241,7 @@ namespace eval $testfile {
 	    -re "break -source exp\\\x07licit" {
 		send_gdb "\t\t"
 		gdb_test_multiple "" $tst {
-		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+\r\n$gdb_prompt" {
-			send_gdb "\n"
-			gdb_test "" \
-			    {Source filename requires function, label, or line offset.} \
-			    $tst
-		    }
-		}
-	    }
-
-	    -re "break -source exp\\\x07l" {
-		# This pattern may occur when glibc debuginfo is installed.
-		send_gdb "\t\t"
-		gdb_test_multiple "" $tst {
-		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+expl.*\r\n$gdb_prompt" {
+		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+\(expl.*\)?\r\n$gdb_prompt" {
 			send_gdb "\n"
 			gdb_test "" \
 			    {Source filename requires function, label, or line offset.} \
