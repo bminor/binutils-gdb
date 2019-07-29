@@ -1,5 +1,10 @@
 2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_arc_close): Call ctfi_bfd_close if set.
+	* ctf-open-bfd.c (ctf_bfdclose): Fix comment.
+
+2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open-bfd.c (ctf_fdopen): Call bfd_set_cacheable.
 
 2019-07-13  Nick Alcock  <nick.alcock@oracle.com>
