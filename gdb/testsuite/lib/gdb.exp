@@ -695,7 +695,7 @@ proc gdb_internal_error_resync {} {
 }
 
 
-# gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS
+# gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS PROMPT_REGEXP
 # Send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
@@ -707,6 +707,8 @@ proc gdb_internal_error_resync {} {
 #   context; action elements will be executed in the caller's context.
 #   Unlike patterns for gdb_test, these patterns should generally include
 #   the final newline and prompt.
+# PROMPT_REGEXP is a regexp matching the expected prompt after the command
+#   output.  If empty, defaults to "$gdb_prompt $"
 #
 # Returns:
 #    1 if the test failed, according to a built-in failure pattern
@@ -744,7 +746,7 @@ proc gdb_internal_error_resync {} {
 # expected from $gdb_spawn_id.  IOW, callers do not need to worry
 # about resetting "-i" back to $gdb_spawn_id explicitly.
 #
-proc gdb_test_multiple { command message user_code } {
+proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
     global GDB
@@ -753,6 +755,10 @@ proc gdb_test_multiple { command message user_code } {
     upvar timeout timeout
     upvar expect_out expect_out
     global any_spawn_id
+
+    if { "$prompt_regexp" == "" } {
+	set prompt_regexp "$gdb_prompt $"
+    }
 
     if { $message == "" } {
 	set message $command
@@ -913,7 +919,7 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     append code {
-	-re "Ending remote debugging.*$gdb_prompt $" {
+	-re "Ending remote debugging.*$prompt_regexp" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
 	    }
@@ -921,17 +927,17 @@ proc gdb_test_multiple { command message user_code } {
 	    gdb_start
 	    set result -1
 	}
-	-re "Undefined\[a-z\]* command:.*$gdb_prompt $" {
+	-re "Undefined\[a-z\]* command:.*$prompt_regexp" {
 	    perror "Undefined command \"$command\"."
 	    fail "$message"
 	    set result 1
 	}
-	-re "Ambiguous command.*$gdb_prompt $" {
+	-re "Ambiguous command.*$prompt_regexp" {
 	    perror "\"$command\" is not a unique command name."
 	    fail "$message"
 	    set result 1
 	}
-	-re "$inferior_exited_re with code \[0-9\]+.*$gdb_prompt $" {
+	-re "$inferior_exited_re with code \[0-9\]+.*$prompt_regexp" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {
@@ -940,7 +946,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	-re "$inferior_exited_re normally.*$gdb_prompt $" {
+	-re "$inferior_exited_re normally.*$prompt_regexp" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {
@@ -949,7 +955,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	-re "The program is not being run.*$gdb_prompt $" {
+	-re "The program is not being run.*$prompt_regexp" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program is no longer running)"
 	    } else {
@@ -958,7 +964,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	-re "\r\n$gdb_prompt $" {
+	-re "\r\n$prompt_regexp" {
 	    if ![string match "" $message] then {
 		fail "$message"
 	    }
@@ -972,13 +978,13 @@ proc gdb_test_multiple { command message user_code } {
 	}
 	-re "\\((y or n|y or \\\[n\\\]|\\\[y\\\] or n)\\) " {
 	    send_gdb "n\n" answer
-	    gdb_expect -re "$gdb_prompt $"
+	    gdb_expect -re "$prompt_regexp"
 	    fail "$message (got interactive prompt)"
 	    set result -1
 	}
 	-re "\\\[0\\\] cancel\r\n\\\[1\\\] all.*\r\n> $" {
 	    send_gdb "0\n"
-	    gdb_expect -re "$gdb_prompt $"
+	    gdb_expect -re "$prompt_regexp"
 	    fail "$message (got breakpoint menu)"
 	    set result -1
 	}
@@ -1869,7 +1875,7 @@ proc skip_python_tests_prompt { prompt_regexp } {
 	    return 1
 	}
 	-re "$prompt_regexp" {}
-    }
+    } "$prompt_regexp"
 
     gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" {
 	-re "3.*$prompt_regexp" {
@@ -1878,7 +1884,7 @@ proc skip_python_tests_prompt { prompt_regexp } {
 	-re ".*$prompt_regexp" {
             set gdb_py_is_py3k 0
         }
-    }
+    } "$prompt_regexp"
 
     return 0
 }
