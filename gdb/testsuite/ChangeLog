@@ -1,5 +1,10 @@
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (skip_libstdcxx_probe_tests_prompt, gdb_is_target_1):
+	Pass prompt_regexp parameter to gdb_test_multiple calls.
+
+2019-07-29  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/maint.exp: Use "\r\n" instead of "\[\r\n\]+" in "maint
           print registers" regexps.
 

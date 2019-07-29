@@ -3120,7 +3120,7 @@ proc skip_libstdcxx_probe_tests_prompt { prompt_regexp } {
 	}
 	-re "\r\n$prompt_regexp" {
 	}
-    }
+    } "$prompt_regexp"
     return $ok
 }
 
@@ -3167,7 +3167,7 @@ proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
 	-re "$prompt_regexp" {
 	    pass $test
 	}
-    }
+    } "$prompt_regexp"
     return 0
 }
 
