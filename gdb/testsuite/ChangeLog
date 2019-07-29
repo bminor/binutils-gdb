@@ -1,5 +1,9 @@
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/define.exp: Add "\r\n" to "reset gdb_prompt" regexp.
+
+2019-07-29  Tom de Vries  <tdevries@suse.de>
+
 	PR gdb/24855
 	* lib/gdb.exp (gdb_test_multiple): Add prompt_regexp parameter.
 	(skip_python_tests_prompt): Add prompt_regexp argument to

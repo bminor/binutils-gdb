@@ -302,7 +302,7 @@ gdb_test_multiple "set prompt \\(blah\\) " "set gdb_prompt" {
 }
 
 gdb_test_multiple "set prompt $prior_prompt " "reset gdb_prompt" {
-    -re "$gdb_prompt $" {
+    -re "\r\n$gdb_prompt $" {
 	pass "reset gdb_prompt"
     }
 }
