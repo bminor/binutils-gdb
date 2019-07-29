@@ -473,7 +473,7 @@ namespace eval $testfile {
 	send_gdb "break \t"
 	gdb_test_multiple "" $tst {
 	    "break \\\x07" {
-		send_gdb "\t\t"
+		send_gdb "\t"
 		gdb_test_multiple "" $tst {
 		    "Display all" {
 			send_gdb "y"

@@ -1,5 +1,10 @@
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.linespec/explicit.exp: Fix completion trigger for "complete with
+	no arguments".
+
+2019-07-29  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.linespec/explicit.exp: Fix gdb_test_multiple regexps where second
 	is a substring of the first for "complete non-unique file name".
 
