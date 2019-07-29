@@ -453,7 +453,7 @@ gdb_py_test_multiple "prompt substitution readline" \
   "end" ""
 
 gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
-    -re "Python Exception (exceptions.RuntimeError|<(type 'exceptions.|class ')RuntimeError'>) Python exception called.*" {
+    -re "Python Exception (exceptions.RuntimeError|<(type 'exceptions.|class ')RuntimeError'>) Python exception called.*$gdb_prompt $" {
 	pass "set hook"
     }
 }
@@ -465,7 +465,7 @@ gdb_py_test_silent_cmd "set python print-stack full" \
     "set print-stack full for prompt error test" 1
 
 gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
-    -re "Traceback.*File.*line.*RuntimeError.*Python exception called.*" {
+    -re "Traceback.*File.*line.*RuntimeError.*Python exception called.*$gdb_prompt $" {
 	pass "set hook"
     }
 }
