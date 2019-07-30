@@ -1,3 +1,13 @@
+2019-07-30  Mel Chen <mel.chen@sifive.com>
+
+	* testsuite/gas/riscv/alias-csr.s: Add testcase for CSR-access
+	alias instructions.
+	* testsuite/gas/riscv/no-aliases-csr.d: Run testcase alias-csr.s with
+	-Mno-aliases.
+
+	* testsuite/gas/riscv/alias-csr.d: Run testcase alias-csr.s.
+	* testsuite/gas/riscv/priv-reg.d: Update.
+
 2019-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
