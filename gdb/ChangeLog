@@ -1,3 +1,11 @@
+2019-07-30  Christian Biesinger  <cbiesinger@google.com>
+
+	PR/24474: Add a function to lookup static variables.
+	* NEWS: Mention this new function.
+	* python/py-symbol.c (gdbpy_lookup_static_symbol): New function.
+	* python/python-internal.h (gdbpy_lookup_static_symbol): New function.
+	* python/python.c (python_GdbMethods): Add new function.
+
 2019-07-29  Christian Biesinger  <cbiesinger@google.com>
 
 	* NEWS: Mention new functions Objfile.lookup_{global,static}_symbol.

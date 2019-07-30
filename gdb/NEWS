@@ -41,6 +41,9 @@
      there are no filters, or when the 'backtrace' '-no-filters' option
      is given.
 
+  ** The new function gdb.lookup_static_symbol can be used to look up
+     symbols with static linkage.
+
   ** gdb.Objfile has new methods 'lookup_global_symbol' and
      'lookup_static_symbol' to lookup a symbol from this objfile only.
 

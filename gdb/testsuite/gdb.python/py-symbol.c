@@ -32,9 +32,14 @@ class SimpleClass
     return i; /* Break in class. */
   }
 };
+
+namespace {
+  int anon = 10;
+};
 #endif
 
 int qq = 72;			/* line of qq */
+static int rr = 42;		/* line of rr */
 
 int func (int arg)
 {

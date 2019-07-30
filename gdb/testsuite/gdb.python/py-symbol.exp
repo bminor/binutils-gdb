@@ -48,6 +48,25 @@ gdb_test "python print (gdb.lookup_global_symbol('qq').needs_frame)" \
     "False" \
     "print whether qq needs a frame"
 
+set rr_line [gdb_get_line_number "line of rr"]
+gdb_test "python print (gdb.lookup_global_symbol ('rr') is None)" "True" \
+    "lookup_global_symbol for static var"
+
+gdb_test "python print (gdb.lookup_static_symbol ('rr').line)" "$rr_line" \
+    "print line number of rr"
+
+gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "42" \
+    "print value of rr"
+
+gdb_test "python print (gdb.lookup_static_symbol ('rr').needs_frame)" \
+    "False" \
+    "print whether rr needs a frame"
+
+gdb_test "python print (gdb.lookup_static_symbol ('nonexistent') is None)" \
+    "True" "lookup_static_symbol for nonexistent var"
+
+gdb_test "python print (gdb.lookup_static_symbol ('qq') is None)" \
+    "True" "lookup_static_symbol for global var"
 
 if ![runto_main] then {
     fail "can't run to main"
@@ -136,6 +155,11 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}-cxx
+
+gdb_test "python print (gdb.lookup_global_symbol ('(anonymous namespace)::anon') is None)" \
+    "True" "anon is None"
+gdb_test "python print (gdb.lookup_static_symbol ('(anonymous namespace)::anon').value ())" \
+    "10" "print value of anon"
 
 if ![runto_main] then {
     fail "can't run to main"

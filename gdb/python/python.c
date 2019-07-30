@@ -1978,6 +1978,10 @@ a boolean indicating if name is a field of the current implied argument\n\
     METH_VARARGS | METH_KEYWORDS,
     "lookup_global_symbol (name [, domain]) -> symbol\n\
 Return the symbol corresponding to the given name (or None)." },
+  { "lookup_static_symbol", (PyCFunction) gdbpy_lookup_static_symbol,
+    METH_VARARGS | METH_KEYWORDS,
+    "lookup_static_symbol (name [, domain]) -> symbol\n\
+Return the static-linkage symbol corresponding to the given name (or None)." },
 
   { "lookup_objfile", (PyCFunction) gdbpy_lookup_objfile,
     METH_VARARGS | METH_KEYWORDS,

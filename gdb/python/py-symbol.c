@@ -471,6 +471,46 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
   return sym_obj;
 }
 
+/* Implementation of
+   gdb.lookup_static_symbol (name [, domain) -> symbol or None.  */
+
+PyObject *
+gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
+{
+  const char *name;
+  int domain = VAR_DOMAIN;
+  static const char *keywords[] = { "name", "domain", NULL };
+  struct symbol *symbol = NULL;
+  PyObject *sym_obj;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &name,
+					&domain))
+    return NULL;
+
+  try
+    {
+      symbol = lookup_static_symbol (name, (domain_enum) domain).symbol;
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (symbol)
+    {
+      sym_obj = symbol_to_symbol_object (symbol);
+      if (!sym_obj)
+	return NULL;
+    }
+  else
+    {
+      sym_obj = Py_None;
+      Py_INCREF (Py_None);
+    }
+
+  return sym_obj;
+}
+
 /* This function is called when an objfile is about to be freed.
    Invalidate the symbol as further actions on the symbol would result
    in bad data.  All access to obj->symbol should be gated by

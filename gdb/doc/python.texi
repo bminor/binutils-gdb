@@ -4847,6 +4847,25 @@ The result is a @code{gdb.Symbol} object or @code{None} if the symbol
 is not found.
 @end defun
 
+@findex gdb.lookup_static_symbol
+@defun gdb.lookup_static_symbol (name @r{[}, domain@r{]})
+This function searches for a global symbol with static linkage by name.
+The search scope can be restricted to by the domain argument.
+
+@var{name} is the name of the symbol.  It must be a string.
+The optional @var{domain} argument restricts the search to the domain type.
+The @var{domain} argument must be a domain constant defined in the @code{gdb}
+module and described later in this chapter.
+
+The result is a @code{gdb.Symbol} object or @code{None} if the symbol
+is not found.
+
+Note that this function will not find function-scoped static variables. To look
+up such variables, iterate over the variables of the function's
+@code{gdb.Block} and check that @code{block.addr_class} is
+@code{gdb.SYMBOL_LOC_STATIC}.
+@end defun
+
 A @code{gdb.Symbol} object has the following attributes:
 
 @defvar Symbol.type

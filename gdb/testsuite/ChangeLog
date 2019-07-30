@@ -1,3 +1,9 @@
+2019-07-30  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdb.python/py-symbol.c: Add a static variable and one in an anonymous
+	namespace.
+	* gdb.python/py-symbol.exp: Test gdb.lookup_static_symbol.
+
 2019-07-30  Tom de Vries  <tdevries@suse.de>
 
 	* lib/read1.c (read): Don't use unsetenv (v), use setenv (v, "", 1)
