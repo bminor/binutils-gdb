@@ -1,5 +1,10 @@
 2019-07-30  Tom de Vries  <tdevries@suse.de>
 
+	* lib/read1.c (read): Don't use unsetenv (v), use setenv (v, "", 1)
+	instead.
+
+2019-07-30  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/24834
 	* lib/gdb.exp (gdb_compile): Fail if nopie results in PIE executable.
 	(exec_is_pie): New proc.
