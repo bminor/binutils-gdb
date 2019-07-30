@@ -66,8 +66,8 @@ gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").lookup_static_symbo
     "static_var" "lookup_static_symbol finds a valid symbol"
 gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").lookup_static_symbol (\"global_var\") is None)" \
     "True" "lookup_static_symbol does not find global symbol"
-gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").lookup_static_symbol (\"nonexistant\"))" \
-    "None" "lookup_static_symbol can handle nonexistant symbol"
+gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").lookup_static_symbol (\"nonexistent\"))" \
+    "None" "lookup_static_symbol can handle nonexistent symbol"
 
 set binfile_build_id [get_build_id $binfile]
 if [string compare $binfile_build_id ""] {
