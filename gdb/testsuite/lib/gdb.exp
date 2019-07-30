@@ -3771,6 +3771,12 @@ proc gdb_compile {source dest type options} {
     regsub "\[\r\n\]*$" "$result" "" result
     regsub "^\[\r\n\]*" "$result" "" result
     
+    if { $type == "executable" && $result == "" && $nopie != -1 } {
+	if { [exec_is_pie "$dest"] } {
+	    set result "nopie failed to prevent PIE executable"
+	}
+    }
+
     if {[lsearch $options quiet] < 0} {
 	# We shall update this on a per language basis, to avoid
 	# changing the entire testsuite in one go.
@@ -5165,6 +5171,18 @@ proc exec_has_index_section { executable } {
     set readelf_program [gdb_find_readelf]
     set res [catch {exec $readelf_program -S $executable \
 			| grep -E "\.gdb_index|\.debug_names" }]
+    if { $res == 0 } {
+	return 1
+    }
+    return 0
+}
+
+# Return true if EXECUTABLE is a Position Independent Executable.
+
+proc exec_is_pie { executable } {
+    set readelf_program [gdb_find_readelf]
+    set res [catch {exec $readelf_program -d $executable \
+			| grep -E "(FLAGS_1).*Flags:.* PIE($| )" }]
     if { $res == 0 } {
 	return 1
     }
