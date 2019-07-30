@@ -11,6 +11,10 @@
 
 2019-07-29  Christian Biesinger  <cbiesinger@google.com>
 
+	* gdb.python/py-objfile.exp: Fix misspelling (nonexistant -> nonexistent)
+
+2019-07-29  Christian Biesinger  <cbiesinger@google.com>
+
 	* gdb.python/py-objfile.c: Add global and static vars.
 	* gdb.python/py-objfile.exp: Test new functions Objfile.
 	  lookup_global_symbol and lookup_static_symbol.
