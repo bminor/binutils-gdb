@@ -1,3 +1,15 @@
+2019-08-01  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (lang_os_list): Rename from lang_output_section_statement.
+	* ldlang.c: Likewise throughout file.
+	* emultempl/alphaelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+
 2019-07-26  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/lto-3r.d: Accept D for powerpc64 descriptors.

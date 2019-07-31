@@ -2154,8 +2154,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 						       NULL);
 	  if (after == NULL)
 	    /* *ABS* is always the first output section statement.  */
-	    after = (&lang_output_section_statement.head
-		     ->output_section_statement);
+	    after = &lang_os_list.head->output_section_statement;
 	}
 
       /* All sections in an executable must be aligned to a page boundary.

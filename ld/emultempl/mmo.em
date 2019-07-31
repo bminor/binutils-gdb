@@ -166,7 +166,7 @@ mmo_place_orphan (asection *s,
 
 	  /* We have to find the oss before this one, so we can use that as
 	     "after".  */
-	  for (lookup = &lang_output_section_statement.head->output_section_statement;
+	  for (lookup = &lang_os_list.head->output_section_statement;
 	       lookup != NULL && lookup->next != before;
 	       lookup = lookup->next)
 	    ;

@@ -502,7 +502,7 @@ extern struct lang_phdr *lang_phdr_list;
 extern struct lang_nocrossrefs *nocrossref_list;
 extern const char *output_target;
 extern lang_output_section_statement_type *abs_output_section;
-extern lang_statement_list_type lang_output_section_statement;
+extern lang_statement_list_type lang_os_list;
 extern struct lang_input_statement_flags input_flags;
 extern bfd_boolean lang_has_input_file;
 extern lang_statement_list_type *stat_ptr;

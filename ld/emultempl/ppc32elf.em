@@ -79,7 +79,7 @@ ppc_after_check_relocs (void)
 
       num_got = 0;
       num_plt = 0;
-      for (os = &lang_output_section_statement.head->output_section_statement;
+      for (os = &lang_os_list.head->output_section_statement;
 	   os != NULL;
 	   os = os->next)
 	{

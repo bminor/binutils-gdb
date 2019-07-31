@@ -47,7 +47,7 @@ alpha_after_open (void)
       lang_output_section_statement_type *plt_os[2];
 
       num_plt = 0;
-      for (os = &lang_output_section_statement.head->output_section_statement;
+      for (os = &lang_os_list.head->output_section_statement;
 	   os != NULL;
 	   os = os->next)
 	{

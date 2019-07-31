@@ -290,7 +290,7 @@ spu_before_allocation (void)
 	    }
 
 	  /* Ensure alignment of overlay sections is sufficient.  */
-	  for (os = &lang_output_section_statement.head->output_section_statement;
+	  for (os = &lang_os_list.head->output_section_statement;
 	       os != NULL;
 	       os = os->next)
 	    if (os->bfd_section != NULL

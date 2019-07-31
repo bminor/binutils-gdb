@@ -101,7 +101,7 @@ static void lang_do_memory_regions (void);
 /* Exported variables.  */
 const char *output_target;
 lang_output_section_statement_type *abs_output_section;
-lang_statement_list_type lang_output_section_statement;
+lang_statement_list_type lang_os_list;
 lang_statement_list_type *stat_ptr = &statement_list;
 /* Header for list of statements corresponding to files used in the final
    executable.  This can be either object file specified on the command-line
@@ -1222,19 +1222,19 @@ output_section_statement_newfunc (struct bfd_hash_entry *entry,
   lang_statement_append (stat_ptr, &ret->s, &ret->s.header.next);
 
   /* For every output section statement added to the list, except the
-     first one, lang_output_section_statement.tail points to the "next"
+     first one, lang_os_list.tail points to the "next"
      field of the last element of the list.  */
-  if (lang_output_section_statement.head != NULL)
+  if (lang_os_list.head != NULL)
     ret->s.output_section_statement.prev
       = ((lang_output_section_statement_type *)
-	 ((char *) lang_output_section_statement.tail
+	 ((char *) lang_os_list.tail
 	  - offsetof (lang_output_section_statement_type, next)));
 
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
   nextp = &ret->s.output_section_statement.next;
-  lang_statement_append (&lang_output_section_statement,
+  lang_statement_append (&lang_os_list,
 			 &ret->s,
 			 (lang_statement_union_type **) nextp);
   return &ret->root;
@@ -1270,7 +1270,7 @@ lang_init (void)
   lang_list_init (stat_ptr);
 
   lang_list_init (&input_file_chain);
-  lang_list_init (&lang_output_section_statement);
+  lang_list_init (&lang_os_list);
   lang_list_init (&file_chain);
   first_file = lang_add_input_file (NULL, lang_input_file_is_marker_enum,
 				    NULL);
@@ -1548,7 +1548,7 @@ lang_output_section_find_by_flags (const asection *sec,
 
   /* We know the first statement on this list is *ABS*.  May as well
      skip it.  */
-  first = &lang_output_section_statement.head->output_section_statement;
+  first = &lang_os_list.head->output_section_statement;
   first = first->next;
 
   /* First try for an exact match.  */
@@ -1776,8 +1776,7 @@ insert_os_after (lang_output_section_statement_type *after)
   lang_statement_union_type **assign = NULL;
   bfd_boolean ignore_first;
 
-  ignore_first
-    = after == &lang_output_section_statement.head->output_section_statement;
+  ignore_first = after == &lang_os_list.head->output_section_statement;
 
   for (where = &after->header.next;
        *where != NULL;
@@ -1863,8 +1862,7 @@ lang_insert_orphan (asection *s,
       || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop (0);
 
-  os_tail = ((lang_output_section_statement_type **)
-	     lang_output_section_statement.tail);
+  os_tail = (lang_output_section_statement_type **) lang_os_list.tail;
   os = lang_enter_output_section_statement (secname, address, normal_section,
 					    NULL, NULL, NULL, constraint, 0);
 
@@ -1902,8 +1900,7 @@ lang_insert_orphan (asection *s,
       /* Shuffle the bfd section list to make the output file look
 	 neater.  This is really only cosmetic.  */
       if (place->section == NULL
-	  && after != (&lang_output_section_statement.head
-		       ->output_section_statement))
+	  && after != &lang_os_list.head->output_section_statement)
 	{
 	  asection *bfd_section = after->bfd_section;
 
@@ -2177,8 +2174,7 @@ lang_insert_orphan (asection *s,
 	     assigning *os_tail = NULL, but possibly added it back in
 	     the same place when assigning *place->os_tail.  */
 	  if (*os_tail == NULL)
-	    lang_output_section_statement.tail
-	      = (lang_statement_union_type **) os_tail;
+	    lang_os_list.tail = (lang_statement_union_type **) os_tail;
 	}
     }
   return os;
@@ -3525,7 +3521,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		  s->input_statement.flags.reload = TRUE;
 		}
 
-	      os_tail = lang_output_section_statement.tail;
+	      os_tail = lang_os_list.tail;
 	      lang_list_init (&add);
 
 	      if (!load_symbols (&s->input_statement, &add))
@@ -3539,7 +3535,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		     section statement list.  Very likely the user
 		     forgot -T, and whatever we do here will not meet
 		     naive user expectations.  */
-		  if (os_tail != lang_output_section_statement.tail)
+		  if (os_tail != lang_os_list.tail)
 		    {
 		      einfo (_("%P: warning: %s contains output sections;"
 			       " did you forget -T?\n"),
@@ -3933,7 +3929,7 @@ process_insert_statements (void)
   /* "start of list" is actually the statement immediately after
      the special abs_section output statement, so that it isn't
      reordered.  */
-  s = &lang_output_section_statement.head;
+  s = &lang_os_list.head;
   while (*(s = &(*s)->header.next) != NULL)
     {
       if ((*s)->header.type == lang_output_section_statement_enum)
@@ -3984,8 +3980,7 @@ process_insert_statements (void)
 	      if (last_os->next == NULL)
 		{
 		  next = &first_os->prev->next;
-		  lang_output_section_statement.tail
-		    = (lang_statement_union_type **) next;
+		  lang_os_list.tail = (lang_statement_union_type **) next;
 		}
 	      else
 		last_os->next->prev = first_os->prev;
@@ -3994,8 +3989,7 @@ process_insert_statements (void)
 	      if (where->next == NULL)
 		{
 		  next = &last_os->next;
-		  lang_output_section_statement.tail
-		    = (lang_statement_union_type **) next;
+		  lang_os_list.tail = (lang_statement_union_type **) next;
 		}
 	      else
 		where->next->prev = last_os;
@@ -4058,14 +4052,14 @@ process_insert_statements (void)
 	  /* Snip everything after the abs_section output statement we
 	     know is at the start of the list, up to and including
 	     the insert statement we are currently processing.  */
-	  first = lang_output_section_statement.head->header.next;
-	  lang_output_section_statement.head->header.next = (*s)->header.next;
+	  first = lang_os_list.head->header.next;
+	  lang_os_list.head->header.next = (*s)->header.next;
 	  /* Add them back where they belong.  */
 	  *s = *ptr;
 	  if (*s == NULL)
 	    statement_list.tail = s;
 	  *ptr = first;
-	  s = &lang_output_section_statement.head;
+	  s = &lang_os_list.head;
 	}
     }
 
@@ -4096,7 +4090,7 @@ strip_excluded_output_sections (void)
       lang_reset_memory_regions ();
     }
 
-  for (os = &lang_output_section_statement.head->output_section_statement;
+  for (os = &lang_os_list.head->output_section_statement;
        os != NULL;
        os = os->next)
     {
@@ -4157,7 +4151,7 @@ lang_clear_os_map (void)
   if (map_head_is_link_order)
     return;
 
-  for (os = &lang_output_section_statement.head->output_section_statement;
+  for (os = &lang_os_list.head->output_section_statement;
        os != NULL;
        os = os->next)
     {
@@ -6966,7 +6960,7 @@ lang_reset_memory_regions (void)
       p->last_os = NULL;
     }
 
-  for (os = &lang_output_section_statement.head->output_section_statement;
+  for (os = &lang_os_list.head->output_section_statement;
        os != NULL;
        os = os->next)
     {
@@ -7346,7 +7340,7 @@ lang_propagate_lma_regions (void)
 {
   lang_output_section_statement_type *os;
 
-  for (os = &lang_output_section_statement.head->output_section_statement;
+  for (os = &lang_os_list.head->output_section_statement;
        os != NULL;
        os = os->next)
     {
@@ -8002,7 +7996,7 @@ lang_record_phdrs (void)
       bfd_vma at;
 
       c = 0;
-      for (os = &lang_output_section_statement.head->output_section_statement;
+      for (os = &lang_os_list.head->output_section_statement;
 	   os != NULL;
 	   os = os->next)
 	{
@@ -8088,7 +8082,7 @@ lang_record_phdrs (void)
   free (secs);
 
   /* Make sure all the phdr assignments succeeded.  */
-  for (os = &lang_output_section_statement.head->output_section_statement;
+  for (os = &lang_os_list.head->output_section_statement;
        os != NULL;
        os = os->next)
     {

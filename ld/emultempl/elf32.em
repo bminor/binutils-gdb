@@ -1962,7 +1962,7 @@ output_rel_find (int isdyn, int rela)
   lang_output_section_statement_type *last_rel = NULL;
   lang_output_section_statement_type *last_rel_alloc = NULL;
 
-  for (lookup = &lang_output_section_statement.head->output_section_statement;
+  for (lookup = &lang_os_list.head->output_section_statement;
        lookup != NULL;
        lookup = lookup->next)
     {
@@ -2136,7 +2136,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
     {
       /* Find the output mbind section with the same type, attributes
 	 and sh_info field.  */
-      for (os = &lang_output_section_statement.head->output_section_statement;
+      for (os = &lang_os_list.head->output_section_statement;
 	   os != NULL;
 	   os = os->next)
 	if (os->bfd_section != NULL
@@ -2315,7 +2315,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 					       _bfd_elf_match_sections_by_type);
       if (after == NULL)
 	/* *ABS* is always the first output section statement.  */
-	after = &lang_output_section_statement.head->output_section_statement;
+	after = &lang_os_list.head->output_section_statement;
     }
 
   return lang_insert_orphan (s, secname, constraint, after, place, NULL, NULL);
