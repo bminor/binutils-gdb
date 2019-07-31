@@ -1,5 +1,14 @@
 2019-08-01  Alan Modra  <amodra@gmail.com>
 
+	PR 24806
+	* ldlang.c (process_insert_statements): Add start of list
+	parameter.  Use rather than lang_os_list.head.  Process insert
+	statements inside group statements with a recursive call.
+	(lang_process): Adjust process_insert_statements call.
+	* lexsup.c (parse_args): Warn when adding missing --end-group.
+
+2019-08-01  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.h (lang_os_list): Rename from lang_output_section_statement.
 	* ldlang.c: Likewise throughout file.
 	* emultempl/alphaelf.em: Likewise.

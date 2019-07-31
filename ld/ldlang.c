@@ -3916,21 +3916,26 @@ map_input_to_output_sections
    start of the list and places them after the output section
    statement specified by the insert.  This operation is complicated
    by the fact that we keep a doubly linked list of output section
-   statements as well as the singly linked list of all statements.  */
+   statements as well as the singly linked list of all statements.
+   FIXME someday: Twiddling with the list not only moves statements
+   from the user's script but also input and group statements that are
+   built from command line object files and --start-group.  We only
+   get away with this because the list pointers used by file_chain
+   and input_file_chain are not reordered, and processing via
+   statement_list after this point mostly ignores input statements.
+   One exception is the map file, where LOAD and START GROUP/END GROUP
+   can end up looking odd.  */
 
 static void
-process_insert_statements (void)
+process_insert_statements (lang_statement_union_type **start)
 {
   lang_statement_union_type **s;
   lang_output_section_statement_type *first_os = NULL;
   lang_output_section_statement_type *last_os = NULL;
   lang_output_section_statement_type *os;
 
-  /* "start of list" is actually the statement immediately after
-     the special abs_section output statement, so that it isn't
-     reordered.  */
-  s = &lang_os_list.head;
-  while (*(s = &(*s)->header.next) != NULL)
+  s = start;
+  while (*s != NULL)
     {
       if ((*s)->header.type == lang_output_section_statement_enum)
 	{
@@ -3948,6 +3953,18 @@ process_insert_statements (void)
 	  last_os->constraint = -2 - last_os->constraint;
 	  if (first_os == NULL)
 	    first_os = last_os;
+	}
+      else if ((*s)->header.type == lang_group_statement_enum)
+	{
+	  /* A user might put -T between --start-group and
+	     --end-group.  One way this odd construct might arise is
+	     from a wrapper around ld to change library search
+	     behaviour.  For example:
+	     #! /bin/sh
+	     exec real_ld --start-group "$@" --end-group
+	     This isn't completely unreasonable so go looking inside a
+	     group statement for insert statements.  */
+	  process_insert_statements (&(*s)->group_statement.children.head);
 	}
       else if ((*s)->header.type == lang_insert_statement_enum)
 	{
@@ -4049,18 +4066,19 @@ process_insert_statements (void)
 	    }
 
 	  ptr = insert_os_after (where);
-	  /* Snip everything after the abs_section output statement we
-	     know is at the start of the list, up to and including
-	     the insert statement we are currently processing.  */
-	  first = lang_os_list.head->header.next;
-	  lang_os_list.head->header.next = (*s)->header.next;
-	  /* Add them back where they belong.  */
+	  /* Snip everything from the start of the list, up to and
+	     including the insert statement we are currently processing.  */
+	  first = *start;
+	  *start = (*s)->header.next;
+	  /* Add them back where they belong, minus the insert.  */
 	  *s = *ptr;
 	  if (*s == NULL)
 	    statement_list.tail = s;
 	  *ptr = first;
-	  s = &lang_os_list.head;
+	  s = start;
+	  continue;
 	}
+      s = &(*s)->header.next;
     }
 
   /* Undo constraint twiddling.  */
@@ -7544,7 +7562,9 @@ lang_process (void)
   lang_statement_iteration++;
   map_input_to_output_sections (statement_list.head, NULL, NULL);
 
-  process_insert_statements ();
+  /* Start at the statement immediately after the special abs_section
+     output statement, so that it isn't reordered.  */
+  process_insert_statements (&lang_os_list.head->header.next);
 
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();

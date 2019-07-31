@@ -1602,6 +1602,7 @@ parse_args (unsigned argc, char **argv)
 
   while (ingroup)
     {
+      einfo (_("%P: missing --end-group; added as last command line option\n"));
       lang_leave_group ();
       ingroup--;
     }
