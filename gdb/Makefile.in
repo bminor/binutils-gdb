@@ -414,6 +414,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/environ-selftests.c \
 	unittests/format_pieces-selftests.c \
 	unittests/function-view-selftests.c \
+	unittests/help-doc-selftests.c \
 	unittests/lookup_name_info-selftests.c \
 	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \

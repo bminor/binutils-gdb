@@ -1,5 +1,10 @@
 2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* unittests/help-doc-selftests.c: New file.
+	* Makefile.in: Add the new file.
+
+2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-decode.h (print_doc_line): Add for_value_prefix argument.
 	* cli/cli-decode.c (print_doc_line): Likewise.  It now prints
 	the full first line, except when FOR_VALUE_PREFIX.  In this case,
