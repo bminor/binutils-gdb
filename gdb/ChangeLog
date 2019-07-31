@@ -1,3 +1,8 @@
+2019-08-01  Tom Tromey  <tromey@adacore.com>
+
+	* ia64-libunwind-tdep.h (struct libunwind_descr): Include
+	gdbarch.h.
+
 2019-08-01  Christian Biesinger  <cbiesinger@google.com>
 
 	* s12z-tdep.c: Fix include path for s12z-opc.h.

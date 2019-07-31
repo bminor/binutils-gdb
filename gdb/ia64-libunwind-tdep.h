@@ -36,6 +36,8 @@ struct frame_unwind;
    running on.  */
 #include "libunwind-ia64.h"
 
+#include "gdbarch.h"
+
 struct libunwind_descr
 {
   int (*gdb2uw) (int);
