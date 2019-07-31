@@ -1,3 +1,7 @@
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Index Files): Update Ada text.
+
 2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Symbols): Add information about the -n flag to
