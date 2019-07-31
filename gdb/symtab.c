@@ -2414,34 +2414,6 @@ basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
 {
   struct block_symbol result;
 
-  /* NOTE: carlton/2003-05-19: The comments below were written when
-     this (or what turned into this) was part of lookup_symbol_aux;
-     I'm much less worried about these questions now, since these
-     decisions have turned out well, but I leave these comments here
-     for posterity.  */
-
-  /* NOTE: carlton/2002-12-05: There is a question as to whether or
-     not it would be appropriate to search the current global block
-     here as well.  (That's what this code used to do before the
-     is_a_field_of_this check was moved up.)  On the one hand, it's
-     redundant with the lookup in all objfiles search that happens
-     next.  On the other hand, if decode_line_1 is passed an argument
-     like filename:var, then the user presumably wants 'var' to be
-     searched for in filename.  On the third hand, there shouldn't be
-     multiple global variables all of which are named 'var', and it's
-     not like decode_line_1 has ever restricted its search to only
-     global variables in a single filename.  All in all, only
-     searching the static block here seems best: it's correct and it's
-     cleanest.  */
-
-  /* NOTE: carlton/2002-12-05: There's also a possible performance
-     issue here: if you usually search for global symbols in the
-     current file, then it would be slightly better to search the
-     current global block before searching all the symtabs.  But there
-     are other factors that have a much greater effect on performance
-     than that one, so I don't think we should worry about that for
-     now.  */
-
   /* NOTE: dje/2014-10-26: The lookup in all objfiles search could skip
      the current objfile.  Searching the current objfile first is useful
      for both matching user expectations as well as performance.  */
@@ -2670,6 +2642,19 @@ lookup_global_symbol (const char *name,
 		      const struct block *block,
 		      const domain_enum domain)
 {
+  /* If a block was passed in, we want to search the corresponding
+     global block first.  This yields "more expected" behavior, and is
+     needed to support 'FILENAME'::VARIABLE lookups.  */
+  const struct block *global_block = block_global_block (block);
+  if (global_block != nullptr)
+    {
+      symbol *sym = lookup_symbol_in_block (name,
+					    symbol_name_match_type::FULL,
+					    global_block, domain);
+      if (sym != nullptr)
+	return { sym, global_block };
+    }
+
   struct objfile *objfile = lookup_objfile_from_block (block);
   return lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
 }
