@@ -1,3 +1,7 @@
+2019-08-05  Christian Biesinger  <cbiesinger@google.com>
+
+	* objfiles.h (objfile): Add a comment describing partial symbols.
+
 2019-08-05  Tom Tromey  <tromey@adacore.com>
 
 	* compile/compile.c (_initialize_compile): Use _(), not N_().

@@ -382,7 +382,13 @@ private:
    2.  Additional symbol files added by the add-symbol-file command,
    3.  Shared library objfiles, added by ADD_SOLIB,  4.  symbol files
    for modules that were loaded when GDB attached to a remote system
-   (see remote-vx.c).  */
+   (see remote-vx.c).
+
+   GDB typically reads symbols twice -- first an initial scan which just
+   reads "partial symbols"; these are partial information for the
+   static/global symbols in a symbol file.  When later looking up symbols,
+   objfile->sf->qf->lookup_symbol is used to check if we only have a partial
+   symbol and if so, read and expand the full compunit.  */
 
 struct objfile
 {
