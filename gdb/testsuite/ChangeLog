@@ -1,3 +1,9 @@
+2019-08-01  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.base/batch-exit-status.exp: Call test_exit_status with
+	prefix argument.
+	(test_exit_status): Add prefix argument.
+
 2019-08-01  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24863
