@@ -1,3 +1,8 @@
+2019-08-01  Ilia Diachkov  <ilia.diachkov@optimitech.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_lui): Set lui relax safety area to
+	two pages in relro presence.
+
 2019-08-01  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (insn_num_slots, get_rsr_lend_opcode)
