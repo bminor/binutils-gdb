@@ -47,6 +47,9 @@
   ** gdb.Objfile has new methods 'lookup_global_symbol' and
      'lookup_static_symbol' to lookup a symbol from this objfile only.
 
+  ** gdb.Block now supports the dictionary syntax for accessing symbols in
+     this block (e.g. block['local_variable']).
+
 * New commands
 
 | [COMMAND] | SHELL_COMMAND

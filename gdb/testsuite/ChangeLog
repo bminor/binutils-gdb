@@ -1,3 +1,7 @@
+2019-08-05  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdb.python/py-block.exp: Test dictionary access on blocks.
+
 2019-08-05  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR gdb/24863

@@ -4722,7 +4722,12 @@ A @code{gdb.Block} is iterable.  The iterator returns the symbols
 should not assume that a specific block object will always contain a
 given symbol, since changes in @value{GDBN} features and
 infrastructure may cause symbols move across blocks in a symbol
-table.
+table.  You can also use Python's @dfn{dictionary syntax} to access
+variables in this block, e.g.:
+
+@smallexample
+symbol = some_block['variable']  # symbol is of type gdb.Symbol
+@end smallexample
 
 The following block-related functions are available in the @code{gdb}
 module:

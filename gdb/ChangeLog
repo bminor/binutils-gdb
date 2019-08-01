@@ -1,5 +1,12 @@
 2019-08-05  Christian Biesinger  <cbiesinger@google.com>
 
+	* NEWS: Mention dictionary access on blocks.
+	* python/py-block.c (blpy_getitem): New function.
+	(block_object_as_mapping): New struct.
+	(block_object_type): Use new struct for tp_as_mapping field.
+
+2019-08-05  Christian Biesinger  <cbiesinger@google.com>
+
 	* objfiles.h (objfile): Add a comment describing partial symbols.
 
 2019-08-05  Tom Tromey  <tromey@adacore.com>
