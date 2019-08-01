@@ -1,3 +1,7 @@
+2019-08-01  Alan Hayward  <alan.hayward@arm.com>
+
+	* NEWS: Require GNU make 3.82.
+
 2019-07-16  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-wingeneral.h (tui_copy_win, tui_box_win): Don't

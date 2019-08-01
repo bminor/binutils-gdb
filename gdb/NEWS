@@ -280,6 +280,11 @@ maint show test-options-completion-result
   GDB) in the output directory for each test script.  Multiple invocations
   are appended with .1, .2, .3 etc.
 
+* Building GDB and GDBserver now requires GNU make >= 3.82.
+
+  Using another implementation of the make program or an earlier version of
+  GNU make to build GDB or GDBserver is not supported.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
