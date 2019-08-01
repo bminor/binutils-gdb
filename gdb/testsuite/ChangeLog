@@ -1,3 +1,8 @@
+2019-08-01  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24863
+	* gdb.base/signals.exp: Fix check-read1 timeout using gdb_test_sequence.
+
 2019-07-30  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/display_nested.exp: New file.
