@@ -1996,11 +1996,15 @@ private:
     typedef typename elfcpp::Swap<fieldsize, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<fieldsize, big_endian>::readval(wv);
-    Valtype reloc = value >> right_shift;
+    if (overflow == CHECK_SIGNED)
+      value = static_cast<SignedAddress>(value) >> right_shift;
+    else
+      value = value >> right_shift;
+    Valtype reloc = value;
     val &= ~dst_mask;
     reloc &= dst_mask;
     elfcpp::Swap<fieldsize, big_endian>::writeval(wv, val | reloc);
-    return overflowed<valsize>(value >> right_shift, overflow);
+    return overflowed<valsize>(value, overflow);
   }
 
   // Do a simple RELA relocation, unaligned.
@@ -2023,11 +2027,15 @@ private:
     typedef typename elfcpp::Swap_unaligned<fieldsize, big_endian>::Valtype
       Valtype;
     Valtype val = elfcpp::Swap<fieldsize, big_endian>::readval(view);
-    Valtype reloc = value >> right_shift;
+    if (overflow == CHECK_SIGNED)
+      value = static_cast<SignedAddress>(value) >> right_shift;
+    else
+      value = value >> right_shift;
+    Valtype reloc = value;
     val &= ~dst_mask;
     reloc &= dst_mask;
     elfcpp::Swap_unaligned<fieldsize, big_endian>::writeval(view, val | reloc);
-    return overflowed<valsize>(value >> right_shift, overflow);
+    return overflowed<valsize>(value, overflow);
   }
 
 public:
