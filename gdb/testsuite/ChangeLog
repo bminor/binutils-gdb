@@ -1,6 +1,13 @@
 2019-08-01  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24863
+	* gdb.base/structs.exp: Fix check-read1 timeout using
+	gdb_test_sequence.
+	* lib/gdb.exp (tcl_version_at_least, lrepeat): New proc.
+
+2019-08-01  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24863
 	* gdb.base/break-interp.exp: Use exp_continue after each "info files"
 	line.
 

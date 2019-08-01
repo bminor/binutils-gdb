@@ -1103,6 +1103,38 @@ proc gdb_test { args } {
      }]
 }
 
+# Return 1 if tcl version used is at least MAJOR.MINOR
+proc tcl_version_at_least { major minor } {
+    global tcl_version
+    regexp {^([0-9]+)\.([0-9]+)$} $tcl_version \
+	dummy tcl_version_major tcl_version_minor
+    if { $tcl_version_major > $major } {
+        return 1
+    } elseif { $tcl_version_major == $major \
+		   && $tcl_version_major >= $minor } {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+if { [tcl_version_at_least 8 5] == 0 } {
+    # lrepeat was added in tcl 8.5.  Only add if missing.
+    proc lrepeat { n element } {
+        if { [string is integer -strict $n] == 0 } {
+            error "expected integer but got \"$n\""
+        }
+        if { $n < 0 } {
+            error "bad count \"$n\": must be integer >= 0"
+        }
+        set res [list]
+        for {set i 0} {$i < $n} {incr i} {
+            lappend res $element
+        }
+        return $res
+    }
+}
+
 # gdb_test_no_output COMMAND MESSAGE
 # Send a command to GDB and verify that this command generated no output.
 #

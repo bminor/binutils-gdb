@@ -102,7 +102,11 @@ proc start_structs_test { types } {
 	# Verify $anychar_re can match all the values of `char' type.
 	gdb_breakpoint [gdb_get_line_number "chartest-done"]
 	gdb_continue_to_breakpoint "chartest-done" ".*chartest-done.*"
-	gdb_test "p chartest" "= {({c = ${anychar_re}}, ){255}{c = ${anychar_re}}}"
+	gdb_test_sequence "p chartest" "" \
+	    [concat \
+		 [list "= \{"] \
+		 [lrepeat 255 "^\{c = ${anychar_re}\}, "] \
+		 [list "^\{c = ${anychar_re}\}\}"]]
     }
 
     # check that at the struct containing all the relevant types is correct
