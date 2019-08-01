@@ -1,3 +1,8 @@
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* source.c (select_source_symtab): Don't call
+	decode_line_with_current_source.
+
 2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* symtab.c (lookup_global_symbol): Search global block.

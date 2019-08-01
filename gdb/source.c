@@ -252,17 +252,14 @@ select_source_symtab (struct symtab *s)
 
   /* Make the default place to list be the function `main'
      if one exists.  */
-  if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0).symbol)
+  block_symbol bsym = lookup_symbol (main_name (), 0, VAR_DOMAIN, 0);
+  if (bsym.symbol != nullptr && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
     {
-      std::vector<symtab_and_line> sals
-	= decode_line_with_current_source (main_name (),
-					   DECODE_LINE_FUNFIRSTLINE);
-      const symtab_and_line &sal = sals[0];
+      symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
       current_source_pspace = sal.pspace;
       current_source_symtab = sal.symtab;
       current_source_line = std::max (sal.line - (lines_to_list - 1), 1);
-      if (current_source_symtab)
-	return;
+      return;
     }
 
   /* Alright; find the last file in the symtab list (ignoring .h's
