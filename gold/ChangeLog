@@ -1,5 +1,14 @@
 2019-08-02  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): Set
+	flags for new relocations, and some missing older relocs.
+	(Target_powerpc::Scan::local): Handle new pcrel tls relocs.
+	Call set_has_static_tls for tprel relocs.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Handle new pcrel tls relocs.
+
+2019-08-02  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relocate_functions::rela, rela_ua): Perform
 	signed right shift for signed overflow check.
 

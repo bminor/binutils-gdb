@@ -1,3 +1,9 @@
+2019-08-02  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.h (R_PPC64_TPREL34, R_PPC64_DTPREL34),
+	(R_PPC64_GOT_TLSGD34, R_PPC64_GOT_TLSLD34),
+	(R_PPC64_GOT_TPREL34, R_PPC64_GOT_DTPREL34): Define.
+
 2019-07-13  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.h (R_PPC64_PCREL_OPT, R_PPC64_D34, R_PPC64_D34_LO),
