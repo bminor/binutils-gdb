@@ -1,3 +1,20 @@
+2019-09-20  Christian Biesinger  <cbiesinger@google.com>
+
+	* solib-darwin.c (darwin_lookup_lib_symbol): Remove.
+	(_initialize_darwin_solib): Don't set
+	darwin_so_ops.lookup_lib_global_symbol.
+	* solib-svr4.c (set_solib_svr4_fetch_link_map_offsets): Call
+	set_gdbarch_iterate_over_objfiles_in_search_order.
+	(elf_lookup_lib_symbol): Rename to...
+	(svr4_iterate_over_objfiles_in_search_order): this, and update
+	to iterate semantics.
+	(_initialize_svr4_solib): Don't set lookup_lib_global_symbol.
+	* solib.c (solib_global_lookup): Remove.
+	* solist.h (struct target_so_ops): Remove lookup_lib_global_symbol.
+	(solib_global_lookup): Remove.
+	* symtab.c (lookup_global_or_static_symbol): Remove call to
+	solib_global_lookup.
+
 2019-09-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Move entries about default MI version now being

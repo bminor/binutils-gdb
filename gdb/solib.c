@@ -1441,21 +1441,6 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
 }
 
 
-/* Handler for library-specific lookup of global symbol NAME in OBJFILE.  Call
-   the library-specific handler if it is installed for the current target.  */
-
-struct block_symbol
-solib_global_lookup (struct objfile *objfile,
-		     const char *name,
-		     const domain_enum domain)
-{
-  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-
-  if (ops->lookup_lib_global_symbol != NULL)
-    return ops->lookup_lib_global_symbol (objfile, name, domain);
-  return {};
-}
-
 /* Lookup the value for a specific symbol from dynamic symbol table.  Look
    up symbol from ABFD.  MATCH_SYM is a callback function to determine
    whether to pick up a symbol.  DATA is the input of this callback

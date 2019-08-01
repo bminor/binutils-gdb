@@ -139,12 +139,6 @@ struct target_so_ops
 			      unsigned o_flags,
 			      gdb::unique_xmalloc_ptr<char> *temp_pathname);
 
-  /* Hook for looking up global symbols in a library-specific way.  */
-  struct block_symbol (*lookup_lib_global_symbol)
-    (struct objfile *objfile,
-     const char *name,
-     const domain_enum domain);
-
   /* Given two so_list objects, one from the GDB thread list
      and another from the list returned by current_sos, return 1
      if they represent the same library.
@@ -208,10 +202,5 @@ extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
 
 /* FIXME: gdbarch needs to control this variable.  */
 extern struct target_so_ops *current_target_so_ops;
-
-/* Handler for library-specific global symbol lookup in solib.c.  */
-struct block_symbol solib_global_lookup (struct objfile *objfile,
-					    const char *name,
-					    const domain_enum domain);
 
 #endif

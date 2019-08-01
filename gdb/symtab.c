@@ -2634,11 +2634,7 @@ lookup_global_or_static_symbol (const char *name,
       return result;
     }
 
-  /* Call library-specific lookup procedure.  */
-  if (objfile != NULL)
-    result = solib_global_lookup (objfile, name, domain);
-
-  /* If that didn't work go a global search (of global blocks, heh).  */
+  /* Do a global search (of global blocks, heh).  */
   if (result.symbol == NULL)
     {
       memset (&lookup_data, 0, sizeof (lookup_data));
