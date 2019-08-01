@@ -451,12 +451,20 @@ proc test_ld {file ifmain trynosym displacement} {
 	    # to slow processing of wildcard capturing long output
 	    set test "info files"
 	    set entrynohex ""
+	    set info_line [join [list \
+				     "\r\n" "\[\t\]" "0x\[0-9af\]+" " - " \
+				     "0x\[0-9af\]+" " @ " "0x\[0-9af\]+"  \
+				     " is " "\[^\r\n\]+"] ""]
 	    gdb_test_multiple $test $test {
 		-re "\r\n\[\t \]*Entry point:\[\t \]*0x(\[0-9a-f\]+)\r\n" {
 		    set entrynohex $expect_out(1,string)
 		    gdb_test_multiple "" $test {
 			-re "\r\n$gdb_prompt $" {
 			    pass $test
+			}
+			-re $info_line {
+			    # Avoid timeout with check-read1
+			    exp_continue
 			}
 		    }
 		}
