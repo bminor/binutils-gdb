@@ -1,3 +1,11 @@
+2019-08-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/char_enum.exp: Add regression tests.
+	* gdb.ada/char_enum/foo.adb (Char_Enum_Type): Use '_'
+	and '0'.
+	(Char, Gchar): Update.
+	* gdb.ada/char_enum/pck.ads (Global_Enum_Type): Use '+'.
+
 2019-08-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdb.python/python.exp: Expect a leading underscore on

@@ -1,3 +1,8 @@
+2019-08-15  Tom Tromey  <tromey@adacore.com>
+
+	* ada-exp.y (convert_char_literal): Handle "Q%c" encoding.
+	* ada-lang.c (ada_enum_name): Likewise.
+
 2019-08-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* python/lib/gdb/__init__.py (GdbOutputFile): Rename to have a

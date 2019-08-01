@@ -16,7 +16,7 @@
 with System;
 
 package Pck is
-   type Global_Enum_Type is ('X', 'Y', 'Z');
+   type Global_Enum_Type is ('x', 'Y', '+');
    procedure Do_Nothing (A : System.Address);
 end Pck;
 

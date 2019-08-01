@@ -9439,6 +9439,14 @@ ada_enum_name (const char *name)
           if (sscanf (name + 2, "%x", &v) != 1)
             return name;
         }
+      else if (((name[1] >= '0' && name[1] <= '9')
+		|| (name[1] >= 'a' && name[1] <= 'z'))
+	       && name[2] == '\0')
+	{
+	  GROW_VECT (result, result_len, 4);
+	  xsnprintf (result, result_len, "'%c'", name[1]);
+	  return result;
+	}
       else
         return name;
 

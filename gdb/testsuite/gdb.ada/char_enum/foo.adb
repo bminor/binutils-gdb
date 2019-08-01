@@ -16,9 +16,9 @@
 with Pck; use Pck;
 
 procedure Foo is
-   type Char_Enum_Type is ('A', 'B', 'C', 'D', 'E');
-   Char : Char_Enum_Type := 'D';
-   Gchar : Global_Enum_Type := 'Z';
+   type Char_Enum_Type is ('A', 'B', 'C', '_', '0');
+   Char : Char_Enum_Type := '_';
+   Gchar : Global_Enum_Type := '+';
 begin
    Do_Nothing (Char'Address);  -- STOP
 end Foo;
