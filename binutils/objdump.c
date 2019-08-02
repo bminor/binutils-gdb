@@ -3290,11 +3290,18 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 
   /* Only print out the name of non-default-named archive members.
      The name .ctf appears everywhere, even for things that aren't
-     really archives, so printing it out is liable to be confusing.  */
-  if (strcmp (name, ".ctf") != 0)
-    printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
+     really archives, so printing it out is liable to be confusing.
 
-  ctf_import (ctf, parent);
+     The parent, if there is one, is the default-owned archive member:
+     avoid importing it into itself.  (This does no harm, but looks
+     confusing.)  */
+
+  if (strcmp (name, ".ctf") != 0)
+    {
+      printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
+      ctf_import (ctf, parent);
+    }
+
   for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
       ctf_dump_state_t *s = NULL;
@@ -3323,7 +3330,7 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 static void
 dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 {
-  ctf_archive_t *ctfa, *parenta = NULL;
+  ctf_archive_t *ctfa, *parenta = NULL, *lookparent;
   bfd_byte *ctfdata, *parentdata = NULL;
   bfd_size_type ctfsize, parentsize;
   ctf_sect_t ctfsect;
@@ -3356,14 +3363,18 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 	  bfd_fatal (bfd_get_filename (abfd));
 	}
 
-      /* Assume that the applicable parent archive member is the default one.
-	 (This is what all known implementations are expected to do, if they
-	 put CTFs and their parents in archives together.)  */
-      if ((parent = ctf_arc_open_by_name (parenta, NULL, &err)) == NULL)
-	{
-	  non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
-	  bfd_fatal (bfd_get_filename (abfd));
-	}
+      lookparent = parenta;
+    }
+  else
+    lookparent = ctfa;
+
+  /* Assume that the applicable parent archive member is the default one.
+     (This is what all known implementations are expected to do, if they
+     put CTFs and their parents in archives together.)  */
+  if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
+    {
+      non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+      bfd_fatal (bfd_get_filename (abfd));
     }
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));

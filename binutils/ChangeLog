@@ -1,3 +1,10 @@
+2019-08-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (dump_ctf): Use the default CTF archive member as the
+	parent even when no parent section is specified.
+	(dump_ctf_archive_member): Only import from the parent
+	if this is not the default ".ctf" member.
+
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* Makefile.am (LIBCTF): Mention the .la file.
