@@ -1552,7 +1552,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   ctf_id_t tmp;
 
   const char *name;
-  uint32_t kind, flag, vlen;
+  uint32_t kind, forward_kind, flag, vlen;
 
   const ctf_type_t *src_tp, *dst_tp;
   ctf_bundle_t src, dst;
@@ -1576,7 +1576,11 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   flag = LCTF_INFO_ISROOT (src_fp, src_tp->ctt_info);
   vlen = LCTF_INFO_VLEN (src_fp, src_tp->ctt_info);
 
-  switch (kind)
+  forward_kind = kind;
+  if (kind == CTF_K_FORWARD)
+    forward_kind = src_tp->ctt_type;
+
+  switch (forward_kind)
     {
     case CTF_K_STRUCT:
       hp = dst_fp->ctf_structs;
@@ -1605,16 +1609,30 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
   /* If an identically named dst_type exists, fail with ECTF_CONFLICT
      unless dst_type is a forward declaration and src_type is a struct,
-     union, or enum (i.e. the definition of the previous forward decl).  */
+     union, or enum (i.e. the definition of the previous forward decl).
 
-  if (dst_type != CTF_ERR && dst_kind != kind
-      && (dst_kind != CTF_K_FORWARD
-	  || (kind != CTF_K_ENUM && kind != CTF_K_STRUCT
-	      && kind != CTF_K_UNION)))
+     We also allow addition in the opposite order (addition of a forward when a
+     struct, union, or enum already exists), which is a NOP and returns the
+     already-present struct, union, or enum.  */
+
+  if (dst_type != CTF_ERR && dst_kind != kind)
     {
-      ctf_dprintf ("Conflict for type %s: kinds differ, new: %i; "
-		   "old (ID %lx): %i\n", name, kind, dst_type, dst_kind);
-      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+      if (kind == CTF_K_FORWARD
+	  && (dst_kind == CTF_K_ENUM || dst_kind == CTF_K_STRUCT
+	      || dst_kind == CTF_K_UNION))
+	{
+	  ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
+	  return dst_type;
+	}
+
+      if (dst_kind != CTF_K_FORWARD
+	  || (kind != CTF_K_ENUM && kind != CTF_K_STRUCT
+	      && kind != CTF_K_UNION))
+	{
+	  ctf_dprintf ("Conflict for type %s: kinds differ, new: %i; "
+		       "old (ID %lx): %i\n", name, kind, dst_type, dst_kind);
+	  return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+	}
     }
 
   /* We take special action for an integer, float, or slice since it is
@@ -1924,10 +1942,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
     case CTF_K_FORWARD:
       if (dst_type == CTF_ERR)
-	{
-	  dst_type = ctf_add_forward (dst_fp, flag,
-				      name, CTF_K_STRUCT); /* Assume STRUCT. */
-	}
+	  dst_type = ctf_add_forward (dst_fp, flag, name, forward_kind);
       break;
 
     case CTF_K_TYPEDEF:
