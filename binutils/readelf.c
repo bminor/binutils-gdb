@@ -7415,11 +7415,6 @@ struct absaddr
   bfd_vma offset;
 };
 
-#define ABSADDR(a) \
-  ((a).section \
-   ? filedata->section_headers [(a).section].sh_addr + (a).offset \
-   : (a).offset)
-
 /* Find the nearest symbol at or below ADDR.  Returns the symbol
    name, if found, and the offset from the symbol to ADDR.  */
 
@@ -7565,8 +7560,21 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
       if (aux->info == NULL)
 	continue;
 
+      offset = tp->info.offset;
+      if (tp->info.section)
+	{
+	  if (tp->info.section >= filedata->file_header.e_shnum)
+	    {
+	      warn (_("Invalid section %u in table entry %ld\n"),
+		    tp->info.section, (long) (tp - aux->table));
+	      res = FALSE;
+	      continue;
+	    }
+	  offset += filedata->section_headers[tp->info.section].sh_addr;
+	}
+      offset -= aux->info_addr;
       /* PR 17531: file: 0997b4d1.  */
-      if ((ABSADDR (tp->info) - aux->info_addr) >= aux->info_size)
+      if (offset >= aux->info_size)
 	{
 	  warn (_("Invalid offset %lx in table entry %ld\n"),
 		(long) tp->info.offset, (long) (tp - aux->table));
@@ -7574,7 +7582,7 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 	  continue;
 	}
 
-      head = aux->info + (ABSADDR (tp->info) - aux->info_addr);
+      head = aux->info + offset;
       stamp = byte_get ((unsigned char *) head, sizeof (stamp));
 
       printf ("  v%u, flags=0x%lx (%s%s), len=%lu bytes\n",
