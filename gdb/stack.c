@@ -3275,7 +3275,7 @@ Options:\n\
   const auto frame_apply_opts
     = make_frame_apply_options_def_group (nullptr, nullptr);
 
-  static std::string frame_apply_cmd_help = gdb::option::build_help (N_("\
+  static std::string frame_apply_cmd_help = gdb::option::build_help (_("\
 Apply a command to a number of frames.\n\
 Usage: frame apply COUNT [OPTION]... COMMAND\n\
 With a negative COUNT argument, applies the command on outermost -COUNT frames.\n"
@@ -3288,7 +3288,7 @@ With a negative COUNT argument, applies the command on outermost -COUNT frames.\
 			&frame_cmd_list);
   set_cmd_completer_handle_brkchars (cmd, frame_apply_cmd_completer);
 
-  static std::string frame_apply_all_cmd_help = gdb::option::build_help (N_("\
+  static std::string frame_apply_all_cmd_help = gdb::option::build_help (_("\
 Apply a command to all frames.\n\
 \n\
 Usage: frame apply all [OPTION]... COMMAND\n"
@@ -3300,7 +3300,7 @@ Usage: frame apply all [OPTION]... COMMAND\n"
 		 &frame_apply_cmd_list);
   set_cmd_completer_handle_brkchars (cmd, frame_apply_all_cmd_completer);
 
-  static std::string frame_apply_level_cmd_help = gdb::option::build_help (N_("\
+  static std::string frame_apply_level_cmd_help = gdb::option::build_help (_("\
 Apply a command to a list of frames.\n\
 \n\
 Usage: frame apply level LEVEL... [OPTION]... COMMAND\n\
@@ -3407,7 +3407,7 @@ Usage: select-frame level LEVEL"),
     = make_backtrace_options_def_group (nullptr, nullptr, nullptr);
 
   static std::string backtrace_help
-    = gdb::option::build_help (N_("\
+    = gdb::option::build_help (_("\
 Print backtrace of all stack frames, or innermost COUNT frames.\n\
 Usage: backtrace [OPTION]... [QUALIFIER]... [COUNT | -COUNT]\n\
 \n\

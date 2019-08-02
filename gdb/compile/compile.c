@@ -971,7 +971,7 @@ Command to compile source code and inject it into the inferior."),
   const auto compile_opts = make_compile_options_def_group (nullptr);
 
   static const std::string compile_code_help
-    = gdb::option::build_help (N_("\
+    = gdb::option::build_help (_("\
 Compile, inject, and execute code.\n\
 \n\
 Usage: compile code [OPTION]... [CODE]\n\
@@ -994,7 +994,7 @@ indicate the end of the expression."),
   set_cmd_completer_handle_brkchars (c, compile_code_command_completer);
 
 static const std::string compile_file_help
-    = gdb::option::build_help (N_("\
+    = gdb::option::build_help (_("\
 Evaluate a file containing source code.\n\
 \n\
 Usage: compile file [OPTION].. [FILENAME]\n\
@@ -1011,7 +1011,7 @@ Options:\n\
   const auto compile_print_opts = make_value_print_options_def_group (nullptr);
 
   static const std::string compile_print_help
-    = gdb::option::build_help (N_("\
+    = gdb::option::build_help (_("\
 Evaluate EXPR by using the compiler and print result.\n\
 \n\
 Usage: compile print [[OPTION]... --] [/FMT] [EXPR]\n\

@@ -1,3 +1,10 @@
+2019-08-05  Tom Tromey  <tromey@adacore.com>
+
+	* compile/compile.c (_initialize_compile): Use _(), not N_().
+	* thread.c (_initialize_thread): Use _(), not N_().
+	* stack.c (_initialize_stack): Use _(), not N_().
+	* printcmd.c (_initialize_printcmd): Use _(), not N_().
+
 2019-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2read.c (struct dw2_symtab_iterator):

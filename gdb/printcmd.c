@@ -2848,7 +2848,7 @@ This may usually be abbreviated to simply \"set\"."),
 
   const auto print_opts = make_value_print_options_def_group (nullptr);
 
-  static const std::string print_help = gdb::option::build_help (N_("\
+  static const std::string print_help = gdb::option::build_help (_("\
 Print value of expression EXP.\n\
 Usage: print [[OPTION]... --] [/FMT] [EXP]\n\
 \n\

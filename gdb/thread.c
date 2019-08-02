@@ -2150,7 +2150,7 @@ Options:\n\
 
   const auto thread_apply_opts = make_thread_apply_options_def_group (nullptr);
 
-  static std::string thread_apply_help = gdb::option::build_help (N_("\
+  static std::string thread_apply_help = gdb::option::build_help (_("\
 Apply a command to a list of threads.\n\
 Usage: thread apply ID... [OPTION]... COMMAND\n\
 ID is a space-separated list of IDs of threads to apply COMMAND on.\n"
@@ -2166,7 +2166,7 @@ THREAD_APPLY_OPTION_HELP),
   const auto thread_apply_all_opts
     = make_thread_apply_all_options_def_group (nullptr, nullptr);
 
-  static std::string thread_apply_all_help = gdb::option::build_help (N_("\
+  static std::string thread_apply_all_help = gdb::option::build_help (_("\
 Apply a command to all threads.\n\
 \n\
 Usage: thread apply all [OPTION]... COMMAND\n"
