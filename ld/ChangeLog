@@ -1,3 +1,7 @@
+2019-08-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsie.s: Correct medium model ELF sequence.
+
 2019-08-01  Alan Modra  <amodra@gmail.com>
 
 	PR 24806

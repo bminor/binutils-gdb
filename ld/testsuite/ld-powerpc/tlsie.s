@@ -22,7 +22,7 @@ _start:
  .text
 
 #Medium model ELF
- addi 9,2,b@got@tprel@ha
+ addis 9,2,b@got@tprel@ha
  ld 10,b@got@tprel@l(9)
  add 3,10,b@tls
 
@@ -38,7 +38,7 @@ _start:
 .Ld:
  .quad d@tprel
  .text
- addi 9,2,d@got@tprel@ha
+ addis 9,2,d@got@tprel@ha
  ld 31,d@got@tprel@l(9)
  add 3,31,d@tls
  pld 30,d@got@tprel@pcrel
