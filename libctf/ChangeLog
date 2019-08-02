@@ -1,3 +1,9 @@
+2019-08-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-create.c (ctf_add_type): Look up and use the forwarded-to
+        type kind.  Allow forwards to unify with pre-existing structs/
+        unions/enums.
+
 2019-07-30  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_file_t) <ctf_link_cu_mappping>: New.
