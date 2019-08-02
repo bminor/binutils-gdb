@@ -11867,9 +11867,22 @@ static CORE_ADDR ada_unhandled_exception_name_addr_from_raise (void);
 
 /* The following exception support info structure describes how to
    implement exception catchpoints with the latest version of the
-   Ada runtime (as of 2007-03-06).  */
+   Ada runtime (as of 2019-08-??).  */
 
 static const struct exception_support_info default_exception_support_info =
+{
+  "__gnat_debug_raise_exception", /* catch_exception_sym */
+  "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
+  "__gnat_debug_raise_assert_failure", /* catch_assert_sym */
+  "__gnat_begin_handler_v1", /* catch_handlers_sym */
+  ada_unhandled_exception_name_addr
+};
+
+/* The following exception support info structure describes how to
+   implement exception catchpoints with an earlier version of the
+   Ada runtime (as of 2007-03-06) using v0 of the EH ABI.  */
+
+static const struct exception_support_info exception_support_info_v0 =
 {
   "__gnat_debug_raise_exception", /* catch_exception_sym */
   "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
@@ -11938,8 +11951,34 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   /* Make sure that the symbol we found corresponds to a function.  */
 
   if (SYMBOL_CLASS (sym) != LOC_BLOCK)
-    error (_("Symbol \"%s\" is not a function (class = %d)"),
-           SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+    {
+      error (_("Symbol \"%s\" is not a function (class = %d)"),
+	     SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+      return 0;
+    }
+
+  sym = standard_lookup (einfo->catch_handlers_sym, NULL, VAR_DOMAIN);
+  if (sym == NULL)
+    {
+      struct bound_minimal_symbol msym
+	= lookup_minimal_symbol (einfo->catch_handlers_sym, NULL, NULL);
+
+      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
+	error (_("Your Ada runtime appears to be missing some debugging "
+		 "information.\nCannot insert Ada exception catchpoint "
+		 "in this configuration."));
+
+      return 0;
+    }
+
+  /* Make sure that the symbol we found corresponds to a function.  */
+
+  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+    {
+      error (_("Symbol \"%s\" is not a function (class = %d)"),
+	     SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+      return 0;
+    }
 
   return 1;
 }
@@ -11963,6 +12002,13 @@ ada_exception_support_info_sniffer (void)
   if (ada_has_this_exception_support (&default_exception_support_info))
     {
       data->exception_info = &default_exception_support_info;
+      return;
+    }
+
+  /* Try the v0 exception suport info.  */
+  if (ada_has_this_exception_support (&exception_support_info_v0))
+    {
+      data->exception_info = &exception_support_info_v0;
       return;
     }
 

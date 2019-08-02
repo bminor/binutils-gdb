@@ -1,3 +1,11 @@
+2019-08-02  Alexandre Oliva <oliva@adacore.com>
+
+	* ada-lang.c (exception_support_info_v0): Renamed from...
+	(default_exception_support_info): ... this.  Create new
+	definition for v1.
+	(ada_has_this_exception_support): Look up catch_handlers_sym.
+	(ada_exception_support_info_sniffer): Try v0 after default.
+
 2019-08-01  Tom Tromey  <tromey@adacore.com>
 
 	* ia64-libunwind-tdep.h (struct libunwind_descr): Include
