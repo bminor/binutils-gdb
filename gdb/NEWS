@@ -144,6 +144,12 @@ eval
   This allows to do formatted printing of strings without having
   a running inferior, or when debugging a core dump.
 
+info sources [-dirname | -basename] [--] [REGEXP]
+  This command has now optional arguments to only print the files
+  whose names match REGEXP.  The arguments -dirname and -basename
+  allow to restrict matching respectively to the dirname and basename
+  parts of the files.
+
 show style
   The "show style" and its subcommands are now styling
   a style name in their output using its own style, to help
@@ -224,6 +230,9 @@ maint show test-options-completion-result
 
       -past-main [on|off]
       -past-entry [on|off]
+
+  ** The new "info sources" options -dirname and -basename options
+     are using the standard '-OPT' infrastructure.
 
    All options above can also be abbreviated.  The argument of boolean
    (on/off) options can be 0/1 too, and also the argument is assumed

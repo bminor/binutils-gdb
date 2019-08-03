@@ -18583,6 +18583,16 @@ Print the names of all source files in your program for which there is
 debugging information, organized into two lists: files whose symbols
 have already been read, and files whose symbols will be read when needed.
 
+@item info sources [-dirname | -basename] [--] [@var{regexp}]
+Like @samp{info sources}, but only print the names of the files
+matching the provided @var{regexp}.
+By default, the @var{regexp} is used to match anywhere in the filename.
+If @code{-dirname}, only files having a dirname matching @var{regexp} are shown.
+If  @code{-basename}, only files having a basename matching @var{regexp}
+are shown.
+The matching is case-sensitive, except on operating systems that
+have case-insensitive filesystem (e.g., MS-Windows).
+
 @kindex info functions
 @item info functions [-q]
 Print the names and data types of all defined functions.
