@@ -314,13 +314,14 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  struct value *v = NULL;
-
 		  TRY
 		    {
-		      v = value_static_field (type, i);
-		    }
+		      struct value *v = value_static_field (type, i);
 
+		      cp_print_static_field (TYPE_FIELD_TYPE (type, i),
+					     v, stream, recurse + 1,
+					     options);
+		    }
 		  CATCH (ex, RETURN_MASK_ERROR)
 		    {
 		      fprintf_filtered (stream,
@@ -328,10 +329,6 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					ex.message);
 		    }
 		  END_CATCH
-
-		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
-					 v, stream, recurse + 1,
-					 options);
 		}
 	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{

@@ -1,3 +1,9 @@
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
+	PR c++/20020:
+	* cp-valprint.c (cp_print_value_fields): Call
+	cp_print_static_field inside "try".
+
 2019-06-10  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/24545
