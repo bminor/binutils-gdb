@@ -1,3 +1,15 @@
+2019-08-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (lookup_static_symbol): Call the new function (and move
+	it down to be next to lookup_global_symbol).
+	(struct global_sym_lookup_data): Add block_enum member and rename to...
+	(struct global_or_static_sym_lookup_data): ...this.
+	(lookup_symbol_global_iterator_cb): Pass block_index instead of
+	GLOBAL_BLOCK to lookup_symbol_in_objfile and rename to...
+	(lookup_symbol_global_or_static_iterator_cb): ...this.
+	(lookup_global_or_static_symbol): New function.
+	(lookup_global_symbol): Call new function.
+
 2019-08-26  Tom de Vries  <tdevries@suse.de>
 
 	PR c++/24852

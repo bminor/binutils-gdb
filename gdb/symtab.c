@@ -2566,47 +2566,9 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
   return result;
 }
 
-/* See symtab.h.  */
-
-struct block_symbol
-lookup_static_symbol (const char *name, const domain_enum domain)
-{
-  struct symbol_cache *cache = get_symbol_cache (current_program_space);
-  struct block_symbol result;
-  struct block_symbol_cache *bsc;
-  struct symbol_cache_slot *slot;
-
-  /* Lookup in STATIC_BLOCK is not current-objfile-dependent, so just pass
-     NULL for OBJFILE_CONTEXT.  */
-  result = symbol_cache_lookup (cache, NULL, STATIC_BLOCK, name, domain,
-				&bsc, &slot);
-  if (result.symbol != NULL)
-    {
-      if (SYMBOL_LOOKUP_FAILED_P (result))
-	return {};
-      return result;
-    }
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      result = lookup_symbol_in_objfile (objfile, STATIC_BLOCK, name, domain);
-      if (result.symbol != NULL)
-	{
-	  /* Still pass NULL for OBJFILE_CONTEXT here.  */
-	  symbol_cache_mark_found (bsc, slot, NULL, result.symbol,
-				   result.block);
-	  return result;
-	}
-    }
-
-  /* Still pass NULL for OBJFILE_CONTEXT here.  */
-  symbol_cache_mark_not_found (bsc, slot, NULL, name, domain);
-  return {};
-}
-
 /* Private data to be used with lookup_symbol_global_iterator_cb.  */
 
-struct global_sym_lookup_data
+struct global_or_static_sym_lookup_data
 {
   /* The name of the symbol we are searching for.  */
   const char *name;
@@ -2614,27 +2576,30 @@ struct global_sym_lookup_data
   /* The domain to use for our search.  */
   domain_enum domain;
 
+  /* The block index in which to search.  */
+  enum block_enum block_index;
+
   /* The field where the callback should store the symbol if found.
      It should be initialized to {NULL, NULL} before the search is started.  */
   struct block_symbol result;
 };
 
 /* A callback function for gdbarch_iterate_over_objfiles_in_search_order.
-   It searches by name for a symbol in the GLOBAL_BLOCK of the given
-   OBJFILE.  The arguments for the search are passed via CB_DATA,
-   which in reality is a pointer to struct global_sym_lookup_data.  */
+   It searches by name for a symbol in the block given by BLOCK_INDEX of the
+   given OBJFILE.  The arguments for the search are passed via CB_DATA, which
+   in reality is a pointer to struct global_or_static_sym_lookup_data.  */
 
 static int
-lookup_symbol_global_iterator_cb (struct objfile *objfile,
-				  void *cb_data)
+lookup_symbol_global_or_static_iterator_cb (struct objfile *objfile,
+					    void *cb_data)
 {
-  struct global_sym_lookup_data *data =
-    (struct global_sym_lookup_data *) cb_data;
+  struct global_or_static_sym_lookup_data *data =
+    (struct global_or_static_sym_lookup_data *) cb_data;
 
   gdb_assert (data->result.symbol == NULL
 	      && data->result.block == NULL);
 
-  data->result = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK,
+  data->result = lookup_symbol_in_objfile (objfile, data->block_index,
 					   data->name, data->domain);
 
   /* If we found a match, tell the iterator to stop.  Otherwise,
@@ -2642,25 +2607,28 @@ lookup_symbol_global_iterator_cb (struct objfile *objfile,
   return (data->result.symbol != NULL);
 }
 
-/* See symtab.h.  */
+/* This function contains the common code of lookup_{global,static}_symbol.
+   OBJFILE is only used if BLOCK_INDEX is GLOBAL_SCOPE, in which case it is
+   the objfile to start the lookup in.  */
 
-struct block_symbol
-lookup_global_symbol (const char *name,
-		      const struct block *block,
-		      const domain_enum domain)
+static struct block_symbol
+lookup_global_or_static_symbol (const char *name,
+				enum block_enum block_index,
+				struct objfile *objfile,
+				const domain_enum domain)
 {
   struct symbol_cache *cache = get_symbol_cache (current_program_space);
   struct block_symbol result;
-  struct objfile *objfile;
-  struct global_sym_lookup_data lookup_data;
+  struct global_or_static_sym_lookup_data lookup_data;
   struct block_symbol_cache *bsc;
   struct symbol_cache_slot *slot;
 
-  objfile = lookup_objfile_from_block (block);
+  gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
+  gdb_assert (objfile == nullptr || block_index == GLOBAL_BLOCK);
 
   /* First see if we can find the symbol in the cache.
      This works because we use the current objfile to qualify the lookup.  */
-  result = symbol_cache_lookup (cache, objfile, GLOBAL_BLOCK, name, domain,
+  result = symbol_cache_lookup (cache, objfile, block_index, name, domain,
 				&bsc, &slot);
   if (result.symbol != NULL)
     {
@@ -2678,10 +2646,11 @@ lookup_global_symbol (const char *name,
     {
       memset (&lookup_data, 0, sizeof (lookup_data));
       lookup_data.name = name;
+      lookup_data.block_index = block_index;
       lookup_data.domain = domain;
       gdbarch_iterate_over_objfiles_in_search_order
 	(objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch (),
-	 lookup_symbol_global_iterator_cb, &lookup_data, objfile);
+	 lookup_symbol_global_or_static_iterator_cb, &lookup_data, objfile);
       result = lookup_data.result;
     }
 
@@ -2691,6 +2660,25 @@ lookup_global_symbol (const char *name,
     symbol_cache_mark_not_found (bsc, slot, objfile, name, domain);
 
   return result;
+}
+
+/* See symtab.h.  */
+
+struct block_symbol
+lookup_static_symbol (const char *name, const domain_enum domain)
+{
+  return lookup_global_or_static_symbol (name, STATIC_BLOCK, nullptr, domain);
+}
+
+/* See symtab.h.  */
+
+struct block_symbol
+lookup_global_symbol (const char *name,
+		      const struct block *block,
+		      const domain_enum domain)
+{
+  struct objfile *objfile = lookup_objfile_from_block (block);
+  return lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
 }
 
 int
