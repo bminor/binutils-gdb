@@ -217,7 +217,9 @@ proc test_gdb_complete_cmd_multiple { cmd_prefix completion_word completion_list
 # Test that completing LINE completes to nothing.
 
 proc test_gdb_complete_none { input_line } {
-    test_gdb_complete_tab_none $input_line
+    if { [readline_is_used] } {
+	test_gdb_complete_tab_none $input_line
+    }
     test_gdb_complete_cmd_none $input_line
 }
 
@@ -239,7 +241,9 @@ proc test_gdb_complete_none { input_line } {
 
 proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "} {max_completions 0}} {
     set append_char_re [string_to_regexp $append_char]
-    test_gdb_complete_tab_unique $input_line $complete_line_re $append_char_re
+    if { [readline_is_used] } {
+	test_gdb_complete_tab_unique $input_line $complete_line_re $append_char_re
+    }
 
     # Trim INPUT_LINE and COMPLETE LINE, for the case we're completing
     # a command with leading whitespace.  Leading command whitespace
@@ -282,7 +286,9 @@ proc test_gdb_complete_multiple {
   cmd_prefix completion_word add_completed_line completion_list
   {start_quote_char ""} {end_quote_char ""} {max_completions 0}
 } {
-    test_gdb_complete_tab_multiple "$cmd_prefix$completion_word" $add_completed_line $completion_list $max_completions
+    if { [readline_is_used] } {
+      test_gdb_complete_tab_multiple "$cmd_prefix$completion_word" $add_completed_line $completion_list $max_completions
+    }
     test_gdb_complete_cmd_multiple $cmd_prefix $completion_word $completion_list $start_quote_char $end_quote_char $max_completions
 }
 

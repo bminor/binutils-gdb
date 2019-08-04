@@ -1,3 +1,10 @@
+2019-08-04  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/completion-support.exp (test_gdb_complete_none): Skip
+	tab completion tests if no readline support.
+	(test_gdb_complete_unique_re): Likewise.
+	(test_gdb_complete_multiple): Likewise.
+
 2019-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/info_sources.exp: New file.
