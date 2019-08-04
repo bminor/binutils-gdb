@@ -23,7 +23,6 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include "readline/readline.h"
 
 #include <windows.h>
 
@@ -166,14 +165,6 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	    num_ready++;
 	}
     }
-
-  /* With multi-threaded SIGINT handling, there is a race between the
-     readline signal handler and GDB.  It may still be in
-     rl_prep_terminal in another thread.  Do not return until it is
-     done; we can check the state here because we never longjmp from
-     signal handlers on Windows.  */
-  while (RL_ISSTATE (RL_STATE_SIGHANDLER))
-    Sleep (1);
 
   return num_ready;
 }
