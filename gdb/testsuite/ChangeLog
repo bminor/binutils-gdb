@@ -1,5 +1,9 @@
 2019-08-04  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.server/reconnect-ctrl-c.exp: Skip if nointerrupts.
+
+2019-08-04  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* lib/completion-support.exp (test_gdb_complete_none): Skip
 	tab completion tests if no readline support.
 	(test_gdb_complete_unique_re): Likewise.
