@@ -1,3 +1,9 @@
+2019-08-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 24829
+	* readelf.c (apply_relocations): Catch potential integer overflow
+	whilst checking reloc location against section size.
+
 2019-08-02  Alan Modra  <amodra@gmail.com>
 
 	PR 24871

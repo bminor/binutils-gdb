@@ -13366,7 +13366,7 @@ apply_relocations (Filedata *                 filedata,
 	    }
 
 	  rloc = start + rp->r_offset;
-	  if ((rloc + reloc_size) > end || (rloc < start))
+	  if (rloc >= end || (rloc + reloc_size) > end || (rloc < start))
 	    {
 	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
 		    (unsigned long) rp->r_offset,
