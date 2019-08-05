@@ -1,3 +1,10 @@
+2019-08-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/24863
+	* gdb.mi/list-thread-groups-available.exp: Increase timeout for
+	-list-thread-groups --available test when running under
+	check-read1.
+
 2019-08-05  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24863
