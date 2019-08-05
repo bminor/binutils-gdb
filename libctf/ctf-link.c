@@ -348,10 +348,15 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
       err = ctf_errno (arg->out_fp);
       if (err != ECTF_CONFLICT)
 	{
-	  ctf_dprintf ("Cannot link type %lx from archive member %s, input file %s "
-		       "into output link: %s\n", type, arg->arcname, arg->file_name,
-		       ctf_errmsg (err));
-	  return -1;
+	  if (err != ECTF_NONREPRESENTABLE)
+	    ctf_dprintf ("Cannot link type %lx from archive member %s, input file %s "
+			 "into output link: %s\n", type, arg->arcname, arg->file_name,
+			 ctf_errmsg (err));
+          /* We must ignore this problem or we end up losing future types, then
+             trying to link the variables in, then exploding.  Better to link as
+             much as possible.  XXX when we add a proper link warning
+             infrastructure, we should report the error here!  */
+	  return 0;
 	}
       ctf_set_errno (arg->out_fp, 0);
     }
@@ -364,6 +369,11 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
     return 0;
 
   err = ctf_errno (per_cu_out_fp);
+  if (err != ECTF_NONREPRESENTABLE)
+    ctf_dprintf ("Cannot link type %lx from CTF archive member %s, input file %s "
+                 "into output per-CU CTF archive member %s: %s: skipped\n", type,
+                 arg->arcname, arg->file_name, arg->arcname,
+                 ctf_errmsg (err));
   if (err == ECTF_CONFLICT)
       /* Conflicts are possible at this stage only if a non-ld user has combined
          multiple TUs into a single output dictionary.  Even in this case we do not

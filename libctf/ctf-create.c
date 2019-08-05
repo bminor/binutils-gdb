@@ -1439,6 +1439,11 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
   if (ctf_lookup_by_id (&tmp, ref) == NULL)
     return -1;			/* errno is set for us.  */
 
+  /* Make sure this type is representable.  */
+  if ((ctf_type_resolve (fp, ref) == CTF_ERR)
+      && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
+    return -1;
+
   if ((dvd = ctf_alloc (sizeof (ctf_dvdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
@@ -1570,6 +1575,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
   if ((src_tp = ctf_lookup_by_id (&src_fp, src_type)) == NULL)
     return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
+
+  if ((ctf_type_resolve (src_fp, src_type) == CTF_ERR)
+      && (ctf_errno (src_fp) == ECTF_NONREPRESENTABLE))
+    return (ctf_set_errno (dst_fp, ECTF_NONREPRESENTABLE));
 
   name = ctf_strptr (src_fp, src_tp->ctt_name);
   kind = LCTF_INFO_KIND (src_fp, src_tp->ctt_info);
@@ -1906,13 +1915,19 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
 	/* Make a final pass through the members changing each dmd_type (a
 	   src_fp type) to an equivalent type in dst_fp.  We pass through all
-	   members, leaving any that fail set to CTF_ERR.  */
+	   members, leaving any that fail set to CTF_ERR, unless they fail
+	   because they are marking a member of type not representable in this
+	   version of CTF, in which case we just want to silently omit them:
+	   no consumer can do anything with them anyway.  */
 	for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
 	     dmd != NULL; dmd = ctf_list_next (dmd))
 	  {
 	    if ((dmd->dmd_type = ctf_add_type (dst_fp, src_fp,
 					       dmd->dmd_type)) == CTF_ERR)
-	      errs++;
+	      {
+		if (ctf_errno (dst_fp) != ECTF_NONREPRESENTABLE)
+		  errs++;
+	      }
 	  }
 
 	if (errs)

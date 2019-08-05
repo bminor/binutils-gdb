@@ -203,7 +203,8 @@ enum
    ECTF_DUMPSECTUNKNOWN,	/* Unknown section number in dump.  */
    ECTF_DUMPSECTCHANGED,	/* Section changed in middle of dump.  */
    ECTF_NOTYET,			/* Feature not yet implemented.  */
-   ECTF_INTERNAL		/* Internal error in link.  */
+   ECTF_INTERNAL,		/* Internal error in link.  */
+   ECTF_NONREPRESENTABLE	/* Type not representable in CTF.  */
   };
 
 /* The CTF data model is inferred to be the caller's data model or the data

@@ -70,7 +70,8 @@ static const char *const _ctf_errlist[] = {
   "Unknown section number in dump",		     /* ECTF_DUMPSECTUNKNOWN */
   "Section changed in middle of dump",		     /* ECTF_DUMPSECTCHANGED */
   "Feature not yet implemented",		     /* ECTF_NOTYET */
-  "Internal error in link"			     /* ECTF_INTERNAL */
+  "Internal error in link",			     /* ECTF_INTERNAL */
+  "Type not representable in CTF"		     /* ECTF_NONREPRESENTABLE */
 };
 
 static const int _ctf_nerr = sizeof (_ctf_errlist) / sizeof (_ctf_errlist[0]);

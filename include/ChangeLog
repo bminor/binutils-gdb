@@ -1,3 +1,7 @@
+2019-08-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NONREPRESENTABLE): New.
+
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h: Note the instability of the ctf_link interfaces.

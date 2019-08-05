@@ -200,6 +200,9 @@ ctf_type_resolve (ctf_file_t *fp, ctf_id_t type)
   ctf_file_t *ofp = fp;
   const ctf_type_t *tp;
 
+  if (type == 0)
+    return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
+
   while ((tp = ctf_lookup_by_id (&fp, type)) != NULL)
     {
       switch (LCTF_INFO_KIND (fp, tp->ctt_info))
@@ -220,6 +223,8 @@ ctf_type_resolve (ctf_file_t *fp, ctf_id_t type)
 	default:
 	  return type;
 	}
+      if (type == 0)
+	return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
     }
 
   return CTF_ERR;		/* errno is set for us.  */
