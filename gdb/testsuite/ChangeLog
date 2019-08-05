@@ -1,3 +1,7 @@
+2019-08-05  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (tcl_version_at_least): Fix typo.
+
 2019-08-04  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.server/reconnect-ctrl-c.exp: Skip if nointerrupts.

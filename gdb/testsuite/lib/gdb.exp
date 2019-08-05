@@ -1111,7 +1111,7 @@ proc tcl_version_at_least { major minor } {
     if { $tcl_version_major > $major } {
         return 1
     } elseif { $tcl_version_major == $major \
-		   && $tcl_version_major >= $minor } {
+		   && $tcl_version_minor >= $minor } {
         return 1
     } else {
         return 0
