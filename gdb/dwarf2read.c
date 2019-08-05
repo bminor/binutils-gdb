@@ -3881,11 +3881,9 @@ struct dw2_symtab_iterator
 {
   /* The dwarf2_per_objfile owning the CUs we are iterating on.  */
   struct dwarf2_per_objfile *dwarf2_per_objfile;
-  /* If non-zero, only look for symbols that match BLOCK_INDEX.  */
-  int want_specific_block;
-  /* One of GLOBAL_BLOCK or STATIC_BLOCK.
-     Unused if !WANT_SPECIFIC_BLOCK.  */
-  int block_index;
+  /* If set, only look for symbols that match that block.  Valid values are
+     GLOBAL_BLOCK and STATIC_BLOCK.  */
+  gdb::optional<int> block_index;
   /* The kind of symbol we're looking for.  */
   domain_enum domain;
   /* The list of CUs from the index entry of the symbol,
@@ -3902,20 +3900,16 @@ struct dw2_symtab_iterator
   int global_seen;
 };
 
-/* Initialize the index symtab iterator ITER.
-   If WANT_SPECIFIC_BLOCK is non-zero, only look for symbols
-   in block BLOCK_INDEX.  Otherwise BLOCK_INDEX is ignored.  */
+/* Initialize the index symtab iterator ITER.  */
 
 static void
 dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      struct dwarf2_per_objfile *dwarf2_per_objfile,
-		      int want_specific_block,
-		      int block_index,
+		      gdb::optional<int> block_index,
 		      domain_enum domain,
 		      const char *name)
 {
   iter->dwarf2_per_objfile = dwarf2_per_objfile;
-  iter->want_specific_block = want_specific_block;
   iter->block_index = block_index;
   iter->domain = domain;
   iter->next = 0;
@@ -3945,9 +3939,6 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
       offset_type cu_index_and_attrs =
 	MAYBE_SWAP (iter->vec[iter->next + 1]);
       offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
-      int want_static = iter->block_index != GLOBAL_BLOCK;
-      /* This value is only valid for index versions >= 7.  */
-      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
       gdb_index_symbol_kind symbol_kind =
 	GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
       /* Only check the symbol attributes if they're present.
@@ -3977,9 +3968,16 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
       /* Check static vs global.  */
       if (attrs_valid)
 	{
-	  if (iter->want_specific_block
-	      && want_static != is_static)
-	    continue;
+	  bool is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
+
+	  if (iter->block_index.has_value ())
+	    {
+	      bool want_static = *iter->block_index == STATIC_BLOCK;
+
+	      if (is_static != want_static)
+		continue;
+	    }
+
 	  /* Work around gold/15646.  */
 	  if (!is_static && iter->global_seen)
 	    continue;
@@ -4032,7 +4030,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
   struct dw2_symtab_iterator iter;
   struct dwarf2_per_cu_data *per_cu;
 
-  dw2_symtab_iter_init (&iter, dwarf2_per_objfile, 1, block_index, domain, name);
+  dw2_symtab_iter_init (&iter, dwarf2_per_objfile, block_index, domain, name);
 
   while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
     {
@@ -4115,9 +4113,7 @@ dw2_expand_symtabs_for_function (struct objfile *objfile,
   struct dw2_symtab_iterator iter;
   struct dwarf2_per_cu_data *per_cu;
 
-  /* Note: It doesn't matter what we pass for block_index here.  */
-  dw2_symtab_iter_init (&iter, dwarf2_per_objfile, 0, GLOBAL_BLOCK, VAR_DOMAIN,
-			func_name);
+  dw2_symtab_iter_init (&iter, dwarf2_per_objfile, {}, VAR_DOMAIN, func_name);
 
   while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
     dw2_instantiate_symtab (per_cu, false);
@@ -5661,14 +5657,11 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 class dw2_debug_names_iterator
 {
 public:
-  /* If WANT_SPECIFIC_BLOCK is true, only look for symbols in block
-     BLOCK_INDEX.  Otherwise BLOCK_INDEX is ignored.  */
   dw2_debug_names_iterator (const mapped_debug_names &map,
-			    bool want_specific_block,
-			    block_enum block_index, domain_enum domain,
+			    gdb::optional<block_enum> block_index,
+			    domain_enum domain,
 			    const char *name)
-    : m_map (map), m_want_specific_block (want_specific_block),
-      m_block_index (block_index), m_domain (domain),
+    : m_map (map), m_block_index (block_index), m_domain (domain),
       m_addr (find_vec_in_debug_names (map, name))
   {}
 
@@ -5691,13 +5684,9 @@ private:
   /* The internalized form of .debug_names.  */
   const mapped_debug_names &m_map;
 
-  /* If true, only look for symbols that match BLOCK_INDEX.  */
-  const bool m_want_specific_block = false;
-
-  /* One of GLOBAL_BLOCK or STATIC_BLOCK.
-     Unused if !WANT_SPECIFIC_BLOCK - FIRST_LOCAL_BLOCK is an invalid
-     value.  */
-  const block_enum m_block_index = FIRST_LOCAL_BLOCK;
+  /* If set, only look for symbols that match that block.  Valid values are
+     GLOBAL_BLOCK and STATIC_BLOCK.  */
+  const gdb::optional<block_enum> m_block_index;
 
   /* The kind of symbol we're looking for.  */
   const domain_enum m_domain = UNDEF_DOMAIN;
@@ -5854,8 +5843,7 @@ dw2_debug_names_iterator::next ()
       return NULL;
     }
   const mapped_debug_names::index_val &indexval = indexval_it->second;
-  bool have_is_static = false;
-  bool is_static;
+  gdb::optional<bool> is_static;
   dwarf2_per_cu_data *per_cu = NULL;
   for (const mapped_debug_names::index_val::attr &attr : indexval.attr_vec)
     {
@@ -5907,13 +5895,11 @@ dw2_debug_names_iterator::next ()
 	case DW_IDX_GNU_internal:
 	  if (!m_map.augmentation_is_gdb)
 	    break;
-	  have_is_static = true;
 	  is_static = true;
 	  break;
 	case DW_IDX_GNU_external:
 	  if (!m_map.augmentation_is_gdb)
 	    break;
-	  have_is_static = true;
 	  is_static = false;
 	  break;
 	}
@@ -5924,11 +5910,11 @@ dw2_debug_names_iterator::next ()
     goto again;
 
   /* Check static vs global.  */
-  if (have_is_static)
+  if (is_static.has_value () && m_block_index.has_value ())
     {
-      const bool want_static = m_block_index != GLOBAL_BLOCK;
-      if (m_want_specific_block && want_static != is_static)
-	goto again;
+	const bool want_static = *m_block_index == STATIC_BLOCK;
+	if (want_static != *is_static)
+	  goto again;
     }
 
   /* Match dw2_symtab_iter_next, symbol_kind
@@ -6027,8 +6013,7 @@ dw2_debug_names_lookup_symbol (struct objfile *objfile, int block_index_int,
     }
   const auto &map = *mapp;
 
-  dw2_debug_names_iterator iter (map, true /* want_specific_block */,
-				 block_index, domain, name);
+  dw2_debug_names_iterator iter (map, block_index, domain, name);
 
   struct compunit_symtab *stab_best = NULL;
   struct dwarf2_per_cu_data *per_cu;
@@ -6091,9 +6076,7 @@ dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
     {
       const mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
 
-      /* Note: It doesn't matter what we pass for block_index here.  */
-      dw2_debug_names_iterator iter (map, false /* want_specific_block */,
-				     GLOBAL_BLOCK, VAR_DOMAIN, func_name);
+      dw2_debug_names_iterator iter (map, {}, VAR_DOMAIN, func_name);
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)

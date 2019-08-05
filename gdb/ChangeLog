@@ -1,3 +1,28 @@
+2019-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2read.c (struct dw2_symtab_iterator):
+	<want_specific_block>: Remove.
+	<block_index>: Change type to gdb::optional.
+	(dw2_symtab_iter_init): Remove WANT_SPECIFIC_BLOCK parameter,
+	change type of BLOCK_INDEX parameter to gdb::optional.
+	(dw2_symtab_iter_next): Re-write in function of gdb::optional.
+	(dw2_lookup_symbol): Don't pass argument for
+	WANT_SPECIFIC_BLOCK.
+	(dw2_expand_symtabs_for_function): Don't pass argument for
+	WANT_SPECIFIC_BLOCK, pass empty optional for BLOCK_INDEX.
+	(class dw2_debug_names_iterator)
+	<dw2_debug_names_iterator>: Remove WANT_SPECIFIC_BLOCK
+	parameter, change BLOCK_INDEX type to gdb::optional.
+	<m_want_specific_block>: Remove.
+	<m_block_index>: Change type to gdb::optional.
+	(dw2_debug_names_iterator::next): Change type of IS_STATIC to
+	gdb::optional.  Re-write in function of gdb::optional.
+	(dw2_debug_names_lookup_symbol): Don't pass argument for
+	WANT_SPECIFIC_BLOCK.
+	(dw2_debug_names_expand_symtabs_for_function): Don't pass
+	argument for WANT_SPECIFIC_BLOCK, pass empty optional for
+	BLOCK_INDEX.
+
 2019-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
         * NEWS: Mention changes to "info sources" command.
