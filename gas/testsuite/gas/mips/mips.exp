@@ -2093,4 +2093,5 @@ if { [istarget mips*-*-vxworks*] } {
     } else {
 	run_dump_test "pr14798"
     }
+    run_dump_test "insn-isa-mode"
 }

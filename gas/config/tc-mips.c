@@ -4441,9 +4441,10 @@ mips_move_labels (struct insn_label_list *labels, bfd_boolean text_p)
       gas_assert (S_GET_SEGMENT (l->label) == now_seg);
       symbol_set_frag (l->label, frag_now);
       val = (valueT) frag_now_fix ();
-      /* MIPS16/microMIPS text labels are stored as odd.  */
+      /* MIPS16/microMIPS text labels are stored as odd.
+	 We just carry the ISA mode bit forward.  */
       if (text_p && HAVE_CODE_COMPRESSION)
-	++val;
+	val |= (S_GET_VALUE (l->label) & 0x1);
       S_SET_VALUE (l->label, val);
     }
 }
@@ -16218,7 +16219,7 @@ mips_align (int to, int *fill, struct insn_label_list *labels)
   else
     frag_align (to, fill ? *fill : 0, 0);
   record_alignment (now_seg, to);
-  mips_move_labels (labels, FALSE);
+  mips_move_labels (labels, subseg_text_p (now_seg));
 }
 
 /* Align to a given power of two.  .align 0 turns off the automatic

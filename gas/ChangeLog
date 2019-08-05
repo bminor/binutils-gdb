@@ -1,3 +1,13 @@
+2019-08-19  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* config/tc-mips.c (mips_move_labels): Retain ISA mode bit
+	when moving labels in text segments.
+	(mips_align): Indicate text mode when aligning labels in
+	text segments.
+	* gas/testsuite/gas/mips/insn-isa-mode.d: New test.
+	* gas/testsuite/gas/mips/insn-isa-mode.s: New test source.
+	* gas/testsuite/gas/mips/mips.exp: Run the new test.
+
 2019-08-19  Barnaby Wilks  <Barnaby.Wilks@arm.com>
 
 	* config/tc-arm.c (md_atof): Add precision check.  Formatting.
