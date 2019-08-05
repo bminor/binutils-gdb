@@ -3019,25 +3019,25 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VQDMLAH.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQDMLAH,
-   0xee000e60, 0xef811f70,
+   0xee000e60, 0xff811f70,
    "vqdmlah%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQRDMLAH.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQRDMLAH,
-   0xee000e40, 0xef811f70,
+   0xee000e40, 0xff811f70,
    "vqrdmlah%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQDMLASH.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQDMLASH,
-   0xee001e60, 0xef811f70,
+   0xee001e60, 0xff811f70,
    "vqdmlash%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQRDMLASH.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQRDMLASH,
-   0xee001e40, 0xef811f70,
+   0xee001e40, 0xff811f70,
    "vqrdmlash%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQDMLSDH.  */

@@ -17900,7 +17900,7 @@ do_mve_vqdmlah (void)
 {
   enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
   struct neon_type_el et
-    = neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+    = neon_check_type (3, rs, N_EQK, N_EQK, N_S_32 | N_KEY);
 
   if (inst.cond > COND_ALWAYS)
     inst.pred_insn_type = INSIDE_VPT_INSN;
@@ -18190,7 +18190,7 @@ do_neon_qrdmlah (void)
     {
       enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
       struct neon_type_el et
-	= neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+	= neon_check_type (3, rs, N_EQK, N_EQK, N_S_32 | N_KEY);
 
       NEON_ENCODE (INTEGER, inst);
       mve_encode_qqr (et.size, et.type == NT_unsigned, 0);

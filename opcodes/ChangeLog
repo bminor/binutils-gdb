@@ -1,3 +1,8 @@
+2019-08-05  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* arm-dis.c: Only accept signed variants of VQ(R)DMLAH and VQ(R)DMLASH
+	instructions.
+
 2019-07-30  Mel Chen <mel.chen@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes): Set frsr, fssr, frcsr, fscsr, frrm,

@@ -1,3 +1,18 @@
+2019-08-05  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/tc-arm.c (do_mve_vqdmlah): Use N_S_32 macro.
+	(do_neon_qrdmlah): Use N_S_32 macro.
+	* testsuite/gas/arm/mve-vqdmlah-bad.d: New test.
+	* testsuite/gas/arm/mve-vqdmlah-bad.l: New test.
+	* testsuite/gas/arm/mve-vqdmlah-bad.s: New test.
+	* testsuite/gas/arm/mve-vqdmlah.d: Remove unsigned instruction tests.
+	* testsuite/gas/arm/mve-vqdmlah.s: Remove unsigned instruction tests.
+	* testsuite/gas/arm/mve-vqdmlash-bad.d: New test.
+	* testsuite/gas/arm/mve-vqdmlash-bad.l: New test.
+	* testsuite/gas/arm/mve-vqdmlash-bad.s: New test.
+	* testsuite/gas/arm/mve-vqdmlash.d: Remove unsigned instruction tests.
+	* testsuite/gas/arm/mve-vqdmlash.s: Remove unsigned instruction tests.
+
 2019-07-30  Mel Chen <mel.chen@sifive.com>
 
 	* testsuite/gas/riscv/alias-csr.s: Add testcase for CSR-access
