@@ -1,5 +1,13 @@
 2019-08-05  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (version_at_least): Factor out of ...
+	(tcl_version_at_least): ... here.
+	(gdb_compile): Fail if pie results in non-PIE executable.
+	(readelf_version, readelf_prints_pie): New proc.
+	(exec_is_pie): Return -1 if unknown.
+
+2019-08-05  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (tcl_version_at_least): Fix typo.
 
 2019-08-04  Sandra Loosemore  <sandra@codesourcery.com>

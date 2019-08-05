@@ -1103,19 +1103,25 @@ proc gdb_test { args } {
      }]
 }
 
+# Return 1 if version MAJOR.MINOR is at least AT_LEAST_MAJOR.AT_LEAST_MINOR.
+proc version_at_least { major minor at_least_major at_least_minor} {
+    if { $major > $at_least_major } {
+        return 1
+    } elseif { $major == $at_least_major \
+		   && $minor >= $at_least_minor } {
+        return 1
+    } else {
+        return 0
+    }
+}
+
 # Return 1 if tcl version used is at least MAJOR.MINOR
 proc tcl_version_at_least { major minor } {
     global tcl_version
     regexp {^([0-9]+)\.([0-9]+)$} $tcl_version \
 	dummy tcl_version_major tcl_version_minor
-    if { $tcl_version_major > $major } {
-        return 1
-    } elseif { $tcl_version_major == $major \
-		   && $tcl_version_minor >= $minor } {
-        return 1
-    } else {
-        return 0
-    }
+    return [version_at_least $tcl_version_major $tcl_version_minor \
+		$major $minor]
 }
 
 if { [tcl_version_at_least 8 5] == 0 } {
@@ -3803,9 +3809,13 @@ proc gdb_compile {source dest type options} {
     regsub "\[\r\n\]*$" "$result" "" result
     regsub "^\[\r\n\]*" "$result" "" result
     
-    if { $type == "executable" && $result == "" && $nopie != -1 } {
-	if { [exec_is_pie "$dest"] } {
+    if { $type == "executable" && $result == "" \
+	     && ($nopie != -1 || $pie != -1) } {
+	set is_pie [exec_is_pie "$dest"]
+	if { $nopie != -1 && $is_pie == 1 } {
 	    set result "nopie failed to prevent PIE executable"
+	} elseif { $pie != -1 && $is_pie == 0 } {
+	    set result "pie failed to generate PIE executable"
 	}
     }
 
@@ -5209,13 +5219,53 @@ proc exec_has_index_section { executable } {
     return 0
 }
 
-# Return true if EXECUTABLE is a Position Independent Executable.
+# Return list with major and minor version of readelf, or an empty list.
+gdb_caching_proc readelf_version {
+    set readelf_program [gdb_find_readelf]
+    set res [catch {exec $readelf_program --version} output]
+    if { $res != 0 } {
+	return [list]
+    }
+    set lines [split $output \n]
+    set line [lindex $lines 0]
+    set res [regexp {[ \t]+([0-9]+)[.]([0-9]+)[^ \t]*$} \
+		 $line dummy major minor]
+    if { $res != 1 } {
+	return [list]
+    }
+    return [list $major $minor]
+}
+
+# Return 1 if readelf prints the PIE flag, 0 if is doesn't, and -1 if unknown.
+proc readelf_prints_pie { } {
+    set version [readelf_version]
+    if { [llength $version] == 0 } {
+	return -1
+    }
+    set major [lindex $version 0]
+    set minor [lindex $version 1]
+    # It would be better to construct a PIE executable and test if the PIE
+    # flag is printed by readelf, but we cannot reliably construct a PIE
+    # executable if the multilib_flags dictate otherwise
+    # (--target_board=unix/-no-pie/-fno-PIE).
+    return [version_at_least $major $minor 2 26]
+}
+
+# Return 1 if EXECUTABLE is a Position Independent Executable, 0 if it is not,
+# and -1 if unknown.
 
 proc exec_is_pie { executable } {
+    set res [readelf_prints_pie]
+    if { $res != 1 } {
+	return -1
+    }
     set readelf_program [gdb_find_readelf]
-    set res [catch {exec $readelf_program -d $executable \
-			| grep -E "(FLAGS_1).*Flags:.* PIE($| )" }]
-    if { $res == 0 } {
+    set res [catch {exec $readelf_program -d $executable} output]
+    if { $res != 0 } {
+	return -1
+    }
+    set res [regexp -line {\(FLAGS_1\).*Flags:.* PIE($| )} $output]
+    if { $res == 1 } {
 	return 1
     }
     return 0
