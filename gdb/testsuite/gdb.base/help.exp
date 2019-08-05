@@ -29,13 +29,15 @@ test_class_help "aliases" {"Aliases of other commands\.\[\r\n\]+"}
 test_class_help "breakpoints" {
     "Making program stop at certain points\.\[\r\n\]+"
 }
-test_class_help "data" {"Examining data\.\[\r\n\]+"}
-test_class_help "files" {"Specifying and examining files\.\[\r\n\]+"}
-test_class_help "internals" {
-    "Maintenance commands\.\[\r\n\]+"
-    "Some gdb commands are provided just for use by gdb maintainers\.\[\r\n\]+"
-    "These commands are subject to frequent change, and may not be as\[\r\n\]+"
-    "well documented as user commands\.\[\r\n\]+"
+with_read1_timeout_factor 10 {
+    test_class_help "data" {"Examining data\.\[\r\n\]+"}
+    test_class_help "files" {"Specifying and examining files\.\[\r\n\]+"}
+    test_class_help "internals" {
+	"Maintenance commands\.\[\r\n\]+"
+	"Some gdb commands are provided just for use by gdb maintainers\.\[\r\n\]+"
+	"These commands are subject to frequent change, and may not be as\[\r\n\]+"
+	"well documented as user commands\.\[\r\n\]+"
+    }
 }
 test_class_help "obscure" {"Obscure features\.\[\r\n\]+"}
 test_class_help "running" {"Running the program\.\[\r\n\]+"}
@@ -44,25 +46,29 @@ test_class_help "stack" {
     "When the program being debugged stops, gdb selects the innermost frame\.\[\r\n\]+"
     "The commands below can be used to select other frames by number or address\.\[\r\n\]+"
 }
-test_class_help "status" {
-    "Status inquiries\.\[\r\n\]+"
-}
-test_class_help "support" {"Support facilities\.\[\r\n\]+"}
-test_class_help "tracepoints" {
-    "Tracing of program execution without stopping the program\.\[\r\n\]+"
+with_read1_timeout_factor 10 {
+    test_class_help "status" {
+	"Status inquiries\.\[\r\n\]+"
+    }
+    test_class_help "support" {"Support facilities\.\[\r\n\]+"}
+    test_class_help "tracepoints" {
+	"Tracing of program execution without stopping the program\.\[\r\n\]+"
+    }
 }
 
-test_user_defined_class_help
+with_read1_timeout_factor 10 {
+    test_user_defined_class_help
 
-# Test help of an abbreviated command.  "break" is picked at random.
-set help_breakpoint_text "Set breakpoint at specified location\..*"
-# test help breakpoint "b" abbreviation
-gdb_test "help b" $help_breakpoint_text "help breakpoint \"b\" abbreviation"
-# test help breakpoint "br" abbreviation
-gdb_test "help br" $help_breakpoint_text "help breakpoint \"br\" abbreviation"
-# test help breakpoint "bre" abbreviation
-gdb_test "help bre" $help_breakpoint_text "help breakpoint \"bre\" abbreviation"
-# test help breakpoint "brea" abbreviation
+    # Test help of an abbreviated command.  "break" is picked at random.
+    set help_breakpoint_text "Set breakpoint at specified location\..*"
+    # test help breakpoint "b" abbreviation
+    gdb_test "help b" $help_breakpoint_text "help breakpoint \"b\" abbreviation"
+    # test help breakpoint "br" abbreviation
+    gdb_test "help br" $help_breakpoint_text "help breakpoint \"br\" abbreviation"
+    # test help breakpoint "bre" abbreviation
+    gdb_test "help bre" $help_breakpoint_text "help breakpoint \"bre\" abbreviation"
+    # test help breakpoint "brea" abbreviation
+}
 gdb_test "help brea" $help_breakpoint_text "help breakpoint \"brea\" abbreviation"
 # test help breakpoint "break" abbreviation
 gdb_test "help break" $help_breakpoint_text "help breakpoint \"break\" abbreviation"

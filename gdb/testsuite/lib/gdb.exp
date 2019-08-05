@@ -2364,6 +2364,18 @@ proc with_timeout_factor { factor body } {
     }
 }
 
+# Run BODY with timeout factor FACTOR if check-read1 is used.
+
+proc with_read1_timeout_factor { factor body } {
+    if { [info exists ::env(READ1)] == 1 && $::env(READ1) == 1 } {
+	# Use timeout factor
+    } else {
+	# Reset timeout factor
+	set factor 1
+    }
+    return [uplevel [list with_timeout_factor $factor $body]]
+}
+
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
 gdb_caching_proc support_complex_tests {

@@ -1,5 +1,13 @@
 2019-08-05  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/24863
+	* lib/gdb.exp (with_read1_timeout_factor): New proc.
+	* gdb.base/help.exp: Use with_read1_timeout_factor.
+	* gdb.base/info-macros.exp: Same.
+	* gdb.cp/nested-types.exp: Same.
+
+2019-08-05  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (version_at_least): Factor out of ...
 	(tcl_version_at_least): ... here.
 	(gdb_compile): Fail if pie results in non-PIE executable.

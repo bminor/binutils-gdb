@@ -278,13 +278,20 @@ proc test_nested_limit {limit log} {
     node_result result 10 $limit {} 0 $log
 
     if {!$log} {
+	if {$limit < 0 || $limit >= 8 } {
+	    set read1_timeout_factor 10
+	} else {
+	    set read1_timeout_factor 1
+	}
 	# The only output we check for is the contents of the struct,
 	# ignoring the leading "type = struct S10 {" and trailing "}" of
 	# the outermost node.
 	set result [lindex $result 0]
 	lassign $result type access key name children
-	cp_test_ptype_class $name "ptype $name (limit = $limit)" $key \
-	    $name $children
+	with_read1_timeout_factor $read1_timeout_factor {
+	    cp_test_ptype_class $name "ptype $name (limit = $limit)" $key \
+		$name $children
+	}
     }
 }
 
