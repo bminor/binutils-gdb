@@ -1,3 +1,25 @@
+2019-08-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-types.c (ctf_type_resolve): Return ECTF_NONREPRESENTABLE on
+	type zero.
+	* ctf-create.c (ctf_add_type): Detect and skip nonrepresentable
+	members and types.
+	(ctf_add_variable): Likewise for variables pointing to them.
+	* ctf-link.c (ctf_link_one_type): Do not warn for nonrepresentable
+	type link failure, but do warn for others.
+	* ctf-dump.c (ctf_dump_format_type): Likewise.  Do not assume all
+	errors to be ENOMEM.
+	(ctf_dump_member): Likewise.
+	(ctf_dump_type): Likewise.
+	(ctf_dump_header_strfield): Do not assume all errors to be ENOMEM.
+	(ctf_dump_header_sectfield): Do not assume all errors to be ENOMEM.
+	(ctf_dump_header): Likewise.
+	(ctf_dump_label): likewise.
+	(ctf_dump_objts): likewise.
+	(ctf_dump_funcs): likewise.
+	(ctf_dump_var): likewise.
+	(ctf_dump_str): Likewise.
+
 2019-09-30  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac (AC_DISABLE_SHARED): New, like opcodes/.
