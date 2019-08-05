@@ -1996,7 +1996,6 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
   unsigned long       previous_open_end = 0;
   long                relsize;
 
-
   relsize = bfd_get_reloc_upper_bound (abfd, sec);
   if (relsize > 0)
     {
@@ -2013,7 +2012,8 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
     }
   
   /* Make a copy of the notes and convert to our internal format.
-     Minimum size of a note is 12 bytes.  */
+     Minimum size of a note is 12 bytes.  Also locate the version
+     notes and check them.  */
   pnote = pnotes = (objcopy_internal_note *) xcalloc ((size / 12), sizeof (* pnote));
   while (remain >= 12)
     {
@@ -2182,12 +2182,10 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
   attribute_type_byte = version_1_seen ? 1 : 3;
   val_start = attribute_type_byte + 1;
 
-  /* The first note should be the first version note.  */
-  if (pnotes[0].note.namedata[attribute_type_byte] != GNU_BUILD_ATTRIBUTE_VERSION)
-    {
-      err = _("bad GNU build attribute notes: first note not version note");
-      goto done;
-    }
+  /* We used to require that the first note be a version note,
+     but this is no longer enforced.  Due to the problems with
+     linking sections with the same name (eg .gnu.build.note.hot)
+     we cannot guarantee that the first note will be a version note.  */
 
   /* Now merge the notes.  The rules are:
      1. Preserve the ordering of the notes.
@@ -2204,8 +2202,9 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	with a non-empty description field must also be preserved *OR* the
 	description field of the note must be changed to contain the starting
 	address to which it refers.
-     6. Notes with the same start and end address can be deleted.  */
-  for (pnote = pnotes + 1; pnote < pnotes_end; pnote ++)
+     6. Notes with the same start and end address can be deleted.
+     7. FIXME: Elminate duplicate version notes - even function specific ones ?  */
+  for (pnote = pnotes; pnote < pnotes_end; pnote ++)
     {
       int                      note_type;
       objcopy_internal_note *  back;
@@ -2233,7 +2232,6 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 		  && back->note.namesz == pnote->note.namesz
 		  && memcmp (back->note.namedata, pnote->note.namedata, pnote->note.namesz) == 0)
 		{
- fprintf (stderr, "DUP FUNXC\n");
 		  duplicate_found = TRUE;
 		  pnote->note.type = 0;
 		  break;

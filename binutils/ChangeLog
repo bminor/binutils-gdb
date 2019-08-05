@@ -1,5 +1,12 @@
 2019-08-05  Nick Clifton  <nickc@redhat.com>
 
+	PR 24874
+	* objcopy.c (merge_gnu_build_notes): Do not insist on the first
+	note being a version note.
+	Remove spurious debugging fprintf.
+
+2019-08-05  Nick Clifton  <nickc@redhat.com>
+
 	PR 24829
 	* readelf.c (apply_relocations): Catch potential integer overflow
 	whilst checking reloc location against section size.
