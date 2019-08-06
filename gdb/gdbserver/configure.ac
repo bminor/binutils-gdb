@@ -45,15 +45,6 @@ AC_HEADER_STDC
 # Set the 'development' global.
 . $srcdir/../../bfd/development.sh
 
-# Enable -lmcheck by default (it provides cheap-enough memory
-# mangling), but turn it off for releases.
-if $development; then
-  libmcheck_default=yes
-else
-  libmcheck_default=no
-fi
-GDB_AC_LIBMCHECK(${libmcheck_default})
-
 GDB_AC_SELFTEST([
   srv_selftest_objs="gdbsupport/selftest.o"
 ])

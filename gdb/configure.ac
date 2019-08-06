@@ -1234,28 +1234,6 @@ fi
 AC_SUBST(SRCHIGH_LIBS)
 AC_SUBST(SRCHIGH_CFLAGS)
 
-# --------------------- #
-# Check for libmcheck.  #
-# --------------------- #
-
-# Enable -lmcheck by default (it provides cheap-enough memory mangling),
-# but turn it off if Python is enabled with threads, since -lmcheck is
-# not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
-# and for releases.
-if test \( "${have_libpython}" = "no" -o "${python_has_threads}" = "no" \) \
-   && $development; then
-  libmcheck_default=yes
-else
-  libmcheck_default=no
-fi
-GDB_AC_LIBMCHECK(${libmcheck_default})
-
-if test "$ENABLE_LIBMCHECK" = "yes" \
-	-a "${have_libpython}" != "no" \
-	-a "${python_has_threads}" = "yes" ; then
-  AC_MSG_WARN(--enable-libmcheck may lead to spurious crashes if threads are used in python)
-fi
-
 AC_ARG_WITH(intel_pt,
   AS_HELP_STRING([--with-intel-pt], [include Intel Processor Trace support (auto/yes/no)]),
   [], [with_intel_pt=auto])

@@ -2044,7 +2044,6 @@ ACLOCAL_AMFLAGS = -I ../config
 aclocal_m4_deps = \
 	configure.ac \
 	acx_configure_dir.m4 \
-	libmcheck.m4 \
 	transform.m4 \
 	../bfd/bfd.m4 \
 	../config/acinclude.m4 \

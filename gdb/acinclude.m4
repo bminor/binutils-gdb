@@ -6,9 +6,6 @@ dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 
 sinclude(acx_configure_dir.m4)
 
-# This gets GDB_AC_LIBMCHECK.
-sinclude(libmcheck.m4)
-
 # This gets GDB_AC_TRANSFORM.
 sinclude(transform.m4)
 

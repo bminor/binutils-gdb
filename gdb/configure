@@ -879,7 +879,6 @@ with_libmpfr_prefix
 with_python
 with_guile
 enable_source_highlight
-enable_libmcheck
 with_intel_pt
 with_libipt_prefix
 with_included_regex
@@ -1556,7 +1555,6 @@ Optional Features:
   --disable-rpath         do not hardcode runtime library paths
   --enable-source-highlight
                           enable source-highlight for source listings
-  --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -11315,85 +11313,6 @@ $as_echo "no" >&6; }
 fi
 
 
-
-# --------------------- #
-# Check for libmcheck.  #
-# --------------------- #
-
-# Enable -lmcheck by default (it provides cheap-enough memory mangling),
-# but turn it off if Python is enabled with threads, since -lmcheck is
-# not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
-# and for releases.
-if test \( "${have_libpython}" = "no" -o "${python_has_threads}" = "no" \) \
-   && $development; then
-  libmcheck_default=yes
-else
-  libmcheck_default=no
-fi
-
-  # Check whether --enable-libmcheck was given.
-if test "${enable_libmcheck+set}" = set; then :
-  enableval=$enable_libmcheck; case "${enableval}" in
-      yes | y) ENABLE_LIBMCHECK="yes" ;;
-      no | n)  ENABLE_LIBMCHECK="no" ;;
-      *) as_fn_error $? "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
-    esac
-fi
-
-
-  if test -z "${ENABLE_LIBMCHECK}"; then
-    ENABLE_LIBMCHECK=${libmcheck_default}
-  fi
-
-  if test "$ENABLE_LIBMCHECK" = "yes" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
-$as_echo_n "checking for main in -lmcheck... " >&6; }
-if ${ac_cv_lib_mcheck_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmcheck  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_mcheck_main=yes
-else
-  ac_cv_lib_mcheck_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mcheck_main" >&5
-$as_echo "$ac_cv_lib_mcheck_main" >&6; }
-if test "x$ac_cv_lib_mcheck_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMCHECK 1
-_ACEOF
-
-  LIBS="-lmcheck $LIBS"
-
-fi
-
-  fi
-
-
-if test "$ENABLE_LIBMCHECK" = "yes" \
-	-a "${have_libpython}" != "no" \
-	-a "${python_has_threads}" = "yes" ; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&5
-$as_echo "$as_me: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&2;}
-fi
 
 
 # Check whether --with-intel_pt was given.

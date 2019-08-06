@@ -1462,15 +1462,6 @@ This GDB was configured as follows:\n\
              --without-intel-pt\n\
 "));
 #endif
-#if HAVE_LIBMCHECK
-    fprintf_filtered (stream, _("\
-             --enable-libmcheck\n\
-"));
-#else
-    fprintf_filtered (stream, _("\
-             --disable-libmcheck\n\
-"));
-#endif
 #if HAVE_LIBMPFR
     fprintf_filtered (stream, _("\
              --with-mpfr\n\
