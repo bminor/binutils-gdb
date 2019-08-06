@@ -3444,6 +3444,7 @@ enum open_bfd_mode
   };
 #ifdef ENABLE_PLUGINS
 static lang_input_statement_type *plugin_insert = NULL;
+static struct bfd_link_hash_entry *plugin_undefs = NULL;
 #endif
 
 static void
@@ -3471,6 +3472,9 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 	case lang_group_statement_enum:
 	  {
 	    struct bfd_link_hash_entry *undefs;
+#ifdef ENABLE_PLUGINS
+	    lang_input_statement_type *plugin_insert_save;
+#endif
 
 	    /* We must continually search the entries in the group
 	       until no new symbols are added to the list of undefined
@@ -3478,11 +3482,21 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 
 	    do
 	      {
+#ifdef ENABLE_PLUGINS
+		plugin_insert_save = plugin_insert;
+#endif
 		undefs = link_info.hash->undefs_tail;
 		open_input_bfds (s->group_statement.children.head,
 				 mode | OPEN_BFD_FORCE);
 	      }
-	    while (undefs != link_info.hash->undefs_tail);
+	    while (undefs != link_info.hash->undefs_tail
+#ifdef ENABLE_PLUGINS
+		   /* Objects inserted by a plugin, which are loaded
+		      before we hit this loop, may have added new
+		      undefs.  */
+		   || (plugin_insert != plugin_insert_save && plugin_undefs)
+#endif
+		   );
 	  }
 	  break;
 	case lang_target_statement_enum:
@@ -7420,7 +7434,10 @@ lang_process (void)
 	einfo (_("%F%P: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
+      plugin_undefs = link_info.hash->undefs_tail;
       open_input_bfds (*added.tail, OPEN_BFD_NORMAL);
+      if (plugin_undefs == link_info.hash->undefs_tail)
+	plugin_undefs = NULL;
       /* Restore the global list pointer now they have all been added.  */
       lang_list_remove_tail (stat_ptr, &added);
       /* And detach the fresh ends of the file lists.  */

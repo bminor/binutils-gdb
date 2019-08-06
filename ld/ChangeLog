@@ -1,3 +1,11 @@
+2019-08-06  Alan Modra  <amodra@gmail.com>
+
+	PR 24873
+	* ldlang.c (plugin_undefs): New static var.
+	(open_input_bfds <lang_group_statement_enum>): Loop on
+	plugin_undefs and hitting plugin_insert point.
+	(lang_process <lto_plugin_active>): Set plugin_undefs.
+
 2019-08-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsie.s: Correct medium model ELF sequence.
