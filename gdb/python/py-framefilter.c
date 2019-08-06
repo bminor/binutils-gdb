@@ -398,7 +398,7 @@ py_print_single_arg (struct ui_out *out,
 	      gdb_assert (fa != NULL && fa->error != NULL);
 	      out->field_fmt ("value",
 			      _("<error reading variable: %s>"),
-			      fa->error);
+			      fa->error.get ());
 	    }
 	  else
 	    py_print_value (out, val, opts, 0, args_type, language);
@@ -485,9 +485,6 @@ enumerate_args (PyObject *iter,
 
 	  read_frame_arg (user_frame_print_options,
 			  sym, frame, &arg, &entryarg);
-
-	  gdb::unique_xmalloc_ptr<char> arg_holder (arg.error);
-	  gdb::unique_xmalloc_ptr<char> entry_holder (entryarg.error);
 
 	  /* The object has not provided a value, so this is a frame
 	     argument to be read by GDB.  In this case we have to

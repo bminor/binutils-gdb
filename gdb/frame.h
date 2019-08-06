@@ -821,15 +821,15 @@ extern frame_print_options user_frame_print_options;
 struct frame_arg
 {
   /* Symbol for this parameter used for example for its name.  */
-  struct symbol *sym;
+  struct symbol *sym = nullptr;
 
   /* Value of the parameter.  It is NULL if ERROR is not NULL; if both VAL and
      ERROR are NULL this parameter's value should not be printed.  */
-  struct value *val;
+  struct value *val = nullptr;
 
   /* String containing the error message, it is more usually NULL indicating no
      error occured reading this parameter.  */
-  char *error;
+  gdb::unique_xmalloc_ptr<char> error;
 
   /* One of the print_entry_values_* entries as appropriate specifically for
      this frame_arg.  It will be different from print_entry_values.  With
@@ -840,7 +840,7 @@ struct frame_arg
      value - print_entry_values_compact is not permitted fi ui_out_is_mi_like_p
      (in such case print_entry_values_no and print_entry_values_only is used
      for each parameter kind specifically.  */
-  const char *entry_kind;
+  const char *entry_kind = nullptr;
 };
 
 extern void read_frame_arg (const frame_print_options &fp_opts,

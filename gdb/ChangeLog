@@ -1,3 +1,13 @@
+2019-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* stack.c (print_frame_arg, read_frame_local, read_frame_arg)
+	(print_frame_args): Update.
+	* python/py-framefilter.c (py_print_single_arg, enumerate_args):
+	Update.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Update.
+	* frame.h (struct frame_arg): Add initializers.
+	<error>: Now a unique_xmalloc_ptr.
+
 2019-08-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* NEWS: Expand the Pointer Authentication entry.

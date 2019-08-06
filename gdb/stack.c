@@ -390,7 +390,7 @@ print_frame_arg (const frame_print_options &fp_opts,
   else
     {
       if (arg->error)
-	stb.printf (_("<error reading variable: %s>"), arg->error);
+	stb.printf (_("<error reading variable: %s>"), arg->error.get ());
       else
 	{
 	  try
@@ -452,13 +452,12 @@ read_frame_local (struct symbol *sym, struct frame_info *frame,
     }
   catch (const gdb_exception_error &except)
     {
-      argp->error = xstrdup (except.what ());
+      argp->error.reset (xstrdup (except.what ()));
     }
 }
 
-/* Read in inferior function parameter SYM at FRAME into ARGP.  Caller is
-   responsible for xfree of ARGP->ERROR.  This function never throws an
-   exception.  */
+/* Read in inferior function parameter SYM at FRAME into ARGP.  This
+   function never throws an exception.  */
 
 void
 read_frame_arg (const frame_print_options &fp_opts,
@@ -626,7 +625,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 
   argp->sym = sym;
   argp->val = val;
-  argp->error = val_error ? xstrdup (val_error) : NULL;
+  argp->error.reset (val_error ? xstrdup (val_error) : NULL);
   if (!val && !val_error)
     argp->entry_kind = print_entry_values_only;
   else if ((fp_opts.print_entry_values == print_entry_values_compact
@@ -641,7 +640,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 
   entryargp->sym = sym;
   entryargp->val = entryval;
-  entryargp->error = entryval_error ? xstrdup (entryval_error) : NULL;
+  entryargp->error.reset (entryval_error ? xstrdup (entryval_error) : NULL);
   if (!entryval && !entryval_error)
     entryargp->entry_kind = print_entry_values_no;
   else
@@ -810,10 +809,8 @@ print_frame_args (const frame_print_options &fp_opts,
 
 	  if (!print_args)
 	    {
-	      memset (&arg, 0, sizeof (arg));
 	      arg.sym = sym;
 	      arg.entry_kind = print_entry_values_no;
-	      memset (&entryarg, 0, sizeof (entryarg));
 	      entryarg.sym = sym;
 	      entryarg.entry_kind = print_entry_values_no;
 	    }
@@ -833,9 +830,6 @@ print_frame_args (const frame_print_options &fp_opts,
 
 	      print_frame_arg (fp_opts, &entryarg);
 	    }
-
-	  xfree (arg.error);
-	  xfree (entryarg.error);
 
 	  first = 0;
 	}
