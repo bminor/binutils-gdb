@@ -1,6 +1,15 @@
 2019-08-06  Alan Modra  <amodra@gmail.com>
 
 	PR 24873
+	* ldlang.c (find_replacements_insert_point): Return "before" flag.
+	(find_next_input_statement): New function.
+	(lang_process): When placing recompiled LTO objects before a
+	claimed archive, place them immediately before in the statement
+	list.
+
+2019-08-06  Alan Modra  <amodra@gmail.com>
+
+	PR 24873
 	* ldlang.c (plugin_undefs): New static var.
 	(open_input_bfds <lang_group_statement_enum>): Loop on
 	plugin_undefs and hitting plugin_insert point.
