@@ -1303,7 +1303,7 @@ set_symbol_cache_size_handler (const char *args, int from_tty,
 
 static struct block_symbol
 symbol_cache_lookup (struct symbol_cache *cache,
-		     struct objfile *objfile_context, int block,
+		     struct objfile *objfile_context, enum block_enum block,
 		     const char *name, domain_enum domain,
 		     struct block_symbol_cache **bsc_ptr,
 		     struct symbol_cache_slot **slot_ptr)
@@ -2338,7 +2338,7 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
    in a psymtab but not in a symtab.  */
 
 static void ATTRIBUTE_NORETURN
-error_in_psymtab_expansion (int block_index, const char *name,
+error_in_psymtab_expansion (enum block_enum block_index, const char *name,
 			    struct compunit_symtab *cust)
 {
   error (_("\
@@ -2355,8 +2355,9 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
    the "quick" symbol table functions.  */
 
 static struct block_symbol
-lookup_symbol_via_quick_fns (struct objfile *objfile, int block_index,
-			     const char *name, const domain_enum domain)
+lookup_symbol_via_quick_fns (struct objfile *objfile,
+			     enum block_enum block_index, const char *name,
+			     const domain_enum domain)
 {
   struct compunit_symtab *cust;
   const struct blockvector *bv;
@@ -2725,7 +2726,8 @@ lookup_transparent_type (const char *name)
    "quick" symbol table functions.  */
 
 static struct type *
-basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
+basic_lookup_transparent_type_quick (struct objfile *objfile,
+				     enum block_enum block_index,
 				     const char *name)
 {
   struct compunit_symtab *cust;
@@ -2755,7 +2757,8 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
    BLOCK_INDEX is either GLOBAL_BLOCK or STATIC_BLOCK.  */
 
 static struct type *
-basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
+basic_lookup_transparent_type_1 (struct objfile *objfile,
+				 enum block_enum block_index,
 				 const char *name)
 {
   const struct blockvector *bv;
