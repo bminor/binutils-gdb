@@ -16,7 +16,9 @@
   architectures require kernel changes.  TLS is not yet supported for
   amd64 and i386 process core dumps.
 
-* Support for Pointer Authentication on AArch64 Linux.
+* Support for Pointer Authentication (PAC) on AArch64 Linux.  Return
+  addresses that required unmasking are shown in the backtrace with the
+  postfix [PAC].
 
 * Two new convenience functions $_cimag and $_creal that extract the
   imaginary and real parts respectively from complex numbers.

@@ -901,6 +901,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	    {
 	      annotate_frame_address ();
 	      out->field_core_addr ("addr", gdbarch, address);
+	      if (get_frame_pc_masked (frame))
+		out->field_string ("pac", " [PAC]");
 	      annotate_frame_address_end ();
 	      out->text (" in ");
 	    }

@@ -1,3 +1,18 @@
+2019-08-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* NEWS: Expand the Pointer Authentication entry.
+	* aarch64-tdep.c (aarch64_frame_unmask_address): Rename from this.
+	(aarch64_frame_unmask_lr): ... to this.
+	(aarch64_prologue_prev_register, aarch64_dwarf2_prev_register):
+	Call aarch64_frame_unmask_lr.
+	* frame.c (struct frame_info): Add "masked" variable.
+	(frame_set_previous_pc_masked) (frame_get_pc_masked): New functions.
+	(fprint_frame): Check for masked pc.
+	* frame.h (frame_set_previous_pc_masked) (frame_get_pc_masked): New
+	declarations.
+	* python/py-framefilter.c (py_print_frame): Check for masked pc.
+	* stack.c (print_frame): Check for masked pc.
+
 2019-08-06  Tom Tromey  <tom@tromey.com>
 
 	* stabsread.c (patch_block_stabs, read_one_struct_field)

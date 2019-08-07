@@ -24390,6 +24390,14 @@ but the lengths of the @code{z} and @code{p} registers will not change.  This
 is a known limitation of @value{GDBN} and does not affect the execution of the
 target process.
 
+@subsubsection AArch64 Pointer Authentication.
+@cindex AArch64 Pointer Authentication.
+
+When @value{GDBN} is debugging the AArch64 architecture, and the program is
+using the v8.3-A feature Pointer Authentication (PAC), then whenever the link
+register @code{$lr} is pointing to an PAC function it's value will be masked.
+When GDB prints a backtrace, any addresses that required unmasking will be
+postfixed with the marker [PAC].
 
 @node i386
 @subsection x86 Architecture-specific Issues

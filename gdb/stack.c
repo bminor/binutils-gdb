@@ -1298,7 +1298,11 @@ print_frame (const frame_print_options &fp_opts,
 	{
 	  annotate_frame_address ();
 	  if (pc_p)
-	    uiout->field_core_addr ("addr", gdbarch, pc);
+	    {
+	      uiout->field_core_addr ("addr", gdbarch, pc);
+	      if (get_frame_pc_masked (frame))
+		uiout->field_string ("pac", " [PAC]");
+	    }
 	  else
 	    uiout->field_string ("addr", "<unavailable>",
 				 ui_out_style_kind::ADDRESS);

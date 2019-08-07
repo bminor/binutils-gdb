@@ -949,4 +949,13 @@ extern const gdb::option::option_def set_backtrace_option_defs[2];
 /* The values behind the global "set backtrace ..." settings.  */
 extern set_backtrace_options user_set_backtrace_options;
 
+/* Mark that the PC value is masked for the previous frame.  */
+
+extern void set_frame_previous_pc_masked (struct frame_info *frame);
+
+/* Get whether the PC value is masked for the given frame.  */
+
+extern bool get_frame_pc_masked (const struct frame_info *frame);
+
+
 #endif /* !defined (FRAME_H)  */

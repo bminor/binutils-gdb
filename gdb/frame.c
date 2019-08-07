@@ -123,6 +123,8 @@ struct frame_info
   /* Cached copy of the previous frame's resume address.  */
   struct {
     enum cached_copy_status status;
+    /* Did VALUE require unmasking when being read.  */
+    bool masked;
     CORE_ADDR value;
   } prev_pc;
   
@@ -160,6 +162,25 @@ struct frame_info
      Only valid when PREV_P is set, but even then may still be NULL.  */
   const char *stop_string;
 };
+
+/* See frame.h.  */
+
+void
+set_frame_previous_pc_masked (struct frame_info *frame)
+{
+  frame->prev_pc.masked = true;
+}
+
+/* See frame.h.  */
+
+bool
+get_frame_pc_masked (const struct frame_info *frame)
+{
+  gdb_assert (frame->next != nullptr);
+  gdb_assert (frame->next->prev_pc.status == CC_VALUE);
+
+  return frame->next->prev_pc.masked;
+}
 
 /* A frame stash used to speed up frame lookups.  Create a hash table
    to stash frames previously accessed from the frame cache for
@@ -429,8 +450,11 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   if (fi->next == NULL || fi->next->prev_pc.status == CC_UNKNOWN)
     fprintf_unfiltered (file, "<unknown>");
   else if (fi->next->prev_pc.status == CC_VALUE)
-    fprintf_unfiltered (file, "%s",
-			hex_string (fi->next->prev_pc.value));
+    {
+      fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_pc.value));
+      if (fi->next->prev_pc.masked)
+	fprintf_unfiltered (file, "[PAC]");
+    }
   else if (fi->next->prev_pc.status == CC_NOT_SAVED)
     val_print_not_saved (file);
   else if (fi->next->prev_pc.status == CC_UNAVAILABLE)

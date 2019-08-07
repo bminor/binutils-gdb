@@ -250,13 +250,13 @@ class instruction_reader : public abstract_instruction_reader
 
 } // namespace
 
-/* If address signing is enabled, mask off the signature bits from ADDR, using
-   the register values in THIS_FRAME.  */
+/* If address signing is enabled, mask off the signature bits from the link
+   register, which is passed by value in ADDR, using the register values in
+   THIS_FRAME.  */
 
 static CORE_ADDR
-aarch64_frame_unmask_address (struct gdbarch_tdep *tdep,
-			      struct frame_info *this_frame,
-			      CORE_ADDR addr)
+aarch64_frame_unmask_lr (struct gdbarch_tdep *tdep,
+			 struct frame_info *this_frame, CORE_ADDR addr)
 {
   if (tdep->has_pauth ()
       && frame_unwind_register_unsigned (this_frame,
@@ -265,6 +265,9 @@ aarch64_frame_unmask_address (struct gdbarch_tdep *tdep,
       int cmask_num = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
       CORE_ADDR cmask = frame_unwind_register_unsigned (this_frame, cmask_num);
       addr = addr & ~cmask;
+
+      /* Record in the frame that the link register required unmasking.  */
+      set_frame_previous_pc_masked (this_frame);
     }
 
   return addr;
@@ -952,7 +955,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
       if (tdep->has_pauth ()
 	  && trad_frame_value_p (cache->saved_regs,
 				 tdep->pauth_ra_state_regnum))
-	lr = aarch64_frame_unmask_address (tdep, this_frame, lr);
+	lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
 
       return frame_unwind_got_constant (this_frame, prev_regnum, lr);
     }
@@ -1119,7 +1122,7 @@ aarch64_dwarf2_prev_register (struct frame_info *this_frame,
     {
     case AARCH64_PC_REGNUM:
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
-      lr = aarch64_frame_unmask_address (tdep, this_frame, lr);
+      lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
       return frame_unwind_got_constant (this_frame, regnum, lr);
 
     default:
