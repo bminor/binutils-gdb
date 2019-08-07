@@ -1,3 +1,9 @@
+2019-08-07  Alan Modra  <amodra@gmail.com>
+
+	PR 24644
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Properly check
+	for overflow in expressions involving nsymz.
+
 2019-08-01  Ilia Diachkov  <ilia.diachkov@optimitech.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_lui): Set lui relax safety area to

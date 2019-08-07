@@ -90,7 +90,14 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   ptrsize = 8 * nsymz;
 
   amt = carsym_size + stringsize + 1;
-  if (carsym_size < nsymz || ptrsize < nsymz || amt < nsymz)
+  if (/* Catch overflow in stringsize (and ptrsize) expression.  */
+      nsymz >= (bfd_size_type) -1 / 8
+      || stringsize > parsed_size
+      /* Catch overflow in carsym_size expression.  */
+      || nsymz > (bfd_size_type) -1 / sizeof (carsym)
+      /* Catch overflow in amt expression.  */
+      || amt <= carsym_size
+      || amt <= stringsize)
     {
       bfd_set_error (bfd_error_malformed_archive);
       return FALSE;
