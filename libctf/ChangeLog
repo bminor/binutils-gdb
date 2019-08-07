@@ -1,3 +1,144 @@
+2019-08-09  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_names_t): New.
+	(ctf_lookup_t) <ctf_hash>: Now a ctf_names_t, not a ctf_hash_t.
+	(ctf_file_t) <ctf_structs>: Likewise.
+	<ctf_unions>: Likewise.
+	<ctf_enums>: Likewise.
+	<ctf_names>: Likewise.
+	<ctf_lookups>: Improve comment.
+	<ctf_ptrtab_len>: New.
+	<ctf_prov_strtab>: New.
+	<ctf_str_prov_offset>: New.
+	<ctf_dtbyname>: Remove, redundant to the names hashes.
+	<ctf_dtnextid>: Remove, redundant to ctf_typemax.
+	(ctf_dtdef_t) <dtd_name>: Remove.
+	<dtd_data>: Note that the ctt_name is now populated.
+	(ctf_str_atom_t) <csa_offset>: This is now the strtab
+	offset for internal strings too.
+	<csa_external_offset>: New, the external strtab offset.
+	(CTF_INDEX_TO_TYPEPTR): Handle the LCTF_RDWR case.
+	(ctf_name_table): New declaration.
+	(ctf_lookup_by_rawname): Likewise.
+	(ctf_lookup_by_rawhash): Likewise.
+	(ctf_set_ctl_hashes): Likewise.
+	(ctf_serialize): Likewise.
+	(ctf_dtd_insert): Adjust.
+	(ctf_simple_open_internal): Likewise.
+	(ctf_bufopen_internal): Likewise.
+	(ctf_list_empty_p): Likewise.
+	(ctf_str_remove_ref): Likewise.
+	(ctf_str_add): Returns uint32_t now.
+	(ctf_str_add_ref): Likewise.
+	(ctf_str_add_external): Now returns a boolean (int).
+	* ctf-string.c (ctf_strraw_explicit): Check the ctf_prov_strtab
+	for strings in the appropriate range.
+	(ctf_str_create_atoms): Create the ctf_prov_strtab.  Detect OOM
+	when adding the null string to the new strtab.
+	(ctf_str_free_atoms): Destroy the ctf_prov_strtab.
+	(ctf_str_add_ref_internal): Add make_provisional argument.  If
+	make_provisional, populate the offset and fill in the
+	ctf_prov_strtab accordingly.
+	(ctf_str_add): Return the offset, not the string.
+	(ctf_str_add_ref): Likewise.
+	(ctf_str_add_external): Return a success integer.
+	(ctf_str_remove_ref): New, remove a single ref.
+	(ctf_str_count_strtab): Do not count the initial null string's
+	length or the existence or length of any unreferenced internal
+	atoms.
+	(ctf_str_populate_sorttab): Skip atoms with no refs.
+	(ctf_str_write_strtab): Populate the nullstr earlier.  Add one
+	to the cts_len for the null string, since it is no longer done
+	in ctf_str_count_strtab.  Adjust for csa_external_offset rename.
+	Populate the csa_offset for both internal and external cases.
+	Flush the ctf_prov_strtab afterwards, and reset the
+	ctf_str_prov_offset.
+	* ctf-create.c (ctf_grow_ptrtab): New.
+	(ctf_create): Call it.	Initialize new fields rather than old
+	ones.  Tell ctf_bufopen_internal that this is a writable dictionary.
+	Set the ctl hashes and data model.
+	(ctf_update): Rename to...
+	(ctf_serialize): ... this.  Leave a compatibility function behind.
+	Tell ctf_simple_open_internal that this is a writable dictionary.
+	Pass the new fields along from the old dictionary.  Drop
+	ctf_dtnextid and ctf_dtbyname.	Use ctf_strraw, not dtd_name.
+	Do not zero out the DTD's ctt_name.
+	(ctf_prefixed_name): Rename to...
+	(ctf_name_table): ... this.  No longer return a prefixed name: return
+	the applicable name table instead.
+	(ctf_dtd_insert): Use it, and use the right name table.	 Pass in the
+	kind we're adding.  Migrate away from dtd_name.
+	(ctf_dtd_delete): Adjust similarly.  Remove the ref to the
+	deleted ctt_name.
+	(ctf_dtd_lookup_type_by_name): Remove.
+	(ctf_dynamic_type): Always return NULL on read-only dictionaries.
+	No longer check ctf_dtnextid: check ctf_typemax instead.
+	(ctf_snapshot): No longer use ctf_dtnextid: use ctf_typemax instead.
+	(ctf_rollback): Likewise.  No longer fail with ECTF_OVERROLLBACK. Use
+	ctf_name_table and the right name table, and migrate away from
+	dtd_name as in ctf_dtd_delete.
+	(ctf_add_generic): Pass in the kind explicitly and pass it to
+	ctf_dtd_insert. Use ctf_typemax, not ctf_dtnextid.  Migrate away
+	from dtd_name to using ctf_str_add_ref to populate the ctt_name.
+        Grow the ptrtab if needed.
+	(ctf_add_encoded): Pass in the kind.
+	(ctf_add_slice): Likewise.
+	(ctf_add_array): Likewise.
+	(ctf_add_function): Likewise.
+	(ctf_add_typedef): Likewise.
+	(ctf_add_reftype): Likewise. Initialize the ctf_ptrtab, checking
+	ctt_name rather than dtd_name.
+	(ctf_add_struct_sized): Pass in the kind.  Use
+	ctf_lookup_by_rawname, not ctf_hash_lookup_type /
+	ctf_dtd_lookup_type_by_name.
+	(ctf_add_union_sized): Likewise.
+	(ctf_add_enum): Likewise.
+	(ctf_add_enum_encoded): Likewise.
+	(ctf_add_forward): Likewise.
+	(ctf_add_type): Likewise.
+	(ctf_compress_write): Call ctf_serialize: adjust for ctf_size not
+	being initialized until after the call.
+	(ctf_write_mem): Likewise.
+	(ctf_write): Likewise.
+	* ctf-archive.c (arc_write_one_ctf): Likewise.
+	* ctf-lookup.c (ctf_lookup_by_name): Use ctf_lookuup_by_rawhash, not
+	ctf_hash_lookup_type.
+	(ctf_lookup_by_id): No longer check the readonly types if the
+	dictionary is writable.
+	* ctf-open.c (init_types): Assert that this dictionary is not
+	writable.  Adjust to use the new name hashes, ctf_name_table,
+	and ctf_ptrtab_len.  GNU style fix for the final ptrtab scan.
+	(ctf_bufopen_internal): New 'writable' parameter.  Flip on LCTF_RDWR
+	if set.	 Drop out early when dictionary is writable.  Split the
+	ctf_lookups initialization into...
+	(ctf_set_cth_hashes): ... this new function.
+	(ctf_simple_open_internal): Adjust.  New 'writable' parameter.
+	(ctf_simple_open): Adjust accordingly.
+	(ctf_bufopen): Likewise.
+	(ctf_file_close): Destroy the appropriate name hashes.	No longer
+	destroy ctf_dtbyname, which is gone.
+	(ctf_getdatasect): Remove spurious "extern".
+	* ctf-types.c (ctf_lookup_by_rawname): New, look up types in the
+	specified name table, given a kind.
+	(ctf_lookup_by_rawhash): Likewise, given a ctf_names_t *.
+	(ctf_member_iter): Add support for iterating over the
+	dynamic type list.
+	(ctf_enum_iter): Likewise.
+	(ctf_variable_iter): Likewise.
+	(ctf_type_rvisit): Likewise.
+	(ctf_member_info): Add support for types in the dynamic type list.
+	(ctf_enum_name): Likewise.
+	(ctf_enum_value): Likewise.
+	(ctf_func_type_info): Likewise.
+	(ctf_func_type_args): Likewise.
+	* ctf-link.c (ctf_accumulate_archive_names): No longer call
+	ctf_update.
+	(ctf_link_write): Likewise.
+	(ctf_link_intern_extern_string): Adjust for new
+	ctf_str_add_external return value.
+	(ctf_link_add_strtab): Likewise.
+	* ctf-util.c (ctf_list_empty_p): New.
+
 2019-08-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-types.c (ctf_type_resolve): Return ECTF_NONREPRESENTABLE on

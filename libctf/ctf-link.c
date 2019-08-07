@@ -639,7 +639,7 @@ ctf_link_intern_extern_string (void *key _libctf_unused_, void *value,
   ctf_link_out_string_cb_arg_t *arg = (ctf_link_out_string_cb_arg_t *) arg_;
 
   fp->ctf_flags |= LCTF_DIRTY;
-  if (ctf_str_add_external (fp, arg->str, arg->offset) == NULL)
+  if (!ctf_str_add_external (fp, arg->str, arg->offset))
     arg->err = ENOMEM;
 }
 
@@ -662,7 +662,7 @@ ctf_link_add_strtab (ctf_file_t *fp, ctf_link_strtab_string_f *add_string,
       ctf_link_out_string_cb_arg_t iter_arg = { str, offset, 0 };
 
       fp->ctf_flags |= LCTF_DIRTY;
-      if (ctf_str_add_external (fp, str, offset) == NULL)
+      if (!ctf_str_add_external (fp, str, offset))
 	err = ENOMEM;
 
       ctf_dynhash_iter (fp->ctf_link_outputs, ctf_link_intern_extern_string,
@@ -693,8 +693,7 @@ typedef struct ctf_name_list_accum_cb_arg
   size_t ndynames;
 } ctf_name_list_accum_cb_arg_t;
 
-/* Accumulate the names and a count of the names in the link output hash,
-   and run ctf_update() on them to generate them.  */
+/* Accumulate the names and a count of the names in the link output hash.  */
 static void
 ctf_accumulate_archive_names (void *key, void *value, void *arg_)
 {
@@ -703,13 +702,6 @@ ctf_accumulate_archive_names (void *key, void *value, void *arg_)
   char **names;
   ctf_file_t **files;
   ctf_name_list_accum_cb_arg_t *arg = (ctf_name_list_accum_cb_arg_t *) arg_;
-  int err;
-
-  if ((err = ctf_update (fp)) < 0)
-    {
-      ctf_set_errno (arg->fp, ctf_errno (fp));
-      return;
-    }
 
   if ((names = realloc (arg->names, sizeof (char *) * ++(arg->i))) == NULL)
     {
@@ -787,12 +779,6 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
 
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
-
-  if (ctf_update (fp) < 0)
-    {
-      errloc = "CTF file construction";
-      goto err;
-    }
 
   if (fp->ctf_link_outputs)
     {

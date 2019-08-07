@@ -655,7 +655,6 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 
   unsigned long pop[CTF_K_MAX + 1] = { 0 };
   const ctf_type_t *tp;
-  ctf_hash_t *hp;
   uint32_t id, dst;
   uint32_t *xp;
 
@@ -665,6 +664,8 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
   int child = cth->cth_parname != 0;
   int nlstructs = 0, nlunions = 0;
   int err;
+
+  assert (!(fp->ctf_flags & LCTF_RDWR));
 
   if (_libctf_unlikely_ (fp->ctf_version == CTF_VERSION_1))
     {
@@ -717,32 +718,37 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
   /* Now that we've counted up the number of each type, we can allocate
      the hash tables, type translation table, and pointer table.  */
 
-  if ((fp->ctf_structs = ctf_hash_create (pop[CTF_K_STRUCT], ctf_hash_string,
-					  ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_structs.ctn_readonly
+       = ctf_hash_create (pop[CTF_K_STRUCT], ctf_hash_string,
+			  ctf_hash_eq_string)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_unions = ctf_hash_create (pop[CTF_K_UNION], ctf_hash_string,
-					 ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_unions.ctn_readonly
+       = ctf_hash_create (pop[CTF_K_UNION], ctf_hash_string,
+			  ctf_hash_eq_string)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_enums = ctf_hash_create (pop[CTF_K_ENUM], ctf_hash_string,
-					ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_enums.ctn_readonly
+       = ctf_hash_create (pop[CTF_K_ENUM], ctf_hash_string,
+			  ctf_hash_eq_string)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_names = ctf_hash_create (pop[CTF_K_INTEGER] +
-					pop[CTF_K_FLOAT] +
-					pop[CTF_K_FUNCTION] +
-					pop[CTF_K_TYPEDEF] +
-					pop[CTF_K_POINTER] +
-					pop[CTF_K_VOLATILE] +
-					pop[CTF_K_CONST] +
-					pop[CTF_K_RESTRICT],
-					ctf_hash_string,
-					ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_names.ctn_readonly
+       = ctf_hash_create (pop[CTF_K_INTEGER] +
+			  pop[CTF_K_FLOAT] +
+			  pop[CTF_K_FUNCTION] +
+			  pop[CTF_K_TYPEDEF] +
+			  pop[CTF_K_POINTER] +
+			  pop[CTF_K_VOLATILE] +
+			  pop[CTF_K_CONST] +
+			  pop[CTF_K_RESTRICT],
+			  ctf_hash_string,
+			  ctf_hash_eq_string)) == NULL)
     return ENOMEM;
 
   fp->ctf_txlate = ctf_alloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
-  fp->ctf_ptrtab = ctf_alloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
+  fp->ctf_ptrtab_len = fp->ctf_typemax + 1;
+  fp->ctf_ptrtab = ctf_alloc (sizeof (uint32_t) * fp->ctf_ptrtab_len);
 
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
@@ -779,10 +785,11 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	     root-visible version so that we can be sure to find it when
 	     checking for conflicting definitions in ctf_add_type().  */
 
-	  if (((ctf_hash_lookup_type (fp->ctf_names, fp, name)) == 0)
+	  if (((ctf_hash_lookup_type (fp->ctf_names.ctn_readonly,
+				      fp, name)) == 0)
 	      || (flag & CTF_ADD_ROOT))
 	    {
-	      err = ctf_hash_define_type (fp->ctf_names, fp,
+	      err = ctf_hash_define_type (fp->ctf_names.ctn_readonly, fp,
 					  LCTF_INDEX_TO_TYPE (fp, id, child),
 					  tp->ctt_name);
 	      if (err != 0)
@@ -797,7 +804,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_FUNCTION:
-	  err = ctf_hash_insert_type (fp->ctf_names, fp,
+	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 	  if (err != 0)
@@ -805,7 +812,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_STRUCT:
-	  err = ctf_hash_define_type (fp->ctf_structs, fp,
+	  err = ctf_hash_define_type (fp->ctf_structs.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
@@ -817,7 +824,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_UNION:
-	  err = ctf_hash_define_type (fp->ctf_unions, fp,
+	  err = ctf_hash_define_type (fp->ctf_unions.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
@@ -829,7 +836,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_ENUM:
-	  err = ctf_hash_define_type (fp->ctf_enums, fp,
+	  err = ctf_hash_define_type (fp->ctf_enums.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
@@ -838,7 +845,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_TYPEDEF:
-	  err = ctf_hash_insert_type (fp->ctf_names, fp,
+	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 	  if (err != 0)
@@ -846,32 +853,20 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_FORWARD:
-	  /* Only insert forward tags into the given hash if the type or tag
-	     name is not already present.  */
-	  switch (tp->ctt_type)
-	    {
-	    case CTF_K_STRUCT:
-	      hp = fp->ctf_structs;
-	      break;
-	    case CTF_K_UNION:
-	      hp = fp->ctf_unions;
-	      break;
-	    case CTF_K_ENUM:
-	      hp = fp->ctf_enums;
-	      break;
-	    default:
-	      hp = fp->ctf_structs;
-	    }
-
-	  if (ctf_hash_lookup_type (hp, fp, name) == 0)
-	    {
-	      err = ctf_hash_insert_type (hp, fp,
-					  LCTF_INDEX_TO_TYPE (fp, id, child),
-					  tp->ctt_name);
-	      if (err != 0)
-		return err;
-	    }
-	  break;
+	  {
+	    ctf_names_t *np = ctf_name_table (fp, tp->ctt_type);
+	    /* Only insert forward tags into the given hash if the type or tag
+	       name is not already present.  */
+	    if (ctf_hash_lookup_type (np->ctn_readonly, fp, name) == 0)
+	      {
+		err = ctf_hash_insert_type (np->ctn_readonly, fp,
+					    LCTF_INDEX_TO_TYPE (fp, id, child),
+					    tp->ctt_name);
+		if (err != 0)
+		  return err;
+	      }
+	    break;
+	  }
 
 	case CTF_K_POINTER:
 	  /* If the type referenced by the pointer is in this CTF container,
@@ -886,7 +881,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
-	  err = ctf_hash_insert_type (fp->ctf_names, fp,
+	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 	  if (err != 0)
@@ -903,12 +898,14 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
     }
 
   ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
-  ctf_dprintf ("%u enum names hashed\n", ctf_hash_size (fp->ctf_enums));
+  ctf_dprintf ("%u enum names hashed\n",
+	       ctf_hash_size (fp->ctf_enums.ctn_readonly));
   ctf_dprintf ("%u struct names hashed (%d long)\n",
-	       ctf_hash_size (fp->ctf_structs), nlstructs);
+	       ctf_hash_size (fp->ctf_structs.ctn_readonly), nlstructs);
   ctf_dprintf ("%u union names hashed (%d long)\n",
-	       ctf_hash_size (fp->ctf_unions), nlunions);
-  ctf_dprintf ("%u base type names hashed\n", ctf_hash_size (fp->ctf_names));
+	       ctf_hash_size (fp->ctf_unions.ctn_readonly), nlunions);
+  ctf_dprintf ("%u base type names hashed\n",
+	       ctf_hash_size (fp->ctf_names.ctn_readonly));
 
   /* Make an additional pass through the pointer table to find pointers that
      point to anonymous typedef nodes.  If we find one, modify the pointer table
@@ -921,11 +918,11 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	{
 	  tp = LCTF_INDEX_TO_TYPEPTR (fp, id);
 
-	  if (LCTF_INFO_KIND (fp, tp->ctt_info) == CTF_K_TYPEDEF &&
-	      strcmp (ctf_strptr (fp, tp->ctt_name), "") == 0 &&
-	      LCTF_TYPE_ISCHILD (fp, tp->ctt_type) == child &&
-	      LCTF_TYPE_TO_INDEX (fp, tp->ctt_type) <= fp->ctf_typemax)
-	    fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, tp->ctt_type)] = dst;
+	  if (LCTF_INFO_KIND (fp, tp->ctt_info) == CTF_K_TYPEDEF
+	      && strcmp (ctf_strptr (fp, tp->ctt_name), "") == 0
+	      && LCTF_TYPE_ISCHILD (fp, tp->ctt_type) == child
+	      && LCTF_TYPE_TO_INDEX (fp, tp->ctt_type) <= fp->ctf_typemax)
+	      fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, tp->ctt_type)] = dst;
 	}
     }
 
@@ -1197,6 +1194,29 @@ flip_ctf (ctf_header_t *cth, unsigned char *buf)
   return flip_types (buf + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
 }
 
+/* Set up the ctl hashes in a ctf_file_t.  Called by both writable and
+   non-writable dictionary initialization.  */
+void ctf_set_ctl_hashes (ctf_file_t *fp)
+{
+  /* Initialize the ctf_lookup_by_name top-level dictionary.  We keep an
+     array of type name prefixes and the corresponding ctf_hash to use.  */
+  fp->ctf_lookups[0].ctl_prefix = "struct";
+  fp->ctf_lookups[0].ctl_len = strlen (fp->ctf_lookups[0].ctl_prefix);
+  fp->ctf_lookups[0].ctl_hash = &fp->ctf_structs;
+  fp->ctf_lookups[1].ctl_prefix = "union";
+  fp->ctf_lookups[1].ctl_len = strlen (fp->ctf_lookups[1].ctl_prefix);
+  fp->ctf_lookups[1].ctl_hash = &fp->ctf_unions;
+  fp->ctf_lookups[2].ctl_prefix = "enum";
+  fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
+  fp->ctf_lookups[2].ctl_hash = &fp->ctf_enums;
+  fp->ctf_lookups[3].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
+  fp->ctf_lookups[3].ctl_hash = &fp->ctf_names;
+  fp->ctf_lookups[4].ctl_prefix = NULL;
+  fp->ctf_lookups[4].ctl_len = 0;
+  fp->ctf_lookups[4].ctl_hash = NULL;
+}
+
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
 
 ctf_file_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
@@ -1207,7 +1227,7 @@ ctf_file_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 {
   return ctf_simple_open_internal (ctfsect, ctfsect_size, symsect, symsect_size,
 				   symsect_entsize, strsect, strsect_size, NULL,
-				   errp);
+				   0, errp);
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect and overriding the external
@@ -1217,7 +1237,8 @@ ctf_file_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
 				      const char *symsect, size_t symsect_size,
 				      size_t symsect_entsize,
 				      const char *strsect, size_t strsect_size,
-				      ctf_dynhash_t *syn_strtab, int *errp)
+				      ctf_dynhash_t *syn_strtab, int writable,
+				      int *errp)
 {
   ctf_sect_t skeleton;
 
@@ -1254,7 +1275,8 @@ ctf_file_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
       strsectp = &str_sect;
     }
 
-  return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab, errp);
+  return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab,
+			       writable, errp);
 }
 
 /* Decode the specified CTF buffer and optional symbol table, and create a new
@@ -1266,7 +1288,7 @@ ctf_file_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
-  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, errp);
+  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, 0, errp);
 }
 
 /* Like ctf_bufopen, but overriding the external strtab with a synthetic one.  */
@@ -1274,7 +1296,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 ctf_file_t *
 ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 		      const ctf_sect_t *strsect, ctf_dynhash_t *syn_strtab,
-		      int *errp)
+		      int writable, int *errp)
 {
   const ctf_preamble_t *pp;
   size_t hdrsz = sizeof (ctf_header_t);
@@ -1353,6 +1375,9 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   memset (fp, 0, sizeof (ctf_file_t));
 
+  if (writable)
+    fp->ctf_flags |= LCTF_RDWR;
+
   if ((fp->ctf_header = ctf_alloc (sizeof (struct ctf_header))) == NULL)
     {
       ctf_free (fp);
@@ -1366,7 +1391,6 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (foreign_endian)
     flip_header (hp);
   fp->ctf_openflags = hp->cth_flags;
-
   fp->ctf_size = hp->cth_stroff + hp->cth_strlen;
 
   ctf_dprintf ("ctf_bufopen: uncompressed size=%lu\n",
@@ -1515,6 +1539,14 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   ctf_set_base (fp, hp, fp->ctf_base);
 
+  /* No need to do anything else for dynamic containers: they do not support
+     symbol lookups, and the type table is maintained in the dthashes.  */
+  if (fp->ctf_flags & LCTF_RDWR)
+    {
+      fp->ctf_refcnt = 1;
+      return fp;
+    }
+
   if ((err = init_types (fp, hp)) != 0)
     goto bad;
 
@@ -1538,24 +1570,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	goto bad;
     }
 
-  /* Initialize the ctf_lookup_by_name top-level dictionary.  We keep an
-     array of type name prefixes and the corresponding ctf_hash to use.
-     NOTE: This code must be kept in sync with the code in ctf_update().  */
-  fp->ctf_lookups[0].ctl_prefix = "struct";
-  fp->ctf_lookups[0].ctl_len = strlen (fp->ctf_lookups[0].ctl_prefix);
-  fp->ctf_lookups[0].ctl_hash = fp->ctf_structs;
-  fp->ctf_lookups[1].ctl_prefix = "union";
-  fp->ctf_lookups[1].ctl_len = strlen (fp->ctf_lookups[1].ctl_prefix);
-  fp->ctf_lookups[1].ctl_hash = fp->ctf_unions;
-  fp->ctf_lookups[2].ctl_prefix = "enum";
-  fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
-  fp->ctf_lookups[2].ctl_hash = fp->ctf_enums;
-  fp->ctf_lookups[3].ctl_prefix = _CTF_NULLSTR;
-  fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
-  fp->ctf_lookups[3].ctl_hash = fp->ctf_names;
-  fp->ctf_lookups[4].ctl_prefix = NULL;
-  fp->ctf_lookups[4].ctl_len = 0;
-  fp->ctf_lookups[4].ctl_hash = NULL;
+  ctf_set_ctl_hashes (fp);
 
   if (symsect != NULL)
     {
@@ -1608,7 +1623,20 @@ ctf_file_close (ctf_file_t *fp)
       ctf_dtd_delete (fp, dtd);
     }
   ctf_dynhash_destroy (fp->ctf_dthash);
-  ctf_dynhash_destroy (fp->ctf_dtbyname);
+  if (fp->ctf_flags & LCTF_RDWR)
+    {
+      ctf_dynhash_destroy (fp->ctf_structs.ctn_writable);
+      ctf_dynhash_destroy (fp->ctf_unions.ctn_writable);
+      ctf_dynhash_destroy (fp->ctf_enums.ctn_writable);
+      ctf_dynhash_destroy (fp->ctf_names.ctn_writable);
+    }
+  else
+    {
+      ctf_hash_destroy (fp->ctf_structs.ctn_readonly);
+      ctf_hash_destroy (fp->ctf_unions.ctn_readonly);
+      ctf_hash_destroy (fp->ctf_enums.ctn_readonly);
+      ctf_hash_destroy (fp->ctf_names.ctn_readonly);
+    }
 
   for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
     {
@@ -1642,11 +1670,6 @@ ctf_file_close (ctf_file_t *fp)
   ctf_free (fp->ctf_txlate);
   ctf_free (fp->ctf_ptrtab);
 
-  ctf_hash_destroy (fp->ctf_structs);
-  ctf_hash_destroy (fp->ctf_unions);
-  ctf_hash_destroy (fp->ctf_enums);
-  ctf_hash_destroy (fp->ctf_names);
-
   ctf_free (fp->ctf_header);
   ctf_free (fp);
 }
@@ -1671,7 +1694,7 @@ ctf_get_arc (const ctf_file_t *fp)
    structure, not a pointer to it, since that is likely to become a pointer to
    freed data before the return value is used under the expected use case of
    ctf_getsect()/ ctf_file_close()/free().  */
-extern ctf_sect_t
+ctf_sect_t
 ctf_getdatasect (const ctf_file_t *fp)
 {
   return fp->ctf_data;
