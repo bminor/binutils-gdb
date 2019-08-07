@@ -385,9 +385,9 @@ get_data (void *         var,
   /* If the size_t type is smaller than the bfd_size_type, eg because
      you are building a 32-bit tool on a 64-bit host, then make sure
      that when the sizes are cast to (size_t) no information is lost.  */
-  if (sizeof (size_t) < sizeof (bfd_size_type)
-      && (   (bfd_size_type) ((size_t) size) != size
-	  || (bfd_size_type) ((size_t) nmemb) != nmemb))
+  if ((size_t) size != size
+      || (size_t) nmemb != nmemb
+      || (size_t) amt != amt)
     {
       if (reason)
 	error (_("Size truncation prevents reading %s"
@@ -397,7 +397,7 @@ get_data (void *         var,
     }
 
   /* Check for size overflow.  */
-  if (amt < nmemb)
+  if (amt / size != nmemb || (size_t) amt + 1 == 0)
     {
       if (reason)
 	error (_("Size overflow prevents reading %s"
@@ -429,10 +429,8 @@ get_data (void *         var,
   mvar = var;
   if (mvar == NULL)
     {
-      /* Check for overflow.  */
-      if (nmemb < (~(bfd_size_type) 0 - 1) / size)
-	/* + 1 so that we can '\0' terminate invalid string table sections.  */
-	mvar = malloc ((size_t) amt + 1);
+      /* + 1 so that we can '\0' terminate invalid string table sections.  */
+      mvar = malloc ((size_t) amt + 1);
 
       if (mvar == NULL)
 	{
