@@ -36,6 +36,10 @@ if {[istarget "spu*-*-*"]} then {
     set is64bitonly "yes"
 }
 
+# Debian9/Ubuntu16.10 onwards default to PIE enabled. Ensure it is disabled as
+# this causes addresses to be out of range for IHEX.
+lappend options {nopie}
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
      untested "failed to compile"
      return -1

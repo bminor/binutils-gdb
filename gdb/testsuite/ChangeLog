@@ -1,3 +1,10 @@
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* README: Add pie options.
+	* gdb.base/break-interp.exp: Ensure pie is disabled.
+	* gdb.base/dump.exp: Likewise.
+	* lib/gdb.exp (gdb_compile): Add pie option.
+
 2019-06-27  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.cp/constexpr-field.exp: Use setup_xfail.
