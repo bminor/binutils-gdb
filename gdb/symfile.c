@@ -1672,7 +1672,19 @@ symbol_file_command (const char *args, int from_tty)
 
       validate_readnow_readnever (flags);
 
+      /* Set SYMFILE_DEFER_BP_RESET because the proper displacement for a PIE
+	 (Position Independent Executable) main symbol file will only be
+	 computed by the solib_create_inferior_hook below.  Without it,
+	 breakpoint_re_set would fail to insert the breakpoints with the zero
+	 displacement.  */
+      add_flags |= SYMFILE_DEFER_BP_RESET;
+
       symbol_file_add_main_1 (name, add_flags, flags, offset);
+
+      solib_create_inferior_hook (from_tty);
+
+      /* Now it's safe to re-add the breakpoints.  */
+      breakpoint_re_set ();
     }
 }
 
