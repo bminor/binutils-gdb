@@ -1,3 +1,10 @@
+2019-08-07  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fld, fstp): Drop FloatMF from extended forms.
+	(fldcw, fnstcw, fstcw, fnstsw, fstsw): Replace FloatMF by
+	IgnoreSize.
+	* i386-tbl.h: Re-generate.
+
 2019-08-05  Barnaby Wilks  <barnaby.wilks@arm.com>
 
 	* arm-dis.c: Only accept signed variants of VQ(R)DMLAH and VQ(R)DMLASH
