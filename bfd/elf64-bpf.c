@@ -31,96 +31,6 @@
 
 #define BASEADDR(SEC)	((SEC)->output_section->vma + (SEC)->output_offset)
 
-/* Handler for PC-relative relocations, which must be handled in
-   64-bit words.  */
-
-static bfd_reloc_status_type
-bpf_elf_insn_disp_reloc (bfd *abfd,
-                         arelent *reloc_entry,
-                         asymbol *symbol,
-                         void *data,
-                         asection *input_section,
-                         bfd *output_bfd,
-                         char **error_message ATTRIBUTE_UNUSED)
-{
-  bfd_signed_vma relocation;
-  bfd_signed_vma addend;
-  reloc_howto_type *howto = reloc_entry->howto;
-
-  /* This part is from bfd_elf_generic_reloc.  */
-  if (output_bfd != NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  /* This works because partial_inplace is FALSE.  */
-  if (output_bfd != NULL)
-    return bfd_reloc_continue;
-
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
-    return bfd_reloc_outofrange;
-
-  relocation = (symbol->value
-		+ symbol->section->output_section->vma
-		+ symbol->section->output_offset);
-  /* Make it PC relative.  */
-  relocation -= (input_section->output_section->vma
-                 + input_section->output_offset);
-  relocation -= reloc_entry->address;
-  /* Make it 64-bit words.  */
-  relocation = relocation / 8;
-
-  /* Get the addend from the instruction and apply it.  */
-  switch (howto->bitsize)
-    {
-    default:
-      abort ();
-      break;
-    case 16:
-      addend = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address + 2);
-      break;
-    case 32:
-      addend = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address + 4);
-      break;
-    }
-
-  if ((addend & (((~howto->src_mask) >> 1) & howto->src_mask)) != 0)
-    addend -= (((~howto->src_mask) >> 1) & howto->src_mask) << 1;
-  relocation += addend;
-
-  /* Write out the relocated value.  */
-  switch (howto->bitsize)
-    {
-    default:
-      abort ();
-      break;
-    case 16:
-      bfd_put_16 (abfd, relocation, (bfd_byte *) data + reloc_entry->address + 2);
-      break;
-    case 32:
-      bfd_put_32 (abfd, relocation, (bfd_byte *) data + reloc_entry->address + 4);
-      break;
-    }
-
-  /* Check for overflow.  */
-  if (howto->complain_on_overflow == complain_overflow_signed)
-    {
-      bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
-      bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
-      
-      if (relocation > reloc_signed_max || relocation < reloc_signed_min)
-        return bfd_reloc_overflow;
-    }
-  else
-    abort();
-
-  return bfd_reloc_ok;
-}
-
 /* Relocation tables.  */
 static reloc_howto_type bpf_elf_howto_table [] =
 {
@@ -192,7 +102,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 	 TRUE,			/* pc_relative */
 	 32,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bpf_elf_insn_disp_reloc, /* special_function */
+	 bfd_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_DISP16",   /* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -277,7 +187,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bpf_elf_insn_disp_reloc, /* special_function */
+	 bfd_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_DISP32",   /* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -336,9 +246,9 @@ static reloc_howto_type *
 bpf_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
                         bfd_reloc_code_real_type code)
 {
-  /* Note that the bpf_elf_howto_table is indxed by the R_
-     constants.  Thus, the order that the howto records appear in the
-     table *must* match the order of the relocation types defined in
+  /* Note that the bpf_elf_howto_table is indexed by the R_ constants.
+     Thus, the order that the howto records appear in the table *must*
+     match the order of the relocation types defined in
      include/elf/bpf.h.  */
 
   switch (code)
@@ -419,6 +329,187 @@ bpf_info_to_howto (bfd *abfd, arelent *bfd_reloc,
   return TRUE;
 }
 
+/* Relocate an eBPF ELF section.
+
+   The RELOCATE_SECTION function is called by the new ELF backend linker
+   to handle the relocations for a section.
+
+   The relocs are always passed as Rela structures; if the section
+   actually uses Rel structures, the r_addend field will always be
+   zero.
+
+   This function is responsible for adjusting the section contents as
+   necessary, and (if using Rela relocs and generating a relocatable
+   output file) adjusting the reloc addend as necessary.
+
+   This function does not have to worry about setting the reloc
+   address or the reloc symbol index.
+
+   LOCAL_SYMS is a pointer to the swapped in local symbols.
+
+   LOCAL_SECTIONS is an array giving the section in the input file
+   corresponding to the st_shndx field of each local symbol.
+
+   The global hash table entry for the global symbols can be found
+   via elf_sym_hashes (input_bfd).
+
+   When generating relocatable output, this function must handle
+   STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
+   going to be the section symbol corresponding to the output
+   section, which means that the addend must be adjusted
+   accordingly.  */
+
+#define sec_addr(sec) ((sec)->output_section->vma + (sec)->output_offset)
+
+static bfd_boolean
+bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
+                          struct bfd_link_info *info,
+                          bfd *input_bfd,
+                          asection *input_section,
+                          bfd_byte *contents,
+                          Elf_Internal_Rela *relocs,
+                          Elf_Internal_Sym *local_syms,
+                          asection **local_sections)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
+
+  symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (input_bfd);
+  relend     = relocs + input_section->reloc_count;
+
+  for (rel = relocs; rel < relend; rel ++)
+    {
+      reloc_howto_type *	   howto;
+      unsigned long		   r_symndx;
+      Elf_Internal_Sym *	   sym;
+      asection *		   sec;
+      struct elf_link_hash_entry * h;
+      bfd_vma			   relocation;
+      bfd_reloc_status_type	   r;
+      const char *		   name = NULL;
+      int			   r_type ATTRIBUTE_UNUSED;
+
+      r_type = ELF64_R_TYPE (rel->r_info);
+      r_symndx = ELF64_R_SYM (rel->r_info);
+      howto  = bpf_elf_howto_table + ELF64_R_TYPE (rel->r_info);
+      h      = NULL;
+      sym    = NULL;
+      sec    = NULL;
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections [r_symndx];
+	  relocation = BASEADDR (sec) + sym->st_value;
+
+	  name = bfd_elf_string_from_elf_section
+	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
+	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	}
+      else
+	{
+	  bfd_boolean warned ATTRIBUTE_UNUSED;
+	  bfd_boolean unresolved_reloc ATTRIBUTE_UNUSED;
+	  bfd_boolean ignored ATTRIBUTE_UNUSED;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned, ignored);
+
+	  name = h->root.root.string;
+	}
+
+      if (sec != NULL && discarded_section (sec))
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, 1, relend, howto, 0, contents);
+
+      if (bfd_link_relocatable (info))
+	continue;
+
+      switch (howto->type)
+        {
+        case R_BPF_INSN_DISP16:
+        case R_BPF_INSN_DISP32:
+          {
+            bfd_signed_vma addend;
+            
+            /* Make the relocation PC-relative, and change its unit to
+               64-bit words.  */
+            relocation -= sec_addr (input_section) + rel->r_offset;
+            /* Make it 64-bit words.  */
+            relocation = relocation / 8;
+            
+            /* Get the addend from the instruction and apply it.  */
+            addend = bfd_get (howto->bitsize, input_bfd,
+                              contents + rel->r_offset
+                              + (howto->bitsize == 16 ? 2 : 4));
+                              
+            if ((addend & (((~howto->src_mask) >> 1) & howto->src_mask)) != 0)
+              addend -= (((~howto->src_mask) >> 1) & howto->src_mask) << 1;
+            relocation += addend;
+
+            /* Write out the relocated value.  */
+            bfd_put (howto->bitsize, input_bfd, relocation,
+                     contents + rel->r_offset
+                     + (howto->bitsize == 16 ? 2 : 4));
+
+            r = bfd_reloc_ok;
+            break;
+          }
+        default:
+          r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+                                        contents, rel->r_offset, relocation,
+                                        rel->r_addend);
+        }
+
+      if (r != bfd_reloc_ok)
+	{
+	  const char * msg = NULL;
+
+	  switch (r)
+	    {
+	    case bfd_reloc_overflow:
+	      (*info->callbacks->reloc_overflow)
+		(info, (h ? &h->root : NULL), name, howto->name,
+		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
+	      break;
+
+	    case bfd_reloc_undefined:
+	      (*info->callbacks->undefined_symbol)
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+	      break;
+
+	    case bfd_reloc_outofrange:
+	      msg = _("internal error: out of range error");
+	      break;
+
+	    case bfd_reloc_notsupported:
+	      if (sym != NULL) /* Only if it's not an unresolved symbol.  */
+                msg = _("internal error: relocation not supported");
+	      break;
+
+	    case bfd_reloc_dangerous:
+	      msg = _("internal error: dangerous relocation");
+	      break;
+
+	    default:
+	      msg = _("internal error: unknown error");
+	      break;
+	    }
+
+	  if (msg)
+	    (*info->callbacks->warning) (info, msg, name, input_bfd,
+					 input_section, rel->r_offset);
+	}
+    }
+
+  return TRUE;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -451,6 +542,7 @@ elf64_bpf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_backend_may_use_rel_p		1
 #define elf_backend_may_use_rela_p		0
 #define elf_backend_default_use_rela_p		0
+#define elf_backend_relocate_section		bpf_elf_relocate_section
 
 #define elf_backend_can_gc_sections		0
 
