@@ -1,3 +1,13 @@
+2019-08-07  Omair Majid  <omajid@redhat.com>
+
+	* testsuite/binutils-all/objdump.exp
+	(test_objdump_dotnet_assemblies): Fix test to distinguish errors
+	in parsing simple pei-i386 and pei-x86-64 vs parsing the newly
+	introduced machine types.
+	* testsuite/gentestdlls.c (write_simple_dll): New function.
+	(main): Generate simple and Linux-specific variants of pei-i386
+	and pei-x86-64 files so both can be used by tests.
+
 2019-08-07  Alan Modra  <amodra@gmail.com>
 
 	PR 24876

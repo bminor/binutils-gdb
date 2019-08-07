@@ -29,7 +29,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
+#define INCORRECT_USAGE 2
+#define IO_ERROR 3
 
 static void
 write_dos_header_and_stub (FILE* file)
@@ -64,6 +68,7 @@ static void
 write_pe_signature (FILE* file)
 {
   char buffer[4];
+
   buffer[0] = 'P';
   buffer[1] = 'E';
   buffer[2] = 0;
@@ -83,70 +88,90 @@ write_coff_header (FILE* file, uint16_t machine)
   buffer[1] = machine >> 0x8;
   fwrite (buffer, 2, 1, file);
   memset (buffer, 0, sizeof (buffer));
-  /* NumberOfSections = 0 */
+  /* NumberOfSections = 0.  */
   fwrite (buffer, 2, 1, file);
-  /* TimeDateStamp = 0 */
+  /* TimeDateStamp = 0.  */
   fwrite (buffer, 4, 1, file);
-  /* PointerToSymbolTable = 0 */
+  /* PointerToSymbolTable = 0.  */
   fwrite (buffer, 4, 1, file);
-  /* NumberOfSymbols = 0 */
+  /* NumberOfSymbols = 0.  */
   fwrite (buffer, 4, 1, file);
-  /* OptionalHeaderSize = 0 */
+  /* OptionalHeaderSize = 0.  */
   fwrite (buffer, 2, 1, file);
-  /* Characteristics = 0x2000 */
+  /* Characteristics = 0x2000.  */
   buffer[0] = 0x00;
   buffer[1] = 0x20;
   fwrite (buffer, 2, 1, file);
   memset (buffer, 0 , sizeof (buffer));
 }
 
+static void
+write_simple_dll (const char* name, uint16_t machine)
+{
+  FILE* file = fopen (name, "w");
+
+  if (file == NULL)
+    {
+      fprintf (stderr, "error: unable to open file for writing\n");
+      exit (IO_ERROR);
+    }
+
+  write_dos_header_and_stub (file);
+  write_pe_signature (file);
+  write_coff_header (file, machine);
+  fclose (file);
+  file = NULL;
+  printf ("wrote %s\n", name);
+}
+
 int
 main (int argc, char** argv)
 {
-  FILE* file;
+  char* program_name = argv[0];
+  char* output_directory = argv[1];
 
-  if (argc < 2)
+  if (argc < 3)
     {
-      fprintf (stderr, "usage: %s output-directory\n", argv[0]);
-      exit (2);
-    }
-  if (chdir (argv[1]) != 0)
-    {
-      fprintf (stderr, "error: unable to change directory to %s\n", argv[0]);
-      exit (2);
+      fprintf (stderr, "usage: %s output-directory format [format ...] \n\n", program_name);
+      fprintf (stderr, "format is an objdump-style format string, like pei-i386\n");
+      exit (INCORRECT_USAGE);
     }
 
-  /* Generate a simple DLL file.  */
-  file = fopen ("simple-i386.dll", "w");
-  if (file == NULL)
+  if (chdir (output_directory) != 0)
     {
-      fprintf (stderr, "error: unable to open file for writing\n");
-      exit (1);
+      fprintf (stderr, "error: unable to change directory to %s\n", output_directory);
+      exit (INCORRECT_USAGE);
     }
 
-  write_dos_header_and_stub (file);
-  write_pe_signature (file);
-  write_coff_header (file, 0x14c);
-  fclose (file);
-  printf ("wrote simple-i386.dll\n");
+  /* We generate a simple PEI format files, and then .NET Core on
+     Linux-style PEI files for a number of architectures.  As opposed
+     to the more common PEI files that contain bytecode (CIL/MSIL), many
+     .NET Core DLLs are pre-compiled for specific architectures and
+     platforms.  See https://github.com/jbevain/cecil/issues/337 for an
+     example of this value being used in practice.  */
 
-  /* Generate a sample .NET Core on Linux dll file.  As opposed to the
-     more common DLLs that contain bytecode (CIL/MSIL), many .NET Core
-     DLLs are pre-compiled for specific architectures and platforms.
-     See https://github.com/jbevain/cecil/issues/337 for an example of
-     this value being used in practice.  */
-  file = fopen ("dotnet-linux-x86-64.dll", "w");
-  if (file == NULL)
+  for (int i = 2; i < argc; i++)
     {
-      fprintf (stderr, "error: unable to open file for writing\n");
-      exit (1);
-    }
+      char* wanted_format = argv[i];
 
-  write_dos_header_and_stub (file);
-  write_pe_signature (file);
-  write_coff_header (file, 0xfd1d /* x86-64 + Linux */);
-  fclose (file);
-  printf ("wrote dotnet-linux-x86-64.dll\n");
+      if (strcmp ("pei-i386", wanted_format) == 0)
+        {
+          write_simple_dll ("simple-pei-i386.dll", 0x14c);
+
+          write_simple_dll ("linux-pei-i386.dll", 0x14c ^ 0x7b79 /* i386 + Linux */);
+        }
+      else if (strcmp ("pei-x86-64", wanted_format) == 0)
+        {
+          write_simple_dll ("simple-pei-x86-64.dll", 0x8664);
+
+          write_simple_dll ("linux-pei-x86-64.dll", 0x8664 ^ 0x7b79 /* x86-64 + Linux */);
+        }
+      else
+        {
+          fprintf (stderr, "error: can't handle format %s\n", wanted_format);
+          exit (INCORRECT_USAGE);
+        }
+    }
 
   return 0;
 }

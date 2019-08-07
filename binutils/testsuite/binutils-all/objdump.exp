@@ -740,34 +740,62 @@ proc test_objdump_dotnet_assemblies {} {
 
     set test "dotnet-assemblies"
 
-    set got [binutils_run "$base_dir/testsuite/gentestdlls" "tmpdir"]
-    set want "wrote dotnet-linux-x86-64.dll"
+    set got [binutils_run "$base_dir/testsuite/gentestdlls" "tmpdir pei-i386 pei-x86-64"]
+    set want "wrote linux-pei-x86-64.dll"
+    # The test program is hardcoded to generate valid dlls on any target
     if ![regexp $want $got] then {
-	unsupported "$test"
+        fail "$test"
     }
 
-    set test "dotnet-assemblies (32-bit)"
+    # First test an ordinary x86 PE format DLL.
+    set test "dotnet-assemblies (ordinary x86 DLL)"
     set want "file format pei-i386"
-    set got [binutils_run $OBJDUMP "-x tmpdir/simple-i386.dll"]
+    set got [binutils_run $OBJDUMP "-x tmpdir/simple-pei-i386.dll"]
     if ![regexp $want $got] then {
 	if [regexp "file format not recognized" $got] then {
+	    # If the target does not recognize vanilla x86 PE format files
+	    # then it cannot be expected to recognize .NET assemblies.  But
+	    # this means that these tests are unsupported, rather than failures.
 	    unsupported $test
 	} else {
 	    fail "$test"
 	}
+	# In either case, if cannot pass this test, then
+	# there is no point in running any further tests.
+	return
+    }
+    pass $test
+
+    # Next check a 32-bit .NET DLL.
+    set test "dotnet-assemblies (32-bit .NET)"
+    set got [binutils_run $OBJDUMP "-x tmpdir/linux-pei-i386.dll"]
+    if ![regexp $want $got] then {
+	fail "$test"
     } else {
 	pass $test
     }
 
-    set test "dotnet-assemblies (64-bit)"
+    # Next check an ordrinary x86_64 PE format DLL.
+    set test "dotnet-assemblies (ordinary x86_64 DLL)"
     set want "file format pei-x86-64"
-    set got [binutils_run $OBJDUMP "-x tmpdir/dotnet-linux-x86-64.dll"]
+    set got [binutils_run $OBJDUMP "-x tmpdir/simple-pei-x86-64.dll"]
     if ![regexp $want $got] then {
 	if [regexp "file format not recognized" $got] then {
+	    # If the target does not support 64-bit PE format
+	    # files, then the following tests are unsupported.
 	    unsupported $test
 	} else {
 	    fail "$test"
 	}
+	return
+    }
+    pass $test
+
+    # Finally check a 64-bit .NET DLL.
+    set test "dotnet-assemblies (64-bit)"
+    set got [binutils_run $OBJDUMP "-x tmpdir/linux-pei-x86-64.dll"]
+    if ![regexp $want $got] then {
+	fail "$test"
     } else {
 	pass $test
     }
