@@ -1,3 +1,19 @@
+2019-08-07  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_file_t) <ctf_add_processing>: New.
+	* ctf-open.c (ctf_file_close): Free it.
+	* ctf-create.c (ctf_serialize): Adjust.
+	(membcmp): When reporting a conflict due to an error, report the
+	error.
+	(ctf_add_type): Turn into a ctf_add_processing wrapper.  Rename to...
+	(ctf_add_type_internal): ... this.  Hand back types we are already
+	in the middle of adding immediately.  Hand back structs/unions with
+	the same number of members immediately.  Do not walk the dynamic
+	list.  Call ctf_add_type_internal, not ctf_add_type.  Handle
+	forwards promoted to other types and the inverse case identically.
+	Add structs to the mapping as soon as we intern them, before they
+	gain any members.
+
 2019-08-09  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_names_t): New.
