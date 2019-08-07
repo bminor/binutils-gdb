@@ -7574,7 +7574,8 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 	}
       offset -= aux->info_addr;
       /* PR 17531: file: 0997b4d1.  */
-      if (offset >= aux->info_size)
+      if (offset >= aux->info_size
+	  || aux->info_size - offset < 8)
 	{
 	  warn (_("Invalid offset %lx in table entry %ld\n"),
 		(long) tp->info.offset, (long) (tp - aux->table));
