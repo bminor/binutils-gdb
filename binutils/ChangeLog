@@ -1,3 +1,10 @@
+2019-08-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 24777
+	* doc/binutils.texi: Ensure consistent formating of title strings
+	for man pages.  Extend the title of the size man page to be more
+	informative.
+
 2019-08-07  Omair Majid  <omajid@redhat.com>
 
 	* testsuite/binutils-all/objdump.exp

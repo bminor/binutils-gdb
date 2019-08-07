@@ -2080,7 +2080,7 @@ ld(1), objdump(1), and the Info entries for @file{binutils}.
 @cindex object file information
 @kindex objdump
 
-@c man title objdump display information from object files.
+@c man title objdump display information from object files
 
 @smallexample
 @c man begin SYNOPSIS objdump
@@ -2812,7 +2812,7 @@ nm(1), readelf(1), and the Info entries for @file{binutils}.
 @cindex archive contents
 @cindex symbol index
 
-@c man title ranlib generate index to archive.
+@c man title ranlib generate an index to an archive
 
 @smallexample
 @c man begin SYNOPSIS ranlib
@@ -2893,7 +2893,7 @@ ar(1), nm(1), and the Info entries for @file{binutils}.
 @kindex size
 @cindex section sizes
 
-@c man title size list section sizes and total size.
+@c man title size list section sizes and total size of binary files
 
 @smallexample
 @c man begin SYNOPSIS size
@@ -2909,13 +2909,13 @@ size [@option{-A}|@option{-B}|@option{-G}|@option{--format=}@var{compatibility}]
 
 @c man begin DESCRIPTION size
 
-The @sc{gnu} @command{size} utility lists the section sizes---and the total
-size---for each of the object or archive files @var{objfile} in its
-argument list.  By default, one line of output is generated for each
-object file or each module in an archive.
+The @sc{gnu} @command{size} utility lists the section sizes and the total
+size for each of the binary files @var{objfile} on its argument list.
+By default, one line of output is generated for each file or each
+module if the file is an archive.
 
-@var{objfile}@dots{} are the object files to be examined.
-If none are specified, the file @code{a.out} will be used.
+@var{objfile}@dots{} are the files to be examined.  If none are
+specified, the file @code{a.out} will be used instead.
 
 @c man end
 
@@ -3040,7 +3040,7 @@ ar(1), objdump(1), readelf(1), and the Info entries for @file{binutils}.
 @cindex printing strings
 @cindex strings, printing
 
-@c man title strings print the strings of printable characters in files.
+@c man title strings print the sequences of printable characters in files
 
 @smallexample
 @c man begin SYNOPSIS strings
@@ -3182,7 +3182,7 @@ and the Info entries for @file{binutils}.
 @cindex discarding symbols
 @cindex symbols, discarding
 
-@c man title strip Discard symbols from object files.
+@c man title strip discard symbols and other data from object files
 
 @smallexample
 @c man begin SYNOPSIS strip
@@ -3472,7 +3472,7 @@ the Info entries for @file{binutils}.
 @kindex c++filt
 @cindex demangling C++ symbols
 
-@c man title cxxfilt Demangle C++ and Java symbols.
+@c man title cxxfilt demangle C++ and Java symbols
 
 @smallexample
 @c man begin SYNOPSIS cxxfilt
@@ -3675,7 +3675,7 @@ c++filt @var{option} @var{symbol}
 @kindex addr2line
 @cindex address to file name and line number
 
-@c man title addr2line convert addresses into file names and line numbers.
+@c man title addr2line convert addresses into file names and line numbers
 
 @smallexample
 @c man begin SYNOPSIS addr2line
@@ -3855,7 +3855,7 @@ Info entries for @file{binutils}.
 utilities, since it is only useful for Windows targets.
 @end quotation
 
-@c man title windmc generates Windows message resources.
+@c man title windmc generates Windows message resources
 
 @smallexample
 @c man begin SYNOPSIS windmc
@@ -4016,7 +4016,7 @@ the Info entries for @file{binutils}.
 utilities, since it is only useful for Windows targets.
 @end quotation
 
-@c man title windres manipulate Windows resources.
+@c man title windres manipulate Windows resources
 
 @smallexample
 @c man begin SYNOPSIS windres
@@ -4222,7 +4222,7 @@ binary utilities, since it is only useful for those targets which
 support DLLs.
 @end quotation
 
-@c man title dlltool Create files needed to build and use DLLs.
+@c man title dlltool create files needed to build and use DLLs
 
 @smallexample
 @c man begin SYNOPSIS dlltool
@@ -4613,7 +4613,7 @@ The Info pages for @file{binutils}.
 @cindex ELF file information
 @kindex readelf
 
-@c man title readelf Displays information about ELF files.
+@c man title readelf display information about ELF files
 
 @smallexample
 @c man begin SYNOPSIS readelf
@@ -4872,7 +4872,7 @@ objdump(1), and the Info entries for @file{binutils}.
 @cindex Update ELF header
 @kindex elfedit
 
-@c man title elfedit Update ELF header and program property of ELF files.
+@c man title elfedit update ELF header and program property of ELF files
 
 @smallexample
 @c man begin SYNOPSIS elfedit
