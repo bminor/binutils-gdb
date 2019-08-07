@@ -525,6 +525,7 @@ ctf_serialize (ctf_file_t *fp)
   nfp->ctf_dvhash = fp->ctf_dvhash;
   nfp->ctf_dvdefs = fp->ctf_dvdefs;
   nfp->ctf_dtoldid = fp->ctf_dtoldid;
+  nfp->ctf_add_processing = fp->ctf_add_processing;
   nfp->ctf_snapshots = fp->ctf_snapshots + 1;
   nfp->ctf_specific = fp->ctf_specific;
   nfp->ctf_ptrtab = fp->ctf_ptrtab;
@@ -553,6 +554,7 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_str_atoms = NULL;
   fp->ctf_prov_strtab = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
+  fp->ctf_add_processing = NULL;
   fp->ctf_ptrtab = NULL;
   fp->ctf_link_inputs = NULL;
   fp->ctf_link_outputs = NULL;
@@ -1527,7 +1529,8 @@ enumcmp (const char *name, int value, void *arg)
 
   if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) < 0)
     {
-      ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
+      ctf_dprintf ("Conflict due to member %s iteration error: %s.\n", name,
+		   ctf_errmsg (ctf_errno (ctb->ctb_file)));
       return 1;
     }
   if (value != bvalue)
@@ -1557,7 +1560,8 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
 
   if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) < 0)
     {
-      ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
+      ctf_dprintf ("Conflict due to member %s iteration error: %s.\n", name,
+		   ctf_errmsg (ctf_errno (ctb->ctb_file)));
       return 1;
     }
   if (ctm.ctm_offset != offset)
@@ -1603,11 +1607,13 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
    following the source type's links and embedded member types.  If the
    destination container already contains a named type which has the same
    attributes, then we succeed and return this type but no changes occur.  */
-ctf_id_t
-ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
+static ctf_id_t
+ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type,
+		       ctf_file_t *proc_tracking_fp)
 {
   ctf_id_t dst_type = CTF_ERR;
   uint32_t dst_kind = CTF_K_UNKNOWN;
+  ctf_file_t *tmp_fp = dst_fp;
   ctf_id_t tmp;
 
   const char *name;
@@ -1618,7 +1624,6 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   ctf_encoding_t src_en, dst_en;
   ctf_arinfo_t src_ar, dst_ar;
 
-  ctf_dtdef_t *dtd;
   ctf_funcinfo_t ctc;
 
   ctf_id_t orig_src_type = src_type;
@@ -1637,6 +1642,33 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   kind = LCTF_INFO_KIND (src_fp, src_tp->ctt_info);
   flag = LCTF_INFO_ISROOT (src_fp, src_tp->ctt_info);
   vlen = LCTF_INFO_VLEN (src_fp, src_tp->ctt_info);
+
+  /* If this is a type we are currently in the middle of adding, hand it
+     straight back.  (This lets us handle self-referential structures without
+     considering forwards and empty structures the same as their completed
+     forms.)  */
+
+  tmp = ctf_type_mapping (src_fp, src_type, &tmp_fp);
+
+  if (tmp != 0)
+    {
+      if (ctf_dynhash_lookup (proc_tracking_fp->ctf_add_processing,
+                              (void *) (uintptr_t) src_type))
+	return tmp;
+
+      /* If this type has already been added from this container, and is the same
+         kind and (if a struct or union) has the same number of members, hand it
+         straight back.  */
+
+      if ((ctf_type_kind_unsliced (tmp_fp, tmp) == (int) kind)
+	  && (kind == CTF_K_STRUCT || kind == CTF_K_UNION
+	      || kind == CTF_K_ENUM))
+        {
+          if ((dst_tp = ctf_lookup_by_id (&tmp_fp, dst_type)) != NULL)
+	    if (vlen == LCTF_INFO_VLEN (tmp_fp, dst_tp->ctt_info))
+	      return tmp;
+        }
+    }
 
   forward_kind = kind;
   if (kind == CTF_K_FORWARD)
@@ -1697,6 +1729,9 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	  if ((dst_tp = ctf_lookup_by_id (&fp, dst_type)) == NULL)
 	    return CTF_ERR;
 
+	  if (ctf_type_encoding (dst_fp, dst_type, &dst_en) != 0)
+	    return CTF_ERR;			/* errno set for us.  */
+
 	  if (LCTF_INFO_ISROOT (fp, dst_tp->ctt_info) & CTF_ADD_ROOT)
 	    {
 	      /* The type that we found in the hash is also root-visible.  If
@@ -1704,9 +1739,6 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 		 declare a conflict.  Note: slices are not certain to match
 		 even if there is no conflict: we must check the contained type
 		 too.  */
-
-	      if (ctf_type_encoding (dst_fp, dst_type, &dst_en) != 0)
-		return CTF_ERR;			/* errno set for us.  */
 
 	      if (memcmp (&src_en, &dst_en, sizeof (ctf_encoding_t)) == 0)
 		{
@@ -1723,70 +1755,16 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	    }
 	  else
 	    {
-	      /* We found a non-root-visible type in the hash.  We reset
-	         dst_type to ensure that we continue to look for a possible
-	         conflict in the pending list.  */
+	      /* We found a non-root-visible type in the hash.  If its encoding
+	         is the same, we can reuse it, unless it is a slice.  */
 
-	      dst_type = CTF_ERR;
-	    }
-	}
-    }
-
-  /* If the non-empty name was not found in the appropriate hash, search
-     the list of pending dynamic definitions that are not yet committed.
-     If a matching name and kind are found, assume this is the type that
-     we are looking for.  This is necessary to permit ctf_add_type() to
-     operate recursively on entities such as a struct that contains a
-     pointer member that refers to the same struct type.  */
-
-  if (dst_type == CTF_ERR && name[0] != '\0')
-    {
-      for (dtd = ctf_list_prev (&dst_fp->ctf_dtdefs); dtd != NULL
-	     && LCTF_TYPE_TO_INDEX (src_fp, dtd->dtd_type) > dst_fp->ctf_dtoldid;
-	   dtd = ctf_list_prev (dtd))
-	{
-          const char *ctt_name;
-
-          if (LCTF_INFO_KIND (src_fp, dtd->dtd_data.ctt_info) == kind
-	      && dtd->dtd_data.ctt_name
-              && ((ctt_name = ctf_strraw (src_fp, dtd->dtd_data.ctt_name)) != NULL)
-              && strcmp (ctt_name, name) == 0)
-	    {
-	      int sroot;	/* Is the src root-visible?  */
-	      int droot;	/* Is the dst root-visible?  */
-	      int match;	/* Do the encodings match?  */
-
-	      if (kind != CTF_K_INTEGER && kind != CTF_K_FLOAT && kind != CTF_K_SLICE)
-		{
-		  ctf_add_type_mapping (src_fp, src_type, dst_fp, dtd->dtd_type);
-		  return dtd->dtd_type;
-		}
-
-	      sroot = (flag & CTF_ADD_ROOT);
-	      droot = (LCTF_INFO_ISROOT (dst_fp,
-					 dtd->dtd_data.
-					 ctt_info) & CTF_ADD_ROOT);
-
-	      match = (memcmp (&src_en, &dtd->dtd_u.dtu_enc,
-			       sizeof (ctf_encoding_t)) == 0);
-
-	      /* If the types share the same encoding then return the id of the
-		 first unless one type is root-visible and the other is not; in
-		 that case the new type must get a new id if a match is never
-		 found.  Note: slices are not certain to match even if there is
-		 no conflict: we must check the contained type too. */
-
-	      if (match && sroot == droot)
+	      if (memcmp (&src_en, &dst_en, sizeof (ctf_encoding_t)) == 0)
 		{
 		  if (kind != CTF_K_SLICE)
 		    {
-		      ctf_add_type_mapping (src_fp, src_type, dst_fp, dtd->dtd_type);
-		      return dtd->dtd_type;
+		      ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
+		      return dst_type;
 		    }
-		}
-	      else if (!match && sroot && droot)
-		{
-		  return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 		}
 	    }
 	}
@@ -1800,10 +1778,18 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   dst.ctb_type = dst_type;
   dst.ctb_dtd = NULL;
 
-  /* Now perform kind-specific processing.  If dst_type is CTF_ERR, then
-     we add a new type with the same properties as src_type to dst_fp.
-     If dst_type is not CTF_ERR, then we verify that dst_type has the
-     same attributes as src_type.  We recurse for embedded references.  */
+  /* Now perform kind-specific processing.  If dst_type is CTF_ERR, then we add
+     a new type with the same properties as src_type to dst_fp.  If dst_type is
+     not CTF_ERR, then we verify that dst_type has the same attributes as
+     src_type.  We recurse for embedded references.  Before we start, we note
+     that we are processing this type, to prevent infinite recursion: we do not
+     re-process any type that appears in this list.  The list is emptied
+     wholesale at the end of processing everything in this recursive stack.  */
+
+  if (ctf_dynhash_insert (proc_tracking_fp->ctf_add_processing,
+                          (void *) (uintptr_t) src_type, (void *) 1) < 0)
+    return ctf_set_errno (dst_fp, ENOMEM);
+
   switch (kind)
     {
     case CTF_K_INTEGER:
@@ -1822,7 +1808,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       /* We have checked for conflicting encodings: now try to add the
 	 contained type.  */
       src_type = ctf_type_reference (src_fp, src_type);
-      dst_type = ctf_add_type (dst_fp, src_fp, src_type);
+      src_type = ctf_add_type_internal (dst_fp, src_fp, src_type,
+					proc_tracking_fp);
 
       if (src_type == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
@@ -1835,7 +1822,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
       src_type = ctf_type_reference (src_fp, src_type);
-      src_type = ctf_add_type (dst_fp, src_fp, src_type);
+      src_type = ctf_add_type_internal (dst_fp, src_fp, src_type,
+					proc_tracking_fp);
 
       if (src_type == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
@@ -1848,8 +1836,11 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
 
       src_ar.ctr_contents =
-	ctf_add_type (dst_fp, src_fp, src_ar.ctr_contents);
-      src_ar.ctr_index = ctf_add_type (dst_fp, src_fp, src_ar.ctr_index);
+	ctf_add_type_internal (dst_fp, src_fp, src_ar.ctr_contents,
+			       proc_tracking_fp);
+      src_ar.ctr_index = ctf_add_type_internal (dst_fp, src_fp,
+						src_ar.ctr_index,
+						proc_tracking_fp);
       src_ar.ctr_nelems = src_ar.ctr_nelems;
 
       if (src_ar.ctr_contents == CTF_ERR || src_ar.ctr_index == CTF_ERR)
@@ -1876,7 +1867,9 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       break;
 
     case CTF_K_FUNCTION:
-      ctc.ctc_return = ctf_add_type (dst_fp, src_fp, src_tp->ctt_type);
+      ctc.ctc_return = ctf_add_type_internal (dst_fp, src_fp,
+					      src_tp->ctt_type,
+					      proc_tracking_fp);
       ctc.ctc_argc = 0;
       ctc.ctc_flags = 0;
 
@@ -1893,6 +1886,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	int errs = 0;
 	size_t size;
 	ssize_t ssize;
+	ctf_dtdef_t *dtd;
 
 	/* Technically to match a struct or union we need to check both
 	   ways (src members vs. dst, dst members vs. src) but we make
@@ -1902,7 +1896,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	   This optimization can be defeated for unions, but is so
 	   pathological as to render it irrelevant for our purposes.  */
 
-	if (dst_type != CTF_ERR && dst_kind != CTF_K_FORWARD)
+	if (dst_type != CTF_ERR && kind != CTF_K_FORWARD
+	    && dst_kind != CTF_K_FORWARD)
 	  {
 	    if (ctf_type_size (src_fp, src_type) !=
 		ctf_type_size (dst_fp, dst_type))
@@ -1936,6 +1931,10 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	dst.ctb_type = dst_type;
 	dst.ctb_dtd = dtd;
 
+        /* Pre-emptively add this struct to the type mapping so that
+           structures that refer to themselves work.  */
+        ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
+
 	if (ctf_member_iter (src_fp, src_type, membadd, &dst) != 0)
 	  errs++;	       /* Increment errs and fail at bottom of case.  */
 
@@ -1963,12 +1962,22 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
 	     dmd != NULL; dmd = ctf_list_next (dmd))
 	  {
-	    if ((dmd->dmd_type = ctf_add_type (dst_fp, src_fp,
-					       dmd->dmd_type)) == CTF_ERR)
-	      {
-		if (ctf_errno (dst_fp) != ECTF_NONREPRESENTABLE)
-		  errs++;
-	      }
+            ctf_file_t *dst = dst_fp;
+            ctf_id_t memb_type;
+
+	    memb_type = ctf_type_mapping (src_fp, dmd->dmd_type, &dst);
+	    if (memb_type == 0)
+              {
+                if ((dmd->dmd_type =
+		     ctf_add_type_internal (dst_fp, src_fp, dmd->dmd_type,
+					    proc_tracking_fp)) == CTF_ERR)
+                  {
+                    if (ctf_errno (dst_fp) != ECTF_NONREPRESENTABLE)
+                      errs++;
+                  }
+              }
+            else
+              dmd->dmd_type = memb_type;
 	  }
 
 	if (errs)
@@ -1977,7 +1986,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
       }
 
     case CTF_K_ENUM:
-      if (dst_type != CTF_ERR && dst_kind != CTF_K_FORWARD)
+      if (dst_type != CTF_ERR && kind != CTF_K_FORWARD
+	  && dst_kind != CTF_K_FORWARD)
 	{
 	  if (ctf_enum_iter (src_fp, src_type, enumcmp, &dst)
 	      || ctf_enum_iter (dst_fp, dst_type, enumcmp, &src))
@@ -2003,7 +2013,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
     case CTF_K_TYPEDEF:
       src_type = ctf_type_reference (src_fp, src_type);
-      src_type = ctf_add_type (dst_fp, src_fp, src_type);
+      src_type = ctf_add_type_internal (dst_fp, src_fp, src_type,
+					proc_tracking_fp);
 
       if (src_type == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
@@ -2017,9 +2028,8 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 	 equivalent.  */
 
       if (dst_type == CTF_ERR)
-	{
 	  dst_type = ctf_add_typedef (dst_fp, flag, name, src_type);
-	}
+
       break;
 
     default:
@@ -2029,6 +2039,27 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
   if (dst_type != CTF_ERR)
     ctf_add_type_mapping (src_fp, orig_src_type, dst_fp, dst_type);
   return dst_type;
+}
+
+ctf_id_t
+ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
+{
+  ctf_id_t id;
+
+  if (!src_fp->ctf_add_processing)
+    src_fp->ctf_add_processing = ctf_dynhash_create (ctf_hash_integer,
+                                                     ctf_hash_eq_integer,
+                                                     NULL, NULL);
+
+  /* We store the hash on the source, because it contains only source type IDs:
+     but callers will invariably expect errors to appear on the dest.  */
+  if (!src_fp->ctf_add_processing)
+    return (ctf_set_errno (dst_fp, ENOMEM));
+
+  id = ctf_add_type_internal (dst_fp, src_fp, src_type, src_fp);
+  ctf_dynhash_empty (src_fp->ctf_add_processing);
+
+  return id;
 }
 
 /* Write the compressed CTF data stream to the specified gzFile descriptor.  */
