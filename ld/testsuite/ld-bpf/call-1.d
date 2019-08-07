@@ -3,7 +3,6 @@
 #source: bar.s
 #objdump: -dr
 #ld: -EL
-#warning: .*cannot find entry symbol _start.*
 #name: CALL with disp32 reloc
 
 .*: +file format .*bpf.*

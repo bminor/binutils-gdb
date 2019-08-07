@@ -40,9 +40,14 @@ if { ![check_compiler_available] } {
     set flags [big_or_little_endian]
 
     # Using -e start prevents the SunOS linker from trying to build a
-    # shared library.
-    send_log "$ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o\n"
-    set exec_output [run_host_cmd "$ld" "-e start $flags -o tmpdir/undefined tmpdir/undefined.o"]
+    # shared library.  But don't use an entry point in BPF targets.
+    switch -glob $target_triplet {
+        bpf-*-* { set entry "" }
+        * { set entry "-e start" }
+    }
+
+    send_log "$ld $entry $flags -o tmpdir/undefined tmpdir/undefined.o\n"
+    set exec_output [run_host_cmd "$ld" "$entry $flags -o tmpdir/undefined tmpdir/undefined.o"]
 
     send_log "$exec_output\n"
     verbose "$exec_output"
@@ -141,6 +146,9 @@ if { ![check_compiler_available] } {
     # See comments above for Xtensa.
     setup_xfail xtensa*-*-linux*
     setup_xfail hppa*64*-*-*
+
+    # eBPF doesn't support dwarf yet.
+    setup_xfail bpf-*-*
 
     checkund $ml $testline
 }

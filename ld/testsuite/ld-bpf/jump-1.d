@@ -3,7 +3,6 @@
 #source: bar.s
 #objdump: -dr
 #ld: -EL
-#warning: .*cannot find entry symbol _start.*
 #name: jump with disp16 reloc
 
 .*: +file format .*bpf.*

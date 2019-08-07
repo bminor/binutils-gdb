@@ -1,3 +1,16 @@
+2019-08-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* scripttempl/elf64bpf.sc: Adapted from elf.sc.
+	* emulparams/elf64bpf.sh (SCRIPT_NAME): Use elf64bpf.
+	(EMBEDDED): Define.
+	* testsuite/ld-bpf/call-1.d: Do not expect a warning regarding an
+	undefined entry symbol.
+	* testsuite/ld-bpf/jump-1.d: Likewise.
+	* testsuite/ld-undefined/undefined.exp: Do not pass '-e entry' to
+	ld in BPF targets, and do not expect line number information.
+	* testsuite/ld-srec/srec.exp (run_srec_test): xfail s-record tests
+	in BPF targets.
+
 2019-08-06  Alan Modra  <amodra@gmail.com>
 
 	PR 24873

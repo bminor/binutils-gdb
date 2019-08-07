@@ -428,6 +428,9 @@ setup_xfail "tile*-*-*"
 # The S-record linker is not supported for C-SKY.
 setup_xfail "csky*-*-*"
 
+# The S-record linker is not supported for eBPF.
+setup_xfail "bpf-*-*"
+
 run_srec_test $test1 "tmpdir/sr1.o tmpdir/sr2.o"
 
 # Now try linking a C++ program with global constructors and
@@ -464,6 +467,7 @@ setup_xfail "score-*-*"
 setup_xfail "bfin-*-linux-uclibc"
 setup_xfail "tile*-*-*"
 setup_xfail "csky*-*-*"
+setup_xfail "bpf-*-*"
 
 run_srec_test $test2 "tmpdir/sr3.o"
 
