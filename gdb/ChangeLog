@@ -1,3 +1,11 @@
+2019-05-28  Alan Hayward  <alan.hayward@arm.com>
+
+	* event-top.c: Remove include comment.
+	* inflow.c (class scoped_ignore_sigttou): Move from here...
+	* inflow.h (class scoped_ignore_sigttou): ...to here.
+	* ser-unix.c (hardwire_drain_output): Block SIGTTOU during drain.
+	* top.c:  Remove include comment.
+
 2019-08-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* symfile.c (symbol_file_command): Call solib_create_inferior_hook.
