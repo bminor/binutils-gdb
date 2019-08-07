@@ -80,6 +80,14 @@ ctf_list_delete (ctf_list_t *lp, void *existing)
     lp->l_prev = p->l_prev;
 }
 
+/* Return 1 if the list is empty.  */
+
+int
+ctf_list_empty_p (ctf_list_t *lp)
+{
+  return (lp->l_next == NULL && lp->l_prev == NULL);
+}
+
 /* Convert a 32-bit ELF symbol into Elf64 and return a pointer to it.  */
 
 Elf64_Sym *

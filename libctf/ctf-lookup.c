@@ -161,8 +161,8 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 		    }
 		}
 
-	      if ((type = ctf_hash_lookup_type (lp->ctl_hash, fp,
-						fp->ctf_tmp_typeslice)) == 0)
+	      if ((type = ctf_lookup_by_rawhash (fp, lp->ctl_hash,
+						 fp->ctf_tmp_typeslice)) == 0)
 		{
 		  (void) ctf_set_errno (fp, ECTF_NOTYPE);
 		  goto err;
@@ -322,13 +322,6 @@ ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
       return NULL;
     }
 
-  idx = LCTF_TYPE_TO_INDEX (fp, type);
-  if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
-    {
-      *fpp = fp;		/* Function returns ending CTF container.  */
-      return (LCTF_INDEX_TO_TYPEPTR (fp, idx));
-    }
-
   /* If this container is writable, check for a dynamic type.  */
 
   if (fp->ctf_flags & LCTF_RDWR)
@@ -340,7 +333,19 @@ ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
 	  *fpp = fp;
 	  return &dtd->dtd_data;
 	}
+      (void) ctf_set_errno (*fpp, ECTF_BADID);
+      return NULL;
     }
+
+  /* Check for a type in the static portion.  */
+
+  idx = LCTF_TYPE_TO_INDEX (fp, type);
+  if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
+    {
+      *fpp = fp;		/* Function returns ending CTF container.  */
+      return (LCTF_INDEX_TO_TYPEPTR (fp, idx));
+    }
+
   (void) ctf_set_errno (*fpp, ECTF_BADID);
   return NULL;
 }

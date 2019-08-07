@@ -267,6 +267,9 @@ arc_write_one_ctf (ctf_file_t * f, int fd, size_t threshold)
   size_t ctfsz_len;
   int (*writefn) (ctf_file_t * fp, int fd);
 
+  if (ctf_serialize (f) < 0)
+    return f->ctf_errno * -1;
+
   if ((off = lseek (fd, 0, SEEK_CUR)) < 0)
     return errno * -1;
 
