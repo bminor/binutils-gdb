@@ -1,3 +1,13 @@
+2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command Options): Use -p and -pretty in the example,
+	as -r is ambiguous.  Update the print - TAB TAB completion result.
+	(Data): Document new option -raw-values.  Use -p and -pretty in the
+	 example, as -r is ambiguous.
+	(Print Settings): Document set print raw values.
+	(Pretty-Printer Commands): Document interaction between enabled
+	pretty printers and -raw-values/-raw-frame-arguments.
+
 2019-12-10  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (gdb.prompt): Use correct quotes in example.

@@ -199,3 +199,24 @@ gdb_test_no_output "python enable_lookup_function ()"
 
 gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
     "print ss enabled #2"
+
+gdb_test "print -raw-values -- ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}" \
+    "print -raw-values -- ss"
+
+gdb_test "print -raw-values on -- ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}" \
+    "print -raw-values on -- ss"
+
+gdb_test "with print raw-values -- print ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}" \
+    "with print raw-values -- print ss"
+
+# Test interaction between /r format and raw-values option:
+#   When /r is not present, raw-values option tells to bypass (or not) the pretty printers.
+#     (these cases are tested above).
+#   When /r is present, it must override the option raw-values off.
+gdb_test "print /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
+
+gdb_test "with print raw-values off -- print /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
+
+gdb_test "print -raw-values off -- /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
+
+

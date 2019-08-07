@@ -1,3 +1,8 @@
+2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/options.exp: Add -raw-values in the print completion list.
+	* gdb.python/py-prettyprint.exp: Add tests for -raw-values.
+
 2019-12-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.threads/omp-par-scope.c: New file.

@@ -148,6 +148,12 @@ show print max-depth
   The default max-depth is 20, but this can be set to unlimited to get
   the old behavior back.
 
+set print raw-values [on|off]
+show print raw-values
+  By default, GDB applies the enabled pretty printers when printing a
+  value.  This allows to ignore the enabled pretty printers for a series
+  of commands.  The default is 'off'.
+
 set logging debugredirect [on|off]
   By default, GDB debug output will go to both the terminal and the logfile.
   Set if you want debug output to go only to the log file.
@@ -303,6 +309,7 @@ focus, winheight, +, -, >, <
       -null-stop [on|off]
       -object [on|off]
       -pretty [on|off]
+      -raw-values [on|off]
       -repeats NUMBER|unlimited
       -static-members [on|off]
       -symbol [on|off]
@@ -347,11 +354,11 @@ focus, winheight, +, -, >, <
    "on" if omitted.  This allows writing compact command invocations,
    like for example:
 
-    (gdb) p -r -p -o 0 -- *myptr
+    (gdb) p -ra -p -o 0 -- *myptr
 
    The above is equivalent to:
 
-    (gdb) print -raw -pretty -object off -- *myptr
+    (gdb) print -raw-values -pretty -object off -- *myptr
 
   ** The "info types" command now supports the '-q' flag to disable
      printing of some header information in a similar fashion to "info

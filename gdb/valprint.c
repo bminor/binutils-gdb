@@ -3198,6 +3198,16 @@ Use \"unlimited\" to print the complete structure.")
     NULL, /* help_doc */
   },
 
+  boolean_option_def {
+    "raw-values",
+    [] (value_print_options *opt) { return &opt->raw; },
+    NULL, /* show_cmd_cb */
+    N_("Set whether to print values in raw form."),
+    N_("Show whether to print values in raw form."),
+    N_("If set, values are printed in raw form, bypassing any\n\
+pretty-printers for that value.")
+  },
+
   uinteger_option_def {
     "repeats",
     [] (value_print_options *opt) { return &opt->repeat_count_threshold; },

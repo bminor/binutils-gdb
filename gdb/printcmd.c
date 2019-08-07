@@ -1152,6 +1152,9 @@ print_command_parse_format (const char **expp, const char *cmdname,
 {
   const char *exp = *expp;
 
+  /* opts->raw value might already have been set by 'set print raw-values'
+     or by using 'print -raw-values'.
+     So, do not set opts->raw to 0, only set it to 1 if /r is given.  */
   if (exp && *exp == '/')
     {
       format_data fmt;
@@ -1162,12 +1165,11 @@ print_command_parse_format (const char **expp, const char *cmdname,
       last_format = fmt.format;
 
       opts->format = fmt.format;
-      opts->raw = fmt.raw;
+      opts->raw = opts->raw || fmt.raw;
     }
   else
     {
       opts->format = 0;
-      opts->raw = 0;
     }
 
   *expp = exp;

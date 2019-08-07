@@ -1949,8 +1949,8 @@ Some commands take raw input as argument.  For example, the print
 command processes arbitrary expressions in any of the languages
 supported by @value{GDBN}.  With such commands, because raw input may
 start with a leading dash that would be confused with an option or any
-of its abbreviations, e.g.@: @code{print -r} (short for @code{print
--raw} or printing negative @code{r}?), if you specify any command
+of its abbreviations, e.g.@: @code{print -p} (short for @code{print
+-pretty} or printing negative @code{p}?), if you specify any command
 option, then you must use a double-dash (@code{--}) delimiter to
 indicate the end of options.
 
@@ -1976,10 +1976,10 @@ on @code{-} after the command name.  For example:
 
 @smallexample
 (@value{GDBP}) print -@key{TAB}@key{TAB}
--address         -max-depth       -repeats         -vtbl
--array           -null-stop       -static-members
--array-indexes   -object          -symbol
--elements        -pretty          -union
+-address         -max-depth       -raw-values      -union
+-array           -null-stop       -repeats         -vtbl
+-array-indexes   -object          -static-members
+-elements        -pretty          -symbol
 @end smallexample
 
 Completion will in some cases guide you with a suggestion of what kind
@@ -9646,6 +9646,11 @@ Set printing C@t{++} virtual function tables.  Related setting:
 Set pretty formatting of structures.  Related setting: @ref{set print
 pretty}.
 
+@item -raw-values [@code{on}|@code{off}]
+Set whether to print values in raw form, bypassing any
+pretty-printers for that value.  Related setting: @ref{set print
+raw-values}.
+
 @item -repeats @var{number-of-repeats}|@code{unlimited}
 Set threshold for repeated print elements.  @code{unlimited} causes
 all elements to be individually printed.  Related setting: @ref{set
@@ -9673,17 +9678,17 @@ may look like options (including abbreviations), if you specify any
 command option, then you must use a double dash (@code{--}) to mark
 the end of option processing.
 
-For example, this prints the value of the @code{-r} expression:
+For example, this prints the value of the @code{-p} expression:
 
 @smallexample
-(@value{GDBP}) print -r
+(@value{GDBP}) print -p
 @end smallexample
 
 While this repeats the last value in the value history (see below)
-with the @code{-raw} option in effect:
+with the @code{-pretty} option in effect:
 
 @smallexample
-(@value{GDBP}) print -r --
+(@value{GDBP}) print -p --
 @end smallexample
 
 Here is an example including both on option and an expression:
@@ -11274,6 +11279,21 @@ This is the default format.
 @item show print pretty
 Show which format @value{GDBN} is using to print structures.
 
+@anchor{set print raw-values}
+@item set print raw-values on
+Print values in raw form, without applying the pretty
+printers for the value.
+
+@item set print raw-values off
+Print values in pretty-printed form, if there is a pretty-printer
+for the value (@pxref{Pretty Printing}),
+otherwise print the value in raw form.
+
+The default setting is ``off''.
+
+@item show print raw-values
+Show whether to print values in raw form.
+
 @item set print sevenbit-strings on
 @cindex eight-bit characters in strings
 @cindex octal escapes in strings
@@ -11612,6 +11632,18 @@ library2.so:
 
 Note that for @code{bar} the entire printer can be disabled,
 as can each individual subprinter.
+
+Printing values and frame arguments is done by default using
+the enabled pretty printers.
+
+The print option @code{-raw-values} and @value{GDBN} setting
+@code{set print raw-values} (@pxref{set print raw-values}) can be
+used to print values without applying the enabled pretty printers.
+
+Similarly, the backtrace option @code{-raw-frame-arguments} and
+@value{GDBN} setting @code{set print raw-frame-arguments}
+(@pxref{set print raw-frame-arguments}) can be used to ignore the
+enabled pretty printers when printing frame argument values.
 
 @node Value History
 @section Value History

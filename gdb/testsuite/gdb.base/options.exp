@@ -168,6 +168,7 @@ proc_with_prefix test-print {{prefix ""}} {
 	"-null-stop"
 	"-object"
 	"-pretty"
+	"-raw-values"
 	"-repeats"
 	"-static-members"
 	"-symbol"
