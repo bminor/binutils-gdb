@@ -1,3 +1,11 @@
+2019-08-07  Phillipe Antoine  <p.antoine@catenacyber.fr>
+
+	PR 24854
+	* arc-dis.c (arc_insn_length): Return 0 rather than aborting when
+	encountering an unknown machine type.
+	(print_insn_arc): Handle arc_insn_length returning 0.  In error
+	cases return -1 rather than calling abort.
+
 2019-08-07  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (fld, fstp): Drop FloatMF from extended forms.

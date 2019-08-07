@@ -672,7 +672,7 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
       break;
 
     default:
-      abort ();
+      return 0;
     }
 }
 
@@ -1009,7 +1009,6 @@ print_insn_arc (bfd_vma memaddr,
      the number of bytes objdump should display on a single line.  If
      the instruction decoder sets this, it should always set it to
      the same value in order to get reasonable looking output.  */
-
   info->bytes_per_line  = 8;
 
   /* In the next lines, we set two info variables control the way
@@ -1017,7 +1016,6 @@ print_insn_arc (bfd_vma memaddr,
      8 and bytes_per_chunk is 4, the output will look like this:
      00:   00000000 00000000
      with the chunks displayed according to "display_endian".  */
-
   if (info->section
       && !(info->section->flags & SEC_CODE))
     {
@@ -1072,13 +1070,16 @@ print_insn_arc (bfd_vma memaddr,
 	  (*info->fprintf_func) (info->stream, ".word\t0x%08lx", data);
 	  break;
 	default:
-	  abort ();
+	  return -1;
 	}
       return size;
     }
 
   insn_len = arc_insn_length (buffer[highbyte], buffer[lowbyte], info);
   pr_debug ("instruction length = %d bytes\n", insn_len);
+  if (insn_len == 0)
+    return -1;
+
   arc_infop = info->private_data;
   arc_infop->insn_len = insn_len;
 
@@ -1131,7 +1132,7 @@ print_insn_arc (bfd_vma memaddr,
 
     default:
       /* There is no instruction whose length is not 2, 4, 6, or 8.  */
-      abort ();
+      return -1;
     }
 
   pr_debug ("instruction value = %llx\n", insn);
@@ -1159,24 +1160,28 @@ print_insn_arc (bfd_vma memaddr,
 	  (*info->fprintf_func) (info->stream, ".shor\t%#04llx",
 				 insn & 0xffff);
 	  break;
+
 	case 4:
 	  (*info->fprintf_func) (info->stream, ".word\t%#08llx",
 				 insn & 0xffffffff);
 	  break;
+
 	case 6:
 	  (*info->fprintf_func) (info->stream, ".long\t%#08llx",
 				 insn & 0xffffffff);
 	  (*info->fprintf_func) (info->stream, ".long\t%#04llx",
 				 (insn >> 32) & 0xffff);
 	  break;
+
 	case 8:
 	  (*info->fprintf_func) (info->stream, ".long\t%#08llx",
 				 insn & 0xffffffff);
 	  (*info->fprintf_func) (info->stream, ".long\t%#08llx",
 				 insn >> 32);
 	  break;
+
 	default:
-	  abort ();
+	  return -1;
 	}
 
       info->insn_type = dis_noninsn;
