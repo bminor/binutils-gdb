@@ -24395,7 +24395,7 @@ target process.
 
 When @value{GDBN} is debugging the AArch64 architecture, and the program is
 using the v8.3-A feature Pointer Authentication (PAC), then whenever the link
-register @code{$lr} is pointing to an PAC function it's value will be masked.
+register @code{$lr} is pointing to an PAC function its value will be masked.
 When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].
 
