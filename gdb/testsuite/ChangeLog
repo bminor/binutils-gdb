@@ -1,3 +1,8 @@
+2019-08-08  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/24862
+	* lib/tuiterm.exp (_accept): Fix CSI regexp.
+
 2019-08-07  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/style.exp: Update tests for help doc new invariants.
