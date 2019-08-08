@@ -129,6 +129,7 @@ main (int argc, char** argv)
 {
   char* program_name = argv[0];
   char* output_directory = argv[1];
+  int i;
 
   if (argc < 3)
     {
@@ -150,7 +151,7 @@ main (int argc, char** argv)
      platforms.  See https://github.com/jbevain/cecil/issues/337 for an
      example of this value being used in practice.  */
 
-  for (int i = 2; i < argc; i++)
+  for (i = 2; i < argc; i++)
     {
       char* wanted_format = argv[i];
 
