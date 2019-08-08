@@ -19179,7 +19179,7 @@ process_notes_at (Filedata *           filedata,
       return FALSE;
     }
 
-  printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
+  printf (_("  %-20s %-10s\tDescription\n"), _("Owner"), _("Data size"));
 
   end = (char *) pnotes + length;
   while ((char *) external < end)

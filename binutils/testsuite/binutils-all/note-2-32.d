@@ -5,7 +5,7 @@
 #source: note-2-32.s
 
 #...
-  Owner                 Data size	Description
+[ 	]+Owner[ 	]+Data size[ 	]+Description
 [ 	]+\$<version>1[ 	]+0x00000004[ 	]+OPEN[ 	]+Applies to region from 0x100 \(note1.s\)
 [ 	]+\$<tool>gcc 7.0.1[ 	]+0x00000000[ 	]+OPEN[ 	]+Applies to region from 0x100
 [ 	]+\+<stack prot>true[ 	]+0x00000000[ 	]+OPEN[ 	]+Applies to region from 0x100
