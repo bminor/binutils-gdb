@@ -438,11 +438,12 @@ ssize_t
 ctf_type_lname (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
 {
   char *str = ctf_type_aname (fp, type);
-  size_t slen = strlen (str);
+  size_t slen;
 
   if (str == NULL)
     return CTF_ERR;             /* errno is set for us */
 
+  slen = strlen (str);
   snprintf (buf, len, "%s", str);
   free (str);
 
