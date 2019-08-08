@@ -1,6 +1,15 @@
+2019-08-08  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* opcode/h8300.h (EXPAND_UNOP_EXTENDED_B): Add MODEL.
+	(EXPAND_UNOP_EXTENDED_W): Likewise.
+	(EXPAND_UNOP_EXTENDED_L): Likewise.
+	(struct h8_opcode h8_opcodes): Likewise.
+	(struct h8_opcode h8_opcodes): tas / ldm / stm supported H8S or
+	later.
+
 2019-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
 
-	* include/opcode/arc.h (FASTMATH): Add.
+	* opcode/arc.h (FASTMATH): Add.
 	(SWITCH): Likewise.
 
 2019-07-24  Alan Modra  <amodra@gmail.com>

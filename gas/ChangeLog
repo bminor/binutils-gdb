@@ -1,9 +1,9 @@
 2019-08-08  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
-	* gas/testsuite/gas/h8300/h8300.exp: Fix movfpe and movtpe tests.
-	* gas/testsuite/gas/h8300/misc.s: Likewise.
-	* gas/testsuite/gas/h8300/misch.s: Likewise.
-	* gas/testsuite/gas/h8300/miscs.s: Likewise.
+	* testsuite/gas/h8300/h8300.exp: Fix movfpe and movtpe tests.
+	* testsuite/gas/h8300/misc.s: Likewise.
+	* testsuite/gas/h8300/misch.s: Likewise.
+	* testsuite/gas/h8300/miscs.s: Likewise.
 
 2019-08-05  Barnaby Wilks  <barnaby.wilks@arm.com>
 
