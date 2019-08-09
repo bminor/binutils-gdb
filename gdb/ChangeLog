@@ -1,3 +1,8 @@
+2019-08-09  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* s390-tdep.c (s390_type_align): New function.
+	(s390_gdbarch_init): Set it as type_align gdbarch method.
+
 2019-08-09  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24591

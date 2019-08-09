@@ -52,6 +52,37 @@ constexpr gdb_byte s390_break_insn[] = { 0x0, 0x1 };
 
 typedef BP_MANIPULATION (s390_break_insn) s390_breakpoint;
 
+/* Types.  */
+
+/* Implement the gdbarch type alignment method.  */
+
+static ULONGEST
+s390_type_align (gdbarch *gdbarch, struct type *t)
+{
+  t = check_typedef (t);
+
+  if (TYPE_LENGTH (t) > 8)
+    {
+      switch (TYPE_CODE (t))
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_RANGE:
+	case TYPE_CODE_FLT:
+	case TYPE_CODE_ENUM:
+	case TYPE_CODE_CHAR:
+	case TYPE_CODE_BOOL:
+	case TYPE_CODE_DECFLOAT:
+	  return 8;
+
+	case TYPE_CODE_ARRAY:
+	  if (TYPE_VECTOR (t))
+	    return 8;
+	  break;
+	}
+    }
+  return 0;
+}
+
 /* Decoding S/390 instructions.  */
 
 /* Read a single instruction from address AT.  */
@@ -6943,6 +6974,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      will give the size of type actually used in each case.  */
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+
+  set_gdbarch_type_align (gdbarch, s390_type_align);
 
   /* Breakpoints.  */
   /* Amount PC must be decremented by after a breakpoint.  This is
