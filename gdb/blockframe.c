@@ -331,6 +331,8 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 	*address = 0;
       if (endaddr != NULL)
 	*endaddr = 0;
+      if (block != nullptr)
+	*block = nullptr;
       return 0;
     }
 
