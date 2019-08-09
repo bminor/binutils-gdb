@@ -739,7 +739,27 @@ ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 
   if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
     {
-      *ep = dtd->dtd_u.dtu_enc;
+      switch (LCTF_INFO_KIND (fp, tp->ctt_info))
+	{
+	case CTF_K_INTEGER:
+	case CTF_K_FLOAT:
+	  *ep = dtd->dtd_u.dtu_enc;
+	  break;
+	case CTF_K_SLICE:
+	  {
+	    const ctf_slice_t *slice;
+	    ctf_encoding_t underlying_en;
+	    slice = &dtd->dtd_u.dtu_slice;
+
+	    data = ctf_type_encoding (fp, slice->cts_type, &underlying_en);
+	    ep->cte_format = underlying_en.cte_format;
+	    ep->cte_offset = slice->cts_offset;
+	    ep->cte_bits = slice->cts_bits;
+	    break;
+	  }
+	default:
+	  return (ctf_set_errno (ofp, ECTF_NOTINTFP));
+	}
       return 0;
     }
 
