@@ -1,3 +1,8 @@
+2019-08-22  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (symbol_cache_lookup): Always initialize *bsc_ptr and
+	*slot_ptr.
+
 2019-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* configure.ac: Don't check for 'dlfcn.h' (moved to

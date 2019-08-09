@@ -1297,9 +1297,8 @@ set_symbol_cache_size_handler (const char *args, int from_tty,
    The result is the symbol if found, SYMBOL_LOOKUP_FAILED if a previous lookup
    failed (and thus this one will too), or NULL if the symbol is not present
    in the cache.
-   If the symbol is not present in the cache, then *BSC_PTR and *SLOT_PTR are
-   set to the cache and slot of the symbol to save the result of a full lookup
-   attempt.  */
+   *BSC_PTR and *SLOT_PTR are set to the cache and slot of the symbol, which
+   can be used to save the result of a full lookup attempt.  */
 
 static struct block_symbol
 symbol_cache_lookup (struct symbol_cache *cache,
@@ -1326,6 +1325,9 @@ symbol_cache_lookup (struct symbol_cache *cache,
   hash = hash_symbol_entry (objfile_context, name, domain);
   slot = bsc->symbols + hash % bsc->size;
 
+  *bsc_ptr = bsc;
+  *slot_ptr = slot;
+
   if (eq_symbol_entry (slot, objfile_context, name, domain))
     {
       if (symbol_lookup_debug)
@@ -1342,9 +1344,6 @@ symbol_cache_lookup (struct symbol_cache *cache,
     }
 
   /* Symbol is not present in the cache.  */
-
-  *bsc_ptr = bsc;
-  *slot_ptr = slot;
 
   if (symbol_lookup_debug)
     {
