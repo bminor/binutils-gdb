@@ -1,3 +1,19 @@
+2019-08-09  Mihailo Stojanovic  <mihailo.stojanovic@rt-rk.com>
+
+	* emulparams/elf32bmip.sh: Add .MIPS.xhash section.
+	* emulparams/elf32bmipn32-defs.sh: Add .MIPS.xhash section.
+	* emulparams/elf64bmip-defs.sh: Add .MIPS.xhash section.
+	* emultempl/mipself.em: Remove mips_after_parse function.
+	* testsuite/ld-elf/hash.d: Update comment.
+	* testsuite/ld-mips-elf/hash1.d: New test.
+	* testsuite/ld-mips-elf/hash1.s: Ditto.
+	* testsuite/ld-mips-elf/hash1a.d: Remove.
+	* testsuite/ld-mips-elf/hash1b.d: Ditto.
+	* testsuite/ld-mips-elf/hash1c.d: Ditto
+	* testsuite/ld-mips-elf/hash2.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: New tests.
+	* testsuite/ld-mips-elf/start.s: New test.
+
 2019-08-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 24887

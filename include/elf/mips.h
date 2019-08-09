@@ -452,6 +452,9 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 /* ABI related flags section.  */
 #define SHT_MIPS_ABIFLAGS	0x7000002a
 
+/* GNU style symbol hash table with xlat.  */
+#define SHT_MIPS_XHASH		0x7000002b
+
 /* A section of type SHT_MIPS_LIBLIST contains an array of the
    following structure.  The sh_link field is the section index of the
    string table.  The sh_info field is the number of entries in the
@@ -759,6 +762,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Relative offset of run time loader map, used for debugging.  */
 #define DT_MIPS_RLD_MAP_REL    0x70000035
+
+/* Address of .MIPS.xhash section.  */
+#define DT_MIPS_XHASH	       0x70000036
 
 /* Flags which may appear in a DT_MIPS_FLAGS entry.  */
 

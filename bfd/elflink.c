@@ -339,7 +339,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       elf_section_data (s)->this_hdr.sh_entsize = bed->s->sizeof_hash_entry;
     }
 
-  if (info->emit_gnu_hash)
+  if (info->emit_gnu_hash && bed->record_xhash_symbol == NULL)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".gnu.hash",
 					      flags | SEC_READONLY);
@@ -5853,6 +5853,7 @@ struct collect_gnu_hash_codes
   unsigned long int *counts;
   bfd_vma *bitmask;
   bfd_byte *contents;
+  bfd_size_type xlat;
   long int min_dynindx;
   unsigned long int bucketcount;
   unsigned long int symindx;
@@ -5917,10 +5918,12 @@ elf_collect_gnu_hash_codes (struct elf_link_hash_entry *h, void *data)
 }
 
 /* This function will be called though elf_link_hash_traverse to do
-   final dynaminc symbol renumbering.  */
+   final dynamic symbol renumbering in case of .gnu.hash.
+   If using .MIPS.xhash, invoke record_xhash_symbol to add symbol index
+   to the translation table.  */
 
 static bfd_boolean
-elf_renumber_gnu_hash_syms (struct elf_link_hash_entry *h, void *data)
+elf_gnu_hash_process_symidx (struct elf_link_hash_entry *h, void *data)
 {
   struct collect_gnu_hash_codes *s = (struct collect_gnu_hash_codes *) data;
   unsigned long int bucket;
@@ -5934,7 +5937,15 @@ elf_renumber_gnu_hash_syms (struct elf_link_hash_entry *h, void *data)
   if (! (*s->bed->elf_hash_symbol) (h))
     {
       if (h->dynindx >= s->min_dynindx)
-	h->dynindx = s->local_indx++;
+	{
+	  if (s->bed->record_xhash_symbol != NULL)
+	    {
+	      (*s->bed->record_xhash_symbol) (h, 0);
+	      s->local_indx++;
+	    }
+	  else
+	    h->dynindx = s->local_indx++;
+	}
       return TRUE;
     }
 
@@ -5951,7 +5962,14 @@ elf_renumber_gnu_hash_syms (struct elf_link_hash_entry *h, void *data)
   bfd_put_32 (s->output_bfd, val,
 	      s->contents + (s->indx[bucket] - s->symindx) * 4);
   --s->counts[bucket];
-  h->dynindx = s->indx[bucket]++;
+  if (s->bed->record_xhash_symbol != NULL)
+    {
+      bfd_vma xlat_loc = s->xlat + (s->indx[bucket]++ - s->symindx) * 4;
+
+      (*s->bed->record_xhash_symbol) (h, xlat_loc);
+    }
+  else
+    h->dynindx = s->indx[bucket]++;
   return TRUE;
 }
 
@@ -6980,7 +6998,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  if ((info->emit_hash
 	       && !_bfd_elf_add_dynamic_entry (info, DT_HASH, 0))
 	      || (info->emit_gnu_hash
-		  && !_bfd_elf_add_dynamic_entry (info, DT_GNU_HASH, 0))
+		  && (bed->record_xhash_symbol == NULL
+		      && !_bfd_elf_add_dynamic_entry (info, DT_GNU_HASH, 0)))
 	      || !_bfd_elf_add_dynamic_entry (info, DT_STRTAB, 0)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_SYMTAB, 0)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_STRSZ, strsize)
@@ -7104,6 +7123,9 @@ _bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
       }
   elf_hash_table (info)->text_index_section = found;
 }
+
+#define GNU_HASH_SECTION_NAME(bed)			    \
+  (bed)->record_xhash_symbol != NULL ? ".MIPS.xhash" : ".gnu.hash"
 
 bfd_boolean
 bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
@@ -7271,12 +7293,12 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	      return FALSE;
 	    }
 
-	  s = bfd_get_linker_section (dynobj, ".gnu.hash");
+	  s = bfd_get_linker_section (dynobj, GNU_HASH_SECTION_NAME (bed));
 	  BFD_ASSERT (s != NULL);
 
 	  if (cinfo.nsyms == 0)
 	    {
-	      /* Empty .gnu.hash section is special.  */
+	      /* Empty .gnu.hash or .MIPS.xhash section is special.  */
 	      BFD_ASSERT (cinfo.min_dynindx == -1);
 	      free (cinfo.hashcodes);
 	      s->size = 5 * 4 + bed->s->arch_size / 8;
@@ -7356,6 +7378,8 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 
 	      s->size = (4 + bucketcount + cinfo.nsyms) * 4;
 	      s->size += cinfo.maskbits / 8;
+	      if (bed->record_xhash_symbol != NULL)
+		s->size += cinfo.nsyms * 4;
 	      contents = (unsigned char *) bfd_zalloc (output_bfd, s->size);
 	      if (contents == NULL)
 		{
@@ -7382,9 +7406,11 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 
 	      cinfo.contents = contents;
 
-	      /* Renumber dynamic symbols, populate .gnu.hash section.  */
+	      cinfo.xlat = contents + cinfo.nsyms * 4 - s->contents;
+	      /* Renumber dynamic symbols, if populating .gnu.hash section.
+		 If using .MIPS.xhash, populate the translation table.  */
 	      elf_link_hash_traverse (elf_hash_table (info),
-				      elf_renumber_gnu_hash_syms, &cinfo);
+				      elf_gnu_hash_process_symidx, &cinfo);
 
 	      contents = s->contents + 16;
 	      for (i = 0; i < maskwords; ++i)

@@ -854,9 +854,8 @@ if { $linux_gnu } {
 
 run_dump_test_n32 "emit-relocs-1" {{as -EB} {ld -EB}}
 
-run_dump_test "hash1a"
-run_dump_test "hash1b"
-run_dump_test "hash1c"
+run_dump_test "hash1"
+run_dump_test "hash2"
 
 if { $linux_gnu && $has_abi(o32) } {
     # The number of symbols that are always included in the symbol table

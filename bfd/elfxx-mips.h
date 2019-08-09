@@ -173,6 +173,9 @@ extern bfd_boolean _bfd_mips_elf_common_definition (Elf_Internal_Sym *);
 extern int _bfd_mips_elf_compact_eh_encoding (struct bfd_link_info *);
 extern int _bfd_mips_elf_cant_unwind_opcode (struct bfd_link_info *);
 
+extern void _bfd_mips_elf_record_xhash_symbol
+  (struct elf_link_hash_entry *h, bfd_vma xlat_loc);
+
 static inline bfd_boolean
 gprel16_reloc_p (unsigned int r_type)
 {
@@ -198,4 +201,5 @@ literal_reloc_p (int r_type)
 #define elf_backend_post_process_headers _bfd_mips_post_process_headers
 #define elf_backend_compact_eh_encoding _bfd_mips_elf_compact_eh_encoding
 #define elf_backend_cant_unwind_opcode _bfd_mips_elf_cant_unwind_opcode
+#define elf_backend_record_xhash_symbol _bfd_mips_elf_record_xhash_symbol
 #define elf_backend_always_renumber_dynsyms TRUE

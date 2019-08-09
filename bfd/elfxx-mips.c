@@ -322,6 +322,11 @@ struct mips_elf_hash_sort_data
   /* The greatest dynamic symbol table index corresponding to an external
      symbol without a GOT entry.  */
   bfd_size_type max_non_got_dynindx;
+  /* If non-NULL, output BFD for .MIPS.xhash finalization.  */
+  bfd *output_bfd;
+  /* If non-NULL, pointer to contents of .MIPS.xhash for filling in
+     real final dynindx.  */
+  bfd_byte *mipsxhash;
 };
 
 /* We make up to two PLT entries if needed, one for standard MIPS code
@@ -378,6 +383,9 @@ struct mips_elf_link_hash_entry
   /* This is like the call_stub field, but it is used if the function
      being called returns a floating point value.  */
   asection *call_fp_stub;
+
+  /* If non-zero, location in .MIPS.xhash to write real final dynindx.  */
+  bfd_vma mipsxhash_loc;
 
   /* The highest GGA_* value that satisfies all references to this symbol.  */
   unsigned int global_got_area : 2;
@@ -1335,6 +1343,7 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       ret->fn_stub = NULL;
       ret->call_stub = NULL;
       ret->call_fp_stub = NULL;
+      ret->mipsxhash_loc = 0;
       ret->global_got_area = GGA_NONE;
       ret->got_only_for_calls = TRUE;
       ret->readonly_reloc = FALSE;
@@ -3907,6 +3916,18 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
      at the head of the table; see `_bfd_elf_link_renumber_dynsyms'.  */
   hsd.max_local_dynindx = count_section_dynsyms (abfd, info) + 1;
   hsd.max_non_got_dynindx = htab->root.local_dynsymcount + 1;
+  hsd.output_bfd = abfd;
+  if (htab->root.dynobj != NULL
+      && htab->root.dynamic_sections_created
+      && info->emit_gnu_hash)
+    {
+      asection *s = bfd_get_linker_section (htab->root.dynobj, ".MIPS.xhash");
+      BFD_ASSERT (s != NULL);
+      hsd.mipsxhash = s->contents;
+      BFD_ASSERT (hsd.mipsxhash != NULL);
+    }
+  else
+    hsd.mipsxhash = NULL;
   mips_elf_link_hash_traverse (htab, mips_elf_sort_hash_table_f, &hsd);
 
   /* There should have been enough room in the symbol table to
@@ -3957,6 +3978,12 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
       h->root.dynindx = hsd->max_unref_got_dynindx++;
       break;
     }
+
+  /* Populate the .MIPS.xhash translation table entry with
+     the symbol dynindx.  */
+  if (h->mipsxhash_loc != 0 && hsd->mipsxhash != NULL)
+    bfd_put_32 (hsd->output_bfd, h->root.dynindx,
+		hsd->mipsxhash + h->mipsxhash_loc);
 
   return TRUE;
 }
@@ -7475,6 +7502,9 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	  && ! CONST_STRNEQ (name, ".MIPS.post_rel"))
 	return FALSE;
       break;
+    case SHT_MIPS_XHASH:
+      if (strcmp (name, ".MIPS.xhash") != 0)
+	return FALSE;
     default:
       break;
     }
@@ -7707,6 +7737,12 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_type = SHT_MIPS_MSYM;
       hdr->sh_flags |= SHF_ALLOC;
       hdr->sh_entsize = 8;
+    }
+  else if (strcmp (name, ".MIPS.xhash") == 0)
+    {
+      hdr->sh_type = SHT_MIPS_XHASH;
+      hdr->sh_flags |= SHF_ALLOC;
+      hdr->sh_entsize = get_elf_backend_data(abfd)->s->arch_size == 64 ? 0 : 4;
     }
 
   /* The generic elf_fake_sections will set up REL_HDR using the default
@@ -7993,6 +8029,11 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
 	return FALSE;
     }
+
+  /* Create .MIPS.xhash section.  */
+  if (info->emit_gnu_hash)
+    s = bfd_make_section_anyway_with_flags (abfd, ".MIPS.xhash",
+					    flags | SEC_READONLY);
 
   /* On IRIX5, we adjust add some additional symbols and change the
      alignments of several sections.  There is no ABI documentation
@@ -10176,6 +10217,10 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_GOTSYM, 0))
 	    return FALSE;
 
+	  if (info->emit_gnu_hash
+	      && ! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_XHASH, 0))
+	    return FALSE;
+
 	  if (IRIX_COMPAT (dynobj) == ict_irix5
 	      && ! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_HIPAGENO, 0))
 	    return FALSE;
@@ -11953,6 +11998,12 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 		swap_out_p = FALSE;
 	      break;
 
+	    case DT_MIPS_XHASH:
+	      name = ".MIPS.xhash";
+	      s = bfd_get_linker_section (dynobj, name);
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+	      break;
+
 	    default:
 	      swap_out_p = FALSE;
 	      if (htab->is_vxworks
@@ -12440,6 +12491,10 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
 	  break;
 
+	case SHT_MIPS_XHASH:
+	  sec = bfd_get_section_by_name (abfd, ".dynsym");
+	  if (sec != NULL)
+	    (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
 	}
     }
 }
@@ -15943,6 +15998,8 @@ _bfd_mips_elf_get_target_dtag (bfd_vma dtag)
       return "DT_MIPS_PLTGOT";
     case DT_MIPS_RWPLT:
       return "DT_MIPS_RWPLT";
+    case DT_MIPS_XHASH:
+      return "DT_MIPS_XHASH";
     }
 }
 
@@ -16276,6 +16333,7 @@ const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
   { STRING_COMMA_LEN (".sbss"),	 -2, SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
   { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
   { STRING_COMMA_LEN (".ucode"),  0, SHT_MIPS_UCODE, 0 },
+  { STRING_COMMA_LEN (".MIPS.xhash"),  0, SHT_MIPS_XHASH,   SHF_ALLOC },
   { NULL,		      0,  0, 0,		     0 }
 };
 
@@ -16590,6 +16648,7 @@ enum
   MIPS_LIBC_ABI_UNIQUE,
   MIPS_LIBC_ABI_MIPS_O32_FP64,
   MIPS_LIBC_ABI_ABSOLUTE,
+  MIPS_LIBC_ABI_XHASH,
   MIPS_LIBC_ABI_MAX
 };
 
@@ -16617,6 +16676,11 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
   if (htab != NULL && htab->use_absolute_zero && htab->gnu_target)
     i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_ABSOLUTE;
 
+  /* Mark that we need support for .MIPS.xhash in the dynamic linker,
+     if it is the only hash section that will be created.  */
+  if (link_info && link_info->emit_gnu_hash && !link_info->emit_hash)
+    i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_XHASH;
+
   _bfd_elf_post_process_headers (abfd, link_info);
 }
 
@@ -16634,4 +16698,18 @@ _bfd_mips_elf_cant_unwind_opcode
   (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   return COMPACT_EH_CANT_UNWIND_OPCODE;
+}
+
+/* Record a position XLAT_LOC in the xlat translation table, associated with
+   the hash entry H.  The entry in the translation table will later be
+   populated with the real symbol dynindx.  */
+
+void
+_bfd_mips_elf_record_xhash_symbol (struct elf_link_hash_entry *h,
+				   bfd_vma xlat_loc)
+{
+  struct mips_elf_link_hash_entry *hmips;
+
+  hmips = (struct mips_elf_link_hash_entry *) h;
+  hmips->mipsxhash_loc = xlat_loc;
 }

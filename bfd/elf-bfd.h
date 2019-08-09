@@ -1392,6 +1392,13 @@ struct elf_backend_data
   /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
   bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
 
+  /* If non-NULL, called to register the location of XLAT_LOC within
+     .MIPS.xhash at which real final dynindx for H will be written.
+     If XLAT_LOC is zero, the symbol is not included in
+     .MIPS.xhash and no dynindx will be written.  */
+  void (*record_xhash_symbol)
+    (struct elf_link_hash_entry *h, bfd_vma xlat_loc);
+
   /* Return TRUE if type is a function symbol type.  */
   bfd_boolean (*is_function_type) (unsigned int type);
 

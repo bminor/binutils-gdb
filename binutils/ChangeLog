@@ -1,3 +1,13 @@
+2019-08-09  Mihailo Stojanovic  <mihailo.stojanovic@rt-rk.com>
+
+	* readelf.c (get_mips_dynamic_type): Return MIPS_XHASH dynamic type.
+	(get_mips_section_type_name): Return MI{S_XHASH name string.
+	(dynamic_section_mips_val): Initialize the .MIPS.xhash dynamic
+	info.
+	(process_symbol_table): Initialize the .MIPS.xhash section
+	pointer. Adjust the readelf output to support the new section.
+	(process_object): Set the .MIPS.xhash dynamic info to zero.
+
 2019-08-09  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/binutils-all/arm/in-order-all.d: Skip on pe, wince, coff.

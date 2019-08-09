@@ -232,6 +232,7 @@ static unsigned int dynamic_syminfo_nent;
 static char program_interpreter[PATH_MAX];
 static bfd_vma dynamic_info[DT_ENCODING];
 static bfd_vma dynamic_info_DT_GNU_HASH;
+static bfd_vma dynamic_info_DT_MIPS_XHASH;
 static bfd_vma version_info[16];
 static Elf_Internal_Dyn *  dynamic_section;
 static elf_section_list * symtab_shndx_list;
@@ -335,6 +336,10 @@ static const char * get_symbol_version_string
 	(ADDR) &= ~1;				\
     }						\
   while (0)
+
+/* Get the correct GNU hash section name.  */
+#define GNU_HASH_SECTION_NAME			\
+  dynamic_info_DT_MIPS_XHASH ? ".MIPS.xhash" : ".gnu.hash"
 
 /* Print a BFD_VMA to an internal buffer, for use in error messages.
    BFD_FMA_FMT can't be used in translated strings.  */
@@ -1872,6 +1877,7 @@ get_mips_dynamic_type (unsigned long type)
     case DT_MIPS_AUX_DYNAMIC: return "MIPS_AUX_DYNAMIC";
     case DT_MIPS_PLTGOT: return "MIPS_PLTGOT";
     case DT_MIPS_RWPLT: return "MIPS_RWPLT";
+    case DT_MIPS_XHASH: return "MIPS_XHASH";
     default:
       return NULL;
     }
@@ -4113,6 +4119,7 @@ get_mips_section_type_name (unsigned int sh_type)
     case SHT_MIPS_XLATE_OLD:	 return "MIPS_XLATE_OLD";
     case SHT_MIPS_PDR_EXCEPTION: return "MIPS_PDR_EXCEPTION";
     case SHT_MIPS_ABIFLAGS:	 return "MIPS_ABIFLAGS";
+    case SHT_MIPS_XHASH:	 return "MIPS_XHASH";
     default:
       break;
     }
@@ -9525,6 +9532,11 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
       print_vma (entry->d_un.d_val, DEC);
       break;
 
+    case DT_MIPS_XHASH:
+      dynamic_info_DT_MIPS_XHASH = entry->d_un.d_val;
+      dynamic_info_DT_GNU_HASH = entry->d_un.d_val;
+      /* Falls through.  */
+
     default:
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
     }
@@ -11673,6 +11685,7 @@ process_symbol_table (Filedata * filedata)
   bfd_vma ngnubuckets = 0;
   bfd_vma * gnubuckets = NULL;
   bfd_vma * gnuchains = NULL;
+  bfd_vma * mipsxlat = NULL;
   bfd_vma gnusymidx = 0;
   bfd_size_type ngnuchains = 0;
 
@@ -11838,7 +11851,31 @@ process_symbol_table (Filedata * filedata)
       gnuchains = get_dynamic_data (filedata, maxchain, 4);
       ngnuchains = maxchain;
 
+      if (gnuchains == NULL)
+	goto no_gnu_hash;
+
+      if (dynamic_info_DT_MIPS_XHASH)
+	{
+	  if (fseek (filedata->handle,
+		     (archive_file_offset
+		      + offset_from_vma (filedata, (buckets_vma
+						    + 4 * (ngnubuckets
+							   + maxchain)), 4)),
+		     SEEK_SET))
+	    {
+	      error (_("Unable to seek to start of dynamic information\n"));
+	      goto no_gnu_hash;
+	    }
+
+	  mipsxlat = get_dynamic_data (filedata, maxchain, 4);
+	}
+
     no_gnu_hash:
+      if (dynamic_info_DT_MIPS_XHASH && mipsxlat == NULL)
+	{
+	  free (gnuchains);
+	  gnuchains = NULL;
+	}
       if (gnuchains == NULL)
 	{
 	  free (gnubuckets);
@@ -11888,7 +11925,8 @@ process_symbol_table (Filedata * filedata)
 
       if (dynamic_info_DT_GNU_HASH)
 	{
-	  printf (_("\nSymbol table of `.gnu.hash' for image:\n"));
+	  printf (_("\nSymbol table of `%s' for image:\n"),
+		  GNU_HASH_SECTION_NAME);
 	  if (is_32bit_elf)
 	    printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
 	  else
@@ -11902,7 +11940,10 @@ process_symbol_table (Filedata * filedata)
 
 		do
 		  {
-		    print_dynamic_symbol (filedata, si, hn);
+		    if (dynamic_info_DT_MIPS_XHASH)
+		      print_dynamic_symbol (filedata, mipsxlat[off], hn);
+		    else
+		      print_dynamic_symbol (filedata, si, hn);
 		    si++;
 		  }
 		while (off < ngnuchains && (gnuchains[off++] & 1) == 0);
@@ -12125,11 +12166,12 @@ process_symbol_table (Filedata * filedata)
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
 
-      printf (ngettext ("\nHistogram for `.gnu.hash' bucket list length "
+      printf (ngettext ("\nHistogram for `%s' bucket list length "
 			"(total of %lu bucket):\n",
-			"\nHistogram for `.gnu.hash' bucket list length "
+			"\nHistogram for `%s' bucket list length "
 			"(total of %lu buckets):\n",
 			(unsigned long) ngnubuckets),
+	      GNU_HASH_SECTION_NAME,
 	      (unsigned long) ngnubuckets);
 
       lengths = (unsigned long *) calloc (ngnubuckets, sizeof (*lengths));
@@ -12186,6 +12228,7 @@ process_symbol_table (Filedata * filedata)
       free (lengths);
       free (gnubuckets);
       free (gnuchains);
+      free (mipsxlat);
     }
 
   return TRUE;
@@ -19744,6 +19787,7 @@ process_object (Filedata * filedata)
   for (i = ARRAY_SIZE (dynamic_info); i--;)
     dynamic_info[i] = 0;
   dynamic_info_DT_GNU_HASH = 0;
+  dynamic_info_DT_MIPS_XHASH = 0;
 
   /* Process the file.  */
   if (show_name)

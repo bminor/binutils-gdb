@@ -1,3 +1,49 @@
+2019-08-09  Mihailo Stojanovic  <mihailo.stojanovic@rt-rk.com>
+
+	* elf-bfd.h (struct elf_backend_data): New members.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Create
+	.gnu.hash section if necessary.
+	(struct collect_gnu_hash_codes): New member.
+	(elf_gnu_hash_process_symidx): New function name.
+	(elf_renumber_gnu_hash_syms): Ignore local and undefined
+	symbols. Record xlat location for every symbol which should have
+	a .MIPS.xhash entry.
+	(bfd_elf_size_dynamic_sections): Add DT_GNU_HASH dynamic tag to
+	dynamic section if necessary.
+	(GNU_HASH_SECTION_NAME): New define.
+	(bfd_elf_size_dynsym_hash_dynstr): Get .MIPS.xhash section.
+	Update the section size info.
+	* elfxx-mips.c (struct mips_elf_hash_sort_data): New members.
+	(struct mips_elf_link_hash_entry): New member.
+	(mips_elf_link_hash_newfunc): Initialize .MIPS.xhash translation
+	table location.
+	(mips_elf_sort_hash_table): Initialize the pointer to the
+	.MIPS.xhash section.
+	(mips_elf_sort_hash_table_f): Populate the .MIPS.xhash
+	translation table entry with the symbol dynindx.
+	(_bfd_mips_elf_section_from_shdr): Add SHT_MIPS_XHASH.
+	(_bfd_mips_elf_fake_sections): Initialize .MIPS.xhash section
+	info.
+	(_bfd_mips_elf_create_dynamic_sections): Create .MIPS.xhash
+	section.
+	(_bfd_mips_elf_size_dynamic_sections): Add DT_MIPS_XHASH tag to
+	dynamic section.
+	(_bfd_mips_elf_finish_synamic_sections): Add DT_MIPS_XHASH.
+	(_bfd_mips_elf_final_write_processing): Set .MIPS.xhash section
+	sh_link info.
+	(_bfd_mips_elf_get_target_dtag): Get DT_MIPS_XHASH tag.
+	(MIPS_LIBC_ABI_XHASH): New ABI version enum value.
+	(_bfd_mips_post_process_headers): Mark the ABI version as
+	MIPS_LIBC_ABI_XHASH if there exists a .MIPS.xhash section,
+	but not a .hash section.
+	(_bfd_mips_elf_record_xhash_symbol): New function. Record a
+	position in the translation table, associated with the hash
+	entry.
+	* elfxx-mips.h (literal_reloc_p): Define
+	elf_backend_record_xhash_symbol backend hook.
+	* elfxx-target.h: Initialize elf_backend_record_xhash_symbol
+	backend hook.
+
 2019-08-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf64-bpf.c (bpf_elf_relocate_section): New function.
