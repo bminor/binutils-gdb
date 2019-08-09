@@ -2,6 +2,7 @@
 #source: out-of-order.s
 #ld: -T out-of-order.T
 #objdump: -D
+#skip: *-*-pe *-wince-* *-*-coff
 #name: Check if disassembler can handle all sections in different order than header
 
 .*: +file format .*arm.*
