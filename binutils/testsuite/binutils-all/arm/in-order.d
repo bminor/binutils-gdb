@@ -2,6 +2,7 @@
 #source: out-of-order.s
 #ld: -e v1 -Ttext-segment=0x400000
 #objdump: -d
+#skip: *-*-pe *-wince-* *-*-coff
 #name: Check if disassembler can handle sections in default order
 
 .*: +file format .*arm.*

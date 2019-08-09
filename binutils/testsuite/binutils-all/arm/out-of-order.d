@@ -1,6 +1,7 @@
 #PROG: objcopy
 #ld: -T out-of-order.T
 #objdump: -d
+#skip: *-*-pe *-wince-* *-*-coff
 #name: Check if disassembler can handle sections in different order than header
 
 .*: +file format .*arm.*
