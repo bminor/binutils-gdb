@@ -23206,6 +23206,9 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 	  != dwarf2_per_objfile->abstract_to_concrete.end ()))
     {
       CORE_ADDR pc = (*get_frame_pc) (baton);
+      CORE_ADDR baseaddr
+	= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       for (const auto &cand_off
 	     : dwarf2_per_objfile->abstract_to_concrete[die->sect_off])
@@ -23220,8 +23223,11 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 
 	  CORE_ADDR pc_low, pc_high;
 	  get_scope_pc_bounds (cand->parent, &pc_low, &pc_high, cu);
-	  if (pc_low == ((CORE_ADDR) -1)
-	      || !(pc_low <= pc && pc < pc_high))
+	  if (pc_low == ((CORE_ADDR) -1))
+	    continue;
+	  pc_low = gdbarch_adjust_dwarf2_addr (gdbarch, pc_low + baseaddr);
+	  pc_high = gdbarch_adjust_dwarf2_addr (gdbarch, pc_high + baseaddr);
+	  if (!(pc_low <= pc && pc < pc_high))
 	    continue;
 
 	  die = cand;
