@@ -512,9 +512,9 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
     return FALSE;
   close (fd);
 
-  for (search = (lang_input_statement_type *) input_file_chain.head;
+  for (search = &input_file_chain.head->input_statement;
        search != NULL;
-       search = (lang_input_statement_type *) search->next_real_file)
+       search = search->next_real_file)
     if (search->filename != NULL)
       {
 	const char *infile = base_name (search->filename);
@@ -575,7 +575,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   new_ent->header.next = entry->header.next;
   entry->header.next = new_ent;
   new_ent->input_statement.next_real_file = entry->next_real_file;
-  entry->next_real_file = new_ent;
+  entry->next_real_file = &new_ent->input_statement;
 
   /* Ensure bfd sections are excluded from the output.  */
   bfd_section_list_clear (entry->the_bfd);

@@ -309,10 +309,10 @@ typedef struct lang_input_statement_struct
   struct flag_info *section_flag_list;
 
   /* Next pointer for file_chain statement list.  */
-  union lang_statement_union *next;
+  struct lang_input_statement_struct *next;
 
   /* Next pointer for input_file_chain statement list.  */
-  union lang_statement_union *next_real_file;
+  struct lang_input_statement_struct *next_real_file;
 
   const char *target;
 
@@ -567,9 +567,6 @@ extern void lang_float
 extern void lang_leave_output_section_statement
   (fill_type *, const char *, lang_output_section_phdr_list *,
    const char *);
-extern void lang_statement_append
-  (lang_statement_list_type *, lang_statement_union_type *,
-   lang_statement_union_type **);
 extern void lang_for_each_input_file
   (void (*dothis) (lang_input_statement_type *));
 extern void lang_for_each_file
@@ -585,7 +582,7 @@ extern asection *section_for_dot
   lang_input_statement_type *statement;					\
   for (statement = &file_chain.head->input_statement;			\
        statement != NULL;						\
-       statement = &statement->next->input_statement)
+       statement = statement->next)
 
 #define lang_output_section_find(NAME) \
   lang_output_section_statement_lookup (NAME, 0, FALSE)

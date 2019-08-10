@@ -818,7 +818,7 @@ add_archive_element (struct bfd_link_info *info,
 
   parent = abfd->my_archive->usrdata;
   if (parent != NULL && !parent->flags.reload)
-    parent->next = (lang_statement_union_type *) input;
+    parent->next = input;
 
   /* Save the original data for trace files/tries below, as plugins
      (if enabled) may possibly alter it to point to a replacement

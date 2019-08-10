@@ -945,9 +945,8 @@ gld${EMULATION_NAME}_before_allocation (void)
       else
 	{
 	  is->header.next = NULL;
-	  lang_statement_append (&os->children,
-				 (lang_statement_union_type *) is,
-				 &is->header.next);
+	  *os->children.tail = (lang_statement_union_type *) is;
+	  os->children.tail = &is->header.next;
 	}
     }
 
