@@ -68,22 +68,22 @@ typedef struct memory_region_struct
 
 enum statement_enum
 {
-  lang_output_section_statement_enum,
-  lang_assignment_statement_enum,
-  lang_input_statement_enum,
   lang_address_statement_enum,
-  lang_wild_statement_enum,
-  lang_input_section_enum,
-  lang_object_symbols_statement_enum,
-  lang_fill_statement_enum,
+  lang_assignment_statement_enum,
   lang_data_statement_enum,
-  lang_reloc_statement_enum,
-  lang_target_statement_enum,
+  lang_fill_statement_enum,
+  lang_group_statement_enum,
+  lang_input_section_enum,
+  lang_input_statement_enum,
+  lang_insert_statement_enum,
+  lang_output_section_statement_enum,
   lang_output_statement_enum,
   lang_padding_statement_enum,
-  lang_group_statement_enum,
-  lang_insert_statement_enum,
-  lang_constructors_statement_enum
+  lang_reloc_statement_enum,
+  lang_target_statement_enum,
+  lang_wild_statement_enum,
+  lang_constructors_statement_enum,
+  lang_object_symbols_statement_enum
 };
 
 typedef struct lang_statement_header_struct
@@ -409,20 +409,20 @@ typedef struct
 typedef union lang_statement_union
 {
   lang_statement_header_type header;
-  lang_wild_statement_type wild_statement;
-  lang_data_statement_type data_statement;
-  lang_reloc_statement_type reloc_statement;
   lang_address_statement_type address_statement;
-  lang_output_section_statement_type output_section_statement;
   lang_assignment_statement_type assignment_statement;
-  lang_input_statement_type input_statement;
-  lang_target_statement_type target_statement;
-  lang_output_statement_type output_statement;
-  lang_input_section_type input_section;
+  lang_data_statement_type data_statement;
   lang_fill_statement_type fill_statement;
-  lang_padding_statement_type padding_statement;
   lang_group_statement_type group_statement;
+  lang_input_section_type input_section;
+  lang_input_statement_type input_statement;
   lang_insert_statement_type insert_statement;
+  lang_output_section_statement_type output_section_statement;
+  lang_output_statement_type output_statement;
+  lang_padding_statement_type padding_statement;
+  lang_reloc_statement_type reloc_statement;
+  lang_target_statement_type target_statement;
+  lang_wild_statement_type wild_statement;
 } lang_statement_union_type;
 
 /* This structure holds information about a program header, from the
