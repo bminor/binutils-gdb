@@ -1,5 +1,12 @@
 2019-08-10  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.h (lang_common_statement_type): Delete.
+	(lang_object_symbols_statement_type): Delete.
+	(union lang_statement_union): Remove common_statement and
+	object_symbols_statement.
+
+2019-08-10  Alan Modra  <amodra@gmail.com>
+
 	* ldexp.c (exp_intop, exp_bigintop, exp_relop, exp_binop, exp_trinop),
 	(exp_unop, exp_nameop, exp_assop, exp_assert): Remove casts of
 	stat_alloc return value.

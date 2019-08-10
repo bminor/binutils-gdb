@@ -176,16 +176,6 @@ typedef struct lang_output_section_statement_struct
 typedef struct
 {
   lang_statement_header_type header;
-} lang_common_statement_type;
-
-typedef struct
-{
-  lang_statement_header_type header;
-} lang_object_symbols_statement_type;
-
-typedef struct
-{
-  lang_statement_header_type header;
   fill_type *fill;
   int size;
   asection *output_section;
@@ -429,8 +419,6 @@ typedef union lang_statement_union
   lang_target_statement_type target_statement;
   lang_output_statement_type output_statement;
   lang_input_section_type input_section;
-  lang_common_statement_type common_statement;
-  lang_object_symbols_statement_type object_symbols_statement;
   lang_fill_statement_type fill_statement;
   lang_padding_statement_type padding_statement;
   lang_group_statement_type group_statement;
