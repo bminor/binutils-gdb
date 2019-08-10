@@ -1,5 +1,16 @@
 2019-08-10  Alan Modra  <amodra@gmail.com>
 
+	* ldexp.c (exp_intop, exp_bigintop, exp_relop, exp_binop, exp_trinop),
+	(exp_unop, exp_nameop, exp_assop, exp_assert): Remove casts of
+	stat_alloc return value.
+	* ldlang.c (new_statement, new_afile, sort_def_symbol),
+	(lang_memory_region_lookup, lang_memory_region_alias),
+	(ldlang_add_undef, ldlang_add_require_defined, insert_pad),
+	(lang_add_gc_name, lang_new_phdr): Likewise.
+	* lexsup.c (set_segment_start): Likewise.
+
+2019-08-10  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.h (lang_input_statement_type): Make next
 	and next_real_file a lang_input_statement_type pointer.
 	(lang_statement_append): Delete prototype.

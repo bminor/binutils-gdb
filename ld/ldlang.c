@@ -1061,7 +1061,7 @@ new_statement (enum statement_enum type,
 {
   lang_statement_union_type *new_stmt;
 
-  new_stmt = (lang_statement_union_type *) stat_alloc (size);
+  new_stmt = stat_alloc (size);
   new_stmt->header.type = type;
   new_stmt->header.next = NULL;
   lang_statement_append (list, new_stmt, &new_stmt->header.next);
@@ -1088,11 +1088,10 @@ new_afile (const char *name,
   lang_has_input_file = TRUE;
 
   if (add_to_list)
-    p = (lang_input_statement_type *) new_stat (lang_input_statement, stat_ptr);
+    p = new_stat (lang_input_statement, stat_ptr);
   else
     {
-      p = (lang_input_statement_type *)
-	  stat_alloc (sizeof (lang_input_statement_type));
+      p = stat_alloc (sizeof (lang_input_statement_type));
       p->header.type = lang_input_statement_enum;
       p->header.next = NULL;
     }
@@ -1345,8 +1344,7 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
     einfo (_("%P:%pS: warning: memory region `%s' not declared\n"),
 	   NULL, name);
 
-  new_region = (lang_memory_region_type *)
-      stat_alloc (sizeof (lang_memory_region_type));
+  new_region = stat_alloc (sizeof (lang_memory_region_type));
 
   new_region->name_list.name = xstrdup (name);
   new_region->name_list.next = NULL;
@@ -1402,7 +1400,7 @@ lang_memory_region_alias (const char *alias, const char *region_name)
 	   NULL, region_name, alias);
 
   /* Add alias to region name list.  */
-  n = (lang_memory_region_name *) stat_alloc (sizeof (lang_memory_region_name));
+  n = stat_alloc (sizeof (lang_memory_region_name));
   n->name = xstrdup (alias);
   n->next = region->name_list.next;
   region->name_list.next = n;
@@ -2341,7 +2339,7 @@ sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 	    get_userdata (hash_entry->u.def.section));
       if (!ud)
 	{
-	  ud = (input_section_userdata_type *) stat_alloc (sizeof (*ud));
+	  ud = stat_alloc (sizeof (*ud));
 	  get_userdata (hash_entry->u.def.section) = ud;
 	  ud->map_symbol_def_tail = &ud->map_symbol_def_head;
 	  ud->map_symbol_def_count = 0;
@@ -3606,7 +3604,7 @@ ldlang_add_undef (const char *const name, bfd_boolean cmdline)
   ldlang_undef_chain_list_type *new_undef;
 
   undef_from_cmdline = undef_from_cmdline || cmdline;
-  new_undef = (ldlang_undef_chain_list_type *) stat_alloc (sizeof (*new_undef));
+  new_undef = stat_alloc (sizeof (*new_undef));
   new_undef->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new_undef;
 
@@ -3672,7 +3670,7 @@ ldlang_add_require_defined (const char *const name)
   struct require_defined_symbol *ptr;
 
   ldlang_add_undef (name, TRUE);
-  ptr = (struct require_defined_symbol *) stat_alloc (sizeof (*ptr));
+  ptr = stat_alloc (sizeof (*ptr));
   ptr->next = require_defined_symbol_list;
   ptr->name = strdup (name);
   require_defined_symbol_list = ptr;
@@ -3706,7 +3704,7 @@ check_input_sections
   (lang_statement_union_type *s,
    lang_output_section_statement_type *output_section_statement)
 {
-  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
+  for (; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -4894,8 +4892,7 @@ insert_pad (lang_statement_union_type **ptr,
   else
     {
       /* Make a new padding statement, linked into existing chain.  */
-      pad = (lang_statement_union_type *)
-	  stat_alloc (sizeof (lang_padding_statement_type));
+      pad = stat_alloc (sizeof (lang_padding_statement_type));
       pad->header.next = *ptr;
       *ptr = pad;
       pad->header.type = lang_padding_statement_enum;
@@ -7373,7 +7370,7 @@ lang_add_gc_name (const char *name)
   if (name == NULL)
     return;
 
-  sym = (struct bfd_sym_chain *) stat_alloc (sizeof (*sym));
+  sym = stat_alloc (sizeof (*sym));
 
   sym->next = link_info.gc_sym_list;
   sym->name = name;
@@ -8030,7 +8027,7 @@ lang_new_phdr (const char *name,
   struct lang_phdr *n, **pp;
   bfd_boolean hdrs;
 
-  n = (struct lang_phdr *) stat_alloc (sizeof (struct lang_phdr));
+  n = stat_alloc (sizeof (struct lang_phdr));
   n->next = NULL;
   n->name = name;
   n->type = exp_get_vma (type, 0, "program header type");
