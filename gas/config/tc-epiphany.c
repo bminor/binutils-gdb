@@ -727,6 +727,8 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	 handling to md_convert_frag.  */
 
       EPIPHANY_RELAX_TYPES subtype;
+      const CGEN_INSN *insn;
+      int i;
       /* We haven't relaxed this at all, so the relaxation type may be
 	 completely wrong.  Set the subtype correctly.  */
       epiphany_relax_frag (segment, fragP, 0);
@@ -753,26 +755,29 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 
       fragP->fr_subtype = subtype;
 
-      {
-	const CGEN_INSN *insn;
-	int i;
+      /* Update the recorded insn.  */
+      for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
+	{
+	  if (strcmp (CGEN_INSN_MNEMONIC (insn),
+		      CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn)) == 0
+	      && CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED))
+	    break;
+	}
 
-	/* Update the recorded insn.  */
+      if (i == 4)
+	abort ();
 
-	for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
-	  {
-	    if ((strcmp (CGEN_INSN_MNEMONIC (insn),
-			 CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn))
-		 == 0)
-		&& CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED))
-	      break;
-	  }
+      /* When changing from a 2-byte to 4-byte insn, don't leave
+	 opcode bytes uninitialised.  */
+      if (CGEN_INSN_BITSIZE (fragP->fr_cgen.insn) < CGEN_INSN_BITSIZE (insn))
+	{
+	  gas_assert (CGEN_INSN_BITSIZE (fragP->fr_cgen.insn) == 16);
+	  gas_assert (CGEN_INSN_BITSIZE (insn) == 32);
+	  fragP->fr_opcode[2] = 0;
+	  fragP->fr_opcode[3] = 0;
+	}
 
-	if (i == 4)
-	  abort ();
-
-	fragP->fr_cgen.insn = insn;
-      }
+      fragP->fr_cgen.insn = insn;
     }
 
   return md_relax_table[fragP->fr_subtype].rlx_length;
