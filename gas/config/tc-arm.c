@@ -7050,6 +7050,7 @@ enum operand_parse_code
   OP_I31w,	/*		   0 .. 31, optional trailing ! */
   OP_I32,	/*		   1 .. 32 */
   OP_I32z,	/*		   0 .. 32 */
+  OP_I48_I64,	/*		   48 or 64 */
   OP_I63,	/*		   0 .. 63 */
   OP_I63s,	/*		 -64 .. 63 */
   OP_I64,	/*		   1 .. 64 */
@@ -7198,6 +7199,25 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
       if (parse_immediate (&str, &val, min, max, popt) == FAIL)	\
 	goto failure;						\
       inst.operands[i].imm = val;				\
+    }								\
+  while (0)
+
+#define po_imm1_or_imm2_or_fail(imm1, imm2, popt)		\
+  do								\
+    {								\
+      expressionS exp;						\
+      my_get_expression (&exp, &str, popt);			\
+      if (exp.X_op != O_constant)				\
+	{							\
+	  inst.error = _("constant expression required");	\
+	  goto failure;						\
+	}							\
+      if (exp.X_add_number != imm1 && exp.X_add_number != imm2) \
+	{							\
+	  inst.error = _("immediate value 48 or 64 expected");	\
+	  goto failure;						\
+	}							\
+      inst.operands[i].imm = exp.X_add_number;			\
     }								\
   while (0)
 
@@ -7545,6 +7565,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_I31:	 po_imm_or_fail (  0,	  31, FALSE);	break;
 	case OP_I32:	 po_imm_or_fail (  1,	  32, FALSE);	break;
 	case OP_I32z:	 po_imm_or_fail (  0,     32, FALSE);   break;
+	case OP_I48_I64: po_imm1_or_imm2_or_fail (48, 64, FALSE); break;
 	case OP_I63s:	 po_imm_or_fail (-64,	  63, FALSE);	break;
 	case OP_I63:	 po_imm_or_fail (  0,     63, FALSE);   break;
 	case OP_I64:	 po_imm_or_fail (  1,     64, FALSE);   break;
@@ -14343,6 +14364,24 @@ v8_1_loop_reloc (int is_le)
       inst.relocs[0].type = BFD_RELOC_ARM_THUMB_LOOP12;
       inst.relocs[0].pc_rel = 1;
     }
+}
+
+/* For shifts with four operands in MVE.  */
+static void
+do_mve_scalar_shift1 (void)
+{
+  unsigned int value = inst.operands[2].imm;
+
+  inst.instruction |= inst.operands[0].reg << 16;
+  inst.instruction |= inst.operands[1].reg << 8;
+
+  /* Setting the bit for saturation.  */
+  inst.instruction |= ((value == 64) ? 0: 1) << 7;
+
+  /* Assuming Rm is already checked not to be 11x1.  */
+  constraint (inst.operands[3].reg == inst.operands[0].reg, BAD_OVERLAP);
+  constraint (inst.operands[3].reg == inst.operands[1].reg, BAD_OVERLAP);
+  inst.instruction |= inst.operands[3].reg << 12;
 }
 
 /* For shifts in MVE.  */
@@ -25405,8 +25444,8 @@ static const struct asm_opcode insns[] =
  ToC("lsll",	ea50010d, 3, (RRe, RRo, RRnpcsp_I32), mve_scalar_shift),
  ToC("lsrl",	ea50011f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
  ToC("asrl",	ea50012d, 3, (RRe, RRo, RRnpcsp_I32), mve_scalar_shift),
- ToC("uqrshll",	ea51010d, 3, (RRe, RRo, RRnpcsp),     mve_scalar_shift),
- ToC("sqrshrl",	ea51012d, 3, (RRe, RRo, RRnpcsp),     mve_scalar_shift),
+ ToC("uqrshll",	ea51010d, 4, (RRe, RRo, I48_I64, RRnpcsp), mve_scalar_shift1),
+ ToC("sqrshrl",	ea51012d, 4, (RRe, RRo, I48_I64, RRnpcsp), mve_scalar_shift1),
  ToC("uqshll",	ea51010f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
  ToC("urshrl",	ea51011f, 3, (RRe, RRo, I32),	      mve_scalar_shift),
  ToC("srshrl",	ea51012f, 3, (RRe, RRo, I32),	      mve_scalar_shift),

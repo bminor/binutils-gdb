@@ -2073,6 +2073,7 @@ static const struct opcode32 neon_opcodes[] =
    %u			print 'U' (unsigned) or 'S' for various mve instructions
    %i			print MVE predicate(s) for vpt and vpst
    %j			print a 5-bit immediate from hw2[14:12,7:6]
+   %k			print 48 if the 7th position bit is set else print 64.
    %m			print rounding mode for vcvt and vrint
    %n			print vector comparison code for predicated instruction
    %s			print size for various vcvt instructions
@@ -3373,8 +3374,8 @@ static const struct mopcode32 mve_opcodes[] =
 
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_SQRSHRL,
-   0xea51012d, 0xfff101ff,
-   "sqrshrl%c\t%17-19l, %9-11h, %12-15S"},
+   0xea51012d, 0xfff1017f,
+   "sqrshrl%c\t%17-19l, %9-11h, %k, %12-15S"},
 
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_SQRSHR,
@@ -3403,8 +3404,8 @@ static const struct mopcode32 mve_opcodes[] =
 
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_UQRSHLL,
-   0xea51010d, 0xfff101ff,
-   "uqrshll%c\t%17-19l, %9-11h, %12-15S"},
+   0xea51010d, 0xfff1017f,
+   "uqrshll%c\t%17-19l, %9-11h, %k, %12-15S"},
 
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_UQRSHL,
@@ -9252,6 +9253,11 @@ print_insn_mve (struct disassemble_info *info, long given)
 			imm5 |= (arm_decode_field (given, 12, 14) << 2);
 			func (stream, "#%u", (imm5 == 0) ? 32 : imm5);
 		      }
+		      break;
+
+		    case 'k':
+		      func (stream, "#%u",
+			    (arm_decode_field (given, 7, 7) == 0) ? 64 : 48);
 		      break;
 
 		    case 'n':

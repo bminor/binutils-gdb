@@ -1,3 +1,16 @@
+2019-08-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* config/tc-arm.c (enum operand_parse_code): Add the entry OP_I48_I64.
+	(po_imm1_or_imm2_or_fail): Marco to check the immediate is either of
+        48 or 64.
+	(parse_operands): Add case OP_I48_I64.
+	(do_mve_scalar_shift1): Add function to encode the MVE shift
+        instructions with 4 arguments.
+	* testsuite/gas/arm/mve-shift-bad.l: Modify.
+	* testsuite/gas/arm/mve-shift-bad.s: Likewise.
+	* testsuite/gas/arm/mve-shift.d: Likewise.
+	* testsuite/gas/arm/mve-shift.s: Likewise.
+
 2019-08-12  Barnaby Wilks  <barnaby.wilks@arm.com>
 
 	* config/tc-arm.c (enum fp_16bit_format): Add enum to represent the 2 float16 encodings.

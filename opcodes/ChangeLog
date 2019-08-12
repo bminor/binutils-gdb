@@ -1,3 +1,10 @@
+2019-08-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* arm-dis.c (struct mopcode32 mve_opcodes): Modify the mask for
+	cases MVE_SQRSHRL and MVE_UQRSHLL.
+	(print_insn_mve): Add case for specifier 'k' to check
+	specific bit of the instruction.
+
 2019-08-07  Phillipe Antoine  <p.antoine@catenacyber.fr>
 
 	PR 24854
