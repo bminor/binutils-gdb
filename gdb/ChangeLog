@@ -1,3 +1,7 @@
+2019-08-13  Tom Tromey  <tromey@adacore.com>
+
+	* tracepoint.c: Don't include readline.h or history.h.
+
 2019-08-12  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

@@ -58,13 +58,6 @@
 #include "location.h"
 #include <algorithm>
 
-/* readline include files */
-#include "readline/readline.h"
-#include "readline/history.h"
-
-/* readline defines this.  */
-#undef savestring
-
 #include <unistd.h>
 
 /* Maximum length of an agent aexpression.
