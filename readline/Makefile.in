@@ -1,6 +1,6 @@
 ## -*- text -*- ##
 # Master Makefile for the GNU readline library.
-# Copyright (C) 1994-2009 Free Software Foundation, Inc.
+# Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ mandir = @mandir@
 includedir = @includedir@
 datadir = @datadir@
 localedir = @localedir@
+pkgconfigdir = ${libdir}/pkgconfig
 
 infodir = @infodir@
 
@@ -85,7 +86,7 @@ TERMCAP_LIB = @TERMCAP_LIB@
 # For libraries which include headers from other libraries.
 INCLUDES = -I. -I$(srcdir)
 
-XCCFLAGS = $(DEFS) $(LOCAL_DEFS) $(INCLUDES) $(CPPFLAGS)
+XCCFLAGS = $(ASAN_CFLAGS) $(DEFS) $(LOCAL_DEFS) $(INCLUDES) $(CPPFLAGS)
 CCFLAGS = $(XCCFLAGS) $(LOCAL_CFLAGS) $(CFLAGS)
 
 # could add -Werror here
@@ -93,6 +94,11 @@ GCC_LINT_FLAGS = -ansi -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 		 -Wwrite-strings -Wstrict-prototypes \
 		 -Wmissing-prototypes -Wno-implicit -pedantic
 GCC_LINT_CFLAGS = $(XCCFLAGS) $(GCC_LINT_FLAGS) @CFLAGS@ @LOCAL_CFLAGS@
+
+ASAN_XCFLAGS = -fsanitize=address -fno-omit-frame-pointer
+ASAN_XLDFLAGS = -fsanitize=address
+
+install_examples = @EXAMPLES_INSTALL_TARGET@
 
 .c.o:
 	${RM} $@
@@ -159,6 +165,9 @@ INSTALL_TARGETS = @STATIC_INSTALL_TARGET@ @SHARED_INSTALL_TARGET@
 all: $(TARGETS)
 
 everything: all examples
+
+asan:
+	${MAKE} ${MFLAGS} ASAN_CFLAGS='${ASAN_XCFLAGS}' ASAN_LDFLAGS='${ASAN_XLDFLAGS}' everything
 
 static: $(STATIC_LIBS)
 
@@ -242,7 +251,16 @@ uninstall-headers:
 
 maybe-uninstall-headers: uninstall-headers
 
-install-static: installdirs $(STATIC_LIBS) install-headers install-doc install-examples
+install-pc: installdirs
+	-$(INSTALL_DATA) $(BUILD_DIR)/readline.pc $(DESTDIR)$(pkgconfigdir)/readline.pc
+
+uninstall-pc:
+	-test -n "$(pkgconfigdir)" && cd $(DESTDIR)$(pkgconfigdir) && \
+		${RM} readline.pc
+
+maybe-uninstall-pc: uninstall-pc
+
+install-static: installdirs $(STATIC_LIBS) install-headers install-doc ${install_examples} install-pc
 	-$(MV) $(DESTDIR)$(libdir)/libreadline.a $(DESTDIR)$(libdir)/libreadline.old
 	$(INSTALL_DATA) libreadline.a $(DESTDIR)$(libdir)/libreadline.a
 	-test -n "$(RANLIB)" && $(RANLIB) $(DESTDIR)$(libdir)/libreadline.a
@@ -253,17 +271,18 @@ install-static: installdirs $(STATIC_LIBS) install-headers install-doc install-e
 installdirs: $(srcdir)/support/mkinstalldirs
 	-$(SHELL) $(srcdir)/support/mkinstalldirs $(DESTDIR)$(includedir) \
 		$(DESTDIR)$(includedir)/readline $(DESTDIR)$(libdir) \
-		$(DESTDIR)$(infodir) $(DESTDIR)$(man3dir) $(DESTDIR)$(docdir)
+		$(DESTDIR)$(infodir) $(DESTDIR)$(man3dir) $(DESTDIR)$(docdir) \
+		$(DESTDIR)$(pkgconfigdir)
 
-uninstall: uninstall-headers uninstall-doc uninstall-examples
+uninstall: uninstall-headers uninstall-doc uninstall-examples uninstall-pc
 	-test -n "$(DESTDIR)$(libdir)" && cd $(DESTDIR)$(libdir) && \
 		${RM} libreadline.a libreadline.old libhistory.a libhistory.old $(SHARED_LIBS)
 	-( cd shlib; ${MAKE} ${MFLAGS} DESTDIR=${DESTDIR} uninstall )
 
-install-shared: installdirs install-headers shared install-doc
+install-shared: installdirs install-headers shared install-doc install-pc
 	( cd shlib ; ${MAKE} ${MFLAGS} DESTDIR=${DESTDIR} install )
 	
-uninstall-shared: maybe-uninstall-headers
+uninstall-shared: maybe-uninstall-headers maybe-uninstall-pc
 	-( cd shlib; ${MAKE} ${MFLAGS} DESTDIR=${DESTDIR} uninstall )
 
 install-examples: installdirs install-headers

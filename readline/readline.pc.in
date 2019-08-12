@@ -7,6 +7,6 @@ Name: Readline
 Description: Gnu Readline library for command line editing
 URL: http://tiswww.cwru.edu/php/chet/readline/rltop.html
 Version: @LIBVERSION@
-Requires.private: tinfo
+Requires.private: @TERMCAP_PKG_CONFIG_LIB@
 Libs: -L${libdir} -lreadline
 Cflags: -I${includedir}/readline

@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Feb 28 15:42:34 EST 2016
+.\"	Last Change: Thu Dec 28 14:49:51 EST 2017
 .\"
-.TH READLINE 3 "2016 February 28" "GNU Readline 7.0"
+.TH READLINE 3 "2017 December 28" "GNU Readline 7.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -378,13 +378,13 @@ in emacs mode and to
 .B #
 in vi command mode.
 .TP
-.B completion\-display\-width (-1)
+.B completion\-display\-width (\-1)
 The number of screen columns used to display possible matches
 when performing completion.
 The value is ignored if it is less than 0 or greater than the terminal
 screen width.
 A value of 0 will cause matches to be displayed one per line.
-The default value is -1.
+The default value is \-1.
 .TP 
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion
@@ -437,6 +437,16 @@ can be set to either
 .B emacs
 or
 .BR vi .
+.TP
+.B emacs\-mode\-string (@)
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled, 
+this string is displayed immediately before the last line of the primary
+prompt when emacs editing mode is active.  The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control 
+sequence into the mode string.
 .TP
 .B enable\-bracketed\-paste (Off)
 When set to \fBOn\fP, readline will configure the terminal in a way
@@ -505,15 +515,6 @@ equivalent to \fIemacs-standard\fP.  The default value is
 The value of
 .B editing\-mode
 also affects the default keymap.
-.TP
-.B emacs\-mode\-string (@)
-This string is displayed immediately before the last line of the primary
-prompt when emacs editing mode is active.  The value is expanded like a
-key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available.
-Use the \e1 and \e2 escapes to begin and end sequences of
-non-printing characters, which can be used to embed a terminal control 
-sequence into the mode string.
 .TP
 .B keyseq\-timeout (500)
 Specifies the duration \fIreadline\fP will wait for a character when reading an
@@ -592,9 +593,9 @@ a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
 .TP
 .B show\-mode\-in\-prompt (Off)
-If set to \fBOn\fP, add a character to the beginning of the prompt
+If set to \fBOn\fP, add a string to the beginning of the prompt
 indicating the editing mode: emacs, vi command, or vi insertion.
-The mode strings are user-settable.
+The mode strings are user-settable (e.g., \fIemacs\-mode\-string\fP).
 .TP
 .B skip\-completed\-text (Off)
 If set to \fBOn\fP, this alters the default completion behavior when
@@ -605,7 +606,8 @@ after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
 .TP
 .B vi\-cmd\-mode\-string ((cmd))
-This string is displayed immediately before the last line of the primary
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled, 
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -615,7 +617,8 @@ non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 .TP
 .B vi\-ins\-mode\-string ((ins))
-This string is displayed immediately before the last line of the primary
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled, 
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.  
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and  
@@ -640,8 +643,9 @@ The
 .B $if
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-readline.  The text of the test extends to the end of the line;
-no characters are required to isolate it.
+readline.  The text of the test, after any comparison operator,
+extends to the end of the line;
+unless otherwise noted, no characters are required to isolate it.
 .RS
 .IP \fBmode\fP
 The \fBmode=\fP form of the \fB$if\fP directive is used to test
@@ -663,6 +667,26 @@ to match both
 and
 .IR sun\-cmd ,
 for instance.
+.IP \fBversion\fP
+The \fBversion\fP test may be used to perform comparisons against
+specific readline versions.
+The \fBversion\fP expands to the current readline version.
+The set of comparison operators includes
+.BR = ,
+(and
+.BR == ),
+.BR != ,
+.BR <= ,
+.BR >= ,
+.BR < ,
+and
+.BR > .
+The version number supplied on the right side of the operator consists
+of a major version number, an optional decimal point, and an optional
+minor version (e.g., \fB7.1\fP). If the minor version is omitted, it
+is assumed to be \fB0\fP.
+The operator may be separated from the string \fBversion\fP
+and from the version number argument by whitespace.
 .IP \fBapplication\fP
 The \fBapplication\fP construct is used to include
 application-specific settings.  Each program using the readline
@@ -680,6 +704,15 @@ key sequence that quotes the current or previous word in \fBbash\fP:
 \fB$endif\fP
 .fi
 .RE
+.IP \fIvariable\fP
+The \fIvariable\fP construct provides simple equality tests for readline
+variables and values.
+The permitted comparison operators are \fI=\fP, \fI==\fP, and \fI!=\fP.
+The variable name must be separated from the comparison operator by
+whitespace; the operator may be separated from the value on the right hand
+side by whitespace.
+Both string and boolean variables may be tested. Boolean variables must be
+tested against the values \fIon\fP and \fIoff\fP.
 .RE
 .IP \fB$endif\fP
 This command, as seen in the previous example, terminates an
@@ -770,6 +803,19 @@ alphanumeric characters (letters and digits).
 .B backward\-word (M\-b)
 Move back to the start of the current or previous word.  Words are
 composed of alphanumeric characters (letters and digits).
+.TP
+.B previous\-screen\-line
+Attempt to move point to the same physical screen column on the previous
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if point is not
+greater than the length of the prompt plus the screen width.
+.TP
+.B next\-screen\-line
+Attempt to move point to the same physical screen column on the next
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if the length
+of the current Readline line is not greater than the length of the prompt
+plus the screen width.
 .TP
 .B clear\-screen (C\-l)
 Clear the screen leaving the current line at the top of the screen.
@@ -1103,6 +1149,7 @@ and store the definition.
 .B call\-last\-kbd\-macro (C\-x e)
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
+.TP
 .B print\-last\-kbd\-macro ()
 Print the last keyboard macro defined in a format suitable for the
 \fIinputrc\fP file.
@@ -1120,9 +1167,10 @@ Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 .BR bell\-style ).
 .TP
-.B do\-uppercase\-version (M\-a, M\-b, M\-\fIx\fP, ...)
-If the metafied character \fIx\fP is lowercase, run the command
-that is bound to the corresponding uppercase character.
+.B do\-lowercase\-version (M\-A, M\-B, M\-\fIx\fP, ...)
+If the metafied character \fIx\fP is uppercase, run the command
+that is bound to the corresponding metafied lowercase character.
+The behavior is undefined if \fIx\fP is already lowercase.
 .TP
 .B prefix\-meta (ESC)
 Metafy the next character typed.

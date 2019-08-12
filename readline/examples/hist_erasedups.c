@@ -38,6 +38,8 @@
 #define STREQN(a, b, n) ((n == 0) ? (1) \
                                   : ((a)[0] == (b)[0] && strncmp(a, b, n) == 0))
 
+int hist_erasedups (void);
+
 static void
 usage()
 {

@@ -1,5 +1,9 @@
 2019-08-12  Tom Tromey  <tom@tromey.com>
 
+	* Imported readline 8.0.
+
+2019-08-12  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (xfree.o): Don't depend on readline.h.
 	* xfree.c (xfree): Remove gdb workaround.
 	* xmalloc.h (xfree): Remove #define.

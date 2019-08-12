@@ -247,7 +247,7 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
 	exit ;;
     *:Bitrig:*:*)
 	UNAME_MACHINE_ARCH=`arch | sed 's/Bitrig.//'`
-	echo ${UNAME_MACHINE_ARCH}-unknown-bitrig${UNAME_RELEASE}
+	echo "$UNAME_MACHINE_ARCH"-unknown-bitrig"$UNAME_RELEASE"
 	exit ;;
     *:OpenBSD:*:*)
 	UNAME_MACHINE_ARCH=`arch | sed 's/OpenBSD.//'`
@@ -395,7 +395,7 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
 	echo i386-pc-auroraux"$UNAME_RELEASE"
 	exit ;;
     i86pc:AuroraUX:5.*:* | i86xen:AuroraUX:5.*:*)
-	echo i386-pc-auroraux${UNAME_RELEASE}
+	echo i386-pc-auroraux"$UNAME_RELEASE"
 	exit ;;
     i86pc:SunOS:5.*:* | i86xen:SunOS:5.*:*)
 	set_cc_for_build
@@ -877,7 +877,7 @@ EOF
 	echo "$UNAME_MACHINE"-pc-mingw64
 	exit ;;
     *:MINGW64*:*)
-	echo ${UNAME_MACHINE}-pc-mingw64
+	echo "$UNAME_MACHINE"-pc-mingw64
 	exit ;;
     *:MINGW*:*)
 	echo "$UNAME_MACHINE"-pc-mingw32
@@ -945,11 +945,11 @@ EOF
 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     aarch64:Linux:*:*)
-	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     aarch64_be:Linux:*:*)
 	UNAME_MACHINE=aarch64_be
-	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     alpha:Linux:*:*)
 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
@@ -962,11 +962,11 @@ EOF
 	  EV68*) UNAME_MACHINE=alphaev68 ;;
 	esac
 	objdump --private-headers /bin/sh | grep -q ld.so.1
-	if test "$?" = 0 ; then LIBC="gnulibc1" ; fi
-	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	if test "$?" = 0 ; then LIBC=gnulibc1 ; fi
+	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     arc:Linux:*:* | arceb:Linux:*:*)
-	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
 	exit ;;
     arm*:Linux:*:*)
 	set_cc_for_build
@@ -1494,10 +1494,13 @@ EOF
 	echo "$UNAME_MACHINE"-unknown-unleashed"$UNAME_RELEASE"
 	exit ;;
     i*86:AROS:*:*)
-	echo ${UNAME_MACHINE}-pc-aros
+	echo "$UNAME_MACHINE"-pc-aros
 	exit ;;
     x86_64:VMkernel:*:*)
-	echo ${UNAME_MACHINE}-unknown-esx
+	echo "$UNAME_MACHINE"-unknown-esx
+	exit ;;
+    amd64:Isilon\ OneFS:*:*)
+	echo x86_64-unknown-onefs
 	exit ;;
 esac
 
@@ -1624,12 +1627,13 @@ main ()
 #endif
 #endif
 
-#if defined (alliant) && defined (i860)
-  printf ("i860-alliant-bsd\n"); exit (0);
-#endif
+case "$UNAME_MACHINE:$UNAME_SYSTEM" in
+    mips:Linux | mips64:Linux)
+	# If we got here on MIPS GNU/Linux, output extra information.
+	cat >&2 <<EOF
 
-  exit (1);
-}
+NOTE: MIPS GNU/Linux systems require a C compiler to fully recognize
+the system type. Please install a C compiler and try again.
 EOF
 
 $CC_FOR_BUILD -o "$dummy" "$dummy.c" 2>/dev/null && SYSTEM_NAME=`$dummy` &&

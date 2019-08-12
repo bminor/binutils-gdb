@@ -118,6 +118,7 @@ examples/rl-fgets.c	f
 examples/rlbasic.c	f
 examples/rlcat.c	f
 examples/rlevent.c	f
+examples/rlkeymaps.c	f
 examples/rltest.c	f
 examples/rl-callbacktest.c	f
 examples/rl.c		f

@@ -46,6 +46,9 @@
 /* Define if you have the fcntl function. */
 #undef HAVE_FCNTL
 
+/* Define if you have the fnmatch function. */
+#undef HAVE_FNMATCH
+
 /* Define if you have the getpwent function. */
 #undef HAVE_GETPWENT
 
