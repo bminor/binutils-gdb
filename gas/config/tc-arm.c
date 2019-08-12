@@ -1037,7 +1037,7 @@ const char EXP_CHARS[] = "eE";
 /* As in 0f12.456  */
 /* or	 0d1.2345e12  */
 
-const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+const char FLT_CHARS[] = "rRsSfFdDxXeEpPHh";
 
 /* Prefix characters that indicate the start of an immediate
    value.  */
@@ -1046,6 +1046,16 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 /* Separator character handling.  */
 
 #define skip_whitespace(str)  do { if (*(str) == ' ') ++(str); } while (0)
+
+enum fp_16bit_format
+{
+  ARM_FP16_FORMAT_IEEE		= 0x1,
+  ARM_FP16_FORMAT_ALTERNATIVE	= 0x2,
+  ARM_FP16_FORMAT_DEFAULT	= 0x3
+};
+
+static enum fp_16bit_format fp16_format = ARM_FP16_FORMAT_DEFAULT;
+
 
 static inline int
 skip_past_char (char ** str, char c)
@@ -1188,6 +1198,11 @@ md_atof (int type, char * litP, int * sizeP)
 
   switch (type)
     {
+    case 'H':
+    case 'h':
+      prec = 1;
+      break;
+
     case 'f':
     case 'F':
     case 's':
@@ -4925,6 +4940,55 @@ pe_directive_secrel (int dummy ATTRIBUTE_UNUSED)
 }
 #endif /* TE_PE */
 
+int
+arm_is_largest_exponent_ok (int precision)
+{
+  /* precision == 1 ensures that this will only return
+     true for 16 bit floats.  */
+  return (precision == 1) && (fp16_format == ARM_FP16_FORMAT_ALTERNATIVE);
+}
+
+static void
+set_fp16_format (int dummy ATTRIBUTE_UNUSED)
+{
+  char saved_char;
+  char* name;
+  enum fp_16bit_format new_format;
+
+  new_format = ARM_FP16_FORMAT_DEFAULT;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
+    input_line_pointer++;
+
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  if (strcasecmp (name, "ieee") == 0)
+    new_format = ARM_FP16_FORMAT_IEEE;
+  else if (strcasecmp (name, "alternative") == 0)
+    new_format = ARM_FP16_FORMAT_ALTERNATIVE;
+  else
+    {
+      as_bad (_("unrecognised float16 format \"%s\""), name);
+      goto cleanup;
+    }
+
+  /* Only set fp16_format if it is still the default (aka not already
+     been set yet).  */
+  if (fp16_format == ARM_FP16_FORMAT_DEFAULT)
+    fp16_format = new_format;
+  else
+    {
+      if (new_format != fp16_format)
+	as_warn (_("float16 format cannot be set more than once, ignoring."));
+    }
+
+cleanup:
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
      pseudo-op name without dot
@@ -5002,9 +5066,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"asmfunc",      s_ccs_asmfunc,    0},
   {"endasmfunc",   s_ccs_endasmfunc, 0},
 
+  {"float16", float_cons, 'h' },
+  {"float16_format", set_fp16_format, 0 },
+
   { 0, 0, 0 }
 };
-
+
 /* Parser functions used exclusively in instruction operands.  */
 
 /* Generic immediate-value read function for use in insn parsing.
@@ -31240,6 +31307,22 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
 }
 
 static bfd_boolean
+arm_parse_fp16_opt (const char *str)
+{
+  if (strcasecmp (str, "ieee") == 0)
+    fp16_format = ARM_FP16_FORMAT_IEEE;
+  else if (strcasecmp (str, "alternative") == 0)
+    fp16_format = ARM_FP16_FORMAT_ALTERNATIVE;
+  else
+    {
+      as_bad (_("unrecognised float16 format \"%s\""), str);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static bfd_boolean
 arm_parse_cpu (const char *str)
 {
   const struct arm_cpu_option_table *opt;
@@ -31430,6 +31513,12 @@ struct arm_long_option_table arm_long_opts[] =
    arm_parse_it_mode, NULL},
   {"mccs", N_("\t\t\t  TI CodeComposer Studio syntax compatibility mode"),
    arm_ccs_mode, NULL},
+  {"mfp16-format=",
+   N_("[ieee|alternative]\n\
+                          set the encoding for half precision floating point "
+			  "numbers to IEEE\n\
+                          or Arm alternative format."),
+   arm_parse_fp16_opt, NULL },
   {NULL, NULL, 0, NULL}
 };
 
@@ -32011,6 +32100,9 @@ aeabi_set_public_attributes (void)
     virt_sec |= 2;
   if (virt_sec != 0)
     aeabi_set_attribute_int (Tag_Virtualization_use, virt_sec);
+
+  if (fp16_format != ARM_FP16_FORMAT_DEFAULT)
+    aeabi_set_attribute_int (Tag_ABI_FP_16bit_format, fp16_format);
 }
 
 /* Post relaxation hook.  Recompute ARM attributes now that relaxation is

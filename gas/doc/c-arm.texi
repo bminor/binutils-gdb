@@ -493,6 +493,22 @@ The default is dependent on the processor selected.  For Architecture 5 or
 later, the default is to assemble for VFP instructions; for earlier
 architectures the default is to assemble for FPA instructions.
 
+@cindex @code{-mfp16-format=} command-line option
+@item -mfp16-format=@var{format}
+This option specifies the half-precision floating point format to use
+when assembling floating point numbers emitted by the @code{.float16}
+directive.
+The following format options are recognized:
+@code{ieee},
+@code{alternative}.
+If @code{ieee} is specified then the IEEE 754-2008 half-precision floating
+point format is used, if @code{alternative} is specified then the Arm
+alternative half-precision format is used. If this option is set on the
+command line then the format is fixed and cannot be changed with
+the @code{float16_format} directive. If this value is not set then
+the IEEE 754-2008 format is used until the format is explicitly set with
+the @code{float16_format} directive.
+
 @cindex @code{-mthumb} command-line option, ARM
 @item -mthumb
 This option specifies that the assembler should start assembling Thumb
@@ -933,6 +949,23 @@ output section.  These are not compatible with current ARM processors
 or ABIs.
 
 @c FFFFFFFFFFFFFFFFFFFFFFFFFF
+
+@cindex @code{.float16} directive, ARM
+@item .float16 @var{value [,...,value_n]}
+Place the half precision floating point representation of one or more
+floating-point values into the current section. The exact format of the
+encoding is specified by @code{.float16_format}. If the format has not
+been explicitly set yet (either via the @code{.float16_format} directive or
+the command line option) then the IEEE 754-2008 format is used.
+
+@cindex @code{.float16_format} directive, ARM
+@item .float16_format @var{format}
+Set the format to use when encoding float16 values emitted by
+the @code{.float16} directive.
+Once the format has been set it cannot be changed.
+@code{format} should be one of the following: @code{ieee} (encode in
+the IEEE 754-2008 half precision format) or @code{alternative} (encode in
+the Arm alternative half precision format).
 
 @anchor{arm_fnend}
 @cindex @code{.fnend} directive, ARM

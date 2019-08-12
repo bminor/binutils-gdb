@@ -1,3 +1,41 @@
+2019-08-12  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/tc-arm.c (enum fp_16bit_format): Add enum to represent the 2 float16 encodings.
+	(md_atof): Set precision for float16 type.
+	(arm_is_largest_exponent_ok): Check for whether to encode with the IEEE or alternative
+	format.
+	(set_fp16_format): Parse a float16_format directive.
+	(arm_parse_fp16_opt): Parse the fp16-format command line option.
+	(aeabi_set_public_attributes): For ELF encode the FP16 format EABI attribute.
+	* config/tc-arm.h (TC_LARGEST_EXPONENT_IS_NORMAL): Macro that expands to
+	arm_is_largest_exponent_ok.
+	(arm_is_largest_exponent_ok): Add prototype for arm_is_largest_exponent_ok function.
+	* doc/c-arm.texi: Add documentation for .float16, .float16_format and -mfp16-format=
+	* testsuite/gas/arm/float16-bad.d: New test.
+	* testsuite/gas/arm/float16-bad.l: New test.
+	* testsuite/gas/arm/float16-bad.s: New test.
+	* testsuite/gas/arm/float16-be.d: New test.
+	* testsuite/gas/arm/float16-format-bad.d: New test.
+	* testsuite/gas/arm/float16-format-bad.l: New test.
+	* testsuite/gas/arm/float16-format-bad.s: New test.
+	* testsuite/gas/arm/float16-format-opt-bad.d: New test.
+	* testsuite/gas/arm/float16-format-opt-bad.l: New test.
+	* testsuite/gas/arm/float16-le.d: New test.
+	* testsuite/gas/arm/float16.s: New test.
+	* testsuite/gas/arm/float16-eabi-alternative-format.d: New test.
+	* testsuite/gas/arm/float16-eabi-ieee-format.d: New test.
+	* testsuite/gas/arm/float16-eabi-no-format.d: New test.
+	* testsuite/gas/arm/float16-eabi.s: New test.
+
+2019-08-12  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/atof-ieee.c (H_PRECISION): Macro for precision of float16
+	type.
+	(atof_ieee): Set precision and exponent bits for encoding float16
+	types.
+	(gen_to_words): NaN and Infinity encoding for float16.
+	(ieee_md_atof): Set precision for encoding float16 type.
+
 2019-08-12  Alan Modra  <amodra@gmail.com>
 
 	PR 24851
