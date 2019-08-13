@@ -15743,6 +15743,24 @@ fix_bad_misaligned_branch_p (fixS *fixP)
   return (val & 0x3) != isa_bit;
 }
 
+/* Calculate the relocation target by masking off ISA mode bit before
+   combining symbol and addend.  */
+
+static valueT
+fix_bad_misaligned_address (fixS *fixP)
+{
+  valueT val;
+  valueT off;
+  unsigned isa_mode;
+  gas_assert (fixP != NULL && fixP->fx_addsy != NULL);
+  val = S_GET_VALUE (fixP->fx_addsy);
+  off = fixP->fx_offset;
+  isa_mode = (ELF_ST_IS_COMPRESSED (S_GET_OTHER (fixP->fx_addsy))
+	      ? 1 : 0);
+
+  return ((val & ~isa_mode) + off);
+}
+
 /* Make the necessary checks on a regular MIPS branch pointed to by FIXP
    and its calculated value VAL.  */
 
@@ -15759,7 +15777,7 @@ fix_validate_branch (fixS *fixP, valueT val)
   else if (fix_bad_misaligned_branch_p (fixP))
     as_bad_where (fixP->fx_file, fixP->fx_line,
 		  _("branch to misaligned address (0x%lx)"),
-		  (long) (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset));
+		  (long) fix_bad_misaligned_address (fixP));
   else if (HAVE_IN_PLACE_ADDENDS && (fixP->fx_offset & 0x3) != 0)
     as_bad_where (fixP->fx_file, fixP->fx_line,
 		  _("cannot encode misaligned addend "
@@ -15898,8 +15916,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	else if (fix_bad_misaligned_jump_p (fixP, shift))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("jump to misaligned address (0x%lx)"),
-			(long) (S_GET_VALUE (fixP->fx_addsy)
-				+ fixP->fx_offset));
+			(long) fix_bad_misaligned_address (fixP));
 	else if (HAVE_IN_PLACE_ADDENDS
 		 && (fixP->fx_offset & ((1 << shift) - 1)) != 0)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -16153,7 +16170,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	       && (fixP->fx_offset & 0x1) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch to misaligned address (0x%lx)"),
-		      (long) (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset));
+		      (long) fix_bad_misaligned_address (fixP));
       else if (HAVE_IN_PLACE_ADDENDS && (fixP->fx_offset & 0x1) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("cannot encode misaligned addend "
@@ -19000,7 +19017,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      else if ((fragp->fr_offset & 0x1) != 0)
 		as_bad_where (fragp->fr_file, fragp->fr_line,
 			      _("branch to misaligned address (0x%lx)"),
-			      (long) val);
+			      (long) (resolve_symbol_value (fragp->fr_symbol)
+				      + (fragp->fr_offset & ~1)));
 	    }
 
 	  val = mips16_pcrel_val (fragp, pcrel_op, val, 0);

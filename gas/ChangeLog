@@ -1,5 +1,14 @@
 2019-08-19  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
+	* config/tc-mips.c (fix_bad_misaligned_address): New function.
+	(fix_validate_branch): Call fix_bad_misaligned address_to
+	calculate the target address.
+	(md_apply_fix): Likewise.
+	(md_convert_frag): Update misaligned address calculation to
+	disregard ISA mode bit.
+
+2019-08-19  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
 	* config/tc-mips.c (mips_move_labels): Retain ISA mode bit
 	when moving labels in text segments.
 	(mips_align): Indicate text mode when aligning labels in
