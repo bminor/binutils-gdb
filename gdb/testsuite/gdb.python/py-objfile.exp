@@ -46,7 +46,7 @@ gdb_test "python print (objfile.username)" "${testfile}" \
   "Get objfile user name"
 
 gdb_test "python print (objfile)" \
-    "<gdb.Objfile filename=[string_to_regexp ${binfile}]>"
+    "<gdb.Objfile filename=.*${testfile}.*>"
 
 gdb_test_no_output "python dir(objfile)"
 
@@ -158,13 +158,16 @@ if { [get_python_valueof "sep_objfile.build_id" "None"] != "None" } {
 
 # An objfile that was a symlink to a differently named file is still
 # findable with its original name.
-set symlink_binary [standard_output_file "symlink-binary"]
-remote_exec host "rm -f ${symlink_binary}"
-remote_exec host "ln -sf ${testfile} ${symlink_binary}"
-if [remote_file host exists "${symlink_binary}"] {
-    clean_restart "${symlink_binary}"
-    gdb_test "python print (gdb.lookup_objfile (\"${symlink_binary}\").filename)" \
-	"${testfile}" "gdb.lookup_objfile of symlinked binary"
+# On Windows we don't have proper symlinks, so skip this.
+if ![ishost *-*-mingw*] {
+    set symlink_binary [standard_output_file "symlink-binary"]
+    remote_exec host "rm -f ${symlink_binary}"
+    remote_exec host "ln -sf ${testfile} ${symlink_binary}"
+    if [remote_file host exists "${symlink_binary}"] {
+	clean_restart "${symlink_binary}"
+	gdb_test "python print (gdb.lookup_objfile (\"${symlink_binary}\").filename)" \
+	    "${testfile}" "gdb.lookup_objfile of symlinked binary"
+    }
 }
 
 # Test printing an Objfile object that is no longer valid.

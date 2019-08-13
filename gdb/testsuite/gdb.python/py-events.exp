@@ -26,7 +26,6 @@ set lib_opts  debug
 
 standard_testfile
 set exec_opts [list debug shlib=$lib_sl]
-set pyfile ${srcdir}/${subdir}/${testfile}.py
 
 if [get_compiler_info] {
     return -1
@@ -43,6 +42,7 @@ clean_restart ${testfile}
 
 if { [skip_python_tests] } { continue }
 
+set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-events.py]
 gdb_test_no_output "source ${pyfile}" "load python file"
 
 gdb_test "test-objfile-events" "Object file events registered."

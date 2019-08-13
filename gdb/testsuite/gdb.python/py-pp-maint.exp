@@ -41,7 +41,7 @@ gdb_test "b [gdb_get_line_number {break to inspect} ${testfile}.c ]" \
     ".*Breakpoint.*"
 gdb_test "continue" ".*Breakpoint.*"
 
-set python_file ${srcdir}/${subdir}/${testfile}.py
+set python_file [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 gdb_test_no_output "source ${python_file}" "load python file"
 

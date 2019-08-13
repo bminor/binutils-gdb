@@ -35,7 +35,8 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" }
 # Skip all tests if Python scripting is not enabled.
 if { [mi_skip_python_tests] } { continue }
 
-mi_gdb_test "source ${srcdir}/${subdir}/${testfile}.py" \
+set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
+mi_gdb_test "source ${pyfile}" \
   ".*\\^done" \
   "load python file"
 

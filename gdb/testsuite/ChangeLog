@@ -1,3 +1,31 @@
+2019-08-13  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.python/py-completion.exp: Download the .py file to the host
+	and use its host pathname.  Conditionalize tests that use
+	tab completion and manipulate files on the build machine.
+	* gdb.python/py-events.exp: Download the .py file to the host
+	and use its host pathname.
+	* gdb.python/py-evsignal.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+	* gdb.python/py-framefilter-invalidarg.exp: Match Windows
+	pathname syntax.
+	* gdb.python/py-framefilter.exp: Download the .py file to the right
+	place on the host.  Match Windows pathname syntax.
+	* gdb.python/py-mi-var-info-path-expression.exp: Download the
+	.py file to the host and use its host pathname.
+	* gdb.python/py-objfile-script.exp: Match Windows pathname syntax.
+	* gdb.python/py-objfile.exp: Expect a host pathname, not a
+	build pathname.  Skip symlink test on Windows host.  Add missing
+	newline at end of file.
+	* gdb.python/py-pp-maint.exp: Download the .py file to the host
+	and use its host pathname.
+	* gdb.python/py-pp-registration.exp: Match Windows pathname syntax.
+	* gdb.python/py-section-script.exp: Use host location of binfile
+	on safe-path.  Use correct path separator on Windows host.
+	Reorder alternatives in gdb_test_multiple to prevent matching
+	the wrong alternative on success.
+	* gdb.python/py-symtab.exp: Match Windows pathname syntax.
+
 2019-08-12  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.gdb/selftest.exp (test_with_self): Update test to now
