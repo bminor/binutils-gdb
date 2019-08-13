@@ -1936,7 +1936,8 @@ do_one_display (struct display *d)
   if (d->block)
     {
       if (d->pspace == current_program_space)
-	within_current_scope = contained_in (get_selected_block (0), d->block);
+	within_current_scope = contained_in (get_selected_block (0), d->block,
+					     true);
       else
 	within_current_scope = 0;
     }
@@ -2098,7 +2099,7 @@ Num Enb Expression\n"));
       else if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
       puts_filtered (d->exp_string);
-      if (d->block && !contained_in (get_selected_block (0), d->block))
+      if (d->block && !contained_in (get_selected_block (0), d->block, true))
 	printf_filtered (_(" (cannot be evaluated in the current context)"));
       printf_filtered ("\n");
     }

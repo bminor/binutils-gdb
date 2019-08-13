@@ -65,25 +65,28 @@ block_gdbarch (const struct block *block)
   return get_objfile_arch (block_objfile (block));
 }
 
-/* Return Nonzero if block a is lexically nested within block b,
-   or if a and b have the same pc range.
-   Return zero otherwise.  */
+/* See block.h.  */
 
-int
-contained_in (const struct block *a, const struct block *b)
+bool
+contained_in (const struct block *a, const struct block *b,
+	      bool allow_nested)
 {
   if (!a || !b)
-    return 0;
+    return false;
 
   do
     {
       if (a == b)
-	return 1;
+	return true;
+      /* If A is a function block, then A cannot be contained in B,
+         except if A was inlined.  */
+      if (!allow_nested && BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
+        return false;
       a = BLOCK_SUPERBLOCK (a);
     }
   while (a != NULL);
 
-  return 0;
+  return true;
 }
 
 

@@ -219,7 +219,15 @@ extern struct symbol *block_containing_function (const struct block *);
 
 extern int block_inlined_p (const struct block *block);
 
-extern int contained_in (const struct block *, const struct block *);
+/* Return true if block A is lexically nested within block B, or if a
+   and b have the same pc range.  Return false otherwise.  If
+   ALLOW_NESTED is true, then block A is considered to be in block B
+   if A is in a nested function in B's function.  If ALLOW_NESTED is
+   false (the default), then blocks in nested functions are not
+   considered to be contained.  */
+
+extern bool contained_in (const struct block *a, const struct block *b,
+			  bool allow_nested = false);
 
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
