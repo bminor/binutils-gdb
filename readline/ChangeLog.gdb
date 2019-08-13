@@ -1,3 +1,8 @@
+2019-08-13  Christian Biesinger  <cbiesinger@google.com>
+
+	* colors.c (_rl_print_color_indicator): Remove unnecessary
+	S_ISLNK check to fix compilation on MinGW.
+
 2019-08-12  Tom Tromey  <tom@tromey.com>
 
 	* Imported readline 8.0.
