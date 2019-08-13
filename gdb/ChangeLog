@@ -1,3 +1,9 @@
+2019-08-22  Christian Biesinger  <cbiesinger@google.com>
+
+	* python/lib/gdb/__init__.py (_execute_file): New function.
+	* python/python.c (python_run_simple_file): Call gdb._execute_file
+	on Windows.
+
 2019-08-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.y (yylex): Remove is_a_field_of_this local variable, and
