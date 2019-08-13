@@ -1,3 +1,8 @@
+2019-08-13  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.gdb/selftest.exp (send ^C to child process again): Accept also
+	Thread.
+
 2019-08-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.python/py-completion.exp: Download the .py file to the host
