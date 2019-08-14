@@ -37,6 +37,7 @@
 #include "arch-utils.h"
 #include "bfd.h"
 #include "bfd/mach-o.h"
+#include "gdbarch.h"
 
 #include <copyfile.h>
 #include <sys/ptrace.h>

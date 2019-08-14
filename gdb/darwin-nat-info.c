@@ -34,6 +34,7 @@
 #include "value.h"
 #include "gdbcmd.h"
 #include "inferior.h"
+#include "gdbarch.h"
 
 #include <sys/sysctl.h>
 
