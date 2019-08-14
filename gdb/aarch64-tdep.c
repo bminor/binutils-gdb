@@ -387,17 +387,16 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  unsigned rt = inst.operands[0].reg.regno;
 	  unsigned rn = inst.operands[1].addr.base_regno;
-	  int is64
-	    = (aarch64_get_qualifier_esize (inst.operands[0].qualifier) == 8);
+	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
 
 	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 2);
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt);
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9);
 	  gdb_assert (!inst.operands[1].addr.offset.is_reg);
 
-	  stack.store (pv_add_constant (regs[rn],
-					inst.operands[1].addr.offset.imm),
-		       is64 ? 8 : 4, regs[rt]);
+	  stack.store
+	    (pv_add_constant (regs[rn], inst.operands[1].addr.offset.imm),
+	     size, regs[rt]);
 	}
       else if ((inst.opcode->iclass == ldstpair_off
 		|| (inst.opcode->iclass == ldstpair_indexed
@@ -409,6 +408,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  unsigned rt2;
 	  unsigned rn = inst.operands[2].addr.base_regno;
 	  int32_t imm = inst.operands[2].addr.offset.imm;
+	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
 
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
 		      || inst.operands[0].type == AARCH64_OPND_Ft);
@@ -430,17 +430,12 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  rt2 = inst.operands[1].reg.regno;
 	  if (inst.operands[0].type == AARCH64_OPND_Ft)
 	    {
-	      /* Only bottom 64-bit of each V register (D register) need
-		 to be preserved.  */
-	      gdb_assert (inst.operands[0].qualifier == AARCH64_OPND_QLF_S_D);
 	      rt1 += AARCH64_X_REGISTER_COUNT;
 	      rt2 += AARCH64_X_REGISTER_COUNT;
 	    }
 
-	  stack.store (pv_add_constant (regs[rn], imm), 8,
-		       regs[rt1]);
-	  stack.store (pv_add_constant (regs[rn], imm + 8), 8,
-		       regs[rt2]);
+	  stack.store (pv_add_constant (regs[rn], imm), size, regs[rt1]);
+	  stack.store (pv_add_constant (regs[rn], imm + size), size, regs[rt2]);
 
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
@@ -457,21 +452,14 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  unsigned int rt = inst.operands[0].reg.regno;
 	  int32_t imm = inst.operands[1].addr.offset.imm;
 	  unsigned int rn = inst.operands[1].addr.base_regno;
-	  bool is64
-	    = (aarch64_get_qualifier_esize (inst.operands[0].qualifier) == 8);
+	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
 		      || inst.operands[0].type == AARCH64_OPND_Ft);
 
 	  if (inst.operands[0].type == AARCH64_OPND_Ft)
-	    {
-	      /* Only bottom 64-bit of each V register (D register) need
-		 to be preserved.  */
-	      gdb_assert (inst.operands[0].qualifier == AARCH64_OPND_QLF_S_D);
-	      rt += AARCH64_X_REGISTER_COUNT;
-	    }
+	    rt += AARCH64_X_REGISTER_COUNT;
 
-	  stack.store (pv_add_constant (regs[rn], imm),
-		       is64 ? 8 : 4, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn], imm), size, regs[rt]);
 	  if (inst.operands[1].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 	}
