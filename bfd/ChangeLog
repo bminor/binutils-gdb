@@ -1,3 +1,17 @@
+2019-08-14  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Remove addr_size parameter.
+	* libbfd-in.h  (_bfd_dwarf2_find_nearest_line): Update prototype.
+	* coffgen.c (coff_find_nearest_line_with_names): Adjust
+	_bfd_dwarf2_find_nearest_line calls.
+	* elf.c (_bfd_elf_find_nearest_line, _bfd_elf_find_line): Likewise.
+	* elf32-arm.c (elf32_arm_find_nearest_line): Likewise.
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_find_nearest_line): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Likewise.
+	* mach-o.c (bfd_mach_o_find_nearest_line): Likewise.
+	* libbfd.h: Regenerate.
+
 2019-08-09  Mihailo Stojanovic  <mihailo.stojanovic@rt-rk.com>
 
 	* elf-bfd.h (struct elf_backend_data): New members.

@@ -5985,7 +5985,7 @@ bfd_mach_o_find_nearest_line (bfd *abfd,
   return _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 					filename_ptr, functionname_ptr,
 					line_ptr, discriminator_ptr,
-					dwarf_debug_sections, 0,
+					dwarf_debug_sections,
 					&mdata->dwarf2_find_line_info);
 }
 

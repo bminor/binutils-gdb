@@ -4531,7 +4531,6 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
    NULL the FUNCTIONNAME_PTR is also filled in.
    SYMBOLS contains the symbol table for ABFD.
    DEBUG_SECTIONS contains the name of the dwarf debug sections.
-   ADDR_SIZE is the number of bytes in the initial .debug_info length
    field and in the abbreviation offset, or zero to indicate that the
    default value should be used.  */
 
@@ -4546,7 +4545,6 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 			       unsigned int *linenumber_ptr,
 			       unsigned int *discriminator_ptr,
 			       const struct dwarf_debug_section *debug_sections,
-			       unsigned int addr_size,
 			       void **pinfo)
 {
   /* Read each compilation unit from the section .debug_info, and check
@@ -4727,18 +4725,11 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	}
     }
 
-  /* The DWARF2 spec says that the initial length field, and the
-     offset of the abbreviation table, should both be 4-byte values.
-     However, some compilers do things differently.  */
-  if (addr_size == 0)
-    addr_size = 4;
-  BFD_ASSERT (addr_size == 4 || addr_size == 8);
-
   /* Read each remaining comp. units checking each as they are read.  */
   while (stash->info_ptr < stash->info_ptr_end)
     {
       bfd_vma length;
-      unsigned int offset_size = addr_size;
+      unsigned int offset_size;
       bfd_byte *info_ptr_unit = stash->info_ptr;
 
       length = read_4_bytes (stash->bfd_ptr, stash->info_ptr, stash->info_ptr_end);
@@ -4768,13 +4759,11 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	   b) if they do use 64-bit offsets but they are not using
 	      the size hints that are tested for above then they are
 	      not conforming to the DWARF3 standard anyway.  */
-      else if (addr_size == 8)
+      else
 	{
 	  offset_size = 4;
 	  stash->info_ptr += 4;
 	}
-      else
-	stash->info_ptr += 4;
 
       if (length > 0)
 	{

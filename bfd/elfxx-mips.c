@@ -13084,7 +13084,6 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
 				     dwarf_debug_sections,
-				     ABI_64_P (abfd) ? 8 : 0,
 				     &elf_tdata (abfd)->dwarf2_find_line_info)
       || _bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
 					filename_ptr, functionname_ptr,

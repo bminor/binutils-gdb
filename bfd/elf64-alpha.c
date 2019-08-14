@@ -1467,7 +1467,7 @@ elf64_alpha_find_nearest_line (bfd *abfd, asymbol **symbols,
   if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
-				     dwarf_debug_sections, 0,
+				     dwarf_debug_sections,
 				     &elf_tdata (abfd)->dwarf2_find_line_info))
     return TRUE;
 

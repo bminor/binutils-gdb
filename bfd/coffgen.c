@@ -2290,7 +2290,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
   /* Also try examining DWARF2 debugging information.  */
   if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, debug_sections, 0,
+				     line_ptr, NULL, debug_sections,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
 
@@ -2330,7 +2330,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	  && _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section,
 					    offset + bias,
 					    filename_ptr, functionname_ptr,
-					    line_ptr, NULL, debug_sections, 0,
+					    line_ptr, NULL, debug_sections,
 					    &coff_data(abfd)->dwarf2_find_line_info))
 	return TRUE;
     }

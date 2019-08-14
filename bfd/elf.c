@@ -8972,7 +8972,7 @@ _bfd_elf_find_nearest_line (bfd *abfd,
   if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
-				     dwarf_debug_sections, 0,
+				     dwarf_debug_sections,
 				     &elf_tdata (abfd)->dwarf2_find_line_info)
       || _bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
 					filename_ptr, functionname_ptr,
@@ -9012,7 +9012,7 @@ _bfd_elf_find_line (bfd *abfd, asymbol **symbols, asymbol *symbol,
 {
   return _bfd_dwarf2_find_nearest_line (abfd, symbols, symbol, NULL, 0,
 					filename_ptr, NULL, line_ptr, NULL,
-					dwarf_debug_sections, 0,
+					dwarf_debug_sections,
 					&elf_tdata (abfd)->dwarf2_find_line_info);
 }
 
