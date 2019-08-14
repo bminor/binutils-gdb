@@ -2804,6 +2804,9 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
   return FALSE;
 }
 
+static bfd_boolean comp_unit_maybe_decode_line_info (struct comp_unit *,
+						     struct dwarf2_debug *);
+
 static bfd_boolean
 find_abstract_instance (struct comp_unit *   unit,
 			bfd_byte *           orig_info_ptr,
@@ -3604,32 +3607,8 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 {
   bfd_boolean func_p;
 
-  if (unit->error)
+  if (!comp_unit_maybe_decode_line_info (unit, stash))
     return FALSE;
-
-  if (! unit->line_table)
-    {
-      if (! unit->stmtlist)
-	{
-	  unit->error = 1;
-	  return FALSE;
-	}
-
-      unit->line_table = decode_line_info (unit, stash);
-
-      if (! unit->line_table)
-	{
-	  unit->error = 1;
-	  return FALSE;
-	}
-
-      if (unit->first_child_die_ptr < unit->end_ptr
-	  && ! scan_unit_for_symbols (unit))
-	{
-	  unit->error = 1;
-	  return FALSE;
-	}
-    }
 
   *function_ptr = NULL;
   func_p = lookup_address_in_function_table (unit, addr, function_ptr);
@@ -4492,13 +4471,7 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
     {
       struct funcinfo * func;
 
-      if (unit->function_table == NULL)
-	{
-	  if (unit->line_table == NULL)
-	    unit->line_table = decode_line_info (unit, stash);
-	  if (unit->line_table != NULL)
-	    scan_unit_for_symbols (unit);
-	}
+      comp_unit_maybe_decode_line_info (unit, stash);
 
       for (func = unit->function_table; func != NULL; func = func->prev_func)
 	if (func->name && func->arange.low)
