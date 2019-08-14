@@ -8157,6 +8157,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 
+	      /* Optimize unaligned reloc use.  */
+	      if ((r_type == R_PPC_ADDR32 && (outrel.r_offset & 3) != 0)
+		  || (r_type == R_PPC_UADDR32 && (outrel.r_offset & 3) == 0))
+		r_type ^= R_PPC_ADDR32 ^ R_PPC_UADDR32;
+	      if ((r_type == R_PPC_ADDR16 && (outrel.r_offset & 1) != 0)
+		  || (r_type == R_PPC_UADDR16 && (outrel.r_offset & 1) == 0))
+		r_type ^= R_PPC_ADDR16 ^ R_PPC_UADDR16;
+
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
 	      else if (!SYMBOL_REFERENCES_LOCAL (info, h))

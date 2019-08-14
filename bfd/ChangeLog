@@ -1,3 +1,7 @@
+2019-08-16  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Optimize unaligned relocs.
+
 2019-08-15  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (perform_relocation) <R_RISCV_RVC_LUI>: If
