@@ -1,3 +1,8 @@
+2019-08-15  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2.c (scan_unit_for_symbols): Check for end of CU, not end
+	of section.
+
 2019-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 24623

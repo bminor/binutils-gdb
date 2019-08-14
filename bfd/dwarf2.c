@@ -3072,7 +3072,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 {
   bfd *abfd = unit->abfd;
   bfd_byte *info_ptr = unit->first_child_die_ptr;
-  bfd_byte *info_ptr_end = unit->stash->info_ptr_end;
+  bfd_byte *info_ptr_end = unit->end_ptr;
   int nesting_level = 0;
   struct nest_funcinfo {
     struct funcinfo *func;
