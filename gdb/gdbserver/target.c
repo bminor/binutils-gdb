@@ -150,23 +150,11 @@ int
 write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		       int len)
 {
-  /* Lacking cleanups, there is some potential for a memory leak if the
-     write fails and we go through error().  Make sure that no more than
-     one buffer is ever pending by making BUFFER static.  */
-  static unsigned char *buffer = 0;
-  int res;
-
-  if (buffer != NULL)
-    free (buffer);
-
-  buffer = (unsigned char *) xmalloc (len);
-  memcpy (buffer, myaddr, len);
-  check_mem_write (memaddr, buffer, myaddr, len);
-  res = (*the_target->write_memory) (memaddr, buffer, len);
-  free (buffer);
-  buffer = NULL;
-
-  return res;
+  /* Make a copy of the data because check_mem_write may need to
+     update it.  */
+  std::vector<unsigned char> buffer (myaddr, myaddr + len);
+  check_mem_write (memaddr, buffer.data (), myaddr, len);
+  return (*the_target->write_memory) (memaddr, buffer.data (), len);
 }
 
 /* See target/target.h.  */
