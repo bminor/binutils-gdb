@@ -1,5 +1,13 @@
 2019-08-14  Alan Modra  <amodra@gmail.com>
 
+	PR 24623
+	* dwarf2.c (stash_comp_unit): New function, extracted from..
+	(_bfd_dwarf2_find_nearest_line): ..here.
+	(find_abstract_instance): Parse comp units and decode line info
+	as needed.
+
+2019-08-14  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c (comp_unit_maybe_decode_line_info): Declare.
 	(comp_unit_find_nearest_line): Use it here..
 	(_bfd_dwarf2_find_symbol_bias): ..and here.
