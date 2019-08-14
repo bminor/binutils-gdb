@@ -401,15 +401,15 @@ remove_memory_breakpoint (struct raw_breakpoint *bp)
   int err;
 
   /* Since there can be trap breakpoints inserted in the same address
-     range, we use `write_inferior_memory', which takes care of
+     range, we use `target_write_memory', which takes care of
      layering breakpoints on top of fast tracepoints, and on top of
      the buffer we pass it.  This works because the caller has already
      either unlinked the breakpoint or marked it uninserted.  Also
      note that we need to pass the current shadow contents, because
-     write_inferior_memory updates any shadow memory with what we pass
+     target_write_memory updates any shadow memory with what we pass
      here, and we want that to be a nop.  */
   memcpy (buf, bp->old_data, bp_size (bp));
-  err = write_inferior_memory (bp->pc, buf, bp_size (bp));
+  err = target_write_memory (bp->pc, buf, bp_size (bp));
   if (err != 0)
     {
       if (debug_threads)
@@ -578,17 +578,17 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
 	      *bp_link = bp->next;
 
 	      /* Since there can be breakpoints inserted in the same
-		 address range, we use `write_inferior_memory', which
+		 address range, we use `target_write_memory', which
 		 takes care of layering breakpoints on top of fast
 		 tracepoints, and on top of the buffer we pass it.
 		 This works because we've already unlinked the fast
 		 tracepoint jump above.  Also note that we need to
 		 pass the current shadow contents, because
-		 write_inferior_memory updates any shadow memory with
+		 target_write_memory updates any shadow memory with
 		 what we pass here, and we want that to be a nop.  */
 	      buf = (unsigned char *) alloca (bp->length);
 	      memcpy (buf, fast_tracepoint_jump_shadow (bp), bp->length);
-	      ret = write_inferior_memory (bp->pc, buf, bp->length);
+	      ret = target_write_memory (bp->pc, buf, bp->length);
 	      if (ret != 0)
 		{
 		  /* Something went wrong, relink the jump.  */
@@ -672,14 +672,14 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   proc->fast_tracepoint_jumps = jp;
 
   /* Since there can be trap breakpoints inserted in the same address
-     range, we use use `write_inferior_memory', which takes care of
+     range, we use use `target_write_memory', which takes care of
      layering breakpoints on top of fast tracepoints, on top of the
      buffer we pass it.  This works because we've already linked in
      the fast tracepoint jump above.  Also note that we need to pass
-     the current shadow contents, because write_inferior_memory
+     the current shadow contents, because target_write_memory
      updates any shadow memory with what we pass here, and we want
      that to be a nop.  */
-  err = write_inferior_memory (where, buf, length);
+  err = target_write_memory (where, buf, length);
   if (err != 0)
     {
       if (debug_threads)
@@ -721,17 +721,17 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
       jp->inserted = 0;
 
       /* Since there can be trap breakpoints inserted in the same
-	 address range, we use use `write_inferior_memory', which
+	 address range, we use use `target_write_memory', which
 	 takes care of layering breakpoints on top of fast
 	 tracepoints, and on top of the buffer we pass it.  This works
 	 because we've already marked the fast tracepoint fast
 	 tracepoint jump uninserted above.  Also note that we need to
 	 pass the current shadow contents, because
-	 write_inferior_memory updates any shadow memory with what we
+	 target_write_memory updates any shadow memory with what we
 	 pass here, and we want that to be a nop.  */
       buf = (unsigned char *) alloca (jp->length);
       memcpy (buf, fast_tracepoint_jump_shadow (jp), jp->length);
-      err = write_inferior_memory (jp->pc, buf, jp->length);
+      err = target_write_memory (jp->pc, buf, jp->length);
       if (err != 0)
 	{
 	  jp->inserted = 1;
@@ -769,16 +769,16 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
   jp->inserted = 1;
 
   /* Since there can be trap breakpoints inserted in the same address
-     range, we use `write_inferior_memory', which takes care of
+     range, we use `target_write_memory', which takes care of
      layering breakpoints on top of fast tracepoints, and on top of
      the buffer we pass it.  This works because we've already marked
      the fast tracepoint jump inserted above.  Also note that we need
      to pass the current shadow contents, because
-     write_inferior_memory updates any shadow memory with what we pass
+     target_write_memory updates any shadow memory with what we pass
      here, and we want that to be a nop.  */
   buf = (unsigned char *) alloca (jp->length);
   memcpy (buf, fast_tracepoint_jump_shadow (jp), jp->length);
-  err = write_inferior_memory (where, buf, jp->length);
+  err = target_write_memory (where, buf, jp->length);
   if (err != 0)
     {
       jp->inserted = 0;

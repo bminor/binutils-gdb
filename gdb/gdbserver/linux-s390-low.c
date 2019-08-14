@@ -1036,7 +1036,7 @@ static const unsigned char s390_ft_exit_gpr_zarch[] = {
 static void
 append_insns (CORE_ADDR *to, size_t len, const unsigned char *buf)
 {
-  write_inferior_memory (*to, buf, len);
+  target_write_memory (*to, buf, len);
   *to += len;
 }
 
@@ -1793,7 +1793,7 @@ s390_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
     }
 
   memcpy (buf, &sdiff, sizeof sdiff);
-  write_inferior_memory (from, buf, sizeof sdiff);
+  target_write_memory (from, buf, sizeof sdiff);
 }
 
 /* Preparation for emitting a literal pool of given size.  Loads the address

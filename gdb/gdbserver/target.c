@@ -146,23 +146,17 @@ target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
   return read_inferior_memory (memaddr, (gdb_byte *) result, sizeof (*result));
 }
 
+/* See target/target.h.  */
+
 int
-write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-		       int len)
+target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		     ssize_t len)
 {
   /* Make a copy of the data because check_mem_write may need to
      update it.  */
   std::vector<unsigned char> buffer (myaddr, myaddr + len);
   check_mem_write (memaddr, buffer.data (), myaddr, len);
   return (*the_target->write_memory) (memaddr, buffer.data (), len);
-}
-
-/* See target/target.h.  */
-
-int
-target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
-{
-  return write_inferior_memory (memaddr, myaddr, len);
 }
 
 ptid_t

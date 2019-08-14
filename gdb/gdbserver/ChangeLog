@@ -1,5 +1,35 @@
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
+	* tracepoint.c (write_inferior_data_pointer)
+	(write_inferior_integer, write_inferior_int8)
+	(write_inferior_uinteger, m_tracepoint_action_download)
+	(r_tracepoint_action_download, x_tracepoint_action_download)
+	(l_tracepoint_action_download, clear_inferior_trace_buffer)
+	(download_agent_expr, download_tracepoint_1)
+	(download_trace_state_variables, upload_fast_traceframes): Update.
+	* server.c (gdb_write_memory): Update.
+	* remote-utils.c (relocate_instruction): Update.
+	* proc-service.c (ps_pdwrite): Update.
+	* mem-break.c (remove_memory_breakpoint)
+	(delete_fast_tracepoint_jump, set_fast_tracepoint_jump)
+	(uninsert_fast_tracepoint_jumps_at)
+	(reinsert_fast_tracepoint_jumps_at): Update.
+	* linux-x86-low.c (append_insns)
+	(i386_install_fast_tracepoint_jump_pad)
+	(amd64_write_goto_address, i386_write_goto_address): Update.
+	* linux-s390-low.c (append_insns, s390_write_goto_address):
+	Update.
+	* linux-ppc-low.c (ppc_relocate_instruction)
+	(ppc_install_fast_tracepoint_jump_pad, emit_insns)
+	(ppc_write_goto_address): Update.
+	* linux-aarch64-low.c (append_insns): Update.
+	* target.h (struct target_ops): Update.
+	(write_inferior_memory): Don't declare.
+	* target.c (target_write_memory): Rename from
+	write_inferior_memory.  Remove old target_write_memory.
+
+2019-08-15  Tom Tromey  <tromey@adacore.com>
+
 	* target.c (write_inferior_memory): Use std::vector.
 
 2019-08-06  Frank Ch. Eigler  <fche@redhat.com>

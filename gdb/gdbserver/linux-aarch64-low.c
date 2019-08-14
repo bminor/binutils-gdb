@@ -1626,11 +1626,11 @@ append_insns (CORE_ADDR *to, size_t len, const uint32_t *buf)
   for (i = 0; i < len; i++)
     le_buf[i] = htole32 (buf[i]);
 
-  write_inferior_memory (*to, (const unsigned char *) le_buf, byte_len);
+  target_write_memory (*to, (const unsigned char *) le_buf, byte_len);
 
   xfree (le_buf);
 #else
-  write_inferior_memory (*to, (const unsigned char *) buf, byte_len);
+  target_write_memory (*to, (const unsigned char *) buf, byte_len);
 #endif
 
   *to += byte_len;

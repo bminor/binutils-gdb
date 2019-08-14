@@ -1026,7 +1026,7 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
       if (ret == 0)
 	{
 	  if (set_desired_thread ())
-	    ret = write_inferior_memory (memaddr, myaddr, len);
+	    ret = target_write_memory (memaddr, myaddr, len);
 	  else
 	    ret = EIO;
 	  done_accessing_memory ();

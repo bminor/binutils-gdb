@@ -167,7 +167,7 @@ struct target_ops
   int (*read_memory) (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
   /* Write memory to the inferior process.  This should generally be
-     called through write_inferior_memory, which handles breakpoint shadowing.
+     called through target_write_memory, which handles breakpoint shadowing.
 
      Write LEN bytes from the buffer at MYADDR to MEMADDR.
 
@@ -725,9 +725,6 @@ void done_accessing_memory (void);
    : false)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
-
-int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-			   int len);
 
 int set_desired_thread ();
 

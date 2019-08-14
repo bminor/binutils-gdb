@@ -1535,12 +1535,12 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 
 	  /* Jump over the unconditional branch.  */
 	  insn = (insn & ~0xfffc) | 0x8;
-	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  target_write_memory (*to, (unsigned char *) &insn, 4);
 	  *to += 4;
 
 	  /* Build a unconditional branch and copy LK bit.  */
 	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  target_write_memory (*to, (unsigned char *) &insn, 4);
 	  *to += 4;
 
 	  return;
@@ -1563,14 +1563,14 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 	  bdnz_insn |= (insn ^ (1 << 22)) & (1 << 22);
 	  bf_insn |= (insn ^ (1 << 24)) & (1 << 24);
 
-	  write_inferior_memory (*to, (unsigned char *) &bdnz_insn, 4);
+	  target_write_memory (*to, (unsigned char *) &bdnz_insn, 4);
 	  *to += 4;
-	  write_inferior_memory (*to, (unsigned char *) &bf_insn, 4);
+	  target_write_memory (*to, (unsigned char *) &bf_insn, 4);
 	  *to += 4;
 
 	  /* Build a unconditional branch and copy LK bit.  */
 	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  target_write_memory (*to, (unsigned char *) &insn, 4);
 	  *to += 4;
 
 	  return;
@@ -1583,14 +1583,14 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 
 	  /* Build a unconditional branch and copy LK bit.  */
 	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+	  target_write_memory (*to, (unsigned char *) &insn, 4);
 	  *to += 4;
 
 	  return;
 	}
     }
 
-  write_inferior_memory (*to, (unsigned char *) &insn, 4);
+  target_write_memory (*to, (unsigned char *) &insn, 4);
   *to += 4;
 }
 
@@ -1750,7 +1750,7 @@ ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   p += GEN_ADDI (p, 1, 1, frame_size);
 
   /* Flush instructions to inferior memory.  */
-  write_inferior_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
+  target_write_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
 
   /* Now, insert the original instruction to execute in the jump pad.  */
   *adjusted_insn_addr = buildaddr + (p - buf) * 4;
@@ -1780,7 +1780,7 @@ ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
     }
   /* b <tpaddr+4> */
   p += GEN_B (p, offset);
-  write_inferior_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
+  target_write_memory (buildaddr, (unsigned char *) buf, (p - buf) * 4);
   *jump_entry = buildaddr + (p - buf) * 4;
 
   /* The jump pad is now built.  Wire in a jump to our jump pad.  This
@@ -1816,7 +1816,7 @@ static void
 emit_insns (uint32_t *buf, int n)
 {
   n = n * sizeof (uint32_t);
-  write_inferior_memory (current_insn_ptr, (unsigned char *) buf, n);
+  target_write_memory (current_insn_ptr, (unsigned char *) buf, n);
   current_insn_ptr += n;
 }
 
@@ -2604,7 +2604,7 @@ ppc_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
     }
 
   if (!emit_error)
-    write_inferior_memory (from, (unsigned char *) &insn, 4);
+    target_write_memory (from, (unsigned char *) &insn, 4);
 }
 
 /* Table of emit ops for 32-bit.  */
