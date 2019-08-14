@@ -4724,6 +4724,10 @@ proc standard_output_file {basename} {
 
     set dir [make_gdb_parallel_path outputs $subdir $gdb_test_file_name]
     file mkdir $dir
+    # If running on MinGW, replace /c/foo with c:/foo
+    if { [ishost *-*-mingw*] } {
+        set dir [regsub {^/([a-z])/} $dir {\1:/}]
+    }
     return [file join $dir $basename]
 }
 
