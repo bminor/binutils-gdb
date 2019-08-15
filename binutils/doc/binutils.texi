@@ -2448,7 +2448,7 @@ Note: @code{intel-mnemonic} implies @code{intel} and
 @itemx addr16
 @itemx data32
 @itemx data16
-Specify the default address size and operand size.  These four options
+Specify the default address size and operand size.  These five options
 will be overridden if @code{x86-64}, @code{i386} or @code{i8086}
 appear later in the option string.
 

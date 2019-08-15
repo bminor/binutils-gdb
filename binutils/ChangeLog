@@ -1,3 +1,8 @@
+2019-08-15  Christophe Vidal  <support@krizalys.com>
+
+	* docs/binutils.texi: Fixed notice message disassembler options
+	section of the man page.
+
 2019-08-09  Mihailo Stojanovic  <mihailo.stojanovic@rt-rk.com>
 
 	* readelf.c (get_mips_dynamic_type): Return MIPS_XHASH dynamic type.
