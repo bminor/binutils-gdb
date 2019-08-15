@@ -1,3 +1,7 @@
+2019-08-19  Barnaby Wilks  <Barnaby.Wilks@arm.com>
+
+	* config/tc-arm.c (md_atof): Add precision check.  Formatting.
+
 2019-08-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

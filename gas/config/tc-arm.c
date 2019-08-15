@@ -1237,34 +1237,29 @@ md_atof (int type, char * litP, int * sizeP)
     input_line_pointer = t;
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
 
-  if (target_big_endian)
-    {
-      for (i = 0; i < prec; i++)
-	{
-	  md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
-	  litP += sizeof (LITTLENUM_TYPE);
-	}
-    }
+  if (target_big_endian || prec == 1)
+    for (i = 0; i < prec; i++)
+      {
+	md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	litP += sizeof (LITTLENUM_TYPE);
+      }
+  else if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_endian_pure))
+    for (i = prec - 1; i >= 0; i--)
+      {
+	md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	litP += sizeof (LITTLENUM_TYPE);
+      }
   else
-    {
-      if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_endian_pure))
-	for (i = prec - 1; i >= 0; i--)
-	  {
-	    md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
-	    litP += sizeof (LITTLENUM_TYPE);
-	  }
-      else
-	/* For a 4 byte float the order of elements in `words' is 1 0.
-	   For an 8 byte float the order is 1 0 3 2.  */
-	for (i = 0; i < prec; i += 2)
-	  {
-	    md_number_to_chars (litP, (valueT) words[i + 1],
-				sizeof (LITTLENUM_TYPE));
-	    md_number_to_chars (litP + sizeof (LITTLENUM_TYPE),
-				(valueT) words[i], sizeof (LITTLENUM_TYPE));
-	    litP += 2 * sizeof (LITTLENUM_TYPE);
-	  }
-    }
+    /* For a 4 byte float the order of elements in `words' is 1 0.
+       For an 8 byte float the order is 1 0 3 2.  */
+    for (i = 0; i < prec; i += 2)
+      {
+	md_number_to_chars (litP, (valueT) words[i + 1],
+			    sizeof (LITTLENUM_TYPE));
+	md_number_to_chars (litP + sizeof (LITTLENUM_TYPE),
+			    (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	litP += 2 * sizeof (LITTLENUM_TYPE);
+      }
 
   return NULL;
 }
