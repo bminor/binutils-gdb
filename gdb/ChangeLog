@@ -1,3 +1,17 @@
+2019-08-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* python/lib/gdb/__init__.py (GdbOutputFile): Rename to have a
+	leading underscore.
+	(GdbOutputErrorFile): Likewise.
+	(global scope): Adjust constructor calls to GdbOutput{,Error}File
+	accordingly.
+	(execute_unwinders): Rename to have a leading underscore.
+	(auto_load_packages): Likewise.
+	(global scope): Adjust call to auto_load_packages accordingly.
+	(GdbSetPythonDirectory): Likewise.
+	* python/py-unwind.c (pyuw_sniffer): Call _execute_unwinders
+	instead of execute_unwinders.
+
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-layout.c (show_layout, show_source_disasm_command)

@@ -1,3 +1,8 @@
+2019-08-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdb.python/python.exp: Expect a leading underscore on
+	GdbOutput{,Error}File.
+
 2019-08-15  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.dwarf2/dw2-dir-file-name.exp: Skip on remote or

@@ -507,16 +507,16 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 
   /* Run unwinders.  */
   if (gdb_python_module == NULL
-      || ! PyObject_HasAttrString (gdb_python_module, "execute_unwinders"))
+      || ! PyObject_HasAttrString (gdb_python_module, "_execute_unwinders"))
     {
       PyErr_SetString (PyExc_NameError,
-                       "Installation error: gdb.execute_unwinders function "
+                       "Installation error: gdb._execute_unwinders function "
                        "is missing");
       gdbpy_print_stack ();
       return 0;
     }
   gdbpy_ref<> pyo_execute (PyObject_GetAttrString (gdb_python_module,
-						   "execute_unwinders"));
+						   "_execute_unwinders"));
   if (pyo_execute == NULL)
     {
       gdbpy_print_stack ();
