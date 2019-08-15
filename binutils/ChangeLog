@@ -1,3 +1,8 @@
+2019-08-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 24767
+	* doc/binutils.texi (nm): Document the 'n' symbol type.
+
 2019-08-15  Christophe Vidal  <support@krizalys.com>
 
 	* docs/binutils.texi: Fixed notice message disassembler options

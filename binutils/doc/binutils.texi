@@ -844,8 +844,11 @@ The symbol is an indirect reference to another symbol.
 @item N
 The symbol is a debugging symbol.
 
+@item n
+The symbol is in the read-only data section.
+
 @item p
-The symbols is in a stack unwind section.
+The symbol is in a stack unwind section.
 
 @item R
 @itemx r
