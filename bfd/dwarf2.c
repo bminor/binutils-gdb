@@ -35,6 +35,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "dwarf2.h"
+#include "hashtab.h"
 
 /* The data in the .debug_line statement prologue looks like this.  */
 
@@ -4552,6 +4553,25 @@ stash_comp_unit (struct dwarf2_debug *stash)
   return NULL;
 }
 
+/* Hash function for an asymbol.  */
+
+static hashval_t
+hash_asymbol (const void *sym)
+{
+  const asymbol *asym = sym;
+  return htab_hash_string (asym->name);
+}
+
+/* Equality function for asymbols.  */
+
+static int
+eq_asymbol (const void *a, const void *b)
+{
+  const asymbol *sa = a;
+  const asymbol *sb = b;
+  return strcmp (sa->name, sb->name) == 0;
+}
+
 /* Scan the debug information in PINFO looking for a DW_TAG_subprogram
    abbrev with a DW_AT_low_pc attached to it.  Then lookup that same
    symbol in SYMBOLS and return the difference between the low_pc and
@@ -4562,11 +4582,27 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 {
   struct dwarf2_debug *stash;
   struct comp_unit * unit;
+  htab_t sym_hash;
+  bfd_signed_vma result = 0;
+  asymbol ** psym;
 
   stash = (struct dwarf2_debug *) *pinfo;
 
   if (stash == NULL || symbols == NULL)
     return 0;
+
+  sym_hash = htab_create_alloc (10, hash_asymbol, eq_asymbol,
+				NULL, xcalloc, free);
+  for (psym = symbols; * psym != NULL; psym++)
+    {
+      asymbol * sym = * psym;
+
+      if (sym->flags & BSF_FUNCTION && sym->section != NULL)
+	{
+	  void **slot = htab_find_slot (sym_hash, sym, INSERT);
+	  *slot = sym;
+	}
+    }
 
   for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
     {
@@ -4577,24 +4613,24 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
       for (func = unit->function_table; func != NULL; func = func->prev_func)
 	if (func->name && func->arange.low)
 	  {
-	    asymbol ** psym;
+	    asymbol search, *sym;
 
 	    /* FIXME: Do we need to scan the aranges looking for the lowest pc value ?  */
 
-	    for (psym = symbols; * psym != NULL; psym++)
+	    search.name = func->name;
+	    sym = htab_find (sym_hash, &search);
+	    if (sym != NULL)
 	      {
-		asymbol * sym = * psym;
-
-		if (sym->flags & BSF_FUNCTION
-		    && sym->section != NULL
-		    && strcmp (sym->name, func->name) == 0)
-		  return ((bfd_signed_vma) func->arange.low) -
-		    ((bfd_signed_vma) (sym->value + sym->section->vma));
+		result = ((bfd_signed_vma) func->arange.low) -
+		  ((bfd_signed_vma) (sym->value + sym->section->vma));
+		goto done;
 	      }
 	  }
     }
 
-  return 0;
+ done:
+  htab_delete (sym_hash);
+  return result;
 }
 
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
