@@ -19,6 +19,13 @@ if {![dwarf2_support]} {
     return 0  
 }
 
+# This test has hard-wired assumptions that host and build filenames are
+# the same, and assumes POSIX pathname syntax.
+if { [is_remote host] || [ishost *-*-mingw*] } {
+    unsupported "dw2-dir-file-name.exp can only run on local host"
+    return 0
+}
+
 # Find length of addresses in bytes.
 if {[is_64_target]} {
     set addr_len 8

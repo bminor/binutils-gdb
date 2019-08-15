@@ -1,5 +1,10 @@
 2019-08-15  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.dwarf2/dw2-dir-file-name.exp: Skip on remote or
+	Windows host.
+
+2019-08-15  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.base/batch-preserve-term-settings.exp
 	(test_terminal_settings_preserved_after_sigterm): Skip on Windows.
 
