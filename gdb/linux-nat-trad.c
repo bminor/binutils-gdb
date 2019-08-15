@@ -22,6 +22,7 @@
 
 #include "nat/gdb_ptrace.h"
 #include "inf-ptrace.h"
+#include "gdbarch.h"
 
 /* Fetch register REGNUM from the inferior.  */
 

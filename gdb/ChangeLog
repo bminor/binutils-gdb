@@ -1,3 +1,7 @@
+2019-08-15  Tom de Vries  <tdevries@suse.de>
+
+	* linux-nat-trad.c: Include gdbarch.h.
+
 2019-08-14  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_analyze_prologue): Allow any valid
