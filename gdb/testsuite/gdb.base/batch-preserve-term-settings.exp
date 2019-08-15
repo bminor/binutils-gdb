@@ -273,6 +273,13 @@ proc test_terminal_settings_preserved_after_sigterm { } {
     global gdb_prompt
     global shell_prompt_re
 
+    # On Windows, GDB's "shell" command spawns cmd.exe, which does not
+    # understand PPID.  So we're out of luck even if the test harness
+    # uses a remote_exec shell with a working "kill" command.
+    if [ishost *-*-mingw*] {
+	return
+    }
+
     if ![spawn_shell] {
 	return
     }
