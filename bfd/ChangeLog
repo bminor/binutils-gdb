@@ -1,3 +1,9 @@
+2019-08-15  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (perform_relocation) <R_RISCV_RVC_LUI>: If
+	RISCV_CONST_HIGH_PART (value) is zero, then convert c.lui instruction
+	to c.li instruction, and use ENCODE_RVC_IMM to set value.
+
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2.c (scan_unit_for_symbols): Check for end of CU, not end

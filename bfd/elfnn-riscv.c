@@ -1482,9 +1482,21 @@ perform_relocation (const reloc_howto_type *howto,
       break;
 
     case R_RISCV_RVC_LUI:
-      if (!VALID_RVC_LUI_IMM (RISCV_CONST_HIGH_PART (value)))
+      if (RISCV_CONST_HIGH_PART (value) == 0)
+	{
+	  /* Linker relaxation can convert an address equal to or greater than
+	     0x800 to slightly below 0x800.  C.LUI does not accept zero as a
+	     valid immediate.  We can fix this by converting it to a C.LI.  */
+	  bfd_vma insn = bfd_get (howto->bitsize, input_bfd,
+				  contents + rel->r_offset);
+	  insn = (insn & ~MATCH_C_LUI) | MATCH_C_LI;
+	  bfd_put (howto->bitsize, input_bfd, insn, contents + rel->r_offset);
+	  value = ENCODE_RVC_IMM (0);
+	}
+      else if (!VALID_RVC_LUI_IMM (RISCV_CONST_HIGH_PART (value)))
 	return bfd_reloc_overflow;
-      value = ENCODE_RVC_LUI_IMM (RISCV_CONST_HIGH_PART (value));
+      else
+	value = ENCODE_RVC_LUI_IMM (RISCV_CONST_HIGH_PART (value));
       break;
 
     case R_RISCV_32:
