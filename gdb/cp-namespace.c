@@ -278,8 +278,9 @@ cp_search_static_and_baseclasses (const char *name,
 
   /* If the scope is a function/method, then look up NESTED as a local
      static variable.  E.g., "print 'function()::static_var'".  */
-  if (TYPE_CODE (scope_type) == TYPE_CODE_FUNC
-      || TYPE_CODE (scope_type) == TYPE_CODE_METHOD)
+  if ((TYPE_CODE (scope_type) == TYPE_CODE_FUNC
+       || TYPE_CODE (scope_type) == TYPE_CODE_METHOD)
+      && domain == VAR_DOMAIN)
     return lookup_symbol (nested, SYMBOL_BLOCK_VALUE (scope_sym.symbol),
 			  VAR_DOMAIN, NULL);
 

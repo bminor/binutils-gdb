@@ -1,3 +1,13 @@
+2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Richard Bunt  <richard.bunt@arm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/nested-funcs.exp: Tests for placing breakpoints on
+	nested functions.
+	* gdb.fortran/nested-funcs.f90: Update expected results.
+	* gdb.fortran/nested-funcs-2.exp: New file.
+	* gdb.fortran/nested-funcs-2.f90: New file.
+
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-parameter.exp: Make test names unique.

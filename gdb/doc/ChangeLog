@@ -1,3 +1,7 @@
+2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* doc/gdb.texinfo (Fortran Operators): Describe scope operator.
+
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Set Catchpoints, Convenience Vars): Document

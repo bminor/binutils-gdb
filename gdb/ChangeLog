@@ -1,3 +1,22 @@
+2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cp-namespace.c (cp_search_static_and_baseclasses): Only search
+	for nested static variables when searchin VAR_DOMAIN.
+	* dwarf2read.c (add_partial_symbol): Add nested subroutines to the
+	global scope, update comment.
+	(add_partial_subprogram): Call add_partial_subprogram recursively
+	for nested subroutines when processinng Fortran.
+	(load_partial_dies): Process the child entities of a subprogram
+	when processing Fortran.
+	(partial_die_parent_scope): Handle building scope
+	for Fortran nested functions.
+	(process_die): Record that nested functions have a scope.
+	(new_symbol): Always record Fortran subprograms on the global
+	symbol list.
+	(determine_prefix): How to build the prefix for Fortran
+	subprograms.
+
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-nat.c (linux_nat_filter_event): Don't ignore SIGSTOP if we
