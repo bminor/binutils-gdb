@@ -1,5 +1,9 @@
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
+	* target.c (target_write_memory): Use gdb::byte_vector.
+
+2019-08-15  Tom Tromey  <tromey@adacore.com>
+
 	* tracepoint.c (write_inferior_data_pointer)
 	(write_inferior_integer, write_inferior_int8)
 	(write_inferior_uinteger, m_tracepoint_action_download)

@@ -20,6 +20,7 @@
 
 #include "server.h"
 #include "tracepoint.h"
+#include "gdbsupport/byte-vector.h"
 
 struct target_ops *the_target;
 
@@ -154,7 +155,7 @@ target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 {
   /* Make a copy of the data because check_mem_write may need to
      update it.  */
-  std::vector<unsigned char> buffer (myaddr, myaddr + len);
+  gdb::byte_vector buffer (myaddr, myaddr + len);
   check_mem_write (memaddr, buffer.data (), myaddr, len);
   return (*the_target->write_memory) (memaddr, buffer.data (), len);
 }
