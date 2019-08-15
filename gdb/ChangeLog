@@ -1,3 +1,8 @@
+2019-08-16  Tom de Vries  <tdevries@suse.de>
+
+	* maint.c (maintenance_info_sections): Also handle !ALLOBJ case using
+	print_objfile_section_info.
+
 2019-08-15  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-io.c (tui_puts_internal): Check TUI_CMD_WIN before
