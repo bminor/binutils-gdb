@@ -154,6 +154,12 @@ maint show test-settings KIND
   A set of commands used by the testsuite for exercising the settings
   infrastructure.
 
+maint set tui-resize-message [on|off]
+maint show tui-resize-message
+  Control whether GDB prints a message each time the terminal is
+  resized when in TUI mode.  This is primarily useful for testing the
+  TUI.
+
 set print frame-info [short-location|location|location-and-address
                         |source-and-location|source-line|auto]
 show print frame-info

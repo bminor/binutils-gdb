@@ -34,24 +34,26 @@ if {![Term::enter_tui]} {
 set layouts {
     {src src {{0 0 80 15}} {{0 0 90 23}}
 	{{"no source" "No Source Available"}}}
-    {regs src-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 13 90 13}}
+    {regs src-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
     {asm asm {{0 0 80 15}} {{0 0 90 23}}
-	{"no asm" "No Assembly Available"}}
-    {regs asm-regs {{0 0 80 8} {0 7 80 9}} {{0 0 90 13} {0 13 90 14}}
+	{
+	    {"no asm" "No Assembly Available"}
+	}}
+    {regs asm-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {split split {{0 0 80 8} {0 7 80 9}} {{0 0 90 13} {0 13 90 14}}
+    {split split {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no asm" "No Assembly Available"}
 	}}
-    {regs split-regs {{0 0 80 8} {0 7 80 9}} {{0 0 90 13} {0 13 90 14}}
+    {regs split-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}
@@ -62,11 +64,6 @@ set layouts {
 proc check_boxes {boxes} {
     set boxno 1
     foreach box $boxes {
-	if {$boxno > 1} {
-	    # The upper-left corner of the second box may not render
-	    # properly, due to overlap.
-	    setup_xfail *-*-*
-	}
 	eval Term::check_box [list "box $boxno"] $box
 	incr boxno
     }
@@ -77,7 +74,9 @@ proc check_text {text_list} {
     set text [Term::get_all_lines]
     foreach item $text_list {
 	lassign $item testname check
-	gdb_assert {[string first $check $text]} $testname
+	if {![gdb_assert {[regexp -- $check $text]} $testname]} {
+	    Term::dump_screen
+	}
     }
 }
 

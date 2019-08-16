@@ -1,3 +1,11 @@
+2019-11-12  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (resize_message): New global.
+	(show_tui_resize_message): New function.
+	(tui_async_resize_screen): Print message if requested.
+	(_initialize_tui_win): Add tui-resize-message setting.
+	* NEWS: Add entry for new commands.
+
 2019-11-11  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui.c (tui_initialize_readline): Add new bindable readline

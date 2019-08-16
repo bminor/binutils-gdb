@@ -33,6 +33,7 @@
 #include "top.h"
 #include "source.h"
 #include "event-loop.h"
+#include "gdbcmd.h"
 
 #include "tui/tui.h"
 #include "tui/tui-io.h"
@@ -339,6 +340,22 @@ tui_set_var_cmd (const char *null_args,
   if (tui_update_variables () && tui_active)
     tui_rehighlight_all ();
 }
+
+
+
+/* True if TUI resizes should print a message.  This is used by the
+   test suite.  */
+
+static bool resize_message;
+
+static void
+show_tui_resize_message (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("TUI resize messaging is %s.\n"), value);
+}
+
+
 
 /* Generic window name completion function.  Complete window name pointed
    to by TEXT and WORD.  If INCLUDE_NEXT_PREV_P is true then the special
@@ -677,6 +694,13 @@ tui_async_resize_screen (gdb_client_data arg)
       tui_resize_all ();
       tui_refresh_all_win ();
       tui_update_gdb_sizes ();
+      if (resize_message)
+	{
+	  static int count;
+	  printf_unfiltered ("@@ resize done %d, size = %dx%d\n", count,
+			     tui_term_width (), tui_term_height ());
+	  ++count;
+	}
       tui_redisplay_readline ();
     }
 }
@@ -1434,4 +1458,14 @@ Show the tab witdh, in characters, for the TUI."), _("\
 This variable controls how many spaces are used to display a tab character."),
 			     tui_set_tab_width, tui_show_tab_width,
 			     &tui_setlist, &tui_showlist);
+
+  add_setshow_boolean_cmd ("tui-resize-message", class_maintenance,
+			   &resize_message, _("\
+Set TUI resize messaging."), _("\
+Show TUI resize messaging."), _("\
+When enabled GDB will print a message when the terminal is resized."),
+			   nullptr,
+			   show_tui_resize_message,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }

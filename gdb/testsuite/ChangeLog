@@ -1,3 +1,17 @@
+2019-11-12  Tom Tromey  <tom@tromey.com>
+
+	* lib/tuiterm.exp (_accept): Add wait_for parameter.  Check output
+	after any command.  Expect prompt after WAIT_FOR is seen.
+	(enter_tui): Enable resize messages.
+	(command): Expect command in output.
+	(get_line): Avoid error when cursor appears to be off-screen.
+	(dump_screen): Include screen size in title.
+	(_do_resize): New proc, from "resize".
+	(resize): Rewrite.  Do resize in two steps.
+	* gdb.tui/empty.exp (layouts): Fix entries.
+	(check_boxes): Remove xfail.
+	(check_text): Dump screen on failure.
+
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-symbol.exp: Add test for

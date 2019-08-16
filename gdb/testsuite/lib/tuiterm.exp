@@ -40,6 +40,8 @@ namespace eval Term {
 
     variable _last_char
 
+    variable _resize_count
+
     # If ARG is empty, return DEF: otherwise ARG.  This is useful for
     # defaulting arguments in CSIs.
     proc _default {arg def} {
@@ -368,11 +370,13 @@ namespace eval Term {
 	variable _cur_x
 	variable _cur_y
 	variable _attrs
+	variable _resize_count
 
 	set _rows $rows
 	set _cols $cols
 	set _cur_x 0
 	set _cur_y 0
+	set _resize_count 0
 	array set _attrs {
 	    intensity normal
 	    fg default
@@ -385,39 +389,58 @@ namespace eval Term {
     }
 
     # Accept some output from gdb and update the screen.
-    proc _accept {} {
+    proc _accept {wait_for} {
 	global expect_out
-	gdb_expect {
-	    -re "^\[\x07\x08\x0a\x0d\]" {
-		scan $expect_out(0,string) %c val
-		set hexval [format "%02x" $val]
-		verbose "+++ _ctl_0x${hexval}"
-		_ctl_0x${hexval}
-		exp_continue
-	    }
-	    -re "^\x1b(\[0-9a-zA-Z\])" {
-		verbose "+++ unsupported escape"
-		error "unsupported escape"
-	    }
-	    -re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
-		set cmd $expect_out(2,string)
-		set params [split $expect_out(1,string) ";"]
-		verbose "+++ _csi_$cmd <<<$expect_out(1,string)>>>"
-		eval _csi_$cmd $params
-		exp_continue
-	    }
-	    -re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
-		_insert $expect_out(0,string)
-		variable _last_char
-		set _last_char [string index $expect_out(0,string) end]
-		# If the prompt was just inserted, return.
-		variable _cur_x
-		variable _cur_y
-		global gdb_prompt
-		set prev [get_line $_cur_y $_cur_x]
-		if {![regexp -- "$gdb_prompt \$" $prev]} {
-		    exp_continue
+	global gdb_prompt
+	variable _cur_x
+	variable _cur_y
+
+	set prompt_wait_for "$gdb_prompt \$"
+
+	while 1 {
+	    gdb_expect {
+		-re "^\[\x07\x08\x0a\x0d\]" {
+		    scan $expect_out(0,string) %c val
+		    set hexval [format "%02x" $val]
+		    verbose "+++ _ctl_0x${hexval}"
+		    _ctl_0x${hexval}
 		}
+		-re "^\x1b(\[0-9a-zA-Z\])" {
+		    verbose "+++ unsupported escape"
+		    error "unsupported escape"
+		}
+		-re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
+		    set cmd $expect_out(2,string)
+		    set params [split $expect_out(1,string) ";"]
+		    verbose "+++ _csi_$cmd <<<$expect_out(1,string)>>>"
+		    eval _csi_$cmd $params
+		}
+		-re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
+		    _insert $expect_out(0,string)
+		    variable _last_char
+		    set _last_char [string index $expect_out(0,string) end]
+		}
+
+		timeout {
+		    # Assume a timeout means we somehow missed the
+		    # expected result, and carry on.
+		    return
+		}
+	    }
+
+	    # If the cursor appears just after the prompt, return.  It
+	    # isn't reliable to check this only after an insertion,
+	    # because curses may make "unusual" redrawing decisions.
+	    if {$wait_for == "$prompt_wait_for"} {
+		set prev [get_line $_cur_y $_cur_x]
+	    } else {
+		set prev [get_line $_cur_y]
+	    }
+	    if {[regexp -- $wait_for $prev]} {
+		if {$wait_for == "$prompt_wait_for"} {
+		    break
+		}
+		set wait_for $prompt_wait_for
 	    }
 	}
     }
@@ -447,6 +470,7 @@ namespace eval Term {
 	}
 
 	gdb_test_no_output "set tui border-kind ascii"
+	gdb_test_no_output "maint set tui-resize-message on"
 	command "tui enable"
 	return 1
     }
@@ -456,13 +480,20 @@ namespace eval Term {
     # be supplied by this function.
     proc command {cmd} {
 	send_gdb "$cmd\n"
-	_accept
+	_accept [string_to_regexp $cmd]
     }
 
     # Return the text of screen line N, without attributes.  Lines are
     # 0-based.  If C is given, stop before column C.  Columns are also
     # zero-based.
     proc get_line {n {c ""}} {
+	variable _rows
+	# This can happen during resizing, if the cursor seems to
+	# temporarily be off-screen.
+	if {$n >= $_rows} {
+	    return ""
+	}
+
 	set result ""
 	variable _cols
 	variable _chars
@@ -567,7 +598,8 @@ namespace eval Term {
     # numbers.
     proc dump_screen {} {
 	variable _rows
-	verbose "Screen Dump:"
+	variable _cols
+	verbose "Screen Dump ($_cols x $_rows):"
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
 	    verbose "$fmt [get_line $y]"
@@ -575,7 +607,7 @@ namespace eval Term {
     }
 
     # Resize the terminal.
-    proc resize {rows cols} {
+    proc _do_resize {rows cols} {
 	variable _chars
 	variable _rows
 	variable _cols
@@ -596,13 +628,31 @@ namespace eval Term {
 		set _chars($x,$y) $local_chars($x,$y)
 	    }
 	}
+    }
+
+    proc resize {rows cols} {
+	variable _rows
+	variable _cols
+	variable _resize_count
 
 	global gdb_spawn_name
+	# expect handles each argument to stty separately.  This means
+	# that gdb will see SIGWINCH twice.  Rather than rely on this
+	# behavior (which, after all, could be changed), we make it
+	# explicit here.  This also simplifies waiting for the redraw.
+	_do_resize $rows $_cols
+	stty rows $_rows < $gdb_spawn_name
+	# Due to the strange column resizing behavior, and because we
+	# don't care about this intermediate resize, we don't check
+	# the size here.
+	_accept "@@ resize done $_resize_count"
+	incr _resize_count
 	# Somehow the number of columns transmitted to gdb is one less
 	# than what we request from expect.  We hide this weird
 	# details from the caller.
-	stty rows $_rows columns [expr {$_cols + 1}] \
-	    < $gdb_spawn_name
-	_accept
+	_do_resize $_rows $cols
+	stty columns [expr {$_cols + 1}] < $gdb_spawn_name
+	_accept "@@ resize done $_resize_count, size = ${_cols}x${rows}"
+	incr _resize_count
     }
 }

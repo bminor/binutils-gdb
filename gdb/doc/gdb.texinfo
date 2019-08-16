@@ -37933,6 +37933,19 @@ does not indicate support.
 target supports it.
 @end table
 
+@kindex maint set tui-resize-message
+@kindex maint show tui-resize-message
+@item maint set tui-resize-message
+@item maint show tui-resize-message
+Control whether @value{GDBN} displays a message each time the terminal
+is resized when in TUI mode.  The default is @code{off}, which means
+that @value{GDBN} is silent during resizes.  When @code{on},
+@value{GDBN} will display a message after a resize is completed; the
+message will include a number indicating how many times the terminal
+has been resized.  This setting is intended for use by the test suite,
+where it would otherwise be difficult to determine when a resize and
+refresh has been completed.
+
 @kindex maint set per-command
 @kindex maint show per-command
 @item maint set per-command
