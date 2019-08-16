@@ -1,3 +1,9 @@
+2019-08-16  Alan Modra  <amodra@gmail.com>
+
+	PR 24909
+	PR 23499
+	* readelf.c (get_symbol_version_string): Set sym_info earlier.
+
 2019-08-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 24767
