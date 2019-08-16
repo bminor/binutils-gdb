@@ -176,12 +176,27 @@ struct buffer;
 # define TRAP_HWBKPT 4
 #endif
 
-extern std::string linux_ptrace_attach_fail_reason (pid_t pid);
+/* Find all possible reasons we could fail to attach PID and return
+   these as a string.  An empty string is returned if we didn't find
+   any reason.  If ERR is EACCES or EPERM, we also add a warning about
+   possible restrictions to use ptrace.  */
+extern std::string linux_ptrace_attach_fail_reason (pid_t pid, int err);
 
-/* Find all possible reasons we could have failed to attach to PTID
-   and return them as a string.  ERR is the error PTRACE_ATTACH failed
-   with (an errno).  */
-extern std::string linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
+/* Find all possible reasons we could have failed to attach to PID's
+   LWPID and return them as a string.  ERR is the error PTRACE_ATTACH
+   failed with (an errno).  Unlike linux_ptrace_attach_fail_reason,
+   this function should be used when attaching to an LWP other than
+   the leader; it does not warn about ptrace restrictions.  */
+extern std::string linux_ptrace_attach_fail_reason_lwp (ptid_t pid, int err);
+
+/* When the call to 'ptrace (PTRACE_TRACEME...' fails, and we have
+   already forked, this function can be called in order to try to
+   obtain the reason why ptrace failed.  ERR should be the ERRNO value
+   returned by ptrace.
+
+   This function will return a 'std::string' containing the fail
+   reason, or an empty string otherwise.  */
+extern std::string linux_ptrace_me_fail_reason (int err);
 
 extern void linux_ptrace_init_warnings (void);
 extern void linux_check_ptrace_features (void);

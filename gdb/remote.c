@@ -5825,8 +5825,20 @@ extended_remote_target::attach (const char *args, int from_tty)
     case PACKET_UNKNOWN:
       error (_("This target does not support attaching to a process"));
     default:
-      error (_("Attaching to %s failed"),
-	     target_pid_to_str (ptid_t (pid)).c_str ());
+      {
+	std::string errmsg = rs->buf.data ();
+
+	if (!errmsg.empty ())
+	  {
+	    /* Get rid of the "E." prefix.  */
+	    errmsg.erase (0, 2);
+	  }
+
+	error (_("Attaching to %s failed%s%s"),
+	       target_pid_to_str (ptid_t (pid)).c_str (),
+	       !errmsg.empty () ? "\n" : "",
+	       errmsg.c_str ());
+      }
     }
 
   set_current_inferior (remote_add_inferior (false, pid, 1, 0));

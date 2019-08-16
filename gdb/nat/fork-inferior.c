@@ -591,7 +591,7 @@ trace_start_error (const char *fmt, ...)
 /* See nat/fork-inferior.h.  */
 
 void
-trace_start_error_with_name (const char *string)
+trace_start_error_with_name (const char *string, const char *append)
 {
-  trace_start_error ("%s: %s", string, safe_strerror (errno));
+  trace_start_error ("%s: %s%s", string, safe_strerror (errno), append);
 }

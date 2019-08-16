@@ -967,7 +967,8 @@ linux_ptrace_fun ()
 {
   if (ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0,
 	      (PTRACE_TYPE_ARG4) 0) < 0)
-    trace_start_error_with_name ("ptrace");
+    trace_start_error_with_name ("ptrace",
+				 linux_ptrace_me_fail_reason (errno).c_str ());
 
   if (setpgid (0, 0) < 0)
     trace_start_error_with_name ("setpgid");
@@ -1165,7 +1166,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
       else if (err != 0)
 	{
 	  std::string reason
-	    = linux_ptrace_attach_fail_reason_string (ptid, err);
+	    = linux_ptrace_attach_fail_reason_lwp (ptid, err);
 
 	  warning (_("Cannot attach to lwp %d: %s"), lwpid, reason.c_str ());
 	}
@@ -1197,8 +1198,8 @@ linux_attach (unsigned long pid)
     {
       remove_process (proc);
 
-      std::string reason = linux_ptrace_attach_fail_reason_string (ptid, err);
-      error ("Cannot attach to process %ld: %s", pid, reason.c_str ());
+      std::string reason = linux_ptrace_attach_fail_reason (pid, err);
+      error (_("Cannot attach to process %ld: %s"), pid, reason.c_str ());
     }
 
   /* Don't ignore the initial SIGSTOP if we just attached to this

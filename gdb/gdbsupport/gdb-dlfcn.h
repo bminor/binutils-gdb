@@ -32,8 +32,8 @@ struct dlclose_deleter
 typedef std::unique_ptr<void, dlclose_deleter> gdb_dlhandle_up;
 
 /* Load the dynamic library file named FILENAME, and return a handle
-   for that dynamic library.  Return NULL if the loading fails for any
-   reason.  */
+   for that dynamic library.  Throw an error if the loading fails for
+   any reason.  */
 
 gdb_dlhandle_up gdb_dlopen (const char *filename);
 

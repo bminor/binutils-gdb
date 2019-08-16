@@ -1,3 +1,8 @@
+2019-09-26  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Linux kernel ptrace restrictions): New appendix
+	section.
+
 2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* doc/gdb.texinfo (Remote Configuration): Remove documentation for

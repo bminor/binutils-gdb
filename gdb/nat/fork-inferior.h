@@ -98,9 +98,10 @@ extern void trace_start_error (const char *fmt, ...)
   ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 /* Like "trace_start_error", but the error message is constructed by
-   combining STRING with the system error message for errno.  This
-   function does not return.  */
-extern void trace_start_error_with_name (const char *string)
+   combining STRING with the system error message for errno, and
+   (optionally) with APPEND.  This function does not return.  */
+extern void trace_start_error_with_name (const char *string,
+					 const char *append = "")
   ATTRIBUTE_NORETURN;
 
 #endif /* NAT_FORK_INFERIOR_H */

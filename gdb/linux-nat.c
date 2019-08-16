@@ -1132,7 +1132,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	  else
 	    {
 	      std::string reason
-		= linux_ptrace_attach_fail_reason_string (ptid, err);
+		= linux_ptrace_attach_fail_reason_lwp (ptid, err);
 
 	      warning (_("Cannot attach to lwp %d: %s"),
 		       lwpid, reason.c_str ());
@@ -1187,8 +1187,9 @@ linux_nat_target::attach (const char *args, int from_tty)
     }
   catch (const gdb_exception_error &ex)
     {
+      int saved_errno = errno;
       pid_t pid = parse_pid_to_attach (args);
-      std::string reason = linux_ptrace_attach_fail_reason (pid);
+      std::string reason = linux_ptrace_attach_fail_reason (pid, saved_errno);
 
       if (!reason.empty ())
 	throw_error (ex.error, "warning: %s\n%s", reason.c_str (),
@@ -4567,6 +4568,10 @@ Enables printf debugging output."),
   sigemptyset (&blocked_mask);
 
   lwp_lwpid_htab_create ();
+
+  /* Set the proper function to generate a message when ptrace
+     fails.  */
+  inf_ptrace_me_fail_reason = linux_ptrace_me_fail_reason;
 }
 
 

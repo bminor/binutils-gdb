@@ -2893,9 +2893,21 @@ handle_v_attach (char *own_buf)
 {
   client_state &cs = get_client_state ();
   int pid;
+  int ret;
 
   pid = strtol (own_buf + 8, NULL, 16);
-  if (pid != 0 && attach_inferior (pid) == 0)
+
+  try
+    {
+      ret = attach_inferior (pid);
+    }
+  catch (const gdb_exception_error &e)
+    {
+      snprintf (own_buf, PBUFSIZ, "E.%s", e.what ());
+      return 0;
+    }
+
+  if (pid != 0 && ret == 0)
     {
       /* Don't report shared library events after attaching, even if
 	 some libraries are preloaded.  GDB will always poll the
