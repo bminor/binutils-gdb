@@ -1,3 +1,9 @@
+2019-08-16  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc32elf.em (ppc_before_allocation): Force running
+	prelim_size_sections before deciding whether branch trampolines
+	might be needed.
+
 2019-07-25  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	Backport from mainline
