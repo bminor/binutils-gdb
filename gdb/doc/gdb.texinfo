@@ -24397,7 +24397,8 @@ When @value{GDBN} is debugging the AArch64 architecture, and the program is
 using the v8.3-A feature Pointer Authentication (PAC), then whenever the link
 register @code{$lr} is pointing to an PAC function its value will be masked.
 When GDB prints a backtrace, any addresses that required unmasking will be
-postfixed with the marker [PAC].
+postfixed with the marker [PAC].  When using the MI, this is printed as part
+of the @code{addr_flags} field.
 
 @node i386
 @subsection x86 Architecture-specific Issues
@@ -28925,6 +28926,11 @@ breakpoint; or the string @samp{<MULTIPLE>}, for a breakpoint with
 multiple locations.  This field will not be present if no address can
 be determined.  For example, a watchpoint does not have an address.
 
+@item addr_flags
+Optional field containing any flags related to the address.  These flags are
+architecture-dependent; see @ref{Architectures} for their meaning for a
+particular CPU.
+
 @item func
 If known, the function in which the breakpoint appears.
 If not known, this field is not present.
@@ -29025,6 +29031,11 @@ Note that this is not the same as the field @code{enable}.
 @item addr
 The address of this location as an hexidecimal number.
 
+@item addr_flags
+Optional field containing any flags related to the address.  These flags are
+architecture-dependent; see @ref{Architectures} for their meaning for a
+particular CPU.
+
 @item func
 If known, the function in which the location appears.
 If not known, this field is not present.
@@ -29076,6 +29087,11 @@ be absent if @value{GDBN} is unable to determine the function name.
 
 @item addr
 The code address for the frame.  This field is always present.
+
+@item addr_flags
+Optional field containing any flags related to the address.  These flags are
+architecture-dependent; see @ref{Architectures} for their meaning for a
+particular CPU.
 
 @item file
 The name of the source files that correspond to the frame's code

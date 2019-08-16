@@ -1640,6 +1640,12 @@ typedef ULONGEST (gdbarch_type_align_ftype) (struct gdbarch *gdbarch, struct typ
 extern ULONGEST gdbarch_type_align (struct gdbarch *gdbarch, struct type *type);
 extern void set_gdbarch_type_align (struct gdbarch *gdbarch, gdbarch_type_align_ftype *type_align);
 
+/* Return a string containing any flags for the given PC in the given FRAME. */
+
+typedef std::string (gdbarch_get_pc_address_flags_ftype) (frame_info *frame, CORE_ADDR pc);
+extern std::string gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, frame_info *frame, CORE_ADDR pc);
+extern void set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, gdbarch_get_pc_address_flags_ftype *get_pc_address_flags);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

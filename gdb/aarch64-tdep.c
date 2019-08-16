@@ -273,6 +273,17 @@ aarch64_frame_unmask_lr (struct gdbarch_tdep *tdep,
   return addr;
 }
 
+/* Implement the "get_pc_address_flags" gdbarch method.  */
+
+static std::string
+aarch64_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
+{
+  if (pc != 0 && get_frame_pc_masked (frame))
+    return "PAC";
+
+  return "";
+}
+
 /* Analyze a prologue, looking for a recognizable stack frame
    and frame pointer.  Scan until we encounter a store that could
    clobber the stack frame unexpectedly, or an unknown instruction.  */
@@ -3369,6 +3380,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_get_longjmp_target (gdbarch, aarch64_get_longjmp_target);
 
   set_gdbarch_gen_return_address (gdbarch, aarch64_gen_return_address);
+
+  set_gdbarch_get_pc_address_flags (gdbarch, aarch64_get_pc_address_flags);
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 

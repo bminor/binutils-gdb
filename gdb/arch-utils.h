@@ -272,4 +272,8 @@ extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch,
 extern ULONGEST default_type_align (struct gdbarch *gdbarch,
 				    struct type *type);
 
+/* Default implementation of gdbarch get_pc_address_flags method.  */
+extern std::string default_get_pc_address_flags (frame_info *frame,
+						 CORE_ADDR pc);
+
 #endif /* ARCH_UTILS_H */

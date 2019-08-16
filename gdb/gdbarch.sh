@@ -1210,6 +1210,9 @@ v;const disasm_options_and_args_t *;valid_disassembler_options;;;0;0;;0;host_add
 # default rules as laid out in gdbtypes.c:type_align.
 m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
 
+# Return a string containing any flags for the given PC in the given FRAME.
+f;std::string;get_pc_address_flags;frame_info *frame, CORE_ADDR pc;frame, pc;;default_get_pc_address_flags;;0
+
 EOF
 }
 

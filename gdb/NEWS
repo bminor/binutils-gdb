@@ -287,6 +287,13 @@ maint show test-options-completion-result
   These can be used to catch C++ exceptions in a similar fashion to
   the CLI commands 'catch throw', 'catch rethrow', and 'catch catch'.
 
+* Other MI changes
+
+ ** Backtraces and frames include a new optional field addr_flags which is
+    given after the addr field.  On AArch64 this contains PAC if the address
+    has been masked in the frame.  On all other targets the field is not
+    present.
+
 * Testsuite
 
   The testsuite now creates the files gdb.cmd (containing the arguments

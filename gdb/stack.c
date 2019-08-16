@@ -923,6 +923,23 @@ print_frame_info_to_print_what (const char *print_frame_info)
 		  print_frame_info);
 }
 
+/* Print the PC from FRAME, plus any flags, to UIOUT.  */
+
+static void
+print_pc (struct ui_out *uiout, struct gdbarch *gdbarch, frame_info *frame,
+	  CORE_ADDR pc)
+{
+  uiout->field_core_addr ("addr", gdbarch, pc);
+
+  std::string flags = gdbarch_get_pc_address_flags (gdbarch, frame, pc);
+  if (!flags.empty ())
+  {
+    uiout->text (" [");
+    uiout->field_string ("addr_flags", flags);
+    uiout->text ("]");
+  }
+}
+
 /* See stack.h.  */
 
 void
@@ -980,8 +997,7 @@ print_frame_info (const frame_print_options &fp_opts,
       if (uiout->is_mi_like_p ())
         {
           annotate_frame_address ();
-          uiout->field_core_addr ("addr",
-				  gdbarch, get_frame_pc (frame));
+	  print_pc (uiout, gdbarch, frame, get_frame_pc (frame));
           annotate_frame_address_end ();
         }
 
@@ -1065,8 +1081,7 @@ print_frame_info (const frame_print_options &fp_opts,
 	     ability to decide for themselves if it is desired.  */
 	  if (opts.addressprint && mid_statement)
 	    {
-	      uiout->field_core_addr ("addr",
-				      gdbarch, get_frame_pc (frame));
+	      print_pc (uiout, gdbarch, frame, get_frame_pc (frame));
 	      uiout->text ("\t");
 	    }
 
@@ -1292,11 +1307,7 @@ print_frame (const frame_print_options &fp_opts,
 	{
 	  annotate_frame_address ();
 	  if (pc_p)
-	    {
-	      uiout->field_core_addr ("addr", gdbarch, pc);
-	      if (get_frame_pc_masked (frame))
-		uiout->field_string ("pac", " [PAC]");
-	    }
+	    print_pc (uiout, gdbarch, frame, pc);
 	  else
 	    uiout->field_string ("addr", "<unavailable>",
 				 ui_out_style_kind::ADDRESS);

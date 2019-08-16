@@ -1,3 +1,9 @@
+2019-08-16  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (AArch64 Pointer Authentication)
+	(GDB/MI Breakpoint Information) (Frame Information): Document
+	addr_field.
+
 2019-08-12  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Configure Options): Document minimum version of

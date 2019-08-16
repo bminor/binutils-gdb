@@ -995,6 +995,14 @@ default_type_align (struct gdbarch *gdbarch, struct type *type)
   return 0;
 }
 
+/* See arch-utils.h.  */
+
+std::string
+default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
+{
+  return "";
+}
+
 void
 _initialize_gdbarch_utils (void)
 {

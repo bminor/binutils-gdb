@@ -1,3 +1,16 @@
+2019-08-16  Alan Hayward  <alan.hayward@arm.com>
+
+	* NEWS (Other MI changes): New subsection.
+	* aarch64-tdep.c (aarch64_get_pc_address_flags): New function.
+	(aarch64_gdbarch_init): Add aarch64_get_pc_address_flags.
+	* arch-utils.c (default_get_pc_address_flags): New function.
+	* arch-utils.h (default_get_pc_address_flags): New declaration.
+	* gdbarch.sh: Add get_pc_address_flags.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* stack.c (print_pc): New function.
+	(print_frame_info) (print_frame): Call print_pc.
+
 2019-08-16  Tom de Vries  <tdevries@suse.de>
 
 	* maint.c (maintenance_info_sections): Also handle !ALLOBJ case using
