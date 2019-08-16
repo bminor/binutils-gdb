@@ -1,3 +1,11 @@
+2019-08-16  Martin Liska  <mliska@suse.cz>
+
+	PR ld/24912
+	* object.cc (big_endian>::do_layout): Do not report error,
+	but only set a flag.
+	(big_endian>::do_add_symbols): Report error only for when
+	relocatable.
+
 2019-08-02  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): Set

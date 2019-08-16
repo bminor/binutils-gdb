@@ -1,3 +1,10 @@
+2019-08-16  Martin Liska  <mliska@suse.cz>
+
+	PR ld/24912
+	* elflink.c: Report error only for not relocatable.
+	* linker.c (_bfd_generic_link_add_one_symbol): Do not handle
+	here lto_slim_object as it's handled in caller.
+
 2019-08-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Optimize unaligned relocs.

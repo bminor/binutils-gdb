@@ -1887,8 +1887,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  const unsigned char* pcontents = this->section_contents(i, &contents_len, false);
 	  struct lto_section lsection = *(const lto_section*)pcontents;
 	  if (lsection.slim_object)
-	    gold_info(_("%s: plugin needed to handle lto object"),
-		      this->name().c_str());
+	    layout->set_lto_slim_object ();
 	}
     }
 
@@ -2127,7 +2126,8 @@ Sized_relobj_file<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   this->symbols_.resize(symcount);
 
-  if (layout->is_lto_slim_object ())
+  if (!parameters->options().relocatable()
+      && layout->is_lto_slim_object ())
     gold_info(_("%s: plugin needed to handle lto object"),
 	      this->name().c_str());
 

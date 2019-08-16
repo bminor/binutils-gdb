@@ -4401,7 +4401,8 @@ error_free_dyn:
       goto error_free_vers;
     }
 
-  if (abfd->lto_slim_object)
+  if (!bfd_link_relocatable (info)
+      && abfd->lto_slim_object)
     {
       _bfd_error_handler
 	(_("%pB: plugin needed to handle lto object"), abfd);
