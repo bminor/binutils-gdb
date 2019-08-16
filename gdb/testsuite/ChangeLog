@@ -1,3 +1,8 @@
+2019-08-16  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/compare-sections.exp ("after run to main"): Allow
+	mismatched read-only sections for PIE executables.
+
 2019-08-16  Tom Tromey  <tom@tromey.com>
 
 	* lib/tuiterm.exp (_csi_Z): New proc.
