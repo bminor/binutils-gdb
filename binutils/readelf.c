@@ -11401,6 +11401,7 @@ get_symbol_version_string (Filedata *                   filedata,
   if ((vers_data & VERSYM_HIDDEN) == 0 && vers_data == 0)
     return NULL;
 
+  *sym_info = (vers_data & VERSYM_HIDDEN) != 0 ? symbol_hidden : symbol_public;
   max_vd_ndx = 0;
 
   /* Usually we'd only see verdef for defined symbols, and verneed for
@@ -11466,12 +11467,8 @@ get_symbol_version_string (Filedata *                   filedata,
 	      ivda.vda_name = BYTE_GET (evda.vda_name);
 
 	      if (psym->st_name != ivda.vda_name)
-		{
-		  *sym_info = ((vers_data & VERSYM_HIDDEN) != 0
-			       ? symbol_hidden : symbol_public);
-		  return (ivda.vda_name < strtab_size
-			  ? strtab + ivda.vda_name : _("<corrupt>"));
-		}
+		return (ivda.vda_name < strtab_size
+			? strtab + ivda.vda_name : _("<corrupt>"));
 	    }
 	}
     }
