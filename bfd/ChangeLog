@@ -1,3 +1,10 @@
+2019-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24905
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Move PIC check for
+	PC-relative relocations back to ...
+	(elf_x86_64_relocate_section): Here.
+
 2019-08-16  Martin Liska  <mliska@suse.cz>
 
 	PR ld/24912

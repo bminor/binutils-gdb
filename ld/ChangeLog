@@ -1,3 +1,12 @@
+2019-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24905
+	* testsuite/ld-x86-64/pr24905-x32.d: New file.
+	* testsuite/ld-x86-64/pr24905.d: Likewise.
+	* testsuite/ld-x86-64/pr24905.s: Likewise.
+	* testsuite/ld-x86-64/pr24905.t: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr24905 and pr24905-x32.
+
 2019-08-16  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* emulparams/armelf.sh (OTHER_SECTIONS): Add support for noinit
