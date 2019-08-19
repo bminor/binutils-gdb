@@ -13700,6 +13700,11 @@ remote_target::remote_btrace_maybe_reopen ()
   int warned = 0;
 #endif
 
+  /* Don't bother walking the entirety of the remote thread list when
+     we know the feature isn't supported by the remote.  */
+  if (packet_support (PACKET_qXfer_btrace_conf) != PACKET_ENABLE)
+    return;
+
   scoped_restore_current_thread restore_thread;
 
   for (thread_info *tp : all_non_exited_threads ())

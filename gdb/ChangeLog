@@ -1,3 +1,8 @@
+2019-08-20  Conrad Meyer  <cem@FreeBSD.org>
+
+	* remote.c (remote_target::remote_btrace_maybe_reopen): Avoid
+	unnecessary thread walk if remote doesn't support the packet.
+
 2019-08-19  Tom Tromey  <tromey@adacore.com>
 
 	* python/py-value.c (value_has_field): Fix indentation.
