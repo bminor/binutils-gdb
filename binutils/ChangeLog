@@ -1,3 +1,9 @@
+2019-08-19  Alan Modra  <amodra@gmail.com>
+
+	PR 24898
+	* dwarf.c (display_debug_frames): Use the read_cie check and error
+	for augmentation data length.
+
 2019-08-17  Alan Modra  <amodra@gmail.com>
 
 	PR 24911

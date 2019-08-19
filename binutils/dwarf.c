@@ -7822,18 +7822,18 @@ display_debug_frames (struct dwarf_section *section,
 	    {
 	      READ_ULEB (augmentation_data_len);
 	      augmentation_data = start;
-	      start += augmentation_data_len;
 	      /* PR 17512 file: 722-8446-0.004 and PR 22386.  */
-	      if (start >= end
-		  || ((bfd_signed_vma) augmentation_data_len) < 0
-		  || augmentation_data > start)
+	      if (augmentation_data_len > (bfd_size_type) (end - start))
 		{
-		  warn (_("Corrupt augmentation data length: 0x%s\n"),
-			dwarf_vmatoa ("x", augmentation_data_len));
+		  warn (_("Augmentation data too long: 0x%s, "
+			  "expected at most %#lx\n"),
+			dwarf_vmatoa ("x", augmentation_data_len),
+			(unsigned long) (end - start));
 		  start = end;
 		  augmentation_data = NULL;
 		  augmentation_data_len = 0;
 		}
+	      start += augmentation_data_len;
 	    }
 
 	  printf ("\n%08lx %s %s FDE cie=%08lx pc=",
