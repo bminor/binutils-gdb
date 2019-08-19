@@ -1,3 +1,8 @@
+2019-09-26  Tom Tromey  <tromey@adacore.com>
+
+	* python/py-type.c (type_to_type_object): Call check_typedef
+	for stub types.
+
 2019-09-26  Tom Tromey  <tom@tromey.com>
 
 	* utils.h (initialize_utils): Don't declare.

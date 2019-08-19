@@ -1,3 +1,10 @@
+2019-09-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/py_taft.exp: New file.
+	* gdb.ada/py_taft/main.adb: New file.
+	* gdb.ada/py_taft/pkg.adb: New file.
+	* gdb.ada/py_taft/pkg.ads: New file.
+
 2019-09-24  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24598
