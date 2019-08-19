@@ -847,7 +847,7 @@ value_has_field (struct value *v, PyObject *field)
       val_type = value_type (v);
       val_type = check_typedef (val_type);
       if (TYPE_IS_REFERENCE (val_type) || TYPE_CODE (val_type) == TYPE_CODE_PTR)
-      val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
+	val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
 
       type_code = TYPE_CODE (val_type);
       if ((type_code == TYPE_CODE_STRUCT || type_code == TYPE_CODE_UNION)

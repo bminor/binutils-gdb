@@ -1,5 +1,9 @@
 2019-08-19  Tom Tromey  <tromey@adacore.com>
 
+	* python/py-value.c (value_has_field): Fix indentation.
+
+2019-08-19  Tom Tromey  <tromey@adacore.com>
+
 	* printcmd.c (do_one_display, info_display_command): Update.
 	* block.h (contained_in): Return bool.  Add allow_nested
 	parameter.
