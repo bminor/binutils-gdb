@@ -1780,8 +1780,9 @@ struct ppc64_elf_obj_tdata
      instruction not one we handle.  */
   unsigned int unexpected_toc_insn : 1;
 
-  /* Set if got relocs that can be optimised are present in this file.  */
-  unsigned int has_gotrel : 1;
+  /* Set if PLT/GOT/TOC relocs that can be optimised are present in
+     this file.  */
+  unsigned int has_optrel : 1;
 };
 
 #define ppc64_elf_tdata(bfd) \
@@ -1982,8 +1983,9 @@ struct _ppc64_elf_section_data
   /* Flag set when PLTCALL relocs are detected.  */
   unsigned int has_pltcall:1;
 
-  /* Flag set when section has GOT relocations that can be optimised.  */
-  unsigned int has_gotrel:1;
+  /* Flag set when section has PLT/GOT/TOC relocations that can be
+     optimised.  */
+  unsigned int has_optrel:1;
 };
 
 #define ppc64_elf_section_data(sec) \
@@ -4573,6 +4575,34 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  sym_addend = 0;
 	  break;
 	}
+
+      switch (r_type)
+	{
+	case R_PPC64_PLT16_HA:
+	case R_PPC64_GOT_TLSLD16_HA:
+	case R_PPC64_GOT_TLSGD16_HA:
+	case R_PPC64_GOT_TPREL16_HA:
+	case R_PPC64_GOT_DTPREL16_HA:
+	case R_PPC64_GOT16_HA:
+	case R_PPC64_TOC16_HA:
+	case R_PPC64_PLT16_LO:
+	case R_PPC64_PLT16_LO_DS:
+	case R_PPC64_GOT_TLSLD16_LO:
+	case R_PPC64_GOT_TLSGD16_LO:
+	case R_PPC64_GOT_TPREL16_LO_DS:
+	case R_PPC64_GOT_DTPREL16_LO_DS:
+	case R_PPC64_GOT16_LO:
+	case R_PPC64_GOT16_LO_DS:
+	case R_PPC64_TOC16_LO:
+	case R_PPC64_TOC16_LO_DS:
+	case R_PPC64_GOT_PCREL34:
+	  ppc64_elf_tdata (abfd)->has_optrel = 1;
+	  ppc64_elf_section_data (sec)->has_optrel = 1;
+	  break;
+	default:
+	  break;
+	}
+
       if (h != NULL)
 	{
 	  if (h->type == STT_GNU_IFUNC)
@@ -4650,17 +4680,13 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  sec->has_tls_reloc = 1;
 	  goto dogot;
 
+	case R_PPC64_GOT16:
+	case R_PPC64_GOT16_LO:
+	case R_PPC64_GOT16_HI:
 	case R_PPC64_GOT16_HA:
+	case R_PPC64_GOT16_DS:
 	case R_PPC64_GOT16_LO_DS:
 	case R_PPC64_GOT_PCREL34:
-	  ppc64_elf_tdata (abfd)->has_gotrel = 1;
-	  ppc64_elf_section_data (sec)->has_gotrel = 1;
-	  /* Fall through.  */
-
-	case R_PPC64_GOT16_DS:
-	case R_PPC64_GOT16:
-	case R_PPC64_GOT16_HI:
-	case R_PPC64_GOT16_LO:
 	dogot:
 	  /* This symbol requires a global offset table entry.  */
 	  sec->has_toc_reloc = 1;
@@ -8604,65 +8630,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  struct elf_link_hash_entry *h;
 		  Elf_Internal_Sym *sym;
 		  bfd_vma val;
-		  enum {no_check, check_lo, check_ha} insn_check;
 
 		  r_type = ELF64_R_TYPE (rel->r_info);
-		  switch (r_type)
-		    {
-		    default:
-		      insn_check = no_check;
-		      break;
-
-		    case R_PPC64_GOT_TLSLD16_HA:
-		    case R_PPC64_GOT_TLSGD16_HA:
-		    case R_PPC64_GOT_TPREL16_HA:
-		    case R_PPC64_GOT_DTPREL16_HA:
-		    case R_PPC64_GOT16_HA:
-		    case R_PPC64_TOC16_HA:
-		      insn_check = check_ha;
-		      break;
-
-		    case R_PPC64_GOT_TLSLD16_LO:
-		    case R_PPC64_GOT_TLSGD16_LO:
-		    case R_PPC64_GOT_TPREL16_LO_DS:
-		    case R_PPC64_GOT_DTPREL16_LO_DS:
-		    case R_PPC64_GOT16_LO:
-		    case R_PPC64_GOT16_LO_DS:
-		    case R_PPC64_TOC16_LO:
-		    case R_PPC64_TOC16_LO_DS:
-		      insn_check = check_lo;
-		      break;
-		    }
-
-		  if (insn_check != no_check)
-		    {
-		      bfd_vma off = rel->r_offset & ~3;
-		      unsigned char buf[4];
-		      unsigned int insn;
-
-		      if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
-			{
-			  free (used);
-			  goto error_ret;
-			}
-		      insn = bfd_get_32 (ibfd, buf);
-		      if (insn_check == check_lo
-			  ? !ok_lo_toc_insn (insn, r_type)
-			  : ((insn & ((0x3f << 26) | 0x1f << 16))
-			     != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
-			{
-			  char str[12];
-
-			  ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
-			  sprintf (str, "%#08x", insn);
-			  info->callbacks->einfo
-			    /* xgettext:c-format */
-			    (_("%H: toc optimization is not supported for"
-			       " %s instruction\n"),
-			     ibfd, sec, rel->r_offset & ~3, str);
-			}
-		    }
-
 		  switch (r_type)
 		    {
 		    case R_PPC64_TOC16:
@@ -9014,11 +8983,13 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       if (!is_ppc64_elf (ibfd))
 	continue;
 
-      if (!ppc64_elf_tdata (ibfd)->has_gotrel)
+      if (!ppc64_elf_tdata (ibfd)->has_optrel)
 	continue;
 
       sec = ppc64_elf_tdata (ibfd)->got;
-      got = sec->output_section->vma + sec->output_offset + 0x8000;
+      got = 0;
+      if (sec != NULL)
+	got = sec->output_section->vma + sec->output_offset + 0x8000;
 
       local_syms = NULL;
       symtab_hdr = &elf_symtab_hdr (ibfd);
@@ -9026,7 +8997,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
 	  if (sec->reloc_count == 0
-	      || !ppc64_elf_section_data (sec)->has_gotrel
+	      || !ppc64_elf_section_data (sec)->has_optrel
 	      || discarded_section (sec))
 	    continue;
 
@@ -9056,8 +9027,65 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      bfd_vma sym_addend, val, pc;
 	      unsigned char buf[8];
 	      unsigned int insn;
+	      enum {no_check, check_lo, check_ha} insn_check;
 
 	      r_type = ELF64_R_TYPE (rel->r_info);
+	      switch (r_type)
+		{
+		default:
+		  insn_check = no_check;
+		  break;
+
+		case R_PPC64_PLT16_HA:
+		case R_PPC64_GOT_TLSLD16_HA:
+		case R_PPC64_GOT_TLSGD16_HA:
+		case R_PPC64_GOT_TPREL16_HA:
+		case R_PPC64_GOT_DTPREL16_HA:
+		case R_PPC64_GOT16_HA:
+		case R_PPC64_TOC16_HA:
+		  insn_check = check_ha;
+		  break;
+
+		case R_PPC64_PLT16_LO:
+		case R_PPC64_PLT16_LO_DS:
+		case R_PPC64_GOT_TLSLD16_LO:
+		case R_PPC64_GOT_TLSGD16_LO:
+		case R_PPC64_GOT_TPREL16_LO_DS:
+		case R_PPC64_GOT_DTPREL16_LO_DS:
+		case R_PPC64_GOT16_LO:
+		case R_PPC64_GOT16_LO_DS:
+		case R_PPC64_TOC16_LO:
+		case R_PPC64_TOC16_LO_DS:
+		  insn_check = check_lo;
+		  break;
+		}
+
+	      if (insn_check != no_check)
+		{
+		  bfd_vma off = rel->r_offset & ~3;
+
+		  if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
+		    goto got_error_ret;
+
+		  insn = bfd_get_32 (ibfd, buf);
+		  if (insn_check == check_lo
+		      ? !ok_lo_toc_insn (insn, r_type)
+		      : ((insn & ((0x3f << 26) | 0x1f << 16))
+			 != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+		    {
+		      char str[12];
+
+		      ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
+		      sprintf (str, "%#08x", insn);
+		      info->callbacks->einfo
+			/* xgettext:c-format */
+			(_("%H: got/toc optimization is not supported for"
+			   " %s instruction\n"),
+			 ibfd, sec, rel->r_offset & ~3, str);
+		      continue;
+		    }
+		}
+
 	      switch (r_type)
 		{
 		/* Note that we don't delete GOT entries for
