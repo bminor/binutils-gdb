@@ -161,6 +161,7 @@ XMLTOC = \
 	rs6000/powerpc-vsx64.xml \
 	rs6000/powerpc-vsx64l.xml \
 	rs6000/rs6000.xml \
+	rx.xml \
 	s390-linux32.xml \
 	s390-linux32v1.xml \
 	s390-linux32v2.xml \
@@ -238,6 +239,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	riscv/64bit-cpu.xml \
 	riscv/64bit-csr.xml \
 	riscv/64bit-fpu.xml \
+	rx.xml \
 	tic6x-c6xp.xml \
 	tic6x-core.xml \
 	tic6x-gp.xml

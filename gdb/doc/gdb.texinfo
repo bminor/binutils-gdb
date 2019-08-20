@@ -44084,6 +44084,7 @@ registers using the capitalization used in the description.
 * OpenRISC 1000 Features::
 * PowerPC Features::
 * RISC-V Features::
+* RX Features::
 * S/390 and System z Features::
 * Sparc Features::
 * TIC6x Features::
@@ -44513,6 +44514,15 @@ expectation is that these registers will be in the fpu feature if the
 target has floating point hardware, but can be moved into the csr
 feature if the target has the floating point control registers, but no
 other floating point hardware.
+
+@node RX Features
+@subsection RX Features
+@cindex target descriptions, RX Features
+
+The @samp{org.gnu.gdb.rx.core} feature is required for RX
+targets.  It should contain the registers @samp{r0} through
+@samp{r15}, @samp{usp}, @samp{isp}, @samp{psw}, @samp{pc}, @samp{intb},
+@samp{bpsw}, @samp{bpc}, @samp{fintv}, @samp{fpsw}, and @samp{acc}.
 
 @node S/390 and System z Features
 @subsection S/390 and System z Features

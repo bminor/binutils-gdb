@@ -1,3 +1,17 @@
+2019-08-25  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+        * gdb/rx-tdep.c (rx_register_names): New.
+        (rx_register_name): Delete.
+        (rx_psw_type): Delete.
+        (rx_fpsw_type): Delete.
+        (rx_register_type): Delete.
+        (rx_gdbarch_init): Convert target-descriptions.
+        (_initialize_rx_tdep): Add initialize_tdesc_rx.
+        * gdb/features/Makefile: Add rx.xml.
+        * gdb/features/rx.xml: New.
+        * gdb/features/rx.c: Generated.
+        * gdb/NEWS: Mention target description support.
+
 2019-08-22  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.c (symbol_cache_lookup): Always initialize *bsc_ptr and

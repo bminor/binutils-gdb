@@ -27,6 +27,8 @@
   provide the exitcode or exit status of the shell commands launched by
   GDB commands such as "shell", "pipe" and "make".
 
+* The RX port now supports XML target descriptions.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
