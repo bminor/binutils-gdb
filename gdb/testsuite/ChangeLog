@@ -1,3 +1,8 @@
+2019-08-20  Tom de Vries  <tdevries@suse.de>
+
+	* lib/pascal.exp (gdb_compile_pascal): Remove $destfile before
+	compilation.
+
 2019-08-16  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/compare-sections.exp ("after run to main"): Allow

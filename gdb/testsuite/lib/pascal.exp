@@ -153,6 +153,8 @@ proc gdb_compile_pascal {source destfile type options} {
 	pascal_init
     }
 
+    file delete $destfile
+
     if { $pascal_compiler_is_fpc == 1 } {
         set result [fpc_compile $source $destfile $type $options]
     } elseif { $pascal_compiler_is_gpc == 1 } {
