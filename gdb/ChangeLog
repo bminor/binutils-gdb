@@ -1,3 +1,9 @@
+2019-09-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* main.c (get_init_files): Change to use std::string.
+	(captured_main_1): Update.
+	(print_gdb_help): Update.
+
 2019-09-11  Ali Tamur  <tamur@google.com>
 
 	*gdb/target-float.c (host_float_ops<T>::to_longest): Update
