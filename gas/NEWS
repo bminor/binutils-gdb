@@ -8,6 +8,12 @@
   to set the default behavior. Set the default if the configure option is not used
   to "no".
 
+* Add support for the Arm Cortex-A76AE, Cortex-A77 and Cortex-M35P
+  processors.
+
+* Add support for the AArch64 Cortex-A34, Cortex-A65, Cortex-A65AE,
+  Cortex-A76AE, and Cortex-A77 processors.
+
 Changes in 2.32:
 
 * Add -mvexwig=[0|1] option to x86 assembler to control encoding of

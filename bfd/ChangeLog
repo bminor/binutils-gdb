@@ -1,3 +1,8 @@
+2019-08-20  Dennis Zhang  <dennis.zhang@arm.com>
+
+	* cpu-aarch64.c: New entries for Cortex-A34, Cortex-A65,
+	 Cortex-A77, cortex-A65AE, and Cortex-A76AE.
+
 2019-08-20  Tamar Christina  <tamar.christina@arm.com>
 
 	* elf32-arm.c (elf32_thumb2_plt_entry, elf32_arm_plt_thumb_stub,

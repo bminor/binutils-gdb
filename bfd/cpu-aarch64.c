@@ -68,10 +68,11 @@ static struct
 }
 processors[] =
 {
-  /* These two are example CPUs supported in GCC, once we have real
-     CPUs they will be removed.  */
-  { bfd_mach_aarch64, "example-1" },
-  { bfd_mach_aarch64, "example-2" }
+  { bfd_mach_aarch64,	  "cortex-a34"	    },
+  { bfd_mach_aarch64,	  "cortex-a65"	    },
+  { bfd_mach_aarch64,	  "cortex-a65ae"    },
+  { bfd_mach_aarch64,	  "cortex-a76ae"    },
+  { bfd_mach_aarch64,	  "cortex-a77"	    }
 };
 
 static bfd_boolean

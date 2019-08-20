@@ -1,3 +1,16 @@
+2019-08-20  Dennis Zhang  <dennis.zhang@arm.com>
+
+	* NEWS: Mention the Arm and AArch64 new processors.
+	* config/tc-aarch64.c: New entries for Cortex-A34, Cortex-A65,
+	Cortex-A77, cortex-A65AE, and Cortex-A76AE.
+	* doc/c-aarch64.texi: Document new CPUs.
+	* testsuite/gas/aarch64/cpu-cortex-a34.d: New test.
+	* testsuite/gas/aarch64/cpu-cortex-a65.d: New test.
+	* testsuite/gas/aarch64/cpu-cortex-a65ae.d: New test.
+	* testsuite/gas/aarch64/cpu-cortex-a76ae.d: New test.
+	* testsuite/gas/aarch64/cpu-cortex-a77.d: New test.
+	* testsuite/gas/aarch64/nop-asm.s: New test.
+
 2019-08-19  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* config/tc-mips.c (fix_bad_misaligned_address): New function.

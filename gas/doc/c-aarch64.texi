@@ -55,14 +55,19 @@ file in ELF32 and ELF64 format respectively.  The default is @code{lp64}.
 This option specifies the target processor.  The assembler will issue an error
 message if an attempt is made to assemble an instruction which will not execute
 on the target processor.  The following processor names are recognized:
+@code{cortex-a34},
 @code{cortex-a35},
 @code{cortex-a53},
 @code{cortex-a55},
 @code{cortex-a57},
+@code{cortex-a65},
+@code{cortex-a65ae},
 @code{cortex-a72},
 @code{cortex-a73},
 @code{cortex-a75},
 @code{cortex-a76},
+@code{cortex-a76ae},
+@code{cortex-a77},
 @code{ares},
 @code{exynos-m1},
 @code{falkor},
