@@ -1,3 +1,29 @@
+2019-08-20  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/ld-arm/cortex-a8-fix-b-plt.d: Update Testcase.
+	* testsuite/ld-arm/cortex-a8-fix-b-rel-arm.d: Likewise.
+	* testsuite/ld-arm/cortex-a8-fix-bcc-plt.d: Likewise.
+	* testsuite/ld-arm/farcall-cond-thumb-arm.d: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app.d: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.d: Likewise.
+	* testsuite/ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+	* testsuite/ld-arm/farcall-thumb-arm-pic-veneer.d: Likewise.
+	* testsuite/ld-arm/farcall-thumb-arm-short.d: Likewise.
+	* testsuite/ld-arm/farcall-thumb-arm.d: Likewise.
+	* testsuite/ld-arm/farcall-thumb-thumb-pic-veneer.d: Likewise.
+	* testsuite/ld-arm/farcall-thumb-thumb.d: Likewise.
+	* testsuite/ld-arm/fix-arm1176-on.d: Likewise.
+	* testsuite/ld-arm/ifunc-10.dd: Likewise.
+	* testsuite/ld-arm/ifunc-2.dd: Likewise.
+	* testsuite/ld-arm/ifunc-4.dd: Likewise.
+	* testsuite/ld-arm/ifunc-6.dd: Likewise.
+	* testsuite/ld-arm/ifunc-8.dd: Likewise.
+	* testsuite/ld-arm/jump-reloc-veneers-long.d: Likewise.
+	* testsuite/ld-arm/mixed-app.d: Likewise.
+	* testsuite/ld-arm/thumb2-b-interwork.d: Likewise.
+	* testsuite/ld-arm/tls-longplt.d: Likewise.
+	* testsuite/ld-arm/tls-thumb1.d: Likewise.
+
 2019-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24905

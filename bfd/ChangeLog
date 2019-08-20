@@ -1,3 +1,14 @@
+2019-08-20  Tamar Christina  <tamar.christina@arm.com>
+
+	* elf32-arm.c (elf32_thumb2_plt_entry, elf32_arm_plt_thumb_stub,
+	elf32_arm_stub_long_branch_v4t_thumb_thumb,
+	elf32_arm_stub_long_branch_v4t_thumb_arm,
+	elf32_arm_stub_short_branch_v4t_thumb_arm,
+	elf32_arm_stub_long_branch_v4t_thumb_arm_pic,
+	elf32_arm_stub_long_branch_v4t_thumb_thumb_pic,
+	elf32_arm_stub_long_branch_v4t_thumb_tls_pic): Change nop to branch to
+	previous instruction.
+
 2019-08-19  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_symbol_bias): Create hash table
