@@ -191,6 +191,47 @@ relocate_gdb_directory (const char *initial, bool relocatable)
   return dir;
 }
 
+/* Given a gdbinit path in FILE, adjusts it according to the gdb_datadir
+   parameter if it is in the data dir, or passes it through relocate_path
+   otherwise.  */
+
+static std::string
+relocate_gdbinit_path_maybe_in_datadir (const std::string& file)
+{
+  size_t datadir_len = strlen (GDB_DATADIR);
+
+  std::string relocated_path;
+
+  /* If SYSTEM_GDBINIT lives in data-directory, and data-directory
+     has been provided, search for SYSTEM_GDBINIT there.  */
+  if (gdb_datadir_provided
+      && datadir_len < file.length ()
+      && filename_ncmp (file.c_str (), GDB_DATADIR, datadir_len) == 0
+      && IS_DIR_SEPARATOR (file[datadir_len]))
+    {
+      /* Append the part of SYSTEM_GDBINIT that follows GDB_DATADIR
+	 to gdb_datadir.  */
+
+      size_t start = datadir_len;
+      for (; IS_DIR_SEPARATOR (file[start]); ++start)
+	;
+      relocated_path = (std::string (gdb_datadir) + SLASH_STRING
+			+ file.substr (start));
+    }
+  else
+    {
+      char *relocated = relocate_path (gdb_program_name,
+				       file.c_str (),
+				       SYSTEM_GDBINIT_RELOCATABLE);
+      if (relocated != nullptr)
+	{
+	  relocated_path = relocated;
+	  xfree (relocated);
+	}
+    }
+    return relocated_path;
+}
+
 /* Compute the locations of init files that GDB should source and
    return them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  If
    there is no system gdbinit (resp. home gdbinit and local gdbinit)
@@ -212,37 +253,8 @@ get_init_files (std::string *system_gdbinit,
 
       if (SYSTEM_GDBINIT[0])
 	{
-	  size_t datadir_len = strlen (GDB_DATADIR);
-	  size_t sys_gdbinit_len = strlen (SYSTEM_GDBINIT);
-	  std::string relocated_sysgdbinit;
-
-	  /* If SYSTEM_GDBINIT lives in data-directory, and data-directory
-	     has been provided, search for SYSTEM_GDBINIT there.  */
-	  if (gdb_datadir_provided
-	      && datadir_len < sys_gdbinit_len
-	      && filename_ncmp (SYSTEM_GDBINIT, GDB_DATADIR, datadir_len) == 0
-	      && IS_DIR_SEPARATOR (SYSTEM_GDBINIT[datadir_len]))
-	    {
-	      /* Append the part of SYSTEM_GDBINIT that follows GDB_DATADIR
-		 to gdb_datadir.  */
-
-	      size_t start = datadir_len;
-	      for (; IS_DIR_SEPARATOR (SYSTEM_GDBINIT[start]); ++start)
-		;
-	      relocated_sysgdbinit = (std::string (gdb_datadir) + SLASH_STRING
-				      + &SYSTEM_GDBINIT[start]);
-	    }
-	  else
-	    {
-	      char *relocated = relocate_path (gdb_program_name,
-					       SYSTEM_GDBINIT,
-					       SYSTEM_GDBINIT_RELOCATABLE);
-	      if (relocated != nullptr)
-	        {
-		  relocated_sysgdbinit = relocated;
-		  xfree (relocated);
-		}
-	    }
+	  std::string relocated_sysgdbinit
+	    = relocate_gdbinit_path_maybe_in_datadir (SYSTEM_GDBINIT);
 	  if (!relocated_sysgdbinit.empty ()
 	      && stat (relocated_sysgdbinit.c_str (), &s) == 0)
 	    sysgdbinit = relocated_sysgdbinit;
