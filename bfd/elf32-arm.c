@@ -2284,6 +2284,11 @@ static const unsigned long dl_tlsdesc_lazy_trampoline [] =
   0x00000018, /* 4:   .word  _GLOBAL_OFFSET_TABLE_ - 2b - 8 */
 };
 
+/* NOTE: [Thumb nop sequence]
+   When adding code that transitions from Thumb to Arm the instruction that
+   should be used for the alignment padding should be 0xe7fd (b .-2) instead of
+   a nop for performance reasons.  */
+
 /* ARM FDPIC PLT entry.  */
 /* The last 5 words contain PLT lazy fragment code and data.  */
 static const bfd_vma elf32_arm_fdpic_plt_entry [] =
@@ -2401,8 +2406,8 @@ static const bfd_vma elf32_thumb2_plt_entry [] =
   0x0c00f240,		/* movw	   ip, #0xNNNN	  */
   0x0c00f2c0,		/* movt	   ip, #0xNNNN	  */
   0xf8dc44fc,		/* add	   ip, pc	  */
-  0xbf00f000		/* ldr.w   pc, [ip]	  */
-			/* nop			  */
+  0xe7fdf000		/* ldr.w   pc, [ip]	  */
+			/* b      .-2		  */
 };
 
 /* The format of the first entry in the procedure linkage table
@@ -2442,7 +2447,7 @@ static const bfd_vma elf32_arm_vxworks_shared_plt_entry[] =
 static const bfd_vma elf32_arm_plt_thumb_stub [] =
 {
   0x4778,		/* bx pc */
-  0x46c0		/* nop   */
+  0xe7fd		/* b .-2 */
 };
 
 /* The entries in a PLT when using a DLL-based target with multiple
@@ -2529,6 +2534,8 @@ typedef struct
   int		       reloc_addend;
 }  insn_sequence;
 
+/* See note [Thumb nop sequence] when adding a veneer.  */
+
 /* Arm/Thumb -> Arm/Thumb long branch stub. On V5T and above, use blx
    to reach the stub if necessary.  */
 static const insn_sequence elf32_arm_stub_long_branch_any_any[] =
@@ -2579,7 +2586,7 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb2_only_pure[] =
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_INSN (0xe59fc000),	     /* ldr  ip, [pc, #0] */
   ARM_INSN (0xe12fff1c),	     /* bx   ip */
   DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
@@ -2590,7 +2597,7 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb[] =
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop   */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_INSN (0xe51ff004),	     /* ldr   pc, [pc, #-4] */
   DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd   R_ARM_ABS32(X) */
 };
@@ -2600,7 +2607,7 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm[] =
 static const insn_sequence elf32_arm_stub_short_branch_v4t_thumb_arm[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop   */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_REL_INSN (0xea000000, -8),     /* b    (X-8) */
 };
 
@@ -2638,7 +2645,7 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_arm_thumb_pic[] =
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm_pic[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop  */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_INSN (0xe59fc000),	     /* ldr  ip, [pc, #0] */
   ARM_INSN (0xe08cf00f),	     /* add  pc, ip, pc */
   DATA_WORD (0, R_ARM_REL32, -4),     /* dcd  R_ARM_REL32(X) */
@@ -2662,7 +2669,7 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb_only_pic[] =
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_INSN (0xe59fc004),	     /* ldr  ip, [pc, #4] */
   ARM_INSN (0xe08fc00c),	     /* add   ip, pc, ip */
   ARM_INSN (0xe12fff1c),	     /* bx   ip */
@@ -2683,7 +2690,7 @@ static const insn_sequence elf32_arm_stub_long_branch_any_tls_pic[] =
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_tls_pic[] =
 {
   THUMB16_INSN (0x4778),	     /* bx   pc */
-  THUMB16_INSN (0x46c0),	     /* nop */
+  THUMB16_INSN (0xe7fd),	     /* b   .-2 */
   ARM_INSN (0xe59f1000),	     /* ldr  r1, [pc, #0] */
   ARM_INSN (0xe081f00f),	     /* add  pc, r1, pc */
   DATA_WORD (0, R_ARM_REL32, -4),    /* dcd  R_ARM_REL32(X) */
