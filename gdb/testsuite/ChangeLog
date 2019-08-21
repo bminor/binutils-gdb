@@ -1,3 +1,7 @@
+2019-08-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/with.exp: Test "with" with no arguments.
+
 2019-08-21  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/gdb-caching-proc.exp: Sort files.

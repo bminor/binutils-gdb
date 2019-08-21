@@ -220,6 +220,8 @@ with_test_prefix "run control" {
 
 # Check errors.
 with_test_prefix "errors" {
+    gdb_test "with" "Missing arguments\\."
+
     # Try both an unknown root setting and an unknown prefixed
     # setting.  The errors come from different locations in the
     # sources.

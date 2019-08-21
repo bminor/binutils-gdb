@@ -1,3 +1,7 @@
+2019-08-21  Bogdan Harjoc  <harjoc@gmail.com>
+
+	* cli/cli-cmds.c (with_command_1): Error out if no arguments.
+
 2019-08-21  Christian Biesinger  <cbiesinger@google.com>
 
 	* tui/tui-data.h (tui_gen_win_info): Add an =default

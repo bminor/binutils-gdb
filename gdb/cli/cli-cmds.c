@@ -217,6 +217,9 @@ void
 with_command_1 (const char *set_cmd_prefix,
 		cmd_list_element *setlist, const char *args, int from_tty)
 {
+  if (args == nullptr)
+    error (_("Missing arguments."));
+
   const char *delim = strstr (args, "--");
   const char *nested_cmd = nullptr;
 
