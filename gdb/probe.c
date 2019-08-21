@@ -695,7 +695,7 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
   if (!probe.prob)
     return NULL;
 
-  n_args = probe.prob->get_argument_count (frame);
+  n_args = probe.prob->get_argument_count (get_frame_arch (frame));
   if (n >= n_args)
     return NULL;
 
@@ -818,7 +818,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
   if (pc_probe.prob == NULL)
     error (_("No probe at PC %s"), core_addr_to_string (pc));
 
-  n_args = pc_probe.prob->get_argument_count (frame);
+  n_args = pc_probe.prob->get_argument_count (arch);
   if (sel == -1)
     return value_from_longest (builtin_type (arch)->builtin_int, n_args);
 
@@ -840,7 +840,6 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   int sel = (int) (uintptr_t) data;
   struct bound_probe pc_probe;
   int n_args;
-  struct frame_info *frame = get_selected_frame (NULL);
 
   /* SEL == -1 means "_probe_argc".  */
   gdb_assert (sel >= -1);
@@ -849,7 +848,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   if (pc_probe.prob == NULL)
     error (_("No probe at PC %s"), core_addr_to_string (pc));
 
-  n_args = pc_probe.prob->get_argument_count (frame);
+  n_args = pc_probe.prob->get_argument_count (expr->gdbarch);
 
   if (sel == -1)
     {

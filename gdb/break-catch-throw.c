@@ -115,7 +115,7 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
 	  && pc_probe.prob->get_name () != "rethrow"))
     error (_("not stopped at a C++ exception catchpoint"));
 
-  n_args = pc_probe.prob->get_argument_count (frame);
+  n_args = pc_probe.prob->get_argument_count (get_frame_arch (frame));
   if (n_args < 2)
     error (_("C++ exception catchpoint has too few arguments"));
 

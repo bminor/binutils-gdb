@@ -122,7 +122,7 @@ public:
   CORE_ADDR get_relocated_address (struct objfile *objfile) override;
 
   /* See probe.h.  */
-  unsigned get_argument_count (struct frame_info *frame) override;
+  unsigned get_argument_count (struct gdbarch *gdbarch) override;
 
   /* See probe.h.  */
   bool can_evaluate_arguments () const override;
@@ -693,7 +693,7 @@ dtrace_probe::get_relocated_address (struct objfile *objfile)
 /* Implementation of the get_argument_count method.  */
 
 unsigned
-dtrace_probe::get_argument_count (struct frame_info *frame)
+dtrace_probe::get_argument_count (struct gdbarch *gdbarch)
 {
   return m_args.size ();
 }

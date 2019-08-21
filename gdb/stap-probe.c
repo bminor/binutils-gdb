@@ -136,7 +136,7 @@ public:
   CORE_ADDR get_relocated_address (struct objfile *objfile) override;
 
   /* See probe.h.  */
-  unsigned get_argument_count (struct frame_info *frame) override;
+  unsigned get_argument_count (struct gdbarch *gdbarch) override;
 
   /* See probe.h.  */
   bool can_evaluate_arguments () const override;
@@ -1301,10 +1301,8 @@ stap_probe::get_relocated_address (struct objfile *objfile)
    argument string.  */
 
 unsigned
-stap_probe::get_argument_count (struct frame_info *frame)
+stap_probe::get_argument_count (struct gdbarch *gdbarch)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-
   if (!m_have_parsed_args)
     {
       if (this->can_evaluate_arguments ())

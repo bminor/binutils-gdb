@@ -1756,7 +1756,7 @@ solib_event_probe_action (struct probe_and_action *pa)
        arg2: struct link_map *new (optional, for incremental updates)  */
   try
     {
-      probe_argc = pa->prob->get_argument_count (frame);
+      probe_argc = pa->prob->get_argument_count (get_frame_arch (frame));
     }
   catch (const gdb_exception_error &ex)
     {

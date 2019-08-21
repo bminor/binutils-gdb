@@ -131,7 +131,7 @@ public:
 
   /* Return the number of arguments of the probe.  This function can
      throw an exception.  */
-  virtual unsigned get_argument_count (struct frame_info *frame) = 0;
+  virtual unsigned get_argument_count (struct gdbarch *gdbarch) = 0;
 
   /* Return 1 if the probe interface can evaluate the arguments of
      probe, zero otherwise.  See the comments on
