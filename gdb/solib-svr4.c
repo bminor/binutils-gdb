@@ -2071,7 +2071,6 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
 					bool with_prefix)
 {
   std::vector<probe *> probes[NUM_PROBES];
-  bool checked_can_use_probe_arguments = false;
 
   for (int i = 0; i < NUM_PROBES; i++)
     {
@@ -2102,12 +2101,23 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
 	return false;
 
       /* Ensure probe arguments can be evaluated.  */
-      if (!checked_can_use_probe_arguments)
+      for (probe *p : probes[i])
 	{
-	  probe *p = probes[i][0];
 	  if (!p->can_evaluate_arguments ())
 	    return false;
-	  checked_can_use_probe_arguments = true;
+	  /* This will fail if the probe is invalid.  This has been seen on Arm
+	     due to references to symbols that have been resolved away.  */
+	  try
+	    {
+	      p->get_argument_count (gdbarch);
+	    }
+	  catch (const gdb_exception_error &ex)
+	    {
+	      exception_print (gdb_stderr, ex);
+	      warning (_("Initializing probes-based dynamic linker interface "
+			 "failed.\nReverting to original interface."));
+	      return false;
+	    }
 	}
     }
 

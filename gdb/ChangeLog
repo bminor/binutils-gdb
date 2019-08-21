@@ -1,5 +1,10 @@
 2019-09-02  Alan Hayward  <alan.hayward@arm.com>
 
+	* solib-svr4.c (svr4_find_and_create_probe_breakpoints): Check all
+	probe arguments.
+
+2019-09-02  Alan Hayward  <alan.hayward@arm.com>
+
 	* break-catch-throw.c (fetch_probe_arguments): Use gdbarch.
 	* dtrace-probe.c (dtrace_probe::get_argument_count): Likewise.
 	* probe.c (probe_safe_evaluate_at_pc) (compute_probe_arg)
