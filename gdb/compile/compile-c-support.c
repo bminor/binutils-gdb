@@ -22,12 +22,12 @@
 #include "compile-c.h"
 #include "compile-cplus.h"
 #include "compile.h"
-#include "gdb-dlfcn.h"
 #include "c-lang.h"
 #include "macrotab.h"
 #include "macroscope.h"
 #include "regcache.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb-dlfcn.h"
 #include "gdbsupport/preprocessor.h"
 #include "gdbarch.h"
 

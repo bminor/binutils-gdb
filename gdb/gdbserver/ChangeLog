@@ -1,3 +1,10 @@
+2019-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add 'gdbsupport/gdb-dlfcn.c'.
+	(OBS): Add 'gdbsupport/gdb-dlfcn.o'.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2019-08-15  Tom Tromey  <tromey@adacore.com>
 
 	* target.c (target_write_memory): Use gdb::byte_vector.

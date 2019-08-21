@@ -210,6 +210,7 @@ SFILES = \
 	$(srcdir)/gdbsupport/fileio.c \
 	$(srcdir)/gdbsupport/filestuff.c \
 	$(srcdir)/gdbsupport/job-control.c \
+	$(srcdir)/gdbsupport/gdb-dlfcn.c \
 	$(srcdir)/gdbsupport/gdb_tilde_expand.c \
 	$(srcdir)/gdbsupport/gdb_vecs.c \
 	$(srcdir)/gdbsupport/netstuff.c \
@@ -255,6 +256,7 @@ OBS = \
 	gdbsupport/fileio.o \
 	gdbsupport/filestuff.o \
 	gdbsupport/format.o \
+	gdbsupport/gdb-dlfcn.o \
 	gdbsupport/gdb_tilde_expand.o \
 	gdbsupport/gdb_vecs.o \
 	gdbsupport/netstuff.o \

@@ -964,6 +964,7 @@ COMMON_SFILES = \
 	gdbsupport/filestuff.c \
 	gdbsupport/format.c \
 	gdbsupport/job-control.c \
+	gdbsupport/gdb-dlfcn.c \
 	gdbsupport/gdb_tilde_expand.c \
 	gdbsupport/gdb_vecs.c \
 	gdbsupport/netstuff.c \
@@ -1028,7 +1029,6 @@ COMMON_SFILES = \
 	frame-unwind.c \
 	gcore.c \
 	gdb_bfd.c \
-	gdb-dlfcn.c \
 	gdb_obstack.c \
 	gdb_regex.c \
 	gdb_usleep.c \
@@ -1262,7 +1262,6 @@ HFILES_NO_SRCDIR = \
 	gcore.h \
 	gdb_bfd.h \
 	gdb_curses.h \
-	gdb-dlfcn.h \
 	gdb_expat.h \
 	gdb_obstack.h \
 	gdb_proc_service.h \
@@ -1460,6 +1459,7 @@ HFILES_NO_SRCDIR = \
 	gdbsupport/environ.h \
 	gdbsupport/fileio.h \
 	gdbsupport/format.h \
+	gdbsupport/gdb-dlfcn.h \
 	gdbsupport/gdb_assert.h \
 	gdbsupport/gdb_tilde_expand.h \
 	gdbsupport/gdb_locale.h \

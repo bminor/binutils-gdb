@@ -1,3 +1,18 @@
+2019-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure.ac: Don't check for 'dlfcn.h' (moved to
+	gdbsupport/common.m4).
+	* Makefile.in (COMMON_SFILES): Move 'gdb-dlfcn.c' to
+	'gdbsupport/'.
+	(HFILES_NO_SRCDIR): Likewise, for 'gdb-dlfcn.h'.
+	* compile/compile-c-support.c: Include
+	'gdbsupport/gdb-dlfcn.h'.
+	* gdbsupport/common.m4: Check for 'dlfcn.h'.
+	* gdb-dlfcn.c: Move to...
+	* gdbsupport/gdb-dlfcn.c: ... here.
+	* gdb-dlfcn.h: Move to...
+	* gdbsupport/gdb-dlfcn.h: ... here.
+
 2019-08-23  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (struct reg_value): Improve comments.  Make

@@ -36,7 +36,7 @@
 #include "symfile.h"
 #include "symtab.h"
 #include "target.h"
-#include "gdb-dlfcn.h"
+#include "gdbsupport/gdb-dlfcn.h"
 #include <sys/stat.h>
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
