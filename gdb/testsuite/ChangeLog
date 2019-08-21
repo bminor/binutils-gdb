@@ -1,3 +1,7 @@
+2019-08-21  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/gdb-caching-proc.exp: Sort files.
+
 2019-08-20  Tom de Vries  <tdevries@suse.de>
 
 	* lib/pascal.exp (gdb_compile_pascal): Remove $destfile before

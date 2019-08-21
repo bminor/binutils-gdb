@@ -104,6 +104,7 @@ if { ![gdb_simple_compile $me $src executable] } {
 
 # Test gdb_caching_procs in gdb/testsuite/lib/*.exp
 set files [eval glob -types f $srcdir/lib/*.exp]
+set files [lsort $files]
 foreach file $files {
     test_file $file
 }
