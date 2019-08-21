@@ -1,3 +1,8 @@
+2019-08-21  Christian Biesinger  <cbiesinger@google.com>
+
+	* tui/tui-data.h (tui_gen_win_info): Add an =default
+	move constructor, required by some GCC versions.
+
 2019-08-21  Jinke Fan  <fanjinke51@yeah.net>
 
 	* go32-nat.c (go32_sysinfo): Add hygon_p.

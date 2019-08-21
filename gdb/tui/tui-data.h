@@ -55,6 +55,7 @@ protected:
   virtual void make_window ();
 
 public:
+  tui_gen_win_info (tui_gen_win_info &&) = default;
 
   virtual ~tui_gen_win_info ();
 
