@@ -11,3 +11,7 @@
 	.single 3.32192809488736218171e0
 #	.byte 0x78, 0x9a, 0x54, 0x40, 0, 0, 0, 0
 	.byte 0, 0, 0, 0, 0, 0
+
+# The assembler used to treat the next value as zero instead of 1e-22.
+        .double .0000000000000000000001
+        .double 1e-22

@@ -184,23 +184,42 @@ atof_generic (/* return pointer to just AFTER number we read.  */
 
 #ifndef OLD_FLOAT_READS
   /* Ignore trailing 0's after the decimal point.  The original code here
-   * (ifdef'd out) does not do this, and numbers like
-   *	4.29496729600000000000e+09	(2**31)
-   * come out inexact for some reason related to length of the digit
-   * string.
-   */
+     (ifdef'd out) does not do this, and numbers like
+    	4.29496729600000000000e+09	(2**31)
+     come out inexact for some reason related to length of the digit
+     string.  */
+
+  /* The case number_of_digits_before_decimal = 0 is handled for
+     deleting zeros after decimal.  In this case the decimal mark and
+     the first zero digits after decimal mark are skipped.  */
+  seen_significant_digit = 0;
+  signed long subtract_decimal_exponent = 0;
+
   if (c && IS_DECIMAL_MARK (c))
     {
-      unsigned int zeros = 0;	/* Length of current string of zeros */
+      unsigned int zeros = 0;	/* Length of current string of zeros.  */
+
+      if (number_of_digits_before_decimal == 0)
+	/* Skip decimal mark.  */
+	first_digit++;
 
       for (p++; (c = *p) && ISDIGIT (c); p++)
 	{
 	  if (c == '0')
 	    {
-	      zeros++;
+	      if (number_of_digits_before_decimal == 0
+		  && !seen_significant_digit)
+		{
+		  /* Skip '0' and the decimal mark.  */
+		  first_digit++;
+		  subtract_decimal_exponent--;
+		}
+	      else
+		zeros++;
 	    }
 	  else
 	    {
+	      seen_significant_digit = 1;
 	      number_of_digits_after_decimal += 1 + zeros;
 	      zeros = 0;
 	    }
@@ -286,6 +305,12 @@ atof_generic (/* return pointer to just AFTER number we read.  */
 	  decimal_exponent = -decimal_exponent;
 	}
     }
+
+#ifndef OLD_FLOAT_READS
+  /* Subtract_decimal_exponent != 0 when number_of_digits_before_decimal = 0
+     and first digit after decimal is '0'.  */
+  decimal_exponent += subtract_decimal_exponent;
+#endif
 
   *address_of_string_pointer = p;
 
