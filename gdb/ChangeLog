@@ -1,3 +1,8 @@
+2019-08-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (yylex): Remove is_a_field_of_this local variable, and
+	all uses as this was never set to anything but a zero value.
+
 2019-08-21  Bogdan Harjoc  <harjoc@gmail.com>
 
 	* cli/cli-cmds.c (with_command_1): Error out if no arguments.

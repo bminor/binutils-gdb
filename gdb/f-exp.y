@@ -1275,7 +1275,6 @@ yylex (void)
   {
     std::string tmp = copy_name (yylval.sval);
     struct block_symbol result;
-    struct field_of_this_result is_a_field_of_this;
     enum domain_enum_tag lookup_domains[] =
     {
       STRUCT_DOMAIN,
@@ -1286,15 +1285,8 @@ yylex (void)
 
     for (int i = 0; i < ARRAY_SIZE (lookup_domains); ++i)
       {
-	/* Initialize this in case we *don't* use it in this call; that
-	   way we can refer to it unconditionally below.  */
-	memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
-
 	result = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
-				lookup_domains[i],
-				pstate->language ()->la_language
-				== language_cplus
-				  ? &is_a_field_of_this : NULL);
+				lookup_domains[i], NULL);
 	if (result.symbol && SYMBOL_CLASS (result.symbol) == LOC_TYPEDEF)
 	  {
 	    yylval.tsym.type = SYMBOL_TYPE (result.symbol);
@@ -1323,14 +1315,14 @@ yylex (void)
 	if (hextype == INT)
 	  {
 	    yylval.ssym.sym = result;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
+	    yylval.ssym.is_a_field_of_this = false;
 	    return NAME_OR_INT;
 	  }
       }
     
     /* Any other kind of symbol */
     yylval.ssym.sym = result;
-    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
+    yylval.ssym.is_a_field_of_this = false;
     return NAME;
   }
 }
