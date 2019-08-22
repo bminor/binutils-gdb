@@ -1,3 +1,9 @@
+2019-08-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 24922
+	* pei-x86_64.c (pex64_xdata_print_uwd_codes): Add checks before
+	reading data from extra records.
+
 2019-08-22  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/24601
