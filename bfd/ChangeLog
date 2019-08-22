@@ -1,3 +1,15 @@
+2019-08-28  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2019-08-22  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24601
+	* elfnn-aarch64.c (aarch64_relocate): Handle weak TLS and undefined TLS.
+	Also Pass input_bfd to _bfd_aarch64_elf_resolve_relocation.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Use it.
+	* elfxx-aarch64.h (_bfd_aarch64_elf_resolve_relocation): Emit warning
+	for weak TLS.
+
 2019-07-08  Alan Modra  <amodra@gmail.com>
 
 	PR 24785

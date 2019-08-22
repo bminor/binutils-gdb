@@ -393,3 +393,6 @@ set aarch64elflinktests {
 }
 
 run_ld_link_tests $aarch64elflinktests
+
+run_dump_test "weak-tls"
+run_dump_test "undef-tls"

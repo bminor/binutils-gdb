@@ -2896,7 +2896,8 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
 	   + offset);
 
   r_type = elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
-  value = _bfd_aarch64_elf_resolve_relocation (r_type, place, value, 0, FALSE);
+  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, r_type, place,
+					       value, 0, FALSE);
   return _bfd_aarch64_elf_put_addend (input_bfd,
 				      input_section->contents + offset, r_type,
 				      howto, value) == bfd_reloc_ok;
@@ -5383,7 +5384,8 @@ bad_ifunc_reloc:
 	  /* FALLTHROUGH */
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
-	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						       place, value,
 						       signed_addend,
 						       weak_undef_p);
 	  return _bfd_aarch64_elf_put_addend (input_bfd, hit_data, bfd_r_type,
@@ -5460,7 +5462,8 @@ bad_ifunc_reloc:
 	    addend = (globals->root.sgot->output_section->vma
 		      + globals->root.sgot->output_offset);
 
-	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						       place, value,
 						       addend, weak_undef_p);
 	  return _bfd_aarch64_elf_put_addend (input_bfd, hit_data, bfd_r_type, howto, value);
 	case BFD_RELOC_AARCH64_ADD_LO12:
@@ -5638,7 +5641,8 @@ bad_ifunc_reloc:
 	    signed_addend = 0;
 	  }
       }
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   signed_addend, weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
@@ -5698,7 +5702,8 @@ bad_ifunc_reloc:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_MOVW_G3:
     case BFD_RELOC_AARCH64_TSTBR14:
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   signed_addend, weak_undef_p);
       break;
 
@@ -5743,7 +5748,8 @@ bad_ifunc_reloc:
 	  if (aarch64_relocation_aginst_gp_p (bfd_r_type))
 	    addend = (globals->root.sgot->output_section->vma
 		      + globals->root.sgot->output_offset);
-	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						       place, value,
 						       addend, weak_undef_p);
 	}
       else
@@ -5790,7 +5796,8 @@ bad_ifunc_reloc:
 	if (aarch64_relocation_aginst_gp_p (bfd_r_type))
 	  addend = base_got->output_section->vma + base_got->output_offset;
 
-	value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+	value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						     place, value,
 						     addend, weak_undef_p);
       }
 
@@ -5827,7 +5834,8 @@ bad_ifunc_reloc:
 	       + globals->root.sgot->output_section->vma
 	       + globals->root.sgot->output_offset);
 
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
@@ -5840,7 +5848,8 @@ bad_ifunc_reloc:
 	return bfd_reloc_notsupported;
 
       value = symbol_got_offset (input_bfd, h, r_symndx);
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
@@ -5861,10 +5870,26 @@ bad_ifunc_reloc:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
-						   signed_addend - dtpoff_base (info),
-						   weak_undef_p);
-      break;
+      {
+	if (!(weak_undef_p || elf_hash_table (info)->tls_sec))
+	  {
+	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: TLS relocation %s against undefined symbol `%s'"),
+		 input_bfd, elfNN_aarch64_howto_table[howto_index].name,
+		 h->root.root.string);
+	    bfd_set_error (bfd_error_bad_value);
+	    return bfd_reloc_notsupported;
+	  }
+
+	bfd_vma def_value
+	  = weak_undef_p ? 0 : signed_addend - dtpoff_base (info);
+	value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						     place, value,
+						     def_value, weak_undef_p);
+	break;
+      }
 
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
@@ -5882,11 +5907,27 @@ bad_ifunc_reloc:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
-						   signed_addend - tpoff_base (info),
-						   weak_undef_p);
-      *unresolved_reloc_p = FALSE;
-      break;
+      {
+	if (!(weak_undef_p || elf_hash_table (info)->tls_sec))
+	  {
+	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: TLS relocation %s against undefined symbol `%s'"),
+		 input_bfd, elfNN_aarch64_howto_table[howto_index].name,
+		 h->root.root.string);
+	    bfd_set_error (bfd_error_bad_value);
+	    return bfd_reloc_notsupported;
+	  }
+
+	bfd_vma def_value
+	  = weak_undef_p ? 0 : signed_addend - tpoff_base (info);
+	value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						     place, value,
+						     def_value, weak_undef_p);
+        *unresolved_reloc_p = FALSE;
+	break;
+      }
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
@@ -5901,7 +5942,8 @@ bad_ifunc_reloc:
 	       + globals->root.sgotplt->output_offset
 	       + globals->sgotplt_jump_table_size);
 
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
@@ -5919,7 +5961,8 @@ bad_ifunc_reloc:
       value -= (globals->root.sgot->output_section->vma
 		+ globals->root.sgot->output_offset);
 
-      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
