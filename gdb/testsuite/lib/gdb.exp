@@ -3951,6 +3951,9 @@ proc gdb_compile {source dest type options} {
 # against several different thread libraries, to see which one this
 # system has.
 proc gdb_compile_pthreads {source dest type options} {
+    if {$type != "executable"} {
+	return [gdb_compile $source $dest $type $options]
+    }
     set built_binfile 0
     set why_msg "unrecognized error"
     foreach lib {-lpthreads -lpthread -lthread ""} {
@@ -4154,6 +4157,14 @@ proc gdb_compile_objc {source dest type options} {
         unsupported "couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
+}
+
+# Build an OpenMP program from SOURCE.  See prefatory comment for
+# gdb_compile, above, for discussion of the parameters to this proc.
+
+proc gdb_compile_openmp {source dest type options} {
+    lappend options "additional_flags=-fopenmp"
+    return [gdb_compile $source $dest $type $options]
 }
 
 # Send a command to GDB.
@@ -5901,7 +5912,7 @@ proc build_executable_from_specs {testname executable options args} {
     }
 
     set func gdb_compile
-    set func_index [lsearch -regexp $options {^(pthreads|shlib|shlib_pthreads)$}]
+    set func_index [lsearch -regexp $options {^(pthreads|shlib|shlib_pthreads|openmp)$}]
     if {$func_index != -1} {
 	set func "${func}_[lindex $options $func_index]"
     }
@@ -5936,7 +5947,7 @@ proc build_executable_from_specs {testname executable options args} {
 	    if { ! [regexp "^/" "$s"] } then {
 		set s "$srcdir/$subdir/$s"
 	    }
-	    if  { [gdb_compile "${s}" "${binfile}${i}.o" object $local_options] != "" } {
+	    if  { [$func "${s}" "${binfile}${i}.o" object $local_options] != "" } {
 		untested $testname
 		return -1
 	    }
