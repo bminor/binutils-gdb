@@ -1,3 +1,7 @@
+2019-08-22  Dennis Zhang  <dennis.zhang@arm.com>
+
+	* cpu-arm.c: New entries for Cortex-M35P, Cortex-A77, Cortex-A76AE.
+
 2019-08-22  Nick Clifton  <nickc@redhat.com>
 
 	PR 24922

@@ -1,3 +1,12 @@
+2019-08-22  Dennis Zhang  <dennis.zhang@arm.com>
+
+	* config/tc-arm.c: New entries for Cortex-M35P, Cortex-A77,
+	and Cortex-A76AE.
+	* doc/c-arm.texi: Document new processors.
+	* testsuite/gas/arm/cpu-cortex-a76ae.d: New test.
+	* testsuite/gas/arm/cpu-cortex-a77.d: New test.
+	* testsuite/gas/arm/cpu-cortex-m35p.d: New test.
+
 2019-08-22  Bosco García  <jbgg.gnu@gmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 
