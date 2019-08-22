@@ -3925,11 +3925,11 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "rndr",		CPENC(3,3,C2,C4,0), F_ARCHEXT | F_REG_READ }, /* RO */
   { "rndrrs",		CPENC(3,3,C2,C4,1), F_ARCHEXT | F_REG_READ }, /* RO */
   { "tco",		CPENC(3,3,C4,C2,7), F_ARCHEXT },
-  { "tfsre0_el1",	CPENC(3,0,C6,C6,1), F_ARCHEXT },
-  { "tfsr_el1",		CPENC(3,0,C6,C5,0), F_ARCHEXT },
-  { "tfsr_el2",		CPENC(3,4,C6,C5,0), F_ARCHEXT },
-  { "tfsr_el3",		CPENC(3,6,C6,C6,0), F_ARCHEXT },
-  { "tfsr_el12",	CPENC(3,5,C6,C6,0), F_ARCHEXT },
+  { "tfsre0_el1",	CPENC(3,0,C5,C6,1), F_ARCHEXT },
+  { "tfsr_el1",		CPENC(3,0,C5,C6,0), F_ARCHEXT },
+  { "tfsr_el2",		CPENC(3,4,C5,C6,0), F_ARCHEXT },
+  { "tfsr_el3",		CPENC(3,6,C5,C6,0), F_ARCHEXT },
+  { "tfsr_el12",	CPENC(3,5,C5,C6,0), F_ARCHEXT },
   { "rgsr_el1",		CPENC(3,0,C1,C0,5), F_ARCHEXT },
   { "gcr_el1",		CPENC(3,0,C1,C0,6), F_ARCHEXT },
   { "gmid_el1",		CPENC(3,1,C0,C0,4), F_ARCHEXT | F_REG_READ }, /* RO */
@@ -4398,11 +4398,11 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
 
   /* System Registers in ARMv8.5-A with AARCH64_FEATURE_MEMTAG.  */
   if ((reg->value == CPENC (3, 3, C4, C2, 7)
-       || reg->value == CPENC (3, 0, C6, C6, 1)
-       || reg->value == CPENC (3, 0, C6, C5, 0)
-       || reg->value == CPENC (3, 4, C6, C5, 0)
-       || reg->value == CPENC (3, 6, C6, C6, 0)
-       || reg->value == CPENC (3, 5, C6, C6, 0)
+       || reg->value == CPENC (3, 0, C5, C6, 1)
+       || reg->value == CPENC (3, 0, C5, C6, 0)
+       || reg->value == CPENC (3, 4, C5, C6, 0)
+       || reg->value == CPENC (3, 6, C5, C6, 0)
+       || reg->value == CPENC (3, 5, C5, C6, 0)
        || reg->value == CPENC (3, 0, C1, C0, 5)
        || reg->value == CPENC (3, 0, C1, C0, 6)
        || reg->value == CPENC (3, 1, C0, C0, 4))

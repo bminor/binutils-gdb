@@ -1,3 +1,11 @@
+2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
+
+	Backport from mainline
+	2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
+
+	* testsuite/gas/aarch64/sysreg-4.d: Update expected disassembly for
+	tfsre0_el1, tfsr_el1, tfsr_el2, tfsr_el3, tfsr_el12 system registers.
+
 2019-08-02  Alan Modra  <amodra@gmail.com>
 
 	Backport from master
