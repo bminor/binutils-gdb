@@ -40,8 +40,8 @@ _bfd_aarch64_elf_put_addend (bfd *, bfd_byte *, bfd_reloc_code_real_type,
 			     reloc_howto_type *, bfd_signed_vma);
 
 extern bfd_vma
-_bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type, bfd_vma, bfd_vma,
-				     bfd_vma, bfd_boolean);
+_bfd_aarch64_elf_resolve_relocation (bfd *, bfd_reloc_code_real_type, bfd_vma,
+				     bfd_vma, bfd_vma, bfd_boolean);
 
 extern bfd_boolean
 _bfd_aarch64_elf_grok_prstatus (bfd *, Elf_Internal_Note *);

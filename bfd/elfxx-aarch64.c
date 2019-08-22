@@ -395,10 +395,12 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 }
 
 bfd_vma
-_bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
+_bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
+				     bfd_reloc_code_real_type r_type,
 				     bfd_vma place, bfd_vma value,
 				     bfd_vma addend, bfd_boolean weak_undef_p)
 {
+  bfd_boolean tls_reloc = TRUE;
   switch (r_type)
     {
     case BFD_RELOC_AARCH64_NONE:
@@ -446,6 +448,8 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_MOVW_G3:
+      tls_reloc = FALSE;
+      /* fall-through.  */
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
@@ -466,6 +470,15 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
+      /* Weak Symbols and TLS relocations are implementation defined.  For this
+	 case we choose to emit 0.  */
+      if (weak_undef_p && tls_reloc)
+	{
+	  _bfd_error_handler (_("%pB: warning: Weak TLS is implementation "
+				"defined and may not work as expected"),
+				input_bfd);
+	  value = place;
+	}
       value = value + addend;
       break;
 

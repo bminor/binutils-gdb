@@ -1,3 +1,12 @@
+2019-08-22  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24601
+	* testsuite/ld-aarch64/aarch64-elf.exp (undef-tls, weak-tls): New.
+	* testsuite/ld-aarch64/undef-tls.d: New test.
+	* testsuite/ld-aarch64/undef-tls.s: New test.
+	* testsuite/ld-aarch64/weak-tls.d: New test.
+	* testsuite/ld-aarch64/weak-tls.s: New test.
+
 2019-08-20  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/ld-arm/cortex-a8-fix-b-plt.d: Update Testcase.

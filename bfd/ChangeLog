@@ -1,3 +1,12 @@
+2019-08-22  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24601
+	* elfnn-aarch64.c (aarch64_relocate): Handle weak TLS and undefined TLS.
+	Also Pass input_bfd to _bfd_aarch64_elf_resolve_relocation.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Use it.
+	* elfxx-aarch64.h (_bfd_aarch64_elf_resolve_relocation): Emit warning
+	for weak TLS.
+
 2019-08-22  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (cmse_scan): Don't use ARM_GET_SYM_CMSE_SPCL,
