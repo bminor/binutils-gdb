@@ -1,3 +1,9 @@
+2019-08-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 24921
+	* dwarf.c (process_cu_tu_index): Handle the case where a table
+	does not have any columns.
+
 2019-08-19  Alan Modra  <amodra@gmail.com>
 
 	PR 24898
