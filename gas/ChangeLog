@@ -1,3 +1,13 @@
+2019-08-22  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* config/tc-aarch64.c: Add float16 directive and add "Hh" to
+	acceptable float characters.
+	* doc/c-aarch64.texi: Documentation for float16 directive.
+	* testsuite/gas/aarch64/float16-be.d: New test.
+	* testsuite/gas/aarch64/float16-le.d: New test.
+	* testsuite/gas/aarch64/float16.s: New test.
+	* NEWS: Add NEWS entry.
+
 2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
 
 	* testsuite/gas/aarch64/sysreg-4.d: Update expected disassembly for

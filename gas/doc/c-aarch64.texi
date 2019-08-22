@@ -358,6 +358,14 @@ The @code{.even} directive aligns the output on the next even byte
 boundary.
 
 @c FFFFFFFFFFFFFFFFFFFFFFFFFF
+
+@cindex @code{.float16} directive, AArch64
+@item .float16 @var{value [,...,value_n]}
+Place the half precision floating point representation of one or more
+floating-point values into the current section.
+The format used to encode the floating point values is always the
+IEEE 754-2008 half precision floating point format.
+
 @c GGGGGGGGGGGGGGGGGGGGGGGGGG
 @c HHHHHHHHHHHHHHHHHHHHHHHHHH
 @c IIIIIIIIIIIIIIIIIIIIIIIIII

@@ -3,16 +3,21 @@
 * Add support for the Armv8.1-M Mainline and M-profile Vector Extension (MVE)
   instructions.
 
-* For MIPS, Add -m[no-]fix-loongson3-llsc option to fix (or not) Loongson3 LLSC
-  Errata.  Add a --enable-mips-fix-loongson3-llsc=[yes|no] configure time option
-  to set the default behavior. Set the default if the configure option is not used
-  to "no".
+* For MIPS, Add -m[no-]fix-loongson3-llsc option to fix (or not) Loongson3
+  LLSC Errata.  Add a --enable-mips-fix-loongson3-llsc=[yes|no] configure
+  time option to set the default behavior. Set the default if the configure
+  option is not used to "no".
 
 * Add support for the Arm Cortex-A76AE, Cortex-A77 and Cortex-M35P
   processors.
 
 * Add support for the AArch64 Cortex-A34, Cortex-A65, Cortex-A65AE,
   Cortex-A76AE, and Cortex-A77 processors.
+
+* Add .float16 directive for both Arm and AArch64 to allow encoding of 16-bit
+  floating point literals.  Add .float16_format directive and
+  -mfp16-format=[ieee|alternative] option for Arm to control the format of the
+  encoding.
 
 Changes in 2.32:
 

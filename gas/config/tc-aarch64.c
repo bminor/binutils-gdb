@@ -529,7 +529,7 @@ const char EXP_CHARS[] = "eE";
 /* As in 0f12.456  */
 /* or	 0d1.2345e12  */
 
-const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+const char FLT_CHARS[] = "rRsSfFdDxXeEpPhH";
 
 /* Prefix character that indicates the start of an immediate value.  */
 #define is_immediate_prefix(C) ((C) == '#')
@@ -2106,6 +2106,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"dword", s_aarch64_elf_cons, 8},
   {"variant_pcs", s_variant_pcs, 0},
 #endif
+  {"float16", float_cons, 'h'},
   {0, 0, 0}
 };
 
