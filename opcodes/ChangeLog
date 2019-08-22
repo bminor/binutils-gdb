@@ -1,3 +1,9 @@
+2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Update encoding of tfsre0_el1,
+	tfsr_el1, tfsr_el2, tfsr_el3, tfsr_el12.
+	(aarch64_sys_reg_supported_p): Update checks for the above.
+
 2019-08-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* arm-dis.c (struct mopcode32 mve_opcodes): Modify the mask for
