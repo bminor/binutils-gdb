@@ -9411,11 +9411,12 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       /* PR 17531: file: 0dd159bf.
 	 Check for integer overflow (can occur when size_t is 32-bit)
 	 with overlarge ncols or nused values.  */
-      if ((size_t) ncols * 4 / 4 != ncols
-	  || (size_t) nused * ncols * 4 / ((size_t) ncols * 4) != nused
-	  || poffsets < ppool || poffsets > limit
-	  || psizes < poffsets || psizes > limit
-	  || pend < psizes || pend > limit)
+      if (ncols > 0
+	  && ((size_t) ncols * 4 / 4 != ncols
+	      || (size_t) nused * ncols * 4 / ((size_t) ncols * 4) != nused
+	      || poffsets < ppool || poffsets > limit
+	      || psizes < poffsets || psizes > limit
+	      || pend < psizes || pend > limit))
 	{
 	  warn (_("Section %s too small for offset and size tables\n"),
 		section->name);
