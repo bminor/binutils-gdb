@@ -2171,17 +2171,18 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 			      bfd_vma);
   bfd_boolean (*valid_plt_reloc_p) (unsigned int);
 
+  dynrelbuf = NULL;
   if (count == 0)
-    return -1;
+    goto bad_return;
 
   dynrelbuf = (arelent **) bfd_malloc (relsize);
   if (dynrelbuf == NULL)
-    return -1;
+    goto bad_return;
 
   dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
 						dynsyms);
   if (dynrelcount <= 0)
-    return -1;
+    goto bad_return;
 
   /* Sort the relocs by address.  */
   qsort (dynrelbuf, dynrelcount, sizeof (arelent *),
