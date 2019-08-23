@@ -1,3 +1,7 @@
+2019-08-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2019-08-22  Dennis Zhang  <dennis.zhang@arm.com>
 
 	* config/tc-arm.c: New entries for Cortex-M35P, Cortex-A77,

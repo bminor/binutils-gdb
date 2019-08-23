@@ -20,7 +20,7 @@ msgstr ""
 "Project-Id-Version: gas 2.31.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2019-01-19 16:32+0000\n"
-"PO-Revision-Date: 2019-08-13 14:05+0200\n"
+"PO-Revision-Date: 2019-08-22 16:30+0200\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -856,10 +856,8 @@ msgid ".size pseudo-op used outside of .def/.endef: ignored."
 msgstr ".size pseudoopkod använd utanför .def/.endef: överhoppad."
 
 #: config/obj-coff.c:943
-#, fuzzy
-#| msgid ".scl pseudo-op used outside of .def/.endef ignored."
 msgid ".scl pseudo-op used outside of .def/.endef: ignored."
-msgstr ".scl pseudoopkod använd utanför .def/.endef överhoppad."
+msgstr ".scl pseudoopkod använd utanför .def/.endef: överhoppad."
 
 #: config/obj-coff.c:960
 msgid ".tag pseudo-op used outside of .def/.endef: ignored."
@@ -875,10 +873,8 @@ msgid ".type pseudo-op used outside of .def/.endef: ignored."
 msgstr ".type pseudoopkod använd utanför .def/.endef: överhoppad."
 
 #: config/obj-coff.c:1009
-#, fuzzy
-#| msgid ".val pseudo-op used outside of .def/.endef ignored."
 msgid ".val pseudo-op used outside of .def/.endef: ignored."
-msgstr ".val pseudoopkod använd utanför .def/.endef överhoppad."
+msgstr ".val pseudoopkod använd utanför .def/.endef: överhoppad."
 
 #: config/obj-coff.c:1156
 msgid "badly formed .weak directive ignored"
@@ -1396,10 +1392,8 @@ msgid "integer or zero register expected"
 msgstr "heltals- eller nollregister förväntat"
 
 #: config/tc-aarch64.c:401
-#, fuzzy
-#| msgid "base register expected"
 msgid "offset register expected"
-msgstr "basregister förväntat"
+msgstr "avståndsregister förväntat"
 
 #: config/tc-aarch64.c:404
 msgid "integer or SP register expected"
@@ -2858,10 +2852,9 @@ msgid "ARC-specific assembler options:\n"
 msgstr "ARM-specifika assemblerflaggor:\n"
 
 #: config/tc-arc.c:3561
-#, fuzzy, c-format
-#| msgid "  -mrelax                   Enable relaxation\n"
+#, c-format
 msgid "  -mrelax                 enable relaxation\n"
-msgstr "  -mrelax                   Aktivera lättnad\n"
+msgstr "  -mrelax                 aktivera lättnad\n"
 
 #: config/tc-arc.c:3564
 #, c-format
@@ -3896,16 +3889,12 @@ msgid "Rd and Rm should be different in mla"
 msgstr "Rd och Rm bör vara olika i mla"
 
 #: config/tc-arm.c:9155 config/tc-arm.c:12236
-#, fuzzy
-#| msgid ":lower16: not allowed this instruction"
 msgid ":lower16: not allowed in this instruction"
 msgstr ":lower16: inte tillåten i denna instruktion"
 
 #: config/tc-arm.c:9157 config/tc-arm.c:12241
-#, fuzzy
-#| msgid ":upper16: not allowed this instruction"
 msgid ":upper16: not allowed in this instruction"
-msgstr ":upper16: tillåter inte denna instruktion"
+msgstr ":upper16: inte tillåten i denna instruktion"
 
 #: config/tc-arm.c:9174
 msgid "operand 1 must be FPSCR"
@@ -16097,22 +16086,19 @@ msgid "bad call to MD_ATOF()"
 msgstr "felaktigt anrop till MD_ATOF()"
 
 #: config/tc-score.c:7185 config/tc-score.c:7251
-#, fuzzy, c-format
-#| msgid " branch relocation truncate (0x%x) [-2^9 ~ 2^9]"
+#, c-format
 msgid " branch relocation truncate (0x%x) [-2^9 ~ 2^9-1]"
-msgstr " grenomlokalisering trunkerad (0x%x) [-2^9 ~ 2^9]"
+msgstr " grenomlokalisering trunkerad (0x%x) [-2^9 ~ 2^9-1]"
 
 #: config/tc-score.c:7200 config/tc-score.c:7229 config/tc-score.c:7281
-#, fuzzy, c-format
-#| msgid " branch relocation truncate (0x%x) [-2^19 ~ 2^19]"
+#, c-format
 msgid " branch relocation truncate (0x%x) [-2^19 ~ 2^19-1]"
-msgstr " grenomlokalisering trunkerad (0x%x) [-2^19 ~ 2^19]"
+msgstr " grenomlokalisering trunkerad (0x%x) [-2^19 ~ 2^19-1]"
 
 #: config/tc-score.c:7306
-#, fuzzy, c-format
-#| msgid " branch relocation truncate (0x%x)  [-2^9 ~ 2^9]"
+#, c-format
 msgid " branch relocation truncate (0x%x)  [-2^9 ~ 2^9-1]"
-msgstr " grenomlokalisering trunkerad (0x%x)  [-2^9 ~ 2^9]"
+msgstr " grenomlokalisering trunkerad (0x%x)  [-2^9 ~ 2^9-1]"
 
 #: config/tc-score.c:7476
 #, c-format
@@ -16687,10 +16673,8 @@ msgid ": unrecognizable hyperprivileged register"
 msgstr ": oigenkännbart hyperprivilegierat register"
 
 #: config/tc-sparc.c:1975 config/tc-sparc.c:1981 config/tc-sparc.c:1990
-#, fuzzy
-#| msgid ": unrecognizable v9a ancillary state register"
 msgid ": unrecognizable ancillary state register"
-msgstr ": oigenkännbart v9a-underordnat stillståndsregister"
+msgstr ": oigenkännbart underordnat tillståndsregister"
 
 #: config/tc-sparc.c:2023
 msgid ": asr number must be between 0 and 31"
@@ -17481,8 +17465,7 @@ msgid "pseudo-op illegal within .struct/.union"
 msgstr "pseudo-op otillåten inom .struct/.union"
 
 #: config/tc-tic54x.c:232
-#, fuzzy, c-format
-#| msgid "C54x-specific command line  options:\n"
+#, c-format
 msgid "C54x-specific command line options:\n"
 msgstr "C54x-specifika kommandoradsflaggor:\n"
 
@@ -20250,10 +20233,8 @@ msgid "wrong argument to .cfi_personality_id"
 msgstr "felaktigt argument till .cfi_personality_id"
 
 #: dw2gencfi.c:1397
-#, fuzzy
-#| msgid ".cfi_endproc without corresponding .cfi_startproc"
 msgid ".cfi_fde_data without corresponding .cfi_startproc"
-msgstr ".cfi_endproc utan föregående .cfi_startproc"
+msgstr ".cfi_fde_data utan motsvarande .cfi_startproc"
 
 #: dw2gencfi.c:1506
 msgid "unexpected .cfi_inline_lsda"
@@ -20277,22 +20258,16 @@ msgid "Alignment negative: 0 assumed."
 msgstr "Justering negativ: 0 antaget."
 
 #: dw2gencfi.c:1564
-#, fuzzy
-#| msgid "CFI is not supported for this target"
 msgid ".cfi_inline_lsda is not supported for this target"
-msgstr "CFI stöds inte för detta mål"
+msgstr ".cfi_inline_lsda stöds inte för detta mål"
 
 #: dw2gencfi.c:1571
-#, fuzzy
-#| msgid "CFI is not supported for this target"
 msgid ".cfi_fde_data is not supported for this target"
-msgstr "CFI stöds inte för detta mål"
+msgstr ".cfi_fde_data stöds inte för detta mål"
 
 #: dw2gencfi.c:1578
-#, fuzzy
-#| msgid "CFI is not supported for this target"
 msgid ".cfi_personality_id is not supported for this target"
-msgstr "CFI stöds inte för detta mål"
+msgstr ".cfi_personality_id stöds inte för detta mål"
 
 #: dw2gencfi.c:2364 dw2gencfi.c:2520
 msgid "open CFI at the end of file; missing .cfi_endproc directive"
@@ -20958,10 +20933,9 @@ msgid "cannot change section or subsection inside .bundle_lock"
 msgstr "kan inte ändra sektion eller undersektion inuti .bundle_lock"
 
 #: read.c:719
-#, fuzzy, c-format
-#| msgid ".bundle_lock sequence at %u bytes but .bundle_align_mode limit is %u bytes"
+#, c-format
 msgid ".bundle_lock sequence at %u bytes, but .bundle_align_mode limit is %u bytes"
-msgstr ".bundle_lock-sekvens vid %u byte men .bundle_align_mode-begränsing är %u byte"
+msgstr ".bundle_lock-sekvens vid %u byte, men .bundle_align_mode-begränsing är %u byte"
 
 #: read.c:728
 #, c-format
@@ -21371,8 +21345,7 @@ msgid ".bundle_unlock without preceding .bundle_lock"
 msgstr ".bundle_unlock utan föregående .bundle_lock"
 
 #: read.c:6098
-#, fuzzy, c-format
-#| msgid ".bundle_lock sequence is %u bytes, but bundle size only %u"
+#, c-format
 msgid ".bundle_lock sequence is %u bytes, but bundle size is only %u bytes"
 msgstr ".bundle_lock-sekvens är %u byte, men buntstorlek är bara %u"
 
