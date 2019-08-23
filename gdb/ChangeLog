@@ -1,3 +1,8 @@
+2019-08-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (struct reg_value): Improve comments.  Make
+	the offset field signed.
+
 2019-08-22  Christian Biesinger  <cbiesinger@google.com>
 
 	* python/lib/gdb/__init__.py (_execute_file): New function.

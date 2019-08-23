@@ -58,13 +58,15 @@ static int nios2_debug = 0;
    analysis; see the reg_value and reg_saved tables in
    struct nios2_unwind_cache, respectively.  */
 
-/* struct reg_value is used to record that a register has the same value
-   as reg at the given offset from the start of a function.  */
+/* struct reg_value is used to record that a register has reg's initial
+   value at the start of a function plus the given constant offset.
+   If reg == 0, then the value is just the offset.
+   If reg < 0, then the value is unknown.  */
 
 struct reg_value
 {
   int reg;
-  unsigned int offset;
+  int offset;
 };
 
 /* struct reg_saved is used to record that a register value has been saved at
