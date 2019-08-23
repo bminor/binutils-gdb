@@ -1,3 +1,11 @@
+2019-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 24456
+	* elf.c (bfd_section_from_shdr): Issue an informative warning
+	message and continue processing other sections after encountering
+	a reloc section for a section which already has other relocs
+	associated with it.
+
 2019-08-23  Alan Modra  <amodra@gmail.com>
 
 	PR 24933

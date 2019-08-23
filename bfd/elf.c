@@ -2466,9 +2466,18 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	else
 	  p_hdr = &esdt->rel.hdr;
 
-	/* PR 17512: file: 0b4f81b7.  */
+	/* PR 17512: file: 0b4f81b7.
+	   Also see PR 24456, for a file which deliberately has two reloc
+	   sections.  */
 	if (*p_hdr != NULL)
-	  goto fail;
+	  {
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: warning: multiple relocation sections for section %pA \
+found - ignoring all but the first"),
+	       abfd, target_sect);
+	    goto success;
+	  }
 	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, sizeof (*hdr2));
 	if (hdr2 == NULL)
 	  goto fail;
