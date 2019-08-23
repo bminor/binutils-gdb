@@ -1,3 +1,11 @@
+2019-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 24829
+	* dwarf.c (check_uvalue): New function.  Ensures that a block's
+	size is valid.
+	(read_and_display_attr_value): Use check_value when processsing
+	DW_FORM_block<n> attributes.
+
 2019-08-22  Nick Clifton  <nickc@redhat.com>
 
 	PR 24921

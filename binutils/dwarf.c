@@ -1832,6 +1832,34 @@ free_dwo_info (void)
   first_dwo_info = NULL;
 }
 
+/* Ensure that START + UVALUE is less than END.
+   Return an adjusted UVALUE if necessary to ensure this relationship.  */
+
+static inline dwarf_vma
+check_uvalue (const unsigned char * start,
+	      dwarf_vma             uvalue,
+	      const unsigned char * end)
+{
+  dwarf_vma max_uvalue = end - start;
+
+  /* FIXME: Testing "(start + uvalue) < start" miscompiles with gcc 4.8.3
+     running on an x86_64 host in 32-bit mode.  So we pre-compute the value
+     here.  */
+  const unsigned char * ptr = start + uvalue;
+
+  /* See PR 17512: file: 008-103549-0.001:0.1.
+     and PR 24829 for examples of where these tests are triggered.  */
+  if (uvalue > max_uvalue
+      || ptr > end
+      || ptr < start)
+    {
+      warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
+      uvalue = max_uvalue;
+    }
+
+  return uvalue;
+}
+
 static unsigned char *
 read_and_display_attr_value (unsigned long           attribute,
 			     unsigned long           form,
@@ -2056,16 +2084,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      /* FIXME: Testing "(block_start + uvalue) < block_start" miscompiles with
-	 gcc 4.8.3 running on an x86_64 host in 32-bit mode.  So we pre-compute
-	 block_start + uvalue here.  */
-      data = block_start + uvalue;
-      /* PR 17512: file: 008-103549-0.001:0.1.  */
-      if (block_start + uvalue > end || data < block_start)
-	{
-	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
-	  uvalue = end - block_start;
-	}
+
+      uvalue = check_uvalue (block_start, uvalue, end);
+
       if (do_loc)
 	data = block_start + uvalue;
       else
@@ -2081,12 +2102,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      data = block_start + uvalue;
-      if (block_start + uvalue > end || data < block_start)
-	{
-	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
-	  uvalue = end - block_start;
-	}
+
+      uvalue = check_uvalue (block_start, uvalue, end);
+
       if (do_loc)
 	data = block_start + uvalue;
       else
@@ -2102,12 +2120,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      data = block_start + uvalue;
-      if (block_start + uvalue > end || data < block_start)
-	{
-	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
-	  uvalue = end - block_start;
-	}
+
+      uvalue = check_uvalue (block_start, uvalue, end);
+
       if (do_loc)
 	data = block_start + uvalue;
       else
@@ -2124,14 +2139,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	  uvalue = 0;
 	  block_start = end;
 	}
-      data = block_start + uvalue;
-      if (block_start + uvalue > end
-	  /* PR 17531: file: 5b5f0592.  */
-	  || data < block_start)
-	{
-	  warn (_("Corrupt attribute block length: %lx\n"), (long) uvalue);
-	  uvalue = end - block_start;
-	}
+
+      uvalue = check_uvalue (block_start, uvalue, end);
+
       if (do_loc)
 	data = block_start + uvalue;
       else
