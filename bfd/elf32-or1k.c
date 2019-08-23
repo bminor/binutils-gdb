@@ -2377,8 +2377,11 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
       or1k_write_plt_entry (output_bfd, splt->contents + h->plt.offset,
 			    plt0, plt1, plt2, OR1K_JR(12));
 
-      /* Fill in the entry in the global offset table.  */
-      bfd_put_32 (output_bfd, plt_addr, sgot->contents + got_offset);
+      /* Fill in the entry in the global offset table.  We initialize it to
+	 point to the top of the plt.  This is done to lazy lookup the actual
+	 symbol as the first plt entry will be setup by libc to call the
+	 runtime dynamic linker.  */
+      bfd_put_32 (output_bfd, plt_base_addr, sgot->contents + got_offset);
 
       /* Fill in the entry in the .rela.plt section.  */
       rela.r_offset = got_addr;
