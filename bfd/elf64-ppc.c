@@ -9112,6 +9112,11 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			      r_symndx, ibfd))
 		goto got_error_ret;
 
+	      if (sym_sec == NULL
+		  || sym_sec->output_section == NULL
+		  || discarded_section (sym_sec))
+		continue;
+
 	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
 		continue;
 
