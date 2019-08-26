@@ -1,5 +1,10 @@
 2019-08-25  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2read.c (dw2_debug_names_iterator::next): Rename local
+	variable symbol_linkage to symbol_linkage_.
+
+2019-08-25  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2read.c (dw2_debug_names_iterator::next): Use enum to
 	represent whether the symbol is static, dynamic, or we don't
 	know.

@@ -5847,7 +5847,7 @@ dw2_debug_names_iterator::next ()
     unknown,
     static_,
     extern_,
-  } symbol_linkage = symbol_linkage::unknown;
+  } symbol_linkage_ = symbol_linkage::unknown;
   dwarf2_per_cu_data *per_cu = NULL;
   for (const mapped_debug_names::index_val::attr &attr : indexval.attr_vec)
     {
@@ -5899,12 +5899,12 @@ dw2_debug_names_iterator::next ()
 	case DW_IDX_GNU_internal:
 	  if (!m_map.augmentation_is_gdb)
 	    break;
-	  symbol_linkage = symbol_linkage::static_;
+	  symbol_linkage_ = symbol_linkage::static_;
 	  break;
 	case DW_IDX_GNU_external:
 	  if (!m_map.augmentation_is_gdb)
 	    break;
-	  symbol_linkage = symbol_linkage::extern_;
+	  symbol_linkage_ = symbol_linkage::extern_;
 	  break;
 	}
     }
@@ -5914,10 +5914,11 @@ dw2_debug_names_iterator::next ()
     goto again;
 
   /* Check static vs global.  */
-  if (symbol_linkage != symbol_linkage::unknown && m_block_index.has_value ())
+  if (symbol_linkage_ != symbol_linkage::unknown && m_block_index.has_value ())
     {
 	const bool want_static = *m_block_index == STATIC_BLOCK;
-	const bool symbol_is_static = symbol_linkage == symbol_linkage::static_;
+	const bool symbol_is_static =
+	  symbol_linkage_ == symbol_linkage::static_;
 	if (want_static != symbol_is_static)
 	  goto again;
     }
