@@ -3158,20 +3158,21 @@ proc skip_unwinder_tests {} {
     return $ok
 }
 
-# Return 0 if we should skip tests that require the libstdc++ stap
+# Return 1 if we should skip tests that require the libstdc++ stap
 # probes.  This must be invoked while gdb is running, after shared
 # libraries have been loaded.  PROMPT_REGEXP is the expected prompt.
 
 proc skip_libstdcxx_probe_tests_prompt { prompt_regexp } {
-    set ok 0
+    set supported 0
     gdb_test_multiple "info probe" "check for stap probe in libstdc++" {
 	-re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
-	    set ok 1
+	    set supported 1
 	}
 	-re "\r\n$prompt_regexp" {
 	}
     } "$prompt_regexp"
-    return $ok
+    set skip [expr !$supported]
+    return $skip
 }
 
 # As skip_libstdcxx_probe_tests_prompt, with gdb_prompt.

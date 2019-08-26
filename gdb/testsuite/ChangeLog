@@ -1,3 +1,11 @@
+2019-08-26  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (skip_libstdcxx_probe_tests_prompt): Return 1 if probe
+	* tests need to be skipped.
+	* gdb.cp/exceptprint.exp: Update call to skip_libstdcxx_probe_tests.
+	* gdb.mi/mi-catch-cpp-exceptions.exp: Update call to
+	mi_skip_libstdcxx_probe_tests.
+
 2019-08-26  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.python/py-xmethods.exp: Use raw strings when passing

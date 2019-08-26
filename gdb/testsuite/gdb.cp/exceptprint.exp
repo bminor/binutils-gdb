@@ -27,7 +27,7 @@ if {![runto_main]} {
     return -1
 }
 
-if {![skip_libstdcxx_probe_tests]} {
+if {[skip_libstdcxx_probe_tests]} {
     untested "could not find libstdc++ stap probe"
     return -1
 }

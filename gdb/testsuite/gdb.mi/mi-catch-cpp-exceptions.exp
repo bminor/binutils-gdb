@@ -36,7 +36,7 @@ mi_gdb_load ${binfile}
 if {![mi_run_to_main]} {
     return -1
 }
-set libstdcxx_probe_tests_supported [mi_skip_libstdcxx_probe_tests]
+set libstdcxx_probe_tests_supported [expr ![mi_skip_libstdcxx_probe_tests]]
 
 # Grab some line numbers we'll need.
 set catch_1_lineno [gdb_get_line_number "Catch 1"]
