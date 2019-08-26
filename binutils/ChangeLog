@@ -1,3 +1,9 @@
+2019-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 24938
+	* debug.c (debug_write_type): Call empty_type for NULL type here..
+	(debug_write_type): ..rather than in just one case here.
+
 2019-08-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 24829

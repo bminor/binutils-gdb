@@ -2419,6 +2419,9 @@ debug_write_type (struct debug_handle *info,
   int is;
   const char *tag = NULL;
 
+  if (type == DEBUG_TYPE_NULL)
+    return (*fns->empty_type) (fhandle);
+
   /* If we have a name for this type, just output it.  We only output
      typedef names after they have been defined.  We output type tags
      whenever we are not actually defining them.  */
@@ -2481,8 +2484,6 @@ debug_write_type (struct debug_handle *info,
       debug_error (_("debug_write_type: illegal type encountered"));
       return FALSE;
     case DEBUG_KIND_INDIRECT:
-      if (*type->u.kindirect->slot == DEBUG_TYPE_NULL)
-	return (*fns->empty_type) (fhandle);
       return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
 			       name);
     case DEBUG_KIND_VOID:
