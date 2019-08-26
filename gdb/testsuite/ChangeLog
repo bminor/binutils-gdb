@@ -1,5 +1,10 @@
 2019-08-26  Tom de Vries  <tdevries@suse.de>
 
+	PR c++/24852
+	* gdb.cp/no-libstdcxx-probe.exp: New test.
+
+2019-08-26  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (skip_libstdcxx_probe_tests_prompt): Return 1 if probe
 	* tests need to be skipped.
 	* gdb.cp/exceptprint.exp: Update call to skip_libstdcxx_probe_tests.

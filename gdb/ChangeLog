@@ -1,3 +1,9 @@
+2019-08-26  Tom de Vries  <tdevries@suse.de>
+
+	PR c++/24852
+	* break-catch-throw.c (fetch_probe_arguments): Improve error mesage
+	when pc_probe.prob == NULL.
+
 2019-08-25  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2read.c (dw2_debug_names_iterator::next): Rename local

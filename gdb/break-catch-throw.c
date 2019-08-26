@@ -106,8 +106,10 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
   unsigned n_args;
 
   pc_probe = find_probe_by_pc (pc);
-  if (pc_probe.prob == NULL
-      || pc_probe.prob->get_provider () != "libstdcxx"
+  if (pc_probe.prob == NULL)
+    error (_("did not find exception probe (does libstdcxx have SDT probes?)"));
+
+  if (pc_probe.prob->get_provider () != "libstdcxx"
       || (pc_probe.prob->get_name () != "catch"
 	  && pc_probe.prob->get_name () != "throw"
 	  && pc_probe.prob->get_name () != "rethrow"))
