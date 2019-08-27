@@ -1,3 +1,9 @@
+2019-08-29  Bernhard Wodok  <barto@gmx.net>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR win32/24284
+	* mingw-hdep.c (gdb_select): Handle case when 'n' is zero.
+
 2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* symtab.c (search_symbols): Don't include MODULE_DOMAIN symbols

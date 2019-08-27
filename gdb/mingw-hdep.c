@@ -64,6 +64,17 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   int num_ready;
   size_t indx;
 
+  if (n == 0)
+    {
+      /* The MS API says that the first argument to
+	 WaitForMultipleObjects cannot be zero.  That's why we just
+	 use a regular Sleep here.  */
+      if (timeout != NULL)
+	Sleep (timeout->tv_sec * 1000 + timeout->tv_usec / 1000);
+
+      return 0;
+    }
+
   num_ready = 0;
   num_handles = 0;
   num_scbs = 0;
