@@ -1,3 +1,7 @@
+2019-08-27  Christian Biesinger  <cbiesinger@google.com>
+
+	* nat/linux-namespaces.c (mnsh_main): Initialize fd (to -1).
+
 2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-utils.c (info_print_options_defs): Delete.
