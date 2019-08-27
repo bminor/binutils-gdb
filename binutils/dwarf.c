@@ -120,9 +120,9 @@ static unsigned int shndx_pool_used = 0;
 
 struct cu_tu_set
 {
-  uint64_t signature;
-  dwarf_vma section_offsets[DW_SECT_MAX];
-  size_t section_sizes[DW_SECT_MAX];
+  uint64_t   signature;
+  dwarf_vma  section_offsets[DW_SECT_MAX];
+  size_t     section_sizes[DW_SECT_MAX];
 };
 
 static int cu_count = 0;
@@ -131,6 +131,12 @@ static struct cu_tu_set *cu_sets = NULL;
 static struct cu_tu_set *tu_sets = NULL;
 
 static bfd_boolean load_cu_tu_indexes (void *);
+
+/* An array that indicates for a given level of CU nesting whether
+   the latest DW_AT_type seen for that level was a signed type or
+   an unsigned type.  */
+#define MAX_CU_NESTING (1 << 8)
+static bfd_boolean level_type_signed[MAX_CU_NESTING];
 
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
@@ -1861,9 +1867,335 @@ check_uvalue (const unsigned char * start,
 }
 
 static unsigned char *
+skip_attr_bytes (unsigned long          form,
+		 unsigned char *        data,
+		 unsigned const char *  end,
+		 dwarf_vma              pointer_size,
+		 dwarf_vma              offset_size,
+		 int                    dwarf_version,
+		 dwarf_vma *            value_return)
+{
+  unsigned int  bytes_read;
+  dwarf_vma     uvalue = 0;
+
+  * value_return = 0;
+
+  switch (form)
+    {
+    case DW_FORM_ref_addr:
+      if (dwarf_version == 2)
+	SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
+      else if (dwarf_version == 3 || dwarf_version == 4)
+	SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
+      else
+	return NULL;
+      break;
+
+    case DW_FORM_addr:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
+      break;
+
+    case DW_FORM_strp:
+    case DW_FORM_line_strp:
+    case DW_FORM_sec_offset:
+    case DW_FORM_GNU_ref_alt:
+    case DW_FORM_GNU_strp_alt:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
+      break;
+
+    case DW_FORM_flag_present:
+      uvalue = 1;
+      break;
+
+    case DW_FORM_ref1:
+    case DW_FORM_flag:
+    case DW_FORM_data1:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
+      break;
+
+    case DW_FORM_ref2:
+    case DW_FORM_data2:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
+      break;
+
+    case DW_FORM_ref4:
+    case DW_FORM_data4:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
+      break;
+
+    case DW_FORM_sdata:
+      uvalue = read_sleb128 (data, & bytes_read, end);
+      data += bytes_read;
+      break;
+
+    case DW_FORM_ref_udata:
+    case DW_FORM_udata:
+    case DW_FORM_GNU_str_index:
+    case DW_FORM_GNU_addr_index:
+      uvalue = read_uleb128 (data, & bytes_read, end);
+      data += bytes_read;
+      break;
+
+    case DW_FORM_ref8:
+    case DW_FORM_data8:
+      data += 8;
+      break;
+
+    case DW_FORM_data16:
+      data += 16;
+      break;
+
+    case DW_FORM_string:
+      data += strnlen ((char *) data, end - data) + 1;
+      break;
+
+    case DW_FORM_block:
+    case DW_FORM_exprloc:
+      uvalue = read_uleb128 (data, & bytes_read, end);
+      data += bytes_read + uvalue;
+      break;
+
+    case DW_FORM_block1:
+      SAFE_BYTE_GET (uvalue, data, 1, end);
+      data += 1 + uvalue;
+      break;
+
+    case DW_FORM_block2:
+      SAFE_BYTE_GET (uvalue, data, 2, end);
+      data += 2 + uvalue;
+      break;
+
+    case DW_FORM_block4:
+      SAFE_BYTE_GET (uvalue, data, 4, end);
+      data += 4 + uvalue;
+      break;
+
+    case DW_FORM_ref_sig8:
+      data += 8;
+      break;
+
+    case DW_FORM_indirect:
+      /* FIXME: Handle this form.  */
+    default:
+      return NULL;
+    }
+
+  * value_return = uvalue;
+  if (data > end)
+    data = (unsigned char *) end;
+  return data;
+}
+
+/* Return IS_SIGNED set to TRUE if the type at
+   DATA can be determined to be a signed type.  */
+
+static void
+get_type_signedness (unsigned char *        start,
+		     unsigned char *        data,
+		     unsigned const char *  end,
+		     dwarf_vma              pointer_size,
+		     dwarf_vma              offset_size,
+		     int                    dwarf_version,
+		     bfd_boolean *          is_signed,
+		     bfd_boolean	    is_nested)
+{
+  unsigned long   abbrev_number;
+  unsigned int    bytes_read;
+  abbrev_entry *  entry;
+  abbrev_attr *   attr;
+
+  * is_signed = FALSE;
+
+  if (data >= end)
+    return;
+
+  abbrev_number = read_uleb128 (data, & bytes_read, end);
+  data += bytes_read;
+
+  for (entry = first_abbrev;
+       entry != NULL && entry->entry != abbrev_number;
+       entry = entry->next)
+    continue;
+
+  if (entry == NULL)
+    /* FIXME: Issue a warning ?  */
+    return;
+
+  for (attr = entry->first_attr;
+       attr != NULL && attr->attribute;
+       attr = attr->next)
+    {
+      dwarf_vma uvalue = 0;
+
+      data = skip_attr_bytes (attr->form, data, end, pointer_size,
+			      offset_size, dwarf_version, & uvalue);
+      if (data == NULL)
+	return;
+
+      switch (attr->attribute)
+	{
+#if 0 /* FIXME: It would be nice to print the name of the type,
+	 but this would mean updating a lot of binutils tests.  */
+	case DW_AT_name:
+	  if (attr->form == DW_FORM_strp)
+	    printf ("%s", fetch_indirect_string (uvalue));
+	  break;
+#endif
+	case DW_AT_type:
+	  /* Recurse.  */
+	  if (is_nested)
+	    {
+	      /* FIXME: Warn - or is this expected ?
+		 NB/ We need to avoid infinite recursion.  */
+	      return;
+	    }
+	  get_type_signedness (start, start + uvalue, end, pointer_size,
+			       offset_size, dwarf_version, is_signed, TRUE);
+	  break;
+
+	case DW_AT_encoding:
+	  /* Determine signness.  */
+	  switch (uvalue)
+	    {
+	    case DW_ATE_address:
+	      /* FIXME - some architectures have signed addresses.  */
+	    case DW_ATE_boolean:
+	    case DW_ATE_unsigned:
+	    case DW_ATE_unsigned_char:
+	    case DW_ATE_unsigned_fixed:
+	      * is_signed = FALSE;
+	      break;
+
+	    default:
+	    case DW_ATE_complex_float:
+	    case DW_ATE_float:
+	    case DW_ATE_signed:
+	    case DW_ATE_signed_char:
+	    case DW_ATE_imaginary_float:
+	    case DW_ATE_decimal_float:
+	    case DW_ATE_signed_fixed:
+	      * is_signed = TRUE;
+	      break;
+	    }
+	  break;
+	}
+    }
+}
+
+static void
+read_and_print_leb128 (unsigned char *        data,
+		       unsigned int *         bytes_read,
+		       unsigned const char *  end,
+		       bfd_boolean            is_signed)
+{
+  if (is_signed)
+    {
+      dwarf_signed_vma sval = read_sleb128 (data, bytes_read, end);
+      printf ("%ld", (long) sval);
+    }
+  else
+    {
+      dwarf_vma uval = read_uleb128 (data, bytes_read, end);
+      printf ("%lu", (unsigned long) uval);
+    }
+}
+
+static void
+display_discr_list (unsigned long          form,
+		    dwarf_vma              uvalue,
+		    unsigned char *        data,
+		    unsigned const char *  end,
+		    int                    level)
+{
+  if (uvalue == 0)
+    {
+      printf ("[default]");
+      return;
+    }
+  
+  switch (form)
+    {
+    case DW_FORM_block:
+    case DW_FORM_block1:
+    case DW_FORM_block2:
+    case DW_FORM_block4:
+      /* Move data pointer back to the start of the byte array.  */
+      data -= uvalue;
+      break;
+    default:
+      printf ("<corrupt>\n");
+      warn (_("corrupt discr_list - not using a block form\n"));
+      return;
+    }
+
+  if (uvalue < 2)
+    {
+      printf ("<corrupt>\n");
+      warn (_("corrupt discr_list - block not long enough\n"));
+      return;
+    }
+
+  bfd_boolean is_signed =
+    (level > 0 && level <= MAX_CU_NESTING)
+    ? level_type_signed [level - 1] : FALSE;
+    
+  printf ("(");
+  while (uvalue)
+    {
+      unsigned char     discriminant;
+      unsigned int      bytes_read;
+
+      SAFE_BYTE_GET (discriminant, data, 1, end);
+      -- uvalue;
+      data ++;
+
+      assert (uvalue > 0);
+      switch (discriminant)
+	{
+	case DW_DSC_label:
+	  printf ("label ");
+	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
+	  assert (bytes_read <= uvalue && bytes_read > 0);
+	  uvalue -= bytes_read;
+	  data += bytes_read;
+	  break;
+
+	case DW_DSC_range:
+	  printf ("range ");
+	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
+	  assert (bytes_read <= uvalue && bytes_read > 0);
+	  uvalue -= bytes_read;
+	  data += bytes_read;
+
+	  printf ("..");
+	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
+	  assert (bytes_read <= uvalue && bytes_read > 0);
+	  uvalue -= bytes_read;
+	  data += bytes_read;
+	  break;
+
+	default:
+	  printf ("<corrupt>\n");
+	  warn (_("corrupt discr_list - unrecognised discriminant byte %#x\n"),
+		discriminant);
+	  return;
+	}
+
+      if (uvalue)
+	printf (", ");
+    }
+
+  if (is_signed)
+    printf (")(signed)");
+  else
+    printf (")(unsigned)");
+}
+
+static unsigned char *
 read_and_display_attr_value (unsigned long           attribute,
 			     unsigned long           form,
 			     dwarf_signed_vma        implicit_const,
+			     unsigned char *         start,
 			     unsigned char *         data,
 			     unsigned char *         end,
 			     dwarf_vma               cu_offset,
@@ -1874,12 +2206,13 @@ read_and_display_attr_value (unsigned long           attribute,
 			     int                     do_loc,
 			     struct dwarf_section *  section,
 			     struct cu_tu_set *      this_set,
-			     char                    delimiter)
+			     char                    delimiter,
+			     int                     level)
 {
-  dwarf_vma uvalue = 0;
-  unsigned char *block_start = NULL;
-  unsigned char * orig_data = data;
-  unsigned int bytes_read;
+  dwarf_vma        uvalue = 0;
+  unsigned char *  block_start = NULL;
+  unsigned char *  orig_data = data;
+  unsigned int     bytes_read;
 
   if (data > end || (data == end && form != DW_FORM_flag_present))
     {
@@ -1960,11 +2293,12 @@ read_and_display_attr_value (unsigned long           attribute,
 	  implicit_const = read_sleb128 (data, & bytes_read, end);
 	  data += bytes_read;
 	}
-      return read_and_display_attr_value (attribute, form, implicit_const, data,
-					  end, cu_offset, pointer_size,
+      return read_and_display_attr_value (attribute, form, implicit_const,
+					  start, data, end,
+					  cu_offset, pointer_size,
 					  offset_size, dwarf_version,
 					  debug_info_p, do_loc,
-					  section, this_set, delimiter);
+					  section, this_set, delimiter, level);
     case DW_FORM_GNU_addr_index:
       uvalue = read_uleb128 (data, & bytes_read, end);
       data += bytes_read;
@@ -2397,6 +2731,17 @@ read_and_display_attr_value (unsigned long           attribute,
   /* For some attributes we can display further information.  */
   switch (attribute)
     {
+    case DW_AT_type:
+      if (level >= 0 && level < MAX_CU_NESTING)
+	{
+	  bfd_boolean is_signed = FALSE;
+
+	  get_type_signedness (start, start + uvalue, end, pointer_size,
+			       offset_size, dwarf_version, & is_signed, FALSE);
+	  level_type_signed[level] = is_signed;
+	}
+      break;
+      
     case DW_AT_inline:
       printf ("\t");
       switch (uvalue)
@@ -2646,12 +2991,7 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_AT_discr_list:
       printf ("\t");
-      switch (uvalue)
-	{
-	case DW_DSC_label:  printf (_("(label)")); break;
-	case DW_DSC_range:  printf (_("(range)")); break;
-	default:            printf (_("(unrecognised)")); break;
-	}
+      display_discr_list (form, uvalue, data, end, level);
       break;
       
     case DW_AT_frame_base:
@@ -2768,6 +3108,7 @@ static unsigned char *
 read_and_display_attr (unsigned long           attribute,
 		       unsigned long           form,
 		       dwarf_signed_vma        implicit_const,
+		       unsigned char *         start,
 		       unsigned char *         data,
 		       unsigned char *         end,
 		       dwarf_vma               cu_offset,
@@ -2777,14 +3118,16 @@ read_and_display_attr (unsigned long           attribute,
 		       debug_info *            debug_info_p,
 		       int                     do_loc,
 		       struct dwarf_section *  section,
-		       struct cu_tu_set *      this_set)
+		       struct cu_tu_set *      this_set,
+		       int                     level)
 {
   if (!do_loc)
     printf ("   %-18s:", get_AT_name (attribute));
-  data = read_and_display_attr_value (attribute, form, implicit_const, data, end,
+  data = read_and_display_attr_value (attribute, form, implicit_const,
+				      start, data, end,
 				      cu_offset, pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
-				      do_loc, section, this_set, ' ');
+				      do_loc, section, this_set, ' ', level);
   if (!do_loc)
     printf ("\n");
   return data;
@@ -3310,6 +3653,7 @@ process_debug_info (struct dwarf_section *           section,
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
 					    attr->implicit_const,
+					    section_begin,
 					    tags,
 					    end,
 					    cu_offset,
@@ -3319,7 +3663,8 @@ process_debug_info (struct dwarf_section *           section,
 					    debug_info_p,
 					    do_loc || ! do_printing,
 					    section,
-					    this_set);
+					    this_set,
+					    level);
 	    }
 
 	  /* If a locview attribute appears before a location one,
@@ -3636,11 +3981,11 @@ display_formatted_table (unsigned char *                   data,
 	      format += bytes_read;
 	      form = read_uleb128 (format, & bytes_read, end);
 	      format += bytes_read;
-	      data = read_and_display_attr_value (0, form, 0, data, end, 0, 0,
+	      data = read_and_display_attr_value (0, form, 0, start, data, end, 0, 0,
 						  linfo->li_offset_size,
 						  linfo->li_version, NULL,
 			    ((content_type == DW_LNCT_path) != (namepass == 1)),
-						  section, NULL, '\t');
+						  section, NULL, '\t', -1);
 	    }
 	}
       if (data == end)
@@ -4080,6 +4425,7 @@ typedef struct
 
 static int
 display_debug_lines_decoded (struct dwarf_section *  section,
+			     unsigned char *         start,
 			     unsigned char *         data,
 			     unsigned char *         end,
 			     void *                  fileptr)
@@ -4213,12 +4559,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			    }
 			  break;
 			}
-		      data = read_and_display_attr_value (0, form, 0, data, end,
+		      data = read_and_display_attr_value (0, form, 0, start, data, end,
 		                                          0, 0,
 							  linfo.li_offset_size,
 							  linfo.li_version,
 							  NULL, 1, section,
-							  NULL, '\t');
+							  NULL, '\t', -1);
 		    }
 		  if (data == end)
 		    {
@@ -4303,12 +4649,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			    }
 			  break;
 			}
-		      data = read_and_display_attr_value (0, form, 0, data, end,
+		      data = read_and_display_attr_value (0, form, 0, start, data, end,
 							  0, 0,
 							  linfo.li_offset_size,
 							  linfo.li_version,
 							  NULL, 1, section,
-							  NULL, '\t');
+							  NULL, '\t', -1);
 		    }
 		  if (data == end)
 		    {
@@ -4835,7 +5181,7 @@ display_debug_lines (struct dwarf_section *section, void *file)
     retValRaw = display_debug_lines_raw (section, data, end, file);
 
   if (do_debug_lines & FLAG_DEBUG_LINES_DECODED)
-    retValDecoded = display_debug_lines_decoded (section, data, end, file);
+    retValDecoded = display_debug_lines_decoded (section, data, data, end, file);
 
   if (!retValRaw || !retValDecoded)
     return 0;
@@ -5440,9 +5786,9 @@ display_debug_macro (struct dwarf_section *section,
 		      SAFE_BYTE_GET_AND_INC (val, desc, 1, end);
 		      curr
 			= read_and_display_attr_value (0, val, 0,
-						       curr, end, 0, 0, offset_size,
+						       start, curr, end, 0, 0, offset_size,
 						       version, NULL, 0, NULL,
-						       NULL, ' ');
+						       NULL, ' ', -1);
 		      if (n != nargs - 1)
 			printf (",");
 		    }
@@ -8880,12 +9226,12 @@ display_debug_names (struct dwarf_section *section, void *file)
 
 		  if (tagno >= 0)
 		    printf (" %s", get_IDX_name (xindex));
-		  entryptr = read_and_display_attr_value (0, form, 0, entryptr,
-							  unit_end, 0, 0,
-							  offset_size,
+		  entryptr = read_and_display_attr_value (0, form, 0,
+							  unit_start, entryptr, unit_end,
+							  0, 0, offset_size,
 							  dwarf_version, NULL,
 							  (tagno < 0), NULL,
-							  NULL, '=');
+							  NULL, '=', -1);
 		}
 	      ++tagno;
 	    }

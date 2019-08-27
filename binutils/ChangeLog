@@ -1,3 +1,26 @@
+2019-08-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 24510
+	* dwarf.c (MAX_CU_NESTING): New constant.
+	(level_type_signed): New static array.
+	(skip_attr_bytes): New function.
+	(get_type_signedness): New function.
+	(read_and_print_leb128): New function.
+	(display_discr_list): New function.
+	(read_and_display_attr_value): Add start parameter.
+	Use new functions when handling DW_AT_type and DW_AT_discr_list.
+	(read_and_display_attr): Add start parameter.  Pass to
+	read_and_display_attr_value.
+	(process_debug_info): Update call to read_and_display_attr.
+	(display_formatted_table): Likewise.
+	(display_debug_lines_decoded): Likewise.  Also add start
+	parameter.
+	(display_debug_lines): Likewise.
+	* testsuite/binutils-all/dwarf-attributes.S: Update discrimination
+	lists.
+	* testsuite/binutils-all/dwarf-attributes.W: Update expected
+	output.
+
 2019-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR 24938
