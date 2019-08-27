@@ -1,3 +1,32 @@
+2019-10-21  Ali Tamur  <tamu@google.com>
+
+	* dwarf2read.c (dir_index): Change type.
+	(file_name_index): Likewise.
+	(line_header::include_dir_at): Change comment and implementation on
+	whether it is DWARF 5.
+	(line_header::is_valid_file_index): New function.
+	(line_header::file_name_at): Change comment and implementation on
+	whether it is DWARF 5.
+	(line_header::file_names): Change to private field renamed as
+	m_file_names and introduce a new accessor method.
+	(line_header::file_names_size): New method.
+	(line_header::include_dirs): Change to private field and rename as
+	m_include_dirs.
+	(dw2_get_file_names_reader): Define local var at a smaller scope and
+	reflect API change.
+	(dwarf2_cu::setup_type_unit_groups): Reflect API change.
+	(process_structure_scope): Likewise.
+	(line_header::add_include_dir): Change message and reflect renaming.
+	(line_header::add_file_name): Likewise.
+	(read_formatted_entries): Handle DW_FORM_data16.
+	(dwarf_decode_line_header): Fix line header length calculation.
+	(psymtab_include_file_name): Change comment and API.
+	(lnp_state_machine::m_file): Update comment and reflect type change.
+	(lnp_state_machine::record_line): Reflect type change.
+	(dwarf_decode_lines): Reflect API change.
+	(file_file_name): Likewise.
+	(file_full_name): Likewise.
+
 2019-10-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objfiles.c (sort_cmp): Ensure that !(a < a) holds true.
