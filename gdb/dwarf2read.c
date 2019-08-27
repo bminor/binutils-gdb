@@ -9336,6 +9336,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	case DW_FORM_data1:
 	case DW_FORM_ref1:
 	case DW_FORM_flag:
+	case DW_FORM_strx1:
 	  info_ptr += 1;
 	  break;
 	case DW_FORM_flag_present:
@@ -9343,10 +9344,15 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	  break;
 	case DW_FORM_data2:
 	case DW_FORM_ref2:
+	case DW_FORM_strx2:
 	  info_ptr += 2;
+	  break;
+	case DW_FORM_strx3:
+	  info_ptr += 3;
 	  break;
 	case DW_FORM_data4:
 	case DW_FORM_ref4:
+	case DW_FORM_strx4:
 	  info_ptr += 4;
 	  break;
 	case DW_FORM_data8:
@@ -20168,6 +20174,10 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
       if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
 	  || attr->form == DW_FORM_string
 	  || attr->form == DW_FORM_strx
+	  || attr->form == DW_FORM_strx1
+	  || attr->form == DW_FORM_strx2
+	  || attr->form == DW_FORM_strx3
+	  || attr->form == DW_FORM_strx4
 	  || attr->form == DW_FORM_GNU_str_index
 	  || attr->form == DW_FORM_GNU_strp_alt)
 	str = DW_STRING (attr);

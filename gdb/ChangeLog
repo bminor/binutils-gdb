@@ -1,5 +1,10 @@
 2019-09-30  Ali Tamur <tamur@google.com>
 
+	* dwarf2read.c (skip_one_die): Handle DW_FORM_strx forms.
+	(dwarf2_string_attr): Likewise.
+
+2019-09-30  Ali Tamur <tamur@google.com>
+
 	* dwarf2read.c (process_full_comp_unit): Remove whitespace at the EOL.
 	(process_full_type_unit): Likewise.
 	(dump_die_shallow): Likewise.
