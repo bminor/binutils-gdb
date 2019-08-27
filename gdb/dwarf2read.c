@@ -373,8 +373,11 @@ struct comp_unit_head
      This will be the first byte following the compilation unit header.  */
   cu_offset first_die_cu_offset;
 
-  /* 64-bit signature of this type unit - it is valid only for
-     UNIT_TYPE DW_UT_type.  */
+
+  /* 64-bit signature of this unit. For type units, it denotes the signature of
+     the type (DW_UT_type in DWARF 4, additionally DW_UT_split_type in DWARF 5).
+     Also used in DWARF 5, to denote the dwo id when the unit type is
+     DW_UT_skeleton or DW_UT_split_compile.  */
   ULONGEST signature;
 
   /* For types, offset in the type's DIE of the type defined by this TU.  */
@@ -1579,6 +1582,8 @@ static struct attribute *dwarf2_attr_no_follow (struct die_info *,
 static const char *dwarf2_string_attr (struct die_info *die, unsigned int name,
                                        struct dwarf2_cu *cu);
 
+static const char *dwarf2_dwo_name (struct die_info *die, struct dwarf2_cu *cu);
+
 static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
                                struct dwarf2_cu *cu);
 
@@ -1760,6 +1765,8 @@ static struct die_info *dwarf2_extension (struct die_info *die,
 static const char *dwarf_tag_name (unsigned int);
 
 static const char *dwarf_attr_name (unsigned int);
+
+static const char *dwarf_unit_type_name (int unit_type);
 
 static const char *dwarf_form_name (unsigned int);
 
@@ -6389,18 +6396,28 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
       switch (cu_header->unit_type)
 	{
 	case DW_UT_compile:
+	case DW_UT_partial:
+	case DW_UT_skeleton:
+	case DW_UT_split_compile:
 	  if (section_kind != rcuh_kind::COMPILE)
 	    error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		   "(is DW_UT_compile, should be DW_UT_type) [in module %s]"),
-		   filename);
+		   "(is %s, should be %s) [in module %s]"),
+		   dwarf_unit_type_name (cu_header->unit_type),
+		   dwarf_unit_type_name (DW_UT_type), filename);
 	  break;
 	case DW_UT_type:
+	case DW_UT_split_type:
 	  section_kind = rcuh_kind::TYPE;
 	  break;
 	default:
 	  error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		 "(is %d, should be %d or %d) [in module %s]"),
-		 cu_header->unit_type, DW_UT_compile, DW_UT_type, filename);
+		 "(is %#04x, should be one of: %s, %s, %s, %s or %s) "
+		 "[in module %s]"), cu_header->unit_type,
+		 dwarf_unit_type_name (DW_UT_compile),
+		 dwarf_unit_type_name (DW_UT_skeleton),
+		 dwarf_unit_type_name (DW_UT_split_compile),
+		 dwarf_unit_type_name (DW_UT_type),
+		 dwarf_unit_type_name (DW_UT_split_type), filename);
 	}
 
       cu_header->addr_size = read_1_byte (abfd, info_ptr);
@@ -6421,13 +6438,19 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 		    _("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
 
+  bool header_has_signature = section_kind == rcuh_kind::TYPE
+    || cu_header->unit_type == DW_UT_skeleton
+    || cu_header->unit_type == DW_UT_split_compile;
+
+  if (header_has_signature)
+    {
+      cu_header->signature = read_8_bytes (abfd, info_ptr);
+      info_ptr += 8;
+    }
+
   if (section_kind == rcuh_kind::TYPE)
     {
       LONGEST type_offset;
-
-      cu_header->signature = read_8_bytes (abfd, info_ptr);
-      info_ptr += 8;
-
       type_offset = read_offset (abfd, info_ptr, cu_header, &bytes_read);
       info_ptr += bytes_read;
       cu_header->type_cu_offset_in_tu = (cu_offset) type_offset;
@@ -7296,6 +7319,21 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   return 1;
 }
 
+/* Return the signature of the compile unit, if found. In DWARF 4 and before,
+   the signature is in the DW_AT_GNU_dwo_id attribute. In DWARF 5 and later, the
+   signature is part of the header.  */
+static gdb::optional<ULONGEST>
+lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
+{
+  if (cu->header.version >= 5)
+    return cu->header.signature;
+  struct attribute *attr;
+  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
+  if (attr == nullptr)
+    return gdb::optional<ULONGEST> ();
+  return DW_UNSND (attr);
+}
+
 /* Subroutine of init_cutu_and_read_dies to simplify it.
    Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
    Returns NULL if the specified DWO unit cannot be found.  */
@@ -7305,14 +7343,13 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
 		 struct die_info *comp_unit_die)
 {
   struct dwarf2_cu *cu = this_cu->cu;
-  ULONGEST signature;
   struct dwo_unit *dwo_unit;
   const char *comp_dir, *dwo_name;
 
   gdb_assert (cu != NULL);
 
   /* Yeah, we look dwo_name up again, but it simplifies the code.  */
-  dwo_name = dwarf2_string_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
+  dwo_name = dwarf2_dwo_name (comp_unit_die, cu);
   comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   if (this_cu->is_debug_types)
@@ -7322,21 +7359,17 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
       /* Since this_cu is the first member of struct signatured_type,
 	 we can go from a pointer to one to a pointer to the other.  */
       sig_type = (struct signatured_type *) this_cu;
-      signature = sig_type->signature;
       dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir);
     }
   else
     {
-      struct attribute *attr;
-
-      attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
-      if (! attr)
+      gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
+      if (!signature.has_value ())
 	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
 		 " [in module %s]"),
 	       dwo_name, objfile_name (this_cu->dwarf2_per_objfile->objfile));
-      signature = DW_UNSND (attr);
       dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
-				       signature);
+				       *signature);
     }
 
   return dwo_unit;
@@ -7448,7 +7481,6 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   struct die_reader_specs reader;
   struct die_info *comp_unit_die;
   int has_children;
-  struct attribute *attr;
   struct signatured_type *sig_type = NULL;
   struct dwarf2_section_info *abbrev_section;
   /* Non-zero if CU currently points to a DWO file and we need to
@@ -7585,9 +7617,9 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
      Note that if USE_EXISTING_OK != 0, and THIS_CU->cu already contains a
      DWO CU, that this test will fail (the attribute will not be present).  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
+  const char *dwo_name = dwarf2_dwo_name (comp_unit_die, cu);
   abbrev_table_up dwo_abbrev_table;
-  if (attr)
+  if (dwo_name != nullptr)
     {
       struct dwo_unit *dwo_unit;
       struct die_info *dwo_comp_unit_die;
@@ -11838,10 +11870,9 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
   struct create_dwo_cu_data *data = (struct create_dwo_cu_data *) datap;
   struct dwo_file *dwo_file = data->dwo_file;
   struct dwo_unit *dwo_unit = &data->dwo_unit;
-  struct attribute *attr;
 
-  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
-  if (attr == NULL)
+  gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
+  if (!signature.has_value ())
     {
       complaint (_("Dwarf Error: debug entry at offset %s is missing"
 		   " its dwo_id [in module %s]"),
@@ -11850,7 +11881,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
     }
 
   dwo_unit->dwo_file = dwo_file;
-  dwo_unit->signature = DW_UNSND (attr);
+  dwo_unit->signature = *signature;
   dwo_unit->section = section;
   dwo_unit->sect_off = sect_off;
   dwo_unit->length = cu->per_cu->length;
@@ -20112,6 +20143,17 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
   return str;
 }
 
+/* Return the dwo name or NULL if not present. If present, it is in either
+   DW_AT_GNU_dwo_name or DW_AT_dwo_name atrribute.  */
+static const char *
+dwarf2_dwo_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const char *dwo_name = dwarf2_string_attr (die, DW_AT_GNU_dwo_name, cu);
+  if (dwo_name == nullptr)
+    dwo_name = dwarf2_string_attr (die, DW_AT_dwo_name, cu);
+  return dwo_name;
+}
+
 /* Return non-zero iff the attribute NAME is defined for the given DIE,
    and holds a non-zero value.  This function should only be used for
    DW_FORM_flag or DW_FORM_flag_present attributes.  */
@@ -22809,6 +22851,33 @@ dwarf_attr_name (unsigned attr)
     return dwarf_unknown ("AT", attr);
 
   return name;
+}
+
+/* Convert a unit type to corresponding DW_UT name.  */
+
+static const char *
+dwarf_unit_type_name (int unit_type) {
+  switch (unit_type)
+    {
+      case 0x01:
+	return "DW_UT_compile (0x01)";
+      case 0x02:
+	return "DW_UT_type (0x02)";
+      case 0x03:
+	return "DW_UT_partial (0x03)";
+      case 0x04:
+	return "DW_UT_skeleton (0x04)";
+      case 0x05:
+	return "DW_UT_split_compile (0x05)";
+      case 0x06:
+	return "DW_UT_split_type (0x06)";
+      case 0x80:
+	return "DW_UT_lo_user (0x80)";
+      case 0xff:
+	return "DW_UT_hi_user (0xff)";
+      default:
+	return nullptr;
+    }
 }
 
 /* Convert a DWARF value form code into its string name.  */

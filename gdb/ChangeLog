@@ -1,3 +1,24 @@
+
+2019-09-09  Ali Tamur  <tamur@google.com>
+
+	* dwarf2read.c (comp_unit_head): Update comment.                     
+	(dwarf2_dwo_name): New function declaration.                             
+	(dwarf_unit_type_name): New function declaration.                        
+	(read_comp_unit_head): Add support for new compilation units,            
+	DW_UT_partial, DW_UT_skeleton, DW_UT_split_compile, DW_UT_split_type.    
+	Particularly, DW_UT_skeleton and DW_UT_split_compile have dwo_id         
+	(currently named as "signature") in their header. Also clarify error     
+	messages.                                                                
+	(lookup_dwo_id): New function. Returns the dwo id of the given           
+	compile unit.                                                            
+	(lookup_dwo_unit): Use the new lookup_dwo_id function.                   
+	(init_cutu_and_read_dies): Use the new dwarf2_dwo_name and lookup_dwo_id 
+	functions.                                                               
+	(create_dwo_cu_reader): Use the added lookup_dwo_id function.            
+	(dwarf2_dwo_name): Get the dwo name if present.                          
+	(dwarf_unit_type_name): Convert DW_UT_* types to string for diagnostic   
+	purposes.
+
 2019-09-09  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-win.c (tui_all_windows_info): Use ui_out.
