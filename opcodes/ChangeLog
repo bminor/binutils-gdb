@@ -1,3 +1,9 @@
+2019-08-27  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* arm-dis.c (mve_opcodes): Add entry for MVE_VMOV_VEC_TO_VEC.
+	(is_mve_undefined): Add case for MVE_VMOV_VEC_TO_VEC.
+	(print_insn_mve): Add condition to check Qm==Qn of VORR instruction.
+
 2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Update encoding of tfsre0_el1,

@@ -5,14 +5,14 @@
 .*: +file format .*arm.*
 
 Disassembly of section .text:
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
-[^>]*> ef20 0150 	vorr	q0, q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
+[^>]*> ef20 0150 	vmov	q0, q0
 [^>]*> ef20 0152 	vorr	q0, q0, q1
 [^>]*> ef20 0152 	vorr	q0, q0, q1
 [^>]*> ef20 0152 	vorr	q0, q0, q1
@@ -53,14 +53,14 @@ Disassembly of section .text:
 [^>]*> ef22 0150 	vorr	q0, q1, q0
 [^>]*> ef22 0150 	vorr	q0, q1, q0
 [^>]*> ef22 0150 	vorr	q0, q1, q0
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
-[^>]*> ef22 0152 	vorr	q0, q1, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
+[^>]*> ef22 0152 	vmov	q0, q1
 [^>]*> ef22 0154 	vorr	q0, q1, q2
 [^>]*> ef22 0154 	vorr	q0, q1, q2
 [^>]*> ef22 0154 	vorr	q0, q1, q2
@@ -101,14 +101,14 @@ Disassembly of section .text:
 [^>]*> ef24 0152 	vorr	q0, q2, q1
 [^>]*> ef24 0152 	vorr	q0, q2, q1
 [^>]*> ef24 0152 	vorr	q0, q2, q1
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
-[^>]*> ef24 0154 	vorr	q0, q2, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
+[^>]*> ef24 0154 	vmov	q0, q2
 [^>]*> ef24 0158 	vorr	q0, q2, q4
 [^>]*> ef24 0158 	vorr	q0, q2, q4
 [^>]*> ef24 0158 	vorr	q0, q2, q4
@@ -149,14 +149,14 @@ Disassembly of section .text:
 [^>]*> ef28 0154 	vorr	q0, q4, q2
 [^>]*> ef28 0154 	vorr	q0, q4, q2
 [^>]*> ef28 0154 	vorr	q0, q4, q2
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
-[^>]*> ef28 0158 	vorr	q0, q4, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
+[^>]*> ef28 0158 	vmov	q0, q4
 [^>]*> ef28 015e 	vorr	q0, q4, q7
 [^>]*> ef28 015e 	vorr	q0, q4, q7
 [^>]*> ef28 015e 	vorr	q0, q4, q7
@@ -197,22 +197,22 @@ Disassembly of section .text:
 [^>]*> ef2e 0158 	vorr	q0, q7, q4
 [^>]*> ef2e 0158 	vorr	q0, q7, q4
 [^>]*> ef2e 0158 	vorr	q0, q7, q4
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef2e 015e 	vorr	q0, q7, q7
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
-[^>]*> ef20 2150 	vorr	q1, q0, q0
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef2e 015e 	vmov	q0, q7
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
+[^>]*> ef20 2150 	vmov	q1, q0
 [^>]*> ef20 2152 	vorr	q1, q0, q1
 [^>]*> ef20 2152 	vorr	q1, q0, q1
 [^>]*> ef20 2152 	vorr	q1, q0, q1
@@ -253,14 +253,14 @@ Disassembly of section .text:
 [^>]*> ef22 2150 	vorr	q1, q1, q0
 [^>]*> ef22 2150 	vorr	q1, q1, q0
 [^>]*> ef22 2150 	vorr	q1, q1, q0
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
-[^>]*> ef22 2152 	vorr	q1, q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
+[^>]*> ef22 2152 	vmov	q1, q1
 [^>]*> ef22 2154 	vorr	q1, q1, q2
 [^>]*> ef22 2154 	vorr	q1, q1, q2
 [^>]*> ef22 2154 	vorr	q1, q1, q2
@@ -301,14 +301,14 @@ Disassembly of section .text:
 [^>]*> ef24 2152 	vorr	q1, q2, q1
 [^>]*> ef24 2152 	vorr	q1, q2, q1
 [^>]*> ef24 2152 	vorr	q1, q2, q1
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
-[^>]*> ef24 2154 	vorr	q1, q2, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
+[^>]*> ef24 2154 	vmov	q1, q2
 [^>]*> ef24 2158 	vorr	q1, q2, q4
 [^>]*> ef24 2158 	vorr	q1, q2, q4
 [^>]*> ef24 2158 	vorr	q1, q2, q4
@@ -349,14 +349,14 @@ Disassembly of section .text:
 [^>]*> ef28 2154 	vorr	q1, q4, q2
 [^>]*> ef28 2154 	vorr	q1, q4, q2
 [^>]*> ef28 2154 	vorr	q1, q4, q2
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
-[^>]*> ef28 2158 	vorr	q1, q4, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
+[^>]*> ef28 2158 	vmov	q1, q4
 [^>]*> ef28 215e 	vorr	q1, q4, q7
 [^>]*> ef28 215e 	vorr	q1, q4, q7
 [^>]*> ef28 215e 	vorr	q1, q4, q7
@@ -397,22 +397,22 @@ Disassembly of section .text:
 [^>]*> ef2e 2158 	vorr	q1, q7, q4
 [^>]*> ef2e 2158 	vorr	q1, q7, q4
 [^>]*> ef2e 2158 	vorr	q1, q7, q4
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef2e 215e 	vorr	q1, q7, q7
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
-[^>]*> ef20 4150 	vorr	q2, q0, q0
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef2e 215e 	vmov	q1, q7
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
+[^>]*> ef20 4150 	vmov	q2, q0
 [^>]*> ef20 4152 	vorr	q2, q0, q1
 [^>]*> ef20 4152 	vorr	q2, q0, q1
 [^>]*> ef20 4152 	vorr	q2, q0, q1
@@ -453,14 +453,14 @@ Disassembly of section .text:
 [^>]*> ef22 4150 	vorr	q2, q1, q0
 [^>]*> ef22 4150 	vorr	q2, q1, q0
 [^>]*> ef22 4150 	vorr	q2, q1, q0
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
-[^>]*> ef22 4152 	vorr	q2, q1, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
+[^>]*> ef22 4152 	vmov	q2, q1
 [^>]*> ef22 4154 	vorr	q2, q1, q2
 [^>]*> ef22 4154 	vorr	q2, q1, q2
 [^>]*> ef22 4154 	vorr	q2, q1, q2
@@ -501,14 +501,14 @@ Disassembly of section .text:
 [^>]*> ef24 4152 	vorr	q2, q2, q1
 [^>]*> ef24 4152 	vorr	q2, q2, q1
 [^>]*> ef24 4152 	vorr	q2, q2, q1
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
-[^>]*> ef24 4154 	vorr	q2, q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
+[^>]*> ef24 4154 	vmov	q2, q2
 [^>]*> ef24 4158 	vorr	q2, q2, q4
 [^>]*> ef24 4158 	vorr	q2, q2, q4
 [^>]*> ef24 4158 	vorr	q2, q2, q4
@@ -549,14 +549,14 @@ Disassembly of section .text:
 [^>]*> ef28 4154 	vorr	q2, q4, q2
 [^>]*> ef28 4154 	vorr	q2, q4, q2
 [^>]*> ef28 4154 	vorr	q2, q4, q2
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
-[^>]*> ef28 4158 	vorr	q2, q4, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
+[^>]*> ef28 4158 	vmov	q2, q4
 [^>]*> ef28 415e 	vorr	q2, q4, q7
 [^>]*> ef28 415e 	vorr	q2, q4, q7
 [^>]*> ef28 415e 	vorr	q2, q4, q7
@@ -597,22 +597,22 @@ Disassembly of section .text:
 [^>]*> ef2e 4158 	vorr	q2, q7, q4
 [^>]*> ef2e 4158 	vorr	q2, q7, q4
 [^>]*> ef2e 4158 	vorr	q2, q7, q4
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef2e 415e 	vorr	q2, q7, q7
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
-[^>]*> ef20 8150 	vorr	q4, q0, q0
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef2e 415e 	vmov	q2, q7
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
+[^>]*> ef20 8150 	vmov	q4, q0
 [^>]*> ef20 8152 	vorr	q4, q0, q1
 [^>]*> ef20 8152 	vorr	q4, q0, q1
 [^>]*> ef20 8152 	vorr	q4, q0, q1
@@ -653,14 +653,14 @@ Disassembly of section .text:
 [^>]*> ef22 8150 	vorr	q4, q1, q0
 [^>]*> ef22 8150 	vorr	q4, q1, q0
 [^>]*> ef22 8150 	vorr	q4, q1, q0
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
-[^>]*> ef22 8152 	vorr	q4, q1, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
+[^>]*> ef22 8152 	vmov	q4, q1
 [^>]*> ef22 8154 	vorr	q4, q1, q2
 [^>]*> ef22 8154 	vorr	q4, q1, q2
 [^>]*> ef22 8154 	vorr	q4, q1, q2
@@ -701,14 +701,14 @@ Disassembly of section .text:
 [^>]*> ef24 8152 	vorr	q4, q2, q1
 [^>]*> ef24 8152 	vorr	q4, q2, q1
 [^>]*> ef24 8152 	vorr	q4, q2, q1
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
-[^>]*> ef24 8154 	vorr	q4, q2, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
+[^>]*> ef24 8154 	vmov	q4, q2
 [^>]*> ef24 8158 	vorr	q4, q2, q4
 [^>]*> ef24 8158 	vorr	q4, q2, q4
 [^>]*> ef24 8158 	vorr	q4, q2, q4
@@ -749,14 +749,14 @@ Disassembly of section .text:
 [^>]*> ef28 8154 	vorr	q4, q4, q2
 [^>]*> ef28 8154 	vorr	q4, q4, q2
 [^>]*> ef28 8154 	vorr	q4, q4, q2
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
-[^>]*> ef28 8158 	vorr	q4, q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
+[^>]*> ef28 8158 	vmov	q4, q4
 [^>]*> ef28 815e 	vorr	q4, q4, q7
 [^>]*> ef28 815e 	vorr	q4, q4, q7
 [^>]*> ef28 815e 	vorr	q4, q4, q7
@@ -797,22 +797,22 @@ Disassembly of section .text:
 [^>]*> ef2e 8158 	vorr	q4, q7, q4
 [^>]*> ef2e 8158 	vorr	q4, q7, q4
 [^>]*> ef2e 8158 	vorr	q4, q7, q4
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef2e 815e 	vorr	q4, q7, q7
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
-[^>]*> ef20 e150 	vorr	q7, q0, q0
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef2e 815e 	vmov	q4, q7
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
+[^>]*> ef20 e150 	vmov	q7, q0
 [^>]*> ef20 e152 	vorr	q7, q0, q1
 [^>]*> ef20 e152 	vorr	q7, q0, q1
 [^>]*> ef20 e152 	vorr	q7, q0, q1
@@ -853,14 +853,14 @@ Disassembly of section .text:
 [^>]*> ef22 e150 	vorr	q7, q1, q0
 [^>]*> ef22 e150 	vorr	q7, q1, q0
 [^>]*> ef22 e150 	vorr	q7, q1, q0
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
-[^>]*> ef22 e152 	vorr	q7, q1, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
+[^>]*> ef22 e152 	vmov	q7, q1
 [^>]*> ef22 e154 	vorr	q7, q1, q2
 [^>]*> ef22 e154 	vorr	q7, q1, q2
 [^>]*> ef22 e154 	vorr	q7, q1, q2
@@ -901,14 +901,14 @@ Disassembly of section .text:
 [^>]*> ef24 e152 	vorr	q7, q2, q1
 [^>]*> ef24 e152 	vorr	q7, q2, q1
 [^>]*> ef24 e152 	vorr	q7, q2, q1
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
-[^>]*> ef24 e154 	vorr	q7, q2, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
+[^>]*> ef24 e154 	vmov	q7, q2
 [^>]*> ef24 e158 	vorr	q7, q2, q4
 [^>]*> ef24 e158 	vorr	q7, q2, q4
 [^>]*> ef24 e158 	vorr	q7, q2, q4
@@ -949,14 +949,14 @@ Disassembly of section .text:
 [^>]*> ef28 e154 	vorr	q7, q4, q2
 [^>]*> ef28 e154 	vorr	q7, q4, q2
 [^>]*> ef28 e154 	vorr	q7, q4, q2
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
-[^>]*> ef28 e158 	vorr	q7, q4, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
+[^>]*> ef28 e158 	vmov	q7, q4
 [^>]*> ef28 e15e 	vorr	q7, q4, q7
 [^>]*> ef28 e15e 	vorr	q7, q4, q7
 [^>]*> ef28 e15e 	vorr	q7, q4, q7
@@ -997,14 +997,14 @@ Disassembly of section .text:
 [^>]*> ef2e e158 	vorr	q7, q7, q4
 [^>]*> ef2e e158 	vorr	q7, q7, q4
 [^>]*> ef2e e158 	vorr	q7, q7, q4
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
-[^>]*> ef2e e15e 	vorr	q7, q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
+[^>]*> ef2e e15e 	vmov	q7, q7
 [^>]*> ef80 0150 	vorr.i32	q0, #0	; 0x00000000
 [^>]*> ff87 015f 	vorr.i32	q0, #255	; 0x000000ff
 [^>]*> ff87 035f 	vorr.i32	q0, #65280	; 0x0000ff00

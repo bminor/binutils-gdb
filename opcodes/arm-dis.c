@@ -2951,6 +2951,16 @@ static const struct mopcode32 mve_opcodes[] =
    0xef200150, 0xffb11f51,
    "vorr%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
+  /* Vector VMOV, vector to vector move. While decoding MVE_VORR_REG if
+     "Qm==Qn", VORR should replaced by its alias VMOV. For that to happen
+     MVE_VMOV_VEC_TO_VEC need to placed after MVE_VORR_REG in this mve_opcodes
+     array.  */
+
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV_VEC_TO_VEC,
+   0xef200150, 0xffb11f51,
+   "vmov%v\t%13-15,22Q, %17-19,7Q"},
+
   /* Vector VQDMULL T1 variant.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
    MVE_VQDMULL_T1,
@@ -6104,6 +6114,12 @@ is_mve_undefined (unsigned long given, enum mve_instructions matched_insn,
       else
 	return FALSE;
 
+    case MVE_VMOV_VEC_TO_VEC:
+      if ((arm_decode_field (given, 5, 5) == 1)
+	  || (arm_decode_field (given, 22, 22) == 1))
+	  return TRUE;
+      return FALSE;
+
     case MVE_VMOV_IMM_TO_VEC:
       if (arm_decode_field (given, 5, 5) == 0)
       {
@@ -9213,6 +9229,13 @@ print_insn_mve (struct disassemble_info *info, long given)
 
 	  if (is_mve_undefined (given, insn->mve_op, &undefined_cond))
 	    is_undefined = TRUE;
+
+	  /* In "VORR Qd, Qm, Qn", if Qm==Qn, VORR is nothing but VMOV,
+	     i.e "VMOV Qd, Qm".  */
+	  if ((insn->mve_op == MVE_VORR_REG)
+	      && (arm_decode_field (given, 1, 3)
+		  == arm_decode_field (given, 17, 19)))
+	    continue;
 
 	  for (c = insn->assembler; *c; c++)
 	    {

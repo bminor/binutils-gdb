@@ -6743,8 +6743,10 @@ parse_neon_mov (char **str, int *which_operand)
 	      inst.operands[i].present = 1;
 	    }
 	}
-      else if ((val = arm_typed_reg_parse (&ptr, REG_TYPE_NSDQ, &rtype,
-					   &optype)) != FAIL)
+      else if (((val = arm_typed_reg_parse (&ptr, REG_TYPE_NSDQ, &rtype,
+		&optype)) != FAIL)
+	       || ((val = arm_typed_reg_parse (&ptr, REG_TYPE_MQ, &rtype,
+		   &optype)) != FAIL))
 	{
 	  /* Case 0: VMOV<c><q> <Qd>, <Qm>
 	     Case 1: VMOV<c><q> <Dd>, <Dm>
