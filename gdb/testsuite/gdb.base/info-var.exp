@@ -37,7 +37,10 @@ gdb_test "info variables" \
 	 "File .*${srcfile2}:" \
 	 "18:\[ \t\]+int global_var;" \
 	 "20:\[ \t\]+static int f2_var;" \
-	 "" \
+	 "(" \
+	 "File .*:(" \
+	 "$decimal:.*" \
+	 ")+)*" \
 	 "Non-debugging symbols:" \
 	 ".*"]
 
@@ -50,7 +53,10 @@ gdb_test "info variables -n" \
 	 "" \
 	 "File .*${srcfile2}:" \
 	 "18:\[ \t\]+int global_var;" \
-	 "20:\[ \t\]+static int f2_var;" ]
+	 "20:\[ \t\]+static int f2_var;(" \
+	 "" \
+	 "File .*:(" \
+	 "$decimal:.*)+)*"]
 
 gdb_test "info variables -n global" \
     [multi_line \

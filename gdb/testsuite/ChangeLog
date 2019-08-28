@@ -1,3 +1,8 @@
+2019-08-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/info-var.exp: Allow info variables to print info for files
+	other than info-var-f1.c and info-var-f2.c.
+
 2019-08-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/info-types.exp: Add module.
