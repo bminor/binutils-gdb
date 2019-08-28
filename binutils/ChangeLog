@@ -1,3 +1,7 @@
+2019-08-29  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (check_uvalue): Remove unnecessary pointer checks.
+
 2019-08-28  Niklas Gürtler  <profclonk@gmail.com>
 
 	PR 24942
