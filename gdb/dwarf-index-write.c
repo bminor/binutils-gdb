@@ -714,13 +714,14 @@ public:
 	   name (of the form "<MumBle>") must be entered without the
 	   angle brackets.  Note that the current index is unusual,
 	   see PR symtab/24820 for details.  */
-	const char *decoded = ada_decode (name);
+	std::string decoded = ada_decode (name);
 	if (decoded[0] == '<')
 	  name = (char *) obstack_copy0 (&m_string_obstack,
-					 decoded + 1,
-					 strlen (decoded + 1) - 1);
+					 decoded.c_str () + 1,
+					 decoded.length () - 2);
 	else
-	  name = obstack_strdup (&m_string_obstack, ada_encode (decoded));
+	  name = obstack_strdup (&m_string_obstack,
+				 ada_encode (decoded.c_str ()));
       }
 
     const auto insertpair

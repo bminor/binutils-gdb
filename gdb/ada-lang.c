@@ -1105,22 +1105,16 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
 
 /* If ENCODED follows the GNAT entity encoding conventions, then return
    the decoded form of ENCODED.  Otherwise, return "<%s>" where "%s" is
-   replaced by ENCODED.
+   replaced by ENCODED.  */
 
-   The resulting string is valid until the next call of ada_decode.
-   If the string is unchanged by decoding, the original string pointer
-   is returned.  */
-
-const char *
+std::string
 ada_decode (const char *encoded)
 {
   int i, j;
   int len0;
   const char *p;
-  char *decoded;
   int at_start_name;
-  static char *decoding_buffer = NULL;
-  static size_t decoding_buffer_size = 0;
+  std::string decoded;
 
   /* With function descriptors on PPC64, the value of a symbol named
      ".FN", if it exists, is the entry point of the function "FN".  */
@@ -1179,8 +1173,7 @@ ada_decode (const char *encoded)
 
   /* Make decoded big enough for possible expansion by operator name.  */
 
-  GROW_VECT (decoding_buffer, decoding_buffer_size, 2 * len0 + 1);
-  decoded = decoding_buffer;
+  decoded.resize (2 * len0 + 1, 'X');
 
   /* Remove trailing __{digit}+ or trailing ${digit}+.  */
 
@@ -1217,7 +1210,7 @@ ada_decode (const char *encoded)
                             op_len - 1) == 0)
                   && !isalnum (encoded[i + op_len]))
                 {
-                  strcpy (decoded + j, ada_opname_table[k].decoded);
+                  strcpy (&decoded.front() + j, ada_opname_table[k].decoded);
                   at_start_name = 0;
                   i += op_len;
                   j += strlen (ada_opname_table[k].decoded);
@@ -1338,27 +1331,22 @@ ada_decode (const char *encoded)
           j += 1;
         }
     }
-  decoded[j] = '\000';
+  decoded.resize (j);
 
   /* Decoded names should never contain any uppercase character.
      Double-check this, and abort the decoding if we find one.  */
 
-  for (i = 0; decoded[i] != '\0'; i += 1)
+  for (i = 0; i < decoded.length(); ++i)
     if (isupper (decoded[i]) || decoded[i] == ' ')
       goto Suppress;
 
-  if (strcmp (decoded, encoded) == 0)
-    return encoded;
-  else
-    return decoded;
+  return decoded;
 
 Suppress:
-  GROW_VECT (decoding_buffer, decoding_buffer_size, strlen (encoded) + 3);
-  decoded = decoding_buffer;
   if (encoded[0] == '<')
-    strcpy (decoded, encoded);
+    decoded = encoded;
   else
-    xsnprintf (decoded, decoding_buffer_size, "<%s>", encoded);
+    decoded = '<' + std::string(encoded) + '>';
   return decoded;
 
 }
@@ -1389,13 +1377,13 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 
   if (!gsymbol->ada_mangled)
     {
-      const char *decoded = ada_decode (gsymbol->name);
+      std::string decoded = ada_decode (gsymbol->name);
       struct obstack *obstack = gsymbol->language_specific.obstack;
 
       gsymbol->ada_mangled = 1;
 
       if (obstack != NULL)
-	*resultp = obstack_strdup (obstack, decoded);
+	*resultp = obstack_strdup (obstack, decoded.c_str ());
       else
         {
 	  /* Sometimes, we can't find a corresponding objfile, in
@@ -1404,10 +1392,10 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 	     significant memory leak (FIXME).  */
 
           char **slot = (char **) htab_find_slot (decoded_names_store,
-                                                  decoded, INSERT);
+                                                  decoded.c_str (), INSERT);
 
           if (*slot == NULL)
-            *slot = xstrdup (decoded);
+            *slot = xstrdup (decoded.c_str ());
           *resultp = *slot;
         }
     }
@@ -1418,7 +1406,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 static char *
 ada_la_decode (const char *encoded, int options)
 {
-  return xstrdup (ada_decode (encoded));
+  return xstrdup (ada_decode (encoded).c_str ());
 }
 
 /* Implement la_sniff_from_mangled_name for Ada.  */
@@ -1426,11 +1414,11 @@ ada_la_decode (const char *encoded, int options)
 static int
 ada_sniff_from_mangled_name (const char *mangled, char **out)
 {
-  const char *demangled = ada_decode (mangled);
+  std::string demangled = ada_decode (mangled);
 
   *out = NULL;
 
-  if (demangled != mangled && demangled != NULL && demangled[0] != '<')
+  if (demangled != mangled && demangled[0] != '<')
     {
       /* Set the gsymbol language to Ada, but still return 0.
 	 Two reasons for that:
@@ -5993,7 +5981,7 @@ is_name_suffix (const char *str)
 static int
 is_valid_name_for_wild_match (const char *name0)
 {
-  const char *decoded_name = ada_decode (name0);
+  std::string decoded_name = ada_decode (name0);
   int i;
 
   /* If the decoded name starts with an angle bracket, it means that
@@ -6233,19 +6221,16 @@ ada_lookup_name_info::matches
   if (strncmp (sym_name, text, text_len) == 0)
     match = true;
 
+  std::string decoded_name = ada_decode (sym_name);
   if (match && !m_encoded_p)
     {
       /* One needed check before declaring a positive match is to verify
          that iff we are doing a verbatim match, the decoded version
          of the symbol name starts with '<'.  Otherwise, this symbol name
          is not a suitable completion.  */
-      const char *sym_name_copy = sym_name;
-      bool has_angle_bracket;
 
-      sym_name = ada_decode (sym_name);
-      has_angle_bracket = (sym_name[0] == '<');
+      bool has_angle_bracket = (decoded_name[0] == '<');
       match = (has_angle_bracket == m_verbatim_p);
-      sym_name = sym_name_copy;
     }
 
   if (match && !m_verbatim_p)
@@ -6269,7 +6254,7 @@ ada_lookup_name_info::matches
       /* Since we are doing wild matching, this means that TEXT
          may represent an unqualified symbol name.  We therefore must
          also compare TEXT against the unqualified name of the symbol.  */
-      sym_name = ada_unqualified_name (ada_decode (sym_name));
+      sym_name = ada_unqualified_name (decoded_name.c_str ());
 
       if (strncmp (sym_name, text, text_len) == 0)
 	match = true;
@@ -13494,7 +13479,7 @@ static bool
 name_matches_regex (const char *name, compiled_regex *preg)
 {
   return (preg == NULL
-	  || preg->exec (ada_decode (name), 0, NULL, 0) == 0);
+	  || preg->exec (ada_decode (name).c_str (), 0, NULL, 0) == 0);
 }
 
 /* Add all exceptions defined globally whose name name match
@@ -13527,8 +13512,8 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   lookup_name_info::match_any (),
 			   [&] (const char *search_name)
 			   {
-			     const char *decoded = ada_decode (search_name);
-			     return name_matches_regex (decoded, preg);
+			     std::string decoded = ada_decode (search_name);
+			     return name_matches_regex (decoded.c_str (), preg);
 			   },
 			   NULL,
 			   VARIABLES_DOMAIN);

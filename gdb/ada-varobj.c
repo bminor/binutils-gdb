@@ -624,6 +624,7 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 	 of the array index type when such type qualification is
 	 needed.  */
       const char *index_type_name = NULL;
+      std::string decoded;
 
       /* If the index type is a range type, find the base type.  */
       while (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
@@ -634,7 +635,10 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 	{
 	  index_type_name = ada_type_name (index_type);
 	  if (index_type_name)
-	    index_type_name = ada_decode (index_type_name);
+	    {
+	      decoded = ada_decode (index_type_name);
+	      index_type_name = decoded.c_str ();
+	    }
 	}
 
       if (index_type_name != NULL)

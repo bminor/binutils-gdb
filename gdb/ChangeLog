@@ -1,3 +1,19 @@
+2019-09-23  Christian Biesinger  <cbiesinger@google.com>
+
+	* ada-exp.y (write_object_remaining): Update.
+	* ada-lang.c (ada_decode): Return a std::string instead of a char*
+	and eliminate the static buffer.
+	(ada_decode_symbol): Update.
+	(ada_la_decode): Update.
+	(ada_sniff_from_mangled_name): Update.
+	(is_valid_name_for_wild_match): Update.
+	(ada_lookup_name_info::matches): Update and simplify.
+	(name_matches_regex): Update.
+	(ada_add_global_exceptions): Update.
+	* ada-lang.h (ada_decode): Update signature.
+	* ada-varobj.c (ada_varobj_describe_simple_array_child): Update.
+	* dwarf-index-write.c (debug_names::insert): Update.
+
 2019-09-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-svr4.c (svr4_iterate_over_objfiles_in_search_order): Fix

@@ -227,7 +227,7 @@ extern struct type *ada_get_decoded_type (struct type *type);
 
 extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
-extern const char *ada_decode (const char*);
+extern std::string ada_decode (const char*);
 
 extern enum language ada_update_initial_language (enum language);
 
