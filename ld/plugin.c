@@ -749,7 +749,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
       if (syms[n].def != LDPK_UNDEF && syms[n].def != LDPK_WEAKUNDEF)
 	{
 	  blhe = h;
-	  if (blhe)
+	  if (blhe && link_info.wrap_hash != NULL)
 	    {
 	      /* Check if a symbol is a wrapper symbol.  */
 	      struct bfd_link_hash_entry *unwrap
