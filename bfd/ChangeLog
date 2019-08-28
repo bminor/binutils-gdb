@@ -1,3 +1,14 @@
+2019-08-29  Alan Modra  <amodra@gmail.com>
+
+	PR 24891
+	* bfd.c (struct bfd): Add no_element_cache.
+	* archive.c (_bfd_get_elt_at_filepos): Don't add element to
+	archive cache when no_element_cache.
+	(bfd_generic_archive_p): Set no_element_cache when opening first
+	element to check format.  Close first element too.
+	(do_slurp_bsd_armap): Don't zero ardata->cache here.
+	* bfd-in2.h: Regenerate.
+
 2019-08-24  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_edit_toc): Exclude undefined weak

@@ -7180,6 +7180,9 @@ struct bfd
   /* Set if this is a thin archive.  */
   unsigned int is_thin_archive : 1;
 
+  /* Set if this archive should not cache element positions.  */
+  unsigned int no_element_cache : 1;
+
   /* Set if only required symbols should be added in the link hash table for
      this object.  Used by VMS linkers.  */
   unsigned int selective_search : 1;

@@ -734,7 +734,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   /* Copy is_linker_input.  */
   n_bfd->is_linker_input = archive->is_linker_input;
 
-  if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_bfd))
+  if (archive->no_element_cache
+      || _bfd_add_bfd_to_archive_cache (archive, filepos, n_bfd))
     return n_bfd;
 
   free (new_areldata);
@@ -885,6 +886,7 @@ bfd_generic_archive_p (bfd *abfd)
   if (abfd->target_defaulted && bfd_has_map (abfd))
     {
       bfd *first;
+      unsigned int save;
 
       /* This archive has a map, so we may presume that the contents
 	 are object files.  Make sure that if the first file in the
@@ -897,14 +899,17 @@ bfd_generic_archive_p (bfd *abfd)
 	 normal archive, regardless of the format of the object files.
 	 We do accept an empty archive.  */
 
+      save = abfd->no_element_cache;
+      abfd->no_element_cache = 1;
       first = bfd_openr_next_archived_file (abfd, NULL);
+      abfd->no_element_cache = save;
       if (first != NULL)
 	{
 	  first->target_defaulted = FALSE;
 	  if (bfd_check_format (first, bfd_object)
 	      && first->xvec != abfd->xvec)
 	    bfd_set_error (bfd_error_wrong_object_format);
-	  /* And we ought to close `first' here too.  */
+	  bfd_close (first);
 	}
     }
 
@@ -974,7 +979,6 @@ do_slurp_bsd_armap (bfd *abfd)
       goto byebye;
     }
 
-  ardata->cache = 0;
   rbase = raw_armap + BSD_SYMDEF_COUNT_SIZE;
   stringbase = ((char *) rbase
 		+ ardata->symdef_count * BSD_SYMDEF_SIZE
