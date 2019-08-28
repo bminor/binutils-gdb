@@ -1,3 +1,17 @@
+2019-08-28  Niklas Gürtler  <profclonk@gmail.com>
+
+	PR 24942
+	* objcopy.c (SECTION_CONTEXT_SET_ALIGNMENT): New constant.
+	(struct section_list): Add alignment field.
+	(command_line_switch): Add OPTION_SET_SECTION_ALIGNMENT.
+	(copy_options): Add --set-section-alignment.
+	(copy_usage): Describe --set-section-alignment.
+	(find_section_list): Initialise the alignment field.
+	(setup_section): Handle the alignment field.
+	(copy_main): Handle OPTION_SET_SECTION_ALIGNMENT.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2019-08-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 24931
