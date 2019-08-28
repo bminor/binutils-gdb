@@ -803,6 +803,46 @@ proc test_objdump_dotnet_assemblies {} {
 
 test_objdump_dotnet_assemblies
 
+# Test objdump -S
+
+proc test_objdump_S { } {
+    global srcdir
+    global subdir
+    global OBJDUMP
+    global OBJDUMPFLAGS
+    
+    set test "objdump -S"
+
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+	unsupported "$test (build)"
+	return
+    }
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -S tmpdir/testprog"]
+
+    set want "static int local = 2"
+
+    if [regexp $want $got] then {
+	pass $test
+    } else {
+	fail $test
+    }
+
+    set test "objdump --source-comment"
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --source-comment=// tmpdir/testprog"]
+
+    set want "//static int local = 2"
+
+    if [regexp $want $got] then {
+	pass $test
+    } else {
+	fail $test
+    }
+}
+
+test_objdump_S
+
 # Options which are not tested: -a -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

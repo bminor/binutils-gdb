@@ -123,6 +123,7 @@ static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
 static bfd_boolean unwind_inlines;	/* --inlines.  */
 static const char * disasm_sym;		/* Disassembly start symbol.  */
+static const char * source_comment;     /* --source_comment.  */
 
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
@@ -217,6 +218,7 @@ usage (FILE *stream, int status)
   -D, --disassemble-all    Display assembler contents of all sections\n\
       --disassemble=<sym>  Display assembler contents from <sym>\n\
   -S, --source             Intermix source code with disassembly\n\
+      --source-comment[=<txt>] Prefix lines of source code with <txt>\n\
   -s, --full-contents      Display the full contents of all sections requested\n\
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
@@ -313,6 +315,7 @@ enum option_values
     OPTION_RECURSE_LIMIT,
     OPTION_NO_RECURSE_LIMIT,
     OPTION_INLINES,
+    OPTION_SOURCE_COMMENT,
     OPTION_CTF,
     OPTION_CTF_PARENT
   };
@@ -354,6 +357,7 @@ static struct option long_options[]=
   {"section-headers", no_argument, NULL, 'h'},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
+  {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
   {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
   {"dwarf", optional_argument, NULL, OPTION_DWARF},
@@ -1594,8 +1598,10 @@ print_line (struct print_file_list *p, unsigned int linenum)
   if (linenum >= p->maxline)
     return;
   l = p->linemap [linenum];
-  /* Test fwrite return value to quiet glibc warning.  */
+  if (source_comment != NULL && strlen (l) > 0)
+    printf ("%s", source_comment);
   len = strcspn (l, "\n\r");
+  /* Test fwrite return value to quiet glibc warning.  */
   if (len == 0 || fwrite (l, len, 1, stdout) == 1)
     putchar ('\n');
 }
@@ -4455,6 +4461,15 @@ main (int argc, char **argv)
 	  with_source_code = TRUE;
 	  seenflag = TRUE;
 	  break;
+	case OPTION_SOURCE_COMMENT:
+	  disassemble = TRUE;
+	  with_source_code = TRUE;
+	  seenflag = TRUE;
+	  if (optarg)
+	    source_comment = xstrdup (sanitize_string (optarg));
+	  else
+	    source_comment = xstrdup ("# ");
+	  break;
 	case 'g':
 	  dump_debugging = 1;
 	  seenflag = TRUE;
@@ -4566,6 +4581,7 @@ main (int argc, char **argv)
   free_only_list ();
   free (dump_ctf_section_name);
   free (dump_ctf_parent_name);
+  free ((void *) source_comment);
 
   END_PROGRESS (program_name);
 

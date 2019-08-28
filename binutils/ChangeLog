@@ -1,3 +1,17 @@
+2019-08-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 24931
+	* objdump.c (source_comment): New static variable.
+	(option_values): Add OPTION_SOURCE_COMMENT.
+	(long_opions): Add --source-comment.
+	(print_line): If source comment is set, use it as a prefix to the
+	source code line.
+	(main): Handle OPTION_SOURCE_COMMENT.
+	* doc/binutils.texi: Document the new option.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/objdump.exp (test_objdump_S): Add tests
+	of the -S and --source-comment options.
+
 2019-08-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 24510

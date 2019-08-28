@@ -1,4 +1,6 @@
 -*- text -*-
+* Add --source-comment[=<txt>] option to objdump which if present,
+  provides a prefix to source code lines displayed in a disassembly.
 
 * Add --verilog-data-width option to objcopy for verilog targets to control
   width of data elements in verilog hex format.

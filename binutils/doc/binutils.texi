@@ -2104,6 +2104,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-j} @var{section}|@option{--section=}@var{section}]
         [@option{-l}|@option{--line-numbers}]
         [@option{-S}|@option{--source}]
+        [@option{--source-comment}[=@var{text}]]
         [@option{-m} @var{machine}|@option{--architecture=}@var{machine}]
         [@option{-M} @var{options}|@option{--disassembler-options=}@var{options}]
         [@option{-p}|@option{--private-headers}]
@@ -2612,6 +2613,15 @@ non-empty sections are displayed.
 @cindex disassembly, with source
 Display source code intermixed with disassembly, if possible.  Implies
 @option{-d}.
+
+@item --source-comment[=@var{txt}]
+@cindex source disassembly
+@cindex disassembly, with source
+Like the @option{-S} option, but all source code lines are displayed
+with a prefix of @var{txt}.  Typically @var{txt} will be a comment
+string which can be used to distinguish the assembler code from the
+source code.  If @var{txt} is not provided then a default string of
+@var{``# ``} (hash followed by a space), will be used.
 
 @item --prefix=@var{prefix}
 @cindex Add prefix to absolute paths
