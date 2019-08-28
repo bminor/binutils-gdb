@@ -1,3 +1,13 @@
+2019-08-28  Tamar Christina  <tamar.christina@arm.com>
+
+	Backported from mainline.
+	2019-08-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/binutils-all/arm/in-order-all.d: Skip on pe, wince, coff.
+	* testsuite/binutils-all/arm/in-order.d: Likewise.
+	* testsuite/binutils-all/arm/out-of-order-all.d: Likewise.
+	* testsuite/binutils-all/arm/out-of-order.d: Likewise.
+
 2019-08-17  Alan Modra  <amodra@gmail.com>
 
 	PR 24911
