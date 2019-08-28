@@ -1,3 +1,8 @@
+2019-09-11  Ali Tamur  <tamur@google.com>
+
+	*gdb/target-float.c (host_float_ops<T>::to_longest): Update
+	implementation.
+
 2019-09-11  Christian Biesinger  <cbiesinger@google.com>
 
 	* dbxread.c (read_dbx_symtab): Update.

@@ -1007,13 +1007,18 @@ host_float_ops<T>::to_longest (const gdb_byte *addr,
 {
   T host_float;
   from_target (type, addr, &host_float);
-  /* Converting an out-of-range value is undefined behavior in C, but we
-     prefer to return a defined value here.  */
-  if (host_float > std::numeric_limits<LONGEST>::max())
-    return std::numeric_limits<LONGEST>::max();
-  if (host_float < std::numeric_limits<LONGEST>::min())
+  T min_possible_range = static_cast<T>(std::numeric_limits<LONGEST>::min());
+  T max_possible_range = -min_possible_range;
+  /* host_float can be converted to an integer as long as it's in
+     the range [min_possible_range, max_possible_range). If not, it is either
+     too large, or too small, or is NaN; in this case return the maximum or
+     minimum possible value.  */
+  if (host_float < max_possible_range && host_float >= min_possible_range)
+    return static_cast<LONGEST> (host_float);
+  if (host_float < min_possible_range)
     return std::numeric_limits<LONGEST>::min();
-  return (LONGEST) host_float;
+  /* This line will be executed if host_float is NaN.  */
+  return std::numeric_limits<LONGEST>::max();
 }
 
 /* Convert signed integer VAL to a target floating-number of type TYPE
