@@ -734,6 +734,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                       pwtmpbuf = malloc (pwbuflen);
                       if (pwtmpbuf == NULL)
                         {
+                          if (__glibc_unlikely (malloc_name))
+                            free (name);
                           retval = GLOB_NOSPACE;
                           goto out;
                         }
@@ -762,6 +764,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                           if (newp == NULL)
                             {
                               free (malloc_pwtmpbuf);
+                              if (__glibc_unlikely (malloc_name))
+                                free (name);
                               retval = GLOB_NOSPACE;
                               goto out;
                             }
@@ -797,23 +801,30 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                               malloc_home_dir = 1;
                             }
                           memcpy (home_dir, p->pw_dir, home_dir_len);
-
-                          free (pwtmpbuf);
                         }
                     }
+                  free (malloc_pwtmpbuf);
+                }
+              else
+                {
+                  if (__glibc_unlikely (malloc_name))
+                    free (name);
                 }
             }
           if (home_dir == NULL || home_dir[0] == '\0')
             {
+              if (__glibc_unlikely (malloc_home_dir))
+                free (home_dir);
               if (flags & GLOB_TILDE_CHECK)
                 {
-                  if (__glibc_unlikely (malloc_home_dir))
-                    free (home_dir);
                   retval = GLOB_NOMATCH;
                   goto out;
                 }
               else
-                home_dir = (char *) "~"; /* No luck.  */
+                {
+                  home_dir = (char *) "~"; /* No luck.  */
+                  malloc_home_dir = 0;
+                }
             }
 #  endif /* WINDOWS32 */
 # endif
@@ -855,6 +866,9 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               dirname = newp;
               dirlen += home_len - 1;
               malloc_dirname = !use_alloca;
+
+              if (__glibc_unlikely (malloc_home_dir))
+                free (home_dir);
             }
           dirname_modified = 1;
         }
@@ -1027,9 +1041,12 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                 free (malloc_pwtmpbuf);
 
                 if (flags & GLOB_TILDE_CHECK)
-                  /* We have to regard it as an error if we cannot find the
-                     home directory.  */
-                  return GLOB_NOMATCH;
+                  {
+                    /* We have to regard it as an error if we cannot find the
+                       home directory.  */
+                    retval = GLOB_NOMATCH;
+                    goto out;
+                  }
               }
           }
         }
@@ -1059,7 +1076,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               free (pglob->gl_pathv);
               pglob->gl_pathv = NULL;
               pglob->gl_pathc = 0;
-              return GLOB_NOSPACE;
+              retval = GLOB_NOSPACE;
+              goto out;
             }
 
           new_gl_pathv = realloc (pglob->gl_pathv,
@@ -1077,12 +1095,19 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               p = mempcpy (pglob->gl_pathv[newcount], dirname, dirlen);
               p[0] = '/';
               p[1] = '\0';
+              if (__glibc_unlikely (malloc_dirname))
+                free (dirname);
             }
           else
             {
-              pglob->gl_pathv[newcount] = strdup (dirname);
-              if (pglob->gl_pathv[newcount] == NULL)
-                goto nospace;
+              if (__glibc_unlikely (malloc_dirname))
+                pglob->gl_pathv[newcount] = dirname;
+              else
+                {
+                  pglob->gl_pathv[newcount] = strdup (dirname);
+                  if (pglob->gl_pathv[newcount] == NULL)
+                    goto nospace;
+                }
             }
           pglob->gl_pathv[++newcount] = NULL;
           ++pglob->gl_pathc;
@@ -1092,7 +1117,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
         }
 
       /* Not found.  */
-      return GLOB_NOMATCH;
+      retval = GLOB_NOMATCH;
+      goto out;
     }
 
   meta = __glob_pattern_type (dirname, !(flags & GLOB_NOESCAPE));
@@ -1138,7 +1164,10 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
       if (status != 0)
         {
           if ((flags & GLOB_NOCHECK) == 0 || status != GLOB_NOMATCH)
-            return status;
+            {
+              retval = status;
+              goto out;
+            }
           goto no_matches;
         }
 
@@ -1157,7 +1186,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
             if (interrupt_state)
               {
                 globfree (&dirs);
-                return GLOB_ABORTED;
+                retval = GLOB_ABORTED;
+                goto out;
               }
           }
 #endif /* SHELL.  */
@@ -1176,7 +1206,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               globfree (&dirs);
               globfree (pglob);
               pglob->gl_pathc = 0;
-              return status;
+              retval = status;
+              goto out;
             }
 
           /* Stick the directory on the front of each name.  */
@@ -1187,7 +1218,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               globfree (&dirs);
               globfree (pglob);
               pglob->gl_pathc = 0;
-              return GLOB_NOSPACE;
+              retval = GLOB_NOSPACE;
+              goto out;
             }
         }
 
@@ -1209,7 +1241,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                 {
                 nospace2:
                   globfree (&dirs);
-                  return GLOB_NOSPACE;
+                  retval = GLOB_NOSPACE;
+                  goto out;
                 }
 
               new_gl_pathv = realloc (pglob->gl_pathv,
@@ -1224,7 +1257,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
                   globfree (&dirs);
                   globfree (pglob);
                   pglob->gl_pathc = 0;
-                  return GLOB_NOSPACE;
+                  retval = GLOB_NOSPACE;
+                  goto out;
                 }
 
               ++pglob->gl_pathc;
@@ -1236,7 +1270,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
           else
             {
               globfree (&dirs);
-              return GLOB_NOMATCH;
+              retval = GLOB_NOMATCH;
+              goto out;
             }
         }
 
@@ -1282,7 +1317,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               flags = orig_flags;
               goto no_matches;
             }
-          return status;
+          retval = status;
+          goto out;
         }
 
       if (dirlen > 0)
@@ -1294,7 +1330,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
             {
               globfree (pglob);
               pglob->gl_pathc = 0;
-              return GLOB_NOSPACE;
+              retval = GLOB_NOSPACE;
+              goto out;
             }
         }
     }
@@ -1319,7 +1356,8 @@ glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
               {
                 globfree (pglob);
                 pglob->gl_pathc = 0;
-                return GLOB_NOSPACE;
+                retval = GLOB_NOSPACE;
+                goto out;
               }
             strcpy (&new[len - 2], "/");
             pglob->gl_pathv[i] = new;

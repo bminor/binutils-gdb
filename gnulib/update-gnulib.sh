@@ -171,6 +171,7 @@ apply_patches ()
 
 apply_patches "patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch"
 apply_patches "patches/0002-mkostemp-mkostemps-Fix-compilation-error-in-C-mode-o.patch"
+apply_patches "patches/0003-Fix-glob-c-Coverity-issues.patch"
 
 # Regenerate all necessary files...
 aclocal -Iimport/m4 -I../config &&
