@@ -580,7 +580,7 @@ trace_start_error (const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  warning ("Could not trace the inferior process.\nError: ");
+  warning ("Could not trace the inferior process.");
   vwarning (fmt, ap);
   va_end (ap);
 
