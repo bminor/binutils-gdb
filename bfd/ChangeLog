@@ -1,3 +1,9 @@
+2019-08-28  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_lui): Add check to exclude abs
+	section when setting max_alignment.  Update comment.
+	(_bfd_riscv_relax_pc): Likewise.
+
 2019-08-29  Alan Modra  <amodra@gmail.com>
 
 	PR 24891

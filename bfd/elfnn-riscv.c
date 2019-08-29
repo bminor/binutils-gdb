@@ -3533,12 +3533,13 @@ _bfd_riscv_relax_lui (bfd *abfd,
 
   if (gp)
     {
-      /* If gp and the symbol are in the same output section, then
-	 consider only that section's alignment.  */
+      /* If gp and the symbol are in the same output section, which is not the
+	 abs section, then consider only that output section's alignment.  */
       struct bfd_link_hash_entry *h =
 	bfd_link_hash_lookup (link_info->hash, RISCV_GP_SYMBOL, FALSE, FALSE,
 			      TRUE);
-      if (h->u.def.section->output_section == sym_sec->output_section)
+      if (h->u.def.section->output_section == sym_sec->output_section
+	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
     }
 
@@ -3767,11 +3768,13 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (gp)
     {
-      /* If gp and the symbol are in the same output section, then
-	 consider only that section's alignment.  */
+      /* If gp and the symbol are in the same output section, which is not the
+	 abs section, then consider only that output section's alignment.  */
       struct bfd_link_hash_entry *h =
-	bfd_link_hash_lookup (link_info->hash, RISCV_GP_SYMBOL, FALSE, FALSE, TRUE);
-      if (h->u.def.section->output_section == sym_sec->output_section)
+	bfd_link_hash_lookup (link_info->hash, RISCV_GP_SYMBOL, FALSE, FALSE,
+			      TRUE);
+      if (h->u.def.section->output_section == sym_sec->output_section
+	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
     }
 
