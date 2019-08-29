@@ -31,6 +31,7 @@ if { ![runto MAIN__] } {
 }
 
 set integer4 [fortran_int4]
+set integer8 [fortran_int8]
 set logical4 [fortran_logical4]
 set character1 [fortran_character1]
 
@@ -41,7 +42,9 @@ gdb_test "info types" \
 	 "File .*:" \
 	 "\[\t \]+${character1}" \
 	 "\[\t \]+${integer4}" \
-	 "\[\t \]+${logical4}" \
-	 "20:\[\t \]+Type __vtype_mod1_M1t1;" \
-	 "17:\[\t \]+Type m1t1;" \
-	 "22:\[\t \]+Type s1;" ]
+	 "(\[\t \]+${integer8}" \
+	 ")?\[\t \]+${logical4}" \
+	 "(20:\[\t \]+Type __vtype_mod1_M1t1;" \
+	 ")?$decimal:\[\t \]+Type m1t1;" \
+	 "22:\[\t \]+Type s1;(" \
+	 ".*)?"]

@@ -41,6 +41,18 @@ proc fortran_int4 {} {
     }
 }
 
+proc fortran_int8 {} {
+    if {[test_compiler_info {gcc-4-[012]-*}]} {
+	return "int8"
+    } elseif {[test_compiler_info {gcc-*}]} {
+	return "integer\\(kind=8\\)"
+    } elseif {[test_compiler_info {icc-*}]} {
+	return "INTEGER\\(8\\)"
+    } else {
+	return "unknown"
+    }
+}
+
 proc fortran_real4 {} {
     if {[test_compiler_info {gcc-4-[012]-*}]} {
 	return "real4"
