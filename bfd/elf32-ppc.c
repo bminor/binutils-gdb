@@ -3096,11 +3096,6 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  /* Indirect .sdata relocation.  */
 	case R_PPC_EMB_SDAI16:
-	  if (bfd_link_pic (info))
-	    {
-	      bad_shared_reloc (abfd, r_type);
-	      return FALSE;
-	    }
 	  htab->sdata[0].sym->ref_regular = 1;
 	  if (!elf_allocate_pointer_linker_section (abfd, &htab->sdata[0],
 						    h, rel))
@@ -3114,7 +3109,7 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  /* Indirect .sdata2 relocation.  */
 	case R_PPC_EMB_SDA2I16:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      bad_shared_reloc (abfd, r_type);
 	      return FALSE;
@@ -3160,7 +3155,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	  break;
 
 	case R_PPC_EMB_SDA2REL:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      bad_shared_reloc (abfd, r_type);
 	      return FALSE;
@@ -3177,11 +3172,6 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_VLE_SDA21:
 	case R_PPC_EMB_SDA21:
 	case R_PPC_EMB_RELSDA:
-	  if (bfd_link_pic (info))
-	    {
-	      bad_shared_reloc (abfd, r_type);
-	      return FALSE;
-	    }
 	  if (h != NULL)
 	    {
 	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
@@ -3194,11 +3184,6 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_EMB_NADDR16_LO:
 	case R_PPC_EMB_NADDR16_HI:
 	case R_PPC_EMB_NADDR16_HA:
-	  if (bfd_link_pic (info))
-	    {
-	      bad_shared_reloc (abfd, r_type);
-	      return FALSE;
-	    }
 	  if (h != NULL)
 	    h->non_got_ref = TRUE;
 	  break;

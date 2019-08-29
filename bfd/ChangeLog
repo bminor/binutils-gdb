@@ -1,5 +1,13 @@
 2019-08-29  Alan Modra  <amodra@gmail.com>
 
+	PR 24697
+	* elf32-ppc.c (ppc_elf_check_relocs): Call bad_shared_reloc
+	when !bfd_link_executable for R_PPC_EMB_SDA2I16 and
+	R_PPC_EMB_SDA2REL.  Don't call bad_shared_reloc for any other
+	reloc.
+
+2019-08-29  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (xlate_pcrel_opt): Add poff parameter.  Allow offset
 	on second insn, return it in poff.
 	(ppc64_elf_relocate_section): Add offset to paddi addend for
