@@ -8265,25 +8265,26 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 
 /* PCREL_OPT in one instance flags to the linker that a pair of insns:
      pld ra,symbol@got@pcrel
-     load/store rt,0(ra)
+     load/store rt,off(ra)
    or
      pla ra,symbol@pcrel
-     load/store rt,0(ra)
+     load/store rt,off(ra)
    may be translated to
-     pload/pstore rt,symbol@pcrel
+     pload/pstore rt,symbol+off@pcrel
      nop.
    This function returns true if the optimization is possible, placing
-   the prefix insn in *PINSN1 and a NOP in *PINSN2.
+   the prefix insn in *PINSN1, a NOP in *PINSN2 and the offset in *POFF.
 
    On entry to this function, the linker has already determined that
    the pld can be replaced with pla: *PINSN1 is that pla insn,
    while *PINSN2 is the second instruction.  */
 
 static bfd_boolean
-xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2)
+xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 {
   uint32_t insn2 = *pinsn2 >> 32;
   uint64_t i1new;
+  bfd_signed_vma off;
 
   /* Check that regs match.  */
   if (((insn2 >> 16) & 31) != ((*pinsn1 >> 21) & 31))
@@ -8306,27 +8307,28 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2)
     case 52: /* stfs */
     case 54: /* stfd */
       /* These are the PMLS cases, where we just need to tack a prefix
-	 on the insn.  Check that the D field is zero.  */
-      if ((insn2 & 0xffff) != 0)
-	return FALSE;
+	 on the insn.  */
       i1new = ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
 	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      off = insn2 & 0xffff;
       break;
 
     case 58: /* lwa, ld */
-      if ((insn2 & 0xfffd) != 0)
+      if ((insn2 & 1) != 0)
 	return FALSE;
       i1new = ((1ULL << 58) | (1ULL << 52)
 	       | (insn2 & 2 ? 41ULL << 26 : 57ULL << 26)
 	       | (insn2 & (31ULL << 21)));
+      off = insn2 & 0xfffc;
       break;
 
     case 57: /* lxsd, lxssp */
-      if ((insn2 & 0xfffc) != 0 || (insn2 & 3) < 2)
+      if ((insn2 & 3) < 2)
 	return FALSE;
       i1new = ((1ULL << 58) | (1ULL << 52)
 	       | ((40ULL | (insn2 & 3)) << 26)
 	       | (insn2 & (31ULL << 21)));
+      off = insn2 & 0xfffc;
       break;
 
     case 61: /* stxsd, stxssp, lxv, stxv  */
@@ -8334,40 +8336,39 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2)
 	return FALSE;
       else if ((insn2 & 3) >= 2)
 	{
-	  if ((insn2 & 0xfffc) != 0)
-	    return FALSE;
 	  i1new = ((1ULL << 58) | (1ULL << 52)
 		   | ((44ULL | (insn2 & 3)) << 26)
 		   | (insn2 & (31ULL << 21)));
+	  off = insn2 & 0xfffc;
 	}
       else
 	{
-	  if ((insn2 & 0xfff0) != 0)
-	    return FALSE;
 	  i1new = ((1ULL << 58) | (1ULL << 52)
 		   | ((50ULL | (insn2 & 4) | ((insn2 & 8) >> 3)) << 26)
 		   | (insn2 & (31ULL << 21)));
+	  off = insn2 & 0xfff0;
 	}
       break;
 
     case 56: /* lq */
-      if ((insn2 & 0xffff) != 0)
-	return FALSE;
       i1new = ((1ULL << 58) | (1ULL << 52)
 	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
+      off = insn2 & 0xffff;
       break;
 
     case 62: /* std, stq */
-      if ((insn2 & 0xfffd) != 0)
+      if ((insn2 & 1) != 0)
 	return FALSE;
       i1new = ((1ULL << 58) | (1ULL << 52)
 	       | ((insn2 & 2) == 0 ? 61ULL << 26 : 60ULL << 26)
 	       | (insn2 & (31ULL << 21)));
+      off = insn2 & 0xfffc;
       break;
     }
 
   *pinsn1 = i1new;
   *pinsn2 = (uint64_t) NOP << 32;
+  *poff = (off ^ 0x8000) - 0x8000;
   return TRUE;
 }
 
@@ -15408,12 +15409,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      if (off2 + 4 <= input_section->size)
 			{
 			  uint64_t pinsn2;
+			  bfd_signed_vma addend_off;
 			  pinsn2 = bfd_get_32 (input_bfd, contents + off2);
 			  pinsn2 <<= 32;
 			  if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
 			    break;
-			  if (xlate_pcrel_opt (&pinsn, &pinsn2))
+			  if (xlate_pcrel_opt (&pinsn, &pinsn2, &addend_off))
 			    {
+			      addend += addend_off;
+			      rel->r_addend = addend;
 			      bfd_put_32 (input_bfd, pinsn >> 32,
 					  contents + offset);
 			      bfd_put_32 (input_bfd, pinsn,
@@ -15428,7 +15432,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 	}
 
-      /* Set `addend'.  */
       tls_type = 0;
       save_unresolved_reloc = unresolved_reloc;
       switch (r_type)

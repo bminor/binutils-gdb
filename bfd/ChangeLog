@@ -1,3 +1,10 @@
+2019-08-29  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (xlate_pcrel_opt): Add poff parameter.  Allow offset
+	on second insn, return it in poff.
+	(ppc64_elf_relocate_section): Add offset to paddi addend for
+	PCREL_OPT.
+
 2019-08-28  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_lui): Add check to exclude abs
