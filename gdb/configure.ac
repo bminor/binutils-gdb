@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(main.c)
-AC_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
 
 # Set the 'development' global.
@@ -2262,12 +2262,6 @@ GDB_AC_SELFTEST([
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
 GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
 AC_CONFIG_FILES([gcore], [chmod +x gcore])
-AC_CONFIG_FILES([Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile],
-[
-case x$CONFIG_HEADERS in
-xconfig.h:config.in)
-echo > stamp-h ;;
-esac
-])
+AC_CONFIG_FILES([Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile])
 
 AC_OUTPUT

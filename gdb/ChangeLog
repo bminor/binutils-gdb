@@ -1,3 +1,11 @@
+2019-10-17  Tom Tromey  <tromey@adacore.com>
+
+	* configure: Rebuild.
+	* configure.ac: Use AC_CONFIG_HEADERS.  Create stamp-h there, not
+	in AC_CONFIG_FILES invocation.
+	* Makefile.in (Makefile, data-directory/Makefile, stamp-h): Use
+	new-style config.status invocation.
+
 2019-10-17  Tom de Vries  <tdevries@suse.de>
 
 	* arm-nbsd-nat.c: Fix typos in comments.

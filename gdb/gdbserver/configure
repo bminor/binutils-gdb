@@ -9806,17 +9806,13 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
 
   case $ac_file$ac_mode in
+    "config.h":H) echo > stamp-h ;;
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
     "gdbdepdir":C)
   for subdir in ${CONFIG_SRC_SUBDIR}
   do
       $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
   done ;;
-    "Makefile":F) case x$CONFIG_HEADERS in
-xconfig.h:config.in)
-echo > stamp-h ;;
-esac
- ;;
 
   esac
 done # for ac_tag

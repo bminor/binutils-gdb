@@ -1996,18 +1996,10 @@ subdir_do: force
 	done
 
 Makefile: Makefile.in config.status
-	# Regenerate the Makefile and the tm.h / nm.h links.
-	CONFIG_FILES="Makefile" \
-	  CONFIG_COMMANDS= \
-	  CONFIG_HEADERS= \
-	  $(SHELL) config.status
+	$(SHELL) config.status $@
 
 data-directory/Makefile: data-directory/Makefile.in config.status
-	CONFIG_FILES="data-directory/Makefile" \
-	  CONFIG_COMMANDS="depfiles" \
-	  CONFIG_HEADERS= \
-	  CONFIG_LINKS= \
-	  $(SHELL) config.status
+	$(SHELL) config.status $@
 
 .PHONY: run
 run: Makefile
@@ -2027,11 +2019,7 @@ gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
 
 config.h: stamp-h ; @true
 stamp-h: $(srcdir)/config.in config.status
-	CONFIG_HEADERS=config.h:config.in \
-	  CONFIG_COMMANDS="default depdir" \
-	  CONFIG_FILES= \
-	  CONFIG_LINKS= \
-	  $(SHELL) config.status
+	$(SHELL) config.status config.h
 
 config.status: $(srcdir)/configure configure.nat configure.tgt configure.host ../bfd/development.sh
 	$(SHELL) config.status --recheck

@@ -496,10 +496,10 @@ subdir_do: force
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
-	CONFIG_FILES="" CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
+	$(SHELL) ./config.status config.h
 
 Makefile: Makefile.in config.status
-	CONFIG_HEADERS="" $(SHELL) ./config.status
+	$(SHELL) ./config.status $@
 
 $(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../../gnulib/Makefile.in config.status
 	  @cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \

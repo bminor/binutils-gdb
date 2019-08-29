@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(server.c)
-AC_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 
 AM_MAINTAINER_MODE
 
@@ -484,11 +484,6 @@ if test x"$STDINT_H" != x; then
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
-AC_CONFIG_FILES([Makefile],
-[case x$CONFIG_HEADERS in
-xconfig.h:config.in)
-echo > stamp-h ;;
-esac
-])
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
