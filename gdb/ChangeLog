@@ -1,3 +1,9 @@
+2021-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Richard Bunt  <richard.bunt@arm.com>
+
+	* breakpoint.c (check_longjmp_breakpoint_for_call_dummy): Add
+	check for why the backtrace stopped.
+
 2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.h (struct structured_type) <signatured_type>: New.

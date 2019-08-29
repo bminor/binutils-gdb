@@ -7357,9 +7357,10 @@ set_longjmp_breakpoint_for_call_dummy (void)
    TP.  Remove those which can no longer be found in the current frame
    stack.
 
-   You should call this function only at places where it is safe to currently
-   unwind the whole stack.  Failed stack unwind would discard live dummy
-   frames.  */
+   If the unwind fails then there is not sufficient information to discard
+   dummy frames.  In this case, elide the clean up and the dummy frames will
+   be cleaned up next time this function is called from a location where
+   unwinding is possible.  */
 
 void
 check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
@@ -7371,12 +7372,55 @@ check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
       {
 	struct breakpoint *dummy_b = b->related_breakpoint;
 
+	/* Find the bp_call_dummy breakpoint in the list of breakpoints
+	   chained off b->related_breakpoint.  */
 	while (dummy_b != b && dummy_b->type != bp_call_dummy)
 	  dummy_b = dummy_b->related_breakpoint;
+
+	/* If there was no bp_call_dummy breakpoint then there's nothing
+	   more to do.  Or, if the dummy frame associated with the
+	   bp_call_dummy is still on the stack then we need to leave this
+	   bp_call_dummy in place.  */
 	if (dummy_b->type != bp_call_dummy
 	    || frame_find_by_id (dummy_b->frame_id) != NULL)
 	  continue;
-	
+
+	/* We didn't find the dummy frame on the stack, this could be
+	   because we have longjmp'd to a stack frame that is previous to
+	   the dummy frame, or it could be because the stack unwind is
+	   broken at some point between the longjmp frame and the dummy
+	   frame.
+
+	   Next we figure out why the stack unwind stopped.  If it looks
+	   like the unwind is complete then we assume the dummy frame has
+	   been jumped over, however, if the unwind stopped for an
+	   unexpected reason then we assume the stack unwind is currently
+	   broken, and that we will (eventually) return to the dummy
+	   frame.
+
+	   It might be tempting to consider using frame_id_inner here, but
+	   that is not safe.   There is no guarantee that the stack frames
+	   we are looking at here are even on the same stack as the
+	   original dummy frame, hence frame_id_inner can't be used.  See
+	   the comments on frame_id_inner for more details.  */
+	bool unwind_finished_unexpectedly = false;
+	for (struct frame_info *fi = get_current_frame (); fi != nullptr; )
+	  {
+	    struct frame_info *prev = get_prev_frame (fi);
+	    if (prev == nullptr)
+	      {
+		/* FI is the last stack frame.  Why did this frame not
+		   unwind further?  */
+		auto stop_reason = get_frame_unwind_stop_reason (fi);
+		if (stop_reason != UNWIND_NO_REASON
+		    && stop_reason != UNWIND_OUTERMOST)
+		  unwind_finished_unexpectedly = true;
+	      }
+	    fi = prev;
+	  }
+	if (unwind_finished_unexpectedly)
+	  continue;
+
 	dummy_frame_discard (dummy_b->frame_id, tp);
 
 	while (b->related_breakpoint != b)
