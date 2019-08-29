@@ -13,6 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This testcase was originally for PR gdb/15415, a problem with the "run"
+# command expanding symlinks in the name of the program being run.
+# This test uses pathnames on build to create symbolic links on host and
+# expects the test program running on target to see those symbolic links.
+# Therefore, it can't work reliably on anything other than configurations 
+# where build/host/target are all the same.
+
+if { ![isnative] } {
+    unsupported "argv0-symlink.exp not supported on non-native target"
+    return -1
+}
+
+if { [is_remote host] } {
+    unsupported "argv0-symlink.exp not supported on remote host"
+    return -1
+}
+
 standard_testfile
 
 set has_argv0 [gdb_has_argv0]
