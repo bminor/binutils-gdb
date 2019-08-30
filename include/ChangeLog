@@ -1,3 +1,8 @@
+2019-08-30  Claudiu Zissulescu <claziss@gmail.com>
+
+	* opcode/arc.h (FASTMATH): Move it from insn_class_t to
+	insn_subclass_t enum.
+
 2019-08-22  Alan Modra  <amodra@gmail.com>
 
 	* elf/arm.h (ARM_GET_SYM_CMSE_SPCL, ARM_SET_SYM_CMSE_SPCL): Delete.
