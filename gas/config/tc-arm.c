@@ -19859,7 +19859,13 @@ do_neon_mov (void)
       et = neon_check_type (2, rs, N_EQK, N_F64 | N_KEY);
       /* It is not an error here if no type is given.  */
       inst.error = NULL;
-      if (et.type == NT_float && et.size == 64)
+
+      /* In MVE we interpret the following instructions as same, so ignoring
+	 the following type (float) and size (64) checks.
+	 a: VMOV<c><q> <Dd>, <Dm>
+	 b: VMOV<c><q>.F64 <Dd>, <Dm>.  */
+      if ((et.type == NT_float && et.size == 64)
+	  || (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)))
 	{
 	  do_vfp_nsyn_opcode ("fcpyd");
 	  break;

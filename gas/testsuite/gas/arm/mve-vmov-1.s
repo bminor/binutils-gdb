@@ -136,3 +136,10 @@ vmov.i64 q0, #255 @ 0x000000000000000FF
 vmov \op1, \op2
 .endr
 .endr
+
+.irp op1, d0, d1, d2, d4, d8, d15
+.irp op2, d0, d1, d2, d4, d8, d15
+vmov \op1, \op2
+vmov.f64 \op1, \op2
+.endr
+.endr
