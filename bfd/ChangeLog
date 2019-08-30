@@ -1,3 +1,9 @@
+2019-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24951
+	* archive.c (_bfd_get_elt_at_filepos): Copy BFD_COMPRESS,
+	BFD_DECOMPRESS and BFD_COMPRESS_GABI flags for thin archive.
+
 2019-08-29  Alan Modra  <amodra@gmail.com>
 
 	PR 24697

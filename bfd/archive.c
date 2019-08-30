@@ -692,6 +692,13 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 	      return NULL;
 	    }
 	  n_bfd->proxy_origin = bfd_tell (archive);
+
+	  /* Copy BFD_COMPRESS, BFD_DECOMPRESS and BFD_COMPRESS_GABI
+	     flags.  */
+	  n_bfd->flags |= archive->flags & (BFD_COMPRESS
+					    | BFD_DECOMPRESS
+					    | BFD_COMPRESS_GABI);
+
 	  return n_bfd;
 	}
 
