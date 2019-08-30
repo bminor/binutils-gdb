@@ -2297,7 +2297,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	     (uint64_t) rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
-	  continue;
+
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = FALSE;
+	  goto out;
 	}
 
       if (r == bfd_reloc_ok)
