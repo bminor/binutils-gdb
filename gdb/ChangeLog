@@ -1,5 +1,18 @@
 2019-09-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* maint.c: Add 'cmath' include.
+	(struct maint_print_section_data): New structure.
+	(print_section_index): New function.
+	(print_bfd_section_info): Add header comment, small whitespace
+	cleanup, and update to call new print_section_index function.
+	(print_objfile_section_info): Likewise.
+	(maint_obj_section_from_bfd_section): New function.
+	(print_bfd_section_info_maybe_relocated): New function.
+	(maintenance_info_sections): Add header comment, always use
+	bfd_map_over_sections instead of ALL_OBJFILE_OSECTIONS.
+
+2019-09-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* psymtab.c (find_pc_sect_psymtab): Move baseaddr local into more
 	inner scope, add check that the objfile has psymtabs before
 	checking psymtabs_addrmap.

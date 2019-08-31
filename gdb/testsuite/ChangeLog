@@ -1,3 +1,7 @@
+2019-09-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint.exp: Add test for 'maint info sections'.
+
 2019-09-12  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/store.exp: Allow register variables to be optimized out at

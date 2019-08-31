@@ -109,6 +109,23 @@ if ![runto_main] then {
         perror "tests suppressed"
 }
 
+# Check that 'maint info sections' output looks correct.  When
+# checking the lines for each section we reject section names starting
+# with a '*' character, the internal *COM*, *UND*, *ABS*, and *IND*
+# sections should not be displayed in this output.
+set test "check maint info sections output"
+gdb_test_multiple "maint info sections" $test {
+    -re "Exec file:\r\n\[\t ]+`\[^'\]+', file type \[^.\]+\.\r\n" {
+	exp_continue
+    }
+    -re "^ \\\[\[0-9\]+\\\]\[\t \]+$hex->$hex at $hex: \[^*\r\]+\r\n" {
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	pass $test
+    }
+}
+
 # If we're using .gdb_index or .debug_names there will be no psymtabs.
 set have_gdb_index 0
 gdb_test_multiple "maint info sections .gdb_index .debug_names" "check for .gdb_index" {
