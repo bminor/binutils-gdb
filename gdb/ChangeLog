@@ -1,3 +1,10 @@
+2019-09-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* psymtab.c (find_pc_sect_psymtab): Move baseaddr local into more
+	inner scope, add check that the objfile has psymtabs before
+	checking psymtabs_addrmap.
+	* psymtab.h (psymtab_storage) <psymtabs_addrmap>: Extend comment.
+
 2019-09-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Announce that Ada task names are now shown at more places,

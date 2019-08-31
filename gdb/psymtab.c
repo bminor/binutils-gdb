@@ -301,14 +301,24 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 		      struct obj_section *section,
 		      struct bound_minimal_symbol msymbol)
 {
-  CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
-				 SECT_OFF_TEXT (objfile));
+  /* Try just the PSYMTABS_ADDRMAP mapping first as it has better
+     granularity than the later used TEXTLOW/TEXTHIGH one.  However, we need
+     to take care as the PSYMTABS_ADDRMAP can hold things other than partial
+     symtabs in some cases.
 
-  /* Try just the PSYMTABS_ADDRMAP mapping first as it has better granularity
-     than the later used TEXTLOW/TEXTHIGH one.  */
+     This function should only be called for objfiles that are using partial
+     symtabs, not for objfiles that are using indexes (.gdb_index or
+     .debug_names), however 'maintenance print psymbols' calls this function
+     directly for all objfiles.  If we assume that PSYMTABS_ADDRMAP contains
+     partial symtabs then we will end up returning a pointer to an object
+     that is not a partial_symtab, which doesn't end well.  */
 
-  if (objfile->partial_symtabs->psymtabs_addrmap != NULL)
+  if (objfile->partial_symtabs->psymtabs != NULL
+      && objfile->partial_symtabs->psymtabs_addrmap != NULL)
     {
+      CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_TEXT (objfile));
+
       struct partial_symtab *pst
 	= ((struct partial_symtab *)
 	   addrmap_find (objfile->partial_symtabs->psymtabs_addrmap,

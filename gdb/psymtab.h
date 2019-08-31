@@ -109,7 +109,11 @@ public:
   /* Map addresses to the entries of PSYMTABS.  It would be more efficient to
      have a map per the whole process but ADDRMAP cannot selectively remove
      its items during FREE_OBJFILE.  This mapping is already present even for
-     PARTIAL_SYMTABs which still have no corresponding full SYMTABs read.  */
+     PARTIAL_SYMTABs which still have no corresponding full SYMTABs read.
+
+     The DWARF parser reuses this addrmap to store things other than
+     psymtabs in the cases where debug information is being read from, for
+     example, the .debug-names section.  */
 
   struct addrmap *psymtabs_addrmap = nullptr;
 
