@@ -1,3 +1,8 @@
+2019-09-04  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/info-var.exp: Test info variables without running
+	to main, to avoid expect's buffer overflow.
+
 2019-09-03  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/bias.exp: New file.

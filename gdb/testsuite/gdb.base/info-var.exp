@@ -22,10 +22,9 @@ if {[prepare_for_testing "failed to prepare" \
     return -1
 }
 
-if ![runto_main] then {
-    fail "can't run to main"
-    return 0
-}
+# Note: we do not run to main, as otherwise, the output of info variables
+# can be very long, showing thousands of glibc variables.
+# This long output then causes expect's buffer to overflow.
 
 gdb_test "info variables" \
     [multi_line \
