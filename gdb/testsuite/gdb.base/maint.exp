@@ -127,18 +127,7 @@ gdb_test_multiple "maint info sections" $test {
 }
 
 # If we're using .gdb_index or .debug_names there will be no psymtabs.
-set have_gdb_index 0
-gdb_test_multiple "maint info sections .gdb_index .debug_names" "check for .gdb_index" {
-    -re ": \\.gdb_index .*\r\n$gdb_prompt $" {
-	set have_gdb_index 1
-    }
-    -re ": \\.debug_names .*\r\n$gdb_prompt $" {
-	set have_gdb_index 1
-    }
-    -re ".*$gdb_prompt $" {
-	;# Nothing to do, present to avoid a FAIL.
-    }
-}
+set have_gdb_index [ exec_has_index_section ${binfile} ]
 
 # There also won't be any psymtabs if we read the index from the index cache.
 # We can detect this by looking if the index-cache is enabled and if the number
