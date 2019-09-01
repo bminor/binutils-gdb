@@ -250,10 +250,8 @@ tui_locator_window::rerender ()
 void
 tui_locator_window::set_locator_fullname (const char *fullname)
 {
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-
-  locator->full_name[0] = 0;
-  strcat_to_buf (locator->full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
+  full_name[0] = 0;
+  strcat_to_buf (full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
   rerender ();
 }
 
