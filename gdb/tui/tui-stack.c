@@ -166,12 +166,12 @@ tui_locator_window::make_status_line () const
   /* Procedure/class name.  */
   if (proc_width > 0)
     {
-      if (strlen (proc_name) > proc_width)
+      if (proc_name.size () > proc_width)
         string.printf ("%s%*.*s* ", PROC_PREFIX,
-		       1 - proc_width, proc_width - 1, proc_name);
+		       1 - proc_width, proc_width - 1, proc_name.c_str ());
       else
         string.printf ("%s%*.*s ", PROC_PREFIX,
-		       -proc_width, proc_width, proc_name);
+		       -proc_width, proc_width, proc_name.c_str ());
     }
 
   if (line_width > 0)
@@ -250,8 +250,7 @@ tui_locator_window::rerender ()
 void
 tui_locator_window::set_locator_fullname (const char *fullname)
 {
-  full_name[0] = 0;
-  strcat_to_buf (full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
+  full_name = fullname;
   rerender ();
 }
 
@@ -272,16 +271,13 @@ tui_locator_window::set_locator_info (struct gdbarch *gdbarch_in,
   if (fullname == NULL)
     fullname = "";
 
-  locator_changed_p |= strncmp (proc_name, procname,
-				MAX_LOCATOR_ELEMENT_LEN) != 0;
+  locator_changed_p |= proc_name != procname;
   locator_changed_p |= lineno != line_no;
   locator_changed_p |= addr_in != addr;
   locator_changed_p |= gdbarch_in != gdbarch;
-  locator_changed_p |= strncmp (full_name, fullname,
-				MAX_LOCATOR_ELEMENT_LEN) != 0;
+  locator_changed_p |= full_name != fullname;
 
-  proc_name[0] = (char) 0;
-  strcat_to_buf (proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
+  proc_name = procname;
   line_no = lineno;
   addr = addr_in;
   gdbarch = gdbarch_in;

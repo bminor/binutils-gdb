@@ -179,7 +179,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	      element->line_or_addr.loa = LOA_LINE;
 	      element->line_or_addr.u.line_no = cur_line_no;
 	      element->is_exec_point
-		= (filename_cmp (locator->full_name,
+		= (filename_cmp (locator->full_name.c_str (),
 				 symtab_to_fullname (s)) == 0
 		   && cur_line_no == locator->line_no);
 
@@ -213,7 +213,7 @@ bool
 tui_source_window::showing_source_p (const char *fullname) const
 {
   return (!content.empty ()
-	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name,
+	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name.c_str (),
 			    fullname) == 0));
 }
 

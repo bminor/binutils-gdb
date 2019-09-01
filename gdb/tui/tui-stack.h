@@ -26,12 +26,6 @@
 
 struct frame_info;
 
-#ifdef PATH_MAX
-# define MAX_LOCATOR_ELEMENT_LEN        PATH_MAX
-#else
-# define MAX_LOCATOR_ELEMENT_LEN        1024
-#endif
-
 /* Locator window class.  */
 
 struct tui_locator_window : public tui_gen_win_info
@@ -57,8 +51,8 @@ struct tui_locator_window : public tui_gen_win_info
   /* Set the full_name portion of the locator.  */
   void set_locator_fullname (const char *fullname);
 
-  char full_name[MAX_LOCATOR_ELEMENT_LEN];
-  char proc_name[MAX_LOCATOR_ELEMENT_LEN];
+  std::string full_name;
+  std::string proc_name;
   int line_no = 0;
   CORE_ADDR addr = 0;
   /* Architecture associated with code at this location.  */

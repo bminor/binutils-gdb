@@ -1,5 +1,16 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (MAX_LOCATOR_ELEMENT_LEN): Remove define.
+	(struct tui_locator_window) <full_name, proc_name>: Now
+	std::string.
+	* tui/tui-stack.c (tui_locator_window::make_status_line)
+	(tui_locator_window::set_locator_fullname)
+	(tui_locator_window::set_locator_info): Update.
+	* tui/tui-source.c (tui_source_window::set_contents)
+	(tui_source_window::showing_source_p): Update.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_locator_window::set_locator_fullname):
 	Don't call tui_locator_win_info_ptr.
 
