@@ -373,9 +373,23 @@ riscv_elf_create_dynamic_sections (bfd *dynobj,
 
   if (!bfd_link_pic (info))
     {
+      /* Technically, this section doesn't have contents.  It is used as the
+	 target of TLS copy relocs, to copy TLS data from shared libraries into
+	 the executable.  However, if we don't mark it as loadable, then it
+	 matches the IS_TBSS test in ldlang.c, and there is no run-time address
+	 space allocated for it even though it has SEC_ALLOC.  That test is
+	 correct for .tbss, but not correct for this section.  There is also
+	 a second problem that having a section with no contents can only work
+	 if it comes after all sections with contents in the same segment,
+	 but the linker script does not guarantee that.  This is just mixed in
+	 with other .tdata.* sections.  We can fix both problems by lying and
+	 saying that there are contents.  This section is expected to be small
+	 so this should not cause a significant extra program startup cost.  */
       htab->sdyntdata =
 	bfd_make_section_anyway_with_flags (dynobj, ".tdata.dyn",
 					    (SEC_ALLOC | SEC_THREAD_LOCAL
+					     | SEC_LOAD | SEC_DATA
+					     | SEC_HAS_CONTENTS
 					     | SEC_LINKER_CREATED));
     }
 
