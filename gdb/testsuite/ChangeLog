@@ -1,3 +1,8 @@
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/nested-funcs-2.exp: Run tests with and without the
+	nested function prefix.
+
 2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
 	    Richard Bunt  <richard.bunt@arm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>

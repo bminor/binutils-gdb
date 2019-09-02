@@ -37,6 +37,15 @@
 * New convenience variable $_ada_exception holds the address of the
   Ada exception being thrown.  This is set by Ada-related catchpoints.
 
+* GDB can now place breakpoints on nested functions and subroutines in
+  Fortran code.  The '::' operator can be used between parent and
+  child scopes when placing breakpoints, for example:
+
+    (gdb) break outer_function::inner_function
+
+  The 'outer_function::' prefix is only needed if 'inner_function' is
+  not visible in the current scope.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
