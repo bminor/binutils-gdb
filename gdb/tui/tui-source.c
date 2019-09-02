@@ -155,7 +155,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 
 	  title = s_filename;
 
-	  fullname = make_unique_xstrdup (symtab_to_fullname (s));
+	  m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
 
 	  cur_line = 0;
 	  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
@@ -275,7 +275,7 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
   return (content[line_no].line_or_addr.loa == LOA_LINE
 	  && content[line_no].line_or_addr.u.line_no == loc->line_number
 	  && loc->symtab != NULL
-	  && filename_cmp (fullname.get (),
+	  && filename_cmp (m_fullname.get (),
 			   symtab_to_fullname (loc->symtab)) == 0);
 }
 
@@ -307,7 +307,7 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
     start_line = 1;
 
   bool source_already_displayed = (sal.symtab != 0
-				   && showing_source_p (fullname.get ()));
+				   && showing_source_p (m_fullname.get ()));
 
   struct tui_line_or_address l;
 

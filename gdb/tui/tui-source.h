@@ -77,7 +77,7 @@ private:
   bool line_is_displayed (int line) const;
 
   /* It is the resolved form as returned by symtab_to_fullname.  */
-  gdb::unique_xmalloc_ptr<char> fullname;
+  gdb::unique_xmalloc_ptr<char> m_fullname;
 
   /* A token used to register and unregister an observer.  */
   gdb::observers::token m_observable;
