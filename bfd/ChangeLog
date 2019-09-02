@@ -3,6 +3,8 @@
 	PR 11983
 	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Free debug_filename
 	on success.  Tidy.
+	(read_alt_indirect_string): Likewise.
+	(read_alt_indirect_ref): Likewise.
 
 2019-08-31  Jim Wilson  <jimw@sifive.com>
 

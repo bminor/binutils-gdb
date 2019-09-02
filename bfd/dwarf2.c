@@ -802,20 +802,21 @@ read_alt_indirect_string (struct comp_unit * unit,
 
   if (stash->alt_bfd_ptr == NULL)
     {
-      bfd *  debug_bfd;
-      char * debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
+      bfd *debug_bfd;
+      char *debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
 
       if (debug_filename == NULL)
 	return NULL;
 
-      if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
-	  || ! bfd_check_format (debug_bfd, bfd_object))
-	{
-	  if (debug_bfd)
-	    bfd_close (debug_bfd);
+      debug_bfd = bfd_openr (debug_filename, NULL);
+      free (debug_filename);
+      if (debug_bfd == NULL)
+	/* FIXME: Should we report our failure to follow the debuglink ?  */
+	return NULL;
 
-	  /* FIXME: Should we report our failure to follow the debuglink ?  */
-	  free (debug_filename);
+      if (!bfd_check_format (debug_bfd, bfd_object))
+	{
+	  bfd_close (debug_bfd);
 	  return NULL;
 	}
       stash->alt_bfd_ptr = debug_bfd;
@@ -850,20 +851,21 @@ read_alt_indirect_ref (struct comp_unit * unit,
 
   if (stash->alt_bfd_ptr == NULL)
     {
-      bfd *  debug_bfd;
-      char * debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
+      bfd *debug_bfd;
+      char *debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
 
       if (debug_filename == NULL)
 	return FALSE;
 
-      if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
-	  || ! bfd_check_format (debug_bfd, bfd_object))
-	{
-	  if (debug_bfd)
-	    bfd_close (debug_bfd);
+      debug_bfd = bfd_openr (debug_filename, NULL);
+      free (debug_filename);
+      if (debug_bfd == NULL)
+	/* FIXME: Should we report our failure to follow the debuglink ?  */
+	return NULL;
 
-	  /* FIXME: Should we report our failure to follow the debuglink ?  */
-	  free (debug_filename);
+      if (!bfd_check_format (debug_bfd, bfd_object))
+	{
+	  bfd_close (debug_bfd);
 	  return NULL;
 	}
       stash->alt_bfd_ptr = debug_bfd;
