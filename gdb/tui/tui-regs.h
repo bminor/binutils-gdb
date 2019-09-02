@@ -71,7 +71,7 @@ struct tui_data_window : public tui_win_info
 
   struct reggroup *get_current_group () const
   {
-    return current_group;
+    return m_current_group;
   }
 
 protected:
@@ -130,9 +130,9 @@ private:
   void erase_data_content (const char *prompt);
 
   /* Windows that are used to display registers.  */
-  std::vector<tui_data_item_window> regs_content;
-  int regs_column_count = 0;
-  struct reggroup *current_group = nullptr;
+  std::vector<tui_data_item_window> m_regs_content;
+  int m_regs_column_count = 0;
+  struct reggroup *m_current_group = nullptr;
 };
 
 #endif /* TUI_TUI_REGS_H */

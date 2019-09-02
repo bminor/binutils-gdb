@@ -1,5 +1,25 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_window) <get_current_group>:
+	Update.
+	<m_regs_content, m_regs_column_count, m_current_group>: Add "m_"
+	prefix.
+	* tui/tui-regs.c (tui_data_window::last_regs_line_no)
+	(tui_data_window::line_from_reg_element_no)
+	(tui_data_window::first_reg_element_no_inline)
+	(tui_data_window::show_registers)
+	(tui_data_window::show_register_group)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::display_registers_from_line)
+	(tui_data_window::first_data_item_displayed)
+	(tui_data_window::delete_data_content_windows)
+	(tui_data_window::erase_data_content)
+	(tui_data_window::do_scroll_vertical)
+	(tui_data_window::refresh_window)
+	(tui_data_window::check_register_values): Update.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (MAX_LOCATOR_ELEMENT_LEN): Remove define.
 	(struct tui_locator_window) <full_name, proc_name>: Now
 	std::string.

@@ -96,8 +96,8 @@ tui_get_register (struct frame_info *frame,
 int
 tui_data_window::last_regs_line_no () const
 {
-  int num_lines = regs_content.size () / regs_column_count;
-  if (regs_content.size () % regs_column_count)
+  int num_lines = m_regs_content.size () / m_regs_column_count;
+  if (m_regs_content.size () % m_regs_column_count)
     num_lines++;
   return num_lines;
 }
@@ -107,14 +107,14 @@ tui_data_window::last_regs_line_no () const
 int
 tui_data_window::line_from_reg_element_no (int element_no) const
 {
-  if (element_no < regs_content.size ())
+  if (element_no < m_regs_content.size ())
     {
       int i, line = (-1);
 
       i = 1;
       while (line == (-1))
 	{
-	  if (element_no < regs_column_count * i)
+	  if (element_no < m_regs_column_count * i)
 	    line = i - 1;
 	  else
 	    i++;
@@ -131,8 +131,8 @@ tui_data_window::line_from_reg_element_no (int element_no) const
 int
 tui_data_window::first_reg_element_no_inline (int line_no) const
 {
-  if (line_no * regs_column_count <= regs_content.size ())
-    return ((line_no + 1) * regs_column_count) - regs_column_count;
+  if (line_no * m_regs_column_count <= m_regs_content.size ())
+    return ((line_no + 1) * m_regs_column_count) - m_regs_column_count;
   else
     return (-1);
 }
@@ -148,17 +148,17 @@ tui_data_window::show_registers (struct reggroup *group)
   if (target_has_registers && target_has_stack && target_has_memory)
     {
       show_register_group (group, get_selected_frame (NULL),
-			   group == current_group);
+			   group == m_current_group);
 
       /* Clear all notation of changed values.  */
-      for (auto &&data_item_win : regs_content)
+      for (auto &&data_item_win : m_regs_content)
 	data_item_win.highlight = false;
-      current_group = group;
+      m_current_group = group;
       rerender ();
     }
   else
     {
-      current_group = 0;
+      m_current_group = 0;
       erase_data_content (_("[ Register Values Unavailable ]"));
     }
 }
@@ -199,7 +199,7 @@ tui_data_window::show_register_group (struct reggroup *group,
       nr_regs++;
     }
 
-  regs_content.resize (nr_regs);
+  m_regs_content.resize (nr_regs);
 
   /* Now set the register names and values.  */
   pos = 0;
@@ -218,7 +218,7 @@ tui_data_window::show_register_group (struct reggroup *group,
       if (name == 0 || *name == '\0')
 	continue;
 
-      data_item_win = &regs_content[pos];
+      data_item_win = &m_regs_content[pos];
       if (data_item_win)
 	{
 	  if (!refresh_values_only)
@@ -241,7 +241,7 @@ tui_data_window::display_registers_from (int start_element_no)
   int j, item_win_width, cur_y;
 
   int max_len = 0;
-  for (auto &&data_item_win : regs_content)
+  for (auto &&data_item_win : m_regs_content)
     {
       const char *p;
       int len;
@@ -257,24 +257,24 @@ tui_data_window::display_registers_from (int start_element_no)
   item_win_width = max_len + 1;
   int i = start_element_no;
 
-  regs_column_count = (width - 2) / item_win_width;
-  if (regs_column_count == 0)
-    regs_column_count = 1;
-  item_win_width = (width - 2) / regs_column_count;
+  m_regs_column_count = (width - 2) / item_win_width;
+  if (m_regs_column_count == 0)
+    m_regs_column_count = 1;
+  item_win_width = (width - 2) / m_regs_column_count;
 
   /* Now create each data "sub" window, and write the display into
      it.  */
   cur_y = 1;
-  while (i < regs_content.size ()
+  while (i < m_regs_content.size ()
 	 && cur_y <= viewport_height)
     {
       for (j = 0;
-	   j < regs_column_count && i < regs_content.size ();
+	   j < m_regs_column_count && i < m_regs_content.size ();
 	   j++)
 	{
 	  /* Create the window if necessary.  */
-	  regs_content[i].resize (1, item_win_width,
-				  (item_win_width * j) + 1, cur_y);
+	  m_regs_content[i].resize (1, item_win_width,
+				    (item_win_width * j) + 1, cur_y);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */
@@ -322,14 +322,14 @@ tui_data_window::display_registers_from_line (int line_no)
 	 registers.  */
       if (line_no >= last_regs_line_no ())
 	{
-	  line_no = line_from_reg_element_no (regs_content.size () - 1);
+	  line_no = line_from_reg_element_no (m_regs_content.size () - 1);
 	  if (line_no < 0)
 	    line_no = 0;
 	}
     }
 
   element_no = first_reg_element_no_inline (line_no);
-  if (element_no < regs_content.size ())
+  if (element_no < m_regs_content.size ())
     display_reg_element_at_line (element_no, line_no);
   else
     line_no = (-1);
@@ -343,11 +343,11 @@ tui_data_window::display_registers_from_line (int line_no)
 int
 tui_data_window::first_data_item_displayed ()
 {
-  for (int i = 0; i < regs_content.size (); i++)
+  for (int i = 0; i < m_regs_content.size (); i++)
     {
       struct tui_gen_win_info *data_item_win;
 
-      data_item_win = &regs_content[i];
+      data_item_win = &m_regs_content[i];
       if (data_item_win->is_visible ())
 	return i;
     }
@@ -360,7 +360,7 @@ tui_data_window::first_data_item_displayed ()
 void
 tui_data_window::delete_data_content_windows ()
 {
-  for (auto &&win : regs_content)
+  for (auto &&win : m_regs_content)
     {
       tui_delete_win (win.handle);
       win.handle = NULL;
@@ -392,7 +392,7 @@ tui_data_window::erase_data_content (const char *prompt)
 void
 tui_data_window::rerender ()
 {
-  if (regs_content.empty ())
+  if (m_regs_content.empty ())
     erase_data_content (_("[ Register Values Unavailable ]"));
   else
     {
@@ -411,7 +411,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
   int first_line = (-1);
 
   first_element_no = first_data_item_displayed ();
-  if (first_element_no < regs_content.size ())
+  if (first_element_no < m_regs_content.size ())
     first_line = line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in
@@ -433,7 +433,7 @@ void
 tui_data_window::refresh_window ()
 {
   tui_gen_win_info::refresh_window ();
-  for (auto &&win : regs_content)
+  for (auto &&win : m_regs_content)
     win.refresh_window ();
 }
 
@@ -443,11 +443,11 @@ tui_data_window::refresh_window ()
 void
 tui_data_window::check_register_values (struct frame_info *frame)
 {
-  if (regs_content.empty ())
-    show_registers (current_group);
+  if (m_regs_content.empty ())
+    show_registers (m_current_group);
   else
     {
-      for (auto &&data_item_win : regs_content)
+      for (auto &&data_item_win : m_regs_content)
 	{
 	  int was_hilighted;
 
