@@ -728,7 +728,9 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   else
     {
       n_bfd->origin = n_bfd->proxy_origin;
-      n_bfd->filename = xstrdup (filename);
+      n_bfd->filename = bfd_strdup (filename);
+      if (n_bfd->filename == NULL)
+	goto out;
     }
 
   n_bfd->arelt_data = new_areldata;
@@ -745,8 +747,10 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
       || _bfd_add_bfd_to_archive_cache (archive, filepos, n_bfd))
     return n_bfd;
 
+ out:
   free (new_areldata);
   n_bfd->arelt_data = NULL;
+  bfd_close (n_bfd);
   return NULL;
 }
 

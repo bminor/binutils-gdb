@@ -1652,6 +1652,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   bfd_vma high_offset;
   bfd_vma shdr_end;
   bfd_vma loadbase;
+  char *filename;
 
   /* Read in the ELF header in external format.  */
   err = target_read_memory (ehdr_vma, (bfd_byte *) &x_ehdr, sizeof x_ehdr);
@@ -1859,14 +1860,22 @@ NAME(_bfd_elf,bfd_from_remote_memory)
       free (contents);
       return NULL;
     }
-  nbfd = _bfd_new_bfd ();
-  if (nbfd == NULL)
+  filename = bfd_strdup ("<in-memory>");
+  if (filename == NULL)
     {
       free (bim);
       free (contents);
       return NULL;
     }
-  nbfd->filename = xstrdup ("<in-memory>");
+  nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    {
+      free (filename);
+      free (bim);
+      free (contents);
+      return NULL;
+    }
+  nbfd->filename = filename;
   nbfd->xvec = templ->xvec;
   bim->size = high_offset;
   bim->buffer = contents;

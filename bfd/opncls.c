@@ -223,6 +223,8 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
   if (nbfd->iostream == NULL)
     {
       bfd_set_error (bfd_error_system_call);
+      if (fd != -1)
+	close (fd);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
@@ -231,7 +233,13 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = xstrdup (filename);
+  nbfd->filename = bfd_strdup (filename);
+  if (nbfd->filename == NULL)
+    {
+      fclose (nbfd->iostream);
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
 
   /* Figure out whether the user is opening the file for reading,
      writing, or both, by looking at the MODE argument.  */
@@ -243,8 +251,9 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
   else
     nbfd->direction = write_direction;
 
-  if (! bfd_cache_init (nbfd))
+  if (!bfd_cache_init (nbfd))
     {
+      fclose (nbfd->iostream);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
@@ -398,7 +407,12 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
   nbfd->iostream = stream;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = xstrdup (filename);
+  nbfd->filename = bfd_strdup (filename);
+  if (nbfd->filename == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
   nbfd->direction = read_direction;
 
   if (! bfd_cache_init (nbfd))
@@ -594,7 +608,12 @@ bfd_openr_iovec (const char *filename, const char *target,
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = xstrdup (filename);
+  nbfd->filename = bfd_strdup (filename);
+  if (nbfd->filename == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
   nbfd->direction = read_direction;
 
   /* `open_p (...)' would get expanded by an the open(2) syscall macro.  */
@@ -661,7 +680,12 @@ bfd_openw (const char *filename, const char *target)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = xstrdup (filename);
+  nbfd->filename = bfd_strdup (filename);
+  if (nbfd->filename == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
   nbfd->direction = write_direction;
 
   if (bfd_open_file (nbfd) == NULL)
@@ -801,7 +825,12 @@ bfd_create (const char *filename, bfd *templ)
     return NULL;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = xstrdup (filename);
+  nbfd->filename = bfd_strdup (filename);
+  if (nbfd->filename == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
   if (templ)
     nbfd->xvec = templ->xvec;
   nbfd->direction = no_direction;

@@ -1,3 +1,17 @@
+2019-09-05  Alan Modra  <amodra@gmail.com>
+
+	PR 24955
+	* libbfd-in.h (bfd_strdup): New inline function.
+	* archive.c (_bfd_get_elt_at_filepos): Use bfd_strdup.  Close
+	bfd on error.
+	* elfcode.h (_bfd_elf_bfd_from_remote_memory): Use bfd_strdup.
+	* opncls.c (bfd_fopen): Use bfd_strdup.  Close fd and stream
+	on error.
+	(bfd_openstreamr): Use bfd_strdup.
+	(bfd_openr_iovec, bfd_openw, bfd_create): Likewise.
+	* plugin.c (try_load_plugin): Use bfd_malloc.
+	* libbfd.h: Regenerate.
+
 2019-09-02  Alan Modra  <amodra@gmail.com>
 
 	PR 11983

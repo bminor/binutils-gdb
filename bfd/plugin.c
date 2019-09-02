@@ -262,7 +262,9 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
 	}
     }
 
-  plugin_list_iter = (struct plugin_list_entry *) xmalloc (sizeof *plugin_list_iter);
+  plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
+  if (plugin_list_iter == NULL)
+    return 0;
   plugin_list_iter->handle = plugin_handle;
   plugin_list_iter->claim_file = NULL;
   plugin_list_iter->next = plugin_list;

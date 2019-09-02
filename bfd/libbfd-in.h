@@ -123,6 +123,15 @@ extern void *bfd_realloc2
 extern void *bfd_zmalloc2
   (bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
 
+static inline char *
+bfd_strdup (const char *str)
+{
+  size_t len = strlen (str) + 1;
+  char *buf = bfd_malloc (len);
+  if (buf != NULL)
+    memcpy (buf, str, len);
+  return buf;
+}
 /* These routines allocate and free things on the BFD's objalloc.  */
 
 extern void *bfd_alloc2
