@@ -4385,18 +4385,20 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	   fail more quickly.  */
 	return FALSE;
 
+      debug_bfd = bfd_openr (debug_filename, NULL);
+      free (debug_filename);
+      if (debug_bfd == NULL)
+	/* FIXME: Should we report our failure to follow the debuglink ?  */
+	return FALSE;
+
       /* Set BFD_DECOMPRESS to decompress debug sections.  */
-      if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
-	  || !(debug_bfd->flags |= BFD_DECOMPRESS,
-	       bfd_check_format (debug_bfd, bfd_object))
+      debug_bfd->flags |= BFD_DECOMPRESS;
+      if (!bfd_check_format (debug_bfd, bfd_object)
 	  || (msec = find_debug_info (debug_bfd,
 				      debug_sections, NULL)) == NULL
 	  || !bfd_generic_link_read_symbols (debug_bfd))
 	{
-	  if (debug_bfd)
-	    bfd_close (debug_bfd);
-	  /* FIXME: Should we report our failure to follow the debuglink ?  */
-	  free (debug_filename);
+	  bfd_close (debug_bfd);
 	  return FALSE;
 	}
 

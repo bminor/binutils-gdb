@@ -1,3 +1,9 @@
+2019-09-02  Alan Modra  <amodra@gmail.com>
+
+	PR 11983
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Free debug_filename
+	on success.  Tidy.
+
 2019-08-31  Jim Wilson  <jimw@sifive.com>
 
 	PR 23825
