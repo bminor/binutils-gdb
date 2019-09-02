@@ -570,19 +570,6 @@ tui_disable_command (const char *args, int from_tty)
   tui_disable ();
 }
 
-void
-strcat_to_buf (char *buf, int buflen, 
-	       const char *item_to_add)
-{
-  if (item_to_add != NULL && buf != NULL)
-    {
-      if ((strlen (buf) + strlen (item_to_add)) <= buflen)
-	strcat (buf, item_to_add);
-      else
-	strncat (buf, item_to_add, (buflen - strlen (buf)));
-    }
-}
-
 #if 0
 /* Solaris <sys/termios.h> defines CTRL.  */
 #ifndef CTRL

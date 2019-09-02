@@ -1,5 +1,10 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (strcat_to_buf): Don't declare.
+	* tui/tui.c (strcat_to_buf): Remove.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.h (struct tui_source_window) <m_fullname>: Rename
 	from "fullname".
 	* tui/tui-source.c (tui_source_window::set_contents)

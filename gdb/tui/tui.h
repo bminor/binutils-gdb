@@ -24,8 +24,6 @@
 
 struct ui_file;
 
-extern void strcat_to_buf (char *, int, const char *);
-
 /* Types of error returns.  */
 enum tui_status
 {
