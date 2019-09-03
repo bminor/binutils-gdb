@@ -853,8 +853,14 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
 	case STRUCT_DOMAIN:
 	  fputs_filtered ("struct domain, ", outfile);
 	  break;
+	case MODULE_DOMAIN:
+	  fputs_filtered ("module domain, ", outfile);
+	  break;
 	case LABEL_DOMAIN:
 	  fputs_filtered ("label domain, ", outfile);
+	  break;
+	case COMMON_BLOCK_DOMAIN:
+	  fputs_filtered ("common block domain, ", outfile);
 	  break;
 	default:
 	  fputs_filtered ("<invalid domain>, ", outfile);
