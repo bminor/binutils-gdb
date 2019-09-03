@@ -1,5 +1,11 @@
 2019-09-03  Nick Clifton  <nickc@redhat.com>
 
+	PR 24961
+	* tic30-dis.c (get_indirect_operand): Check for bufcnt being
+	greater than zero before indexing via (bufcnt -1).
+
+2019-09-03  Nick Clifton  <nickc@redhat.com>
+
 	PR 24958
 	* mmix-dis.c (MAX_REG_NAME_LEN): Define.
 	(MAX_SPEC_REG_NAME_LEN): Define.

@@ -253,7 +253,9 @@ get_indirect_operand (unsigned short fragment,
 		for (i = 0, bufcnt = 0; i < len; i++, bufcnt++)
 		  {
 		    buffer[bufcnt] = current_ind->syntax[i];
-		    if (buffer[bufcnt - 1] == 'a' && buffer[bufcnt] == 'r')
+		    if (bufcnt > 0
+			&& buffer[bufcnt - 1] == 'a'
+			&& buffer[bufcnt] == 'r')
 		      buffer[++bufcnt] = arnum + '0';
 		    if (buffer[bufcnt] == '('
 			&& current_ind->displacement == DISP_REQUIRED)
