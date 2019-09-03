@@ -1,3 +1,13 @@
+2019-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 24958
+	* mmix-dis.c (MAX_REG_NAME_LEN): Define.
+	(MAX_SPEC_REG_NAME_LEN): Define.
+	(struct mmix_dis_info): Use defined constants for array lengths.
+	(get_reg_name): New function.
+	(get_sprec_reg_name): New function.
+	(print_insn_mmix): Use new functions.
+
 2019-08-27  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* arm-dis.c (mve_opcodes): Add entry for MVE_VMOV_VEC_TO_VEC.
