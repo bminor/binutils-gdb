@@ -16554,6 +16554,10 @@ The access component operator.  Normally used to access elements in derived
 types.  Also suitable for unions.  As unions aren't part of regular Fortran,
 this can only happen when accessing a register that uses a gdbarch-defined
 union type.
+@item ::
+The scope operator.  Normally used to access variables in modules or
+to set breakpoints on subroutines nested in modules or in other
+subroutines (internal subroutines).
 @end table
 
 @node Fortran Defaults

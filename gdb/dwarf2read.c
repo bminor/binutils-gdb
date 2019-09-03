@@ -8816,6 +8816,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       return NULL;
     }
 
+  /* Nested subroutines in Fortran get a prefix.  */
   if (pdi->tag == DW_TAG_enumerator)
     /* Enumerators should not get the name of the enumeration as a prefix.  */
     parent->scope = grandparent_scope;
@@ -8825,7 +8826,10 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       || parent->tag == DW_TAG_class_type
       || parent->tag == DW_TAG_interface_type
       || parent->tag == DW_TAG_union_type
-      || parent->tag == DW_TAG_enumeration_type)
+      || parent->tag == DW_TAG_enumeration_type
+      || (cu->language == language_fortran
+	  && parent->tag == DW_TAG_subprogram
+	  && pdi->tag == DW_TAG_subprogram))
     {
       if (grandparent_scope == NULL)
 	parent->scope = parent->name;
@@ -8916,12 +8920,15 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     case DW_TAG_subprogram:
       addr = (gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr)
 	      - baseaddr);
-      if (pdi->is_external || cu->language == language_ada)
+      if (pdi->is_external
+	  || cu->language == language_ada
+	  || (cu->language == language_fortran
+	      && pdi->die_parent
+	      && pdi->die_parent->tag == DW_TAG_subprogram))
 	{
-          /* brobecker/2007-12-26: Normally, only "external" DIEs are part
-             of the global scope.  But in Ada, we want to be able to access
-             nested procedures globally.  So all Ada subprograms are stored
-             in the global scope.  */
+          /* Normally, only "external" DIEs are part of the global scope.
+             But in Ada and Fortran, we want to be able to access nested procedures
+             globally.  So all Ada subprograms are stored in the global scope.  */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
@@ -9177,7 +9184,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
   if (! pdi->has_children)
     return;
 
-  if (cu->language == language_ada)
+  if (cu->language == language_ada || cu->language == language_fortran)
     {
       pdi = pdi->die_child;
       while (pdi != NULL)
@@ -10613,6 +10620,12 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       read_type_unit_scope (die, cu);
       break;
     case DW_TAG_subprogram:
+      /* Nested subprograms in Fortran get a prefix.  */
+      if (cu->language == language_fortran
+	  && die->parent != NULL
+	  && die->parent->tag == DW_TAG_subprogram)
+	cu->processing_has_namespace_info = true;
+      /* Fall through.  */
     case DW_TAG_inlined_subroutine:
       read_func_scope (die, cu);
       break;
@@ -18640,10 +18653,10 @@ load_partial_dies (const struct die_reader_specs *reader,
 	 inside functions to find template arguments (if the name of the
 	 function does not already contain the template arguments).
 
-	 For Ada, we need to scan the children of subprograms and lexical
-	 blocks as well because Ada allows the definition of nested
-	 entities that could be interesting for the debugger, such as
-	 nested subprograms for instance.  */
+	 For Ada and Fortran, we need to scan the children of subprograms
+	 and lexical blocks as well because these languages allow the
+	 definition of nested entities that could be interesting for the
+	 debugger, such as nested subprograms for instance.  */
       if (last_die->has_children
 	  && (load_all
 	      || last_die->tag == DW_TAG_namespace
@@ -18658,7 +18671,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 		      || last_die->tag == DW_TAG_interface_type
 		      || last_die->tag == DW_TAG_structure_type
 		      || last_die->tag == DW_TAG_union_type))
-	      || (cu->language == language_ada
+	      || ((cu->language == language_ada
+		   || cu->language == language_fortran)
 		  && (last_die->tag == DW_TAG_subprogram
 		      || last_die->tag == DW_TAG_lexical_block))))
 	{
@@ -21619,14 +21633,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	  if ((attr2 && (DW_UNSND (attr2) != 0))
-              || cu->language == language_ada)
+	      || cu->language == language_ada
+	      || cu->language == language_fortran)
 	    {
               /* Subprograms marked external are stored as a global symbol.
-                 Ada subprograms, whether marked external or not, are always
-                 stored as a global symbol, because we want to be able to
-                 access them globally.  For instance, we want to be able
-                 to break on a nested subprogram without having to
-                 specify the context.  */
+                 Ada and Fortran subprograms, whether marked external or
+                 not, are always stored as a global symbol, because we want
+                 to be able to access them globally.  For instance, we want
+                 to be able to break on a nested subprogram without having
+                 to specify the context.  */
 	      list_to_add = cu->get_builder ()->get_global_symbols ();
 	    }
 	  else
@@ -22621,6 +22636,16 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	      return name;
 	  }
 	return "";
+      case DW_TAG_subprogram:
+	/* Nested subroutines in Fortran get a prefix with the name
+	   of the parent's subroutine.  */
+	if (cu->language == language_fortran)
+	  {
+	    if ((die->tag ==  DW_TAG_subprogram)
+		&& (dwarf2_name (parent, cu) != NULL))
+	      return dwarf2_name (parent, cu);
+	  }
+	return determine_prefix (parent, cu);
       case DW_TAG_enumeration_type:
 	parent_type = read_type_die (parent, cu);
 	if (TYPE_DECLARED_CLASS (parent_type))
