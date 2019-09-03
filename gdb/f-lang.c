@@ -673,9 +673,9 @@ extern const struct language_defn f_language_defn =
   default_pass_by_reference,
   default_get_string,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
+  cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   iterate_over_symbols,
-  default_search_name_hash,
+  cp_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,

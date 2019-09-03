@@ -121,12 +121,6 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
 	".*print \\\*, program_i ! post_hidden"
     gdb_test "p program_i" " = 30" "printing hidden global"
 
-    # Check that the methods in the container module still require the
-    # module name as context.
-    gdb_test_no_output "set confirm off"
-    gdb_test "break print_from_module" \
-        "Function \\\"print_from_module\\\" not defined."
-
     # Check info symbol, whatis and ptype can find information on
     # these nested functions.
     foreach entry \
@@ -147,10 +141,7 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
 }
 
 foreach_with_prefix src_prefix { 0 1 } {
-    # For now this loop is only run with a value of '1'.  A later
-    # patch will extend this with the value '0', at which point this
-    # comment will be removed.
-    foreach_with_prefix nest_prefix { 1 } {
+    foreach_with_prefix nest_prefix { 0 1 } {
 	do_bp_tests ${src_prefix} ${nest_prefix}
     }
 }
