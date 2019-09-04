@@ -1,3 +1,9 @@
+2019-09-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/pcrelopt.s,
+	* testsuite/ld-powerpc/pcrelopt.d: Test offset and prefix in
+	second instruction.
+
 2019-08-29  Alan Modra  <amodra@gmail.com>
 
 	PR ld/24406

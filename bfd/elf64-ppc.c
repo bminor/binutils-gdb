@@ -8282,12 +8282,31 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 static bfd_boolean
 xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 {
-  uint32_t insn2 = *pinsn2 >> 32;
-  uint64_t i1new;
+  uint64_t insn1 = *pinsn1;
+  uint64_t insn2 = *pinsn2;
   bfd_signed_vma off;
 
+  if ((insn2 & (63ULL << 58)) == 1ULL << 58)
+    {
+      /* Check that regs match.  */
+      if (((insn2 >> 16) & 31) != ((insn1 >> 21) & 31))
+	return FALSE;
+
+      /* P8LS or PMLS form, non-pcrel.  */
+      if ((insn2 & (-1ULL << 50) & ~(1ULL << 56)) != (1ULL << 58))
+	return FALSE;
+
+      *pinsn1 = (insn2 & ~(31 << 16) & ~0x3ffff0000ffffULL) | (1ULL << 52);
+      *pinsn2 = PNOP;
+      off = ((insn2 >> 16) & 0x3ffff0000ULL) | (insn2 & 0xffff);
+      *poff = (off ^ 0x200000000ULL) - 0x200000000ULL;
+      return TRUE;
+    }
+
+  insn2 >>= 32;
+
   /* Check that regs match.  */
-  if (((insn2 >> 16) & 31) != ((*pinsn1 >> 21) & 31))
+  if (((insn2 >> 16) & 31) != ((insn1 >> 21) & 31))
     return FALSE;
 
   switch ((insn2 >> 26) & 63)
@@ -8308,7 +8327,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
     case 54: /* stfd */
       /* These are the PMLS cases, where we just need to tack a prefix
 	 on the insn.  */
-      i1new = ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
+      insn1 = ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
 	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
       off = insn2 & 0xffff;
       break;
@@ -8316,7 +8335,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
     case 58: /* lwa, ld */
       if ((insn2 & 1) != 0)
 	return FALSE;
-      i1new = ((1ULL << 58) | (1ULL << 52)
+      insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | (insn2 & 2 ? 41ULL << 26 : 57ULL << 26)
 	       | (insn2 & (31ULL << 21)));
       off = insn2 & 0xfffc;
@@ -8325,7 +8344,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
     case 57: /* lxsd, lxssp */
       if ((insn2 & 3) < 2)
 	return FALSE;
-      i1new = ((1ULL << 58) | (1ULL << 52)
+      insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | ((40ULL | (insn2 & 3)) << 26)
 	       | (insn2 & (31ULL << 21)));
       off = insn2 & 0xfffc;
@@ -8336,14 +8355,14 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 	return FALSE;
       else if ((insn2 & 3) >= 2)
 	{
-	  i1new = ((1ULL << 58) | (1ULL << 52)
+	  insn1 = ((1ULL << 58) | (1ULL << 52)
 		   | ((44ULL | (insn2 & 3)) << 26)
 		   | (insn2 & (31ULL << 21)));
 	  off = insn2 & 0xfffc;
 	}
       else
 	{
-	  i1new = ((1ULL << 58) | (1ULL << 52)
+	  insn1 = ((1ULL << 58) | (1ULL << 52)
 		   | ((50ULL | (insn2 & 4) | ((insn2 & 8) >> 3)) << 26)
 		   | (insn2 & (31ULL << 21)));
 	  off = insn2 & 0xfff0;
@@ -8351,7 +8370,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
       break;
 
     case 56: /* lq */
-      i1new = ((1ULL << 58) | (1ULL << 52)
+      insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | (insn2 & ((63ULL << 26) | (31ULL << 21))));
       off = insn2 & 0xffff;
       break;
@@ -8359,14 +8378,14 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
     case 62: /* std, stq */
       if ((insn2 & 1) != 0)
 	return FALSE;
-      i1new = ((1ULL << 58) | (1ULL << 52)
+      insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | ((insn2 & 2) == 0 ? 61ULL << 26 : 60ULL << 26)
 	       | (insn2 & (31ULL << 21)));
       off = insn2 & 0xfffc;
       break;
     }
 
-  *pinsn1 = i1new;
+  *pinsn1 = insn1;
   *pinsn2 = (uint64_t) NOP << 32;
   *poff = (off ^ 0x8000) - 0x8000;
   return TRUE;
@@ -15413,7 +15432,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  pinsn2 = bfd_get_32 (input_bfd, contents + off2);
 			  pinsn2 <<= 32;
 			  if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
-			    break;
+			    {
+			      if (off2 + 8 > input_section->size)
+				break;
+			      pinsn2 |= bfd_get_32 (input_bfd,
+						    contents + off2 + 4);
+			    }
 			  if (xlate_pcrel_opt (&pinsn, &pinsn2, &addend_off))
 			    {
 			      addend += addend_off;
@@ -15424,6 +15448,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 					  contents + offset + 4);
 			      bfd_put_32 (input_bfd, pinsn2 >> 32,
 					  contents + off2);
+			      if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
+				bfd_put_32 (input_bfd, pinsn2,
+					    contents + off2 + 4);
 			    }
 			}
 		    }

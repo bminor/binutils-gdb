@@ -1,5 +1,11 @@
 2019-09-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (xlate_pcrel_opt): Handle prefix loads and stores
+	in second instruction.
+	(ppc64_elf_relocate_section): Likewise.
+
+2019-09-05  Alan Modra  <amodra@gmail.com>
+
 	PR 24955
 	* libbfd-in.h (bfd_strdup): New inline function.
 	* archive.c (_bfd_get_elt_at_filepos): Use bfd_strdup.  Close
