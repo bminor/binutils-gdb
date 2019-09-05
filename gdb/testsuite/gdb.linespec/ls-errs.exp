@@ -231,9 +231,6 @@ proc do_test {lang} {
 
     foreach x $spaces {
 	test_break "main${x}there" invalid_label "there" "main"
-	if {[test_compiler_info {clang-*-*}]} {
-	    setup_xfail clang/14500 *-*-*
-	}
 	test_break "main:here${x}" unexpected "end of input"
     }
 

@@ -1,3 +1,9 @@
+2019-09-06  David Blaikie  <dblaikie@gmail.com>
+
+	* gdb.base/label.exp: un-XFAIL label related tests under Clang.
+	* gdb.cp/cplabel.exp: Ditto.
+	* gdb.linespec/ls-errs.exp: Ditto.
+
 2019-09-05  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (cmp_file_string): New proc.
