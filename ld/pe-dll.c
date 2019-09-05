@@ -1445,6 +1445,11 @@ pe_find_data_imports (const char *symhead,
 	    undef->u.def.value = sym->u.def.value;
 	    undef->u.def.section = sym->u.def.section;
 
+	    /* We replace the original name with the __imp_ prefixed one, this
+	       1) may trash memory 2) leads to duplicate symbols.  But this is
+	       better than having a misleading name that can confuse GDB.  */
+	    undef->root.string = sym->root.string;
+
 	    if (link_info.pei386_auto_import == -1)
 	      {
 		static bfd_boolean warned = FALSE;
