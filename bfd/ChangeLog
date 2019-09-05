@@ -1,5 +1,13 @@
 2019-09-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_check_relocs): Interpret an addend in
+	GOT_PCREL and PLT_PCREL relocs as affecting the value stored
+	in the GOT/PLT entry rather than affecting the offset to that
+	GOI/PLT entry.
+	(ppc64_elf_edit_toc, ppc64_elf_relocate_section): Likewise.
+
+2019-09-05  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (xlate_pcrel_opt): Handle prefix loads and stores
 	in second instruction.
 	(ppc64_elf_relocate_section): Likewise.
