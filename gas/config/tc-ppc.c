@@ -2267,8 +2267,8 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	      case BFD_RELOC_LO16_GOTOFF:
 	      case BFD_RELOC_HI16_GOTOFF:
 	      case BFD_RELOC_HI16_S_GOTOFF:
-		as_warn (_("identifier+constant@got means "
-			   "identifier@got+constant"));
+		as_warn (_("symbol+offset@%s means symbol@%s+offset"),
+			 ptr->string, ptr->string);
 		break;
 
 	      case BFD_RELOC_PPC_GOT_TLSGD16:
@@ -2287,7 +2287,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	      case BFD_RELOC_PPC_GOT_TPREL16_LO:
 	      case BFD_RELOC_PPC_GOT_TPREL16_HI:
 	      case BFD_RELOC_PPC_GOT_TPREL16_HA:
-		as_bad (_("symbol+offset not supported for got tls"));
+		as_bad (_("symbol+offset@%s not supported"), ptr->string);
 		break;
 	      }
 	  }

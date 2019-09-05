@@ -1,3 +1,8 @@
+2019-09-05  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Display the relocation
+	operator on GOT reloc warnings/errors.
+
 2019-08-27  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* config/tc-arm.c (parse_neon_mov): Add check to accept vector
