@@ -23,7 +23,10 @@ if { [prepare_for_testing "failed to prepare" ui-redirect start.c] } {
     return -1
 }
 
-gdb_breakpoint main
+if ![runto_main] {
+    fail "can't run to main"
+    return -1
+}
 
 set test "commands"
 gdb_test_multiple $test $test {
@@ -40,18 +43,27 @@ gdb_test_multiple $test $test {
 }
 gdb_test_no_output "end"
 
-if ![runto_main] {
-    fail "can't run to main"
-    return -1
-}
 gdb_breakpoint "foo"
 gdb_breakpoint "bar"
+
+set cmds [multi_line_input \
+	      "break main" \
+	      "  commands" \
+	      "    print 1" \
+	      "  end" \
+	      "break foo" \
+	      "break bar"]
+set cmds "$cmds\n"
+set outdir [standard_output_file {}]
+set cmds_file "$outdir/cmds.txt"
 
 with_test_prefix "logging" {
     gdb_test_no_output "set logging file /dev/null"
     gdb_test "set logging on" \
     "Copying output to /dev/null.*Copying debug output to /dev/null\\."
-    gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
+    gdb_test "save breakpoints $cmds_file" "Saved to file '$cmds_file'\\." \
+	"save breakpoints cmds.txt"
+    cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
 }
@@ -60,7 +72,8 @@ with_test_prefix "redirect" {
     gdb_test "set logging redirect on"
     gdb_test "set logging on" \
     "Redirecting output to /dev/null.*Copying debug output to /dev/null\\."
-    gdb_test_no_output "save breakpoints /dev/null"
+    gdb_test_no_output "save breakpoints $cmds_file" "save breakpoints cmds.txt"
+    cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
 }
@@ -71,7 +84,9 @@ with_test_prefix "redirect while already logging" {
     "Copying output to /dev/null.*Copying debug output to /dev/null\\."
     gdb_test "set logging redirect on" \
     ".*warning: Currently logging .*Turn the logging off and on to make the new setting effective.*"
-    gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
+    gdb_test "save breakpoints $cmds_file" "Saved to file '$cmds_file'\\." \
+	"save breakpoints cmds.txt"
+    cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
     gdb_test_no_output "set logging redirect off"

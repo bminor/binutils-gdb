@@ -6668,5 +6668,32 @@ proc gdb_write_cmd_file { cmdline } {
     catch "close $cmd_file"
 }
 
+# Compare contents of FILE to string STR.  Pass with MSG if equal, otherwise
+# fail with MSG.
+
+proc cmp_file_string { file str msg } {
+    if { ![file exists $file]} {
+	fail "$msg"
+	return
+    }
+
+    set caught_error [catch {
+	set fp [open "$file" r]
+	set file_contents [read $fp]
+	close $fp
+    } error_message]
+    if { $caught_error } then {
+	error "$error_message"
+	fail "$msg"
+	return
+    }
+
+    if { $file_contents == $str } {
+	pass "$msg"
+    } else {
+	fail "$msg"
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

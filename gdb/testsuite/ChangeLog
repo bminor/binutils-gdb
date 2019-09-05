@@ -1,3 +1,9 @@
+2019-09-05  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (cmp_file_string): New proc.
+	* gdb.base/ui-redirect.exp: Replace "gdb_breakpoint main" with
+	runto_main.  Verify save breakpoints output.
+
 2019-09-04  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/info-var.exp: Test info variables without running
