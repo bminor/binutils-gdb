@@ -282,7 +282,7 @@ struct value;
 
 /* This really belong in utils.c (path-utils.c?), but it references some
    globals that are currently only available to main.c.  */
-extern char *relocate_gdb_directory (const char *initial, int flag);
+extern char *relocate_gdb_directory (const char *initial, bool relocatable);
 
 
 /* Annotation stuff.  */

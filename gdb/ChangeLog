@@ -1,3 +1,10 @@
+2019-09-06  Christian Biesinger  <cbiesinger@google.com>
+
+	* defs.h (relocate_gdb_directory): Change int to bool in
+	signature and rename flag to relocatable.
+	* main.c (relocate_path): Likewise.
+	(relocate_gdb_directory): Likewise.
+
 2019-09-06  Alan Modra  <amodra@gmail.com>
 
 	* coffread.c (coff_symfile_read): Constify filename variable.

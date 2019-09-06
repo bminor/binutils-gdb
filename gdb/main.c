@@ -139,14 +139,14 @@ set_gdb_data_directory (const char *new_datadir)
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb
    was invoked (i.e., argv[0]).  INITIAL is the default value for the
-   file or directory.  FLAG is true if the value is relocatable, false
-   otherwise.  Returns a newly allocated string; this may return NULL
-   under the same conditions as make_relative_prefix.  */
+   file or directory.  RELOCATABLE is true if the value is relocatable,
+   false otherwise.  Returns a newly allocated string; this may return
+   NULL under the same conditions as make_relative_prefix.  */
 
 static char *
-relocate_path (const char *progname, const char *initial, int flag)
+relocate_path (const char *progname, const char *initial, bool relocatable)
 {
-  if (flag)
+  if (relocatable)
     return make_relative_prefix (progname, BINDIR, initial);
   return xstrdup (initial);
 }
@@ -158,11 +158,11 @@ relocate_path (const char *progname, const char *initial, int flag)
    function always returns a newly-allocated string.  */
 
 char *
-relocate_gdb_directory (const char *initial, int flag)
+relocate_gdb_directory (const char *initial, bool relocatable)
 {
   char *dir;
 
-  dir = relocate_path (gdb_program_name, initial, flag);
+  dir = relocate_path (gdb_program_name, initial, relocatable);
   if (dir)
     {
       struct stat s;
