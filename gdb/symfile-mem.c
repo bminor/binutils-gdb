@@ -101,7 +101,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   /* Manage the new reference for the duration of this function.  */
   gdb_bfd_ref_ptr nbfd_holder = gdb_bfd_ref_ptr::new_reference (nbfd);
 
-  xfree (bfd_get_filename (nbfd));
+  xfree ((char *) bfd_get_filename (nbfd));
   if (name == NULL)
     nbfd->filename = xstrdup ("shared object read from target memory");
   else

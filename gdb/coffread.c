@@ -538,7 +538,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   struct coff_symfile_info *info;
   bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
-  char *filename = bfd_get_filename (abfd);
+  const char *filename = bfd_get_filename (abfd);
   int val;
   unsigned int num_symbols;
   int symtab_offset;

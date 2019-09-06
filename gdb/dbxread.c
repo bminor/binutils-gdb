@@ -587,7 +587,7 @@ dbx_symfile_init (struct objfile *objfile)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
+  const char *name = bfd_get_filename (sym_bfd);
   asection *text_sect;
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
@@ -2939,7 +2939,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
+  const char *name = bfd_get_filename (sym_bfd);
   unsigned int stabsize;
 
   /* Allocate struct to keep track of stab reading.  */
@@ -3026,7 +3026,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
+  const char *name = bfd_get_filename (sym_bfd);
 
   stabsread_new_init ();
 
@@ -3107,7 +3107,7 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
+  const char *name = bfd_get_filename (sym_bfd);
   asection *stabsect;
   asection *stabstrsect;
   asection *text_sect;

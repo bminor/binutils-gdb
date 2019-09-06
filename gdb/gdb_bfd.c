@@ -504,7 +504,7 @@ static int
 gdb_bfd_close_or_warn (struct bfd *abfd)
 {
   int ret;
-  char *name = bfd_get_filename (abfd);
+  const char *name = bfd_get_filename (abfd);
 
   bfd_map_over_sections (abfd, free_one_bfd_section, NULL);
 

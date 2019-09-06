@@ -552,7 +552,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	     FIXME: The code could be a lot cleverer about allocating space
 	     for the processed string.  */
 	  char *    end = strchr (var, '/');
-	  char *    replacement = NULL;
+	  const char *replacement = NULL;
 	  char *    v = var + 1;
 	  char *    freeme = NULL;
 	  unsigned  flen = strlen (filename);

@@ -1480,7 +1480,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		      {
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
-			char *other_bfd_filename;
+			const char *other_bfd_filename;
 			char *n;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];

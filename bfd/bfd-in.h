@@ -518,9 +518,7 @@ extern int bfd_stat (bfd *, struct stat *);
 #endif
 extern void _bfd_warn_deprecated (const char *, const char *, int, const char *);
 
-/* Cast from const char * to char * so that caller can assign to
-   a char * without a warning.  */
-#define bfd_get_filename(abfd) ((char *) (abfd)->filename)
+#define bfd_get_filename(abfd) ((abfd)->filename)
 #define bfd_get_cacheable(abfd) ((abfd)->cacheable)
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)

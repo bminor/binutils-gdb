@@ -746,7 +746,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
      specified.  */
   if (abfd != NULL && !cris_bare_iron)
     {
-      char *name = bfd_get_filename (abfd);
+      const char *name = bfd_get_filename (abfd);
       char **my_environ = GET_ENVIRON ();
       /* We use these maps to give the same behavior as the old xsim
 	 simulator.  */

@@ -1296,7 +1296,7 @@ reload_shared_libraries_1 (int from_tty)
 
   for (so = so_list_head; so != NULL; so = so->next)
     {
-      char *found_pathname = NULL;
+      const char *found_pathname = NULL;
       int was_loaded = so->symbols_loaded;
       symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 

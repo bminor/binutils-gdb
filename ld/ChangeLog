@@ -1,3 +1,10 @@
+2019-09-06  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_search_needed): Constify
+	variable.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_open): Likewise.
+
 2019-09-05  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/24574

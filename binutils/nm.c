@@ -77,15 +77,15 @@ struct extended_symbol_info
   (sym->elfinfo ? sym->elfinfo->internal_elf_sym.st_size: sym->ssize)
 
 /* The output formatting functions.  */
-static void print_object_filename_bsd (char *);
-static void print_object_filename_sysv (char *);
-static void print_object_filename_posix (char *);
-static void print_archive_filename_bsd (char *);
-static void print_archive_filename_sysv (char *);
-static void print_archive_filename_posix (char *);
-static void print_archive_member_bsd (char *, const char *);
-static void print_archive_member_sysv (char *, const char *);
-static void print_archive_member_posix (char *, const char *);
+static void print_object_filename_bsd (const char *);
+static void print_object_filename_sysv (const char *);
+static void print_object_filename_posix (const char *);
+static void print_archive_filename_bsd (const char *);
+static void print_archive_filename_sysv (const char *);
+static void print_archive_filename_posix (const char *);
+static void print_archive_member_bsd (const char *, const char *);
+static void print_archive_member_sysv (const char *, const char *);
+static void print_archive_member_posix (const char *, const char *);
 static void print_symbol_filename_bsd (bfd *, bfd *);
 static void print_symbol_filename_sysv (bfd *, bfd *);
 static void print_symbol_filename_posix (bfd *, bfd *);
@@ -98,13 +98,13 @@ static void print_symbol_info_posix (struct extended_symbol_info *, bfd *);
 struct output_fns
   {
     /* Print the name of an object file given on the command line.  */
-    void (*print_object_filename) (char *);
+    void (*print_object_filename) (const char *);
 
     /* Print the name of an archive file given on the command line.  */
-    void (*print_archive_filename) (char *);
+    void (*print_archive_filename) (const char *);
 
     /* Print the name of an archive member file.  */
-    void (*print_archive_member) (char *, const char *);
+    void (*print_archive_member) (const char *, const char *);
 
     /* Print the name of the file (and archive, if there is one)
        containing a symbol.  */
@@ -1357,14 +1357,14 @@ display_file (char *filename)
 /* Print the name of an object file given on the command line.  */
 
 static void
-print_object_filename_bsd (char *filename)
+print_object_filename_bsd (const char *filename)
 {
   if (filename_per_file && !filename_per_symbol)
     printf ("\n%s:\n", filename);
 }
 
 static void
-print_object_filename_sysv (char *filename)
+print_object_filename_sysv (const char *filename)
 {
   if (undefined_only)
     printf (_("\n\nUndefined symbols from %s:\n\n"), filename);
@@ -1379,7 +1379,7 @@ Name                  Value           Class        Type         Size            
 }
 
 static void
-print_object_filename_posix (char *filename)
+print_object_filename_posix (const char *filename)
 {
   if (filename_per_file && !filename_per_symbol)
     printf ("%s:\n", filename);
@@ -1388,26 +1388,26 @@ print_object_filename_posix (char *filename)
 /* Print the name of an archive file given on the command line.  */
 
 static void
-print_archive_filename_bsd (char *filename)
+print_archive_filename_bsd (const char *filename)
 {
   if (filename_per_file)
     printf ("\n%s:\n", filename);
 }
 
 static void
-print_archive_filename_sysv (char *filename ATTRIBUTE_UNUSED)
+print_archive_filename_sysv (const char *filename ATTRIBUTE_UNUSED)
 {
 }
 
 static void
-print_archive_filename_posix (char *filename ATTRIBUTE_UNUSED)
+print_archive_filename_posix (const char *filename ATTRIBUTE_UNUSED)
 {
 }
 
 /* Print the name of an archive member file.  */
 
 static void
-print_archive_member_bsd (char *archive ATTRIBUTE_UNUSED,
+print_archive_member_bsd (const char *archive ATTRIBUTE_UNUSED,
 			  const char *filename)
 {
   if (!filename_per_symbol)
@@ -1415,7 +1415,7 @@ print_archive_member_bsd (char *archive ATTRIBUTE_UNUSED,
 }
 
 static void
-print_archive_member_sysv (char *archive, const char *filename)
+print_archive_member_sysv (const char *archive, const char *filename)
 {
   if (undefined_only)
     printf (_("\n\nUndefined symbols from %s[%s]:\n\n"), archive, filename);
@@ -1430,7 +1430,7 @@ Name                  Value           Class        Type         Size            
 }
 
 static void
-print_archive_member_posix (char *archive, const char *filename)
+print_archive_member_posix (const char *archive, const char *filename)
 {
   if (!filename_per_symbol)
     printf ("%s[%s]:\n", archive, filename);

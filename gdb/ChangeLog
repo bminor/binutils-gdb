@@ -1,3 +1,15 @@
+2019-09-06  Alan Modra  <amodra@gmail.com>
+
+	* coffread.c (coff_symfile_read): Constify filename variable.
+	* dbxread.c (dbx_symfile_init, coffstab_build_psymtabs),
+	(elfstab_build_psymtabs, stabsect_build_psymtabs): Likewise.
+	* gdb_bfd.c (gdb_bfd_close_or_warn): Likewise.
+	* solib.c (reload_shared_libraries_1): Likewise.
+	* symfile.c (reread_symbols): Likewise.
+	* solib-aix.c (solib_aix_bfd_open): Add cast for xfree of filename.
+	* solib-darwin.c (darwin_bfd_open): Likewise.
+	* symfile-mem.c (symbol_file_add_from_memory): Likewise.
+
 2019-09-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* psymtab.c (print_partial_symbols): Handle missing domain_enum

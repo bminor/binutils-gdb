@@ -1,3 +1,14 @@
+2019-09-06  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (print_object_filename_bsd, print_object_filename_sysv),
+	(print_object_filename_posix, print_archive_filename_bsd),
+	(print_archive_filename_sysv, print_archive_filename_posix),
+	(print_archive_member_bsd, print_archive_member_sysv),
+	(print_archive_member_posix): Constify parameter.
+	(struct output_fns <print_object_filename, print_archive_filename>),
+	(<print_archive_member>): Likewise.
+	* objcopy.c (copy_archive): Add cast for make_tempdir.
+
 2019-08-29  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (check_uvalue): Remove unnecessary pointer checks.

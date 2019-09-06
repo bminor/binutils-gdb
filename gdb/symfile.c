@@ -2548,7 +2548,7 @@ reread_symbols (void)
 	  /* Clean up any state BFD has sitting around.  */
 	  {
 	    gdb_bfd_ref_ptr obfd (objfile->obfd);
-	    char *obfd_filename;
+	    const char *obfd_filename;
 
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
