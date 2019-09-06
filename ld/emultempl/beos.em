@@ -393,17 +393,18 @@ gld_${EMULATION_NAME}_after_open (void)
 static int
 sort_by_file_name (const void *a, const void *b)
 {
-  const lang_statement_union_type *const *ra = a;
-  const lang_statement_union_type *const *rb = b;
+  const lang_input_section_type *const *ra = a;
+  const lang_input_section_type *const *rb = b;
+  asection *sa = (*ra)->section;
+  asection *sb = (*rb)->section;
   int i, a_sec, b_sec;
 
-  i = filename_cmp ((*ra)->input_section.section->owner->my_archive->filename,
-		    (*rb)->input_section.section->owner->my_archive->filename);
+  i = filename_cmp (sa->owner->my_archive->filename,
+		    sb->owner->my_archive->filename);
   if (i != 0)
     return i;
 
-  i = filename_cmp ((*ra)->input_section.section->owner->filename,
-		    (*rb)->input_section.section->owner->filename);
+  i = filename_cmp (sa->owner->filename, sb->owner->filename);
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an
@@ -412,36 +413,29 @@ sort_by_file_name (const void *a, const void *b)
      and HNT properly. if no reloc this one is import by ordinal
      so we have to sort by section contents */
 
-  if ((*ra)->input_section.section->reloc_count
-      + (*rb)->input_section.section->reloc_count)
+  if (sa->reloc_count + sb->reloc_count != 0)
     {
-      i = ((*ra)->input_section.section->reloc_count
-	   > (*rb)->input_section.section->reloc_count) ? -1 : 0;
+      i = sa->reloc_count > sb->reloc_count ? -1 : 0;
       if (i != 0)
 	return i;
 
-      return ((*ra)->input_section.section->reloc_count
-	      > (*rb)->input_section.section->reloc_count) ? 0 : 1;
+      return sa->reloc_count > sb->reloc_count ? 0 : 1;
     }
   else
     {
       /* don't sort .idata$6 or .idata$7 FIXME dlltool eliminate .idata$7 */
-      if ((strcmp ((*ra)->input_section.section->name, ".idata$6") == 0))
+      if ((strcmp (sa->name, ".idata$6") == 0))
 	return 0;
 
-      if (!bfd_get_section_contents ((*ra)->input_section.section->owner,
-				     (*ra)->input_section.section, &a_sec,
-				     (file_ptr) 0,
-				     (bfd_size_type) sizeof(a_sec)))
+      if (!bfd_get_section_contents (sa->owner, sa, &a_sec, (file_ptr) 0,
+				     (bfd_size_type) sizeof (a_sec)))
 	einfo (_("%F%P: %pB: can't read contents of section .idata: %E\n"),
-	       (*ra)->input_section.section->owner);
+	       sa->owner);
 
-      if (!bfd_get_section_contents ((*rb)->input_section.section->owner,
-				     (*rb)->input_section.section, &b_sec,
-				     (file_ptr) 0,
-				     (bfd_size_type) sizeof(b_sec)))
+      if (!bfd_get_section_contents (sb->owner, sb, &b_sec, (file_ptr) 0,
+				     (bfd_size_type) sizeof (b_sec)))
 	einfo (_("%F%P: %pB: can't read contents of section .idata: %E\n"),
-	       (*rb)->input_section.section->owner);
+	       sb->owner);
 
       i = a_sec < b_sec ? -1 : 0;
       if (i != 0)
@@ -454,18 +448,19 @@ sort_by_file_name (const void *a, const void *b)
 static int
 sort_by_section_name (const void *a, const void *b)
 {
-  const lang_statement_union_type *const *ra = a;
-  const lang_statement_union_type *const *rb = b;
+  const lang_input_section_type *const *ra = a;
+  const lang_input_section_type *const *rb = b;
+  const char *sna = (*ra)->section->name;
+  const char *snb = (*rb)->section->name;
   int i;
-  i = strcmp ((*ra)->input_section.section->name,
-	      (*rb)->input_section.section->name);
+  i = strcmp (sna, snb);
   /* This is a hack to make .stab and .stabstr last, so we don't have
      to fix strip/objcopy for .reloc sections.
      FIXME stripping images with a .rsrc section still needs to be fixed.  */
   if (i != 0)
     {
-      if ((CONST_STRNEQ ((*ra)->input_section.section->name, ".stab"))
-	  && (! CONST_STRNEQ ((*rb)->input_section.section->name, ".stab")))
+      if ((CONST_STRNEQ (sna, ".stab"))
+	  && (!CONST_STRNEQ (snb, ".stab")))
 	return 1;
     }
   return i;

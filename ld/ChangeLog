@@ -1,5 +1,11 @@
 2019-09-06  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/beos.em (sort_by_file_name): Use appropriate
+	intermediary variables.
+	(sort_by_section_name): Likewise.
+
+2019-09-06  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_search_needed): Constify
 	variable.
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Likewise.
