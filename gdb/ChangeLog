@@ -1,3 +1,8 @@
+2019-09-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* python/python.c (do_start_initialization): Make progname_copy static,
+	to avoid a leak report.
+
 2019-09-08  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-wingeneral.c (box_win): Truncate long window titles.
