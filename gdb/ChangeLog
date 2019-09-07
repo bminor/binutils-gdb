@@ -1,3 +1,9 @@
+2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* source-cache.c (source_cache::get_line_charpos): Catch
+	exceptions and return false, this matches the behaviour documented
+	in the header file.
+
 2019-09-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (info_task): Remove quoting of the task's name.

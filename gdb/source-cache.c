@@ -231,19 +231,26 @@ bool
 source_cache::get_line_charpos (struct symtab *s,
 				const std::vector<off_t> **offsets)
 {
-  std::string fullname = symtab_to_fullname (s);
-
-  auto iter = m_offset_cache.find (fullname);
-  if (iter == m_offset_cache.end ())
+  try
     {
-      ensure (s);
-      iter = m_offset_cache.find (fullname);
-      /* cache_source_text ensured this was entered.  */
-      gdb_assert (iter != m_offset_cache.end ());
-    }
+      std::string fullname = symtab_to_fullname (s);
 
-  *offsets = &iter->second;
-  return true;
+      auto iter = m_offset_cache.find (fullname);
+      if (iter == m_offset_cache.end ())
+	{
+	  ensure (s);
+	  iter = m_offset_cache.find (fullname);
+	  /* cache_source_text ensured this was entered.  */
+	  gdb_assert (iter != m_offset_cache.end ());
+	}
+
+      *offsets = &iter->second;
+      return true;
+    }
+  catch (const gdb_exception_error &e)
+    {
+      return false;
+    }
 }
 
 /* A helper function that extracts the desired source lines from TEXT,

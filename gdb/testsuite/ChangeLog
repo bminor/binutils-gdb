@@ -1,3 +1,7 @@
+2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/list-missing-source.exp: New file.
+
 2019-09-14  Tom de Vries  <tdevries@suse.de>
 
 	PR teststuite/24599
