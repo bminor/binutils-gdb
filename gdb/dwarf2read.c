@@ -3883,7 +3883,7 @@ struct dw2_symtab_iterator
   struct dwarf2_per_objfile *dwarf2_per_objfile;
   /* If set, only look for symbols that match that block.  Valid values are
      GLOBAL_BLOCK and STATIC_BLOCK.  */
-  gdb::optional<int> block_index;
+  gdb::optional<block_enum> block_index;
   /* The kind of symbol we're looking for.  */
   domain_enum domain;
   /* The list of CUs from the index entry of the symbol,
@@ -3905,7 +3905,7 @@ struct dw2_symtab_iterator
 static void
 dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      struct dwarf2_per_objfile *dwarf2_per_objfile,
-		      gdb::optional<int> block_index,
+		      gdb::optional<block_enum> block_index,
 		      domain_enum domain,
 		      const char *name)
 {
@@ -4018,7 +4018,7 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 }
 
 static struct compunit_symtab *
-dw2_lookup_symbol (struct objfile *objfile, int block_index,
+dw2_lookup_symbol (struct objfile *objfile, block_enum block_index,
 		   const char *name, domain_enum domain)
 {
   struct compunit_symtab *stab_best = NULL;
@@ -6004,10 +6004,9 @@ dw2_debug_names_iterator::next ()
 }
 
 static struct compunit_symtab *
-dw2_debug_names_lookup_symbol (struct objfile *objfile, int block_index_int,
+dw2_debug_names_lookup_symbol (struct objfile *objfile, block_enum block_index,
 			       const char *name, domain_enum domain)
 {
-  const block_enum block_index = static_cast<block_enum> (block_index_int);
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 

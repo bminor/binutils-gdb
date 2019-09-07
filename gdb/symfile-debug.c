@@ -140,8 +140,8 @@ debug_qf_map_symtabs_matching_filename
 }
 
 static struct compunit_symtab *
-debug_qf_lookup_symbol (struct objfile *objfile, int kind, const char *name,
-			domain_enum domain)
+debug_qf_lookup_symbol (struct objfile *objfile, block_enum kind,
+			const char *name, domain_enum domain)
 {
   const struct debug_sym_fns_data *debug_data
     = symfile_debug_objfile_data_key.get (objfile);

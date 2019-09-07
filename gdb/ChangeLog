@@ -1,3 +1,17 @@
+2019-09-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2read.c (struct dw2_symtab_iterator) <block_index>:
+	Change type to gdb::optional<block_enum>.
+	(dw2_symtab_iter_init): Change block_index parameter type
+	to gdb::optional<block_enum>.
+	(dw2_lookup_symbol): Change block_index parameter
+	type to block_enum.c
+	(dw2_debug_names_lookup_symbol): Likewise.
+	* psymtab.c (psym_lookup_symbol): Likewise.
+	* symfile-debug.c (debug_qf_lookup_symbol): Likewise.
+	* symfile.h (struct quick_symbol_functions) <lookup_symbol>:
+	Likewise.
+
 2019-09-06  Christian Biesinger  <cbiesinger@google.com>
 
 	* defs.h (relocate_gdb_directory): Change int to bool in

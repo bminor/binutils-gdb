@@ -479,7 +479,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
 
 static struct compunit_symtab *
 psym_lookup_symbol (struct objfile *objfile,
-		    int block_index, const char *name,
+		    block_enum block_index, const char *name,
 		    const domain_enum domain)
 {
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);

@@ -179,7 +179,8 @@ struct quick_symbol_functions
      contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
      only TYPE_OPAQUE symbol(s), return at least that compunit.  */
   struct compunit_symtab *(*lookup_symbol) (struct objfile *objfile,
-					    int block_index, const char *name,
+					    block_enum block_index,
+					    const char *name,
 					    domain_enum domain);
 
   /* Print statistics about any indices loaded for OBJFILE.  The
