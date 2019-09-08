@@ -133,7 +133,15 @@ extern struct cli_suppress_notification cli_suppress_notification;
 
 /* API to the manipulation of command lists.  */
 
+/* Return TRUE if NAME is a valid user-defined command name.
+   This is a stricter subset of all gdb commands,
+   see find_command_name_length.  */
+
 extern bool valid_user_defined_cmd_name_p (const char *name);
+
+/* Return TRUE if C is a valid command character.  */
+
+extern bool valid_cmd_char_p (int c);
 
 /* Const-correct variant of the above.  */
 

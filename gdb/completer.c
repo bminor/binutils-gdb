@@ -102,13 +102,13 @@ enum explicit_location_match_type
 
 /* Variables which are necessary for fancy command line editing.  */
 
-/* When completing on command names, we remove '-' from the list of
+/* When completing on command names, we remove '-' and '.' from the list of
    word break characters, since we use it in command names.  If the
    readline library sees one in any of the current completion strings,
    it thinks that the string needs to be quoted and automatically
    supplies a leading quote.  */
 static const char gdb_completer_command_word_break_characters[] =
-" \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
 
 /* When completing on file names, we remove from the list of word
    break characters any characters that are commonly used in file
@@ -1284,7 +1284,7 @@ complete_line_internal_1 (completion_tracker &tracker,
      on command strings (as opposed to strings supplied by the
      individual command completer functions, which can be any string)
      then we will switch to the special word break set for command
-     strings, which leaves out the '-' character used in some
+     strings, which leaves out the '-' and '.' character used in some
      commands.  */
   set_rl_completer_word_break_characters
     (current_language->la_word_break_characters());
@@ -1347,7 +1347,7 @@ complete_line_internal_1 (completion_tracker &tracker,
       /* lookup_cmd_1 advances p up to the first ambiguous thing, but
 	 doesn't advance over that thing itself.  Do so now.  */
       q = p;
-      while (*q && (isalnum (*q) || *q == '-' || *q == '_'))
+      while (valid_cmd_char_p (*q))
 	++q;
       if (q != tmp_command + point)
 	{
@@ -1435,7 +1435,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	      q = p;
 	      while (q > tmp_command)
 		{
-		  if (isalnum (q[-1]) || q[-1] == '-' || q[-1] == '_')
+		  if (valid_cmd_char_p (q[-1]))
 		    --q;
 		  else
 		    break;

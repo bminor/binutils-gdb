@@ -1342,7 +1342,7 @@ validate_comname (const char **comname)
   p = *comname;
   while (*p)
     {
-      if (!isalnum (*p) && *p != '-' && *p != '_')
+      if (!valid_cmd_char_p (*p))
 	error (_("Junk in argument list: \"%s\""), p);
       p++;
     }

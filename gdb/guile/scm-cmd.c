@@ -492,10 +492,7 @@ gdbscm_parse_command_name (const char *name,
   lastchar = i;
 
   /* Find first character of the final word.  */
-  for (; i > 0 && (isalnum (name[i - 1])
-		   || name[i - 1] == '-'
-		   || name[i - 1] == '_');
-       --i)
+  for (; i > 0 && valid_cmd_char_p (name[i - 1]); --i)
     ;
   result = (char *) xmalloc (lastchar - i + 2);
   memcpy (result, &name[i], lastchar - i + 1);

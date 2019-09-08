@@ -1372,7 +1372,7 @@ find_command_name_length (const char *text)
   if (*p == '!' || *p == '|')
     return 1;
 
-  while (isalnum (*p) || *p == '-' || *p == '_'
+  while (valid_cmd_char_p (*p)
 	 /* Characters used by TUI specific commands.  */
 	 || *p == '+' || *p == '<' || *p == '>' || *p == '$')
     p++;
@@ -1380,9 +1380,18 @@ find_command_name_length (const char *text)
   return p - text;
 }
 
-/* Return TRUE if NAME is a valid user-defined command name.
-   This is a stricter subset of all gdb commands,
-   see find_command_name_length.  */
+/* See command.h.  */
+
+bool
+valid_cmd_char_p (int c)
+{
+  /* Alas "42" is a legitimate user-defined command.
+     In the interests of not breaking anything we preserve that.  */
+
+  return isalnum (c) || c == '-' || c == '_' || c == '.';
+}
+
+/* See command.h.  */
 
 bool
 valid_user_defined_cmd_name_p (const char *name)
@@ -1392,14 +1401,9 @@ valid_user_defined_cmd_name_p (const char *name)
   if (*name == '\0')
     return false;
 
-  /* Alas "42" is a legitimate user-defined command.
-     In the interests of not breaking anything we preserve that.  */
-
   for (p = name; *p != '\0'; ++p)
     {
-      if (isalnum (*p)
-	  || *p == '-'
-	  || *p == '_')
+      if (valid_cmd_char_p (*p))
 	; /* Ok.  */
       else
 	return false;

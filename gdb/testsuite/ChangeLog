@@ -1,5 +1,11 @@
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.base/define.exp: Test . in command names.
+	* gdb.base/setshow.exp: Update test, as . is now part of
+	command name.
+
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.base/define-prefix.exp: New file.
 
 2019-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>

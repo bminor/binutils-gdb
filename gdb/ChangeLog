@@ -1,5 +1,19 @@
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* command.h (valid_cmd_char_p): Declare.
+	* cli/cli-decode.c (valid_cmd_char_p): New function factorizing
+	the check of valid command char.
+	(find_command_name_length, valid_user_defined_cmd_name_p): Use
+	valid_cmd_char_p.
+	* cli/cli-script.c (validate_comname): Likewise.
+	* completer.c (gdb_completer_command_word_break_characters):
+	Do not remove . from the word break char, update comments.
+	(complete_line_internal_1): Use valid_cmd_char_p.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	* python/py-cmd.c (gdbpy_parse_command_name): Likewise.
+
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-script.c (do_define_command): Ensure a redefined
 	prefix command is kept as a prefix command.
 	(define_prefix_command): New function.

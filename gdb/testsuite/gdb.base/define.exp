@@ -130,6 +130,31 @@ gdb_test "help nextwhere" \
     "   A next command that first shows you where you're stepping from.*" \
     "preserve whitespace in help string"
 
+# Verify that GDB allows a user to use . in a command name.
+#
+gdb_test_multiple "define dot.command" "define user command: dot.command" {
+    -re "Type commands for definition of \"dot.command\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "echo dot command\\n\nend" "" \
+	    "define user command: dot.command"
+    }
+}
+
+# Verify that dot.command works.
+#
+gdb_test "dot.command" \
+    "dot command" \
+    "full name dot.command"
+gdb_test "dot" \
+    "dot command" \
+    "partial name dot"
+gdb_test "dot." \
+    "dot command" \
+    "partial name dot."
+gdb_test "dot.c" \
+    "dot command" \
+    "partial name dot.c"
+
+
 # Verify that the command parser doesn't require a space after an 'if'
 # command in a user defined function.
 #
