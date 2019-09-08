@@ -1,3 +1,14 @@
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-script.c (do_define_command): Ensure a redefined
+	prefix command is kept as a prefix command.
+	(define_prefix_command): New function.
+	(show_user_1): Report user defined prefixes.
+	(_initialize_cli_script):  Create the new 'define-prefix' command.
+	Add completers for 'define' and 'document'.
+	* top.c (execute_command):  If command is a user-defined prefix only
+	command, report the list of commands for this prefix command.
+
 2019-11-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* valops.c (find_oload_champ): Improve debug output.

@@ -627,6 +627,18 @@ execute_command (const char *p, int from_tty)
       /* c->user_commands would be NULL in the case of a python command.  */
       if (c->theclass == class_user && c->user_commands)
 	execute_user_command (c, arg);
+      else if (c->theclass == class_user
+	       && c->prefixlist && !c->allow_unknown)
+	/* If this is a user defined prefix that does not allow unknown
+	   (in other words, C is a prefix command and not a command
+	   that can be followed by its args), report the list of
+	   subcommands.  */
+	{
+	  printf_unfiltered
+	    ("\"%.*s\" must be followed by the name of a subcommand.\n",
+	     (int) strlen (c->prefixname) - 1, c->prefixname);
+	  help_list (*c->prefixlist, c->prefixname, all_commands, gdb_stdout);
+	}
       else if (c->type == set_cmd)
 	do_set_command (arg, from_tty, c);
       else if (c->type == show_cmd)
