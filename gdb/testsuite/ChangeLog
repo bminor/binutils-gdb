@@ -1,3 +1,7 @@
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/define-prefix.exp: New file.
+
 2019-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/gdb.exp (skip_btrace_tests): Return 1 if the test fails to
