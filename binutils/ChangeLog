@@ -1,3 +1,9 @@
+2019-09-11  Tom Tromey  <tom@tromey.com>
+
+	* objcopy.c (copy_archive): Update.
+	* bucomm.h (make_tempname, make_tempdir): Make argument const.
+	* bucomm.c (make_tempname, make_tempdir): Make argument const.
+
 2019-09-11  Alan Modra  <amodra@gmail.com>
 
 	PR 24907

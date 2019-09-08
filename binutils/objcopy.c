@@ -3311,7 +3311,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     }
 
   /* Make a temp directory to hold the contents.  */
-  dir = make_tempdir ((char *) bfd_get_filename (obfd));
+  dir = make_tempdir (bfd_get_filename (obfd));
   if (dir == NULL)
     fatal (_("cannot create tempdir for archive copying (error: %s)"),
 	   strerror (errno));

@@ -532,7 +532,7 @@ template_in_dir (const char *path)
    as FILENAME.  */
 
 char *
-make_tempname (char *filename)
+make_tempname (const char *filename)
 {
   char *tmpname = template_in_dir (filename);
   int fd;
@@ -558,7 +558,7 @@ make_tempname (char *filename)
    directory containing FILENAME.  */
 
 char *
-make_tempdir (char *filename)
+make_tempdir (const char *filename)
 {
   char *tmpname = template_in_dir (filename);
 
