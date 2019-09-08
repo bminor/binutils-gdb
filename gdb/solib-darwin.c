@@ -670,8 +670,7 @@ darwin_bfd_open (const char *pathname)
   /* The current filename for fat-binary BFDs is a name generated
      by BFD, usually a string containing the name of the architecture.
      Reset its value to the actual filename.  */
-  xfree ((char *) bfd_get_filename (res.get ()));
-  res->filename = xstrdup (pathname);
+  bfd_set_filename (res.get (), xstrdup (pathname));
 
   return res;
 }

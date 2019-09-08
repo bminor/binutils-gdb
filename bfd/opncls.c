@@ -2089,3 +2089,23 @@ bfd_follow_build_id_debuglink (bfd *abfd, const char *dir)
 				   get_build_id_name,
 				   check_build_id_file, &build_id);
 }
+
+/*
+FUNCTION
+	bfd_set_filename
+
+SYNOPSIS
+	void bfd_set_filename (bfd *abfd, char *filename);
+
+DESCRIPTION
+	Set the filename of @var{abfd}.  The old filename, if any, is freed.
+	@var{filename} must be allocated using @code{xmalloc}.  After
+	this call, it is owned @var{abfd}.
+*/
+
+void
+bfd_set_filename (bfd *abfd, char *filename)
+{
+  free ((char *) abfd->filename);
+  abfd->filename = filename;
+}

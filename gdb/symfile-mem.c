@@ -101,11 +101,9 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   /* Manage the new reference for the duration of this function.  */
   gdb_bfd_ref_ptr nbfd_holder = gdb_bfd_ref_ptr::new_reference (nbfd);
 
-  xfree ((char *) bfd_get_filename (nbfd));
   if (name == NULL)
-    nbfd->filename = xstrdup ("shared object read from target memory");
-  else
-    nbfd->filename = name;
+    name = xstrdup ("shared object read from target memory");
+  bfd_set_filename (nbfd, name);
 
   if (!bfd_check_format (nbfd, bfd_object))
     error (_("Got object file from memory but can't read symbols: %s."),

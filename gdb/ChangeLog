@@ -1,3 +1,10 @@
+2019-09-11  Tom Tromey  <tom@tromey.com>
+
+	* symfile-mem.c (symbol_file_add_from_memory): Use
+	bfd_set_filename.
+	* solib-darwin.c (darwin_bfd_open): Use bfd_set_filename.
+	* solib-aix.c (solib_aix_bfd_open): Use bfd_set_filename.
+
 2019-09-10  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf-index-write.c (write_psymbols): Extend error message.

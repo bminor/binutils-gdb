@@ -1193,6 +1193,8 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
 
 char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
 
+void bfd_set_filename (bfd *abfd, char *filename);
+
 /* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */
