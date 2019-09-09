@@ -974,6 +974,14 @@ bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
   return elf_next_in_group (sec) != NULL;
 }
 
+const char *
+bfd_elf_group_name (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
+{
+  if (elf_sec_group (sec) != NULL)
+    return elf_group_name (sec);
+  return NULL;
+}
+
 static char *
 convert_debug_to_zdebug (bfd *abfd, const char *name)
 {

@@ -577,7 +577,8 @@ extern bfd_boolean _bfd_coff_reloc_link_order
    struct bfd_link_order *);
 extern bfd_boolean bfd_coff_gc_sections
   (bfd *, struct bfd_link_info *);
-
+extern const char *bfd_coff_group_name
+  (bfd *, const asection *);
 
 #define coff_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window

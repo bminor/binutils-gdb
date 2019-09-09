@@ -1275,6 +1275,7 @@ srec_print_symbol (bfd *abfd,
 #define srec_bfd_lookup_section_flags		  bfd_generic_lookup_section_flags
 #define srec_bfd_merge_sections			  bfd_generic_merge_sections
 #define srec_bfd_is_group_section		  bfd_generic_is_group_section
+#define srec_bfd_group_name			  bfd_generic_group_name
 #define srec_bfd_discard_group			  bfd_generic_discard_group
 #define srec_section_already_linked		  _bfd_generic_section_already_linked
 #define srec_bfd_define_common_symbol		  bfd_generic_define_common_symbol

@@ -462,6 +462,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_lookup_section_flags, \
 .  NAME##_bfd_merge_sections, \
 .  NAME##_bfd_is_group_section, \
+.  NAME##_bfd_group_name, \
 .  NAME##_bfd_discard_group, \
 .  NAME##_section_already_linked, \
 .  NAME##_bfd_define_common_symbol, \
@@ -519,6 +520,9 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Is this section a member of a group?  *}
 .  bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
+.
+.  {* The group name, if section is a member of a group.  *}
+.  const char *(*_bfd_group_name) (bfd *, const struct bfd_section *);
 .
 .  {* Discard members of a group.  *}
 .  bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);

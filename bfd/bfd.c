@@ -1862,6 +1862,9 @@ DESCRIPTION
 .#define bfd_is_group_section(abfd, sec) \
 .	BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
 .
+.#define bfd_group_name(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_group_name, (abfd, sec))
+.
 .#define bfd_discard_group(abfd, sec) \
 .	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 .

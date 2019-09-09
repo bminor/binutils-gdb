@@ -3311,6 +3311,7 @@ mmo_write_object_contents (bfd *abfd)
 #define mmo_bfd_relax_section bfd_generic_relax_section
 #define mmo_bfd_merge_sections bfd_generic_merge_sections
 #define mmo_bfd_is_group_section bfd_generic_is_group_section
+#define mmo_bfd_group_name bfd_generic_group_name
 #define mmo_bfd_discard_group bfd_generic_discard_group
 #define mmo_section_already_linked \
   _bfd_generic_section_already_linked

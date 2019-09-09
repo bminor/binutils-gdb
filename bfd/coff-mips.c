@@ -1416,6 +1416,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 #define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
 
 #define _bfd_ecoff_bfd_is_group_section bfd_generic_is_group_section
+#define _bfd_ecoff_bfd_group_name bfd_generic_group_name
 #define _bfd_ecoff_bfd_discard_group bfd_generic_discard_group
 #define _bfd_ecoff_section_already_linked \
   _bfd_coff_section_already_linked

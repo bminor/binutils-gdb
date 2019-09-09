@@ -1,5 +1,10 @@
 2019-09-11  Alan Modra  <amodra@gmail.com>
 
+	* ldmisc.c: Don't #include elf-bfd.h or coff-bfd.h.
+	(vfinfo): Use bfd_group_name.
+
+2019-09-11  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (asymbol_from_plugin_symbol): Move code handling
 	ELF common symbols to block handling ELF visibility.  Simplify
 	visibility setting.

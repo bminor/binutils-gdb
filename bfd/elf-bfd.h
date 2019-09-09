@@ -2111,6 +2111,8 @@ extern bfd_boolean _bfd_elf_match_sections_by_type
   (bfd *, const asection *, bfd *, const asection *);
 extern bfd_boolean bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
+extern const char *bfd_elf_group_name
+  (bfd *, const struct bfd_section *);
 extern bfd_boolean _bfd_elf_section_already_linked
   (bfd *, asection *, struct bfd_link_info *);
 extern void bfd_elf_set_group_contents

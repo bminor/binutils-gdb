@@ -3461,6 +3461,13 @@ _bfd_nolink_bfd_is_group_section (bfd *abfd,
   return _bfd_bool_bfd_false_error (abfd);
 }
 
+const char *
+_bfd_nolink_bfd_group_name (bfd *abfd,
+			    const asection *sec ATTRIBUTE_UNUSED)
+{
+  return _bfd_ptr_bfd_null_error (abfd);
+}
+
 bfd_boolean
 _bfd_nolink_bfd_discard_group (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
 {

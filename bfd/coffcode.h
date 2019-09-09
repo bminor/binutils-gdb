@@ -5751,6 +5751,10 @@ static bfd_coff_backend_data bigobj_swap_table =
 #define coff_bfd_is_group_section	    bfd_generic_is_group_section
 #endif
 
+#ifndef coff_bfd_group_name
+#define coff_bfd_group_name		    bfd_coff_group_name
+#endif
+
 #ifndef coff_bfd_discard_group
 #define coff_bfd_discard_group		    bfd_generic_discard_group
 #endif

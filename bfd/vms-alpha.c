@@ -9504,6 +9504,7 @@ bfd_vms_get_data (bfd *abfd)
 #define vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type
 #define vms_bfd_is_group_section	  bfd_generic_is_group_section
+#define vms_bfd_group_name		  bfd_generic_group_name
 #define vms_bfd_discard_group		  bfd_generic_discard_group
 #define vms_section_already_linked	  _bfd_generic_section_already_linked
 #define vms_bfd_define_common_symbol	  bfd_generic_define_common_symbol
@@ -9550,6 +9551,7 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_bfd_lookup_section_flags bfd_generic_lookup_section_flags
 #define alpha_vms_bfd_merge_sections bfd_generic_merge_sections
 #define alpha_vms_bfd_is_group_section bfd_generic_is_group_section
+#define alpha_vms_bfd_group_name bfd_generic_group_name
 #define alpha_vms_bfd_discard_group bfd_generic_discard_group
 #define alpha_vms_section_already_linked \
   _bfd_generic_section_already_linked

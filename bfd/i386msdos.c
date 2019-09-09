@@ -226,6 +226,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_bfd_lookup_section_flags bfd_generic_lookup_section_flags
 #define msdos_bfd_merge_sections bfd_generic_merge_sections
 #define msdos_bfd_is_group_section bfd_generic_is_group_section
+#define msdos_bfd_group_name bfd_generic_group_name
 #define msdos_bfd_discard_group bfd_generic_discard_group
 #define msdos_section_already_linked \
   _bfd_generic_section_already_linked

@@ -35,8 +35,6 @@
 #include "ldlex.h"
 #include "ldmain.h"
 #include "ldfile.h"
-#include "elf-bfd.h"
-#include "coff-bfd.h"
 
 /*
  %% literal %
@@ -431,26 +429,18 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		  /* section name from a section */
 		  asection *sec;
 		  bfd *abfd;
-		  const char *group = NULL;
-		  struct coff_comdat_info *ci;
 
 		  fmt++;
 		  sec = (asection *) args[arg_no].p;
 		  ++arg_count;
-		  abfd = sec->owner;
 		  fprintf (fp, "%s", sec->name);
-		  if (abfd != NULL
-		      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
-		      && elf_next_in_group (sec) != NULL
-		      && (sec->flags & SEC_GROUP) == 0)
-		    group = elf_group_name (sec);
-		  else if (abfd != NULL
-			   && bfd_get_flavour (abfd) == bfd_target_coff_flavour
-			   && (ci = bfd_coff_get_comdat_section (sec->owner,
-								 sec)) != NULL)
-		    group = ci->name;
-		  if (group != NULL)
-		    fprintf (fp, "[%s]", group);
+		  abfd = sec->owner;
+		  if (abfd != NULL)
+		    {
+		      const char *group = bfd_group_name (abfd, sec);
+		      if (group != NULL)
+			fprintf (fp, "[%s]", group);
+		    }
 		}
 	      else if (*fmt == 'B')
 		{

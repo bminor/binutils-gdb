@@ -502,6 +502,9 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_bfd_is_group_section
 #define MY_bfd_is_group_section bfd_generic_is_group_section
 #endif
+#ifndef MY_bfd_group_name
+#define MY_bfd_group_name bfd_generic_group_name
+#endif
 #ifndef MY_bfd_discard_group
 #define MY_bfd_discard_group bfd_generic_discard_group
 #endif

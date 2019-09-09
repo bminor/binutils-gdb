@@ -528,6 +528,8 @@ extern bfd_boolean _bfd_nolink_bfd_lookup_section_flags
 #define _bfd_nolink_bfd_merge_sections _bfd_bool_bfd_link_false_error
 extern bfd_boolean _bfd_nolink_bfd_is_group_section
   (bfd *, const asection *) ATTRIBUTE_HIDDEN;
+extern const char *_bfd_nolink_bfd_group_name
+  (bfd *, const asection *) ATTRIBUTE_HIDDEN;
 extern bfd_boolean _bfd_nolink_bfd_discard_group
   (bfd *, asection *) ATTRIBUTE_HIDDEN;
 extern struct bfd_link_hash_table *_bfd_nolink_bfd_link_hash_table_create

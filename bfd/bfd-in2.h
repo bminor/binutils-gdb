@@ -2002,6 +2002,8 @@ bfd_boolean bfd_copy_private_section_data
                  (ibfd, isection, obfd, osection))
 bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
 
+const char *bfd_generic_group_name (bfd *, const asection *sec);
+
 bfd_boolean bfd_generic_discard_group (bfd *abfd, asection *group);
 
 /* Extracted from archures.c.  */
@@ -7477,6 +7479,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_is_group_section(abfd, sec) \
        BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
 
+#define bfd_group_name(abfd, sec) \
+       BFD_SEND (abfd, _bfd_group_name, (abfd, sec))
+
 #define bfd_discard_group(abfd, sec) \
        BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 
@@ -7908,6 +7913,7 @@ typedef struct bfd_target
   NAME##_bfd_lookup_section_flags, \
   NAME##_bfd_merge_sections, \
   NAME##_bfd_is_group_section, \
+  NAME##_bfd_group_name, \
   NAME##_bfd_discard_group, \
   NAME##_section_already_linked, \
   NAME##_bfd_define_common_symbol, \
@@ -7965,6 +7971,9 @@ typedef struct bfd_target
 
   /* Is this section a member of a group?  */
   bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
+
+  /* The group name, if section is a member of a group.  */
+  const char *(*_bfd_group_name) (bfd *, const struct bfd_section *);
 
   /* Discard members of a group.  */
   bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);

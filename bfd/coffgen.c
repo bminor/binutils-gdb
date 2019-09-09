@@ -3155,3 +3155,14 @@ bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   /* ... and mark SEC_EXCLUDE for those that go.  */
   return coff_gc_sweep (abfd, info);
 }
+
+/* Return name used to identify a comdat group.  */
+
+const char *
+bfd_coff_group_name (bfd *abfd, const asection *sec)
+{
+  struct coff_comdat_info *ci = bfd_coff_get_comdat_section (abfd, sec);
+  if (ci != NULL)
+    return ci->name;
+  return NULL;
+}

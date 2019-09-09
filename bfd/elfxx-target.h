@@ -192,6 +192,10 @@
 #define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
 #endif
 
+#ifndef bfd_elfNN_bfd_group_name
+#define bfd_elfNN_bfd_group_name bfd_elf_group_name
+#endif
+
 #ifndef bfd_elfNN_bfd_discard_group
 #define bfd_elfNN_bfd_discard_group bfd_generic_discard_group
 #endif

@@ -1664,6 +1664,24 @@ bfd_generic_is_group_section (bfd *abfd ATTRIBUTE_UNUSED,
 
 /*
 FUNCTION
+	bfd_generic_group_name
+
+SYNOPSIS
+	const char *bfd_generic_group_name (bfd *, const asection *sec);
+
+DESCRIPTION
+	Returns group name if @var{sec} is a member of a group.
+*/
+
+const char *
+bfd_generic_group_name (bfd *abfd ATTRIBUTE_UNUSED,
+			const asection *sec ATTRIBUTE_UNUSED)
+{
+  return NULL;
+}
+
+/*
+FUNCTION
 	bfd_generic_discard_group
 
 SYNOPSIS

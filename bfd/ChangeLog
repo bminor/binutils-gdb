@@ -1,3 +1,42 @@
+2019-09-11  Alan Modra  <amodra@gmail.com>
+
+	* targets.c (struct bfd_target): Add _bfd_group_name.
+	(BFD_JUMP_TABLE): Likewise.
+	* coffgen.c (bfd_coff_group_name): New function.
+	* elf.c (bfd_elf_group_name): New function.
+	* linker.c (_bfd_nolink_bfd_group_name): New function.
+	* section.c (bfd_generic_group_name): New function.
+	* elf-bfd.h (bfd_elf_group_name): Declare.
+	* libbfd-in.h (_bfd_nolink_bfd_group_name): Declare.
+	* libcoff-in.h (bfd_coff_group_name): Declare.
+	* aout-target.h (MY_bfd_group_name): Define.
+	* aout-tic30.c (MY_bfd_group_name): Define.
+	* bfd.c (bfd_group_name): Define.
+	* binary.c (binary_bfd_group_name): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_group_name): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_group_name): Define.
+	* coff-rs6000.c (_bfd_xcoff_bfd_group_name): Define.
+	* coffcode.h (coff_bfd_group_name): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_group_name): Define.
+	* i386msdos.c (msdos_bfd_group_name): Define.
+	* ihex.c (ihex_bfd_group_name): Define.
+	* mach-o-target.c (bfd_mach_o_bfd_group_name): Define.
+	* mmo.c (mmo_bfd_group_name): Define.
+	* pef.c (bfd_pef_bfd_group_name): Define.
+	* plugin.c (bfd_plugin_bfd_group_name): Define.
+	* ppcboot.c (ppcboot_bfd_group_name): Define.
+	* som.c (som_bfd_group_name): Define.
+	* srec.c (srec_bfd_group_name): Define.
+	* tekhex.c (tekhex_bfd_group_name): Define.
+	* verilog.c (verilog_bfd_group_name): Define.
+	* vms-alpha.c (vms_bfd_group_name, alpha_vms_bfd_group_name): Define.
+	* xsym.c (bfd_sym_bfd_group_name): Define.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Init new field.
+	(rs6000_xcoff64_aix_vec): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2019-09-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 24907
