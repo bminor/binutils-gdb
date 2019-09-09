@@ -178,7 +178,7 @@ static std::vector<gdb::unique_xmalloc_ptr<char>>
 auto_load_expand_dir_vars (const char *string)
 {
   char *s = xstrdup (string);
-  substitute_path_component (&s, "$datadir", gdb_datadir);
+  substitute_path_component (&s, "$datadir", gdb_datadir.c_str ());
   substitute_path_component (&s, "$debugdir", debug_file_directory);
 
   if (debug_auto_load && strcmp (s, string) != 0)

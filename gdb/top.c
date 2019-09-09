@@ -2038,7 +2038,7 @@ show_gdb_datadir (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("GDB's data directory is \"%s\".\n"),
-		    gdb_datadir);
+		    gdb_datadir.c_str ());
 }
 
 static void

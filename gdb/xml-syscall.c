@@ -316,7 +316,8 @@ static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
   gdb::optional<gdb::char_vector> full_file
-    = xml_fetch_content_from_file (filename, gdb_datadir);
+    = xml_fetch_content_from_file (filename,
+				   const_cast<char *>(gdb_datadir.c_str ()));
   if (!full_file)
     return NULL;
 
@@ -336,7 +337,7 @@ init_syscalls_info (struct gdbarch *gdbarch)
   /* Should we re-read the XML info for this target?  */
   if (syscalls_info != NULL && !syscalls_info->my_gdb_datadir.empty ()
       && filename_cmp (syscalls_info->my_gdb_datadir.c_str (),
-		       gdb_datadir) != 0)
+		       gdb_datadir.c_str ()) != 0)
     {
       /* The data-directory changed from the last time we used it.
 	 It means that we have to re-read the XML info.  */
@@ -361,7 +362,7 @@ init_syscalls_info (struct gdbarch *gdbarch)
     {
       if (xml_syscall_file != NULL)
 	warning (_("Could not load the syscall XML file `%s/%s'."),
-		 gdb_datadir, xml_syscall_file);
+		 gdb_datadir.c_str (), xml_syscall_file);
       else
 	warning (_("There is no XML file to open."));
 

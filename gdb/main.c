@@ -61,7 +61,7 @@ int dbx_commands = 0;
 char *gdb_sysroot = 0;
 
 /* GDB datadir, used to store data files.  */
-char *gdb_datadir = 0;
+std::string gdb_datadir;
 
 /* Non-zero if GDB_DATADIR was provided on the command line.
    This doesn't track whether data-directory is set later from the
@@ -70,7 +70,7 @@ static int gdb_datadir_provided = 0;
 
 /* If gdb was configured with --with-python=/path,
    the possibly relocated path to python's lib directory.  */
-char *python_libdir = 0;
+std::string python_libdir;
 
 /* Target IO streams.  */
 struct ui_file *gdb_stdtargin;
@@ -121,71 +121,70 @@ set_gdb_data_directory (const char *new_datadir)
   else if (!S_ISDIR (st.st_mode))
     warning (_("%s is not a directory."), new_datadir);
 
-  xfree (gdb_datadir);
-  gdb_datadir = gdb_realpath (new_datadir).release ();
+  gdb_datadir = gdb_realpath (new_datadir).get ();
 
   /* gdb_realpath won't return an absolute path if the path doesn't exist,
      but we still want to record an absolute path here.  If the user entered
      "../foo" and "../foo" doesn't exist then we'll record $(pwd)/../foo which
      isn't canonical, but that's ok.  */
-  if (!IS_ABSOLUTE_PATH (gdb_datadir))
+  if (!IS_ABSOLUTE_PATH (gdb_datadir.c_str ()))
     {
-      gdb::unique_xmalloc_ptr<char> abs_datadir = gdb_abspath (gdb_datadir);
+      gdb::unique_xmalloc_ptr<char> abs_datadir
+        = gdb_abspath (gdb_datadir.c_str ());
 
-      xfree (gdb_datadir);
-      gdb_datadir = abs_datadir.release ();
+      gdb_datadir = abs_datadir.get ();
     }
 }
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb
    was invoked (i.e., argv[0]).  INITIAL is the default value for the
    file or directory.  RELOCATABLE is true if the value is relocatable,
-   false otherwise.  Returns a newly allocated string; this may return
-   NULL under the same conditions as make_relative_prefix.  */
+   false otherwise.  This may return an empty string under the same
+   conditions as make_relative_prefix returning NULL.  */
 
-static char *
+static std::string
 relocate_path (const char *progname, const char *initial, bool relocatable)
 {
   if (relocatable)
-    return make_relative_prefix (progname, BINDIR, initial);
-  return xstrdup (initial);
+    {
+      gdb::unique_xmalloc_ptr<char> str (make_relative_prefix (progname,
+							       BINDIR,
+							       initial));
+      if (str != nullptr)
+	return str.get ();
+      return std::string ();
+    }
+  return initial;
 }
 
 /* Like relocate_path, but specifically checks for a directory.
    INITIAL is relocated according to the rules of relocate_path.  If
    the result is a directory, it is used; otherwise, INITIAL is used.
-   The chosen directory is then canonicalized using lrealpath.  This
-   function always returns a newly-allocated string.  */
+   The chosen directory is then canonicalized using lrealpath.  */
 
-char *
+std::string
 relocate_gdb_directory (const char *initial, bool relocatable)
 {
-  char *dir;
-
-  dir = relocate_path (gdb_program_name, initial, relocatable);
-  if (dir)
+  std::string dir = relocate_path (gdb_program_name, initial, relocatable);
+  if (!dir.empty ())
     {
       struct stat s;
 
-      if (*dir == '\0' || stat (dir, &s) != 0 || !S_ISDIR (s.st_mode))
+      if (stat (dir.c_str (), &s) != 0 || !S_ISDIR (s.st_mode))
 	{
-	  xfree (dir);
-	  dir = NULL;
+	  dir.clear ();
 	}
     }
-  if (!dir)
-    dir = xstrdup (initial);
+  if (dir.empty ())
+    dir = initial;
 
   /* Canonicalize the directory.  */
-  if (*dir)
+  if (!dir.empty ())
     {
-      char *canon_sysroot = lrealpath (dir);
+      gdb::unique_xmalloc_ptr<char> canon_sysroot (lrealpath (dir.c_str ()));
 
       if (canon_sysroot)
-	{
-	  xfree (dir);
-	  dir = canon_sysroot;
-	}
+	dir = canon_sysroot.get ();
     }
 
   return dir;
@@ -220,14 +219,9 @@ relocate_gdbinit_path_maybe_in_datadir (const std::string& file)
     }
   else
     {
-      char *relocated = relocate_path (gdb_program_name,
-				       file.c_str (),
-				       SYSTEM_GDBINIT_RELOCATABLE);
-      if (relocated != nullptr)
-	{
-	  relocated_path = relocated;
-	  xfree (relocated);
-	}
+      relocated_path = relocate_path (gdb_program_name,
+				      file.c_str (),
+				      SYSTEM_GDBINIT_RELOCATABLE);
     }
     return relocated_path;
 }
@@ -541,20 +535,23 @@ captured_main_1 (struct captured_main_args *context)
     perror_warning_with_name (_("error finding working directory"));
 
   /* Set the sysroot path.  */
-  gdb_sysroot = relocate_gdb_directory (TARGET_SYSTEM_ROOT,
-					TARGET_SYSTEM_ROOT_RELOCATABLE);
+  gdb_sysroot
+    = xstrdup (relocate_gdb_directory (TARGET_SYSTEM_ROOT,
+				     TARGET_SYSTEM_ROOT_RELOCATABLE).c_str ());
 
-  if (gdb_sysroot == NULL || *gdb_sysroot == '\0')
+  if (*gdb_sysroot == '\0')
     {
       xfree (gdb_sysroot);
       gdb_sysroot = xstrdup (TARGET_SYSROOT_PREFIX);
     }
 
-  debug_file_directory = relocate_gdb_directory (DEBUGDIR,
-						 DEBUGDIR_RELOCATABLE);
+  debug_file_directory
+    = xstrdup (relocate_gdb_directory (DEBUGDIR,
+				     DEBUGDIR_RELOCATABLE).c_str ());
 
-  gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
-					GDB_DATADIR_RELOCATABLE);
+  gdb_datadir
+    = xstrdup (relocate_gdb_directory (GDB_DATADIR,
+				     GDB_DATADIR_RELOCATABLE).c_str ());
 
 #ifdef WITH_PYTHON_PATH
   {

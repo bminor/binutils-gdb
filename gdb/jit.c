@@ -42,7 +42,7 @@
 #include "readline/tilde.h"
 #include "completer.h"
 
-static const char *jit_reader_dir = NULL;
+static std::string jit_reader_dir;
 
 static const struct objfile_data *jit_objfile_data;
 
@@ -216,7 +216,7 @@ jit_reader_load_command (const char *args, int from_tty)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
   if (!IS_ABSOLUTE_PATH (file.get ()))
-    file.reset (xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING,
+    file.reset (xstrprintf ("%s%s%s", jit_reader_dir.c_str (), SLASH_STRING,
 			    file.get ()));
 
   loaded_jit_reader = jit_reader_load (file.get ());

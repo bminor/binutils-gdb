@@ -325,7 +325,7 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 static SCM
 gdbscm_data_directory (void)
 {
-  return gdbscm_scm_from_c_string (gdb_datadir);
+  return gdbscm_scm_from_c_string (gdb_datadir.c_str ());
 }
 
 /* (guile-data-directory) -> string */
@@ -582,7 +582,8 @@ initialize_scheme_side (void)
 {
   char *boot_scm_path;
 
-  guile_datadir = concat (gdb_datadir, SLASH_STRING, "guile", (char *) NULL);
+  guile_datadir = concat (gdb_datadir.c_str (), SLASH_STRING, "guile",
+			  (char *) NULL);
   boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",
 			  SLASH_STRING, boot_scm_filename, (char *) NULL);
 

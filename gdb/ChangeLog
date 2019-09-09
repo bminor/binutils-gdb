@@ -1,5 +1,27 @@
 2019-09-11  Christian Biesinger  <cbiesinger@google.com>
 
+	* auto-load.c (auto_load_expand_dir_vars): Update.
+	* defs.h (gdb_datadir): Change to std::string.
+	(python_libdir): Likewise.
+	(relocate_gdb_directory): Change return type to std::string.
+	* guile/guile.c (gdbscm_data_directory): Update.
+	(initialize_scheme_side): Update.
+	* jit.c (jit_reader_dir): Change to std::string.
+	(jit_reader_load_command): Update.
+	* main.c (gdb_datadir): Change to std::string.
+	(python_libdir): Likewise.
+	(set_gdb_data_directory): Update.
+	(relocate_path): Change to return std::string.
+	(relocate_gdb_directory): Change to return std::string.
+	(relocate_gdbinit_path_maybe_in_datadir): Update.
+	(captured_main_1): Update.
+	* python/python.c (do_start_initialization): Update.
+	* top.c (show_gdb_datadir): Update.
+	* xml-syscall.c (xml_init_syscalls_info): Update.
+	(init_syscalls_info): Update.
+
+2019-09-11  Christian Biesinger  <cbiesinger@google.com>
+
 	* main.c (relocate_gdbinit_path_maybe_in_datadir): Factor this code
 	out of get_init_files.
 	(get_init_files): Update.

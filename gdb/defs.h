@@ -115,11 +115,11 @@ extern int dbx_commands;
 extern char *gdb_sysroot;
 
 /* * GDB datadir, used to store data files.  */
-extern char *gdb_datadir;
+extern std::string gdb_datadir;
 
-/* * If non-NULL, the possibly relocated path to python's "lib" directory
+/* * If not empty, the possibly relocated path to python's "lib" directory
    specified with --with-python.  */
-extern char *python_libdir;
+extern std::string python_libdir;
 
 /* * Search path for separate debug files.  */
 extern char *debug_file_directory;
@@ -282,7 +282,7 @@ struct value;
 
 /* This really belong in utils.c (path-utils.c?), but it references some
    globals that are currently only available to main.c.  */
-extern char *relocate_gdb_directory (const char *initial, bool relocatable);
+extern std::string relocate_gdb_directory (const char *initial, bool relocatable);
 
 
 /* Annotation stuff.  */

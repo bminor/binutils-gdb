@@ -1608,7 +1608,7 @@ do_start_initialization ()
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
   gdb::unique_xmalloc_ptr<char> progname
-    (concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
+    (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
 #ifdef IS_PY3K
   std::string oldloc = setlocale (LC_ALL, NULL);
