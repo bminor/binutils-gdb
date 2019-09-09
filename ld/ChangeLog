@@ -1,3 +1,34 @@
+2019-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/24887
+	* testsuite/ld-i386/property-1.r: Adjust for new output format
+	from readelf.
+	* testsuite/ld-i386/property-1a.r: Likewise.
+	* testsuite/ld-i386/property-2.r: Likewise.
+	* testsuite/ld-i386/property-2a.r: Likewise.
+	* testsuite/ld-i386/property-3.r: Likewise.
+	* testsuite/ld-i386/property-3a.r: Likewise.
+	* testsuite/ld-i386/property-4.r: Likewise.
+	* testsuite/ld-i386/property-4a.r: Likewise.
+	* testsuite/ld-i386/property-5.r: Likewise.
+	* testsuite/ld-i386/property-5a.r: Likewise.
+	* testsuite/ld-i386/property-6.r: Likewise.
+	* testsuite/ld-i386/property-7.r: Likewise.
+	* testsuite/ld-i386/property-7a.r: Likewise.
+	* testsuite/ld-i386/property-1.r: Likewise.
+	* testsuite/ld-i386/property-1a.r: Likewise.
+	* testsuite/ld-i386/property-2.r: Likewise.
+	* testsuite/ld-i386/property-2a.r: Likewise.
+	* testsuite/ld-i386/property-3.r: Likewise.
+	* testsuite/ld-i386/property-3a.r: Likewise.
+	* testsuite/ld-i386/property-4.r: Likewise.
+	* testsuite/ld-i386/property-4a.r: Likewise.
+	* testsuite/ld-i386/property-5.r: Likewise.
+	* testsuite/ld-i386/property-5a.r: Likewise.
+	* testsuite/ld-i386/property-6.r: Likewise.
+	* testsuite/ld-i386/property-7.r: Likewise.
+	* testsuite/ld-i386/property-7a.r: Likewise.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* configure, Makefile.in: Regenerated.
