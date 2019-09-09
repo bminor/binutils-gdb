@@ -1,3 +1,7 @@
+2019-09-09  Phil Blundell  <pb@pbcl.net>
+
+	binutils 2.33 branch created.
+
 2019-08-30  Claudiu Zissulescu <claziss@gmail.com>
 
 	* opcode/arc.h (FASTMATH): Move it from insn_class_t to

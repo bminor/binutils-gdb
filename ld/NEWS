@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.33:
+
 * Add command-line option --no-print-map-discarded.
 
 * The Cortex-A53 Erratum 843419 workaround now supports a choice of which

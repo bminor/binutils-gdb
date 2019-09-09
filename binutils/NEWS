@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.33:
+
 * Add --source-comment[=<txt>] option to objdump which if present,
   provides a prefix to source code lines displayed in a disassembly.
 

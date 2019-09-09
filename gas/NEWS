@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.33:
+
 * Add support for the Armv8.1-M Mainline and M-profile Vector Extension (MVE)
   instructions.
 
