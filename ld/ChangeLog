@@ -1,5 +1,97 @@
 2019-09-11  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (ALL_EMUL_EXTRA_OFILES): Add ldelf and ldelfgen.
+	(CFILES, HFILES, EXTRA_ld_new_SOURCES): Likewise.
+	* configure.tgt: Formatting.
+	(targ_extra_ofiles): Init to ldelf.o ldelfgen.o, reset to just
+	ldelfgen.o for generic ELF targets, and empty for non-ELF.
+	* emultempl/aarch64elf.em (gldaarch64_layout_sections_again): Use
+	ldelf_map_segments.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, aarch64_for_each_input_file_wrapper),
+	(aarch64_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/alphaelf.em (alpha_after_parse): Use ldelf_map_segments.
+	* emultempl/armelf.em (gldarm_layout_sections_again): Likewise.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, arm_for_each_input_file_wrapper),
+	(arm_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/cr16elf.em (cr16elf_after_parse): Use ldelf_map_segments.
+	* emultempl/crxelf.em (crxelf_after_parse): Likewise.  Delete
+	declaration.
+	* emultempl/cskyelf.em (gldcsky_layout_sections_again): Use
+	ldelf_map_segments.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, csky_for_each_input_file_wrapper),
+	(csky_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/genelf.em: Include ldelfgen.h.
+	(gld${EMULATION_NAME}_before_allocation): Use ldelf_map_segments.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	(hppaelf_layout_sections_again): Likewise.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, hppa_for_each_input_file_wrapper),
+	(hppa_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/ia64elf.em (ia64elf_after_parse): Use ldelf_map_segments.
+	* emultempl/m68hc1xelf.em (real_func),
+	(m68hc11_for_each_input_file_wrapper),
+	(m68hc11_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/metagelf.em (metagelf_layout_sections_again): Use
+	ldelf_map_segments.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, metag_for_each_input_file_wrapper),
+	(metag_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/mipself.em (real_func),
+	(mips_for_each_input_file_wrapper),
+	(mips_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/mmo.em: Don't include elf-bfd.h, do include ldelfgen.h.
+	(gld${EMULATION_NAME}_after_allocation): Use ldelf_map_segments.
+	* emultempl/nds32elf.em (nds32_elf_after_parse): Use ldelf_after_parse.
+	(nds32_elf_after_allocation): Comment fix.
+	* emultempl/nios2elf.em (nios2elf_layout_sections_again): Use
+	ldelf_map_segments.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, nios2_for_each_input_file_wrapper),
+	(nios2_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	* emultempl/ppc32elf.em (gld${EMULATION_NAME}_load_symbols): Delete
+	declaration.
+	(ppc_recognized_file): Call ldelf_load_symbols.
+	* emultempl/ppc64elf.em (ppc_layout_sections_again): Likewise.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(real_func, ppc_for_each_input_file_wrapper),
+	(ppc_lang_for_each_input_file): Delete.
+	(lang_for_each_input_file): Don't define.
+	(gld${EMULATION_NAME}_load_symbols): Don't declare.
+	(ppc64_recognized_file): Call ldelf_load_symbols.
+	* emultempl/riscvelf.em (gld${EMULATION_NAME}_after_allocation):
+	Use ldelf_map_segments.
+	* emultempl/spuelf.em (spu_place_special_section): Use
+	ldelf_place_orphan.
+	* emultempl/tic6xdsbt.em (gld${EMULATION_NAME}_after_allocation):
+	Use ldelf_map_segments.
+	* emultempl/vms.em: Include ldelfgen.h.
+	(gld${EMULATION_NAME}_after_allocation): Use ldelf_map_segments.
+	* emultempl/elf32.em: Remove unnecessary headers, include ldelf.h
+	and ldelfgen.h.  Move much of file content to..
+	* ldelf.c: ..here.  New file.
+	* ldelf.h: New file.
+	* emultempl/elf-generic.em: Move gld${EMULATION_NAME}_map_segments..
+	* ldelfgen.c: ..to here.
+	* ldelfgen.h: New file.
+	* ldlang.c (lang_for_each_input_file): Adjust to only call func
+	on real files.
+	(lang_for_each_file): Likewise.
+	* po/SRC-POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+
+2019-09-11  Alan Modra  <amodra@gmail.com>
+
 	* ldmisc.c: Don't #include elf-bfd.h or coff-bfd.h.
 	(vfinfo): Use bfd_group_name.
 

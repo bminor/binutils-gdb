@@ -6862,8 +6862,8 @@ lang_set_flags (lang_memory_region_type *ptr, const char *flags, int invert)
     }
 }
 
-/* Call a function on each input file.  This function will be called
-   on an archive, but not on the elements.  */
+/* Call a function on each real input file.  This function will be
+   called on an archive, but not on the elements.  */
 
 void
 lang_for_each_input_file (void (*func) (lang_input_statement_type *))
@@ -6873,19 +6873,21 @@ lang_for_each_input_file (void (*func) (lang_input_statement_type *))
   for (f = &input_file_chain.head->input_statement;
        f != NULL;
        f = f->next_real_file)
-    func (f);
+    if (f->flags.real)
+      func (f);
 }
 
-/* Call a function on each file.  The function will be called on all
-   the elements of an archive which are included in the link, but will
-   not be called on the archive file itself.  */
+/* Call a function on each real file.  The function will be called on
+   all the elements of an archive which are included in the link, but
+   will not be called on the archive file itself.  */
 
 void
 lang_for_each_file (void (*func) (lang_input_statement_type *))
 {
   LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
-      func (f);
+      if (f->flags.real)
+	func (f);
     }
 }
 

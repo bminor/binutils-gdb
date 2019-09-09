@@ -62,7 +62,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	}
     }
 
-  gld${EMULATION_NAME}_map_segments (need_layout);
+  ldelf_map_segments (need_layout);
 }
 
 /* This is a convenient point to tell BFD about target specific flags.

@@ -29,11 +29,10 @@ fragment <<EOF
 #define gldmmo_before_allocation before_allocation_default
 
 /* We include this header *not* because we expect to handle ELF here
-   but because we re-use the map_segments function in elf-generic.em,
-   a file which is rightly somewhat ELF-centric.  But this is only to
+   but because we use the map_segments function.  But this is only to
    get a weird testcase right; ld-mmix/bpo-22, forcing ELF to be
    output from the mmo emulation: -m mmo --oformat elf64-mmix!  */
-#include "elf-bfd.h"
+#include "ldelfgen.h"
 
 static void gld${EMULATION_NAME}_after_allocation (void);
 EOF
@@ -205,7 +204,7 @@ static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
   bfd_map_over_sections (link_info.output_bfd, mmo_wipe_sec_reloc_flag, NULL);
-  gld${EMULATION_NAME}_map_segments (FALSE);
+  ldelf_map_segments (FALSE);
 }
 
 /* To get on-demand global register allocation right, we need to parse the

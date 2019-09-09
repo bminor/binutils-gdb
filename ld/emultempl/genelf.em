@@ -23,6 +23,7 @@
 #
 fragment <<EOF
 #include "elf-bfd.h"
+#include "ldelfgen.h"
 
 EOF
 source_em ${srcdir}/emultempl/elf-generic.em
@@ -63,7 +64,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  gld${EMULATION_NAME}_map_segments (FALSE);
+  ldelf_map_segments (FALSE);
 }
 EOF
 # Put these extra routines in ld_${EMULATION_NAME}_emulation

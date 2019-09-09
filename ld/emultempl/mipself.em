@@ -227,26 +227,6 @@ mips_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 }
 
-/* Avoid processing the fake stub_file in vercheck, stat_needed and
-   check_needed routines.  */
-
-static void (*real_func) (lang_input_statement_type *);
-
-static void mips_for_each_input_file_wrapper (lang_input_statement_type *l)
-{
-  if (l != stub_file)
-    (*real_func) (l);
-}
-
-static void
-mips_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
-{
-  real_func = func;
-  lang_for_each_input_file (&mips_for_each_input_file_wrapper);
-}
-
-#define lang_for_each_input_file mips_lang_for_each_input_file
-
 EOF
 
 # Define some shell vars to insert bits of code into the standard elf

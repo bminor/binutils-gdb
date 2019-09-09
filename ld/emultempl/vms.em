@@ -174,6 +174,7 @@ if test "$OUTPUT_FORMAT" = "elf64-ia64-vms"; then
 
 fragment <<EOF
 #include "elf-bfd.h"
+#include "ldelfgen.h"
 EOF
 
 source_em ${srcdir}/emultempl/elf-generic.em
@@ -212,7 +213,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   if (need_layout < 0)
     einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
   else
-    gld${EMULATION_NAME}_map_segments (need_layout);
+    ldelf_map_segments (need_layout);
 }
 
 static void

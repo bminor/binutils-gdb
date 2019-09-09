@@ -159,7 +159,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   else if (ret > 0)
     layout_changed = 1;
 
-  gld${EMULATION_NAME}_map_segments (layout_changed);
+  ldelf_map_segments (layout_changed);
 }
 EOF
 

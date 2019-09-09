@@ -142,7 +142,7 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
     os = lang_output_section_find (output_name);
   if (os == NULL)
     {
-      os = gld${EMULATION_NAME}_place_orphan (s, output_name, 0);
+      os = ldelf_place_orphan (s, output_name, 0);
       os->addr_tree = NULL;
     }
   else if (params.ovly_flavour != ovly_soft_icache

@@ -456,7 +456,7 @@ ppc_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  gld${EMULATION_NAME}_map_segments (TRUE);
+  ldelf_map_segments (TRUE);
 
   if (!bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
@@ -565,7 +565,7 @@ gld${EMULATION_NAME}_after_allocation (void)
      unneeded, after ppc_layout_sections_again.  Another call removes
      these sections from the segment map.  Their presence is
      innocuous except for confusing ELF_SECTION_IN_SEGMENT.  */
-  gld${EMULATION_NAME}_map_segments (need_laying_out > 0);
+  ldelf_map_segments (need_laying_out > 0);
 
   if (need_laying_out != -1 && !bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
@@ -652,34 +652,12 @@ gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
   return dot_entry;
 }
 
-
-/* Avoid processing the fake stub_file in vercheck, stat_needed and
-   check_needed routines.  */
-
-static void (*real_func) (lang_input_statement_type *);
-
-static void ppc_for_each_input_file_wrapper (lang_input_statement_type *l)
-{
-  if (l != stub_file)
-    (*real_func) (l);
-}
-
-static void
-ppc_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
-{
-  real_func = func;
-  lang_for_each_input_file (&ppc_for_each_input_file_wrapper);
-}
-
-#define lang_for_each_input_file ppc_lang_for_each_input_file
-
 EOF
 
 if grep -q 'ld_elf32_spu_emulation' ldemul-list.h; then
   fragment <<EOF
 /* Special handling for embedded SPU executables.  */
 extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
-static bfd_boolean gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *);
 
 static bfd_boolean
 ppc64_recognized_file (lang_input_statement_type *entry)
@@ -687,7 +665,7 @@ ppc64_recognized_file (lang_input_statement_type *entry)
   if (embedded_spu_file (entry, "-m64"))
     return TRUE;
 
-  return gld${EMULATION_NAME}_load_symbols (entry);
+  return ldelf_load_symbols (entry);
 }
 EOF
 LDEMUL_RECOGNIZED_FILE=ppc64_recognized_file
