@@ -37,5 +37,6 @@ const bfd_arch_info_type bfd_bfin_arch =
     bfd_default_compatible,
     bfd_default_scan,
     bfd_arch_default_fill,
-    0,
+    NULL,
+    0 /* Maximum offset of a reloc from the start of an insn.  */
   };

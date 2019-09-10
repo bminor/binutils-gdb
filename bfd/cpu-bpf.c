@@ -25,7 +25,7 @@
 
 const bfd_arch_info_type bfd_bpf_arch =
 {
-  64,				/* Bits per word */
+  64,				/* Bits per word.  */
   64,				/* Bits per address.  */
   8,				/* Bits per byte.  */
   bfd_arch_bpf,			/* Architecture.  */
@@ -37,5 +37,6 @@ const bfd_arch_info_type bfd_bpf_arch =
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
   bfd_arch_default_fill,	/* Default fill.  */
-  NULL				/* Next in list.  */
+  NULL,				/* Next in list.  */
+  0 /* Maximum offset of a reloc from the start of an insn.  */
 };

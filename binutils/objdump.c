@@ -1836,6 +1836,12 @@ objdump_sprintf (SFILE *f, const char *format, ...)
 
 #define DEFAULT_SKIP_ZEROES_AT_END 3
 
+static int
+null_print (const void * stream ATTRIBUTE_UNUSED, const char * format ATTRIBUTE_UNUSED, ...)
+{
+  return 1;
+}
+
 /* Disassemble some data in memory between given values.  */
 
 static void
@@ -1903,10 +1909,7 @@ disassemble_bytes (struct disassemble_info * inf,
     {
       bfd_vma z;
       bfd_boolean need_nl = FALSE;
-      int previous_octets;
 
-      /* Remember the length of the previous instruction.  */
-      previous_octets = octets;
       octets = 0;
 
       /* Make sure we don't use relocs from previous instructions.  */
@@ -1990,26 +1993,43 @@ disassemble_bytes (struct disassemble_info * inf,
 		  && *relppp < relppend)
 		{
 		  bfd_signed_vma distance_to_rel;
+		  int insn_size = 0;
 
 		  distance_to_rel = (**relppp)->address
 		    - (rel_offset + addr_offset);
 
+		  if (distance_to_rel > 0
+		      && aux->abfd->arch_info->max_reloc_offset_into_insn <= distance_to_rel)
+		    {
+		      /* This reloc *might* apply to the current insn,
+			 starting somewhere inside it.  Discover the length
+			 of the current insn so that the check below will
+			 work.  */
+		      if (insn_width)
+			insn_size = insn_width;
+		      else
+			{
+			  /* We find the length by calling the dissassembler
+			     function with a dummy print handler.  This should
+			     work unless the disassembler is not expecting to
+			     be called multiple times for the same address.
+
+			     This does mean disassembling the instruction
+			     twice, but we only do this when there is a high
+			     probability that there is a reloc that will
+			     affect the instruction.  */
+			  inf->fprintf_func = (fprintf_ftype) null_print;
+			  insn_size = disassemble_fn (section->vma
+						      + addr_offset, inf);
+			  inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
+			}
+		    }
+
 		  /* Check to see if the current reloc is associated with
 		     the instruction that we are about to disassemble.  */
 		  if (distance_to_rel == 0
-		      /* FIXME: This is wrong.  We are trying to catch
-			 relocs that are addressed part way through the
-			 current instruction, as might happen with a packed
-			 VLIW instruction.  Unfortunately we do not know the
-			 length of the current instruction since we have not
-			 disassembled it yet.  Instead we take a guess based
-			 upon the length of the previous instruction.  The
-			 proper solution is to have a new target-specific
-			 disassembler function which just returns the length
-			 of an instruction at a given address without trying
-			 to display its disassembly. */
 		      || (distance_to_rel > 0
-			  && distance_to_rel < (bfd_signed_vma) (previous_octets/ opb)))
+			  && distance_to_rel < (bfd_signed_vma) (insn_size / opb)))
 		    {
 		      inf->flags |= INSN_HAS_RELOC;
 		      aux->reloc = **relppp;

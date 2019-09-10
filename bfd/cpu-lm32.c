@@ -25,17 +25,18 @@
 
 const bfd_arch_info_type bfd_lm32_arch =
 {
-    32,				  /* Bits in word.  */
-    32,				  /* Bits in address.  */
-    8,				  /* Bits in byte.  */
-    bfd_arch_lm32,		  /* Enum bfd_architecture.  */
-    bfd_mach_lm32,		  /* Machine number.  */
-    "lm32",			  /* Architecture name.  */
-    "lm32",			  /* Printable name.  */
-    4,				  /* Alignment.  */
-    TRUE,			  /* Is this the default machine for the target.  */
-    bfd_default_compatible,	  /* Function callback to test if two files have compatible machines.  */
-    bfd_default_scan,
-    bfd_arch_default_fill,
-    NULL			  /* Next.  */
+  32,			  /* Bits in word.  */
+  32,			  /* Bits in address.  */
+  8,			  /* Bits in byte.  */
+  bfd_arch_lm32,	  /* Enum bfd_architecture.  */
+  bfd_mach_lm32,	  /* Machine number.  */
+  "lm32",		  /* Architecture name.  */
+  "lm32",		  /* Printable name.  */
+  4,			  /* Alignment.  */
+  TRUE,			  /* Is this the default machine for the target.  */
+  bfd_default_compatible, /* Function callback to test if two files have compatible machines.  */
+  bfd_default_scan,
+  bfd_arch_default_fill,
+  NULL,			  /* Next.  */
+  0 			  /* Maximum offset of a reloc from the start of an insn.  */
 };

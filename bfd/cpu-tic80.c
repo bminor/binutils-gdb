@@ -24,18 +24,19 @@
 #include "libbfd.h"
 
 const bfd_arch_info_type bfd_tic80_arch =
-  {
-    32,				/* 32 bits in a word */
-    32,				/* 32 bits in an address */
-    8,				/* 8 bits in a byte */
-    bfd_arch_tic80,		/* bfd_architecture enum */
-    0,				/* only 1 machine */
-    "tic80",			/* architecture name */
-    "tic80",			/* printable name */
-    2,				/* section alignment power */
-    TRUE,			/* default machine for architecture */
-    bfd_default_compatible,
-    bfd_default_scan,
-    bfd_arch_default_fill,
-    NULL,				/* Pointer to next in chain */
-  };
+{
+  32,				/* Bits in a word.  */
+  32,				/* Bits in an address.  */
+  8,				/* Bits in a byte.  */
+  bfd_arch_tic80,		/* Architecture number.  */
+  0,				/* Only 1 machine.  */
+  "tic80",			/* Architecture name.  */
+  "tic80",			/* Printable name.  */
+  2,				/* Section alignment power.  */
+  TRUE,				/* Default machine.  */
+  bfd_default_compatible,
+  bfd_default_scan,
+  bfd_arch_default_fill,
+  NULL,				/* Pointer to next in chain.  */
+  0 /* Maximum offset of a reloc from the start of an insn.  */
+};

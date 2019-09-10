@@ -23,19 +23,20 @@
 #include "libbfd.h"
 
 const bfd_arch_info_type bfd_pdp11_arch =
-  {
-    16,	/* 16 bits in a word */
-    16,	/* 16 bits in an address */
-    8,	/* 8 bits in a byte */
-    bfd_arch_pdp11,
-    0,	/* only 1 machine */
-    "pdp11",
-    "pdp11",
-    1,		/* alignment = 16 bit */
-    TRUE, /* the one and only */
-    bfd_default_compatible,
-    bfd_default_scan,
-    bfd_arch_default_fill,
-    0,
-  };
+{
+  16,	/* Bits in a word.  */
+  16,	/* Bits in an address.  */
+  8,	/* Bits in a byte.  */
+  bfd_arch_pdp11,
+  0,	/* Only 1 machine.  */
+  "pdp11",
+  "pdp11",
+  1,	/* Alignment = 16 bit.  */
+  TRUE, /* The one and only.  */
+  bfd_default_compatible,
+  bfd_default_scan,
+  bfd_arch_default_fill,
+  NULL,
+  0 /* Maximum offset of a reloc from the start of an insn.  */
+};
 

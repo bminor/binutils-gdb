@@ -37,7 +37,8 @@
     bfd_default_compatible,				\
     bfd_default_scan,					\
     bfd_arch_default_fill,				\
-    NEXT						\
+    NEXT,						\
+    0 /* Maximum offset of a reloc from the start of an insn.  */ \
   }
 
 const bfd_arch_info_type bfd_pru_arch = N (32, 32, 0, "pru", TRUE, NULL);

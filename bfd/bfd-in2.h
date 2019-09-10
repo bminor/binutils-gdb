@@ -2514,6 +2514,16 @@ typedef struct bfd_arch_info
                  bfd_boolean code);
 
   const struct bfd_arch_info *next;
+
+  /* On some architectures the offset for a relocation can point into
+     the middle of an instruction.  This field specifies the maximum
+     offset such a relocation can have (in octets).  This affects the
+     behaviour of the disassembler, since a value greater than zero
+     means that it may need to disassemble an instruction twice, once
+     to get its length and then a second time to display it.  If the
+     value is negative then this has to be done for every single
+     instruction, regardless of the offset of the reloc.  */
+  signed int max_reloc_offset_into_insn;
 }
 bfd_arch_info_type;
 

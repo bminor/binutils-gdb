@@ -41,8 +41,8 @@ compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
 }
 
 #define N(name,print,default,next)  \
-{ 16, 16, 8, bfd_arch_z80, name, "z80", print, 0, default, \
-  compatible, bfd_default_scan, bfd_arch_default_fill, next }
+ { 16, 16, 8, bfd_arch_z80, name, "z80", print, 0, default, \
+   compatible, bfd_default_scan, bfd_arch_default_fill, next, 0 }
 
 #define M(n) &arch_info_struct[n]
 

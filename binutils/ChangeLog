@@ -1,3 +1,13 @@
+2019-09-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 24907
+	* objdump.c (null_print): New function.
+	(disassemble_bytes): Delete previous_octets local and replace with
+	a test of the max_reloc_offset_into_insn field of the
+	bfd_arch_info structure.  If a reloc is a potential match for the
+	next insn, then perform a dummy disassembly in order to calculate
+	its real length.
+
 2019-09-09  Phil Blundell  <pb@pbcl.net>
 
 	binutils 2.33 branch created.

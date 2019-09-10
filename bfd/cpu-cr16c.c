@@ -23,18 +23,19 @@
 #include "libbfd.h"
 
 const bfd_arch_info_type bfd_cr16c_arch =
-  {
-    16,		/* 16 bits in a word.  */
-    32,		/* 32 bits in an address.  */
-    8,		/*  8 bits in a byte.  */
-    bfd_arch_cr16c,
-    bfd_mach_cr16c,
-    "cr16c",
-    "cr16c",
-    1,
-    TRUE,	/* The one and only.  */
-    bfd_default_compatible,
-    bfd_default_scan,
-    bfd_arch_default_fill,
-    0,
-  };
+{
+  16,		/* Bits in a word.  */
+  32,		/* Bits in an address.  */
+  8,		/* Bits in a byte.  */
+  bfd_arch_cr16c,
+  bfd_mach_cr16c,
+  "cr16c",
+  "cr16c",
+  1,
+  TRUE,		/* The one and only.  */
+  bfd_default_compatible,
+  bfd_default_scan,
+  bfd_arch_default_fill,
+  NULL,
+  0 /* Maximum offset of a reloc from the start of an insn.  */
+};

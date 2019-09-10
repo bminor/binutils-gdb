@@ -24,17 +24,18 @@
 
 const bfd_arch_info_type bfd_tic54x_arch =
 {
-  16,				/* 16 bits in a word */
-  16,				/* 16 bits in an address (except '548) */
-  16,				/* 16 bits in a byte */
+  16,				/* Bits in a word.  */
+  16,				/* Bits in an address (except '548).  */
+  16,				/* Bits in a byte.  */
   bfd_arch_tic54x,
-  0,				/* only 1 machine */
+  0,				/* Only 1 machine.  */
   "tic54x",
   "tms320c54x",
   1,
-  TRUE,				/* the one and only */
+  TRUE,				/* The one and only.  */
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,
-  0,
+  NULL,
+  0 /* Maximum offset of a reloc from the start of an insn.  */
 };

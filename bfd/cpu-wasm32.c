@@ -24,8 +24,8 @@
 #include "libiberty.h"
 
 #define N(number, print, default, next)  \
-{  32, 32, 8, bfd_arch_wasm32, number, "wasm32", "wasm32", 4, default, bfd_default_compatible, \
-   bfd_default_scan, bfd_arch_default_fill, next }
+ { 32, 32, 8, bfd_arch_wasm32, number, "wasm32", "wasm32", 4, default, bfd_default_compatible, \
+   bfd_default_scan, bfd_arch_default_fill, next, 0 }
 
 static const bfd_arch_info_type arch_info_struct[] =
 {

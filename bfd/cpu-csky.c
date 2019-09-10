@@ -23,21 +23,22 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-#define N(NUMBER, PRINT, ISDEFAULT, NEXT)  \
-{                                                                      \
-  32,                     /* 32 bits in a word */                      \
-  32,                     /* 32 bits in an address */                  \
-  8,                      /* 8 bits in a byte */                       \
-  bfd_arch_csky,          /* Architecture */                           \
-  NUMBER,                 /* Machine number */                         \
-  "csky",                 /* Architecture name */                      \
-  PRINT,                  /* Printable name */                         \
-  3,                      /* Section align power */                    \
-  ISDEFAULT,              /* Is this the default architecture ? */     \
-  bfd_default_compatible, /* Architecture comparison function */       \
-  bfd_default_scan,       /* String to architecture conversion */      \
-  bfd_arch_default_fill,                                               \
-  NEXT                    /* Next in list */                           \
+#define N(NUMBER, PRINT, ISDEFAULT, NEXT)			        \
+{                                                                       \
+  32,                     /* Bits in a word.  */                        \
+  32,                     /* Bits in an address.  */                    \
+  8,                      /* Bits in a byte.  */                        \
+  bfd_arch_csky,          /* Architecture.  */                          \
+  NUMBER,                 /* Machine number.  */                        \
+  "csky",                 /* Architecture name.  */                     \
+  PRINT,                  /* Printable name.  */                        \
+  3,                      /* Section align power.  */                   \
+  ISDEFAULT,              /* Is this the default architecture ?  */	\
+  bfd_default_compatible, /* Architecture comparison function.  */	\
+  bfd_default_scan,       /* String to architecture conversion.  */	\
+  bfd_arch_default_fill,						\
+  NEXT,                   /* Next in list.  */				\
+  0 /* Maximum offset of a reloc from the start of an insn.  */		\
 }
 
 static const bfd_arch_info_type arch_info_struct[] =
