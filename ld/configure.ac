@@ -378,7 +378,7 @@ tdir_$i=$result"
 	    elf_list_options=TRUE
 	    ;;
 	  *)
-	    if $GREP "TEMPLATE_NAME=elf32" ${srcdir}/emulparams/${i}.sh >/dev/null 2>/dev/null; then
+	    if $GREP "TEMPLATE_NAME=elf" ${srcdir}/emulparams/${i}.sh >/dev/null 2>/dev/null; then
 	      elf_list_options=TRUE
 	    fi
 	    ;;

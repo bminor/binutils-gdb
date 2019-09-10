@@ -113,7 +113,7 @@ foreach t $test_list {
 set ASFLAGS "$saved_ASFLAGS"
 
 # Check that the --out-implib option work correctly.
-# Targets that don't use elf32.em won't support this.
+# Targets that don't use elf.em won't support this.
 run_ld_link_tests [list \
     [list "Generate empty import library" \
 	"--out-implib=tmpdir/implib.lib" "" \

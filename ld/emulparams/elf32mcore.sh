@@ -26,7 +26,7 @@ OTHER_BSS_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__bss_end__ = .${CREATE_SHLIB+)}
 # This sets the stack to the top of the simulator memory (2^19 bytes).
 STACK_ADDR=0x80000
 
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 
 # This code gets inserted into the generic elf32.sc linker script
 # and allows us to define our own command line switches.

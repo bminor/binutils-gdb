@@ -10,7 +10,7 @@ OUTPUT_FORMAT="elf32-bigmips"
 BIG_OUTPUT_FORMAT="elf32-bigmips"
 LITTLE_OUTPUT_FORMAT="elf32-littlemips"
 
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 EXTRA_EM_FILE=mipself
 
 # Note: use "x$var" not x"$var" in case directive in order to work around bug in bash 4.2

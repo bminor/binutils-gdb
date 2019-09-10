@@ -111,7 +111,7 @@ SECTIONS
     KEEP (*(SORT_NONE(.fini.*)))}
     *(.text)
     ${RELOCATING+*(.text.*)}
-    /* .gnu.warning sections are handled specially by elf32.em.  */
+    /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
     ${RELOCATING+*(.gnu.linkonce.t*)
     _etext = .;

@@ -1,4 +1,4 @@
-/* ELF emulation code for targets using elf32.em.
+/* ELF emulation code for targets using elf.em.
    Copyright (C) 1991-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.

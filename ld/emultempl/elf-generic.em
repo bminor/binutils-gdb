@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em and from ELF targets that use
+# This file is sourced from elf.em and from ELF targets that use
 # generic.em.
 #
 fragment <<EOF

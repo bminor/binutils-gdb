@@ -18,7 +18,7 @@
 # see <http://www.gnu.org/licenses/>.
 #
 
-# This file is sourced from elf32.em, and defines x86 specific routines.
+# This file is sourced from elf.em, and defines x86 specific routines.
 #
 fragment <<EOF
 

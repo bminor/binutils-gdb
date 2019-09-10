@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em and mmo.em, used to define
+# This file is sourced from elf.em and mmo.em, used to define
 # MMIX-specific things common to ELF and MMO.
 
 fragment <<EOF

@@ -3,7 +3,7 @@
 #ld: -r
 #readelf: -S
 #xfail: [uses_genelf]
-# if not using elf32.em, you don't get fancy section handling
+# if not using elf.em, you don't get fancy section handling
 
 #...
 .* .abcxyz .*

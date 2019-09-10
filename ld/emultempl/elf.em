@@ -1,7 +1,5 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-# This file is now misnamed, because it supports both 32 bit and 64 bit
-# ELF emulations.
 test -z "${ELFSIZE}" && ELFSIZE=32
 if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}

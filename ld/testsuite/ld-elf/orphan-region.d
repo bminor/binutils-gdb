@@ -2,7 +2,7 @@
 #ld: -T orphan-region.ld -N -z stack-size=0
 #readelf: -S -l --wide
 #xfail: [uses_genelf] hppa*64*-*-* spu-*-* *-*-nacl*
-# if not using elf32.em, you don't get fancy orphan handling
+# if not using elf.em, you don't get fancy orphan handling
 # spu twiddles LOAD range, hppa64 adds PHDR, nacl splits to two segments
 
 #...

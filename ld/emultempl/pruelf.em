@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra pru-elf
+# This file is sourced from elf.em, and defines extra pru-elf
 # specific routines.
 #
 fragment <<EOF

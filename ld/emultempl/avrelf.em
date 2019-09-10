@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 
 
-# This file is sourced from elf32.em, and defines extra avr-elf specific
+# This file is sourced from elf.em, and defines extra avr-elf specific
 # routines.  It is used to generate the trampolines for the avr6 family
 # of devices where one needs to address the issue that it is not possible
 # to reach the whole program memory by using 16 bit pointers.

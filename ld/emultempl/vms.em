@@ -85,7 +85,7 @@ gld${EMULATION_NAME}_find_potential_libraries
 }
 
 /* Place an orphan section.  We use this to put random OVR sections.
-   Much borrowed from elf32.em.  */
+   Much borrowed from elf.em.  */
 
 static lang_output_section_statement_type *
 vms_place_orphan (asection *s,

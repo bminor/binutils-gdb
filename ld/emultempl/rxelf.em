@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra rx-elf
+# This file is sourced from elf.em, and defines extra rx-elf
 # specific routines.
 #
 test -z "$TARGET2_TYPE" && TARGET2_TYPE="rel"

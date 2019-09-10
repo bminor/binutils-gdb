@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# This file is sourced from elf32.em, and defines extra C-SKY ELF
+# This file is sourced from elf.em, and defines extra C-SKY ELF
 # specific routines.
 #
 fragment <<EOF

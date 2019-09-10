@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra m68hc12-elf
+# This file is sourced from elf.em, and defines extra m68hc12-elf
 # and m68hc11-elf specific routines.  It is used to generate the
 # HC11/HC12 trampolines to call a far function by using a normal 'jsr/bsr'.
 #

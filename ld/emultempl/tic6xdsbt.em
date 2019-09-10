@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra C6X DSBT specific
+# This file is sourced from elf.em, and defines extra C6X DSBT specific
 # features.
 #
 fragment <<EOF

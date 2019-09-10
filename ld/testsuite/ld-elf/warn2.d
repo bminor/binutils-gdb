@@ -4,7 +4,7 @@
 #ld: -T group.ld
 #warning: ^[^\n]*\.[obj]+: warning: function 'Foo' used$
 #readelf: -s
-# if not using elf32.em, you don't get fancy section handling
+# if not using elf.em, you don't get fancy section handling
 #xfail: [uses_genelf]
 #xfail: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
 

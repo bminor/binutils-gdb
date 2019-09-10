@@ -20,7 +20,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra cr16-elf
+# This file is sourced from elf.em, and defines extra cr16-elf
 # specific routines.
 #
 fragment <<EOF

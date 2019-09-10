@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em and used to define MMIX and ELF
+# This file is sourced from elf.em and used to define MMIX and ELF
 # specific things.  First include what we have in common with mmo.
 
 source_em ${srcdir}/emultempl/mmix-elfnmmo.em

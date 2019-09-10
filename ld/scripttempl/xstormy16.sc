@@ -181,7 +181,7 @@ SECTIONS
     *(.text)
     ${RELOCATING+*(.text.*)}
     *(.stub)
-    /* .gnu.warning sections are handled specially by elf32.em.  */
+    /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
     ${RELOCATING+*(.gnu.linkonce.t.*)}
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}

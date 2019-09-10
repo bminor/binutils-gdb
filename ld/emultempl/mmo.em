@@ -24,7 +24,7 @@
 fragment <<EOF
 /* Need to have this macro defined before mmix-elfnmmo, which uses the
    name for the before_allocation function, defined in ldemul.c (for
-   the mmo "emulation") or in elf32.em (for the elf64mmix
+   the mmo "emulation") or in elf.em (for the elf64mmix
    "emulation").  */
 #define gldmmo_before_allocation before_allocation_default
 
@@ -44,7 +44,7 @@ fragment <<EOF
 
 /* Place an orphan section.  We use this to put random SEC_CODE or
    SEC_READONLY sections right after MMO_TEXT_SECTION_NAME.  Much borrowed
-   from elf32.em.  */
+   from elf.em.  */
 
 static lang_output_section_statement_type *
 mmo_place_orphan (asection *s,
@@ -181,7 +181,7 @@ mmo_place_orphan (asection *s,
     return NULL;
 
   /* If there's an output section by *this* name, we'll use it, regardless
-     of actual section flags, in contrast to what's done in elf32.em.  */
+     of actual section flags, in contrast to what's done in elf.em.  */
   os = lang_insert_orphan (s, secname, 0, after, place, NULL, NULL);
 
   return os;

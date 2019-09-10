@@ -20,9 +20,9 @@
 # MA 02110-1301, USA.
 
 
-# This file is sourced from elf32.em, and defines some extra routines for m68k
+# This file is sourced from elf.em, and defines some extra routines for m68k
 # embedded systems using ELF and for some other systems using m68k ELF.  While
-# it is sourced from elf32.em for all m68k ELF configurations, here we include
+# it is sourced from elf.em for all m68k ELF configurations, here we include
 # only the features we want depending on the configuration.
 
 case ${target} in

@@ -205,7 +205,7 @@ SECTIONS
     ${RELOCATING+${TEXT_START_SYMBOLS}}
 
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
-    /* .gnu.warning sections are handled specially by elf32.em.  */
+    /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
 
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
