@@ -1,5 +1,12 @@
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.c: Remove separator comments.
+	* tui/tui-layout.c: Remove separator comments.
+	* tui/tui-win.c: Remove separator comments.
+	* tui/tui-wingeneral.c: Remove separator comments.
+
+2019-09-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (strcat_to_buf): Don't declare.
 	* tui/tui.c (strcat_to_buf): Remove.
 

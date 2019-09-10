@@ -27,33 +27,18 @@
 #include "tui/tui-winsource.h"
 #include "gdb_curses.h"
 
-/****************************
-** GLOBAL DECLARATIONS
-****************************/
 struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-/***************************
-** Private data
-****************************/
 static int term_height, term_width;
 static struct tui_win_info *win_with_focus = NULL;
 
 static bool win_resized = false;
-
-
-/*********************************
-** PUBLIC FUNCTIONS
-**********************************/
 
 int
 tui_win_is_auxiliary (enum tui_win_type win_type)
 {
   return (win_type > MAX_MAJOR_WINDOWS);
 }
-
-/******************************************
-** ACCESSORS & MUTATORS FOR PRIVATE DATA
-******************************************/
 
 /* Answer a whether the terminal window has been resized or not.  */
 bool
@@ -117,11 +102,6 @@ tui_set_term_width_to (int w)
 {
   term_width = w;
 }
-
-
-/*****************************
-** OTHER PUBLIC FUNCTIONS
-*****************************/
 
 
 /* Answer the next window in the list, cycling back to the top if

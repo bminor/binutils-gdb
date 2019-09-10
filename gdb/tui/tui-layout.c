@@ -40,9 +40,6 @@
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
 
-/*******************************
-** Static Local Decls
-********************************/
 static void show_layout (enum tui_layout_type);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
 static void show_source_command (void);
@@ -64,9 +61,6 @@ tui_current_layout (void)
   return current_layout;
 }
 
-/***************************************
-** DEFINITIONS
-***************************************/
 
 /* Show the screen layout defined.  */
 static void
@@ -336,11 +330,6 @@ Layout names are:\n\
            the window that has current logical focus."));
   set_cmd_completer (cmd, layout_completer);
 }
-
-
-/*************************
-** STATIC LOCAL FUNCTIONS
-**************************/
 
 
 /* Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, or

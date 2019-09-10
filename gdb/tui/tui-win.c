@@ -53,9 +53,6 @@
 
 #include <signal.h>
 
-/*******************************
-** Static Local Decls
-********************************/
 static enum tui_status tui_adjust_win_heights (struct tui_win_info *, 
 					       int);
 static int new_height_ok (struct tui_win_info *, int);
@@ -71,15 +68,8 @@ static void parse_scrolling_args (const char *,
 				  int *);
 
 
-/***************************************
-** DEFINITIONS
-***************************************/
 #define WIN_HEIGHT_USAGE    "Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n"
 #define FOCUS_USAGE         "Usage: focus [WINDOW-NAME | next | prev]\n"
-
-/***************************************
-** PUBLIC FUNCTIONS
-***************************************/
 
 #ifndef ACS_LRCORNER
 #  define ACS_LRCORNER '+'
@@ -718,11 +708,6 @@ tui_initialize_win (void)
   }
 #endif
 }
-
-
-/*************************
-** STATIC LOCAL FUNCTIONS
-**************************/
 
 
 static void

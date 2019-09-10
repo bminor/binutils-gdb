@@ -28,10 +28,6 @@
 
 #include "gdb_curses.h"
 
-/***********************
-** PUBLIC FUNCTIONS
-***********************/
-
 /* See tui-data.h.  */
 
 void
@@ -191,8 +187,3 @@ tui_refresh_all ()
   if (locator->is_visible ())
     locator->refresh_window ();
 }
-
-
-/*********************************
-** Local Static Functions
-*********************************/
