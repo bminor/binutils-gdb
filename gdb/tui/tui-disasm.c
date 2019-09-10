@@ -218,7 +218,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
       if (line.size() > offset)
 	src->line.reset (xstrndup (&line[offset], line_width));
       else
-	src->line.reset (xstrdup (""));
+	src->line = make_unique_xstrdup ("");
 
       src->line_or_addr.loa = LOA_ADDRESS;
       src->line_or_addr.u.addr = asm_lines[i].addr;
