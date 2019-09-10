@@ -1,3 +1,8 @@
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.threads/stop-with-handle.c: New file.
+	* gdb.threads/stop-with-handle.exp: New file.
+
 2019-10-03  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/25059

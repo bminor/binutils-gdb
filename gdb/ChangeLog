@@ -1,5 +1,11 @@
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linux-nat.c (linux_nat_filter_event): Don't ignore SIGSTOP if we
+	have just sent the thread a SIGSTOP and are waiting for it to
+	arrive.
+
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* btrace.c (btrace_add_pc): Remove whitespace before the template
 	parameter in 'std::vector <...>'.
 	(parse_xml_btrace_block): Likewise.
