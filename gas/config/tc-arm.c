@@ -14424,6 +14424,7 @@ do_mve_scalar_shift (void)
 #define M_MNEM_vmlsdavax  0xeef01e21
 #define M_MNEM_vmullt	0xee011e00
 #define M_MNEM_vmullb	0xee010e00
+#define M_MNEM_vctp	0xf000e801
 #define M_MNEM_vst20	0xfc801e00
 #define M_MNEM_vst21	0xfc801e20
 #define M_MNEM_vst40	0xfc801e01
@@ -15791,6 +15792,45 @@ mve_get_vcmp_vpt_cond (struct neon_type_el et)
     }
   /* Should be unreachable.  */
   abort ();
+}
+
+/* For VCTP (create vector tail predicate) in MVE.  */
+static void
+do_mve_vctp (void)
+{
+  int dt = 0;
+  unsigned size = 0x0;
+
+  if (inst.cond > COND_ALWAYS)
+    inst.pred_insn_type = INSIDE_VPT_INSN;
+  else
+    inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+
+  /* This is a typical MVE instruction which has no type but have size 8, 16,
+     32 and 64.  For instructions with no type, inst.vectype.el[j].type is set
+     to NT_untyped and size is updated in inst.vectype.el[j].size.  */
+  if ((inst.operands[0].present) && (inst.vectype.el[0].type == NT_untyped))
+    dt = inst.vectype.el[0].size;
+
+  /* Setting this does not indicate an actual NEON instruction, but only
+     indicates that the mnemonic accepts neon-style type suffixes.  */
+  inst.is_neon = 1;
+
+  switch (dt)
+    {
+      case 8:
+	break;
+      case 16:
+	size = 0x1; break;
+      case 32:
+	size = 0x2; break;
+      case 64:
+	size = 0x3; break;
+      default:
+	first_error (_("Type is not allowed for this instruction"));
+    }
+  inst.instruction |= size << 20;
+  inst.instruction |= inst.operands[0].reg << 16;
 }
 
 static void
@@ -25494,6 +25534,7 @@ static const struct asm_opcode insns[] =
 
  /* MVE and MVE FP only.  */
  mToC("vhcadd",	ee000f00,   4, (RMQ, RMQ, RMQ, EXPi),		  mve_vhcadd),
+ mCEF(vctp,	_vctp,      1, (RRnpc),				  mve_vctp),
  mCEF(vadc,	_vadc,      3, (RMQ, RMQ, RMQ),			  mve_vadc),
  mCEF(vadci,	_vadci,     3, (RMQ, RMQ, RMQ),			  mve_vadc),
  mToC("vsbc",	fe300f00,   3, (RMQ, RMQ, RMQ),			  mve_vsbc),
