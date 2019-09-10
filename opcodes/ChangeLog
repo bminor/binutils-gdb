@@ -1,3 +1,8 @@
+2019-09-10  Miod Vallat  <miod@online.fr>
+
+	PR 24982
+	* m68k-opc.c: Correct aliases for tdivsl and tdivul.
+
 2019-09-09  Phil Blundell  <pb@pbcl.net>
 
 	binutils 2.33 branch created.
