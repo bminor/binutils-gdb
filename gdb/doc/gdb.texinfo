@@ -25056,6 +25056,10 @@ for more details about the Readline
 interface.  Users unfamiliar with @sc{gnu} Emacs or @code{vi} are
 encouraged to read that chapter.
 
+@cindex Readline application name
+@value{GDBN} sets the Readline application name to @samp{gdb}.  This
+is useful for conditions in @file{.inputrc}.
+
 @node Command History
 @section Command History
 @cindex command history
@@ -27658,6 +27662,10 @@ with the TUI SingleKey mode.  Once the command is entered the TUI
 SingleKey mode is restored.  The only way to permanently leave
 this mode is by typing @kbd{q} or @kbd{C-x s}.
 
+@cindex SingleKey keymap name
+If @value{GDBN} was built with Readline 8.0 or later, the TUI
+SingleKey keymap will be named @samp{SingleKey}.  This can be used in
+@file{.inputrc} to add additional bindings to this keymap.
 
 @node TUI Commands
 @section TUI-specific Commands

@@ -1,3 +1,8 @@
+2019-09-18  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Editing): Document readline application name.
+	(TUI Single Key Mode): Document TUI SingleKey keymap name.
+
 2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Source Path): Additional text to better describe

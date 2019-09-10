@@ -323,6 +323,10 @@ maint show test-options-completion-result
   GDB now bundles GNU readline 8.0, but if you choose to use
   --with-system-readline, only readline >= 7.0 can be used.
 
+* The TUI SingleKey keymap is now named "SingleKey".  This can be used
+  from .inputrc to bind keys in this keymap.  This feature is only
+  available when gdb is built against GNU readline 8.0 or later.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on

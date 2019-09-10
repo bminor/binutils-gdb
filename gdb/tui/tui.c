@@ -329,13 +329,17 @@ tui_initialize_readline (void)
   int i;
   Keymap tui_ctlx_keymap;
 
-  rl_initialize ();
-
   rl_add_defun ("tui-switch-mode", tui_rl_switch_mode, -1);
   rl_add_defun ("gdb-command", tui_rl_command_key, -1);
   rl_add_defun ("next-keymap", tui_rl_next_keymap, -1);
 
   tui_keymap = rl_make_bare_keymap ();
+
+  /* The named keymap feature was added in Readline 8.0.  */
+#if RL_READLINE_VERSION >= 0x800
+  rl_set_keymap_name ("SingleKey", tui_keymap);
+#endif
+
   tui_ctlx_keymap = rl_make_bare_keymap ();
   tui_readline_standard_keymap = rl_get_keymap ();
 
@@ -467,7 +471,6 @@ tui_enable (void)
       nodelay(w, FALSE);
       nl();
       keypad (w, TRUE);
-      rl_initialize ();
       tui_set_term_height_to (LINES);
       tui_set_term_width_to (COLS);
       def_prog_mode ();

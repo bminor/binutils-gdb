@@ -1,3 +1,10 @@
+2019-09-18  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add entry.
+	* tui/tui.c (tui_initialize_readline): Set name of keymap.  Do not
+	call rl_initialize.
+	(tui_enable): Do not call rl_initialize.
+
 2019-09-18  Christian Groessler  <chris@groessler.org>
 
 	* alpha-linux-nat.c: Include gdbarch.h.
