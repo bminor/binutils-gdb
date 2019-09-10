@@ -1,3 +1,16 @@
+2019-09-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* dbxread.c (read_dbx_symtab): Update.
+	* dwarf2read.c (load_partial_dies): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(handle_psymbol_enumerators): Update.
+	* psympriv.h (add_psymbol_to_list): Change type of copy_names to bool.
+	* psymtab.c (add_psymbol_to_bcache): Likewise.
+	(add_psymbol_to_list): Likewise.
+	* symtab.c (symbol_set_names): Likewise.
+	* symtab.h (symbol_set_names): Likewise.
+	* xcoffread.c (scan_xcoff_symtab): Update.
+
 2019-09-11  Tom Tromey  <tom@tromey.com>
 
 	* symfile-mem.c (symbol_file_add_from_memory): Use

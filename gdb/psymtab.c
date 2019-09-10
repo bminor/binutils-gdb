@@ -1558,7 +1558,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
    different domain (or address) is possible and correct.  */
 
 static struct partial_symbol *
-add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
+add_psymbol_to_bcache (const char *name, int namelength, bool copy_name,
 		       domain_enum domain,
 		       enum address_class theclass,
 		       short section,
@@ -1602,7 +1602,7 @@ append_psymbol_to_list (std::vector<partial_symbol *> *list,
    Return the partial symbol that has been added.  */
 
 void
-add_psymbol_to_list (const char *name, int namelength, int copy_name,
+add_psymbol_to_list (const char *name, int namelength, bool copy_name,
 		     domain_enum domain,
 		     enum address_class theclass,
 		     short section,

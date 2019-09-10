@@ -289,7 +289,7 @@ enum class psymbol_placement
 /* Add any kind of symbol to a partial_symbol vector.  */
 
 extern void add_psymbol_to_list (const char *, int,
-				 int, domain_enum,
+				 bool, domain_enum,
 				 enum address_class,
 				 short /* section */,
 				 enum psymbol_placement,

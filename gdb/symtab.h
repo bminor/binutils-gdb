@@ -497,7 +497,7 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
   symbol_set_names (&(symbol)->ginfo, linkage_name, len, copy_name, \
 		    (objfile)->per_bfd)
 extern void symbol_set_names (struct general_symbol_info *symbol,
-			      const char *linkage_name, int len, int copy_name,
+			      const char *linkage_name, int len, bool copy_name,
 			      struct objfile_per_bfd_storage *per_bfd);
 
 /* Now come lots of name accessor macros.  Short version as to when to

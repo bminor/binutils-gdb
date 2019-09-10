@@ -2644,7 +2644,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		  namestring = gdbarch_static_transform_name
 				 (gdbarch, namestring);
 
-		add_psymbol_to_list (namestring, p - namestring, 1,
+		add_psymbol_to_list (namestring, p - namestring, true,
 				     VAR_DOMAIN, LOC_STATIC,
 				     SECT_OFF_DATA (objfile),
 				     psymbol_placement::STATIC,
@@ -2655,7 +2655,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 'G':
 		/* The addresses in these entries are reported to be
 		   wrong.  See the code that reads 'G's for symtabs.  */
-		add_psymbol_to_list (namestring, p - namestring, 1,
+		add_psymbol_to_list (namestring, p - namestring, true,
 				     VAR_DOMAIN, LOC_STATIC,
 				     SECT_OFF_DATA (objfile),
 				     psymbol_placement::GLOBAL,
@@ -2674,14 +2674,14 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    || (p == namestring + 1
 			&& namestring[0] != ' '))
 		  {
-		    add_psymbol_to_list (namestring, p - namestring, 1,
+		    add_psymbol_to_list (namestring, p - namestring, true,
 					 STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 					 psymbol_placement::STATIC,
 					 0, psymtab_language, objfile);
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
-			add_psymbol_to_list (namestring, p - namestring, 1,
+			add_psymbol_to_list (namestring, p - namestring, true,
 					     VAR_DOMAIN, LOC_TYPEDEF, -1,
 					     psymbol_placement::STATIC,
 					     0, psymtab_language, objfile);
@@ -2693,7 +2693,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 't':
 		if (p != namestring)	/* a name is there, not just :T...  */
 		  {
-		    add_psymbol_to_list (namestring, p - namestring, 1,
+		    add_psymbol_to_list (namestring, p - namestring, true,
 					 VAR_DOMAIN, LOC_TYPEDEF, -1,
 					 psymbol_placement::STATIC,
 					 0, psymtab_language, objfile);
@@ -2755,7 +2755,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			  ;
 			/* Note that the value doesn't matter for
 			   enum constants in psymtabs, just in symtabs.  */
-			add_psymbol_to_list (p, q - p, 1,
+			add_psymbol_to_list (p, q - p, true,
 					     VAR_DOMAIN, LOC_CONST, -1,
 					     psymbol_placement::STATIC,
 					     0, psymtab_language, objfile);
@@ -2773,7 +2773,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 	      case 'c':
 		/* Constant, e.g. from "const" in Pascal.  */
-		add_psymbol_to_list (namestring, p - namestring, 1,
+		add_psymbol_to_list (namestring, p - namestring, true,
 				     VAR_DOMAIN, LOC_CONST, -1,
 				     psymbol_placement::STATIC,
 				     0, psymtab_language, objfile);
@@ -2790,7 +2790,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    function_outside_compilation_unit_complaint (name);
 		    xfree (name);
 		  }
-		add_psymbol_to_list (namestring, p - namestring, 1,
+		add_psymbol_to_list (namestring, p - namestring, true,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     SECT_OFF_TEXT (objfile),
 				     psymbol_placement::STATIC,
@@ -2820,7 +2820,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		if (startswith (namestring, "@FIX"))
 		  continue;
 
-		add_psymbol_to_list (namestring, p - namestring, 1,
+		add_psymbol_to_list (namestring, p - namestring, true,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     SECT_OFF_TEXT (objfile),
 				     psymbol_placement::GLOBAL,

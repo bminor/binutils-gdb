@@ -18533,7 +18533,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	      || pdi.tag == DW_TAG_subrange_type))
 	{
 	  if (building_psymtab && pdi.name != NULL)
-	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
+	    add_psymbol_to_list (pdi.name, strlen (pdi.name), false,
 				 VAR_DOMAIN, LOC_TYPEDEF, -1,
 				 psymbol_placement::STATIC,
 				 0, cu->language, objfile);
@@ -18567,7 +18567,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  if (pdi.name == NULL)
 	    complaint (_("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_psymbol_to_list (pdi.name, strlen (pdi.name), 0,
+	    add_psymbol_to_list (pdi.name, strlen (pdi.name), false,
 				 VAR_DOMAIN, LOC_CONST, -1,
 				 cu->language == language_cplus
 				 ? psymbol_placement::GLOBAL

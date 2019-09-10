@@ -811,7 +811,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
-		  const char *linkage_name, int len, int copy_name,
+		  const char *linkage_name, int len, bool copy_name,
 		  struct objfile_per_bfd_storage *per_bfd)
 {
   struct demangled_name_entry **slot;
