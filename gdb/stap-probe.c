@@ -684,12 +684,8 @@ stap_parse_register_operand (struct stap_parse_info *p)
   /* Variables used to extract the register name from the probe's
      argument.  */
   const char *start;
-  char *regname;
-  int len;
   const char *gdb_reg_prefix = gdbarch_stap_gdb_register_prefix (gdbarch);
-  int gdb_reg_prefix_len = gdb_reg_prefix ? strlen (gdb_reg_prefix) : 0;
   const char *gdb_reg_suffix = gdbarch_stap_gdb_register_suffix (gdbarch);
-  int gdb_reg_suffix_len = gdb_reg_suffix ? strlen (gdb_reg_suffix) : 0;
   const char *reg_prefix;
   const char *reg_ind_prefix;
   const char *reg_suffix;
@@ -751,37 +747,29 @@ stap_parse_register_operand (struct stap_parse_info *p)
   while (isalnum (*p->arg))
     ++p->arg;
 
-  len = p->arg - start;
-
-  regname = (char *) alloca (len + gdb_reg_prefix_len + gdb_reg_suffix_len + 1);
-  regname[0] = '\0';
+  std::string regname (start, p->arg - start);
 
   /* We only add the GDB's register prefix/suffix if we are dealing with
      a numeric register.  */
-  if (gdb_reg_prefix && isdigit (*start))
+  if (isdigit (*start))
     {
-      strncpy (regname, gdb_reg_prefix, gdb_reg_prefix_len);
-      strncpy (regname + gdb_reg_prefix_len, start, len);
+      if (gdb_reg_prefix != NULL)
+	regname = gdb_reg_prefix + regname;
 
-      if (gdb_reg_suffix)
-	strncpy (regname + gdb_reg_prefix_len + len,
-		 gdb_reg_suffix, gdb_reg_suffix_len);
-
-      len += gdb_reg_prefix_len + gdb_reg_suffix_len;
+      if (gdb_reg_suffix != NULL)
+	regname += gdb_reg_suffix;
     }
-  else
-    strncpy (regname, start, len);
-
-  regname[len] = '\0';
 
   /* Is this a valid register name?  */
-  if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+  if (user_reg_map_name_to_regnum (gdbarch,
+				   regname.c_str (),
+				   regname.size ()) == -1)
     error (_("Invalid register name `%s' on expression `%s'."),
-	   regname, p->saved_arg);
+	   regname.c_str (), p->saved_arg);
 
   write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-  str.ptr = regname;
-  str.length = len;
+  str.ptr = regname.c_str ();
+  str.length = regname.size ();
   write_exp_string (&p->pstate, str);
   write_exp_elt_opcode (&p->pstate, OP_REGISTER);
 

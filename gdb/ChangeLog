@@ -1,3 +1,8 @@
+2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* stap-probe.c (stap_parse_register_operand): Make "regname" an
+	"std::string", simplifying the algorithm.
+
 2019-05-28  Alan Hayward  <alan.hayward@arm.com>
 
 	* event-top.c: Remove include comment.
