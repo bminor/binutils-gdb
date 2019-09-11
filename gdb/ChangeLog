@@ -1,3 +1,15 @@
+2019-06-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/24541
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh: Add 'stap_adjust_register'.
+	* i386-tdep.c: Include '<unordered_set>'.
+	(i386_stap_adjust_register): New function.
+	(i386_elf_init_abi): Register 'i386_stap_adjust_register'.
+	* stap-probe.c (stap_parse_register_operand): Call
+	'gdbarch_stap_adjust_register'.
+
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* stap-probe.c (stap_parse_register_operand): Make "regname" an

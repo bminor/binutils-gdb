@@ -323,6 +323,7 @@ struct gdbarch
   const char * stap_gdb_register_suffix;
   gdbarch_stap_is_single_operand_ftype *stap_is_single_operand;
   gdbarch_stap_parse_special_token_ftype *stap_parse_special_token;
+  gdbarch_stap_adjust_register_ftype *stap_adjust_register;
   gdbarch_dtrace_parse_probe_argument_ftype *dtrace_parse_probe_argument;
   gdbarch_dtrace_probe_is_enabled_ftype *dtrace_probe_is_enabled;
   gdbarch_dtrace_enable_probe_ftype *dtrace_enable_probe;
@@ -685,6 +686,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stap_gdb_register_suffix, invalid_p == 0 */
   /* Skip verify of stap_is_single_operand, has predicate.  */
   /* Skip verify of stap_parse_special_token, has predicate.  */
+  /* Skip verify of stap_adjust_register, has predicate.  */
   /* Skip verify of dtrace_parse_probe_argument, has predicate.  */
   /* Skip verify of dtrace_probe_is_enabled, has predicate.  */
   /* Skip verify of dtrace_enable_probe, has predicate.  */
@@ -1388,6 +1390,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
                       host_address_to_string (gdbarch->stack_frame_destroyed_p));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_stap_adjust_register_p() = %d\n",
+                      gdbarch_stap_adjust_register_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stap_adjust_register = <%s>\n",
+                      host_address_to_string (gdbarch->stap_adjust_register));
   fprintf_unfiltered (file,
                       "gdbarch_dump: stap_gdb_register_prefix = %s\n",
                       pstring (gdbarch->stap_gdb_register_prefix));
@@ -4481,6 +4489,30 @@ set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch,
                                       gdbarch_stap_parse_special_token_ftype stap_parse_special_token)
 {
   gdbarch->stap_parse_special_token = stap_parse_special_token;
+}
+
+int
+gdbarch_stap_adjust_register_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->stap_adjust_register != NULL;
+}
+
+void
+gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->stap_adjust_register != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stap_adjust_register called\n");
+  gdbarch->stap_adjust_register (gdbarch, p, regname, regnum);
+}
+
+void
+set_gdbarch_stap_adjust_register (struct gdbarch *gdbarch,
+                                  gdbarch_stap_adjust_register_ftype stap_adjust_register)
+{
+  gdbarch->stap_adjust_register = stap_adjust_register;
 }
 
 int

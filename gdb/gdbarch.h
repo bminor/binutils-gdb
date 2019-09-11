@@ -1338,6 +1338,36 @@ typedef int (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, s
 extern int gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
 extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
 
+/* Perform arch-dependent adjustments to a register name.
+  
+   In very specific situations, it may be necessary for the register
+   name present in a SystemTap probe's argument to be handled in a
+   special way.  For example, on i386, GCC may over-optimize the
+   register allocation and use smaller registers than necessary.  In
+   such cases, the client that is reading and evaluating the SystemTap
+   probe (ourselves) will need to actually fetch values from the wider
+   version of the register in question.
+  
+   To illustrate the example, consider the following probe argument
+   (i386):
+  
+      4@%ax
+  
+   This argument says that its value can be found at the %ax register,
+   which is a 16-bit register.  However, the argument's prefix says
+   that its type is "uint32_t", which is 32-bit in size.  Therefore, in
+   this case, GDB should actually fetch the probe's value from register
+   %eax, not %ax.  In this scenario, this function would actually
+   replace the register name from %ax to %eax.
+  
+   The rationale for this can be found at PR breakpoints/24541. */
+
+extern int gdbarch_stap_adjust_register_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_stap_adjust_register_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum);
+extern void gdbarch_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p, std::string &regname, int regnum);
+extern void set_gdbarch_stap_adjust_register (struct gdbarch *gdbarch, gdbarch_stap_adjust_register_ftype *stap_adjust_register);
+
 /* DTrace related functions.
    The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
    NARG must be >= 0. */

@@ -64,6 +64,7 @@
 #include "parser-defs.h"
 #include <ctype.h>
 #include <algorithm>
+#include <unordered_set>
 
 /* Register names.  */
 
@@ -4388,6 +4389,32 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* Implementation of 'gdbarch_stap_adjust_register', as defined in
+   gdbarch.h.  */
+
+static void
+i386_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p,
+			   std::string &regname, int regnum)
+{
+  static const std::unordered_set<std::string> reg_assoc
+    = { "ax", "bx", "cx", "dx",
+	"si", "di", "bp", "sp" };
+
+  if (register_size (gdbarch, regnum) >= TYPE_LENGTH (p->arg_type))
+    {
+      /* If we're dealing with a register whose size is greater or
+	 equal than the size specified by the "[-]N@" prefix, then we
+	 don't need to do anything.  */
+      return;
+    }
+
+  if (reg_assoc.find (regname) != reg_assoc.end ())
+    {
+      /* Use the extended version of the register.  */
+      regname = "e" + regname;
+    }
+}
+
 
 
 /* gdbarch gnu_triplet_regexp method.  Both arches are acceptable as GDB always
@@ -4436,6 +4463,8 @@ i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					i386_stap_parse_special_token);
+  set_gdbarch_stap_adjust_register (gdbarch,
+				    i386_stap_adjust_register);
 
   set_gdbarch_in_indirect_branch_thunk (gdbarch,
 					i386_in_indirect_branch_thunk);

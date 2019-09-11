@@ -760,12 +760,37 @@ stap_parse_register_operand (struct stap_parse_info *p)
 	regname += gdb_reg_suffix;
     }
 
+  int regnum = user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
+					    regname.size ());
+
   /* Is this a valid register name?  */
-  if (user_reg_map_name_to_regnum (gdbarch,
-				   regname.c_str (),
-				   regname.size ()) == -1)
+  if (regnum == -1)
     error (_("Invalid register name `%s' on expression `%s'."),
 	   regname.c_str (), p->saved_arg);
+
+  /* Check if there's any special treatment that the arch-specific
+     code would like to perform on the register name.  */
+  if (gdbarch_stap_adjust_register_p (gdbarch))
+    {
+      std::string oldregname = regname;
+
+      gdbarch_stap_adjust_register (gdbarch, p, regname, regnum);
+
+      if (regname != oldregname)
+	{
+	  /* This is just a check we perform to make sure that the
+	     arch-dependent code has provided us with a valid
+	     register name.  */
+	  regnum = user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
+						regname.size ());
+
+	  if (regnum == -1)
+	    internal_error (__FILE__, __LINE__,
+			    _("Invalid register name '%s' after replacing it"
+			      " (previous name was '%s')"),
+			    regname.c_str (), oldregname.c_str ());
+	}
+    }
 
   write_exp_elt_opcode (&p->pstate, OP_REGISTER);
   str.ptr = regname.c_str ();
