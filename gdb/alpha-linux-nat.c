@@ -22,6 +22,7 @@
 #include "linux-nat-trad.h"
 
 #include "alpha-tdep.h"
+#include "gdbarch.h"
 
 #include "nat/gdb_ptrace.h"
 #include <alpha/ptrace.h>
