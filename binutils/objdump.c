@@ -1994,12 +1994,15 @@ disassemble_bytes (struct disassemble_info * inf,
 		{
 		  bfd_signed_vma distance_to_rel;
 		  int insn_size = 0;
+		  int max_reloc_offset
+		    = aux->abfd->arch_info->max_reloc_offset_into_insn;
 
-		  distance_to_rel = (**relppp)->address
-		    - (rel_offset + addr_offset);
+		  distance_to_rel = ((**relppp)->address - rel_offset
+				     - addr_offset);
 
 		  if (distance_to_rel > 0
-		      && aux->abfd->arch_info->max_reloc_offset_into_insn <= distance_to_rel)
+		      && (max_reloc_offset < 0
+			  || distance_to_rel <= max_reloc_offset))
 		    {
 		      /* This reloc *might* apply to the current insn,
 			 starting somewhere inside it.  Discover the length
@@ -2029,7 +2032,7 @@ disassemble_bytes (struct disassemble_info * inf,
 		     the instruction that we are about to disassemble.  */
 		  if (distance_to_rel == 0
 		      || (distance_to_rel > 0
-			  && distance_to_rel < (bfd_signed_vma) (insn_size / opb)))
+			  && distance_to_rel < insn_size / (int) opb))
 		    {
 		      inf->flags |= INSN_HAS_RELOC;
 		      aux->reloc = **relppp;

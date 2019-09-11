@@ -1,3 +1,9 @@
+2019-09-11  Alan Modra  <amodra@gmail.com>
+
+	PR 24907
+	* objdump.c (disassemble_bytes): Adjust code to avoid overlong
+	lines.  Correct max_reloc_offset_into_insn test.
+
 2019-09-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 24907
