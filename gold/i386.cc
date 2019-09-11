@@ -2957,10 +2957,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_GOTOFF:
       {
-	elfcpp::Elf_types<32>::Elf_Addr value;
-	value = (psymval->value(object, 0)
-		 - target->got_plt_section()->address());
-	Relocate_functions<32, false>::rel32(view, value);
+	elfcpp::Elf_types<32>::Elf_Addr reladdr;
+	reladdr = target->got_plt_section()->address();
+	Relocate_functions<32, false>::pcrel32(view, object, psymval, reladdr);
       }
       break;
 

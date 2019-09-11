@@ -1,3 +1,11 @@
+2019-09-28  Alan Modra  <amodra@gmail.com>
+
+	PR 16794
+	* i386.cc (Target_i386::Relocate::relocate <R_386_GOTOFF>): Don't
+	ignore addend, apply using pcrel32.
+	* x86_64.cc (Target_x86_64::Relocate::relocate <R_X86_64_GOTOFF64>):
+	Similarly use pcrel64.
+
 2019-09-24  Nick Clifton  <nickc@redhat.com>
 
 	* descriptors.cc: Include <string>

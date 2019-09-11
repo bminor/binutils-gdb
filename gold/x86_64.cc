@@ -4852,10 +4852,9 @@ Target_x86_64<size>::Relocate::relocate(
 
     case elfcpp::R_X86_64_GOTOFF64:
       {
-	typename elfcpp::Elf_types<size>::Elf_Addr value;
-	value = (psymval->value(object, 0)
-		 - target->got_plt_section()->address());
-	Reloc_funcs::rela64(view, value, addend);
+	typename elfcpp::Elf_types<size>::Elf_Addr reladdr;
+	reladdr = target->got_plt_section()->address();
+	Reloc_funcs::pcrela64(view, object, psymval, addend, reladdr);
       }
       break;
 
