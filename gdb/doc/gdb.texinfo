@@ -8954,11 +8954,21 @@ it tries all the directories in the list, in the order they are present
 in the list, until it finds a file with the desired name.
 
 For example, suppose an executable references the file
-@file{/usr/src/foo-1.0/lib/foo.c}, and our source path is
-@file{/mnt/cross}.  The file is first looked up literally; if this
-fails, @file{/mnt/cross/usr/src/foo-1.0/lib/foo.c} is tried; if this
-fails, @file{/mnt/cross/foo.c} is opened; if this fails, an error
-message is printed.  @value{GDBN} does not look up the parts of the
+@file{/usr/src/foo-1.0/lib/foo.c}, does not record a compilation
+directory, and the @dfn{source path} is @file{/mnt/cross}.
+@value{GDBN} would look for the source file in the following
+locations:
+
+@enumerate
+
+@item @file{/usr/src/foo-1.0/lib/foo.c}
+@item @file{/mnt/cross/usr/src/foo-1.0/lib/foo.c}
+@item @file{/mnt/cross/foo.c}
+
+@end enumerate
+
+If the source file is not present at any of the above locations then
+an error is printed.  @value{GDBN} does not look up the parts of the
 source file name, such as @file{/mnt/cross/src/foo-1.0/lib/foo.c}.
 Likewise, the subdirectories of the source path are not searched: if
 the source path is @file{/mnt/cross}, and the binary refers to
@@ -8966,11 +8976,91 @@ the source path is @file{/mnt/cross}, and the binary refers to
 @file{/mnt/cross/usr/src/foo-1.0/lib}.
 
 Plain file names, relative file names with leading directories, file
-names containing dots, etc.@: are all treated as described above; for
-instance, if the source path is @file{/mnt/cross}, and the source file
-is recorded as @file{../lib/foo.c}, @value{GDBN} would first try
-@file{../lib/foo.c}, then @file{/mnt/cross/../lib/foo.c}, and after
-that---@file{/mnt/cross/foo.c}.
+names containing dots, etc.@: are all treated as described above,
+except that non-absolute file names are not looked up literally.  If
+the @dfn{source path} is @file{/mnt/cross}, the source file is
+recorded as @file{../lib/foo.c}, and no compilation directory is
+recorded, then @value{GDBN} will search in the following locations:
+
+@enumerate
+
+@item @file{/mnt/cross/../lib/foo.c}
+@item @file{/mnt/cross/foo.c}
+
+@end enumerate
+
+@kindex cdir
+@kindex cwd
+@vindex $cdir@r{, convenience variable}
+@vindex $cwd@r{, convenience variable}
+@cindex compilation directory
+@cindex current directory
+@cindex working directory
+@cindex directory, current
+@cindex directory, compilation
+The @dfn{source path} will always include two special entries
+@samp{$cdir} and @samp{$cwd}, these refer to the compilation directory
+(if one is recorded) and the current working directory respectively.
+
+@samp{$cdir} causes @value{GDBN} to search within the compilation
+directory, if one is recorded in the debug information.  If no
+compilation directory is recorded in the debug information then
+@samp{$cdir} is ignored.
+
+@samp{$cwd} is not the same as @samp{.}---the former tracks the
+current working directory as it changes during your @value{GDBN}
+session, while the latter is immediately expanded to the current
+directory at the time you add an entry to the source path.
+
+If a compilation directory is recorded in the debug information, and
+@value{GDBN} has not found the source file after the first search
+using @dfn{source path}, then @value{GDBN} will combine the
+compilation directory and the filename, and then search for the source
+file again using the @dfn{source path}.
+
+For example, if the executable records the source file as
+@file{/usr/src/foo-1.0/lib/foo.c}, the compilation directory is
+recorded as @file{/project/build}, and the @dfn{source path} is
+@file{/mnt/cross:$cdir:$cwd} while the current working directory of
+the @value{GDBN} session is @file{/home/user}, then @value{GDBN} will
+search for the source file in the following loctions:
+
+@enumerate
+
+@item @file{/usr/src/foo-1.0/lib/foo.c}
+@item @file{/mnt/cross/usr/src/foo-1.0/lib/foo.c}
+@item @file{/project/build/usr/src/foo-1.0/lib/foo.c}
+@item @file{/home/user/usr/src/foo-1.0/lib/foo.c}
+@item @file{/mnt/cross/project/build/usr/src/foo-1.0/lib/foo.c}
+@item @file{/project/build/project/build/usr/src/foo-1.0/lib/foo.c}
+@item @file{/home/user/project/build/usr/src/foo-1.0/lib/foo.c}
+@item @file{/mnt/cross/foo.c}
+@item @file{/project/build/foo.c}
+@item @file{/home/user/foo.c}
+
+@end enumerate
+
+If the file name in the previous example had been recorded in the
+executable as a relative path rather than an absolute path, then the
+first look up would not have occurred, but all of the remaining steps
+would be similar.
+
+When searching for source files on MS-DOS and MS-Windows, where
+absolute paths start with a drive letter (e.g.
+@file{C:/project/foo.c}), @value{GDBN} will remove the drive letter
+from the file name before appending it to a search directory from
+@dfn{source path}; for instance if the executable references the
+source file @file{C:/project/foo.c} and @dfn{source path} is set to
+@file{D:/mnt/cross}, then @value{GDBN} will search in the following
+locations for the source file:
+
+@enumerate
+
+@item @file{C:/project/foo.c}
+@item @file{D:/mnt/cross/project/foo.c}
+@item @file{D:/mnt/cross/foo.c}
+
+@end enumerate
 
 Note that the executable search path is @emph{not} used to locate the
 source files.
@@ -8981,8 +9071,8 @@ each line is in the file.
 
 @kindex directory
 @kindex dir
-When you start @value{GDBN}, its source path includes only @samp{cdir}
-and @samp{cwd}, in that order.
+When you start @value{GDBN}, its source path includes only @samp{$cdir}
+and @samp{$cwd}, in that order.
 To add other directories, use the @code{directory} command.
 
 The search path is used to find both program source files and @value{GDBN}
@@ -9058,21 +9148,12 @@ part of absolute file names) or
 whitespace.  You may specify a directory that is already in the source
 path; this moves it forward, so @value{GDBN} searches it sooner.
 
-@kindex cdir
-@kindex cwd
-@vindex $cdir@r{, convenience variable}
-@vindex $cwd@r{, convenience variable}
-@cindex compilation directory
-@cindex current directory
-@cindex working directory
-@cindex directory, current
-@cindex directory, compilation
-You can use the string @samp{$cdir} to refer to the compilation
-directory (if one is recorded), and @samp{$cwd} to refer to the current
-working directory.  @samp{$cwd} is not the same as @samp{.}---the former
-tracks the current working directory as it changes during your @value{GDBN}
-session, while the latter is immediately expanded to the current
-directory at the time you add an entry to the source path.
+The special strings @samp{$cdir} (to refer to the compilation
+directory, if one is recorded), and @samp{$cwd} (to refer to the
+current working directory) can also be included in the list of
+directories @var{dirname}.  Though these will already be in the source
+path they will be moved forward in the list so @value{GDBN} searches
+them sooner.
 
 @item directory
 Reset the source path to its default value (@samp{$cdir:$cwd} on Unix systems).  This requires confirmation.

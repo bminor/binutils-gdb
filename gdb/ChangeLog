@@ -1,3 +1,10 @@
+2019-09-17  Mike Gulick  <mgulick@mathworks.com>
+
+	* source.c (prepare_path_for_appending): New function.
+	(openp): Make use of new function.
+	(find_and_open_source): Search for the compilation directory and
+	source file as a relative path beneath the directory search path.
+
 2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* source-cache.c (source_cache::get_line_charpos): Catch

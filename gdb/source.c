@@ -654,6 +654,36 @@ info_source_command (const char *ignore, int from_tty)
 }
 
 
+/* Helper function to remove characters from the start of PATH so that
+   PATH can then be appended to a directory name.  We remove leading drive
+   letters (for dos) as well as leading '/' characters and './'
+   sequences.  */
+
+const char *
+prepare_path_for_appending (const char *path)
+{
+  /* For dos paths, d:/foo -> /foo, and d:foo -> foo.  */
+  if (HAS_DRIVE_SPEC (path))
+    path = STRIP_DRIVE_SPEC (path);
+
+  const char *old_path;
+  do
+    {
+      old_path = path;
+
+      /* /foo => foo, to avoid multiple slashes that Emacs doesn't like.  */
+      while (IS_DIR_SEPARATOR(path[0]))
+	path++;
+
+      /* ./foo => foo */
+      while (path[0] == '.' && IS_DIR_SEPARATOR (path[1]))
+	path += 2;
+    }
+  while (old_path != path);
+
+  return path;
+}
+
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE in the calls to open.  You cannot use this function to
    create files (O_CREAT).
@@ -747,17 +777,9 @@ openp (const char *path, openp_flags opts, const char *string,
 	    goto done;
     }
 
-  /* For dos paths, d:/foo -> /foo, and d:foo -> foo.  */
-  if (HAS_DRIVE_SPEC (string))
-    string = STRIP_DRIVE_SPEC (string);
-
-  /* /foo => foo, to avoid multiple slashes that Emacs doesn't like.  */
-  while (IS_DIR_SEPARATOR(string[0]))
-    string++;
-
-  /* ./foo => foo */
-  while (string[0] == '.' && IS_DIR_SEPARATOR (string[1]))
-    string += 2;
+  /* Remove characters from the start of PATH that we don't need when PATH
+     is appended to a directory name.  */
+  string = prepare_path_for_appending (string);
 
   alloclen = strlen (path) + strlen (string) + 2;
   filename = (char *) alloca (alloclen);
@@ -1033,7 +1055,32 @@ find_and_open_source (const char *filename,
   openp_flags flags = OPF_SEARCH_IN_PATH;
   if (basenames_may_differ)
     flags |= OPF_RETURN_REALPATH;
+
+  /* Try to locate file using filename.  */
   result = openp (path, flags, filename, OPEN_MODE, fullname);
+  if (result < 0 && dirname != NULL)
+    {
+      /* Remove characters from the start of PATH that we don't need when
+	 PATH is appended to a directory name.  */
+      const char *filename_start = prepare_path_for_appending (filename);
+
+      /* Try to locate file using compilation dir + filename.  This is
+	 helpful if part of the compilation directory was removed,
+	 e.g. using gcc's -fdebug-prefix-map, and we have added the missing
+	 prefix to source_path.  */
+      std::string cdir_filename (dirname);
+
+      /* Remove any trailing directory separators.  */
+      while (IS_DIR_SEPARATOR (cdir_filename.back ()))
+	cdir_filename.pop_back ();
+
+      /* Add our own directory separator.  */
+      cdir_filename.append (SLASH_STRING);
+      cdir_filename.append (filename_start);
+
+      result = openp (path, flags, cdir_filename.c_str (), OPEN_MODE,
+		      fullname);
+    }
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename.  */
