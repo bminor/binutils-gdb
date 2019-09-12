@@ -7500,8 +7500,9 @@ lang_process (void)
 	      prev = find_next_input_statement (prev);
 	      if (*prev != (void *) plugin_insert->next_real_file)
 		{
-		  /* Huh?  We didn't find the expected input statement.  */
-		  ASSERT (0);
+		  /* We didn't find the expected input statement.
+		     This can happen due to lookup_name creating input
+		     statements not linked into the statement list.  */
 		  prev = &plugin_insert->header.next;
 		}
 	    }
