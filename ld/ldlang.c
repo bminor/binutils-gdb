@@ -4344,9 +4344,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 static void
 print_input_statement (lang_input_statement_type *statm)
 {
-  if (statm->filename != NULL
-      && (statm->the_bfd == NULL
-	  || (statm->the_bfd->flags & BFD_LINKER_CREATED) == 0))
+  if (statm->filename != NULL)
     fprintf (config.map_file, "LOAD %s\n", statm->filename);
 }
 
