@@ -2476,40 +2476,12 @@ wait_again:
 		wstat = (what << 8) | 0177;
 		break;
 	      case PR_FAULTED:
-		switch (what) {
-		case FLTWATCH:
-		  wstat = (SIGTRAP << 8) | 0177;
-		  break;
-		  /* FIXME: use si_signo where possible.  */
-		case FLTPRIV:
-		case FLTILL:
-		  wstat = (SIGILL << 8) | 0177;
-		  break;
-		case FLTBPT:
-		case FLTTRACE:
-		  wstat = (SIGTRAP << 8) | 0177;
-		  break;
-		case FLTSTACK:
-		case FLTACCESS:
-		case FLTBOUNDS:
-		  wstat = (SIGSEGV << 8) | 0177;
-		  break;
-		case FLTIOVF:
-		case FLTIZDIV:
-		case FLTFPE:
-		  wstat = (SIGFPE << 8) | 0177;
-		  break;
-		case FLTPAGE:	/* Recoverable page fault */
-		default:	/* FIXME: use si_signo if possible for
-				   fault.  */
-		  retval = ptid_t (-1);
-		  printf_filtered ("procfs:%d -- ", __LINE__);
-		  printf_filtered (_("child stopped for unknown reason:\n"));
-		  proc_prettyprint_why (why, what, 1);
-		  error (_("... giving up..."));
-		  break;
+		{
+		  int signo = pi->prstatus.pr_lwp.pr_info.si_signo;
+		  if (signo != 0)
+		    wstat = (signo << 8) | 0177;
 		}
-		break;	/* case PR_FAULTED: */
+		break;
 	      default:	/* switch (why) unmatched */
 		printf_filtered ("procfs:%d -- ", __LINE__);
 		printf_filtered (_("child stopped for unknown reason:\n"));

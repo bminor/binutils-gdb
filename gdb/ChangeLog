@@ -1,3 +1,8 @@
+2019-09-12  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_target::wait) <PR_FAULTED>: Get signal from
+	prstatus.pr_lwp.pr_info instead of making it up.
+
 2019-09-11  Christian Biesinger  <cbiesinger@google.com>
 
 	* auto-load.c (auto_load_expand_dir_vars): Update.
