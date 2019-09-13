@@ -1,3 +1,11 @@
+2019-09-13  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (new_afile): Remove add_to_list parameter.
+	(lang_add_input_file): Update new_afile calls.
+	(lookup_name): Splice input_statement added by new_afile into
+	statement_list after current input_file_chain entry.
+	(lang_process): Update comment.
+
 2019-09-12  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (print_input_statement): Do not exclude linker created

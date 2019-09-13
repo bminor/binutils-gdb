@@ -1080,22 +1080,13 @@ new_statement (enum statement_enum type,
 static lang_input_statement_type *
 new_afile (const char *name,
 	   lang_input_file_enum_type file_type,
-	   const char *target,
-	   bfd_boolean add_to_list)
+	   const char *target)
 {
   lang_input_statement_type *p;
 
   lang_has_input_file = TRUE;
 
-  if (add_to_list)
-    p = new_stat (lang_input_statement, stat_ptr);
-  else
-    {
-      p = stat_alloc (sizeof (lang_input_statement_type));
-      p->header.type = lang_input_statement_enum;
-      p->header.next = NULL;
-    }
-
+  p = new_stat (lang_input_statement, stat_ptr);
   memset (&p->the_bfd, 0,
 	  sizeof (*p) - offsetof (lang_input_statement_type, the_bfd));
   p->target = target;
@@ -1177,12 +1168,12 @@ lang_add_input_file (const char *name,
 	 within the sysroot subdirectory.)  */
       unsigned int outer_sysrooted = input_flags.sysrooted;
       input_flags.sysrooted = 0;
-      ret = new_afile (sysrooted_name, file_type, target, TRUE);
+      ret = new_afile (sysrooted_name, file_type, target);
       input_flags.sysrooted = outer_sysrooted;
       return ret;
     }
 
-  return new_afile (name, file_type, target, TRUE);
+  return new_afile (name, file_type, target);
 }
 
 struct out_section_hash_entry
@@ -2861,8 +2852,25 @@ lookup_name (const char *name)
     }
 
   if (search == NULL)
-    search = new_afile (name, lang_input_file_is_search_file_enum,
-			default_target, FALSE);
+    {
+      /* Arrange to splice the input statement added by new_afile into
+	 statement_list after the current input_file_chain tail.
+	 We know input_file_chain is not an empty list, and that
+	 lookup_name was called via open_input_bfds.  Later calls to
+	 lookup_name should always match an existing input_statement.  */
+      lang_statement_union_type **tail = stat_ptr->tail;
+      lang_statement_union_type **after
+	= (void *) ((char *) input_file_chain.tail
+		    - offsetof (lang_input_statement_type, next_real_file)
+		    + offsetof (lang_input_statement_type, header.next));
+      lang_statement_union_type *rest = *after;
+      stat_ptr->tail = after;
+      search = new_afile (name, lang_input_file_is_search_file_enum,
+			  default_target);
+      *stat_ptr->tail = rest;
+      if (*tail == NULL)
+	stat_ptr->tail = tail;
+    }
 
   /* If we have already added this file, or this file is not real
      don't add this file.  */
@@ -7501,8 +7509,7 @@ lang_process (void)
 	      if (*prev != (void *) plugin_insert->next_real_file)
 		{
 		  /* We didn't find the expected input statement.
-		     This can happen due to lookup_name creating input
-		     statements not linked into the statement list.  */
+		     Fall back to adding after plugin_insert.  */
 		  prev = &plugin_insert->header.next;
 		}
 	    }
