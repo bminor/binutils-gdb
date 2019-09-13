@@ -301,7 +301,7 @@ struct maint_print_section_data
       arg(arg)
   {
     int section_count = gdb_bfd_count_sections (abfd);
-    index_digits = ((int) log10 (section_count)) + 1;
+    index_digits = ((int) log10 ((float) section_count)) + 1;
   }
 
 private:
