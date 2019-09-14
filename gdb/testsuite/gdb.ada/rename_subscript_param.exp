@@ -15,6 +15,10 @@
 
 load_lib "ada.exp"
 
+if { ![gnatmake_version_at_least 8] } {
+    return -1
+}
+
 standard_ada_testfile pb30_012
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
