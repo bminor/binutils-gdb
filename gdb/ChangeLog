@@ -1,3 +1,8 @@
+2019-09-14  Christian Biesinger  <cbiesinger@google.com>
+
+	* NEWS: Mention that gdb can now be compiled with Python 3
+	on Windows.
+
 2019-09-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* maint.c (maint_print_section_data::maint_print_section_data):

@@ -32,6 +32,8 @@
 * GDB now shows the Ada task names at more places, e.g. in task switching
   messages.
 
+* GDB can now be compiled with Python 3 on Windows.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
