@@ -39,7 +39,7 @@
 
 /* True if we want to print debug printouts related to file/function
    skipping. */
-static int debug_skip = 0;
+static bool debug_skip = false;
 
 class skiplist_entry
 {

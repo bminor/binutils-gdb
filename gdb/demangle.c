@@ -44,7 +44,7 @@
 #endif
 
 /* See documentation in gdb-demangle.h.  */
-int demangle = 1;
+bool demangle = true;
 
 static void
 show_demangle (struct ui_file *file, int from_tty,
@@ -57,7 +57,7 @@ show_demangle (struct ui_file *file, int from_tty,
 }
 
 /* See documentation in gdb-demangle.h.  */
-int asm_demangle = 0;
+bool asm_demangle = false;
 
 static void
 show_asm_demangle (struct ui_file *file, int from_tty,

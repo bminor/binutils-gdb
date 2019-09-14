@@ -128,10 +128,10 @@ current_top_target ()
 
 static struct cmd_list_element *targetlist = NULL;
 
-/* Nonzero if we should trust readonly sections from the
+/* True if we should trust readonly sections from the
    executable when reading memory.  */
 
-static int trust_readonly = 0;
+static bool trust_readonly = false;
 
 /* Nonzero if we should show true memory content including
    memory breakpoint inserted by gdb.  */
@@ -142,17 +142,17 @@ static int show_memory_breakpoints = 0;
    operations; they are useful for targets that need to prevent
    inadvertant disruption, such as in non-stop mode.  */
 
-int may_write_registers = 1;
+bool may_write_registers = true;
 
-int may_write_memory = 1;
+bool may_write_memory = true;
 
-int may_insert_breakpoints = 1;
+bool may_insert_breakpoints = true;
 
-int may_insert_tracepoints = 1;
+bool may_insert_tracepoints = true;
 
-int may_insert_fast_tracepoints = 1;
+bool may_insert_fast_tracepoints = true;
 
-int may_stop = 1;
+bool may_stop = true;
 
 /* Non-zero if we want to see trace of target level stuff.  */
 
@@ -2374,7 +2374,7 @@ target_require_runnable (void)
 
 /* Whether GDB is allowed to fall back to the default run target for
    "run", "attach", etc. when no target is connected yet.  */
-static int auto_connect_native_target = 1;
+static bool auto_connect_native_target = true;
 
 static void
 show_auto_connect_native_target (struct ui_file *file, int from_tty,
@@ -3356,9 +3356,9 @@ void
 target_stop_and_wait (ptid_t ptid)
 {
   struct target_waitstatus status;
-  int was_non_stop = non_stop;
+  bool was_non_stop = non_stop;
 
-  non_stop = 1;
+  non_stop = true;
   target_stop (ptid);
 
   memset (&status, 0, sizeof (status));
@@ -3841,11 +3841,11 @@ target_thread_events (int enable)
 
 /* Controls if targets can report that they can/are async.  This is
    just for maintainers to use when debugging gdb.  */
-int target_async_permitted = 1;
+bool target_async_permitted = true;
 
 /* The set command writes to this variable.  If the inferior is
    executing, target_async_permitted is *not* updated.  */
-static int target_async_permitted_1 = 1;
+static bool target_async_permitted_1 = true;
 
 static void
 maint_set_target_async_command (const char *args, int from_tty,
@@ -3933,12 +3933,12 @@ maint_show_target_non_stop_command (struct ui_file *file, int from_tty,
 
 /* Temporary copies of permission settings.  */
 
-static int may_write_registers_1 = 1;
-static int may_write_memory_1 = 1;
-static int may_insert_breakpoints_1 = 1;
-static int may_insert_tracepoints_1 = 1;
-static int may_insert_fast_tracepoints_1 = 1;
-static int may_stop_1 = 1;
+static bool may_write_registers_1 = true;
+static bool may_write_memory_1 = true;
+static bool may_insert_breakpoints_1 = true;
+static bool may_insert_tracepoints_1 = true;
+static bool may_insert_fast_tracepoints_1 = true;
+static bool may_stop_1 = true;
 
 /* Make the user-set values match the real values again.  */
 

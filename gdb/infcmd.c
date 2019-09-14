@@ -105,7 +105,7 @@ int stopped_by_random_signal;
 
 /* See inferior.h.  */
 
-int startup_with_shell = 1;
+bool startup_with_shell = true;
 
 
 /* Accessor routines.  */

@@ -65,7 +65,7 @@
 #include "gdbsupport/selftest.h"
 #endif
 
-static int arm_debug;
+static bool arm_debug;
 
 /* Macros for setting and testing a bit in a minimal symbol that marks
    it as Thumb function.  The MSB of the minimal symbol's "info" field
@@ -296,7 +296,7 @@ static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
 
 /* Set to true if the 32-bit mode is in use.  */
 
-int arm_apcs_32 = 1;
+bool arm_apcs_32 = true;
 
 /* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
 

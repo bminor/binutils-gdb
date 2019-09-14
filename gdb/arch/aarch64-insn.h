@@ -19,7 +19,7 @@
 #ifndef ARCH_AARCH64_INSN_H
 #define ARCH_AARCH64_INSN_H
 
-extern int aarch64_debug;
+extern bool aarch64_debug;
 
 /* List of opcodes that we need for building the jump pad and relocating
    an instruction.  */

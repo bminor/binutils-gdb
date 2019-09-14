@@ -623,7 +623,7 @@ extern void thread_command (const char *tidstr, int from_tty);
 
 /* Print notices on thread events (attach, detach, etc.), set with
    `set print thread-events'.  */
-extern int print_thread_events;
+extern bool print_thread_events;
 
 /* Prints the list of threads and their details on UIOUT.  If
    REQUESTED_THREADS, a list of GDB ids/ranges, is not NULL, only

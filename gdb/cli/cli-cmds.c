@@ -165,7 +165,7 @@ struct cmd_list_element *showchecklist;
 /* Command tracing state.  */
 
 int source_verbose = 0;
-int trace_commands = 0;
+bool trace_commands = false;
 
 /* 'script-extension' option support.  */
 

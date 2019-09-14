@@ -808,9 +808,9 @@ struct frame_print_options
   const char *print_frame_info = print_frame_info_auto;
   const char *print_entry_values = print_entry_values_default;
 
-  /* If non-zero, don't invoke pretty-printers for frame
+  /* If true, don't invoke pretty-printers for frame
      arguments.  */
-  int print_raw_frame_arguments;
+  bool print_raw_frame_arguments;
 };
 
 /* The values behind the global "set print ..." settings.  */
@@ -931,11 +931,11 @@ struct set_backtrace_options
 {
   /* Flag to indicate whether backtraces should continue past
      main.  */
-  int backtrace_past_main = 0;
+  bool backtrace_past_main = false;
 
   /* Flag to indicate whether backtraces should continue past
      entry.  */
-  int backtrace_past_entry = 0;
+  bool backtrace_past_entry = false;
 
   /* Upper bound on the number of backtrace levels.  Note this is not
      exposed as a command option, because "backtrace" and "frame

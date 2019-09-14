@@ -102,11 +102,11 @@ static unsigned int dwarf_die_debug = 0;
 /* When non-zero, dump line number entries as they are read in.  */
 static unsigned int dwarf_line_debug = 0;
 
-/* When non-zero, cross-check physname against demangler.  */
-static int check_physname = 0;
+/* When true, cross-check physname against demangler.  */
+static bool check_physname = false;
 
-/* When non-zero, do not reject deprecated .gdb_index sections.  */
-static int use_deprecated_index_sections = 0;
+/* When true, do not reject deprecated .gdb_index sections.  */
+static bool use_deprecated_index_sections = false;
 
 static const struct objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
 
@@ -25837,7 +25837,7 @@ show_dwarf_cmd (const char *args, int from_tty)
   cmd_show_list (show_dwarf_cmdlist, from_tty, "");
 }
 
-int dwarf_always_disassemble;
+bool dwarf_always_disassemble;
 
 static void
 show_dwarf_always_disassemble (struct ui_file *file, int from_tty,

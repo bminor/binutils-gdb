@@ -51,7 +51,7 @@ static struct cmd_list_element *maint_btrace_pt_set_cmdlist;
 static struct cmd_list_element *maint_btrace_pt_show_cmdlist;
 
 /* Control whether to skip PAD packets when computing the packet history.  */
-static int maint_btrace_pt_skip_pad = 1;
+static bool maint_btrace_pt_skip_pad = true;
 
 static void btrace_add_pc (struct thread_info *tp);
 

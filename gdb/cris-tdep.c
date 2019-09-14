@@ -148,7 +148,7 @@ extern const struct cris_spec_reg cris_spec_regs[];
 static unsigned int usr_cmd_cris_version;
 
 /* Indicates whether to trust the above variable.  */
-static int usr_cmd_cris_version_valid = 0;
+static bool usr_cmd_cris_version_valid = false;
 
 static const char cris_mode_normal[] = "normal";
 static const char cris_mode_guru[] = "guru";
@@ -163,7 +163,7 @@ static const char *const cris_modes[] = {
 static const char *usr_cmd_cris_mode = cris_mode_normal;
 
 /* Whether to make use of Dwarf-2 CFI (default on).  */
-static int usr_cmd_cris_dwarf2_cfi = 1;
+static bool usr_cmd_cris_dwarf2_cfi = true;
 
 /* Sigtramp identification code copied from i386-linux-tdep.c.  */
 

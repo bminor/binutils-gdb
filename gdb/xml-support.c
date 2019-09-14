@@ -26,7 +26,7 @@
 #include <string>
 
 /* Debugging flag.  */
-static int debug_xml;
+static bool debug_xml;
 
 /* The contents of this file are only useful if XML support is
    available.  */

@@ -439,7 +439,7 @@ extern section_addr_info
 
 			/*   Variables   */
 
-/* If non-zero, shared library symbols will be added automatically
+/* If true, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
    attaching to the inferior.  This is almost always what users will
    want to have happen; but for very large programs, the startup time
@@ -449,7 +449,7 @@ extern section_addr_info
    library symbols are not loaded, commands like "info fun" will *not*
    report all the functions that are actually present.  */
 
-extern int auto_solib_add;
+extern bool auto_solib_add;
 
 /* From symfile.c */
 
@@ -625,6 +625,6 @@ extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 
 /* True if we are printing debug output about separate debug info files.  */
 
-extern int separate_debug_file_debug;
+extern bool separate_debug_file_debug;
 
 #endif /* !defined(SYMFILE_H) */

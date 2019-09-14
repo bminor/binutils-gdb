@@ -59,7 +59,7 @@
 #include <vector>
 
 /* Control debugging information emitted in this file.  */
-static int csky_debug = 0;
+static bool csky_debug = false;
 
 static struct reggroup *cr_reggroup;
 static struct reggroup *fr_reggroup;

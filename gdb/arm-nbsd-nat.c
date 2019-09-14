@@ -40,7 +40,7 @@ public:
 
 static arm_netbsd_nat_target the_arm_netbsd_nat_target;
 
-extern int arm_apcs_32;
+extern bool arm_apcs_32;
 
 static void
 arm_supply_gregset (struct regcache *regcache, struct reg *gregset)

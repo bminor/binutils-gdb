@@ -858,7 +858,7 @@ static int heuristic_fence_post = 0;
    register N.  NOTE: This defines the pseudo register type so need to
    rebuild the architecture vector.  */
 
-static int mips64_transfers_32bit_regs_p = 0;
+static bool mips64_transfers_32bit_regs_p = false;
 
 static void
 set_mips64_transfers_32bit_regs (const char *args, int from_tty,

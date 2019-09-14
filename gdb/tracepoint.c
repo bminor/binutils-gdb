@@ -131,12 +131,12 @@ static struct cmd_list_element *tfindlist;
 /* List of expressions to collect by default at each tracepoint hit.  */
 char *default_collect;
 
-static int disconnected_tracing;
+static bool disconnected_tracing;
 
 /* This variable controls whether we ask the target for a linear or
    circular trace buffer.  */
 
-static int circular_trace_buffer;
+static bool circular_trace_buffer;
 
 /* This variable is the requested trace buffer size, or -1 to indicate
    that we don't care and leave it up to the target to set a size.  */

@@ -52,8 +52,8 @@ extern void async_enable_stdin (void);
 /* Exported variables from event-top.c.
    FIXME: these should really go into top.h.  */
 
-extern int set_editing_cmd_var;
-extern int exec_done_display_p;
+extern bool set_editing_cmd_var;
+extern bool exec_done_display_p;
 extern struct prompts the_prompts;
 extern void (*after_char_processing_hook) (void);
 extern int call_stdin_event_handler_again_p;

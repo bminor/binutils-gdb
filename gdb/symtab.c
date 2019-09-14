@@ -241,10 +241,10 @@ static unsigned int new_symbol_cache_size = DEFAULT_SYMBOL_CACHE_SIZE;
    the original value from here.  */
 static unsigned int symbol_cache_size = DEFAULT_SYMBOL_CACHE_SIZE;
 
-/* Non-zero if a file may be known by two different basenames.
+/* True if a file may be known by two different basenames.
    This is the uncommon case, and significantly slows down gdb.
    Default set to "off" to not slow down the common case.  */
-int basenames_may_differ = 0;
+bool basenames_may_differ = false;
 
 /* Allow the user to configure the debugger behavior with respect
    to multiple-choice menus when more than one symbol matches during
@@ -4131,10 +4131,10 @@ operator_chars (const char *p, const char **end)
 struct filename_partial_match_opts
 {
   /* Only match the directory name part.   */
-  int dirname = false;
+  bool dirname = false;
 
   /* Only match the basename part.  */
-  int basename = false;
+  bool basename = false;
 };
 
 /* Data structure to maintain printing state for output_source_filename.  */
@@ -4912,8 +4912,8 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
 
 struct info_print_options
 {
-  int quiet = false;
-  int exclude_minsyms = false;
+  bool quiet = false;
+  bool exclude_minsyms = false;
   char *type_regexp = nullptr;
 
   ~info_print_options ()
@@ -5010,7 +5010,7 @@ info_functions_command (const char *args, int from_tty)
 
 struct info_types_options
 {
-  int quiet = false;
+  bool quiet = false;
 };
 
 /* The options used by the 'info types' command.  */

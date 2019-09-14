@@ -30,23 +30,23 @@ struct value_print_options
   enum val_prettyformat prettyformat;
 
   /* Controls pretty formatting of arrays.  */
-  int prettyformat_arrays;
+  bool prettyformat_arrays;
 
   /* Controls pretty formatting of structures.  */
-  int prettyformat_structs;
+  bool prettyformat_structs;
 
   /* Controls printing of virtual tables.  */
-  int vtblprint;
+  bool vtblprint;
 
   /* Controls printing of nested unions.  */
-  int unionprint;
+  bool unionprint;
 
   /* Controls printing of addresses.  */
-  int addressprint;
+  bool addressprint;
 
   /* Controls looking up an object's derived type using what we find
      in its vtables.  */
-  int objectprint;
+  bool objectprint;
 
   /* Maximum number of chars to print for a string pointer value or vector
      contents, or UINT_MAX for no limit.  Note that "set print elements 0"
@@ -66,40 +66,40 @@ struct value_print_options
   int format;
 
   /* Stop printing at null character?  */
-  int stop_print_at_null;
+  bool stop_print_at_null;
 
   /* True if we should print the index of each element when printing
      an array.  */
-  int print_array_indexes;
+  bool print_array_indexes;
 
-  /* If nonzero, then dereference references, otherwise just print
+  /* If true, then dereference references, otherwise just print
      them like pointers.  */
-  int deref_ref;
+  bool deref_ref;
 
-  /* If nonzero, print static fields.  */
-  int static_field_print;
+  /* If true, print static fields.  */
+  bool static_field_print;
 
-  /* If nonzero, print static fields for Pascal.  FIXME: C++ has a
+  /* If true, print static fields for Pascal.  FIXME: C++ has a
      flag, why not share with Pascal too?  */
-  int pascal_static_field_print;
+  bool pascal_static_field_print;
 
-  /* If non-zero don't do Python pretty-printing.  */
-  int raw;
+  /* If true, don't do Python pretty-printing.  */
+  bool raw;
 
-  /* If nonzero, print the value in "summary" form.
-     If raw and summary are both non-zero, don't print non-scalar values
+  /* If true, print the value in "summary" form.
+     If raw and summary are both true, don't print non-scalar values
      ("..." is printed instead).  */
-  int summary;
+  bool summary;
 
-  /* If nonzero, when printing a pointer, print the symbol to which it
+  /* If true, when printing a pointer, print the symbol to which it
      points, if any.  */
-  int symbol_print;
+  bool symbol_print;
 
   /* Maximum print depth when printing nested aggregates.  */
   int max_depth;
 
   /* Whether "finish" should print the value.  */
-  int finish_print;
+  bool finish_print;
 };
 
 /* Create an option_def_group for the value_print options, with OPTS

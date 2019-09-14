@@ -1469,10 +1469,10 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
 
 #ifdef HAVE_WORKING_FORK
 
-/* If nonzero, attempt to catch crashes in the demangler and print
+/* If true, attempt to catch crashes in the demangler and print
    useful debugging information.  */
 
-static int catch_demangler_crashes = 1;
+static bool catch_demangler_crashes = true;
 
 /* Stack context and environment for demangler crash recovery.  */
 

@@ -126,7 +126,7 @@ static int dcache_read_line (DCACHE *dcache, struct dcache_block *db);
 
 static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
 
-static int dcache_enabled_p = 0; /* OBSOLETE */
+static bool dcache_enabled_p = false; /* OBSOLETE */
 
 static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,

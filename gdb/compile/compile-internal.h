@@ -21,7 +21,7 @@
 
 /* Debugging flag for the "compile" family of commands.  */
 
-extern int compile_debug;
+extern bool compile_debug;
 
 struct block;
 

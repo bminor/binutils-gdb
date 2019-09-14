@@ -100,7 +100,7 @@ show_max_symbolic_offset (struct ui_file *file, int from_tty,
 
 /* Append the source filename and linenumber of the symbol when
    printing a symbolic value as `<symbol at filename:linenum>' if set.  */
-static int print_symbol_filename = 0;
+static bool print_symbol_filename = false;
 static void
 show_print_symbol_filename (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)

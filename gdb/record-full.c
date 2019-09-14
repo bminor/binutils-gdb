@@ -159,7 +159,7 @@ struct record_full_entry
 
 /* If true, query if PREC cannot record memory
    change of next instruction.  */
-int record_full_memory_query = 0;
+bool record_full_memory_query = false;
 
 struct record_full_core_buf_entry
 {
@@ -196,8 +196,8 @@ static struct record_full_entry *record_full_list = &record_full_first;
 static struct record_full_entry *record_full_arch_list_head = NULL;
 static struct record_full_entry *record_full_arch_list_tail = NULL;
 
-/* 1 ask user. 0 auto delete the last struct record_full_entry.  */
-static int record_full_stop_at_limit = 1;
+/* true ask user. false auto delete the last struct record_full_entry.  */
+static bool record_full_stop_at_limit = true;
 /* Maximum allowed number of insns in execution log.  */
 static unsigned int record_full_insn_max_num
 	= DEFAULT_RECORD_FULL_INSN_MAX_NUM;

@@ -589,7 +589,7 @@ const char * const boolean_enums[] = { "on", "off", NULL };
    Returns the new command element.  */
 
 cmd_list_element *
-add_setshow_boolean_cmd (const char *name, enum command_class theclass, int *var,
+add_setshow_boolean_cmd (const char *name, enum command_class theclass, bool *var,
 			 const char *set_doc, const char *show_doc,
 			 const char *help_doc,
 			 cmd_const_sfunc_ftype *set_func,

@@ -215,9 +215,9 @@ check_for_argument (char **str, const char *arg)
 
 struct qcs_flags
 {
-  int quiet = false;
-  int cont = false;
-  int silent = false;
+  bool quiet = false;
+  bool cont = false;
+  bool silent = false;
 };
 
 /* Validate FLAGS.  Throws an error if both FLAGS->CONT and

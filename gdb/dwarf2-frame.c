@@ -171,7 +171,7 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 
 
 /* See dwarf2-frame.h.  */
-int dwarf2_frame_unwinders_enabled_p = 1;
+bool dwarf2_frame_unwinders_enabled_p = true;
 
 /* Store the length the expression for the CFA in the `cfa_reg' field,
    which is unused in that case.  */

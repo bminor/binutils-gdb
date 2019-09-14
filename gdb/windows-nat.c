@@ -245,16 +245,16 @@ static int saw_create;
 static int open_process_used = 0;
 
 /* User options.  */
-static int new_console = 0;
+static bool new_console = false;
 #ifdef __CYGWIN__
-static int cygwin_exceptions = 0;
+static bool cygwin_exceptions = false;
 #endif
-static int new_group = 1;
-static int debug_exec = 0;		/* show execution */
-static int debug_events = 0;		/* show events from kernel */
-static int debug_memory = 0;		/* show target memory accesses */
-static int debug_exceptions = 0;	/* show target exceptions */
-static int useshell = 0;		/* use shell for subprocesses */
+static bool new_group = true;
+static bool debug_exec = false;		/* show execution */
+static bool debug_events = false;	/* show events from kernel */
+static bool debug_memory = false;	/* show target memory accesses */
+static bool debug_exceptions = false;	/* show target exceptions */
+static bool useshell = false;		/* use shell for subprocesses */
 
 /* This vector maps GDB's idea of a register's number into an offset
    in the windows exception context vector.

@@ -137,7 +137,7 @@ extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Whether to open exec and core files read-only or read-write.  */
 
-extern int write_files;
+extern bool write_files;
 
 /* Open and set up the core file bfd.  */
 

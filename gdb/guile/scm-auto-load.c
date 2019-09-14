@@ -30,7 +30,7 @@
    set auto-load guile-scripts on|off
    This is true if we should auto-load associated Guile scripts when an
    objfile is opened, false otherwise.  */
-static int auto_load_guile_scripts = 1;
+static bool auto_load_guile_scripts = true;
 
 /* "show" command for the auto_load_guile_scripts configuration variable.  */
 

@@ -99,13 +99,13 @@ static std::chrono::steady_clock::duration prompt_for_continue_wait_time;
 
 /* A flag indicating whether to timestamp debugging messages.  */
 
-static int debug_timestamp = 0;
+static bool debug_timestamp = false;
 
-/* Nonzero means that strings with character values >0x7F should be printed
-   as octal escapes.  Zero means just print the value (e.g. it's an
+/* True means that strings with character values >0x7F should be printed
+   as octal escapes.  False means just print the value (e.g. it's an
    international character, and the terminal or window can cope.)  */
 
-int sevenbit_strings = 0;
+bool sevenbit_strings = false;
 static void
 show_sevenbit_strings (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
@@ -119,7 +119,7 @@ show_sevenbit_strings (struct ui_file *file, int from_tty,
 
 const char *warning_pre_print = "\nwarning: ";
 
-int pagination_enabled = 1;
+bool pagination_enabled = true;
 static void
 show_pagination_enabled (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)

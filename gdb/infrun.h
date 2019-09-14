@@ -30,7 +30,7 @@ struct return_value_info;
 extern unsigned int debug_infrun;
 
 /* True if we are debugging displaced stepping.  */
-extern int debug_displaced;
+extern bool debug_displaced;
 
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
@@ -39,24 +39,24 @@ extern int stop_on_solib_events;
 /* True if execution commands resume all threads of all processes by
    default; otherwise, resume only threads of the current inferior
    process.  */
-extern int sched_multi;
+extern bool sched_multi;
 
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
-extern int step_stop_if_no_debug;
+extern bool step_stop_if_no_debug;
 
 /* If set, the inferior should be controlled in non-stop mode.  In
    this mode, each thread is controlled independently.  Execution
    commands apply only to the selected thread by default, and stop
    events stop only the thread that had the event -- the other threads
    are kept running freely.  */
-extern int non_stop;
+extern bool non_stop;
 
 /* When set (default), the target should attempt to disable the
    operating system's address space randomization feature when
    starting an inferior.  */
-extern int disable_randomization;
+extern bool disable_randomization;
 
 /* Returns a unique identifier for the current stop.  This can be used
    to tell whether a command has proceeded the inferior past the

@@ -41,11 +41,11 @@ const char *compile_cplus_instance::m_default_cflags = "-std=gnu++11";
 
 /* Flag to enable internal debugging.  */
 
-static int debug_compile_cplus_types = 0;
+static bool debug_compile_cplus_types = false;
 
 /* Flag to enable internal scope switching debugging.  */
 
-static int debug_compile_cplus_scopes = 0;
+static bool debug_compile_cplus_scopes = false;
 
 /* Forward declarations.  */
 

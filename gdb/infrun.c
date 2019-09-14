@@ -136,7 +136,7 @@ mark_infrun_async_event_handler (void)
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
-int step_stop_if_no_debug = 0;
+bool step_stop_if_no_debug = false;
 static void
 show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
@@ -155,9 +155,9 @@ static ptid_t previous_inferior_ptid;
    Exactly which branch is detached depends on 'set follow-fork-mode'
    setting.  */
 
-static int detach_fork = 1;
+static bool detach_fork = true;
 
-int debug_displaced = 0;
+bool debug_displaced = false;
 static void
 show_debug_displaced (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -176,7 +176,7 @@ show_debug_infrun (struct ui_file *file, int from_tty,
 
 /* Support for disabling address space randomization.  */
 
-int disable_randomization = 1;
+bool disable_randomization = true;
 
 static void
 show_disable_randomization (struct ui_file *file, int from_tty,
@@ -205,8 +205,8 @@ set_disable_randomization (const char *args, int from_tty,
 
 /* User interface for non-stop mode.  */
 
-int non_stop = 0;
-static int non_stop_1 = 0;
+bool non_stop = false;
+static bool non_stop_1 = false;
 
 static void
 set_non_stop (const char *args, int from_tty,
@@ -234,8 +234,8 @@ show_non_stop (struct ui_file *file, int from_tty,
    non-stop, in which all GDB operations that might affect the
    target's execution have been disabled.  */
 
-int observer_mode = 0;
-static int observer_mode_1 = 0;
+bool observer_mode = false;
+static bool observer_mode_1 = false;
 
 static void
 set_observer_mode (const char *args, int from_tty,
@@ -256,7 +256,7 @@ set_observer_mode (const char *args, int from_tty,
   /* We can insert fast tracepoints in or out of observer mode,
      but enable them if we're going into this mode.  */
   if (observer_mode)
-    may_insert_fast_tracepoints = 1;
+    may_insert_fast_tracepoints = true;
   may_stop = !observer_mode;
   update_target_permissions ();
 
@@ -265,7 +265,7 @@ set_observer_mode (const char *args, int from_tty,
   if (observer_mode)
     {
       pagination_enabled = 0;
-      non_stop = non_stop_1 = 1;
+      non_stop = non_stop_1 = true;
     }
 
   if (from_tty)
@@ -289,13 +289,11 @@ show_observer_mode (struct ui_file *file, int from_tty,
 void
 update_observer_mode (void)
 {
-  int newval;
-
-  newval = (!may_insert_breakpoints
-	    && !may_insert_tracepoints
-	    && may_insert_fast_tracepoints
-	    && !may_stop
-	    && non_stop);
+  bool newval = (!may_insert_breakpoints
+		 && !may_insert_tracepoints
+		 && may_insert_fast_tracepoints
+		 && !may_stop
+		 && non_stop);
 
   /* Let the user know if things change.  */
   if (newval != observer_mode)
@@ -2089,7 +2087,7 @@ set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
 /* True if execution commands resume all threads of all processes by
    default; otherwise, resume only threads of the current inferior
    process.  */
-int sched_multi = 0;
+bool sched_multi = false;
 
 /* Try to setup for software single stepping over the specified location.
    Return 1 if target_resume() should use hardware single step.

@@ -594,6 +594,9 @@ captured_main_1 (struct captured_main_args *context)
       OPT_READNOW,
       OPT_READNEVER
     };
+    /* This struct requires int* in the struct, but write_files is a bool.
+       So use this temporary int that we write back after argument parsing.  */
+    int write_files_1 = 0;
     static struct option long_options[] =
     {
       {"tui", no_argument, 0, OPT_TUI},
@@ -658,7 +661,7 @@ captured_main_1 (struct captured_main_args *context)
       {"w", no_argument, NULL, OPT_WINDOWS},
       {"windows", no_argument, NULL, OPT_WINDOWS},
       {"statistics", no_argument, 0, OPT_STATISTICS},
-      {"write", no_argument, &write_files, 1},
+      {"write", no_argument, &write_files_1, 1},
       {"args", no_argument, &set_args, 1},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
@@ -842,6 +845,7 @@ captured_main_1 (struct captured_main_args *context)
 		   gdb_program_name);
 	  }
       }
+    write_files = (write_files_1 != 0);
 
     if (batch_flag)
       {

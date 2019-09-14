@@ -1802,7 +1802,7 @@ extern int target_has_execution_current (void);
   (current_top_target ()->get_thread_control_capabilities () & tc_schedlock)
 
 /* Controls whether async mode is permitted.  */
-extern int target_async_permitted;
+extern bool target_async_permitted;
 
 /* Can the target support asynchronous execution?  */
 #define target_can_async_p() (current_top_target ()->can_async_p ())
@@ -2482,12 +2482,12 @@ extern int remote_timeout;
 extern scoped_restore_tmpl<int>
     make_scoped_restore_show_memory_breakpoints (int show);
 
-extern int may_write_registers;
-extern int may_write_memory;
-extern int may_insert_breakpoints;
-extern int may_insert_tracepoints;
-extern int may_insert_fast_tracepoints;
-extern int may_stop;
+extern bool may_write_registers;
+extern bool may_write_memory;
+extern bool may_insert_breakpoints;
+extern bool may_insert_tracepoints;
+extern bool may_insert_fast_tracepoints;
+extern bool may_stop;
 
 extern void update_target_permissions (void);
 

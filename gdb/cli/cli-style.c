@@ -26,15 +26,15 @@
 /* True if styling is enabled.  */
 
 #if defined (__MSDOS__) || defined (__CYGWIN__)
-int cli_styling = 0;
+bool cli_styling = false;
 #else
-int cli_styling = 1;
+bool cli_styling = true;
 #endif
 
 /* True if source styling is enabled.  Note that this is only
    consulted when cli_styling is true.  */
 
-int source_styling = 1;
+bool source_styling = true;
 
 /* Name of colors; must correspond to ui_file_style::basic_color.  */
 static const char * const cli_colors[] = {

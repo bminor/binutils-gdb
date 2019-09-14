@@ -52,9 +52,9 @@ static struct cmd_list_element *setspucmdlist = NULL;
 static struct cmd_list_element *showspucmdlist = NULL;
 
 /* Whether to stop for new SPE contexts.  */
-static int spu_stop_on_load_p = 0;
+static bool spu_stop_on_load_p = false;
 /* Whether to automatically flush the SW-managed cache.  */
-static int spu_auto_flush_cache_p = 1;
+static bool spu_auto_flush_cache_p = true;
 
 
 /* The tdep structure.  */

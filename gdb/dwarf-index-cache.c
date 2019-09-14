@@ -32,8 +32,8 @@
 #include <string>
 #include <stdlib.h>
 
-/* When set to 1, show debug messages about the index cache.  */
-static int debug_index_cache = 0;
+/* When set to true, show debug messages about the index cache.  */
+static bool debug_index_cache = false;
 
 /* The index cache directory, used for "set/show index-cache directory".  */
 static char *index_cache_directory = NULL;

@@ -97,7 +97,7 @@ static CORE_ADDR allocate_space_in_inferior (int);
 
 static struct value *cast_into_complex (struct type *, struct value *);
 
-int overload_resolution = 0;
+bool overload_resolution = false;
 static void
 show_overload_resolution (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, 

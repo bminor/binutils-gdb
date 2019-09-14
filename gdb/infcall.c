@@ -55,7 +55,7 @@
    asynchronous inferior function call implementation, and that in
    turn means restructuring the code so that it is event driven.  */
 
-static int may_call_functions_p = 1;
+static bool may_call_functions_p = true;
 static void
 show_may_call_functions_p (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c,
@@ -86,7 +86,7 @@ show_may_call_functions_p (struct ui_file *file, int from_tty,
    trust the debug information; the user can override this behavior
    with "set coerce-float-to-double 0".  */
 
-static int coerce_float_to_double_p = 1;
+static bool coerce_float_to_double_p = true;
 static void
 show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
@@ -104,7 +104,7 @@ show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
 
    The default is to stop in the frame where the signal was received.  */
 
-static int unwind_on_signal_p = 0;
+static bool unwind_on_signal_p = false;
 static void
 show_unwind_on_signal_p (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
@@ -127,7 +127,7 @@ show_unwind_on_signal_p (struct ui_file *file, int from_tty,
    The default is to unwind the frame if a std::terminate call is
    made.  */
 
-static int unwind_on_terminating_exception_p = 1;
+static bool unwind_on_terminating_exception_p = true;
 
 static void
 show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,

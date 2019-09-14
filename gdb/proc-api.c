@@ -50,7 +50,7 @@ struct trans {
   const char *desc;             /* Short description of value */
 };
 
-static int   procfs_trace    = 0;
+static bool  procfs_trace   = false;
 static FILE *procfs_file     = NULL;
 static char *procfs_filename;
 

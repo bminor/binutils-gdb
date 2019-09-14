@@ -41,7 +41,7 @@
 #include "hppa-tdep.h"
 #include <algorithm>
 
-static int hppa_debug = 0;
+static bool hppa_debug = false;
 
 /* Some local constants.  */
 static const int hppa32_num_regs = 128;

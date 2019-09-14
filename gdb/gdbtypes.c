@@ -116,7 +116,7 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
 
 /* Should opaque types be resolved?  */
 
-static int opaque_type_resolution = 1;
+static bool opaque_type_resolution = true;
 
 /* A flag to enable printing of debugging information of C++
    overloading.  */
@@ -125,7 +125,7 @@ unsigned int overload_debug = 0;
 
 /* A flag to enable strict type checking.  */
 
-static int strict_type_checking = 1;
+static bool strict_type_checking = true;
 
 /* A function to show whether opaque types are resolved.  */
 

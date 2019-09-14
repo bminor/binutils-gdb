@@ -110,13 +110,13 @@ public:
 
 static char *libthread_db_search_path;
 
-/* Set to non-zero if thread_db auto-loading is enabled
+/* Set to true if thread_db auto-loading is enabled
    by the "set auto-load libthread-db" command.  */
-static int auto_load_thread_db = 1;
+static bool auto_load_thread_db = true;
 
-/* Set to non-zero if load-time libthread_db tests have been enabled
+/* Set to true if load-time libthread_db tests have been enabled
    by the "maintenence set check-libthread-db" command.  */
-static int check_thread_db_on_load = 0;
+static bool check_thread_db_on_load = false;
 
 /* "show" command for the auto_load_thread_db configuration variable.  */
 

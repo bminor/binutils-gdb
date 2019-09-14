@@ -48,8 +48,8 @@ struct debug_sym_fns_data
 static const struct objfile_key<debug_sym_fns_data>
   symfile_debug_objfile_data_key;
 
-/* If non-zero all calls to the symfile functions are logged.  */
-static int debug_symfile = 0;
+/* If true all calls to the symfile functions are logged.  */
+static bool debug_symfile = false;
 
 /* Return non-zero if symfile debug logging is installed.  */
 

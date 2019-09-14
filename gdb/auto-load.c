@@ -61,7 +61,7 @@ static void maybe_print_script_not_found_warning
    const char *section_name, unsigned offset);
 
 /* Value of the 'set debug auto-load' configuration variable.  */
-static int debug_auto_load = 0;
+static bool debug_auto_load = false;
 
 /* "show" command for the debug_auto_load configuration variable.  */
 
@@ -79,7 +79,7 @@ show_debug_auto_load (struct ui_file *file, int from_tty,
    set auto-load gdb-scripts on|off
    This is true if we should auto-load associated scripts when an objfile
    is opened, false otherwise.  */
-static int auto_load_gdb_scripts = 1;
+static bool auto_load_gdb_scripts = true;
 
 /* "show" command for the auto_load_gdb_scripts configuration variable.  */
 
@@ -110,16 +110,16 @@ auto_load_gdb_scripts_enabled (const struct extension_language_defn *extlang)
    This flag exists to facilitate deferring auto-loading during start-up
    until after ./.gdbinit has been read; it may augment the search directories
    used to find the scripts.  */
-int global_auto_load = 1;
+bool global_auto_load = true;
 
 /* Auto-load .gdbinit file from the current directory?  */
-int auto_load_local_gdbinit = 1;
+bool auto_load_local_gdbinit = true;
 
 /* Absolute pathname to the current directory .gdbinit, if it exists.  */
 char *auto_load_local_gdbinit_pathname = NULL;
 
-/* Boolean value if AUTO_LOAD_LOCAL_GDBINIT_PATHNAME has been loaded.  */
-int auto_load_local_gdbinit_loaded = 0;
+/* if AUTO_LOAD_LOCAL_GDBINIT_PATHNAME has been loaded.  */
+bool auto_load_local_gdbinit_loaded = false;
 
 /* "show" command for the auto_load_local_gdbinit configuration variable.  */
 

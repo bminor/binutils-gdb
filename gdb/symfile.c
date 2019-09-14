@@ -143,7 +143,7 @@ static const char *print_symbol_loading = print_symbol_loading_full;
 
 /* See symfile.h.  */
 
-int auto_solib_add = 1;
+bool auto_solib_add = true;
 
 
 /* Return non-zero if symbol-loading messages should be printed.
@@ -1265,7 +1265,7 @@ symbol_file_clear (int from_tty)
 
 /* See symfile.h.  */
 
-int separate_debug_file_debug = 0;
+bool separate_debug_file_debug = false;
 
 static int
 separate_debug_file_exists (const std::string &name, unsigned long crc,

@@ -91,12 +91,12 @@ struct smaps_vmflags
 /* Whether to take the /proc/PID/coredump_filter into account when
    generating a corefile.  */
 
-static int use_coredump_filter = 1;
+static bool use_coredump_filter = true;
 
 /* Whether the value of smaps_vmflags->exclude_coredump should be
    ignored, including mappings marked with the VM_DONTDUMP flag in
    the dump.  */
-static int dump_excluded_mappings = 0;
+static bool dump_excluded_mappings = false;
 
 /* This enum represents the signals' numbers on a generic architecture
    running the Linux kernel.  The definition of "generic" comes from

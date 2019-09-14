@@ -72,7 +72,7 @@ static struct cmd_list_element *tcp_show_cmdlist;
 
 /* Whether to auto-retry refused connections.  */
 
-static int tcp_auto_retry = 1;
+static bool tcp_auto_retry = true;
 
 /* Timeout period for connections, in seconds.  */
 

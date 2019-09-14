@@ -50,7 +50,7 @@
 
 /* Global debug flag.  */
 
-static int or1k_debug = 0;
+static bool or1k_debug = false;
 
 static void
 show_or1k_debug (struct ui_file *file, int from_tty,

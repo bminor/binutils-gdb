@@ -137,7 +137,7 @@ static htab_t gdb_bfd_cache;
 /* When true gdb will reuse an existing bfd object if the filename,
    modification time, and file size all match.  */
 
-static int bfd_sharing = 1;
+static bool bfd_sharing = true;
 static void
 show_bfd_sharing  (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)

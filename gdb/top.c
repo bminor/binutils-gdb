@@ -115,7 +115,7 @@ extern char lang_frame_mismatch_warn[];		/* language.c */
 /* Flag for whether we want to confirm potentially dangerous
    operations.  Default is yes.  */
 
-int confirm = 1;
+bool confirm = true;
 
 static void
 show_confirm (struct ui_file *file, int from_tty,
@@ -850,15 +850,15 @@ gdb_readline_no_editing (const char *prompt)
 /* Variables which control command line editing and history
    substitution.  These variables are given default values at the end
    of this file.  */
-static int command_editing_p;
+static bool command_editing_p;
 
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c.  */
 
-/* static */ int history_expansion_p;
+/* static */ bool history_expansion_p;
 
-static int write_history_p;
+static bool write_history_p;
 static void
 show_write_history_p (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -1876,7 +1876,7 @@ show_history (const char *args, int from_tty)
   cmd_show_list (showhistlist, from_tty, "");
 }
 
-int info_verbose = 0;		/* Default verbose msgs off.  */
+bool info_verbose = false;	/* Default verbose msgs off.  */
 
 /* Called by do_set_command.  An elaborate joke.  */
 void

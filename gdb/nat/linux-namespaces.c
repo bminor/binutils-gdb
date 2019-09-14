@@ -31,7 +31,7 @@
 #include "gdbsupport/scope-exit.h"
 
 /* See nat/linux-namespaces.h.  */
-int debug_linux_namespaces;
+bool debug_linux_namespaces;
 
 /* Handle systems without fork.  */
 

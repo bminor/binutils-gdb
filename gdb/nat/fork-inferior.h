@@ -72,7 +72,7 @@ extern ptid_t startup_inferior (pid_t pid, int ntraps,
 
    The catch-exec traps expected during start-up will be one more if
    the target is started up with a shell.  */
-extern int startup_with_shell;
+extern bool startup_with_shell;
 
 /* Perform any necessary tasks before a fork/vfork takes place.  ARGS
    is a string containing all the arguments received by the inferior.

@@ -41,7 +41,7 @@ struct hardwire_ttystate
 
 #ifdef CRTSCTS
 /* Boolean to explicitly enable or disable h/w flow control.  */
-static int serial_hwflow;
+static bool serial_hwflow;
 static void
 show_serial_hwflow (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)

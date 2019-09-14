@@ -84,7 +84,7 @@ static exec_target exec_ops;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
-int write_files = 0;
+bool write_files = false;
 static void
 show_write_files (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)

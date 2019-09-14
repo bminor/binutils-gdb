@@ -544,7 +544,7 @@ extern const char *symbol_demangled_name
 
 #define SYMBOL_PRINT_NAME(symbol)					\
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
-extern int demangle;
+extern bool demangle;
 
 /* Macro that returns the name to be used when sorting and searching symbols.
    In C++, we search for the demangled form of a name,
@@ -2064,7 +2064,7 @@ extern unsigned int symtab_create_debug;
 
 extern unsigned int symbol_lookup_debug;
 
-extern int basenames_may_differ;
+extern bool basenames_may_differ;
 
 int compare_filenames_for_search (const char *filename,
 				  const char *search_name);

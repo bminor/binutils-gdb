@@ -46,7 +46,7 @@ struct inferior *inferior_list = NULL;
 static int highest_inferior_num;
 
 /* See inferior.h.  */
-int print_inferior_events = 1;
+bool print_inferior_events = true;
 
 /* The Current Inferior.  This is a strong reference.  I.e., whenever
    an inferior is the current inferior, its refcount is

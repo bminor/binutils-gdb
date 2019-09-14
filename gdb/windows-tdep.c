@@ -100,7 +100,7 @@ static const int MAX_TIB64 =
   sizeof (thread_information_64) / sizeof (uint64_t);
 static const int FULL_TIB_SIZE = 0x1000;
 
-static int maint_display_all_tib = 0;
+static bool maint_display_all_tib = false;
 
 /* Define Thread Local Base pointer type.  */
 

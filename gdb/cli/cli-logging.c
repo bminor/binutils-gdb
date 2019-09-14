@@ -33,7 +33,7 @@ show_logging_filename (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int logging_overwrite;
+static bool logging_overwrite;
 
 static void
 maybe_warn_already_logging ()
@@ -61,8 +61,8 @@ show_logging_overwrite (struct ui_file *file, int from_tty,
 }
 
 /* Value as configured by the user.  */
-static int logging_redirect;
-static int debug_redirect;
+static bool logging_redirect;
+static bool debug_redirect;
 
 static void
 set_logging_redirect (const char *args,

@@ -25,11 +25,11 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
-extern int global_auto_load;
+extern bool global_auto_load;
 
-extern int auto_load_local_gdbinit;
+extern bool auto_load_local_gdbinit;
 extern char *auto_load_local_gdbinit_pathname;
-extern int auto_load_local_gdbinit_loaded;
+extern bool auto_load_local_gdbinit_loaded;
 
 extern struct auto_load_pspace_info *
   get_auto_load_pspace_data_for_loading (struct program_space *pspace);

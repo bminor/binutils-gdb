@@ -832,8 +832,8 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 }
 
 #ifdef PT_LWPINFO
-static int debug_fbsd_lwp;
-static int debug_fbsd_nat;
+static bool debug_fbsd_lwp;
+static bool debug_fbsd_nat;
 
 static void
 show_fbsd_lwp_debug (struct ui_file *file, int from_tty,

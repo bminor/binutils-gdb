@@ -441,7 +441,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
     case var_boolean:
       {
-	if (* (int *) var)
+	if (* (bool *) var)
 	  Py_RETURN_TRUE;
 	else
 	  Py_RETURN_FALSE;

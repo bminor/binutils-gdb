@@ -110,9 +110,9 @@ extern cli_style_option title_style;
 
 
 /* True if source styling is enabled.  */
-extern int source_styling;
+extern bool source_styling;
 
 /* True if styling is enabled.  */
-extern int cli_styling;
+extern bool cli_styling;
 
 #endif /* CLI_CLI_STYLE_H */

@@ -675,7 +675,7 @@ enum watchpoint_triggered
    only one register per watchpoint, thus assuming that all acesses that
    modify a memory location happen at its starting address. */
 
-extern int target_exact_watchpoints;
+extern bool target_exact_watchpoints;
 
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint

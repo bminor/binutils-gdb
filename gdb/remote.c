@@ -1038,7 +1038,7 @@ static struct cmd_list_element *remote_show_cmdlist;
 
 /* Controls whether GDB is willing to use range stepping.  */
 
-static int use_range_stepping = 1;
+static bool use_range_stepping = true;
 
 /* The max number of chars in debug output.  The rest of chars are
    omitted.  */
@@ -1492,12 +1492,12 @@ show_interrupt_sequence (struct ui_file *file, int from_tty,
    to the remote target when gdb connects to it.
    This is mostly needed when you debug the Linux kernel: The Linux kernel
    expects BREAK g which is Magic SysRq g for connecting gdb.  */
-static int interrupt_on_connect = 0;
+static bool interrupt_on_connect = false;
 
 /* This variable is used to implement the "set/show remotebreak" commands.
    Since these commands are now deprecated in favor of "set/show remote
    interrupt-sequence", it no longer has any effect on the code.  */
-static int remote_break;
+static bool remote_break;
 
 static void
 set_remotebreak (const char *args, int from_tty, struct cmd_list_element *c)

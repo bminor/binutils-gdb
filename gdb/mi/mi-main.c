@@ -101,11 +101,11 @@ static void output_register (struct frame_info *, int regnum, int format,
 			     int skip_unavailable);
 
 /* Controls whether the frontend wants MI in async mode.  */
-static int mi_async = 0;
+static bool mi_async = false;
 
 /* The set command writes to this variable.  If the inferior is
    executing, mi_async is *not* updated.  */
-static int mi_async_1 = 0;
+static bool mi_async_1 = false;
 
 static void
 set_mi_async_command (const char *args, int from_tty,

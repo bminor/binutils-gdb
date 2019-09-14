@@ -32,7 +32,7 @@ extern void initialize_utils (void);
 
 /* String utilities.  */
 
-extern int sevenbit_strings;
+extern bool sevenbit_strings;
 
 /* Modes of operation for strncmp_iw_with_mode.  */
 
@@ -316,7 +316,7 @@ extern void wrap_here (const char *);
 
 extern void reinitialize_more_filter (void);
 
-extern int pagination_enabled;
+extern bool pagination_enabled;
 
 extern struct ui_file **current_ui_gdb_stdout_ptr (void);
 extern struct ui_file **current_ui_gdb_stdin_ptr (void);

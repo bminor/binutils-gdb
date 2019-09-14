@@ -290,7 +290,7 @@ static char *dprintf_channel;
 
 /* True if dprintf commands should continue to operate even if GDB
    has disconnected.  */
-static int disconnected_dprintf = 1;
+static bool disconnected_dprintf = true;
 
 struct command_line *
 breakpoint_commands (struct breakpoint *b)
@@ -301,7 +301,7 @@ breakpoint_commands (struct breakpoint *b)
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */
 
-static int breakpoint_proceeded;
+static bool breakpoint_proceeded;
 
 const char *
 bpdisp_text (enum bpdisp disp)
@@ -346,11 +346,11 @@ show_pending_break_support (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* If 1, gdb will automatically use hardware breakpoints for breakpoints
+/* If true, gdb will automatically use hardware breakpoints for breakpoints
    set with "break" but falling in read-only memory.
-   If 0, gdb will warn about such breakpoints, but won't automatically
+   If false, gdb will warn about such breakpoints, but won't automatically
    use hardware breakpoints.  */
-static int automatic_hardware_breakpoints;
+static bool automatic_hardware_breakpoints;
 static void
 show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
 				     struct cmd_list_element *c,
@@ -368,7 +368,7 @@ show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
    breakpoints until the next resume, and removes them again when the
    target fully stops.  This is a bit safer in case GDB crashes while
    processing user input.  */
-static int always_inserted_mode = 0;
+static bool always_inserted_mode = false;
 
 static void
 show_always_inserted_mode (struct ui_file *file, int from_tty,
@@ -477,7 +477,7 @@ static int executing_breakpoint_commands;
 static int overlay_events_enabled;
 
 /* See description in breakpoint.h. */
-int target_exact_watchpoints = 0;
+bool target_exact_watchpoints = false;
 
 /* Walk the following statement or block through all breakpoints.
    ALL_BREAKPOINTS_SAFE does so even if the statement deletes the
@@ -15954,7 +15954,7 @@ Usage: agent-printf \"format string\", ARG1, ARG2, ARG3, ..., ARGN\n\
 This supports most C printf format specifications, like %s, %d, etc.\n\
 This is useful for formatted output in user-defined commands."));
 
-  automatic_hardware_breakpoints = 1;
+  automatic_hardware_breakpoints = true;
 
   gdb::observers::about_to_proceed.attach (breakpoint_about_to_proceed);
   gdb::observers::thread_exit.attach (remove_threaded_breakpoints);

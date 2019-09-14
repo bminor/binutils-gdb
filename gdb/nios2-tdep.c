@@ -52,7 +52,7 @@
 
 /* Control debugging information emitted in this file.  */
 
-static int nios2_debug = 0;
+static bool nios2_debug = false;
 
 /* The following structures are used in the cache for prologue
    analysis; see the reg_value and reg_saved tables in

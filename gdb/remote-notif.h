@@ -129,6 +129,6 @@ remote_notif_state *remote_notif_state_allocate (remote_target *remote);
 
 extern struct notif_client notif_client_stop;
 
-extern int notif_debug;
+extern bool notif_debug;
 
 #endif /* REMOTE_NOTIF_H */

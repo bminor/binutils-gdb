@@ -183,9 +183,9 @@ pretty-printers for that value.")
 
 struct backtrace_cmd_options
 {
-  int full = 0;
-  int no_filters = 0;
-  int hide = 0;
+  bool full = false;
+  bool no_filters = false;
+  bool hide = false;
 };
 
 using bt_flag_option_def
@@ -2423,7 +2423,7 @@ print_frame_local_vars (struct frame_info *frame,
 
 struct info_print_options
 {
-  int quiet = false;
+  bool quiet = false;
   char *type_regexp = nullptr;
 
   ~info_print_options ()

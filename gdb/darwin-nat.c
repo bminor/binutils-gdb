@@ -120,7 +120,7 @@ static vm_size_t mach_page_size;
 
 /* If Set, catch all mach exceptions (before they are converted to signals
    by the kernel).  */
-static int enable_mach_exceptions;
+static bool enable_mach_exceptions;
 
 /* Inferior that should report a fake stop event.  */
 static struct inferior *darwin_inf_fake_stop;

@@ -201,7 +201,7 @@ struct dwarf2_frame_state
    registered with the gdbarch.  Not all architectures can or do use the
    DWARF unwinders.  Setting this to true on a target that does not
    otherwise support the DWARF unwinders has no effect.  */
-extern int dwarf2_frame_unwinders_enabled_p;
+extern bool dwarf2_frame_unwinders_enabled_p;
 
 /* Set the architecture-specific register state initialization
    function for GDBARCH to INIT_REG.  */

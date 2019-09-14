@@ -29,7 +29,7 @@
    set auto-load python-scripts on|off
    This is true if we should auto-load associated Python scripts when an
    objfile is opened, false otherwise.  */
-static int auto_load_python_scripts = 1;
+static bool auto_load_python_scripts = true;
 
 /* "show" command for the auto_load_python_scripts configuration variable.  */
 

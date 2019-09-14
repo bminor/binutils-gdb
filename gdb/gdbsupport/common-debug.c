@@ -22,7 +22,7 @@
 
 /* See gdbsupport/common-debug.h.  */
 
-int show_debug_regs;
+bool show_debug_regs;
 
 /* See gdbsupport/common-debug.h.  */
 

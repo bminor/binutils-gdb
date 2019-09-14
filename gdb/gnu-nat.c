@@ -93,7 +93,7 @@ int proc_wait_pid = 0;
 /* The number of wait requests we've sent, and expect replies from.  */
 int proc_waits_pending = 0;
 
-int gnu_debug_flag = 0;
+bool gnu_debug_flag = false;
 
 /* Forward decls */
 

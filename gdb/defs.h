@@ -314,7 +314,7 @@ struct ui;
 
 extern int input_interactive_p (struct ui *);
 
-extern int info_verbose;
+extern bool info_verbose;
 
 /* From printcmd.c */
 

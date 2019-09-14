@@ -580,7 +580,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 			   encoding, errors);
 }
 
-/* Given a Python object, copy its truth value to a C int (the value
+/* Given a Python object, copy its truth value to a C bool (the value
    pointed by dest).
    If src_obj is NULL, then *dest is not modified.
 
@@ -588,7 +588,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
    in case of error.  */
 
 static bool
-copy_py_bool_obj (int *dest, PyObject *src_obj)
+copy_py_bool_obj (bool *dest, PyObject *src_obj)
 {
   if (src_obj)
     {

@@ -770,7 +770,7 @@ maintenance_with_cmd_completer (struct cmd_list_element *ignore,
 
 /* Profiling support.  */
 
-static int maintenance_profile_p;
+static bool maintenance_profile_p;
 static void
 show_maintenance_profile_p (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
@@ -841,17 +841,17 @@ maintenance_set_profile_cmd (const char *args, int from_tty,
 }
 #endif
 
-/* If nonzero, display time usage both at startup and for each command.  */
+/* If true, display time usage both at startup and for each command.  */
 
-static int per_command_time;
+static bool per_command_time;
 
-/* If nonzero, display space usage both at startup and for each command.  */
+/* If true, display space usage both at startup and for each command.  */
 
-static int per_command_space;
+static bool per_command_space;
 
-/* If nonzero, display basic symtab stats for each command.  */
+/* If true, display basic symtab stats for each command.  */
 
-static int per_command_symtab;
+static bool per_command_symtab;
 
 /* mt per-command commands.  */
 

@@ -30,7 +30,7 @@
 
 /* Variable controlling the output of the debugging traces for
    this module.  */
-static int solib_aix_debug;
+static bool solib_aix_debug;
 
 /* Our private data in struct so_list.  */
 

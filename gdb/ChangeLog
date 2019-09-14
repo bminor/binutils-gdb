@@ -1,3 +1,254 @@
+2019-09-17  Christian Biesinger  <cbiesinger@google.com>
+
+	* ada-lang.c (ada_ignore_descriptive_types_p): Change to bool.
+	(print_signatures): Likewise.
+	(trust_pad_over_xvs): Likewise.
+	* arch/aarch64-insn.c (aarch64_debug): Likewise.
+	* arch/aarch64-insn.h (aarch64_debug): Likewise.
+	* arm-linux-nat.c (arm_apcs_32): Likewise.
+	* arm-linux-tdep.c (arm_apcs_32): Likewise.
+	* arm-nbsd-nat.c (arm_apcs_32): Likewise.
+	* arm-tdep.c (arm_debug): Likewise.
+	(arm_apcs_32): Likewise.
+	* auto-load.c (debug_auto_load): Likewise.
+	(auto_load_gdb_scripts): Likewise.
+	(global_auto_load): Likewise.
+	(auto_load_local_gdbinit): Likewise.
+	(auto_load_local_gdbinit_loaded): Likewise.
+	* auto-load.h (global_auto_load): Likewise.
+	(auto_load_local_gdbinit): Likewise.
+	(auto_load_local_gdbinit_loaded): Likewise.
+	* breakpoint.c (disconnected_dprintf): Likewise.
+	(breakpoint_proceeded): Likewise.
+	(automatic_hardware_breakpoints): Likewise.
+	(always_inserted_mode): Likewise.
+	(target_exact_watchpoints): Likewise.
+	(_initialize_breakpoint): Update.
+	* breakpoint.h (target_exact_watchpoints): Change to bool.
+	* btrace.c (maint_btrace_pt_skip_pad): Likewise.
+	* cli/cli-cmds.c (trace_commands): Likewise.
+	* cli/cli-cmds.h (trace_commands): Likewise.
+	* cli/cli-decode.c (add_setshow_boolean_cmd): Change int* argument
+	to bool*.
+	* cli/cli-logging.c (logging_overwrite): Change to bool.
+	(logging_redirect): Likewise.
+	(debug_redirect): Likewise.
+	* cli/cli-option.h (option_def) <boolean>: Change return type to bool*.
+	(struct boolean_option_def) <get_var_address_cb_>: Change return type
+	to bool.
+	<boolean_option_def>: Update.
+	(struct flag_option_def): Change default type of Context to bool
+	from int.
+	<flag_option_def>: Change return type of var_address_cb_ to bool*.
+	* cli/cli-setshow.c (do_set_command): Cast to bool* instead of int*.
+	(get_setshow_command_value_string): Likewise.
+	* cli/cli-style.c (cli_styling): Change to bool.
+	(source_styling): Likewise.
+	* cli/cli-style.h (source_styling): Likewise.
+	(cli_styling): Likewise.
+	* cli/cli-utils.h (struct qcs_flags) <quiet, cont, silent>: Change
+	to bool.
+	* command.h (var_types): Update comment.
+	(add_setshow_boolean_cmd): Change int* var argument to bool*.
+	* compile/compile-cplus-types.c (debug_compile_cplus_types): Change to
+	bool.
+	(debug_compile_cplus_scopes): Likewise.
+	* compile/compile-internal.h (compile_debug): Likewise.
+	* compile/compile.c (compile_debug): Likewise.
+	(struct compile_options) <raw>: Likewise.
+	* cp-support.c (catch_demangler_crashes): Likewise.
+	* cris-tdep.c (usr_cmd_cris_version_valid): Likewise.
+	(usr_cmd_cris_dwarf2_cfi): Likewise.
+	* csky-tdep.c (csky_debug): Likewise.
+	* darwin-nat.c (enable_mach_exceptions): Likewise.
+	* dcache.c (dcache_enabled_p): Likewise.
+	* defs.h (info_verbose): Likewise.
+	* demangle.c (demangle): Likewise.
+	(asm_demangle): Likewise.
+	* dwarf-index-cache.c (debug_index_cache): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_unwinders_enabled_p): Likewise.
+	* dwarf2-frame.h (dwarf2_frame_unwinders_enabled_p): Likewise.
+	* dwarf2read.c (check_physname): Likewise.
+	(use_deprecated_index_sections): Likewise.
+	(dwarf_always_disassemble): Likewise.
+	* eval.c (overload_resolution): Likewise.
+	* event-top.c (set_editing_cmd_var): Likewise.
+	(exec_done_display_p): Likewise.
+	* event-top.h (set_editing_cmd_var): Likewise.
+	(exec_done_display_p): Likewise.
+	* exec.c (write_files): Likewise.
+	* fbsd-nat.c (debug_fbsd_lwp): Likewise
+	(debug_fbsd_nat): Likewise.
+	* frame.h (struct frame_print_options) <print_raw_frame_arguments>:
+	Likewise.
+	(struct set_backtrace_options) <backtrace_past_main>: Likewise.
+	<backtrace_past_entry> Likewise.
+	* gdb-demangle.h (demangle): Likewise.
+	(asm_demangle): Likewise.
+	* gdb_bfd.c (bfd_sharing): Likewise.
+	* gdbcore.h (write_files): Likewise.
+	* gdbsupport/common-debug.c (show_debug_regs): Likewise.
+	* gdbsupport/common-debug.h (show_debug_regs): Likewise.
+	* gdbthread.h (print_thread_events): Likewise.
+	* gdbtypes.c (opaque_type_resolution): Likewise.
+	(strict_type_checking): Likewise.
+	* gnu-nat.c (gnu_debug_flag): Likewise.
+	* guile/scm-auto-load.c (auto_load_guile_scripts): Likewise.
+	* guile/scm-param.c (pascm_variable): Add boolval.
+	(add_setshow_generic): Update.
+	(pascm_param_value): Update.
+	(pascm_set_param_value_x): Update.
+	* hppa-tdep.c (hppa_debug): Change to bool..
+	* infcall.c (may_call_functions_p): Likewise.
+	(coerce_float_to_double_p): Likewise.
+	(unwind_on_signal_p): Likewise.
+	(unwind_on_terminating_exception_p): Likewise.
+	* infcmd.c (startup_with_shell): Likewise.
+	* inferior.c (print_inferior_events): Likewise.
+	* inferior.h (startup_with_shell): Likewise.
+	(print_inferior_events): Likewise.
+	* infrun.c (step_stop_if_no_debug): Likewise.
+	(detach_fork): Likewise.
+	(debug_displaced): Likewise.
+	(disable_randomization): Likewise.
+	(non_stop): Likewise.
+	(non_stop_1): Likewise.
+	(observer_mode): Likewise.
+	(observer_mode_1): Likewise.
+	(set_observer_mode): Update.
+	(sched_multi): Change to bool.
+	* infrun.h (debug_displaced): Likewise.
+	(sched_multi): Likewise.
+	(step_stop_if_no_debug): Likewise.
+	(non_stop): Likewise.
+	(disable_randomization): Likewise.
+	* linux-tdep.c (use_coredump_filter): Likewise.
+	(dump_excluded_mappings): Likewise.
+	* linux-thread-db.c (auto_load_thread_db): Likewise.
+	(check_thread_db_on_load): Likewise.
+	* main.c (captured_main_1): Update.
+	* maint-test-options.c (struct test_options_opts) <flag_opt, xx1_opt,
+	xx2_opt, boolean_opt>: Change to bool.
+	* maint-test-settings.c (maintenance_test_settings_boolean): Likewise.
+	* maint.c (maintenance_profile_p): Likewise.
+	(per_command_time): Likewise.
+	(per_command_space): Likewise.
+	(per_command_symtab): Likewise.
+	* memattr.c (inaccessible_by_default): Likewise.
+	* mi/mi-main.c (mi_async): Likewise.
+	(mi_async_1): Likewise.
+	* mips-tdep.c (mips64_transfers_32bit_regs_p): Likewise.
+	* nat/fork-inferior.h (startup_with_shell): Likewise.
+	* nat/linux-namespaces.c (debug_linux_namespaces): Likewise.
+	* nat/linux-namespaces.h (debug_linux_namespaces): Likewise.
+	* nios2-tdep.c (nios2_debug): Likewise.
+	* or1k-tdep.c (or1k_debug): Likewise.
+	* parse.c (parser_debug): Likewise.
+	* parser-defs.h (parser_debug): Likewise.
+	* printcmd.c (print_symbol_filename): Likewise.
+	* proc-api.c (procfs_trace): Likewise.
+	* python/py-auto-load.c (auto_load_python_scripts): Likewise.
+	* python/py-param.c (union parmpy_variable): Add "bool boolval" field.
+	(set_parameter_value): Update.
+	(add_setshow_generic): Update.
+	* python/py-value.c (copy_py_bool_obj): Change argument from int*
+	to bool*.
+	* python/python.c (gdbpy_parameter_value): Cast to bool* instead of
+	int*.
+	* ravenscar-thread.c (ravenscar_task_support): Change to bool.
+	* record-btrace.c (record_btrace_target::store_registers): Update.
+	* record-full.c (record_full_memory_query): Change to bool.
+	(record_full_stop_at_limit): Likewise.
+	* record-full.h (record_full_memory_query): Likewise.
+	* remote-notif.c (notif_debug): Likewise.
+	* remote-notif.h (notif_debug): Likewise.
+	* remote.c (use_range_stepping): Likewise.
+	(interrupt_on_connect): Likewise.
+	(remote_break): Likewise.
+	* ser-tcp.c (tcp_auto_retry): Likewise.
+	* ser-unix.c (serial_hwflow): Likewise.
+	* skip.c (debug_skip): Likewise.
+	* solib-aix.c (solib_aix_debug): Likewise.
+	* spu-tdep.c (spu_stop_on_load_p): Likewise.
+	(spu_auto_flush_cache_p): Likewise.
+	* stack.c (struct backtrace_cmd_options) <full, no_filters, hide>:
+	Likewise.
+	(struct info_print_options) <quiet>: Likewise.
+	* symfile-debug.c (debug_symfile): Likewise.
+	* symfile.c (auto_solib_add): Likewise.
+	(separate_debug_file_debug): Likewise.
+	* symfile.h (auto_solib_add): Likewise.
+	(separate_debug_file_debug): Likewise.
+	* symtab.c (basenames_may_differ): Likewise.
+	(struct filename_partial_match_opts) <dirname, basename>: Likewise.
+	(struct info_print_options) <quiet, exclude_minsyms>: Likewise.
+	(struct info_types_options) <quiet>: Likewise.
+	* symtab.h (demangle): Likewise.
+	(basenames_may_differ): Likewise.
+	* target-dcache.c (stack_cache_enabled_1): Likewise.
+	(code_cache_enabled_1): Likewise.
+	* target.c (trust_readonly): Likewise.
+	(may_write_registers): Likewise.
+	(may_write_memory): Likewise.
+	(may_insert_breakpoints): Likewise.
+	(may_insert_tracepoints): Likewise.
+	(may_insert_fast_tracepoints): Likewise.
+	(may_stop): Likewise.
+	(auto_connect_native_target): Likewise.
+	(target_stop_and_wait): Update.
+	(target_async_permitted): Change to bool.
+	(target_async_permitted_1): Likewise.
+	(may_write_registers_1): Likewise.
+	(may_write_memory_1): Likewise.
+	(may_insert_breakpoints_1): Likewise.
+	(may_insert_tracepoints_1): Likewise.
+	(may_insert_fast_tracepoints_1): Likewise.
+	(may_stop_1): Likewise.
+	* target.h (target_async_permitted): Likewise.
+	(may_write_registers): Likewise.
+	(may_write_memory): Likewise.
+	(may_insert_breakpoints): Likewise.
+	(may_insert_tracepoints): Likewise.
+	(may_insert_fast_tracepoints): Likewise.
+	(may_stop): Likewise.
+	* thread.c (struct info_threads_opts) <show_global_ids>: Likewise.
+	(make_thread_apply_all_options_def_group): Change argument from int*
+	to bool*.
+	(thread_apply_all_command): Update.
+	(print_thread_events): Change to bool.
+	* top.c (confirm): Likewise.
+	(command_editing_p): Likewise.
+	(history_expansion_p): Likewise.
+	(write_history_p): Likewise.
+	(info_verbose): Likewise.
+	* top.h (confirm): Likewise.
+	(history_expansion_p): Likewise.
+	* tracepoint.c (disconnected_tracing): Likewise.
+	(circular_trace_buffer): Likewise.
+	* typeprint.c (print_methods): Likewise.
+	(print_typedefs): Likewise.
+	* utils.c (debug_timestamp): Likewise.
+	(sevenbit_strings): Likewise.
+	(pagination_enabled): Likewise.
+	* utils.h (sevenbit_strings): Likewise.
+	(pagination_enabled): Likewise.
+	* valops.c (overload_resolution): Likewise.
+	* valprint.h (struct value_print_options) <prettyformat_arrays,
+	prettyformat_structs, vtblprint, unionprint, addressprint, objectprint,
+	stop_print_at_null, print_array_indexes, deref_ref, static_field_print,
+	pascal_static_field_print, raw, summary, symbol_print, finish_print>:
+	Likewise.
+	* windows-nat.c (new_console): Likewise.
+	(cygwin_exceptions): Likewise.
+	(new_group): Likewise.
+	(debug_exec): Likewise.
+	(debug_events): Likewise.
+	(debug_memory): Likewise.
+	(debug_exceptions): Likewise.
+	(useshell): Likewise.
+	* windows-tdep.c (maint_display_all_tib): Likewise.
+	* xml-support.c (debug_xml): Likewise.
+
 2019-09-17  Mike Gulick  <mgulick@mathworks.com>
 
 	* source.c (prepare_path_for_appending): New function.

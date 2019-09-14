@@ -416,9 +416,9 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 
 	if (val < 0)
 	  error (_("\"on\" or \"off\" expected."));
-	if (val != *(int *) c->var)
+	if (val != *(bool *) c->var)
 	  {
-	    *(int *) c->var = val;
+	    *(bool *) c->var = val;
 
 	    option_changed = 1;
 	  }
@@ -588,7 +588,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	  break;
 	case var_boolean:
 	  {
-	    const char *opt = *(int *) c->var ? "on" : "off";
+	    const char *opt = *(bool *) c->var ? "on" : "off";
 
 	    gdb::observers::command_param_changed.notify (name, opt);
 	  }
@@ -645,7 +645,7 @@ get_setshow_command_value_string (cmd_list_element *c)
 	stb.puts (*(char **) c->var);
       break;
     case var_boolean:
-      stb.puts (*(int *) c->var ? "on" : "off");
+      stb.puts (*(bool *) c->var ? "on" : "off");
       break;
     case var_auto_boolean:
       switch (*(enum auto_boolean*) c->var)

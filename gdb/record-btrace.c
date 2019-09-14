@@ -1560,7 +1560,7 @@ record_btrace_target::store_registers (struct regcache *regcache, int regno)
       && record_is_replaying (regcache->ptid ()))
     error (_("Cannot write registers while replaying."));
 
-  gdb_assert (may_write_registers != 0);
+  gdb_assert (may_write_registers);
 
   this->beneath ()->store_registers (regcache, regno);
 }

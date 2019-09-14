@@ -57,8 +57,8 @@
    is running, switching to its corresponding ptid, and then performing
    the operation on that ptid using the target beneath us.  */
 
-/* If non-null, ravenscar task support is enabled.  */
-static int ravenscar_task_support = 1;
+/* If true, ravenscar task support is enabled.  */
+static bool ravenscar_task_support = true;
 
 static const char running_thread_name[] = "__gnat_running_thread_table";
 

@@ -139,7 +139,7 @@ extern gdb::optional<open_script>
 /* Command tracing state.  */
 
 extern int source_verbose;
-extern int trace_commands;
+extern bool trace_commands;
 
 /* Common code for the "with" and "maintenance with" commands.
    SET_CMD_PREFIX is the spelling of the corresponding "set" command

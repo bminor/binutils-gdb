@@ -56,7 +56,7 @@ static struct cmd_list_element *compile_command_list;
 
 /* Debug flag for "compile" commands.  */
 
-int compile_debug;
+bool compile_debug;
 
 /* Object of this type are stored in the compiler's symbol_err_map.  */
 
@@ -241,7 +241,7 @@ show_compile_debug (struct ui_file *file, int from_tty,
 struct compile_options
 {
   /* For -raw.  */
-  int raw = false;
+  bool raw = false;
 };
 
 using compile_flag_option_def

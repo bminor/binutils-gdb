@@ -244,7 +244,7 @@ extern void prepare_execution_command (struct target_ops *target,
 
    The catch-exec traps expected during start-up will be one more if
    the target is started up with a shell.  */
-extern int startup_with_shell;
+extern bool startup_with_shell;
 
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
@@ -257,7 +257,7 @@ extern int stopped_by_random_signal;
 
 /* Print notices on inferior events (attach, detach, etc.), set with
    `set print inferior-events'.  */
-extern int print_inferior_events;
+extern bool print_inferior_events;
 
 /* Anything but NO_STOP_QUIETLY means we expect a trap and the caller
    will handle it themselves.  STOP_QUIETLY is used when running in

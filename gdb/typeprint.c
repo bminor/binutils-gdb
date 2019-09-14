@@ -727,7 +727,7 @@ show_print_type (const char *args, int from_tty)
   cmd_show_list (showprinttypelist, from_tty, "");
 }
 
-static int print_methods = 1;
+static bool print_methods = true;
 
 static void
 set_print_type_methods (const char *args,
@@ -744,7 +744,7 @@ show_print_type_methods (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int print_typedefs = 1;
+static bool print_typedefs = true;
 
 static void
 set_print_type_typedefs (const char *args,

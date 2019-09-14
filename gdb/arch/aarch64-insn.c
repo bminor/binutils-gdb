@@ -20,7 +20,7 @@
 #include "aarch64-insn.h"
 
 /* Toggle this file's internal debugging dump.  */
-int aarch64_debug = 0;
+bool aarch64_debug = false;
 
 /* Extract a signed value from a bit field within an instruction
    encoding.

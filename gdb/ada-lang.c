@@ -358,7 +358,7 @@ maint_show_ada_cmd (const char *args, int from_tty)
 
 /* The "maintenance ada set/show ignore-descriptive-type" value.  */
 
-static int ada_ignore_descriptive_types_p = 0;
+static bool ada_ignore_descriptive_types_p = false;
 
 			/* Inferior-specific data.  */
 
@@ -3795,7 +3795,7 @@ sort_choices (struct block_symbol syms[], int nsyms)
 
 /* Whether GDB should display formals and return types for functions in the
    overloads selection menu.  */
-static int print_signatures = 1;
+static bool print_signatures = true;
 
 /* Print the signature for SYM on STREAM according to the FLAGS options.  For
    all but functions, the signature is just the name of the symbol.  For
@@ -9299,7 +9299,7 @@ ada_is_string_type (struct type *type)
 
    Set to True if the debugger should trust the contents of PAD types.
    Otherwise, ignore the PAD type if there is a parallel XVS type.  */
-static int trust_pad_over_xvs = 1;
+static bool trust_pad_over_xvs = true;
 
 /* True if TYPE is a struct type introduced by the compiler to force the
    alignment of a value.  Such types have a single field with a

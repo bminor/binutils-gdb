@@ -55,7 +55,10 @@ struct parm_constant parm_constants[] =
 /* A union that can hold anything described by enum var_types.  */
 union parmpy_variable
 {
-  /* Hold an integer value, for boolean and integer types.  */
+  /* Hold a boolean value.  */
+  bool boolval;
+
+  /* Hold an integer value.  */
   int intval;
 
   /* Hold an auto_boolean.  */
@@ -198,7 +201,7 @@ set_parameter_value (parmpy_object *self, PyObject *value)
       cmp = PyObject_IsTrue (value);
       if (cmp < 0)
 	  return -1;
-      self->value.intval = cmp;
+      self->value.boolval = cmp;
       break;
 
     case var_auto_boolean:
@@ -475,7 +478,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
     case var_boolean:
 
       add_setshow_boolean_cmd (cmd_name, cmdclass,
-			       &self->value.intval, set_doc, show_doc,
+			       &self->value.boolval, set_doc, show_doc,
 			       help_doc, get_set_value, get_show_value,
 			       set_list, show_list);
 

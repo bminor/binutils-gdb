@@ -50,7 +50,7 @@ maintenance_show_test_settings_cmd (const char *args, int from_tty)
 /* Control variables for all the "maintenance set/show test-settings
    xxx" commands.  */
 
-static int maintenance_test_settings_boolean;
+static bool maintenance_test_settings_boolean;
 
 static auto_boolean maintenance_test_settings_auto_boolean = AUTO_BOOLEAN_AUTO;
 

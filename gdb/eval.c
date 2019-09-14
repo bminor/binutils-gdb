@@ -43,7 +43,7 @@
 #include <ctype.h>
 
 /* This is defined in valops.c */
-extern int overload_resolution;
+extern bool overload_resolution;
 
 /* Prototypes for local functions.  */
 

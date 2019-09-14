@@ -41,7 +41,7 @@
 #include "infrun.h"
 #include "gdbcmd.h"
 
-int notif_debug = 0;
+bool notif_debug = false;
 
 /* Supported clients of notifications.  */
 
