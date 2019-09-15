@@ -104,8 +104,10 @@ namespace eval $testfile {
 
 	# Test abbreviations
 	set short [string range $arg 0 3]
-	gdb_test "break -$short" \
-	    [string_to_regexp "missing argument for \"-$short\""]
+	if { $arg != $short } {
+	    gdb_test "break -$short" \
+		[string_to_regexp "missing argument for \"-$short\""]
+	}
     }
 
     # Test invalid arguments

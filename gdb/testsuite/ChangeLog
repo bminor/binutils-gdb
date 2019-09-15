@@ -1,5 +1,10 @@
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.linespec/explicit.exp: Make test names unique.
+	* gdb.linespec/ls-errs.exp: Likewise.
+
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.reverse/break-precsave.exp: Make test names unique.
 	* gdb.reverse/break-reverse.exp: Likewise.
 	* gdb.reverse/finish-precsave.exp: Likewise.
