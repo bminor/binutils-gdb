@@ -117,7 +117,7 @@ proc test_one_sig_reverse {prevsig} {
 	-re "Program received signal SIG$prevsig.*$gdb_prompt " {
 	    pass "reverse to signal event, $prevsig"
 
-	    set nested_testmsg "reverse signal delivered"
+	    set nested_testmsg "reverse signal $prevsig delivered"
 	    gdb_test_multiple "frame" $nested_testmsg {
 		-re ".*handle_$prevsig.*$gdb_prompt " {
 		    fail "$nested_testmsg (wrong location)"
@@ -289,8 +289,10 @@ set sig_supported 1
 set thissig "ABRT"
 
 # test signal handling
-foreach sig [lrange $signals 1 end] {
-    test_one_sig $sig
+with_test_prefix "sig-test-1" {
+    foreach sig [lrange $signals 1 end] {
+	test_one_sig $sig
+    }
 }
 
 # The last signal (SIGTERM) gets handled slightly differently because
@@ -313,6 +315,8 @@ foreach sig [lreverse $signals] {
 set sig_supported 1
 set thissig "ABRT"
 
-foreach sig [lrange $signals 1 end] {
-    test_one_sig $sig
+with_test_prefix "sig-test-2" {
+    foreach sig [lrange $signals 1 end] {
+	test_one_sig $sig
+    }
 }

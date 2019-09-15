@@ -1,5 +1,21 @@
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.reverse/break-precsave.exp: Make test names unique.
+	* gdb.reverse/break-reverse.exp: Likewise.
+	* gdb.reverse/finish-precsave.exp: Likewise.
+	* gdb.reverse/finish-reverse.exp: Likewise.
+	* gdb.reverse/machinestate-precsave.exp: Likewise.
+	* gdb.reverse/machinestate.exp: Likewise.
+	* gdb.reverse/readv-reverse.exp: Likewise.
+	* gdb.reverse/recvmsg-reverse.exp: Likewise.
+	* gdb.reverse/sigall-precsave.exp: Likewise.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+	* gdb.reverse/step-indirect-call-thunk.exp: Likewise.
+	* gdb.reverse/watch-precsave.exp: Likewise.
+	* gdb.reverse/watch-reverse.exp: Likewise.
+
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.threads/stop-with-handle.c: New file.
 	* gdb.threads/stop-with-handle.exp: New file.
 
