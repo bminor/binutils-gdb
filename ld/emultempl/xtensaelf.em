@@ -596,8 +596,12 @@ xtensa_get_section_deps (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
   /* We have a separate function for this so that
      we could in the future keep a completely independent
      structure that maps a section to its dependence edges.
-     For now, we place these in the sec->userdata field.  */
-  reloc_deps_section *sec_deps = sec->userdata;
+     For now, we place these in the sec->userdata field.
+     This doesn't clash with ldlang.c use of userdata for output
+     sections, and during map output for input sections, since the
+     xtensa use is only for input sections and only extant in
+     before_allocation.  */
+  reloc_deps_section *sec_deps = bfd_section_userdata (sec);
   return sec_deps;
 }
 
@@ -606,7 +610,7 @@ xtensa_set_section_deps (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
 			 asection *sec,
 			 reloc_deps_section *deps_section)
 {
-  sec->userdata = deps_section;
+  bfd_set_section_userdata (sec, deps_section);
 }
 
 

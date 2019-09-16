@@ -1,5 +1,16 @@
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/xtensaelf.em (xtensa_get_section_deps): Comment.
+	Use bfd_section_userdata.
+	(xtensa_set_section_deps): Use bfd_set_section_userdata.
+	* ldlang.c (lang_output_section_get): Use bfd_section_userdata.
+	(sort_def_symbol): Likewise, and bfd_set_section_userdata.
+	(init_os): Use bfd_set_section_userdata.
+	(print_all_symbols): Use bfd_section_userdata.
+	* ldlang.h (get_userdata): Delete.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
 	* ldelf.c (ldelf_after_open, ldelf_place_orphan
 	* ldlang.c (walk_wild_file, lang_process): Use bfd_usrdata.
 	(load_symbols, ldlang_add_file): Use bfd_set_usrdata.

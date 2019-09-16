@@ -477,6 +477,105 @@ CODE_FRAGMENT
 .  sy->name = name;
 .}
 .
+.static inline bfd_size_type
+.bfd_get_section_limit_octets (const bfd *abfd, const asection *sec)
+.{
+.  if (abfd->direction != write_direction && sec->rawsize != 0)
+.    return sec->rawsize;
+.  return sec->size;
+.}
+.
+.{* Find the address one past the end of SEC.  *}
+.static inline bfd_size_type
+.bfd_get_section_limit (const bfd *abfd, const asection *sec)
+.{
+.  return bfd_get_section_limit_octets (abfd, sec) / bfd_octets_per_byte (abfd);
+.}
+.
+.{* Functions to handle insertion and deletion of a bfd's sections.  These
+.   only handle the list pointers, ie. do not adjust section_count,
+.   target_index etc.  *}
+.static inline void
+.bfd_section_list_remove (bfd *abfd, asection *s)
+.{
+.  asection *next = s->next;
+.  asection *prev = s->prev;
+.  if (prev)
+.    prev->next = next;
+.  else
+.    abfd->sections = next;
+.  if (next)
+.    next->prev = prev;
+.  else
+.    abfd->section_last = prev;
+.}
+.
+.static inline void
+.bfd_section_list_append (bfd *abfd, asection *s)
+.{
+.  s->next = 0;
+.  if (abfd->section_last)
+.    {
+.      s->prev = abfd->section_last;
+.      abfd->section_last->next = s;
+.    }
+.  else
+.    {
+.      s->prev = 0;
+.      abfd->sections = s;
+.    }
+.  abfd->section_last = s;
+.}
+.
+.static inline void
+.bfd_section_list_prepend (bfd *abfd, asection *s)
+.{
+.  s->prev = 0;
+.  if (abfd->sections)
+.    {
+.      s->next = abfd->sections;
+.      abfd->sections->prev = s;
+.    }
+.  else
+.    {
+.      s->next = 0;
+.      abfd->section_last = s;
+.    }
+.  abfd->sections = s;
+.}
+.
+.static inline void
+.bfd_section_list_insert_after (bfd *abfd, asection *a, asection *s)
+.{
+.  asection *next = a->next;
+.  s->next = next;
+.  s->prev = a;
+.  a->next = s;
+.  if (next)
+.    next->prev = s;
+.  else
+.    abfd->section_last = s;
+.}
+.
+.static inline void
+.bfd_section_list_insert_before (bfd *abfd, asection *b, asection *s)
+.{
+.  asection *prev = b->prev;
+.  s->prev = prev;
+.  s->next = b;
+.  b->prev = s;
+.  if (prev)
+.    prev->next = s;
+.  else
+.    abfd->sections = s;
+.}
+.
+.static inline bfd_boolean
+.bfd_section_removed_from_list (const bfd *abfd, const asection *s)
+.{
+.  return s->next ? s->next->prev != s : abfd->section_last != s;
+.}
+.
 */
 
 #include "sysdep.h"

@@ -329,8 +329,6 @@ typedef struct input_section_userdata_struct
   unsigned long map_symbol_def_count;
 } input_section_userdata_type;
 
-#define get_userdata(x) ((x)->userdata)
-
 static inline bfd_boolean
 bfd_input_just_syms (const bfd *abfd)
 {

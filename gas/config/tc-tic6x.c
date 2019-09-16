@@ -4526,7 +4526,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   if (reloc->howto->pcrel_offset && reloc->howto->partial_inplace)
     {
       reloc->addend += reloc->address;
-      if (!bfd_is_com_section (symbol))
+      if (!bfd_is_com_section (bfd_asymbol_section (symbol)))
 	reloc->addend -= symbol->value;
     }
   if (r_type == BFD_RELOC_C6000_PCR_H16

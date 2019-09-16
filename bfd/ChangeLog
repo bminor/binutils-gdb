@@ -1,5 +1,28 @@
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (bfd_section_name, bfd_section_size, bfd_section_vma),
+	(bfd_section_lma, bfd_section_alignment, bfd_section_flags),
+	(bfd_section_userdata, bfd_is_com_section, discarded_section),
+	(bfd_get_section_limit_octets, bfd_get_section_limit): Delete macros.
+	* bfd.c (bfd_get_section_limit_octets, bfd_get_section_limit),
+	(bfd_section_list_remove, bfd_section_list_append),
+	(bfd_section_list_prepend, bfd_section_list_insert_after),
+	(bfd_section_list_insert_before, bfd_section_removed_from_list):
+	New inline functions.
+	* section.c (bfd_is_und_section, bfd_is_abs_section),
+	(bfd_is_ind_section, bfd_is_const_section, bfd_section_list_remove),
+	(bfd_section_list_append, bfd_section_list_prepend),
+	(bfd_section_list_insert_after, bfd_section_list_insert_before),
+	(bfd_section_removed_from_list): Delete macros.
+	(bfd_section_name, bfd_section_size, bfd_section_vma),
+	(bfd_section_lma, bfd_section_alignment, bfd_section_flags),
+	(bfd_section_userdata, bfd_is_com_section, bfd_is_und_section),
+	(bfd_is_abs_section, bfd_is_ind_section, bfd_is_const_section),
+	(discarded_section): New inline functions.
+	* bfd-in2.h: Regenerate.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (bfd_asymbol_section, bfd_asymbol_value, bfd_asymbol_name),
 	(bfd_asymbol_bfd, bfd_asymbol_flavour, bfd_set_asymbol_name): Delete.
 	* bfd.c (bfd_asymbol_section, bfd_asymbol_value, bfd_asymbol_name),
