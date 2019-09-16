@@ -1059,7 +1059,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 
   gdbarch = target_gdbarch ();
   btinfo = &tp->btrace;
-  blk = VEC_length (btrace_block_s, btrace->blocks);
+  blk = btrace->blocks->size ();
 
   if (btinfo->functions.empty ())
     level = INT_MAX;
@@ -1068,13 +1068,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 
   while (blk != 0)
     {
-      btrace_block_s *block;
       CORE_ADDR pc;
 
       blk -= 1;
 
-      block = VEC_index (btrace_block_s, btrace->blocks, blk);
-      pc = block->begin;
+      const btrace_block &block = btrace->blocks->at (blk);
+      pc = block.begin;
 
       for (;;)
 	{
@@ -1083,7 +1082,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  int size;
 
 	  /* We should hit the end of the block.  Warn if we went too far.  */
-	  if (block->end < pc)
+	  if (block.end < pc)
 	    {
 	      /* Indicate the gap in the trace.  */
 	      bfun = ftrace_new_gap (btinfo, BDE_BTS_OVERFLOW, gaps);
@@ -1119,7 +1118,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  ftrace_update_insns (bfun, insn);
 
 	  /* We're done once we pushed the instruction at the end.  */
-	  if (block->end == pc)
+	  if (block.end == pc)
 	    break;
 
 	  /* We can't continue if we fail to compute the size.  */
@@ -1573,7 +1572,6 @@ static void
 btrace_add_pc (struct thread_info *tp)
 {
   struct btrace_data btrace;
-  struct btrace_block *block;
   struct regcache *regcache;
   CORE_ADDR pc;
 
@@ -1581,11 +1579,9 @@ btrace_add_pc (struct thread_info *tp)
   pc = regcache_read_pc (regcache);
 
   btrace.format = BTRACE_FORMAT_BTS;
-  btrace.variant.bts.blocks = NULL;
+  btrace.variant.bts.blocks = new std::vector <btrace_block>;
 
-  block = VEC_safe_push (btrace_block_s, btrace.variant.bts.blocks, NULL);
-  block->begin = pc;
-  block->end = pc;
+  btrace.variant.bts.blocks->emplace_back (pc, pc);
 
   btrace_compute_ftrace (tp, &btrace, NULL);
 }
@@ -1692,11 +1688,11 @@ btrace_stitch_bts (struct btrace_data_bts *btrace, struct thread_info *tp)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_function *last_bfun;
-  btrace_block_s *first_new_block;
+  btrace_block *first_new_block;
 
   btinfo = &tp->btrace;
   gdb_assert (!btinfo->functions.empty ());
-  gdb_assert (!VEC_empty (btrace_block_s, btrace->blocks));
+  gdb_assert (!btrace->blocks->empty ());
 
   last_bfun = &btinfo->functions.back ();
 
@@ -1705,14 +1701,14 @@ btrace_stitch_bts (struct btrace_data_bts *btrace, struct thread_info *tp)
      of the new trace,  though, since we can't fill in the start address.*/
   if (last_bfun->insn.empty ())
     {
-      VEC_pop (btrace_block_s, btrace->blocks);
+      btrace->blocks->pop_back ();
       return 0;
     }
 
   /* Beware that block trace starts with the most recent block, so the
      chronologically first block in the new trace is the last block in
      the new trace's block vector.  */
-  first_new_block = VEC_last (btrace_block_s, btrace->blocks);
+  first_new_block = &btrace->blocks->back ();
   const btrace_insn &last_insn = last_bfun->insn.back ();
 
   /* If the current PC at the end of the block is the same as in our current
@@ -1723,10 +1719,9 @@ btrace_stitch_bts (struct btrace_data_bts *btrace, struct thread_info *tp)
      entries.
      In the second case, the delta trace vector should contain exactly one
      entry for the partial block containing the current PC.  Remove it.  */
-  if (first_new_block->end == last_insn.pc
-      && VEC_length (btrace_block_s, btrace->blocks) == 1)
+  if (first_new_block->end == last_insn.pc && btrace->blocks->size () == 1)
     {
-      VEC_pop (btrace_block_s, btrace->blocks);
+      btrace->blocks->pop_back ();
       return 0;
     }
 
@@ -2030,7 +2025,6 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 			std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_data *btrace;
-  struct btrace_block *block;
   ULONGEST *begin, *end;
 
   btrace = (struct btrace_data *) user_data;
@@ -2042,7 +2036,7 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 
     case BTRACE_FORMAT_NONE:
       btrace->format = BTRACE_FORMAT_BTS;
-      btrace->variant.bts.blocks = NULL;
+      btrace->variant.bts.blocks = new std::vector <btrace_block>;
       break;
 
     default:
@@ -2051,10 +2045,7 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 
   begin = (ULONGEST *) xml_find_attribute (attributes, "begin")->value.get ();
   end = (ULONGEST *) xml_find_attribute (attributes, "end")->value.get ();
-
-  block = VEC_safe_push (btrace_block_s, btrace->variant.bts.blocks, NULL);
-  block->begin = *begin;
-  block->end = *end;
+  btrace->variant.bts.blocks->emplace_back (*begin, *end);
 }
 
 /* Parse a "raw" xml record.  */
@@ -3095,7 +3086,7 @@ btrace_maint_update_packets (struct btrace_thread_info *btinfo,
     case BTRACE_FORMAT_BTS:
       /* Nothing to do - we operate directly on BTINFO->DATA.  */
       *begin = 0;
-      *end = VEC_length (btrace_block_s, btinfo->data.variant.bts.blocks);
+      *end = btinfo->data.variant.bts.blocks->size ();
       *from = btinfo->maint.variant.bts.packet_history.begin;
       *to = btinfo->maint.variant.bts.packet_history.end;
       break;
@@ -3128,19 +3119,17 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 
     case BTRACE_FORMAT_BTS:
       {
-	VEC (btrace_block_s) *blocks;
+	const std::vector <btrace_block> &blocks
+	  = *btinfo->data.variant.bts.blocks;
 	unsigned int blk;
 
-	blocks = btinfo->data.variant.bts.blocks;
 	for (blk = begin; blk < end; ++blk)
 	  {
-	    const btrace_block_s *block;
-
-	    block = VEC_index (btrace_block_s, blocks, blk);
+	    const btrace_block &block = blocks.at (blk);
 
 	    printf_unfiltered ("%u\tbegin: %s, end: %s\n", blk,
-			       core_addr_to_string_nz (block->begin),
-			       core_addr_to_string_nz (block->end));
+			       core_addr_to_string_nz (block.begin),
+			       core_addr_to_string_nz (block.end));
 	  }
 
 	btinfo->maint.variant.bts.packet_history.begin = begin;
@@ -3443,9 +3432,8 @@ maint_info_btrace_cmd (const char *args, int from_tty)
       break;
 
     case BTRACE_FORMAT_BTS:
-      printf_unfiltered (_("Number of packets: %u.\n"),
-			 VEC_length (btrace_block_s,
-				     btinfo->data.variant.bts.blocks));
+      printf_unfiltered (_("Number of packets: %zu.\n"),
+			 btinfo->data.variant.bts.blocks->size ());
       break;
 
 #if defined (HAVE_LIBIPT)

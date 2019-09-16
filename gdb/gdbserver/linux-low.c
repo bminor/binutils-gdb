@@ -7115,9 +7115,7 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
 		       enum btrace_read_type type)
 {
   struct btrace_data btrace;
-  struct btrace_block *block;
   enum btrace_error err;
-  int i;
 
   err = linux_read_btrace (&btrace, tinfo, type);
   if (err != BTRACE_ERR_NONE)
@@ -7140,11 +7138,9 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
       buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
       buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
 
-      for (i = 0;
-	   VEC_iterate (btrace_block_s, btrace.variant.bts.blocks, i, block);
-	   i++)
+      for (const btrace_block &block : *btrace.variant.bts.blocks)
 	buffer_xml_printf (buffer, "<block begin=\"0x%s\" end=\"0x%s\"/>\n",
-			   paddress (block->begin), paddress (block->end));
+			   paddress (block.begin), paddress (block.end));
 
       buffer_grow_str0 (buffer, "</btrace>\n");
       break;

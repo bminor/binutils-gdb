@@ -1,3 +1,8 @@
+2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-low.c (linux_low_read_btrace): Update for change to
+	std::vector.
+
 2019-09-20  Christian Biesinger  <cbiesinger@google.com>
 
 	* debug.c (debug_threads): Remove comment in favor of the header.

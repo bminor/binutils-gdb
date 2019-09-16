@@ -271,11 +271,11 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
    In case the buffer overflows during sampling, one sample may have its lower
    part at the end and its upper part at the beginning of the buffer.  */
 
-static VEC (btrace_block_s) *
+static std::vector <btrace_block> *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 		     const uint8_t *end, const uint8_t *start, size_t size)
 {
-  VEC (btrace_block_s) *btrace = NULL;
+  std::vector <btrace_block> *btrace = new std::vector <btrace_block>;
   struct perf_event_sample sample;
   size_t read = 0;
   struct btrace_block block = { 0, 0 };
@@ -343,7 +343,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
       /* We found a valid sample, so we can complete the current block.  */
       block.begin = psample->bts.to;
 
-      VEC_safe_push (btrace_block_s, btrace, &block);
+      btrace->push_back (block);
 
       /* Start the next block.  */
       block.end = psample->bts.from;
@@ -354,7 +354,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
      reading delta trace, we can fill in the start address later on.
      Otherwise we will prune it.  */
   block.begin = 0;
-  VEC_safe_push (btrace_block_s, btrace, &block);
+  btrace->push_back (block);
 
   return btrace;
 }
@@ -785,7 +785,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
       data_head = *pevent->data_head;
 
       /* Delete any leftover trace from the previous iteration.  */
-      VEC_free (btrace_block_s, btrace->blocks);
+      delete btrace->blocks;
+      btrace->blocks = nullptr;
 
       if (type == BTRACE_READ_DELTA)
 	{
@@ -843,9 +844,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
   /* Prune the incomplete last block (i.e. the first one of inferior execution)
      if we're not doing a delta read.  There is no way of filling in its zeroed
      BEGIN element.  */
-  if (!VEC_empty (btrace_block_s, btrace->blocks)
-      && type != BTRACE_READ_DELTA)
-    VEC_pop (btrace_block_s, btrace->blocks);
+  if (!btrace->blocks->empty () && type != BTRACE_READ_DELTA)
+    btrace->blocks->pop_back ();
 
   return BTRACE_ERR_NONE;
 }

@@ -73,7 +73,8 @@ btrace_data::fini ()
       return;
 
     case BTRACE_FORMAT_BTS:
-      VEC_free (btrace_block_s, variant.bts.blocks);
+      delete variant.bts.blocks;
+      variant.bts.blocks = nullptr;
       return;
 
     case BTRACE_FORMAT_PT:
@@ -95,7 +96,7 @@ btrace_data::empty () const
       return true;
 
     case BTRACE_FORMAT_BTS:
-      return VEC_empty (btrace_block_s, variant.bts.blocks);
+      return variant.bts.blocks->empty ();
 
     case BTRACE_FORMAT_PT:
       return (variant.pt.size == 0);
@@ -132,7 +133,7 @@ btrace_data_append (struct btrace_data *dst,
 
 	case BTRACE_FORMAT_NONE:
 	  dst->format = BTRACE_FORMAT_BTS;
-	  dst->variant.bts.blocks = NULL;
+	  dst->variant.bts.blocks = new std::vector <btrace_block>;
 
 	  /* Fall-through.  */
 	case BTRACE_FORMAT_BTS:
@@ -141,15 +142,12 @@ btrace_data_append (struct btrace_data *dst,
 
 	    /* We copy blocks in reverse order to have the oldest block at
 	       index zero.  */
-	    blk = VEC_length (btrace_block_s, src->variant.bts.blocks);
+	    blk = src->variant.bts.blocks->size ();
 	    while (blk != 0)
 	      {
-		btrace_block_s *block;
-
-		block = VEC_index (btrace_block_s, src->variant.bts.blocks,
-				   --blk);
-
-		VEC_safe_push (btrace_block_s, dst->variant.bts.blocks, block);
+		const btrace_block &block
+		  = src->variant.bts.blocks->at (--blk);
+		dst->variant.bts.blocks->push_back (block);
 	      }
 	  }
 	}

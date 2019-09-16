@@ -1,3 +1,25 @@
+2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* btrace.c (btrace_compute_ftrace_bts): Update for std::vector,
+	make accesses into the vector constant references.
+	(btrace_add_pc): Update for std::vector.
+	(btrace_stitch_bts): Likewise.
+	(parse_xml_btrace_block): Likewise.
+	(btrace_maint_update_packets): Likewise.
+	(btrace_maint_print_packets): Likewise.
+	(maint_info_btrace_cmd): Likewise.
+	* gdbsupport/btrace-common.c (btrace_data::fini): Update for
+	std::vector.
+	(btrace_data::empty): Likewise.
+	(btrace_data_append): Likewise.
+	* gdbsupport/btrace-common.h: Remove use of DEF_VEC_O.
+	(typedef btrace_block_s): Delete.
+	(struct btrace_block): Add constructor.
+	(struct btrace_data_bts) <blocks>: Change to std::vector.
+	* nat/linux-btrace.c (perf_event_read_bts): Update for
+	std::vector.
+	(linux_read_bts): Likewise.
+
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
 	* cli/cli-logging.c (show_logging_filename): Use styled_string.
