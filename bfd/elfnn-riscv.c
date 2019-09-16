@@ -310,13 +310,13 @@ riscv_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 					  (bed->dynamic_sec_flags
 					   | SEC_READONLY));
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->srelgot = s;
 
   s = s_got = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->sgot = s;
 
@@ -327,8 +327,7 @@ riscv_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s,
-					 bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       htab->sgotplt = s;
 
@@ -1840,7 +1839,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  name = (bfd_elf_string_from_elf_section
 		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	  if (name == NULL || *name == '\0')
-	    name = bfd_section_name (input_bfd, sec);
+	    name = bfd_section_name (sec);
 	}
 
       resolved_to_zero = (h != NULL
@@ -3160,7 +3159,7 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
-	  if ((bfd_get_section_flags (ibfd, sec)
+	  if ((bfd_section_flags (sec)
 	       & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 	      == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 	    only_data_sections = FALSE;

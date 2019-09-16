@@ -1071,7 +1071,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		/* Only relocate if the symbol is defined.  */
 		if (sec)
 		  {
-		    name = bfd_get_section_name (sec->owner, sec);
+		    name = bfd_section_name (sec);
 
 		    if (strcmp (name, ".sdata2") == 0
 			|| strcmp (name, ".sbss2") == 0)
@@ -1119,7 +1119,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		/* Only relocate if the symbol is defined.  */
 		if (sec)
 		  {
-		    name = bfd_get_section_name (sec->owner, sec);
+		    name = bfd_section_name (sec);
 
 		    if (strcmp (name, ".sdata") == 0
 			|| strcmp (name, ".sbss") == 0)
@@ -1608,7 +1608,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	      name = (bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (errmsg != NULL)
@@ -2766,7 +2766,7 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > s->alignment_power)
     {
-      if (!bfd_set_section_alignment (s->owner, s, power_of_two))
+      if (!bfd_set_section_alignment (s, power_of_two))
 	return FALSE;
     }
 
@@ -3115,7 +3115,7 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
+      name = bfd_section_name (s);
 
       if (strncmp (name, ".rela", 5) == 0)
 	{
@@ -3501,7 +3501,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 	 put into .sbss.  */
       *secp = bfd_make_section_old_way (abfd, ".sbss");
       if (*secp == NULL
-	  || ! bfd_set_section_flags (abfd, *secp, SEC_IS_COMMON))
+	  || !bfd_set_section_flags (*secp, SEC_IS_COMMON))
 	return FALSE;
 
       *valp = sym->st_size;

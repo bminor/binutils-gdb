@@ -1012,8 +1012,7 @@ mips_relocate_section (bfd *output_bfd,
 
 		  /* Compute a new r_symndx value.  */
 		  s = h->root.u.def.section;
-		  name = bfd_get_section_name (output_bfd,
-					       s->output_section);
+		  name = bfd_section_name (s->output_section);
 
 		  int_rel.r_symndx = -1;
 		  switch (name[1])
@@ -1223,7 +1222,7 @@ mips_relocate_section (bfd *output_bfd,
 		if (int_rel.r_extern)
 		  name = NULL;
 		else
-		  name = bfd_section_name (input_bfd, s);
+		  name = bfd_section_name (s);
 		(*info->callbacks->reloc_overflow)
 		  (info, (h ? &h->root : NULL), name, howto->name,
 		   (bfd_vma) 0, input_bfd, input_section,

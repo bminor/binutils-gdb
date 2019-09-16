@@ -200,15 +200,14 @@ find_lowest_section (bfd *abfd, asection *sect, void *obj)
 {
   asection **lowest = (asection **) obj;
 
-  if (0 == (bfd_get_section_flags (abfd, sect) & (SEC_ALLOC | SEC_LOAD)))
+  if (0 == (bfd_section_flags (sect) & (SEC_ALLOC | SEC_LOAD)))
     return;
   if (!*lowest)
     *lowest = sect;		/* First loadable section */
-  else if (bfd_section_vma (abfd, *lowest) > bfd_section_vma (abfd, sect))
+  else if (bfd_section_vma (*lowest) > bfd_section_vma (sect))
     *lowest = sect;		/* A lower loadable section */
-  else if (bfd_section_vma (abfd, *lowest) == bfd_section_vma (abfd, sect)
-	   && (bfd_section_size (abfd, (*lowest))
-	       <= bfd_section_size (abfd, sect)))
+  else if (bfd_section_vma (*lowest) == bfd_section_vma (sect)
+	   && (bfd_section_size (*lowest) <= bfd_section_size (sect)))
     *lowest = sect;
 }
 
@@ -228,10 +227,10 @@ build_section_addr_info_from_section_table (const struct target_section *start,
       struct bfd_section *asect = stp->the_bfd_section;
       bfd *abfd = asect->owner;
 
-      if (bfd_get_section_flags (abfd, asect) & (SEC_ALLOC | SEC_LOAD)
+      if (bfd_section_flags (asect) & (SEC_ALLOC | SEC_LOAD)
 	  && sap.size () < end - start)
 	sap.emplace_back (stp->addr,
-			  bfd_section_name (abfd, asect),
+			  bfd_section_name (asect),
 			  gdb_bfd_section_index (abfd, asect));
     }
 
@@ -247,9 +246,9 @@ build_section_addr_info_from_bfd (bfd *abfd)
 
   section_addr_info sap;
   for (sec = abfd->sections; sec != NULL; sec = sec->next)
-    if (bfd_get_section_flags (abfd, sec) & (SEC_ALLOC | SEC_LOAD))
-      sap.emplace_back (bfd_get_section_vma (abfd, sec),
-			bfd_get_section_name (abfd, sec),
+    if (bfd_section_flags (sec) & (SEC_ALLOC | SEC_LOAD))
+      sap.emplace_back (bfd_section_vma (sec),
+			bfd_section_name (sec),
 			gdb_bfd_section_index (abfd, sec));
 
   return sap;
@@ -353,10 +352,10 @@ place_section (bfd *abfd, asection *sect, void *obj)
   struct place_section_arg *arg = (struct place_section_arg *) obj;
   CORE_ADDR *offsets = arg->offsets->offsets, start_addr;
   int done;
-  ULONGEST align = ((ULONGEST) 1) << bfd_get_section_alignment (abfd, sect);
+  ULONGEST align = ((ULONGEST) 1) << bfd_section_alignment (sect);
 
   /* We are only interested in allocated sections.  */
-  if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+  if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
     return;
 
   /* If the user specified an offset, honor it.  */
@@ -380,7 +379,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
 	  continue;
 
 	/* We can only conflict with allocated sections.  */
-	if ((bfd_get_section_flags (abfd, cur_sec) & SEC_ALLOC) == 0)
+	if ((bfd_section_flags (cur_sec) & SEC_ALLOC) == 0)
 	  continue;
 
 	/* If the section offset is 0, either the section has not been placed
@@ -390,10 +389,10 @@ place_section (bfd *abfd, asection *sect, void *obj)
 	  continue;
 
 	/* If this section would overlap us, then we must move up.  */
-	if (start_addr + bfd_get_section_size (sect) > offsets[indx]
-	    && start_addr < offsets[indx] + bfd_get_section_size (cur_sec))
+	if (start_addr + bfd_section_size (sect) > offsets[indx]
+	    && start_addr < offsets[indx] + bfd_section_size (cur_sec))
 	  {
-	    start_addr = offsets[indx] + bfd_get_section_size (cur_sec);
+	    start_addr = offsets[indx] + bfd_section_size (cur_sec);
 	    start_addr = (start_addr + align - 1) & -align;
 	    done = 0;
 	    break;
@@ -405,7 +404,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
   while (!done);
 
   offsets[gdb_bfd_section_index (abfd, sect)] = start_addr;
-  arg->lowest = start_addr + bfd_get_section_size (sect);
+  arg->lowest = start_addr + bfd_section_size (sect);
 }
 
 /* Store section_addr_info as prepared (made relative and with SECTINDEX
@@ -510,7 +509,7 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
       lower_offset = 0;
     }
   else
-    lower_offset = bfd_section_vma (bfd_get_filename (abfd), lower_sect);
+    lower_offset = bfd_section_vma (lower_sect);
 
   /* Create ADDRS_TO_ABFD_ADDRS array to map the sections in ADDRS to sections
      in ABFD.  Section names are not unique - there can be multiple sections of
@@ -658,7 +657,7 @@ default_symfile_offsets (struct objfile *objfile,
       for (cur_sec = abfd->sections; cur_sec != NULL; cur_sec = cur_sec->next)
 	/* We do not expect this to happen; just skip this step if the
 	   relocatable file has a section with an assigned VMA.  */
-	if (bfd_section_vma (abfd, cur_sec) != 0)
+	if (bfd_section_vma (cur_sec) != 0)
 	  break;
 
       if (cur_sec == NULL)
@@ -700,10 +699,10 @@ default_symfile_offsets (struct objfile *objfile,
 	  for (cur_sec = abfd->sections; cur_sec != NULL;
 	       cur_sec = cur_sec->next)
 	    {
-	      if ((bfd_get_section_flags (abfd, cur_sec) & SEC_ALLOC) == 0)
+	      if ((bfd_section_flags (cur_sec) & SEC_ALLOC) == 0)
 		continue;
 
-	      bfd_set_section_vma (abfd, cur_sec, offsets[cur_sec->index]);
+	      bfd_set_section_vma (cur_sec, offsets[cur_sec->index]);
 	      exec_set_section_address (bfd_get_filename (abfd),
 					cur_sec->index,
 					offsets[cur_sec->index]);
@@ -740,7 +739,7 @@ default_symfile_segments (bfd *abfd)
   /* Make sure there is at least one loadable section in the file.  */
   for (sect = abfd->sections; sect != NULL; sect = sect->next)
     {
-      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+      if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
 	continue;
 
       break;
@@ -748,8 +747,8 @@ default_symfile_segments (bfd *abfd)
   if (sect == NULL)
     return NULL;
 
-  low = bfd_get_section_vma (abfd, sect);
-  high = low + bfd_get_section_size (sect);
+  low = bfd_section_vma (sect);
+  high = low + bfd_section_size (sect);
 
   data = XCNEW (struct symfile_segment_data);
   data->num_segments = 1;
@@ -763,14 +762,14 @@ default_symfile_segments (bfd *abfd)
     {
       CORE_ADDR vma;
 
-      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+      if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
 	continue;
 
-      vma = bfd_get_section_vma (abfd, sect);
+      vma = bfd_section_vma (sect);
       if (vma < low)
 	low = vma;
-      if (vma + bfd_get_section_size (sect) > high)
-	high = vma + bfd_get_section_size (sect);
+      if (vma + bfd_section_size (sect) > high)
+	high = vma + bfd_section_size (sect);
 
       data->segment_info[i] = 1;
     }
@@ -872,9 +871,9 @@ init_entry_point_info (struct objfile *objfile)
 	{
 	  struct bfd_section *sect = osect->the_bfd_section;
 
-	  if (entry_point >= bfd_get_section_vma (objfile->obfd, sect)
-	      && entry_point < (bfd_get_section_vma (objfile->obfd, sect)
-				+ bfd_get_section_size (sect)))
+	  if (entry_point >= bfd_section_vma (sect)
+	      && entry_point < (bfd_section_vma (sect)
+				+ bfd_section_size (sect)))
 	    {
 	      ei->the_bfd_section_index
 		= gdb_bfd_section_index (objfile->obfd, sect);
@@ -1878,7 +1877,7 @@ add_section_size_callback (bfd *abfd, asection *asec, void *data)
 {
   bfd_size_type *sum = (bfd_size_type *) data;
 
-  *sum += bfd_get_section_size (asec);
+  *sum += bfd_section_size (asec);
 }
 
 /* Opaque data for load_progress.  */
@@ -2001,16 +2000,16 @@ static void
 load_section_callback (bfd *abfd, asection *asec, void *data)
 {
   struct load_section_data *args = (struct load_section_data *) data;
-  bfd_size_type size = bfd_get_section_size (asec);
-  const char *sect_name = bfd_get_section_name (abfd, asec);
+  bfd_size_type size = bfd_section_size (asec);
+  const char *sect_name = bfd_section_name (asec);
 
-  if ((bfd_get_section_flags (abfd, asec) & SEC_LOAD) == 0)
+  if ((bfd_section_flags (asec) & SEC_LOAD) == 0)
     return;
 
   if (size == 0)
     return;
 
-  ULONGEST begin = bfd_section_lma (abfd, asec) + args->load_offset;
+  ULONGEST begin = bfd_section_lma (asec) + args->load_offset;
   ULONGEST end = begin + size;
   gdb_byte *buffer = (gdb_byte *) xmalloc (size);
   bfd_get_section_contents (abfd, asec, buffer, 0, size);
@@ -2988,9 +2987,8 @@ section_is_overlay (struct obj_section *section)
     {
       asection *bfd_section = section->the_bfd_section;
 
-      if (bfd_section_lma (abfd, bfd_section) != 0
-	  && bfd_section_lma (abfd, bfd_section)
-	     != bfd_section_vma (abfd, bfd_section))
+      if (bfd_section_lma (bfd_section) != 0
+	  && bfd_section_lma (bfd_section) != bfd_section_vma (bfd_section))
 	return 1;
     }
 
@@ -3061,15 +3059,14 @@ pc_in_unmapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
     {
-      bfd *abfd = section->objfile->obfd;
       asection *bfd_section = section->the_bfd_section;
 
       /* We assume the LMA is relocated by the same offset as the VMA.  */
-      bfd_vma size = bfd_get_section_size (bfd_section);
+      bfd_vma size = bfd_section_size (bfd_section);
       CORE_ADDR offset = obj_section_offset (section);
 
-      if (bfd_get_section_lma (abfd, bfd_section) + offset <= pc
-	  && pc < bfd_get_section_lma (abfd, bfd_section) + offset + size)
+      if (bfd_section_lma (bfd_section) + offset <= pc
+	  && pc < bfd_section_lma (bfd_section) + offset + size)
 	return 1;
     }
 
@@ -3117,8 +3114,8 @@ overlay_unmapped_address (CORE_ADDR pc, struct obj_section *section)
     {
       asection *bfd_section = section->the_bfd_section;
 
-      return pc + bfd_section_lma (abfd, bfd_section)
-		- bfd_section_vma (abfd, bfd_section);
+      return (pc + bfd_section_lma (bfd_section)
+	      - bfd_section_vma (bfd_section));
     }
 
   return pc;
@@ -3135,8 +3132,8 @@ overlay_mapped_address (CORE_ADDR pc, struct obj_section *section)
     {
       asection *bfd_section = section->the_bfd_section;
 
-      return pc + bfd_section_vma (abfd, bfd_section)
-		- bfd_section_lma (abfd, bfd_section);
+      return (pc + bfd_section_vma (bfd_section)
+	      - bfd_section_lma (bfd_section));
     }
 
   return pc;
@@ -3241,10 +3238,10 @@ list_overlays_command (const char *args, int from_tty)
 	      bfd_vma lma, vma;
 	      int size;
 
-	      vma = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
-	      lma = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
-	      size = bfd_get_section_size (osect->the_bfd_section);
-	      name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
+	      vma = bfd_section_vma (osect->the_bfd_section);
+	      lma = bfd_section_lma (osect->the_bfd_section);
+	      size = bfd_section_size (osect->the_bfd_section);
+	      name = bfd_section_name (osect->the_bfd_section);
 
 	      printf_filtered ("Section %s, loaded at ", name);
 	      fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
@@ -3282,8 +3279,7 @@ map_overlay_command (const char *args, int from_tty)
   /* First, find a section matching the user supplied argument.  */
   for (objfile *obj_file : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (obj_file, sec)
-      if (!strcmp (bfd_section_name (obj_file->obfd, sec->the_bfd_section),
-		   args))
+      if (!strcmp (bfd_section_name (sec->the_bfd_section), args))
 	{
 	  /* Now, check to see if the section is an overlay.  */
 	  if (!section_is_overlay (sec))
@@ -3301,8 +3297,7 @@ map_overlay_command (const char *args, int from_tty)
 		{
 		  if (info_verbose)
 		    printf_unfiltered (_("Note: section %s unmapped by overlap\n"),
-				       bfd_section_name (obj_file->obfd,
-							 sec2->the_bfd_section));
+				       bfd_section_name (sec2->the_bfd_section));
 		  sec2->ovly_mapped = 0; /* sec2 overlaps sec: unmap sec2.  */
 		}
 	  return;
@@ -3330,7 +3325,7 @@ unmap_overlay_command (const char *args, int from_tty)
   /* First, find a section matching the user supplied argument.  */
   for (objfile *objfile : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, sec)
-      if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
+      if (!strcmp (bfd_section_name (sec->the_bfd_section), args))
 	{
 	  if (!sec->ovly_mapped)
 	    error (_("Section %s is not mapped"), args);
@@ -3539,14 +3534,14 @@ simple_overlay_update_1 (struct obj_section *osect)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   for (i = 0; i < cache_novlys; i++)
-    if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
-	&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect))
+    if (cache_ovly_table[i][VMA] == bfd_section_vma (bsect)
+	&& cache_ovly_table[i][LMA] == bfd_section_lma (bsect))
       {
 	read_target_long_array (cache_ovly_table_base + i * word_size,
 				(unsigned int *) cache_ovly_table[i],
 				4, word_size, byte_order);
-	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
-	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect))
+	if (cache_ovly_table[i][VMA] == bfd_section_vma (bsect)
+	    && cache_ovly_table[i][LMA] == bfd_section_lma (bsect))
 	  {
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    return 1;
@@ -3607,8 +3602,8 @@ simple_overlay_update (struct obj_section *osect)
 	  asection *bsect = osect->the_bfd_section;
 
 	  for (i = 0; i < cache_novlys; i++)
-	    if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
-		&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect))
+	    if (cache_ovly_table[i][VMA] == bfd_section_vma (bsect)
+		&& cache_ovly_table[i][LMA] == bfd_section_lma (bsect))
 	      { /* obj_section matches i'th entry in ovly_table.  */
 		osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 		break;		/* finished with inner for loop: break out.  */

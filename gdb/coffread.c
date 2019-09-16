@@ -222,15 +222,15 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
   const char *name;
 
   csi = (struct coff_symfile_info *) csip;
-  name = bfd_get_section_name (abfd, sectp);
+  name = bfd_section_name (sectp);
   if (strcmp (name, ".text") == 0)
     {
-      csi->textaddr = bfd_section_vma (abfd, sectp);
-      csi->textsize += bfd_section_size (abfd, sectp);
+      csi->textaddr = bfd_section_vma (sectp);
+      csi->textsize += bfd_section_size (sectp);
     }
   else if (startswith (name, ".text"))
     {
-      csi->textsize += bfd_section_size (abfd, sectp);
+      csi->textsize += bfd_section_size (sectp);
     }
   else if (strcmp (name, ".stabstr") == 0)
     {
@@ -307,7 +307,7 @@ cs_section_address (struct coff_symbol *cs, bfd *abfd)
   args.resultp = &sect;
   bfd_map_over_sections (abfd, find_targ_sec, &args);
   if (sect != NULL)
-    addr = bfd_get_section_vma (abfd, sect);
+    addr = bfd_section_vma (sect);
   return addr;
 }
 
@@ -692,7 +692,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
          bfd_get_section_contents?  */
       bfd_seek (abfd, abfd->where, 0);
 
-      stabstrsize = bfd_section_size (abfd, info->stabstrsect);
+      stabstrsize = bfd_section_size (info->stabstrsect);
 
       coffstab_build_psymtabs (objfile,
 			       info->textaddr, info->textsize,

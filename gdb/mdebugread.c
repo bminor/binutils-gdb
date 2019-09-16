@@ -2338,7 +2338,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
      the text section (and fh->adr) really starts at zero.  */
   text_sect = bfd_get_section_by_name (cur_bfd, ".text");
   if (text_sect != NULL
-      && (bfd_get_section_flags (cur_bfd, text_sect) & SEC_RELOC))
+      && (bfd_section_flags (text_sect) & SEC_RELOC))
     relocatable = 1;
 
   extern_tab = XOBNEWVEC (&objfile->objfile_obstack, EXTR, hdr->iextMax);

@@ -763,7 +763,7 @@ dump_xcoff32_symbols (bfd *abfd, struct xcoff_dump *data)
     {
       bfd_size_type size;
 
-      size = bfd_get_section_size (debugsec);
+      size = bfd_section_size (debugsec);
       debug = (char *) xmalloc (size);
       bfd_get_section_contents (abfd, debugsec, debug, 0, size);
     }
@@ -1051,7 +1051,7 @@ dump_xcoff32_loader (bfd *abfd)
       printf (_("no .loader section in file\n"));
       return;
     }
-  size = bfd_get_section_size (loader);
+  size = bfd_section_size (loader);
   if (size < sizeof (*lhdr))
     {
       printf (_("section .loader is too short\n"));
@@ -1198,7 +1198,7 @@ dump_xcoff32_except (bfd *abfd, struct xcoff_dump *data)
       printf (_("no .except section in file\n"));
       return;
     }
-  size = bfd_get_section_size (sec);
+  size = bfd_section_size (sec);
   excp_data = (bfd_byte *) xmalloc (size);
   bfd_get_section_contents (abfd, sec, excp_data, 0, size);
   exceptab = (struct external_exceptab *)excp_data;
@@ -1241,7 +1241,7 @@ dump_xcoff32_typchk (bfd *abfd)
       printf (_("no .typchk section in file\n"));
       return;
     }
-  size = bfd_get_section_size (sec);
+  size = bfd_section_size (sec);
   data = (bfd_byte *) xmalloc (size);
   bfd_get_section_contents (abfd, sec, data, 0, size);
 
@@ -1449,9 +1449,9 @@ dump_xcoff32_traceback (bfd *abfd, struct xcoff_dump *data)
   text_sec = bfd_get_section_by_name (abfd, ".text");
   if (text_sec == NULL)
     return;
-  text_vma = bfd_get_section_vma (abfd, text_sec);
+  text_vma = bfd_section_vma (text_sec);
 
-  text_size = bfd_get_section_size (text_sec);
+  text_size = bfd_section_size (text_sec);
   text = (char *) xmalloc (text_size);
   bfd_get_section_contents (abfd, text_sec, text, 0, text_size);
 

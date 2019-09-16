@@ -905,7 +905,7 @@ pru_elf32_relocate_section (bfd *output_bfd,
 						      symtab_hdr->sh_link,
 						      sym->st_name);
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  switch (r)

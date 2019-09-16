@@ -1218,7 +1218,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   if (sect == NULL)
     return NULL;
 
-  size = bfd_get_section_size (sect);
+  size = bfd_section_size (sect);
 
   /* PR 22794: Make sure that the section has a reasonable size.  */
   if (size < 8 || size >= bfd_get_size (abfd))
@@ -1308,7 +1308,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
   if (sect == NULL)
     return NULL;
 
-  size = bfd_get_section_size (sect);
+  size = bfd_section_size (sect);
   if (size < 8 || size >= bfd_get_size (abfd))
     return NULL;
 
@@ -1322,7 +1322,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
   /* BuildID value is stored after the filename.  */
   name = (char *) contents;
   buildid_offset = strnlen (name, size) + 1;
-  if (buildid_offset >= bfd_get_section_size (sect))
+  if (buildid_offset >= bfd_section_size (sect))
     return NULL;
 
   *buildid_len = size - buildid_offset;
@@ -1727,14 +1727,14 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
   debuglink_size &= ~3;
   debuglink_size += 4;
 
-  if (! bfd_set_section_size (abfd, sect, debuglink_size))
+  if (!bfd_set_section_size (sect, debuglink_size))
     /* XXX Should we delete the section from the bfd ?  */
     return NULL;
 
   /* PR 21193: Ensure that the section has 4-byte alignment for the CRC.
      Note - despite the name of the function being called, we are
      setting an alignment power, not a byte alignment value.  */
-  bfd_set_section_alignment (abfd, sect, 2);
+  bfd_set_section_alignment (sect, 2);
 
   return sect;
 }
@@ -1872,7 +1872,7 @@ get_build_id (bfd *abfd)
       return NULL;
     }
 
-  size = bfd_get_section_size (sect);
+  size = bfd_section_size (sect);
   /* FIXME: Should we support smaller build-id notes ?  */
   if (size < 0x24)
     {
@@ -1890,7 +1890,7 @@ get_build_id (bfd *abfd)
   /* FIXME: Paranoia - allow for compressed build-id sections.
      Maybe we should complain if this size is different from
      the one obtained above...  */
-  size = bfd_get_section_size (sect);
+  size = bfd_section_size (sect);
   if (size < sizeof (Elf_External_Note))
     {
       bfd_set_error (bfd_error_invalid_operation);

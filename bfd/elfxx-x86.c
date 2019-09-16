@@ -1238,7 +1238,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  /* Strip these too.  */
 	}
-      else if (htab->is_reloc_section (bfd_get_section_name (dynobj, s)))
+      else if (htab->is_reloc_section (bfd_section_name (s)))
 	{
 	  if (s->size != 0
 	      && s != htab->elf.srelplt
@@ -1280,8 +1280,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	 it is empty.  Update its section alignment now since it
 	 is non-empty.  */
       if (s == htab->elf.iplt)
-	bfd_set_section_alignment (s->owner, s,
-				   htab->plt.iplt_alignment);
+	bfd_set_section_alignment (s, htab->plt.iplt_alignment);
 
       /* Allocate memory for the section contents.  We use bfd_zalloc
 	 here in case unused entries are not reclaimed before the
@@ -2625,7 +2624,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 	  if (sec == NULL)
 	    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
 
-	  if (!bfd_set_section_alignment (ebfd, sec, class_align))
+	  if (!bfd_set_section_alignment (sec, class_align))
 	    {
 error_alignment:
 	      info->callbacks->einfo (_("%F%pA: failed to align section\n"),
@@ -2839,11 +2838,11 @@ error_alignment:
      instead of in create_dynamic_sections so that they are always
      properly aligned even if create_dynamic_sections isn't called.  */
   sec = htab->elf.sgot;
-  if (!bfd_set_section_alignment (dynobj, sec, got_align))
+  if (!bfd_set_section_alignment (sec, got_align))
     goto error_alignment;
 
   sec = htab->elf.sgotplt;
-  if (!bfd_set_section_alignment (dynobj, sec, got_align))
+  if (!bfd_set_section_alignment (sec, got_align))
     goto error_alignment;
 
   /* Create the ifunc sections here so that check_relocs can be
@@ -2881,8 +2880,7 @@ error_alignment:
 	    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
 
 	  sec = pltsec;
-	  if (!bfd_set_section_alignment (sec->owner, sec,
-					  plt_alignment))
+	  if (!bfd_set_section_alignment (sec, plt_alignment))
 	    goto error_alignment;
 
 	  /* Create the GOT procedure linkage table.  */
@@ -2892,8 +2890,7 @@ error_alignment:
 	  if (sec == NULL)
 	    info->callbacks->einfo (_("%F%P: failed to create GOT PLT section\n"));
 
-	  if (!bfd_set_section_alignment (dynobj, sec,
-					  non_lazy_plt_alignment))
+	  if (!bfd_set_section_alignment (sec, non_lazy_plt_alignment))
 	    goto error_alignment;
 
 	  htab->plt_got = sec;
@@ -2913,8 +2910,7 @@ error_alignment:
 		  if (sec == NULL)
 		    info->callbacks->einfo (_("%F%P: failed to create IBT-enabled PLT section\n"));
 
-		  if (!bfd_set_section_alignment (dynobj, sec,
-						  plt_alignment))
+		  if (!bfd_set_section_alignment (sec, plt_alignment))
 		    goto error_alignment;
 		}
 	      else if (htab->params->bndplt && ABI_64_P (dynobj))
@@ -2928,8 +2924,7 @@ error_alignment:
 		  if (sec == NULL)
 		    info->callbacks->einfo (_("%F%P: failed to create BND PLT section\n"));
 
-		  if (!bfd_set_section_alignment (dynobj, sec,
-						  non_lazy_plt_alignment))
+		  if (!bfd_set_section_alignment (sec, non_lazy_plt_alignment))
 		    goto error_alignment;
 		}
 
@@ -2949,7 +2944,7 @@ error_alignment:
 	  if (sec == NULL)
 	    info->callbacks->einfo (_("%F%P: failed to create PLT .eh_frame section\n"));
 
-	  if (!bfd_set_section_alignment (dynobj, sec, class_align))
+	  if (!bfd_set_section_alignment (sec, class_align))
 	    goto error_alignment;
 
 	  htab->plt_eh_frame = sec;
@@ -2962,7 +2957,7 @@ error_alignment:
 	      if (sec == NULL)
 		info->callbacks->einfo (_("%F%P: failed to create GOT PLT .eh_frame section\n"));
 
-	      if (!bfd_set_section_alignment (dynobj, sec, class_align))
+	      if (!bfd_set_section_alignment (sec, class_align))
 		goto error_alignment;
 
 	      htab->plt_got_eh_frame = sec;
@@ -2976,7 +2971,7 @@ error_alignment:
 	      if (sec == NULL)
 		info->callbacks->einfo (_("%F%P: failed to create the second PLT .eh_frame section\n"));
 
-	      if (!bfd_set_section_alignment (dynobj, sec, class_align))
+	      if (!bfd_set_section_alignment (sec, class_align))
 		goto error_alignment;
 
 	      htab->plt_second_eh_frame = sec;
@@ -2995,7 +2990,7 @@ error_alignment:
 	 section backwards, resulting in a warning and section lma not
 	 being set properly.  It later leads to a "File truncated"
 	 error.  */
-      if (!bfd_set_section_alignment (sec->owner, sec, 0))
+      if (!bfd_set_section_alignment (sec, 0))
 	goto error_alignment;
 
       htab->plt.iplt_alignment = (normal_target

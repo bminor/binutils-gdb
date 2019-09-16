@@ -2280,7 +2280,7 @@ get_section_name (const struct dwarf2_section_info *section)
   asection *sectp = get_section_bfd_section (section);
 
   gdb_assert (sectp != NULL);
-  return bfd_section_name (get_section_bfd_owner (section), sectp);
+  return bfd_section_name (sectp);
 }
 
 /* Return the name of the file SECTION is in.  */
@@ -2315,7 +2315,7 @@ get_section_flags (const struct dwarf2_section_info *section)
   asection *sectp = get_section_bfd_section (section);
 
   gdb_assert (sectp != NULL);
-  return bfd_get_section_flags (sectp->owner, sectp);
+  return bfd_section_flags (sectp);
 }
 
 /* When loading sections, we look either for uncompressed section or for
@@ -2340,7 +2340,7 @@ void
 dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
 				     const dwarf2_debug_sections &names)
 {
-  flagword aflag = bfd_get_section_flags (abfd, sectp);
+  flagword aflag = bfd_section_flags (sectp);
 
   if ((aflag & SEC_HAS_CONTENTS) == 0)
     {
@@ -2348,72 +2348,72 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
   else if (section_is_p (sectp->name, &names.info))
     {
       this->info.s.section = sectp;
-      this->info.size = bfd_get_section_size (sectp);
+      this->info.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.abbrev))
     {
       this->abbrev.s.section = sectp;
-      this->abbrev.size = bfd_get_section_size (sectp);
+      this->abbrev.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.line))
     {
       this->line.s.section = sectp;
-      this->line.size = bfd_get_section_size (sectp);
+      this->line.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.loc))
     {
       this->loc.s.section = sectp;
-      this->loc.size = bfd_get_section_size (sectp);
+      this->loc.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.loclists))
     {
       this->loclists.s.section = sectp;
-      this->loclists.size = bfd_get_section_size (sectp);
+      this->loclists.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.macinfo))
     {
       this->macinfo.s.section = sectp;
-      this->macinfo.size = bfd_get_section_size (sectp);
+      this->macinfo.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.macro))
     {
       this->macro.s.section = sectp;
-      this->macro.size = bfd_get_section_size (sectp);
+      this->macro.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.str))
     {
       this->str.s.section = sectp;
-      this->str.size = bfd_get_section_size (sectp);
+      this->str.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.line_str))
     {
       this->line_str.s.section = sectp;
-      this->line_str.size = bfd_get_section_size (sectp);
+      this->line_str.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.addr))
     {
       this->addr.s.section = sectp;
-      this->addr.size = bfd_get_section_size (sectp);
+      this->addr.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.frame))
     {
       this->frame.s.section = sectp;
-      this->frame.size = bfd_get_section_size (sectp);
+      this->frame.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.eh_frame))
     {
       this->eh_frame.s.section = sectp;
-      this->eh_frame.size = bfd_get_section_size (sectp);
+      this->eh_frame.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.ranges))
     {
       this->ranges.s.section = sectp;
-      this->ranges.size = bfd_get_section_size (sectp);
+      this->ranges.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.rnglists))
     {
       this->rnglists.s.section = sectp;
-      this->rnglists.size = bfd_get_section_size (sectp);
+      this->rnglists.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.types))
     {
@@ -2421,28 +2421,28 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
 
       memset (&type_section, 0, sizeof (type_section));
       type_section.s.section = sectp;
-      type_section.size = bfd_get_section_size (sectp);
+      type_section.size = bfd_section_size (sectp);
 
       this->types.push_back (type_section);
     }
   else if (section_is_p (sectp->name, &names.gdb_index))
     {
       this->gdb_index.s.section = sectp;
-      this->gdb_index.size = bfd_get_section_size (sectp);
+      this->gdb_index.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.debug_names))
     {
       this->debug_names.s.section = sectp;
-      this->debug_names.size = bfd_get_section_size (sectp);
+      this->debug_names.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names.debug_aranges))
     {
       this->debug_aranges.s.section = sectp;
-      this->debug_aranges.size = bfd_get_section_size (sectp);
+      this->debug_aranges.size = bfd_section_size (sectp);
     }
 
-  if ((bfd_get_section_flags (abfd, sectp) & (SEC_LOAD | SEC_ALLOC))
-      && bfd_section_vma (abfd, sectp) == 0)
+  if ((bfd_section_flags (sectp) & (SEC_LOAD | SEC_ALLOC))
+      && bfd_section_vma (sectp) == 0)
     this->has_section_at_zero = true;
 }
 
@@ -2531,7 +2531,7 @@ dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
     {
       error (_("Dwarf Error: Can't read DWARF data"
 	       " in section %s [in module %s]"),
-	     bfd_section_name (abfd, sectp), bfd_get_filename (abfd));
+	     bfd_section_name (sectp), bfd_get_filename (abfd));
     }
 }
 
@@ -2603,37 +2603,37 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
   if (section_is_p (sectp->name, &dwarf2_elf_names.abbrev))
     {
       dwz_file->abbrev.s.section = sectp;
-      dwz_file->abbrev.size = bfd_get_section_size (sectp);
+      dwz_file->abbrev.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.info))
     {
       dwz_file->info.s.section = sectp;
-      dwz_file->info.size = bfd_get_section_size (sectp);
+      dwz_file->info.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.str))
     {
       dwz_file->str.s.section = sectp;
-      dwz_file->str.size = bfd_get_section_size (sectp);
+      dwz_file->str.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.line))
     {
       dwz_file->line.s.section = sectp;
-      dwz_file->line.size = bfd_get_section_size (sectp);
+      dwz_file->line.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.macro))
     {
       dwz_file->macro.s.section = sectp;
-      dwz_file->macro.size = bfd_get_section_size (sectp);
+      dwz_file->macro.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.gdb_index))
     {
       dwz_file->gdb_index.s.section = sectp;
-      dwz_file->gdb_index.size = bfd_get_section_size (sectp);
+      dwz_file->gdb_index.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.debug_names))
     {
       dwz_file->debug_names.s.section = sectp;
-      dwz_file->debug_names.size = bfd_get_section_size (sectp);
+      dwz_file->debug_names.size = bfd_section_size (sectp);
     }
 }
 
@@ -12311,7 +12311,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->abbrev.s.section != NULL)
 	return 0;
       sections->abbrev.s.section = sectp;
-      sections->abbrev.size = bfd_get_section_size (sectp);
+      sections->abbrev.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo)
 	   || section_is_p (sectp->name, &names->types_dwo))
@@ -12320,7 +12320,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->info_or_types.s.section != NULL)
 	return 0;
       sections->info_or_types.s.section = sectp;
-      sections->info_or_types.size = bfd_get_section_size (sectp);
+      sections->info_or_types.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
@@ -12328,7 +12328,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->line.s.section != NULL)
 	return 0;
       sections->line.s.section = sectp;
-      sections->line.size = bfd_get_section_size (sectp);
+      sections->line.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
@@ -12336,7 +12336,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->loc.s.section != NULL)
 	return 0;
       sections->loc.s.section = sectp;
-      sections->loc.size = bfd_get_section_size (sectp);
+      sections->loc.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
@@ -12344,7 +12344,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->macinfo.s.section != NULL)
 	return 0;
       sections->macinfo.s.section = sectp;
-      sections->macinfo.size = bfd_get_section_size (sectp);
+      sections->macinfo.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
@@ -12352,7 +12352,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->macro.s.section != NULL)
 	return 0;
       sections->macro.s.section = sectp;
-      sections->macro.size = bfd_get_section_size (sectp);
+      sections->macro.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
@@ -12360,7 +12360,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
       if (sections->str_offsets.s.section != NULL)
 	return 0;
       sections->str_offsets.s.section = sectp;
-      sections->str_offsets.size = bfd_get_section_size (sectp);
+      sections->str_offsets.size = bfd_section_size (sectp);
     }
   else
     {
@@ -12558,11 +12558,11 @@ create_dwp_v2_section (struct dwarf2_per_objfile *dwarf2_per_objfile,
      bounds of the real section.  This is a pretty-rare event, so just
      flag an error (easier) instead of a warning and trying to cope.  */
   if (sectp == NULL
-      || offset + size > bfd_get_section_size (sectp))
+      || offset + size > bfd_section_size (sectp))
     {
       error (_("Dwarf Error: Bad DWP V2 section info, doesn't fit"
 	       " in section %s [in module %s]"),
-	     sectp ? bfd_section_name (abfd, sectp) : "<unknown>",
+	     sectp ? bfd_section_name (sectp) : "<unknown>",
 	     objfile_name (dwarf2_per_objfile->objfile));
     }
 
@@ -12933,42 +12933,42 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
       dwo_sections->abbrev.s.section = sectp;
-      dwo_sections->abbrev.size = bfd_get_section_size (sectp);
+      dwo_sections->abbrev.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
       dwo_sections->info.s.section = sectp;
-      dwo_sections->info.size = bfd_get_section_size (sectp);
+      dwo_sections->info.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
       dwo_sections->line.s.section = sectp;
-      dwo_sections->line.size = bfd_get_section_size (sectp);
+      dwo_sections->line.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
       dwo_sections->loc.s.section = sectp;
-      dwo_sections->loc.size = bfd_get_section_size (sectp);
+      dwo_sections->loc.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
       dwo_sections->macinfo.s.section = sectp;
-      dwo_sections->macinfo.size = bfd_get_section_size (sectp);
+      dwo_sections->macinfo.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
       dwo_sections->macro.s.section = sectp;
-      dwo_sections->macro.size = bfd_get_section_size (sectp);
+      dwo_sections->macro.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_dwo))
     {
       dwo_sections->str.s.section = sectp;
-      dwo_sections->str.size = bfd_get_section_size (sectp);
+      dwo_sections->str.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
       dwo_sections->str_offsets.s.section = sectp;
-      dwo_sections->str_offsets.size = bfd_get_section_size (sectp);
+      dwo_sections->str_offsets.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
     {
@@ -12976,7 +12976,7 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
 
       memset (&type_section, 0, sizeof (type_section));
       type_section.s.section = sectp;
-      type_section.size = bfd_get_section_size (sectp);
+      type_section.size = bfd_section_size (sectp);
       dwo_sections->types.push_back (type_section);
     }
 }
@@ -13040,17 +13040,17 @@ dwarf2_locate_common_dwp_sections (bfd *abfd, asection *sectp,
   if (section_is_p (sectp->name, &names->str_dwo))
     {
       dwp_file->sections.str.s.section = sectp;
-      dwp_file->sections.str.size = bfd_get_section_size (sectp);
+      dwp_file->sections.str.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->cu_index))
     {
       dwp_file->sections.cu_index.s.section = sectp;
-      dwp_file->sections.cu_index.size = bfd_get_section_size (sectp);
+      dwp_file->sections.cu_index.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->tu_index))
     {
       dwp_file->sections.tu_index.s.section = sectp;
-      dwp_file->sections.tu_index.size = bfd_get_section_size (sectp);
+      dwp_file->sections.tu_index.size = bfd_section_size (sectp);
     }
 }
 
@@ -13075,42 +13075,42 @@ dwarf2_locate_v2_dwp_sections (bfd *abfd, asection *sectp, void *dwp_file_ptr)
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
       dwp_file->sections.abbrev.s.section = sectp;
-      dwp_file->sections.abbrev.size = bfd_get_section_size (sectp);
+      dwp_file->sections.abbrev.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
       dwp_file->sections.info.s.section = sectp;
-      dwp_file->sections.info.size = bfd_get_section_size (sectp);
+      dwp_file->sections.info.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
       dwp_file->sections.line.s.section = sectp;
-      dwp_file->sections.line.size = bfd_get_section_size (sectp);
+      dwp_file->sections.line.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
       dwp_file->sections.loc.s.section = sectp;
-      dwp_file->sections.loc.size = bfd_get_section_size (sectp);
+      dwp_file->sections.loc.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
       dwp_file->sections.macinfo.s.section = sectp;
-      dwp_file->sections.macinfo.size = bfd_get_section_size (sectp);
+      dwp_file->sections.macinfo.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
       dwp_file->sections.macro.s.section = sectp;
-      dwp_file->sections.macro.size = bfd_get_section_size (sectp);
+      dwp_file->sections.macro.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
       dwp_file->sections.str_offsets.s.section = sectp;
-      dwp_file->sections.str_offsets.size = bfd_get_section_size (sectp);
+      dwp_file->sections.str_offsets.size = bfd_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
     {
       dwp_file->sections.types.s.section = sectp;
-      dwp_file->sections.types.size = bfd_get_section_size (sectp);
+      dwp_file->sections.types.size = bfd_section_size (sectp);
     }
 }
 

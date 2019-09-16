@@ -112,7 +112,7 @@ typedef struct segment_info_struct {
 
 
 #define seg_info(sec) \
-  ((segment_info_type *) bfd_get_section_userdata (stdoutput, sec))
+  ((segment_info_type *) bfd_section_userdata (sec))
 
 extern symbolS *section_symbol (segT);
 

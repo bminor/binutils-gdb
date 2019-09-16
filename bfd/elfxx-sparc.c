@@ -1263,15 +1263,14 @@ create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
 
   s = bfd_make_section_with_flags (abfd, ".iplt", pltflags);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+      || !bfd_set_section_alignment (s, bed->plt_alignment))
     return FALSE;
   htab->iplt = s;
 
   s = bfd_make_section_with_flags (abfd, ".rela.iplt",
 				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s,
-				      bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->irelplt = s;
 
@@ -4164,8 +4163,7 @@ do_relocation:
 		     || r_type == R_SPARC_UA32
 		     || r_type == R_SPARC_DISP32)
 		    && (((input_section->flags & SEC_DEBUGGING) != 0
-			 && strcmp (bfd_section_name (input_bfd,
-						      input_section),
+			 && strcmp (bfd_section_name (input_section),
 				    ".stab") == 0)
 			|| _bfd_elf_section_offset (output_bfd, info,
 						    input_section,
@@ -4194,7 +4192,7 @@ do_relocation:
 		    if (name == NULL)
 		      return FALSE;
 		    if (*name == '\0')
-		      name = bfd_section_name (input_bfd, sec);
+		      name = bfd_section_name (sec);
 		  }
 		(*info->callbacks->reloc_overflow)
 		  (info, (h ? &h->root : NULL), name, howto->name,

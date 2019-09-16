@@ -3866,7 +3866,7 @@ bfd_uses_spe_extensions (bfd *abfd)
   if (!sect)
     return 0;
 
-  size = bfd_get_section_size (sect);
+  size = bfd_section_size (sect);
   contents = (gdb_byte *) xmalloc (size);
   if (!bfd_get_section_contents (abfd, sect, contents, 0, size))
     {

@@ -293,7 +293,7 @@ ldctor_build_sets (void)
 	      /* See PR 20911 for a reproducer.  */
 	      if (p->elements->section->owner == NULL)
 		einfo (_("%X%P: special section %s does not support reloc %s for set %s\n"),
-		       bfd_get_section_name (link_info.output_bfd, p->elements->section),
+		       bfd_section_name (p->elements->section),
 		       bfd_get_reloc_code_name (p->reloc),
 		       p->h->root.string);
 	      else

@@ -382,10 +382,10 @@ change_output_section (lang_statement_union_type ** head,
 }
 
 static void
-add_region_prefix (bfd *abfd, asection *s,
-		   ATTRIBUTE_UNUSED void *unused)
+add_region_prefix (bfd *abfd ATTRIBUTE_UNUSED, asection *s,
+		   void *unused ATTRIBUTE_UNUSED)
 {
-  const char *curr_name = bfd_get_section_name (abfd, s);
+  const char *curr_name = bfd_section_name (s);
   int region = REGION_NONE;
 
   if (strncmp (curr_name, ".text", 5) == 0)
@@ -404,10 +404,10 @@ add_region_prefix (bfd *abfd, asection *s,
     case REGION_NONE:
       break;
     case REGION_UPPER:
-      bfd_rename_section (abfd, s, concat (".upper", curr_name, NULL));
+      bfd_rename_section (s, concat (".upper", curr_name, NULL));
       break;
     case REGION_LOWER:
-      bfd_rename_section (abfd, s, concat (".lower", curr_name, NULL));
+      bfd_rename_section (s, concat (".lower", curr_name, NULL));
       break;
     case REGION_EITHER:
       s->name = concat (".either", curr_name, NULL);
@@ -538,7 +538,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
 }
 
 static void
-eval_upper_either_sections (bfd *abfd, asection *s, void *data)
+eval_upper_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *s, void *data)
 {
   const char * base_sec_name;
   const char * curr_name;
@@ -560,7 +561,7 @@ eval_upper_either_sections (bfd *abfd, asection *s, void *data)
     return;
 
   base_sec_name = (const char *) data;
-  curr_name = bfd_get_section_name (abfd, s);
+  curr_name = bfd_section_name (s);
 
   /* Only concerned with .either input sections in the upper output section.  */
   either_name = concat (".either", base_sec_name, NULL);
@@ -620,7 +621,8 @@ eval_upper_either_sections (bfd *abfd, asection *s, void *data)
 }
 
 static void
-eval_lower_either_sections (bfd *abfd, asection *s, void *data)
+eval_lower_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *s, void *data)
 {
   const char * base_sec_name;
   const char * curr_name;
@@ -640,7 +642,7 @@ eval_lower_either_sections (bfd *abfd, asection *s, void *data)
     return;
 
   base_sec_name = (const char *) data;
-  curr_name = bfd_get_section_name (abfd, s);
+  curr_name = bfd_section_name (s);
 
   /* Only concerned with .either input sections in the lower or "default"
      output section i.e. not in the upper output section.  */

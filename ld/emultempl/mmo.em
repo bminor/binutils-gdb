@@ -192,10 +192,10 @@ mmo_place_orphan (asection *s,
    paper over the bug similarly.  */
 
 static void
-mmo_wipe_sec_reloc_flag (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
+mmo_wipe_sec_reloc_flag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
+			 void *ptr ATTRIBUTE_UNUSED)
 {
-  bfd_set_section_flags (abfd, sec,
-			 bfd_get_section_flags (abfd, sec) & ~SEC_RELOC);
+  bfd_set_section_flags (sec, bfd_section_flags (sec) & ~SEC_RELOC);
 }
 
 /* Iterate with bfd_map_over_sections over mmo_wipe_sec_reloc_flag... */

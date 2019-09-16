@@ -781,7 +781,7 @@ md_begin (void)
 
   /* This is copied from perform_an_assembly_pass.  */
   applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
+  bfd_set_section_flags (sbss_section, applicable & SEC_ALLOC);
 
   subseg_set (seg, subseg);
 
@@ -4483,7 +4483,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
 {
   /* Round up section sizes to ensure that text sections consist of
      whole fetch packets.  */
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 

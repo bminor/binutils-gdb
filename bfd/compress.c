@@ -155,8 +155,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 	      return 0;
 	    }
 	  free (uncompressed_buffer);
-	  bfd_set_section_alignment (abfd, sec,
-				     orig_uncompressed_alignment_pow);
+	  bfd_set_section_alignment (sec, orig_uncompressed_alignment_pow);
 
 	  sec->contents = buffer;
 	  sec->compress_status = COMPRESS_SECTION_DONE;
@@ -255,7 +254,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	      && filesize < sz
 	      /* PR 24753: Linker created sections can be larger than
 		 the file size, eg if they are being used to hold stubs.  */
-	      && (bfd_get_section_flags (abfd, sec) & SEC_LINKER_CREATED) == 0
+	      && (bfd_section_flags (sec) & SEC_LINKER_CREATED) == 0
 	      /* The MMO file format supports its own special compression
 		 technique, but it uses COMPRESS_SECTION_NONE when loading
 		 a section's contents.  */
@@ -552,7 +551,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
 
   sec->compressed_size = sec->size;
   sec->size = uncompressed_size;
-  bfd_set_section_alignment (abfd, sec, uncompressed_alignment_power);
+  bfd_set_section_alignment (sec, uncompressed_alignment_power);
   sec->compress_status = DECOMPRESS_SECTION_SIZED;
 
   return TRUE;

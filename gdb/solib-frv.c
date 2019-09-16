@@ -546,7 +546,7 @@ enable_break2 (void)
 
       /* Read the contents of the .interp section into a local buffer;
          the contents specify the dynamic linker this program uses.  */
-      interp_sect_size = bfd_section_size (exec_bfd, interp_sect);
+      interp_sect_size = bfd_section_size (interp_sect);
       buf = (char *) alloca (interp_sect_size);
       bfd_get_section_contents (exec_bfd, interp_sect,
 				buf, 0, interp_sect_size);
@@ -603,24 +603,20 @@ enable_break2 (void)
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
-	  interp_text_sect_low
-	    = bfd_section_vma (tmp_bfd.get (), interp_sect);
+	  interp_text_sect_low = bfd_section_vma (interp_sect);
 	  interp_text_sect_low
 	    += displacement_from_map (ldm, interp_text_sect_low);
 	  interp_text_sect_high
-	    = interp_text_sect_low + bfd_section_size (tmp_bfd.get (),
-						       interp_sect);
+	    = interp_text_sect_low + bfd_section_size (interp_sect);
 	}
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
-	  interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd.get (), interp_sect);
+	  interp_plt_sect_low = bfd_section_vma (interp_sect);
 	  interp_plt_sect_low
 	    += displacement_from_map (ldm, interp_plt_sect_low);
 	  interp_plt_sect_high =
-	    interp_plt_sect_low + bfd_section_size (tmp_bfd.get (),
-						    interp_sect);
+	    interp_plt_sect_low + bfd_section_size (interp_sect);
 	}
 
       addr = gdb_bfd_lookup_symbol (tmp_bfd.get (), cmp_name, "_dl_debug_addr");

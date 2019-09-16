@@ -2259,7 +2259,7 @@ dump_section_content (bfd *abfd,
 		asection *bfdsec = sec->bfdsection;
 		unsigned char *content;
 
-		size = bfd_get_section_size (bfdsec);
+		size = bfd_section_size (bfdsec);
 		content = (unsigned char *) xmalloc (size);
 		bfd_get_section_contents (abfd, bfdsec, content, 0, size);
 

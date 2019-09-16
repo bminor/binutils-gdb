@@ -816,7 +816,7 @@ parse_coff (bfd *abfd, asymbol **syms, long symcount, void *dhandle)
 		  else
 		    base = auxent.x_sym.x_misc.x_lnsz.x_lnno - 1;
 
-		  addr = bfd_get_section_vma (abfd, bfd_asymbol_section (sym));
+		  addr = bfd_section_vma (bfd_asymbol_section (sym));
 
 		  ++linenos;
 

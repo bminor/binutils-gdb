@@ -1989,7 +1989,7 @@ bfd_arm_get_bfd_for_interworking (bfd *			 abfd,
       sec = bfd_make_section_with_flags (abfd, ARM2THUMB_GLUE_SECTION_NAME,
 					 flags);
       if (sec == NULL
-	  || ! bfd_set_section_alignment (abfd, sec, 2))
+	  || !bfd_set_section_alignment (sec, 2))
 	return FALSE;
     }
 
@@ -2003,7 +2003,7 @@ bfd_arm_get_bfd_for_interworking (bfd *			 abfd,
 					 flags);
 
       if (sec == NULL
-	  || ! bfd_set_section_alignment (abfd, sec, 2))
+	  || !bfd_set_section_alignment (sec, 2))
 	return FALSE;
     }
 

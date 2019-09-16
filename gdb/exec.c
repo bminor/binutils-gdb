@@ -454,14 +454,14 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
      encountered on sparc-solaris 2.10 a shared library with an empty .bss
      section to which a symbol named "_end" was attached.  The address
      of this symbol still needs to be relocated.  */
-  aflag = bfd_get_section_flags (abfd, asect);
+  aflag = bfd_section_flags (asect);
   if (!(aflag & SEC_ALLOC))
     return;
 
   (*table_pp)->owner = NULL;
   (*table_pp)->the_bfd_section = asect;
-  (*table_pp)->addr = bfd_section_vma (abfd, asect);
-  (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
+  (*table_pp)->addr = bfd_section_vma (asect);
+  (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (asect);
   (*table_pp)++;
 }
 
@@ -571,7 +571,7 @@ add_target_sections_of_objfile (struct objfile *objfile)
   /* Compute the number of sections to add.  */
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
-      if (bfd_get_section_size (osect->the_bfd_section) == 0)
+      if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
       count++;
     }
@@ -585,7 +585,7 @@ add_target_sections_of_objfile (struct objfile *objfile)
 
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
-      if (bfd_get_section_size (osect->the_bfd_section) == 0)
+      if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
 
       gdb_assert (ts < table->sections + space + count);
@@ -665,7 +665,7 @@ exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
 	    continue;
 
 	  vma = s->vma;
-	  size = bfd_get_section_size (s);
+	  size = bfd_section_size (s);
 	  if (vma <= offset && offset < (vma + size))
 	    {
 	      ULONGEST amt;
@@ -705,9 +705,7 @@ section_table_available_memory (CORE_ADDR memaddr, ULONGEST len,
 
   for (target_section *p = sections; p < sections_end; p++)
     {
-      if ((bfd_get_section_flags (p->the_bfd_section->owner,
-				  p->the_bfd_section)
-	   & SEC_READONLY) == 0)
+      if ((bfd_section_flags (p->the_bfd_section) & SEC_READONLY) == 0)
 	continue;
 
       /* Copy the meta-data, adjusted.  */
@@ -894,17 +892,16 @@ print_section_info (struct target_section_table *t, bfd *abfd)
       for (p = t->sections; p < t->sections_end; p++)
 	{
 	  struct bfd_section *psect = p->the_bfd_section;
-	  bfd *pbfd = psect->owner;
 
-	  if ((bfd_get_section_flags (pbfd, psect) & (SEC_ALLOC | SEC_LOAD))
+	  if ((bfd_section_flags (psect) & (SEC_ALLOC | SEC_LOAD))
 	      != (SEC_ALLOC | SEC_LOAD))
 	    continue;
 
-	  if (bfd_get_section_vma (pbfd, psect) <= abfd->start_address
-	      && abfd->start_address < (bfd_get_section_vma (pbfd, psect)
-					+ bfd_get_section_size (psect)))
+	  if (bfd_section_vma (psect) <= abfd->start_address
+	      && abfd->start_address < (bfd_section_vma (psect)
+					+ bfd_section_size (psect)))
 	    {
-	      displacement = p->addr - bfd_get_section_vma (pbfd, psect);
+	      displacement = p->addr - bfd_section_vma (psect);
 	      break;
 	    }
 	}
@@ -935,7 +932,7 @@ print_section_info (struct target_section_table *t, bfd *abfd)
       if (info_verbose)
 	printf_filtered (" @ %s",
 			 hex_string_custom (psect->filepos, 8));
-      printf_filtered (" is %s", bfd_section_name (pbfd, psect));
+      printf_filtered (" is %s", bfd_section_name (psect));
       if (pbfd != abfd)
 	printf_filtered (" in %s", bfd_get_filename (pbfd));
       printf_filtered ("\n");
@@ -975,9 +972,8 @@ set_section_command (const char *args, int from_tty)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (!strncmp (secname, bfd_section_name (p->bfd,
-					       p->the_bfd_section), seclen)
-	  && bfd_section_name (p->bfd, p->the_bfd_section)[seclen] == '\0')
+      if (!strncmp (secname, bfd_section_name (p->the_bfd_section), seclen)
+	  && bfd_section_name (p->the_bfd_section)[seclen] == '\0')
 	{
 	  offset = secaddr - p->addr;
 	  p->addr += offset;

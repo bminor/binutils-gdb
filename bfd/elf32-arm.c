@@ -3817,7 +3817,8 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
       htab->srofixup = bfd_make_section_with_flags (dynobj, ".rofixup",
 						    (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 						     | SEC_IN_MEMORY | SEC_LINKER_CREATED | SEC_READONLY));
-      if (htab->srofixup == NULL || ! bfd_set_section_alignment (dynobj, htab->srofixup, 2))
+      if (htab->srofixup == NULL
+	  || !bfd_set_section_alignment (htab->srofixup, 2))
 	return FALSE;
     }
 
@@ -3845,7 +3846,7 @@ create_ifunc_sections (struct bfd_link_info *info)
       s = bfd_make_section_anyway_with_flags (dynobj, ".iplt",
 					      flags | SEC_READONLY | SEC_CODE);
       if (s == NULL
-	  || !bfd_set_section_alignment (dynobj, s, bed->plt_alignment))
+	  || !bfd_set_section_alignment (s, bed->plt_alignment))
 	return FALSE;
       htab->root.iplt = s;
     }
@@ -3856,7 +3857,7 @@ create_ifunc_sections (struct bfd_link_info *info)
 					      RELOC_SECTION (htab, ".iplt"),
 					      flags | SEC_READONLY);
       if (s == NULL
-	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       htab->root.irelplt = s;
     }
@@ -3865,7 +3866,7 @@ create_ifunc_sections (struct bfd_link_info *info)
     {
       s = bfd_make_section_anyway_with_flags (dynobj, ".igot.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       htab->root.igotplt = s;
     }
@@ -7709,7 +7710,7 @@ arm_make_glue_section (bfd * abfd, const char * name)
   sec = bfd_make_section_anyway_with_flags (abfd, name, ARM_GLUE_SECTION_FLAGS);
 
   if (sec == NULL
-      || !bfd_set_section_alignment (abfd, sec, 2))
+      || !bfd_set_section_alignment (sec, 2))
     return FALSE;
 
   /* Set the gc mark to prevent the section from being removed by garbage
@@ -13374,7 +13375,7 @@ elf32_arm_relocate_section (bfd *		   output_bfd,
 	  name = (bfd_elf_string_from_elf_section
 		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	  if (name == NULL || *name == '\0')
-	    name = bfd_section_name (input_bfd, sec);
+	    name = bfd_section_name (sec);
 	}
 
       if (r_symndx != STN_UNDEF
@@ -13552,10 +13553,10 @@ adjust_exidx_size(asection *exidx_sec, int adjust)
   if (!exidx_sec->rawsize)
     exidx_sec->rawsize = exidx_sec->size;
 
-  bfd_set_section_size (exidx_sec->owner, exidx_sec, exidx_sec->size + adjust);
+  bfd_set_section_size (exidx_sec, exidx_sec->size + adjust);
   out_sec = exidx_sec->output_section;
   /* Adjust size of output section.  */
-  bfd_set_section_size (out_sec->owner, out_sec, out_sec->size +adjust);
+  bfd_set_section_size (out_sec, out_sec->size +adjust);
 }
 
 /* Insert an EXIDX_CANTUNWIND marker at the end of a section.  */
@@ -15696,9 +15697,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		{
 		  flagword flags;
 
-		  flags = bfd_get_section_flags (dynobj, sreloc);
+		  flags = bfd_section_flags (sreloc);
 		  flags &= ~(SEC_LOAD | SEC_ALLOC);
-		  bfd_set_section_flags (dynobj, sreloc, flags);
+		  bfd_set_section_flags (sreloc, flags);
 		}
 	    }
 
@@ -17158,7 +17159,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
+      name = bfd_section_name (s);
 
       if (s == htab->root.splt)
 	{
@@ -17951,7 +17952,7 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
 {
   const char * name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   if (is_arm_elf_unwind_section_name (abfd, name))
     {
@@ -20874,7 +20875,7 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  if (strcmp (sec->name, ".glue_7")
 	      && strcmp (sec->name, ".glue_7t"))
 	    {
-	      if ((bfd_get_section_flags (ibfd, sec)
+	      if ((bfd_section_flags (sec)
 		   & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 		  == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 		only_data_sections = FALSE;

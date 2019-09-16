@@ -1979,7 +1979,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
       ls = &(*pl)->input_section;
 
-      lname = bfd_get_section_name (ls->section->owner, ls->section);
+      lname = bfd_section_name (ls->section);
       if (strchr (lname, '\$') != NULL
 	  && (dollar == NULL || strcmp (orig_secname, lname) < 0))
 	break;

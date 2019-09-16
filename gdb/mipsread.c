@@ -200,10 +200,10 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
       || si.dyninfo_sect == NULL || si.got_sect == NULL)
     return;
 
-  gdb::byte_vector sym_sec (bfd_get_section_size (si.sym_sect));
-  gdb::byte_vector str_sec (bfd_get_section_size (si.str_sect));
-  gdb::byte_vector dyninfo_sec (bfd_get_section_size (si.dyninfo_sect));
-  gdb::byte_vector got_sec (bfd_get_section_size (si.got_sect));
+  gdb::byte_vector sym_sec (bfd_section_size (si.sym_sect));
+  gdb::byte_vector str_sec (bfd_section_size (si.str_sect));
+  gdb::byte_vector dyninfo_sec (bfd_section_size (si.dyninfo_sect));
+  gdb::byte_vector got_sec (bfd_section_size (si.got_sect));
 
   if (!bfd_get_section_contents (abfd, si.sym_sect, sym_sec.data (),
 				 (file_ptr) 0, sym_sec.size ()))

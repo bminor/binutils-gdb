@@ -794,8 +794,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 	 file header and the section alignment.  */
       cygwin_load_start = (CORE_ADDR) (uintptr_t) ((char *)
 						   load_addr + 0x1000);
-      cygwin_load_end = cygwin_load_start + bfd_section_size (abfd.get (),
-							      text);
+      cygwin_load_end = cygwin_load_start + bfd_section_size (text);
     }
 #endif
 

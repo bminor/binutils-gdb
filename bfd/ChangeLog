@@ -1,5 +1,50 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (bfd_get_section_name, bfd_get_section_vma),
+	(bfd_get_section_lma, bfd_get_section_alignment),
+	(bfd_get_section_size, bfd_get_section_flags),
+	(bfd_get_section_userdata): Delete.
+	(bfd_section_name, bfd_section_size, bfd_section_vma),
+	(bfd_section_lma, bfd_section_alignment): Lose bfd parameter.
+	(bfd_section_flags, bfd_section_userdata): New.
+	(bfd_is_com_section): Rename parameter.
+	* section.c (bfd_set_section_userdata, bfd_set_section_vma),
+	(bfd_set_section_alignment, bfd_set_section_flags, bfd_rename_section),
+	(bfd_set_section_size): Delete bfd parameter, rename section parameter.
+	(bfd_set_section_lma): New.
+	* bfd-in2.h: Regenerate.
+	* mach-o.c (bfd_mach_o_init_section_from_mach_o): Delete bfd param,
+	update callers.
+	* aoutx.h, * bfd.c, * coff-alpha.c, * coff-arm.c, * coff-mips.c,
+	* coff64-rs6000.c, * coffcode.h, * coffgen.c, * cofflink.c,
+	* compress.c, * ecoff.c, * elf-eh-frame.c, * elf-hppa.h,
+	* elf-ifunc.c, * elf-m10200.c, * elf-m10300.c, * elf-properties.c,
+	* elf-s390-common.c, * elf-vxworks.c, * elf.c, * elf32-arc.c,
+	* elf32-arm.c, * elf32-avr.c, * elf32-bfin.c, * elf32-cr16.c,
+	* elf32-cr16c.c, * elf32-cris.c, * elf32-crx.c, * elf32-csky.c,
+	* elf32-d10v.c, * elf32-epiphany.c, * elf32-fr30.c, * elf32-frv.c,
+	* elf32-ft32.c, * elf32-h8300.c, * elf32-hppa.c, * elf32-i386.c,
+	* elf32-ip2k.c, * elf32-iq2000.c, * elf32-lm32.c, * elf32-m32c.c,
+	* elf32-m32r.c, * elf32-m68hc1x.c, * elf32-m68k.c, * elf32-mcore.c,
+	* elf32-mep.c, * elf32-metag.c, * elf32-microblaze.c,
+	* elf32-moxie.c, * elf32-msp430.c, * elf32-mt.c, * elf32-nds32.c,
+	* elf32-nios2.c, * elf32-or1k.c, * elf32-ppc.c, * elf32-pru.c,
+	* elf32-rl78.c, * elf32-rx.c, * elf32-s390.c, * elf32-score.c,
+	* elf32-score7.c, * elf32-sh.c, * elf32-spu.c, * elf32-tic6x.c,
+	* elf32-tilepro.c, * elf32-v850.c, * elf32-vax.c, * elf32-visium.c,
+	* elf32-xstormy16.c, * elf32-xtensa.c, * elf64-alpha.c,
+	* elf64-bpf.c, * elf64-hppa.c, * elf64-ia64-vms.c, * elf64-mmix.c,
+	* elf64-ppc.c, * elf64-s390.c, * elf64-sparc.c, * elf64-x86-64.c,
+	* elflink.c, * elfnn-aarch64.c, * elfnn-ia64.c, * elfnn-riscv.c,
+	* elfxx-aarch64.c, * elfxx-mips.c, * elfxx-sparc.c,
+	* elfxx-tilegx.c, * elfxx-x86.c, * i386msdos.c, * linker.c,
+	* mach-o.c, * mmo.c, * opncls.c, * pdp11.c, * pei-x86_64.c,
+	* peicode.h, * reloc.c, * section.c, * syms.c, * vms-alpha.c,
+	* xcofflink.c: Update throughout for bfd section macro and function
+	changes.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (bfd_asymbol_section): Rename from bfd_get_section.
 	(bfd_get_output_section): Delete.
 	(bfd_asymbol_base): Delete.

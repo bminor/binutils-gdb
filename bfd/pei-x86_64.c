@@ -770,7 +770,7 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 	  if (PEX64_IS_RUNTIME_FUNCTION_CHAINED (&rf))
 	    {
 	      bfd_vma altent = PEX64_GET_UNWINDDATA_UNIFIED_RVA (&rf);
-	      bfd_vma pdata_vma = bfd_get_section_vma (abfd, pdata_section);
+	      bfd_vma pdata_vma = bfd_section_vma (pdata_section);
 	      struct pex64_runtime_function arf;
 
 	      fprintf (file, "\t shares information with ");

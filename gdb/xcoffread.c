@@ -267,9 +267,9 @@ find_targ_sec (bfd *abfd, asection *sect, void *obj)
   if (sect->target_index == args->targ_index)
     {
       /* This is the section.  Figure out what SECT_OFF_* code it is.  */
-      if (bfd_get_section_flags (abfd, sect) & SEC_CODE)
+      if (bfd_section_flags (sect) & SEC_CODE)
 	*args->resultp = SECT_OFF_TEXT (objfile);
-      else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
+      else if (bfd_section_flags (sect) & SEC_LOAD)
 	*args->resultp = SECT_OFF_DATA (objfile);
       else
 	*args->resultp = gdb_bfd_section_index (abfd, sect);
@@ -2354,7 +2354,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		       section.  */
 		    bfd_sect = secnum_to_bfd_section (symbol.n_scnum, objfile);
 		    if (bfd_sect)
-		      toc_offset -= bfd_section_vma (objfile->obfd, bfd_sect);
+		      toc_offset -= bfd_section_vma (bfd_sect);
 		    break;
 
 		  case XMC_TC:
@@ -2952,7 +2952,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  secp = bfd_get_section_by_name (abfd, ".debug");
 	  if (secp)
 	    {
-	      length = bfd_section_size (abfd, secp);
+	      length = bfd_section_size (secp);
 	      if (length)
 		{
 		  debugsec
@@ -3029,8 +3029,7 @@ xcoff_symfile_offsets (struct objfile *objfile,
   if (objfile->num_sections == 0)
     return; /* Is that even possible?  Better safe than sorry.  */
 
-  first_section_name
-    = bfd_section_name (objfile->obfd, objfile->sections[0].the_bfd_section);
+  first_section_name = bfd_section_name (objfile->sections[0].the_bfd_section);
 
   if (objfile->sect_index_text == 0
       && strcmp (first_section_name, ".text") != 0)
@@ -3089,7 +3088,7 @@ xcoff_get_core_n_import_files (bfd *abfd)
   if (sect == NULL)
     return -1;  /* Not a core file.  */
 
-  for (offset = 0; offset < bfd_get_section_size (sect);)
+  for (offset = 0; offset < bfd_section_size (sect);)
     {
       int next;
 

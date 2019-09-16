@@ -346,7 +346,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
   te = (hwcap & HWCAP_S390_TE);
   gs = (hwcap & HWCAP_S390_GS);
 
-  switch (bfd_section_size (abfd, section))
+  switch (bfd_section_size (section))
     {
     case s390_sizeof_gregset:
       if (high_gprs)

@@ -1322,7 +1322,7 @@ _bfd_m32r_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 					asection *sec,
 					int *retval)
 {
-  if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
+  if (strcmp (bfd_section_name (sec), ".scommon") == 0)
     {
       *retval = SHN_M32R_SCOMMON;
       return TRUE;
@@ -1407,7 +1407,7 @@ m32r_elf_add_symbol_hook (bfd *abfd,
 						  flags);
 	  if (s == NULL)
 	    return FALSE;
-	  if (! bfd_set_section_alignment (abfd, s, 2))
+	  if (!bfd_set_section_alignment (s, 2))
 	    return FALSE;
 	}
 
@@ -1623,7 +1623,7 @@ m32r_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd, ".plt", pltflags);
   htab->root.splt = s;
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+      || !bfd_set_section_alignment (s, bed->plt_alignment))
     return FALSE;
 
   if (bed->want_plt_sym)
@@ -1654,7 +1654,7 @@ m32r_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					  flags | SEC_READONLY);
   htab->root.srelplt = s;
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, ptralign))
+      || !bfd_set_section_alignment (s, ptralign))
     return FALSE;
 
   if (htab->root.sgot == NULL
@@ -1693,7 +1693,7 @@ m32r_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 						  flags | SEC_READONLY);
 	  htab->srelbss = s;
 	  if (s == NULL
-	      || ! bfd_set_section_alignment (abfd, s, ptralign))
+	      || !bfd_set_section_alignment (s, ptralign))
 	    return FALSE;
 	}
     }
@@ -2234,7 +2234,7 @@ m32r_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->root.srelplt)
 	    relocs = TRUE;
@@ -2954,7 +2954,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		const char *name;
 
 		BFD_ASSERT (sec != NULL);
-		name = bfd_get_section_name (sec->owner, sec);
+		name = bfd_section_name (sec);
 
 		if (   strcmp (name, ".sdata") == 0
 		    || strcmp (name, ".sbss") == 0
@@ -3022,7 +3022,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      name = (bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (errmsg != NULL)

@@ -1152,14 +1152,14 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
 
   record_alignment (now_seg, log_align);
 
-  cur_size = bfd_section_size (stdoutput, now_seg);
+  cur_size = bfd_section_size (now_seg);
   if ((int) size > cur_size)
     {
       char *pfrag
         = frag_var (rs_fill, 1, 1, (relax_substateT)0, NULL,
                     (valueT)size - (valueT)cur_size, NULL);
       *pfrag = 0;
-      bfd_section_size (stdoutput, now_seg) = size;
+      bfd_set_section_size (now_seg, size);
     }
 
   /* Switch back to current segment.  */
@@ -3606,8 +3606,7 @@ start_unwind_section (const segT text_seg, int sec_index)
   else
     {
       set_section (sec_name);
-      bfd_set_section_flags (stdoutput, now_seg,
-			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+      bfd_set_section_flags (now_seg, SEC_LOAD | SEC_ALLOC | SEC_READONLY);
     }
 
   elf_linked_to_section (now_seg) = text_seg;
@@ -7250,7 +7249,7 @@ md_begin (void)
   md.auto_align = 1;
   md.explicit_mode = md.default_explicit_mode;
 
-  bfd_set_section_alignment (stdoutput, text_section, 4);
+  bfd_set_section_alignment (text_section, 4);
 
   /* Make sure function pointers get initialized.  */
   target_big_endian = -1;
@@ -7778,7 +7777,7 @@ ia64_frob_label (struct symbol *sym)
       return;
     }
 
-  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+  if (bfd_section_flags (now_seg) & SEC_CODE)
     {
       md.last_text_seg = now_seg;
       fix = XOBNEW (&notes, struct label_fix);
@@ -7818,7 +7817,7 @@ void
 ia64_flush_pending_output (void)
 {
   if (!md.keep_pending_output
-      && bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+      && bfd_section_flags (now_seg) & SEC_CODE)
     {
       /* ??? This causes many unnecessary stop bits to be emitted.
 	 Unfortunately, it isn't clear if it is safe to remove this.  */
@@ -10989,7 +10988,7 @@ ia64_pcrel_from_section (fixS *fix, segT sec)
 {
   unsigned long off = fix->fx_frag->fr_address + fix->fx_where;
 
-  if (bfd_get_section_flags (stdoutput, sec) & SEC_CODE)
+  if (bfd_section_flags (sec) & SEC_CODE)
     off &= ~0xfUL;
 
   return off;
@@ -11946,9 +11945,7 @@ ia64_vms_note (void)
   /* Create the .note section.  */
 
   secp = subseg_new (".note", 0);
-  bfd_set_section_flags (stdoutput,
-			 secp,
-			 SEC_HAS_CONTENTS | SEC_READONLY);
+  bfd_set_section_flags (secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
   /* Module header note (MHD).  */
   bname = xstrdup (lbasename (out_file_name));
@@ -11993,9 +11990,7 @@ ia64_vms_note (void)
   frag_align (3, 0, 0);
 
   secp = subseg_new (".vms_display_name_info", 0);
-  bfd_set_section_flags (stdoutput,
-			 secp,
-			 SEC_HAS_CONTENTS | SEC_READONLY);
+  bfd_set_section_flags (secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
   /* This symbol should be passed on the command line and be variable
      according to language.  */

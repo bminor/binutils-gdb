@@ -306,21 +306,15 @@ typedef struct bfd_section *sec_ptr;
    ? (((bfd_vma) (this) + ((boundary) - 1)) & ~ (bfd_vma) ((boundary)-1)) \
    : ~ (bfd_vma) 0)
 
-#define bfd_get_section_name(bfd, ptr) ((void) bfd, (ptr)->name)
-#define bfd_get_section_vma(bfd, ptr) ((void) bfd, (ptr)->vma)
-#define bfd_get_section_lma(bfd, ptr) ((void) bfd, (ptr)->lma)
-#define bfd_get_section_alignment(bfd, ptr) ((void) bfd, \
-					     (ptr)->alignment_power)
-#define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) ((ptr)->size)
-#define bfd_get_section_size(ptr) ((ptr)->size)
-#define bfd_section_vma(bfd, ptr) ((ptr)->vma)
-#define bfd_section_lma(bfd, ptr) ((ptr)->lma)
-#define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
-#define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
-#define bfd_get_section_userdata(bfd, ptr) ((void) bfd, (ptr)->userdata)
+#define bfd_section_name(sec) ((sec)->name)
+#define bfd_section_size(sec) ((sec)->size)
+#define bfd_section_vma(sec) ((sec)->vma)
+#define bfd_section_lma(sec) ((sec)->lma)
+#define bfd_section_alignment(sec) ((sec)->alignment_power)
+#define bfd_section_flags(sec) ((sec)->flags)
+#define bfd_section_userdata(sec) ((sec)->userdata)
 
-#define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
+#define bfd_is_com_section(sec) (((sec)->flags & SEC_IS_COMMON) != 0)
 
 #define bfd_get_section_limit_octets(bfd, sec)			\
   ((bfd)->direction != write_direction && (sec)->rawsize != 0	\
@@ -1742,26 +1736,31 @@ struct relax_table {
    would use a comma expression, eg: "((ptr)->foo = val, TRUE)" and some
    compilers will complain about comma expressions that have no effect.  */
 static inline bfd_boolean
-bfd_set_section_userdata (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr,
-                          void * val)
+bfd_set_section_userdata (asection *sec, void *val)
 {
-  ptr->userdata = val;
+  sec->userdata = val;
   return TRUE;
 }
 
 static inline bfd_boolean
-bfd_set_section_vma (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, bfd_vma val)
+bfd_set_section_vma (asection *sec, bfd_vma val)
 {
-  ptr->vma = ptr->lma = val;
-  ptr->user_set_vma = TRUE;
+  sec->vma = sec->lma = val;
+  sec->user_set_vma = TRUE;
   return TRUE;
 }
 
 static inline bfd_boolean
-bfd_set_section_alignment (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr,
-                           unsigned int val)
+bfd_set_section_lma (asection *sec, bfd_vma val)
 {
-  ptr->alignment_power = val;
+  sec->lma = val;
+  return TRUE;
+}
+
+static inline bfd_boolean
+bfd_set_section_alignment (asection *sec, unsigned int val)
+{
+  sec->alignment_power = val;
   return TRUE;
 }
 
@@ -1963,11 +1962,10 @@ asection *bfd_make_section_with_flags
 
 asection *bfd_make_section (bfd *, const char *name);
 
-bfd_boolean bfd_set_section_flags
-   (bfd *abfd, asection *sec, flagword flags);
+bfd_boolean bfd_set_section_flags (asection *sec, flagword flags);
 
 void bfd_rename_section
-   (bfd *abfd, asection *sec, const char *newname);
+   (asection *sec, const char *newname);
 
 void bfd_map_over_sections
    (bfd *abfd,
@@ -1979,8 +1977,7 @@ asection *bfd_sections_find_if
     bfd_boolean (*operation) (bfd *abfd, asection *sect, void *obj),
     void *obj);
 
-bfd_boolean bfd_set_section_size
-   (bfd *abfd, asection *sec, bfd_size_type val);
+bfd_boolean bfd_set_section_size (asection *sec, bfd_size_type val);
 
 bfd_boolean bfd_set_section_contents
    (bfd *abfd, asection *section, const void *data,

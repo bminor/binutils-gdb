@@ -168,7 +168,7 @@ mips_add_stub_section (const char *stub_sec_name, asection *input_section,
   /* Set the flags.  */
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP);
-  if (!bfd_set_section_flags (stub_bfd, stub_sec, flags))
+  if (!bfd_set_section_flags (stub_sec, flags))
     goto err_ret;
 
   os = lang_output_section_get (output_section);

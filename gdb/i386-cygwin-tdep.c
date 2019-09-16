@@ -110,14 +110,14 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   if (!startswith (sect->name, ".module"))
     return;
 
-  buf = (gdb_byte *) xmalloc (bfd_get_section_size (sect) + 1);
+  buf = (gdb_byte *) xmalloc (bfd_section_size (sect) + 1);
   if (!buf)
     {
       printf_unfiltered ("memory allocation failed for %s\n", sect->name);
       goto out;
     }
   if (!bfd_get_section_contents (abfd, sect,
-				 buf, 0, bfd_get_section_size (sect)))
+				 buf, 0, bfd_section_size (sect)))
     goto out;
 
 
@@ -130,7 +130,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   module_name_size =
     extract_unsigned_integer (buf + 8, 4, byte_order);
 
-  if (12 + module_name_size > bfd_get_section_size (sect))
+  if (12 + module_name_size > bfd_section_size (sect))
     goto out;
   module_name = (char *) buf + 12;
 
@@ -240,7 +240,7 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
     {
       asection *section = bfd_get_section_by_name (abfd, ".reg");
       if (section
-	  && bfd_section_size (abfd, section) == I386_WINDOWS_SIZEOF_GREGSET)
+	  && bfd_section_size (section) == I386_WINDOWS_SIZEOF_GREGSET)
 	return GDB_OSABI_CYGWIN;
     }
 

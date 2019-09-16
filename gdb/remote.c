@@ -8749,9 +8749,7 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
 
   secp = target_section_by_addr (this, memaddr);
   if (secp != NULL
-      && (bfd_get_section_flags (secp->the_bfd_section->owner,
-				 secp->the_bfd_section)
-	  & SEC_READONLY))
+      && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
     {
       struct target_section *p;
       ULONGEST memend = memaddr + len;
@@ -10656,11 +10654,11 @@ compare_sections_command (const char *args, int from_tty)
       if (read_only && (s->flags & SEC_READONLY) == 0)
 	continue;		/* Skip writeable sections */
 
-      size = bfd_get_section_size (s);
+      size = bfd_section_size (s);
       if (size == 0)
 	continue;		/* Skip zero-length section.  */
 
-      sectname = bfd_get_section_name (exec_bfd, s);
+      sectname = bfd_section_name (s);
       if (args && strcmp (args, sectname) != 0)
 	continue;		/* Not the section selected by user.  */
 
@@ -13059,7 +13057,6 @@ void
 remote_target::trace_set_readonly_regions ()
 {
   asection *s;
-  bfd *abfd = NULL;
   bfd_size_type size;
   bfd_vma vma;
   int anysecs = 0;
@@ -13083,8 +13080,8 @@ remote_target::trace_set_readonly_regions ()
 	continue;
 
       anysecs = 1;
-      vma = bfd_get_section_vma (abfd, s);
-      size = bfd_get_section_size (s);
+      vma = bfd_section_vma (s);
+      size = bfd_section_size (s);
       sprintf_vma (tmp1, vma);
       sprintf_vma (tmp2, vma + size);
       sec_length = 1 + strlen (tmp1) + 1 + strlen (tmp2);

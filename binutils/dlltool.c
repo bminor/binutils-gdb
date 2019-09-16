@@ -1384,7 +1384,7 @@ scan_drectve_symbols (bfd *abfd)
   if (s == NULL)
     return;
 
-  size = bfd_get_section_size (s);
+  size = bfd_section_size (s);
   buf  = xmalloc (size);
 
   bfd_get_section_contents (abfd, s, buf, 0, size);
@@ -2482,11 +2482,9 @@ make_one_lib_file (export_type *exp, int i, int delay)
       if (si->id != i)
 	abort ();
       si->sec = bfd_make_section_old_way (abfd, si->name);
-      bfd_set_section_flags (abfd,
-			     si->sec,
-			     si->flags & applicable);
+      bfd_set_section_flags (si->sec, si->flags & applicable);
 
-      bfd_set_section_alignment(abfd, si->sec, si->align);
+      bfd_set_section_alignment (si->sec, si->align);
       si->sec->output_section = si->sec;
       si->sym = bfd_make_empty_symbol(abfd);
       si->sym->name = si->sec->name;
@@ -2822,7 +2820,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	    arelent *imglue, *ba_rel, *ea_rel, *pea_rel;
 
 	    /* Alignment must be set to 2**2 or you get extra stuff.  */
-	    bfd_set_section_alignment(abfd, sec, 2);
+	    bfd_set_section_alignment (sec, 2);
 
 	    si->size = 4 * 5;
 	    si->data = xmalloc (si->size);
@@ -2908,8 +2906,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
       {
 	sinfo *si = secdata + i;
 
-	bfd_set_section_size (abfd, si->sec, si->size);
-	bfd_set_section_vma (abfd, si->sec, vma);
+	bfd_set_section_size (si->sec, si->size);
+	bfd_set_section_vma (si->sec, vma);
       }
   }
   /* Write them out.  */
@@ -3691,7 +3689,7 @@ identify_search_section (bfd * abfd, asection * section, void * obj)
   if (ms_style && ((section->flags & SEC_DATA) == 0))
     return;
 
-  if ((datasize = bfd_section_size (abfd, section)) == 0)
+  if ((datasize = bfd_section_size (section)) == 0)
     return;
 
   data = (bfd_byte *) xmalloc (datasize + 1);

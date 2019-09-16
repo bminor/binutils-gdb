@@ -1565,7 +1565,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       base = 0;
       break;
     case DW_EH_PE_pcrel:
-      base = bfd_get_section_vma (unit->abfd, unit->dwarf_frame_section);
+      base = bfd_section_vma (unit->dwarf_frame_section);
       base += (buf - unit->dwarf_frame_buffer);
       break;
     case DW_EH_PE_datarel:

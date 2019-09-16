@@ -910,12 +910,12 @@ JITed symbol file is not an object file, ignoring it.\n"));
      addresses that we care about.  */
   section_addr_info sai;
   for (sec = nbfd->sections; sec != NULL; sec = sec->next)
-    if ((bfd_get_section_flags (nbfd.get (), sec) & (SEC_ALLOC|SEC_LOAD)) != 0)
+    if ((bfd_section_flags (sec) & (SEC_ALLOC|SEC_LOAD)) != 0)
       {
         /* We assume that these virtual addresses are absolute, and do not
            treat them as offsets.  */
-	sai.emplace_back (bfd_get_section_vma (nbfd.get (), sec),
-			  bfd_get_section_name (nbfd.get (), sec),
+	sai.emplace_back (bfd_section_vma (sec),
+			  bfd_section_name (sec),
 			  sec->index);
       }
 

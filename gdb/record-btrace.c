@@ -1435,8 +1435,7 @@ record_btrace_target::xfer_partial (enum target_object object,
 	    if (section != NULL)
 	      {
 		/* Check if the section we found is readonly.  */
-		if ((bfd_get_section_flags (section->the_bfd_section->owner,
-					    section->the_bfd_section)
+		if ((bfd_section_flags (section->the_bfd_section)
 		     & SEC_READONLY) != 0)
 		  {
 		    /* Truncate the request to fit into this section.  */

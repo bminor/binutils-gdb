@@ -1255,7 +1255,7 @@ group_signature (asection *group)
 static bfd_boolean
 is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  const char *name = bfd_get_section_name (abfd, sec);
+  const char *name = bfd_section_name (sec);
   int len = strlen (name);
 
   return strncmp (name + len - 4, ".dwo", 4) == 0;
@@ -1310,17 +1310,17 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       struct section_list *p;
       struct section_list *q;
 
-      p = find_section_list (bfd_get_section_name (abfd, sec), FALSE,
+      p = find_section_list (bfd_section_name (sec), FALSE,
 			     SECTION_CONTEXT_REMOVE);
-      q = find_section_list (bfd_get_section_name (abfd, sec), FALSE,
+      q = find_section_list (bfd_section_name (sec), FALSE,
 			     SECTION_CONTEXT_COPY);
 
       if (p && q)
 	fatal (_("error: section %s matches both remove and copy options"),
-	       bfd_get_section_name (abfd, sec));
+	       bfd_section_name (sec));
       if (p && is_update_section (abfd, sec))
 	fatal (_("error: section %s matches both update and remove options"),
-	       bfd_get_section_name (abfd, sec));
+	       bfd_section_name (sec));
 
       if (p != NULL)
 	return TRUE;
@@ -1328,7 +1328,7 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return TRUE;
     }
 
-  if ((bfd_get_section_flags (abfd, sec) & SEC_DEBUGGING) != 0)
+  if ((bfd_section_flags (sec) & SEC_DEBUGGING) != 0)
     {
       if (strip_symbols == STRIP_DEBUG
 	  || strip_symbols == STRIP_UNNEEDED
@@ -1339,7 +1339,7 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	  /* By default we don't want to strip .reloc section.
 	     This section has for pe-coff special meaning.   See
 	     pe-dll.c file in ld, and peXXigen.c in bfd for details.  */
-	  if (strcmp (bfd_get_section_name (abfd, sec), ".reloc") != 0)
+	  if (strcmp (bfd_section_name (sec), ".reloc") != 0)
 	    return TRUE;
 	}
 
@@ -1364,7 +1364,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   if (is_strip_section_1 (abfd, sec))
     return TRUE;
 
-  if ((bfd_get_section_flags (abfd, sec) & SEC_GROUP) != 0)
+  if ((bfd_section_flags (sec) & SEC_GROUP) != 0)
     {
       asymbol *gsym;
       const char *gname;
@@ -1414,7 +1414,7 @@ is_nondebug_keep_contents_section (bfd *ibfd, asection *isection)
      directory", but that may be the .text section for objects produced by some
      tools, which it is not sensible to keep.  */
   if (ibfd->xvec->flavour == bfd_target_coff_flavour)
-    return (strcmp (bfd_get_section_name (ibfd, isection), ".buildid") == 0);
+    return (strcmp (bfd_section_name (isection), ".buildid") == 0);
 
   return FALSE;
 }
@@ -2728,7 +2728,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		}
 	    }
 
-	  if (! bfd_set_section_size (obfd, padd->section, padd->size))
+	  if (!bfd_set_section_size (padd->section, padd->size))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, padd->section, NULL);
 	      return FALSE;
@@ -2737,7 +2737,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  pset = find_section_list (padd->name, FALSE,
 				    SECTION_CONTEXT_SET_VMA | SECTION_CONTEXT_ALTER_VMA);
 	  if (pset != NULL
-	      && ! bfd_set_section_vma (obfd, padd->section, pset->vma_val))
+	      && !bfd_set_section_vma (padd->section, pset->vma_val))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, padd->section, NULL);
 	      return FALSE;
@@ -2749,9 +2749,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    {
 	      padd->section->lma = pset->lma_val;
 
-	      if (! bfd_set_section_alignment
-		  (obfd, padd->section,
-		   bfd_section_alignment (obfd, padd->section)))
+	      if (!bfd_set_section_alignment
+		  (padd->section, bfd_section_alignment (padd->section)))
 		{
 		  bfd_nonfatal_message (NULL, obfd, padd->section, NULL);
 		  return FALSE;
@@ -2776,7 +2775,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 
 	  osec = pupdate->section->output_section;
-	  if (! bfd_set_section_size (obfd, osec, pupdate->size))
+	  if (!bfd_set_section_size (osec, pupdate->size))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, osec, NULL);
 	      return FALSE;
@@ -2793,7 +2792,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	{
 	  bfd_size_type size;
 	  
-	  size = bfd_get_section_size (osec);
+	  size = bfd_section_size (osec);
 	  if (size == 0)
 	    {
 	      bfd_nonfatal_message (NULL, ibfd, osec, _("warning: note section is empty"));
@@ -2820,7 +2819,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      else
 		{
 		  if (osec->output_section == NULL
-		      || ! bfd_set_section_size (obfd, osec->output_section, merged_size))
+		      || !bfd_set_section_size (osec->output_section,
+						merged_size))
 		    {
 		      bfd_nonfatal_message (NULL, obfd, osec, _("warning: failed to set merged notes size"));
 		      free (merged_notes);
@@ -2848,14 +2848,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      continue;
 	    }
 
-	  if ((bfd_get_section_flags (ibfd, osec) & SEC_HAS_CONTENTS) == 0)
+	  if ((bfd_section_flags (osec) & SEC_HAS_CONTENTS) == 0)
 	    {
 	      bfd_nonfatal_message (NULL, ibfd, osec,
 				    _("can't dump section - it has no contents"));
 	      continue;
 	    }
 
-	  bfd_size_type size = bfd_get_section_size (osec);
+	  bfd_size_type size = bfd_section_size (osec);
 	  if (size == 0)
 	    {
 	      bfd_nonfatal_message (NULL, ibfd, osec,
@@ -2948,7 +2948,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 					   + highest_section->size,
 					   /* FIXME: We ought to be using
 					      COFF_PAGE_SIZE here or maybe
-					      bfd_get_section_alignment() (if it
+					      bfd_section_alignment() (if it
 					      was set) but since this is for PE
 					      and we know the required alignment
 					      it is easier just to hard code it.  */
@@ -2957,7 +2957,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		/* Umm, not sure what to do in this case.  */
 		debuglink_vma = 0x1000;
 
-	      bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
+	      bfd_set_section_vma (gnu_debuglink_section, debuglink_vma);
 	    }
 	}
     }
@@ -2991,18 +2991,18 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      bfd_size_type size;
 	      bfd_vma gap_start, gap_stop;
 
-	      flags = bfd_get_section_flags (obfd, osections[i]);
+	      flags = bfd_section_flags (osections[i]);
 	      if ((flags & SEC_HAS_CONTENTS) == 0
 		  || (flags & SEC_LOAD) == 0)
 		continue;
 
-	      size = bfd_section_size (obfd, osections[i]);
-	      gap_start = bfd_section_lma (obfd, osections[i]) + size;
-	      gap_stop = bfd_section_lma (obfd, osections[i + 1]);
+	      size = bfd_section_size (osections[i]);
+	      gap_start = bfd_section_lma (osections[i]) + size;
+	      gap_stop = bfd_section_lma (osections[i + 1]);
 	      if (gap_start < gap_stop)
 		{
-		  if (! bfd_set_section_size (obfd, osections[i],
-					      size + (gap_stop - gap_start)))
+		  if (!bfd_set_section_size (osections[i],
+					     size + (gap_stop - gap_start)))
 		    {
 		      bfd_nonfatal_message (NULL, obfd, osections[i],
 					    _("Can't fill gap after section"));
@@ -3021,12 +3021,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  bfd_vma lma;
 	  bfd_size_type size;
 
-	  lma = bfd_section_lma (obfd, osections[c - 1]);
-	  size = bfd_section_size (obfd, osections[c - 1]);
+	  lma = bfd_section_lma (osections[c - 1]);
+	  size = bfd_section_size (osections[c - 1]);
 	  if (lma + size < pad_to)
 	    {
-	      if (! bfd_set_section_size (obfd, osections[c - 1],
-					  pad_to - lma))
+	      if (!bfd_set_section_size (osections[c - 1], pad_to - lma))
 		{
 		  bfd_nonfatal_message (NULL, obfd, osections[c - 1],
 					_("can't add padding"));
@@ -3204,7 +3203,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      file_ptr off;
 
 	      left = gaps[i];
-	      off = bfd_section_size (obfd, osections[i]) - left;
+	      off = bfd_section_size (osections[i]) - left;
 
 	      while (left > 0)
 		{
@@ -3779,13 +3778,13 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     return;
 
   /* Get the, possibly new, name of the output section.  */
-  name = bfd_section_name (ibfd, isection);
-  flags = bfd_get_section_flags (ibfd, isection);
+  name = bfd_section_name (isection);
+  flags = bfd_section_flags (isection);
   name = find_section_rename (name, &flags);
 
   /* Prefix sections.  */
   if ((prefix_alloc_sections_string)
-      && (bfd_get_section_flags (ibfd, isection) & SEC_ALLOC))
+      && (bfd_section_flags (isection) & SEC_ALLOC))
     prefix = prefix_alloc_sections_string;
   else if (prefix_sections_string)
     prefix = prefix_sections_string;
@@ -3802,7 +3801,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   make_nobits = FALSE;
 
-  p = find_section_list (bfd_section_name (ibfd, isection), FALSE,
+  p = find_section_list (bfd_section_name (isection), FALSE,
 			 SECTION_CONTEXT_SET_FLAGS);
   if (p != NULL)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
@@ -3834,20 +3833,20 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (make_nobits)
     elf_section_type (osection) = SHT_NOBITS;
 
-  size = bfd_section_size (ibfd, isection);
+  size = bfd_section_size (isection);
   size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
     size = (size + interleave - 1) / interleave * copy_width;
   else if (extract_symbol)
     size = 0;
-  if (! bfd_set_section_size (obfd, osection, size))
+  if (!bfd_set_section_size (osection, size))
     {
       err = _("failed to set size");
       goto loser;
     }
 
-  vma = bfd_section_vma (ibfd, isection);
-  p = find_section_list (bfd_section_name (ibfd, isection), FALSE,
+  vma = bfd_section_vma (isection);
+  p = find_section_list (bfd_section_name (isection), FALSE,
 			 SECTION_CONTEXT_ALTER_VMA | SECTION_CONTEXT_SET_VMA);
   if (p != NULL)
     {
@@ -3859,14 +3858,14 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else
     vma += change_section_address;
 
-  if (! bfd_set_section_vma (obfd, osection, vma))
+  if (!bfd_set_section_vma (osection, vma))
     {
       err = _("failed to set vma");
       goto loser;
     }
 
   lma = isection->lma;
-  p = find_section_list (bfd_section_name (ibfd, isection), FALSE,
+  p = find_section_list (bfd_section_name (isection), FALSE,
 			 SECTION_CONTEXT_ALTER_LMA | SECTION_CONTEXT_SET_LMA);
   if (p != NULL)
     {
@@ -3880,18 +3879,16 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   osection->lma = lma;
 
-  p = find_section_list (bfd_section_name (ibfd, isection), FALSE,
+  p = find_section_list (bfd_section_name (isection), FALSE,
 			 SECTION_CONTEXT_SET_ALIGNMENT);
   if (p != NULL)
     alignment = p->alignment;
   else
-    alignment = bfd_section_alignment (ibfd, isection);
+    alignment = bfd_section_alignment (isection);
   
   /* FIXME: This is probably not enough.  If we change the LMA we
      may have to recompute the header for the file as well.  */
-  if (!bfd_set_section_alignment (obfd,
-				  osection,
-				  alignment))
+  if (!bfd_set_section_alignment (osection, alignment))
     {
       err = _("failed to set alignment");
       goto loser;
@@ -3965,12 +3962,12 @@ skip_section (bfd *ibfd, sec_ptr isection, bfd_boolean skip_copy)
   if (skip_copy && is_merged_note_section (ibfd, isection))
     return TRUE;
 
-  flags = bfd_get_section_flags (ibfd, isection);
+  flags = bfd_section_flags (isection);
   if ((flags & SEC_GROUP) != 0)
     return TRUE;
 
   osection = isection->output_section;
-  size = bfd_get_section_size (isection);
+  size = bfd_section_size (isection);
 
   if (size == 0 || osection == 0)
     return TRUE;
@@ -3995,7 +3992,7 @@ handle_remove_relocations_option (const char *section_pattern)
 static bfd_boolean
 discard_relocations (bfd *ibfd ATTRIBUTE_UNUSED, asection *isection)
 {
-  return (find_section_list (bfd_section_name (ibfd, isection), FALSE,
+  return (find_section_list (bfd_section_name (isection), FALSE,
 			     SECTION_CONTEXT_REMOVE_RELOCS) != NULL);
 }
 
@@ -4140,10 +4137,10 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
      ELF classes of input and output aren't the same.  We can't use
      the output section size since --interleave will shrink the output
      section.   Size will be updated if the section is converted.   */
-  size = bfd_get_section_size (isection);
+  size = bfd_section_size (isection);
 
-  if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
-      && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
+  if (bfd_section_flags (isection) & SEC_HAS_CONTENTS
+      && bfd_section_flags (osection) & SEC_HAS_CONTENTS)
     {
       bfd_byte *memhunk = NULL;
 
@@ -4180,7 +4177,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  else
 	    /* User must pad the section up in order to do this.  */
 	    fatal (_("cannot reverse bytes: length of section %s must be evenly divisible by %d"),
-		   bfd_section_name (ibfd, isection), reverse_bytes);
+		   bfd_section_name (isection), reverse_bytes);
 	}
 
       if (copy_byte >= 0)
@@ -4223,7 +4220,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	}
       free (memhunk);
     }
-  else if ((p = find_section_list (bfd_get_section_name (ibfd, isection),
+  else if ((p = find_section_list (bfd_section_name (isection),
 				   FALSE, SECTION_CONTEXT_SET_FLAGS)) != NULL
 	   && (p->flags & SEC_HAS_CONTENTS) != 0)
     {
@@ -4294,9 +4291,9 @@ compare_section_lma (const void *arg1, const void *arg2)
     return -1;
 
   /* Sort sections with the same LMA by size.  */
-  if (bfd_get_section_size (*sec1) > bfd_get_section_size (*sec2))
+  if (bfd_section_size (*sec1) > bfd_section_size (*sec2))
     return 1;
-  else if (bfd_get_section_size (*sec1) < bfd_get_section_size (*sec2))
+  else if (bfd_section_size (*sec1) < bfd_section_size (*sec2))
     return -1;
 
   return 0;
@@ -4378,10 +4375,10 @@ write_debugging_info (bfd *obfd, void *dhandle,
       stabstrsec = bfd_make_section_with_flags (obfd, ".stabstr", flags);
       if (stabsec == NULL
 	  || stabstrsec == NULL
-	  || ! bfd_set_section_size (obfd, stabsec, symsize)
-	  || ! bfd_set_section_size (obfd, stabstrsec, stringsize)
-	  || ! bfd_set_section_alignment (obfd, stabsec, 2)
-	  || ! bfd_set_section_alignment (obfd, stabstrsec, 0))
+	  || !bfd_set_section_size (stabsec, symsize)
+	  || !bfd_set_section_size (stabstrsec, stringsize)
+	  || !bfd_set_section_alignment (stabsec, 2)
+	  || !bfd_set_section_alignment (stabstrsec, 0))
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL,
 				_("can't create debugging section"));

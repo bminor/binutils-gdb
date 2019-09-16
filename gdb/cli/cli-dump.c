@@ -163,12 +163,10 @@ dump_bfd_file (const char *filename, const char *mode,
 
   gdb_bfd_ref_ptr obfd (bfd_openw_or_error (filename, target, mode));
   osection = bfd_make_section_anyway (obfd.get (), ".newsec");
-  bfd_set_section_size (obfd.get (), osection, len);
-  bfd_set_section_vma (obfd.get (), osection, vaddr);
-  bfd_set_section_alignment (obfd.get (), osection, 0);
-  bfd_set_section_flags (obfd.get (), osection, (SEC_HAS_CONTENTS
-						 | SEC_ALLOC
-						 | SEC_LOAD));
+  bfd_set_section_size (osection, len);
+  bfd_set_section_vma (osection, vaddr);
+  bfd_set_section_alignment (osection, 0);
+  bfd_set_section_flags (osection, (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD));
   osection->entsize = 0;
   if (!bfd_set_section_contents (obfd.get (), osection, buf, 0, len))
     warning (_("writing dump file '%s' (%s)"), filename,
@@ -403,15 +401,15 @@ static void
 restore_section_callback (bfd *ibfd, asection *isec, void *args)
 {
   struct callback_data *data = (struct callback_data *) args;
-  bfd_vma sec_start  = bfd_section_vma (ibfd, isec);
-  bfd_size_type size = bfd_section_size (ibfd, isec);
+  bfd_vma sec_start  = bfd_section_vma (isec);
+  bfd_size_type size = bfd_section_size (isec);
   bfd_vma sec_end    = sec_start + size;
   bfd_size_type sec_offset = 0;
   bfd_size_type sec_load_count = size;
   int ret;
 
   /* Ignore non-loadable sections, eg. from elf files.  */
-  if (!(bfd_get_section_flags (ibfd, isec) & SEC_LOAD))
+  if (!(bfd_section_flags (isec) & SEC_LOAD))
     return;
 
   /* Does the section overlap with the desired restore range? */
@@ -420,7 +418,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
     {
       /* No, no useable data in this section.  */
       printf_filtered (_("skipping section %s...\n"), 
-		       bfd_section_name (ibfd, isec));
+		       bfd_section_name (isec));
       return;
     }
 
@@ -441,7 +439,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 	   bfd_errmsg (bfd_get_error ()));
 
   printf_filtered ("Restoring section %s (0x%lx to 0x%lx)",
-		   bfd_section_name (ibfd, isec), 
+		   bfd_section_name (isec), 
 		   (unsigned long) sec_start, 
 		   (unsigned long) sec_end);
 

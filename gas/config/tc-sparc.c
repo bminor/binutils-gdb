@@ -4001,7 +4001,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     }
 
   /* Nothing is aligned in DWARF debugging sections.  */
-  if (bfd_get_section_flags (stdoutput, section) & SEC_DEBUGGING)
+  if (bfd_section_flags (section) & SEC_DEBUGGING)
     switch (code)
       {
       case BFD_RELOC_16: code = BFD_RELOC_SPARC_UA16; break;

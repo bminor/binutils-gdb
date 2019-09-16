@@ -413,7 +413,7 @@ mn10200_elf_relocate_section (bfd *output_bfd,
 	      name = (bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  switch (r)

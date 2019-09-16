@@ -94,7 +94,7 @@ bfd_nonfatal_message (const char *filename,
       if (!filename)
 	filename = bfd_get_archive_filename (abfd);
       if (section)
-	section_name = bfd_get_section_name (abfd, section);
+	section_name = bfd_section_name (section);
     }
   if (section_name)
     fprintf (stderr, ":%s[%s]", filename, section_name);

@@ -554,26 +554,31 @@ CODE_FRAGMENT
 .   would use a comma expression, eg: "((ptr)->foo = val, TRUE)" and some
 .   compilers will complain about comma expressions that have no effect.  *}
 .static inline bfd_boolean
-.bfd_set_section_userdata (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr,
-.			   void * val)
+.bfd_set_section_userdata (asection *sec, void *val)
 .{
-.  ptr->userdata = val;
+.  sec->userdata = val;
 .  return TRUE;
 .}
 .
 .static inline bfd_boolean
-.bfd_set_section_vma (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, bfd_vma val)
+.bfd_set_section_vma (asection *sec, bfd_vma val)
 .{
-.  ptr->vma = ptr->lma = val;
-.  ptr->user_set_vma = TRUE;
+.  sec->vma = sec->lma = val;
+.  sec->user_set_vma = TRUE;
 .  return TRUE;
 .}
 .
 .static inline bfd_boolean
-.bfd_set_section_alignment (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr,
-.			    unsigned int val)
+.bfd_set_section_lma (asection *sec, bfd_vma val)
 .{
-.  ptr->alignment_power = val;
+.  sec->lma = val;
+.  return TRUE;
+.}
+.
+.static inline bfd_boolean
+.bfd_set_section_alignment (asection *sec, unsigned int val)
+.{
+.  sec->alignment_power = val;
 .  return TRUE;
 .}
 .
@@ -1289,13 +1294,12 @@ FUNCTION
 	bfd_set_section_flags
 
 SYNOPSIS
-	bfd_boolean bfd_set_section_flags
-	  (bfd *abfd, asection *sec, flagword flags);
+	bfd_boolean bfd_set_section_flags (asection *sec, flagword flags);
 
 DESCRIPTION
-	Set the attributes of the section @var{sec} in the BFD
-	@var{abfd} to the value @var{flags}. Return <<TRUE>> on success,
-	<<FALSE>> on error. Possible error returns are:
+	Set the attributes of the section @var{sec} to the value @var{flags}.
+	Return <<TRUE>> on success, <<FALSE>> on error.  Possible error
+	returns are:
 
 	o <<bfd_error_invalid_operation>> -
 	The section cannot have one or more of the attributes
@@ -1305,9 +1309,7 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
-		       sec_ptr section,
-		       flagword flags)
+bfd_set_section_flags (asection *section, flagword flags)
 {
   section->flags = flags;
   return TRUE;
@@ -1319,21 +1321,21 @@ FUNCTION
 
 SYNOPSIS
 	void bfd_rename_section
-	  (bfd *abfd, asection *sec, const char *newname);
+	  (asection *sec, const char *newname);
 
 DESCRIPTION
-	Rename section @var{sec} in @var{abfd} to @var{newname}.
+	Rename section @var{sec} to @var{newname}.
 */
 
 void
-bfd_rename_section (bfd *abfd, sec_ptr sec, const char *newname)
+bfd_rename_section (asection *sec, const char *newname)
 {
   struct section_hash_entry *sh;
 
   sh = (struct section_hash_entry *)
     ((char *) sec - offsetof (struct section_hash_entry, section));
   sh->section.name = newname;
-  bfd_hash_rename (&abfd->section_htab, newname, &sh->root);
+  bfd_hash_rename (&sec->owner->section_htab, newname, &sh->root);
 }
 
 /*
@@ -1417,8 +1419,7 @@ FUNCTION
 	bfd_set_section_size
 
 SYNOPSIS
-	bfd_boolean bfd_set_section_size
-	  (bfd *abfd, asection *sec, bfd_size_type val);
+	bfd_boolean bfd_set_section_size (asection *sec, bfd_size_type val);
 
 DESCRIPTION
 	Set @var{sec} to the size @var{val}. If the operation is
@@ -1431,18 +1432,18 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_set_section_size (bfd *abfd, sec_ptr ptr, bfd_size_type val)
+bfd_set_section_size (asection *sec, bfd_size_type val)
 {
   /* Once you've started writing to any section you cannot create or change
      the size of any others.  */
 
-  if (abfd->output_has_begun)
+  if (sec->owner == NULL || sec->owner->output_has_begun)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
 
-  ptr->size = val;
+  sec->size = val;
   return TRUE;
 }
 
@@ -1486,7 +1487,7 @@ bfd_set_section_contents (bfd *abfd,
 {
   bfd_size_type sz;
 
-  if (!(bfd_get_section_flags (abfd, section) & SEC_HAS_CONTENTS))
+  if (!(bfd_section_flags (section) & SEC_HAS_CONTENTS))
     {
       bfd_set_error (bfd_error_no_contents);
       return FALSE;

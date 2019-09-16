@@ -437,7 +437,7 @@ bfd_mach_o_convert_section_name_to_mach_o (bfd *abfd ATTRIBUTE_UNUSED,
 					   bfd_mach_o_section *section)
 {
   const mach_o_section_name_xlat *xlat;
-  const char *name = bfd_get_section_name (abfd, sect);
+  const char *name = bfd_section_name (sect);
   const char *segname;
   const char *dot;
   unsigned int len;
@@ -2583,13 +2583,13 @@ bfd_mach_o_mangle_sections (bfd *abfd, bfd_mach_o_data_struct *mdata)
   target_index = 0;
   for (sec = abfd->sections; sec; sec = sec->next)
     {
-      unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
+      unsigned bfd_align = bfd_section_alignment (sec);
       bfd_mach_o_section *msect = bfd_mach_o_get_mach_o_section (sec);
 
       mdata->sections[target_index] = msect;
 
-      msect->addr = bfd_get_section_vma (abfd, sec);
-      msect->size = bfd_get_section_size (sec);
+      msect->addr = bfd_section_vma (sec);
+      msect->size = bfd_section_size (sec);
 
       /* Use the largest alignment set, in case it was bumped after the
 	 section was created.  */
@@ -2808,7 +2808,7 @@ bfd_mach_o_set_section_flags_from_bfd (bfd *abfd ATTRIBUTE_UNUSED,
   bfd_mach_o_section *s = bfd_mach_o_get_mach_o_section (sec);
 
   /* Create default flags.  */
-  bfd_flags = bfd_get_section_flags (abfd, sec);
+  bfd_flags = bfd_section_flags (sec);
   if ((bfd_flags & SEC_CODE) == SEC_CODE)
     s->flags = BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS
       | BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS
@@ -2983,7 +2983,7 @@ bfd_mach_o_build_exec_seg_command (bfd *abfd, bfd_mach_o_segment_command *seg)
   for (s = seg->sect_head; s != NULL; s = s->next)
     {
       asection *sec = s->bfdsection;
-      flagword flags = bfd_get_section_flags (abfd, sec);
+      flagword flags = bfd_section_flags (sec);
 
       /* Adjust segment size.  */
       seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
@@ -3502,7 +3502,7 @@ bfd_boolean
 bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 {
   bfd_mach_o_section *s;
-  unsigned bfdalign = bfd_get_section_alignment (abfd, sec);
+  unsigned bfdalign = bfd_section_alignment (sec);
 
   s = bfd_mach_o_get_mach_o_section (sec);
   if (s == NULL)
@@ -3526,10 +3526,10 @@ bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 	  s->flags = xlat->macho_sectype | xlat->macho_secattr;
 	  s->align = xlat->sectalign > bfdalign ? xlat->sectalign
 						: bfdalign;
-	  (void) bfd_set_section_alignment (abfd, sec, s->align);
-	  bfd_flags = bfd_get_section_flags (abfd, sec);
+	  bfd_set_section_alignment (sec, s->align);
+	  bfd_flags = bfd_section_flags (sec);
 	  if (bfd_flags == SEC_NO_FLAGS)
-	    bfd_set_section_flags (abfd, sec, xlat->bfd_flags);
+	    bfd_set_section_flags (sec, xlat->bfd_flags);
 	}
       else
 	/* Create default flags.  */
@@ -3540,13 +3540,12 @@ bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 }
 
 static void
-bfd_mach_o_init_section_from_mach_o (bfd *abfd, asection *sec,
-				     unsigned long prot)
+bfd_mach_o_init_section_from_mach_o (asection *sec, unsigned long prot)
 {
   flagword flags;
   bfd_mach_o_section *section;
 
-  flags = bfd_get_section_flags (abfd, sec);
+  flags = bfd_section_flags (sec);
   section = bfd_mach_o_get_mach_o_section (sec);
 
   /* TODO: see if we should use the xlat system for doing this by
@@ -3584,7 +3583,7 @@ bfd_mach_o_init_section_from_mach_o (bfd *abfd, asection *sec,
   if (section->nreloc != 0)
     flags |= SEC_RELOC;
 
-  bfd_set_section_flags (abfd, sec, flags);
+  bfd_set_section_flags (sec, flags);
 
   sec->vma = section->addr;
   sec->lma = section->addr;
@@ -3651,7 +3650,7 @@ bfd_mach_o_read_section_32 (bfd *abfd, unsigned long prot)
   section->reserved2 = bfd_h_get_32 (abfd, raw.reserved2);
   section->reserved3 = 0;
 
-  bfd_mach_o_init_section_from_mach_o (abfd, sec, prot);
+  bfd_mach_o_init_section_from_mach_o (sec, prot);
 
   return sec;
 }
@@ -3694,7 +3693,7 @@ bfd_mach_o_read_section_64 (bfd *abfd, unsigned long prot)
   section->reserved2 = bfd_h_get_32 (abfd, raw.reserved2);
   section->reserved3 = bfd_h_get_32 (abfd, raw.reserved3);
 
-  bfd_mach_o_init_section_from_mach_o (abfd, sec, prot);
+  bfd_mach_o_init_section_from_mach_o (sec, prot);
 
   return sec;
 }

@@ -1,5 +1,33 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* as.c, * as.h, * dw2gencfi.c, * dwarf2dbg.c, * ecoff.c,
+	* read.c, * stabs.c, * subsegs.c, * subsegs.h, * write.c,
+	* config/obj-coff-seh.c, * config/obj-coff.c, * config/obj-ecoff.c,
+	* config/obj-elf.c, * config/obj-macho.c, * config/obj-som.c,
+	* config/tc-aarch64.c, * config/tc-alpha.c, * config/tc-arc.c,
+	* config/tc-arm.c, * config/tc-avr.c, * config/tc-bfin.c,
+	* config/tc-bpf.c, * config/tc-d10v.c, * config/tc-d30v.c,
+	* config/tc-epiphany.c, * config/tc-fr30.c, * config/tc-frv.c,
+	* config/tc-h8300.c, * config/tc-hppa.c, * config/tc-i386.c,
+	* config/tc-ia64.c, * config/tc-ip2k.c, * config/tc-iq2000.c,
+	* config/tc-lm32.c, * config/tc-m32c.c, * config/tc-m32r.c,
+	* config/tc-m68hc11.c, * config/tc-mep.c, * config/tc-microblaze.c,
+	* config/tc-mips.c, * config/tc-mmix.c, * config/tc-mn10200.c,
+	* config/tc-mn10300.c, * config/tc-msp430.c, * config/tc-mt.c,
+	* config/tc-nds32.c, * config/tc-or1k.c, * config/tc-ppc.c,
+	* config/tc-pru.c, * config/tc-rl78.c, * config/tc-rx.c,
+	* config/tc-s12z.c, * config/tc-s390.c, * config/tc-score.c,
+	* config/tc-score7.c, * config/tc-sh.c, * config/tc-sparc.c,
+	* config/tc-spu.c, * config/tc-tic4x.c, * config/tc-tic54x.c,
+	* config/tc-tic6x.c, * config/tc-tilegx.c, * config/tc-tilepro.c,
+	* config/tc-v850.c, * config/tc-visium.c, * config/tc-wasm32.c,
+	* config/tc-xc16x.c, * config/tc-xgate.c, * config/tc-xstormy16.c,
+	* config/tc-xtensa.c, * config/tc-z8k.c: Update throughout for
+	bfd section macro and function changes.
+	* write.c (compress_debug): Use bfd_rename_section.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* symbols.c (S_IS_LOCAL): Update bfd_get_section to
 	bfd_asymbol_section.
 

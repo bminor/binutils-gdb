@@ -3989,7 +3989,7 @@ check_relocation_error:
 	      if (name == NULL)
 		return FALSE;
 	      if (*name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (r == bfd_reloc_overflow)

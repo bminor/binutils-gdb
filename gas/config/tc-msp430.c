@@ -4239,7 +4239,7 @@ md_assemble (char * str)
 valueT
 md_section_align (asection * seg, valueT addr)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
 
   return ((addr + (1 << align) - 1) & -(1 << align));
 }

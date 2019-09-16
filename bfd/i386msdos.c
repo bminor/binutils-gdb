@@ -109,7 +109,7 @@ msdos_object_p (bfd *abfd)
       return NULL;
     }
 
-  bfd_set_section_size (abfd, section, size);
+  bfd_set_section_size (section, size);
   section->alignment_power = 4;
 
   return abfd->xvec;
@@ -135,16 +135,16 @@ msdos_write_object_contents (bfd *abfd)
     {
       if (sec->size == 0)
 	continue;
-      if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+      if (bfd_section_flags (sec) & SEC_ALLOC)
 	{
-	  bfd_vma sec_vma = bfd_get_section_vma (abfd, sec) + sec->size;
+	  bfd_vma sec_vma = bfd_section_vma (sec) + sec->size;
 	  if (sec_vma > high_vma)
 	    high_vma = sec_vma;
 	}
-      if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
+      if (bfd_section_flags (sec) & SEC_LOAD)
 	{
 	  file_ptr sec_end = (sizeof (hdr)
-			      + bfd_get_section_vma (abfd, sec)
+			      + bfd_section_vma (sec)
 			      + sec->size);
 	  if (sec_end > outfile_size)
 	    outfile_size = sec_end;
@@ -195,9 +195,9 @@ msdos_set_section_contents (bfd *abfd,
   if (count == 0)
     return TRUE;
 
-  section->filepos = EXE_PAGE_SIZE + bfd_get_section_vma (abfd, section);
+  section->filepos = EXE_PAGE_SIZE + bfd_section_vma (section);
 
-  if (bfd_get_section_flags (abfd, section) & SEC_LOAD)
+  if (bfd_section_flags (section) & SEC_LOAD)
     {
       if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
 	  || bfd_bwrite (location, count, abfd) != count)

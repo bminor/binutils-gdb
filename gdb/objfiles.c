@@ -271,7 +271,7 @@ add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
     {
       flagword aflag;
 
-      aflag = bfd_get_section_flags (abfd, asect);
+      aflag = bfd_section_flags (asect);
       if (!(aflag & SEC_ALLOC))
 	return;
     }
@@ -1119,15 +1119,15 @@ static int
 insert_section_p (const struct bfd *abfd,
 		  const struct bfd_section *section)
 {
-  const bfd_vma lma = bfd_section_lma (abfd, section);
+  const bfd_vma lma = bfd_section_lma (section);
 
-  if (overlay_debugging && lma != 0 && lma != bfd_section_vma (abfd, section)
+  if (overlay_debugging && lma != 0 && lma != bfd_section_vma (section)
       && (bfd_get_file_flags (abfd) & BFD_IN_MEMORY) == 0)
     /* This is an overlay section.  IN_MEMORY check is needed to avoid
        discarding sections from the "system supplied DSO" (aka vdso)
        on some Linux systems (e.g. Fedora 11).  */
     return 0;
-  if ((bfd_get_section_flags (abfd, section) & SEC_THREAD_LOCAL) != 0)
+  if ((bfd_section_flags (section) & SEC_THREAD_LOCAL) != 0)
     /* This is a TLS section.  */
     return 0;
 
@@ -1220,10 +1220,10 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 			   " (A) section `%s' from `%s' [%s, %s)\n"
 			   " (B) section `%s' from `%s' [%s, %s).\n"
 			   "Will ignore section B"),
-			 bfd_section_name (abfd1, bfds1), objfile_name (objf1),
+			 bfd_section_name (bfds1), objfile_name (objf1),
 			 paddress (gdbarch, sect1_addr),
 			 paddress (gdbarch, sect1_endaddr),
-			 bfd_section_name (abfd2, bfds2), objfile_name (objf2),
+			 bfd_section_name (bfds2), objfile_name (objf2),
 			 paddress (gdbarch, sect2_addr),
 			 paddress (gdbarch, sect2_endaddr));
 	    }

@@ -1329,14 +1329,14 @@ ppc_elf_section_from_shdr (bfd *abfd,
     return FALSE;
 
   newsect = hdr->bfd_section;
-  flags = bfd_get_section_flags (abfd, newsect);
+  flags = bfd_section_flags (newsect);
   if (hdr->sh_flags & SHF_EXCLUDE)
     flags |= SEC_EXCLUDE;
 
   if (hdr->sh_type == SHT_ORDERED)
     flags |= SEC_SORT_ENTRIES;
 
-  bfd_set_section_flags (abfd, newsect, flags);
+  bfd_set_section_flags (newsect, flags);
   return TRUE;
 }
 
@@ -1674,7 +1674,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
       /* Set the output section size, if it exists.  */
       asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
 
-      if (asec && ! bfd_set_section_size (abfd, asec, 20 + num_entries * 4))
+      if (asec && !bfd_set_section_size (asec, 20 + num_entries * 4))
 	{
 	  ibfd = abfd;
 	  /* xgettext:c-format */
@@ -2337,7 +2337,7 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
 	 executable.  */
       flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS
 			| SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      if (!bfd_set_section_flags (abfd, htab->elf.sgot, flags))
+      if (!bfd_set_section_flags (htab->elf.sgot, flags))
 	return FALSE;
     }
 
@@ -2390,7 +2390,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   if (p2align < htab->params->plt_stub_align)
     p2align = htab->params->plt_stub_align;
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, p2align))
+      || !bfd_set_section_alignment (s, p2align))
     return FALSE;
 
   if (!info->no_ld_generated_unwind_info)
@@ -2400,7 +2400,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
       s = bfd_make_section_anyway_with_flags (abfd, ".eh_frame", flags);
       htab->glink_eh_frame = s;
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, 2))
+	  || !bfd_set_section_alignment (s, 2))
 	return FALSE;
     }
 
@@ -2408,7 +2408,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd, ".iplt", flags);
   htab->elf.iplt = s;
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, 4))
+      || !bfd_set_section_alignment (s, 4))
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
@@ -2416,7 +2416,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd, ".rela.iplt", flags);
   htab->elf.irelplt = s;
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, 2))
+      || ! bfd_set_section_alignment (s, 2))
     return FALSE;
 
   /* Local plt entries.  */
@@ -2425,7 +2425,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   htab->pltlocal = bfd_make_section_anyway_with_flags (abfd, ".branch_lt",
 						       flags);
   if (htab->pltlocal == NULL
-      || ! bfd_set_section_alignment (abfd, htab->pltlocal, 2))
+      || !bfd_set_section_alignment (htab->pltlocal, 2))
     return FALSE;
 
   if (bfd_link_pic (info))
@@ -2435,7 +2435,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
       htab->relpltlocal
 	= bfd_make_section_anyway_with_flags (abfd, ".rela.branch_lt", flags);
       if (htab->relpltlocal == NULL
-	  || ! bfd_set_section_alignment (abfd, htab->relpltlocal, 2))
+	  || !bfd_set_section_alignment (htab->relpltlocal, 2))
 	return FALSE;
     }
 
@@ -2487,7 +2487,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       s = bfd_make_section_anyway_with_flags (abfd, ".rela.sbss", flags);
       htab->relsbss = s;
       if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s, 2))
+	  || !bfd_set_section_alignment (s, 2))
 	return FALSE;
     }
 
@@ -2500,7 +2500,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (htab->plt_type == PLT_VXWORKS)
     /* The VxWorks PLT is a loaded section with contents.  */
     flags |= SEC_HAS_CONTENTS | SEC_LOAD | SEC_READONLY;
-  return bfd_set_section_flags (abfd, s, flags);
+  return bfd_set_section_flags (s, flags);
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -2739,7 +2739,7 @@ elf_allocate_pointer_linker_section (bfd *abfd,
   linker_section_ptr->lsect = lsect;
   *ptr_linker_section_ptr = linker_section_ptr;
 
-  if (!bfd_set_section_alignment (lsect->section->owner, lsect->section, 2))
+  if (!bfd_set_section_alignment (lsect->section, 2))
     return FALSE;
   linker_section_ptr->offset = lsect->section->size;
   lsect->section->size += 4;
@@ -4029,19 +4029,19 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* The new PLT is a loaded section.  */
       if (htab->elf.splt != NULL
-	  && !bfd_set_section_flags (htab->elf.dynobj, htab->elf.splt, flags))
+	  && !bfd_set_section_flags (htab->elf.splt, flags))
 	return -1;
 
       /* The new GOT is not executable.  */
       if (htab->elf.sgot != NULL
-	  && !bfd_set_section_flags (htab->elf.dynobj, htab->elf.sgot, flags))
+	  && !bfd_set_section_flags (htab->elf.sgot, flags))
 	return -1;
     }
   else
     {
       /* Stop an unused .glink section from affecting .text alignment.  */
       if (htab->glink != NULL
-	  && !bfd_set_section_alignment (htab->elf.dynobj, htab->glink, 0))
+	  && !bfd_set_section_alignment (htab->glink, 0))
 	return -1;
     }
   return htab->plt_type == PLT_NEW;
@@ -5823,8 +5823,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  strip_section = (s->flags & SEC_KEEP) == 0;
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (htab->elf.dynobj, s),
-			     ".rela"))
+      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -8394,10 +8393,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      unresolved_reloc = TRUE;
 	      break;
 	    }
-	  BFD_ASSERT (strcmp (bfd_get_section_name (sec->owner, sec),
-			      ".got") == 0
-		      || strcmp (bfd_get_section_name (sec->owner, sec),
-				 ".cgot") == 0);
+	  BFD_ASSERT (strcmp (bfd_section_name (sec), ".got") == 0
+		      || strcmp (bfd_section_name (sec), ".cgot") == 0);
 
 	  addend -= sec->output_section->vma + sec->output_offset + 0x8000;
 	  break;
@@ -8512,7 +8509,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	    addend -= SYM_VAL (sda);
 
-	    name = bfd_get_section_name (output_bfd, sec->output_section);
+	    name = bfd_section_name (sec->output_section);
 	    if (!(strcmp (name, ".sdata") == 0
 		  || strcmp (name, ".sbss") == 0))
 	      {
@@ -8543,7 +8540,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	    addend -= SYM_VAL (sda);
 
-	    name = bfd_get_section_name (output_bfd, sec->output_section);
+	    name = bfd_section_name (sec->output_section);
 	    if (!(strcmp (name, ".sdata2") == 0
 		  || strcmp (name, ".sbss2") == 0))
 	      {
@@ -8618,7 +8615,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		break;
 	      }
 
-	    name = bfd_get_section_name (output_bfd, sec->output_section);
+	    name = bfd_section_name (sec->output_section);
 	    if (strcmp (name, ".sdata") == 0
 		|| strcmp (name, ".sbss") == 0)
 	      {
@@ -8725,7 +8722,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		break;
 	      }
 
-	    name = bfd_get_section_name (output_bfd, sec->output_section);
+	    name = bfd_section_name (sec->output_section);
 	    if (strcmp (name, ".sdata") == 0
 		|| strcmp (name, ".sbss") == 0)
 	      sda = htab->sdata[0].sym;

@@ -3723,11 +3723,11 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   /* _bfd_elf_create_got_section will create it for us.  */
   ehtab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
   if (ehtab->srelgot == NULL
-      || !bfd_set_section_flags (dynobj, ehtab->srelgot,
+      || !bfd_set_section_flags (ehtab->srelgot,
 				 (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 				  | SEC_IN_MEMORY | SEC_LINKER_CREATED
 				  | SEC_READONLY))
-      || !bfd_set_section_alignment (dynobj, ehtab->srelgot, 2))
+      || !bfd_set_section_alignment (ehtab->srelgot, 2))
     return FALSE;
 
   return TRUE;
@@ -3769,8 +3769,8 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section (abfd, ".plt");
   ehtab->splt = s;
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, pltflags)
-      || !bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+      || !bfd_set_section_flags (s, pltflags)
+      || !bfd_set_section_alignment (s, bed->plt_alignment))
     return FALSE;
 
   if (bed->want_plt_sym)
@@ -3798,8 +3798,8 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 			bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
   ehtab->srelplt = s;
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-      || !bfd_set_section_alignment (abfd, s, ptralign))
+      || !bfd_set_section_flags (s, flags | SEC_READONLY)
+      || !bfd_set_section_alignment (s, ptralign))
     return FALSE;
 
   if (ehtab->sgot == NULL && !create_got_section (abfd, info))
@@ -3807,11 +3807,11 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   for (sec = abfd->sections; sec; sec = sec->next)
     {
-      secflags = bfd_get_section_flags (abfd, sec);
+      secflags = bfd_section_flags (sec);
       if ((secflags & (SEC_DATA | SEC_LINKER_CREATED))
 	  || ((secflags & SEC_HAS_CONTENTS) != SEC_HAS_CONTENTS))
 	continue;
-      secname = bfd_get_section_name (abfd, sec);
+      secname = bfd_section_name (sec);
       relname = (char *) bfd_malloc ((bfd_size_type) strlen (secname) + 6);
       strcpy (relname, ".rela");
       strcat (relname, secname);
@@ -3819,8 +3819,8 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	continue;
       s = bfd_make_section (abfd, relname);
       if (s == NULL
-	  || !bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
+	  || !bfd_set_section_flags (s, flags | SEC_READONLY)
+	  || !bfd_set_section_alignment (s, ptralign))
 	return FALSE;
     }
 
@@ -3835,7 +3835,7 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       s = bfd_make_section (abfd, ".dynbss");
       htab->sdynbss = s;
       if (s == NULL
-	  || !bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
+	  || !bfd_set_section_flags (s, SEC_ALLOC | SEC_LINKER_CREATED))
 	return FALSE;
       /* The .rel[a].bss section holds copy relocs.  This section is not
 	 normally needed.  We need to create it here, though, so that the
@@ -3854,8 +3854,8 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 				       ? ".rela.bss" : ".rel.bss"));
 	  htab->srelbss = s;
 	  if (s == NULL
-	      || !bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-	      || !bfd_set_section_alignment (abfd, s, ptralign))
+	      || !bfd_set_section_flags (s, flags | SEC_READONLY)
+	      || !bfd_set_section_alignment (s, ptralign))
 	    return FALSE;
 	}
     }
@@ -4065,9 +4065,9 @@ nds32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Apply the required alignment.  */
   s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, s))
+  if (power_of_two > bfd_section_alignment (s))
     {
-      if (!bfd_set_section_alignment (dynobj, s, power_of_two))
+      if (!bfd_set_section_alignment (s, power_of_two))
 	return FALSE;
     }
 
@@ -4525,7 +4525,7 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  got_size += s->size;
 	}
-      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
+      else if (strncmp (bfd_section_name (s), ".rela", 5) == 0)
 	{
 	  if (s->size != 0 && s != elf_hash_table (info)->srelplt)
 	    relocs = TRUE;
@@ -5571,8 +5571,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 		    return FALSE;
 
 		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
+			      && strcmp (bfd_section_name (input_section),
 					 name + 5) == 0);
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
@@ -6166,7 +6165,7 @@ check_reloc:
 	      name = bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (errmsg != NULL)
@@ -7390,7 +7389,7 @@ nds32_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    return FALSE;
 
 		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (abfd, sec),
+			      && strcmp (bfd_section_name (sec),
 					 name + 5) == 0);
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
@@ -7404,8 +7403,8 @@ nds32_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      if ((sec->flags & SEC_ALLOC) != 0)
 			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
-			  || !bfd_set_section_flags (dynobj, sreloc, flags)
-			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
+			  || !bfd_set_section_flags (sreloc, flags)
+			  || !bfd_set_section_alignment (sreloc, 2))
 			return FALSE;
 
 		      elf_section_type (sreloc) = SHT_RELA;

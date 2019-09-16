@@ -164,14 +164,14 @@ build_swap_list (struct bfd *abfd)
 	  struct swap_list *sl;
 	  bfd_size_type size;
 
-	  size = bfd_get_section_size (s);
+	  size = bfd_section_size (s);
 	  if (size <= 0)
 	    continue;
 	  
 	  sl = malloc (sizeof (struct swap_list));
 	  assert (sl != NULL);
 	  sl->next = swap_list;
-	  sl->start = bfd_section_lma (abfd, s);
+	  sl->start = bfd_section_lma (s);
 	  sl->end = sl->start + size;
 	  swap_list = sl;
 	}

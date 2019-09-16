@@ -335,8 +335,8 @@ print_bfd_section_info (bfd *abfd,
 			asection *asect,
 			void *datum)
 {
-  flagword flags = bfd_get_section_flags (abfd, asect);
-  const char *name = bfd_section_name (abfd, asect);
+  flagword flags = bfd_section_flags (asect);
+  const char *name = bfd_section_name (asect);
   maint_print_section_data *print_data = (maint_print_section_data *) datum;
   const char *arg = print_data->arg;
 
@@ -348,8 +348,8 @@ print_bfd_section_info (bfd *abfd,
       int addr_size = gdbarch_addr_bit (gdbarch) / 8;
       CORE_ADDR addr, endaddr;
 
-      addr = bfd_section_vma (abfd, asect);
-      endaddr = addr + bfd_section_size (abfd, asect);
+      addr = bfd_section_vma (asect);
+      endaddr = addr + bfd_section_size (asect);
       print_section_index (abfd, asect, print_data->index_digits);
       maint_print_section_info (name, flags, addr, endaddr,
 				asect->filepos, addr_size);
@@ -366,8 +366,8 @@ print_objfile_section_info (bfd *abfd,
 			    struct obj_section *asect,
 			    maint_print_section_data *print_data)
 {
-  flagword flags = bfd_get_section_flags (abfd, asect->the_bfd_section);
-  const char *name = bfd_section_name (abfd, asect->the_bfd_section);
+  flagword flags = bfd_section_flags (asect->the_bfd_section);
+  const char *name = bfd_section_name (asect->the_bfd_section);
   const char *string = print_data->arg;
 
   if (string == NULL || *string == '\0'

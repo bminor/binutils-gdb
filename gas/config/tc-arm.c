@@ -22878,7 +22878,7 @@ arm_frob_label (symbolS * sym)
      out of the jump table, and chaos would ensue.  */
   if (label_is_thumb_function_name
       && (S_GET_NAME (sym)[0] != '.' || S_GET_NAME (sym)[1] != 'L')
-      && (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+      && (bfd_section_flags (now_seg) & SEC_CODE) != 0)
     {
       /* When the address of a Thumb function is taken the bottom
 	 bit of that address should be set.  This will allow
@@ -26491,7 +26491,7 @@ arm_init_frag (fragS * fragP, int max_chars)
 
   /* PR 21809: Do not set a mapping state for debug sections
      - it just confuses other tools.  */
-  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+  if (bfd_section_flags (now_seg) & SEC_DEBUGGING)
     return;
 
   frag_thumb_mode = fragP->tc_frag_data.thumb_mode ^ MODE_RECORDED;
@@ -30019,9 +30019,8 @@ md_begin (void)
 
 	if (sec != NULL)
 	  {
-	    bfd_set_section_flags
-	      (stdoutput, sec, SEC_READONLY | SEC_DEBUGGING /* | SEC_HAS_CONTENTS */);
-	    bfd_set_section_size (stdoutput, sec, 0);
+	    bfd_set_section_flags (sec, SEC_READONLY | SEC_DEBUGGING);
+	    bfd_set_section_size (sec, 0);
 	    bfd_set_section_contents (stdoutput, sec, NULL, 0, 0);
 	  }
       }

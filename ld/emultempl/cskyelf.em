@@ -180,10 +180,10 @@ elf32_csky_add_stub_section (const char *stub_sec_name,
   if (stub_sec == NULL)
     goto err_ret;
 
-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+  bfd_set_section_alignment (stub_sec, 3);
 
   output_section = input_section->output_section;
-  secname = bfd_get_section_name (output_section->owner, output_section);
+  secname = bfd_section_name (output_section);
   os = lang_output_section_find (secname);
 
   info.input_section = input_section;

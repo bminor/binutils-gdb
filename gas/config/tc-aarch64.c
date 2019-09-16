@@ -7363,7 +7363,7 @@ aarch64_init_frag (fragS * fragP, int max_chars)
 
   /* PR 21809: Do not set a mapping state for debug sections
      - it just confuses other tools.  */
-  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+  if (bfd_section_flags (now_seg) & SEC_DEBUGGING)
     return;
 
   switch (fragP->fr_type)

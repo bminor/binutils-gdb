@@ -713,7 +713,7 @@ md_begin (void)
 
   /* This is copied from perform_an_assembly_pass.  */
   applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
+  bfd_set_section_flags (sbss_section, applicable & SEC_ALLOC);
 
   subseg_set (seg, subseg);
 
@@ -1448,7 +1448,7 @@ md_operand (expressionS *expressionP)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
 
   return ((size + (1 << align) - 1) & -(1 << align));
 }

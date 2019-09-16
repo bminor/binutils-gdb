@@ -1065,7 +1065,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 
 	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
 	    {
-	      const char *name = bfd_get_section_name (abfd, s);
+	      const char *name = bfd_section_name (s);
 
 	      if (bfd_is_abs_section (s->output_section))
 		continue;
@@ -1112,7 +1112,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 					   bed->dynamic_sec_flags
 					   | SEC_READONLY);
 	  if (s != NULL
-	      && bfd_set_section_alignment (elfbfd, s, 2))
+	      && bfd_set_section_alignment (s, 2))
 	    {
 	      htab->eh_info.hdr_sec = s;
 	      warn_eh_frame = FALSE;
@@ -1382,7 +1382,7 @@ ldelf_setup_build_id (bfd *ibfd)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
   s = bfd_make_section_with_flags (ibfd, ".note.gnu.build-id", flags);
-  if (s != NULL && bfd_set_section_alignment (ibfd, s, 2))
+  if (s != NULL && bfd_set_section_alignment (s, 2))
     {
       struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
       t->o->build_id.after_write_object_contents = &write_build_id;

@@ -1676,10 +1676,10 @@ ecoff_slurp_reloc_table (bfd *abfd,
 	    abort ();
 	  rptr->sym_ptr_ptr = sec->symbol_ptr_ptr;
 
-	  rptr->addend = - bfd_get_section_vma (abfd, sec);
+	  rptr->addend = - bfd_section_vma (sec);
 	}
 
-      rptr->address = intern.r_vaddr - bfd_get_section_vma (abfd, section);
+      rptr->address = intern.r_vaddr - bfd_section_vma (section);
 
       /* Let the backend select the howto field and do any other
 	 required processing.  */
@@ -2431,7 +2431,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
       strncpy (section.s_name, current->name, sizeof section.s_name);
 
       /* This seems to be correct for Irix 4 shared libraries.  */
-      vma = bfd_get_section_vma (abfd, current);
+      vma = bfd_section_vma (current);
       if (streq (current->name, _LIB))
 	section.s_vaddr = 0;
       else
@@ -2682,8 +2682,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 	      if (reloc->howto == NULL)
 		continue;
 
-	      in.r_vaddr = (reloc->address
-			    + bfd_get_section_vma (abfd, current));
+	      in.r_vaddr = reloc->address + bfd_section_vma (current);
 	      in.r_type = reloc->howto->type;
 
 	      if ((sym->flags & BSF_SECTION_SYM) == 0)
@@ -2719,7 +2718,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 		    { _RCONST, RELOC_SECTION_RCONST }
 		  };
 
-		  name = bfd_get_section_name (abfd, bfd_asymbol_section (sym));
+		  name = bfd_section_name (bfd_asymbol_section (sym));
 
 		  for (j = 0; j < ARRAY_SIZE (section_symndx); j++)
 		    if (streq (name, section_symndx[j].name))
@@ -4010,7 +4009,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
 	  (*info->callbacks->reloc_overflow)
 	    (info, NULL,
 	     (link_order->type == bfd_section_reloc_link_order
-	      ? bfd_section_name (output_bfd, section)
+	      ? bfd_section_name (section)
 	      : link_order->u.reloc.p->u.name),
 	     rel.howto->name, addend, NULL, NULL, (bfd_vma) 0);
 	  break;
@@ -4025,8 +4024,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
   rel.addend = 0;
 
   /* Move the information into an internal_reloc structure.  */
-  in.r_vaddr = (rel.address
-		+ bfd_get_section_vma (output_bfd, output_section));
+  in.r_vaddr = rel.address + bfd_section_vma (output_section);
   in.r_type = rel.howto->type;
 
   if (type == bfd_symbol_reloc_link_order)
@@ -4076,7 +4074,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
 	{ _RCONST, RELOC_SECTION_RCONST }
       };
 
-      name = bfd_get_section_name (output_bfd, section);
+      name = bfd_section_name (section);
 
       for (i = 0; i < ARRAY_SIZE (section_symndx); i++)
 	if (streq (name, section_symndx[i].name))
@@ -4189,7 +4187,7 @@ ecoff_link_write_external (struct bfd_hash_entry *bh, void * data)
 	  };
 
 	  output_section = h->root.u.def.section->output_section;
-	  name = bfd_section_name (output_section->owner, output_section);
+	  name = bfd_section_name (output_section);
 
 	  for (i = 0; i < ARRAY_SIZE (section_storage_classes); i++)
 	    if (streq (name, section_storage_classes[i].name))

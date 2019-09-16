@@ -1608,7 +1608,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 valueT
 md_section_align (asection *segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   int align2 = (1 << align) - 1;
 
   return (size + align2) & ~align2;
@@ -5962,7 +5962,7 @@ pa_build_unwind_subspace (struct call_info *call_info)
   char *name, *p;
   symbolS *symbolP;
 
-  if ((bfd_get_section_flags (stdoutput, now_seg)
+  if ((bfd_section_flags (now_seg)
        & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       != (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
     return;
@@ -6006,10 +6006,9 @@ pa_build_unwind_subspace (struct call_info *call_info)
   if (seg == ASEC_NULL)
     {
       seg = subseg_new (UNWIND_SECTION_NAME, 0);
-      bfd_set_section_flags (stdoutput, seg,
-			     SEC_READONLY | SEC_HAS_CONTENTS
-			     | SEC_LOAD | SEC_RELOC | SEC_ALLOC | SEC_DATA);
-      bfd_set_section_alignment (stdoutput, seg, 2);
+      bfd_set_section_flags (seg, (SEC_READONLY | SEC_HAS_CONTENTS | SEC_LOAD
+				   | SEC_RELOC | SEC_ALLOC | SEC_DATA));
+      bfd_set_section_alignment (seg, 2);
     }
 
   subseg_set (seg, 0);
@@ -7533,14 +7532,13 @@ pa_subspace (int create_new)
 	seg_info (section)->bss = 1;
 
       /* Now set the flags.  */
-      bfd_set_section_flags (stdoutput, section, applicable);
+      bfd_set_section_flags (section, applicable);
 
       /* Record any alignment request for this section.  */
       record_alignment (section, exact_log2 (alignment));
 
       /* Set the starting offset for this section.  */
-      bfd_set_section_vma (stdoutput, section,
-			   pa_subspace_start (space, quadrant));
+      bfd_set_section_vma (section, pa_subspace_start (space, quadrant));
 
       /* Now that all the flags are set, update an existing subspace,
 	 or create a new one.  */
@@ -7614,7 +7612,7 @@ pa_spaces_begin (void)
 	{
 	  text_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC | SEC_CODE
 					       | SEC_READONLY
@@ -7624,7 +7622,7 @@ pa_spaces_begin (void)
 	{
 	  data_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_HAS_CONTENTS));
@@ -7634,13 +7632,13 @@ pa_spaces_begin (void)
 	{
 	  bss_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & SEC_ALLOC);
 	}
       else if (!strcmp (pa_def_subspaces[i].name, "$LIT$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY
@@ -7649,7 +7647,7 @@ pa_spaces_begin (void)
       else if (!strcmp (pa_def_subspaces[i].name, "$MILLICODE$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY
@@ -7658,7 +7656,7 @@ pa_spaces_begin (void)
       else if (!strcmp (pa_def_subspaces[i].name, "$UNWIND$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY

@@ -1109,7 +1109,7 @@ add_eh_frame_hdr_terminator (asection *sec,
   if (!sec->rawsize)
     sec->rawsize = sec->size;
 
-  bfd_set_section_size (sec->owner, sec, sec->size + 8);
+  bfd_set_section_size (sec, sec->size + 8);
 }
 
 /* Finish a pass over all .eh_frame_entry sections.  */
@@ -1682,7 +1682,7 @@ _bfd_elf_eh_frame_entry_present (struct bfd_link_info *info)
     {
       for (o = abfd->sections; o; o = o->next)
 	{
-	  const char *name = bfd_get_section_name (abfd, o);
+	  const char *name = bfd_section_name (o);
 
 	  if (strcmp (name, ".eh_frame_entry")
 	      && !bfd_is_abs_section (o->output_section))

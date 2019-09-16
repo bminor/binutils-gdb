@@ -232,7 +232,7 @@ get_debugseg_name (segT seg, const char *base_name)
   if (!seg)
     return concat (base_name, NULL);
 
-  name = bfd_get_section_name (stdoutput, seg);
+  name = bfd_section_name (seg);
 
   if (name == NULL || *name == 0)
     return concat (base_name, NULL);
@@ -281,7 +281,7 @@ is_now_linkonce_segment (void)
   if (compact_eh)
     return now_seg;
 
-  if ((bfd_get_section_flags (stdoutput, now_seg)
+  if ((bfd_section_flags (now_seg)
        & (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
 	  | SEC_LINK_DUPLICATES_ONE_ONLY | SEC_LINK_DUPLICATES_SAME_SIZE
 	  | SEC_LINK_DUPLICATES_SAME_CONTENTS)) != 0)
@@ -306,16 +306,16 @@ make_debug_seg (segT cseg, char *name, int sflags)
   if (!cseg)
     flags = 0;
   else
-    flags = bfd_get_section_flags (stdoutput, cseg)
-      & (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
-	 | SEC_LINK_DUPLICATES_ONE_ONLY | SEC_LINK_DUPLICATES_SAME_SIZE
-	 | SEC_LINK_DUPLICATES_SAME_CONTENTS);
+    flags = (bfd_section_flags (cseg)
+	     & (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
+		| SEC_LINK_DUPLICATES_ONE_ONLY | SEC_LINK_DUPLICATES_SAME_SIZE
+		| SEC_LINK_DUPLICATES_SAME_CONTENTS));
 
   /* Add standard section flags.  */
   flags |= sflags;
 
   /* Apply possibly linked once flags to new generated segment, too.  */
-  if (!bfd_set_section_flags (stdoutput, r, flags))
+  if (!bfd_set_section_flags (r, flags))
     as_bad (_("bfd_set_section_flags: %s"),
 	    bfd_errmsg (bfd_get_error ()));
 
@@ -1359,7 +1359,7 @@ get_cfi_seg (segT cseg, const char *base, flagword flags, int align)
   else
     {
       cseg = subseg_new (base, 0);
-      bfd_set_section_flags (stdoutput, cseg, flags);
+      bfd_set_section_flags (cseg, flags);
     }
   record_alignment (cseg, align);
   return cseg;

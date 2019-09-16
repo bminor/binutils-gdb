@@ -4115,7 +4115,7 @@ get_is_linkonce_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec)
 {
   flagword flags, link_once_flags;
 
-  flags = bfd_get_section_flags (abfd, sec);
+  flags = bfd_section_flags (sec);
   link_once_flags = (flags & SEC_LINK_ONCE);
 
   /* Flags might not be set yet.  */
@@ -4980,7 +4980,7 @@ xtensa_mark_frags_for_org (void)
       segment_info_type *seginfo;
       fragS *fragP;
       flagword flags;
-      flags = bfd_get_section_flags (stdoutput, sec);
+      flags = bfd_section_flags (sec);
       if (flags & SEC_DEBUGGING)
 	continue;
       if (!(flags & SEC_ALLOC))
@@ -5025,7 +5025,7 @@ xtensa_find_unmarked_state_frags (void)
       segment_info_type *seginfo;
       fragS *fragP;
       flagword flags;
-      flags = bfd_get_section_flags (stdoutput, sec);
+      flags = bfd_section_flags (sec);
       if (flags & SEC_DEBUGGING)
 	continue;
       if (!(flags & SEC_ALLOC))
@@ -5073,7 +5073,7 @@ xtensa_find_unaligned_branch_targets (bfd *abfd ATTRIBUTE_UNUSED,
 				      asection *sec,
 				      void *unused ATTRIBUTE_UNUSED)
 {
-  flagword flags = bfd_get_section_flags (abfd, sec);
+  flagword flags = bfd_section_flags (sec);
   segment_info_type *seginfo = seg_info (sec);
   fragS *frag = seginfo->frchainP->frch_root;
 
@@ -5112,7 +5112,7 @@ xtensa_find_unaligned_loops (bfd *abfd ATTRIBUTE_UNUSED,
 			     asection *sec,
 			     void *unused ATTRIBUTE_UNUSED)
 {
-  flagword flags = bfd_get_section_flags (abfd, sec);
+  flagword flags = bfd_section_flags (sec);
   segment_info_type *seginfo = seg_info (sec);
   fragS *frag = seginfo->frchainP->frch_root;
   xtensa_isa isa = xtensa_default_isa;
@@ -8941,7 +8941,7 @@ xtensa_add_config_info (void)
   int sz;
 
   info_sec = subseg_new (".xtensa.info", 0);
-  bfd_set_section_flags (stdoutput, info_sec, SEC_HAS_CONTENTS | SEC_READONLY);
+  bfd_set_section_flags (info_sec, SEC_HAS_CONTENTS | SEC_READONLY);
 
   data = XNEWVEC (char, 100);
   sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
@@ -11682,8 +11682,8 @@ cache_literal_section (bfd_boolean use_abs_literals)
 
       elf_group_name (seg) = group_name;
 
-      bfd_set_section_flags (stdoutput, seg, flags);
-      bfd_set_section_alignment (stdoutput, seg, 2);
+      bfd_set_section_flags (seg, flags);
+      bfd_set_section_alignment (seg, 2);
     }
 
   *pcached = seg;
@@ -11814,7 +11814,7 @@ xtensa_create_property_segments (frag_predicate property_function,
 	    num_recs++;
 
 	  rec_size = num_recs * 8;
-	  bfd_set_section_size (stdoutput, sec, rec_size);
+	  bfd_set_section_size (sec, rec_size);
 
 	  if (num_recs)
 	    {
@@ -11911,7 +11911,7 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 	    num_recs++;
 
 	  rec_size = num_recs * (8 + 4);
-	  bfd_set_section_size (stdoutput, sec, rec_size);
+	  bfd_set_section_size (sec, rec_size);
 	  /* elf_section_data (sec)->this_hdr.sh_entsize = 12; */
 
 	  if (num_recs)
@@ -11955,7 +11955,7 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 static bfd_boolean
 exclude_section_from_property_tables (segT sec)
 {
-  flagword flags = bfd_get_section_flags (stdoutput, sec);
+  flagword flags = bfd_section_flags (sec);
 
   /* Sections that don't contribute to the memory footprint are excluded.  */
   if ((flags & SEC_DEBUGGING)

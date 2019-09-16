@@ -234,7 +234,7 @@ md_atof (int type, char *litP, int *sizeP)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & -(1 << align));
 }
 

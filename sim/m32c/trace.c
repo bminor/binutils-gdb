@@ -231,7 +231,7 @@ sim_disasm_one (void)
 	  if (s->flags & SEC_CODE || code_section == 0)
 	    {
 	      code_section = s;
-	      code_base = bfd_section_lma (current_bfd, s);
+	      code_base = bfd_section_lma (s);
 	      break;
 	    }
 	}

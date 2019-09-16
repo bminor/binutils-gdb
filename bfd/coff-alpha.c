@@ -426,7 +426,7 @@ alpha_ecoff_object_p (bfd *abfd)
 	  size = sec->line_filepos * 8;
 	  BFD_ASSERT (size == sec->size
 		      || size + 8 == sec->size);
-	  if (! bfd_set_section_size (abfd, sec, size))
+	  if (!bfd_set_section_size (sec, size))
 	    return NULL;
 	}
     }
@@ -1237,7 +1237,7 @@ alpha_convert_external_reloc (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* Compute a new r_symndx value.  */
       hsec = h->root.u.def.section;
-      name = bfd_get_section_name (output_bfd, hsec->output_section);
+      name = bfd_section_name (hsec->output_section);
 
       r_symndx = (unsigned long) -1;
       switch (name[1])
@@ -1928,8 +1928,7 @@ alpha_relocate_section (bfd *output_bfd,
 		    if (r_extern)
 		      name = sym_hashes[r_symndx]->root.root.string;
 		    else
-		      name = bfd_section_name (input_bfd,
-					       symndx_to_section[r_symndx]);
+		      name = bfd_section_name (symndx_to_section[r_symndx]);
 		    (*info->callbacks->reloc_overflow)
 		      (info, NULL, name, alpha_howto_table[r_type].name,
 		       (bfd_vma) 0, input_bfd, input_section,

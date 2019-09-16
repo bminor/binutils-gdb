@@ -959,7 +959,7 @@ xcoff64_write_object_contents (bfd *abfd)
       if (text_sec != NULL)
 	{
 	  internal_a.o_sntext = text_sec->target_index;
-	  internal_a.o_algntext = bfd_get_section_alignment (abfd, text_sec);
+	  internal_a.o_algntext = bfd_section_alignment (text_sec);
 	}
       else
 	{
@@ -970,7 +970,7 @@ xcoff64_write_object_contents (bfd *abfd)
       if (data_sec != NULL)
 	{
 	  internal_a.o_sndata = data_sec->target_index;
-	  internal_a.o_algndata = bfd_get_section_alignment (abfd, data_sec);
+	  internal_a.o_algndata = bfd_section_alignment (data_sec);
 	}
       else
 	{

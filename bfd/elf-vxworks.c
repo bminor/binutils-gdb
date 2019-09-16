@@ -97,7 +97,7 @@ elf_vxworks_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info,
 					      | SEC_READONLY
 					      | SEC_LINKER_CREATED);
       if (s == NULL
-	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
 
       *srelplt2_out = s;
@@ -279,9 +279,7 @@ elf_vxworks_finish_dynamic_entry (bfd *output_bfd, Elf_Internal_Dyn *dyn)
 
     case DT_VX_WRS_TLS_DATA_ALIGN:
       sec = bfd_get_section_by_name (output_bfd, ".tls_data");
-      dyn->d_un.d_val
-	= (bfd_size_type)1 << bfd_get_section_alignment (output_bfd,
-							 sec);
+      dyn->d_un.d_val = (bfd_size_type) 1 << bfd_section_alignment (sec);
       break;
 
     case DT_VX_WRS_TLS_VARS_START:

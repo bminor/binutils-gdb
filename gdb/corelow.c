@@ -289,10 +289,10 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
   bool fake_pid_p = false;
   struct inferior *inf;
 
-  if (!startswith (bfd_section_name (abfd, asect), ".reg/"))
+  if (!startswith (bfd_section_name (asect), ".reg/"))
     return;
 
-  core_tid = atoi (bfd_section_name (abfd, asect) + 5);
+  core_tid = atoi (bfd_section_name (asect) + 5);
 
   pid = bfd_core_file_pid (core_bfd);
   if (pid == 0)
@@ -584,7 +584,7 @@ core_target::get_core_register_section (struct regcache *regcache,
       return;
     }
 
-  size = bfd_section_size (core_bfd, section);
+  size = bfd_section_size (section);
   if (size < section_min_size)
     {
       warning (_("Section `%s' in core file too small."),
@@ -614,8 +614,7 @@ core_target::get_core_register_section (struct regcache *regcache,
 
   gdb_assert (m_core_vec != nullptr);
   m_core_vec->core_read_registers (regcache, contents, size, which,
-				   ((CORE_ADDR)
-				    bfd_section_vma (core_bfd, section)));
+				   (CORE_ADDR) bfd_section_vma (section));
 }
 
 /* Data passed to gdbarch_iterate_over_regset_sections's callback.  */
@@ -727,7 +726,7 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
     = bfd_big_endian (abfd) ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
   int fd, pos = 0;
 
-  sscanf (bfd_section_name (abfd, asect), "SPU/%d/regs%n", &fd, &pos);
+  sscanf (bfd_section_name (asect), "SPU/%d/regs%n", &fd, &pos);
   if (pos == 0)
     return;
 
@@ -768,7 +767,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	  if (section == NULL)
 	    return TARGET_XFER_E_IO;
 
-	  size = bfd_section_size (core_bfd, section);
+	  size = bfd_section_size (section);
 	  if (offset >= size)
 	    return TARGET_XFER_EOF;
 	  size -= offset;
@@ -803,7 +802,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	  if (section == NULL)
 	    return TARGET_XFER_E_IO;
 
-	  size = bfd_section_size (core_bfd, section);
+	  size = bfd_section_size (section);
 	  if (offset >= size)
 	    return TARGET_XFER_EOF;
 	  size -= offset;
@@ -883,7 +882,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	  if (section == NULL)
 	    return TARGET_XFER_E_IO;
 
-	  size = bfd_section_size (core_bfd, section);
+	  size = bfd_section_size (section);
 	  if (offset >= size)
 	    return TARGET_XFER_EOF;
 	  size -= offset;

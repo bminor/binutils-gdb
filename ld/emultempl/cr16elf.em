@@ -75,14 +75,12 @@ cr16_elf_after_open (void)
 
 	      relsec = bfd_make_section (abfd, ".emreloc");
 	      if (relsec == NULL
-		  || ! bfd_set_section_flags (abfd, relsec,
-					      (SEC_ALLOC
-					       | SEC_LOAD
-					       | SEC_HAS_CONTENTS
-					       | SEC_IN_MEMORY))
-		  || ! bfd_set_section_alignment (abfd, relsec, 2)
-		  || ! bfd_set_section_size (abfd, relsec,
-					     datasec->reloc_count * 8))
+		  || !bfd_set_section_flags (relsec, (SEC_ALLOC
+						      | SEC_LOAD
+						      | SEC_HAS_CONTENTS
+						      | SEC_IN_MEMORY))
+		  || !bfd_set_section_alignment (relsec, 2)
+		  || !bfd_set_section_size (relsec, datasec->reloc_count * 8))
 		einfo (_("%F%P: %pB: can not create .emreloc section: %E\n"));
 	    }
 
@@ -99,11 +97,11 @@ cr16_elf_after_open (void)
 static void
 check_sections (bfd *abfd, asection *sec, void *datasec)
 {
-  if ((strncmp (bfd_get_section_name (abfd, sec), ".data.rel", 9) == 0)
+  if ((strncmp (bfd_section_name (sec), ".data.rel", 9) == 0)
       && sec != datasec
       && sec->reloc_count == 0 )
     einfo (_("%X%P: %pB: section %s has relocs; can not use --embedded-relocs\n"),
-	   abfd, bfd_get_section_name (abfd, sec));
+	   abfd, bfd_section_name (sec));
 }
 
 static void

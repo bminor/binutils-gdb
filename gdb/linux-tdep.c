@@ -1046,7 +1046,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 
   addr_size_bits = gdbarch_addr_bit (core_gdbarch);
   addr_size = addr_size_bits / 8;
-  note_size = bfd_get_section_size (section);
+  note_size = bfd_section_size (section);
 
   if (note_size < 2 * addr_size)
     error (_("malformed core note - too short for header"));

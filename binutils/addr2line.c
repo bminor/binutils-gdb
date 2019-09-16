@@ -182,14 +182,14 @@ find_address_in_section (bfd *abfd, asection *section,
   if (found)
     return;
 
-  if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0)
+  if ((bfd_section_flags (section) & SEC_ALLOC) == 0)
     return;
 
-  vma = bfd_get_section_vma (abfd, section);
+  vma = bfd_section_vma (section);
   if (pc < vma)
     return;
 
-  size = bfd_get_section_size (section);
+  size = bfd_section_size (section);
   if (pc >= vma + size)
     return;
 
@@ -208,10 +208,10 @@ find_offset_in_section (bfd *abfd, asection *section)
   if (found)
     return;
 
-  if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0)
+  if ((bfd_section_flags (section) & SEC_ALLOC) == 0)
     return;
 
-  size = bfd_get_section_size (section);
+  size = bfd_section_size (section);
   if (pc >= size)
     return;
 

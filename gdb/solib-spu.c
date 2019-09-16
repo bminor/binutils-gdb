@@ -364,7 +364,7 @@ spu_bfd_open (const char *pathname)
   spu_name = bfd_get_section_by_name (abfd.get (), ".note.spu_name");
   if (spu_name)
     {
-      int sect_size = bfd_section_size (abfd.get (), spu_name);
+      int sect_size = bfd_section_size (spu_name);
 
       if (sect_size > 20)
 	{

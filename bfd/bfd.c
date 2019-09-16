@@ -2342,7 +2342,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		  bfd_put_32 (abfd, 1 << sec->alignment_power,
 			      &echdr->ch_addralign);
 		  /* bfd_log2 (alignof (Elf32_Chdr)) */
-		  bfd_set_section_alignment (abfd, sec, 2);
+		  bfd_set_section_alignment (sec, 2);
 		}
 	      else
 		{
@@ -2354,7 +2354,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		  bfd_put_64 (abfd, 1 << sec->alignment_power,
 			      &echdr->ch_addralign);
 		  /* bfd_log2 (alignof (Elf64_Chdr)) */
-		  bfd_set_section_alignment (abfd, sec, 3);
+		  bfd_set_section_alignment (sec, 3);
 		}
 	    }
 	  else
@@ -2368,7 +2368,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	      memcpy (contents, "ZLIB", 4);
 	      bfd_putb64 (sec->size, contents + 4);
 	      /* No way to keep the original alignment, just use 1 always. */
-	      bfd_set_section_alignment (abfd, sec, 0);
+	      bfd_set_section_alignment (sec, 0);
 	    }
 	}
     }
@@ -2597,7 +2597,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
       use_memmove = TRUE;
     }
 
-  size = bfd_get_section_size (isec) - ihdr_size + ohdr_size;
+  size = bfd_section_size (isec) - ihdr_size + ohdr_size;
   if (!use_memmove)
     {
       contents = (bfd_byte *) bfd_malloc (size);

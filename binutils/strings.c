@@ -332,7 +332,7 @@ strings_a_section (bfd *abfd, asection *sect, const char *filename,
   if ((sect->flags & DATA_FLAGS) != DATA_FLAGS)
     return;
 
-  sectsize = bfd_get_section_size (sect);
+  sectsize = bfd_section_size (sect);
   if (sectsize == 0)
     return;
 

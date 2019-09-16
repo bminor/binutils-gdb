@@ -244,8 +244,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	{
 	  if (section->the_bfd_section != NULL)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (objfile->obfd,
-						section->the_bfd_section));
+			      bfd_section_name (section->the_bfd_section));
 	  else
 	    fprintf_filtered (outfile, " spurious section %ld",
 			      (long) (section - objfile->sections));
@@ -525,8 +524,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 		      outfile);
       if (section)
 	fprintf_filtered (outfile, " section %s\n",
-			  bfd_section_name (section->the_bfd_section->owner,
-					    section->the_bfd_section));
+			  bfd_section_name (section->the_bfd_section));
       else
 	fprintf_filtered (outfile, "\n");
       return;
@@ -596,8 +594,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section->owner,
-						section->the_bfd_section));
+			      bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_REGISTER:
@@ -638,8 +635,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section->owner,
-						section->the_bfd_section));
+			      bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_BLOCK:
@@ -655,8 +651,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section->owner,
-						section->the_bfd_section));
+			      bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_COMPUTED:

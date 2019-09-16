@@ -1957,7 +1957,7 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->elf.srelplt)
 	    relocs = TRUE;
@@ -3203,7 +3203,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      if (name == NULL)
 		return FALSE;
 	      if (*name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (r == bfd_reloc_overflow)

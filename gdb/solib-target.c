@@ -323,7 +323,7 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	  for (i = 0, sect = so->abfd->sections;
 	       sect != NULL;
 	       i++, sect = sect->next)
-	    if ((bfd_get_section_flags (so->abfd, sect) & SEC_ALLOC))
+	    if ((bfd_section_flags (sect) & SEC_ALLOC))
 	      num_alloc_sections++;
 
 	  if (num_alloc_sections != li->section_bases.size ())
@@ -341,14 +341,14 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		   sect != NULL;
 		   i++, sect = sect->next)
 		{
-		  if (!(bfd_get_section_flags (so->abfd, sect) & SEC_ALLOC))
+		  if (!(bfd_section_flags (sect) & SEC_ALLOC))
 		    continue;
-		  if (bfd_section_size (so->abfd, sect) > 0)
+		  if (bfd_section_size (sect) > 0)
 		    {
 		      CORE_ADDR low, high;
 
 		      low = li->section_bases[i];
-		      high = low + bfd_section_size (so->abfd, sect) - 1;
+		      high = low + bfd_section_size (sect) - 1;
 
 		      if (low < so->addr_low)
 			so->addr_low = low;

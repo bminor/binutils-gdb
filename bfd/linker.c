@@ -2396,7 +2396,7 @@ _bfd_generic_reloc_link_order (bfd *abfd,
 	  (*info->callbacks->reloc_overflow)
 	    (info, NULL,
 	     (link_order->type == bfd_section_reloc_link_order
-	      ? bfd_section_name (abfd, link_order->u.reloc.p->u.section)
+	      ? bfd_section_name (link_order->u.reloc.p->u.section)
 	      : link_order->u.reloc.p->u.name),
 	     r->howto->name, link_order->u.reloc.p->addend,
 	     NULL, NULL, 0);
@@ -2942,7 +2942,7 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
      into a single large link once section, which defeats the purpose
      of having link once sections in the first place.  */
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   already_linked_list = bfd_section_already_linked_table_lookup (name);
 

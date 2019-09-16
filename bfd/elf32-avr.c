@@ -1465,7 +1465,7 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	  name = name == NULL ? bfd_section_name (sec) : name;
 	}
       else
 	{
@@ -2354,8 +2354,7 @@ avr_property_record_compare (const void *ap, const void *bp)
     return (a->offset - b->offset);
 
   if (a->section != b->section)
-    return (bfd_get_section_vma (a->section->owner, a->section)
-	    - bfd_get_section_vma (b->section->owner, b->section));
+    return bfd_section_vma (a->section) - bfd_section_vma (b->section);
 
   return (a->type - b->type);
 }
@@ -3948,12 +3947,12 @@ internal_reloc_compare (const void *ap, const void *bp)
 /* Return true if ADDRESS is within the vma range of SECTION from ABFD.  */
 
 static bfd_boolean
-avr_is_section_for_address (bfd *abfd, asection *section, bfd_vma address)
+avr_is_section_for_address (asection *section, bfd_vma address)
 {
   bfd_vma vma;
   bfd_size_type size;
 
-  vma = bfd_get_section_vma (abfd, section);
+  vma = bfd_section_vma (section);
   if (address < vma)
     return FALSE;
 
@@ -3985,7 +3984,7 @@ struct avr_find_section_data
    perform any checks, and just returns.  */
 
 static void
-avr_find_section_for_address (bfd *abfd,
+avr_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
 			      asection *section, void *data)
 {
   struct avr_find_section_data *fs_data
@@ -3996,11 +3995,11 @@ avr_find_section_for_address (bfd *abfd,
     return;
 
   /* If this section isn't part of the addressable code content, skip it.  */
-  if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0
-      && (bfd_get_section_flags (abfd, section) & SEC_CODE) == 0)
+  if ((bfd_section_flags (section) & SEC_ALLOC) == 0
+      && (bfd_section_flags (section) & SEC_CODE) == 0)
     return;
 
-  if (avr_is_section_for_address (abfd, section, fs_data->address))
+  if (avr_is_section_for_address (section, fs_data->address))
     fs_data->section = section;
 }
 
@@ -4023,7 +4022,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 
   fs_data.section = NULL;
 
-  size = bfd_get_section_size (sec);
+  size = bfd_section_size (sec);
   contents = bfd_malloc (size);
   bfd_get_section_contents (abfd, sec, contents, 0, size);
   ptr = contents;
@@ -4126,8 +4125,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	{
 	  /* Try to find section and offset from address.  */
 	  if (fs_data.section != NULL
-	      && !avr_is_section_for_address (abfd, fs_data.section,
-					      address))
+	      && !avr_is_section_for_address (fs_data.section, address))
 	    fs_data.section = NULL;
 
 	  if (fs_data.section == NULL)
@@ -4145,7 +4143,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 
 	  r_list->records [i].section = fs_data.section;
 	  r_list->records [i].offset
-	    = address - bfd_get_section_vma (abfd, fs_data.section);
+	    = address - bfd_section_vma (fs_data.section);
 	}
 
       r_list->records [i].type = *((bfd_byte *) ptr);

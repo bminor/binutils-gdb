@@ -430,7 +430,7 @@ md_assemble (char * str)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & -(1 << align));
 }
 
@@ -817,7 +817,7 @@ s_iq2000_end (int x ATTRIBUTE_UNUSED)
   else
     p = NULL;
 
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;
@@ -916,7 +916,7 @@ s_iq2000_ent (int aent)
   if (ISDIGIT (*input_line_pointer) || *input_line_pointer == '-')
     get_number ();
 
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;

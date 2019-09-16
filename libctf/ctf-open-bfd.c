@@ -100,7 +100,7 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 
   ctfsect.cts_name = _CTF_SECTION;
   ctfsect.cts_entsize = 1;
-  ctfsect.cts_size = bfd_section_size (abfd, ctf_asect);
+  ctfsect.cts_size = bfd_section_size (ctf_asect);
   ctfsect.cts_data = contents;
 
   if ((arc = ctf_bfdopen_ctfsect (abfd, &ctfsect, errp)) != NULL)
@@ -157,7 +157,7 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 	    }
 	  strsect.cts_data = contents;
 	  strsect.cts_name = (char *) strsect.cts_data + strhdr->sh_name;
-	  strsect.cts_size = bfd_section_size (abfd, str_asect);
+	  strsect.cts_size = bfd_section_size (str_asect);
 	  strsect.cts_entsize = strhdr->sh_size;
 	  strsectp = &strsect;
 
@@ -170,7 +170,7 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 
 	  symsect.cts_name = (char *) strsect.cts_data + symhdr->sh_name;
 	  symsect.cts_entsize = symhdr->sh_size;
-	  symsect.cts_size = bfd_section_size (abfd, sym_asect);
+	  symsect.cts_size = bfd_section_size (sym_asect);
 	  symsect.cts_data = contents;
 	  symsectp = &symsect;
 	}

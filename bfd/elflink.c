@@ -162,13 +162,13 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 					  (bed->dynamic_sec_flags
 					   | SEC_READONLY));
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->srelgot = s;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->sgot = s;
 
@@ -176,8 +176,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s,
-					 bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       htab->sgotplt = s;
     }
@@ -286,25 +285,25 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version_d",
 					  flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version",
 					  flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, 1))
+      || !bfd_set_section_alignment (s, 1))
     return FALSE;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version_r",
 					  flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".dynsym",
 					  flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   elf_hash_table (info)->dynsym = s;
 
@@ -315,7 +314,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   s = bfd_make_section_anyway_with_flags (abfd, ".dynamic", flags);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
 
   /* The special symbol _DYNAMIC is always set to the start of the
@@ -334,7 +333,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       s = bfd_make_section_anyway_with_flags (abfd, ".hash",
 					      flags | SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       elf_section_data (s)->this_hdr.sh_entsize = bed->s->sizeof_hash_entry;
     }
@@ -344,7 +343,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       s = bfd_make_section_anyway_with_flags (abfd, ".gnu.hash",
 					      flags | SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return FALSE;
       /* For 64-bit ELF, .gnu.hash is a non-uniform entity size section:
 	 4 32-bit words followed by variable count of 64-bit words, then
@@ -395,7 +394,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   s = bfd_make_section_anyway_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+      || !bfd_set_section_alignment (s, bed->plt_alignment))
     return FALSE;
   htab->splt = s;
 
@@ -415,7 +414,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					   ? ".rela.plt" : ".rel.plt"),
 					  flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+      || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return FALSE;
   htab->srelplt = s;
 
@@ -466,7 +465,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 						   ? ".rela.bss" : ".rel.bss"),
 						  flags | SEC_READONLY);
 	  if (s == NULL
-	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+	      || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	    return FALSE;
 	  htab->srelbss = s;
 
@@ -477,8 +476,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 			   ? ".rela.data.rel.ro" : ".rel.data.rel.ro"),
 		    flags | SEC_READONLY));
 	      if (s == NULL
-		  || ! bfd_set_section_alignment (abfd, s,
-						  bed->s->log_file_align))
+		  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 		return FALSE;
 	      htab->sreldynrelro = s;
 	    }
@@ -3099,7 +3097,7 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
      know the symbol alignment requirement, we start with the
      maximum alignment and check low bits of the symbol address
      for the minimum alignment.  */
-  power_of_two = bfd_get_section_alignment (sec->owner, sec);
+  power_of_two = bfd_section_alignment (sec);
   mask = ((bfd_vma) 1 << power_of_two) - 1;
   while ((h->root.u.def.value & mask) != 0)
     {
@@ -3107,12 +3105,10 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
        --power_of_two;
     }
 
-  if (power_of_two > bfd_get_section_alignment (dynbss->owner,
-						dynbss))
+  if (power_of_two > bfd_section_alignment (dynbss))
     {
       /* Adjust the section alignment if needed.  */
-      if (! bfd_set_section_alignment (dynbss->owner, dynbss,
-				       power_of_two))
+      if (!bfd_set_section_alignment (dynbss, power_of_two))
 	return FALSE;
     }
 
@@ -3949,7 +3945,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       const char *name;
 
-      name = bfd_get_section_name (abfd, s);
+      name = bfd_section_name (s);
       if (CONST_STRNEQ (name, ".gnu.warning."))
 	{
 	  char *msg;
@@ -11393,8 +11389,7 @@ elf_reloc_link_order (bfd *output_bfd,
 
 	case bfd_reloc_overflow:
 	  if (link_order->type == bfd_section_reloc_link_order)
-	    sym_name = bfd_section_name (output_bfd,
-					 link_order->u.reloc.p->u.section);
+	    sym_name = bfd_section_name (link_order->u.reloc.p->u.section);
 	  else
 	    sym_name = link_order->u.reloc.p->u.name;
 	  (*info->callbacks->reloc_overflow) (info, NULL, sym_name,
@@ -11837,7 +11832,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  attr_size = bfd_elf_obj_attr_size (abfd);
-	  bfd_set_section_size (abfd, o, attr_size);
+	  bfd_set_section_size (o, attr_size);
 	  /* Skip this section later on.  */
 	  o->map_head.link_order = NULL;
 	  if (attr_size)
@@ -13588,7 +13583,7 @@ bfd_elf_parse_eh_frame_entries (bfd *abfd ATTRIBUTE_UNUSED,
 
       for (sec = ibfd->sections; sec; sec = sec->next)
 	{
-	  if (CONST_STRNEQ (bfd_section_name (ibfd, sec), ".eh_frame_entry")
+	  if (CONST_STRNEQ (bfd_section_name (sec), ".eh_frame_entry")
 	      && init_reloc_cookie_rels (&cookie, info, ibfd, sec))
 	    {
 	      _bfd_elf_parse_eh_frame_entry (info, sec, &cookie);
@@ -14444,7 +14439,7 @@ get_dynamic_reloc_section_name (bfd *       abfd,
 				bfd_boolean is_rela)
 {
   char *name;
-  const char *old_name = bfd_get_section_name (NULL, sec);
+  const char *old_name = bfd_section_name (sec);
   const char *prefix = is_rela ? ".rela" : ".rel";
 
   if (old_name == NULL)
@@ -14527,7 +14522,7 @@ _bfd_elf_make_dynamic_reloc_section (asection *sec,
 		 section named "auto" we'll get ".relauto" which is
 		 seen to be a .rela section.  */
 	      elf_section_type (reloc_sec) = is_rela ? SHT_RELA : SHT_REL;
-	      if (! bfd_set_section_alignment (dynobj, reloc_sec, alignment))
+	      if (!bfd_set_section_alignment (reloc_sec, alignment))
 		reloc_sec = NULL;
 	    }
 	}

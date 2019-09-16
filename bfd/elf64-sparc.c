@@ -748,7 +748,7 @@ elf64_sparc_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 {
   const char *name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   if (strcmp (name, ".stab") == 0)
     {

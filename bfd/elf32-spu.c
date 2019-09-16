@@ -585,7 +585,7 @@ spu_elf_create_sections (struct bfd_link_info *info)
       flags = SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       s = bfd_make_section_anyway_with_flags (ibfd, SPU_PTNOTE_SPUNAME, flags);
       if (s == NULL
-	  || !bfd_set_section_alignment (ibfd, s, 4))
+	  || !bfd_set_section_alignment (s, 4))
 	return FALSE;
       /* Because we didn't set SEC_LINKER_CREATED we need to set the
 	 proper section type.  */
@@ -595,7 +595,7 @@ spu_elf_create_sections (struct bfd_link_info *info)
       size = 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4);
       size += (name_len + 3) & -4;
 
-      if (!bfd_set_section_size (ibfd, s, size))
+      if (!bfd_set_section_size (s, size))
 	return FALSE;
 
       data = bfd_zalloc (ibfd, size);
@@ -622,7 +622,7 @@ spu_elf_create_sections (struct bfd_link_info *info)
       flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       s = bfd_make_section_anyway_with_flags (ibfd, ".fixup", flags);
-      if (s == NULL || !bfd_set_section_alignment (ibfd, s, 2))
+      if (s == NULL || !bfd_set_section_alignment (s, 2))
 	return FALSE;
       htab->sfixup = s;
     }
@@ -1694,7 +1694,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
       stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
       htab->stub_sec[0] = stub;
       if (stub == NULL
-	  || !bfd_set_section_alignment (ibfd, stub,
+	  || !bfd_set_section_alignment (stub,
 					 ovl_stub_size_log2 (htab->params)))
 	return 0;
       stub->size = htab->stub_count[0] * ovl_stub_size (htab->params);
@@ -1709,7 +1709,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 	  stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
 	  htab->stub_sec[ovl] = stub;
 	  if (stub == NULL
-	      || !bfd_set_section_alignment (ibfd, stub,
+	      || !bfd_set_section_alignment (stub,
 					     ovl_stub_size_log2 (htab->params)))
 	    return 0;
 	  stub->size = htab->stub_count[ovl] * ovl_stub_size (htab->params);
@@ -1727,7 +1727,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
       flags = SEC_ALLOC;
       htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
       if (htab->ovtab == NULL
-	  || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
+	  || !bfd_set_section_alignment (htab->ovtab, 4))
 	return 0;
 
       htab->ovtab->size = (16 + 16 + (16 << htab->fromelem_size_log2))
@@ -1736,7 +1736,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
       flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       htab->init = bfd_make_section_anyway_with_flags (ibfd, ".ovini", flags);
       if (htab->init == NULL
-	  || !bfd_set_section_alignment (ibfd, htab->init, 4))
+	  || !bfd_set_section_alignment (htab->init, 4))
 	return 0;
 
       htab->init->size = 16;
@@ -1761,7 +1761,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
       flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
       if (htab->ovtab == NULL
-	  || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
+	  || !bfd_set_section_alignment (htab->ovtab, 4))
 	return 0;
 
       htab->ovtab->size = htab->num_overlays * 16 + 16 + htab->num_buf * 4;
@@ -1769,7 +1769,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 
   htab->toe = bfd_make_section_anyway_with_flags (ibfd, ".toe", SEC_ALLOC);
   if (htab->toe == NULL
-      || !bfd_set_section_alignment (ibfd, htab->toe, 4))
+      || !bfd_set_section_alignment (htab->toe, 4))
     return 0;
   htab->toe->size = 16;
 
@@ -5049,7 +5049,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	    (_("%pB(%s+%#" PRIx64 "): "
 	       "unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
-	     bfd_get_section_name (input_bfd, input_section),
+	     bfd_section_name (input_section),
 	     (uint64_t) rel->r_offset,
 	     howto->name,
 	     sym_name);
@@ -5436,7 +5436,7 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 }
 
 bfd_boolean
-spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
+spu_elf_size_sections (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
   if (htab->params->emit_fixups)
@@ -5493,7 +5493,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 
       /* We always have a NULL fixup as a sentinel */
       size = (fixup_count + 1) * FIXUP_RECORD_SIZE;
-      if (!bfd_set_section_size (output_bfd, sfixup, size))
+      if (!bfd_set_section_size (sfixup, size))
 	return FALSE;
       sfixup->contents = (bfd_byte *) bfd_zalloc (info->input_bfds, size);
       if (sfixup->contents == NULL)

@@ -102,9 +102,8 @@ m68k_elf_after_open (void)
 						    | SEC_HAS_CONTENTS
 						    | SEC_IN_MEMORY));
 	      if (relsec == NULL
-		  || ! bfd_set_section_alignment (abfd, relsec, 2)
-		  || ! bfd_set_section_size (abfd, relsec,
-					     datasec->reloc_count * 12))
+		  || !bfd_set_section_alignment (relsec, 2)
+		  || !bfd_set_section_size (relsec, datasec->reloc_count * 12))
 		einfo (_("%F%P: %pB: can not create .emreloc section: %E\n"));
 	    }
 
@@ -123,11 +122,11 @@ m68k_elf_after_open (void)
 static void
 check_sections (bfd *abfd, asection *sec, void *datasec)
 {
-  if ((bfd_get_section_flags (abfd, sec) & SEC_DATA)
+  if ((bfd_section_flags (sec) & SEC_DATA)
       && sec != datasec
       && sec->reloc_count != 0)
     einfo (_("%X%P: %pB: section %s has relocs; can not use --embedded-relocs\n"),
-	   abfd, bfd_get_section_name (abfd, sec));
+	   abfd, bfd_section_name (sec));
 }
 
 #endif /* SUPPORT_EMBEDDED_RELOCS */

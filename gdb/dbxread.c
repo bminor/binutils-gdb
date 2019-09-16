@@ -207,10 +207,10 @@ find_text_range (bfd * sym_bfd, struct objfile *objfile)
   CORE_ADDR end = 0;
 
   for (sec = sym_bfd->sections; sec; sec = sec->next)
-    if (bfd_get_section_flags (sym_bfd, sec) & SEC_CODE)
+    if (bfd_section_flags (sec) & SEC_CODE)
       {
-	CORE_ADDR sec_start = bfd_section_vma (sym_bfd, sec);
-	CORE_ADDR sec_end = sec_start + bfd_section_size (sym_bfd, sec);
+	CORE_ADDR sec_start = bfd_section_vma (sec);
+	CORE_ADDR sec_end = sec_start + bfd_section_size (sec);
 
 	if (found_any)
 	  {
@@ -607,8 +607,8 @@ dbx_symfile_init (struct objfile *objfile)
   text_sect = bfd_get_section_by_name (sym_bfd, ".text");
   if (!text_sect)
     error (_("Can't find .text section in symbol file"));
-  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
-  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (text_sect);
 
   DBX_SYMBOL_SIZE (objfile) = obj_symbol_entry_size (sym_bfd);
   DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
@@ -781,7 +781,7 @@ fill_symbuf (bfd *sym_bfd)
 
 	  if (bfd_seek (sym_bfd, filepos, SEEK_SET) != 0)
 	    perror_with_name (bfd_get_filename (sym_bfd));
-	  symbuf_left = bfd_section_size (sym_bfd, (*symbuf_sections)[sect_idx]);
+	  symbuf_left = bfd_section_size ((*symbuf_sections)[sect_idx]);
 	  symbol_table_offset = filepos - symbuf_read;
 	  ++sect_idx;
 	}
@@ -2980,7 +2980,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
     = make_scoped_restore (&symbuf_sections);
   if (stabsects.size () == 1)
     {
-      stabsize = bfd_section_size (sym_bfd, stabsects[0]);
+      stabsize = bfd_section_size (stabsects[0]);
       DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
       DBX_SYMTAB_OFFSET (objfile) = stabsects[0]->filepos;
     }
@@ -2989,7 +2989,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
       DBX_SYMCOUNT (objfile) = 0;
       for (asection *section : stabsects)
 	{
-	  stabsize = bfd_section_size (sym_bfd, section);
+	  stabsize = bfd_section_size (section);
 	  DBX_SYMCOUNT (objfile) += stabsize / DBX_SYMBOL_SIZE (objfile);
 	}
 
@@ -2997,7 +2997,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
 
       sect_idx = 1;
       symbuf_sections = &stabsects;
-      symbuf_left = bfd_section_size (sym_bfd, stabsects[0]);
+      symbuf_left = bfd_section_size (stabsects[0]);
       symbuf_read = 0;
     }
 
@@ -3040,7 +3040,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 #define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE (objfile) = ELF_STABS_SYMBOL_SIZE;
   DBX_SYMCOUNT (objfile)
-    = bfd_section_size (objfile->obfd, stabsect) / DBX_SYMBOL_SIZE (objfile);
+    = bfd_section_size (stabsect) / DBX_SYMBOL_SIZE (objfile);
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
   DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;
   DBX_STAB_SECTION (objfile) = stabsect;
@@ -3067,7 +3067,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   processing_acc_compilation = 1;
 
   symbuf_read = 0;
-  symbuf_left = bfd_section_size (objfile->obfd, stabsect);
+  symbuf_left = bfd_section_size (stabsect);
 
   scoped_restore restore_stabs_data = make_scoped_restore (&stabs_data);
   gdb::unique_xmalloc_ptr<gdb_byte> data_holder;
@@ -3128,13 +3128,13 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
   if (!text_sect)
     error (_("Can't find %s section in symbol file"), text_name);
-  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
-  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (text_sect);
 
   DBX_SYMBOL_SIZE (objfile) = sizeof (struct external_nlist);
-  DBX_SYMCOUNT (objfile) = bfd_section_size (sym_bfd, stabsect)
+  DBX_SYMCOUNT (objfile) = bfd_section_size (stabsect)
     / DBX_SYMBOL_SIZE (objfile);
-  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (sym_bfd, stabstrsect);
+  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (stabstrsect);
   DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;	/* XXX - FIXME: POKING
 							   INSIDE BFD DATA
 							   STRUCTURES */

@@ -99,30 +99,30 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
       if (sect->output_section == NULL)
 	sect->output_section = sect;
 
-      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+      if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
 	return;
 
       /* Make the memory always readable.  */
       prot = GDB_MMAP_PROT_READ;
-      if ((bfd_get_section_flags (abfd, sect) & SEC_READONLY) == 0)
+      if ((bfd_section_flags (sect) & SEC_READONLY) == 0)
 	prot |= GDB_MMAP_PROT_WRITE;
-      if ((bfd_get_section_flags (abfd, sect) & SEC_CODE) != 0)
+      if ((bfd_section_flags (sect) & SEC_CODE) != 0)
 	prot |= GDB_MMAP_PROT_EXEC;
 
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "module \"%s\" section \"%s\" size %s prot %u\n",
 			    bfd_get_filename (abfd),
-			    bfd_get_section_name (abfd, sect),
+			    bfd_section_name (sect),
 			    paddress (target_gdbarch (),
-				      bfd_get_section_size (sect)),
+				      bfd_section_size (sect)),
 			    prot);
     }
   else
     prot = -1;
 
   if (sect == NULL
-      || (data->last_prot != prot && bfd_get_section_size (sect) != 0))
+      || (data->last_prot != prot && bfd_section_size (sect) != 0))
     {
       CORE_ADDR addr;
       asection *sect_iter;
@@ -150,9 +150,8 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 
       for (sect_iter = data->last_section_first; sect_iter != sect;
 	   sect_iter = sect_iter->next)
-	if ((bfd_get_section_flags (abfd, sect_iter) & SEC_ALLOC) != 0)
-	  bfd_set_section_vma (abfd, sect_iter,
-			       addr + bfd_get_section_vma (abfd, sect_iter));
+	if ((bfd_section_flags (sect_iter) & SEC_ALLOC) != 0)
+	  bfd_set_section_vma (sect_iter, addr + bfd_section_vma (sect_iter));
 
       data->last_size = 0;
       data->last_section_first = sect;
@@ -163,14 +162,14 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
   if (sect == NULL)
     return;
 
-  alignment = ((CORE_ADDR) 1) << bfd_get_section_alignment (abfd, sect);
+  alignment = ((CORE_ADDR) 1) << bfd_section_alignment (sect);
   data->last_max_alignment = std::max (data->last_max_alignment, alignment);
 
   data->last_size = (data->last_size + alignment - 1) & -alignment;
 
-  bfd_set_section_vma (abfd, sect, data->last_size);
+  bfd_set_section_vma (sect, data->last_size);
 
-  data->last_size += bfd_get_section_size (sect);
+  data->last_size += bfd_section_size (sect);
   data->last_size = (data->last_size + alignment - 1) & -alignment;
 }
 
@@ -197,7 +196,7 @@ link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
 			bfd_vma address)
 {
   warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
-	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
+	   bfd_get_filename (abfd), bfd_section_name (section),
 	   xwarning);
 }
 
@@ -210,7 +209,7 @@ link_callbacks_undefined_symbol (struct bfd_link_info *link_info,
 {
   warning (_("Cannot resolve relocation to \"%s\" "
 	     "from compiled module \"%s\" section \"%s\"."),
-	   name, bfd_get_filename (abfd), bfd_get_section_name (abfd, section));
+	   name, bfd_get_filename (abfd), bfd_section_name (section));
 }
 
 /* Helper for link_callbacks callbacks vector.  */
@@ -233,7 +232,7 @@ link_callbacks_reloc_dangerous (struct bfd_link_info *link_info,
 {
   warning (_("Compiled module \"%s\" section \"%s\": dangerous "
 	     "relocation: %s\n"),
-	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
+	   bfd_get_filename (abfd), bfd_section_name (section),
 	   message);
 }
 
@@ -246,7 +245,7 @@ link_callbacks_unattached_reloc (struct bfd_link_info *link_info,
 {
   warning (_("Compiled module \"%s\" section \"%s\": unattached "
 	     "relocation: %s\n"),
-	   bfd_get_filename (abfd), bfd_get_section_name (abfd, section),
+	   bfd_get_filename (abfd), bfd_section_name (section),
 	   name);
 }
 
@@ -324,11 +323,11 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   struct bfd_link_order link_order;
   CORE_ADDR inferior_addr;
 
-  if ((bfd_get_section_flags (abfd, sect) & (SEC_ALLOC | SEC_LOAD))
+  if ((bfd_section_flags (sect) & (SEC_ALLOC | SEC_LOAD))
       != (SEC_ALLOC | SEC_LOAD))
     return;
 
-  if (bfd_get_section_size (sect) == 0)
+  if (bfd_section_size (sect) == 0)
     return;
 
   /* Mostly a copy of bfd_simple_get_relocated_section_contents which GDB
@@ -349,11 +348,11 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.next = NULL;
   link_order.type = bfd_indirect_link_order;
   link_order.offset = 0;
-  link_order.size = bfd_get_section_size (sect);
+  link_order.size = bfd_section_size (sect);
   link_order.u.indirect.section = sect;
 
   gdb::unique_xmalloc_ptr<gdb_byte> sect_data
-    ((bfd_byte *) xmalloc (bfd_get_section_size (sect)));
+    ((bfd_byte *) xmalloc (bfd_section_size (sect)));
 
   sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
 						      &link_order,
@@ -362,19 +361,19 @@ copy_sections (bfd *abfd, asection *sect, void *data)
 
   if (sect_data_got == NULL)
     error (_("Cannot map compiled module \"%s\" section \"%s\": %s"),
-	   bfd_get_filename (abfd), bfd_get_section_name (abfd, sect),
+	   bfd_get_filename (abfd), bfd_section_name (sect),
 	   bfd_errmsg (bfd_get_error ()));
   gdb_assert (sect_data_got == sect_data.get ());
 
-  inferior_addr = bfd_get_section_vma (abfd, sect);
+  inferior_addr = bfd_section_vma (sect);
   if (0 != target_write_memory (inferior_addr, sect_data.get (),
-				bfd_get_section_size (sect)))
+				bfd_section_size (sect)))
     error (_("Cannot write compiled module \"%s\" section \"%s\" "
 	     "to inferior memory range %s-%s."),
-	   bfd_get_filename (abfd), bfd_get_section_name (abfd, sect),
+	   bfd_get_filename (abfd), bfd_section_name (sect),
 	   paddress (target_gdbarch (), inferior_addr),
 	   paddress (target_gdbarch (),
-		     inferior_addr + bfd_get_section_size (sect)));
+		     inferior_addr + bfd_section_size (sect)));
 }
 
 /* Fetch the type of COMPILE_I_EXPR_PTR_TYPE and COMPILE_I_EXPR_VAL

@@ -478,11 +478,11 @@ berkeley_or_gnu_sum (bfd *abfd ATTRIBUTE_UNUSED, sec_ptr sec,
   flagword flags;
   bfd_size_type size;
 
-  flags = bfd_get_section_flags (abfd, sec);
+  flags = bfd_section_flags (sec);
   if ((flags & SEC_ALLOC) == 0)
     return;
 
-  size = bfd_get_section_size (sec);
+  size = bfd_section_size (sec);
   if ((flags & SEC_CODE) != 0
       || (selected_output_format == FORMAT_BERKLEY
 	  && (flags & SEC_READONLY) != 0))
@@ -557,21 +557,21 @@ static void
 sysv_internal_sizer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 		     void *ignore ATTRIBUTE_UNUSED)
 {
-  bfd_size_type size = bfd_section_size (file, sec);
+  bfd_size_type size = bfd_section_size (sec);
 
   if (   ! bfd_is_abs_section (sec)
       && ! bfd_is_com_section (sec)
       && ! bfd_is_und_section (sec))
     {
-      int namelen = strlen (bfd_section_name (file, sec));
+      int namelen = strlen (bfd_section_name (sec));
 
       if (namelen > svi_namelen)
 	svi_namelen = namelen;
 
       svi_total += size;
 
-      if (bfd_section_vma (file, sec) > svi_maxvma)
-	svi_maxvma = bfd_section_vma (file, sec);
+      if (bfd_section_vma (sec) > svi_maxvma)
+	svi_maxvma = bfd_section_vma (sec);
     }
 }
 
@@ -589,7 +589,7 @@ static void
 sysv_internal_printer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 		       void *ignore ATTRIBUTE_UNUSED)
 {
-  bfd_size_type size = bfd_section_size (file, sec);
+  bfd_size_type size = bfd_section_size (sec);
 
   if (   ! bfd_is_abs_section (sec)
       && ! bfd_is_com_section (sec)
@@ -597,9 +597,9 @@ sysv_internal_printer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
     {
       svi_total += size;
 
-      sysv_one_line (bfd_section_name (file, sec),
+      sysv_one_line (bfd_section_name (sec),
 		     size,
-		     bfd_section_vma (file, sec));
+		     bfd_section_vma (sec));
     }
 }
 

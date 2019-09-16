@@ -344,15 +344,15 @@ sim_prepare_for_program (SIM_DESC sd, bfd* abfd)
             {
               bfd_size_type size;
 
-              size = bfd_get_section_size (s);
+	      size = bfd_section_size (s);
               if (size > 0)
                 {
                   bfd_vma lma;
 
                   if (STATE_LOAD_AT_LMA_P (sd))
-                    lma = bfd_section_lma (abfd, s);
+		    lma = bfd_section_lma (s);
                   else
-                    lma = bfd_section_vma (abfd, s);
+		    lma = bfd_section_vma (s);
 
                   if (lma <= 0xFFFE && lma+size >= 0x10000)
                     cpu->cpu_use_elf_start = 0;

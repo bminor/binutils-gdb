@@ -50,21 +50,18 @@ find_base (bfd *prog_bfd)
   found = 0;
   for (s = prog_bfd->sections; s; s = s->next)
     {
-      if ((strcmp (bfd_get_section_name (prog_bfd, s), ".boot") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".data") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".bss") == 0))
+      if ((strcmp (bfd_section_name (s), ".boot") == 0)
+	  || (strcmp (bfd_section_name (s), ".text") == 0)
+	  || (strcmp (bfd_section_name (s), ".data") == 0)
+	  || (strcmp (bfd_section_name (s), ".bss") == 0))
 	{
 	  if (!found)
 	    {
-	      base = bfd_get_section_vma (prog_bfd, s);
+	      base = bfd_section_vma (s);
 	      found = 1;
 	    }
 	  else
-	    base =
-	      bfd_get_section_vma (prog_bfd,
-				   s) < base ? bfd_get_section_vma (prog_bfd,
-								    s) : base;
+	    base = bfd_section_vma (s) < base ? bfd_section_vma (s) : base;
 	}
     }
   return base & ~(0xffffUL);

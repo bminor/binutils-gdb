@@ -1519,7 +1519,7 @@ elf_metag_relocate_section (bfd *output_bfd,
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	  name = name == NULL ? bfd_section_name (sec) : name;
 	}
       else
 	{
@@ -2934,7 +2934,7 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->etab.srelplt)
 	    relocs = TRUE;

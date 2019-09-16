@@ -1001,9 +1001,9 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
       symbol_set_frag (line_label, frag_now);
     }
 
-  if (bfd_get_section_flags (stdoutput, seg) == SEC_NO_FLAGS)
+  if (bfd_section_flags (seg) == SEC_NO_FLAGS)
     {
-      if (!bfd_set_section_flags (stdoutput, seg, SEC_DATA))
+      if (!bfd_set_section_flags (seg, SEC_DATA))
 	as_warn (_("Error setting flags for \"%s\": %s"), name,
 		 bfd_errmsg (bfd_get_error ()));
     }
@@ -1104,7 +1104,7 @@ tic4x_usect (int x ATTRIBUTE_UNUSED)
       S_SET_VALUE (line_label, frag_now_fix ());
     }
   seg_info (seg)->bss = 1;	/* Uninitialised data.  */
-  if (!bfd_set_section_flags (stdoutput, seg, SEC_ALLOC))
+  if (!bfd_set_section_flags (seg, SEC_ALLOC))
     as_warn (_("Error setting flags for \"%s\": %s"), name,
 	     bfd_errmsg (bfd_get_error ()));
   tic4x_seg_alloc (name, seg, size, line_label);

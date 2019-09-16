@@ -299,21 +299,15 @@ typedef struct bfd_section *sec_ptr;
    ? (((bfd_vma) (this) + ((boundary) - 1)) & ~ (bfd_vma) ((boundary)-1)) \
    : ~ (bfd_vma) 0)
 
-#define bfd_get_section_name(bfd, ptr) ((void) bfd, (ptr)->name)
-#define bfd_get_section_vma(bfd, ptr) ((void) bfd, (ptr)->vma)
-#define bfd_get_section_lma(bfd, ptr) ((void) bfd, (ptr)->lma)
-#define bfd_get_section_alignment(bfd, ptr) ((void) bfd, \
-					     (ptr)->alignment_power)
-#define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) ((ptr)->size)
-#define bfd_get_section_size(ptr) ((ptr)->size)
-#define bfd_section_vma(bfd, ptr) ((ptr)->vma)
-#define bfd_section_lma(bfd, ptr) ((ptr)->lma)
-#define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
-#define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
-#define bfd_get_section_userdata(bfd, ptr) ((void) bfd, (ptr)->userdata)
+#define bfd_section_name(sec) ((sec)->name)
+#define bfd_section_size(sec) ((sec)->size)
+#define bfd_section_vma(sec) ((sec)->vma)
+#define bfd_section_lma(sec) ((sec)->lma)
+#define bfd_section_alignment(sec) ((sec)->alignment_power)
+#define bfd_section_flags(sec) ((sec)->flags)
+#define bfd_section_userdata(sec) ((sec)->userdata)
 
-#define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
+#define bfd_is_com_section(sec) (((sec)->flags & SEC_IS_COMMON) != 0)
 
 #define bfd_get_section_limit_octets(bfd, sec)			\
   ((bfd)->direction != write_direction && (sec)->rawsize != 0	\

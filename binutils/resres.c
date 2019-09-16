@@ -142,7 +142,7 @@ write_res_file (const char *fn,const rc_res_directory *resdir)
   sec_length = write_res_directory ((windres_bfd *) NULL, 0x20UL, resdir,
 				    (const rc_res_id *) NULL,
 				    (const rc_res_id *) NULL, &language, 1);
-  if (! bfd_set_section_size (abfd, sec, (sec_length + 3) & ~3))
+  if (!bfd_set_section_size (sec, (sec_length + 3) & ~3))
     bfd_fatal ("bfd_set_section_size");
   if ((sec_length & 3) != 0)
     set_windres_bfd_content (&wrbfd, sign, sec_length, 4-(sec_length & 3));

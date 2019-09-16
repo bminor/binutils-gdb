@@ -359,8 +359,8 @@ record_alignment (/* Segment to which alignment pertains.  */
   if (seg == absolute_section)
     return;
 
-  if (align > bfd_get_section_alignment (stdoutput, seg))
-    bfd_set_section_alignment (stdoutput, seg, align);
+  if (align > bfd_section_alignment (seg))
+    bfd_set_section_alignment (seg, align);
 }
 
 int
@@ -369,7 +369,7 @@ get_recorded_alignment (segT seg)
   if (seg == absolute_section)
     return 0;
 
-  return bfd_get_section_alignment (stdoutput, seg);
+  return bfd_section_alignment (seg);
 }
 
 /* Reset the section indices after removing the gas created sections.  */
@@ -555,7 +555,7 @@ relax_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx)
 }
 
 static void
-size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
+size_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 {
   flagword flags;
   fragS *fragp;
@@ -580,8 +580,8 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   else
     size = 0;
 
-  flags = bfd_get_section_flags (abfd, sec);
-  if (size == 0 && bfd_get_section_size (sec) != 0 &&
+  flags = bfd_section_flags (sec);
+  if (size == 0 && bfd_section_size (sec) != 0 &&
     (flags & SEC_HAS_CONTENTS) != 0)
     return;
 
@@ -589,7 +589,7 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     flags |= SEC_HAS_CONTENTS;
 
   flags &= ~SEC_RELOC;
-  x = bfd_set_section_flags (abfd, sec, flags);
+  x = bfd_set_section_flags (sec, flags);
   gas_assert (x);
 
   /* If permitted, allow the backend to pad out the section
@@ -598,7 +598,7 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     newsize = size;
   else
     newsize = md_section_align (sec, size);
-  x = bfd_set_section_size (abfd, sec, newsize);
+  x = bfd_set_section_size (sec, newsize);
   gas_assert (x);
 
   /* If the size had to be rounded up, add some padding in the last
@@ -1215,7 +1215,8 @@ get_frag_for_reloc (fragS *last_frag,
 }
 
 static void
-write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
+write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
+	      void *xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   unsigned int n;
@@ -1345,9 +1346,9 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   if (n)
     {
-      flagword flags = bfd_get_section_flags (abfd, sec);
+      flagword flags = bfd_section_flags (sec);
       flags |= SEC_RELOC;
-      bfd_set_section_flags (abfd, sec, flags);
+      bfd_set_section_flags (sec, flags);
       bfd_set_reloc (stdoutput, sec, relocs, n);
     }
 
@@ -1433,7 +1434,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   char *header;
   struct z_stream_s *strm;
   int x;
-  flagword flags = bfd_get_section_flags (abfd, sec);
+  flagword flags = bfd_section_flags (sec);
   unsigned int header_size, compression_header_size;
 
   if (seginfo == NULL
@@ -1441,7 +1442,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       || (flags & (SEC_ALLOC | SEC_HAS_CONTENTS)) == SEC_ALLOC)
     return;
 
-  section_name = bfd_get_section_name (stdoutput, sec);
+  section_name = bfd_section_name (sec);
   if (strncmp (section_name, ".debug_", 7) != 0)
     return;
 
@@ -1565,12 +1566,12 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* Update the section size and its name.  */
   bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
-  x = bfd_set_section_size (abfd, sec, compressed_size);
+  x = bfd_set_section_size (sec, compressed_size);
   gas_assert (x);
   if (!compression_header_size)
     {
       compressed_name = concat (".z", section_name + 1, (char *) NULL);
-      bfd_section_name (stdoutput, sec) = compressed_name;
+      bfd_rename_section (sec, compressed_name);
     }
 }
 
@@ -1599,7 +1600,7 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* Write out the frags.  */
   if (seginfo == NULL
-      || !(bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
+      || !(bfd_section_flags (sec) & SEC_HAS_CONTENTS))
     return;
 
   for (f = seginfo->frchainP->frch_root;
@@ -1815,7 +1816,7 @@ subsegs_finish_section (asection *s)
 	do_not_pad_sections_to_alignment = 1;
 
       alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
-      if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
+      if ((bfd_section_flags (now_seg) & SEC_MERGE)
 	  && now_seg->entsize)
 	{
 	  unsigned int entsize = now_seg->entsize;
@@ -1875,7 +1876,7 @@ create_obj_attrs_section (void)
   s = subseg_new (name, 0);
   elf_section_type (s)
     = get_elf_backend_data (stdoutput)->obj_attrs_section_type;
-  bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
+  bfd_set_section_flags (s, SEC_READONLY | SEC_DATA);
   frag_now_fix ();
   p = frag_more (size);
   bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
@@ -1959,9 +1960,8 @@ maybe_generate_build_notes (void)
   /* Create a GNU Build Attribute section.  */
   sec = subseg_new (GNU_BUILD_ATTRS_SECTION_NAME, FALSE);
   elf_section_type (sec) = SHT_NOTE;
-  bfd_set_section_flags (stdoutput, sec,
-			 SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA);
-  bfd_set_section_alignment (stdoutput, sec, 2);
+  bfd_set_section_flags (sec, SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA);
+  bfd_set_section_alignment (sec, 2);
 
   /* Work out the size of the notes that we will create,
      and the relocation we should use.  */
@@ -2041,7 +2041,7 @@ maybe_generate_build_notes (void)
 
 	/* ...and another one to install the end address.  */
 	create_note_reloc (sec, sym, total_size, desc2_offset, desc_reloc,
-			   bfd_get_section_size (bsym->section),
+			   bfd_section_size (bsym->section),
 			   note);
 
 	total_size += note_size;

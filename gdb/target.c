@@ -1042,9 +1042,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
       secp = target_section_by_addr (ops, memaddr);
       if (secp != NULL
-	  && (bfd_get_section_flags (secp->the_bfd_section->owner,
-				     secp->the_bfd_section)
-	      & SEC_READONLY))
+	  && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
 	{
 	  table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,

@@ -8105,7 +8105,7 @@ x86_cleanup (void)
 
   /* Create the .note.gnu.property section.  */
   sec = subseg_new (NOTE_GNU_PROPERTY_SECTION_NAME, 0);
-  bfd_set_section_flags (stdoutput, sec,
+  bfd_set_section_flags (sec,
 			 (SEC_ALLOC
 			  | SEC_LOAD
 			  | SEC_DATA
@@ -8123,7 +8123,7 @@ x86_cleanup (void)
       alignment = 2;
     }
 
-  bfd_set_section_alignment (stdoutput, sec, alignment);
+  bfd_set_section_alignment (sec, alignment);
   elf_section_type (sec) = SHT_NOTE;
 
   /* GNU_PROPERTY_X86_ISA_1_USED: 4-byte type + 4-byte data size
@@ -11939,7 +11939,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 	 work.  */
       int align;
 
-      align = bfd_get_section_alignment (stdoutput, segment);
+      align = bfd_section_alignment (segment);
       size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
     }
 #endif
@@ -12382,8 +12382,7 @@ handle_large_common (int small ATTRIBUTE_UNUSED)
 	  /* The .lbss section is for local .largecomm symbols.  */
 	  lbss_section = subseg_new (".lbss", 0);
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, lbss_section,
-				 applicable & SEC_ALLOC);
+	  bfd_set_section_flags (lbss_section, applicable & SEC_ALLOC);
 	  seg_info (lbss_section)->bss = 1;
 
 	  subseg_set (seg, subseg);

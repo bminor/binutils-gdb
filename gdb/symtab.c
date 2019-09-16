@@ -1033,20 +1033,17 @@ matching_obj_sections (struct obj_section *obj_first,
      have the same size, address, and name.  We can't compare section indexes,
      which would be more reliable, because some sections may have been
      stripped.  */
-  if (bfd_get_section_size (first) != bfd_get_section_size (second))
+  if (bfd_section_size (first) != bfd_section_size (second))
     return 0;
 
   /* In-memory addresses may start at a different offset, relativize them.  */
-  if (bfd_get_section_vma (first->owner, first)
-      - bfd_get_start_address (first->owner)
-      != bfd_get_section_vma (second->owner, second)
-	 - bfd_get_start_address (second->owner))
+  if (bfd_section_vma (first) - bfd_get_start_address (first->owner)
+      != bfd_section_vma (second) - bfd_get_start_address (second->owner))
     return 0;
 
-  if (bfd_get_section_name (first->owner, first) == NULL
-      || bfd_get_section_name (second->owner, second) == NULL
-      || strcmp (bfd_get_section_name (first->owner, first),
-		 bfd_get_section_name (second->owner, second)) != 0)
+  if (bfd_section_name (first) == NULL
+      || bfd_section_name (second) == NULL
+      || strcmp (bfd_section_name (first), bfd_section_name (second)) != 0)
     return 0;
 
   /* Otherwise check that they are in corresponding objfiles.  */

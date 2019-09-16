@@ -1,3 +1,7 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* ctf-open-bfd.c: Update throughout for bfd section macro changes.
+
 2019-09-09  Phil Blundell  <pb@pbcl.net>
 
 	binutils 2.33 branch created.

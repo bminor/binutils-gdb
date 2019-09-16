@@ -70,7 +70,7 @@ dicos_load_module_p (bfd *abfd, int header_size)
   if (!section)
     return 0;
 
-  if (bfd_section_size (abfd, section) != header_size)
+  if (bfd_section_size (section) != header_size)
     return 0;
 
   /* Dicos LMs always have a "Dicos_loadModuleInfo" symbol

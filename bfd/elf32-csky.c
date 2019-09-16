@@ -2092,7 +2092,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rel") )
+      else if (CONST_STRNEQ (bfd_section_name (s), ".rel") )
 	{
 	  if (s->size != 0 )
 	    relocs = TRUE;
@@ -5070,7 +5070,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 		  if (name == NULL)
 		    break;
 		  if (*name == '\0')
-		    name = bfd_section_name (input_bfd, sec);
+		    name = bfd_section_name (sec);
 		}
 	      (*info->callbacks->reloc_overflow)
 		(info,

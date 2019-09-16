@@ -791,8 +791,8 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 	      && sec == bfd_asymbol_section (next))
 	    sz = valueof (next) - valueof (sym);
 	  else
-	    sz = (bfd_get_section_vma (abfd, sec)
-		  + bfd_section_size (abfd, sec)
+	    sz = (bfd_section_vma (sec)
+		  + bfd_section_size (sec)
 		  - valueof (sym));
 	}
 

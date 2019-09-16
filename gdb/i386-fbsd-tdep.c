@@ -233,7 +233,7 @@ i386fbsd_core_read_xcr0 (bfd *abfd)
 
   if (xstate)
     {
-      size_t size = bfd_section_size (abfd, xstate);
+      size_t size = bfd_section_size (xstate);
 
       /* Check extended state size.  */
       if (size < X86_XSTATE_AVX_SIZE)

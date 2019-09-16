@@ -2846,8 +2846,7 @@ _bfd_coff_reloc_link_order (bfd *output_bfd,
 	  (*flaginfo->info->callbacks->reloc_overflow)
 	    (flaginfo->info, NULL,
 	     (link_order->type == bfd_section_reloc_link_order
-	      ? bfd_section_name (output_bfd,
-				  link_order->u.reloc.p->u.section)
+	      ? bfd_section_name (link_order->u.reloc.p->u.section)
 	      : link_order->u.reloc.p->u.name),
 	     howto->name, link_order->u.reloc.p->addend,
 	     (bfd *) NULL, (asection *) NULL, (bfd_vma) 0);

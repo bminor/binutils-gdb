@@ -452,7 +452,7 @@ aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
       return 0;
     }
 
-  size_t size = bfd_section_size (abfd, sve_section);
+  size_t size = bfd_section_size (sve_section);
 
   /* Check extended state size.  */
   if (size < SVE_HEADER_SIZE)

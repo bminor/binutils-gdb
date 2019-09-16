@@ -1948,7 +1948,7 @@ elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 {
   const char *name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   /* This is an ugly, but unfortunately necessary hack that is
      needed when producing EFI binaries on x86. It tells
@@ -3429,7 +3429,7 @@ check_relocation_error:
 	      if (name == NULL)
 		return FALSE;
 	      if (*name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  if (r == bfd_reloc_overflow)

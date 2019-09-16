@@ -1526,8 +1526,7 @@ _bfd_clear_contents (reloc_howto_type *howto,
 
   /* For a range list, use 1 instead of 0 as placeholder.  0
      would terminate the list, hiding any later entries.  */
-  if (strcmp (bfd_get_section_name (input_bfd, input_section),
-	      ".debug_ranges") == 0
+  if (strcmp (bfd_section_name (input_section), ".debug_ranges") == 0
       && (howto->dst_mask & 1) != 0)
     x |= 1;
 

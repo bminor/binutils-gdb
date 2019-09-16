@@ -3108,18 +3108,18 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  break;
 	case N_TEXT | N_EXT:
 	  section = obj_textsec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_DATA | N_EXT:
 	case N_SETV | N_EXT:
 	  /* Treat N_SETV symbols as N_DATA symbol; see comment in
 	     translate_from_native_sym_flags.  */
 	  section = obj_datasec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_BSS | N_EXT:
 	  section = obj_bsssec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_INDR | N_EXT:
 	  /* An indirect symbol.  The next symbol is the symbol
@@ -3145,17 +3145,17 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	case N_SETT: case N_SETT | N_EXT:
 	  section = obj_textsec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_SETD: case N_SETD | N_EXT:
 	  section = obj_datasec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_SETB: case N_SETB | N_EXT:
 	  section = obj_bsssec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  break;
 	case N_WARNING:
 	  /* A warning symbol.  The next symbol is the one to warn
@@ -3181,17 +3181,17 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  break;
 	case N_WEAKT:
 	  section = obj_textsec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  flags = BSF_WEAK;
 	  break;
 	case N_WEAKD:
 	  section = obj_datasec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  flags = BSF_WEAK;
 	  break;
 	case N_WEAKB:
 	  section = obj_bsssec (abfd);
-	  value -= bfd_get_section_vma (abfd, section);
+	  value -= bfd_section_vma (section);
 	  flags = BSF_WEAK;
 	  break;
 	}
@@ -3899,8 +3899,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	      (*flaginfo->info->callbacks->reloc_overflow)
 		(flaginfo->info, NULL,
 		 (p->type == bfd_section_reloc_link_order
-		  ? bfd_section_name (flaginfo->output_bfd,
-				      pr->u.section)
+		  ? bfd_section_name (pr->u.section)
 		  : pr->u.name),
 		 howto->name, pr->addend, NULL, NULL, (bfd_vma) 0);
 	      break;
@@ -4314,7 +4313,7 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 		    asection *s;
 
 		    s = aout_reloc_index_to_section (input_bfd, r_index);
-		    name = bfd_section_name (input_bfd, s);
+		    name = bfd_section_name (s);
 		  }
 		(*flaginfo->info->callbacks->reloc_overflow)
 		  (flaginfo->info, (h ? &h->root : NULL), name, howto->name,
@@ -4728,7 +4727,7 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 			asection *s;
 
 			s = aout_reloc_index_to_section (input_bfd, r_index);
-			name = bfd_section_name (input_bfd, s);
+			name = bfd_section_name (s);
 		      }
 		    (*flaginfo->info->callbacks->reloc_overflow)
 		      (flaginfo->info, (h ? &h->root : NULL), name,
@@ -4868,8 +4867,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 	return FALSE;
       PUT_WORD (output_bfd, strtab_index, outsym->e_strx);
       PUT_WORD (output_bfd,
-		(bfd_get_section_vma (output_bfd,
-				      obj_textsec (input_bfd)->output_section)
+		(bfd_section_vma (obj_textsec (input_bfd)->output_section)
 		 + obj_textsec (input_bfd)->output_offset),
 		outsym->e_value);
       ++obj_aout_external_sym_count (output_bfd);
@@ -5077,7 +5075,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 		  BFD_ASSERT (bfd_is_abs_section (output_section)
 			      || output_section->owner == output_bfd);
 		  val = (hresolve->root.u.def.value
-			 + bfd_get_section_vma (output_bfd, output_section)
+			 + bfd_section_vma (output_section)
 			 + input_section->output_offset);
 
 		  /* Get the correct type based on the section.  If

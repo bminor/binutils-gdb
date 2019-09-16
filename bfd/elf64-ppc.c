@@ -3487,7 +3487,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
       htab->sfpr = bfd_make_section_anyway_with_flags (dynobj, ".sfpr",
 						       flags);
       if (htab->sfpr == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->sfpr, 2))
+	  || !bfd_set_section_alignment (htab->sfpr, 2))
 	return FALSE;
     }
 
@@ -3498,7 +3498,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->glink = bfd_make_section_anyway_with_flags (dynobj, ".glink",
 						    flags);
   if (htab->glink == NULL
-      || !bfd_set_section_alignment (dynobj, htab->glink, 3))
+      || !bfd_set_section_alignment (htab->glink, 3))
     return FALSE;
 
   /* The part of .glink used by global entry stubs, separate so that
@@ -3506,7 +3506,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->global_entry = bfd_make_section_anyway_with_flags (dynobj, ".glink",
 							   flags);
   if (htab->global_entry == NULL
-      || !bfd_set_section_alignment (dynobj, htab->global_entry, 2))
+      || !bfd_set_section_alignment (htab->global_entry, 2))
     return FALSE;
 
   if (!info->no_ld_generated_unwind_info)
@@ -3517,14 +3517,14 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 								 ".eh_frame",
 								 flags);
       if (htab->glink_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->glink_eh_frame, 2))
+	  || !bfd_set_section_alignment (htab->glink_eh_frame, 2))
 	return FALSE;
     }
 
   flags = SEC_ALLOC | SEC_LINKER_CREATED;
   htab->elf.iplt = bfd_make_section_anyway_with_flags (dynobj, ".iplt", flags);
   if (htab->elf.iplt == NULL
-      || !bfd_set_section_alignment (dynobj, htab->elf.iplt, 3))
+      || !bfd_set_section_alignment (htab->elf.iplt, 3))
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
@@ -3532,7 +3532,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->elf.irelplt
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.iplt", flags);
   if (htab->elf.irelplt == NULL
-      || !bfd_set_section_alignment (dynobj, htab->elf.irelplt, 3))
+      || !bfd_set_section_alignment (htab->elf.irelplt, 3))
     return FALSE;
 
   /* Create branch lookup table for plt_branch stubs.  */
@@ -3541,7 +3541,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->brlt = bfd_make_section_anyway_with_flags (dynobj, ".branch_lt",
 						   flags);
   if (htab->brlt == NULL
-      || !bfd_set_section_alignment (dynobj, htab->brlt, 3))
+      || !bfd_set_section_alignment (htab->brlt, 3))
     return FALSE;
 
   /* Local plt entries, put in .branch_lt but a separate section for
@@ -3549,7 +3549,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->pltlocal = bfd_make_section_anyway_with_flags (dynobj, ".branch_lt",
 						       flags);
   if (htab->pltlocal == NULL
-      || !bfd_set_section_alignment (dynobj, htab->pltlocal, 3))
+      || !bfd_set_section_alignment (htab->pltlocal, 3))
     return FALSE;
 
   if (!bfd_link_pic (info))
@@ -3560,13 +3560,13 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->relbrlt
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.branch_lt", flags);
   if (htab->relbrlt == NULL
-      || !bfd_set_section_alignment (dynobj, htab->relbrlt, 3))
+      || !bfd_set_section_alignment (htab->relbrlt, 3))
     return FALSE;
 
   htab->relpltlocal
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.branch_lt", flags);
   if (htab->relpltlocal == NULL
-      || !bfd_set_section_alignment (dynobj, htab->relpltlocal, 3))
+      || !bfd_set_section_alignment (htab->relpltlocal, 3))
     return FALSE;
 
   return TRUE;
@@ -3762,13 +3762,13 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   got = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (!got
-      || !bfd_set_section_alignment (abfd, got, 3))
+      || !bfd_set_section_alignment (got, 3))
     return FALSE;
 
   relgot = bfd_make_section_anyway_with_flags (abfd, ".rela.got",
 					       flags | SEC_READONLY);
   if (!relgot
-      || !bfd_set_section_alignment (abfd, relgot, 3))
+      || !bfd_set_section_alignment (relgot, 3))
     return FALSE;
 
   ppc64_elf_tdata (abfd)->got = got;

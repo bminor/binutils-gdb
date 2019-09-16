@@ -234,7 +234,7 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
       if (dyninfo_sect == NULL)
 	goto set_addr;
 
-      dynaddr = bfd_section_vma (abfd, dyninfo_sect);
+      dynaddr = bfd_section_vma (dyninfo_sect);
 
       if (dynaddr + l_addr != l_dynaddr)
 	{
@@ -559,7 +559,7 @@ find_program_interpreter (void)
      interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
      if (interp_sect != NULL)
       {
-	int sect_size = bfd_section_size (exec_bfd, interp_sect);
+	int sect_size = bfd_section_size (interp_sect);
 
 	gdb::byte_vector buf (sect_size);
 	bfd_get_section_contents (exec_bfd, interp_sect, buf.data (), 0,
@@ -618,12 +618,12 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
 	 such fallback to the file VMA address without the possibility of
 	 having the section relocated to its actual in-memory address.  */
 
-      dyn_addr = bfd_section_vma (abfd, sect);
+      dyn_addr = bfd_section_vma (sect);
     }
 
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
-  sect_size = bfd_section_size (abfd, sect);
+  sect_size = bfd_section_size (sect);
   buf = bufstart = (gdb_byte *) alloca (sect_size);
   if (!bfd_get_section_contents (abfd, sect,
 				 buf, 0, sect_size))
@@ -2255,20 +2255,18 @@ enable_break (struct svr4_info *info, int from_tty)
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
 	  if (interp_sect)
 	    {
-	      info->interp_text_sect_low =
-		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	      info->interp_text_sect_high =
-		info->interp_text_sect_low
-		+ bfd_section_size (tmp_bfd, interp_sect);
+	      info->interp_text_sect_low
+		= bfd_section_vma (interp_sect) + load_addr;
+	      info->interp_text_sect_high
+		= info->interp_text_sect_low + bfd_section_size (interp_sect);
 	    }
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
 	  if (interp_sect)
 	    {
-	      info->interp_plt_sect_low =
-		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	      info->interp_plt_sect_high =
-		info->interp_plt_sect_low
-		+ bfd_section_size (tmp_bfd, interp_sect);
+	      info->interp_plt_sect_low
+		= bfd_section_vma (interp_sect) + load_addr;
+	      info->interp_plt_sect_high
+		= info->interp_plt_sect_low + bfd_section_size (interp_sect);
 	    }
 
 	  svr4_create_solib_event_breakpoints (info, target_gdbarch (), sym_addr);
@@ -2392,20 +2390,18 @@ enable_break (struct svr4_info *info, int from_tty)
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
-	  info->interp_text_sect_low =
-	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
-	  info->interp_text_sect_high =
-	    info->interp_text_sect_low
-	    + bfd_section_size (tmp_bfd.get (), interp_sect);
+	  info->interp_text_sect_low
+	    = bfd_section_vma (interp_sect) + load_addr;
+	  info->interp_text_sect_high
+	    = info->interp_text_sect_low + bfd_section_size (interp_sect);
 	}
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
-	  info->interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
-	  info->interp_plt_sect_high =
-	    info->interp_plt_sect_low
-	    + bfd_section_size (tmp_bfd.get (), interp_sect);
+	  info->interp_plt_sect_low
+	    = bfd_section_vma (interp_sect) + load_addr;
+	  info->interp_plt_sect_high
+	    = info->interp_plt_sect_low + bfd_section_size (interp_sect);
 	}
 
       /* Now try to set a breakpoint in the dynamic linker.  */
@@ -2733,7 +2729,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		      gdb_byte *buf_filesz_p = (gdb_byte *) &phdrp->p_filesz;
 		      CORE_ADDR filesz;
 
-		      content2 = (bfd_get_section_flags (exec_bfd, plt2_asect)
+		      content2 = (bfd_section_flags (plt2_asect)
 				  & SEC_HAS_CONTENTS) != 0;
 
 		      filesz = extract_unsigned_integer (buf_filesz_p, 4,
@@ -2742,9 +2738,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		      /* PLT2_ASECT is from on-disk file (exec_bfd) while
 			 FILESZ is from the in-memory image.  */
 		      if (content2)
-			filesz += bfd_get_section_size (plt2_asect);
+			filesz += bfd_section_size (plt2_asect);
 		      else
-			filesz -= bfd_get_section_size (plt2_asect);
+			filesz -= bfd_section_size (plt2_asect);
 
 		      store_unsigned_integer (buf_filesz_p, 4, byte_order,
 					      filesz);
@@ -2867,7 +2863,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		      gdb_byte *buf_filesz_p = (gdb_byte *) &phdrp->p_filesz;
 		      CORE_ADDR filesz;
 
-		      content2 = (bfd_get_section_flags (exec_bfd, plt2_asect)
+		      content2 = (bfd_section_flags (plt2_asect)
 				  & SEC_HAS_CONTENTS) != 0;
 
 		      filesz = extract_unsigned_integer (buf_filesz_p, 8,
@@ -2876,9 +2872,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		      /* PLT2_ASECT is from on-disk file (exec_bfd) while
 			 FILESZ is from the in-memory image.  */
 		      if (content2)
-			filesz += bfd_get_section_size (plt2_asect);
+			filesz += bfd_section_size (plt2_asect);
 		      else
-			filesz -= bfd_get_section_size (plt2_asect);
+			filesz -= bfd_section_size (plt2_asect);
 
 		      store_unsigned_integer (buf_filesz_p, 8, byte_order,
 					      filesz);
@@ -2972,8 +2968,7 @@ svr4_relocate_main_executable (void)
 
       for (asect = exec_bfd->sections; asect != NULL; asect = asect->next)
 	exec_set_section_address (bfd_get_filename (exec_bfd), asect->index,
-				  (bfd_section_vma (exec_bfd, asect)
-				   + displacement));
+				  bfd_section_vma (asect) + displacement);
     }
 }
 

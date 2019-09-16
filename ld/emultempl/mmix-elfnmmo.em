@@ -103,14 +103,14 @@ mmix_after_allocation (void)
     }
 
   /* Set vma to correspond to first such register number * 8.  */
-  bfd_set_section_vma (link_info.output_bfd, sec, (bfd_vma) regvma);
+  bfd_set_section_vma (sec, (bfd_vma) regvma);
 
   /* Simplify symbol output for the register section (without contents;
      created for register symbols) by setting the output offset to 0.
      This section is only present when there are register symbols.  */
   sec = bfd_get_section_by_name (link_info.output_bfd, MMIX_REG_SECTION_NAME);
   if (sec != NULL)
-    bfd_set_section_vma (sec->owner, sec, 0);
+    bfd_set_section_vma (sec, 0);
 
   if (!_bfd_mmix_after_linker_allocation (link_info.output_bfd, &link_info))
     {

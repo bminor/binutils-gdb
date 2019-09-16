@@ -438,12 +438,12 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	 such fallback to the file VMA address without the possibility of
 	 having the section relocated to its actual in-memory address.  */
 
-      dyn_addr = bfd_section_vma (abfd, sect);
+      dyn_addr = bfd_section_vma (sect);
     }
 
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
-  sect_size = bfd_section_size (abfd, sect);
+  sect_size = bfd_section_size (sect);
   buf = bufstart = (gdb_byte *) alloca (sect_size);
   if (!bfd_get_section_contents (abfd, sect,
 				 buf, 0, sect_size))
@@ -807,7 +807,7 @@ enable_break (void)
 
       /* Read the contents of the .interp section into a local buffer;
 	 the contents specify the dynamic linker this program uses.  */
-      interp_sect_size = bfd_section_size (exec_bfd, interp_sect);
+      interp_sect_size = bfd_section_size (interp_sect);
       buf = (char *) alloca (interp_sect_size);
       bfd_get_section_contents (exec_bfd, interp_sect,
 				buf, 0, interp_sect_size);
@@ -839,24 +839,20 @@ enable_break (void)
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
-	  info->interp_text_sect_low
-	    = bfd_section_vma (tmp_bfd.get (), interp_sect);
+	  info->interp_text_sect_low = bfd_section_vma (interp_sect);
 	  info->interp_text_sect_low
 	    += displacement_from_map (ldm, info->interp_text_sect_low);
 	  info->interp_text_sect_high
-	    = info->interp_text_sect_low
-	    + bfd_section_size (tmp_bfd.get (), interp_sect);
+	    = info->interp_text_sect_low + bfd_section_size (interp_sect);
 	}
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
-	  info->interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd.get (), interp_sect);
+	  info->interp_plt_sect_low = bfd_section_vma (interp_sect);
 	  info->interp_plt_sect_low
 	    += displacement_from_map (ldm, info->interp_plt_sect_low);
-	  info->interp_plt_sect_high =
-	    info->interp_plt_sect_low + bfd_section_size (tmp_bfd.get (),
-							  interp_sect);
+	  info->interp_plt_sect_high
+	    = info->interp_plt_sect_low + bfd_section_size (interp_sect);
 	}
 
       addr = gdb_bfd_lookup_symbol (tmp_bfd.get (), cmp_name,

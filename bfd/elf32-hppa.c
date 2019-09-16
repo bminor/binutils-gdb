@@ -2270,12 +2270,12 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      /* Make space for the plt stub at the end of the .plt
 		 section.  We want this stub right at the end, up
 		 against the .got section.  */
-	      int gotalign = bfd_section_alignment (dynobj, htab->etab.sgot);
-	      int pltalign = bfd_section_alignment (dynobj, sec);
+	      int gotalign = bfd_section_alignment (htab->etab.sgot);
+	      int pltalign = bfd_section_alignment (sec);
 	      bfd_size_type mask;
 
 	      if (gotalign > pltalign)
-		(void) bfd_set_section_alignment (dynobj, sec, gotalign);
+		bfd_set_section_alignment (sec, gotalign);
 	      mask = ((bfd_size_type) 1 << gotalign) - 1;
 	      sec->size = (sec->size + sizeof (plt_stub) + mask) & ~mask;
 	    }
@@ -2284,7 +2284,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	       || sec == htab->etab.sdynbss
 	       || sec == htab->etab.sdynrelro)
 	;
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, sec), ".rela"))
+      else if (CONST_STRNEQ (bfd_section_name (sec), ".rela"))
 	{
 	  if (sec->size != 0)
 	    {
@@ -4151,7 +4151,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		    if (sym_name == NULL)
 		      return FALSE;
 		    if (*sym_name == '\0')
-		      sym_name = bfd_section_name (input_bfd, sym_sec);
+		      sym_name = bfd_section_name (sym_sec);
 		    _bfd_error_handler
 		      (_("%pB:%s has both normal and TLS relocs"),
 		       input_bfd, sym_name);
@@ -4201,7 +4201,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  if (sym_name == NULL)
 	    return FALSE;
 	  if (*sym_name == '\0')
-	    sym_name = bfd_section_name (input_bfd, sym_sec);
+	    sym_name = bfd_section_name (sym_sec);
 	}
 
       howto = elf_hppa_howto_table + r_type;

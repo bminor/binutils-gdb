@@ -2009,12 +2009,11 @@ arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
   struct obj_section *osect;
 
   ALL_OBJFILE_OSECTIONS (objfile, osect)
-    if (bfd_get_section_flags (objfile->obfd,
-			       osect->the_bfd_section) & SEC_ALLOC)
+    if (bfd_section_flags (osect->the_bfd_section) & SEC_ALLOC)
       {
 	bfd_vma start, size;
-	start = bfd_get_section_vma (objfile->obfd, osect->the_bfd_section);
-	size = bfd_get_section_size (osect->the_bfd_section);
+	start = bfd_section_vma (osect->the_bfd_section);
+	size = bfd_section_size (osect->the_bfd_section);
 
 	if (start <= vma && vma < start + size)
 	  return osect;
@@ -2054,8 +2053,8 @@ arm_exidx_new_objfile (struct objfile *objfile)
   gdb::byte_vector exidx_data;
   if (exidx)
     {
-      exidx_vma = bfd_section_vma (objfile->obfd, exidx);
-      exidx_data.resize (bfd_get_section_size (exidx));
+      exidx_vma = bfd_section_vma (exidx);
+      exidx_data.resize (bfd_section_size (exidx));
 
       if (!bfd_get_section_contents (objfile->obfd, exidx,
 				     exidx_data.data (), 0,
@@ -2067,8 +2066,8 @@ arm_exidx_new_objfile (struct objfile *objfile)
   gdb::byte_vector extab_data;
   if (extab)
     {
-      extab_vma = bfd_section_vma (objfile->obfd, extab);
-      extab_data.resize (bfd_get_section_size (extab));
+      extab_vma = bfd_section_vma (extab);
+      extab_data.resize (bfd_section_size (extab));
 
       if (!bfd_get_section_contents (objfile->obfd, extab,
 				     extab_data.data (), 0,
@@ -2100,7 +2099,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
       sec = arm_obj_section_from_vma (objfile, idx);
       if (sec == NULL)
 	continue;
-      idx -= bfd_get_section_vma (objfile->obfd, sec->the_bfd_section);
+      idx -= bfd_section_vma (sec->the_bfd_section);
 
       /* Determine address of exception table entry.  */
       if (val == 1)

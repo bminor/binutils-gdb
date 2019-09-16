@@ -698,7 +698,7 @@ windmc_write_bin (const char *filename, mc_node_lang **nl, int elems)
       dta_off += mi[i].res_len;
     }
   sec_length = (dta_off + 3) & ~3;
-  if (! bfd_set_section_size (mc_bfd.abfd, mc_bfd.sec, sec_length))
+  if (!bfd_set_section_size (mc_bfd.sec, sec_length))
     bfd_fatal ("bfd_set_section_size");
   /* Make sure we write the complete block.  */
   set_windmc_bfd_content ("\0", sec_length - 1, 1);

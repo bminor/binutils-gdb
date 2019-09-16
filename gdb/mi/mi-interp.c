@@ -1179,8 +1179,7 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
       sec = find_pc_section (memaddr);
       if (sec != NULL && sec->objfile != NULL)
 	{
-	  flagword flags = bfd_get_section_flags (sec->objfile->obfd,
-						  sec->the_bfd_section);
+	  flagword flags = bfd_section_flags (sec->the_bfd_section);
 
 	  if (flags & SEC_CODE)
 	    mi_uiout->field_string ("type", "code");

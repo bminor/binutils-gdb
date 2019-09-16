@@ -176,8 +176,7 @@ gld${EMULATION_NAME}_finish (void)
 	  /* Special procesing is required for a Thumb entry symbol.  The
 	     bottom bit of its address must be set.  */
 	  val = (h->u.def.value
-		 + bfd_get_section_vma (link_info.output_bfd,
-					h->u.def.section->output_section)
+		 + bfd_section_vma (h->u.def.section->output_section)
 		 + h->u.def.section->output_offset);
 
 	  val |= 1;

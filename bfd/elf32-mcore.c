@@ -536,7 +536,7 @@ mcore_elf_relocate_section (bfd * output_bfd,
 		      break;
 
 		    if (* name == '\0')
-		      name = bfd_section_name (input_bfd, sec);
+		      name = bfd_section_name (sec);
 		  }
 
 		(*info->callbacks->reloc_overflow)

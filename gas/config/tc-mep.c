@@ -1380,7 +1380,7 @@ md_assemble (char * str)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & -(1 << align));
 }
 
@@ -1528,7 +1528,7 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
       || S_IS_WEAK (fragP->fr_symbol)
 #ifdef MEP_IVC2_SUPPORTED
       || (mep_cop == EF_MEP_COP_IVC2
-	  && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+	  && bfd_section_flags (segment) & SEC_MEP_VLIW)
 #endif /* MEP_IVC2_SUPPORTED */
       )
     {
@@ -1539,7 +1539,7 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
     }
 
   if (MEP_VLIW && ! MEP_VLIW64
-      && (bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW))
+      && (bfd_section_flags (segment) & SEC_MEP_VLIW))
     {
       /* Use 32 bit branches for vliw32 so the vliw word is not split.  */
       switch (fragP->fr_cgen.insn->base->num)
@@ -1572,7 +1572,7 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
 
 #ifdef MEP_IVC2_SUPPORTED
   if (mep_cop == EF_MEP_COP_IVC2
-      && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+      && bfd_section_flags (segment) & SEC_MEP_VLIW)
     return 0;
 #endif /* MEP_IVC2_SUPPORTED */
 
@@ -1587,7 +1587,7 @@ mep_relax_frag (segT segment, fragS *fragP, long stretch)
   long rv = relax_frag (segment, fragP, stretch);
 #ifdef MEP_IVC2_SUPPORTED
   if (mep_cop == EF_MEP_COP_IVC2
-      && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+      && bfd_section_flags (segment) & SEC_MEP_VLIW)
     return 0;
 #endif
   return rv;
@@ -1624,7 +1624,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
   int core_mode;
 
 #ifdef MEP_IVC2_SUPPORTED
-  if (bfd_get_section_flags (stdoutput, seg) & SEC_MEP_VLIW
+  if (bfd_section_flags (seg) & SEC_MEP_VLIW
       && mep_cop == EF_MEP_COP_IVC2)
     core_mode = 0;
   else
@@ -2110,7 +2110,7 @@ mep_vtext_section (void)
     {
       flagword applicable = bfd_applicable_section_flags (stdoutput);
       vtext_section = subseg_new (VTEXT_SECTION_NAME, 0);
-      bfd_set_section_flags (stdoutput, vtext_section,
+      bfd_set_section_flags (vtext_section,
 			     applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 					   | SEC_CODE | SEC_READONLY
 					   | SEC_MEP_VLIW));

@@ -87,7 +87,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   struct gdb_lzma_stream *lstream;
   size_t pos;
 
-  size = bfd_get_section_size (section);
+  size = bfd_section_size (section);
   offset = section->filepos + size - LZMA_STREAM_HEADER_SIZE;
   if (size < LZMA_STREAM_HEADER_SIZE
       || bfd_seek (section->owner, offset, SEEK_SET) != 0

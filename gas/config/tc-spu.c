@@ -904,7 +904,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 valueT
 md_section_align (segT seg, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
   valueT mask = ((valueT) 1 << align) - 1;
 
   return (size + mask) & ~mask;

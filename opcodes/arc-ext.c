@@ -438,7 +438,7 @@ build_ARC_extmap (bfd *text_bfd)
 	  sizeof (".gnu.linkonce.arcextmap.") - 1)
 	|| !strcmp (sect->name,".arcextmap"))
       {
-	bfd_size_type  count  = bfd_get_section_size (sect);
+	bfd_size_type  count  = bfd_section_size (sect);
 	unsigned char* buffer = xmalloc (count);
 
 	if (buffer)

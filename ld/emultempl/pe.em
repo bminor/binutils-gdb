@@ -1920,8 +1920,7 @@ gld_${EMULATION_NAME}_finish (void)
 	  /* Special procesing is required for a Thumb entry symbol.  The
 	     bottom bit of its address must be set.  */
 	  val = (h->u.def.value
-		 + bfd_get_section_vma (link_info.output_bfd,
-					h->u.def.section->output_section)
+		 + bfd_section_vma (h->u.def.section->output_section)
 		 + h->u.def.section->output_offset);
 
 	  val |= 1;
@@ -2182,7 +2181,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
       ls = &(*pl)->input_section;
 
-      lname = bfd_get_section_name (ls->section->owner, ls->section);
+      lname = bfd_section_name (ls->section);
       if (strchr (lname, '\$') != NULL
 	  && (dollar == NULL || strcmp (orig_secname, lname) < 0))
 	break;

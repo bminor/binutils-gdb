@@ -1,5 +1,18 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* ldcref.c, * ldctor.c, * ldelf.c, * ldlang.c, * pe-dll.c,
+	* emultempl/aarch64elf.em, * emultempl/aix.em,
+	* emultempl/armcoff.em, * emultempl/armelf.em,
+	* emultempl/cr16elf.em, * emultempl/cskyelf.em,
+	* emultempl/m68hc1xelf.em, * emultempl/m68kelf.em,
+	* emultempl/mipself.em, * emultempl/mmix-elfnmmo.em,
+	* emultempl/mmo.em, * emultempl/msp430.em,
+	* emultempl/nios2elf.em, * emultempl/pe.em, * emultempl/pep.em,
+	* emultempl/ppc64elf.em, * emultempl/xtensaelf.em: Update
+	throughout for bfd section macro and function changes.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* ldcref.c (check_reloc_refs): Update bfd_get_section to
 	bfd_asymbol_section.
 

@@ -111,9 +111,9 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
 
   section_addr_info sai;
   for (sec = nbfd->sections; sec != NULL; sec = sec->next)
-    if ((bfd_get_section_flags (nbfd, sec) & (SEC_ALLOC|SEC_LOAD)) != 0)
-      sai.emplace_back (bfd_get_section_vma (nbfd, sec) + loadbase,
-			bfd_get_section_name (nbfd, sec),
+    if ((bfd_section_flags (sec) & (SEC_ALLOC|SEC_LOAD)) != 0)
+      sai.emplace_back (bfd_section_vma (sec) + loadbase,
+			bfd_section_name (sec),
 			sec->index);
 
   if (from_tty)

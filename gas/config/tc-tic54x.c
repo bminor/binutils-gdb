@@ -1391,7 +1391,7 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
     blocking_flag = alignment_flag = 0;
 
   seg = subseg_new (name, 0);
-  flags = bfd_get_section_flags (stdoutput, seg) | SEC_ALLOC;
+  flags = bfd_section_flags (seg) | SEC_ALLOC;
 
   if (alignment_flag)
     {
@@ -1420,7 +1420,7 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
   if (blocking_flag)
     flags |= SEC_TIC54X_BLOCK;
 
-  if (!bfd_set_section_flags (stdoutput, seg, flags))
+  if (!bfd_set_section_flags (seg, flags))
     as_warn (_("Error setting flags for \"%s\": %s"), name,
 	     bfd_errmsg (bfd_get_error ()));
 
@@ -3977,12 +3977,12 @@ static void
 emit_insn (tic54x_insn *insn)
 {
   int i;
-  flagword oldflags = bfd_get_section_flags (stdoutput, now_seg);
+  flagword oldflags = bfd_section_flags (now_seg);
   flagword flags = oldflags | SEC_CODE;
 
-  if (! bfd_set_section_flags (stdoutput, now_seg, flags))
+  if (!bfd_set_section_flags (now_seg, flags))
         as_warn (_("error setting flags for \"%s\": %s"),
-                 bfd_section_name (stdoutput, now_seg),
+                 bfd_section_name (now_seg),
                  bfd_errmsg (bfd_get_error ()));
 
   for (i = 0; i < insn->words; i++)

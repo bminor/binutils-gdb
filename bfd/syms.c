@@ -1290,7 +1290,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 
   /* We are passed a section relative offset.  The offsets in the
      stabs information are absolute.  */
-  offset += bfd_get_section_vma (abfd, section);
+  offset += bfd_section_vma (section);
 
 #ifdef ENABLE_CACHING
   if (info->cached_indexentry != NULL

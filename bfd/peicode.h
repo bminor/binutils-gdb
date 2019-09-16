@@ -608,16 +608,16 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
 
   flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_KEEP | SEC_IN_MEMORY;
 
-  bfd_set_section_flags (vars->abfd, sec, flags | extra_flags);
+  bfd_set_section_flags (sec, flags | extra_flags);
 
-  (void) bfd_set_section_alignment (vars->abfd, sec, 2);
+  bfd_set_section_alignment (sec, 2);
 
   /* Check that we will not run out of space.  */
   BFD_ASSERT (vars->data + size < vars->bim->buffer + vars->bim->size);
 
   /* Set the section size and contents.  The actual
      contents are filled in by our parent.  */
-  bfd_set_section_size (vars->abfd, sec, (bfd_size_type) size);
+  bfd_set_section_size (sec, (bfd_size_type) size);
   sec->contents = vars->data;
   sec->target_index = vars->sec_index ++;
 

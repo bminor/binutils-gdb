@@ -657,7 +657,7 @@ dwarf2_emit_label (symbolS *label)
     return;
   if (S_GET_SEGMENT (label) != now_seg)
     return;
-  if (!(bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE))
+  if (!(bfd_section_flags (now_seg) & SEC_CODE))
     return;
   if (files_in_use == 0 && debug_type != DEBUG_DWARF2)
     return;
@@ -1594,7 +1594,7 @@ process_entries (segT seg, struct line_entry *e)
 	 that all of the sub-sections are merged into a proper
 	 .debug_line section before a debugger sees them.  */
 
-      sec_name = bfd_get_section_name (stdoutput, seg);
+      sec_name = bfd_section_name (seg);
       if (strcmp (sec_name, ".text") != 0)
 	{
 	  name = concat (".debug_line", sec_name, (char *) NULL);
@@ -2238,7 +2238,7 @@ dwarf2_finish (void)
 
   /* Create and switch to the line number section.  */
   line_seg = subseg_new (".debug_line", 0);
-  bfd_set_section_flags (stdoutput, line_seg, SEC_READONLY | SEC_DEBUGGING);
+  bfd_set_section_flags (line_seg, SEC_READONLY | SEC_DEBUGGING);
 
   /* For each subsection, chain the debug entries together.  */
   for (s = all_segs; s; s = s->next)
@@ -2284,15 +2284,11 @@ dwarf2_finish (void)
       aranges_seg = subseg_new (".debug_aranges", 0);
       str_seg = subseg_new (".debug_str", 0);
 
-      bfd_set_section_flags (stdoutput, info_seg,
-			     SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (stdoutput, abbrev_seg,
-			     SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (stdoutput, aranges_seg,
-			     SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (stdoutput, str_seg,
-			     (SEC_READONLY | SEC_DEBUGGING
-			      | SEC_MERGE | SEC_STRINGS));
+      bfd_set_section_flags (info_seg, SEC_READONLY | SEC_DEBUGGING);
+      bfd_set_section_flags (abbrev_seg, SEC_READONLY | SEC_DEBUGGING);
+      bfd_set_section_flags (aranges_seg, SEC_READONLY | SEC_DEBUGGING);
+      bfd_set_section_flags (str_seg, (SEC_READONLY | SEC_DEBUGGING
+				       | SEC_MERGE | SEC_STRINGS));
       str_seg->entsize = 1;
 
       record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
@@ -2302,8 +2298,7 @@ dwarf2_finish (void)
       else
 	{
 	  ranges_seg = subseg_new (".debug_ranges", 0);
-	  bfd_set_section_flags (stdoutput, ranges_seg,
-				 SEC_READONLY | SEC_DEBUGGING);
+	  bfd_set_section_flags (ranges_seg, SEC_READONLY | SEC_DEBUGGING);
 	  record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
 	  out_debug_ranges (ranges_seg);
 	}

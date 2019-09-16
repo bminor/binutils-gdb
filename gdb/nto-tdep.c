@@ -319,8 +319,8 @@ nto_sniff_abi_note_section (bfd *abfd, asection *sect, void *obj)
   const char *name;
   const unsigned sizeof_Elf_Nhdr = 12;
 
-  sectname = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
+  sectname = bfd_section_name (sect);
+  sectsize = bfd_section_size (sect);
 
   if (sectsize > 128)
     sectsize = 128;

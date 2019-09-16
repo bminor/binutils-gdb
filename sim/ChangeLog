@@ -1,3 +1,11 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* common/sim-load.c, * common/sim-utils.c, * cris/sim-if.c,
+	* erc32/func.c, * lm32/sim-if.c, * m32c/load.c, * m32c/trace.c,
+	* m68hc11/interp.c, * ppc/hw_htab.c, * ppc/hw_init.c,
+	* rl78/load.c, * rl78/trace.c, * rx/gdb-if.c, * rx/load.c,
+	* rx/trace.c: Update throughout for bfd section macro changes.
+
 2019-06-13  Stafford Horne  <shorne@gmail.com>
 
 	* or1k/cpu.c: Regenerate.

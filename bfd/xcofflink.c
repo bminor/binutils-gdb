@@ -2080,14 +2080,14 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   for (o = abfd->sections; o != first_csect; o = o->next)
     {
       /* Debugging sections have no csects.  */
-      if (bfd_get_section_flags (abfd, o) & SEC_DEBUGGING)
+      if (bfd_section_flags (o) & SEC_DEBUGGING)
 	continue;
 
       /* Reset the section size and the line number count, since the
 	 data is now attached to the csects.  Don't reset the size of
 	 the .debug section, since we need to read it below in
 	 bfd_xcoff_size_dynamic_sections.  */
-      if (strcmp (bfd_get_section_name (abfd, o), ".debug") != 0)
+      if (strcmp (bfd_section_name (o), ".debug") != 0)
 	o->size = 0;
       o->lineno_count = 0;
 
@@ -3019,7 +3019,7 @@ xcoff_sweep (struct bfd_link_info *info)
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
 		  || o == xcoff_hash_table (info)->descriptor_section
-		  || (bfd_get_section_flags (sub, o) & SEC_DEBUGGING)
+		  || (bfd_section_flags (o) & SEC_DEBUGGING)
 		  || strcmp (o->name, ".debug") == 0)
 		o->flags |= SEC_MARK;
 	      else

@@ -416,7 +416,7 @@ check_note (bfd *abfd, asection *sect, char *note, unsigned int *sectsize,
   gdb_assert (notesz <= MAX_NOTESZ);
 
   /* Check whether SECT is big enough to comtain the complete note.  */
-  if (notesz > bfd_section_size (abfd, sect))
+  if (notesz > bfd_section_size (sect))
     return 0;
 
   /* Check the note name.  */
@@ -445,8 +445,8 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
   unsigned int sectsize;
   char *note;
 
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
+  name = bfd_section_name (sect);
+  sectsize = bfd_section_size (sect);
 
   /* Limit the amount of data to read.  */
   if (sectsize > MAX_NOTESZ)

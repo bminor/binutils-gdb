@@ -545,13 +545,13 @@ dump_section_header (bfd *abfd, asection *section, void *data)
     return;
 
   printf ("%3d %-*s %08lx  ", section->index, longest_section_name,
-	  sanitize_string (bfd_get_section_name (abfd, section)),
-	  (unsigned long) bfd_section_size (abfd, section) / opb);
-  bfd_printf_vma (abfd, bfd_get_section_vma (abfd, section));
+	  sanitize_string (bfd_section_name (section)),
+	  (unsigned long) bfd_section_size (section) / opb);
+  bfd_printf_vma (abfd, bfd_section_vma (section));
   printf ("  ");
   bfd_printf_vma (abfd, section->lma);
   printf ("  %08lx  2**%u", (unsigned long) section->filepos,
-	  bfd_get_section_alignment (abfd, section));
+	  bfd_section_alignment (section));
   if (! wide_output)
     printf ("\n                ");
   printf ("  ");
@@ -631,7 +631,8 @@ dump_section_header (bfd *abfd, asection *section, void *data)
    DATA which contains the string length of the longest section name.  */
 
 static void
-find_longest_section_name (bfd *abfd, asection *section, void *data)
+find_longest_section_name (bfd *abfd ATTRIBUTE_UNUSED,
+			   asection *section, void *data)
 {
   int *longest_so_far = (int *) data;
   const char *name;
@@ -645,7 +646,7 @@ find_longest_section_name (bfd *abfd, asection *section, void *data)
   if (! process_section_p (section))
     return;
 
-  name = bfd_get_section_name (abfd, section);
+  name = bfd_section_name (section);
   len = (int) strlen (name);
   if (len > *longest_so_far)
     *longest_so_far = len;
@@ -1034,8 +1035,8 @@ sym_ok (bfd_boolean               want_section,
 	 debug info file, whilst the section we want is in a normal file.
 	 So the section pointers will be different, but the section names
 	 will be the same.  */
-      if (strcmp (bfd_section_name (abfd, sorted_syms[place]->section),
-		  bfd_section_name (abfd, sec)) != 0)
+      if (strcmp (bfd_section_name (sorted_syms[place]->section),
+		  bfd_section_name (sec)) != 0)
 	return FALSE;
     }
 
@@ -1141,9 +1142,9 @@ find_symbol_for_address (bfd_vma vma,
      Also give the target a chance to reject symbols.  */
   want_section = (aux->require_sec
 		  || ((abfd->flags & HAS_RELOC) != 0
-		      && vma >= bfd_get_section_vma (abfd, sec)
-		      && vma < (bfd_get_section_vma (abfd, sec)
-				+ bfd_section_size (abfd, sec) / opb)));
+		      && vma >= bfd_section_vma (sec)
+		      && vma < (bfd_section_vma (sec)
+				+ bfd_section_size (sec) / opb)));
   
   if (! sym_ok (want_section, abfd, thisplace, sec, inf))
     {
@@ -1267,8 +1268,8 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
       bfd_vma secaddr;
 
       (*inf->fprintf_func) (inf->stream, " <%s",
-			    sanitize_string (bfd_get_section_name (abfd, sec)));
-      secaddr = bfd_get_section_vma (abfd, sec);
+			    sanitize_string (bfd_section_name (sec)));
+      secaddr = bfd_section_vma (sec);
       if (vma < secaddr)
 	{
 	  (*inf->fprintf_func) (inf->stream, "-0x");
@@ -2235,7 +2236,7 @@ disassemble_bytes (struct disassemble_info * inf,
 		      asection *sym_sec;
 
 		      sym_sec = bfd_asymbol_section (*q->sym_ptr_ptr);
-		      sym_name = bfd_get_section_name (aux->abfd, sym_sec);
+		      sym_name = bfd_section_name (sym_sec);
 		      if (sym_name == NULL || *sym_name == '\0')
 			sym_name = "*unknown*";
 		      printf ("%s", sanitize_string (sym_name));
@@ -2308,7 +2309,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   if (! process_section_p (section))
     return;
 
-  datasize = bfd_get_section_size (section);
+  datasize = bfd_section_size (section);
   if (datasize == 0)
     return;
 
@@ -2538,7 +2539,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       else
 	{
 #define is_valid_next_sym(SYM) \
-  (strcmp (bfd_section_name (abfd, (SYM)->section), bfd_section_name (abfd, section)) == 0 \
+  (strcmp (bfd_section_name ((SYM)->section), bfd_section_name (section)) == 0 \
    && (bfd_asymbol_value (SYM) > bfd_asymbol_value (sym)) \
    && pinfo->symbol_is_valid (SYM, pinfo))
 
@@ -2750,9 +2751,9 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->filename = bfd_get_filename (abfd);
   section->reloc_info = NULL;
   section->num_relocs = 0;
-  section->address = bfd_get_section_vma (abfd, sec);
+  section->address = bfd_section_vma (sec);
   section->user_data = sec;
-  section->size = bfd_get_section_size (sec);
+  section->size = bfd_section_size (sec);
   /* PR 24360: On 32-bit hosts sizeof (size_t) < sizeof (bfd_size_type). */
   alloced = amt = section->size + 1;
   if (alloced != amt || alloced == 0)
@@ -2925,7 +2926,7 @@ static void
 dump_dwarf_section (bfd *abfd, asection *section,
 		    void *arg ATTRIBUTE_UNUSED)
 {
-  const char *name = bfd_get_section_name (abfd, section);
+  const char *name = bfd_section_name (section);
   const char *match;
   int i;
 
@@ -3050,7 +3051,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
       return NULL;
     }
 
-  *size_ptr = bfd_section_size (abfd, stabsect);
+  *size_ptr = bfd_section_size (stabsect);
   if (entsize_ptr)
     *entsize_ptr = stabsect->entsize;
 
@@ -3459,7 +3460,7 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   if (! process_section_p (section))
     return;
 
-  if ((datasize = bfd_section_size (abfd, section)) == 0)
+  if ((datasize = bfd_section_size (section)) == 0)
     return;
 
   /* Compute the address range to display.  */

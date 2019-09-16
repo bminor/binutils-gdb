@@ -596,7 +596,7 @@ static bfd_boolean
 mmo_section_has_contents (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *p ATTRIBUTE_UNUSED)
 {
   /* The point is to match what --extract-symbols does (well, negated).  */
-  return bfd_get_section_size (sec) != 0;
+  return bfd_section_size (sec) != 0;
 }
 
 /* Find out whether we should omit symbol consistency checks for this
@@ -642,10 +642,10 @@ static void
 mmo_find_sec_w_addr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *p)
 {
   struct mmo_find_sec_info *infop = (struct mmo_find_sec_info *) p;
-  bfd_vma vma = bfd_get_section_vma (abfd, sec);
+  bfd_vma vma = bfd_section_vma (sec);
 
   /* Ignore sections that aren't loaded.  */
-  if ((bfd_get_section_flags (abfd, sec) & (SEC_LOAD | SEC_ALLOC))
+  if ((bfd_section_flags (sec) & (SEC_LOAD | SEC_ALLOC))
       !=  (SEC_LOAD | SEC_ALLOC))
     return;
 
@@ -657,10 +657,10 @@ static void
 mmo_find_sec_w_addr_grow (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *p)
 {
   struct mmo_find_sec_info *infop = (struct mmo_find_sec_info *) p;
-  bfd_vma vma = bfd_get_section_vma (abfd, sec);
+  bfd_vma vma = bfd_section_vma (sec);
 
   /* Ignore sections that aren't loaded.  */
-  if ((bfd_get_section_flags (abfd, sec) & (SEC_LOAD | SEC_ALLOC))
+  if ((bfd_section_flags (sec) & (SEC_LOAD | SEC_ALLOC))
       !=  (SEC_LOAD | SEC_ALLOC))
     return;
 
@@ -700,12 +700,11 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
       if (sec == NULL)
 	return NULL;
 
-      if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+      if (!sec->user_set_vma && !bfd_set_section_vma (sec, vma))
 	return NULL;
 
-      if (! bfd_set_section_flags (abfd, sec,
-				   bfd_get_section_flags (abfd, sec)
-				   | SEC_CODE | SEC_LOAD | SEC_ALLOC))
+      if (!bfd_set_section_flags (sec, (bfd_section_flags (sec)
+					| SEC_CODE | SEC_LOAD | SEC_ALLOC)))
 	return NULL;
     }
   else if ((vma >> 56) == 0x20)
@@ -715,12 +714,11 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
       if (sec == NULL)
 	return NULL;
 
-      if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+      if (!sec->user_set_vma && !bfd_set_section_vma (sec, vma))
 	return NULL;
 
-      if (! bfd_set_section_flags (abfd, sec,
-				   bfd_get_section_flags (abfd, sec)
-				   | SEC_LOAD | SEC_ALLOC))
+      if (!bfd_set_section_flags (sec, (bfd_section_flags (sec)
+					| SEC_LOAD | SEC_ALLOC)))
 	return NULL;
     }
 
@@ -733,12 +731,11 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
   sprintf (sec_name, ".MMIX.sec.%d", abfd->tdata.mmo_data->sec_no++);
   sec = mmo_make_section (abfd, sec_name);
 
-  if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+  if (!sec->user_set_vma && !bfd_set_section_vma (sec, vma))
     return NULL;
 
-  if (! bfd_set_section_flags (abfd, sec,
-			       bfd_get_section_flags (abfd, sec)
-			       | SEC_LOAD | SEC_ALLOC))
+  if (!bfd_set_section_flags (sec, (bfd_section_flags (sec)
+				    | SEC_LOAD | SEC_ALLOC)))
     return NULL;
   return sec;
 }
@@ -1136,14 +1133,13 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
 
   /* Add in the section flags we found to those bfd entered during this
      process and set the contents.  */
-  if (! bfd_set_section_flags (abfd, sec,
-			       bfd_sec_flags_from_mmo_flags (flags)
-			       | bfd_get_section_flags (abfd, sec)
-			       | (section_length != 0 ? SEC_HAS_CONTENTS : 0))
-      || ! bfd_set_section_size (abfd, sec, sec->size + section_length)
+  if (!bfd_set_section_flags (sec,
+			      (bfd_sec_flags_from_mmo_flags (flags)
+			       | bfd_section_flags (sec)
+			       | (section_length != 0 ? SEC_HAS_CONTENTS : 0)))
+      || !bfd_set_section_size (sec, sec->size + section_length)
       /* Set VMA only for the first occurrence.  */
-      || (! sec->user_set_vma
-	  && ! bfd_set_section_vma  (abfd, sec, section_vma)))
+      || (!sec->user_set_vma && !bfd_set_section_vma (sec, section_vma)))
     {
       /* If we get an error for any of the calls above, signal more than
 	 just a format error for the spec section.  */
@@ -1561,9 +1557,8 @@ mmo_get_loc (asection *sec, bfd_vma vma, int size)
 
 	  /* We get here for the first time (at other times too) for this
 	     section.  Say we have contents.  */
-	  if (! bfd_set_section_flags (sec->owner, sec,
-				       bfd_get_section_flags (sec->owner, sec)
-				       | SEC_HAS_CONTENTS))
+	  if (!bfd_set_section_flags (sec, (bfd_section_flags (sec)
+					    | SEC_HAS_CONTENTS)))
 	    return NULL;
 	}
     }
@@ -2070,18 +2065,16 @@ mmo_scan (bfd *abfd)
      section flags must be set then.  */
   sec = bfd_get_section_by_name (abfd, MMO_TEXT_SECTION_NAME);
   if (sec != NULL
-      && (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS)
-      && ! bfd_set_section_flags (abfd, sec,
-				  bfd_get_section_flags (abfd, sec)
-				  | SEC_ALLOC | SEC_LOAD | SEC_CODE))
+      && (bfd_section_flags (sec) & SEC_HAS_CONTENTS)
+      && !bfd_set_section_flags (sec, (bfd_section_flags (sec)
+				       | SEC_ALLOC | SEC_LOAD | SEC_CODE)))
     error = TRUE;
 
   sec = bfd_get_section_by_name (abfd, MMO_DATA_SECTION_NAME);
   if (sec != NULL
-      && (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS)
-      && ! bfd_set_section_flags (abfd, sec,
-				  bfd_get_section_flags (abfd, sec)
-				  | SEC_ALLOC | SEC_LOAD))
+      && (bfd_section_flags (sec) & SEC_HAS_CONTENTS)
+      && !bfd_set_section_flags (sec, (bfd_section_flags (sec)
+				       | SEC_ALLOC | SEC_LOAD)))
     error = TRUE;
 
   /* Free whatever resources we took.  */
@@ -2432,7 +2425,7 @@ bfd_sec_flags_from_mmo_flags (flagword flags)
 static bfd_boolean
 mmo_has_leading_or_trailing_zero_tetra_p (bfd *abfd, asection *sec)
 {
-  bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+  bfd_vma secaddr = bfd_section_vma (sec);
 
   if (sec->size < 4)
     return FALSE;
@@ -2464,7 +2457,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
 
   if (strcmp (sec->name, MMO_TEXT_SECTION_NAME) == 0)
     {
-      bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+      bfd_vma secaddr = bfd_section_vma (sec);
 
       /* Because leading and trailing zeros are omitted in output, we need to
 	 specify the section boundaries so they're correct when the file
@@ -2485,7 +2478,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
     }
   else if (strcmp (sec->name, MMO_DATA_SECTION_NAME) == 0)
     {
-      bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+      bfd_vma secaddr = bfd_section_vma (sec);
 
       /* Same goes as for MMO_TEXT_SECTION_NAME above.  */
       if (sec->size != 0
@@ -2519,7 +2512,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
     }
   /* Ignore sections that are just allocated or empty; we write out
      _contents_ here.  */
-  else if ((bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS) != 0
+  else if ((bfd_section_flags (sec) & SEC_HAS_CONTENTS) != 0
 	   && sec->size != 0)
     {
       if (!mmo_write_section_description (abfd, sec))
@@ -2527,7 +2520,7 @@ mmo_internal_write_section (bfd *abfd, asection *sec)
 
       /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
 	 loaded.  */
-      if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
+      if (bfd_section_flags (sec) & SEC_LOAD)
 	return (! abfd->tdata.mmo_data->have_error
 		&& mmo_write_loc_chunk_list (abfd,
 					 mmo_section_data (sec)->head));
@@ -2646,10 +2639,9 @@ EXAMPLE
      for all alien sections; perhaps mmo.em should clear that flag.  Might
      be related to weak references.  */
   mmo_write_tetra (abfd,
-		   mmo_sec_flags_from_bfd_flags
-		   (bfd_get_section_flags (abfd, sec)));
+		   mmo_sec_flags_from_bfd_flags (bfd_section_flags (sec)));
   mmo_write_octa (abfd, sec->size);
-  mmo_write_octa (abfd, bfd_get_section_vma (abfd, sec));
+  mmo_write_octa (abfd, bfd_section_vma (sec));
   return TRUE;
 }
 
@@ -3171,7 +3163,7 @@ mmo_write_section_unless_reg_contents (bfd *abfd, asection *sec, void *p)
   /* Exclude the convenience register section.  */
   if (strcmp (sec->name, MMIX_REG_SECTION_NAME) == 0)
     {
-      if (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS)
+      if (bfd_section_flags (sec) & SEC_HAS_CONTENTS)
 	{
 	  /* Make sure it hasn't got contents.  It seems impossible to
 	     make it carry contents, so we don't have a test-case for

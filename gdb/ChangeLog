@@ -1,3 +1,26 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-linux-tdep.c, * arm-tdep.c, * auto-load.c,
+	* coff-pe-read.c, * coffread.c, * corelow.c, * dbxread.c,
+	* dicos-tdep.c, * dwarf2-frame.c, * dwarf2read.c, * elfread.c,
+	* exec.c, * fbsd-tdep.c, * gcore.c, * gdb_bfd.c, * gdb_bfd.h,
+	* hppa-tdep.c, * i386-cygwin-tdep.c, * i386-fbsd-tdep.c,
+	* i386-linux-tdep.c, * jit.c, * linux-tdep.c, * machoread.c,
+	* maint.c, * mdebugread.c, * minidebug.c, * mips-linux-tdep.c,
+	* mips-sde-tdep.c, * mips-tdep.c, * mipsread.c, * nto-tdep.c,
+	* objfiles.c, * objfiles.h, * osabi.c, * ppc-linux-tdep.c,
+	* ppc64-tdep.c, * record-btrace.c, * record-full.c, * remote.c,
+	* rs6000-aix-tdep.c, * rs6000-tdep.c, * s390-linux-tdep.c,
+	* s390-tdep.c, * solib-aix.c, * solib-dsbt.c, * solib-frv.c,
+	* solib-spu.c, * solib-svr4.c, * solib-target.c,
+	* spu-linux-nat.c, * spu-tdep.c, * symfile-mem.c, * symfile.c,
+	* symmisc.c, * symtab.c, * target.c, * windows-nat.c,
+	* xcoffread.c, * cli/cli-dump.c, * compile/compile-object-load.c,
+	* mi/mi-interp.c: Update throughout for bfd section macro and
+	function changes.
+	* gcore (gcore_create_callback): Use bfd_set_section_lma.
+	* spu-tdep.c (spu_overlay_new_objfile): Likewise.
+
 2019-09-18  Tom Tromey  <tom@tromey.com>
 
 	* NEWS: Add entry.

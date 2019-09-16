@@ -380,7 +380,7 @@ read_unwind_info (struct objfile *objfile)
       if (strcmp (unwind_sec->name, "$UNWIND_START$") == 0
 	  || strcmp (unwind_sec->name, ".PARISC.unwind") == 0)
 	{
-	  unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
+	  unwind_size = bfd_section_size (unwind_sec);
 	  unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
 
 	  total_entries += unwind_entries;
@@ -393,7 +393,7 @@ read_unwind_info (struct objfile *objfile)
 
   if (stub_unwind_sec)
     {
-      stub_unwind_size = bfd_section_size (objfile->obfd, stub_unwind_sec);
+      stub_unwind_size = bfd_section_size (stub_unwind_sec);
       stub_entries = stub_unwind_size / STUB_UNWIND_ENTRY_SIZE;
     }
   else
@@ -421,7 +421,7 @@ read_unwind_info (struct objfile *objfile)
       if (strcmp (unwind_sec->name, "$UNWIND_START$") == 0
 	  || strcmp (unwind_sec->name, ".PARISC.unwind") == 0)
 	{
-	  unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
+	  unwind_size = bfd_section_size (unwind_sec);
 	  unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
 
 	  internalize_unwinds (objfile, &ui->table[index], unwind_sec,

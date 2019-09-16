@@ -3846,7 +3846,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 				  (input_bfd, symtab_hdr->sh_link,
 				   sym->st_name));
 			  if (name == NULL || *name == '\0')
-			    name = bfd_section_name (input_bfd, sec);
+			    name = bfd_section_name (sec);
 			}
 		      /* xgettext:c-format */
 		      format = _("unable to reach %s (at %#" PRIx64 ") from "
@@ -4484,7 +4484,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 						      symtab_hdr->sh_link,
 						      sym->st_name);
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  switch (r)
@@ -4554,7 +4554,7 @@ static bfd_boolean
 nios2_elf32_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 			   Elf_Internal_Shdr *hdr, asection *sec)
 {
-  register const char *name = bfd_get_section_name (abfd, sec);
+  const char *name = bfd_section_name (sec);
 
   if ((sec->flags & SEC_SMALL_DATA)
       || strcmp (name, ".sdata") == 0
@@ -4580,7 +4580,7 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
 
   /* In order for the two loads in .PLTresolve to share the same %hiadj,
      _GLOBAL_OFFSET_TABLE_ must be aligned to a 16-byte boundary.  */
-  if (!bfd_set_section_alignment (dynobj, htab->root.sgotplt, 4))
+  if (!bfd_set_section_alignment (htab->root.sgotplt, 4))
     return FALSE;
 
   /* The Nios II ABI specifies that GOT-relative relocations are relative
@@ -4616,7 +4616,7 @@ nios2_elf32_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
      same %hiadj, the start of the PLT (as well as the GOT) must be aligned
      to a 16-byte boundary.  This is because the addresses for these loads
      include the -(.plt+4) PIC correction.  */
-  return bfd_set_section_alignment (dynobj, htab->root.splt, 4);
+  return bfd_set_section_alignment (htab->root.splt, 4);
 }
 
 /* Implement elf_backend_copy_indirect_symbol:
@@ -5429,8 +5429,8 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Align dynbss.  */
   s->size = BFD_ALIGN (s->size, (bfd_size_type)1 << align2);
-  if (align2 > bfd_get_section_alignment (dynobj, s)
-      && !bfd_set_section_alignment (dynobj, s, align2))
+  if (align2 > bfd_section_alignment (s)
+      && !bfd_set_section_alignment (s, align2))
     return FALSE;
 
   /* Define the symbol as being at this point in the section.  */
@@ -5853,7 +5853,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
+      name = bfd_section_name (s);
 
       if (CONST_STRNEQ (name, ".rela"))
 	{

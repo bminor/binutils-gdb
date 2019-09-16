@@ -697,9 +697,7 @@ s390_load (struct s390_prologue_data *data,
       struct target_section *secp;
       secp = target_section_by_addr (current_top_target (), addr.k);
       if (secp != NULL
-	  && (bfd_get_section_flags (secp->the_bfd_section->owner,
-				     secp->the_bfd_section)
-	      & SEC_READONLY))
+	  && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
 	return pv_constant (read_memory_integer (addr.k, size,
 						 data->byte_order));
     }

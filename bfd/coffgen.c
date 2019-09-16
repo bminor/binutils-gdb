@@ -217,7 +217,7 @@ make_a_section_from_file (bfd *abfd,
 	  break;
 	}
       if (new_name != NULL)
-	bfd_rename_section (abfd, return_section, new_name);
+	bfd_rename_section (return_section, new_name);
     }
 
   return result;
@@ -2366,7 +2366,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
       bfd_vma maxdiff;
 
       /* Look through the C_FILE symbols to find the best one.  */
-      sec_vma = bfd_get_section_vma (abfd, section);
+      sec_vma = bfd_section_vma (section);
       *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
       maxdiff = (bfd_vma) 0 - (bfd_vma) 1;
       while (1)
@@ -2658,7 +2658,7 @@ _bfd_coff_section_already_linked (bfd *abfd,
   if ((flags & SEC_GROUP) != 0)
     return FALSE;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
   s_comdat = bfd_coff_get_comdat_section (abfd, sec);
 
   if (s_comdat != NULL)

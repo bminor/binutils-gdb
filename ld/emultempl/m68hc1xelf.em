@@ -212,10 +212,8 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 
 	case lang_input_section_enum:
 	  if (l->input_section.section == info->input_section
-	      || strcmp (bfd_get_section_name (l->input_section.section->owner,
-					       l->input_section.section),
-			 bfd_get_section_name (info->input_section->owner,
-					       info->input_section)) == 0)
+	      || strcmp (bfd_section_name (l->input_section.section),
+			 bfd_section_name (info->input_section)) == 0)
 	    {
 	      /* We've found our section.  Insert the stub immediately
 		 before its associated input section.  */

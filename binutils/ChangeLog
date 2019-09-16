@@ -1,5 +1,13 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* addr2line.c, * bucomm.c, * coffgrok.c, * dlltool.c, * nm.c,
+	* objcopy.c, * objdump.c, * od-elf32_avr.c, * od-macho.c,
+	* od-xcoff.c, * prdbg.c, * rdcoff.c, * rddbg.c, * rescoff.c,
+	* resres.c, * size.c, * srconv.c, * strings.c, * windmc.c: Update
+	throughout for bfd section macro and function changes.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* nm.c: Update bfd_get_section to bfd_asymbol_section throughout.
 	* objcopy.c: Likewise.
 	* objdump.c: Likewise.

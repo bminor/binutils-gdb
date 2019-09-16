@@ -232,7 +232,7 @@ elf32_arm_add_stub_section (const char * stub_sec_name,
   if (stub_sec == NULL)
     goto err_ret;
 
-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, alignment_power);
+  bfd_set_section_alignment (stub_sec, alignment_power);
 
   os = lang_output_section_get (output_section);
 
@@ -478,8 +478,7 @@ gld${EMULATION_NAME}_finish (void)
       /* Special procesing is required for a Thumb entry symbol.  The
 	 bottom bit of its address must be set.  */
       val = (h->u.def.value
-	     + bfd_get_section_vma (link_info.output_bfd,
-				    h->u.def.section->output_section)
+	     + bfd_section_vma (h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
 
       val |= 1;

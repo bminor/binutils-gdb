@@ -177,7 +177,7 @@ v850_elf_check_relocs (bfd *abfd,
 
 	  if (h && h->root.type == bfd_link_hash_common
 	      && h->root.u.c.p
-	      && !strcmp (bfd_get_section_name (abfd, h->root.u.c.p->section), "COMMON"))
+	      && !strcmp (bfd_section_name (h->root.u.c.p->section), "COMMON"))
 	    {
 	      asection * section;
 
@@ -2269,7 +2269,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	      name = (bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  switch ((int) r)
@@ -2372,11 +2372,11 @@ v850_elf_make_note_section (bfd * abfd)
   if (s == NULL)
     return NULL;
 
-  if (!bfd_set_section_alignment (abfd, s, 2))
+  if (!bfd_set_section_alignment (s, 2))
     return NULL;
 
   /* Allocate space for all known notes.  */
-  if (!bfd_set_section_size (abfd, s, NUM_V850_NOTES * SIZEOF_V850_NOTE))
+  if (!bfd_set_section_size (s, NUM_V850_NOTES * SIZEOF_V850_NOTE))
     return NULL;
 
   data = bfd_zalloc (abfd, NUM_V850_NOTES * SIZEOF_V850_NOTE);
@@ -2443,7 +2443,7 @@ v850_elf_copy_notes (bfd *ibfd, bfd *obfd)
   if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) == NULL)
     return;
 
-  if (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes))
+  if (bfd_section_size (inotes) == bfd_section_size (onotes))
     {
       bfd_byte * icont;
       bfd_byte * ocont;
@@ -2457,7 +2457,7 @@ v850_elf_copy_notes (bfd *ibfd, bfd *obfd)
 	return;
 
       /* Copy/overwrite notes from the input to the output.  */
-      memcpy (ocont, icont, bfd_section_size (obfd, onotes));
+      memcpy (ocont, icont, bfd_section_size (onotes));
     }
 }
 
@@ -2490,7 +2490,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
       bfd_byte * icont;
       bfd_byte * ocont;
 
-      BFD_ASSERT (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes));
+      BFD_ASSERT (bfd_section_size (inotes) == bfd_section_size (onotes));
 
       if ((icont = elf_section_data (inotes)->this_hdr.contents) == NULL)
 	BFD_ASSERT (bfd_malloc_and_get_section (ibfd, inotes, & icont));
@@ -2672,7 +2672,7 @@ v850_elf_print_notes (bfd * abfd, FILE * file)
   if (notes == NULL || notes->contents == NULL)
     return;
 
-  BFD_ASSERT (bfd_section_size (abfd, notes) == NUM_V850_NOTES * SIZEOF_V850_NOTE);
+  BFD_ASSERT (bfd_section_size (notes) == NUM_V850_NOTES * SIZEOF_V850_NOTE);
 
   for (id = V850_NOTE_ALIGNMENT; id <= NUM_V850_NOTES; id++)
     print_v850_note (abfd, file, notes->contents, id);
@@ -2946,11 +2946,11 @@ v850_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 				   asection *sec,
 				   int *retval)
 {
-  if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
+  if (strcmp (bfd_section_name (sec), ".scommon") == 0)
     *retval = SHN_V850_SCOMMON;
-  else if (strcmp (bfd_get_section_name (abfd, sec), ".tcommon") == 0)
+  else if (strcmp (bfd_section_name (sec), ".tcommon") == 0)
     *retval = SHN_V850_TCOMMON;
-  else if (strcmp (bfd_get_section_name (abfd, sec), ".zcommon") == 0)
+  else if (strcmp (bfd_section_name (sec), ".zcommon") == 0)
     *retval = SHN_V850_ZCOMMON;
   else
     return FALSE;
@@ -3162,10 +3162,9 @@ v850_elf_section_from_shdr (bfd *abfd,
     case SHT_V850_SCOMMON:
     case SHT_V850_TCOMMON:
     case SHT_V850_ZCOMMON:
-      if (! bfd_set_section_flags (abfd, hdr->bfd_section,
-				   (bfd_get_section_flags (abfd,
-							   hdr->bfd_section)
-				    | SEC_IS_COMMON)))
+      if (!bfd_set_section_flags (hdr->bfd_section,
+				  (bfd_section_flags (hdr->bfd_section)
+				   | SEC_IS_COMMON)))
 	return FALSE;
     }
 
@@ -3182,7 +3181,7 @@ v850_elf_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 {
   const char * name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   if (strcmp (name, ".scommon") == 0)
     hdr->sh_type = SHT_V850_SCOMMON;

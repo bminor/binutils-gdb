@@ -480,7 +480,7 @@ static void
 free_one_bfd_section (bfd *abfd, asection *sectp, void *ignore)
 {
   struct gdb_bfd_section_data *sect
-    = (struct gdb_bfd_section_data *) bfd_get_section_userdata (abfd, sectp);
+    = (struct gdb_bfd_section_data *) bfd_section_userdata (sectp);
 
   if (sect != NULL && sect->data != NULL)
     {
@@ -626,14 +626,13 @@ get_section_descriptor (asection *section)
 {
   struct gdb_bfd_section_data *result;
 
-  result = ((struct gdb_bfd_section_data *)
-	    bfd_get_section_userdata (section->owner, section));
+  result = (struct gdb_bfd_section_data *) bfd_section_userdata (section);
 
   if (result == NULL)
     {
       result = ((struct gdb_bfd_section_data *)
 		bfd_zalloc (section->owner, sizeof (*result)));
-      bfd_set_section_userdata (section->owner, section, result);
+      bfd_set_section_userdata (section, result);
     }
 
   return result;
@@ -671,9 +670,9 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
       /* Only try to mmap sections which are large enough: we don't want
 	 to waste space due to fragmentation.  */
 
-      if (bfd_get_section_size (sectp) > 4 * pagesize)
+      if (bfd_section_size (sectp) > 4 * pagesize)
 	{
-	  descriptor->size = bfd_get_section_size (sectp);
+	  descriptor->size = bfd_section_size (sectp);
 	  descriptor->data = bfd_mmap (abfd, 0, descriptor->size, PROT_READ,
 				       MAP_PRIVATE, sectp->filepos,
 				       &descriptor->map_addr,
@@ -697,14 +696,14 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
   /* Handle compressed sections, or ordinary uncompressed sections in
      the no-mmap case.  */
 
-  descriptor->size = bfd_get_section_size (sectp);
+  descriptor->size = bfd_section_size (sectp);
   descriptor->data = NULL;
 
   data = NULL;
   if (!bfd_get_full_section_contents (abfd, sectp, &data))
     {
       warning (_("Can't read data for section '%s' in file '%s'"),
-	       bfd_get_section_name (abfd, sectp),
+	       bfd_section_name (sectp),
 	       bfd_get_filename (abfd));
       /* Set size to 0 to prevent further attempts to read the invalid
 	 section.  */

@@ -1975,9 +1975,7 @@ ppc_cleanup (void)
 
     /* Create the .PPC.EMB.apuinfo section.  */
     apuinfo_secp = subseg_new (APUINFO_SECTION_NAME, 0);
-    bfd_set_section_flags (stdoutput,
-			   apuinfo_secp,
-			   SEC_HAS_CONTENTS | SEC_READONLY);
+    bfd_set_section_flags (apuinfo_secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
     p = frag_more (4);
     md_number_to_chars (p, (valueT) 8, 4);
@@ -2703,7 +2701,7 @@ ppc_frob_file_before_adjust (void)
   toc = bfd_get_section_by_name (stdoutput, ".toc");
   if (toc != NULL
       && toc_reloc_types != has_large_toc_reloc
-      && bfd_section_size (stdoutput, toc) > 0x10000)
+      && bfd_section_size (toc) > 0x10000)
     as_warn (_("TOC section size exceeds 64k"));
 }
 
@@ -4681,14 +4679,14 @@ ppc_change_debug_section (unsigned int idx, subsegT subseg)
   const struct xcoff_dwsect_name *dw = &xcoff_dwsect_names[idx];
 
   sec = subseg_new (dw->name, subseg);
-  oldflags = bfd_get_section_flags (stdoutput, sec);
+  oldflags = bfd_section_flags (sec);
   if (oldflags == SEC_NO_FLAGS)
     {
       /* Just created section.  */
       gas_assert (dw_sections[idx].sect == NULL);
 
-      bfd_set_section_flags (stdoutput, sec, SEC_DEBUGGING);
-      bfd_set_section_alignment (stdoutput, sec, 0);
+      bfd_set_section_flags (sec, SEC_DEBUGGING);
+      bfd_set_section_alignment (sec, 0);
       dw_sections[idx].sect = sec;
     }
 
@@ -5804,11 +5802,10 @@ ppc_pdata (int ignore ATTRIBUTE_UNUSED)
     {
       pdata_section = subseg_new (".pdata", 0);
 
-      bfd_set_section_flags (stdoutput, pdata_section,
-			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-			      | SEC_READONLY | SEC_DATA ));
+      bfd_set_section_flags (pdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+					     | SEC_READONLY | SEC_DATA));
 
-      bfd_set_section_alignment (stdoutput, pdata_section, 2);
+      bfd_set_section_alignment (pdata_section, 2);
     }
   else
     {
@@ -5837,11 +5834,10 @@ ppc_ydata (int ignore ATTRIBUTE_UNUSED)
   if (ydata_section == 0)
     {
       ydata_section = subseg_new (".ydata", 0);
-      bfd_set_section_flags (stdoutput, ydata_section,
-			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-			      | SEC_READONLY | SEC_DATA ));
+      bfd_set_section_flags (ydata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+					     | SEC_READONLY | SEC_DATA ));
 
-      bfd_set_section_alignment (stdoutput, ydata_section, 3);
+      bfd_set_section_alignment (ydata_section, 3);
     }
   else
     {
@@ -5874,11 +5870,10 @@ ppc_reldata (int ignore ATTRIBUTE_UNUSED)
     {
       reldata_section = subseg_new (".reldata", 0);
 
-      bfd_set_section_flags (stdoutput, reldata_section,
-			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-			      | SEC_DATA));
+      bfd_set_section_flags (reldata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+					       | SEC_DATA));
 
-      bfd_set_section_alignment (stdoutput, reldata_section, 2);
+      bfd_set_section_alignment (reldata_section, 2);
     }
   else
     {
@@ -5903,11 +5898,10 @@ ppc_rdata (int ignore ATTRIBUTE_UNUSED)
   if (rdata_section == 0)
     {
       rdata_section = subseg_new (".rdata", 0);
-      bfd_set_section_flags (stdoutput, rdata_section,
-			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-			      | SEC_READONLY | SEC_DATA ));
+      bfd_set_section_flags (rdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+					     | SEC_READONLY | SEC_DATA ));
 
-      bfd_set_section_alignment (stdoutput, rdata_section, 2);
+      bfd_set_section_alignment (rdata_section, 2);
     }
   else
     {
@@ -6261,13 +6255,13 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 
   if (flags != SEC_NO_FLAGS)
     {
-      if (! bfd_set_section_flags (stdoutput, sec, flags))
+      if (!bfd_set_section_flags (sec, flags))
 	as_bad (_("error setting flags for \"%s\": %s"),
-		bfd_section_name (stdoutput, sec),
+		bfd_section_name (sec),
 		bfd_errmsg (bfd_get_error ()));
     }
 
-  bfd_set_section_alignment (stdoutput, sec, align);
+  bfd_set_section_alignment (sec, align);
 }
 
 static void
@@ -6298,11 +6292,10 @@ ppc_pe_tocd (int ignore ATTRIBUTE_UNUSED)
     {
       tocdata_section = subseg_new (".tocd", 0);
       /* FIXME: section flags won't work.  */
-      bfd_set_section_flags (stdoutput, tocdata_section,
-			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-			      | SEC_READONLY | SEC_DATA));
+      bfd_set_section_flags (tocdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+					       | SEC_READONLY | SEC_DATA));
 
-      bfd_set_section_alignment (stdoutput, tocdata_section, 2);
+      bfd_set_section_alignment (tocdata_section, 2);
     }
   else
     {
@@ -6573,8 +6566,7 @@ ppc_frob_symbol (symbolS *sym)
 	  /* This is a csect symbol.  x_scnlen is the size of the
 	     csect.  */
 	  if (symbol_get_tc (sym)->next == (symbolS *) NULL)
-	    a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
-						       S_GET_SEGMENT (sym))
+	    a->x_csect.x_scnlen.l = (bfd_section_size (S_GET_SEGMENT (sym))
 				     - S_GET_VALUE (sym));
 	  else
 	    {
@@ -6622,8 +6614,7 @@ ppc_frob_symbol (symbolS *sym)
 	      || symbol_get_tc (next)->symbol_class != XMC_TC)
 	    {
 	      if (ppc_after_toc_frag == (fragS *) NULL)
-		a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
-							   data_section)
+		a->x_csect.x_scnlen.l = (bfd_section_size (data_section)
 					 - S_GET_VALUE (sym));
 	      else
 		a->x_csect.x_scnlen.l = (ppc_after_toc_frag->fr_address
@@ -6787,12 +6778,12 @@ ppc_frob_section (asection *sec)
   static bfd_vma vma = 0;
 
   /* Dwarf sections start at 0.  */
-  if (bfd_get_section_flags (NULL, sec) & SEC_DEBUGGING)
+  if (bfd_section_flags (sec) & SEC_DEBUGGING)
     return;
 
   vma = md_section_align (sec, vma);
-  bfd_set_section_vma (stdoutput, sec, vma);
-  vma += bfd_section_size (stdoutput, sec);
+  bfd_set_section_vma (sec, vma);
+  vma += bfd_section_size (sec);
 }
 
 #endif /* OBJ_XCOFF */
@@ -6823,7 +6814,7 @@ md_section_align (asection *seg ATTRIBUTE_UNUSED, valueT addr)
 #ifdef OBJ_ELF
   return addr;
 #else
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
 
   return ((addr + (1 << align) - 1) & -(1 << align));
 #endif
@@ -6886,7 +6877,7 @@ ppc_fix_adjustable (fixS *fix)
     return 0;
 
   /* Always adjust symbols in debugging sections.  */
-  if (bfd_get_section_flags (stdoutput, symseg) & SEC_DEBUGGING)
+  if (bfd_section_flags (symseg) & SEC_DEBUGGING)
     return 1;
 
   if (ppc_toc_csect != (symbolS *) NULL
@@ -7927,9 +7918,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 #else
       /* We want to use the offset within the toc, not the actual VMA
 	 of the symbol.  */
-      fixP->fx_addnumber =
-	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixP->fx_addsy))
-	- S_GET_VALUE (ppc_toc_csect);
+      fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
+			    - S_GET_VALUE (ppc_toc_csect));
       /* Set *valP to avoid errors.  */
       *valP = value;
 #endif

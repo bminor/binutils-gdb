@@ -502,10 +502,10 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
       thread_section_name section_name (".thrmisc", thr->ptid);
 
       section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
-      if (section != NULL && bfd_section_size (core_bfd, section) > 0)
+      if (section != NULL && bfd_section_size (section) > 0)
 	{
 	  /* Truncate the name if it is longer than "buf".  */
-	  size = bfd_section_size (core_bfd, section);
+	  size = bfd_section_size (section);
 	  if (size > sizeof buf - 1)
 	    size = sizeof buf - 1;
 	  if (bfd_get_section_contents (core_bfd, section, buf, (file_ptr) 0,
@@ -1058,7 +1058,7 @@ fbsd_core_info_proc_files (struct gdbarch *gdbarch)
       return;
     }
 
-  size_t note_size = bfd_get_section_size (section);
+  size_t note_size = bfd_section_size (section);
   if (note_size < 4)
     error (_("malformed core note - too short for header"));
 
@@ -1191,7 +1191,7 @@ fbsd_core_info_proc_mappings (struct gdbarch *gdbarch)
       return;
     }
 
-  note_size = bfd_get_section_size (section);
+  note_size = bfd_section_size (section);
   if (note_size < 4)
     error (_("malformed core note - too short for header"));
 
@@ -1239,7 +1239,7 @@ fbsd_core_vnode_path (struct gdbarch *gdbarch, int fd)
   if (section == NULL)
     return nullptr;
 
-  note_size = bfd_get_section_size (section);
+  note_size = bfd_section_size (section);
   if (note_size < 4)
     error (_("malformed core note - too short for header"));
 
@@ -1344,7 +1344,7 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
    * structure size, then it must be long enough to access the last
    * field used (ki_rusage_ch.ru_majflt) which is the size of a long.
    */
-  note_size = bfd_get_section_size (section);
+  note_size = bfd_section_size (section);
   if (note_size < (4 + kp->ki_rusage_ch + kp->ru_majflt
 		   + long_bit / TARGET_CHAR_BIT))
     error (_("malformed core note - too short"));

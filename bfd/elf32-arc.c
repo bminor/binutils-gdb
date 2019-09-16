@@ -900,7 +900,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
-	  if ((bfd_get_section_flags (ibfd, sec)
+	  if ((bfd_section_flags (sec)
 	       & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 	      == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 	    only_data_sections = FALSE;

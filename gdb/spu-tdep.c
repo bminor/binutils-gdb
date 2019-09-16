@@ -1833,7 +1833,7 @@ spu_get_overlay_table (struct objfile *objfile)
 	continue;
 
       ALL_OBJFILE_OSECTIONS (objfile, osect)
-	if (vma == bfd_section_vma (objfile->obfd, osect->the_bfd_section)
+	if (vma == bfd_section_vma (osect->the_bfd_section)
 	    && pos == osect->the_bfd_section->filepos)
 	  {
 	    int ndx = osect - objfile->sections;
@@ -1921,9 +1921,9 @@ spu_overlay_new_objfile (struct objfile *objfile)
       int ndx = osect - objfile->sections;
 
       if (ovly_table[ndx].mapped_ptr == 0)
-	bfd_section_lma (obfd, bsect) = bfd_section_vma (obfd, bsect);
+	bfd_set_section_lma (bsect, bfd_section_vma (bsect));
       else
-	bfd_section_lma (obfd, bsect) = SPU_OVERLAY_LMA + bsect->filepos;
+	bfd_set_section_lma (bsect, SPU_OVERLAY_LMA + bsect->filepos);
     }
 }
 

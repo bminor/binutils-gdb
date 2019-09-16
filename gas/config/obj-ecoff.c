@@ -90,15 +90,15 @@ ecoff_frob_file_before_fix (void)
 	  }
       if (i == n_names)
 	{
-	  bfd_set_section_vma (stdoutput, sec, addr);
-	  addr += bfd_section_size (stdoutput, sec);
+	  bfd_set_section_vma (sec, addr);
+	  addr += bfd_section_size (sec);
 	}
     }
   for (i = 0; i < n_names; i++)
     if (secs[i])
       {
-	bfd_set_section_vma (stdoutput, secs[i], addr);
-	addr += bfd_section_size (stdoutput, secs[i]);
+	bfd_set_section_vma (secs[i], addr);
+	addr += bfd_section_size (secs[i]);
       }
   for (i = n_names - 1; i >= 0; i--)
     if (secs[i])

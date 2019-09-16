@@ -3162,8 +3162,8 @@ md_section_align (segT seg ATTRIBUTE_UNUSED, valueT size)
 #ifdef OBJ_ELF
   return size;
 #else /* ! OBJ_ELF */
-  return ((size + (1 << bfd_get_section_alignment (stdoutput, seg)) - 1)
-	  & -(1 << bfd_get_section_alignment (stdoutput, seg)));
+  return ((size + (1 << bfd_section_alignment (seg)) - 1)
+	  & -(1 << bfd_section_alignment (seg)));
 #endif /* ! OBJ_ELF */
 }
 

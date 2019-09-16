@@ -267,7 +267,7 @@ elf32_m68hc11_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
 	   section != NULL;
 	   section = section->next)
 	{
-	  const char* name = bfd_get_section_name (input_bfd, section);
+	  const char *name = bfd_section_name (section);
 
 	  if (!strcmp (name, ".tramp"))
 	    htab->tramp_section = section;
@@ -1014,7 +1014,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  name = (bfd_elf_string_from_elf_section
 		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	  if (name == NULL || *name == '\0')
-	    name = bfd_section_name (input_bfd, sec);
+	    name = bfd_section_name (sec);
 	}
 
       if (is_far && ELF32_R_TYPE (rel->r_info) == R_M68HC11_16)

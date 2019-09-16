@@ -1168,9 +1168,8 @@ elf64_alpha_section_from_shdr (bfd *abfd,
 
   if (hdr->sh_type == SHT_ALPHA_DEBUG)
     {
-      if (! bfd_set_section_flags (abfd, newsect,
-				   (bfd_get_section_flags (abfd, newsect)
-				    | SEC_DEBUGGING)))
+      if (!bfd_set_section_flags (newsect,
+				  bfd_section_flags (newsect) | SEC_DEBUGGING))
 	return FALSE;
     }
 
@@ -1196,7 +1195,7 @@ elf64_alpha_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 {
   register const char *name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   if (strcmp (name, ".mdebug") == 0)
     {
@@ -1270,7 +1269,7 @@ elf64_alpha_create_got_section (bfd *abfd,
 	   | SEC_LINKER_CREATED);
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, 3))
+      || !bfd_set_section_alignment (s, 3))
     return FALSE;
 
   alpha_elf_tdata (abfd)->got = s;
@@ -1302,7 +1301,7 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	   | (elf64_alpha_use_secureplt ? SEC_READONLY : 0));
   s = bfd_make_section_anyway_with_flags (abfd, ".plt", flags);
   elf_hash_table (info)->splt = s;
-  if (s == NULL || ! bfd_set_section_alignment (abfd, s, 4))
+  if (s == NULL || ! bfd_set_section_alignment (s, 4))
     return FALSE;
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
@@ -1317,7 +1316,7 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	   | SEC_LINKER_CREATED | SEC_READONLY);
   s = bfd_make_section_anyway_with_flags (abfd, ".rela.plt", flags);
   elf_hash_table (info)->srelplt = s;
-  if (s == NULL || ! bfd_set_section_alignment (abfd, s, 3))
+  if (s == NULL || ! bfd_set_section_alignment (s, 3))
     return FALSE;
 
   if (elf64_alpha_use_secureplt)
@@ -1325,7 +1324,7 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       flags = SEC_ALLOC | SEC_LINKER_CREATED;
       s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       elf_hash_table (info)->sgotplt = s;
-      if (s == NULL || ! bfd_set_section_alignment (abfd, s, 3))
+      if (s == NULL || ! bfd_set_section_alignment (s, 3))
 	return FALSE;
     }
 
@@ -1343,7 +1342,7 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd, ".rela.got", flags);
   elf_hash_table (info)->srelgot = s;
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, 3))
+      || !bfd_set_section_alignment (s, 3))
     return FALSE;
 
   /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the
@@ -1616,7 +1615,7 @@ elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, void * data)
 	    h->esym.asym.sc = scUndefined;
 	  else
 	    {
-	      name = bfd_section_name (output_section->owner, output_section);
+	      name = bfd_section_name (output_section);
 
 	      if (strcmp (name, ".text") == 0)
 		h->esym.asym.sc = scText;
@@ -2860,7 +2859,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
+      name = bfd_section_name (s);
 
       if (CONST_STRNEQ (name, ".rela"))
 	{
@@ -4508,7 +4507,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    if (name == NULL)
 		      name = _("<unknown>");
 		    else if (name[0] == 0)
-		      name = bfd_section_name (input_bfd, sec);
+		      name = bfd_section_name (sec);
 		  }
 		_bfd_error_handler
 		  /* xgettext:c-format */
@@ -4779,7 +4778,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		if (name == NULL)
 		  return FALSE;
 		if (*name == '\0')
-		  name = bfd_section_name (input_bfd, sec);
+		  name = bfd_section_name (sec);
 	      }
 	    (*info->callbacks->reloc_overflow)
 	      (info, (h ? &h->root.root : NULL), name, howto->name,

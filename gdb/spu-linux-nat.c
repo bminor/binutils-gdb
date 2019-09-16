@@ -363,7 +363,7 @@ spu_bfd_open (ULONGEST addr)
   spu_name = bfd_get_section_by_name (nbfd.get (), ".note.spu_name");
   if (spu_name)
     {
-      int sect_size = bfd_section_size (nbfd.get (), spu_name);
+      int sect_size = bfd_section_size (spu_name);
       if (sect_size > 20)
 	{
 	  char *buf = (char *)alloca (sect_size - 20 + 1);

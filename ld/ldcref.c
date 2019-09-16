@@ -574,7 +574,7 @@ check_nocrossref (struct cref_hash_entry *h, void *ignore ATTRIBUTE_UNUSED)
   defsec = hl->u.def.section->output_section;
   if (defsec == NULL)
     return TRUE;
-  defsecname = bfd_get_section_name (defsec->owner, defsec);
+  defsecname = bfd_section_name (defsec);
 
   for (ncrs = nocrossref_list; ncrs != NULL; ncrs = ncrs->next)
     for (ncr = ncrs->list; ncr != NULL; ncr = ncr->next)
@@ -658,10 +658,10 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
   arelent **p, **pend;
 
   outsec = sec->output_section;
-  outsecname = bfd_get_section_name (outsec->owner, outsec);
+  outsecname = bfd_section_name (outsec);
 
   outdefsec = info->defsec->output_section;
-  outdefsecname = bfd_get_section_name (outdefsec->owner, outdefsec);
+  outdefsecname = bfd_section_name (outdefsec);
 
   /* The section where the symbol is defined is permitted.  */
   if (strcmp (outsecname, outdefsecname) == 0)

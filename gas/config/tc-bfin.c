@@ -789,7 +789,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int boundary = bfd_get_section_alignment (stdoutput, segment);
+  int boundary = bfd_section_alignment (segment);
   return ((size + (1 << boundary) - 1) & -(1 << boundary));
 }
 

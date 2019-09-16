@@ -1147,13 +1147,13 @@ perform_an_assembly_pass (int argc, char ** argv)
   /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
      to have relocs, otherwise we don't find out in time.  */
   applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (stdoutput, text_section,
+  bfd_set_section_flags (text_section,
 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				       | SEC_CODE | SEC_READONLY));
-  bfd_set_section_flags (stdoutput, data_section,
+  bfd_set_section_flags (data_section,
 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				       | SEC_DATA));
-  bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
+  bfd_set_section_flags (bss_section, applicable & SEC_ALLOC);
   seg_info (bss_section)->bss = 1;
 #endif
   subseg_new (BFD_ABS_SECTION_NAME, 0);
@@ -1360,7 +1360,7 @@ main (int argc, char ** argv)
       segT gnustack;
 
       gnustack = subseg_new (".note.GNU-stack", 0);
-      bfd_set_section_flags (stdoutput, gnustack,
+      bfd_set_section_flags (gnustack,
 			     SEC_READONLY | (flag_execstack ? SEC_CODE : 0));
 
     }

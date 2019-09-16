@@ -303,15 +303,13 @@ solib_aix_bss_data_overlap (bfd *abfd)
      section after the .data section (the problem has only been
      observed when using the GNU linker, and the default linker
      script always places the .data and .bss sections in that order).  */
-  if (bfd_section_vma (abfd, bss_sect)
-      < bfd_section_vma (abfd, data_sect))
+  if (bfd_section_vma (bss_sect) < bfd_section_vma (data_sect))
     return 0;
 
-  if (bfd_section_vma (abfd, bss_sect)
-      < bfd_section_vma (abfd, data_sect) + bfd_get_section_size (data_sect))
-    return ((bfd_section_vma (abfd, data_sect)
-	     + bfd_get_section_size (data_sect))
-	    - bfd_section_vma (abfd, bss_sect));
+  if (bfd_section_vma (bss_sect)
+      < bfd_section_vma (data_sect) + bfd_section_size (data_sect))
+    return (bfd_section_vma (data_sect) + bfd_section_size (data_sect)
+	    - bfd_section_vma (bss_sect));
 
   return 0;
 }
@@ -324,7 +322,7 @@ solib_aix_relocate_section_addresses (struct so_list *so,
 {
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
-  const char *section_name = bfd_section_name (abfd, bfd_sect);
+  const char *section_name = bfd_section_name (bfd_sect);
   lm_info_aix *info = (lm_info_aix *) so->lm_info;
 
   if (strcmp (section_name, ".text") == 0)
@@ -355,17 +353,17 @@ solib_aix_relocate_section_addresses (struct so_list *so,
       CORE_ADDR data_offset = 0;
 
       if (data_sect != NULL)
-	data_offset = info->data_addr - bfd_section_vma (abfd, data_sect);
+	data_offset = info->data_addr - bfd_section_vma (data_sect);
 
-      sec->addr = bfd_section_vma (abfd, bfd_sect) + data_offset;
+      sec->addr = bfd_section_vma (bfd_sect) + data_offset;
       sec->addr += solib_aix_bss_data_overlap (abfd);
-      sec->endaddr = sec->addr + bfd_section_size (abfd, bfd_sect);
+      sec->endaddr = sec->addr + bfd_section_size (bfd_sect);
     }
   else
     {
       /* All other sections should not be relocated.  */
-      sec->addr = bfd_section_vma (abfd, bfd_sect);
-      sec->endaddr = sec->addr + bfd_section_size (abfd, bfd_sect);
+      sec->addr = bfd_section_vma (bfd_sect);
+      sec->endaddr = sec->addr + bfd_section_size (bfd_sect);
     }
 }
 
@@ -414,7 +412,7 @@ solib_aix_get_section_offsets (struct objfile *objfile,
 	= objfile->sections[objfile->sect_index_text].the_bfd_section;
 
       offsets->offsets[objfile->sect_index_text]
-	= info->text_addr + sect->filepos - bfd_section_vma (abfd, sect);
+	= info->text_addr + sect->filepos - bfd_section_vma (sect);
     }
 
   /* .data */
@@ -425,7 +423,7 @@ solib_aix_get_section_offsets (struct objfile *objfile,
 	= objfile->sections[objfile->sect_index_data].the_bfd_section;
 
       offsets->offsets[objfile->sect_index_data]
-	= info->data_addr - bfd_section_vma (abfd, sect);
+	= info->data_addr - bfd_section_vma (sect);
     }
 
   /* .bss
@@ -661,8 +659,7 @@ data_obj_section_from_objfile (struct objfile *objfile)
   struct obj_section *osect;
 
   ALL_OBJFILE_OSECTIONS (objfile, osect)
-    if (strcmp (bfd_section_name (objfile->obfd, osect->the_bfd_section),
-		".data") == 0)
+    if (strcmp (bfd_section_name (osect->the_bfd_section), ".data") == 0)
       return osect;
 
   return NULL;

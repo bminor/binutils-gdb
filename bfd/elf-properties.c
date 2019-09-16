@@ -695,12 +695,12 @@ _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
   align_shift = bed->s->elfclass == ELFCLASS64 ? 3 : 2;
 
   /* Get the output .note.gnu.property section size.  */
-  size = bfd_get_section_size (isec->output_section);
+  size = bfd_section_size (isec->output_section);
 
   /* Update the output .note.gnu.property section alignment.  */
-  bfd_set_section_alignment (obfd, isec->output_section, align_shift);
+  bfd_set_section_alignment (isec->output_section, align_shift);
 
-  if (size > bfd_get_section_size (isec))
+  if (size > bfd_section_size (isec))
     {
       contents = (bfd_byte *) bfd_malloc (size);
       free (*ptr);

@@ -575,7 +575,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
                          sec->name, sym->name,
                          paddress (arch, res));
                     }
-                  bfd_set_section_vma (abfd.get (), sec, res);
+                  bfd_set_section_vma (sec, res);
                   sections_rebased[sec->index] = 1;
                 }
             }
@@ -854,8 +854,7 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
             {
               if (strcmp (asect->name, dsect->name) != 0)
                 break;
-              bfd_set_section_size (dsym_bfd.get (), dsect,
-                                    bfd_get_section_size (asect));
+              bfd_set_section_size (dsect, bfd_section_size (asect));
             }
 
 	  /* Add the dsym file as a separate file.  */

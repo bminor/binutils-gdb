@@ -562,7 +562,7 @@ mips_linux_core_read_description (struct gdbarch *gdbarch,
   if (! section)
     return NULL;
 
-  switch (bfd_section_size (abfd, section))
+  switch (bfd_section_size (section))
     {
     case sizeof (mips_elf_gregset_t):
       return mips_tdesc_gp32;

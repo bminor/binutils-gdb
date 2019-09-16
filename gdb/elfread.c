@@ -125,7 +125,7 @@ elf_symfile_segments (bfd *abfd)
     {
       int j;
 
-      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+      if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
 	continue;
 
       Elf_Internal_Shdr *this_hdr = &elf_section_data (sect)->this_hdr;
@@ -146,10 +146,10 @@ elf_symfile_segments (bfd *abfd)
 	 RealView) use SHT_NOBITS for uninitialized data.  Since it is
 	 uninitialized, it doesn't need a program header.  Such
 	 binaries are not relocatable.  */
-      if (bfd_get_section_size (sect) > 0 && j == num_segments
-	  && (bfd_get_section_flags (abfd, sect) & SEC_LOAD) != 0)
+      if (bfd_section_size (sect) > 0 && j == num_segments
+	  && (bfd_section_flags (sect) & SEC_LOAD) != 0)
 	warning (_("Loadable section \"%s\" outside of ELF segments"),
-		 bfd_section_name (abfd, sect));
+		 bfd_section_name (sect));
     }
 
   return data;
@@ -289,12 +289,12 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	     covers the stub's address.  */
 	  for (sect = abfd->sections; sect != NULL; sect = sect->next)
 	    {
-	      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+	      if ((bfd_section_flags (sect) & SEC_ALLOC) == 0)
 		continue;
 
-	      if (symaddr >= bfd_get_section_vma (abfd, sect)
-		  && symaddr < bfd_get_section_vma (abfd, sect)
-			       + bfd_get_section_size (sect))
+	      if (symaddr >= bfd_section_vma (sect)
+		  && symaddr < bfd_section_vma (sect)
+			       + bfd_section_size (sect))
 		break;
 	    }
 	  if (!sect)
@@ -591,9 +591,9 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       if (section == NULL)
 	return false;
 
-      return (bfd_get_section_vma (obfd, section) <= address
-	      && (address < bfd_get_section_vma (obfd, section)
-		  + bfd_get_section_size (section)));
+      return (bfd_section_vma (section) <= address
+	      && (address < bfd_section_vma (section)
+		  + bfd_section_size (section)));
     };
 
   reloc_count = relplt->size / elf_section_data (relplt)->this_hdr.sh_entsize;
@@ -1236,7 +1236,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	elfstab_build_psymtabs (objfile,
 				ei.stabsect,
 				str_sect->filepos,
-				bfd_section_size (abfd, str_sect));
+				bfd_section_size (str_sect));
     }
 
   if (dwarf2_has_info (objfile, NULL))

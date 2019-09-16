@@ -895,7 +895,7 @@ gld${EMULATION_NAME}_before_allocation (void)
       if (is == NULL)
 	{
 	  einfo (_("%F%P: can't find %s in output section\n"),
-		 bfd_get_section_name (sec->owner, sec));
+		 bfd_section_name (sec));
 	}
 
       /* Now figure out where the section should go.  */

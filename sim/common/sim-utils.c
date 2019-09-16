@@ -263,11 +263,11 @@ sim_analyze_program (SIM_DESC sd, const char *prog_name, bfd *prog_bfd)
   STATE_START_ADDR (sd) = bfd_get_start_address (prog_bfd);
 
   for (s = prog_bfd->sections; s; s = s->next)
-    if (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
+    if (strcmp (bfd_section_name (s), ".text") == 0)
       {
 	STATE_TEXT_SECTION (sd) = s;
-	STATE_TEXT_START (sd) = bfd_get_section_vma (prog_bfd, s);
-	STATE_TEXT_END (sd) = STATE_TEXT_START (sd) + bfd_section_size (prog_bfd, s);
+	STATE_TEXT_START (sd) = bfd_section_vma (s);
+	STATE_TEXT_END (sd) = STATE_TEXT_START (sd) + bfd_section_size (s);
 	break;
       }
 

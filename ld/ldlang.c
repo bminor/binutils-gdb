@@ -319,7 +319,7 @@ walk_wild_section_general (lang_wild_statement_type *ptr,
 
 	  if (sec->spec.name != NULL)
 	    {
-	      const char *sname = bfd_get_section_name (file->the_bfd, s);
+	      const char *sname = bfd_section_name (s);
 
 	      skip = name_match (sec->spec.name, sname) != 0;
 	    }
@@ -452,10 +452,8 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
       abort ();
 
     case by_init_priority:
-      ainit_priority
-	= get_init_priority (bfd_get_section_name (asec->owner, asec));
-      binit_priority
-	= get_init_priority (bfd_get_section_name (bsec->owner, bsec));
+      ainit_priority = get_init_priority (bfd_section_name (asec));
+      binit_priority = get_init_priority (bfd_section_name (bsec));
       if (ainit_priority == 0 || binit_priority == 0)
 	goto sort_by_name;
       ret = ainit_priority - binit_priority;
@@ -465,28 +463,24 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
 	goto sort_by_name;
 
     case by_alignment_name:
-      ret = (bfd_section_alignment (bsec->owner, bsec)
-	     - bfd_section_alignment (asec->owner, asec));
+      ret = bfd_section_alignment (bsec) - bfd_section_alignment (asec);
       if (ret)
 	break;
       /* Fall through.  */
 
     case by_name:
 sort_by_name:
-      ret = strcmp (bfd_get_section_name (asec->owner, asec),
-		    bfd_get_section_name (bsec->owner, bsec));
+      ret = strcmp (bfd_section_name (asec), bfd_section_name (bsec));
       break;
 
     case by_name_alignment:
-      ret = strcmp (bfd_get_section_name (asec->owner, asec),
-		    bfd_get_section_name (bsec->owner, bsec));
+      ret = strcmp (bfd_section_name (asec), bfd_section_name (bsec));
       if (ret)
 	break;
       /* Fall through.  */
 
     case by_alignment:
-      ret = (bfd_section_alignment (bsec->owner, bsec)
-	     - bfd_section_alignment (asec->owner, asec));
+      ret = bfd_section_alignment (bsec) - bfd_section_alignment (asec);
       break;
     }
 
@@ -610,7 +604,7 @@ walk_wild_section_specs1_wild1 (lang_wild_statement_type *ptr,
 
   for (s = file->the_bfd->sections; s != NULL; s = s->next)
     {
-      const char *sname = bfd_get_section_name (file->the_bfd, s);
+      const char *sname = bfd_section_name (s);
       bfd_boolean skip = !match_simple_wild (wildsec0->spec.name, sname);
 
       if (!skip)
@@ -647,7 +641,7 @@ walk_wild_section_specs2_wild1 (lang_wild_statement_type *ptr,
 	walk_wild_consider_section (ptr, file, s, sec0, callback, data);
       else
 	{
-	  const char *sname = bfd_get_section_name (file->the_bfd, s);
+	  const char *sname = bfd_section_name (s);
 	  bfd_boolean skip = !match_simple_wild (wildsec1->spec.name, sname);
 
 	  if (!skip)
@@ -682,7 +676,7 @@ walk_wild_section_specs3_wild2 (lang_wild_statement_type *ptr,
 	walk_wild_consider_section (ptr, file, s, sec0, callback, data);
       else
 	{
-	  const char *sname = bfd_get_section_name (file->the_bfd, s);
+	  const char *sname = bfd_section_name (s);
 	  bfd_boolean skip = !match_simple_wild (wildsec1->spec.name, sname);
 
 	  if (!skip)
@@ -734,7 +728,7 @@ walk_wild_section_specs4_wild2 (lang_wild_statement_type *ptr,
 	  walk_wild_consider_section (ptr, file, s, sec1, callback, data);
 	else
 	  {
-	    const char *sname = bfd_get_section_name (file->the_bfd, s);
+	    const char *sname = bfd_section_name (s);
 	    bfd_boolean skip = !match_simple_wild (wildsec2->spec.name,
 						   sname);
 
@@ -5314,9 +5308,8 @@ lang_size_sections_1
 			   " section %s\n"), os->name);
 
 		input = os->children.head->input_section.section;
-		bfd_set_section_vma (os->bfd_section->owner,
-				     os->bfd_section,
-				     bfd_section_vma (input->owner, input));
+		bfd_set_section_vma (os->bfd_section,
+				     bfd_section_vma (input));
 		if (!(os->bfd_section->flags & SEC_FIXED_SIZE))
 		  os->bfd_section->size = input->size;
 		break;
@@ -5371,13 +5364,11 @@ lang_size_sections_1
 			if (command_line.check_section_addresses)
 			  einfo (_("%F%P: error: no memory region specified"
 				   " for loadable section `%s'\n"),
-				 bfd_get_section_name (link_info.output_bfd,
-						       os->bfd_section));
+				 bfd_section_name (os->bfd_section));
 			else
 			  einfo (_("%P: warning: no memory region specified"
 				   " for loadable section `%s'\n"),
-				 bfd_get_section_name (link_info.output_bfd,
-						       os->bfd_section));
+				 bfd_section_name (os->bfd_section));
 		      }
 
 		    newdot = os->region->current;
@@ -5406,7 +5397,7 @@ lang_size_sections_1
 			     os->name, (unsigned long) dotdelta);
 		  }
 
-		bfd_set_section_vma (0, os->bfd_section, newdot);
+		bfd_set_section_vma (os->bfd_section, newdot);
 
 		os->bfd_section->output_offset = 0;
 	      }
@@ -6464,8 +6455,7 @@ lang_end (void)
       bfd_vma val;
 
       val = (h->u.def.value
-	     + bfd_get_section_vma (link_info.output_bfd,
-				    h->u.def.section->output_section)
+	     + bfd_section_vma (h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
       if (!bfd_set_start_address (link_info.output_bfd, val))
 	einfo (_("%F%P: %s: can't set start address\n"), entry_symbol.name);
@@ -6496,10 +6486,9 @@ lang_end (void)
 		einfo (_("%P: warning: cannot find entry symbol %s;"
 			 " defaulting to %V\n"),
 		       entry_symbol.name,
-		       bfd_get_section_vma (link_info.output_bfd, ts));
-	      if (!(bfd_set_start_address
-		    (link_info.output_bfd,
-		     bfd_get_section_vma (link_info.output_bfd, ts))))
+		       bfd_section_vma (ts));
+	      if (!bfd_set_start_address (link_info.output_bfd,
+					  bfd_section_vma (ts)))
 		einfo (_("%F%P: can't set start address\n"));
 	    }
 	  else

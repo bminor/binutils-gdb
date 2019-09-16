@@ -1314,7 +1314,7 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
 
 	  name = bfd_elf_string_from_elf_section
 	      (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL || * name == 0) ? bfd_section_name (input_bfd, sec) : name;
+	  name = name == NULL || *name == 0 ? bfd_section_name (sec) : name;
 	}
       else
 	{
@@ -1691,7 +1691,7 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 
       name = bfd_elf_string_from_elf_section
 	(abfd, symtab_hdr->sh_link, isym->st_name);
-      name = (name == NULL || * name == 0) ? bfd_section_name (abfd, sec) : name;
+      name = name == NULL || *name == 0 ? bfd_section_name (sec) : name;
 
       if (isym->st_shndx != sec_shndx)
 	continue;

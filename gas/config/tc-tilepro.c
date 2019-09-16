@@ -207,7 +207,7 @@ md_begin (void)
   int i;
 
   /* Guarantee text section is aligned.  */
-  bfd_set_section_alignment (stdoutput, text_section,
+  bfd_set_section_alignment (text_section,
                              TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES);
 
   require_canonical_reg_names = 1;
@@ -838,8 +838,8 @@ tilepro_flush_bundle (void)
 
   /* If the section seems to have no alignment set yet, go ahead and
      make it large enough to hold code.  */
-  if (bfd_get_section_alignment (stdoutput, now_seg) == 0)
-    bfd_set_section_alignment (stdoutput, now_seg,
+  if (bfd_section_alignment (now_seg) == 0)
+    bfd_set_section_alignment (now_seg,
                                TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES);
 
   for (j = 0; j < current_bundle_index; j++)

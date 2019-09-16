@@ -763,7 +763,7 @@ elf32_cr16c_relocate_section (bfd *output_bfd,
 	      name = (bfd_elf_string_from_elf_section
 		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
 	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
+		name = bfd_section_name (sec);
 	    }
 
 	  switch (r)
@@ -827,9 +827,9 @@ elf32_cr16c_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 				      asection *sec,
 				      int *retval)
 {
-  if (strcmp (bfd_get_section_name (abfd, sec), ".fcommon") == 0)
+  if (strcmp (bfd_section_name (sec), ".fcommon") == 0)
     *retval = SHN_CR16C_FCOMMON;
-  else if (strcmp (bfd_get_section_name (abfd, sec), ".ncommon") == 0)
+  else if (strcmp (bfd_section_name (sec), ".ncommon") == 0)
     *retval = SHN_CR16C_NCOMMON;
   else
     return FALSE;

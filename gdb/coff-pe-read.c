@@ -136,7 +136,7 @@ get_section_vmas (bfd *abfd, asection *sectp, void *context)
          bfd_get_section_vma() within memory.  Store the offset.  */
 
       sections[sectix].vma_offset
-	= bfd_get_section_vma (abfd, sectp) - sections[sectix].rva_start;
+	= bfd_section_vma (sectp) - sections[sectix].rva_start;
     }
 }
 

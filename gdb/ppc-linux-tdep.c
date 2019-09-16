@@ -1558,7 +1558,7 @@ ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 ppc_linux_spu_section (bfd *abfd, asection *asect, void *user_data)
 {
-  return startswith (bfd_section_name (abfd, asect), "SPU/");
+  return startswith (bfd_section_name (asect), "SPU/");
 }
 
 static const struct target_desc *
@@ -1580,7 +1580,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   if (! section)
     return NULL;
 
-  switch (bfd_section_size (abfd, section))
+  switch (bfd_section_size (section))
     {
     case 48 * 4:
       features.wordsize = 4;

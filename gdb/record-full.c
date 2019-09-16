@@ -2350,9 +2350,9 @@ record_full_restore (void)
 			osec ? "succeeded" : "failed");
   if (osec == NULL)
     return;
-  osec_size = bfd_section_size (core_bfd, osec);
+  osec_size = bfd_section_size (osec);
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "%s", bfd_section_name (core_bfd, osec));
+    fprintf_unfiltered (gdb_stdlog, "%s", bfd_section_name (osec));
 
   /* Check the magic code.  */
   bfdcore_read (core_bfd, osec, &magic, sizeof (magic), &bfd_offset);
@@ -2599,10 +2599,9 @@ record_full_base_target::save_record (const char *recfilename)
     error (_("Failed to create 'precord' section for corefile %s: %s"),
 	   recfilename,
            bfd_errmsg (bfd_get_error ()));
-  bfd_set_section_size (obfd.get (), osec, save_size);
-  bfd_set_section_vma (obfd.get (), osec, 0);
-  bfd_set_section_alignment (obfd.get (), osec, 0);
-  bfd_section_lma (obfd.get (), osec) = 0;
+  bfd_set_section_size (osec, save_size);
+  bfd_set_section_vma (osec, 0);
+  bfd_set_section_alignment (osec, 0);
 
   /* Save corefile state.  */
   write_gcore_file (obfd.get ());

@@ -956,7 +956,7 @@ elfNN_ia64_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr,
 {
   const char *name;
 
-  name = bfd_get_section_name (abfd, sec);
+  name = bfd_section_name (sec);
 
   if (is_unwind_section_name (abfd, name))
     {
@@ -1561,11 +1561,10 @@ elfNN_ia64_create_dynamic_sections (bfd *abfd,
     return FALSE;
 
   {
-    flagword flags = bfd_get_section_flags (abfd, ia64_info->root.sgot);
-    bfd_set_section_flags (abfd, ia64_info->root.sgot,
-			   SEC_SMALL_DATA | flags);
+    flagword flags = bfd_section_flags (ia64_info->root.sgot);
+    bfd_set_section_flags (ia64_info->root.sgot, SEC_SMALL_DATA | flags);
     /* The .got section is always aligned at 8 bytes.  */
-    if (! bfd_set_section_alignment (abfd, ia64_info->root.sgot, 3))
+    if (!bfd_set_section_alignment (ia64_info->root.sgot, 3))
       return FALSE;
   }
 
@@ -1579,7 +1578,7 @@ elfNN_ia64_create_dynamic_sections (bfd *abfd,
 					   | SEC_LINKER_CREATED
 					   | SEC_READONLY));
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, LOG_SECTION_ALIGN))
+      || !bfd_set_section_alignment (s, LOG_SECTION_ALIGN))
     return FALSE;
   ia64_info->rel_pltoff_sec = s;
 
@@ -1977,11 +1976,11 @@ get_got (bfd *abfd, struct bfd_link_info *info,
       got = ia64_info->root.sgot;
 
       /* The .got section is always aligned at 8 bytes.  */
-      if (!bfd_set_section_alignment (abfd, got, 3))
+      if (!bfd_set_section_alignment (got, 3))
 	return NULL;
 
-      flags = bfd_get_section_flags (abfd, got);
-      if (! bfd_set_section_flags (abfd, got, SEC_SMALL_DATA | flags))
+      flags = bfd_section_flags (got);
+      if (!bfd_set_section_flags (got, SEC_SMALL_DATA | flags))
 	return NULL;
     }
 
@@ -2016,7 +2015,7 @@ get_fptr (bfd *abfd, struct bfd_link_info *info,
 						     ? 0 : SEC_READONLY)
 						  | SEC_LINKER_CREATED));
       if (!fptr
-	  || !bfd_set_section_alignment (abfd, fptr, 4))
+	  || !bfd_set_section_alignment (fptr, 4))
 	{
 	  BFD_ASSERT (0);
 	  return NULL;
@@ -2034,8 +2033,7 @@ get_fptr (bfd *abfd, struct bfd_link_info *info,
 							  | SEC_LINKER_CREATED
 							  | SEC_READONLY));
 	  if (fptr_rel == NULL
-	      || !bfd_set_section_alignment (abfd, fptr_rel,
-					     LOG_SECTION_ALIGN))
+	      || !bfd_set_section_alignment (fptr_rel, LOG_SECTION_ALIGN))
 	    {
 	      BFD_ASSERT (0);
 	      return NULL;
@@ -2071,7 +2069,7 @@ get_pltoff (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED,
 						    | SEC_SMALL_DATA
 						    | SEC_LINKER_CREATED));
       if (!pltoff
-	  || !bfd_set_section_alignment (abfd, pltoff, 4))
+	  || !bfd_set_section_alignment (pltoff, 4))
 	{
 	  BFD_ASSERT (0);
 	  return NULL;
@@ -2112,8 +2110,7 @@ get_reloc_section (bfd *abfd,
 						  | SEC_LINKER_CREATED
 						  | SEC_READONLY));
       if (srel == NULL
-	  || !bfd_set_section_alignment (dynobj, srel,
-					 LOG_SECTION_ALIGN))
+	  || !bfd_set_section_alignment (srel, LOG_SECTION_ALIGN))
 	return NULL;
     }
 
@@ -3171,7 +3168,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  /* It's OK to base decisions on the section name, because none
 	     of the dynobj section names depend upon the input files.  */
-	  name = bfd_get_section_name (dynobj, sec);
+	  name = bfd_section_name (sec);
 
 	  if (strcmp (name, ".got.plt") == 0)
 	    strip = FALSE;

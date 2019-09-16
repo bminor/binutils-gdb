@@ -593,8 +593,8 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 				      s->the_bfd_section,
 				      &buf, addr - s->addr, 8);
       if (res != 0)
-	return extract_unsigned_integer (buf, 8, byte_order)
-		- bfd_section_vma (s->bfd, s->the_bfd_section) + s->addr;
+	return (extract_unsigned_integer (buf, 8, byte_order)
+		- bfd_section_vma (s->the_bfd_section) + s->addr);
    }
 
   return addr;

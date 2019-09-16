@@ -3859,9 +3859,9 @@ md_begin (void)
   if (strncmp (TARGET_OS, "elf", 3) != 0
       && strncmp (TARGET_OS, "vxworks", 7) != 0)
     {
-      (void) bfd_set_section_alignment (stdoutput, text_section, 4);
-      (void) bfd_set_section_alignment (stdoutput, data_section, 4);
-      (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
+      bfd_set_section_alignment (text_section, 4);
+      bfd_set_section_alignment (data_section, 4);
+      bfd_set_section_alignment (bss_section, 4);
     }
 
   /* Create a .reginfo section for register masks and a .mdebug
@@ -3886,8 +3886,8 @@ md_begin (void)
       {
 	sec = subseg_new (".reginfo", (subsegT) 0);
 
-	bfd_set_section_flags (stdoutput, sec, flags);
-	bfd_set_section_alignment (stdoutput, sec, HAVE_NEWABI ? 3 : 2);
+	bfd_set_section_flags (sec, flags);
+	bfd_set_section_alignment (sec, HAVE_NEWABI ? 3 : 2);
 
 	mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
       }
@@ -3896,8 +3896,8 @@ md_begin (void)
 	/* The 64-bit ABI uses a .MIPS.options section rather than
 	   .reginfo section.  */
 	sec = subseg_new (".MIPS.options", (subsegT) 0);
-	bfd_set_section_flags (stdoutput, sec, flags);
-	bfd_set_section_alignment (stdoutput, sec, 3);
+	bfd_set_section_flags (sec, flags);
+	bfd_set_section_alignment (sec, 3);
 
 	/* Set up the option header.  */
 	{
@@ -3918,25 +3918,23 @@ md_begin (void)
       }
 
     sec = subseg_new (".MIPS.abiflags", (subsegT) 0);
-    bfd_set_section_flags (stdoutput, sec,
+    bfd_set_section_flags (sec,
 			   SEC_READONLY | SEC_DATA | SEC_ALLOC | SEC_LOAD);
-    bfd_set_section_alignment (stdoutput, sec, 3);
+    bfd_set_section_alignment (sec, 3);
     mips_flags_frag = frag_more (sizeof (Elf_External_ABIFlags_v0));
 
     if (ECOFF_DEBUGGING)
       {
 	sec = subseg_new (".mdebug", (subsegT) 0);
-	(void) bfd_set_section_flags (stdoutput, sec,
-				      SEC_HAS_CONTENTS | SEC_READONLY);
-	(void) bfd_set_section_alignment (stdoutput, sec, 2);
+	bfd_set_section_flags (sec, SEC_HAS_CONTENTS | SEC_READONLY);
+	bfd_set_section_alignment (sec, 2);
       }
     else if (mips_flag_pdr)
       {
 	pdr_seg = subseg_new (".pdr", (subsegT) 0);
-	(void) bfd_set_section_flags (stdoutput, pdr_seg,
-				      SEC_READONLY | SEC_RELOC
-				      | SEC_DEBUGGING);
-	(void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
+	bfd_set_section_flags (pdr_seg,
+			       SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
+	bfd_set_section_alignment (pdr_seg, 2);
       }
 
     subseg_set (seg, subseg);
@@ -4468,7 +4466,7 @@ s_is_linkonce (symbolS *sym, segT from_seg)
 
   if (symseg != from_seg && !S_IS_LOCAL (sym))
     {
-      if ((bfd_get_section_flags (stdoutput, symseg) & SEC_LINK_ONCE))
+      if ((bfd_section_flags (symseg) & SEC_LINK_ONCE))
 	linkonce = TRUE;
       /* The GNU toolchain uses an extension for ELF: a section
 	 beginning with the magic string .gnu.linkonce is a
@@ -6180,7 +6178,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
     }
 
   new_seg = subseg_new (newname, (subsegT) 0);
-  bfd_set_section_flags (stdoutput, new_seg,
+  bfd_set_section_flags (new_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA);
   frag_align (length == 4 ? 2 : 3, 0, 0);
   if (strncmp (TARGET_OS, "elf", 3) != 0)
@@ -16128,7 +16126,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	       && fixP->fx_done
 	       && fixP->fx_frag->fr_address >= text_section->vma
 	       && (fixP->fx_frag->fr_address
-		   < text_section->vma + bfd_get_section_size (text_section))
+		   < text_section->vma + bfd_section_size (text_section))
 	       && ((insn & 0xffff0000) == 0x10000000	 /* beq $0,$0 */
 		   || (insn & 0xffff0000) == 0x04010000	 /* bgez $0 */
 		   || (insn & 0xffff0000) == 0x04110000)) /* bgezal $0 */
@@ -16319,9 +16317,8 @@ s_change_sec (int sec)
     case 'r':
       seg = subseg_new (RDATA_SECTION_NAME,
 			(subsegT) get_absolute_expression ());
-      bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
-					      | SEC_READONLY | SEC_RELOC
-					      | SEC_DATA));
+      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+				   | SEC_RELOC | SEC_DATA));
       if (strncmp (TARGET_OS, "elf", 3) != 0)
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
@@ -16329,7 +16326,7 @@ s_change_sec (int sec)
 
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (stdoutput, seg,
+      bfd_set_section_flags (seg,
 			     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
       if (strncmp (TARGET_OS, "elf", 3) != 0)
 	record_alignment (seg, 4);
@@ -16338,7 +16335,7 @@ s_change_sec (int sec)
 
     case 'B':
       seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (stdoutput, seg, SEC_ALLOC);
+      bfd_set_section_flags (seg, SEC_ALLOC);
       if (strncmp (TARGET_OS, "elf", 3) != 0)
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
@@ -17603,7 +17600,7 @@ tc_get_register (int frame)
 valueT
 md_section_align (asection *seg, valueT addr)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
 
   /* We don't need to align ELF sections to the full alignment.
      However, Irix 5 may prefer that we align them at least to a 16
@@ -19760,7 +19757,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   else
     p = NULL;
 
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) == 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) == 0)
     as_warn (_(".end not in text section"));
 
   if (!cur_proc_ptr)
@@ -19850,7 +19847,7 @@ s_mips_ent (int aent)
       || *input_line_pointer == '-')
     get_number ();
 
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) == 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) == 0)
     as_warn (_(".ent or .aent not in text section"));
 
   if (!aent && cur_proc_ptr)

@@ -226,7 +226,7 @@ COMMON subsegT now_subseg;
 /* Segment our instructions emit to.  */
 COMMON segT now_seg;
 
-#define segment_name(SEG)	bfd_get_section_name (stdoutput, SEG)
+#define segment_name(SEG)	bfd_section_name (SEG)
 
 extern segT reg_section, expr_section;
 /* Shouldn't these be eliminated someday?  */

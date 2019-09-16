@@ -3841,7 +3841,7 @@ do_nds32_seg (int i, subsegT sub)
       seg->s = subseg_new (seg->name, sub);
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	{
-	  bfd_set_section_flags (stdoutput, seg->s, seg->flags);
+	  bfd_set_section_flags (seg->s, seg->flags);
 	  if ((seg->flags & SEC_LOAD) == 0)
 	    seg_info (seg->s)->bss = 1;
 	}
@@ -6609,7 +6609,7 @@ md_operand (expressionS *expressionP)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
 
   return ((size + (1 << align) - 1) & ((valueT) -1 << align));
 }
@@ -7569,7 +7569,7 @@ nds32_set_section_relocs (asection *sec, arelent ** relocs ATTRIBUTE_UNUSED,
 			  unsigned int n ATTRIBUTE_UNUSED)
 {
   bfd *abfd ATTRIBUTE_UNUSED = sec->owner;
-  if (bfd_get_section_flags (abfd, sec) & (flagword) SEC_RELOC)
+  if (bfd_section_flags (sec) & (flagword) SEC_RELOC)
     nds32_insertion_sort (sec->orelocation, sec->reloc_count,
 			  sizeof (arelent**), compar_relent);
 }

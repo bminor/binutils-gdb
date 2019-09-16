@@ -127,9 +127,9 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   /* Create a property table section for it.  */
   prop_sec_name = strdup (prop_sec_name);
   prop_sec = bfd_make_section_with_flags
-    (abfd, prop_sec_name, bfd_get_section_flags (abfd, insn_sec));
+    (abfd, prop_sec_name, bfd_section_flags (insn_sec));
   if (prop_sec == NULL
-      || ! bfd_set_section_alignment (abfd, prop_sec, 2))
+      || !bfd_set_section_alignment (prop_sec, 2))
     {
       *error_message = _("could not create new section");
       goto cleanup;
@@ -247,7 +247,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
   char *owned_prop_sec_name = NULL;
   const char *sec_name;
 
-  sec_name = bfd_get_section_name (abfd, sec);
+  sec_name = bfd_section_name (sec);
   if (strcmp (sec_name, INSN_SEC_BASE_NAME) == 0)
     {
       insn_sec_name = INSN_SEC_BASE_NAME;
@@ -1293,10 +1293,10 @@ static bfd_boolean
 is_inconsistent_linkonce_section (asection *sec)
 {
   bfd *abfd = sec->owner;
-  const char *sec_name = bfd_get_section_name (abfd, sec);
+  const char *sec_name = bfd_section_name (sec);
   const char *name;
 
-  if ((bfd_get_section_flags (abfd, sec) & SEC_LINK_ONCE) == 0
+  if ((bfd_section_flags (sec) & SEC_LINK_ONCE) == 0
       || strncmp (sec_name, ".gnu.linkonce.", linkonce_len) != 0)
     return FALSE;
 

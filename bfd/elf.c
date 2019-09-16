@@ -547,7 +547,7 @@ bfd_elf_sym_name (bfd *abfd,
   if (name == NULL)
     name = "(null)";
   else if (sym_sec && *name == '\0')
-    name = bfd_section_name (abfd, sym_sec);
+    name = bfd_section_name (sym_sec);
 
   return name;
 }
@@ -1049,10 +1049,9 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   newsect->filepos = hdr->sh_offset;
 
-  if (! bfd_set_section_vma (abfd, newsect, hdr->sh_addr)
-      || ! bfd_set_section_size (abfd, newsect, hdr->sh_size)
-      || ! bfd_set_section_alignment (abfd, newsect,
-				      bfd_log2 (hdr->sh_addralign)))
+  if (!bfd_set_section_vma (newsect, hdr->sh_addr)
+      || !bfd_set_section_size (newsect, hdr->sh_size)
+      || !bfd_set_section_alignment (newsect, bfd_log2 (hdr->sh_addralign)))
     return FALSE;
 
   flags = SEC_NO_FLAGS;
@@ -1142,7 +1141,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     if (! bed->elf_backend_section_flags (&flags, hdr))
       return FALSE;
 
-  if (! bfd_set_section_flags (abfd, newsect, flags))
+  if (!bfd_set_section_flags (newsect, flags))
     return FALSE;
 
   /* We do not parse the PT_NOTE segments as we are interested even in the
@@ -1286,7 +1285,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	      char *new_name = convert_zdebug_to_debug (abfd, name);
 	      if (new_name == NULL)
 		return FALSE;
-	      bfd_rename_section (abfd, newsect, new_name);
+	      bfd_rename_section (newsect, new_name);
 	    }
 	}
       else
@@ -5542,7 +5541,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  unsigned int secalign;
 
-		  secalign = bfd_get_section_alignment (abfd, *secpp);
+		  secalign = bfd_section_alignment (*secpp);
 		  if (secalign > align_power)
 		    align_power = secalign;
 		}
@@ -5696,7 +5695,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	  sec = *secpp;
 	  this_hdr = &elf_section_data (sec)->this_hdr;
-	  align = (bfd_size_type) 1 << bfd_get_section_alignment (abfd, sec);
+	  align = (bfd_size_type) 1 << bfd_section_alignment (sec);
 
 	  if ((p->p_type == PT_LOAD
 	       || p->p_type == PT_TLS)
@@ -6835,8 +6834,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
        || (segment->p_paddr						\
 	   ? segment->p_paddr != section->lma				\
 	   : segment->p_vaddr != section->vma)				\
-       || (strcmp (bfd_get_section_name (ibfd, section), ".dynamic")	\
-	   == 0))							\
+       || (strcmp (bfd_section_name (section), ".dynamic") == 0))	\
    && (segment->p_type != PT_LOAD || !section->segment_mark))
 
 /* If the output section of a section in the input segment is NULL,
