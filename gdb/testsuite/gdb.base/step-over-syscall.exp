@@ -27,7 +27,7 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
     return -1
 }
 
-proc check_pc_after_cross_syscall { syscall syscall_insn_next_addr } {
+proc_with_prefix check_pc_after_cross_syscall { syscall syscall_insn_next_addr } {
     set syscall_insn_next_addr_found [get_hexadecimal_valueof "\$pc" "0"]
 
     set test "single step over $syscall final pc"
@@ -59,7 +59,8 @@ proc setup { syscall } {
     # Delete the breakpoint on main.
     gdb_test_no_output "delete break 1"
 
-    gdb_test_no_output "set displaced-stepping off"
+    gdb_test_no_output "set displaced-stepping off" \
+	"set displaced-stepping off during test setup"
 
     gdb_test "break $syscall" "Breakpoint \[0-9\]* at .*"
 
@@ -100,11 +101,13 @@ proc setup { syscall } {
 	return { -1, -1 }
     }
 
-    set syscall_insn_addr [get_hexadecimal_valueof "\$pc" "0"]
+    set syscall_insn_addr [get_hexadecimal_valueof "\$pc" "0" \
+			       "pc before stepi"]
     if {[gdb_test "stepi" "x/i .*=>.*" "stepi $syscall insn"] != 0} {
 	return { -1, -1 }
     }
-    return [list $syscall_insn_addr [get_hexadecimal_valueof "\$pc" "0"]]
+    return [list $syscall_insn_addr [get_hexadecimal_valueof "\$pc" \
+					 "0" "pc after stepi"]]
 }
 
 proc step_over_syscall { syscall } {

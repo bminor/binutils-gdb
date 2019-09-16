@@ -71,9 +71,11 @@ proc start_scalars_test { type } {
     gdb_load ${binfile}
 
     # Make certain that the output is consistent
-    gdb_test_no_output "set print sevenbit-strings"
-    gdb_test_no_output "set print address off"
-    gdb_test_no_output "set width 0"
+    with_test_prefix "testfile=$testfile" {
+	gdb_test_no_output "set print sevenbit-strings"
+	gdb_test_no_output "set print address off"
+	gdb_test_no_output "set width 0"
+    }
 
     # Advance to main
     if { ![runto_main] } then {
@@ -243,7 +245,7 @@ proc test_scalar_returns { } {
     #
     # This happens on ppc64 GNU/Linux with gcc 3.4.1 and a buggy GDB
 
-    set test "return foo; synchronize pc to main()"
+    set test "return foo; synchronize pc to main() for '${testfile}'"
     for {set loop_count 0} {$loop_count < 2} {incr loop_count} {
       gdb_test_multiple "backtrace 1" $test {
         -re "#0.*main \\(\\).*${gdb_prompt} $" {

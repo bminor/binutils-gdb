@@ -1,5 +1,17 @@
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/break-interp.exp: Reduce test name duplication.
+	* gdb.base/call-sc.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/charset.exp: Likewise.
+	* gdb.base/dump.exp: Likewise.
+	* gdb.base/ena-dis-br.exp: Likewise.
+	* gdb.base/relational.exp: Likewise.
+	* gdb.base/step-over-syscall.exp: Likewise.
+	* gdb.base/structs.exp: Likewise.
+
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.linespec/explicit.exp: Make test names unique.
 	* gdb.linespec/ls-errs.exp: Likewise.
 

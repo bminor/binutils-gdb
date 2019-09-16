@@ -82,10 +82,12 @@ proc start_structs_test { types } {
     gdb_load ${binfile}
 
     # Make certain that the output is consistent
-    gdb_test_no_output "set print sevenbit-strings"
-    gdb_test_no_output "set print address off"
-    gdb_test_no_output "set width 0"
-    gdb_test_no_output "set print elements 300"
+    with_test_prefix "types=$types" {
+	gdb_test_no_output "set print sevenbit-strings"
+	gdb_test_no_output "set print address off"
+	gdb_test_no_output "set width 0"
+	gdb_test_no_output "set print elements 300"
+    }
 
     # Advance to main
     if { ![runto_main] } then {

@@ -191,8 +191,16 @@ proc reach_1 {func command displacement} {
 # DISPLACEMENT can be "NONE" for no message to be present, "ZERO" for
 # displacement of 0 bytes to be present, "NONZERO" for displacement of non-0
 # bytes to be present and "PRESENT" if both "ZERO" and "NONZERO" are valid.
-proc reach {func command displacement} {
-    with_test_prefix "reach-$func" {
+#
+# The optional ITERATION parameter is used in order to make unique
+# test prefixes, when calling this proc with the same FUNC name
+# provide a unique ITERATION value for each call.
+proc reach {func command displacement {iteration 1}} {
+    set prefix "reach-$func"
+    if { $iteration > 1 } {
+	set prefix "$prefix-$iteration"
+    }
+    with_test_prefix $prefix {
 	reach_1 $func $command $displacement
     }
 }
@@ -399,7 +407,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	    "set args OBJDIR/${subdir}/$binfile_test"
     }
 
-    reach $solib_bp "run" $displacement
+    reach $solib_bp "run" $displacement 1
 
     gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?$solib_bp\\M.*" "dl bt"
 
@@ -413,7 +421,7 @@ proc test_ld {file ifmain trynosym displacement} {
 
     # Try re-run if the new PIE displacement takes effect.
     gdb_test "kill" "" "kill" {Kill the program being debugged\? \(y or n\) } "y"
-    reach $solib_bp "run" $displacement
+    reach $solib_bp "run" $displacement 2
 
     if $ifmain {
 	test_core $file $displacement
@@ -445,7 +453,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	gdb_test "exec-file $file" "exec-file $escapedfile" "load"
 
 	if $ifmain {
-	    reach $solib_bp run $displacement
+	    reach $solib_bp run $displacement 3
 
 	    # Use two separate gdb_test_multiple statements to avoid timeouts due
 	    # to slow processing of wildcard capturing long output
@@ -594,9 +602,10 @@ foreach ldprelink {NO YES} {
 		file delete "${interp}.debug"
 	    }
 
-	    if ![prelink$ldprelink $interp] {
+	    if ![prelink$ldprelink $interp "$interp, second time"] {
 		continue
 	    }
+
 	    if {$ldprelink == "NO"} {
 		set displacement "NONZERO"
 	    } else {
@@ -662,33 +671,38 @@ foreach ldprelink {NO YES} {
 
 			    if {[prelink$binprelink $relink_args [file tail $exec]]
 				&& [file_copy $interp_saved $interp]} {
-				if {$binpie != "ATTACH"} {
-				    test_ld $exec 1 [expr {$binsepdebug == "NO"}] $displacement
-				} else {
-				    # If the file has been randomly prelinked it must be
-				    # "NONZERO".  We could see "ZERO" only if it was unprelinked
-				    # and it is now running at the same address - which is 0 but
-				    # executable can never run at address 0.
+				# In order to make test names unique wrap the core of this if block
+				# with a test prefix.  Some of the tests performed in the if
+				# condition are repeated within this body.
+				with_test_prefix "INNER" {
+				    if {$binpie != "ATTACH"} {
+					test_ld $exec 1 [expr {$binsepdebug == "NO"}] $displacement
+				    } else {
+					# If the file has been randomly prelinked it must be
+					# "NONZERO".  We could see "ZERO" only if it was unprelinked
+					# and it is now running at the same address - which is 0 but
+					# executable can never run at address 0.
 
-				    set displacement "NONZERO"
-				    test_attach $exec $displacement $relink_args
+					set displacement "NONZERO"
+					test_attach $exec $displacement $relink_args
 
-				    # ATTACH means that executables and libraries have been
-				    # modified after they have been run.  They cannot be reused
-				    # for problem reproducibility after the testcase ends in
-				    # the ATTACH case.  Therefore they are rather deleted not
-				    # to confuse after the run finishes.
-				    set exec_debug [system_debug_get $exec]
-				    if {$exec_debug != ""} {
-					# `file delete [glob "${exec_debug}*"]' does not work.
-					foreach f [glob "${exec_debug}*"] {
+					# ATTACH means that executables and libraries have been
+					# modified after they have been run.  They cannot be reused
+					# for problem reproducibility after the testcase ends in
+					# the ATTACH case.  Therefore they are rather deleted not
+					# to confuse after the run finishes.
+					set exec_debug [system_debug_get $exec]
+					if {$exec_debug != ""} {
+					    # `file delete [glob "${exec_debug}*"]' does not work.
+					    foreach f [glob "${exec_debug}*"] {
+						file delete $f
+					    }
+					}
+					file delete -force $dir
+					# `file delete [glob "${exec}*"]' does not work.
+					foreach f [glob "${exec}*"] {
 					    file delete $f
 					}
-				    }
-				    file delete -force $dir
-				    # `file delete [glob "${exec}*"]' does not work.
-				    foreach f [glob "${exec}*"] {
-					file delete $f
 				    }
 				}
 			    }

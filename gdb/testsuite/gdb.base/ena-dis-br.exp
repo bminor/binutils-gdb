@@ -60,7 +60,7 @@ gdb_test_no_output "enable $bp" "enable break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y.*" \
-    "info break marker1"
+    "info break marker1 before hitting breakpoint"
 
 # See the comments in condbreak.exp for "run until breakpoint at
 # marker1" for an explanation of the xfail below.
@@ -84,7 +84,7 @@ gdb_test_no_output "enable once $bp" "enable once break marker2"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+dis\[ \t\]+y.*" \
-    "info auto-disabled break marker2"
+    "info auto-disabled break marker2 before hitting breakpoint"
 
 # See the comments in condbreak.exp for "run until breakpoint at
 # marker1" for an explanation of the xfail below.
@@ -100,7 +100,7 @@ gdb_test_multiple "continue" "$test" {
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+dis\[ \t\]+n.*" \
-    "info auto-disabled break marker2"
+    "info auto-disabled break marker2 after hitting breakpoint"
 
 # Verify that we don't stop at a disabled breakpoint.
 gdb_continue_to_end "no stop"
@@ -209,7 +209,7 @@ gdb_test "ignore $bp 0" \
 
 gdb_test "ignore $bp 1" \
     "Will ignore next crossing of breakpoint \[0-9\]*.*" \
-    "ignore break marker1"
+    "ignore break marker1 1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y.*ignore next 1 hits.*" \
@@ -246,7 +246,7 @@ gdb_test_no_output "enable del $bp" "enable del break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+del\[ \t\]+y.*ignore next 1 hits.*" \
-    "info break marker1"
+    "info break marker1 after hitting breakpoint"
 
 gdb_continue_to_end "no stop at ignored & auto-deleted break marker1"
 rerun_to_main
@@ -266,7 +266,7 @@ set bp [break_at marker1 " line $bp_location15"]
 
 gdb_test "ignore $bp 10" \
     "Will ignore next 10 crossings of breakpoint \[0-9\]*.*" \
-    "ignore break marker1"
+    "ignore break marker1 10"
 
 gdb_test_no_output "disable $bp" "disable break marker1"
 
