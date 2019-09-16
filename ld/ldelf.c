@@ -22,6 +22,7 @@
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
+#include "safe-ctype.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"
