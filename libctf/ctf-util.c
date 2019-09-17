@@ -103,7 +103,7 @@ ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst)
   return dst;
 }
 
-/* A string appender working on dynamic strings.  */
+/* A string appender working on dynamic strings.  Returns NULL on OOM.  */
 
 char *
 ctf_str_append (char *s, const char *append)
@@ -125,6 +125,19 @@ ctf_str_append (char *s, const char *append)
   s[s_len + append_len] = '\0';
 
   return s;
+}
+
+/* A version of ctf_str_append that returns the old string on OOM.  */
+
+char *
+ctf_str_append_noerr (char *s, const char *append)
+{
+  char *new_s;
+
+  new_s = ctf_str_append (s, append);
+  if (!new_s)
+    return s;
+  return new_s;
 }
 
 /* A realloc() that fails noisily if called with any ctf_str_num_users.  */

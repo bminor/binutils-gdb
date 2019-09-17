@@ -1,5 +1,20 @@
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_str_append_noerr): Declare.
+	* ctf-util.c (ctf_str_append_noerr): Define in terms of
+	ctf_str_append.
+	* ctf-dump.c (str_append): New, call it.
+	(ctf_dump_format_type): Use str_append, not ctf_str_append.
+	(ctf_dump_label): Likewise.
+	(ctf_dump_objts): Likewise.
+	(ctf_dump_funcs): Likewise.
+	(ctf_dump_var): Likewise.
+	(ctf_dump_member): Likewise.
+	(ctf_dump_type): Likewise.
+	(ctf_dump): Likewise.
+
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_alloc): Remove.
 	(ctf_free): Likewise.
 	(ctf_strdup): Likewise.
