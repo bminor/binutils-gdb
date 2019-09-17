@@ -457,6 +457,7 @@ extern ssize_t ctf_pread (int fd, void *buf, ssize_t count, off_t offset);
 
 extern void *ctf_realloc (ctf_file_t *, void *, size_t);
 extern char *ctf_str_append (char *, const char *);
+extern char *ctf_str_append_noerr (char *, const char *);
 extern const char *ctf_strerror (int);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_file_t *, ctf_id_t);
