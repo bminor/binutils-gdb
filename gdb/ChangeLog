@@ -12,6 +12,7 @@
 
 2019-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	PR breakpoints/24541
 	* stap-probe.c (stap_parse_register_operand): Make "regname" an
 	"std::string", simplifying the algorithm.
 
