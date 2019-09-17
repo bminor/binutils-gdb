@@ -103,19 +103,6 @@ ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst)
   return dst;
 }
 
-/* Same as strdup(3C), but use ctf_alloc() to do the memory allocation. */
-
-_libctf_malloc_ char *
-ctf_strdup (const char *s1)
-{
-  char *s2 = ctf_alloc (strlen (s1) + 1);
-
-  if (s2 != NULL)
-    (void) strcpy (s2, s1);
-
-  return s2;
-}
-
 /* A string appender working on dynamic strings.  */
 
 char *

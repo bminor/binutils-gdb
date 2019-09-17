@@ -479,7 +479,7 @@ ctf_serialize (ctf_file_t *fp)
 
   if (strtab.cts_strs == NULL)
     {
-      ctf_free (buf);
+      free (buf);
       return (ctf_set_errno (fp, EAGAIN));
     }
 
@@ -491,8 +491,8 @@ ctf_serialize (ctf_file_t *fp)
 
   if ((newbuf = ctf_realloc (fp, buf, buf_size + strtab.cts_len)) == NULL)
     {
-      ctf_free (buf);
-      ctf_free (strtab.cts_strs);
+      free (buf);
+      free (strtab.cts_strs);
       return (ctf_set_errno (fp, EAGAIN));
     }
   buf = newbuf;
@@ -500,7 +500,7 @@ ctf_serialize (ctf_file_t *fp)
   hdrp = (ctf_header_t *) buf;
   hdrp->cth_strlen = strtab.cts_len;
   buf_size += hdrp->cth_strlen;
-  ctf_free (strtab.cts_strs);
+  free (strtab.cts_strs);
 
   /* Finally, we are ready to ctf_simple_open() the new container.  If this
      is successful, we then switch nfp and fp and free the old container.  */
@@ -509,7 +509,7 @@ ctf_serialize (ctf_file_t *fp)
 				       0, NULL, 0, fp->ctf_syn_ext_strtab,
 				       1, &err)) == NULL)
     {
-      ctf_free (buf);
+      free (buf);
       return (ctf_set_errno (fp, err));
     }
 
@@ -635,13 +635,13 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
 	   dmd != NULL; dmd = nmd)
 	{
 	  if (dmd->dmd_name != NULL)
-	      ctf_free (dmd->dmd_name);
+	      free (dmd->dmd_name);
 	  nmd = ctf_list_next (dmd);
-	  ctf_free (dmd);
+	  free (dmd);
 	}
       break;
     case CTF_K_FUNCTION:
-      ctf_free (dtd->dtd_u.dtu_argv);
+      free (dtd->dtd_u.dtu_argv);
       break;
     }
 
@@ -654,7 +654,7 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
     }
 
   ctf_list_delete (&fp->ctf_dtdefs, dtd);
-  ctf_free (dtd);
+  free (dtd);
 }
 
 ctf_dtdef_t *
@@ -694,10 +694,10 @@ void
 ctf_dvd_delete (ctf_file_t *fp, ctf_dvdef_t *dvd)
 {
   ctf_dynhash_remove (fp->ctf_dvhash, dvd->dvd_name);
-  ctf_free (dvd->dvd_name);
+  free (dvd->dvd_name);
 
   ctf_list_delete (&fp->ctf_dvdefs, dvd);
-  ctf_free (dvd);
+  free (dvd);
 }
 
 ctf_dvdef_t *
@@ -815,7 +815,7 @@ ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name, int kind,
   if (ctf_grow_ptrtab (fp) < 0)
       return CTF_ERR;		/* errno is set for us. */
 
-  if ((dtd = ctf_alloc (sizeof (ctf_dtdef_t))) == NULL)
+  if ((dtd = malloc (sizeof (ctf_dtdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
   type = ++fp->ctf_typemax;
@@ -827,13 +827,13 @@ ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name, int kind,
 
   if (dtd->dtd_data.ctt_name == 0 && name != NULL && name[0] != '\0')
     {
-      ctf_free (dtd);
+      free (dtd);
       return (ctf_set_errno (fp, EAGAIN));
     }
 
   if (ctf_dtd_insert (fp, dtd, kind) < 0)
     {
-      ctf_free (dtd);
+      free (dtd);
       return CTF_ERR;			/* errno is set for us.  */
     }
   fp->ctf_flags |= LCTF_DIRTY;
@@ -1066,13 +1066,13 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
   if (vlen > CTF_MAX_VLEN)
     return (ctf_set_errno (fp, EOVERFLOW));
 
-  if (vlen != 0 && (vdat = ctf_alloc (sizeof (ctf_id_t) * vlen)) == NULL)
+  if (vlen != 0 && (vdat = malloc (sizeof (ctf_id_t) * vlen)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
 			       &dtd)) == CTF_ERR)
     {
-      ctf_free (vdat);
+      free (vdat);
       return CTF_ERR;		   /* errno is set for us.  */
     }
 
@@ -1315,12 +1315,12 @@ ctf_add_enumerator (ctf_file_t *fp, ctf_id_t enid, const char *name,
 	return (ctf_set_errno (fp, ECTF_DUPLICATE));
     }
 
-  if ((dmd = ctf_alloc (sizeof (ctf_dmdef_t))) == NULL)
+  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
-  if ((s = ctf_strdup (name)) == NULL)
+  if ((s = strdup (name)) == NULL)
     {
-      ctf_free (dmd);
+      free (dmd);
       return (ctf_set_errno (fp, EAGAIN));
     }
 
@@ -1378,12 +1378,12 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
       (malign = ctf_type_align (fp, type)) < 0)
     return -1;			/* errno is set for us.  */
 
-  if ((dmd = ctf_alloc (sizeof (ctf_dmdef_t))) == NULL)
+  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
-  if (name != NULL && (s = ctf_strdup (name)) == NULL)
+  if (name != NULL && (s = strdup (name)) == NULL)
     {
-      ctf_free (dmd);
+      free (dmd);
       return (ctf_set_errno (fp, EAGAIN));
     }
 
@@ -1500,12 +1500,12 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
       && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
     return -1;
 
-  if ((dvd = ctf_alloc (sizeof (ctf_dvdef_t))) == NULL)
+  if ((dvd = malloc (sizeof (ctf_dvdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
-  if (name != NULL && (dvd->dvd_name = ctf_strdup (name)) == NULL)
+  if (name != NULL && (dvd->dvd_name = strdup (name)) == NULL)
     {
-      ctf_free (dvd);
+      free (dvd);
       return (ctf_set_errno (fp, EAGAIN));
     }
   dvd->dvd_type = ref;
@@ -1513,7 +1513,8 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
 
   if (ctf_dvd_insert (fp, dvd) < 0)
     {
-      ctf_free (dvd);
+      free (dvd->dvd_name);
+      free (dvd);
       return -1;			/* errno is set for us.  */
     }
 
@@ -1580,12 +1581,12 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
   ctf_dmdef_t *dmd;
   char *s = NULL;
 
-  if ((dmd = ctf_alloc (sizeof (ctf_dmdef_t))) == NULL)
+  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (ctb->ctb_file, EAGAIN));
 
-  if (name != NULL && (s = ctf_strdup (name)) == NULL)
+  if (name != NULL && (s = strdup (name)) == NULL)
     {
-      ctf_free (dmd);
+      free (dmd);
       return (ctf_set_errno (ctb->ctb_file, EAGAIN));
     }
 
@@ -2115,7 +2116,7 @@ ctf_compress_write (ctf_file_t *fp, int fd)
   hp->cth_flags |= CTF_F_COMPRESS;
   compress_len = compressBound (fp->ctf_size);
 
-  if ((buf = ctf_alloc (compress_len)) == NULL)
+  if ((buf = malloc (compress_len)) == NULL)
     return (ctf_set_errno (fp, ECTF_ZALLOC));
 
   if ((rc = compress (buf, (uLongf *) &compress_len,
@@ -2150,7 +2151,7 @@ ctf_compress_write (ctf_file_t *fp, int fd)
     }
 
 ret:
-  ctf_free (buf);
+  free (buf);
   return err;
 }
 
@@ -2198,7 +2199,7 @@ ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
 	{
 	  ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
 	  ctf_set_errno (fp, ECTF_COMPRESS);
-	  ctf_free (buf);
+	  free (buf);
 	  return NULL;
 	}
       *size += compress_len;
