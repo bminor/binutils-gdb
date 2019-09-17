@@ -1,6 +1,22 @@
 2019-10-01  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (print_symbol_info): Use %ps.
+	(print_msymbol_info): Use %ps.
+	* symfile.c (symbol_file_add_with_addrs): Use %ps.
+	* printcmd.c (print_variable_and_value): Use %ps.
+	* macrocmd.c (show_pp_source_pos): Use %ps.
+	* infrun.c (print_exited_reason): Use ui_out::message.
+	* breakpoint.c (watchpoint_check, print_one_breakpoint_location)
+	(describe_other_breakpoints): Use ui_out::message and new
+	formats.
+	(say_where): Use new formats.
+	(bkpt_print_it, tracepoint_print_one_detail): Use ui_out::message
+	and new formats.
+
+2019-10-01  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
 	* unittests/format_pieces-selftests.c: Add gdb_format parameter.
 	(test_gdb_formats): New function.
 	(run_tests): Call it.

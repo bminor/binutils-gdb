@@ -7656,24 +7656,19 @@ print_exited_reason (struct ui_out *uiout, int exitstatus)
     {
       if (uiout->is_mi_like_p ())
 	uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_EXITED));
-      uiout->text ("[Inferior ");
-      uiout->text (plongest (inf->num));
-      uiout->text (" (");
-      uiout->text (pidstr.c_str ());
-      uiout->text (") exited with code ");
-      uiout->field_fmt ("exit-code", "0%o", (unsigned int) exitstatus);
-      uiout->text ("]\n");
+      std::string exit_code_str
+	= string_printf ("0%o", (unsigned int) exitstatus);
+      uiout->message ("[Inferior %s (%s) exited with code %pF]\n",
+		      plongest (inf->num), pidstr.c_str (),
+		      string_field ("exit-code", exit_code_str.c_str ()));
     }
   else
     {
       if (uiout->is_mi_like_p ())
 	uiout->field_string
 	  ("reason", async_reason_lookup (EXEC_ASYNC_EXITED_NORMALLY));
-      uiout->text ("[Inferior ");
-      uiout->text (plongest (inf->num));
-      uiout->text (" (");
-      uiout->text (pidstr.c_str ());
-      uiout->text (") exited normally]\n");
+      uiout->message ("[Inferior %s (%s) exited normally]\n",
+		      plongest (inf->num), pidstr.c_str ());
     }
 }
 

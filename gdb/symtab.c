@@ -4748,9 +4748,9 @@ print_symbol_info (enum search_domain kind,
 
       if (filename_cmp (last, s_filename) != 0)
 	{
-	  fputs_filtered ("\nFile ", gdb_stdout);
-	  fputs_styled (s_filename, file_name_style.style (), gdb_stdout);
-	  fputs_filtered (":\n", gdb_stdout);
+	  printf_filtered (_("\nFile %ps:\n"),
+			   styled_string (file_name_style.style (),
+					  s_filename));
 	}
 
       if (SYMBOL_LINE (sym) != 0)
@@ -4812,15 +4812,15 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
   else
     tmp = hex_string_custom (BMSYMBOL_VALUE_ADDRESS (msymbol),
 			     16);
-  fputs_styled (tmp, address_style.style (), gdb_stdout);
-  fputs_filtered ("  ", gdb_stdout);
-  if (msymbol.minsym->text_p ())
-    fputs_styled (MSYMBOL_PRINT_NAME (msymbol.minsym),
-		  function_name_style.style (),
-		  gdb_stdout);
-  else
-    fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), gdb_stdout);
-  fputs_filtered ("\n", gdb_stdout);
+
+  ui_file_style sym_style = (msymbol.minsym->text_p ()
+			     ? function_name_style.style ()
+			     : ui_file_style ());
+
+  printf_filtered (_("%ps  %ps\n"),
+		   styled_string (address_style.style (), tmp),
+		   styled_string (sym_style,
+				  MSYMBOL_PRINT_NAME (msymbol.minsym)));
 }
 
 /* This is the guts of the commands "info functions", "info types", and

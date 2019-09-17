@@ -4912,10 +4912,10 @@ watchpoint_check (bpstat bs)
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string
 	      ("reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
-	  uiout->text ("\nWatchpoint ");
-	  uiout->field_signed ("wpnum", b->number);
-	  uiout->text (" deleted because the program has left the block in\n"
-		       "which its expression is valid.\n");
+	  uiout->message ("\nWatchpoint %pF deleted because the program has "
+			  "left the block in\n"
+			  "which its expression is valid.\n",
+			  signed_field ("wpnum", b->number));
 	}
 
       /* Make sure the watchpoint's commands aren't executed.  */
@@ -6141,10 +6141,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  && breakpoint_condition_evaluation_mode ()
 	  == condition_evaluation_target)
 	{
-	  uiout->text (" (");
-	  uiout->field_string ("evaluated-by",
-			       bp_condition_evaluator (b));
-	  uiout->text (" evals)");
+	  uiout->message (" (%pF evals)",
+			  string_field ("evaluated-by",
+					bp_condition_evaluator (b)));
 	}
       uiout->text ("\n");
     }
@@ -6193,9 +6192,8 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (!part_of_multiple && b->ignore_count)
     {
       annotate_field (8);
-      uiout->text ("\tignore next ");
-      uiout->field_signed ("ignore", b->ignore_count);
-      uiout->text (" hits\n");
+      uiout->message ("\tignore next %pF hits\n",
+		      signed_field ("ignore", b->ignore_count));
     }
 
   /* Note that an enable count of 1 corresponds to "enable once"
@@ -6658,9 +6656,9 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 			     (others > 1) ? "," 
 			     : ((others == 1) ? " and" : ""));
 	  }
-      printf_filtered (_("also set at pc "));
-      fputs_styled (paddress (gdbarch, pc), address_style.style (), gdb_stdout);
-      printf_filtered (".\n");
+      current_uiout->message (_("also set at pc %ps.\n"),
+			      styled_string (address_style.style (),
+					     paddress (gdbarch, pc)));
     }
 }
 
@@ -12075,23 +12073,21 @@ say_where (struct breakpoint *b)
   else
     {
       if (opts.addressprint || b->loc->symtab == NULL)
-	{
-	  printf_filtered (" at ");
-	  fputs_styled (paddress (b->loc->gdbarch, b->loc->address),
-			address_style.style (),
-			gdb_stdout);
-	}
+	printf_filtered (" at %ps",
+			 styled_string (address_style.style (),
+					paddress (b->loc->gdbarch,
+						  b->loc->address)));
       if (b->loc->symtab != NULL)
 	{
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
 	  if (b->loc->next == NULL)
 	    {
-	      puts_filtered (": file ");
-	      fputs_styled (symtab_to_filename_for_display (b->loc->symtab),
-			    file_name_style.style (),
-			    gdb_stdout);
-	      printf_filtered (", line %d.",
+	      const char *filename
+		= symtab_to_filename_for_display (b->loc->symtab);
+	      printf_filtered (": file %ps, line %d.",
+			       styled_string (file_name_style.style (),
+					      filename),
 			       b->loc->line_number);
 	    }
 	  else
@@ -12389,18 +12385,18 @@ bkpt_print_it (bpstat bs)
   annotate_breakpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
-  if (bp_temp)
-    uiout->text ("Temporary breakpoint ");
-  else
-    uiout->text ("Breakpoint ");
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
-  uiout->field_signed ("bkptno", b->number);
-  uiout->text (", ");
+  if (bp_temp)
+    uiout->message ("Temporary breakpoint %pF, ",
+		    signed_field ("bkptno", b->number));
+  else
+    uiout->message ("Breakpoint %pF, ",
+		    signed_field ("bkptno", b->number));
 
   return PRINT_SRC_AND_LOC;
 }
@@ -12716,10 +12712,9 @@ tracepoint_print_one_detail (const struct breakpoint *self,
     {
       gdb_assert (self->type == bp_static_tracepoint);
 
-      uiout->text ("\tmarker id is ");
-      uiout->field_string ("static-tracepoint-marker-string-id",
-			   tp->static_trace_marker_id);
-      uiout->text ("\n");
+      uiout->message ("\tmarker id is %pF\n",
+		      string_field ("static-tracepoint-marker-string-id",
+				    tp->static_trace_marker_id.c_str ()));
     }
 }
 
