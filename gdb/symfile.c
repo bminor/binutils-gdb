@@ -141,15 +141,7 @@ static const char *print_symbol_loading_enums[] =
 };
 static const char *print_symbol_loading = print_symbol_loading_full;
 
-/* If non-zero, shared library symbols will be added automatically
-   when the inferior is created, new libraries are loaded, or when
-   attaching to the inferior.  This is almost always what users will
-   want to have happen; but for very large programs, the startup time
-   will be excessive, and so if this is a problem, the user can clear
-   this flag and then add the shared library symbols as needed.  Note
-   that there is a potential for confusion, since if the shared
-   library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present.  */
+/* See symfile.h.  */
 
 int auto_solib_add = 1;
 
