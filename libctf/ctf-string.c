@@ -82,7 +82,7 @@ ctf_str_purge_atom_refs (ctf_str_atom_t *atom)
     {
       next = ctf_list_next (ref);
       ctf_list_delete (&atom->csa_refs, ref);
-      ctf_free (ref);
+      free (ref);
     }
 }
 
@@ -93,7 +93,7 @@ ctf_str_free_atom (void *a)
   ctf_str_atom_t *atom = a;
 
   ctf_str_purge_atom_refs (atom);
-  ctf_free (atom);
+  free (atom);
 }
 
 /* Create the atoms table.  There is always at least one atom in it, the null
@@ -102,7 +102,7 @@ int
 ctf_str_create_atoms (ctf_file_t *fp)
 {
   fp->ctf_str_atoms = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-					  ctf_free, ctf_str_free_atom);
+					  free, ctf_str_free_atom);
   if (fp->ctf_str_atoms == NULL)
     return -ENOMEM;
 
@@ -154,7 +154,7 @@ ctf_str_add_ref_internal (ctf_file_t *fp, const char *str,
 
   if (add_ref)
     {
-      if ((aref = ctf_alloc (sizeof (struct ctf_str_atom_ref))) == NULL)
+      if ((aref = malloc (sizeof (struct ctf_str_atom_ref))) == NULL)
 	return NULL;
       aref->caf_ref = ref;
     }
@@ -169,11 +169,11 @@ ctf_str_add_ref_internal (ctf_file_t *fp, const char *str,
       return atom;
     }
 
-  if ((atom = ctf_alloc (sizeof (struct ctf_str_atom))) == NULL)
+  if ((atom = malloc (sizeof (struct ctf_str_atom))) == NULL)
     goto oom;
   memset (atom, 0, sizeof (struct ctf_str_atom));
 
-  if ((newstr = ctf_strdup (str)) == NULL)
+  if ((newstr = strdup (str)) == NULL)
     goto oom;
 
   if (ctf_dynhash_insert (fp->ctf_str_atoms, newstr, atom) < 0)
@@ -203,9 +203,9 @@ ctf_str_add_ref_internal (ctf_file_t *fp, const char *str,
  oom:
   if (newstr)
     ctf_dynhash_remove (fp->ctf_str_atoms, newstr);
-  ctf_free (atom);
-  ctf_free (aref);
-  ctf_free (newstr);
+  free (atom);
+  free (aref);
+  free (newstr);
   return NULL;
 }
 
@@ -279,7 +279,7 @@ ctf_str_remove_ref (ctf_file_t *fp, const char *str, uint32_t *ref)
       if (aref->caf_ref == ref)
 	{
 	  ctf_list_delete (&atom->csa_refs, aref);
-	  ctf_free (aref);
+	  free (aref);
 	}
     }
 }
@@ -452,7 +452,7 @@ ctf_str_write_strtab (ctf_file_t *fp)
   qsort (&sorttab[1], s.strtab_count - 1, sizeof (ctf_str_atom_t *),
 	 ctf_str_sort_strtab);
 
-  if ((strtab.cts_strs = ctf_alloc (strtab.cts_len)) == NULL)
+  if ((strtab.cts_strs = malloc (strtab.cts_len)) == NULL)
     goto oom_sorttab;
 
   if (!fp->ctf_syn_ext_strtab)

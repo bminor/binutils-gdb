@@ -446,7 +446,7 @@ upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
      number unchanged, so that LCTF_INFO_* still works on the
      as-yet-untranslated type info.  */
 
-  if ((ctf_base = ctf_alloc (fp->ctf_size + increase)) == NULL)
+  if ((ctf_base = malloc (fp->ctf_size + increase)) == NULL)
     return ECTF_ZALLOC;
 
   /* Start at ctf_buf, not ctf_base, to squeeze out the original header: we
@@ -613,7 +613,7 @@ upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
   assert ((size_t) t2p - (size_t) fp->ctf_buf == cth->cth_stroff);
 
   ctf_set_version (fp, cth, CTF_VERSION_1_UPGRADED_3);
-  ctf_free (old_ctf_base);
+  free (old_ctf_base);
 
   return 0;
 }
@@ -746,9 +746,9 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 			  ctf_hash_eq_string)) == NULL)
     return ENOMEM;
 
-  fp->ctf_txlate = ctf_alloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
+  fp->ctf_txlate = malloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
   fp->ctf_ptrtab_len = fp->ctf_typemax + 1;
-  fp->ctf_ptrtab = ctf_alloc (sizeof (uint32_t) * fp->ctf_ptrtab_len);
+  fp->ctf_ptrtab = malloc (sizeof (uint32_t) * fp->ctf_ptrtab_len);
 
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
@@ -1370,7 +1370,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
 
-  if ((fp = ctf_alloc (sizeof (ctf_file_t))) == NULL)
+  if ((fp = malloc (sizeof (ctf_file_t))) == NULL)
     return (ctf_set_open_errno (errp, ENOMEM));
 
   memset (fp, 0, sizeof (ctf_file_t));
@@ -1378,9 +1378,9 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (writable)
     fp->ctf_flags |= LCTF_RDWR;
 
-  if ((fp->ctf_header = ctf_alloc (sizeof (struct ctf_header))) == NULL)
+  if ((fp->ctf_header = malloc (sizeof (struct ctf_header))) == NULL)
     {
-      ctf_free (fp);
+      free (fp);
       return (ctf_set_open_errno (errp, ENOMEM));
     }
   hp = fp->ctf_header;
@@ -1435,7 +1435,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       /* We are allocating this ourselves, so we can drop the ctf header
 	 copy in favour of ctf->ctf_header.  */
 
-      if ((fp->ctf_base = ctf_alloc (fp->ctf_size)) == NULL)
+      if ((fp->ctf_base = malloc (fp->ctf_size)) == NULL)
 	{
 	  err = ECTF_ZALLOC;
 	  goto bad;
@@ -1466,7 +1466,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
   else if (foreign_endian)
     {
-      if ((fp->ctf_base = ctf_alloc (fp->ctf_size)) == NULL)
+      if ((fp->ctf_base = malloc (fp->ctf_size)) == NULL)
 	{
 	  err = ECTF_ZALLOC;
 	  goto bad;
@@ -1506,11 +1506,23 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (fp->ctf_data.cts_name != NULL)
-    fp->ctf_data.cts_name = ctf_strdup (fp->ctf_data.cts_name);
+    if ((fp->ctf_data.cts_name = strdup (fp->ctf_data.cts_name)) == NULL)
+      {
+	err = ENOMEM;
+	goto bad;
+      }
   if (fp->ctf_symtab.cts_name != NULL)
-    fp->ctf_symtab.cts_name = ctf_strdup (fp->ctf_symtab.cts_name);
+    if ((fp->ctf_symtab.cts_name = strdup (fp->ctf_symtab.cts_name)) == NULL)
+      {
+	err = ENOMEM;
+	goto bad;
+      }
   if (fp->ctf_strtab.cts_name != NULL)
-    fp->ctf_strtab.cts_name = ctf_strdup (fp->ctf_strtab.cts_name);
+    if ((fp->ctf_strtab.cts_name = strdup (fp->ctf_strtab.cts_name)) == NULL)
+      {
+	err = ENOMEM;
+	goto bad;
+      }
 
   if (fp->ctf_data.cts_name == NULL)
     fp->ctf_data.cts_name = _CTF_NULLSTR;
@@ -1558,7 +1570,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (symsect != NULL)
     {
       fp->ctf_nsyms = symsect->cts_size / symsect->cts_entsize;
-      fp->ctf_sxlate = ctf_alloc (fp->ctf_nsyms * sizeof (uint32_t));
+      fp->ctf_sxlate = malloc (fp->ctf_nsyms * sizeof (uint32_t));
 
       if (fp->ctf_sxlate == NULL)
 	{
@@ -1613,8 +1625,8 @@ ctf_file_close (ctf_file_t *fp)
       return;
     }
 
-  ctf_free (fp->ctf_dyncuname);
-  ctf_free (fp->ctf_dynparname);
+  free (fp->ctf_dyncuname);
+  free (fp->ctf_dynparname);
   ctf_file_close (fp->ctf_parent);
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
@@ -1645,20 +1657,20 @@ ctf_file_close (ctf_file_t *fp)
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
   ctf_str_free_atoms (fp);
-  ctf_free (fp->ctf_tmp_typeslice);
+  free (fp->ctf_tmp_typeslice);
 
   if (fp->ctf_data.cts_name != _CTF_NULLSTR)
-    ctf_free ((char *) fp->ctf_data.cts_name);
+    free ((char *) fp->ctf_data.cts_name);
 
   if (fp->ctf_symtab.cts_name != _CTF_NULLSTR)
-    ctf_free ((char *) fp->ctf_symtab.cts_name);
+    free ((char *) fp->ctf_symtab.cts_name);
 
   if (fp->ctf_strtab.cts_name != _CTF_NULLSTR)
-    ctf_free ((char *) fp->ctf_strtab.cts_name);
+    free ((char *) fp->ctf_strtab.cts_name);
   else if (fp->ctf_data_mmapped)
     ctf_munmap (fp->ctf_data_mmapped, fp->ctf_data_mmapped_len);
 
-  ctf_free (fp->ctf_dynbase);
+  free (fp->ctf_dynbase);
 
   ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
   ctf_dynhash_destroy (fp->ctf_link_inputs);
@@ -1667,12 +1679,12 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
 
-  ctf_free (fp->ctf_sxlate);
-  ctf_free (fp->ctf_txlate);
-  ctf_free (fp->ctf_ptrtab);
+  free (fp->ctf_sxlate);
+  free (fp->ctf_txlate);
+  free (fp->ctf_ptrtab);
 
-  ctf_free (fp->ctf_header);
-  ctf_free (fp);
+  free (fp->ctf_header);
+  free (fp);
 }
 
 /* The converse of ctf_open().  ctf_open() disguises whatever it opens as an
@@ -1719,14 +1731,16 @@ ctf_parent_name (ctf_file_t *fp)
 
 /* Set the parent name.  It is an error to call this routine without calling
    ctf_import() at some point.  */
-void
+int
 ctf_parent_name_set (ctf_file_t *fp, const char *name)
 {
   if (fp->ctf_dynparname != NULL)
-    ctf_free (fp->ctf_dynparname);
+    free (fp->ctf_dynparname);
 
-  fp->ctf_dynparname = ctf_strdup (name);
+  if ((fp->ctf_dynparname = strdup (name)) == NULL)
+    return (ctf_set_errno (fp, ENOMEM));
   fp->ctf_parname = fp->ctf_dynparname;
+  return 0;
 }
 
 /* Return the name of the compilation unit this CTF file applies to.  Usually
@@ -1738,14 +1752,16 @@ ctf_cuname (ctf_file_t *fp)
 }
 
 /* Set the compilation unit name.  */
-void
+int
 ctf_cuname_set (ctf_file_t *fp, const char *name)
 {
   if (fp->ctf_dyncuname != NULL)
-    ctf_free (fp->ctf_dyncuname);
+    free (fp->ctf_dyncuname);
 
-  fp->ctf_dyncuname = ctf_strdup (name);
+  if ((fp->ctf_dyncuname = strdup (name)) == NULL)
+    return (ctf_set_errno (fp, ENOMEM));
   fp->ctf_cuname = fp->ctf_dyncuname;
+  return 0;
 }
 
 /* Import the types from the specified parent container by storing a pointer
@@ -1761,15 +1777,21 @@ ctf_import (ctf_file_t *fp, ctf_file_t *pfp)
     return (ctf_set_errno (fp, ECTF_DMODEL));
 
   if (fp->ctf_parent != NULL)
-    ctf_file_close (fp->ctf_parent);
+    {
+      ctf_file_close (fp->ctf_parent);
+      fp->ctf_parent = NULL;
+    }
 
   if (pfp != NULL)
     {
-      fp->ctf_flags |= LCTF_CHILD;
-      pfp->ctf_refcnt++;
+      int err;
 
       if (fp->ctf_parname == NULL)
-	ctf_parent_name_set (fp, "PARENT");
+	if ((err = ctf_parent_name_set (fp, "PARENT")) < 0)
+	  return err;
+
+      fp->ctf_flags |= LCTF_CHILD;
+      pfp->ctf_refcnt++;
     }
   fp->ctf_parent = pfp;
   return 0;

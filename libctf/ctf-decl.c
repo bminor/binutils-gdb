@@ -65,7 +65,7 @@ ctf_decl_fini (ctf_decl_t *cd)
       for (cdp = ctf_list_next (&cd->cd_nodes[i]); cdp != NULL; cdp = ndp)
 	{
 	  ndp = ctf_list_next (cdp);
-	  ctf_free (cdp);
+	  free (cdp);
 	}
     }
 }
@@ -132,7 +132,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_file_t *fp, ctf_id_t type)
       prec = CTF_PREC_BASE;
     }
 
-  if ((cdp = ctf_alloc (sizeof (ctf_decl_node_t))) == NULL)
+  if ((cdp = malloc (sizeof (ctf_decl_node_t))) == NULL)
     {
       cd->cd_err = EAGAIN;
       return;
@@ -176,10 +176,14 @@ void ctf_decl_sprintf (ctf_decl_t *cd, const char *format, ...)
   va_end (ap);
 
   if (n > 0)
-      cd->cd_buf = ctf_str_append (cd->cd_buf, str);
+    {
+      char *newbuf;
+      if ((newbuf = ctf_str_append (cd->cd_buf, str)) != NULL)
+	cd->cd_buf = newbuf;
+    }
 
   /* Sticky error condition.  */
-  if (n < 0)
+  if (n < 0 || cd->cd_buf == NULL)
     {
       free (cd->cd_buf);
       cd->cd_buf = NULL;

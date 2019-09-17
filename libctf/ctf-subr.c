@@ -65,18 +65,6 @@ ctf_munmap (void *buf, size_t length _libctf_unused_)
 #endif
 }
 
-_libctf_malloc_ void *
-ctf_alloc (size_t size)
-{
-  return (malloc (size));
-}
-
-void
-ctf_free (void *buf)
-{
-  free (buf);
-}
-
 ssize_t
 ctf_pread (int fd, void *buf, ssize_t count, off_t offset)
 {

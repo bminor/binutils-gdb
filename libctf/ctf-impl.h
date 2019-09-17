@@ -455,13 +455,7 @@ extern void *ctf_mmap (size_t length, size_t offset, int fd);
 extern void ctf_munmap (void *, size_t);
 extern ssize_t ctf_pread (int fd, void *buf, ssize_t count, off_t offset);
 
-_libctf_malloc_
-extern void *ctf_alloc (size_t);
-extern void ctf_free (void *);
 extern void *ctf_realloc (ctf_file_t *, void *, size_t);
-
-_libctf_malloc_
-extern char *ctf_strdup (const char *);
 extern char *ctf_str_append (char *, const char *);
 extern const char *ctf_strerror (int);
 

@@ -1,3 +1,46 @@
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_alloc): Remove.
+	(ctf_free): Likewise.
+	(ctf_strdup): Likewise.
+	* ctf-subr.c (ctf_alloc): Remove.
+	(ctf_free): Likewise.
+	* ctf-util.c (ctf_strdup): Remove.
+
+	* ctf-create.c (ctf_serialize): Use malloc, not ctf_alloc; free, not
+	ctf_free; strdup, not ctf_strdup.
+	(ctf_dtd_delete): Likewise.
+	(ctf_dvd_delete): Likewise.
+	(ctf_add_generic): Likewise.
+	(ctf_add_function): Likewise.
+	(ctf_add_enumerator): Likewise.
+	(ctf_add_member_offset): Likewise.
+	(ctf_add_variable): Likewise.
+	(membadd): Likewise.
+	(ctf_compress_write): Likewise.
+	(ctf_write_mem): Likewise.
+	* ctf-decl.c (ctf_decl_push): Likewise.
+	(ctf_decl_fini): Likewise.
+	(ctf_decl_sprintf): Likewise.  Check for OOM.
+	* ctf-dump.c (ctf_dump_append): Use malloc, not ctf_alloc; free, not
+	ctf_free; strdup, not ctf_strdup.
+	(ctf_dump_free): Likewise.
+	(ctf_dump): Likewise.
+	* ctf-open.c (upgrade_types_v1): Likewise.
+	(init_types): Likewise.
+	(ctf_file_close): Likewise.
+	(ctf_bufopen_internal): Likewise.  Check for OOM.
+	(ctf_parent_name_set): Likewise: report the OOM to the caller.
+	(ctf_cuname_set): Likewise.
+	(ctf_import): Likewise.
+	* ctf-string.c (ctf_str_purge_atom_refs): Use malloc, not ctf_alloc;
+	free, not ctf_free; strdup, not ctf_strdup.
+	(ctf_str_free_atom): Likewise.
+	(ctf_str_create_atoms): Likewise.
+	(ctf_str_add_ref_internal): Likewise.
+	(ctf_str_remove_ref): Likewise.
+	(ctf_str_write_strtab): Likewise.
+
 2019-08-09  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-types.c (ctf_type_encoding): Fix the dynamic case to
