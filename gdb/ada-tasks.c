@@ -1199,7 +1199,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 
   /* Print the name of the task.  */
   if (task_info->name[0] != '\0')
-    printf_filtered (_("Name: \"%s\"\n"), task_info->name);
+    printf_filtered (_("Name: %s\n"), task_info->name);
   else
     printf_filtered (_("<no name>\n"));
 
@@ -1220,7 +1220,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 
       printf_filtered (_("Parent: %d"), parent_taskno);
       if (parent->name[0] != '\0')
-        printf_filtered (" (\"%s\")", parent->name);
+        printf_filtered (" (%s)", parent->name);
       printf_filtered ("\n");
     }
   else
@@ -1253,7 +1253,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
         ada_task_info *target_task_info = &data->task_list[target_taskno - 1];
 
         if (target_task_info->name[0] != '\0')
-          printf_filtered (" (\"%s\")", target_task_info->name);
+          printf_filtered (" (%s)", target_task_info->name);
       }
 
     printf_filtered ("\n");

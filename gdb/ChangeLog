@@ -1,3 +1,7 @@
+2019-09-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (info_task): Remove quoting of the task's name.
+
 2019-09-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* symfile.c (auto_solib_add): Replace comment with a reference
