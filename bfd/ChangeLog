@@ -1,5 +1,12 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* archures.c (bfd_get_arch): Make param const.
+	(bfd_get_mach, bfd_arch_bits_per_byte): Likewise.
+	(bfd_arch_bits_per_address, bfd_octets_per_byte): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (carsym.name): Make const.
 	* reloc.c (struct reloc_howto_struct.name): Likewise.
 	* targets.c (bfd_target.name): Likewise.!

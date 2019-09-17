@@ -999,7 +999,7 @@ FUNCTION
 	bfd_get_arch
 
 SYNOPSIS
-	enum bfd_architecture bfd_get_arch (bfd *abfd);
+	enum bfd_architecture bfd_get_arch (const bfd *abfd);
 
 DESCRIPTION
 	Return the enumerated type which describes the BFD @var{abfd}'s
@@ -1007,7 +1007,7 @@ DESCRIPTION
 */
 
 enum bfd_architecture
-bfd_get_arch (bfd *abfd)
+bfd_get_arch (const bfd *abfd)
 {
   return abfd->arch_info->arch;
 }
@@ -1017,7 +1017,7 @@ FUNCTION
 	bfd_get_mach
 
 SYNOPSIS
-	unsigned long bfd_get_mach (bfd *abfd);
+	unsigned long bfd_get_mach (const bfd *abfd);
 
 DESCRIPTION
 	Return the long type which describes the BFD @var{abfd}'s
@@ -1025,7 +1025,7 @@ DESCRIPTION
 */
 
 unsigned long
-bfd_get_mach (bfd *abfd)
+bfd_get_mach (const bfd *abfd)
 {
   return abfd->arch_info->mach;
 }
@@ -1035,7 +1035,7 @@ FUNCTION
 	bfd_arch_bits_per_byte
 
 SYNOPSIS
-	unsigned int bfd_arch_bits_per_byte (bfd *abfd);
+	unsigned int bfd_arch_bits_per_byte (const bfd *abfd);
 
 DESCRIPTION
 	Return the number of bits in one of the BFD @var{abfd}'s
@@ -1043,7 +1043,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_arch_bits_per_byte (bfd *abfd)
+bfd_arch_bits_per_byte (const bfd *abfd)
 {
   return abfd->arch_info->bits_per_byte;
 }
@@ -1053,7 +1053,7 @@ FUNCTION
 	bfd_arch_bits_per_address
 
 SYNOPSIS
-	unsigned int bfd_arch_bits_per_address (bfd *abfd);
+	unsigned int bfd_arch_bits_per_address (const bfd *abfd);
 
 DESCRIPTION
 	Return the number of bits in one of the BFD @var{abfd}'s
@@ -1061,7 +1061,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_arch_bits_per_address (bfd *abfd)
+bfd_arch_bits_per_address (const bfd *abfd)
 {
   return abfd->arch_info->bits_per_address;
 }
@@ -1383,7 +1383,7 @@ FUNCTION
 	bfd_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_octets_per_byte (bfd *abfd);
+	unsigned int bfd_octets_per_byte (const bfd *abfd);
 
 DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
@@ -1392,7 +1392,7 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_octets_per_byte (bfd *abfd)
+bfd_octets_per_byte (const bfd *abfd)
 {
   return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
 					bfd_get_mach (abfd));

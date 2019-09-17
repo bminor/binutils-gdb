@@ -2545,13 +2545,13 @@ void bfd_set_arch_info (bfd *abfd, const bfd_arch_info_type *arg);
 bfd_boolean bfd_default_set_arch_mach
    (bfd *abfd, enum bfd_architecture arch, unsigned long mach);
 
-enum bfd_architecture bfd_get_arch (bfd *abfd);
+enum bfd_architecture bfd_get_arch (const bfd *abfd);
 
-unsigned long bfd_get_mach (bfd *abfd);
+unsigned long bfd_get_mach (const bfd *abfd);
 
-unsigned int bfd_arch_bits_per_byte (bfd *abfd);
+unsigned int bfd_arch_bits_per_byte (const bfd *abfd);
 
-unsigned int bfd_arch_bits_per_address (bfd *abfd);
+unsigned int bfd_arch_bits_per_address (const bfd *abfd);
 
 const bfd_arch_info_type *bfd_get_arch_info (bfd *abfd);
 
@@ -2561,7 +2561,7 @@ const bfd_arch_info_type *bfd_lookup_arch
 const char *bfd_printable_arch_mach
    (enum bfd_architecture arch, unsigned long machine);
 
-unsigned int bfd_octets_per_byte (bfd *abfd);
+unsigned int bfd_octets_per_byte (const bfd *abfd);
 
 unsigned int bfd_arch_mach_octets_per_byte
    (enum bfd_architecture arch, unsigned long machine);
