@@ -1,5 +1,10 @@
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (ctf_import): Do not leak a ctf_file_t ref on every
+	ctf_import after the first for a given file.
+
+2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_str_append_noerr): Declare.
 	* ctf-util.c (ctf_str_append_noerr): Define in terms of
 	ctf_str_append.
