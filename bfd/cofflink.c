@@ -1186,9 +1186,9 @@ _bfd_coff_final_link (bfd *abfd,
 
   _bfd_stringtab_free (flaginfo.strtab);
 
-  /* Setting bfd_get_symcount to 0 will cause write_object_contents to
+  /* Setting symcount to 0 will cause write_object_contents to
      not try to write out the symbols.  */
-  bfd_get_symcount (abfd) = 0;
+  abfd->symcount = 0;
 
   return TRUE;
 

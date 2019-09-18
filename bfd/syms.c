@@ -455,8 +455,8 @@ bfd_set_symtab (bfd *abfd, asymbol **location, unsigned int symcount)
       return FALSE;
     }
 
-  bfd_get_outsymbols (abfd) = location;
-  bfd_get_symcount (abfd) = symcount;
+  abfd->outsymbols = location;
+  abfd->symcount = symcount;
   return TRUE;
 }
 

@@ -2031,12 +2031,12 @@ som_object_setup (bfd *abfd,
 	  || (aux_hdrp->exec_entry & 0x3) != 0
 	  || ! found)
 	{
-	  bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
+	  abfd->start_address = aux_hdrp->exec_flags;
 	  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
 	}
       else
 	{
-	  bfd_get_start_address (abfd) = aux_hdrp->exec_entry + current_offset;
+	  abfd->start_address = aux_hdrp->exec_entry + current_offset;
 	  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
 	}
     }
@@ -2044,7 +2044,7 @@ som_object_setup (bfd *abfd,
   obj_som_exec_data (abfd)->version_id = file_hdrp->version_id;
 
   bfd_default_set_arch_mach (abfd, bfd_arch_hppa, pa10);
-  bfd_get_symcount (abfd) = file_hdrp->symbol_total;
+  abfd->symcount = file_hdrp->symbol_total;
 
   /* Initialize the saved symbol table and string table to NULL.
      Save important offsets and sizes from the SOM header into
@@ -4792,7 +4792,7 @@ som_slurp_symbol_table (bfd *abfd)
 
   /* We modify the symbol count to record the number of BFD symbols we
      created.  */
-  bfd_get_symcount (abfd) = sym - symbase;
+  abfd->symcount = sym - symbase;
 
   /* Save our results and return success.  */
   obj_som_symtab (abfd) = symbase;
@@ -6131,7 +6131,7 @@ som_slurp_armap (bfd *abfd)
   /* For archives without .o files there is no symbol table.  */
   if (! CONST_STRNEQ (nextname, "/               "))
     {
-      bfd_has_map (abfd) = FALSE;
+      abfd->has_armap = FALSE;
       return TRUE;
     }
 
@@ -6201,7 +6201,7 @@ som_slurp_armap (bfd *abfd)
     return FALSE;
 
   /* Notify the generic archive code that we have a symbol map.  */
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
   return TRUE;
 }
 

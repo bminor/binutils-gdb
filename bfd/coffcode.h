@@ -4809,7 +4809,7 @@ coff_slurp_symbol_table (bfd * abfd)
   obj_symbols (abfd) = cached_area;
   obj_raw_syments (abfd) = native_symbols;
 
-  bfd_get_symcount (abfd) = number_of_symbols;
+  abfd->symcount = number_of_symbols;
   obj_convert (abfd) = table_ptr;
   /* Slurp the line tables for each section too.  */
   {

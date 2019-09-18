@@ -446,7 +446,7 @@ ecoff_slurp_symbolic_header (bfd *abfd)
   /* See whether there is a symbolic header.  */
   if (ecoff_data (abfd)->sym_filepos == 0)
     {
-      bfd_get_symcount (abfd) = 0;
+      abfd->symcount = 0;
       return TRUE;
     }
 
@@ -479,8 +479,7 @@ ecoff_slurp_symbolic_header (bfd *abfd)
     }
 
   /* Now we can get the correct number of symbols.  */
-  bfd_get_symcount (abfd) = (internal_symhdr->isymMax
-			     + internal_symhdr->iextMax);
+  abfd->symcount = internal_symhdr->isymMax + internal_symhdr->iextMax;
 
   if (raw != NULL)
     free (raw);
@@ -521,7 +520,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
     return TRUE;
   if (ecoff_data (abfd)->sym_filepos == 0)
     {
-      bfd_get_symcount (abfd) = 0;
+      abfd->symcount = 0;
       return TRUE;
     }
 
@@ -965,7 +964,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
      the symbol count and warning the user.  */
   if (internal_ptr - internal < (ptrdiff_t) bfd_get_symcount (abfd))
     {
-      bfd_get_symcount (abfd) = internal_ptr - internal;
+      abfd->symcount = internal_ptr - internal;
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("%pB: warning: isymMax (%ld) is greater than ifdMax (%ld)"),
@@ -2905,7 +2904,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
 	  && nextname[ARMAP_OBJECT_ENDIAN_INDEX] != ARMAP_LITTLE_ENDIAN)
       || ! strneq (nextname + ARMAP_END_INDEX, ARMAP_END, sizeof ARMAP_END - 1))
     {
-      bfd_has_map (abfd) = FALSE;
+      abfd->has_armap = FALSE;
       return TRUE;
     }
 
@@ -3018,7 +3017,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   /* Pad to an even boundary.  */
   ardata->first_file_filepos += ardata->first_file_filepos % 2;
 
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
 
   return TRUE;
 }
@@ -4459,7 +4458,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  bfd_get_symcount (abfd) = symhdr->iextMax + symhdr->isymMax;
+  abfd->symcount = symhdr->iextMax + symhdr->isymMax;
 
   ecoff_data (abfd)->linker = TRUE;
 

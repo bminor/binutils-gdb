@@ -66,7 +66,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
 
   if (! CONST_STRNEQ (nextname, "/SYM64/         "))
     {
-      bfd_has_map (abfd) = FALSE;
+      abfd->has_armap = FALSE;
       return TRUE;
     }
 
@@ -137,7 +137,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   /* Pad to an even boundary if you have to.  */
   ardata->first_file_filepos += (ardata->first_file_filepos) % 2;
 
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
   bfd_release (abfd, raw_armap);
 
   return TRUE;

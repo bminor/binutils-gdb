@@ -8405,7 +8405,7 @@ _bfd_elf_canonicalize_symtab (bfd *abfd, asymbol **allocation)
   long symcount = bed->s->slurp_symbol_table (abfd, allocation, FALSE);
 
   if (symcount >= 0)
-    bfd_get_symcount (abfd) = symcount;
+    abfd->symcount = symcount;
   return symcount;
 }
 
@@ -8417,7 +8417,7 @@ _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
   long symcount = bed->s->slurp_symbol_table (abfd, allocation, TRUE);
 
   if (symcount >= 0)
-    bfd_get_dynamic_symcount (abfd) = symcount;
+    abfd->dynsymcount = symcount;
   return symcount;
 }
 

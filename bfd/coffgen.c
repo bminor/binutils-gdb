@@ -257,14 +257,14 @@ coff_real_object_p (bfd *abfd,
   if ((internal_f->f_flags & F_EXEC) != 0)
     abfd->flags |= D_PAGED;
 
-  bfd_get_symcount (abfd) = internal_f->f_nsyms;
+  abfd->symcount = internal_f->f_nsyms;
   if (internal_f->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
   if (internal_a != (struct internal_aouthdr *) NULL)
-    bfd_get_start_address (abfd) = internal_a->entry;
+    abfd->start_address = internal_a->entry;
   else
-    bfd_get_start_address (abfd) = 0;
+    abfd->start_address = 0;
 
   /* Set up the tdata area.  ECOFF uses its own routine, and overrides
      abfd->flags.  */
@@ -309,7 +309,7 @@ coff_real_object_p (bfd *abfd,
  fail2:
   abfd->tdata.any = tdata_save;
   abfd->flags = oflags;
-  bfd_get_start_address (abfd) = ostart;
+  abfd->start_address = ostart;
   return (const bfd_target *) NULL;
 }
 

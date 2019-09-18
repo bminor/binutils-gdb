@@ -1093,7 +1093,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 
   /* Point the bfd at the symbol table.  */
   obj_symbols (abfd) = vars.sym_cache;
-  bfd_get_symcount (abfd) = vars.sym_index;
+  abfd->symcount = vars.sym_index;
 
   obj_raw_syments (abfd) = vars.native_syms;
   obj_raw_syment_count (abfd) = vars.sym_index;

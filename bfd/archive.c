@@ -1013,7 +1013,7 @@ do_slurp_bsd_armap (bfd *abfd)
   /* FIXME, we should provide some way to free raw_ardata when
      we are done using the strings from it.  For now, it seems
      to be allocated on an objalloc anyway...  */
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
   return TRUE;
 }
 
@@ -1105,7 +1105,7 @@ do_slurp_coff_armap (bfd *abfd)
   /* Pad to an even boundary if you have to.  */
   ardata->first_file_filepos += (ardata->first_file_filepos) % 2;
 
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
   bfd_release (abfd, raw_armap);
 
   /* Check for a second archive header (as used by PE).  */
@@ -1188,7 +1188,7 @@ bfd_slurp_armap (bfd *abfd)
 	return do_slurp_bsd_armap (abfd);
     }
 
-  bfd_has_map (abfd) = FALSE;
+  abfd->has_armap = FALSE;
   return TRUE;
 }
 

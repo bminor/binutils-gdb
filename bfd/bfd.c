@@ -1418,7 +1418,7 @@ bfd_set_file_flags (bfd *abfd, flagword flags)
       return FALSE;
     }
 
-  bfd_get_file_flags (abfd) = flags;
+  abfd->flags = flags;
   if ((flags & bfd_applicable_file_flags (abfd)) != flags)
     {
       bfd_set_error (bfd_error_invalid_operation);

@@ -1906,7 +1906,7 @@ xcoff64_slurp_armap (bfd *abfd)
 
   if (xcoff_ardata (abfd) == NULL)
     {
-      bfd_has_map (abfd) = FALSE;
+      abfd->has_armap = FALSE;
       return TRUE;
     }
 
@@ -1914,7 +1914,7 @@ xcoff64_slurp_armap (bfd *abfd)
 		      (const char **) NULL, 10);
   if (off == 0)
     {
-      bfd_has_map (abfd) = FALSE;
+      abfd->has_armap = FALSE;
       return TRUE;
     }
 
@@ -1976,7 +1976,7 @@ xcoff64_slurp_armap (bfd *abfd)
     }
 
   bfd_ardata (abfd)->symdef_count = c;
-  bfd_has_map (abfd) = TRUE;
+  abfd->has_armap = TRUE;
 
   return TRUE;
 }

@@ -305,7 +305,7 @@ elf_core_file_p (bfd *abfd)
   }
 
   /* Save the entry point from the ELF header.  */
-  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
+  abfd->start_address = i_ehdrp->e_entry;
   return abfd->xvec;
 
 wrong:

@@ -8912,8 +8912,8 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
       return FALSE;
     }
 
-  bfd_get_outsymbols (abfd) = NULL;
-  bfd_get_symcount (abfd) = 0;
+  abfd->outsymbols = NULL;
+  abfd->symcount = 0;
 
   /* Mark all sections which will be included in the output file.  */
   for (o = abfd->sections; o != NULL; o = o->next)

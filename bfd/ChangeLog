@@ -1,5 +1,47 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (slurp_symbol_table): Don't set symcount using bfd_get
+	macros.
+	* pdp11.c (slurp_symbol_table): Likewise.
+	* som.c (som_slurp_symbol_table): Likewise.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Likewise.
+	* coffcode.h (coff_slurp_symbol_table): Likewise.
+	* cofflink.c (_bfd_coff_final_link): Likewise.
+	* ecoff.c (ecoff_slurp_symbolic_header): Likewise.
+	(_bfd_ecoff_slurp_symbolic_info): Likewise.
+	(_bfd_ecoff_slurp_symbol_table): Likewise.
+	(_bfd_ecoff_bfd_final_link): Likewise.
+	* elf.c (_bfd_elf_canonicalize_symtab): Likewise.
+	* elflink.c (elf_link_output_symstrtab): Likewise.
+	(bfd_elf_final_link): Likewise.
+	* peicode.h (pe_ILF_build_a_bfd): Likewise.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Likewise.
+	* aoutx.h (some_aout_object_p, slurp_symbol_table): Don't set
+	start_address or symcount using bfd_get macros.
+	* coffgen.c (coff_real_object_p): Likewise.
+	* pdp11.c (some_aout_object_p, slurp_symbol_table): Likewise.
+	* som.c (som_object_setup, som_slurp_symbol_table): Likewise.
+	* elfcore.h (elf_core_file_p): Don't set start_address using
+	bfd_get macro.
+	* elf.c (_bfd_elf_canonicalize_dynamic_symtab): Don't set dynsymcount
+	using bfd_get macro.
+	* bfd.c (bfd_set_file_flags): Don't set flags using bfd_get macro.
+	* linker.c (bfd_generic_link_read_symbols): Don't set outsymbols
+	or symcount using bfd_get macros.
+	(_bfd_generic_final_link, generic_add_output_symbol): Likewise.
+	* syms.c (bfd_set_symtab): Likewise.
+	* vms-alpha.c (alpha_vms_bfd_final_link): Likewise.
+	* archive.c (do_slurp_bsd_armap): Don't set has_armap using
+	bfd_has_map macro.
+	(do_slurp_coff_armap, bfd_slurp_armap): Likewise.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Likewise.
+	* coff64-rs6000.c (xcoff64_slurp_armap): Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_armap): Likewise.
+	* som.c (som_slurp_armap): Likewise.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* archures.c (bfd_get_arch): Make param const.
 	(bfd_get_mach, bfd_arch_bits_per_byte): Likewise.
 	(bfd_arch_bits_per_address, bfd_octets_per_byte): Likewise.

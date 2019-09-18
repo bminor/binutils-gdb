@@ -9481,7 +9481,7 @@ elf_link_output_symstrtab (struct elf_final_link_info *flinfo,
   hash_table->strtab[hash_table->strtabcount].destshndx_index
     = flinfo->symshndxbuf ? bfd_get_symcount (flinfo->output_bfd) : 0;
 
-  bfd_get_symcount (flinfo->output_bfd) += 1;
+  flinfo->output_bfd->symcount += 1;
   hash_table->strtabcount += 1;
 
   return 1;
@@ -12012,7 +12012,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Figure out the file positions for everything but the symbol table
      and the relocs.  We set symcount to force assign_section_numbers
      to create a symbol table.  */
-  bfd_get_symcount (abfd) = info->strip != strip_all || emit_relocs;
+  abfd->symcount = info->strip != strip_all || emit_relocs;
   BFD_ASSERT (! abfd->output_has_begun);
   if (! _bfd_elf_compute_section_file_positions (abfd, info))
     goto error_return;
@@ -12057,7 +12057,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      .symtab, .strtab, and non-loaded reloc sections.  We start the
      .symtab section at the current file position, and write directly
      to it.  We build the .strtab section in memory.  */
-  bfd_get_symcount (abfd) = 0;
+  abfd->symcount = 0;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */
   symtab_hdr->sh_type = SHT_SYMTAB;

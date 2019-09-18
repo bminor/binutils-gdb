@@ -511,10 +511,10 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
        was called.  */
     abort ();
 
-  bfd_get_start_address (abfd) = execp->a_entry;
+  abfd->start_address = execp->a_entry;
 
   obj_aout_symbols (abfd) = NULL;
-  bfd_get_symcount (abfd) = execp->a_syms / sizeof (struct external_nlist);
+  abfd->symcount = execp->a_syms / sizeof (struct external_nlist);
 
   /* The default relocation entry size is that of traditional V7 Unix.  */
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
@@ -1782,7 +1782,7 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
       return FALSE;
     }
 
-  bfd_get_symcount (abfd) = obj_aout_external_sym_count (abfd);
+  abfd->symcount = obj_aout_external_sym_count (abfd);
 
   obj_aout_symbols (abfd) = cached;
 

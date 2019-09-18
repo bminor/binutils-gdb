@@ -810,14 +810,13 @@ bfd_generic_link_read_symbols (bfd *abfd)
       symsize = bfd_get_symtab_upper_bound (abfd);
       if (symsize < 0)
 	return FALSE;
-      bfd_get_outsymbols (abfd) = (struct bfd_symbol **) bfd_alloc (abfd,
-								    symsize);
+      abfd->outsymbols = bfd_alloc (abfd, symsize);
       if (bfd_get_outsymbols (abfd) == NULL && symsize != 0)
 	return FALSE;
       symcount = bfd_canonicalize_symtab (abfd, bfd_get_outsymbols (abfd));
       if (symcount < 0)
 	return FALSE;
-      bfd_get_symcount (abfd) = symcount;
+      abfd->symcount = symcount;
     }
 
   return TRUE;
@@ -1824,8 +1823,8 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
   size_t outsymalloc;
   struct generic_write_global_symbol_info wginfo;
 
-  bfd_get_outsymbols (abfd) = NULL;
-  bfd_get_symcount (abfd) = 0;
+  abfd->outsymbols = NULL;
+  abfd->symcount = 0;
   outsymalloc = 0;
 
   /* Mark all sections which will be included in the output file.  */
@@ -1958,12 +1957,12 @@ generic_add_output_symbol (bfd *output_bfd, size_t *psymalloc, asymbol *sym)
       newsyms = (asymbol **) bfd_realloc (bfd_get_outsymbols (output_bfd), amt);
       if (newsyms == NULL)
 	return FALSE;
-      bfd_get_outsymbols (output_bfd) = newsyms;
+      output_bfd->outsymbols = newsyms;
     }
 
-  bfd_get_outsymbols (output_bfd) [bfd_get_symcount (output_bfd)] = sym;
+  output_bfd->outsymbols[output_bfd->symcount] = sym;
   if (sym != NULL)
-    ++ bfd_get_symcount (output_bfd);
+    ++output_bfd->symcount;
 
   return TRUE;
 }
