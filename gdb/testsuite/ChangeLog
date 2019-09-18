@@ -1,5 +1,9 @@
 2019-09-19  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdbserver-support.exp (gdb_target_cmd): Fix argument passing.
+
+2019-09-19  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdbserver-support.exp (gdb_target_cmd_ext): Return 2 (meaning
 	UNSUPPORTED) for 'Network is unreachable' message.  Factor out of ...
 	(gdb_target_cmd): ... here.

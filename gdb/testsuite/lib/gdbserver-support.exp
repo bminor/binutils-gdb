@@ -112,8 +112,8 @@ proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
 
 # Like gdb_target_cmd_ext, but returns 0 on success, 1 on failure.
 
-proc gdb_target_cmd { $args } {
-    set res [gdb_target_cmd_ext $args]
+proc gdb_target_cmd { args } {
+    set res [eval gdb_target_cmd_ext $args]
     return [expr $res == 0 ? 0 : 1]
 }
 
