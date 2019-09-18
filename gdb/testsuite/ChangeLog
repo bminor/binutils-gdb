@@ -1,3 +1,8 @@
+2019-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/source-dir.exp: Avoid having directory names in test
+	names.
+
 2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/source-dir.exp: Add extra test for mapped compilation

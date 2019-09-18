@@ -131,7 +131,8 @@ proc test_truncated_comp_dir {} {
 	[search_dir_list [list \
 			      "$strip_dir" \
 			      "\\\$cdir" \
-			      "\\\$cwd"]]
+			      "\\\$cwd"]] \
+	"setup source path search directory"
     gdb_test "list" [multi_line \
 			 "1\[ \t\]+int" \
 			 "2\[ \t\]+main \\(\\)" \
