@@ -264,7 +264,7 @@ typedef unsigned long symindex;
 /* This is a type pun with struct ranlib on purpose!  */
 typedef struct carsym
 {
-  char *name;
+  const char *name;
   file_ptr file_offset;	/* Look here to find the file.  */
 }
 carsym;			/* To make these you call a carsymogen.  */
@@ -2718,7 +2718,7 @@ struct reloc_howto_struct
      bfd *, char **);
 
   /* The textual name of the relocation type.  */
-  char *name;
+  const char *name;
 };
 
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
@@ -7634,7 +7634,7 @@ typedef struct flag_info flag_info;
 typedef struct bfd_target
 {
   /* Identifies the kind of target, e.g., SunOS4, Ultrix, etc.  */
-  char *name;
+  const char *name;
 
  /* The "flavour" of a back end is a general indication about
     the contents of a file.  */

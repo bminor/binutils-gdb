@@ -257,7 +257,7 @@ typedef unsigned long symindex;
 /* This is a type pun with struct ranlib on purpose!  */
 typedef struct carsym
 {
-  char *name;
+  const char *name;
   file_ptr file_offset;	/* Look here to find the file.  */
 }
 carsym;			/* To make these you call a carsymogen.  */

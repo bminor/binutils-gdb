@@ -1507,7 +1507,7 @@ RETURNS
 int
 bfd_get_sign_extend_vma (bfd *abfd)
 {
-  char *name;
+  const char *name;
 
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     return get_elf_backend_data (abfd)->sign_extend_vma;

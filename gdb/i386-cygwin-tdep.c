@@ -229,7 +229,7 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static enum gdb_osabi
 i386_cygwin_osabi_sniffer (bfd *abfd)
 {
-  char *target_name = bfd_get_target (abfd);
+  const char *target_name = bfd_get_target (abfd);
 
   if (strcmp (target_name, "pei-i386") == 0)
     return GDB_OSABI_CYGWIN;

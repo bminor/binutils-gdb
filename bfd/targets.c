@@ -179,7 +179,7 @@ DESCRIPTION
 .typedef struct bfd_target
 .{
 .  {* Identifies the kind of target, e.g., SunOS4, Ultrix, etc.  *}
-.  char *name;
+.  const char *name;
 .
 . {* The "flavour" of a back end is a general indication about
 .    the contents of a file.  *}

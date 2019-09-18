@@ -1,5 +1,11 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* amd64-dicos-tdep.c (amd64_dicos_osabi_sniffer): Constify target.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Likewise.
+	* i386-dicos-tdep.c (i386_dicos_osabi_sniffer): Likewise.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* solib-spu.c (spu_bfd_open): Use bfd_set_filename.
 	* spu-linux-nat.c (spu_bfd_open): Likewise.
 

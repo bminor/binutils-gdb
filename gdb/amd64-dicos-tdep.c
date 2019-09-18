@@ -35,7 +35,7 @@ amd64_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static enum gdb_osabi
 amd64_dicos_osabi_sniffer (bfd *abfd)
 {
-  char *target_name = bfd_get_target (abfd);
+  const char *target_name = bfd_get_target (abfd);
 
   /* On amd64-DICOS, the Load Module's "header" section is 72
      bytes.  */

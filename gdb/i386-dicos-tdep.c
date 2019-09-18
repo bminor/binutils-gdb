@@ -31,7 +31,7 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static enum gdb_osabi
 i386_dicos_osabi_sniffer (bfd *abfd)
 {
-  char *target_name = bfd_get_target (abfd);
+  const char *target_name = bfd_get_target (abfd);
 
   /* On x86-DICOS, the Load Module's "header" section is 36 bytes.  */
   if (strcmp (target_name, "elf32-i386") == 0

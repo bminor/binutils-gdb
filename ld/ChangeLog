@@ -1,5 +1,10 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (stricpy, strcut, name_compare): Constify params.
+	(get_first_input_target): Make return and "target" const.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/pe.em (after_open): Use bfd_set_filename.
 	* emultempl/pep.em (after_open): Use bfd_set_filename.
 

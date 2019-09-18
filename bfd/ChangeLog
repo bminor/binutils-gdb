@@ -1,5 +1,15 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (carsym.name): Make const.
+	* reloc.c (struct reloc_howto_struct.name): Likewise.
+	* targets.c (bfd_target.name): Likewise.!
+	* bfd.c (bfd_get_sign_extend_vma): Make variable const.
+	* som.c (som_bfd_fill_in_ar_symbols): Use an intermediary variable
+	when setting carsym.name.
+	* bfd-in2.h: Regenerate.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* mach-o.c (bfd_mach_o_fat_member_init): Likewise.  Replace
 	xstrdup and xmalloc with bfd_strdup and bfd_malloc.  Return an
 	error status.  Adjust calls.

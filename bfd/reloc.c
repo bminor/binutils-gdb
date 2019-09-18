@@ -361,7 +361,7 @@ CODE_FRAGMENT
 .     bfd *, char **);
 .
 .  {* The textual name of the relocation type.  *}
-.  char *name;
+.  const char *name;
 .};
 .
 */

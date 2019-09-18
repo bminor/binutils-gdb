@@ -5995,6 +5995,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
       unsigned int hash_val;
       unsigned int len;
       unsigned char ext_len[4];
+      char *name;
 
       /* An empty chain has zero as it's file offset.  */
       hash_val = bfd_getb32 (hash_table + 4 * i);
@@ -6025,13 +6026,14 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
       len = bfd_getb32 (ext_len);
 
       /* Allocate space for the name and null terminate it too.  */
-      set->name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
-      if (!set->name)
+      name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
+      if (!name)
 	goto error_return;
-      if (bfd_bread (set->name, (bfd_size_type) len, abfd) != len)
+      if (bfd_bread (name, (bfd_size_type) len, abfd) != len)
 	goto error_return;
 
-      set->name[len] = 0;
+      name[len] = 0;
+      set->name = name;
 
       /* Fill in the file offset.  Note that the "location" field points
 	 to the SOM itself, not the ar_hdr in front of it.  */
@@ -6068,13 +6070,14 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	  len = bfd_getb32 (ext_len);
 
 	  /* Allocate space for the name and null terminate it too.  */
-	  set->name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
-	  if (!set->name)
+	  name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
+	  if (!name)
 	    goto error_return;
 
-	  if (bfd_bread (set->name, (bfd_size_type) len, abfd) != len)
+	  if (bfd_bread (name, (bfd_size_type) len, abfd) != len)
 	    goto error_return;
-	  set->name[len] = 0;
+	  name[len] = 0;
+	  set->name = name;
 
 	  /* Fill in the file offset.  Note that the "location" field points
 	     to the SOM itself, not the ar_hdr in front of it.  */
