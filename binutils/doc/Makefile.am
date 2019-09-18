@@ -174,18 +174,7 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
 
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install-data-local: install-info
-
 MAINTAINERCLEANFILES = binutils.info
-
-# Automake 1.9 will only build info files in the objdir if they are
-# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
-# though, so we use a bogus condition.
-if GENINSRC_NEVER
-DISTCLEANFILES = binutils.info
-endif
 
 # Maintenance
 

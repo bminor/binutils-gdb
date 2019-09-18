@@ -1,5 +1,11 @@
 2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* doc/Makefile.am (install-data-loca): Remove target.
+	(DISTCLEANFILES): Remove variable.
+	* doc/Makefile.in: Re-generate.
+
+2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in: Re-generate.
 	* configure: Re-generate.
 	* doc/Makefile.in: Re-generate.
