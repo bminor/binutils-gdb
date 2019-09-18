@@ -14,6 +14,7 @@
 
 2019-07-08  Alan Hayward  <alan.hayward@arm.com>
 
+	PR breakpoints/25011
 	* gdb.base/break-idempotent.exp: Test both PIE and non PIE.
 
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
