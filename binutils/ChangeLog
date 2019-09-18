@@ -1,5 +1,12 @@
 2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* doc/Makefile.am (MOSTLYCLEANFILES): Clean all man pages,
+	cxxfilt.man and binutils.info.
+	(MAINTAINERCLEANFILES): Remove.
+	* doc/Makefile.in: Re-generate.
+
+2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* doc/Makefile.am: Remove references to binutils_TEXINFOS.
 	* doc/Makefile.in: Re-generate.
 

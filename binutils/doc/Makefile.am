@@ -162,7 +162,7 @@ cxxfilt.man:	$(binutils_TEXI)
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f $(DEMANGLER_NAME).pod
 
-MOSTLYCLEANFILES     = $(DEMANGLER_NAME).1
+MOSTLYCLEANFILES     = $(man_MANS) binutils.info cxxfilt.man
 
 $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	if test -f cxxfilt.man; then \
@@ -173,8 +173,6 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' \
 	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
-
-MAINTAINERCLEANFILES = binutils.info
 
 # Maintenance
 
