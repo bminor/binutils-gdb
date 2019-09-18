@@ -247,18 +247,15 @@ typedef unsigned long symindex;
 /* General purpose part of a symbol X;
    target specific parts are in libcoff.h, libaout.h, etc.  */
 
-#define bfd_get_section(x) ((x)->section)
-#define bfd_get_output_section(x) ((x)->section->output_section)
-#define bfd_set_section(x,y) ((x)->section) = (y)
-#define bfd_asymbol_base(x) ((x)->section->vma)
-#define bfd_asymbol_value(x) (bfd_asymbol_base(x) + (x)->value)
-#define bfd_asymbol_name(x) ((x)->name)
-/*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
-#define bfd_asymbol_bfd(x) ((x)->the_bfd)
-#define bfd_asymbol_flavour(x)			\
-  (((x)->flags & BSF_SYNTHETIC) != 0		\
+#define bfd_asymbol_section(sy) ((sy)->section)
+#define bfd_asymbol_value(sy) ((sy)->section->vma + (sy)->value)
+#define bfd_asymbol_name(sy) ((sy)->name)
+#define bfd_asymbol_bfd(sy) ((sy)->the_bfd)
+#define bfd_asymbol_flavour(sy)			\
+  (((sy)->flags & BSF_SYNTHETIC) != 0		\
    ? bfd_target_unknown_flavour			\
-   : bfd_asymbol_bfd (x)->xvec->flavour)
+   : (sy)->the_bfd->xvec->flavour)
+#define bfd_set_asymbol_name(sy, n) do { (sy)->name = (n); } while (0)
 
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */

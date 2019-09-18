@@ -1315,7 +1315,7 @@ mmix_elf_reloc (bfd *abfd,
   else
     relocation = symbol->value;
 
-  reloc_target_output_section = bfd_get_output_section (symbol);
+  reloc_target_output_section = bfd_asymbol_section (symbol)->output_section;
 
   /* Here the variable relocation holds the final address of the symbol we
      are relocating against, plus any addend.  */

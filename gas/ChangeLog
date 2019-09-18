@@ -1,3 +1,8 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (S_IS_LOCAL): Update bfd_get_section to
+	bfd_asymbol_section.
+
 2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Re-generate.

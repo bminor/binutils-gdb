@@ -2310,14 +2310,14 @@ S_IS_LOCAL (symbolS *s)
   if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
     abort ();
 
-  if (bfd_get_section (s->bsym) == reg_section)
+  if (bfd_asymbol_section (s->bsym) == reg_section)
     return 1;
 
   if (flag_strip_local_absolute
       /* Keep BSF_FILE symbols in order to allow debuggers to identify
 	 the source file even when the object file is stripped.  */
       && (flags & (BSF_GLOBAL | BSF_FILE)) == 0
-      && bfd_get_section (s->bsym) == absolute_section)
+      && bfd_asymbol_section (s->bsym) == absolute_section)
     return 1;
 
   name = S_GET_NAME (s);

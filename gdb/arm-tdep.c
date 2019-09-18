@@ -8575,7 +8575,7 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
     data = arm_objfile_data_key.emplace (objfile,
 					 objfile->obfd->section_count);
   arm_mapping_symbol_vec &map
-    = data->section_maps[bfd_get_section (sym)->index];
+    = data->section_maps[bfd_asymbol_section (sym)->index];
 
   new_map_sym.value = sym->value;
   new_map_sym.type = name[1];

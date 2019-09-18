@@ -2736,7 +2736,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
   bfd_vma best_fit_len = 0;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_get_section (sym);
+  asection *sec = bfd_asymbol_section (sym);
 
   for (each_func = unit->function_table;
        each_func;
@@ -2784,7 +2784,7 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 				 unsigned int *linenumber_ptr)
 {
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_get_section (sym);
+  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
 
   for (each = unit->variable_table; each; each = each->prev_var)
@@ -4048,7 +4048,7 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
   struct info_list_node *node;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_get_section (sym);
+  asection *sec = bfd_asymbol_section (sym);
 
   for (node = lookup_info_hash_table (hash_table, name);
        node;
@@ -4096,7 +4096,7 @@ info_hash_lookup_varinfo (struct info_hash_table *hash_table,
 			  unsigned int *linenumber_ptr)
 {
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_get_section (sym);
+  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
   struct info_list_node *node;
 
@@ -4695,7 +4695,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   if (do_line)
     {
       BFD_ASSERT (section == NULL && offset == 0 && functionname_ptr == NULL);
-      section = bfd_get_section (symbol);
+      section = bfd_asymbol_section (symbol);
       addr = symbol->value;
     }
   else

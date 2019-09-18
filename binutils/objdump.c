@@ -995,7 +995,7 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
   if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
     version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
 
-  if (bfd_is_und_section (bfd_get_section (sym)))
+  if (bfd_is_und_section (bfd_asymbol_section (sym)))
     hidden = TRUE;
 
   name = sanitize_string (name);
@@ -1351,7 +1351,7 @@ objdump_print_addr (bfd_vma vma,
       /* Adjust the vma to the reloc.  */
       vma += bfd_asymbol_value (sym);
 
-      if (bfd_is_und_section (bfd_get_section (sym)))
+      if (bfd_is_und_section (bfd_asymbol_section (sym)))
 	skip_find = TRUE;
     }
 
@@ -2234,7 +2234,7 @@ disassemble_bytes (struct disassemble_info * inf,
 		    {
 		      asection *sym_sec;
 
-		      sym_sec = bfd_get_section (*q->sym_ptr_ptr);
+		      sym_sec = bfd_asymbol_section (*q->sym_ptr_ptr);
 		      sym_name = bfd_get_section_name (aux->abfd, sym_sec);
 		      if (sym_name == NULL || *sym_name == '\0')
 			sym_name = "*unknown*";

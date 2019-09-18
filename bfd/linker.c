@@ -1163,9 +1163,9 @@ generic_link_add_symbol_list (bfd *abfd,
 		       | BSF_GLOBAL
 		       | BSF_CONSTRUCTOR
 		       | BSF_WEAK)) != 0
-	  || bfd_is_und_section (bfd_get_section (p))
-	  || bfd_is_com_section (bfd_get_section (p))
-	  || bfd_is_ind_section (bfd_get_section (p)))
+	  || bfd_is_und_section (bfd_asymbol_section (p))
+	  || bfd_is_com_section (bfd_asymbol_section (p))
+	  || bfd_is_ind_section (bfd_asymbol_section (p)))
 	{
 	  const char *name;
 	  const char *string;
@@ -1191,7 +1191,7 @@ generic_link_add_symbol_list (bfd *abfd,
 
 	  bh = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
-		 (info, abfd, name, p->flags, bfd_get_section (p),
+		 (info, abfd, name, p->flags, bfd_asymbol_section (p),
 		  p->value, string, FALSE, FALSE, &bh)))
 	    return FALSE;
 	  h = (struct generic_link_hash_entry *) bh;
@@ -1218,15 +1218,15 @@ generic_link_add_symbol_list (bfd *abfd,
 	  if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      if (h->sym == NULL
-		  || (! bfd_is_und_section (bfd_get_section (p))
-		      && (! bfd_is_com_section (bfd_get_section (p))
-			  || bfd_is_und_section (bfd_get_section (h->sym)))))
+		  || (! bfd_is_und_section (bfd_asymbol_section (p))
+		      && (! bfd_is_com_section (bfd_asymbol_section (p))
+			  || bfd_is_und_section (bfd_asymbol_section (h->sym)))))
 		{
 		  h->sym = p;
 		  /* BSF_OLD_COMMON is a hack to support COFF reloc
 		     reading, and it should go away when the COFF
 		     linker is switched to the new version.  */
-		  if (bfd_is_com_section (bfd_get_section (p)))
+		  if (bfd_is_com_section (bfd_asymbol_section (p)))
 		    p->flags |= BSF_OLD_COMMON;
 		}
 	    }
@@ -2026,9 +2026,9 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 			 | BSF_GLOBAL
 			 | BSF_CONSTRUCTOR
 			 | BSF_WEAK)) != 0
-	  || bfd_is_und_section (bfd_get_section (sym))
-	  || bfd_is_com_section (bfd_get_section (sym))
-	  || bfd_is_ind_section (bfd_get_section (sym)))
+	  || bfd_is_und_section (bfd_asymbol_section (sym))
+	  || bfd_is_com_section (bfd_asymbol_section (sym))
+	  || bfd_is_ind_section (bfd_asymbol_section (sym)))
 	{
 	  if (sym->udata.p != NULL)
 	    h = (struct generic_link_hash_entry *) sym->udata.p;
@@ -2044,7 +2044,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 		 the relocs in the output format being used.  */
 	      h = NULL;
 	    }
-	  else if (bfd_is_und_section (bfd_get_section (sym)))
+	  else if (bfd_is_und_section (bfd_asymbol_section (sym)))
 	    h = ((struct generic_link_hash_entry *)
 		 bfd_wrapped_link_hash_lookup (output_bfd, info,
 					       bfd_asymbol_name (sym),
@@ -2601,15 +2601,15 @@ default_indirect_link_order (bfd *output_bfd,
 			     | BSF_GLOBAL
 			     | BSF_CONSTRUCTOR
 			     | BSF_WEAK)) != 0
-	      || bfd_is_und_section (bfd_get_section (sym))
-	      || bfd_is_com_section (bfd_get_section (sym))
-	      || bfd_is_ind_section (bfd_get_section (sym)))
+	      || bfd_is_und_section (bfd_asymbol_section (sym))
+	      || bfd_is_com_section (bfd_asymbol_section (sym))
+	      || bfd_is_ind_section (bfd_asymbol_section (sym)))
 	    {
 	      /* sym->udata may have been set by
 		 generic_link_add_symbol_list.  */
 	      if (sym->udata.p != NULL)
 		h = (struct bfd_link_hash_entry *) sym->udata.p;
-	      else if (bfd_is_und_section (bfd_get_section (sym)))
+	      else if (bfd_is_und_section (bfd_asymbol_section (sym)))
 		h = bfd_wrapped_link_hash_lookup (output_bfd, info,
 						  bfd_asymbol_name (sym),
 						  FALSE, FALSE, TRUE);

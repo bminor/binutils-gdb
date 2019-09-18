@@ -2312,7 +2312,7 @@ ecoff_get_extr (asymbol *sym, EXTR *esym)
      symbol.  */
   if ((esym->asym.sc == scUndefined
        || esym->asym.sc == scSUndefined)
-      && ! bfd_is_und_section (bfd_get_section (sym)))
+      && ! bfd_is_und_section (bfd_asymbol_section (sym)))
     esym->asym.sc = scAbs;
 
   /* Adjust the FDR index for the symbol by that used for the input
@@ -2719,7 +2719,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 		    { _RCONST, RELOC_SECTION_RCONST }
 		  };
 
-		  name = bfd_get_section_name (abfd, bfd_get_section (sym));
+		  name = bfd_get_section_name (abfd, bfd_asymbol_section (sym));
 
 		  for (j = 0; j < ARRAY_SIZE (section_symndx); j++)
 		    if (streq (name, section_symndx[j].name))

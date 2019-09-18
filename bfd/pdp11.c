@@ -1352,7 +1352,7 @@ translate_to_native_sym_flags (bfd *abfd,
      to another.  */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-  sec = bfd_get_section (cache_ptr);
+  sec = bfd_asymbol_section (cache_ptr);
   off = 0;
 
   if (sec == NULL)

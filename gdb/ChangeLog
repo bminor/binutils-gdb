@@ -1,5 +1,10 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* arm-tdep.c (arm_record_special_symbol): Update bfd_get_section
+	to bfd_asymbol_section.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* amd64-dicos-tdep.c (amd64_dicos_osabi_sniffer): Constify target.
 	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Likewise.
 	* i386-dicos-tdep.c (i386_dicos_osabi_sniffer): Likewise.

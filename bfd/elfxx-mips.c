@@ -2531,8 +2531,8 @@ _bfd_mips_elf_got16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			   bfd *output_bfd, char **error_message)
 {
   if ((symbol->flags & (BSF_GLOBAL | BSF_WEAK)) != 0
-      || bfd_is_und_section (bfd_get_section (symbol))
-      || bfd_is_com_section (bfd_get_section (symbol)))
+      || bfd_is_und_section (bfd_asymbol_section (symbol))
+      || bfd_is_com_section (bfd_asymbol_section (symbol)))
     /* The relocation is against a global symbol.  */
     return _bfd_mips_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 					input_section, output_bfd,

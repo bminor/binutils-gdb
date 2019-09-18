@@ -1465,7 +1465,7 @@ create_new_symbol (struct addsym_node *ptr, bfd *obfd)
 {
   asymbol *sym = bfd_make_empty_symbol (obfd);
 
-  bfd_asymbol_name (sym) = ptr->symdef;
+  bfd_set_asymbol_name (sym, ptr->symdef);
   sym->value = ptr->symval;
   sym->flags = ptr->flags;
   if (ptr->section)
@@ -1503,7 +1503,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       bfd_boolean rem_leading_char;
       bfd_boolean add_leading_char;
 
-      undefined = bfd_is_und_section (bfd_get_section (sym));
+      undefined = bfd_is_und_section (bfd_asymbol_section (sym));
 
       if (add_sym_list)
 	{
@@ -1521,7 +1521,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	  if (new_name == name
 	      && (flags & BSF_SECTION_SYM) != 0)
 	    new_name = (char *) find_section_rename (name, NULL);
-	  bfd_asymbol_name (sym) = new_name;
+	  bfd_set_asymbol_name (sym, new_name);
 	  name = new_name;
 	}
 
@@ -1532,7 +1532,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    || (remove_leading_char
 		&& ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
 		    || undefined
-		    || bfd_is_com_section (bfd_get_section (sym)))));
+		    || bfd_is_com_section (bfd_asymbol_section (sym)))));
 
       /* Check if we will add a new leading character.  */
       add_leading_char =
@@ -1545,14 +1545,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       if (rem_leading_char && add_leading_char && !prefix_symbols_string)
 	{
 	  name[0] = bfd_get_symbol_leading_char (obfd);
-	  bfd_asymbol_name (sym) = name;
+	  bfd_set_asymbol_name (sym, name);
 	  rem_leading_char = FALSE;
 	  add_leading_char = FALSE;
 	}
 
       /* Remove leading char.  */
       if (rem_leading_char)
-	bfd_asymbol_name (sym) = ++name;
+	bfd_set_asymbol_name (sym, ++name);
 
       /* Add new leading char and/or prefix.  */
       if (add_leading_char || prefix_symbols_string)
@@ -1571,7 +1571,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    }
 
 	  strcpy (ptr, name);
-	  bfd_asymbol_name (sym) = n;
+	  bfd_set_asymbol_name (sym, n);
 	  name = n;
 	}
 
@@ -1579,7 +1579,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	keep = FALSE;
       else if ((flags & BSF_KEEP) != 0		/* Used in relocation.  */
 	       || ((flags & BSF_SECTION_SYM) != 0
-		   && ((*bfd_get_section (sym)->symbol_ptr_ptr)->flags
+		   && ((*bfd_asymbol_section (sym)->symbol_ptr_ptr)->flags
 		       & BSF_KEEP) != 0))
 	{
 	  keep = TRUE;
@@ -1587,7 +1587,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	}
       else if (relocatable			/* Relocatable file.  */
 	       && ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
-		   || bfd_is_com_section (bfd_get_section (sym))))
+		   || bfd_is_com_section (bfd_asymbol_section (sym))))
 	keep = TRUE;
       else if (bfd_decode_symclass (sym) == 'I')
 	/* Global symbols in $idata sections need to be retained
@@ -1598,13 +1598,13 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       else if ((flags & BSF_GLOBAL) != 0	/* Global symbol.  */
 	       || (flags & BSF_WEAK) != 0
 	       || undefined
-	       || bfd_is_com_section (bfd_get_section (sym)))
+	       || bfd_is_com_section (bfd_asymbol_section (sym)))
 	keep = strip_symbols != STRIP_UNNEEDED;
       else if ((flags & BSF_DEBUGGING) != 0)	/* Debugging symbol.  */
 	keep = (strip_symbols != STRIP_DEBUG
 		&& strip_symbols != STRIP_UNNEEDED
 		&& ! convert_debugging);
-      else if (bfd_coff_get_comdat_section (abfd, bfd_get_section (sym)))
+      else if (bfd_coff_get_comdat_section (abfd, bfd_asymbol_section (sym)))
 	/* COMDAT sections store special information in local
 	   symbols, so we cannot risk stripping any of them.  */
 	keep = TRUE;
@@ -1637,7 +1637,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	      || is_specified_symbol (name, keep_specific_htab)))
 	keep = TRUE;
 
-      if (keep && is_strip_section (abfd, bfd_get_section (sym)))
+      if (keep && is_strip_section (abfd, bfd_asymbol_section (sym)))
 	keep = FALSE;
 
       if (keep)

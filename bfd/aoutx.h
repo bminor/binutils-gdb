@@ -1570,7 +1570,7 @@ translate_to_native_sym_flags (bfd *abfd,
      to another.  */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-  sec = bfd_get_section (cache_ptr);
+  sec = bfd_asymbol_section (cache_ptr);
   off = 0;
 
   if (sec == NULL)
@@ -2064,14 +2064,14 @@ NAME (aout, swap_ext_reloc_out) (bfd *abfd,
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
      check for that here.  */
-  if (bfd_is_abs_section (bfd_get_section (sym)))
+  if (bfd_is_abs_section (bfd_asymbol_section (sym)))
     {
       r_extern = 0;
       r_index = N_ABS;
     }
   else if ((sym->flags & BSF_SECTION_SYM) == 0)
     {
-      if (bfd_is_und_section (bfd_get_section (sym))
+      if (bfd_is_und_section (bfd_asymbol_section (sym))
 	  || (sym->flags & BSF_GLOBAL) != 0)
 	r_extern = 1;
       else

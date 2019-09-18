@@ -1,3 +1,29 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in.h (bfd_asymbol_section): Rename from bfd_get_section.
+	(bfd_get_output_section): Delete.
+	(bfd_asymbol_base): Delete.
+	(bfd_asymbol_section, bfd_asymbol_value, bfd_asymbol_name),
+	(bfd_asymbol_bfd, bfd_asymbol_flavour): Tidy.
+	(bfd_set_asymbol_name): New macro.
+	* bfd-in2.h: Regenerate.
+	* aout-cris.c: Update throughout to use bfd_asymbol_section.
+	* aoutx.h: Likewise.
+	* cofflink.c: Likewise.
+	* dwarf2.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elfn32-mips.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* linker.c: Likewise.
+	* pdp11.c: Likewise.
+	* elf64-mmix.c (mmix_elf_reloc): Part expand bfd_get_output_section.
+
 2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Re-generate.

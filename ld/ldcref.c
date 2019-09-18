@@ -705,14 +705,14 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
       if (q->sym_ptr_ptr != NULL
 	  && *q->sym_ptr_ptr != NULL
 	  && ((global
-	       && (bfd_is_und_section (bfd_get_section (*q->sym_ptr_ptr))
-		   || bfd_is_com_section (bfd_get_section (*q->sym_ptr_ptr))
+	       && (bfd_is_und_section (bfd_asymbol_section (*q->sym_ptr_ptr))
+		   || bfd_is_com_section (bfd_asymbol_section (*q->sym_ptr_ptr))
 		   || ((*q->sym_ptr_ptr)->flags & (BSF_GLOBAL
 						   | BSF_WEAK)) != 0))
 	      || (!global
 		  && ((*q->sym_ptr_ptr)->flags & (BSF_LOCAL
 						  | BSF_SECTION_SYM)) != 0
-		  && bfd_get_section (*q->sym_ptr_ptr) == info->defsec))
+		  && bfd_asymbol_section (*q->sym_ptr_ptr) == info->defsec))
 	  && (symname != NULL
 	      ? strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), symname) == 0
 	      : ((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0))

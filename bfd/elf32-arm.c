@@ -16076,7 +16076,7 @@ arm_elf_find_function (bfd *	     abfd,
 		    BFD_ARM_SPECIAL_SYM_TYPE_ANY))
 	    continue;
 	  /* Fall through.  */
-	  if (bfd_get_section (&q->symbol) == section
+	  if (bfd_asymbol_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
 	    {

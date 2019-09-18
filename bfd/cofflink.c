@@ -902,7 +902,7 @@ _bfd_coff_final_link (bfd *abfd,
 					bfd_asymbol_name(sym), FALSE, FALSE)
 		       == NULL))
 		  || (((flaginfo.info->discard == discard_sec_merge
-			&& (bfd_get_section (sym)->flags & SEC_MERGE)
+			&& (bfd_asymbol_section (sym)->flags & SEC_MERGE)
 			&& ! bfd_link_relocatable (flaginfo.info))
 		       || flaginfo.info->discard == discard_l)
 		      && bfd_is_local_label_name (sub, bfd_asymbol_name(sym))))
