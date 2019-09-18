@@ -24,6 +24,7 @@
 #include "gdb_obstack.h"
 #include "gdb_select.h"
 #include "gdbsupport/filestuff.h"
+#include "cli/cli-style.h"
 
 null_file null_stream;
 
@@ -106,8 +107,6 @@ ui_file_isatty (struct ui_file *file)
 static bool
 term_cli_styling ()
 {
-  extern int cli_styling;
-
   if (!cli_styling)
     return false;
 

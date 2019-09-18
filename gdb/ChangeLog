@@ -1,3 +1,8 @@
+2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-file.c: Include cli/cli-style.h.
+	(term_cli_styling): Remove cli_styling declaration.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* arm-tdep.c (arm_record_special_symbol): Update bfd_get_section
