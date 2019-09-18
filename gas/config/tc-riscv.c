@@ -121,15 +121,28 @@ riscv_subset_supports (const char *feature)
 }
 
 static bfd_boolean
-riscv_multi_subset_supports (const char *features[])
+riscv_multi_subset_supports (enum riscv_insn_class insn_class)
 {
-  unsigned i = 0;
-  bfd_boolean supported = TRUE;
+  switch (insn_class)
+    {
+    case INSN_CLASS_I: return riscv_subset_supports ("i");
+    case INSN_CLASS_C: return riscv_subset_supports ("c");
+    case INSN_CLASS_A: return riscv_subset_supports ("a");
+    case INSN_CLASS_M: return riscv_subset_supports ("m");
+    case INSN_CLASS_F: return riscv_subset_supports ("f");
+    case INSN_CLASS_D: return riscv_subset_supports ("d");
+    case INSN_CLASS_D_AND_C:
+      return riscv_subset_supports ("d") && riscv_subset_supports ("c");
 
-  for (;features[i]; ++i)
-    supported = supported && riscv_subset_supports (features[i]);
+    case INSN_CLASS_F_AND_C:
+      return riscv_subset_supports ("f") && riscv_subset_supports ("c");
 
-  return supported;
+    case INSN_CLASS_Q: return riscv_subset_supports ("q");
+
+    default:
+      as_fatal ("Unreachable");
+      return FALSE;
+    }
 }
 
 /* Set which ISA and extensions are available.  */
@@ -1427,7 +1440,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       if ((insn->xlen_requirement != 0) && (xlen != insn->xlen_requirement))
 	continue;
 
-      if (!riscv_multi_subset_supports (insn->subset))
+      if (!riscv_multi_subset_supports (insn->insn_class))
 	continue;
 
       create_insn (ip, insn);

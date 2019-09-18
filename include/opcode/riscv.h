@@ -294,6 +294,23 @@ static const char * const riscv_pred_succ[16] =
 /* The maximal number of subset can be required. */
 #define MAX_SUBSET_NUM 4
 
+/* All RISC-V instructions belong to at least one of these classes.  */
+
+enum riscv_insn_class
+  {
+   INSN_CLASS_NONE,
+
+   INSN_CLASS_I,
+   INSN_CLASS_C,
+   INSN_CLASS_A,
+   INSN_CLASS_M,
+   INSN_CLASS_F,
+   INSN_CLASS_D,
+   INSN_CLASS_D_AND_C,
+   INSN_CLASS_F_AND_C,
+   INSN_CLASS_Q,
+  };
+
 /* This structure holds information for a particular instruction.  */
 
 struct riscv_opcode
@@ -302,9 +319,9 @@ struct riscv_opcode
   const char *name;
   /* The requirement of xlen for the instruction, 0 if no requirement.  */
   unsigned xlen_requirement;
-  /* An array of ISA subset name (I, M, A, F, D, Xextension), must ended
-     with a NULL pointer sential.  */
-  const char *subset[MAX_SUBSET_NUM];
+  /* Class to which this instruction belongs.  Used to decide whether or
+     not this instruction is legal in the current -march context.  */
+  enum riscv_insn_class insn_class;
   /* A string describing the arguments for this instruction.  */
   const char *args;
   /* The basic opcode for the instruction.  When assembling, this

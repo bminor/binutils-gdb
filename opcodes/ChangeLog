@@ -1,3 +1,9 @@
+2019-09-17  Maxim Blinov  <maxim.blinov@embecosm.com>
+
+	* riscv-opc.c (riscv_opcodes): Change subset field
+	to insn_class field for all instructions.
+	(riscv_insn_types): Likewise.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* configure: Regenerated.
