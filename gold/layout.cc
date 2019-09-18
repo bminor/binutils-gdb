@@ -1129,7 +1129,8 @@ Layout::special_ordering_of_input_section(const char* name)
     ".text.unlikely",
     ".text.exit",
     ".text.startup",
-    ".text.hot"
+    ".text.hot",
+    ".text.sorted"
   };
 
   for (size_t i = 0;

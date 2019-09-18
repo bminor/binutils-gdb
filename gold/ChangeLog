@@ -1,3 +1,12 @@
+2019-11-26  Martin Liska  <mliska@suse.cz>
+
+	* layout.cc (Layout::special_ordering_of_input_section):
+	Add ".text.sorted".
+	* output.cc: Special case ".text.sorted".
+	* testsuite/section_sorting_name.cc: Cover also .text.sorted
+	subsections.
+	* testsuite/section_sorting_name.sh: Likewise.
+
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
 	PR 24853

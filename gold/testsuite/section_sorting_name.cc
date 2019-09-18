@@ -50,6 +50,49 @@ int hot_foo_0002()
   return 1;
 }
 
+extern "C"
+__attribute__ ((section(".text.sorted.0002")))
+int sorted_foo_0002()
+{
+  return 1;
+}
+
+extern "C"
+__attribute__ ((section(".text.sorted.0001.abc")))
+int sorted_foo_0001_abc()
+{
+  return 1;
+}
+
+
+extern "C"
+__attribute__ ((section(".text.sorted.0001")))
+int sorted_foo_0001()
+{
+  return 1;
+}
+
+extern "C"
+__attribute__ ((section(".text.sorted.0003")))
+int sorted_foo_0003()
+{
+  return 1;
+}
+
+extern "C"
+__attribute__ ((section(".text.sorted.z")))
+int sorted_foo_z()
+{
+  return 1;
+}
+
+extern "C"
+__attribute__ ((section(".text.sorted.y")))
+int sorted_foo_y()
+{
+  return 1;
+}
+
 int vdata_0002  __attribute__((section(".data.0002"))) = 2;
 int vbss_0002 __attribute__((section(".bss.0002"))) = 0;
 

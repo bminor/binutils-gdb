@@ -1,3 +1,15 @@
+2019-11-26  Martin Liska  <mliska@suse.cz>
+
+	* scripttempl/arclinux.sc: Add .text.sorted.* which is sorted
+	by default.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf64bpf.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* testsuite/ld-arm/arm-no-rel-plt.ld: Expect .text.sorted.*
+	in the default linker script.
+	* testsuite/ld-arm/fdpic-main.ld: Likewise.
+	* testsuite/ld-arm/fdpic-shared.ld: Likewise.
+
 2019-11-25  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (fold_name): Pass section to bfd_octets_per_byte.

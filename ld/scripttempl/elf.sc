@@ -514,6 +514,7 @@ cat <<EOF
     ${RELOCATING+*(.text.exit .text.exit.*)}
     ${RELOCATING+*(.text.startup .text.startup.*)}
     ${RELOCATING+*(.text.hot .text.hot.*)}
+    ${RELOCATING+*(SORT(.text.sorted.*))}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
     /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)

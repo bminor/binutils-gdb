@@ -3547,8 +3547,10 @@ Output_section::Input_section_sort_section_prefix_special_ordering_compare
     const Output_section::Input_section_sort_entry& s2) const
 {
   // Some input section names have special ordering requirements.
-  int o1 = Layout::special_ordering_of_input_section(s1.section_name().c_str());
-  int o2 = Layout::special_ordering_of_input_section(s2.section_name().c_str());
+  const char *s1_section_name = s1.section_name().c_str();
+  const char *s2_section_name = s2.section_name().c_str();
+  int o1 = Layout::special_ordering_of_input_section(s1_section_name);
+  int o2 = Layout::special_ordering_of_input_section(s2_section_name);
   if (o1 != o2)
     {
       if (o1 < 0)
@@ -3558,6 +3560,8 @@ Output_section::Input_section_sort_section_prefix_special_ordering_compare
       else
 	return o1 < o2;
     }
+  else if (is_prefix_of(".text.sorted", s1_section_name))
+    return strcmp(s1_section_name, s2_section_name) <= 0;
 
   // Keep input order otherwise.
   return s1.index() < s2.index();
