@@ -602,6 +602,7 @@ static void
 init_line_structures (int minsize)
 {
   register int n;
+  int original_minsize = minsize;
 
   if (minsize <= _rl_screenwidth)	/* XXX - for gdb */
     minsize = _rl_screenwidth + 1;
@@ -622,7 +623,7 @@ init_line_structures (int minsize)
       invisible_line = (char *)xrealloc (invisible_line, line_size);
     }
 
-  for (n = minsize; n < line_size; n++)
+  for (n = original_minsize; n < line_size; n++)
     {
       visible_line[n] = 0;
       invisible_line[n] = 1;

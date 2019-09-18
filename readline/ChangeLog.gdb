@@ -1,3 +1,9 @@
+2019-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/24980
+	* display.c (init_line_structures): Initialise line_state using
+	original minsize value.
+
 2019-08-13  Christian Biesinger  <cbiesinger@google.com>
 
 	* colors.c (_rl_print_color_indicator): Remove unnecessary
