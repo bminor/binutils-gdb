@@ -1,3 +1,14 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (must_be_dyn_reloc): Return 0 for TOC16 relocs.
+	(ppc64_elf_check_relocs): Support dynamic/copy relocs for TOC16.
+	(ppc64_elf_adjust_dynamic_symbol): Don't keep dynamic reloc when
+	needs_copy even if all relocs are in rw sections.
+	(dec_dynrel_count): Handle TOC16 relocs.
+	(ppc64_elf_relocate_section): Support dynamic relocs for TOC16.
+	(ppc64_elf_finish_dynamic_symbol): Adjust to handle needs_copy
+	semantic change.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* version.m4: Set version to 2.33.50.

@@ -2745,6 +2745,12 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     case R_PPC64_REL32:
     case R_PPC64_REL64:
     case R_PPC64_REL30:
+    case R_PPC64_TOC16:
+    case R_PPC64_TOC16_DS:
+    case R_PPC64_TOC16_LO:
+    case R_PPC64_TOC16_HI:
+    case R_PPC64_TOC16_HA:
+    case R_PPC64_TOC16_LO_DS:
       return 0;
 
     case R_PPC64_TPREL16:
@@ -4830,6 +4836,16 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_TOC16_LO_DS:
 	  sec->has_toc_reloc = 1;
+	  if (h != NULL && !bfd_link_pic (info))
+	    {
+	      /* We may need a copy reloc.  */
+	      h->non_got_ref = 1;
+	      /* Strongly prefer a copy reloc over a dynamic reloc.
+		 glibc ld.so as of 2019-08 will error out if one of
+		 these relocations is emitted.  */
+	      h->needs_copy = 1;
+	      goto dodyn;
+	    }
 	  break;
 
 	  /* Marker reloc.  */
@@ -6425,7 +6441,9 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
       /* If we don't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      || (ELIMINATE_COPY_RELOCS && !alias_readonly_dynrelocs (h))
+      || (ELIMINATE_COPY_RELOCS
+	  && !h->needs_copy
+	  && !alias_readonly_dynrelocs (h))
 
       /* Protected variables do not work with .dynbss.  The copy in
 	 .dynbss won't be used by the shared library with the protected
@@ -6812,6 +6830,16 @@ dec_dynrel_count (bfd_vma r_info,
     {
     default:
       return TRUE;
+
+    case R_PPC64_TOC16:
+    case R_PPC64_TOC16_DS:
+    case R_PPC64_TOC16_LO:
+    case R_PPC64_TOC16_HI:
+    case R_PPC64_TOC16_HA:
+    case R_PPC64_TOC16_LO_DS:
+      if (h == NULL)
+	return TRUE;
+      break;
 
     case R_PPC64_TPREL16:
     case R_PPC64_TPREL16_LO:
@@ -15801,6 +15829,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TOC16_LO_DS:
 	case R_PPC64_TOC16_HA:
 	  addend -= TOCstart + htab->sec_info[input_section->id].toc_off;
+	  if (h != NULL)
+	    goto dodyn;
 	  break;
 
 	  /* Relocate against the beginning of the section.  */
@@ -16734,18 +16764,18 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  break;
 	}
 
-  if (h->needs_copy)
+  if (h->needs_copy
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+      && (h->root.u.def.section == htab->elf.sdynbss
+	  || h->root.u.def.section == htab->elf.sdynrelro))
     {
       /* This symbol needs a copy reloc.  Set it up.  */
       Elf_Internal_Rela rela;
       asection *srel;
       bfd_byte *loc;
 
-      if (h->dynindx == -1
-	  || (h->root.type != bfd_link_hash_defined
-	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->elf.srelbss == NULL
-	  || htab->elf.sreldynrelro == NULL)
+      if (h->dynindx == -1)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
