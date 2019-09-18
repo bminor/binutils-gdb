@@ -1,3 +1,8 @@
+2019-09-18  Christian Biesinger  <cbiesinger@google.com>
+
+	* dwarf2loc.c: Change extern declaration of dwarf_always_disassemble
+	to bool to match definition in dwarf2read.c.
+
 2019-09-17  Christian Biesinger  <cbiesinger@google.com>
 
 	* ada-lang.c (ada_ignore_descriptive_types_p): Change to bool.

@@ -46,7 +46,7 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/byte-vector.h"
 
-extern int dwarf_always_disassemble;
+extern bool dwarf_always_disassemble;
 
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    struct frame_info *frame,
