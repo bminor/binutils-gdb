@@ -1,5 +1,14 @@
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
+	* mach-o.c (bfd_mach_o_fat_member_init): Likewise.  Replace
+	xstrdup and xmalloc with bfd_strdup and bfd_malloc.  Return an
+	error status.  Adjust calls.
+	* vms-lib.c (_bfd_vms_lib_get_module): Test mhd->id earlier.
+	Close bfd on failure.  Replace xstrdup/bfd_alloc use with
+	bfd_malloc.  Use bfd_set_filename.
+
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (must_be_dyn_reloc): Return 0 for TOC16 relocs.
 	(ppc64_elf_check_relocs): Support dynamic/copy relocs for TOC16.
 	(ppc64_elf_adjust_dynamic_symbol): Don't keep dynamic reloc when

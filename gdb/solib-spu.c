@@ -377,8 +377,7 @@ spu_bfd_open (const char *pathname)
 
 	  strcat (buf, original_name);
 
-	  xfree ((char *)abfd->filename);
-	  abfd->filename = xstrdup (buf);
+	  bfd_set_filename (abfd.get (), xstrdup (buf));
 	}
     }
 

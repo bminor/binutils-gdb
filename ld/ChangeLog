@@ -1,3 +1,8 @@
+2019-09-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/pe.em (after_open): Use bfd_set_filename.
+	* emultempl/pep.em (after_open): Use bfd_set_filename.
+
 2019-09-16  Alan Modra  <amodra@gmail.com>
 
 	PR 25002

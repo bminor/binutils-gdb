@@ -1510,7 +1510,7 @@ gld_${EMULATION_NAME}_after_open (void)
 			/* Rename this implib to match the other one.  */
 			n = xmalloc (strlen (other_bfd_filename) + 1);
 			strcpy (n, other_bfd_filename);
-			is->the_bfd->my_archive->filename = n;
+			bfd_set_filename (is->the_bfd->my_archive, n);
 		      }
 
 		    free (relocs);
@@ -1615,7 +1615,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		new_name = xmalloc (strlen (is->the_bfd->filename) + 3);
 		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
-		is->the_bfd->filename = new_name;
+		bfd_set_filename (is->the_bfd, new_name);
 
 		new_name = xmalloc (strlen (is->filename) + 3);
 		sprintf (new_name, "%s.%c", is->filename, seq);

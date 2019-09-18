@@ -5417,7 +5417,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
    ARCH_TYPE/ARCH_SUBTYPE and corresponding entry in header is ENTRY.
    Set arelt_data and origin fields too.  */
 
-static void
+static bfd_boolean
 bfd_mach_o_fat_member_init (bfd *abfd,
 			    enum bfd_architecture arch_type,
 			    unsigned long arch_subtype,
@@ -5426,27 +5426,35 @@ bfd_mach_o_fat_member_init (bfd *abfd,
   struct areltdata *areltdata;
   /* Create the member filename. Use ARCH_NAME.  */
   const bfd_arch_info_type *ap = bfd_lookup_arch (arch_type, arch_subtype);
+  char *filename;
 
   if (ap)
     {
       /* Use the architecture name if known.  */
-      abfd->filename = xstrdup (ap->printable_name);
+      filename = bfd_strdup (ap->printable_name);
+      if (filename == NULL)
+	return FALSE;
     }
   else
     {
       /* Forge a uniq id.  */
       const size_t namelen = 2 + 8 + 1 + 2 + 8 + 1;
-      char *name = xmalloc (namelen);
-      snprintf (name, namelen, "0x%lx-0x%lx",
+      filename = bfd_malloc (namelen);
+      if (filename == NULL)
+	return FALSE;
+      snprintf (filename, namelen, "0x%lx-0x%lx",
 		entry->cputype, entry->cpusubtype);
-      abfd->filename = name;
     }
+  bfd_set_filename (abfd, filename);
 
   areltdata = bfd_zmalloc (sizeof (struct areltdata));
+  if (areltdata == NULL)
+    return FALSE;
   areltdata->parsed_size = entry->size;
   abfd->arelt_data = areltdata;
   abfd->iostream = NULL;
   abfd->origin = entry->offset;
+  return TRUE;
 }
 
 bfd *
@@ -5502,7 +5510,11 @@ bfd_mach_o_fat_openr_next_archived_file (bfd *archive, bfd *prev)
   bfd_mach_o_convert_architecture (entry->cputype, entry->cpusubtype,
 				   &arch_type, &arch_subtype);
 
-  bfd_mach_o_fat_member_init (nbfd, arch_type, arch_subtype, entry);
+  if (!bfd_mach_o_fat_member_init (nbfd, arch_type, arch_subtype, entry))
+    {
+      bfd_close (nbfd);
+      return NULL;
+    }
 
   bfd_set_arch_mach (nbfd, arch_type, arch_subtype);
 
@@ -5574,9 +5586,8 @@ bfd_mach_o_fat_extract (bfd *abfd,
       if (res == NULL)
 	return NULL;
 
-      bfd_mach_o_fat_member_init (res, cpu_type, cpu_subtype, e);
-
-      if (bfd_check_format (res, format))
+      if (bfd_mach_o_fat_member_init (res, cpu_type, cpu_subtype, e)
+	  && bfd_check_format (res, format))
 	{
 	  BFD_ASSERT (bfd_get_arch_info (res) == arch);
 	  return res;

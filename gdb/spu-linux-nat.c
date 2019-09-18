@@ -371,8 +371,7 @@ spu_bfd_open (ULONGEST addr)
 				    sect_size - 20);
 	  buf[sect_size - 20] = '\0';
 
-	  xfree ((char *)nbfd->filename);
-	  nbfd->filename = xstrdup (buf);
+	  bfd_set_filename (nbfd.get (), xstrdup (buf));
 	}
     }
 
