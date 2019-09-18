@@ -1,3 +1,8 @@
+2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Re-generate.
+	* configure: Re-generate.
+
 2019-09-17  Maxim Blinov  <maxim.blinov@embecosm.com>
 
 	* riscv-opc.c (riscv_opcodes): Change subset field
