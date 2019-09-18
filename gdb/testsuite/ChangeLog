@@ -19,6 +19,7 @@
 
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 
+	PR testsuite/25016
 	* README: Add pie options.
 	* gdb.base/break-interp.exp: Ensure pie is disabled.
 	* gdb.base/dump.exp: Likewise.
