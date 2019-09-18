@@ -41,6 +41,7 @@
 #include "gdb/section-scripts.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
+#include "cli/cli-style.h"
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).
@@ -490,9 +491,10 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
     return 1;
 
-  warning (_("File \"%s\" auto-loading has been declined by your "
+  warning (_("File \"%ps\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
-	   filename_real.get (), auto_load_safe_path);
+	   styled_string (file_name_style.style (), filename_real.get ()),
+	   auto_load_safe_path);
 
   if (!advice_printed)
     {
@@ -989,8 +991,10 @@ execute_script_contents (struct auto_load_pspace_info *pspace_info,
       /* We don't throw an error, the program is still debuggable.  */
       warning (_("\
 Missing/bad script name in entry at offset %u in section %s\n\
-of file %s."),
-	       offset, section_name, objfile_name (objfile));
+of file %ps."),
+	       offset, section_name,
+	       styled_string (file_name_style.style (),
+			      objfile_name (objfile)));
       return;
     }
   script_text = newline + 1;
@@ -1120,8 +1124,10 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
     return;
 
   if (!bfd_get_full_section_contents (abfd, scripts_sect, &data))
-    warning (_("Couldn't read %s section of %s"),
-	     section_name, bfd_get_filename (abfd));
+    warning (_("Couldn't read %s section of %ps"),
+	     section_name,
+	     styled_string (file_name_style.style (),
+			    bfd_get_filename (abfd)));
   else
     {
       gdb::unique_xmalloc_ptr<bfd_byte> data_holder (data);
@@ -1349,11 +1355,13 @@ info_auto_load_local_gdbinit (const char *args, int from_tty)
   if (auto_load_local_gdbinit_pathname == NULL)
     printf_filtered (_("Local .gdbinit file was not found.\n"));
   else if (auto_load_local_gdbinit_loaded)
-    printf_filtered (_("Local .gdbinit file \"%s\" has been loaded.\n"),
-		     auto_load_local_gdbinit_pathname);
+    printf_filtered (_("Local .gdbinit file \"%ps\" has been loaded.\n"),
+		     styled_string (file_name_style.style (),
+				    auto_load_local_gdbinit_pathname));
   else
-    printf_filtered (_("Local .gdbinit file \"%s\" has not been loaded.\n"),
-		     auto_load_local_gdbinit_pathname);
+    printf_filtered (_("Local .gdbinit file \"%ps\" has not been loaded.\n"),
+		     styled_string (file_name_style.style (),
+				    auto_load_local_gdbinit_pathname));
 }
 
 /* Print an "unsupported script" warning if it has not already been printed.
@@ -1370,9 +1378,11 @@ maybe_print_unsupported_script_warning
     {
       warning (_("\
 Unsupported auto-load script at offset %u in section %s\n\
-of file %s.\n\
+of file %ps.\n\
 Use `info auto-load %s-scripts [REGEXP]' to list them."),
-	       offset, section_name, objfile_name (objfile),
+	       offset, section_name,
+	       styled_string (file_name_style.style (),
+			      objfile_name (objfile)),
 	       ext_lang_name (language));
       pspace_info->unsupported_script_warning_printed = true;
     }
@@ -1392,9 +1402,11 @@ maybe_print_script_not_found_warning
     {
       warning (_("\
 Missing auto-load script at offset %u in section %s\n\
-of file %s.\n\
+of file %ps.\n\
 Use `info auto-load %s-scripts [REGEXP]' to list them."),
-	       offset, section_name, objfile_name (objfile),
+	       offset, section_name,
+	       styled_string (file_name_style.style (),
+			      objfile_name (objfile)),
 	       ext_lang_name (language));
       pspace_info->script_not_found_warning_printed = true;
     }

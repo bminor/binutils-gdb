@@ -1393,7 +1393,7 @@ print_frame (const frame_print_options &fp_opts,
 	    annotate_frame_where ();
 	    uiout->wrap_hint ("  ");
 	    uiout->text (" from ");
-	    uiout->field_string ("from", lib);
+	    uiout->field_string ("from", lib, file_name_style.style ());
 	  }
       }
     if (uiout->is_mi_like_p ())
@@ -1524,8 +1524,11 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
   wrap_here ("   ");
   if (sal.symtab)
-    printf_filtered (" (%s:%d)", symtab_to_filename_for_display (sal.symtab),
-		     sal.line);
+    printf_filtered
+      (" (%ps:%d)",
+       styled_string (file_name_style.style (),
+		      symtab_to_filename_for_display (sal.symtab)),
+       sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s = ", pc_regname);

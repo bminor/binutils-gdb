@@ -1,5 +1,17 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (print_frame, info_frame_command_core): Use
+	styled_string.
+	* linux-thread-db.c (try_thread_db_load_1)
+	(try_thread_db_load_from_pdir_1): Use styled_string.
+	* auto-load.c (file_is_auto_load_safe, execute_script_contents)
+	(auto_load_section_scripts, info_auto_load_local_gdbinit)
+	(maybe_print_unsupported_script_warning)
+	(maybe_print_script_not_found_warning): Use styled_string.
+	* ada-lang.c (user_select_syms): Use styled_string.
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* p-lang.c (pascal_printstr): Use metadata style.
 	* value.c (show_convenience): Use metadata style.
 	* valprint.c (valprint_check_validity, val_print_optimized_out)

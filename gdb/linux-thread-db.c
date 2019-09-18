@@ -48,6 +48,7 @@
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "valprint.h"
+#include "cli/cli-style.h"
 
 /* GNU/Linux libthread_db support.
 
@@ -933,8 +934,9 @@ try_thread_db_load_1 (struct thread_db_info *info)
 	 enabled.  User visible output should not depend on debug
 	 settings.  */
       file = *libthread_db_search_path != '\0' ? gdb_stdout : gdb_stdlog;
-      fprintf_unfiltered (file, _("Using host libthread_db library \"%s\".\n"),
-			  library);
+      fprintf_unfiltered (file,
+			  _("Using host libthread_db library \"%ps\".\n"),
+			  styled_string (file_name_style.style (), library));
     }
 
   /* The thread library was detected.  Activate the thread_db target
@@ -1028,7 +1030,8 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
   if (obj_name[0] != '/')
     {
       warning (_("Expected absolute pathname for libpthread in the"
-		 " inferior, but got %s."), obj_name);
+		 " inferior, but got %ps."),
+	       styled_string (file_name_style.style (), obj_name));
       return false;
     }
 

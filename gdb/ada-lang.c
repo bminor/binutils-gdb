@@ -3881,9 +3881,11 @@ See set/show multiple-symbol."));
 	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
 			     metadata_style.style ().ptr (), nullptr, sal.line);
 	  else
-	    printf_filtered (_(" at %s:%d\n"),
-			     symtab_to_filename_for_display (sal.symtab),
-			     sal.line);
+	    printf_filtered
+	      (_(" at %ps:%d\n"),
+	       styled_string (file_name_style.style (),
+			      symtab_to_filename_for_display (sal.symtab)),
+	       sal.line);
           continue;
         }
       else
