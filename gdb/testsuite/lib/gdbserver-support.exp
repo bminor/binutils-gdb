@@ -41,12 +41,13 @@
 #
 
 #
-# gdb_target_cmd
-# Send gdb the "target" command.  Returns 0 on success, 1 on failure.
+# gdb_target_cmd_ext
+# Send gdb the "target" command.  Returns 0 on success, 1 on failure, 2 on
+# unsupported.
 # If specified, then ADDITIONAL_TEXT must match the text that comes after
 # the connection message in order for the procedure to succeed.
 #
-proc gdb_target_cmd { targetname serialport {additional_text ""} } {
+proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
     global gdb_prompt
 
     set serialport_re [string_to_regexp $serialport]
@@ -97,6 +98,9 @@ proc gdb_target_cmd { targetname serialport {additional_text ""} } {
 		# Leave it there for the test to diagnose.
 		return 1
 	    }
+	    -re ": Network is unreachable.\r\n.*$gdb_prompt $" {
+		return 2
+	    }
 	    timeout {
 		send_gdb ""
 		break
@@ -106,6 +110,12 @@ proc gdb_target_cmd { targetname serialport {additional_text ""} } {
     return 1
 }
 
+# Like gdb_target_cmd_ext, but returns 0 on success, 1 on failure.
+
+proc gdb_target_cmd { $args } {
+    set res [gdb_target_cmd_ext $args]
+    return [expr $res == 0 ? 0 : 1]
+}
 
 global portnum
 set portnum "2345"
