@@ -294,7 +294,7 @@ static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
 
 #define DISPLACED_STEPPING_ARCH_VERSION		5
 
-/* Set to true if the 32-bit mode is in use.  */
+/* See arm-tdep.h.  */
 
 bool arm_apcs_32 = true;
 

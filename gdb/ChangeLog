@@ -1,5 +1,13 @@
 2019-09-19  Christian Biesinger  <cbiesinger@google.com>
 
+	* arm-linux-nat.c: Remove extern declaration for arm_apcs_32.
+	* arm-linux-tdep.c: Likewise.
+	* arm-nbsd-nat.c: Likewise.
+	* arm-tdep.h: Declare arm_apcs_32.
+	* arm-tdep.c: Move documentation for arm_apcs_32 to arm-tdep.h.
+
+2019-09-19  Christian Biesinger  <cbiesinger@google.com>
+
 	* dwarf2loc.c: Remove extern declaration of dwarf_always_disassemble.
 	* dwarf2read.h: Declare dwarf_always_disassemble.
 

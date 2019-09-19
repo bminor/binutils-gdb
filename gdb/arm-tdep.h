@@ -26,6 +26,10 @@ struct get_next_pcs;
 struct arm_get_next_pcs;
 struct gdb_get_next_pcs;
 
+/* Set to true if the 32-bit mode is in use.  */
+
+extern bool arm_apcs_32;
+
 #include "gdbarch.h"
 #include "arch/arm.h"
 #include "infrun.h"
