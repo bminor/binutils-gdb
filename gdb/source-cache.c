@@ -190,14 +190,14 @@ source_cache::ensure (struct symtab *s)
 	     conditional compilation in source-cache.h.  */
 	  static srchilite::SourceHighlight *highlighter;
 
-	  if (highlighter == nullptr)
-	    {
-	      highlighter = new srchilite::SourceHighlight ("esc.outlang");
-	      highlighter->setStyleFile ("esc.style");
-	    }
-
 	  try
 	    {
+	      if (highlighter == nullptr)
+		{
+		  highlighter = new srchilite::SourceHighlight ("esc.outlang");
+		  highlighter->setStyleFile ("esc.style");
+		}
+
 	      std::istringstream input (contents);
 	      std::ostringstream output;
 	      highlighter->highlight (input, output, lang_name, fullname);
