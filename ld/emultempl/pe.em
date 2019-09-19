@@ -2116,9 +2116,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 		&& (nexts->flags & SEC_EXCLUDE) == 0
 		&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
 		&& (nexts->owner->flags & DYNAMIC) == 0
-		&& nexts->owner->usrdata != NULL
-		&& !(((lang_input_statement_type *) nexts->owner->usrdata)
-		     ->flags.just_syms))
+		&& !bfd_input_just_syms (nexts->owner))
 	      flags = (((flags ^ SEC_READONLY)
 			| (nexts->flags ^ SEC_READONLY))
 		       ^ SEC_READONLY);

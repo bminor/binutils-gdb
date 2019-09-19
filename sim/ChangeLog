@@ -1,3 +1,7 @@
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* ppc/emul_generic.c (emul_add_tree_options): Delete old bfd code.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* common/sim-load.c, * common/sim-utils.c, * cris/sim-if.c,

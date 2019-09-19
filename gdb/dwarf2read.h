@@ -417,7 +417,7 @@ struct dwz_file
 
   const char *filename () const
   {
-    return bfd_get_filename (this->dwz_bfd);
+    return bfd_get_filename (this->dwz_bfd.get ());
   }
 
   /* A dwz file can only contain a few sections.  */

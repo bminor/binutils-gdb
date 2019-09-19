@@ -3584,14 +3584,14 @@ dwarf2_read_gdb_index
 	return 0;
 
       if (!read_gdb_index_from_buffer (objfile,
-				       bfd_get_filename (dwz->dwz_bfd), 1,
-				       dwz_index_content, &dwz_map,
+				       bfd_get_filename (dwz->dwz_bfd.get ()),
+				       1, dwz_index_content, &dwz_map,
 				       &dwz_list, &dwz_list_elements,
 				       &dwz_types_ignore,
 				       &dwz_types_elements_ignore))
 	{
 	  warning (_("could not read '.gdb_index' section from %s; skipping"),
-		   bfd_get_filename (dwz->dwz_bfd));
+		   bfd_get_filename (dwz->dwz_bfd.get ()));
 	  return 0;
 	}
     }
@@ -5596,11 +5596,11 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (dwz != NULL)
     {
       if (!read_debug_names_from_section (objfile,
-					  bfd_get_filename (dwz->dwz_bfd),
+					  bfd_get_filename (dwz->dwz_bfd.get ()),
 					  &dwz->debug_names, dwz_map))
 	{
 	  warning (_("could not read '.debug_names' section from %s; skipping"),
-		   bfd_get_filename (dwz->dwz_bfd));
+		   bfd_get_filename (dwz->dwz_bfd.get ()));
 	  return false;
 	}
     }
@@ -19759,11 +19759,11 @@ read_indirect_string_from_dwz (struct objfile *objfile, struct dwz_file *dwz,
   if (dwz->str.buffer == NULL)
     error (_("DW_FORM_GNU_strp_alt used without .debug_str "
 	     "section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd));
+	   bfd_get_filename (dwz->dwz_bfd.get ()));
   if (str_offset >= dwz->str.size)
     error (_("DW_FORM_GNU_strp_alt pointing outside of "
 	     ".debug_str section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd));
+	   bfd_get_filename (dwz->dwz_bfd.get ()));
   gdb_assert (HOST_CHAR_BIT == 8);
   if (dwz->str.buffer[str_offset] == '\0')
     return NULL;

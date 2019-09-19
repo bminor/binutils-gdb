@@ -1,5 +1,28 @@
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
+	* archive.c (bfd_generic_archive_p): Use bfd_set_thin_archive.
+	* bfd-in.h (bfd_get_filename, bfd_get_cacheable, bfd_get_format),
+	(bfd_get_target, bfd_get_flavour, bfd_family_coff, bfd_big_endian),
+	(bfd_little_endian, bfd_header_big_endian, bfd_header_little_endian),
+	(bfd_get_file_flags, bfd_applicable_file_flags),
+	(bfd_applicable_section_flags, bfd_has_map, bfd_is_thin_archive),
+	(bfd_valid_reloc_types, bfd_usrdata, bfd_get_start_address),
+	(bfd_get_symcount, bfd_get_outsymbols, bfd_count_sections),
+	(bfd_get_dynamic_symcount, bfd_get_symbol_leading_char): Delete.
+	* bfd/bfd.c (bfd_get_filename, bfd_get_cacheable, bfd_get_format),
+	(bfd_get_file_flags, bfd_get_start_address, bfd_get_symcount),
+	(bfd_get_dynamic_symcount, bfd_get_outsymbols, bfd_count_sections),
+	(bfd_has_map, bfd_is_thin_archive, bfd_set_thin_archive),
+	(bfd_usrdata, bfd_set_usrdata): New inline functions.
+	* targets.c (bfd_get_target, bfd_get_flavour),
+	(bfd_applicable_file_flags, bfd_family_coff, bfd_big_endian),
+	(bfd_little_endian, bfd_header_big_endian),
+	(bfd_header_little_endian, bfd_applicable_section_flags),
+	(bfd_get_symbol_leading_char): New inline functions.
+	* bfd-in2.h: Regenerate.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_glibc_dynamic_reloc): New function.
 	(ppc64_elf_relocate_section): Warn if emitting unsupported dynamic
 	relocations.

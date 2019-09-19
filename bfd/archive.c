@@ -856,7 +856,7 @@ bfd_generic_archive_p (bfd *abfd)
       return NULL;
     }
 
-  bfd_is_thin_archive (abfd) = (strncmp (armag, ARMAGT, SARMAG) == 0);
+  bfd_set_thin_archive (abfd, strncmp (armag, ARMAGT, SARMAG) == 0);
 
   if (strncmp (armag, ARMAG, SARMAG) != 0
       && ! bfd_is_thin_archive (abfd))

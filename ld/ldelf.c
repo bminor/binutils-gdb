@@ -1018,7 +1018,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 	    && bfd_count_sections (abfd) != 0
-	    && !((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
+	    && !bfd_input_just_syms (abfd))
 	  break;
 
       /* PR 10555: If there are no ELF input files do not try to
@@ -1060,7 +1060,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	{
 	  int type = 0;
 
-	  if (((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
+	  if (bfd_input_just_syms (abfd))
 	    continue;
 
 	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
@@ -2065,9 +2065,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	    && (nexts->flags & SEC_EXCLUDE) == 0
 	    && ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
 	    && (nexts->owner->flags & DYNAMIC) == 0
-	    && nexts->owner->usrdata != NULL
-	    && !(((lang_input_statement_type *) nexts->owner->usrdata)
-		 ->flags.just_syms)
+	    && !bfd_input_just_syms (nexts->owner)
 	    && _bfd_elf_match_sections_by_type (nexts->owner, nexts,
 						s->owner, s))
 	  flags = (((flags ^ SEC_READONLY)

@@ -902,12 +902,8 @@ walk_wild_file (lang_wild_statement_type *s,
 	     archive which is included, BFD will call ldlang_add_file,
 	     which will set the usrdata field of the member to the
 	     lang_input_statement.  */
-	  if (member->usrdata != NULL)
-	    {
-	      walk_wild_section (s,
-				 (lang_input_statement_type *) member->usrdata,
-				 callback, data);
-	    }
+	  if (bfd_usrdata (member) != NULL)
+	    walk_wild_section (s, bfd_usrdata (member), callback, data);
 
 	  member = bfd_openr_next_archived_file (f->the_bfd, member);
 	}
@@ -3038,7 +3034,7 @@ load_symbols (lang_input_statement_type *entry,
     case bfd_archive:
       check_excluded_libs (entry->the_bfd);
 
-      entry->the_bfd->usrdata = entry;
+      bfd_set_usrdata (entry->the_bfd, entry);
       if (entry->flags.whole_archive)
 	{
 	  bfd *member = NULL;
@@ -6898,7 +6894,7 @@ ldlang_add_file (lang_input_statement_type *entry)
 
   *link_info.input_bfds_tail = entry->the_bfd;
   link_info.input_bfds_tail = &entry->the_bfd->link.next;
-  entry->the_bfd->usrdata = entry;
+  bfd_set_usrdata (entry->the_bfd, entry);
   bfd_set_gp_size (entry->the_bfd, g_switch_value);
 
   /* Look through the sections and check for any which should not be
@@ -7540,7 +7536,7 @@ lang_process (void)
 	      *iter = temp;
 	      if (my_arch != NULL)
 		{
-		  lang_input_statement_type *parent = my_arch->usrdata;
+		  lang_input_statement_type *parent = bfd_usrdata (my_arch);
 		  if (parent != NULL)
 		    parent->next = (lang_input_statement_type *)
 		      ((char *) iter

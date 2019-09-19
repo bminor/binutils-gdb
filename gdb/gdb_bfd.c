@@ -546,7 +546,7 @@ gdb_bfd_ref (struct bfd *abfd)
   abfd->flags |= BFD_DECOMPRESS;
 
   gdata = new gdb_bfd_data (abfd);
-  bfd_usrdata (abfd) = gdata;
+  bfd_set_usrdata (abfd, gdata);
   bfd_alloc_data (abfd);
 
   /* This is the first we've seen it, so add it to the hash table.  */
@@ -608,7 +608,7 @@ gdb_bfd_unref (struct bfd *abfd)
 
   bfd_free_data (abfd);
   delete gdata;
-  bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
+  bfd_set_usrdata (abfd, NULL);  /* Paranoia.  */
 
   htab_remove_elt (all_bfds, abfd);
 

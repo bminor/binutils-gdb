@@ -816,7 +816,7 @@ add_archive_element (struct bfd_link_info *info,
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
 
-  parent = abfd->my_archive->usrdata;
+  parent = bfd_usrdata (abfd->my_archive);
   if (parent != NULL && !parent->flags.reload)
     parent->next = input;
 

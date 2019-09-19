@@ -671,7 +671,7 @@ macho_symfile_read_all_oso (std::vector<oso_el> *oso_vector_ptr,
           /* Load all oso in this library.  */
 	  while (member_bfd != NULL)
 	    {
-	      const char *member_name = member_bfd->filename;
+	      const char *member_name = bfd_get_filename (member_bfd.get ());
               int member_len = strlen (member_name);
 
               /* If this member is referenced, add it as a symfile.  */
@@ -685,7 +685,7 @@ macho_symfile_read_all_oso (std::vector<oso_el> *oso_vector_ptr,
                                   member_len))
                     {
                       macho_add_oso_symfile (oso2, member_bfd,
-					     bfd_get_filename (member_bfd),
+					     bfd_get_filename (member_bfd.get ()),
                                              main_objfile, symfile_flags);
                       oso2->name = NULL;
                       break;

@@ -502,14 +502,14 @@ solib_bfd_open (const char *pathname)
   /* Check bfd format.  */
   if (!bfd_check_format (abfd.get (), bfd_object))
     error (_("`%s': not in executable format: %s"),
-	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
+	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
 
   /* Check bfd arch.  */
   b = gdbarch_bfd_arch_info (target_gdbarch ());
   if (!b->compatible (b, bfd_get_arch_info (abfd.get ())))
     warning (_("`%s': Shared library architecture %s is not compatible "
-               "with target architecture %s."), bfd_get_filename (abfd),
-             bfd_get_arch_info (abfd.get ())->printable_name,
+	       "with target architecture %s."), bfd_get_filename (abfd.get ()),
+	     bfd_get_arch_info (abfd.get ())->printable_name,
 	     b->printable_name);
 
   return abfd;

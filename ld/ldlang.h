@@ -331,6 +331,12 @@ typedef struct input_section_userdata_struct
 
 #define get_userdata(x) ((x)->userdata)
 
+static inline bfd_boolean
+bfd_input_just_syms (const bfd *abfd)
+{
+  lang_input_statement_type *is = bfd_usrdata (abfd);
+  return is != NULL && is->flags.just_syms;
+}
 
 typedef struct lang_wild_statement_struct lang_wild_statement_type;
 

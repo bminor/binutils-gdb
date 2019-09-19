@@ -355,12 +355,96 @@ CODE_FRAGMENT
 .  const struct bfd_build_id *build_id;
 .};
 .
+.static inline const char *
+.bfd_get_filename (const bfd *abfd)
+.{
+.  return abfd->filename;
+.}
+.
+.static inline bfd_boolean
+.bfd_get_cacheable (const bfd *abfd)
+.{
+.  return abfd->cacheable;
+.}
+.
+.static inline enum bfd_format
+.bfd_get_format (const bfd *abfd)
+.{
+.  return abfd->format;
+.}
+.
+.static inline flagword
+.bfd_get_file_flags (const bfd *abfd)
+.{
+.  return abfd->flags;
+.}
+.
+.static inline bfd_vma
+.bfd_get_start_address (const bfd *abfd)
+.{
+.  return abfd->start_address;
+.}
+.
+.static inline unsigned int
+.bfd_get_symcount (const bfd *abfd)
+.{
+.  return abfd->symcount;
+.}
+.
+.static inline unsigned int
+.bfd_get_dynamic_symcount (const bfd *abfd)
+.{
+.  return abfd->dynsymcount;
+.}
+.
+.static inline struct bfd_symbol **
+.bfd_get_outsymbols (const bfd *abfd)
+.{
+.  return abfd->outsymbols;
+.}
+.
+.static inline unsigned int
+.bfd_count_sections (const bfd *abfd)
+.{
+.  return abfd->section_count;
+.}
+.
+.static inline bfd_boolean
+.bfd_has_map (const bfd *abfd)
+.{
+.  return abfd->has_armap;
+.}
+.
+.static inline bfd_boolean
+.bfd_is_thin_archive (const bfd *abfd)
+.{
+.  return abfd->is_thin_archive;
+.}
+.
+.static inline void *
+.bfd_usrdata (const bfd *abfd)
+.{
+.  return abfd->usrdata;
+.}
+.
 .{* See note beside bfd_set_section_userdata.  *}
 .static inline bfd_boolean
 .bfd_set_cacheable (bfd * abfd, bfd_boolean val)
 .{
 .  abfd->cacheable = val;
 .  return TRUE;
+.}
+.
+.static inline void
+.bfd_set_thin_archive (bfd *abfd, bfd_boolean val)
+.{
+.  abfd->is_thin_archive = val;
+.}
+.
+.static inline void
+.bfd_set_usrdata (bfd *abfd, void *val)
+.{
+.  abfd->usrdata = val;
 .}
 .
 */

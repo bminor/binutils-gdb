@@ -1,3 +1,7 @@
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* ar.c (write_archive): Use bfd_set_thin_archive.
+
 2019-09-18  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/binutils-all/objdump.exp (objump -S): Update testcases.

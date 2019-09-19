@@ -1,3 +1,12 @@
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* gdb_bfd.c (gdb_bfd_ref, gdb_bfd_unref): Use bfd_set_usrdata.
+	* dwarf2read.c (dwarf2_read_gdb_index, dwarf2_read_debug_names),
+	(read_indirect_string_from_dwz): Use bfd accessor.
+	* dwarf2read.h (struct dwz_file <filename>): Likewise.
+	* machoread.c (macho_symfile_read_all_oso): Likewise.
+	* solib.c (solib_bfd_open): Likewise.
+
 2019-09-19  Christian Biesinger  <cbiesinger@google.com>
 
 	* eval.c: Move declaration of overload_resolution to...

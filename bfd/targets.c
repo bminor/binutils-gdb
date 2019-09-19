@@ -584,6 +584,66 @@ to find an alternative output format that is suitable.
 .
 .} bfd_target;
 .
+.static inline const char *
+.bfd_get_target (const bfd *abfd)
+.{
+.  return abfd->xvec->name;
+.}
+.
+.static inline enum bfd_flavour
+.bfd_get_flavour (const bfd *abfd)
+.{
+.  return abfd->xvec->flavour;
+.}
+.
+.static inline flagword
+.bfd_applicable_file_flags (const bfd *abfd)
+.{
+.  return abfd->xvec->object_flags;
+.}
+.
+.static inline bfd_boolean
+.bfd_family_coff (const bfd *abfd)
+.{
+.  return (bfd_get_flavour (abfd) == bfd_target_coff_flavour
+.          || bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
+.}
+.
+.static inline bfd_boolean
+.bfd_big_endian (const bfd *abfd)
+.{
+.  return abfd->xvec->byteorder == BFD_ENDIAN_BIG;
+.}
+.static inline bfd_boolean
+.bfd_little_endian (const bfd *abfd)
+.{
+.  return abfd->xvec->byteorder == BFD_ENDIAN_LITTLE;
+.}
+.
+.static inline bfd_boolean
+.bfd_header_big_endian (const bfd *abfd)
+.{
+.  return abfd->xvec->header_byteorder == BFD_ENDIAN_BIG;
+.}
+.
+.static inline bfd_boolean
+.bfd_header_little_endian (const bfd *abfd)
+.{
+.  return abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE;
+.}
+.
+.static inline flagword
+.bfd_applicable_section_flags (const bfd *abfd)
+.{
+.  return abfd->xvec->section_flags;
+.}
+.
+.static inline char
+.bfd_get_symbol_leading_char (const bfd *abfd)
+.{
+.  return abfd->xvec->symbol_leading_char;
+.}
+.
 */
 
 /* All known xvecs (even those that don't compile on all systems).

@@ -1200,7 +1200,7 @@ write_archive (bfd *iarch)
     obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
 
   if (make_thin_archive || bfd_is_thin_archive (iarch))
-    bfd_is_thin_archive (obfd) = 1;
+    bfd_set_thin_archive (obfd, TRUE);
 
   if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);

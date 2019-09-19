@@ -1,3 +1,16 @@
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* ldelf.c (ldelf_after_open, ldelf_place_orphan
+	* ldlang.c (walk_wild_file, lang_process): Use bfd_usrdata.
+	(load_symbols, ldlang_add_file): Use bfd_set_usrdata.
+	* ldmain.c (add_archive_element): Use bfd_usrdata.
+	* ldlang.h (bfd_input_just_syms): New inline function.
+	* emultempl/aarch64elf.em (build_section_lists): Use it.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/ppc64elf.em (build_section_lists): Likewise.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* ldcref.c, * ldctor.c, * ldelf.c, * ldlang.c, * pe-dll.c,
