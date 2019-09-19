@@ -26,8 +26,6 @@
    inferior.  For presentation purposes, the branch trace is represented as a
    list of sequential control-flow blocks, one such list per thread.  */
 
-#include "vec.h"
-
 /* A branch trace block.
 
    This represents a block of sequential control-flow.  Adjacent blocks will be

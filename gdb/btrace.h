@@ -264,9 +264,6 @@ struct btrace_pt_packet
   struct pt_packet packet;
 };
 
-/* Define functions operating on a vector of packets.  */
-typedef struct btrace_pt_packet btrace_pt_packet_s;
-DEF_VEC_O (btrace_pt_packet_s);
 #endif /* defined (HAVE_LIBIPT)  */
 
 /* Branch trace iteration state for "maintenance btrace packet-history".  */
@@ -300,7 +297,7 @@ struct btrace_maint_info
     struct
     {
       /* A vector of decoded packets.  */
-      VEC (btrace_pt_packet_s) *packets;
+      std::vector <btrace_pt_packet> *packets;
 
       /* The packet history iterator.
 	 We are iterating over the above PACKETS vector.  */

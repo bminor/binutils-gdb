@@ -1825,7 +1825,7 @@ btrace_maint_clear (struct btrace_thread_info *btinfo)
 
 #if defined (HAVE_LIBIPT)
     case BTRACE_FORMAT_PT:
-      xfree (btinfo->maint.variant.pt.packets);
+      delete btinfo->maint.variant.pt.packets;
 
       btinfo->maint.variant.pt.packets = NULL;
       btinfo->maint.variant.pt.packet_history.begin = 0;
@@ -2962,6 +2962,9 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
 {
   int errcode;
 
+  if (maint->variant.pt.packets == NULL)
+    maint->variant.pt.packets = new std::vector <btrace_pt_packet>;
+
   for (;;)
     {
       struct btrace_pt_packet packet;
@@ -2982,8 +2985,7 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
 	  if (maint_btrace_pt_skip_pad == 0 || packet.packet.type != ppt_pad)
 	    {
 	      packet.errcode = pt_errcode (errcode);
-	      VEC_safe_push (btrace_pt_packet_s, maint->variant.pt.packets,
-			     &packet);
+	      maint->variant.pt.packets->push_back (packet);
 	    }
 	}
 
@@ -2991,8 +2993,7 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
 	break;
 
       packet.errcode = pt_errcode (errcode);
-      VEC_safe_push (btrace_pt_packet_s, maint->variant.pt.packets,
-		     &packet);
+      maint->variant.pt.packets->push_back (packet);
 
       warning (_("Error at trace offset 0x%" PRIx64 ": %s."),
 	       packet.offset, pt_errstr (packet.errcode));
@@ -3093,11 +3094,14 @@ btrace_maint_update_packets (struct btrace_thread_info *btinfo,
 
 #if defined (HAVE_LIBIPT)
     case BTRACE_FORMAT_PT:
-      if (VEC_empty (btrace_pt_packet_s, btinfo->maint.variant.pt.packets))
+      if (btinfo->maint.variant.pt.packets == nullptr)
+	btinfo->maint.variant.pt.packets = new std::vector <btrace_pt_packet>;
+
+      if (btinfo->maint.variant.pt.packets->empty ())
 	btrace_maint_update_pt_packets (btinfo);
 
       *begin = 0;
-      *end = VEC_length (btrace_pt_packet_s, btinfo->maint.variant.pt.packets);
+      *end = btinfo->maint.variant.pt.packets->size ();
       *from = btinfo->maint.variant.pt.packet_history.begin;
       *to = btinfo->maint.variant.pt.packet_history.end;
       break;
@@ -3140,23 +3144,21 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 #if defined (HAVE_LIBIPT)
     case BTRACE_FORMAT_PT:
       {
-	VEC (btrace_pt_packet_s) *packets;
+	const std::vector <btrace_pt_packet> &packets
+	  = *btinfo->maint.variant.pt.packets;
 	unsigned int pkt;
 
-	packets = btinfo->maint.variant.pt.packets;
 	for (pkt = begin; pkt < end; ++pkt)
 	  {
-	    const struct btrace_pt_packet *packet;
-
-	    packet = VEC_index (btrace_pt_packet_s, packets, pkt);
+	    const struct btrace_pt_packet &packet = packets.at (pkt);
 
 	    printf_unfiltered ("%u\t", pkt);
-	    printf_unfiltered ("0x%" PRIx64 "\t", packet->offset);
+	    printf_unfiltered ("0x%" PRIx64 "\t", packet.offset);
 
-	    if (packet->errcode == pte_ok)
-	      pt_print_packet (&packet->packet);
+	    if (packet.errcode == pte_ok)
+	      pt_print_packet (&packet.packet);
 	    else
-	      printf_unfiltered ("[error: %s]", pt_errstr (packet->errcode));
+	      printf_unfiltered ("[error: %s]", pt_errstr (packet.errcode));
 
 	    printf_unfiltered ("\n");
 	  }
@@ -3447,9 +3449,9 @@ maint_info_btrace_cmd (const char *args, int from_tty)
 			   version.ext != NULL ? version.ext : "");
 
 	btrace_maint_update_pt_packets (btinfo);
-	printf_unfiltered (_("Number of packets: %u.\n"),
-			   VEC_length (btrace_pt_packet_s,
-				       btinfo->maint.variant.pt.packets));
+	printf_unfiltered (_("Number of packets: %zu.\n"),
+			   ((btinfo->maint.variant.pt.packets == nullptr)
+			    ? 0 : btinfo->maint.variant.pt.packets->size ()));
       }
       break;
 #endif /* defined (HAVE_LIBIPT)  */
