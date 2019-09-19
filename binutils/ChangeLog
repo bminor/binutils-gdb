@@ -1,3 +1,7 @@
+2019-09-18  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/binutils-all/objdump.exp (objump -S): Update testcases.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* addr2line.c, * bucomm.c, * coffgrok.c, * dlltool.c, * nm.c,
