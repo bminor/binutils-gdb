@@ -1,3 +1,7 @@
+2019-09-19  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/binutils-all/objdump.exp (objdump -S): Update testcase.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* Makefile.in, doc/Makefile.in, configure: Regenerated.

@@ -818,7 +818,7 @@ proc test_objdump_S { } {
 	return
     }
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -S tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -D -S tmpdir/testprog"]
 
     set want "static int local = 2"
 
@@ -830,7 +830,7 @@ proc test_objdump_S { } {
 
     set test "objdump --source-comment"
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --source-comment=// tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble-all --source-comment=// tmpdir/testprog"]
 
     set want "//static int local = 2"
 
