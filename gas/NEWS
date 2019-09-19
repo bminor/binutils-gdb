@@ -2,6 +2,12 @@
 
 Changes in 2.33:
 
+* Add support for the Arm Scalable Vector Extension version 2 (SVE2)
+  instructions.
+
+* Add support for the Arm Transactional Memory Extension (TME)
+  instructions.
+
 * Add support for the Armv8.1-M Mainline and M-profile Vector Extension (MVE)
   instructions.
 

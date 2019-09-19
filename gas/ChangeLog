@@ -1,3 +1,7 @@
+2019-09-19  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* NEWS: Add SVE2 and TME entries.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* Makefile.in, doc/Makefile.in, configure: Regenerated.
