@@ -1083,24 +1083,28 @@ proc gdb_test { args } {
     set command [lindex $args 0]
     set pattern [lindex $args 1]
 
-    if [llength $args]==5 {
-	set question_string [lindex $args 3]
-	set response_string [lindex $args 4]
-    } else {
-	set question_string "^FOOBAR$"
-    }
-
-    return [gdb_test_multiple $command $message {
+    set user_code {}
+    lappend user_code {
 	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		pass "$message"
             }
         }
-	-re "(${question_string})$" {
-	    send_gdb "$response_string\n"
-	    exp_continue
+    }
+
+    if { [llength $args] == 5 } {
+	set question_string [lindex $args 3]
+	set response_string [lindex $args 4]
+	lappend user_code {
+	    -re "(${question_string})$" {
+		send_gdb "$response_string\n"
+		exp_continue
+	    }
 	}
-     }]
+     }
+
+    set user_code [join $user_code]
+    return [gdb_test_multiple $command $message $user_code]
 }
 
 # Return 1 if version MAJOR.MINOR is at least AT_LEAST_MAJOR.AT_LEAST_MINOR.

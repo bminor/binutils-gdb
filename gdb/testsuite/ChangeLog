@@ -1,5 +1,9 @@
 2019-09-19  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_test): Eliminate "^FOOBAR$" pattern.
+
+2019-09-19  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdbserver-support.exp (gdb_target_cmd): Fix argument passing.
 
 2019-09-19  Tom de Vries  <tdevries@suse.de>
