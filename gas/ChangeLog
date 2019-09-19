@@ -1,3 +1,7 @@
+2019-09-19  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* NEWS: Add SVE2 and TME entries.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* as.c, * as.h, * dw2gencfi.c, * dwarf2dbg.c, * ecoff.c,
