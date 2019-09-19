@@ -447,6 +447,36 @@ CODE_FRAGMENT
 .  abfd->usrdata = val;
 .}
 .
+.static inline asection *
+.bfd_asymbol_section (const asymbol *sy)
+.{
+.  return sy->section;
+.}
+.
+.static inline bfd_vma
+.bfd_asymbol_value (const asymbol *sy)
+.{
+.  return sy->section->vma + sy->value;
+.}
+.
+.static inline const char *
+.bfd_asymbol_name (const asymbol *sy)
+.{
+.  return sy->name;
+.}
+.
+.static inline struct bfd *
+.bfd_asymbol_bfd (const asymbol *sy)
+.{
+.  return sy->the_bfd;
+.}
+.
+.static inline void
+.bfd_set_asymbol_name (asymbol *sy, const char *name)
+.{
+.  sy->name = name;
+.}
+.
 */
 
 #include "sysdep.h"

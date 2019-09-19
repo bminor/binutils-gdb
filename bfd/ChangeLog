@@ -1,5 +1,14 @@
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (bfd_asymbol_section, bfd_asymbol_value, bfd_asymbol_name),
+	(bfd_asymbol_bfd, bfd_asymbol_flavour, bfd_set_asymbol_name): Delete.
+	* bfd.c (bfd_asymbol_section, bfd_asymbol_value, bfd_asymbol_name),
+	(bfd_asymbol_bfd, bfd_set_asymbol_name): New inline functions.
+	* targets.c (bfd_asymbol_flavour): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (bfd_generic_archive_p): Use bfd_set_thin_archive.
 	* bfd-in.h (bfd_get_filename, bfd_get_cacheable, bfd_get_format),
 	(bfd_get_target, bfd_get_flavour, bfd_family_coff, bfd_big_endian),

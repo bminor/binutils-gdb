@@ -644,6 +644,14 @@ to find an alternative output format that is suitable.
 .  return abfd->xvec->symbol_leading_char;
 .}
 .
+.static inline enum bfd_flavour
+.bfd_asymbol_flavour (const asymbol *sy)
+.{
+.  if ((sy->flags & BSF_SYNTHETIC) != 0)
+.    return bfd_target_unknown_flavour;
+.  return sy->the_bfd->xvec->flavour;
+.}
+.
 */
 
 /* All known xvecs (even those that don't compile on all systems).

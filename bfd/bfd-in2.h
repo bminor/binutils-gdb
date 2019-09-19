@@ -244,19 +244,6 @@ typedef unsigned long symindex;
 
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
-/* General purpose part of a symbol X;
-   target specific parts are in libcoff.h, libaout.h, etc.  */
-
-#define bfd_asymbol_section(sy) ((sy)->section)
-#define bfd_asymbol_value(sy) ((sy)->section->vma + (sy)->value)
-#define bfd_asymbol_name(sy) ((sy)->name)
-#define bfd_asymbol_bfd(sy) ((sy)->the_bfd)
-#define bfd_asymbol_flavour(sy)			\
-  (((sy)->flags & BSF_SYNTHETIC) != 0		\
-   ? bfd_target_unknown_flavour			\
-   : (sy)->the_bfd->xvec->flavour)
-#define bfd_set_asymbol_name(sy, n) do { (sy)->name = (n); } while (0)
-
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */
 typedef struct carsym
@@ -7381,6 +7368,36 @@ bfd_set_usrdata (bfd *abfd, void *val)
   abfd->usrdata = val;
 }
 
+static inline asection *
+bfd_asymbol_section (const asymbol *sy)
+{
+  return sy->section;
+}
+
+static inline bfd_vma
+bfd_asymbol_value (const asymbol *sy)
+{
+  return sy->section->vma + sy->value;
+}
+
+static inline const char *
+bfd_asymbol_name (const asymbol *sy)
+{
+  return sy->name;
+}
+
+static inline struct bfd *
+bfd_asymbol_bfd (const asymbol *sy)
+{
+  return sy->the_bfd;
+}
+
+static inline void
+bfd_set_asymbol_name (asymbol *sy, const char *name)
+{
+  sy->name = name;
+}
+
 
 typedef enum bfd_error
 {
@@ -8133,6 +8150,14 @@ static inline char
 bfd_get_symbol_leading_char (const bfd *abfd)
 {
   return abfd->xvec->symbol_leading_char;
+}
+
+static inline enum bfd_flavour
+bfd_asymbol_flavour (const asymbol *sy)
+{
+  if ((sy->flags & BSF_SYNTHETIC) != 0)
+    return bfd_target_unknown_flavour;
+  return sy->the_bfd->xvec->flavour;
 }
 
 bfd_boolean bfd_set_default_target (const char *name);

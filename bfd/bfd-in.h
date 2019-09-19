@@ -237,19 +237,6 @@ typedef unsigned long symindex;
 
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
-/* General purpose part of a symbol X;
-   target specific parts are in libcoff.h, libaout.h, etc.  */
-
-#define bfd_asymbol_section(sy) ((sy)->section)
-#define bfd_asymbol_value(sy) ((sy)->section->vma + (sy)->value)
-#define bfd_asymbol_name(sy) ((sy)->name)
-#define bfd_asymbol_bfd(sy) ((sy)->the_bfd)
-#define bfd_asymbol_flavour(sy)			\
-  (((sy)->flags & BSF_SYNTHETIC) != 0		\
-   ? bfd_target_unknown_flavour			\
-   : (sy)->the_bfd->xvec->flavour)
-#define bfd_set_asymbol_name(sy, n) do { (sy)->name = (n); } while (0)
-
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */
 typedef struct carsym
