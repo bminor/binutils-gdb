@@ -81,6 +81,8 @@ struct value_print_options;
   value_contents_eq for more info.
 */
 
+extern bool overload_resolution;
+
 /* The structure which defines the type of a value.  It should never
    be possible for a program lval value to survive over a call to the
    inferior (i.e. to be put into the history list or an internal

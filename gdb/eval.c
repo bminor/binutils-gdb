@@ -42,9 +42,6 @@
 #include "typeprint.h"
 #include <ctype.h>
 
-/* This is defined in valops.c */
-extern bool overload_resolution;
-
 /* Prototypes for local functions.  */
 
 static struct value *evaluate_subexp_for_sizeof (struct expression *, int *,

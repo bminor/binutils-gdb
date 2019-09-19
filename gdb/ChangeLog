@@ -1,5 +1,10 @@
 2019-09-19  Christian Biesinger  <cbiesinger@google.com>
 
+	* eval.c: Move declaration of overload_resolution to...
+	* value.h: ...here.
+
+2019-09-19  Christian Biesinger  <cbiesinger@google.com>
+
 	* arm-linux-nat.c: Remove extern declaration for arm_apcs_32.
 	* arm-linux-tdep.c: Likewise.
 	* arm-nbsd-nat.c: Likewise.
