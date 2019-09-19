@@ -33,6 +33,8 @@ extern struct cmd_list_element *show_dwarf_cmdlist;
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
 DEF_VEC_P (dwarf2_per_cu_ptr);
 
+extern bool dwarf_always_disassemble;
+
 /* A descriptor for dwarf sections.
 
    S.ASECTION, SIZE are typically initialized when the objfile is first
