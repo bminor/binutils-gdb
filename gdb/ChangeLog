@@ -1,3 +1,12 @@
+2019-08-19  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/25009
+	* configure: Rebuild.
+	* configure.ac: Disallow the combination of -static-libstdc++ and
+	source highlight.
+	* source-cache.c (get_language_name): Handle rust.
+	(source_cache::get_source_lines): Ignore highlighting exceptions.
+
 2019-06-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/24541

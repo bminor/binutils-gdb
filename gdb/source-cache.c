@@ -156,8 +156,7 @@ get_language_name (enum language lang)
       break;
 
     case language_rust:
-      /* Not handled by Source Highlight.  */
-      break;
+      return "rust.lang";
 
     case language_ada:
       return "ada.lang";
@@ -213,21 +212,33 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 		     use-after-free.  */
 		  fullname = symtab_to_fullname (s);
 		}
-	      srchilite::SourceHighlight highlighter ("esc.outlang");
-	      highlighter.setStyleFile("esc.style");
+	      try
+		{
+		  srchilite::SourceHighlight highlighter ("esc.outlang");
+		  highlighter.setStyleFile("esc.style");
 
-	      std::ostringstream output;
-	      highlighter.highlight (input, output, lang_name, fullname);
+		  std::ostringstream output;
+		  highlighter.highlight (input, output, lang_name, fullname);
 
-	      source_text result = { fullname, output.str () };
-	      m_source_map.push_back (std::move (result));
+		  source_text result = { fullname, output.str () };
+		  m_source_map.push_back (std::move (result));
 
-	      if (m_source_map.size () > MAX_ENTRIES)
-		m_source_map.erase (m_source_map.begin ());
+		  if (m_source_map.size () > MAX_ENTRIES)
+		    m_source_map.erase (m_source_map.begin ());
 
-	      *lines = extract_lines (m_source_map.back (), first_line,
-				      last_line);
-	      return true;
+		  *lines = extract_lines (m_source_map.back (), first_line,
+					  last_line);
+		  return true;
+		}
+	      catch (...)
+		{
+		  /* Source Highlight will throw an exception if
+		     highlighting fails.  One possible reason it can fail
+		     is if the language is unknown -- which matters to gdb
+		     because Rust support wasn't added until after 3.1.8.
+		     Ignore exceptions here and fall back to
+		     un-highlighted text. */
+		}
 	    }
 	}
     }

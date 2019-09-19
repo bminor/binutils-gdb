@@ -1251,6 +1251,14 @@ if test "${enable_source_highlight}" != "no"; then
       AC_MSG_ERROR([pkg-config was not found in your system])
     fi
   else
+    case "$LDFLAGS" in
+      *static-libstdc*)
+        AC_MSG_ERROR([source highlight is incompatible with -static-libstdc++; dnl
+either use --disable-source-highlight or dnl
+--without-static-standard-libraries])
+        ;;
+    esac
+
     if ${pkg_config_prog_path} --exists source-highlight; then
       SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
       SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`

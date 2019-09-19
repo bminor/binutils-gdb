@@ -11503,6 +11503,12 @@ $as_echo "no - pkg-config not found" >&6; }
       as_fn_error $? "pkg-config was not found in your system" "$LINENO" 5
     fi
   else
+    case "$LDFLAGS" in
+      *static-libstdc*)
+        as_fn_error $? "source highlight is incompatible with -static-libstdc++; either use --disable-source-highlight or --without-static-standard-libraries" "$LINENO" 5
+        ;;
+    esac
+
     if ${pkg_config_prog_path} --exists source-highlight; then
       SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
       SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
