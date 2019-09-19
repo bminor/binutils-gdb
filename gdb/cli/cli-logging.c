@@ -21,6 +21,7 @@
 #include "gdbcmd.h"
 #include "ui-out.h"
 #include "interps.h"
+#include "cli/cli-style.h"
 
 static char *saved_filename;
 
@@ -29,8 +30,8 @@ static void
 show_logging_filename (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The current logfile is \"%s\".\n"),
-		    value);
+  fprintf_filtered (file, _("The current logfile is \"%ps\".\n"),
+		    styled_string (file_name_style.style (), value));
 }
 
 static bool logging_overwrite;

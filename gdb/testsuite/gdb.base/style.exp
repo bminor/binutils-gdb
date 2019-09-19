@@ -137,4 +137,7 @@ save_vars { env(TERM) } {
     gdb_test_no_output "set print repeat 3"
     gdb_test "print {0,0,0,0,0,0,0,0}" \
 	" = \\{0 [style {<repeats.*8.*times>} metadata]\\}"
+
+    gdb_test "show logging file" \
+	"The current logfile is \"[style .*? file]\"\\..*"
 }

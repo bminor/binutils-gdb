@@ -1,5 +1,9 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-logging.c (show_logging_filename): Use styled_string.
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (print_frame, info_frame_command_core): Use
 	styled_string.
 	* linux-thread-db.c (try_thread_db_load_1)
