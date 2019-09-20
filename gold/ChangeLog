@@ -1,3 +1,8 @@
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::check_non_pic): Move REL24
+	to 32-bit supported.
+
 2019-09-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* testsuite/Makefile.in: Re-generate.

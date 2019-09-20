@@ -14148,6 +14148,66 @@ ppc64_elf_action_discarded (asection *sec)
   return _bfd_elf_default_action_discarded (sec);
 }
 
+/* These are the dynamic relocations supported by glibc.  */
+
+static bfd_boolean
+ppc64_glibc_dynamic_reloc (enum elf_ppc64_reloc_type r_type)
+{
+  switch (r_type)
+    {
+    case R_PPC64_RELATIVE:
+    case R_PPC64_NONE:
+    case R_PPC64_ADDR64:
+    case R_PPC64_GLOB_DAT:
+    case R_PPC64_IRELATIVE:
+    case R_PPC64_JMP_IREL:
+    case R_PPC64_JMP_SLOT:
+    case R_PPC64_DTPMOD64:
+    case R_PPC64_DTPREL64:
+    case R_PPC64_TPREL64:
+    case R_PPC64_TPREL16_LO_DS:
+    case R_PPC64_TPREL16_DS:
+    case R_PPC64_TPREL16:
+    case R_PPC64_TPREL16_LO:
+    case R_PPC64_TPREL16_HI:
+    case R_PPC64_TPREL16_HIGH:
+    case R_PPC64_TPREL16_HA:
+    case R_PPC64_TPREL16_HIGHA:
+    case R_PPC64_TPREL16_HIGHER:
+    case R_PPC64_TPREL16_HIGHEST:
+    case R_PPC64_TPREL16_HIGHERA:
+    case R_PPC64_TPREL16_HIGHESTA:
+    case R_PPC64_ADDR16_LO_DS:
+    case R_PPC64_ADDR16_LO:
+    case R_PPC64_ADDR16_HI:
+    case R_PPC64_ADDR16_HIGH:
+    case R_PPC64_ADDR16_HA:
+    case R_PPC64_ADDR16_HIGHA:
+    case R_PPC64_REL30:
+    case R_PPC64_COPY:
+    case R_PPC64_UADDR64:
+    case R_PPC64_UADDR32:
+    case R_PPC64_ADDR32:
+    case R_PPC64_ADDR24:
+    case R_PPC64_ADDR16:
+    case R_PPC64_UADDR16:
+    case R_PPC64_ADDR16_DS:
+    case R_PPC64_ADDR16_HIGHER:
+    case R_PPC64_ADDR16_HIGHEST:
+    case R_PPC64_ADDR16_HIGHERA:
+    case R_PPC64_ADDR16_HIGHESTA:
+    case R_PPC64_ADDR14:
+    case R_PPC64_ADDR14_BRTAKEN:
+    case R_PPC64_ADDR14_BRNTAKEN:
+    case R_PPC64_REL32:
+    case R_PPC64_REL64:
+      return TRUE;
+
+    default:
+      return FALSE;
+    }
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -14201,6 +14261,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   bfd_boolean is_opd;
   /* Assume 'at' branch hints.  */
   bfd_boolean is_isa_v2 = TRUE;
+  bfd_boolean warned_dynamic = FALSE;
   bfd_vma d_offset = (bfd_big_endian (input_bfd) ? 2 : 0);
 
   /* Initialize howto table if needed.  */
@@ -16165,6 +16226,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      loc = sreloc->contents;
 	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+
+	      if (!warned_dynamic
+		  && !ppc64_glibc_dynamic_reloc (ELF64_R_TYPE (outrel.r_info)))
+		{
+		  info->callbacks->einfo
+		    /* xgettext:c-format */
+		    (_("%X%P: %pB: %s against %pT "
+		       "is not supported by glibc as a dynamic relocation\n"),
+		     input_bfd,
+		     ppc64_elf_howto_table[ELF64_R_TYPE (outrel.r_info)]->name,
+		     sym_name);
+		  warned_dynamic = TRUE;
+		}
 
 	      /* If this reloc is against an external symbol, it will
 		 be computed at runtime, so there's no need to do
