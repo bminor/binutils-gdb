@@ -1,3 +1,22 @@
+2019-09-20  Nelson Chu <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_pcgp_hi_reloc): Add new field undefined_weak.
+	(riscv_record_pcgp_hi_reloc): New parameter undefined_weak.
+	Set undefined_weak field from it.
+	(relax_func_t): New parameter undefined_weak.
+	(_bfd_riscv_relax_call): New ignored parameter undefined_weak.
+	(_bfd_riscv_relax_tls_le): Likewise.
+	(_bfd_riscv_relax_align): Likewise.
+	(_bfd_riscv_relax_delete): Likewise.
+	(_bfd_riscv_relax_lui): New parameter undefined_weak.  If true,
+	allow relaxing.  For LO12* relocs, set rs1 to x0 when undefined_weak.
+	(_bfd_riscv_relax_pc): New parameter undefined_weak.  For LO12* relocs,
+	set undefined_weak from hi_reloc.  If true, allow relaxing.  For LO12*
+	relocs, set rs1 to x0 when undefined_weak and change to non-pcrel
+	reloc.
+	(_bfd_riscv_relax_section): New local undefined_weak.  Set for
+	undef weak relocs that can be relaxed.  Pass to relax_func call.
+
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in.h (bfd_section_name, bfd_section_size, bfd_section_vma),
