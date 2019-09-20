@@ -1,3 +1,10 @@
+2019-10-04  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/25012
+	* i386-opc.tbl (push, pop): Re-instate distinct Cpu64 templates
+	with SReg operand.
+	* i386-tbl.h: Re-generate.
+
 2019-09-30  Phil Blundell  <pb@pbcl.net>
 
 	Release 2.33

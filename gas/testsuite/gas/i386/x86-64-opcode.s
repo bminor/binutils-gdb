@@ -323,15 +323,21 @@
 	POPq (%r8)		      #	 --  --	 -- 41	 8F 00				 ; REX to access upper reg.
 	POPq (%rax)		      #	 --  --	 -- --	 8F 00
 	POP %fs			      #	 --  --	 -- --	 0F A1
+	POPq %fs		      #	 --  --	 -- --	 0F A1
 	POP %gs			      #	 --  --	 -- --	 0F A9
-	POPFQ			      #	 --  --	 -- --	 9D
+	POPq %gs		      #	 --  --	 -- --	 0F A9
+	POPF			      #	 --  --	 -- --	 9D
+	POPFq			      #	 --  --	 -- --	 9D
 
 	# PUSH
 	PUSHq (%r8)		      #	 --  --	 -- 41	 FF 30				 ; REX to access upper reg.
 	PUSHq (%rax)		      #	 --  --	 -- --	 FF 30
 	PUSH %fs		      #	 --  --	 -- --	 0F A0
+	PUSHq %fs		      #	 --  --	 -- --	 0F A0
 	PUSH %gs		      #	 --  --	 -- --	 0F A8
-	PUSHFQ			      #	 --  --	 -- --	 9C
+	PUSHq %gs		      #	 --  --	 -- --	 0F A8
+	PUSHF			      #	 --  --	 -- --	 9C
+	PUSHFq			      #	 --  --	 -- --	 9C
 
 
 

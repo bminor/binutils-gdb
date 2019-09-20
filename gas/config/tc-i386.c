@@ -7010,14 +7010,14 @@ duplicate:
 	  if (flag_code != CODE_64BIT
 	      ? i.tm.base_opcode == POP_SEG_SHORT
 		&& i.op[0].regs->reg_num == 1
-	      : (i.tm.base_opcode | 1) == POP_SEG_SHORT
+	      : (i.tm.base_opcode | 1) == POP_SEG386_SHORT
 		&& i.op[0].regs->reg_num < 4)
 	    {
 	      as_bad (_("you can't `%s %s%s'"),
 		      i.tm.name, register_prefix, i.op[0].regs->reg_name);
 	      return 0;
 	    }
-	  if ( i.op[0].regs->reg_num > 3 )
+	  if ( i.op[0].regs->reg_num > 3 && i.tm.opcode_length == 1 )
 	    {
 	      i.tm.base_opcode ^= POP_SEG_SHORT ^ POP_SEG386_SHORT;
 	      i.tm.opcode_length = 2;
