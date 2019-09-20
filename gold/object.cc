@@ -1884,10 +1884,15 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       if (strncmp (name, lto_section_name, strlen (lto_section_name)) == 0)
 	{
 	  section_size_type contents_len;
-	  const unsigned char* pcontents = this->section_contents(i, &contents_len, false);
-	  struct lto_section lsection = *(const lto_section*)pcontents;
-	  if (lsection.slim_object)
-	    layout->set_lto_slim_object ();
+	  const unsigned char* pcontents
+	    = this->section_contents(i, &contents_len, false);
+	  if (contents_len >= sizeof(lto_section))
+	    {
+	      const lto_section* lsection
+		= reinterpret_cast<const lto_section*>(pcontents);
+	      if (lsection->slim_object)
+		layout->set_lto_slim_object();
+	    }
 	}
     }
 

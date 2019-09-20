@@ -1,5 +1,12 @@
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
+	PR 24768
+	* layout.cc (Layout::Layout): Init lto_slim_object_.
+	* object.cc (Sized_relobj_file::do_layout): Wrap overlong line.
+	Don't use C cast.  Validate section size.  Don't copy contents.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Scan::check_non_pic): Move REL24
 	to 32-bit supported.
 
