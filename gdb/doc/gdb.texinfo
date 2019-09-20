@@ -22563,14 +22563,6 @@ are:
 @tab @code{qXfer:sdata:read}
 @tab @code{print $_sdata}
 
-@item @code{read-spu-object}
-@tab @code{qXfer:spu:read}
-@tab @code{info spu}
-
-@item @code{write-spu-object}
-@tab @code{qXfer:spu:write}
-@tab @code{info spu}
-
 @item @code{read-siginfo-object}
 @tab @code{qXfer:siginfo:read}
 @tab @code{print $_siginfo}
@@ -24438,7 +24430,6 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * Alpha::
 * MIPS::
 * HPPA::               HP PA architecture
-* SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
 * Nios II::
 * Sparc64::
@@ -24752,69 +24743,6 @@ given @var{address}.
 
 @end table
 
-
-@node SPU
-@subsection Cell Broadband Engine SPU architecture
-@cindex Cell Broadband Engine
-@cindex SPU
-
-When @value{GDBN} is debugging the Cell Broadband Engine SPU architecture,
-it provides the following special commands:
-
-@table @code
-@item info spu event
-@kindex info spu
-Display SPU event facility status.  Shows current event mask
-and pending event status.
-
-@item info spu signal
-Display SPU signal notification facility status.  Shows pending
-signal-control word and signal notification mode of both signal
-notification channels.
-
-@item info spu mailbox
-Display SPU mailbox facility status.  Shows all pending entries,
-in order of processing, in each of the SPU Write Outbound,
-SPU Write Outbound Interrupt, and SPU Read Inbound mailboxes.
-
-@item info spu dma
-Display MFC DMA status.  Shows all pending commands in the MFC
-DMA queue.  For each entry, opcode, tag, class IDs, effective
-and local store addresses and transfer size are shown.
-
-@item info spu proxydma
-Display MFC Proxy-DMA status.  Shows all pending commands in the MFC
-Proxy-DMA queue.  For each entry, opcode, tag, class IDs, effective
-and local store addresses and transfer size are shown.
-
-@end table
- 
-When @value{GDBN} is debugging a combined PowerPC/SPU application
-on the Cell Broadband Engine, it provides in addition the following
-special commands:
-
-@table @code
-@item set spu stop-on-load @var{arg}
-@kindex set spu
-Set whether to stop for new SPE threads.  When set to @code{on}, @value{GDBN}
-will give control to the user when a new SPE thread enters its @code{main}
-function.  The default is @code{off}.
-
-@item show spu stop-on-load
-@kindex show spu
-Show whether to stop for new SPE threads.
-
-@item set spu auto-flush-cache @var{arg}
-Set whether to automatically flush the software-managed cache.  When set to
-@code{on}, @value{GDBN} will automatically cause the SPE software-managed
-cache to be flushed whenever SPE execution stops.  This provides a consistent
-view of PowerPC memory that is accessed via the cache.  If an application
-does not use the software-managed cache, this option has no effect.
-
-@item show spu auto-flush-cache
-Show whether to automatically flush the software-managed cache.
-
-@end table
 
 @node PowerPC
 @subsection PowerPC
@@ -40110,16 +40038,6 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
-@item @samp{qXfer:spu:read}
-@tab No
-@tab @samp{-}
-@tab Yes
-
-@item @samp{qXfer:spu:write}
-@tab No
-@tab @samp{-}
-@tab Yes
-
 @item @samp{qXfer:siginfo:read}
 @tab No
 @tab @samp{-}
@@ -40351,14 +40269,6 @@ The remote stub understands the @samp{qXfer:memory-map:read} packet
 @item qXfer:sdata:read
 The remote stub understands the @samp{qXfer:sdata:read} packet
 (@pxref{qXfer sdata read}).
-
-@item qXfer:spu:read
-The remote stub understands the @samp{qXfer:spu:read} packet
-(@pxref{qXfer spu read}).
-
-@item qXfer:spu:write
-The remote stub understands the @samp{qXfer:spu:write} packet
-(@pxref{qXfer spu write}).
 
 @item qXfer:siginfo:read
 The remote stub understands the @samp{qXfer:siginfo:read} packet
@@ -40805,18 +40715,6 @@ This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response
 (@pxref{qSupported}).
 
-@item qXfer:spu:read:@var{annex}:@var{offset},@var{length}
-@anchor{qXfer spu read}
-Read contents of an @code{spufs} file on the target system.  The
-annex specifies which file to read; it must be of the form 
-@file{@var{id}/@var{name}}, where @var{id} specifies an SPU context ID
-in the target process, and @var{name} identifes the @code{spufs} file
-in that context to be accessed.
-
-This packet is not probed by default; the remote stub must request it,
-by supplying an appropriate @samp{qSupported} response
-(@pxref{qSupported}).
-
 @item qXfer:threads:read::@var{offset},@var{length}
 @anchor{qXfer threads read}
 Access the list of threads on target.  @xref{Thread List Format}.  The
@@ -40902,17 +40800,6 @@ empty (@pxref{qXfer write}).
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response
 (@pxref{qSupported}).
-
-@item qXfer:spu:write:@var{annex}:@var{offset}:@var{data}@dots{}
-@anchor{qXfer spu write}
-Write @var{data} to an @code{spufs} file on the target system.  The
-annex specifies which file to write; it must be of the form
-@file{@var{id}/@var{name}}, where @var{id} specifies an SPU context ID
-in the target process, and @var{name} identifes the @code{spufs} file
-in that context to be accessed.
-
-This packet is not probed by default; the remote stub must request it,
-by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 @end table
 
 @item qXfer:@var{object}:@var{operation}:@dots{}

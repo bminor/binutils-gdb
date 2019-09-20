@@ -53,7 +53,7 @@ WHICH = arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
 	rs6000/powerpc-32 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
-	rs6000/powerpc-vsx64l rs6000/powerpc-cell32l rs6000/powerpc-cell64l \
+	rs6000/powerpc-vsx64l \
 	rs6000/powerpc-isa205-32l rs6000/powerpc-isa205-64l \
 	rs6000/powerpc-isa205-altivec32l rs6000/powerpc-isa205-altivec64l \
 	rs6000/powerpc-isa205-vsx32l rs6000/powerpc-isa205-vsx64l \
@@ -84,8 +84,6 @@ microblaze-expedite = r1,rpc
 nios2-linux-expedite = sp,pc
 or1k-expedite = r1,npc
 powerpc-expedite = r1,pc
-rs6000/powerpc-cell32l-expedite = r1,pc,r0,orig_r3,r4
-rs6000/powerpc-cell64l-expedite = r1,pc,r0,orig_r3,r4
 s390-linux32-expedite = r14,r15,pswa
 s390-linux32v1-expedite = r14,r15,pswa
 s390-linux32v2-expedite = r14,r15,pswa
@@ -140,8 +138,6 @@ XMLTOC = \
 	rs6000/powerpc-altivec32l.xml \
 	rs6000/powerpc-altivec64.xml \
 	rs6000/powerpc-altivec64l.xml \
-	rs6000/powerpc-cell32l.xml \
-	rs6000/powerpc-cell64l.xml \
 	rs6000/powerpc-e500.xml \
 	rs6000/powerpc-e500l.xml \
 	rs6000/powerpc-isa205-32l.xml \

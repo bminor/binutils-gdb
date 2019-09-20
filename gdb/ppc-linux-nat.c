@@ -2646,9 +2646,6 @@ ppc_linux_nat_target::read_description ()
 	perror_with_name (_("Unable to fetch AltiVec registers"));
     }
 
-  if (hwcap & PPC_FEATURE_CELL)
-    features.cell = true;
-
   features.isa205 = ppc_linux_has_isa205 (hwcap);
 
   if ((hwcap2 & PPC_FEATURE2_DSCR)

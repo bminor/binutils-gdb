@@ -776,7 +776,6 @@ ALL_TARGET_OBS = \
 	solib-darwin.o \
 	solib-dsbt.o \
 	solib-frv.o \
-	solib-spu.o \
 	solib-svr4.o \
 	sparc-linux-tdep.o \
 	sparc-nbsd-tdep.o \
@@ -784,8 +783,6 @@ ALL_TARGET_OBS = \
 	sparc-ravenscar-thread.o \
 	sparc-sol2-tdep.o \
 	sparc-tdep.o \
-	spu-multiarch.o \
-	spu-tdep.o \
 	symfile-mem.o \
 	tic6x-linux-tdep.o \
 	tic6x-tdep.o \
@@ -1382,7 +1379,6 @@ HFILES_NO_SRCDIR = \
 	solib.h \
 	solib-aix.h \
 	solib-darwin.h \
-	solib-spu.h \
 	solib-svr4.h \
 	solib-target.h \
 	solist.h \
@@ -1392,7 +1388,6 @@ HFILES_NO_SRCDIR = \
 	sparc-ravenscar-thread.h \
 	sparc-tdep.h \
 	sparc64-tdep.h \
-	spu-tdep.h \
 	stabsread.h \
 	stack.h \
 	stap-probe.h \
@@ -2304,7 +2299,6 @@ ALLDEPFILES = \
 	sh-tdep.c \
 	sol2-tdep.c \
 	solib-aix.c \
-	solib-spu.c \
 	solib-svr4.c \
 	sparc-linux-nat.c \
 	sparc-linux-tdep.c \
@@ -2327,9 +2321,6 @@ ALLDEPFILES = \
 	sparc64-obsd-tdep.c \
 	sparc64-sol2-tdep.c \
 	sparc64-tdep.c \
-	spu-linux-nat.c \
-	spu-multiarch.c \
-	spu-tdep.c \
 	tilegx-linux-nat.c \
 	tilegx-linux-tdep.c \
 	tilegx-tdep.c \

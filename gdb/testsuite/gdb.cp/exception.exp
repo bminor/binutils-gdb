@@ -35,11 +35,6 @@ set nl	"\[\r\n\]+"
 
 if { [skip_stl_tests] } { continue }
 
-# On SPU this test fails because the executable exceeds local storage size.
-if { [istarget "spu*-*-*"] } {
-        return 0
-}
-
 standard_testfile .cc
  
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {

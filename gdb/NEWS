@@ -330,6 +330,12 @@ focus, winheight, +, -, >, <
   from .inputrc to bind keys in this keymap.  This feature is only
   available when gdb is built against GNU readline 8.0 or later.
 
+* Removed targets and native configurations
+
+  GDB no longer supports debugging the Cell Broadband Engine.  This includes
+  both debugging standalone Cell/B.E. SPU applications and integrated debugging
+  of Cell/B.E. applications that use both the PPU and SPU architectures.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on

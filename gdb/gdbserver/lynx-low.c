@@ -753,7 +753,6 @@ static struct target_ops lynx_target_ops = {
   NULL,  /* stopped_data_address */
   NULL,  /* read_offsets */
   NULL,  /* get_tls_address */
-  NULL,  /* qxfer_spu */
   NULL,  /* hostio_last_error */
   NULL,  /* qxfer_osdata */
   NULL,  /* qxfer_siginfo */

@@ -1413,73 +1413,6 @@ find_signalled_thread (struct thread_info *info, void *data)
   return 0;
 }
 
-/* Generate corefile notes for SPU contexts.  */
-
-static char *
-linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
-{
-  static const char *spu_files[] =
-    {
-      "object-id",
-      "mem",
-      "regs",
-      "fpcr",
-      "lslr",
-      "decr",
-      "decr_status",
-      "signal1",
-      "signal1_type",
-      "signal2",
-      "signal2_type",
-      "event_mask",
-      "event_status",
-      "mbox_info",
-      "ibox_info",
-      "wbox_info",
-      "dma_info",
-      "proxydma_info",
-   };
-
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-
-  /* Determine list of SPU ids.  */
-  gdb::optional<gdb::byte_vector>
-    spu_ids = target_read_alloc (current_top_target (),
-				 TARGET_OBJECT_SPU, NULL);
-
-  if (!spu_ids)
-    return note_data;
-
-  /* Generate corefile notes for each SPU file.  */
-  for (size_t i = 0; i < spu_ids->size (); i += 4)
-    {
-      int fd = extract_unsigned_integer (spu_ids->data () + i, 4, byte_order);
-
-      for (size_t j = 0; j < sizeof (spu_files) / sizeof (spu_files[0]); j++)
-	{
-	  char annex[32], note_name[32];
-
-	  xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[j]);
-	  gdb::optional<gdb::byte_vector> spu_data
-	    = target_read_alloc (current_top_target (), TARGET_OBJECT_SPU, annex);
-
-	  if (spu_data && !spu_data->empty ())
-	    {
-	      xsnprintf (note_name, sizeof note_name, "SPU/%s", annex);
-	      note_data = elfcore_write_note (obfd, note_data, note_size,
-					      note_name, NT_SPU,
-					      spu_data->data (),
-					      spu_data->size ());
-
-	      if (!note_data)
-		return nullptr;
-	    }
-	}
-    }
-
-  return note_data;
-}
-
 /* This is used to pass information from
    linux_make_mappings_corefile_notes through
    linux_find_memory_regions_full.  */
@@ -2007,11 +1940,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
       if (!note_data)
 	return NULL;
     }
-
-  /* SPU information.  */
-  note_data = linux_spu_make_corefile_notes (obfd, note_data, note_size);
-  if (!note_data)
-    return NULL;
 
   /* File mappings.  */
   note_data = linux_make_mappings_corefile_notes (gdbarch, obfd,

@@ -1,3 +1,89 @@
+2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* NEWS: Mention that Cell/B.E. debugging support was removed.
+	* MAINTAINERS: Remove spu target.
+
+	* config/djgpp/fnchange.lst: Remove entries for removed files.
+
+	* Makefile.in (ALL_TARGET_OBS): Remove solib-spu.o,
+	spu-multiarch.o, and spu-tdep.o.
+	(HFILES_NO_SRCDIR): Remove solib-spu.h and spu-tdep.h.
+	(ALLDEPFILES): Remove solib-spu.c, spu-linux-nat.c,
+	spu-multiarch.c, and spu-tdep.c.
+	* spu-linux-nat.c: Remove file.
+	* spu-multiarch.c: Remove file.
+	* spu-tdep.c: Remove file.
+	* spu-tdep.h: Remove file.
+	* solib-spu.c: Remove file.
+	* solib-spu.h: Remove file.
+
+	* configure.host (powerpc64*-*-linux*): Remove Cell/B.E. support.
+	* configure.nat (spu-linux): Remove.
+	* configure.tgt (powerpc*-*-linux*): Remove solib-spu.o and
+	solib-multiarch.o from gdb_target_obs.
+	(spu*-*-*): Remove.
+
+	* arch/ppc-linux-common.h (struct ppc_linux_features): Remove "cell"
+	feature flag.
+	(ppc_linux_no_features): Update.
+	* arch/ppc-linux-common.c (ppc_linux_match_description): Remove
+	Cell/B.E. support.
+	* arch/ppc-linux-tdesc.h (tdesc_powerpc_cell32l): Remove declaration.
+	(tdesc_powerpc_cell64l): Likewise.
+	* nat/ppc-linux.h (PPC_FEATURE_CELL): Remove.
+	* ppc-linux-nat.c (ppc_linux_nat_target::read_description): Remove
+	Cell/B.E. support.
+	* ppc-linux-tdep.h: Do not include "solib-spu.h" or "spu-tdep.h".
+	Do not include "features/rs6000/powerpc-cell32l.c" or
+	"features/rs6000/powerpc-cell64l.c".
+	(ppc_linux_spu_section): Remove.
+	(ppc_linux_core_read_description): Remove Cell/B.E. support.
+	(spe_context_objfile, spe_context_lm_addr, spe_context_offset,
+	spe_context_cache_ptid, spe_context_cache_ptid): Remove.
+	(ppc_linux_spe_context_lookup): Remove.
+	(ppc_linux_spe_context_inferior_created): Remove.
+	(ppc_linux_spe_context_solib_loaded): Remove.
+	(ppc_linux_spe_context_solib_unloaded): Remove.
+	(ppc_linux_spe_context): Remove.
+	(struct ppu2spu_cache): Remove.
+	(ppu2spu_prev_arch, ppu2spu_this_id, ppu2spu_prev_register): Remove.
+	(struct ppu2spu_data): Remove.
+	(ppu2spu_unwind_register, ppu2spu_sniffer, ppu2spu_dealloc_cache,
+	ppu2spu_unwind): Remove.
+	(ppc_linux_init_abi): Remove Cell/B.E. support.
+	* rs6000-tdep.h (rs6000_gdbarch_init): Remove Cell/B.E. support.
+
+	* features/Makefile (rs6000/powerpc-cell32l-expedite): Remove.
+	(rs6000/powerpc-cell64l-expedite): Likewise
+	(WHICH): Remove rs6000/powerpc-cell32l and rs6000/powerpc-cell64l.
+	(XMLTOC): Remove rs6000/powerpc-cell32l.xml and
+	rs6000/powerpc-cell64l.xml.
+	* features/rs6000/powerpc-cell32l.xml: Remove.
+	* features/rs6000/powerpc-cell64l.xml: Likewise.
+	* features/rs6000/powerpc-cell32l.c: Remove generated file.
+	* features/rs6000/powerpc-cell64l.c: Likewise.
+	* regformats/rs6000/powerpc-cell32l.dat: Remove generated file.
+	* regformats/rs6000/powerpc-cell64l.dat: Likewise.
+	* regformats/reg-spu.dat: Remove.
+
+	* target.h (enum target_object): Remove TARGET_OBJECT_SPU.
+	* corelow.c (struct spuid_list): Remove.
+	(add_to_spuid_list): Remove.
+	(core_target::xfer_partial): Remove support for TARGET_OBJECT_SPU.
+	* remote.c (PACKET_qXfer_spu_read, PACKET_qXfer_spu_write): Remove.
+	(remote_protocol_features): Remove associated entries.
+	(_initialize_remote): No longer initialize them.
+	(remote_target::xfer_partial): Remove support for TARGET_OBJECT_SPU.
+	* linux-nat.c (SPUFS_MAGIC): Remove.
+	(linux_proc_xfer_spu): Remove.
+	(spu_enumerate_spu_ids): Remove.
+	(linux_nat_target::xfer_partial): Remove support for TARGET_OBJECT_SPU.
+	* linux-tdep.c (-linux_spu_make_corefile_notes): Remove.
+	(linux_make_corefile_notes): No longer call it.
+
+	* regcache.c (cooked_read_test): Remove bfd_arch_spu special case.
+	(cooked_write_test): Likewise.
+
 2019-09-20  Tom Tromey  <tom@tromey.com>
 
 	* NEWS: Mention case-sensitivity of TUI commands.

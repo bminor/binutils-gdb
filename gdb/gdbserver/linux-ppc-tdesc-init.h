@@ -27,7 +27,7 @@
 enum ppc_linux_tdesc {
   PPC_TDESC_BASE,
   PPC_TDESC_ALTIVEC,
-  PPC_TDESC_CELL,
+  PPC_TDESC_CELL,  /* No longer used, but kept to avoid ABI changes.  */
   PPC_TDESC_VSX,
   PPC_TDESC_ISA205,
   PPC_TDESC_ISA205_ALTIVEC,
@@ -45,9 +45,6 @@ void init_registers_powerpc_32l (void);
 
 /* Defined in auto-generated file powerpc-altivec32l.c.  */
 void init_registers_powerpc_altivec32l (void);
-
-/* Defined in auto-generated file powerpc-cell32l.c.  */
-void init_registers_powerpc_cell32l (void);
 
 /* Defined in auto-generated file powerpc-vsx32l.c.  */
 void init_registers_powerpc_vsx32l (void);
@@ -82,9 +79,6 @@ void init_registers_powerpc_64l (void);
 
 /* Defined in auto-generated file powerpc-altivec64l.c.  */
 void init_registers_powerpc_altivec64l (void);
-
-/* Defined in auto-generated file powerpc-cell64l.c.  */
-void init_registers_powerpc_cell64l (void);
 
 /* Defined in auto-generated file powerpc-vsx64l.c.  */
 void init_registers_powerpc_vsx64l (void);

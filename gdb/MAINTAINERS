@@ -319,9 +319,6 @@ the native maintainer when resolving ABI issues.
 	sparc		--target=sparc64-solaris2.10 ,-Werror
 			(--target=sparc-elf broken)
 
-	spu		--target=spu-elf ,-Werror
-			Ulrich Weigand		uweigand@de.ibm.com
-
 	tic6x		--target=tic6x-elf ,-Werror
 			Yao Qi			qiyao@sourceware.org
 

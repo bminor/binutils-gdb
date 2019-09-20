@@ -58,13 +58,11 @@ struct ppc_linux_features
   bool ppr_dscr;
   bool isa207;
   bool htm;
-  bool cell;
 };
 
 /* Base value for ppc_linux_features variables.  */
 const struct ppc_linux_features ppc_linux_no_features = {
   0,
-  false,
   false,
   false,
   false,

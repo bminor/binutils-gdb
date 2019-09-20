@@ -5,18 +5,6 @@
 
 #include "ovlymgr.h"
 
-#ifdef __SPU__
-/* SPU tool chain provides its own overlay manager.  */
-bool
-OverlayLoad (unsigned long ovlyno)
-{
-}
-bool
-OverlayUnload (unsigned long ovlyno)
-{
-}
-#else /* __SPU__ */
-
 /* Local functions and data: */
 
 extern unsigned long _ovly_table[][4];
@@ -243,4 +231,3 @@ ovly_copy (unsigned long dst, unsigned long src, long size)
   return;
 }
 
-#endif /* __SPU__ */

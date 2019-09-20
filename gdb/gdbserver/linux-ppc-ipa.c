@@ -181,8 +181,6 @@ get_ipa_tdesc (int idx)
       return tdesc_powerpc_64l;
     case PPC_TDESC_ALTIVEC:
       return tdesc_powerpc_altivec64l;
-    case PPC_TDESC_CELL:
-      return tdesc_powerpc_cell64l;
     case PPC_TDESC_VSX:
       return tdesc_powerpc_vsx64l;
     case PPC_TDESC_ISA205:
@@ -202,8 +200,6 @@ get_ipa_tdesc (int idx)
       return tdesc_powerpc_32l;
     case PPC_TDESC_ALTIVEC:
       return tdesc_powerpc_altivec32l;
-    case PPC_TDESC_CELL:
-      return tdesc_powerpc_cell32l;
     case PPC_TDESC_VSX:
       return tdesc_powerpc_vsx32l;
     case PPC_TDESC_ISA205:
@@ -241,7 +237,6 @@ initialize_low_tracepoint (void)
 #ifdef __powerpc64__
   init_registers_powerpc_64l ();
   init_registers_powerpc_altivec64l ();
-  init_registers_powerpc_cell64l ();
   init_registers_powerpc_vsx64l ();
   init_registers_powerpc_isa205_64l ();
   init_registers_powerpc_isa205_altivec64l ();
@@ -252,7 +247,6 @@ initialize_low_tracepoint (void)
 #else
   init_registers_powerpc_32l ();
   init_registers_powerpc_altivec32l ();
-  init_registers_powerpc_cell32l ();
   init_registers_powerpc_vsx32l ();
   init_registers_powerpc_isa205_32l ();
   init_registers_powerpc_isa205_altivec32l ();

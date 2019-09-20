@@ -1,3 +1,32 @@
+2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/spu-info.exp: Remove file.
+	* gdb.arch/spu-info.c: Remove file.
+	* gdb.arch/spu-ls.exp: Remove file.
+	* gdb.arch/spu-ls.c: Remove file.
+
+	* gdb.asm/asm-source.exp: Remove support for spu*-*-*.
+	* gdb.asm/spu.inc: Remove file.
+
+	* gdb.base/dump.exp: Remove support for spu*-*-*.
+	* gdb.base/stack-checking.exp: Likewise.
+	* gdb.base/overlays.exp: Likewise.
+	* gdb.base/ovlymgr.c: Likewise.
+	* gdb.base/spu.ld: Remove file.
+
+	* gdb.cp/bs15503.exp: Remove support for spu*-*-*.
+	* gdb.cp/cpexprs.exp: Likewise.
+	* gdb.cp/exception.exp: Likewise.
+	* gdb.cp/gdb2495.exp: Likewise.
+	* gdb.cp/mb-templates.exp: Likewise.
+	* gdb.cp/pr9167.exp: Likewise.
+	* gdb.cp/userdef.exp: Likewise.
+
+	* gdb.xml/tdesc-regs.exp: Remove support for spu*-*-*.
+
+	* gdb.cell: Remove directory.
+	* lib/cell.exp: Remove file.
+
 2019-09-19  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test): Eliminate "^FOOBAR$" pattern.

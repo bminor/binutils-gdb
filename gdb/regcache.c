@@ -1605,10 +1605,7 @@ cooked_read_test (struct gdbarch *gdbarch)
 
       SELF_CHECK (mock_target.fetch_registers_called == 0);
       SELF_CHECK (mock_target.store_registers_called == 0);
-
-      /* Some SPU pseudo registers are got via TARGET_OBJECT_SPU.  */
-      if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
-	SELF_CHECK (mock_target.xfer_partial_called == 0);
+      SELF_CHECK (mock_target.xfer_partial_called == 0);
 
       mock_target.reset ();
     }
@@ -1724,16 +1721,12 @@ cooked_write_test (struct gdbarch *gdbarch)
 
       auto bfd_arch = gdbarch_bfd_arch_info (gdbarch)->arch;
 
-      if ((bfd_arch == bfd_arch_sparc
-	   /* SPARC64_CWP_REGNUM, SPARC64_PSTATE_REGNUM,
-	      SPARC64_ASI_REGNUM and SPARC64_CCR_REGNUM are hard to test.  */
-	   && gdbarch_ptr_bit (gdbarch) == 64
-	   && (regnum >= gdbarch_num_regs (gdbarch)
-	       && regnum <= gdbarch_num_regs (gdbarch) + 4))
-	  || (bfd_arch == bfd_arch_spu
-	      /* SPU pseudo registers except SPU_SP_REGNUM are got by
-		 TARGET_OBJECT_SPU.  */
-	      && regnum >= gdbarch_num_regs (gdbarch) && regnum != 130))
+      if (bfd_arch == bfd_arch_sparc
+	  /* SPARC64_CWP_REGNUM, SPARC64_PSTATE_REGNUM,
+	     SPARC64_ASI_REGNUM and SPARC64_CCR_REGNUM are hard to test.  */
+	  && gdbarch_ptr_bit (gdbarch) == 64
+	  && (regnum >= gdbarch_num_regs (gdbarch)
+	      && regnum <= gdbarch_num_regs (gdbarch) + 4))
 	continue;
 
       std::vector<gdb_byte> expected (register_size (gdbarch, regnum), 0);

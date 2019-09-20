@@ -30,12 +30,6 @@ if [istarget "alpha*-*-*"] then {
     lappend options "additional_flags=-Wl,-taso"
 }
 
-if {[istarget "spu*-*-*"]} then {
-    # The internal address format used for the combined Cell/B.E.
-    # debugger requires 64-bit.
-    set is64bitonly "yes"
-}
-
 # Debian9/Ubuntu16.10 onwards default to PIE enabled. Ensure it is disabled as
 # this causes addresses to be out of range for IHEX.
 lappend options {nopie}

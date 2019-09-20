@@ -1613,22 +1613,6 @@ handle_qxfer_siginfo (const char *annex,
   return (*the_target->qxfer_siginfo) (annex, readbuf, writebuf, offset, len);
 }
 
-/* Handle qXfer:spu:read and qXfer:spu:write.  */
-
-static int
-handle_qxfer_spu (const char *annex,
-		  gdb_byte *readbuf, const gdb_byte *writebuf,
-		  ULONGEST offset, LONGEST len)
-{
-  if (the_target->qxfer_spu == NULL)
-    return -2;
-
-  if (current_thread == NULL)
-    return -1;
-
-  return (*the_target->qxfer_spu) (annex, readbuf, writebuf, offset, len);
-}
-
 /* Handle qXfer:statictrace:read.  */
 
 static int
@@ -1985,7 +1969,6 @@ static const struct qxfer qxfer_packets[] =
     { "libraries-svr4", handle_qxfer_libraries_svr4 },
     { "osdata", handle_qxfer_osdata },
     { "siginfo", handle_qxfer_siginfo },
-    { "spu", handle_qxfer_spu },
     { "statictrace", handle_qxfer_statictrace },
     { "threads", handle_qxfer_threads },
     { "traceframe-info", handle_qxfer_traceframe_info },
@@ -2396,9 +2379,6 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
-
-      if (the_target->qxfer_spu != NULL)
-	strcat (own_buf, ";qXfer:spu:read+;qXfer:spu:write+");
 
       if (the_target->qxfer_siginfo != NULL)
 	strcat (own_buf, ";qXfer:siginfo:read+;qXfer:siginfo:write+");

@@ -69,16 +69,6 @@ switch -glob -- [istarget] {
 	set regdir "sparc/"
         set core-regs {sparc64-cpu.xml sparc64-fpu.xml sparc64-cp0.xml}
     }
-    "spu*-*-*" {
-	# This may be either the spu-linux-nat target, or the Cell/B.E.
-	# multi-architecture debugger in SPU standalone executable mode.
-	# We do not support XML register sets on SPU in either case.
-	# However, the multi-arch debugger will accept XML registers sets
-	# (on the PowerPC side), hence the test below would fail.
-	# Simply return unconditionally here.
-	unsupported "register tests"
-	return 0
-    }
     "tic6x-*-*" {
 	set core-regs {tic6x-core.xml}
     }

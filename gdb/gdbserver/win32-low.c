@@ -1809,7 +1809,6 @@ static struct target_ops win32_target_ops = {
   win32_stopped_data_address,
   NULL, /* read_offsets */
   NULL, /* get_tls_address */
-  NULL, /* qxfer_spu */
 #ifdef _WIN32_WCE
   wince_hostio_last_error,
 #else

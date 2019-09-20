@@ -484,21 +484,4 @@ case ${gdb_host} in
 		;;
 	esac
 	;;
-    spu-linux)
-	case ${gdb_host_cpu} in
-	    powerpc)
-		# Target: Cell BE (PowerPC64 + SPU)
-		# This implements a 'pseudo-native' GDB running on the
-		# PPU side of the Cell BE and debugging the SPU side.
-		NAT_FILE=
-		NAT_CDEPS=
-		LOADLIBES=
-		NATDEPFILES='spu-linux-nat.o \
-		      inf-ptrace.o fork-child.o nat/fork-inferior.o \
-		      nat/linux-procfs.o nat/linux-ptrace.o \
-		      nat/linux-waitpid.o \
-		      nat/linux-personality.o nat/linux-namespaces.o'
-		;;
-	esac
-	;;
 esac

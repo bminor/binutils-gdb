@@ -256,10 +256,6 @@ struct target_ops
   int (*get_tls_address) (struct thread_info *thread, CORE_ADDR offset,
 			  CORE_ADDR load_module, CORE_ADDR *address);
 
-   /* Read/Write from/to spufs using qXfer packets.  */
-  int (*qxfer_spu) (const char *annex, unsigned char *readbuf,
-		    unsigned const char *writebuf, CORE_ADDR offset, int len);
-
   /* Fill BUF with an hostio error packet representing the last hostio
      error.  */
   void (*hostio_last_error) (char *buf);

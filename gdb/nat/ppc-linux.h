@@ -33,9 +33,6 @@
    If they aren't, we can provide them ourselves (their values are fixed
    because they are part of the kernel ABI).  They are used in the AT_HWCAP
    entry of the AUXV.  */
-#ifndef PPC_FEATURE_CELL
-#define PPC_FEATURE_CELL 0x00010000
-#endif
 #ifndef PPC_FEATURE_BOOKE
 #define PPC_FEATURE_BOOKE 0x00008000
 #endif

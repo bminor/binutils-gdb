@@ -963,7 +963,6 @@ static struct target_ops nto_target_ops = {
   nto_stopped_data_address,
   NULL, /* nto_read_offsets */
   NULL, /* thread_db_set_tls_address */
-  NULL,
   hostio_last_error_from_errno,
   NULL, /* nto_qxfer_osdata */
   NULL, /* xfer_siginfo */

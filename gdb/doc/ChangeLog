@@ -1,3 +1,10 @@
+2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* doc/gdb.texinfo (Remote Configuration): Remove documentation for
+	qXfer:spu:read and qXfer:spu:write.
+	(General Query Packets): Likewise.
+	(Cell Broadband Engine SPU architecture): Remove subsection.
+
 2019-09-18  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Editing): Document readline application name.

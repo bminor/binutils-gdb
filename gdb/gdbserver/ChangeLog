@@ -1,3 +1,43 @@
+2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv (ipa_ppc_linux_regobj): Remove powerpc-cell32l-ipa.o
+	and powerpc-cell64l-ipa.o.
+	(powerpc*-*-linux*): Remove powerpc-cell32l.o and powerpc-cell64l.o
+	from srv_regobj.  Remove rs6000/powerpc-cell32l.xml and
+	rs6000/powerpc-cell64l.xml from srv_xmlfiles.
+	(spu*-*-*): Remove.
+
+	* spu-low.c: Remove file.
+
+	* linux-ppc-low.c (INSTR_SC, NR_spu_run): Remove.
+	(parse_spufs_run): Remove.
+	(ppc_get_pc): Remove Cell/B.E. support.
+	(ppc_set_pc): Likewise.
+	(ppc_breakpoint_at): Likewise.
+	(ppc_arch_setup): Likewise.
+	(ppc_get_ipa_tdesc_idx): Do not handle tdesc_powerpc_cell64l or
+	tdesc_powerpc_cell32l.
+	(initialize_low_arch): Do not call init_registers_powerpc_cell64l
+	or init_registers_powerpc_cell32l.
+	* linux-ppc-ipa.c (get_ipa_tdesc): Do not handle PPC_TDESC_CELL.
+	(initialize_low_tracepoint): Do not call init_registers_powerpc_cell64l
+	or init_registers_powerpc_cell32l.
+	* linux-ppc-tdesc-init.h (PPC_TDESC_CELL): Mark as unused.
+	(init_registers_powerpc_cell32l): Remove prototype.
+	(init_registers_powerpc_cell64l): Likewise.
+
+	* target.h (struct target_ops): Remove qxfer_spu member.
+	* server.c (handle_qxfer_spu): Remove.
+	(qxfer_packets): Remove entry for "spu".
+	(handle_query): No longer support qXfer:spu:read or qXfer:spu:write.
+	* linux-low.c (SPUFS_MAGIC): Remove.
+	(spu_enumerate_spu_ids): Remove.
+	(linux_qxfer_spu): Remove.
+	(linux_target_ops): Remove qxfer_spu member.
+	* lynx-low.c (lynx_target_ops): Remove qxfer_spu member.
+	* nto-low.c (nto_target_ops): Remove qxfer_spu member.
+	* win32-low.c (win32_target_ops): Remove qxfer_spu member.
+
 2019-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (SFILES): Add 'gdbsupport/gdb-dlfcn.c'.

@@ -50,9 +50,7 @@ ppc_linux_match_description (struct ppc_linux_features features)
 
   if (features.wordsize == 8)
     {
-      if (features.cell)
-	tdesc = tdesc_powerpc_cell64l;
-      else if (features.vsx)
+      if (features.vsx)
 	tdesc = (features.htm? tdesc_powerpc_isa207_htm_vsx64l
 		 : features.isa207? tdesc_powerpc_isa207_vsx64l
 		 : features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx64l
@@ -69,9 +67,7 @@ ppc_linux_match_description (struct ppc_linux_features features)
     {
       gdb_assert (features.wordsize == 4);
 
-      if (features.cell)
-	tdesc = tdesc_powerpc_cell32l;
-      else if (features.vsx)
+      if (features.vsx)
 	tdesc = (features.htm? tdesc_powerpc_isa207_htm_vsx32l
 		 : features.isa207? tdesc_powerpc_isa207_vsx32l
 		 : features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx32l
