@@ -22,8 +22,7 @@
 
 #include "linux-low.h"
 
-extern int debug_threads;
-
+#include "debug.h"
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
 #include "gdbsupport/gdb_vecs.h"

@@ -22,6 +22,7 @@
 #include "gdbthread.h"
 #include "nto-low.h"
 #include "hostio.h"
+#include "debug.h"
 
 #include <limits.h>
 #include <fcntl.h>
@@ -32,7 +33,6 @@
 #include <sys/neutrino.h>
 
 
-extern int using_threads;
 int using_threads = 1;
 
 const struct target_desc *nto_tdesc;

@@ -28,7 +28,13 @@ extern int remote_debug;
 void debug_set_output (const char *debug_file);
 #endif
 
+extern int using_threads;
+
+/* Enable miscellaneous debugging output.  The name is historical - it
+   was originally used to debug LinuxThreads support.  */
+
 extern int debug_threads;
+
 extern int debug_timestamp;
 
 void debug_flush (void);

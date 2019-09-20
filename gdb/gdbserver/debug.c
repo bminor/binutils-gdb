@@ -26,8 +26,7 @@ int remote_debug = 0;
 /* Output file for debugging.  Default to standard error.  */
 FILE *debug_file = stderr;
 
-/* Enable miscellaneous debugging output.  The name is historical - it
-   was originally used to debug LinuxThreads support.  */
+/* See debug.h.  */
 int debug_threads;
 
 /* Include timestamps in debugging output.  */

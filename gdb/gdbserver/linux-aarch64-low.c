@@ -28,6 +28,7 @@
 #include "elf/common.h"
 #include "ax.h"
 #include "tracepoint.h"
+#include "debug.h"
 
 #include <signal.h>
 #include <sys/user.h>
@@ -152,10 +153,6 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, AARCH64_PAUTH_CMASK_REGNUM (pauth_base),
 		   &pauth_regset[1]);
 }
-
-/* Enable miscellaneous debugging output.  The name is historical - it
-   was originally used to debug LinuxThreads support.  */
-extern int debug_threads;
 
 /* Implementation of linux_target_ops method "get_pc".  */
 

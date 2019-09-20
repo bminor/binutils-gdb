@@ -1,3 +1,14 @@
+2019-09-20  Christian Biesinger  <cbiesinger@google.com>
+
+	* debug.c (debug_threads): Remove comment in favor of the header.
+	* debug.h (using_threads): Add declaration.
+	(debug_threads): Add comment.
+	* linux-aarch64-low.c: Include debug.h and remove declaration of
+	debug_threads.
+	* nto-low.c: Likewise.
+	* remote-utils.c: Likewise.
+	* thread-db.c: Likewise.
+
 2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv (ipa_ppc_linux_regobj): Remove powerpc-cell32l-ipa.o
