@@ -1,3 +1,8 @@
+2019-09-20  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/24919:
+	* block.c (contained_in): Fix final return value.
+
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
 	* gdb_bfd.c (gdb_bfd_ref, gdb_bfd_unref): Use bfd_set_usrdata.

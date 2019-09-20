@@ -86,7 +86,7 @@ contained_in (const struct block *a, const struct block *b,
     }
   while (a != NULL);
 
-  return true;
+  return false;
 }
 
 
