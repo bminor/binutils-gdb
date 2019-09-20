@@ -304,6 +304,20 @@ focus, winheight, +, -, >, <
 
 * Other MI changes
 
+ ** The default version of the MI interpreter is now 3 (-i=mi3).
+
+  ** The output of information about multi-location breakpoints (which is
+     syntactically incorrect in MI 2) has changed in MI 3.  This affects
+     the following commands and events:
+
+	- -break-insert
+	- -break-info
+	- =breakpoint-created
+	- =breakpoint-modified
+
+     The -fix-multi-location-breakpoint-output command can be used to enable
+     this behavior with previous MI versions.
+
  ** Backtraces and frames include a new optional field addr_flags which is
     given after the addr field.  On AArch64 this contains PAC if the address
     has been masked in the frame.  On all other targets the field is not
@@ -501,8 +515,6 @@ set style address intensity VALUE
 
 * MI changes
 
-  ** The default version of the MI interpreter is now 3 (-i=mi3).
-
   ** The '-data-disassemble' MI command now accepts an '-a' option to
      disassemble the whole function surrounding the given program
      counter value or function name.  Support for this feature can be
@@ -511,18 +523,6 @@ set style address intensity VALUE
 
   ** Command responses and notifications that include a frame now include
      the frame's architecture in a new "arch" attribute.
-
-  ** The output of information about multi-location breakpoints (which is
-     syntactically incorrect in MI 2) has changed in MI 3.  This affects
-     the following commands and events:
-
-	- -break-insert
-	- -break-info
-	- =breakpoint-created
-	- =breakpoint-modified
-
-     The -fix-multi-location-breakpoint-output command can be used to enable
-     this behavior with previous MI versions.
 
 * New native configurations
 

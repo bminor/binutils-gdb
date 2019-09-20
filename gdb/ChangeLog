@@ -1,5 +1,11 @@
 2019-09-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Move entries about default MI version now being
+	version 3, and about the GDB/MI fix for multi-location
+	breakpoints to the "since GDB 8.3" section.
+
+2019-09-20  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 8.3.1 released.
 
 2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
