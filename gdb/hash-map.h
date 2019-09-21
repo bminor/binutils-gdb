@@ -1,0 +1,220 @@
+/* A type-safe hash map.
+   Copyright (C) 2014-2019 Free Software Foundation, Inc.
+
+This file is part of GCC.
+
+GCC is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 3, or (at your option) any later
+version.
+
+GCC is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License
+along with GCC; see the file COPYING3.  If not see
+<http://www.gnu.org/licenses/>.  */
+
+
+#ifndef hash_map_h
+#define hash_map_h
+
+#include "hash-table.h"
+
+/* Class hash_map is a hash-value based container mapping objects of
+   KeyId type to those of the Value type.
+   Both KeyId and Value may be non-trivial (non-POD) types provided
+   a suitabe Traits class.  A few default Traits specializations are
+   provided for basic types such as integers, pointers, and std::pair.
+   Inserted elements are value-initialized either to zero for POD types
+   or by invoking their default ctor.  Removed elements are destroyed
+   by invoking their dtor.   On hash_map destruction all elements are
+   removed.  Objects of hash_map type are copy-constructible but not
+   assignable.  */
+
+template<typename KeyId, typename Value,
+	 typename Traits /* = simple_hashmap_traits<default_hash_traits<Key>,
+			                            Value> */>
+class hash_map
+{
+  typedef typename Traits::key_type Key;
+  struct hash_entry
+  {
+    Key m_key;
+    Value m_value;
+
+    typedef hash_entry value_type;
+    typedef Key compare_type;
+
+    static hashval_t hash (const hash_entry &e)
+      {
+       	return Traits::hash (e.m_key);
+      }
+
+    static bool equal (const hash_entry &a, const Key &b)
+       	{
+	  return Traits::equal_keys (a.m_key, b);
+       	}
+
+    static void remove (hash_entry &e) { Traits::remove (e); }
+
+    static void mark_deleted (hash_entry &e) { Traits::mark_deleted (e); }
+
+    static bool is_deleted (const hash_entry &e)
+      {
+       	return Traits::is_deleted (e);
+      }
+
+    static void mark_empty (hash_entry &e) { Traits::mark_empty (e); }
+    static bool is_empty (const hash_entry &e) { return Traits::is_empty (e); }
+  };
+
+public:
+  explicit hash_map (size_t n = 13,
+		     bool sanitize_eq_and_hash = true)
+    : m_table (n, sanitize_eq_and_hash)
+  {
+  }
+
+  explicit hash_map (const hash_map &h,
+		     bool sanitize_eq_and_hash = true)
+    : m_table (h.m_table, sanitize_eq_and_hash) {}
+
+  /* If key k isn't already in the map add key k with value v to the map, and
+     return false.  Otherwise set the value of the entry for key k to be v and
+     return true.  */
+
+  bool put (const Key &k, const Value &v)
+    {
+      hash_entry *e = m_table.find_slot_with_hash (k, Traits::hash (k),
+						   INSERT);
+      bool ins = hash_entry::is_empty (*e);
+      if (ins)
+	{
+	  e->m_key = k;
+	  new ((void *) &e->m_value) Value (v);
+	}
+      else
+	e->m_value = v;
+
+      return !ins;
+    }
+
+  /* if the passed in key is in the map return its value otherwise NULL.  */
+
+  Value *get (const Key &k)
+    {
+      hash_entry &e = m_table.find_with_hash (k, Traits::hash (k));
+      return Traits::is_empty (e) ? NULL : &e.m_value;
+    }
+
+  /* Return a reference to the value for the passed in key, creating the entry
+     if it doesn't already exist.  If existed is not NULL then it is set to
+     false if the key was not previously in the map, and true otherwise.  */
+
+  Value &get_or_insert (const Key &k, bool *existed = NULL)
+    {
+      hash_entry *e = m_table.find_slot_with_hash (k, Traits::hash (k),
+						   INSERT);
+      bool ins = Traits::is_empty (*e);
+      if (ins)
+	{
+	  e->m_key = k;
+	  new ((void *)&e->m_value) Value ();
+	}
+
+      if (existed != NULL)
+	*existed = !ins;
+
+      return e->m_value;
+    }
+
+  void remove (const Key &k)
+    {
+      m_table.remove_elt_with_hash (k, Traits::hash (k));
+    }
+
+  /* Call the call back on each pair of key and value with the passed in
+     arg.  */
+
+  template<typename Arg, bool (*f)(const typename Traits::key_type &,
+				   const Value &, Arg)>
+  void traverse (Arg a) const
+    {
+      for (typename hash_table<hash_entry>::iterator iter = m_table.begin ();
+	   iter != m_table.end (); ++iter)
+	f ((*iter).m_key, (*iter).m_value, a);
+    }
+
+  template<typename Arg, bool (*f)(const typename Traits::key_type &,
+				   Value *, Arg)>
+  void traverse (Arg a) const
+    {
+      for (typename hash_table<hash_entry>::iterator iter = m_table.begin ();
+	   iter != m_table.end (); ++iter)
+	if (!f ((*iter).m_key, &(*iter).m_value, a))
+	  break;
+    }
+
+  size_t elements () const { return m_table.elements (); }
+
+  void empty () { m_table.empty(); }
+
+  /* Return true when there are no elements in this hash map.  */
+  bool is_empty () const { return m_table.is_empty (); }
+
+  class iterator
+  {
+  public:
+    explicit iterator (const typename hash_table<hash_entry>::iterator &iter) :
+      m_iter (iter) {}
+
+    iterator &operator++ ()
+    {
+      ++m_iter;
+      return *this;
+    }
+
+    /* Can't use std::pair here, because GCC before 4.3 don't handle
+       std::pair where template parameters are references well.
+       See PR86739.  */
+    class reference_pair {
+    public:
+      const Key &first;
+      Value &second;
+
+      reference_pair (const Key &key, Value &value) : first (key), second (value) {}
+
+      template <typename K, typename V>
+      operator std::pair<K, V> () const { return std::pair<K, V> (first, second); }
+    };
+
+    reference_pair operator* ()
+    {
+      hash_entry &e = *m_iter;
+      return reference_pair (e.m_key, e.m_value);
+    }
+
+    bool
+    operator != (const iterator &other) const
+    {
+      return m_iter != other.m_iter;
+    }
+
+  private:
+    typename hash_table<hash_entry>::iterator m_iter;
+  };
+
+  /* Standard iterator retrieval methods.  */
+
+  iterator  begin () const { return iterator (m_table.begin ()); }
+  iterator end () const { return iterator (m_table.end ()); }
+
+private:
+
+  hash_table<hash_entry> m_table;
+};
+
+#endif

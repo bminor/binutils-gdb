@@ -90,6 +90,7 @@
 #include <forward_list>
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
+#include "hash-map.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -5076,12 +5077,8 @@ dw_expand_symtabs_matching_file_matcher
 
   objfile *const objfile = dwarf2_per_objfile->objfile;
 
-  htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
-					    htab_eq_pointer,
-					    NULL, xcalloc, xfree));
-  htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
-						htab_eq_pointer,
-						NULL, xcalloc, xfree));
+  hash_table<nofree_ptr_hash <quick_file_names>> visited_found (10);
+  hash_table<nofree_ptr_hash <quick_file_names>> visited_not_found (10);
 
   /* The rule is CUs specify all the files, including those used by
      any TU, so there's no need to scan TUs here.  */
@@ -5100,9 +5097,9 @@ dw_expand_symtabs_matching_file_matcher
       if (file_data == NULL)
 	continue;
 
-      if (htab_find (visited_not_found.get (), file_data) != NULL)
+      if (visited_not_found.find_slot (file_data, NO_INSERT) != NULL)
 	continue;
-      else if (htab_find (visited_found.get (), file_data) != NULL)
+      else if (visited_found.find_slot (file_data, NO_INSERT) != NULL)
 	{
 	  per_cu->v.quick->mark = 1;
 	  continue;
@@ -5132,12 +5129,10 @@ dw_expand_symtabs_matching_file_matcher
 	      break;
 	    }
 	}
-
-      void **slot = htab_find_slot (per_cu->v.quick->mark
-				    ? visited_found.get ()
-				    : visited_not_found.get (),
-				    file_data, INSERT);
-      *slot = file_data;
+      if (per_cu->v.quick->mark)
+	*visited_found.find_slot (file_data, INSERT) = file_data;
+      else
+	*visited_not_found.find_slot (file_data, INSERT) = file_data;
     }
 }
 
