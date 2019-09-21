@@ -1,3 +1,9 @@
+2019-09-25  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-09-21  Alan Modra  <amodra@gmail.com>
+	* config/tc-i386.c (md_parse_option): Fix warning on vexwig assignment.
+
 2019-09-19  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* NEWS: Add SVE2 and TME entries.
