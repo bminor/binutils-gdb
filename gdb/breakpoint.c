@@ -1727,7 +1727,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	 to the user when the old value and the new value may actually
 	 be completely different objects.  */
       b->val = NULL;
-      b->val_valid = 0;
+      b->val_valid = false;
 
       /* Note that unlike with breakpoints, the watchpoint's condition
 	 expression is stored in the breakpoint object, not in the
@@ -1780,7 +1780,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	  if (b->val_bitsize != 0)
 	    v = extract_bitfield_from_watchpoint_value (b, v);
 	  b->val = release_value (v);
-	  b->val_valid = 1;
+	  b->val_valid = true;
 	}
 
       frame_pspace = get_frame_program_space (get_selected_frame (NULL));
@@ -3900,7 +3900,7 @@ breakpoint_init_inferior (enum inf_context context)
 		  /* Reset val field to force reread of starting value in
 		     insert_breakpoints.  */
 		  w->val.reset (nullptr);
-		  w->val_valid = 0;
+		  w->val_valid = false;
 		}
 	    }
 	}
@@ -4877,7 +4877,7 @@ watchpoint_check (bpstat bs)
 	{
 	  bs->old_val = b->val;
 	  b->val = release_value (new_val);
-	  b->val_valid = 1;
+	  b->val_valid = true;
 	  if (new_val != NULL)
 	    value_free_to_mark (mark);
 	  return WP_VALUE_CHANGED;
@@ -10717,7 +10717,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       w->val = val;
       w->val_bitpos = saved_bitpos;
       w->val_bitsize = saved_bitsize;
-      w->val_valid = 1;
+      w->val_valid = true;
     }
 
   if (cond_start)
@@ -14375,7 +14375,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 		  && addr + len > loc->address)
 		{
 		  wp->val = NULL;
-		  wp->val_valid = 0;
+		  wp->val_valid = false;
 		}
 	  }
       }

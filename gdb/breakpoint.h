@@ -817,9 +817,10 @@ struct watchpoint : public breakpoint
      we do not know the value yet or the value was not readable.  VAL
      is never lazy.  */
   value_ref_ptr val;
-  /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
+
+  /* True if VAL is valid.  If VAL_VALID is set but VAL is NULL,
      then an error occurred reading the value.  */
-  int val_valid;
+  bool val_valid;
 
   /* When watching the location of a bitfield, contains the offset and size of
      the bitfield.  Otherwise contains 0.  */
