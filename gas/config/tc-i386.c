@@ -11438,9 +11438,9 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MVEXWIG:
       if (strcmp (arg, "0") == 0)
-	vexwig = evexw0;
+	vexwig = vexw0;
       else if (strcmp (arg, "1") == 0)
-	vexwig = evexw1;
+	vexwig = vexw1;
       else
 	as_fatal (_("invalid -mvexwig= option: `%s'"), arg);
       break;
