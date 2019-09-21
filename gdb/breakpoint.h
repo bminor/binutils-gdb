@@ -387,17 +387,17 @@ public:
   /* Is this particular location enabled.  */
   bool enabled = false;
   
-  /* Nonzero if this breakpoint is now inserted.  */
+  /* True if this breakpoint is now inserted.  */
   bool inserted = false;
 
-  /* Nonzero if this is a permanent breakpoint.  There is a breakpoint
+  /* True if this is a permanent breakpoint.  There is a breakpoint
      instruction hard-wired into the target's code.  Don't try to
      write another breakpoint instruction on top of it, or restore its
      value.  Step over it using the architecture's
      gdbarch_skip_permanent_breakpoint method.  */
   bool permanent = false;
 
-  /* Nonzero if this is not the first breakpoint in the list
+  /* True if this is not the first breakpoint in the list
      for the given address.  location of tracepoint can _never_
      be duplicated with other locations of tracepoints and other
      kinds of breakpoints, because two locations at the same
