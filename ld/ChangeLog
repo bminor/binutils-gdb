@@ -1,3 +1,7 @@
+2019-09-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-srec/sr3.cc (FOO_MSG_LEN): Set to 4.
+
 2019-09-20  Nelson Chu <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/weakref32.s: Add relaxable undef weak code.
