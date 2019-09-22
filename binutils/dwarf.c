@@ -1999,9 +1999,6 @@ get_type_signedness (unsigned char *        start,
 
   * is_signed = FALSE;
 
-  if (data >= end)
-    return;
-
   abbrev_number = read_uleb128 (data, & bytes_read, end);
   data += bytes_read;
 
@@ -2042,6 +2039,8 @@ get_type_signedness (unsigned char *        start,
 		 NB/ We need to avoid infinite recursion.  */
 	      return;
 	    }
+	  if (uvalue >= (size_t) (end - start))
+	    return;
 	  get_type_signedness (start, start + uvalue, end, pointer_size,
 			       offset_size, dwarf_version, is_signed, TRUE);
 	  break;
@@ -2725,7 +2724,8 @@ read_and_display_attr_value (unsigned long           attribute,
   switch (attribute)
     {
     case DW_AT_type:
-      if (level >= 0 && level < MAX_CU_NESTING)
+      if (level >= 0 && level < MAX_CU_NESTING
+	  && uvalue < (size_t) (end - start))
 	{
 	  bfd_boolean is_signed = FALSE;
 
