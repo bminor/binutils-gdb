@@ -1,3 +1,14 @@
+2019-09-25  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-09-23  Alan Modra  <amodra@gmail.com>
+	PR 25018
+	* dwarf.c (get_type_signedness): Delete ineffective pointer
+	comparison check.  Properly range check uvalue offset on
+	recursive call.
+	(read_and_display_attr_value): Range check uvalue offset before
+	calling get_type_signedness.
+
 2019-09-19  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/binutils-all/objdump.exp (objdump -S): Update testcase.
