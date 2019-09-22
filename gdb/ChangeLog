@@ -1,5 +1,10 @@
 2019-09-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-svr4.c (svr4_iterate_over_objfiles_in_search_order): Fix
+	formatting.
+
+2019-09-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.h (bp_location) <inserted, permanent, duplicate>:
 	Change "nonzero" to "true" in documentation.
 

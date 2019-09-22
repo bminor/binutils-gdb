@@ -3229,8 +3229,8 @@ svr4_iterate_over_objfiles_in_search_order
       else
 	abfd = current_objfile->obfd;
 
-      if (abfd != nullptr &&
-	  scan_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
+      if (abfd != nullptr
+	  && scan_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
 	{
 	  checked_current_objfile = true;
 	  if (cb (current_objfile, cb_data) != 0)
