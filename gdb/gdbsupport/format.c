@@ -129,7 +129,8 @@ format_pieces::format_pieces (const char **arg)
 	current_substring += f - 1 - prev_start;
 	*current_substring++ = '\0';
 
-	m_pieces.emplace_back (sub_start, literal_piece);
+	if (*sub_start != '\0')
+	  m_pieces.emplace_back (sub_start, literal_piece);
 
 	percent_loc = f - 1;
 
@@ -340,11 +341,14 @@ format_pieces::format_pieces (const char **arg)
 
   /* Record the remainder of the string.  */
 
-  sub_start = current_substring;
+  if (f > prev_start)
+    {
+      sub_start = current_substring;
 
-  strncpy (current_substring, prev_start, f - prev_start);
-  current_substring += f - prev_start;
-  *current_substring++ = '\0';
+      strncpy (current_substring, prev_start, f - prev_start);
+      current_substring += f - prev_start;
+      *current_substring++ = '\0';
 
-  m_pieces.emplace_back (sub_start, literal_piece);
+      m_pieces.emplace_back (sub_start, literal_piece);
+    }
 }

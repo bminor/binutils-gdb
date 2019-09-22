@@ -48,13 +48,15 @@ test_escape_sequences ()
 static void
 test_format_specifier ()
 {
-  check ("Hello %d%llx%%d", /* ARI: %ll */
+  /* The format string here ends with a % sequence, to ensure we don't
+     see a trailing empty literal piece.  */
+  check ("Hello %d%llx%%d%d", /* ARI: %ll */
     {
       format_piece ("Hello ", literal_piece),
       format_piece ("%d", int_arg),
-      format_piece ("", literal_piece),
       format_piece ("%llx", long_long_arg), /* ARI: %ll */
       format_piece ("%%d", literal_piece),
+      format_piece ("%d", int_arg),
     });
 }
 

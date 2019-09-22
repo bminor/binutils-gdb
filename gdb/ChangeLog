@@ -1,5 +1,11 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* unittests/format_pieces-selftests.c: Update.  Add final format.
+	* gdbsupport/format.c (format_pieces::format_pieces): Don't add
+	empty literal pieces.
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* ui-out.h (enum class ui_out_style_kind): Remove.
 	(class ui_out) <field_string, field_stsream, do_field_string>:
 	Change type of "style".
