@@ -350,6 +350,10 @@ focus, winheight, +, -, >, <
   both debugging standalone Cell/B.E. SPU applications and integrated debugging
   of Cell/B.E. applications that use both the PPU and SPU architectures.
 
+* New Simulators
+
+TI PRU					pru-*-elf
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on

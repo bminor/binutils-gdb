@@ -29,6 +29,7 @@ mips I-IV	Maciej W. Rozycki <macro@linux-mips.org>
 moxie		Anthony Green <green@moxielogic.com>
 msp430		Nick Clifton <nickc@redhat.com>
 or1k		Stafford Horne <shorne@gmail.com>
+pru		Dimitar Dimitrov <dimitar@dinux.eu>
 sh		(global maintainers)
 sh64		Dave Brolley <brolley@redhat.com>
 common		Frank Ch. Eigler <fche@redhat.com>

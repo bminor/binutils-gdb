@@ -79,6 +79,9 @@ case "${target}" in
    or1k-*-* | or1knd-*-*)
        SIM_ARCH(or1k)
        ;;
+   pru*-*-*)
+       SIM_ARCH(pru)
+       ;;
    rl78-*-*)
        SIM_ARCH(rl78)
        ;;
