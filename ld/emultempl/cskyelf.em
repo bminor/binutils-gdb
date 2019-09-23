@@ -25,6 +25,7 @@ fragment <<EOF
 
 #include "ldctor.h"
 #include "elf/csky.h"
+#include "elf32-csky.h"
 
 /* To use branch stub or not.  */
 extern bfd_boolean use_branch_stub;

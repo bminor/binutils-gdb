@@ -28,6 +28,7 @@
 #include "opcode/csky.h"
 #include <assert.h>
 #include "libiberty.h"
+#include "elf32-csky.h"
 
 /* Data structures used for merging different arch variants.
    V1 (510/610) and V2 (8xx) processors are incompatible, but
