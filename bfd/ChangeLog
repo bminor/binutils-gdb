@@ -1,5 +1,16 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_check_relocs): Use bfd_link_executable
+	in choosing between different actions for shared library and
+	non-shared library cases.  Delete ELIMINATE_COPY_RELOCS test.
+	(dec_dynrel_count): Likewise.  Account for ifunc special case.
+	(ppc64_elf_adjust_dynamic_symbol): Copy relocs are for executables,
+	not non-pic.
+	(allocate_dynrelocs): Comment fixes.  Delete ELIMINATE_COPY_RELOCS
+	test.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (SOURCE_HFILES): Add many missing .h files.
 	* Makefile.in: Regenerate.
 	* po/SRC-POTFILES.in: Regenerate.

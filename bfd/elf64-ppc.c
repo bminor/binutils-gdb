@@ -4836,7 +4836,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_TOC16_LO_DS:
 	  sec->has_toc_reloc = 1;
-	  if (h != NULL && !bfd_link_pic (info))
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* We may need a copy reloc.  */
 	      h->non_got_ref = 1;
@@ -5076,7 +5076,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
-	  if (h != NULL && !bfd_link_pic (info))
+	  if (h != NULL && bfd_link_executable (info))
 	    /* We may need a copy reloc.  */
 	    h->non_got_ref = 1;
 
@@ -5106,17 +5106,14 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
 	dodyn:
-	  if ((bfd_link_pic (info)
-	       && (must_be_dyn_reloc (info, r_type)
-		   || (h != NULL
-		       && (!SYMBOLIC_BIND (info, h)
-			   || h->root.type == bfd_link_hash_defweak
-			   || !h->def_regular))))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular))
+	  if ((h != NULL
+	       && (h->root.type == bfd_link_hash_defweak
+		   || !h->def_regular))
+	      || (h != NULL
+		  && !bfd_link_executable (info)
+		  && !SYMBOLIC_BIND (info, h))
+	      || (bfd_link_pic (info)
+		  && must_be_dyn_reloc (info, r_type))
 	      || (!bfd_link_pic (info)
 		  && ifunc != NULL))
 	    {
@@ -6425,7 +6422,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -6904,17 +6901,18 @@ dec_dynrel_count (bfd_vma r_info,
 	return FALSE;
     }
 
-  if ((bfd_link_pic (info)
-       && (must_be_dyn_reloc (info, r_type)
-	   || (h != NULL
-	       && (!SYMBOLIC_BIND (info, h)
-		   || h->root.type == bfd_link_hash_defweak
-		   || !h->def_regular))))
-      || (ELIMINATE_COPY_RELOCS
-	  && !bfd_link_pic (info)
-	  && h != NULL
-	  && (h->root.type == bfd_link_hash_defweak
-	      || !h->def_regular)))
+  if ((h != NULL
+       && (h->root.type == bfd_link_hash_defweak
+	   || !h->def_regular))
+      || (h != NULL
+	  && !bfd_link_executable (info)
+	  && !SYMBOLIC_BIND (info, h))
+      || (bfd_link_pic (info)
+	  && must_be_dyn_reloc (info, r_type))
+      || (!bfd_link_pic (info)
+	  && (h != NULL
+	      ? h->type == STT_GNU_IFUNC
+	      : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)))
     ;
   else
     return TRUE;
@@ -9403,7 +9401,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   for (gent = h->got.glist; gent != NULL; gent = gent->next)
     if (!gent->is_indirect)
       {
-	/* Make sure this symbol is output as a dynamic symbol.  */
+	/* Ensure we catch all the cases where this symbol should
+	   be made dynamic.  */
 	if (!ensure_undef_dynamic (info, h))
 	  return FALSE;
 
@@ -9438,7 +9437,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 be defined in regular objects.  For the normal shared case,
 	 discard space for relocs that have become local due to symbol
 	 visibility changes.  */
-
       if (bfd_link_pic (info))
 	{
 	  /* Relocs that use pc_count are those that appear on a call
@@ -9463,24 +9461,27 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  if (eh->dyn_relocs != NULL)
 	    {
-	      /* Make sure this symbol is output as a dynamic symbol.  */
+	      /* Ensure we catch all the cases where this symbol
+		 should be made dynamic.  */
 	      if (!ensure_undef_dynamic (info, h))
 		return FALSE;
 	    }
 	}
-      else if (ELIMINATE_COPY_RELOCS && h->type != STT_GNU_IFUNC)
+
+      /* For a fixed position executable, discard space for
+	 relocs against symbols which are not dynamic.  */
+      else if (h->type != STT_GNU_IFUNC)
 	{
-	  /* For the non-pic case, discard space for relocs against
-	     symbols which turn out to need copy relocs or are not
-	     dynamic.  */
 	  if (h->dynamic_adjusted
 	      && !h->def_regular
 	      && !ELF_COMMON_DEF_P (h))
 	    {
-	      /* Make sure this symbol is output as a dynamic symbol.  */
+	      /* Ensure we catch all the cases where this symbol
+		 should be made dynamic.  */
 	      if (!ensure_undef_dynamic (info, h))
 		return FALSE;
 
+	      /* But if that didn't work out, discard dynamic relocs.  */
 	      if (h->dynindx == -1)
 		eh->dyn_relocs = NULL;
 	    }
