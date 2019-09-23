@@ -24,6 +24,9 @@
 #include "libiberty.h"
 #include "opcode/mips.h"
 #include "opintl.h"
+#include "elf-bfd.h"
+#include "elf/mips.h"
+#include "elfxx-mips.h"
 
 /* FIXME: These are needed to figure out if the code is mips16 or
    not. The low bit of the address is often a good indicator.  No
@@ -32,8 +35,6 @@
 
 #if !defined(EMBEDDED_ENV)
 #define SYMTAB_AVAILABLE 1
-#include "elf-bfd.h"
-#include "elf/mips.h"
 #endif
 
 /* Mips instructions are at maximum this many bytes long.  */

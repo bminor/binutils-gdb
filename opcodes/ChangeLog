@@ -1,3 +1,8 @@
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
+	* mips-dis.c: Include elfxx-mips.h.  Move "elf-bfd.h" and
+	"elf/mips.h" earlier.
+
 2018-09-20  Jan Beulich  <jbeulich@suse.com>
 
 	PR gas/25012

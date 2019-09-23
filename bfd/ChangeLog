@@ -1,5 +1,11 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move mips function declaration to..
+	* elfxx-mips.h: ..here.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move csky function declarations to..
 	* elf32-csky.h: ..here, new file.
 	* elf32-csky.c: Include elf32-csky.h.

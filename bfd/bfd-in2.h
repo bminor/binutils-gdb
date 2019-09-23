@@ -1026,10 +1026,6 @@ extern bfd_boolean v850_elf_create_sections
 
 extern bfd_boolean v850_elf_set_note
   (bfd *, unsigned int, unsigned int);
-
-/* MIPS ABI flags data access.  For the disassembler.  */
-struct elf_internal_abiflags_v0;
-extern struct elf_internal_abiflags_v0 *bfd_mips_elf_get_abiflags (bfd *);
 /* Extracted from init.c.  */
 unsigned int bfd_init (void);
 

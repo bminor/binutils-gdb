@@ -176,6 +176,9 @@ extern int _bfd_mips_elf_cant_unwind_opcode (struct bfd_link_info *);
 extern void _bfd_mips_elf_record_xhash_symbol
   (struct elf_link_hash_entry *h, bfd_vma xlat_loc);
 
+/* MIPS ABI flags data access.  For the disassembler.  */
+extern struct elf_internal_abiflags_v0 *bfd_mips_elf_get_abiflags (bfd *);
+
 static inline bfd_boolean
 gprel16_reloc_p (unsigned int r_type)
 {
