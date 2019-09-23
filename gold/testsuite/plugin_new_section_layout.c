@@ -144,12 +144,12 @@ new_input_hook(const struct ld_plugin_input_file *file)
     section.shndx = i;
 
     if (get_input_section_type(section, &type) != LDPS_OK)
-      return LDPL_FATAL;
+      return LDPS_ERR;
     if (type != SHT_PROGBITS)
       continue;
 
     if (get_input_section_name(section, &name))
-      return LDPL_FATAL;
+      return LDPS_ERR;
 
     /* As in plugin_section_order.c, order is foo() followed by bar()
        followed by baz() */
@@ -172,7 +172,7 @@ new_input_hook(const struct ld_plugin_input_file *file)
   }
 
   if (num_entries != 3)
-    return LDPL_FATAL;
+    return LDPS_ERR;
 
   update_section_order(section_list, num_entries);
   unique_segment_for_sections (".text.plugin_created_unique", 0, 0x1000,
