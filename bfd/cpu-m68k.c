@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "opcode/m68k.h"
+#include "cpu-m68k.h"
 
 static const bfd_arch_info_type *
 bfd_m68k_compatible (const bfd_arch_info_type *a,

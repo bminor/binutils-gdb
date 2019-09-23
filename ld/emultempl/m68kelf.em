@@ -45,6 +45,8 @@ esac
 
 fragment <<EOF
 
+#include "elf32-m68k.h"
+
 #define GOT_HANDLING_SINGLE   (0)
 #define GOT_HANDLING_NEGATIVE (1)
 #define GOT_HANDLING_MULTIGOT (2)

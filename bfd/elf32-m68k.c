@@ -25,6 +25,8 @@
 #include "elf-bfd.h"
 #include "elf/m68k.h"
 #include "opcode/m68k.h"
+#include "cpu-m68k.h"
+#include "elf32-m68k.h"
 
 static bfd_boolean
 elf_m68k_discard_copies (struct elf_link_hash_entry *, void *);

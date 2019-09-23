@@ -23,7 +23,7 @@
 #include "floatformat.h"
 #include "libiberty.h"
 #include "opintl.h"
-
+#include "cpu-m68k.h"
 #include "opcode/m68k.h"
 
 /* Local function prototypes.  */
