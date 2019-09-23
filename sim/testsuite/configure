@@ -1946,6 +1946,9 @@ case "${target}" in
    powerpc*-*-*)
        sim_arch=ppc
        ;;
+   pru*-*-*)
+       sim_arch=pru
+       ;;
    ft32-*-*)
        sim_arch=ft32
        ;;
