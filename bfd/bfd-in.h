@@ -993,11 +993,3 @@ extern bfd_boolean elf32_aarch64_size_stubs
    void (*) (void));
 extern bfd_boolean elf32_aarch64_build_stubs
   (struct bfd_link_info *);
-
-
-/* TI COFF load page support.  */
-extern void bfd_ticoff_set_section_load_page
-  (struct bfd_section *, int);
-
-extern int bfd_ticoff_get_section_load_page
-  (struct bfd_section *);

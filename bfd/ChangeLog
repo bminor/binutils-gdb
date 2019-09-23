@@ -1,5 +1,12 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Delete ticoff function declarations.
+	* coff-tic54x.c (bfd_ticoff_set_section_load_page),
+	(bfd_ticoff_get_section_load_page): Make static.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move h8300 function declaration to..
 	* cpu-h8300.h: ..here, new file.
 	* cpu-h8300.c: Include cpu-h8300.h.

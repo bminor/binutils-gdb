@@ -82,14 +82,14 @@ tic54x_getl_signed_32 (const void *p)
 #define coff_get_section_load_page bfd_ticoff_get_section_load_page
 #define coff_set_section_load_page bfd_ticoff_set_section_load_page
 
-void
+static void
 bfd_ticoff_set_section_load_page (asection *sect,
 				  int page)
 {
   sect->lma = (sect->lma & ADDR_MASK) | PG_TO_FLAG(page);
 }
 
-int
+static int
 bfd_ticoff_get_section_load_page (asection *sect)
 {
   int page;
