@@ -529,6 +529,13 @@ struct elf_sym_strtab
   unsigned long destshndx_index;
 };
 
+struct bfd_link_needed_list
+{
+  struct bfd_link_needed_list *next;
+  bfd *by;
+  const char *name;
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -1828,6 +1835,14 @@ typedef struct elf_section_list
   struct elf_section_list *  next;
 } elf_section_list;
 
+enum dynamic_lib_link_class {
+  DYN_NORMAL = 0,
+  DYN_AS_NEEDED = 1,
+  DYN_DT_NEEDED = 2,
+  DYN_NO_ADD_NEEDED = 4,
+  DYN_NO_NEEDED = 8
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -2287,6 +2302,37 @@ extern file_ptr _bfd_elf_assign_file_position_for_section
 extern bfd_boolean _bfd_elf_validate_reloc
   (bfd *, arelent *);
 
+extern bfd_boolean bfd_elf_record_link_assignment
+  (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
+   bfd_boolean);
+extern bfd_boolean bfd_elf_stack_segment_size (bfd *, struct bfd_link_info *,
+					       const char *, bfd_vma);
+extern bfd_boolean bfd_elf_size_dynamic_sections
+  (bfd *, const char *, const char *, const char *, const char *, const char *,
+   const char * const *, struct bfd_link_info *, struct bfd_section **);
+extern bfd_boolean bfd_elf_size_dynsym_hash_dynstr
+  (bfd *, struct bfd_link_info *);
+extern bfd_boolean bfd_elf_get_bfd_needed_list
+  (bfd *, struct bfd_link_needed_list **);
+extern struct bfd_link_needed_list *bfd_elf_get_needed_list
+  (bfd *, struct bfd_link_info *);
+extern void bfd_elf_set_dt_needed_name
+  (bfd *, const char *);
+extern const char *bfd_elf_get_dt_soname
+  (bfd *);
+extern void bfd_elf_set_dyn_lib_class
+  (bfd *, enum dynamic_lib_link_class);
+extern int bfd_elf_get_dyn_lib_class
+  (bfd *);
+extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
+  (bfd *, struct bfd_link_info *);
+extern int bfd_elf_discard_info
+  (bfd *, struct bfd_link_info *);
+extern unsigned int _bfd_elf_default_action_discarded
+  (struct bfd_section *);
+extern struct bfd_section *_bfd_elf_tls_setup
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean _bfd_elf_link_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_omit_section_dynsym_default
@@ -2556,6 +2602,22 @@ extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
 /* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
 extern bfd_boolean _bfd_elf_ppc_merge_fp_attributes
   (bfd *, struct bfd_link_info *);
+
+/* Return an upper bound on the number of bytes required to store a
+   copy of ABFD's program header table entries.  Return -1 if an error
+   occurs; bfd_get_error will return an appropriate code.  */
+extern long bfd_get_elf_phdr_upper_bound
+  (bfd *abfd);
+
+/* Copy ABFD's program header table entries to *PHDRS.  The entries
+   will be stored as an array of Elf_Internal_Phdr structures, as
+   defined in include/elf/internal.h.  To find out how large the
+   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
+
+   Return the number of program header table entries read, or -1 if an
+   error occurs; bfd_get_error will return an appropriate code.  */
+extern int bfd_get_elf_phdrs
+  (bfd *abfd, void *phdrs);
 
 /* Exported interface for writing elf corefile notes.  */
 extern char *elfcore_write_note

@@ -42,6 +42,12 @@ enum bfd_link_discard
   discard_all		/* Discard all locals.  */
 };
 
+enum notice_asneeded_action {
+  notice_as_needed,
+  notice_not_needed,
+  notice_needed
+};
+
 /* Whether to generate ELF common symbols with the STT_COMMON type
    during a relocatable link.  */
 enum bfd_link_elf_stt_common

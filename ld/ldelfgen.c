@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "bfdlink.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"

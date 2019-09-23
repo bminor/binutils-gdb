@@ -1,5 +1,12 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (enum notice_asneeded_action): Move to bfdlink.h.
+	Move most other elf declarations..
+	* elf-bfd.h: ..to here.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move m68k function declaration..
 	* cpu-m68k.h: ..to here, new file..
 	* elf32-m68k.h: ..and here, new file.

@@ -23,6 +23,7 @@
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include "bfd.h"
+#include "bfdlink.h"
 #include "ld.h"
 #include "ldmisc.h"
 #include "deffile.h"

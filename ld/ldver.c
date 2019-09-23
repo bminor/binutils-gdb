@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdver.h"
-
+#include "bfdlink.h"
 #include "ld.h"
 #include "ldver.h"
 #include "ldexp.h"

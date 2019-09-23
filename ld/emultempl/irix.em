@@ -19,11 +19,10 @@
 # MA 02110-1301, USA.
 #
 
-fragment <<EOF
+# This file is sourced from elf.em, and defines extra irix specific
+# functions.
 
-#include "ld.h"
-#include "ldmain.h"
-#include "libiberty.h"
+fragment <<EOF
 
 /* The native IRIX linker will always create a DT_SONAME for shared objects.
    While this shouldn't really be necessary for ABI conformance, some versions
