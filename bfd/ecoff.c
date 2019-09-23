@@ -24,6 +24,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
+#include "ecoff-bfd.h"
 #include "aout/ar.h"
 #include "aout/stab_gnu.h"
 

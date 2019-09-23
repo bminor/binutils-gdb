@@ -526,48 +526,6 @@ extern bfd_boolean _bfd_handle_already_linked
   (struct bfd_section *, struct bfd_section_already_linked *,
    struct bfd_link_info *);
 
-/* Externally visible ECOFF routines.  */
-
-extern bfd_boolean bfd_ecoff_set_gp_value
-  (bfd *abfd, bfd_vma gp_value);
-extern bfd_boolean bfd_ecoff_set_regmasks
-  (bfd *abfd, unsigned long gprmask, unsigned long fprmask,
-   unsigned long *cprmask);
-extern void *bfd_ecoff_debug_init
-  (bfd *output_bfd, struct ecoff_debug_info *output_debug,
-   const struct ecoff_debug_swap *output_swap, struct bfd_link_info *);
-extern void bfd_ecoff_debug_free
-  (void *handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
-   const struct ecoff_debug_swap *output_swap, struct bfd_link_info *);
-extern bfd_boolean bfd_ecoff_debug_accumulate
-  (void *handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
-   const struct ecoff_debug_swap *output_swap, bfd *input_bfd,
-   struct ecoff_debug_info *input_debug,
-   const struct ecoff_debug_swap *input_swap, struct bfd_link_info *);
-extern bfd_boolean bfd_ecoff_debug_accumulate_other
-  (void *handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
-   const struct ecoff_debug_swap *output_swap, bfd *input_bfd,
-   struct bfd_link_info *);
-extern bfd_boolean bfd_ecoff_debug_externals
-  (bfd *abfd, struct ecoff_debug_info *debug,
-   const struct ecoff_debug_swap *swap, bfd_boolean relocatable,
-   bfd_boolean (*get_extr) (struct bfd_symbol *, struct ecoff_extr *),
-   void (*set_index) (struct bfd_symbol *, bfd_size_type));
-extern bfd_boolean bfd_ecoff_debug_one_external
-  (bfd *abfd, struct ecoff_debug_info *debug,
-   const struct ecoff_debug_swap *swap, const char *name,
-   struct ecoff_extr *esym);
-extern bfd_size_type bfd_ecoff_debug_size
-  (bfd *abfd, struct ecoff_debug_info *debug,
-   const struct ecoff_debug_swap *swap);
-extern bfd_boolean bfd_ecoff_write_debug
-  (bfd *abfd, struct ecoff_debug_info *debug,
-   const struct ecoff_debug_swap *swap, file_ptr where);
-extern bfd_boolean bfd_ecoff_write_accumulated_debug
-  (void *handle, bfd *abfd, struct ecoff_debug_info *debug,
-   const struct ecoff_debug_swap *swap,
-   struct bfd_link_info *info, file_ptr where);
-
 /* Externally visible ELF routines.  */
 
 /* Create a new BFD as if by bfd_openr.  Rather than opening a file,

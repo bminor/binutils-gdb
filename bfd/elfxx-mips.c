@@ -33,6 +33,7 @@
 #include "libbfd.h"
 #include "libiberty.h"
 #include "elf-bfd.h"
+#include "ecoff-bfd.h"
 #include "elfxx-mips.h"
 #include "elf/mips.h"
 #include "elf-vxworks.h"

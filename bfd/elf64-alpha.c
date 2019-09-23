@@ -27,6 +27,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "ecoff-bfd.h"
 
 #include "elf/alpha.h"
 

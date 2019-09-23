@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
+#include "ecoff-bfd.h"
 #include "objalloc.h"
 #include "aout/stab_gnu.h"
 #include "coff/internal.h"

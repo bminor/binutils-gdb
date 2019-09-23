@@ -33,6 +33,7 @@
 
 #ifdef NEED_ECOFF_DEBUG
 #include "ecoff.h"
+#include "bfd/ecoff-bfd.h"
 #endif
 
 #ifdef TC_ALPHA

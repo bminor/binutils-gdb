@@ -25,6 +25,7 @@
 #include "coff/internal.h"
 #include "bfd/libcoff.h"
 #include "bfd/libecoff.h"
+#include "bfd/ecoff-bfd.h"
 
 /* Almost all of the ECOFF support is actually in ecoff.c in the main
    gas directory.  This file mostly just arranges to call that one at

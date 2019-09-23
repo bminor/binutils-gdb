@@ -1,5 +1,15 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move ecoff function declarations..
+	* ecoff-bfd.h: ..to here, new file.
+	* ecoff.c: Include ecoff-bfd.h.
+	* ecofflink.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (enum notice_asneeded_action): Move to bfdlink.h.
 	Move most other elf declarations..
 	* elf-bfd.h: ..to here.
