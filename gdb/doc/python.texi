@@ -4872,6 +4872,15 @@ Note that this function will not find function-scoped static variables. To look
 up such variables, iterate over the variables of the function's
 @code{gdb.Block} and check that @code{block.addr_class} is
 @code{gdb.SYMBOL_LOC_STATIC}.
+
+There can be multiple global symbols with static linkage with the same
+name.  This function will only return the first matching symbol that
+it finds.  Which symbol is found depends on where @value{GDBN} is
+currently stopped, as @value{GDBN} will first search for matching
+symbols in the current object file, and then search all other object
+files.  If the application is not yet running then @value{GDBN} will
+search all object files in the order they appear in the debug
+information.
 @end defun
 
 A @code{gdb.Symbol} object has the following attributes:

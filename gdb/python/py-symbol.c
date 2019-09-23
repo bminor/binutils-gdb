@@ -472,7 +472,7 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
 }
 
 /* Implementation of
-   gdb.lookup_static_symbol (name [, domain) -> symbol or None.  */
+   gdb.lookup_static_symbol (name [, domain]) -> symbol or None.  */
 
 PyObject *
 gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
@@ -487,9 +487,32 @@ gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
 					&domain))
     return NULL;
 
+  /* In order to find static symbols associated with the "current" object
+     file ahead of those from other object files, we first need to see if
+     we can acquire a current block.  If this fails however, then we still
+     want to search all static symbols, so don't throw an exception just
+     yet.  */
+  const struct block *block = NULL;
   try
     {
-      symbol = lookup_static_symbol (name, (domain_enum) domain).symbol;
+      struct frame_info *selected_frame
+	= get_selected_frame (_("No frame selected."));
+      block = get_frame_block (selected_frame, NULL);
+    }
+  catch (const gdb_exception &except)
+    {
+      /* Nothing.  */
+    }
+
+  try
+    {
+      if (block != nullptr)
+	symbol
+	  = lookup_symbol_in_static_block (name, block,
+					   (domain_enum) domain).symbol;
+
+      if (symbol == nullptr)
+	symbol = lookup_static_symbol (name, (domain_enum) domain).symbol;
     }
   catch (const gdb_exception &except)
     {

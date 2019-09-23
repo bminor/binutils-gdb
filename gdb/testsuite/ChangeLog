@@ -1,3 +1,11 @@
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-symbol.c: Declare and call function from new
+	py-symbol-2.c file.
+	* gdb.python/py-symbol.exp: Compile both source files, and add new
+	tests for gdb.lookup_static_symbol.
+	* gdb.python/py-symbol-2.c: New file.
+
 2019-11-02  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/advance.exp: Drop superfluous 3rd argument to gdb_test.

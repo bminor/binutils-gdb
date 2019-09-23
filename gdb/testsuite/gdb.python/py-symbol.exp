@@ -18,9 +18,11 @@
 
 load_lib gdb-python.exp
 
-standard_testfile
+standard_testfile py-symbol.c py-symbol-2.c
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+set opts { debug additional_flags=-DUSE_TWO_FILES }
+if {[prepare_for_testing "failed to prepare" $testfile \
+	 [list $srcfile $srcfile2] $opts]} {
     return -1
 }
 
@@ -48,6 +50,7 @@ gdb_test "python print (gdb.lookup_global_symbol('qq').needs_frame)" \
     "False" \
     "print whether qq needs a frame"
 
+# Similarly, test looking up a static symbol before we runto_main.
 set rr_line [gdb_get_line_number "line of rr"]
 gdb_test "python print (gdb.lookup_global_symbol ('rr') is None)" "True" \
     "lookup_global_symbol for static var"
@@ -100,9 +103,22 @@ gdb_test "python print (func.print_name)" "func" "test func.print_name"
 gdb_test "python print (func.linkage_name)" "func" "test func.linkage_name"
 gdb_test "python print (func.addr_class == gdb.SYMBOL_LOC_BLOCK)" "True" "test func.addr_class"
 
-gdb_breakpoint [gdb_get_line_number "Break at end."]
+# Stop in a second file and ensure we find its local static symbol.
+gdb_breakpoint "function_in_other_file"
+gdb_continue_to_breakpoint "function_in_other_file"
+gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "99" \
+    "print value of rr from other file"
+
+# Now continue back to the first source file.
+set linenum [gdb_get_line_number "Break at end."]
+gdb_breakpoint "$srcfile:$linenum"
 gdb_continue_to_breakpoint "Break at end for variable a" ".*Break at end.*"
 gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
+
+# Check that we find the static sybol local to this file over the
+# static symbol from the second source file.
+gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "42" \
+    "print value of rr from main file"
 
 # Test is_variable attribute.
 gdb_py_test_silent_cmd "python a = gdb.lookup_symbol(\'a\')" "Get variable a" 0
@@ -145,16 +161,11 @@ gdb_test "python print (t\[0\].symtab)" "${py_symbol_c}" "get symtab"
 
 # C++ tests
 # Recompile binary.
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "debug c++"] != "" } {
-    untested "failed to compile in C++ mode"
+lappend opts c++
+if {[prepare_for_testing "failed to prepare" "${binfile}-cxx" \
+	 [list $srcfile $srcfile2] $opts]} {
     return -1
 }
-
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}-cxx
 
 gdb_test "python print (gdb.lookup_global_symbol ('(anonymous namespace)::anon') is None)" \
     "True" "anon is None"
@@ -189,7 +200,7 @@ gdb_test "python print (cplusfunc.addr_class == gdb.SYMBOL_LOC_BLOCK)" "True" "t
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.
 # Start with a fresh gdb.
-clean_restart ${testfile}
+clean_restart ${binfile}
 if ![runto_main] then {
     fail "cannot run to main."
     return 0

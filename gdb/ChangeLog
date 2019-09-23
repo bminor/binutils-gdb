@@ -1,5 +1,11 @@
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-symbol.c (gdbpy_lookup_static_symbol): Lookup in
+	static block of current object file first.  Also fix typo in
+	header comment.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* stack.c (set_last_displayed_sal): Delete.
 	(last_displayed_sal_valid): Delete.
 	(last_displayed_pspace): Delete.
