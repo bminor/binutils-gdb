@@ -26,6 +26,7 @@ fragment <<EOF
 
 #include "ldctor.h"
 #include "elf/aarch64.h"
+#include "elfxx-aarch64.h"
 
 static int no_enum_size_warning = 0;
 static int no_wchar_size_warning = 0;

@@ -22,6 +22,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include "cpu-aarch64.h"
 
 /* This routine is provided two arch_infos and works out which Aarch64
    machine which would be compatible with both and returns a pointer

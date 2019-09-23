@@ -144,6 +144,7 @@
 #include "objalloc.h"
 #include "elf/aarch64.h"
 #include "elfxx-aarch64.h"
+#include "cpu-aarch64.h"
 
 #define ARCH_SIZE	NN
 

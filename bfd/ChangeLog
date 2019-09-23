@@ -1,5 +1,14 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move aarch64 declarations and defines..
+	* cpu-aarch64.h: ..to here, new file..
+	* elfxx-aarch64.h: ..and here.
+	* cpu-aarch64.c: Include cpu-aarch64.h.
+	* elfnn-aarch64.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Delete ticoff function declarations.
 	* coff-tic54x.c (bfd_ticoff_set_section_load_page),
 	(bfd_ticoff_get_section_load_page): Make static.
