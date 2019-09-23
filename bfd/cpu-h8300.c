@@ -22,6 +22,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
+#include "cpu-h8300.h"
 
 static bfd_boolean
 h8300_scan (const struct bfd_arch_info *info, const char *string)

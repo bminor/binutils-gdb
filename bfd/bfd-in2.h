@@ -1008,10 +1008,6 @@ extern void bfd_ticoff_set_section_load_page
 
 extern int bfd_ticoff_get_section_load_page
   (struct bfd_section *);
-
-/* H8/300 functions.  */
-extern bfd_vma bfd_h8300_pad_address
-  (bfd *, bfd_vma);
 /* Extracted from init.c.  */
 unsigned int bfd_init (void);
 
