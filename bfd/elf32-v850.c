@@ -29,6 +29,7 @@
 #include "elf-bfd.h"
 #include "elf/v850.h"
 #include "libiberty.h"
+#include "elf32-v850.h"
 
 /* Sign-extend a 17-bit number.  */
 #define SEXT17(x)	((((x) & 0x1ffff) ^ 0x10000) - 0x10000)

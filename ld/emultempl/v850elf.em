@@ -24,6 +24,7 @@
 #
 fragment <<EOF
 #include "ldctor.h"
+#include "elf32-v850.h"
 
 static bfd_boolean
 is_v850_target (void)
