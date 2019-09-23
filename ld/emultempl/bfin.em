@@ -25,6 +25,7 @@
 fragment <<EOF
 
 #include "elf-bfd.h"
+#include "elf32-bfin.h"
 
 /* Whether to put code in Blackfin L1 SRAM.  */
 extern bfd_boolean elf32_bfin_code_in_l1;

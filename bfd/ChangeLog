@@ -1,5 +1,12 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move bfin function declaration..
+	* elf32-bfin.h: ..to here, new file.
+	* elf32-bfin.c: Include elf32-bfin.h.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move cr16 function declaration..
 	* elf32-cr16.h: ..to here, new file.
 	* elf32-cr16.c: Include elf32-cr16.h.

@@ -681,10 +681,6 @@ extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
 
 extern void bfd_elf_m68k_set_target_options (struct bfd_link_info *, int);
 
-extern bfd_boolean bfd_bfin_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
-   char **);
-
 /* mmap hacks */
 
 struct _bfd_window_internal;

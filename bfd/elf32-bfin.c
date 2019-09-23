@@ -25,6 +25,7 @@
 #include "elf/bfin.h"
 #include "dwarf2.h"
 #include "hashtab.h"
+#include "elf32-bfin.h"
 
 /* FUNCTION : bfin_pltpc_reloc
    ABSTRACT : TODO : figure out how to handle pltpc relocs.  */
