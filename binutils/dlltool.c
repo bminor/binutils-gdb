@@ -240,6 +240,7 @@
 #include "bucomm.h"
 #include "dlltool.h"
 #include "safe-ctype.h"
+#include "coff-bfd.h"
 
 #include <time.h>
 #include <assert.h>

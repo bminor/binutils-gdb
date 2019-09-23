@@ -86,3 +86,6 @@ extern bfd_boolean bfd_coff_get_syment
 
 extern bfd_boolean bfd_coff_get_auxent
   (bfd *, struct bfd_symbol *, int, union internal_auxent *);
+
+extern bfd_boolean bfd_coff_set_symbol_class
+  (bfd *, struct bfd_symbol *, unsigned int);

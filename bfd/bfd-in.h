@@ -753,13 +753,3 @@ extern bfd_boolean bfd_xcoff_link_generate_rtinit
 /* XCOFF support routines for ar.  */
 extern bfd_boolean bfd_xcoff_ar_archive_set_magic
   (bfd *, char *);
-
-/* Externally visible COFF routines.  */
-
-#if defined(__STDC__) || defined(ALMOST_STDC)
-struct internal_syment;
-union internal_auxent;
-#endif
-
-extern bfd_boolean bfd_coff_set_symbol_class
-  (bfd *, struct bfd_symbol *, unsigned int);
