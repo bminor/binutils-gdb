@@ -1,4 +1,4 @@
-2019-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+2019-09-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR cli/24980
 	* display.c (init_line_structures): Initialise line_state using
