@@ -28,6 +28,7 @@
 #include "libcoff.h"
 #include "libxcoff.h"
 #include "libiberty.h"
+#include "xcofflink.h"
 
 /* This file holds the XCOFF linker code.  */
 

@@ -1,5 +1,13 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move xcoff function declarations..
+	* xcofflink.h: ..to here, new file.
+	* xcofflink.c: Include xcofflink.h.
+	* coff-rs6000.c (bfd_xcoff_ar_archive_set_magic): Delete unused func.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Delete coff forward refs and move coff declaration..
 	* coff-bfd.h: ..to here.
 	* bfd-in2.h: Regenerate.

@@ -55,6 +55,7 @@ fragment <<EOF
 #include "coff/xcoff.h"
 #include "libcoff.h"
 #include "libxcoff.h"
+#include "xcofflink.h"
 
 static void gld${EMULATION_NAME}_read_file (const char *, bfd_boolean);
 static void gld${EMULATION_NAME}_free (void *);

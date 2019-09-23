@@ -1169,20 +1169,6 @@ _bfd_xcoff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
    to take care that we are not generating the new form of archives
    on AIX 4.2 or earlier systems.  */
 
-/* XCOFF archives use this as a magic string.  Note that both strings
-   have the same length.  */
-
-/* Set the magic for archive.  */
-
-bfd_boolean
-bfd_xcoff_ar_archive_set_magic (bfd *abfd ATTRIBUTE_UNUSED,
-				char *magic ATTRIBUTE_UNUSED)
-{
-  /* Not supported yet.  */
-  return FALSE;
- /* bfd_xcoff_archive_set_magic (abfd, magic); */
-}
-
 /* PR 21786:  The PE/COFF standard does not require NUL termination for any of
    the ASCII fields in the archive headers.  So in order to be able to extract
    numerical values we provide our own versions of strtol and strtoll which

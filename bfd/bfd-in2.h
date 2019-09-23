@@ -732,34 +732,6 @@ extern void bfd_free_window
   (bfd_window *);
 extern bfd_boolean bfd_get_file_window
   (bfd *, file_ptr, bfd_size_type, bfd_window *, bfd_boolean);
-
-/* XCOFF support routines for the linker.  */
-
-extern bfd_boolean bfd_xcoff_split_import_path
-  (bfd *, const char *, const char **, const char **);
-extern bfd_boolean bfd_xcoff_set_archive_import_path
-  (struct bfd_link_info *, bfd *, const char *);
-extern bfd_boolean bfd_xcoff_link_record_set
-  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, bfd_size_type);
-extern bfd_boolean bfd_xcoff_import_symbol
-  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, bfd_vma,
-   const char *, const char *, const char *, unsigned int);
-extern bfd_boolean bfd_xcoff_export_symbol
-  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *);
-extern bfd_boolean bfd_xcoff_link_count_reloc
-  (bfd *, struct bfd_link_info *, const char *);
-extern bfd_boolean bfd_xcoff_record_link_assignment
-  (bfd *, struct bfd_link_info *, const char *);
-extern bfd_boolean bfd_xcoff_size_dynamic_sections
-  (bfd *, struct bfd_link_info *, const char *, const char *,
-   unsigned long, unsigned long, unsigned long, bfd_boolean,
-   int, bfd_boolean, unsigned int, struct bfd_section **, bfd_boolean);
-extern bfd_boolean bfd_xcoff_link_generate_rtinit
-  (bfd *, const char *, const char *, bfd_boolean);
-
-/* XCOFF support routines for ar.  */
-extern bfd_boolean bfd_xcoff_ar_archive_set_magic
-  (bfd *, char *);
 /* Extracted from init.c.  */
 unsigned int bfd_init (void);
 
