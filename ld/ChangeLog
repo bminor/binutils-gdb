@@ -1,3 +1,13 @@
+2019-10-02  Alan Modra  <amodra@gmail.com>
+
+	* ld.texi (-Bsymbolic, -Bsymbolic-functions): Don't mention PIEs.
+	* ld.h (symbolic_enum, dynamic_list_enum),
+	(args_type <symbolic, dynamic_list>): Move to..
+	* lexsup.c (parse_args): ..here, using auto vars opt_symbolic
+	and opt_dynamic_list rather than command_line fields.  Only
+	act on -Bsymbolic and -Bsymbolic-functions for shared library
+	output.  Free dynamic_list.
+
 2019-09-26  Alan Modra  <amodra@gmail.com>
 
 	PR 24262
