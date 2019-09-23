@@ -37,6 +37,11 @@ struct elf32_tic6x_params
 extern void elf32_tic6x_setup (struct bfd_link_info *,
 			       struct elf32_tic6x_params *);
 
+/* C6x unwind section editing support.  */
+extern bfd_boolean elf32_tic6x_fix_exidx_coverage (struct bfd_section **,
+						   unsigned int,
+						   struct bfd_link_info *,
+						   bfd_boolean);
 #ifdef __cplusplus
 }
 #endif

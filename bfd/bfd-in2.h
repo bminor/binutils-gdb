@@ -910,10 +910,6 @@ extern bfd_boolean elf32_arm_build_stubs
 /* ARM unwind section editing support.  */
 extern bfd_boolean elf32_arm_fix_exidx_coverage
 (struct bfd_section **, unsigned int, struct bfd_link_info *, bfd_boolean);
-
-/* C6x unwind section editing support.  */
-extern bfd_boolean elf32_tic6x_fix_exidx_coverage
-(struct bfd_section **, unsigned int, struct bfd_link_info *, bfd_boolean);
 /* Extracted from init.c.  */
 unsigned int bfd_init (void);
 
