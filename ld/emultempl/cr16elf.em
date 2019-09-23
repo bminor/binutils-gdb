@@ -26,6 +26,7 @@
 fragment <<EOF
 
 #include "ldctor.h"
+#include "elf32-cr16.h"
 
 static void check_sections (bfd *, asection *, void *);
 

@@ -25,6 +25,7 @@
 #include "libiberty.h"
 #include "elf-bfd.h"
 #include "elf/cr16.h"
+#include "elf32-cr16.h"
 
 /* The cr16 linker needs to keep track of the number of relocs that
    it decides to copy in check_relocs for each symbol.  This is so
