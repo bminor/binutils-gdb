@@ -1,5 +1,14 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h (bfd_sunos_get_needed_list),
+	(bfd_sunos_record_link_assignment),
+	(bfd_sunos_size_dynamic_sections),
+	(bfd_i386linux_size_dynamic_sections),
+	(bfd_sparclinux_size_dynamic_sections): Delete obsolete decls.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move xcoff function declarations..
 	* xcofflink.h: ..to here, new file.
 	* xcofflink.c: Include xcofflink.h.

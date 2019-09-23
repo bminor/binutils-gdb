@@ -682,23 +682,6 @@ extern bfd_boolean bfd_cr16_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
    char **);
 
-/* SunOS shared library support routines for the linker.  */
-
-extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_sunos_record_link_assignment
-  (bfd *, struct bfd_link_info *, const char *);
-extern bfd_boolean bfd_sunos_size_dynamic_sections
-  (bfd *, struct bfd_link_info *, struct bfd_section **,
-   struct bfd_section **, struct bfd_section **);
-
-/* Linux shared library support routines for the linker.  */
-
-extern bfd_boolean bfd_i386linux_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_sparclinux_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-
 /* mmap hacks */
 
 struct _bfd_window_internal;
