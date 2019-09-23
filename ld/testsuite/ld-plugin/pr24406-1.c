@@ -12,6 +12,6 @@ __wrap_read (int fd, void *buffer, size_t count)
 int
 main ()
 {
-  int i = read (1, "abc", 5);
+  int i = read (1, "abc", 4);
   return i == 0;
 }
