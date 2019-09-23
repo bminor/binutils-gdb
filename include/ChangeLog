@@ -1,5 +1,13 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h (struct bfd_section_already_linked): Forward declare.
+	(bfd_section_already_linked_table_init),
+	(bfd_section_already_linked_table_free),
+	(_bfd_handle_already_linked, _bfd_nearby_section),
+	(_bfd_fix_excluded_sec_syms): Declare.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfdlink.h (enum notice_asneeded_action): Define.
 
 2019-09-17  Maxim Blinov  <maxim.blinov@embecosm.com>

@@ -509,49 +509,6 @@ void bfd_putl16 (bfd_vma, void *);
 bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
 void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
 
-#if defined(__STDC__) || defined(ALMOST_STDC)
-struct ecoff_debug_info;
-struct ecoff_debug_swap;
-struct ecoff_extr;
-struct bfd_symbol;
-struct bfd_link_info;
-struct bfd_link_hash_entry;
-struct bfd_section_already_linked;
-struct bfd_elf_version_tree;
-#endif
-
-extern bfd_boolean bfd_section_already_linked_table_init (void);
-extern void bfd_section_already_linked_table_free (void);
-extern bfd_boolean _bfd_handle_already_linked
-  (struct bfd_section *, struct bfd_section_already_linked *,
-   struct bfd_link_info *);
-
-/* Externally visible ELF routines.  */
-
-/* Create a new BFD as if by bfd_openr.  Rather than opening a file,
-   reconstruct an ELF file by reading the segments out of remote
-   memory based on the ELF file header at EHDR_VMA and the ELF program
-   headers it points to.  If non-zero, SIZE is the known extent of the
-   object.  If not null, *LOADBASEP is filled in with the difference
-   between the VMAs from which the segments were read, and the VMAs
-   the file headers (and hence BFD's idea of each section's VMA) put
-   them at.
-
-   The function TARGET_READ_MEMORY is called to copy LEN bytes from
-   the remote memory at target address VMA into the local buffer at
-   MYADDR; it should return zero on success or an `errno' code on
-   failure.  TEMPL must be a BFD for a target with the word size and
-   byte order found in the remote memory.  */
-extern bfd *bfd_elf_bfd_from_remote_memory
-  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
-   int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
-			      bfd_size_type len));
-
-extern struct bfd_section *
-_bfd_nearby_section (bfd *, struct bfd_section *, bfd_vma);
-
-extern void _bfd_fix_excluded_sec_syms
-  (bfd *, struct bfd_link_info *);
 
 /* mmap hacks */
 
@@ -579,3 +536,31 @@ extern void bfd_free_window
   (bfd_window *);
 extern bfd_boolean bfd_get_file_window
   (bfd *, file_ptr, bfd_size_type, bfd_window *, bfd_boolean);
+
+/* Externally visible ELF routines.  */
+
+/* Create a new BFD as if by bfd_openr.  Rather than opening a file,
+   reconstruct an ELF file by reading the segments out of remote
+   memory based on the ELF file header at EHDR_VMA and the ELF program
+   headers it points to.  If non-zero, SIZE is the known extent of the
+   object.  If not null, *LOADBASEP is filled in with the difference
+   between the VMAs from which the segments were read, and the VMAs
+   the file headers (and hence BFD's idea of each section's VMA) put
+   them at.
+
+   The function TARGET_READ_MEMORY is called to copy LEN bytes from
+   the remote memory at target address VMA into the local buffer at
+   MYADDR; it should return zero on success or an `errno' code on
+   failure.  TEMPL must be a BFD for a target with the word size and
+   byte order found in the remote memory.  */
+extern bfd *bfd_elf_bfd_from_remote_memory
+  (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
+   int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
+			      bfd_size_type len));
+
+/* Forward declarations.  */
+struct ecoff_debug_info;
+struct ecoff_debug_swap;
+struct ecoff_extr;
+struct bfd_link_info;
+struct bfd_link_hash_entry;
