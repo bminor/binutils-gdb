@@ -1,5 +1,11 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move ia64 function declarations..
+	* elfxx-ia64.h: ..to here.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move v850 function declarations..
 	* elf32-v850.h: ..to here, new file.
 	* elf32-v850.c: Include elf32-v850.h.

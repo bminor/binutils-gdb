@@ -27,6 +27,8 @@
 #
 fragment <<EOF
 
+#include "elfxx-ia64.h"
+
 /* None zero if generating binary for Intel Itanium processor.  */
 static int itanium = 0;
 
