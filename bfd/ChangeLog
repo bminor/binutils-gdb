@@ -1,5 +1,11 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (SOURCE_HFILES): Add many missing .h files.
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h (bfd_symbol, bfd_section_already_linked),
 	(bfd_elf_version_tree): Delete forward declarations.
 	Move other forward decls and remaining elf function decl later.

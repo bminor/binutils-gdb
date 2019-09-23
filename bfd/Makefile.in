@@ -1108,15 +1108,30 @@ BUILD_CFILES = \
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
-	aout-target.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
-	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
-	elf64-hppa.h elfcode.h elfcore.h \
+	aout-target.h aoutx.h arc-got.h arc-plt.h \
+	coff-arm.h coff-bfd.h coffcode.h coffswap.h \
+	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h \
+	ecoff-bfd.h ecoffswap.h \
+	elf32-arm.h elf32-avr.h elf32-bfin.h elf32-cr16.h elf32-csky.h \
+	elf32-dlx.h elf32-hppa.h elf32-m68hc1x.h elf32-m68k.h \
+	elf32-metag.h elf32-nds32.h elf32-nios2.h elf32-ppc.h \
+	elf32-rx.h elf32-score.h elf32-sh-relocs.h elf32-spu.h \
+	elf32-tic6x.h elf32-tilegx.h elf32-tilepro.h elf32-v850.h \
+	elf64-hppa.h elf64-ppc.h elf64-tilegx.h \
+	elf-bfd.h elfcode.h elfcore.h elf-hppa.h elf-linker-x86.h \
+	elf-linux-core.h elf-nacl.h elf-s390.h elf-vxworks.h \
+	elfxx-aarch64.h elfxx-ia64.h elfxx-mips.h elfxx-riscv.h \
+	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h \
 	genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
-	libpei.h libxcoff.h mach-o.h \
+	libpei.h libxcoff.h \
+	mach-o.h \
 	netbsd.h ns32k.h \
-	pef.h pef-traceback.h peicode.h som.h version.h \
-	vms.h xsym.h
+	pef.h pef-traceback.h peicode.h plugin.h \
+	som.h sysdep.h \
+	version.h vms.h \
+	wasm-module.h \
+	xcofflink.h xsym.h
 
 BUILD_HFILES = \
 	bfdver.h elf32-target.h elf64-target.h targmatch.h bfd_stdint.h
