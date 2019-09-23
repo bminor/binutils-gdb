@@ -1,5 +1,18 @@
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Move arm declaraions..
+	* cpu-arm.h: ..to here, new file..
+	* coff-arm.h: ..and here, new file..
+	* elf32-arm.h: ..and here, new file.
+	* cpu-arm.c: Include cpu-arm.h.
+	* coff-arm.c: Include cpu-arm.h and coff-arm.h.
+	* elf32-arm.c: Include cpu-arm.h and elf32-arm.h.
+	* pe-arm.c: Move function rename defines later.
+	* pe-arm-wince.c: Likewise and include sysdep.h and bfd.h early.
+	* bfd-in2.h: Regenerate.
+
+2019-09-23  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Move tic6x function declaration..
 	* elf32-tic6x.h: ..to here.
 	* bfd-in2.h: Regenerate.

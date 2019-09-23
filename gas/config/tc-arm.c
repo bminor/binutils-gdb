@@ -32,6 +32,7 @@
 #include "obstack.h"
 #include "libiberty.h"
 #include "opcode/arm.h"
+#include "cpu-arm.h"
 
 #ifdef OBJ_ELF
 #include "elf/arm.h"

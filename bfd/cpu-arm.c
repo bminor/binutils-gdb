@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include "cpu-arm.h"
 
 /* This routine is provided two arch_infos and works out which ARM
    machine which would be compatible with both and returns a pointer

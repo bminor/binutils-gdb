@@ -27,6 +27,7 @@ fragment <<EOF
 
 #include "ldctor.h"
 #include "elf/arm.h"
+#include "elf32-arm.h"
 
 static struct elf32_arm_params params =
 {

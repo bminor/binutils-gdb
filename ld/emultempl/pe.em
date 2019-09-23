@@ -37,18 +37,6 @@ fragment <<EOF
 
 #define TARGET_IS_${EMULATION_NAME}
 
-/* Do this before including bfd.h, so we prototype the right functions.  */
-
-#if defined(TARGET_IS_armpe) \
-    || defined(TARGET_IS_arm_wince_pe)
-#define bfd_arm_allocate_interworking_sections \
-	bfd_${EMULATION_NAME}_allocate_interworking_sections
-#define bfd_arm_get_bfd_for_interworking \
-	bfd_${EMULATION_NAME}_get_bfd_for_interworking
-#define bfd_arm_process_before_allocation \
-	bfd_${EMULATION_NAME}_process_before_allocation
-#endif
-
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"
@@ -77,6 +65,17 @@ fragment <<EOF
    using it here.  */
 #include "../bfd/libcoff.h"
 #include "../bfd/libpei.h"
+
+#if defined(TARGET_IS_armpe) \
+    || defined(TARGET_IS_arm_wince_pe)
+#define bfd_arm_allocate_interworking_sections \
+	bfd_${EMULATION_NAME}_allocate_interworking_sections
+#define bfd_arm_get_bfd_for_interworking \
+	bfd_${EMULATION_NAME}_get_bfd_for_interworking
+#define bfd_arm_process_before_allocation \
+	bfd_${EMULATION_NAME}_process_before_allocation
+#include "coff-arm.h"
+#endif
 
 #include "deffile.h"
 #include "pe-dll.h"

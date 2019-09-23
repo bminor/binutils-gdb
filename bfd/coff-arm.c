@@ -24,6 +24,8 @@
 #include "libbfd.h"
 #include "coff/arm.h"
 #include "coff/internal.h"
+#include "cpu-arm.h"
+#include "coff-arm.h"
 
 #ifdef COFF_WITH_PE
 #include "coff/pe.h"
