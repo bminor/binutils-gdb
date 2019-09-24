@@ -1,3 +1,14 @@
+2019-09-24  Tamar Christina  <tamar.christina@arm.com>
+
+	PR gas/24991
+	* config/tc-arm.c (out_of_range_p): New.
+	(md_apply_fix): Use it in BFD_RELOC_THUMB_PCREL_BRANCH9,
+	BFD_RELOC_THUMB_PCREL_BRANCH12, BFD_RELOC_THUMB_PCREL_BRANCH20,
+	BFD_RELOC_THUMB_PCREL_BRANCH23, BFD_RELOC_THUMB_PCREL_BRANCH25
+	* testsuite/gas/arm/pr24991.d: New test.
+	* testsuite/gas/arm/pr24991.l: New test.
+	* testsuite/gas/arm/pr24991.s: New test.
+
 2019-09-23  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-ecoff.c: Include ecoff-bfd.h.
