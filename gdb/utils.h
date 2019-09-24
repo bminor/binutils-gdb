@@ -540,11 +540,6 @@ extern void warn_cant_dump_core (const char *reason);
 
 extern void dump_core (void);
 
-/* Return the hex string form of LENGTH bytes of DATA.
-   Space for the result is malloc'd, caller must free.  */
-
-extern char *make_hex_string (const gdb_byte *data, size_t length);
-
 /* Copy NBITS bits from SOURCE to DEST starting at the given bit
    offsets.  Use the bit order as specified by BITS_BIG_ENDIAN.
    Source and destination buffers must not overlap.  */

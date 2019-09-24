@@ -141,10 +141,9 @@ objfpy_get_build_id (PyObject *self, void *closure)
 
   if (build_id != NULL)
     {
-      gdb::unique_xmalloc_ptr<char> hex_form
-	(make_hex_string (build_id->data, build_id->size));
+      std::string hex_form = bin2hex (build_id->data, build_id->size);
 
-      return host_string_to_python_string (hex_form.get ()).release ();
+      return host_string_to_python_string (hex_form.c_str ()).release ();
     }
 
   Py_RETURN_NONE;

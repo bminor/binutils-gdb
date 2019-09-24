@@ -1,3 +1,9 @@
+2019-09-25  Tom Tromey  <tom@tromey.com>
+
+	* python/py-objfile.c (objfpy_get_build_id): Use bin2hex.
+	* utils.h (make_hex_string): Don't declare.
+	* utils.c (make_hex_string): Remove.
+
 2019-09-24  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/23815

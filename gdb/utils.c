@@ -736,22 +736,6 @@ gdb_print_host_address_1 (const void *addr, struct ui_file *stream)
   fprintf_filtered (stream, "%s", host_address_to_string (addr));
 }
 
-/* See utils.h.  */
-
-char *
-make_hex_string (const gdb_byte *data, size_t length)
-{
-  char *result = (char *) xmalloc (length * 2 + 1);
-  char *p;
-  size_t i;
-
-  p = result;
-  for (i = 0; i < length; ++i)
-    p += xsnprintf (p, 3, "%02x", data[i]);
-  *p = '\0';
-  return result;
-}
-
 
 
 /* An RAII class that sets up to handle input and then tears down
