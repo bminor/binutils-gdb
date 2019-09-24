@@ -4712,11 +4712,69 @@ global_symbol_searcher::search () const
   return result;
 }
 
-/* Helper function for symtab_symbol_info, this function uses
-   the data returned from search_symbols() to print information
-   regarding the match to gdb_stdout.  If LAST is not NULL,
-   print file and line number information for the symbol as
-   well.  Skip printing the filename if it matches LAST.  */
+/* See symtab.h.  */
+
+std::string
+symbol_to_info_string (struct symbol *sym, int block,
+		       enum search_domain kind)
+{
+  std::string str;
+
+  gdb_assert (block == GLOBAL_BLOCK || block == STATIC_BLOCK);
+
+  if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
+    str += "static ";
+
+  /* Typedef that is not a C++ class.  */
+  if (kind == TYPES_DOMAIN
+      && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
+    {
+      string_file tmp_stream;
+
+      /* FIXME: For C (and C++) we end up with a difference in output here
+	 between how a typedef is printed, and non-typedefs are printed.
+	 The TYPEDEF_PRINT code places a ";" at the end in an attempt to
+	 appear C-like, while TYPE_PRINT doesn't.
+
+	 For the struct printing case below, things are worse, we force
+	 printing of the ";" in this function, which is going to be wrong
+	 for languages that don't require a ";" between statements.  */
+      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
+	typedef_print (SYMBOL_TYPE (sym), sym, &tmp_stream);
+      else
+	type_print (SYMBOL_TYPE (sym), "", &tmp_stream, -1);
+      str += tmp_stream.string ();
+    }
+  /* variable, func, or typedef-that-is-c++-class.  */
+  else if (kind < TYPES_DOMAIN
+	   || (kind == TYPES_DOMAIN
+	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
+    {
+      string_file tmp_stream;
+
+      type_print (SYMBOL_TYPE (sym),
+		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+		   ? "" : sym->print_name ()),
+		  &tmp_stream, 0);
+
+      str += tmp_stream.string ();
+      str += ";";
+    }
+  /* Printing of modules is currently done here, maybe at some future
+     point we might want a language specific method to print the module
+     symbol so that we can customise the output more.  */
+  else if (kind == MODULES_DOMAIN)
+    str += sym->print_name ();
+
+  return str;
+}
+
+/* Helper function for symbol info commands, for example 'info functions',
+   'info variables', etc.  KIND is the kind of symbol we searched for, and
+   BLOCK is the type of block the symbols was found in, either GLOBAL_BLOCK
+   or STATIC_BLOCK.  SYM is the symbol we found.  If LAST is not NULL,
+   print file and line number information for the symbol as well.  Skip
+   printing the filename if it matches LAST.  */
 
 static void
 print_symbol_info (enum search_domain kind,
@@ -4743,44 +4801,8 @@ print_symbol_info (enum search_domain kind,
 	puts_filtered ("\t");
     }
 
-  if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
-    printf_filtered ("static ");
-
-  /* Typedef that is not a C++ class.  */
-  if (kind == TYPES_DOMAIN
-      && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
-    {
-      /* FIXME: For C (and C++) we end up with a difference in output here
-	 between how a typedef is printed, and non-typedefs are printed.
-	 The TYPEDEF_PRINT code places a ";" at the end in an attempt to
-	 appear C-like, while TYPE_PRINT doesn't.
-
-	 For the struct printing case below, things are worse, we force
-	 printing of the ";" in this function, which is going to be wrong
-	 for languages that don't require a ";" between statements.  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
-	typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
-      else
-	type_print (SYMBOL_TYPE (sym), "", gdb_stdout, -1);
-      printf_filtered ("\n");
-    }
-  /* variable, func, or typedef-that-is-c++-class.  */
-  else if (kind < TYPES_DOMAIN
-	   || (kind == TYPES_DOMAIN
-	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
-    {
-      type_print (SYMBOL_TYPE (sym),
-		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : sym->print_name ()),
-		  gdb_stdout, 0);
-
-      printf_filtered (";\n");
-    }
-  /* Printing of modules is currently done here, maybe at some future
-     point we might want a language specific method to print the module
-     symbol so that we can customise the output more.  */
-  else if (kind == MODULES_DOMAIN)
-    printf_filtered ("%s\n", sym->print_name ());
+  std::string str = symbol_to_info_string (sym, block, kind);
+  printf_filtered ("%s\n", str.c_str ());
 }
 
 /* This help function for symtab_symbol_info() prints information

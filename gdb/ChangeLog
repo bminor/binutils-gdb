@@ -1,5 +1,13 @@
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (symbol_to_info_string): New function, most content
+	moved from print_symbol_info, but updated to return a std::string.
+	(print_symbol_info): Update to use symbol_to_info_string and print
+	returned string.
+	* symtab.h (symbol_to_info_string): Declare new function.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/python.c (gdbpy_rbreak): Convert to using
 	global_symbol_searcher.
 	* symtab.c (file_matches): Convert return type to bool, change
