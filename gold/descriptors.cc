@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "debug.h"
