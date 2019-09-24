@@ -54,7 +54,6 @@ f_print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = check_typedef (type);
   f_print_type (type, "", stream, 0, 0, &type_print_raw_options);
-  fprintf_filtered (stream, "\n");
 }
 
 /* LEVEL is the depth to indent lines by.  */

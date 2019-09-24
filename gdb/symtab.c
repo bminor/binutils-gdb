@@ -4774,10 +4774,8 @@ print_symbol_info (enum search_domain kind,
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
 	typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
       else
-	{
-	  type_print (SYMBOL_TYPE (sym), "", gdb_stdout, -1);
-	  printf_filtered ("\n");
-	}
+	type_print (SYMBOL_TYPE (sym), "", gdb_stdout, -1);
+      printf_filtered ("\n");
     }
   /* variable, func, or typedef-that-is-c++-class.  */
   else if (kind < TYPES_DOMAIN

@@ -170,7 +170,7 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
   else
     fprintf_filtered (stream, "<builtin> = ");
   type_print (type, "", stream, 0);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ";");
 }
 
 /* m2_type_name - if a, type, has a name then print it.  */

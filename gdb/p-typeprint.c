@@ -101,7 +101,7 @@ pascal_print_typedef (struct type *type, struct symbol *new_symbol,
   fprintf_filtered (stream, "type ");
   fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new_symbol));
   type_print (type, "", stream, 0);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ";");
 }
 
 /* If TYPE is a derived type, then print out derivation information.

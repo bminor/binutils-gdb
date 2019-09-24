@@ -945,5 +945,4 @@ ada_print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = ada_check_typedef (type);
   ada_print_type (type, "", stream, 0, 0, &type_print_raw_options);
-  fprintf_filtered (stream, "\n");
 }

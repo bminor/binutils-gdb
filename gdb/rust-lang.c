@@ -831,7 +831,7 @@ rust_print_typedef (struct type *type,
   type = check_typedef (type);
   fprintf_filtered (stream, "type %s = ", SYMBOL_PRINT_NAME (new_symbol));
   type_print (type, "", stream, 0);
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ";");
 }
 
 /* la_print_type implementation for Rust.  */

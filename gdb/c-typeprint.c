@@ -211,7 +211,7 @@ c_print_typedef (struct type *type,
 		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0
       || TYPE_CODE (SYMBOL_TYPE (new_symbol)) == TYPE_CODE_TYPEDEF)
     fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new_symbol));
-  fprintf_filtered (stream, ";\n");
+  fprintf_filtered (stream, ";");
 }
 
 /* If TYPE is a derived type, then print out derivation information.

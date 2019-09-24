@@ -1,5 +1,17 @@
 2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-typeprint.c (ada_print_typedef): Don't print newline at the
+	end.
+	* c-typeprint.c (c_print_typedef): Likewise.
+	* f-typeprint.c (f_print_typedef): Likewise.
+	* m2-typeprint.c (m2_print_typedef): Likewise.
+	* p-typeprint.c (pascal_print_typedef): Likewise.
+	* rust-lang.c (rust_print_typedef): Likewise.
+	* symtab.c (print_symbol_info): Print a newline after calling
+	typedef_print.
+
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* symtab.c (info_module_cmdlist): New variable.
 	(info_module_command): New function.
 	(search_module_symbols): New function.
