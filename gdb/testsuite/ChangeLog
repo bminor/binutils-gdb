@@ -1,3 +1,8 @@
+2019-09-24  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24598
+	* gdb.arch/amd64-init-x87-values.exp: Add xfail.
+
 2019-09-22  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/restore.exp: Allow register variables to be optimized out at

@@ -238,6 +238,12 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	  char xstateregs[X86_XSTATE_MAX_SIZE];
 	  struct iovec iov;
 
+	  /* Pre-4.14 kernels have a bug (fixed by commit 0852b374173b
+	     "x86/fpu: Add FPU state copying quirk to handle XRSTOR failure on
+	     Intel Skylake CPUs") that sometimes causes the mxcsr location in
+	     xstateregs not to be copied by PTRACE_GETREGSET.  Make sure that
+	     the location is at least initialized with a defined value.  */
+	  memset (xstateregs, 0, sizeof (xstateregs));
 	  iov.iov_base = xstateregs;
 	  iov.iov_len = sizeof (xstateregs);
 	  if (ptrace (PTRACE_GETREGSET, tid,
