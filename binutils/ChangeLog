@@ -1,6 +1,13 @@
 2019-09-25  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2019-09-24  Alan Modra  <amodra@gmail.com>
+	PR 25031
+	* nm.c (print_format_string): New.
+	(get_print_format): Delete saved_format.  Move earlier.
+	(set_print_width): Call get_print_format.
+	(print_value): Use print_format_string.
+
 	2019-09-23  Alan Modra  <amodra@gmail.com>
 	PR 25018
 	* dwarf.c (get_type_signedness): Delete ineffective pointer
