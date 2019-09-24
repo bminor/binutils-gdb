@@ -1,3 +1,7 @@
+2019-09-24  Nick Clifton  <nickc@redhat.com>
+
+	* descriptors.cc: Include <string>
+
 2019-09-20  Alan Modra  <amodra@gmail.com>
 
 	PR 24768
