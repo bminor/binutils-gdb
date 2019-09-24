@@ -17282,6 +17282,7 @@ static void
 do_mve_vstr_vldr_RQ (int size, int elsize, int load)
 {
     unsigned os = inst.operands[1].imm >> 5;
+    unsigned type = inst.vectype.el[0].type;
     constraint (os != 0 && size == 8,
 		_("can not shift offsets when accessing less than half-word"));
     constraint (os && os != neon_logbits (size),
@@ -17312,15 +17313,14 @@ do_mve_vstr_vldr_RQ (int size, int elsize, int load)
 	constraint (inst.operands[0].reg == (inst.operands[1].imm & 0x1f),
 		    _("destination register and offset register may not be"
 		    " the same"));
-	constraint (size == elsize && inst.vectype.el[0].type != NT_unsigned,
+	constraint (size == elsize && type == NT_signed, BAD_EL_TYPE);
+	constraint (size != elsize && type != NT_unsigned && type != NT_signed,
 		    BAD_EL_TYPE);
-	constraint (inst.vectype.el[0].type != NT_unsigned
-		    && inst.vectype.el[0].type != NT_signed, BAD_EL_TYPE);
-	inst.instruction |= (inst.vectype.el[0].type == NT_unsigned) << 28;
+	inst.instruction |= ((size == elsize) || (type == NT_unsigned)) << 28;
       }
     else
       {
-	constraint (inst.vectype.el[0].type != NT_untyped, BAD_EL_TYPE);
+	constraint (type != NT_untyped, BAD_EL_TYPE);
       }
 
     inst.instruction |= 1 << 23;

@@ -116,3 +116,16 @@ vldrde.u64 q2, [r0, q1]
 vpste
 vldrdt.u64 q3, [r3, q5, UXTW #3]
 vldrde.u64 q7, [r7, q4, UXTW #3]
+
+.irp dt, u8, s16, 8
+vldrb.\dt q0, [r2, q3]
+.endr
+.irp dt, 16, u16, s32, f16, p16, u32
+vldrh.\dt q0, [r2, q3, UXTW #1]
+.endr
+.irp dt, 32, u32, f32, p32
+vldrw.\dt q0, [r2, q3, UXTW #2]
+.endr
+.irp dt, 64, u64, f64, p64
+vldrd.\dt q0, [r2, q3, UXTW #3]
+.endr

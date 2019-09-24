@@ -135,4 +135,15 @@ vldrweq.32 q0, [r0]
 vldrwt.32 q0, [r0]
 vpst
 vldrw.32 q0, [r0]
-
+.irp op1, 16, 32, 64, f16, f32, f64, p16, p32, p64, s8
+vldrb.\op1 q0, [r2, q3]
+.endr
+.irp op1, 8, 32, 64, f32, f64, p32, p64, s16
+vldrh.\op1 q0, [r2, q3, uxtw #1]
+.endr
+.irp op1, 8, 16, 64, f16, f64, p16, p64, s32
+vldrw.\op1 q0, [r2, q3, uxtw #2]
+.endr
+.irp op1, 8, 16, 32, f16, f32, p16, p32, s64
+vldrd.\op1 q0, [r2, q3, uxtw #3]
+.endr
