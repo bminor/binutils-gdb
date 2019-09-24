@@ -2234,7 +2234,6 @@ gdb_init (char *argv0)
 
   init_cmd_lists ();	    /* This needs to be done first.  */
   initialize_targets ();    /* Setup target_terminal macros for utils.c.  */
-  initialize_utils ();	    /* Make errors and warnings possible.  */
 
   init_page_info ();
 
