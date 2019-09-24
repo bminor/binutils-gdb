@@ -209,7 +209,7 @@ clear_pc_function_cache (void)
 
 /* See symtab.h.  */
 
-int
+bool
 find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr, const struct block **block)
 {
@@ -333,7 +333,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 	*endaddr = 0;
       if (block != nullptr)
 	*block = nullptr;
-      return 0;
+      return false;
     }
 
   cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
@@ -374,7 +374,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   if (block != nullptr)
     *block = cache_pc_function_block;
 
-  return 1;
+  return true;
 }
 
 /* See symtab.h.  */

@@ -1,3 +1,30 @@
+2019-09-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* blockframe.c (find_pc_partial_function): Change return type to bool.
+	* elfread.c (elf_gnu_ifunc_resolve_name): Likewise.
+	* minsyms.c (in_gnu_ifunc_stub): Likewise.
+	(stub_gnu_ifunc_resolve_name): Likewise.
+	* symtab.c (compare_filenames_for_search): Likewise.
+	(compare_glob_filenames_for_search): Likewise.
+	(matching_obj_sections): Likewise.
+	(symbol_matches_domain): Likewise.
+	(find_line_symtab): Change out param EXACT_MATCH to bool *.
+	(find_line_pc): Change return type to bool.
+	(find_line_pc_range): Likewise.
+	(producer_is_realview): Likewise.
+	* symtab.h (symbol_matches_domain): Likewise.
+	(find_pc_partial_function): Likewise.
+	(find_pc_line_pc_range): Likewise.
+	(in_gnu_ifunc_stub): Likewise.
+	(struct gnu_ifunc_fns) <gnu_ifunc_resolve_name>: Likewise.
+	(find_line_pc): Likewise.
+	(find_line_pc_range): Likewise.
+	(matching_obj_sections): Likewise.
+	(find_line_symtab): Change out parameter to bool.
+	(producer_is_realview): Change return type to bool.
+	(compare_filenames_for_search): Likewise.
+	(compare_glob_filenames_for_search): Likewise.
+
 2019-09-26  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (COMMON_SFILES): Remove gdb_usleep.c.

@@ -1518,9 +1518,9 @@ extern const char multiple_symbols_cancel[];
 
 const char *multiple_symbols_select_mode (void);
 
-int symbol_matches_domain (enum language symbol_language, 
-			   domain_enum symbol_domain,
-			   domain_enum domain);
+bool symbol_matches_domain (enum language symbol_language,
+			    domain_enum symbol_domain,
+			    domain_enum domain);
 
 /* lookup a symbol table by source file name.  */
 
@@ -1689,8 +1689,8 @@ extern struct symbol *find_symbol_at_address (CORE_ADDR);
    nullptr is used as a return value for *BLOCK if no block is found. 
    This function either succeeds or fails (not halfway succeeds).  If
    it succeeds, it sets *NAME, *ADDRESS, and *ENDADDR to real
-   information and returns 1.  If it fails, it sets *NAME, *ADDRESS
-   and *ENDADDR to zero and returns 0.
+   information and returns true.  If it fails, it sets *NAME, *ADDRESS
+   and *ENDADDR to zero and returns false.
    
    If the function in question occupies non-contiguous ranges,
    *ADDRESS and *ENDADDR are (subject to the conditions noted above) set
@@ -1716,9 +1716,9 @@ extern struct symbol *find_symbol_at_address (CORE_ADDR);
    containing the entry pc should instead call
    find_function_entry_range_from_pc.  */
 
-extern int find_pc_partial_function (CORE_ADDR pc, const char **name,
-				     CORE_ADDR *address, CORE_ADDR *endaddr,
-				     const struct block **block = nullptr);
+extern bool find_pc_partial_function (CORE_ADDR pc, const char **name,
+				      CORE_ADDR *address, CORE_ADDR *endaddr,
+				      const struct block **block = nullptr);
 
 /* Like find_pc_partial_function, above, but *ADDRESS and *ENDADDR are
    set to start and end addresses of the range containing the entry pc.
@@ -1764,7 +1764,7 @@ extern struct compunit_symtab *find_pc_compunit_symtab (CORE_ADDR);
 extern struct compunit_symtab *
   find_pc_sect_compunit_symtab (CORE_ADDR, struct obj_section *);
 
-extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
+extern bool find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
 extern void reread_symbols (void);
 
@@ -1786,7 +1786,7 @@ extern struct type *basic_lookup_transparent_type (const char *);
 #define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled."
 #endif
 
-extern int in_gnu_ifunc_stub (CORE_ADDR pc);
+extern bool in_gnu_ifunc_stub (CORE_ADDR pc);
 
 /* Functions for resolving STT_GNU_IFUNC symbols which are implemented only
    for ELF symbol files.  */
@@ -1797,7 +1797,7 @@ struct gnu_ifunc_fns
   CORE_ADDR (*gnu_ifunc_resolve_addr) (struct gdbarch *gdbarch, CORE_ADDR pc);
 
   /* See elf_gnu_ifunc_resolve_name for its real implementation.  */
-  int (*gnu_ifunc_resolve_name) (const char *function_name,
+  bool (*gnu_ifunc_resolve_name) (const char *function_name,
 				 CORE_ADDR *function_address_p);
 
   /* See elf_gnu_ifunc_resolver_stop for its real implementation.  */
@@ -1861,10 +1861,10 @@ extern struct symtab *find_pc_line_symtab (CORE_ADDR);
 
 /* Given a symtab and line number, return the pc there.  */
 
-extern int find_line_pc (struct symtab *, int, CORE_ADDR *);
+extern bool find_line_pc (struct symtab *, int, CORE_ADDR *);
 
-extern int find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
-			       CORE_ADDR *);
+extern bool find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
+				CORE_ADDR *);
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 
@@ -1936,9 +1936,9 @@ completion_skip_symbol (complete_symbol_mode mode, Symbol *sym)
 
 /* symtab.c */
 
-int matching_obj_sections (struct obj_section *, struct obj_section *);
+bool matching_obj_sections (struct obj_section *, struct obj_section *);
 
-extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
+extern struct symtab *find_line_symtab (struct symtab *, int, int *, bool *);
 
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.  If FUNFIRSTLINE is true, we want the first line
@@ -2051,7 +2051,7 @@ extern struct block_symbol
 
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */
-int producer_is_realview (const char *producer);
+bool producer_is_realview (const char *producer);
 
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
@@ -2066,11 +2066,11 @@ extern unsigned int symbol_lookup_debug;
 
 extern bool basenames_may_differ;
 
-int compare_filenames_for_search (const char *filename,
-				  const char *search_name);
+bool compare_filenames_for_search (const char *filename,
+				   const char *search_name);
 
-int compare_glob_filenames_for_search (const char *filename,
-				       const char *search_name);
+bool compare_glob_filenames_for_search (const char *filename,
+					const char *search_name);
 
 bool iterate_over_some_symtabs (const char *name,
 				const char *real_path,

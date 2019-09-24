@@ -850,21 +850,21 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 
 /* Try to find the target resolved function entry address of a STT_GNU_IFUNC
    function NAME.  If the address is found it is stored to *ADDR_P (if ADDR_P
-   is not NULL) and the function returns 1.  It returns 0 otherwise.
+   is not NULL) and the function returns true.  It returns false otherwise.
 
    Both the elf_objfile_gnu_ifunc_cache_data hash table and
    SYMBOL_GOT_PLT_SUFFIX locations are searched by this function.  */
 
-static int
+static bool
 elf_gnu_ifunc_resolve_name (const char *name, CORE_ADDR *addr_p)
 {
   if (elf_gnu_ifunc_resolve_by_cache (name, addr_p))
-    return 1;
+    return true;
 
   if (elf_gnu_ifunc_resolve_by_got (name, addr_p))
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /* Call STT_GNU_IFUNC - a function returning addresss of a real function to

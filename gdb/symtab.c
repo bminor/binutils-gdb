@@ -355,18 +355,18 @@ minimal_symbol::text_p () const
    describes what we advertise).  Returns true if they match, false
    otherwise.  */
 
-int
+bool
 compare_filenames_for_search (const char *filename, const char *search_name)
 {
   int len = strlen (filename);
   size_t search_len = strlen (search_name);
 
   if (len < search_len)
-    return 0;
+    return false;
 
   /* The tail of FILENAME must match.  */
   if (FILENAME_CMP (filename + len - search_len, search_name) != 0)
-    return 0;
+    return false;
 
   /* Either the names must completely match, or the character
      preceding the trailing SEARCH_NAME segment of FILENAME must be a
@@ -393,7 +393,7 @@ compare_filenames_for_search (const char *filename, const char *search_name)
    compare_filenames_for_search, but it's the opposite of the order of
    arguments to gdb_filename_fnmatch.  */
 
-int
+bool
 compare_glob_filenames_for_search (const char *filename,
 				   const char *search_name)
 {
@@ -403,7 +403,7 @@ compare_glob_filenames_for_search (const char *filename,
   int search_path_elements = count_path_elements (search_name);
 
   if (search_path_elements > file_path_elements)
-    return 0;
+    return false;
 
   if (IS_ABSOLUTE_PATH (search_name))
     {
@@ -1002,11 +1002,11 @@ symbol_matches_search_name (const struct general_symbol_info *gsymbol,
 
 
 
-/* Return 1 if the two sections are the same, or if they could
+/* Return true if the two sections are the same, or if they could
    plausibly be copies of each other, one in an original object
    file and another in a separated debug file.  */
 
-int
+bool
 matching_obj_sections (struct obj_section *obj_first,
 		       struct obj_section *obj_second)
 {
@@ -1015,36 +1015,36 @@ matching_obj_sections (struct obj_section *obj_first,
 
   /* If they're the same section, then they match.  */
   if (first == second)
-    return 1;
+    return true;
 
   /* If either is NULL, give up.  */
   if (first == NULL || second == NULL)
-    return 0;
+    return false;
 
   /* This doesn't apply to absolute symbols.  */
   if (first->owner == NULL || second->owner == NULL)
-    return 0;
+    return false;
 
   /* If they're in the same object file, they must be different sections.  */
   if (first->owner == second->owner)
-    return 0;
+    return false;
 
   /* Check whether the two sections are potentially corresponding.  They must
      have the same size, address, and name.  We can't compare section indexes,
      which would be more reliable, because some sections may have been
      stripped.  */
   if (bfd_section_size (first) != bfd_section_size (second))
-    return 0;
+    return false;
 
   /* In-memory addresses may start at a different offset, relativize them.  */
   if (bfd_section_vma (first) - bfd_get_start_address (first->owner)
       != bfd_section_vma (second) - bfd_get_start_address (second->owner))
-    return 0;
+    return false;
 
   if (bfd_section_name (first) == NULL
       || bfd_section_name (second) == NULL
       || strcmp (bfd_section_name (first), bfd_section_name (second)) != 0)
-    return 0;
+    return false;
 
   /* Otherwise check that they are in corresponding objfiles.  */
 
@@ -1059,12 +1059,12 @@ matching_obj_sections (struct obj_section *obj_first,
 
   if (obj->separate_debug_objfile != NULL
       && obj->separate_debug_objfile->obfd == second->owner)
-    return 1;
+    return true;
   if (obj->separate_debug_objfile_backlink != NULL
       && obj->separate_debug_objfile_backlink->obfd == second->owner)
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /* See symtab.h.  */
@@ -2674,7 +2674,7 @@ lookup_global_symbol (const char *name,
   return lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
 }
 
-int
+bool
 symbol_matches_domain (enum language symbol_language,
 		       domain_enum symbol_domain,
 		       domain_enum domain)
@@ -2688,7 +2688,7 @@ symbol_matches_domain (enum language symbol_language,
     {
       if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
 	  && symbol_domain == STRUCT_DOMAIN)
-	return 1;
+	return true;
     }
   /* For all other languages, strict match is required.  */
   return (symbol_domain == domain);
@@ -3297,14 +3297,14 @@ find_pc_line_symtab (CORE_ADDR pc)
 
    If found, return the symtab that contains the linetable in which it was
    found, set *INDEX to the index in the linetable of the best entry
-   found, and set *EXACT_MATCH nonzero if the value returned is an
+   found, and set *EXACT_MATCH to true if the value returned is an
    exact match.
 
    If not found, return NULL.  */
 
 struct symtab *
 find_line_symtab (struct symtab *sym_tab, int line,
-		  int *index, int *exact_match)
+		  int *index, bool *exact_match)
 {
   int exact = 0;  /* Initialized here to avoid a compiler warning.  */
 
@@ -3389,7 +3389,7 @@ done:
   if (index)
     *index = best_index;
   if (exact_match)
-    *exact_match = exact;
+    *exact_match = (exact != 0);
 
   return best_symtab;
 }
@@ -3435,10 +3435,10 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 
 
 /* Set the PC value for a given source file and line number and return true.
-   Returns zero for invalid line number (and sets the PC to 0).
+   Returns false for invalid line number (and sets the PC to 0).
    The source file is specified with a struct symtab.  */
 
-int
+bool
 find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
 {
   struct linetable *l;
@@ -3446,26 +3446,26 @@ find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
 
   *pc = 0;
   if (symtab == 0)
-    return 0;
+    return false;
 
   symtab = find_line_symtab (symtab, line, &ind, NULL);
   if (symtab != NULL)
     {
       l = SYMTAB_LINETABLE (symtab);
       *pc = l->item[ind].pc;
-      return 1;
+      return true;
     }
   else
-    return 0;
+    return false;
 }
 
 /* Find the range of pc values in a line.
    Store the starting pc of the line into *STARTPTR
    and the ending pc (start of next line) into *ENDPTR.
-   Returns 1 to indicate success.
-   Returns 0 if could not find the specified line.  */
+   Returns true to indicate success.
+   Returns false if could not find the specified line.  */
 
-int
+bool
 find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
 		    CORE_ADDR *endptr)
 {
@@ -3474,7 +3474,7 @@ find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
 
   startaddr = sal.pc;
   if (startaddr == 0 && !find_line_pc (sal.symtab, sal.line, &startaddr))
-    return 0;
+    return false;
 
   /* This whole function is based on address.  For example, if line 10 has
      two parts, one from 0x100 to 0x200 and one from 0x300 to 0x400, then
@@ -3495,7 +3495,7 @@ find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
       *startptr = found_sal.pc;
       *endptr = found_sal.end;
     }
-  return 1;
+  return true;
 }
 
 /* Given a line table and a line number, return the index into the line
@@ -3549,7 +3549,7 @@ find_line_common (struct linetable *l, int lineno,
   return best_index;
 }
 
-int
+bool
 find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 {
   struct symtab_and_line sal;
@@ -6062,7 +6062,7 @@ symtab_observer_executable_changed (void)
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */
 
-int
+bool
 producer_is_realview (const char *producer)
 {
   static const char *const arm_idents[] = {
@@ -6076,13 +6076,13 @@ producer_is_realview (const char *producer)
   int i;
 
   if (producer == NULL)
-    return 0;
+    return false;
 
   for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
     if (startswith (producer, arm_idents[i]))
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 

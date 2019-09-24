@@ -895,7 +895,7 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 
 /* Return non-zero iff PC is in an STT_GNU_IFUNC function resolver.  */
 
-int
+bool
 in_gnu_ifunc_stub (CORE_ADDR pc)
 {
   bound_minimal_symbol msymbol
@@ -916,7 +916,7 @@ stub_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 /* See elf_gnu_ifunc_resolve_name for its real implementation.  */
 
-static int
+static bool
 stub_gnu_ifunc_resolve_name (const char *function_name,
 			     CORE_ADDR *function_address_p)
 {
