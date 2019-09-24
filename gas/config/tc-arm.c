@@ -106,6 +106,15 @@ enum arm_float_abi
    should define CPU_DEFAULT here.  */
 #endif
 
+/* Perform range checks on positive and negative overflows by checking if the
+   VALUE given fits within the range of an BITS sized immediate.  */
+static bfd_boolean out_of_range_p (offsetT value, offsetT bits)
+ {
+  gas_assert (bits < (offsetT)(sizeof (value) * 8));
+  return (value & ~((1 << bits)-1))
+	  && ((value & ~((1 << bits)-1)) != ~((1 << bits)-1));
+}
+
 #ifndef FPU_DEFAULT
 # ifdef TE_LINUX
 #  define FPU_DEFAULT FPU_ARCH_FPA
@@ -28047,7 +28056,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH9: /* Conditional branch.	*/
-      if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
+      if (out_of_range_p (value, 8))
 	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
@@ -28059,7 +28068,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH12: /* Unconditional branch.  */
-      if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
+      if (out_of_range_p (value, 11))
 	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
@@ -28070,6 +28079,7 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
+    /* This relocation is misnamed, it should be BRANCH21.  */
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
@@ -28080,7 +28090,7 @@ md_apply_fix (fixS *	fixP,
 	  /* Force a relocation for a branch 20 bits wide.  */
 	  fixP->fx_done = 0;
 	}
-      if ((value & ~0x1fffff) && ((value & ~0x0fffff) != ~0x0fffff))
+      if (out_of_range_p (value, 20))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("conditional branch out of range"));
 
@@ -28159,12 +28169,11 @@ md_apply_fix (fixS *	fixP,
 	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
 #endif
 
-      if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
+      if (out_of_range_p (value, 22))
 	{
 	  if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)))
 	    as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
-	  else if ((value & ~0x1ffffff)
-		   && ((value & ~0x1ffffff) != ~0x1ffffff))
+	  else if (out_of_range_p (value, 24))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("Thumb2 branch out of range"));
 	}
@@ -28175,7 +28184,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
-      if ((value & ~0x0ffffff) && ((value & ~0x0ffffff) != ~0x0ffffff))
+      if (out_of_range_p (value, 24))
 	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
