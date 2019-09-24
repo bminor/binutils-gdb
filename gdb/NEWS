@@ -366,6 +366,10 @@ focus, winheight, +, -, >, <
   These can be used to catch C++ exceptions in a similar fashion to
   the CLI commands 'catch throw', 'catch rethrow', and 'catch catch'.
 
+-symbol-info-functions, -symbol-info-types, and -symbol-info-variables
+  These commands are the MI equivalent of the CLI commands 'info
+  functions', 'info types', and 'info variables' respectively.
+
 * Other MI changes
 
  ** The default version of the MI interpreter is now 3 (-i=mi3).

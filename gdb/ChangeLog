@@ -1,5 +1,22 @@
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mi/mi-cmds.c (mi_cmds): Add '-symbol-info-functions',
+	'-symbol-info-types', and '-symbol-info-variables'.
+	* mi/mi-cmds.h (mi_cmd_symbol_info_functions): Declare.
+	(mi_cmd_symbol_info_types): Declare.
+	(mi_cmd_symbol_info_variables): Declare.
+	* mi/mi-symbol-cmds.c: Add 'source.h' and 'mi-getopt.h' includes.
+	(output_debug_symbol): New function.
+	(output_nondebug_symbol): New function.
+	(mi_symbol_info): New function.
+	(mi_info_functions_or_variables): New function.
+	(mi_cmd_symbol_info_functions): New function.
+	(mi_cmd_symbol_info_types): New function.
+	(mi_cmd_symbol_info_variables): New function.
+	* NEWS: Mention new commands.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* symtab.c (symbol_to_info_string): New function, most content
 	moved from print_symbol_info, but updated to return a std::string.
 	(print_symbol_info): Update to use symbol_to_info_string and print
