@@ -33874,27 +33874,283 @@ There's no equivalent @value{GDBN} command.  @code{gdbtk} has
 
 @subsubheading Example
 N.A.
+@end ignore
 
-
-@subheading The @code{-symbol-info-function} Command
-@findex -symbol-info-function
+@subheading The @code{-symbol-info-functions} Command
+@findex -symbol-info-functions
+@anchor{-symbol-info-functions}
 
 @subsubheading Synopsis
 
 @smallexample
- -symbol-info-function
+ -symbol-info-functions [--include-nondebug]
+                        [--type @var{type_regexp}]
+                        [--name @var{name_regexp}]
 @end smallexample
 
-Show which function the symbol lives in.
+@noindent
+Return a list containing the names and types for all global functions
+taken from the debug information.  The functions are grouped by source
+file, and shown with the line number on which each function is
+defined.
+
+The @code{--include-nondebug} option causes the output to include
+code symbols from the symbol table.
+
+The options @code{--type} and @code{--name} allow the symbols returned
+to be filtered based on either the name of the function, or the type
+signature of the function.
 
 @subsubheading @value{GDBN} Command
 
-@samp{gdb_get_function} in @code{gdbtk}.
+The corresponding @value{GDBN} command is @samp{info functions}.
 
 @subsubheading Example
-N.A.
+@smallexample
+@group
+(gdb)
+-symbol-info-functions
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="36", name="f4", type="void (int *)",
+                description="void f4(int *);"@},
+               @{line="42", name="main", type="int ()",
+                description="int main();"@},
+               @{line="30", name="f1", type="my_int_t (int, int)",
+                description="static my_int_t f1(int, int);"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="33", name="f2", type="float (another_float_t)",
+                description="float f2(another_float_t);"@},
+               @{line="39", name="f3", type="int (another_int_t)",
+                description="int f3(another_int_t);"@},
+               @{line="27", name="f1", type="another_float_t (int)",
+                description="static another_float_t f1(int);"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-functions --name f1
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="30", name="f1", type="my_int_t (int, int)",
+                description="static my_int_t f1(int, int);"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="27", name="f1", type="another_float_t (int)",
+                description="static another_float_t f1(int);"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-functions --type void
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="36", name="f4", type="void (int *)",
+                description="void f4(int *);"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-functions --include-nondebug
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="36", name="f4", type="void (int *)",
+                description="void f4(int *);"@},
+               @{line="42", name="main", type="int ()",
+                description="int main();"@},
+               @{line="30", name="f1", type="my_int_t (int, int)",
+                description="static my_int_t f1(int, int);"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="33", name="f2", type="float (another_float_t)",
+                description="float f2(another_float_t);"@},
+               @{line="39", name="f3", type="int (another_int_t)",
+                description="int f3(another_int_t);"@},
+               @{line="27", name="f1", type="another_float_t (int)",
+                description="static another_float_t f1(int);"@}]@}],
+   nondebug=
+    [@{address="0x0000000000400398",name="_init"@},
+     @{address="0x00000000004003b0",name="_start"@},
+      ...
+    ]@}
+@end group
+@end smallexample
 
+@subheading The @code{-symbol-info-types} Command
+@findex -symbol-info-types
+@anchor{-symbol-info-types}
 
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-info-types [--name @var{name_regexp}]
+@end smallexample
+
+@noindent
+Return a list of all defined types.  The types are grouped by source
+file, and shown with the line number on which each user defined type
+is defined.  Some base types are not defined in the source code but
+are added to the debug information by the compiler, for example
+@code{int}, @code{float}, etc.; these types do not have an associated
+line number.
+
+The option @code{--name} allows the list of types returned to be
+filtered by name.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info types}.
+
+@subsubheading Example
+@smallexample
+@group
+(gdb)
+-symbol-info-types
+^done,symbols=
+  @{debug=
+     [@{filename="gdb.mi/mi-sym-info-1.c",
+       fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+       symbols=[@{name="float"@},
+                @{name="int"@},
+                @{line="27",name="typedef int my_int_t;"@}]@},
+      @{filename="gdb.mi/mi-sym-info-2.c",
+       fullname="/project/gdb.mi/mi-sym-info-2.c",
+       symbols=[@{line="24",name="typedef float another_float_t;"@},
+                @{line="23",name="typedef int another_int_t;"@},
+                @{name="float"@},
+                @{name="int"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-types --name _int_
+^done,symbols=
+  @{debug=
+     [@{filename="gdb.mi/mi-sym-info-1.c",
+       fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+       symbols=[@{line="27",name="typedef int my_int_t;"@}]@},
+      @{filename="gdb.mi/mi-sym-info-2.c",
+       fullname="/project/gdb.mi/mi-sym-info-2.c",
+       symbols=[@{line="23",name="typedef int another_int_t;"@}]@}]@}
+@end group
+@end smallexample
+
+@subheading The @code{-symbol-info-variables} Command
+@findex -symbol-info-variables
+@anchor{-symbol-info-variables}
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-info-variables [--include-nondebug]
+                        [--type @var{type_regexp}]
+                        [--name @var{name_regexp}]
+@end smallexample
+
+@noindent
+Return a list containing the names and types for all global variables
+taken from the debug information.  The variables are grouped by source
+file, and shown with the line number on which each variable is
+defined.
+
+The @code{--include-nondebug} option causes the output to include
+data symbols from the symbol table.
+
+The options @code{--type} and @code{--name} allow the symbols returned
+to be filtered based on either the name of the variable, or the type
+of the variable.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info variables}.
+
+@subsubheading Example
+@smallexample
+@group
+(gdb)
+-symbol-info-variables
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="25",name="global_f1",type="float",
+                description="static float global_f1;"@},
+               @{line="24",name="global_i1",type="int",
+                description="static int global_i1;"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="21",name="global_f2",type="int",
+                description="int global_f2;"@},
+               @{line="20",name="global_i2",type="int",
+                description="int global_i2;"@},
+               @{line="19",name="global_f1",type="float",
+                description="static float global_f1;"@},
+               @{line="18",name="global_i1",type="int",
+                description="static int global_i1;"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-variables --name f1
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="25",name="global_f1",type="float",
+                description="static float global_f1;"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="19",name="global_f1",type="float",
+                description="static float global_f1;"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-variables --type float
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="25",name="global_f1",type="float",
+                description="static float global_f1;"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="19",name="global_f1",type="float",
+                description="static float global_f1;"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-variables --include-nondebug
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-1.c",
+      symbols=[@{line="25",name="global_f1",type="float",
+                description="static float global_f1;"@},
+               @{line="24",name="global_i1",type="int",
+                description="static int global_i1;"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-sym-info-2.c",
+      symbols=[@{line="21",name="global_f2",type="int",
+                description="int global_f2;"@},
+               @{line="20",name="global_i2",type="int",
+                description="int global_i2;"@},
+               @{line="19",name="global_f1",type="float",
+                description="static float global_f1;"@},
+               @{line="18",name="global_i1",type="int",
+                description="static int global_i1;"@}]@}],
+   nondebug=
+    [@{address="0x00000000004005d0",name="_IO_stdin_used"@},
+     @{address="0x00000000004005d8",name="__dso_handle"@}
+      ...
+    ]@}
+@end group
+@end smallexample
+
+@ignore
 @subheading The @code{-symbol-info-line} Command
 @findex -symbol-info-line
 

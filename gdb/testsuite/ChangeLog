@@ -1,3 +1,9 @@
+2019-11-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-sym-info-1.c: New file.
+	* gdb.mi/mi-sym-info-2.c: New file.
+	* gdb.mi/mi-sym-info.exp: New file.
+
 2019-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.python/py-progspace.exp: Add missing parentheses on some

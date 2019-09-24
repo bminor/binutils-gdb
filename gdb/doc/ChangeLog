@@ -1,3 +1,9 @@
+2019-11-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
+	-symbol-info-functions, -symbol-info-types, and
+	-symbol-info-variables.
+
 2019-11-14  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.texinfo: Fix typos.
