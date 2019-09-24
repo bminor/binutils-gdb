@@ -2147,6 +2147,14 @@ extern std::vector<module_symbol_search> search_module_symbols
 	(const char *module_regexp, const char *regexp,
 	 const char *type_regexp, search_domain kind);
 
+/* Convert a global or static symbol SYM (based on BLOCK, which should be
+   either GLOBAL_BLOCK or STATIC_BLOCK) into a string for use in 'info'
+   type commands (e.g. 'info variables', 'info functions', etc).  KIND is
+   the type of symbol that was searched for which gave us SYM.  */
+
+extern std::string symbol_to_info_string (struct symbol *sym, int block,
+					  enum search_domain kind);
+
 extern bool treg_matches_sym_type_name (const compiled_regex &treg,
 					const struct symbol *sym);
 
