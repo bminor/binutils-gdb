@@ -142,6 +142,7 @@ static struct output_fns formats[] =
 /* The output format to use.  */
 static struct output_fns *format = &formats[FORMAT_DEFAULT];
 static unsigned int print_format = FORMAT_DEFAULT;
+static const char *print_format_string = NULL;
 
 /* Command options.  */
 
@@ -1216,6 +1217,51 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
   free (symsizes);
 }
 
+/* Construct a formatting string for printing symbol values.  */
+
+static const char *
+get_print_format (void)
+{
+  const char * padding;
+  if (print_format == FORMAT_POSIX)
+    {
+      /* POSIX compatible output does not have any padding.  */
+      padding = "";
+    }
+  else if (print_width == 32)
+    {
+      padding ="08";
+    }
+  else /* print_width == 64 */
+    {
+      padding = "016";
+    }
+
+  const char * length = "l";
+  if (print_width == 64)
+    {
+#if BFD_HOST_64BIT_LONG
+      ;
+#elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
+      length = "ll";
+#else
+      length = "I64";
+#endif
+#endif
+    }
+
+  const char * radix = NULL;
+  switch (print_radix)
+    {
+    case 8:  radix = "o"; break;
+    case 10: radix = "d"; break;
+    case 16: radix = "x"; break;
+    }
+
+  return concat ("%", padding, length, radix, NULL);
+}
+
 static void
 set_print_width (bfd *file)
 {
@@ -1234,6 +1280,8 @@ set_print_width (bfd *file)
       else
 	print_width = 32;
     }
+  free ((char *) print_format_string);
+  print_format_string = get_print_format ();
 }
 
 static void
@@ -1474,58 +1522,6 @@ print_symbol_filename_posix (bfd *archive_bfd, bfd *abfd)
     }
 }
 
-/* Construct a formatting string for printing symbol values.  */
-
-static const char *
-get_print_format (void)
-{
-  static const char * saved_format = NULL;
-
-  /* See if we have already constructed the format.  */
-  if (saved_format)
-    return saved_format;
-
-  const char * padding;
-  if (print_format == FORMAT_POSIX)
-    {
-      /* POSIX compatible output does not have any padding.  */
-      padding = "";
-    }
-  else if (print_width == 32)
-    {
-      padding ="08";
-    }
-  else /* print_width == 64 */
-    {
-      padding = "016";
-    }
-
-  const char * length = "l";
-  if (print_width == 64)
-    {
-#if BFD_HOST_64BIT_LONG
-      ;
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-      length = "ll";
-#else
-      length = "I64";
-#endif
-#endif
-    }
-
-  const char * radix = NULL;
-  switch (print_radix)
-    {
-    case 8:  radix = "o"; break;
-    case 10: radix = "d"; break;
-    case 16: radix = "x"; break;
-    }
-
-  saved_format = concat ("%", padding, length, radix, NULL);
-  return saved_format;
-}
-
 /* Print a symbol value.  */
 
 static void
@@ -1534,12 +1530,12 @@ print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
   switch (print_width)
     {
     case 32:
-      printf (get_print_format (), (unsigned long) val);
+      printf (print_format_string, (unsigned long) val);
       break;
 
     case 64:
 #if BFD_HOST_64BIT_LONG || BFD_HOST_64BIT_LONG_LONG
-      printf (get_print_format (), val);
+      printf (print_format_string, val);
 #else
       /* We have a 64 bit value to print, but the host is only 32 bit.  */
       if (print_radix == 16)
