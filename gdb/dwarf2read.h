@@ -401,9 +401,6 @@ struct signatured_type
   struct dwo_unit *dwo_unit;
 };
 
-typedef struct signatured_type *sig_type_ptr;
-DEF_VEC_P (sig_type_ptr);
-
 ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
 
 /* This represents a '.dwz' file.  */

@@ -1,5 +1,14 @@
 2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2read.c (struct type_unit_group) <tus>: Convert to
+	std::vector.
+	(build_type_psymtabs_reader): Update for std::vector.
+	(build_type_psymtab_dependencies): Likewise.
+	* dwarf2read.h: Remove use of DEF_VEC_P.
+	(typedef sig_type_ptr): Delete.
+
+2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* btrace.c (btrace_maint_clear): Update to handle change from VEC
 	to std::vector.
 	(btrace_maint_decode_pt): Likewise, and move allocation of the

@@ -620,7 +620,7 @@ struct type_unit_group
   /* The TUs that share this DW_AT_stmt_list entry.
      This is added to while parsing type units to build partial symtabs,
      and is deleted afterwards and not used again.  */
-  VEC (sig_type_ptr) *tus;
+  std::vector <signatured_type *> *tus;
 
   /* The compunit symtab.
      Type units in a group needn't all be defined in the same source file,
@@ -8184,7 +8184,9 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
   tu_group = get_type_unit_group (cu, attr);
 
-  VEC_safe_push (sig_type_ptr, tu_group->tus, sig_type);
+  if (tu_group->tus == nullptr)
+    tu_group->tus = new std::vector <signatured_type *>;
+  tu_group->tus->push_back (sig_type);
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);
   pst = create_partial_symtab (per_cu, "");
@@ -8341,8 +8343,7 @@ build_type_psymtab_dependencies (void **slot, void *info)
   struct type_unit_group *tu_group = (struct type_unit_group *) *slot;
   struct dwarf2_per_cu_data *per_cu = &tu_group->per_cu;
   struct partial_symtab *pst = per_cu->v.psymtab;
-  int len = VEC_length (sig_type_ptr, tu_group->tus);
-  struct signatured_type *iter;
+  int len = (tu_group->tus == nullptr) ? 0 : tu_group->tus->size ();
   int i;
 
   gdb_assert (len > 0);
@@ -8350,16 +8351,16 @@ build_type_psymtab_dependencies (void **slot, void *info)
 
   pst->number_of_dependencies = len;
   pst->dependencies = objfile->partial_symtabs->allocate_dependencies (len);
-  for (i = 0;
-       VEC_iterate (sig_type_ptr, tu_group->tus, i, iter);
-       ++i)
+  for (i = 0; i < len; ++i)
     {
+      struct signatured_type *iter = tu_group->tus->at (i);
       gdb_assert (iter->per_cu.is_debug_types);
       pst->dependencies[i] = iter->per_cu.v.psymtab;
       iter->type_unit_group = tu_group;
     }
 
-  VEC_free (sig_type_ptr, tu_group->tus);
+  delete tu_group->tus;
+  tu_group->tus = nullptr;
 
   return 1;
 }
