@@ -1,3 +1,23 @@
+2019-09-24  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb/ctfread.c: New file.
+	* gdb/ctfread.h: New file.
+	* gdb/elfread.c: Include ctfread.h.
+	(struct elfinfo text_p): New member ctfsect.
+	(elf_locate_sections): Mark CTF section.
+	(elf_symfile_read): Call elfctf_build_psymtabs.
+	* gdb/Makefile.in (LIBCTF): Add.
+	(CLIBS): Use it.
+	(CDEPS): Likewise.
+	(DIST): Add ctfread.c.
+	* gdb/tracectf.h: Rename, was gdb/ctf.h
+	* gdb/ctf.c: Replace ctf.h with tracectf.h
+	* gdb/tracefile.c: Likewise
+	* gdb/tracepoint.c: Remove unused include ctf.h
+	* gdb/mi/mi-main.c: Likewise
+	* Makefile.def (dependencies): Add all-libctf to all-gdb
+	* Makefile.in: Add "all-gdb: maybe-all-libctf"
+
 2019-09-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-svr4.c (svr4_iterate_over_objfiles_in_search_order): Fix

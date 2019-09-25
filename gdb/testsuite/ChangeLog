@@ -1,3 +1,13 @@
+2019-09-24  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.base/ctf-whatis.exp: New file.
+	* gdb.base/ctf-whatis.c: New file.
+	* gdb.base/ctf-ptype.exp: New file.
+	* gdb.base/ctf-ptype.c: New file.
+	* gdb.base/ctf-constvars.exp: New file.
+	* gdb.base/ctf-constvars.c: New file.
+	* gdb.base/ctf-cvexpr.exp: New file.
+
 2019-09-22  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/restore.exp: Allow register variables to be optimized out at

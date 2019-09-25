@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "ctf.h"
+#include "tracectf.h"
 #include "tracepoint.h"
 #include "regcache.h"
 #include <sys/stat.h>

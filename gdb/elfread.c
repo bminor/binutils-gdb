@@ -47,6 +47,7 @@
 #include "location.h"
 #include "auxv.h"
 #include "mdebugread.h"
+#include "ctfread.h"
 
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;
@@ -61,6 +62,7 @@ struct elfinfo
   {
     asection *stabsect;		/* Section pointer for .stab section */
     asection *mdebugsect;	/* Section pointer for .mdebug section */
+    asection *ctfsect;		/* Section pointer for .ctf section */
   };
 
 /* Type for per-BFD data.  */
@@ -187,6 +189,10 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   else if (strcmp (sectp->name, ".mdebug") == 0)
     {
       ei->mdebugsect = sectp;
+    }
+  else if (strcmp (sectp->name, ".ctf") == 0)
+    {
+      ei->ctfsect = sectp;
     }
 }
 
@@ -1053,7 +1059,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
      go away once all types of symbols are in the per-BFD object.  */
   if (objfile->per_bfd->minsyms_read
       && ei->stabsect == NULL
-      && ei->mdebugsect == NULL)
+      && ei->mdebugsect == NULL
+      && ei->ctfsect == NULL)
     {
       if (symtab_create_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -1194,6 +1201,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
+  bool has_dwarf2 = true;
 
   memset ((char *) &ei, 0, sizeof (ei));
   if (!(objfile->flags & OBJF_READNEVER))
@@ -1296,6 +1304,14 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  symbol_file_add_separate (debug_bfd.get (), debugfile.c_str (),
 				    symfile_flags, objfile);
 	}
+	else
+	  has_dwarf2 = false;
+    }
+  
+  /* Read the CTF section only if there is no DWARF info.  */
+  if (!has_dwarf2 && ei.ctfsect)
+    {
+      elfctf_build_psymtabs (objfile);
     }
 }
 
