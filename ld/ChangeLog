@@ -1,3 +1,8 @@
+2019-09-25  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/avrelf.em (_before_allocation): Silence build warning
+	using clang.
+
 2019-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-plugin/pr24406-1.c (main): Correct buffer size
