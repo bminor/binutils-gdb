@@ -4630,17 +4630,20 @@ pattern in parentheses (e.g., @code{SORT_BY_NAME(.text*)}).  When the
 into ascending order by name before placing them in the output file.
 
 @cindex SORT_BY_ALIGNMENT
-@code{SORT_BY_ALIGNMENT} is very similar to @code{SORT_BY_NAME}. The
-difference is @code{SORT_BY_ALIGNMENT} will sort sections into
-descending order by alignment before placing them in the output file.
-Larger alignments are placed before smaller alignments in order to
-reduce the amount of padding necessary.
+@code{SORT_BY_ALIGNMENT} is similar to @code{SORT_BY_NAME}.
+@code{SORT_BY_ALIGNMENT} will sort sections into descending order of
+alignment before placing them in the output file.  Placing larger
+alignments before smaller alignments can reduce the amount of padding
+needed.
 
 @cindex SORT_BY_INIT_PRIORITY
-@code{SORT_BY_INIT_PRIORITY} is very similar to @code{SORT_BY_NAME}. The
-difference is @code{SORT_BY_INIT_PRIORITY} will sort sections into
-ascending order by numerical value of the GCC init_priority attribute
-encoded in the section name before placing them in the output file.
+@code{SORT_BY_INIT_PRIORITY} is also similar to @code{SORT_BY_NAME}.
+@code{SORT_BY_INIT_PRIORITY} will sort sections into ascending
+numerical order of the GCC init_priority attribute encoded in the
+section name before placing them in the output file.  In
+@code{.init_array.NNNNN} and @code{.fini_array.NNNNN}, @code{NNNNN} is
+the init_priority.  In @code{.ctors.NNNNN} and @code{.dtors.NNNNN},
+@code{NNNNN} is 65535 minus the init_priority.
 
 @cindex SORT
 @code{SORT} is an alias for @code{SORT_BY_NAME}.

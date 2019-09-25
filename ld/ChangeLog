@@ -1,3 +1,13 @@
+2019-09-25  Alan Modra  <amodra@gmail.com>
+
+	* ld.texi (SORT_BY_ALIGNMENT): Reword slightly.
+	(SORT_BY_INIT_PRIORITY): Elucidate.
+	* ldlang.c: Include limits.h.
+	(get_init_priority): Comment.  Change param to a section,
+	return an int.  Sanity check priority digits.  Support sorting
+	more sections with trailing digits.  Return -1 on error.
+	(compare_section): Adjust.
+
 2019-09-25  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/avrelf.em (_before_allocation): Silence build warning

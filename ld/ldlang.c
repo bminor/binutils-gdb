@@ -19,6 +19,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
@@ -403,39 +404,50 @@ match_simple_wild (const char *pattern, const char *name)
 /* Return the numerical value of the init_priority attribute from
    section name NAME.  */
 
-static unsigned long
-get_init_priority (const char *name)
+static int
+get_init_priority (const asection *sec)
 {
-  char *end;
-  unsigned long init_priority;
+  const char *name = bfd_section_name (sec);
+  const char *dot;
 
   /* GCC uses the following section names for the init_priority
-     attribute with numerical values 101 and 65535 inclusive. A
+     attribute with numerical values 101 to 65535 inclusive. A
      lower value means a higher priority.
 
-     1: .init_array.NNNN/.fini_array.NNNN: Where NNNN is the
+     1: .init_array.NNNNN/.fini_array.NNNNN: Where NNNNN is the
 	decimal numerical value of the init_priority attribute.
 	The order of execution in .init_array is forward and
 	.fini_array is backward.
-     2: .ctors.NNNN/.dtors.NNNN: Where NNNN is 65535 minus the
+     2: .ctors.NNNNN/.dtors.NNNNN: Where NNNNN is 65535 minus the
 	decimal numerical value of the init_priority attribute.
 	The order of execution in .ctors is backward and .dtors
 	is forward.
-   */
-  if (strncmp (name, ".init_array.", 12) == 0
-      || strncmp (name, ".fini_array.", 12) == 0)
-    {
-      init_priority = strtoul (name + 12, &end, 10);
-      return *end ? 0 : init_priority;
-    }
-  else if (strncmp (name, ".ctors.", 7) == 0
-	   || strncmp (name, ".dtors.", 7) == 0)
-    {
-      init_priority = strtoul (name + 7, &end, 10);
-      return *end ? 0 : 65535 - init_priority;
-    }
 
-  return 0;
+     .init_array.NNNNN sections would normally be placed in an output
+     .init_array section, .fini_array.NNNNN in .fini_array,
+     .ctors.NNNNN in .ctors, and .dtors.NNNNN in .dtors.  This means
+     we should sort by increasing number (and could just use
+     SORT_BY_NAME in scripts).  However if .ctors.NNNNN sections are
+     being placed in .init_array (which may also contain
+     .init_array.NNNNN sections) or .dtors.NNNNN sections are being
+     placed in .fini_array then we need to extract the init_priority
+     attribute and sort on that.  */
+  dot = strrchr (name, '.');
+  if (dot != NULL && ISDIGIT (dot[1]))
+    {
+      char *end;
+      unsigned long init_priority = strtoul (dot + 1, &end, 10);
+      if (*end == 0)
+	{
+	  if (dot == name + 6
+	      && (strncmp (name, ".ctors", 6) == 0
+		  || strncmp (name, ".dtors", 6) == 0))
+	    init_priority = 65535 - init_priority;
+	  if (init_priority <= INT_MAX)
+	    return init_priority;
+	}
+    }
+  return -1;
 }
 
 /* Compare sections ASEC and BSEC according to SORT.  */
@@ -444,7 +456,7 @@ static int
 compare_section (sort_type sort, asection *asec, asection *bsec)
 {
   int ret;
-  unsigned long ainit_priority, binit_priority;
+  int a_priority, b_priority;
 
   switch (sort)
     {
@@ -452,11 +464,11 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
       abort ();
 
     case by_init_priority:
-      ainit_priority = get_init_priority (bfd_section_name (asec));
-      binit_priority = get_init_priority (bfd_section_name (bsec));
-      if (ainit_priority == 0 || binit_priority == 0)
+      a_priority = get_init_priority (asec);
+      b_priority = get_init_priority (bsec);
+      if (a_priority < 0 || b_priority < 0)
 	goto sort_by_name;
-      ret = ainit_priority - binit_priority;
+      ret = a_priority - b_priority;
       if (ret)
 	break;
       else
