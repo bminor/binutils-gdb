@@ -1,3 +1,13 @@
+2019-10-09  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-09-26  Alan Modra  <amodra@gmail.com>
+	PR 24262
+	* Makefile.am (AM_CPPFLAGS): Add -DLIBDIR.
+	* plugin.c (load_plugin): Search both ${libdir}/bfd-plugins and
+	${bindir}/../lib/bfd-plugins if different.
+	* Makefile.in: Regenerate.
+
 2019-09-30  Phil Blundell  <pb@pbcl.net>
 
 	Release 2.33

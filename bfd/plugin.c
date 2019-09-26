@@ -366,11 +366,15 @@ register_ld_plugin_object_p (const bfd_target *(*object_p) (bfd *))
 static int
 load_plugin (bfd *abfd)
 {
-  char *plugin_dir;
-  char *p;
-  DIR *d;
-  struct dirent *ent;
+  /* The intent was to search ${libdir}/bfd-plugins for plugins, but
+     unfortunately the original implementation wasn't precisely that
+     when configuring binutils using --libdir.  Search in the proper
+     path first, then the old one for backwards compatibility.  */
+  static const char *path[]
+    = { LIBDIR "/bfd-plugins", BINDIR "/../lib/bfd-plugins" };
+  struct stat last_st;
   int found = 0;
+  unsigned int i;
 
   if (!has_plugin)
     return found;
@@ -381,37 +385,57 @@ load_plugin (bfd *abfd)
   if (plugin_program_name == NULL)
     return found;
 
-  plugin_dir = concat (BINDIR, "/../lib/bfd-plugins", NULL);
-  p = make_relative_prefix (plugin_program_name,
-			    BINDIR,
-			    plugin_dir);
-  free (plugin_dir);
-  plugin_dir = NULL;
-
-  d = opendir (p);
-  if (!d)
-    goto out;
-
-  while ((ent = readdir (d)))
+  /* Try not to search the same dir twice, by looking at st_dev and
+     st_ino for the dir.  If we are on a file system that always sets
+     st_ino to zero or the actual st_ino is zero we might waste some
+     time, but that doesn't matter too much.  */
+  last_st.st_dev = 0;
+  last_st.st_ino = 0;
+  for (i = 0; i < sizeof (path) / sizeof (path[0]); i++)
     {
-      char *full_name;
-      struct stat s;
-      int valid_plugin;
+      char *plugin_dir = make_relative_prefix (plugin_program_name,
+					       BINDIR,
+					       path[i]);
+      if (plugin_dir)
+	{
+	  struct stat st;
+	  DIR *d;
 
-      full_name = concat (p, "/", ent->d_name, NULL);
-      if (stat (full_name, &s) == 0 && S_ISREG (s.st_mode))
-	found = try_load_plugin (full_name, abfd, &valid_plugin);
-      if (has_plugin <= 0)
-	has_plugin = valid_plugin;
-      free (full_name);
+	  if (stat (plugin_dir, &st) == 0
+	      && S_ISDIR (st.st_mode)
+	      && !(last_st.st_dev == st.st_dev
+		   && last_st.st_ino == st.st_ino
+		   && st.st_ino != 0)
+	      && (d = opendir (plugin_dir)) != NULL)
+	    {
+	      struct dirent *ent;
+
+	      last_st.st_dev = st.st_dev;
+	      last_st.st_ino = st.st_ino;
+	      while ((ent = readdir (d)) != NULL)
+		{
+		  char *full_name;
+
+		  full_name = concat (plugin_dir, "/", ent->d_name, NULL);
+		  if (stat (full_name, &st) == 0 && S_ISREG (st.st_mode))
+		    {
+		      int valid_plugin;
+
+		      found = try_load_plugin (full_name, abfd, &valid_plugin);
+		      if (has_plugin <= 0)
+			has_plugin = valid_plugin;
+		    }
+		  free (full_name);
+		  if (found)
+		    break;
+		}
+	      closedir (d);
+	    }
+	  free (plugin_dir);
+	}
       if (found)
 	break;
     }
-
- out:
-  free (p);
-  if (d)
-    closedir (d);
 
   return found;
 }

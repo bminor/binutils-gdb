@@ -1,3 +1,10 @@
+2019-10-09  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-09-26  Alan Modra  <amodra@gmail.com>
+	PR 24262
+	* ld.texi (-plugin): Revert 2019-03-15 change.
+
 2019-09-30  Phil Blundell  <pb@pbcl.net>
 
 	Release 2.33

@@ -479,8 +479,9 @@ libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
-AM_CPPFLAGS = -DBINDIR='"$(bindir)"' @HDEFINES@ @COREFLAG@ @TDEFINES@ \
-	$(CSEARCH) $(CSWITCHES) $(HAVEVECS) @INCINTL@
+AM_CPPFLAGS = -DBINDIR='"$(bindir)"' -DLIBDIR='"$(libdir)"' @HDEFINES@ \
+	@COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(HAVEVECS) \
+	@INCINTL@ $(am__empty)
 @PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 
 # bfd.h goes here, for now
