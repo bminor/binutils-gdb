@@ -21,9 +21,6 @@
 #include "linux-procfs.h"
 #include "linux-waitpid.h"
 #include "gdbsupport/buffer.h"
-#include "gdbsupport/gdb-dlfcn.h"
-#include "nat/fork-inferior.h"
-#include "gdbsupport/filestuff.h"
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif
@@ -33,94 +30,11 @@
    of 0 means there are no supported features.  */
 static int supported_ptrace_options = -1;
 
-typedef int (*selinux_ftype) (const char *);
+/* Find all possible reasons we could fail to attach PID and return these
+   as a string.  An empty string is returned if we didn't find any reason.  */
 
-/* Helper function which checks if ptrace is probably restricted
-   (i.e., if ERR is either EACCES or EPERM), and returns a string with
-   possible workarounds.  */
-
-static std::string
-linux_ptrace_restricted_fail_reason (int err)
-{
-  if (err != EACCES && err != EPERM)
-    {
-      /* It just makes sense to perform the checks below if errno was
-	 either EACCES or EPERM.  */
-      return {};
-    }
-
-  std::string ret;
-  gdb_dlhandle_up handle;
-
-  try
-    {
-      handle = gdb_dlopen ("libselinux.so.1");
-    }
-  catch (const gdb_exception_error &e)
-    {
-      handle.reset (nullptr);
-    }
-
-  if (handle != nullptr)
-    {
-      selinux_ftype selinux_get_bool
-	= (selinux_ftype) gdb_dlsym (handle, "security_get_boolean_active");
-
-      if (selinux_get_bool != NULL
-	  && (*selinux_get_bool) ("deny_ptrace") == 1)
-	string_appendf (ret,
-			_("\n\
-The SELinux 'deny_ptrace' option is enabled and preventing GDB\n\
-from using 'ptrace'.  You can disable it by executing (as root):\n\
-\n\
-  setsebool deny_ptrace off\n"));
-    }
-
-  gdb_file_up yama_ptrace_scope
-    = gdb_fopen_cloexec ("/proc/sys/kernel/yama/ptrace_scope", "r");
-
-  if (yama_ptrace_scope != nullptr)
-    {
-      char yama_scope = fgetc (yama_ptrace_scope.get ());
-
-      if (yama_scope != '0')
-	string_appendf (ret,
-			_("\n\
-The Linux kernel's Yama ptrace scope is in effect, which can prevent\n\
-GDB from using 'ptrace'.  You can disable it by executing (as root):\n\
-\n\
-  echo 0 > /proc/sys/kernel/yama/ptrace_scope\n"));
-    }
-
-  if (ret.empty ())
-    {
-      /* It wasn't possible to determine the exact reason for the
-	 ptrace error.  Let's just emit a generic error message
-	 pointing the user to our documentation, where she can find
-	 instructions on how to try to diagnose the problem.  */
-      ret = _("\n\
-There might be restrictions preventing ptrace from working.  Please see\n\
-the appendix \"Linux kernel ptrace restrictions\" in the GDB documentation\n\
-for more details.");
-    }
-
-  /* The user may be debugging remotely, so we have to warn that
-     the instructions above should be performed in the target.  */
-  string_appendf (ret,
-		  _("\n\
-If you are debugging the inferior remotely, the ptrace restriction(s) must\n\
-be disabled in the target system (e.g., where GDBserver is running)."));
-
-  return ret;
-}
-
-/* Find all possible reasons we could fail to attach PID and return
-   these as a string.  An empty string is returned if we didn't find
-   any reason.  Helper for linux_ptrace_attach_fail_reason and
-   linux_ptrace_attach_fail_reason_lwp.  */
-
-static std::string
-linux_ptrace_attach_fail_reason_1 (pid_t pid)
+std::string
+linux_ptrace_attach_fail_reason (pid_t pid)
 {
   pid_t tracerpid = linux_proc_get_tracerpid_nowarn (pid);
   std::string result;
@@ -142,38 +56,16 @@ linux_ptrace_attach_fail_reason_1 (pid_t pid)
 /* See linux-ptrace.h.  */
 
 std::string
-linux_ptrace_attach_fail_reason (pid_t pid, int err)
-{
-  std::string result = linux_ptrace_attach_fail_reason_1 (pid);
-  std::string ptrace_restrict = linux_ptrace_restricted_fail_reason (err);
-
-  if (!ptrace_restrict.empty ())
-    result += "\n" + ptrace_restrict;
-
-  return result;
-}
-
-/* See linux-ptrace.h.  */
-
-std::string
-linux_ptrace_attach_fail_reason_lwp (ptid_t ptid, int err)
+linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err)
 {
   long lwpid = ptid.lwp ();
-  std::string reason = linux_ptrace_attach_fail_reason_1 (lwpid);
+  std::string reason = linux_ptrace_attach_fail_reason (lwpid);
 
   if (!reason.empty ())
     return string_printf ("%s (%d), %s", safe_strerror (err), err,
 			  reason.c_str ());
   else
     return string_printf ("%s (%d)", safe_strerror (err), err);
-}
-
-/* See linux-ptrace.h.  */
-
-std::string
-linux_ptrace_me_fail_reason (int err)
-{
-  return linux_ptrace_restricted_fail_reason (err);
 }
 
 #if defined __i386__ || defined __x86_64__
@@ -365,12 +257,6 @@ linux_ptrace_test_ret_to_nx (void)
 #endif /* defined __i386__ || defined __x86_64__ */
 }
 
-/* If the PTRACE_TRACEME call on linux_child_function errors, we need
-   to be able to send ERRNO back to the parent so that it can check
-   whether there are restrictions in place preventing ptrace from
-   working.  We do that with a pipe.  */
-static int errno_pipe[2];
-
 /* Helper function to fork a process and make the child process call
    the function FUNCTION, passing CHILD_STACK as parameter.
 
@@ -386,11 +272,6 @@ linux_fork_to_function (gdb_byte *child_stack, int (*function) (void *))
 
   /* Sanity check the function pointer.  */
   gdb_assert (function != NULL);
-
-  /* Create the pipe that will be used by the child to pass ERRNO
-     after the PTRACE_TRACEME call.  */
-  if (pipe (errno_pipe) != 0)
-    trace_start_error_with_name ("pipe");
 
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
 #define STACK_SIZE 4096
@@ -440,21 +321,7 @@ linux_grandchild_function (void *child_stack)
 static int
 linux_child_function (void *child_stack)
 {
-  /* Close read end.  */
-  close (errno_pipe[0]);
-
-  int ret = ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0,
-		    (PTRACE_TYPE_ARG4) 0);
-  int ptrace_errno = errno;
-
-  /* Write ERRNO to the pipe, even if it's zero, and close the writing
-     end of the pipe.  */
-  write (errno_pipe[1], &ptrace_errno, sizeof (ptrace_errno));
-  close (errno_pipe[1]);
-
-  if (ret != 0)
-    _exit (0);
-
+  ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
   kill (getpid (), SIGSTOP);
 
   /* Fork a grandchild.  */
@@ -468,48 +335,6 @@ linux_child_function (void *child_stack)
 static void linux_test_for_tracesysgood (int child_pid);
 static void linux_test_for_tracefork (int child_pid);
 static void linux_test_for_exitkill (int child_pid);
-
-/* Helper function to wait for the child to send us the ptrace ERRNO,
-   and check if it's OK.  */
-
-static void
-linux_check_child_ptrace_errno ()
-{
-  int child_errno;
-  fd_set rset;
-  struct timeval timeout;
-
-  /* Close the writing end of the pipe.  */
-  close (errno_pipe[1]);
-
-  FD_ZERO (&rset);
-  FD_SET (errno_pipe[0], &rset);
-
-  /* One second should be plenty of time to wait for the child's
-     reply.  */
-  timeout.tv_sec = 1;
-  timeout.tv_usec = 0;
-
-  int ret = select (errno_pipe[0] + 1, &rset, NULL, NULL, &timeout);
-
-  if (ret < 0)
-    trace_start_error_with_name ("select");
-  else if (ret == 0)
-    error (_("Timeout while waiting for child's ptrace errno"));
-  else
-    read (errno_pipe[0], &child_errno, sizeof (child_errno));
-
-  if (child_errno != 0)
-    {
-      /* The child can't use PTRACE_TRACEME.  We just bail out.  */
-      std::string reason = linux_ptrace_restricted_fail_reason (child_errno);
-
-      errno = child_errno;
-      trace_start_error_with_name ("ptrace", reason.c_str ());
-    }
-
-  close (errno_pipe[0]);
-}
 
 /* Determine ptrace features available on this target.  */
 
@@ -526,9 +351,6 @@ linux_check_ptrace_features (void)
      eventually fork a grandchild so we can test fork event
      reporting.  */
   child_pid = linux_fork_to_function (NULL, linux_child_function);
-
-  /* Check if the child can successfully use ptrace.  */
-  linux_check_child_ptrace_errno ();
 
   ret = my_waitpid (child_pid, &status, 0);
   if (ret == -1)

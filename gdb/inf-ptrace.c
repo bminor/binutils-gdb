@@ -94,20 +94,6 @@ inf_ptrace_target::remove_fork_catchpoint (int pid)
 #endif /* PT_GET_PROCESS_STATE */
 
 
-/* Default method for "inf_ptrace_me_fail_reason", which returns an
-   empty string.  */
-
-static std::string
-default_inf_ptrace_me_fail_reason (int err)
-{
-  return {};
-}
-
-/* See inf-ptrace.h.  */
-
-std::string (*inf_ptrace_me_fail_reason) (int err)
-  = default_inf_ptrace_me_fail_reason;
-
 /* Prepare to be traced.  */
 
 static void
@@ -115,8 +101,7 @@ inf_ptrace_me (void)
 {
   /* "Trace me, Dr. Memory!"  */
   if (ptrace (PT_TRACE_ME, 0, (PTRACE_TYPE_ARG3) 0, 0) < 0)
-    trace_start_error_with_name ("ptrace",
-				 inf_ptrace_me_fail_reason (errno).c_str ());
+    trace_start_error_with_name ("ptrace");
 }
 
 /* Start a new inferior Unix child process.  EXEC_FILE is the file to

@@ -1,17 +1,3 @@
-2019-09-26  Sergio Durigan Junior  <sergiodj@redhat.com>
-	    Pedro Alves  <palves@redhat.com>
-
-	* linux-low.c (linux_ptrace_fun): Call
-	'linux_ptrace_me_fail_reason'.
-	(attach_proc_task_lwp_callback): Call
-	'linux_ptrace_attach_fail_reason_lwp'.
-	(linux_attach): Call 'linux_ptrace_attach_fail_reason'.
-	* server.c (handle_v_attach): Use try..catch when calling
-	'attach_inferior', and send an error message to the client
-	when needed.
-	* thread-db.c (attach_thread): Call
-	'linux_ptrace_attach_fail_reason_lwp'.
-
 2019-09-20  Christian Biesinger  <cbiesinger@google.com>
 
 	* debug.c (debug_threads): Remove comment in favor of the header.

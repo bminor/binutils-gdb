@@ -83,14 +83,4 @@ protected:
 
 extern pid_t get_ptrace_pid (ptid_t);
 
-/* Pointer to "inf_ptrace_me_fail_reason", which implements a function
-   that can be called by "inf_ptrace_me" in order to obtain the reason
-   for a ptrace failure.  ERR is the ERRNO value set by the failing
-   ptrace call.
-
-   This pointer can be overriden by targets that want to personalize
-   the error message printed when ptrace fails (see linux-nat.c, for
-   example).  */
-extern std::string (*inf_ptrace_me_fail_reason) (int err);
-
 #endif
