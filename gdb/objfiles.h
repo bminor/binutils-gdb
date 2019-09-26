@@ -29,6 +29,8 @@
 #include "gdb_bfd.h"
 #include "psymtab.h"
 #include <bitset>
+#include <map>
+#include <unordered_map>
 #include <vector>
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
@@ -230,10 +232,14 @@ private:
    instance of this structure, and associated with the BFD using the
    registry system.  */
 
+// Maps hash -> symbol
+typedef std::unordered_multimap<unsigned int, struct minimal_symbol *> minsym_hash_table;
 struct objfile_per_bfd_storage
 {
   objfile_per_bfd_storage ()
     : minsyms_read (false)
+    , msymbol_hash(MINIMAL_SYMBOL_HASH_SIZE)
+    , msymbol_demangled_hash(MINIMAL_SYMBOL_HASH_SIZE)
   {}
 
   ~objfile_per_bfd_storage ();
@@ -307,12 +313,12 @@ struct objfile_per_bfd_storage
 
   /* This is a hash table used to index the minimal symbols by name.  */
 
-  minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
+  minsym_hash_table msymbol_hash;
 
   /* This hash table is used to index the minimal symbols by their
      demangled names.  */
 
-  minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
+  minsym_hash_table msymbol_demangled_hash;
 
   /* All the different languages of symbols found in the demangled
      hash table.  */

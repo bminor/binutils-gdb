@@ -669,16 +669,6 @@ struct minimal_symbol : public general_symbol_info
      the object file format may not carry that piece of information.  */
   unsigned int has_size : 1;
 
-  /* Minimal symbols with the same hash key are kept on a linked
-     list.  This is the link.  */
-
-  struct minimal_symbol *hash_next;
-
-  /* Minimal symbols are stored in two different hash tables.  This is
-     the `next' pointer for the demangled hash table.  */
-
-  struct minimal_symbol *demangled_hash_next;
-
   /* True if this symbol is of some data type.  */
 
   bool data_p () const;
