@@ -1542,8 +1542,8 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       (err = flip_ctf (hp, fp->ctf_buf)) != 0)
     {
       /* We can be certain that flip_ctf() will have endian-flipped everything
-         other than the types table when we return.  In particular the header
-         is fine, so set it, to allow freeing to use the usual code path.  */
+	 other than the types table when we return.  In particular the header
+	 is fine, so set it, to allow freeing to use the usual code path.  */
 
       ctf_set_base (fp, hp, fp->ctf_base);
       goto bad;

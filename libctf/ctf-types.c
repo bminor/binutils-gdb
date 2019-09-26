@@ -441,7 +441,7 @@ ctf_type_lname (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
   size_t slen;
 
   if (str == NULL)
-    return CTF_ERR;             /* errno is set for us */
+    return CTF_ERR;			/* errno is set for us.  */
 
   slen = strlen (str);
   snprintf (buf, len, "%s", str);
