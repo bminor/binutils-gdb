@@ -1,3 +1,10 @@
+2019-09-30  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (main): Fix tabdamage.
+	* readelf.c (CTF_DUMP): Likewise.
+	(options): Likewise.
+	(dump_section_as_ctf): Likewise.
+
 2019-08-03  Nick Alcock  <nick.alcock@oracle.com>
 
 	* objdump.c (dump_ctf): Use the default CTF archive member as the

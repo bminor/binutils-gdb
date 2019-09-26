@@ -4548,11 +4548,11 @@ main (int argc, char **argv)
 	case OPTION_DWARF_CHECK:
 	  dwarf_check = TRUE;
 	  break;
-        case OPTION_CTF:
-          dump_ctf_section_info = TRUE;
-          dump_ctf_section_name = xstrdup (optarg);
-          seenflag = TRUE;
-          break;
+	case OPTION_CTF:
+	  dump_ctf_section_info = TRUE;
+	  dump_ctf_section_name = xstrdup (optarg);
+	  seenflag = TRUE;
+	  break;
 	case OPTION_CTF_PARENT:
 	  dump_ctf_parent_name = xstrdup (optarg);
 	  break;

@@ -184,7 +184,7 @@ typedef struct elf_section_list
 #define DEBUG_DUMP	(1 << 2)	/* The -w command line switch.  */
 #define STRING_DUMP     (1 << 3)	/* The -p command line switch.  */
 #define RELOC_DUMP      (1 << 4)	/* The -R command line switch.  */
-#define CTF_DUMP        (1 << 5)        /* The --ctf command line switch.  */
+#define CTF_DUMP	(1 << 5)	/* The --ctf command line switch.  */
 
 typedef unsigned char dump_type;
 
@@ -4465,7 +4465,7 @@ static struct option options[] =
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
 
-  {"ctf",              required_argument, 0, OPTION_CTF_DUMP},
+  {"ctf",	       required_argument, 0, OPTION_CTF_DUMP},
 
   {"ctf-symbols",      required_argument, 0, OPTION_CTF_SYMBOLS},
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
@@ -13922,15 +13922,15 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   Elf_Internal_Shdr *  parent_sec = NULL;
   Elf_Internal_Shdr *  symtab_sec = NULL;
   Elf_Internal_Shdr *  strtab_sec = NULL;
-  void *      	       data = NULL;
-  void *      	       symdata = NULL;
-  void *      	       strdata = NULL;
-  void *      	       parentdata = NULL;
-  ctf_sect_t           ctfsect, symsect, strsect, parentsect;
-  ctf_sect_t *         symsectp = NULL;
-  ctf_sect_t *         strsectp = NULL;
-  ctf_file_t *         ctf = NULL;
-  ctf_file_t *         parent = NULL;
+  void *	       data = NULL;
+  void *	       symdata = NULL;
+  void *	       strdata = NULL;
+  void *	       parentdata = NULL;
+  ctf_sect_t	       ctfsect, symsect, strsect, parentsect;
+  ctf_sect_t *	       symsectp = NULL;
+  ctf_sect_t *	       strsectp = NULL;
+  ctf_file_t *	       ctf = NULL;
+  ctf_file_t *	       parent = NULL;
 
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
