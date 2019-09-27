@@ -1,3 +1,8 @@
+2019-09-27  Tom de Vries  <tdevries@suse.de>
+
+	PR record/23188
+	* gdb.reverse/step-precsave.exp: Add kfail for PR record/23188.
+
 2019-09-26  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/py_taft.exp: New file.

@@ -46,7 +46,15 @@ gdb_test "break $end_of_main" \
 
 # This can take awhile.
 with_timeout_factor 20 {
-    gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
+    set test "run to end of main"
+    gdb_test_multiple "continue" $test {
+	-re "Breakpoint .* end of main .*" {
+	    pass $test
+	}
+	-re "Process record does not support instruction 0xc5 at.*$gdb_prompt $" {
+	    kfail "record/23188" $test
+	}
+    }
 }
 
 # So can this, against gdbserver, for example.
