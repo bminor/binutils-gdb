@@ -2217,6 +2217,29 @@ else
   fi
 fi
 
+# Check for xxhash
+AC_ARG_WITH(xxhash,
+  AC_HELP_STRING([--with-xxhash], [use libxxhash for hashing (faster) (auto/yes/no)]),
+  [], [with_xxhash=auto])
+
+if test "x$with_xxhash" != "xno"; then
+  AC_LIB_HAVE_LINKFLAGS([xxhash], [],
+			[#include <xxhash.h>],
+			[XXH32("foo", 3, 0);
+			])
+  if test "$HAVE_LIBXXHASH" != yes; then
+    if test "$with_xxhash" = yes; then
+      AC_MSG_ERROR([xxhash is missing or unusable])
+    fi
+  fi
+  if test "x$with_xxhash" = "xauto"; then
+    with_xxhash="$HAVE_LIBXXHASH"
+  fi
+fi
+
+AC_MSG_CHECKING([whether to use xxhash])
+AC_MSG_RESULT([$with_xxhash])
+
 NM_H=
 rm -f nm.h
 if test "${nativefile}" != ""; then

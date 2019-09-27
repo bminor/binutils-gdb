@@ -574,7 +574,11 @@ extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 static inline unsigned int
 fast_hash (const char* str, size_t len)
 {
+#ifdef HAVE_LIBXXHASH
+  return XXH64 (str, len, 0);
+#else
   return iterative_hash (str, len, 0);
+#endif
 }
 
 #endif /* UTILS_H */

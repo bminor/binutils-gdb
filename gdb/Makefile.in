@@ -187,9 +187,13 @@ LIBEXPAT = @LIBEXPAT@
 # Where is lzma?  This will be empty if lzma was not available.
 LIBLZMA = @LIBLZMA@
 
-# Where is libbabeltrace? This will be empty if lbabeltrace was not
+# Where is libbabeltrace? This will be empty if libbabeltrace was not
 # available.
 LIBBABELTRACE = @LIBBABELTRACE@
+
+# Where is libxxhash? This will be empty if libxxhash was not
+# available.
+LIBXXHASH = @LIBXXHASH@
 
 # Where is libipt?  This will be empty if libipt was not available.
 LIBIPT = @LIBIPT@
@@ -597,7 +601,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(LIBCTF) $(ZLIB) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) $(LIBMPFR) \
-	$(SRCHIGH_LIBS)
+	$(SRCHIGH_LIBS) $(LIBXXHASH)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(LIBCTF) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
 

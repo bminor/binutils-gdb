@@ -1,5 +1,13 @@
 2019-10-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* Makefile.in: Link with libxxhash.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Search for libxxhash.
+	* utils.c (fast_hash): Use xxhash if present.
+
+2019-10-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* utils.h (fast_hash): New function.
 	* symtab.c (hash_demangled_name_entry): Call new function
 	fast_hash.

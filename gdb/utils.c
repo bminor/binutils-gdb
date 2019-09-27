@@ -36,6 +36,10 @@
 #include <pc.h>
 #endif
 
+#ifdef HAVE_LIBXXHASH
+#include <xxhash.h>
+#endif
+
 #include <signal.h>
 #include "gdbcmd.h"
 #include "serial.h"
