@@ -1,5 +1,9 @@
 2019-09-27  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/step-precsave.exp: Add missing $gdb_prompt in regexps.
+
+2019-09-27  Tom de Vries  <tdevries@suse.de>
+
 	PR record/23188
 	* gdb.reverse/step-precsave.exp: Add kfail for PR record/23188.
 
