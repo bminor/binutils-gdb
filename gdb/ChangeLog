@@ -1,5 +1,11 @@
 2019-10-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* utils.h (fast_hash): New function.
+	* symtab.c (hash_demangled_name_entry): Call new function
+	fast_hash.
+
+2019-10-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* symtab.c (struct demangled_name_entry): Change type of mangled
 	to gdb::string_view. Also adds a constructor that takes the
 	mangled name.

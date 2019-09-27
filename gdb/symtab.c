@@ -70,6 +70,7 @@
 #include <algorithm>
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/pathstuff.h"
+#include "gdbsupport/common-utils.h"
 
 /* Forward declarations for local functions.  */
 
@@ -727,7 +728,7 @@ hash_demangled_name_entry (const void *data)
   const struct demangled_name_entry *e
     = (const struct demangled_name_entry *) data;
 
-  return iterative_hash (e->mangled.data (), e->mangled.length (), 0);
+  return fast_hash (e->mangled.data (), e->mangled.length ());
 }
 
 /* Equality function for the demangled name hash.  */

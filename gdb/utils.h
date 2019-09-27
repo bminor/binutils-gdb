@@ -567,4 +567,14 @@ extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 			  const gdb_byte *source, ULONGEST source_offset,
 			  ULONGEST nbits, int bits_big_endian);
 
+/* A fast hashing function.  This can be used to hash strings in a fast way
+   when the length is known.  If no fast hashing library is available, falls
+   back to iterative_hash from libiberty.  */
+
+static inline unsigned int
+fast_hash (const char* str, size_t len)
+{
+  return iterative_hash (str, len, 0);
+}
+
 #endif /* UTILS_H */
