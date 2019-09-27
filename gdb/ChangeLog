@@ -1,3 +1,16 @@
+2019-10-22  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (struct demangled_name_entry): Change type of mangled
+	to gdb::string_view. Also adds a constructor that takes the
+	mangled name.
+	(hash_demangled_name_entry): Update.
+	(eq_demangled_name_entry): Update.
+	(free_demangled_name_entry): New function to call the destructor
+	now that this is not a POD anymore.
+	(create_demangled_names_hash): Pass free_demangled_name_entry to
+	htab_create_alloc.
+	(symbol_set_names): Update.
+
 2019-10-21  Ali Tamur  <tamu@google.com>
 
 	* dwarf2read.c (dir_index): Change type.
