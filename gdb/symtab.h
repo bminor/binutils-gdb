@@ -483,6 +483,16 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
                                  enum language language,
 				 struct obstack *obstack);
 
+
+/* Try to determine the demangled name for a symbol, based on the
+   language of that symbol.  If the language is set to language_auto,
+   it will attempt to find any demangling algorithm that works and
+   then set the language appropriately.  The returned name is allocated
+   by the demangler and should be xfree'd.  */
+
+extern char *symbol_find_demangled_name (struct general_symbol_info *gsymbol,
+					 const char *mangled);
+
 /* Set just the linkage name of a symbol; do not try to demangle
    it.  Used for constructs which do not have a mangled name,
    e.g. struct tags.  Unlike SYMBOL_SET_NAMES, linkage_name must

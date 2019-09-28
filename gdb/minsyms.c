@@ -56,6 +56,20 @@
 #include "gdbsupport/alt-stack.h"
 #include "gdbsupport/parallel-for.h"
 
+#if CXX_STD_THREAD
+#include <mutex>
+#endif
+
+#if CXX_STD_THREAD
+/* Mutex that is used when modifying or accessing the demangled hash
+   table.  This is a global mutex simply because the only current
+   multi-threaded user of the hash table does not process multiple
+   objfiles in parallel.  The mutex could easily live on the per-BFD
+   object, but this approach avoids using extra memory when it is not
+   needed.  */
+static std::mutex demangled_mutex;
+#endif
+
 /* See minsyms.h.  */
 
 bool
@@ -1346,12 +1360,27 @@ minimal_symbol_reader::install ()
 	     {
 	       if (!msym->name_set)
 		 {
-		   symbol_set_names (msym, msym->name,
-				     strlen (msym->name), 0,
-				     m_objfile->per_bfd);
+		   /* This will be freed later, by symbol_set_names.  */
+		   char* demangled_name = symbol_find_demangled_name (msym,
+								      msym->name);
+		   symbol_set_demangled_name (msym, demangled_name,
+					      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
 		 }
 	     }
+	   {
+	     /* To limit how long we hold the lock, we only acquire it here
+	        and not while we demangle the names above.  */
+#if CXX_STD_THREAD
+	     std::lock_guard<std::mutex> guard (demangled_mutex);
+#endif
+	     for (minimal_symbol *msym = start; msym < end; ++msym)
+	       {
+		 symbol_set_names (msym, msym->name,
+				   strlen (msym->name), 0,
+				   m_objfile->per_bfd);
+	       }
+	   }
 	 });
 
       build_minimal_symbol_hash_tables (m_objfile);
