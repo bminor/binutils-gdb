@@ -1,3 +1,8 @@
+2019-09-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/25045
+	* hppa-linux-nat.c: Include gdbarch.h.
+
 2019-09-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* blockframe.c (find_pc_partial_function): Change return type to bool.

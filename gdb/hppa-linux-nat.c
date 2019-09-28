@@ -24,6 +24,7 @@
 #include "target.h"
 #include "linux-nat.h"
 #include "inf-ptrace.h"
+#include "gdbarch.h"
 
 #include <sys/procfs.h>
 #include "nat/gdb_ptrace.h"
