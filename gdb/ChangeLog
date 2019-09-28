@@ -1,4 +1,8 @@
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* NEWS:  Mention define-prefix.  Tell that command names can now
+	contain a . character.
+
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* command.h (valid_cmd_char_p): Declare.
 	* cli/cli-decode.c (valid_cmd_char_p): New function factorizing

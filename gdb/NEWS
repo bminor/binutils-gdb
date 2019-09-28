@@ -33,6 +33,12 @@
   provide the exitcode or exit status of the shell commands launched by
   GDB commands such as "shell", "pipe" and "make".
 
+* The command define-prefix can now define user defined prefix commands.
+  User defined commands can now be defined using these user defined prefix
+  commands.
+
+* Command names can now use the . character.
+
 * The RX port now supports XML target descriptions.
 
 * GDB now shows the Ada task names at more places, e.g. in task switching
@@ -100,6 +106,9 @@ pipe -d DELIM COMMAND DELIM SHELL_COMMAND
   With no COMMAND, repeat the last executed command
   and send its output to SHELL_COMMAND.
 
+define-prefix COMMAND
+  Define or mark a command as a user-defined prefix command.
+  
 with SETTING [VALUE] [-- COMMAND]
 w SETTING [VALUE] [-- COMMAND]
   Temporarily set SETTING, run COMMAND, and restore SETTING.

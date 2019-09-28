@@ -26525,8 +26525,9 @@ end
 Define a command named @var{commandname}.  If there is already a command
 by that name, you are asked to confirm that you want to redefine it.
 The argument @var{commandname} may be a bare command name consisting of letters,
-numbers, dashes, and underscores.  It may also start with any predefined
-prefix command.  For example, @samp{define target my-target} creates
+numbers, dashes, dots, and underscores.  It may also start with any
+predefined or user-defined prefix command.
+For example, @samp{define target my-target} creates
 a user-defined @samp{target my-target} command.
 
 The definition of the command is made up of other @value{GDBN} command lines,
@@ -26546,6 +26547,46 @@ After the @code{document} command is finished, @code{help} on command
 You may use the @code{document} command again to change the
 documentation of a command.  Redefining the command with @code{define}
 does not change the documentation.
+
+@kindex define-prefix
+@item define-prefix @var{commandname}
+Define or mark the command @var{commandname} as a user-defined prefix
+command.  Once marked, @var{commandname} can be used as prefix command
+by the  @code{define} command.
+Note that @code{define-prefix} can be used with a not yet defined
+@var{commandname}.  In such a case, @var{commandname} is defined as
+an empty user-defined command.
+In case you redefine a command that was marked as a user-defined
+prefix command, the subcommands of the redefined command are kept
+(and @value{GDBN} indicates so to the user).
+
+Example:
+@example
+(gdb) define-prefix abc
+(gdb) define-prefix abc def
+(gdb) define abc def
+Type commands for definition of "abc def".
+End with a line saying just "end".
+>echo command initial def\n
+>end
+(gdb) define abc def ghi
+Type commands for definition of "abc def ghi".
+End with a line saying just "end".
+>echo command ghi\n
+>end
+(gdb) define abc def
+Keeping subcommands of prefix command "def".
+Redefine command "def"? (y or n) y
+Type commands for definition of "abc def".
+End with a line saying just "end".
+>echo command def\n
+>end
+(gdb) abc def ghi
+command ghi
+(gdb) abc def
+command def
+(gdb)
+@end example
 
 @kindex dont-repeat
 @cindex don't repeat command

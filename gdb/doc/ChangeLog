@@ -1,3 +1,8 @@
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Define): Indicate that user-defined prefix can
+	be used in 'define' command.  Document 'define-prefix' command.
+
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
