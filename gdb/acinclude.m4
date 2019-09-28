@@ -4,64 +4,64 @@ dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 # Keep these includes in sync with the aclocal_m4_deps list in
 # Makefile.in.
 
-sinclude(acx_configure_dir.m4)
+m4_include(acx_configure_dir.m4)
 
 # This gets GDB_AC_TRANSFORM.
-sinclude(transform.m4)
+m4_include(transform.m4)
 
 # This gets AM_GDB_WARNINGS.
-sinclude(warning.m4)
+m4_include(warning.m4)
 
 # AM_GDB_UBSAN
-sinclude(sanitize.m4)
+m4_include(sanitize.m4)
 
 # This gets GDB_AC_SELFTEST.
-sinclude(selftest.m4)
+m4_include(selftest.m4)
 
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
-sinclude(../bfd/bfd.m4)
+m4_include(../bfd/bfd.m4)
 
 dnl This gets the standard macros.
-sinclude(../config/acinclude.m4)
+m4_include(../config/acinclude.m4)
 
 dnl This gets AC_PLUGINS, needed by ACX_LARGEFILE.
-sinclude(../config/plugins.m4)
+m4_include(../config/plugins.m4)
 
 dnl For ACX_LARGEFILE.
-sinclude(../config/largefile.m4)
+m4_include(../config/largefile.m4)
 
 dnl For AM_SET_LEADING_DOT.
-sinclude(../config/lead-dot.m4)
+m4_include(../config/lead-dot.m4)
 
 dnl This gets autoconf bugfixes.
-sinclude(../config/override.m4)
+m4_include(../config/override.m4)
 
 dnl For ZW_GNU_GETTEXT_SISTER_DIR.
-sinclude(../config/gettext-sister.m4)
+m4_include(../config/gettext-sister.m4)
 
 dnl For AC_LIB_HAVE_LINKFLAGS.
-sinclude(../config/lib-ld.m4)
-sinclude(../config/lib-prefix.m4)
-sinclude(../config/lib-link.m4)
+m4_include(../config/lib-ld.m4)
+m4_include(../config/lib-prefix.m4)
+m4_include(../config/lib-link.m4)
 
 dnl For ACX_PKGVERSION and ACX_BUGURL.
-sinclude(../config/acx.m4)
+m4_include(../config/acx.m4)
 
 dnl for TCL definitions
-sinclude(../config/tcl.m4)
+m4_include(../config/tcl.m4)
 
 dnl For dependency tracking macros.
-sinclude([../config/depstand.m4])
+m4_include([../config/depstand.m4])
 
 dnl For AM_LC_MESSAGES
-sinclude([../config/lcmessage.m4])
+m4_include([../config/lcmessage.m4])
 
 dnl For AM_LANGINFO_CODESET.
-sinclude([../config/codeset.m4])
+m4_include([../config/codeset.m4])
 
-sinclude([../config/iconv.m4])
+m4_include([../config/iconv.m4])
 
-sinclude([../config/zlib.m4])
+m4_include([../config/zlib.m4])
 
 m4_include([gdbsupport/common.m4])
 

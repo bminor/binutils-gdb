@@ -1,16 +1,16 @@
 dnl gdb/gdbserver/configure.in uses BFD_HAVE_SYS_PROCFS_TYPE.
-sinclude(../../bfd/bfd.m4)
+m4_include(../../bfd/bfd.m4)
 
-sinclude(../acx_configure_dir.m4)
+m4_include(../acx_configure_dir.m4)
 
 # This gets AM_GDB_WARNINGS.
-sinclude(../warning.m4)
+m4_include(../warning.m4)
 
 dnl This gets autoconf bugfixes
-sinclude(../../config/override.m4)
+m4_include(../../config/override.m4)
 
 dnl For ACX_PKGVERSION and ACX_BUGURL.
-sinclude(../../config/acx.m4)
+m4_include(../../config/acx.m4)
 
 m4_include(../../config/depstand.m4)
 m4_include(../../config/lead-dot.m4)

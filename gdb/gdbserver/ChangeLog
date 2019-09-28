@@ -1,3 +1,8 @@
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* acinclude.m4: Use m4_include, not sinclude.
+
 2019-09-20  Christian Biesinger  <cbiesinger@google.com>
 
 	* debug.c (debug_threads): Remove comment in favor of the header.
