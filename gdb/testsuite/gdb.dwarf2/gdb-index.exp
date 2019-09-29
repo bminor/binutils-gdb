@@ -34,8 +34,10 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" \
 
 proc add_gdb_index { program } {
     set index_file ${program}.gdb-index
-    set dwz ${program}.dwz
-    set dwz_index_file ${dwz}.gdb-index
+    set dir [file dirname ${program}]
+    set filename [file tail ${program}]
+    set dwz $dir/.tmp/${filename}.dwz
+    set dwz_index_file $program.dwz.gdb-index
     verbose -log "index_file: ${index_file}"
     remote_file host delete ${index_file}
     remote_file host delete ${dwz_index_file}

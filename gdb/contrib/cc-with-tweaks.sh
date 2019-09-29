@@ -163,6 +163,12 @@ then
     exit 1
 fi
 
+get_tmpdir ()
+{
+    tmpdir=$(dirname "$output_file")/.tmp
+    mkdir -p "$tmpdir"
+}
+
 if [ "$want_objcopy_compress" = true ]; then
     $OBJCOPY --compress-debug-sections "$output_file"
     rc=$?
@@ -202,17 +208,19 @@ if [ "$want_dwz" = true ]; then
 	;;
     esac
 elif [ "$want_multi" = true ]; then
+    get_tmpdir
+    dwz_file=$tmpdir/$(basename "$output_file").dwz
     # Remove the dwz output file if it exists, so we don't mistake it for a
     # new file in case dwz fails.
-    rm -f "${output_file}.dwz"
+    rm -f "$dwz_file"
 
     cp $output_file ${output_file}.alt
-    $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null
+    $DWZ -m "$dwz_file" "$output_file" ${output_file}.alt > /dev/null
     rm -f ${output_file}.alt
 
     # Validate dwz's work by checking if the expected output file exists.
-    if [ ! -f "${output_file}.dwz" ]; then
-	echo "$myname: dwz file ${output_file}.dwz missing."
+    if [ ! -f "$dwz_file" ]; then
+	echo "$myname: dwz file $dwz_file missing."
 	exit 1
     fi
 fi

@@ -1,3 +1,9 @@
+2019-09-29  Tom de Vries  <tdevries@suse.de>
+
+	* contrib/cc-with-tweaks.sh (get_tmpdir): New function.
+	Use $tmpdir/$(basename "$output_file").dwz instead of
+	"${output_file}.dwz".
+
 2019-09-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/25045

@@ -1,5 +1,9 @@
 2019-09-29  Tom de Vries  <tdevries@suse.de>
 
+        * gdb.dwarf2/gdb-index.exp: Handle new location of .dwz file.
+
+2019-09-29  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/gdb-index.exp: Use with_test_prefix for second objcopy.
 
 2019-09-27  Tom de Vries  <tdevries@suse.de>
