@@ -195,6 +195,9 @@
 /* Have PTHREAD_PRIO_INHERIT. */
 #undef HAVE_PTHREAD_PRIO_INHERIT
 
+/* Define to 1 if you have the `pthread_sigmask' function. */
+#undef HAVE_PTHREAD_SIGMASK
+
 /* Define if the target supports PTRACE_GETFPXREGS for extended register
    access. */
 #undef HAVE_PTRACE_GETFPXREGS

@@ -1,5 +1,12 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* remote-utils.c (block_unblock_async_io): Use gdb_sigmask.
+	* linux-low.c (linux_wait_for_event_filtered, linux_async): Use
+	gdb_sigmask.
+	* configure, config.in: Rebuild.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
 	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
 	(GDBSERVER_LIBS): Use PTHREAD_LIBS.

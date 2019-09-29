@@ -67,6 +67,7 @@
 #include "nat/linux-namespaces.h"
 #include "gdbsupport/fileio.h"
 #include "gdbsupport/scope-exit.h"
+#include "gdbsupport/gdb-sigmask.h"
 
 /* This comment documents high-level logic of this file.
 
@@ -764,7 +765,7 @@ block_child_signals (sigset_t *prev_mask)
   if (!sigismember (&blocked_mask, SIGCHLD))
     sigaddset (&blocked_mask, SIGCHLD);
 
-  sigprocmask (SIG_BLOCK, &blocked_mask, prev_mask);
+  gdb_sigmask (SIG_BLOCK, &blocked_mask, prev_mask);
 }
 
 /* Restore child signals mask, previously returned by
@@ -773,7 +774,7 @@ block_child_signals (sigset_t *prev_mask)
 static void
 restore_child_signals_mask (sigset_t *prev_mask)
 {
-  sigprocmask (SIG_SETMASK, prev_mask, NULL);
+  gdb_sigmask (SIG_SETMASK, prev_mask, NULL);
 }
 
 /* Mask of signals to pass directly to the inferior.  */
@@ -4564,7 +4565,7 @@ Enables printf debugging output."),
   sigaction (SIGCHLD, &sigchld_action, NULL);
 
   /* Make sure we don't block SIGCHLD during a sigsuspend.  */
-  sigprocmask (SIG_SETMASK, NULL, &suspend_mask);
+  gdb_sigmask (SIG_SETMASK, NULL, &suspend_mask);
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);

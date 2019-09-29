@@ -28,6 +28,7 @@
 #include "gdbsupport/rsp-low.h"
 #include "gdbsupport/netstuff.h"
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/gdb-sigmask.h"
 #include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -807,7 +808,7 @@ block_unblock_async_io (int block)
 
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
-  sigprocmask (block ? SIG_BLOCK : SIG_UNBLOCK, &sigio_set, NULL);
+  gdb_sigmask (block ? SIG_BLOCK : SIG_UNBLOCK, &sigio_set, NULL);
 #endif
 }
 

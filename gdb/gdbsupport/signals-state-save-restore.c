@@ -17,6 +17,7 @@
 
 #include "common-defs.h"
 #include "signals-state-save-restore.h"
+#include "gdbsupport/gdb-sigmask.h"
 
 #include <signal.h>
 
@@ -25,10 +26,6 @@
 #ifdef HAVE_SIGACTION
 static struct sigaction original_signal_actions[NSIG];
 
-/* Note that we use sigprocmask without worrying about threads because
-   the save/restore functions are called either from main, or after a
-   fork.  In both cases, we know the calling process is single
-   threaded.  */
 static sigset_t original_signal_mask;
 #endif
 
@@ -41,7 +38,7 @@ save_original_signals_state (bool quiet)
   int i;
   int res;
 
-  res = sigprocmask (0,  NULL, &original_signal_mask);
+  res = gdb_sigmask (0,  NULL, &original_signal_mask);
   if (res == -1)
     perror_with_name (("sigprocmask"));
 
@@ -110,7 +107,7 @@ restore_original_signals_state (void)
 	perror_with_name (("sigaction"));
     }
 
-  res = sigprocmask (SIG_SETMASK,  &original_signal_mask, NULL);
+  res = gdb_sigmask (SIG_SETMASK,  &original_signal_mask, NULL);
   if (res == -1)
     perror_with_name (("sigprocmask"));
 #endif

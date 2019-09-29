@@ -36,6 +36,7 @@
 #include "guile-internal.h"
 #endif
 #include <signal.h>
+#include "gdbsupport/block-signals.h"
 
 /* The Guile version we're using.
    We *could* use the macros in libguile/version.h but that would preclude
@@ -798,10 +799,6 @@ _initialize_guile (void)
 
 #if HAVE_GUILE
   {
-#ifdef HAVE_SIGPROCMASK
-    sigset_t sigchld_mask, prev_mask;
-#endif
-
     /* The Python support puts the C side in module "_gdb", leaving the Python
        side to define module "gdb" which imports "_gdb".  There is evidently no
        similar convention in Guile so we skip this.  */
@@ -813,25 +810,20 @@ _initialize_guile (void)
     scm_set_automatic_finalization_enabled (0);
 #endif
 
-#ifdef HAVE_SIGPROCMASK
-    /* Before we initialize Guile, block SIGCHLD.
+    /* Before we initialize Guile, block signals needed by gdb
+       (especially SIGCHLD).
        This is done so that all threads created during Guile initialization
        have SIGCHLD blocked.  PR 17247.
        Really libgc and Guile should do this, but we need to work with
        libgc 7.4.x.  */
-    sigemptyset (&sigchld_mask);
-    sigaddset (&sigchld_mask, SIGCHLD);
-    sigprocmask (SIG_BLOCK, &sigchld_mask, &prev_mask);
-#endif
+    {
+      gdb::block_signals blocker;
 
-    /* scm_with_guile is the most portable way to initialize Guile.
-       Plus we need to initialize the Guile support while in Guile mode
-       (e.g., called from within a call to scm_with_guile).  */
-    scm_with_guile (call_initialize_gdb_module, NULL);
-
-#ifdef HAVE_SIGPROCMASK
-    sigprocmask (SIG_SETMASK, &prev_mask, NULL);
-#endif
+      /* scm_with_guile is the most portable way to initialize Guile.
+	 Plus we need to initialize the Guile support while in Guile mode
+	 (e.g., called from within a call to scm_with_guile).  */
+      scm_with_guile (call_initialize_gdb_module, NULL);
+    }
 
     /* Set Guile's backtrace to match the "set guile print-stack" default.
        [N.B. The two settings are still separate.]
