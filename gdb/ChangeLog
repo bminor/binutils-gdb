@@ -1,5 +1,11 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* main.c (setup_alternate_signal_stack): Remove.
+	(captured_main_1): Use gdb::alternate_signal_stack.
+	* gdbsupport/alt-stack.h: New file.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/signals-state-save-restore.c (original_signal_mask):
 	Remove comment.
 	(save_original_signals_state, restore_original_signals_state): Use
