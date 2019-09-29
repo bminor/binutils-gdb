@@ -1,5 +1,12 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for
+	pthread_sigmask.
+	* configure: Rebuild.
+	* gdbsupport/block-signals.h: New file.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* acinclude.m4: Include ax_pthread.m4.
 	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
 	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
