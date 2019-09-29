@@ -52,6 +52,7 @@
 #ifdef GDBTK
 #include "gdbtk/generic/gdbtk.h"
 #endif
+#include "gdbsupport/alt-stack.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -332,29 +333,6 @@ get_init_files (std::vector<std::string> *system_gdbinit,
   *system_gdbinit = sysgdbinit;
   *home_gdbinit = homeinit;
   *local_gdbinit = localinit;
-}
-
-/* Try to set up an alternate signal stack for SIGSEGV handlers.
-   This allows us to handle SIGSEGV signals generated when the
-   normal process stack is exhausted.  If this stack is not set
-   up (sigaltstack is unavailable or fails) and a SIGSEGV is
-   generated when the normal stack is exhausted then the program
-   will behave as though no SIGSEGV handler was installed.  */
-
-static void
-setup_alternate_signal_stack (void)
-{
-#ifdef HAVE_SIGALTSTACK
-  stack_t ss;
-
-  /* FreeBSD versions older than 11.0 use char * for ss_sp instead of
-     void *.  This cast works with both types.  */
-  ss.ss_sp = (char *) xmalloc (SIGSTKSZ);
-  ss.ss_size = SIGSTKSZ;
-  ss.ss_flags = 0;
-
-  sigaltstack(&ss, NULL);
-#endif
 }
 
 /* Call command_loop.  */
@@ -898,7 +876,7 @@ captured_main_1 (struct captured_main_args *context)
   save_original_signals_state (quiet);
 
   /* Try to set up an alternate signal stack for SIGSEGV handlers.  */
-  setup_alternate_signal_stack ();
+  gdb::alternate_signal_stack signal_stack;
 
   /* Initialize all files.  */
   gdb_init (gdb_program_name);
