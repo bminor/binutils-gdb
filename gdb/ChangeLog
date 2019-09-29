@@ -1,5 +1,11 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* main.c (setup_alternate_signal_stack): Remove.
+	(captured_main_1): Use gdb::alternate_signal_stack.
+	* gdbsupport/alt-stack.h: New file.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for
 	pthread_sigmask.
 	* configure: Rebuild.
