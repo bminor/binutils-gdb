@@ -1,3 +1,11 @@
+2019-09-28  Christian Biesinger  <cbiesinger@google.com>
+
+	* minsyms.c (compare_minimal_symbols): Rename to...
+	(minimal_symbol_is_less_than): ...this, and adjust to STL
+	conventions (return bool, take arguments as references)
+	(minimal_symbol_reader::install): Call std::sort instead
+	of qsort.
+
 2019-09-29  Christian Biesinger  <cbiesinger@google.com>
 
 	* minsyms.h (msymbol_hash): Document that this is a case-insensitive

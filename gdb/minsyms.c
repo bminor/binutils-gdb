@@ -1124,41 +1124,36 @@ minimal_symbol_reader::record_full (const char *name, int name_len,
   return msymbol;
 }
 
-/* Compare two minimal symbols by address and return a signed result based
-   on unsigned comparisons, so that we sort into unsigned numeric order.
+/* Compare two minimal symbols by address and return true if FN1's address
+   is less than FN2's, so that we sort into unsigned numeric order.
    Within groups with the same address, sort by name.  */
 
-static int
-compare_minimal_symbols (const void *fn1p, const void *fn2p)
+static inline bool
+minimal_symbol_is_less_than (const minimal_symbol &fn1,
+			     const minimal_symbol &fn2)
 {
-  const struct minimal_symbol *fn1;
-  const struct minimal_symbol *fn2;
-
-  fn1 = (const struct minimal_symbol *) fn1p;
-  fn2 = (const struct minimal_symbol *) fn2p;
-
-  if (MSYMBOL_VALUE_RAW_ADDRESS (fn1) < MSYMBOL_VALUE_RAW_ADDRESS (fn2))
+  if (MSYMBOL_VALUE_RAW_ADDRESS (&fn1) < MSYMBOL_VALUE_RAW_ADDRESS (&fn2))
     {
-      return (-1);		/* addr 1 is less than addr 2.  */
+      return true;		/* addr 1 is less than addr 2.  */
     }
-  else if (MSYMBOL_VALUE_RAW_ADDRESS (fn1) > MSYMBOL_VALUE_RAW_ADDRESS (fn2))
+  else if (MSYMBOL_VALUE_RAW_ADDRESS (&fn1) > MSYMBOL_VALUE_RAW_ADDRESS (&fn2))
     {
-      return (1);		/* addr 1 is greater than addr 2.  */
+      return false;		/* addr 1 is greater than addr 2.  */
     }
   else
     /* addrs are equal: sort by name */
     {
-      const char *name1 = MSYMBOL_LINKAGE_NAME (fn1);
-      const char *name2 = MSYMBOL_LINKAGE_NAME (fn2);
+      const char *name1 = MSYMBOL_LINKAGE_NAME (&fn1);
+      const char *name2 = MSYMBOL_LINKAGE_NAME (&fn2);
 
       if (name1 && name2)	/* both have names */
-	return strcmp (name1, name2);
+	return strcmp (name1, name2) < 0;
       else if (name2)
-	return 1;		/* fn1 has no name, so it is "less".  */
+	return true;		/* fn1 has no name, so it is "less".  */
       else if (name1)		/* fn2 has no name, so it is "less".  */
-	return -1;
+	return false;
       else
-	return (0);		/* Neither has a name, so they're equal.  */
+	return false;		/* Neither has a name, so they're equal.  */
     }
 }
 
@@ -1315,8 +1310,7 @@ minimal_symbol_reader::install ()
 
       /* Sort the minimal symbols by address.  */
 
-      qsort (msymbols, mcount, sizeof (struct minimal_symbol),
-	     compare_minimal_symbols);
+      std::sort (msymbols, msymbols + mcount, minimal_symbol_is_less_than);
 
       /* Compact out any duplicates, and free up whatever space we are
          no longer using.  */
