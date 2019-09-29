@@ -214,8 +214,7 @@ relocate_gdbinit_path_maybe_in_datadir (const std::string& file)
       size_t start = datadir_len;
       for (; IS_DIR_SEPARATOR (file[start]); ++start)
 	;
-      relocated_path = (std::string (gdb_datadir) + SLASH_STRING
-			+ file.substr (start));
+      relocated_path = gdb_datadir + SLASH_STRING + file.substr (start);
     }
   else
     {
@@ -549,9 +548,8 @@ captured_main_1 (struct captured_main_args *context)
     = xstrdup (relocate_gdb_directory (DEBUGDIR,
 				     DEBUGDIR_RELOCATABLE).c_str ());
 
-  gdb_datadir
-    = xstrdup (relocate_gdb_directory (GDB_DATADIR,
-				     GDB_DATADIR_RELOCATABLE).c_str ());
+  gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
+					GDB_DATADIR_RELOCATABLE);
 
 #ifdef WITH_PYTHON_PATH
   {

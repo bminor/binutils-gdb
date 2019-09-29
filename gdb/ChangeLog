@@ -1,3 +1,10 @@
+2019-10-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* main.c (relocate_gdbinit_path_maybe_in_datadir): Remove std::string
+	conversion of gdb_datadir.
+	(captured_main_1): Remove xstrdup when assigning to gdb_datadir,
+	remove not needed c_str ().
+
 2019-09-30  Ali Tamur <tamur@google.com>
 
 	* dwarf2read.c (skip_one_die): Handle DW_FORM_strx forms.
