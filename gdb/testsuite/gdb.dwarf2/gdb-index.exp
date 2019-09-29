@@ -59,14 +59,16 @@ proc add_gdb_index { program } {
 	return ""
     }
 
-    if { [remote_file host exists ${dwz_index_file}] } {
-	# We're modifying $dwz in place, otherwise we'd have to update
-	# .gnu_debugaltlink in $program.
-	set args [join [list "--remove-section .gdb_index" \
-			    " --add-section .gdb_index=$dwz_index_file" \
-			    " --set-section-flags .gdb_index=readonly $dwz"]]
-	if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
-	    return ""
+    with_test_prefix "modify dwz file" {
+	if { [remote_file host exists ${dwz_index_file}] } {
+	    # We're modifying $dwz in place, otherwise we'd have to update
+	    # .gnu_debugaltlink in $program.
+	    set args [join [list "--remove-section .gdb_index" \
+				" --add-section .gdb_index=$dwz_index_file" \
+				" --set-section-flags .gdb_index=readonly $dwz"]]
+	    if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
+		return ""
+	    }
 	}
     }
 
