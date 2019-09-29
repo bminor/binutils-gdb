@@ -40,6 +40,7 @@
 #include "gdbsupport/buffer.h"
 #include "ser-event.h"
 #include "gdb_select.h"
+#include "gdbsupport/gdb-sigmask.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -1127,7 +1128,7 @@ async_sigtstp_handler (gdb_client_data arg)
     sigset_t zero;
 
     sigemptyset (&zero);
-    sigprocmask (SIG_SETMASK, &zero, 0);
+    gdb_sigmask (SIG_SETMASK, &zero, 0);
   }
 #elif HAVE_SIGSETMASK
   sigsetmask (0);

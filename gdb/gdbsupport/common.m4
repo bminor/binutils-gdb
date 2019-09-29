@@ -54,6 +54,11 @@ AC_DEFUN([GDB_AC_COMMON], [
     [[std::thread t(callback);]])],
 				  gdb_cv_cxx_std_thread=yes,
 				  gdb_cv_cxx_std_thread=no)])
+
+    # This check must be here, while LIBS includes any necessary
+    # threading library.
+    AC_CHECK_FUNCS([pthread_sigmask])
+
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi

@@ -1471,6 +1471,7 @@ HFILES_NO_SRCDIR = \
 	gdbsupport/fileio.h \
 	gdbsupport/format.h \
 	gdbsupport/gdb-dlfcn.h \
+	gdbsupport/gdb-sigmask.h \
 	gdbsupport/gdb_assert.h \
 	gdbsupport/gdb_binary_search.h \
 	gdbsupport/gdb_tilde_expand.h \

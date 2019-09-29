@@ -50,6 +50,7 @@
 #include "gdbsupport/common-inferior.h"
 #include "nat/fork-inferior.h"
 #include "gdbsupport/environ.h"
+#include "gdbsupport/gdb-sigmask.h"
 #include "gdbsupport/scoped_restore.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
@@ -2689,7 +2690,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
   /* Make sure SIGCHLD is blocked until the sigsuspend below.  Block
      all signals while here.  */
   sigfillset (&block_mask);
-  sigprocmask (SIG_BLOCK, &block_mask, &prev_mask);
+  gdb_sigmask (SIG_BLOCK, &block_mask, &prev_mask);
 
   /* Always pull all events out of the kernel.  We'll randomly select
      an event LWP out of all that have events, to prevent
@@ -2775,7 +2776,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	{
 	  if (debug_threads)
 	    debug_printf ("LLW: exit (no unwaited-for LWP)\n");
-	  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+	  gdb_sigmask (SIG_SETMASK, &prev_mask, NULL);
 	  return -1;
 	}
 
@@ -2785,7 +2786,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	  if (debug_threads)
 	    debug_printf ("WNOHANG set, no event found\n");
 
-	  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+	  gdb_sigmask (SIG_SETMASK, &prev_mask, NULL);
 	  return 0;
 	}
 
@@ -2794,11 +2795,11 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	debug_printf ("sigsuspend'ing\n");
 
       sigsuspend (&prev_mask);
-      sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+      gdb_sigmask (SIG_SETMASK, &prev_mask, NULL);
       goto retry;
     }
 
-  sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+  gdb_sigmask (SIG_SETMASK, &prev_mask, NULL);
 
   current_thread = event_thread;
 
@@ -6215,7 +6216,7 @@ linux_async (int enable)
       sigemptyset (&mask);
       sigaddset (&mask, SIGCHLD);
 
-      sigprocmask (SIG_BLOCK, &mask, NULL);
+      gdb_sigmask (SIG_BLOCK, &mask, NULL);
 
       if (enable)
 	{
@@ -6223,7 +6224,7 @@ linux_async (int enable)
 	    {
 	      linux_event_pipe[0] = -1;
 	      linux_event_pipe[1] = -1;
-	      sigprocmask (SIG_UNBLOCK, &mask, NULL);
+	      gdb_sigmask (SIG_UNBLOCK, &mask, NULL);
 
 	      warning ("creating event pipe failed.");
 	      return previous;
@@ -6249,7 +6250,7 @@ linux_async (int enable)
 	  linux_event_pipe[1] = -1;
 	}
 
-      sigprocmask (SIG_UNBLOCK, &mask, NULL);
+      gdb_sigmask (SIG_UNBLOCK, &mask, NULL);
     }
 
   return previous;
