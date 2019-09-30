@@ -1,3 +1,11 @@
+2019-10-09  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-09-30  Alan Modra  <amodra@gmail.com>
+	PR 25046
+	* readelf.c (process_program_headers): Clear dynamic_addr and
+	dynamic_size earlier.
+
 2019-10-02  Niklas Gürtler  <profclonk@gmail.com>
 
 	PR 24942

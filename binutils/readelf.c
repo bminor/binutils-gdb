@@ -5101,6 +5101,9 @@ process_program_headers (Filedata * filedata)
   unsigned int i;
   Elf_Internal_Phdr * previous_load = NULL;
 
+  dynamic_addr = 0;
+  dynamic_size = 0;
+
   if (filedata->file_header.e_phnum == 0)
     {
       /* PR binutils/12467.  */
@@ -5150,9 +5153,6 @@ process_program_headers (Filedata * filedata)
 	    (_("                 FileSiz            MemSiz              Flags  Align\n"));
 	}
     }
-
-  dynamic_addr = 0;
-  dynamic_size = 0;
 
   for (i = 0, segment = filedata->program_headers;
        i < filedata->file_header.e_phnum;
