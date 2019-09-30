@@ -1,5 +1,15 @@
 2019-11-27  Christian Biesinger  <cbiesinger@google.com>
 
+	* minsyms.c (add_minsym_to_hash_table): Use a previously computed
+	hash code if possible.
+	(add_minsym_to_demangled_hash_table): Likewise.
+	(minimal_symbol_reader::install): Compute the hash codes for msymbol
+	on the background thread.
+	* symtab.h (struct minimal_symbol) <hash_value, demangled_hash_value>:
+	Add these fields.
+
+2019-11-27  Christian Biesinger  <cbiesinger@google.com>
+
 	* minsyms.c (minimal_symbol_reader::install): Also compute the hash
 	of the mangled name on the background thread.
 	* symtab.c (symbol_set_names): Allow passing in the hash of the

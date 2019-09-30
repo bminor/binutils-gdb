@@ -141,12 +141,12 @@ msymbol_hash (const char *string)
 /* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
 static void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
-			  struct minimal_symbol **table)
+			  struct minimal_symbol **table,
+			  unsigned int hash_value)
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash
-	= msymbol_hash (sym->linkage_name ()) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash = hash_value % MINIMAL_SYMBOL_HASH_SIZE;
 
       sym->hash_next = table[hash];
       table[hash] = sym;
@@ -157,18 +157,16 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
    TABLE.  */
 static void
 add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
-				    struct objfile *objfile)
+				    struct objfile *objfile,
+				    unsigned int hash_value)
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = search_name_hash (MSYMBOL_LANGUAGE (sym),
-					    sym->search_name ());
-
       objfile->per_bfd->demangled_hash_languages.set (MSYMBOL_LANGUAGE (sym));
 
       struct minimal_symbol **table
 	= objfile->per_bfd->msymbol_demangled_hash;
-      unsigned int hash_index = hash % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash_index = hash_value % MINIMAL_SYMBOL_HASH_SIZE;
       sym->demangled_hash_next = table[hash_index];
       table[hash_index] = sym;
     }
@@ -1266,6 +1264,10 @@ struct computed_hash_values
   size_t name_length;
   /* Hash code (using fast_hash) of the linkage_name.  */
   hashval_t mangled_name_hash;
+  /* The msymbol_hash of the linkage_name.  */
+  unsigned int minsym_hash;
+  /* The msymbol_hash of the search_name.  */
+  unsigned int minsym_demangled_hash;
 };
 
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
@@ -1273,23 +1275,28 @@ struct computed_hash_values
    thus causing the internal minimal_symbol pointers to become jumbled.  */
   
 static void
-build_minimal_symbol_hash_tables (struct objfile *objfile)
+build_minimal_symbol_hash_tables
+  (struct objfile *objfile,
+   const std::vector<computed_hash_values>& hash_values)
 {
   int i;
   struct minimal_symbol *msym;
 
   /* (Re)insert the actual entries.  */
-  for ((i = objfile->per_bfd->minimal_symbol_count,
+  int mcount = objfile->per_bfd->minimal_symbol_count;
+  for ((i = 0,
 	msym = objfile->per_bfd->msymbols.get ());
-       i > 0;
-       i--, msym++)
+       i < mcount;
+       i++, msym++)
     {
       msym->hash_next = 0;
-      add_minsym_to_hash_table (msym, objfile->per_bfd->msymbol_hash);
+      add_minsym_to_hash_table (msym, objfile->per_bfd->msymbol_hash,
+				hash_values[i].minsym_hash);
 
       msym->demangled_hash_next = 0;
       if (msym->search_name () != msym->linkage_name ())
-	add_minsym_to_demangled_hash_table (msym, objfile);
+	add_minsym_to_demangled_hash_table
+	  (msym, objfile, hash_values[i].minsym_demangled_hash);
     }
 }
 
@@ -1404,6 +1411,15 @@ minimal_symbol_reader::install ()
 		   hash_values[idx].mangled_name_hash
 		     = fast_hash (msym->name, hash_values[idx].name_length);
 		 }
+	       hash_values[idx].minsym_hash
+		 = msymbol_hash (msym->linkage_name ());
+	       /* We only use this hash code if the search name differs
+		  from the linkage name.  See the code in
+		  build_minimal_symbol_hash_tables.  */
+	       if (msym->search_name () != msym->linkage_name ())
+		 hash_values[idx].minsym_demangled_hash
+		   = search_name_hash (MSYMBOL_LANGUAGE (msym),
+				       msym->search_name ());
 	     }
 	   {
 	     /* To limit how long we hold the lock, we only acquire it here
@@ -1425,7 +1441,7 @@ minimal_symbol_reader::install ()
 	   }
 	 });
 
-      build_minimal_symbol_hash_tables (m_objfile);
+      build_minimal_symbol_hash_tables (m_objfile, hash_values);
     }
 }
 
