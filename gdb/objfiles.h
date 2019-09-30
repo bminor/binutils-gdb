@@ -258,10 +258,10 @@ struct objfile_per_bfd_storage
   struct gdbarch *gdbarch = NULL;
 
   /* Hash table for mapping symbol names to demangled names.  Each
-     entry in the hash table is actually two consecutive strings,
-     both null-terminated; the first one is a mangled or linkage
-     name, and the second is the demangled name or just a zero byte
-     if the name doesn't demangle.  */
+     entry in the hash table is a demangled_name_entry struct, storing the
+     language and two consecutive strings, both null-terminated; the first one
+     is a mangled or linkage name, and the second is the demangled name or just
+     a zero byte if the name doesn't demangle.  */
 
   htab_up demangled_names_hash;
 
@@ -305,12 +305,14 @@ struct objfile_per_bfd_storage
 
   bool minsyms_read : 1;
 
-  /* This is a hash table used to index the minimal symbols by name.  */
+  /* This is a hash table used to index the minimal symbols by (mangled)
+     name.  */
 
   minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 
   /* This hash table is used to index the minimal symbols by their
-     demangled names.  */
+     demangled names.  Uses a language-specific hash function via
+     search_name_hash.  */
 
   minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 

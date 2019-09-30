@@ -1,3 +1,10 @@
+2019-09-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* minsyms.h (msymbol_hash): Document that this is a case-insensitive
+	hash and why.
+	* objfiles.h (struct objfile_per_bfd_storage) <demangled_names_hash,
+	msymbol_hash, msymbol_demangled_hash>: Improve comments.
+
 2019-09-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* psymtab.c (add_psymbol_to_list): Move comment to psympriv.h.

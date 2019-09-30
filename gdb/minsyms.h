@@ -159,7 +159,8 @@ bool msymbol_is_function (struct objfile *objfile,
 			  minimal_symbol *minsym,
 			  CORE_ADDR *func_address_p = NULL);
 
-/* Compute a hash code for the string argument.  */
+/* Compute a hash code for the string argument.  Unlike htab_hash_string,
+   this is a case-insensitive hash to support "set case-sensitive off".  */
 
 unsigned int msymbol_hash (const char *);
 
