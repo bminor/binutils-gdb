@@ -1605,11 +1605,7 @@ append_psymbol_to_list (std::vector<partial_symbol *> *list,
   OBJSTAT (objfile, n_psyms++);
 }
 
-/* Add a symbol with a long value to a psymtab.
-   Since one arg is a struct, we pass in a ptr and deref it (sigh).
-   The only value we need to store for psyms is an address.
-   For all other psyms pass zero for COREADDR.
-   Return the partial symbol that has been added.  */
+/* See psympriv.h.  */
 
 void
 add_psymbol_to_list (const char *name, int namelength, bool copy_name,

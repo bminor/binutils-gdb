@@ -286,15 +286,32 @@ enum class psymbol_placement
   GLOBAL
 };
 
-/* Add any kind of symbol to a partial_symbol vector.  */
+/* Add a symbol to the partial symbol table of OBJFILE.
 
-extern void add_psymbol_to_list (const char *, int,
-				 bool, domain_enum,
-				 enum address_class,
-				 short /* section */,
-				 enum psymbol_placement,
-				 CORE_ADDR,
-				 enum language, struct objfile *);
+   If COPY_NAME is true, make a copy of NAME, otherwise use the passed
+   reference.
+
+   THECLASS is the type of symbol.
+
+   SECTION is the index of the section of OBJFILE in which the symbol is found.
+
+   WHERE determines whether the symbol goes in the list of static or global
+   partial symbols of OBJFILE.
+
+   COREADDR is the address of the symbol.  For partial symbols that don't have
+   an address, zero is passed.
+
+   LANGUAGE is the language from which the symbol originates.  This will
+   influence, amongst other things, how the symbol name is demangled. */
+
+extern void add_psymbol_to_list (const char *name, int namelength,
+				 bool copy_name, domain_enum domain,
+				 enum address_class theclass,
+				 short section,
+				 psymbol_placement where,
+				 CORE_ADDR coreaddr,
+				 enum language language,
+				 struct objfile *objfile);
 
 /* Initialize storage for partial symbols.  If partial symbol storage
    has already been initialized, this does nothing.  TOTAL_SYMBOLS is
