@@ -10377,7 +10377,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   if (cu->language == language_go)
     fixup_go_packaging (cu);
 
-  /* Now that we have processed all the DIEs in the CU, all the types 
+  /* Now that we have processed all the DIEs in the CU, all the types
      should be complete, and it should now be safe to compute all of the
      physnames.  */
   compute_delayed_physnames (cu);
@@ -10426,7 +10426,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
 	 Still one can confuse GDB by using non-standard GCC compilation
 	 options - this waits on GCC PR other/32998 (-frecord-gcc-switches).
-	 */ 
+	 */
       if (cu->has_loclist && gcc_4_minor >= 5)
 	cust->locations_valid = 1;
 
@@ -10481,7 +10481,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   if (cu->language == language_go)
     fixup_go_packaging (cu);
 
-  /* Now that we have processed all the DIEs in the CU, all the types 
+  /* Now that we have processed all the DIEs in the CU, all the types
      should be complete, and it should now be safe to compute all of the
      physnames.  */
   compute_delayed_physnames (cu);
@@ -23062,7 +23062,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_indirect:
 	  /* The reader will have reduced the indirect form to
 	     the "base form" so this form should not occur.  */
-	  fprintf_unfiltered (f, 
+	  fprintf_unfiltered (f,
 			      "unexpected attribute form: DW_FORM_indirect");
 	  break;
 	case DW_FORM_implicit_const:
@@ -25163,7 +25163,7 @@ cu_debug_loc_section (struct dwarf2_cu *cu)
   if (cu->dwo_unit)
     {
       struct dwo_sections *sections = &cu->dwo_unit->dwo_file->sections;
-      
+
       return cu->header.version >= 5 ? &sections->loclists : &sections->loc;
     }
   return (cu->header.version >= 5 ? &dwarf2_per_objfile->loclists

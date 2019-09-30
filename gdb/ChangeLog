@@ -1,3 +1,10 @@
+2019-09-30  Ali Tamur <tamur@google.com>
+
+	* dwarf2read.c (process_full_comp_unit): Remove whitespace at the EOL.
+	(process_full_type_unit): Likewise.
+	(dump_die_shallow): Likewise.
+	(cu_debug_loc_section): Likewise.
+
 2019-09-28  Christian Biesinger  <cbiesinger@google.com>
 
 	* minsyms.c (compare_minimal_symbols): Rename to...
