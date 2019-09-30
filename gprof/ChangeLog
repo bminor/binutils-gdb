@@ -1,3 +1,8 @@
+2019-09-30  Phil Blundell  <pb@pbcl.net>
+
+	Release 2.33
+	* configure, Makefile.in, po/gprof.pot: Regenerate.
+
 2019-09-16  Phil Blundell  <pb@pbcl.net>
 
 	* configure, Makefile.in: Regenerated.

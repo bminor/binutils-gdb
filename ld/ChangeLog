@@ -1,3 +1,8 @@
+2019-09-30  Phil Blundell  <pb@pbcl.net>
+
+	Release 2.33
+	* configure, Makefile.in, po/ld.pot: Regenerate.
+
 2019-09-25  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
