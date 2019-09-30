@@ -152,12 +152,12 @@ msymbol_hash (const char *string)
 /* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
 static void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
-			  struct minimal_symbol **table)
+			  struct minimal_symbol **table,
+			  unsigned int hash_value)
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash
-	= msymbol_hash (MSYMBOL_LINKAGE_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash = hash_value % MINIMAL_SYMBOL_HASH_SIZE;
 
       sym->hash_next = table[hash];
       table[hash] = sym;
@@ -168,18 +168,16 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
    TABLE.  */
 static void
 add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
-				    struct objfile *objfile)
+				    struct objfile *objfile,
+				    unsigned int hash_value)
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = search_name_hash (MSYMBOL_LANGUAGE (sym),
-					    MSYMBOL_SEARCH_NAME (sym));
-
       objfile->per_bfd->demangled_hash_languages.set (MSYMBOL_LANGUAGE (sym));
 
       struct minimal_symbol **table
 	= objfile->per_bfd->msymbol_demangled_hash;
-      unsigned int hash_index = hash % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash_index = hash_value % MINIMAL_SYMBOL_HASH_SIZE;
       sym->demangled_hash_next = table[hash_index];
       table[hash_index] = sym;
     }
@@ -1242,7 +1240,9 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
    thus causing the internal minimal_symbol pointers to become jumbled.  */
   
 static void
-build_minimal_symbol_hash_tables (struct objfile *objfile)
+build_minimal_symbol_hash_tables
+  (struct objfile *objfile,
+   std::vector<std::pair<unsigned, unsigned>>& hash_codes)
 {
   int i;
   struct minimal_symbol *msym;
@@ -1255,17 +1255,20 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
     }
 
   /* Now, (re)insert the actual entries.  */
-  for ((i = objfile->per_bfd->minimal_symbol_count,
+  int mcount = objfile->per_bfd->minimal_symbol_count;
+  for ((i = 0,
 	msym = objfile->per_bfd->msymbols.get ());
-       i > 0;
-       i--, msym++)
+       i < mcount;
+       i++, msym++)
     {
       msym->hash_next = 0;
-      add_minsym_to_hash_table (msym, objfile->per_bfd->msymbol_hash);
+      add_minsym_to_hash_table (msym, objfile->per_bfd->msymbol_hash,
+				hash_codes[i].first);
 
       msym->demangled_hash_next = 0;
       if (MSYMBOL_SEARCH_NAME (msym) != MSYMBOL_LINKAGE_NAME (msym))
-	add_minsym_to_demangled_hash_table (msym, objfile);
+	add_minsym_to_demangled_hash_table (msym, objfile,
+					    hash_codes[i].second);
     }
 }
 
@@ -1347,6 +1350,8 @@ minimal_symbol_reader::install ()
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
+      std::vector<std::pair<unsigned, unsigned>> hash_codes (mcount);
+
       msymbols = m_objfile->per_bfd->msymbols.get ();
       gdb::parallel_for_each
 	(&msymbols[0], &msymbols[mcount],
@@ -1367,6 +1372,11 @@ minimal_symbol_reader::install ()
 					      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
 		 }
+		size_t idx = msym - msymbols;
+		hash_codes[idx].first = msymbol_hash (MSYMBOL_LINKAGE_NAME (msym));
+		hash_codes[idx].second
+		  = search_name_hash (MSYMBOL_LANGUAGE (msym),
+				      MSYMBOL_SEARCH_NAME (msym));
 	     }
 	   {
 	     /* To limit how long we hold the lock, we only acquire it here
@@ -1383,7 +1393,7 @@ minimal_symbol_reader::install ()
 	   }
 	 });
 
-      build_minimal_symbol_hash_tables (m_objfile);
+      build_minimal_symbol_hash_tables (m_objfile, hash_codes);
     }
 }
 
