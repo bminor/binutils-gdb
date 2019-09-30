@@ -131,7 +131,9 @@ bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
+#ifdef ENABLE_LIBCTF
 static ctf_file_t *ctf_output;
+#endif
 
 /* Functions that traverse the linker script and might evaluate
    DEFINED() need to increment this at the start of the traversal.  */
@@ -3669,6 +3671,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
     einfo ("%F");
 }
 
+#ifdef ENABLE_LIBCTF
 /* Open the CTF sections in the input files with libctf: if any were opened,
    create a fake input file that we'll write the merged CTF data to later
    on.  */
@@ -3848,6 +3851,38 @@ ldlang_write_ctf_late (void)
 
   lang_write_ctf (1);
 }
+#else
+static void
+ldlang_open_ctf (void)
+{
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
+    {
+      asection *sect;
+
+      /* If built without CTF, warn and delete all CTF sections from the output.
+	 (The alternative would be to simply concatenate them, which does not
+	 yield a valid CTF section.)  */
+
+      if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL)
+	{
+	    einfo (_("%P: warning: CTF section in `%pI' not linkable: "
+		     "%P was built without support for CTF\n"), file);
+	    sect->size = 0;
+	    sect->flags |= SEC_EXCLUDE;
+	}
+    }
+}
+
+static void lang_merge_ctf (void) {}
+void
+ldlang_ctf_apply_strsym (struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
+			 bfd_size_type symcount ATTRIBUTE_UNUSED,
+			 struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)
+{
+}
+static void lang_write_ctf (int late ATTRIBUTE_UNUSED) {}
+void ldlang_write_ctf_late (void) {}
+#endif
 
 /* Add the supplied name to the symbol table as an undefined reference.
    This is a two step process as the symbol table doesn't even exist at

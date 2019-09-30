@@ -1,3 +1,33 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac [--enable-libctf]: New, default yes.
+	Set ENABLE_LIBCTF accordingly.
+	* Makefile.am [!ENABLE_LIBCTF]: Empty LIBCTF.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* ldlang.c (ctf_output): Conditionalize on ENABLE_LIBCTF.
+	(ldlang_open_ctf): Likewise.
+	(lang_merge_ctf): Likewise.
+	(ldlang_ctf_apply_strsym): Likewise.
+	(lang_write_ctf): Likewise.
+	(ldlang_write_ctf_late): Likewise.
+	(ldlang_open_ctf) [!ENABLE_LIBCTF]: Warn about the presence of CTF
+	sections.
+	(lang_merge_ctf) [!ENABLE_LIBCTF]: New stub.
+	(ldlang_ctf_apply_strsym) [!ENABLE_LIBCTF]: Likewise.
+	(lang_write_ctf) [!ENABLE_LIBCTF]: Likewise.
+	(ldlang_write_ctf_late) [!ENABLE_LIBCTF]: Likewise.
+	* ldelfgen.c (ldelf_emit_ctf_early): Conditionalize on
+	ENABLE_LIBCTF.
+	(struct ctf_strsym_iter_cb_arg): Likewise.
+	(ldelf_ctf_strtab_iter_cb): Likewise.
+	(ldelf_ctf_symbols_iter_cb): Likewise.
+	(ldelf_examine_strtab_for_ctf): Likewise.
+	(ldelf_emit_ctf_early) [!ENABLE_LIBCTF]: New stub.
+	(ldelf_examine_strtab_for_ctf) [!ENABLE_LIBCTF]: New stub.
+
 2020-06-26  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-x86-64/x86-64.exp: Run K1OM tests.

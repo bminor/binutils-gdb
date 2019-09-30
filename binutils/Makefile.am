@@ -164,8 +164,13 @@ BFDLIB = ../bfd/libbfd.la
 
 OPCODES = ../opcodes/libopcodes.la
 
+if ENABLE_LIBCTF
 LIBCTF = ../libctf/libctf.la
 LIBCTF_NOBFD = ../libctf/libctf-nobfd.la
+else
+LIBCTF =
+LIBCTF_NOBFD =
+endif
 
 LIBIBERTY = ../libiberty/libiberty.a
 

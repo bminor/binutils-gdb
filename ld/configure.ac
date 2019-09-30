@@ -221,6 +221,12 @@ case "${enable_default_hash_style}" in
   *) ac_default_emit_gnu_hash=0 ;;
 esac
 
+GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
+if test "${enable_libctf}" = yes; then
+    AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
+fi
+AM_CONDITIONAL(ENABLE_LIBCTF, test "${enable_libctf}" = yes)
+
 AM_BINUTILS_WARNINGS
 
 AM_LC_MESSAGES
@@ -523,6 +529,9 @@ if test x${enable_static} = xno; then
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
   TESTCTFLIB="../libctf/.libs/libctf.a"
+fi
+if test "${enable_libctf}" = no; then
+    TESTCTFLIB=
 fi
 AC_SUBST(TESTBFDLIB)
 AC_SUBST(TESTCTFLIB)

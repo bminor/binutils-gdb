@@ -88,6 +88,7 @@ ldelf_map_segments (bfd_boolean need_layout)
     }
 }
 
+#ifdef ENABLE_LIBCTF
 /* We want to emit CTF early if and only if we are not targetting ELF with this
    invocation.  */
 
@@ -197,3 +198,16 @@ ldelf_examine_strtab_for_ctf
 		 "cost: %s\n"), ctf_errmsg (ctf_errno (ctf_output)));
     }
 }
+#else
+extern int ldelf_emit_ctf_early (void)
+{
+  return 0;
+}
+
+extern void ldelf_examine_strtab_for_ctf
+  (struct ctf_file *ctf_output ATTRIBUTE_UNUSED,
+   struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
+   bfd_size_type symcount ATTRIBUTE_UNUSED,
+   struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)
+{}
+#endif

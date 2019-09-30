@@ -21,6 +21,9 @@
 /* Should strings use -a behavior by default? */
 #undef DEFAULT_STRINGS_ALL
 
+/* Handle .ctf type-info sections */
+#undef ENABLE_LIBCTF
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS

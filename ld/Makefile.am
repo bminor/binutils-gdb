@@ -144,7 +144,11 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @zlibinc@ \
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
+if ENABLE_LIBCTF
 LIBCTF = ../libctf/libctf.la
+else
+LIBCTF =
+endif
 
 # These all start with e so 'make clean' can find them.
 ALL_EMULATION_SOURCES = \

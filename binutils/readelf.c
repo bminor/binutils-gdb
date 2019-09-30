@@ -4502,11 +4502,13 @@ static struct option options[] =
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
 
+#ifdef ENABLE_LIBCTF
   {"ctf",	       required_argument, 0, OPTION_CTF_DUMP},
 
   {"ctf-symbols",      required_argument, 0, OPTION_CTF_SYMBOLS},
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
   {"ctf-parent",       required_argument, 0, OPTION_CTF_PARENT},
+#endif
 
   {"version",	       no_argument, 0, 'v'},
   {"wide",	       no_argument, 0, 'W'},
@@ -4558,6 +4560,7 @@ usage (FILE * stream)
   --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
   --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
                          or deeper\n"));
+#ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
   --ctf=<number|name>    Display CTF info from section <number|name>\n\
   --ctf-parent=<number|name>\n\
@@ -4566,6 +4569,7 @@ usage (FILE * stream)
                          Use section <number|name> as the CTF external symtab\n\n\
   --ctf-strings=<number|name>\n\
                          Use section <number|name> as the CTF external strtab\n\n"));
+#endif
 
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -14132,6 +14136,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
   return FALSE;
 }
 
+#ifdef ENABLE_LIBCTF
 static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
@@ -14292,6 +14297,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   free (strdata);
   return ret;
 }
+#endif
 
 static bfd_boolean
 load_specific_debug_section (enum dwarf_section_display_enum  debug,
@@ -14777,11 +14783,13 @@ process_section_contents (Filedata * filedata)
 	    res = FALSE;
 	}
 
+#ifdef ENABLE_LIBCTF
       if (dump & CTF_DUMP)
 	{
 	  if (! dump_section_as_ctf (section, filedata))
 	    res = FALSE;
 	}
+#endif
     }
 
   /* Check to see if the user requested a

@@ -1,3 +1,28 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac [--enable-libctf]: New, default yes.
+	Set ENABLE_LIBCTF accordingly.
+	* Makefile.am [!ENABLE_LIBCTF]: Empty LIBCTF and LIBCTF_NOBFD.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* objdump.c (usage): Conditionalize portions on ENABLE_LIBCTF.
+	(option_values): Likewise.
+	(long_options): Likewise.
+	(main): Likewise.
+	(dump_ctf_indent_lines): Conditionalize out when !ENABLE_LIBCTF.
+	(make_ctfsect): Likewise.
+	(dump_ctf_archive_member): Likewise.
+	(dump_ctf) [ENABLE_LIBCTF]: Likewise.
+	(dump_ctf) [!ENABLE_LIBCTF]: New empty stub.
+	* readelf.c (options): Conditionalize portions on ENABLE_LIBCTF.
+	(usage): Likewise.
+	(process_section_contents): Likewise.
+	(shdr_to_ctf_sect): Conditionalize out when !ENABLE_LIBCTF.
+	(dump_ctf_indent_lines): Likewise.
+	(dump_section_as_ctf) [ENABLE_LIBCTF]: Likewise.
+
 2020-06-26  Jan Beulich  <jbeulich@suse.com>
 
 	* doc/binutils.texi: Adjust description of x86's -Msuffix. Drop
