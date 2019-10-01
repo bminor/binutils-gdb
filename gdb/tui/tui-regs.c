@@ -154,13 +154,14 @@ tui_data_window::show_registers (struct reggroup *group)
       for (auto &&data_item_win : m_regs_content)
 	data_item_win.highlight = false;
       m_current_group = group;
-      rerender ();
     }
   else
     {
       m_current_group = 0;
-      erase_data_content (_("[ Register Values Unavailable ]"));
+      m_regs_content.clear ();
     }
+
+  rerender ();
 }
 
 

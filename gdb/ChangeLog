@@ -1,5 +1,10 @@
 2019-10-09  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::show_registers): Don't call
+	erase_data_content.
+
+2019-10-09  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_delete_win): Don't declare.
 	* tui/tui-stack.c (tui_locator_window::rerender): Update.
 	* tui/tui-command.c (tui_cmd_window::resize)
