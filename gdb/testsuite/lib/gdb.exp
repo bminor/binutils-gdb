@@ -719,10 +719,24 @@ proc gdb_internal_error_resync {} {
 #
 # gdb_test_multiple "print foo" "test foo" {
 #    -re "expected output 1" {
-#        pass "print foo"
+#        pass "test foo"
 #    }
 #    -re "expected output 2" {
-#        fail "print foo"
+#        fail "test foo"
+#    }
+# }
+#
+# Within action elements you can also make use of the variable
+# gdb_test_name.  This variable is setup automatically by
+# gdb_test_multiple, and contains the value of MESSAGE.  You can then
+# write this, which is equivalent to the above:
+#
+# gdb_test_multiple "print foo" "test foo" {
+#    -re "expected output 1" {
+#        pass $gdb_test_name
+#    }
+#    -re "expected output 2" {
+#        fail $gdb_test_name
 #    }
 # }
 #
@@ -1038,8 +1052,28 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	}
     }
 
+    # Create gdb_test_name in the parent scope.  If this variable
+    # already exists, which it might if we have nested calls to
+    # gdb_test_multiple, then preserve the old value, otherwise,
+    # create a new variable in the parent scope.
+    upvar gdb_test_name gdb_test_name
+    if { [info exists gdb_test_name] } {
+	set gdb_test_name_old "$gdb_test_name"
+    }
+    set gdb_test_name "$message"
+
     set result 0
     set code [catch {gdb_expect $code} string]
+
+    # Clean up the gdb_test_name variable.  If we had a
+    # previous value then restore it, otherwise, delete the variable
+    # from the parent scope.
+    if { [info exists gdb_test_name_old] } {
+	set gdb_test_name "$gdb_test_name_old"
+    } else {
+	unset gdb_test_name
+    }
+
     if {$code == 1} {
 	global errorInfo errorCode
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
