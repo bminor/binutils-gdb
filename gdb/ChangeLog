@@ -1,5 +1,9 @@
 2019-10-09  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (struct tui_gen_win_info): Don't declare.
+
+2019-10-09  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.c (tui_win_is_auxiliary): Remove.
 	* tui/tui-data.h (tui_win_is_auxiliary): Don't declare.
 

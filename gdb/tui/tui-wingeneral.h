@@ -25,7 +25,6 @@
 #include "gdb_curses.h"
 
 struct tui_win_info;
-struct tui_gen_win_info;
 
 /* Makes all windows invisible.  */
 extern void tui_make_all_invisible (void);
