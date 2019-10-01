@@ -43,6 +43,8 @@
 #endif
 #endif
 
+#include "gdb_string_view.h"
+
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */
 
@@ -116,6 +118,16 @@ static inline bool
 startswith (const char *string, const char *pattern)
 {
   return strncmp (string, pattern, strlen (pattern)) == 0;
+}
+
+/* Version of startswith that takes string_view arguments.  See comment
+   above.  */
+
+static inline bool
+startswith (gdb::string_view string, gdb::string_view pattern)
+{
+  return (string.length () >= pattern.length ()
+	  && strncmp (string.data (), pattern.data (), pattern.length ()) == 0);
 }
 
 ULONGEST strtoulst (const char *num, const char **trailer, int base);

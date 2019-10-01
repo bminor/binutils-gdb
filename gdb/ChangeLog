@@ -1,3 +1,8 @@
+2019-10-28  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdbsupport/common-utils.h (startswith): Add an overloaded version
+	that takes gdb::string_view arguments.
+
 2019-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* aarch64-linux-tdep.c: Fix typos in comments.
