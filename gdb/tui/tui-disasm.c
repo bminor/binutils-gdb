@@ -28,6 +28,7 @@
 #include "source.h"
 #include "disasm.h"
 #include "tui/tui.h"
+#include "tui/tui-command.h"
 #include "tui/tui-data.h"
 #include "tui/tui-win.h"
 #include "tui/tui-layout.h"
@@ -325,7 +326,14 @@ tui_get_low_disassembly_address (struct gdbarch *gdbarch,
 
   /* Determine where to start the disassembly so that the pc is about
      in the middle of the viewport.  */
-  pos = tui_default_win_viewport_height (DISASSEM_WIN, DISASSEM_COMMAND) / 2;
+  if (tui_win_list[DISASSEM_WIN] != NULL)
+    pos = tui_win_list[DISASSEM_WIN]->height;
+  else if (TUI_CMD_WIN == NULL)
+    pos = tui_term_height () / 2 - 2;
+  else
+    pos = tui_term_height () - TUI_CMD_WIN->height - 2;
+  pos = (pos - 2) / 2;
+
   pc = tui_find_disassembly_address (gdbarch, pc, -pos);
 
   if (pc < low)
