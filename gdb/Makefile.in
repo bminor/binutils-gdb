@@ -993,6 +993,7 @@ COMMON_SFILES = \
 	gdbsupport/signals.c \
 	gdbsupport/signals-state-save-restore.c \
 	gdbsupport/tdesc.c \
+	gdbsupport/thread-pool.c \
 	gdbsupport/xml-utils.c \
 	complaints.c \
 	completer.c \
@@ -1495,6 +1496,7 @@ HFILES_NO_SRCDIR = \
 	gdbsupport/signals-state-save-restore.h \
 	gdbsupport/symbol.h \
 	gdbsupport/tdesc.h \
+	gdbsupport/thread-pool.h \
 	gdbsupport/version.h \
 	gdbsupport/x86-xstate.h \
 	gdbsupport/xml-utils.h \

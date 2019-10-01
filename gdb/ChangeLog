@@ -1,3 +1,11 @@
+2019-10-19  Christian Biesinger  <cbiesinger@google.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* gdbsupport/thread-pool.h: New file.
+	* gdbsupport/thread-pool.c: New file.
+	* Makefile.in (COMMON_SFILES): Add thread-pool.c.
+	(HFILES_NO_SRCDIR): Add thread-pool.h.
+
 2019-10-19  Tom Tromey  <tom@tromey.com>
 
 	* event-top.h (thread_local_segv_handler): Declare.
