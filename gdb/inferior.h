@@ -227,25 +227,6 @@ extern struct value *get_return_value (struct value *function,
 extern void prepare_execution_command (struct target_ops *target,
 				       int background);
 
-/* Whether to start up the debuggee under a shell.
-
-   If startup-with-shell is set, GDB's "run" will attempt to start up
-   the debuggee under a shell.
-
-   This is in order for argument-expansion to occur.  E.g.,
-
-   (gdb) run *
-
-   The "*" gets expanded by the shell into a list of files.
-
-   While this is a nice feature, it may be handy to bypass the shell
-   in some cases.  To disable this feature, do "set startup-with-shell
-   false".
-
-   The catch-exec traps expected during start-up will be one more if
-   the target is started up with a shell.  */
-extern bool startup_with_shell;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 extern enum stop_stack_kind stop_stack_dummy;

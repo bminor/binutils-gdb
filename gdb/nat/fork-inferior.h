@@ -54,26 +54,6 @@ extern ptid_t startup_inferior (pid_t pid, int ntraps,
 				struct target_waitstatus *mystatus,
 				ptid_t *myptid);
 
-/* Whether to start up the debuggee under a shell.
-
-   If startup-with-shell is set, GDB's "run" will attempt to start up
-   the debuggee under a shell.  This also happens when using GDBserver
-   under extended remote mode.
-
-   This is in order for argument-expansion to occur.  E.g.,
-
-   (gdb) run *
-
-   The "*" gets expanded by the shell into a list of files.
-
-   While this is a nice feature, it may be handy to bypass the shell
-   in some cases.  To disable this feature, do "set startup-with-shell
-   false".
-
-   The catch-exec traps expected during start-up will be one more if
-   the target is started up with a shell.  */
-extern bool startup_with_shell;
-
 /* Perform any necessary tasks before a fork/vfork takes place.  ARGS
    is a string containing all the arguments received by the inferior.
    This function is mainly used by fork_inferior.  */

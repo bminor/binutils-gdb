@@ -953,6 +953,7 @@ COMMON_SFILES = \
 	gdbsupport/cleanups.c \
 	gdbsupport/common-debug.c \
 	gdbsupport/common-exceptions.c \
+	gdbsupport/common-inferior.c \
 	gdbsupport/common-regcache.c \
 	gdbsupport/common-utils.c \
 	gdbsupport/errors.c \

@@ -104,10 +104,6 @@ enum stop_stack_kind stop_stack_dummy;
 
 int stopped_by_random_signal;
 
-/* See inferior.h.  */
-
-bool startup_with_shell = true;
-
 
 /* Accessor routines.  */
 

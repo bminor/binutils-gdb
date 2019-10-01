@@ -1,3 +1,12 @@
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in (COMMON_SFILES): Add common-inferior.c.
+	* gdbsupport/common-inferior.c: New file.
+	* infcmd.c (startup_with_shell): Don't define.
+	* nat/fork-inferior.h (startup_with_shell): Don't declare.
+	* gdbsupport/common-inferior.h (startup_with_shell): Declare.
+	* inferior.h (startup_with_shell): Don't declare.
+
 2019-10-02  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/gdb_assert.h: Include errors.h.

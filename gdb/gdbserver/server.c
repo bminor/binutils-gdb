@@ -67,12 +67,6 @@ char *current_directory;
 
 static gdb_environ our_environ;
 
-/* Start the inferior using a shell.  */
-
-/* We always try to start the inferior using a shell.  */
-
-int startup_with_shell = 1;
-
 int server_waiting;
 
 static int extended_protocol;

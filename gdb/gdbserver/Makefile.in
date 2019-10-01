@@ -203,6 +203,7 @@ SFILES = \
 	$(srcdir)/gdbsupport/cleanups.c \
 	$(srcdir)/gdbsupport/common-debug.c \
 	$(srcdir)/gdbsupport/common-exceptions.c \
+	$(srcdir)/gdbsupport/common-inferior.c \
 	$(srcdir)/gdbsupport/common-regcache.c \
 	$(srcdir)/gdbsupport/common-utils.c \
 	$(srcdir)/gdbsupport/errors.c \
@@ -248,6 +249,7 @@ OBS = \
 	gdbsupport/cleanups.o \
 	gdbsupport/common-debug.o \
 	gdbsupport/common-exceptions.o \
+	gdbsupport/common-inferior.o \
 	gdbsupport/job-control.o \
 	gdbsupport/common-regcache.o \
 	gdbsupport/common-utils.o \
