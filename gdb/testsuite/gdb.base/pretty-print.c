@@ -23,16 +23,18 @@ struct s1_t
   struct
   {
     union {
-      int three : 3;
+      unsigned three : 3;
       int four : 4;
     };
 
     union {
       int five : 3;
-      int six : 4;
+      unsigned six : 4;
     };
   } data;
-} s1 = { .one = 1, .two = 2, .data = { .three = 3, .five = 5 } };
+} s1 = { .one = 1, .two = 2,
+	 /* Use all-ones bit patterns for endianness independence.  */
+	 .data = { .four = -1, .six = 15 } };
 
 struct s2_t
 {

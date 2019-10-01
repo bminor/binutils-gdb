@@ -36,12 +36,12 @@ gdb_test "print s1" \
 	 "  two = 2," \
 	 "  data = {" \
 	 "    {" \
-	 "      three = 3," \
-	 "      four = 3" \
+	 "      three = 7," \
+	 "      four = -1" \
 	 "    }," \
 	 "    {" \
-	 "      five = -3," \
-	 "      six = 5" \
+	 "      five = -1," \
+	 "      six = 15" \
 	 "    }" \
 	 "  }" \
 	 "}" ]

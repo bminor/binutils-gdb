@@ -1,3 +1,12 @@
+2019-10-01  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* gdb.base/pretty-print.c (struct s1_t): Change fields 'three' and
+	'six' to unsigned.
+	(s1): Initialize fields 'four' and 'six' instead of 'three' and
+	'five'.  Use an all-ones bit pattern for each.
+	* gdb.base/pretty-print.exp: Adjust expected output of "print s1"
+	to its changed values.
+
 2019-09-30  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.rust/traits.rs: Disable all warnings.
