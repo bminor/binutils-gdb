@@ -205,7 +205,7 @@ void
 target_stop_and_wait (ptid_t ptid)
 {
   struct target_waitstatus status;
-  int was_non_stop = non_stop;
+  bool was_non_stop = non_stop;
   struct thread_resume resume_info;
 
   resume_info.thread = ptid;
@@ -213,7 +213,7 @@ target_stop_and_wait (ptid_t ptid)
   resume_info.sig = GDB_SIGNAL_0;
   (*the_target->resume) (&resume_info, 1);
 
-  non_stop = 1;
+  non_stop = true;
   mywait (ptid, &status, 0, 0);
   non_stop = was_non_stop;
 }

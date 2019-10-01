@@ -68,15 +68,15 @@ void initialize_low ();
 
 /* Public variables in server.c */
 
-extern int server_waiting;
+extern bool server_waiting;
 
-extern int disable_packet_vCont;
-extern int disable_packet_Tthread;
-extern int disable_packet_qC;
-extern int disable_packet_qfThreadInfo;
+extern bool disable_packet_vCont;
+extern bool disable_packet_Tthread;
+extern bool disable_packet_qC;
+extern bool disable_packet_qfThreadInfo;
 
-extern int run_once;
-extern int non_stop;
+extern bool run_once;
+extern bool non_stop;
 
 #if USE_WIN32API
 #include <winsock2.h>

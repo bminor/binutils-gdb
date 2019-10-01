@@ -1,3 +1,31 @@
+2019-10-02  Christian Biesinger  <cbiesinger@google.com>
+
+	* server.c (server_waiting): Change to bool.
+	(extended_protocol): Likewise.
+	(response_needed): Likewise.
+	(exit_requested): Likewise.
+	(run_once): Likewise.
+	(report_no_resumed): Likewise.
+	(non_stop): Likewise.
+	(disable_packet_vCont): Likewise.
+	(disable_packet_Tthread): Likewise.
+	(disable_packet_qC): Likewise.
+	(disable_packet_qfThreadInfo): Likewise.
+	(handle_general_set): Update.
+	(handle_detach): Update.
+	(handle_monitor_command): Update.
+	(handle_query): Update.
+	(captured_main): Update.
+	(process_serial_event): Update.
+	* server.h (server_waiting): Change to bool.
+	(disable_packet_vCont): Likewise.
+	(disable_packet_Tthread): Likewise.
+	(disable_packet_qC): Likewise.
+	(disable_packet_qfThreadInfo): Likewise.
+	(run_once): Likewise.
+	(non_stop): Likewise.
+	* target.c (target_stop_and_wait): Update.
+
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* Makefile.in (SFILES): Add common-inferior.c.

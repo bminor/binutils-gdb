@@ -67,19 +67,19 @@ char *current_directory;
 
 static gdb_environ our_environ;
 
-int server_waiting;
+bool server_waiting;
 
-static int extended_protocol;
-static int response_needed;
-static int exit_requested;
+static bool extended_protocol;
+static bool response_needed;
+static bool exit_requested;
 
 /* --once: Exit after the first connection has closed.  */
-int run_once;
+bool run_once;
 
 /* Whether to report TARGET_WAITKING_NO_RESUMED events.  */
-static int report_no_resumed;
+static bool report_no_resumed;
 
-int non_stop;
+bool non_stop;
 
 static struct {
   /* Set the PROGRAM_PATH.  Here we adjust the path of the provided
@@ -123,10 +123,10 @@ unsigned long signal_pid;
 /* Set if you want to disable optional thread related packets support
    in gdbserver, for the sake of testing GDB against stubs that don't
    support them.  */
-int disable_packet_vCont;
-int disable_packet_Tthread;
-int disable_packet_qC;
-int disable_packet_qfThreadInfo;
+bool disable_packet_vCont;
+bool disable_packet_Tthread;
+bool disable_packet_qC;
+bool disable_packet_qfThreadInfo;
 
 static unsigned char *mem_buf;
 
@@ -744,7 +744,7 @@ handle_general_set (char *own_buf)
 	  return;
 	}
 
-      non_stop = req;
+      non_stop = (req != 0);
 
       if (remote_debug)
 	debug_printf ("[%s mode enabled]\n", req_str);
@@ -1231,7 +1231,7 @@ handle_detach (char *own_buf)
 	  if (debug_threads)
 	    debug_printf ("Forcing non-stop mode\n");
 
-	  non_stop = 1;
+	  non_stop = true;
 	  start_non_stop (1);
 	}
 
@@ -1400,7 +1400,7 @@ handle_monitor_command (char *mon, char *own_buf)
   else if (strcmp (mon, "help") == 0)
     monitor_show_help ();
   else if (strcmp (mon, "exit") == 0)
-    exit_requested = 1;
+    exit_requested = true;
   else
     {
       monitor_output ("Unknown monitor command.\n\n");
@@ -2331,7 +2331,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		{
 		  /* GDB supports and wants TARGET_WAITKIND_NO_RESUMED
 		     events.  */
-		  report_no_resumed = 1;
+		  report_no_resumed = true;
 		}
 	      else
 		{
@@ -3639,19 +3639,19 @@ captured_main (int argc, char *argv[])
 	       tok = strtok (NULL, ","))
 	    {
 	      if (strcmp ("vCont", tok) == 0)
-		disable_packet_vCont = 1;
+		disable_packet_vCont = true;
 	      else if (strcmp ("Tthread", tok) == 0)
-		disable_packet_Tthread = 1;
+		disable_packet_Tthread = true;
 	      else if (strcmp ("qC", tok) == 0)
-		disable_packet_qC = 1;
+		disable_packet_qC = true;
 	      else if (strcmp ("qfThreadInfo", tok) == 0)
-		disable_packet_qfThreadInfo = 1;
+		disable_packet_qfThreadInfo = true;
 	      else if (strcmp ("threads", tok) == 0)
 		{
-		  disable_packet_vCont = 1;
-		  disable_packet_Tthread = 1;
-		  disable_packet_qC = 1;
-		  disable_packet_qfThreadInfo = 1;
+		  disable_packet_vCont = true;
+		  disable_packet_Tthread = true;
+		  disable_packet_qC = true;
+		  disable_packet_qfThreadInfo = true;
 		}
 	      else
 		{
@@ -3679,7 +3679,7 @@ captured_main (int argc, char *argv[])
       else if (strcmp (*next_arg, "--no-startup-with-shell") == 0)
 	startup_with_shell = false;
       else if (strcmp (*next_arg, "--once") == 0)
-	run_once = 1;
+	run_once = true;
       else if (strcmp (*next_arg, "--selftest") == 0)
 	selftest = true;
       else if (startswith (*next_arg, "--selftest="))
@@ -4010,7 +4010,7 @@ process_serial_event (void)
 
   disable_async_io ();
 
-  response_needed = 0;
+  response_needed = false;
   packet_len = getpkt (cs.own_buf);
   if (packet_len <= 0)
     {
@@ -4018,7 +4018,7 @@ process_serial_event (void)
       /* Force an event loop break.  */
       return -1;
     }
-  response_needed = 1;
+  response_needed = true;
 
   char ch = cs.own_buf[0];
   switch (ch)
@@ -4033,7 +4033,7 @@ process_serial_event (void)
       handle_detach (cs.own_buf);
       break;
     case '!':
-      extended_protocol = 1;
+      extended_protocol = true;
       write_ok (cs.own_buf);
       break;
     case '?':
@@ -4248,7 +4248,7 @@ process_serial_event (void)
 	break;
       }
     case 'k':
-      response_needed = 0;
+      response_needed = false;
       if (!target_running ())
 	/* The packet we received doesn't make sense - but we can't
 	   reply to it, either.  */
@@ -4287,7 +4287,7 @@ process_serial_event (void)
       }
       break;
     case 'R':
-      response_needed = 0;
+      response_needed = false;
 
       /* Restarting the inferior is only supported in the extended
 	 protocol.  */
@@ -4348,7 +4348,7 @@ process_serial_event (void)
   else
     putpkt (cs.own_buf);
 
-  response_needed = 0;
+  response_needed = false;
 
   if (exit_requested)
     return -1;
