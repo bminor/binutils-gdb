@@ -46,6 +46,7 @@ namespace gdb {
 
 #include <string>
 #include <limits>
+#include "gdb_assert.h"
 
 namespace gdb {
 

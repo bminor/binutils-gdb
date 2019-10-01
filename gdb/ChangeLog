@@ -1,3 +1,8 @@
+2019-10-02  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdbsupport/gdb_assert.h: Include errors.h.
+	* gdbsupport/gdb_string_view.h: Include gdb_assert.h.
+
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* NEWS: Add $_ada_exception entry.
