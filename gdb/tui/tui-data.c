@@ -34,12 +34,6 @@ static struct tui_win_info *win_with_focus = NULL;
 
 static bool win_resized = false;
 
-int
-tui_win_is_auxiliary (enum tui_win_type win_type)
-{
-  return (win_type > MAX_MAJOR_WINDOWS);
-}
-
 /* Answer a whether the terminal window has been resized or not.  */
 bool
 tui_win_resized ()

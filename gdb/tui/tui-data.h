@@ -207,8 +207,6 @@ public:
   bool is_highlighted = false;
 };
 
-extern int tui_win_is_auxiliary (enum tui_win_type win_type);
-
 
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];

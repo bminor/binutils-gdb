@@ -1,5 +1,10 @@
 2019-10-09  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.c (tui_win_is_auxiliary): Remove.
+	* tui/tui-data.h (tui_win_is_auxiliary): Don't declare.
+
+2019-10-09  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.c (tui_get_low_disassembly_address): Compute
 	window height directly.
 	* tui/tui-layout.h (tui_default_win_viewport_height): Don't
