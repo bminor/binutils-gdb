@@ -22,11 +22,13 @@
 
 #include <algorithm>
 #if CXX_STD_THREAD
+#include <condition_variable>
 #include <system_error>
 #include <thread>
 #endif
 
 #include "gdbsupport/block-signals.h"
+#include "gdbsupport/thread_pool.h"
 
 namespace gdb
 {
@@ -34,6 +36,8 @@ namespace gdb
 /* True if threading should be enabled.  */
 
 extern int max_threads;
+
+extern thread_pool parallel_for_pool;
 
 /* A very simple "parallel for".  This splits the range of iterators
    into subranges, and then passes each subrange to the callback.  The
@@ -56,44 +60,49 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
     n_threads = max_threads;
   if (n_threads > local_max)
     n_threads = local_max;
-  int n_actual_threads = 0;
+  if (!parallel_for_pool.started ())
+  {
+    /* Ensure that signals used by gdb are blocked in the new
+       threads.  */
+    block_signals blocker;
+    parallel_for_pool.start (n_threads);
+  }
 
-  std::thread threads[local_max];
+  std::mutex mtx;
+  std::condition_variable cv;
+  int num_finished = 0;
+
   size_t n_elements = last - first;
   if (n_threads > 1 && 2 * n_threads <= n_elements)
     {
-      /* Ensure that signals used by gdb are blocked in the new
-	 threads.  */
-      block_signals blocker;
-
       size_t elts_per_thread = n_elements / n_threads;
-      n_actual_threads = n_threads - 1;
-      for (int i = 0; i < n_actual_threads; ++i)
+      for (int i = 0; i < n_threads; ++i)
 	{
 	  RandomIt end = first + elts_per_thread;
-	  try
-	    {
-	      threads[i] = std::thread (callback, first, end);
-	    }
-	  catch (const std::system_error &failure)
-	    {
-	      /* If a thread failed to start, ignore it and fall back
-		 to processing in the main thread. */
-	      n_actual_threads = i;
-	      break;
-	    }
+	  parallel_for_pool.post_task ([&, first, end] () {
+				       callback (first, end);
+				       std::unique_lock<std::mutex> lck (mtx);
+				       num_finished++;
+				       cv.notify_all ();
+				       });
 	  first = end;
 	}
     }
+  else
+    n_threads = 0;
 #endif /* CXX_STD_THREAD */
 
   /* Process all the remaining elements in the main thread.  */
   callback (first, last);
-
-#if CXX_STD_THREAD
-  for (int i = 0; i < n_actual_threads; ++i)
-    threads[i].join ();
-#endif /* CXX_STD_THREAD */
+  if (n_threads)
+    {
+      for (;;) {
+	std::unique_lock<std::mutex> lck (mtx);
+	if (num_finished == n_threads)
+	  break;
+	cv.wait (lck);
+      }
+    }
 }
 
 }

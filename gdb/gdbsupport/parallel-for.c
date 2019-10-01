@@ -24,4 +24,5 @@ namespace gdb
 {
 /* See parallel-for.h.  */
 int max_threads = -1;
+thread_pool parallel_for_pool;
 }

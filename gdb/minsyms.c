@@ -57,6 +57,7 @@
 #include "gdbsupport/parallel-for.h"
 
 #if CXX_STD_THREAD
+#include <condition_variable>
 #include <mutex>
 #endif
 

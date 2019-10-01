@@ -980,6 +980,7 @@ COMMON_SFILES = \
 	gdbsupport/signals.c \
 	gdbsupport/signals-state-save-restore.c \
 	gdbsupport/tdesc.c \
+	gdbsupport/thread_pool.c \
 	gdbsupport/vec.c \
 	gdbsupport/xml-utils.c \
 	complaints.c \
