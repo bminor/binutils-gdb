@@ -1,3 +1,7 @@
+2019-10-09  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui.h: Remove comments.
+
 2019-10-09  Tom de Vries  <tdevries@suse.de>
 
 	* python/lib/gdb/printer/bound_registers.py: Use

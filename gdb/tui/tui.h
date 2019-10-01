@@ -45,8 +45,6 @@ enum tui_win_type
   DATA_ITEM_WIN
 };
 
-/* GENERAL TUI FUNCTIONS */
-/* tui.c */
 extern CORE_ADDR tui_get_low_disassembly_address (struct gdbarch *,
 						  CORE_ADDR, CORE_ADDR);
 extern void tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr);
