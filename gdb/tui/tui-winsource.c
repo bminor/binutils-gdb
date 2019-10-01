@@ -193,14 +193,14 @@ tui_source_window_base::do_erase_source_content (const char *str)
   content.clear ();
   if (handle != NULL)
     {
-      werase (handle);
+      werase (handle.get ());
       check_and_display_highlight_if_needed ();
 
       if (strlen (str) >= half_width)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (str);
-      mvwaddstr (handle,
+      mvwaddstr (handle.get (),
 		 (height / 2),
 		 x_pos,
 		 (char *) str);
@@ -219,19 +219,19 @@ tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
 
   line = &win_info->content[lineno - 1];
   if (line->is_exec_point)
-    tui_set_reverse_mode (win_info->handle, true);
+    tui_set_reverse_mode (win_info->handle.get (), true);
 
-  wmove (win_info->handle, lineno, TUI_EXECINFO_SIZE);
-  tui_puts (line->line.get (), win_info->handle);
+  wmove (win_info->handle.get (), lineno, TUI_EXECINFO_SIZE);
+  tui_puts (line->line.get (), win_info->handle.get ());
   if (line->is_exec_point)
-    tui_set_reverse_mode (win_info->handle, false);
+    tui_set_reverse_mode (win_info->handle.get (), false);
 
   /* Clear to end of line but stop before the border.  */
-  x = getcurx (win_info->handle);
+  x = getcurx (win_info->handle.get ());
   while (x + 1 < win_info->width)
     {
-      waddch (win_info->handle, ' ');
-      x = getcurx (win_info->handle);
+      waddch (win_info->handle.get (), ' ');
+      x = getcurx (win_info->handle.get ());
     }
 }
 
@@ -261,7 +261,7 @@ tui_source_window_base::tui_source_window_base (enum tui_win_type type)
 void
 tui_source_window_base::update_tab_width ()
 {
-  werase (handle);
+  werase (handle.get ());
   rerender ();
 }
 
@@ -479,7 +479,7 @@ tui_source_window_base::update_exec_info ()
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
 
-      mvwaddstr (handle, i + 1, 1, element);
+      mvwaddstr (handle.get (), i + 1, 1, element);
     }
   refresh_window ();
 }

@@ -361,17 +361,14 @@ void
 tui_data_window::delete_data_content_windows ()
 {
   for (auto &&win : m_regs_content)
-    {
-      tui_delete_win (win.handle);
-      win.handle = NULL;
-    }
+    win.handle.reset (nullptr);
 }
 
 
 void
 tui_data_window::erase_data_content (const char *prompt)
 {
-  werase (handle);
+  werase (handle.get ());
   check_and_display_highlight_if_needed ();
   if (prompt != NULL)
     {
@@ -382,9 +379,9 @@ tui_data_window::erase_data_content (const char *prompt)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (prompt);
-      mvwaddstr (handle, (height / 2), x_pos, (char *) prompt);
+      mvwaddstr (handle.get (), (height / 2), x_pos, (char *) prompt);
     }
-  wrefresh (handle);
+  wrefresh (handle.get ());
 }
 
 /* See tui-regs.h.  */
@@ -470,21 +467,21 @@ tui_data_item_window::rerender ()
 {
   int i;
 
-  scrollok (handle, FALSE);
+  scrollok (handle.get (), FALSE);
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandout (handle);
+    (void) wstandout (handle.get ());
       
-  wmove (handle, 0, 0);
+  wmove (handle.get (), 0, 0);
   for (i = 1; i < width; i++)
-    waddch (handle, ' ');
-  wmove (handle, 0, 0);
+    waddch (handle.get (), ' ');
+  wmove (handle.get (), 0, 0);
   if (content)
-    waddstr (handle, content.get ());
+    waddstr (handle.get (), content.get ());
 
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
@@ -492,7 +489,7 @@ tui_data_item_window::rerender ()
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandend (handle);
+    (void) wstandend (handle.get ());
   refresh_window ();
 }
 
@@ -504,8 +501,8 @@ tui_data_item_window::refresh_window ()
       /* This seems to be needed because the data items are nested
 	 windows, which according to the ncurses man pages aren't well
 	 supported.  */
-      touchwin (handle);
-      wrefresh (handle);
+      touchwin (handle.get ());
+      wrefresh (handle.get ());
     }
 }
 

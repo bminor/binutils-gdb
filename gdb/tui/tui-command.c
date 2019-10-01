@@ -64,10 +64,10 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 	 it.  However we can at least move it and keep the old size if
 	 wresize isn't available.  */
 #ifdef HAVE_WRESIZE
-      wresize (handle, height, width);
+      wresize (handle.get (), height, width);
 #endif
-      mvwin (handle, origin.y, origin.x);
-      wmove (handle, 0, 0);
+      mvwin (handle.get (), origin.y, origin.x);
+      wmove (handle.get (), 0, 0);
     }
 }
 
@@ -76,7 +76,7 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 void
 tui_refresh_cmd_win (void)
 {
-  WINDOW *w = TUI_CMD_WIN->handle;
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
 
   wrefresh (w);
 

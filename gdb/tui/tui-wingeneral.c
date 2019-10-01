@@ -34,17 +34,8 @@ void
 tui_gen_win_info::refresh_window ()
 {
   if (handle != NULL)
-    wrefresh (handle);
+    wrefresh (handle.get ());
 }
-
-/* Function to delete the curses window, checking for NULL.  */
-void
-tui_delete_win (WINDOW *window)
-{
-  if (window != NULL)
-    delwin (window);
-}
-
 
 /* Draw a border arround the window.  */
 static void
@@ -54,7 +45,7 @@ box_win (struct tui_win_info *win_info,
   WINDOW *win;
   int attrs;
 
-  win = win_info->handle;
+  win = win_info->handle.get ();
   if (highlight_flag)
     attrs = tui_active_border_attrs;
   else
@@ -132,9 +123,9 @@ tui_win_info::check_and_display_highlight_if_needed ()
 void
 tui_gen_win_info::make_window ()
 {
-  handle = newwin (height, width, origin.y, origin.x);
+  handle.reset (newwin (height, width, origin.y, origin.x));
   if (handle != NULL)
-    scrollok (handle, TRUE);
+    scrollok (handle.get (), TRUE);
 }
 
 void
@@ -157,10 +148,7 @@ tui_gen_win_info::make_visible (bool visible)
   if (visible)
     make_window ();
   else
-    {
-      tui_delete_win (handle);
-      handle = NULL;
-    }
+    handle.reset (nullptr);
 }
 
 /* See tui-wingeneral.h.  */

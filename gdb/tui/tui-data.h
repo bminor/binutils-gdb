@@ -36,6 +36,15 @@ struct tui_point
   int x, y;
 };
 
+/* A deleter that calls delwin.  */
+struct curses_deleter
+{
+  void operator() (WINDOW *win) const
+  {
+    delwin (win);
+  }
+};
+
 /* Generic window information.  */
 struct tui_gen_win_info
 {
@@ -57,7 +66,9 @@ protected:
 public:
   tui_gen_win_info (tui_gen_win_info &&) = default;
 
-  virtual ~tui_gen_win_info ();
+  virtual ~tui_gen_win_info ()
+  {
+  }
 
   /* Call to refresh this window.  */
   virtual void refresh_window ();
@@ -83,7 +94,7 @@ public:
   }
 
   /* Window handle.  */
-  WINDOW *handle = nullptr;
+  std::unique_ptr<WINDOW, curses_deleter> handle;
   /* Type of window.  */
   enum tui_win_type type;
   /* Window width.  */

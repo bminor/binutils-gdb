@@ -1,5 +1,34 @@
 2019-10-09  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_delete_win): Don't declare.
+	* tui/tui-stack.c (tui_locator_window::rerender): Update.
+	* tui/tui-command.c (tui_cmd_window::resize)
+	(tui_refresh_cmd_win): Update.
+	* tui/tui-win.c (tui_resize_all, tui_set_focus_command): Update.
+	* tui/tui.c (tui_rl_other_window, tui_enable): Update.
+	* tui/tui-data.c (~tui_gen_win_info): Remove.
+	* tui/tui-layout.c (tui_gen_win_info::resize): Update.
+	* tui/tui-io.c (update_cmdwin_start_line, tui_putc, tui_puts)
+	(tui_redisplay_readline, tui_mld_flush)
+	(tui_mld_erase_entire_line, tui_mld_getc, tui_getc): Update.
+	* tui/tui-regs.c (tui_data_window::delete_data_content_windows)
+	(tui_data_window::erase_data_content)
+	(tui_data_item_window::rerender)
+	(tui_data_item_window::refresh_window): Update.
+	* tui/tui-wingeneral.c (tui_gen_win_info::refresh_window)
+	(box_win, tui_gen_win_info::make_window)
+	(tui_gen_win_info::make_visible): Update.
+	(tui_delete_win): Remove.
+	* tui/tui-winsource.c
+	(tui_source_window_base::do_erase_source_content): Update.
+	(tui_show_source_line, tui_source_window_base::update_tab_width)
+	(tui_source_window_base::update_exec_info): Update.
+	* tui/tui-data.h (struct curses_deleter): New.
+	(struct tui_gen_win_info) <handle>: Now a unique_ptr.
+	(struct tui_gen_win_info) <~tui_gen_win_info>: Define.
+
+2019-10-09  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (struct tui_gen_win_info): Don't declare.
 
 2019-10-09  Tom Tromey  <tom@tromey.com>

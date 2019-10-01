@@ -529,7 +529,7 @@ tui_resize_all (void)
 #endif      
       /* Turn keypad off while we resize.  */
       if (win_with_focus != TUI_CMD_WIN)
-	keypad (TUI_CMD_WIN->handle, FALSE);
+	keypad (TUI_CMD_WIN->handle.get (), FALSE);
       tui_update_gdb_sizes ();
       tui_set_term_height_to (screenheight);
       tui_set_term_width_to (screenwidth);
@@ -639,7 +639,7 @@ tui_resize_all (void)
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
       if (win_with_focus != TUI_CMD_WIN)
-	keypad (TUI_CMD_WIN->handle, TRUE);
+	keypad (TUI_CMD_WIN->handle.get (), TRUE);
     }
 }
 
@@ -791,7 +791,7 @@ tui_set_focus_command (const char *arg, int from_tty)
 	error (_("Window \"%s\" is not visible"), arg);
 
       tui_set_win_focus_to (win_info);
-      keypad (TUI_CMD_WIN->handle, (win_info != TUI_CMD_WIN));
+      keypad (TUI_CMD_WIN->handle.get (), win_info != TUI_CMD_WIN);
       printf_filtered (_("Focus set to %s window.\n"),
 		       tui_win_with_focus ()->name ());
     }

@@ -205,11 +205,6 @@ tui_win_info::tui_win_info (enum tui_win_type type)
 {
 }
 
-tui_gen_win_info::~tui_gen_win_info ()
-{
-  tui_delete_win (handle);
-}
-
 void
 tui_win_info::rerender ()
 {

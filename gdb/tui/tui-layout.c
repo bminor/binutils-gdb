@@ -511,12 +511,11 @@ tui_gen_win_info::resize (int height_, int width_,
   if (handle != nullptr)
     {
 #ifdef HAVE_WRESIZE
-      wresize (handle, height, width);
-      mvwin (handle, origin.y, origin.x);
-      wmove (handle, 0, 0);
+      wresize (handle.get (), height, width);
+      mvwin (handle.get (), origin.y, origin.x);
+      wmove (handle.get (), 0, 0);
 #else
-      tui_delete_win (handle);
-      handle = NULL;
+      handle.reset (nullptr);
 #endif
     }
 

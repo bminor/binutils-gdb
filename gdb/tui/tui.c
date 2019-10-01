@@ -237,7 +237,7 @@ tui_rl_other_window (int count, int key)
   if (win_info)
     {
       tui_set_win_focus_to (win_info);
-      keypad (TUI_CMD_WIN->handle, (win_info != TUI_CMD_WIN));
+      keypad (TUI_CMD_WIN->handle.get (), win_info != TUI_CMD_WIN);
     }
   return 0;
 }
@@ -478,8 +478,8 @@ tui_enable (void)
       tui_show_frame_info (0);
       tui_set_layout (SRC_COMMAND);
       tui_set_win_focus_to (TUI_SRC_WIN);
-      keypad (TUI_CMD_WIN->handle, TRUE);
-      wrefresh (TUI_CMD_WIN->handle);
+      keypad (TUI_CMD_WIN->handle.get (), TRUE);
+      wrefresh (TUI_CMD_WIN->handle.get ());
       tui_finish_init = 0;
     }
   else

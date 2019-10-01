@@ -229,19 +229,19 @@ tui_locator_window::rerender ()
   if (handle != NULL)
     {
       std::string string = make_status_line ();
-      scrollok (handle, FALSE);
-      wmove (handle, 0, 0);
+      scrollok (handle.get (), FALSE);
+      wmove (handle.get (), 0, 0);
       /* We ignore the return value from wstandout and wstandend, casting
 	 them to void in order to avoid a compiler warning.  The warning
 	 itself was introduced by a patch to ncurses 5.7 dated 2009-08-29,
 	 changing these macro to expand to code that causes the compiler
 	 to generate an unused-value warning.  */
-      (void) wstandout (handle);
-      waddstr (handle, string.c_str ());
-      wclrtoeol (handle);
-      (void) wstandend (handle);
+      (void) wstandout (handle.get ());
+      waddstr (handle.get (), string.c_str ());
+      wclrtoeol (handle.get ());
+      (void) wstandend (handle.get ());
       refresh_window ();
-      wmove (handle, 0, 0);
+      wmove (handle.get (), 0, 0);
     }
 }
 
