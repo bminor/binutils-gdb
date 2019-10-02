@@ -124,7 +124,7 @@ set default_regexp_dict [dict create \
   "a_point_t_pointer"		$default_pointer_regexp \
   "a_point_t_ref"		"Pretty Point \\(42, 12\\)" \
   "another_point"		"Pretty Point \\(123, 456\\)" \
-  "a_struct_with_union"		"\\{the_union = \\{an_int = 42, a_char = 42 '\\*'\\}\\}" \
+  "a_struct_with_union"		"\\{the_union = \\{an_int = 707406378, a_char = 42 '\\*'\\}\\}" \
   "an_enum"			"ENUM_BAR" \
   "a_string"			"${default_pointer_regexp} \"hello world\"" \
   "a_binary_string"		"${default_pointer_regexp} \"hello\"" \
@@ -333,7 +333,7 @@ proc test_pretty_structs {} {
   global current_lang
 
   set a_struct_with_union_pretty \
-    "\\{\[\r\n\]+  the_union = \\{\[\r\n\]+    an_int = 42,\[\r\n\]+    a_char = 42 '\\*'\[\r\n\]+  \\}\[\r\n\]+\\}"
+    "\\{\[\r\n\]+  the_union = \\{\[\r\n\]+    an_int = 707406378,\[\r\n\]+    a_char = 42 '\\*'\[\r\n\]+  \\}\[\r\n\]+\\}"
 
   check_var_with_bool_opt "pretty_structs" "a_point_t"
   check_var_with_bool_opt "pretty_structs" "a_point_t_pointer"
@@ -814,7 +814,7 @@ proc test_format {} {
     check_format_string "a_point_t_pointer" $opts
     check_format_string "another_point" $opts
     check_format_string "a_struct_with_union" $opts \
-      "\\{the_union = \\{an_int = 0x2a, a_char = 0x2a\\}\\}"
+      "\\{the_union = \\{an_int = 0x2a2a2a2a, a_char = 0x2a\\}\\}"
     check_format_string "an_enum" $opts \
       "0x1"
     check_format_string "a_string" $opts \
@@ -851,7 +851,7 @@ proc test_format {} {
       $decimal_pointer_regexp
     check_format_string "another_point" $opts
     check_format_string "a_struct_with_union" $opts \
-      "\\{the_union = \\{an_int = 42, a_char = 42\\}\\}"
+      "\\{the_union = \\{an_int = 707406378, a_char = 42\\}\\}"
     check_format_string "an_enum" $opts \
       "1"
     check_format_string "a_string" $opts \

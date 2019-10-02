@@ -1,3 +1,12 @@
+2019-10-02  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* gdb.python/py-format-string.c (string.h): New include.
+	(main): Fill a_struct_with_union.the_union.an_int with bytes of
+	the same value, for endianness-independence.
+	* gdb.python/py-format-string.exp (default_regexp_dict)
+	(test_pretty_structs, test_format): Adjust expected output to the
+	changed initialization.
+
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/catch_ex_std.exp: Add $_ada_exception test.

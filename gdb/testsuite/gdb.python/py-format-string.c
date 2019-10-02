@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <string.h>
+
 typedef struct point
 {
   int x;
@@ -84,7 +86,9 @@ main ()
   struct point another_point = { 123, 456 };
 
   struct_union_t a_struct_with_union;
-  a_struct_with_union.the_union.an_int = 42;
+  /* Fill the union in an endianness-independent way.  */
+  memset (&a_struct_with_union.the_union, 42,
+	  sizeof (a_struct_with_union.the_union));
 
   enum_t an_enum = ENUM_BAR;
 
