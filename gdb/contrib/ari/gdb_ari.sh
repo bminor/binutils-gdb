@@ -353,7 +353,8 @@ Do not use printf(\"%p\"), instead use printf(\"%s\",paddr()) to dump a \
 target address, or host_address_to_string() for a host address"
     category["%p"] = ari_code
 }
-/%p/ && !/%prec/ {
+# Allow gdb %p extensions, but not other uses of %p.
+/%p[^[\]sF]/ && !/%prec/ {
     fail("%p")
 }
 

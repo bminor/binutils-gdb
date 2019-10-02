@@ -1,3 +1,7 @@
+2019-10-08  Tom Tromey  <tromey@adacore.com>
+
+	* contrib/ari/gdb_ari.sh (%p): Allow gdb-specific %p extensions.
+
 2019-10-08  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbtypes.c (overload_debug): Move comment to header.
