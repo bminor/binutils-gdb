@@ -1580,6 +1580,10 @@ class Symbol_table
   saw_undefined() const
   { return this->saw_undefined_; }
 
+  void
+  set_has_gnu_output()
+  { this->has_gnu_output_ = true; }
+
   // Allocate the common symbols
   void
   allocate_commons(Layout*, Mapfile*);
@@ -1981,6 +1985,8 @@ class Symbol_table
   // The number of global dynamic symbols (including forced-local symbols),
   // or 0 if none.
   unsigned int dynamic_count_;
+  // Set if a STT_GNU_IFUNC or STB_GNU_UNIQUE symbol will be output.
+  bool has_gnu_output_;
   // The symbol hash table.
   Symbol_table_type table_;
   // A pool of symbol names.  This is used for all global symbols.

@@ -2646,6 +2646,10 @@ Sized_relobj_file<size, big_endian>::do_finalize_local_symbols(
 	      lv->set_output_symtab_index(index);
 	      ++index;
 	    }
+	  if (lv->is_ifunc_symbol()
+	      && (lv->has_output_symtab_entry()
+		  || lv->needs_output_dynsym_entry()))
+	    symtab->set_has_gnu_output();
 	  break;
 	case CFLV_DISCARDED:
 	case CFLV_ERROR:

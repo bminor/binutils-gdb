@@ -1,3 +1,14 @@
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
+	PR 24853
+	* symtab.h (set_has_gnu_output, has_gnu_output_): New.
+	* symtab.cc (Symbol_table::Symbol_table): Init has_gnu_output_.
+	(Symbol_table::finalize): Set ELFOSABI_GNU when has_gnu_output_.
+	(Symbol_table::set_dynsym_indexes, Symbol_table::sized_finalize):
+	Call set_has_gnu_output for STT_GNU_IFUNC and STB_GNU_UNIQUE globals.
+	* object.cc (Sized_relobj_file::do_finalize_local_symbols): Call
+	set_has_gnu_output when STT_GNU_IFUNC locals will be output.
+
 2019-11-11  Miguel Saldivar  <saldivarcher@gmail.com>
 
 	PR 24996
