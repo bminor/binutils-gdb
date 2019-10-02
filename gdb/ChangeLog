@@ -1,3 +1,24 @@
+2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb/dwarf2read.c (dwarf2_per_objfile::~dwarf2_per_objfile):
+	Update for new std::vector based implementation.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(scan_partial_symbols): Likewise.
+	(recursively_compute_inclusions): Likewise.
+	(compute_compunit_symtab_includes): Likewise.
+	(process_imported_unit_die): Likewise.
+	(queue_and_load_dwo_tu): Likewise.
+	(follow_die_sig_1): Likewise.
+	* gdb/dwarf2read.h: Remove DEF_VEC_P.
+	(typedef dwarf2_per_cu_ptr): Remove.
+	(struct dwarf2_per_cu_data) <imported_symtabs_empty>: New
+	function.
+	(struct dwarf2_per_cu_data) <imported_symtabs_push>: New function.
+	(struct dwarf2_per_cu_data) <imported_symtabs_size>: New function.
+	(struct dwarf2_per_cu_data) <imported_symtabs_free>: New function.
+	(struct dwarf2_per_cu_data) <imported_symtabs>: Change to
+	std::vector.
+
 2019-10-15  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (windows_nat_target::resume): Use %x when logging

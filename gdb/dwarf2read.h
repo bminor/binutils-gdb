@@ -30,9 +30,6 @@
 extern struct cmd_list_element *set_dwarf_cmdlist;
 extern struct cmd_list_element *show_dwarf_cmdlist;
 
-typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
-DEF_VEC_P (dwarf2_per_cu_ptr);
-
 extern bool dwarf_always_disassemble;
 
 /* A descriptor for dwarf sections.
@@ -347,6 +344,37 @@ struct dwarf2_per_cu_data
     struct dwarf2_per_cu_quick_data *quick;
   } v;
 
+  /* Return true of IMPORTED_SYMTABS is empty or not yet allocated.  */
+  bool imported_symtabs_empty () const
+  {
+    return (imported_symtabs == nullptr || imported_symtabs->empty ());
+  }
+
+  /* Push P to the back of IMPORTED_SYMTABS, allocated IMPORTED_SYMTABS
+     first if required.  */
+  void imported_symtabs_push (dwarf2_per_cu_data *p)
+  {
+    if (imported_symtabs == nullptr)
+      imported_symtabs = new std::vector <dwarf2_per_cu_data *>;
+    imported_symtabs->push_back (p);
+  }
+
+  /* Return the size of IMPORTED_SYMTABS if it is allocated, otherwise
+     return 0.  */
+  size_t imported_symtabs_size () const
+  {
+    if (imported_symtabs == nullptr)
+      return 0;
+    return imported_symtabs->size ();
+  }
+
+  /* Delete IMPORTED_SYMTABS and set the pointer back to nullptr.  */
+  void imported_symtabs_free ()
+  {
+    delete imported_symtabs;
+    imported_symtabs = nullptr;
+  }
+
   /* The CUs we import using DW_TAG_imported_unit.  This is filled in
      while reading psymtabs, used to compute the psymtab dependencies,
      and then cleared.  Then it is filled in again while reading full
@@ -364,8 +392,14 @@ struct dwarf2_per_cu_data
      .gdb_index version <=7 this also records the TUs that the CU referred
      to.  Concurrently with this change gdb was modified to emit version 8
      indices so we only pay a price for gold generated indices.
-     http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
-  VEC (dwarf2_per_cu_ptr) *imported_symtabs;
+     http://sourceware.org/bugzilla/show_bug.cgi?id=15021.
+
+     This currently needs to be a public member due to how
+     dwarf2_per_cu_data is allocated and used.  Ideally in future things
+     could be refactored to make this private.  Until then please try to
+     avoid direct access to this member, and instead use the helper
+     functions above.  */
+  std::vector <dwarf2_per_cu_data *> *imported_symtabs;
 };
 
 /* Entry in the signatured_types hash table.  */

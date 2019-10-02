@@ -2152,10 +2152,10 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
     htab_delete (line_header_hash);
 
   for (dwarf2_per_cu_data *per_cu : all_comp_units)
-    VEC_free (dwarf2_per_cu_ptr, per_cu->imported_symtabs);
+    per_cu->imported_symtabs_free ();
 
   for (signatured_type *sig_type : all_type_units)
-    VEC_free (dwarf2_per_cu_ptr, sig_type->per_cu.imported_symtabs);
+    sig_type->per_cu.imported_symtabs_free ();
 
   /* Everything else should be on the objfile obstack.  */
 }
@@ -8080,24 +8080,23 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 
   end_psymtab_common (objfile, pst);
 
-  if (!VEC_empty (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs))
+  if (!cu->per_cu->imported_symtabs_empty ())
     {
       int i;
-      int len = VEC_length (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs);
-      struct dwarf2_per_cu_data *iter;
+      int len = cu->per_cu->imported_symtabs_size ();
 
       /* Fill in 'dependencies' here; we fill in 'users' in a
 	 post-pass.  */
       pst->number_of_dependencies = len;
       pst->dependencies
 	= objfile->partial_symtabs->allocate_dependencies (len);
-      for (i = 0;
-	   VEC_iterate (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
-			i, iter);
-	   ++i)
-	pst->dependencies[i] = iter->v.psymtab;
+      for (i = 0; i < len; ++i)
+	{
+	  pst->dependencies[i]
+	    = cu->per_cu->imported_symtabs->at (i)->v.psymtab;
+	}
 
-      VEC_free (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs);
+      cu->per_cu->imported_symtabs_free ();
     }
 
   /* Get the list of files included in the current compilation unit,
@@ -8727,8 +8726,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		if (per_cu->v.psymtab == NULL)
 		  process_psymtab_comp_unit (per_cu, 1, cu->language);
 
-		VEC_safe_push (dwarf2_per_cu_ptr,
-			       cu->per_cu->imported_symtabs, per_cu);
+		cu->per_cu->imported_symtabs_push (per_cu);
 	      }
 	      break;
 	    case DW_TAG_imported_declaration:
@@ -10244,9 +10242,7 @@ recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
 				struct compunit_symtab *immediate_parent)
 {
   void **slot;
-  int ix;
   struct compunit_symtab *cust;
-  struct dwarf2_per_cu_data *iter;
 
   slot = htab_find_slot (all_children, per_cu, INSERT);
   if (*slot != NULL)
@@ -10281,13 +10277,12 @@ recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
 	}
     }
 
-  for (ix = 0;
-       VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs, ix, iter);
-       ++ix)
-    {
-      recursively_compute_inclusions (result, all_children,
-				      all_type_symtabs, iter, cust);
-    }
+  if (!per_cu->imported_symtabs_empty ())
+    for (dwarf2_per_cu_data *ptr : *per_cu->imported_symtabs)
+      {
+	recursively_compute_inclusions (result, all_children,
+					all_type_symtabs, ptr, cust);
+      }
 }
 
 /* Compute the compunit_symtab 'includes' fields for the compunit_symtab of
@@ -10298,10 +10293,9 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 {
   gdb_assert (! per_cu->is_debug_types);
 
-  if (!VEC_empty (dwarf2_per_cu_ptr, per_cu->imported_symtabs))
+  if (!per_cu->imported_symtabs_empty ())
     {
-      int ix, len;
-      struct dwarf2_per_cu_data *per_cu_iter;
+      int len;
       std::vector<compunit_symtab *> result_symtabs;
       htab_t all_children, all_type_symtabs;
       struct compunit_symtab *cust = get_compunit_symtab (per_cu);
@@ -10315,14 +10309,10 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
       all_type_symtabs = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
 					    NULL, xcalloc, xfree);
 
-      for (ix = 0;
-	   VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs,
-			ix, per_cu_iter);
-	   ++ix)
+      for (dwarf2_per_cu_data *ptr : *per_cu->imported_symtabs)
 	{
 	  recursively_compute_inclusions (&result_symtabs, all_children,
-					  all_type_symtabs, per_cu_iter,
-					  cust);
+					  all_type_symtabs, ptr, cust);
 	}
 
       /* Now we have a transitive closure of all the included symtabs.  */
@@ -10566,8 +10556,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
 	load_full_comp_unit (per_cu, false, cu->language);
 
-      VEC_safe_push (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
-		     per_cu);
+      cu->per_cu->imported_symtabs_push (per_cu);
     }
 }
 
@@ -13499,7 +13488,7 @@ queue_and_load_dwo_tu (void **slot, void *info)
 	 while processing PER_CU.  */
       if (maybe_queue_comp_unit (NULL, sig_cu, per_cu->cu->language))
 	load_full_type_unit (sig_cu);
-      VEC_safe_push (dwarf2_per_cu_ptr, per_cu->imported_symtabs, sig_cu);
+      per_cu->imported_symtabs_push (sig_cu);
     }
 
   return 1;
@@ -23666,9 +23655,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
       if (dwarf2_per_objfile->index_table != NULL
 	  && dwarf2_per_objfile->index_table->version <= 7)
 	{
-	  VEC_safe_push (dwarf2_per_cu_ptr,
-			 (*ref_cu)->per_cu->imported_symtabs,
-			 sig_cu->per_cu);
+	  (*ref_cu)->per_cu->imported_symtabs_push (sig_cu->per_cu);
 	}
 
       *ref_cu = sig_cu;
