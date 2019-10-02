@@ -1,3 +1,15 @@
+2019-10-02  Niklas Gürtler  <profclonk@gmail.com>
+
+	PR 24942
+	* objcopy.c (copy_usage): Update description of
+	--set-section-alignment.
+	(copy_main): Interpret numeric argument of --set-section-alignment
+	as a byte alignment, not a power of two alignment.
+	* doc/binutils.texi: Update description of
+	--set-section-alignment.
+	* testsuite/binutils-all/set-section-alignment.d: New test.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
 2019-09-30  Alan Modra  <amodra@gmail.com>
 
 	PR 25046

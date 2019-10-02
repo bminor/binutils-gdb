@@ -615,7 +615,7 @@ copy_usage (FILE *stream, int exit_status)
      --set-section-flags <name>=<flags>\n\
                                    Set section <name>'s properties to <flags>\n\
      --set-section-alignment <name>=<align>\n\
-                                   Set section <name>'s alignment to 2^<align> bytes\n\
+                                   Set section <name>'s alignment to <align> bytes\n\
      --add-section <name>=<file>   Add section <name> found in <file> to output\n\
      --update-section <name>=<file>\n\
                                    Update contents of section <name> with\n\
@@ -5280,24 +5280,37 @@ copy_main (int argc, char *argv[])
 	    const char *s;
 	    int len;
 	    char *name;
-	    int align;
+	    int palign, align;
 
 	    s = strchr (optarg, '=');
 	    if (s == NULL)
-	      fatal (_("bad format for %s"), "--set-section-alignment");
+	      fatal (_("bad format for --set-section-alignment: argument needed"));
 	    
-	    align = atoi(s+1);
-	    if (align < 0)
-	      fatal (_("bad format for %s"), "--set-section-alignment");
+	    align = atoi (s + 1);
+	    if (align <= 0)
+	      fatal (_("bad format for --set-section-alignment: numeric argument needed"));
 
+	    /* Convert integer alignment into a power-of-two alignment.  */
+	    palign = 0;
+	    while ((align & 1) == 0)
+	      {
+	    	align >>= 1;
+	    	++palign;
+	      }
+	    
+	    if (align != 1)
+	      /* Number has more than on 1, i.e. wasn't a power of 2.  */
+	      fatal (_("bad format for --set-section-alignment: alignment is not a power of two"));
+
+	    /* Add the alignment setting to the section list.  */
 	    len = s - optarg;
 	    name = (char *) xmalloc (len + 1);
 	    strncpy (name, optarg, len);
 	    name[len] = '\0';
 
 	    p = find_section_list (name, TRUE, SECTION_CONTEXT_SET_ALIGNMENT);
-
-	    p->alignment = align;
+	    if (p)
+	      p->alignment = palign;
 	  }
 	  break;
 	  
