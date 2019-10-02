@@ -1225,20 +1225,20 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
    after compacting or sorting the table since the entries move around
-   thus causing the internal minimal_symbol pointers to become jumbled.  */
+   thus causing the internal minimal_symbol pointers to become jumbled.
+ 
+   The two functions are separate so that they can be executed on a
+   background thread.  */
   
 static void
-build_minimal_symbol_hash_tables (struct objfile *objfile)
+build_minimal_symbol_hash_table (struct objfile *objfile)
 {
   int i;
   struct minimal_symbol *msym;
 
-  /* Clear the hash tables.  */
+  /* Clear the hash table.  */
   for (i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
-    {
-      objfile->per_bfd->msymbol_hash[i] = 0;
-      objfile->per_bfd->msymbol_demangled_hash[i] = 0;
-    }
+    objfile->per_bfd->msymbol_hash[i] = 0;
 
   /* Now, (re)insert the actual entries.  */
   for ((i = objfile->per_bfd->minimal_symbol_count,
@@ -1248,7 +1248,25 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
     {
       msym->hash_next = 0;
       add_minsym_to_hash_table (msym, objfile->per_bfd->msymbol_hash);
+    }
+}
 
+static void
+build_minimal_symbol_demangled_hash_table (struct objfile *objfile)
+{
+  int i;
+  struct minimal_symbol *msym;
+
+  /* Clear the hash table.  */
+  for (i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
+    objfile->per_bfd->msymbol_demangled_hash[i] = 0;
+
+  /* Now, (re)insert the actual entries.  */
+  for ((i = objfile->per_bfd->minimal_symbol_count,
+	msym = objfile->per_bfd->msymbols.get ());
+       i > 0;
+       i--, msym++)
+    {
       msym->demangled_hash_next = 0;
       if (MSYMBOL_SEARCH_NAME (msym) != MSYMBOL_LINKAGE_NAME (msym))
 	add_minsym_to_demangled_hash_table (msym, objfile);
@@ -1333,6 +1351,8 @@ minimal_symbol_reader::install ()
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
+      std::thread msym_hash_thread (build_minimal_symbol_hash_table, m_objfile);
+
       msymbols = m_objfile->per_bfd->msymbols.get ();
       gdb::parallel_for_each
 	(&msymbols[0], &msymbols[mcount],
@@ -1354,7 +1374,8 @@ minimal_symbol_reader::install ()
 	     }
 	 });
 
-      build_minimal_symbol_hash_tables (m_objfile);
+      build_minimal_symbol_demangled_hash_table (m_objfile);
+      msym_hash_thread.join ();
     }
 }
 
