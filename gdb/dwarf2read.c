@@ -620,7 +620,7 @@ struct type_unit_group
   /* The TUs that share this DW_AT_stmt_list entry.
      This is added to while parsing type units to build partial symtabs,
      and is deleted afterwards and not used again.  */
-  std::vector <signatured_type *> *tus;
+  std::vector<signatured_type *> *tus;
 
   /* The compunit symtab.
      Type units in a group needn't all be defined in the same source file,
@@ -8191,7 +8191,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   tu_group = get_type_unit_group (cu, attr);
 
   if (tu_group->tus == nullptr)
-    tu_group->tus = new std::vector <signatured_type *>;
+    tu_group->tus = new std::vector<signatured_type *>;
   tu_group->tus->push_back (sig_type);
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);

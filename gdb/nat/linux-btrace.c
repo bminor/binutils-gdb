@@ -271,11 +271,11 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
    In case the buffer overflows during sampling, one sample may have its lower
    part at the end and its upper part at the beginning of the buffer.  */
 
-static std::vector <btrace_block> *
+static std::vector<btrace_block> *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 		     const uint8_t *end, const uint8_t *start, size_t size)
 {
-  std::vector <btrace_block> *btrace = new std::vector <btrace_block>;
+  std::vector<btrace_block> *btrace = new std::vector<btrace_block>;
   struct perf_event_sample sample;
   size_t read = 0;
   struct btrace_block block = { 0, 0 };

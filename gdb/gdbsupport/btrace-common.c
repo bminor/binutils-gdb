@@ -133,7 +133,7 @@ btrace_data_append (struct btrace_data *dst,
 
 	case BTRACE_FORMAT_NONE:
 	  dst->format = BTRACE_FORMAT_BTS;
-	  dst->variant.bts.blocks = new std::vector <btrace_block>;
+	  dst->variant.bts.blocks = new std::vector<btrace_block>;
 
 	  /* Fall-through.  */
 	case BTRACE_FORMAT_BTS:

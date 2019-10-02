@@ -1579,7 +1579,7 @@ btrace_add_pc (struct thread_info *tp)
   pc = regcache_read_pc (regcache);
 
   btrace.format = BTRACE_FORMAT_BTS;
-  btrace.variant.bts.blocks = new std::vector <btrace_block>;
+  btrace.variant.bts.blocks = new std::vector<btrace_block>;
 
   btrace.variant.bts.blocks->emplace_back (pc, pc);
 
@@ -2036,7 +2036,7 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 
     case BTRACE_FORMAT_NONE:
       btrace->format = BTRACE_FORMAT_BTS;
-      btrace->variant.bts.blocks = new std::vector <btrace_block>;
+      btrace->variant.bts.blocks = new std::vector<btrace_block>;
       break;
 
     default:
@@ -2963,7 +2963,7 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
   int errcode;
 
   if (maint->variant.pt.packets == NULL)
-    maint->variant.pt.packets = new std::vector <btrace_pt_packet>;
+    maint->variant.pt.packets = new std::vector<btrace_pt_packet>;
 
   for (;;)
     {
@@ -3095,7 +3095,7 @@ btrace_maint_update_packets (struct btrace_thread_info *btinfo,
 #if defined (HAVE_LIBIPT)
     case BTRACE_FORMAT_PT:
       if (btinfo->maint.variant.pt.packets == nullptr)
-	btinfo->maint.variant.pt.packets = new std::vector <btrace_pt_packet>;
+	btinfo->maint.variant.pt.packets = new std::vector<btrace_pt_packet>;
 
       if (btinfo->maint.variant.pt.packets->empty ())
 	btrace_maint_update_pt_packets (btinfo);
@@ -3123,7 +3123,7 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 
     case BTRACE_FORMAT_BTS:
       {
-	const std::vector <btrace_block> &blocks
+	const std::vector<btrace_block> &blocks
 	  = *btinfo->data.variant.bts.blocks;
 	unsigned int blk;
 
@@ -3144,7 +3144,7 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 #if defined (HAVE_LIBIPT)
     case BTRACE_FORMAT_PT:
       {
-	const std::vector <btrace_pt_packet> &packets
+	const std::vector<btrace_pt_packet> &packets
 	  = *btinfo->maint.variant.pt.packets;
 	unsigned int pkt;
 

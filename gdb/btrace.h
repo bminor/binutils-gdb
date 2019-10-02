@@ -297,7 +297,7 @@ struct btrace_maint_info
     struct
     {
       /* A vector of decoded packets.  */
-      std::vector <btrace_pt_packet> *packets;
+      std::vector<btrace_pt_packet> *packets;
 
       /* The packet history iterator.
 	 We are iterating over the above PACKETS vector.  */

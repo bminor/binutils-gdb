@@ -141,7 +141,7 @@ struct btrace_data_bts
   /* Branch trace is represented as a vector of branch trace blocks starting
      with the most recent block.  This needs to be a pointer as we place
      btrace_data_bts into a union.  */
-  std::vector <btrace_block> *blocks;
+  std::vector<btrace_block> *blocks;
 };
 
 /* Configuration information to go with the trace data.  */

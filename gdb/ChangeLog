@@ -1,3 +1,18 @@
+2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* btrace.c (btrace_add_pc): Remove whitespace before the template
+	parameter in 'std::vector <...>'.
+	(parse_xml_btrace_block): Likewise.
+	(btrace_maint_decode_pt): Likewise.
+	(btrace_maint_update_packets): Likewise.
+	(btrace_maint_print_packets): Likewise.
+	* btrace.h (struct btrace_maint_info): Likewise.
+	* dwarf2read.c (struct type_unit_group): Likewise.
+	(build_type_psymtabs_reader): Likewise.
+	* gdbsupport/btrace-common.c (btrace_data_append): Likewise.
+	* gdbsupport/btrace-common.h (struct btrace_data_bts): Likewise.
+	* nat/linux-btrace.c (perf_event_read_bts): Likewise.
+
 2019-10-03  Tom de Vries  <tdevries@suse.de>
 
 	* cli/cli-style.c (_initialize_cli_style): Adding a '.' at the end of
