@@ -4911,7 +4911,7 @@ elf32_arm_tls_transition (struct bfd_link_info *info, int r_type,
 {
   int is_local = (h == NULL);
 
-  if (bfd_link_pic (info)
+  if (bfd_link_dll (info)
       || (h && h->root.type == bfd_link_hash_undefweak))
     return r_type;
 
@@ -11697,7 +11697,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    /* If we don't know the module number, create a relocation
 	       for it.  */
-	    if (bfd_link_pic (info))
+	    if (bfd_link_dll (info))
 	      {
 		Elf_Internal_Rela outrel;
 
@@ -11801,7 +11801,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	       now, and emit any relocations.  If both an IE GOT and a
 	       GD GOT are necessary, we emit the GD first.  */
 
-	    if ((bfd_link_pic (info) || indx != 0)
+	    if ((bfd_link_dll (info) || indx != 0)
 		&& (h == NULL
 		    || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			&& !resolved_to_zero)
@@ -11818,7 +11818,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		/* We should have relaxed, unless this is an undefined
 		   weak symbol.  */
 		BFD_ASSERT ((h && (h->root.type == bfd_link_hash_undefweak))
-			    || bfd_link_pic (info));
+			    || bfd_link_dll (info));
 		BFD_ASSERT (globals->sgotplt_jump_table_size + offplt + 8
 			    <= globals->root.sgotplt->size);
 
@@ -16491,7 +16491,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	    indx = h->dynindx;
 
 	  if (tls_type != GOT_NORMAL
-	      && (bfd_link_pic (info) || indx != 0)
+	      && (bfd_link_dll (info) || indx != 0)
 	      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		  || h->root.type != bfd_link_hash_undefweak))
 	    {
