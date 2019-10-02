@@ -1622,9 +1622,9 @@ contents--just remove the section instead.  Not all flags are
 meaningful for all object file formats.
 
 @item --set-section-alignment @var{sectionpattern}=@var{align}
-Set the alignment for any sections matching @var{sectionpattern}.  @var{align}
-specifies the alignment as the exponent for the power of two, i.e. the
-alignment in bytes will be 2^@var{align}.
+Set the alignment for any sections matching @var{sectionpattern}.
+@var{align} specifies the alignment in bytes and must be a power of
+two, i.e. 1, 2, 4, 8@dots{}.
 
 @item --add-section @var{sectionname}=@var{filename}
 Add a new section named @var{sectionname} while copying the file.  The
