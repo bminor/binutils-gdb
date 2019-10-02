@@ -1,3 +1,7 @@
+2019-10-02  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* MAINTAINERS: Update my email address.
+
 2019-10-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (struct type_unit_group) <tus>: Convert to
