@@ -1,5 +1,14 @@
 2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	PR ld/22263
+	PR ld/25056
+	* elf32-arm.c (elf32_arm_tls_transition): Use bfd_link_dll instead of
+	bfd_link_pic for TLS checks.
+	(elf32_arm_final_link_relocate): Likewise.
+	(allocate_dynrelocs_for_symbol): Likewise.
+
+2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	PR ld/25062
 	* elf32-arm.c (elf32_arm_final_link_relocate): Sign extend data.
 
