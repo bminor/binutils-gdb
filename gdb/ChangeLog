@@ -1,5 +1,9 @@
 2019-10-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c: Don't include buildsym-legacy.h.
+
+2019-10-08  Tom Tromey  <tromey@adacore.com>
+
 	* contrib/ari/gdb_ari.sh (%p): Allow gdb-specific %p extensions.
 
 2019-10-08  Christian Biesinger  <cbiesinger@google.com>
