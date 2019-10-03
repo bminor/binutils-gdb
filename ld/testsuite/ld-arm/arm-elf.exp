@@ -839,6 +839,11 @@ set armeabitests_nonacl {
      "" {tls-gdesc.s}
      {{readelf "-x .got" tls-gdesc-nlazy.g}}
      "tls-lib2-nlazy.so"}
+    {"TLS gnu shared library negative addend"
+     "--no-fix-arm1176 -shared -T arm-dyn.ld --hash-style=sysv" ""
+     "" {tls-gdesc-neg.s}
+     {{objdump -fdw tls-gdesc-neg.d}}
+     "tls-lib2-neg.so"}
     {"TLS long plt library"
      "-shared -T arm-dyn.ld --hash-style=sysv --section-start .foo=0x4001000" ""
      "" {tls-longplt-lib.s}

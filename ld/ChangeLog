@@ -1,3 +1,12 @@
+2019-10-10  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	Apply from master
+	2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+	PR ld/25062
+	* testsuite/ld-arm/arm-elf.exp: Update.
+	* testsuite/ld-arm/tls-gdesc-neg.d: New test.
+	* testsuite/ld-arm/tls-gdesc-neg.s: New test.
+
 2019-10-09  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

@@ -1,3 +1,10 @@
+2019-10-10  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	Apply from master
+	2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+	PR ld/25062
+	* elf32-arm.c (elf32_arm_final_link_relocate): Sign extend data.
+
 2019-10-09  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

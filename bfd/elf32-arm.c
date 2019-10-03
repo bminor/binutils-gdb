@@ -12024,9 +12024,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	    unsigned long data, insn;
 	    unsigned thumb;
 
-	    data = bfd_get_32 (input_bfd, hit_data);
+	    data = bfd_get_signed_32 (input_bfd, hit_data);
 	    thumb = data & 1;
-	    data &= ~1u;
+	    data &= ~1ul;
 
 	    if (thumb)
 	      {
