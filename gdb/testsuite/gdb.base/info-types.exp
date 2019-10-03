@@ -85,8 +85,8 @@ proc run_test { lang } {
 		 "39:\[\t \]+typedef enum_t nested_enum_t;" \
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
-		 "62:\[\t \]+typedef union_t nested_union_t;" \
-		 "\[\t \]+unsigned int(" \
+		 "62:\[\t \]+typedef union_t nested_union_t;(" \
+		 "\[\t \]+unsigned int)?(" \
 		 "" \
 		 "File .*:.*)?" ]
     } else {
@@ -117,8 +117,8 @@ proc run_test { lang } {
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
 		 "62:\[\t \]+typedef union union_t nested_union_t;" \
-		 "56:\[\t \]+union union_t;" \
-		 "\[\t \]+unsigned int(" \
+		 "56:\[\t \]+union union_t;(" \
+		 "\[\t \]+unsigned int)?(" \
 		 "" \
 		 "File .*:.*)?" ]
     }
