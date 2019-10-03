@@ -1,6 +1,14 @@
 2019-10-09  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2019-10-04  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-powerpc/tlsso.d: Adjust to suit tlsld_got usage change.
+	* testsuite/ld-powerpc/tlsso.g: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.d: Likewise.
+	* testsuite/ld-powerpc/tlsso32.g: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+
 	2019-09-26  Alan Modra  <amodra@gmail.com>
 	PR 24262
 	* ld.texi (-plugin): Revert 2019-03-15 change.

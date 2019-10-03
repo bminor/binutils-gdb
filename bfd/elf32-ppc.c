@@ -4455,11 +4455,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			h = (struct elf_link_hash_entry *) h->root.u.i.link;
 		    }
 
-		  is_local = FALSE;
-		  if (h == NULL
-		      || !h->def_dynamic)
-		    is_local = TRUE;
-
+		  is_local = SYMBOL_REFERENCES_LOCAL (info, h);
 		  r_type = ELF32_R_TYPE (rel->r_info);
 		  /* If this section has old-style __tls_get_addr calls
 		     without marker relocs, then check that each
@@ -5049,24 +5045,6 @@ got_entries_needed (int tls_mask)
   return need;
 }
 
-/* Calculate size of relocs needed for symbol given its TLS_MASK and
-   NEEDed GOT entries.  KNOWN says a TPREL offset can be calculated at
-   link time.  */
-
-static inline unsigned int
-got_relocs_needed (int tls_mask, unsigned int need, bfd_boolean known)
-{
-  /* All the entries we allocated need relocs.
-     Except IE in executable with a local symbol.  We could also omit
-     the DTPREL reloc on the second word of a GD entry under the same
-     condition as that for IE, but ld.so needs to differentiate
-     LD and GD entries.  */
-  if (known && (tls_mask & TLS_TLS) != 0
-      && (tls_mask & (TLS_TPREL | TLS_GDIE)) != 0)
-    need -= 4;
-  return need * sizeof (Elf32_External_Rela) / 4;
-}
-
 /* If H is undefined, make it dynamic if that makes sense.  */
 
 static bfd_boolean
@@ -5119,7 +5097,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       need = 0;
       if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
 	{
-	  if (!eh->elf.def_dynamic)
+	  if (SYMBOL_REFERENCES_LOCAL (info, &eh->elf))
 	    /* We'll just use htab->tlsld_got.offset.  This should
 	       always be the case.  It's a little odd if we have
 	       a local dynamic reloc against a non-local symbol.  */
@@ -5133,20 +5111,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else
 	{
 	  eh->elf.got.offset = allocate_got (htab, need);
-	  if ((bfd_link_pic (info)
+	  if (((bfd_link_pic (info)
+		&& !((eh->tls_mask & TLS_TLS) != 0
+		     && bfd_link_executable (info)
+		     && SYMBOL_REFERENCES_LOCAL (info, &eh->elf)))
 	       || (htab->elf.dynamic_sections_created
 		   && eh->elf.dynindx != -1
 		   && !SYMBOL_REFERENCES_LOCAL (info, &eh->elf)))
 	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &eh->elf))
 	    {
 	      asection *rsec;
-	      bfd_boolean tprel_known = (bfd_link_executable (info)
-					 && SYMBOL_REFERENCES_LOCAL (info,
-								     &eh->elf));
 
-	      need = got_relocs_needed (eh->tls_mask, need, tprel_known);
-	      if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD)
-		  && eh->elf.def_dynamic)
+	      need *= sizeof (Elf32_External_Rela) / 4;
+	      if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
 		need -= sizeof (Elf32_External_Rela);
 	      rsec = htab->elf.srelgot;
 	      if (eh->elf.type == STT_GNU_IFUNC)
@@ -5594,12 +5571,13 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	    else
 	      {
 		*local_got = allocate_got (htab, need);
-		if (bfd_link_pic (info))
+		if (bfd_link_pic (info)
+		    && !((*lgot_masks & TLS_TLS) != 0
+			 && bfd_link_executable (info)))
 		  {
 		    asection *srel;
-		    bfd_boolean tprel_known = bfd_link_executable (info);
 
-		    need = got_relocs_needed (*lgot_masks, need, tprel_known);
+		    need *= sizeof (Elf32_External_Rela) / 4;
 		    srel = htab->elf.srelgot;
 		    if ((*lgot_masks & (TLS_TLS | PLT_IFUNC)) == PLT_IFUNC)
 		      srel = htab->elf.irelplt;
@@ -5676,7 +5654,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
   if (htab->tlsld_got.refcount > 0)
     {
       htab->tlsld_got.offset = allocate_got (htab, 8);
-      if (bfd_link_pic (info))
+      if (bfd_link_dll (info))
 	htab->elf.srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
@@ -7750,8 +7728,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    indx = 0;
 	    if (tls_type == (TLS_TLS | TLS_LD)
-		&& (h == NULL
-		    || !h->def_dynamic))
+		&& SYMBOL_REFERENCES_LOCAL (info, h))
 	      offp = &htab->tlsld_got.offset;
 	    else if (h != NULL)
 	      {
@@ -7793,8 +7770,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 		if (offp == &htab->tlsld_got.offset)
 		  tls_m = TLS_LD;
-		else if (h == NULL
-			 || !h->def_dynamic)
+		else if ((tls_m & TLS_LD) != 0
+			 && SYMBOL_REFERENCES_LOCAL (info, h))
 		  tls_m &= ~TLS_LD;
 
 		/* We might have multiple got entries for this sym.
@@ -7828,9 +7805,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    if (indx != 0
 			|| (bfd_link_pic (info)
 			    && (h == NULL
-				|| !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)
-				|| offp == &htab->tlsld_got.offset)
-			    && !(tls_ty == (TLS_TLS | TLS_TPREL)
+				|| !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+			    && !(tls_ty != 0
 				 && bfd_link_executable (info)
 				 && SYMBOL_REFERENCES_LOCAL (info, h))))
 		      {
@@ -7940,8 +7916,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		if (tls_type != (TLS_TLS | TLS_LD))
 		  {
 		    if ((tls_mask & TLS_LD) != 0
-			&& !(h == NULL
-			     || !h->def_dynamic))
+			&& !SYMBOL_REFERENCES_LOCAL (info, h))
 		      off += 8;
 		    if (tls_type != (TLS_TLS | TLS_GD))
 		      {

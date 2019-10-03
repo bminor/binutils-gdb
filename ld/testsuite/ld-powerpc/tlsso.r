@@ -44,9 +44,9 @@ Program Headers:
  +02 +\.dynamic *
  +03 +\.tdata \.tbss *
 
-Relocation section '\.rela\.dyn' at offset .* contains 18 entries:
+Relocation section '\.rela\.dyn' at offset .* contains 20 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_PPC64_RELATIVE +4fc
+[0-9a-f ]+R_PPC64_RELATIVE +51c
 [0-9a-f ]+R_PPC64_RELATIVE +18800
 [0-9a-f ]+R_PPC64_TPREL16 +0+60 le0 \+ 0
 [0-9a-f ]+R_PPC64_TPREL16_HA +0+68 le1 \+ 0
@@ -60,6 +60,8 @@ Relocation section '\.rela\.dyn' at offset .* contains 18 entries:
 [0-9a-f ]+R_PPC64_DTPMOD64 +0
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+ gd \+ 0
 [0-9a-f ]+R_PPC64_DTPREL64 +0+ gd \+ 0
+[0-9a-f ]+R_PPC64_DTPMOD64 +0+40 ld0 \+ 0
+[0-9a-f ]+R_PPC64_DTPMOD64 +0+ ld \+ 0
 [0-9a-f ]+R_PPC64_DTPREL64 +0+50 ld2 \+ 0
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+38 gd0 \+ 0
 [0-9a-f ]+R_PPC64_DTPREL64 +0+38 gd0 \+ 0
