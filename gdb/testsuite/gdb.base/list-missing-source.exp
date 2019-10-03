@@ -54,8 +54,8 @@ gdb_test "list" "1\[ \t\]+in\[ \t\]+$srcfile"
 gdb_test "info source" \
     [multi_line \
 	 "info source" \
-	 "Current source file is $srcfile" \
-	 "Compilation directory is \[^\n\r\]+" \
+	 "Current source file is $srcfile\(" \
+	 "Compilation directory is \[^\n\r\]+)?" \
 	 "Source language is c." \
 	 "Producer is \[^\n\r\]+" \
 	 "Compiled with DWARF $decimal debugging format." \

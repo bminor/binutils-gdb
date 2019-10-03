@@ -1,6 +1,12 @@
 2019-10-03  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/25059
+	* gdb.base/list-missing-source.exp: Allowing the "Compilation
+	directory" line to be missing.
+
+2019-10-03  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/25059
 	* gdb.base/info-types.exp: Make the presence of the 'unsigned int'
 	type optional.
 
