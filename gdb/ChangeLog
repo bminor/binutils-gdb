@@ -1,5 +1,12 @@
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mi/mi-cmds.c (mi_cmds): Add 'symbol-info-modules' entry.
+	* mi/mi-cmds.h (mi_cmd_symbol_info_modules): Declare.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_info_modules): New function.
+	* NEWS: Mention new MI command.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* mi/mi-cmds.c (mi_cmds): Add '-symbol-info-functions',
 	'-symbol-info-types', and '-symbol-info-variables'.
 	* mi/mi-cmds.h (mi_cmd_symbol_info_functions): Declare.

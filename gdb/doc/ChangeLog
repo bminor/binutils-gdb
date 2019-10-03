@@ -1,6 +1,11 @@
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
+	-symbol-info-modules.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
 	-symbol-info-functions, -symbol-info-types, and
 	-symbol-info-variables.
 

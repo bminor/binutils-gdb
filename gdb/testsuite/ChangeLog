@@ -1,5 +1,11 @@
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-fortran-modules-2.f90: New file.
+	* gdb.mi/mi-fortran-modules.exp: New file.
+	* gdb.mi/mi-fortran-modules.f90: New file.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.mi/mi-sym-info-1.c: New file.
 	* gdb.mi/mi-sym-info-2.c: New file.
 	* gdb.mi/mi-sym-info.exp: New file.

@@ -33995,6 +33995,60 @@ The corresponding @value{GDBN} command is @samp{info functions}.
 @end group
 @end smallexample
 
+@subheading The @code{-symbol-info-modules} Command
+@findex -symbol-info-modules
+@anchor{-symbol-info-modules}
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-info-modules [--name @var{name_regexp}]
+@end smallexample
+
+@noindent
+Return a list containing the names of all known Fortran modules.  The
+modules are grouped by source file, and shown with the line number on
+which each modules is defined.
+
+The option @code{--name} allows the modules returned to be filtered
+based the name of the module.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info modules}.
+
+@subsubheading Example
+@smallexample
+@group
+(gdb)
+-symbol-info-modules
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+      symbols=[@{line="16",name="mod1"@},
+               @{line="22",name="mod2"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+      symbols=[@{line="16",name="mod3"@},
+               @{line="22",name="modmany"@},
+               @{line="26",name="moduse"@}]@}]@}
+@end group
+@group
+(gdb)
+-symbol-info-modules --name mod[123]
+^done,symbols=
+  @{debug=
+    [@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+      symbols=[@{line="16",name="mod1"@},
+               @{line="22",name="mod2"@}]@},
+     @{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+      fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+      symbols=[@{line="16",name="mod3"@}]@}]@}
+@end group
+@end smallexample
+
 @subheading The @code{-symbol-info-types} Command
 @findex -symbol-info-types
 @anchor{-symbol-info-types}

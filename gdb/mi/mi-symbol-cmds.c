@@ -224,6 +224,43 @@ mi_cmd_symbol_info_functions (const char *command, char **argv, int argc)
   mi_info_functions_or_variables (FUNCTIONS_DOMAIN, argv, argc);
 }
 
+/* Implement -symbol-inf-modules command.  */
+
+void
+mi_cmd_symbol_info_modules (const char *command, char **argv, int argc)
+{
+  const char *regexp = nullptr;
+
+  enum opt
+    {
+     NAME_REGEXP_OPT
+    };
+  static const struct mi_opt opts[] =
+  {
+    {"-name", NAME_REGEXP_OPT, 1},
+    { 0, 0, 0 }
+  };
+
+  int oind = 0;
+  char *oarg = nullptr;
+
+  while (1)
+    {
+      int opt = mi_getopt ("-symbol-info-modules", argc, argv, opts,
+			   &oind, &oarg);
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case NAME_REGEXP_OPT:
+	  regexp = oarg;
+	  break;
+	}
+    }
+
+  mi_symbol_info (MODULES_DOMAIN, regexp, nullptr, true);
+}
+
 /* Implement -symbol-info-types command.  */
 
 void
