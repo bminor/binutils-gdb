@@ -1,3 +1,28 @@
+2019-10-04  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Move initialisation of vars.
+	(ppc64_elf_tls_optimize): Correct is_local condition.
+	(allocate_got): Don't reserve dynamic relocations for any of the
+	tls got relocs in PIEs when the symbol is local.
+	(allocate_dynrelocs): Correct validity test for local sym using
+	tlsld_got slot.
+	(ppc64_elf_size_dynamic_sections): Don't reserve dynamic relocations
+	for any of the tls got relocs in PIEs.
+	(ppc64_elf_layout_multitoc): Likewise.
+	(ppc64_elf_relocate_section): Correct validity test for local sym
+	using tlsld_got slot.  Don't emit dynamic relocations for any of
+	the tls got relocs in PIEs when the symbol is local.
+	* elf32-ppc.c (ppc_elf_tls_optimize): Correct is_local condition.
+	(got_relocs_needed): Delete.
+	(allocate_dynrelocs): Correct validity test for local sym using
+	tlsld_got slot.  Don't reserve dynamic relocations for any of the
+	tls got relocs in PIEs when the symbol is local.
+	(ppc_elf_size_dynamic_sections): Don't reserve dynamic relocations
+	for any of the tls got relocs in PIEs.
+	(ppc_elf_relocate_section): Correct validity test for local sym
+	using tlsld_got slot.  Don't emit dynamic relocations for any of
+	the tls got relocs in PIEs when the symbol is local.
+
 2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/22263

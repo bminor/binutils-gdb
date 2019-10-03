@@ -1,3 +1,12 @@
+2019-10-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsso.d: Adjust to suit tlsld_got usage change.
+	* testsuite/ld-powerpc/tlsso.g: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.d: Likewise.
+	* testsuite/ld-powerpc/tlsso32.g: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+
 2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/25062
