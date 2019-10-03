@@ -1,3 +1,11 @@
+2019-11-27  Christian Biesinger  <cbiesinger@google.com>
+
+	* minsyms.c (minimal_symbol_reader::install): Also compute the hash
+	of the mangled name on the background thread.
+	* symtab.c (symbol_set_names): Allow passing in the hash of the
+	linkage_name.
+	* symtab.h (symbol_set_names): Likewise.
+
 2019-11-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (inherit_abstract_dies): Ensure that delayed

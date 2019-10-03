@@ -836,7 +836,8 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
 		  gdb::string_view linkage_name, bool copy_name,
-		  struct objfile_per_bfd_storage *per_bfd)
+		  struct objfile_per_bfd_storage *per_bfd,
+		  gdb::optional<hashval_t> hash)
 {
   struct demangled_name_entry **slot;
 
@@ -864,9 +865,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
     create_demangled_names_hash (per_bfd);
 
   struct demangled_name_entry entry (linkage_name);
+  if (!hash.has_value ())
+    hash = hash_demangled_name_entry (&entry);
   slot = ((struct demangled_name_entry **)
-	  htab_find_slot (per_bfd->demangled_names_hash.get (),
-			  &entry, INSERT));
+          htab_find_slot_with_hash (per_bfd->demangled_names_hash.get (),
+				    &entry, *hash, INSERT));
 
   /* If this name is not in the hash table, add it.  */
   if (*slot == NULL

@@ -553,7 +553,9 @@ extern char *symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 		    (objfile)->per_bfd)
 extern void symbol_set_names (struct general_symbol_info *symbol,
 			      gdb::string_view linkage_name, bool copy_name,
-			      struct objfile_per_bfd_storage *per_bfd);
+			      struct objfile_per_bfd_storage *per_bfd,
+			      gdb::optional<hashval_t> hash
+			        = gdb::optional<hashval_t> ());
 
 /* Return true if NAME matches the "search" name of SYMBOL, according
    to the symbol's language.  */

@@ -1258,6 +1258,16 @@ clear_minimal_symbol_hash_tables (struct objfile *objfile)
     }
 }
 
+/* This struct is used to store values we compute for msymbols on the
+   background threads but don't need to keep around long term.  */
+struct computed_hash_values
+{
+  /* Length of the linkage_name of the symbol.  */
+  size_t name_length;
+  /* Hash code (using fast_hash) of the linkage_name.  */
+  hashval_t mangled_name_hash;
+};
+
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
    after compacting or sorting the table since the entries move around
    thus causing the internal minimal_symbol pointers to become jumbled.  */
@@ -1370,6 +1380,8 @@ minimal_symbol_reader::install ()
       std::mutex demangled_mutex;
 #endif
 
+      std::vector<computed_hash_values> hash_values (mcount);
+
       msymbols = m_objfile->per_bfd->msymbols.get ();
       gdb::parallel_for_each
 	(&msymbols[0], &msymbols[mcount],
@@ -1377,6 +1389,8 @@ minimal_symbol_reader::install ()
 	 {
 	   for (minimal_symbol *msym = start; msym < end; ++msym)
 	     {
+	       size_t idx = msym - msymbols;
+	       hash_values[idx].name_length = strlen (msym->name);
 	       if (!msym->name_set)
 		 {
 		   /* This will be freed later, by symbol_set_names.  */
@@ -1386,6 +1400,9 @@ minimal_symbol_reader::install ()
 		     (msym, demangled_name,
 		      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
+
+		   hash_values[idx].mangled_name_hash
+		     = fast_hash (msym->name, hash_values[idx].name_length);
 		 }
 	     }
 	   {
@@ -1396,8 +1413,14 @@ minimal_symbol_reader::install ()
 #endif
 	     for (minimal_symbol *msym = start; msym < end; ++msym)
 	       {
-		 symbol_set_names (msym, msym->name, false,
-				   m_objfile->per_bfd);
+		 size_t idx = msym - msymbols;
+		 symbol_set_names
+		   (msym,
+		    gdb::string_view(msym->name,
+				     hash_values[idx].name_length),
+		    false,
+		    m_objfile->per_bfd,
+		    hash_values[idx].mangled_name_hash);
 	       }
 	   }
 	 });
