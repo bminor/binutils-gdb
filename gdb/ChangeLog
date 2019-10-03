@@ -1,3 +1,8 @@
+2019-10-03  Tom de Vries  <tdevries@suse.de>
+
+	* cli/cli-style.c (_initialize_cli_style): Adding a '.' at the end of
+	the first line of the help text for set/show style metadata.
+
 2019-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* Makefile.in (COMMON_SFILES): Add common-inferior.c.

@@ -379,7 +379,7 @@ of their output."));
 
   STYLE_ADD_SETSHOW_COMMANDS (metadata_style,
 			      _("\
-Metadata display styling\n\
+Metadata display styling.\n\
 Configure metadata colors and display intensity\n\
 The \"metadata\" style is used when GDB displays information about\n\
 your data, for example \"<unavailable>\""));
