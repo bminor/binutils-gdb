@@ -1,5 +1,26 @@
 2019-11-05  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_language_defn): Update.
+	* python/py-value.c (valpy_string): Call c_get_string.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.c (unknown_language_defn, auto_language_defn): Update.
+	(default_get_string): Remove.
+	* guile/scm-value.c (gdbscm_value_to_string): Use c_get_string.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-lang.c (ada_language_defn): Update.
+	* language.h (struct language_defn) <la_get_string>: Remove.
+	(LA_GET_STRING): Remove.
+	(default_get_string): Don't declare.
+
+2019-11-05  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-source.h (struct tui_source_window): Inline
 	constructor.  Remove destructor.
 	<style_changed, m_observable>: Move to superclass.

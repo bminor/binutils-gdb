@@ -14135,7 +14135,6 @@ extern const struct language_defn ada_language_defn = {
   ada_language_arch_info,
   ada_print_array_index,
   default_pass_by_reference,
-  c_get_string,
   ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   ada_iterate_over_symbols,

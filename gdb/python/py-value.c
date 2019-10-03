@@ -567,7 +567,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
-      LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
+      c_get_string (value, &buffer, &length, &char_type, &la_encoding);
     }
   catch (const gdb_exception &except)
     {

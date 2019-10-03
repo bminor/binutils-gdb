@@ -360,21 +360,6 @@ struct language_defn
        reference at the language level.  */
     int (*la_pass_by_reference) (struct type *type);
 
-    /* Obtain a string from the inferior, storing it in a newly allocated
-       buffer in BUFFER, which should be freed by the caller.  If the
-       in- and out-parameter *LENGTH is specified at -1, the string is
-       read until a null character of the appropriate width is found -
-       otherwise the string is read to the length of characters specified.
-       On completion, *LENGTH will hold the size of the string in characters.
-       If a *LENGTH of -1 was specified it will count only actual
-       characters, excluding any eventual terminating null character.
-       Otherwise *LENGTH will include all characters - including any nulls.
-       CHARSET will hold the encoding used in the string.  */
-    void (*la_get_string) (struct value *value,
-			   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-			   int *length, struct type **chartype,
-			   const char **charset);
-
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
        to watch, and ADDR is the address of the watched memory.  */
@@ -559,8 +544,6 @@ extern enum language set_language (enum language);
 				 encoding, force_ellipses,options))
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->la_emitchar(ch, type, stream, quoter))
-#define LA_GET_STRING(value, buffer, length, chartype, encoding) \
-  (current_language->la_get_string(value, buffer, length, chartype, encoding))
 
 #define LA_PRINT_ARRAY_INDEX(index_value, stream, options) \
   (current_language->la_print_array_index(index_value, stream, options))
@@ -642,11 +625,6 @@ int default_pass_by_reference (struct type *type);
 /* The default implementation of la_print_typedef.  */
 void default_print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream);
-
-void default_get_string (struct value *value,
-			 gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-			 int *length, struct type **char_type,
-			 const char **charset);
 
 /* Default name hashing function.  */
 

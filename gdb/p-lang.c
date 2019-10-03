@@ -466,7 +466,6 @@ extern const struct language_defn pascal_language_defn =
   pascal_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
   c_watch_location_expression,
   NULL,				/* la_compare_symbol_for_completion */
   iterate_over_symbols,

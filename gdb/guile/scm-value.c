@@ -1015,7 +1015,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
   try
     {
       gdb::unique_xmalloc_ptr<gdb_byte> buffer;
-      LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
+      c_get_string (value, &buffer, &length, &char_type, &la_encoding);
       buffer_contents = buffer.release ();
     }
   catch (const gdb_exception &except)

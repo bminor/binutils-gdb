@@ -690,14 +690,6 @@ default_print_array_index (struct value *index_value, struct ui_file *stream,
   fprintf_filtered (stream, "] = ");
 }
 
-void
-default_get_string (struct value *value,
-		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-		    int *length, struct type **char_type, const char **charset)
-{
-  error (_("Getting a string is unsupported in this language."));
-}
-
 /* See language.h.  */
 
 bool
@@ -885,7 +877,6 @@ const struct language_defn unknown_language_defn =
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -937,7 +928,6 @@ const struct language_defn auto_language_defn =
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,

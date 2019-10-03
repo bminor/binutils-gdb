@@ -244,7 +244,6 @@ extern const struct language_defn d_language_defn =
   d_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  c_get_string,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
