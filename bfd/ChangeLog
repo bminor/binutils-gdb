@@ -1,3 +1,8 @@
+2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/25062
+	* elf32-arm.c (elf32_arm_final_link_relocate): Sign extend data.
+
 2019-09-30  Nick Alcock  <nick.alcock@oracle.com>
 
 	* elf-bfd.h (bfd_section_is_ctf): New inline function.

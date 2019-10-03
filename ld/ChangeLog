@@ -1,3 +1,10 @@
+2019-10-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/25062
+	* testsuite/ld-arm/arm-elf.exp: Update.
+	* testsuite/ld-arm/tls-gdesc-neg.d: New test.
+	* testsuite/ld-arm/tls-gdesc-neg.s: New test.
+
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac (TESTCTFLIB): Set to the .so or .a, like TESTBFDLIB.
