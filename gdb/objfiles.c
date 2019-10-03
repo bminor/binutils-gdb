@@ -1019,18 +1019,16 @@ have_minimal_symbols (void)
 
 /* Qsort comparison function.  */
 
-static int
-qsort_cmp (const void *a, const void *b)
+static bool
+sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 {
-  const struct obj_section *sect1 = *(const struct obj_section **) a;
-  const struct obj_section *sect2 = *(const struct obj_section **) b;
   const CORE_ADDR sect1_addr = obj_section_addr (sect1);
   const CORE_ADDR sect2_addr = obj_section_addr (sect2);
 
   if (sect1_addr < sect2_addr)
-    return -1;
+    return true;
   else if (sect1_addr > sect2_addr)
-    return 1;
+    return false;
   else
     {
       /* Sections are at the same address.  This could happen if
@@ -1047,12 +1045,12 @@ qsort_cmp (const void *a, const void *b)
 	  /* Case A.  The ordering doesn't matter: separate debuginfo files
 	     will be filtered out later.  */
 
-	  return 0;
+	  return false;
 	}
 
       /* Case B.  Maintain stable sort order, so bugs in GDB are easier to
 	 triage.  This section could be slow (since we iterate over all
-	 objfiles in each call to qsort_cmp), but this shouldn't happen
+	 objfiles in each call to sort_cmp), but this shouldn't happen
 	 very often (GDB is already in a confused state; one hopes this
 	 doesn't happen at all).  If you discover that significant time is
 	 spent in the loops below, do 'set complaints 100' and examine the
@@ -1067,9 +1065,9 @@ qsort_cmp (const void *a, const void *b)
 
 	  ALL_OBJFILE_OSECTIONS (objfile1, osect)
 	    if (osect == sect1)
-	      return -1;
+	      return true;
 	    else if (osect == sect2)
-	      return 1;
+	      return false;
 
 	  /* We should have found one of the sections before getting here.  */
 	  gdb_assert_not_reached ("section not found");
@@ -1080,9 +1078,9 @@ qsort_cmp (const void *a, const void *b)
 
 	  for (objfile *objfile : current_program_space->objfiles ())
 	    if (objfile == objfile1)
-	      return -1;
+	      return true;
 	    else if (objfile == objfile2)
-	      return 1;
+	      return false;
 
 	  /* We should have found one of the objfiles before getting here.  */
 	  gdb_assert_not_reached ("objfile not found");
@@ -1091,7 +1089,7 @@ qsort_cmp (const void *a, const void *b)
 
   /* Unreachable.  */
   gdb_assert_not_reached ("unexpected code path");
-  return 0;
+  return false;
 }
 
 /* Select "better" obj_section to keep.  We prefer the one that came from
@@ -1283,7 +1281,7 @@ update_section_map (struct program_space *pspace,
       if (insert_section_p (objfile->obfd, s->the_bfd_section))
 	map[i++] = s;
 
-  qsort (map, alloc_size, sizeof (*map), qsort_cmp);
+  std::sort (map, map + alloc_size, sort_cmp);
   map_size = filter_debuginfo_sections(map, alloc_size);
   map_size = filter_overlapping_sections(map, map_size);
 

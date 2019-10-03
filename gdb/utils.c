@@ -3050,14 +3050,6 @@ gdb_argv::reset (const char *s)
   m_argv = argv;
 }
 
-int
-compare_positive_ints (const void *ap, const void *bp)
-{
-  /* Because we know we're comparing two ints which are positive,
-     there's no danger of overflow here.  */
-  return * (int *) ap - * (int *) bp;
-}
-
 #define AMBIGUOUS_MESS1	".\nMatching formats:"
 #define AMBIGUOUS_MESS2	\
   ".\nUse \"set gnutarget format-name\" to specify the format."

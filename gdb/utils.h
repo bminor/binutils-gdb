@@ -101,8 +101,6 @@ extern int streq_hash (const void *, const void *);
 
 extern int subset_compare (const char *, const char *);
 
-int compare_positive_ints (const void *ap, const void *bp);
-
 /* Compare C strings for std::sort.  */
 
 static inline bool

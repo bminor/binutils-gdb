@@ -28,6 +28,7 @@
 #include <sys/file.h>
 #endif
 #include <sys/stat.h>
+#include <algorithm>
 
 #include "coff/internal.h"
 #include "libcoff.h"		/* FIXME, internal data from BFD */
@@ -234,8 +235,6 @@ static void read_xcoff_symtab (struct objfile *, struct partial_symtab *);
 static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static int compare_lte (const void *, const void *);
-
 static struct linetable *arrange_linetable (struct linetable *);
 
 static void record_include_end (struct coff_symbol *);
@@ -407,18 +406,6 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 /* *INDENT-ON* */
 
 
-
-/* compare line table entry addresses.  */
-
-static int
-compare_lte (const void *lte1p, const void *lte2p)
-{
-  struct linetable_entry *lte1 = (struct linetable_entry *) lte1p;
-  struct linetable_entry *lte2 = (struct linetable_entry *) lte2p;
-
-  return lte1->pc - lte2->pc;
-}
-
 /* Given a line table with function entries are marked, arrange its
    functions in ascending order and strip off function entry markers
    and return it in a newly created table.  If the old one is good
@@ -471,8 +458,9 @@ arrange_linetable (struct linetable *oldLineTb)
       return oldLineTb;
     }
   else if (function_count > 1)
-    qsort (fentry, function_count,
-	   sizeof (struct linetable_entry), compare_lte);
+    std::sort (fentry, fentry + function_count,
+	       [] (const linetable_entry &lte1, const linetable_entry& lte2)
+	        { return lte1.pc < lte2.pc; });
 
   /* Allocate a new line table.  */
   newLineTb = (struct linetable *)

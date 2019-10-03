@@ -163,28 +163,27 @@ gdb_disassembler::dis_asm_print_address (bfd_vma addr,
   print_address (self->arch (), addr, self->stream ());
 }
 
-static int
-compare_lines (const void *mle1p, const void *mle2p)
+static bool
+line_is_less_than (const deprecated_dis_line_entry &mle1,
+		   const deprecated_dis_line_entry &mle2)
 {
-  struct deprecated_dis_line_entry *mle1, *mle2;
-  int val;
-
-  mle1 = (struct deprecated_dis_line_entry *) mle1p;
-  mle2 = (struct deprecated_dis_line_entry *) mle2p;
+  bool val;
 
   /* End of sequence markers have a line number of 0 but don't want to
      be sorted to the head of the list, instead sort by PC.  */
-  if (mle1->line == 0 || mle2->line == 0)
+  if (mle1.line == 0 || mle2.line == 0)
     {
-      val = mle1->start_pc - mle2->start_pc;
-      if (val == 0)
-        val = mle1->line - mle2->line;
+      if (mle1.start_pc != mle2.start_pc)
+	val = mle1.start_pc < mle2.start_pc;
+    else
+        val = mle1.line < mle2.line;
     }
   else
     {
-      val = mle1->line - mle2->line;
-      if (val == 0)
-        val = mle1->start_pc - mle2->start_pc;
+      if (mle1.line != mle2.line)
+	val = mle1.line < mle2.line;
+      else
+        val = mle1.start_pc < mle2.start_pc;
     }
   return val;
 }
@@ -404,8 +403,7 @@ do_mixed_source_and_assembly_deprecated
   /* Now, sort mle by line #s (and, then by addresses within lines).  */
 
   if (out_of_order)
-    qsort (mle, newlines, sizeof (struct deprecated_dis_line_entry),
-	   compare_lines);
+    std::sort (mle, mle + newlines, line_is_less_than);
 
   /* Now, for each line entry, emit the specified lines (unless
      they have been emitted before), followed by the assembly code

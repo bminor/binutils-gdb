@@ -75,6 +75,7 @@
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/environ.h"
 #include "gdbsupport/byte-vector.h"
+#include <algorithm>
 #include <unordered_map>
 
 /* The remote target.  */
@@ -1276,22 +1277,6 @@ show_remote_exec_file (struct ui_file *file, int from_tty,
 }
 
 static int
-compare_pnums (const void *lhs_, const void *rhs_)
-{
-  const struct packet_reg * const *lhs
-    = (const struct packet_reg * const *) lhs_;
-  const struct packet_reg * const *rhs
-    = (const struct packet_reg * const *) rhs_;
-
-  if ((*lhs)->pnum < (*rhs)->pnum)
-    return -1;
-  else if ((*lhs)->pnum == (*rhs)->pnum)
-    return 0;
-  else
-    return 1;
-}
-
-static int
 map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
 {
   int regnum, num_remote_regs, offset;
@@ -1321,8 +1306,9 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
     if (regs[regnum].pnum != -1)
       remote_regs[num_remote_regs++] = &regs[regnum];
 
-  qsort (remote_regs, num_remote_regs, sizeof (struct packet_reg *),
-	 compare_pnums);
+  std::sort (remote_regs, remote_regs + num_remote_regs,
+	     [] (const packet_reg *a, const packet_reg *b)
+	      { return a->pnum < b->pnum; });
 
   for (regnum = 0, offset = 0; regnum < num_remote_regs; regnum++)
     {

@@ -519,7 +519,7 @@ bool target_exact_watchpoints = false;
 
 static struct breakpoint *breakpoint_chain;
 
-/* Array is sorted by bp_locations_compare - primarily by the ADDRESS.  */
+/* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
 
 static struct bp_location **bp_locations;
 
@@ -773,7 +773,7 @@ show_condition_evaluation_mode (struct ui_file *file, int from_tty,
 
 /* A comparison function for bp_location AP and BP that is used by
    bsearch.  This comparison function only cares about addresses, unlike
-   the more general bp_locations_compare function.  */
+   the more general bp_location_is_less_than function.  */
 
 static int
 bp_locations_compare_addrs (const void *ap, const void *bp)
@@ -11428,41 +11428,36 @@ breakpoint_auto_delete (bpstat bs)
 }
 
 /* A comparison function for bp_location AP and BP being interfaced to
-   qsort.  Sort elements primarily by their ADDRESS (no matter what
+   std::sort.  Sort elements primarily by their ADDRESS (no matter what
    bl_address_is_meaningful says), secondarily by ordering first
    permanent elements and terciarily just ensuring the array is sorted
-   stable way despite qsort being an unstable algorithm.  */
+   stable way despite std::sort being an unstable algorithm.  */
 
 static int
-bp_locations_compare (const void *ap, const void *bp)
+bp_location_is_less_than (const bp_location *a, const bp_location *b)
 {
-  const struct bp_location *a = *(const struct bp_location **) ap;
-  const struct bp_location *b = *(const struct bp_location **) bp;
-
   if (a->address != b->address)
-    return (a->address > b->address) - (a->address < b->address);
+    return a->address < b->address;
 
   /* Sort locations at the same address by their pspace number, keeping
      locations of the same inferior (in a multi-inferior environment)
      grouped.  */
 
   if (a->pspace->num != b->pspace->num)
-    return ((a->pspace->num > b->pspace->num)
-	    - (a->pspace->num < b->pspace->num));
+    return a->pspace->num < b->pspace->num;
 
   /* Sort permanent breakpoints first.  */
   if (a->permanent != b->permanent)
-    return (a->permanent < b->permanent) - (a->permanent > b->permanent);
+    return a->permanent > b->permanent;
 
   /* Make the internal GDB representation stable across GDB runs
      where A and B memory inside GDB can differ.  Breakpoint locations of
      the same type at the same address can be sorted in arbitrary order.  */
 
   if (a->owner->number != b->owner->number)
-    return ((a->owner->number > b->owner->number)
-	    - (a->owner->number < b->owner->number));
+    return a->owner->number < b->owner->number;
 
-  return (a > b) - (a < b);
+  return a < b;
 }
 
 /* Set bp_locations_placed_address_before_address_max and
@@ -11677,8 +11672,8 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)
       *locp++ = loc;
-  qsort (bp_locations, bp_locations_count, sizeof (*bp_locations),
-	 bp_locations_compare);
+  std::sort (bp_locations, bp_locations + bp_locations_count,
+	     bp_location_is_less_than);
 
   bp_locations_target_extensions_update ();
 

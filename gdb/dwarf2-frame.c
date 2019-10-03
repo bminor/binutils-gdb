@@ -44,6 +44,8 @@
 #include "selftest-arch.h"
 #endif
 
+#include <algorithm>
+
 struct comp_unit;
 
 /* Call Frame Information (CFI).  */
@@ -2181,25 +2183,22 @@ Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
   return ret;
 }
 
-static int
-qsort_fde_cmp (const void *a, const void *b)
+static bool
+fde_is_less_than (const dwarf2_fde *aa, const dwarf2_fde *bb)
 {
-  struct dwarf2_fde *aa = *(struct dwarf2_fde **)a;
-  struct dwarf2_fde *bb = *(struct dwarf2_fde **)b;
-
   if (aa->initial_location == bb->initial_location)
     {
       if (aa->address_range != bb->address_range
           && aa->eh_frame_p == 0 && bb->eh_frame_p == 0)
         /* Linker bug, e.g. gold/10400.
            Work around it by keeping stable sort order.  */
-        return (a < b) ? -1 : 1;
+        return aa < bb;
       else
         /* Put eh_frame entries after debug_frame ones.  */
-        return aa->eh_frame_p - bb->eh_frame_p;
+        return aa->eh_frame_p < bb->eh_frame_p;
     }
 
-  return (aa->initial_location < bb->initial_location) ? -1 : 1;
+  return aa->initial_location < bb->initial_location;
 }
 
 void
@@ -2347,8 +2346,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
       int i;
 
       /* Prepare FDE table for lookups.  */
-      qsort (fde_table.entries, fde_table.num_entries,
-             sizeof (fde_table.entries[0]), qsort_fde_cmp);
+      std::sort (fde_table.entries, fde_table.entries + fde_table.num_entries,
+		 fde_is_less_than);
 
       /* Check for leftovers from --gc-sections.  The GNU linker sets
 	 the relevant symbols to zero, but doesn't zero the FDE *end*

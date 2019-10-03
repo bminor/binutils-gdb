@@ -68,6 +68,8 @@
 
 #include "expression.h"
 
+#include <algorithm>
+
 /* Provide a way to test if we have both ECOFF and ELF symbol tables.
    We use this define in order to know whether we should override a 
    symbol's ECOFF section with its ELF section.  This is necessary in 
@@ -4560,17 +4562,16 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 
 /* Blocks with a smaller low bound should come first.  */
 
-static int
-compare_blocks (const void *arg1, const void *arg2)
+static bool
+block_is_less_than (const struct block *b1, const struct block *b2)
 {
-  LONGEST addr_diff;
-  struct block **b1 = (struct block **) arg1;
-  struct block **b2 = (struct block **) arg2;
+  CORE_ADDR start1 = BLOCK_START (b1);
+  CORE_ADDR start2 = BLOCK_START (b2);
 
-  addr_diff = (BLOCK_START ((*b1))) - (BLOCK_START ((*b2)));
-  if (addr_diff == 0)
-    return (BLOCK_END ((*b2))) - (BLOCK_END ((*b1)));
-  return addr_diff;
+  if (start1 != start2)
+    return start1 < start2;
+
+  return (BLOCK_END (b2)) < (BLOCK_END (b1));
 }
 
 /* Sort the blocks of a symtab S.
@@ -4600,10 +4601,9 @@ sort_blocks (struct symtab *s)
    * to detect -O3 images in advance.
    */
   if (BLOCKVECTOR_NBLOCKS (bv) > FIRST_LOCAL_BLOCK + 1)
-    qsort (&BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK),
-	   BLOCKVECTOR_NBLOCKS (bv) - FIRST_LOCAL_BLOCK,
-	   sizeof (struct block *),
-	   compare_blocks);
+    std::sort (&BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK),
+	       &BLOCKVECTOR_BLOCK (bv, BLOCKVECTOR_NBLOCKS (bv)),
+	       block_is_less_than);
 
   {
     CORE_ADDR high = 0;

@@ -1,3 +1,33 @@
+2019-10-19  Christian Biesinger  <cbiesinger@google.com>
+
+	* bcache.c (bcache::print_statistics): Use std::sort instead of qsort.
+	* breakpoint.c (bp_locations_compare): Rename to...
+	(bp_location_is_less_than): ...this, and change to std::sort semantics.
+	(update_global_location_list): Use std::sort instead of qsort.
+	* buildsym.c (compare_line_numbers): Rename to...
+	(lte_is_less_than): ...this, and change to std::sort semantics.
+	(buildsym_compunit::end_symtab_with_blockvector): Use std::sort
+	instead of qsort.
+	* disasm.c (compare_lines): Rename to...
+	(line_is_less_than): ...this, and change to std::sort semantics.
+	(do_mixed_source_and_assembly_deprecated): Call std::sort instead
+	of qsort.
+	* dwarf2-frame.c (qsort_fde_cmp): Rename to...
+	(fde_is_less_than): ...this, and change to std::sort semantics.
+	(dwarf2_build_frame_info): Call std::sort instead of qsort.
+	* mdebugread.c (compare_blocks):
+	(block_is_less_than): ...this, and change to std::sort semantics.
+	(sort_blocks): Call std::sort instead of qsort.
+	* objfiles.c (qsort_cmp): Rename to...
+	(sort_cmp): ...this, and change to std::sort semantics.
+	(update_section_map): Call std::sort instead of qsort.
+	* remote.c (compare_pnums): Remove.
+	(map_regcache_remote_table): Call std::sort instead of qsort.
+	* utils.c (compare_positive_ints): Remove.
+	* utils.h (compare_positive_ints): Remove.
+	* xcoffread.c (compare_lte): Remove.
+	(arrange_linetable): Call std::sort instead of qsort.
+
 2019-10-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* symfile.c (init_entry_point_info): Fix typo.

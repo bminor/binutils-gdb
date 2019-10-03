@@ -23,6 +23,8 @@
 #include "gdb_obstack.h"
 #include "bcache.h"
 
+#include <algorithm>
+
 /* The type used to hold a single bcache string.  The user data is
    stored in d.data.  Since it can be any type, it needs to have the
    same alignment as the most strict alignment of any type on the host
@@ -311,10 +313,8 @@ bcache::print_statistics (const char *type)
 
     /* To compute the median, we need the set of chain lengths
        sorted.  */
-    qsort (chain_length, m_num_buckets, sizeof (chain_length[0]),
-	   compare_positive_ints);
-    qsort (entry_size, m_unique_count, sizeof (entry_size[0]),
-	   compare_positive_ints);
+    std::sort (chain_length, chain_length + m_num_buckets);
+    std::sort (entry_size, entry_size + m_unique_count);
 
     if (m_num_buckets > 0)
       {
