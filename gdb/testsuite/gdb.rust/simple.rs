@@ -85,6 +85,10 @@ union Union {
     f2: u8,
 }
 
+pub union Union2 {
+    pub name: [u8; 1],
+}
+
 struct StringAtOffset {
     pub field1: &'static str,
     pub field2: i32,
@@ -179,6 +183,8 @@ fn main () {
     let simplelayout = SimpleLayout { f1: 8, f2: 9 };
 
     let empty_enum_value: EmptyEnum;
+
+    let u2 = Union2 { name: [1] };
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));

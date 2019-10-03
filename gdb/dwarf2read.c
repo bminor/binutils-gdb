@@ -10076,10 +10076,10 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       SET_FIELD_BITPOS (TYPE_FIELD (type, 0), 0);
       TYPE_FIELD_NAME (type, 0) = "<<variants>>";
     }
-  else if (TYPE_NFIELDS (type) == 1)
+  /* A union with a single anonymous field is probably an old-style
+     univariant enum.  */
+  else if (TYPE_NFIELDS (type) == 1 && streq (TYPE_FIELD_NAME (type, 0), ""))
     {
-      /* We assume that a union with a single field is a univariant
-	 enum.  */
       /* Smash this type to be a structure type.  We have to do this
 	 because the type has already been recorded.  */
       TYPE_CODE (type) = TYPE_CODE_STRUCT;

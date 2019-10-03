@@ -1,3 +1,10 @@
+2019-10-03  Tom Tromey  <tom@tromey.com>
+
+	PR rust/24976:
+	* gdb.rust/simple.rs (Union2): New type.
+	(main): Use Union2.
+	* gdb.rust/simple.exp: Add test.
+
 2019-10-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/nested-funcs-2.exp: Run tests with and without the
