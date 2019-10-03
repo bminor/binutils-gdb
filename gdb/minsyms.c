@@ -1342,6 +1342,11 @@ minimal_symbol_reader::install ()
       std::mutex demangled_mutex;
 #endif
 
+      struct computed_hash_values {
+	hashval_t mangled_name_hash;
+      };
+      std::vector<computed_hash_values> hash_values (mcount);
+
       msymbols = m_objfile->per_bfd->msymbols.get ();
       gdb::parallel_for_each
 	(&msymbols[0], &msymbols[mcount],
@@ -1361,6 +1366,9 @@ minimal_symbol_reader::install ()
 		   symbol_set_demangled_name (msym, demangled_name,
 					      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
+
+		   size_t idx = msym - msymbols;
+		   hash_values[idx].mangled_name_hash = htab_hash_string (msym->name);
 		 }
 	     }
 	   {
@@ -1371,9 +1379,11 @@ minimal_symbol_reader::install ()
 #endif
 	     for (minimal_symbol *msym = start; msym < end; ++msym)
 	       {
+		 size_t idx = msym - msymbols;
 		 symbol_set_names (msym, msym->name,
 				   strlen (msym->name), 0,
-				   m_objfile->per_bfd);
+				   m_objfile->per_bfd,
+				   hash_values[idx].mangled_name_hash);
 	       }
 	   }
 	 });

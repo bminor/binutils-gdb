@@ -502,13 +502,16 @@ extern char *symbol_find_demangled_name (struct general_symbol_info *gsymbol,
   (symbol)->ginfo.name = (linkage_name)
 
 /* Set the linkage and natural names of a symbol, by demangling
-   the linkage name.  */
+   the linkage name.  Optionally, HASH can be set to the value
+   of htab_hash_string (linkage_name) (if nullterminated), to
+   speed up this function.  */
 #define SYMBOL_SET_NAMES(symbol,linkage_name,len,copy_name,objfile)	\
   symbol_set_names (&(symbol)->ginfo, linkage_name, len, copy_name, \
 		    (objfile)->per_bfd)
 extern void symbol_set_names (struct general_symbol_info *symbol,
 			      const char *linkage_name, int len, bool copy_name,
-			      struct objfile_per_bfd_storage *per_bfd);
+			      struct objfile_per_bfd_storage *per_bfd,
+			      hashval_t hash = 0);
 
 /* Now come lots of name accessor macros.  Short version as to when to
    use which: Use SYMBOL_NATURAL_NAME to refer to the name of the
