@@ -34058,6 +34058,148 @@ The corresponding @value{GDBN} command is @samp{info functions}.
 @end group
 @end smallexample
 
+@subheading The @code{-symbol-info-module-functions} Command
+@findex -symbol-info-module-functions
+@anchor{-symbol-info-module-functions}
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-info-module-functions [--module @var{module_regexp}]
+                               [--name @var{name_regexp}]
+                               [--type @var{type_regexp}]
+@end smallexample
+
+@noindent
+Return a list containing the names of all known functions within all
+know Fortran modules.  The functions are grouped by source file and
+containing module, and shown with the line number on which each
+function is defined.
+
+The option @code{--module} only returns results for modules matching
+@var{module_regexp}.  The option @code{--name} only returns functions
+whose name matches @var{name_regexp}, and @code{--type} only returns
+functions whose type matches @var{type_regexp}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info module functions}.
+
+@subsubheading Example
+
+@smallexample
+@group
+(gdb)
+-symbol-info-module-functions
+^done,symbols=
+  [@{module="mod1",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            symbols=[@{line="21",name="mod1::check_all",type="void (void)",
+                      description="void mod1::check_all(void);"@}]@}]@},
+    @{module="mod2",
+     files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+             fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+             symbols=[@{line="30",name="mod2::check_var_i",type="void (void)",
+                       description="void mod2::check_var_i(void);"@}]@}]@},
+    @{module="mod3",
+     files=[@{filename="/projec/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             fullname="/projec/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             symbols=[@{line="21",name="mod3::check_all",type="void (void)",
+                       description="void mod3::check_all(void);"@},
+                      @{line="27",name="mod3::check_mod2",type="void (void)",
+                       description="void mod3::check_mod2(void);"@}]@}]@},
+    @{module="modmany",
+     files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             symbols=[@{line="35",name="modmany::check_some",type="void (void)",
+                       description="void modmany::check_some(void);"@}]@}]@},
+    @{module="moduse",
+     files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+             symbols=[@{line="44",name="moduse::check_all",type="void (void)",
+                       description="void moduse::check_all(void);"@},
+                      @{line="49",name="moduse::check_var_x",type="void (void)",
+                       description="void moduse::check_var_x(void);"@}]@}]@}]
+@end group
+@end smallexample
+
+@subheading The @code{-symbol-info-module-variables} Command
+@findex -symbol-info-module-variables
+@anchor{-symbol-info-module-variables}
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-info-module-variables [--module @var{module_regexp}]
+                               [--name @var{name_regexp}]
+                               [--type @var{type_regexp}]
+@end smallexample
+
+@noindent
+Return a list containing the names of all known variables within all
+know Fortran modules.  The variables are grouped by source file and
+containing module, and shown with the line number on which each
+variable is defined.
+
+The option @code{--module} only returns results for modules matching
+@var{module_regexp}.  The option @code{--name} only returns variables
+whose name matches @var{name_regexp}, and @code{--type} only returns
+variables whose type matches @var{type_regexp}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info module variables}.
+
+@subsubheading Example
+
+@smallexample
+@group
+(gdb)
+-symbol-info-module-variables
+^done,symbols=
+  [@{module="mod1",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            symbols=[@{line="18",name="mod1::var_const",type="integer(kind=4)",
+                      description="integer(kind=4) mod1::var_const;"@},
+                     @{line="17",name="mod1::var_i",type="integer(kind=4)",
+                      description="integer(kind=4) mod1::var_i;"@}]@}]@},
+   @{module="mod2",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules-2.f90",
+            symbols=[@{line="28",name="mod2::var_i",type="integer(kind=4)",
+                      description="integer(kind=4) mod2::var_i;"@}]@}]@},
+   @{module="mod3",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            symbols=[@{line="18",name="mod3::mod1",type="integer(kind=4)",
+                      description="integer(kind=4) mod3::mod1;"@},
+                     @{line="17",name="mod3::mod2",type="integer(kind=4)",
+                      description="integer(kind=4) mod3::mod2;"@},
+                     @{line="19",name="mod3::var_i",type="integer(kind=4)",
+                      description="integer(kind=4) mod3::var_i;"@}]@}]@},
+   @{module="modmany",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            symbols=[@{line="33",name="modmany::var_a",type="integer(kind=4)",
+                      description="integer(kind=4) modmany::var_a;"@},
+                     @{line="33",name="modmany::var_b",type="integer(kind=4)",
+                      description="integer(kind=4) modmany::var_b;"@},
+                     @{line="33",name="modmany::var_c",type="integer(kind=4)",
+                      description="integer(kind=4) modmany::var_c;"@},
+                     @{line="33",name="modmany::var_i",type="integer(kind=4)",
+                      description="integer(kind=4) modmany::var_i;"@}]@}]@},
+   @{module="moduse",
+    files=[@{filename="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            fullname="/project/gdb/testsuite/gdb.mi/mi-fortran-modules.f90",
+            symbols=[@{line="42",name="moduse::var_x",type="integer(kind=4)",
+                      description="integer(kind=4) moduse::var_x;"@},
+                     @{line="42",name="moduse::var_y",type="integer(kind=4)",
+                      description="integer(kind=4) moduse::var_y;"@}]@}]@}]
+@end group
+@end smallexample
+
 @subheading The @code{-symbol-info-modules} Command
 @findex -symbol-info-modules
 @anchor{-symbol-info-modules}

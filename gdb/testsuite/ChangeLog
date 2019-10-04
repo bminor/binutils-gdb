@@ -1,3 +1,8 @@
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-fortran-modules.exp: Add additional tests for
+	-symbol-info-module-functions and -symbol-info-module-variables.
+
 2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/array-slices.exp: Add test for dynamic strings.

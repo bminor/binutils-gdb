@@ -1,3 +1,18 @@
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* mi/mi-cmds.c (mi_cmds): Add -symbol-info-module-functions and
+	-symbol-info-module-variables entries.
+	* mi/mi-cmds.h (mi_cmd_symbol_info_module_functions): Declare.
+	(mi_cmd_symbol_info_module_variables): Declare.
+	* mi/mi-symbol-cmds.c
+	(module_symbol_search_iterator): New typedef.
+	(output_module_symbols_in_single_module_and_file): New function.
+	(output_module_symbols_in_single_module): New function.
+	(mi_info_module_functions_or_variables): New function.
+	(mi_cmd_symbol_info_module_functions): New function.
+	(mi_cmd_symbol_info_module_variables): New function.
+	* NEWS: Mention new MI command.
+
 2019-12-03  Christian Biesinger  <cbiesinger@google.com>
 
 	* bcache.c (hash): Remove.

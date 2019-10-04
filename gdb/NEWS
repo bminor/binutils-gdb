@@ -402,6 +402,10 @@ focus, winheight, +, -, >, <
 -symbol-info-modules, this is the MI equivalent of the CLI 'info
   modules' command.
 
+-symbol-info-module-functions and -symbol-info-module-variables.
+  These commands are the MI equivalent of the CLI commands 'info
+  module functions' and 'info module variables'.
+
 * Other MI changes
 
  ** The default version of the MI interpreter is now 3 (-i=mi3).
