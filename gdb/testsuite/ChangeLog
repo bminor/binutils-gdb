@@ -1,3 +1,8 @@
+2019-10-04  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/local-static.c (main): Move declaration of int i out of the
+	for loop.
+
 2019-10-03  Tom Tromey  <tom@tromey.com>
 
 	PR rust/24976:
