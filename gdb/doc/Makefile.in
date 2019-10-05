@@ -74,7 +74,7 @@ BUGURL_TEXI = @REPORT_BUGS_TEXI@
 
 # Where is the source dir for the READLINE library doc?  
 # Traditionally readline is in .. or .
-READLINE_DIR = ${gdbdir}/../readline/doc
+READLINE_DIR = ${gdbdir}/../readline/readline/doc
 READLINE_TEXI_INCFLAG = @READLINE_TEXI_INCFLAG@
 
 # The GDB/MI docs come from a sibling directory ../mi

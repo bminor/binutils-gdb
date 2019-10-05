@@ -174,8 +174,8 @@ LIBDECNUMBER = $(LIBDECNUMBER_DIR)/libdecnumber.a
 LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUMBER_DIR)
 LIBDECNUMBER_CFLAGS = -I$(LIBDECNUMBER_DIR) -I$(LIBDECNUMBER_SRC)
 
-# Where is the READLINE library?  Typically in ../readline.
-READLINE_DIR = ../readline
+# Where is the READLINE library?  Typically in ../readline/readline.
+READLINE_DIR = ../readline/readline
 READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 READLINE = @READLINE@
 READLINE_DEPS = @READLINE_DEPS@

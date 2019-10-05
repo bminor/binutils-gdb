@@ -1,4 +1,4 @@
-2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2019-10-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Imported readline 6.2, and upstream patch 001.
 

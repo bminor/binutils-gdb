@@ -1,4 +1,4 @@
-2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2019-10-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* hsuser.texi (Using History Interactively): Disable !BashFeatures
 	@defcodeindex.  Make the `Programming with GNU History' reference

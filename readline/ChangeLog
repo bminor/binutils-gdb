@@ -1,0 +1,6 @@
+2019-10-23  Tom Tromey  <tom@tromey.com>
+
+	Move old contents to readline/ subdirectory.
+	* aclocal.m4, configure, configure.ac, .gitignore, Makefile.am,
+	Makefile.in, README: New files.
+

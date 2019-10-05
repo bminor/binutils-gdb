@@ -1,4 +1,4 @@
-2004-11-04  Per Bothner  <per@bothner.com>
+2019-10-23  Per Bothner  <per@bothner.com>
 
 	* pty.c:  Import from screen-4.0.2.
 	* configure.in, Makefile.in, config.h.in:  Set up autoconf handling,
