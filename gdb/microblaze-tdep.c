@@ -34,8 +34,8 @@
 #include "dwarf2-frame.h"
 #include "osabi.h"
 #include "target-descriptions.h"
-#include "../opcodes/microblaze-opcm.h"
-#include "../opcodes/microblaze-dis.h"
+#include "opcodes/microblaze-opcm.h"
+#include "opcodes/microblaze-dis.h"
 #include "microblaze-tdep.h"
 #include "remote.h"
 

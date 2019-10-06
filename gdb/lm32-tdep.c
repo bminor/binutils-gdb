@@ -35,7 +35,7 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "reggroups.h"
-#include "../opcodes/lm32-desc.h"
+#include "opcodes/lm32-desc.h"
 #include <algorithm>
 
 /* Macros to extract fields from an instruction.  */

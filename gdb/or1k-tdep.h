@@ -23,8 +23,8 @@
 #define TARGET_OR1K
 #endif
 
-#include "../opcodes/or1k-desc.h"
-#include "../opcodes/or1k-opc.h"
+#include "opcodes/or1k-desc.h"
+#include "opcodes/or1k-opc.h"
 
 /* General Purpose Registers */
 #define OR1K_ZERO_REGNUM          0

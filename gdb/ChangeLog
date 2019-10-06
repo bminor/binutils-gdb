@@ -1,5 +1,17 @@
 2019-10-23  Tom Tromey  <tom@tromey.com>
 
+	* arc-tdep.c: Remove ".." from include.
+	* frv-tdep.c: Remove ".." from include.
+	* lm32-tdep.c: Remove ".." from include.
+	* microblaze-tdep.c: Remove ".." from include.
+	* or1k-tdep.h: Remove ".." from include.
+	* s12z-tdep.c: Remove ".." from include.
+	* Makefile.in (OPCODES_CFLAGS): Add comment.
+	(TOP_CFLAGS): New variable.
+	(INTERNAL_CFLAGS_BASE): Add TOP_CFLAGS.
+
+2019-10-23  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (READLINE_DIR): Update.
 
 2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
