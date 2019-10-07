@@ -2222,8 +2222,9 @@ struct ppc_elf_link_hash_table
 /* Nonzero if this section has TLS related relocations.  */
 #define has_tls_reloc sec_flg0
 
-/* Nonzero if this section has a call to __tls_get_addr.  */
-#define has_tls_get_addr_call sec_flg1
+/* Nonzero if this section has a call to __tls_get_addr lacking marker
+   relocs.  */
+#define nomark_tls_get_addr sec_flg1
 
   /* Flag set when PLTCALL relocs are detected.  */
 #define has_pltcall sec_flg2
@@ -3010,7 +3011,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    ;
 	  else
 	    /* Mark this section as having an old-style call.  */
-	    sec->has_tls_get_addr_call = 1;
+	    sec->nomark_tls_get_addr = 1;
 	}
 
       switch (r_type)
@@ -4464,7 +4465,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		     setup insn.  If we don't find matching arg setup
 		     relocs, don't do any tls optimization.  */
 		  if (pass == 0
-		      && sec->has_tls_get_addr_call
+		      && sec->nomark_tls_get_addr
 		      && h != NULL
 		      && h == htab->tls_get_addr
 		      && !expecting_tls_get_addr
@@ -4577,7 +4578,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  if (pass == 0)
 		    {
 		      if (!expecting_tls_get_addr
-			  || !sec->has_tls_get_addr_call)
+			  || !sec->nomark_tls_get_addr)
 			continue;
 
 		      if (rel + 1 < relend
@@ -4627,7 +4628,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		     indirect call to __tls_get_addr without a marker.
 		     Disable optimization in this case.  */
 		  if ((tls_clear & (TLS_GD | TLS_LD)) != 0
-		      && !sec->has_tls_get_addr_call
+		      && !sec->nomark_tls_get_addr
 		      && ((*tls_mask & (TLS_TLS | TLS_MARK))
 			  != (TLS_TLS | TLS_MARK)))
 		    continue;
@@ -7225,7 +7226,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		 stays with its arg setup insns, ie. that the next
 		 reloc is the __tls_get_addr call associated with
 		 the current reloc.  Edit both insns.  */
-	      if (input_section->has_tls_get_addr_call
+	      if (input_section->nomark_tls_get_addr
 		  && rel + 1 < relend
 		  && branch_reloc_hash_match (input_bfd, rel + 1,
 					      htab->tls_get_addr))
