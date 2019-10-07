@@ -1,5 +1,5 @@
 
-tmpdir/tls-lib2-neg.so:     file format elf32-littlearm
+.*:     file format .*
 architecture: armv.*, flags 0x[0-9a-f]+:
 HAS_SYMS, DYNAMIC, D_PAGED
 start address 0x[0-9a-f]+
