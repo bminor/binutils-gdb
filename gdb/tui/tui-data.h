@@ -82,6 +82,9 @@ public:
     return "";
   }
 
+  /* Compute the maximum height of this window.  */
+  virtual int max_height () const = 0;
+
   /* Resize this window.  The parameters are used to set the window's
      size and position.  */
   virtual void resize (int height, int width,
@@ -173,8 +176,7 @@ public:
   {
   }
 
-  /* Compute the maximum height of this window.  */
-  virtual int max_height () const;
+  int max_height () const override;
 
   /* Called after the tab width has been changed.  */
   virtual void update_tab_width ()

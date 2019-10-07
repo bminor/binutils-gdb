@@ -37,6 +37,11 @@ struct tui_locator_window : public tui_gen_win_info
     proc_name[0] = 0;
   }
 
+  int max_height () const override
+  {
+    return 1;
+  }
+
   void rerender () override;
 
   /* Update the locator, with the provided arguments.

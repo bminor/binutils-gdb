@@ -41,6 +41,11 @@ struct tui_data_item_window : public tui_gen_win_info
 
   void refresh_window () override;
 
+  int max_height () const override
+  {
+    return 1;
+  }
+
   const char *name = nullptr;
   /* The register number, or data display number.  */
   int item_no = -1;
