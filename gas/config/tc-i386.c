@@ -6198,7 +6198,7 @@ check_string (void)
 	{
 	  as_bad (_("`%s' operand %d must use `%ses' segment"),
 		  i.tm.name,
-		  mem_op + 1,
+		  intel_syntax ? i.tm.operands - mem_op : mem_op + 1,
 		  register_prefix);
 	  return 0;
 	}
@@ -6214,7 +6214,7 @@ check_string (void)
 	{
 	  as_bad (_("`%s' operand %d must use `%ses' segment"),
 		  i.tm.name,
-		  mem_op + 2,
+		  intel_syntax ? i.tm.operands - mem_op - 1 : mem_op + 2,
 		  register_prefix);
 	  return 0;
 	}
