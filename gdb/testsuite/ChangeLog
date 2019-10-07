@@ -1,3 +1,8 @@
+2019-10-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.ada/catch_ex_std.exp: Handle being unabled to catch Ada
+	exceptions due to missing debug information.
+
 2019-10-07  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/default.exp: Expect _gdb_major/_gdb_minor to be 9.1.
