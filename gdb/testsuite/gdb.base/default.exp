@@ -604,8 +604,8 @@ set show_conv_list \
 	{$_cimag = <internal function _cimag>} \
 	{$_creal = <internal function _creal>} \
 	{$_isvoid = <internal function _isvoid>} \
-	{$_gdb_major = 8} \
-	{$_gdb_minor = 4} \
+	{$_gdb_major = 9} \
+	{$_gdb_minor = 1} \
 	{$_shell_exitsignal = void} \
 	{$_shell_exitcode = 0} \
     }
