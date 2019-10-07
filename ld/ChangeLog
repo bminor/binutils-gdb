@@ -1,5 +1,27 @@
 2019-10-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tlsexe.r: Adjust for added TLSMARK symbol.
+	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+	* testsuite/ld-powerpc/tls32no.d,
+	* testsuite/ld-powerpc/tls32no.g: New test files.
+	* testsuite/ld-powerpc/tlsexe32no.d,
+	* testsuite/ld-powerpc/tlsexe32no.g,
+	* testsuite/ld-powerpc/tlsexe32no.r: New test files.
+	* testsuite/ld-powerpc/tlsexeno.d,
+	* testsuite/ld-powerpc/tlsexeno.g,
+	* testsuite/ld-powerpc/tlsexeno.r: New test files.
+	* testsuite/ld-powerpc/tlsexetocno.d,
+	* testsuite/ld-powerpc/tlsexetocno.g: New test files.
+	* testsuite/ld-powerpc/tlsno.d,
+	* testsuite/ld-powerpc/tlsno.g: New test files.
+	* testsuite/ld-powerpc/tlstocno.d,
+	* testsuite/ld-powerpc/tlstocno.g: New test files.
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+
+2019-10-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-arm/tls-gdesc-neg.d: Relax target match.
 
 2019-10-04  Alan Modra  <amodra@gmail.com>

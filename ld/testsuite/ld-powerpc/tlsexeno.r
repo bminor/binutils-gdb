@@ -1,7 +1,7 @@
 #source: tls.s
 #source: tlslib.s
 #as: -a64
-#ld:
+#ld: --no-tls-optimize
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 
@@ -21,7 +21,7 @@ Section Headers:
  +\[[ 0-9]+\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8
  +\[[ 0-9]+\] \.dynamic +DYNAMIC .* 0+160 10 +WA +4 +0 +8
  +\[[ 0-9]+\] \.opd .*
- +\[[ 0-9]+\] \.got +PROGBITS .* 0+30 08 +WA +0 +0 +256
+ +\[[ 0-9]+\] \.got +PROGBITS .* 0+70 08 +WA +0 +0 +256
  +\[[ 0-9]+\] \.plt +.*
  +\[[ 0-9]+\] \.symtab +.*
  +\[[ 0-9]+\] \.strtab +.*
@@ -51,9 +51,10 @@ Program Headers:
  +04 +\.dynamic *
  +05 +\.tdata \.tbss *
 
-Relocation section '\.rela\.dyn' at offset .* contains 2 entries:
+Relocation section '\.rela\.dyn' at offset .* contains 3 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_PPC64_TPREL64 +0+ gd \+ 0
+[0-9a-f ]+R_PPC64_DTPMOD64 +0+ gd \+ 0
+[0-9a-f ]+R_PPC64_DTPREL64 +0+ gd \+ 0
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+ ld \+ 0
 
 Relocation section '\.rela\.plt' at offset .* contains 1 entry:

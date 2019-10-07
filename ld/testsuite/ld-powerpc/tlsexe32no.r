@@ -1,7 +1,7 @@
 #source: tls32.s
 #source: tlslib32.s
 #as: -a32
-#ld: 
+#ld: --no-tls-optimize
 #readelf: -WSsrl
 #target: powerpc*-*-*
 
@@ -20,7 +20,7 @@ Section Headers:
  +\[[ 0-9]+\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
  +\[[ 0-9]+\] \.tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
  +\[[ 0-9]+\] \.dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 08 +WA +4 +0 +4
- +\[[ 0-9]+\] \.got +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000018 04 +WA +0 +0 +4
+ +\[[ 0-9]+\] \.got +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000038 04 +WA +0 +0 +4
  +\[[ 0-9]+\] \.plt +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000004 00 +WA +0 +0 +4
  +\[[ 0-9]+\] \.symtab +SYMTAB +.*
  +\[[ 0-9]+\] \.strtab +STRTAB +.*
@@ -50,10 +50,11 @@ Program Headers:
  +04 +\.dynamic 
  +05 +\.tdata \.tbss 
 
-Relocation section '\.rela\.dyn' at offset .* contains 2 entries:
+Relocation section '\.rela\.dyn' at offset .* contains 3 entries:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_PPC_TPREL32 +00000000 +gd \+ 0
-[0-9a-f ]+R_PPC_DTPMOD32 +00000000 +ld \+ 0
+[0-9a-f ]+R_PPC_DTPMOD32 +0+ +gd \+ 0
+[0-9a-f ]+R_PPC_DTPREL32 +0+ +gd \+ 0
+[0-9a-f ]+R_PPC_DTPMOD32 +0+ +ld \+ 0
 
 Relocation section '\.rela\.plt' at offset .* contains 1 entry:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
