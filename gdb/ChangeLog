@@ -1,5 +1,11 @@
 2019-10-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* breakpoint.c (breakpoint_chain): Make static.
+	* tui/tui-winsource.c: Call iterate_over_breakpoints instead
+	of accessing breakpoint_chain.
+
+2019-10-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* breakpoint.c (iterate_over_breakpoints): Change function pointer
 	to a gdb::function_view and return value to bool.
 	* breakpoint.h (iterate_over_breakpoints): Likewise.

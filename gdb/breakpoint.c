@@ -517,7 +517,7 @@ bool target_exact_watchpoints = false;
 
 /* Chains of all breakpoints defined.  */
 
-struct breakpoint *breakpoint_chain;
+static struct breakpoint *breakpoint_chain;
 
 /* Array is sorted by bp_locations_compare - primarily by the ADDRESS.  */
 

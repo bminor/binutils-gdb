@@ -401,8 +401,6 @@ tui_source_window_base::update_breakpoint_info
 
   for (i = 0; i < content.size (); i++)
     {
-      struct breakpoint *bp;
-      extern struct breakpoint *breakpoint_chain;
       struct tui_source_element *line;
 
       line = &content[i];
@@ -413,9 +411,7 @@ tui_source_window_base::update_breakpoint_info
          do with it.  Identify enable/disabled breakpoints as well as
          those that we already hit.  */
       tui_bp_flags mode = 0;
-      for (bp = breakpoint_chain;
-           bp != NULL;
-           bp = bp->next)
+      iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
         {
 	  struct bp_location *loc;
 
@@ -423,7 +419,7 @@ tui_source_window_base::update_breakpoint_info
 		      || line->line_or_addr.loa == LOA_ADDRESS);
 
 	  if (bp == being_deleted)
-	    continue;
+	    return false;
 
 	  for (loc = bp->loc; loc != NULL; loc = loc->next)
 	    {
@@ -441,7 +437,8 @@ tui_source_window_base::update_breakpoint_info
 		    mode |= TUI_BP_HARDWARE;
 		}
 	    }
-        }
+	  return false;
+        });
       if (line->break_mode != mode)
         {
           line->break_mode = mode;
