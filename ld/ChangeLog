@@ -1,5 +1,12 @@
 2019-10-07  Alan Modra  <amodra@gmail.com>
 
+	* ldmisc.c (vfinfo): Save and restore bfd_error around bfd
+	function calls that might set it.
+	* testsuite/ld-elf/indirect.exp: Don't expect "nonrepresentable
+	section" message.
+
+2019-10-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/tlsexe.r: Adjust for added TLSMARK symbol.
 	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
 	* testsuite/ld-powerpc/tlsso.r: Likewise.

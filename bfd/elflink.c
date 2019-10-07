@@ -11535,7 +11535,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	{
 	  s = p->u.indirect.section;
 	  sub = s->owner;
-	  if (bfd_get_flavour (sub) == bfd_target_elf_flavour
+	  if ((s->flags & SEC_LINKER_CREATED) == 0
+	      && bfd_get_flavour (sub) == bfd_target_elf_flavour
 	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
 	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s))
 	      && elfsec < elf_numsections (sub)

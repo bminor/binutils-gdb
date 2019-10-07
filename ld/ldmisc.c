@@ -322,6 +322,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		unsigned int linenumber;
 		bfd_boolean discard_last;
 		bfd_boolean done;
+		bfd_error_type last_bfd_error = bfd_get_error ();
 
 		abfd = args[arg_no].reladdr.abfd;
 		section = args[arg_no].reladdr.sec;
@@ -406,6 +407,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		  }
 		if (!done)
 		  lfinfo (fp, "(%pA+0x%v)", section, offset);
+		bfd_set_error (last_bfd_error);
 
 		if (discard_last)
 		  {

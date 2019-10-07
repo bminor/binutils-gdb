@@ -1,5 +1,10 @@
 2019-10-07  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_fixup_link_order): Don't attempt to find
+	an elf_section for linker created bfd sections.
+
+2019-10-07  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_tls_optimize): Don't process R_PPC_TLSLD
 	with non-local symbol.  Don't double count __tls_get_addr calls
 	with marker relocs.
