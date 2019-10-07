@@ -4530,8 +4530,11 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      else
 			continue;
 
-		    case R_PPC_TLSGD:
 		    case R_PPC_TLSLD:
+		      if (!is_local)
+			continue;
+		      /* Fall through.  */
+		    case R_PPC_TLSGD:
 		      if (rel + 1 < relend
 			  && is_plt_seq_reloc (ELF32_R_TYPE (rel[1].r_info)))
 			{
@@ -4633,7 +4636,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			  != (TLS_TLS | TLS_MARK)))
 		    continue;
 
-		  if (expecting_tls_get_addr)
+		  if (expecting_tls_get_addr == 1 + !sec->nomark_tls_get_addr)
 		    {
 		      struct plt_entry *ent;
 		      bfd_vma addend = 0;
@@ -4646,10 +4649,9 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 					  got2, addend);
 		      if (ent != NULL && ent->plt.refcount > 0)
 			ent->plt.refcount -= 1;
-
-		      if (expecting_tls_get_addr == 2)
-			continue;
 		    }
+		  if (tls_clear == 0)
+		    continue;
 
 		  if (tls_set == 0)
 		    {
