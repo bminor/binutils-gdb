@@ -988,7 +988,6 @@ COMMON_SFILES = \
 	cp-namespace.c \
 	cp-support.c \
 	cp-valprint.c \
-	ctf.c \
 	d-lang.c \
 	d-namespace.c \
 	d-valprint.c \
@@ -1124,6 +1123,7 @@ COMMON_SFILES = \
 	thread-iter.c \
 	tid-parse.c \
 	top.c \
+	tracectf.c \
 	tracefile.c \
 	tracefile-tfile.c \
 	tracepoint.c \
@@ -1224,7 +1224,6 @@ HFILES_NO_SRCDIR = \
 	cp-abi.h \
 	cp-support.h \
 	csky-tdep.h \
-	ctf.h \
 	d-lang.h \
 	darwin-nat.h \
 	dcache.h \
@@ -1398,6 +1397,7 @@ HFILES_NO_SRCDIR = \
 	terminal.h \
 	tid-parse.h \
 	top.h \
+	tracectf.h \
 	tracefile.h \
 	tracepoint.h \
 	trad-frame.h \
