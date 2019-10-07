@@ -19,8 +19,6 @@
 #ifndef AX_H
 #define AX_H
 
-#include "gdbsupport/vec.h"
-
 /* It's sometimes useful to be able to debug programs that you can't
    really stop for more than a fraction of a second.  To this end, the
    user can specify a tracepoint (like a breakpoint, but you don't

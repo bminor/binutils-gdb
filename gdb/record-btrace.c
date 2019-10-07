@@ -38,7 +38,6 @@
 #include "infrun.h"
 #include "event-loop.h"
 #include "inf-loop.h"
-#include "gdbsupport/vec.h"
 #include "inferior.h"
 #include <algorithm>
 #include "gdbarch.h"

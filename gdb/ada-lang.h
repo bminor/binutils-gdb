@@ -28,7 +28,6 @@ struct parser_state;
 #include "value.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
-#include "gdbsupport/vec.h"
 
 /* Names of specific files known to be part of the runtime
    system and that might consider (confusing) debugging information.

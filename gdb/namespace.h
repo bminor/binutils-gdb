@@ -19,7 +19,6 @@
 #ifndef NAMESPACE_H
 #define NAMESPACE_H
 
-#include "gdbsupport/vec.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "gdb_obstack.h"
 

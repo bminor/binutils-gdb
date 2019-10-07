@@ -221,7 +221,6 @@ SFILES = \
 	$(srcdir)/gdbsupport/ptid.c \
 	$(srcdir)/gdbsupport/rsp-low.c \
 	$(srcdir)/gdbsupport/tdesc.c \
-	$(srcdir)/gdbsupport/vec.c \
 	$(srcdir)/gdbsupport/xml-utils.c \
 	$(srcdir)/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/nat/linux-btrace.c \
@@ -270,7 +269,6 @@ OBS = \
 	gdbsupport/signals.o \
 	gdbsupport/signals-state-save-restore.o \
 	gdbsupport/tdesc.o \
-	gdbsupport/vec.o \
 	gdbsupport/xml-utils.o \
 	debug.o \
 	dll.o \

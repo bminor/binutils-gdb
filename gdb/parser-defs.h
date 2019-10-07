@@ -23,7 +23,6 @@
 #if !defined (PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
-#include "gdbsupport/vec.h"
 #include "expression.h"
 #include "symtab.h"
 

@@ -25,7 +25,6 @@
 /* We need this for 'domain_enum', alas...  */
 
 #include "symtab.h"
-#include "gdbsupport/vec.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "gdb_obstack.h"
 #include "gdbsupport/array-view.h"

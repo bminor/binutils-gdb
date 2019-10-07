@@ -23,7 +23,6 @@
 #include "gdb_obstack.h"
 #include "gdbsupport/gdb_wait.h"
 #include "charset-list.h"
-#include "gdbsupport/vec.h"
 #include "gdbsupport/environ.h"
 #include "arch-utils.h"
 #include "gdbsupport/gdb_vecs.h"

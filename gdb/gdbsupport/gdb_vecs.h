@@ -20,8 +20,6 @@
 #ifndef COMMON_GDB_VECS_H
 #define COMMON_GDB_VECS_H
 
-#include "vec.h"
-
 /* Split STR, a list of DELIMITER-separated fields, into a char pointer vector.
 
    You may modify the returned strings.  */

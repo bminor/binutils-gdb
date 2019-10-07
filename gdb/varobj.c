@@ -26,7 +26,6 @@
 #include "gdb_regex.h"
 
 #include "varobj.h"
-#include "gdbsupport/vec.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include "varobj-iter.h"

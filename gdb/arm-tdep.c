@@ -55,8 +55,6 @@
 #include "coff/internal.h"
 #include "elf/arm.h"
 
-#include "gdbsupport/vec.h"
-
 #include "record.h"
 #include "record-full.h"
 #include <algorithm>

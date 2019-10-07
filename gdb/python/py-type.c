@@ -26,7 +26,6 @@
 #include "demangle.h"
 #include "objfiles.h"
 #include "language.h"
-#include "gdbsupport/vec.h"
 #include "typeprint.h"
 
 typedef struct pyty_type_object

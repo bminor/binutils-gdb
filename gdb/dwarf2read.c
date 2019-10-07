@@ -55,7 +55,6 @@
 #include "addrmap.h"
 #include "typeprint.h"
 #include "psympriv.h"
-#include "gdbsupport/vec.h"
 #include "c-lang.h"
 #include "go-lang.h"
 #include "valprint.h"

@@ -52,8 +52,6 @@
 #include "elf-bfd.h"
 #include "elf/aarch64.h"
 
-#include "gdbsupport/vec.h"
-
 #include "record.h"
 #include "record-full.h"
 #include "arch/aarch64-insn.h"

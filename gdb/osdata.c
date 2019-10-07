@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "target.h"
-#include "gdbsupport/vec.h"
 #include "xml-support.h"
 #include "osdata.h"
 #include "ui-out.h"

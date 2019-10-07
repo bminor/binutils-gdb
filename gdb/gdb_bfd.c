@@ -23,7 +23,6 @@
 #include "gdbcmd.h"
 #include "hashtab.h"
 #include "gdbsupport/filestuff.h"
-#include "gdbsupport/vec.h"
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
 #ifndef MAP_FAILED

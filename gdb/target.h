@@ -74,7 +74,6 @@ struct inferior;
 #include "bfd.h"
 #include "symtab.h"
 #include "memattr.h"
-#include "gdbsupport/vec.h"
 #include "gdbsupport/gdb_signals.h"
 #include "btrace.h"
 #include "record.h"

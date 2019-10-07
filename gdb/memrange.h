@@ -20,8 +20,6 @@
 #ifndef MEMRANGE_H
 #define MEMRANGE_H
 
-#include "gdbsupport/vec.h"
-
 /* Defines a [START, START + LENGTH) memory range.  */
 
 struct mem_range

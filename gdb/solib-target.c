@@ -23,7 +23,6 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "target.h"
-#include "gdbsupport/vec.h"
 #include "solib-target.h"
 #include <vector>
 

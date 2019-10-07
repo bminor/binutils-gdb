@@ -27,7 +27,6 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "symtab.h"
-#include "gdbsupport/vec.h"
 #include "frame.h"
 #include <algorithm>
 

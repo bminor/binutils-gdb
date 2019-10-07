@@ -25,7 +25,6 @@
 #include "target-dcache.h"
 #include "value.h"
 #include "language.h"
-#include "gdbsupport/vec.h"
 #include "breakpoint.h"
 #include "cli/cli-utils.h"
 #include <algorithm>

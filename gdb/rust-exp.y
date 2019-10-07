@@ -40,7 +40,6 @@
 #include "parser-defs.h"
 #include "gdbsupport/selftest.h"
 #include "value.h"
-#include "gdbsupport/vec.h"
 #include "gdbarch.h"
 
 #define GDB_YY_REMAP_PREFIX rust

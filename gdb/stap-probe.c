@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "stap-probe.h"
 #include "probe.h"
-#include "gdbsupport/vec.h"
 #include "ui-out.h"
 #include "objfiles.h"
 #include "arch-utils.h"

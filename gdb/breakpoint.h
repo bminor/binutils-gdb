@@ -21,7 +21,6 @@
 
 #include "frame.h"
 #include "value.h"
-#include "gdbsupport/vec.h"
 #include "ax.h"
 #include "command.h"
 #include "gdbsupport/break-common.h"

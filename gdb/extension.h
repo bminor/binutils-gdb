@@ -21,7 +21,6 @@
 #define EXTENSION_H
 
 #include "mi/mi-cmds.h" /* For PRINT_NO_VALUES, etc.  */
-#include "gdbsupport/vec.h"
 #include "gdbsupport/array-view.h"
 
 struct breakpoint;

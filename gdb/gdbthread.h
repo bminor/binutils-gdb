@@ -27,7 +27,6 @@ struct symtab;
 #include "frame.h"
 #include "ui-out.h"
 #include "btrace.h"
-#include "gdbsupport/vec.h"
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
 #include "gdbsupport/refcounted-object.h"

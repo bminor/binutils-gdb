@@ -19,7 +19,6 @@
 
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "gdbsupport/vec.h"
 #include "value.h"
 
 /* Enumeration for the format types */

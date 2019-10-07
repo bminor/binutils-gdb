@@ -22,7 +22,6 @@
 #define PROGSPACE_H
 
 #include "target.h"
-#include "gdbsupport/vec.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "registry.h"

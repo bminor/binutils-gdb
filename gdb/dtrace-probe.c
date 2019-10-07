@@ -21,7 +21,6 @@
 
 #include "defs.h"
 #include "probe.h"
-#include "gdbsupport/vec.h"
 #include "elf-bfd.h"
 #include "gdbtypes.h"
 #include "obstack.h"
