@@ -1535,7 +1535,7 @@ enum flash_preserve_mode
    that supports writing to flash memory, and it should be used for
    all cases where access to flash memory is desirable.
 
-   REQUESTS is the vector (see vec.h) of memory_write_request.
+   REQUESTS is the vector of memory_write_request.
    PRESERVE_FLASH_P indicates what to do with blocks which must be
      erased, but not completely rewritten.
    PROGRESS_CB is a function that will be periodically called to provide

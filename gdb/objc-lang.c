@@ -1063,7 +1063,7 @@ find_methods (char type, const char *theclass, const char *category,
     }
 }
 
-/* Uniquify a VEC of strings.  */
+/* Uniquify a vector of strings.  */
 
 static void
 uniquify_strings (std::vector<const char *> *strings)

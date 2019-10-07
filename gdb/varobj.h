@@ -286,7 +286,7 @@ extern int varobj_get_num_children (struct varobj *var);
    indicating the range of children to return.  If either *FROM or *TO
    is less than zero on entry, then all children will be returned.  On
    return, *FROM and *TO will be updated to indicate the real range
-   that was returned.  The resulting VEC will contain at least the
+   that was returned.  The resulting vector will contain at least the
    children from *FROM to just before *TO; it might contain more
    children, depending on whether any more were available.  */
 extern const std::vector<varobj *> &

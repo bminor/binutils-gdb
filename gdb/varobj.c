@@ -597,10 +597,9 @@ varobj_get_frozen (const struct varobj *var)
   return var->frozen;
 }
 
-/* A helper function that restricts a range to what is actually
-   available in a VEC.  This follows the usual rules for the meaning
-   of FROM and TO -- if either is negative, the entire range is
-   used.  */
+/* A helper function that updates the contents of FROM and TO based on the
+   size of the vector CHILDREN.  If the contents of either FROM or TO are
+   negative the entire range is used.  */
 
 void
 varobj_restrict_range (const std::vector<varobj *> &children,

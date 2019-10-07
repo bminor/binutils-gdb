@@ -1575,9 +1575,9 @@ struct hw_break_tuple
   struct ppc_hw_breakpoint *hw_break;
 };
 
-/* This is an internal VEC created to store information about *points inserted
-   for each thread.  This is used when PowerPC HWDEBUG ptrace interface is
-   available.  */
+/* This is an internal vector created to store information about *points
+   inserted for each thread.  This is used when PowerPC HWDEBUG ptrace
+   interface is available.  */
 struct thread_points
   {
     /* The TID to which this *point relates.  */

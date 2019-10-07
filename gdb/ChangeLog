@@ -1,5 +1,18 @@
 2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linespec.c (decode_digits_ordinary): Update comment.
+	* make-target-delegates: No longer need to handle VEC case.
+	* memrange.c (normalize_mem_ranges): Update comment.
+	* namespace.c (add_using_directive): Update comment.
+	* objc-lang.c (uniquify_strings): Update comment.
+	* ppc-linux-nat.c (struct thread_points): Update comment.
+	* probe.h (find_probes_in_objfile): Update comment.
+	* target.h (enum flash_preserve_mode): Update comment.
+	* varobj.c (varobj_restrict_range): Update comment.
+	* varobj.h (varobj_list_children): Update comment.
+
+2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in: Remove references to vec.h and vec.c.
 	* aarch64-tdep.c: No longer include vec.h.
 	* ada-lang.c: Likewise.

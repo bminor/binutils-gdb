@@ -30,8 +30,8 @@
    it is NULL.  EXCLUDES is a list of names not to import from an
    imported module or NULL.  If COPY_NAMES is non-zero, then the
    arguments are copied into newly allocated memory so they can be
-   temporaries.  For EXCLUDES the VEC pointers are copied but the
-   pointed to characters are not copied.  */
+   temporaries.  For EXCLUDES the contents of the vector are copied,
+   but the pointed to characters are not copied.  */
 
 void
 add_using_directive (struct using_direct **using_directives,
