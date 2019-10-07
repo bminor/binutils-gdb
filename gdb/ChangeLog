@@ -1,3 +1,8 @@
+2019-10-07  Christian Biesinger  <cbiesinger@google.com>
+
+	* charset.c (your_gdb_wchar_t_is_bogus): Replace with a
+	gdb_static_assert.
+
 2019-10-07  Weimin Pan  <weimin.pan@oracle.com>
 
 	* ../Makefile.def (dependencies): Add all-libctf to all-gdb
