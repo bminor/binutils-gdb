@@ -1,3 +1,9 @@
+2019-10-07  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (nomark_tls_get_addr): Rename from has_tls_get_addr_call
+	throughout.
+	* elf64-ppc.c (nomark_tls_get_addr): Likewise.
+
 2019-10-04  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_check_relocs): Move initialisation of vars.
