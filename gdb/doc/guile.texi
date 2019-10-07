@@ -729,7 +729,7 @@ The result @code{bar} will be a @code{<gdb:value>} object holding the
 value pointed to by @code{foo}.
 
 A similar function @code{value-referenced-value} exists which also
-returns @code{<gdb:value>} objects corresonding to the values pointed to
+returns @code{<gdb:value>} objects corresponding to the values pointed to
 by pointer values (and additionally, values referenced by reference
 values).  However, the behavior of @code{value-dereference}
 differs from @code{value-referenced-value} by the fact that the

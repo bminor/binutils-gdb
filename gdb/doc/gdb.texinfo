@@ -27634,7 +27634,7 @@ possible or desirable to enable curses window management.
 @item tui enable
 @kindex tui enable
 Activate TUI mode.  The last active TUI window layout will be used if
-TUI mode has prevsiouly been used in the current debugging session,
+TUI mode has previously been used in the current debugging session,
 otherwise a default layout is used.
 
 @item tui disable

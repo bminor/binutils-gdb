@@ -1,3 +1,9 @@
+2019-10-07  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo: Fix typo.
+	* guile.texi: Same.
+	* python.texi: Same.
+
 2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* doc/gdb.texinfo (Fortran Operators): Describe scope operator.
