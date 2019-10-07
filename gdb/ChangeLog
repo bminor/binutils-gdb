@@ -1,3 +1,15 @@
+2019-10-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ctfread.c (struct nextfield): Renamed to ...
+	(struct ctf_nextfield): ... this.
+	(struct field_info): Renamed to ...
+	(strut ctf_field_info): ... this.
+	(attach_fields_to_type): Update for renamed structures.
+	(ctf_add_member_cb): Likewise.
+	(ctf_add_enum_member_cb): Likewise.
+	(process_struct_members): Likewise.
+	(process_enum_type): Likewise.
+
 2019-10-07  Weimin Pan  <weimin.pan@oracle.com>
 
 	* ctfread.c: New file.

@@ -98,17 +98,17 @@ typedef struct ctf_context
 
 /* The routines that read and process fields/members of a C struct, union,
    or enumeration, pass lists of data member fields in an instance of a
-   field_info structure. It is derived from dwarf2read.c.  */
+   ctf_field_info structure. It is derived from dwarf2read.c.  */
 
-struct nextfield
+struct ctf_nextfield
 {
   struct field field {};
 };
 
-struct field_info
+struct ctf_field_info
 {
   /* List of data member fields.  */
-  std::vector<struct nextfield> fields;
+  std::vector<struct ctf_nextfield> fields;
 
   /* Context.  */
   ctf_context_t *cur_context;
@@ -269,7 +269,7 @@ set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
 /* Create the vector of fields, and attach it to TYPE.  */
 
 static void
-attach_fields_to_type (struct field_info *fip, struct type *type)
+attach_fields_to_type (struct ctf_field_info *fip, struct type *type)
 {
   int nfields = fip->fields.size ();
 
@@ -284,7 +284,7 @@ attach_fields_to_type (struct field_info *fip, struct type *type)
   /* Copy the saved-up fields into the field vector.  */
   for (int i = 0; i < nfields; ++i)
     {
-      struct nextfield &field = fip->fields[i];
+      struct ctf_nextfield &field = fip->fields[i];
       TYPE_FIELD (type, i) = field.field;
     }
 }
@@ -314,7 +314,7 @@ ctf_init_float_type (struct objfile *objfile,
 
 /* Callback to add member NAME to a struct/union type. TID is the type
    of struct/union member, OFFSET is the offset of member in bits,
-   and ARG contains the field_info.  */
+   and ARG contains the ctf_field_info.  */
 
 static int
 ctf_add_member_cb (const char *name,
@@ -322,9 +322,9 @@ ctf_add_member_cb (const char *name,
 		   unsigned long offset,
 		   void *arg)
 {
-  struct field_info *fip = (struct field_info *) arg;
+  struct ctf_field_info *fip = (struct ctf_field_info *) arg;
   ctf_context_t *ccp = fip->cur_context;
-  struct nextfield new_field;
+  struct ctf_nextfield new_field;
   struct field *fp;
   struct type *t;
   uint32_t kind;
@@ -358,13 +358,13 @@ ctf_add_member_cb (const char *name,
 }
 
 /* Callback to add member NAME of EVAL to an enumeration type.
-   ARG contains the field_info.  */
+   ARG contains the ctf_field_info.  */
 
 static int
 ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 {
-  struct field_info *fip = (struct field_info *) arg;
-  struct nextfield new_field;
+  struct ctf_field_info *fip = (struct ctf_field_info *) arg;
+  struct ctf_nextfield new_field;
   struct field *fp;
   ctf_context_t *ccp = fip->cur_context;
 
@@ -587,7 +587,7 @@ process_struct_members (ctf_context_t *ccp,
 			ctf_id_t tid,
 			struct type *type)
 {
-  struct field_info fi;
+  struct ctf_field_info fi;
 
   fi.cur_context = ccp;
   if (ctf_member_iter (ccp->fp, tid, ctf_add_member_cb, &fi) == CTF_ERR)
@@ -665,7 +665,7 @@ static void
 process_enum_type (ctf_context_t *ccp, ctf_id_t tid)
 {
   struct type *type;
-  struct field_info fi;
+  struct ctf_field_info fi;
 
   type = read_enum_type (ccp, tid);
 
