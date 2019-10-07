@@ -1,5 +1,12 @@
 2019-10-08  Christian Biesinger  <cbiesinger@google.com>
 
+	* gdbtypes.c (overload_debug): Move comment to header.
+	* gdbtypes.h (overload_debug): Declare.
+	* valops.c: Remove declaration of overload_debug, instead
+	include gdbtypes.h.
+
+2019-10-08  Christian Biesinger  <cbiesinger@google.com>
+
 	* language.c (show_language_command): Pass lang_frame_mismatch_warn
 	through _().
 	(lang_frame_mismatch_warn): Make const, mark with N_(), and

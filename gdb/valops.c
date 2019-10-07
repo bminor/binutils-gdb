@@ -39,9 +39,9 @@
 #include "observable.h"
 #include "objfiles.h"
 #include "extension.h"
+#include "gdbtypes.h"
 #include "gdbsupport/byte-vector.h"
 
-extern unsigned int overload_debug;
 /* Local functions.  */
 
 static int typecmp (int staticp, int varargs, int nargs,

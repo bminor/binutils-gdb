@@ -2146,4 +2146,9 @@ extern int type_not_allocated (const struct type *type);
 
 extern int type_not_associated (const struct type *type);
 
+/* A flag to enable printing of debugging information of C++
+   overloading.  */
+
+extern unsigned int overload_debug;
+
 #endif /* GDBTYPES_H */

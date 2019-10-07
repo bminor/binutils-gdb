@@ -118,8 +118,7 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
 
 static bool opaque_type_resolution = true;
 
-/* A flag to enable printing of debugging information of C++
-   overloading.  */
+/* See gdbtypes.h.  */
 
 unsigned int overload_debug = 0;
 
