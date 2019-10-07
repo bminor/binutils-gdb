@@ -483,6 +483,11 @@ extern const struct language_defn *current_language;
 
 extern const struct language_defn *expected_language;
 
+/* Warning issued when current_language and the language of the current
+   frame do not match.  */
+
+extern const char lang_frame_mismatch_warn[];
+
 /* language_mode == 
    language_mode_auto:   current_language automatically set upon selection
    of scope (e.g. stack frame)

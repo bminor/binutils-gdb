@@ -1,3 +1,15 @@
+2019-10-08  Christian Biesinger  <cbiesinger@google.com>
+
+	* language.c (show_language_command): Pass lang_frame_mismatch_warn
+	through _().
+	(lang_frame_mismatch_warn): Make const, mark with N_(), and
+	move comment...
+	* language.h (lang_frame_mismatch_warn): ... here. Also add
+	declaration.
+	* top.c (lang_frame_mismatch_warn): Remove declaration.
+	(check_frame_language_change): Pass lang_frame_mismatch_warn
+	through _().
+
 2019-10-07  Christian Biesinger  <cbiesinger@google.com>
 
 	* c-lang.h (vtbl_ptr_name): Declare.

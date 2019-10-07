@@ -112,10 +112,9 @@ static const char *language;
 static const char *range;
 static const char *case_sensitive;
 
-/* Warning issued when current_language and the language of the current
-   frame do not match.  */
-char lang_frame_mismatch_warn[] =
-"Warning: the current language does not match this frame.";
+/* See language.h.  */
+const char lang_frame_mismatch_warn[] =
+N_("Warning: the current language does not match this frame.");
 
 /* This page contains the functions corresponding to GDB commands
    and their helpers.  */
@@ -147,7 +146,7 @@ show_language_command (struct ui_file *file, int from_tty,
       if (flang != language_unknown
 	  && language_mode == language_mode_manual
 	  && current_language->la_language != flang)
-	printf_filtered ("%s\n", lang_frame_mismatch_warn);
+	printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
     }
 }
 

@@ -110,8 +110,6 @@ gen_ret_current_ui_field_ptr (struct ui_out *, current_uiout)
 
 int inhibit_gdbinit = 0;
 
-extern char lang_frame_mismatch_warn[];		/* language.c */
-
 /* Flag for whether we want to confirm potentially dangerous
    operations.  Default is yes.  */
 
@@ -492,7 +490,7 @@ check_frame_language_change (void)
 	  && flang != language_unknown
 	  && flang != current_language->la_language)
 	{
-	  printf_filtered ("%s\n", lang_frame_mismatch_warn);
+	  printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
 	  warned = 1;
 	}
     }
