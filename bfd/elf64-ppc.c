@@ -9781,7 +9781,9 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 			htab->elf.irelplt->size += rel_size;
 			htab->got_reli_size += rel_size;
 		      }
-		    else if (bfd_link_dll (info))
+		    else if (bfd_link_pic (info)
+			     && !(ent->tls_type != 0
+				  && bfd_link_executable (info)))
 		      {
 			asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 			srel->size += rel_size;
