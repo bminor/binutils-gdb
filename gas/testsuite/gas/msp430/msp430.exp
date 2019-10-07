@@ -46,4 +46,10 @@ if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "preinit-array"
     run_dump_test "init-array"
     run_dump_test "fini-array"
+    run_dump_test "attr-430-small-bad"
+    run_dump_test "attr-430-small-good"
+    run_dump_test "attr-430x-large-lower-bad"
+    run_dump_test "attr-430x-large-lower-good"
+    run_dump_test "attr-430x-large-any-bad"
+    run_dump_test "attr-430x-large-any-good"
 }

@@ -7585,6 +7585,23 @@ The vector ABI used by this object file.  The value will be:
 @end itemize
 @end table
 
+@subsection MSP430 Attributes
+
+@table @r
+@item Tag_GNU_MSP430_Data_Region (4)
+The data region used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not using the large memory model.
+@item
+1 for files which have been compiled with the condition that all
+data is in the lower memory region, i.e. below address 0x10000.
+@item
+2 for files which allow data to be placed in the full 20-bit memory range.
+@end itemize
+@end table
+
 @node Defining New Object Attributes
 @section Defining New Object Attributes
 

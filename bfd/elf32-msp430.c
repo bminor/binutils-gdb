@@ -2408,15 +2408,15 @@ data_model (int model)
     }
 }
 
-/* Merge MSPABI object attributes from IBFD into OBFD.
+/* Merge MSPABI and GNU object attributes from IBFD into OBFD.
    Raise an error if there are conflicting attributes.  */
 
 static bfd_boolean
-elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
+elf32_msp430_merge_msp430_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
-  obj_attribute *in_attr;
-  obj_attribute *out_attr;
+  obj_attribute *in_msp_attr, *in_gnu_attr;
+  obj_attribute *out_msp_attr, *out_gnu_attr;
   bfd_boolean result = TRUE;
   static bfd * first_input_bfd = NULL;
 
@@ -2435,45 +2435,48 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_elf_copy_obj_attributes (ibfd, obfd);
 
-      out_attr = elf_known_obj_attributes_proc (obfd);
+      out_msp_attr = elf_known_obj_attributes_proc (obfd);
 
       /* Use the Tag_null value to indicate that
 	 the attributes have been initialized.  */
-      out_attr[0].i = 1;
+      out_msp_attr[0].i = 1;
 
       first_input_bfd = ibfd;
       return TRUE;
     }
 
-  in_attr = elf_known_obj_attributes_proc (ibfd);
-  out_attr = elf_known_obj_attributes_proc (obfd);
+  in_msp_attr = elf_known_obj_attributes_proc (ibfd);
+  out_msp_attr = elf_known_obj_attributes_proc (obfd);
+  in_gnu_attr = elf_known_obj_attributes (ibfd) [OBJ_ATTR_GNU];
+  out_gnu_attr = elf_known_obj_attributes (obfd) [OBJ_ATTR_GNU];
 
   /* The ISAs must be the same.  */
-  if (in_attr[OFBA_MSPABI_Tag_ISA].i != out_attr[OFBA_MSPABI_Tag_ISA].i)
+  if (in_msp_attr[OFBA_MSPABI_Tag_ISA].i != out_msp_attr[OFBA_MSPABI_Tag_ISA].i)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB uses %s instructions but %pB uses %s"),
-	 ibfd, isa_type (in_attr[OFBA_MSPABI_Tag_ISA].i),
-	 first_input_bfd, isa_type (out_attr[OFBA_MSPABI_Tag_ISA].i));
+	 ibfd, isa_type (in_msp_attr[OFBA_MSPABI_Tag_ISA].i),
+	 first_input_bfd, isa_type (out_msp_attr[OFBA_MSPABI_Tag_ISA].i));
       result = FALSE;
     }
 
   /* The code models must be the same.  */
-  if (in_attr[OFBA_MSPABI_Tag_Code_Model].i !=
-      out_attr[OFBA_MSPABI_Tag_Code_Model].i)
+  if (in_msp_attr[OFBA_MSPABI_Tag_Code_Model].i
+      != out_msp_attr[OFBA_MSPABI_Tag_Code_Model].i)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB uses the %s code model whereas %pB uses the %s code model"),
-	 ibfd, code_model (in_attr[OFBA_MSPABI_Tag_Code_Model].i),
-	 first_input_bfd, code_model (out_attr[OFBA_MSPABI_Tag_Code_Model].i));
+	 ibfd, code_model (in_msp_attr[OFBA_MSPABI_Tag_Code_Model].i),
+	 first_input_bfd,
+	 code_model (out_msp_attr[OFBA_MSPABI_Tag_Code_Model].i));
       result = FALSE;
     }
 
   /* The large code model is only supported by the MSP430X.  */
-  if (in_attr[OFBA_MSPABI_Tag_Code_Model].i == 2
-      && out_attr[OFBA_MSPABI_Tag_ISA].i != 2)
+  if (in_msp_attr[OFBA_MSPABI_Tag_Code_Model].i == 2
+      && out_msp_attr[OFBA_MSPABI_Tag_ISA].i != 2)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
@@ -2483,39 +2486,67 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
     }
 
   /* The data models must be the same.  */
-  if (in_attr[OFBA_MSPABI_Tag_Data_Model].i !=
-      out_attr[OFBA_MSPABI_Tag_Data_Model].i)
+  if (in_msp_attr[OFBA_MSPABI_Tag_Data_Model].i
+      != out_msp_attr[OFBA_MSPABI_Tag_Data_Model].i)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB uses the %s data model whereas %pB uses the %s data model"),
-	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
-	 first_input_bfd, data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
+	 ibfd, data_model (in_msp_attr[OFBA_MSPABI_Tag_Data_Model].i),
+	 first_input_bfd,
+	 data_model (out_msp_attr[OFBA_MSPABI_Tag_Data_Model].i));
       result = FALSE;
     }
 
   /* The small code model requires the use of the small data model.  */
-  if (in_attr[OFBA_MSPABI_Tag_Code_Model].i == 1
-      && out_attr[OFBA_MSPABI_Tag_Data_Model].i != 1)
+  if (in_msp_attr[OFBA_MSPABI_Tag_Code_Model].i == 1
+      && out_msp_attr[OFBA_MSPABI_Tag_Data_Model].i != 1)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB uses the small code model but %pB uses the %s data model"),
 	 ibfd, first_input_bfd,
-	 data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
+	 data_model (out_msp_attr[OFBA_MSPABI_Tag_Data_Model].i));
       result = FALSE;
     }
 
   /* The large data models are only supported by the MSP430X.  */
-  if (in_attr[OFBA_MSPABI_Tag_Data_Model].i > 1
-      && out_attr[OFBA_MSPABI_Tag_ISA].i != 2)
+  if (in_msp_attr[OFBA_MSPABI_Tag_Data_Model].i > 1
+      && out_msp_attr[OFBA_MSPABI_Tag_ISA].i != 2)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB uses the %s data model but %pB only uses MSP430 instructions"),
-	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
+	 ibfd, data_model (in_msp_attr[OFBA_MSPABI_Tag_Data_Model].i),
 	 first_input_bfd);
       result = FALSE;
+    }
+
+  /* Just ignore the data region unless the large memory model is in use.
+     We have already checked that ibfd and obfd use the same memory model.  */
+  if ((in_msp_attr[OFBA_MSPABI_Tag_Code_Model].i
+       == OFBA_MSPABI_Val_Code_Model_LARGE)
+      && (in_msp_attr[OFBA_MSPABI_Tag_Data_Model].i
+	  == OFBA_MSPABI_Val_Data_Model_LARGE))
+    {
+      /* We cannot allow "lower region only" to be linked with any other
+	 values (i.e. ANY or NONE).
+	 Before this attribute existed, "ANY" region was the default.  */
+      bfd_boolean ibfd_lower_region_used
+	= (in_gnu_attr[Tag_GNU_MSP430_Data_Region].i
+	   == Val_GNU_MSP430_Data_Region_Lower);
+      bfd_boolean obfd_lower_region_used
+	= (out_gnu_attr[Tag_GNU_MSP430_Data_Region].i
+	   == Val_GNU_MSP430_Data_Region_Lower);
+      if (ibfd_lower_region_used != obfd_lower_region_used)
+	{
+	  _bfd_error_handler
+	    (_("error: %pB can use the upper region for data, "
+	       "but %pB assumes data is exclusively in lower memory"),
+	     ibfd_lower_region_used ? obfd : ibfd,
+	     ibfd_lower_region_used ? ibfd : obfd);
+	  result = FALSE;
+	}
     }
 
   return result;
@@ -2536,7 +2567,7 @@ elf32_msp430_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 			       max (bfd_get_mach (ibfd), bfd_get_mach (obfd)));
 #undef max
 
-  return elf32_msp430_merge_mspabi_attributes (ibfd, info);
+  return elf32_msp430_merge_msp430_attributes (ibfd, info);
 }
 
 static bfd_boolean

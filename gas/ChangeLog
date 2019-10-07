@@ -1,3 +1,27 @@
+2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (md_parse_option): Set lower_data_region_only
+	to FALSE if the data region is set to "upper", "either" or "none".
+	(msp430_object_attribute): New.
+	(md_pseudo_table): Handle .mspabi_attribute and .gnu_attribute.
+	(msp430_md_end): Replace hard-coded attribute values with enums.
+	Handle data region object attribute.
+	* doc/as.texi: Document MSP430 Data Region object attribute.
+	* doc/c-msp430.texi: Document the .mspabi_attribute directive.
+	* testsuite/gas/msp430/attr-430-small-bad.d: New test.
+	* testsuite/gas/msp430/attr-430-small-bad.l: New test.
+	* testsuite/gas/msp430/attr-430-small-good.d: New test.
+	* testsuite/gas/msp430/attr-430-small.s: New test.
+	* testsuite/gas/msp430/attr-430x-large-any-bad.d: New test.
+	* testsuite/gas/msp430/attr-430x-large-any-bad.l: New test.
+	* testsuite/gas/msp430/attr-430x-large-any-good.d: New test.
+	* testsuite/gas/msp430/attr-430x-large-any.s: New test.
+	* testsuite/gas/msp430/attr-430x-large-lower-bad.d: New test.
+	* testsuite/gas/msp430/attr-430x-large-lower-bad.l: New test.
+	* testsuite/gas/msp430/attr-430x-large-lower-good.d: New test.
+	* testsuite/gas/msp430/attr-430x-large-lower.s: New test.
+	* testsuite/gas/msp430/msp430.exp: Run new tests.
+
 2019-10-07  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_string): Make reported operand number

@@ -1,3 +1,12 @@
+2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/ld-msp430-elf/attr-gnu-main.s: New test.
+	* testsuite/ld-msp430-elf/attr-gnu-obj.s: New test.
+	* testsuite/ld-msp430-elf/attr-gnu-region-lower-upper.d: New test.
+	* testsuite/ld-msp430-elf/attr-gnu-region-lower.d: New test.
+	* testsuite/ld-msp430-elf/attr-gnu-region-upper.d: New test.
+	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new tests.
+
 2019-10-07  Alan Modra  <amodra@gmail.com>
 
 	* ldmisc.c (vfinfo): Save and restore bfd_error around bfd

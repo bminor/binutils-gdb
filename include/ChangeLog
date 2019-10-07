@@ -1,3 +1,8 @@
+2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf/msp430.h: Add enums for MSPABI and GNU object attribute tag
+	names and values.
+
 2019-09-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_cuname_set): Can now fail, returning int.

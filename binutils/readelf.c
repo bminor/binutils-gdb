@@ -15738,6 +15738,36 @@ display_msp430x_attribute (unsigned char * p,
   return p;
 }
 
+static unsigned char *
+display_msp430_gnu_attribute (unsigned char * p,
+			      unsigned int tag,
+			      const unsigned char * const end)
+{
+  if (tag == Tag_GNU_MSP430_Data_Region)
+    {
+      unsigned int len;
+      int val;
+
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_GNU_MSP430_Data_Region: ");
+
+      switch (val)
+	{
+	case Val_GNU_MSP430_Data_Region_Any:
+	  printf (_("Any Region\n"));
+	  break;
+	case Val_GNU_MSP430_Data_Region_Lower:
+	  printf (_("Lower Region Only\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	}
+      return p;
+    }
+  return display_tag_value (tag & 1, p, end);
+}
+
 struct riscv_attr_tag_t {
   const char *name;
   int tag;
@@ -19562,7 +19592,7 @@ process_arch_specific (Filedata * filedata)
     case EM_MSP430:
      return process_attributes (filedata, "mspabi", SHT_MSP430_ATTRIBUTES,
 				display_msp430x_attribute,
-				display_generic_attribute);
+				display_msp430_gnu_attribute);
 
     case EM_RISCV:
      return process_attributes (filedata, "riscv", SHT_RISCV_ATTRIBUTES,

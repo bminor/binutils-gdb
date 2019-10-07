@@ -46,6 +46,7 @@ if { ![istarget "msp430*elf*"] } {
 #     treated as a sign of an error and FAILs the test.
 #
 #
+
 set msp430regionprefixtests {
   {"Move main() to .upper.text" "-T msp430.ld --code-region=upper"
     "" "" {main-with-text-rodata.s} {{objdump -d main-text-upper.d}} "main-upper"}
@@ -162,7 +163,7 @@ set msp430warntests {
         {{ld warn-no-lower-data.r}} "warn-no-lower-data"}
 }
 
-# Don't run section shuffle tests when msp430 ISA is selected
+# Don't run further tests when msp430 ISA is selected
 if {[string match "*-mcpu=msp430 *" [board_info [target_info name] multilib_flags]]
   || [string match "*-mcpu=msp430" [board_info [target_info name] multilib_flags]]} {
     return
@@ -173,3 +174,12 @@ run_ld_link_tests $msp430eithershuffletests
 run_ld_link_tests $msp430warntests
 
 run_dump_test valid-map
+
+# Don't run data region tests if a data region is specified
+if {[string match "*-mdata-region*" [board_info [target_info name] multilib_flags]]} {
+    return
+}
+# GNU object attribute dump tests
+run_dump_test attr-gnu-region-lower
+run_dump_test attr-gnu-region-upper
+run_dump_test attr-gnu-region-lower-upper

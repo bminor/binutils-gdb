@@ -322,6 +322,18 @@ exist purely for pulling in object files from archives.  Note that
 this reloc is not sufficient to prevent garbage collection; use a
 KEEP() directive in the linker file to preserve such objects.
 
+@cindex @code{mspabi_attribute} directive, MSP430
+@item .mspabi_attribute
+This directive tells the assembler what the MSPABI build attributes for this
+file are.  This is used for validating the command line options passed to
+the assembler against the options the original source file was compiled with.
+The expected format is:
+@samp{.mspabi_attribute tag_name, tag_value}
+For example, to set the tag @code{OFBA_MSPABI_Tag_ISA} to @code{MSP430X}:
+@samp{.mspabi_attribute 4, 2}
+
+See the @cite{MSP430 EABI, document slaa534} for the details on tag names and
+values.
 @end table
 
 @node MSP430 Opcodes

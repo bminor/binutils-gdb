@@ -1,3 +1,9 @@
+2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (elf32_msp430_merge_mspabi_attributes): Rename to..
+	(elf32_msp430_merge_msp430_attributes): Add support for merging
+	the GNU object attribute for data region.
+
 2019-10-07  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Do allocate
