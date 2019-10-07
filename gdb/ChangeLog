@@ -1,5 +1,20 @@
 2019-10-07  Weimin Pan  <weimin.pan@oracle.com>
 
+	* ctfread.c: New file.
+	* ctfread.h: New file.
+	* elfread.c: Include ctfread.h.
+	(struct elfinfo text_p): New member ctfsect.
+	(elf_locate_sections): Mark CTF section.
+	(elf_symfile_read): Call elfctf_build_psymtabs.
+	* Makefile.in (LIBCTF): Add.
+	(CLIBS): Use it.
+	(CDEPS): Likewise.
+	(DIST): Add ctfread.c.
+	* ../Makefile.def (dependencies): Add all-libctf to all-gdb
+	* ../Makefile.in: Add "all-gdb: maybe-all-libctf"
+
+2019-10-07  Weimin Pan  <weimin.pan@oracle.com>
+
 	* tracectf.h: Rename, was ctf.h.
 	* tracectf.c: Rename, was ctf.c, replace ctf.h with tracectf.h.
 	* tracefile.c: Likewise.
