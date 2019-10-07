@@ -85,6 +85,9 @@ public:
   /* Compute the maximum height of this window.  */
   virtual int max_height () const = 0;
 
+  /* Compute the minimum height of this window.  */
+  virtual int min_height () const = 0;
+
   /* Return true if this window can be boxed.  */
   virtual bool can_box () const
   {
@@ -183,6 +186,11 @@ public:
   }
 
   int max_height () const override;
+
+  int min_height () const override
+  {
+    return MIN_WIN_HEIGHT;
+  }
 
   /* Called after the tab width has been changed.  */
   virtual void update_tab_width ()
