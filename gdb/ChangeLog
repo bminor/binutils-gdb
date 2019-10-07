@@ -1,3 +1,11 @@
+2019-10-09  Christian Biesinger  <cbiesinger@google.com>
+
+	* guile/guile.c (guile_extension_script_ops): Remove forward
+	declaration and mark as static.
+	(guile_script_ops): Likewise.
+	(extension_language_guile): Move further down in the file so
+	it can reference the definitions for guile_{extension_,}script_ops.
+
 2019-10-09  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* s390-tdep.c (390_process_record): Handle new arch13 instructions

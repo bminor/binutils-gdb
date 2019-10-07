@@ -71,33 +71,6 @@ static const char *const guile_print_excp_enums[] =
    the default.  */
 const char *gdbscm_print_excp = gdbscm_print_excp_message;
 
-#ifdef HAVE_GUILE
-/* Forward decls, these are defined later.  */
-extern const struct extension_language_script_ops guile_extension_script_ops;
-extern const struct extension_language_ops guile_extension_ops;
-#endif
-
-/* The main struct describing GDB's interface to the Guile
-   extension language.  */
-extern const struct extension_language_defn extension_language_guile =
-{
-  EXT_LANG_GUILE,
-  "guile",
-  "Guile",
-
-  ".scm",
-  "-gdb.scm",
-
-  guile_control,
-
-#ifdef HAVE_GUILE
-  &guile_extension_script_ops,
-  &guile_extension_ops
-#else
-  NULL,
-  NULL
-#endif
-};
 
 #ifdef HAVE_GUILE
 
@@ -126,7 +99,7 @@ static const char boot_scm_filename[] = "boot.scm";
 
 /* The interface between gdb proper and loading of python scripts.  */
 
-const struct extension_language_script_ops guile_extension_script_ops =
+static const struct extension_language_script_ops guile_extension_script_ops =
 {
   gdbscm_source_script,
   gdbscm_source_objfile_script,
@@ -136,7 +109,7 @@ const struct extension_language_script_ops guile_extension_script_ops =
 
 /* The interface between gdb proper and guile scripting.  */
 
-const struct extension_language_ops guile_extension_ops =
+static const struct extension_language_ops guile_extension_ops =
 {
   gdbscm_finish_initialization,
   gdbscm_initialized,
@@ -159,7 +132,31 @@ const struct extension_language_ops guile_extension_ops =
   NULL, /* gdbscm_check_quit_flag, */
   NULL, /* gdbscm_set_quit_flag, */
 };
+#endif
 
+/* The main struct describing GDB's interface to the Guile
+   extension language.  */
+extern const struct extension_language_defn extension_language_guile =
+{
+  EXT_LANG_GUILE,
+  "guile",
+  "Guile",
+
+  ".scm",
+  "-gdb.scm",
+
+  guile_control,
+
+#ifdef HAVE_GUILE
+  &guile_extension_script_ops,
+  &guile_extension_ops
+#else
+  NULL,
+  NULL
+#endif
+};
+
+#ifdef HAVE_GUILE
 /* Implementation of the gdb "guile-repl" command.  */
 
 static void
