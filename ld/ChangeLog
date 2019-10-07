@@ -1,3 +1,10 @@
+2020-01-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	Backport from master.
+	2019-10-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-arm/tls-gdesc-neg.d: Relax target match.
+
 2020-01-15  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from master.
