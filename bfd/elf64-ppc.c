@@ -7880,8 +7880,11 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			}
 		      continue;
 
-		    case R_PPC64_TLSGD:
 		    case R_PPC64_TLSLD:
+		      if (!is_local)
+			continue;
+		      /* Fall through.  */
+		    case R_PPC64_TLSGD:
 		      if (rel + 1 < relend
 			  && is_plt_seq_reloc (ELF64_R_TYPE (rel[1].r_info)))
 			{
@@ -8066,7 +8069,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			  != (TLS_TLS | TLS_MARK)))
 		    continue;
 
-		  if (expecting_tls_get_addr)
+		  if (expecting_tls_get_addr == 1 + !sec->nomark_tls_get_addr)
 		    {
 		      struct plt_entry *ent = NULL;
 
