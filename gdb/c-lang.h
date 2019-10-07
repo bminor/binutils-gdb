@@ -144,6 +144,12 @@ extern void cp_print_value_fields_rtti (struct type *,
 					const struct value_print_options *,
 					struct type **, int);
 
+/* gcc-2.6 or later (when using -fvtable-thunks)
+   emits a unique named type for a vtable entry.
+   Some gdb code depends on that specific name.  */
+
+extern const char vtbl_ptr_name[];
+
 extern int cp_is_vtbl_ptr_type (struct type *);
 
 extern int cp_is_vtbl_member (struct type *);

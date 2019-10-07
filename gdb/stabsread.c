@@ -42,6 +42,7 @@
 #include "gdb-demangle.h"
 #include "language.h"
 #include "target-float.h"
+#include "c-lang.h"
 #include "cp-abi.h"
 #include "cp-support.h"
 #include <ctype.h>
@@ -1259,11 +1260,6 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
 	{
-	  /* gcc-2.6 or later (when using -fvtable-thunks)
-	     emits a unique named type for a vtable entry.
-	     Some gdb code depends on that specific name.  */
-	  extern const char vtbl_ptr_name[];
-
 	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
 	       && strcmp (SYMBOL_LINKAGE_NAME (sym), vtbl_ptr_name))
 	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)

@@ -1,5 +1,12 @@
 2019-10-07  Christian Biesinger  <cbiesinger@google.com>
 
+	* c-lang.h (vtbl_ptr_name): Declare.
+	* cp-valprint.c (vtbl_ptr_name): Remove "extern" now that we get
+	it from the header.
+	* stabsread.c (define_symbol): Remove declaration of vtbl_ptr_name.
+
+2019-10-07  Christian Biesinger  <cbiesinger@google.com>
+
 	* charset.c (your_gdb_wchar_t_is_bogus): Replace with a
 	gdb_static_assert.
 

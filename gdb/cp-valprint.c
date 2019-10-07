@@ -56,7 +56,7 @@ static void cp_print_value (struct type *, struct type *,
 
 
 /* GCC versions after 2.4.5 use this.  */
-extern const char vtbl_ptr_name[] = "__vtbl_ptr_type";
+const char vtbl_ptr_name[] = "__vtbl_ptr_type";
 
 /* Return truth value for assertion that TYPE is of the type
    "pointer to virtual function".  */
