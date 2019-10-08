@@ -377,7 +377,8 @@ main (void)
       else if (strcmp (cpu_string, "z14") == 0
 	       || strcmp (cpu_string, "arch12") == 0)
 	min_cpu = S390_OPCODE_ARCH12;
-      else if (strcmp (cpu_string, "arch13") == 0)
+      else if (strcmp (cpu_string, "z15") == 0
+	       || strcmp (cpu_string, "arch13") == 0)
 	min_cpu = S390_OPCODE_ARCH13;
       else {
 	fprintf (stderr, "Couldn't parse cpu string %s\n", cpu_string);

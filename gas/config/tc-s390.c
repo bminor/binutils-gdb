@@ -291,7 +291,7 @@ s390_parse_cpu (const char *         arg,
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
     { STRING_COMMA_LEN ("z14"), STRING_COMMA_LEN ("arch12"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
-    { STRING_COMMA_LEN (""), STRING_COMMA_LEN ("arch13"),
+    { STRING_COMMA_LEN ("z15"), STRING_COMMA_LEN ("arch13"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
