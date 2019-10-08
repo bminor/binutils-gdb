@@ -1,5 +1,21 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (class tui_layout_base)
+	(class tui_layout_window, class tui_layout_split): New.
+	* tui/tui-layout.c (tui_get_window_by_name)
+	(tui_layout_window::clone, tui_layout_window::apply)
+	(tui_layout_window::get_sizes, tui_layout_window::add_split)
+	(tui_layout_split::add_window, tui_layout_split::clone)
+	(tui_layout_split::get_sizes)
+	(tui_layout_split::set_weights_from_heights)
+	(tui_layout_split::adjust_size, tui_layout_split::apply): New
+	functions.
+	(tui_layout_split::add_split, tui_layout_split::add_split)
+	(tui_layout_split::set_weights_from_heights)
+	(tui_layout_split::set_weights_from_heights): New functions.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_gen_win_info::make_window): Update.
 	* tui/tui-win.c (tui_adjust_win_heights, tui_resize_all): Update.
 	* tui/tui-layout.c (tui_gen_win_info::resize): Update.
