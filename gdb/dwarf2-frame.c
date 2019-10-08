@@ -43,6 +43,7 @@
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #endif
+#include <unordered_map>
 
 #include <algorithm>
 
@@ -100,11 +101,9 @@ struct dwarf2_cie
   unsigned char segment_size;
 };
 
-struct dwarf2_cie_table
-{
-  int num_entries;
-  struct dwarf2_cie **entries;
-};
+/* The CIE table is used to find CIEs during parsing, but then
+   discarded.  It maps from the CIE's offset to the CIE.  */
+typedef std::unordered_map<ULONGEST, dwarf2_cie *> dwarf2_cie_table;
 
 /* Frame Description Entry (FDE).  */
 
@@ -1643,53 +1642,14 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 }
 
 
-static int
-bsearch_cie_cmp (const void *key, const void *element)
-{
-  ULONGEST cie_pointer = *(ULONGEST *) key;
-  struct dwarf2_cie *cie = *(struct dwarf2_cie **) element;
-
-  if (cie_pointer == cie->cie_pointer)
-    return 0;
-
-  return (cie_pointer < cie->cie_pointer) ? -1 : 1;
-}
-
 /* Find CIE with the given CIE_POINTER in CIE_TABLE.  */
 static struct dwarf2_cie *
-find_cie (struct dwarf2_cie_table *cie_table, ULONGEST cie_pointer)
+find_cie (const dwarf2_cie_table &cie_table, ULONGEST cie_pointer)
 {
-  struct dwarf2_cie **p_cie;
-
-  /* The C standard (ISO/IEC 9899:TC2) requires the BASE argument to
-     bsearch be non-NULL.  */
-  if (cie_table->entries == NULL)
-    {
-      gdb_assert (cie_table->num_entries == 0);
-      return NULL;
-    }
-
-  p_cie = ((struct dwarf2_cie **)
-	   bsearch (&cie_pointer, cie_table->entries, cie_table->num_entries,
-		    sizeof (cie_table->entries[0]), bsearch_cie_cmp));
-  if (p_cie != NULL)
-    return *p_cie;
+  auto iter = cie_table.find (cie_pointer);
+  if (iter != cie_table.end ())
+    return iter->second;
   return NULL;
-}
-
-/* Add a pointer to new CIE to the CIE_TABLE, allocating space for it.  */
-static void
-add_cie (struct dwarf2_cie_table *cie_table, struct dwarf2_cie *cie)
-{
-  const int n = cie_table->num_entries;
-
-  gdb_assert (n < 1
-              || cie_table->entries[n - 1]->cie_pointer < cie->cie_pointer);
-
-  cie_table->entries
-    = XRESIZEVEC (struct dwarf2_cie *, cie_table->entries, n + 1);
-  cie_table->entries[n] = cie;
-  cie_table->num_entries = n + 1;
 }
 
 static int
@@ -1780,7 +1740,7 @@ enum eh_frame_type
 static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
 					   const gdb_byte *start,
 					   int eh_frame_p,
-					   struct dwarf2_cie_table *cie_table,
+					   dwarf2_cie_table &cie_table,
 					   struct dwarf2_fde_table *fde_table,
 					   enum eh_frame_type entry_type);
 
@@ -1790,7 +1750,7 @@ static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
 static const gdb_byte *
 decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 		      int eh_frame_p,
-                      struct dwarf2_cie_table *cie_table,
+                      dwarf2_cie_table &cie_table,
                       struct dwarf2_fde_table *fde_table,
                       enum eh_frame_type entry_type)
 {
@@ -2009,7 +1969,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       cie->end = end;
       cie->unit = unit;
 
-      add_cie (cie_table, cie);
+      cie_table[cie->cie_pointer] = cie;
     }
   else
     {
@@ -2092,7 +2052,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 static const gdb_byte *
 decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
 		    int eh_frame_p,
-                    struct dwarf2_cie_table *cie_table,
+		    dwarf2_cie_table &cie_table,
                     struct dwarf2_fde_table *fde_table,
                     enum eh_frame_type entry_type)
 {
@@ -2206,12 +2166,9 @@ dwarf2_build_frame_info (struct objfile *objfile)
 {
   struct comp_unit *unit;
   const gdb_byte *frame_ptr;
-  struct dwarf2_cie_table cie_table;
+  dwarf2_cie_table cie_table;
   struct dwarf2_fde_table fde_table;
   struct dwarf2_fde_table *fde_table2;
-
-  cie_table.num_entries = 0;
-  cie_table.entries = NULL;
 
   fde_table.num_entries = 0;
   fde_table.entries = NULL;
@@ -2254,7 +2211,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      frame_ptr = unit->dwarf_frame_buffer;
 	      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
 		frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
-						&cie_table, &fde_table,
+						cie_table, &fde_table,
 						EH_CIE_OR_FDE_TYPE_ID);
 	    }
 
@@ -2269,16 +2226,10 @@ dwarf2_build_frame_info (struct objfile *objfile)
 		  fde_table.entries = NULL;
 		  fde_table.num_entries = 0;
 		}
-	      /* The cie_table is discarded by the next if.  */
+	      /* The cie_table is discarded below.  */
 	    }
 
-          if (cie_table.num_entries != 0)
-            {
-              /* Reinit cie_table: debug_frame has different CIEs.  */
-              xfree (cie_table.entries);
-              cie_table.num_entries = 0;
-              cie_table.entries = NULL;
-            }
+	  cie_table.clear ();
         }
     }
 
@@ -2295,7 +2246,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  frame_ptr = unit->dwarf_frame_buffer;
 	  while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
 	    frame_ptr = decode_frame_entry (unit, frame_ptr, 0,
-					    &cie_table, &fde_table,
+					    cie_table, &fde_table,
 					    EH_CIE_OR_FDE_TYPE_ID);
 	}
       catch (const gdb_exception_error &e)
@@ -2319,16 +2270,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 		}
 	    }
 	  fde_table.num_entries = num_old_fde_entries;
-	  /* The cie_table is discarded by the next if.  */
 	}
-    }
-
-  /* Discard the cie_table, it is no longer needed.  */
-  if (cie_table.num_entries != 0)
-    {
-      xfree (cie_table.entries);
-      cie_table.entries = NULL;   /* Paranoia.  */
-      cie_table.num_entries = 0;  /* Paranoia.  */
     }
 
   /* Copy fde_table to obstack: it is needed at runtime.  */

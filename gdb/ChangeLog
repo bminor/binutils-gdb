@@ -1,3 +1,11 @@
+2019-10-25  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2-frame.c (dwarf2_cie_table): Now a typedef.
+	(bsearch_cie_cmp, add_cie): Remove.
+	(find_cie): Reimplement.
+	(decode_frame_entry_1, decode_frame_entry): Change type.  Update.
+	(dwarf2_build_frame_info): Update.
+
 2019-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gdb/25126
