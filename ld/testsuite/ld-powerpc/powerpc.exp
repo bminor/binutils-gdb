@@ -374,6 +374,7 @@ if [ supports_ppc64 ] then {
     run_dump_test "tlsie"
 }
 
+run_dump_test "localgot"
 run_dump_test "tlsldopt32"
 
 run_ld_link_tests $ppceabitests
