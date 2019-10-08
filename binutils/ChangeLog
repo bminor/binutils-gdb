@@ -1,3 +1,9 @@
+2019-10-09  Alan Modra  <amodra@gmail.com>
+
+	PR 25079
+	* ar.c (decode_options): Don't try for command options if
+	write_armap or mri_mode is selected.
+
 2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* readelf.c (display_msp430_gnu_attribute): New.

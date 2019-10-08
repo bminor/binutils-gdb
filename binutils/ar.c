@@ -602,7 +602,8 @@ decode_options (int argc, char **argv)
   /* PR 13256: Allow for the possibility that the first command line option
      started with a dash (eg --plugin) but then the following option(s) are
      old style, non-dash-prefixed versions.  */
-  if (operation == none && optind > 0 && optind < argc)
+  if (operation == none && write_armap != 1 && !mri_mode
+      && optind > 0 && optind < argc)
     {
       argv += (optind - 1);
       argc -= (optind - 1);
