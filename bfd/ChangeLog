@@ -1,3 +1,10 @@
+2019-10-08  Alan Modra  <amodra@gmail.com>
+
+	PR 25078
+	* dwarf2.c (find_abstract_instance): Delete orig_info_ptr, add
+	recur_count.  Error on recur_count reaching 100 rather than
+	info_ptr matching orig_info_ptr.  Adjust calls.
+
 2019-10-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* elf32-msp430.c (elf32_msp430_merge_mspabi_attributes): Rename to..
