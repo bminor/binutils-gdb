@@ -6787,5 +6787,16 @@ proc cmp_file_string { file str msg } {
     }
 }
 
+# Does the compiler support CTF debug output using '-gt' compiler
+# flag?  If not then we should skip these tests.
+
+gdb_caching_proc skip_ctf_tests {
+    return ![gdb_can_simple_compile ctfdebug {
+	int main () {
+	    return 0;
+	}
+    } executable "additional_flags=-gt"]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

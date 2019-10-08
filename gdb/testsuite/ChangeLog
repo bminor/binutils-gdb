@@ -1,3 +1,11 @@
+2019-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/ctf-constvars.exp: Skip test if CTF is not supported in
+	the compiler.  Clean up header comment a little.
+	* gdb.base/ctf-ptype.exp: Likewise.
+	* gdb.base/ctf-whatis.exp: Likewise.
+	* lib/gdb.exp (skip_ctf_tests): New proc.
+
 2019-11-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	https://bugzilla.redhat.com/show_bug.cgi?id=1765117

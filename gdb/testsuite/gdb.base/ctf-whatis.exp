@@ -15,14 +15,15 @@
 
 # This file is a subset of whatis.exp written by Rob Savoye. (rob@cygnus.com)
 
-#
-# test running programs
-#
-# -gt generates full-fledged CTF.
+if [skip_ctf_tests] {
+    unsupported "no ctf debug format support"
+    return 0
+}
 
 standard_testfile .c
-set opts "additional_flags=-gt"
 
+# Using `-gt` generates full-fledged CTF debug information.
+set opts "additional_flags=-gt"
 if { [prepare_for_testing "failed to prepare" ${testfile} \
           [list $srcfile] [list $opts nowarnings]] } {
     return 0

@@ -18,20 +18,21 @@
 #
 # This file is part of the gdb testsuite
 #
-# tests for const variables
-#           const pointers to vars
-#           pointers to const variables
-#           const pointers to const vars
-# with mixed types
+# Tests for: const variables,
+#            const pointers to vars
+#            pointers to const variables
+#            const pointers to const vars
+# with mixed types.
 
-#
-# test running programs
-#
-# -gt generates full-fledged CTF.
+if [skip_ctf_tests] {
+    unsupported "no ctf debug format support"
+    return 0
+}
 
 standard_testfile .c
-set opts "additional_flags=-gt"
 
+# Using `-gt` generates full-fledged CTF debug information.
+set opts "additional_flags=-gt"
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile] [list $opts nowarnings]] } {
     return 0
