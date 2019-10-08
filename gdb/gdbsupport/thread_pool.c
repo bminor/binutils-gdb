@@ -40,7 +40,7 @@ thread_pool::thread_function ()
 	  break;
 	if (m_tasks.empty ())
 	  continue;
-	t = m_tasks.front();
+	t = std::move (m_tasks.front());
 	m_tasks.pop();
       }
       t ();

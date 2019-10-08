@@ -68,9 +68,7 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
     parallel_for_pool.start (n_threads);
   }
 
-  std::mutex mtx;
-  std::condition_variable cv;
-  int num_finished = 0;
+  std::future<void> futures[n_threads];
 
   size_t n_elements = last - first;
   if (n_threads > 1 && 2 * n_threads <= n_elements)
@@ -79,12 +77,9 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
       for (int i = 0; i < n_threads; ++i)
 	{
 	  RandomIt end = first + elts_per_thread;
-	  parallel_for_pool.post_task ([&, first, end] () {
-				       callback (first, end);
-				       std::unique_lock<std::mutex> lck (mtx);
-				       num_finished++;
-				       cv.notify_all ();
-				       });
+	  futures[i] = parallel_for_pool.post_task ([&, first, end] () {
+						     callback (first, end);
+						     });
 	  first = end;
 	}
     }
@@ -94,15 +89,10 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
 
   /* Process all the remaining elements in the main thread.  */
   callback (first, last);
-  if (n_threads)
-    {
-      for (;;) {
-	std::unique_lock<std::mutex> lck (mtx);
-	if (num_finished == n_threads)
-	  break;
-	cv.wait (lck);
-      }
-    }
+#ifdef CXX_STD_THREAD
+  for (size_t i = 0; i < n_threads; ++i)
+    futures[i].wait ();
+#endif /* CXX_STD_THREAD */
 }
 
 }

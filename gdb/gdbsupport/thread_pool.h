@@ -8,6 +8,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 
 namespace gdb {
 
@@ -20,11 +21,14 @@ class thread_pool {
 
   void start(size_t num_threads);
 
-  typedef std::function<void ()> task;
-  void post_task(task t) {
+  typedef std::packaged_task<void()> task;
+  std::future<void> post_task(std::function<void ()> func) {
+    task t(func);
+    std::future<void> f = t.get_future();
     std::lock_guard<std::mutex> guard (m_tasks_mutex);
-    m_tasks.push (t);
+    m_tasks.push (std::move (t));
     m_tasks_cv.notify_one ();
+    return f;
   }
 
  private:
