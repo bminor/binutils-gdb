@@ -1,5 +1,10 @@
 2019-10-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (struct windows_thread_info_struct) <sf>: Remove.
+	(struct safe_symbol_file_add_args): Remove.
+
+2019-10-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c: Don't include buildsym-legacy.h.
 
 2019-10-08  Tom Tromey  <tromey@adacore.com>

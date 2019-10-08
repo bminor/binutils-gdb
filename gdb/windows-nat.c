@@ -224,7 +224,6 @@ typedef struct windows_thread_info_struct
     int suspended;
     int reload_context;
     CONTEXT context;
-    STACKFRAME sf;
   }
 windows_thread_info;
 
@@ -675,19 +674,6 @@ windows_nat_target::store_registers (struct regcache *regcache, int r)
   else
     windows_store_one_register (regcache, th, r);
 }
-
-/* Encapsulate the information required in a call to
-   symbol_file_add_args.  */
-struct safe_symbol_file_add_args
-{
-  char *name;
-  int from_tty;
-  section_addr_info *addrs;
-  int mainline;
-  int flags;
-  struct ui_file *err, *out;
-  struct objfile *ret;
-};
 
 /* Maintain a linked list of "so" information.  */
 struct lm_info_windows : public lm_info_base
