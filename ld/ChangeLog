@@ -1,3 +1,11 @@
+2019-10-11  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2019-10-09  Alan Modra  <amodra@gmail.com>
+	PR 25081
+	* ldlang.c (lang_size_sections_1): Set lma from section vma
+	rather than dot.
+
 2019-10-10  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	Apply from master

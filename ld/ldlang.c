@@ -5500,7 +5500,7 @@ lang_size_sections_1
 		    /* Otherwise, keep the same lma to vma relationship
 		       as the previous section.  */
 		    else
-		      lma = dot + last->lma - last->vma;
+		      lma = os->bfd_section->vma + last->lma - last->vma;
 
 		    if (section_alignment > 0)
 		      lma = align_power (lma, section_alignment);
