@@ -1,3 +1,9 @@
+2019-10-09  Alan Modra  <amodra@gmail.com>
+
+	PR 25070
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Catch overflow of
+	total_size calculation.
+
 2019-10-08  Alan Modra  <amodra@gmail.com>
 
 	PR 25078
