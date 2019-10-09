@@ -91,6 +91,7 @@ show_layout (enum tui_layout_type layout)
 	  break;
 	}
 
+      current_layout = layout;
       tui_delete_invisible_windows ();
     }
 }
@@ -418,7 +419,6 @@ show_source_disasm_command (void)
 		       tui_term_width (),
 		       0,
 		       tui_term_height () - cmd_height);
-  current_layout = SRC_DISASSEM_COMMAND;
 }
 
 
@@ -461,8 +461,6 @@ show_data (enum tui_layout_type new_layout)
 		   0, total_height - 1);
   TUI_CMD_WIN->resize (TUI_CMD_WIN->height, tui_term_width (),
 		       0, total_height);
-
-  current_layout = new_layout;
 }
 
 void
@@ -541,7 +539,6 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 		       tui_term_width (),
 		       0,
 		       src_height);
-  current_layout = layout_type;
 }
 
 

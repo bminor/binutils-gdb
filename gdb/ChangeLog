@@ -1,5 +1,11 @@
 2019-11-12  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (show_layout): Set current_layout.
+	(show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Don't set current_layout.
+
+2019-11-12  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (_initialize_tui_layout): Move to end.
 
 2019-11-12  Tom Tromey  <tom@tromey.com>
