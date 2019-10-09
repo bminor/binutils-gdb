@@ -29,6 +29,7 @@
 #include "location.h"
 #include <vector>
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/function-view.h"
 #include "cli/cli-script.h"
 
 struct block;
@@ -1664,8 +1665,8 @@ public:
    returned.  This can be useful for implementing a search for a
    breakpoint with arbitrary attributes, or for applying an operation
    to every breakpoint.  */
-extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *,
-							     void *), void *);
+extern struct breakpoint *iterate_over_breakpoints
+  (gdb::function_view<bool (breakpoint *)>);
 
 /* Nonzero if the specified PC cannot be a location where functions
    have been inlined.  */

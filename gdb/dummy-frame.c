@@ -126,11 +126,9 @@ remove_dummy_frame (struct dummy_frame **dummy_ptr)
 /* Delete any breakpoint B which is a momentary breakpoint for return from
    inferior call matching DUMMY_VOIDP.  */
 
-static int
-pop_dummy_frame_bpt (struct breakpoint *b, void *dummy_voidp)
+static bool
+pop_dummy_frame_bpt (struct breakpoint *b, struct dummy_frame *dummy)
 {
-  struct dummy_frame *dummy = (struct dummy_frame *) dummy_voidp;
-
   if (b->thread == dummy->id.thread->global_num
       && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id.id))
     {
@@ -140,11 +138,11 @@ pop_dummy_frame_bpt (struct breakpoint *b, void *dummy_voidp)
       delete_breakpoint (b);
 
       /* Stop the traversal.  */
-      return 1;
+      return true;
     }
 
   /* Continue the traversal.  */
-  return 0;
+  return false;
 }
 
 /* Pop *DUMMY_PTR, restoring program state to that before the
@@ -168,7 +166,10 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
 
   restore_infcall_suspend_state (dummy->caller_state);
 
-  iterate_over_breakpoints (pop_dummy_frame_bpt, dummy);
+  iterate_over_breakpoints ([dummy] (breakpoint* bp)
+    {
+      return pop_dummy_frame_bpt (bp, dummy);
+    });
 
   /* restore_infcall_control_state frees inf_state,
      all that remains is to pop *dummy_ptr.  */

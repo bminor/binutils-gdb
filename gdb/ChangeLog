@@ -1,3 +1,21 @@
+2019-10-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* breakpoint.c (iterate_over_breakpoints): Change function pointer
+	to a gdb::function_view and return value to bool.
+	* breakpoint.h (iterate_over_breakpoints): Likewise.
+	* dummy-frame.c (pop_dummy_frame_bpt): Update.
+	(pop_dummy_frame): Update.
+	* guile/scm-breakpoint.c (bpscm_build_bp_list): Update.
+	(gdbscm_breakpoints): Update.
+	* python/py-breakpoint.c (build_bp_list): Update.
+	(gdbpy_breakpoints): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_detect_out_scope_cb):
+	Update.
+	(bpfinishpy_handle_stop): Update.
+	(bpfinishpy_handle_exit): Update.
+	* solib-svr4.c (svr4_update_solib_event_breakpoint): Update.
+	(svr4_update_solib_event_breakpoints): Update.
+
 2019-10-15  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* s390-tdep.c (s390_effective_inner_type): Ignore static fields

@@ -15128,14 +15128,13 @@ save_command (const char *arg, int from_tty)
 }
 
 struct breakpoint *
-iterate_over_breakpoints (int (*callback) (struct breakpoint *, void *),
-			  void *data)
+iterate_over_breakpoints (gdb::function_view<bool (breakpoint *)> callback)
 {
   struct breakpoint *b, *b_tmp;
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
     {
-      if ((*callback) (b, data))
+      if (callback (b))
 	return b;
     }
 

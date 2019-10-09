@@ -341,10 +341,10 @@ bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
 /* Callback for `bpfinishpy_detect_out_scope'.  Triggers Python's
    `B->out_of_scope' function if B is a FinishBreakpoint out of its scope.  */
 
-static int
-bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
+static bool
+bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
+				struct breakpoint *bp_stopped)
 {
-  struct breakpoint *bp_stopped = (struct breakpoint *) args;
   PyObject *py_bp = (PyObject *) b->py_bp_object;
 
   /* Trigger out_of_scope if this is a FinishBreakpoint and its frame is
@@ -383,8 +383,11 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb,
-                            bs == NULL ? NULL : bs->breakpoint_at);
+  iterate_over_breakpoints ([&] (breakpoint *bp)
+    {
+      return bpfinishpy_detect_out_scope_cb
+	(bp, bs == NULL ? NULL : bs->breakpoint_at);
+    });
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -395,7 +398,10 @@ bpfinishpy_handle_exit (struct inferior *inf)
 {
   gdbpy_enter enter_py (target_gdbarch (), current_language);
 
-  iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb, NULL);
+  iterate_over_breakpoints ([&] (breakpoint *bp)
+    {
+      return bpfinishpy_detect_out_scope_cb (bp, nullptr);
+    });
 }
 
 /* Initialize the Python finish breakpoint code.  */

@@ -1991,15 +1991,15 @@ svr4_handle_solib_event (void)
 
 /* Helper function for svr4_update_solib_event_breakpoints.  */
 
-static int
-svr4_update_solib_event_breakpoint (struct breakpoint *b, void *arg)
+static bool
+svr4_update_solib_event_breakpoint (struct breakpoint *b)
 {
   struct bp_location *loc;
 
   if (b->type != bp_shlib_event)
     {
       /* Continue iterating.  */
-      return 0;
+      return false;
     }
 
   for (loc = b->loc; loc != NULL; loc = loc->next)
@@ -2027,7 +2027,7 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b, void *arg)
     }
 
   /* Continue iterating.  */
-  return 0;
+  return false;
 }
 
 /* Enable or disable optional solib event breakpoints as appropriate.
@@ -2036,7 +2036,7 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b, void *arg)
 static void
 svr4_update_solib_event_breakpoints (void)
 {
-  iterate_over_breakpoints (svr4_update_solib_event_breakpoint, NULL);
+  iterate_over_breakpoints (svr4_update_solib_event_breakpoint);
 }
 
 /* Create and register solib event breakpoints.  PROBES is an array
