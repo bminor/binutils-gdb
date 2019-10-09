@@ -555,13 +555,9 @@ namespace eval Term {
 	    return "lr corner"
 	}
 
-	for {set i [expr {$x + 1}]} {$i < $x2 - 1} {incr i} {
-	    # Note we do not check the top border of the box, because
-	    # it will contain a title.
-	    if {[get_char $i $y2] != "-"} {
-		return "bottom border $i"
-	    }
-	}
+	# Note we do not check the horizonal borders of the box.  The
+	# top will contain a title, and the bottom may as well, if it
+	# is overlapped by some other border.
 	for {set i [expr {$y + 1}]} {$i < $y2 - 1} {incr i} {
 	    if {[get_char $x $i] != "|"} {
 		return "left side $i"

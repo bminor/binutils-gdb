@@ -41,16 +41,17 @@
 #include "gdb_curses.h"
 
 static void show_layout (enum tui_layout_type);
-static void show_source_or_disasm_and_command (enum tui_layout_type);
-static void show_source_command (void);
-static void show_disasm_command (void);
-static void show_source_disasm_command (void);
-static void show_data (enum tui_layout_type);
 static enum tui_layout_type next_layout (void);
 static enum tui_layout_type prev_layout (void);
 static void tui_layout_command (const char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
+
+/* The pre-defined layouts.  */
+static tui_layout_split *standard_layouts[UNDEFINED_LAYOUT];
+
+/* The layout that is currently applied.  */
+static std::unique_ptr<tui_layout_base> applied_layout;
 
 static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
 
@@ -61,6 +62,13 @@ tui_current_layout (void)
   return current_layout;
 }
 
+/* See tui-layout.h.  */
+
+void
+tui_apply_current_layout ()
+{
+  applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
+}
 
 /* Show the screen layout defined.  */
 static void
@@ -71,26 +79,8 @@ show_layout (enum tui_layout_type layout)
   if (layout != cur_layout)
     {
       tui_make_all_invisible ();
-      switch (layout)
-	{
-	case SRC_DATA_COMMAND:
-	case DISASSEM_DATA_COMMAND:
-	  show_data (layout);
-	  break;
-	  /* Now show the new layout.  */
-	case SRC_COMMAND:
-	  show_source_command ();
-	  break;
-	case DISASSEM_COMMAND:
-	  show_disasm_command ();
-	  break;
-	case SRC_DISASSEM_COMMAND:
-	  show_source_disasm_command ();
-	  break;
-	default:
-	  break;
-	}
-
+      applied_layout = standard_layouts[layout]->clone ();
+      tui_apply_current_layout ();
       current_layout = layout;
       tui_delete_invisible_windows ();
     }
@@ -364,105 +354,6 @@ prev_layout (void)
   return (enum tui_layout_type) new_layout;
 }
 
-/* Show the Source/Command layout.  */
-static void
-show_source_command (void)
-{
-  show_source_or_disasm_and_command (SRC_COMMAND);
-}
-
-
-/* Show the Dissassem/Command layout.  */
-static void
-show_disasm_command (void)
-{
-  show_source_or_disasm_and_command (DISASSEM_COMMAND);
-}
-
-
-/* Show the Source/Disassem/Command layout.  */
-static void
-show_source_disasm_command (void)
-{
-  int cmd_height, src_height, asm_height;
-
-  if (TUI_CMD_WIN != NULL)
-    cmd_height = TUI_CMD_WIN->height;
-  else
-    cmd_height = tui_term_height () / 3;
-
-  src_height = (tui_term_height () - cmd_height) / 2;
-  asm_height = tui_term_height () - (src_height + cmd_height);
-
-  if (TUI_SRC_WIN == NULL)
-    tui_win_list[SRC_WIN] = new tui_source_window ();
-  TUI_SRC_WIN->resize (src_height,
-		       tui_term_width (),
-		       0,
-		       0);
-
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-  gdb_assert (locator != nullptr);
-
-  if (TUI_DISASM_WIN == NULL)
-    tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
-  TUI_DISASM_WIN->resize (asm_height,
-			  tui_term_width (),
-			  0,
-			  src_height - 1);
-  locator->resize (1, tui_term_width (),
-		   0, (src_height + asm_height) - 1);
-
-  if (TUI_CMD_WIN == NULL)
-    tui_win_list[CMD_WIN] = new tui_cmd_window ();
-  TUI_CMD_WIN->resize (cmd_height,
-		       tui_term_width (),
-		       0,
-		       tui_term_height () - cmd_height);
-}
-
-
-/* Show the Source/Data/Command or the Dissassembly/Data/Command
-   layout.  */
-static void
-show_data (enum tui_layout_type new_layout)
-{
-  int total_height = (tui_term_height () - TUI_CMD_WIN->height);
-  int src_height, data_height;
-  enum tui_win_type win_type;
-
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-  gdb_assert (locator != nullptr);
-
-  data_height = total_height / 2;
-  src_height = total_height - data_height;
-  if (tui_win_list[DATA_WIN] == nullptr)
-    tui_win_list[DATA_WIN] = new tui_data_window ();
-  tui_win_list[DATA_WIN]->resize (data_height, tui_term_width (), 0, 0);
-
-  if (new_layout == SRC_DATA_COMMAND)
-    win_type = SRC_WIN;
-  else
-    win_type = DISASSEM_WIN;
-
-  if (tui_win_list[win_type] == NULL)
-    {
-      if (win_type == SRC_WIN)
-	tui_win_list[win_type] = new tui_source_window ();
-      else
-	tui_win_list[win_type] = new tui_disasm_window ();
-    }
-
-  tui_win_list[win_type]->resize (src_height,
-				  tui_term_width (),
-				  0,
-				  data_height - 1);
-  locator->resize (1, tui_term_width (),
-		   0, total_height - 1);
-  TUI_CMD_WIN->resize (TUI_CMD_WIN->height, tui_term_width (),
-		       0, total_height);
-}
-
 void
 tui_gen_win_info::resize (int height_, int width_,
 			  int origin_x_, int origin_y_)
@@ -496,49 +387,6 @@ tui_gen_win_info::resize (int height_, int width_,
     make_window ();
 
   rerender ();
-}
-
-/* Show the Source/Command or the Disassem layout.  */
-static void
-show_source_or_disasm_and_command (enum tui_layout_type layout_type)
-{
-  struct tui_source_window_base *win_info;
-  int src_height, cmd_height;
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-  gdb_assert (locator != nullptr);
-
-  if (TUI_CMD_WIN != NULL)
-    cmd_height = TUI_CMD_WIN->height;
-  else
-    cmd_height = tui_term_height () / 3;
-  src_height = tui_term_height () - cmd_height;
-
-  if (layout_type == SRC_COMMAND)
-    {
-      if (tui_win_list[SRC_WIN] == nullptr)
-	tui_win_list[SRC_WIN] = new tui_source_window ();
-      win_info = TUI_SRC_WIN;
-    }
-  else
-    {
-      if (tui_win_list[DISASSEM_WIN] == nullptr)
-	tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
-      win_info = TUI_DISASM_WIN;
-    }
-
-  locator->resize (1, tui_term_width (),
-		   0, src_height - 1);
-  win_info->resize (src_height - 1,
-		    tui_term_width (),
-		    0,
-		    0);
-
-  if (TUI_CMD_WIN == NULL)
-    tui_win_list[CMD_WIN] = new tui_cmd_window ();
-  TUI_CMD_WIN->resize (cmd_height,
-		       tui_term_width (),
-		       0,
-		       src_height);
 }
 
 
@@ -901,6 +749,38 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
   m_applied = true;
 }
 
+static void
+initialize_layouts ()
+{
+  standard_layouts[SRC_COMMAND] = new tui_layout_split ();
+  standard_layouts[SRC_COMMAND]->add_window ("src", 2);
+  standard_layouts[SRC_COMMAND]->add_window ("locator", 0);
+  standard_layouts[SRC_COMMAND]->add_window ("cmd", 1);
+
+  standard_layouts[DISASSEM_COMMAND] = new tui_layout_split ();
+  standard_layouts[DISASSEM_COMMAND]->add_window ("asm", 2);
+  standard_layouts[DISASSEM_COMMAND]->add_window ("locator", 0);
+  standard_layouts[DISASSEM_COMMAND]->add_window ("cmd", 1);
+
+  standard_layouts[SRC_DATA_COMMAND] = new tui_layout_split ();
+  standard_layouts[SRC_DATA_COMMAND]->add_window ("regs", 1);
+  standard_layouts[SRC_DATA_COMMAND]->add_window ("src", 1);
+  standard_layouts[SRC_DATA_COMMAND]->add_window ("locator", 0);
+  standard_layouts[SRC_DATA_COMMAND]->add_window ("cmd", 1);
+
+  standard_layouts[DISASSEM_DATA_COMMAND] = new tui_layout_split ();
+  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("regs", 1);
+  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("asm", 1);
+  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("locator", 0);
+  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("cmd", 1);
+
+  standard_layouts[SRC_DISASSEM_COMMAND] = new tui_layout_split ();
+  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("src", 1);
+  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("asm", 1);
+  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("locator", 0);
+  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("cmd", 1);
+}
+
 
 
 /* Function to initialize gdb commands, for tui window layout
@@ -925,4 +805,6 @@ Layout names are:\n\
            the register window is displayed with \n\
            the window that has current logical focus."));
   set_cmd_completer (cmd, layout_completer);
+
+  initialize_layouts ();
 }

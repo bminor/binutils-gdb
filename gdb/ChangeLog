@@ -1,5 +1,19 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (tui_apply_current_layout): Declare.
+	* tui/tui-layout.c (standard_layouts, applied_layout): New
+	globals.
+	(tui_apply_current_layout): New function.
+	(show_layout): Set applied_layout.  Call
+	tui_apply_current_layout.
+	(show_source_command, show_disasm_command)
+	(show_source_disasm_command, show_data)
+	(show_source_or_disasm_and_command): Remove.
+	(initialize_layouts): New function.
+	(_initialize_tui_layout): Call initialize_layouts.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (class tui_layout_base)
 	(class tui_layout_window, class tui_layout_split): New.
 	* tui/tui-layout.c (tui_get_window_by_name)

@@ -1,3 +1,10 @@
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/regs.exp: Update.
+	* gdb.tui/empty.exp (layouts): Update.
+	* gdb.tui/basic.exp: Update.
+	* lib/tuiterm.exp (_check_box): Don't check bottom border.
+
 2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/options.exp: Add -raw-values in the print completion list.

@@ -34,7 +34,7 @@ if {![Term::enter_tui]} {
 set layouts {
     {src src {{0 0 80 15}} {{0 0 90 23}}
 	{{"no source" "No Source Available"}}}
-    {regs src-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
+    {regs src-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no regs" "Register Values Unavailable"}
@@ -43,17 +43,17 @@ set layouts {
 	{
 	    {"no asm" "No Assembly Available"}
 	}}
-    {regs asm-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
+    {regs asm-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {split split {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
+    {split split {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no asm" "No Assembly Available"}
 	}}
-    {regs split-regs {{0 0 80 8} {0 7 80 8}} {{0 0 90 13} {0 12 90 13}}
+    {regs split-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}

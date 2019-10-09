@@ -174,4 +174,7 @@ private:
 extern void tui_add_win_to_layout (enum tui_win_type);
 extern void tui_set_layout (enum tui_layout_type);
 
+/* Apply the current layout.  */
+extern void tui_apply_current_layout ();
+
 #endif /* TUI_TUI_LAYOUT_H */
