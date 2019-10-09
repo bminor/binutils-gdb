@@ -1,3 +1,8 @@
+2019-10-09  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* s390-tdep.c (390_process_record): Handle new arch13 instructions
+	except SORTL, DFLTCC, and KDSA.
+
 2019-10-08  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (struct windows_thread_info_struct) <sf>: Remove.
