@@ -24,6 +24,9 @@ m4_include(../bfd/bfd.m4)
 dnl This gets the standard macros.
 m4_include(../config/acinclude.m4)
 
+dnl This gets GCC_ENABLE.
+sinclude(../config/enable.m4)
+
 dnl This gets AC_PLUGINS, needed by ACX_LARGEFILE.
 m4_include(../config/plugins.m4)
 

@@ -1,3 +1,13 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Add --enable-libctf.
+	* aclocal.m4: sinclude ../config/enable.m4.
+	* Makefile.in (site.exp): Add enable_libctf to site.exp.
+	* lib/gdb.exp (skip_ctf_tests): Use it.
+	* gdb.base/ctf-constvars.exp: Error message tweak.
+	* gdb.base/ctf-ptype.exp: Likewise.
+	* configure: Regenerate.
+
 2020-06-26  Gary Benson <gbenson@redhat.com>
 
 	* gdb.cp/try_catch.cc: Include string.h.

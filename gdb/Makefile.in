@@ -154,7 +154,8 @@ INCLUDE_CFLAGS = -I$(INCLUDE_DIR)
 LIBIBERTY = ../libiberty/libiberty.a
 
 # Where is the CTF library?  Typically in ../libctf.
-LIBCTF = ../libctf/.libs/libctf.a
+LIBCTF = @LIBCTF@
+CTF_DEPS = @CTF_DEPS@
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
@@ -614,7 +615,7 @@ INTERNAL_LDFLAGS = \
 # Libraries and corresponding dependencies for compiling gdb.
 # XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
-CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(LIBCTF) $(ZLIB) \
+CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
         $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(GDBTKLIBS) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
@@ -622,7 +623,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(LIBCTF) $(ZLIB) \
 	$(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
 	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
 	@LIBDEBUGINFOD@
-CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(LIBCTF) \
+CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
 	$(LIBSUPPORT)
 
@@ -2006,6 +2007,7 @@ aclocal_m4_deps = \
 	transform.m4 \
 	../bfd/bfd.m4 \
 	../config/acinclude.m4 \
+	../config/enable.m4 \
 	../config/plugins.m4 \
 	../config/lead-dot.m4 \
 	../config/override.m4 \

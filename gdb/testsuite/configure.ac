@@ -43,6 +43,9 @@ if test $enable_gdbtk = yes; then
    AC_CONFIG_SUBDIRS(gdb.gdbtk)
 fi
 
+GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
+AC_SUBST(enable_libctf)
+
 # Enable shared libraries.
 AC_ARG_ENABLE(shared,
 [  --enable-shared         build shared libraries [deault=yes]],,

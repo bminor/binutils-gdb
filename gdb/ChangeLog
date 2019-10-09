@@ -1,3 +1,19 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Add --enable-libctf: handle --disable-static
+	properly.
+	* acinclude.m4: sinclude ../config/enable.m4.
+	* Makefile.in (aclocal_m4_deps): Adjust accordingly.
+	(LIBCTF): Substitute in.
+	(CTF_DEPS): New, likewise.
+	(CLIBS): libctf needs symbols from libbfd: move earlier.
+	(CDEPS): Use CTF_DEPS, not LIBCTF, now LIBCTF can include rpath
+	flags.
+	* ctfread.c: Surround in ENABLE_LIBCTF.
+	(elfctf_build_psymtabs) [!ENABLE_LIBCTF]: New stub.
+	* configure: Regenerate.
+	* config.in: Likewise.
+
 2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infcmd.c (set_inferior_io_terminal): Use make_unique_xstrdup.

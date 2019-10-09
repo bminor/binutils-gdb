@@ -631,6 +631,9 @@ GDB_NM_FILE
 LTLIBXXHASH
 LIBXXHASH
 HAVE_LIBXXHASH
+CTF_DEPS
+LIBCTF
+ENABLE_LIBCTF
 LTLIBBABELTRACE
 LIBBABELTRACE
 HAVE_LIBBABELTRACE
@@ -917,6 +920,7 @@ with_babeltrace
 with_libbabeltrace_prefix
 with_libbabeltrace_type
 with_xxhash
+enable_libctf
 with_libxxhash_prefix
 with_libxxhash_type
 enable_unit_tests
@@ -1583,6 +1587,7 @@ Optional Features:
                           gcc is used
   --enable-ubsan          enable undefined behavior sanitizer (auto/yes/no)
   --enable-sim            link gdb with simulator
+  --enable-libctf         Handle .ctf type-info sections [default=yes]
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
 
@@ -18560,6 +18565,41 @@ else
   with_xxhash=auto
 fi
 
+
+ # Check whether --enable-libctf was given.
+if test "${enable_libctf+set}" = set; then :
+  enableval=$enable_libctf;
+      case "$enableval" in
+       yes|no) ;;
+       *) as_fn_error $? "Argument to enable/disable libctf must be yes or no" "$LINENO" 5 ;;
+      esac
+
+else
+  enable_libctf=yes
+fi
+
+
+if test x${enable_static} = xno; then
+  LIBCTF="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
+  CTF_DEPS="../libctf/.libs/libctf.so"
+else
+  LIBCTF="../libctf/.libs/libctf.a"
+  CTF_DEPS="$LIBCTF"
+fi
+if test "${enable_libctf}" = yes; then
+
+$as_echo "#define ENABLE_LIBCTF 1" >>confdefs.h
+
+else
+  LIBCTF=
+  CTF_DEPS=
+fi
+
+
+
+
+# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
+# empty version.
 
 if test "x$with_xxhash" != "xno"; then
 

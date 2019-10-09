@@ -16,7 +16,7 @@
 # This file is a subset of ptype.exp written by Rob Savoye. (rob@cygnus.com)
 
 if [skip_ctf_tests] {
-    unsupported "no ctf debug format support"
+    unsupported "no CTF debug format support, or CTF disabled in GDB"
     return 0
 }
 
@@ -24,6 +24,7 @@ standard_testfile .c
 
 # Using `-gt` generates full-fledged CTF debug information.
 set opts "additional_flags=-gt"
+
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile] [list $opts nowarnings]] } {
     return 0

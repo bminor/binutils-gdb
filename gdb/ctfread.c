@@ -81,6 +81,9 @@
 #include "block.h"
 #include "ctfread.h"
 #include "psympriv.h"
+
+#if ENABLE_LIBCTF
+
 #include "ctf.h"
 #include "ctf-api.h"
 
@@ -1485,3 +1488,13 @@ elfctf_build_psymtabs (struct objfile *of)
 
   scan_partial_symbols (fp, of);
 }
+
+#else
+
+void
+elfctf_build_psymtabs (struct objfile *of)
+{
+  /* Nothing to do if CTF is disabled.  */
+}
+
+#endif /* ENABLE_LIBCTF */
