@@ -39,5 +39,5 @@ class MpxBound128Printer:
         return result
 
 gdb.printing.add_builtin_pretty_printer ('mpx_bound128',
-                                         '^__gdb_builtin_type_bound128',
+                                         '^builtin_type_bound128',
                                          MpxBound128Printer)

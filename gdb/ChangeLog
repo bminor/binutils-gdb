@@ -1,3 +1,9 @@
+2019-10-09  Tom de Vries  <tdevries@suse.de>
+
+	* python/lib/gdb/printer/bound_registers.py: Use
+	'^builtin_type_bound128' as regexp argument for
+	add_builtin_pretty_printer.
+
 2019-10-09  Christian Biesinger  <cbiesinger@google.com>
 
 	* guile/guile.c (guile_extension_script_ops): Remove forward
