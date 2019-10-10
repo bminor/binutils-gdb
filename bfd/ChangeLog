@@ -1,3 +1,9 @@
+2019-10-11  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* dwarf2.c (stash_maybe_enable_info_hash_tables): Only set
+	stash->info_hash_status = STASH_INFO_HASH_ON when
+	stash_maybe_update_info_hash_tables succeeds.
+
 2019-10-09  Alan Modra  <amodra@gmail.com>
 
 	PR 25070

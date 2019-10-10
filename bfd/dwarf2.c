@@ -4231,8 +4231,8 @@ stash_maybe_enable_info_hash_tables (bfd *abfd, struct dwarf2_debug *stash)
   /* We need a forced update so that the info hash tables will
      be created even though there is no compilation unit.  That
      happens if STASH_INFO_HASH_TRIGGER is 0.  */
-  stash_maybe_update_info_hash_tables (stash);
-  stash->info_hash_status = STASH_INFO_HASH_ON;
+  if (stash_maybe_update_info_hash_tables (stash))
+    stash->info_hash_status = STASH_INFO_HASH_ON;
 }
 
 /* Find the file and line associated with a symbol and address using the
