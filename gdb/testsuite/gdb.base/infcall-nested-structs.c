@@ -141,7 +141,7 @@ int cmp_struct_01_04 (struct struct_01_04 a, struct struct_01_04 b)
 { return a.a == b.a; }
 
 int cmp_struct_02_01 (struct struct_02_01 a, struct struct_02_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b; }
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b; }
 
 int cmp_struct_02_02 (struct struct_02_02 a, struct struct_02_02 b)
 { return a.a == b.a && a.b == b.b; }
@@ -153,8 +153,8 @@ int cmp_struct_02_04 (struct struct_02_04 a, struct struct_02_04 b)
 { return a.a == b.a && a.b == b.b; }
 
 int cmp_struct_04_01 (struct struct_04_01 a, struct struct_04_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
-	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d; }
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == b.s2.s1.d; }
 
 int cmp_struct_04_02 (struct struct_04_02 a, struct struct_04_02 b)
 { return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d; }
@@ -167,8 +167,8 @@ int cmp_struct_04_04 (struct struct_04_04 a, struct struct_04_04 b)
 { return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d; }
 
 int cmp_struct_05_01 (struct struct_05_01 a, struct struct_05_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
-	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == b.s2.s1.d
 	 && a.s2.s1.e == b.s2.s1.e; }
 
 int cmp_struct_05_02 (struct struct_05_02 a, struct struct_05_02 b)
@@ -187,7 +187,7 @@ int cmp_struct_05_04 (struct struct_05_04 a, struct struct_05_04 b)
 int
 cmp_struct_static_02_01 (struct struct_static_02_01 a,
 			 struct struct_static_02_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b; }
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b; }
 
 int
 cmp_struct_static_02_02 (struct struct_static_02_02 a,
@@ -207,8 +207,8 @@ cmp_struct_static_02_04 (struct struct_static_02_04 a,
 int
 cmp_struct_static_04_01 (struct struct_static_04_01 a,
 			 struct struct_static_04_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
-	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d; }
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == b.s2.s1.d; }
 
 int
 cmp_struct_static_04_02 (struct struct_static_04_02 a,
@@ -229,8 +229,8 @@ cmp_struct_static_04_04 (struct struct_static_04_04 a,
 int
 cmp_struct_static_06_01 (struct struct_static_06_01 a,
 			 struct struct_static_06_01 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
-	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == b.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == b.s2.s1.d
 	 && a.s2.s1.e == b.s2.s1.e && a.f == b.f; }
 
 int

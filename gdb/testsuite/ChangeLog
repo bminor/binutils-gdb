@@ -1,3 +1,11 @@
+2019-10-10  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* gdb.base/infcall-nested-structs.c (cmp_struct_02_01)
+	(cmp_struct_02_02, cmp_struct_04_01, cmp_struct_04_02)
+	(cmp_struct_05_01, cmp_struct_static_02_01)
+	(cmp_struct_static_04_01, cmp_struct_static_06_01): Fix redundant
+	comparisons.
+
 2019-10-10  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/24888
