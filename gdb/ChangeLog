@@ -1,5 +1,10 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_resize_all): Remove code, call
+	tui_apply_current_layout.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (tui_apply_current_layout): Declare.
 	* tui/tui-layout.c (standard_layouts, applied_layout): New
 	globals.

@@ -32,28 +32,28 @@ if {![Term::enter_tui]} {
 # 4. List of boxes in 90x40 mode
 # 5. List of test name and text for the empty window
 set layouts {
-    {src src {{0 0 80 15}} {{0 0 90 23}}
+    {src src {{0 0 80 15}} {{0 0 90 26}}
 	{{"no source" "No Source Available"}}}
-    {regs src-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
+    {regs src-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {asm asm {{0 0 80 15}} {{0 0 90 23}}
+    {asm asm {{0 0 80 13}} {{0 0 90 26}}
 	{
 	    {"no asm" "No Assembly Available"}
 	}}
-    {regs asm-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
+    {regs asm-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}
 	}}
-    {split split {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
+    {split split {{0 0 80 6} {0 5 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no source" "No Source Available"}
 	    {"no asm" "No Assembly Available"}
 	}}
-    {regs split-regs {{0 0 80 7} {0 6 80 9}} {{0 0 90 12} {0 11 90 14}}
+    {regs split-regs {{0 0 80 6} {0 5 80 8}} {{0 0 90 13} {0 12 90 13}}
 	{
 	    {"no asm" "No Assembly Available"}
 	    {"no regs" "Register Values Unavailable"}

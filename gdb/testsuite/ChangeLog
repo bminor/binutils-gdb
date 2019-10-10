@@ -1,5 +1,10 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/resize.exp: Update.
+	* gdb.tui/empty.exp (layouts): Update.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/regs.exp: Update.
 	* gdb.tui/empty.exp (layouts): Update.
 	* gdb.tui/basic.exp: Update.

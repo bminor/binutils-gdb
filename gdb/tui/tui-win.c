@@ -536,13 +536,7 @@ tui_resize_all (void)
   height_diff = screenheight - tui_term_height ();
   if (height_diff || width_diff)
     {
-      enum tui_layout_type cur_layout = tui_current_layout ();
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
-      struct tui_win_info *first_win;
-      struct tui_win_info *second_win;
-      tui_source_window_base *src_win;
-      struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-      int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
 
 #ifdef HAVE_RESIZE_TERM
       resize_term (screenheight, screenwidth);
@@ -553,108 +547,12 @@ tui_resize_all (void)
       tui_update_gdb_sizes ();
       tui_set_term_height_to (screenheight);
       tui_set_term_width_to (screenwidth);
-      if (cur_layout == SRC_DISASSEM_COMMAND 
-	  || cur_layout == SRC_DATA_COMMAND
-	  || cur_layout == DISASSEM_DATA_COMMAND)
-	num_wins_displayed++;
-      split_diff = height_diff / num_wins_displayed;
-      cmd_split_diff = split_diff;
-      if (height_diff % num_wins_displayed)
-	{
-	  if (height_diff < 0)
-	    cmd_split_diff--;
-	  else
-           cmd_split_diff++;
-       }
-      /* Now adjust each window.  */
+
       /* erase + clearok are used instead of a straightforward clear as
          AIX 5.3 does not define clear.  */
       erase ();
       clearok (curscr, TRUE);
-      switch (cur_layout)
-       {
-	case SRC_COMMAND:
-	case DISASSEM_COMMAND:
-	  src_win = *(tui_source_windows ().begin ());
-	  /* Check for invalid heights.  */
-	  if (height_diff == 0)
-	    new_height = src_win->height;
-	  else if ((src_win->height + split_diff) >=
-		   (screenheight - MIN_CMD_WIN_HEIGHT - 1))
-	    new_height = screenheight - MIN_CMD_WIN_HEIGHT - 1;
-	  else if ((src_win->height + split_diff) <= 0)
-	    new_height = MIN_WIN_HEIGHT;
-	  else
-	    new_height = src_win->height + split_diff;
-
-	  src_win->resize (new_height, screenwidth, 0, 0);
-
-	  locator->resize (1, screenwidth, 0, new_height);
-
-	  new_height = screenheight - (new_height + 1);
-	  TUI_CMD_WIN->resize (new_height, screenwidth,
-			       0, locator->y + 1);
-	  break;
-	default:
-	  if (cur_layout == SRC_DISASSEM_COMMAND)
-	    {
-	      src_win = TUI_SRC_WIN;
-	      first_win = src_win;
-	      second_win = TUI_DISASM_WIN;
-	    }
-	  else
-	    {
-	      first_win = TUI_DATA_WIN;
-	      src_win = *(tui_source_windows ().begin ());
-	      second_win = src_win;
-	    }
-	  /* Change the first window's height/width.  */
-	  /* Check for invalid heights.  */
-	  if (height_diff == 0)
-	    new_height = first_win->height;
-	  else if ((first_win->height +
-		    second_win->height + (split_diff * 2)) >=
-		   (screenheight - MIN_CMD_WIN_HEIGHT - 1))
-	    new_height = (screenheight - MIN_CMD_WIN_HEIGHT - 1) / 2;
-	  else if ((first_win->height + split_diff) <= 0)
-	    new_height = MIN_WIN_HEIGHT;
-	  else
-	    new_height = first_win->height + split_diff;
-
-	  first_win->resize (new_height, screenwidth, 0, 0);
-
-	  /* Change the second window's height/width.  */
-	  /* Check for invalid heights.  */
-	  if (height_diff == 0)
-	    new_height = second_win->height;
-	  else if ((first_win->height +
-		    second_win->height + (split_diff * 2)) >=
-		   (screenheight - MIN_CMD_WIN_HEIGHT - 1))
-	    {
-	      new_height = screenheight - MIN_CMD_WIN_HEIGHT - 1;
-	      if (new_height % 2)
-		new_height = (new_height / 2) + 1;
-	      else
-		new_height /= 2;
-	    }
-	  else if ((second_win->height + split_diff) <= 0)
-	    new_height = MIN_WIN_HEIGHT;
-	  else
-	    new_height = second_win->height + split_diff;
-
-	  second_win->resize (new_height, screenwidth,
-			      0, first_win->height - 1);
-
-	  locator->resize (1, screenwidth,
-			   0, second_win->y + new_height);
-
-	  /* Change the command window's height/width.  */
-	  new_height = screenheight - (locator->y + 1);
-	  TUI_CMD_WIN->resize (new_height, screenwidth,
-			       0, locator->y + 1);
-	  break;
-	}
-
+      tui_apply_current_layout ();
       tui_delete_invisible_windows ();
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
