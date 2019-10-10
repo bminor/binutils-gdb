@@ -1,5 +1,10 @@
 2019-10-15  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers): Rename "pid" to "tid".
+
+2019-10-15  Tom Tromey  <tromey@adacore.com>
+
 	* gdbarch.h, gdbarch.c: Rebuild.
 	* gdbarch.sh (gcc_target_options): Change return type to
 	std::string.
