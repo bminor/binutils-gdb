@@ -48,6 +48,9 @@
 #include <vector>
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#ifdef GDBTK
+#include "gdbtk/generic/gdbtk.h"
+#endif
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -764,8 +767,6 @@ captured_main_1 (struct captured_main_args *context)
 #ifdef GDBTK
 	  case 'z':
 	    {
-	      extern int gdbtk_test (char *);
-
 	      if (!gdbtk_test (optarg))
 		error (_("%s: unable to load tclcommand file \"%s\""),
 		       gdb_program_name, optarg);
@@ -778,8 +779,6 @@ captured_main_1 (struct captured_main_args *context)
 	    {
 	      /* Set the external editor commands when gdb is farming out files
 		 to be edited by another program.  */
-	      extern char *external_editor_command;
-
 	      external_editor_command = xstrdup (optarg);
 	      break;
 	    }
