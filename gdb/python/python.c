@@ -644,19 +644,6 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
 {
-  /* A simple type to ensure clean up of a vector of allocated strings
-     when a C interface demands a const char *array[] type
-     interface.  */
-  struct symtab_list_type
-  {
-    ~symtab_list_type ()
-    {
-      for (const char *elem: vec)
-	xfree ((void *) elem);
-    }
-    std::vector<const char *> vec;
-  };
-
   char *regex = NULL;
   std::vector<symbol_search> symbols;
   unsigned long count = 0;
@@ -666,7 +653,6 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
   unsigned int throttle = 0;
   static const char *keywords[] = {"regex","minsyms", "throttle",
 				   "symtabs", NULL};
-  symtab_list_type symtab_paths;
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!IO", keywords,
 					&regex, &PyBool_Type,
@@ -682,6 +668,12 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
 	return NULL;
       minsyms_p = cmp;
     }
+
+  global_symbol_searcher spec (FUNCTIONS_DOMAIN, regex);
+  SCOPE_EXIT {
+    for (const char *elem : spec.filenames)
+      xfree ((void *) elem);
+  };
 
   /* The "symtabs" keyword is any Python iterable object that returns
      a gdb.Symtab on each iteration.  If specified, iterate through
@@ -728,20 +720,13 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
 
 	  /* Make sure there is a definite place to store the value of
 	     filename before it is released.  */
-	  symtab_paths.vec.push_back (nullptr);
-	  symtab_paths.vec.back () = filename.release ();
+	  spec.filenames.push_back (nullptr);
+	  spec.filenames.back () = filename.release ();
 	}
     }
 
-  if (symtab_list)
-    {
-      const char **files = symtab_paths.vec.data ();
-
-      symbols = search_symbols (regex, FUNCTIONS_DOMAIN, NULL,
-				symtab_paths.vec.size (), files, false);
-    }
-  else
-    symbols = search_symbols (regex, FUNCTIONS_DOMAIN, NULL, 0, NULL, false);
+  /* The search spec.  */
+  symbols = spec.search ();
 
   /* Count the number of symbols (both symbols and optionally minimal
      symbols) so we can correctly check the throttle limit.  */

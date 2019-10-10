@@ -4347,27 +4347,24 @@ info_sources_command (const char *args, int from_tty)
   printf_filtered ("\n");
 }
 
-/* Compare FILE against all the NFILES entries of FILES.  If BASENAMES is
-   non-zero compare only lbasename of FILES.  */
+/* Compare FILE against all the entries of FILENAMES.  If BASENAMES is
+   true compare only lbasename of FILENAMES.  */
 
-static int
-file_matches (const char *file, const char *files[], int nfiles, int basenames)
+static bool
+file_matches (const char *file, const std::vector<const char *> &filenames,
+	      bool basenames)
 {
-  int i;
+  if (filenames.empty ())
+    return true;
 
-  if (file != NULL && nfiles != 0)
+  for (const char *name : filenames)
     {
-      for (i = 0; i < nfiles; i++)
-	{
-	  if (compare_filenames_for_search (file, (basenames
-						   ? lbasename (files[i])
-						   : files[i])))
-	    return 1;
-	}
+      name = (basenames ? lbasename (name) : name);
+      if (compare_filenames_for_search (file, name))
+	return true;
     }
-  else if (nfiles == 0)
-    return 1;
-  return 0;
+
+  return false;
 }
 
 /* Helper function for sort_search_symbols_remove_dups and qsort.  Can only
@@ -4443,30 +4440,10 @@ sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 		 result->end ());
 }
 
-/* Search the symbol table for matches to the regular expression REGEXP,
-   returning the results.
-
-   Only symbols of KIND are searched:
-   VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
-                      and constants (enums).
-		      if T_REGEXP is not NULL, only returns var that have
-		      a type matching regular expression T_REGEXP.
-   FUNCTIONS_DOMAIN - search all functions
-   TYPES_DOMAIN     - search all type names
-   ALL_DOMAIN       - an internal error for this function
-
-   Within each file the results are sorted locally; each symtab's global and
-   static blocks are separately alphabetized.
-   Duplicate entries are removed.
-
-   When EXCLUDE_MINSYMS is false then matching minsyms are also returned,
-   otherwise they are excluded.  */
+/* See symtab.h.  */
 
 std::vector<symbol_search>
-search_symbols (const char *regexp, enum search_domain kind,
-		const char *t_regexp,
-		int nfiles, const char *files[],
-		bool exclude_minsyms)
+global_symbol_searcher::search () const
 {
   const struct blockvector *bv;
   const struct block *b;
@@ -4490,21 +4467,23 @@ search_symbols (const char *regexp, enum search_domain kind,
   gdb::optional<compiled_regex> preg;
   gdb::optional<compiled_regex> treg;
 
-  gdb_assert (kind != ALL_DOMAIN);
+  gdb_assert (m_kind != ALL_DOMAIN);
 
-  ourtype = types[kind];
-  ourtype2 = types2[kind];
-  ourtype3 = types3[kind];
-  ourtype4 = types4[kind];
+  ourtype = types[m_kind];
+  ourtype2 = types2[m_kind];
+  ourtype3 = types3[m_kind];
+  ourtype4 = types4[m_kind];
 
-  if (regexp != NULL)
+  if (m_symbol_name_regexp != NULL)
     {
+      const char *symbol_name_regexp = m_symbol_name_regexp;
+
       /* Make sure spacing is right for C++ operators.
          This is just a courtesy to make the matching less sensitive
          to how many spaces the user leaves between 'operator'
          and <TYPENAME> or <OPERATOR>.  */
       const char *opend;
-      const char *opname = operator_chars (regexp, &opend);
+      const char *opname = operator_chars (symbol_name_regexp, &opend);
 
       if (*opname)
 	{
@@ -4529,28 +4508,30 @@ search_symbols (const char *regexp, enum search_domain kind,
 	      char *tmp = (char *) alloca (8 + fix + strlen (opname) + 1);
 
 	      sprintf (tmp, "operator%.*s%s", fix, " ", opname);
-	      regexp = tmp;
+	      symbol_name_regexp = tmp;
 	    }
 	}
 
       int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
 				? REG_ICASE : 0);
-      preg.emplace (regexp, cflags, _("Invalid regexp"));
+      preg.emplace (symbol_name_regexp, cflags,
+		    _("Invalid regexp"));
     }
 
-  if (t_regexp != NULL)
+  if (m_symbol_type_regexp != NULL)
     {
       int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
 				? REG_ICASE : 0);
-      treg.emplace (t_regexp, cflags, _("Invalid regexp"));
+      treg.emplace (m_symbol_type_regexp, cflags,
+		    _("Invalid regexp"));
     }
 
-  /* Search through the partial symtabs *first* for all symbols
-     matching the regexp.  That way we don't have to reproduce all of
-     the machinery below.  */
+  /* Search through the partial symtabs *first* for all symbols matching
+     the m_symbol_name_regexp (in preg).  That way we don't have to
+     reproduce all of the machinery below.  */
   expand_symtabs_matching ([&] (const char *filename, bool basenames)
 			   {
-			     return file_matches (filename, files, nfiles,
+			     return file_matches (filename, filenames,
 						  basenames);
 			   },
 			   lookup_name_info::match_any (),
@@ -4561,7 +4542,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 						    0, NULL, 0) == 0);
 			   },
 			   NULL,
-			   kind);
+			   m_kind);
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
@@ -4579,7 +4560,8 @@ search_symbols (const char *regexp, enum search_domain kind,
      all objfiles.  In large programs (1000s of shared libs) searching all
      objfiles is not worth the pain.  */
 
-  if (nfiles == 0 && (kind == VARIABLES_DOMAIN || kind == FUNCTIONS_DOMAIN))
+  if (filenames.empty () && (m_kind == VARIABLES_DOMAIN
+			     || m_kind == FUNCTIONS_DOMAIN))
     {
       for (objfile *objfile : current_program_space->objfiles ())
 	{
@@ -4603,7 +4585,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			 lookup functions is to expand the symbol
 			 table if msymbol is found, for the benefit of
 			 the next loop on compunits.  */
-		      if (kind == FUNCTIONS_DOMAIN
+		      if (m_kind == FUNCTIONS_DOMAIN
 			  ? (find_pc_compunit_symtab
 			     (MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
 			     == NULL)
@@ -4634,16 +4616,16 @@ search_symbols (const char *regexp, enum search_domain kind,
 		  /* Check first sole REAL_SYMTAB->FILENAME.  It does
 		     not need to be a substring of symtab_to_fullname as
 		     it may contain "./" etc.  */
-		  if ((file_matches (real_symtab->filename, files, nfiles, 0)
+		  if ((file_matches (real_symtab->filename, filenames, false)
 		       || ((basenames_may_differ
 			    || file_matches (lbasename (real_symtab->filename),
-					     files, nfiles, 1))
+					     filenames, true))
 			   && file_matches (symtab_to_fullname (real_symtab),
-					    files, nfiles, 0)))
+					    filenames, false)))
 		      && ((!preg.has_value ()
 			   || preg->exec (sym->natural_name (), 0,
 					  NULL, 0) == 0)
-			  && ((kind == VARIABLES_DOMAIN
+			  && ((m_kind == VARIABLES_DOMAIN
 			       && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			       && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
 			       && SYMBOL_CLASS (sym) != LOC_BLOCK
@@ -4656,15 +4638,15 @@ search_symbols (const char *regexp, enum search_domain kind,
 					== TYPE_CODE_ENUM))
 			       && (!treg.has_value ()
 				   || treg_matches_sym_type_name (*treg, sym)))
-			      || (kind == FUNCTIONS_DOMAIN
+			      || (m_kind == FUNCTIONS_DOMAIN
 				  && SYMBOL_CLASS (sym) == LOC_BLOCK
 				  && (!treg.has_value ()
 				      || treg_matches_sym_type_name (*treg,
 								     sym)))
-			      || (kind == TYPES_DOMAIN
+			      || (m_kind == TYPES_DOMAIN
 				  && SYMBOL_CLASS (sym) == LOC_TYPEDEF
 				  && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN)
-			      || (kind == MODULES_DOMAIN
+			      || (m_kind == MODULES_DOMAIN
 				  && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
 				  && SYMBOL_LINE (sym) != 0))))
 		    {
@@ -4679,13 +4661,13 @@ search_symbols (const char *regexp, enum search_domain kind,
   if (!result.empty ())
     sort_search_symbols_remove_dups (&result);
 
-  /* If there are no eyes, avoid all contact.  I mean, if there are
-     no debug symbols, then add matching minsyms.  But if the user wants
-     to see symbols matching a type regexp, then never give a minimal symbol,
-     as we assume that a minimal symbol does not have a type.  */
+  /* If there are no debug symbols, then add matching minsyms.  But if the
+     user wants to see symbols matching a type m_symbol_type_regexp, then
+     never give a minimal symbol, as we assume that a minimal symbol does
+     not have a type.  */
 
-  if ((found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
-      && !exclude_minsyms
+  if ((found_misc || (filenames.empty () && m_kind != FUNCTIONS_DOMAIN))
+      && !m_exclude_minsyms
       && !treg.has_value ())
     {
       for (objfile *objfile : current_program_space->objfiles ())
@@ -4708,7 +4690,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 		    {
 		      /* For functions we can do a quick check of whether the
 			 symbol might be found via find_pc_symtab.  */
-		      if (kind != FUNCTIONS_DOMAIN
+		      if (m_kind != FUNCTIONS_DOMAIN
 			  || (find_pc_compunit_symtab
 			      (MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
 			      == NULL))
@@ -4847,10 +4829,10 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
   if (regexp != nullptr && *regexp == '\0')
     regexp = nullptr;
 
-  /* Must make sure that if we're interrupted, symbols gets freed.  */
-  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
-						       t_regexp, 0, NULL,
-						       exclude_minsyms);
+  global_symbol_searcher spec (kind, regexp);
+  spec.set_symbol_type_regexp (t_regexp);
+  spec.set_exclude_minsyms (exclude_minsyms);
+  std::vector<symbol_search> symbols = spec.search ();
 
   if (!quiet)
     {
@@ -5081,11 +5063,9 @@ static void
 rbreak_command (const char *regexp, int from_tty)
 {
   std::string string;
-  const char **files = NULL;
-  const char *file_name;
-  int nfiles = 0;
+  const char *file_name = nullptr;
 
-  if (regexp)
+  if (regexp != nullptr)
     {
       const char *colon = strchr (regexp, ':');
 
@@ -5101,17 +5081,14 @@ rbreak_command (const char *regexp, int from_tty)
 	  while (isspace (local_name[colon_index]))
 	    local_name[colon_index--] = 0;
 	  file_name = local_name;
-	  files = &file_name;
-	  nfiles = 1;
 	  regexp = skip_spaces (colon + 1);
 	}
     }
 
-  std::vector<symbol_search> symbols = search_symbols (regexp,
-						       FUNCTIONS_DOMAIN,
-						       NULL,
-						       nfiles, files,
-						       false);
+  global_symbol_searcher spec (FUNCTIONS_DOMAIN, regexp);
+  if (file_name != nullptr)
+    spec.filenames.push_back (file_name);
+  std::vector<symbol_search> symbols = spec.search ();
 
   scoped_rbreak_breakpoints finalize;
   for (const symbol_search &p : symbols)
@@ -6345,17 +6322,17 @@ search_module_symbols (const char *module_regexp, const char *regexp,
   std::vector<module_symbol_search> results;
 
   /* Search for all modules matching MODULE_REGEXP.  */
-  std::vector<symbol_search> modules = search_symbols (module_regexp,
-						       MODULES_DOMAIN,
-						       NULL, 0, NULL,
-						       true);
+  global_symbol_searcher spec1 (MODULES_DOMAIN, module_regexp);
+  spec1.set_exclude_minsyms (true);
+  std::vector<symbol_search> modules = spec1.search ();
 
   /* Now search for all symbols of the required KIND matching the required
      regular expressions.  We figure out which ones are in which modules
      below.  */
-  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
-						       type_regexp, 0,
-						       NULL, true);
+  global_symbol_searcher spec2 (kind, regexp);
+  spec2.set_symbol_type_regexp (type_regexp);
+  spec2.set_exclude_minsyms (true);
+  std::vector<symbol_search> symbols = spec2.search ();
 
   /* Now iterate over all MODULES, checking to see which items from
      SYMBOLS are in each module.  */

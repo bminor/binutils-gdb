@@ -1,3 +1,20 @@
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/python.c (gdbpy_rbreak): Convert to using
+	global_symbol_searcher.
+	* symtab.c (file_matches): Convert return type to bool, change
+	file list to std::vector, update header comment.
+	(search_symbols): Rename to...
+	(global_symbol_searcher::search): ...this and update now its
+	a member function of global_symbol_searcher.  Take account of the
+	changes to file_matches.
+	(symtab_symbol_info): Convert to using global_symbol_searcher.
+	(rbreak_command): Likewise.
+	(search_module_symbols): Likewise.
+	* symtab.h (enum symbol_search): Update comment.
+	(search_symbols): Remove declaration.
+	(class global_symbol_searcher): New class.
+
 2019-11-26  Tom Tromey  <tromey@adacore.com>
 
 	* cp-support.c (_initialize_cp_support): Conditionally initialize

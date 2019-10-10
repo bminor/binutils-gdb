@@ -797,7 +797,7 @@ gdb_static_assert (NR_DOMAINS <= (1 << SYMBOL_DOMAIN_BITS));
 
 extern const char *domain_name (domain_enum);
 
-/* Searching domains, used for `search_symbols'.  Element numbers are
+/* Searching domains, used when searching for symbols.  Element numbers are
    hardcoded in GDB, check all enum uses before changing it.  */
 
 enum search_domain
@@ -2011,11 +2011,9 @@ extern struct symbol *fixup_symbol_section (struct symbol *,
 extern symbol *find_function_alias_target (bound_minimal_symbol msymbol);
 
 /* Symbol searching */
-/* Note: struct symbol_search, search_symbols, et.al. are declared here,
-   instead of making them local to symtab.c, for gdbtk's sake.  */
 
-/* When using search_symbols, a vector of the following structs is
-   returned.  */
+/* When using the symbol_searcher struct to search for symbols, a vector of
+   the following structs is returned.  */
 struct symbol_search
 {
   symbol_search (int block_, struct symbol *symbol_)
@@ -2064,12 +2062,68 @@ private:
 				  const symbol_search &sym_b);
 };
 
-extern std::vector<symbol_search> search_symbols (const char *,
-						  enum search_domain,
-						  const char *,
-						  int,
-						  const char **,
-						  bool);
+/* In order to search for global symbols of a particular kind matching
+   particular regular expressions, create an instance of this structure and
+   call the SEARCH member function.  */
+class global_symbol_searcher
+{
+public:
+
+  /* Constructor.  */
+  global_symbol_searcher (enum search_domain kind,
+			  const char *symbol_name_regexp)
+    : m_kind (kind),
+      m_symbol_name_regexp (symbol_name_regexp)
+  {
+    /* The symbol searching is designed to only find one kind of thing.  */
+    gdb_assert (m_kind != ALL_DOMAIN);
+  }
+
+  /* Set the optional regexp that matches against the symbol type.  */
+  void set_symbol_type_regexp (const char *regexp)
+  {
+    m_symbol_type_regexp = regexp;
+  }
+
+  /* Set the flag to exclude minsyms from the search results.  */
+  void set_exclude_minsyms (bool exclude_minsyms)
+  {
+    m_exclude_minsyms = exclude_minsyms;
+  }
+
+  /* Search the symbols from all objfiles in the current program space
+     looking for matches as defined by the current state of this object.
+
+     Within each file the results are sorted locally; each symtab's global
+     and static blocks are separately alphabetized.  Duplicate entries are
+     removed.  */
+  std::vector<symbol_search> search () const;
+
+  /* The set of source files to search in for matching symbols.  This is
+     currently public so that it can be populated after this object has
+     been constructed.  */
+  std::vector<const char *> filenames;
+
+private:
+  /* The kind of symbols are we searching for.
+     VARIABLES_DOMAIN - Search all symbols, excluding functions, type
+                        names, and constants (enums).
+     FUNCTIONS_DOMAIN - Search all functions..
+     TYPES_DOMAIN     - Search all type names.
+     MODULES_DOMAIN   - Search all Fortran modules.
+     ALL_DOMAIN       - Not valid for this function.  */
+  enum search_domain m_kind;
+
+  /* Regular expression to match against the symbol name.  */
+  const char *m_symbol_name_regexp = nullptr;
+
+  /* Regular expression to match against the symbol type.  */
+  const char *m_symbol_type_regexp = nullptr;
+
+  /* When this flag is false then minsyms that match M_SYMBOL_REGEXP will
+     be included in the results, otherwise they are excluded.  */
+  bool m_exclude_minsyms = false;
+};
 
 /* When searching for Fortran symbols within modules (functions/variables)
    we return a vector of this type.  The first item in the pair is the
