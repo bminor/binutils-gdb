@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "gdbcmd.h"
+#include "xml-builtin.h"
 #include "xml-support.h"
 #include "gdbsupport/filestuff.h"
 #include "safe-ctype.h"
@@ -919,7 +920,7 @@ xml_process_xincludes (std::string &result,
 const char *
 fetch_xml_builtin (const char *filename)
 {
-  const char *(*p)[2];
+  const char *const (*p)[2];
 
   for (p = xml_builtin; (*p)[0]; p++)
     if (strcmp ((*p)[0], filename) == 0)

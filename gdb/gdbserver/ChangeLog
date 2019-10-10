@@ -1,3 +1,8 @@
+2019-10-16  Christian Biesinger  <cbiesinger@google.com>
+
+	* server.c: Include xml-builtin.h.
+	(get_xml_features): Don't declare xml_builtins here.
+
 2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in: Remove references to vec-ipa.o.

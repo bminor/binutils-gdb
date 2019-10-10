@@ -1425,6 +1425,7 @@ HFILES_NO_SRCDIR = \
 	x86-linux-nat.h \
 	x86-nat.h \
 	xcoffread.h \
+	xml-builtin.h \
 	xml-support.h \
 	xml-syscall.h \
 	xml-tdesc.h \

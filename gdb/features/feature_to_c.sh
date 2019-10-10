@@ -32,6 +32,8 @@ if test -e "$output"; then
   exit 1
 fi
 
+echo '#include "xml-builtin.h"' >> $output
+
 for input; do
   arrayname=xml_feature_`echo $input | sed 's,.*/,,; s/[-.]/_/g'`
 

@@ -41,6 +41,9 @@
 #include "gdbsupport/environ.h"
 #include "filenames.h"
 #include "gdbsupport/pathstuff.h"
+#ifdef USE_XML
+#include "xml-builtin.h"
+#endif
 
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/scope-exit.h"
@@ -920,7 +923,6 @@ get_features_xml (const char *annex)
 
 #ifdef USE_XML
   {
-    extern const char *const xml_builtin[][2];
     int i;
 
     /* Look for the annex.  */

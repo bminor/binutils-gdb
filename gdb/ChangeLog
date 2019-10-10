@@ -1,3 +1,12 @@
+2019-10-16  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Add xml-builtin.h.
+	* features/feature_to_c.sh: Add an include for xml-builtin.h
+	to ensure that the compiler checks that the types match.
+	* xml-builtin.h: New file.
+	* xml-support.c (fetch_xml_builtin): Add missing const.
+	* xml-support.h: Remove declaration of xml_builtins.
+
 2019-10-16  Tom de Vries  <tdevries@suse.de>
 
 	PR tdep/25096

@@ -44,11 +44,6 @@ LONGEST xml_builtin_xfer_partial (const char *filename,
 				  gdb_byte *readbuf, const gdb_byte *writebuf,
 				  ULONGEST offset, LONGEST len);
 
-/* The text of compiled-in XML documents, from xml-builtin.c
-   (generated).  */
-
-extern const char *xml_builtin[][2];
-
 /* Support for XInclude.  */
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
