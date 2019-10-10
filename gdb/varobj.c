@@ -40,7 +40,7 @@
 typedef int PyObject;
 #endif
 
-/* Non-zero if we want to see trace of varobj level stuff.  */
+/* See varobj.h.  */
 
 unsigned int varobjdebug = 0;
 static void

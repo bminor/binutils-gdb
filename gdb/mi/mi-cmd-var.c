@@ -33,8 +33,6 @@
 #include "gdbsupport/gdb_optional.h"
 #include "inferior.h"
 
-extern unsigned int varobjdebug;		/* defined in varobj.c.  */
-
 static void varobj_update_one (struct varobj *var,
 			       enum print_values print_values,
 			       bool is_explicit);
