@@ -101,6 +101,10 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
+/* Limit the call depth of user-defined commands */
+
+extern unsigned int max_user_call_depth;
+
 /* Exported to gdb/top.c */
 
 void init_cmd_lists (void);

@@ -74,7 +74,7 @@ static void ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 static void filter_sals (std::vector<symtab_and_line> &);
 
 
-/* Limit the call depth of user-defined commands */
+/* See cli-cmds.h. */
 unsigned int max_user_call_depth;
 
 /* Define all cmd_list_elements.  */
@@ -1538,7 +1538,6 @@ static void
 show_user (const char *args, int from_tty)
 {
   struct cmd_list_element *c;
-  extern struct cmd_list_element *cmdlist;
 
   if (args)
     {

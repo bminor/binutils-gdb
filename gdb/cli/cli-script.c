@@ -449,7 +449,6 @@ void
 execute_user_command (struct cmd_list_element *c, const char *args)
 {
   counted_command_line cmdlines_copy;
-  extern unsigned int max_user_call_depth;
 
   /* Ensure that the user commands can't be deleted while they are
      executing.  */
