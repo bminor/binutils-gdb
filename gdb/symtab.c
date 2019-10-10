@@ -4339,27 +4339,24 @@ info_sources_command (const char *args, int from_tty)
   printf_filtered ("\n");
 }
 
-/* Compare FILE against all the NFILES entries of FILES.  If BASENAMES is
-   non-zero compare only lbasename of FILES.  */
+/* Compare FILE against all the entries of FILENAMES.  If BASENAMES is
+   non-zero compare only lbasename of FILENAMES.  */
 
-static int
-file_matches (const char *file, const char *files[], int nfiles, int basenames)
+static bool
+file_matches (const char *file, const std::vector<const char *> &filenames,
+	      bool basenames)
 {
-  int i;
+  if (filenames.empty ())
+    return true;
 
-  if (file != NULL && nfiles != 0)
+  for (const char *name : filenames)
     {
-      for (i = 0; i < nfiles; i++)
-	{
-	  if (compare_filenames_for_search (file, (basenames
-						   ? lbasename (files[i])
-						   : files[i])))
-	    return 1;
-	}
+      name = (basenames ? lbasename (name) : name);
+      if (compare_filenames_for_search (file, name))
+	return true;
     }
-  else if (nfiles == 0)
-    return 1;
-  return 0;
+
+  return false;
 }
 
 /* Helper function for sort_search_symbols_remove_dups and qsort.  Can only
@@ -4436,31 +4433,16 @@ sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 		 result->end ());
 }
 
-/* Search the symbol table for matches to the regular expression REGEXP,
-   returning the results.
-
-   Only symbols of KIND are searched:
-   VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
-                      and constants (enums).
-		      if T_REGEXP is not NULL, only returns var that have
-		      a type matching regular expression T_REGEXP.
-   FUNCTIONS_DOMAIN - search all functions
-   TYPES_DOMAIN     - search all type names
-   ALL_DOMAIN       - an internal error for this function
-
-   Within each file the results are sorted locally; each symtab's global and
-   static blocks are separately alphabetized.
-   Duplicate entries are removed.
-
-   When EXCLUDE_MINSYMS is false then matching minsyms are also returned,
-   otherwise they are excluded.  */
+/* See symtab.h.  */
 
 std::vector<symbol_search>
-search_symbols (const char *regexp, enum search_domain kind,
-		const char *t_regexp,
-		int nfiles, const char *files[],
-		bool exclude_minsyms)
+global_symbol_searcher::search () const
 {
+  const char *regexp = m_symbol_regexp;
+  const char *t_regexp = m_type_regexp;
+  enum search_domain kind = m_kind;
+  bool exclude_minsyms = m_exclude_minsyms;
+  int nfiles = filenames.size ();
   const struct blockvector *bv;
   const struct block *b;
   int i = 0;
@@ -4543,8 +4525,11 @@ search_symbols (const char *regexp, enum search_domain kind,
      the machinery below.  */
   expand_symtabs_matching ([&] (const char *filename, bool basenames)
 			   {
-			     return file_matches (filename, files, nfiles,
-						  basenames);
+			     /* EXPAND_SYMTABS_MATCHING expects a callback
+				that returns an integer, not a boolean as
+				FILE_MATCHES does.  */
+			     return file_matches (filename, filenames,
+						  basenames) ? 1 : 0;
 			   },
 			   lookup_name_info::match_any (),
 			   [&] (const char *symname)
@@ -4628,12 +4613,12 @@ search_symbols (const char *regexp, enum search_domain kind,
 		  /* Check first sole REAL_SYMTAB->FILENAME.  It does
 		     not need to be a substring of symtab_to_fullname as
 		     it may contain "./" etc.  */
-		  if ((file_matches (real_symtab->filename, files, nfiles, 0)
+		  if ((file_matches (real_symtab->filename, filenames, false)
 		       || ((basenames_may_differ
 			    || file_matches (lbasename (real_symtab->filename),
-					     files, nfiles, 1))
+					     filenames, true))
 			   && file_matches (symtab_to_fullname (real_symtab),
-					    files, nfiles, 0)))
+					    filenames, false)))
 		      && ((!preg.has_value ()
 			   || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
 					  NULL, 0) == 0)
@@ -4844,9 +4829,8 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
     regexp = nullptr;
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
-  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
-						       t_regexp, 0, NULL,
-						       exclude_minsyms);
+  global_symbol_searcher spec (kind, regexp, t_regexp, exclude_minsyms);
+  std::vector<symbol_search> symbols = spec.search ();
 
   if (!quiet)
     {
@@ -5085,11 +5069,9 @@ static void
 rbreak_command (const char *regexp, int from_tty)
 {
   std::string string;
-  const char **files = NULL;
-  const char *file_name;
-  int nfiles = 0;
+  const char *file_name = nullptr;
 
-  if (regexp)
+  if (regexp != nullptr)
     {
       const char *colon = strchr (regexp, ':');
 
@@ -5105,17 +5087,14 @@ rbreak_command (const char *regexp, int from_tty)
 	  while (isspace (local_name[colon_index]))
 	    local_name[colon_index--] = 0;
 	  file_name = local_name;
-	  files = &file_name;
-	  nfiles = 1;
 	  regexp = skip_spaces (colon + 1);
 	}
     }
 
-  std::vector<symbol_search> symbols = search_symbols (regexp,
-						       FUNCTIONS_DOMAIN,
-						       NULL,
-						       nfiles, files,
-						       false);
+  global_symbol_searcher spec (FUNCTIONS_DOMAIN, regexp);
+  if (file_name != nullptr)
+    spec.filenames.push_back (file_name);
+  std::vector<symbol_search> symbols = spec.search ();
 
   scoped_rbreak_breakpoints finalize;
   for (const symbol_search &p : symbols)
@@ -6349,17 +6328,14 @@ search_module_symbols (const char *module_regexp, const char *regexp,
   std::vector<module_symbol_search> results;
 
   /* Search for all modules matching MODULE_REGEXP.  */
-  std::vector<symbol_search> modules = search_symbols (module_regexp,
-						       MODULES_DOMAIN,
-						       NULL, 0, NULL,
-						       true);
+  global_symbol_searcher spec1 (MODULES_DOMAIN, module_regexp, nullptr, true);
+  std::vector<symbol_search> modules = spec1.search ();
 
   /* Now search for all symbols of the required KIND matching the required
      regular expressions.  We figure out which ones are in which modules
      below.  */
-  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
-						       type_regexp, 0,
-						       NULL, true);
+  global_symbol_searcher spec2 (kind, regexp, type_regexp, true);
+  std::vector<symbol_search> symbols = spec2.search ();
 
   /* Now iterate over all MODULES, checking to see which items from
      SYMBOLS are in each module.  */
