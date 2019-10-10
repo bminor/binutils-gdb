@@ -19,11 +19,36 @@
 
 proc target_compile_ada_from_dir {builddir source dest type options} {
     set saved_cwd [pwd]
+
+    global board
+    set board [target_info name]
+    set save_multilib_flag [board_info $board multilib_flags]
+    set multilib_flag ""
+    foreach op $save_multilib_flag {
+	if { $op == "-pie" || $op == "-no-pie" } {
+	    # Pretend gnatmake supports -pie/-no-pie, route it to
+	    # linker.
+	    append multilib_flag " -largs $op -margs"
+	} else {
+	    append multilib_flag " $op"
+	}
+    }
+    if { $multilib_flag != "" } {
+	unset_board_info "multilib_flags"
+	set_board_info multilib_flags "$multilib_flag"
+    }
+
     catch {
         cd $builddir
         return [target_compile $source $dest $type $options]
     } result options
     cd $saved_cwd
+
+    if { $save_multilib_flag != "" } {
+	unset_board_info "multilib_flags"
+	set_board_info multilib_flags $save_multilib_flag
+    }
+
     return -options $options $result
 }
 
