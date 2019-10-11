@@ -26,6 +26,7 @@
 #include "ui-out.h"
 #include "gdbsupport/format.h"
 #include "cli/cli-style.h"
+#include "diagnostics.h"
 
 #include <vector>
 #include <memory>
@@ -587,7 +588,15 @@ ui_out::call_do_message (const ui_file_style &style, const char *format,
   va_list args;
 
   va_start (args, format);
+
+  /* Since call_do_message is only used as a helper of vmessage, silence the
+     warning here once instead of at all call sites in vmessage, if we were
+     to put a "format" attribute on call_do_message.  */
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
   do_message (style, format, args);
+  DIAGNOSTIC_POP
+
   va_end (args);
 }
 

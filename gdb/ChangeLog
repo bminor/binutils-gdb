@@ -1,3 +1,8 @@
+2019-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (ui_out::call_do_message): Silence
+	-Wformat-nonliteral warning.
+
 2019-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.c: Remove some includes: continuations.h, skip.h,
