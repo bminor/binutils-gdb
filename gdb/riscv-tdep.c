@@ -1654,8 +1654,8 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
   if (riscv_debug_breakpoints || riscv_debug_infcall)
     fprintf_unfiltered (gdb_stdlog,
-			"Writing %lld-byte nop instruction to %s: %s\n",
-			((unsigned long long) sizeof (nop_insn)),
+			"Writing %s-byte nop instruction to %s: %s\n",
+			plongest (sizeof (nop_insn)),
 			paddress (gdbarch, *bp_addr),
 			(status == 0 ? "success" : "failed"));
 

@@ -1,3 +1,8 @@
+2019-10-11  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_push_dummy_code): Change %lld to %s and use
+	plongest instead of unsigned long long cast.
+
 2019-10-10  Christian Biesinger  <cbiesinger@google.com>
 
 	* main.c (captured_main_1): Include gdbtk.h and remove declarations
