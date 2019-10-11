@@ -1,5 +1,10 @@
 2019-10-12  Christian Biesinger  <cbiesinger@google.com>
 
+	* remote.c (remote_target::get_trace_status): Remove declaration of
+	trace_regblock_size.
+
+2019-10-12  Christian Biesinger  <cbiesinger@google.com>
+
 	* cli/cli-cmds.c (max_user_call_depth): Move comment to header.
 	(show_user): Remove declaration of cmdlist.
 	* cli/cli-cmds.h (max_user_call_depth): Declare.

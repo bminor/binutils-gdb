@@ -13102,14 +13102,13 @@ remote_target::get_trace_status (struct trace_status *ts)
 {
   /* Initialize it just to avoid a GCC false warning.  */
   char *p = NULL;
-  /* FIXME we need to get register block size some other way.  */
-  extern int trace_regblock_size;
   enum packet_result result;
   struct remote_state *rs = get_remote_state ();
 
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
     return -1;
 
+  /* FIXME we need to get register block size some other way.  */
   trace_regblock_size
     = rs->get_remote_arch_state (target_gdbarch ())->sizeof_g_packet;
 
