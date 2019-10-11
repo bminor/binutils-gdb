@@ -24,20 +24,23 @@
    cell.  */
 #define PRINT_CELL_SIZE 50
 
-/* %d for LONGEST.  The result is stored in a circular static buffer,
+/* %u for ULONGEST.  The result is stored in a circular static buffer,
    NUMCELLS deep.  */
 
 extern char *pulongest (ULONGEST u);
 
-/* %u for ULONGEST.  The result is stored in a circular static buffer,
+/* %d for LONGEST.  The result is stored in a circular static buffer,
    NUMCELLS deep.  */
 
 extern char *plongest (LONGEST l);
 
+/* Convert a ULONGEST into a HEX string, like %lx, with leading zeros.
+   The result is stored in a circular static buffer, NUMCELLS deep.  */
+
 extern char *phex (ULONGEST l, int sizeof_l);
 
-/* Convert a ULONGEST into a HEX string, like %lx.  The result is
-   stored in a circular static buffer, NUMCELLS deep.  */
+/* Convert a ULONGEST into a HEX string, like %lx, without leading zeros.
+   The result is  stored in a circular static buffer, NUMCELLS deep.  */
 
 extern char *phex_nz (ULONGEST l, int sizeof_l);
 

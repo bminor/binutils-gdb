@@ -1,5 +1,10 @@
 2019-10-11  Jim Wilson  <jimw@sifive.com>
 
+	* gdbsupport/print-utils.h (pulongest): Fix comment.
+	(plongest): Likewise.
+	(phex): Add missing comment, mention leading zeros.
+	(phex_nz): Add mention of no leading zeros to comment.
+
 	* riscv-tdep.c (riscv_push_dummy_code): Change %lld to %s and use
 	plongest instead of unsigned long long cast.
 
