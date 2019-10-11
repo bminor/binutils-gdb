@@ -1447,8 +1447,8 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
   last_sig = GDB_SIGNAL_0;
 
-  DEBUG_EXEC (("gdb: windows_resume (pid=%d, tid=%ld, step=%d, sig=%d);\n",
-	       ptid.pid (), ptid.tid (), step, sig));
+  DEBUG_EXEC (("gdb: windows_resume (pid=%d, tid=0x%x, step=%d, sig=%d);\n",
+	       ptid.pid (), (unsigned) ptid.tid (), step, sig));
 
   /* Get context for currently selected thread.  */
   th = thread_rec (inferior_ptid.tid (), FALSE);

@@ -1,5 +1,10 @@
 2019-10-15  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_nat_target::resume): Use %x when logging
+	TID.
+
+2019-10-15  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_nat_target::fetch_registers)
 	(windows_nat_target::store_registers): Rename "pid" to "tid".
 
