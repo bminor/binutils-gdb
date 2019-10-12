@@ -1,3 +1,8 @@
+2019-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Tweak a few sections based on the
+	results of the 2.33.1 release.
+
 2019-10-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_TW.po: Updated Chinese (traditional) translation.

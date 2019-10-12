@@ -27,7 +27,8 @@ How to perform a release.
      directories and the top level configure files.
 
   3. When branch day arrives add markers for the upcoming release to
-     the NEWS files in gas, ld, gold and binutils.
+     the NEWS files in gas, ld, and binutils.  No need to update NEWS
+     in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
      elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
@@ -279,7 +280,7 @@ When the time comes to actually make the release....
       Make the html documentation locally with the "make html" command
       and then upload and rename the directories as needed.  (sftp
       does not appear to support recursive uploads however, so the
-      directories will have to be made by hand).
+      directories had to be made by hand, as shown above).
 
          cd as
 	 lcd <build-dir>/gas/doc/as.html
@@ -315,7 +316,10 @@ When the time comes to actually make the release....
 
   30. Send emails to binutils@sourceware.org, info-gnu@gnu.org and
       David Edelsohn <dje.gcc@gmail.com> announcing the new release.
-      Sign the email and include the checksum.
+      Sign the email and include the checksum:
+
+          md5sum binutils-2.3x.tar.*
+
       (The email to Davis is so that he can update the GNU Toolchain
       social media).  Something like this:
       -----------------------------------------------------------------------
@@ -415,9 +419,6 @@ looks like this:
 
        i. Edit bfd/development.sh and set "development=true".
        j. Commit this change into the git repository.
-       k. Clean up the source tree.
-       
-            git clean -dfx .
 
   4. [If paranoid - upload the tarballs to one of the FTP servers and
       ask people to test it before going on to step 5].
@@ -451,6 +452,7 @@ looks like this:
      David Edelsohn <dje.gcc@gmail.com> announcing the new release.
      (The email to Davis is so that he can update the GNU Toolchain
      social media).  Something like this:
+
 ------------------------------------------------------------------------
 Hi Everyone,
 
@@ -472,6 +474,9 @@ Hi Everyone,
     xx
     xx
 --------------------------------------------------------------------------
+  9. Clean up the source tree.
+       
+            git clean -dfx .
 
 
 Copyright (C) 2017-2019 Free Software Foundation, Inc.
