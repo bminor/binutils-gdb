@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2019-09-30 11:00+0100\n"
+"POT-Creation-Date: 2019-10-12 14:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,7 +96,7 @@ msgstr ""
 msgid "%s: cannot find section %s"
 msgstr ""
 
-#: addr2line.c:448 ar.c:734 dlltool.c:3508 nm.c:1710 objcopy.c:5756
+#: addr2line.c:448 ar.c:735 dlltool.c:3508 nm.c:1710 objcopy.c:5769
 #: objdump.c:4291 size.c:153 strings.c:291 windmc.c:960 windres.c:816
 msgid "fatal error: libbfd ABI mismatch"
 msgstr ""
@@ -346,97 +346,97 @@ msgstr ""
 msgid "two different operation options specified"
 msgstr ""
 
-#: ar.c:588 ar.c:659 nm.c:1823
+#: ar.c:588 ar.c:660 nm.c:1823
 #, c-format
 msgid "sorry - this program has been built without plugin support\n"
 msgstr ""
 
-#: ar.c:790
+#: ar.c:791
 msgid "no operation specified"
 msgstr ""
 
-#: ar.c:793
+#: ar.c:794
 msgid "`u' is only meaningful with the `r' option."
 msgstr ""
 
-#: ar.c:796
+#: ar.c:797
 msgid "`u' is not meaningful with the `D' option."
 msgstr ""
 
-#: ar.c:799
+#: ar.c:800
 msgid "`u' modifier ignored since `D' is the default (see `U')"
 msgstr ""
 
-#: ar.c:808
+#: ar.c:809
 msgid "missing position arg."
 msgstr ""
 
-#: ar.c:814
+#: ar.c:815
 msgid "`N' is only meaningful with the `x' and `d' options."
 msgstr ""
 
-#: ar.c:816
+#: ar.c:817
 msgid "`N' missing value."
 msgstr ""
 
-#: ar.c:819
+#: ar.c:820
 msgid "Value for `N' must be positive."
 msgstr ""
 
-#: ar.c:835
+#: ar.c:836
 msgid "`x' cannot be used on thin archives."
 msgstr ""
 
-#: ar.c:882
+#: ar.c:883
 #, c-format
 msgid "internal error -- this option not implemented"
 msgstr ""
 
-#: ar.c:951
+#: ar.c:952
 #, c-format
 msgid "creating %s"
 msgstr ""
 
-#: ar.c:982
+#: ar.c:983
 #, c-format
 msgid "Cannot convert existing library %s to thin format"
 msgstr ""
 
-#: ar.c:988
+#: ar.c:989
 #, c-format
 msgid "Cannot convert existing thin library %s to normal format"
 msgstr ""
 
-#: ar.c:1020 ar.c:1084 ar.c:1414 objcopy.c:3391
+#: ar.c:1021 ar.c:1085 ar.c:1415 objcopy.c:3391
 #, c-format
 msgid "internal stat error on %s"
 msgstr ""
 
-#: ar.c:1039 ar.c:1117
+#: ar.c:1040 ar.c:1118
 #, c-format
 msgid "%s is not a valid archive"
 msgstr ""
 
-#: ar.c:1076 objcopy.c:3353
+#: ar.c:1077 objcopy.c:3353
 #, c-format
 msgid "illegal pathname found in archive member: %s"
 msgstr ""
 
-#: ar.c:1175
+#: ar.c:1176
 msgid "could not create temporary file whilst writing archive"
 msgstr ""
 
-#: ar.c:1319
+#: ar.c:1320
 #, c-format
 msgid "No member named `%s'\n"
 msgstr ""
 
-#: ar.c:1369
+#: ar.c:1370
 #, c-format
 msgid "no entry %s in archive %s!"
 msgstr ""
 
-#: ar.c:1508
+#: ar.c:1509
 #, c-format
 msgid "%s: no archive map to update"
 msgstr ""
@@ -4595,8 +4595,8 @@ msgid ""
 "                                   Set section <name>'s properties to "
 "<flags>\n"
 "     --set-section-alignment <name>=<align>\n"
-"                                   Set section <name>'s alignment to "
-"2^<align> bytes\n"
+"                                   Set section <name>'s alignment to <align> "
+"bytes\n"
 "     --add-section <name>=<file>   Add section <name> found in <file> to "
 "output\n"
 "     --update-section <name>=<file>\n"
@@ -5110,7 +5110,7 @@ msgid "unknown PE subsystem: %s"
 msgstr ""
 
 #: objcopy.c:4748 objcopy.c:5014 objcopy.c:5094 objcopy.c:5235 objcopy.c:5267
-#: objcopy.c:5290 objcopy.c:5294 objcopy.c:5317 objcopy.c:5321 objcopy.c:5341
+#: objcopy.c:5330 objcopy.c:5334 objcopy.c:5354
 #, c-format
 msgid "bad format for %s"
 msgstr ""
@@ -5152,86 +5152,99 @@ msgstr ""
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr ""
 
-#: objcopy.c:5396
+#: objcopy.c:5290
+msgid "bad format for --set-section-alignment: argument needed"
+msgstr ""
+
+#: objcopy.c:5294
+msgid "bad format for --set-section-alignment: numeric argument needed"
+msgstr ""
+
+#. Number has more than on 1, i.e. wasn't a power of 2.
+#: objcopy.c:5306
+msgid "bad format for --set-section-alignment: alignment is not a power of two"
+msgstr ""
+
+#: objcopy.c:5409
 #, c-format
 msgid "unknown long section names option '%s'"
 msgstr ""
 
-#: objcopy.c:5419
+#: objcopy.c:5432
 msgid "unable to parse alternative machine code"
 msgstr ""
 
-#: objcopy.c:5468
+#: objcopy.c:5481
 msgid "number of bytes to reverse must be positive and even"
 msgstr ""
 
-#: objcopy.c:5471
+#: objcopy.c:5484
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
 msgstr ""
 
-#: objcopy.c:5486
+#: objcopy.c:5499
 #, c-format
 msgid "%s: invalid reserve value for --heap"
 msgstr ""
 
-#: objcopy.c:5492
+#: objcopy.c:5505
 #, c-format
 msgid "%s: invalid commit value for --heap"
 msgstr ""
 
-#: objcopy.c:5517
+#: objcopy.c:5530
 #, c-format
 msgid "%s: invalid reserve value for --stack"
 msgstr ""
 
-#: objcopy.c:5523
+#: objcopy.c:5536
 #, c-format
 msgid "%s: invalid commit value for --stack"
 msgstr ""
 
-#: objcopy.c:5532
+#: objcopy.c:5545
 msgid "verilog data width must be at least 1 byte"
 msgstr ""
 
-#: objcopy.c:5549
+#: objcopy.c:5562
 msgid "--globalize-symbol(s) is incompatible with -G/--keep-global-symbol(s)"
 msgstr ""
 
-#: objcopy.c:5561
+#: objcopy.c:5574
 msgid "interleave start byte must be set with --byte"
 msgstr ""
 
-#: objcopy.c:5564
+#: objcopy.c:5577
 msgid "byte number must be less than interleave"
 msgstr ""
 
-#: objcopy.c:5567
+#: objcopy.c:5580
 msgid "interleave width must be less than or equal to interleave - byte`"
 msgstr ""
 
-#: objcopy.c:5596
+#: objcopy.c:5609
 #, c-format
 msgid "unknown input EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5627
+#: objcopy.c:5640
 #, c-format
 msgid "unknown output EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5640
+#: objcopy.c:5653
 #, c-format
 msgid "warning: could not locate '%s'.  System error message: %s"
 msgstr ""
 
-#: objcopy.c:5652
+#: objcopy.c:5665
 #, c-format
 msgid ""
 "warning: could not create temporary file whilst copying '%s', (error: %s)"
 msgstr ""
 
-#: objcopy.c:5685 objcopy.c:5699
+#: objcopy.c:5698 objcopy.c:5712
 #, c-format
 msgid "%s %s%c0x%s never used"
 msgstr ""
@@ -6895,64 +6908,64 @@ msgstr ""
 msgid "Out of memory reading %u program headers\n"
 msgstr ""
 
-#: readelf.c:5109
+#: readelf.c:5112
 msgid ""
 "possibly corrupt ELF header - it has a non-zero program header offset, but "
 "no program headers\n"
 msgstr ""
 
-#: readelf.c:5114
+#: readelf.c:5117
 #, c-format
 msgid ""
 "\n"
 "There are no program headers in this file.\n"
 msgstr ""
 
-#: readelf.c:5120
+#: readelf.c:5123
 #, c-format
 msgid ""
 "\n"
 "Elf file type is %s\n"
 msgstr ""
 
-#: readelf.c:5121
+#: readelf.c:5124
 #, c-format
 msgid "Entry point 0x%s\n"
 msgstr ""
 
-#: readelf.c:5122
+#: readelf.c:5125
 #, c-format
 msgid "There is %d program header, starting at offset %s\n"
 msgid_plural "There are %d program headers, starting at offset %s\n"
 msgstr[0] ""
 msgstr[1] ""
 
-#: readelf.c:5135 readelf.c:5137
+#: readelf.c:5138 readelf.c:5140
 #, c-format
 msgid ""
 "\n"
 "Program Headers:\n"
 msgstr ""
 
-#: readelf.c:5141
+#: readelf.c:5144
 #, c-format
 msgid ""
 "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
 msgstr ""
 
-#: readelf.c:5144
+#: readelf.c:5147
 #, c-format
 msgid ""
 "  Type           Offset   VirtAddr           PhysAddr           FileSiz  "
 "MemSiz   Flg Align\n"
 msgstr ""
 
-#: readelf.c:5148
+#: readelf.c:5151
 #, c-format
 msgid "  Type           Offset             VirtAddr           PhysAddr\n"
 msgstr ""
 
-#: readelf.c:5150
+#: readelf.c:5153
 #, c-format
 msgid "                 FileSiz            MemSiz              Flags  Align\n"
 msgstr ""
