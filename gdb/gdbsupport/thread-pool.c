@@ -26,6 +26,19 @@
 #include "gdbsupport/block-signals.h"
 #include <algorithm>
 
+/* On the off chance that we have the pthread library on a Windows
+   host, but std::thread is not using it, avoid calling
+   pthread_setname_np on Windows.  */
+#ifndef _WIN32
+#ifdef HAVE_PTHREAD_SETNAME_NP
+#define USE_PTHREAD_SETNAME_NP
+#endif
+#endif
+
+#ifdef USE_PTHREAD_SETNAME_NP
+#include <pthread.h>
+#endif
+
 namespace gdb
 {
 
@@ -62,6 +75,9 @@ thread_pool::set_thread_count (size_t num_threads)
       for (size_t i = m_thread_count; i < num_threads; ++i)
 	{
 	  std::thread thread (&thread_pool::thread_function, this);
+#ifdef USE_PTHREAD_SETNAME_NP
+	  pthread_setname_np (thread.native_handle (), "gdb worker");
+#endif
 	  thread.detach ();
 	}
     }

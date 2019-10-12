@@ -57,7 +57,7 @@ AC_DEFUN([GDB_AC_COMMON], [
 
     # This check must be here, while LIBS includes any necessary
     # threading library.
-    AC_CHECK_FUNCS([pthread_sigmask])
+    AC_CHECK_FUNCS([pthread_sigmask pthread_setname_np])
 
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
