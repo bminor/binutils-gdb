@@ -13697,6 +13697,9 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
       origin_child_die = sibling_die (origin_child_die);
     }
   origin_cu->list_in_scope = origin_previous_list_in_scope;
+
+  if (cu != origin_cu)
+    compute_delayed_physnames (origin_cu);
 }
 
 static void
