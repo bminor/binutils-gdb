@@ -1,5 +1,9 @@
 2019-10-19  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2019-10-19  Tom Tromey  <tom@tromey.com>
+
 	* remote-utils.c (block_unblock_async_io): Use gdb_sigmask.
 	* linux-low.c (linux_wait_for_event_filtered, linux_async): Use
 	gdb_sigmask.
