@@ -1000,6 +1000,7 @@
 
 2019-06-27  Tom Tromey  <tromey@adacore.com>
 
+	PR c++/20020:
 	* gdb.cp/constexpr-field.exp: Use setup_xfail.
 
 2019-06-26  Tom de Vries  <tdevries@suse.de>
