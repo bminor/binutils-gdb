@@ -1,3 +1,10 @@
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Also set SYSTEM_GDBINIT_DIR for the info manual
+	generation.
+	* gdb.texinfo (many sections): Document new --with-system-gdbinit-dir
+	option.
+
 2019-10-23  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (READLINE_DIR): Update.

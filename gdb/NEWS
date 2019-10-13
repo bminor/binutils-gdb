@@ -46,6 +46,12 @@
   The 'outer_function::' prefix is only needed if 'inner_function' is
   not visible in the current scope.
 
+* In addition to the system-wide gdbinit file, if configured with
+ --with-system-gdbinit-dir, GDB will now also load files in that directory
+ as system gdbinit files, unless the -nx or -n flag is provided.  Files
+ with extensions .gdb, .py and .scm are supported as long as GDB was
+ compiled with support for that language.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a

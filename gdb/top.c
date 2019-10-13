@@ -1513,6 +1513,10 @@ This GDB was configured as follows:\n\
     fprintf_filtered (stream, _("\
              --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
+  if (SYSTEM_GDBINIT_DIR[0])
+    fprintf_filtered (stream, _("\
+             --with-system-gdbinit-dir=%s%s\n\
+"), SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE ? " (relocatable)" : "");
     /* We assume "relocatable" will be printed at least once, thus we always
        print this text.  It's a reasonably safe assumption for now.  */
     fprintf_filtered (stream, _("\n\

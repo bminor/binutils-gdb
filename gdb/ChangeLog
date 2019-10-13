@@ -1,3 +1,19 @@
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* NEWS: Mention new --with-system-gdbinit-dir option.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Add new option --with-system-gdbinit-dir.
+	* extension.c (get_ext_lang_of_file): Return extension_language_gdb
+	for a ".gdb" suffix.
+	* main.c (get_init_files): Change system_gdbinit argument to
+	a vector and return the files in SYSTEM_GDBINIT_DIR in
+	addition to SYSTEM_GDBINIT.
+	(captured_main_1): Update.
+	(print_gdb_help): Update.
+	* top.c (print_gdb_configuration): Also print the value of
+	SYSTEM_GDBINIT_DIR.
+
 2019-10-28  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/common-utils.h (startswith): Add an overloaded version

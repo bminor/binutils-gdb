@@ -1795,6 +1795,9 @@ GDB_AC_DEFINE_RELOCATABLE(TARGET_SYSTEM_ROOT, sysroot, ${ac_define_dir})
 GDB_AC_WITH_DIR(SYSTEM_GDBINIT, system-gdbinit,
     [automatically load a system-wide gdbinit file],
     [])
+GDB_AC_WITH_DIR(SYSTEM_GDBINIT_DIR, system-gdbinit-dir,
+    [automatically load system-wide gdbinit files from this directory],
+    [])
 
 AM_GDB_WARNINGS
 AM_GDB_UBSAN

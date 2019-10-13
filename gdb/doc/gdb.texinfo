@@ -1083,6 +1083,16 @@ Its location is specified with the @code{--with-system-gdbinit}
 configure option (@pxref{System-wide configuration}).
 It is loaded first when @value{GDBN} starts, before command line options
 have been processed.
+@item @file{system.gdbinit.d}
+This is the system-wide init directory.
+Its location is specified with the @code{--with-system-gdbinit-dir}
+configure option (@pxref{System-wide configuration}).
+Files in this directory are loaded in alphabetical order immediately after
+system.gdbinit (if enabled) when @value{GDBN} starts, before command line
+options have been processed.  Files need to have a recognized scripting
+language extension (@file{.py}/@file{.scm}) or be named with a @file{.gdb}
+extension to be interpreted as regular @value{GDBN} commands.  @value{GDBN}
+will not recurse into any subdirectories of this directory.
 @item @file{~/.gdbinit}
 This is the init file in your home directory.
 It is loaded next, after @file{system.gdbinit}, and before
@@ -1315,8 +1325,11 @@ Sets up the command interpreter as specified by the command line
 @cindex init file
 Reads the system-wide @dfn{init file} (if @option{--with-system-gdbinit} was
 used when building @value{GDBN}; @pxref{System-wide configuration,
- ,System-wide configuration and settings}) and executes all the commands in
-that file.
+ ,System-wide configuration and settings}) and the files in the system-wide
+gdbinit directory (if @option{--with-system-gdbinit-dir} was used) and executes
+all the commands in those files.  The files need to be named with a @file{.gdb}
+extension to be interpreted as @value{GDBN} commands, or they can be written
+in a supported scripting language with an appropriate file extension.
 
 @anchor{Home Directory Init File}
 @item
@@ -26283,6 +26296,13 @@ Display the current value of the @code{script-extension} option.
 
 @end table
 
+@ifset SYSTEM_GDBINIT_DIR
+This setting is not used for files in the system-wide gdbinit directory.
+Files in that directory must have an extension matching their language,
+or have a @file{.gdb} extension to be interpreted as regular @value{GDBN}
+commands.  @xref{Startup}.
+@end ifset
+
 @node Sequences
 @section Canned Sequences of Commands
 
@@ -37054,6 +37074,14 @@ directory under the configured prefix, and @value{GDBN} is moved to
 another location after being built, the location of the system-wide
 init file will be adjusted accordingly.
 
+@item --with-system-gdbinit-dir=@var{directory}
+Configure @value{GDBN} to automatically load init files from a
+system-wide directory.  @var{directory} should be an absolute directory
+name.  If @var{directory} is in a directory under the configured
+prefix, and @value{GDBN} is moved to another location after being
+built, the location of the system-wide init directory will be
+adjusted accordingly.
+
 @item --enable-build-warnings
 When building the @value{GDBN} sources, ask the compiler to warn about
 any code which looks even vaguely suspicious.  It passes many
@@ -37079,24 +37107,28 @@ was first introduced in GCC 4.9.
 @section System-wide configuration and settings
 @cindex system-wide init file
 
-@value{GDBN} can be configured to have a system-wide init file;
-this file will be read and executed at startup (@pxref{Startup, , What
-@value{GDBN} does during startup}).
+@value{GDBN} can be configured to have a system-wide init file and a
+system-wide init file directory; this file and files in that directory
+(if they have a recognized file extension) will be read and executed at
+startup (@pxref{Startup, , What @value{GDBN} does during startup}).
 
-Here is the corresponding configure option:
+Here are the corresponding configure options:
 
 @table @code
 @item --with-system-gdbinit=@var{file}
 Specify that the default location of the system-wide init file is
 @var{file}.
+@item --with-system-gdbinit-dir=@var{directory}
+Specify that the default location of the system-wide init file directory
+is @var{directory}.
 @end table
 
 If @value{GDBN} has been configured with the option @option{--prefix=$prefix},
-it may be subject to relocation.  Two possible cases:
+they may be subject to relocation.  Two possible cases:
 
 @itemize @bullet
 @item 
-If the default location of this init file contains @file{$prefix},
+If the default location of this init file/directory contains @file{$prefix},
 it will be subject to relocation.  Suppose that the configure options
 are @option{--prefix=$prefix --with-system-gdbinit=$prefix/etc/gdbinit};
 if @value{GDBN} is moved from @file{$prefix} to @file{$install}, the system
@@ -37121,6 +37153,14 @@ Note that the system-wide init file is only read once, during @value{GDBN}
 initialization.  If the data-directory is changed after @value{GDBN} has
 started with the @code{set data-directory} command, the file will not be
 reread.
+
+This applies similarly to the system-wide directory specified in
+@option{--with-system-gdbinit-dir}.
+
+Any supported scripting language can be used for these init files, as long
+as the file extension matches the scripting language.  To be interpreted
+as regular @value{GDBN} commands, the files needs to have a @file{.gdb}
+extension.
 
 @menu
 * System-wide Configuration Scripts::  Installed System-wide Configuration Scripts
@@ -45611,6 +45651,10 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @value{SYSTEM_GDBINIT}
 @end ifset
 
+@ifset SYSTEM_GDBINIT_DIR
+@value{SYSTEM_GDBINIT_DIR}/*
+@end ifset
+
 ~/.gdbinit
 
 ./.gdbinit
@@ -45647,6 +45691,20 @@ the @value{GDBN} manual in node @code{Startup}
 @end ifclear
 System-wide initialization file.  It is executed unless user specified
 @value{GDBN} option @code{-nx} or @code{-n}.
+See more in
+@ifset man
+the @value{GDBN} manual in node @code{System-wide configuration}
+-- shell command @code{info -f gdb -n 'System-wide configuration'}.
+@end ifset
+@ifset SYSTEM_GDBINIT_DIR
+@item @value{SYSTEM_GDBINIT_DIR}
+@end ifset
+@ifclear SYSTEM_GDBINIT_DIR
+@item (not enabled with @code{--with-system-gdbinit-dir} during compilation)
+@end ifclear
+System-wide initialization directory.  All files in this directory are
+executed on startup unless user specified @value{GDBN} option @code{-nx} or
+@code{-n}, as long as they have a recognized file extension.
 See more in
 @ifset man
 the @value{GDBN} manual in node @code{System-wide configuration}

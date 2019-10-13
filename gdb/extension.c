@@ -154,6 +154,9 @@ get_ext_lang_of_file (const char *file)
   int i;
   const struct extension_language_defn *extlang;
 
+  if (has_extension (file, extension_language_gdb.suffix))
+    return &extension_language_gdb;
+
   ALL_EXTENSION_LANGUAGES (i, extlang)
     {
       if (has_extension (file, extlang->suffix))

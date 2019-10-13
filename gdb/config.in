@@ -681,6 +681,13 @@
 /* automatically load a system-wide gdbinit file */
 #undef SYSTEM_GDBINIT
 
+/* automatically load system-wide gdbinit files from this directory */
+#undef SYSTEM_GDBINIT_DIR
+
+/* Define if the system-gdbinit-dir directory should be relocated when GDB is
+   moved. */
+#undef SYSTEM_GDBINIT_DIR_RELOCATABLE
+
 /* Define if the system-gdbinit directory should be relocated when GDB is
    moved. */
 #undef SYSTEM_GDBINIT_RELOCATABLE

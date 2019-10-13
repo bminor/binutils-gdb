@@ -697,6 +697,7 @@ WIN32LIBS
 SER_HARDWIRE
 WERROR_CFLAGS
 WARN_CFLAGS
+SYSTEM_GDBINIT_DIR
 SYSTEM_GDBINIT
 TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
@@ -888,6 +889,7 @@ with_libipt_prefix
 with_included_regex
 with_sysroot
 with_system_gdbinit
+with_system_gdbinit_dir
 enable_werror
 enable_build_warnings
 enable_gdb_build_warnings
@@ -1624,6 +1626,9 @@ Optional Packages:
   --with-sysroot[=DIR]    search for usr/lib et al within DIR
   --with-system-gdbinit=PATH
                           automatically load a system-wide gdbinit file
+  --with-system-gdbinit-dir=PATH
+                          automatically load system-wide gdbinit files from
+                          this directory
   --with-lzma             support lzma compression (auto/yes/no)
   --with-liblzma-prefix[=DIR]  search for liblzma in DIR/include and DIR/lib
   --without-liblzma-prefix     don't search for liblzma in includedir and libdir
@@ -15178,6 +15183,52 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define SYSTEM_GDBINIT_RELOCATABLE $value
+_ACEOF
+
+
+
+
+
+# Check whether --with-system-gdbinit-dir was given.
+if test "${with_system_gdbinit_dir+set}" = set; then :
+  withval=$with_system_gdbinit_dir;
+    SYSTEM_GDBINIT_DIR=$withval
+else
+  SYSTEM_GDBINIT_DIR=
+fi
+
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $SYSTEM_GDBINIT_DIR`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define SYSTEM_GDBINIT_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${ac_define_dir} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define SYSTEM_GDBINIT_DIR_RELOCATABLE $value
 _ACEOF
 
 
