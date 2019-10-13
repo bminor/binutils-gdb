@@ -478,6 +478,9 @@ Hi Everyone,
        
             git clean -dfx .
 
+ 10. Edit bfd/development.sh on the branch and set the development flag
+     to "true".  Commit this change.
+
 
 Copyright (C) 2017-2019 Free Software Foundation, Inc.
 

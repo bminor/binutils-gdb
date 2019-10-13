@@ -1,3 +1,8 @@
+2019-10-13  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add a note to reset the
+	development flag back to true after making a point release.
+
 2019-10-12  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Tweak a few sections based on the

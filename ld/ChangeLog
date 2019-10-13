@@ -1,3 +1,7 @@
+2019-10-13  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Delete superflous "Changes in 2.33" comment.
+
 2019-10-09  Alan Modra  <amodra@gmail.com>
 
 	PR 25081
