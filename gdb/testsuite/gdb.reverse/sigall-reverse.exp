@@ -37,6 +37,7 @@ proc test_one_sig {nextsig} {
     global sig_supported
     global gdb_prompt
     global thissig
+    global record_instruction_kfail
 
     set this_sig_supported $sig_supported
     gdb_test "handle SIG$thissig stop print" \
@@ -51,6 +52,7 @@ proc test_one_sig {nextsig} {
 	    setup_xfail "i*86-pc-linuxoldld-gnu" "i*86-pc-linuxaout-gnu"
 	}
 	set testmsg "get signal $thissig"
+	set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
 	gdb_test_multiple "continue" $testmsg {
 	    -re "Program received signal SIG$thissig.*handle_$thissig.*$gdb_prompt $" {
 		fail "$testmsg (wrong location)"
@@ -61,6 +63,11 @@ proc test_one_sig {nextsig} {
 	    -re "Breakpoint.* handle_$thissig.*$gdb_prompt $" {
 		xfail $testmsg
 		set need_another_continue 0
+	    }
+	    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
+		kfail "gdb/25038" "$testmsg"
+		set record_instruction_kfail 1
+		return
 	    }
 	}
     }
@@ -238,8 +245,12 @@ set thissig "ABRT"
 
 # test signal handling
 with_test_prefix "sig-test-1" {
+    set record_instruction_kfail 0
     foreach sig [lrange $signals 1 end] {
 	test_one_sig $sig
+	if { $record_instruction_kfail } {
+	    return -1
+	}
     }
 }
 

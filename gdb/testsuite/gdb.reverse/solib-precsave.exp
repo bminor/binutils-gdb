@@ -91,7 +91,18 @@ gdb_test "break $end_of_main" \
     "Breakpoint $decimal at .*$srcfile, line $end_of_main\." \
     "breakpoint at end of main"
 
-gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
+set test "run to end of main"
+set pass_pattern "Breakpoint .* end of main .*"
+set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
+gdb_test_multiple "continue" $test {
+    -re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
+	pass $test
+    }
+    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
+	kfail "gdb/25038" $test
+	return -1
+    }
+}
 
 gdb_test "record save $precsave" \
     "Saved core file $precsave with execution log\."  \

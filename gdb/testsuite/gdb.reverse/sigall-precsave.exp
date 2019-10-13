@@ -258,13 +258,19 @@ foreach sig $signals {
     }
 }
 
-gdb_test_multiple "continue" "continue" {
+set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
+set test "run to end of main"
+gdb_test_multiple "continue" $test {
     -re "Breakpoint .* end of main .*$gdb_prompt $" {
-	pass "run to end of main"
+	pass $test
     }
     -re "Breakpoint .* handle_.*$gdb_prompt $" {
 	send_gdb "continue\n"
 	exp_continue
+    }
+    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
+	kfail "gdb/25038" $test
+	return -1
     }
 }
 

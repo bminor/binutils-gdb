@@ -86,7 +86,18 @@ if [supports_process_record] {
 
 set end_part_one [gdb_get_line_number " end part one" "$srcfile"]
 set end_part_two [gdb_get_line_number " end part two" "$srcfile"]
-gdb_test "until $end_part_one" " end part one.*" "run until end part one"
+set test "run until end part one"
+set pass_pattern " end part one.*"
+set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
+gdb_test_multiple "until $end_part_one" $test {
+    -re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
+	pass $test
+    }
+    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
+	kfail "gdb/25038" $test
+	return -1
+    }
+}
 
 gdb_test "reverse-step" " shr1 three .*" "reverse-step third shr1"
 gdb_test "reverse-step" " shr1 two .*"   "reverse-step second shr1"

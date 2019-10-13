@@ -49,12 +49,16 @@ with_timeout_factor 20 {
     set test "run to end of main"
     set pass_pattern "Breakpoint .* end of main .*"
     set kfail_pattern "Process record does not support instruction 0xc5 at.*"
+    set kfail2_pattern "Process record does not support instruction 0xfae64 at.*"
     gdb_test_multiple "continue" $test {
 	-re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
 	    pass $test
 	}
 	-re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
 	    kfail "record/23188" $test
+	}
+	-re "\[\r\n\]*(?:$kfail2_pattern)\[\r\n\]+$gdb_prompt $" {
+	    kfail "record/25038" $test
 	}
     }
 }

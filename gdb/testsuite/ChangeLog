@@ -1,3 +1,15 @@
+2019-10-13  Tom de Vries  <tdevries@suse.de>
+
+	PR record/25038
+	* gdb.reverse/sigall-precsave.exp: Add PR record/25038 KFAIL.
+	* gdb.reverse/sigall-reverse.exp: Same.
+	* gdb.reverse/solib-precsave.exp: Same.
+	* gdb.reverse/solib-reverse.exp: Same.
+	* gdb.reverse/step-precsave.exp: Same.
+	* gdb.reverse/until-precsave.exp: Same.
+	* gdb.reverse/until-reverse.exp: Same.
+	* lib/gdb.exp (gdb_continue_to_breakpoint): Same.
+
 2019-10-10  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* gdb.base/infcall-nested-structs.c (cmp_struct_02_01)
