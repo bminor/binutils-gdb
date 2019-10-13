@@ -41,7 +41,6 @@
 #include "buildsym.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
-#include "expression.h"
 #include "filenames.h"	/* for DOSish file names */
 #include "macrotab.h"
 #include "language.h"
@@ -56,38 +55,27 @@
 #include "addrmap.h"
 #include "typeprint.h"
 #include "psympriv.h"
-#include <sys/stat.h>
-#include "completer.h"
 #include "gdbsupport/vec.h"
 #include "c-lang.h"
 #include "go-lang.h"
 #include "valprint.h"
 #include "gdbcore.h" /* for gnutarget */
 #include "gdb/gdb-index.h"
-#include <ctype.h>
 #include "gdb_bfd.h"
 #include "f-lang.h"
 #include "source.h"
-#include "gdbsupport/filestuff.h"
 #include "build-id.h"
 #include "namespace.h"
-#include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/underlying.h"
-#include "gdbsupport/byte-vector.h"
 #include "gdbsupport/hash_enum.h"
 #include "filename-seen-cache.h"
 #include "producer.h"
 #include <fcntl.h>
-#include <sys/types.h>
 #include <algorithm>
-#include <unordered_set>
 #include <unordered_map>
 #include "gdbsupport/selftest.h"
-#include <cmath>
-#include <set>
-#include <forward_list>
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
 

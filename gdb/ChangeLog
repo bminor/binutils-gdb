@@ -1,3 +1,7 @@
+2019-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2read.c: Remove includes.
+
 2019-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ui-out.c (ui_out::call_do_message): Silence
