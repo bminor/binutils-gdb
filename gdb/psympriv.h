@@ -22,6 +22,7 @@
 
 #include "psymtab.h"
 #include "objfiles.h"
+#include "gdbsupport/gdb_string_view.h"
 
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
@@ -304,7 +305,7 @@ enum class psymbol_placement
    LANGUAGE is the language from which the symbol originates.  This will
    influence, amongst other things, how the symbol name is demangled. */
 
-extern void add_psymbol_to_list (const char *name, int namelength,
+extern void add_psymbol_to_list (gdb::string_view name,
 				 bool copy_name, domain_enum domain,
 				 enum address_class theclass,
 				 short section,

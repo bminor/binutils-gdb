@@ -1086,7 +1086,7 @@ mst_str (minimal_symbol_type t)
 /* See minsyms.h.  */
 
 struct minimal_symbol *
-minimal_symbol_reader::record_full (const char *name, int name_len,
+minimal_symbol_reader::record_full (gdb::string_view name,
 				    bool copy_name, CORE_ADDR address,
 				    enum minimal_symbol_type ms_type,
 				    int section)
@@ -1100,24 +1100,22 @@ minimal_symbol_reader::record_full (const char *name, int name_len,
      lookup_minimal_symbol_by_pc would have no way of getting the
      right one.  */
   if (ms_type == mst_file_text && name[0] == 'g'
-      && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
-	  || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
+      && (name == GCC_COMPILED_FLAG_SYMBOL
+	  || name == GCC2_COMPILED_FLAG_SYMBOL))
     return (NULL);
 
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table.  */
   if (name[0] == get_symbol_leading_char (m_objfile->obfd))
-    {
-      ++name;
-      --name_len;
-    }
+    name = name.substr (1);
 
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
 
   if (symtab_create_debug >= 2)
-    printf_unfiltered ("Recording minsym:  %-21s  %18s  %4d  %s\n",
-               mst_str (ms_type), hex_string (address), section, name);
+    printf_unfiltered ("Recording minsym:  %-21s  %18s  %4d  %.*s\n",
+               mst_str (ms_type), hex_string (address), section,
+	       (int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
@@ -1129,7 +1127,7 @@ minimal_symbol_reader::record_full (const char *name, int name_len,
   msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
   symbol_set_language (msymbol, language_auto,
 		       &m_objfile->per_bfd->storage_obstack);
-  symbol_set_names (msymbol, name, name_len, copy_name, m_objfile->per_bfd);
+  symbol_set_names (msymbol, name, copy_name, m_objfile->per_bfd);
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;

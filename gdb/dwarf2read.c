@@ -8952,7 +8952,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
              But in Ada and Fortran, we want to be able to access nested
              procedures globally.  So all Ada and Fortran subprograms are
              stored in the global scope.  */
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
+	  add_psymbol_to_list (actual_name,
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       SECT_OFF_TEXT (objfile),
@@ -8962,7 +8962,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
+	  add_psymbol_to_list (actual_name,
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       SECT_OFF_TEXT (objfile),
@@ -8974,7 +8974,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	set_objfile_main_name (objfile, actual_name, cu->language);
       break;
     case DW_TAG_constant:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
+      add_psymbol_to_list (actual_name,
 			   built_actual_name != NULL, VAR_DOMAIN, LOC_STATIC,
 			   -1, (pdi->is_external
 				? psymbol_placement::GLOBAL
@@ -9010,7 +9010,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	     table building.  */
 
 	  if (pdi->d.locdesc || pdi->has_type)
-	    add_psymbol_to_list (actual_name, strlen (actual_name),
+	    add_psymbol_to_list (actual_name,
 				 built_actual_name != NULL,
 				 VAR_DOMAIN, LOC_STATIC,
 				 SECT_OFF_TEXT (objfile),
@@ -9029,7 +9029,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	      return;
 	    }
 
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
+	  add_psymbol_to_list (actual_name,
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
 			       SECT_OFF_TEXT (objfile),
@@ -9041,7 +9041,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     case DW_TAG_typedef:
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
+      add_psymbol_to_list (actual_name,
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF, -1,
 			   psymbol_placement::STATIC,
@@ -9049,7 +9049,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_namespace:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
+      add_psymbol_to_list (actual_name,
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF, -1,
 			   psymbol_placement::GLOBAL,
@@ -9060,7 +9060,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
          available without any name.  If so, we skip the module as it
          doesn't bring any value.  */
       if (actual_name != nullptr)
-	add_psymbol_to_list (actual_name, strlen (actual_name),
+	add_psymbol_to_list (actual_name,
 			     built_actual_name != NULL,
 			     MODULE_DOMAIN, LOC_TYPEDEF, -1,
 			     psymbol_placement::GLOBAL,
@@ -9084,7 +9084,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
       /* NOTE: carlton/2003-10-07: See comment in new_symbol about
 	 static vs. global.  */
-      add_psymbol_to_list (actual_name, strlen (actual_name),
+      add_psymbol_to_list (actual_name,
 			   built_actual_name != NULL,
 			   STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 			   cu->language == language_cplus
@@ -9094,7 +9094,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
       break;
     case DW_TAG_enumerator:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
+      add_psymbol_to_list (actual_name,
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_CONST, -1,
 			   cu->language == language_cplus
@@ -9924,8 +9924,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 
       sym = allocate_symbol (objfile);
       SYMBOL_SET_LANGUAGE (sym, language_go, &objfile->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, saved_package_name,
-			strlen (saved_package_name), 0, objfile);
+      SYMBOL_SET_NAMES (sym, saved_package_name, false, objfile);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
@@ -18566,7 +18565,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	      || pdi.tag == DW_TAG_subrange_type))
 	{
 	  if (building_psymtab && pdi.name != NULL)
-	    add_psymbol_to_list (pdi.name, strlen (pdi.name), false,
+	    add_psymbol_to_list (pdi.name, false,
 				 VAR_DOMAIN, LOC_TYPEDEF, -1,
 				 psymbol_placement::STATIC,
 				 0, cu->language, objfile);
@@ -18600,7 +18599,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  if (pdi.name == NULL)
 	    complaint (_("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_psymbol_to_list (pdi.name, strlen (pdi.name), false,
+	    add_psymbol_to_list (pdi.name, false,
 				 VAR_DOMAIN, LOC_CONST, -1,
 				 cu->language == language_cplus
 				 ? psymbol_placement::GLOBAL
@@ -21606,7 +21605,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Cache this symbol's name and the name's demangled form (if any).  */
       SYMBOL_SET_LANGUAGE (sym, cu->language, &objfile->objfile_obstack);
       linkagename = dwarf2_physname (name, die, cu);
-      SYMBOL_SET_NAMES (sym, linkagename, strlen (linkagename), 0, objfile);
+      SYMBOL_SET_NAMES (sym, linkagename, false, objfile);
 
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */

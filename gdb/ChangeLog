@@ -1,5 +1,33 @@
 2019-10-29  Christian Biesinger  <cbiesinger@google.com>
 
+	* coffread.c (record_minimal_symbol): Update.
+	(process_coff_symbol): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	* dwarf2read.c (add_partial_symbol): Update.
+	(fixup_go_packaging): Update.
+	(load_partial_dies): Update.
+	(new_symbol): Update.
+	* elfread.c (record_minimal_symbol): Change signature to use
+	gdb::string_view instead of name+len.
+	(elf_symtab_read): Update.
+	(elf_rel_plt_read): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(handle_psymbol_enumerators): Update.
+	(new_symbol): Update.
+	* minsyms.c (minimal_symbol_reader::record_full): Change signature
+	to use gdb::string_view instead of name+len.
+	* minsyms.h (class minimal_symbol_reader) <record_full>: Likewise.
+	* psympriv.h (add_psymbol_to_list): Likewise.
+	* psymtab.c (add_psymbol_to_bcache): Likewise.
+	(add_psymbol_to_list): Likewise.
+	* stabsread.c (define_symbol): Update.
+	* symtab.c (symbol_set_names): Change signature to use gdb::string_view.
+	* symtab.h (SYMBOL_SET_NAMES): Likewise.
+	(symbol_set_names): Likewise.
+	* xcoffread.c (scan_xcoff_symtab): Update.
+
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
 	* symtab.h (symbol_set_names): Document that copy_name must be
 	set to true for non-nullterminated strings.
 	* symtab.c (symbol_set_names): Only make a nullterminated copy of

@@ -752,11 +752,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (!new_name.empty ())
 	{
 	  SYMBOL_SET_NAMES (sym,
-			    new_name.c_str (), new_name.length (),
+			    new_name,
 			    1, objfile);
 	}
       else
-	SYMBOL_SET_NAMES (sym, string, p - string, 1, objfile);
+	SYMBOL_SET_NAMES (sym, gdb::string_view (string, p - string), true,
+			  objfile);
 
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
 	cp_scan_for_anonymous_namespaces (get_buildsym_compunit (), sym,

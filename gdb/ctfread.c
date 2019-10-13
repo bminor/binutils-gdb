@@ -380,7 +380,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
       OBJSTAT (ccp->of, n_syms++);
 
       SYMBOL_SET_LANGUAGE (sym, language_c, &ccp->of->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, name, strlen (name), 0, ccp->of);
+      SYMBOL_SET_NAMES (sym, name, false, ccp->of);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_TYPE (sym) = fip->ptype;
@@ -409,7 +409,7 @@ new_symbol (ctf_context_t *ccp, struct type *type, ctf_id_t tid)
       OBJSTAT (objfile, n_syms++);
 
       SYMBOL_SET_LANGUAGE (sym, language_c, &objfile->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, name.get (), strlen (name.get ()), 1, objfile);
+      SYMBOL_SET_NAMES (sym, name.get (), true, objfile);
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 
@@ -1029,7 +1029,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	if (type)
 	  {
 	    sym = new_symbol (ccp, type, id);
-	    SYMBOL_SET_NAMES (sym, name, strlen (name), 0, ccp->of);
+	    SYMBOL_SET_NAMES (sym, name, false, ccp->of);
 	  }
 	break;
       case CTF_K_STRUCT:
@@ -1045,7 +1045,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	SYMBOL_TYPE (sym) = type;
 	SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
-	SYMBOL_SET_NAMES (sym, name, strlen (name), 0, ccp->of);
+	SYMBOL_SET_NAMES (sym, name, false, ccp->of);
 	add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
 	break;
       default:
@@ -1365,7 +1365,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 	return 0;
     }
 
-    add_psymbol_to_list (name.get (), strlen (name.get ()), true,
+    add_psymbol_to_list (name.get (), true,
 			 domain, aclass, section,
 			 psymbol_placement::GLOBAL,
 			 0, language_c, ccp->of);
@@ -1380,7 +1380,7 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
 {
   ctf_context_t *ccp = (ctf_context_t *) arg;
 
-  add_psymbol_to_list (name, strlen (name), true,
+  add_psymbol_to_list (name, true,
 		       VAR_DOMAIN, LOC_STATIC, -1,
 		       psymbol_placement::GLOBAL,
 		       0, language_c, ccp->of);
@@ -1445,7 +1445,7 @@ scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
       else
 	aclass = LOC_TYPEDEF;
 
-      add_psymbol_to_list (tname.get (), strlen (tname.get ()), true,
+      add_psymbol_to_list (tname.get (), true,
 			   tdomain, aclass, -1,
 			   psymbol_placement::STATIC,
 			   0, language_c, of);

@@ -1568,7 +1568,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
    different domain (or address) is possible and correct.  */
 
 static struct partial_symbol *
-add_psymbol_to_bcache (const char *name, int namelength, bool copy_name,
+add_psymbol_to_bcache (gdb::string_view name, bool copy_name,
 		       domain_enum domain,
 		       enum address_class theclass,
 		       short section,
@@ -1585,7 +1585,7 @@ add_psymbol_to_bcache (const char *name, int namelength, bool copy_name,
   psymbol.aclass = theclass;
   symbol_set_language (&psymbol.ginfo, language,
 		       objfile->partial_symtabs->obstack ());
-  symbol_set_names (&psymbol.ginfo, name, namelength, copy_name,
+  symbol_set_names (&psymbol.ginfo, name, copy_name,
 		    objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
@@ -1608,7 +1608,7 @@ append_psymbol_to_list (std::vector<partial_symbol *> *list,
 /* See psympriv.h.  */
 
 void
-add_psymbol_to_list (const char *name, int namelength, bool copy_name,
+add_psymbol_to_list (gdb::string_view name, bool copy_name,
 		     domain_enum domain,
 		     enum address_class theclass,
 		     short section,
@@ -1621,7 +1621,7 @@ add_psymbol_to_list (const char *name, int namelength, bool copy_name,
   int added;
 
   /* Stash the partial symbol away in the cache.  */
-  psym = add_psymbol_to_bcache (name, namelength, copy_name, domain, theclass,
+  psym = add_psymbol_to_bcache (name, copy_name, domain, theclass,
 				section, coreaddr, language, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */

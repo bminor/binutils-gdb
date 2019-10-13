@@ -462,8 +462,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       return NULL;
     }
 
-  return reader.record_full (cs->c_name, strlen (cs->c_name), true, address,
-			     type, section);
+  return reader.record_full (cs->c_name, true, address, type, section);
 }
 
 /* coff_symfile_init ()
@@ -1569,7 +1568,7 @@ process_coff_symbol (struct coff_symbol *cs,
   name = EXTERNAL_NAME (name, objfile->obfd);
   SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
 		       &objfile->objfile_obstack);
-  SYMBOL_SET_NAMES (sym, name, strlen (name), 1, objfile);
+  SYMBOL_SET_NAMES (sym, name, true, objfile);
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;

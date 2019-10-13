@@ -88,7 +88,6 @@ class minimal_symbol_reader
      Arguments are:
 
      NAME - the symbol's name
-     NAME_LEN - the length of the name
      COPY_NAME - if true, the minsym code must make a copy of NAME.  If
      false, then NAME must be NUL-terminated, and must have a lifetime
      that is at least as long as OBJFILE's lifetime.
@@ -97,15 +96,14 @@ class minimal_symbol_reader
      SECTION - the symbol's section
   */
 
-  struct minimal_symbol *record_full (const char *name,
-				      int name_len,
+  struct minimal_symbol *record_full (gdb::string_view name,
 				      bool copy_name,
 				      CORE_ADDR address,
 				      enum minimal_symbol_type ms_type,
 				      int section);
 
   /* Like record_full, but:
-     - uses strlen to compute NAME_LEN,
+     - computes the length of NAME
      - passes COPY_NAME = true,
      - and passes a default SECTION, depending on the type
 
@@ -115,7 +113,7 @@ class minimal_symbol_reader
 	       enum minimal_symbol_type ms_type);
 
   /* Like record_full, but:
-     - uses strlen to compute NAME_LEN,
+     - computes the length of NAME
      - passes COPY_NAME = true.
 
      This variant does not return the new symbol.  */
@@ -124,7 +122,7 @@ class minimal_symbol_reader
 			 enum minimal_symbol_type ms_type,
 			 int section)
   {
-    record_full (name, strlen (name), true, address, ms_type, section);
+    record_full (name, true, address, ms_type, section);
   }
 
  private:

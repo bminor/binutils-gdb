@@ -48,6 +48,7 @@
 #include "auxv.h"
 #include "mdebugread.h"
 #include "ctfread.h"
+#include "gdbsupport/gdb_string_view.h"
 
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;
@@ -198,7 +199,7 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 
 static struct minimal_symbol *
 record_minimal_symbol (minimal_symbol_reader &reader,
-		       const char *name, int name_len, bool copy_name,
+		       gdb::string_view name, bool copy_name,
 		       CORE_ADDR address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
@@ -210,7 +211,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
     address = gdbarch_addr_bits_remove (gdbarch, address);
 
   struct minimal_symbol *result
-    = reader.record_full (name, name_len, copy_name, address,
+    = reader.record_full (name, copy_name, address,
 			  ms_type,
 			  gdb_bfd_section_index (objfile->obfd,
 						 bfd_section));
@@ -330,7 +331,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	    continue;
 
 	  msym = record_minimal_symbol
-	    (reader, sym->name, strlen (sym->name), copy_names,
+	    (reader, sym->name, copy_names,
 	     symaddr, mst_solib_trampoline, sect, objfile);
 	  if (msym != NULL)
 	    {
@@ -474,7 +475,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	      continue;	/* Skip this symbol.  */
 	    }
 	  msym = record_minimal_symbol
-	    (reader, sym->name, strlen (sym->name), copy_names, symaddr,
+	    (reader, sym->name, copy_names, symaddr,
 	     ms_type, sym->section, objfile);
 
 	  if (msym)
@@ -503,8 +504,10 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		{
 		  int len = atsign - sym->name;
 
-		  record_minimal_symbol (reader, sym->name, len, true, symaddr,
-					 ms_type, sym->section, objfile);
+		  record_minimal_symbol (reader,
+					 gdb::string_view (sym->name, len),
+					 true, symaddr, ms_type, sym->section,
+					 objfile);
 		}
 	    }
 
@@ -520,10 +523,9 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		{
 		  struct minimal_symbol *mtramp;
 
-		  mtramp = record_minimal_symbol (reader, sym->name, len - 4,
-						  true, symaddr,
-						  mst_solib_trampoline,
-						  sym->section, objfile);
+		  mtramp = record_minimal_symbol
+		    (reader, gdb::string_view (sym->name, len - 4), true,
+		     symaddr, mst_solib_trampoline, sym->section, objfile);
 		  if (mtramp)
 		    {
 		      SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
@@ -639,8 +641,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       string_buffer.assign (name);
       string_buffer.append (got_suffix, got_suffix + got_suffix_len);
 
-      msym = record_minimal_symbol (reader, string_buffer.c_str (),
-				    string_buffer.size (),
+      msym = record_minimal_symbol (reader, string_buffer,
 				    true, address, mst_slot_got_plt,
 				    msym_section, objfile);
       if (msym)
