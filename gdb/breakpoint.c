@@ -59,9 +59,7 @@
 #include "gdb_regex.h"
 #include "probe.h"
 #include "cli/cli-utils.h"
-#include "continuations.h"
 #include "stack.h"
-#include "skip.h"
 #include "ax-gdb.h"
 #include "dummy-frame.h"
 #include "interps.h"
@@ -69,11 +67,9 @@
 #include "thread-fsm.h"
 #include "tid-parse.h"
 #include "cli/cli-style.h"
-#include "mi/mi-main.h"
 
 /* readline include files */
-#include "readline/readline.h"
-#include "readline/history.h"
+#include "readline/tilde.h"
 
 /* readline defines this.  */
 #undef savestring

@@ -1,3 +1,9 @@
+2019-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c: Remove some includes: continuations.h, skip.h,
+	mi/mi-main.h, readline/readline.h, readline/history.h.  Add
+	include: readline/tilde.h.
+
 2019-10-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* remote.c (remote_target::get_trace_status): Remove declaration of
