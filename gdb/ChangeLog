@@ -1,3 +1,11 @@
+2019-10-25  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (struct demangled_name_entry): Change demangled name
+	to a unique_xmalloc_ptr<char>, now that we don't allocate it as
+	part of the struct anymore.
+	(symbol_set_names): No longer obstack allocate + copy the demangled
+	name, just store the allocated name from bfd.
+
 2019-10-25  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2-frame.c (dwarf2_cie_table): Now a typedef.

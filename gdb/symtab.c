@@ -723,7 +723,7 @@ struct demangled_name_entry
 
   gdb::string_view mangled;
   enum language language;
-  char demangled[1];
+  gdb::unique_xmalloc_ptr<char> demangled;
 };
 
 /* Hash function for the demangled name hash.  */
@@ -839,7 +839,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
     {
       /* In Ada, we do the symbol lookups using the mangled name, so
          we can save some space by not storing the demangled name.  */
-      if (!copy_name)
+      if (!copy_name && linkage_name_copy == linkage_name)
 	gsymbol->name = linkage_name;
       else
 	{
@@ -880,20 +880,17 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   if (*slot == NULL
       /* A C version of the symbol may have already snuck into the table.
 	 This happens to, e.g., main.init (__go_init_main).  Cope.  */
-      || (gsymbol->language == language_go
-	  && (*slot)->demangled[0] == '\0'))
+      || (gsymbol->language == language_go && (*slot)->demangled == nullptr))
     {
-      char *demangled_name_ptr
-	= symbol_find_demangled_name (gsymbol, linkage_name_copy);
-      gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
-      int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
+      gdb::unique_xmalloc_ptr<char> demangled_name_ptr
+	(symbol_find_demangled_name (gsymbol, linkage_name_copy));
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
 	 mangled name saved, and we don't have a demangled name.  So,
 	 you might think we could save a little space by not recording
 	 this in the hash table at all.
-	 
+
 	 It turns out that it is actually important to still save such
 	 an entry in the hash table, because storing this name gives
 	 us better bcache hit rates for partial symbols.  */
@@ -902,42 +899,33 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  *slot
 	    = ((struct demangled_name_entry *)
 	       obstack_alloc (&per_bfd->storage_obstack,
-			      offsetof (struct demangled_name_entry, demangled)
-			      + demangled_len + 1));
+			      sizeof (demangled_name_entry)));
 	  new (*slot) demangled_name_entry
 	    (gdb::string_view (linkage_name, len));
 	}
       else
 	{
-	  char *mangled_ptr;
-
 	  /* If we must copy the mangled name, put it directly after
-	     the demangled name so we can have a single
-	     allocation.  */
+	     the struct so we can have a single allocation.  */
 	  *slot
 	    = ((struct demangled_name_entry *)
 	       obstack_alloc (&per_bfd->storage_obstack,
-			      offsetof (struct demangled_name_entry, demangled)
-			      + len + demangled_len + 2));
-	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
+			      sizeof (demangled_name_entry) + len + 1));
+	  char *mangled_ptr = reinterpret_cast<char *> (*slot + 1);
 	  strcpy (mangled_ptr, linkage_name_copy);
 	  new (*slot) demangled_name_entry
 	    (gdb::string_view (mangled_ptr, len));
 	}
+      (*slot)->demangled = std::move (demangled_name_ptr);
       (*slot)->language = gsymbol->language;
-
-      if (demangled_name != NULL)
-	strcpy ((*slot)->demangled, demangled_name.get ());
-      else
-	(*slot)->demangled[0] = '\0';
     }
   else if (gsymbol->language == language_unknown
 	   || gsymbol->language == language_auto)
     gsymbol->language = (*slot)->language;
 
   gsymbol->name = (*slot)->mangled.data ();
-  if ((*slot)->demangled[0] != '\0')
-    symbol_set_demangled_name (gsymbol, (*slot)->demangled,
+  if ((*slot)->demangled != nullptr)
+    symbol_set_demangled_name (gsymbol, (*slot)->demangled.get (),
 			       &per_bfd->storage_obstack);
   else
     symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
