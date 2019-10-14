@@ -334,7 +334,9 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
   return TRUE;
 }
 
-/* Compare two elf_strtab_hash_entry structures.  Called via qsort.  */
+/* Compare two elf_strtab_hash_entry structures.  Called via qsort.
+   Won't ever return zero as all entries differ, so there is no issue
+   with qsort stability here.  */
 
 static int
 strrevcmp (const void *a, const void *b)

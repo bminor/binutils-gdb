@@ -7862,6 +7862,7 @@ struct elf_symbol
     {
       Elf_Internal_Sym *isym;
       struct elf_symbuf_symbol *ssym;
+      void *p;
     } u;
   const char *name;
 };
@@ -7874,7 +7875,13 @@ elf_sort_elf_symbol (const void *arg1, const void *arg2)
   const Elf_Internal_Sym *s1 = *(const Elf_Internal_Sym **) arg1;
   const Elf_Internal_Sym *s2 = *(const Elf_Internal_Sym **) arg2;
 
-  return s1->st_shndx - s2->st_shndx;
+  if (s1->st_shndx != s2->st_shndx)
+    return s1->st_shndx > s2->st_shndx ? 1 : -1;
+  /* Final sort by the address of the sym in the symbuf ensures
+     a stable sort.  */
+  if (s1 != s2)
+    return s1 > s2 ? 1 : -1;
+  return 0;
 }
 
 static int
@@ -7882,7 +7889,12 @@ elf_sym_name_compare (const void *arg1, const void *arg2)
 {
   const struct elf_symbol *s1 = (const struct elf_symbol *) arg1;
   const struct elf_symbol *s2 = (const struct elf_symbol *) arg2;
-  return strcmp (s1->name, s2->name);
+  int ret = strcmp (s1->name, s2->name);
+  if (ret != 0)
+    return ret;
+  if (s1->u.p != s2->u.p)
+    return s1->u.p > s2->u.p ? 1 : -1;
+  return 0;
 }
 
 static struct elf_symbuf_head *
@@ -8005,8 +8017,10 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 	goto done;
 
       if (!info->reduce_memory_overheads)
-	elf_tdata (bfd1)->symbuf = ssymbuf1
-	  = elf_create_symbuf (symcount1, isymbuf1);
+	{
+	  ssymbuf1 = elf_create_symbuf (symcount1, isymbuf1);
+	  elf_tdata (bfd1)->symbuf = ssymbuf1;
+	}
     }
 
   if (ssymbuf1 == NULL || ssymbuf2 == NULL)
@@ -8017,8 +8031,10 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 	goto done;
 
       if (ssymbuf1 != NULL && !info->reduce_memory_overheads)
-	elf_tdata (bfd2)->symbuf = ssymbuf2
-	  = elf_create_symbuf (symcount2, isymbuf2);
+	{
+	  ssymbuf2 = elf_create_symbuf (symcount2, isymbuf2);
+	  elf_tdata (bfd2)->symbuf = ssymbuf2;
+	}
     }
 
   if (ssymbuf1 != NULL && ssymbuf2 != NULL)
@@ -9059,6 +9075,15 @@ struct elf_link_sort_rela
   /* We use this as an array of size int_rels_per_ext_rel.  */
   Elf_Internal_Rela rela[1];
 };
+
+/* qsort stability here and for cmp2 is only an issue if multiple
+   dynamic relocations are emitted at the same address.  But targets
+   that apply a series of dynamic relocations each operating on the
+   result of the prior relocation can't use -z combreloc as
+   implemented anyway.  Such schemes tend to be broken by sorting on
+   symbol index.  That leaves dynamic NONE relocs as the only other
+   case where ld might emit multiple relocs at the same address, and
+   those are only emitted due to target bugs.  */
 
 static int
 elf_link_sort_cmp1 (const void *A, const void *B)

@@ -2101,7 +2101,17 @@ compare_symbols (const void *ap, const void *bp)
   if ((a->flags & BSF_DYNAMIC) == 0 && (b->flags & BSF_DYNAMIC) != 0)
     return 1;
 
-  return a > b;
+  /* Finally, sort on where the symbol is in memory.  The symbols will
+     be in at most two malloc'd blocks, one for static syms, one for
+     dynamic syms, and we distinguish the two blocks above by testing
+     BSF_DYNAMIC.  Since we are sorting the symbol pointers which were
+     originally in the same order as the symbols (and we're not
+     sorting the symbols themselves), this ensures a stable sort.  */
+  if (a < b)
+    return -1;
+  if (a > b)
+    return 1;
+  return 0;
 }
 
 /* Search SYMS for a symbol of the given VALUE.  */

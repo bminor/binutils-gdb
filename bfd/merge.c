@@ -555,6 +555,9 @@ error_return:
   return FALSE;
 }
 
+/* qsort comparison function.  Won't ever return zero as all entries
+   differ, so there is no issue with qsort stability here.  */
+
 static int
 strrevcmp (const void *a, const void *b)
 {

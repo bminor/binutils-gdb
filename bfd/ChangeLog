@@ -1,5 +1,17 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* elf-strtab.c (strrevcmp): Comment.
+	* merge.c (strrevcmp): Likewise.
+	* elf64-ppc.c (compare_symbols): Correct final pointer comparison.
+	Comment on why comparing pointers ensures a stable sort.
+	* elflink.c (struct elf_symbol): Add void* to union.
+	(elf_sort_elf_symbol): Ensure a stable sort with pointer comparison.
+	(elf_sym_name_compare): Likewise.
+	(bfd_elf_match_symbols_in_sections): Style fix.
+	(elf_link_sort_cmp1): Comment.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	PR 24955
 	* elflink.c (elf_output_implib): Don't use xmalloc.  Don't ignore
 	return value of bfd_alloc2.
