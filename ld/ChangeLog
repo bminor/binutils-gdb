@@ -1,5 +1,14 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* ldctor.h (struct set_element): Make next field a union, adding
+	idx field.
+	* ldctor.c (ctor_cmp): Dereference pointer and lose unnecessary
+	const.  Replace final sort on pointer value with final sort on idx.
+	(ldctor_add_set_entry): Adjust next field access.
+	(ldctor_build_sets): Likewise.  Set u.idx field for sort.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	* pe-dll.c (reloc_data_type): Add idx field.
 	(reloc_sort): Perform final sort by idx.
 	(generate_reloc): Set idx.
