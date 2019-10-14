@@ -4703,6 +4703,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	{
 	  if ((s->flags & SEC_ALLOC) != 0)
 	    {
+	      /* target_index is unused until bfd_elf_final_link
+		 starts output of section symbols.  Use it to make
+		 qsort stable.  */
+	      s->target_index = i;
 	      sections[i] = s;
 	      ++i;
 	      /* A wrapping section potentially clashes with header.  */
@@ -5270,14 +5274,7 @@ elf_sort_sections (const void *arg1, const void *arg2)
 
   if (TOEND (sec1))
     {
-      if (TOEND (sec2))
-	{
-	  /* If the indices are the same, do not return 0
-	     here, but continue to try the next comparison.  */
-	  if (sec1->target_index - sec2->target_index != 0)
-	    return sec1->target_index - sec2->target_index;
-	}
-      else
+      if (!TOEND (sec2))
 	return 1;
     }
   else if (TOEND (sec2))
@@ -5479,8 +5476,12 @@ assign_file_positions_for_load_sections (bfd *abfd,
       if (m->count > 1
 	  && !(elf_elfheader (abfd)->e_type == ET_CORE
 	       && m->p_type == PT_NOTE))
-	qsort (m->sections, (size_t) m->count, sizeof (asection *),
-	       elf_sort_sections);
+	{
+	  for (i = 0; i < m->count; i++)
+	    m->sections[i]->target_index = i;
+	  qsort (m->sections, (size_t) m->count, sizeof (asection *),
+		 elf_sort_sections);
+	}
 
       /* An ELF segment (described by Elf_Internal_Phdr) may contain a
 	 number of sections with contents contributing to both p_filesz

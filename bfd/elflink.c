@@ -12048,6 +12048,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    goto error_return;
 	}
 
+      /* _bfd_elf_compute_section_file_positions makes temporary use
+	 of target_index.  Reset it.  */
+      o->target_index = 0;
+
       /* Now, reset REL_COUNT and REL_COUNT2 so that we can use them
 	 to count upwards while actually outputting the relocations.  */
       esdo->rel.count = 0;

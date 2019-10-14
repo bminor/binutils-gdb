@@ -1,5 +1,13 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (_bfd_elf_map_sections_to_segments): Init target_index
+	for sections about to be sorted.
+	(assign_file_positions_for_load_sections): Likewise.
+	(elf_sort_sections): Don't bother optimising both TOEND case.
+	* elflink.c (bfd_elf_final_link): Reset target_index.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_get_linked_section_vma): Delete.
 	(compare_link_order): Use elf_linked_to_section and sort by lma,
 	size, and id.
