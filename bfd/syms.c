@@ -884,6 +884,7 @@ struct indexentry
   char *directory_name;
   char *file_name;
   char *function_name;
+  int idx;
 };
 
 /* Compare two indexentry structures.  This is called via qsort.  */
@@ -896,10 +897,9 @@ cmpindexentry (const void *a, const void *b)
 
   if (contestantA->val < contestantB->val)
     return -1;
-  else if (contestantA->val > contestantB->val)
+  if (contestantA->val > contestantB->val)
     return 1;
-  else
-    return 0;
+  return contestantA->idx - contestantB->idx;
 }
 
 /* A pointer to this structure is stored in *pinfo.  */
@@ -1198,6 +1198,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  info->indextable[i].directory_name = directory_name;
 		  info->indextable[i].file_name = file_name;
 		  info->indextable[i].function_name = NULL;
+		  info->indextable[i].idx = i;
 		  ++i;
 		}
 
@@ -1257,6 +1258,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      info->indextable[i].directory_name = directory_name;
 	      info->indextable[i].file_name = file_name;
 	      info->indextable[i].function_name = function_name;
+	      info->indextable[i].idx = i;
 	      ++i;
 	      break;
 	    }
@@ -1270,6 +1272,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  info->indextable[i].directory_name = directory_name;
 	  info->indextable[i].file_name = file_name;
 	  info->indextable[i].function_name = NULL;
+	  info->indextable[i].idx = i;
 	  ++i;
 	}
 
@@ -1279,6 +1282,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       info->indextable[i].directory_name = NULL;
       info->indextable[i].file_name = NULL;
       info->indextable[i].function_name = NULL;
+      info->indextable[i].idx = i;
       ++i;
 
       info->indextablesize = i;

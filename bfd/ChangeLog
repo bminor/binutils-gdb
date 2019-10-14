@@ -1,5 +1,11 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* syms.c (struct indexentry): Add idx field.
+	(cmpindexentry): Final sort on idx.
+	(_bfd_stab_section_find_nearest_line): Set idx.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c (struct lookup_funcinfo): Add idx field.
 	(compare_lookup_funcinfos): Perform final sort on idx.
 	(build_lookup_funcinfo_table): Set idx.
