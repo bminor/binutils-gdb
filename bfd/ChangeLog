@@ -1,3 +1,8 @@
+2019-10-15  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_check_compression_header): Check for powers of two
+	with x == (x & -x).
+
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
 	* syms.c (struct indexentry): Add idx field.

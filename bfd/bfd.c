@@ -2635,7 +2635,7 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
       if (chdr.ch_type == ELFCOMPRESS_ZLIB
-	  && chdr.ch_addralign == (1U << bfd_log2 (chdr.ch_addralign)))
+	  && chdr.ch_addralign == (chdr.ch_addralign & -chdr.ch_addralign))
 	{
 	  *uncompressed_size = chdr.ch_size;
 	  *uncompressed_alignment_power = bfd_log2 (chdr.ch_addralign);
