@@ -11478,56 +11478,43 @@ elf_reloc_link_order (bfd *output_bfd,
 }
 
 
-/* Get the output vma of the section pointed to by the sh_link field.  */
-
-static bfd_vma
-elf_get_linked_section_vma (struct bfd_link_order *p)
-{
-  Elf_Internal_Shdr **elf_shdrp;
-  asection *s;
-  int elfsec;
-
-  s = p->u.indirect.section;
-  elf_shdrp = elf_elfsections (s->owner);
-  elfsec = _bfd_elf_section_from_bfd_section (s->owner, s);
-  elfsec = elf_shdrp[elfsec]->sh_link;
-  /* PR 290:
-     The Intel C compiler generates SHT_IA_64_UNWIND with
-     SHF_LINK_ORDER.  But it doesn't set the sh_link or
-     sh_info fields.  Hence we could get the situation
-     where elfsec is 0.  */
-  if (elfsec == 0)
-    {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (s->owner);
-      if (bed->link_order_error_handler)
-	bed->link_order_error_handler
-	  /* xgettext:c-format */
-	  (_("%pB: warning: sh_link not set for section `%pA'"), s->owner, s);
-      return 0;
-    }
-  else
-    {
-      s = elf_shdrp[elfsec]->bfd_section;
-      return s->output_section->vma + s->output_offset;
-    }
-}
-
-
 /* Compare two sections based on the locations of the sections they are
    linked to.  Used by elf_fixup_link_order.  */
 
 static int
-compare_link_order (const void * a, const void * b)
+compare_link_order (const void *a, const void *b)
 {
-  bfd_vma apos;
-  bfd_vma bpos;
+  const struct bfd_link_order *alo = *(const struct bfd_link_order **) a;
+  const struct bfd_link_order *blo = *(const struct bfd_link_order **) b;
+  asection *asec = elf_linked_to_section (alo->u.indirect.section);
+  asection *bsec = elf_linked_to_section (blo->u.indirect.section);
+  bfd_vma apos = asec->output_section->lma + asec->output_offset;
+  bfd_vma bpos = bsec->output_section->lma + bsec->output_offset;
 
-  apos = elf_get_linked_section_vma (*(struct bfd_link_order **)a);
-  bpos = elf_get_linked_section_vma (*(struct bfd_link_order **)b);
   if (apos < bpos)
     return -1;
-  return apos > bpos;
+  if (apos > bpos)
+    return 1;
+
+  /* The only way we should get matching LMAs is when the first of two
+     sections has zero size.  */
+  if (asec->size < bsec->size)
+    return -1;
+  if (asec->size > bsec->size)
+    return 1;
+
+  /* If they are both zero size then they almost certainly have the same
+     VMA and thus are not ordered with respect to each other.  Test VMA
+     anyway, and fall back to id to make the result reproducible across
+     qsort implementations.  */
+  apos = asec->output_section->vma + asec->output_offset;
+  bpos = bsec->output_section->vma + bsec->output_offset;
+  if (apos < bpos)
+    return -1;
+  if (apos > bpos)
+    return 1;
+
+  return asec->id - bsec->id;
 }
 
 
@@ -11539,13 +11526,11 @@ compare_link_order (const void * a, const void * b)
 static bfd_boolean
 elf_fixup_link_order (bfd *abfd, asection *o)
 {
-  int seen_linkorder;
-  int seen_other;
-  int n;
+  size_t seen_linkorder;
+  size_t seen_other;
+  size_t n;
   struct bfd_link_order *p;
   bfd *sub;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  unsigned elfsec;
   struct bfd_link_order **sections;
   asection *s, *other_sec, *linkorder_sec;
   bfd_vma offset;
@@ -11562,11 +11547,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	  sub = s->owner;
 	  if ((s->flags & SEC_LINKER_CREATED) == 0
 	      && bfd_get_flavour (sub) == bfd_target_elf_flavour
-	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
-	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s))
-	      && elfsec < elf_numsections (sub)
-	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER
-	      && elf_elfsections (sub)[elfsec]->sh_link < elf_numsections (sub))
+	      && elf_section_data (s) != NULL
+	      && elf_linked_to_section (s) != NULL)
 	    {
 	      seen_linkorder++;
 	      linkorder_sec = s;
@@ -11600,26 +11582,25 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   if (!seen_linkorder)
     return TRUE;
 
-  sections = (struct bfd_link_order **)
-    bfd_malloc (seen_linkorder * sizeof (struct bfd_link_order *));
+  sections = bfd_malloc (seen_linkorder * sizeof (*sections));
   if (sections == NULL)
     return FALSE;
-  seen_linkorder = 0;
 
+  seen_linkorder = 0;
   for (p = o->map_head.link_order; p != NULL; p = p->next)
-    {
-      sections[seen_linkorder++] = p;
-    }
+    sections[seen_linkorder++] = p;
+
   /* Sort the input sections in the order of their linked section.  */
-  qsort (sections, seen_linkorder, sizeof (struct bfd_link_order *),
-	 compare_link_order);
+  qsort (sections, seen_linkorder, sizeof (*sections), compare_link_order);
 
   /* Change the offsets of the sections.  */
   offset = 0;
   for (n = 0; n < seen_linkorder; n++)
     {
+      bfd_vma mask;
       s = sections[n]->u.indirect.section;
-      offset &= ~(bfd_vma) 0 << s->alignment_power;
+      mask = ~(bfd_vma) 0 << s->alignment_power;
+      offset = (offset + ~mask) & mask;
       s->output_offset = offset / bfd_octets_per_byte (abfd);
       sections[n]->offset = offset;
       offset += sections[n]->size;

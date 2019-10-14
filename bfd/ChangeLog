@@ -1,5 +1,14 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_get_linked_section_vma): Delete.
+	(compare_link_order): Use elf_linked_to_section and sort by lma,
+	size, and id.
+	(elf_fixup_link_order): Use size_t variables where appropriate.
+	Make use of elf_linked_to_section.  Formatting.  Properly align
+	sections.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	* elf-strtab.c (strrevcmp): Comment.
 	* merge.c (strrevcmp): Likewise.
 	* elf64-ppc.c (compare_symbols): Correct final pointer comparison.
