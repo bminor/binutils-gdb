@@ -3587,27 +3587,60 @@ on_needed_list (const char *soname,
   return FALSE;
 }
 
-/* Sort symbol by value, section, and size.  */
+/* Sort symbol by value, section, size, and type.  */
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
 {
   const struct elf_link_hash_entry *h1;
   const struct elf_link_hash_entry *h2;
   bfd_signed_vma vdiff;
+  int sdiff;
+  const char *n1;
+  const char *n2;
 
   h1 = *(const struct elf_link_hash_entry **) arg1;
   h2 = *(const struct elf_link_hash_entry **) arg2;
   vdiff = h1->root.u.def.value - h2->root.u.def.value;
   if (vdiff != 0)
     return vdiff > 0 ? 1 : -1;
-  else
-    {
-      int sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
-      if (sdiff != 0)
-	return sdiff > 0 ? 1 : -1;
-    }
+
+  sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
+  if (sdiff != 0)
+    return sdiff;
+
+  /* Sort so that sized symbols are selected over zero size symbols.  */
   vdiff = h1->size - h2->size;
-  return vdiff == 0 ? 0 : vdiff > 0 ? 1 : -1;
+  if (vdiff != 0)
+    return vdiff > 0 ? 1 : -1;
+
+  /* Sort so that STT_OBJECT is selected over STT_NOTYPE.  */
+  if (h1->type != h2->type)
+    return h1->type - h2->type;
+
+  /* If symbols are properly sized and typed, and multiple strong
+     aliases are not defined in a shared library by the user we
+     shouldn't get here.  Unfortunately linker script symbols like
+     __bss_start sometimes match a user symbol defined at the start of
+     .bss without proper size and type.  We'd like to preference the
+     user symbol over reserved system symbols.  Sort on leading
+     underscores.  */
+  n1 = h1->root.root.string;
+  n2 = h2->root.root.string;
+  while (*n1 == *n2)
+    {
+      if (*n1 == 0)
+	break;
+      ++n1;
+      ++n2;
+    }
+  if (*n1 == '_')
+    return -1;
+  if (*n2 == '_')
+    return 1;
+
+  /* Final sort on name selects user symbols like '_u' over reserved
+     system symbols like '_Z' and also will avoid qsort instability.  */
+  return *n1 - *n2;
 }
 
 /* This function is used to adjust offsets into .dynstr for
@@ -5345,8 +5378,8 @@ error_free_dyn:
 	 defined symbol, search time for N weak defined symbols will be
 	 O(N^2). Binary search will cut it down to O(NlogN).  */
       amt = extsymcount;
-      amt *= sizeof (struct elf_link_hash_entry *);
-      sorted_sym_hash = (struct elf_link_hash_entry **) bfd_malloc (amt);
+      amt *= sizeof (*sorted_sym_hash);
+      sorted_sym_hash = bfd_malloc (amt);
       if (sorted_sym_hash == NULL)
 	goto error_return;
       sym_hash = sorted_sym_hash;
@@ -5366,8 +5399,7 @@ error_free_dyn:
 	    }
 	}
 
-      qsort (sorted_sym_hash, sym_count,
-	     sizeof (struct elf_link_hash_entry *),
+      qsort (sorted_sym_hash, sym_count, sizeof (*sorted_sym_hash),
 	     elf_sort_symbol);
 
       while (weaks != NULL)
