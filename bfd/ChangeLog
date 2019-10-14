@@ -1,3 +1,14 @@
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
+	PR 24955
+	* elflink.c (elf_output_implib): Don't use xmalloc.  Don't ignore
+	return value of bfd_alloc2.
+	* peXXigen.c (_bfd_XXi_write_codeview_record): Don't use xmalloc.
+	* pef.c (bfd_pef_print_symbol): Likewise.  Don't ignore return
+	value of bfd_get_section_contents.
+	* som.c (som_write_space_strings): Don't use xmalloc.
+	(som_write_symbol_strings): Likewise.
+
 2019-10-11  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* dwarf2.c (stash_maybe_enable_info_hash_tables): Only set

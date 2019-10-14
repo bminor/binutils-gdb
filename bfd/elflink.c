@@ -11649,7 +11649,10 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Read in the symbol table.  */
-  sympp = (asymbol **) xmalloc (symsize);
+  sympp = (asymbol **) bfd_malloc (symsize);
+  if (sympp == NULL)
+    return FALSE;
+
   symcount = bfd_canonicalize_symtab (abfd, sympp);
   if (symcount < 0)
     goto free_sym_buf;
@@ -11677,6 +11680,9 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
   /* Make symbols absolute.  */
   osymbuf = (elf_symbol_type *) bfd_alloc2 (implib_bfd, symcount,
 					    sizeof (*osymbuf));
+  if (osymbuf == NULL)
+    goto free_sym_buf;
+
   for (src_count = 0; src_count < symcount; src_count++)
     {
       memcpy (&osymbuf[src_count], (elf_symbol_type *) sympp[src_count],

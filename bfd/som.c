@@ -3309,12 +3309,15 @@ som_write_space_strings (bfd *abfd,
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
-  char *tmp_space = xmalloc (tmp_space_size);
+  char *tmp_space = bfd_malloc (tmp_space_size);
   char *p = tmp_space;
   unsigned int strings_size = 0;
   asection *section;
   bfd_size_type amt;
   bfd_size_type res;
+
+  if (tmp_space == NULL)
+    return FALSE;
 
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
@@ -3419,11 +3422,14 @@ som_write_symbol_strings (bfd *abfd,
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
-  char *tmp_space = xmalloc (tmp_space_size);
+  char *tmp_space = bfd_malloc (tmp_space_size);
   char *p = tmp_space;
   unsigned int strings_size = 0;
   bfd_size_type amt;
   bfd_size_type res;
+
+  if (tmp_space == NULL)
+    return FALSE;
 
   /* This gets a bit gruesome because of the compilation unit.  The
      strings within the compilation unit are part of the symbol

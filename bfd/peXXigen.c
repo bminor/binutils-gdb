@@ -1216,7 +1216,10 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return 0;
 
-  buffer = xmalloc (size);
+  buffer = bfd_malloc (size);
+  if (buffer == NULL)
+    return 0;
+
   cvinfo70 = (CV_INFO_PDB70 *) buffer;
   H_PUT_32 (abfd, CVINFO_PDB70_CVSIGNATURE, cvinfo70->CvSignature);
 

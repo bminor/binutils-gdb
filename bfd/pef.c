@@ -221,15 +221,16 @@ bfd_pef_print_symbol (bfd *abfd,
       fprintf (file, " %-5s %s", symbol->section->name, symbol->name);
       if (CONST_STRNEQ (symbol->name, "__traceback_"))
 	{
-	  unsigned char *buf = xmalloc (symbol->udata.i);
+	  unsigned char *buf;
 	  size_t offset = symbol->value + 4;
 	  size_t len = symbol->udata.i;
-	  int ret;
 
-	  bfd_get_section_contents (abfd, symbol->section, buf, offset, len);
-	  ret = bfd_pef_parse_traceback_table (abfd, symbol->section, buf,
-					       len, 0, NULL, file);
-	  if (ret < 0)
+	  buf = bfd_malloc (len);
+	  if (buf == NULL
+	      || !bfd_get_section_contents (abfd, symbol->section, buf,
+					    offset, len)
+	      || bfd_pef_parse_traceback_table (abfd, symbol->section, buf,
+						len, 0, NULL, file) < 0)
 	    fprintf (file, " [ERROR]");
 	  free (buf);
 	}
