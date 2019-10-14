@@ -445,16 +445,25 @@ typedef struct
     bfd_vma vma;
     char type;
     short extra;
+    int idx;
   }
 reloc_data_type;
 
 static int
 reloc_sort (const void *va, const void *vb)
 {
-  bfd_vma a = ((const reloc_data_type *) va)->vma;
-  bfd_vma b = ((const reloc_data_type *) vb)->vma;
+  const reloc_data_type *a = (const reloc_data_type *) va;
+  const reloc_data_type *b = (const reloc_data_type *) vb;
 
-  return (a > b) ? 1 : ((a < b) ? -1 : 0);
+  if (a->vma > b->vma)
+    return 1;
+  if (a->vma < b->vma)
+    return -1;
+  if (a->idx > b->idx)
+    return 1;
+  if (a->idx < b->idx)
+    return -1;
+  return 0;
 }
 
 static int
@@ -1596,6 +1605,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		    }
 
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
+		  reloc_data[total_relocs].idx = total_relocs;
 
 #define BITS_AND_SHIFT(bits, shift) (bits * 1000 | shift)
 

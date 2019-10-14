@@ -1,3 +1,9 @@
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
+	* pe-dll.c (reloc_data_type): Add idx field.
+	(reloc_sort): Perform final sort by idx.
+	(generate_reloc): Set idx.
+
 2019-10-13  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Delete superflous "Changes in 2.33" comment.
