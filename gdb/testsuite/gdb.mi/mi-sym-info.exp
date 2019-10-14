@@ -127,3 +127,24 @@ set lineno2 [gdb_get_line_number "typedef int another_int_t;" ${srcfile2}]
 mi_gdb_test "120-symbol-info-types --name _int_" \
     "120\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"27\",name=\"my_int_t\"\}\\\]\},\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"23\",name=\"another_int_t\"\}\\\]\}\\\]\}" \
     "List all types matching _int_"
+
+# Test the --max-results parameter.
+mi_gdb_test "121-symbol-info-functions --max-results 0" \
+    "121\\^done,symbols=\{\}" \
+    "-symbol-info-functions --max-results 0"
+
+mi_gdb_test "122-symbol-info-functions --max-results 1" \
+    "122\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
+    "-symbol-info-functions --max-results 1"
+
+mi_gdb_test "123-symbol-info-functions --max-results 2" \
+    "123\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"33\",name=\"f2\",type=\"float \\(another_float_t\\)\",description=\"float f2\\(another_float_t\\);\"\},\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
+    "-symbol-info-functions --max-results 2"
+
+mi_gdb_test "124-symbol-info-variables --max-results 3" \
+    "124\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\},\{line=\"20\",name=\"global_i2\",type=\"int\",description=\"int global_i2;\"\},\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
+    "-symbol-info-variables --max-results 3"
+
+mi_gdb_test "125-symbol-info-types --max-results 4" \
+    "125\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"24\",name=\"another_float_t\"\},\{line=\"23\",name=\"another_int_t\"\},\{name=\"float\"\},\{name=\"int\"\}\\\]\}\\\]\}" \
+    "-symbol-info-types --max-results 4"

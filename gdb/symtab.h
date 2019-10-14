@@ -23,6 +23,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <set>
 #include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
 #include "gdb_obstack.h"
@@ -2092,6 +2093,12 @@ public:
     m_exclude_minsyms = exclude_minsyms;
   }
 
+  /* Set the maximum number of search results to be returned.  */
+  void set_max_search_results (size_t max_search_results)
+  {
+    m_max_search_results = max_search_results;
+  }
+
   /* Search the symbols from all objfiles in the current program space
      looking for matches as defined by the current state of this object.
 
@@ -2125,6 +2132,10 @@ private:
      be included in the results, otherwise they are excluded.  */
   bool m_exclude_minsyms = false;
 
+  /* Maximum number of search results.  We currently impose a hard limit
+     of SIZE_MAX, there is no "unlimited".  */
+  size_t m_max_search_results = SIZE_MAX;
+
   /* Expand symtabs in OBJFILE that match PREG, are of type M_KIND.  Return
      true if any msymbols were seen that we should later consider adding to
      the results list.  */
@@ -2132,15 +2143,23 @@ private:
 		       const gdb::optional<compiled_regex> &preg) const;
 
   /* Add symbols from symtabs in OBJFILE that match PREG, and TREG, and are
-     of type M_KIND, to the results vector RESULTS.  */
-  void add_matching_symbols (objfile *objfile,
+     of type M_KIND, to the results set RESULTS_SET.  Return false if we
+     stop adding results early due to having already found too many results
+     (based on M_MAX_SEARCH_RESULTS limit), otherwise return true.
+     Returning true does not indicate that any results were added, just
+     that we didn't _not_ add a result due to reaching MAX_SEARCH_RESULTS.  */
+  bool add_matching_symbols (objfile *objfile,
 			     const gdb::optional<compiled_regex> &preg,
 			     const gdb::optional<compiled_regex> &treg,
-			     std::vector<symbol_search> *results) const;
+			     std::set<symbol_search> *result_set) const;
 
-  /* Add msymbols from OBJFILE that match PREG and M_KIND, to the
-     results vector RESULTS.  */
-  void add_matching_msymbols (objfile *objfile,
+  /* Add msymbols from OBJFILE that match PREG and M_KIND, to the results
+     vector RESULTS.  Return false if we stop adding results early due to
+     having already found too many results (based on max search results
+     limit M_MAX_SEARCH_RESULTS), otherwise return true.  Returning true
+     does not indicate that any results were added, just that we didn't
+     _not_ add a result due to reaching MAX_SEARCH_RESULTS.  */
+  bool add_matching_msymbols (objfile *objfile,
 			      const gdb::optional<compiled_regex> &preg,
 			      std::vector<symbol_search> *results) const;
 

@@ -33962,6 +33962,7 @@ N.A.
  -symbol-info-functions [--include-nondebug]
                         [--type @var{type_regexp}]
                         [--name @var{name_regexp}]
+                        [--max-results @var{limit}]
 @end smallexample
 
 @noindent
@@ -33976,6 +33977,11 @@ code symbols from the symbol table.
 The options @code{--type} and @code{--name} allow the symbols returned
 to be filtered based on either the name of the function, or the type
 signature of the function.
+
+The option @code{--max-results} restricts the command to return no
+more than @var{limit} results.  If exactly @var{limit} results are
+returned then there might be additional results available if a higher
+limit is used.
 
 @subsubheading @value{GDBN} Command
 
@@ -34208,6 +34214,8 @@ The corresponding @value{GDBN} command is @samp{info module variables}.
 
 @smallexample
  -symbol-info-modules [--name @var{name_regexp}]
+                      [--max-results @var{limit}]
+
 @end smallexample
 
 @noindent
@@ -34217,6 +34225,11 @@ which each modules is defined.
 
 The option @code{--name} allows the modules returned to be filtered
 based the name of the module.
+
+The option @code{--max-results} restricts the command to return no
+more than @var{limit} results.  If exactly @var{limit} results are
+returned then there might be additional results available if a higher
+limit is used.
 
 @subsubheading @value{GDBN} Command
 
@@ -34262,6 +34275,8 @@ The corresponding @value{GDBN} command is @samp{info modules}.
 
 @smallexample
  -symbol-info-types [--name @var{name_regexp}]
+                    [--max-results @var{limit}]
+
 @end smallexample
 
 @noindent
@@ -34274,6 +34289,11 @@ line number.
 
 The option @code{--name} allows the list of types returned to be
 filtered by name.
+
+The option @code{--max-results} restricts the command to return no
+more than @var{limit} results.  If exactly @var{limit} results are
+returned then there might be additional results available if a higher
+limit is used.
 
 @subsubheading @value{GDBN} Command
 
@@ -34322,6 +34342,8 @@ The corresponding @value{GDBN} command is @samp{info types}.
  -symbol-info-variables [--include-nondebug]
                         [--type @var{type_regexp}]
                         [--name @var{name_regexp}]
+                        [--max-results @var{limit}]
+
 @end smallexample
 
 @noindent
@@ -34336,6 +34358,11 @@ data symbols from the symbol table.
 The options @code{--type} and @code{--name} allow the symbols returned
 to be filtered based on either the name of the variable, or the type
 of the variable.
+
+The option @code{--max-results} restricts the command to return no
+more than @var{limit} results.  If exactly @var{limit} results are
+returned then there might be additional results available if a higher
+limit is used.
 
 @subsubheading @value{GDBN} Command
 

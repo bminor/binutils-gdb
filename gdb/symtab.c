@@ -4547,12 +4547,12 @@ global_symbol_searcher::expand_symtabs
 
 /* See symtab.h.  */
 
-void
+bool
 global_symbol_searcher::add_matching_symbols
 	(objfile *objfile,
 	 const gdb::optional<compiled_regex> &preg,
 	 const gdb::optional<compiled_regex> &treg,
-	 std::vector<symbol_search> *results) const
+	 std::set<symbol_search> *result_set) const
 {
   enum search_domain kind = m_kind;
 
@@ -4610,17 +4610,26 @@ global_symbol_searcher::add_matching_symbols
 			      && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
 			      && SYMBOL_LINE (sym) != 0))))
 		{
-		  /* Matching msymbol, add it to the results list.  */
-		  results->emplace_back (block, sym);
+		  if (result_set->size () < m_max_search_results)
+		    {
+		      /* Match, insert if not already in the results.  */
+		      symbol_search ss (block, sym);
+		      if (result_set->find (ss) == result_set->end ())
+			result_set->insert (ss);
+		    }
+		  else
+		    return false;
 		}
 	    }
 	}
     }
+
+  return true;
 }
 
 /* See symtab.h.  */
 
-void
+bool
 global_symbol_searcher::add_matching_msymbols
 	(objfile *objfile, const gdb::optional<compiled_regex> &preg,
 	 std::vector<symbol_search> *results) const
@@ -4652,22 +4661,17 @@ global_symbol_searcher::add_matching_msymbols
 		       VAR_DOMAIN).symbol == NULL)
 		    {
 		      /* Matching msymbol, add it to the results list.  */
-		      results->emplace_back (GLOBAL_BLOCK, msymbol, objfile);
+		      if (results->size () < m_max_search_results)
+			results->emplace_back (GLOBAL_BLOCK, msymbol, objfile);
+		      else
+			return false;
 		    }
 		}
 	    }
 	}
     }
-}
 
-/* Sort the symbols in RESULT and remove duplicates.  */
-
-static void
-sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
-{
-  std::sort (result->begin (), result->end ());
-  result->erase (std::unique (result->begin (), result->end ()),
-		 result->end ());
+  return true;
 }
 
 /* See symtab.h.  */
@@ -4733,20 +4737,24 @@ global_symbol_searcher::search () const
     }
 
   bool found_msymbol = false;
-  std::vector<symbol_search> result;
+  std::set<symbol_search> result_set;
   for (objfile *objfile : current_program_space->objfiles ())
     {
       /* Expand symtabs within objfile that possibly contain matching
 	 symbols.  */
       found_msymbol |= expand_symtabs (objfile, preg);
 
-      /* Find matching symbols within OBJFILE and add them in to the RESULT
-	 vector.  */
-      add_matching_symbols (objfile, preg, treg, &result);
+      /* Find matching symbols within OBJFILE and add them in to the
+	 RESULT_SET set.  Use a set here so that we can easily detect
+	 duplicates as we go, and can therefore track how many unique
+	 matches we have found so far.  */
+      if (!add_matching_symbols (objfile, preg, treg, &result_set))
+	break;
     }
 
-  if (!result.empty ())
-    sort_search_symbols_remove_dups (&result);
+  /* Convert the result set into a sorted result list, as std::set is
+     defined to be sorted then no explicit call to std::sort is needed.  */
+  std::vector<symbol_search> result (result_set.begin (), result_set.end ());
 
   /* If there are no debug symbols, then add matching minsyms.  But if the
      user wants to see symbols matching a type regexp, then never give a
@@ -4758,7 +4766,8 @@ global_symbol_searcher::search () const
     {
       gdb_assert (m_kind == VARIABLES_DOMAIN || m_kind == FUNCTIONS_DOMAIN);
       for (objfile *objfile : current_program_space->objfiles ())
-	add_matching_msymbols (objfile, preg, &result);
+	if (!add_matching_msymbols (objfile, preg, &result))
+	  break;
     }
 
   return result;

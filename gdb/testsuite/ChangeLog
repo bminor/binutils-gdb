@@ -1,5 +1,9 @@
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-sym-info.exp: Add tests for -max-results parameter.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.mi/mi-fortran-modules.exp: Add additional tests for
 	-symbol-info-module-functions and -symbol-info-module-variables.
 

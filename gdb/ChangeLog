@@ -1,5 +1,32 @@
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mi/mi-symbol-cmds.c (mi_symbol_info): Take extra parameter, and
+	add it into the search spec.
+	(parse_max_results_option): New function.
+	(mi_info_functions_or_variables): Parse -max-results flag and pass
+	it to mi_symbol_info.
+	(mi_cmd_symbol_info_modules): Likewise.
+	(mi_cmd_symbol_info_types): Likewise.
+	* symtab.c (global_symbol_searcher::add_matching_symbols): Change
+	return type to bool, change result container into a set, and don't
+	add new results if we have enough already.
+	(global_symbol_searcher::add_matching_msymbols): Change return
+	type to bool, and don't add new results if we have enough already.
+	(sort_search_symbols_remove_dups): Delete.
+	(global_symbol_searcher::search): Early exit from search loop when
+	we have enough results.  Use a std::set to collect the results
+	from calling add_matching_symbols.
+	* symtab.h (global_symbol_searcher) <set_max_seach_results>: New
+	member function.
+	(global_symbol_searcher) <m_max_search_results>: New member
+	variable.
+	(global_symbol_searcher) <add_matching_symbols>: Update header
+	comment and change return type to bool.
+	(global_symbol_searcher) <add_matching_msymbols>: Update header
+	comment and change return type to bool.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* symtab.c (symbol_search::compare_search_syms): Update header
 	comment.
 	(global_symbol_searcher::is_suitable_msymbol): New function.

@@ -1,5 +1,10 @@
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Add documentation of
+	-max-results to some -symbol-info-* commands.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
 	-symbol-info-module-functions and -symbol-info-module-variables.
 

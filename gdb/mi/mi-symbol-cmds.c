@@ -111,11 +111,13 @@ output_nondebug_symbol (ui_out *uiout,
 
 static void
 mi_symbol_info (enum search_domain kind, const char *name_regexp,
-		const char *type_regexp, bool exclude_minsyms)
+		const char *type_regexp, bool exclude_minsyms,
+		size_t max_results)
 {
   global_symbol_searcher sym_search (kind, name_regexp);
   sym_search.set_symbol_type_regexp (type_regexp);
   sym_search.set_exclude_minsyms (exclude_minsyms);
+  sym_search.set_max_search_results (max_results);
   std::vector<symbol_search> symbols = sym_search.search ();
   ui_out *uiout = current_uiout;
   int i = 0;
@@ -166,25 +168,42 @@ mi_symbol_info (enum search_domain kind, const char *name_regexp,
     }
 }
 
+/* Helper to parse the option text from an -max-results argument and return
+   the parsed value.  If the text can't be parsed then an error is thrown.  */
+
+static size_t
+parse_max_results_option (char *arg)
+{
+  char *ptr = arg;
+  long long val = strtoll (arg, &ptr, 10);
+  if (arg == ptr || *ptr != '\0' || val > SIZE_MAX || val < 0)
+    error (_("invalid value for --max-results argument"));
+  size_t max_results = (size_t) val;
+
+  return max_results;
+}
+
 /* Helper for mi_cmd_symbol_info_{functions,variables} - depending on KIND.
    Processes command line options from ARGV and ARGC.  */
 
 static void
 mi_info_functions_or_variables (enum search_domain kind, char **argv, int argc)
 {
+  size_t max_results = SIZE_MAX;
   const char *regexp = nullptr;
   const char *t_regexp = nullptr;
   bool exclude_minsyms = true;
 
   enum opt
     {
-     INCLUDE_NONDEBUG_OPT, TYPE_REGEXP_OPT, NAME_REGEXP_OPT
+     INCLUDE_NONDEBUG_OPT, TYPE_REGEXP_OPT, NAME_REGEXP_OPT, MAX_RESULTS_OPT
     };
   static const struct mi_opt opts[] =
   {
     {"-include-nondebug" , INCLUDE_NONDEBUG_OPT, 0},
     {"-type", TYPE_REGEXP_OPT, 1},
     {"-name", NAME_REGEXP_OPT, 1},
+    {"-max-results", MAX_RESULTS_OPT, 1},
     { 0, 0, 0 }
   };
 
@@ -210,10 +229,13 @@ mi_info_functions_or_variables (enum search_domain kind, char **argv, int argc)
 	case NAME_REGEXP_OPT:
 	  regexp = oarg;
 	  break;
+	case MAX_RESULTS_OPT:
+	  max_results = parse_max_results_option (oarg);
+	  break;
 	}
     }
 
-  mi_symbol_info (kind, regexp, t_regexp, exclude_minsyms);
+  mi_symbol_info (kind, regexp, t_regexp, exclude_minsyms, max_results);
 }
 
 /* Type for an iterator over a vector of module_symbol_search results.  */
@@ -384,15 +406,17 @@ mi_cmd_symbol_info_module_variables (const char *command, char **argv,
 void
 mi_cmd_symbol_info_modules (const char *command, char **argv, int argc)
 {
+  size_t max_results = SIZE_MAX;
   const char *regexp = nullptr;
 
   enum opt
     {
-     NAME_REGEXP_OPT
+     NAME_REGEXP_OPT, MAX_RESULTS_OPT
     };
   static const struct mi_opt opts[] =
   {
     {"-name", NAME_REGEXP_OPT, 1},
+    {"-max-results", MAX_RESULTS_OPT, 1},
     { 0, 0, 0 }
   };
 
@@ -410,10 +434,13 @@ mi_cmd_symbol_info_modules (const char *command, char **argv, int argc)
 	case NAME_REGEXP_OPT:
 	  regexp = oarg;
 	  break;
+	case MAX_RESULTS_OPT:
+	  max_results = parse_max_results_option (oarg);
+	  break;
 	}
     }
 
-  mi_symbol_info (MODULES_DOMAIN, regexp, nullptr, true);
+  mi_symbol_info (MODULES_DOMAIN, regexp, nullptr, true, max_results);
 }
 
 /* Implement -symbol-info-types command.  */
@@ -421,15 +448,17 @@ mi_cmd_symbol_info_modules (const char *command, char **argv, int argc)
 void
 mi_cmd_symbol_info_types (const char *command, char **argv, int argc)
 {
+  size_t max_results = SIZE_MAX;
   const char *regexp = nullptr;
 
   enum opt
     {
-     NAME_REGEXP_OPT
+     NAME_REGEXP_OPT, MAX_RESULTS_OPT
     };
   static const struct mi_opt opts[] =
   {
     {"-name", NAME_REGEXP_OPT, 1},
+    {"-max-results", MAX_RESULTS_OPT, 1},
     { 0, 0, 0 }
   };
 
@@ -447,10 +476,13 @@ mi_cmd_symbol_info_types (const char *command, char **argv, int argc)
 	case NAME_REGEXP_OPT:
 	  regexp = oarg;
 	  break;
+	case MAX_RESULTS_OPT:
+	  max_results = parse_max_results_option (oarg);
+	  break;
 	}
     }
 
-  mi_symbol_info (TYPES_DOMAIN, regexp, nullptr, true);
+  mi_symbol_info (TYPES_DOMAIN, regexp, nullptr, true, max_results);
 }
 
 /* Implement -symbol-info-variables command.  */
