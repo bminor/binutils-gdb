@@ -54,15 +54,24 @@ set cores_re "cores=\\\[(\"$decimal\"(,\"$decimal\")*)?\\\]"
 # List all available processes.
 set process_entry_re "{${id_re},${type_re}(,$description_re)?(,$user_re)?(,$cores_re)?}"
 
-# Increase the timeout: when running with `make check-read1`, this can take
-# a bit of time, as there is a lot of output generated, hence a lot of read
-# syscalls.
-with_read1_timeout_factor 10 {
-    mi_gdb_test \
-	"-list-thread-groups --available" \
-	"\\^done,groups=\\\[${process_entry_re}(,$process_entry_re)*\\\]" \
-	"list available thread groups"
-}
+# The list can be long, so read entries one by one to avoid hitting the
+# timeout (especially when running with check-read1).
+gdb_test_multiple "-list-thread-groups --available" "list available thread groups" {
+    -re "\\^done,groups=\\\[" {
+	# The beginning of the response.
+	exp_continue
+    }
+
+    -re "${process_entry_re}," {
+	# All entries except the last one.
+	exp_continue
+    }
+
+    -re "${process_entry_re}\\\]\r\n${mi_gdb_prompt}" {
+	# The last entry.
+	pass $gdb_test_name
+    }
+} $mi_gdb_prompt
 
 # List specific processes, make sure there are two entries.
 set spawn_id_1 [remote_spawn target $binfile]

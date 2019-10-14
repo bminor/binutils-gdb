@@ -1,3 +1,8 @@
+2019-10-14  Simon Marchi <simon.marchi@polymtl.ca>
+
+	* gdb.mi/list-thread-groups-available.exp: Read entries one by
+	one instead of increasing timeout.
+
 2019-10-13  Tom de Vries  <tdevries@suse.de>
 
 	PR record/25038
