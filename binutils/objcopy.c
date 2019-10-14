@@ -4256,20 +4256,20 @@ get_sections (bfd *obfd ATTRIBUTE_UNUSED, asection *osection, void *secppparg)
   ++(*secppp);
 }
 
-/* Sort sections by VMA.  This is called via qsort, and is used when
+/* Sort sections by LMA.  This is called via qsort, and is used when
    --gap-fill or --pad-to is used.  We force non loadable or empty
    sections to the front, where they are easier to ignore.  */
 
 static int
 compare_section_lma (const void *arg1, const void *arg2)
 {
-  const asection *const *sec1 = (const asection * const *) arg1;
-  const asection *const *sec2 = (const asection * const *) arg2;
+  const asection *sec1 = *(const asection **) arg1;
+  const asection *sec2 = *(const asection **) arg2;
   flagword flags1, flags2;
 
   /* Sort non loadable sections to the front.  */
-  flags1 = (*sec1)->flags;
-  flags2 = (*sec2)->flags;
+  flags1 = sec1->flags;
+  flags2 = sec2->flags;
   if ((flags1 & SEC_HAS_CONTENTS) == 0
       || (flags1 & SEC_LOAD) == 0)
     {
@@ -4285,17 +4285,21 @@ compare_section_lma (const void *arg1, const void *arg2)
     }
 
   /* Sort sections by LMA.  */
-  if ((*sec1)->lma > (*sec2)->lma)
+  if (sec1->lma > sec2->lma)
     return 1;
-  else if ((*sec1)->lma < (*sec2)->lma)
+  if (sec1->lma < sec2->lma)
     return -1;
 
   /* Sort sections with the same LMA by size.  */
-  if (bfd_section_size (*sec1) > bfd_section_size (*sec2))
+  if (bfd_section_size (sec1) > bfd_section_size (sec2))
     return 1;
-  else if (bfd_section_size (*sec1) < bfd_section_size (*sec2))
+  if (bfd_section_size (sec1) < bfd_section_size (sec2))
     return -1;
 
+  if (sec1->id > sec2->id)
+    return 1;
+  if (sec1->id < sec2->id)
+    return -1;
   return 0;
 }
 

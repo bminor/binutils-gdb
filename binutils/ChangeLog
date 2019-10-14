@@ -1,3 +1,9 @@
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (compare_section_lma): Correct comment.  Dereference
+	section pointer earlier and lose unnecessary const.  Style fixes.
+	Add final sort by id.
+
 2019-10-13  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add a note to reset the
