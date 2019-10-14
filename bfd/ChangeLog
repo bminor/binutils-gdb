@@ -1,5 +1,14 @@
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2.c (struct lookup_funcinfo): Add idx field.
+	(compare_lookup_funcinfos): Perform final sort on idx.
+	(build_lookup_funcinfo_table): Set idx.
+	(compare_sequences): Perform final sort on num_lines.
+	(build_line_info_table): Set num_lines and line_info_lookup earlier.
+	(sort_line_sequences): Set num_lines for sort.
+
+2019-10-14  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_sort_symbol): Sort on type and name as well.
 	(elf_link_add_object_symbols): Style fix.
 

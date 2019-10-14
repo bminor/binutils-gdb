@@ -1413,6 +1413,8 @@ struct lookup_funcinfo
      The highest address of all prior functions after the lookup table is
      sorted, which is used for binary search.  */
   bfd_vma		high_addr;
+  /* Index of this function, used to ensure qsort is stable.  */
+  unsigned int idx;
 };
 
 struct varinfo
@@ -1713,6 +1715,11 @@ compare_sequences (const void* a, const void* b)
   if (seq1->last_line->op_index > seq2->last_line->op_index)
     return -1;
 
+  /* num_lines is initially an index, to make the sort stable.  */
+  if (seq1->num_lines < seq2->num_lines)
+    return -1;
+  if (seq1->num_lines > seq2->num_lines)
+    return 1;
   return 0;
 }
 
@@ -1739,12 +1746,14 @@ build_line_info_table (struct line_info_table *  table,
   for (each_line = seq->last_line; each_line; each_line = each_line->prev_line)
     num_lines++;
 
+  seq->num_lines = num_lines;
   if (num_lines == 0)
     return TRUE;
 
   /* Allocate space for the line information lookup table.  */
   amt = sizeof (struct line_info*) * num_lines;
   line_info_lookup = (struct line_info**) bfd_alloc (table->abfd, amt);
+  seq->line_info_lookup = line_info_lookup;
   if (line_info_lookup == NULL)
     return FALSE;
 
@@ -1754,10 +1763,6 @@ build_line_info_table (struct line_info_table *  table,
     line_info_lookup[--line_index] = each_line;
 
   BFD_ASSERT (line_index == 0);
-
-  seq->num_lines = num_lines;
-  seq->line_info_lookup = line_info_lookup;
-
   return TRUE;
 }
 
@@ -1793,7 +1798,7 @@ sort_line_sequences (struct line_info_table* table)
       sequences[n].prev_sequence = NULL;
       sequences[n].last_line = seq->last_line;
       sequences[n].line_info_lookup = NULL;
-      sequences[n].num_lines = 0;
+      sequences[n].num_lines = n;
       seq = seq->prev_sequence;
       free (last_seq);
     }
@@ -2569,6 +2574,10 @@ compare_lookup_funcinfos (const void * a, const void * b)
   if (lookup1->high_addr > lookup2->high_addr)
     return 1;
 
+  if (lookup1->idx < lookup2->idx)
+    return -1;
+  if (lookup1->idx > lookup2->idx)
+    return 1;
   return 0;
 }
 
@@ -2598,6 +2607,7 @@ build_lookup_funcinfo_table (struct comp_unit * unit)
     {
       entry = &lookup_funcinfo_table[--func_index];
       entry->funcinfo = each;
+      entry->idx = func_index;
 
       /* Calculate the lowest and highest address for this function entry.  */
       low_addr  = entry->funcinfo->arange.low;
