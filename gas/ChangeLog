@@ -1,3 +1,10 @@
+2019-10-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-xtensa.c (xg_order_trampoline_chain_entry): Don't
+	call S_GET_VALUE multiple times for a symbol.  Rearrange code
+	so it is obvious what is the primary sort key.
+	(xg_order_trampoline_chain): Similarly.
+
 2019-10-15  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-nds32.c (nds32_set_section_relocs): Use relocs and n

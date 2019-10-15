@@ -7584,14 +7584,17 @@ static int xg_order_trampoline_chain_entry (const void *a, const void *b)
   const struct trampoline_chain_entry *pa = a;
   const struct trampoline_chain_entry *pb = b;
 
-  if (pa->sym == pb->sym ||
-      S_GET_VALUE (pa->sym) == S_GET_VALUE (pb->sym))
-    if (pa->offset == pb->offset)
-      return 0;
-    else
-      return pa->offset < pb->offset ? -1 : 1;
-  else
-    return S_GET_VALUE (pa->sym) < S_GET_VALUE (pb->sym) ? -1 : 1;
+  if (pa->sym != pb->sym)
+    {
+      valueT aval = S_GET_VALUE (pa->sym);
+      valueT bval = S_GET_VALUE (pb->sym);
+
+      if (aval != bval)
+	return aval < bval ? -1 : 1;
+    }
+  if (pa->offset != pb->offset)
+    return pa->offset < pb->offset ? -1 : 1;
+  return 0;
 }
 
 static void xg_sort_trampoline_chain (struct trampoline_chain *tc)
@@ -7674,23 +7677,24 @@ static int xg_order_trampoline_chain (const void *a, const void *b)
   const struct trampoline_chain_entry *pb = &_pb->target;
   symbolS *s1 = pa->sym;
   symbolS *s2 = pb->sym;
-  symbolS *tmp;
 
-  tmp = symbol_symbolS (s1);
-  if (tmp)
-    s1 = tmp;
+  if (s1 != s2)
+    {
+      symbolS *tmp = symbol_symbolS (s1);
+      if (tmp)
+	s1 = tmp;
 
-  tmp = symbol_symbolS (s2);
-  if (tmp)
-    s2 = tmp;
+      tmp = symbol_symbolS (s2);
+      if (tmp)
+	s2 = tmp;
 
-  if (s1 == s2)
-    if (pa->offset == pb->offset)
-      return 0;
-    else
-      return pa->offset < pb->offset ? -1 : 1;
-  else
-    return s1 < s2 ? -1 : 1;
+      if (s1 != s2)
+	return s1 < s2 ? -1 : 1;
+    }
+
+  if (pa->offset != pb->offset)
+    return pa->offset < pb->offset ? -1 : 1;
+  return 0;
 }
 
 static struct trampoline_chain *
