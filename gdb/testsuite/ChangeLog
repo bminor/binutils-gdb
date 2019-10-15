@@ -1,5 +1,11 @@
 2019-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/ctf-whatis.c: Delete.
+	* gdb.base/ctf-whatis.exp: Delete.
+	* gdb.base/whatis.exp: Rewrite to compile as both dwarf and ctf.
+
+2019-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/ctf-cvexpr.exp: Delete.
 	* gdb.base/cvexpr.exp: Rewrite to compile as both dwarf and ctf.
 
