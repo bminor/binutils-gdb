@@ -1539,7 +1539,16 @@ gdb_demangle (const char *name, int options)
       ofunc = signal (SIGSEGV, gdb_demangle_signal_handler);
 #endif
 
-      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf);
+      /* The signal handler may keep the signal blocked when we longjmp out
+         of it.  If we have sigprocmask, we can use it to unblock the signal
+	 afterwards and we can avoid the performance overhead of saving the
+	 signal mask just in case the signal gets triggered.  Otherwise, just
+	 tell sigsetjmp to save the mask.  */
+#ifdef HAVE_SIGPROCMASK
+      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf, 0);
+#else
+      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf, 1);
+#endif
     }
 #endif
 
@@ -1558,6 +1567,14 @@ gdb_demangle (const char *name, int options)
       if (crash_signal != 0)
 	{
 	  static int error_reported = 0;
+
+#ifdef HAVE_SIGPROCMASK
+	  /* If we got the signal, SIGSEGV may still be blocked; restore it.  */
+	  sigset_t segv_sig_set;
+	  sigemptyset (&segv_sig_set);
+	  sigaddset (&segv_sig_set, SIGSEGV);
+	  sigprocmask (SIG_UNBLOCK, &segv_sig_set, NULL);
+#endif
 
 	  if (!error_reported)
 	    {

@@ -1,3 +1,9 @@
+2019-10-16  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdbsupport/gdb_setjmp.h (SIGSETJMP): Allow passing in the value to
+	pass on to sigsetjmp's second argument.
+	* cp-support.c (gdb_demangle): Unblock SIGSEGV if we caught a crash.
+
 2019-10-16  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/23567
