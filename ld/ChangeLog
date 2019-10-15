@@ -1,3 +1,11 @@
+2019-10-16  Alan Modra  <amodra@gmail.com>
+
+	* genscripts.sh: Correct comments.  Remove outdated comment block
+	saying "Generate 5 or 6 script files..".  Remove description of
+	ld options from comment emitted to script files, and order options
+	as per comment block in genscripts.sh saying which scripts are
+	generated.
+
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
 	* ldctor.h (struct set_element): Make next field a union, adding
