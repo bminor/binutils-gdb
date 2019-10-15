@@ -1,3 +1,8 @@
+2019-10-15  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* s390-tdep.c (s390_effective_inner_type): Ignore static fields
+	when unwrapping single-field structs.
+
 2019-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2read.c: Remove includes.

@@ -1637,11 +1637,26 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 static struct type *
 s390_effective_inner_type (struct type *type, unsigned int min_size)
 {
-  while (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	 && TYPE_NFIELDS (type) == 1)
+  while (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
-      struct type *inner = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      struct type *inner = NULL;
 
+      /* Find a non-static field, if any.  Unless there's exactly one,
+	 abort the unwrapping.  */
+      for (int i = 0; i < TYPE_NFIELDS (type); i++)
+	{
+	  struct field f = TYPE_FIELD (type, i);
+
+	  if (field_is_static (&f))
+	    continue;
+	  if (inner != NULL)
+	    return type;
+	  inner = FIELD_TYPE (f);
+	}
+
+      if (inner == NULL)
+	break;
+      inner = check_typedef (inner);
       if (TYPE_LENGTH (inner) < min_size)
 	break;
       type = inner;
