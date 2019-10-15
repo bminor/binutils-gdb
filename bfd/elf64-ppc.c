@@ -5837,9 +5837,7 @@ sfpr_define (struct bfd_link_info *info,
 	      s = elf_link_hash_lookup (&htab->elf, buf, TRUE, TRUE, FALSE);
 	      if (s == NULL)
 		return FALSE;
-	      if (s->root.type == bfd_link_hash_new
-		  || (s->root.type = bfd_link_hash_defined
-		      && s->root.u.def.section == stub_sec))
+	      if (s->root.type == bfd_link_hash_new)
 		{
 		  s->root.type = bfd_link_hash_defined;
 		  s->root.u.def.section = stub_sec;

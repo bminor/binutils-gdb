@@ -1,5 +1,10 @@
 2019-10-15  Alan Modra  <amodra@gmail.com>
 
+	PR 25100
+	* elf64-ppc.c (sfpr_define): Delete dead code that triggered a warning.
+
+2019-10-15  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (bfd_check_compression_header): Check for powers of two
 	with x == (x & -x).
 
