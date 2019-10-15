@@ -6255,7 +6255,10 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
     return FALSE;
 
   /* Read in the input secure gateway import library's symbol table.  */
-  sympp = (asymbol **) xmalloc (symsize);
+  sympp = (asymbol **) bfd_malloc (symsize);
+  if (sympp == NULL)
+    return FALSE;
+
   symcount = bfd_canonicalize_symtab (in_implib_bfd, sympp);
   if (symcount < 0)
     {

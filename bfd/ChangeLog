@@ -1,5 +1,15 @@
 2019-10-15  Alan Modra  <amodra@gmail.com>
 
+	PR 24955
+	* elf32-arm.c (set_cmse_veneer_addr_from_implib): Use bfd_malloc
+	rather than xmalloc.
+	* elf32-m68hc1x.c (reloc_warning): New function.
+	(elf32_m68hc11_relocate_section): Use it here.  Cast bfd_vma values
+	corresponding to %lx in format strings.
+	* elf32-nds32.c (nds32_insertion_sort): Use a stack temporary.
+
+2019-10-15  Alan Modra  <amodra@gmail.com>
+
 	PR 25100
 	* elf64-ppc.c (sfpr_define): Delete dead code that triggered a warning.
 

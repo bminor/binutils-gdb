@@ -1,3 +1,9 @@
+2019-10-15  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-nds32.c (nds32_set_section_relocs): Use relocs and n
+	parameters rather than equivalent sec->orelocation and
+	sec->reloc_count.  Don't sort for n <= 1.  Tidy.
+
 2019-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 25041

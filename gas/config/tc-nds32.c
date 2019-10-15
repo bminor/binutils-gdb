@@ -7565,13 +7565,13 @@ compar_relent (const void *lhs, const void *rhs)
    relocation.  */
 
 void
-nds32_set_section_relocs (asection *sec, arelent ** relocs ATTRIBUTE_UNUSED,
-			  unsigned int n ATTRIBUTE_UNUSED)
+nds32_set_section_relocs (asection *sec ATTRIBUTE_UNUSED,
+			  arelent **relocs, unsigned int n)
 {
-  bfd *abfd ATTRIBUTE_UNUSED = sec->owner;
-  if (bfd_section_flags (sec) & (flagword) SEC_RELOC)
-    nds32_insertion_sort (sec->orelocation, sec->reloc_count,
-			  sizeof (arelent**), compar_relent);
+  if (n <= 1)
+    return;
+
+  nds32_insertion_sort (relocs, n, sizeof (*relocs), compar_relent);
 }
 
 long
