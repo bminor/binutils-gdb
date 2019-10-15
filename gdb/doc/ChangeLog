@@ -1,5 +1,10 @@
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python.texi (Symbols In Python): Add documentation for
+	gdb.lookup_static_symbols.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python.texi (Symbols In Python): Extend documentation for
 	gdb.lookup_static_symbol.
 

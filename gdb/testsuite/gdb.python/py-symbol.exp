@@ -29,6 +29,15 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+# Check that we find all static symbols before the inferior has
+# started, at which point some of the symtabs might not have been
+# expanded.
+gdb_test "python print (len (gdb.lookup_static_symbols ('rr')))" \
+    "2" "print (len (gdb.lookup_static_symbols ('rr')))"
+
+# Restart so we don't have expanded symtabs after the previous test.
+clean_restart ${binfile}
+
 # Test looking up a global symbol before we runto_main as this is the
 # point where we don't have a current frame, and we don't want to
 # require one.
@@ -108,6 +117,10 @@ gdb_breakpoint "function_in_other_file"
 gdb_continue_to_breakpoint "function_in_other_file"
 gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "99" \
     "print value of rr from other file"
+gdb_test "python print (gdb.lookup_static_symbols ('rr')\[0\].value ())" "99" \
+    "print value of gdb.lookup_static_symbols ('rr')\[0\], from the other file"
+gdb_test "python print (gdb.lookup_static_symbols ('rr')\[1\].value ())" "42" \
+    "print value of gdb.lookup_static_symbols ('rr')\[1\], from the other file"
 
 # Now continue back to the first source file.
 set linenum [gdb_get_line_number "Break at end."]
@@ -119,6 +132,10 @@ gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
 # static symbol from the second source file.
 gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "42" \
     "print value of rr from main file"
+gdb_test "python print (gdb.lookup_static_symbols ('rr')\[0\].value ())" "99" \
+    "print value of gdb.lookup_static_symbols ('rr')\[0\], from the main file"
+gdb_test "python print (gdb.lookup_static_symbols ('rr')\[1\].value ())" "42" \
+    "print value of gdb.lookup_static_symbols ('rr')\[1\], from the main file"
 
 # Test is_variable attribute.
 gdb_py_test_silent_cmd "python a = gdb.lookup_symbol(\'a\')" "Get variable a" 0

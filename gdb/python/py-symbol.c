@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "python-internal.h"
 #include "objfiles.h"
+#include "symfile.h"
 
 typedef struct sympy_symbol_object {
   PyObject_HEAD
@@ -532,6 +533,66 @@ gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   return sym_obj;
+}
+
+/* Implementation of
+   gdb.lookup_static_symbols (name [, domain]) -> symbol list.
+
+   Returns a list of all static symbols matching NAME in DOMAIN.  */
+
+PyObject *
+gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
+{
+  const char *name;
+  int domain = VAR_DOMAIN;
+  static const char *keywords[] = { "name", "domain", NULL };
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &name,
+					&domain))
+    return NULL;
+
+  gdbpy_ref<> return_list (PyList_New (0));
+  if (return_list == NULL)
+    return NULL;
+
+  try
+    {
+      /* Expand any symtabs that contain potentially matching symbols.  */
+      lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+      expand_symtabs_matching (NULL, lookup_name, NULL, NULL, ALL_DOMAIN);
+
+      for (objfile *objfile : current_program_space->objfiles ())
+	{
+	  for (compunit_symtab *cust : objfile->compunits ())
+	    {
+	      const struct blockvector *bv;
+	      const struct block *block;
+
+	      bv = COMPUNIT_BLOCKVECTOR (cust);
+	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+
+	      if (block != nullptr)
+		{
+		  symbol *symbol = lookup_symbol_in_static_block
+		    (name, block, (domain_enum) domain).symbol;
+
+		  if (symbol != nullptr)
+		    {
+		      PyObject *sym_obj
+			= symbol_to_symbol_object (symbol);
+		      if (PyList_Append (return_list.get (), sym_obj) == -1)
+			return NULL;
+		    }
+		}
+	    }
+	}
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return return_list.release ();
 }
 
 /* This function is called when an objfile is about to be freed.

@@ -426,6 +426,8 @@ PyObject *gdbpy_lookup_global_symbol (PyObject *self, PyObject *args,
 				      PyObject *kw);
 PyObject *gdbpy_lookup_static_symbol (PyObject *self, PyObject *args,
 				      PyObject *kw);
+PyObject *gdbpy_lookup_static_symbols (PyObject *self, PyObject *args,
+					   PyObject *kw);
 PyObject *gdbpy_start_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_current_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_stop_recording (PyObject *self, PyObject *args);

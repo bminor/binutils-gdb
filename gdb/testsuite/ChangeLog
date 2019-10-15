@@ -1,5 +1,10 @@
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-symbol.exp: Add test for
+	gdb.lookup_static_symbols.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-symbol.c: Declare and call function from new
 	py-symbol-2.c file.
 	* gdb.python/py-symbol.exp: Compile both source files, and add new

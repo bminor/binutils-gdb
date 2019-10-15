@@ -1994,6 +1994,10 @@ Return the symbol corresponding to the given name (or None)." },
     METH_VARARGS | METH_KEYWORDS,
     "lookup_static_symbol (name [, domain]) -> symbol\n\
 Return the static-linkage symbol corresponding to the given name (or None)." },
+  { "lookup_static_symbols", (PyCFunction) gdbpy_lookup_static_symbols,
+    METH_VARARGS | METH_KEYWORDS,
+    "lookup_static_symbols (name [, domain]) -> symbol\n\
+Return a list of all static-linkage symbols corresponding to the given name." },
 
   { "lookup_objfile", (PyCFunction) gdbpy_lookup_objfile,
     METH_VARARGS | METH_KEYWORDS,
