@@ -1,5 +1,11 @@
 2019-10-15  Alan Modra  <amodra@gmail.com>
 
+	* elf32-m68hc1x.c (reloc_warning): Add printf attribute.
+	(elf32_m68hc11_relocate_section): Don't use a variable for format
+	strings.  Delete some unnecessary xgettext:c-format comments.
+
+2019-10-15  Alan Modra  <amodra@gmail.com>
+
 	PR 24955
 	* elf32-arm.c (set_cmse_veneer_addr_from_implib): Use bfd_malloc
 	rather than xmalloc.

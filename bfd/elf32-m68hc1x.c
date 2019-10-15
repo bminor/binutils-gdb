@@ -899,7 +899,7 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-static bfd_boolean
+static bfd_boolean ATTRIBUTE_PRINTF (6, 7)
 reloc_warning (struct bfd_link_info *info, const char *name, bfd *input_bfd,
 	       asection *input_section, const Elf_Internal_Rela *rel,
 	       const char *fmt, ...)
@@ -1132,10 +1132,10 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_M68HC11_16:
 	  if (is_far)
 	    {
-	      msg = _("reference to the far symbol `%s' using a wrong "
-		      "relocation may result in incorrect execution");
 	      if (!reloc_warning (info, name, input_bfd, input_section, rel,
-				  msg, name))
+				  _("reference to the far symbol `%s' using a "
+				    "wrong relocation may result in incorrect "
+				    "execution"), name))
 		return FALSE;
 	    }
 
@@ -1163,12 +1163,12 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		}
 	      else
 		{
-		  msg = _("XGATE address (%lx) is not within shared RAM"
-			  "(0xE000-0xFFFF), therefore you must manually offset "
-			  "the address, and possibly manage the page, in your "
-			  "code.");
 		  if (!reloc_warning (info, name, input_bfd, input_section, rel,
-				      msg, (long) phys_addr))
+				      _("XGATE address (%lx) is not within "
+					"shared RAM(0xE000-0xFFFF), therefore "
+					"you must manually offset the address, "
+					"and possibly manage the page, in your "
+					"code."), (long) phys_addr))
 		    return FALSE;
 		  break;
 		}
@@ -1179,11 +1179,11 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && phys_page != insn_page
 	      && !(e_flags & E_M68HC11_NO_BANK_WARNING))
 	    {
-	      /* xgettext:c-format */
-	      msg = _("banked address [%lx:%04lx] (%lx) is not in the same "
-		      "bank as current banked address [%lx:%04lx] (%lx)");
 	      if (!reloc_warning (info, name, input_bfd, input_section, rel,
-				  msg, (long) phys_page, (long) phys_addr,
+				  _("banked address [%lx:%04lx] (%lx) is not "
+				    "in the same bank as current banked "
+				    "address [%lx:%04lx] (%lx)"),
+				  (long) phys_page, (long) phys_addr,
 				  (long) (relocation + rel->r_addend),
 				  (long) insn_page,
 				  (long) m68hc11_phys_addr (pinfo, insn_addr),
@@ -1194,11 +1194,10 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  if (phys_page != 0 && insn_page == 0)
 	    {
-	      /* xgettext:c-format */
-	      msg = _("reference to a banked address [%lx:%04lx] in the "
-		      "normal address space at %04lx");
 	      if (!reloc_warning (info, name, input_bfd, input_section, rel,
-				  msg, (long) phys_page, (long) phys_addr,
+				  _("reference to a banked address [%lx:%04lx] "
+				    "in the normal address space at %04lx"),
+				  (long) phys_page, (long) phys_addr,
 				  (long) insn_addr))
 		return FALSE;
 	      relocation = phys_addr;
@@ -1231,11 +1230,11 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		relocation += 0xC000;
 	      else
 		{
-		  msg = _("S12 address (%lx) is not within shared RAM"
-			  "(0x2000-0x4000), therefore you must manually "
-			  "offset the address in your code");
 		  if (!reloc_warning (info, name, input_bfd, input_section, rel,
-				      msg, (long) phys_addr))
+				      _("S12 address (%lx) is not within "
+					"shared RAM(0x2000-0x4000), therefore "
+					"you must manually offset the address "
+					"in your code"), (long) phys_addr))
 		    return FALSE;
 		  break;
 		}
