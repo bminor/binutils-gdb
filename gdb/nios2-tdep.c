@@ -2260,11 +2260,11 @@ nios2_type_align (struct gdbarch *gdbarch, struct type *type)
 }
 
 /* Implement the gcc_target_options gdbarch method.  */
-static char *
+static std::string
 nios2_gcc_target_options (struct gdbarch *gdbarch)
 {
   /* GCC doesn't know "-m32".  */
-  return NULL;
+  return {};
 }
 
 /* Initialize the Nios II gdbarch.  */

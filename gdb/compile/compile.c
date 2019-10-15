@@ -635,7 +635,7 @@ get_args (const compile_instance *compiler, struct gdbarch *gdbarch,
   int argc_compiler;
   char **argv_compiler;
 
-  build_argc_argv (gdbarch_gcc_target_options (gdbarch),
+  build_argc_argv (gdbarch_gcc_target_options (gdbarch).c_str (),
 		   argcp, argvp);
 
   cs_producer_options = get_selected_pc_producer_options ();

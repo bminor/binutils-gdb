@@ -1429,11 +1429,11 @@ aarch64_linux_syscall_record (struct regcache *regcache,
 
 /* Implement the "gcc_target_options" gdbarch method.  */
 
-static char *
+static std::string
 aarch64_linux_gcc_target_options (struct gdbarch *gdbarch)
 {
   /* GCC doesn't know "-m64".  */
-  return NULL;
+  return {};
 }
 
 static void

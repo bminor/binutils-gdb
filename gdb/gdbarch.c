@@ -5043,7 +5043,7 @@ set_gdbarch_infcall_munmap (struct gdbarch *gdbarch,
   gdbarch->infcall_munmap = infcall_munmap;
 }
 
-char *
+std::string
 gdbarch_gcc_target_options (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);

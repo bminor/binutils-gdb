@@ -1,3 +1,18 @@
+2019-10-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdbarch.h, gdbarch.c: Rebuild.
+	* gdbarch.sh (gcc_target_options): Change return type to
+	std::string.
+	* compile/compile.c (get_args): Update.
+	* nios2-tdep.c (nios2_gcc_target_options): Return std::string.
+	* arm-linux-tdep.c (arm_linux_gcc_target_options): Return
+	std::string.
+	* aarch64-linux-tdep.c (aarch64_linux_gcc_target_options): Return
+	std::string.
+	* arch-utils.c (default_gcc_target_options): Return std::string.
+	* arch-utils.h (default_gcc_target_options): Return std::string.
+	* s390-tdep.c (s390_gcc_target_options): Return std::string.
+
 2019-10-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* breakpoint.c (breakpoint_chain): Make static.

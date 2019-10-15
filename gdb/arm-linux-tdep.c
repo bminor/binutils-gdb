@@ -1710,11 +1710,11 @@ arm_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
 /* Implement the gcc_target_options gdbarch method.  */
 
-static char *
+static std::string
 arm_linux_gcc_target_options (struct gdbarch *gdbarch)
 {
   /* GCC doesn't know "-m32".  */
-  return NULL;
+  return {};
 }
 
 static void

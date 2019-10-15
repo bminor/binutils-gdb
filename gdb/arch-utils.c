@@ -903,11 +903,12 @@ default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
 /* -mcmodel=large is used so that no GOT (Global Offset Table) is needed to be
    created in inferior memory by GDB (normally it is set by ld.so).  */
 
-char *
+std::string
 default_gcc_target_options (struct gdbarch *gdbarch)
 {
-  return xstrprintf ("-m%d%s", gdbarch_ptr_bit (gdbarch),
-		     gdbarch_ptr_bit (gdbarch) == 64 ? " -mcmodel=large" : "");
+  return string_printf ("-m%d%s", gdbarch_ptr_bit (gdbarch),
+			(gdbarch_ptr_bit (gdbarch) == 64
+			 ? " -mcmodel=large" : ""));
 }
 
 /* gdbarch gnu_triplet_regexp method.  */

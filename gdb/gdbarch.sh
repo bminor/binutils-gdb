@@ -1184,8 +1184,8 @@ f;void;infcall_munmap;CORE_ADDR addr, CORE_ADDR size;addr, size;;default_infcall
 # Return string (caller has to use xfree for it) with options for GCC
 # to produce code for this target, typically "-m64", "-m32" or "-m31".
 # These options are put before CU's DW_AT_producer compilation options so that
-# they can override it.  Method may also return NULL.
-m;char *;gcc_target_options;void;;;default_gcc_target_options;;0
+# they can override it.
+m;std::string;gcc_target_options;void;;;default_gcc_target_options;;0
 
 # Return a regular expression that matches names used by this
 # architecture in GNU configury triplets.  The result is statically

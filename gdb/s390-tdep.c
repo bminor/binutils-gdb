@@ -6779,10 +6779,10 @@ UNKNOWN_OP:
 /* Implement gdbarch_gcc_target_options.  GCC does not know "-m32" or
    "-mcmodel=large".  */
 
-static char *
+static std::string
 s390_gcc_target_options (struct gdbarch *gdbarch)
 {
-  return xstrdup (gdbarch_ptr_bit (gdbarch) == 64 ? "-m64" : "-m31");
+  return gdbarch_ptr_bit (gdbarch) == 64 ? "-m64" : "-m31";
 }
 
 /* Implement gdbarch_gnu_triplet_regexp.  Target triplets are "s390-*"
