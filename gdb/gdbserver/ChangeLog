@@ -1,5 +1,9 @@
 2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* Makefile.in: Remove references to vec-ipa.o.
+
+2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in: Remove references to vec.c.
 
 2019-10-02  Christian Biesinger  <cbiesinger@google.com>

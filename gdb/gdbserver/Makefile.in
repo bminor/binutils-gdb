@@ -426,7 +426,6 @@ IPA_OBJS = \
 	gdbsupport/print-utils-ipa.o \
 	gdbsupport/rsp-low-ipa.o \
 	gdbsupport/tdesc-ipa.o \
-	gdbsupport/vec-ipa.o \
 	regcache-ipa.o \
 	remote-utils-ipa.o \
 	tdesc-ipa.o \
