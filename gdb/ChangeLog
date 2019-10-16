@@ -1,3 +1,9 @@
+2019-10-16  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23567
+	* dwarf2read.c (dwarf2_per_objfile::locate_sections): Discard
+	sections whose size is greater than the file size.
+
 2019-10-16  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_gcc_target_options): New.
