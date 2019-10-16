@@ -1,5 +1,10 @@
 2019-10-16  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/25059
+	* gdb.cp/local-static.exp (do_test): Add xfails for gcc PR debug/55541.
+
+2019-10-16  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/jit-reader.exp: Allow non-pointer registers to be printed
 	as signed.
 
