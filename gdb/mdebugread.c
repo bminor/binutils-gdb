@@ -3747,7 +3747,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       && pst->number_of_dependencies == 0
       && pst->n_global_syms == 0
       && pst->n_static_syms == 0)
-    objfile->partial_symtabs->psymtabs = NULL;
+    objfile->partial_symtabs->discard_psymtab (pst);
 }
 
 /* If the current psymbol has an enumerated type, we need to add

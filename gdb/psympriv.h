@@ -104,6 +104,13 @@ enum psymtab_search_status
 
 struct partial_symtab
 {
+  partial_symtab ()
+    : searched_flag (PST_NOT_SEARCHED),
+      text_low_valid (0),
+      text_high_valid (0)
+  {
+  }
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -145,21 +152,21 @@ struct partial_symtab
 
   /* Chain of all existing partial symtabs.  */
 
-  struct partial_symtab *next;
+  struct partial_symtab *next = nullptr;
 
   /* Name of the source file which this partial_symtab defines,
      or if the psymtab is anonymous then a descriptive name for
      debugging purposes, or "".  It must not be NULL.  */
 
-  const char *filename;
+  const char *filename = nullptr;
 
   /* Full path of the source file.  NULL if not known.  */
 
-  char *fullname;
+  char *fullname = nullptr;
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
 
-  const char *dirname;
+  const char *dirname = nullptr;
 
   /* Range of text addresses covered by this file; texthigh is the
      beginning of the next section.  Do not use if PSYMTABS_ADDRMAP_SUPPORTED
@@ -168,8 +175,8 @@ struct partial_symtab
      text_low_valid and text_high_valid fields; these are located later
      in this structure for better packing.  */
 
-  CORE_ADDR m_text_low;
-  CORE_ADDR m_text_high;
+  CORE_ADDR m_text_low = 0;
+  CORE_ADDR m_text_high = 0;
 
   /* If NULL, this is an ordinary partial symbol table.
 
@@ -198,7 +205,7 @@ struct partial_symtab
      The choice of which one should be canonical is left to the
      debuginfo reader; it can be arbitrary.  */
 
-  struct partial_symtab *user;
+  struct partial_symtab *user = nullptr;
 
   /* Array of pointers to all of the partial_symtab's which this one
      depends on.  Since this array can only be set to previous or
@@ -209,17 +216,17 @@ struct partial_symtab
      in foo.h may use type numbers defined in foo.c.  For other debugging
      formats there may be no need to use dependencies.  */
 
-  struct partial_symtab **dependencies;
+  struct partial_symtab **dependencies = nullptr;
 
-  int number_of_dependencies;
+  int number_of_dependencies = 0;
 
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of
      finding a symbol within it.  globals_offset is an integer offset
      within global_psymbols[].  */
 
-  int globals_offset;
-  int n_global_syms;
+  int globals_offset = 0;
+  int n_global_syms = 0;
 
   /* Static symbol list.  This list will *not* be sorted after readin;
      to find a symbol in it, exhaustive search must be used.  This is
@@ -229,24 +236,24 @@ struct partial_symtab
      how long errors take).  This is an offset and size within
      static_psymbols[].  */
 
-  int statics_offset;
-  int n_static_syms;
+  int statics_offset = 0;
+  int n_static_syms = 0;
 
   /* Non-zero if the symtab corresponding to this psymtab has been
      readin.  This is located here so that this structure packs better
      on 64-bit systems.  */
 
-  unsigned char readin;
+  unsigned char readin = 0;
 
   /* True iff objfile->psymtabs_addrmap is properly populated for this
      partial_symtab.  For discontiguous overlapping psymtabs is the only usable
      info in PSYMTABS_ADDRMAP.  */
 
-  unsigned char psymtabs_addrmap_supported;
+  unsigned char psymtabs_addrmap_supported = 0;
 
   /* True if the name of this partial symtab is not a source file name.  */
 
-  unsigned char anonymous;
+  unsigned char anonymous = 0;
 
   /* A flag that is temporarily used when searching psymtabs.  */
 
@@ -260,19 +267,19 @@ struct partial_symtab
   /* Pointer to compunit eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */
 
-  struct compunit_symtab *compunit_symtab;
+  struct compunit_symtab *compunit_symtab = nullptr;
 
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
 
-  void (*read_symtab) (struct partial_symtab *, struct objfile *);
+  void (*read_symtab) (struct partial_symtab *, struct objfile *) = nullptr;
 
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the
      format-dependent symbol reading routines.  For further detail examine
      the various symbol reading modules.  */
 
-  void *read_symtab_private;
+  void *read_symtab_private = nullptr;
 };
 
 /* Specify whether a partial psymbol should be allocated on the global

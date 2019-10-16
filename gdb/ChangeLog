@@ -1,5 +1,15 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* mdebugread.c (parse_partial_symbols): Use discard_psymtab.
+	* psymtab.h (class psymtab_storage) <free_psymtabs>: Remove.
+	* psymtab.c (psymtab_storage): Delete psymtabs.
+	(psymtab_storage::allocate_psymtab): Use new.
+	(psymtab_storage::discard_psymtab): Use delete.
+	* psympriv.h (struct partial_symtab): Add constructor and
+	initializers.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* machoread.c: Do not include psympriv.h.
 
 2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
