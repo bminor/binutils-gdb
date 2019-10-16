@@ -579,6 +579,72 @@ amd64_has_unaligned_fields (struct type *type)
   return false;
 }
 
+/* Classify field I of TYPE starting at BITOFFSET according to the rules for
+   structures and union types, and store the result in THECLASS.  */
+
+static void
+amd64_classify_aggregate_field (struct type *type, int i,
+				enum amd64_reg_class theclass[2],
+				unsigned int bitoffset)
+{
+  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+  int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
+  int pos = bitpos / 64;
+  enum amd64_reg_class subclass[2];
+  int bitsize = TYPE_FIELD_BITSIZE (type, i);
+  int endpos;
+
+  if (bitsize == 0)
+    bitsize = TYPE_LENGTH (subtype) * 8;
+  endpos = (bitpos + bitsize - 1) / 64;
+
+  /* Ignore static fields, or empty fields, for example nested
+     empty structures.*/
+  if (field_is_static (&TYPE_FIELD (type, i)) || bitsize == 0)
+    return;
+
+  if (TYPE_CODE (subtype) == TYPE_CODE_STRUCT
+      || TYPE_CODE (subtype) == TYPE_CODE_UNION)
+    {
+      /* Each field of an object is classified recursively.  */
+      int j;
+      for (j = 0; j < TYPE_NFIELDS (subtype); j++)
+	amd64_classify_aggregate_field (subtype, j, theclass, bitpos);
+      return;
+    }
+
+  gdb_assert (pos == 0 || pos == 1);
+
+  amd64_classify (subtype, subclass);
+  theclass[pos] = amd64_merge_classes (theclass[pos], subclass[0]);
+  if (bitsize <= 64 && pos == 0 && endpos == 1)
+    /* This is a bit of an odd case:  We have a field that would
+       normally fit in one of the two eightbytes, except that
+       it is placed in a way that this field straddles them.
+       This has been seen with a structure containing an array.
+
+       The ABI is a bit unclear in this case, but we assume that
+       this field's class (stored in subclass[0]) must also be merged
+       into class[1].  In other words, our field has a piece stored
+       in the second eight-byte, and thus its class applies to
+       the second eight-byte as well.
+
+       In the case where the field length exceeds 8 bytes,
+       it should not be necessary to merge the field class
+       into class[1].  As LEN > 8, subclass[1] is necessarily
+       different from AMD64_NO_CLASS.  If subclass[1] is equal
+       to subclass[0], then the normal class[1]/subclass[1]
+       merging will take care of everything.  For subclass[1]
+       to be different from subclass[0], I can only see the case
+       where we have a SSE/SSEUP or X87/X87UP pair, which both
+       use up all 16 bytes of the aggregate, and are already
+       handled just fine (because each portion sits on its own
+       8-byte).  */
+    theclass[1] = amd64_merge_classes (theclass[1], subclass[0]);
+  if (pos == 0)
+    theclass[1] = amd64_merge_classes (theclass[1], subclass[1]);
+}
+
 /* Classify TYPE according to the rules for aggregate (structures and
    arrays) and union types, and store the result in CLASS.  */
 
@@ -619,53 +685,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 		  || TYPE_CODE (type) == TYPE_CODE_UNION);
 
       for (i = 0; i < TYPE_NFIELDS (type); i++)
-	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
-	  int pos = TYPE_FIELD_BITPOS (type, i) / 64;
-	  enum amd64_reg_class subclass[2];
-	  int bitsize = TYPE_FIELD_BITSIZE (type, i);
-	  int endpos;
-
-	  if (bitsize == 0)
-	    bitsize = TYPE_LENGTH (subtype) * 8;
-	  endpos = (TYPE_FIELD_BITPOS (type, i) + bitsize - 1) / 64;
-
-	  /* Ignore static fields, or empty fields, for example nested
-	     empty structures.*/
-	  if (field_is_static (&TYPE_FIELD (type, i)) || bitsize == 0)
-	    continue;
-
-	  gdb_assert (pos == 0 || pos == 1);
-
-	  amd64_classify (subtype, subclass);
-	  theclass[pos] = amd64_merge_classes (theclass[pos], subclass[0]);
-	  if (bitsize <= 64 && pos == 0 && endpos == 1)
-	    /* This is a bit of an odd case:  We have a field that would
-	       normally fit in one of the two eightbytes, except that
-	       it is placed in a way that this field straddles them.
-	       This has been seen with a structure containing an array.
-
-	       The ABI is a bit unclear in this case, but we assume that
-	       this field's class (stored in subclass[0]) must also be merged
-	       into class[1].  In other words, our field has a piece stored
-	       in the second eight-byte, and thus its class applies to
-	       the second eight-byte as well.
-
-	       In the case where the field length exceeds 8 bytes,
-	       it should not be necessary to merge the field class
-	       into class[1].  As LEN > 8, subclass[1] is necessarily
-	       different from AMD64_NO_CLASS.  If subclass[1] is equal
-	       to subclass[0], then the normal class[1]/subclass[1]
-	       merging will take care of everything.  For subclass[1]
-	       to be different from subclass[0], I can only see the case
-	       where we have a SSE/SSEUP or X87/X87UP pair, which both
-	       use up all 16 bytes of the aggregate, and are already
-	       handled just fine (because each portion sits on its own
-	       8-byte).  */
-	    theclass[1] = amd64_merge_classes (theclass[1], subclass[0]);
-	  if (pos == 0)
-	    theclass[1] = amd64_merge_classes (theclass[1], subclass[1]);
-	}
+	amd64_classify_aggregate_field (type, i, theclass, 0);
     }
 
   /* 4. Then a post merger cleanup is done:  */

@@ -132,10 +132,6 @@ proc run_tests { lang types } {
 	    continue
 	}
 
-	if { $lang == "c++" && $name == "struct_02_01"
-	     && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] } {
-	    setup_kfail gdb/25096 "x86_64-*-linux*"
-	}
 	gdb_test "p/d check_arg_${name} (ref_val_${name})" "= 1"
 
 	set refval [ get_valueof "" "ref_val_${name}" "" ]
@@ -147,10 +143,6 @@ proc run_tests { lang types } {
 	    set answer [ get_valueof "" "rtn_str_${name} ()" "XXXX"]
 	    verbose -log "Answer: ${answer}"
 
-	    if { $lang == "c++" && $name == "struct_02_01"
-		 && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] } {
-		setup_kfail gdb/25096 "x86_64-*-linux*"
-	    }
 	    gdb_assert [string eq ${answer} ${refval}] ${test}
 	} else {
 	    unresolved $test

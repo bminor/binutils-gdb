@@ -1,5 +1,13 @@
 2019-10-16  Tom de Vries  <tdevries@suse.de>
 
+	PR tdep/25096
+	* amd64-tdep.c (amd64_classify_aggregate_field): Factor out of ...
+	(amd64_classify_aggregate): ... here.
+	(amd64_classify_aggregate_field): Handled fiels of nested structs
+	recursively.
+
+2019-10-16  Tom de Vries  <tdevries@suse.de>
+
 	PR tdep/24104
 	* amd64-tdep.c (amd64_push_arguments): Handle AMD64_NO_CLASS in loop
 	that handles 'theclass'.

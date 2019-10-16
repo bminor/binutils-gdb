@@ -1,5 +1,10 @@
 2019-10-16  Tom de Vries  <tdevries@suse.de>
 
+	PR tdep/25096
+	* gdb.base/infcall-nested-structs.exp: Remove PR25096 KFAILs.
+
+2019-10-16  Tom de Vries  <tdevries@suse.de>
+
 	PR tdep/24104
 	* gdb.base/infcall-nested-structs.exp: Remove XFAIL for PR tdep/24104.
 	Add KFAIL for PR tdep/25096.
