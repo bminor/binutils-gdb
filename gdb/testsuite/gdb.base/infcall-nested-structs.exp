@@ -132,16 +132,9 @@ proc run_tests { lang types } {
 	    continue
 	}
 
-	if { $lang == "c++"
-	     && ( ( [regexp "struct_01_0(1|2|3)" $name match] && [regexp "^types-(td($|-)|tl(|l)(|-tf|-td|-tld)$)" $types match] )
-		  || ( $name == "struct_01_02" && $types == "types-tfc" )
-		  || ( $name == "struct_01_04" && [regexp "^types-(tf($|-)|ti(|-tf|-td|-tld)$)" $types match] )
-		  || ( $name == "struct_02_01" && [regexp "^types-tf-t(c|s|i)" $types match] )
-		  || ( $name == "struct_static_02_02" && [regexp "^types-(t(f|d|ld)-t(d|l|ll)$|t(d|l|ll)$|t(c|s|i|l|ll)-td)" $types match] )
-		  || ( $name == "struct_static_02_03" && [regexp "^types-(ti-t(f|l|d|)|tf(-|$)|ti$)" $types match] )
-		  || ( $name == "struct_static_04_02" && [regexp "^types-(t(c|s)-tf|tf-ts)" $types match] )
-		  || ( $name == "struct_static_06_04" && ![regexp "^types-(t(c|dc|ldc|ld)$|t.-tld|tl(l|d)-tld|t(f|d|ld)-tc)" $types match] ) ) } {
-	    setup_xfail gdb/24104 "x86_64-*-linux*"
+	if { $lang == "c++" && $name == "struct_02_01"
+	     && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] } {
+	    setup_kfail gdb/25096 "x86_64-*-linux*"
 	}
 	gdb_test "p/d check_arg_${name} (ref_val_${name})" "= 1"
 
@@ -154,8 +147,9 @@ proc run_tests { lang types } {
 	    set answer [ get_valueof "" "rtn_str_${name} ()" "XXXX"]
 	    verbose -log "Answer: ${answer}"
 
-	    if { ($lang == "c++" && $name == "struct_02_01" && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] ) } {
-		setup_xfail gdb/24104 "x86_64-*-linux*"
+	    if { $lang == "c++" && $name == "struct_02_01"
+		 && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] } {
+		setup_kfail gdb/25096 "x86_64-*-linux*"
 	    }
 	    gdb_assert [string eq ${answer} ${refval}] ${test}
 	} else {

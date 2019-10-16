@@ -1,3 +1,9 @@
+2019-10-16  Tom de Vries  <tdevries@suse.de>
+
+	PR tdep/24104
+	* amd64-tdep.c (amd64_push_arguments): Handle AMD64_NO_CLASS in loop
+	that handles 'theclass'.
+
 2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linespec.c (decode_digits_ordinary): Update comment.

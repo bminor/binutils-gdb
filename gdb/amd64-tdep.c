@@ -978,6 +978,9 @@ if (return_method == return_method_struct)
 		  offset = 8;
 		  break;
 
+		case AMD64_NO_CLASS:
+		  continue;
+
 		default:
 		  gdb_assert (!"Unexpected register class.");
 		}
