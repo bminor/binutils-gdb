@@ -65,32 +65,33 @@ proc info_registers_current_frame {sp} {
 
     set any "\[^\r\n\]*"
 
+    set neg_decimal "-?$decimal"
     gdb_test "info registers" \
 	[multi_line \
-	     "rax            $hex +$decimal" \
-	     "rbx            $hex +$decimal" \
-	     "rcx            $hex +$decimal" \
-	     "rdx            $hex +$decimal" \
-	     "rsi            $hex +$decimal" \
-	     "rdi            $hex +$decimal" \
+	     "rax            $hex +$neg_decimal" \
+	     "rbx            $hex +$neg_decimal" \
+	     "rcx            $hex +$neg_decimal" \
+	     "rdx            $hex +$neg_decimal" \
+	     "rsi            $hex +$neg_decimal" \
+	     "rdi            $hex +$neg_decimal" \
 	     "rbp            $hex +$hex" \
 	     "rsp            $sp +$sp" \
-	     "r8             $hex +$decimal" \
-	     "r9             $hex +$decimal" \
-	     "r10            $hex +$decimal" \
-	     "r11            $hex +$decimal" \
-	     "r12            $hex +$decimal" \
-	     "r13            $hex +$decimal" \
-	     "r14            $hex +$decimal" \
-	     "r15            $hex +$decimal" \
+	     "r8             $hex +$neg_decimal" \
+	     "r9             $hex +$neg_decimal" \
+	     "r10            $hex +$neg_decimal" \
+	     "r11            $hex +$neg_decimal" \
+	     "r12            $hex +$neg_decimal" \
+	     "r13            $hex +$neg_decimal" \
+	     "r14            $hex +$neg_decimal" \
+	     "r15            $hex +$neg_decimal" \
 	     "rip            $hex +$hex$any" \
 	     "eflags         $hex +\\\[$any\\\]" \
-	     "cs             $hex +$decimal" \
-	     "ss             $hex +$decimal" \
-	     "ds             $hex +$decimal" \
-	     "es             $hex +$decimal" \
-	     "fs             $hex +$decimal" \
-	     "gs             $hex +$decimal" \
+	     "cs             $hex +$neg_decimal" \
+	     "ss             $hex +$neg_decimal" \
+	     "ds             $hex +$neg_decimal" \
+	     "es             $hex +$neg_decimal" \
+	     "fs             $hex +$neg_decimal" \
+	     "gs             $hex +$neg_decimal" \
 	    ]
 }
 
