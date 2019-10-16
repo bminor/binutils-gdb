@@ -1,3 +1,13 @@
+2019-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx-dis.c (get_register_name): New function.  Provides safe
+	access to name array.
+	(get_condition_name, get_flag_name, get_double_register_name)
+	(get_double_register_high_name, get_double_register_low_name)
+	(get_double_control_register_name, get_double_condition_name):
+	Likewise.
+	(print_insn_rx): Use the accessor functions.
+
 2019-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 25041
