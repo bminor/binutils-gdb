@@ -236,6 +236,29 @@ after_parse_default (void)
 void
 after_open_default (void)
 {
+  link_info.big_endian = TRUE;
+
+  if (bfd_big_endian (link_info.output_bfd))
+    ;
+  else if (bfd_little_endian (link_info.output_bfd))
+    link_info.big_endian = FALSE;
+  else
+    {
+      if (command_line.endian == ENDIAN_BIG)
+	;
+      else if (command_line.endian == ENDIAN_LITTLE)
+	link_info.big_endian = FALSE;
+      else if (command_line.endian == ENDIAN_UNSET)
+	{
+	  LANG_FOR_EACH_INPUT_STATEMENT (s)
+	    if (s->the_bfd != NULL)
+	      {
+		if (bfd_little_endian (s->the_bfd))
+		  link_info.big_endian = FALSE;
+		break;
+	      }
+	}
+    }
 }
 
 void

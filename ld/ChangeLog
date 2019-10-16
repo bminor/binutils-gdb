@@ -1,5 +1,14 @@
 2019-10-16  Alan Modra  <amodra@gmail.com>
 
+	PR 13616
+	* emulparams/elf64lppc.sh (NOP): Don't define.
+	* emulparams/elf64ppc.sh (NOP): Don't define.
+	* ldwrite.c (build_link_order): Use link_info.big_endian.  Move
+	code determining endian to use for data_statement to..
+	* ldemul.c (after_open_default): ..here.  Set link_info.big_endian.
+
+2019-10-16  Alan Modra  <amodra@gmail.com>
+
 	* genscripts.sh: Correct comments.  Remove outdated comment block
 	saying "Generate 5 or 6 script files..".  Remove description of
 	ld options from comment emitted to script files, and order options

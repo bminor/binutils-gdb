@@ -359,6 +359,10 @@ struct bfd_link_info
   /* TRUE if section groups should be resolved.  */
   unsigned int resolve_section_groups: 1;
 
+  /* Set if output file is big-endian, or if that is unknown, from
+     the command line or first input file endianness.  */
+  unsigned int big_endian : 1;
+
   /* Which symbols to strip.  */
   ENUM_BITFIELD (bfd_link_strip) strip : 2;
 

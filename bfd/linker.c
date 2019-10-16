@@ -2469,7 +2469,7 @@ _bfd_default_link_order (bfd *abfd,
 
 static bfd_boolean
 default_data_link_order (bfd *abfd,
-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *info,
 			 asection *sec,
 			 struct bfd_link_order *link_order)
 {
@@ -2489,7 +2489,7 @@ default_data_link_order (bfd *abfd,
   fill_size = link_order->u.data.size;
   if (fill_size == 0)
     {
-      fill = abfd->arch_info->fill (size, bfd_big_endian (abfd),
+      fill = abfd->arch_info->fill (size, info->big_endian,
 				    (sec->flags & SEC_CODE) != 0);
       if (fill == NULL)
 	return FALSE;

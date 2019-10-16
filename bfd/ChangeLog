@@ -1,3 +1,11 @@
+2019-10-16  Alan Modra  <amodra@gmail.com>
+
+	PR 13616
+	* cpu-powerpc.c (bfd_arch_ppc_nop_fill): New function, use it
+	for all ppc arch info.
+	* linker.c (default_data_link_order): Pass info->big_endian to
+	arch_info->fill function.
+
 2019-10-15  Alan Modra  <amodra@gmail.com>
 
 	* elf32-m68hc1x.c (reloc_warning): Add printf attribute.

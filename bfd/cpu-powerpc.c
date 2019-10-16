@@ -48,6 +48,43 @@ powerpc_compatible (const bfd_arch_info_type *a,
   /*NOTREACHED*/
 }
 
+/* Return a COUNT sized buffer filled with nops (if CODE is TRUE) or
+   zeros (if CODE is FALSE).  This is the fill used between input
+   sections for alignment.  It won't normally be executed.   */
+
+static void *
+bfd_arch_ppc_nop_fill (bfd_size_type count,
+		       bfd_boolean is_bigendian,
+		       bfd_boolean code)
+{
+  bfd_byte *fill;
+
+  if (count == 0)
+    return NULL;
+  fill = bfd_malloc (count);
+  if (fill == NULL)
+    return fill;
+
+  if (code && (count & 3) == 0)
+    {
+      static const char nop_be[4] = {0x60, 0, 0, 0};
+      static const char nop_le[4] = {0, 0, 0, 0x60};
+      const char *nop = is_bigendian ? nop_be : nop_le;
+      bfd_byte *p = fill;
+
+      while (count != 0)
+	{
+	  memcpy (p, nop, 4);
+	  p += 4;
+	  count -= 4;
+	}
+    }
+  else
+    memset (fill, 0, count);
+
+  return fill;
+}
+
 #define N(BITS, NUMBER, PRINT, DEFAULT, NEXT)		\
   {							\
     BITS,      /* Bits in a word.  */			\
@@ -61,7 +98,7 @@ powerpc_compatible (const bfd_arch_info_type *a,
     DEFAULT,						\
     powerpc_compatible,					\
     bfd_default_scan,					\
-    bfd_arch_default_fill,				\
+    bfd_arch_ppc_nop_fill,				\
     NEXT,						\
     0 /* Maximum offset of a reloc from the start of an insn.  */ \
   }
