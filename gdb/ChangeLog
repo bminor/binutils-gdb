@@ -1,3 +1,10 @@
+2019-10-16  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_gcc_target_options): New.
+	(riscv_gnu_triplet_regexp): New.
+	(riscv_gdbarch_init): Call set_gdbarch_gcc_triplet_options and
+	set_gdbarch_gnu_triplet_regexp.
+
 2019-10-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Add xml-builtin.h.

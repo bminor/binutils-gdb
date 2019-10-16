@@ -3055,6 +3055,58 @@ riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return -1;
 }
 
+/* Implement the gcc_target_options method.  We have to select the arch and abi
+   from the feature info.  We have enough feature info to select the abi, but
+   not enough info for the arch given all of the possible architecture
+   extensions.  So choose reasonable defaults for now.  */
+
+static std::string
+riscv_gcc_target_options (struct gdbarch *gdbarch)
+{
+  int isa_xlen = riscv_isa_xlen (gdbarch);
+  int isa_flen = riscv_isa_flen (gdbarch);
+  int abi_xlen = riscv_abi_xlen (gdbarch);
+  int abi_flen = riscv_abi_flen (gdbarch);
+  std::string target_options;
+
+  target_options = "-march=rv";
+  if (isa_xlen == 8)
+    target_options += "64";
+  else
+    target_options += "32";
+  if (isa_flen == 8)
+    target_options += "gc";
+  else if (isa_flen == 4)
+    target_options += "imafc";
+  else
+    target_options += "imac";
+
+  target_options += " -mabi=";
+  if (abi_xlen == 8)
+    target_options += "lp64";
+  else
+    target_options += "ilp32";
+  if (abi_flen == 8)
+    target_options += "d";
+  else if (abi_flen == 4)
+    target_options += "f";
+
+  /* The gdb loader doesn't handle link-time relaxation relocations.  */
+  target_options += " -mno-relax";
+
+  return target_options;
+}
+
+/* Implement the gnu_triplet_regexp method.  A single compiler supports both
+   32-bit and 64-bit code, and may be named riscv32 or riscv64 or (not
+   recommended) riscv.  */
+
+static const char *
+riscv_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return "riscv(32|64)?";
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3298,6 +3350,10 @@ riscv_gdbarch_init (struct gdbarch_info info,
   if (riscv_has_fp_regs (gdbarch))
     riscv_setup_register_aliases (gdbarch, &riscv_freg_feature);
   riscv_setup_register_aliases (gdbarch, &riscv_csr_feature);
+
+  /* Compile command hooks.  */
+  set_gdbarch_gcc_target_options (gdbarch, riscv_gcc_target_options);
+  set_gdbarch_gnu_triplet_regexp (gdbarch, riscv_gnu_triplet_regexp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
