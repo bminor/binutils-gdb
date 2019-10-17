@@ -1,3 +1,7 @@
+2019-10-16  Tom Tromey  <tom@tromey.com>
+
+	* objfiles.h (struct objfile) <original_name>: Now const.
+
 2019-10-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/gdb_setjmp.h (SIGSETJMP): Allow passing in the value to

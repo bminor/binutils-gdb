@@ -483,7 +483,7 @@ struct objfile
      This pointer is never NULL.  This does not have to be freed; it is
      guaranteed to have a lifetime at least as long as the objfile.  */
 
-  char *original_name = nullptr;
+  const char *original_name = nullptr;
 
   CORE_ADDR addr_low = 0;
 
