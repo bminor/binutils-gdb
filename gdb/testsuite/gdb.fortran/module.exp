@@ -53,7 +53,10 @@ gdb_test "info variables -n" \
 	 "33:\[ \t\]+${int_type} modmany::var_c;" \
 	 "33:\[ \t\]+${int_type} modmany::var_i;" \
 	 "37:\[ \t\]+${int_type} moduse::var_x;" \
-	 "37:\[ \t\]+${int_type} moduse::var_y;" ]
+	 "37:\[ \t\]+${int_type} moduse::var_y;(" \
+	 "" \
+	 "File .*:(" \
+	 "$decimal:.*)+)*"]
 
 
 # Do not use simple single-letter names as GDB would pick up for expectedly

@@ -1,3 +1,8 @@
+2019-10-17  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/module.exp: Allow info variables to print info for files
+	other than module.f90.
+
 2019-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/module.exp: Extend with 'info variables' test.
