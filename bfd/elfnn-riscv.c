@@ -1787,6 +1787,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       int r_type = ELFNN_R_TYPE (rel->r_info), tls_type;
       reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
       const char *msg = NULL;
+      char *msg_buf = NULL;
       bfd_boolean resolved_to_zero;
 
       if (howto == NULL
@@ -2088,6 +2089,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	       || (h != NULL && h->type == STT_SECTION))
 	      && rel->r_addend)
 	    {
+	      msg = _("%pcrel_lo section symbol with an addend");
 	      r = bfd_reloc_dangerous;
 	      break;
 	    }
@@ -2302,24 +2304,42 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  (*_bfd_error_handler)
-	    (_("%pB(%pA+%#" PRIx64 "): "
-	       "unresolvable %s relocation against symbol `%s'"),
-	     input_bfd,
-	     input_section,
-	     (uint64_t) rel->r_offset,
-	     howto->name,
-	     h->root.root.string);
+	  switch (r_type)
+	    {
+	    case R_RISCV_CALL:
+	    case R_RISCV_JAL:
+	    case R_RISCV_RVC_JUMP:
+	      if (asprintf (&msg_buf,
+			    _("%%X%%P: relocation %s against `%s' can "
+			      "not be used when making a shared object; "
+			      "recompile with -fPIC\n"),
+			    howto->name,
+			    h->root.root.string) == -1)
+		msg_buf = NULL;
+	      break;
 
-	  bfd_set_error (bfd_error_bad_value);
-	  ret = FALSE;
-	  goto out;
+	    default:
+	      if (asprintf (&msg_buf,
+			    _("%%X%%P: unresolvable %s relocation against "
+			      "symbol `%s'\n"),
+			    howto->name,
+			    h->root.root.string) == -1)
+		msg_buf = NULL;
+	      break;
+	    }
+
+	  msg = msg_buf;
+	  r = bfd_reloc_notsupported;
 	}
 
       if (r == bfd_reloc_ok)
 	r = perform_relocation (howto, rel, relocation, input_section,
 				input_bfd, contents);
 
+      /* We should have already detected the error and set message before.
+	 If the error message isn't set since the linker runs out of memory
+	 or we don't set it before, then we should set the default message
+	 with the "internal error" string here.  */
       switch (r)
 	{
 	case bfd_reloc_ok:
@@ -2338,17 +2358,21 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case bfd_reloc_outofrange:
-	  msg = _("%X%P: internal error: out of range error\n");
+	  if (msg == NULL)
+	    msg = _("%X%P: internal error: out of range error\n");
 	  break;
 
 	case bfd_reloc_notsupported:
-	  msg = _("%X%P: internal error: unsupported relocation error\n");
+	  if (msg == NULL)
+	    msg = _("%X%P: internal error: unsupported relocation error\n");
 	  break;
 
 	case bfd_reloc_dangerous:
+	  /* The error message should already be set.  */
+	  if (msg == NULL)
+	    msg = _("dangerous relocation error");
 	  info->callbacks->reloc_dangerous
-	    (info, "%pcrel_lo section symbol with an addend", input_bfd,
-	     input_section, rel->r_offset);
+	    (info, msg, input_bfd, input_section, rel->r_offset);
 	  break;
 
 	default:
@@ -2356,8 +2380,13 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 	}
 
-      if (msg)
+      /* Do not report error message for the dangerous relocation again.  */
+      if (msg && r != bfd_reloc_dangerous)
 	info->callbacks->einfo (msg);
+
+      /* Free the unused `msg_buf` if needed.  */
+      if (msg_buf)
+	free (msg_buf);
 
       /* We already reported the error via a callback, so don't try to report
 	 it again by returning false.  That leads to spurious errors.  */

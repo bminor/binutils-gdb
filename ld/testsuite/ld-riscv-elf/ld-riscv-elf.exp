@@ -71,4 +71,11 @@ if [istarget "riscv*-*-*"] {
 				    [list "readelf --syms gp-test.sd"] \
 				    "gp-test-${abi}"]]
     }
+
+    run_ld_link_tests {
+	{ "Link non-pic code into a shared library (setup)"
+	    "-shared" "" "" {lib-nopic-01a.s}
+	    {} "lib-nopic-01a.so" }
+    }
+    run_dump_test "lib-nopic-01b"
 }

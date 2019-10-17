@@ -1,3 +1,16 @@
+2019-10-17  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/lib-nopic-01b.d: Update the error message.
+
+	* testsuite/ld-riscv-elf/lib-nopic-01a.s: Create the shared library
+	lib-nopic-01a.so, it will be linked with lib-nopic-01b.s.
+	* testsuite/ld-riscv-elf/lib-nopic-01b.s: Add new test for the
+	unresolved relocation.  Link the non-pic code into a shared library
+	may cause the error.
+	* testsuite/ld-riscv-elf/lib-nopic-01b.d: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run the new test only when
+	the shared library is supported.
+
 2019-10-16  Alan Modra  <amodra@gmail.com>
 
 	PR 13616

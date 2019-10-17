@@ -1,3 +1,16 @@
+2019-10-17  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_relocate_section): Report the error message
+	that user should recompile their code with `fPIC` when linking non-pic
+	code into shared library.
+
+	* elfnn-riscv.c (riscv_elf_relocate_section): Use asprintf to extend
+	the error message if needed, and then store the result into the
+	`msg_buf`.  Finally, remember to free the unused `msg_buf`.  All error
+	message for the dangerous relocation should be set before we call the
+	callback function.  If we miss the error message since linker runs out
+	of memory, we should set the default error message for the error.
+
 2019-10-16  Alan Modra  <amodra@gmail.com>
 
 	PR 13616
