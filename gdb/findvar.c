@@ -218,7 +218,7 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
    bytes.  If SOURCE_SIZE is greater than DEST_SIZE, then truncate the most
    significant bytes.  If SOURCE_SIZE is less than DEST_SIZE then either sign
    or zero extended according to IS_SIGNED.  Values are stored in memory with
-   endianess BYTE_ORDER.  */
+   endianness BYTE_ORDER.  */
 
 void
 copy_integer_to_size (gdb_byte *dest, int dest_size, const gdb_byte *source,

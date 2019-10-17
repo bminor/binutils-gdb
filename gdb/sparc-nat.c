@@ -308,7 +308,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 void
 _initialize_sparc_nat (void)
 {
-  /* Deafult to using SunOS 4 register sets.  */
+  /* Default to using SunOS 4 register sets.  */
   if (sparc_gregmap == NULL)
     sparc_gregmap = &sparc32_sunos4_gregmap;
   if (sparc_fpregmap == NULL)

@@ -76,7 +76,7 @@ struct target_buffer
   ULONGEST size;
 };
 
-/* Openning the file is a no-op.  */
+/* Opening the file is a no-op.  */
 
 static void *
 mem_bfd_iovec_open (struct bfd *abfd, void *open_closure)

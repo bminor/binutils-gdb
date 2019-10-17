@@ -1747,7 +1747,7 @@ static std::vector<xml_test_tdesc> xml_tdesc;
 
 #if GDB_SELF_TEST
 
-/* See target-descritpions.h.  */
+/* See target-descriptions.h.  */
 
 void
 record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)

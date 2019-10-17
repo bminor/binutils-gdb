@@ -657,7 +657,7 @@ const struct regset ppc32_linux_tm_sprregset = {
    general-purpose regsets for 32-bit, 64-bit big-endian, and 64-bit
    little endian targets.  The ptrace and core file buffers for 64-bit
    targets use 8-byte fields for the 4-byte registers, and the
-   position of the register in the fields depends on the endianess.
+   position of the register in the fields depends on the endianness.
    The 32-bit regmap is the same for both endian types because the
    fields are all 4-byte long.
 
@@ -761,7 +761,7 @@ const struct regset ppc32_linux_cfprregset = {
 
 /* Regmaps for the Hardware Transactional Memory checkpointed vector
    regsets, for big and little endian targets.  The position of the
-   4-byte VSCR in its 16-byte field depends on the endianess.  */
+   4-byte VSCR in its 16-byte field depends on the endianness.  */
 
 static const struct regcache_map_entry ppc32_le_regmap_cvmx[] =
   {

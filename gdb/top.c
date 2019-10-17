@@ -86,7 +86,7 @@ extern void initialize_all_files (void);
 #define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
 #define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
 
-/* Default command line prompt.  This is overriden in some configs.  */
+/* Default command line prompt.  This is overridden in some configs.  */
 
 #ifndef DEFAULT_PROMPT
 #define DEFAULT_PROMPT	"(gdb) "

@@ -2733,7 +2733,7 @@ check_stub_method_group (struct type *type, int method_id)
     }
 }
 
-/* Ensure it is in .rodata (if available) by workarounding GCC PR 44690.  */
+/* Ensure it is in .rodata (if available) by working around GCC PR 44690.  */
 const struct cplus_struct_type cplus_struct_default = { };
 
 void

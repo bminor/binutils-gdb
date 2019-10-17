@@ -141,7 +141,7 @@ struct vCont_action_support
   bool S = false;
 };
 
-/* About this many threadisds fit in a packet.  */
+/* About this many threadids fit in a packet.  */
 
 #define MAXTHREADLISTRESULTS 32
 
@@ -3250,7 +3250,7 @@ remote_target::remote_unpack_thread_info_response (char *pkt,
     }
   copy_threadref (&info->threadid, &ref);
 
-  /* Loop on tagged fields , try to bail if somthing goes wrong.  */
+  /* Loop on tagged fields , try to bail if something goes wrong.  */
 
   /* Packets are terminated with nulls.  */
   while ((pkt < limit) && mask && *pkt)
@@ -3389,7 +3389,7 @@ remote_target::remote_get_threadlist (int startflag, threadref *nextthread,
   struct remote_state *rs = get_remote_state ();
   int result = 1;
 
-  /* Trancate result limit to be smaller than the packet size.  */
+  /* Truncate result limit to be smaller than the packet size.  */
   if ((((result_limit + 1) * BUF_THREAD_ID_SIZE) + 10)
       >= get_remote_packet_size ())
     result_limit = (get_remote_packet_size () / BUF_THREAD_ID_SIZE) - 2;
@@ -3411,8 +3411,8 @@ remote_target::remote_get_threadlist (int startflag, threadref *nextthread,
   if (!threadmatch (&rs->echo_nextthread, nextthread))
     {
       /* FIXME: This is a good reason to drop the packet.  */
-      /* Possably, there is a duplicate response.  */
-      /* Possabilities :
+      /* Possibly, there is a duplicate response.  */
+      /* Possibilities :
          retransmit immediatly - race conditions
          retransmit after timeout - yes
          exit
@@ -11283,7 +11283,7 @@ output_threadid (char *title, threadref *ref)
 {
   char hexid[20];
 
-  pack_threadid (&hexid[0], ref);	/* Convert threead id into hex.  */
+  pack_threadid (&hexid[0], ref);	/* Convert thread id into hex.  */
   hexid[16] = 0;
   printf_filtered ("%s  %s\n", title, (&hexid[0]));
 }

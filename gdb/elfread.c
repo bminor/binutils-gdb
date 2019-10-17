@@ -1433,7 +1433,7 @@ const struct sym_fns elf_sym_fns_gdb_index =
   elf_symfile_read,		/* read a symbol file into symtab */
   NULL,				/* sym_read_psymbols */
   elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocatin */
+  default_symfile_offsets,	/* Translate ext. to int. relocation */
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
@@ -1450,7 +1450,7 @@ const struct sym_fns elf_sym_fns_debug_names =
   elf_symfile_read,		/* read a symbol file into symtab */
   NULL,				/* sym_read_psymbols */
   elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocatin */
+  default_symfile_offsets,	/* Translate ext. to int. relocation */
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */

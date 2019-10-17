@@ -1,3 +1,33 @@
+2019-10-17  Tom de Vries  <tdevries@suse.de>
+
+	* arm-nbsd-nat.c: Fix typos in comments.
+	* arm-tdep.c: Same.
+	* darwin-nat-info.c: Same.
+	* dwarf2read.c: Same.
+	* elfread.c: Same.
+	* event-top.c: Same.
+	* findvar.c: Same.
+	* gdbtypes.c: Same.
+	* hppa-tdep.c: Same.
+	* i386-tdep.c: Same.
+	* jit.c: Same.
+	* main.c: Same.
+	* mdebugread.c: Same.
+	* moxie-tdep.c: Same.
+	* nto-procfs.c: Same.
+	* osabi.c: Same.
+	* ppc-linux-tdep.c: Same.
+	* remote.c: Same.
+	* riscv-tdep.c: Same.
+	* s390-tdep.c: Same.
+	* sh-tdep.c: Same.
+	* sparc-linux-tdep.c: Same.
+	* sparc-nat.c: Same.
+	* stack.c: Same.
+	* target-descriptions.c: Same.
+	* top.c: Same.
+	* varobj.c: Same.
+
 2019-10-16  Tom Tromey  <tom@tromey.com>
 
 	* objfiles.h (struct objfile) <original_name>: Now const.

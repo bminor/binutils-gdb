@@ -271,7 +271,7 @@ struct moxie_unwind_cache
 };
 
 /* Read an unsigned integer from the inferior, and adjust
-   endianess.  */
+   endianness.  */
 static ULONGEST
 moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 		     int length, enum bfd_endian byte_order)

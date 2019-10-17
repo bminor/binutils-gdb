@@ -2956,7 +2956,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 	|| code == TYPE_CODE_UNION
 	|| code == TYPE_CODE_ARRAY)
        && !i386_reg_struct_return_p (gdbarch, type))
-      /* Complex double and long double uses the struct return covention.  */
+      /* Complex double and long double uses the struct return convention.  */
       || (code == TYPE_CODE_COMPLEX && TYPE_LENGTH (type) == 16)
       || (code == TYPE_CODE_COMPLEX && TYPE_LENGTH (type) == 24)
       /* 128-bit decimal float uses the struct return convention.  */

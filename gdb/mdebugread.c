@@ -187,7 +187,7 @@ static const struct ecoff_debug_swap *debug_swap;
 
 static struct ecoff_debug_info *debug_info;
 
-/* Pointer to current file decriptor record, and its index.  */
+/* Pointer to current file descriptor record, and its index.  */
 
 static FDR *cur_fdr;
 static int cur_fd;
@@ -3729,7 +3729,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  if (rh == f_idx)
 	    continue;
 
-	  /* Do not add to dependeny list if psymtab was empty.  */
+	  /* Do not add to dependency list if psymtab was empty.  */
 	  if (fdr_to_pst[rh].pst == NULL)
 	    continue;
 	  pst->dependencies[pst->number_of_dependencies++]

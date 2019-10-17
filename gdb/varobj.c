@@ -1831,7 +1831,7 @@ install_variable (struct varobj *var)
   return true;			/* OK */
 }
 
-/* Unistall the object VAR.  */
+/* Uninstall the object VAR.  */
 static void
 uninstall_variable (struct varobj *var)
 {

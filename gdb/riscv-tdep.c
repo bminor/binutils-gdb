@@ -1010,7 +1010,7 @@ public:
       LUI,
       SD,
       SW,
-      /* These are needed for software breakopint support.  */
+      /* These are needed for software breakpoint support.  */
       JAL,
       JALR,
       BEQ,

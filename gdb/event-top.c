@@ -421,7 +421,7 @@ display_gdb_prompt (const char *new_prompt)
 }
 
 /* Return the top level prompt, as specified by "set prompt", possibly
-   overriden by the python gdb.prompt_hook hook, and then composed
+   overridden by the python gdb.prompt_hook hook, and then composed
    with the prompt prefix and suffix (annotations).  */
 
 static std::string
@@ -1152,7 +1152,7 @@ handle_sigfpe (int sig)
   signal (sig, handle_sigfpe);
 }
 
-/* Event loop will call this functin to process a SIGFPE.  */
+/* Event loop will call this function to process a SIGFPE.  */
 static void
 async_float_handler (gdb_client_data arg)
 {

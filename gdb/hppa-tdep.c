@@ -88,7 +88,7 @@ static const struct objfile_key<hppa_objfile_private,
 				gdb::noop_deleter<hppa_objfile_private>>
   hppa_objfile_priv_data;
 
-/* Get at various relevent fields of an instruction word.  */
+/* Get at various relevant fields of an instruction word.  */
 #define MASK_5 0x1f
 #define MASK_11 0x7ff
 #define MASK_14 0x3fff

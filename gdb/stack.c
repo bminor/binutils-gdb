@@ -959,7 +959,7 @@ get_user_print_what_frame_info (gdb::optional<enum print_what> *what)
 /* Print information about frame FRAME.  The output is format according
    to PRINT_LEVEL and PRINT_WHAT and PRINT_ARGS.  For the meaning of
    PRINT_WHAT, see enum print_what comments in frame.h.
-   Note that PRINT_WHAT is overriden if FP_OPTS.print_frame_info
+   Note that PRINT_WHAT is overridden if FP_OPTS.print_frame_info
    != print_frame_info_auto.
 
    Used in "where" output, and to emit breakpoint or step

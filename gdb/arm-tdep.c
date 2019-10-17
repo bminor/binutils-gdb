@@ -6809,7 +6809,7 @@ thumb2_decode_svc_copro (struct gdbarch *gdbarch, uint16_t insn1,
 	      if (bit_4 == 0) /* STC/STC2.  */
 		return thumb_copy_unmodified_32bit (gdbarch, insn1, insn2,
 						    "stc/stc2", dsc);
-	      else /* LDC/LDC2 {literal, immeidate}.  */
+	      else /* LDC/LDC2 {literal, immediate}.  */
 		return thumb2_copy_copro_load_store (gdbarch, insn1, insn2,
 						     regs, dsc);
 	    }
@@ -6954,7 +6954,7 @@ thumb_copy_16bit_ldr_literal (struct gdbarch *gdbarch, uint16_t insn1,
   return 0;
 }
 
-/* Copy Thumb cbnz/cbz insruction.  */
+/* Copy Thumb cbnz/cbz instruction.  */
 
 static int
 thumb_copy_cbnz_cbz (struct gdbarch *gdbarch, uint16_t insn1,
@@ -7329,7 +7329,7 @@ thumb_process_displaced_32bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
 	  case 0:
 	    if (bit (insn1, 6))
 	      {
-		/* Load/store {dual, execlusive}, table branch.  */
+		/* Load/store {dual, exclusive}, table branch.  */
 		if (bits (insn1, 7, 8) == 1 && bits (insn1, 4, 5) == 1
 		    && bits (insn2, 5, 7) == 0)
 		  err = thumb2_copy_table_branch (gdbarch, insn1, insn2, regs,
@@ -7390,7 +7390,7 @@ thumb_process_displaced_32bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
 		err = thumb_copy_unmodified_32bit (gdbarch, insn1, insn2,
 						   "dp/pb", dsc);
 	    }
-	  else /* Data processing (modified immeidate) */
+	  else /* Data processing (modified immediate) */
 	    err = thumb_copy_unmodified_32bit (gdbarch, insn1, insn2,
 					       "dp/mi", dsc);
 	}

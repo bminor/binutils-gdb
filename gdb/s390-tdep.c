@@ -2116,7 +2116,7 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
 
 /* Frame unwinding.  */
 
-/* Implmement the stack_frame_destroyed_p gdbarch method.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
 s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -5311,7 +5311,7 @@ ex:
 	case 0xe383: /* MSGC - multiply single 64x64mem -> 64 */
 	case 0xe398: /* ALC - add logical with carry */
 	case 0xe399: /* SLB - subtract logical with borrow */
-	case 0xe727: /* LCBB - load count to block bounduary */
+	case 0xe727: /* LCBB - load count to block boundary */
 	case 0xeb81: /* ICMY - insert characters under mask */
 	case 0xebdc: /* SRAK - shift left single */
 	case 0xebdd: /* SLAK - shift left single */
@@ -5537,7 +5537,7 @@ ex:
 	case 0xe704: /* VLLEZ - vector load logical element and zero */
 	case 0xe705: /* VLREP - vector load and replicate */
 	case 0xe706: /* VL - vector load */
-	case 0xe707: /* VLBB - vector load to block bounduary */
+	case 0xe707: /* VLBB - vector load to block boundary */
 	case 0xe712: /* VGEG - vector gather element */
 	case 0xe713: /* VGEF - vector gather element */
 	case 0xe722: /* VLVG - vector load vr element from gr */
@@ -6238,7 +6238,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xed42-0xed47 undefind */
+	/* 0xed42-0xed47 undefined */
 
 	case 0xed48: /* SLXT - shift significand left */
 	case 0xed49: /* SRXT - shift significand right */
@@ -6253,10 +6253,10 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xed4a-0xed4f undefind */
-	/* 0xed52-0xed53 undefind */
-	/* 0xed56-0xed57 undefind */
-	/* 0xed5a-0xed63 undefind */
+	/* 0xed4a-0xed4f undefined */
+	/* 0xed52-0xed53 undefined */
+	/* 0xed56-0xed57 undefined */
+	/* 0xed5a-0xed63 undefined */
 	/* 0xed68-0xeda7 undefined */
 
 	case 0xeda8: /* CZDT - convert to zoned */

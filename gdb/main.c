@@ -911,7 +911,7 @@ captured_main_1 (struct captured_main_args *context)
     }
 
   /* Lookup gdbinit files.  Note that the gdbinit file name may be
-     overriden during file initialization, so get_init_files should be
+     overridden during file initialization, so get_init_files should be
      called after gdb_init.  */
   std::string system_gdbinit;
   std::string home_gdbinit;

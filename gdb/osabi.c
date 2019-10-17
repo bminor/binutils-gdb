@@ -415,7 +415,7 @@ check_note (bfd *abfd, asection *sect, char *note, unsigned int *sectsize,
   /* If this assertion triggers, increase MAX_NOTESZ.  */
   gdb_assert (notesz <= MAX_NOTESZ);
 
-  /* Check whether SECT is big enough to comtain the complete note.  */
+  /* Check whether SECT is big enough to contain the complete note.  */
   if (notesz > bfd_section_size (sect))
     return 0;
 

@@ -1486,7 +1486,7 @@ struct cu_partial_die_info
   cu_partial_die_info (struct dwarf2_cu *cu, struct partial_die_info *pdi)
     : cu (cu),
       pdi (pdi)
-  { /* Nothhing.  */ }
+  { /* Nothing.  */ }
 
 private:
   cu_partial_die_info () = delete;
@@ -14942,7 +14942,7 @@ producer_is_codewarrior (struct dwarf2_cu *cu)
   return cu->producer_is_codewarrior;
 }
 
-/* Return the default accessibility type if it is not overriden by
+/* Return the default accessibility type if it is not overridden by
    DW_AT_accessibility.  */
 
 static enum dwarf_access_attribute
