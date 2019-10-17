@@ -66,7 +66,7 @@ getver()
 	cat VER.tmp | grep 'version\[\]' | sed 's/.*"\([^"]*\)".*/\1/' | sed 's/-git$//'
         rm -f VER.tmp
     elif test -f $tool/version.in; then
-	head -1 $tool/version.in
+	head -n 1 $tool/version.in
     else
 	echo VERSION
     fi
