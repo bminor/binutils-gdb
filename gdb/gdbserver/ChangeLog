@@ -1,5 +1,9 @@
 2019-10-23  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2019-10-23  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* acinclude.m4: Use m4_include, not sinclude.
 

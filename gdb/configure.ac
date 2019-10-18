@@ -1363,7 +1363,7 @@ AC_FUNC_VFORK
 AC_CHECK_FUNCS([getauxval getrusage getuid getgid \
 		pipe poll pread pread64 pwrite resize_term \
 		sbrk getpgid setpgid setpgrp setsid \
-		sigaction sigprocmask sigsetmask socketpair \
+		sigaction sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid \
 		ptrace64 sigaltstack setns use_default_colors])
