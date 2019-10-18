@@ -1,3 +1,9 @@
+2019-12-16  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* infcmd.c (prepare_one_step): Step over skipped inline functions.
+	* infrun.c (inline_frame_is_marked_for_skip): New helper function.
+	(process_event_stop_test): Keep stepping over skipped inline functions.
+
 2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.c (struct gdb_block) <next>: Remove field.

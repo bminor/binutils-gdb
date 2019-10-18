@@ -4034,6 +4034,45 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
   return 0;
 }
 
+/* Look for an inline frame that is marked for skip.
+   If PREV_FRAME is TRUE start at the previous frame,
+   otherwise start at the current frame.  Stop at the
+   first non-inline frame, or at the frame where the
+   step started.  */
+
+static bool
+inline_frame_is_marked_for_skip (bool prev_frame, struct thread_info *tp)
+{
+  struct frame_info *frame = get_current_frame ();
+
+  if (prev_frame)
+    frame = get_prev_frame (frame);
+
+  for (; frame != NULL; frame = get_prev_frame (frame))
+    {
+      const char *fn = NULL;
+      symtab_and_line sal;
+      struct symbol *sym;
+
+      if (frame_id_eq (get_frame_id (frame), tp->control.step_frame_id))
+	break;
+      if (get_frame_type (frame) != INLINE_FRAME)
+	break;
+
+      sal = find_frame_sal (frame);
+      sym = get_frame_function (frame);
+
+      if (sym != NULL)
+	fn = sym->print_name ();
+
+      if (sal.line != 0
+	  && function_name_is_marked_for_skip (fn, sal))
+	return true;
+    }
+
+  return false;
+}
+
 /* If the event thread has the stop requested flag set, pretend it
    stopped for a GDB_SIGNAL_0 (i.e., as if it stopped due to
    target_stop).  */
@@ -6524,7 +6563,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0
 	    && !function_name_is_marked_for_skip (ecs->stop_func_name,
-						  tmp_sal))
+						  tmp_sal)
+	    && !inline_frame_is_marked_for_skip (true, ecs->event_thread))
 	  {
 	    if (execution_direction == EXEC_REVERSE)
 	      handle_step_into_function_backward (gdbarch, ecs);
@@ -6690,7 +6730,14 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	  if (call_sal.line == ecs->event_thread->current_line
 	      && call_sal.symtab == ecs->event_thread->current_symtab)
-	    step_into_inline_frame (ecs->event_thread);
+	    {
+	      step_into_inline_frame (ecs->event_thread);
+	      if (inline_frame_is_marked_for_skip (false, ecs->event_thread))
+		{
+		  keep_going (ecs);
+		  return;
+		}
+	    }
 
 	  end_stepping_range (ecs);
 	  return;
@@ -6724,7 +6771,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: stepping through inlined function\n");
 
-      if (ecs->event_thread->control.step_over_calls == STEP_OVER_ALL)
+      if (ecs->event_thread->control.step_over_calls == STEP_OVER_ALL
+	  || inline_frame_is_marked_for_skip (false, ecs->event_thread))
 	keep_going (ecs);
       else
 	end_stepping_range (ecs);

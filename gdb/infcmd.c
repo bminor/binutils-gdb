@@ -52,6 +52,7 @@
 #include "thread-fsm.h"
 #include "top.h"
 #include "interps.h"
+#include "skip.h"
 #include "gdbsupport/gdb_optional.h"
 #include "source.h"
 #include "cli/cli-style.h"
@@ -1106,14 +1107,29 @@ prepare_one_step (struct step_command_fsm *sm)
 	      && inline_skipped_frames (tp))
 	    {
 	      ptid_t resume_ptid;
+	      const char *fn = NULL;
+	      symtab_and_line sal;
+	      struct symbol *sym;
 
 	      /* Pretend that we've ran.  */
 	      resume_ptid = user_visible_resume_ptid (1);
 	      set_running (resume_ptid, 1);
 
 	      step_into_inline_frame (tp);
-	      sm->count--;
-	      return prepare_one_step (sm);
+
+	      frame = get_current_frame ();
+	      sal = find_frame_sal (frame);
+	      sym = get_frame_function (frame);
+
+	      if (sym != NULL)
+		fn = sym->print_name ();
+
+	      if (sal.line == 0
+		  || !function_name_is_marked_for_skip (fn, sal))
+		{
+		  sm->count--;
+		  return prepare_one_step (sm);
+		}
 	    }
 
 	  pc = get_frame_pc (frame);
