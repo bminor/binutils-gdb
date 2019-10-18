@@ -1104,7 +1104,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
 
      And, we DON'T want to call delete_breakpoints() here, since
      that may write the bp's "shadow contents" (the instruction
-     value that was overwritten witha TRAP instruction).  Since
+     value that was overwritten with a TRAP instruction).  Since
      we now have a new a.out, those shadow contents aren't valid.  */
 
   mark_breakpoints_out ();
@@ -1429,7 +1429,7 @@ step_over_info_valid_p (void)
      register contents, and memory.  We use this in step n1.
 
    - gdbarch_displaced_step_fixup adjusts registers and memory after
-     we have successfuly single-stepped the instruction, to yield the
+     we have successfully single-stepped the instruction, to yield the
      same effect the instruction would have had if we had executed it
      at its original address.  We use this in step n3.
 
@@ -5922,7 +5922,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  return;
 	}
 
-      /* Note: step_resume_breakpoint may be non-NULL.  This occures
+      /* Note: step_resume_breakpoint may be non-NULL.  This occurs
 	 when either there's a nested signal, or when there's a
 	 pending signal enabled just as the signal handler returns
 	 (leaving the inferior at the step-resume-breakpoint without

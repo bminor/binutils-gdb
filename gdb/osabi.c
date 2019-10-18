@@ -346,7 +346,7 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	continue;
 
       /* If the architecture described by ARCH_INFO can run code for
-	 the architcture we registered the handler for, then the
+	 the architecture we registered the handler for, then the
 	 handler is applicable.  Note, though, that if the handler is
 	 for an architecture that is a superset of ARCH_INFO, we can't
 	 use that --- it would be perfectly correct for it to install

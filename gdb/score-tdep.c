@@ -870,7 +870,7 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
       inst_t *inst = NULL;
       if (memblock != NULL)
         {
-          /* Reading memory block from target succefully and got all
+          /* Reading memory block from target successfully and got all
              the instructions(from STARTADDR to PC) needed.  */
           score7_adjust_memblock_ptr (&memblock, prev_pc, cur_pc);
           inst = score7_fetch_inst (gdbarch, cur_pc, memblock);

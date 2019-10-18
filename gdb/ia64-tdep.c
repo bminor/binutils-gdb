@@ -707,7 +707,7 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
   if (val != 0)
     return val;
 
-  /* Breakpoints already present in the code will get deteacted and not get
+  /* Breakpoints already present in the code will get detected and not get
      reinserted by bp_loc_is_permanent.  Multiple breakpoints at the same
      location cannot induce the internal error as they are optimized into
      a single instance by update_global_location_list.  */

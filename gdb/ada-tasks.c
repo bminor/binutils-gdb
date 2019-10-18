@@ -604,7 +604,7 @@ ptid_from_atcb_common (struct value *common_value)
 }
 
 /* Read the ATCB data of a given task given its TASK_ID (which is in practice
-   the address of its assocated ATCB record), and store the result inside
+   the address of its associated ATCB record), and store the result inside
    TASK_INFO.  */
 
 static void
@@ -744,7 +744,7 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
                                        called_task_fieldno));
     }
 
-  /* If the ATCB cotnains some information about RV callers, then
+  /* If the ATCB contains some information about RV callers, then
      compute the "caller_task".  Otherwise, leave it as zero.  */
 
   if (pspace_data->atcb_fieldno.call >= 0)

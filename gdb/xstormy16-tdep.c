@@ -43,7 +43,7 @@ enum gdb_regnum
      to the function in r2.  Further arguments are beginning in r3 then.
      R13 is used as frame pointer when GCC compiles w/o optimization
      R14 is used as "PSW", displaying the CPU status.
-     R15 is used implicitely as stack pointer.  */
+     R15 is used implicitly as stack pointer.  */
   E_R0_REGNUM,
   E_R1_REGNUM,
   E_R2_REGNUM, E_1ST_ARG_REGNUM = E_R2_REGNUM, E_PTR_RET_REGNUM = E_R2_REGNUM,

@@ -588,7 +588,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
 
   bfd_hash_table_free (&table);
 
-  /* We need to clear SYMFILE_MAINLINE to avoid interractive question
+  /* We need to clear SYMFILE_MAINLINE to avoid interactive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
   symbol_file_add_from_bfd
     (abfd.get (), name, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE),

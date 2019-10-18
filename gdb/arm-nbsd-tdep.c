@@ -28,7 +28,7 @@
 #define ARM_NBSD_JB_PC 24
 #define ARM_NBSD_JB_ELEMENT_SIZE ARM_INT_REGISTER_SIZE
 
-/* For compatibility with previous implemenations of GDB on arm/NetBSD,
+/* For compatibility with previous implementations of GDB on arm/NetBSD,
    override the default little-endian breakpoint.  */
 static const gdb_byte arm_nbsd_arm_le_breakpoint[] = {0x11, 0x00, 0x00, 0xe6};
 static const gdb_byte arm_nbsd_arm_be_breakpoint[] = {0xe6, 0x00, 0x00, 0x11};

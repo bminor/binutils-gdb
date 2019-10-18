@@ -1911,7 +1911,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       gen_expr (exp, pc, ax, &value3);
       gen_usual_unary (ax, &value3);
       ax_label (ax, end, ax->len);
-      /* This is arbitary - what if B and C are incompatible types? */
+      /* This is arbitrary - what if B and C are incompatible types? */
       value->type = value2.type;
       value->kind = value2.kind;
       break;

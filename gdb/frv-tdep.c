@@ -524,7 +524,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
      J - The register number of GRj in the instruction description.
      K - The register number of GRk in the instruction description.
      I - The register number of GRi.
-     S - a signed imediate offset.
+     S - a signed immediate offset.
      U - an unsigned immediate offset.
 
      The dots below the numbers indicate where hex digit boundaries

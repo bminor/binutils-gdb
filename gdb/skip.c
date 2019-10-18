@@ -179,7 +179,7 @@ skip_file_command (const char *arg, int from_tty)
       if (symtab == NULL)
 	error (_("No default file now."));
 
-      /* It is not a typo, symtab_to_filename_for_display woule be needlessly
+      /* It is not a typo, symtab_to_filename_for_display would be needlessly
 	 ambiguous.  */
       filename = symtab_to_fullname (symtab);
     }

@@ -824,7 +824,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
    l.sw    lr_loc(r1),r9        # Link (return) address
 
-   The link register is usally saved at fp_loc - 4.  It may not be saved at
+   The link register is usually saved at fp_loc - 4.  It may not be saved at
    all in a leaf function.
 
    l.sw    reg_loc(r1),ry       # Save any callee saved regs

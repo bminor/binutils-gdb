@@ -1758,7 +1758,7 @@ record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
 
 }
 
-/* Test the convesion process of a target description to/from xml: Take a target
+/* Test the conversion process of a target description to/from xml: Take a target
    description TDESC, convert to xml, back to a description, and confirm the new
    tdesc is identical to the original.  */
 static bool

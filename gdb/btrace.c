@@ -926,7 +926,7 @@ ftrace_bridge_gap (struct btrace_thread_info *btinfo,
   best_r = NULL;
 
   /* We search the back traces of LHS and RHS for valid connections and connect
-     the two functon segments that give the longest combined back trace.  */
+     the two function segments that give the longest combined back trace.  */
 
   for (cand_l = lhs; cand_l != NULL;
        cand_l = ftrace_get_caller (btinfo, cand_l))

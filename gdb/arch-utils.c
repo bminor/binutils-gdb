@@ -69,7 +69,7 @@ legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch));
   /* NOTE: cagney/2002-05-13: The old code did it this way and it is
      suspected that some GDB/SIM combinations may rely on this
-     behavour.  The default should be one2one_register_sim_regno
+     behaviour.  The default should be one2one_register_sim_regno
      (below).  */
   if (gdbarch_register_name (gdbarch, regnum) != NULL
       && gdbarch_register_name (gdbarch, regnum)[0] != '\0')
@@ -373,7 +373,7 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 
    SELECTED may be NULL, in which case we return the architecture
    associated with TARGET_DESC.  If SELECTED specifies a variant
-   of the architecture associtated with TARGET_DESC, return the
+   of the architecture associated with TARGET_DESC, return the
    more specific of the two.
 
    If SELECTED is a different architecture, but it is accepted as

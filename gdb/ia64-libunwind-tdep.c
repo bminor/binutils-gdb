@@ -197,7 +197,7 @@ libunwind_frame_cache (struct frame_info *this_frame, void **this_cache)
        The best we can do, in that case, is use the frame PC as the function
        address.  We don't need to give up since we still have the unwind
        record to help us perform the unwinding.  There is also another
-       compelling to continue, because abandonning now means stopping
+       compelling to continue, because abandoning now means stopping
        the backtrace, which can never be helpful for the user.  */
     cache->func_addr = get_frame_pc (this_frame);
 

@@ -418,7 +418,7 @@ unop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	{
 	default:
 	  /* Perform integral promotion for ANSI C/C++.
-	     If not appropropriate for any particular language
+	     If not appropriate for any particular language
 	     it needs to modify this function.  */
 	  {
 	    struct type *builtin_int = builtin_type (gdbarch)->builtin_int;
@@ -3219,7 +3219,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 
       /* Deal with the special case if NOSIDE is EVAL_NORMAL and the resulting
 	 type of the subscript is a variable length array type. In this case we
-	 must re-evaluate the right hand side of the subcription to allow
+	 must re-evaluate the right hand side of the subscription to allow
 	 side-effects. */
     case BINOP_SUBSCRIPT:
       if (noside == EVAL_NORMAL)

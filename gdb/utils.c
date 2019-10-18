@@ -1338,7 +1338,7 @@ set_screen_size (void)
      commands and either:
 
      - the user specified "unlimited", which maps to UINT_MAX, or
-     - the user spedified some number between INT_MAX and UINT_MAX.
+     - the user specified some number between INT_MAX and UINT_MAX.
 
      Cap "infinity" to approximately sqrt(INT_MAX) so that we don't
      overflow in rl_set_screen_size, which multiplies rows and columns
@@ -2034,7 +2034,7 @@ puts_debug (char *prefix, char *string, char *suffix)
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
    to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
-   call prompt_for_continue to get the users permision to continue.
+   call prompt_for_continue to get the users permission to continue.
 
    Unlike fprintf, this function does not return a value.
 

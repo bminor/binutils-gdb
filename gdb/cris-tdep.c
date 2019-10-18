@@ -3056,7 +3056,7 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
   inst_env->disable_interrupt = 0;
 }
 
-/* Handles the intructions that's not yet implemented, by setting 
+/* Handles the instructions that's not yet implemented, by setting
    inst_env->invalid to true.  */
 
 static void 

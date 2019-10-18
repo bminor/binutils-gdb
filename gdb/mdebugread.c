@@ -1993,7 +1993,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
       s = new_symbol (sh_name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = LOC_BLOCK;
-      /* Donno its type, hope int is ok.  */
+      /* Don't know its type, hope int is ok.  */
       SYMBOL_TYPE (s)
 	= lookup_function_type (objfile_type (pst->objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -2442,7 +2442,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
      (inefficient; 
      assumes no side-effects result from ignoring ECOFF symbol)
      3) create it, but lookup ELF's minimal symbol and use it's section
-     during relocation, then modify "uniqify" phase to merge and 
+     during relocation, then modify "uniquify" phase to merge and
      eliminate the duplicate symbol
      (highly inefficient)
 
@@ -3442,7 +3442,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		  /* Usually there is a local and a global stProc symbol
 		     for a function.  This means that the function name
-		     has already been entered into the mimimal symbol table
+		     has already been entered into the minimal symbol table
 		     while processing the global symbols in pass 2 above.
 		     One notable exception is the PROGRAM name from
 		     f77 compiled executables, it is only put out as
@@ -3861,7 +3861,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
     return;
   pst->readin = 1;
 
-  /* Read in all partial symbtabs on which this one is dependent.
+  /* Read in all partial symtabs on which this one is dependent.
      NOTE that we do have circular dependencies, sigh.  We solved
      that by setting pst->readin before this point.  */
 

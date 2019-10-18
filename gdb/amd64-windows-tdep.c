@@ -1214,7 +1214,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* The dwarf2 unwinder (appended very early by i386_gdbarch_init) is
      preferred over the SEH one.  The reasons are:
-     - binaries without SEH but with dwarf2 debug info are correcly handled
+     - binaries without SEH but with dwarf2 debug info are correctly handled
        (although they aren't ABI compliant, gcc before 4.7 didn't emit SEH
        info).
      - dwarf3 DW_OP_call_frame_cfa is correctly handled (it can only be

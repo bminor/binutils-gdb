@@ -1115,7 +1115,7 @@ find_and_open_source (const char *filename,
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  
    
-   This function is a convience function to find_and_open_source.  */
+   This function is a convenience function to find_and_open_source.  */
 
 scoped_fd
 open_source_file (struct symtab *s)

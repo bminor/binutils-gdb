@@ -994,11 +994,11 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
   const char *name;
 
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
-     look at tramp-frame.h and other simplier per-architecture
+     look at tramp-frame.h and other simpler per-architecture
      sigtramp unwinders.  */
 
   /* We shouldn't even bother to try if the OSABI didn't register a
-     sigcontext_addr handler or pc_in_sigtramp hander.  */
+     sigcontext_addr handler or pc_in_sigtramp handler.  */
   if (gdbarch_tdep (gdbarch)->sigcontext_addr == NULL)
     return 0;
   if (gdbarch_tdep (gdbarch)->pc_in_sigtramp == NULL)

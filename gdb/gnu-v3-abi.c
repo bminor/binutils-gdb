@@ -393,7 +393,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
   /* If this architecture uses function descriptors directly in the vtable,
      then the address of the vtable entry is actually a "function pointer"
      (i.e. points to the descriptor).  We don't need to scale the index
-     by the size of a function descriptor; GCC does that before outputing
+     by the size of a function descriptor; GCC does that before outputting
      debug information.  */
   if (gdbarch_vtable_function_descriptors (gdbarch))
     vfn = value_addr (vfn);

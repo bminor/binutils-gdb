@@ -1437,7 +1437,7 @@ shared_objfile_contains_address_p (struct program_space *pspace,
    searching the objfiles in the order they are stored internally,
    ignoring CURRENT_OBJFILE.
 
-   On most platorms, it should be close enough to doing the best
+   On most platforms, it should be close enough to doing the best
    we can without some knowledge specific to the architecture.  */
 
 void

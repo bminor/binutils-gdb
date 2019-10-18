@@ -2262,7 +2262,7 @@ get_target_float_ops (enum target_float_ops_kind kind)
 
       /* For binary floating-point formats that do not match any host format,
          use mpfr_t as intermediate format to provide precise target-floating
-         point emulation.  However, if the MPFR library is not availabe,
+         point emulation.  However, if the MPFR library is not available,
          use the largest host floating-point type as intermediate format.  */
       case target_float_ops_kind::binary:
         {

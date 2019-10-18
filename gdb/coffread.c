@@ -417,7 +417,7 @@ static int
 is_import_fixup_symbol (struct coff_symbol *cs,
 			enum minimal_symbol_type type)
 {
-  /* The following is a bit of a heuristic using the characterictics
+  /* The following is a bit of a heuristic using the characteristics
      of these fixup symbols, but should work well in practice...  */
   int i;
 

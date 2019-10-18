@@ -28,7 +28,7 @@ static void cplus_class_num_children (struct type *type, int children[3]);
 #define ANONYMOUS_UNION_NAME _("<anonymous union>")
 
 /* Does CHILD represent a child with no name?  This happens when
-   the child is an anonmous struct or union and it has no field name
+   the child is an anonymous struct or union and it has no field name
    in its parent variable.
 
    This has already been determined by *_describe_child. The easiest

@@ -57,7 +57,7 @@
     GDB_INDEX_SYMBOL_KIND_SET_VALUE((cu_index), (value)); \
   } while (0)
 
-/* Ensure we don't use more than the alloted nuber of bits for the CU.  */
+/* Ensure we don't use more than the allotted number of bits for the CU.  */
 #define DW2_GDB_INDEX_CU_SET_VALUE(cu_index, value) \
   do { \
     gdb_assert (((value) & ~GDB_INDEX_CU_MASK) == 0); \
@@ -257,7 +257,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
      (which would allow us to avoid the duplication by only having to check
      the last entry pushed), but a symbol could have multiple kinds in one CU.
      To keep things simple we don't worry about the duplication here and
-     sort and uniqufy the list after we've processed all symbols.  */
+     sort and uniquify the list after we've processed all symbols.  */
   slot.cu_indices.push_back (cu_index_and_attrs);
 }
 

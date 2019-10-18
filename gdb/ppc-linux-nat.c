@@ -1085,7 +1085,7 @@ store_altivec_registers (const struct regcache *regcache, int tid,
     perror_with_name (_("Unable to store AltiVec registers"));
 }
 
-/* Assuming TID referrs to an SPE process, set the top halves of TID's
+/* Assuming TID refers to an SPE process, set the top halves of TID's
    general-purpose registers and its SPE-specific registers to the
    values in EVRREGSET.  If we don't support PTRACE_SETEVRREGS, do
    nothing.

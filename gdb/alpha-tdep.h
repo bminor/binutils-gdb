@@ -83,7 +83,7 @@ struct gdbarch_tdep
 
   /* Does the PC fall in a signal trampoline.  */
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
-     look at tramp-frame.h and other simplier per-architecture
+     look at tramp-frame.h and other simpler per-architecture
      sigtramp unwinders.  */
   int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc,
 			 const char *name);

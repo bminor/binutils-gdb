@@ -2126,7 +2126,7 @@ do_enable_disable_display (struct display *d, void *data)
   d->enabled_p = *(int *) data;
 }
 
-/* Implamentation of both the "disable display" and "enable display"
+/* Implementation of both the "disable display" and "enable display"
    commands.  ENABLE decides what to do.  */
 
 static void

@@ -1972,7 +1972,7 @@ get_thread_current_frame_id (struct thread_info *tp)
      For the latter, EXECUTING is false and this has no effect.
      For the former, EXECUTING is true and we're in wait, about to
      move the thread.  Since we need to recompute the stack, we temporarily
-     set EXECUTING to flase.  */
+     set EXECUTING to false.  */
   executing = tp->executing;
   set_executing (inferior_ptid, false);
 

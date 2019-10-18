@@ -1166,7 +1166,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	     c_type value of main symbol table will be set only in case of
 	     C_EXT/C_HIDEEXT/C_WEAKEXT storage class symbols.
 	     Bit 10 of type is set if symbol is a function, ie the value is set
-	     to 32(0x20). So we need to read the first function auxiliay entry
+	     to 32(0x20). So we need to read the first function auxiliary entry
 	     which contains the size. */
 	  if (cs->c_naux > 1 && ISFCN (cs->c_type))
 	  {
@@ -1184,7 +1184,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    continue;
 	  }
 	  /* Read the csect auxiliary header, which is always the last by
-	     onvention. */
+	     convention. */
 	  bfd_coff_swap_aux_in (abfd,
 			       raw_auxptr
 			       + ((coff_data (abfd)->local_symesz)

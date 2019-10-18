@@ -1367,7 +1367,7 @@ static struct linux_record_tdep ppc64_linux_record_tdep;
    syscall ids into a canonical set of syscall ids used by process
    record.  (See arch/powerpc/include/uapi/asm/unistd.h in kernel tree.)
    Return -1 if this system call is not supported by process record.
-   Otherwise, return the syscall number for preocess reocrd of given
+   Otherwise, return the syscall number for process record of given
    SYSCALL.  */
 
 static enum gdb_syscall
@@ -2159,7 +2159,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 void
 _initialize_ppc_linux_tdep (void)
 {
-  /* Register for all sub-familes of the POWER/PowerPC: 32-bit and
+  /* Register for all sub-families of the POWER/PowerPC: 32-bit and
      64-bit PowerPC, and the older rs6k.  */
   gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);

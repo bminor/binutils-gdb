@@ -385,7 +385,7 @@ open_procinfo_files (procinfo *pi, int which)
      several.  Here is some rationale:
 
      There are several file descriptors that may need to be open
-       for any given process or LWP.  The ones we're intereted in are:
+       for any given process or LWP.  The ones we're interested in are:
 	 - control	 (ctl)	  write-only	change the state
 	 - status	 (status) read-only	query the state
 	 - address space (as)	  read/write	access memory
@@ -838,7 +838,7 @@ proc_unset_run_on_last_close (procinfo *pi)
 }
 
 /* Reset inherit_on_fork flag.  If the process forks a child while we
-   are registered for events in the parent, then we will NOT recieve
+   are registered for events in the parent, then we will NOT receive
    events from the child.  Returns non-zero for success, zero for
    failure.  */
 
@@ -2591,7 +2591,7 @@ procfs_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
    File descriptors are also cached.  As they are a limited resource,
    we cannot hold onto them indefinitely.  However, as they are
    expensive to open, we don't want to throw them away
-   indescriminately either.  As a compromise, we will keep the file
+   indiscriminately either.  As a compromise, we will keep the file
    descriptors for the parent process, but discard any file
    descriptors we may have accumulated for the threads.
 

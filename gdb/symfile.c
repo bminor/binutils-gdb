@@ -499,7 +499,7 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
   int i;
 
   /* Find lowest loadable section to be used as starting point for
-     continguous sections.  */
+     contiguous sections.  */
   lower_sect = NULL;
   bfd_map_over_sections (abfd, find_lowest_section, &lower_sect);
   if (lower_sect == NULL)
@@ -905,7 +905,7 @@ init_entry_point_info (struct objfile *objfile)
    into a format-specific offset table --- a `struct section_offsets'.
    The sectindex field is used to control the ordering of sections
    with the same name.  Upon return, it is updated to contain the
-   correspondig BFD section index, or -1 if the section was not found.
+   corresponding BFD section index, or -1 if the section was not found.
 
    ADD_FLAGS encodes verbosity level, whether this is main symbol or
    an extra symbol file such as dynamically loaded code, and wether
@@ -1444,7 +1444,7 @@ find_separate_debug_file (const char *dir,
 
     https://sourceware.org/ml/gdb-patches/2019-04/msg00605.html
 
-    If some of those scenarions need to be supported, we will need to
+    If some of those scenarios need to be supported, we will need to
     use a different condition for HAS_DRIVE_SPEC and a different macro
     instead of STRIP_DRIVE_SPEC, which work on Posix systems as well.  */
   std::string drive;

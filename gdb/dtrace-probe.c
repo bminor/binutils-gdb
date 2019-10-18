@@ -151,7 +151,7 @@ public:
   struct dtrace_probe_arg *get_arg_by_number (unsigned n,
 					      struct gdbarch *gdbarch);
 
-  /* Build the GDB internal expressiosn that, once evaluated, will
+  /* Build the GDB internal expression that, once evaluated, will
      calculate the values of the arguments of the probe.  */
   void build_arg_exprs (struct gdbarch *gdbarch);
 

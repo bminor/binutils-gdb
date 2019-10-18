@@ -3550,7 +3550,7 @@ aarch64_record_data_proc_reg (insn_decode_record *aarch64_insn_r)
 	    }
 	  else if (insn_bits21_23 == 0x04 || insn_bits21_23 == 0x06)
 	    {
-	      /* CConditional select.  */
+	      /* Conditional select.  */
 	      /* Data-processing (2 source).  */
 	      /* Data-processing (1 source).  */
 	      record_buf[0] = reg_rd;

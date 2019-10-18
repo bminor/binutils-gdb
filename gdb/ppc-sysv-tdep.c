@@ -55,7 +55,7 @@ ppc_sysv_use_opencl_abi (struct type *ftype)
    are passed in user stack.
 
    If the function is returning a structure, then the return address is passed
-   in r3, then the first 7 words of the parametes can be passed in registers,
+   in r3, then the first 7 words of the parameters can be passed in registers,
    starting from r4.  */
 
 CORE_ADDR

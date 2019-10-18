@@ -2298,7 +2298,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
       else if (type & N_EXT || type == (unsigned char) N_TEXT
 	       || type == (unsigned char) N_NBTEXT)
 	{
-	  /* Global symbol: see if we came across a dbx defintion for
+	  /* Global symbol: see if we came across a dbx definition for
 	     a corresponding symbol.  If so, store the value.  Remove
 	     syms from the chain when their values are stored, but
 	     search the whole chain, as there may be several syms from
@@ -2628,7 +2628,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
          function-relative symbols.  */
       valu += function_start_offset;
 
-      /* GCC 2.95.3 emits the first N_SLINE stab somwehere in the
+      /* GCC 2.95.3 emits the first N_SLINE stab somewhere in the
 	 middle of the prologue instead of right at the start of the
 	 function.  To deal with this we record the address for the
 	 first N_SLINE stab to be the start of the function instead of

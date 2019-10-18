@@ -45,7 +45,7 @@ struct tailcall_cache
      tailcall_cache.  */
   int refc;
 
-  /* Associated found virtual taill call frames chain, it is never NULL.  */
+  /* Associated found virtual tail call frames chain, it is never NULL.  */
   struct call_site_chain *chain;
 
   /* Cached pretended_chain_levels result.  */

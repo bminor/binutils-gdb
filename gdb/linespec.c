@@ -3331,7 +3331,7 @@ decode_line_with_last_displayed (const char *string, int flags)
 
 
 
-/* First, some functions to initialize stuff at the beggining of the
+/* First, some functions to initialize stuff at the beginning of the
    function.  */
 
 static void

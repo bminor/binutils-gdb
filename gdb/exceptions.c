@@ -76,7 +76,7 @@ print_flush (void)
 static void
 print_exception (struct ui_file *file, const struct gdb_exception &e)
 {
-  /* KLUGE: cagney/2005-01-13: Write the string out one line at a time
+  /* KLUDGE: cagney/2005-01-13: Write the string out one line at a time
      as that way the MI's behavior is preserved.  */
   const char *start;
   const char *end;

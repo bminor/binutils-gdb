@@ -3737,7 +3737,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	}
 
-      /* Push stack padding for dowubleword alignment.  */
+      /* Push stack padding for doubleword alignment.  */
       if (nstack & (align - 1))
 	{
 	  si = push_stack_item (si, val, ARM_INT_REGISTER_SIZE);
@@ -4828,7 +4828,7 @@ cleanup_branch (struct gdbarch *gdbarch, struct regcache *regs,
   if (dsc->u.branch.link)
     {
       /* The value of LR should be the next insn of current one.  In order
-       not to confuse logic hanlding later insn `bx lr', if current insn mode
+       not to confuse logic handling later insn `bx lr', if current insn mode
        is Thumb, the bit 0 of LR value should be set to 1.  */
       ULONGEST next_insn_addr = dsc->insn_addr + dsc->insn_size;
 
@@ -5519,7 +5519,7 @@ install_load_store (struct gdbarch *gdbarch, struct regcache *regs,
 
      Before this sequence of instructions:
      r0 is the PC value got from displaced_read_reg, so r0 = from + 8;
-     r2 is the Rn value got from dispalced_read_reg.
+     r2 is the Rn value got from displaced_read_reg.
 
      Insn1: push {pc} Write address of STR instruction + offset on stack
      Insn2: pop  {r4} Read it back from stack, r4 = addr(Insn1) + offset
@@ -6196,7 +6196,7 @@ cleanup_svc (struct gdbarch *gdbarch, struct regcache *regs,
 }
 
 
-/* Common copy routine for svc instruciton.  */
+/* Common copy routine for svc instruction.  */
 
 static int
 install_svc (struct gdbarch *gdbarch, struct regcache *regs,
@@ -9445,7 +9445,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Add standard register aliases.  We add aliases even for those
-     nanes which are used by the current architecture - it's simpler,
+     names which are used by the current architecture - it's simpler,
      and does no harm, since nothing ever lists user registers.  */
   for (i = 0; i < ARRAY_SIZE (arm_register_aliases); i++)
     user_reg_add (gdbarch, arm_register_aliases[i].name,
@@ -10687,7 +10687,7 @@ arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
     {
       reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
       /* LDR insn has a capability to do branching, if
-         MOV LR, PC is precedded by LDR insn having Rn as R15
+         MOV LR, PC is preceded by LDR insn having Rn as R15
          in that case, it emulates branch and link insn, and hence we
          need to save CSPR and PC as well.  */
       if (15 != reg_dest)
@@ -13006,7 +13006,7 @@ class instruction_reader : public abstract_memory_reader
 } // namespace
 
 /* Extracts arm/thumb/thumb2 insn depending on the size, and returns 0 on success 
-and positive val on fauilure.  */
+and positive val on failure.  */
 
 static int
 extract_arm_insn (abstract_memory_reader& reader,

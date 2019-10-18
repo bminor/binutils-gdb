@@ -1704,7 +1704,7 @@ bsearch_fde_cmp (const void *key, const void *element)
 }
 
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
-   inital location associated with it into *PC.  */
+   initial location associated with it into *PC.  */
 
 static struct dwarf2_fde *
 dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)

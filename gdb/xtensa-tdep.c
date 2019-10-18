@@ -931,7 +931,7 @@ typedef struct xtensa_windowed_frame_cache
 /* Each element of xtensa_call0_frame_cache.c0_rt[] describes for each
    A-register where the current content of the reg came from (in terms
    of an original reg and a constant).  Negative values of c0_rt[n].fp_reg
-   mean that the orignal content of the register was saved to the stack.
+   mean that the original content of the register was saved to the stack.
    c0_rt[n].fr.ofs is NOT the offset from the frame base because we don't 
    know where SP will end up until the entire prologue has been analyzed.  */
 
@@ -957,7 +957,7 @@ typedef struct xtensa_call0_frame_cache
   int c0_hasfp;			   /* Current frame uses frame pointer.  */
   int fp_regnum;		   /* A-register used as FP.  */
   int c0_fp;			   /* Actual value of frame pointer.  */
-  int c0_fpalign;		   /* Dinamic adjustment for the stack
+  int c0_fpalign;		   /* Dynamic adjustment for the stack
 				      pointer. It's an AND mask. Zero,
 				      if alignment was not adjusted.  */
   int c0_old_sp;		   /* In case of dynamic adjustment, it is
@@ -1349,7 +1349,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  if ((cache->wd.ws & (1 << cache->wd.wb)) == 0)
 	    {
 	      /* Register window overflow already happened.
-		 We can read caller's SP from the proper spill loction.  */
+		 We can read caller's SP from the proper spill location.  */
 	      sp = get_frame_register_unsigned
 		(this_frame, gdbarch_tdep (gdbarch)->a0_base + 1);
 	      cache->prev_sp = read_memory_integer (sp - 12, 4, byte_order);
@@ -1387,7 +1387,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 static int xtensa_session_once_reported = 1;
 
 /* Report a problem with prologue analysis while doing backtracing.
-   But, do it only once to avoid annoyng repeated messages.  */
+   But, do it only once to avoid annoying repeated messages.  */
 
 static void
 warning_once (void)
@@ -1893,7 +1893,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Set the return address of dummy frame to the dummy address.
      The return address for the current function (in A0) is
-     saved in the dummy frame, so we can savely overwrite A0 here.  */
+     saved in the dummy frame, so we can safely overwrite A0 here.  */
 
   if (gdbarch_tdep (gdbarch)->call_abi != CallAbiCall0Only)
     {
@@ -2172,7 +2172,7 @@ call0_classify_opcode (xtensa_isa isa, xtensa_opcode opc)
    be within a bundle.  Updates the destination register tracking info
    accordingly.  The pc is needed only for pc-relative load instructions
    (eg. l32r).  The SP register number is needed to identify stores to
-   the stack frame.  Returns 0, if analysis was succesfull, non-zero
+   the stack frame.  Returns 0, if analysis was successful, non-zero
    otherwise.  */
 
 static int
@@ -2388,7 +2388,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
     body_pc = prologue_sal.end;
 
   /* If we are going to analyze the prologue in general without knowing about
-     the current PC, make the best assumtion for the end of the prologue.  */
+     the current PC, make the best assumption for the end of the prologue.  */
   if (pc == 0)
     {
       find_pc_partial_function (start, 0, NULL, &end_pc);

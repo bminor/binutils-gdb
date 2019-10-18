@@ -101,7 +101,7 @@ enum
    all architectures.
 
    Note that FreeBSD 7.0 used an older version of this structure
-   (struct kinfo_ovmentry), but the NT_FREEBSD_PROCSTAT_VMMAP core
+   (struct kinfo_vmentry), but the NT_FREEBSD_PROCSTAT_VMMAP core
    dump note wasn't introduced until FreeBSD 9.2.  As a result, the
    core dump note has always used the 7.1 and later structure
    format.  */

@@ -1076,7 +1076,7 @@ remote_fileio_func_system (remote_target *remote, char *buf)
 	}
     }
   
-  /* Check if system(3) has been explicitely allowed using the
+  /* Check if system(3) has been explicitly allowed using the
      `set remote system-call-allowed 1' command.  If length is 0,
      indicating a NULL parameter to the system call, return zero to
      indicate a shell is not available.  Otherwise fail with EPERM.  */

@@ -825,7 +825,7 @@ get_base_type (struct type *type)
 
 /* Return a decoded version of the given VALUE.  This means returning
    a value whose type is obtained by applying all the GNAT-specific
-   encondings, making the resulting type a static but standard description
+   encodings, making the resulting type a static but standard description
    of the initial type.  */
 
 struct value *
@@ -1459,7 +1459,7 @@ ada_sniff_from_mangled_name (const char *mangled, char **out)
    Otherwise, do nothing.  This function also does nothing if
    INDEX_DESC_TYPE is NULL.
 
-   The GNAT encoding used to describle the array index type evolved a bit.
+   The GNAT encoding used to describe the array index type evolved a bit.
    Initially, the information would be provided through the name of each
    field of the structure type only, while the type of these fields was
    described as unspecified and irrelevant.  The debugger was then expected
@@ -8968,7 +8968,7 @@ ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
       brobecker/2010-11-19: It seems to me that the only case where it is
       useful to preserve the typedef layer is when dealing with fat pointers.
       Perhaps, we could add a check for that and preserve the typedef layer
-      only in that situation.  But this seems unecessary so far, probably
+      only in that situation.  But this seems unnecessary so far, probably
       because we call check_typedef/ada_check_typedef pretty much everywhere.
       */
   if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF
@@ -9320,7 +9320,7 @@ ada_get_base_type (struct type *raw_type)
   if (TYPE_CODE (TYPE_FIELD_TYPE (real_type_namer, 0)) != TYPE_CODE_REF)
     {
       /* This is an older encoding form where the base type needs to be
-	 looked up by name.  We prefer the newer enconding because it is
+	 looked up by name.  We prefer the newer encoding because it is
 	 more efficient.  */
       raw_real_type = ada_find_any_type (TYPE_FIELD_NAME (real_type_namer, 0));
       if (raw_real_type == NULL)
@@ -12046,7 +12046,7 @@ is_known_support_routine (struct frame_info *frame)
   if (access (fullname, R_OK) != 0)
     return 1;
 
-  /* Check the unit filename againt the Ada runtime file naming.
+  /* Check the unit filename against the Ada runtime file naming.
      We also check the name of the objfile against the name of some
      known system libraries that sometimes come with debugging info
      too.  */
@@ -12899,7 +12899,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
      exception constraint_error" is rewritten into "catch exception
      standard.constraint_error".
 
-     If an exception named contraint_error is defined in another package of
+     If an exception named constraint_error is defined in another package of
      the inferior program, then the only way to specify this exception as a
      breakpoint condition is to use its fully-qualified named:
      e.g. my_package.constraint_error.  */

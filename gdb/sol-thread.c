@@ -391,7 +391,7 @@ sol_thread_target::detach (inferior *inf, int from_tty)
   beneath->detach (inf, from_tty);
 }
 
-/* Resume execution of process PTID.  If STEP is nozero, then just
+/* Resume execution of process PTID.  If STEP is nonzero, then just
    single step it.  If SIGNAL is nonzero, restart it with that signal
    activated.  We may have to convert PTID from a thread ID to an LWP
    ID for procfs.  */

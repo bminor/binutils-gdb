@@ -746,7 +746,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
        if special addresses are different, the frames are different.  */
     eq = 0;
   else if (l.artificial_depth != r.artificial_depth)
-    /* If artifical depths are different, the frames must be different.  */
+    /* If artificial depths are different, the frames must be different.  */
     eq = 0;
   else
     /* Frames are equal.  */

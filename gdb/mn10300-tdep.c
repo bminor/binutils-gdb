@@ -117,7 +117,7 @@ mn10300_type_align (struct type *type)
 
     case TYPE_CODE_ARRAY:
       /* HACK!  Structures containing arrays, even small ones, are not
-	 elligible for returning in registers.  */
+	 eligible for returning in registers.  */
       return 256;
 
     case TYPE_CODE_TYPEDEF:

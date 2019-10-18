@@ -66,7 +66,7 @@ static struct cmd_list_element *dcache_show_list = NULL;
    is set, etc., then the chunk is skipped.  Those chunks are handled
    in target_xfer_memory() (or target_xfer_memory_partial()).
 
-   This doesn't occur very often.  The most common occurance is when
+   This doesn't occur very often.  The most common occurrence is when
    the last bit of the .text segment and the first bit of the .data
    segment fall within the same dcache page with a ro/cacheable memory
    region defined for the .text segment and a rw/non-cacheable memory

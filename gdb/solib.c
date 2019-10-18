@@ -144,7 +144,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
    *   If IS_SOLIB is non-zero:
    *     Look in inferior's $LD_LIBRARY_PATH.
    *
-   * The last check avoids doing this search when targetting remote
+   * The last check avoids doing this search when targeting remote
    * machines since a sysroot will almost always be set.
 */
 

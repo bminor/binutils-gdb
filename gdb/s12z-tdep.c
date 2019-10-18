@@ -170,7 +170,7 @@ struct mem_read_abstraction
 {
   struct mem_read_abstraction_base base; /* The parent struct.  */
   bfd_vma memaddr;                  /* Where to read from.  */
-  struct disassemble_info* info;  /* The disassember  to use for reading.  */
+  struct disassemble_info* info;  /* The disassembler  to use for reading.  */
 };
 
 /* Advance the reader by one byte.  */
@@ -676,7 +676,7 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, s12z_register_type);
 
   frame_unwind_append_unwinder (gdbarch, &s12z_frame_unwind);
-  /* Currently, the only known producer for this archtecture, produces buggy
+  /* Currently, the only known producer for this architecture, produces buggy
      dwarf CFI.   So don't append a dwarf unwinder until the situation is
      better understood.  */
 

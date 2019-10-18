@@ -26,7 +26,7 @@
    into the scope DEST.  ALIAS is the name of the imported namespace
    in the current scope.  If ALIAS is NULL then the namespace is known
    by its original name.  DECLARATION is the name if the imported
-   varable if this is a declaration import (Eg. using A::x), otherwise
+   variable if this is a declaration import (Eg. using A::x), otherwise
    it is NULL.  EXCLUDES is a list of names not to import from an
    imported module or NULL.  If COPY_NAMES is non-zero, then the
    arguments are copied into newly allocated memory so they can be

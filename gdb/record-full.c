@@ -1359,7 +1359,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  if (first_record_full_end
 		      && execution_direction == EXEC_REVERSE)
 		    {
-		      /* When reverse excute, the first
+		      /* When reverse execute, the first
 			 record_full_end is the part of current
 			 instruction.  */
 		      first_record_full_end = 0;

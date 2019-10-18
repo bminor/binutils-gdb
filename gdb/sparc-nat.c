@@ -149,7 +149,7 @@ sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
      belong to the selected thread (the LWP could be in the middle of
      executing the thread switch code).
 
-     These functions should instead be paramaterized with an explicit
+     These functions should instead be parameterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
   pid = get_ptrace_pid (regcache->ptid ());

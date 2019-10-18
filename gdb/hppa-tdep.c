@@ -367,7 +367,7 @@ read_unwind_info (struct objfile *objfile)
 
   /* For reasons unknown the HP PA64 tools generate multiple unwinder
      sections in a single executable.  So we just iterate over every
-     section in the BFD looking for unwinder sections intead of trying
+     section in the BFD looking for unwinder sections instead of trying
      to do a lookup with bfd_get_section_by_name.
 
      First determine the total size of the unwind tables so that we
@@ -1182,7 +1182,7 @@ hppa64_return_value (struct gdbarch *gdbarch, struct value *function,
 
   if (len > 16)
     {
-      /* All return values larget than 128 bits must be aggregate
+      /* All return values larger than 128 bits must be aggregate
          return values.  */
       gdb_assert (!hppa64_integral_or_pointer_p (type));
       gdb_assert (!hppa64_floating_p (type));
@@ -1431,7 +1431,7 @@ is_branch (unsigned long inst)
     - stw: 0x1a, store a word from a general register.
 
     - stwm: 0x1b, store a word from a general register and perform base
-      register modification (2.0 will still treate it as stw).
+      register modification (2.0 will still treat it as stw).
 
     - std: 0x1c, store a doubleword from a general register (2.0 only).
 
@@ -1592,7 +1592,7 @@ restart:
      For unoptimized GCC code and for any HP CC code this will never ever
      examine any user instructions.
 
-     For optimzied GCC code we're faced with problems.  GCC will schedule
+     For optimized GCC code we're faced with problems.  GCC will schedule
      its prologue and make prologue instructions available for delay slot
      filling.  The end result is user code gets mixed in with the prologue
      and a prologue instruction may be in the delay slot of the first branch
@@ -1759,7 +1759,7 @@ restart:
 	final_iteration = 1;
     }
 
-  /* We've got a tenative location for the end of the prologue.  However
+  /* We've got a tentative location for the end of the prologue.  However
      because of limitations in the unwind descriptor mechanism we may
      have went too far into user code looking for the save of a register
      that does not exist.  So, if there registers we expected to be saved
@@ -2869,7 +2869,7 @@ hppa_match_insns (struct gdbarch *gdbarch, CORE_ADDR pc,
   return 1;
 }
 
-/* This relaxed version of the insstruction matcher allows us to match
+/* This relaxed version of the instruction matcher allows us to match
    from somewhere inside the pattern, by looking backwards in the
    instruction scheme.  */
 

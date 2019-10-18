@@ -219,7 +219,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   struct compunit_symtab *compunit_symtab = NULL;
   CORE_ADDR mapped_pc;
 
-  /* To ensure that the symbol returned belongs to the correct setion
+  /* To ensure that the symbol returned belongs to the correct section
      (and that the last [random] symbol from the previous section
      isn't returned) try to find the section containing PC.  First try
      the overlay code (which by default returns NULL); and second try

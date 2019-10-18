@@ -284,7 +284,7 @@ me_module_register_set (CONFIG_ATTR me_module,
 
 /* Given a hardware table entry HW representing a register set, return
    a pointer to the keyword table with all the register names.  If HW
-   is NULL, return NULL, to propage the "no such register set" info
+   is NULL, return NULL, to propagate the "no such register set" info
    along.  */
 static CGEN_KEYWORD *
 register_set_keyword_table (const CGEN_HW_ENTRY *hw)

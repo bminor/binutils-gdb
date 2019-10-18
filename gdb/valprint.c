@@ -1329,7 +1329,7 @@ val_print_scalar_formatted (struct type *type,
    (leading 0 or 0x). 
    
    Hilfinger/2004-09-09: USE_C_FORMAT was originally called USE_LOCAL
-   and was intended to request formating according to the current
+   and was intended to request formatting according to the current
    language and would be used for most integers that GDB prints.  The
    exceptional cases were things like protocols where the format of
    the integer is a protocol thing, not a user-visible thing).  The
@@ -2664,7 +2664,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 		       obstack, 0, &need_escape);
 	  obstack_grow_wstr (obstack, LCST (">"));
 
-	  /* We do not attempt to outupt anything after this.  */
+	  /* We do not attempt to output anything after this.  */
 	  state = FINISH;
 	  break;
 
@@ -3120,7 +3120,7 @@ using uinteger_option_def
 using zuinteger_unlimited_option_def
   = gdb::option::zuinteger_unlimited_option_def<value_print_options>;
 
-/* Definions of options for the "print" and "compile print"
+/* Definitions of options for the "print" and "compile print"
    commands.  */
 static const gdb::option::option_def value_print_option_defs[] = {
 

@@ -1505,7 +1505,7 @@ struct i386_insn i386_frame_setup_skip_insns[] =
   /* Check for `mov imm32, r32'.  Note that there is an alternative
      encoding for `mov m32, %eax'.
 
-     ??? Should we handle SIB adressing here?
+     ??? Should we handle SIB addressing here?
      ??? Should we handle 16-bit operand-sizes here?  */
 
   /* `movl m32, %eax' */

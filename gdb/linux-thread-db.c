@@ -116,7 +116,7 @@ static char *libthread_db_search_path;
 static bool auto_load_thread_db = true;
 
 /* Set to true if load-time libthread_db tests have been enabled
-   by the "maintenence set check-libthread-db" command.  */
+   by the "maintenance set check-libthread-db" command.  */
 static bool check_thread_db_on_load = false;
 
 /* "show" command for the auto_load_thread_db configuration variable.  */

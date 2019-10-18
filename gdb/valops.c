@@ -907,7 +907,7 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
 /* Return a value with type TYPE located at ADDR.
 
    Call value_at only if the data needs to be fetched immediately;
-   if we can be 'lazy' and defer the fetch, perhaps indefinately, call
+   if we can be 'lazy' and defer the fetch, perhaps indefinitely, call
    value_at_lazy instead.  value_at_lazy simply records the address of
    the data and sets the lazy-evaluation-required flag.  The lazy flag
    is tested in the value_contents macro, which is used if and when
@@ -3850,7 +3850,7 @@ value_slice (struct value *array, int lowbound, int length)
 /* Create a value for a FORTRAN complex number.  Currently most of the
    time values are coerced to COMPLEX*16 (i.e. a complex number
    composed of 2 doubles.  This really should be a smarter routine
-   that figures out precision inteligently as opposed to assuming
+   that figures out precision intelligently as opposed to assuming
    doubles.  FIXME: fmb  */
 
 struct value *

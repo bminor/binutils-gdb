@@ -1,4 +1,4 @@
-/* Target dependent code for ARC arhitecture, for GDB.
+/* Target dependent code for ARC architecture, for GDB.
 
    Copyright 2005-2019 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.

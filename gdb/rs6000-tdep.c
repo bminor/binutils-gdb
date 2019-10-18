@@ -1234,7 +1234,7 @@ store_insn_p (unsigned long op, unsigned long rs,
    this masking operation is equal to BL_INSTRUCTION, then the opcode in
    question is a ``bl'' instruction.
    
-   BL_DISPLACMENT_MASK is anded with the opcode in order to extract
+   BL_DISPLACEMENT_MASK is anded with the opcode in order to extract
    the branch displacement.  */
 
 #define BL_MASK 0xfc000001

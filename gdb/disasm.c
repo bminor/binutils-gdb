@@ -764,12 +764,12 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
   m_di.memory_error_func = dis_asm_memory_error;
   m_di.print_address_func = dis_asm_print_address;
   /* NOTE: cagney/2003-04-28: The original code, from the old Insight
-     disassembler had a local optomization here.  By default it would
+     disassembler had a local optimization here.  By default it would
      access the executable file, instead of the target memory (there
      was a growing list of exceptions though).  Unfortunately, the
      heuristic was flawed.  Commands like "disassemble &variable"
      didn't work as they relied on the access going to the target.
-     Further, it has been supperseeded by trust-read-only-sections
+     Further, it has been superseeded by trust-read-only-sections
      (although that should be superseeded by target_trust..._p()).  */
   m_di.read_memory_func = read_memory_func;
   m_di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;

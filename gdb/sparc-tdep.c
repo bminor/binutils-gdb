@@ -1687,7 +1687,7 @@ sparc_analyze_control_transfer (struct regcache *regcache,
       if (fused_p)
 	{
 	  /* Fused compare-and-branch instructions are non-delayed,
-	     and do not have an annuling capability.  So we need to
+	     and do not have an annulling capability.  So we need to
 	     always set a breakpoint on both the NPC and the branch
 	     target address.  */
 	  gdb_assert (offset != 0);

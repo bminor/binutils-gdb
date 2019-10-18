@@ -1375,7 +1375,7 @@ struct field_info
     /* Number of fields (including baseclasses).  */
     int nfields = 0;
 
-    /* Set if the accesibility of one of the fields is not public.  */
+    /* Set if the accessibility of one of the fields is not public.  */
     int non_public_fields = 0;
 
     /* Member function fieldlist array, contains name of possibly overloaded
@@ -16751,7 +16751,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
 /* Create appropriate locally-scoped variables for all the
    DW_TAG_common_block entries.  Also create a struct common_block
    listing all such variables for `info common'.  COMMON_BLOCK_DOMAIN
-   is used to sepate the common blocks name namespace from regular
+   is used to separate the common blocks name namespace from regular
    variable names.  */
 
 static void
@@ -17309,7 +17309,7 @@ prototyped_function_p (struct die_info *die, struct dwarf2_cu *cu)
     return 1;
 
   /* The DWARF standard implies that the DW_AT_prototyped attribute
-     is only meaninful for C, but the concept also extends to other
+     is only meaningful for C, but the concept also extends to other
      languages that allow unprototyped functions (Eg: Objective C).
      For all other languages, assume that functions are always
      prototyped.  */
@@ -18039,7 +18039,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_NAME (type) = dwarf2_name (die, cu);
 
   /* In Ada, an unspecified type is typically used when the description
-     of the type is defered to a different unit.  When encountering
+     of the type is deferred to a different unit.  When encountering
      such a type, we treat it as a stub, and try to resolve it later on,
      when needed.  */
   if (cu->language == language_ada)
@@ -20199,7 +20199,7 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
 }
 
 /* Return the dwo name or NULL if not present. If present, it is in either
-   DW_AT_GNU_dwo_name or DW_AT_dwo_name atrribute.  */
+   DW_AT_GNU_dwo_name or DW_AT_dwo_name attribute.  */
 static const char *
 dwarf2_dwo_name (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -25622,7 +25622,7 @@ per_cu_offset_and_type_eq (const void *item_lhs, const void *item_rhs)
    table if necessary.  For convenience, return TYPE.
 
    The DIEs reading must have careful ordering to:
-    * Not cause infite loops trying to read in DIEs as a prerequisite for
+    * Not cause infinite loops trying to read in DIEs as a prerequisite for
       reading current DIE.
     * Not trying to dereference contents of still incompletely read in types
       while reading in other DIEs.

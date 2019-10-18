@@ -2079,7 +2079,7 @@ set_environment_command (const char *arg, int from_tty)
   if (arg == 0)
     error_no_arg (_("environment variable and value"));
 
-  /* Find seperation between variable name and value.  */
+  /* Find separation between variable name and value.  */
   p = (char *) strchr (arg, '=');
   val = (char *) strchr (arg, ' ');
 
@@ -3026,7 +3026,7 @@ info_proc_cmd_1 (const char *args, enum info_proc_what what, int from_tty)
     }
 }
 
-/* Implement `info proc' when given without any futher parameters.  */
+/* Implement `info proc' when given without any further parameters.  */
 
 static void
 info_proc_cmd (const char *args, int from_tty)

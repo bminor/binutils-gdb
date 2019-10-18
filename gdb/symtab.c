@@ -4026,7 +4026,7 @@ operator_chars (const char *p, const char **end)
 	  }
 	else
 	  {
-	    /* Gratuitous qoute: skip it and move on.  */
+	    /* Gratuitous quote: skip it and move on.  */
 	    p++;
 	    continue;
 	  }

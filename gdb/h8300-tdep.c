@@ -1343,7 +1343,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &h8300_frame_base);
 
   /* 
-   * Miscelany
+   * Miscellany
    */
   /* Stack grows up.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

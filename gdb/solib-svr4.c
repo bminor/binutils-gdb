@@ -2515,7 +2515,7 @@ read_program_headers_from_bfd (bfd *abfd)
      ...  Though the system chooses virtual addresses for
      individual processes, it maintains the segments' relative
      positions.  Because position-independent code uses relative
-     addressesing between segments, the difference between
+     addressing between segments, the difference between
      virtual addresses in memory must match the difference
      between virtual addresses in the file.  The difference
      between the virtual address of any segment in memory and
@@ -3139,7 +3139,7 @@ svr4_have_link_map_offsets (void)
 
 /* Most OS'es that have SVR4-style ELF dynamic libraries define a
    `struct r_debug' and a `struct link_map' that are binary compatible
-   with the origional SVR4 implementation.  */
+   with the original SVR4 implementation.  */
 
 /* Fetch (and possibly build) an appropriate `struct link_map_offsets'
    for an ILP32 SVR4 system.  */

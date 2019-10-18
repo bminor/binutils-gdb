@@ -297,7 +297,7 @@ print_stack_frame (struct frame_info *frame, int print_level,
 		   int set_current_sal)
 {
 
-  /* For mi, alway print location and address.  */
+  /* For mi, always print location and address.  */
   if (current_uiout->is_mi_like_p ())
     print_what = LOC_AND_ADDRESS;
 
@@ -349,7 +349,7 @@ print_frame_nameless_args (struct frame_info *frame, long start, int num,
    read in.
 
    Errors are printed as if they would be the parameter value.  Use zeroed ARG
-   iff it should not be printed accoring to user settings.  */
+   iff it should not be printed according to user settings.  */
 
 static void
 print_frame_arg (const frame_print_options &fp_opts,
