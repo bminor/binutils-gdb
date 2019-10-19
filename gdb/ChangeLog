@@ -1,3 +1,8 @@
+2019-10-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbsupport/common-utils.h (startswith): Change return type to
+	bool.
+
 2019-10-19  Christian Biesinger  <cbiesinger@google.com>
 
 	* bcache.c (bcache::print_statistics): Use std::sort instead of qsort.

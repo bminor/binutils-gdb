@@ -110,10 +110,9 @@ std::string extract_string_maybe_quoted (const char **arg);
 
 extern char *safe_strerror (int);
 
-/* Return non-zero if the start of STRING matches PATTERN, zero
-   otherwise.  */
+/* Return true if the start of STRING matches PATTERN, false otherwise.  */
 
-static inline int
+static inline bool
 startswith (const char *string, const char *pattern)
 {
   return strncmp (string, pattern, strlen (pattern)) == 0;
