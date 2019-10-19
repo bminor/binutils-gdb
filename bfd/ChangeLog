@@ -1,3 +1,18 @@
+2019-10-19  John David Anglin  <danglin@gcc.gnu.org>
+
+	* elf32-hppa.c: Revise import stub sequences.
+	(LONG_BRANCH_STUB_SIZE): Define.
+	(LONG_BRANCH_SHARED_STUB_SIZE): Define.
+	(IMPORT_STUB_SIZE): Define.
+	(IMPORT_SHARED_STUB_SIZE): Define.
+	(EXPORT_STUB_SIZE): Define.
+	(plt_stub): Revise to not use register %r22.
+	(LDO_R1_R22): Define.
+	(LDW_R22_R21): Define.
+	(LDW_R22_R19): Define.
+	(hppa_build_one_stub): Update stub generation and use new defines.
+	(hppa_size_one_stub): Likewise.
+
 2019-10-17  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_relocate_section): Report the error message

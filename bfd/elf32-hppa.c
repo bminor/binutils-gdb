@@ -71,34 +71,38 @@
 
    Import stub to call shared library routine from normal object file
    (single sub-space version)
-   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw RR'lt_ptr+ltoff(%r1),%r21
+   :		addil LR'lt_ptr+ltoff,%dp	; get PLT address
+   :		ldo RR'lt_ptr+ltoff(%r1),%r22   ; 
+   :		ldw 0(%r22),%r21		; get procedure entry point
    :		bv %r0(%r21)
-   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
+   :		ldw 4(%r22),%r19		; get new dlt value.
 
    Import stub to call shared library routine from shared library
    (single sub-space version)
-   :		addil LR'ltoff,%r19		; get procedure entry point
-   :		ldw RR'ltoff(%r1),%r21
+   :		addil LR'ltoff,%r19		; get PLT address
+   :		ldo RR'ltoff(%r1),%r22
+   :		ldw 0(%r22),%r21		; get procedure entry point
    :		bv %r0(%r21)
-   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
+   :		ldw 4(%r22),%r19		; get new dlt value.
 
    Import stub to call shared library routine from normal object file
    (multiple sub-space support)
-   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw RR'lt_ptr+ltoff(%r1),%r21
-   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
-   :		ldsid (%r21),%r1
+   :		addil LR'lt_ptr+ltoff,%dp	; get PLT address
+   :		ldo RR'lt_ptr+ltoff(%r1),%r22   ; 
+   :		ldw 0(%r22),%r21		; get procedure entry point
+   :		ldsid (%r21),%r1		; get target sid
+   :		ldw 4(%r22),%r19		; get new dlt value.
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
    :		stw %rp,-24(%sp)		; save rp
 
    Import stub to call shared library routine from shared library
    (multiple sub-space support)
-   :		addil LR'ltoff,%r19		; get procedure entry point
-   :		ldw RR'ltoff(%r1),%r21
-   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
-   :		ldsid (%r21),%r1
+   :		addil LR'ltoff,%r19		; get PLT address
+   :		ldo RR'ltoff(%r1),%r22
+   :		ldw 0(%r22),%r21		; get procedure entry point
+   :		ldsid (%r21),%r1		; get target sid
+   :		ldw 4(%r22),%r19		; get new dlt value.
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
    :		stw %rp,-24(%sp)		; save rp
@@ -136,12 +140,17 @@
 
 #define PLT_ENTRY_SIZE 8
 #define GOT_ENTRY_SIZE 4
+#define LONG_BRANCH_STUB_SIZE 8
+#define LONG_BRANCH_SHARED_STUB_SIZE 12
+#define IMPORT_STUB_SIZE 20
+#define IMPORT_SHARED_STUB_SIZE 32
+#define EXPORT_STUB_SIZE 24
 #define ELF_DYNAMIC_INTERPRETER "/lib/ld.so.1"
 
 static const bfd_byte plt_stub[] =
 {
-  0x0e, 0x80, 0x10, 0x96,  /* 1: ldw	0(%r20),%r22		*/
-  0xea, 0xc0, 0xc0, 0x00,  /*    bv	%r0(%r22)		*/
+  0x0e, 0x80, 0x10, 0x95,  /* 1: ldw	0(%r20),%r21		*/
+  0xea, 0xa0, 0xc0, 0x00,  /*    bv	%r0(%r21)		*/
   0x0e, 0x88, 0x10, 0x95,  /*    ldw	4(%r20),%r21		*/
 #define PLT_STUB_ENTRY (3*4)
   0xea, 0x9f, 0x1f, 0xdd,  /*    b,l	1b,%r20			*/
@@ -662,6 +671,10 @@ hppa_type_of_stub (asection *input_sec,
 #define ADDIL_R19	0x2a600000	/* addil LR'XXX,%r19,%r1	*/
 #define LDW_R1_DP	0x483b0000	/* ldw   RR'XXX(%sr0,%r1),%dp	*/
 
+#define LDO_R1_R22	0x34360000	/* ldo   RR'XXX(%r1),%r22	*/
+#define LDW_R22_R21	0x0ec01095	/* ldw   0(%r22),%r21		*/
+#define LDW_R22_R19	0x0ec81093	/* ldw   4(%r22),%r19		*/
+
 #define LDSID_R21_R1	0x02a010a1	/* ldsid (%sr0,%r21),%r1	*/
 #define MTSP_R1		0x00011820	/* mtsp  %r1,%sr0		*/
 #define BE_SR0_R21	0xe2a00000	/* be    0(%sr0,%r21)		*/
@@ -734,7 +747,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       insn = hppa_rebuild_insn ((int) BE_SR4_R1, val, 17);
       bfd_put_32 (stub_bfd, insn, loc + 4);
 
-      size = 8;
+      size = LONG_BRANCH_STUB_SIZE;
       break;
 
     case hppa_stub_long_branch_shared:
@@ -756,7 +769,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_rrsel) >> 2;
       insn = hppa_rebuild_insn ((int) BE_SR4_R1, val, 17);
       bfd_put_32 (stub_bfd, insn, loc + 8);
-      size = 12;
+      size = LONG_BRANCH_SHARED_STUB_SIZE;
       break;
 
     case hppa_stub_import:
@@ -776,40 +789,35 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       if (hsh->stub_type == hppa_stub_import_shared)
 	insn = ADDIL_R19;
 #endif
+
+      /* Load function descriptor address into register %r22.  It is
+	 sometimes needed for lazy binding.  */
       val = hppa_field_adjust (sym_value, 0, e_lrsel),
       insn = hppa_rebuild_insn ((int) insn, val, 21);
       bfd_put_32 (stub_bfd, insn, loc);
 
-      /* It is critical to use lrsel/rrsel here because we are using
-	 two different offsets (+0 and +4) from sym_value.  If we use
-	 lsel/rsel then with unfortunate sym_values we will round
-	 sym_value+4 up to the next 2k block leading to a mis-match
-	 between the lsel and rsel value.  */
       val = hppa_field_adjust (sym_value, 0, e_rrsel);
-      insn = hppa_rebuild_insn ((int) LDW_R1_R21, val, 14);
+      insn = hppa_rebuild_insn ((int) LDO_R1_R22, val, 14);
       bfd_put_32 (stub_bfd, insn, loc + 4);
+
+      bfd_put_32 (stub_bfd, (bfd_vma) LDW_R22_R21, loc + 8);
 
       if (htab->multi_subspace)
 	{
-	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rrsel);
-	  insn = hppa_rebuild_insn ((int) LDW_R1_DLT, val, 14);
-	  bfd_put_32 (stub_bfd, insn, loc + 8);
-
 	  bfd_put_32 (stub_bfd, (bfd_vma) LDSID_R21_R1, loc + 12);
-	  bfd_put_32 (stub_bfd, (bfd_vma) MTSP_R1,      loc + 16);
-	  bfd_put_32 (stub_bfd, (bfd_vma) BE_SR0_R21,   loc + 20);
-	  bfd_put_32 (stub_bfd, (bfd_vma) STW_RP,       loc + 24);
+	  bfd_put_32 (stub_bfd, (bfd_vma) LDW_R22_R19,  loc + 16);
+	  bfd_put_32 (stub_bfd, (bfd_vma) MTSP_R1,      loc + 20);
+	  bfd_put_32 (stub_bfd, (bfd_vma) BE_SR0_R21,   loc + 24);
+	  bfd_put_32 (stub_bfd, (bfd_vma) STW_RP,       loc + 28);
 
-	  size = 28;
+	  size = IMPORT_SHARED_STUB_SIZE;
 	}
       else
 	{
-	  bfd_put_32 (stub_bfd, (bfd_vma) BV_R0_R21, loc + 8);
-	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rrsel);
-	  insn = hppa_rebuild_insn ((int) LDW_R1_DLT, val, 14);
-	  bfd_put_32 (stub_bfd, insn, loc + 12);
+	  bfd_put_32 (stub_bfd, (bfd_vma) BV_R0_R21, loc + 12);
+	  bfd_put_32 (stub_bfd, (bfd_vma) LDW_R22_R19, loc + 16);
 
-	  size = 16;
+	  size = IMPORT_STUB_SIZE;
 	}
 
       break;
@@ -858,7 +866,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       hsh->hh->eh.root.u.def.section = stub_sec;
       hsh->hh->eh.root.u.def.value = stub_sec->size;
 
-      size = 24;
+      size = EXPORT_STUB_SIZE;
       break;
 
     default:
@@ -906,17 +914,17 @@ hppa_size_one_stub (struct bfd_hash_entry *bh, void *in_arg)
   htab = in_arg;
 
   if (hsh->stub_type == hppa_stub_long_branch)
-    size = 8;
+    size = LONG_BRANCH_STUB_SIZE;
   else if (hsh->stub_type == hppa_stub_long_branch_shared)
-    size = 12;
+    size = LONG_BRANCH_SHARED_STUB_SIZE;
   else if (hsh->stub_type == hppa_stub_export)
-    size = 24;
+    size = EXPORT_STUB_SIZE;
   else /* hppa_stub_import or hppa_stub_import_shared.  */
     {
       if (htab->multi_subspace)
-	size = 28;
+	size = IMPORT_SHARED_STUB_SIZE;
       else
-	size = 16;
+	size = IMPORT_STUB_SIZE;
     }
 
   hsh->stub_sec->size += size;
