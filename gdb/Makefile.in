@@ -812,6 +812,7 @@ LOADLIBES = @LOADLIBES@
 MH_CFLAGS = @MH_CFLAGS@
 XM_CLIBS = @XM_CLIBS@
 NAT_GENERATED_FILES = @NAT_GENERATED_FILES@
+NM_H = @NM_H@
 HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
 
 # Native-target dependent makefile fragment comes in here.
@@ -1617,9 +1618,9 @@ DISTSTUFF = $(YYFILES)
 generated_files = \
 	ada-lex.c \
 	config.h \
-	gcore \
 	jit-reader.h \
-	$(NAT_GENERATED_FILES)
+	$(NAT_GENERATED_FILES) \
+	$(NM_H)
 
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
@@ -2020,6 +2021,10 @@ gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
 config.h: stamp-h ; @true
 stamp-h: $(srcdir)/config.in config.status
 	$(SHELL) config.status config.h
+
+nm.h: stamp-nmh ; @true
+stamp-nmh: config.status
+	$(SHELL) config.status nm.h
 
 config.status: $(srcdir)/configure configure.nat configure.tgt configure.host ../bfd/development.sh
 	$(SHELL) config.status --recheck

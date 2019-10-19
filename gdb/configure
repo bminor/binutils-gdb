@@ -626,6 +626,7 @@ LIBOBJS
 GCORE_TRANSFORM_NAME
 GDB_TRANSFORM_NAME
 XSLTPROC
+NM_H
 GDB_NM_FILE
 LTLIBBABELTRACE
 LIBBABELTRACE
@@ -17556,26 +17557,23 @@ $as_echo "$as_me: WARNING: babeltrace is missing or unusable; GDB is unable to r
   fi
 fi
 
-# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
-# empty version.
-
-files=
-links=
-
+NM_H=
 rm -f nm.h
 if test "${nativefile}" != ""; then
     case "${nativefile}" in
       nm-*.h ) GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}" ;;
       * ) GDB_NM_FILE="${nativefile}"
     esac
-    files="${files} ${GDB_NM_FILE}"
-    links="${links} nm.h"
+    ac_config_links="$ac_config_links nm.h:$GDB_NM_FILE"
+
 
 cat >>confdefs.h <<_ACEOF
 #define GDB_NM_FILE "${GDB_NM_FILE}"
 _ACEOF
 
+    NM_H=nm.h
 fi
+
 
 
 for ac_prog in xsltproc
@@ -17629,16 +17627,6 @@ if test "x$USE_MAINTAINER_MODE" = xyes; then
     as_fn_error $? "unable to find xsltproc.  maintainer-mode requires xsltproc." "$LINENO" 5
   fi
 fi
-
-
-ac_sources="$files"
-ac_dests="$links"
-while test -n "$ac_sources"; do
-  set $ac_dests; ac_dest=$1; shift; ac_dests=$*
-  set $ac_sources; ac_source=$1; shift; ac_sources=$*
-  ac_config_links_1="$ac_config_links_1 $ac_dest:$ac_source"
-done
-ac_config_links="$ac_config_links $ac_config_links_1"
 
 
 
@@ -18406,6 +18394,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # INIT-COMMANDS
 #
 ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+GDB_NM_FILE=$GDB_NM_FILE
 
 _ACEOF
 
@@ -18418,7 +18407,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
-    "$ac_config_links_1") CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
+    "nm.h") CONFIG_LINKS="$CONFIG_LINKS nm.h:$GDB_NM_FILE" ;;
     "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
@@ -19053,6 +19042,7 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
   case $ac_file$ac_mode in
     "config.h":H) echo > stamp-h ;;
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
+    "nm.h":L) echo > stamp-nmh ;;
     "gcore":F) chmod +x gcore ;;
 
   esac

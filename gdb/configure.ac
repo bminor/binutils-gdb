@@ -2217,23 +2217,20 @@ else
   fi
 fi
 
-# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
-# empty version.
-
-files=
-links=
-
+NM_H=
 rm -f nm.h
 if test "${nativefile}" != ""; then
     case "${nativefile}" in
       nm-*.h ) GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}" ;;
       * ) GDB_NM_FILE="${nativefile}"
     esac
-    files="${files} ${GDB_NM_FILE}"
-    links="${links} nm.h"
+    AC_CONFIG_LINKS([nm.h:$GDB_NM_FILE], [echo > stamp-nmh],
+                    [GDB_NM_FILE=$GDB_NM_FILE])
     AC_DEFINE_UNQUOTED(GDB_NM_FILE, "${GDB_NM_FILE}", [nativefile])
+    NM_H=nm.h
 fi
 AC_SUBST(GDB_NM_FILE)
+AC_SUBST(NM_H)
 
 dnl Add dependency for xsltproc if building with maintainer-mode enabled.
 AC_PATH_PROGS(XSLTPROC, xsltproc, missing)
@@ -2243,8 +2240,6 @@ if test "x$USE_MAINTAINER_MODE" = xyes; then
   fi
 fi
 AC_SUBST(XSLTPROC)
-
-AC_LINK_FILES($files, $links)
 
 dnl Check for exe extension set on certain hosts (e.g. Win32)
 AC_EXEEXT
