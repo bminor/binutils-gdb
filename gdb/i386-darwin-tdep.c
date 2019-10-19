@@ -104,7 +104,7 @@ darwin_dwarf_signal_frame_p (struct gdbarch *gdbarch,
   return i386_sigtramp_p (this_frame);
 }
 
-/* Check wether TYPE is a 128-bit vector (__m128, __m128d or __m128i).  */
+/* Check whether TYPE is a 128-bit vector (__m128, __m128d or __m128i).  */
 
 static int
 i386_m128_p (struct type *type)

@@ -908,7 +908,7 @@ init_entry_point_info (struct objfile *objfile)
    corresponding BFD section index, or -1 if the section was not found.
 
    ADD_FLAGS encodes verbosity level, whether this is main symbol or
-   an extra symbol file such as dynamically loaded code, and wether
+   an extra symbol file such as dynamically loaded code, and whether
    breakpoint reset should be deferred.  */
 
 static void
