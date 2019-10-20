@@ -1,5 +1,8 @@
 2019-10-20  John David Anglin  <danglin@gcc.gnu.org>
 
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Provide 8-byte
+	minimum alignment for .plt section.
+
 	* elf32-hppa.c: Revise import stub sequences.
 	(LONG_BRANCH_STUB_SIZE): Define.
 	(LONG_BRANCH_SHARED_STUB_SIZE): Define.
