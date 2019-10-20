@@ -2280,10 +2280,11 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 against the .got section.  */
 	      int gotalign = bfd_section_alignment (htab->etab.sgot);
 	      int pltalign = bfd_section_alignment (sec);
+	      int align = gotalign > 3 ? gotalign : 3;
 	      bfd_size_type mask;
 
-	      if (gotalign > pltalign)
-		bfd_set_section_alignment (sec, gotalign);
+	      if (align > pltalign)
+		bfd_set_section_alignment (sec, align);
 	      mask = ((bfd_size_type) 1 << gotalign) - 1;
 	      sec->size = (sec->size + sizeof (plt_stub) + mask) & ~mask;
 	    }
