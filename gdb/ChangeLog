@@ -1,5 +1,9 @@
 2019-10-21  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (tui_exec_info_content): Remove typedef.
+
+2019-10-21  Tom Tromey  <tom@tromey.com>
+
 	* configure.ac (nm.h): Conditionally create nm.h link.  Subst
 	NM_H.   Use AC_CONFIG_LINKS.
 	* configure: Rebuild.

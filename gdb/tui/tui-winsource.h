@@ -43,8 +43,6 @@ DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
 #define TUI_EXEC_POS        2
 #define TUI_EXECINFO_SIZE   4
 
-typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
-
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
 {
