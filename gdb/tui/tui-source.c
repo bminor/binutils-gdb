@@ -37,90 +37,6 @@
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
 
-/* A helper function for tui_set_source_content that extracts some
-   source text from PTR.  LINE_NO is the line number; FIRST_COL is the
-   first column to extract, and LINE_WIDTH is the number of characters
-   to display.  Returns a string holding the desired text.  */
-
-static std::string
-copy_source_line (const char **ptr, int line_no, int first_col,
-		  int line_width)
-{
-  const char *lineptr = *ptr;
-
-  /* Init the line with the line number.  */
-  std::string result = string_printf ("%-6d", line_no);
-  int len = result.size ();
-  len = len - ((len / tui_tab_width) * tui_tab_width);
-  result.append (len, ' ');
-
-  int column = 0;
-  char c;
-  do
-    {
-      int skip_bytes;
-
-      c = *lineptr;
-      if (c == '\033' && skip_ansi_escape (lineptr, &skip_bytes))
-	{
-	  /* We always have to preserve escapes.  */
-	  result.append (lineptr, lineptr + skip_bytes);
-	  lineptr += skip_bytes;
-	  continue;
-	}
-
-      ++lineptr;
-      ++column;
-
-      auto process_tab = [&] ()
-	{
-	  int max_tab_len = tui_tab_width;
-
-	  --column;
-	  for (int j = column % max_tab_len;
-	       j < max_tab_len && column < first_col + line_width;
-	       column++, j++)
-	    if (column >= first_col)
-	      result.push_back (' ');
-	};
-
-      /* We have to process all the text in order to pick up all the
-	 escapes.  */
-      if (column <= first_col || column > first_col + line_width)
-	{
-	  if (c == '\t')
-	    process_tab ();
-	  continue;
-	}
-
-      if (c == '\n' || c == '\r' || c == '\0')
-	{
-	  /* Nothing.  */
-	}
-      else if (c < 040 && c != '\t')
-	{
-	  result.push_back ('^');
-	  result.push_back (c + 0100);
-	}
-      else if (c == 0177)
-	{
-	  result.push_back ('^');
-	  result.push_back ('?');
-	}
-      else if (c == '\t')
-	process_tab ();
-      else
-	result.push_back (c);
-    }
-  while (c != '\0' && c != '\n' && c != '\r');
-
-  if (c == '\r' && *lineptr == '\n')
-    ++lineptr;
-  *ptr = lineptr;
-
-  return result;
-}
-
 /* Function to display source in the source window.  */
 enum tui_status
 tui_source_window::set_contents (struct gdbarch *arch,
@@ -171,8 +87,9 @@ tui_source_window::set_contents (struct gdbarch *arch,
 
 	      std::string text;
 	      if (*iter != '\0')
-		text = copy_source_line (&iter, cur_line_no, horizontal_offset,
-					 line_width);
+		text = tui_copy_source_line (&iter, cur_line_no,
+					     horizontal_offset,
+					     line_width);
 
 	      /* Set whether element is the execution point
 		 and whether there is a break point on it.  */
@@ -247,26 +164,6 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 
       print_source_lines (s, l.u.line_no, l.u.line_no + 1, 0);
     }
-}
-
-tui_source_window::tui_source_window ()
-  : tui_source_window_base (SRC_WIN)
-{
-  gdb::observers::source_styling_changed.attach
-    (std::bind (&tui_source_window::style_changed, this),
-     m_observable);
-}
-
-tui_source_window::~tui_source_window ()
-{
-  gdb::observers::source_styling_changed.detach (m_observable);
-}
-
-void
-tui_source_window::style_changed ()
-{
-  if (tui_active && is_visible ())
-    refill ();
 }
 
 bool

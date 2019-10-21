@@ -1,5 +1,32 @@
 2019-11-05  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.h (struct tui_source_window): Inline
+	constructor.  Remove destructor.
+	<style_changed, m_observable>: Move to superclass.
+	* tui/tui-winsource.h (tui_copy_source_line): Declare.
+	(struct tui_source_window_base): Move private members to end.
+	<style_changed, m_observable>: Move from tui_source_window.
+	* tui/tui-winsource.c (tui_copy_source_line): Move from
+	tui-source.c.  Rename from copy_source_line.  Add special handling
+	for negative line number.
+	(tui_source_window_base::style_changed): Move from
+	tui_source_window.
+	(tui_source_window_base): Register observer.
+	(~tui_source_window_base): New.
+	* tui/tui-source.c (copy_source_line): Move to tui-winsource.c;
+	rename.
+	(tui_source_window::set_contents): Use tui_copy_source_line.
+	(tui_source_window::tui_source_window): Move to tui-source.h.
+	(tui_source_window::~tui_source_window): Remove.
+	(tui_source_window::style_changed): Move to superclass.
+	* tui/tui-disasm.c (tui_disassemble): Create string file with
+	styling, when possible.  Add "addr_size" parameter.
+	(tui_disasm_window::set_contents): Use tui_copy_source_line.
+	Don't compute maximum size.
+	(len_without_escapes): New function
+
+2019-11-05  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_element) <line>: Now a
 	std::string.
 	* tui/tui-winsource.c (tui_show_source_line): Update.

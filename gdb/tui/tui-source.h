@@ -31,8 +31,10 @@ struct symtab;
 
 struct tui_source_window : public tui_source_window_base
 {
-  tui_source_window ();
-  ~tui_source_window ();
+  tui_source_window ()
+    : tui_source_window_base (SRC_WIN)
+  {
+  }
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
@@ -70,17 +72,12 @@ protected:
 
 private:
 
-  void style_changed ();
-
   /* Answer whether a particular line number or address is displayed
      in the current source window.  */
   bool line_is_displayed (int line) const;
 
   /* It is the resolved form as returned by symtab_to_fullname.  */
   gdb::unique_xmalloc_ptr<char> m_fullname;
-
-  /* A token used to register and unregister an observer.  */
-  gdb::observers::token m_observable;
 };
 
 #endif /* TUI_TUI_SOURCE_H */

@@ -74,11 +74,9 @@ struct tui_source_element
 
 struct tui_source_window_base : public tui_win_info
 {
-private:
-  void show_source_content ();
-
 protected:
   explicit tui_source_window_base (enum tui_win_type type);
+  ~tui_source_window_base ();
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window_base);
 
@@ -140,6 +138,16 @@ public:
   struct gdbarch *gdbarch = nullptr;
 
   std::vector<tui_source_element> content;
+
+private:
+
+  void show_source_content ();
+
+  /* Called when the user "set style enabled" setting is changed.  */
+  void style_changed ();
+
+  /* A token used to register and unregister an observer.  */
+  gdb::observers::token m_observable;
 };
 
 
@@ -226,6 +234,16 @@ extern void tui_display_main (void);
 extern void tui_update_source_windows_with_addr (struct gdbarch *, CORE_ADDR);
 extern void tui_update_source_windows_with_line (struct symtab *, 
 						 int);
+
+/* Extract some source text from PTR.  LINE_NO is the line number.  If
+   it is positive, it is printed at the start of the line.  FIRST_COL
+   is the first column to extract, and LINE_WIDTH is the number of
+   characters to display.  Returns a string holding the desired text.
+   PTR is updated to point to the start of the next line.  */
+
+extern std::string tui_copy_source_line (const char **ptr,
+					 int line_no, int first_col,
+					 int line_width);
 
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */

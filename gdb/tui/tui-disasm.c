@@ -39,6 +39,7 @@
 #include "tui/tui-source.h"
 #include "progspace.h"
 #include "objfiles.h"
+#include "cli/cli-style.h"
 
 #include "gdb_curses.h"
 
@@ -49,15 +50,47 @@ struct tui_asm_line
   std::string insn;
 };
 
+/* Helper function to find the number of characters in STR, skipping
+   any ANSI escape sequences.  */
+static size_t
+len_without_escapes (const std::string &str)
+{
+  size_t len = 0;
+  const char *ptr = str.c_str ();
+  char c;
+
+  while ((c = *ptr++) != '\0')
+    {
+      if (c == '\033')
+	{
+	  ui_file_style style;
+	  size_t n_read;
+	  if (style.parse (ptr, &n_read))
+	    ptr += n_read;
+	  else
+	    {
+	      /* Shouldn't happen, but just skip the ESC if it somehow
+		 does.  */
+	      ++ptr;
+	    }
+	}
+      else
+	++len;
+    }
+  return len;
+}
+
 /* Function to set the disassembly window's content.
    Disassemble count lines starting at pc.
    Return address of the count'th instruction after pc.  */
 static CORE_ADDR
 tui_disassemble (struct gdbarch *gdbarch,
 		 std::vector<tui_asm_line> &asm_lines,
-		 CORE_ADDR pc, int pos, int count)
+		 CORE_ADDR pc, int pos, int count,
+		 size_t *addr_size = nullptr)
 {
-  string_file gdb_dis_out;
+  bool term_out = source_styling && gdb_stdout->can_emit_style_escape ();
+  string_file gdb_dis_out (term_out);
 
   /* Now construct each line.  */
   for (int i = 0; i < count; ++i)
@@ -67,6 +100,17 @@ tui_disassemble (struct gdbarch *gdbarch,
       asm_lines[pos + i].addr_string = std::move (gdb_dis_out.string ());
 
       gdb_dis_out.clear ();
+
+      if (addr_size != nullptr)
+	{
+	  size_t new_size;
+
+	  if (term_out)
+	    new_size = len_without_escapes (asm_lines[pos + i].addr_string);
+	  else
+	    new_size = asm_lines[pos + i].addr_string.size ();
+	  *addr_size = std::max (*addr_size, new_size);
+	}
 
       pc = pc + gdb_print_insn (gdbarch, pc, &gdb_dis_out, NULL);
 
@@ -164,8 +208,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_tab_width;
   int insn_pos;
-  int addr_size, insn_size;
-  
+
   gdb_assert (line_or_addr.loa == LOA_ADDRESS);
   CORE_ADDR pc = line_or_addr.u.addr;
   if (pc == 0)
@@ -182,23 +225,8 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   std::vector<tui_asm_line> asm_lines (max_lines);
-
-  tui_disassemble (gdbarch, asm_lines, pc, 0, max_lines);
-
-  /* Determine maximum address- and instruction lengths.  */
-  addr_size = 0;
-  insn_size = 0;
-  for (i = 0; i < max_lines; i++)
-    {
-      size_t len = asm_lines[i].addr_string.size ();
-
-      if (len > addr_size)
-        addr_size = len;
-
-      len = asm_lines[i].insn.size ();
-      if (len > insn_size)
-	insn_size = len;
-    }
+  size_t addr_size = 0;
+  tui_disassemble (gdbarch, asm_lines, pc, 0, max_lines, &addr_size);
 
   /* Align instructions to the same column.  */
   insn_pos = (1 + (addr_size / tab_len)) * tab_len;
@@ -215,11 +243,8 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 		       - asm_lines[i].addr_string.size ())
 	   + asm_lines[i].insn);
 
-      /* Now copy the line taking the offset into account.  */
-      if (line.size () > offset)
-	src->line = line.substr (offset, line_width);
-      else
-	src->line.clear ();
+      const char *ptr = line.c_str ();
+      src->line = tui_copy_source_line (&ptr, -1, offset, line_width);
 
       src->line_or_addr.loa = LOA_ADDRESS;
       src->line_or_addr.u.addr = asm_lines[i].addr;
