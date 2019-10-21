@@ -781,8 +781,8 @@ run_cc_link_tests $build_tests
 
 run_ld_link_tests [list \
     [list \
-	"Build pr22269-1" \
-	"-pie -e _start --no-dynamic-linker -z text" \
+	"pr22269-1 (static pie undefined weak)" \
+	"-pie -e _start --no-dynamic-linker -z text -z nocombreloc " \
 	"" \
 	"$AFLAGS_PIC" \
 	{ pr22269-1.c } \

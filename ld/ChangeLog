@@ -1,3 +1,11 @@
+2019-10-22  Alan Modra  <amodra@gmail.com>
+
+	PR 22269
+	* testsuite/ld-elf/pr22269-1.rd: Look for GOT section NONE and
+	RELATIVE relocs.
+	* testsuite/ld-elf/shared.exp (pr22269-1): Give test a better
+	name.  Use -z nocombreloc.
+
 2019-10-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/25110
