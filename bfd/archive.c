@@ -1299,6 +1299,9 @@ normalize (bfd *abfd, const char *file)
   const char *last;
   char *copy;
 
+  if (abfd->flags & BFD_ARCHIVE_FULL_PATH)
+    return file;
+
   first = file + strlen (file) - 1;
   last = first + 1;
 
@@ -1326,8 +1329,10 @@ normalize (bfd *abfd, const char *file)
 
 #else
 static const char *
-normalize (bfd *abfd ATTRIBUTE_UNUSED, const char *file)
+normalize (bfd *abfd, const char *file)
 {
+  if (abfd->flags & BFD_ARCHIVE_FULL_PATH)
+    return file;
   return lbasename (file);
 }
 #endif
@@ -1562,7 +1567,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	  continue;
 	}
 
-      normal = normalize (current, current->filename);
+      normal = normalize (abfd, current->filename);
       if (normal == NULL)
 	return FALSE;
 
@@ -1643,7 +1648,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	}
       else
 	{
-	  normal = normalize (current, filename);
+	  normal = normalize (abfd, filename);
 	  if (normal == NULL)
 	    return FALSE;
 	}
@@ -1714,7 +1719,7 @@ _bfd_archive_bsd44_construct_extended_name_table (bfd *abfd,
        current != NULL;
        current = current->archive_next)
     {
-      const char *normal = normalize (current, current->filename);
+      const char *normal = normalize (abfd, current->filename);
       int has_space = 0;
       unsigned int len;
 

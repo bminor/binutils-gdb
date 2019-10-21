@@ -387,7 +387,10 @@ use the @samp{v} modifier with this operation, to request that
 If you do not specify a @var{member}, all files in the archive
 are extracted.
 
-Files cannot be extracted from a thin archive.
+Files cannot be extracted from a thin archive, and there are
+restrictions on extracting from archives created with @option{P}: The
+paths must not be absolute, may not contain @code{..}, and any
+subdirectories in the paths must exist.
 @end table
 
 A number of modifiers (@var{mod}) may immediately follow the @var{p}
@@ -463,12 +466,20 @@ Display member offsets inside the archive. Use together with the @samp{t}
 option.
 
 @item P
-Use the full path name when matching names in the archive.  @sc{gnu}
-@command{ar} can not create an archive with a full path name (such archives
-are not POSIX compliant), but other archive creators can.  This option
-will cause @sc{gnu} @command{ar} to match file names using a complete path
-name, which can be convenient when extracting a single file from an
-archive created by another tool.
+Use the full path name when matching or storing names in the archive.
+Archives created with full path names are not POSIX compliant, and
+thus may not work with tools other than up to date @sc{gnu} tools.
+Modifying such archives with @sc{gnu} @command{ar} without using
+@option{P} will remove the full path names unless the archive is a
+thin archive.  Note that @option{P} may be useful when adding files to
+a thin archive since @option{r} without @option{P} ignores the path
+when choosing which element to replace.  Thus
+@smallexample
+ar rcST archive.a subdir/file1 subdir/file2 file1
+@end smallexample
+will result in the first @code{subdir/file1} being replaced with
+@code{file1} from the current directory.  Adding @option{P} will
+prevent this replacement.
 
 @item s
 @cindex writing archive index
@@ -533,7 +544,7 @@ and then exits.
 Displays the version information of @command{ar} and then exits.
 
 @item -X32_64
-@command{ar} ignores an initial option spelt @samp{-X32_64}, for
+@command{ar} ignores an initial option spelled @samp{-X32_64}, for
 compatibility with AIX.  The behaviour produced by this option is the
 default for @sc{gnu} @command{ar}.  @command{ar} does not support any
 of the other @samp{-X} options; in particular, it does not support

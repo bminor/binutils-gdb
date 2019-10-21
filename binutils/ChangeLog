@@ -1,3 +1,13 @@
+2019-10-21  Alan Modra  <amodra@gmail.com>
+
+	PR 452
+	PR 25104
+	* ar.c (write_archive): Set BFD_ARCHIVE_FULL_PATH.
+	* doc/binutils.texi (extract from archive): Mention
+	restrictions when extracting from archives with full paths.
+	(ar P): Update to current P support.
+	(ar -X32_64): Fix spelling.
+
 2019-10-14  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (compare_section_lma): Correct comment.  Dereference

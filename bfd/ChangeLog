@@ -1,3 +1,15 @@
+2019-10-21  Alan Modra  <amodra@gmail.com>
+
+	PR 452
+	* archive.c (normalize): Return file unchanged when
+	BFD_ARCHIVE_FULL_PATH.
+	(_bfd_construct_extended_name_table): Pass abfd, the output
+	bfd, to normalize.
+	(_bfd_archive_bsd44_construct_extended_name_table): Likewise.
+	* bfd.c (struct bfd): Make flags a full flagword.
+	(BFD_ARCHIVE_FULL_PATH): Define.
+	* bfd-in2.h: Regenerate.
+
 2019-10-20  John David Anglin  <danglin@gcc.gnu.org>
 
 	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Provide 8-byte

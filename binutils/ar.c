@@ -1200,6 +1200,9 @@ write_archive (bfd *iarch)
   if (deterministic)
     obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
 
+  if (full_pathname)
+    obfd->flags |= BFD_ARCHIVE_FULL_PATH;
+
   if (make_thin_archive || bfd_is_thin_archive (iarch))
     bfd_set_thin_archive (obfd, TRUE);
 
