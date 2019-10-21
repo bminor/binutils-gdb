@@ -1,3 +1,7 @@
+2019-10-25  Ali Tamur <tamur@google.com>
+
+	* charset.c (find_charset_names): Reflect API change.
+
 2019-10-25  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.c (struct demangled_name_entry): Change demangled name
