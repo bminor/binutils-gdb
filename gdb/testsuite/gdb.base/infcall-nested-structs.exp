@@ -73,6 +73,7 @@ proc start_nested_structs_test { lang types } {
     # Create the additional flags
     set flags $compile_flags
     lappend flags $lang
+    lappend flags "additional_flags=-O2"
 
     for {set n 0} {$n<[llength ${types}]} {incr n} {
 	set m [I2A ${n}]

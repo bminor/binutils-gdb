@@ -1,3 +1,12 @@
+2019-10-21  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/infcall-nested-structs.c: Add
+	__attribute__((noinline,noclone)) to all functions.
+	(call_all): Add missing variable initialization.  Simplify return value.
+	(breakpt): Increment volatile variable, to prevent call from being
+	optimized out.
+	* gdb.base/infcall-nested-structs.exp: Compile with -O2.
+
 2019-10-17  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.fortran/module.exp: Allow info variables to print info for files
