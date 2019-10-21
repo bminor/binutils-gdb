@@ -1044,19 +1044,23 @@ sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 	 doesn't happen at all).  If you discover that significant time is
 	 spent in the loops below, do 'set complaints 100' and examine the
 	 resulting complaints.  */
-
       if (objfile1 == objfile2)
 	{
-	  /* Both sections came from the same objfile.  We are really confused.
-	     Sort on sequence order of sections within the objfile.  */
+	  /* Both sections came from the same objfile.  We are really
+	     confused.  Sort on sequence order of sections within the
+	     objfile.  The order of checks is important here, if we find a
+	     match on SECT2 first then either SECT2 is before SECT1, or,
+	     SECT2 == SECT1, in both cases we should return false.  The
+	     second case shouldn't occur during normal use, but std::sort
+	     does check that '!(a < a)' when compiled in debug mode.  */
 
 	  const struct obj_section *osect;
 
 	  ALL_OBJFILE_OSECTIONS (objfile1, osect)
-	    if (osect == sect1)
-	      return true;
-	    else if (osect == sect2)
+	    if (osect == sect2)
 	      return false;
+	    else if (osect == sect1)
+	      return true;
 
 	  /* We should have found one of the sections before getting here.  */
 	  gdb_assert_not_reached ("section not found");

@@ -1,3 +1,7 @@
+2019-10-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objfiles.c (sort_cmp): Ensure that !(a < a) holds true.
+
 2019-10-21  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-winsource.h (tui_exec_info_content): Remove typedef.
