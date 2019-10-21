@@ -473,10 +473,31 @@ separate_debug_iterator::operator++ ()
   return *this;
 }
 
+/* Unlink OBJFILE from the list of known objfiles.  */
+
+static void
+unlink_objfile (struct objfile *objfile)
+{
+  struct objfile **objpp;
+
+  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
+    {
+      if (*objpp == objfile)
+	{
+	  *objpp = (*objpp)->next;
+	  objfile->next = NULL;
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  _("unlink_objfile: objfile already unlinked"));
+}
+
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
    another when using objfiles_safe to free all objfiles.  */
-void
+static void
 put_objfile_before (struct objfile *objfile, struct objfile *before_this)
 {
   struct objfile **objp;
@@ -495,38 +516,6 @@ put_objfile_before (struct objfile *objfile, struct objfile *before_this)
   
   internal_error (__FILE__, __LINE__,
 		  _("put_objfile_before: before objfile not in list"));
-}
-
-/* Unlink OBJFILE from the list of known objfiles, if it is found in the
-   list.
-
-   It is not a bug, or error, to call this function if OBJFILE is not known
-   to be in the current list.  This is done in the case of mapped objfiles,
-   for example, just to ensure that the mapped objfile doesn't appear twice
-   in the list.  Since the list is threaded, linking in a mapped objfile
-   twice would create a circular list.
-
-   If OBJFILE turns out to be in the list, we zap it's NEXT pointer after
-   unlinking it, just to ensure that we have completely severed any linkages
-   between the OBJFILE and the list.  */
-
-void
-unlink_objfile (struct objfile *objfile)
-{
-  struct objfile **objpp;
-
-  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
-    {
-      if (*objpp == objfile)
-	{
-	  *objpp = (*objpp)->next;
-	  objfile->next = NULL;
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("unlink_objfile: objfile already unlinked"));
 }
 
 /* Add OBJFILE as a separate debug objfile of PARENT.  */

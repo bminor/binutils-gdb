@@ -1,3 +1,10 @@
+2019-10-20  Tom Tromey  <tom@tromey.com>
+
+	* objfiles.h (unlink_objfile, put_objfile_before): Don't declare.
+	* objfiles.c (unlink_objfile): Move earlier.  Now static.  Remove
+	obsolete comment.
+	(put_objfile_before): Now static.
+
 2019-10-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbsupport/common-utils.h (startswith): Change return type to

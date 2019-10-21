@@ -637,11 +637,7 @@ extern CORE_ADDR entry_point_address (void);
 
 extern void build_objfile_section_table (struct objfile *);
 
-extern void put_objfile_before (struct objfile *, struct objfile *);
-
 extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
-
-extern void unlink_objfile (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 
