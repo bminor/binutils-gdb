@@ -1,3 +1,15 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open.c (init_types): Only intern root-visible types.
+	* ctf-create.c (ctf_dtd_insert): Likewise.
+	(ctf_dtd_delete): Only remove root-visible types.
+	(ctf_rollback): Likewise.
+	(ctf_add_generic): Adjust.
+	(ctf_add_struct_sized): Adjust comment.
+	(ctf_add_union_sized): Likewise.
+	(ctf_add_enum): Likewise.
+	* ctf-impl.h (ctf_dtd_insert): Adjust prototype.
+
 2020-03-11  John Baldwin  <jhb@FreeBSD.org>
 
 	* swap.h (bswap_identity_64): Make static.

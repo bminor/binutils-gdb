@@ -399,7 +399,7 @@ extern void ctf_list_prepend (ctf_list_t *, void *);
 extern void ctf_list_delete (ctf_list_t *, void *);
 extern int ctf_list_empty_p (ctf_list_t *lp);
 
-extern int ctf_dtd_insert (ctf_file_t *, ctf_dtdef_t *, int);
+extern int ctf_dtd_insert (ctf_file_t *, ctf_dtdef_t *, int flag, int kind);
 extern void ctf_dtd_delete (ctf_file_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_file_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_file_t *, ctf_id_t);

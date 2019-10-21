@@ -597,13 +597,13 @@ ctf_name_table (ctf_file_t *fp, int kind)
 }
 
 int
-ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd, int kind)
+ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 {
   const char *name;
   if (ctf_dynhash_insert (fp->ctf_dthash, (void *) dtd->dtd_type, dtd) < 0)
     return -1;
 
-  if (dtd->dtd_data.ctt_name
+  if (flag == CTF_ADD_ROOT && dtd->dtd_data.ctt_name
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
     {
       if (ctf_dynhash_insert (ctf_name_table (fp, kind)->ctn_writable,
@@ -646,7 +646,8 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
     }
 
   if (dtd->dtd_data.ctt_name
-      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
+      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
+      && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
     {
       ctf_dynhash_remove (ctf_name_table (fp, kind)->ctn_writable,
 			  name);
@@ -762,7 +763,8 @@ ctf_rollback (ctf_file_t *fp, ctf_snapshot_id_t id)
       kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
 
       if (dtd->dtd_data.ctt_name
-	  && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
+	  && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
+	  && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
 	{
 	  ctf_dynhash_remove (ctf_name_table (fp, kind)->ctn_writable,
 			      name);
@@ -831,7 +833,7 @@ ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name, int kind,
       return (ctf_set_errno (fp, EAGAIN));
     }
 
-  if (ctf_dtd_insert (fp, dtd, kind) < 0)
+  if (ctf_dtd_insert (fp, dtd, flag, kind) < 0)
     {
       free (dtd);
       return CTF_ERR;			/* errno is set for us.  */
@@ -1094,8 +1096,7 @@ ctf_add_struct_sized (ctf_file_t *fp, uint32_t flag, const char *name,
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
 
-  /* Promote forwards to structs.  */
-
+  /* Promote root-visible forwards to structs.  */
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, CTF_K_STRUCT, name);
 
@@ -1132,7 +1133,7 @@ ctf_add_union_sized (ctf_file_t *fp, uint32_t flag, const char *name,
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
 
-  /* Promote forwards to unions.  */
+  /* Promote root-visible forwards to unions.  */
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, CTF_K_UNION, name);
 
@@ -1168,7 +1169,7 @@ ctf_add_enum (ctf_file_t *fp, uint32_t flag, const char *name)
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
 
-  /* Promote forwards to enums.  */
+  /* Promote root-visible forwards to enums.  */
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
 
