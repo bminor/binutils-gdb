@@ -39,6 +39,7 @@
 #include "ax.h"
 #include "dwarf2loc.h"
 #include "dwarf2-frame-tailcall.h"
+#include "gdbsupport/gdb_binary_search.h"
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
@@ -1652,15 +1653,12 @@ find_cie (const dwarf2_cie_table &cie_table, ULONGEST cie_pointer)
   return NULL;
 }
 
-static int
-bsearch_fde_cmp (const void *key, const void *element)
+static inline int
+bsearch_fde_cmp (const dwarf2_fde *fde, CORE_ADDR seek_pc)
 {
-  CORE_ADDR seek_pc = *(CORE_ADDR *) key;
-  struct dwarf2_fde *fde = *(struct dwarf2_fde **) element;
-
-  if (seek_pc < fde->initial_location)
+  if (fde->initial_location + fde->address_range <= seek_pc)
     return -1;
-  if (seek_pc < fde->initial_location + fde->address_range)
+  if (fde->initial_location <= seek_pc)
     return 0;
   return 1;
 }
@@ -1674,7 +1672,6 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
   for (objfile *objfile : current_program_space->objfiles ())
     {
       struct dwarf2_fde_table *fde_table;
-      struct dwarf2_fde **p_fde;
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
@@ -1697,15 +1694,14 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
         continue;
 
       seek_pc = *pc - offset;
-      p_fde = ((struct dwarf2_fde **)
-	       bsearch (&seek_pc, fde_table->entries, fde_table->num_entries,
-                        sizeof (fde_table->entries[0]), bsearch_fde_cmp));
-      if (p_fde != NULL)
+      auto end = fde_table->entries + fde_table->num_entries;
+      auto it = gdb::binary_search (fde_table->entries, end, seek_pc, bsearch_fde_cmp);
+      if (it != end)
         {
-          *pc = (*p_fde)->initial_location + offset;
+          *pc = (*it)->initial_location + offset;
 	  if (out_offset)
 	    *out_offset = offset;
-          return *p_fde;
+          return *it;
         }
     }
   return NULL;

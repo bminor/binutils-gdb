@@ -1,5 +1,12 @@
 2019-10-29  Christian Biesinger  <cbiesinger@google.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add gdb_binary_search.h.
+	* dwarf2-frame.c (bsearch_fde_cmp): Update.
+	(dwarf2_frame_find_fde): Replace bsearch with gdb::binary_search.
+	* gdbsupport/gdb_binary_search.h: New file.
+
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
 	* NEWS: Mention new --with-system-gdbinit-dir option.
 	* config.in: Regenerate.
 	* configure: Regenerate.
