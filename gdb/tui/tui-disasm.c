@@ -216,10 +216,10 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 	   + asm_lines[i].insn);
 
       /* Now copy the line taking the offset into account.  */
-      if (line.size() > offset)
-	src->line.reset (xstrndup (&line[offset], line_width));
+      if (line.size () > offset)
+	src->line = line.substr (offset, line_width);
       else
-	src->line = make_unique_xstrdup ("");
+	src->line.clear ();
 
       src->line_or_addr.loa = LOA_ADDRESS;
       src->line_or_addr.u.addr = asm_lines[i].addr;

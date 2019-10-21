@@ -62,7 +62,7 @@ struct tui_source_element
   {
   }
 
-  gdb::unique_xmalloc_ptr<char> line;
+  std::string line;
   struct tui_line_or_address line_or_addr;
   bool is_exec_point = false;
   tui_bp_flags break_mode = 0;

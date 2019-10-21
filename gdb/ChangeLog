@@ -1,3 +1,11 @@
+2019-11-05  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_element) <line>: Now a
+	std::string.
+	* tui/tui-winsource.c (tui_show_source_line): Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Update.
+
 2019-11-05  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.h (gdb_static_assert): Put && operator at the beginning

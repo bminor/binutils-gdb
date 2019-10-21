@@ -183,7 +183,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 				 symtab_to_fullname (s)) == 0
 		   && cur_line_no == locator->line_no);
 
-	      content[cur_line].line = make_unique_xstrdup (text.c_str ());
+	      content[cur_line].line = std::move (text);
 
 	      cur_line++;
 	      cur_line_no++;

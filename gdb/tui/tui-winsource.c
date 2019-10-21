@@ -222,7 +222,7 @@ tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
     tui_set_reverse_mode (win_info->handle.get (), true);
 
   wmove (win_info->handle.get (), lineno, TUI_EXECINFO_SIZE);
-  tui_puts (line->line.get (), win_info->handle.get ());
+  tui_puts (line->line.c_str (), win_info->handle.get ());
   if (line->is_exec_point)
     tui_set_reverse_mode (win_info->handle.get (), false);
 
