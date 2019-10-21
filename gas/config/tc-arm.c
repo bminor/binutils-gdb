@@ -1943,7 +1943,7 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 	      const char apsr_str[] = "apsr";
 	      int apsr_str_len = strlen (apsr_str);
 
-	      reg = arm_reg_parse (&str, REGLIST_RN);
+	      reg = arm_reg_parse (&str, REG_TYPE_RN);
 	      if (etype == REGLIST_CLRM)
 		{
 		  if (reg == REG_SP || reg == REG_PC)

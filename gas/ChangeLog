@@ -1,3 +1,8 @@
+2020-01-02  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-arm.c (parse_reg_list): Use REG_TYPE_RN instead of
+	REGLIST_RN.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
