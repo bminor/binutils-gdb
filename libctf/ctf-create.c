@@ -1229,7 +1229,10 @@ ctf_add_forward (ctf_file_t *fp, uint32_t flag, const char *name,
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, kind, name);
 
-  if ((type = ctf_add_generic (fp, flag, name, CTF_K_FORWARD,&dtd)) == CTF_ERR)
+  if (type)
+    return type;
+
+  if ((type = ctf_add_generic (fp, flag, name, CTF_K_FORWARD, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_FORWARD, flag, 0);

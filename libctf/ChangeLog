@@ -1,5 +1,10 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_forward): Don't add forwards to
+	types that already exist.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (init_types): Only intern root-visible types.
 	* ctf-create.c (ctf_dtd_insert): Likewise.
 	(ctf_dtd_delete): Only remove root-visible types.
