@@ -195,6 +195,22 @@ get_double_condition_name (unsigned int cond)
   return _("<inavlid condition code>");
 }
 
+static inline const char *
+get_opsize_name (unsigned int opsize)
+{
+  if (opsize < ARRAY_SIZE (opsize_names))
+    return opsize_names[opsize];
+  return _("<inavlid opsize>");
+}
+
+static inline const char *
+get_size_name (unsigned int size)
+{
+  if (size < ARRAY_SIZE (size_names))
+    return size_names[size];
+  return _("<inavlid size>");
+}
+
 
 int
 print_insn_rx (bfd_vma addr, disassemble_info * dis)
@@ -278,25 +294,27 @@ print_insn_rx (bfd_vma addr, disassemble_info * dis)
 	      break;
 
 	    case 's':
-	      PR (PS, "%s", opsize_names[opcode.size]);
+	      PR (PS, "%s", get_opsize_name (opcode.size));
 	      break;
 
 	    case 'b':
 	      s ++;
-	      if (*s == 'f') {
-		int imm = opcode.op[2].addend;
-		int slsb, dlsb, width;
-		dlsb = (imm >> 5) & 0x1f;
-		slsb = (imm & 0x1f);
-		slsb = (slsb >= 0x10?(slsb ^ 0x1f) + 1:slsb);
-		slsb = dlsb - slsb;
-		slsb = (slsb < 0?-slsb:slsb);
-		width = ((imm >> 10) & 0x1f) - dlsb;
-		PR (PS, "#%d, #%d, #%d, %s, %s",
-		    slsb, dlsb, width,
-		    register_names[opcode.op[1].reg],
-		    register_names[opcode.op[0].reg]);
-	      }
+	      if (*s == 'f')
+		{
+		  int imm = opcode.op[2].addend;
+		  int slsb, dlsb, width;
+
+		  dlsb = (imm >> 5) & 0x1f;
+		  slsb = (imm & 0x1f);
+		  slsb = (slsb >= 0x10?(slsb ^ 0x1f) + 1:slsb);
+		  slsb = dlsb - slsb;
+		  slsb = (slsb < 0?-slsb:slsb);
+		  width = ((imm >> 10) & 0x1f) - dlsb;
+		  PR (PS, "#%d, #%d, #%d, %s, %s",
+		      slsb, dlsb, width,
+		      get_register_name (opcode.op[1].reg),
+		      get_register_name (opcode.op[0].reg));
+		}
 	      break;
 	    case '0':
 	    case '1':
@@ -305,7 +323,7 @@ print_insn_rx (bfd_vma addr, disassemble_info * dis)
 	      if (do_size)
 		{
 		  if (oper->type == RX_Operand_Indirect || oper->type == RX_Operand_Zero_Indirect)
-		    PR (PS, "%s", size_names[oper->size]);
+		    PR (PS, "%s", get_size_name (oper->size));
 		}
 	      else
 		switch (oper->type)

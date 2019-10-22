@@ -1,3 +1,10 @@
+2019-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* rx-dis.c (get_size_name): New function.  Provides safe
+	access to name array.
+	(get_opsize_name): Likewise.
+	(print_insn_rx): Use the accessor functions.
+
 2019-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* rx-dis.c (get_register_name): New function.  Provides safe
