@@ -1475,24 +1475,18 @@ sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
     });
 }
 
-/* Allocate and partially fill a partial symtab.  It will be
-   completely filled at the end of the symbol list.
+/* Partially fill a partial symtab.  It will be completely filled at
+   the end of the symbol list.  */
 
-   FILENAME is the name of the symbol-file we are reading from.  */
-
-struct partial_symtab *
-start_psymtab_common (struct objfile *objfile,
-		      const char *filename,
-		      CORE_ADDR textlow)
+partial_symtab::partial_symtab (const char *filename,
+				struct objfile *objfile,
+				CORE_ADDR textlow)
+  : partial_symtab (filename, objfile)
 {
-  struct partial_symtab *psymtab;
-
-  psymtab = new partial_symtab (filename, objfile);
-  psymtab->set_text_low (textlow);
-  psymtab->set_text_high (psymtab->raw_text_low ()); /* default */
-  psymtab->globals_offset = objfile->partial_symtabs->global_psymbols.size ();
-  psymtab->statics_offset = objfile->partial_symtabs->static_psymbols.size ();
-  return psymtab;
+  set_text_low (textlow);
+  set_text_high (raw_text_low ()); /* default */
+  globals_offset = objfile->partial_symtabs->global_psymbols.size ();
+  statics_offset = objfile->partial_symtabs->static_psymbols.size ();
 }
 
 /* Perform "finishing up" operations of a partial symtab.  */

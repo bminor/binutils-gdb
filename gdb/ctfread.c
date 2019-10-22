@@ -1299,7 +1299,7 @@ create_partial_symtab (const char *name,
   struct partial_symtab *pst;
   struct ctf_context *ccx;
 
-  pst = start_psymtab_common (objfile, name, 0);
+  pst = new partial_symtab (name, objfile, 0);
 
   ccx = XOBNEW (&objfile->objfile_obstack, struct ctf_context);
   ccx->fp = cfp;

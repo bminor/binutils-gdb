@@ -2007,11 +2007,8 @@ static struct partial_symtab *
 xcoff_start_psymtab (struct objfile *objfile,
 		     const char *filename, int first_symnum)
 {
-  struct partial_symtab *result =
-    start_psymtab_common (objfile,
-			  filename,
-			  /* We fill in textlow later.  */
-			  0);
+  /* We fill in textlow later.  */
+  struct partial_symtab *result = new partial_symtab (filename, objfile, 0);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);

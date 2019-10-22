@@ -113,6 +113,14 @@ struct partial_symtab
   partial_symtab (const char *filename, struct objfile *objfile)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
+  /* Like the above, but also sets the initial text low and text high
+     from the ADDR argument, and sets the global- and
+     static-offsets.  */
+
+  partial_symtab (const char *filename, struct objfile *objfile,
+		  CORE_ADDR addr)
+    ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -325,9 +333,6 @@ extern void add_psymbol_to_list (gdb::string_view name,
    an estimate of how many symbols there will be.  */
 
 extern void init_psymbol_list (struct objfile *objfile, int total_symbols);
-
-extern struct partial_symtab *start_psymtab_common (struct objfile *,
-						    const char *, CORE_ADDR);
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 

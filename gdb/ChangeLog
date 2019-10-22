@@ -1,5 +1,17 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_start_psymtab): Use new.
+	* psymtab.c (partial_symtab::partial_symtab): New constructor,
+	renamed from start_psymtab_common.
+	* psympriv.h (struct partial_symtab): Add new constructor.
+	(start_psymtab_common): Don't declare.
+	* mdebugread.c (parse_partial_symbols): Use new.
+	* dwarf2read.c (create_partial_symtab): Use new.
+	* dbxread.c (start_psymtab): Use new.
+	* ctfread.c (create_partial_symtab): Use new.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_end_psymtab): Use new.
 	* psymtab.c (start_psymtab_common): Use new.
 	(partial_symtab::partial_symtab): Rename from allocate_psymtab.

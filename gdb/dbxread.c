@@ -1903,8 +1903,8 @@ static struct partial_symtab *
 start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
 	       int ldsymoff)
 {
-  struct partial_symtab *result =
-    start_psymtab_common (objfile, filename, textlow);
+  struct partial_symtab *result = new partial_symtab (filename, objfile,
+						      textlow);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
