@@ -1,3 +1,13 @@
+2019-11-08  Tom Tromey  <tromey@adacore.com>
+
+	* top.c (read_command_file): Update.
+	(command_line_input): Make return type const.
+	* python/py-gdb-readline.c: Update.
+	* linespec.c (decode_line_2): Update.
+	* defs.h (command_line_input): Make return type const.
+	* cli/cli-script.c (read_next_line): Make return type const.
+	* ada-lang.c (get_selections): Update.
+
 2019-11-06  Christian Biesinger  <cbiesinger@google.com>
 
 	* linux-tdep.c (linux_info_proc): Use strtok_r instead of strtok.

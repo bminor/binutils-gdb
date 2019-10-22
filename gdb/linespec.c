@@ -1489,7 +1489,7 @@ decode_line_2 (struct linespec_state *self,
 	       std::vector<symtab_and_line> *result,
 	       const char *select_mode)
 {
-  char *args;
+  const char *args;
   const char *prompt;
   int i;
   std::vector<const char *> filters;

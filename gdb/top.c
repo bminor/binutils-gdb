@@ -420,7 +420,7 @@ read_command_file (FILE *stream)
 
   while (ui->instream != NULL && !feof (ui->instream))
     {
-      char *command;
+      const char *command;
 
       /* Get a command-line.  This calls the readline package.  */
       command = command_line_input (NULL, NULL);
@@ -1210,7 +1210,7 @@ gdb_safe_append_history (void)
    This routine either uses fancy command line editing or simple input
    as the user has requested.  */
 
-char *
+const char *
 command_line_input (const char *prompt_arg, const char *annotation_suffix)
 {
   static struct buffer cmd_line_buffer;

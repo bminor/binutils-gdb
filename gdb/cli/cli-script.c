@@ -50,7 +50,7 @@ recurse_read_control_structure
 static void do_define_command (const char *comname, int from_tty,
 			       const counted_command_line *commands);
 
-static char *read_next_line (void);
+static const char *read_next_line ();
 
 /* Level of control structure when reading.  */
 static int control_level;
@@ -890,8 +890,8 @@ user_args::insert_args (const char *line) const
    recurse_read_control_structure whenever we need to read commands
    from stdin.  */
 
-static char *
-read_next_line (void)
+static const char *
+read_next_line ()
 {
   struct ui *ui = current_ui;
   char *prompt_ptr, control_prompt[256];

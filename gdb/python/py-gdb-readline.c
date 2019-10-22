@@ -37,7 +37,8 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 #endif
 {
   int n;
-  char *p = NULL, *q;
+  const char *p = NULL;
+  char *q;
 
   try
     {

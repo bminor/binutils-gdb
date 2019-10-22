@@ -3273,7 +3273,7 @@ static int
 get_selections (int *choices, int n_choices, int max_results,
                 int is_all_choice, const char *annotation_suffix)
 {
-  char *args;
+  const char *args;
   const char *prompt;
   int n_chosen;
   int first_choice = is_all_choice ? 2 : 1;
