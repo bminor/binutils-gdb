@@ -399,7 +399,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
     }
 }
 
-typedef std::unordered_map<partial_symtab *, unsigned int> psym_index_map;
+typedef std::unordered_map<dwarf2_psymtab *, unsigned int> psym_index_map;
 
 /* Helper struct for building the address table.  */
 struct addrmap_index_data
@@ -439,7 +439,7 @@ static int
 add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
 {
   struct addrmap_index_data *data = (struct addrmap_index_data *) datap;
-  struct partial_symtab *pst = (struct partial_symtab *) obj;
+  dwarf2_psymtab *pst = (dwarf2_psymtab *) obj;
 
   if (data->previous_valid)
     add_address_entry (data->objfile, data->addr_vec,
@@ -582,7 +582,7 @@ write_one_signatured_type (void **slot, void *d)
   struct signatured_type_index_data *info
     = (struct signatured_type_index_data *) d;
   struct signatured_type *entry = (struct signatured_type *) *slot;
-  struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
+  dwarf2_psymtab *psymtab = entry->per_cu.v.psymtab;
 
   write_psymbols (info->symtab,
 		  info->psyms_seen,
@@ -612,12 +612,12 @@ write_one_signatured_type (void **slot, void *d)
    if they appeared in this psymtab.  */
 
 static void
-recursively_count_psymbols (struct partial_symtab *psymtab,
+recursively_count_psymbols (dwarf2_psymtab *psymtab,
 			    size_t &psyms_seen)
 {
   for (int i = 0; i < psymtab->number_of_dependencies; ++i)
     if (psymtab->dependencies[i]->user != NULL)
-      recursively_count_psymbols (psymtab->dependencies[i],
+      recursively_count_psymbols ((dwarf2_psymtab *) psymtab->dependencies[i],
 				  psyms_seen);
 
   psyms_seen += psymtab->n_global_syms;
@@ -629,7 +629,7 @@ recursively_count_psymbols (struct partial_symtab *psymtab,
 
 static void
 recursively_write_psymbols (struct objfile *objfile,
-			    struct partial_symtab *psymtab,
+			    dwarf2_psymtab *psymtab,
 			    struct mapped_symtab *symtab,
 			    std::unordered_set<partial_symbol *> &psyms_seen,
 			    offset_type cu_index)
@@ -638,7 +638,8 @@ recursively_write_psymbols (struct objfile *objfile,
 
   for (i = 0; i < psymtab->number_of_dependencies; ++i)
     if (psymtab->dependencies[i]->user != NULL)
-      recursively_write_psymbols (objfile, psymtab->dependencies[i],
+      recursively_write_psymbols (objfile,
+				  (dwarf2_psymtab *) psymtab->dependencies[i],
 				  symtab, psyms_seen, cu_index);
 
   write_psymbols (symtab,
@@ -868,14 +869,14 @@ public:
      as if they appeared in this psymtab.  */
   void recursively_write_psymbols
     (struct objfile *objfile,
-     struct partial_symtab *psymtab,
+     dwarf2_psymtab *psymtab,
      std::unordered_set<partial_symbol *> &psyms_seen,
      int cu_index)
   {
     for (int i = 0; i < psymtab->number_of_dependencies; ++i)
       if (psymtab->dependencies[i]->user != NULL)
-	recursively_write_psymbols (objfile, psymtab->dependencies[i],
-				    psyms_seen, cu_index);
+	recursively_write_psymbols
+	  (objfile, (dwarf2_psymtab *) psymtab->dependencies[i], psyms_seen, cu_index);
 
     write_psymbols (psyms_seen,
 		    (objfile->partial_symtabs->global_psymbols.data ()
@@ -1234,7 +1235,7 @@ private:
   write_one_signatured_type (struct signatured_type *entry,
 			     struct signatured_type_index_data *info)
   {
-    struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
+    dwarf2_psymtab *psymtab = entry->per_cu.v.psymtab;
 
     write_psymbols (info->psyms_seen,
 		    (info->objfile->partial_symtabs->global_psymbols.data ()
@@ -1320,7 +1321,7 @@ psyms_seen_size (struct dwarf2_per_objfile *dwarf2_per_objfile)
   size_t psyms_count = 0;
   for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
     {
-      struct partial_symtab *psymtab = per_cu->v.psymtab;
+      dwarf2_psymtab *psymtab = per_cu->v.psymtab;
 
       if (psymtab != NULL && psymtab->user == NULL)
 	recursively_count_psymbols (psymtab, psyms_count);
@@ -1423,7 +1424,7 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
     {
       struct dwarf2_per_cu_data *per_cu
 	= dwarf2_per_objfile->all_comp_units[i];
-      struct partial_symtab *psymtab = per_cu->v.psymtab;
+      dwarf2_psymtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main file.
 	 It may be referenced from a local scope but in such case it does not
@@ -1508,7 +1509,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   for (int i = 0; i < dwarf2_per_objfile->all_comp_units.size (); ++i)
     {
       const dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->all_comp_units[i];
-      partial_symtab *psymtab = per_cu->v.psymtab;
+      dwarf2_psymtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main
 	 file.  It may be referenced from a local scope but in such

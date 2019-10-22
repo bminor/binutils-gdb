@@ -121,6 +121,14 @@ struct partial_symtab
 		  CORE_ADDR addr)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
+  virtual ~partial_symtab ()
+  {
+  }
+
+  /* Read the full symbol table corresponding to this partial symbol
+     table.  */
+  virtual void read_symtab (struct objfile *) = 0;
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -278,11 +286,35 @@ struct partial_symtab
      !readin or if we haven't looked for the symtab after it was readin.  */
 
   struct compunit_symtab *compunit_symtab = nullptr;
+};
+
+/* A partial_symtab that works in the historical db way.  This should
+   not be used in new code, but exists to transition the somewhat
+   unmaintained "legacy" debug formats.  */
+
+struct legacy_psymtab : public partial_symtab
+{
+  legacy_psymtab (const char *filename, struct objfile *objfile)
+    : partial_symtab (filename, objfile)
+  {
+  }
+
+  legacy_psymtab (const char *filename, struct objfile *objfile,
+		  CORE_ADDR addr)
+    : partial_symtab (filename, objfile, addr)
+  {
+  }
+
+  void read_symtab (struct objfile *objf) override
+  {
+    if (legacy_read_symtab)
+      (*legacy_read_symtab) (this, objf);
+  }
 
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
 
-  void (*read_symtab) (struct partial_symtab *, struct objfile *) = nullptr;
+  void (*legacy_read_symtab) (legacy_psymtab *, struct objfile *) = nullptr;
 
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the

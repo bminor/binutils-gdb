@@ -1,5 +1,50 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (this_symtab_psymtab, read_xcoff_symtab)
+	(xcoff_psymtab_to_symtab_1, xcoff_read_symtab)
+	(xcoff_start_psymtab, xcoff_end_psymtab, scan_xcoff_symtab): Use
+	legacy_symtab.
+	* stabsread.h (dbx_end_psymtab): Use legacy_symtab.
+	* psymtab.c (psymtab_to_symtab): Call method.
+	(dump_psymtab): Update.
+	* psympriv.h (struct partial_symtab): Add virtual destructor.
+	<read_symtab>: New method.
+	(struct legacy_symtab): New.
+	* mdebugread.c (mdebug_read_symtab): Use legacy_psymtab.
+	(struct pst_map) <pst>: Now a legacy_psymtab.
+	(parse_procedure, parse_partial_symbols, psymtab_to_symtab_1)
+	(new_psymtab): Use legacy_psymtab.
+	* dwarf2read.h (struct dwarf2_psymtab): New.
+	(struct dwarf2_per_cu_data) <psymtab>: Use it.
+	* dwarf2read.c (dwarf2_create_include_psymtab)
+	(dwarf2_build_include_psymtabs, create_type_unit_group)
+	(create_partial_symtab, process_psymtab_comp_unit_reader)
+	(build_type_psymtabs_reader, build_type_psymtab_dependencies)
+	(set_partial_user): Use dwarf2_psymtab.
+	(dwarf2_psymtab::read_symtab): Rename from dwarf2_read_symtab.
+	(psymtab_to_symtab_1, process_full_comp_unit)
+	(process_full_type_unit, dwarf2_ranges_read)
+	(dwarf2_get_pc_bounds, psymtab_include_file_name)
+	(dwarf_decode_lines): Use dwarf2_psymtab.
+	* dwarf-index-write.c (psym_index_map): Use dwarf2_psymtab.
+	(add_address_entry_worker, write_one_signatured_type)
+	(recursively_count_psymbols, recursively_write_psymbols)
+	(write_one_signatured_type, psyms_seen_size, write_gdbindex)
+	(write_debug_names): Likewise.
+	* dbxread.c (struct header_file_location): Take a legacy_psymtab.
+	<pst>: Now a legacy_psymtab.
+	(find_corresponding_bincl_psymtab): Return a legacy_psymtab.
+	(read_dbx_symtab, start_psymtab, dbx_end_psymtab)
+	(dbx_psymtab_to_symtab_1, read_ofile_symtab): Use legacy_psymtab.
+	* ctfread.c (struct ctf_psymtab): New.
+	(ctf_start_symtab, ctf_end_symtab, psymtab_to_symtab): Take a
+	ctf_psymtab.
+	(ctf_psymtab::read_symtab): Rename from ctf_read_symtab.
+	(create_partial_symtab): Return a ctf_psymtab.
+	(scan_partial_symbols): Update.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_start_psymtab): Use new.
 	* psymtab.c (partial_symtab::partial_symtab): New constructor,
 	renamed from start_psymtab_common.

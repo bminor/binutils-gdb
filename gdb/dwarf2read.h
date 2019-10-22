@@ -25,6 +25,7 @@
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
+#include "psympriv.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;
@@ -269,9 +270,28 @@ public:
 
 dwarf2_per_objfile *get_dwarf2_per_objfile (struct objfile *objfile);
 
+/* A partial symtab specialized for DWARF.  */
+struct dwarf2_psymtab : public partial_symtab
+{
+  dwarf2_psymtab (const char *filename, struct objfile *objfile)
+    : partial_symtab (filename, objfile)
+  {
+  }
+
+  dwarf2_psymtab (const char *filename, struct objfile *objfile,
+		  CORE_ADDR addr)
+    : partial_symtab (filename, objfile, addr)
+  {
+  }
+
+  void read_symtab (struct objfile *) override;
+
+  struct dwarf2_per_cu_data *per_cu_data;
+};
+
 /* Persistent data held for a compilation unit, even when not
    processing it.  We put a pointer to this structure in the
-   read_symtab_private field of the psymtab.  */
+   psymtab.  */
 
 struct dwarf2_per_cu_data
 {
@@ -339,7 +359,7 @@ struct dwarf2_per_cu_data
   {
     /* The partial symbol table associated with this compilation unit,
        or NULL for unread partial units.  */
-    struct partial_symtab *psymtab;
+    dwarf2_psymtab *psymtab;
 
     /* Data needed by the "quick" functions.  */
     struct dwarf2_per_cu_quick_data *quick;

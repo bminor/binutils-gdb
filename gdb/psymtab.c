@@ -758,7 +758,7 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
     {
       scoped_restore decrementer = increment_reading_symtab ();
 
-      (*pst->read_symtab) (pst, objfile);
+      pst->read_symtab (objfile);
     }
 
   return pst->compunit_symtab;
@@ -946,8 +946,6 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
       fprintf_filtered (outfile,
 			"  Full symtab was read (at ");
       gdb_print_host_address (psymtab->compunit_symtab, outfile);
-      fprintf_filtered (outfile, " by function at ");
-      gdb_print_host_address (psymtab->read_symtab, outfile);
       fprintf_filtered (outfile, ")\n");
     }
 
