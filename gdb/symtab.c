@@ -715,6 +715,9 @@ symbol_set_language (struct general_symbol_info *gsymbol,
 /* Objects of this type are stored in the demangled name hash table.  */
 struct demangled_name_entry
 {
+  demangled_name_entry (gdb::string_view mangled_name)
+    : mangled (mangled_name) {}
+
   gdb::string_view mangled;
   ENUM_BITFIELD(language) language : LANGUAGE_BITS;
   char demangled[1];
@@ -744,6 +747,15 @@ eq_demangled_name_entry (const void *a, const void *b)
   return da->mangled == db->mangled;
 }
 
+static void
+free_demangled_name_entry (void *data)
+{
+  struct demangled_name_entry *e
+    = (struct demangled_name_entry *) data;
+
+  e->~demangled_name_entry();
+}
+
 /* Create the hash table used for demangled names.  Each hash entry is
    a pair of strings; one for the mangled name and one for the demangled
    name.  The entry is hashed via just the mangled name.  */
@@ -758,7 +770,7 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
 
   per_bfd->demangled_names_hash.reset (htab_create_alloc
     (256, hash_demangled_name_entry, eq_demangled_name_entry,
-     NULL, xcalloc, xfree));
+     free_demangled_name_entry, xcalloc, xfree));
 }
 
 /* Try to determine the demangled name for a symbol, based on the
@@ -819,7 +831,6 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   struct demangled_name_entry **slot;
   /* A 0-terminated copy of the linkage name.  */
   const char *linkage_name_copy;
-  struct demangled_name_entry entry;
 
   if (gsymbol->language == language_ada)
     {
@@ -857,7 +868,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   else
     linkage_name_copy = linkage_name;
 
-  entry.mangled = gdb::string_view (linkage_name_copy, len);
+  struct demangled_name_entry entry (gdb::string_view (linkage_name_copy, len));
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (per_bfd->demangled_names_hash.get (),
 			  &entry, INSERT));
@@ -890,7 +901,8 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	       obstack_alloc (&per_bfd->storage_obstack,
 			      offsetof (struct demangled_name_entry, demangled)
 			      + demangled_len + 1));
-	  (*slot)->mangled = gdb::string_view (linkage_name, len);
+	  new (*slot) demangled_name_entry
+	    (gdb::string_view (linkage_name, len));
 	}
       else
 	{
@@ -906,7 +918,8 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 			      + len + demangled_len + 2));
 	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
 	  strcpy (mangled_ptr, linkage_name_copy);
-	  (*slot)->mangled = gdb::string_view (mangled_ptr, len);
+	  new (*slot) demangled_name_entry
+	    (gdb::string_view (mangled_ptr, len));
 	}
       (*slot)->language = gsymbol->language;
 

@@ -25,6 +25,10 @@
 #include "gdbsupport/scoped_restore.h"
 #include <chrono>
 
+#ifdef HAVE_LIBXXHASH
+#include <xxhash.h>
+#endif
+
 struct completion_match_for_lcd;
 class compiled_regex;
 

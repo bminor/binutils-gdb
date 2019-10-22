@@ -1,5 +1,17 @@
 2019-10-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* symtab.c (struct demangled_name_entry): Add a constructor.
+	(free_demangled_name_entry): New function to call the destructor
+	for demangled_name_entry.
+	(create_demangled_names_hash): Pass free_demangled_name_entry to
+	htab_create_alloc.
+	(symbol_set_names): Call placement new for demangled_name_entry.
+	* utils.c: No longer include xxhash.h here, now that fast_hash
+	is inlined in the header.
+	* utils.h: Instead, include it here.
+
+2019-10-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* Makefile.in: Link with libxxhash.
 	* config.in: Regenerate.
 	* configure: Regenerate.
