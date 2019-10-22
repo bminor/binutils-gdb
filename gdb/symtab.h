@@ -504,7 +504,8 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
   (symbol)->ginfo.name = (linkage_name)
 
 /* Set the linkage and natural names of a symbol, by demangling
-   the linkage name.  */
+   the linkage name.  If linkage_name may not be nullterminated,
+   copy_name must be set to true.  */
 #define SYMBOL_SET_NAMES(symbol,linkage_name,len,copy_name,objfile)	\
   symbol_set_names (&(symbol)->ginfo, linkage_name, len, copy_name, \
 		    (objfile)->per_bfd)

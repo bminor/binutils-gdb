@@ -832,8 +832,6 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 		  struct objfile_per_bfd_storage *per_bfd)
 {
   struct demangled_name_entry **slot;
-  /* A 0-terminated copy of the linkage name.  */
-  const char *linkage_name_copy;
 
   if (gsymbol->language == language_ada)
     {
@@ -858,20 +856,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   if (per_bfd->demangled_names_hash == NULL)
     create_demangled_names_hash (per_bfd);
 
-  if (linkage_name[len] != '\0')
-    {
-      char *alloc_name;
-
-      alloc_name = (char *) alloca (len + 1);
-      memcpy (alloc_name, linkage_name, len);
-      alloc_name[len] = '\0';
-
-      linkage_name_copy = alloc_name;
-    }
-  else
-    linkage_name_copy = linkage_name;
-
-  struct demangled_name_entry entry (gdb::string_view (linkage_name_copy, len));
+  struct demangled_name_entry entry (gdb::string_view (linkage_name, len));
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (per_bfd->demangled_names_hash.get (),
 			  &entry, INSERT));
@@ -882,6 +867,21 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 This happens to, e.g., main.init (__go_init_main).  Cope.  */
       || (gsymbol->language == language_go && (*slot)->demangled == nullptr))
     {
+      /* A 0-terminated copy of the linkage name.  Callers must set COPY_NAME
+         to true if the string might not be nullterminated.  We have to make
+         this copy because demangling needs a nullterminated string.  */
+      const char *linkage_name_copy;
+      if (copy_name)
+	{
+	  char *alloc_name = (char *) alloca (len + 1);
+	  memcpy (alloc_name, linkage_name, len);
+	  alloc_name[len] = '\0';
+
+	  linkage_name_copy = alloc_name;
+	}
+      else
+	linkage_name_copy = linkage_name;
+
       gdb::unique_xmalloc_ptr<char> demangled_name_ptr
 	(symbol_find_demangled_name (gsymbol, linkage_name_copy));
 
@@ -894,7 +894,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 It turns out that it is actually important to still save such
 	 an entry in the hash table, because storing this name gives
 	 us better bcache hit rates for partial symbols.  */
-      if (!copy_name && linkage_name_copy == linkage_name)
+      if (!copy_name)
 	{
 	  *slot
 	    = ((struct demangled_name_entry *)
@@ -912,7 +912,8 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	       obstack_alloc (&per_bfd->storage_obstack,
 			      sizeof (demangled_name_entry) + len + 1));
 	  char *mangled_ptr = reinterpret_cast<char *> (*slot + 1);
-	  strcpy (mangled_ptr, linkage_name_copy);
+	  memcpy (mangled_ptr, linkage_name, len);
+	  mangled_ptr [len] = '\0';
 	  new (*slot) demangled_name_entry
 	    (gdb::string_view (mangled_ptr, len));
 	}

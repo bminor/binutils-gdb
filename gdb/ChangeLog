@@ -1,5 +1,12 @@
 2019-10-29  Christian Biesinger  <cbiesinger@google.com>
 
+	* symtab.h (symbol_set_names): Document that copy_name must be
+	set to true for non-nullterminated strings.
+	* symtab.c (symbol_set_names): Only make a nullterminated copy of
+	linkage_name if the entry was not found and we need to demangle.
+
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add gdb_binary_search.h.
 	* dwarf2-frame.c (bsearch_fde_cmp): Update.
 	(dwarf2_frame_find_fde): Replace bsearch with gdb::binary_search.
