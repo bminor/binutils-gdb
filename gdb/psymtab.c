@@ -1487,7 +1487,7 @@ start_psymtab_common (struct objfile *objfile,
 {
   struct partial_symtab *psymtab;
 
-  psymtab = allocate_psymtab (filename, objfile);
+  psymtab = new partial_symtab (filename, objfile);
   psymtab->set_text_low (textlow);
   psymtab->set_text_high (psymtab->raw_text_low ()); /* default */
   psymtab->globals_offset = objfile->partial_symtabs->global_psymbols.size ();
@@ -1646,16 +1646,17 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 
 /* See psympriv.h.  */
 
-struct partial_symtab *
-allocate_psymtab (const char *filename, struct objfile *objfile)
+partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
+  : searched_flag (PST_NOT_SEARCHED),
+    text_low_valid (0),
+    text_high_valid (0)
 {
-  struct partial_symtab *psymtab = new partial_symtab;
-  objfile->partial_symtabs->install_psymtab (psymtab);
+  objfile->partial_symtabs->install_psymtab (this);
 
-  psymtab->filename
+  filename
     = ((const char *) objfile->per_bfd->filename_cache.insert
-       (filename, strlen (filename) + 1));
-  psymtab->compunit_symtab = NULL;
+       (filename_, strlen (filename_) + 1));
+  compunit_symtab = NULL;
 
   if (symtab_create_debug)
     {
@@ -1674,10 +1675,8 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
 	}
       fprintf_filtered (gdb_stdlog,
 			"Created psymtab %s for module %s.\n",
-			host_address_to_string (psymtab), filename);
+			host_address_to_string (this), filename);
     }
-
-  return psymtab;
 }
 
 void

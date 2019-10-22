@@ -4662,7 +4662,7 @@ new_psymtab (const char *name, struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
-  psymtab = allocate_psymtab (name, objfile);
+  psymtab = new partial_symtab (name, objfile);
 
   /* Keep a backpointer to the file's symbols.  */
 

@@ -6695,7 +6695,7 @@ static void
 dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
                                struct objfile *objfile)
 {
-  struct partial_symtab *subpst = allocate_psymtab (name, objfile);
+  struct partial_symtab *subpst = new partial_symtab (name, objfile);
 
   if (!IS_ABSOLUTE_PATH (subpst->filename))
     {

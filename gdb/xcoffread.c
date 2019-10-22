@@ -2065,7 +2065,7 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
   for (i = 0; i < num_includes; i++)
     {
       struct partial_symtab *subpst =
-	allocate_psymtab (include_list[i], objfile);
+	new partial_symtab (include_list[i], objfile);
 
       subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;

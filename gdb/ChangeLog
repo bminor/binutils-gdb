@@ -1,5 +1,18 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_end_psymtab): Use new.
+	* psymtab.c (start_psymtab_common): Use new.
+	(partial_symtab::partial_symtab): Rename from allocate_psymtab.
+	Update.
+	* psympriv.h (struct partial_symtab): Add parameters to
+	constructor.  Don't inline.
+	(allocate_psymtab): Don't declare.
+	* mdebugread.c (new_psymtab): Use new.
+	* dwarf2read.c (dwarf2_create_include_psymtab): Use new.
+	* dbxread.c (dbx_end_psymtab): Use new.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.h (class psymtab_storage) <install_psymtab>: Rename from
 	allocate_psymtab.  Update documentation.
 	* psymtab.c (psymtab_storage::install_psymtab): Rename from

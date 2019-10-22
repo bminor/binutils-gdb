@@ -104,12 +104,14 @@ enum psymtab_search_status
 
 struct partial_symtab
 {
-  partial_symtab ()
-    : searched_flag (PST_NOT_SEARCHED),
-      text_low_valid (0),
-      text_high_valid (0)
-  {
-  }
+  /* Allocate a new partial symbol table associated with OBJFILE.
+     FILENAME (which must be non-NULL) is the filename of this partial
+     symbol table; it is copied into the appropriate storage.  The
+     partial symtab will also be installed using
+     psymtab_storage::install.  */
+
+  partial_symtab (const char *filename, struct objfile *objfile)
+    ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
@@ -328,16 +330,6 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    const char *, CORE_ADDR);
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
-
-/* Allocate a new partial symbol table associated with OBJFILE.
-   FILENAME (which must be non-NULL) is the filename of this partial
-   symbol table; it is copied into the appropriate storage.  A new
-   partial symbol table is returned; aside from "next" and "filename",
-   its fields are initialized to zero.  */
-
-extern struct partial_symtab *allocate_psymtab (const char *filename,
-						struct objfile *objfile)
-  ATTRIBUTE_NONNULL (1);
 
 static inline void
 discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
