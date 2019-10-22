@@ -3862,7 +3862,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
   if (pst->readin)
     return;
-  pst->readin = 1;
+  pst->readin = true;
 
   /* Read in all partial symtabs on which this one is dependent.
      NOTE that we do have circular dependencies, sigh.  We solved

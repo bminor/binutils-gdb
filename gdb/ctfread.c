@@ -1241,7 +1241,7 @@ psymtab_to_symtab (struct partial_symtab *pst)
       set_symbol_address (ccp->of, sym, sym->linkage_name ());
     }
 
-  pst->readin = 1;
+  pst->readin = true;
 }
 
 /* Expand partial symbol table PST into a full symbol table.

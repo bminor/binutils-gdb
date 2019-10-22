@@ -7945,7 +7945,7 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 	name = string_printf ("<type_units_at_0x%x>", line_offset);
 
       pst = create_partial_symtab (per_cu, name.c_str ());
-      pst->anonymous = 1;
+      pst->anonymous = true;
     }
 
   tu_group->hash.dwo_unit = cu->dwo_unit;
@@ -8029,7 +8029,7 @@ create_partial_symtab (struct dwarf2_per_cu_data *per_cu, const char *name)
 
   pst = start_psymtab_common (objfile, name, 0);
 
-  pst->psymtabs_addrmap_supported = 1;
+  pst->psymtabs_addrmap_supported = true;
 
   /* This is the glue that links PST into GDB's symbol API.  */
   pst->read_symtab_private = per_cu;
@@ -8241,7 +8241,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);
   pst = create_partial_symtab (per_cu, "");
-  pst->anonymous = 1;
+  pst->anonymous = true;
 
   first_die = load_partial_dies (reader, info_ptr, 1);
 
@@ -9720,7 +9720,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
     {
       /* It's an include file, no symbols to read for it.
          Everything is in the parent symtab.  */
-      pst->readin = 1;
+      pst->readin = true;
       return;
     }
 
@@ -10479,7 +10479,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
     {
       struct partial_symtab *pst = per_cu->v.psymtab;
       pst->compunit_symtab = cust;
-      pst->readin = 1;
+      pst->readin = true;
     }
 
   /* Push it for inclusion processing later.  */
@@ -10559,7 +10559,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
     {
       struct partial_symtab *pst = per_cu->v.psymtab;
       pst->compunit_symtab = cust;
-      pst->readin = 1;
+      pst->readin = true;
     }
 
   /* Not needed any more.  */

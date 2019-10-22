@@ -2108,7 +2108,7 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
       read_ofile_symtab (objfile, pst);
     }
 
-  pst->readin = 1;
+  pst->readin = true;
 }
 
 /* Read in all of the symbols for a given psymtab for real.

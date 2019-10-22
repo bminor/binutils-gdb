@@ -1005,7 +1005,7 @@ psym_print_stats (struct objfile *objfile)
   i = 0;
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (ps->readin == 0)
+      if (!ps->readin)
 	i++;
     }
   printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"), i);

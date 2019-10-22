@@ -1,5 +1,18 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
+	* psymtab.c (psym_print_stats): Update.
+	* psympriv.h (struct partial_symtab) <readin,
+	psymtabs_addrmap_supported, anonymous>: Now bool.
+	* mdebugread.c (psymtab_to_symtab_1): Update.
+	* dwarf2read.c (create_type_unit_group, create_partial_symtab)
+	(build_type_psymtabs_reader, psymtab_to_symtab_1)
+	(process_full_comp_unit, process_full_type_unit): Update.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Update.
+	* ctfread.c (psymtab_to_symtab): Update.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* mdebugread.c (parse_partial_symbols): Use discard_psymtab.
 	* psymtab.h (class psymtab_storage) <free_psymtabs>: Remove.
 	* psymtab.c (psymtab_storage): Delete psymtabs.

@@ -239,21 +239,21 @@ struct partial_symtab
   int statics_offset = 0;
   int n_static_syms = 0;
 
-  /* Non-zero if the symtab corresponding to this psymtab has been
-     readin.  This is located here so that this structure packs better
-     on 64-bit systems.  */
+  /* True if the symtab corresponding to this psymtab has been readin.
+     This is located here so that this structure packs better on
+     64-bit systems.  */
 
-  unsigned char readin = 0;
+  bool readin = false;
 
   /* True iff objfile->psymtabs_addrmap is properly populated for this
      partial_symtab.  For discontiguous overlapping psymtabs is the only usable
      info in PSYMTABS_ADDRMAP.  */
 
-  unsigned char psymtabs_addrmap_supported = 0;
+  bool psymtabs_addrmap_supported = false;
 
   /* True if the name of this partial symtab is not a source file name.  */
 
-  unsigned char anonymous = 0;
+  bool anonymous = false;
 
   /* A flag that is temporarily used when searching psymtabs.  */
 
