@@ -21,6 +21,18 @@ AC_DEFUN([GDB_AC_COMMON], [
   AC_HEADER_STDC
   AC_FUNC_ALLOCA
 
+  WIN32APILIBS=
+  case ${host} in
+    *mingw32*)
+      AC_DEFINE(USE_WIN32API, 1,
+		[Define if we should use the Windows API, instead of the
+		 POSIX API.  On Windows, we use the Windows API when
+		 building for MinGW, but the POSIX API when building
+		 for Cygwin.])
+      WIN32APILIBS="-lws2_32"
+      ;;
+  esac
+
   dnl Note that this requires codeset.m4, which is included
   dnl by the users of common.m4.
   AM_LANGINFO_CODESET

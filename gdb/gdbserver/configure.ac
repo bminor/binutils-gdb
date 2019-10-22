@@ -248,19 +248,12 @@ esac
 if test "${srv_mingwce}" = "yes"; then
   LIBS="$LIBS -lws2"
 elif test "${srv_mingw}" = "yes"; then
-  LIBS="$LIBS -lws2_32"
+  # WIN32APILIBS is set by GDB_AC_COMMON.
+  LIBS="$LIBS $WIN32APILIBS"
 elif test "${srv_qnx}" = "yes"; then
   LIBS="$LIBS -lsocket"
 elif test "${srv_lynxos}" = "yes"; then
   LIBS="$LIBS -lnetinet"
-fi
-
-if test "${srv_mingw}" = "yes"; then
-  AC_DEFINE(USE_WIN32API, 1,
-	    [Define if we should use the Windows API, instead of the
-	     POSIX API.  On Windows, we use the Windows API when
-	     building for MinGW, but the POSIX API when building
-	     for Cygwin.])
 fi
 
 if test "${srv_linux_usrregs}" = "yes"; then

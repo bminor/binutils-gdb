@@ -1827,17 +1827,8 @@ if test x"$gdb_cv_os_cygwin" = xyes; then
 fi
 
 # The ser-tcp.c module requires sockets.
-case ${host} in
-  *mingw32*)
-    AC_DEFINE(USE_WIN32API, 1,
-              [Define if we should use the Windows API, instead of the
-	       POSIX API.  On Windows, we use the Windows API when
-	       building for MinGW, but the POSIX API when building
-	       for Cygwin.])
-    WIN32LIBS="$WIN32LIBS -lws2_32"
-    ;;
-esac
-AC_SUBST(WIN32LIBS)
+# Note that WIN32APILIBS is set by GDB_AC_COMMON.
+WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
 
 # Add ELF support to GDB, but only if BFD includes ELF support.
 GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
