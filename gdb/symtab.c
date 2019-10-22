@@ -719,7 +719,7 @@ struct demangled_name_entry
     : mangled (mangled_name) {}
 
   gdb::string_view mangled;
-  ENUM_BITFIELD(language) language : LANGUAGE_BITS;
+  enum language language;
   char demangled[1];
 };
 

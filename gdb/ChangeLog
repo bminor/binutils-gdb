@@ -1,5 +1,10 @@
 2019-10-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* symtab.c (struct demangled_name_entry) <language>: Change from
+	bitfield to regular variable.
+
+2019-10-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* symtab.c (struct demangled_name_entry): Add a constructor.
 	(free_demangled_name_entry): New function to call the destructor
 	for demangled_name_entry.
