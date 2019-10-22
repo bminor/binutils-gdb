@@ -28,7 +28,6 @@
 #include "gdbcore.h"
 #include "mach-o.h"
 #include "aout/stab_gnu.h"
-#include "psympriv.h"
 #include "complaints.h"
 #include "gdb_bfd.h"
 #include <string>

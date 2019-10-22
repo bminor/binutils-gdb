@@ -1,3 +1,7 @@
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
+	* machoread.c: Do not include psympriv.h.
+
 2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention the new option and the set/show commands.
