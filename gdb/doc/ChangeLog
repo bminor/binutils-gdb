@@ -1,3 +1,8 @@
+2019-10-23  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi (Threads In Python): Add a note for how to get the
+	list of threads.
+
 2019-10-07  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.texinfo: Fix typo.
