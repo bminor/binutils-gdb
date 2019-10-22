@@ -1,5 +1,13 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.h (class psymtab_storage) <install_psymtab>: Rename from
+	allocate_psymtab.  Update documentation.
+	* psymtab.c (psymtab_storage::install_psymtab): Rename from
+	allocate_psymtab.  Do not use new.
+	(allocate_psymtab): Use new.  Update.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
 	* psymtab.c (psym_print_stats): Update.
 	* psympriv.h (struct partial_symtab) <readin,

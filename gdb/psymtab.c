@@ -75,15 +75,11 @@ psymtab_storage::~psymtab_storage ()
 
 /* See psymtab.h.  */
 
-struct partial_symtab *
-psymtab_storage::allocate_psymtab ()
+void
+psymtab_storage::install_psymtab (partial_symtab *pst)
 {
-  struct partial_symtab *psymtab = new struct partial_symtab;
-
-  psymtab->next = psymtabs;
-  psymtabs = psymtab;
-
-  return psymtab;
+  pst->next = psymtabs;
+  psymtabs = pst;
 }
 
 
@@ -1653,8 +1649,8 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 struct partial_symtab *
 allocate_psymtab (const char *filename, struct objfile *objfile)
 {
-  struct partial_symtab *psymtab
-    = objfile->partial_symtabs->allocate_psymtab ();
+  struct partial_symtab *psymtab = new partial_symtab;
+  objfile->partial_symtabs->install_psymtab (psymtab);
 
   psymtab->filename
     = ((const char *) objfile->per_bfd->filename_cache.insert
