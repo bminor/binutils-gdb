@@ -397,11 +397,7 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
     }
 
   if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("Cannot locate object file for block."));
-      return NULL;
-    }
+    Py_RETURN_NONE;
 
   if (block)
     return block_to_block_object (block, COMPUNIT_OBJFILE (cust));

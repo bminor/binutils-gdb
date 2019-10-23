@@ -57,6 +57,20 @@ if {![runto_main]} {
     return
 }
 
+# Check we can get a block for the current $pc.
+set pc_val [get_integer_valueof "\$pc" 0]
+gdb_py_test_silent_cmd "python blk = gdb.current_progspace ().block_for_pc (${pc_val})" \
+    "get block for the current \$pc" 1
+gdb_test "python print blk.start <= ${pc_val}" "True" \
+    "block start is before \$pc"
+gdb_test "python print blk.end >= ${pc_val}" "True" \
+    "block end is after \$pc"
+
+# Check what happens when we ask for a block of an invalid address.
+if ![is_address_zero_readable] {
+    gdb_test "python print gdb.current_progspace ().block_for_pc (0)" "None"
+}
+
 # With a single inferior, progspace.objfiles () and gdb.objfiles () should
 # be identical.
 gdb_test "python print (progspace.objfiles () == gdb.objfiles ())" "True"
