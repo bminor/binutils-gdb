@@ -668,6 +668,42 @@ run_inferior_call (struct call_thread_fsm *sm,
   return caught_error;
 }
 
+/* Reserve space on the stack for a value of the given type.
+   Return the address of the allocated space.
+   Make certain that the value is correctly aligned.
+   The SP argument is modified.  */
+
+static CORE_ADDR
+reserve_stack_space (const type *values_type, CORE_ADDR &sp)
+{
+  struct frame_info *frame = get_current_frame ();
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  CORE_ADDR addr = 0;
+
+  if (gdbarch_inner_than (gdbarch, 1, 2))
+    {
+      /* Stack grows downward.  Align STRUCT_ADDR and SP after
+	 making space.  */
+      sp -= TYPE_LENGTH (values_type);
+      if (gdbarch_frame_align_p (gdbarch))
+	sp = gdbarch_frame_align (gdbarch, sp);
+      addr = sp;
+    }
+  else
+    {
+      /* Stack grows upward.  Align the frame, allocate space, and
+	 then again, re-align the frame???  */
+      if (gdbarch_frame_align_p (gdbarch))
+	sp = gdbarch_frame_align (gdbarch, sp);
+      addr = sp;
+      sp += TYPE_LENGTH (values_type);
+      if (gdbarch_frame_align_p (gdbarch))
+	sp = gdbarch_frame_align (gdbarch, sp);
+    }
+
+  return addr;
+}
+
 /* See infcall.h.  */
 
 struct value *
@@ -689,7 +725,7 @@ call_function_by_hand (struct value *function,
    making dummy frames be different from normal frames, consider that.  */
 
 /* Perform a function call in the inferior.
-   ARGS is a vector of values of arguments (NARGS of them).
+   ARGS is a vector of values of arguments.
    FUNCTION is a value, the function to be called.
    Returns a value representing what the function returned.
    May fail to return, if a breakpoint or signal is hit
@@ -989,8 +1025,7 @@ call_function_by_hand_dummy (struct value *function,
     }
 
   /* Reserve space for the return structure to be written on the
-     stack, if necessary.  Make certain that the value is correctly
-     aligned.
+     stack, if necessary.
 
      While evaluating expressions, we reserve space on the stack for
      return values of class type even if the language ABI and the target
@@ -1005,28 +1040,7 @@ call_function_by_hand_dummy (struct value *function,
 
   if (return_method != return_method_normal
       || (stack_temporaries && class_or_union_p (values_type)))
-    {
-      if (gdbarch_inner_than (gdbarch, 1, 2))
-	{
-	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
-             making space for the return value.  */
-	  sp -= TYPE_LENGTH (values_type);
-	  if (gdbarch_frame_align_p (gdbarch))
-	    sp = gdbarch_frame_align (gdbarch, sp);
-	  struct_addr = sp;
-	}
-      else
-	{
-	  /* Stack grows upward.  Align the frame, allocate space, and
-             then again, re-align the frame???  */
-	  if (gdbarch_frame_align_p (gdbarch))
-	    sp = gdbarch_frame_align (gdbarch, sp);
-	  struct_addr = sp;
-	  sp += TYPE_LENGTH (values_type);
-	  if (gdbarch_frame_align_p (gdbarch))
-	    sp = gdbarch_frame_align (gdbarch, sp);
-	}
-    }
+    struct_addr = reserve_stack_space (values_type, sp);
 
   std::vector<struct value *> new_args;
   if (return_method == return_method_hidden_param)
