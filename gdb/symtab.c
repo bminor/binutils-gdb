@@ -480,6 +480,9 @@ iterate_over_some_symtabs (const char *name,
 
 	      gdb_assert (IS_ABSOLUTE_PATH (real_path));
 	      gdb_assert (IS_ABSOLUTE_PATH (name));
+	      gdb::unique_xmalloc_ptr<char> fullname_real_path
+		= gdb_realpath (fullname);
+	      fullname = fullname_real_path.get ();
 	      if (FILENAME_CMP (real_path, fullname) == 0)
 		{
 		  if (callback (s))
