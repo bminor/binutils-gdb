@@ -5302,6 +5302,7 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	      && spu_elf_section_data ((*p)->sections[0])->u.o.ovl_index != 0)
 	    {
 	      m = *p;
+	      m->no_sort_lma = 1;
 	      *p = m->next;
 	      *p_overlay = m;
 	      p_overlay = &m->next;

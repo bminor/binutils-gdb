@@ -1,3 +1,9 @@
+2019-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR 4499
+	* elf/internal.h (struct elf_segment_map): Delete header_size.
+	Add no_sort_lma and idx.
+
 2019-10-16  Alan Modra  <amodra@gmail.com>
 
 	PR 13616

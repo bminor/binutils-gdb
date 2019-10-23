@@ -273,8 +273,6 @@ struct elf_segment_map
   bfd_vma p_align;
   /* Segment size in file and memory */
   bfd_vma p_size;
-  /* Required size of filehdr + phdrs, if non-zero */
-  bfd_vma header_size;
   /* Whether the p_flags field is valid; if not, the flags are based
      on the section flags.  */
   unsigned int p_flags_valid : 1;
@@ -291,6 +289,13 @@ struct elf_segment_map
   unsigned int includes_filehdr : 1;
   /* Whether this segment includes the program headers.  */
   unsigned int includes_phdrs : 1;
+  /* Assume this PT_LOAD header has an lma of zero when sorting
+     headers before assigning file offsets.  PT_LOAD headers with this
+     flag set are placed after one with includes_filehdr set, and
+     before PT_LOAD headers without this flag set.  */
+  unsigned int no_sort_lma : 1;
+  /* Index holding original order before sorting segments.  */
+  unsigned int idx;
   /* Number of sections (may be 0).  */
   unsigned int count;
   /* Sections.  Actual number of elements is in count field.  */

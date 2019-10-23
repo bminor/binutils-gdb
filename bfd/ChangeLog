@@ -1,3 +1,26 @@
+2019-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR 4499
+	* elf-nacl.c (nacl_modify_segment_map): Set no_sort_lma for all
+	PT_LOAD segments.
+	* elf32-spu.c (spu_elf_modify_segment_map): Likewise on overlay
+	PT_LOAD segments.
+	* elf.c (elf_sort_segments): New function.
+	(assign_file_positions_except_relocs): Use shortcuts to elfheader
+	and elf_tdata.  Seek to e_phoff not sizeof_ehdr to write program
+	headers.  Move PT_PHDR check..
+	(assign_file_positions_for_non_load_sections): ..and code setting
+	PT_PHDR p_vaddr and p_paddr, and code setting __ehdr_start value..
+	(assign_file_positions_for_load_sections): ..to here.  Sort
+	PT_LOAD headers.  Delete header_pad code.  Use actual number of
+	headers rather than allocated in calculating size for program
+	headers.  Don't assume program headers follow ELF file header.
+	Simplify pt_load_count code.  Only set "off" for PT_LOAD or
+	PT_NOTE in cores.
+	(rewrite_elf_program_header): Set p_vaddr_offset for segments
+	that include file and program headers.
+	(copy_elf_program_header): Likewise, replacing header_size code.
+
 2019-10-21  Alan Modra  <amodra@gmail.com>
 
 	PR 452

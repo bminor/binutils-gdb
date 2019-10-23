@@ -197,6 +197,7 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 		 included the file header and phdrs.  */
 	      seg->includes_filehdr = 0;
 	      seg->includes_phdrs = 0;
+	      seg->no_sort_lma = 1;
 	      /* Also strip out empty segments.  */
 	      if (seg->count == 0)
 		{
