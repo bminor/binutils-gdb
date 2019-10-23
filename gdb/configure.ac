@@ -691,19 +691,17 @@ fi
 # --------------------- #
 
 dnl Utility to simplify finding libpython.
-dnl $1 = pythonX.Y
-dnl $2 = the shell variable to assign the result to
+dnl $1 = the shell variable to assign the result to
 dnl      If libpython is found we store $version here.
-dnl $3 = additional flags to add to CPPFLAGS
-dnl $4 = additional flags to add to LIBS
+dnl $2 = additional flags to add to CPPFLAGS
+dnl $3 = additional flags to add to LIBS
 
 AC_DEFUN([AC_TRY_LIBPYTHON],
 [
-  version=$1
-  define([have_libpython_var],$2)
-  new_CPPFLAGS=$3
-  new_LIBS=$4
-  AC_MSG_CHECKING([for ${version}])
+  define([have_libpython_var],$1)
+  new_CPPFLAGS=$2
+  new_LIBS=$3
+  AC_MSG_CHECKING([for python])
   save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
@@ -711,7 +709,7 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   found_usable_python=no
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Python.h"]],
                                  [[Py_Initialize ();]])],
-                 [have_libpython_var=${version}
+                 [have_libpython_var=yes
                   found_usable_python=yes
                   PYTHON_CPPFLAGS=$new_CPPFLAGS
                   PYTHON_LIBS=$new_LIBS])
@@ -868,46 +866,17 @@ else
 
   have_libpython=no
   if test "${have_python_config}" = yes; then
-    # Determine the Python version by extracting "-lpython<version>"
-    # part of the python_libs. <version> is usually X.Y with X and Y
-    # being decimal numbers, but can also be XY (seen on Windows).
-    #
-    # The extraction is performed using sed with a regular expression.
-    # Initially, the regexp used was using the '?' quantifier to make
-    # the dot in the version number optional.  Unfortunately, this
-    # does not work with non-GNU versions of sed because, because of
-    # what looks like a limitation (the '?' quantifier does not work
-    # with back-references).  We work around this limitation by using
-    # the '*' quantifier instead.  It means that, in theory, we might
-    # match unexpected version strings such as "-lpython2..7", but
-    # this seems unlikely in practice.  And even if that happens,
-    # an error will be triggered later on, when checking that version
-    # number.
-    python_version=`echo " ${python_libs} " \
-                         | sed -e 's,^.* -l\(python[[0-9]]*[[.]]*[[0-9]]*\).*$,\1,'`
-    case "${python_version}" in
-    python*)
-      AC_TRY_LIBPYTHON(${python_version}, have_libpython,
-                       ${python_includes}, ${python_libs})
-      ;;
-    *)
-      AC_MSG_ERROR([unable to determine python version from ${python_libs}])
-      ;;
-    esac
+    AC_TRY_LIBPYTHON(have_libpython,
+                     ${python_includes}, ${python_libs})
   elif test "${have_python_config}" != failed; then
     if test "${have_libpython}" = no; then
-      AC_TRY_LIBPYTHON(python2.7, have_libpython,
+      AC_TRY_LIBPYTHON(have_libpython,
                        ${python_includes}, "-lpython2.7 ${python_libs}")
     fi
     if test "${have_libpython}" = no; then
-      AC_TRY_LIBPYTHON(python2.6, have_libpython,
+      AC_TRY_LIBPYTHON(have_libpython,
                        ${python_includes}, "-lpython2.6 ${python_libs}")
     fi
-  fi
-  if test "${have_libpython}" = python2.7 -o "${have_libpython}" = python27; then
-    AC_DEFINE(HAVE_LIBPYTHON2_7, 1, [Define if Python 2.7 is being used.])
-  elif test "${have_libpython}" = python2.6 -o "${have_libpython}" = python26; then
-    AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
   fi
 
   if test "${have_libpython}" = no; then

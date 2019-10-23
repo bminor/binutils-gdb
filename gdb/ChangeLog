@@ -1,3 +1,10 @@
+2019-10-24  Christian Biesinger  <cbiesinger@google.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Remove the code that uses sed to get the python
+	version and defines HAVE_LIBPYTHON2_6 / HAVE_LIBPYTHON2_7.
+
 2019-10-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-progspace.c (pspy_block_for_pc): Return None for all
