@@ -136,7 +136,7 @@ get_register_name (unsigned int reg)
 {
   if (reg < ARRAY_SIZE (register_names))
     return register_names[reg];
-  return _("<inavlid register number>");
+  return _("<invalid register number>");
 }
 
 static inline const char *
@@ -144,7 +144,7 @@ get_condition_name (unsigned int cond)
 {
   if (cond < ARRAY_SIZE (condition_names))
     return condition_names[cond];
-  return _("<inavlid condition code>");
+  return _("<invalid condition code>");
 }
 
 static inline const char *
@@ -152,7 +152,7 @@ get_flag_name (unsigned int flag)
 {
   if (flag < ARRAY_SIZE (flag_names))
     return flag_names[flag];
-  return _("<inavlid flag>");
+  return _("<invalid flag>");
 }
 
 static inline const char *
@@ -160,7 +160,7 @@ get_double_register_name (unsigned int reg)
 {
   if (reg < ARRAY_SIZE (double_register_names))
     return double_register_names[reg];
-  return _("<inavlid register number>");
+  return _("<invalid register number>");
 }
 
 static inline const char *
@@ -168,7 +168,7 @@ get_double_register_high_name (unsigned int reg)
 {
   if (reg < ARRAY_SIZE (double_register_high_names))
     return double_register_high_names[reg];
-  return _("<inavlid register number>");
+  return _("<invalid register number>");
 }
 
 static inline const char *
@@ -176,7 +176,7 @@ get_double_register_low_name (unsigned int reg)
 {
   if (reg < ARRAY_SIZE (double_register_low_names))
     return double_register_low_names[reg];
-  return _("<inavlid register number>");
+  return _("<invalid register number>");
 }
 
 static inline const char *
@@ -184,7 +184,7 @@ get_double_control_register_name (unsigned int reg)
 {
   if (reg < ARRAY_SIZE (double_control_register_names))
     return double_control_register_names[reg];
-  return _("<inavlid register number>");
+  return _("<invalid register number>");
 }
 
 static inline const char *
@@ -192,7 +192,7 @@ get_double_condition_name (unsigned int cond)
 {
   if (cond < ARRAY_SIZE (double_condition_names))
     return double_condition_names[cond];
-  return _("<inavlid condition code>");
+  return _("<invalid condition code>");
 }
 
 static inline const char *
@@ -200,7 +200,7 @@ get_opsize_name (unsigned int opsize)
 {
   if (opsize < ARRAY_SIZE (opsize_names))
     return opsize_names[opsize];
-  return _("<inavlid opsize>");
+  return _("<invalid opsize>");
 }
 
 static inline const char *
@@ -208,7 +208,7 @@ get_size_name (unsigned int size)
 {
   if (size < ARRAY_SIZE (size_names))
     return size_names[size];
-  return _("<inavlid size>");
+  return _("<invalid size>");
 }
 
 

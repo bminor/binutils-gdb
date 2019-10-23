@@ -1,3 +1,12 @@
+2019-10-23  Nick Clifton  <nickc@redhat.com>
+
+	* rx-dis.c (get_register_name): Fix spelling typo in error
+	message.
+	(get_condition_name, get_flag_name, get_double_register_name)
+	(get_double_register_high_name, get_double_register_low_name)
+	(get_double_control_register_name, get_double_condition_name)
+	(get_opsize_name, get_size_name): Likewise.
+
 2019-10-22  Nick Clifton  <nickc@redhat.com>
 
 	* rx-dis.c (get_size_name): New function.  Provides safe
