@@ -253,8 +253,8 @@ static void sort_blocks (struct symtab *);
 
 static legacy_psymtab *new_psymtab (const char *, struct objfile *);
 
-static void psymtab_to_symtab_1 (struct objfile *objfile,
-				 legacy_psymtab *, const char *);
+static void psymtab_to_symtab_1 (legacy_psymtab *pst,
+				 struct objfile *objfile);
 
 static void add_block (struct block *, struct symtab *);
 
@@ -279,7 +279,7 @@ mdebug_read_symtab (legacy_psymtab *self, struct objfile *objfile)
 {
   next_symbol_text_func = mdebug_next_symbol_text;
 
-  psymtab_to_symtab_1 (objfile, self, self->filename);
+  self->expand_psymtab (objfile);
 
   /* Match with global symbols.  This only needs to be done once,
      after all of the symtabs and dependencies have been read in.  */
@@ -2613,6 +2613,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
       /* The way to turn this into a symtab is to call...  */
       pst->legacy_read_symtab = mdebug_read_symtab;
+      pst->legacy_expand_psymtab = psymtab_to_symtab_1;
 
       /* Set up language for the pst.
          The language from the FDR is used if it is unambigious (e.g. cfront
@@ -3834,8 +3835,7 @@ mdebug_next_symbol_text (struct objfile *objfile)
    The flow of control and even the memory allocation differs.  FIXME.  */
 
 static void
-psymtab_to_symtab_1 (struct objfile *objfile,
-		     legacy_psymtab *pst, const char *filename)
+psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
@@ -3872,9 +3872,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	    wrap_here ("");	/* Flush output */
 	    gdb_flush (gdb_stdout);
 	  }
-	/* We only pass the filename for debug purposes.  */
-	psymtab_to_symtab_1 (objfile, (legacy_psymtab *) pst->dependencies[i],
-			     pst->dependencies[i]->filename);
+	pst->dependencies[i]->expand_psymtab (objfile);
       }
 
   /* Do nothing if this is a dummy psymtab.  */
@@ -4664,6 +4662,7 @@ new_psymtab (const char *name, struct objfile *objfile)
 
   /* The way to turn this into a symtab is to call...  */
   psymtab->legacy_read_symtab = mdebug_read_symtab;
+  psymtab->legacy_expand_psymtab = psymtab_to_symtab_1;
   return (psymtab);
 }
 

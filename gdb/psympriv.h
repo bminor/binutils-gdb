@@ -129,6 +129,11 @@ struct partial_symtab
      table.  */
   virtual void read_symtab (struct objfile *) = 0;
 
+  /* Psymtab expansion is done in two steps.  The first step is a call
+     to read_symtab; but while that is in progress, calls to
+     expand_psymtab can be made.  */
+  virtual void expand_psymtab (struct objfile *) = 0;
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -311,10 +316,20 @@ struct legacy_psymtab : public partial_symtab
       (*legacy_read_symtab) (this, objf);
   }
 
+  void expand_psymtab (struct objfile *objf) override
+  {
+    (*legacy_expand_psymtab) (this, objf);
+  }
+
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
 
   void (*legacy_read_symtab) (legacy_psymtab *, struct objfile *) = nullptr;
+
+  /* Pointer to function which will actually expand this psymtab into
+     a full symtab.  */
+
+  void (*legacy_expand_psymtab) (legacy_psymtab *, struct objfile *) = nullptr;
 
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the

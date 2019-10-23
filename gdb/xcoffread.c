@@ -1817,7 +1817,7 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 }
 
 static void
-xcoff_psymtab_to_symtab_1 (struct objfile *objfile, legacy_psymtab *pst)
+xcoff_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
 {
   int i;
 
@@ -1847,8 +1847,7 @@ xcoff_psymtab_to_symtab_1 (struct objfile *objfile, legacy_psymtab *pst)
 	    wrap_here ("");	/* Flush output */
 	    gdb_flush (gdb_stdout);
 	  }
-	xcoff_psymtab_to_symtab_1 (objfile,
-				   (legacy_psymtab *) pst->dependencies[i]);
+	pst->dependencies[i]->expand_psymtab (objfile);
       }
 
   if (((struct symloc *) pst->read_symtab_private)->numsyms != 0)
@@ -1876,7 +1875,7 @@ xcoff_read_symtab (legacy_psymtab *self, struct objfile *objfile)
     {
       next_symbol_text_func = xcoff_next_symbol_text;
 
-      xcoff_psymtab_to_symtab_1 (objfile, self);
+      self->expand_psymtab (objfile);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -1997,6 +1996,7 @@ xcoff_start_psymtab (struct objfile *objfile,
     XOBNEW (&objfile->objfile_obstack, struct symloc);
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->legacy_read_symtab = xcoff_read_symtab;
+  result->legacy_expand_psymtab = xcoff_psymtab_to_symtab_1;
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
@@ -2059,6 +2059,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       subpst->number_of_dependencies = 1;
 
       subpst->legacy_read_symtab = pst->legacy_read_symtab;
+      subpst->legacy_expand_psymtab = pst->legacy_expand_psymtab;
     }
 
   if (num_includes == 0

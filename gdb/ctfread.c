@@ -124,6 +124,7 @@ struct ctf_psymtab : public partial_symtab
   }
 
   void read_symtab (struct objfile *) override;
+  void expand_psymtab (struct objfile *) override;
 
   struct ctf_context *context;
 };
@@ -159,8 +160,6 @@ struct ctf_field_info
 
 
 /* Local function prototypes */
-
-static void psymtab_to_symtab (ctf_psymtab *);
 
 static int ctf_add_type_cb (ctf_id_t tid, void *arg);
 
@@ -1216,15 +1215,15 @@ ctf_end_symtab (ctf_psymtab *pst,
 
 /* Read in full symbols for PST, and anything it depends on.  */
 
-static void
-psymtab_to_symtab (ctf_psymtab *pst)
+void
+ctf_psymtab::expand_psymtab (struct objfile *objfile)
 {
   struct symbol *sym;
   struct ctf_context *ccp;
 
-  gdb_assert (!pst->readin);
+  gdb_assert (!readin);
 
-  ccp = pst->context;
+  ccp = context;
 
   /* Iterate over entries in data types section.  */
   if (ctf_type_iter (ccp->fp, ctf_add_type_cb, ccp) == CTF_ERR)
@@ -1254,7 +1253,7 @@ psymtab_to_symtab (ctf_psymtab *pst)
       set_symbol_address (ccp->of, sym, sym->linkage_name ());
     }
 
-  pst->readin = true;
+  readin = true;
 }
 
 /* Expand partial symbol table PST into a full symbol table.
@@ -1279,7 +1278,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
 
       offset = get_objfile_text_range (objfile, &tsize);
       ctf_start_symtab (this, objfile, offset);
-      psymtab_to_symtab (this);
+      expand_psymtab (objfile);
 
       set_text_low (offset);
       set_text_high (offset + tsize);

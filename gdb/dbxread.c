@@ -268,7 +268,7 @@ static void read_ofile_symtab (struct objfile *, legacy_psymtab *);
 static void dbx_read_symtab (legacy_psymtab *self,
 			     struct objfile *objfile);
 
-static void dbx_psymtab_to_symtab_1 (struct objfile *, legacy_psymtab *);
+static void dbx_psymtab_to_symtab_1 (legacy_psymtab *, struct objfile *);
 
 static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
 
@@ -1909,6 +1909,7 @@ start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
     XOBNEW (&objfile->objfile_obstack, struct symloc);
   LDSYMOFF (result) = ldsymoff;
   result->legacy_read_symtab = dbx_read_symtab;
+  result->legacy_expand_psymtab = dbx_psymtab_to_symtab_1;
   SYMBOL_SIZE (result) = symbol_size;
   SYMBOL_OFFSET (result) = symbol_table_offset;
   STRING_OFFSET (result) = string_table_offset;
@@ -2039,6 +2040,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       subpst->number_of_dependencies = 1;
 
       subpst->legacy_read_symtab = pst->legacy_read_symtab;
+      subpst->legacy_expand_psymtab = pst->legacy_expand_psymtab;
     }
 
   if (num_includes == 0
@@ -2064,7 +2066,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 }
 
 static void
-dbx_psymtab_to_symtab_1 (struct objfile *objfile, legacy_psymtab *pst)
+dbx_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
 {
   int i;
 
@@ -2091,8 +2093,7 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, legacy_psymtab *pst)
 	    wrap_here ("");	/* Flush output.  */
 	    gdb_flush (gdb_stdout);
 	  }
-	dbx_psymtab_to_symtab_1 (objfile,
-				 (legacy_psymtab *) pst->dependencies[i]);
+	pst->dependencies[i]->expand_psymtab (objfile);
       }
 
   if (LDSYMLEN (pst))		/* Otherwise it's a dummy.  */
@@ -2135,7 +2136,7 @@ dbx_read_symtab (legacy_psymtab *self, struct objfile *objfile)
 	    data_holder.reset (stabs_data);
 	  }
 
-	dbx_psymtab_to_symtab_1 (objfile, self);
+	self->expand_psymtab (objfile);
       }
 
       /* Match with global symbols.  This only needs to be done once,

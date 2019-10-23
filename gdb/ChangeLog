@@ -1,5 +1,35 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Change argument order.
+	Call expand_psymtab.
+	(xcoff_read_symtab): Call expand_psymtab.
+	(xcoff_start_psymtab, xcoff_end_psymtab): Set
+	legacy_expand_psymtab.
+	* psympriv.h (struct partial_symtab) <expand_psymtab>: New
+	method.
+	(struct legacy_psymtab) <expand_psymtab>: Implement.
+	<legacy_expand_psymtab>: New member.
+	* mdebugread.c (mdebug_read_symtab): Call expand_psymtab.
+	(parse_partial_symbols): Set legacy_expand_psymtab.
+	(psymtab_to_symtab_1): Change argument order.  Call
+	expand_psymtab.
+	(new_psymtab): Set legacy_expand_psymtab.
+	* dwarf2read.h (struct dwarf2_psymtab) <expand_psymtab>: Declare.
+	* dwarf2read.c (dwarf2_psymtab::read_symtab): Call
+	expand_psymtab.
+	(dwarf2_psymtab::expand_psymtab): Rename from
+	psymtab_to_symtab_1.  Call expand_psymtab.
+	* dbxread.c (start_psymtab): Set legacy_expand_psymtab.
+	(dbx_end_psymtab): Likewise.
+	(dbx_psymtab_to_symtab_1): Change argument order. Call
+	expand_psymtab.
+	(dbx_read_symtab): Call expand_psymtab.
+	* ctfread.c (struct ctf_psymtab) <expand_psymtab>: Declare.
+	(ctf_psymtab::expand_psymtab): Rename from psymtab_to_symtab.
+	(ctf_psymtab::read_symtab): Call expand_psymtab.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_read_symtab): Remove prints.  Add assert.
 	* psymtab.c (psymtab_to_symtab): Print verbose "Reading"
 	messages.

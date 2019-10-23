@@ -1513,8 +1513,6 @@ static void add_partial_subprogram (struct partial_die_info *pdi,
 				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
 				    int need_pc, struct dwarf2_cu *cu);
 
-static void psymtab_to_symtab_1 (dwarf2_psymtab *);
-
 static abbrev_table_up abbrev_table_read_table
   (struct dwarf2_per_objfile *dwarf2_per_objfile, struct dwarf2_section_info *,
    sect_offset);
@@ -9510,7 +9508,7 @@ dwarf2_psymtab::read_symtab (struct objfile *objfile)
 
   dwarf2_per_objfile->reading_partial_symbols = 0;
 
-  psymtab_to_symtab_1 (this);
+  expand_psymtab (objfile);
 
   process_cu_includes (dwarf2_per_objfile);
 }
@@ -9661,18 +9659,18 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
 /* Read in full symbols for PST, and anything it depends on.  */
 
-static void
-psymtab_to_symtab_1 (dwarf2_psymtab *pst)
+void
+dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
 {
   struct dwarf2_per_cu_data *per_cu;
   int i;
 
-  if (pst->readin)
+  if (readin)
     return;
 
-  for (i = 0; i < pst->number_of_dependencies; i++)
-    if (!pst->dependencies[i]->readin
-	&& pst->dependencies[i]->user == NULL)
+  for (i = 0; i < number_of_dependencies; i++)
+    if (!dependencies[i]->readin
+	&& dependencies[i]->user == NULL)
       {
         /* Inform about additional files that need to be read in.  */
         if (info_verbose)
@@ -9682,20 +9680,20 @@ psymtab_to_symtab_1 (dwarf2_psymtab *pst)
             wrap_here ("");
             fputs_filtered ("and ", gdb_stdout);
             wrap_here ("");
-            printf_filtered ("%s...", pst->dependencies[i]->filename);
+            printf_filtered ("%s...", dependencies[i]->filename);
             wrap_here ("");     /* Flush output.  */
             gdb_flush (gdb_stdout);
           }
-        psymtab_to_symtab_1 ((dwarf2_psymtab *) pst->dependencies[i]);
+	dependencies[i]->expand_psymtab (objfile);
       }
 
-  per_cu = pst->per_cu_data;
+  per_cu = per_cu_data;
 
   if (per_cu == NULL)
     {
       /* It's an include file, no symbols to read for it.
          Everything is in the parent symtab.  */
-      pst->readin = true;
+      readin = true;
       return;
     }
 
