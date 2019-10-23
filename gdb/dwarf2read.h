@@ -271,16 +271,16 @@ public:
 dwarf2_per_objfile *get_dwarf2_per_objfile (struct objfile *objfile);
 
 /* A partial symtab specialized for DWARF.  */
-struct dwarf2_psymtab : public partial_symtab
+struct dwarf2_psymtab : public standard_psymtab
 {
   dwarf2_psymtab (const char *filename, struct objfile *objfile)
-    : partial_symtab (filename, objfile)
+    : standard_psymtab (filename, objfile)
   {
   }
 
   dwarf2_psymtab (const char *filename, struct objfile *objfile,
 		  CORE_ADDR addr)
-    : partial_symtab (filename, objfile, addr)
+    : standard_psymtab (filename, objfile, addr)
   {
   }
 

@@ -137,6 +137,15 @@ struct partial_symtab
   /* Ensure that all the dependencies are read in.  */
   void read_dependencies (struct objfile *);
 
+  /* Return true if the symtab corresponding to this psymtab has been
+     readin.  */
+  virtual bool readin_p () const = 0;
+
+  /* Return a pointer to the compunit allocated for this source file.
+     Return nullptr if !readin or if there was no symtab.  */
+  virtual struct compunit_symtab *get_compunit_symtab () const = 0;
+
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -265,12 +274,6 @@ struct partial_symtab
   int statics_offset = 0;
   int n_static_syms = 0;
 
-  /* True if the symtab corresponding to this psymtab has been readin.
-     This is located here so that this structure packs better on
-     64-bit systems.  */
-
-  bool readin = false;
-
   /* True iff objfile->psymtabs_addrmap is properly populated for this
      partial_symtab.  For discontiguous overlapping psymtabs is the only usable
      info in PSYMTABS_ADDRMAP.  */
@@ -289,6 +292,40 @@ struct partial_symtab
 
   unsigned int text_low_valid : 1;
   unsigned int text_high_valid : 1;
+};
+
+/* A partial symtab that tracks the "readin" and "compunit_symtab"
+   information in the ordinary way -- by storing it directly in this
+   object.  */
+struct standard_psymtab : public partial_symtab
+{
+  standard_psymtab (const char *filename, struct objfile *objfile)
+    : partial_symtab (filename, objfile)
+  {
+  }
+
+  standard_psymtab (const char *filename, struct objfile *objfile,
+		    CORE_ADDR addr)
+    : partial_symtab (filename, objfile, addr)
+  {
+  }
+
+  bool readin_p () const override
+  {
+    return readin;
+  }
+
+  /* Return a pointer to the compunit allocated for this source file.
+     Return nullptr if !readin or if there was no symtab.  */
+  struct compunit_symtab *get_compunit_symtab () const override
+  {
+    return compunit_symtab;
+  }
+
+  /* True if the symtab corresponding to this psymtab has been
+     readin.  */
+
+  bool readin = false;
 
   /* Pointer to compunit eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */
@@ -300,16 +337,16 @@ struct partial_symtab
    not be used in new code, but exists to transition the somewhat
    unmaintained "legacy" debug formats.  */
 
-struct legacy_psymtab : public partial_symtab
+struct legacy_psymtab : public standard_psymtab
 {
   legacy_psymtab (const char *filename, struct objfile *objfile)
-    : partial_symtab (filename, objfile)
+    : standard_psymtab (filename, objfile)
   {
   }
 
   legacy_psymtab (const char *filename, struct objfile *objfile,
 		  CORE_ADDR addr)
-    : partial_symtab (filename, objfile, addr)
+    : standard_psymtab (filename, objfile, addr)
   {
   }
 

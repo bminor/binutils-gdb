@@ -116,10 +116,10 @@ struct ctf_context
 };
 
 /* A partial symtab, specialized for this module.  */
-struct ctf_psymtab : public partial_symtab
+struct ctf_psymtab : public standard_psymtab
 {
   ctf_psymtab (const char *filename, struct objfile *objfile, CORE_ADDR addr)
-    : partial_symtab (filename, objfile, addr)
+    : standard_psymtab (filename, objfile, addr)
   {
   }
 

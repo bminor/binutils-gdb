@@ -1,5 +1,24 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (partial_map_expand_apply)
+	(psym_find_pc_sect_compunit_symtab, psym_lookup_symbol)
+	(psymtab_to_symtab, psym_find_last_source_symtab, dump_psymtab)
+	(psym_print_stats, psym_expand_symtabs_for_function)
+	(psym_map_symbol_filenames, psym_map_matching_symbols)
+	(psym_expand_symtabs_matching)
+	(partial_symtab::read_dependencies, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Use new methods.
+	* psympriv.h (struct partial_symtab) <readin_p,
+	get_compunit_symtab>: New methods.
+	<readin, compunit_symtab>: Remove members.
+	(struct standard_psymtab): New.
+	(struct legacy_psymtab): Derive from standard_psymtab.
+	* dwarf2read.h (struct dwarf2_psymtab): Derive from
+	standard_psymtab.
+	* ctfread.c (struct ctf_psymtab): Derive from standard_psymtab.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_psymtab_to_symtab_1): Call
 	read_dependencies.  Add assert.
 	* psymtab.c (partial_symtab::read_dependencies): New method.

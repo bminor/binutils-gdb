@@ -131,7 +131,7 @@ partial_map_expand_apply (struct objfile *objfile,
   gdb_assert (pst->user == NULL);
 
   /* Don't visit already-expanded psymtabs.  */
-  if (pst->readin)
+  if (pst->readin_p ())
     return 0;
 
   /* This may expand more than one symtab, and we want to iterate over
@@ -385,7 +385,7 @@ psym_find_pc_sect_compunit_symtab (struct objfile *objfile,
 						    msymbol);
   if (ps != NULL)
     {
-      if (warn_if_readin && ps->readin)
+      if (warn_if_readin && ps->readin_p ())
 	/* Might want to error() here (in case symtab is corrupt and
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
@@ -393,7 +393,7 @@ psym_find_pc_sect_compunit_symtab (struct objfile *objfile,
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
 		 paddress (get_objfile_arch (objfile), pc));
       psymtab_to_symtab (objfile, ps);
-      return ps->compunit_symtab;
+      return ps->get_compunit_symtab ();
     }
   return NULL;
 }
@@ -484,8 +484,8 @@ psym_lookup_symbol (struct objfile *objfile,
 
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (!ps->readin && lookup_partial_symbol (objfile, ps, name,
-						psymtab_index, domain))
+      if (!ps->readin_p () && lookup_partial_symbol (objfile, ps, name,
+						     psymtab_index, domain))
 	{
 	  struct symbol *sym, *with_opaque = NULL;
 	  struct compunit_symtab *stab = psymtab_to_symtab (objfile, ps);
@@ -750,11 +750,11 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
     pst = pst->user;
 
   /* If it's been looked up before, return it.  */
-  if (pst->compunit_symtab)
-    return pst->compunit_symtab;
+  if (pst->get_compunit_symtab ())
+    return pst->get_compunit_symtab ();
 
   /* If it has not yet been read in, read it.  */
-  if (!pst->readin)
+  if (!pst->readin_p ())
     {
       scoped_restore decrementer = increment_reading_symtab ();
 
@@ -772,7 +772,7 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	printf_filtered (_("done.\n"));
     }
 
-  return pst->compunit_symtab;
+  return pst->get_compunit_symtab ();
 }
 
 /* Psymtab version of find_last_source_symtab.  See its definition in
@@ -795,7 +795,7 @@ psym_find_last_source_symtab (struct objfile *ofp)
 
   if (cs_pst)
     {
-      if (cs_pst->readin)
+      if (cs_pst->readin_p ())
 	{
 	  internal_error (__FILE__, __LINE__,
 			  _("select_source_symtab: "
@@ -952,11 +952,11 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   gdb_print_host_address (objfile, outfile);
   fprintf_filtered (outfile, ")\n");
 
-  if (psymtab->readin)
+  if (psymtab->readin_p ())
     {
       fprintf_filtered (outfile,
 			"  Full symtab was read (at ");
-      gdb_print_host_address (psymtab->compunit_symtab, outfile);
+      gdb_print_host_address (psymtab->get_compunit_symtab (), outfile);
       fprintf_filtered (outfile, ")\n");
     }
 
@@ -1010,7 +1010,7 @@ psym_print_stats (struct objfile *objfile)
   i = 0;
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (!ps->readin)
+      if (!ps->readin_p ())
 	i++;
     }
   printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"), i);
@@ -1050,7 +1050,7 @@ psym_expand_symtabs_for_function (struct objfile *objfile,
 {
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (ps->readin)
+      if (ps->readin_p ())
 	continue;
 
       if ((lookup_partial_symbol (objfile, ps, func_name, 1, VAR_DOMAIN)
@@ -1105,7 +1105,7 @@ psym_map_symbol_filenames (struct objfile *objfile,
     {
       const char *fullname;
 
-      if (ps->readin)
+      if (ps->readin_p ())
 	continue;
 
       /* We can skip shared psymtabs here, because any file name will be
@@ -1185,7 +1185,7 @@ psym_map_matching_symbols
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
       QUIT;
-      if (ps->readin
+      if (ps->readin_p ()
 	  || match_partial_symbol (objfile, ps, global, name, domain,
 				   ordered_compare))
 	{
@@ -1320,7 +1320,7 @@ psym_expand_symtabs_matching
     {
       QUIT;
 
-      if (ps->readin)
+      if (ps->readin_p ())
 	continue;
 
       /* We skip shared psymtabs because file-matching doesn't apply
@@ -1659,7 +1659,6 @@ partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
   filename
     = ((const char *) objfile->per_bfd->filename_cache.insert
        (filename_, strlen (filename_) + 1));
-  compunit_symtab = NULL;
 
   if (symtab_create_debug)
     {
@@ -1689,7 +1688,7 @@ partial_symtab::read_dependencies (struct objfile *objfile)
 {
   for (int i = 0; i < number_of_dependencies; ++i)
     {
-      if (!dependencies[i]->readin)
+      if (!dependencies[i]->readin_p ())
 	{
 	  /* Inform about additional files to be read in.  */
 	  if (info_verbose)
@@ -2001,7 +2000,7 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 				 host_address_to_string (psymtab));
 
 		printf_filtered ("    readin %s\n",
-				 psymtab->readin ? "yes" : "no");
+				 psymtab->readin_p () ? "yes" : "no");
 		printf_filtered ("    fullname %s\n",
 				 psymtab->fullname
 				 ? psymtab->fullname : "(null)");
@@ -2092,7 +2091,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	/* We don't call psymtab_to_symtab here because that may cause symtab
 	   expansion.  When debugging a problem it helps if checkers leave
 	   things unchanged.  */
-	cust = ps->compunit_symtab;
+	cust = ps->get_compunit_symtab ();
 
 	/* First do some checks that don't require the associated symtab.  */
 	if (ps->text_high (objfile) < ps->text_low (objfile))
