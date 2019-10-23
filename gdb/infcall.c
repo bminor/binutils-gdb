@@ -145,13 +145,11 @@ show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
    for arguments to be passed to C, Ada or Fortran functions.
 
    If PARAM_TYPE is non-NULL, it is the expected parameter type.
-   IS_PROTOTYPED is non-zero if the function declaration is prototyped.
-   SP is the stack pointer were additional data can be pushed (updating
-   its value as needed).  */
+   IS_PROTOTYPED is non-zero if the function declaration is prototyped.  */
 
 static struct value *
 value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
-		  struct type *param_type, int is_prototyped, CORE_ADDR *sp)
+		  struct type *param_type, int is_prototyped)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
   struct type *arg_type = check_typedef (value_type (arg));
@@ -984,7 +982,7 @@ call_function_by_hand_dummy (struct value *function,
 	param_type = NULL;
 
       args[i] = value_arg_coerce (gdbarch, args[i],
-				  param_type, prototyped, &sp);
+				  param_type, prototyped);
 
       if (param_type != NULL && language_pass_by_reference (param_type))
 	args[i] = value_addr (args[i]);

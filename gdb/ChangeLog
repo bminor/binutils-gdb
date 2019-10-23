@@ -1,5 +1,11 @@
 2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infcall.c (value_arg_coerce): Remove an unused parameter.
+	(call_function_by_hand_dummy): Update the call to
+	'value_arg_coerce'.
+
+2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* infcall.c (call_function_by_hand_dummy): Refactor.
 
 2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
