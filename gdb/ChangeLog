@@ -1,5 +1,15 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_read_symtab): Remove prints.  Add assert.
+	* psymtab.c (psymtab_to_symtab): Print verbose "Reading"
+	messages.
+	* mdebugread.c (mdebug_read_symtab): Remove prints.
+	* dwarf2read.c (dwarf2_psymtab::read_symtab): Remove prints.  Add
+	assert.
+	* dbxread.c (dbx_read_symtab): Remove prints.  Add assert.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (this_symtab_psymtab, read_xcoff_symtab)
 	(xcoff_psymtab_to_symtab_1, xcoff_read_symtab)
 	(xcoff_start_psymtab, xcoff_end_psymtab, scan_xcoff_symtab): Use

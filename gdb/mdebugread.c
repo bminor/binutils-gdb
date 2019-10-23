@@ -277,12 +277,6 @@ static const char *mdebug_next_symbol_text (struct objfile *);
 static void
 mdebug_read_symtab (legacy_psymtab *self, struct objfile *objfile)
 {
-  if (info_verbose)
-    {
-      printf_filtered (_("Reading in symbols for %s..."), self->filename);
-      gdb_flush (gdb_stdout);
-    }
-
   next_symbol_text_func = mdebug_next_symbol_text;
 
   psymtab_to_symtab_1 (objfile, self, self->filename);
@@ -290,9 +284,6 @@ mdebug_read_symtab (legacy_psymtab *self, struct objfile *objfile)
   /* Match with global symbols.  This only needs to be done once,
      after all of the symtabs and dependencies have been read in.  */
   scan_file_globals (objfile);
-
-  if (info_verbose)
-    printf_filtered (_("done.\n"));
 }
 
 /* File-level interface functions.  */

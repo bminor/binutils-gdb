@@ -9494,41 +9494,23 @@ dwarf2_psymtab::read_symtab (struct objfile *objfile)
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 
-  if (readin)
+  gdb_assert (!readin);
+  /* If this psymtab is constructed from a debug-only objfile, the
+     has_section_at_zero flag will not necessarily be correct.  We
+     can get the correct value for this flag by looking at the data
+     associated with the (presumably stripped) associated objfile.  */
+  if (objfile->separate_debug_objfile_backlink)
     {
-      warning (_("bug: psymtab for %s is already read in."),
-	       filename);
+      struct dwarf2_per_objfile *dpo_backlink
+	= get_dwarf2_per_objfile (objfile->separate_debug_objfile_backlink);
+
+      dwarf2_per_objfile->has_section_at_zero
+	= dpo_backlink->has_section_at_zero;
     }
-  else
-    {
-      if (info_verbose)
-	{
-	  printf_filtered (_("Reading in symbols for %s..."),
-			   filename);
-	  gdb_flush (gdb_stdout);
-	}
 
-      /* If this psymtab is constructed from a debug-only objfile, the
-	 has_section_at_zero flag will not necessarily be correct.  We
-	 can get the correct value for this flag by looking at the data
-	 associated with the (presumably stripped) associated objfile.  */
-      if (objfile->separate_debug_objfile_backlink)
-	{
-	  struct dwarf2_per_objfile *dpo_backlink
-	    = get_dwarf2_per_objfile (objfile->separate_debug_objfile_backlink);
+  dwarf2_per_objfile->reading_partial_symbols = 0;
 
-	  dwarf2_per_objfile->has_section_at_zero
-	    = dpo_backlink->has_section_at_zero;
-	}
-
-      dwarf2_per_objfile->reading_partial_symbols = 0;
-
-      psymtab_to_symtab_1 (this);
-
-      /* Finish up the debug error message.  */
-      if (info_verbose)
-	printf_filtered (_("done.\n"));
-    }
+  psymtab_to_symtab_1 (this);
 
   process_cu_includes (dwarf2_per_objfile);
 }

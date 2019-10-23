@@ -2117,24 +2117,10 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, legacy_psymtab *pst)
 static void
 dbx_read_symtab (legacy_psymtab *self, struct objfile *objfile)
 {
-  if (self->readin)
-    {
-      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  "
-			  "Shouldn't happen.\n",
-			  self->filename);
-      return;
-    }
+  gdb_assert (!self->readin);
 
   if (LDSYMLEN (self) || self->number_of_dependencies)
     {
-      /* Print the message now, before reading the string table,
-         to avoid disconcerting pauses.  */
-      if (info_verbose)
-	{
-	  printf_filtered ("Reading in symbols for %s...", self->filename);
-	  gdb_flush (gdb_stdout);
-	}
-
       next_symbol_text_func = dbx_next_symbol_text;
 
       {
@@ -2155,10 +2141,6 @@ dbx_read_symtab (legacy_psymtab *self, struct objfile *objfile)
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
       scan_file_globals (objfile);
-
-      /* Finish up the debug error message.  */
-      if (info_verbose)
-	printf_filtered ("done.\n");
     }
 }
 
