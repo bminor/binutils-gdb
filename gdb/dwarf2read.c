@@ -9663,29 +9663,11 @@ void
 dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
 {
   struct dwarf2_per_cu_data *per_cu;
-  int i;
 
   if (readin)
     return;
 
-  for (i = 0; i < number_of_dependencies; i++)
-    if (!dependencies[i]->readin
-	&& dependencies[i]->user == NULL)
-      {
-        /* Inform about additional files that need to be read in.  */
-        if (info_verbose)
-          {
-	    /* FIXME: i18n: Need to make this a single string.  */
-            fputs_filtered (" ", gdb_stdout);
-            wrap_here ("");
-            fputs_filtered ("and ", gdb_stdout);
-            wrap_here ("");
-            printf_filtered ("%s...", dependencies[i]->filename);
-            wrap_here ("");     /* Flush output.  */
-            gdb_flush (gdb_stdout);
-          }
-	dependencies[i]->expand_psymtab (objfile);
-      }
+  read_dependencies (objfile);
 
   per_cu = per_cu_data;
 

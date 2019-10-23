@@ -1819,36 +1819,10 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 static void
 xcoff_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
 {
-  int i;
-
-  if (!pst)
-    return;
-
-  if (pst->readin)
-    {
-      fprintf_unfiltered
-	(gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	 pst->filename);
-      return;
-    }
+  gdb_assert (!pst->readin);
 
   /* Read in all partial symtabs on which this one is dependent.  */
-  for (i = 0; i < pst->number_of_dependencies; i++)
-    if (!pst->dependencies[i]->readin)
-      {
-	/* Inform about additional files that need to be read in.  */
-	if (info_verbose)
-	  {
-	    fputs_filtered (" ", gdb_stdout);
-	    wrap_here ("");
-	    fputs_filtered ("and ", gdb_stdout);
-	    wrap_here ("");
-	    printf_filtered ("%s...", pst->dependencies[i]->filename);
-	    wrap_here ("");	/* Flush output */
-	    gdb_flush (gdb_stdout);
-	  }
-	pst->dependencies[i]->expand_psymtab (objfile);
-      }
+  pst->read_dependencies (objfile);
 
   if (((struct symloc *) pst->read_symtab_private)->numsyms != 0)
     {

@@ -134,6 +134,9 @@ struct partial_symtab
      expand_psymtab can be made.  */
   virtual void expand_psymtab (struct objfile *) = 0;
 
+  /* Ensure that all the dependencies are read in.  */
+  void read_dependencies (struct objfile *);
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {

@@ -1,5 +1,18 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Call
+	read_dependencies.  Add assert.
+	* psymtab.c (partial_symtab::read_dependencies): New method.
+	* psympriv.h (struct partial_symtab) <read_dependencies>: New
+	method.
+	* mdebugread.c (psymtab_to_symtab_1): Call read_dependencies.
+	* dwarf2read.c (dwarf2_psymtab::expand_psymtab): Call
+	read_dependencies.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Call read_dependencies.
+	Add assert.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_psymtab_to_symtab_1): Change argument order.
 	Call expand_psymtab.
 	(xcoff_read_symtab): Call expand_psymtab.

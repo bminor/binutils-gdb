@@ -1682,6 +1682,32 @@ partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
     }
 }
 
+/* See psympriv.h.  */
+
+void
+partial_symtab::read_dependencies (struct objfile *objfile)
+{
+  for (int i = 0; i < number_of_dependencies; ++i)
+    {
+      if (!dependencies[i]->readin)
+	{
+	  /* Inform about additional files to be read in.  */
+	  if (info_verbose)
+	    {
+	      fputs_filtered (" ", gdb_stdout);
+	      wrap_here ("");
+	      fputs_filtered ("and ", gdb_stdout);
+	      wrap_here ("");
+	      printf_filtered ("%s...", dependencies[i]->filename);
+	      wrap_here ("");	/* Flush output */
+	      gdb_flush (gdb_stdout);
+	    }
+	  dependencies[i]->expand_psymtab (objfile);
+	}
+    }
+}
+
+
 void
 psymtab_storage::discard_psymtab (struct partial_symtab *pst)
 {
