@@ -746,6 +746,27 @@ call_function_by_hand_dummy (struct value *function,
   if (!gdbarch_push_dummy_call_p (gdbarch))
     error (_("This target does not support function calls."));
 
+  /* Find the function type and do a sanity check.  */
+  type *ftype;
+  type *values_type;
+  CORE_ADDR funaddr = find_function_addr (function, &values_type, &ftype);
+
+  if (values_type == NULL)
+    values_type = default_return_type;
+  if (values_type == NULL)
+    {
+      const char *name = get_function_name (funaddr,
+					    name_buf, sizeof (name_buf));
+      error (_("'%s' has unknown return type; "
+	       "cast the call to its declared return type"),
+	     name);
+    }
+
+  values_type = check_typedef (values_type);
+
+  if (args.size () < TYPE_NFIELDS (ftype))
+    error (_("Too few arguments in function call."));
+
   /* A holder for the inferior status.
      This is only needed while we're preparing the inferior function call.  */
   infcall_control_state_up inf_status (save_infcall_control_state ());
@@ -851,23 +872,6 @@ call_function_by_hand_dummy (struct value *function,
       }
   }
 
-  type *ftype;
-  type *values_type;
-  CORE_ADDR funaddr = find_function_addr (function, &values_type, &ftype);
-
-  if (values_type == NULL)
-    values_type = default_return_type;
-  if (values_type == NULL)
-    {
-      const char *name = get_function_name (funaddr,
-					    name_buf, sizeof (name_buf));
-      error (_("'%s' has unknown return type; "
-	       "cast the call to its declared return type"),
-	     name);
-    }
-
-  values_type = check_typedef (values_type);
-
   /* Are we returning a value using a structure return?  */
 
   if (gdbarch_return_in_first_hidden_param_p (gdbarch, values_type))
@@ -944,9 +948,6 @@ call_function_by_hand_dummy (struct value *function,
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
-
-  if (args.size () < TYPE_NFIELDS (ftype))
-    error (_("Too few arguments in function call."));
 
   for (int i = args.size () - 1; i >= 0; i--)
     {

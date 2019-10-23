@@ -1,5 +1,9 @@
 2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infcall.c (call_function_by_hand_dummy): Refactor.
+
+2019-10-23  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* MAINTAINERS (Write After Approval): Add Tankut Baris Aktemur.
 
 2019-10-23  Tom Tromey  <tom@tromey.com>
