@@ -188,6 +188,17 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
   ULONGEST elt_size = type_length_units (elt_type);
+
+  /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
+     in a byte.  */
+  LONGEST stride = TYPE_ARRAY_BIT_STRIDE (array_type);
+  if (stride != 0)
+    {
+      struct gdbarch *arch = get_type_arch (elt_type);
+      int unit_size = gdbarch_addressable_memory_unit_size (arch);
+      elt_size = stride / (unit_size * 8);
+    }
+
   ULONGEST elt_offs = elt_size * (index - lowerbound);
 
   if (index < lowerbound

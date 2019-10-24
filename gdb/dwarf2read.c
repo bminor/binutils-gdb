@@ -18065,7 +18065,52 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       && !TYPE_UNSIGNED (base_type) && (high.data.const_val & negative_mask))
     high.data.const_val |= negative_mask;
 
-  range_type = create_range_type (NULL, orig_base_type, &low, &high, bias);
+  /* Check for bit and byte strides.  */
+  struct dynamic_prop byte_stride_prop;
+  attribute *attr_byte_stride = dwarf2_attr (die, DW_AT_byte_stride, cu);
+  if (attr_byte_stride != nullptr)
+    {
+      struct type *prop_type
+	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+      attr_to_dynamic_prop (attr_byte_stride, die, cu, &byte_stride_prop,
+			    prop_type);
+    }
+
+  struct dynamic_prop bit_stride_prop;
+  attribute *attr_bit_stride = dwarf2_attr (die, DW_AT_bit_stride, cu);
+  if (attr_bit_stride != nullptr)
+    {
+      /* It only makes sense to have either a bit or byte stride.  */
+      if (attr_byte_stride != nullptr)
+	{
+	  complaint (_("Found DW_AT_bit_stride and DW_AT_byte_stride "
+		       "- DIE at %s [in module %s]"),
+		     sect_offset_str (die->sect_off),
+		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	  attr_bit_stride = nullptr;
+	}
+      else
+	{
+	  struct type *prop_type
+	    = dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+	  attr_to_dynamic_prop (attr_bit_stride, die, cu, &bit_stride_prop,
+				prop_type);
+	}
+    }
+
+  if (attr_byte_stride != nullptr
+      || attr_bit_stride != nullptr)
+    {
+      bool byte_stride_p = (attr_byte_stride != nullptr);
+      struct dynamic_prop *stride
+	= byte_stride_p ? &byte_stride_prop : &bit_stride_prop;
+
+      range_type
+	= create_range_type_with_stride (NULL, orig_base_type, &low,
+					 &high, bias, stride, byte_stride_p);
+    }
+  else
+    range_type = create_range_type (NULL, orig_base_type, &low, &high, bias);
 
   if (high_bound_is_count)
     TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count = 1;

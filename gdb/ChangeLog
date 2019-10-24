@@ -1,3 +1,27 @@
+2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (read_subrange_type): Read bit and byte stride and
+	create a range with stride where appropriate.
+	* f-valprint.c: Include 'gdbarch.h'.
+	(f77_print_array_1): Take the stride into account when walking the
+	array.  Also convert the stride into addressable units.
+	* gdbtypes.c (create_range_type): Initialise the stride to
+	constant zero.
+	(create_range_type_with_stride): New function, initialise the
+	range as normal, and then setup the stride.
+	(has_static_range): Include the stride here.  Also change the
+	return type to bool.
+	(create_array_type_with_stride): Consider the range stride if the
+	array isn't given its own stride.
+	(resolve_dynamic_range): Resolve the stride if needed.
+	* gdbtypes.h (struct range_bounds) <stride>: New member variable.
+	(struct range_bounds) <flag_is_byte_stride>: New member variable.
+	(TYPE_BIT_STRIDE): Define.
+	(TYPE_ARRAY_BIT_STRIDE): Define.
+	(create_range_type_with_stride): Declare.
+	* valarith.c (value_subscripted_rvalue): Take range stride into
+	account when walking the array.
+
 2019-12-01  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-win.c (tui_all_windows_info): Treat inactive TUI

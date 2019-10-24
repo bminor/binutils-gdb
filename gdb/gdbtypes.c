@@ -935,6 +935,10 @@ create_range_type (struct type *result_type, struct type *index_type,
   TYPE_RANGE_DATA (result_type)->high = *high_bound;
   TYPE_RANGE_DATA (result_type)->bias = bias;
 
+  /* Initialize the stride to be a constant, the value will already be zero
+     thanks to the use of TYPE_ZALLOC above.  */
+  TYPE_RANGE_DATA (result_type)->stride.kind = PROP_CONST;
+
   if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
     TYPE_UNSIGNED (result_type) = 1;
 
@@ -947,6 +951,29 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   return result_type;
 }
+
+/* See gdbtypes.h.  */
+
+struct type *
+create_range_type_with_stride (struct type *result_type,
+			       struct type *index_type,
+			       const struct dynamic_prop *low_bound,
+			       const struct dynamic_prop *high_bound,
+			       LONGEST bias,
+			       const struct dynamic_prop *stride,
+			       bool byte_stride_p)
+{
+  result_type = create_range_type (result_type, index_type, low_bound,
+				   high_bound, bias);
+
+  gdb_assert (stride != nullptr);
+  TYPE_RANGE_DATA (result_type)->stride = *stride;
+  TYPE_RANGE_DATA (result_type)->flag_is_byte_stride = byte_stride_p;
+
+  return result_type;
+}
+
+
 
 /* Create a range type using either a blank type supplied in
    RESULT_TYPE, or creating a new type, inheriting the objfile from
@@ -978,11 +1005,14 @@ create_static_range_type (struct type *result_type, struct type *index_type,
 /* Predicate tests whether BOUNDS are static.  Returns 1 if all bounds values
    are static, otherwise returns 0.  */
 
-static int
+static bool
 has_static_range (const struct range_bounds *bounds)
 {
+  /* If the range doesn't have a defined stride then its stride field will
+     be initialized to the constant 0.  */
   return (bounds->low.kind == PROP_CONST
-	  && bounds->high.kind == PROP_CONST);
+	  && bounds->high.kind == PROP_CONST
+	  && bounds->stride.kind == PROP_CONST);
 }
 
 
@@ -1189,6 +1219,15 @@ create_array_type_with_stride (struct type *result_type,
 	  && !type_not_allocated (result_type)))
     {
       LONGEST low_bound, high_bound;
+      unsigned int stride;
+
+      /* If the array itself doesn't provide a stride value then take
+	 whatever stride the range provides.  Don't update BIT_STRIDE as
+	 we don't want to place the stride value from the range into this
+	 arrays bit size field.  */
+      stride = bit_stride;
+      if (stride == 0)
+	stride = TYPE_BIT_STRIDE (range_type);
 
       if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
 	low_bound = high_bound = 0;
@@ -1198,9 +1237,9 @@ create_array_type_with_stride (struct type *result_type,
 	 In such cases, the array length should be zero.  */
       if (high_bound < low_bound)
 	TYPE_LENGTH (result_type) = 0;
-      else if (bit_stride > 0)
+      else if (stride > 0)
 	TYPE_LENGTH (result_type) =
-	  (bit_stride * (high_bound - low_bound + 1) + 7) / 8;
+	  (stride * (high_bound - low_bound + 1) + 7) / 8;
       else
 	TYPE_LENGTH (result_type) =
 	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
@@ -1982,7 +2021,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
   const struct dynamic_prop *prop;
-  struct dynamic_prop low_bound, high_bound;
+  struct dynamic_prop low_bound, high_bound, stride;
 
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
@@ -2014,13 +2053,37 @@ resolve_dynamic_range (struct type *dyn_range_type,
       high_bound.data.const_val = 0;
     }
 
+  bool byte_stride_p = TYPE_RANGE_DATA (dyn_range_type)->flag_is_byte_stride;
+  prop = &TYPE_RANGE_DATA (dyn_range_type)->stride;
+  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      stride.kind = PROP_CONST;
+      stride.data.const_val = value;
+
+      /* If we have a bit stride that is not an exact number of bytes then
+	 I really don't think this is going to work with current GDB, the
+	 array indexing code in GDB seems to be pretty heavily tied to byte
+	 offsets right now.  Assuming 8 bits in a byte.  */
+      struct gdbarch *gdbarch = get_type_arch (dyn_range_type);
+      int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+      if (!byte_stride_p && (value % (unit_size * 8)) != 0)
+	error (_("bit strides that are not a multiple of the byte size "
+		 "are currently not supported"));
+    }
+  else
+    {
+      stride.kind = PROP_UNDEFINED;
+      stride.data.const_val = 0;
+      byte_stride_p = true;
+    }
+
   static_target_type
     = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
 				     addr_stack, 0);
   LONGEST bias = TYPE_RANGE_DATA (dyn_range_type)->bias;
-  static_range_type = create_range_type (copy_type (dyn_range_type),
-					 static_target_type,
-					 &low_bound, &high_bound, bias);
+  static_range_type = create_range_type_with_stride
+    (copy_type (dyn_range_type), static_target_type,
+     &low_bound, &high_bound, bias, &stride, byte_stride_p);
   TYPE_RANGE_DATA (static_range_type)->flag_bound_evaluated = 1;
   return static_range_type;
 }

@@ -623,6 +623,13 @@ struct range_bounds
 
   struct dynamic_prop high;
 
+  /* The stride value for this range.  This can be stored in bits or bytes
+     based on the value of BYTE_STRIDE_P.  It is optional to have a stride
+     value, if this range has no stride value defined then this will be set
+     to the constant zero.  */
+
+  struct dynamic_prop stride;
+
   /* * The bias.  Sometimes a range value is biased before storage.
      The bias is added to the stored bits to form the true value.  */
 
@@ -637,6 +644,10 @@ struct range_bounds
      a dynamic one.  */
 
   unsigned int flag_bound_evaluated : 1;
+
+  /* If this is true this STRIDE is in bytes, otherwise STRIDE is in bits.  */
+
+  unsigned int flag_is_byte_stride : 1;
 };
 
 /* Compare two range_bounds objects for equality.  Simply does
@@ -1352,6 +1363,9 @@ extern bool set_type_align (struct type *, ULONGEST);
   TYPE_RANGE_DATA(range_type)->high.kind
 #define TYPE_LOW_BOUND_KIND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.kind
+#define TYPE_BIT_STRIDE(range_type) \
+  (TYPE_RANGE_DATA(range_type)->stride.data.const_val \
+   * (TYPE_RANGE_DATA(range_type)->flag_is_byte_stride ? 8 : 1))
 
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
@@ -1393,6 +1407,9 @@ extern bool set_type_align (struct type *, ULONGEST);
 
 #define TYPE_ARRAY_LOWER_BOUND_VALUE(arraytype) \
    (TYPE_LOW_BOUND(TYPE_INDEX_TYPE((arraytype))))
+
+#define TYPE_ARRAY_BIT_STRIDE(arraytype) \
+  (TYPE_BIT_STRIDE(TYPE_INDEX_TYPE((arraytype))))
 
 /* C++ */
 
@@ -1965,6 +1982,16 @@ extern struct type *create_range_type (struct type *, struct type *,
 				       const struct dynamic_prop *,
 				       const struct dynamic_prop *,
 				       LONGEST);
+
+/* Like CREATE_RANGE_TYPE but also sets up a stride.  When BYTE_STRIDE_P
+   is true the value in STRIDE is a byte stride, otherwise STRIDE is a bit
+   stride.  */
+
+extern struct type * create_range_type_with_stride
+  (struct type *result_type, struct type *index_type,
+   const struct dynamic_prop *low_bound,
+   const struct dynamic_prop *high_bound, LONGEST bias,
+   const struct dynamic_prop *stride, bool byte_stride_p);
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);

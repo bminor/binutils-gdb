@@ -1,3 +1,11 @@
+2019-12-01  Richard Bunt  <richard.bunt@arm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/derived-type-striding.exp: New file.
+	* gdb.fortran/derived-type-striding.f90: New file.
+	* gdb.fortran/array-slices.exp: New file.
+	* gdb.fortran/array-slices.f90: New file.
+
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/define.exp: Test . in command names.

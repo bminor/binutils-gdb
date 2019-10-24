@@ -34,6 +34,7 @@
 #include "block.h"
 #include "dictionary.h"
 #include "cli/cli-style.h"
+#include "gdbarch.h"
 
 static void f77_get_dynamic_length_of_aggregate (struct type *);
 
@@ -120,7 +121,12 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 
   if (nss != ndimensions)
     {
-      size_t dim_size = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+      struct gdbarch *gdbarch = get_type_arch (type);
+      size_t dim_size = type_length_units (TYPE_TARGET_TYPE (type));
+      int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+      size_t byte_stride = TYPE_ARRAY_BIT_STRIDE (type) / (unit_size * 8);
+      if (byte_stride == 0)
+	byte_stride = dim_size;
       size_t offs = 0;
 
       for (i = lowerbound;
@@ -137,7 +143,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 			     value_embedded_offset (subarray),
 			     value_address (subarray),
 			     stream, recurse, subarray, options, elts);
-	  offs += dim_size;
+	  offs += byte_stride;
 	  fprintf_filtered (stream, ") ");
 	}
       if (*elts >= options->print_max && i < upperbound)
