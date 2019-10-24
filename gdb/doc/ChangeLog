@@ -1,3 +1,8 @@
+2020-01-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (M68K Features): Document floating-point feature
+	correspondence.
+
 2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Attach): Document the new option and the

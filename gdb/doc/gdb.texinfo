@@ -45230,6 +45230,12 @@ used.  The feature that is present should contain registers
 This feature is optional.  If present, it should contain registers
 @samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
 @samp{fpiaddr}.
+
+Note that, despite the fact that this feature's name says
+@samp{coldfire}, it is used to describe any floating point registers.
+The size of the registers must match the main m68k flavor; so, for
+example, if the primary feature is reported as @samp{coldfire}, then
+64-bit floating point registers are required.
 @end table
 
 @node NDS32 Features
