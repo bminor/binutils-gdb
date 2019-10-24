@@ -2518,6 +2518,9 @@ reread_symbols (void)
 	     automatically recreated by sym_read.  */
 	  free_objfile_separate_debug (objfile);
 
+	  /* Clear the stale source cache.  */
+	  forget_cached_source_info ();
+
 	  /* Remove any references to this objfile in the global
 	     value lists.  */
 	  preserve_values (objfile);
