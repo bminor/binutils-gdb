@@ -764,6 +764,17 @@ proc gdb_internal_error_resync {} {
 # expected from $gdb_spawn_id.  IOW, callers do not need to worry
 # about resetting "-i" back to $gdb_spawn_id explicitly.
 #
+# In EXPECT_ARGUMENTS we can use a -wrap pattern flag, that wraps the regexp
+# pattern as gdb_test wraps its message argument.
+# This allows us to rewrite:
+#   gdb_test <command> <pattern> <message>
+# into:
+#   gdb_test_multiple <command> <message> {
+#       -re -wrap <pattern> {
+#           pass $gdb_test_name
+#       }
+#   }
+#
 proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
@@ -825,6 +836,7 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     set patterns ""
     set expecting_action 0
     set expecting_arg 0
+    set wrap_pattern 0
     foreach item $user_code subst_item $subst_code {
 	if { $item == "-n" || $item == "-notransfer" || $item == "-nocase" } {
 	    lappend processed_code $item
@@ -837,6 +849,10 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	if { $item == "-timeout" || $item == "-i" } {
 	    set expecting_arg 1
 	    lappend processed_code $item
+	    continue
+	}
+	if { $item == "-wrap" } {
+	    set wrap_pattern 1
 	    continue
 	}
 	if { $expecting_arg } {
@@ -852,7 +868,14 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	    continue
 	}
 	set expecting_action 1
-	lappend processed_code $subst_item
+	if { $wrap_pattern } {
+	    # Wrap subst_item as is done for the gdb_test PATTERN argument.
+	    lappend processed_code \
+		"\[\r\n\]*(?:$subst_item)\[\r\n\]+$gdb_prompt $"
+	    set wrap_pattern 0
+	} else {
+	    lappend processed_code $subst_item
+	}
 	if {$patterns != ""} {
 	    append patterns "; "
 	}

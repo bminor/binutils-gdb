@@ -1,3 +1,10 @@
+2019-10-24  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_test_multiple): Add -wrap pattern flag.
+	* gdb.reverse/step-precsave.exp: Rewrite gdb_test_multiple containing
+	kfail using -wrap pattern flag and convenience variable
+	gdb_test_name.
+
 2019-10-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-progspace.exp: Add tests for the
