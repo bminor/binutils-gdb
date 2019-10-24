@@ -10664,34 +10664,6 @@ $as_echo "${PYTHON_CFLAGS}" >&6; }
            fi
            ;;
   esac
-
-  # Note that "python -m threading" cannot be used to check for
-  # threading support due to a bug in Python 2.7.3
-  # (http://bugs.python.org/issue15567).
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether python supports threads" >&5
-$as_echo_n "checking whether python supports threads... " >&6; }
-  saved_CPPFLAGS="${CPPFLAGS}"
-  CPPFLAGS="${PYTHON_CPPFLAGS}"
-  # Note that the test is reversed so that python_has_threads=yes on
-  # unexpected failures.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <Python.h>
-#ifdef WITH_THREAD
-# error
-#endif
-
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  python_has_threads=no
-else
-  python_has_threads=yes
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${python_has_threads}" >&5
-$as_echo "${python_has_threads}" >&6; }
-  CPPFLAGS="${saved_CPPFLAGS}"
 else
   # Even if Python support is not compiled in, we need to have this file
   # included so that the "python" command, et.al., still exists.

@@ -948,23 +948,6 @@ if test "${have_libpython}" != no; then
            fi
            ;;
   esac
-
-  # Note that "python -m threading" cannot be used to check for
-  # threading support due to a bug in Python 2.7.3
-  # (http://bugs.python.org/issue15567).
-  AC_MSG_CHECKING(whether python supports threads)
-  saved_CPPFLAGS="${CPPFLAGS}"
-  CPPFLAGS="${PYTHON_CPPFLAGS}"
-  # Note that the test is reversed so that python_has_threads=yes on
-  # unexpected failures.
-  AC_PREPROC_IFELSE([AC_LANG_SOURCE([[
-#include <Python.h>
-#ifdef WITH_THREAD
-# error
-#endif
-  ]])], [python_has_threads=no], [python_has_threads=yes])
-  AC_MSG_RESULT(${python_has_threads})
-  CPPFLAGS="${saved_CPPFLAGS}"
 else
   # Even if Python support is not compiled in, we need to have this file
   # included so that the "python" command, et.al., still exists.

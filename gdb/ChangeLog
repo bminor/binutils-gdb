@@ -1,5 +1,10 @@
 2019-10-24  Christian Biesinger  <cbiesinger@google.com>
 
+	* configure: Regenerate.
+	* configure.ac: Remove code that sets python_has_threads.
+
+2019-10-24  Christian Biesinger  <cbiesinger@google.com>
+
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* configure.ac: Remove the code that uses sed to get the python
