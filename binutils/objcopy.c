@@ -97,8 +97,14 @@ static int deterministic = -1;		/* Enable deterministic archives.  */
 static int status = 0;			/* Exit status.  */
 
 static bfd_boolean    merge_notes = FALSE;	/* Merge note sections.  */
-static bfd_byte *     merged_notes = NULL;	/* Contents on note section undergoing a merge.  */
-static bfd_size_type  merged_size = 0;		/* New, smaller size of the merged note section.  */
+
+typedef struct merged_note_section
+{
+  asection *                    sec;	 /* The section that is being merged.  */
+  bfd_byte *                    contents;/* New contents of the section.  */
+  bfd_size_type                 size;	 /* New size of the section.  */
+  struct merged_note_section *  next;  	 /* Link to next merged note section.  */
+} merged_note_section;
 
 enum strip_action
 {
@@ -1283,7 +1289,7 @@ is_update_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 }
 
 static bfd_boolean
-is_merged_note_section (bfd * abfd, asection * sec)
+is_mergeable_note_section (bfd * abfd, asection * sec)
 {
   if (merge_notes
       && bfd_get_flavour (abfd) == bfd_target_elf_flavour
@@ -1292,9 +1298,9 @@ is_merged_note_section (bfd * abfd, asection * sec)
 	 We should add support for more note types.  */
       && ((elf_section_data (sec)->this_hdr.sh_flags & SHF_GNU_BUILD_NOTE) != 0
 	  /* Old versions of GAS (prior to 2.27) could not set the section
-	     flags to OS-specific values, so we also accept sections with the
-	     expected name.  */
-	  || (strcmp (sec->name, GNU_BUILD_ATTRS_SECTION_NAME) == 0)))
+	     flags to OS-specific values, so we also accept sections that
+	     start with the expected name.  */
+	  || (CONST_STRNEQ (sec->name, GNU_BUILD_ATTRS_SECTION_NAME))))
     return TRUE;
 
   return FALSE;
@@ -1917,56 +1923,81 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
-/* Returns the number of bytes needed to store VAL.  */
-
-static inline unsigned int
-num_bytes (unsigned long val)
-{
-  unsigned int count = 0;
-
-  /* FIXME: There must be a faster way to do this.  */
-  while (val)
-    {
-      count ++;
-      val >>= 8;
-    }
-  return count;
-}
-
 typedef struct objcopy_internal_note
 {
   Elf_Internal_Note  note;
+  unsigned long      padded_namesz;
   bfd_vma            start;
   bfd_vma            end;
-  bfd_boolean        modified;
 } objcopy_internal_note;
   
-/* Returns TRUE if a gap does, or could, exist between the address range
-   covered by PNOTE1 and PNOTE2.  */
+#define DEBUG_MERGE 0
+
+#if DEBUG_MERGE
+#define merge_debug(format, ...) fprintf (stderr, format, ## __VA_ARGS__)
+#else
+#define merge_debug(format, ...)
+#endif
+
+/* Returns TRUE iff PNOTE1 overlaps or adjoins PNOTE2.  */
 
 static bfd_boolean
-gap_exists (objcopy_internal_note * pnote1,
-	    objcopy_internal_note * pnote2)
+overlaps_or_adjoins (objcopy_internal_note * pnote1,
+		     objcopy_internal_note * pnote2)
 {
-  /* Without range end notes, we assume that a gap might exist.  */
-  if (pnote1->end == 0 || pnote2->end == 0)
+  if (pnote1->end < pnote2->start)
+    /* FIXME: Alignment of 16 bytes taken from x86_64 binaries.
+       Really we should extract the alignment of the section
+       covered by the notes.  */
+    return BFD_ALIGN (pnote1->end, 16) < pnote2->start;
+
+  if (pnote2->end < pnote2->start)
+    return BFD_ALIGN (pnote2->end, 16) < pnote1->start;
+
+  if (pnote1->end < pnote2->end)
     return TRUE;
 
-  /* FIXME: Alignment of 16 bytes taken from x86_64 binaries.
-     Really we should extract the alignment of the section covered by the notes.  */
-  return BFD_ALIGN (pnote1->end, 16) < pnote2->start;
+  if (pnote2->end < pnote1->end)
+    return TRUE;
+
+  return FALSE;
+}
+
+/* Returns TRUE iff NEEDLE is fully contained by HAYSTACK.  */
+
+static bfd_boolean
+contained_by (objcopy_internal_note * needle,
+	      objcopy_internal_note * haystack)
+{
+  return needle->start >= haystack->start && needle->end <= haystack->end;
 }
 
 static bfd_boolean
 is_open_note (objcopy_internal_note * pnote)
 {
-  return (pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_OPEN);
+  return pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
 }
 
 static bfd_boolean
 is_func_note (objcopy_internal_note * pnote)
 {
-  return (pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_FUNC);
+  return pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_FUNC;
+}
+
+static bfd_boolean
+is_deleted_note (objcopy_internal_note * pnote)
+{
+  return pnote->note.type == 0;
+}
+
+static bfd_boolean
+is_version_note (objcopy_internal_note * pnote)
+{
+  return (pnote->note.namesz > 4
+	  && pnote->note.namedata[0] == 'G'
+	  && pnote->note.namedata[1] == 'A'
+	  && pnote->note.namedata[2] == '$'
+	  && pnote->note.namedata[3] == GNU_BUILD_ATTRIBUTE_VERSION);
 }
 
 static bfd_boolean
@@ -1979,11 +2010,97 @@ is_64bit (bfd * abfd)
   return elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64;
 }
 
+/* This sorting function is used to get the notes into an order
+   that makes merging easy.  */
+
+static int
+compare_gnu_build_notes (const void * data1, const void * data2)
+{
+  objcopy_internal_note * pnote1 = (objcopy_internal_note *) data1;
+  objcopy_internal_note * pnote2 = (objcopy_internal_note *) data2;
+
+  /* Sort notes based upon the attribute they record.  */
+  int cmp = memcmp (pnote1->note.namedata + 3,
+		    pnote2->note.namedata + 3,
+		    pnote1->note.namesz < pnote2->note.namesz ?
+		    pnote1->note.namesz - 3 : pnote2->note.namesz - 3);
+  if (cmp)
+    return cmp;
+  
+  if (pnote1->end < pnote2->start)
+    return -1;
+  if (pnote1->start > pnote2->end)
+    return 1;
+
+  /* Overlaps - we should merge the two ranges.  */
+  if (pnote1->start < pnote2->start)
+    return -1;
+  if (pnote1->end > pnote2->end)
+    return 1;
+  
+  /* Put OPEN notes before function notes.  */
+  if (is_open_note (pnote1) && ! is_open_note (pnote2))
+    return -1;
+  if (! is_open_note (pnote1) && is_open_note (pnote2))
+    return 1;
+  
+  return 0;
+}
+
+/* This sorting function is used to get the notes into an order
+   that makes eliminating address ranges easier.  */
+
+static int
+sort_gnu_build_notes (const void * data1, const void * data2)
+{
+  objcopy_internal_note * pnote1 = (objcopy_internal_note *) data1;
+  objcopy_internal_note * pnote2 = (objcopy_internal_note *) data2;
+
+  if (pnote1->note.type != pnote2->note.type)
+    {
+      /* Move deleted notes to the end.  */
+      if (is_deleted_note (pnote1))     /* 1: OFD 2: OFD */
+	return 1;
+
+      /* Move OPEN notes to the start.  */
+      if (is_open_note (pnote1))	/* 1: OF  2: OFD */
+	return -1;
+
+      if (is_deleted_note (pnote2))	/* 1: F   2: O D */
+	return 1;
+
+      return 1;				/* 1: F   2: O   */
+    }
+  
+  /* Sort by starting address.  */
+  if (pnote1->start < pnote2->start)
+    return -1;
+  if (pnote1->start > pnote2->start)
+    return 1;
+
+  /* Then by end address (bigger range first).  */
+  if (pnote1->end > pnote2->end)
+    return -1;
+  if (pnote1->end < pnote2->end)
+    return 1;
+
+  /* Then by attribute type.  */
+  if (pnote1->note.namesz > 4
+      && pnote2->note.namesz > 4
+      && pnote1->note.namedata[3] != pnote2->note.namedata[3])
+    return pnote1->note.namedata[3] - pnote2->note.namedata[3];
+  
+  return 0;
+}
+
 /* Merge the notes on SEC, removing redundant entries.
    Returns the new, smaller size of the section upon success.  */
 
 static bfd_size_type
-merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte * contents)
+merge_gnu_build_notes (bfd *          abfd,
+		       asection *     sec,
+		       bfd_size_type  size,
+		       bfd_byte *     contents)
 {
   objcopy_internal_note *  pnotes_end;
   objcopy_internal_note *  pnotes = NULL;
@@ -1992,11 +2109,8 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
   unsigned            version_1_seen = 0;
   unsigned            version_2_seen = 0;
   unsigned            version_3_seen = 0;
-  bfd_boolean         duplicate_found = FALSE;
   const char *        err = NULL;
   bfd_byte *          in = contents;
-  int                 attribute_type_byte;
-  int                 val_start;
   unsigned long       previous_func_start = 0;
   unsigned long       previous_open_start = 0;
   unsigned long       previous_func_end = 0;
@@ -2015,20 +2129,33 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
       relcount = bfd_canonicalize_reloc (abfd, sec, relpp, isympp);
       free (relpp);
       if (relcount != 0)
-	goto done;
+	{
+	  if (! is_strip)
+	    non_fatal (_("%s[%s]: Cannot merge - there are relocations against this section"),
+		       bfd_get_filename (abfd), bfd_section_name (sec));
+	  goto done;
+	}
     }
   
   /* Make a copy of the notes and convert to our internal format.
      Minimum size of a note is 12 bytes.  Also locate the version
      notes and check them.  */
-  pnote = pnotes = (objcopy_internal_note *) xcalloc ((size / 12), sizeof (* pnote));
+  pnote = pnotes = (objcopy_internal_note *)
+    xcalloc ((size / 12), sizeof (* pnote));
   while (remain >= 12)
     {
       bfd_vma start, end;
 
-      pnote->note.namesz = (bfd_get_32 (abfd, in    ) + 3) & ~3;
-      pnote->note.descsz = (bfd_get_32 (abfd, in + 4) + 3) & ~3;
-      pnote->note.type   =  bfd_get_32 (abfd, in + 8);
+      pnote->note.namesz   = bfd_get_32 (abfd, in);
+      pnote->note.descsz   = bfd_get_32 (abfd, in + 4);
+      pnote->note.type     = bfd_get_32 (abfd, in + 8);
+      pnote->padded_namesz = (pnote->note.namesz + 3) & ~3;
+
+      if (((pnote->note.descsz + 3) & ~3) != pnote->note.descsz)
+	{
+	  err = _("corrupt GNU build attribute note: description size not a factor of 4");
+	  goto done;
+	}
 
       if (pnote->note.type    != NT_GNU_BUILD_ATTRIBUTE_OPEN
 	  && pnote->note.type != NT_GNU_BUILD_ATTRIBUTE_FUNC)
@@ -2037,7 +2164,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	  goto done;
 	}
 
-      if (pnote->note.namesz + pnote->note.descsz + 12 > remain)
+      if (pnote->padded_namesz + pnote->note.descsz + 12 > remain)
 	{
 	  err = _("corrupt GNU build attribute note: note too big");
 	  goto done;
@@ -2050,21 +2177,17 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	}
 
       pnote->note.namedata = (char *)(in + 12);
-      pnote->note.descdata = (char *)(in + 12 + pnote->note.namesz);
+      pnote->note.descdata = (char *)(in + 12 + pnote->padded_namesz);
 
-      remain -= 12 + pnote->note.namesz + pnote->note.descsz;
-      in     += 12 + pnote->note.namesz + pnote->note.descsz;
+      remain -= 12 + pnote->padded_namesz + pnote->note.descsz;
+      in     += 12 + pnote->padded_namesz + pnote->note.descsz;
 
       if (pnote->note.namesz > 2
 	  && pnote->note.namedata[0] == '$'
 	  && pnote->note.namedata[1] == GNU_BUILD_ATTRIBUTE_VERSION
 	  && pnote->note.namedata[2] == '1')
 	++ version_1_seen;
-      else if (pnote->note.namesz > 4
-	       && pnote->note.namedata[0] == 'G'
-	       && pnote->note.namedata[1] == 'A'
-	       && pnote->note.namedata[2] == '$'
-	       && pnote->note.namedata[3] == GNU_BUILD_ATTRIBUTE_VERSION)
+      else if (is_version_note (pnote))
 	{
 	  if (pnote->note.namedata[4] == '2')
 	    ++ version_2_seen;
@@ -2170,11 +2293,18 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 
   if (version_1_seen == 0 && version_2_seen == 0 && version_3_seen == 0)
     {
+#if 0
       err = _("bad GNU build attribute notes: no known versions detected");
       goto done;
+#else
+      /* This happens with glibc.  No idea why.  */
+      non_fatal (_("%s[%s]: Warning: version note missing - assuming version 3"),
+		 bfd_get_filename (abfd), bfd_section_name (sec));
+      version_3_seen = 2;
+#endif
     }
 
-  if ((version_1_seen > 0 && version_2_seen > 0)
+  if (   (version_1_seen > 0 && version_2_seen > 0)
       || (version_1_seen > 0 && version_3_seen > 0)
       || (version_2_seen > 0 && version_3_seen > 0))
     {
@@ -2182,269 +2312,214 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
       goto done;
     }
 
-  /* Merging is only needed if there is more than one version note...  */
-  if (version_1_seen == 1 || version_2_seen == 1 || version_3_seen == 1)
-    goto done;
+  /* We are now only supporting the merging v3+ notes
+     - it makes things much simpler.  */
+  if (version_3_seen == 0)
+    {
+      merge_debug ("%s: skipping merge - not using v3 notes", bfd_section_name (sec));
+      goto done;
+    }
 
-  attribute_type_byte = version_1_seen ? 1 : 3;
-  val_start = attribute_type_byte + 1;
+  merge_debug ("Merging section %s which contains %ld notes\n",
+	       sec->name, pnotes_end - pnotes);
 
-  /* We used to require that the first note be a version note,
-     but this is no longer enforced.  Due to the problems with
-     linking sections with the same name (eg .gnu.build.note.hot)
-     we cannot guarantee that the first note will be a version note.  */
+  /* Sort the notes.  */
+  qsort (pnotes, pnotes_end - pnotes, sizeof (* pnotes),
+	 compare_gnu_build_notes);
+
+#if DEBUG_MERGE
+  merge_debug ("Results of initial sort:\n");
+  for (pnote = pnotes; pnote < pnotes_end; pnote ++)
+    merge_debug ("offset %#08lx range %#08lx..%#08lx type %ld attribute %d namesz %ld\n",
+		 (pnote->note.namedata - (char *) contents) - 12,
+		 pnote->start, pnote->end,
+		 pnote->note.type,
+		 pnote->note.namedata[3],
+		 pnote->note.namesz
+		 );
+#endif
 
   /* Now merge the notes.  The rules are:
-     1. Preserve the ordering of the notes.
-     2. Preserve any NT_GNU_BUILD_ATTRIBUTE_FUNC notes.
-     3. Eliminate any NT_GNU_BUILD_ATTRIBUTE_OPEN notes that have the same
-        full name field as the immediately preceeding note with the same type
-	of name and whose address ranges coincide.
-	IE - if there are gaps in the coverage of the notes, then these gaps
-	must be preserved.
-     4. Combine the numeric value of any NT_GNU_BUILD_ATTRIBUTE_OPEN notes
-        of type GNU_BUILD_ATTRIBUTE_STACK_SIZE.
-     5. If an NT_GNU_BUILD_ATTRIBUTE_OPEN note is going to be preserved and
-        its description field is empty then the nearest preceeding OPEN note
-	with a non-empty description field must also be preserved *OR* the
-	description field of the note must be changed to contain the starting
-	address to which it refers.
-     6. Notes with the same start and end address can be deleted.
-     7. FIXME: Elminate duplicate version notes - even function specific ones ?  */
+     1. If a note has a zero range, it can be eliminated.
+     2. If two notes have the same namedata then:
+        2a. If one note's range is fully covered by the other note
+	    then it can be deleted.
+	2b. If one note's range partially overlaps or adjoins the
+	    other note then if they are both of the same type (open
+	    or func) then they can be merged and one deleted.  If
+	    they are of different types then they cannot be merged.  */
   for (pnote = pnotes; pnote < pnotes_end; pnote ++)
     {
-      int                      note_type;
-      objcopy_internal_note *  back;
-      objcopy_internal_note *  prev_open_with_range = NULL;
+      /* Skip already deleted notes.
+	 FIXME: Can this happen ?  We are scanning forwards and
+	 deleting backwards after all.  */
+      if (is_deleted_note (pnote))
+	continue;
 
-      /* Rule 6 - delete 0-range notes.  */
+      /* Rule 1 - delete 0-range notes.  */
       if (pnote->start == pnote->end)
 	{
-	  duplicate_found = TRUE;
+	  merge_debug ("Delete note at offset %#08lx - empty range\n",
+		       (pnote->note.namedata - (char *) contents) - 12);
 	  pnote->note.type = 0;
 	  continue;
 	}
 
-      /* Rule 2 - preserve function notes.  */
-      if (! is_open_note (pnote))
+      int iter;
+      objcopy_internal_note * back;
+
+      /* Rule 2: Check to see if there is an identical previous note.  */
+      for (iter = 0, back = pnote - 1; back >= pnotes; back --)
 	{
-	  int iter;
+	  if (is_deleted_note (back))
+	    continue;
 
-	  /* Check to see if there is an identical previous function note.
-	     This can happen with overlays for example.  */
-	  for (iter = 0, back = pnote -1; back >= pnotes; back --)
+	  /* Our sorting function should have placed all identically
+	     attributed notes together, so if we see a note of a different
+	     attribute type stop searching.  */
+	  if (back->note.namesz != pnote->note.namesz
+	      || memcmp (back->note.namedata,
+			 pnote->note.namedata, pnote->note.namesz) != 0)
+	    break;
+	  
+	  if (back->start == pnote->start
+	      && back->end == pnote->end)
 	    {
-	      if (back->start == pnote->start
-		  && back->end == pnote->end
-		  && back->note.namesz == pnote->note.namesz
-		  && memcmp (back->note.namedata, pnote->note.namedata, pnote->note.namesz) == 0)
-		{
-		  duplicate_found = TRUE;
-		  pnote->note.type = 0;
-		  break;
-		}
-
-	      /* Don't scan too far back however.  */
-	      if (iter ++ > 16)
-		break;
+	      merge_debug ("Delete note at offset %#08lx - duplicate of note at offset %#08lx\n",
+			   (pnote->note.namedata - (char *) contents) - 12,
+			   (back->note.namedata - (char *) contents) - 12);
+	      pnote->note.type = 0;
+	      break;
 	    }
-	  continue;
+
+	  /* Rule 2a.  */
+	  if (contained_by (pnote, back))
+	    {
+	      merge_debug ("Delete note at offset %#08lx - fully contained by note at %#08lx\n",
+			   (pnote->note.namedata - (char *) contents) - 12,
+			   (back->note.namedata - (char *) contents) - 12);
+	      pnote->note.type = 0;
+	      break;
+	    }
+
+#if DEBUG_MERGE
+	  /* This should not happen as we have sorted the
+	     notes with earlier starting addresses first.  */
+	  if (contained_by (back, pnote))
+	    merge_debug ("ERROR: UNEXPECTED CONTAINMENT\n");
+#endif
+
+	  /* Rule 2b.  */
+	  if (overlaps_or_adjoins (back, pnote)
+	      && is_func_note (back) == is_func_note (pnote))
+	    {
+	      merge_debug ("Delete note at offset %#08lx - merge into note at %#08lx\n",
+			   (pnote->note.namedata - (char *) contents) - 12,
+			   (back->note.namedata - (char *) contents) - 12);
+
+	      back->end   = back->end > pnote->end ? back->end : pnote->end;
+	      back->start = back->start < pnote->start ? back->start : pnote->start;
+	      pnote->note.type = 0;
+	      break;
+	    }
+
+	  /* Don't scan too far back however.  */
+	  if (iter ++ > 16)
+	    {
+	      /* FIXME: Not sure if this can ever be triggered.  */
+	      merge_debug ("ITERATION LIMIT REACHED\n");
+	      break;
+	    }
 	}
+#if DEBUG_MERGE
+      if (! is_deleted_note (pnote))
+	merge_debug ("Unable to do anything with note at %#08lx\n",
+		     (pnote->note.namedata - (char *) contents) - 12);
+#endif		     
+    }
 
-      note_type = pnote->note.namedata[attribute_type_byte];
+  /* Resort the notes.  */
+  merge_debug ("Final sorting of notes\n");
+  qsort (pnotes, pnotes_end - pnotes, sizeof (* pnotes), sort_gnu_build_notes);
 
-      /* Scan backwards from pnote, looking for duplicates.
-	 Clear the type field of any found - but do not delete them just yet.  */
-      for (back = pnote - 1; back >= pnotes; back --)
+  /* Reconstruct the ELF notes.  */
+  bfd_byte *     new_contents;
+  bfd_byte *     old;
+  bfd_byte *     new;
+  bfd_size_type  new_size;
+  bfd_vma        prev_start = 0;
+  bfd_vma        prev_end = 0;
+
+  new = new_contents = xmalloc (size);
+  for (pnote = pnotes, old = contents;
+       pnote < pnotes_end;
+       pnote ++)
+    {
+      bfd_size_type note_size = 12 + pnote->padded_namesz + pnote->note.descsz;
+
+      if (! is_deleted_note (pnote))
 	{
-	  int back_type = back->note.namedata[attribute_type_byte];
-
-	  /* If this is the first open note with an address
-	     range that	we have encountered then record it.  */
-	  if (prev_open_with_range == NULL
-	      && back->note.descsz > 0
-	      && ! is_func_note (back))
-	    prev_open_with_range = back;
-
-	  if (! is_open_note (back))
-	    continue;
-
-	  /* If the two notes are different then keep on searching.  */
-	  if (back_type != note_type)
-	    continue;
-
-	  /* Rule 4 - combine stack size notes.  */
-	  if (back_type == GNU_BUILD_ATTRIBUTE_STACK_SIZE)
+	  /* Create the note, potentially using the
+	     address range of the previous note.  */
+	  if (pnote->start == prev_start && pnote->end == prev_end)
 	    {
-	      unsigned char * name;
-	      unsigned long   note_val;
-	      unsigned long   back_val;
-	      unsigned int    shift;
-	      unsigned int    bytes;
-	      unsigned long   byte;
-
-	      for (shift = 0, note_val = 0,
-		     bytes = pnote->note.namesz - val_start,
-		     name = (unsigned char *) pnote->note.namedata + val_start;
-		   bytes--;)
-		{
-		  byte = (* name ++) & 0xff;
-		  note_val |= byte << shift;
-		  shift += 8;
-		}
-
-	      for (shift = 0, back_val = 0,
-		     bytes = back->note.namesz - val_start,
-		     name = (unsigned char *) back->note.namedata + val_start;
-		   bytes--;)
-		{
-		  byte = (* name ++) & 0xff;
-		  back_val |= byte << shift;
-		  shift += 8;
-		}
-
-	      back_val += note_val;
-	      if (num_bytes (back_val) >= back->note.namesz - val_start)
-		{
-		  /* We have a problem - the new value requires more bytes of
-		     storage in the name field than are available.  Currently
-		     we have no way of fixing this, so we just preserve both
-		     notes.  */
-		  continue;
-		}
-
-	      /* Write the new val into back.  */
-	      name = (unsigned char *) back->note.namedata + val_start;
-	      while (name < (unsigned char *) back->note.namedata
-		     + back->note.namesz)
-		{
-		  byte = back_val & 0xff;
-		  * name ++ = byte;
-		  if (back_val == 0)
-		    break;
-		  back_val >>= 8;
-		}
-
-	      duplicate_found = TRUE;
-	      pnote->note.type = 0;
-	      break;
-	    }
-
-	  /* Rule 3 - combine identical open notes.  */
-	  if (back->note.namesz == pnote->note.namesz
-	      && memcmp (back->note.namedata,
-			 pnote->note.namedata, back->note.namesz) == 0
-	      && ! gap_exists (back, pnote))
-	    {
-	      duplicate_found = TRUE;
-	      pnote->note.type = 0;
-
-	      if (pnote->end > back->end)
-		back->end = pnote->end;
-
-	      if (version_3_seen)
-		back->modified = TRUE;
-	      break;
-	    }
-
-	  /* Rule 5 - Since we are keeping this note we must check to see
-	     if its description refers back to an earlier OPEN version
-	     note that has been scheduled for deletion.  If so then we
-	     must make sure that version note is also preserved.  */
-	  if (version_3_seen)
-	    {
-	      /* As of version 3 we can just
-		 move the range into the note.  */
-	      pnote->modified = TRUE;
-	      pnote->note.type = NT_GNU_BUILD_ATTRIBUTE_FUNC;
-	      back->modified = TRUE;
-	      back->note.type = NT_GNU_BUILD_ATTRIBUTE_FUNC;
+	      bfd_put_32 (abfd, pnote->note.namesz, new);
+	      bfd_put_32 (abfd, 0, new + 4);
+	      bfd_put_32 (abfd, pnote->note.type, new + 8);
+	      new += 12;
+	      memcpy (new, pnote->note.namedata, pnote->note.namesz);
+	      if (pnote->note.namesz < pnote->padded_namesz)
+		memset (new + pnote->note.namesz, 0, pnote->padded_namesz - pnote->note.namesz);
+	      new += pnote->padded_namesz;
 	    }
 	  else
 	    {
-	      if (pnote->note.descsz == 0
-		  && prev_open_with_range != NULL
-		  && prev_open_with_range->note.type == 0)
-		prev_open_with_range->note.type = NT_GNU_BUILD_ATTRIBUTE_OPEN;
-	    }
-
-	  /* We have found a similar attribute but the details do not match.
-	     Stop searching backwards.  */
-	  break;
-	}
-    }
-
-  if (duplicate_found)
-    {
-      bfd_byte *     new_contents;
-      bfd_byte *     old;
-      bfd_byte *     new;
-      bfd_size_type  new_size;
-      bfd_vma        prev_start = 0;
-      bfd_vma        prev_end = 0;
-
-      /* Eliminate the duplicates.  */
-      new = new_contents = xmalloc (size);
-      for (pnote = pnotes, old = contents;
-	   pnote < pnotes_end;
-	   pnote ++)
-	{
-	  bfd_size_type note_size = 12 + pnote->note.namesz + pnote->note.descsz;
-
-	  if (pnote->note.type != 0)
-	    {
-	      if (pnote->modified)
+	      bfd_put_32 (abfd, pnote->note.namesz, new);
+	      bfd_put_32 (abfd, is_64bit (abfd) ? 16 : 8, new + 4);
+	      bfd_put_32 (abfd, pnote->note.type, new + 8);
+	      new += 12;
+	      memcpy (new, pnote->note.namedata, pnote->note.namesz);
+	      if (pnote->note.namesz < pnote->padded_namesz)
+		memset (new + pnote->note.namesz, 0, pnote->padded_namesz - pnote->note.namesz);
+	      new += pnote->padded_namesz;
+	      if (is_64bit (abfd))
 		{
-		  /* If the note has been modified then we must copy it by
-		     hand, potentially adding in a new description field.  */
-		  if (pnote->start == prev_start && pnote->end == prev_end)
-		    {
-		      bfd_put_32 (abfd, pnote->note.namesz, new);
-		      bfd_put_32 (abfd, 0, new + 4);
-		      bfd_put_32 (abfd, pnote->note.type, new + 8);
-		      new += 12;
-		      memcpy (new, pnote->note.namedata, pnote->note.namesz);
-		      new += pnote->note.namesz;
-		    }
-		  else
-		    {
-		      bfd_put_32 (abfd, pnote->note.namesz, new);
-		      bfd_put_32 (abfd, is_64bit (abfd) ? 16 : 8, new + 4);
-		      bfd_put_32 (abfd, pnote->note.type, new + 8);
-		      new += 12;
-		      memcpy (new, pnote->note.namedata, pnote->note.namesz);
-		      new += pnote->note.namesz;
-		      if (is_64bit (abfd))
-			{
-			  bfd_put_64 (abfd, pnote->start, new);
-			  bfd_put_64 (abfd, pnote->end, new + 8);
-			  new += 16;
-			}
-		      else
-			{
-			  bfd_put_32 (abfd, pnote->start, new);
-			  bfd_put_32 (abfd, pnote->end, new + 4);
-			  new += 8;
-			}
-		    }
+		  bfd_put_64 (abfd, pnote->start, new);
+		  bfd_put_64 (abfd, pnote->end, new + 8);
+		  new += 16;
 		}
 	      else
 		{
-		  memcpy (new, old, note_size);
-		  new += note_size;
+		  bfd_put_32 (abfd, pnote->start, new);
+		  bfd_put_32 (abfd, pnote->end, new + 4);
+		  new += 8;
 		}
+
 	      prev_start = pnote->start;
 	      prev_end = pnote->end;
 	    }
-
-	  old += note_size;
 	}
 
-      new_size = new - new_contents;
-      memcpy (contents, new_contents, new_size);
-      size = new_size;
-      free (new_contents);
+      old += note_size;
     }
+
+#if DEBUG_MERGE
+  merge_debug ("Results of merge:\n");
+  for (pnote = pnotes; pnote < pnotes_end; pnote ++)
+    if (! is_deleted_note (pnote))
+      merge_debug ("offset %#08lx range %#08lx..%#08lx type %ld attribute %d namesz %ld\n",
+		   (pnote->note.namedata - (char *) contents) - 12,
+		   pnote->start, pnote->end,
+		   pnote->note.type,
+		   pnote->note.namedata[3],
+		   pnote->note.namesz
+		   );
+#endif
+  
+  new_size = new - new_contents;
+  memcpy (contents, new_contents, new_size);
+  size = new_size;
+  free (new_contents);
 
  done:
   if (err)
@@ -2783,53 +2858,62 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
+  merged_note_section * merged_note_sections = NULL;
   if (merge_notes)
     {
       /* This palaver is necessary because we must set the output
 	 section size first, before its contents are ready.  */
-      osec = bfd_get_section_by_name (ibfd, GNU_BUILD_ATTRS_SECTION_NAME);
-      if (osec && is_merged_note_section (ibfd, osec))
+      for (osec = ibfd->sections; osec != NULL; osec = osec->next)
 	{
-	  bfd_size_type size;
-	  
-	  size = bfd_section_size (osec);
+	  if (! is_mergeable_note_section (ibfd, osec))
+	    continue;
+
+	  bfd_size_type size = bfd_section_size (osec);
+
 	  if (size == 0)
 	    {
-	      bfd_nonfatal_message (NULL, ibfd, osec, _("warning: note section is empty"));
-	      merge_notes = FALSE;
+	      bfd_nonfatal_message (NULL, ibfd, osec,
+				    _("warning: note section is empty"));
+	      continue;
 	    }
-	  else if (! bfd_get_full_section_contents (ibfd, osec, & merged_notes))
+
+	  merged_note_section * merged = xmalloc (sizeof * merged);
+	  merged->contents = NULL;
+	  if (! bfd_get_full_section_contents (ibfd, osec, & merged->contents))
 	    {
-	      bfd_nonfatal_message (NULL, ibfd, osec, _("warning: could not load note section"));
-	      free (merged_notes);
-	      merged_notes = NULL;
-	      merge_notes = FALSE;
+	      bfd_nonfatal_message (NULL, ibfd, osec,
+				    _("warning: could not load note section"));
+	      free (merged->contents);
+	      free (merged);
+	      continue;
 	    }
-	  else
+
+	  merged->size = merge_gnu_build_notes (ibfd, osec, size,
+						merged->contents);
+	  if (merged->size == size)
 	    {
-	      merged_size = merge_gnu_build_notes (ibfd, osec, size, merged_notes);
-	      if (merged_size == size)
-		{
-		  /* Merging achieves nothing.  */
-		  free (merged_notes);
-		  merged_notes = NULL;
-		  merge_notes = FALSE;
-		  merged_size = 0;
-		}
-	      else
-		{
-		  if (osec->output_section == NULL
-		      || !bfd_set_section_size (osec->output_section,
-						merged_size))
-		    {
-		      bfd_nonfatal_message (NULL, obfd, osec, _("warning: failed to set merged notes size"));
-		      free (merged_notes);
-		      merged_notes = NULL;
-		      merge_notes = FALSE;
-		      merged_size = 0;
-		    }
-		}
+	      /* Merging achieves nothing.  */
+	      merge_debug ("Merge of section %s achieved nothing - skipping\n",
+			   bfd_section_name (osec));
+	      free (merged->contents);
+	      free (merged);
+	      continue;
 	    }
+
+	  if (osec->output_section == NULL
+	      || !bfd_set_section_size (osec->output_section, merged->size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec,
+				    _("warning: failed to set merged notes size"));
+	      free (merged->contents);
+	      free (merged);
+	      continue;
+	    }
+
+	  /* Add section to list of merged sections.  */
+	  merged->sec  = osec;
+	  merged->next = merged_note_sections;
+	  merged_note_sections = merged;
 	}
     }
 
@@ -3154,23 +3238,72 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  if (merge_notes)
+  if (merged_note_sections != NULL)
     {
-      osec = bfd_get_section_by_name (obfd, GNU_BUILD_ATTRS_SECTION_NAME);
-      if (osec && is_merged_note_section (obfd, osec))
+      merged_note_section * merged = NULL;
+
+      for (osec = obfd->sections; osec != NULL; osec = osec->next)
 	{
-	  if (! bfd_set_section_contents (obfd, osec, merged_notes, 0, merged_size))
+	  if (! is_mergeable_note_section (obfd, osec))
+	    continue;
+
+	  if (merged == NULL)
+	    merged = merged_note_sections;
+
+	  /* It is likely that output sections are in the same order
+	     as the input sections, but do not assume that this is
+	     the case.  */
+	  if (strcmp (bfd_section_name (merged->sec),
+		      bfd_section_name (osec)) != 0)
 	    {
-	      bfd_nonfatal_message (NULL, obfd, osec, _("error: failed to copy merged notes into output"));
+	      for (merged = merged_note_sections;
+		   merged != NULL;
+		   merged = merged->next)
+		if (strcmp (bfd_section_name (merged->sec),
+			    bfd_section_name (osec)) == 0)
+		  break;
+
+	      if (merged == NULL)
+		{
+		  bfd_nonfatal_message
+		    (NULL, obfd, osec,
+		     _("error: failed to copy merged notes into output"));
+		  continue;
+		}
+	    }
+
+	  if (! is_mergeable_note_section (obfd, osec))
+	    {
+	      bfd_nonfatal_message
+		(NULL, obfd, osec,
+		 _("error: failed to copy merged notes into output"));
+	      continue;
+	    }
+
+	  if (! bfd_set_section_contents (obfd, osec, merged->contents, 0,
+					  merged->size))
+	    {
+	      bfd_nonfatal_message
+		(NULL, obfd, osec,
+		 _("error: failed to copy merged notes into output"));
 	      return FALSE;
 	    }
+
+	  merged = merged->next;
 	}
-      else if (! is_strip)
-	bfd_nonfatal_message (NULL, obfd, osec, _("could not find any mergeable note sections"));
-      free (merged_notes);
-      merged_notes = NULL;
-      merge_notes = FALSE;
+
+      /* Free the memory.  */
+      merged_note_section * next;
+      for (merged = merged_note_sections; merged != NULL; merged = next)
+	{
+	  next = merged->next;
+	  free (merged->contents);
+	  free (merged);
+	}
     }
+  else if (merge_notes && ! is_strip)
+    non_fatal (_("%s: Could not find any mergeable note sections"),
+	       bfd_get_filename (ibfd));
 
   if (gnu_debuglink_filename != NULL)
     {
@@ -3959,7 +4092,7 @@ skip_section (bfd *ibfd, sec_ptr isection, bfd_boolean skip_copy)
 
   /* When merging a note section we skip the copying of the contents,
      but not the copying of the relocs associated with the contents.  */
-  if (skip_copy && is_merged_note_section (ibfd, isection))
+  if (skip_copy && is_mergeable_note_section (ibfd, isection))
     return TRUE;
 
   flags = bfd_section_flags (isection);

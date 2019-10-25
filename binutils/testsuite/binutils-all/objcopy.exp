@@ -1108,10 +1108,12 @@ if [is_elf_format] {
 	run_dump_test "note-2-64"
 	run_dump_test "note-3-64"
 	run_dump_test "note-4-64"
+	run_dump_test "note-6-64"
     } else {
 	run_dump_test "note-2-32"
 	run_dump_test "note-3-32"
 	run_dump_test "note-4-32"
+	run_dump_test "note-6-32"
     }
     run_dump_test "note-5"
 }

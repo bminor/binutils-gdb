@@ -1,3 +1,41 @@
+2019-10-25  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (struct merged_note_section): New structure.  Used to
+	chain together details of mergeable note sections.
+	(is_merged_note_section): Rename to is_megreable_note_section and
+	return true for note sections that use GNU_BUILD_ATTRS_SECTION_NAME
+	as a prefix.
+	(num_bytes): Delete
+	(objcoopy_internal_note): Add padded_namesz field.
+	(DEBUG_MERGE): New macro.  Set to non-zero to enable debugging of
+	the note merging code.
+	(gap_exists): Rename to overlaps_or_adjoins and return TRUE for
+	overlapping notes or adjoining notes.
+	(contained_by, is_deleted_note, is_version_note)
+	(compare_gnu_build_notes, sort_gnu_build_notes): New functions.
+	(merge_gnu_build_notes):  Rework.  Sort notes into a mergeable
+	order first.  Merge them.  Then sort them into an ascending
+	address order before writing them out.
+	(copy_object): Handle more than one mergeable note section.
+	* testsuite/binutils-all/note-2-32.d: Update for new merging
+	behaviour.
+	* testsuite/binutils-all/note-2-32.s: Likewise.
+	* testsuite/binutils-all/note-2-64.d: Likewise.
+	* testsuite/binutils-all/note-2-64.s: Likewise.
+	* testsuite/binutils-all/note-3-32.d: Likewise.
+	* testsuite/binutils-all/note-3-32.s: Likewise.
+	* testsuite/binutils-all/note-3-64.d: Likewise.
+	* testsuite/binutils-all/note-3-64.s: Likewise.
+	* testsuite/binutils-all/note-4-32.d: Likewise.
+	* testsuite/binutils-all/note-4-32.s: Likewise.
+	* testsuite/binutils-all/note-4-64.d: Likewise.
+	* testsuite/binutils-all/note-4-64.s: Likewise.
+	* testsuite/binutils-all/note-6-32.s: New test source file.
+	* testsuite/binutils-all/note-6-64.s: New test source file.
+	* testsuite/binutils-all/note-6-32.d: New test driver file.
+	* testsuite/binutils-all/note-6-64.d: New test driver file.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
 2019-10-25  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_program_headers): Check PT_PHDR p_offset
