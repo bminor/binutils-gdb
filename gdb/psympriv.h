@@ -82,6 +82,12 @@ struct partial_symbol
   ENUM_BITFIELD(address_class) aclass : SYMBOL_ACLASS_BITS;
 };
 
+/* This struct is size-critical (see comment at the to of symtab.h), so this
+   assert makes sure the size doesn't change accidentally.  Be careful when
+   purposely increasing the size.  */
+gdb_static_assert ((sizeof (void *) == 8 && sizeof (partial_symbol) == 40)
+		   || (sizeof (void *) == 4 && sizeof (partial_symbol) == 24));
+
 /* A convenience enum to give names to some constants used when
    searching psymtabs.  This is internal to psymtab and should not be
    used elsewhere.  */

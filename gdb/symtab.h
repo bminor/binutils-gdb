@@ -446,6 +446,13 @@ struct general_symbol_info
   short section;
 };
 
+/* This struct is size-critical (see comment at the top), so this assert
+   makes sure the size doesn't change accidentally.  Be careful when
+   purposely increasing the size.  */
+gdb_static_assert ((sizeof (void *) == 8 && sizeof (general_symbol_info) == 32)
+		   || (sizeof (void *) == 4 &&
+		       sizeof (general_symbol_info) == 20));
+
 extern void symbol_set_demangled_name (struct general_symbol_info *,
 				       const char *,
                                        struct obstack *);
@@ -1186,6 +1193,12 @@ struct symbol
 
   struct symbol *hash_next;
 };
+
+/* This struct is size-critical (see comment at the top), so this assert
+   makes sure the size doesn't change accidentally.  Be careful when
+   purposely increasing the size.  */
+gdb_static_assert ((sizeof (void *) == 8 && sizeof (symbol) == 72)
+		   || (sizeof (void *) == 4 && sizeof (symbol) == 40));
 
 /* Several lookup functions return both a symbol and the block in which the
    symbol is found.  This structure is used in these cases.  */
