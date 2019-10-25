@@ -839,7 +839,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
     {
       /* In Ada, we do the symbol lookups using the mangled name, so
          we can save some space by not storing the demangled name.  */
-      if (!copy_name && linkage_name_copy == linkage_name)
+      if (!copy_name)
 	gsymbol->name = linkage_name;
       else
 	{
