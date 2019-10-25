@@ -1,3 +1,8 @@
+2019-10-25  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_program_headers): Check PT_PHDR p_offset
+	as well as p_vaddr.  Use p_filesz, not p_memsz, in vaddr test.
+
 2019-10-21  Alan Modra  <amodra@gmail.com>
 
 	PR 452

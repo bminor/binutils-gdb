@@ -5262,11 +5262,17 @@ process_program_headers (Filedata * filedata)
 	      unsigned int j;
 
 	      for (j = 1; j < filedata->file_header.e_phnum; j++)
-		if (filedata->program_headers[j].p_vaddr <= segment->p_vaddr
-		    && (filedata->program_headers[j].p_vaddr
-			+ filedata->program_headers[j].p_memsz)
-		    >= (segment->p_vaddr + segment->p_filesz))
-		  break;
+		{
+		  Elf_Internal_Phdr *load = filedata->program_headers + j;
+		  if (load->p_type == PT_LOAD
+		      && load->p_offset <= segment->p_offset
+		      && (load->p_offset + load->p_filesz
+			  >= segment->p_offset + segment->p_filesz)
+		      && load->p_vaddr <= segment->p_vaddr
+		      && (load->p_vaddr + load->p_filesz
+			  >= segment->p_vaddr + segment->p_filesz))
+		    break;
+		}
 	      if (j == filedata->file_header.e_phnum)
 		error (_("the PHDR segment is not covered by a LOAD segment\n"));
 	    }
