@@ -1,3 +1,8 @@
+2019-10-25  Nick Clifton  <nickc@redhat.com>
+
+	* rx-dis.c (print_insn_rx): Use parenthesis to ensure correct
+	access to opcodes.op array element.
+
 2019-10-23  Nick Clifton  <nickc@redhat.com>
 
 	* rx-dis.c (get_register_name): Fix spelling typo in error

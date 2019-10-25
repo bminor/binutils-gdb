@@ -319,7 +319,7 @@ print_insn_rx (bfd_vma addr, disassemble_info * dis)
 	    case '0':
 	    case '1':
 	    case '2':
-	      oper = opcode.op + *s - '0';
+	      oper = opcode.op + (*s - '0');
 	      if (do_size)
 		{
 		  if (oper->type == RX_Operand_Indirect || oper->type == RX_Operand_Zero_Indirect)
