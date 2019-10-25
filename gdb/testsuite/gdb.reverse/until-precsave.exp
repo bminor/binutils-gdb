@@ -50,15 +50,12 @@ gdb_test "break $end_of_main" \
 
 # This can take awhile.
 with_timeout_factor 20 {
-    set test "run to end of main"
-    set pass_pattern "Breakpoint .* set breakpoint 10a here .*"
-    set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
-    gdb_test_multiple "continue" $test {
-	-re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
-	    pass $test
+    gdb_test_multiple "continue" "run to end of main" {
+	-wrap -re "Breakpoint .* set breakpoint 10a here .*" {
+	    pass $gdb_test_name
 	}
-	-re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
-	    kfail "gdb/25038" $test
+	-wrap -re "Process record does not support instruction 0xfae64 at.*" {
+	    kfail "gdb/25038" $gdb_test_name
 	    return -1
 	}
     }

@@ -49,15 +49,12 @@ gdb_test "until $bp_location1" \
 
 # Advance up to factorial, outer invocation
 #
-set test "advance to factorial"
-set pass_pattern "factorial .value=6..*$srcfile:$bp_location7.*"
-set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
-gdb_test_multiple "advance factorial" $test {
-    -re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
-	pass "$test"
+gdb_test_multiple "advance factorial" "" {
+    -wrap -re "factorial .value=6..*$srcfile:$bp_location7.*" {
+	pass $gdb_test_name
     }
-    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
-	kfail "gdb/25038" $test
+    -wrap -re "Process record does not support instruction 0xfae64 at.*" {
+	kfail "gdb/25038" $gdb_test_name
 	return -1
     }
 }

@@ -1,3 +1,13 @@
+2019-10-25  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.reverse/sigall-precsave.exp: Use -wrap and $gdb_test_name in
+	gdb_test_multiple calls.
+	* gdb.reverse/sigall-reverse.exp: Same.
+	* gdb.reverse/solib-precsave.exp: Same.
+	* gdb.reverse/solib-reverse.exp: Same.
+	* gdb.reverse/until-precsave.exp: Same.
+	* gdb.reverse/until-reverse.exp: Same.
+
 2019-10-24  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test_multiple): Add -wrap pattern flag.

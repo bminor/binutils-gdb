@@ -51,21 +51,21 @@ proc test_one_sig {nextsig} {
 	if { $thissig == "IO" } {
 	    setup_xfail "i*86-pc-linuxoldld-gnu" "i*86-pc-linuxaout-gnu"
 	}
-	set testmsg "get signal $thissig"
-	set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
-	gdb_test_multiple "continue" $testmsg {
-	    -re "Program received signal SIG$thissig.*handle_$thissig.*$gdb_prompt $" {
-		fail "$testmsg (wrong location)"
+	gdb_test_multiple "continue" "get signal $thissig" {
+	    -wrap -re \
+		"Program received signal SIG$thissig.*handle_$thissig.*" {
+		fail "$gdb_test_name (wrong location)"
 	    }
-	    -re "Program received signal SIG$thissig.*$gdb_prompt $" {
-		pass $testmsg
+	    -wrap -re "Program received signal SIG$thissig.*" {
+		pass $gdb_test_name
 	    }
-	    -re "Breakpoint.* handle_$thissig.*$gdb_prompt $" {
-		xfail $testmsg
+	    -wrap -re "Breakpoint.* handle_$thissig.*" {
+		xfail $gdb_test_name
 		set need_another_continue 0
 	    }
-	    -re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
-		kfail "gdb/25038" "$testmsg"
+	    -wrap -re \
+		"Process record does not support instruction 0xfae64 at.*" {
+		kfail "gdb/25038" $gdb_test_name
 		set record_instruction_kfail 1
 		return
 	    }
