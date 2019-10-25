@@ -1,3 +1,12 @@
+2019-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR gas/25125
+	PR gas/12049
+	* write.c (relax_frag): Correct calculation of delta for
+	positive branches where "stretch" would make the branch
+	negative.  Return zero immediately in that case.  Correct
+	TC_PCREL_ADJUST comment.
+
 2019-10-16  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-xtensa.c (xg_order_trampoline_chain_entry): Don't

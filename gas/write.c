@@ -2497,7 +2497,7 @@ relax_frag (segT segment, fragS *fragP, long stretch)
   const relax_typeS *table;
 
   target = fragP->fr_offset;
-  address = fragP->fr_address;
+  address = fragP->fr_address + fragP->fr_fix;
   table = TC_GENERIC_RELAX_TABLE;
   this_state = fragP->fr_subtype;
   start_type = this_type = table + this_state;
@@ -2537,13 +2537,13 @@ relax_frag (segT segment, fragS *fragP, long stretch)
 	     negative.  Don't allow this in case the negative reach is
 	     large enough to require a larger branch instruction.  */
 	  else if (target < address)
-	    target = fragP->fr_next->fr_address + stretch;
+	    return 0;
 	}
     }
 
-  aim = target - address - fragP->fr_fix;
+  aim = target - address;
 #ifdef TC_PCREL_ADJUST
-  /* Currently only the ns32k family needs this.  */
+  /* Currently only the ns32k and arc needs this.  */
   aim += TC_PCREL_ADJUST (fragP);
 #endif
 
