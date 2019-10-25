@@ -225,7 +225,7 @@ update_gnu_property (const char *file_name, FILE *file)
 			if (disable_x86_features)
 			  bitmask &= ~disable_x86_features;
 			if (old_bitmask != bitmask)
-			  BYTE_PUT (ptr, bitmask);
+			  byte_put (ptr, bitmask, 4);
 			goto out;
 		      }
 

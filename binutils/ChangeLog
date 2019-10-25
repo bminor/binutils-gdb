@@ -1,3 +1,7 @@
+2019-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfedit.c (update_gnu_property): Replace BYTE_PUT with byte_put.
+
 2019-10-25  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (struct merged_note_section): New structure.  Used to
