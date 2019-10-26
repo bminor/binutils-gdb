@@ -294,7 +294,6 @@ struct all_tui_windows
 
 
 /* Data Manipulation Functions.  */
-extern struct tui_win_info *tui_partial_win_by_name (const char *);
 extern enum tui_layout_type tui_current_layout (void);
 extern int tui_term_height (void);
 extern void tui_set_term_height_to (int);

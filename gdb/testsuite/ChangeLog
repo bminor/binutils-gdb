@@ -1,3 +1,7 @@
+2019-11-19  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/winheight.exp: New file.
+
 2019-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/ctf-whatis.c: Delete.

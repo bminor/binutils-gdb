@@ -51,6 +51,7 @@
 #include "gdb_curses.h"
 #include <ctype.h>
 #include "readline/readline.h"
+#include "gdbsupport/gdb_string_view.h"
 
 #include <signal.h>
 
@@ -792,6 +793,24 @@ tui_scroll_right_command (const char *arg, int from_tty)
 }
 
 
+/* Answer the window represented by name.  */
+static struct tui_win_info *
+tui_partial_win_by_name (gdb::string_view name)
+{
+  if (name != NULL)
+    {
+      for (tui_win_info *item : all_tui_windows ())
+	{
+	  const char *cur_name = item->name ();
+
+	  if (startswith (cur_name, name))
+	    return item;
+	}
+    }
+
+  return NULL;
+}
+
 /* Set focus to the window named by 'arg'.  */
 static void
 tui_set_focus_command (const char *arg, int from_tty)
@@ -939,20 +958,16 @@ tui_set_win_height_command (const char *arg, int from_tty)
   tui_enable ();
   if (arg != NULL)
     {
-      std::string copy = arg;
-      char *buf = &copy[0];
-      char *buf_ptr = buf;
-      char *wname = NULL;
+      const char *buf = arg;
+      const char *buf_ptr = buf;
       int new_height;
       struct tui_win_info *win_info;
 
-      wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
       if (buf_ptr != NULL)
 	{
-	  *buf_ptr = '\0';
-
 	  /* Validate the window name.  */
+	  gdb::string_view wname (buf, buf_ptr - buf);
 	  win_info = tui_partial_win_by_name (wname);
 
 	  if (win_info == NULL)

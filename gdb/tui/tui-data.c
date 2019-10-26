@@ -158,25 +158,6 @@ tui_prev_win (struct tui_win_info *cur_win)
 }
 
 
-/* Answer the window represented by name.  */
-struct tui_win_info *
-tui_partial_win_by_name (const char *name)
-{
-  if (name != NULL)
-    {
-      for (tui_win_info *item : all_tui_windows ())
-	{
-	  const char *cur_name = item->name ();
-
-	  if (strlen (name) <= strlen (cur_name)
-	      && startswith (cur_name, name))
-	    return item;
-	}
-    }
-
-  return NULL;
-}
-
 /* See tui-data.h.  */
 
 void

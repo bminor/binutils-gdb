@@ -1,3 +1,11 @@
+2019-11-19  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_partial_win_by_name): Move from tui-data.c.
+	Now static.  Change type of "name".
+	(tui_set_win_height_command): Don't copy "arg".
+	* tui/tui-data.h (tui_partial_win_by_name): Don't declare.
+	* tui/tui-data.c (tui_partial_win_by_name): Move to tui-win.c.
+
 2019-11-19  Ali Tamur <tamur@google.com>
 
 	* dwarf2read.c (dw2_get_file_names_reader): Replace "if (attr)" with
