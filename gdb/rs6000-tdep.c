@@ -1360,7 +1360,7 @@ rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
       return pc;
     }
 
-  /* Third sequence: No probe; instead, a comparizon between the stack size
+  /* Third sequence: No probe; instead, a comparison between the stack size
      limit (saved in a run-time global variable) and the current stack
      pointer:
 

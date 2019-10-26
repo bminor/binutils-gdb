@@ -1299,7 +1299,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	{
 	  /* For variables that are frozen, or are children of frozen
 	     variables, we don't do fetch on initial assignment.
-	     For non-initial assignemnt we do the fetch, since it means we're
+	     For non-initial assignment we do the fetch, since it means we're
 	     explicitly asked to compare the new value with the old one.  */
 	  intentionally_not_fetched = true;
 	}

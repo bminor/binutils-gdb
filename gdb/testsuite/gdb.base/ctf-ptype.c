@@ -17,7 +17,7 @@
 
 /*
  *	Test file with lots of different types, for testing the
- *	"ptype" command on CTF data. It's devired from ptype.c.
+ *	"ptype" command on CTF data. It's derived from ptype.c.
  */
 
 /*

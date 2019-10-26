@@ -1,3 +1,15 @@
+2019-10-26  Tom de Vries  <tdevries@suse.de>
+
+	* linux-aarch64-low.c: Fix typos in comments.
+	* linux-arm-low.c: Same.
+	* linux-low.c: Same.
+	* linux-ppc-low.c: Same.
+	* proc-service.c: Same.
+	* regcache.h: Same.
+	* server.c: Same.
+	* tracepoint.c: Same.
+	* win32-low.c: Same.
+
 2019-10-25  Tom Tromey  <tromey@adacore.com>
 
 	* utils.c (xstrdup): Remove.

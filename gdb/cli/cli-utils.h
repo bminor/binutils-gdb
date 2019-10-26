@@ -56,7 +56,7 @@ extern void report_unrecognized_option_error (const char *command,
 
 /* Builds the help string for a command documented by PREFIX,
    followed by the extract_info_print_args help for ENTITY_KIND.  If
-   DOCUMENT_N_FLAG is true then help text descibing the -n flag is also
+   DOCUMENT_N_FLAG is true then help text describing the -n flag is also
    included.  */
 
 const char *info_print_args_help (const char *prefix,

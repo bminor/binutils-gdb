@@ -90,7 +90,7 @@ key_is_start_sequence (int ch)
    be garbled.  This is implemented with a pipe that TUI reads and
    readline writes to.  A gdb input handler is created so that reading
    the pipe is handled automatically.  This will probably not work on
-   non-Unix platforms.  The best fix is to make readline clean enougth
+   non-Unix platforms.  The best fix is to make readline clean enough
    so that is never write on stdout.
 
    Note SCz/2002-09-01: we now use more readline hooks and it seems

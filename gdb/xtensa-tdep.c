@@ -638,7 +638,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
   DEBUGTRACE ("xtensa_pseudo_register_write (... regnum = %d (%s) ...)\n",
 	      regnum, xtensa_register_name (gdbarch, regnum));
 
-  /* Renumber register, if aliase a0..a15 on Windowed ABI.  */
+  /* Renumber register, if aliases a0..a15 on Windowed ABI.  */
   if (gdbarch_tdep (gdbarch)->isa_use_windowed_registers
       && (regnum >= gdbarch_tdep (gdbarch)->a0_base)
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))

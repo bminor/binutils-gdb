@@ -1613,7 +1613,7 @@ linux_detach (process_info *process)
   complete_ongoing_step_over ();
 
   /* Stop all threads before detaching.  First, ptrace requires that
-     the thread is stopped to sucessfully detach.  Second, thread_db
+     the thread is stopped to successfully detach.  Second, thread_db
      may need to uninstall thread event breakpoints from memory, which
      only works with a stopped process anyway.  */
   stop_all_lwps (0, NULL);

@@ -21,7 +21,7 @@
 #define FRAME_H 1
 
 /* The following is the intended naming schema for frame functions.
-   It isn't 100% consistent, but it is aproaching that.  Frame naming
+   It isn't 100% consistent, but it is approaching that.  Frame naming
    schema:
 
    Prefixes:

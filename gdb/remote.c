@@ -2829,7 +2829,7 @@ remote_target::thread_name (struct thread_info *info)
 
 /* About these extended threadlist and threadinfo packets.  They are
    variable length packets but, the fields within them are often fixed
-   length.  They are redundent enough to send over UDP as is the
+   length.  They are redundant enough to send over UDP as is the
    remote protocol in general.  There is a matching unit test module
    in libstub.  */
 

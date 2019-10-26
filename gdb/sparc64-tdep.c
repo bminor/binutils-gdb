@@ -1199,7 +1199,7 @@ sparc64_16_byte_align_p (struct type *type)
 
 /* Store floating fields of element ELEMENT of an "parameter array"
    that has type TYPE and is stored at BITPOS in VALBUF in the
-   apropriate registers of REGCACHE.  This function can be called
+   appropriate registers of REGCACHE.  This function can be called
    recursively and therefore handles floating types in addition to
    structures.  */
 

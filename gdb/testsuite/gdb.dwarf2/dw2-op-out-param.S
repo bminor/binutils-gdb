@@ -28,7 +28,7 @@
    like gdb to behave in a user friendly, and helpful way when presented
    with such dwarf.  */
 
-/* There are 4 test cases in this assembler file.  In each case funcion
+/* There are 4 test cases in this assembler file.  In each case function
    main calls each test function in turn, each test case then calls the
    breakpt function.
 

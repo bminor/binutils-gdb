@@ -969,7 +969,7 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
   /* Store of some register.  May or may not update base address register.  */
   if (insn.insn_class == STORE || insn.insn_class == PUSH)
     {
-      /* There is definetely at least one operand - register/value being
+      /* There is definitely at least one operand - register/value being
 	 stored.  */
       gdb_assert (insn.operands_count > 0);
 
@@ -1886,7 +1886,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 	}
     }
 
-  /* Mandatory AUX registeres are intentionally few and are common between
+  /* Mandatory AUX registers are intentionally few and are common between
      ARCompact and ARC v2, so same code can be used for both.  */
   feature = tdesc_find_feature (tdesc_loc, aux_minimal_feature_name);
   if (feature == NULL)

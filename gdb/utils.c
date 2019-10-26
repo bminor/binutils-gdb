@@ -1281,7 +1281,7 @@ init_page_info (void)
 	  || getenv ("EMACS") || getenv ("INSIDE_EMACS"))
 	{
 	  /* The number of lines per page is not mentioned in the terminal
-	     description or EMACS evironment variable is set.  This probably
+	     description or EMACS environment variable is set.  This probably
 	     means that paging is not useful, so disable paging.  */
 	  lines_per_page = UINT_MAX;
 	}
@@ -3098,7 +3098,7 @@ parse_pid_to_attach (const char *args)
   return pid;
 }
 
-/* Substitute all occurences of string FROM by string TO in *STRINGP.  *STRINGP
+/* Substitute all occurrences of string FROM by string TO in *STRINGP.  *STRINGP
    must come from xrealloc-compatible allocator and it may be updated.  FROM
    needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
    located at the start or end of *STRINGP.  */

@@ -335,7 +335,7 @@ value_user_defined_op (struct value **argp, gdb::array_view<value *> args,
    arg1.operator @ (arg1,arg2) and return that value (where '@' is any
    binary operator which is legal for GNU C++).
 
-   OP is the operatore, and if it is BINOP_ASSIGN_MODIFY, then OTHEROP
+   OP is the operator, and if it is BINOP_ASSIGN_MODIFY, then OTHEROP
    is the opcode saying how to modify it.  Otherwise, OTHEROP is
    unused.  */
 

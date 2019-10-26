@@ -1333,7 +1333,7 @@ expand (const char *id,
 
 
 /* If the single token in SRC_FIRST followed by the tokens in SRC_REST
-   constitute a macro invokation not forbidden in NO_LOOP, append its
+   constitute a macro invocation not forbidden in NO_LOOP, append its
    expansion to DEST and return non-zero.  Otherwise, return zero, and
    leave DEST unchanged.
 

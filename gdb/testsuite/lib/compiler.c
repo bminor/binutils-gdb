@@ -45,7 +45,7 @@ set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ "unknown"} -]
 
 #if defined (__xlc__)
 /* IBM'x xlc compiler. NOTE:  __xlc__ expands to a double quoted string of four
-   numbers seperated by '.'s: currently "7.0.0.0" */
+   numbers separated by '.'s: currently "7.0.0.0" */
 set need_a_set [regsub -all {\.} [join {xlc __xlc__} -] - compiler_info]
 #endif
 

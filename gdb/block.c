@@ -343,7 +343,7 @@ block_set_using (struct block *block,
 }
 
 /* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
-   ititialize its members to zero.  */
+   initialize its members to zero.  */
 
 static void
 block_initialize_namespace (struct block *block, struct obstack *obstack)

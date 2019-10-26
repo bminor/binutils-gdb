@@ -21,7 +21,7 @@
 #include "server.h"
 
 /* This file is currently tied to GNU/Linux.  It should scale well to
-   another libthread_db implementation, with the approriate gdbserver
+   another libthread_db implementation, with the appropriate gdbserver
    hooks, but for now this means we can use GNU/Linux's target data.  */
 
 #include "linux-low.h"

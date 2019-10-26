@@ -307,7 +307,7 @@ net_open (struct serial *scb, const char *name)
   /* Flag to indicate whether we've got a connection refused.  It will
      be true if any of the connections tried was refused.  */
   bool got_connrefused;
-  /* If a connection succeeeds, SUCCESS_AINFO will point to the
+  /* If a connection succeeds, SUCCESS_AINFO will point to the
      'struct addrinfo' that succeed.  */
   struct addrinfo *success_ainfo = NULL;
   unsigned int polls = 0;

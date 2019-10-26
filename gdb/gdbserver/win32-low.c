@@ -146,7 +146,7 @@ win32_set_thread_context (win32_thread_info *th)
      will often not be true.  In those cases, the context returned by
      GetThreadContext will not be correct by the time the thread
      stops, hence we can't set that context back into the thread when
-     resuming - it will most likelly crash the inferior.
+     resuming - it will most likely crash the inferior.
      Unfortunately, there is no way to know when the thread will
      really stop.  To work around it, we'll only write the context
      back to the thread when either the user or GDB explicitly change
@@ -1426,7 +1426,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
   else
 #endif
     {
-      /* Keep the wait time low enough for confortable remote
+      /* Keep the wait time low enough for comfortable remote
 	 interruption, but high enough so gdbserver doesn't become a
 	 bottleneck.  */
       if (!WaitForDebugEvent (&current_event, 250))

@@ -841,7 +841,7 @@ call_function_by_hand_dummy (struct value *function,
 	   void parameterless generic dummy frame calls to frameless
 	   functions will create a sequence of effectively identical
 	   frames (SP, FP and TOS and PC the same).  This, not
-	   suprisingly, results in what appears to be a stack in an
+	   surprisingly, results in what appears to be a stack in an
 	   infinite loop --- when GDB tries to find a generic dummy
 	   frame on the internal dummy frame stack, it will always
 	   find the first one.

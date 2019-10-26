@@ -1622,7 +1622,7 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
       /* Check for some special instructions that might be migrated by
 	 GCC into the prologue and skip them.  At this point in the
 	 prologue, code should only touch the scratch registers %eax,
-	 %ecx and %edx, so while the number of posibilities is sheer,
+	 %ecx and %edx, so while the number of possibilities is sheer,
 	 it is limited.
 
 	 Make sure we only skip these instructions if we later see the

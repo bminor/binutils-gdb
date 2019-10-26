@@ -2136,7 +2136,7 @@ tfind_1 (enum trace_find_type type, int num,
 	 DON'T give an error, but DO change the state of
 	 traceframe_number etc. to invalid.
 
-	 The rationalle is that if you typed the command, you
+	 The rationale is that if you typed the command, you
 	 might just have committed a typo or something, and you'd
 	 like to NOT lose your current debugging state.  However
 	 if you're in a user-defined command or especially in a

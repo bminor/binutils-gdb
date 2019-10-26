@@ -346,7 +346,7 @@ gdbscm_execute_objfile_script (const struct extension_language_defn *extlang,
   ofscm_current_objfile = NULL;
 }
 
-/* (current-objfile) -> <gdb:obfjile>
+/* (current-objfile) -> <gdb:objfile>
    Return the current objfile, or #f if there isn't one.
    Ideally this would be named ofscm_current_objfile, but that name is
    taken by the variable recording the current objfile.  */

@@ -1,3 +1,15 @@
+2019-10-26  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/bigcore.c: Fix typos in comments.
+	* gdb.base/ctf-ptype.c: Same.
+	* gdb.base/long_long.c: Same.
+	* gdb.dwarf2/dw2-op-out-param.S: Same.
+	* gdb.python/py-evthreads.c: Same.
+	* gdb.reverse/i387-stack-reverse.c: Same.
+	* gdb.trace/tfile.c: Same.
+	* lib/compiler.c: Same.
+	* lib/compiler.cc: Same.
+
 2019-10-25  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.reverse/sigall-precsave.exp: Use -wrap and $gdb_test_name in

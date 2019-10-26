@@ -251,7 +251,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	}
 
       /* An if command.  Recursively print both arms before
-	 continueing.  */
+	 continuing.  */
       if (list->control_type == if_control)
 	{
 	  uiout->field_fmt (NULL, "if %s", list->line);

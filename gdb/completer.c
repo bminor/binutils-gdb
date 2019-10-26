@@ -865,7 +865,7 @@ complete_explicit_location (completion_tracker &tracker,
 	  else if (quoted_arg_end[1] == ' ')
 	    {
 	      /* We're maybe past the explicit location argument.
-		 Skip the argument without interpretion, assuming the
+		 Skip the argument without interpretation, assuming the
 		 user may want to create pending breakpoint.  Offer
 		 the keyword and explicit location options as possible
 		 completions.  */

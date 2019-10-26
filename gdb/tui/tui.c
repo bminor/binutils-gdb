@@ -405,7 +405,7 @@ tui_enable (void)
   if (tui_active)
     return;
 
-  /* To avoid to initialize curses when gdb starts, there is a defered
+  /* To avoid to initialize curses when gdb starts, there is a deferred
      curses initialization.  This initialization is made only once
      and the first time the curses mode is entered.  */
   if (tui_finish_init)

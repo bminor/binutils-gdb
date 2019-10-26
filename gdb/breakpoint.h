@@ -375,7 +375,7 @@ public:
   agent_expr_up cmd_bytecode;
 
   /* Signals that breakpoint conditions and/or commands need to be
-     re-synched with the target.  This has no use other than
+     re-synced with the target.  This has no use other than
      target-side breakpoints.  */
   bool needs_update = false;
 
@@ -672,7 +672,7 @@ enum watchpoint_triggered
 
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
-   only one register per watchpoint, thus assuming that all acesses that
+   only one register per watchpoint, thus assuming that all accesses that
    modify a memory location happen at its starting address. */
 
 extern bool target_exact_watchpoints;

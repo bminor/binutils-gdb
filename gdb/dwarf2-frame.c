@@ -1343,7 +1343,7 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
   if (!dwarf2_frame_unwinders_enabled_p)
     return 0;
 
-  /* Grab an address that is guarenteed to reside somewhere within the
+  /* Grab an address that is guaranteed to reside somewhere within the
      function.  get_frame_pc(), with a no-return next function, can
      end up returning something past the end of this function's body.
      If the frame we're sniffing for is a signal frame whose start

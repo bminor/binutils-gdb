@@ -43,7 +43,7 @@ extern CORE_ADDR find_function_addr (struct value *function,
    function returned.  May fail to return, if a breakpoint or signal
    is hit during the execution of the function.
 
-   DFEAULT_RETURN_TYPE is used as function return type if the return
+   DEFAULT_RETURN_TYPE is used as function return type if the return
    type is unknown.  This is used when calling functions with no debug
    info.
 

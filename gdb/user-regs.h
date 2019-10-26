@@ -36,7 +36,7 @@
 /* TODO: cagney/2003-06-27: Need to think more about how these
    registers are added, read, and modified.  At present they are kind
    of assumed to be read-only.  Should it, for instance, return a
-   register descriptor that contains all the relvent access methods.  */
+   register descriptor that contains all the relevant access methods.  */
 
 struct frame_info;
 struct gdbarch;

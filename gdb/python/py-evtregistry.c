@@ -112,7 +112,7 @@ gdbpy_initialize_eventregistry (void)
 				 (PyObject *) &eventregistry_object_type);
 }
 
-/* Retern the number of listeners currently connected to this
+/* Return the number of listeners currently connected to this
    registry.  */
 
 int

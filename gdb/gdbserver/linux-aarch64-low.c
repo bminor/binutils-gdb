@@ -1948,7 +1948,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   for (i = 30; i >= 0; i -= 2)
     p += emit_stp_q_offset (p, i, i + 1, sp, i * 16);
 
-  /* Push general puspose registers on the stack.  Note that we do not need
+  /* Push general purpose registers on the stack.  Note that we do not need
      to push x31 as it represents the xzr register and not the stack
      pointer in a STR instruction.
 
@@ -2116,7 +2116,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
        ; This instruction is a normal store with memory ordering
        ; constraints.  Thanks to this we do not have to put a data
        ; barrier instruction to make sure all data read and writes are done
-       ; before this instruction is executed.  Furthermore, this instrucion
+       ; before this instruction is executed.  Furthermore, this instruction
        ; will trigger an event, letting other threads know they can grab
        ; the lock.
        STLR xzr, [x0]
@@ -2311,7 +2311,7 @@ aarch64_emit_prologue (void)
      the current stack pointer in the frame pointer.  This way, it is not
      clobbered when calling C functions.
 
-     Finally, throughtout every operation, we are using register x0 as the
+     Finally, throughout every operation, we are using register x0 as the
      top of the stack, and x1 as a scratch register.  */
 
   p += emit_stp (p, x0, x1, sp, preindex_memory_operand (-2 * 16));

@@ -1731,7 +1731,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	}
     }
   else
-    /* A supppressed exception, which ignore.  */
+    /* A suppressed exception, which ignore.  */
     {
       inf->wait.suppress = 1;
       mach_port_deallocate (mach_task_self (), reply_port);

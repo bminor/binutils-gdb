@@ -257,7 +257,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 
    The 68020/030/040/060 do support an FPU, either as a coprocessor
    (68881/2) or built-in (68040/68060).  That's why System V release 4
-   (SVR4) instroduces a new calling convention specified by the SVR4
+   (SVR4) introduces a new calling convention specified by the SVR4
    psABI.  Integer values are returned in %d0/%d1, pointer return
    values in %a0 and floating values in %fp0.  When calling functions
    returning a structure the caller should pass a pointer to a buffer

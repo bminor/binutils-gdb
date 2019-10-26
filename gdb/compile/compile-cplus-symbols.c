@@ -194,7 +194,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	      if (scope.nested_type () != GCC_TYPE_NONE)
 		{
 		  /* We found a symbol for this type that was defined inside
-		     some other symbol, e.g., a class tyepdef defined.  */
+		     some other symbol, e.g., a class typedef defined.  */
 		  return;
 		}
 

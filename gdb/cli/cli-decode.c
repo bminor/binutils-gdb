@@ -1038,7 +1038,7 @@ apropos_cmd (struct ui_file *stream,
       command that requires subcommands.  Also called by saying just
       "help".)
 
-   I am going to split this into two seperate comamnds, help_cmd and
+   I am going to split this into two separate commands, help_cmd and
    help_list.  */
 
 void
@@ -1570,7 +1570,7 @@ undef_cmd_error (const char *cmdtype, const char *q)
    unless ALLOW_UNKNOWN is negative.
    CMDTYPE precedes the word "command" in the error message.
 
-   If INGNORE_HELP_CLASSES is nonzero, ignore any command list
+   If IGNORE_HELP_CLASSES is nonzero, ignore any command list
    elements which are actually help classes rather than commands (i.e.
    the function field of the struct cmd_list_element is 0).  */
 

@@ -121,7 +121,7 @@ maximize_rlimit (int resource, const char *prefix)
   print_string ("\n");
 }
 
-/* Maintain a doublely linked list.  */
+/* Maintain a doubly linked list.  */
 struct list
 {
   struct list *next;
@@ -194,7 +194,7 @@ main ()
   }
   
   /* Compute an initial chunk size.  The math is dodgy but it works
-     for the moment.  Perhaphs there's a constant around somewhere.
+     for the moment.  Perhaps there's a constant around somewhere.
      Limit this to max_core_size bytes - no point in trying to
      allocate more than can be written to the corefile.  */
   {

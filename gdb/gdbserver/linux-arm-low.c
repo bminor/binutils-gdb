@@ -249,7 +249,7 @@ get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
   return arm_is_thumb_mode ();
 }
 
-/* Read memory from the inferiror.
+/* Read memory from the inferior.
    BYTE_ORDER is ignored and there to keep compatiblity with GDB's
    read_memory_unsigned_integer. */
 static ULONGEST

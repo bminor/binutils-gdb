@@ -260,7 +260,7 @@ struct gdbarch_tdep
 
 /* Floating-point registers.  */
 
-/* All FPU control regusters (except for FIOFF and FOOFF) are 16-bit
+/* All FPU control registers (except for FIOFF and FOOFF) are 16-bit
    (at most) in the FPU, but are zero-extended to 32 bits in GDB's
    register cache.  */
 

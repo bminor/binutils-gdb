@@ -36,7 +36,7 @@ struct regcache;
    debug info.  It is assumed that dwarf2, stabs, ... will each
    provide their own methods.
 
-   A typical implmentation will return the same value for base,
+   A typical implementation will return the same value for base,
    locals-base and args-base.  That value, however, will likely be
    different to the frame ID's stack address.  */
 

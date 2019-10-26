@@ -1468,7 +1468,7 @@ linux_nat_target::detach (inferior *inf, int from_tty)
      inferiors running. */
 
   /* Stop all threads before detaching.  ptrace requires that the
-     thread is stopped to sucessfully detach.  */
+     thread is stopped to successfully detach.  */
   iterate_over_lwps (ptid_t (pid), stop_callback);
   /* ... and wait until all of them have reported back that
      they're no longer running.  */
@@ -3726,7 +3726,7 @@ linux_nat_target::kill ()
       ptid_t ptid = ptid_t (inferior_ptid.pid ());
 
       /* Stop all threads before killing them, since ptrace requires
-	 that the thread is stopped to sucessfully PTRACE_KILL.  */
+	 that the thread is stopped to successfully PTRACE_KILL.  */
       iterate_over_lwps (ptid, stop_callback);
       /* ... and wait until all of them have reported back that
 	 they're no longer running.  */

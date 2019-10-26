@@ -69,8 +69,8 @@ struct partial_symbol;
    testcase are broken for some targets.  In this test the functions
    are all implemented as part of one file and the testcase is not
    necessarily linked with a start file (depending on the target).
-   What happens is, that the first frame is printed normaly and
-   following frames are treated as being inside the enttry file then.
+   What happens is, that the first frame is printed normally and
+   following frames are treated as being inside the entry file then.
    This way, only the #0 frame is printed in the backtrace output.''
    Ref "frame.c" "NOTE: vinschen/2003-04-01".
 

@@ -1002,7 +1002,7 @@ EXTERN_C_POP
 
 /* Control structure holding the read/write/etc. pointers into the
    trace buffer.  We need more than one of these to implement a
-   transaction-like mechanism to garantees that both GDBserver and the
+   transaction-like mechanism to guarantees that both GDBserver and the
    in-process agent can try to change the trace buffer
    simultaneously.  */
 
@@ -5154,7 +5154,7 @@ traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
   return NULL;
 }
 
-/* Look for the block of type TYPE_WANTED in the trameframe starting
+/* Look for the block of type TYPE_WANTED in the traceframe starting
    at DATABASE of DATASIZE bytes long.  TFNUM is the traceframe
    number.  */
 
@@ -6310,7 +6310,7 @@ download_trace_state_variables (void)
    into GDBserver's trace buffer.  This always uploads either all or
    no trace frames.  This is the counter part of
    `trace_alloc_trace_buffer'.  See its description of the atomic
-   synching mechanism.  */
+   syncing mechanism.  */
 
 static void
 upload_fast_traceframes (void)

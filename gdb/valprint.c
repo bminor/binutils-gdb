@@ -1720,7 +1720,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
    * decimal.
    *
    * Given a hex number (in nibbles) as XYZ, we start by taking X and
-   * decemalizing it as "x1 x2" in two decimal nibbles.  Then we multiply
+   * decimalizing it as "x1 x2" in two decimal nibbles.  Then we multiply
    * the nibbles by 16, add Y and re-decimalize.  Repeat with Z.
    *
    * The trick is that "digits" holds a base-10 number, but sometimes

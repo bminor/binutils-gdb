@@ -47,7 +47,7 @@ extract_signed_bitfield (uint32_t insn, unsigned width, unsigned offset)
    INSN is the instruction opcode.
 
    MASK specifies the bits within the opcode that are to be tested
-   agsinst for a match with PATTERN.  */
+   against for a match with PATTERN.  */
 
 static int
 decode_masked_match (uint32_t insn, uint32_t mask, uint32_t pattern)

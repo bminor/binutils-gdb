@@ -181,7 +181,7 @@ public:
   {
   }
 
-  /* Set whether this window is highglighted.  */
+  /* Set whether this window is highlighted.  */
   void set_highlight (bool highlight)
   {
     is_highlighted = highlight;

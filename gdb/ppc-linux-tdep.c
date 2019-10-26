@@ -150,7 +150,7 @@ static struct target_so_ops powerpc_so_ops;
 	Examine the PLT again.  Note that the loading of the shared
 	library has initialized the PLT to code which loads a constant
 	(which I think is an index into the GOT) into r11 and then
-	branchs a short distance to the code which actually does the
+	branches a short distance to the code which actually does the
 	resolving.
 
 	    (gdb) x/2i 0x100409d4

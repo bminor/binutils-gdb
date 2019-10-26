@@ -456,7 +456,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
     {
       /* Because the value of these symbols is within a function code
 	 range, these symbols interfere with the symbol-from-address
-	 reverse lookup; this manifests itselfs in backtraces, or any
+	 reverse lookup; this manifests itself in backtraces, or any
 	 other commands that prints symbolic addresses.  Just pretend
 	 these symbols do not exist.  */
       return NULL;

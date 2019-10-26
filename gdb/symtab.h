@@ -1044,7 +1044,7 @@ struct symbol_block_ops
      register, the CFA as defined by DWARF unwinding information, ...
 
      So this specific method is supposed to compute the frame base address such
-     as for nested fuctions, the static link computes the same address.  For
+     as for nested functions, the static link computes the same address.  For
      instance, considering DWARF debugging information, the static link is
      computed with DW_AT_static_link and this method must be used to compute
      the corresponding DW_AT_frame_base attribute.  */

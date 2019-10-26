@@ -985,7 +985,7 @@ cp_find_first_component_aux (const char *name, int permissive)
   /* Operator names can show up in unexpected places.  Since these can
      contain parentheses or angle brackets, they can screw up the
      recursion.  But not every string 'operator' is part of an
-     operater name: e.g. you could have a variable 'cooperator'.  So
+     operator name: e.g. you could have a variable 'cooperator'.  So
      this variable tells us whether or not we should treat the string
      'operator' as starting an operator.  */
   int operator_possible = 1;

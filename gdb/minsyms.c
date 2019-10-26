@@ -737,7 +737,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 	     or equal to the desired pc value, we accomplish two things:
 	     (1) the case where the pc value is larger than any minimal
 	     symbol address is trivially solved, (2) the address associated
-	     with the hi index is always the one we want when the interation
+	     with the hi index is always the one we want when the iteration
 	     terminates.  In essence, we are iterating the test interval
 	     down until the pc value is pushed out of it from the high end.
 

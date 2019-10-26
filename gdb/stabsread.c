@@ -4548,7 +4548,7 @@ cleanup_undefined_types_1 (void)
   undef_types_length = 0;
 }
 
-/* Try to fix all the undefined types we ecountered while processing
+/* Try to fix all the undefined types we encountered while processing
    this unit.  */
 
 void

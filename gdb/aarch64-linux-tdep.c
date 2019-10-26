@@ -1347,7 +1347,7 @@ aarch64_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
      This function will only ever get called when stopped at the entry or exit
      of a syscall, so by checking for 0 in x0 (arg0/retval), x1 (arg1), x8
      (syscall), x29 (FP) and x30 (LR) we can infer:
-     1) Either inferior is at exit from sucessful execve.
+     1) Either inferior is at exit from successful execve.
      2) Or inferior is at entry to a call to io_setup with invalid arguments and
 	a corrupted FP and LR.
      It should be safe enough to assume case 1.  */

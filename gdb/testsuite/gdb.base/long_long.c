@@ -80,7 +80,7 @@ int known_types()
 
 int main() {
 
-   /* Pack Byte, Half, Word and Giant arrays with byte-orderd values.
+   /* Pack Byte, Half, Word and Giant arrays with byte-ordered values.
       That way "(gdb) x" gives the same output on different
       architectures.  */
    pack (b, 1, 2);

@@ -1414,7 +1414,7 @@ struct aarch64_call_info
 };
 
 /* Pass a value in a sequence of consecutive X registers.  The caller
-   is responsbile for ensuring sufficient registers are available.  */
+   is responsible for ensuring sufficient registers are available.  */
 
 static void
 pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,

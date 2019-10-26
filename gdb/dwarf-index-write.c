@@ -951,7 +951,7 @@ private:
   {
   public:
 
-    /* Object costructor to be called for current DWARF2_PER_OBJFILE.
+    /* Object constructor to be called for current DWARF2_PER_OBJFILE.
        All .debug_str section strings are automatically stored.  */
     debug_str_lookup (struct dwarf2_per_objfile *dwarf2_per_objfile)
       : m_abfd (dwarf2_per_objfile->objfile->obfd),

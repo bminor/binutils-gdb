@@ -1044,7 +1044,7 @@ finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
    For NAME description see the objfile constructor.
 
    ADD_FLAGS encodes verbosity, whether this is main symbol file or
-   extra, such as dynamically loaded code, and what to do with breakpoins.
+   extra, such as dynamically loaded code, and what to do with breakpoints.
 
    ADDRS is as described for syms_from_objfile_1, above.
    ADDRS is ignored when SYMFILE_MAINLINE bit is set in ADD_FLAGS.

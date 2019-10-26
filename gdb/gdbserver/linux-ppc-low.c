@@ -1588,7 +1588,7 @@ ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
      6. Restore SP
      7. Build a jump for back to the program
      8. Copy/relocate original instruction
-     9. Build a jump for replacing orignal instruction.  */
+     9. Build a jump for replacing original instruction.  */
 
   /* Adjust stack pointer.  */
   if (is_64)

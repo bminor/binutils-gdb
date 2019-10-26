@@ -1861,7 +1861,7 @@ record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
 }
 
 /* btrace recording does not store previous memory content, neither the stack
-   frames content.  Any unwinding would return errorneous results as the stack
+   frames content.  Any unwinding would return erroneous results as the stack
    contents no longer matches the changed PC value restored from history.
    Therefore this unwinder reports any possibly unwound registers as
    <unavailable>.  */

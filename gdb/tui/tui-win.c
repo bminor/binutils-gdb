@@ -1050,7 +1050,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  second_win = *(tui_source_windows ().begin ());
 		}
 	      if (primary_win_info == TUI_CMD_WIN)
-		{ /* Split the change in height accross the 1st & 2nd
+		{ /* Split the change in height across the 1st & 2nd
 		     windows, adjusting them as well.  */
 		  /* Subtract the locator.  */
 		  int first_split_diff = diff / 2;
@@ -1072,7 +1072,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 			    second_split_diff++;
 			}
 		    }
-		  /* Make sure that the minimum hieghts are
+		  /* Make sure that the minimum heights are
 		     honored.  */
 		  while ((first_win->height + first_split_diff) < 3)
 		    {

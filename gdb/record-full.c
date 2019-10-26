@@ -53,7 +53,7 @@
    mode, and we build up an execution log in which, for each executed
    instruction, we record all changes in memory and register state.
    This is invisible to the user, to whom it just looks like an
-   ordinary debugging session (except for performance degredation).
+   ordinary debugging session (except for performance degradation).
 
    In replay mode, instead of actually letting the inferior run as a
    process, we simulate its execution by playing back the recorded

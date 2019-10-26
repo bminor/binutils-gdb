@@ -330,7 +330,7 @@ maybe_say_no_core_file_now (int from_tty)
     printf_filtered (_("No core file now.\n"));
 }
 
-/* Backward compatability with old way of specifying core files.  */
+/* Backward compatibility with old way of specifying core files.  */
 
 void
 core_file_command (const char *filename, int from_tty)

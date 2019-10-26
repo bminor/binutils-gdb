@@ -34,7 +34,7 @@ static void test_hex2bin_byte_vector ()
   bv = hex2bin ("");
   SELF_CHECK (bv.size () == 0);
 
-  /* Test a well-formated hex string.  */
+  /* Test a well-formatted hex string.  */
   bv = hex2bin ("abcd01");
   SELF_CHECK (bv.size () == 3);
   SELF_CHECK (bv[0] == 0xab);

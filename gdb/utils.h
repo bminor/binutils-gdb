@@ -125,7 +125,7 @@ void reset_prompt_for_continue_wait_time (void);
 /* Return the time spent in prompt_for_continue.  */
 std::chrono::steady_clock::duration get_prompt_for_continue_wait_time ();
 
-/* Parsing utilites.  */
+/* Parsing utilities.  */
 
 extern int parse_pid_to_attach (const char *args);
 

@@ -42,7 +42,7 @@ struct regcache : public reg_buffer_common
   int registers_owned = 0;
   unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
-  /* One of REG_UNAVAILBLE or REG_VALID.  */
+  /* One of REG_UNAVAILABLE or REG_VALID.  */
   unsigned char *register_status = nullptr;
 #endif
 

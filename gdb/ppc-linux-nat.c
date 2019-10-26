@@ -616,7 +616,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   if (altivec_register_p (gdbarch, regno))
     {
       /* If this is the first time through, or if it is not the first
-         time through, and we have comfirmed that there is kernel
+         time through, and we have confirmed that there is kernel
          support for such a ptrace request, then go and fetch the
          register.  */
       if (have_ptrace_getvrregs)

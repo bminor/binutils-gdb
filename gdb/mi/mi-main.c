@@ -1234,12 +1234,12 @@ mi_cmd_data_evaluate_expression (const char *command, char **argv, int argc)
    the ``x'' command.
    WORD-SIZE: size of each ``word''; 1,2,4, or 8 bytes.
    NR_ROW: Number of rows.
-   NR_COL: The number of colums (words per row).
+   NR_COL: The number of columns (words per row).
    ASCHAR: (OPTIONAL) Append an ascii character dump to each row.  Use
    ASCHAR for unprintable characters.
 
    Reads SIZE*NR_ROW*NR_COL bytes starting at ADDR from memory and
-   displayes them.  Returns:
+   displays them.  Returns:
 
    {addr="...",rowN={wordN="..." ,... [,ascii="..."]}, ...}
 
@@ -1359,7 +1359,7 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   uiout->field_core_addr ("next-page", gdbarch, addr + total_bytes);
   uiout->field_core_addr ("prev-page", gdbarch, addr - total_bytes);
 
-  /* Build the result as a two dimentional table.  */
+  /* Build the result as a two dimensional table.  */
   {
     int row;
     int row_byte;

@@ -140,7 +140,7 @@ static int show_memory_breakpoints = 0;
 
 /* These globals control whether GDB attempts to perform these
    operations; they are useful for targets that need to prevent
-   inadvertant disruption, such as in non-stop mode.  */
+   inadvertent disruption, such as in non-stop mode.  */
 
 bool may_write_registers = true;
 

@@ -445,7 +445,7 @@ extern int btrace_find_insn_by_number (struct btrace_insn_iterator *,
 				       unsigned int number);
 
 /* Dereference a branch trace call iterator.  Return a pointer to the
-   function the iterator points to or NULL if the interator points past
+   function the iterator points to or NULL if the iterator points past
    the end of the branch trace.  */
 extern const struct btrace_function *
   btrace_call_get (const struct btrace_call_iterator *);

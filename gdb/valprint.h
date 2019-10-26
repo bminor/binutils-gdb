@@ -260,7 +260,7 @@ extern void print_command_completer (struct cmd_list_element *ignore,
    symbols won't be used except in instances where no symbol was
    found; otherwise, a minsym might be used in some instances (mostly
    involving function with non-contiguous address ranges).  Return
-   0 in case of success, when all the info in the OUT paramters is
+   0 in case of success, when all the info in the OUT parameters is
    valid.  Return 1 otherwise.  */
 
 extern int build_address_symbolic (struct gdbarch *,

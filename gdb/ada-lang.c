@@ -6443,7 +6443,7 @@ ada_is_ignored_field (struct type *type, int field_num)
 
     /* Anonymous field names should not be printed.
        brobecker/2007-02-20: I don't think this can actually happen
-       but we don't want to print the value of annonymous fields anyway.  */
+       but we don't want to print the value of anonymous fields anyway.  */
     if (name == NULL)
       return 1;
 
@@ -10117,7 +10117,7 @@ ada_value_cast (struct type *type, struct value *arg2)
     information nor the associated type structure in GDB are able to
     express such dynamic types.  So what the debugger does is to create
     "fixed" versions of the type that applies to the specific object.
-    We also informally refer to this opperation as "fixing" an object,
+    We also informally refer to this operation as "fixing" an object,
     which means creating its associated fixed type.
 
     Example: when printing the value of variable "Yes" above, its fixed

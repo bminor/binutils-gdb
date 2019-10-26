@@ -239,7 +239,7 @@ sparc_sol2_static_transform_name (const char *name)
      be incorrect in some places, at least for SPARC.  The
      globalization prefix is encoded into an N_OPT stab, with the form
      "G=<prefix>".  The globalization prefix always seems to start
-     with a dollar sign '$'; a dot '.' is used as a seperator.  So we
+     with a dollar sign '$'; a dot '.' is used as a separator.  So we
      simply strip everything up until the last dot.  */
 
   if (name[0] == '$')

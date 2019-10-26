@@ -82,7 +82,7 @@ adjust_value_for_child_access (struct value **value,
 
   /* Pointers to structures are treated just like
      structures when accessing children.  Don't
-     dererences pointers to other types.  */
+     dereference pointers to other types.  */
   if (TYPE_CODE (*type) == TYPE_CODE_PTR)
     {
       struct type *target_type = get_target_type (*type);
@@ -765,7 +765,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	  --type_index;
 
 	  /* If the type is anonymous and the field has no name,
-	     set an appopriate name.  */
+	     set an appropriate name.  */
 	  field_name = TYPE_FIELD_NAME (type, type_index);
 	  if (field_name == NULL || *field_name == '\0')
 	    {

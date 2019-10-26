@@ -58,7 +58,7 @@ extern int mi_getopt_allow_unknown (const char *prefix, int argc,
 
 /* mi_valid_noargs determines if ARGC/ARGV are a valid set of
    parameters to satisfy an MI function that is not supposed to
-   recieve any arguments.
+   receive any arguments.
    
    An MI function that should not receive arguments can still be 
    passed parameters after the special option '--' such as below.

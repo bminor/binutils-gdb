@@ -79,7 +79,7 @@ static bool exit_requested;
 /* --once: Exit after the first connection has closed.  */
 bool run_once;
 
-/* Whether to report TARGET_WAITKING_NO_RESUMED events.  */
+/* Whether to report TARGET_WAITKIND_NO_RESUMED events.  */
 static bool report_no_resumed;
 
 bool non_stop;

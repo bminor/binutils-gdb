@@ -568,7 +568,7 @@ extern void mark_value_bits_unavailable (struct value *value,
    Optimized-out contents are equal to optimized-out contents, and are
    not equal to non-optimized-out contents.
 
-   Unavailable contente are equal to unavailable contents, and are not
+   Unavailable contents are equal to unavailable contents, and are not
    equal to non-unavailable contents.
 
    For example, if 'x's represent an unavailable byte, and 'V' and 'Z'

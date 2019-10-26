@@ -2820,7 +2820,7 @@ find_overload_match (gdb::array_view<value *> args,
    contained in QUALIFIED_NAME until it either finds a good match or
    runs out of namespaces.  It stores the overloaded functions in
    *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  If NO_ADL,
-   argument dependent lookup is not performned.  */
+   argument dependent lookup is not performed.  */
 
 static int
 find_oload_champ_namespace (gdb::array_view<value *> args,

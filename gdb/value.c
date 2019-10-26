@@ -2153,7 +2153,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
      on this value go back to affect the original internal variable.
 
      Do not do this for INTERNALVAR_MAKE_VALUE variables, as those have
-     no underlying modifyable state in the internal variable.
+     no underlying modifiable state in the internal variable.
 
      Likewise, if the variable's value is a computed lvalue, we want
      references to it to produce another computed lvalue, where
