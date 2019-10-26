@@ -468,7 +468,7 @@ tui_gen_win_info::resize (int height_, int width_,
 			  int origin_x_, int origin_y_)
 {
   if (width == width_ && height == height_
-      && origin.x == origin_x_ && origin.y == origin_y_
+      && x == origin_x_ && y == origin_y_
       && handle != nullptr)
     return;
 
@@ -478,14 +478,14 @@ tui_gen_win_info::resize (int height_, int width_,
     viewport_height = height - 2;
   else
     viewport_height = 1;
-  origin.x = origin_x_;
-  origin.y = origin_y_;
+  x = origin_x_;
+  y = origin_y_;
 
   if (handle != nullptr)
     {
 #ifdef HAVE_WRESIZE
       wresize (handle.get (), height, width);
-      mvwin (handle.get (), origin.y, origin.x);
+      mvwin (handle.get (), y, x);
       wmove (handle.get (), 0, 0);
 #else
       handle.reset (nullptr);

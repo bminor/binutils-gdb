@@ -131,7 +131,7 @@ tui_win_info::check_and_display_highlight_if_needed ()
 void
 tui_gen_win_info::make_window ()
 {
-  handle.reset (newwin (height, width, origin.y, origin.x));
+  handle.reset (newwin (height, width, y, x));
   if (handle != NULL)
     scrollok (handle.get (), TRUE);
 }

@@ -1,5 +1,15 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_gen_win_info::make_window): Update.
+	* tui/tui-win.c (tui_adjust_win_heights, tui_resize_all): Update.
+	* tui/tui-layout.c (tui_gen_win_info::resize): Update.
+	* tui/tui-data.h (struct tui_point): Remove.
+	(struct tui_gen_win_info) <origin>: Remove.
+	<x, y>: New fields.
+	* tui/tui-command.c (tui_cmd_window::resize): Update.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window) <min_height>:
 	Implement.
 	* tui/tui-regs.h (struct tui_data_item_window) <min_height>:

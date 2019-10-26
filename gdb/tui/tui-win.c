@@ -593,7 +593,7 @@ tui_resize_all (void)
 
 	  new_height = screenheight - (new_height + 1);
 	  TUI_CMD_WIN->resize (new_height, screenwidth,
-			       0, locator->origin.y + 1);
+			       0, locator->y + 1);
 	  break;
 	default:
 	  if (cur_layout == SRC_DISASSEM_COMMAND)
@@ -646,12 +646,12 @@ tui_resize_all (void)
 			      0, first_win->height - 1);
 
 	  locator->resize (1, screenwidth,
-			   0, second_win->origin.y + new_height);
+			   0, second_win->y + new_height);
 
 	  /* Change the command window's height/width.  */
-	  new_height = screenheight - (locator->origin.y + 1);
+	  new_height = screenheight - (locator->y + 1);
 	  TUI_CMD_WIN->resize (new_height, screenwidth,
-			       0, locator->origin.y + 1);
+			       0, locator->y + 1);
 	  break;
 	}
 
@@ -1078,7 +1078,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      struct tui_win_info *src_win_info;
 
 	      primary_win_info->resize (new_height, width,
-					0, primary_win_info->origin.y);
+					0, primary_win_info->y);
 	      if (primary_win_info->type == CMD_WIN)
 		{
 		  win_info = *(tui_source_windows ().begin ());
@@ -1090,8 +1090,8 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  src_win_info = primary_win_info;
 		}
 	      win_info->resize (win_info->height + diff, width,
-				0, win_info->origin.y);
-	      TUI_CMD_WIN->origin.y = locator->origin.y + 1;
+				0, win_info->y);
+	      TUI_CMD_WIN->y = locator->y + 1;
 	      if ((src_win_info->type == SRC_WIN
 		   || src_win_info->type == DISASSEM_WIN))
 		{
@@ -1156,16 +1156,16 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		    }
 		  first_win->resize (first_win->height + first_split_diff,
 				     width,
-				     0, first_win->origin.y);
+				     0, first_win->y);
 		  second_win->resize (second_win->height + second_split_diff,
 				      width,
 				      0, first_win->height - 1);
 		  locator->resize (1, width,
-				   0, (second_win->origin.y
+				   0, (second_win->y
 				       + second_win->height + 1));
 
 		  TUI_CMD_WIN->resize (new_height, width,
-				       0, locator->origin.y + 1);
+				       0, locator->y + 1);
 		}
 	      else
 		{
@@ -1189,7 +1189,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		    first_win->resize (new_height, width, 0, 0);
 		  else
 		    first_win->resize (first_win->height, width, 0, 0);
-		  second_win->origin.y = first_win->height - 1;
+		  second_win->y = first_win->height - 1;
 		  if (primary_win_info == second_win)
 		    second_win->resize (new_height, width,
 					0, first_win->height - 1);
@@ -1197,14 +1197,14 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		    second_win->resize (second_win->height, width,
 					0, first_win->height - 1);
 		  locator->resize (1, width,
-				   0, (second_win->origin.y
+				   0, (second_win->y
 				       + second_win->height + 1));
-		  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
+		  TUI_CMD_WIN->y = locator->y + 1;
 		  if ((TUI_CMD_WIN->height + diff) < 1)
-		    TUI_CMD_WIN->resize (1, width, 0, locator->origin.y + 1);
+		    TUI_CMD_WIN->resize (1, width, 0, locator->y + 1);
 		  else
 		    TUI_CMD_WIN->resize (TUI_CMD_WIN->height + diff, width,
-					 0, locator->origin.y + 1);
+					 0, locator->y + 1);
 		}
 	      if (src1 != nullptr && src1->content.empty ())
 		src1->erase_source_content ();

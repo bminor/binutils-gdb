@@ -50,8 +50,8 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
     }
   else
     viewport_height = 1;
-  origin.x = origin_x;
-  origin.y = origin_y;
+  x = origin_x;
+  y = origin_y;
 
   if (handle == nullptr)
     make_window ();
@@ -66,7 +66,7 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 #ifdef HAVE_WRESIZE
       wresize (handle.get (), height, width);
 #endif
-      mvwin (handle.get (), origin.y, origin.x);
+      mvwin (handle.get (), y, x);
       wmove (handle.get (), 0, 0);
     }
 }

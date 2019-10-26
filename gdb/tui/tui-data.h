@@ -30,12 +30,6 @@ struct tui_cmd_window;
 struct tui_source_window_base;
 struct tui_source_window;
 
-/* This is a point definition.  */
-struct tui_point
-{
-  int x, y;
-};
-
 /* A deleter that calls delwin.  */
 struct curses_deleter
 {
@@ -114,7 +108,8 @@ public:
   /* Window height.  */
   int height = 0;
   /* Origin of window.  */
-  struct tui_point origin = {0, 0};
+  int x = 0;
+  int y = 0;
   /* Viewport height.  */
   int viewport_height = 0;
 };
