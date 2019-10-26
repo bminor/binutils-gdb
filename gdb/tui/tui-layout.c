@@ -70,6 +70,14 @@ tui_apply_current_layout ()
   applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
 }
 
+/* See tui-layout.  */
+
+void
+tui_adjust_window_height (struct tui_win_info *win, int new_height)
+{
+  applied_layout->adjust_size (win->name (), new_height);
+}
+
 /* Show the screen layout defined.  */
 static void
 show_layout (enum tui_layout_type layout)

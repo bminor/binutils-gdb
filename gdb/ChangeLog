@@ -1,5 +1,13 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_win_height_command): Call
+	tui_adjust_window_height.
+	(tui_adjust_win_heights, new_height_ok): Remove.
+	* tui/tui-layout.h (tui_adjust_window_height): Declare.
+	* tui/tui-layout.c (tui_adjust_window_height): New function.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_resize_all): Remove code, call
 	tui_apply_current_layout.
 

@@ -177,4 +177,8 @@ extern void tui_set_layout (enum tui_layout_type);
 /* Apply the current layout.  */
 extern void tui_apply_current_layout ();
 
+/* Adjust the window height of WIN to NEW_HEIGHT.  */
+extern void tui_adjust_window_height (struct tui_win_info *win,
+				      int new_height);
+
 #endif /* TUI_TUI_LAYOUT_H */
