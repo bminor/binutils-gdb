@@ -1,3 +1,9 @@
+2019-10-26  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR gas/25121
+	* config/tc-hppa.c (tc_gen_reloc): Cast some enums to int.
+	(md_assemble): Likewise.
+
 2019-10-26  Alan Modra  <amodra@gmail.com>
 
 	PR 25125

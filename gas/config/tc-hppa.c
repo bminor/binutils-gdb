@@ -1365,15 +1365,15 @@ tc_gen_reloc (asection *section, fixS *fixp)
   /* ??? It might be better to hide this +8 stuff in tc_cfi_emit_pcrel_expr,
      undefine DIFF_EXPR_OK, and let these sorts of complex expressions fail
      when R_HPPA_COMPLEX == R_PARISC_UNIMPLEMENTED.  */
-  if (fixp->fx_r_type == (bfd_reloc_code_real_type) R_HPPA_COMPLEX
+  if (fixp->fx_r_type == (int) R_HPPA_COMPLEX
       && fixp->fx_pcrel)
     {
-      fixp->fx_r_type = R_HPPA_PCREL_CALL;
+      fixp->fx_r_type = (int) R_HPPA_PCREL_CALL;
       fixp->fx_offset += 8;
     }
 
   codes = hppa_gen_reloc_type (stdoutput,
-			       fixp->fx_r_type,
+			       (int) fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field,
 			       fixp->fx_subsy != NULL,
@@ -5787,7 +5787,7 @@ md_assemble (char *str)
   if (the_insn.reloc != R_HPPA_NONE)
     fix_new_hppa (frag_now, (to - frag_now->fr_literal), 4, NULL,
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
-		  the_insn.reloc, the_insn.field_selector,
+		  (int) the_insn.reloc, the_insn.field_selector,
 		  the_insn.format, the_insn.arg_reloc, 0);
 
 #ifdef OBJ_ELF
@@ -8317,7 +8317,8 @@ hppa_fix_adjustable (fixS *fixp)
   /* LR/RR selectors are implicitly used for a number of different relocation
      types.  We must ensure that none of these types are adjusted (see below)
      even if they occur with a different selector.  */
-  code = elf_hppa_reloc_final_type (stdoutput, fixp->fx_r_type,
+  code = elf_hppa_reloc_final_type (stdoutput,
+				    (int) fixp->fx_r_type,
 		  		    hppa_fix->fx_r_format,
 				    hppa_fix->fx_r_field);
 
