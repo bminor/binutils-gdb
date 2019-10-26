@@ -2067,7 +2067,7 @@ sort_gnu_build_notes (const void * data1, const void * data2)
 	return -1;
 
       if (is_deleted_note (pnote2))	/* 1: F   2: O D */
-	return 1;
+	return -1;
 
       return 1;				/* 1: F   2: O   */
     }
