@@ -1,3 +1,13 @@
+2019-10-26  Alan Modra  <amodra@gmail.com>
+
+	PR 25125
+	* dw2gencfi.c (output_cfi_insn): Don't output DW_CFA_advance_loc+0.
+	* ehopt.c (eh_frame_estimate_size_before_relax): Return -1 for
+	an advance_loc of zero.
+	(eh_frame_relax_frag): Translate fr_subtype of 7 to size -1.
+	(eh_frame_convert_frag): Handle fr_subtype of 7.  Abort on
+	unexpected fr_subtype.
+
 2019-10-25  Alan Modra  <amodra@gmail.com>
 
 	PR gas/25125

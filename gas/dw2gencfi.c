@@ -1598,7 +1598,9 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	    addressT delta = S_GET_VALUE (to) - S_GET_VALUE (from);
 	    addressT scaled = delta / DWARF2_LINE_MIN_INSN_LENGTH;
 
-	    if (scaled <= 0x3F)
+	    if (scaled == 0)
+	      ;
+	    else if (scaled <= 0x3F)
 	      out_one (DW_CFA_advance_loc + scaled);
 	    else if (scaled <= 0xFF)
 	      {

@@ -482,7 +482,9 @@ eh_frame_estimate_size_before_relax (fragS *frag)
 
   gas_assert (ca > 0);
   diff /= ca;
-  if (diff < 0x40)
+  if (diff == 0)
+    ret = -1;
+  else if (diff < 0x40)
     ret = 0;
   else if (diff < 0x100)
     ret = 1;
@@ -491,7 +493,7 @@ eh_frame_estimate_size_before_relax (fragS *frag)
   else
     ret = 4;
 
-  frag->fr_subtype = (frag->fr_subtype & ~7) | ret;
+  frag->fr_subtype = (frag->fr_subtype & ~7) | (ret & 7);
 
   return ret;
 }
@@ -506,6 +508,8 @@ eh_frame_relax_frag (fragS *frag)
   int oldsize, newsize;
 
   oldsize = frag->fr_subtype & 7;
+  if (oldsize == 7)
+    oldsize = -1;
   newsize = eh_frame_estimate_size_before_relax (frag);
   return newsize - oldsize;
 }
@@ -548,9 +552,17 @@ eh_frame_convert_frag (fragS *frag)
       md_number_to_chars (frag->fr_literal + frag->fr_fix, diff, 2);
       break;
 
-    default:
+    case 4:
       md_number_to_chars (frag->fr_literal + frag->fr_fix, diff, 4);
       break;
+
+    case 7:
+      gas_assert (diff == 0);
+      frag->fr_fix -= 8;
+      break;
+
+    default:
+      abort ();
     }
 
   frag->fr_fix += frag->fr_subtype & 7;
