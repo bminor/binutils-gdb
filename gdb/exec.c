@@ -38,7 +38,7 @@
 #include "source.h"
 
 #include <fcntl.h>
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "gdbcore.h"
 
 #include <ctype.h>

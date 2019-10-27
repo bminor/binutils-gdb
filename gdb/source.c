@@ -40,7 +40,7 @@
 #include "filenames.h"		/* for DOSish file names */
 #include "completer.h"
 #include "ui-out.h"
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/scoped_fd.h"
 #include <algorithm>

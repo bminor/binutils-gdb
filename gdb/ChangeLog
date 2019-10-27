@@ -1,3 +1,17 @@
+2019-11-06  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-interp.c: Don't include readline.h.
+	* tui/tui-hooks.c: Don't include readline.h.
+	* symmisc.c: Include tilde.h, not readline.h.
+	* symfile.c: Include tilde.h, not readline.h.
+	* source.c: Include tilde.h, not readline.h.
+	* solib.c: Include tilde.h, not readline.h.
+	* psymtab.c: Include tilde.h, not readline.h.
+	* exec.c: Include tilde.h, not readline.h.
+	* corelow.c: Include tilde.h, not readline.h.
+	* cli/cli-dump.c: Include tilde.h, not readline.h.
+	* cli/cli-cmds.c: Don't include readline.h.
+
 2019-11-05  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-disasm.c (struct tui_asm_line) <addr_size>: New member.

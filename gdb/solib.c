@@ -39,7 +39,7 @@
 #include "exec.h"
 #include "solist.h"
 #include "observable.h"
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "remote.h"
 #include "solib.h"
 #include "interps.h"

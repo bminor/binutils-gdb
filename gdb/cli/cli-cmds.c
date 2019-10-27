@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include "readline/readline.h"
 #include "readline/tilde.h"
 #include "completer.h"
 #include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */

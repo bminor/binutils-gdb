@@ -44,7 +44,7 @@
 #include "completer.h"
 #include "bcache.h"
 #include "hashtab.h"
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "block.h"
 #include "observable.h"
 #include "exec.h"

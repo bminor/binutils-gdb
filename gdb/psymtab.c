@@ -28,7 +28,7 @@
 #include "gdbtypes.h"
 #include "ui-out.h"
 #include "command.h"
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "gdb_regex.h"
 #include "dictionary.h"
 #include "language.h"

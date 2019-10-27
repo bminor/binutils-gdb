@@ -26,7 +26,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "tui/tui-data.h"
-#include "readline/readline.h"
 #include "tui/tui-win.h"
 #include "tui/tui.h"
 #include "tui/tui-io.h"

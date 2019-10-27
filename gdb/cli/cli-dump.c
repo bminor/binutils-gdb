@@ -26,7 +26,7 @@
 #include "completer.h"
 #include <ctype.h>
 #include "target.h"
-#include "readline/readline.h"
+#include "readline/tilde.h"
 #include "gdbcore.h"
 #include "cli/cli-utils.h"
 #include "gdb_bfd.h"

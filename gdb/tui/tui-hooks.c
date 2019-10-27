@@ -49,11 +49,6 @@
 
 #include "gdb_curses.h"
 
-/* This redefines CTRL if it is not already defined, so it must come
-   after terminal state releated include files like <term.h> and
-   "gdb_curses.h".  */
-#include "readline/readline.h"
-
 static void
 tui_new_objfile_hook (struct objfile* objfile)
 {
