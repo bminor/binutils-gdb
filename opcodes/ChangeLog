@@ -1,5 +1,10 @@
 2019-10-28  Nick Clifton  <nickc@redhat.com>
 
+	* csky-dis.c (csky_chars_to_number): Check for a negative
+	count. Use an unsigned integer to construct the return value.
+
+2019-10-28  Nick Clifton  <nickc@redhat.com>
+
 	* tic30-dis.c (OPERAND_BUFFER_LEN): Define.  Use as length of
 	operand buffer.  Set value to 15 not 13.
 	(get_register_operand): Use OPERAND_BUFFER_LEN.

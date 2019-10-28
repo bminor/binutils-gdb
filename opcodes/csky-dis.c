@@ -134,10 +134,10 @@ csky_get_mask (struct csky_opcode_info const *pinfo)
 static unsigned int
 csky_chars_to_number (unsigned char * buf, int n)
 {
-  if (n == 0)
+  if (n <= 0)
     abort ();
   int i;
-  int val = 0;
+  unsigned int val = 0;
 
   if (dis_info.info->endian == BFD_ENDIAN_BIG)
     while (n--)
