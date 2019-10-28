@@ -265,6 +265,8 @@ bit_extract (bfd_byte *buffer, int offset, int count)
   int result;
   int bit;
 
+  if (offset < 0 || count < 0)
+    return 0;
   buffer += offset >> 3;
   offset &= 7;
   bit = 1;
@@ -292,6 +294,8 @@ bit_extract_simple (bfd_byte *buffer, int offset, int count)
   int result;
   int bit;
 
+  if (offset < 0 || count < 0)
+    return 0;
   buffer += offset >> 3;
   offset &= 7;
   bit = 1;
@@ -313,6 +317,8 @@ bit_extract_simple (bfd_byte *buffer, int offset, int count)
 static void
 bit_copy (bfd_byte *buffer, int offset, int count, char *to)
 {
+  if (offset < 0 || count < 0)
+    return;
   for (; count > 8; count -= 8, to++, offset += 8)
     *to = bit_extract (buffer, offset, 8);
   *to = bit_extract (buffer, offset, count);
@@ -836,8 +842,10 @@ print_insn_ns32k (bfd_vma memaddr, disassemble_info *info)
 				    memaddr, arg_bufs[argnum],
 				    index_offset[whicharg]);
 	  d++;
-	  whicharg++;
+	  if (whicharg++ >= 1)
+	    break;
 	}
+
       for (argnum = 0; argnum <= maxarg; argnum++)
 	{
 	  bfd_vma addr;

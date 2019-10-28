@@ -1,5 +1,13 @@
 2019-10-28  Nick Clifton  <nickc@redhat.com>
 
+	* ns32k-dis.c (bit_extract): Add sanitiy check of parameters.
+	(bit_extract_simple): Likewise.
+	(bit_copy): Likewise.
+	(pirnt_insn_ns32k): Ensure that uninitialised elements in the
+	index_offset array are not accessed.
+
+2019-10-28  Nick Clifton  <nickc@redhat.com>
+
 	* xgate-dis.c (print_insn): Fix decoding of the XGATE_OP_DYA
 	operand.
 
