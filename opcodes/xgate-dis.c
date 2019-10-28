@@ -169,8 +169,8 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info)
             }
           else if (!strcmp (decodePTR->opcodePTR->constraints, XGATE_OP_DYA))
             {
-        	  operandOne = ripBits (&operMaskReg, 3, opcodePTR, raw_code);
-        	  operandTwo = ripBits (&operMaskReg, 3, opcodePTR, raw_code);
+        	  operandOne = ripBits (&operMaskReg, 3, decodePTR->opcodePTR, raw_code);
+        	  operandTwo = ripBits (&operMaskReg, 3, decodePTR->opcodePTR, raw_code);
         	 ( *info->fprintf_func)(info->stream, " R%x, R%x", operandOne,
         	      operandTwo);
             }
@@ -259,7 +259,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info)
           else
             {
               (*info->fprintf_func)(info->stream, " unhandled mode %s",
-                opcodePTR->constraints);
+				    decodePTR->opcodePTR->constraints);
             }
           perviousBin = raw_code;
         }
