@@ -1,5 +1,15 @@
 2019-10-28  Nick Clifton  <nickc@redhat.com>
 
+	* tic30-dis.c (OPERAND_BUFFER_LEN): Define.  Use as length of
+	operand buffer.  Set value to 15 not 13.
+	(get_register_operand): Use OPERAND_BUFFER_LEN.
+	(get_indirect_operand): Likewise.
+	(print_two_operand): Likewise.
+	(print_three_operand): Likewise.
+	(print_oar_insn): Likewise.
+
+2019-10-28  Nick Clifton  <nickc@redhat.com>
+
 	* ns32k-dis.c (bit_extract): Add sanitiy check of parameters.
 	(bit_extract_simple): Likewise.
 	(bit_copy): Likewise.

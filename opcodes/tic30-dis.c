@@ -188,6 +188,8 @@ get_tic30_instruction (unsigned long insn_word, struct instruction *insn)
   return 1;
 }
 
+#define OPERAND_BUFFER_LEN 15
+
 static int
 get_register_operand (unsigned char fragment, char *buffer)
 {
@@ -199,7 +201,8 @@ get_register_operand (unsigned char fragment, char *buffer)
     {
       if ((fragment & 0x1F) == current_reg->opcode)
 	{
-	  strcpy (buffer, current_reg->name);
+	  strncpy (buffer, current_reg->name, OPERAND_BUFFER_LEN);
+	  buffer[OPERAND_BUFFER_LEN - 1] = 0;
 	  return 1;
 	}
     }
@@ -250,18 +253,25 @@ get_indirect_operand (unsigned short fragment,
 		int bufcnt;
 
 		len = strlen (current_ind->syntax);
+
 		for (i = 0, bufcnt = 0; i < len; i++, bufcnt++)
 		  {
 		    buffer[bufcnt] = current_ind->syntax[i];
+
 		    if (bufcnt > 0
+			&& bufcnt < OPERAND_BUFFER_LEN - 1
 			&& buffer[bufcnt - 1] == 'a'
 			&& buffer[bufcnt] == 'r')
 		      buffer[++bufcnt] = arnum + '0';
-		    if (buffer[bufcnt] == '('
+		    
+		    if (bufcnt < OPERAND_BUFFER_LEN - 1
+			&& buffer[bufcnt] == '('
 			&& current_ind->displacement == DISP_REQUIRED)
 		      {
-			sprintf (&buffer[bufcnt + 1], "%u", disp);
-			bufcnt += strlen (&buffer[bufcnt + 1]);
+			snprintf (buffer + (bufcnt + 1),
+				 OPERAND_BUFFER_LEN - (bufcnt + 1),
+				 "%u", disp);
+			bufcnt += strlen (buffer + (bufcnt + 1));
 		      }
 		  }
 		buffer[bufcnt + 1] = '\0';
@@ -342,7 +352,7 @@ print_two_operand (disassemble_info *info,
 		   struct instruction *insn)
 {
   char name[12];
-  char operand[2][13] =
+  char operand[2][OPERAND_BUFFER_LEN] =
   {
     {0},
     {0}
@@ -429,7 +439,7 @@ print_three_operand (disassemble_info *info,
 		     unsigned long insn_word,
 		     struct instruction *insn)
 {
-  char operand[3][13] =
+  char operand[3][OPERAND_BUFFER_LEN] =
   {
     {0},
     {0},
@@ -475,7 +485,7 @@ print_par_insn (disassemble_info *info,
 {
   size_t i, len;
   char *name1, *name2;
-  char operand[2][3][13] =
+  char operand[2][3][OPERAND_BUFFER_LEN] =
   {
     {
       {0},
