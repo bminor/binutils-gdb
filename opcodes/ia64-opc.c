@@ -372,13 +372,16 @@ locate_opcode_ent (ia64_insn opcode, enum ia64_insn_type type)
 
       bitpos[currstatenum] = currbitnum;
 
-      /* Skip opval[0] bits in the instruction. */
+      /* Skip opval[0] bits in the instruction.  */
       if (op & 0x40)
 	{
 	  currbitnum -= opval[0];
 	}
 
-      /* The value of the current bit being tested. */
+      if (currbitnum < 0)
+	currbitnum = 0;
+
+      /* The value of the current bit being tested.  */
       currbit = opcode & (((ia64_insn) 1) << currbitnum) ? 1 : 0;
       next_op = -1;
 
@@ -463,7 +466,7 @@ locate_opcode_ent (ia64_insn opcode, enum ia64_insn_type type)
 
 	  if (next_op > 65535)
 	    {
-	      abort ();
+	      return -1;
 	    }
 
 	  /* Run through the list of opcodes to check, trying to find

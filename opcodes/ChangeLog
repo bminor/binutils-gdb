@@ -1,5 +1,10 @@
 2019-10-29  Nick Clifton  <nickc@redhat.com>
 
+	* ia64-opc.c (locate_opcode_ent): Prevent a negative shift when
+	locating the bit to be tested.
+
+2019-10-29  Nick Clifton  <nickc@redhat.com>
+
 	* s12z-dis.c (opr_emit_disassembly): Check for illegal register
 	values.
 	(shift_size_table): Use a fixed size defined as S12Z_N_SIZES.
