@@ -1,5 +1,10 @@
 2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infcmd.c: Remove includes.
+	* infrun.c: Remove includes.
+
+2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ada-lang.h (GROW_VECT): Move to ada-lang.c.
 	(grow_vect): Remove declaration.
 	(ada_type_of_array): Remove declaration.

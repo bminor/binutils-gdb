@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include <signal.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -35,8 +34,6 @@
 #include "objfiles.h"
 #include "completer.h"
 #include "ui-out.h"
-#include "event-top.h"
-#include "parser-defs.h"
 #include "regcache.h"
 #include "reggroups.h"
 #include "block.h"
@@ -45,7 +42,6 @@
 #include "observable.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
-#include "cli/cli-decode.h"
 #include "gdbthread.h"
 #include "valprint.h"
 #include "inline-frame.h"
@@ -53,8 +49,6 @@
 #include "inf-loop.h"
 #include "continuations.h"
 #include "linespec.h"
-#include "cli/cli-utils.h"
-#include "infcall.h"
 #include "thread-fsm.h"
 #include "top.h"
 #include "interps.h"
