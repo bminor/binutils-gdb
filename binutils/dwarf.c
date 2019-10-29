@@ -7378,7 +7378,7 @@ frame_need_space (Frame_Chunk *fc, unsigned int reg)
   if (reg < (unsigned int) fc->ncols)
     return 0;
 
-  if (dwarf_regnames_count
+  if (dwarf_regnames_count > 0
       && reg > dwarf_regnames_count)
     return -1;
 
@@ -7389,7 +7389,7 @@ frame_need_space (Frame_Chunk *fc, unsigned int reg)
     return -1;
 
   /* PR 17512: file: 2844a11d.  */
-  if (fc->ncols > 1024)
+  if (fc->ncols > 1024 && dwarf_regnames_count == 0)
     {
       error (_("Unfeasibly large register number: %u\n"), reg);
       fc->ncols = 0;
