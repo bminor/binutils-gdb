@@ -22,6 +22,11 @@
 #include "gdb_obstack.h"
 #include "addrmap.h"
 
+/* Make sure splay trees can actually hold the values we want to
+   store in them.  */
+gdb_static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
+gdb_static_assert (sizeof (splay_tree_value) >= sizeof (void *));
+
 
 /* The "abstract class".  */
 
@@ -586,15 +591,4 @@ addrmap_create_mutable (struct obstack *obstack)
                                              map);
 
   return (struct addrmap *) map;
-}
-
-/* Initialization.  */
-
-void
-_initialize_addrmap (void)
-{
-  /* Make sure splay trees can actually hold the values we want to 
-     store in them.  */
-  gdb_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
-  gdb_assert (sizeof (splay_tree_value) >= sizeof (void *));
 }
