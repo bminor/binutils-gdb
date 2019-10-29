@@ -19,20 +19,16 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "value.h"
-#include "demangle.h"
 #include "valprint.h"
 #include "language.h"
 #include "annotate.h"
 #include "ada-lang.h"
-#include "c-lang.h"
-#include "infcall.h"
-#include "objfiles.h"
 #include "target-float.h"
 #include "cli/cli-style.h"
+#include "gdbarch.h"
 
 static int print_field_values (struct type *, const gdb_byte *,
 			       int,

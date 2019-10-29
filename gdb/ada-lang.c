@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "demangle.h"
 #include "gdb_regex.h"
 #include "frame.h"
 #include "symtab.h"
@@ -30,7 +29,6 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "varobj.h"
-#include "c-lang.h"
 #include "inferior.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -40,22 +38,18 @@
 #include "gdb_obstack.h"
 #include "ada-lang.h"
 #include "completer.h"
-#include <sys/stat.h>
 #include "ui-out.h"
 #include "block.h"
 #include "infcall.h"
-#include "dictionary.h"
 #include "annotate.h"
 #include "valprint.h"
 #include "source.h"
 #include "observable.h"
 #include "stack.h"
-#include "gdbsupport/gdb_vecs.h"
 #include "typeprint.h"
 #include "namespace.h"
 #include "cli/cli-style.h"
 
-#include "psymtab.h"
 #include "value.h"
 #include "mi/mi-common.h"
 #include "arch-utils.h"
@@ -63,7 +57,6 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/byte-vector.h"
 #include <algorithm>
-#include <map>
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).

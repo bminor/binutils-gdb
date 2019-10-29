@@ -1,3 +1,9 @@
+2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ada-lang.c: Remove includes.
+	* ada-typeprint.c: Remove includes.
+	* ada-valprint.c: Remove includes.
+
 2019-10-29  Simon Marchi  <simon.marchi@efficios.com>
 
 	* addrmap.c: Add static assertions of type size, moved from
