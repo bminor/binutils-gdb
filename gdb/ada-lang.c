@@ -527,7 +527,7 @@ ada_print_array_index (struct value *index_value, struct ui_file *stream,
 
 /* la_watch_location_expression for Ada.  */
 
-gdb::unique_xmalloc_ptr<char>
+static gdb::unique_xmalloc_ptr<char>
 ada_watch_location_expression (struct type *type, CORE_ADDR addr)
 {
   type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
@@ -536,11 +536,17 @@ ada_watch_location_expression (struct type *type, CORE_ADDR addr)
     (xstrprintf ("{%s} %s", name.c_str (), core_addr_to_string (addr)));
 }
 
+/* Assuming V points to an array of S objects,  make sure that it contains at
+   least M objects, updating V and S as necessary.  */
+
+#define GROW_VECT(v, s, m)                                    \
+   if ((s) < (m)) (v) = (char *) grow_vect (v, &(s), m, sizeof *(v));
+
 /* Assuming VECT points to an array of *SIZE objects of size
    ELEMENT_SIZE, grow it to contain at least MIN_SIZE objects,
    updating *SIZE as necessary and returning the (new) array.  */
 
-void *
+static void *
 grow_vect (void *vect, size_t *size, size_t min_size, int element_size)
 {
   if (*size < min_size)
@@ -862,7 +868,7 @@ ada_get_decoded_type (struct type *type)
 /* If the main program is in Ada, return language_ada, otherwise return LANG
    (the main program is in Ada iif the adainit symbol is found).  */
 
-enum language
+static enum language
 ada_update_initial_language (enum language lang)
 {
   if (lookup_minimal_symbol ("adainit", NULL, NULL).minsym != NULL)
@@ -1009,7 +1015,7 @@ ada_encode (const char *decoded)
    quotes, unfolded, but with the quotes stripped away.  Result good
    to next call.  */
 
-char *
+static char *
 ada_fold_name (const char *name)
 {
   static char *fold_buffer = NULL;
@@ -1910,7 +1916,8 @@ ada_is_bogus_array_descriptor (struct type *type)
    the ARR denotes a null array descriptor and BOUNDS is non-zero,
    returns NULL.  The result is simply the type of ARR if ARR is not
    a descriptor.  */
-struct type *
+
+static struct type *
 ada_type_of_array (struct value *arr, int bounds)
 {
   if (ada_is_constrained_packed_array_type (value_type (arr)))
@@ -3140,6 +3147,319 @@ ada_decoded_op_name (enum exp_opcode op)
   error (_("Could not find operator name for opcode"));
 }
 
+/* Returns true (non-zero) iff decoded name N0 should appear before N1
+   in a listing of choices during disambiguation (see sort_choices, below).
+   The idea is that overloadings of a subprogram name from the
+   same package should sort in their source order.  We settle for ordering
+   such symbols by their trailing number (__N  or $N).  */
+
+static int
+encoded_ordered_before (const char *N0, const char *N1)
+{
+  if (N1 == NULL)
+    return 0;
+  else if (N0 == NULL)
+    return 1;
+  else
+    {
+      int k0, k1;
+
+      for (k0 = strlen (N0) - 1; k0 > 0 && isdigit (N0[k0]); k0 -= 1)
+        ;
+      for (k1 = strlen (N1) - 1; k1 > 0 && isdigit (N1[k1]); k1 -= 1)
+        ;
+      if ((N0[k0] == '_' || N0[k0] == '$') && N0[k0 + 1] != '\000'
+          && (N1[k1] == '_' || N1[k1] == '$') && N1[k1 + 1] != '\000')
+        {
+          int n0, n1;
+
+          n0 = k0;
+          while (N0[n0] == '_' && n0 > 0 && N0[n0 - 1] == '_')
+            n0 -= 1;
+          n1 = k1;
+          while (N1[n1] == '_' && n1 > 0 && N1[n1 - 1] == '_')
+            n1 -= 1;
+          if (n0 == n1 && strncmp (N0, N1, n0) == 0)
+            return (atoi (N0 + k0 + 1) < atoi (N1 + k1 + 1));
+        }
+      return (strcmp (N0, N1) < 0);
+    }
+}
+
+/* Sort SYMS[0..NSYMS-1] to put the choices in a canonical order by the
+   encoded names.  */
+
+static void
+sort_choices (struct block_symbol syms[], int nsyms)
+{
+  int i;
+
+  for (i = 1; i < nsyms; i += 1)
+    {
+      struct block_symbol sym = syms[i];
+      int j;
+
+      for (j = i - 1; j >= 0; j -= 1)
+        {
+          if (encoded_ordered_before (SYMBOL_LINKAGE_NAME (syms[j].symbol),
+                                      SYMBOL_LINKAGE_NAME (sym.symbol)))
+            break;
+          syms[j + 1] = syms[j];
+        }
+      syms[j + 1] = sym;
+    }
+}
+
+/* Whether GDB should display formals and return types for functions in the
+   overloads selection menu.  */
+static bool print_signatures = true;
+
+/* Print the signature for SYM on STREAM according to the FLAGS options.  For
+   all but functions, the signature is just the name of the symbol.  For
+   functions, this is the name of the function, the list of types for formals
+   and the return type (if any).  */
+
+static void
+ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
+			    const struct type_print_options *flags)
+{
+  struct type *type = SYMBOL_TYPE (sym);
+
+  fprintf_filtered (stream, "%s", SYMBOL_PRINT_NAME (sym));
+  if (!print_signatures
+      || type == NULL
+      || TYPE_CODE (type) != TYPE_CODE_FUNC)
+    return;
+
+  if (TYPE_NFIELDS (type) > 0)
+    {
+      int i;
+
+      fprintf_filtered (stream, " (");
+      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	{
+	  if (i > 0)
+	    fprintf_filtered (stream, "; ");
+	  ada_print_type (TYPE_FIELD_TYPE (type, i), NULL, stream, -1, 0,
+			  flags);
+	}
+      fprintf_filtered (stream, ")");
+    }
+  if (TYPE_TARGET_TYPE (type) != NULL
+      && TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+    {
+      fprintf_filtered (stream, " return ");
+      ada_print_type (TYPE_TARGET_TYPE (type), NULL, stream, -1, 0, flags);
+    }
+}
+
+/* Read and validate a set of numeric choices from the user in the
+   range 0 .. N_CHOICES-1.  Place the results in increasing
+   order in CHOICES[0 .. N-1], and return N.
+
+   The user types choices as a sequence of numbers on one line
+   separated by blanks, encoding them as follows:
+
+     + A choice of 0 means to cancel the selection, throwing an error.
+     + If IS_ALL_CHOICE, a choice of 1 selects the entire set 0 .. N_CHOICES-1.
+     + The user chooses k by typing k+IS_ALL_CHOICE+1.
+
+   The user is not allowed to choose more than MAX_RESULTS values.
+
+   ANNOTATION_SUFFIX, if present, is used to annotate the input
+   prompts (for use with the -f switch).  */
+
+static int
+get_selections (int *choices, int n_choices, int max_results,
+                int is_all_choice, const char *annotation_suffix)
+{
+  char *args;
+  const char *prompt;
+  int n_chosen;
+  int first_choice = is_all_choice ? 2 : 1;
+
+  prompt = getenv ("PS2");
+  if (prompt == NULL)
+    prompt = "> ";
+
+  args = command_line_input (prompt, annotation_suffix);
+
+  if (args == NULL)
+    error_no_arg (_("one or more choice numbers"));
+
+  n_chosen = 0;
+
+  /* Set choices[0 .. n_chosen-1] to the users' choices in ascending
+     order, as given in args.  Choices are validated.  */
+  while (1)
+    {
+      char *args2;
+      int choice, j;
+
+      args = skip_spaces (args);
+      if (*args == '\0' && n_chosen == 0)
+        error_no_arg (_("one or more choice numbers"));
+      else if (*args == '\0')
+        break;
+
+      choice = strtol (args, &args2, 10);
+      if (args == args2 || choice < 0
+          || choice > n_choices + first_choice - 1)
+        error (_("Argument must be choice number"));
+      args = args2;
+
+      if (choice == 0)
+        error (_("cancelled"));
+
+      if (choice < first_choice)
+        {
+          n_chosen = n_choices;
+          for (j = 0; j < n_choices; j += 1)
+            choices[j] = j;
+          break;
+        }
+      choice -= first_choice;
+
+      for (j = n_chosen - 1; j >= 0 && choice < choices[j]; j -= 1)
+        {
+        }
+
+      if (j < 0 || choice != choices[j])
+        {
+          int k;
+
+          for (k = n_chosen - 1; k > j; k -= 1)
+            choices[k + 1] = choices[k];
+          choices[j + 1] = choice;
+          n_chosen += 1;
+        }
+    }
+
+  if (n_chosen > max_results)
+    error (_("Select no more than %d of the above"), max_results);
+
+  return n_chosen;
+}
+
+/* Given a list of NSYMS symbols in SYMS, select up to MAX_RESULTS>0
+   by asking the user (if necessary), returning the number selected,
+   and setting the first elements of SYMS items.  Error if no symbols
+   selected.  */
+
+/* NOTE: Adapted from decode_line_2 in symtab.c, with which it ought
+   to be re-integrated one of these days.  */
+
+static int
+user_select_syms (struct block_symbol *syms, int nsyms, int max_results)
+{
+  int i;
+  int *chosen = XALLOCAVEC (int , nsyms);
+  int n_chosen;
+  int first_choice = (max_results == 1) ? 1 : 2;
+  const char *select_mode = multiple_symbols_select_mode ();
+
+  if (max_results < 1)
+    error (_("Request to select 0 symbols!"));
+  if (nsyms <= 1)
+    return nsyms;
+
+  if (select_mode == multiple_symbols_cancel)
+    error (_("\
+canceled because the command is ambiguous\n\
+See set/show multiple-symbol."));
+
+  /* If select_mode is "all", then return all possible symbols.
+     Only do that if more than one symbol can be selected, of course.
+     Otherwise, display the menu as usual.  */
+  if (select_mode == multiple_symbols_all && max_results > 1)
+    return nsyms;
+
+  printf_filtered (_("[0] cancel\n"));
+  if (max_results > 1)
+    printf_filtered (_("[1] all\n"));
+
+  sort_choices (syms, nsyms);
+
+  for (i = 0; i < nsyms; i += 1)
+    {
+      if (syms[i].symbol == NULL)
+        continue;
+
+      if (SYMBOL_CLASS (syms[i].symbol) == LOC_BLOCK)
+        {
+          struct symtab_and_line sal =
+            find_function_start_sal (syms[i].symbol, 1);
+
+	  printf_filtered ("[%d] ", i + first_choice);
+	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+				      &type_print_raw_options);
+	  if (sal.symtab == NULL)
+	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
+			     metadata_style.style ().ptr (), nullptr, sal.line);
+	  else
+	    printf_filtered
+	      (_(" at %ps:%d\n"),
+	       styled_string (file_name_style.style (),
+			      symtab_to_filename_for_display (sal.symtab)),
+	       sal.line);
+          continue;
+        }
+      else
+        {
+          int is_enumeral =
+            (SYMBOL_CLASS (syms[i].symbol) == LOC_CONST
+             && SYMBOL_TYPE (syms[i].symbol) != NULL
+             && TYPE_CODE (SYMBOL_TYPE (syms[i].symbol)) == TYPE_CODE_ENUM);
+	  struct symtab *symtab = NULL;
+
+	  if (SYMBOL_OBJFILE_OWNED (syms[i].symbol))
+	    symtab = symbol_symtab (syms[i].symbol);
+
+          if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
+	    {
+	      printf_filtered ("[%d] ", i + first_choice);
+	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+					  &type_print_raw_options);
+	      printf_filtered (_(" at %s:%d\n"),
+			       symtab_to_filename_for_display (symtab),
+			       SYMBOL_LINE (syms[i].symbol));
+	    }
+          else if (is_enumeral
+                   && TYPE_NAME (SYMBOL_TYPE (syms[i].symbol)) != NULL)
+            {
+              printf_filtered (("[%d] "), i + first_choice);
+              ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
+                              gdb_stdout, -1, 0, &type_print_raw_options);
+              printf_filtered (_("'(%s) (enumeral)\n"),
+			       SYMBOL_PRINT_NAME (syms[i].symbol));
+            }
+	  else
+	    {
+	      printf_filtered ("[%d] ", i + first_choice);
+	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+					  &type_print_raw_options);
+
+	      if (symtab != NULL)
+		printf_filtered (is_enumeral
+				 ? _(" in %s (enumeral)\n")
+				 : _(" at %s:?\n"),
+				 symtab_to_filename_for_display (symtab));
+	      else
+		printf_filtered (is_enumeral
+				 ? _(" (enumeral)\n")
+				 : _(" at ?\n"));
+	    }
+        }
+    }
+
+  n_chosen = get_selections (chosen, nsyms, max_results, max_results > 1,
+                             "overload-choice");
+
+  for (i = 0; i < n_chosen; i += 1)
+    syms[i] = syms[chosen[i]];
+
+  return n_chosen;
+}
 
 /* Same as evaluate_type (*EXP), but resolves ambiguous symbol
    references (marked by OP_VAR_VALUE nodes in which the symbol has an
@@ -3711,320 +4031,6 @@ ada_resolve_function (struct block_symbol syms[],
   return 0;
 }
 
-/* Returns true (non-zero) iff decoded name N0 should appear before N1
-   in a listing of choices during disambiguation (see sort_choices, below).
-   The idea is that overloadings of a subprogram name from the
-   same package should sort in their source order.  We settle for ordering
-   such symbols by their trailing number (__N  or $N).  */
-
-static int
-encoded_ordered_before (const char *N0, const char *N1)
-{
-  if (N1 == NULL)
-    return 0;
-  else if (N0 == NULL)
-    return 1;
-  else
-    {
-      int k0, k1;
-
-      for (k0 = strlen (N0) - 1; k0 > 0 && isdigit (N0[k0]); k0 -= 1)
-        ;
-      for (k1 = strlen (N1) - 1; k1 > 0 && isdigit (N1[k1]); k1 -= 1)
-        ;
-      if ((N0[k0] == '_' || N0[k0] == '$') && N0[k0 + 1] != '\000'
-          && (N1[k1] == '_' || N1[k1] == '$') && N1[k1 + 1] != '\000')
-        {
-          int n0, n1;
-
-          n0 = k0;
-          while (N0[n0] == '_' && n0 > 0 && N0[n0 - 1] == '_')
-            n0 -= 1;
-          n1 = k1;
-          while (N1[n1] == '_' && n1 > 0 && N1[n1 - 1] == '_')
-            n1 -= 1;
-          if (n0 == n1 && strncmp (N0, N1, n0) == 0)
-            return (atoi (N0 + k0 + 1) < atoi (N1 + k1 + 1));
-        }
-      return (strcmp (N0, N1) < 0);
-    }
-}
-
-/* Sort SYMS[0..NSYMS-1] to put the choices in a canonical order by the
-   encoded names.  */
-
-static void
-sort_choices (struct block_symbol syms[], int nsyms)
-{
-  int i;
-
-  for (i = 1; i < nsyms; i += 1)
-    {
-      struct block_symbol sym = syms[i];
-      int j;
-
-      for (j = i - 1; j >= 0; j -= 1)
-        {
-          if (encoded_ordered_before (SYMBOL_LINKAGE_NAME (syms[j].symbol),
-                                      SYMBOL_LINKAGE_NAME (sym.symbol)))
-            break;
-          syms[j + 1] = syms[j];
-        }
-      syms[j + 1] = sym;
-    }
-}
-
-/* Whether GDB should display formals and return types for functions in the
-   overloads selection menu.  */
-static bool print_signatures = true;
-
-/* Print the signature for SYM on STREAM according to the FLAGS options.  For
-   all but functions, the signature is just the name of the symbol.  For
-   functions, this is the name of the function, the list of types for formals
-   and the return type (if any).  */
-
-static void
-ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
-			    const struct type_print_options *flags)
-{
-  struct type *type = SYMBOL_TYPE (sym);
-
-  fprintf_filtered (stream, "%s", SYMBOL_PRINT_NAME (sym));
-  if (!print_signatures
-      || type == NULL
-      || TYPE_CODE (type) != TYPE_CODE_FUNC)
-    return;
-
-  if (TYPE_NFIELDS (type) > 0)
-    {
-      int i;
-
-      fprintf_filtered (stream, " (");
-      for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	{
-	  if (i > 0)
-	    fprintf_filtered (stream, "; ");
-	  ada_print_type (TYPE_FIELD_TYPE (type, i), NULL, stream, -1, 0,
-			  flags);
-	}
-      fprintf_filtered (stream, ")");
-    }
-  if (TYPE_TARGET_TYPE (type) != NULL
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
-    {
-      fprintf_filtered (stream, " return ");
-      ada_print_type (TYPE_TARGET_TYPE (type), NULL, stream, -1, 0, flags);
-    }
-}
-
-/* Given a list of NSYMS symbols in SYMS, select up to MAX_RESULTS>0 
-   by asking the user (if necessary), returning the number selected, 
-   and setting the first elements of SYMS items.  Error if no symbols
-   selected.  */
-
-/* NOTE: Adapted from decode_line_2 in symtab.c, with which it ought
-   to be re-integrated one of these days.  */
-
-int
-user_select_syms (struct block_symbol *syms, int nsyms, int max_results)
-{
-  int i;
-  int *chosen = XALLOCAVEC (int , nsyms);
-  int n_chosen;
-  int first_choice = (max_results == 1) ? 1 : 2;
-  const char *select_mode = multiple_symbols_select_mode ();
-
-  if (max_results < 1)
-    error (_("Request to select 0 symbols!"));
-  if (nsyms <= 1)
-    return nsyms;
-
-  if (select_mode == multiple_symbols_cancel)
-    error (_("\
-canceled because the command is ambiguous\n\
-See set/show multiple-symbol."));
-
-  /* If select_mode is "all", then return all possible symbols.
-     Only do that if more than one symbol can be selected, of course.
-     Otherwise, display the menu as usual.  */
-  if (select_mode == multiple_symbols_all && max_results > 1)
-    return nsyms;
-
-  printf_filtered (_("[0] cancel\n"));
-  if (max_results > 1)
-    printf_filtered (_("[1] all\n"));
-
-  sort_choices (syms, nsyms);
-
-  for (i = 0; i < nsyms; i += 1)
-    {
-      if (syms[i].symbol == NULL)
-        continue;
-
-      if (SYMBOL_CLASS (syms[i].symbol) == LOC_BLOCK)
-        {
-          struct symtab_and_line sal =
-            find_function_start_sal (syms[i].symbol, 1);
-
-	  printf_filtered ("[%d] ", i + first_choice);
-	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
-				      &type_print_raw_options);
-	  if (sal.symtab == NULL)
-	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
-			     metadata_style.style ().ptr (), nullptr, sal.line);
-	  else
-	    printf_filtered
-	      (_(" at %ps:%d\n"),
-	       styled_string (file_name_style.style (),
-			      symtab_to_filename_for_display (sal.symtab)),
-	       sal.line);
-          continue;
-        }
-      else
-        {
-          int is_enumeral =
-            (SYMBOL_CLASS (syms[i].symbol) == LOC_CONST
-             && SYMBOL_TYPE (syms[i].symbol) != NULL
-             && TYPE_CODE (SYMBOL_TYPE (syms[i].symbol)) == TYPE_CODE_ENUM);
-	  struct symtab *symtab = NULL;
-
-	  if (SYMBOL_OBJFILE_OWNED (syms[i].symbol))
-	    symtab = symbol_symtab (syms[i].symbol);
-
-          if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
-	    {
-	      printf_filtered ("[%d] ", i + first_choice);
-	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
-					  &type_print_raw_options);
-	      printf_filtered (_(" at %s:%d\n"),
-			       symtab_to_filename_for_display (symtab),
-			       SYMBOL_LINE (syms[i].symbol));
-	    }
-          else if (is_enumeral
-                   && TYPE_NAME (SYMBOL_TYPE (syms[i].symbol)) != NULL)
-            {
-              printf_filtered (("[%d] "), i + first_choice);
-              ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
-                              gdb_stdout, -1, 0, &type_print_raw_options);
-              printf_filtered (_("'(%s) (enumeral)\n"),
-			       SYMBOL_PRINT_NAME (syms[i].symbol));
-            }
-	  else
-	    {
-	      printf_filtered ("[%d] ", i + first_choice);
-	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
-					  &type_print_raw_options);
-
-	      if (symtab != NULL)
-		printf_filtered (is_enumeral
-				 ? _(" in %s (enumeral)\n")
-				 : _(" at %s:?\n"),
-				 symtab_to_filename_for_display (symtab));
-	      else
-		printf_filtered (is_enumeral
-				 ? _(" (enumeral)\n")
-				 : _(" at ?\n"));
-	    }
-        }
-    }
-
-  n_chosen = get_selections (chosen, nsyms, max_results, max_results > 1,
-                             "overload-choice");
-
-  for (i = 0; i < n_chosen; i += 1)
-    syms[i] = syms[chosen[i]];
-
-  return n_chosen;
-}
-
-/* Read and validate a set of numeric choices from the user in the
-   range 0 .. N_CHOICES-1.  Place the results in increasing
-   order in CHOICES[0 .. N-1], and return N.
-
-   The user types choices as a sequence of numbers on one line
-   separated by blanks, encoding them as follows:
-
-     + A choice of 0 means to cancel the selection, throwing an error.
-     + If IS_ALL_CHOICE, a choice of 1 selects the entire set 0 .. N_CHOICES-1.
-     + The user chooses k by typing k+IS_ALL_CHOICE+1.
-
-   The user is not allowed to choose more than MAX_RESULTS values.
-
-   ANNOTATION_SUFFIX, if present, is used to annotate the input
-   prompts (for use with the -f switch).  */
-
-int
-get_selections (int *choices, int n_choices, int max_results,
-                int is_all_choice, const char *annotation_suffix)
-{
-  char *args;
-  const char *prompt;
-  int n_chosen;
-  int first_choice = is_all_choice ? 2 : 1;
-
-  prompt = getenv ("PS2");
-  if (prompt == NULL)
-    prompt = "> ";
-
-  args = command_line_input (prompt, annotation_suffix);
-
-  if (args == NULL)
-    error_no_arg (_("one or more choice numbers"));
-
-  n_chosen = 0;
-
-  /* Set choices[0 .. n_chosen-1] to the users' choices in ascending
-     order, as given in args.  Choices are validated.  */
-  while (1)
-    {
-      char *args2;
-      int choice, j;
-
-      args = skip_spaces (args);
-      if (*args == '\0' && n_chosen == 0)
-        error_no_arg (_("one or more choice numbers"));
-      else if (*args == '\0')
-        break;
-
-      choice = strtol (args, &args2, 10);
-      if (args == args2 || choice < 0
-          || choice > n_choices + first_choice - 1)
-        error (_("Argument must be choice number"));
-      args = args2;
-
-      if (choice == 0)
-        error (_("cancelled"));
-
-      if (choice < first_choice)
-        {
-          n_chosen = n_choices;
-          for (j = 0; j < n_choices; j += 1)
-            choices[j] = j;
-          break;
-        }
-      choice -= first_choice;
-
-      for (j = n_chosen - 1; j >= 0 && choice < choices[j]; j -= 1)
-        {
-        }
-
-      if (j < 0 || choice != choices[j])
-        {
-          int k;
-
-          for (k = n_chosen - 1; k > j; k -= 1)
-            choices[k + 1] = choices[k];
-          choices[j + 1] = choice;
-          n_chosen += 1;
-        }
-    }
-
-  if (n_chosen > max_results)
-    error (_("Select no more than %d of the above"), max_results);
-
-  return n_chosen;
-}
-
 /* Replace the operator of length OPLEN at position PC in *EXPP with a call
    on the function identified by SYM and BLOCK, and taking NARGS
    arguments.  Update *EXPP as needed to hold more space.  */
@@ -4335,6 +4341,131 @@ ensure_lval (struct value *val)
     }
 
   return val;
+}
+
+/* Given ARG, a value of type (pointer or reference to a)*
+   structure/union, extract the component named NAME from the ultimate
+   target structure/union and return it as a value with its
+   appropriate type.
+
+   The routine searches for NAME among all members of the structure itself
+   and (recursively) among all members of any wrapper members
+   (e.g., '_parent').
+
+   If NO_ERR, then simply return NULL in case of error, rather than
+   calling error.  */
+
+static struct value *
+ada_value_struct_elt (struct value *arg, const char *name, int no_err)
+{
+  struct type *t, *t1;
+  struct value *v;
+  int check_tag;
+
+  v = NULL;
+  t1 = t = ada_check_typedef (value_type (arg));
+  if (TYPE_CODE (t) == TYPE_CODE_REF)
+    {
+      t1 = TYPE_TARGET_TYPE (t);
+      if (t1 == NULL)
+	goto BadValue;
+      t1 = ada_check_typedef (t1);
+      if (TYPE_CODE (t1) == TYPE_CODE_PTR)
+        {
+          arg = coerce_ref (arg);
+          t = t1;
+        }
+    }
+
+  while (TYPE_CODE (t) == TYPE_CODE_PTR)
+    {
+      t1 = TYPE_TARGET_TYPE (t);
+      if (t1 == NULL)
+	goto BadValue;
+      t1 = ada_check_typedef (t1);
+      if (TYPE_CODE (t1) == TYPE_CODE_PTR)
+        {
+          arg = value_ind (arg);
+          t = t1;
+        }
+      else
+        break;
+    }
+
+  if (TYPE_CODE (t1) != TYPE_CODE_STRUCT && TYPE_CODE (t1) != TYPE_CODE_UNION)
+    goto BadValue;
+
+  if (t1 == t)
+    v = ada_search_struct_field (name, arg, 0, t);
+  else
+    {
+      int bit_offset, bit_size, byte_offset;
+      struct type *field_type;
+      CORE_ADDR address;
+
+      if (TYPE_CODE (t) == TYPE_CODE_PTR)
+	address = value_address (ada_value_ind (arg));
+      else
+	address = value_address (ada_coerce_ref (arg));
+
+      /* Check to see if this is a tagged type.  We also need to handle
+         the case where the type is a reference to a tagged type, but
+         we have to be careful to exclude pointers to tagged types.
+         The latter should be shown as usual (as a pointer), whereas
+         a reference should mostly be transparent to the user.  */
+
+      if (ada_is_tagged_type (t1, 0)
+          || (TYPE_CODE (t1) == TYPE_CODE_REF
+              && ada_is_tagged_type (TYPE_TARGET_TYPE (t1), 0)))
+        {
+          /* We first try to find the searched field in the current type.
+	     If not found then let's look in the fixed type.  */
+
+          if (!find_struct_field (name, t1, 0,
+                                  &field_type, &byte_offset, &bit_offset,
+                                  &bit_size, NULL))
+	    check_tag = 1;
+	  else
+	    check_tag = 0;
+        }
+      else
+	check_tag = 0;
+
+      /* Convert to fixed type in all cases, so that we have proper
+	 offsets to each field in unconstrained record types.  */
+      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
+			      address, NULL, check_tag);
+
+      if (find_struct_field (name, t1, 0,
+                             &field_type, &byte_offset, &bit_offset,
+                             &bit_size, NULL))
+        {
+          if (bit_size != 0)
+            {
+              if (TYPE_CODE (t) == TYPE_CODE_REF)
+                arg = ada_coerce_ref (arg);
+              else
+                arg = ada_value_ind (arg);
+              v = ada_value_primitive_packed_val (arg, NULL, byte_offset,
+                                                  bit_offset, bit_size,
+                                                  field_type);
+            }
+          else
+            v = value_at_lazy (field_type, address + byte_offset);
+        }
+    }
+
+  if (v != NULL || no_err)
+    return v;
+  else
+    error (_("There is no member named %s."), name);
+
+ BadValue:
+  if (no_err)
+    return NULL;
+  else
+    error (_("Attempt to extract a component of "
+	     "a value that is not a record."));
 }
 
 /* Return the value ACTUAL, converted to be an appropriate value for a
@@ -6491,7 +6622,7 @@ ada_is_tag_type (struct type *type)
 
 /* The type of the tag on VAL.  */
 
-struct type *
+static struct type *
 ada_tag_type (struct value *val)
 {
   return ada_lookup_struct_elt_type (value_type (val), "_tag", 1, 0);
@@ -6508,7 +6639,7 @@ is_ada95_tag (struct value *tag)
 
 /* The value of the tag on VAL.  */
 
-struct value *
+static struct value *
 ada_value_tag (struct value *val)
 {
   return ada_value_struct_elt (val, "_tag", 0);
@@ -6860,7 +6991,7 @@ ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
    valid field number within it, returns 1 iff field FIELD_NUM of TYPE
    represents a 'when others' clause; otherwise 0.  */
 
-int
+static int
 ada_is_others_clause (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
@@ -6968,7 +7099,7 @@ ada_scan_number (const char str[], int k, LONGEST * R, int *new_k)
    and FIELD_NUM is a valid field number within it, returns 1 iff VAL is
    in the range encoded by field FIELD_NUM of TYPE; otherwise 0.  */
 
-int
+static int
 ada_in_variant (LONGEST val, struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
@@ -7367,131 +7498,6 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
 	*index_p -= 1;
     }
   return NULL;
-}
-
-/* Given ARG, a value of type (pointer or reference to a)*
-   structure/union, extract the component named NAME from the ultimate
-   target structure/union and return it as a value with its
-   appropriate type.
-
-   The routine searches for NAME among all members of the structure itself
-   and (recursively) among all members of any wrapper members
-   (e.g., '_parent').
-
-   If NO_ERR, then simply return NULL in case of error, rather than 
-   calling error.  */
-
-struct value *
-ada_value_struct_elt (struct value *arg, const char *name, int no_err)
-{
-  struct type *t, *t1;
-  struct value *v;
-  int check_tag;
-
-  v = NULL;
-  t1 = t = ada_check_typedef (value_type (arg));
-  if (TYPE_CODE (t) == TYPE_CODE_REF)
-    {
-      t1 = TYPE_TARGET_TYPE (t);
-      if (t1 == NULL)
-	goto BadValue;
-      t1 = ada_check_typedef (t1);
-      if (TYPE_CODE (t1) == TYPE_CODE_PTR)
-        {
-          arg = coerce_ref (arg);
-          t = t1;
-        }
-    }
-
-  while (TYPE_CODE (t) == TYPE_CODE_PTR)
-    {
-      t1 = TYPE_TARGET_TYPE (t);
-      if (t1 == NULL)
-	goto BadValue;
-      t1 = ada_check_typedef (t1);
-      if (TYPE_CODE (t1) == TYPE_CODE_PTR)
-        {
-          arg = value_ind (arg);
-          t = t1;
-        }
-      else
-        break;
-    }
-
-  if (TYPE_CODE (t1) != TYPE_CODE_STRUCT && TYPE_CODE (t1) != TYPE_CODE_UNION)
-    goto BadValue;
-
-  if (t1 == t)
-    v = ada_search_struct_field (name, arg, 0, t);
-  else
-    {
-      int bit_offset, bit_size, byte_offset;
-      struct type *field_type;
-      CORE_ADDR address;
-
-      if (TYPE_CODE (t) == TYPE_CODE_PTR)
-	address = value_address (ada_value_ind (arg));
-      else
-	address = value_address (ada_coerce_ref (arg));
-
-      /* Check to see if this is a tagged type.  We also need to handle
-         the case where the type is a reference to a tagged type, but
-         we have to be careful to exclude pointers to tagged types.
-         The latter should be shown as usual (as a pointer), whereas
-         a reference should mostly be transparent to the user.  */
-
-      if (ada_is_tagged_type (t1, 0)
-          || (TYPE_CODE (t1) == TYPE_CODE_REF
-              && ada_is_tagged_type (TYPE_TARGET_TYPE (t1), 0)))
-        {
-          /* We first try to find the searched field in the current type.
-	     If not found then let's look in the fixed type.  */
-
-          if (!find_struct_field (name, t1, 0,
-                                  &field_type, &byte_offset, &bit_offset,
-                                  &bit_size, NULL))
-	    check_tag = 1;
-	  else
-	    check_tag = 0;
-        }
-      else
-	check_tag = 0;
-
-      /* Convert to fixed type in all cases, so that we have proper
-	 offsets to each field in unconstrained record types.  */
-      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
-			      address, NULL, check_tag);
-
-      if (find_struct_field (name, t1, 0,
-                             &field_type, &byte_offset, &bit_offset,
-                             &bit_size, NULL))
-        {
-          if (bit_size != 0)
-            {
-              if (TYPE_CODE (t) == TYPE_CODE_REF)
-                arg = ada_coerce_ref (arg);
-              else
-                arg = ada_value_ind (arg);
-              v = ada_value_primitive_packed_val (arg, NULL, byte_offset,
-                                                  bit_offset, bit_size,
-                                                  field_type);
-            }
-          else
-            v = value_at_lazy (field_type, address + byte_offset);
-        }
-    }
-
-  if (v != NULL || no_err)
-    return v;
-  else
-    error (_("There is no member named %s."), name);
-
- BadValue:
-  if (no_err)
-    return NULL;
-  else
-    error (_("Attempt to extract a component of "
-	     "a value that is not a record."));
 }
 
 /* Return a string representation of type TYPE.  */
@@ -9145,7 +9151,7 @@ static const char *attribute_names[] = {
   0
 };
 
-const char *
+static const char *
 ada_attribute_name (enum exp_opcode n)
 {
   if (n >= OP_ATR_FIRST && n <= (int) OP_ATR_VAL)

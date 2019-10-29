@@ -1,5 +1,41 @@
 2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ada-lang.h (GROW_VECT): Move to ada-lang.c.
+	(grow_vect): Remove declaration.
+	(ada_type_of_array): Remove declaration.
+	(ada_update_initial_language): Remove declaration.
+	(ada_fold_name): Remove declaration.
+	(ada_fill_in_ada_prototype): Remove declaration.
+	(user_select_syms): Remove declaration.
+	(get_selections): Remove declaration.
+	(ada_tag_type): Remove declaration.
+	(ada_value_tag): Remove declaration.
+	(ada_is_others_clause): Remove declaration.
+	(ada_in_variant): Remove declaration.
+	(ada_value_struct_elt): Remove declaration.
+	(ada_attribute_name): Remove declaration.
+	(ada_system_address_type): Remove declaration.
+	* ada-lang.c (ada_watch_location_expression): Make static.
+	(GROW_VECT): Move here from ada-lang.h.
+	(grow_vect): Make static.
+	(ada_update_initial_language): Make static.
+	(ada_fold_name): Make static.
+	(ada_type_of_array): Make static.
+	(encoded_ordered_before): Move up.
+	(sort_choices): Move up.
+	(print_signatures): Move up.
+	(ada_print_symbol_signature): Move up.
+	(get_selections): Move up and make static.
+	(user_select_syms): Move up and make static.
+	(ada_value_struct_elt): Move up and make static.
+	(ada_tag_type): Make static.
+	(ada_value_tag): Make static.
+	(ada_is_others_clause): Make static.
+	(ada_in_variant): Make static.
+	(ada_attribute_name): Make static.
+
+2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ada-lang.c: Remove includes.
 	* ada-typeprint.c: Remove includes.
 	* ada-valprint.c: Remove includes.

@@ -149,14 +149,6 @@ struct ada_task_info
   int base_cpu;
 };
 
-/* Assuming V points to an array of S objects,  make sure that it contains at
-   least M objects, updating V and S as necessary.  */
-
-#define GROW_VECT(v, s, m)                                    \
-   if ((s) < (m)) (v) = (char *) grow_vect (v, &(s), m, sizeof *(v));
-
-extern void *grow_vect (void *, size_t *, size_t, int);
-
 extern void ada_ensure_varsize_limit (const struct type *type);
 
 extern int ada_get_field_index (const struct type *type,
@@ -204,8 +196,6 @@ extern struct type *ada_array_element_type (struct type *, int);
 
 extern int ada_array_arity (struct type *);
 
-struct type *ada_type_of_array (struct value *, int);
-
 extern struct value *ada_coerce_to_simple_array_ptr (struct value *);
 
 struct value *ada_coerce_to_simple_array (struct value *);
@@ -228,13 +218,9 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
 extern std::string ada_decode (const char*);
 
-extern enum language ada_update_initial_language (enum language);
-
 extern int ada_lookup_symbol_list (const char *, const struct block *,
                                    domain_enum,
 				   std::vector<struct block_symbol> *);
-
-extern char *ada_fold_name (const char *);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
 					      const struct block *,
@@ -245,12 +231,6 @@ extern void ada_lookup_encoded_symbol
    struct block_symbol *symbol_info);
 
 extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *);
-
-extern void ada_fill_in_ada_prototype (struct symbol *);
-
-extern int user_select_syms (struct block_symbol *, int, int);
-
-extern int get_selections (int *, int, int, int, const char *);
 
 extern int ada_scan_number (const char *, int, LONGEST *, int *);
 
@@ -275,10 +255,6 @@ extern int ada_is_tagged_type (struct type *, int);
 
 extern int ada_is_tag_type (struct type *);
 
-extern struct type *ada_tag_type (struct value *);
-
-extern struct value *ada_value_tag (struct value *);
-
 extern const char *ada_tag_name (struct value *);
 
 extern struct value *ada_tag_value_at_base_address (struct value *obj);
@@ -291,13 +267,7 @@ extern int ada_is_variant_part (struct type *, int);
 
 extern struct type *ada_variant_discrim_type (struct type *, struct type *);
 
-extern int ada_is_others_clause (struct type *, int);
-
-extern int ada_in_variant (LONGEST, struct type *, int);
-
 extern const char *ada_variant_discrim_name (struct type *);
-
-extern struct value *ada_value_struct_elt (struct value *, const char *, int);
 
 extern int ada_is_aligner_type (struct type *);
 
@@ -306,8 +276,6 @@ extern struct type *ada_aligned_type (struct type *);
 extern const gdb_byte *ada_aligned_value_addr (struct type *,
 					       const gdb_byte *);
 
-extern const char *ada_attribute_name (enum exp_opcode);
-
 extern int ada_is_fixed_point_type (struct type *);
 
 extern int ada_is_system_address_type (struct type *);
@@ -315,8 +283,6 @@ extern int ada_is_system_address_type (struct type *);
 extern struct value *ada_delta (struct type *);
 
 extern struct value *ada_scaling_factor (struct type *);
-
-extern struct type *ada_system_address_type (void);
 
 extern int ada_which_variant_applies (struct type *, struct type *,
 				      const gdb_byte *);
