@@ -446,12 +446,6 @@ opcode_name_lookup (char **s)
   return o;
 }
 
-struct regname
-{
-  const char *name;
-  unsigned int num;
-};
-
 enum reg_class
 {
   RCLASS_GPR,
@@ -489,7 +483,7 @@ hash_reg_names (enum reg_class class, const char * const names[], unsigned n)
 static unsigned int
 reg_lookup_internal (const char *s, enum reg_class class)
 {
-  struct regname *r = (struct regname *) hash_find (reg_names_hash, s);
+  void *r = hash_find (reg_names_hash, s);
 
   if (r == NULL || DECODE_REG_CLASS (r) != class)
     return -1;
