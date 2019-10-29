@@ -1,3 +1,15 @@
+2019-10-29  Andrew Eikum  <aeikum@codeweavers.com>
+
+	* libcoff-in.h (struct pe_tdata): Add dos_message field.
+	* libcoff.h: Regenerate.
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Copy the
+	dos_message field rather than initialising it.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Copy the dos_message
+	field.
+	* peicode.h (pe_mkobject): Initialise the dos_message field.
+	(pe_mkobject_hook): Copy the dos_message field.
+	(pe_bfd_object_p): Copy the dos_message field.
+
 2019-10-25  Alan Modra  <amodra@gmail.com>
 
 	PR 4499

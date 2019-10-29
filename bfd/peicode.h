@@ -271,6 +271,24 @@ pe_mkobject (bfd * abfd)
   /* in_reloc_p is architecture dependent.  */
   pe->in_reloc_p = in_reloc_p;
 
+  /* Default DOS message string.  */
+  pe->dos_message[0]  = 0x0eba1f0e;
+  pe->dos_message[1]  = 0xcd09b400;
+  pe->dos_message[2]  = 0x4c01b821;
+  pe->dos_message[3]  = 0x685421cd;
+  pe->dos_message[4]  = 0x70207369;
+  pe->dos_message[5]  = 0x72676f72;
+  pe->dos_message[6]  = 0x63206d61;
+  pe->dos_message[7]  = 0x6f6e6e61;
+  pe->dos_message[8]  = 0x65622074;
+  pe->dos_message[9]  = 0x6e757220;
+  pe->dos_message[10] = 0x206e6920;
+  pe->dos_message[11] = 0x20534f44;
+  pe->dos_message[12] = 0x65646f6d;
+  pe->dos_message[13] = 0x0a0d0d2e;
+  pe->dos_message[14] = 0x24;
+  pe->dos_message[15] = 0x0;
+
   memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
   return TRUE;
 }
@@ -324,6 +342,9 @@ pe_mkobject_hook (bfd * abfd,
   if (! _bfd_coff_arm_set_private_flags (abfd, internal_f->f_flags))
     coff_data (abfd) ->flags = 0;
 #endif
+
+  memcpy (pe->dos_message, internal_f->pe.dos_message,
+	  sizeof (pe->dos_message));
 
   return (void *) pe;
 }
@@ -1455,6 +1476,9 @@ pe_bfd_object_p (bfd * abfd)
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
+
+  memcpy (internal_f.pe.dos_message, dos_hdr.dos_message,
+	  sizeof (internal_f.pe.dos_message));
 
   /* Read the optional header, which has variable size.  */
   opt_hdr_size = internal_f.f_opthdr;

@@ -863,22 +863,9 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
 
   /* This next collection of data are mostly just characters.  It
      appears to be constant within the headers put on NT exes.  */
-  filehdr_in->pe.dos_message[0]  = 0x0eba1f0e;
-  filehdr_in->pe.dos_message[1]  = 0xcd09b400;
-  filehdr_in->pe.dos_message[2]  = 0x4c01b821;
-  filehdr_in->pe.dos_message[3]  = 0x685421cd;
-  filehdr_in->pe.dos_message[4]  = 0x70207369;
-  filehdr_in->pe.dos_message[5]  = 0x72676f72;
-  filehdr_in->pe.dos_message[6]  = 0x63206d61;
-  filehdr_in->pe.dos_message[7]  = 0x6f6e6e61;
-  filehdr_in->pe.dos_message[8]  = 0x65622074;
-  filehdr_in->pe.dos_message[9]  = 0x6e757220;
-  filehdr_in->pe.dos_message[10] = 0x206e6920;
-  filehdr_in->pe.dos_message[11] = 0x20534f44;
-  filehdr_in->pe.dos_message[12] = 0x65646f6d;
-  filehdr_in->pe.dos_message[13] = 0x0a0d0d2e;
-  filehdr_in->pe.dos_message[14] = 0x24;
-  filehdr_in->pe.dos_message[15] = 0x0;
+  memcpy (filehdr_in->pe.dos_message, pe_data (abfd)->dos_message,
+	  sizeof (filehdr_in->pe.dos_message));
+
   filehdr_in->pe.nt_signature = IMAGE_NT_SIGNATURE;
 
   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
@@ -2978,6 +2965,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   if (! pe_data (ibfd)->has_reloc_section
       && ! (pe_data (ibfd)->real_flags & IMAGE_FILE_RELOCS_STRIPPED))
     pe_data (obfd)->dont_strip_reloc = 1;
+
+  memcpy (ope->dos_message, ipe->dos_message, sizeof (ope->dos_message));
 
   /* The file offsets contained in the debug directory need rewriting.  */
   if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size != 0)
