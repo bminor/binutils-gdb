@@ -1,3 +1,11 @@
+2019-10-30  Christian Biesinger  <cbiesinger@google.com>
+
+	* minsyms.c (clear_minimal_symbol_hash_tables): New function.
+	(build_minimal_symbol_hash_tables): Code to clear the table moved
+	to clear_minimal_symbol_hash_tables.
+	(minimal_symbol_reader::install): Call clear_minimal_symbol_hash_tables
+	when needed.
+
 2019-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infcmd.c: Remove includes.

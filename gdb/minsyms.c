@@ -1238,6 +1238,16 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
   return (mcount);
 }
 
+static void
+clear_minimal_symbol_hash_tables (struct objfile *objfile)
+{
+  for (size_t i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
+    {
+      objfile->per_bfd->msymbol_hash[i] = 0;
+      objfile->per_bfd->msymbol_demangled_hash[i] = 0;
+    }
+}
+
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
    after compacting or sorting the table since the entries move around
    thus causing the internal minimal_symbol pointers to become jumbled.  */
@@ -1248,14 +1258,7 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
   int i;
   struct minimal_symbol *msym;
 
-  /* Clear the hash tables.  */
-  for (i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
-    {
-      objfile->per_bfd->msymbol_hash[i] = 0;
-      objfile->per_bfd->msymbol_demangled_hash[i] = 0;
-    }
-
-  /* Now, (re)insert the actual entries.  */
+  /* (Re)insert the actual entries.  */
   for ((i = objfile->per_bfd->minimal_symbol_count,
 	msym = objfile->per_bfd->msymbols.get ());
        i > 0;
@@ -1344,6 +1347,9 @@ minimal_symbol_reader::install ()
       /* Attach the minimal symbol table to the specified objfile.
          The strings themselves are also located in the storage_obstack
          of this objfile.  */
+
+      if (m_objfile->per_bfd->minimal_symbol_count != 0)
+	clear_minimal_symbol_hash_tables (m_objfile);
 
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
