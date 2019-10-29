@@ -23,6 +23,7 @@
 #include "opcode/d30v.h"
 #include "disassemble.h"
 #include "opintl.h"
+#include "libiberty.h"
 
 #define PC_MASK 0xFFFFFFFF
 
@@ -313,7 +314,9 @@ print_insn (struct disassemble_info *info,
 	  (*info->fprintf_func) (info->stream, "0x%x", val);
 	}
       /* If there is another operand, then write a comma and space.  */
-      if (insn->form->operands[opind] && !(found_control && opind == 2))
+      if (opind < (int) ARRAY_SIZE (insn->form->operands)
+	  && insn->form->operands[opind]
+	  && !(found_control && opind == 2))
 	need_comma = 1;
     }
   if (need_paren)
