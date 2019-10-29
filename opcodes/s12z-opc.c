@@ -2205,8 +2205,16 @@ exg_sex_discrim (struct mem_read_abstraction_base *mra, enum optr hint ATTRIBUTE
   struct operand *op0 = create_register_operand ((eb & 0xf0) >> 4);
   struct operand *op1 = create_register_operand (eb & 0xf);
 
-  const struct reg *r0 = registers + ((struct register_operand *) op0)->reg;
-  const struct reg *r1 = registers + ((struct register_operand *) op1)->reg;
+  int reg0 = ((struct register_operand *) op0)->reg;
+  if (reg0 < 0 || reg0 >= S12Z_N_REGISTERS)
+    return OP_INVALID;
+
+  int reg1 = ((struct register_operand *) op1)->reg;
+  if (reg1 < 0 || reg1 >= S12Z_N_REGISTERS)
+    return OP_INVALID;
+
+  const struct reg *r0 = registers + reg0;
+  const struct reg *r1 = registers + reg1;
 
   enum optr operator = (r0->bytes < r1->bytes) ? OP_sex : OP_exg;
 

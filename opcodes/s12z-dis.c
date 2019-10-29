@@ -25,13 +25,11 @@
 #include <assert.h>
 
 #include "opcode/s12z.h"
-
 #include "bfd.h"
 #include "dis-asm.h"
-
 #include "disassemble.h"
-
 #include "s12z-opc.h"
+#include "opintl.h"
 
 struct mem_read_abstraction
 {
@@ -255,7 +253,11 @@ opr_emit_disassembly (const struct operand *opr,
     case OPND_CL_REGISTER:
       {
         int r = ((struct register_operand*) opr)->reg;
-	(*info->fprintf_func) (info->stream, "%s", registers[r].name);
+
+	if (r < 0 || r >= S12Z_N_REGISTERS)
+	  (*info->fprintf_func) (info->stream, _("<illegal reg num>"));
+	else
+	  (*info->fprintf_func) (info->stream, "%s", registers[r].name);
       }
       break;
     case OPND_CL_REGISTER_ALL16:
@@ -306,14 +308,25 @@ opr_emit_disassembly (const struct operand *opr,
 	    break;
 	  }
 	if (mo->n_regs > 0)
-	  (*info->fprintf_func) (info->stream, fmt,
-				 registers[mo->regs[0]].name);
+	  {
+	    int r = mo->regs[0];
+
+	    if (r < 0 || r >= S12Z_N_REGISTERS)
+	      (*info->fprintf_func) (info->stream, fmt, _("<illegal reg num>"));
+	    else
+	      (*info->fprintf_func) (info->stream, fmt, registers[r].name);
+	  }
 	used_reg = 1;
 
         if (mo->n_regs > used_reg)
           {
-            (*info->fprintf_func) (info->stream, ",%s",
-				   registers[mo->regs[used_reg]].name);
+	    int r = mo->regs[used_reg];
+
+	    if (r < 0 || r >= S12Z_N_REGISTERS)
+	      (*info->fprintf_func) (info->stream, _("<illegal reg num>"));
+	    else
+	      (*info->fprintf_func) (info->stream, ",%s",
+				     registers[r].name);
           }
 
 	(*info->fprintf_func) (info->stream, "%c",
@@ -323,7 +336,9 @@ opr_emit_disassembly (const struct operand *opr,
     };
 }
 
-static const char shift_size_table[] = {
+#define S12Z_N_SIZES 4
+static const char shift_size_table[S12Z_N_SIZES] =
+{
   'b', 'w', 'p', 'l'
 };
 
@@ -357,6 +372,7 @@ print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
   if (osize == -1)
     {
       bool suffix = false;
+
       for (o = 0; o < n_operands; ++o)
 	{
 	  if (operands[o] && operands[o]->osize != -1)
@@ -366,17 +382,26 @@ print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
 		  (*mra.info->fprintf_func) (mra.info->stream, "%c", '.');
 		  suffix = true;
 		}
-	      (*mra.info->fprintf_func) (mra.info->stream, "%c",
-				     shift_size_table[operands[o]->osize]);
+
+	      osize = operands[o]->osize;
+
+	      if (osize < 0 || osize >= S12Z_N_SIZES)
+		(*mra.info->fprintf_func) (mra.info->stream, _("<bad>"));
+	      else
+		(*mra.info->fprintf_func) (mra.info->stream, "%c",
+					   shift_size_table[osize]);
+		
 	    }
 	}
     }
   else
     {
-      (*mra.info->fprintf_func) (mra.info->stream, ".%c",
-			     shift_size_table[osize]);
+      if (osize < 0 || osize >= S12Z_N_SIZES)
+	(*mra.info->fprintf_func) (mra.info->stream, _(".<bad>"));
+      else
+	(*mra.info->fprintf_func) (mra.info->stream, ".%c",
+				   shift_size_table[osize]);
     }
-
 
   /* Ship out the operands.  */
   for (o = 0; o < n_operands; ++o)

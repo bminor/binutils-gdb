@@ -1,3 +1,10 @@
+2019-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* s12z-dis.c (opr_emit_disassembly): Check for illegal register
+	values.
+	(shift_size_table): Use a fixed size defined as S12Z_N_SIZES.
+	(print_insn_s12z):  Check for illegal size values.
+
 2019-10-28  Nick Clifton  <nickc@redhat.com>
 
 	* csky-dis.c (csky_chars_to_number): Check for a negative
