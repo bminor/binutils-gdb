@@ -1630,7 +1630,12 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	    /* The code in ehopt.c expects that one byte of the encoding
 	       is already allocated to the frag.  This comes from the way
 	       that it scans the .eh_frame section looking first for the
-	       .byte DW_CFA_advance_loc4.  */
+	       .byte DW_CFA_advance_loc4.  Call frag_grow with the sum of
+	       room needed by frag_more and frag_var to preallocate space
+	       ensuring that the DW_CFA_advance_loc4 is in the fixed part
+	       of the rs_cfa frag, so that the relax machinery can remove
+	       the advance_loc should it advance by zero.  */
+	    frag_grow (5);
 	    *frag_more (1) = DW_CFA_advance_loc4;
 
 	    frag_var (rs_cfa, 4, 0, DWARF2_LINE_MIN_INSN_LENGTH << 3,
