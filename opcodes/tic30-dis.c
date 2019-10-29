@@ -607,7 +607,7 @@ print_branch (disassemble_info *info,
 	      unsigned long insn_word,
 	      struct instruction *insn)
 {
-  char operand[2][13] =
+  char operand[2][OPERAND_BUFFER_LEN] =
   {
     {0},
     {0}

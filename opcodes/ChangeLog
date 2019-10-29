@@ -1,5 +1,9 @@
 2019-10-29  Nick Clifton  <nickc@redhat.com>
 
+	* tic30-dis.c (print_branch): Correct size of operand array.
+
+2019-10-29  Nick Clifton  <nickc@redhat.com>
+
 	* d30v-dis.c (print_insn): Check that operand index is valid
 	before attempting to access the operands array.
 
