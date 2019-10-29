@@ -54,7 +54,7 @@ struct internal_extra_pe_filehdr
   unsigned short e_oeminfo;	/* OEM information; e_oemid specific, 0x0 */
   unsigned short e_res2[10];	/* Reserved words, all 0x0 */
   bfd_vma  e_lfanew;		/* File address of new exe header, 0x80 */
-  unsigned long dos_message[16]; /* text which always follows dos header */
+  unsigned int dos_message[16]; /* Text which always follows DOS header.  */
   bfd_vma  nt_signature;   	/* required NT signature, 0x4550 */
 };
 

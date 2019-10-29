@@ -1,3 +1,8 @@
+2019-10-29  Andrew Eikum  <aeikum@codeweavers.com>
+
+	* coff/internal.h (struct internal_extra_pe_filehdr): Use ints
+	instead of longs to hold dos_message.
+
 2019-10-25  Alan Modra  <amodra@gmail.com>
 
 	PR 4499
