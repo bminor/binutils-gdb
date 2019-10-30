@@ -22,6 +22,18 @@
 #include "i386-opc.h"
 #undef None
 
+#define Reg8  Reg|Byte
+#define Reg16 Reg|Word
+#define Reg32 Reg|Dword
+#define Reg64 Reg|Qword
+
+#define FloatAcc Acc|Tbyte
+#define FloatReg Reg|Tbyte
+
+#define RegXMM RegSIMD|Xmmword
+#define RegYMM RegSIMD|Ymmword
+#define RegZMM RegSIMD|Zmmword
+
 #define Size16 Size=SIZE16
 #define Size32 Size=SIZE32
 #define Size64 Size=SIZE64

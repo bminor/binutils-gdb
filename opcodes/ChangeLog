@@ -1,5 +1,17 @@
 2019-10-30  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_shorthands): Delete.
+	(operand_type_init): Expand previous shorthands.
+	(set_bitfield_from_shorthand): Rename back to ...
+	(set_bitfield_from_cpu_flag_init): ... this.  Drop processing
+	of operand_type_init[].
+	(set_bitfield): Adjust call to the above function.
+	* i386-opc.tbl (Reg8, Reg16, Reg32, Reg64, FloatAcc, FloatReg,
+	RegXMM, RegYMM, RegZMM): Define.
+	* i386-reg.tbl: Expand prior shorthands.
+
+2019-10-30  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (output_i386_opcode): Change order of fields
 	emitted to output.
 	* i386-opc.h (struct insn_template): Move operands field.
