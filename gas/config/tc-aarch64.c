@@ -3402,6 +3402,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
      [base,Xm,SXTX {#imm}]
      [base,Wm,(S|U)XTW {#imm}]
    Pre-indexed
+     [base]!                    // in ldraa/ldrab exclusive
      [base,#imm]!
    Post-indexed
      [base],#imm
@@ -3716,29 +3717,42 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
     }
 
   /* If at this point neither .preind nor .postind is set, we have a
-     bare [Rn]{!}; reject [Rn]! accept [Rn] as a shorthand for [Rn,#0].
+     bare [Rn]{!}; only accept [Rn]! as a shorthand for [Rn,#0]! for ldraa and
+     ldrab, accept [Rn] as a shorthand for [Rn,#0].
      For SVE2 vector plus scalar offsets, allow [Zn.<T>] as shorthand for
      [Zn.<T>, xzr].  */
   if (operand->addr.preind == 0 && operand->addr.postind == 0)
     {
       if (operand->addr.writeback)
 	{
-	  /* Reject [Rn]!   */
-	  set_syntax_error (_("missing offset in the pre-indexed address"));
-	  return FALSE;
+	  if (operand->type == AARCH64_OPND_ADDR_SIMM10)
+            {
+              /* Accept [Rn]! as a shorthand for [Rn,#0]!   */
+              operand->addr.offset.is_reg = 0;
+              operand->addr.offset.imm = 0;
+              operand->addr.preind = 1;
+            }
+          else
+           {
+	     /* Reject [Rn]!   */
+	     set_syntax_error (_("missing offset in the pre-indexed address"));
+	     return FALSE;
+	   }
 	}
-
-      operand->addr.preind = 1;
-      if (operand->type == AARCH64_OPND_SVE_ADDR_ZX)
+       else
 	{
-	  operand->addr.offset.is_reg = 1;
-	  operand->addr.offset.regno = REG_ZR;
-	  *offset_qualifier = AARCH64_OPND_QLF_X;
-	}
-      else
-	{
-	  inst.reloc.exp.X_op = O_constant;
-	  inst.reloc.exp.X_add_number = 0;
+          operand->addr.preind = 1;
+          if (operand->type == AARCH64_OPND_SVE_ADDR_ZX)
+	   {
+	     operand->addr.offset.is_reg = 1;
+	     operand->addr.offset.regno = REG_ZR;
+	     *offset_qualifier = AARCH64_OPND_QLF_X;
+ 	   }
+          else
+	   {
+	     inst.reloc.exp.X_op = O_constant;
+	     inst.reloc.exp.X_add_number = 0;
+	   }
 	}
     }
 

@@ -1,3 +1,10 @@
+2019-10-30  Delia Burduv   <delia.burduv@arm.com>
+
+	* aarch64-opc.c (print_immediate_offset_address): Don't print the
+	immediate for the writeback form of ldraa/ldrab if it is 0.
+	* aarch64-tbl.h: Updated the documentation for ADDR_SIMM10.
+	* aarch64-opc-2.c: Regenerated.
+
 2019-10-30  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_shorthands): Delete.

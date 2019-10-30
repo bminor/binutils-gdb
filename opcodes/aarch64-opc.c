@@ -3063,7 +3063,12 @@ print_immediate_offset_address (char *buf, size_t size,
   if (opnd->addr.writeback)
     {
       if (opnd->addr.preind)
-	snprintf (buf, size, "[%s, #%d]!", base, opnd->addr.offset.imm);
+        {
+	  if (opnd->type == AARCH64_OPND_ADDR_SIMM10 && !opnd->addr.offset.imm)
+            snprintf (buf, size, "[%s]!", base);
+          else
+	    snprintf (buf, size, "[%s, #%d]!", base, opnd->addr.offset.imm);
+        }
       else
 	snprintf (buf, size, "[%s], #%d", base, opnd->addr.offset.imm);
     }

@@ -1,3 +1,15 @@
+2019-10-30  Delia Burduv  <Delia.Burduv@arm.com>
+
+	* config/tc-aarch64.c (parse_address_main): Accept the omission of
+	the immediate argument for ldraa and ldrab as a shorthand for the
+	immediate being 0.
+	* testsuite/gas/aarch64/ldraa-ldrab-no-offset.d: New test.
+	* testsuite/gas/aarch64/ldraa-ldrab-no-offset.s: New test.
+	* testsuite/gas/aarch64/illegal-ldraa.s: Modified to accept the
+	writeback form with no offset.
+	* testsuite/gas/aarch64/illegal-ldraa.s: Removed missing offset
+	error.
+
 2019-10-30  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/noreg16.d, testsuite/gas/i386/noreg16.s,

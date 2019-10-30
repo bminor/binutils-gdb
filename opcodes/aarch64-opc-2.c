@@ -112,7 +112,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM7", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm7,FLD_index2}, "an address with 7-bit signed immediate offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM9", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm9,FLD_index}, "an address with 9-bit signed immediate offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM9_2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm9,FLD_index}, "an address with 9-bit negative or unaligned immediate offset"},
-  {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM10", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_S_imm10,FLD_imm9,FLD_index}, "an address with 10-bit scaled, signed immediate offset"},
+  {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM10", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_S_imm10,FLD_imm9,FLD_index}, "an address with an optional 10-bit scaled, signed immediate offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM11", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm7,FLD_index2}, "an address with 11-bit signed immediate (multiple of 16) offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_UIMM12", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_imm12}, "an address with scaled, unsigned immediate offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "ADDR_SIMM13", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm9,FLD_index}, "an address with 13-bit signed immediate (multiple of 16) offset"},
