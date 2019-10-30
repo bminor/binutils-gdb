@@ -1294,8 +1294,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
     }
 
   fprintf (table, "  { \"%s\", %s, %s, %s, %s,\n",
-	   name, operands, base_opcode, extension_opcode,
-	   opcode_length);
+	   name, base_opcode, extension_opcode, opcode_length, operands);
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 

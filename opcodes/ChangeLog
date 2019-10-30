@@ -1,5 +1,13 @@
 2019-10-30  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (output_i386_opcode): Change order of fields
+	emitted to output.
+	* i386-opc.h (struct insn_template): Move operands field.
+	Convert extension_opcode field to unsigned short.
+	* i386-tbl.h: Re-generate.
+
+2019-10-30  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (process_i386_opcode_modifier): Report bogus uses
 	of W.
 	* i386-opc.h (W): Extend comment.

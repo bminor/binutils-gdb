@@ -852,9 +852,6 @@ typedef struct insn_template
   /* instruction name sans width suffix ("mov" for movl insns) */
   char *name;
 
-  /* how many operands */
-  unsigned int operands;
-
   /* base_opcode is the fundamental opcode byte without optional
      prefix(es).  */
   unsigned int base_opcode;
@@ -871,11 +868,14 @@ typedef struct insn_template
      AMD 3DNow! instructions.
      If this template has no extension opcode (the usual case) use None
      Instructions */
-  unsigned int extension_opcode;
+  unsigned short extension_opcode;
 #define None 0xffff		/* If no extension_opcode is possible.  */
 
   /* Opcode length.  */
   unsigned char opcode_length;
+
+  /* how many operands */
+  unsigned char operands;
 
   /* cpu feature flags */
   i386_cpu_flags cpu_flags;
