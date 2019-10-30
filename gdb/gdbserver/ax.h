@@ -22,7 +22,6 @@
 #include "regcache.h"
 
 #ifdef IN_PROCESS_AGENT
-extern int debug_agent;
 #define debug_threads debug_agent
 #endif
 

@@ -1,3 +1,7 @@
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
+	* ax.h (debug_agent): Remove duplicate declaration.
+
 2019-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* linux-aarch64-low.c: Fix typos in comments.

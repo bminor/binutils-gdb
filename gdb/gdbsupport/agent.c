@@ -26,7 +26,7 @@
 #define IPA_SYM_STRUCT_NAME ipa_sym_addresses_common
 #include "agent.h"
 
-int debug_agent = 0;
+bool debug_agent = false;
 
 /* A stdarg wrapper for debug_vprintf.  */
 
@@ -45,7 +45,7 @@ debug_agent_printf (const char *fmt, ...)
 #define DEBUG_AGENT debug_agent_printf
 
 /* Global flag to determine using agent or not.  */
-int use_agent = 0;
+bool use_agent = false;
 
 /* Addresses of in-process agent's symbols both GDB and GDBserver cares
    about.  */
@@ -73,9 +73,9 @@ static struct
 
 static struct ipa_sym_addresses_common ipa_sym_addrs;
 
-static int all_agent_symbols_looked_up = 0;
+static bool all_agent_symbols_looked_up = false;
 
-int
+bool
 agent_loaded_p (void)
 {
   return all_agent_symbols_looked_up;
@@ -87,11 +87,9 @@ agent_loaded_p (void)
 int
 agent_look_up_symbols (void *arg)
 {
-  int i;
+  all_agent_symbols_looked_up = false;
 
-  all_agent_symbols_looked_up = 0;
-
-  for (i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
+  for (int i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
     {
       CORE_ADDR *addrp =
 	(CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
@@ -105,7 +103,7 @@ agent_look_up_symbols (void *arg)
 	}
     }
 
-  all_agent_symbols_looked_up = 1;
+  all_agent_symbols_looked_up = true;
   return 0;
 }
 
@@ -260,7 +258,7 @@ static uint32_t agent_capability = 0;
 
 /* Return true if agent has capability AGENT_CAP, otherwise return false.  */
 
-int
+bool
 agent_capability_check (enum agent_capa agent_capa)
 {
   if (agent_capability == 0)
@@ -269,7 +267,7 @@ agent_capability_check (enum agent_capa agent_capa)
 			      &agent_capability))
 	warning (_("Error reading capability of agent"));
     }
-  return agent_capability & agent_capa;
+  return (agent_capability & agent_capa) != 0;
 }
 
 /* Invalidate the cache of agent capability, so we'll read it from inferior

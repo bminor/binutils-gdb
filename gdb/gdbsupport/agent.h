@@ -42,11 +42,11 @@ int agent_look_up_symbols (void *);
    thread.  */
 #define IPA_CMD_BUF_SIZE 1024
 
-int agent_loaded_p (void);
+bool agent_loaded_p (void);
 
-extern int debug_agent;
+extern bool debug_agent;
 
-extern int use_agent;
+extern bool use_agent;
 
 /* Capability of agent.  Different agents may have different capabilities,
    such as installing fast tracepoint or evaluating breakpoint conditions.
@@ -61,7 +61,7 @@ enum agent_capa
   AGENT_CAPA_STATIC_TRACE = (0x1 << 1),
 };
 
-int agent_capability_check (enum agent_capa);
+bool agent_capability_check (enum agent_capa);
 
 void agent_capability_invalidate (void);
 

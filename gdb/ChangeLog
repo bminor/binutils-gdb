@@ -1,3 +1,16 @@
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
+	* gdbsupport/agent.c (debug_agent): Change type to bool.
+	(use_agent): Likewise.
+	(all_agent_symbols_look_up): Likewise.
+	(agent_loaded_p): Change return value to bool.
+	(agent_look_up_symbols): Update.
+	(agent_capability_check): Change return value to bool.
+	* gdbsupport/agent.h (agent_loaded_p): Likewise.
+	(debug_agent): Change type to bool.
+	(use_agent): Likewise.
+	(agent_capability_check): Change return value to bool.
+
 2019-10-30  Christian Biesinger  <cbiesinger@google.com>
 
 	* minsyms.c (clear_minimal_symbol_hash_tables): New function.
