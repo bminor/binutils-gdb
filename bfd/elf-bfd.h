@@ -1377,6 +1377,8 @@ struct elf_backend_data
      int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr,
 				bfd_size_type len));
 
+  bfd_boolean (*elf_backend_core_find_build_id) (bfd *, bfd_vma);
+
   /* This function is used by `_bfd_elf_get_synthetic_symtab';
      see elf.c.  */
   bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
@@ -2403,6 +2405,8 @@ extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 extern int bfd_elf32_core_file_pid
   (bfd *);
+extern bfd_boolean _bfd_elf32_core_find_build_id
+  (bfd *, bfd_vma);
 
 extern bfd_boolean bfd_elf32_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -2449,6 +2453,8 @@ extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
 extern int bfd_elf64_core_file_pid
   (bfd *);
+extern bfd_boolean _bfd_elf64_core_find_build_id
+  (bfd *, bfd_vma);
 
 extern bfd_boolean bfd_elf64_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -2773,6 +2779,7 @@ extern bfd_boolean _bfd_elf_merge_object_attributes
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_list (bfd *, bfd *);
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr (asection *sec);
+extern bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type, size_t);
 
 extern bfd_boolean _bfd_elf_parse_gnu_properties
   (bfd *, Elf_Internal_Note *);

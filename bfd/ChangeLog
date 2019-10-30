@@ -1,3 +1,21 @@
+2019-10-30  Keith Seitz  <keiths@redhat.com>
+
+	* elf-bfd.h (elf_backend_data) <elf_backend_core_find_build_id>:
+	New field.
+	(_bfd_elf32_core_find_build_id, _bfd_elf64_core_find_build_id):
+	New functions.
+	(elf_read_notes): Add declaration.
+	* elf.c (elf_read_notes): Move elf-bfd.h.
+	(_bfd_elf_core_find_build_id): New function.
+	(bfd_section_from_phdr): Scan core file PT_LOAD segments for
+	build-id if none is known.
+	(elf_parse_notes): For core files, scan for notes.
+	* elfcore.h (elf_core_file_matches_executable_p): If both
+	BFDs have identical build-ids, then they match.
+	(_bfd_elf_core_find_build_id): New function.
+	* elfxx-target.h (elf_backend_core_find_build_id): Define.
+	(elfNN_bed): Add elf_backend_core_find_build_id.
+
 2019-10-29  Andrew Eikum  <aeikum@codeweavers.com>
 
 	* libcoff-in.h (struct pe_tdata): Add dos_message field.

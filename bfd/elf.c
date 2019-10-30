@@ -53,8 +53,6 @@ static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int) ;
-static bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type,
-				   size_t align) ;
 static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
 				    file_ptr offset, size_t align);
 
@@ -3061,6 +3059,16 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
   return TRUE;
 }
 
+static bfd_boolean
+_bfd_elf_core_find_build_id (bfd *templ, bfd_vma offset)
+{
+  /* The return value is ignored.  Build-ids are considered optional.  */
+  if (templ->xvec->flavour == bfd_target_elf_flavour)
+    return (*get_elf_backend_data (templ)->elf_backend_core_find_build_id)
+      (templ, offset);
+  return FALSE;
+}
+
 bfd_boolean
 bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
 {
@@ -3072,7 +3080,11 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
       return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "null");
 
     case PT_LOAD:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "load");
+      if (! _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "load"))
+	return FALSE;
+      if (bfd_get_format (abfd) == bfd_core && abfd->build_id == NULL)
+	_bfd_elf_core_find_build_id (abfd, hdr->p_offset);
+      return TRUE;
 
     case PT_DYNAMIC:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "dynamic");
@@ -11838,7 +11850,8 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 	      GROKER_ELEMENT ("NetBSD-CORE", elfcore_grok_netbsd_note),
 	      GROKER_ELEMENT ( "OpenBSD", elfcore_grok_openbsd_note),
 	      GROKER_ELEMENT ("QNX", elfcore_grok_nto_note),
-	      GROKER_ELEMENT ("SPU/", elfcore_grok_spu_note)
+	      GROKER_ELEMENT ("SPU/", elfcore_grok_spu_note),
+	      GROKER_ELEMENT ("GNU", elfobj_grok_gnu_note)
 	    };
 #undef GROKER_ELEMENT
 	    int i;
@@ -11878,7 +11891,7 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
   return TRUE;
 }
 
-static bfd_boolean
+bfd_boolean
 elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
 		size_t align)
 {
