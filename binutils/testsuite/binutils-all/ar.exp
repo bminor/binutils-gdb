@@ -605,6 +605,50 @@ proc empty_archive { } {
     pass $testname
 }
 
+# Test extracting an element.
+
+proc extract_an_element { } {
+    global AR
+    global AS
+    global srcdir
+    global subdir
+
+    set testname "ar extracting an element"
+
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o] {
+	unresolved $testname
+	return
+    }
+
+    set archive artest.a
+
+    if [is_remote host] {
+	set objfile [remote_download host tmpdir/bintest.o]
+	remote_file host delete $archive
+    } else {
+	set objfile tmpdir/bintest.o
+    }
+
+    remote_file build delete $archive
+
+    set got [binutils_run $AR "-r -c $archive ${objfile}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    set got [binutils_run $AR "--output=tmpdir -x $archive ${objfile}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    remote_file build delete $archive
+    remote_file build delete tmpdir/$archive
+
+    pass $testname
+}
+
 # Run the tests.
 
 # Only run the bfdtest checks if the programs exist.  Since these
@@ -625,6 +669,7 @@ deterministic_archive
 delete_an_element
 move_an_element
 empty_archive
+extract_an_element
 
 if { [is_elf_format] && [supports_gnu_unique] } {
     unique_symbol

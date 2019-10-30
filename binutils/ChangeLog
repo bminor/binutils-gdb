@@ -1,3 +1,18 @@
+2019-10-30  Fangrui Song  <i@maskray.me>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* ar.c (emum long option numbers): Declare.  Use to provide
+	numerical values for long options.
+	(long_options): Add --output option.
+	(usage): Mention the --output option.
+	(open_output_file): New function.  Create a filepath for an output
+	file and open it.
+	(extract_file): Use open_output_file().
+	(open_output_file):
+	* testsuite/binutils-all/ar.exp: Add a test of the new feature.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2019-10-26  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (sort_gnu_build_notes): Correct sort of deleted

@@ -169,7 +169,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -253,7 +253,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -579,6 +579,21 @@ The optional command-line switch @option{--target @var{bfdname}}
 specifies that the archive members are in an object code format
 different from your system's default format.  See
 @xref{Target Selection}, for more information.
+
+@item --output @var{dirname}
+The @option{--output} option can be used to specify a path to a
+directory into which archive members should be extracted.  If this
+option is not specified then the current directory will be used.
+
+Note - although the presence of this option does imply a @option{x} 
+extraction operation that option must still be included on the command
+line.
+
+Note - using this option does not allow archive members to be
+extracted to locations outside of the current directory, or one of its 
+sub-directories.  This is a security feature to prevent archives
+created with the @option{P} option from maliciously overwriting user
+files.
 @end table
 @c man end
 
