@@ -1,3 +1,7 @@
+2019-10-30  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_test_multiple): Handle -early pattern flag.
+
 2019-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/bigcore.c: Fix typos in comments.

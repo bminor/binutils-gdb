@@ -775,6 +775,23 @@ proc gdb_internal_error_resync {} {
 #       }
 #   }
 #
+# In EXPECT_ARGUMENTS, a pattern flag -early can be used.  It makes sure the
+# pattern is inserted before any implicit pattern added by gdb_test_multiple.
+# Using this pattern flag, we can f.i. setup a kfail for an assertion failure
+# <assert> during gdb_continue_to_breakpoint by the rewrite:
+#   gdb_continue_to_breakpoint <msg> <pattern>
+# into:
+#   set breakpoint_pattern "(?:Breakpoint|Temporary breakpoint) .* (at|in)"
+#   gdb_test_multiple "continue" "continue to breakpoint: <msg>"  {
+#	-early -re "internal-error: <assert>" {
+#	    setup_kfail gdb/nnnnn "*-*-*"
+#	    exp_continue
+#	}
+#	-re "$breakpoint_pattern <pattern>\r\n$gdb_prompt $" {
+#	    pass $gdb_test_name
+#	}
+#    }
+#
 proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
@@ -833,22 +850,30 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     set subst_code [uplevel list $subst_code]
 
     set processed_code ""
+    set early_processed_code ""
+    # The variable current_list holds the name of the currently processed
+    # list, either processed_code or early_processed_code.
+    set current_list "processed_code"
     set patterns ""
     set expecting_action 0
     set expecting_arg 0
     set wrap_pattern 0
     foreach item $user_code subst_item $subst_code {
 	if { $item == "-n" || $item == "-notransfer" || $item == "-nocase" } {
-	    lappend processed_code $item
+	    lappend $current_list $item
 	    continue
 	}
 	if { $item == "-indices" || $item == "-re" || $item == "-ex" } {
-	    lappend processed_code $item
+	    lappend $current_list $item
+	    continue
+	}
+	if { $item == "-early" } {
+	    set current_list "early_processed_code"
 	    continue
 	}
 	if { $item == "-timeout" || $item == "-i" } {
 	    set expecting_arg 1
-	    lappend processed_code $item
+	    lappend $current_list $item
 	    continue
 	}
 	if { $item == "-wrap" } {
@@ -857,24 +882,26 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	}
 	if { $expecting_arg } {
 	    set expecting_arg 0
-	    lappend processed_code $subst_item
+	    lappend $current_list $subst_item
 	    continue
 	}
 	if { $expecting_action } {
-	    lappend processed_code "uplevel [list $item]"
+	    lappend $current_list "uplevel [list $item]"
 	    set expecting_action 0
 	    # Cosmetic, no effect on the list.
-	    append processed_code "\n"
+	    append $current_list "\n"
+	    # End the effect of -early, it only applies to one action.
+	    set current_list "processed_code"
 	    continue
 	}
 	set expecting_action 1
 	if { $wrap_pattern } {
 	    # Wrap subst_item as is done for the gdb_test PATTERN argument.
-	    lappend processed_code \
+	    lappend $current_list \
 		"\[\r\n\]*(?:$subst_item)\[\r\n\]+$gdb_prompt $"
 	    set wrap_pattern 0
 	} else {
-	    lappend processed_code $subst_item
+	    lappend $current_list $subst_item
 	}
 	if {$patterns != ""} {
 	    append patterns "; "
@@ -938,7 +965,8 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	}
     }
 
-    set code {
+    set code $early_processed_code
+    append code {
 	-re ".*A problem internal to GDB has been detected" {
 	    fail "$message (GDB internal error)"
 	    gdb_internal_error_resync
