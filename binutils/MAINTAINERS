@@ -124,7 +124,7 @@ responsibility among the other maintainers.
   PPC		   Alan Modra <amodra@gmail.com>
   PPC		   Peter Bergner <bergner@vnet.ibm.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
-  RISC-V	   Palmer Dabbelt <palmer@sifive.com>
+  RISC-V	   Palmer Dabbelt <palmer@dabbelt.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
   RISC-V	   Jim Wilson <jimw@sifive.com>
   RX               Nick Clifton <nickc@redhat.com>
