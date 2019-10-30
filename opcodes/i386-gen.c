@@ -1107,6 +1107,8 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 
   if (strcmp (mod, "0"))
     {
+      unsigned int have_w = 0, bwlq_suf = 0xf;
+
       last = mod + strlen (mod);
       for (next = mod; next && next < last; )
 	{
@@ -1120,8 +1122,30 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 			  lineno);
 	      if (strcasecmp(str, "IsString") == 0)
 		active_isstring = 1;
+
+	      if (strcasecmp(str, "W") == 0)
+		have_w = 1;
+
+	      if (strcasecmp(str, "No_bSuf") == 0)
+		bwlq_suf &= ~1;
+	      if (strcasecmp(str, "No_wSuf") == 0)
+		bwlq_suf &= ~2;
+	      if (strcasecmp(str, "No_lSuf") == 0)
+		bwlq_suf &= ~4;
+	      if (strcasecmp(str, "No_qSuf") == 0)
+		bwlq_suf &= ~8;
 	    }
 	}
+
+      if (have_w && !bwlq_suf)
+	fail ("%s: %d: stray W modifier\n", filename, lineno);
+      if (have_w && !(bwlq_suf & 1))
+	fprintf (stderr, "%s: %d: W modifier without Byte operand(s)\n",
+		 filename, lineno);
+      if (have_w && !(bwlq_suf & ~1))
+	fprintf (stderr,
+		 "%s: %d: W modifier without Word/Dword/Qword operand(s)\n",
+		 filename, lineno);
     }
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
 }

@@ -3974,7 +3974,7 @@ optimize_encoding (void)
 		&& i.reg_operands == 1
 		&& i.imm_operands == 1
 		&& i.op[0].imms->X_op == O_constant
-		&& ((i.tm.base_opcode == 0xb0
+		&& ((i.tm.base_opcode == 0xb8
 		     && i.tm.extension_opcode == None
 		     && fits_in_unsigned_long (i.op[0].imms->X_add_number))
 		    || (fits_in_imm31 (i.op[0].imms->X_add_number)
@@ -3984,7 +3984,7 @@ optimize_encoding (void)
 			    || (i.tm.base_opcode == 0x80
 				&& i.tm.extension_opcode == 0x4)
 			    || ((i.tm.base_opcode == 0xf6
-				 || i.tm.base_opcode == 0xc6)
+				 || (i.tm.base_opcode | 1) == 0xc7)
 				&& i.tm.extension_opcode == 0x0)))
 		    || (fits_in_imm7 (i.op[0].imms->X_add_number)
 			&& i.tm.base_opcode == 0x83
@@ -4010,7 +4010,7 @@ optimize_encoding (void)
 	   movq $imm32, %r64   -> movl $imm32, %r32
         */
       i.tm.opcode_modifier.norex64 = 1;
-      if (i.tm.base_opcode == 0xb0 || i.tm.base_opcode == 0xc6)
+      if (i.tm.base_opcode == 0xb8 || (i.tm.base_opcode | 1) == 0xc7)
 	{
 	  /* Handle
 	       movq $imm31, %r64   -> movl $imm31, %r32
@@ -4024,13 +4024,14 @@ optimize_encoding (void)
 	  i.types[0].bitfield.imm64 = 0;
 	  i.types[1].bitfield.dword = 1;
 	  i.types[1].bitfield.qword = 0;
-	  if (i.tm.base_opcode == 0xc6)
+	  if ((i.tm.base_opcode | 1) == 0xc7)
 	    {
 	      /* Handle
 		   movq $imm31, %r64   -> movl $imm31, %r32
 	       */
-	      i.tm.base_opcode = 0xb0;
+	      i.tm.base_opcode = 0xb8;
 	      i.tm.extension_opcode = None;
+	      i.tm.opcode_modifier.w = 0;
 	      i.tm.opcode_modifier.shortform = 1;
 	      i.tm.opcode_modifier.modrm = 0;
 	    }

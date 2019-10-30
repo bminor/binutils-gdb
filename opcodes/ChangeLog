@@ -1,3 +1,12 @@
+2019-10-30  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (process_i386_opcode_modifier): Report bogus uses
+	of W.
+	* i386-opc.h (W): Extend comment.
+	* i386-opc.tbl (mov, movabs, movq): Drop W and adjust opcodes of
+	general purpose variants not allowing for byte operands.
+	* i386-tbl.h: Re-generate.
+
 2019-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* tic30-dis.c (print_branch): Correct size of operand array.

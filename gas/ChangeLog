@@ -1,3 +1,8 @@
+2019-10-30  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_encoding): Adjust opcodes compared
+	against. Adjust replacement opcode and clear .w.
+
 2019-10-29  Alan Modra  <amodra@gmail.com>
 
 	PR 25125

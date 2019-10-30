@@ -387,7 +387,9 @@ enum
 {
   /* has direction bit. */
   D = 0,
-  /* set if operands can be words or dwords encoded the canonical way */
+  /* set if operands can be both bytes and words/dwords/qwords, encoded the
+     canonical way; the base_opcode field should hold the encoding for byte
+     operands  */
   W,
   /* load form instruction. Must be placed before store form.  */
   Load,
