@@ -1,3 +1,10 @@
+2019-11-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	https://bugzilla.redhat.com/show_bug.cgi?id=1765117
+	* target.c (target_stack::push): Call 'unpush' if there's a
+	target on top of the stack.
+
 2019-11-18  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* python/py-block.c (blpy_dealloc): Call tp_free.

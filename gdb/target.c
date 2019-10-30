@@ -562,11 +562,7 @@ target_stack::push (target_ops *t)
   strata stratum = t->stratum ();
 
   if (m_stack[stratum] != NULL)
-    {
-      target_ops *prev = m_stack[stratum];
-      m_stack[stratum] = NULL;
-      target_close (prev);
-    }
+    unpush (m_stack[stratum]);
 
   /* Now add the new one.  */
   m_stack[stratum] = t;

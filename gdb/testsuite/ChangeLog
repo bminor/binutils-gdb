@@ -1,3 +1,8 @@
+2019-11-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	https://bugzilla.redhat.com/show_bug.cgi?id=1765117
+	* gdb.tui/corefile-run.exp: New file.
+
 2019-11-14  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/gdbvars.exp (test_convenience_variables): Add
