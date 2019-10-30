@@ -30,6 +30,9 @@
 #include "psymtab.h"
 #include <bitset>
 #include <vector>
+#if CXX_STD_THREAD
+#include <future>
+#endif
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "bcache.h"
@@ -319,6 +322,19 @@ struct objfile_per_bfd_storage
   /* All the different languages of symbols found in the demangled
      hash table.  */
   std::bitset<nr_languages> demangled_hash_languages;
+
+  void wait_for_msymbols() {
+#if CXX_STD_THREAD
+    if (m_minsym_future.valid ())
+      {
+	m_minsym_future.wait ();
+	m_minsym_future = std::future<void> ();
+      }
+#endif
+  }
+#if CXX_STD_THREAD
+  std::future<void> m_minsym_future;
+#endif
 };
 
 /* An iterator that first returns a parent objfile, and then each
@@ -439,11 +455,13 @@ struct objfile
 
     minimal_symbol_iterator begin () const
     {
+      m_objfile->per_bfd->wait_for_msymbols ();
       return minimal_symbol_iterator (m_objfile->per_bfd->msymbols.get ());
     }
 
     minimal_symbol_iterator end () const
     {
+      m_objfile->per_bfd->wait_for_msymbols ();
       return minimal_symbol_iterator
 	(m_objfile->per_bfd->msymbols.get ()
 	 + m_objfile->per_bfd->minimal_symbol_count);
