@@ -1,3 +1,16 @@
+2020-01-08  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.c (add_partial_symbol): Use unique_xmalloc_ptr.
+	(dwarf2_compute_name, open_dwo_file): Likewise.
+	(process_enumeration_scope): Use std::vector.
+	(guess_partial_die_structure_name): Use unique_xmalloc_ptr.
+	(partial_die_info::fixup, dwarf2_start_subfile)
+	(guess_full_die_structure_name, dwarf2_name): Likewise.
+	(determine_prefix): Update.
+	(guess_full_die_structure_name): Make return type const.
+	(partial_die_full_name): Return unique_xmalloc_ptr.
+	(DW_FIELD_ALLOC_CHUNK): Remove.
+
 2020-01-07  Tom Tromey  <tromey@adacore.com>
 
 	PR build/24937:
