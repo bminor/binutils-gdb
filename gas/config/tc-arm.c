@@ -355,6 +355,7 @@ static arm_feature_set selected_fpu = FPU_NONE;
 /* Feature bits selected by the last .object_arch directive.  */
 static arm_feature_set selected_object_arch = ARM_ARCH_NONE;
 /* Must be long enough to hold any of the names in arm_cpus.  */
+static const struct arm_ext_table * selected_ctx_ext_table = NULL;
 static char selected_cpu_name[20];
 
 extern FLONUM_TYPE generic_floating_point_number;
@@ -31502,6 +31503,7 @@ arm_parse_arch (const char *str)
 	  march_ext_opt = XNEW (arm_feature_set);
 	*march_ext_opt = arm_arch_none;
 	march_fpu_opt = &opt->default_fpu;
+	selected_ctx_ext_table = opt->ext_table;
 	strcpy (selected_cpu_name, opt->name);
 
 	if (ext != NULL)
@@ -32359,6 +32361,35 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
     {
       adding_value = 0;
       name += 2;
+    }
+
+  /* Check the context specific extension table */
+  if (selected_ctx_ext_table)
+    {
+      const struct arm_ext_table * ext_opt;
+      for (ext_opt = selected_ctx_ext_table; ext_opt->name != NULL; ext_opt++)
+        {
+          if (streq (ext_opt->name, name))
+	    {
+	      if (adding_value)
+		{
+		  if (ARM_FEATURE_ZERO (ext_opt->merge))
+		    /* TODO: Option not supported.  When we remove the
+		    legacy table this case should error out.  */
+		    continue;
+		  ARM_MERGE_FEATURE_SETS (selected_ext, selected_ext,
+					  ext_opt->merge);
+		}
+	      else
+		ARM_CLEAR_FEATURE (selected_ext, selected_ext, ext_opt->clear);
+
+	      ARM_MERGE_FEATURE_SETS (selected_cpu, selected_arch, selected_ext);
+	      ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
+	      *input_line_pointer = saved_char;
+	      demand_empty_rest_of_line ();
+	      return;
+	    }
+	}
     }
 
   for (opt = arm_extensions; opt->name != NULL; opt++)

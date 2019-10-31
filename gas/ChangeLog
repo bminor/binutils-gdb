@@ -1,3 +1,15 @@
+2019-10-31  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (selected_ctx_ext_table) New static variable.
+	(arm_parse_arch): Set context sensitive extension table based on the
+	chosen base architecture.
+	(s_arm_arch_extension): Change to lookup extensions in the new context
+	sensitive tables.
+	* gas/testsuite/gas/arm/mve-ext.s: New.
+	* gas/testsuite/gas/arm/mve-ext.d: New.
+	* gas/testsuite/gas/arm/mvefp-ext.s: New.
+	* gas/testsuite/gas/arm/mvefp-ext.d: New.
+
 2019-10-30  Delia Burduv  <Delia.Burduv@arm.com>
 
 	* config/tc-aarch64.c (parse_address_main): Accept the omission of
