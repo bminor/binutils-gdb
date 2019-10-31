@@ -9892,7 +9892,7 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
 static void
 fixup_go_packaging (struct dwarf2_cu *cu)
 {
-  char *package_name = NULL;
+  gdb::unique_xmalloc_ptr<char> package_name;
   struct pending *list;
   int i;
 
@@ -9907,24 +9907,24 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	  if (sym->language () == language_go
 	      && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	    {
-	      char *this_package_name = go_symbol_package_name (sym);
+	      gdb::unique_xmalloc_ptr<char> this_package_name
+		(go_symbol_package_name (sym));
 
 	      if (this_package_name == NULL)
 		continue;
 	      if (package_name == NULL)
-		package_name = this_package_name;
+		package_name = std::move (this_package_name);
 	      else
 		{
 		  struct objfile *objfile
 		    = cu->per_cu->dwarf2_per_objfile->objfile;
-		  if (strcmp (package_name, this_package_name) != 0)
+		  if (strcmp (package_name.get (), this_package_name.get ()) != 0)
 		    complaint (_("Symtab %s has objects from two different Go packages: %s and %s"),
 			       (symbol_symtab (sym) != NULL
 				? symtab_to_filename_for_display
 				    (symbol_symtab (sym))
 				: objfile_name (objfile)),
-			       this_package_name, package_name);
-		  xfree (this_package_name);
+			       this_package_name.get (), package_name.get ());
 		}
 	    }
 	}
@@ -9934,7 +9934,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     {
       struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
       const char *saved_package_name
-	= obstack_strdup (&objfile->per_bfd->storage_obstack, package_name);
+	= obstack_strdup (&objfile->per_bfd->storage_obstack, package_name.get ());
       struct type *type = init_type (objfile, TYPE_CODE_MODULE, 0,
 				     saved_package_name);
       struct symbol *sym;
@@ -9949,8 +9949,6 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       SYMBOL_TYPE (sym) = type;
 
       add_symbol_to_list (sym, cu->get_builder ()->get_global_symbols ());
-
-      xfree (package_name);
     }
 }
 

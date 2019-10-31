@@ -1,5 +1,9 @@
 2020-01-08  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2read.c (fixup_go_packaging): Use unique_xmalloc_ptr.
+
+2020-01-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (add_partial_symbol): Use unique_xmalloc_ptr.
 	(dwarf2_compute_name, open_dwo_file): Likewise.
 	(process_enumeration_scope): Use std::vector.
