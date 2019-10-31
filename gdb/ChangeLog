@@ -1,5 +1,12 @@
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
+	* agent.c (set_can_use_agent): When the setting is turned on,
+	look up agent symbols if we don't have them yet.
+	(agent_new_objfile): Don't look up agent symbols when the agent
+	setting is off.
+
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
 	* config.in: Regenerate.
 
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
