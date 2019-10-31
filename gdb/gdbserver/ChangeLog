@@ -1,5 +1,11 @@
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Also check for strerror_r.
+
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
 	* ax.h (debug_agent): Remove duplicate declaration.
 
 2019-10-26  Tom de Vries  <tdevries@suse.de>
