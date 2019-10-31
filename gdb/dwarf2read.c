@@ -24570,7 +24570,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
     {
       /* It's an object-like macro.  */
       int name_len = p - body;
-      char *name = savestring (body, name_len);
+      std::string name (body, name_len);
       const char *replacement;
 
       if (*p == ' ')
@@ -24581,14 +24581,12 @@ parse_macro_definition (struct macro_source_file *file, int line,
           replacement = body + name_len;
         }
 
-      macro_define_object (file, line, name, replacement);
-
-      xfree (name);
+      macro_define_object (file, line, name.c_str (), replacement);
     }
   else if (*p == '(')
     {
       /* It's a function-like macro.  */
-      char *name = savestring (body, p - body);
+      std::string name (body, p - body);
       int argc = 0;
       int argv_size = 1;
       char **argv = XNEWVEC (char *, argv_size);
@@ -24637,14 +24635,14 @@ parse_macro_definition (struct macro_source_file *file, int line,
 
           if (*p == ' ')
             /* Perfectly formed definition, no complaints.  */
-            macro_define_function (file, line, name,
+            macro_define_function (file, line, name.c_str (),
                                    argc, (const char **) argv,
                                    p + 1);
           else if (*p == '\0')
             {
               /* Complain, but do define it.  */
 	      dwarf2_macro_malformed_definition_complaint (body);
-              macro_define_function (file, line, name,
+              macro_define_function (file, line, name.c_str (),
                                      argc, (const char **) argv,
                                      p);
             }
@@ -24656,7 +24654,6 @@ parse_macro_definition (struct macro_source_file *file, int line,
         /* Just complain.  */
 	dwarf2_macro_malformed_definition_complaint (body);
 
-      xfree (name);
       {
         int i;
 

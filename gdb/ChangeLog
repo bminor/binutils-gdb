@@ -1,5 +1,10 @@
 2020-01-08  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2read.c (parse_macro_definition): Use std::string.
+	(parse_macro_definition): Likewise.
+
+2020-01-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (abbrev_table_read_table): Use std::vector.
 	(ATTR_ALLOC_CHUNK): Remove.
 
