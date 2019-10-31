@@ -1,3 +1,9 @@
+2021-02-08  Shahab Vahedi  <shahab@synopsys.com>
+
+	PR tdep/27369
+	* arc-linux-tdep.c (handle_atomic_sequence): New.
+	(arc_linux_software_single_step): Call handle_atomic_sequence().
+
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-tui.c (gdbpy_tui_window) <is_valid>: New member

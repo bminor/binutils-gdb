@@ -332,6 +332,78 @@ arc_linux_sw_breakpoint_from_kind (struct gdbarch *gdbarch,
 	  : arc_linux_trap_s_le);
 }
 
+/* Check for an atomic sequence of instructions beginning with an
+   LLOCK instruction and ending with a SCOND instruction.
+
+   These patterns are hand coded in libc's (glibc and uclibc). Take
+   a look at [1] for instance:
+
+   main+14: llock   r2,[r0]
+   main+18: brne.nt r2,0,main+30
+   main+22: scond   r3,[r0]
+   main+26: bne     main+14
+   main+30: mov_s   r0,0
+
+   If such a sequence is found, attempt to step over it.
+   A breakpoint is placed at the end of the sequence.
+
+   This function expects the INSN to be a "llock(d)" instruction.
+
+   [1]
+   https://cgit.uclibc-ng.org/cgi/cgit/uclibc-ng.git/tree/libc/ \
+     sysdeps/linux/arc/bits/atomic.h#n46
+   */
+
+static std::vector<CORE_ADDR>
+handle_atomic_sequence (arc_instruction insn, disassemble_info &di)
+{
+  const int atomic_seq_len = 24;    /* Instruction sequence length.  */
+  std::vector<CORE_ADDR> next_pcs;
+
+  /* Sanity check.  */
+  gdb_assert (insn.insn_class == LLOCK);
+
+  /* Data size we are dealing with: LLOCK vs. LLOCKD  */
+  arc_ldst_data_size llock_data_size_mode = insn.data_size_mode;
+  /* Indicator if any conditional branch is found in the sequence.  */
+  bool found_bc = false;
+  /* Becomes true if "LLOCK(D) .. SCOND(D)" sequence is found.  */
+  bool is_pattern_valid = false;
+
+  for (int insn_count = 0; insn_count < atomic_seq_len; ++insn_count)
+    {
+      arc_insn_decode (arc_insn_get_linear_next_pc (insn),
+		       &di, arc_delayed_print_insn, &insn);
+
+      if (insn.insn_class == BRCC)
+        {
+          /* If more than one conditional branch is found, this is not
+             the pattern we are interested in.  */
+          if (found_bc)
+	    break;
+	  found_bc = true;
+	  continue;
+        }
+
+      /* This is almost a happy ending.  */
+      if (insn.insn_class == SCOND)
+        {
+	  /* SCOND should match the LLOCK's data size.  */
+	  if (insn.data_size_mode == llock_data_size_mode)
+	    is_pattern_valid = true;
+	  break;
+        }
+    }
+
+  if (is_pattern_valid)
+    {
+      /* Get next instruction after scond(d).  There is no limm.  */
+      next_pcs.push_back (insn.address + insn.length);
+    }
+
+  return next_pcs;
+}
+
 /* Implement the "software_single_step" gdbarch method.  */
 
 static std::vector<CORE_ADDR>
@@ -345,8 +417,11 @@ arc_linux_software_single_step (struct regcache *regcache)
   struct arc_instruction curr_insn;
   arc_insn_decode (regcache_read_pc (regcache), &di, arc_delayed_print_insn,
 		   &curr_insn);
-  CORE_ADDR next_pc = arc_insn_get_linear_next_pc (curr_insn);
 
+  if (curr_insn.insn_class == LLOCK)
+    return handle_atomic_sequence (curr_insn, di);
+
+  CORE_ADDR next_pc = arc_insn_get_linear_next_pc (curr_insn);
   std::vector<CORE_ADDR> next_pcs;
 
   /* For instructions with delay slots, the fall thru is not the
