@@ -1,3 +1,34 @@
+2019-10-31  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/array_bounds.exp: Drop superfluous 3rd argument to gdb_test.
+	* gdb.ada/array_subscript_addr.exp: Same.
+	* gdb.ada/arrayidx.exp: Same.
+	* gdb.ada/arrayparam.exp: Same.
+	* gdb.ada/arrayptr.exp: Same.
+	* gdb.ada/boolean_expr.exp: Same.
+	* gdb.ada/call_pn.exp: Same.
+	* gdb.ada/complete.exp: Same.
+	* gdb.ada/fixed_cmp.exp: Same.
+	* gdb.ada/fun_addr.exp: Same.
+	* gdb.ada/funcall_param.exp: Same.
+	* gdb.ada/interface.exp: Same.
+	* gdb.ada/mod_from_name.exp: Same.
+	* gdb.ada/null_array.exp: Same.
+	* gdb.ada/packed_array.exp: Same.
+	* gdb.ada/packed_tagged.exp: Same.
+	* gdb.ada/print_chars.exp: Same.
+	* gdb.ada/print_pc.exp: Same.
+	* gdb.ada/ptype_arith_binop.exp: Same.
+	* gdb.ada/ptype_field.exp: Same.
+	* gdb.ada/ptype_tagged_param.exp: Same.
+	* gdb.ada/rec_return.exp: Same.
+	* gdb.ada/ref_tick_size.exp: Same.
+	* gdb.ada/str_ref_cmp.exp: Same.
+	* gdb.ada/taft_type.exp: Same.
+	* gdb.ada/tagged.exp: Same.
+	* gdb.ada/type_coercion.exp: Same.
+	* gdb.ada/uninitialized_vars.exp: Same.
+
 2019-10-30  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test_multiple): Handle -early pattern flag.

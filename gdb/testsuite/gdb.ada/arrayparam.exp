@@ -30,8 +30,7 @@ runto "foo.adb:$bp_location"
 # works without problem.
 
 gdb_test "print call_me (\"bonjour\")" \
-         "= void" \
-         "print call_me (\"bonjour\")"
+         "= void"
 
 # Verify that the array was passed properly by checking the global
 # variables that Call_Me sets as side-effects.  Use the package name to avoid

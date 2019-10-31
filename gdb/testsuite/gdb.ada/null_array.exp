@@ -36,13 +36,10 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     setup_xfail *-*-* 
 }
 gdb_test "print my_table" \
-         "= \\(\\)" \
-         "print my_table"
+         "= \\(\\)"
 
 gdb_test "ptype my_table" \
-         "type = array \\(10 \\.\\. 1\\) of integer" \
-         "ptype my_table"
+         "type = array \\(10 \\.\\. 1\\) of integer"
 
 gdb_test "print my_matrix" \
-         "= \\(m => \\((\"\", ){9}\"\"\\)\\)" \
-         "print my_matrix"
+         "= \\(m => \\((\"\", ){9}\"\"\\)\\)"

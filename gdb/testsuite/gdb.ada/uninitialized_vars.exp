@@ -33,5 +33,4 @@ runto "parse.adb:$bp_location"
 
 # Check that printing uninitialized variables does not crash the debugger.
 gdb_test "info locals" \
-         ".*" \
-         "info locals"
+         ".*"

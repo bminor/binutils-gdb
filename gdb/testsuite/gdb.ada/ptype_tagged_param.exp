@@ -31,6 +31,4 @@ set eol "\[\r\n\]+"
 set sp "\[ \t\]*"
 
 gdb_test "ptype s" \
-         "type = <ref> new pck.shape with record${eol}${sp}r: integer;${eol}end record" \
-         "ptype s"
-
+         "type = <ref> new pck.shape with record${eol}${sp}r: integer;${eol}end record"

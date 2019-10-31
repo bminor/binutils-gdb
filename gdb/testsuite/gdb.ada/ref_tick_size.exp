@@ -32,6 +32,4 @@ runto "p.adb:$bp_location"
 # the size of d1.
 
 gdb_test "print d1'size = d2'size" \
-         "= true" \
-         "print d1'size = d2'size"
-
+         "= true"

@@ -21,11 +21,7 @@ gdb_test_no_output "set lang ada" \
          "set lang ada"
 
 gdb_test "ptype 3 * 2.0" \
-         "= <\[0-9\]+-byte float>" \
-         "ptype 3 * 2.0"
+         "= <\[0-9\]+-byte float>"
 
 gdb_test "ptype 3 / 2.0" \
-         "= <\[0-9\]+-byte float>" \
-         "ptype 3 / 2.0"
-
-
+         "= <\[0-9\]+-byte float>"

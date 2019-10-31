@@ -28,10 +28,7 @@ gdb_test_no_output "set lang ada" \
          "changing the language to ada"
 
 gdb_test "print 1 = 2" \
-         "= false" \
-         "print 1 = 2"
+         "= false"
 
 gdb_test "print 3 = 3" \
-         "= true" \
-         "print 3 = 3"
-
+         "= true"

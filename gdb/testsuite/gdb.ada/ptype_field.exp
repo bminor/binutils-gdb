@@ -30,19 +30,13 @@ gdb_test "ptype circle" \
          [multi_line "type = record" \
                      "    pos: pck\\.position;" \
                      "    radius: integer;" \
-                     "end record" ] \
-         "ptype circle"
+                     "end record" ]
 
 gdb_test "ptype circle.pos" \
          [multi_line "type = record" \
                      "    x: integer;" \
                      "    y: integer;" \
-                     "end record" ] \
-         "ptype circle.pos"
+                     "end record" ]
 
 gdb_test "ptype circle.pos.x" \
-         "type = <\[0-9\]+-byte integer>" \
-         "ptype circle.pos.x"
-
-
-
+         "type = <\[0-9\]+-byte integer>"

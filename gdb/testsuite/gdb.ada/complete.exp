@@ -33,8 +33,7 @@ set eol "\[\r\n\]*"
 
 proc test_gdb_complete { expr expected_output } {
     gdb_test "complete p $expr" \
-             "$expected_output" \
-             "complete p $expr"
+             "$expected_output"
 }
 
 # A convenience function that verifies that the "complete EXPR" command

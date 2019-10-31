@@ -30,6 +30,4 @@ if ![runto "foo.adb:$bp_location" ] then {
 }
 
 gdb_test "print bar" \
-         "= \\(x => 42, s => \"ABCDEFGH\"\\)" \
-         "print bar"
-
+         "= \\(x => 42, s => \"ABCDEFGH\"\\)"
