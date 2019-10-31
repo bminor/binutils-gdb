@@ -1,5 +1,9 @@
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
+	* config.in: Regenerate.
+
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
 	* configure: Regenerate.
 	* configure.ac: Check for strerror_r.
 	* gdbsupport/common-utils.h (safe_strerror): Change return value
