@@ -1339,10 +1339,6 @@ struct dwarf_block
     const gdb_byte *data;
   };
 
-#ifndef ATTR_ALLOC_CHUNK
-#define ATTR_ALLOC_CHUNK 4
-#endif
-
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
    but this would require a corresponding change in unpack_field_as_long
    and friends.  */
@@ -18559,8 +18555,7 @@ abbrev_table_read_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form;
-  struct attr_abbrev *cur_attrs;
-  unsigned int allocated_attrs;
+  std::vector<struct attr_abbrev> cur_attrs;
 
   abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
 
@@ -18569,12 +18564,10 @@ abbrev_table_read_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
   abbrev_ptr += bytes_read;
 
-  allocated_attrs = ATTR_ALLOC_CHUNK;
-  cur_attrs = XNEWVEC (struct attr_abbrev, allocated_attrs);
-
   /* Loop until we reach an abbrev number of 0.  */
   while (abbrev_number)
     {
+      cur_attrs.clear ();
       cur_abbrev = abbrev_table->alloc_abbrev ();
 
       /* read in abbrev header */
@@ -18609,25 +18602,18 @@ abbrev_table_read_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  if (abbrev_name == 0)
 	    break;
 
-	  if (cur_abbrev->num_attrs == allocated_attrs)
-	    {
-	      allocated_attrs += ATTR_ALLOC_CHUNK;
-	      cur_attrs
-		= XRESIZEVEC (struct attr_abbrev, cur_attrs, allocated_attrs);
-	    }
-
-	  cur_attrs[cur_abbrev->num_attrs].name
-	    = (enum dwarf_attribute) abbrev_name;
-	  cur_attrs[cur_abbrev->num_attrs].form
-	    = (enum dwarf_form) abbrev_form;
-	  cur_attrs[cur_abbrev->num_attrs].implicit_const = implicit_const;
+	  cur_attrs.emplace_back ();
+	  struct attr_abbrev &cur_attr = cur_attrs.back ();
+	  cur_attr.name = (enum dwarf_attribute) abbrev_name;
+	  cur_attr.form = (enum dwarf_form) abbrev_form;
+	  cur_attr.implicit_const = implicit_const;
 	  ++cur_abbrev->num_attrs;
 	}
 
       cur_abbrev->attrs =
 	XOBNEWVEC (&abbrev_table->abbrev_obstack, struct attr_abbrev,
 		   cur_abbrev->num_attrs);
-      memcpy (cur_abbrev->attrs, cur_attrs,
+      memcpy (cur_abbrev->attrs, cur_attrs.data (),
 	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
 
       abbrev_table->add_abbrev (abbrev_number, cur_abbrev);
@@ -18647,7 +18633,6 @@ abbrev_table_read_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	break;
     }
 
-  xfree (cur_attrs);
   return abbrev_table;
 }
 

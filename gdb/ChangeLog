@@ -1,5 +1,10 @@
 2020-01-08  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2read.c (abbrev_table_read_table): Use std::vector.
+	(ATTR_ALLOC_CHUNK): Remove.
+
+2020-01-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (fixup_go_packaging): Use unique_xmalloc_ptr.
 
 2020-01-08  Tom Tromey  <tromey@adacore.com>
