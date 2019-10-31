@@ -1,3 +1,8 @@
+2019-11-01  Christian Biesinger  <cbiesinger@google.com>
+
+	* configure: Regenerate.
+	* configure.ac: Remove check for strerror_r.
+
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
 	* config.in: Regenerate.
