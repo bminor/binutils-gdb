@@ -1,5 +1,9 @@
 2019-11-01  Tom Tromey  <tromey@adacore.com>
 
+	* utils.c (print_sys_errmsg): Simplify.
+
+2019-11-01  Tom Tromey  <tromey@adacore.com>
+
 	* gdbsupport/mingw-strerror.c (safe_strerror): Constify result.
 
 2019-11-01  Christian Biesinger  <cbiesinger@google.com>

@@ -629,15 +629,10 @@ void
 print_sys_errmsg (const char *string, int errcode)
 {
   const char *err = safe_strerror (errcode);
-  char *combined = (char *) alloca (strlen (err) + strlen (string) + 3);
-  strcpy (combined, string);
-  strcat (combined, ": ");
-  strcat (combined, err);
-
   /* We want anything which was printed on stdout to come out first, before
      this message.  */
   gdb_flush (gdb_stdout);
-  fprintf_unfiltered (gdb_stderr, "%s.\n", combined);
+  fprintf_unfiltered (gdb_stderr, "%s: %s.\n", string, err);
 }
 
 /* Control C eventually causes this to be called, at a convenient time.  */
