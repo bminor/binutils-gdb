@@ -134,5 +134,4 @@ if ![runto_main] {
 # Note we use a name that is very different from the linkage name, in
 # order to not set the breakpoint via minsyms.
 gdb_test "break someothername" \
-    "Breakpoint.*at.*" \
-    "break someothername"
+    "Breakpoint.*at.*"

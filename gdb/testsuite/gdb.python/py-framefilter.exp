@@ -85,8 +85,7 @@ gdb_continue_to_breakpoint "Inner test breakpoint"
 
 # Test multiple local blocks.
 gdb_test "bt full no-filters" \
-    ".*#0.*end_func.*h = 9.*f = 42.*g = 19.*bar = $hex \"Inside block x2\".*d = 15.*e = 14.*foo = $hex \"Inside block\".*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*" \
-    "bt full no-filters"
+    ".*#0.*end_func.*h = 9.*f = 42.*g = 19.*bar = $hex \"Inside block x2\".*d = 15.*e = 14.*foo = $hex \"Inside block\".*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*"
 gdb_test "bt full" \
     ".*#0.*cnuf_dne.*h = 9.*f = 42.*g = 19.*bar = $hex \"Inside block x2\".*d = 15.*e = 14.*foo = $hex \"Inside block\".*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*" \
     "bt full with filters"
@@ -145,8 +144,7 @@ gdb_test "disable frame-filter global NoSuchFilter" \
 
 # Test no-filters
 gdb_test "bt no-filters" \
-    ".*#0.*end_func.*#22.*in func1.*#27.*in main \\(\\).*" \
-    "bt no-filters"
+    ".*#0.*end_func.*#22.*in func1.*#27.*in main \\(\\).*"
 
 # Test reverse
 gdb_test "bt" \

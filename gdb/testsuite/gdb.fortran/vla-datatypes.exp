@@ -55,16 +55,11 @@ gdb_test "print l" " = \\.TRUE\\." "charactervla allocated"
 
 gdb_breakpoint [gdb_get_line_number "vlas-initialized"]
 gdb_continue_to_breakpoint "vlas-initialized"
-gdb_test "ptype intvla" "type = $int, allocatable \\\(11,22,33\\\)" \
-  "ptype intvla"
-gdb_test "ptype realvla" "type = $real, allocatable \\\(11,22,33\\\)" \
-  "ptype realvla"
-gdb_test "ptype complexvla" "type = $complex, allocatable \\\(11,22,33\\\)" \
-  "ptype complexvla"
-gdb_test "ptype logicalvla" "type = $logical, allocatable \\\(11,22,33\\\)" \
-  "ptype logicalvla"
-gdb_test "ptype charactervla" "type = character\\\*1, allocatable \\\(11,22,33\\\)" \
-  "ptype charactervla"
+gdb_test "ptype intvla" "type = $int, allocatable \\\(11,22,33\\\)"
+gdb_test "ptype realvla" "type = $real, allocatable \\\(11,22,33\\\)"
+gdb_test "ptype complexvla" "type = $complex, allocatable \\\(11,22,33\\\)"
+gdb_test "ptype logicalvla" "type = $logical, allocatable \\\(11,22,33\\\)"
+gdb_test "ptype charactervla" "type = character\\\*1, allocatable \\\(11,22,33\\\)"
 
 gdb_test "print intvla(5,5,5)" " = 1" "print intvla(5,5,5) (1st)"
 gdb_test "print realvla(5,5,5)" " = 3.14\\d+" \

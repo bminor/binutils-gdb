@@ -148,12 +148,12 @@ gdb_test "print \$myvar" \
   "print \$myvar set to vla1"
 
 gdb_test "next" "\\d+.*vla1\\(1, 3, 8\\) = 1001" "next (2)"
-gdb_test "print \$myvar(3,6,9)" " = 1311" "print \$myvar(3,6,9)"
+gdb_test "print \$myvar(3,6,9)" " = 1311"
 
 gdb_breakpoint [gdb_get_line_number "pvla-associated"]
 gdb_continue_to_breakpoint "pvla-associated, second time"
 gdb_test_no_output "set \$mypvar = pvla" "set \$mypvar = pvla"
-gdb_test "print \$mypvar(1,3,8)" " = 1001" "print \$mypvar(1,3,8)"
+gdb_test "print \$mypvar(1,3,8)" " = 1001"
 
 # deallocate pointer and make sure user defined variable still has the
 # right value.

@@ -159,8 +159,7 @@ gdb_test_no_output "disable xmethod progspace E_methods;method_int" \
 gdb_test "info xmethod progspace E_methods;method_int" ".* \\\[disabled\\\]" \
   "info xmethod xmethods E_methods;method_int"
 gdb_test_no_output "disable xmethod progspace G_methods" "disable G_methods 2"
-gdb_test "info xmethod progspace" ".*G_methods \\\[disabled\\\].*" \
-  "info xmethod progspace"
+gdb_test "info xmethod progspace" ".*G_methods \\\[disabled\\\].*"
 
 # PR 18285
 # First make sure both are enabled.

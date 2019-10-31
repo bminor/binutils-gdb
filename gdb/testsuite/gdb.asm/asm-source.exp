@@ -421,8 +421,7 @@ gdb_test_multiple "info sources" "info sources" {
 
 # Try 'info line'
 gdb_test "info line" \
-	"Line $line_call_foo3_again of.*asmsrc2.s.*starts at.*<\\.?foo2+.*> and ends at.*<\\.?foo2+.*>." \
-	"info line"
+	"Line $line_call_foo3_again of.*asmsrc2.s.*starts at.*<\\.?foo2+.*> and ends at.*<\\.?foo2+.*>."
 
 # Try 'nexting' over next call to foo3
 gdb_test "next" "$line_foo2_leave\[ \t\]+gdbasm_leave" "next over foo3"

@@ -257,8 +257,7 @@ proc do_test {suffix} {
 	# This is intentional since that behavior is one of the bugs that
 	# this test case tests for.
 	gdb_test "break foo" \
-	    "Breakpoint.*at.* file .*$srcfile, line \\d+\\." \
-	    "break foo"
+	    "Breakpoint.*at.* file .*$srcfile, line \\d+\\."
 
 	# Continue to foo.  Allow execution to stop either on the prologue
 	# or on the call to bar since either behavior is acceptable though
@@ -323,8 +322,7 @@ proc do_test {suffix} {
     # This more permissive RE for "break foo" will allow a breakpoint on
     # multiple locations to PASS.  */
     gdb_test "break foo" \
-	"Breakpoint.*at.*" \
-	"break foo"
+	"Breakpoint.*at.*"
 
     gdb_test "break baz" \
 	"Breakpoint.*at.* file .*$srcfile, line \\d+\\."

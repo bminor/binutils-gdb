@@ -94,7 +94,7 @@ gdb_py_test_multiple "indented multi-line python command" \
 
 gdb_test "source $remote_source2_py" "yes" "source source2.py"
 
-gdb_test "source -s source2.py" "yes" "source -s source2.py"
+gdb_test "source -s source2.py" "yes"
 
 set remote_source2_symlink_notpy \
     [gdb_remote_download host ${srcdir}/${subdir}/source2.py \

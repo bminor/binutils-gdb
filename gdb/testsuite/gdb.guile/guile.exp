@@ -68,7 +68,7 @@ gdb_test_multiline "show guile command" \
 
 gdb_test "source $srcdir/$subdir/source2.scm" "yes" "source source2.scm"
 
-gdb_test "source -s source2.scm" "yes" "source -s source2.scm"
+gdb_test "source -s source2.scm" "yes"
 
 gdb_test "guile (print (current-objfile))" "= #f"
 gdb_test "guile (print (objfiles))" "= \\(\\)"

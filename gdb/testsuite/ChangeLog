@@ -1,5 +1,41 @@
 2019-10-31  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.arch/amd64-disp-step-avx.exp: Drop superfluous 3rd argument to
+	gdb_test.
+	* gdb.arch/amd64-disp-step.exp: Same.
+	* gdb.asm/asm-source.exp: Same.
+	* gdb.btrace/buffer-size.exp: Same.
+	* gdb.btrace/cpu.exp: Same.
+	* gdb.btrace/enable.exp: Same.
+	* gdb.dwarf2/count.exp: Same.
+	* gdb.dwarf2/dw2-ranges-func.exp: Same.
+	* gdb.dwarf2/dw2-ranges-psym.exp: Same.
+	* gdb.fortran/vla-datatypes.exp: Same.
+	* gdb.fortran/vla-history.exp: Same.
+	* gdb.fortran/vla-ptype.exp: Same.
+	* gdb.fortran/vla-value.exp: Same.
+	* gdb.fortran/whatis_type.exp: Same.
+	* gdb.guile/guile.exp: Same.
+	* gdb.multi/tids.exp: Same.
+	* gdb.python/py-finish-breakpoint.exp: Same.
+	* gdb.python/py-framefilter.exp: Same.
+	* gdb.python/py-pp-registration.exp: Same.
+	* gdb.python/py-xmethods.exp: Same.
+	* gdb.python/python.exp: Same.
+	* gdb.server/connect-with-no-symbol-file.exp: Same.
+	* gdb.server/no-thread-db.exp: Same.
+	* gdb.server/run-without-local-binary.exp: Same.
+	* gdb.stabs/weird.exp: Same.
+	* gdb.threads/attach-many-short-lived-threads.exp: Same.
+	* gdb.threads/thread-find.exp: Same.
+	* gdb.threads/tls-shared.exp: Same.
+	* gdb.threads/tls.exp: Same.
+	* gdb.threads/wp-replication.exp: Same.
+	* gdb.trace/ax.exp: Same.
+	* lib/gdb.exp (gdb_test_exact, help_test_raw): Same.
+
+2019-10-31  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/array_bounds.exp: Drop superfluous 3rd argument to gdb_test.
 	* gdb.ada/array_subscript_addr.exp: Same.
 	* gdb.ada/arrayidx.exp: Same.

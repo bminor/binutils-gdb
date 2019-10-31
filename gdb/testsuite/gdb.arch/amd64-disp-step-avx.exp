@@ -78,11 +78,9 @@ proc disp_step_func { func } {
     set test_end_label "${func}_end"
 
     gdb_test "break ${test_start_label}" \
-	"Breakpoint.*at.* file .*$srcfile, line.*" \
-	"break ${test_start_label}"
+	"Breakpoint.*at.* file .*$srcfile, line.*"
     gdb_test "break ${test_end_label}" \
-	"Breakpoint.*at.* file .*$srcfile, line.*" \
-	"break ${test_end_label}"
+	"Breakpoint.*at.* file .*$srcfile, line.*"
 
     gdb_test "continue" \
 	"Continuing.*Breakpoint.*, ${test_start_label} ().*" \

@@ -42,11 +42,9 @@ proc test_junk { arg junk current } {
 gdb_test "show record btrace cpu" "btrace cpu is 'auto'\." "default cpu"
 
 gdb_test "set record" \
-    "\"set record\" must be followed by an appropriate subcommand.*" \
-    "set record"
+    "\"set record\" must be followed by an appropriate subcommand.*"
 gdb_test "set record btrace" \
-    "\"set record btrace\" must be followed by an appropriate subcommand.*" \
-    "set record btrace"
+    "\"set record btrace\" must be followed by an appropriate subcommand.*"
 test_bad "" "auto"
 
 test_good "intel: 0/0"

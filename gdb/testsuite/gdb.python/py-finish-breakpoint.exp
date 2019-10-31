@@ -255,5 +255,5 @@ if ![runto "test_exec_exit"] then {
 }     
 
 gdb_test "python SimpleFinishBreakpoint(gdb.newest_frame())" "SimpleFinishBreakpoint init" "set FinishBP after the exec"
-gdb_test "catch exec" "Catchpoint.*\(exec\).*" "catch exec"
+gdb_test "catch exec" "Catchpoint.*\(exec\).*"
 gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" "catch out of scope after exec"

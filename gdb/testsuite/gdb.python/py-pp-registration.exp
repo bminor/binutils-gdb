@@ -58,10 +58,8 @@ proc prepare_test { } {
 proc test_printers { s_prefix } {
     global hex
 
-    gdb_test "print flt" " = x=<42> y=<43>" \
-	"print flt"
-    gdb_test "print s" " = ${s_prefix} a=<1> b=<$hex>" \
-	"print s"
+    gdb_test "print flt" " = x=<42> y=<43>"
+    gdb_test "print s" " = ${s_prefix} a=<1> b=<$hex>"
 }
 
 # Test registration with verbose off.

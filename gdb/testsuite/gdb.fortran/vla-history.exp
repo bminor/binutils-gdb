@@ -39,7 +39,7 @@ with_timeout_factor 2 {
 }
 
 # Try to access history values for full vla prints.
-gdb_test "print \$1" " = <not allocated>" "print \$1"
+gdb_test "print \$1" " = <not allocated>"
 with_timeout_factor 2 {
     gdb_test "print \$2" \
       " = \\( *\\( *\\( *1311, *1311, *1311,\[()1311, .\]*\\)" "print \$4"
@@ -47,9 +47,9 @@ with_timeout_factor 2 {
 
 gdb_breakpoint [gdb_get_line_number "vla2-filled"]
 gdb_continue_to_breakpoint "vla2-filled"
-gdb_test "print vla2(1,43,20)" " = 1311" "print vla2(1,43,20)"
-gdb_test "print vla1(1,3,8)" " = 1001" "print vla2(1,3,8)"
+gdb_test "print vla2(1,43,20)" " = 1311"
+gdb_test "print vla1(1,3,8)" " = 1001"
 
 # Try to access history values for vla values.
-gdb_test "print \$5" " = 1311" "print \$5"
-gdb_test "print \$6" " = 1001" "print \$6"
+gdb_test "print \$5" " = 1311"
+gdb_test "print \$6" " = 1001"

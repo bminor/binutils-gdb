@@ -39,7 +39,7 @@ save_vars { GDBFLAGS } {
 
     # Make sure we're disconnected, in case we're testing with an
     # extended-remote board, therefore already connected.
-    gdb_test "disconnect" ".*" "disconnect"
+    gdb_test "disconnect" ".*"
 
     # Let's start gdbserver in extended-remote mode now.  We cannot
     # use gdbserver_start_extended here because it starts gdbserver,

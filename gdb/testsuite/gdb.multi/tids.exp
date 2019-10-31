@@ -52,10 +52,12 @@ proc thread_apply {tid_list exp_tid_list {message ""}} {
     }
 
     set cmd "thread apply $tid_list"
-    if {$message == ""} {
-	set message $cmd
+    if {$message != ""} {
+	gdb_test "$cmd p 1234" $r $message
+	return
     }
-    gdb_test "$cmd p 1234" $r $message
+
+    gdb_test "$cmd p 1234" $r
 }
 
 # Issue "info threads TID_LIST" and expect EXP_TID_LIST (a list of
@@ -66,10 +68,11 @@ proc info_threads {tid_list exp_tid_list {message ""}} {
     set r [join $expected " ${any}\r\n${any} "]
     set r "${any} $r ${any}"
     set cmd "info threads $tid_list"
-    if {$message == ""} {
-	set message $cmd
+    if {$message != ""} {
+	gdb_test $cmd $r $message
+	return
     }
-    gdb_test $cmd $r $message
+    gdb_test $cmd $r
 }
 
 # Issue "info threads TID_LIST" and expect INFO_THR output.  Then
@@ -96,8 +99,7 @@ proc thr_apply_info_thr_error {tid_list exp_error_apply {exp_error_info ""}} {
 	$exp_error_info
 
     gdb_test "thread apply $tid_list" \
-	$exp_error_apply \
-	"thread apply $tid_list"
+	$exp_error_apply
 }
 
 # Issue both "info threads TID_LIST" and "thread apply TID_LIST" and

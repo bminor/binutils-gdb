@@ -55,8 +55,7 @@ gdb_breakpoint [gdb_get_line_number "vla1-filled"]
 gdb_continue_to_breakpoint "vla1-filled"
 gdb_test "ptype vla1" "type = $real, allocatable \\\(10,10,10\\\)" \
   "ptype vla1 filled"
-gdb_test "ptype vla1(3, 6, 9)" "type = $real" \
-  "ptype vla1(3, 6, 9)"
+gdb_test "ptype vla1(3, 6, 9)" "type = $real"
 
 gdb_breakpoint [gdb_get_line_number "vla2-filled"]
 gdb_continue_to_breakpoint "vla2-filled"
@@ -69,8 +68,7 @@ gdb_breakpoint [gdb_get_line_number "pvla-associated"]
 gdb_continue_to_breakpoint "pvla-associated"
 gdb_test "ptype pvla" "type = $real \\\(10,10,10\\\)" \
   "ptype pvla associated"
-gdb_test "ptype pvla(3, 6, 9)" "type = $real" \
-  "ptype pvla(3, 6, 9)"
+gdb_test "ptype pvla(3, 6, 9)" "type = $real"
 
 gdb_breakpoint [gdb_get_line_number "pvla-re-associated"]
 gdb_continue_to_breakpoint "pvla-re-associated"

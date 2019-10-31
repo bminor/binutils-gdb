@@ -43,4 +43,4 @@ gdb_test "info record" [multi_line \
   "Recording format: \[^\\\r\\\n\]*" \
   "Buffer size: 4kB\." \
   "Recorded 0 instructions in 0 functions \\\(0 gaps\\\) for \[^\\\r\\\n\]*" \
-  ] "info record"
+  ]

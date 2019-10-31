@@ -276,9 +276,7 @@ gdb_test_multiple "info threads 3-3" "info threads 3-3" {
 # Test bad input
 
 gdb_test "info thread foo" \
-    "Invalid thread ID: foo" \
-    "info thread foo"
+    "Invalid thread ID: foo"
 
 gdb_test "info thread foo -1" \
-    "Invalid thread ID: foo -1" \
-    "info thread foo -1"
+    "Invalid thread ID: foo -1"

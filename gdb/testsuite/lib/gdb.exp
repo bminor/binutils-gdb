@@ -1401,11 +1401,10 @@ proc gdb_test_exact { args } {
     regsub -all "\n" $pattern "\r\n" pattern
     if [llength $args]==3 then {
 	set message [lindex $args 2]
-    } else {
-	set message $command
+	return [gdb_test $command $pattern $message]
     }
 
-    return [gdb_test $command $pattern $message]
+    return [gdb_test $command $pattern]
 }
 
 # Wrapper around gdb_test_multiple that looks for a list of expected
@@ -5783,13 +5782,13 @@ proc gdb_gnu_strip_debug { dest args } {
 # If third argument TESTNAME is not empty, it's used as the name of the
 # test to be printed on pass/fail.
 proc help_test_raw { gdb_command expected_lines {testname {}} } {
-    if {$testname == {}} {
-	set message $gdb_command
-    } else {
-	set message $testname
-    }
     set expected_output [join $expected_lines ""]
-    gdb_test "${gdb_command}" "${expected_output}" $message
+    if {$testname != {}} {
+	gdb_test "${gdb_command}" "${expected_output}" $testname
+	return
+    }
+
+    gdb_test "${gdb_command}" "${expected_output}"
 }
 
 # A regexp that matches the end of help CLASS|PREFIX_COMMAND

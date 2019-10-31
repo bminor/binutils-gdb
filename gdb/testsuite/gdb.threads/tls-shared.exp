@@ -61,6 +61,4 @@ gdb_test "continue" \
         "continue to break"
 # This is more of a gcc/glibc test, really. 
 #
-gdb_test "print result" "3" "print result"
-
-
+gdb_test "print result" "3"

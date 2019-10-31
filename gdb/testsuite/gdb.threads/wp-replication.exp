@@ -114,8 +114,7 @@ for { set i 0 } { $i < $NR_THREADS } { incr i } {
     # in the background for a specific thread.
     if {$i < $hwatch_count} {
       gdb_test "watch watched_data\[$i\]" \
-	"Hardware watchpoint .*" \
-	"watch watched_data\[$i\]"
+	"Hardware watchpoint .*"
     } else {
       verbose -log "Not setting watchpoint for watched_data\[$i\]\n"
     }

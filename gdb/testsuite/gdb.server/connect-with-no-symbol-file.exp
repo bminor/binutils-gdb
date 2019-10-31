@@ -50,7 +50,7 @@ proc connect_no_symbol_file { sysroot action } {
 
 	# Make sure we're disconnected, in case we're testing with an
 	# extended-remote board, therefore already connected.
-	gdb_test "disconnect" ".*" "disconnect"
+	gdb_test "disconnect" ".*"
 
 	# Discard any symbol files that we have opened.
 	gdb_test "file" ".*" "discard symbol table" \
