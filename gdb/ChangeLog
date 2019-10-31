@@ -1,3 +1,11 @@
+2019-10-31  Luis Machado  <luis.machado@linaro.org>
+
+	* arm-tdep.c (arm_exidx_data_key): Use bfd_key instead of
+	objfile_key.
+	(arm_exidx_new_objfile): Adjust to use objfile->obfd instead of
+	objfile to fetch per-bfd data.
+	(arm_find_exidx_entry): Likewise.
+
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/agent.c (debug_agent): Change type to bool.

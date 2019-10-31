@@ -1999,7 +1999,8 @@ struct arm_exidx_data
   std::vector<std::vector<arm_exidx_entry>> section_maps;
 };
 
-static const struct objfile_key<arm_exidx_data> arm_exidx_data_key;
+/* Per-BFD key to store exception handling information.  */
+static const struct bfd_key<arm_exidx_data> arm_exidx_data_key;
 
 static struct obj_section *
 arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
@@ -2043,7 +2044,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   LONGEST i;
 
   /* If we've already touched this file, do nothing.  */
-  if (!objfile || arm_exidx_data_key.get (objfile) != NULL)
+  if (!objfile || arm_exidx_data_key.get (objfile->obfd) != NULL)
     return;
 
   /* Read contents of exception table and index.  */
@@ -2074,7 +2075,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
     }
 
   /* Allocate exception table data structure.  */
-  data = arm_exidx_data_key.emplace (objfile);
+  data = arm_exidx_data_key.emplace (objfile->obfd);
   data->section_maps.resize (objfile->obfd->section_count);
 
   /* Fill in exception table.  */
@@ -2246,7 +2247,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
       struct arm_exidx_data *data;
       struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
 
-      data = arm_exidx_data_key.get (sec->objfile);
+      data = arm_exidx_data_key.get (sec->objfile->obfd);
       if (data != NULL)
 	{
 	  std::vector<arm_exidx_entry> &map
