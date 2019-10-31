@@ -28,7 +28,7 @@
    unfortunately this includes all socket-related error codes.
    This replacement tries to find a system-provided error message.  */
 
-char *
+const char *
 safe_strerror (int errnum)
 {
   static char *buffer;
