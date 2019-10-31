@@ -108,9 +108,9 @@ std::string extract_string_maybe_quoted (const char **arg);
 
 /* The strerror() function can return NULL for errno values that are
    out of range.  Provide a "safe" version that always returns a
-   printable string.  */
+   printable string.  This version is also thread-safe.  */
 
-extern char *safe_strerror (int);
+extern const char *safe_strerror (int);
 
 /* Return true if the start of STRING matches PATTERN, false otherwise.  */
 

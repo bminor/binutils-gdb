@@ -21,15 +21,25 @@
 
 /* Implementation of safe_strerror as defined in common-utils.h.  */
 
-char *
+const char *
 safe_strerror (int errnum)
 {
-  char *msg;
+  static thread_local char buf[1024];
 
+  char *msg = nullptr;
+#ifdef HAVE_STRERROR_R
+#  if !__GLIBC__ || ((_POSIX_C_SOURCE >= 200112L) && !  _GNU_SOURCE)
+  /* Glibc has two different, incompatible versions of strerror_r.  */
+  if (strerror_r (errnum, buf, sizeof (buf)) == 0)
+    msg = buf;
+#  else
+  msg = strerror_r (errnum, buf, sizeof (buf));
+#  endif
+#else
   msg = strerror (errnum);
-  if (msg == NULL)
+#endif
+  if (msg == nullptr)
     {
-      static char buf[32];
 
       xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
       msg = buf;

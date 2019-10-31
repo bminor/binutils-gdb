@@ -582,9 +582,7 @@ add_internal_problem_command (struct internal_problem *problem)
 static std::string
 perror_string (const char *prefix)
 {
-  char *err;
-
-  err = safe_strerror (errno);
+  const char *err = safe_strerror (errno);
   return std::string (prefix) + ": " + err;
 }
 
@@ -630,11 +628,8 @@ perror_warning_with_name (const char *string)
 void
 print_sys_errmsg (const char *string, int errcode)
 {
-  char *err;
-  char *combined;
-
-  err = safe_strerror (errcode);
-  combined = (char *) alloca (strlen (err) + strlen (string) + 3);
+  const char *err = safe_strerror (errcode);
+  char *combined = (char *) alloca (strlen (err) + strlen (string) + 3);
   strcpy (combined, string);
   strcat (combined, ": ");
   strcat (combined, err);

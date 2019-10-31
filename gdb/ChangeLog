@@ -1,3 +1,14 @@
+2019-10-31  Christian Biesinger  <cbiesinger@google.com>
+
+	* configure: Regenerate.
+	* configure.ac: Check for strerror_r.
+	* gdbsupport/common-utils.h (safe_strerror): Change return value
+	to const char * and document that this function is now threadsafe.
+	* gdbsupport/posix-strerror.c (safe_strerror): Make buf
+	thread_local and call strerror_r, if available.
+	* utils.c (perror_string): Update.
+	(print_sys_errmsg): Update.
+
 2019-10-31  Luis Machado  <luis.machado@linaro.org>
 
 	* arm-tdep.c (arm_exidx_data_key): Use bfd_key instead of
