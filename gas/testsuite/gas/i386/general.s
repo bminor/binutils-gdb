@@ -216,5 +216,11 @@
 	movzb	%al,%di
 	movzb	%al,%ecx
 
+.code16gcc
+# Use 16-bit layout by default for fldenv.
+	fldenv	(%eax)
+	fldenvs	(%eax)
+	fldenvl	(%eax)
+
 	# Force a good alignment.
 	.p2align	4,0

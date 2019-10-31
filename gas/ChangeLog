@@ -1,3 +1,8 @@
+2019-10-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/general.s: Add .code16gcc fldenv tests.
+	* testsuite/gas/i386/general.l: Updated.
+
 2019-10-31  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* config/tc-arm.c (selected_ctx_ext_table) New static variable.

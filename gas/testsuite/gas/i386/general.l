@@ -282,5 +282,12 @@
  216 0226 660FB6F8          		movzb	%al,%di
  217 022a 0FB6C8            		movzb	%al,%ecx
  218                       	
- 219                       		# Force a good alignment.
- 220 022d 000000            		.p2align	4,0
+ 219                       	.code16gcc
+ 220                       	# Use 16-bit layout by default for fldenv.
+ 221 022d 67D920            		fldenv	\(%eax\)
+ 222 0230 67D920            		fldenvs	\(%eax\)
+ 223 0233 6766D920          		fldenvl	\(%eax\)
+ 224                       	
+ 225                       		# Force a good alignment.
+ 226 0237 00000000 00000000 		.p2align	4,0
+ 226      00
