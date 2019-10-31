@@ -1039,10 +1039,11 @@ scoped_command_stats::print_time (const char *msg)
   auto millis = ticks % 1000;
 
   std::time_t as_time = system_clock::to_time_t (now);
-  struct tm *tm = localtime (&as_time);
+  struct tm tm;
+  localtime_r (&as_time, &tm);
 
   char out[100];
-  strftime (out, sizeof (out), "%F %H:%M:%S", tm);
+  strftime (out, sizeof (out), "%F %H:%M:%S", &tm);
 
   printf_unfiltered ("%s.%03d - %s\n", out, (int) millis, msg);
 }

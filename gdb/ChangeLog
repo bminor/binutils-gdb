@@ -1,5 +1,12 @@
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* maint.c (scoped_command_stats::print_time): Use localtime_r
+	instead of localtime (provided through gnulib if necessary).
+	* nat/linux-osdata.c (time_from_time_t): Use ctime_r instead
+	of ctime.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* gdbsupport/common-defs.h: Include time.h before pathmax.h to
 	avoid compile errors.
 
