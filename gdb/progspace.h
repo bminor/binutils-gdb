@@ -170,6 +170,8 @@ struct program_space
      list.  */
   void add_objfile (struct objfile *objfile, struct objfile *before);
 
+  /* Remove OBJFILE from the list of objfiles.  */
+  void remove_objfile (struct objfile *objfile);
 
   /* Pointer to next in linked list.  */
   struct program_space *next = NULL;

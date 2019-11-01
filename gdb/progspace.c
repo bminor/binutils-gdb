@@ -175,6 +175,31 @@ program_space::add_objfile (struct objfile *objfile, struct objfile *before)
 
 }
 
+/* See progspace.h.  */
+
+void
+program_space::remove_objfile (struct objfile *objfile)
+{
+  struct objfile **objpp;
+
+  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
+    {
+      if (*objpp == objfile)
+	{
+	  *objpp = (*objpp)->next;
+	  objfile->next = NULL;
+
+	  if (objfile == symfile_object_file)
+	    symfile_object_file = NULL;
+
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  _("remove_objfile: objfile already unlinked"));
+}
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 

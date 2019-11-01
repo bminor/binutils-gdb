@@ -1,5 +1,13 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (struct program_space) <remove_objfile>: Declare.
+	* progspace.c (program_space::remove_objfile): New method.
+	* objfiles.c (unlink_objfile): Remove.
+	(objfile::unlink): Call remove_objfile.
+	(objfile): Don't call unlink_objfile.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (struct program_space) <add_objfile>: Declare
 	method.
 	* progspace.c (program_space::add_objfile): New method.

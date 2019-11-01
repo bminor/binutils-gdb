@@ -456,27 +456,6 @@ separate_debug_iterator::operator++ ()
   return *this;
 }
 
-/* Unlink OBJFILE from the list of known objfiles.  */
-
-static void
-unlink_objfile (struct objfile *objfile)
-{
-  struct objfile **objpp;
-
-  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
-    {
-      if (*objpp == objfile)
-	{
-	  *objpp = (*objpp)->next;
-	  objfile->next = NULL;
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("unlink_objfile: objfile already unlinked"));
-}
-
 /* Add OBJFILE as a separate debug objfile of PARENT.  */
 
 static void
@@ -519,6 +498,7 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
 void
 objfile::unlink ()
 {
+  current_program_space->remove_objfile (this);
   delete this;
 }
 
@@ -608,13 +588,6 @@ objfile::~objfile ()
     gdb_bfd_unref (obfd);
   else
     delete per_bfd;
-
-  /* Remove it from the chain of all objfiles.  */
-
-  unlink_objfile (this);
-
-  if (this == symfile_objfile)
-    symfile_objfile = NULL;
 
   /* Before the symbol table code was redone to make it easier to
      selectively load and remove information particular to a specific
