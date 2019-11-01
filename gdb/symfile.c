@@ -1093,10 +1093,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 
   if (mainline)
     flags |= OBJF_MAINLINE;
-  objfile = objfile::make (abfd, name, flags);
-
-  if (parent)
-    add_separate_debug_objfile (objfile, parent);
+  objfile = objfile::make (abfd, name, flags, parent);
 
   /* We either created a new mapped symbol table, mapped an existing
      symbol table file which has not had initial symbol reading

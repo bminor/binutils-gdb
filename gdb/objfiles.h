@@ -402,10 +402,8 @@ private:
 public:
 
   /* Create an objfile.  */
-  static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_)
-  {
-    return new objfile (bfd_, name_, flags_);
-  }
+  static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_,
+			objfile *parent = nullptr);
 
   ~objfile ();
 
@@ -648,8 +646,6 @@ extern int entry_point_address_query (CORE_ADDR *entry_p);
 extern CORE_ADDR entry_point_address (void);
 
 extern void build_objfile_section_table (struct objfile *);
-
-extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 

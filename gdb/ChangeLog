@@ -1,5 +1,15 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (symbol_file_add_with_addrs): Pass "parent" to
+	objfile::make.
+	* objfiles.h (struct objjfile) <make>: No longer inline.
+	(add_separate_debug_objfile): Don't declare.
+	* objfiles.c (add_separate_debug_objfile): Now static.
+	(objfile::make): Move from objfiles.h.  Call
+	add_separate_debug_objfile.  Add "parent" parameter.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_add_with_addrs): Use objfile::make.
 	* objfiles.h (struct objfile): Make constructor private.
 	<make>: New static method.

@@ -520,7 +520,7 @@ put_objfile_before (struct objfile *objfile, struct objfile *before_this)
 
 /* Add OBJFILE as a separate debug objfile of PARENT.  */
 
-void
+static void
 add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
 {
   gdb_assert (objfile && parent);
@@ -539,6 +539,18 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
   /* Put the separate debug object before the normal one, this is so that
      usage of objfiles_safe will stay safe.  */
   put_objfile_before (objfile, parent);
+}
+
+/* See objfiles.h.  */
+
+objfile *
+objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
+	       objfile *parent)
+{
+  objfile *result = new objfile (bfd_, name_, flags_);
+  if (parent != nullptr)
+    add_separate_debug_objfile (result, parent);
+  return result;
 }
 
 /* Free all separate debug objfile of OBJFILE, but don't free OBJFILE
