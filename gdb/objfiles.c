@@ -371,23 +371,6 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
     }
 
   per_bfd = get_objfile_bfd_data (this, abfd);
-
-  /* Add this file onto the tail of the linked list of other such files.  */
-
-  if (object_files == NULL)
-    object_files = this;
-  else
-    {
-      struct objfile *last_one;
-
-      for (last_one = object_files;
-	   last_one->next;
-	   last_one = last_one->next);
-      last_one->next = this;
-    }
-
-  /* Rebuild section map next time we need it.  */
-  get_objfile_pspace_data (pspace)->new_objfiles_available = 1;
 }
 
 /* Retrieve the gdbarch associated with OBJFILE.  */
@@ -494,30 +477,6 @@ unlink_objfile (struct objfile *objfile)
 		  _("unlink_objfile: objfile already unlinked"));
 }
 
-/* Put one object file before a specified on in the global list.
-   This can be used to make sure an object file is destroyed before
-   another when using objfiles_safe to free all objfiles.  */
-static void
-put_objfile_before (struct objfile *objfile, struct objfile *before_this)
-{
-  struct objfile **objp;
-
-  unlink_objfile (objfile);
-  
-  for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
-    {
-      if (*objp == before_this)
-	{
-	  objfile->next = *objp;
-	  *objp = objfile;
-	  return;
-	}
-    }
-  
-  internal_error (__FILE__, __LINE__,
-		  _("put_objfile_before: before objfile not in list"));
-}
-
 /* Add OBJFILE as a separate debug objfile of PARENT.  */
 
 static void
@@ -535,10 +494,6 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
   objfile->separate_debug_objfile_backlink = parent;
   objfile->separate_debug_objfile_link = parent->separate_debug_objfile;
   parent->separate_debug_objfile = objfile;
-
-  /* Put the separate debug object before the normal one, this is so that
-     usage of objfiles_safe will stay safe.  */
-  put_objfile_before (objfile, parent);
 }
 
 /* See objfiles.h.  */
@@ -550,6 +505,12 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
   objfile *result = new objfile (bfd_, name_, flags_);
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
+
+  current_program_space->add_objfile (result, parent);
+
+  /* Rebuild section map next time we need it.  */
+  get_objfile_pspace_data (current_program_space)->new_objfiles_available = 1;
+
   return result;
 }
 

@@ -153,6 +153,28 @@ program_space::~program_space ()
   program_space_free_data (this);
 }
 
+/* See progspace.h.  */
+
+void
+program_space::add_objfile (struct objfile *objfile, struct objfile *before)
+{
+  for (struct objfile **objp = &objfiles_head;
+       *objp != NULL;
+       objp = &((*objp)->next))
+    {
+      if (*objp == before)
+	{
+	  objfile->next = *objp;
+	  *objp = objfile;
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  _("put_objfile_before: before objfile not in list"));
+
+}
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 

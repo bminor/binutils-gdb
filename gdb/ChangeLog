@@ -1,5 +1,16 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (struct program_space) <add_objfile>: Declare
+	method.
+	* progspace.c (program_space::add_objfile): New method.
+	* objfiles.c (~objfile): Don't unlink objfile.
+	(put_objfile_before): Remove.
+	(add_separate_debug_objfile): Don't call put_objfile_before.
+	(objfile::make): Call add_objfile.  Set new_objfiles_available on
+	the per-program-space data.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (syms_from_objfile_1): Use objfile_up.
 	(syms_from_objfile_1, remove_symbol_file_command): Call unlink
 	method.

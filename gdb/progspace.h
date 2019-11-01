@@ -165,6 +165,12 @@ struct program_space
     return objfiles_safe_range (objfiles_head);
   }
 
+  /* Add OBJFILE to the list of objfiles, putting it just before
+     BEFORE.  If BEFORE is nullptr, it will go at the end of the
+     list.  */
+  void add_objfile (struct objfile *objfile, struct objfile *before);
+
+
   /* Pointer to next in linked list.  */
   struct program_space *next = NULL;
 
