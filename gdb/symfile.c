@@ -1093,7 +1093,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 
   if (mainline)
     flags |= OBJF_MAINLINE;
-  objfile = new struct objfile (abfd, name, flags);
+  objfile = objfile::make (abfd, name, flags);
 
   if (parent)
     add_separate_debug_objfile (objfile, parent);

@@ -1,3 +1,10 @@
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (symbol_file_add_with_addrs): Use objfile::make.
+	* objfiles.h (struct objfile): Make constructor private.
+	<make>: New static method.
+	* jit.c (jit_object_close_impl): Update.
+
 2019-12-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.c (jit_reader_try_read_symtab): Replace xmalloc/xfree with

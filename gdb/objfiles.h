@@ -394,7 +394,19 @@ private:
 
 struct objfile
 {
+private:
+
+  /* The only way to create an objfile is to call objfile::make.  */
   objfile (bfd *, const char *, objfile_flags);
+
+public:
+
+  /* Create an objfile.  */
+  static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_)
+  {
+    return new objfile (bfd_, name_, flags_);
+  }
+
   ~objfile ();
 
   DISABLE_COPY_AND_ASSIGN (objfile);

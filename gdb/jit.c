@@ -786,8 +786,8 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   priv_data = (jit_dbg_reader_data *) cb->priv_data;
 
-  objfile = new struct objfile (NULL, "<< JIT compiled code >>",
-				OBJF_NOT_FILENAME);
+  objfile = objfile::make (nullptr, "<< JIT compiled code >>",
+			   OBJF_NOT_FILENAME);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
   j = NULL;
