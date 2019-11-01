@@ -1,3 +1,18 @@
+2019-11-04  Fangrui Song  <maskray@google.com>
+
+	* objcopy.c (enum option_values): Add OPTION_KEEP_SECTION.
+	(SECTION_CONTEXT_KEEP): Define.  Adjust other SECTION_CONTEXT macros.
+	(copy_usage): Describe --keep-section.
+	(strip_usage): Likewise.
+	(copy_main): Handle SECTION_CONTEXT_KEEP.
+	(strip_main): Likewise.
+	(is_strip_section_1): Likewise.
+	* testsuite/binutils-all/objcopy.exp: Add tests.
+	* testsuite/binutils-all/keep-section-1.d: New test driver file.
+	* testsuite/binutils-all/keep-section-2.d: Likewise.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2019-10-20  Palmer Dabbelt  <palmer@sifive.com>
 
         * MAINTAINERS: Change palmer@sifive.com to palmer@dabbelt.com.

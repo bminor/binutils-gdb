@@ -143,13 +143,14 @@ struct section_list
      COPY and REMOVE are mutually exlusive.  SET and ALTER are mutually exclusive.  */
 #define SECTION_CONTEXT_REMOVE    (1 << 0) /* Remove this section.  */
 #define SECTION_CONTEXT_COPY      (1 << 1) /* Copy this section, delete all non-copied section.  */
-#define SECTION_CONTEXT_SET_VMA   (1 << 2) /* Set the sections' VMA address.  */
-#define SECTION_CONTEXT_ALTER_VMA (1 << 3) /* Increment or decrement the section's VMA address.  */
-#define SECTION_CONTEXT_SET_LMA   (1 << 4) /* Set the sections' LMA address.  */
-#define SECTION_CONTEXT_ALTER_LMA (1 << 5) /* Increment or decrement the section's LMA address.  */
-#define SECTION_CONTEXT_SET_FLAGS (1 << 6) /* Set the section's flags.  */
-#define SECTION_CONTEXT_REMOVE_RELOCS (1 << 7) /* Remove relocations for this section.  */
-#define SECTION_CONTEXT_SET_ALIGNMENT (1 << 8) /* Set alignment for section.  */
+#define SECTION_CONTEXT_KEEP      (1 << 2) /* Keep this section.  */
+#define SECTION_CONTEXT_SET_VMA   (1 << 3) /* Set the sections' VMA address.  */
+#define SECTION_CONTEXT_ALTER_VMA (1 << 4) /* Increment or decrement the section's VMA address.  */
+#define SECTION_CONTEXT_SET_LMA   (1 << 5) /* Set the sections' LMA address.  */
+#define SECTION_CONTEXT_ALTER_LMA (1 << 6) /* Increment or decrement the section's LMA address.  */
+#define SECTION_CONTEXT_SET_FLAGS (1 << 7) /* Set the section's flags.  */
+#define SECTION_CONTEXT_REMOVE_RELOCS (1 << 8) /* Remove relocations for this section.  */
+#define SECTION_CONTEXT_SET_ALIGNMENT (1 << 9) /* Set alignment for section.  */
 
   bfd_vma		vma_val;   /* Amount to change by or set to.  */
   bfd_vma		lma_val;   /* Amount to change by or set to.  */
@@ -332,6 +333,7 @@ enum command_line_switch
   OPTION_INTERLEAVE_WIDTH,
   OPTION_KEEPGLOBAL_SYMBOLS,
   OPTION_KEEP_FILE_SYMBOLS,
+  OPTION_KEEP_SECTION,
   OPTION_KEEP_SYMBOLS,
   OPTION_LOCALIZE_HIDDEN,
   OPTION_LOCALIZE_SYMBOLS,
@@ -386,6 +388,7 @@ static struct option strip_options[] =
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
+  {"keep-section", required_argument, 0, OPTION_KEEP_SECTION},
   {"keep-symbol", required_argument, 0, 'K'},
   {"merge-notes", no_argument, 0, 'M'},
   {"no-merge-notes", no_argument, 0, OPTION_NO_MERGE_NOTES},
@@ -457,6 +460,7 @@ static struct option copy_options[] =
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-global-symbol", required_argument, 0, 'G'},
   {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
+  {"keep-section", required_argument, 0, OPTION_KEEP_SECTION},
   {"keep-symbol", required_argument, 0, 'K'},
   {"keep-symbols", required_argument, 0, OPTION_KEEP_SYMBOLS},
   {"localize-hidden", no_argument, 0, OPTION_LOCALIZE_HIDDEN},
@@ -589,6 +593,7 @@ copy_usage (FILE *stream, int exit_status)
      --only-keep-debug             Strip everything but the debug information\n\
      --extract-dwo                 Copy only DWO sections\n\
      --extract-symbol              Remove section contents but keep symbols\n\
+     --keep-section <name>         Do not strip section <name>\n\
   -K --keep-symbol <name>          Do not strip symbol <name>\n\
      --keep-file-symbols           Do not strip file symbol(s)\n\
      --localize-hidden             Turn all ELF hidden symbols into locals\n\
@@ -722,6 +727,7 @@ strip_usage (FILE *stream, int exit_status)
   -M  --merge-notes                Remove redundant entries in note sections (default)\n\
       --no-merge-notes             Do not attempt to remove redundant notes\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
+     --keep-section=<name>         Do not strip section <name>\n\
   -K --keep-symbol=<name>          Do not strip symbol <name>\n\
      --keep-file-symbols           Do not strip file symbol(s)\n\
   -w --wildcard                    Permit wildcard in symbol comparison\n\
@@ -1311,6 +1317,10 @@ is_mergeable_note_section (bfd * abfd, asection * sec)
 static bfd_boolean
 is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
+  if (find_section_list (bfd_section_name (sec), FALSE, SECTION_CONTEXT_KEEP)
+      != NULL)
+    return FALSE;
+
   if (sections_removed || sections_copied)
     {
       struct section_list *p;
@@ -4584,6 +4594,9 @@ strip_main (int argc, char *argv[])
 	case 'R':
 	  handle_remove_section_option (optarg);
 	  break;
+	case OPTION_KEEP_SECTION:
+	  find_section_list (optarg, TRUE, SECTION_CONTEXT_KEEP);
+	  break;
 	case OPTION_REMOVE_RELOCS:
 	  handle_remove_relocations_option (optarg);
 	  break;
@@ -5008,6 +5021,10 @@ copy_main (int argc, char *argv[])
 
 	case 'R':
 	  handle_remove_section_option (optarg);
+	  break;
+
+	case OPTION_KEEP_SECTION:
+	  find_section_list (optarg, TRUE, SECTION_CONTEXT_KEEP);
 	  break;
 
         case OPTION_REMOVE_RELOCS:

@@ -1186,6 +1186,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--interleave-width=}@var{width}]
         [@option{-j} @var{sectionpattern}|@option{--only-section=}@var{sectionpattern}]
         [@option{-R} @var{sectionpattern}|@option{--remove-section=}@var{sectionpattern}]
+        [@option{--keep-section=}@var{sectionpattern}]
         [@option{--remove-relocations=}@var{sectionpattern}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{-D}|@option{--enable-deterministic-archives}]
@@ -1368,6 +1369,10 @@ would otherwise remove it.  For example:
 
 will remove all sections matching the pattern '.text.*', but will not
 remove the section '.text.foo'.
+
+@item --keep-section=@var{sectionpattern}
+When removing sections from the output file, keep sections that match
+@var{sectionpattern}.
 
 @item --remove-relocations=@var{sectionpattern}
 Remove non-dynamic relocations from the output file for any section
@@ -3242,6 +3247,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
+      [@option{--keep-section=}@var{sectionpattern}]
       [@option{--remove-relocations=}@var{sectionpattern}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
@@ -3311,6 +3317,10 @@ would otherwise remove it.  For example:
 
 will remove all sections matching the pattern '.text.*', but will not
 remove the section '.text.foo'.
+
+@item --keep-section=@var{sectionpattern}
+When removing sections from the output file, keep sections that match
+@var{sectionpattern}.
 
 @item --remove-relocations=@var{sectionpattern}
 Remove relocations from the output file for any section matching

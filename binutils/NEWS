@@ -3,6 +3,9 @@
 * Add --output option to the "ar" program.  This option can be used to specify
   the output directory when extracting members from an archive.
 
+* Add --keep-section option to objcopy and strip.  This option keeps the
+  specified section from being removed.
+
 Changes in 2.33:
 
 * Add --source-comment[=<txt>] option to objdump which if present,
