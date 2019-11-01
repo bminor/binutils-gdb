@@ -1,3 +1,15 @@
+2019-11-01  Luis Machado  <luis.machado@linaro.org>
+
+	PR gdb/25124
+
+	* arm-tdep.c (arm_per_objfile): Rename to ...
+	(arm_per_bfd): ... this.
+	(arm_objfile_data_key): Rename to ...
+	(arm_bfd_data_key): ... this.
+	(arm_find_mapping_symbol): Adjust access to new bfd_key-based
+	data.
+	(arm_record_special_symbol): Likewise.
+
 2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-typeprint.c (ada_print_typedef): Don't print newline at the

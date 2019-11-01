@@ -1,3 +1,10 @@
+2019-11-01  Luis Machado  <luis.machado@linaro.org>
+
+	PR gdb/25124
+
+	* gdb.arch/pr25124.S: New file.
+	* gdb.arch/pr25124.exp: New file.
+
 2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/info-modules.exp: Update expected results, and add

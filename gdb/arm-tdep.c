@@ -89,14 +89,14 @@ struct arm_mapping_symbol
 
 typedef std::vector<arm_mapping_symbol> arm_mapping_symbol_vec;
 
-struct arm_per_objfile
+struct arm_per_bfd
 {
-  explicit arm_per_objfile (size_t num_sections)
+  explicit arm_per_bfd (size_t num_sections)
   : section_maps (new arm_mapping_symbol_vec[num_sections]),
     section_maps_sorted (new bool[num_sections] ())
   {}
 
-  DISABLE_COPY_AND_ASSIGN (arm_per_objfile);
+  DISABLE_COPY_AND_ASSIGN (arm_per_bfd);
 
   /* Information about mapping symbols ($a, $d, $t) in the objfile.
 
@@ -113,8 +113,8 @@ struct arm_per_objfile
   std::unique_ptr<bool[]> section_maps_sorted;
 };
 
-/* Per-objfile data used for mapping symbols.  */
-static objfile_key<arm_per_objfile> arm_objfile_data_key;
+/* Per-bfd data used for mapping symbols.  */
+static bfd_key<arm_per_bfd> arm_bfd_data_key;
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;
@@ -350,7 +350,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   sec = find_pc_section (memaddr);
   if (sec != NULL)
     {
-      arm_per_objfile *data = arm_objfile_data_key.get (sec->objfile);
+      arm_per_bfd *data = arm_bfd_data_key.get (sec->objfile->obfd);
       if (data != NULL)
 	{
 	  unsigned int section_idx = sec->the_bfd_section->index;
@@ -8561,17 +8561,17 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 			   asymbol *sym)
 {
   const char *name = bfd_asymbol_name (sym);
-  struct arm_per_objfile *data;
+  struct arm_per_bfd *data;
   struct arm_mapping_symbol new_map_sym;
 
   gdb_assert (name[0] == '$');
   if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
     return;
 
-  data = arm_objfile_data_key.get (objfile);
+  data = arm_bfd_data_key.get (objfile->obfd);
   if (data == NULL)
-    data = arm_objfile_data_key.emplace (objfile,
-					 objfile->obfd->section_count);
+    data = arm_bfd_data_key.emplace (objfile->obfd,
+				     objfile->obfd->section_count);
   arm_mapping_symbol_vec &map
     = data->section_maps[bfd_asymbol_section (sym)->index];
 
