@@ -6,7 +6,8 @@ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 TEMPLATE_NAME=elf
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
-EMBEDDED= # This gets us program headers mapped as part of the text segment.
+# This gets us program headers mapped as part of the text segment.
+unset EMBEDDED
 OTHER_GOT_SYMBOLS=
 OTHER_READONLY_SECTIONS="
   .rofixup        : {

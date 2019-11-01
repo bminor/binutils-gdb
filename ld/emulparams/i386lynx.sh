@@ -18,4 +18,4 @@ GENERATE_SHLIB_SCRIPT=yes
 ELF_INTERPRETER_NAME=\"/usr/lib/ld.so.1\"
 
 # Leave room of SIZEOF_HEADERS before text.
-EMBEDDED=
+unset EMBEDDED

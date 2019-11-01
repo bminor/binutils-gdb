@@ -1,3 +1,10 @@
+2019-11-05  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf32bfinfd.sh: Unset EMBEDDED rather assigning as empty.
+	* emulparams/elf32frvfd.sh: Likewise.
+	* emulparams/elf32lm32fd.sh: Likewise.
+	* emulparams/i386lynx.sh: Likewise.
+
 2019-10-22  Alan Modra  <amodra@gmail.com>
 
 	PR 22269
