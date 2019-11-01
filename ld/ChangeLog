@@ -1,5 +1,27 @@
 2019-11-05  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/aarch64elf.sh (GENERATE_SHLIB_SCRIPT),
+	(GENERATE_PIE_SCRIPT): Don't set.
+	* emulparams/aarch64elf32.sh (GENERATE_SHLIB_SCRIPT),
+	(GENERATE_PIE_SCRIPT): Don't set.
+	* emulparams/arcelf.sh (GENERATE_SHLIB_SCRIPT): Don't set.
+	* emulparams/armelf.sh (GENERATE_SHLIB_SCRIPT),
+	(GENERATE_PIE_SCRIPT): Don't set.
+	* emulparams/armelf_fbsd.sh (GENERATE_SHLIB_SCRIPT): Set.
+	* emulparams/armelf_nbsd.sh (GENERATE_SHLIB_SCRIPT),
+	(GENERATE_PIE_SCRIPT): Set.
+	* emulparams/armelf_vxworks.sh (GENERATE_SHLIB_SCRIPT): Set.
+	* emulparams/armsymbian.sh (GENERATE_SHLIB_SCRIPT): Set.
+	* emulparams/elf32bfin.sh (GENERATE_SHLIB_SCRIPT): Don't set.
+	* emulparams/elf32microblaze.sh (GENERATE_SHLIB_SCRIPT): Don't set.
+	* emulparams/score3_elf.sh (GENERATE_SHLIB_SCRIPT): Don't set.
+	* emulparams/shelf.sh (GENERATE_SHLIB_SCRIPT): Don't set.
+	* emulparams/shelf_nbsd.sh (GENERATE_SHLIB_SCRIPT),
+	(GENERATE_PIE_SCRIPT): Set.
+	* emulparams/shelf_uclinux.sh (GENERATE_SHLIB_SCRIPT): Set.
+
+2019-11-05  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32bfinfd.sh: Unset EMBEDDED rather assigning as empty.
 	* emulparams/elf32frvfd.sh: Likewise.
 	* emulparams/elf32lm32fd.sh: Likewise.

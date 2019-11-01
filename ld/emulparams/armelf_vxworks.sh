@@ -4,3 +4,4 @@ BIG_OUTPUT_FORMAT="elf32-bigarm-vxworks"
 LITTLE_OUTPUT_FORMAT="$OUTPUT_FORMAT"
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 source_sh ${srcdir}/emulparams/vxworks.sh
+GENERATE_SHLIB_SCRIPT=yes

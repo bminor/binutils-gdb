@@ -9,7 +9,6 @@ MAXPAGESIZE=128
 ARCH=sh
 MACHINE=
 TEMPLATE_NAME=elf
-GENERATE_SHLIB_SCRIPT=yes
 EMBEDDED=yes
 # These are for compatibility with the COFF toolchain.
 ENTRY=start
