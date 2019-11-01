@@ -553,6 +553,14 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
   return result;
 }
 
+/* See objfiles.h.  */
+
+void
+objfile::unlink ()
+{
+  delete this;
+}
+
 /* Free all separate debug objfile of OBJFILE, but don't free OBJFILE
    itself.  */
 
@@ -564,7 +572,7 @@ free_objfile_separate_debug (struct objfile *objfile)
   for (child = objfile->separate_debug_objfile; child;)
     {
       struct objfile *next_child = child->separate_debug_objfile_link;
-      delete child;
+      child->unlink ();
       child = next_child;
     }
 }
@@ -687,7 +695,7 @@ free_all_objfiles (void)
     gdb_assert (so->objfile == NULL);
 
   for (objfile *objfile : current_program_space->objfiles_safe ())
-    delete objfile;
+    objfile->unlink ();
   clear_symtab_users (0);
 }
 
@@ -996,7 +1004,7 @@ objfile_purge_solibs (void)
 	 be soon.  */
 
       if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
-	delete objf;
+	objf->unlink ();
     }
 }
 

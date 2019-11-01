@@ -951,18 +951,6 @@ jit_register_code (struct gdbarch *gdbarch,
     jit_bfd_try_read_symtab (code_entry, entry_addr, gdbarch);
 }
 
-/* This function unregisters JITed code and frees the corresponding
-   objfile.  */
-
-static void
-jit_unregister_code (struct objfile *objfile)
-{
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, "jit_unregister_code (%s)\n",
-			host_address_to_string (objfile));
-  delete objfile;
-}
-
 /* Look up the objfile with this code entry address.  */
 
 static struct objfile *
@@ -1380,7 +1368,7 @@ jit_inferior_exit_hook (struct inferior *inf)
 	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
 
       if (objf_data != NULL && objf_data->addr != 0)
-	jit_unregister_code (objf);
+	objf->unlink ();
     }
 }
 
@@ -1414,7 +1402,7 @@ jit_event_handler (struct gdbarch *gdbarch)
 			     "entry at address: %s\n"),
 			   paddress (gdbarch, entry_addr));
       else
-        jit_unregister_code (objf);
+        objf->unlink ();
 
       break;
     default:

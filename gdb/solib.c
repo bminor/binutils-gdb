@@ -835,7 +835,7 @@ update_solib_list (int from_tty)
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (gdb->objfile && ! (gdb->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (gdb))
-	    delete gdb->objfile;
+	    gdb->objfile->unlink ();
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
@@ -1312,7 +1312,7 @@ reload_shared_libraries_1 (int from_tty)
 	{
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
-	    delete so->objfile;
+	    so->objfile->unlink ();
 	  remove_target_sections (so);
 	  clear_so (so);
 	}

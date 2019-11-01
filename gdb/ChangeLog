@@ -1,5 +1,28 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (syms_from_objfile_1): Use objfile_up.
+	(syms_from_objfile_1, remove_symbol_file_command): Call unlink
+	method.
+	(reread_symbols): Use objfile_up.
+	* solib.c (update_solib_list, reload_shared_libraries_1): Call
+	unlink method.
+	* objfiles.h (struct objfile) <~objfile>: Now private.
+	<unlink>: New method.
+	(struct objfile_deleter): New.
+	(objfile_up): New typedef.
+	* objfiles.c (objfile::unlink): New method.
+	(free_objfile_separate_debug, free_all_objfiles)
+	(objfile_purge_solibs): Use it.
+	* jit.c (jit_unregister_code): Remove.
+	(jit_inferior_exit_hook, jit_event_handler): Call unlink on
+	objfile.
+	* compile/compile-object-run.c (do_module_cleanup): Call unlink on
+	objfile.
+	* compile/compile-object-load.c (compile_object_load): Use
+	objfile_up.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_add_with_addrs): Pass "parent" to
 	objfile::make.
 	* objfiles.h (struct objjfile) <make>: No longer inline.

@@ -399,13 +399,18 @@ private:
   /* The only way to create an objfile is to call objfile::make.  */
   objfile (bfd *, const char *, objfile_flags);
 
+  /* The only way to free an objfile is via 'unlink'.  */
+  ~objfile ();
+
 public:
 
   /* Create an objfile.  */
   static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_,
 			objfile *parent = nullptr);
 
-  ~objfile ();
+  /* Remove an objfile from the current program space, and free
+     it.  */
+  void unlink ();
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
@@ -636,6 +641,20 @@ public:
      allocated on the objfile's obstack.  */
   htab_up static_links;
 };
+
+/* A deleter for objfile.  */
+
+struct objfile_deleter
+{
+  void operator() (objfile *ptr) const
+  {
+    ptr->unlink ();
+  }
+};
+
+/* A unique pointer that holds an objfile.  */
+
+typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
 
 /* Declarations for functions defined in objfiles.c */
 

@@ -940,7 +940,7 @@ syms_from_objfile_1 (struct objfile *objfile,
      if an error occurs during symbol reading.  */
   gdb::optional<clear_symtab_users_cleanup> defer_clear_users;
 
-  std::unique_ptr<struct objfile> objfile_holder (objfile);
+  objfile_up objfile_holder (objfile);
 
   /* If ADDRS is NULL, put together a dummy address list.
      We now establish the convention that an addr of zero means
@@ -958,7 +958,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
       if (symfile_objfile != NULL)
 	{
-	  delete symfile_objfile;
+	  symfile_objfile->unlink ();
 	  gdb_assert (symfile_objfile == NULL);
 	}
 
@@ -2438,7 +2438,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 		 objfile_name (objf)))
     error (_("Not confirmed."));
 
-  delete objf;
+  objf->unlink ();
   clear_symtab_users (0);
 }
 
@@ -2495,7 +2495,7 @@ reread_symbols (void)
 	  /* If we get an error, blow away this objfile (not sure if
 	     that is the correct response for things like shared
 	     libraries).  */
-	  std::unique_ptr<struct objfile> objfile_holder (objfile);
+	  objfile_up objfile_holder (objfile);
 
 	  /* We need to do this whenever any symbols go away.  */
 	  clear_symtab_users_cleanup defer_clear_users (0);
