@@ -205,7 +205,10 @@ commandline_from_pid (PID_T pid)
 static void
 user_from_uid (char *user, int maxlen, uid_t uid)
 {
-  struct passwd *pwentry = getpwuid (uid);
+  struct passwd *pwentry;
+  char buf[1024];
+  struct passwd pwd;
+  getpwuid_r (uid, &pwd, buf, sizeof (buf), &pwentry);
 
   if (pwentry)
     {

@@ -1,3 +1,7 @@
+2019-11-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* nat/linux-osdata.c (user_from_uid): Use getpwuid_r.
+
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-symbol.c (gdbpy_lookup_static_symbols): New
