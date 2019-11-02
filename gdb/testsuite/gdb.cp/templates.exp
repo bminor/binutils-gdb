@@ -577,8 +577,7 @@ gdb_test_multiple "ptype/r Garply<Garply<char> >" "ptype Garply<Garply<char> >" 
 # print out a function from a nested template name
 
 gdb_test "print Garply<Garply<char> >::garply" \
-    "\\$\[0-9\]* = \\{(class |)Garply<char> \\((class |)Garply<Garply<char> > \\*(| const), int, (class |)Garply<char>\\)\\} $hex <Garply<Garply<char>\[ \t\]*>::garply\\(int, (class |)Garply<char>\\)>" \
-    "print Garply<Garply<char> >::garply"
+    "\\$\[0-9\]* = \\{(class |)Garply<char> \\((class |)Garply<Garply<char> > \\*(| const), int, (class |)Garply<char>\\)\\} $hex <Garply<Garply<char>\[ \t\]*>::garply\\(int, (class |)Garply<char>\\)>"
 
 # djb - 06-03-2000
 # Now should work fine

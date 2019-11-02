@@ -181,8 +181,7 @@ foreach f [list "$func" "'$func'"] {
 	     "file: \".*$srcfile\", line number: $line2, symbol: \"B::$func_re\"" \
 	     "$line2${any}B::test${any}" \
 	     "file: \".*$srcfile\", line number: $line3, symbol: \"$func_re\"" \
-	     "$line3${any}// test${any}"] \
-	"list $f"
+	     "$line3${any}// test${any}"]
 
     delete_breakpoints
     gdb_test "break $f" "\\(3 locations\\)"

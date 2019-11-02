@@ -1,3 +1,22 @@
+2019-11-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/anon-union.exp: Drop superfluous 3rd argument to gdb_test.
+	* gdb.cp/cpexprs.exp: Same.
+	* gdb.cp/except-multi-location.exp: Same.
+	* gdb.cp/exceptprint.exp: Same.
+	* gdb.cp/gdb2384.exp: Same.
+	* gdb.cp/inherit.exp: Same.
+	* gdb.cp/m-static.exp: Same.
+	* gdb.cp/meth-typedefs.exp: Same.
+	* gdb.cp/misc.exp: Same.
+	* gdb.cp/namespace.exp: Same.
+	* gdb.cp/non-trivial-retval.exp: Same.
+	* gdb.cp/overload.exp: Same.
+	* gdb.cp/pr17132.exp: Same.
+	* gdb.cp/re-set-overloaded.exp: Same.
+	* gdb.cp/rvalue-ref-types.exp: Same.
+	* gdb.cp/templates.exp: Same.
+
 2019-11-01  Luis Machado  <luis.machado@linaro.org>
 
 	PR gdb/25124

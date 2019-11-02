@@ -372,21 +372,17 @@ gdb_test "print intToChar(1)" "\\$\[0-9\]+ = 297"
 
 # Test expression evaluation with overloaded methods
 gdb_test "print foo::overload1arg" \
-    "non-unique member `overload1arg' requires type instantiation" \
-    "print foo::overload1arg"
+    "non-unique member `overload1arg' requires type instantiation"
 
 gdb_test "print foo::overload1arg(char***)" \
-    "no member function matches that type instantiation" \
-    "print foo::overload1arg(char***)"
+    "no member function matches that type instantiation"
 
 gdb_test "print foo::overload1arg(void)" \
-    "\\$$decimal = {int \\(foo \\*( const|)\\)} $hex <foo::overload1arg\\(\\)>" \
-    "print foo::overload1arg(void)"
+    "\\$$decimal = {int \\(foo \\*( const|)\\)} $hex <foo::overload1arg\\(\\)>"
 
 foreach t [list char "signed char" "unsigned char" "short" \
 	       "unsigned short" int "unsigned int" long "unsigned long" \
 	       float double] {
     gdb_test "print foo::overload1arg($t)" \
-	"\\$$decimal = {int \\(foo \\*( const|), $t\\)} $hex <foo::overload1arg\\($t\\)>" \
-	"print foo::overload1arg($t)"
+	"\\$$decimal = {int \\(foo \\*( const|), $t\\)} $hex <foo::overload1arg\\($t\\)>"
 }

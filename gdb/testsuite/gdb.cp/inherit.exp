@@ -479,9 +479,9 @@ proc test_print_svi_members { } {
     gdb_test "print g_vC.vC::vx" "$vhn = 10"
 
     # Print members of g_vC using compact form.
-    gdb_test "print g_vC.va" "$vhn = 7" "print g_vC.va"
-    gdb_test "print g_vC.vc" "$vhn = 9" "print g_vC.vc"
-    gdb_test "print g_vC.vx" "$vhn = 10" "print g_vC.vx"
+    gdb_test "print g_vC.va" "$vhn = 7"
+    gdb_test "print g_vC.vc" "$vhn = 9"
+    gdb_test "print g_vC.vx" "$vhn = 10"
 }
 
 # Single virtual inheritance, print complete classes.

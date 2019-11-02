@@ -134,7 +134,7 @@ gdb_test "print foo" \
     "print foo 9"
 
 # Step over next four assignments
-gdb_test "next 4" "53\[ \t\]*w = 45;" "next 4"
+gdb_test "next 4" "53\[ \t\]*w = 45;"
 
 # Tests for anon unions that are not members of a class or struct
 

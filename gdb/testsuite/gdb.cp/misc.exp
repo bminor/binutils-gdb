@@ -93,8 +93,8 @@ test_expr "set variable v_bool_array\[1\] = true" \
     "set a bool array elem"
 
 # bool constants
-gdb_test "print true" "\\$\[0-9\]* = true" "print true"
-gdb_test "print false" "\\$\[0-9\]* = false" "print false"
+gdb_test "print true" "\\$\[0-9\]* = true"
+gdb_test "print false" "\\$\[0-9\]* = false"
 
 # arithmetic conversions
 gdb_test "print 1 + true" "\\$\[0-9\]* = 2" "1 + true"

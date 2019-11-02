@@ -36,7 +36,7 @@ clean_restart $testfile
 gdb_load_shlib ${sofile}
 
 gdb_test_no_output "set breakpoint pending yes"
-gdb_test "break C::C" {Breakpoint [0-9]+ \(C::C\) pending\.} "break C::C"
+gdb_test "break C::C" {Breakpoint [0-9]+ \(C::C\) pending\.}
 gdb_test_no_output {set variable $brk = $bpnum}
 
 # runto or runto_main would call delete_breakpoints.

@@ -60,12 +60,9 @@ proc do_exceptprint_tests {prefix output} {
     }
 }
 
-gdb_test "catch catch" "Catchpoint \[0-9\]+ \\(catch\\)" \
-    "catch catch"
-gdb_test "catch throw" "Catchpoint \[0-9\]+ \\(throw\\)" \
-    "catch throw"
-gdb_test "catch rethrow" "Catchpoint \[0-9\]+ \\(rethrow\\)" \
-    "catch rethrow"
+gdb_test "catch catch" "Catchpoint \[0-9\]+ \\(catch\\)"
+gdb_test "catch throw" "Catchpoint \[0-9\]+ \\(throw\\)"
+gdb_test "catch rethrow" "Catchpoint \[0-9\]+ \\(rethrow\\)"
 
 do_exceptprint_tests string "$hex \"hi bob\""
 do_exceptprint_tests int 23
