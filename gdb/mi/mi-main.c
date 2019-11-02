@@ -696,8 +696,9 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
   ui_out_emit_list list_emitter (uiout, field_name);
   auto cores = make_unique_xstrdup (xcores);
   char *p = cores.get ();
+  char *saveptr;
 
-  for (p = strtok (p, ","); p;  p = strtok (NULL, ","))
+  for (p = strtok_r (p, ",", &saveptr); p;  p = strtok_r (NULL, ",", &saveptr))
     uiout->field_string (NULL, p);
 }
 

@@ -912,9 +912,11 @@ x86_linux_process_qsupported (char **features, int count)
       if (startswith (feature, "xmlRegisters="))
 	{
 	  char *copy = xstrdup (feature + 13);
-	  char *p;
 
-	  for (p = strtok (copy, ","); p != NULL; p = strtok (NULL, ","))
+	  char *saveptr;
+	  for (char *p = strtok_r (copy, ",", &saveptr);
+	       p != NULL;
+	       p = strtok_r (NULL, ",", &saveptr))
 	    {
 	      if (strcmp (p, "i386") == 0)
 		{

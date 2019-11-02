@@ -5169,7 +5169,8 @@ register_remote_support_xml (const char *xml)
   else
     {
       char *copy = xstrdup (remote_support_xml + 13);
-      char *p = strtok (copy, ",");
+      char *saveptr;
+      char *p = strtok_r (copy, ",", &saveptr);
 
       do
 	{
@@ -5180,7 +5181,7 @@ register_remote_support_xml (const char *xml)
 	      return;
 	    }
 	}
-      while ((p = strtok (NULL, ",")) != NULL);
+      while ((p = strtok_r (NULL, ",", &saveptr)) != NULL);
       xfree (copy);
 
       remote_support_xml = reconcat (remote_support_xml,

@@ -2268,9 +2268,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
 	  /* Two passes, to avoid nested strtok calls in
 	     target_process_qsupported.  */
-	  for (p = strtok (p + 1, ";");
+	  char *saveptr;
+	  for (p = strtok_r (p + 1, ";", &saveptr);
 	       p != NULL;
-	       p = strtok (NULL, ";"))
+	       p = strtok_r (NULL, ";", &saveptr))
 	    {
 	      count++;
 	      qsupported = XRESIZEVEC (char *, qsupported, count);
@@ -3633,12 +3634,11 @@ captured_main (int argc, char *argv[])
 	}
       else if (startswith (*next_arg, "--disable-packet="))
 	{
-	  char *packets, *tok;
-
-	  packets = *next_arg += sizeof ("--disable-packet=") - 1;
-	  for (tok = strtok (packets, ",");
+	  char *packets = *next_arg += sizeof ("--disable-packet=") - 1;
+	  char *saveptr;
+	  for (char *tok = strtok_r (packets, ",", &saveptr);
 	       tok != NULL;
-	       tok = strtok (NULL, ","))
+	       tok = strtok_r (NULL, ",", &saveptr))
 	    {
 	      if (strcmp ("vCont", tok) == 0)
 		disable_packet_vCont = true;

@@ -316,8 +316,10 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
   if (data)
     {
       adi_stat_t adi_stat = get_adi_info (pid);
-      char *line;
-      for (line = strtok (data.get (), "\n"); line; line = strtok (NULL, "\n"))
+      char *saveptr;
+      for (char *line = strtok_r (data.get (), "\n", &saveptr);
+	   line;
+	   line = strtok_r (NULL, "\n", &saveptr))
         {
           ULONGEST addr, endaddr;
 

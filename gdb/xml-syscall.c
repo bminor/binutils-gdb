@@ -221,9 +221,10 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
   /*  Add syscall to its groups.  */
   if (groups != NULL)
     {
-      for (char *group = strtok (groups, ",");
+      char *saveptr;
+      for (char *group = strtok_r (groups, ",", &saveptr);
 	   group != NULL;
-	   group = strtok (NULL, ","))
+	   group = strtok_r (NULL, ",", &saveptr))
 	syscall_group_add_syscall (syscalls_info, sysdesc, group);
     }
 }

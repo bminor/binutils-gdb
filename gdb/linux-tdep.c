@@ -839,9 +839,10 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 			   "      Size", "    Offset", "objfile");
 	    }
 
-	  for (line = strtok (map.get (), "\n");
+	  char *saveptr;
+	  for (line = strtok_r (map.get (), "\n", &saveptr);
 	       line;
-	       line = strtok (NULL, "\n"))
+	       line = strtok_r (NULL, "\n", &saveptr))
 	    {
 	      ULONGEST addr, endaddr, offset, inode;
 	      const char *permissions, *device, *mapping_filename;

@@ -1,3 +1,13 @@
+2019-11-06  Christian Biesinger  <cbiesinger@google.com>
+
+	* linux-tdep.c (linux_info_proc): Use strtok_r instead of strtok.
+	* mi/mi-main.c (output_cores): Likewise.
+	* nat/linux-osdata.c (linux_xfer_osdata_cpus): Likewise.
+	(linux_xfer_osdata_modules): Likewise.
+	* remote.c (register_remote_support_xml): Likewise.
+	* sparc64-tdep.c (adi_is_addr_mapped): Likewise.
+	* xml-syscall.c (syscall_create_syscall_desc): Likewise.
+
 2019-11-01  Christian Biesinger  <cbiesinger@google.com>
 
 	* configure: Regenerate.

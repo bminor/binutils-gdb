@@ -566,11 +566,12 @@ linux_xfer_osdata_cpus (struct buffer *buffer)
 	      char *key, *value;
 	      int i = 0;
 
-	      key = strtok (buf, ":");
+	      char *saveptr;
+	      key = strtok_r (buf, ":", &saveptr);
 	      if (key == NULL)
 		continue;
 
-	      value = strtok (NULL, ":");
+	      value = strtok_r (NULL, ":", &saveptr);
 	      if (value == NULL)
 		continue;
 
@@ -1216,36 +1217,36 @@ linux_xfer_osdata_modules (struct buffer *buffer)
 	{
 	  if (fgets (buf, sizeof (buf), fp.get ()))
 	    {
-	      char *name, *dependencies, *status, *tmp;
+	      char *name, *dependencies, *status, *tmp, *saveptr;
 	      unsigned int size;
 	      unsigned long long address;
 	      int uses;
 
-	      name = strtok (buf, " ");
+	      name = strtok_r (buf, " ", &saveptr);
 	      if (name == NULL)
 		continue;
 
-	      tmp = strtok (NULL, " ");
+	      tmp = strtok_r (NULL, " ", &saveptr);
 	      if (tmp == NULL)
 		continue;
 	      if (sscanf (tmp, "%u", &size) != 1)
 		continue;
 
-	      tmp = strtok (NULL, " ");
+	      tmp = strtok_r (NULL, " ", &saveptr);
 	      if (tmp == NULL)
 		continue;
 	      if (sscanf (tmp, "%d", &uses) != 1)
 		continue;
 
-	      dependencies = strtok (NULL, " ");
+	      dependencies = strtok_r (NULL, " ", &saveptr);
 	      if (dependencies == NULL)
 		continue;
 
-	      status = strtok (NULL, " ");
+	      status = strtok_r (NULL, " ", &saveptr);
 	      if (status == NULL)
 		continue;
 
-	      tmp = strtok (NULL, "\n");
+	      tmp = strtok_r (NULL, "\n", &saveptr);
 	      if (tmp == NULL)
 		continue;
 	      if (sscanf (tmp, "%llx", &address) != 1)
