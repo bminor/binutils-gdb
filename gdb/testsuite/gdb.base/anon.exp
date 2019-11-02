@@ -29,4 +29,4 @@ set loc [gdb_get_line_number "break here"]
 gdb_test "break $loc" ".*Breakpoint 2 .*" "set breakpoint in anon.c"
 gdb_continue_to_breakpoint "continue to breakpoint in anon.c"
 
-gdb_test "print val.data.six" " = 6" "print val.data.six"
+gdb_test "print val.data.six" " = 6"

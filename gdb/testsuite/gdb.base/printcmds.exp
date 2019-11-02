@@ -948,7 +948,7 @@ proc test_printf_convenience_var {prefix} {
 	# Without a target, the below produces no output
 	# but with a target, it gives a warning.
 	# So, use gdb_test expecting ".*" instead of gdb_test_no_output.
-	gdb_test "set language ada" ".*" "set language ada"
+	gdb_test "set language ada" ".*"
 	gdb_test_no_output "set var \$astr := \"fghij\"" "set \$astr"
 	gdb_test "printf \"astr val = %s\\n\", \$astr" "astr val = fghij" \
 	    "printf \$astr"
@@ -959,7 +959,7 @@ proc test_printf_convenience_var {prefix} {
 	# Switch to c++ for the wide strings tests, as wchar_t is predefined
 	# when current language is c++.
 	# See above "set language ada" about why we use gdb_test.
-	gdb_test "set language c++" ".*" "set language c++"
+	gdb_test "set language c++" ".*"
 	gdb_test_no_output "set var \$wstr = L\"facile\"" \
 	    "set \$wstr"
 	gdb_test "printf \"wstr val = %ls\\n\", \$wstr" \

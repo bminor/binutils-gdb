@@ -139,7 +139,7 @@ proc test_native_target_remains_pushed {} {
 # remains pushed.
 
 with_test_prefix "kill" {
-    gdb_test "start" "main.*" "start"
+    gdb_test "start" "main.*"
 
     kill_program "kill"
 

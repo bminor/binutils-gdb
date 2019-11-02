@@ -42,70 +42,53 @@ if ![runto_main] {
 
 # Test various error messages.
 gdb_test "info macro -- -all" \
-	 "The symbol `-all' has no definition .*\r\nat .*$srcfile:\[0-9\]+" \
-	 "info macro -- -all"
+	 "The symbol `-all' has no definition .*\r\nat .*$srcfile:\[0-9\]+"
 gdb_test "info macro  -- -all" \
-	 "The symbol `-all' has no definition .*\r\nat .*$srcfile:\[0-9\]+" \
-	 "info macro  -- -all"
+	 "The symbol `-all' has no definition .*\r\nat .*$srcfile:\[0-9\]+"
 
 gdb_test "info macro -all --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "info macro -all --"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro -all  --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "info macro -all  --"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro  -all  --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "info macro  -all  --"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "info macro --"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "'info macro -- '"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 gdb_test "info macro  -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
-	 "'info macro  -- '"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro -invalid-option" \
-	 "Unrecognized option.*Try \"help info macro\"\." \
-	 "info macro -invalid-option 1"
+	 "Unrecognized option.*Try \"help info macro\"\."
 
 gdb_test "info macro  -invalid-option" \
-	 "Unrecognized option.*Try \"help info macro\"\." \
-	 "info macro  -invalid-option"
+	 "Unrecognized option.*Try \"help info macro\"\."
 
 gdb_test "info macro -invalid-option FOO" \
-	 "Unrecognized option.*Try \"help info macro\"\." \
-	 "info macro -invalid-option FOO"
+	 "Unrecognized option.*Try \"help info macro\"\."
 gdb_test "info macro  -invalid-option FOO" \
-	 "Unrecognized option.*Try \"help info macro\"\." \
-	 "info macro  -invalid-option FOO"
+	 "Unrecognized option.*Try \"help info macro\"\."
 
 # Single macro lookups.
 gdb_test "info macro -- FOO" \
-	 ".*#define FOO \"hello\"" \
-	 "info macro -- FOO"
+	 ".*#define FOO \"hello\""
 
 gdb_test "info macro  -- FOO" \
-	 ".*#define FOO \"hello\"" \
-	 "info macro  -- FOO"
+	 ".*#define FOO \"hello\""
 
 gdb_test "info macro --  FOO" \
-	 ".*#define FOO \"hello\"" \
-	 "info macro --  FOO"
+	 ".*#define FOO \"hello\""
 
 gdb_test "info macro FOO" \
-	 ".*#define FOO \"hello\"" \
-	 "info macro FOO"
+	 ".*#define FOO \"hello\""
 
 gdb_test "info macro  FOO" \
-	 ".*#define FOO \"hello\"" \
-	 "info macro  FOO"
+	 ".*#define FOO \"hello\""
 
 # Multiple macro lookups.
 set test "info macro -a FOO"
@@ -125,12 +108,10 @@ set testname "$test 1"
 gdb_test "$test" "$r1$r2$r3$r4" "$testname"
 
 set test "info macro -a  --  FOO"
-set testname "$test"
-gdb_test "$test" "$r1$r2$r3$r4" "$testname"
+gdb_test "$test" "$r1$r2$r3$r4"
 
 set test "info macro  -a  --  FOO"
-set testname "$test"
-gdb_test "$test" "$r1$r2$r3$r4" "$testname"
+gdb_test "$test" "$r1$r2$r3$r4"
 
 proc gdb_test_multiple_with_read1_timeout_factor { factor command message \
 						       user_code } {
@@ -295,4 +276,4 @@ set r2 ".*define ONE"
 # info macros on the line where the #define or #include is
 # fails to find the macro defined (though it works on the next line.)
 setup_kfail "gdb/NNNN" *-*-*
-gdb_test "$test" "$r1$r2" "$test"
+gdb_test "$test" "$r1$r2"

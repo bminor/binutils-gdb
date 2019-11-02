@@ -74,7 +74,7 @@ gdb_test_multiple "info line 1" "annotation_level 2" {
 set gdb_prompt $old_gdb_prompt
 
 #test set annotate 1
-gdb_test "set annotate 1" ".*post-prompt.*"  "set annotate 1" 
+gdb_test "set annotate 1" ".*post-prompt.*"
 gdb_test "show annotate" "Annotation_level is 1..*"  "show annotate (1)" 
 #test annotation_level 1
 gdb_test "info line 1" "Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*"  "annotation_level 1" 
@@ -93,7 +93,7 @@ gdb_test "show args" "Argument list to give program being debugged when it is st
 #test set args
 gdb_test_no_output "set args foo bar blup baz bubble" "set args" 
 #test show args
-gdb_test "show args" "Argument list to give program being debugged when it is started is \"foo bar blup baz bubble\"..*" "show args"
+gdb_test "show args" "Argument list to give program being debugged when it is started is \"foo bar blup baz bubble\"..*"
 gdb_test "p \$_gdb_setting(\"args\")" " = \"foo bar blup baz bubble\"" \
     "_gdb_setting args"
 
@@ -208,11 +208,11 @@ gdb_test "show editing" "Editing of command lines as they are typed is off..*" "
 gdb_test_no_output "set environment FOOBARBAZ = grbxgrbxgrbx" \
     "set environment FOOBARBAZ" 
 #test show environment FOOBARBAZ
-gdb_test "show environment FOOBARBAZ" "FOOBARBAZ = grbxgrbxgrbx.*"  "show environment FOOBARBAZ" 
+gdb_test "show environment FOOBARBAZ" "FOOBARBAZ = grbxgrbxgrbx.*"
 #test set height 100
 gdb_test_no_output "set height 100" "set height 100" 
 #test show height 100
-gdb_test "show height" "Number of lines gdb thinks are in a page is 100..*" "show height" 
+gdb_test "show height" "Number of lines gdb thinks are in a page is 100..*"
 gdb_test "p \$_gdb_setting_str(\"height\")" " = \"100\"" \
     "_gdb_setting_str height 100"
 gdb_test "p \$_gdb_setting(\"height\")" " = 100" \
@@ -324,9 +324,9 @@ if ![board_info target exists gdb_prompt] {
 }
 
 #test set radix 11
-gdb_test "set radix 11" "Unsupported output radix ``decimal 11''; output radix unchanged..*"  "set radix 11" 
+gdb_test "set radix 11" "Unsupported output radix ``decimal 11''; output radix unchanged..*"
 #test set radix 16
-gdb_test "set radix 16" "Input and output radices now set to decimal 16, hex 10, octal 20..*"  "set radix 16" 
+gdb_test "set radix 16" "Input and output radices now set to decimal 16, hex 10, octal 20..*"
 #test show radix 16
 gdb_test "show radix" "Input and output radices set to decimal 16, hex 10, octal 20..*"  "show radix (16)" 
 #test set radix 10

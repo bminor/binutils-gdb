@@ -42,8 +42,8 @@ proc return_tests { } {
     }
 
     # Set breakpoints in other interesting functions.
-    gdb_test "break func2" ".*" "break func2"
-    gdb_test "break func3" ".*" "break func3"
+    gdb_test "break func2" ".*"
+    gdb_test "break func3" ".*"
 
     gdb_test "continue" "return -5;" "continue to return of -5"
 

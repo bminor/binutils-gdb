@@ -158,12 +158,10 @@ The program being debugged stopped while in a function called from GDB.*" \
     # symbolic signal name, or an integer ID.
 
     gdb_test "info signal SIGTRAP" \
-	"SIGTRAP\[ \t\]*Yes\[ \t\]*Yes\[ \t\]*No\[ \t\]*Trace/breakpoint trap.*" \
-	"info signal SIGTRAP"
+	"SIGTRAP\[ \t\]*Yes\[ \t\]*Yes\[ \t\]*No\[ \t\]*Trace/breakpoint trap.*"
 
     gdb_test "info signal 5" \
-	"SIGTRAP\[ \t\]*Yes\[ \t\]*Yes\[ \t\]*No\[ \t\]*Trace/breakpoint trap.*" \
-	"info signal 5"
+	"SIGTRAP\[ \t\]*Yes\[ \t\]*Yes\[ \t\]*No\[ \t\]*Trace/breakpoint trap.*"
 
     # Verify that "handle" with illegal arguments is gracefully, um,
     # handled.

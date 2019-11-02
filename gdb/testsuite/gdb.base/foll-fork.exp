@@ -91,8 +91,7 @@ proc test_follow_fork { who detach cmd } {
 	}
 
 	gdb_test "show follow-fork" \
-	"Debugger response to a program call of fork or vfork is \"$who\"." \
-	"show follow-fork"
+	"Debugger response to a program call of fork or vfork is \"$who\"."
 
 	# Set detach-on-fork mode if we aren't using the default.
 	if {$detach == "default"} {
@@ -102,8 +101,7 @@ proc test_follow_fork { who detach cmd } {
 	}
 
 	gdb_test "show detach-on-fork" \
-		 "Whether gdb will detach.* fork is $detach." \
-		 "show detach-on-fork"
+		 "Whether gdb will detach.* fork is $detach."
 
 	# Set a breakpoint after the fork if we aren't single-stepping
 	# past the fork.
@@ -138,15 +136,13 @@ proc test_follow_fork { who detach cmd } {
 	if {$who == "parent" && $detach == "on"} {
 
 	    # Follow parent / detach child: the only inferior is the parent.
-	    gdb_test "info inferiors" "\\* 1 .* process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" "\\* 1 .* process.*"
 
 	} elseif {$who == "parent" && $detach == "off"} {
 
 	    # Follow parent / keep child: two inferiors under debug, the
 	    # parent is the current inferior.
-	    gdb_test "info inferiors" "\\* 1 .*process.* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" "\\* 1 .*process.* 2 .*process.*"
 
 	    gdb_test "inferior 2" "Switching to inferior 2 .*"
 	    set resume_unfollowed 1
@@ -156,15 +152,13 @@ proc test_follow_fork { who detach cmd } {
 	    # Follow child / detach parent: the child is under debug and is
 	    # the current inferior.  The parent is listed but is not under
 	    # debug.
-	    gdb_test "info inferiors" " 1 .*<null>.*\\* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" " 1 .*<null>.*\\* 2 .*process.*"
 
 	} elseif {$who == "child" && $detach == "off"} {
 
 	    # Follow child / keep parent: two inferiors under debug, the
 	    # child is the current inferior.
-	    gdb_test "info inferiors" " 1 .*process.*\\* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" " 1 .*process.*\\* 2 .*process.*"
 
 	    gdb_test "inferior 1" "Switching to inferior 1 .*"
 	    set resume_unfollowed 1
@@ -340,8 +334,7 @@ A fork or vfork creates a new process.  follow-fork-mode can be:.*
 .*parent  - the original process is debugged after a fork.*
 .*child   - the new process is debugged after a fork.*
 The unfollowed process will continue to run..*
-By default, the debugger will follow the parent process..*" \
-	"help set follow-fork"
+By default, the debugger will follow the parent process..*"
 
     # Verify that we can set follow-fork-mode, using an abbreviation
     # for both the flag and its value.

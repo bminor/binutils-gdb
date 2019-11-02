@@ -64,8 +64,7 @@ gdb_test "br foo" \
 	 "foo in libmd"
 
 gdb_test "continue" \
-	 "Continuing.*" \
-	 "continue"
+	 "Continuing.*"
 
 # This symbol is now looked up in the ELF library and the binary.
 gdb_test "br foo2" \

@@ -204,8 +204,7 @@ with_test_prefix "admin" {
     gdb_test "info skip 2-3" \
 	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
-	"info skip 2-3"
+3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*"
 
     gdb_test "skip delete 2 3"
     gdb_test "info skip" \

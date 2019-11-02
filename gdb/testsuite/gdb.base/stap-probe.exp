@@ -34,8 +34,7 @@ proc stap_test {exec_name {arg ""}} {
 	"check argument not at probe point"
 
     gdb_test "info probes stap" \
-	"test *user *$hex .*" \
-	"info probes stap"
+	"test *user *$hex .*"
     
     if {[runto "-pstap test:user"]} {
 	pass "run to -pstap test:user"

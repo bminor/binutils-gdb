@@ -252,5 +252,4 @@ local_compiler_xfail_check
 local_compiler_xfail_check_2
 
 gdb_test "ptype qux2" \
-    "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\)" \
-    "ptype qux2"
+    "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\)"

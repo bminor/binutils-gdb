@@ -1,5 +1,50 @@
 2019-11-02  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/advance.exp: Drop superfluous 3rd argument to gdb_test.
+	* gdb.base/anon.exp: Same.
+	* gdb.base/auto-connect-native-target.exp: Same.
+	* gdb.base/call-ar-st.exp: Same.
+	* gdb.base/catch-syscall.exp: Same.
+	* gdb.base/commands.exp: Same.
+	* gdb.base/default.exp: Same.
+	* gdb.base/display.exp: Same.
+	* gdb.base/float.exp: Same.
+	* gdb.base/foll-fork.exp: Same.
+	* gdb.base/help.exp: Same.
+	* gdb.base/info-macros.exp: Same.
+	* gdb.base/info-proc.exp: Same.
+	* gdb.base/info-target.exp: Same.
+	* gdb.base/long_long.exp: Same.
+	* gdb.base/macscp.exp: Same.
+	* gdb.base/memattr.exp: Same.
+	* gdb.base/nofield.exp: Same.
+	* gdb.base/pointers.exp: Same.
+	* gdb.base/printcmds.exp: Same.
+	* gdb.base/ptype.exp: Same.
+	* gdb.base/restore.exp: Same.
+	* gdb.base/return.exp: Same.
+	* gdb.base/scope.exp: Same.
+	* gdb.base/set-noassign.exp: Same.
+	* gdb.base/setshow.exp: Same.
+	* gdb.base/shlib-call.exp: Same.
+	* gdb.base/signals.exp: Same.
+	* gdb.base/sigstep.exp: Same.
+	* gdb.base/skip.exp: Same.
+	* gdb.base/solib-symbol.exp: Same.
+	* gdb.base/stap-probe.exp: Same.
+	* gdb.base/step-line.exp: Same.
+	* gdb.base/step-test.exp: Same.
+	* gdb.base/style.exp: Same.
+	* gdb.base/varargs.exp: Same.
+	* gdb.base/vla-datatypes.exp: Same.
+	* gdb.base/vla-ptr.exp: Same.
+	* gdb.base/vla-sideeffect.exp: Same.
+	* gdb.base/volatile.exp: Same.
+	* gdb.base/watch-cond-infcall.exp: Same.
+	* gdb.base/watchpoint.exp: Same.
+
+2019-11-02  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.cp/anon-union.exp: Drop superfluous 3rd argument to gdb_test.
 	* gdb.cp/cpexprs.exp: Same.
 	* gdb.cp/except-multi-location.exp: Same.

@@ -124,8 +124,7 @@ save_vars { env(TERM) } {
 	     "${tfaas_expr} --.*" \
 	     "Usage:.*" \
 	     "short${cut_for_thre_expr}ad apply.*" \
-	    ] \
-	"apropos -v cut for 'thre"
+	    ]
 
     set quoted [string_to_regexp $binfile]
     gdb_test "file $binfile" \
