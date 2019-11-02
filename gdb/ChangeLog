@@ -1,5 +1,14 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (symbol_file_clear): Update.
+	* progspace.h (struct program_space) <free_all_objfiles>: Declare
+	method.
+	* progspace.c (program_space::free_all_objfiles): New method.
+	* objfiles.h (free_all_objfiles): Don't declare.
+	* objfiles.c (free_all_objfiles): Move to program_space.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (program_space::add_objfile)
 	(program_space::remove_objfile): Update.
 	(program_space::multi_objfile_p): Remove.

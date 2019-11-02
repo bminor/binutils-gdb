@@ -179,6 +179,9 @@ struct program_space
     return objfiles_list.size () > 1;
   }
 
+  /* Free all the objfiles associated with this program space.  */
+  void free_all_objfiles ();
+
 
   /* Pointer to next in linked list.  */
   struct program_space *next = NULL;

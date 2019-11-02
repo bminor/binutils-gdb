@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 #include "solib.h"
+#include "solist.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include <algorithm>
@@ -152,6 +153,23 @@ program_space::~program_space ()
   clear_program_space_solib_cache (this);
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (this);
+}
+
+/* See progspace.h.  */
+
+void
+program_space::free_all_objfiles ()
+{
+  struct so_list *so;
+
+  /* Any objfile reference would become stale.  */
+  for (so = master_so_list (); so; so = so->next)
+    gdb_assert (so->objfile == NULL);
+
+  while (!objfiles_list.empty ())
+    objfiles_list.front ()->unlink ();
+
+  clear_symtab_users (0);
 }
 
 /* See progspace.h.  */

@@ -1251,7 +1251,7 @@ symbol_file_clear (int from_tty)
      objfiles get stale by free_all_objfiles.  */
   no_shared_libraries (NULL, from_tty);
 
-  free_all_objfiles ();
+  current_program_space->free_all_objfiles ();
 
   gdb_assert (symfile_objfile == NULL);
   if (from_tty)

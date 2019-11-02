@@ -662,8 +662,6 @@ extern void build_objfile_section_table (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 
-extern void free_all_objfiles (void);
-
 extern void objfile_relocate (struct objfile *, const struct section_offsets *);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
 

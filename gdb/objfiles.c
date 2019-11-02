@@ -618,21 +618,6 @@ objfile::~objfile ()
   get_objfile_pspace_data (pspace)->section_map_dirty = 1;
 }
 
-/* Free all the object files at once and clean up their users.  */
-
-void
-free_all_objfiles (void)
-{
-  struct so_list *so;
-
-  /* Any objfile reference would become stale.  */
-  for (so = master_so_list (); so; so = so->next)
-    gdb_assert (so->objfile == NULL);
-
-  for (objfile *objfile : current_program_space->objfiles_safe ())
-    objfile->unlink ();
-  clear_symtab_users (0);
-}
 
 /* A helper function for objfile_relocate1 that relocates a single
    symbol.  */
