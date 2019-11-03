@@ -1,5 +1,10 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile) <partial_symtabs>: Now a
+	unique_ptr.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (objfile_list): New typedef.
 	(class unwrapping_objfile_iterator)
 	(struct unwrapping_objfile_range): Newl
