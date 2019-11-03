@@ -28,12 +28,14 @@
 #include "registry.h"
 #include "gdb_bfd.h"
 #include "psymtab.h"
+#include <atomic>
 #include <bitset>
 #include <vector>
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "bcache.h"
 #include "gdbarch.h"
+#include "gdbsupport/refcounted-object.h"
 
 struct htab;
 struct objfile_data;
@@ -399,10 +401,15 @@ private:
   /* The only way to create an objfile is to call objfile::make.  */
   objfile (bfd *, const char *, objfile_flags);
 
-  /* The only way to free an objfile is via 'unlink'.  */
-  ~objfile ();
-
 public:
+
+  /* Normally you should not call delete.  Instead, call 'unlink' to
+     remove it from the program space's list.  In some cases, you may
+     need to hold a reference to an objfile that is independent of its
+     existence on the program space's list; for this case, the
+     destructor must be public so that shared_ptr can reference
+     it.  */
+  ~objfile ();
 
   /* Create an objfile.  */
   static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_,

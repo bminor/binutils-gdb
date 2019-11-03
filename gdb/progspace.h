@@ -38,6 +38,79 @@ struct address_space;
 struct program_space_data;
 struct address_space_data;
 
+typedef std::list<std::shared_ptr<objfile>> objfile_list;
+
+/* An iterator that wraps an iterator over std::shared_ptr<objfile>,
+   and dereferences the returned object.  This is useful for iterating
+   over a list of shared pointers and returning raw pointers -- which
+   helped avoid touching a lot of code when changing how objfiles are
+   managed.  */
+
+class unwrapping_objfile_iterator
+{
+public:
+
+  typedef unwrapping_objfile_iterator self_type;
+  typedef typename ::objfile *value_type;
+  typedef typename ::objfile &reference;
+  typedef typename ::objfile **pointer;
+  typedef typename objfile_list::iterator::iterator_category iterator_category;
+  typedef typename objfile_list::iterator::difference_type difference_type;
+
+  unwrapping_objfile_iterator (const objfile_list::iterator &iter)
+    : m_iter (iter)
+  {
+  }
+
+  objfile *operator* () const
+  {
+    return m_iter->get ();
+  }
+
+  unwrapping_objfile_iterator operator++ ()
+  {
+    ++m_iter;
+    return *this;
+  }
+
+  bool operator!= (const unwrapping_objfile_iterator &other) const
+  {
+    return m_iter != other.m_iter;
+  }
+
+private:
+
+  /* The underlying iterator.  */
+  objfile_list::iterator m_iter;
+};
+
+
+/* A range that returns unwrapping_objfile_iterators.  */
+
+struct unwrapping_objfile_range
+{
+  typedef unwrapping_objfile_iterator iterator;
+
+  unwrapping_objfile_range (objfile_list &ol)
+    : m_list (ol)
+  {
+  }
+
+  iterator begin () const
+  {
+    return iterator (m_list.begin ());
+  }
+
+  iterator end () const
+  {
+    return iterator (m_list.end ());
+  }
+
+private:
+
+  objfile_list &m_list;
+};
+
 /* A program space represents a symbolic view of an address space.
    Roughly speaking, it holds all the data associated with a
    non-running-yet program (main executable, main symbols), and when
@@ -139,15 +212,15 @@ struct program_space
   program_space (address_space *aspace_);
   ~program_space ();
 
-  typedef std::list<struct objfile *> objfiles_range;
+  typedef unwrapping_objfile_range objfiles_range;
 
   /* Return an iterable object that can be used to iterate over all
      objfiles.  The basic use is in a foreach, like:
 
      for (objfile *objf : pspace->objfiles ()) { ... }  */
-  objfiles_range &objfiles ()
+  objfiles_range objfiles ()
   {
-    return objfiles_list;
+    return unwrapping_objfile_range (objfiles_list);
   }
 
   typedef basic_safe_range<objfiles_range> objfiles_safe_range;
@@ -167,7 +240,8 @@ struct program_space
   /* Add OBJFILE to the list of objfiles, putting it just before
      BEFORE.  If BEFORE is nullptr, it will go at the end of the
      list.  */
-  void add_objfile (struct objfile *objfile, struct objfile *before);
+  void add_objfile (std::shared_ptr<objfile> &&objfile,
+		    struct objfile *before);
 
   /* Remove OBJFILE from the list of objfiles.  */
   void remove_objfile (struct objfile *objfile);
@@ -234,7 +308,7 @@ struct program_space
   struct objfile *symfile_object_file = NULL;
 
   /* All known objfiles are kept in a linked list.  */
-  std::list<struct objfile *> objfiles_list;
+  std::list<std::shared_ptr<objfile>> objfiles_list;
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */

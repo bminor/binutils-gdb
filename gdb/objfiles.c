@@ -486,7 +486,10 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
 
-  current_program_space->add_objfile (result, parent);
+  /* Using std::make_shared might be a bit nicer here, but that would
+     require making the constructor public.  */
+  current_program_space->add_objfile (std::shared_ptr<objfile> (result),
+				      parent);
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (current_program_space)->new_objfiles_available = 1;
@@ -500,7 +503,6 @@ void
 objfile::unlink ()
 {
   current_program_space->remove_objfile (this);
-  delete this;
 }
 
 /* Free all separate debug objfile of OBJFILE, but don't free OBJFILE

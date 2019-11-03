@@ -175,16 +175,20 @@ program_space::free_all_objfiles ()
 /* See progspace.h.  */
 
 void
-program_space::add_objfile (struct objfile *objfile, struct objfile *before)
+program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
+			    struct objfile *before)
 {
   if (before == nullptr)
-    objfiles_list.push_back (objfile);
+    objfiles_list.push_back (std::move (objfile));
   else
     {
-      auto iter = std::find (objfiles_list.begin (), objfiles_list.end (),
-			     before);
+      auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
+				[=] (const std::shared_ptr<::objfile> &objf)
+				{
+				  return objf.get () == before;
+				});
       gdb_assert (iter != objfiles_list.end ());
-      objfiles_list.insert (iter, objfile);
+      objfiles_list.insert (iter, std::move (objfile));
     }
 }
 
@@ -193,8 +197,11 @@ program_space::add_objfile (struct objfile *objfile, struct objfile *before)
 void
 program_space::remove_objfile (struct objfile *objfile)
 {
-  auto iter = std::find (objfiles_list.begin (), objfiles_list.end (),
-			 objfile);
+  auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
+			    [=] (const std::shared_ptr<::objfile> &objf)
+			    {
+			      return objf.get () == objfile;
+			    });
   gdb_assert (iter != objfiles_list.end ());
   objfiles_list.erase (iter);
 

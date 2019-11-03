@@ -1,5 +1,21 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (objfile_list): New typedef.
+	(class unwrapping_objfile_iterator)
+	(struct unwrapping_objfile_range): Newl
+	(struct program_space) <objfiles_range>: Change type.
+	<objfiles>: Change return type.
+	<add_objfile>: Change type of "objfile" parameter.
+	<objfiles_list>: Now a list of shared_ptr.
+	* progspace.c (program_space::add_objfile): Change type of
+	"objfile".  Update.
+	(program_space::remove_objfile): Update.
+	* objfiles.h (struct objfile) <~objfile>: Make public.
+	* objfiles.c (objfile::make): Update.
+	(objfile::unlink): Don't call delete.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_clear): Update.
 	* progspace.h (struct program_space) <free_all_objfiles>: Declare
 	method.
