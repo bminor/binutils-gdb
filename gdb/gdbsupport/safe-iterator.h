@@ -48,12 +48,24 @@ public:
   typedef typename Iterator::iterator_category iterator_category;
   typedef typename Iterator::difference_type difference_type;
 
-  /* Construct by forwarding all arguments to the underlying
-     iterator.  */
-  template<typename... Args>
-  explicit basic_safe_iterator (Args &&...args)
-    : m_it (std::forward<Args> (args)...),
+  /* Construct using the given argument; the end iterator is default
+     constructed.  */
+  template<typename Arg>
+  explicit basic_safe_iterator (Arg &&arg)
+    : m_it (std::forward<Arg> (arg)),
       m_next (m_it)
+  {
+    if (m_it != m_end)
+      ++m_next;
+  }
+
+  /* Construct the iterator using the first argument, and construct
+     the end iterator using the second argument.  */
+  template<typename Arg>
+  explicit basic_safe_iterator (Arg &&arg, Arg &&arg2)
+    : m_it (std::forward<Arg> (arg)),
+      m_next (m_it),
+      m_end (std::forward<Arg> (arg2))
   {
     if (m_it != m_end)
       ++m_next;
@@ -88,6 +100,36 @@ private:
 
   /* A one-past-end iterator.  */
   Iterator m_end {};
+};
+
+/* A range adapter that wraps another range, and then returns safe
+   iterators wrapping the original range's iterators.  */
+
+template<typename Range>
+class basic_safe_range
+{
+public:
+
+  typedef basic_safe_iterator<typename Range::iterator> iterator;
+
+  explicit basic_safe_range (Range range)
+    : m_range (range)
+  {
+  }
+
+  iterator begin () const
+  {
+    return iterator (m_range.begin (), m_range.end ());
+  }
+
+  iterator end () const
+  {
+    return iterator (m_range.end (), m_range.end ());
+  }
+
+private:
+
+  Range m_range;
 };
 
 #endif /* COMMON_SAFE_ITERATOR_H */

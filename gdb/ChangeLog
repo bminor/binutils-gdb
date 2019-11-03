@@ -1,5 +1,11 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* gdbsupport/safe-iterator.h (basic_safe_iterator): Simplify.  Add
+	second constructor.
+	(basic_safe_range): New class.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (program_space::multi_objfile_p): New method.
 	* printcmd.c (info_symbol_command): Update.
 	* maint.c (maintenance_translate_address): Update.
