@@ -1759,7 +1759,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
       return sym;
     }
 
-  fixup_section (&sym->ginfo, addr, objfile);
+  fixup_section (sym, addr, objfile);
 
   return sym;
 }
@@ -6208,23 +6208,13 @@ initialize_ordinary_address_classes (void)
 
 
 
-/* Helper function to initialize the fields of an objfile-owned symbol.
-   It assumed that *SYM is already all zeroes.  */
-
-static void
-initialize_objfile_symbol_1 (struct symbol *sym)
-{
-  SYMBOL_OBJFILE_OWNED (sym) = 1;
-  SYMBOL_SECTION (sym) = -1;
-}
-
 /* Initialize the symbol SYM, and mark it as being owned by an objfile.  */
 
 void
 initialize_objfile_symbol (struct symbol *sym)
 {
-  memset (sym, 0, sizeof (*sym));
-  initialize_objfile_symbol_1 (sym);
+  SYMBOL_OBJFILE_OWNED (sym) = 1;
+  SYMBOL_SECTION (sym) = -1;
 }
 
 /* Allocate and initialize a new 'struct symbol' on OBJFILE's
@@ -6233,10 +6223,9 @@ initialize_objfile_symbol (struct symbol *sym)
 struct symbol *
 allocate_symbol (struct objfile *objfile)
 {
-  struct symbol *result;
+  struct symbol *result = new (&objfile->objfile_obstack) symbol ();
 
-  result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
-  initialize_objfile_symbol_1 (result);
+  initialize_objfile_symbol (result);
 
   return result;
 }
@@ -6249,8 +6238,8 @@ allocate_template_symbol (struct objfile *objfile)
 {
   struct template_symbol *result;
 
-  result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
-  initialize_objfile_symbol_1 (result);
+  result = new (&objfile->objfile_obstack) template_symbol ();
+  initialize_objfile_symbol (result);
 
   return result;
 }
@@ -6309,7 +6298,7 @@ get_symbol_address (const struct symbol *sym)
       if (minsym.minsym != nullptr)
 	return BMSYMBOL_VALUE_ADDRESS (minsym);
     }
-  return sym->ginfo.value.address;
+  return sym->value.address;
 }
 
 /* See symtab.h.  */

@@ -25,6 +25,7 @@
 #include <string>
 #include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
+#include "gdb_obstack.h"
 #include "gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/function-view.h"
@@ -470,35 +471,29 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 extern CORE_ADDR get_symbol_address (const struct symbol *sym);
 
-/* Note that all the following SYMBOL_* macros are used with the
-   SYMBOL argument being either a partial symbol or
-   a full symbol.  Both types have a ginfo field.  In particular
-   the SYMBOL_SET_LANGUAGE, SYMBOL_DEMANGLED_NAME, etc.
-   macros cannot be entirely substituted by
-   functions, unless the callers are changed to pass in the ginfo
-   field only, instead of the SYMBOL parameter.  */
+/* Note that these macros only work with symbol, not partial_symbol.  */
 
-#define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
+#define SYMBOL_VALUE(symbol)		(symbol)->value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)			      \
   (((symbol)->maybe_copied) ? get_symbol_address (symbol)     \
-   : ((symbol)->ginfo.value.address))
+   : ((symbol)->value.address))
 #define SET_SYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->ginfo.value.address = (new_value))
-#define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
-#define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->ginfo.value.common_block
-#define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block
-#define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
-#define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
-#define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
+  ((symbol)->value.address = (new_value))
+#define SYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
+#define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->value.common_block
+#define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
+#define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
+#define SYMBOL_LANGUAGE(symbol)		(symbol)->language
+#define SYMBOL_SECTION(symbol)		(symbol)->section
 #define SYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->ginfo.section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->ginfo.section]))	\
+  (((symbol)->section >= 0)				\
+   ? (&(((objfile)->sections)[(symbol)->section]))	\
    : NULL)
 
 /* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol.  */
 #define SYMBOL_SET_LANGUAGE(symbol,language,obstack)	\
-  (symbol_set_language (&(symbol)->ginfo, (language), (obstack)))
+  (symbol_set_language ((symbol), (language), (obstack)))
 extern void symbol_set_language (struct general_symbol_info *symbol,
                                  enum language language,
 				 struct obstack *obstack);
@@ -509,13 +504,13 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
    be terminated and either already on the objfile's obstack or
    permanently allocated.  */
 #define SYMBOL_SET_LINKAGE_NAME(symbol,linkage_name) \
-  (symbol)->ginfo.name = (linkage_name)
+  (symbol)->name = (linkage_name)
 
 /* Set the linkage and natural names of a symbol, by demangling
    the linkage name.  If linkage_name may not be nullterminated,
    copy_name must be set to true.  */
 #define SYMBOL_SET_NAMES(symbol,linkage_name,copy_name,objfile)	\
-  symbol_set_names (&(symbol)->ginfo, linkage_name, copy_name, \
+  symbol_set_names ((symbol), linkage_name, copy_name, \
 		    (objfile)->per_bfd)
 extern void symbol_set_names (struct general_symbol_info *symbol,
 			      gdb::string_view linkage_name, bool copy_name,
@@ -535,7 +530,7 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
    demangled name.  */
 
 #define SYMBOL_NATURAL_NAME(symbol) \
-  (symbol_natural_name (&(symbol)->ginfo))
+  (symbol_natural_name ((symbol)))
 extern const char *symbol_natural_name
   (const struct general_symbol_info *symbol);
 
@@ -544,12 +539,12 @@ extern const char *symbol_natural_name
    manipulation by the linker, this is the mangled name; otherwise,
    it's the same as SYMBOL_NATURAL_NAME.  */
 
-#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->ginfo.name
+#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->name
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL.  */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
-  (symbol_demangled_name (&(symbol)->ginfo))
+  (symbol_demangled_name ((symbol)))
 extern const char *symbol_demangled_name
   (const struct general_symbol_info *symbol);
 
@@ -560,7 +555,7 @@ extern const char *symbol_demangled_name
    The result should never be NULL.  Don't use this for internal
    purposes (e.g. storing in a hashtable): it's only suitable for output.
 
-   N.B. symbol may be anything with a ginfo member,
+   N.B. symbol may be anything inheriting from general_symbol_info,
    e.g., struct symbol or struct minimal_symbol.  */
 
 #define SYMBOL_PRINT_NAME(symbol)					\
@@ -573,13 +568,13 @@ extern bool demangle;
    name.  If there is no distinct demangled name, then SYMBOL_SEARCH_NAME
    returns the same value (same pointer) as SYMBOL_LINKAGE_NAME.  */
 #define SYMBOL_SEARCH_NAME(symbol)					 \
-   (symbol_search_name (&(symbol)->ginfo))
+   (symbol_search_name (symbol))
 extern const char *symbol_search_name (const struct general_symbol_info *ginfo);
 
 /* Return true if NAME matches the "search" name of SYMBOL, according
    to the symbol's language.  */
 #define SYMBOL_MATCHES_SEARCH_NAME(symbol, name)                       \
-  symbol_matches_search_name (&(symbol)->ginfo, (name))
+  symbol_matches_search_name ((symbol), (name))
 
 /* Helper for SYMBOL_MATCHES_SEARCH_NAME that works with both symbols
    and psymbols.  */
@@ -1105,16 +1100,31 @@ enum symbol_subclass_kind
 
 /* This structure is space critical.  See space comments at the top.  */
 
-struct symbol
+struct symbol : public general_symbol_info, public allocate_on_obstack
 {
-
-  /* The general symbol info required for all types of symbols.  */
-
-  struct general_symbol_info ginfo;
+  symbol ()
+    /* Class-initialization of bitfields is only allowed in C++20.  */
+    : domain (UNDEF_DOMAIN),
+      aclass_index (0),
+      is_objfile_owned (0),
+      is_argument (0),
+      is_inlined (0),
+      maybe_copied (0),
+      subclass (SYMBOL_NONE)
+    {
+      /* We can't use an initializer list for members of a base class, and
+         general_symbol_info needs to stay a POD type.  */
+      name = nullptr;
+      value.ivalue = 0;
+      language_specific.obstack = nullptr;
+      language = language_unknown;
+      ada_mangled = 0;
+      section = 0;
+    }
 
   /* Data type of value */
 
-  struct type *type;
+  struct type *type = nullptr;
 
   /* The owner of this symbol.
      Which one to use is defined by symbol.is_objfile_owned.  */
@@ -1124,7 +1134,7 @@ struct symbol
     /* The symbol table containing this symbol.  This is the file associated
        with LINE.  It can be NULL during symbols read-in but it is never NULL
        during normal operation.  */
-    struct symtab *symtab;
+    struct symtab *symtab = nullptr;
 
     /* For types defined by the architecture.  */
     struct gdbarch *arch;
@@ -1141,7 +1151,7 @@ struct symbol
   unsigned int aclass_index : SYMBOL_ACLASS_BITS;
 
   /* If non-zero then symbol is objfile-owned, use owner.symtab.
-     Otherwise symbol is arch-owned, use owner.arch.  */
+       Otherwise symbol is arch-owned, use owner.arch.  */
 
   unsigned int is_objfile_owned : 1;
 
@@ -1175,7 +1185,7 @@ struct symbol
      to debug files longer than 64K lines?  What about machine
      generated programs?  */
 
-  unsigned short line;
+  unsigned short line = 0;
 
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
@@ -1189,9 +1199,9 @@ struct symbol
      to add a magic symbol to the block containing this information,
      or to have a generic debug info annotation slot for symbols.  */
 
-  void *aux_value;
+  void *aux_value = nullptr;
 
-  struct symbol *hash_next;
+  struct symbol *hash_next = nullptr;
 };
 
 /* This struct is size-critical (see comment at the top), so this assert
@@ -1272,11 +1282,11 @@ extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 struct template_symbol : public symbol
 {
   /* The number of template arguments.  */
-  int n_template_arguments;
+  int n_template_arguments = 0;
 
   /* The template arguments.  This is an array with
      N_TEMPLATE_ARGUMENTS elements.  */
-  struct symbol **template_arguments;
+  struct symbol **template_arguments = nullptr;
 };
 
 /* A symbol that represents a Rust virtual table object.  */
@@ -1285,7 +1295,7 @@ struct rust_vtable_symbol : public symbol
 {
   /* The concrete type for which this vtable was created; that is, in
      "impl Trait for Type", this is "Type".  */
-  struct type *concrete_type;
+  struct type *concrete_type = nullptr;
 };
 
 

@@ -14320,8 +14320,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
 
-	  storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-				    struct rust_vtable_symbol);
+	  storage = new (&objfile->objfile_obstack) rust_vtable_symbol ();
 	  initialize_objfile_symbol (storage);
 	  storage->concrete_type = containing_type;
 	  storage->subclass = SYMBOL_RUST_VTABLE;
@@ -21636,8 +21635,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */
       if (cu->language == language_fortran
-          && symbol_get_demangled_name (&(sym->ginfo)) == NULL)
-	symbol_set_demangled_name (&(sym->ginfo),
+          && symbol_get_demangled_name (sym) == NULL)
+	symbol_set_demangled_name (sym,
 				   dwarf2_full_name (name, die, cu),
 	                           NULL);
 

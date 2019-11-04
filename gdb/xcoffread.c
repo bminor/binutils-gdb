@@ -1522,7 +1522,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 #define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
-  (SYMBOL2) = XOBNEW (&objfile->objfile_obstack, struct symbol); \
+  (SYMBOL2) = new (&objfile->objfile_obstack) symbol (); \
   *(SYMBOL2) = *(SYMBOL1);
 
 

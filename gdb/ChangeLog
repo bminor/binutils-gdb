@@ -1,3 +1,42 @@
+2019-11-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* ada-exp.y (write_ambiguous_var): Update.
+	* buildsym.c (add_symbol_to_list): Update.
+	* dwarf2read.c (read_variable): Update.
+	(new_symbol): Update.
+	* jit.c (finalize_symtab): Update.
+	* language.c (language_alloc_type_symbol): Update.
+	* symtab.c (fixup_symbol_section): Update.
+	(initialize_objfile_symbol_1): Move code to...
+	(initialize_objfile_symbol): ...here. Remove now-unnecessary memset.
+	(allocate_symbol): Update.
+	(allocate_template_symbol): Update.
+	(get_symbol_address): Update.
+	* symtab.h (struct symbol): Inherit from general_symbol_info instead
+	of having as a field, and add a constructor.
+	(SYMBOL_VALUE): Update.
+	(SYMBOL_VALUE_ADDRESS): Update.
+	(SET_SYMBOL_VALUE_ADDRESS): Update.
+	(SYMBOL_VALUE_BYTES): Update.
+	(SYMBOL_VALUE_COMMON_BLOCK): Update.
+	(SYMBOL_BLOCK_VALUE): Update.
+	(SYMBOL_VALUE_CHAIN): Update.
+	(SYMBOL_LANGUAGE): Update.
+	(SYMBOL_SECTION): Update.
+	(SYMBOL_OBJ_SECTION): Update.
+	(SYMBOL_SET_LANGUAGE): Update.
+	(SYMBOL_SET_LINKAGE_NAME): Update.
+	(SYMBOL_SET_NAMES): Update.
+	(SYMBOL_NATURAL_NAME): Update.
+	(SYMBOL_LINKAGE_NAME): Update.
+	(SYMBOL_DEMANGLED_NAME): Update.
+	(SYMBOL_SEARCH_NAME): Update.
+	(SYMBOL_MATCHES_SEARCH_NAME): Update.
+	(struct symbol): Update.
+	(struct template_symbol): Update.
+	(struct rust_vtable_symbol): Update.
+	* xcoffread.c (SYMBOL_DUP): Update.
+
 2019-11-12  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-layout.c (show_layout): Set current_layout.

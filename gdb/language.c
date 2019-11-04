@@ -1048,10 +1048,10 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   gdb_assert (!TYPE_OBJFILE_OWNED (type));
 
   gdbarch = TYPE_OWNER (type).gdbarch;
-  symbol = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct symbol);
+  symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
 
-  symbol->ginfo.name = TYPE_NAME (type);
-  symbol->ginfo.language = lang;
+  symbol->name = TYPE_NAME (type);
+  symbol->language = lang;
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;
   SYMBOL_TYPE (symbol) = type;
