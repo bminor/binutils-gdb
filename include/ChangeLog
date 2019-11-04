@@ -1,3 +1,7 @@
+2019-11-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2.h (DW_CIE_VERSION): Delete.
+
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_I8MM): New feature macro.

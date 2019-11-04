@@ -1,3 +1,20 @@
+2019-11-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* as.c (parse_args): Parse --gdwarf-cie-version option.
+	(flag_dwarf_cie_version): New variable.
+	* as.h (flag_dwarf_cie_version): Declare.
+	* dw2gencfi.c (output_cie): Switch from DW_CIE_VERSION to
+	flag_dwarf_cie_version.
+	* doc/as.texi (Overview): Document --gdwarf-cie-version.
+	* NEWS: Likewise.
+	* testsuite/gas/cfi/cfi.exp: Add new tests.
+	* testsuite/gas/cfi/cie-version-0.d: New file.
+	* testsuite/gas/cfi/cie-version-1.d: New file.
+	* testsuite/gas/cfi/cie-version-2.d: New file.
+	* testsuite/gas/cfi/cie-version-3.d: New file.
+	* testsuite/gas/cfi/cie-version-4.d: New file.
+	* testsuite/gas/cfi/cie-version.s: New file.
+
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (operand_size_match, md_assemble,

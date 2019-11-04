@@ -95,6 +95,11 @@ int debug_memory = 0;
 /* Enable verbose mode.  */
 int verbose = 0;
 
+/* Which version of DWARF CIE to produce.  The default could be overridden
+   by a target during its initialisation, or by the --gdwarf-cie-version
+   command line flag.  */
+int flag_dwarf_cie_version = 1;
+
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 bfd_boolean flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
@@ -479,6 +484,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GSTABS_PLUS,
       OPTION_GDWARF2,
       OPTION_GDWARF_SECTIONS,
+      OPTION_GDWARF_CIE_VERSION,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_WARN,
@@ -534,6 +540,7 @@ parse_args (int * pargc, char *** pargv)
        so we keep it here for backwards compatibility.  */
     ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
     ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
+    ,{"gdwarf-cie-version", required_argument, NULL, OPTION_GDWARF_CIE_VERSION}
     ,{"gen-debug", no_argument, NULL, 'g'}
     ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
@@ -826,6 +833,16 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_GDWARF_SECTIONS:
 	  flag_dwarf_sections = TRUE;
+	  break;
+
+        case OPTION_GDWARF_CIE_VERSION:
+	  flag_dwarf_cie_version = atoi (optarg);
+          /* The available CIE versions are 1 (DWARF 2), 3 (DWARF 3), and 4
+             (DWARF 4 and 5).  */
+	  if (flag_dwarf_cie_version < 1
+              || flag_dwarf_cie_version == 2
+              || flag_dwarf_cie_version > 4)
+            as_fatal (_("Invalid --gdwarf-cie-version `%s'"), optarg);
 	  break;
 
 	case 'J':

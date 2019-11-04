@@ -231,6 +231,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
  [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--gdwarf-sections}]
+ [@b{--gdwarf-cie-version}=@var{VERSION}]
  [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
  [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
@@ -771,6 +772,11 @@ will have its dwarf line number information placed into a section called
 @var{.debug_line.text.func}.  If the code section is just called @var{.text}
 then debug line section will still be called just @var{.debug_line} without any
 suffix.
+
+@item --gdwarf-cie-version=@var{version}
+Control which version of DWARF Common Information Entries (CIEs) are produced.
+When this flag is not specificed the default is version 1, though some targets
+can modify this default.  Other possible values for @var{version} are 3 or 4.
 
 @ifset ELF
 @item --size-check=error

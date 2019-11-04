@@ -1860,7 +1860,7 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
       if (fmt != dwarf2_format_32bit)
 	out_four (-1);
     }
-  out_one (DW_CIE_VERSION);			/* Version.  */
+  out_one (flag_dwarf_cie_version);		/* Version.  */
   if (eh_frame)
     {
       out_one ('z');				/* Augmentation.  */
@@ -1876,9 +1876,17 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
   if (cie->signal_frame)
     out_one ('S');
   out_one (0);
+  if (flag_dwarf_cie_version >= 4)
+    {
+      /* For now we are assuming a flat address space with 4 or 8 byte
+         addresses.  */
+      int address_size = dwarf2_format_32bit ? 4 : 8;
+      out_one (address_size);			/* Address size.  */
+      out_one (0);				/* Segment size.  */
+    }
   out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment.  */
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment.  */
-  if (DW_CIE_VERSION == 1)			/* Return column.  */
+  if (flag_dwarf_cie_version == 1)		/* Return column.  */
     out_one (cie->return_column);
   else
     out_uleb128 (cie->return_column);

@@ -27,6 +27,9 @@ Changes in 2.33:
   -mfp16-format=[ieee|alternative] option for Arm to control the format of the
   encoding.
 
+* Add --gdwarf-cie-version command line flag.  This allows control over which
+  version of DWARF CIE the assembler creates.
+
 Changes in 2.32:
 
 * Add -mvexwig=[0|1] option to x86 assembler to control encoding of

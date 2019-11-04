@@ -316,7 +316,6 @@ enum dwarf_location_list_entry_type
 
 #define DW_CIE_ID	  0xffffffff
 #define DW64_CIE_ID	  0xffffffffffffffffULL
-#define DW_CIE_VERSION	  1
 
 #define DW_CFA_extended   0
 
