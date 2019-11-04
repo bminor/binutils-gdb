@@ -95,10 +95,12 @@ int debug_memory = 0;
 /* Enable verbose mode.  */
 int verbose = 0;
 
-/* Which version of DWARF CIE to produce.  The default could be overridden
-   by a target during its initialisation, or by the --gdwarf-cie-version
-   command line flag.  */
-int flag_dwarf_cie_version = 1;
+/* Which version of DWARF CIE to produce.  This default value of -1
+   indicates that this value has not been set yet, a default value is
+   provided in dwarf2_init.  A different value can also be supplied by the
+   command line flag --gdwarf-cie-version, or by a target in
+   MD_AFTER_PARSE_ARGS.  */
+int flag_dwarf_cie_version = -1;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;

@@ -9,7 +9,7 @@
 Contents of the .eh_frame section:
 
 0+0000 0+001[04] 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zR"
   Code alignment factor: .*
   Data alignment factor: .*
@@ -28,7 +28,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
 
 0+00(2c|30) 0+0014 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zPR"
   Code alignment factor: .*
   Data alignment factor: .*
@@ -52,7 +52,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
 
 0+007[48] 0+001[8c] 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zPLR"
   Code alignment factor: .*
   Data alignment factor: .*
@@ -73,7 +73,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
 
 0+00b[08] 0+001[04] 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zR"
   Code alignment factor: .*
   Data alignment factor: .*
@@ -88,7 +88,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
 #...
 0+00[de]8 0+0014 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zPR"
   Code alignment factor: .*
   Data alignment factor: .*
@@ -110,7 +110,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
 #...
 0+01(1c|30) 0+001[8c] 0+0000 CIE
-  Version:               1
+  Version:               [13]
   Augmentation:          "zPLR"
   Code alignment factor: .*
   Data alignment factor: .*

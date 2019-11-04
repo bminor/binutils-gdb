@@ -1,3 +1,7 @@
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-elf/eh5.d: Accept version 3 DWARF CIE.
+
 2019-11-26  Martin Liska  <mliska@suse.cz>
 
 	* scripttempl/arclinux.sc: Add .text.sorted.* which is sorted

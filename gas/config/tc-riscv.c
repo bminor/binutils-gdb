@@ -2341,6 +2341,12 @@ riscv_after_parse_args (void)
 
   /* Insert float_abi into the EF_RISCV_FLOAT_ABI field of elf_flags.  */
   elf_flags |= float_abi * (EF_RISCV_FLOAT_ABI & ~(EF_RISCV_FLOAT_ABI << 1));
+
+  /* If the CIE to be produced has not been overridden on the command line,
+     then produce version 3 by default.  This allows us to use the full
+     range of registers in a .cfi_return_column directive.  */
+  if (flag_dwarf_cie_version == -1)
+    flag_dwarf_cie_version = 3;
 }
 
 long

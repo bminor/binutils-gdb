@@ -1,5 +1,16 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* as.c (flag_dwarf_cie_version): Change initial value to -1, and
+	update comment.
+	* config/tc-riscv.c (riscv_after_parse_args): Set
+	flag_dwarf_cie_version if it has not already been set.
+	* dwarf2dbg.c (dwarf2_init): Initialise flag_dwarf_cie_version if
+	needed.
+	* testsuite/gas/riscv/default-cie-version.d: New file.
+	* testsuite/gas/riscv/default-cie-version.s: New file.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dw2gencfi.c (output_cie): Error on return column overflow.
 	* testsuite/gas/riscv/cie-rtn-col-1.d: New file.
 	* testsuite/gas/riscv/cie-rtn-col-3.d: New file.

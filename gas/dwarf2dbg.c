@@ -2171,6 +2171,17 @@ void
 dwarf2_init (void)
 {
   last_seg_ptr = &all_segs;
+
+  /* Select the default CIE version to produce here.  The global
+     starts with a value of -1 and will be modified to a valid value
+     either by the user providing a command line option, or some
+     targets will select their own default in md_after_parse_args.  If
+     we get here and the global still contains -1 then it is up to us
+     to pick a sane default.  The default we choose is 1, this is the
+     CIE version gas has produced for a long time, and there seems no
+     reason to change it yet.  */
+  if (flag_dwarf_cie_version == -1)
+    flag_dwarf_cie_version = 1;
 }
 
 
