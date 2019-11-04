@@ -396,6 +396,11 @@ focus, winheight, +, -, >, <
 
 TI PRU					pru-*-elf
 
+* Removed targets and native configurations
+
+Solaris 10			i?86-*-solaris2.10, x86_64-*-solaris2.10,
+				sparc*-*-solaris2.10
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
