@@ -1,3 +1,17 @@
+2019-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (get_v850_sreg_name): New function.  Returns the name
+	of a v850 system register.  Move the v850_sreg_names array into
+	this function.
+	(get_v850_reg_name): Likewise for ordinary register names.
+	(get_v850_vreg_name): Likewise for vector register names.
+	(get_v850_cc_name): Likewise for condition codes.
+	* get_v850_float_cc_name): Likewise for floating point condition
+	codes.
+	(get_v850_cacheop_name): Likewise for cache-ops.
+	(get_v850_prefop_name): Likewise for pref-ops.
+	(disassemble): Use the new accessor functions.
+
 2019-10-30  Delia Burduv   <delia.burduv@arm.com>
 
 	* aarch64-opc.c (print_immediate_offset_address): Don't print the
