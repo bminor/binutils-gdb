@@ -1887,7 +1887,12 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
   out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment.  */
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment.  */
   if (flag_dwarf_cie_version == 1)		/* Return column.  */
-    out_one (cie->return_column);
+    {
+      if ((cie->return_column & 0xff) != cie->return_column)
+	as_bad (_("return column number %d overflows in CIE version 1"),
+		cie->return_column);
+      out_one (cie->return_column);
+    }
   else
     out_uleb128 (cie->return_column);
   if (eh_frame)
