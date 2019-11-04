@@ -1,3 +1,7 @@
+2019-11-06  Christian Eggers  <ceggers@gmx.de>
+
+	* ldlang.c (print_input_section): Shift printed size by opb_shift.
+
 2019-11-05  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/aarch64elf.sh (GENERATE_SHLIB_SCRIPT),

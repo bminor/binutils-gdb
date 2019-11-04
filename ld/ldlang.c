@@ -4653,7 +4653,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
 	size = 0;
     }
 
-  minfo ("0x%V %W %pB\n", addr, size, i->owner);
+  minfo ("0x%V %W %pB\n", addr, TO_ADDR (size), i->owner);
 
   if (size != i->rawsize && i->rawsize != 0)
     {
@@ -4669,7 +4669,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
 	  --len;
 	}
 
-      minfo (_("%W (size before relaxing)\n"), i->rawsize);
+      minfo (_("%W (size before relaxing)\n"), TO_ADDR (i->rawsize));
     }
 
   if (i->output_section != NULL
