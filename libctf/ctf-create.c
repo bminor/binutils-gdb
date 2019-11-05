@@ -1665,13 +1665,17 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	 kind and (if a struct or union) has the same number of members, hand it
 	 straight back.  */
 
-      if ((ctf_type_kind_unsliced (tmp_fp, tmp) == (int) kind)
-	  && (kind == CTF_K_STRUCT || kind == CTF_K_UNION
-	      || kind == CTF_K_ENUM))
+      if (ctf_type_kind_unsliced (tmp_fp, tmp) == (int) kind)
 	{
-	  if ((dst_tp = ctf_lookup_by_id (&tmp_fp, dst_type)) != NULL)
-	    if (vlen == LCTF_INFO_VLEN (tmp_fp, dst_tp->ctt_info))
-	      return tmp;
+	  if (kind == CTF_K_STRUCT || kind == CTF_K_UNION
+	      || kind == CTF_K_ENUM)
+	    {
+	      if ((dst_tp = ctf_lookup_by_id (&tmp_fp, dst_type)) != NULL)
+		if (vlen == LCTF_INFO_VLEN (tmp_fp, dst_tp->ctt_info))
+		  return tmp;
+	    }
+	  else
+	    return tmp;
 	}
     }
 

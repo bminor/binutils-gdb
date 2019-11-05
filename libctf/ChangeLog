@@ -1,5 +1,10 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_type_internal): Hand back existing types
+	unchanged.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_forward): Don't add forwards to
 	types that already exist.
 
