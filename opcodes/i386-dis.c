@@ -964,6 +964,8 @@ enum
   PREFIX_0F01_REG_5_MOD_0,
   PREFIX_0F01_REG_5_MOD_3_RM_0,
   PREFIX_0F01_REG_5_MOD_3_RM_2,
+  PREFIX_0F01_REG_7_MOD_3_RM_2,
+  PREFIX_0F01_REG_7_MOD_3_RM_3,
   PREFIX_0F09,
   PREFIX_0F10,
   PREFIX_0F11,
@@ -3641,6 +3643,16 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { "saveprevssp",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_0F01_REG_7_MOD_3_RM_2 */
+  {
+    { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
+  },
+
+  /* PREFIX_0F01_REG_7_MOD_3_RM_3 */
+  {
+    { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
   },
 
   /* PREFIX_0F09 */
@@ -11016,8 +11028,8 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_7_MOD_3 */
     { "swapgs",		{ Skip_MODRM }, 0  },
     { "rdtscp",		{ Skip_MODRM }, 0  },
-    { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
-    { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
+    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_2) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_3) },
     { "clzero",		{ Skip_MODRM }, 0  },
   },
   {

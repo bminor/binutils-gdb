@@ -1,5 +1,12 @@
 2019-11-05  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (PREFIX_0F01_REG_7_MOD_3_RM_2,
+	PREFIX_0F01_REG_7_MOD_3_RM_3): New.
+	(prefix_table): Add respective entries.
+	(rm_table): Link to those entries.
+
+2019-11-05  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (REG_0F1C_MOD_0): Rename to ...
 	(REG_0F1C_P_0_MOD_0): ... this.
 	(REG_0F1E_MOD_3): Rename to ...
