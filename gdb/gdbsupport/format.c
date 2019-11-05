@@ -123,6 +123,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 	int seen_space = 0, seen_plus = 0;
 	int seen_big_l = 0, seen_h = 0, seen_big_h = 0;
 	int seen_big_d = 0, seen_double_big_d = 0;
+	int seen_size_t = 0;
 	int bad = 0;
 	int n_int_args = 0;
 
@@ -234,6 +235,12 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 	    else
 	      seen_big_d = 1;
 	  }
+	/* For size_t or ssize_t.  */
+	else if (*f == 'z')
+	  {
+	    seen_size_t = 1;
+	    f++;
+	  }
 
 	switch (*f)
 	  {
@@ -251,7 +258,9 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 
 	  case 'd':
 	  case 'i':
-	    if (lcount == 0)
+	    if (seen_size_t)
+	      this_argclass = size_t_arg;
+	    else if (lcount == 0)
 	      this_argclass = int_arg;
 	    else if (lcount == 1)
 	      this_argclass = long_arg;

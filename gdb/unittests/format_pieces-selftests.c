@@ -76,12 +76,56 @@ test_gdb_formats ()
     }, true);
 }
 
+/* Test the different size modifiers that can be applied to an integer
+   argument.  Test with different integer format specifiers too.  */
+
+static void
+test_format_int_sizes ()
+{
+  check ("Hello\\t %hu%lu%llu%zu", /* ARI: %ll */
+    {
+      format_piece ("Hello\t ", literal_piece, 0),
+      format_piece ("%hu", int_arg, 0),
+      format_piece ("%lu", long_arg, 0),
+      format_piece ("%llu", long_long_arg, 0), /* ARI: %ll */
+      format_piece ("%zu", size_t_arg, 0)
+    });
+
+  check ("Hello\\t %hx%lx%llx%zx", /* ARI: %ll */
+    {
+      format_piece ("Hello\t ", literal_piece, 0),
+      format_piece ("%hx", int_arg, 0),
+      format_piece ("%lx", long_arg, 0),
+      format_piece ("%llx", long_long_arg, 0), /* ARI: %ll */
+      format_piece ("%zx", size_t_arg, 0)
+    });
+
+  check ("Hello\\t %ho%lo%llo%zo", /* ARI: %ll */
+    {
+      format_piece ("Hello\t ", literal_piece, 0),
+      format_piece ("%ho", int_arg, 0),
+      format_piece ("%lo", long_arg, 0),
+      format_piece ("%llo", long_long_arg, 0), /* ARI: %ll */
+      format_piece ("%zo", size_t_arg, 0)
+    });
+
+  check ("Hello\\t %hd%ld%lld%zd", /* ARI: %ll */
+    {
+      format_piece ("Hello\t ", literal_piece, 0),
+      format_piece ("%hd", int_arg, 0),
+      format_piece ("%ld", long_arg, 0),
+      format_piece ("%lld", long_long_arg, 0), /* ARI: %ll */
+      format_piece ("%zd", size_t_arg, 0)
+    });
+}
+
 static void
 run_tests ()
 {
   test_escape_sequences ();
   test_format_specifier ();
   test_gdb_formats ();
+  test_format_int_sizes ();
 }
 
 } /* namespace format_pieces */

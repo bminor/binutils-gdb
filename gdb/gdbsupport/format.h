@@ -38,7 +38,7 @@
 enum argclass
   {
     literal_piece,
-    int_arg, long_arg, long_long_arg, ptr_arg,
+    int_arg, long_arg, long_long_arg, size_t_arg, ptr_arg,
     string_arg, wide_string_arg, wide_char_arg,
     double_arg, long_double_arg,
     dec32float_arg, dec64float_arg, dec128float_arg

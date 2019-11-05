@@ -1,3 +1,14 @@
+2019-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbsupport/format.c (format_pieces::format_pieces): Support
+	printf 'z' size modifier.
+	* gdbsupport/format.h (enum argclass): Add size_t_arg.
+	* printcmd.c (ui_printf):  Handle size_t_arg.
+	* ui-out.c (ui_out::vmessage): Likewise.
+	* unittests/format_pieces-selftests.c (test_format_int_sizes): New
+	function.
+	(run_tests): Call test_format_int_sizes.
+
 2019-11-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* ada-exp.y (write_ambiguous_var): Update.

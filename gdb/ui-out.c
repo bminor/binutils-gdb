@@ -688,6 +688,24 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	      }
 	  }
 	  break;
+	case size_t_arg:
+	  {
+	    size_t val = va_arg (args, size_t);
+	    switch (piece.n_int_args)
+	      {
+	      case 0:
+		call_do_message (style, current_substring, val);
+		break;
+	      case 1:
+		call_do_message (style, current_substring, intvals[0], val);
+		break;
+	      case 2:
+		call_do_message (style, current_substring,
+				 intvals[0], intvals[1], val);
+		break;
+	      }
+	  }
+	  break;
 	case double_arg:
 	  call_do_message (style, current_substring, va_arg (args, double));
 	  break;

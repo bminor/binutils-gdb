@@ -2663,6 +2663,16 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      DIAGNOSTIC_POP
 	      break;
 	    }
+	  case size_t_arg:
+	    {
+	      size_t val = value_as_long (val_args[i]);
+
+	      DIAGNOSTIC_PUSH
+	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
+              fprintf_filtered (stream, current_substring, val);
+	      DIAGNOSTIC_POP
+	      break;
+	    }
 	  /* Handles floating-point values.  */
 	  case double_arg:
 	  case long_double_arg:
