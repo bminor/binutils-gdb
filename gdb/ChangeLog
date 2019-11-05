@@ -1,3 +1,12 @@
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (lnp_state_machine::record_line): Include
+	end_sequence parameter in debug print out.  Record the line if we
+	are at an end_sequence marker even if it's not the start of a
+	statement.
+	* symmisc.c (maintenance_print_one_line_table): Print end of
+	sequence markers with 'END' not '0'.
+
 2020-01-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/25410

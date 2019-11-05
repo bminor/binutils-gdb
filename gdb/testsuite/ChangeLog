@@ -1,3 +1,8 @@
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint.exp: Update line table parsing test.
+	* gdb.dwarf2/dw2-ranges-base.exp: Add new line table parsing test.
+
 2020-01-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/25410

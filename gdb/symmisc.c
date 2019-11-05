@@ -999,8 +999,12 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	  struct linetable_entry *item;
 
 	  item = &linetable->item [i];
-	  printf_filtered (_("%-6d %6d %s\n"), i, item->line,
-			   core_addr_to_string (item->pc));
+	  printf_filtered ("%-6d ", i);
+	  if (item->line > 0)
+	    printf_filtered ("%6d ", item->line);
+	  else
+	    printf_filtered ("%6s ", _("END"));
+	  printf_filtered ("%s\n", core_addr_to_string (item->pc));
 	}
     }
 

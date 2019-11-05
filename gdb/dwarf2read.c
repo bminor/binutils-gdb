@@ -21314,10 +21314,11 @@ lnp_state_machine::record_line (bool end_sequence)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Processing actual line %u: file %u,"
-			  " address %s, is_stmt %u, discrim %u\n",
+			  " address %s, is_stmt %u, discrim %u%s\n",
 			  m_line, m_file,
 			  paddress (m_gdbarch, m_address),
-			  m_is_stmt, m_discriminator);
+			  m_is_stmt, m_discriminator,
+			  (end_sequence ? "\t(end sequence)" : ""));
     }
 
   file_entry *fe = current_file ();
@@ -21330,7 +21331,8 @@ lnp_state_machine::record_line (bool end_sequence)
   else if (m_op_index == 0 || end_sequence)
     {
       fe->included_p = 1;
-      if (m_record_lines_p && (producer_is_codewarrior (m_cu) || m_is_stmt))
+      if (m_record_lines_p
+	  && (producer_is_codewarrior (m_cu) || m_is_stmt || end_sequence))
 	{
 	  if (m_last_subfile != m_cu->get_builder ()->get_current_subfile ()
 	      || end_sequence)
