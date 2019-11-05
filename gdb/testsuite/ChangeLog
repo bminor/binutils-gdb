@@ -1,3 +1,8 @@
+2019-11-14  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/gdbvars.exp (test_convenience_variables): Add
+	regression tests.
+
 2019-11-12  Tom Tromey  <tom@tromey.com>
 
 	* lib/tuiterm.exp (_accept): Add wait_for parameter.  Check output

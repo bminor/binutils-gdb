@@ -2151,7 +2151,14 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case BINOP_ASSIGN:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+      /* Special-case assignments where the left-hand-side is a
+	 convenience variable -- in these, don't bother setting an
+	 expected type.  This avoids a weird case where re-assigning a
+	 string or array to an internal variable could error with "Too
+	 many array elements".  */
+      arg2 = evaluate_subexp (VALUE_LVAL (arg1) == lval_internalvar
+			      ? NULL_TYPE : value_type (arg1),
+			      exp, pos, noside);
 
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;

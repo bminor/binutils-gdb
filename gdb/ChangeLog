@@ -1,3 +1,8 @@
+2019-11-14  Tom Tromey  <tromey@adacore.com>
+
+	* eval.c (evaluate_subexp_standard) <BINOP_ASSIGN>: Do not pass an
+	expected type for the RHS if the LHS is a convenience variable.
+
 2019-11-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* unittests/vec-utils-selftests.c (unordered_remove_tests::obj):
