@@ -739,8 +739,8 @@ enum
   REG_0F01,
   REG_0F0D,
   REG_0F18,
-  REG_0F1C_MOD_0,
-  REG_0F1E_MOD_3,
+  REG_0F1C_P_0_MOD_0,
+  REG_0F1E_P_1_MOD_3,
   REG_0F71,
   REG_0F72,
   REG_0F73,
@@ -951,19 +951,19 @@ enum
   RM_0F01_REG_1,
   RM_0F01_REG_2,
   RM_0F01_REG_3,
-  RM_0F01_REG_5,
-  RM_0F01_REG_7,
-  RM_0F1E_MOD_3_REG_7,
-  RM_0FAE_REG_6,
-  RM_0FAE_REG_7
+  RM_0F01_REG_5_MOD_3,
+  RM_0F01_REG_7_MOD_3,
+  RM_0F1E_P_1_MOD_3_REG_7,
+  RM_0FAE_REG_6_MOD_3_P_0,
+  RM_0FAE_REG_7_MOD_3,
 };
 
 enum
 {
   PREFIX_90 = 0,
-  PREFIX_MOD_0_0F01_REG_5,
-  PREFIX_MOD_3_0F01_REG_5_RM_0,
-  PREFIX_MOD_3_0F01_REG_5_RM_2,
+  PREFIX_0F01_REG_5_MOD_0,
+  PREFIX_0F01_REG_5_MOD_3_RM_0,
+  PREFIX_0F01_REG_5_MOD_3_RM_2,
   PREFIX_0F09,
   PREFIX_0F10,
   PREFIX_0F11,
@@ -1005,25 +1005,25 @@ enum
   PREFIX_0F7D,
   PREFIX_0F7E,
   PREFIX_0F7F,
-  PREFIX_0FAE_REG_0,
-  PREFIX_0FAE_REG_1,
-  PREFIX_0FAE_REG_2,
-  PREFIX_0FAE_REG_3,
-  PREFIX_MOD_0_0FAE_REG_4,
-  PREFIX_MOD_3_0FAE_REG_4,
-  PREFIX_MOD_0_0FAE_REG_5,
-  PREFIX_MOD_3_0FAE_REG_5,
-  PREFIX_MOD_0_0FAE_REG_6,
-  PREFIX_MOD_1_0FAE_REG_6,
-  PREFIX_0FAE_REG_7,
+  PREFIX_0FAE_REG_0_MOD_3,
+  PREFIX_0FAE_REG_1_MOD_3,
+  PREFIX_0FAE_REG_2_MOD_3,
+  PREFIX_0FAE_REG_3_MOD_3,
+  PREFIX_0FAE_REG_4_MOD_0,
+  PREFIX_0FAE_REG_4_MOD_3,
+  PREFIX_0FAE_REG_5_MOD_0,
+  PREFIX_0FAE_REG_5_MOD_3,
+  PREFIX_0FAE_REG_6_MOD_0,
+  PREFIX_0FAE_REG_6_MOD_3,
+  PREFIX_0FAE_REG_7_MOD_0,
   PREFIX_0FB8,
   PREFIX_0FBC,
   PREFIX_0FBD,
   PREFIX_0FC2,
-  PREFIX_MOD_0_0FC3,
-  PREFIX_MOD_0_0FC7_REG_6,
-  PREFIX_MOD_3_0FC7_REG_6,
-  PREFIX_MOD_3_0FC7_REG_7,
+  PREFIX_0FC3_MOD_0,
+  PREFIX_0FC7_REG_6_MOD_0,
+  PREFIX_0FC7_REG_6_MOD_3,
+  PREFIX_0FC7_REG_7_MOD_3,
   PREFIX_0FD0,
   PREFIX_0FD6,
   PREFIX_0FE6,
@@ -3435,7 +3435,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_6) },
     { MOD_TABLE (MOD_0F18_REG_7) },
   },
-  /* REG_0F1C_MOD_0 */
+  /* REG_0F1C_P_0_MOD_0 */
   {
     { "cldemote",	{ Mb }, 0 },
     { "nopQ",		{ Ev }, 0 },
@@ -3446,7 +3446,7 @@ static const struct dis386 reg_table[][8] = {
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
   },
-  /* REG_0F1E_MOD_3 */
+  /* REG_0F1E_P_1_MOD_3 */
   {
     { "nopQ",		{ Ev }, 0 },
     { "rdsspK",		{ Rdq }, PREFIX_OPCODE },
@@ -3455,7 +3455,7 @@ static const struct dis386 reg_table[][8] = {
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
-    { RM_TABLE (RM_0F1E_MOD_3_REG_7) },
+    { RM_TABLE (RM_0F1E_P_1_MOD_3_REG_7) },
   },
   /* REG_0F71 */
   {
@@ -3625,19 +3625,19 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
-  /* PREFIX_MOD_0_0F01_REG_5 */
+  /* PREFIX_0F01_REG_5_MOD_0 */
   {
     { Bad_Opcode },
     { "rstorssp",	{ Mq }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_3_0F01_REG_5_RM_0 */
+  /* PREFIX_0F01_REG_5_MOD_3_RM_0 */
   {
     { Bad_Opcode },
     { "setssbsy",	{ Skip_MODRM }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_3_0F01_REG_5_RM_2 */
+  /* PREFIX_0F01_REG_5_MOD_3_RM_2 */
   {
     { Bad_Opcode },
     { "saveprevssp",	{ Skip_MODRM }, PREFIX_OPCODE },
@@ -3951,69 +3951,69 @@ static const struct dis386 prefix_table[][4] = {
     { "movdqa",	{ EXxS, XM }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0FAE_REG_0 */
+  /* PREFIX_0FAE_REG_0_MOD_3 */
   {
     { Bad_Opcode },
     { "rdfsbase", { Ev }, 0 },
   },
 
-  /* PREFIX_0FAE_REG_1 */
+  /* PREFIX_0FAE_REG_1_MOD_3 */
   {
     { Bad_Opcode },
     { "rdgsbase", { Ev }, 0 },
   },
 
-  /* PREFIX_0FAE_REG_2 */
+  /* PREFIX_0FAE_REG_2_MOD_3 */
   {
     { Bad_Opcode },
     { "wrfsbase", { Ev }, 0 },
   },
 
-  /* PREFIX_0FAE_REG_3 */
+  /* PREFIX_0FAE_REG_3_MOD_3 */
   {
     { Bad_Opcode },
     { "wrgsbase", { Ev }, 0 },
   },
 
-  /* PREFIX_MOD_0_0FAE_REG_4 */
+  /* PREFIX_0FAE_REG_4_MOD_0 */
   {
     { "xsave",	{ FXSAVE }, 0 },
     { "ptwrite%LQ", { Edq }, 0 },
   },
 
-  /* PREFIX_MOD_3_0FAE_REG_4 */
+  /* PREFIX_0FAE_REG_4_MOD_3 */
   {
     { Bad_Opcode },
     { "ptwrite%LQ", { Edq }, 0 },
   },
 
-  /* PREFIX_MOD_0_0FAE_REG_5 */
+  /* PREFIX_0FAE_REG_5_MOD_0 */
   {
     { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_3_0FAE_REG_5 */
+  /* PREFIX_0FAE_REG_5_MOD_3 */
   {
     { "lfence",		{ Skip_MODRM }, 0 },
     { "incsspK",	{ Rdq }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_0_0FAE_REG_6 */
+  /* PREFIX_0FAE_REG_6_MOD_0 */
   {
     { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE },
     { "clrssbsy",	{ Mq }, PREFIX_OPCODE },
     { "clwb",	{ Mb }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_1_0FAE_REG_6 */
+  /* PREFIX_0FAE_REG_6_MOD_3 */
   {
-    { RM_TABLE (RM_0FAE_REG_6) },
+    { RM_TABLE (RM_0FAE_REG_6_MOD_3_P_0) },
     { "umonitor",	{ Eva }, PREFIX_OPCODE },
     { "tpause",	{ Edq }, PREFIX_OPCODE },
     { "umwait",	{ Edq }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0FAE_REG_7 */
+  /* PREFIX_0FAE_REG_7_MOD_0 */
   {
     { "clflush",	{ Mb }, 0 },
     { Bad_Opcode },
@@ -4048,26 +4048,26 @@ static const struct dis386 prefix_table[][4] = {
     { "cmpsd",	{ XM, EXq, CMP }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_0_0FC3 */
+  /* PREFIX_0FC3_MOD_0 */
   {
     { "movntiS", { Edq, Gdq }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_MOD_0_0FC7_REG_6 */
+  /* PREFIX_0FC7_REG_6_MOD_0 */
   {
     { "vmptrld",{ Mq }, 0 },
     { "vmxon",	{ Mq }, 0 },
     { "vmclear",{ Mq }, 0 },
   },
 
-  /* PREFIX_MOD_3_0FC7_REG_6 */
+  /* PREFIX_0FC7_REG_6_MOD_3 */
   {
     { "rdrand",	{ Ev }, 0 },
     { Bad_Opcode },
     { "rdrand",	{ Ev }, 0 }
   },
 
-  /* PREFIX_MOD_3_0FC7_REG_7 */
+  /* PREFIX_0FC7_REG_7_MOD_3 */
   {
     { "rdseed",	{ Ev }, 0 },
     { "rdpid",	{ Em }, 0 },
@@ -10229,13 +10229,13 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F01_REG_5 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0F01_REG_5) },
-    { RM_TABLE (RM_0F01_REG_5) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_0) },
+    { RM_TABLE (RM_0F01_REG_5_MOD_3) },
   },
   {
     /* MOD_0F01_REG_7 */
     { "invlpg",		{ Mb }, 0 },
-    { RM_TABLE (RM_0F01_REG_7) },
+    { RM_TABLE (RM_0F01_REG_7_MOD_3) },
   },
   {
     /* MOD_0F12_PREFIX_0 */
@@ -10304,13 +10304,13 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F1C_PREFIX_0 */
-    { REG_TABLE (REG_0F1C_MOD_0) },
+    { REG_TABLE (REG_0F1C_P_0_MOD_0) },
     { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F1E_PREFIX_1 */
     { "nopQ",		{ Ev }, 0 },
-    { REG_TABLE (REG_0F1E_MOD_3) },
+    { REG_TABLE (REG_0F1E_P_1_MOD_3) },
   },
   {
     /* MOD_0F24 */
@@ -10396,42 +10396,42 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0FAE_REG_0 */
     { "fxsave",		{ FXSAVE }, 0 },
-    { PREFIX_TABLE (PREFIX_0FAE_REG_0) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_0_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_1 */
     { "fxrstor",	{ FXSAVE }, 0 },
-    { PREFIX_TABLE (PREFIX_0FAE_REG_1) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_1_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_2 */
     { "ldmxcsr",	{ Md }, 0 },
-    { PREFIX_TABLE (PREFIX_0FAE_REG_2) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_2_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_3 */
     { "stmxcsr",	{ Md }, 0 },
-    { PREFIX_TABLE (PREFIX_0FAE_REG_3) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_3_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_4 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_4) },
-    { PREFIX_TABLE (PREFIX_MOD_3_0FAE_REG_4) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_4_MOD_0) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_4_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_5 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_5) },
-    { PREFIX_TABLE (PREFIX_MOD_3_0FAE_REG_5) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_5_MOD_0) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_5_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_6 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_6) },
-    { PREFIX_TABLE (PREFIX_MOD_1_0FAE_REG_6) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_6_MOD_0) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_6_MOD_3) },
   },
   {
     /* MOD_0FAE_REG_7 */
-    { PREFIX_TABLE (PREFIX_0FAE_REG_7) },
-    { RM_TABLE (RM_0FAE_REG_7) },
+    { PREFIX_TABLE (PREFIX_0FAE_REG_7_MOD_0) },
+    { RM_TABLE (RM_0FAE_REG_7_MOD_3) },
   },
   {
     /* MOD_0FB2 */
@@ -10447,7 +10447,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FC3 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0FC3) },
+    { PREFIX_TABLE (PREFIX_0FC3_MOD_0) },
   },
   {
     /* MOD_0FC7_REG_3 */
@@ -10463,13 +10463,13 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FC7_REG_6 */
-    { PREFIX_TABLE (PREFIX_MOD_0_0FC7_REG_6) },
-    { PREFIX_TABLE (PREFIX_MOD_3_0FC7_REG_6) }
+    { PREFIX_TABLE (PREFIX_0FC7_REG_6_MOD_0) },
+    { PREFIX_TABLE (PREFIX_0FC7_REG_6_MOD_3) }
   },
   {
     /* MOD_0FC7_REG_7 */
     { "vmptrst",	{ Mq }, 0 },
-    { PREFIX_TABLE (PREFIX_MOD_3_0FC7_REG_7) }
+    { PREFIX_TABLE (PREFIX_0FC7_REG_7_MOD_3) }
   },
   {
     /* MOD_0FD7 */
@@ -11002,10 +11002,10 @@ static const struct dis386 rm_table[][8] = {
     { "invlpga",	{ Skip_MODRM }, 0 },
   },
   {
-    /* RM_0F01_REG_5 */
-    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_0) },
+    /* RM_0F01_REG_5_MOD_3 */
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_0) },
     { Bad_Opcode },
-    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_2) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_2) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -11013,7 +11013,7 @@ static const struct dis386 rm_table[][8] = {
     { "wrpkru",		{ Skip_MODRM }, 0 },
   },
   {
-    /* RM_0F01_REG_7 */
+    /* RM_0F01_REG_7_MOD_3 */
     { "swapgs",		{ Skip_MODRM }, 0  },
     { "rdtscp",		{ Skip_MODRM }, 0  },
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
@@ -11021,7 +11021,7 @@ static const struct dis386 rm_table[][8] = {
     { "clzero",		{ Skip_MODRM }, 0  },
   },
   {
-    /* RM_0F1E_MOD_3_REG_7 */
+    /* RM_0F1E_P_1_MOD_3_REG_7 */
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
     { "endbr64",	{ Skip_MODRM },  PREFIX_OPCODE },
@@ -11032,11 +11032,11 @@ static const struct dis386 rm_table[][8] = {
     { "nopQ",		{ Ev }, 0 },
   },
   {
-    /* RM_0FAE_REG_6 */
+    /* RM_0FAE_REG_6_MOD_3 */
     { "mfence",		{ Skip_MODRM }, 0 },
   },
   {
-    /* RM_0FAE_REG_7 */
+    /* RM_0FAE_REG_7_MOD_3 */
     { "sfence",		{ Skip_MODRM }, 0 },
 
   },
