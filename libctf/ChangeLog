@@ -1,5 +1,11 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_forward): Intern in the right namespace.
+	(ctf_dtd_delete): Remove correspondingly.
+	(ctf_rollback): Likewise.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_type_internal): Hand back existing types
 	unchanged.
 
