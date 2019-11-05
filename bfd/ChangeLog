@@ -1,3 +1,10 @@
+2019-11-05  Tim Rühsen  <tim.ruehsen@gmx.de>
+
+	* doc/chew.c (add_to_definition): Use correct type when
+	calculating size of array reallocation.
+	(nextword): Always initialise the word return parameter.
+	(compile): Check return value of nextword().
+
 2019-10-30  Keith Seitz  <keiths@redhat.com>
 
 	* elf-bfd.h (elf_backend_data) <elf_backend_core_find_build_id>:
