@@ -1,3 +1,8 @@
+2019-11-05  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.h (gdb_static_assert): Put && operator at the beginning
+	of the line instead of the end.
+
 2019-11-04  Christian Biesinger  <cbiesinger@google.com>
 
 	* psympriv.h: Add static_asserts for sizeof (general_symbol_info)

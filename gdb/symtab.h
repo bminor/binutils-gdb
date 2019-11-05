@@ -450,8 +450,8 @@ struct general_symbol_info
    makes sure the size doesn't change accidentally.  Be careful when
    purposely increasing the size.  */
 gdb_static_assert ((sizeof (void *) == 8 && sizeof (general_symbol_info) == 32)
-		   || (sizeof (void *) == 4 &&
-		       sizeof (general_symbol_info) == 20));
+		   || (sizeof (void *) == 4
+		       && sizeof (general_symbol_info) == 20));
 
 extern void symbol_set_demangled_name (struct general_symbol_info *,
 				       const char *,
