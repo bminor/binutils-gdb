@@ -1,5 +1,11 @@
 2019-11-05  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_Mwaitx): Delete.
+	(prefix_table): Use OP_Mwait for mwaitx entry.
+	(OP_Mwait): Also handle mwaitx.
+
+2019-11-05  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_0F01_REG_7_MOD_3_RM_2,
 	PREFIX_0F01_REG_7_MOD_3_RM_3): New.
 	(prefix_table): Add respective entries.

@@ -101,7 +101,6 @@ static void VPCOM_Fixup (int, int);
 static void OP_0f07 (int, int);
 static void OP_Monitor (int, int);
 static void OP_Mwait (int, int);
-static void OP_Mwaitx (int, int);
 static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
@@ -3652,7 +3651,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F01_REG_7_MOD_3_RM_3 */
   {
-    { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
+    { "mwaitx",		{ { OP_Mwait, eBX_reg } }, 0  },
   },
 
   /* PREFIX_0F09 */
@@ -15516,35 +15515,17 @@ CMP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_Mwaitx (int bytemode ATTRIBUTE_UNUSED,
-	  int sizeflag ATTRIBUTE_UNUSED)
+OP_Mwait (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
-  /* mwaitx %eax,%ecx,%ebx */
+  /* mwait %eax,%ecx / mwaitx %eax,%ecx,%ebx  */
   if (!intel_syntax)
     {
       const char **names = (address_mode == mode_64bit
 			    ? names64 : names32);
       strcpy (op_out[0], names[0]);
       strcpy (op_out[1], names[1]);
-      strcpy (op_out[2], names[3]);
-      two_source_ops = 1;
-    }
-  /* Skip mod/rm byte.  */
-  MODRM_CHECK;
-  codep++;
-}
-
-static void
-OP_Mwait (int bytemode ATTRIBUTE_UNUSED,
-	  int sizeflag ATTRIBUTE_UNUSED)
-{
-  /* mwait %eax,%ecx  */
-  if (!intel_syntax)
-    {
-      const char **names = (address_mode == mode_64bit
-			    ? names64 : names32);
-      strcpy (op_out[0], names[0]);
-      strcpy (op_out[1], names[1]);
+      if (bytemode == eBX_reg)
+	strcpy (op_out[2], names[3]);
       two_source_ops = 1;
     }
   /* Skip mod/rm byte.  */
