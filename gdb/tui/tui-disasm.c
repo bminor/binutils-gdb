@@ -276,32 +276,6 @@ tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
     tui_set_win_focus_to (TUI_DISASM_WIN);
 }
 
-
-/* Function to display the disassembly window.  */
-void
-tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
-				     CORE_ADDR start_addr)
-{
-  struct symtab_and_line sal;
-
-  tui_show_disassem (gdbarch, start_addr);
-  if (tui_current_layout () == SRC_DISASSEM_COMMAND)
-    {
-      struct tui_line_or_address val;
-
-      /* Update what is in the source window if it is displayed too,
-         note that it follows what is in the disassembly window and
-         visa-versa.  */
-      sal = find_pc_line (start_addr, 0);
-      val.loa = LOA_LINE;
-      val.u.line_no = sal.line;
-      TUI_SRC_WIN->update_source_window (gdbarch, sal.symtab, val);
-      if (sal.symtab)
-	set_current_source_symtab_and_line (sal);
-      tui_update_locator_fullname (sal.symtab);
-    }
-}
-
 void
 tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {

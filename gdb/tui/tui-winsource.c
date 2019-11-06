@@ -221,21 +221,15 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
       struct symtab_and_line sal;
       struct tui_line_or_address l;
       
-      switch (tui_current_layout ())
+      if (TUI_DISASM_WIN != nullptr)
+	tui_show_disassem (gdbarch, addr);
+
+      if (TUI_SRC_WIN != nullptr)
 	{
-	case DISASSEM_COMMAND:
-	case DISASSEM_DATA_COMMAND:
-	  tui_show_disassem (gdbarch, addr);
-	  break;
-	case SRC_DISASSEM_COMMAND:
-	  tui_show_disassem_and_update_source (gdbarch, addr);
-	  break;
-	default:
 	  sal = find_pc_line (addr, 0);
 	  l.loa = LOA_LINE;
 	  l.u.line_no = sal.line;
 	  TUI_SRC_WIN->show_symtab_source (gdbarch, sal.symtab, l);
-	  break;
 	}
     }
   else

@@ -69,7 +69,6 @@ private:
 };
 
 extern void tui_show_disassem (struct gdbarch *, CORE_ADDR);
-extern void tui_show_disassem_and_update_source (struct gdbarch *, CORE_ADDR);
 extern void tui_get_begin_asm_address (struct gdbarch **, CORE_ADDR *);
 
 #endif /* TUI_TUI_DISASM_H */

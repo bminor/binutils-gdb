@@ -1,5 +1,13 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_windows_with_addr): Call
+	tui_show_disassem.
+	* tui/tui-disasm.h (tui_show_disassem_and_update_source): Don't
+	declare.
+	* tui/tui-disasm.c (tui_show_disassem_and_update_source): Remove.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (tui_show_source): Remove parameters.
 	* tui/tui.c (tui_show_source): Remove parameters.
 	* tui/tui-out.c (tui_ui_out::do_field_string): Update.
