@@ -12309,8 +12309,12 @@ process_syminfo (Filedata * filedata ATTRIBUTE_UNUSED)
   return TRUE;
 }
 
-#define IN_RANGE(START,END,ADDR,OFF)		\
-  (((ADDR) >= (START)) && ((ADDR) + (OFF) < (END)))
+/* A macro which evaluates to TRUE if the region ADDR .. ADDR + NELEM
+   is contained by the region START .. END.  The types of ADDR, START
+   and END should all be the same.  Note both ADDR + NELEM and END
+   point to just beyond the end of the regions that are being tested.  */
+#define IN_RANGE(START,END,ADDR,NELEM)		\
+  (((ADDR) >= (START)) && ((ADDR) < (END)) && ((ADDR) + (NELEM) <= (END)))
 
 /* Check to see if the given reloc needs to be handled in a target specific
    manner.  If so then process the reloc and return TRUE otherwise return
@@ -13411,7 +13415,7 @@ apply_relocations (Filedata *                 filedata,
 	    }
 
 	  rloc = start + rp->r_offset;
-	  if (rloc >= end || (rloc + reloc_size) > end || (rloc < start))
+	  if (!IN_RANGE (start, end, rloc, reloc_size))
 	    {
 	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
 		    (unsigned long) rp->r_offset,

@@ -1,3 +1,10 @@
+2019-11-06  Christian Eggers  <ceggers@gmx.de>
+
+	* readelf.c (IN_RANGE): Rename parameter OFF to NELEM. Add
+	comment.  Catch potential integer overflow and fix off by one
+	error whilst checking reloc location against section size.
+	(apply_relocations): Use IN_RANGE macro.
+
 2019-11-04  Fangrui Song  <maskray@google.com>
 
 	* objcopy.c (enum option_values): Add OPTION_KEEP_SECTION.
