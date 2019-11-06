@@ -20,6 +20,26 @@
 #include "common-defs.h"
 #include <string.h>
 
+/* There are two different versions of strerror_r; one is GNU-specific, the
+   other XSI-compliant.  They differ in the return type.  This overload lets
+   us choose the right behavior for each return type.  We cannot rely on Gnulib
+   to solve this for us because IPA does not use Gnulib but uses this
+   function.  */
+
+/* Called if we have a XSI-compliant strerror_r.  */
+static char *
+select_strerror_r (int res, char *buf)
+{
+  return res == 0 ? buf : nullptr;
+}
+
+/* Called if we have a GNU strerror_r.  */
+static char *
+select_strerror_r (char *res, char *)
+{
+  return res;
+}
+
 /* Implementation of safe_strerror as defined in common-utils.h.  */
 
 const char *
@@ -27,11 +47,9 @@ safe_strerror (int errnum)
 {
   static thread_local char buf[1024];
 
-  /* Assign the return value to an int, so we get an error if we accidentally
-     get the wrong version of this function (glibc has two of them...).  */
-  int ret = strerror_r (errnum, buf, sizeof (buf));
-  if (ret == 0)
-    return buf;
+  char *res = select_strerror_r (strerror_r (errnum, buf, sizeof (buf)), buf);
+  if (res != nullptr)
+    return res;
 
   xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
   return buf;

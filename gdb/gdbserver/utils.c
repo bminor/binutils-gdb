@@ -47,7 +47,7 @@ perror_with_name (const char *string)
   const char *err;
   char *combined;
 
-  err = strerror (errno);
+  err = safe_strerror (errno);
   if (err == NULL)
     err = "unknown error";
 

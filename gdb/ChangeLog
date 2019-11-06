@@ -1,3 +1,13 @@
+2019-12-10  Christian Biesinger  <cbiesinger@google.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* gdbsupport/agent.c (gdb_connect_sync_socket): Call
+	safe_strerror instead of strerror.
+	* gdbsupport/common.m4: Don't check for strerror.
+	* gdbsupport/safe-strerror.c: Support both the glibc version
+	of strerror_r and the XSI version.
+
 2019-12-10  Tom Tromey  <tromey@adacore.com>
 
 	* ada-typeprint.c (print_choices): Use a single "?".

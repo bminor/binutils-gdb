@@ -158,7 +158,7 @@ LIBS="$old_LIBS"
 
 libiberty_INIT
 
-AC_CHECK_DECLS([strerror, perror, vasprintf, vsnprintf])
+AC_CHECK_DECLS([perror, vasprintf, vsnprintf])
 
 AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 

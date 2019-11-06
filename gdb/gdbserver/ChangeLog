@@ -1,3 +1,18 @@
+2019-12-10  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Add safe-strerror.c to gdbreplay and IPA, and change
+	UNDO_GNULIB_CFLAGS to undo strerror_r instead of strerror.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Don't check for strerror.
+	* linux-i386-ipa.c (initialize_fast_tracepoint_trampoline_buffer):
+	Call safe_strerror instead of strerror.
+	* server.h (strerror): Remove this now-unnecessary declaration.
+	* tracepoint.c (init_named_socket): Call safe_strerror instead of
+	strerror.
+	(gdb_agent_helper_thread): Likewise.
+	* utils.c (perror_with_name): Likewise.
+
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
 	* configure, config.in: Rebuild.

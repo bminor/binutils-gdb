@@ -29,12 +29,6 @@ gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #include "gdbsupport/version.h"
 
-#if !HAVE_DECL_STRERROR
-#ifndef strerror
-extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
-#endif
-#endif
-
 #if !HAVE_DECL_PERROR
 #ifndef perror
 extern void perror (const char *);

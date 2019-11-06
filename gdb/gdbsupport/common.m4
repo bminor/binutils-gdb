@@ -35,7 +35,7 @@ AC_DEFUN([GDB_AC_COMMON], [
   AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 socketpair sigaction \
 		  sigprocmask])
 
-  AC_CHECK_DECLS([strerror, strstr])
+  AC_CHECK_DECLS([strstr])
 
   # Check for std::thread.  This does not work on some platforms, like
   # mingw and DJGPP.

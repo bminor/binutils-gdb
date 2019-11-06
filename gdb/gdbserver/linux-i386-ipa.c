@@ -210,7 +210,7 @@ initialize_fast_tracepoint_trampoline_buffer (void)
   if (!f)
     {    
       snprintf (buf, sizeof (buf), "mmap_min_addr open failed: %s",
-		strerror (errno));
+		safe_strerror (errno));
       set_trampoline_buffer_space (0, 0, buf);
       return;
     }
@@ -233,7 +233,7 @@ initialize_fast_tracepoint_trampoline_buffer (void)
       else
 	{
 	  snprintf (buf, IPA_BUFSIZ, "low-64K-buffer mmap() failed: %s",
-		    strerror (errno));
+		    safe_strerror (errno));
 	  set_trampoline_buffer_space (0, 0, buf);
 	}
     }

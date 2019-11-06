@@ -149,7 +149,7 @@ gdb_connect_sync_socket (int pid)
   res = fd = gdb_socket_cloexec (PF_UNIX, SOCK_STREAM, 0);
   if (res == -1)
     {
-      warning (_("error opening sync socket: %s"), strerror (errno));
+      warning (_("error opening sync socket: %s"), safe_strerror (errno));
       return -1;
     }
 
@@ -168,7 +168,7 @@ gdb_connect_sync_socket (int pid)
     {
       warning (_("error connecting sync socket (%s): %s. "
 		 "Make sure the directory exists and that it is writable."),
-		 path, strerror (errno));
+		 path, safe_strerror (errno));
       close (fd);
       return -1;
     }

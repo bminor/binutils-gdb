@@ -304,6 +304,7 @@ GDBREPLAY_OBS = \
 	gdbsupport/errors.o \
 	gdbsupport/netstuff.o \
 	gdbsupport/print-utils.o \
+	gdbsupport/safe-strerror.o \
 	gdbreplay.o \
 	utils.o \
 	version.o
@@ -430,6 +431,7 @@ IPA_OBJS = \
 	gdbsupport/format-ipa.o \
 	gdbsupport/print-utils-ipa.o \
 	gdbsupport/rsp-low-ipa.o \
+	gdbsupport/safe-strerror-ipa.o \
 	gdbsupport/tdesc-ipa.o \
 	regcache-ipa.o \
 	remote-utils-ipa.o \
@@ -557,7 +559,7 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 # Undo gnulib replacements for the IPA shared library build.
 # The gnulib headers are still needed, but gnulib is not linked
 # into the IPA lib so replacement apis don't work.
-UNDO_GNULIB_CFLAGS = -Drpl_strerror=strerror
+UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
