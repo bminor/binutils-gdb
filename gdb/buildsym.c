@@ -719,23 +719,6 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
   e->pc = pc;
 }
 
-/* Needed in order to sort line tables from IBM xcoff files.  Sigh!  */
-
-static bool
-lte_is_less_than (const linetable_entry &ln1, const linetable_entry &ln2)
-{
-  /* Note: this code does not assume that CORE_ADDRs can fit in ints.
-     Please keep it that way.  */
-  if (ln1.pc < ln2.pc)
-    return true;
-
-  if (ln1.pc > ln2.pc)
-    return false;
-
-  /* If pc equal, sort by line.  I'm not sure whether this is optimum
-     behavior (see comment at struct linetable in symtab.h).  */
-  return ln1.line < ln2.line;
-}
 
 /* Subroutine of end_symtab to simplify it.  Look for a subfile that
    matches the main source file's basename.  If there is only one, and
@@ -953,14 +936,23 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	  linetablesize = sizeof (struct linetable) +
 	    subfile->line_vector->nitems * sizeof (struct linetable_entry);
 
-	  /* Like the pending blocks, the line table may be
-	     scrambled in reordered executables.  Sort it if
-	     OBJF_REORDERED is true.  */
+	  const auto lte_is_less_than
+	    = [] (const linetable_entry &ln1,
+		  const linetable_entry &ln2) -> bool
+	      {
+		return (ln1.pc < ln2.pc);
+	      };
+
+	  /* Like the pending blocks, the line table may be scrambled in
+	     reordered executables.  Sort it if OBJF_REORDERED is true.  It
+	     is important to preserve the order of lines at the same
+	     address, as this maintains the inline function caller/callee
+	     relationships, this is why std::stable_sort is used.  */
 	  if (m_objfile->flags & OBJF_REORDERED)
-	    std::sort (subfile->line_vector->item,
-		       subfile->line_vector->item
-			 + subfile->line_vector->nitems,
-		       lte_is_less_than);
+	    std::stable_sort (subfile->line_vector->item,
+			      subfile->line_vector->item
+			      + subfile->line_vector->nitems,
+			      lte_is_less_than);
 	}
 
       /* Allocate a symbol table if necessary.  */

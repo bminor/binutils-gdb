@@ -1,5 +1,14 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* buildsym.c (lte_is_less_than): Delete.
+	(buildsym_compunit::end_symtab_with_blockvector): Create local
+	lambda function to sort line table entries, and use
+	std::stable_sort instead of std::sort.
+	* symtab.c (find_pc_sect_line): Skip backward over end of sequence
+	markers when looking for a previous line.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (lnp_state_machine::record_line): Include
 	end_sequence parameter in debug print out.  Record the line if we
 	are at an end_sequence marker even if it's not the start of a

@@ -1,5 +1,10 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-inline-stepping.c: New file.
+	* gdb.dwarf2/dw2-inline-stepping.exp: New file.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/maint.exp: Update line table parsing test.
 	* gdb.dwarf2/dw2-ranges-base.exp: Add new line table parsing test.
 

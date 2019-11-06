@@ -3222,7 +3222,12 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       struct linetable_entry *last = item + len;
       item = std::upper_bound (first, last, pc, pc_compare);
       if (item != first)
-	prev = item - 1;		/* Found a matching item.  */
+	{
+	  /* Found a matching item.  Skip backwards over any end of
+	     sequence markers.  */
+	  for (prev = item - 1; prev->line == 0 && prev != first; prev--)
+	    /* Nothing.  */;
+	}
 
       /* At this point, prev points at the line whose start addr is <= pc, and
          item points at the next line.  If we ran off the end of the linetable
