@@ -1,5 +1,10 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_gen_win_info) <can_box>: New method.
+	(struct tui_win_info) <can_box>: Update.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window) <max_height>: New
 	method.
 	* tui/tui-regs.h (struct tui_data_item_window) <max_height>: New

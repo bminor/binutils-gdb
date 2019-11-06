@@ -85,6 +85,12 @@ public:
   /* Compute the maximum height of this window.  */
   virtual int max_height () const = 0;
 
+  /* Return true if this window can be boxed.  */
+  virtual bool can_box () const
+  {
+    return false;
+  }
+
   /* Resize this window.  The parameters are used to set the window's
      size and position.  */
   virtual void resize (int height, int width,
@@ -203,7 +209,7 @@ public:
     return true;
   }
 
-  virtual bool can_box () const
+  bool can_box () const override
   {
     return true;
   }
