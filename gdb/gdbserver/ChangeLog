@@ -1,3 +1,8 @@
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2019-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ax.c (ax_printf): Handle size_t_arg.

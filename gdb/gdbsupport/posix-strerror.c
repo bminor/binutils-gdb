@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
+#include <string.h>
 
 /* Implementation of safe_strerror as defined in common-utils.h.  */
 
@@ -26,23 +27,12 @@ safe_strerror (int errnum)
 {
   static thread_local char buf[1024];
 
-  char *msg = nullptr;
-#ifdef HAVE_STRERROR_R
-#  if !__GLIBC__ || ((_POSIX_C_SOURCE >= 200112L) && !  _GNU_SOURCE)
-  /* Glibc has two different, incompatible versions of strerror_r.  */
-  if (strerror_r (errnum, buf, sizeof (buf)) == 0)
-    msg = buf;
-#  else
-  msg = strerror_r (errnum, buf, sizeof (buf));
-#  endif
-#else
-  msg = strerror (errnum);
-#endif
-  if (msg == nullptr)
-    {
+  /* Assign the return value to an int, so we get an error if we accidentally
+     get the wrong version of this function (glibc has two of them...).  */
+  int ret = strerror_r (errnum, buf, sizeof (buf));
+  if (ret == 0)
+    return buf;
 
-      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
-      msg = buf;
-    }
-  return (msg);
+  xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
+  return buf;
 }

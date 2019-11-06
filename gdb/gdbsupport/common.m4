@@ -33,7 +33,7 @@ AC_DEFUN([GDB_AC_COMMON], [
 		   dlfcn.h)
 
   AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 socketpair sigaction \
-		  sigprocmask strerror_r])
+		  sigprocmask])
 
   AC_CHECK_DECLS([strerror, strstr])
 

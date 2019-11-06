@@ -169,11 +169,15 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/isnand.m4 \
 	$(top_srcdir)/import/m4/isnanl.m4 \
 	$(top_srcdir)/import/m4/largefile.m4 \
+	$(top_srcdir)/import/m4/lib-ld.m4 \
+	$(top_srcdir)/import/m4/lib-link.m4 \
+	$(top_srcdir)/import/m4/lib-prefix.m4 \
 	$(top_srcdir)/import/m4/limits-h.m4 \
 	$(top_srcdir)/import/m4/localcharset.m4 \
 	$(top_srcdir)/import/m4/locale-fr.m4 \
 	$(top_srcdir)/import/m4/locale-ja.m4 \
 	$(top_srcdir)/import/m4/locale-zh.m4 \
+	$(top_srcdir)/import/m4/lock.m4 \
 	$(top_srcdir)/import/m4/longlong.m4 \
 	$(top_srcdir)/import/m4/lstat.m4 \
 	$(top_srcdir)/import/m4/malloc.m4 \
@@ -227,6 +231,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/strchrnul.m4 \
 	$(top_srcdir)/import/m4/strdup.m4 \
 	$(top_srcdir)/import/m4/strerror.m4 \
+	$(top_srcdir)/import/m4/strerror_r.m4 \
 	$(top_srcdir)/import/m4/string_h.m4 \
 	$(top_srcdir)/import/m4/strstr.m4 \
 	$(top_srcdir)/import/m4/strtok_r.m4 \
@@ -236,6 +241,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/sys_types_h.m4 \
 	$(top_srcdir)/import/m4/sys_uio_h.m4 \
 	$(top_srcdir)/import/m4/tempname.m4 \
+	$(top_srcdir)/import/m4/threadlib.m4 \
 	$(top_srcdir)/import/m4/time_h.m4 \
 	$(top_srcdir)/import/m4/unistd-safer.m4 \
 	$(top_srcdir)/import/m4/unistd_h.m4 \
@@ -313,13 +319,13 @@ CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.in \
 	$(top_srcdir)/../ar-lib $(top_srcdir)/../compile \
-	$(top_srcdir)/../config.guess $(top_srcdir)/../config.sub \
-	$(top_srcdir)/../install-sh $(top_srcdir)/../missing \
-	$(top_srcdir)/../mkinstalldirs ../COPYING ../COPYING.LIB \
-	../ChangeLog ../README ../ar-lib ../compile ../config.guess \
-	../config.rpath ../config.sub ../depcomp ../install-sh \
-	../ltmain.sh ../missing ../mkinstalldirs ../ylwrap ChangeLog \
-	README
+	$(top_srcdir)/../config.guess $(top_srcdir)/../config.rpath \
+	$(top_srcdir)/../config.sub $(top_srcdir)/../install-sh \
+	$(top_srcdir)/../missing $(top_srcdir)/../mkinstalldirs \
+	../COPYING ../COPYING.LIB ../ChangeLog ../README ../ar-lib \
+	../compile ../config.guess ../config.rpath ../config.sub \
+	../depcomp ../install-sh ../ltmain.sh ../missing \
+	../mkinstalldirs ../ylwrap ChangeLog README
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -1115,8 +1121,12 @@ LDFLAGS = @LDFLAGS@
 LIBGNU_LIBDEPS = @LIBGNU_LIBDEPS@
 LIBGNU_LTLIBDEPS = @LIBGNU_LTLIBDEPS@
 LIBINTL = @LIBINTL@
+LIBMULTITHREAD = @LIBMULTITHREAD@
 LIBOBJS = @LIBOBJS@
+LIBPTH = @LIBPTH@
+LIBPTH_PREFIX = @LIBPTH_PREFIX@
 LIBS = @LIBS@
+LIBTHREAD = @LIBTHREAD@
 LIMITS_H = @LIMITS_H@
 LN_S = @LN_S@
 LOCALCHARSET_TESTS_ENVIRONMENT = @LOCALCHARSET_TESTS_ENVIRONMENT@
@@ -1125,7 +1135,10 @@ LOCALE_FR_UTF8 = @LOCALE_FR_UTF8@
 LOCALE_JA = @LOCALE_JA@
 LOCALE_ZH_CN = @LOCALE_ZH_CN@
 LTLIBINTL = @LTLIBINTL@
+LTLIBMULTITHREAD = @LTLIBMULTITHREAD@
 LTLIBOBJS = @LTLIBOBJS@
+LTLIBPTH = @LTLIBPTH@
+LTLIBTHREAD = @LTLIBTHREAD@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@

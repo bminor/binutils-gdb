@@ -1,5 +1,28 @@
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* import/Makefile.am: Update.
+	* import/Makefile.in: Regenerate.
+	* import/extra/config.rpath: New file.
+	* import/glthread/lock.c: New file.
+	* import/glthread/lock.h: New file.
+	* import/glthread/threadlib.c: New file.
+	* import/m4/gnulib-cache.m4: Update.
+	* import/m4/gnulib-comp.m4: Update.
+	* import/m4/lib-ld.m4: New file.
+	* import/m4/lib-link.m4: New file.
+	* import/m4/lib-prefix.m4: New file.
+	* import/m4/lock.m4: New file.
+	* import/m4/strerror_r.m4: New file.
+	* import/m4/threadlib.m4: New file.
+	* import/strerror_r.c: New file.
+	* update-gnulib.sh: Import strerror_r-posix.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* Makefile.am: New file.
 	* Makefile.in: Replace with generated file.
 	* aclocal-m4-deps.mk: Remove.

@@ -55,6 +55,7 @@ IMPORTED_GNULIB_MODULES="\
     setenv \
     signal-h \
     strchrnul \
+    strerror_r-posix \
     strstr \
     strtok_r \
     sys_stat \

@@ -1,3 +1,12 @@
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* gdbsupport/common.m4: No longer check for strerror_r.
+	* gdbsupport/posix-strerror.c (safe_strerror): Always call the
+	POSIX version of strerror_r, now that gnulib provides it if
+	necessary.
+
 2019-11-14  Christian Biesinger  <cbiesinger@google.com>
 
 	* README (`configure' options): Update.
