@@ -1,5 +1,11 @@
 2019-11-05  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-disasm.c (struct tui_asm_line) <addr_size>: New member.
+	(tui_disassemble): Set addr_size.
+	(tui_disasm_window::set_contents): Use addr_size.
+
+2019-11-05  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_language_defn): Update.
 	* python/py-value.c (valpy_string): Call c_get_string.
 	* p-lang.c (pascal_language_defn): Update.

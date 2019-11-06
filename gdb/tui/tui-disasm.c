@@ -47,6 +47,7 @@ struct tui_asm_line
 {
   CORE_ADDR addr;
   std::string addr_string;
+  size_t addr_size;
   std::string insn;
 };
 
@@ -110,6 +111,7 @@ tui_disassemble (struct gdbarch *gdbarch,
 	  else
 	    new_size = asm_lines[pos + i].addr_string.size ();
 	  *addr_size = std::max (*addr_size, new_size);
+	  asm_lines[pos + i].addr_size = new_size;
 	}
 
       pc = pc + gdb_print_insn (gdbarch, pc, &gdb_dis_out, NULL);
@@ -239,8 +241,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
       std::string line
 	= (asm_lines[i].addr_string
-	   + n_spaces (insn_pos
-		       - asm_lines[i].addr_string.size ())
+	   + n_spaces (insn_pos - asm_lines[i].addr_size)
 	   + asm_lines[i].insn);
 
       const char *ptr = line.c_str ();
