@@ -398,6 +398,9 @@
 /* Define to 1 if you have the `dirfd' function. */
 #undef HAVE_DIRFD
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the 'dup2' function. */
 #undef HAVE_DUP2
 
@@ -1604,6 +1607,9 @@
 
 /* Define to 1 if you have the <wctype.h> header file. */
 #undef HAVE_WCTYPE_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
 
 /* Define to 1 if you have the <winsock2.h> header file. */
 #undef HAVE_WINSOCK2_H
