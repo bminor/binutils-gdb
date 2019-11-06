@@ -1,3 +1,8 @@
+2019-11-19  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat_target::attach): Include GetLastError
+	result in error when DebugActiveProcess fails.
+
 2019-11-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

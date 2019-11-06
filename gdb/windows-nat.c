@@ -1983,7 +1983,8 @@ windows_nat_target::attach (const char *args, int from_tty)
 #endif
 
   if (!ok)
-    error (_("Can't attach to process."));
+    error (_("Can't attach to process %u (error %u)"),
+	   (unsigned) pid, (unsigned) GetLastError ());
 
   DebugSetProcessKillOnExit (FALSE);
 
