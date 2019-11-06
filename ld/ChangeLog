@@ -1,5 +1,9 @@
 2019-11-07  Alan Modra  <amodra@gmail.com>
 
+	* configure.tgt: Order targets by cpu.
+
+2019-11-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-aarch64/aarch64-elf.exp: Run tests requiring pie
 	or shared library support only when check_shared_lib_support.
 	* testsuite/ld-aarch64/bti-pac-plt-1.d: Likewise.
