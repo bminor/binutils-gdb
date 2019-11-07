@@ -1,5 +1,23 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* config/tc-arm.c (arm_ext_i8mm): New feature set.
+	(do_vusdot): New.
+	(do_vsudot): New.
+	(do_vsmmla): New.
+	(do_vummla): New.
+	(insns): Add vsmmla, vummla, vusmmla, vusdot, vsudot mnemonics.
+	(armv86a_ext_table): Add i8mm extension.
+	(arm_extensions): Move bf16 extension to context sensitive table.
+	(armv82a_ext_table, armv84a_ext_table, armv85a_ext_table):
+	Move bf16 extension to context sensitive table.
+	(armv86a_ext_table): Add i8mm extension.
+	* doc/c-arm.texi: Document i8mm extension.
+	* testsuite/gas/arm/i8mm.s: New test.
+	* testsuite/gas/arm/i8mm.d: New test.
+	* testsuite/gas/arm/bfloat17-cmdline-bad-3.d: Update test.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* config/tc-aarch64.c: Add new arch fetures to suppport the mm extension.
 	(parse_operands): Add new operand.
 	* testsuite/gas/aarch64/i8mm.s: New test.

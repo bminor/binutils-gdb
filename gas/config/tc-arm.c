@@ -277,6 +277,8 @@ static const arm_feature_set arm_ext_predres =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES);
 static const arm_feature_set arm_ext_bf16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16);
+static const arm_feature_set arm_ext_i8mm =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 #ifdef OBJ_ELF
@@ -21483,6 +21485,79 @@ do_neon_dotproduct_u (void)
   return do_neon_dotproduct (1);
 }
 
+static void
+do_vusdot (void)
+{
+  enum neon_shape rs;
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
+  if (inst.operands[2].isscalar)
+    {
+      rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
+      neon_check_type (3, rs, N_EQK, N_EQK, N_S8 | N_KEY);
+
+      inst.instruction |= (1 << 25);
+      int index = inst.operands[2].reg & 0xf;
+      constraint ((index != 1 && index != 0), _("index must be 0 or 1"));
+      inst.operands[2].reg >>= 4;
+      constraint (!(inst.operands[2].reg < 16),
+		  _("indexed register must be less than 16"));
+      neon_three_args (rs == NS_QQS);
+      inst.instruction |= (index << 5);
+    }
+  else
+    {
+      inst.instruction |= (1 << 21);
+      rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+      neon_check_type (3, rs, N_EQK, N_EQK, N_S8 | N_KEY);
+      neon_three_args (rs == NS_QQQ);
+    }
+}
+
+static void
+do_vsudot (void)
+{
+  enum neon_shape rs;
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
+  if (inst.operands[2].isscalar)
+    {
+      rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
+      neon_check_type (3, rs, N_EQK, N_EQK, N_U8 | N_KEY);
+
+      inst.instruction |= (1 << 25);
+      int index = inst.operands[2].reg & 0xf;
+      constraint ((index != 1 && index != 0), _("index must be 0 or 1"));
+      inst.operands[2].reg >>= 4;
+      constraint (!(inst.operands[2].reg < 16),
+		  _("indexed register must be less than 16"));
+      neon_three_args (rs == NS_QQS);
+      inst.instruction |= (index << 5);
+    }
+}
+
+static void
+do_vsmmla (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
+  neon_check_type (3, rs, N_EQK, N_EQK, N_S8 | N_KEY);
+
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
+
+  neon_three_args (1);
+
+}
+
+static void
+do_vummla (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_QQQ, NS_NULL);
+  neon_check_type (3, rs, N_EQK, N_EQK, N_U8 | N_KEY);
+
+  set_pred_insn_type (OUTSIDE_PRED_INSN);
+
+  neon_three_args (1);
+
+}
+
 /* Crypto v1 instructions.  */
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
@@ -26000,7 +26075,7 @@ static const struct asm_opcode insns[] =
 #define	THUMB_VARIANT &arm_ext_i8mm
  TUF ("vsmmla", c200c40, fc200c40, 3, (RNQ, RNQ, RNQ), vsmmla, vsmmla),
  TUF ("vummla", c200c50, fc200c50, 3, (RNQ, RNQ, RNQ), vummla, vummla),
- TUF ("vusmmla", ca00c40, fca00c40, 3, (RNQ, RNQ, RNQ), vummla, vummla),
+ TUF ("vusmmla", ca00c40, fca00c40, 3, (RNQ, RNQ, RNQ), vsmmla, vsmmla),
  TUF ("vusdot", c800d00, fc800d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), vusdot, vusdot),
  TUF ("vsudot", c800d10, fc800d10, 3, (RNDQ, RNDQ, RNSC), vsudot, vsudot),
 };
@@ -31127,6 +31202,8 @@ static const struct arm_ext_table armv82a_ext_table[] =
   ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8_1),
   ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_2_FP16),
   ARM_ADD ("fp16fml", FPU_ARCH_NEON_VFP_ARMV8_2_FP16FML),
+  ARM_ADD ("bf16", ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16)),
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
   ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1,
 	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
   ARM_ADD ("dotprod", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
@@ -31143,6 +31220,8 @@ static const struct arm_ext_table armv84a_ext_table[] =
 {
   ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_ADD ("bf16", ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16)),
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
   ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
 	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
 
@@ -31158,6 +31237,8 @@ static const struct arm_ext_table armv85a_ext_table[] =
 {
   ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_ADD ("bf16", ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16)),
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
   ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
 	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
 
@@ -31169,6 +31250,7 @@ static const struct arm_ext_table armv85a_ext_table[] =
 
 static const struct arm_ext_table armv86a_ext_table[] =
 {
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
@@ -31308,9 +31390,6 @@ struct arm_option_extension_value_table
    use the context sensitive approach using arm_ext_table's.  */
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
-  ARM_EXT_OPT ("bf16",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
-			ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
-			ARM_ARCH_V8_2A),
   ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 			 ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,

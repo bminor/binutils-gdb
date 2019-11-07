@@ -1471,6 +1471,20 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
     0xfe300810, 0xffb00f10, "vfma%6?tb.bf16\t%12-15,22Q, %16-19,7Q, %0-2D[%3,5d]"},
 
+  /* Matrix Multiply instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfc200c40, 0xffb00f50, "vsmmla.s8\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfc200c50, 0xffb00f50, "vummla.u8\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfca00c40, 0xffb00f50, "vusmmla.s8\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfca00d00, 0xffb00f10, "vusdot.s8\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfe800d00, 0xffb00f10, "vusdot.s8\t%12-15,22R, %16-19,7R, d%0-3d[%5d]"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM),
+    0xfe800d10, 0xffb00f10, "vsudot.u8\t%12-15,22R, %16-19,7R, d%0-3d[%5d]"},
+
   /* Two registers, miscellaneous.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8),
     0xf3ba0400, 0xffbf0c10, "vrint%7-9?p?m?zaxn%u.f32\t%12-15,22R, %0-3,5R"},

@@ -181,6 +181,7 @@ been added, again in ascending alphabetical order.  For example,
 
 The following extensions are currently supported:
 @code{bf16} (BFloat16 extensions for v8.6-A architecture),
+@code{i8mm} (Int8 Matrix Multiply extensions for v8.6-A architecture),
 @code{crc}
 @code{crypto} (Cryptography Extensions for v8-A architecture, implies @code{fp+simd}),
 @code{dotprod} (Dot Product Extensions for v8.2-A architecture, implies @code{fp+simd}),

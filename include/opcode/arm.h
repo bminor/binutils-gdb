@@ -75,6 +75,7 @@
 #define ARM_EXT2_V8_1M_MAIN  0x00008000 /* ARMv8.1-M Mainline.		     */
 #define ARM_EXT2_V8_6A	     0x00010000	/* ARM V8.6A.			     */
 #define ARM_EXT2_BF16	     0x00020000 /* ARMv8 bfloat16.		     */
+#define ARM_EXT2_I8MM	     0x00040000 /* ARMv8.6A i8mm.		     */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */

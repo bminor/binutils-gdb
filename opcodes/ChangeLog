@@ -1,5 +1,10 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* arm-dis.c (neon_opcodes): Add i8mm SIMD instructions.
+
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_i8mm_sve, aarch64_feature_f32mm_sve,
 	aarch64_feature_f64mm_sve, aarch64_feature_i8mm, aarch64_feature_f32mm,
 	aarch64_feature_f64mm): New feature sets.

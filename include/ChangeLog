@@ -1,5 +1,9 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* opcode/arm.h (ARM_EXT2_I8MM): New feature macro.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_I8MM): New.
 	(AARCH64_FEATURE_F32MM): New.
 	(AARCH64_FEATURE_F64MM): New.
