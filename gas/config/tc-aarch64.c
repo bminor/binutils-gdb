@@ -5130,6 +5130,10 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
       if (vectype->type == NT_b && vectype->width == 4)
 	return AARCH64_OPND_QLF_S_4B;
 
+      /* Special case S_2H.  */
+      if (vectype->type == NT_h && vectype->width == 2)
+	return AARCH64_OPND_QLF_S_2H;
+
       /* Vector element register.  */
       return AARCH64_OPND_QLF_S_B + vectype->type;
     }
@@ -9003,6 +9007,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 					 | AARCH64_FEATURE_SHA3, 0)},
   {"sve2-bitperm",	AARCH64_FEATURE (AARCH64_FEATURE_SVE2_BITPERM, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_SVE2, 0)},
+  {"bf16",		AARCH64_FEATURE (AARCH64_FEATURE_BFLOAT16, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

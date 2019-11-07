@@ -1,6 +1,17 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* opcode/aarch64.h (AARCH64_FEATURE_BFLOAT16): New feature macros.
+	(AARCH64_ARCH_V8_6): Include BFloat16 feature macros.
+	(enum aarch64_opnd_qualifier): Introduce new operand qualifier
+	AARCH64_OPND_QLF_S_2H.
+	(enum aarch64_insn_class): Introduce new class "bfloat16".
+	(BFLOAT16_SVE_INSNC): New feature set for bfloat16
+	instructions to support the movprfx constraint.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_V8_6): New.
 	(AARCH64_ARCH_V8_6): New.
 

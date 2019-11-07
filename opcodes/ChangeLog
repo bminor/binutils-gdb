@@ -1,6 +1,28 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_reglane): Use AARCH64_OPND_QLF_S_2H
+	in reglane special case.
+	* aarch64-dis-2.c (aarch64_opcode_lookup_1,
+	aarch64_find_next_opcode): Account for new instructions.
+	* aarch64-dis.c (aarch64_ext_reglane): Use AARCH64_OPND_QLF_S_2H
+	in reglane special case.
+	* aarch64-opc.c (struct operand_qualifier_data): Add data for
+	new AARCH64_OPND_QLF_S_2H qualifier.
+	* aarch64-tbl.h (QL_BFDOT QL_BFDOT64, QL_BFDOT64I, QL_BFMMLA2,
+	QL_BFCVT64, QL_BFCVTN64, QL_BFCVTN2_64): New qualifiers.
+	(aarch64_feature_bfloat16, aarch64_feature_bfloat16_sve): New feature
+	sets.
+	(BFLOAT_SVE, BFLOAT): New feature set macros.
+	(BFLOAT_SVE_INSN, BFLOAT_INSN): New macros to define BFloat16
+	instructions.
+	(aarch64_opcode_table): Define new instructions bfdot,
+	bfmmla, bfcvt, bfcvtnt, bfdot, bfdot, bfcvtn, bfmlal[b/t]
+	bfcvtn2, bfcvt.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-tbl.h (ARMV8_6): New macro.
 
 2019-11-07  Jan Beulich  <jbeulich@suse.com>

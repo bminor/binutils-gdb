@@ -1,6 +1,20 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* config/tc-aarch64.c (vectype_to_qualifier): Special case the
+	S_2H operand qualifier.
+	* doc/c-aarch64.texi: Document bf16 extension.
+	* testsuite/gas/aarch64/bfloat16.d: New test.
+	* testsuite/gas/aarch64/bfloat16.s: New test.
+	* testsuite/gas/aarch64/illegal-bfloat16.d: New test.
+	* testsuite/gas/aarch64/illegal-bfloat16.l: New test.
+	* testsuite/gas/aarch64/illegal-bfloat16.s: New test.
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.s: New test.
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.d: New test.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-aarch64.c (armv8.6-a): New arch.
 	* doc/c-aarch64.texi (armv8.6-a): Document new arch.
 

@@ -64,6 +64,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F16_FML	0x1000000000ULL	/* v8.2 FP16FML ins.  */
 #define AARCH64_FEATURE_V8_5	0x2000000000ULL	/* ARMv8.5 processors.  */
 #define AARCH64_FEATURE_V8_6	0x00000002	/* ARMv8.6 processors.  */
+#define AARCH64_FEATURE_BFLOAT16	0x00000004	/* Bfloat16 insns.  */
 
 /* Flag Manipulation insns.  */
 #define AARCH64_FEATURE_FLAGMANIP	0x4000000000ULL
@@ -131,7 +132,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_ID_PFR2 \
 						 | AARCH64_FEATURE_SSBS)
 #define AARCH64_ARCH_V8_6	AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
-						 AARCH64_FEATURE_V8_6)
+						 AARCH64_FEATURE_V8_6   \
+						 | AARCH64_FEATURE_BFLOAT16)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
@@ -462,11 +464,13 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_S_S,
   AARCH64_OPND_QLF_S_D,
   AARCH64_OPND_QLF_S_Q,
-  /* This type qualifier has a special meaning in that it means that 4 x 1 byte
-     are selected by the instruction.  Other than that it has no difference
-     with AARCH64_OPND_QLF_S_B in encoding.  It is here purely for syntactical
-     reasons and is an exception from normal AArch64 disassembly scheme.  */
+  /* These type qualifiers have a special meaning in that they mean 4 x 1 byte
+     or 2 x 2 byte are selected by the instruction.  Other than that they have
+     no difference with AARCH64_OPND_QLF_S_B in encoding.  They are here purely
+     for syntactical reasons and is an exception from normal AArch64
+     disassembly scheme.  */
   AARCH64_OPND_QLF_S_4B,
+  AARCH64_OPND_QLF_S_2H,
 
   /* Qualifying an operand which is a SIMD vector register or a SIMD vector
      register list; indicating register shape.
@@ -609,6 +613,7 @@ enum aarch64_insn_class
   cryptosm3,
   cryptosm4,
   dotproduct,
+  bfloat16,
 };
 
 /* Opcode enumerators.  */

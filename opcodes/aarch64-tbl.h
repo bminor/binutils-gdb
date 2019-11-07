@@ -2257,6 +2257,50 @@
 {		\
   QLF2(X, NIL),	\
 }
+
+/* e.g. BFDOT <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb> */
+#define QL_BFDOT64    \
+{		      \
+  QLF3(V_2S, V_4H, V_4H),\
+  QLF3(V_4S, V_8H, V_8H),\
+}
+
+/* e.g. BFDOT <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.2H[<index>] */
+#define QL_BFDOT64I    \
+{		      \
+  QLF3(V_2S, V_4H, S_2H),\
+  QLF3(V_4S, V_8H, S_2H),\
+}
+
+/* e.g. BFMMLA <Vd>.4s, <Vn>.8h, <Vm>.8h */
+#define QL_BFMMLA    \
+{		      \
+  QLF3(V_4S, V_8H, V_8H),\
+}
+
+/* e.g. BFCVT <Hd>, <Sn> */
+#define QL_BFCVT64      \
+{		      \
+  QLF2(S_H,S_S),  \
+}
+
+/* e.g. BFCVT <Hd>, <Sn> */
+#define QL_BFCVTN64      \
+{		      \
+  QLF2(V_4H,V_4S),  \
+}
+
+/* e.g. BFCVT <Hd>, <Sn> */
+#define QL_BFCVTN2_64      \
+{		      \
+  QLF2(V_8H,V_4S),  \
+}
+
+/* e.g. BFMLAL2 <Vd>.4s, <Vn>.8h, <Vm>.H[<index>] */
+#define QL_V3BFML4S      \
+{		      \
+  QLF3(V_4S, V_8H, S_H),	\
+}
 
 /* Opcode table.  */
 
@@ -2331,6 +2375,10 @@ static const aarch64_feature_set aarch64_feature_bti =
   AARCH64_FEATURE (AARCH64_FEATURE_BTI, 0);
 static const aarch64_feature_set aarch64_feature_memtag =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_5 | AARCH64_FEATURE_MEMTAG, 0);
+static const aarch64_feature_set aarch64_feature_bfloat16 =
+  AARCH64_FEATURE (AARCH64_FEATURE_BFLOAT16, 0);
+static const aarch64_feature_set aarch64_feature_bfloat16_sve =
+  AARCH64_FEATURE (AARCH64_FEATURE_BFLOAT16 | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_tme =
   AARCH64_FEATURE (AARCH64_FEATURE_TME, 0);
 static const aarch64_feature_set aarch64_feature_sve2 =
@@ -2387,6 +2435,8 @@ static const aarch64_feature_set aarch64_feature_v8_6 =
 #define SVE2_SM4		&aarch64_feature_sve2sm4
 #define SVE2_BITPERM	&aarch64_feature_sve2bitperm
 #define ARMV8_6		&aarch64_feature_v8_6
+#define BFLOAT16_SVE	&aarch64_feature_bfloat16_sve
+#define BFLOAT16	&aarch64_feature_bfloat16
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2477,6 +2527,13 @@ static const aarch64_feature_set aarch64_feature_v8_6 =
 #define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
+#define BFLOAT16_SVE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16_SVE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define BFLOAT16_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16_SVE, OPS, QUALS, FLAGS | F_STRICT, \
+    CONSTRAINTS, TIED, NULL }
+#define BFLOAT16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -4974,6 +5031,29 @@ struct aarch64_opcode aarch64_opcode_table[] =
   V8_4_INSN ("ldapursw", 0x99800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   V8_4_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   V8_4_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+
+  /* BFloat instructions.  */
+  BFLOAT16_SVE_INSNC ("bfdot",  0x64608000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfdot",  0x64604000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfmmla",  0x6460e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfcvt",  0x658aa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HMS, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfcvtnt",  0x648aa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HMS, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfmlalt",  0x64e08400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfmlalb",  0x64e08000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfmlalt",  0x64e04400, 0xffe0f400, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  BFLOAT16_SVE_INSNC ("bfmlalb",  0x64e04000, 0xffe0f400, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  /* BFloat Advanced SIMD instructions.  */
+  BFLOAT16_INSN ("bfdot", 0x2e40fc00, 0xbfe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFDOT64, F_SIZEQ),
+  /* Using dotproduct as iclass to treat instruction similar to udot.  */
+  BFLOAT16_INSN ("bfdot", 0x0f40f000, 0xbfc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_BFDOT64I, F_SIZEQ),
+  BFLOAT16_INSN ("bfmmla", 0x6e40ec00, 0xffe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFMMLA, F_SIZEQ),
+  BFLOAT16_INSN ("bfcvtn",  0x0ea16800, 0xfffffc00, bfloat16, OP2 (Vd, Vn), QL_BFCVTN64, 0),
+  BFLOAT16_INSN ("bfcvtn2", 0x4ea16800, 0xfffffc00, bfloat16, OP2 (Vd, Vn), QL_BFCVTN2_64, 0),
+  BFLOAT16_INSN ("bfcvt",  0x1e634000, 0xfffffc00, bfloat16, OP2 (Fd, Fn), QL_BFCVT64, 0),
+  BFLOAT16_INSN ("bfmlalt", 0x6ec0fc00, 0xffe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFMMLA, 0),
+  BFLOAT16_INSN ("bfmlalb", 0x2ec0fc00, 0xffe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFMMLA, 0),
+  BFLOAT16_INSN ("bfmlalt", 0x4fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
+  BFLOAT16_INSN ("bfmlalb", 0x0fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 

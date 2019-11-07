@@ -144,6 +144,8 @@ automatically cause those extensions to be disabled.
 @multitable @columnfractions .12 .17 .17 .54
 @headitem Extension @tab Minimum Architecture @tab Enabled by default
  @tab Description
+@item @code{bf16} @tab ARMv8.2-A @tab ARMv8.6-A or later
+ @tab Enable BFloat16 extension.
 @item @code{compnum} @tab ARMv8.2-A @tab ARMv8.3-A or later
  @tab Enable the complex number SIMD extensions.  This implies
  @code{fp16} and @code{simd}.
