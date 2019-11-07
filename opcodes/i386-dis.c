@@ -3647,6 +3647,7 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F01_REG_7_MOD_3_RM_2 */
   {
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
+    { "mcommit",	{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0F01_REG_7_MOD_3_RM_3 */
@@ -11030,6 +11031,7 @@ static const struct dis386 rm_table[][8] = {
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_2) },
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_3) },
     { "clzero",		{ Skip_MODRM }, 0  },
+    { "rdpru",		{ Skip_MODRM }, 0  },
   },
   {
     /* RM_0F1E_P_1_MOD_3_REG_7 */

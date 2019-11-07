@@ -102,7 +102,7 @@ static initializer cpu_flag_init[] =
   { "CPU_ZNVER1_FLAGS",
     "CPU_GENERIC64_FLAGS|CpuFISTTP|CpuRdtscp|CpuCX16|CPU_AVX2_FLAGS|CpuSSE4A|CpuABM|CpuSVME|CpuAES|CpuPCLMUL|CpuLZCNT|CpuPRFCHW|CpuFMA|CpuBMI|CpuF16C|CpuXsaveopt|CpuFSGSBase|CpuMovbe|CpuBMI2|CpuRdRnd|CpuADX|CpuRdSeed|CpuSMAP|CpuSHA|CpuXSAVEC|CpuXSAVES|CpuClflushOpt|CpuCLZERO|CpuMWAITX" },
   { "CPU_ZNVER2_FLAGS",
-    "CPU_ZNVER1_FLAGS|CpuRDPID|CpuWBNOINVD|CpuCLWB" },
+    "CPU_ZNVER1_FLAGS|CpuCLWB|CpuRDPID|CpuRDPRU|CpuMCOMMIT|CpuWBNOINVD" },
   { "CPU_BTVER1_FLAGS",
     "CPU_GENERIC64_FLAGS|CpuFISTTP|CpuCX16|CpuRdtscp|CPU_SSSE3_FLAGS|CpuSSE4A|CpuABM|CpuPRFCHW|CpuCX16|CpuClflush|CpuFISTTP|CpuSVME|CpuLZCNT" },
   { "CPU_BTVER2_FLAGS",
@@ -303,6 +303,10 @@ static initializer cpu_flag_init[] =
     "CpuENQCMD" },
   { "CPU_AVX512_VP2INTERSECT_FLAGS",
     "CpuAVX512_VP2INTERSECT" },
+  { "CPU_RDPRU_FLAGS",
+    "CpuRDPRU" },
+  { "CPU_MCOMMIT_FLAGS",
+    "CpuMCOMMIT" },
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -598,6 +602,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuMOVDIRI),
   BITFIELD (CpuMOVDIR64B),
   BITFIELD (CpuENQCMD),
+  BITFIELD (CpuRDPRU),
+  BITFIELD (CpuMCOMMIT),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

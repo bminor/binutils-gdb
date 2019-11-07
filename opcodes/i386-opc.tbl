@@ -4767,3 +4767,15 @@ vp2intersectd, 3, 0xf268, None, 1, CpuAVX512_VP2INTERSECT, Modrm|VexOpcode|VexVV
 vp2intersectq, 3, 0xf268, None, 1, CpuAVX512_VP2INTERSECT, Modrm|VexOpcode|VexVVVV|VexW1|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
 
 // VP2INTERSECT instructions end.
+
+// MCOMMIT instruction
+
+mcommit, 0, 0xf30f01fa, None, 3, CpuMCOMMIT, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// MCOMMIT instruction end
+
+// RDPRU instruction
+
+rdpru, 0, 0x0f01fd, None, 3, CpuRDPRU, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// RDPRU instruction end

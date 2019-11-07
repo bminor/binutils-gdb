@@ -27,8 +27,14 @@
 	clwb	(%ecx)	 # CLWB
 	clwb	-123456(%esp,%esi,8)	 # CLWB
 
+# mcommit instruction
+	mcommit
+
 # rdpid instruction
 	rdpid %eax
+
+# rdpru instruction
+	rdpru
 
 # wbnoinvd instruction
 	wbnoinvd

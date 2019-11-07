@@ -1,5 +1,17 @@
 2019-11-07  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (prefix_table): Add mcommit.
+	(rm_table): Add rdpru.
+	* i386-gen.c (cpu_flag_init): Adjust CPU_ZNVER2_FLAGS entry. Add
+	CPU_RDPRU_FLAGS and CPU_MCOMMIT_FLAGS entries.
+	(cpu_flags): Add CpuRDPRU and CpuMCOMMIT entries.
+	* i386-opc.h (CpuRDPRU, CpuMCOMMIT): New.
+	(union i386_cpu_flags): Add cpurdpru and cpumcommit fields.
+	* i386-opc.tbl (mcommit, rdpru): New.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-07  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_Mwait): Drop local variable "names", use
 	"names32" instead.
 	(OP_Monitor): Drop local variable "op1_names", re-purpose

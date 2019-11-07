@@ -30,9 +30,15 @@
 	clwb	(%rcx)	 # CLWB
 	clwb	0x123(%rax,%r14,8)	 # CLWB
 
+# mcommit instruction
+	mcommit
+
 # rdpid instruction
 	rdpid %rax
 	rdpid %r10
+
+# rdpru instruction
+	rdpru
 
 # wbnoinvd instruction
 	wbnoinvd

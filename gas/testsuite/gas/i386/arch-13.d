@@ -1,4 +1,4 @@
-#as: -march=i686+smap+adx+rdseed+clzero+xsavec+xsaves+clflushopt+mwaitx+rdpid+clwb+wbnoinvd
+#as: -march=i686+smap+adx+rdseed+clzero+xsavec+xsaves+clflushopt+mwaitx+rdpid+clwb+wbnoinvd+rdpru+mcommit
 #objdump: -dw
 #name: i386 arch 13
 
@@ -23,6 +23,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 01 fb             	mwaitx %eax,%ecx,%ebx
 [ 	]*[a-f0-9]+:[ 	]*66 0f ae 31[ 	]*clwb   \(%ecx\)
 [ 	]*[a-f0-9]+:[ 	]*66 0f ae b4 f4 c0 1d fe ff[ 	]*clwb   -0x1e240\(%esp,%esi,8\)
+[ 	]*[a-f0-9]+:[ 	]*f3 0f 01 fa[ 	]*mcommit[ 	]*
 [ 	]*[a-f0-9]+:[ 	]*f3 0f c7 f8[ 	]*rdpid  %eax
+[ 	]*[a-f0-9]+:[ 	]*0f 01 fd[ 	]*rdpru[ 	]*
 [ 	]*[a-f0-9]+:[ 	]*f3 0f 09[ 	]*wbnoinvd[ 	]*
 #pass

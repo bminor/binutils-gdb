@@ -1089,6 +1089,10 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_VP2INTERSECT_FLAGS, 0 },
   { STRING_COMMA_LEN (".enqcmd"), PROCESSOR_UNKNOWN,
     CPU_ENQCMD_FLAGS, 0 },
+  { STRING_COMMA_LEN (".rdpru"), PROCESSOR_UNKNOWN,
+    CPU_RDPRU_FLAGS, 0 },
+  { STRING_COMMA_LEN (".mcommit"), PROCESSOR_UNKNOWN,
+    CPU_MCOMMIT_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
