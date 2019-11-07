@@ -19,6 +19,7 @@ foo:
 	hsubps		(%rsp,1),%xmm3
 	lddqu		(%rsi),%xmm5
 	monitor
+	monitor		%rax,%ecx,%edx
 	monitor		%rax,%rcx,%rdx
 	movddup		%xmm7,%xmm6
 	movddup		(%rax),%xmm7
@@ -27,8 +28,10 @@ foo:
 	movsldup	(%rbx),%xmm2
 	movsldup	%xmm4,%xmm3
 	mwait
+	mwait		%eax,%ecx
 	mwait		%rax,%rcx
 
+	monitor		%eax,%ecx,%edx
 	monitor		%eax,%rcx,%rdx
 	addr32 monitor
 

@@ -1,13 +1,13 @@
 #objdump: -dwMsuffix
-#name: x86-64 rep prefix (with suffixes)
+#name: x86-64 suffix (AT&T mode)
 
 .*: +file format .*
 
 Disassembly of section .text:
 
 0+ <foo>:
-[ 	]*[a-f0-9]+:	0f 01 c8             	monitor %rax,%rcx,%rdx
-[ 	]*[a-f0-9]+:	0f 01 c9             	mwait  %rax,%rcx
+[ 	]*[a-f0-9]+:	0f 01 c8             	monitor %rax,%ecx,%edx
+[ 	]*[a-f0-9]+:	0f 01 c9             	mwait  %eax,%ecx
 [ 	]*[a-f0-9]+:	0f 01 c1             	vmcall 
 [ 	]*[a-f0-9]+:	0f 01 c2             	vmlaunch 
 [ 	]*[a-f0-9]+:	0f 01 c3             	vmresume 

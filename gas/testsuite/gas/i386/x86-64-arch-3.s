@@ -18,9 +18,12 @@
 	xsaves64        (%rcx)
 #CLFLUSHOPT
 	clflushopt      (%rcx)
+	monitorx %rax,%ecx,%edx
+	monitorx %eax,%ecx,%edx
 	monitorx %rax,%rcx,%rdx
 	monitorx %eax,%rcx,%rdx
 	monitorx
+	mwaitx %eax,%ecx,%ebx
 	mwaitx %rax,%rcx,%rbx
 	mwaitx
 # clwb instruction

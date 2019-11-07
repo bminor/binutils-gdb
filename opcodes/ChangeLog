@@ -1,5 +1,13 @@
 2019-11-07  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_Mwait): Drop local variable "names", use
+	"names32" instead.
+	(OP_Monitor): Drop local variable "op1_names", re-purpose
+	"names" for it instead, and replace former "names" uses by
+	"names32" ones.
+
+2019-11-07  Jan Beulich  <jbeulich@suse.com>
+
 	PR/gas 25167
 	* opcodes/i386-opc.tbl (movsd, cmpsd): Drop IgnoreSize from
 	operand-less forms.

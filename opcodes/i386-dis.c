@@ -15520,12 +15520,10 @@ OP_Mwait (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   /* mwait %eax,%ecx / mwaitx %eax,%ecx,%ebx  */
   if (!intel_syntax)
     {
-      const char **names = (address_mode == mode_64bit
-			    ? names64 : names32);
-      strcpy (op_out[0], names[0]);
-      strcpy (op_out[1], names[1]);
+      strcpy (op_out[0], names32[0]);
+      strcpy (op_out[1], names32[1]);
       if (bytemode == eBX_reg)
-	strcpy (op_out[2], names[3]);
+	strcpy (op_out[2], names32[3]);
       two_source_ops = 1;
     }
   /* Skip mod/rm byte.  */
@@ -15537,27 +15535,25 @@ static void
 OP_Monitor (int bytemode ATTRIBUTE_UNUSED,
 	    int sizeflag ATTRIBUTE_UNUSED)
 {
-  /* monitor %eax,%ecx,%edx"  */
+  /* monitor %{e,r,}ax,%ecx,%edx"  */
   if (!intel_syntax)
     {
-      const char **op1_names;
       const char **names = (address_mode == mode_64bit
 			    ? names64 : names32);
 
-      if (!(prefixes & PREFIX_ADDR))
-	op1_names = (address_mode == mode_16bit
-		     ? names16 : names);
-      else
+      if (prefixes & PREFIX_ADDR)
 	{
 	  /* Remove "addr16/addr32".  */
 	  all_prefixes[last_addr_prefix] = 0;
-	  op1_names = (address_mode != mode_32bit
-		       ? names32 : names16);
+	  names = (address_mode != mode_32bit
+		   ? names32 : names16);
 	  used_prefixes |= PREFIX_ADDR;
 	}
-      strcpy (op_out[0], op1_names[0]);
-      strcpy (op_out[1], names[1]);
-      strcpy (op_out[2], names[2]);
+      else if (address_mode == mode_16bit)
+	names = names16;
+      strcpy (op_out[0], names[0]);
+      strcpy (op_out[1], names32[1]);
+      strcpy (op_out[2], names32[2]);
       two_source_ops = 1;
     }
   /* Skip mod/rm byte.  */
