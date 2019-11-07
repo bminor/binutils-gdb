@@ -396,6 +396,7 @@ struct opcode16
    %%			%
 
    %c			print condition code (always bits 28-31 in ARM mode)
+   %b			print condition code allowing cp_num == 9
    %q			print shifter argument
    %u			print condition code (unconditional in ARM mode,
                           UNPREDICTABLE if not AL in Thumb)
@@ -1207,11 +1208,15 @@ static const struct sopcode32 coprocessor_opcodes[] =
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0xfea00800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%20?780"},
 
+  /* BFloat16 instructions.  */
+  {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0x0eb30940, 0x0fbf0f50, "vcvt%7?tb%b.bf16.f32\t%y1, %y0"},
+
   /* Dot Product instructions in the space of coprocessor 13.  */
   {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
     0xfc200d00, 0xffb00f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3,5V"},
   {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
-    0xfe000d00, 0xff000f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3D[%5?10]"},
+    0xfe200d00, 0xff200f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3D[%5?10]"},
 
   /* ARMv8.2 FMAC Long instructions in the space of coprocessor 8.  */
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
@@ -1451,6 +1456,20 @@ static const struct opcode32 neon_opcodes[] =
     0xf2200c10, 0xffb00f10, "vfms%c.f32\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
     0xf2300c10, 0xffb00f10, "vfms%c.f16\t%12-15,22R, %16-19,7R, %0-3,5R"},
+
+  /* BFloat16 instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xfc000d00, 0xffb00f10, "vdot.bf16\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xfe000d00, 0xffb00f10, "vdot.bf16\t%12-15,22R, %16-19,7R, d%0-3d[%5d]"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xfc000c40, 0xffb00f50, "vmmla.bf16\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xf3b60640, 0xffbf0fd0, "vcvt%c.bf16.f32\t%12-15,22D, %0-3,5Q"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xfc300810, 0xffb00f10, "vfma%6?tb.bf16\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16),
+    0xfe300810, 0xffb00f10, "vfma%6?tb.bf16\t%12-15,22Q, %16-19,7Q, %0-2D[%3,5d]"},
 
   /* Two registers, miscellaneous.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8),
@@ -8159,6 +8178,8 @@ print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
 		  if (cond != COND_UNCOND && cp_num == 9)
 		    is_unpredictable = TRUE;
 
+		  /* Fall through.  */
+		case 'b':
 		  func (stream, "%s", arm_conditional[cond]);
 		  break;
 
@@ -8772,6 +8793,10 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 	}
       else if ((given & 0xff000000) == 0xf9000000)
 	given ^= 0xf9000000 ^ 0xf4000000;
+      /* BFloat16 neon instructions without special top byte handling.  */
+      else if ((given & 0xff000000) == 0xfe000000
+	       || (given & 0xff000000) == 0xfc000000)
+	;
       /* vdup is also a valid neon instruction.  */
       else if ((given & 0xff910f5f) != 0xee800b10)
 	return FALSE;
@@ -11625,11 +11650,11 @@ select_arm_features (unsigned long mach,
     case bfd_mach_arm_7EM:	 ARM_SET_FEATURES (ARM_ARCH_V7EM); break;
     case bfd_mach_arm_8:
 	{
-	  /* Add bits for extensions that Armv8.5-A recognizes.  */
-	  arm_feature_set armv8_5_ext_fset
+	  /* Add bits for extensions that Armv8.6-A recognizes.  */
+	  arm_feature_set armv8_6_ext_fset
 	    = ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
-	  ARM_SET_FEATURES (ARM_ARCH_V8_5A);
-	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_5_ext_fset);
+	  ARM_SET_FEATURES (ARM_ARCH_V8_6A);
+	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_6_ext_fset);
 	  break;
 	}
     case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;

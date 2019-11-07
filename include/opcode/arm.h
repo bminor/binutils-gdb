@@ -73,6 +73,8 @@
 #define ARM_EXT2_SB	     0x00002000	/* Speculation Barrier instruction.  */
 #define ARM_EXT2_PREDRES     0x00004000	/* Prediction Restriction insns.     */
 #define ARM_EXT2_V8_1M_MAIN  0x00008000 /* ARMv8.1-M Mainline.		     */
+#define ARM_EXT2_V8_6A	     0x00010000	/* ARM V8.6A.			     */
+#define ARM_EXT2_BF16	     0x00020000 /* ARMv8 bfloat16.		     */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -169,6 +171,7 @@
 					   | ARM_EXT2_V8_4A)
 #define ARM_AEXT2_V8_5A	(ARM_AEXT2_V8_4A   | ARM_EXT2_V8_5A | ARM_EXT2_SB     \
 					   | ARM_EXT2_PREDRES)
+#define ARM_AEXT2_V8_6A	(ARM_AEXT2_V8_5A   | ARM_EXT2_V8_6A | ARM_EXT2_BF16)
 #define ARM_AEXT_V8M_BASE	(ARM_AEXT_V6SM	    | ARM_EXT_DIV)
 #define ARM_AEXT_V8M_MAIN	 ARM_AEXT_V7M
 #define ARM_AEXT_V8M_MAIN_DSP	 ARM_AEXT_V7EM
@@ -350,6 +353,9 @@
 				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA	   \
 						    | FPU_NEON_EXT_DOTPROD)
 #define ARM_ARCH_V8_5A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_5A,	   \
+				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA	   \
+						    | FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V8_6A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_6A,	   \
 				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA	   \
 						    | FPU_NEON_EXT_DOTPROD)
 #define ARM_ARCH_V8M_BASE      ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE,	   \

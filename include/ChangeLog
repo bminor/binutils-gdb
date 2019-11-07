@@ -1,6 +1,14 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* opcode/arm.h (ARM_EXT2_V8_6A, ARM_AEXT2_V8_6A,
+	ARM_ARCH_V8_6A): New.
+	* opcode/arm.h (ARM_EXT2_BF16): New feature macro.
+	(ARM_AEXT2_V8_6A): Include above macro in definition.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_BFLOAT16): New feature macros.
 	(AARCH64_ARCH_V8_6): Include BFloat16 feature macros.
 	(enum aarch64_opnd_qualifier): Introduce new operand qualifier
