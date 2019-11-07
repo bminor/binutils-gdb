@@ -1,4 +1,12 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Barnaby Wilks  <barnaby.wilks@arm.com>
+
+	* as.h (atof_ieee_detail): Add prototype for atof_ieee_detail function.
+	(atof_ieee): Move some code into the atof_ieee_detail function.
+	(atof_ieee_detail): Add function that provides a higher level of
+	control over generating IEEE-like numbers.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-arm.c (arm_archs): Add armv8.6-a option.

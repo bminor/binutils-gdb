@@ -484,6 +484,7 @@ char * app_push (void);
 #define MAX_LITTLENUMS 6
 
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
+char * atof_ieee_detail (char *, int, int, LITTLENUM_TYPE *, FLONUM_TYPE *);
 const char * ieee_md_atof (int, char *, int *, bfd_boolean);
 const char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (const char *, char *);
