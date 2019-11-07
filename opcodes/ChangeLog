@@ -1,3 +1,10 @@
+2019-11-07  Jan Beulich  <jbeulich@suse.com>
+
+	PR/gas 25167
+	* opcodes/i386-opc.tbl (movsd, cmpsd): Drop IgnoreSize from
+	operand-less forms.
+	* opcodes/i386-tbl.h: Re-generate.
+
 2019-11-05  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_Mwaitx): Delete.
