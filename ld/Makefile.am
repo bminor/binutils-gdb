@@ -238,7 +238,6 @@ ALL_EMULATION_SOURCES = \
 	eelf32bfin.c \
 	eelf32bfinfd.c \
 	eelf32cr16.c \
-	eelf32cr16c.c \
 	eelf32crx.c \
 	eelf32epiphany.c \
 	eelf32epiphany_4x4.c \
@@ -729,7 +728,6 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bfin.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bfinfd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16.Pc@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16c.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32crx.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32epiphany.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32epiphany_4x4.Pc@am__quote@

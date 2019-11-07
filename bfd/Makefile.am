@@ -98,7 +98,6 @@ ALL_MACHINES = \
 	cpu-bfin.lo \
 	cpu-bpf.lo \
 	cpu-cr16.lo \
-	cpu-cr16c.lo \
 	cpu-cris.lo \
 	cpu-crx.lo \
 	cpu-csky.lo \
@@ -185,7 +184,6 @@ ALL_MACHINES_CFILES = \
 	cpu-bfin.c \
 	cpu-bpf.c \
 	cpu-cr16.c \
-	cpu-cr16c.c \
 	cpu-cris.c \
 	cpu-crx.c \
 	cpu-csky.c \
@@ -304,7 +302,6 @@ BFD32_BACKENDS = \
 	elf32-avr.lo \
 	elf32-bfin.lo \
 	elf32-cr16.lo \
-	elf32-cr16c.lo \
 	elf32-cris.lo \
 	elf32-crx.lo \
 	elf32-csky.lo \
@@ -441,7 +438,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-avr.c \
 	elf32-bfin.c \
 	elf32-cr16.c \
-	elf32-cr16c.c \
 	elf32-cris.c \
 	elf32-crx.c \
 	elf32-csky.c \

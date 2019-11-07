@@ -1,3 +1,7 @@
+2019-11-07  Alan Modra  <amodra@gmail.com>
+
+	* elf/cr16c.h: Delete.
+
 2019-10-29  Andrew Eikum  <aeikum@codeweavers.com>
 
 	* coff/internal.h (struct internal_extra_pe_filehdr): Use ints

@@ -1,3 +1,19 @@
+2019-11-07  Alan Modra  <amodra@gmail.com>
+
+	* cpu-cr16c.c: Delete.
+	* elf32-cr16c.c: Delete.
+	* Makefile.am,
+	* archures.c,
+	* config.bfd,
+	* configure.ac,
+	* reloc.c,
+	* targets.c: Remove cr16c support.
+	* Makefile.in,
+	* bfd-in2.h,
+	* configure,
+	* libbfd.h,
+	* po/SRC-POTFILES.in: Regenerate.
+
 2019-11-05  Tim Rühsen  <tim.ruehsen@gmx.de>
 
 	* doc/chew.c (add_to_definition): Use correct type when

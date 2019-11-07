@@ -1826,8 +1826,6 @@ enum bfd_architecture
 #define bfd_mach_bfin          1
   bfd_arch_cr16,      /* National Semiconductor CompactRISC (ie CR16).  */
 #define bfd_mach_cr16          1
-  bfd_arch_cr16c,     /* National Semiconductor CompactRISC.  */
-#define bfd_mach_cr16c         1
   bfd_arch_crx,       /*  National Semiconductor CRX.  */
 #define bfd_mach_crx           1
   bfd_arch_cris,      /* Axis CRIS.  */
@@ -4858,48 +4856,6 @@ a matching LO8XG part.  */
 This is a 15 bit relative address.  If the most significant bits are all zero
 then it may be truncated to 8 bits.  */
   BFD_RELOC_S12Z_15_PCREL,
-
-/* NS CR16C Relocations.  */
-  BFD_RELOC_16C_NUM08,
-  BFD_RELOC_16C_NUM08_C,
-  BFD_RELOC_16C_NUM16,
-  BFD_RELOC_16C_NUM16_C,
-  BFD_RELOC_16C_NUM32,
-  BFD_RELOC_16C_NUM32_C,
-  BFD_RELOC_16C_DISP04,
-  BFD_RELOC_16C_DISP04_C,
-  BFD_RELOC_16C_DISP08,
-  BFD_RELOC_16C_DISP08_C,
-  BFD_RELOC_16C_DISP16,
-  BFD_RELOC_16C_DISP16_C,
-  BFD_RELOC_16C_DISP24,
-  BFD_RELOC_16C_DISP24_C,
-  BFD_RELOC_16C_DISP24a,
-  BFD_RELOC_16C_DISP24a_C,
-  BFD_RELOC_16C_REG04,
-  BFD_RELOC_16C_REG04_C,
-  BFD_RELOC_16C_REG04a,
-  BFD_RELOC_16C_REG04a_C,
-  BFD_RELOC_16C_REG14,
-  BFD_RELOC_16C_REG14_C,
-  BFD_RELOC_16C_REG16,
-  BFD_RELOC_16C_REG16_C,
-  BFD_RELOC_16C_REG20,
-  BFD_RELOC_16C_REG20_C,
-  BFD_RELOC_16C_ABS20,
-  BFD_RELOC_16C_ABS20_C,
-  BFD_RELOC_16C_ABS24,
-  BFD_RELOC_16C_ABS24_C,
-  BFD_RELOC_16C_IMM04,
-  BFD_RELOC_16C_IMM04_C,
-  BFD_RELOC_16C_IMM16,
-  BFD_RELOC_16C_IMM16_C,
-  BFD_RELOC_16C_IMM20,
-  BFD_RELOC_16C_IMM20_C,
-  BFD_RELOC_16C_IMM24,
-  BFD_RELOC_16C_IMM24_C,
-  BFD_RELOC_16C_IMM32,
-  BFD_RELOC_16C_IMM32_C,
 
 /* NS CR16 Relocations.  */
   BFD_RELOC_CR16_NUM8,

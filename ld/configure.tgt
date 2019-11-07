@@ -224,8 +224,6 @@ bpf-*-*)		targ_emul=elf64bpf
 			;;
 cr16-*-elf*)		targ_emul=elf32cr16
 			;;
-cr16c-*-elf*)		targ_emul=elf32cr16c
-			;;
 cris-*-*aout*)		targ_emul=crisaout
 			targ_extra_emuls="criself crislinux"
 			targ_extra_libpath=$targ_extra_emuls

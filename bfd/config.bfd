@@ -85,6 +85,7 @@ case $targ in
  arm-*-oabi | \
  arm-*-riscix* | \
  arm-epoc-pe* | \
+ cr16c-*-* | \
  h8300*-*-coff | \
  h8500*-*-coff | \
  hppa*-*-rtems* | \
@@ -433,11 +434,6 @@ case "${targ}" in
 
   cr16-*-elf* | cr16*-*-uclinux*)
     targ_defvec=cr16_elf32_vec
-    targ_underscore=yes
-    ;;
-
-  cr16c-*-elf*)
-    targ_defvec=cr16c_elf32_vec
     targ_underscore=yes
     ;;
 

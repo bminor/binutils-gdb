@@ -1,5 +1,15 @@
 2019-11-07  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf32cr16c.sh: Delete.
+	* scripttempl/elf32cr16c.sc: Delete.
+	* Makefile.am,
+	* configure.tgt: Remove cr16c support.
+	* NEWS: Mention removal of cr16c.
+	* Makefile.in,
+	* po/BLD-POTFILES.in: Regenerate.
+
+2019-11-07  Alan Modra  <amodra@gmail.com>
+
 	* configure.tgt: Order targets by cpu.
 
 2019-11-07  Alan Modra  <amodra@gmail.com>

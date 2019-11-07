@@ -53,7 +53,6 @@ cpu-avr.c
 cpu-bfin.c
 cpu-bpf.c
 cpu-cr16.c
-cpu-cr16c.c
 cpu-cris.c
 cpu-crx.c
 cpu-csky.c
@@ -165,7 +164,6 @@ elf32-bfin.c
 elf32-bfin.h
 elf32-cr16.c
 elf32-cr16.h
-elf32-cr16c.c
 elf32-cris.c
 elf32-crx.c
 elf32-csky.c

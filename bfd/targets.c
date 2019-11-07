@@ -697,7 +697,6 @@ extern const bfd_target avr_elf32_vec;
 extern const bfd_target bfin_elf32_vec;
 extern const bfd_target bfin_elf32_fdpic_vec;
 extern const bfd_target cr16_elf32_vec;
-extern const bfd_target cr16c_elf32_vec;
 extern const bfd_target cris_aout_vec;
 extern const bfd_target cris_elf32_vec;
 extern const bfd_target cris_elf32_us_vec;
@@ -1029,7 +1028,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfin_elf32_fdpic_vec,
 
 	&cr16_elf32_vec,
-	&cr16c_elf32_vec,
 
 	&cris_aout_vec,
 	&cris_elf32_vec,
