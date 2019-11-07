@@ -1,3 +1,9 @@
+2019-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Skip note sections that do not have
+	an output section.  Always copy note sections, even if no
+	changes are made.
+
 2019-11-06  Christian Eggers  <ceggers@gmx.de>
 
 	* readelf.c (IN_RANGE): Rename parameter OFF to NELEM. Add

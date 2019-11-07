@@ -2878,6 +2878,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  if (! is_mergeable_note_section (ibfd, osec))
 	    continue;
 
+	  /* If the section is going to be completly deleted then
+	     do not bother to merge it.  */
+	  if (osec->output_section == NULL)
+	    continue;
+
 	  bfd_size_type size = bfd_section_size (osec);
 
 	  if (size == 0)
@@ -2893,25 +2898,19 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    {
 	      bfd_nonfatal_message (NULL, ibfd, osec,
 				    _("warning: could not load note section"));
-	      free (merged->contents);
 	      free (merged);
 	      continue;
 	    }
 
 	  merged->size = merge_gnu_build_notes (ibfd, osec, size,
 						merged->contents);
-	  if (merged->size == size)
-	    {
-	      /* Merging achieves nothing.  */
-	      merge_debug ("Merge of section %s achieved nothing - skipping\n",
-			   bfd_section_name (osec));
-	      free (merged->contents);
-	      free (merged);
-	      continue;
-	    }
 
-	  if (osec->output_section == NULL
-	      || !bfd_set_section_size (osec->output_section, merged->size))
+	  /* FIXME: Once we have read the contents in, we must write
+	     them out again.  So even if the mergeing has achieved
+	     nothing we still add this entry to the merge list.  */
+
+	  if (size != merged->size
+	      && !bfd_set_section_size (osec->output_section, merged->size))
 	    {
 	      bfd_nonfatal_message (NULL, obfd, osec,
 				    _("warning: failed to set merged notes size"));
@@ -3277,16 +3276,16 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		{
 		  bfd_nonfatal_message
 		    (NULL, obfd, osec,
-		     _("error: failed to copy merged notes into output"));
+		     _("error: failed to locate merged notes"));
 		  continue;
 		}
 	    }
 
-	  if (! is_mergeable_note_section (obfd, osec))
+	  if (merged->contents == NULL)
 	    {
 	      bfd_nonfatal_message
 		(NULL, obfd, osec,
-		 _("error: failed to copy merged notes into output"));
+		 _("error: failed to merge notes"));
 	      continue;
 	    }
 
