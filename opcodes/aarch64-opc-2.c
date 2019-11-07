@@ -132,6 +132,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_PSB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the PSB option name CSYNC"},
   {AARCH64_OPND_CLASS_SYSTEM, "BTI", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "BTI targets j/c/jc"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4x16", 4 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by 16"},
+  {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4x32", 5 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by 32"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4xVL", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by VL"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4x2xVL", 1 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by 2*VL"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4x3xVL", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by 3*VL"},

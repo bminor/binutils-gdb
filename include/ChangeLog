@@ -1,4 +1,13 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_I8MM): New.
+	(AARCH64_FEATURE_F32MM): New.
+	(AARCH64_FEATURE_F64MM): New.
+	(AARCH64_OPND_SVE_ADDR_RI_S4x32): New.
+	(enum aarch64_insn_class): Add new instruction class "aarch64_misc" for
+	instructions that do not require special handling.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_V8_6A, ARM_AEXT2_V8_6A,

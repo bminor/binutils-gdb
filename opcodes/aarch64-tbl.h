@@ -1519,6 +1519,10 @@
 {                                                       \
   QLF3(S_D,S_D,S_D),                                    \
 }
+#define OP_SVE_QQQ                                      \
+{                                                       \
+  QLF3(S_Q,S_Q,S_Q),                                    \
+}
 #define OP_SVE_DDDD                                     \
 {                                                       \
   QLF4(S_D,S_D,S_D,S_D),                                \
@@ -1662,6 +1666,10 @@
 #define OP_SVE_SZS                                      \
 {                                                       \
   QLF3(S_S,P_Z,S_S),                                    \
+}
+#define OP_SVE_SBB                                      \
+{                                                       \
+  QLF3(S_S,S_B,S_B),                                    \
 }
 #define OP_SVE_SBBU                                     \
 {                                                       \
@@ -2272,6 +2280,12 @@
   QLF3(V_4S, V_8H, S_2H),\
 }
 
+/* e.g. SMMLA <Vd>.4S, <Vn>.16B, <Vm>.16B */
+#define QL_MMLA64      \
+{		      \
+  QLF3(V_4S, V_16B, V_16B),\
+}
+
 /* e.g. BFMMLA <Vd>.4s, <Vn>.8h, <Vm>.8h */
 #define QL_BFMMLA    \
 {		      \
@@ -2393,6 +2407,17 @@ static const aarch64_feature_set aarch64_feature_sve2bitperm =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_BITPERM, 0);
 static const aarch64_feature_set aarch64_feature_v8_6 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6, 0);
+static const aarch64_feature_set aarch64_feature_i8mm =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_I8MM, 0);
+static const aarch64_feature_set aarch64_feature_i8mm_sve =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_I8MM
+       | AARCH64_FEATURE_SVE, 0);
+static const aarch64_feature_set aarch64_feature_f32mm_sve =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F32MM
+       | AARCH64_FEATURE_SVE, 0);
+static const aarch64_feature_set aarch64_feature_f64mm_sve =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F64MM
+       | AARCH64_FEATURE_SVE, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2435,8 +2460,13 @@ static const aarch64_feature_set aarch64_feature_v8_6 =
 #define SVE2_SM4		&aarch64_feature_sve2sm4
 #define SVE2_BITPERM	&aarch64_feature_sve2bitperm
 #define ARMV8_6		&aarch64_feature_v8_6
+#define ARMV8_6_SVE		&aarch64_feature_v8_6
 #define BFLOAT16_SVE	&aarch64_feature_bfloat16_sve
 #define BFLOAT16	&aarch64_feature_bfloat16
+#define I8MM_SVE      &aarch64_feature_i8mm_sve
+#define F32MM_SVE     &aarch64_feature_f32mm_sve
+#define F64MM_SVE     &aarch64_feature_f64mm_sve
+#define I8MM      &aarch64_feature_i8mm
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2534,6 +2564,16 @@ static const aarch64_feature_set aarch64_feature_v8_6 =
     CONSTRAINTS, TIED, NULL }
 #define BFLOAT16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define INT8MATMUL_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, I8MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
+#define INT8MATMUL_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, I8MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F64MATMUL_SVE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, F64MM_SVE, OPS, QUALS, FLAGS, 0, TIED, NULL }
+#define F64MATMUL_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, F64MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
+#define F32MATMUL_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, F32MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -5032,6 +5072,37 @@ struct aarch64_opcode aarch64_opcode_table[] =
   V8_4_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   V8_4_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
 
+  /* Matrix Multiply instructions.  */
+  INT8MATMUL_SVE_INSNC ("smmla",  0x45009800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  INT8MATMUL_SVE_INSNC ("ummla",  0x45c09800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  INT8MATMUL_SVE_INSNC ("usmmla", 0x45809800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  INT8MATMUL_SVE_INSNC ("usdot",  0x44807800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  INT8MATMUL_SVE_INSNC ("usdot",  0x44a01800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  INT8MATMUL_SVE_INSNC ("sudot",  0x44a01c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
+  F32MATMUL_SVE_INSNC ("fmmla",   0x64a0e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_S, 0, C_SCAN_MOVPRFX, 0),
+  F64MATMUL_SVE_INSNC ("fmmla",   0x64c0e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, C_SCAN_MOVPRFX, 0),
+  F64MATMUL_SVE_INSN ("ld1rob",  0xa4200000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_BZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1roh",  0xa4a00000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_HZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1row",  0xa5200000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_SZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1rod",  0xa5a00000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_DZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1rob",  0xa4202000, 0xfff0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4x32), OP_SVE_BZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1roh",  0xa4a02000, 0xfff0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4x32), OP_SVE_HZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1row",  0xa5202000, 0xfff0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4x32), OP_SVE_SZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("ld1rod",  0xa5a02000, 0xfff0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4x32), OP_SVE_DZU, F_OD(1), 0),
+  F64MATMUL_SVE_INSN ("zip1",    0x05a00000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("zip2",    0x05a00400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("uzip1",   0x05a00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("uzip2",   0x05a00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("trn1",    0x05a01800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("trn2",    0x05a01c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  /* Matrix Multiply advanced SIMD instructions.  */
+  INT8MATMUL_INSN ("smmla",  0x4e80a400, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
+  INT8MATMUL_INSN ("ummla",  0x6e80a400, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
+  INT8MATMUL_INSN ("usmmla", 0x4e80ac00, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
+  INT8MATMUL_INSN ("usdot",  0x4e809c00, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
+  INT8MATMUL_INSN ("usdot",  0x4f80f000, 0xffc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+  INT8MATMUL_INSN ("sudot",  0x4f00f000, 0xffc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+
   /* BFloat instructions.  */
   BFLOAT16_SVE_INSNC ("bfdot",  0x64608000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   BFLOAT16_SVE_INSNC ("bfdot",  0x64604000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
@@ -5263,6 +5334,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, sve_addr_ri_s4, "SVE_ADDR_RI_S4x16",			\
       4 << OPD_F_OD_LSB, F(FLD_Rn),					\
       "an address with a 4-bit signed offset, multiplied by 16")	\
+    Y(ADDRESS, sve_addr_ri_s4, "SVE_ADDR_RI_S4x32",			\
+      5 << OPD_F_OD_LSB, F(FLD_Rn),					\
+      "an address with a 4-bit signed offset, multiplied by 32")	\
     Y(ADDRESS, sve_addr_ri_s4xvl, "SVE_ADDR_RI_S4xVL",			\
       0 << OPD_F_OD_LSB, F(FLD_Rn),					\
       "an address with a 4-bit signed offset, multiplied by VL")	\

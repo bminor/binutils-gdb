@@ -1,4 +1,32 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_i8mm_sve, aarch64_feature_f32mm_sve,
+	aarch64_feature_f64mm_sve, aarch64_feature_i8mm, aarch64_feature_f32mm,
+	aarch64_feature_f64mm): New feature sets.
+	(INT8MATMUL_INSN, F64MATMUL_SVE_INSN, F64MATMUL_INSN,
+	F32MATMUL_SVE_INSN, F32MATMUL_INSN): New macros to define matrix multiply
+	instructions.
+	(I8MM_SVE, F32MM_SVE, F64MM_SVE, I8MM, F32MM, F64MM): New feature set
+	macros.
+	(QL_MMLA64, OP_SVE_SBB): New qualifiers.
+	(OP_SVE_QQQ): New qualifier.
+	(INT8MATMUL_SVE_INSNC, F64MATMUL_SVE_INSNC,
+	F32MATMUL_SVE_INSNC): New feature set for bfloat16 instructions to support
+	the movprfx constraint.
+	(aarch64_opcode_table): Support for SVE_ADDR_RI_S4x32.
+	(aarch64_opcode_table): Define new instructions smmla,
+	ummla, usmmla, usdot, sudot, fmmla, ld1rob, ld1roh, ld1row, ld1rod,
+	uzip{1/2}, trn{1/2}.
+	* aarch64-opc.c (operand_general_constraint_met_p): Handle
+	AARCH64_OPND_SVE_ADDR_RI_S4x32.
+	(aarch64_print_operand): Handle AARCH64_OPND_SVE_ADDR_RI_S4x32.
+	* aarch64-dis-2.c (aarch64_opcode_lookup_1, aarch64_find_next_opcode):
+	Account for new instructions.
+	* opcodes/aarch64-asm-2.c (aarch64_insert_operand): Support the new
+	S4x32 operand.
+	* aarch64-opc-2.c (aarch64_operands): Support the new S4x32 operand.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* arm-dis.c (select_arm_features): Update bfd_march_arm_8 with

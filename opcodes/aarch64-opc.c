@@ -1899,6 +1899,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
+	case AARCH64_OPND_SVE_ADDR_RI_S4x32:
 	  min_value = -8;
 	  max_value = 7;
 	  goto sve_imm_offset;
@@ -3644,6 +3645,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM13:
     case AARCH64_OPND_ADDR_OFFSET:
     case AARCH64_OPND_SVE_ADDR_RI_S4x16:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x32:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:

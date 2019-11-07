@@ -144,6 +144,12 @@ automatically cause those extensions to be disabled.
 @multitable @columnfractions .12 .17 .17 .54
 @headitem Extension @tab Minimum Architecture @tab Enabled by default
  @tab Description
+@item @code{i8mm} @tab ARMv8.2-A @tab ARMv8.6-A or later
+ @tab Enable Int8 Matrix Multiply extension.
+@item @code{f32mm} @tab ARMv8.2-A @tab No
+ @tab Enable F32 Matrix Multiply extension.
+@item @code{f64mm} @tab ARMv8.2-A @tab No
+ @tab Enable F64 Matrix Multiply extension.
 @item @code{bf16} @tab ARMv8.2-A @tab ARMv8.6-A or later
  @tab Enable BFloat16 extension.
 @item @code{compnum} @tab ARMv8.2-A @tab ARMv8.3-A or later

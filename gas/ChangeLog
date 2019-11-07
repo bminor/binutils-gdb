@@ -1,4 +1,17 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-aarch64.c: Add new arch fetures to suppport the mm extension.
+	(parse_operands): Add new operand.
+	* testsuite/gas/aarch64/i8mm.s: New test.
+	* testsuite/gas/aarch64/i8mm.d: New test.
+	* testsuite/gas/aarch64/f32mm.s: New test.
+	* testsuite/gas/aarch64/f32mm.d: New test.
+	* testsuite/gas/aarch64/f64mm.s: New test.
+	* testsuite/gas/aarch64/f64mm.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx-mm.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx-mm.d: New test.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Barnaby Wilks  <barnaby.wilks@arm.com>
 
 	* config/tc-aarch64.c (md_atof): Add encoding for the bfloat16 format.

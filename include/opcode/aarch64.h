@@ -91,6 +91,11 @@ typedef uint32_t aarch64_insn;
 /* Transactional Memory Extension.  */
 #define AARCH64_FEATURE_TME		0x2000000000000ULL
 
+/* Matrix Multiply instructions */
+#define AARCH64_FEATURE_I8MM		0x10000000000000ULL
+#define AARCH64_FEATURE_F32MM		0x20000000000000ULL
+#define AARCH64_FEATURE_F64MM		0x40000000000000ULL
+
 /* SVE2 instructions.  */
 #define AARCH64_FEATURE_SVE2		0x000000010
 #define AARCH64_FEATURE_SVE2_AES		0x000000080
@@ -133,7 +138,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_SSBS)
 #define AARCH64_ARCH_V8_6	AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
 						 AARCH64_FEATURE_V8_6   \
-						 | AARCH64_FEATURE_BFLOAT16)
+						 | AARCH64_FEATURE_BFLOAT16 \
+						 | AARCH64_FEATURE_I8MM)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
@@ -322,6 +328,7 @@ enum aarch64_opnd
   AARCH64_OPND_BTI_TARGET,	/* BTI {<target>}.  */
 
   AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
+  AARCH64_OPND_SVE_ADDR_RI_S4x32,   /* SVE [<Xn|SP>, #<simm4>*32].  */
   AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x2xVL, /* SVE [<Xn|SP>, #<simm4>*2, MUL VL].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x3xVL, /* SVE [<Xn|SP>, #<simm4>*3, MUL VL].  */
@@ -520,6 +527,7 @@ enum aarch64_opnd_qualifier
 
 enum aarch64_insn_class
 {
+  aarch64_misc,
   addsub_carry,
   addsub_ext,
   addsub_imm,
