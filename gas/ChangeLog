@@ -1,6 +1,14 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Barnaby Wilks  <barnaby.wilks@arm.com>
 
+	* config/tc-arm.c (md_atof): Add encoding for bfloat16
+	* testsuite/gas/arm/bfloat16-directive-le.d: New test.
+	* testsuite/gas/arm/bfloat16-directive-be.d: New test.
+	* testsuite/gas/arm/bfloat16-directive.s: New test.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Barnaby Wilks  <barnaby.wilks@arm.com>
+
 	* as.h (atof_ieee_detail): Add prototype for atof_ieee_detail function.
 	(atof_ieee): Move some code into the atof_ieee_detail function.
 	(atof_ieee_detail): Add function that provides a higher level of

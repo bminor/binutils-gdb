@@ -1218,6 +1218,52 @@ md_atof (int type, char * litP, int * sizeP)
       prec = 1;
       break;
 
+    /* If this is a bfloat16, then parse it slightly differently, as it
+       does not follow the IEEE specification for floating point numbers
+       exactly.  */
+    case 'b':
+      {
+	FLONUM_TYPE generic_float;
+
+	t = atof_ieee_detail (input_line_pointer, 1, 8, words, &generic_float);
+
+	if (t)
+	  input_line_pointer = t;
+	else
+	  return _("invalid floating point number");
+
+	switch (generic_float.sign)
+	  {
+	  /* Is +Inf.  */
+	  case 'P':
+	    words[0] = 0x7f80;
+	    break;
+
+	  /* Is -Inf.  */
+	  case 'N':
+	    words[0] = 0xff80;
+	    break;
+
+	  /* Is NaN.  */
+	  /* bfloat16 has two types of NaN - quiet and signalling.
+	     Quiet NaN has bit[6] == 1 && faction != 0, whereas
+	     signalling NaN's have bit[0] == 0 && fraction != 0.
+	     Chosen this specific encoding as it is the same form
+	     as used by other IEEE 754 encodings in GAS.  */
+	  case 0:
+	    words[0] = 0x7fff;
+	    break;
+
+	  default:
+	    break;
+	  }
+
+	*sizeP = 2;
+
+	md_number_to_chars (litP, (valueT) words[0], sizeof (LITTLENUM_TYPE));
+
+	return NULL;
+      }
     case 'f':
     case 'F':
     case 's':
@@ -5088,6 +5134,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "extend",	   float_cons, 'x' },
   { "ldouble",	   float_cons, 'x' },
   { "packed",	   float_cons, 'p' },
+  { "bfloat16",	   float_cons, 'b' },
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},
 #endif
