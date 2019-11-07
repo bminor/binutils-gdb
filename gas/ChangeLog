@@ -1,3 +1,9 @@
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (armv8.6-a): New arch.
+	* doc/c-aarch64.texi (armv8.6-a): Document new arch.
+
 2019-11-07  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (cpu_arch): Add .rdpru and .mcommit entries.

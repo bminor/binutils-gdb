@@ -8918,6 +8918,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8.3-a", AARCH64_ARCH_V8_3},
   {"armv8.4-a", AARCH64_ARCH_V8_4},
   {"armv8.5-a", AARCH64_ARCH_V8_5},
+  {"armv8.6-a", AARCH64_ARCH_V8_6},
   {NULL, AARCH64_ARCH_NONE}
 };
 

@@ -1,3 +1,9 @@
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_V8_6): New.
+	(AARCH64_ARCH_V8_6): New.
+
 2019-11-07  Alan Modra  <amodra@gmail.com>
 
 	* elf/cr16c.h: Delete.

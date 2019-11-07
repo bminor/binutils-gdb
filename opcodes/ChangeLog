@@ -1,3 +1,8 @@
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-tbl.h (ARMV8_6): New macro.
+
 2019-11-07  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (prefix_table): Add mcommit.

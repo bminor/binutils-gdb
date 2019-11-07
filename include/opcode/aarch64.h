@@ -63,6 +63,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_DOTPROD 0x080000000     /* Dot Product instructions.  */
 #define AARCH64_FEATURE_F16_FML	0x1000000000ULL	/* v8.2 FP16FML ins.  */
 #define AARCH64_FEATURE_V8_5	0x2000000000ULL	/* ARMv8.5 processors.  */
+#define AARCH64_FEATURE_V8_6	0x00000002	/* ARMv8.6 processors.  */
 
 /* Flag Manipulation insns.  */
 #define AARCH64_FEATURE_FLAGMANIP	0x4000000000ULL
@@ -129,7 +130,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_SCXTNUM \
 						 | AARCH64_FEATURE_ID_PFR2 \
 						 | AARCH64_FEATURE_SSBS)
-
+#define AARCH64_ARCH_V8_6	AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
+						 AARCH64_FEATURE_V8_6)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */

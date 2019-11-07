@@ -2343,6 +2343,8 @@ static const aarch64_feature_set aarch64_feature_sve2sm4 =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_SM4, 0);
 static const aarch64_feature_set aarch64_feature_sve2bitperm =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_BITPERM, 0);
+static const aarch64_feature_set aarch64_feature_v8_6 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_6, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2384,6 +2386,7 @@ static const aarch64_feature_set aarch64_feature_sve2bitperm =
 #define SVE2_SHA3	&aarch64_feature_sve2sha3
 #define SVE2_SM4		&aarch64_feature_sve2sm4
 #define SVE2_BITPERM	&aarch64_feature_sve2bitperm
+#define ARMV8_6		&aarch64_feature_v8_6
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
