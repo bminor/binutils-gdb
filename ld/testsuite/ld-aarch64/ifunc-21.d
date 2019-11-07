@@ -1,7 +1,7 @@
 #source: ifunc-21.s
+#target: [check_shared_lib_support]
 #ld: -shared --hash-style=sysv -z nocombreloc
 #objdump: -d -s -j .got.plt -j .text
-#target: aarch64*-*-*
 
 # Ensure the .got.plt slot used is correct
 

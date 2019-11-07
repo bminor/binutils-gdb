@@ -1,6 +1,6 @@
+#target: [check_shared_lib_support]
 #ld: -shared --hash-style=sysv
 #objdump: -dw
-#target: aarch64*-*-*
 
 #...
 0+(130|1a0|1c8) <foo>:

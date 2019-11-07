@@ -1,5 +1,6 @@
 #source: variant_pcs-1.s
 #source: variant_pcs-2.s
+#target: [check_shared_lib_support]
 #ld: -shared --hash-style=sysv -T variant_pcs.ld -z now
 #readelf: -rsW
 

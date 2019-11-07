@@ -1,5 +1,6 @@
 #name: Check -z force-bti emits BTI PLT (exec)
 #source: bti-plt-1.s
+#target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -z force-bti -e _start -T bti-plt.ld -L./tmpdir -lbti-plt-so
 #objdump: -dr -j .plt

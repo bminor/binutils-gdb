@@ -1,4 +1,5 @@
 #source: bti-plt-1.s
+#target: [check_shared_lib_support]
 #as: -mabi=lp64 --defsym __guard_property_bti__=1
 #ld: -shared -z pac-plt -T bti-plt.ld
 #objdump: -dr -j .plt

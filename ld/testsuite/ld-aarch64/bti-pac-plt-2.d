@@ -1,4 +1,5 @@
 #source: bti-plt-1.s
+#target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -z force-bti -z pac-plt -e _start -T bti-plt.ld -L./tmpdir -lbti-plt-so
 #objdump: -dr -j .plt

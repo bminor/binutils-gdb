@@ -37,11 +37,14 @@ set aarch64elftests {
      "--fix-cortex-a53-835769" "" "" {erratum835769.s}
      {{objdump -dr erratum835769.d}}
      "erratum835769"}
+}
+set tmp {
     {"Erratum 835769 dump test -shared"
      "--fix-cortex-a53-835769 -shared" "" "" {erratum835769.s}
      {{objdump -dr erratum835769.d}}
      "erratum835769"}
 }
+if [check_shared_lib_support] { append aarch64elftests $tmp }
 
 proc aarch64_choose_ilp32_emul {} {
     if [istarget *linux*] then {
@@ -410,7 +413,9 @@ set aarch64elflinktests {
     {} "libbti-plt-so.so"}
 }
 
-run_ld_link_tests $aarch64elflinktests
+if [check_shared_lib_support] {
+    run_ld_link_tests $aarch64elflinktests
+}
 
 run_dump_test "bti-plt-3"
 run_dump_test "bti-plt-4"

@@ -1,9 +1,9 @@
 #name: GNU Property (single input, combine section)
 #source: property-bti-pac1.s
+#alltargets: [check_shared_lib_support] *linux*
 #as: -march=armv8.5-a -defsym __mult__=0
 #ld: -shared
 #readelf: -n
-#target: *linux*
 
 Displaying notes found in: .note.gnu.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description

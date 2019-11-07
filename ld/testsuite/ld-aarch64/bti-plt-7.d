@@ -1,6 +1,7 @@
 #name: Warn when neither inputs has GNU NOTE BTI
 #source: property-bti-pac2.s
 #source: plt_mapping_symbol.s
+#target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -shared -z force-bti
 #warning: .*plt_mapping_symbol.*: warning: BTI turned on by -z force-bti.*

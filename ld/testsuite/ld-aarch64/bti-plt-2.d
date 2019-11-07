@@ -1,6 +1,7 @@
 #name: Check -z force-bti emits BTI feature (shared)
 #source: bti-plt-1.s
 #source: bti-plt-2.s
+#target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -shared -z force-bti -T bti-plt.ld
 #readelf: -n
