@@ -1,5 +1,10 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* testsuite/gas/aarch64/dgh.s: New test.
+	* testsuite/gas/aarch64/dgh.d: New test.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* config/tc-arm.c (arm_ext_i8mm): New feature set.
 	(do_vusdot): New.
 	(do_vsudot): New.
