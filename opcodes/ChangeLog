@@ -1,6 +1,18 @@
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* arm-dis.c (print_insn_coprocessor,
+	print_insn_generic_coprocessor): Create wrapper functions around
+	the implementation of the print_insn_coprocessor control codes.
+	(print_insn_coprocessor_1): Original print_insn_coprocessor
+	function that now takes which array to look at as an argument.
+	(print_insn_arm): Use both print_insn_coprocessor and
+	print_insn_generic_coprocessor.
+	(print_insn_thumb32): As above.
+
+2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
+2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_reglane): Use AARCH64_OPND_QLF_S_2H
 	in reglane special case.
 	* aarch64-dis-2.c (aarch64_opcode_lookup_1,

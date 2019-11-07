@@ -1184,38 +1184,7 @@ static const struct sopcode32 coprocessor_opcodes[] =
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
     0xfeb80b40, 0xffbc0fd0, "vrint%16-17?mpna%u.f64\t%z1, %z0"},
 
-  /* Generic coprocessor instructions.  */
   {ANY, ARM_FEATURE_CORE_LOW (0), SENTINEL_GENERIC_START, 0, "" },
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5E),
-    0x0c400000, 0x0ff00000, "mcrr%c\t%8-11d, %4-7d, %12-15R, %16-19r, cr%0-3d"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5E),
-    0x0c500000, 0x0ff00000,
-    "mrrc%c\t%8-11d, %4-7d, %12-15Ru, %16-19Ru, cr%0-3d"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0e000000, 0x0f000010,
-    "cdp%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0e10f010, 0x0f10f010,
-    "mrc%c\t%8-11d, %21-23d, APSR_nzcv, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0e100010, 0x0f100010,
-    "mrc%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0e000010, 0x0f100010,
-    "mcr%c\t%8-11d, %21-23d, %12-15R, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0c000000, 0x0e100000, "stc%22'l%c\t%8-11d, cr%12-15d, %A"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
-    0x0c100000, 0x0e100000, "ldc%22'l%c\t%8-11d, cr%12-15d, %A"},
-
-  /* V6 coprocessor instructions.  */
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V6),
-    0xfc500000, 0xfff00000,
-    "mrrc2%c\t%8-11d, %4-7d, %12-15Ru, %16-19Ru, cr%0-3d"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V6),
-    0xfc400000, 0xfff00000,
-    "mcrr2%c\t%8-11d, %4-7d, %12-15R, %16-19R, cr%0-3d"},
-
   /* ARMv8.3 AdvSIMD instructions in the space of coprocessor 8.  */
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0xfc800800, 0xfeb00f10, "vcadd%c.f16\t%12-15,22V, %16-19,7V, %0-3,5V, #%24?29%24'70"},
@@ -1261,21 +1230,6 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0xfe000850, 0xffb00f50, "vfmal.f16\t%12-15,22Q, d%16-19,7d, d%0-2d[%3,5d]"},
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_V8_2A),
     0xfe100850, 0xffb00f50, "vfmsl.f16\t%12-15,22Q, d%16-19,7d, d%0-2d[%3,5d]"},
-
-  /* V5 coprocessor instructions.  */
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0xfc100000, 0xfe100000, "ldc2%22'l%c\t%8-11d, cr%12-15d, %A"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0xfc000000, 0xfe100000, "stc2%22'l%c\t%8-11d, cr%12-15d, %A"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0xfe000000, 0xff000010,
-    "cdp2%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0xfe000010, 0xff100010,
-    "mcr2%c\t%8-11d, %21-23d, %12-15R, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0xfe100010, 0xff100010,
-    "mrc2%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
 
   /* ARMv8.2 half-precision Floating point coprocessor 9 (VFP) instructions.
      cp_num: bit <11:8> == 0b1001.
@@ -1354,6 +1308,60 @@ static const struct sopcode32 coprocessor_opcodes[] =
   /* ARMv8.3 javascript conversion instruction.  */
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0x0eb90bc0, 0x0fbf0fd0, "vjcvt%c.s32.f64\t%y1, %z0"},
+
+  {ANY, ARM_FEATURE_CORE_LOW (0), 0, 0, 0}
+};
+
+/* Generic coprocessor instructions.  These are only matched if a more specific
+   SIMD or co-processor instruction does not match first.  */
+
+static const struct sopcode32 generic_coprocessor_opcodes[] =
+{
+  /* Generic coprocessor instructions.  */
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5E),
+    0x0c400000, 0x0ff00000, "mcrr%c\t%8-11d, %4-7d, %12-15R, %16-19r, cr%0-3d"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5E),
+    0x0c500000, 0x0ff00000,
+    "mrrc%c\t%8-11d, %4-7d, %12-15Ru, %16-19Ru, cr%0-3d"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0e000000, 0x0f000010,
+    "cdp%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0e10f010, 0x0f10f010,
+    "mrc%c\t%8-11d, %21-23d, APSR_nzcv, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0e100010, 0x0f100010,
+    "mrc%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0e000010, 0x0f100010,
+    "mcr%c\t%8-11d, %21-23d, %12-15R, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0c000000, 0x0e100000, "stc%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
+    0x0c100000, 0x0e100000, "ldc%22'l%c\t%8-11d, cr%12-15d, %A"},
+
+  /* V6 coprocessor instructions.  */
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V6),
+    0xfc500000, 0xfff00000,
+    "mrrc2%c\t%8-11d, %4-7d, %12-15Ru, %16-19Ru, cr%0-3d"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V6),
+    0xfc400000, 0xfff00000,
+    "mcrr2%c\t%8-11d, %4-7d, %12-15R, %16-19R, cr%0-3d"},
+
+  /* V5 coprocessor instructions.  */
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0xfc100000, 0xfe100000, "ldc2%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0xfc000000, 0xfe100000, "stc2%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0xfe000000, 0xff000010,
+    "cdp2%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0xfe000010, 0xff100010,
+    "mcr2%c\t%8-11d, %21-23d, %12-15R, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ANY, ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0xfe100010, 0xff100010,
+    "mrc2%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
 
   {ANY, ARM_FEATURE_CORE_LOW (0), 0, 0, 0}
 };
@@ -7887,10 +7895,11 @@ print_vec_condition (struct disassemble_info *info, long given,
    recognised coprocessor instruction.  */
 
 static bfd_boolean
-print_insn_coprocessor (bfd_vma pc,
-			struct disassemble_info *info,
-			long given,
-			bfd_boolean thumb)
+print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
+			  bfd_vma pc,
+			  struct disassemble_info *info,
+			  long given,
+			  bfd_boolean thumb)
 {
   const struct sopcode32 *insn;
   void *stream = info->stream;
@@ -7906,7 +7915,7 @@ print_insn_coprocessor (bfd_vma pc,
 
   allowed_arches = private_data->features;
 
-  for (insn = coprocessor_opcodes; insn->assembler; insn++)
+  for (insn = opcodes; insn->assembler; insn++)
     {
       unsigned long u_reg = 16;
       bfd_boolean is_unpredictable = FALSE;
@@ -8620,6 +8629,26 @@ print_insn_coprocessor (bfd_vma pc,
       return TRUE;
     }
   return FALSE;
+}
+
+static bfd_boolean
+print_insn_coprocessor (bfd_vma pc,
+			struct disassemble_info *info,
+			long given,
+			bfd_boolean thumb)
+{
+  return print_insn_coprocessor_1 (coprocessor_opcodes,
+				   pc, info, given, thumb);
+}
+
+static bfd_boolean
+print_insn_generic_coprocessor (bfd_vma pc,
+				struct disassemble_info *info,
+				long given,
+				bfd_boolean thumb)
+{
+  return print_insn_coprocessor_1 (generic_coprocessor_opcodes,
+				   pc, info, given, thumb);
 }
 
 /* Decodes and prints ARM addressing modes.  Returns the offset
@@ -9652,6 +9681,9 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
   if (print_insn_neon (info, given, FALSE))
     return;
 
+  if (print_insn_generic_coprocessor (pc, info, given, FALSE))
+    return;
+
   for (insn = arm_opcodes; insn->assembler; insn++)
     {
       if ((given & insn->mask) != insn->value)
@@ -10487,6 +10519,9 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
     return;
 
   if (is_mve && print_insn_mve (info, given))
+    return;
+
+  if (print_insn_generic_coprocessor (pc, info, given, TRUE))
     return;
 
   for (insn = thumb32_opcodes; insn->assembler; insn++)
