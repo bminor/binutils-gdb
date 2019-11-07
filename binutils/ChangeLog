@@ -1,5 +1,12 @@
 2019-11-07  Nick Clifton  <nickc@redhat.com>
 
+	* ar.c (open_output_file): Check for filename validity before
+	prefixing with output directory.
+	Display the constructed output filename if in verbose mode.
+	(extract_file): Let open_output_file display the filename.
+
+2019-11-07  Nick Clifton  <nickc@redhat.com>
+
 	* objcopy.c (copy_object): Skip note sections that do not have
 	an output section.  Always copy note sections, even if no
 	changes are made.

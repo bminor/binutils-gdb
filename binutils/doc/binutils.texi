@@ -390,7 +390,9 @@ are extracted.
 Files cannot be extracted from a thin archive, and there are
 restrictions on extracting from archives created with @option{P}: The
 paths must not be absolute, may not contain @code{..}, and any
-subdirectories in the paths must exist.
+subdirectories in the paths must exist.  If it is desired to avoid
+these restrictions then used the @option{--output} option to specify
+an output directory.
 @end table
 
 A number of modifiers (@var{mod}) may immediately follow the @var{p}
@@ -589,11 +591,6 @@ Note - although the presence of this option does imply a @option{x}
 extraction operation that option must still be included on the command
 line.
 
-Note - using this option does not allow archive members to be
-extracted to locations outside of the current directory, or one of its 
-sub-directories.  This is a security feature to prevent archives
-created with the @option{P} option from maliciously overwriting user
-files.
 @end table
 @c man end
 

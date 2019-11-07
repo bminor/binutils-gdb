@@ -1070,6 +1070,18 @@ open_output_file (bfd * abfd)
 {
   output_filename = bfd_get_filename (abfd);
 
+  /* PR binutils/17533: Do not allow directory traversal
+     outside of the current directory tree - unless the
+     user has explicitly specified an output directory.  */
+  if (! is_valid_archive_path (output_filename))
+    {
+      char * base = (char *) lbasename (output_filename);
+
+      non_fatal (_("illegal output pathname for archive member: %s, using '%s' instead"),
+		 output_filename, base);
+      output_filename = base;
+    }
+  
   if (output_dir)
     {
       size_t len = strlen (output_dir);
@@ -1083,18 +1095,10 @@ open_output_file (bfd * abfd)
 	    output_filename = concat (output_dir, "/", output_filename, NULL);
 	}
     }
-    
-  /* PR binutils/17533: Do not allow directory traversal
-     outside of the current directory tree.  */
-  if (! is_valid_archive_path (output_filename))
-    {
-      char * base = (char *) lbasename (output_filename);
 
-      non_fatal (_("illegal output pathname for archive member: %s, using '%s' instead"),
-		 output_filename, base);
-      output_filename = base;
-    }
-
+  if (verbose)
+    printf ("x - %s\n", output_filename);
+  
   FILE * ostream = fopen (output_filename, FOPEN_WB);
   if (ostream == NULL)
     {
@@ -1125,9 +1129,6 @@ extract_file (bfd *abfd)
     /* xgettext:c-format */
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
   size = buf.st_size;
-
-  if (verbose)
-    printf ("x - %s\n", bfd_get_filename (abfd));
 
   bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
 
