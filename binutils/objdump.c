@@ -264,7 +264,7 @@ usage (FILE *stream, int status)
   -w, --wide                     Format output for more than 80 columns\n\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
       --start-address=ADDR       Only process data whose address is >= ADDR\n\
-      --stop-address=ADDR        Only process data whose address is <= ADDR\n\
+      --stop-address=ADDR        Only process data whose address is < ADDR\n\
       --prefix-addresses         Print complete address alongside disassembly\n\
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
       --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n\
