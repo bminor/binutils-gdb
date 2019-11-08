@@ -54,14 +54,38 @@ void get_user_print_what_frame_info (gdb::optional<enum print_what> *what);
 
 bool frame_show_address (struct frame_info *frame, struct symtab_and_line sal);
 
-/* Get or set the last displayed symtab and line, which is, e.g. where we set a
- * breakpoint when `break' is supplied with no arguments.  */
+/* Forget the last sal we displayed.  */
+
 void clear_last_displayed_sal (void);
-int last_displayed_sal_is_valid (void);
+
+/* Is our record of the last sal we displayed valid?  If not, the
+   get_last_displayed_* functions will return NULL or 0, as appropriate.  */
+
+bool last_displayed_sal_is_valid (void);
+
+/* Get the pspace of the last sal we displayed, if it's valid, otherwise
+   return nullptr.  */
+
 struct program_space* get_last_displayed_pspace (void);
+
+/* Get the address of the last sal we displayed, if it's valid, otherwise
+   return an address of 0.  */
+
 CORE_ADDR get_last_displayed_addr (void);
+
+/* Get the symtab of the last sal we displayed, if it's valid, otherwise
+   return nullptr.  */
+
 struct symtab* get_last_displayed_symtab (void);
+
+/* Get the line of the last sal we displayed, if it's valid, otherwise
+   return 0.  */
+
 int get_last_displayed_line (void);
+
+/* Get the last sal we displayed, if it's valid, otherwise return a
+   symtab_and_line constructed in its default state.  */
+
 symtab_and_line get_last_displayed_sal ();
 
 /* Completer for the "frame apply all" command.  */

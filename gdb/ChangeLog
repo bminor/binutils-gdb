@@ -1,5 +1,32 @@
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (set_last_displayed_sal): Delete.
+	(last_displayed_sal_valid): Delete.
+	(last_displayed_pspace): Delete.
+	(last_displayed_addr): Delete.
+	(last_displayed_symtab): Delete.
+	(last_displayed_line): Delete.
+	(class last_displayed_symtab_info_type): New.
+	(last_displayed_symtab_info): New static global variable.
+	(print_frame_info): Call methods on last_displayed_symtab_info.
+	(clear_last_displayed_sal): Update header comment, and make use of
+	last_displayed_symtab_info.
+	(last_displayed_sal_is_valid): Likewise.
+	(get_last_displayed_pspace): Likewise.
+	(get_last_displayed_addr): Likewise.
+	(get_last_displayed_symtab): Likewise.
+	(get_last_displayed_line): Likewise.
+	(get_last_displayed_sal): Likewise.
+	* stack.h (clear_last_displayed_sal): Update header comment.
+	(last_displayed_sal_is_valid): Likewise.
+	(get_last_displayed_pspace): Likewise.
+	(get_last_displayed_addr): Likewise.
+	(get_last_displayed_symtab): Likewise.
+	(get_last_displayed_line): Likewise.
+	(get_last_displayed_sal): Likewise.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* stack.c (frame_show_address): Convert return type to bool.
 	* stack.h (frame_show_address): Likewise, and update header
 	comment.

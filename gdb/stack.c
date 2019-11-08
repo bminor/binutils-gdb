@@ -224,12 +224,6 @@ static void print_frame (const frame_print_options &opts,
 			 enum print_what print_what,  int print_args,
 			 struct symtab_and_line sal);
 
-static void set_last_displayed_sal (int valid,
-				    struct program_space *pspace,
-				    CORE_ADDR addr,
-				    struct symtab *symtab,
-				    int line);
-
 static struct frame_info *find_frame_for_function (const char *);
 static struct frame_info *find_frame_for_address (CORE_ADDR);
 
@@ -241,13 +235,79 @@ static struct frame_info *find_frame_for_address (CORE_ADDR);
 
 int annotation_level = 0;
 
-/* These variables hold the last symtab and line we displayed to the user.
- * This is where we insert a breakpoint or a skiplist entry by default.  */
-static int last_displayed_sal_valid = 0;
-static struct program_space *last_displayed_pspace = 0;
-static CORE_ADDR last_displayed_addr = 0;
-static struct symtab *last_displayed_symtab = 0;
-static int last_displayed_line = 0;
+/* Class used to manage tracking the last symtab we displayed.  */
+
+class last_displayed_symtab_info_type
+{
+public:
+  /* True if the cached information is valid.  */
+  bool is_valid () const
+  { return m_valid; }
+
+  /* Return the cached program_space.  If the cache is invalid nullptr is
+     returned.  */
+  struct program_space *pspace () const
+  { return m_pspace; }
+
+  /* Return the cached CORE_ADDR address.  If the cache is invalid 0 is
+     returned.  */
+  CORE_ADDR address () const
+  { return m_address; }
+
+  /* Return the cached symtab.  If the cache is invalid nullptr is
+     returned.  */
+  struct symtab *symtab () const
+  { return m_symtab; }
+
+  /* Return the cached line number.  If the cache is invalid 0 is
+     returned.  */
+  int line () const
+  { return m_line; }
+
+  /* Invalidate the cache, reset all the members to their default value.  */
+  void invalidate ()
+  {
+    m_valid = false;
+    m_pspace = nullptr;
+    m_address = 0;
+    m_symtab = nullptr;
+    m_line = 0;
+  }
+
+  /* Store a new set of values in the cache.  */
+  void set (struct program_space *pspace, CORE_ADDR address,
+	    struct symtab *symtab, int line)
+  {
+    gdb_assert (pspace != nullptr);
+
+    m_valid = true;
+    m_pspace = pspace;
+    m_address = address;
+    m_symtab = symtab;
+    m_line = line;
+  }
+
+private:
+  /* True when the cache is valid.  */
+  bool m_valid = false;
+
+  /* The last program space displayed.  */
+  struct program_space *m_pspace = nullptr;
+
+  /* The last address displayed.  */
+  CORE_ADDR m_address = 0;
+
+  /* The last symtab displayed.  */
+  struct symtab *m_symtab = nullptr;
+
+  /* The last line number displayed.  */
+  int m_line = 0;
+};
+
+/* An actual instance of the cache, holds information about the last symtab
+   displayed.  */
+static last_displayed_symtab_info_type last_displayed_symtab_info;
+
 
 
 /* See stack.h.  */
@@ -1105,9 +1165,9 @@ print_frame_info (const frame_print_options &fp_opts,
       CORE_ADDR pc;
 
       if (get_frame_pc_if_available (frame, &pc))
-	set_last_displayed_sal (1, sal.pspace, pc, sal.symtab, sal.line);
+	last_displayed_symtab_info.set (sal.pspace, pc, sal.symtab, sal.line);
       else
-	set_last_displayed_sal (0, 0, 0, 0, 0);
+	last_displayed_symtab_info.invalidate ();
     }
 
   annotate_frame_end ();
@@ -1115,103 +1175,67 @@ print_frame_info (const frame_print_options &fp_opts,
   gdb_flush (gdb_stdout);
 }
 
-/* Remember the last symtab and line we displayed, which we use e.g.
- * as the place to put a breakpoint when the `break' command is
- * invoked with no arguments.  */
-
-static void
-set_last_displayed_sal (int valid, struct program_space *pspace,
-			CORE_ADDR addr, struct symtab *symtab,
-			int line)
-{
-  last_displayed_sal_valid = valid;
-  last_displayed_pspace = pspace;
-  last_displayed_addr = addr;
-  last_displayed_symtab = symtab;
-  last_displayed_line = line;
-  if (valid && pspace == NULL)
-    {
-      clear_last_displayed_sal ();
-      internal_error (__FILE__, __LINE__,
-		      _("Trying to set NULL pspace."));
-    }
-}
-
-/* Forget the last sal we displayed.  */
+/* See stack.h.  */
 
 void
 clear_last_displayed_sal (void)
 {
-  last_displayed_sal_valid = 0;
-  last_displayed_pspace = 0;
-  last_displayed_addr = 0;
-  last_displayed_symtab = 0;
-  last_displayed_line = 0;
+  last_displayed_symtab_info.invalidate ();
 }
 
-/* Is our record of the last sal we displayed valid?  If not,
- * the get_last_displayed_* functions will return NULL or 0, as
- * appropriate.  */
+/* See stack.h.  */
 
-int
+bool
 last_displayed_sal_is_valid (void)
 {
-  return last_displayed_sal_valid;
+  return last_displayed_symtab_info.is_valid ();
 }
 
-/* Get the pspace of the last sal we displayed, if it's valid.  */
+/* See stack.h.  */
 
 struct program_space *
 get_last_displayed_pspace (void)
 {
-  if (last_displayed_sal_valid)
-    return last_displayed_pspace;
-  return 0;
+  return last_displayed_symtab_info.pspace ();
 }
 
-/* Get the address of the last sal we displayed, if it's valid.  */
+/* See stack.h.  */
 
 CORE_ADDR
 get_last_displayed_addr (void)
 {
-  if (last_displayed_sal_valid)
-    return last_displayed_addr;
-  return 0;
+  return last_displayed_symtab_info.address ();
 }
 
-/* Get the symtab of the last sal we displayed, if it's valid.  */
+/* See stack.h.  */
 
 struct symtab*
 get_last_displayed_symtab (void)
 {
-  if (last_displayed_sal_valid)
-    return last_displayed_symtab;
-  return 0;
+  return last_displayed_symtab_info.symtab ();
 }
 
-/* Get the line of the last sal we displayed, if it's valid.  */
+/* See stack.h.  */
 
 int
 get_last_displayed_line (void)
 {
-  if (last_displayed_sal_valid)
-    return last_displayed_line;
-  return 0;
+  return last_displayed_symtab_info.line ();
 }
 
-/* Get the last sal we displayed, if it's valid.  */
+/* See stack.h.  */
 
 symtab_and_line
 get_last_displayed_sal ()
 {
   symtab_and_line sal;
 
-  if (last_displayed_sal_valid)
+  if (last_displayed_symtab_info.is_valid ())
     {
-      sal.pspace = last_displayed_pspace;
-      sal.pc = last_displayed_addr;
-      sal.symtab = last_displayed_symtab;
-      sal.line = last_displayed_line;
+      sal.pspace = last_displayed_symtab_info.pspace ();
+      sal.pc = last_displayed_symtab_info.address ();
+      sal.symtab = last_displayed_symtab_info.symtab ();
+      sal.line = last_displayed_symtab_info.line ();
     }
 
   return sal;
