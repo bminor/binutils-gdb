@@ -1,3 +1,21 @@
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Add Class=. New
+	OPERAND_TYPE_ANYIMM entry.
+	(operand_classes): New.
+	(operand_types): Drop Reg entry.
+	(output_operand_type): New parameter "class". Process it.
+	(process_i386_operand_type): New local variable "class".
+	(main): Adjust static assertions.
+	* i386-opc.h (CLASS_WIDTH): Define.
+	(enum operand_class): New.
+	(Reg): Replace by Class. Adjust comment.
+	(union i386_operand_type): Replace reg by class.
+	* i386-opc.tbl (Reg8, Reg16, Reg32, Reg64, FloatReg): Add
+	Class=.
+	* i386-reg.tbl: Replace Reg by Class=Reg.
+	* i386-init.h: Re-generate.
+
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* opcodes/aarch64-tbl.h (V8_6_INSN): New macro for v8.6 instructions.

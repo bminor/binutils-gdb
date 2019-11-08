@@ -1,3 +1,17 @@
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (operand_type_set, operand_type_and,
+	operand_type_and_not, operand_type_or, operand_type_xor): Handle
+	"class" field specially.
+	(anyimm): New.
+	(operand_type_check, operand_size_match,
+	operand_type_register_match, pi, md_assemble, is_short_form,
+	process_suffix, check_byte_reg, check_long_reg, check_qword_reg,
+	check_word_reg, process_operands, build_modrm_byte): Use "class"
+	instead of "reg" field.
+	(optimize_imm): Likewise. Reduce redundancy. Adjust calculation
+	of "allowed".
+
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* testsuite/gas/aarch64/dgh.s: New test.

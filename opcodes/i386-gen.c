@@ -388,13 +388,13 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_NONE",
     "0" },
   { "OPERAND_TYPE_REG8",
-    "Reg|Byte" },
+    "Class=Reg|Byte" },
   { "OPERAND_TYPE_REG16",
-    "Reg|Word" },
+    "Class=Reg|Word" },
   { "OPERAND_TYPE_REG32",
-    "Reg|Dword" },
+    "Class=Reg|Dword" },
   { "OPERAND_TYPE_REG64",
-    "Reg|Qword" },
+    "Class=Reg|Qword" },
   { "OPERAND_TYPE_IMM1",
     "Imm1" },
   { "OPERAND_TYPE_IMM8",
@@ -432,7 +432,7 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_DEBUG",
     "Debug" },
   { "OPERAND_TYPE_FLOATREG",
-    "Reg|Tbyte" },
+    "Class=Reg|Tbyte" },
   { "OPERAND_TYPE_FLOATACC",
     "Acc|Tbyte" },
   { "OPERAND_TYPE_SREG",
@@ -479,6 +479,8 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32" },
   { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
+  { "OPERAND_TYPE_ANYIMM",
+    "Imm1|Imm8|Imm8S|Imm16|Imm32|Imm32S|Imm64" },
   { "OPERAND_TYPE_REGBND",
     "RegBND" },
 };
@@ -674,9 +676,19 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Intel64),
 };
 
+#define CLASS(n) #n, n
+
+static const struct {
+  const char *name;
+  enum operand_class value;
+} operand_classes[] = {
+  CLASS (Reg),
+};
+
+#undef CLASS
+
 static bitfield operand_types[] =
 {
-  BITFIELD (Reg),
   BITFIELD (RegMMX),
   BITFIELD (RegSIMD),
   BITFIELD (RegMask),
@@ -1134,20 +1146,21 @@ enum stage {
 };
 
 static void
-output_operand_type (FILE *table, bitfield *types, unsigned int size,
+output_operand_type (FILE *table, enum operand_class class,
+		     const bitfield *types, unsigned int size,
 		     enum stage stage, const char *indent)
 {
   unsigned int i;
 
-  fprintf (table, "{ { ");
+  fprintf (table, "{ { %d, ", class);
 
   for (i = 0; i < size - 1; i++)
     {
-      if (((i + 1) % 20) != 0)
+      if (((i + 2) % 20) != 0)
 	fprintf (table, "%d, ", types[i].value);
       else
 	fprintf (table, "%d,", types[i].value);
-      if (((i + 1) % 20) == 0)
+      if (((i + 2) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
 	  if (stage == stage_macros)
@@ -1165,6 +1178,7 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 			   const char *indent, int lineno)
 {
   char *str, *next, *last;
+  enum operand_class class = ClassNone;
   bitfield types [ARRAY_SIZE (operand_types)];
 
   /* Copy the default operand type.  */
@@ -1178,6 +1192,21 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
       for (next = op; next && next < last; )
 	{
 	  str = next_field (next, '|', &next, last);
+	  if (str)
+	    {
+	      unsigned int i;
+
+	      if (!strncmp(str, "Class=", 6))
+		{
+		  for (i = 0; i < ARRAY_SIZE(operand_classes); ++i)
+		    if (!strcmp(str + 6, operand_classes[i].name))
+		      {
+			class = operand_classes[i].value;
+			str = NULL;
+			break;
+		      }
+		}
+	    }
 	  if (str)
 	    {
 	      set_bitfield (str, types, 1, ARRAY_SIZE (types), lineno);
@@ -1197,7 +1226,7 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 	    set_bitfield("Disp32S", types, 1, ARRAY_SIZE (types), lineno);
 	}
     }
-  output_operand_type (table, types, ARRAY_SIZE (types), stage,
+  output_operand_type (table, class, types, ARRAY_SIZE (types), stage,
 		       indent);
 }
 
@@ -1688,9 +1717,9 @@ main (int argc, char **argv)
 
   /* Check the unused bitfield in i386_operand_type.  */
 #ifdef OTUnused
-  static_assert (ARRAY_SIZE (operand_types) == OTNum + 1);
+  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH == OTNum + 1);
 #else
-  static_assert (ARRAY_SIZE (operand_types) == OTNum);
+  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH == OTNum);
 
   c = OTNumOfBits - OTMax - 1;
   if (c)

@@ -702,12 +702,21 @@ typedef struct i386_opcode_modifier
   unsigned int intel64:1;
 } i386_opcode_modifier;
 
+/* Operand classes.  */
+
+#define CLASS_WIDTH 4
+enum operand_class
+{
+  ClassNone,
+  Reg, /* GPRs and FP regs, distinguished by operand size */
+};
+
 /* Position of operand_type bits.  */
 
 enum
 {
-  /* Register (qualified by Byte, Word, etc) */
-  Reg = 0,
+  /* Class */
+  Class = CLASS_WIDTH - 1,
   /* MMX register */
   RegMMX,
   /* Vector registers */
@@ -791,7 +800,7 @@ enum
   /* Bound register.  */
   RegBND,
 
-  /* The number of bitfields in i386_operand_type.  */
+  /* The number of bits in i386_operand_type.  */
   OTNum
 };
 
@@ -808,7 +817,7 @@ typedef union i386_operand_type
 {
   struct
     {
-      unsigned int reg:1;
+      unsigned int class:CLASS_WIDTH;
       unsigned int regmmx:1;
       unsigned int regsimd:1;
       unsigned int regmask:1;
