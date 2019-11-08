@@ -1,3 +1,12 @@
+2019-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25167
+	* config/tc-i386.c (match_template): Don't check instruction
+	suffix set from operand.
+	* testsuite/gas/i386/code16.d: New file.
+	* testsuite/gas/i386/code16.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run code16.
+
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (optimize_encoding, build_modrm_byte,

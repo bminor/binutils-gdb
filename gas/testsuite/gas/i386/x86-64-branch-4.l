@@ -7,11 +7,11 @@
 .*:9: Error: operand type mismatch for `call'
 .*:10: Error: invalid instruction suffix for `call'
 .*:11: Error: invalid instruction suffix for `call'
-.*:12: Error: invalid instruction suffix for `call'
+.*:12: Error: operand size mismatch for `call'
 .*:13: Error: operand type mismatch for `jmp'
 .*:14: Error: invalid instruction suffix for `jmp'
 .*:15: Error: invalid instruction suffix for `jmp'
-.*:16: Error: invalid instruction suffix for `jmp'
+.*:16: Error: operand size mismatch for `jmp'
 GAS LISTING .*
 #...
 [ 	]*1[ 	]+\.text

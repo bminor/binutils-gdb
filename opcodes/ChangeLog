@@ -1,3 +1,9 @@
+2019-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25167
+	* i386-opc.tbl: Remove IgnoreSize from cmpsd and movsd.
+	* i386-tbl.h: Regenerated.
+
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Add Class= to

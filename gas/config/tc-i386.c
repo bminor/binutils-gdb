@@ -5693,7 +5693,7 @@ match_template (char mnem_suffix)
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;
-  i386_opcode_modifier suffix_check, mnemsuf_check;
+  i386_opcode_modifier suffix_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j;
@@ -5708,33 +5708,33 @@ match_template (char mnem_suffix)
   found_reverse_match = 0;
   addr_prefix_disp = -1;
 
+  /* Prepare for mnemonic suffix check.  */
   memset (&suffix_check, 0, sizeof (suffix_check));
-  if (intel_syntax && i.broadcast)
-    /* nothing */;
-  else if (i.suffix == BYTE_MNEM_SUFFIX)
-    suffix_check.no_bsuf = 1;
-  else if (i.suffix == WORD_MNEM_SUFFIX)
-    suffix_check.no_wsuf = 1;
-  else if (i.suffix == SHORT_MNEM_SUFFIX)
-    suffix_check.no_ssuf = 1;
-  else if (i.suffix == LONG_MNEM_SUFFIX)
-    suffix_check.no_lsuf = 1;
-  else if (i.suffix == QWORD_MNEM_SUFFIX)
-    suffix_check.no_qsuf = 1;
-  else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
-    suffix_check.no_ldsuf = 1;
-
-  memset (&mnemsuf_check, 0, sizeof (mnemsuf_check));
-  if (intel_syntax)
+  switch (mnem_suffix)
     {
-      switch (mnem_suffix)
-	{
-	case BYTE_MNEM_SUFFIX:  mnemsuf_check.no_bsuf = 1; break;
-	case WORD_MNEM_SUFFIX:  mnemsuf_check.no_wsuf = 1; break;
-	case SHORT_MNEM_SUFFIX: mnemsuf_check.no_ssuf = 1; break;
-	case LONG_MNEM_SUFFIX:  mnemsuf_check.no_lsuf = 1; break;
-	case QWORD_MNEM_SUFFIX: mnemsuf_check.no_qsuf = 1; break;
-	}
+    case BYTE_MNEM_SUFFIX:
+      suffix_check.no_bsuf = 1;
+      break;
+    case WORD_MNEM_SUFFIX:
+      suffix_check.no_wsuf = 1;
+      break;
+    case SHORT_MNEM_SUFFIX:
+      suffix_check.no_ssuf = 1;
+      break;
+    case LONG_MNEM_SUFFIX:
+      suffix_check.no_lsuf = 1;
+      break;
+    case QWORD_MNEM_SUFFIX:
+      suffix_check.no_qsuf = 1;
+      break;
+    default:
+      /* NB: In Intel syntax, normally we can check for memory operand
+	 size when there is no mnemonic suffix.  But jmp and call have
+	 2 different encodings with Dword memory operand size, one with
+	 No_ldSuf and the other without.  i.suffix is set to
+	 LONG_DOUBLE_MNEM_SUFFIX to skip the one with No_ldSuf.  */
+      if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
+	suffix_check.no_ldsuf = 1;
     }
 
   /* Must have right number of operands.  */
@@ -5768,23 +5768,14 @@ match_template (char mnem_suffix)
 	  || (!intel64 && t->opcode_modifier.intel64))
 	continue;
 
-      /* Check the suffix, except for some instructions in intel mode.  */
+      /* Check the suffix.  */
       i.error = invalid_instruction_suffix;
-      if ((!intel_syntax || !t->opcode_modifier.ignoresize)
-	  && ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
-	      || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
-	      || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
-	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
-	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
-	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
-	continue;
-      /* In Intel mode all mnemonic suffixes must be explicitly allowed.  */
-      if ((t->opcode_modifier.no_bsuf && mnemsuf_check.no_bsuf)
-	  || (t->opcode_modifier.no_wsuf && mnemsuf_check.no_wsuf)
-	  || (t->opcode_modifier.no_lsuf && mnemsuf_check.no_lsuf)
-	  || (t->opcode_modifier.no_ssuf && mnemsuf_check.no_ssuf)
-	  || (t->opcode_modifier.no_qsuf && mnemsuf_check.no_qsuf)
-	  || (t->opcode_modifier.no_ldsuf && mnemsuf_check.no_ldsuf))
+      if ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
+	  || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
+	  || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
+	  || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
+	  || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
+	  || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf))
 	continue;
 
       size_match = operand_size_match (t);
