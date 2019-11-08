@@ -1,3 +1,9 @@
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add new file to the list.
+	* unittests/vec-utils-selftests.c: New file.
+	* gdbsupport/gdb_vecs.h (unordered_remove): Avoid self move assign.
+
 2019-11-10  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-wingeneral.c (tui_unhighlight_win): Use can_box.

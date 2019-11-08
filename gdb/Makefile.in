@@ -440,6 +440,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/tracepoint-selftests.c \
 	unittests/unpack-selftests.c \
 	unittests/utils-selftests.c \
+	unittests/vec-utils-selftests.c \
 	unittests/xml-utils-selftests.c
 
 SUBDIR_UNITTESTS_OBS = $(patsubst %.c,%.o,$(SUBDIR_UNITTESTS_SRCS))

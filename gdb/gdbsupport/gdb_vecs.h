@@ -51,7 +51,8 @@ unordered_remove (std::vector<T> &vec, typename std::vector<T>::iterator it)
   gdb_assert (it >= vec.begin () && it < vec.end ());
 
   T removed = std::move (*it);
-  *it = std::move (vec.back ());
+  if (it != vec.end () - 1)
+    *it = std::move (vec.back ());
   vec.pop_back ();
 
   return removed;
