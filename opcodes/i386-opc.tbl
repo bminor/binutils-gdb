@@ -32,6 +32,10 @@
 
 #define SReg  Class=SReg
 
+#define Control Class=RegCR
+#define Debug   Class=RegDR
+#define Test    Class=RegTR
+
 #define RegXMM RegSIMD|Xmmword
 #define RegYMM RegSIMD|Ymmword
 #define RegZMM RegSIMD|Zmmword

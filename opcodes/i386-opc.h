@@ -710,6 +710,9 @@ enum operand_class
   ClassNone,
   Reg, /* GPRs and FP regs, distinguished by operand size */
   SReg, /* Segment register */
+  RegCR, /* Control register */
+  RegDR, /* Debug register */
+  RegTR, /* Test register */
 };
 
 /* Position of operand_type bits.  */
@@ -724,12 +727,6 @@ enum
   RegSIMD,
   /* Vector Mask registers */
   RegMask,
-  /* Control register */
-  Control,
-  /* Debug register */
-  Debug,
-  /* Test register */
-  Test,
   /* 1 bit immediate */
   Imm1,
   /* 8 bit immediate */
@@ -820,9 +817,6 @@ typedef union i386_operand_type
       unsigned int regmmx:1;
       unsigned int regsimd:1;
       unsigned int regmask:1;
-      unsigned int control:1;
-      unsigned int debug:1;
-      unsigned int test:1;
       unsigned int imm1:1;
       unsigned int imm8:1;
       unsigned int imm8s:1;

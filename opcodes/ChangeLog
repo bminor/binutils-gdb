@@ -1,6 +1,22 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Add Class= to
+	OPERAND_TYPE_CONTROL, OPERAND_TYPE_TEST, and OPERAND_TYPE_DEBUG
+	entries.
+	(operand_classes): Add RegCR, RegDR, and RegTR entries.
+	(operand_types): Drop Control, Debug, and Test entries.
+	* i386-opc.h (enum operand_class): Add RegCR, RegDR, and RegTR.
+	(Control, Debug, Test): Delete.
+	(union i386_operand_type): Remove control, debug, and test
+	fields.
+	* i386-opc.tbl (Control, Debug, Test): Define.
+	* i386-reg.tbl: Replace Control by Class=RegCR, Debug by
+	Class=RegDR, and Test by Class=RegTR.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Add Class= to
 	OPERAND_TYPE_SREG entry.
 	(operand_classes): Add SReg entry.
 	(operand_types): Drop SReg entry.

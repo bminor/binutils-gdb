@@ -426,11 +426,11 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_SHIFTCOUNT",
     "ShiftCount" },
   { "OPERAND_TYPE_CONTROL",
-    "Control" },
+    "Class=RegCR" },
   { "OPERAND_TYPE_TEST",
-    "Test" },
+    "Class=RegTR" },
   { "OPERAND_TYPE_DEBUG",
-    "Debug" },
+    "Class=RegDR" },
   { "OPERAND_TYPE_FLOATREG",
     "Class=Reg|Tbyte" },
   { "OPERAND_TYPE_FLOATACC",
@@ -684,6 +684,9 @@ static const struct {
 } operand_classes[] = {
   CLASS (Reg),
   CLASS (SReg),
+  CLASS (RegCR),
+  CLASS (RegDR),
+  CLASS (RegTR),
 };
 
 #undef CLASS
@@ -708,9 +711,6 @@ static bitfield operand_types[] =
   BITFIELD (Disp64),
   BITFIELD (InOutPortReg),
   BITFIELD (ShiftCount),
-  BITFIELD (Control),
-  BITFIELD (Debug),
-  BITFIELD (Test),
   BITFIELD (Acc),
   BITFIELD (JumpAbsolute),
   BITFIELD (EsSeg),

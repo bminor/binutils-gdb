@@ -1,5 +1,11 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (pi, check_byte_reg, build_modrm_byte,
+	parse_real_register): Use "class" instead of "control"/"debug"/
+	"test" fields.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (pi, check_byte_reg, process_operands,
 	build_modrm_byte, i386_att_operand, parse_real_register): Use
 	"class" instead of "sreg" field.

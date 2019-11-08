@@ -3049,9 +3049,9 @@ pi (const char *line, i386_insn *x)
 	  || x->types[j].bitfield.regmmx
 	  || x->types[j].bitfield.regsimd
 	  || x->types[j].bitfield.class == SReg
-	  || x->types[j].bitfield.control
-	  || x->types[j].bitfield.debug
-	  || x->types[j].bitfield.test)
+	  || x->types[j].bitfield.class == RegCR
+	  || x->types[j].bitfield.class == RegDR
+	  || x->types[j].bitfield.class == RegTR)
 	fprintf (stdout, "%s\n", x->op[j].regs->reg_name);
       if (operand_type_check (x->types[j], imm))
 	pe (x->op[j].imms);
@@ -6605,9 +6605,9 @@ check_byte_reg (void)
 	  || i.types[op].bitfield.regmmx
 	  || i.types[op].bitfield.regsimd
 	  || i.types[op].bitfield.class == SReg
-	  || i.types[op].bitfield.control
-	  || i.types[op].bitfield.debug
-	  || i.types[op].bitfield.test)
+	  || i.types[op].bitfield.class == RegCR
+	  || i.types[op].bitfield.class == RegDR
+	  || i.types[op].bitfield.class == RegTR)
 	{
 	  as_bad (_("`%s%s' not allowed with `%s%c'"),
 		  register_prefix,
@@ -7363,7 +7363,7 @@ build_modrm_byte (void)
 	}
       if (flag_code != CODE_64BIT && (i.rex & REX_R))
 	{
-	  if (!i.types[!i.tm.opcode_modifier.regmem].bitfield.control)
+	  if (i.types[!i.tm.opcode_modifier.regmem].bitfield.class != RegCR)
 	    abort ();
 	  i.rex &= ~REX_R;
 	  add_prefix (LOCK_PREFIX_OPCODE);
@@ -7683,9 +7683,9 @@ build_modrm_byte (void)
 		  || i.types[op].bitfield.regbnd
 		  || i.types[op].bitfield.regmask
 		  || i.types[op].bitfield.class == SReg
-		  || i.types[op].bitfield.control
-		  || i.types[op].bitfield.debug
-		  || i.types[op].bitfield.test)
+		  || i.types[op].bitfield.class == RegCR
+		  || i.types[op].bitfield.class == RegDR
+		  || i.types[op].bitfield.class == RegTR)
 		break;
 	      if (i.types[op].bitfield.regsimd)
 		{
@@ -10922,9 +10922,9 @@ parse_real_register (char *reg_string, char **end_op)
 
   if ((r->reg_type.bitfield.dword
        || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
-       || r->reg_type.bitfield.control
-       || r->reg_type.bitfield.debug
-       || r->reg_type.bitfield.test)
+       || r->reg_type.bitfield.class == RegCR
+       || r->reg_type.bitfield.class == RegDR
+       || r->reg_type.bitfield.class == RegTR)
       && !cpu_arch_flags.bitfield.cpui386)
     return (const reg_entry *) NULL;
 
@@ -10965,7 +10965,7 @@ parse_real_register (char *reg_string, char **end_op)
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
-      && (!cpu_arch_flags.bitfield.cpulm || !r->reg_type.bitfield.control)
+      && (!cpu_arch_flags.bitfield.cpulm || r->reg_type.bitfield.class != RegCR)
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
