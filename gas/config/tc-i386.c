@@ -2030,7 +2030,7 @@ match_mem_size (const insn_template *t, unsigned int wanted,
 		  operands at the same time, some special casing is needed
 		  here.  Also for v{,p}broadcast*, {,v}pmov{s,z}*, and
 		  down-conversion vpmov*.  */
-	       || ((t->operand_types[wanted].bitfield.regsimd
+	       || ((t->operand_types[wanted].bitfield.class == RegSIMD
 		    && !t->opcode_modifier.broadcast
 		    && (t->operand_types[wanted].bitfield.byte
 			|| t->operand_types[wanted].bitfield.word
@@ -2065,7 +2065,8 @@ operand_size_match (const insn_template *t)
   /* Check memory and accumulator operand size.  */
   for (j = 0; j < i.operands; j++)
     {
-      if (i.types[j].bitfield.class != Reg && !i.types[j].bitfield.regsimd
+      if (i.types[j].bitfield.class != Reg
+	  && i.types[j].bitfield.class != RegSIMD
 	  && t->operand_types[j].bitfield.anysize)
 	continue;
 
@@ -2076,7 +2077,7 @@ operand_size_match (const insn_template *t)
 	  break;
 	}
 
-      if (t->operand_types[j].bitfield.regsimd
+      if (t->operand_types[j].bitfield.class == RegSIMD
 	  && !match_simd_size (t, j, j))
 	{
 	  match = 0;
@@ -2116,7 +2117,7 @@ mismatch:
 	  && !match_operand_size (t, j, given))
 	goto mismatch;
 
-      if (t->operand_types[j].bitfield.regsimd
+      if (t->operand_types[j].bitfield.class == RegSIMD
 	  && !match_simd_size (t, j, given))
 	goto mismatch;
 
@@ -2173,17 +2174,17 @@ operand_type_register_match (i386_operand_type g0,
 			     i386_operand_type t1)
 {
   if (g0.bitfield.class != Reg
-      && !g0.bitfield.regsimd
+      && g0.bitfield.class != RegSIMD
       && (!operand_type_check (g0, anymem)
 	  || g0.bitfield.unspecified
-	  || !t0.bitfield.regsimd))
+	  || t0.bitfield.class != RegSIMD))
     return 1;
 
   if (g1.bitfield.class != Reg
-      && !g1.bitfield.regsimd
+      && g1.bitfield.class != RegSIMD
       && (!operand_type_check (g1, anymem)
 	  || g1.bitfield.unspecified
-	  || !t1.bitfield.regsimd))
+	  || t1.bitfield.class != RegSIMD))
     return 1;
 
   if (g0.bitfield.byte == g1.bitfield.byte
@@ -3046,8 +3047,8 @@ pi (const char *line, i386_insn *x)
       pt (x->types[j]);
       fprintf (stdout, "\n");
       if (x->types[j].bitfield.class == Reg
-	  || x->types[j].bitfield.regmmx
-	  || x->types[j].bitfield.regsimd
+	  || x->types[j].bitfield.class == RegMMX
+	  || x->types[j].bitfield.class == RegSIMD
 	  || x->types[j].bitfield.class == SReg
 	  || x->types[j].bitfield.class == RegCR
 	  || x->types[j].bitfield.class == RegDR
@@ -5380,10 +5381,10 @@ check_VecOperands (const insn_template *t)
       gas_assert (i.reg_operands == 2 || i.mask);
       if (i.reg_operands == 2 && !i.mask)
 	{
-	  gas_assert (i.types[0].bitfield.regsimd);
+	  gas_assert (i.types[0].bitfield.class == RegSIMD);
 	  gas_assert (i.types[0].bitfield.xmmword
 		      || i.types[0].bitfield.ymmword);
-	  gas_assert (i.types[2].bitfield.regsimd);
+	  gas_assert (i.types[2].bitfield.class == RegSIMD);
 	  gas_assert (i.types[2].bitfield.xmmword
 		      || i.types[2].bitfield.ymmword);
 	  if (operand_check == check_none)
@@ -5404,7 +5405,7 @@ check_VecOperands (const insn_template *t)
 	}
       else if (i.reg_operands == 1 && i.mask)
 	{
-	  if (i.types[1].bitfield.regsimd
+	  if (i.types[1].bitfield.class == RegSIMD
 	      && (i.types[1].bitfield.xmmword
 	          || i.types[1].bitfield.ymmword
 	          || i.types[1].bitfield.zmmword)
@@ -5595,7 +5596,7 @@ check_VecOperands (const insn_template *t)
 		else if (!i.types[op].bitfield.unspecified)
 		  type = &i.types[op];
 	      }
-	    else if (i.types[op].bitfield.regsimd
+	    else if (i.types[op].bitfield.class == RegSIMD
 		     && t->opcode_modifier.evex != EVEXLIG)
 	      {
 		if (i.types[op].bitfield.zmmword)
@@ -5801,10 +5802,10 @@ match_template (char mnem_suffix)
 	         && !t->opcode_modifier.broadcast
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
-	  && ((!operand_types[0].bitfield.regmmx
-	       && !operand_types[0].bitfield.regsimd)
-	      || (!operand_types[t->operands > 1].bitfield.regmmx
-		  && !operand_types[t->operands > 1].bitfield.regsimd))
+	  && ((operand_types[0].bitfield.class != RegMMX
+	       && operand_types[0].bitfield.class != RegSIMD)
+	      || (operand_types[t->operands > 1].bitfield.class != RegMMX
+		  && operand_types[t->operands > 1].bitfield.class != RegSIMD))
 	  && (t->base_opcode != 0x0fc7
 	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
@@ -5816,10 +5817,11 @@ match_template (char mnem_suffix)
 		   ? (!t->opcode_modifier.ignoresize
 		      && !intel_float_operand (t->name))
 		   : intel_float_operand (t->name) != 2)
-	       && ((!operand_types[0].bitfield.regmmx
-		    && !operand_types[0].bitfield.regsimd)
-		   || (!operand_types[t->operands > 1].bitfield.regmmx
-		       && !operand_types[t->operands > 1].bitfield.regsimd)))
+	       && ((operand_types[0].bitfield.class != RegMMX
+		    && operand_types[0].bitfield.class != RegSIMD)
+		   || (operand_types[t->operands > 1].bitfield.class != RegMMX
+		       && operand_types[t->operands > 1].bitfield.class
+			  != RegSIMD)))
 	continue;
 
       /* Do not verify operands when there are none.  */
@@ -5995,8 +5997,8 @@ check_reverse:
 		found_reverse_match = Opcode_FloatD;
 	      else if (operand_types[0].bitfield.xmmword
 		       || operand_types[i.operands - 1].bitfield.xmmword
-		       || operand_types[0].bitfield.regmmx
-		       || operand_types[i.operands - 1].bitfield.regmmx
+		       || operand_types[0].bitfield.class == RegMMX
+		       || operand_types[i.operands - 1].bitfield.class == RegMMX
 		       || is_any_vex_encoding(t))
 		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
 				      ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
@@ -6602,8 +6604,8 @@ check_byte_reg (void)
 	}
       /* Any other register is bad.  */
       if (i.types[op].bitfield.class == Reg
-	  || i.types[op].bitfield.regmmx
-	  || i.types[op].bitfield.regsimd
+	  || i.types[op].bitfield.class == RegMMX
+	  || i.types[op].bitfield.class == RegSIMD
 	  || i.types[op].bitfield.class == SReg
 	  || i.types[op].bitfield.class == RegCR
 	  || i.types[op].bitfield.class == RegDR
@@ -6675,7 +6677,7 @@ check_long_reg (void)
       {
 	if (intel_syntax
 	    && i.tm.opcode_modifier.toqword
-	    && !i.types[0].bitfield.regsimd)
+	    && i.types[0].bitfield.class != RegSIMD)
 	  {
 	    /* Convert to QWORD.  We want REX byte. */
 	    i.suffix = QWORD_MNEM_SUFFIX;
@@ -6726,7 +6728,7 @@ check_qword_reg (void)
 	   lowering is more complicated.  */
 	if (intel_syntax
 	    && i.tm.opcode_modifier.todword
-	    && !i.types[0].bitfield.regsimd)
+	    && i.types[0].bitfield.class != RegSIMD)
 	  {
 	    /* Convert to DWORD.  We don't want REX byte. */
 	    i.suffix = LONG_MNEM_SUFFIX;
@@ -6903,7 +6905,7 @@ process_operands (void)
 	      /* Keep xmm0 for instructions with VEX prefix and 3
 		 sources.  */
 	      i.tm.operand_types[0].bitfield.acc = 0;
-	      i.tm.operand_types[0].bitfield.regsimd = 1;
+	      i.tm.operand_types[0].bitfield.class = RegSIMD;
 	      goto duplicate;
 	    }
 	  else
@@ -6993,7 +6995,7 @@ duplicate:
       unsigned int regnum, first_reg_in_group, last_reg_in_group;
 
       /* The second operand must be {x,y,z}mmN, where N is a multiple of 4. */
-      gas_assert (i.operands >= 2 && i.types[1].bitfield.regsimd);
+      gas_assert (i.operands >= 2 && i.types[1].bitfield.class == RegSIMD);
       regnum = register_number (i.op[1].regs);
       first_reg_in_group = regnum & ~3;
       last_reg_in_group = first_reg_in_group + 3;
@@ -7138,7 +7140,7 @@ build_modrm_byte (void)
 		   || (i.reg_operands == 3 && i.mem_operands == 1))
 		  && i.tm.opcode_modifier.vexvvvv == VEXXDS
 		  && i.tm.opcode_modifier.vexw
-		  && i.tm.operand_types[dest].bitfield.regsimd);
+		  && i.tm.operand_types[dest].bitfield.class == RegSIMD);
 
       /* If VexW1 is set, the first non-immediate operand is the source and
 	 the second non-immediate one is encoded in the immediate operand.  */
@@ -7162,7 +7164,7 @@ build_modrm_byte (void)
 	  i.types[i.operands] = imm8;
 	  i.operands++;
 
-	  gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
+	  gas_assert (i.tm.operand_types[reg_slot].bitfield.class == RegSIMD);
 	  exp->X_op = O_constant;
 	  exp->X_add_number = register_number (i.op[reg_slot].regs) << 4;
 	  gas_assert ((i.op[reg_slot].regs->reg_flags & RegVRex) == 0);
@@ -7176,13 +7178,13 @@ build_modrm_byte (void)
 	  /* Turn on Imm8 again so that output_imm will generate it.  */
 	  i.types[0].bitfield.imm8 = 1;
 
-	  gas_assert (i.tm.operand_types[reg_slot].bitfield.regsimd);
+	  gas_assert (i.tm.operand_types[reg_slot].bitfield.class == RegSIMD);
 	  i.op[0].imms->X_add_number
 	      |= register_number (i.op[reg_slot].regs) << 4;
 	  gas_assert ((i.op[reg_slot].regs->reg_flags & RegVRex) == 0);
 	}
 
-      gas_assert (i.tm.operand_types[nds].bitfield.regsimd);
+      gas_assert (i.tm.operand_types[nds].bitfield.class == RegSIMD);
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -7304,7 +7306,7 @@ build_modrm_byte (void)
 	      if ((dest + 1) >= i.operands
 		  || ((op.bitfield.class != Reg
 		       || (!op.bitfield.dword && !op.bitfield.qword))
-		      && !op.bitfield.regsimd
+		      && op.bitfield.class != RegSIMD
 		      && !operand_type_equal (&op, &regmask)))
 		abort ();
 	      i.vex.register_specifier = i.op[vvvv].regs;
@@ -7324,11 +7326,11 @@ build_modrm_byte (void)
 	{
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
-	  if (i.op[dest].regs->reg_type.bitfield.regmmx
-	       || i.op[source].regs->reg_type.bitfield.regmmx)
+	  if (i.op[dest].regs->reg_type.bitfield.class == RegMMX
+	       || i.op[source].regs->reg_type.bitfield.class == RegMMX)
 	    i.has_regmmx = TRUE;
-	  else if (i.op[dest].regs->reg_type.bitfield.regsimd
-		   || i.op[source].regs->reg_type.bitfield.regsimd)
+	  else if (i.op[dest].regs->reg_type.bitfield.class == RegSIMD
+		   || i.op[source].regs->reg_type.bitfield.class == RegSIMD)
 	    {
 	      if (i.types[dest].bitfield.zmmword
 		  || i.types[source].bitfield.zmmword)
@@ -7687,7 +7689,7 @@ build_modrm_byte (void)
 		  || i.types[op].bitfield.class == RegDR
 		  || i.types[op].bitfield.class == RegTR)
 		break;
-	      if (i.types[op].bitfield.regsimd)
+	      if (i.types[op].bitfield.class == RegSIMD)
 		{
 		  if (i.types[op].bitfield.zmmword)
 		    i.has_regzmm = TRUE;
@@ -7697,7 +7699,7 @@ build_modrm_byte (void)
 		    i.has_regxmm = TRUE;
 		  break;
 		}
-	      if (i.types[op].bitfield.regmmx)
+	      if (i.types[op].bitfield.class == RegMMX)
 		{
 		  i.has_regmmx = TRUE;
 		  break;
@@ -7763,7 +7765,7 @@ build_modrm_byte (void)
 
 	      if ((type->bitfield.class != Reg
 		   || (!type->bitfield.dword && !type->bitfield.qword))
-		  && !type->bitfield.regsimd
+		  && type->bitfield.class != RegSIMD
 		  && !operand_type_equal (type, &regmask))
 		abort ();
 
@@ -10928,7 +10930,7 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpui386)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
+  if (r->reg_type.bitfield.class == RegMMX && !cpu_arch_flags.bitfield.cpummx)
     return (const reg_entry *) NULL;
 
   if (!cpu_arch_flags.bitfield.cpuavx512f)

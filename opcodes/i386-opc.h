@@ -713,6 +713,8 @@ enum operand_class
   RegCR, /* Control register */
   RegDR, /* Debug register */
   RegTR, /* Test register */
+  RegMMX, /* MMX register */
+  RegSIMD, /* XMM/YMM/ZMM registers, distinguished by operand size */
 };
 
 /* Position of operand_type bits.  */
@@ -721,10 +723,6 @@ enum
 {
   /* Class */
   Class = CLASS_WIDTH - 1,
-  /* MMX register */
-  RegMMX,
-  /* Vector registers */
-  RegSIMD,
   /* Vector Mask registers */
   RegMask,
   /* 1 bit immediate */
@@ -814,8 +812,6 @@ typedef union i386_operand_type
   struct
     {
       unsigned int class:CLASS_WIDTH;
-      unsigned int regmmx:1;
-      unsigned int regsimd:1;
       unsigned int regmask:1;
       unsigned int imm1:1;
       unsigned int imm8:1;

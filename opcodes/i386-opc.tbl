@@ -36,9 +36,10 @@
 #define Debug   Class=RegDR
 #define Test    Class=RegTR
 
-#define RegXMM RegSIMD|Xmmword
-#define RegYMM RegSIMD|Ymmword
-#define RegZMM RegSIMD|Zmmword
+#define RegMMX Class=RegMMX
+#define RegXMM Class=RegSIMD|Xmmword
+#define RegYMM Class=RegSIMD|Ymmword
+#define RegZMM Class=RegSIMD|Zmmword
 
 #define Size16 Size=SIZE16
 #define Size32 Size=SIZE32

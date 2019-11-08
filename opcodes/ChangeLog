@@ -1,6 +1,22 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Add Class= to
+	OPERAND_TYPE_REGMMX, OPERAND_TYPE_REGXMM, OPERAND_TYPE_REGYMM, and
+	OPERAND_TYPE_REGZMM entries.
+	(operand_classes): Add RegMMX and RegSIMD entries.
+	(operand_types): Drop RegMMX and RegSIMD entries.
+	* i386-opc.h (enum operand_class): Add RegMMX and RegSIMD.
+	(RegMMX, RegSIMD): Delete.
+	(union i386_operand_type): Remove regmmx and regsimd fields.
+	* i386-opc.tbl (RegMMX): Define.
+	(RegXMM, RegYMM, RegZMM): Add Class=.
+	* i386-reg.tbl: Replace RegMMX by Class=RegMMX and RegSIMD by
+	Class=RegSIMD.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Add Class= to
 	OPERAND_TYPE_CONTROL, OPERAND_TYPE_TEST, and OPERAND_TYPE_DEBUG
 	entries.
 	(operand_classes): Add RegCR, RegDR, and RegTR entries.

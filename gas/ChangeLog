@@ -1,5 +1,13 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_mem_size, operand_size_match,
+	operand_type_register_match, pi, check_VecOperands, match_template,
+	check_byte_reg, check_long_reg, check_qword_reg, process_operands,
+	build_modrm_byte, parse_real_register): Use "class" instead of
+	"regsimd" / "regmmx" fields.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (pi, check_byte_reg, build_modrm_byte,
 	parse_real_register): Use "class" instead of "control"/"debug"/
 	"test" fields.

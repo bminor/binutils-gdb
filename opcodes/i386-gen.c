@@ -440,13 +440,13 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_JUMPABSOLUTE",
     "JumpAbsolute" },
   { "OPERAND_TYPE_REGMMX",
-    "RegMMX" },
+    "Class=RegMMX" },
   { "OPERAND_TYPE_REGXMM",
-    "RegSIMD|Xmmword" },
+    "Class=RegSIMD|Xmmword" },
   { "OPERAND_TYPE_REGYMM",
-    "RegSIMD|Ymmword" },
+    "Class=RegSIMD|Ymmword" },
   { "OPERAND_TYPE_REGZMM",
-    "RegSIMD|Zmmword" },
+    "Class=RegSIMD|Zmmword" },
   { "OPERAND_TYPE_REGMASK",
     "RegMask" },
   { "OPERAND_TYPE_ESSEG",
@@ -687,14 +687,14 @@ static const struct {
   CLASS (RegCR),
   CLASS (RegDR),
   CLASS (RegTR),
+  CLASS (RegMMX),
+  CLASS (RegSIMD),
 };
 
 #undef CLASS
 
 static bitfield operand_types[] =
 {
-  BITFIELD (RegMMX),
-  BITFIELD (RegSIMD),
   BITFIELD (RegMask),
   BITFIELD (Imm1),
   BITFIELD (Imm8),
