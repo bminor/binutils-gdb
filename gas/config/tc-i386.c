@@ -4154,7 +4154,7 @@ optimize_encoding (void)
 	  else
 	    return;
 	}
-      else if (i.tm.operand_types[0].bitfield.regmask)
+      else if (i.tm.operand_types[0].bitfield.class == RegMask)
 	{
 	  i.tm.base_opcode &= 0xff;
 	  i.tm.opcode_modifier.vexw = VEXW0;
@@ -7682,8 +7682,8 @@ build_modrm_byte (void)
 	  for (op = 0; op < i.operands; op++)
 	    {
 	      if (i.types[op].bitfield.class == Reg
-		  || i.types[op].bitfield.regbnd
-		  || i.types[op].bitfield.regmask
+		  || i.types[op].bitfield.class == RegBND
+		  || i.types[op].bitfield.class == RegMask
 		  || i.types[op].bitfield.class == SReg
 		  || i.types[op].bitfield.class == RegCR
 		  || i.types[op].bitfield.class == RegDR
@@ -9238,7 +9238,7 @@ check_VecOperations (char *op_string, char *op_end)
 	  else if ((mask = parse_register (op_string, &end_op)) != NULL)
 	    {
 	      /* k0 can't be used for write mask.  */
-	      if (!mask->reg_type.bitfield.regmask || mask->reg_num == 0)
+	      if (mask->reg_type.bitfield.class != RegMask || !mask->reg_num)
 		{
 		  as_bad (_("`%s%s' can't be used for write mask"),
 			  register_prefix, mask->reg_name);
@@ -10935,7 +10935,8 @@ parse_real_register (char *reg_string, char **end_op)
 
   if (!cpu_arch_flags.bitfield.cpuavx512f)
     {
-      if (r->reg_type.bitfield.zmmword || r->reg_type.bitfield.regmask)
+      if (r->reg_type.bitfield.zmmword
+	  || r->reg_type.bitfield.class == RegMask)
 	return (const reg_entry *) NULL;
 
       if (!cpu_arch_flags.bitfield.cpuavx)
@@ -10948,7 +10949,7 @@ parse_real_register (char *reg_string, char **end_op)
 	}
     }
 
-  if (r->reg_type.bitfield.regbnd && !cpu_arch_flags.bitfield.cpumpx)
+  if (r->reg_type.bitfield.class == RegBND && !cpu_arch_flags.bitfield.cpumpx)
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */

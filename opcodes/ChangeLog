@@ -1,6 +1,21 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Add Class= to
+	OPERAND_TYPE_REGMASK and OPERAND_TYPE_REGBND entries. Move up
+	OPERAND_TYPE_REGBND entry.
+	(operand_classes): Add RegMask and RegBND entries.
+	(operand_types): Drop RegMask and RegBND entry.
+	* i386-opc.h (enum operand_class): Add RegMask and RegBND.
+	(RegMask, RegBND): Delete.
+	(union i386_operand_type): Remove regmask and regbnd fields.
+	* i386-opc.tbl (RegMask, RegBND): Define.
+	* i386-reg.tbl: Replace RegMask by Class=RegMask and RegBND by
+	Class=RegBND.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Add Class= to
 	OPERAND_TYPE_REGMMX, OPERAND_TYPE_REGXMM, OPERAND_TYPE_REGYMM, and
 	OPERAND_TYPE_REGZMM entries.
 	(operand_classes): Add RegMMX and RegSIMD entries.

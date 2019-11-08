@@ -96,14 +96,14 @@ r13, Class=Reg|Qword|BaseIndex, RegRex, 5, Dw2Inval, 13
 r14, Class=Reg|Qword|BaseIndex, RegRex, 6, Dw2Inval, 14
 r15, Class=Reg|Qword|BaseIndex, RegRex, 7, Dw2Inval, 15
 // Vector mask registers.
-k0, RegMask, 0, 0, 93, 118
-k1, RegMask, 0, 1, 94, 119
-k2, RegMask, 0, 2, 95, 120
-k3, RegMask, 0, 3, 96, 121
-k4, RegMask, 0, 4, 97, 122
-k5, RegMask, 0, 5, 98, 123
-k6, RegMask, 0, 6, 99, 124
-k7, RegMask, 0, 7, 100, 125
+k0, Class=RegMask, 0, 0, 93, 118
+k1, Class=RegMask, 0, 1, 94, 119
+k2, Class=RegMask, 0, 2, 95, 120
+k3, Class=RegMask, 0, 3, 96, 121
+k4, Class=RegMask, 0, 4, 97, 122
+k5, Class=RegMask, 0, 5, 98, 123
+k6, Class=RegMask, 0, 6, 99, 124
+k7, Class=RegMask, 0, 7, 100, 125
 // Segment registers.
 es, Class=SReg, 0, 0, 40, 50
 cs, Class=SReg, 0, 1, 41, 51
@@ -279,10 +279,10 @@ zmm29, Class=RegSIMD|Zmmword, RegVRex|RegRex, 5, Dw2Inval, Dw2Inval
 zmm30, Class=RegSIMD|Zmmword, RegVRex|RegRex, 6, Dw2Inval, Dw2Inval
 zmm31, Class=RegSIMD|Zmmword, RegVRex|RegRex, 7, Dw2Inval, Dw2Inval
 // Bound registers for MPX
-bnd0, RegBND, 0, 0, Dw2Inval, Dw2Inval
-bnd1, RegBND, 0, 1, Dw2Inval, Dw2Inval
-bnd2, RegBND, 0, 2, Dw2Inval, Dw2Inval
-bnd3, RegBND, 0, 3, Dw2Inval, Dw2Inval
+bnd0, Class=RegBND, 0, 0, Dw2Inval, Dw2Inval
+bnd1, Class=RegBND, 0, 1, Dw2Inval, Dw2Inval
+bnd2, Class=RegBND, 0, 2, Dw2Inval, Dw2Inval
+bnd3, Class=RegBND, 0, 3, Dw2Inval, Dw2Inval
 // No Class=Reg will make these registers rejected for all purposes except
 // for addressing.  This saves creating one extra type for RIP/EIP.
 rip, Qword, RegRex64, RegIP, Dw2Inval, 16

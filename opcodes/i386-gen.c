@@ -448,7 +448,9 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_REGZMM",
     "Class=RegSIMD|Zmmword" },
   { "OPERAND_TYPE_REGMASK",
-    "RegMask" },
+    "Class=RegMask" },
+  { "OPERAND_TYPE_REGBND",
+    "Class=RegBND" },
   { "OPERAND_TYPE_ESSEG",
     "EsSeg" },
   { "OPERAND_TYPE_ACC8",
@@ -481,8 +483,6 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
   { "OPERAND_TYPE_ANYIMM",
     "Imm1|Imm8|Imm8S|Imm16|Imm32|Imm32S|Imm64" },
-  { "OPERAND_TYPE_REGBND",
-    "RegBND" },
 };
 
 typedef struct bitfield
@@ -689,13 +689,14 @@ static const struct {
   CLASS (RegTR),
   CLASS (RegMMX),
   CLASS (RegSIMD),
+  CLASS (RegMask),
+  CLASS (RegBND),
 };
 
 #undef CLASS
 
 static bitfield operand_types[] =
 {
-  BITFIELD (RegMask),
   BITFIELD (Imm1),
   BITFIELD (Imm8),
   BITFIELD (Imm8S),
@@ -725,7 +726,6 @@ static bitfield operand_types[] =
   BITFIELD (Zmmword),
   BITFIELD (Unspecified),
   BITFIELD (Anysize),
-  BITFIELD (RegBND),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif

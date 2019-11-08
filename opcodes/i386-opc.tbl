@@ -41,6 +41,10 @@
 #define RegYMM Class=RegSIMD|Ymmword
 #define RegZMM Class=RegSIMD|Zmmword
 
+#define RegMask Class=RegMask
+
+#define RegBND Class=RegBND
+
 #define Size16 Size=SIZE16
 #define Size32 Size=SIZE32
 #define Size64 Size=SIZE64
