@@ -1,3 +1,20 @@
+2019-11-08  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/aarch64elf.sh: Revert 2019-11-05 change.
+	* emulparams/aarch64elf32.sh: Likewise.
+	* emulparams/arcelf.sh: Likewise.
+	* emulparams/armelf.sh: Likewise.
+	* emulparams/armelf_fbsd.sh: Likewise.
+	* emulparams/armelf_nbsd.sh: Likewise.
+	* emulparams/armelf_vxworks.sh: Likewise.
+	* emulparams/armsymbian.sh: Likewise.
+	* emulparams/elf32bfin.sh: Likewise.
+	* emulparams/elf32microblaze.sh: Likewise.
+	* emulparams/score3_elf.sh: Likewise.
+	* emulparams/shelf.sh: Likewise.
+	* emulparams/shelf_nbsd.sh: Likewise.
+	* emulparams/shelf_uclinux.sh: Likewise.
+
 2019-11-07  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/elf32cr16c.sh: Delete.

@@ -8,8 +8,6 @@ TARGET1_IS_REL=1
 TARGET2_TYPE=abs
 # On BPABI systems, program headers should not be mapped.
 EMBEDDED=yes
-# Nonetheless, shared libraries are also supported
-GENERATE_SHLIB_SCRIPT=yes
 
 # As for armelf.sh, but add the SymbianOS-specific
 # .ARM.exidx$${Base,Limit} symbols.
