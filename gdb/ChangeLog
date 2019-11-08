@@ -1,5 +1,11 @@
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (frame_show_address): Convert return type to bool.
+	* stack.h (frame_show_address): Likewise, and update header
+	comment.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add new file to the list.
 	* unittests/vec-utils-selftests.c: New file.
 	* gdbsupport/gdb_vecs.h (unordered_remove): Avoid self move assign.

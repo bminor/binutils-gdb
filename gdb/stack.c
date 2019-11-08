@@ -252,7 +252,7 @@ static int last_displayed_line = 0;
 
 /* See stack.h.  */
 
-int
+bool
 frame_show_address (struct frame_info *frame,
 		    struct symtab_and_line sal)
 {
@@ -267,7 +267,7 @@ frame_show_address (struct frame_info *frame,
 	gdb_assert (inline_skipped_frames (inferior_thread ()) > 0);
       else
 	gdb_assert (get_frame_type (get_next_frame (frame)) == INLINE_FRAME);
-      return 0;
+      return false;
     }
 
   return get_frame_pc (frame) != sal.pc;
