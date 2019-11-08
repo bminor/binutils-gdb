@@ -1,5 +1,18 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Add Class= to
+	OPERAND_TYPE_SREG entry.
+	(operand_classes): Add SReg entry.
+	(operand_types): Drop SReg entry.
+	* i386-opc.h (enum operand_class): Add SReg.
+	(SReg): Delete.
+	(union i386_operand_type): Remove sreg field.
+	* i386-opc.tbl (SReg): Define.
+	* i386-reg.tbl: Replace SReg by Class=SReg.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_init): Add Class=. New
 	OPERAND_TYPE_ANYIMM entry.
 	(operand_classes): New.

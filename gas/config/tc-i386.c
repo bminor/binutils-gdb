@@ -3048,7 +3048,7 @@ pi (const char *line, i386_insn *x)
       if (x->types[j].bitfield.class == Reg
 	  || x->types[j].bitfield.regmmx
 	  || x->types[j].bitfield.regsimd
-	  || x->types[j].bitfield.sreg
+	  || x->types[j].bitfield.class == SReg
 	  || x->types[j].bitfield.control
 	  || x->types[j].bitfield.debug
 	  || x->types[j].bitfield.test)
@@ -6604,7 +6604,7 @@ check_byte_reg (void)
       if (i.types[op].bitfield.class == Reg
 	  || i.types[op].bitfield.regmmx
 	  || i.types[op].bitfield.regsimd
-	  || i.types[op].bitfield.sreg
+	  || i.types[op].bitfield.class == SReg
 	  || i.types[op].bitfield.control
 	  || i.types[op].bitfield.debug
 	  || i.types[op].bitfield.test)
@@ -7034,7 +7034,7 @@ duplicate:
 
       default_seg = build_modrm_byte ();
     }
-  else if (i.types[0].bitfield.sreg)
+  else if (i.types[0].bitfield.class == SReg)
     {
       if (flag_code != CODE_64BIT
 	  ? i.tm.base_opcode == POP_SEG_SHORT
@@ -7682,7 +7682,7 @@ build_modrm_byte (void)
 	      if (i.types[op].bitfield.class == Reg
 		  || i.types[op].bitfield.regbnd
 		  || i.types[op].bitfield.regmask
-		  || i.types[op].bitfield.sreg
+		  || i.types[op].bitfield.class == SReg
 		  || i.types[op].bitfield.control
 		  || i.types[op].bitfield.debug
 		  || i.types[op].bitfield.test)
@@ -10058,7 +10058,7 @@ i386_att_operand (char *operand_string)
       op_string = end_op;
       if (is_space_char (*op_string))
 	++op_string;
-      if (*op_string == ':' && r->reg_type.bitfield.sreg)
+      if (*op_string == ':' && r->reg_type.bitfield.class == SReg)
 	{
 	  switch (r->reg_num)
 	    {
@@ -10921,7 +10921,7 @@ parse_real_register (char *reg_string, char **end_op)
     return (const reg_entry *) NULL;
 
   if ((r->reg_type.bitfield.dword
-       || (r->reg_type.bitfield.sreg && r->reg_num > 3)
+       || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
        || r->reg_type.bitfield.control
        || r->reg_type.bitfield.debug
        || r->reg_type.bitfield.test)
@@ -10969,7 +10969,8 @@ parse_real_register (char *reg_string, char **end_op)
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
-  if (r->reg_type.bitfield.sreg && r->reg_num == RegFlat && !intel_syntax)
+  if (r->reg_type.bitfield.class == SReg && r->reg_num == RegFlat
+      && !intel_syntax)
     return (const reg_entry *) NULL;
 
   return r;

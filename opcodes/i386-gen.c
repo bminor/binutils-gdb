@@ -436,7 +436,7 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_FLOATACC",
     "Acc|Tbyte" },
   { "OPERAND_TYPE_SREG",
-    "SReg" },
+    "Class=SReg" },
   { "OPERAND_TYPE_JUMPABSOLUTE",
     "JumpAbsolute" },
   { "OPERAND_TYPE_REGMMX",
@@ -683,6 +683,7 @@ static const struct {
   enum operand_class value;
 } operand_classes[] = {
   CLASS (Reg),
+  CLASS (SReg),
 };
 
 #undef CLASS
@@ -710,7 +711,6 @@ static bitfield operand_types[] =
   BITFIELD (Control),
   BITFIELD (Debug),
   BITFIELD (Test),
-  BITFIELD (SReg),
   BITFIELD (Acc),
   BITFIELD (JumpAbsolute),
   BITFIELD (EsSeg),

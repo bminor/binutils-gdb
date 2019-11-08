@@ -1,5 +1,13 @@
 2019-11-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (pi, check_byte_reg, process_operands,
+	build_modrm_byte, i386_att_operand, parse_real_register): Use
+	"class" instead of "sreg" field.
+	* config/tc-i386-intel.c (i386_intel_simplify_register,
+	i386_intel_operand): Likewise.
+
+2019-11-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (operand_type_set, operand_type_and,
 	operand_type_and_not, operand_type_or, operand_type_xor): Handle
 	"class" field specially.

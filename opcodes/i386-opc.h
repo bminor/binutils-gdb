@@ -709,6 +709,7 @@ enum operand_class
 {
   ClassNone,
   Reg, /* GPRs and FP regs, distinguished by operand size */
+  SReg, /* Segment register */
 };
 
 /* Position of operand_type bits.  */
@@ -729,8 +730,6 @@ enum
   Debug,
   /* Test register */
   Test,
-  /* Segment register */
-  SReg,
   /* 1 bit immediate */
   Imm1,
   /* 8 bit immediate */
@@ -824,7 +823,6 @@ typedef union i386_operand_type
       unsigned int control:1;
       unsigned int debug:1;
       unsigned int test:1;
-      unsigned int sreg:1;
       unsigned int imm1:1;
       unsigned int imm8:1;
       unsigned int imm8s:1;

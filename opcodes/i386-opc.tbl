@@ -30,6 +30,8 @@
 #define FloatAcc Acc|Tbyte
 #define FloatReg Class=Reg|Tbyte
 
+#define SReg  Class=SReg
+
 #define RegXMM RegSIMD|Xmmword
 #define RegYMM RegSIMD|Ymmword
 #define RegZMM RegSIMD|Zmmword
