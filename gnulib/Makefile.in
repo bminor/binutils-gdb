@@ -243,6 +243,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/tempname.m4 \
 	$(top_srcdir)/import/m4/threadlib.m4 \
 	$(top_srcdir)/import/m4/time_h.m4 \
+	$(top_srcdir)/import/m4/time_r.m4 \
 	$(top_srcdir)/import/m4/unistd-safer.m4 \
 	$(top_srcdir)/import/m4/unistd_h.m4 \
 	$(top_srcdir)/import/m4/warn-on-use.m4 \

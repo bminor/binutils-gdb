@@ -182,6 +182,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module threadlib:
   gl_THREADLIB_EARLY
   # Code from module time:
+  # Code from module time_r:
   # Code from module unistd:
   # Code from module unistd-safer:
   # Code from module unsetenv:
@@ -619,6 +620,12 @@ AC_DEFUN([gl_INIT],
   gl_FUNC_GEN_TEMPNAME
   gl_THREADLIB
   gl_HEADER_TIME_H
+  gl_TIME_R
+  if test $HAVE_LOCALTIME_R = 0 || test $REPLACE_LOCALTIME_R = 1; then
+    AC_LIBOBJ([time_r])
+    gl_PREREQ_TIME_R
+  fi
+  gl_TIME_MODULE_INDICATOR([time_r])
   gl_UNISTD_H
   gl_UNISTD_SAFER
   gl_FUNC_UNSETENV
@@ -934,6 +941,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/tempname.c
   lib/tempname.h
   lib/time.in.h
+  lib/time_r.c
   lib/unistd--.h
   lib/unistd-safer.h
   lib/unistd.c
@@ -1075,6 +1083,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/tempname.m4
   m4/threadlib.m4
   m4/time_h.m4
+  m4/time_r.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4
   m4/warn-on-use.m4

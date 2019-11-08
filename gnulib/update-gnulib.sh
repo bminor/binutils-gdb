@@ -59,6 +59,7 @@ IMPORTED_GNULIB_MODULES="\
     strstr \
     strtok_r \
     sys_stat \
+    time_r \
     unistd \
     unsetenv \
     update-copyright \

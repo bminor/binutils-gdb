@@ -6,6 +6,20 @@
 	* configure: Regenerate.
 	* import/Makefile.am: Update.
 	* import/Makefile.in: Regenerate.
+	* import/m4/gnulib-cache.m4: Update.
+	* import/m4/gnulib-comp.m4: Update.
+	* import/m4/time_r.m4: New file.
+	* import/time_r.c: New file.
+	* update-gnulib.sh: Import time_r.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* import/Makefile.am: Update.
+	* import/Makefile.in: Regenerate.
 	* import/extra/config.rpath: New file.
 	* import/glthread/lock.c: New file.
 	* import/glthread/lock.h: New file.

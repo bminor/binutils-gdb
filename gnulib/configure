@@ -3564,6 +3564,7 @@ gl_func_list="$gl_func_list __xpg_strerror_r"
 gl_func_list="$gl_func_list catgets"
 gl_func_list="$gl_func_list snprintf"
 gl_header_list="$gl_header_list sys/uio.h"
+gl_func_list="$gl_func_list localtime_r"
 gl_func_list="$gl_func_list pipe"
 gl_func_list="$gl_func_list iswcntrl"
 # Check that the precious variables saved in the cache have kept the same
@@ -5986,6 +5987,7 @@ fi
 
 
   # Code from module time:
+  # Code from module time_r:
   # Code from module unistd:
   # Code from module unistd-safer:
   # Code from module unsetenv:
@@ -16067,6 +16069,11 @@ $as_echo "$gl_cv_next_time_h" >&6; }
        gl_next_as_first_directive=$gl_cv_next_time_h
      fi
      NEXT_AS_FIRST_DIRECTIVE_TIME_H=$gl_next_as_first_directive
+
+
+
+
+
 
 
 
@@ -27009,6 +27016,110 @@ $as_echo "$gl_cv_next_sys_uio_h" >&6; }
 
 
 
+
+
+
+
+
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "localtime_r" "ac_cv_have_decl_localtime_r" "#include <time.h>
+"
+if test "x$ac_cv_have_decl_localtime_r" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_LOCALTIME_R $ac_have_decl
+_ACEOF
+
+  if test $ac_cv_have_decl_localtime_r = no; then
+    HAVE_DECL_LOCALTIME_R=0
+  fi
+
+
+  :
+
+
+
+
+
+  if test $ac_cv_func_localtime_r = yes; then
+    HAVE_LOCALTIME_R=1
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether localtime_r is compatible with its POSIX signature" >&5
+$as_echo_n "checking whether localtime_r is compatible with its POSIX signature... " >&6; }
+if ${gl_cv_time_r_posix+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+int
+main ()
+{
+/* We don't need to append 'restrict's to the argument types,
+                 even though the POSIX signature has the 'restrict's,
+                 since C99 says they can't affect type compatibility.  */
+              struct tm * (*ptr) (time_t const *, struct tm *) = localtime_r;
+              if (ptr) return 0;
+              /* Check the return type is a pointer.
+                 On HP-UX 10 it is 'int'.  */
+              *localtime_r (0, 0);
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_time_r_posix=yes
+else
+  gl_cv_time_r_posix=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_time_r_posix" >&5
+$as_echo "$gl_cv_time_r_posix" >&6; }
+    if test $gl_cv_time_r_posix = yes; then
+      REPLACE_LOCALTIME_R=0
+    else
+      REPLACE_LOCALTIME_R=1
+    fi
+  else
+    HAVE_LOCALTIME_R=0
+  fi
+
+  if test $HAVE_LOCALTIME_R = 0 || test $REPLACE_LOCALTIME_R = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS time_r.$ac_objext"
+
+
+  :
+
+  fi
+
+
+
+
+
+          GNULIB_TIME_R=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_TIME_R 1" >>confdefs.h
 
 
 

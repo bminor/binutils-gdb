@@ -273,6 +273,9 @@
 /* Define to 1 when the gnulib module strtok_r should be tested. */
 #undef GNULIB_TEST_STRTOK_R
 
+/* Define to 1 when the gnulib module time_r should be tested. */
+#undef GNULIB_TEST_TIME_R
+
 /* Define to 1 when the gnulib module unsetenv should be tested. */
 #undef GNULIB_TEST_UNSETENV
 
@@ -345,6 +348,10 @@
 /* Define to 1 if you have the declaration of `isblank', and to 0 if you
    don't. */
 #undef HAVE_DECL_ISBLANK
+
+/* Define to 1 if you have the declaration of `localtime_r', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LOCALTIME_R
 
 /* Define to 1 if you have the declaration of `mbrtowc', and to 0 if you
    don't. */
@@ -522,6 +529,9 @@
 
 /* Define to 1 if you have the 'link' function. */
 #undef HAVE_LINK
+
+/* Define to 1 if you have the 'localtime_r' function. */
+#undef HAVE_LOCALTIME_R
 
 /* Define to 1 if the system has the type 'long long int'. */
 #undef HAVE_LONG_LONG_INT

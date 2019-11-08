@@ -1,5 +1,10 @@
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* gdbsupport/common-defs.h: Include time.h before pathmax.h to
+	avoid compile errors.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* gdbsupport/common.m4: No longer check for strerror_r.
