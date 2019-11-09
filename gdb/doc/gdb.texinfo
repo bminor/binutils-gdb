@@ -27621,6 +27621,9 @@ its standard mode, writing on the terminal directly.  When reentering
 the TUI mode, control is given back to the curses windows.
 The screen is then refreshed.
 
+This key binding uses the bindable Readline function
+@code{tui-switch-mode}.
+
 @kindex C-x 1
 @item C-x 1
 Use a TUI layout with only one window.  The layout will
@@ -27628,6 +27631,9 @@ either be @samp{source} or @samp{assembly}.  When the TUI mode
 is not active, it will switch to the TUI mode.
 
 Think of this key binding as the Emacs @kbd{C-x 1} binding.
+
+This key binding uses the bindable Readline function
+@code{tui-delete-other-windows}.
 
 @kindex C-x 2
 @item C-x 2
@@ -27638,6 +27644,9 @@ previous layout and the new one.
 
 Think of it as the Emacs @kbd{C-x 2} binding.
 
+This key binding uses the bindable Readline function
+@code{tui-change-windows}.
+
 @kindex C-x o
 @item C-x o
 Change the active window.  The TUI associates several key bindings
@@ -27646,10 +27655,16 @@ gives the focus to the next TUI window.
 
 Think of it as the Emacs @kbd{C-x o} binding.
 
+This key binding uses the bindable Readline function
+@code{tui-other-window}.
+
 @kindex C-x s
 @item C-x s
 Switch in and out of the TUI SingleKey mode that binds single
 keys to @value{GDBN} commands (@pxref{TUI Single Key Mode}).
+
+This key binding uses the bindable Readline function
+@code{next-keymap}.
 @end table
 
 The following key bindings only work in the TUI mode:

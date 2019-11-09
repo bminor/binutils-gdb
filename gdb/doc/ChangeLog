@@ -1,5 +1,9 @@
 2019-11-11  Tom Tromey  <tom@tromey.com>
 
+	* gdb.texinfo (TUI Keys): Document readline function names.
+
+2019-11-11  Tom Tromey  <tom@tromey.com>
+
 	* gdb.texinfo (Editing): Document operate-and-get-next.
 
 2019-11-11  Tom Tromey  <tromey@adacore.com>
