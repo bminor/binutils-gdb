@@ -25139,6 +25139,13 @@ encouraged to read that chapter.
 @value{GDBN} sets the Readline application name to @samp{gdb}.  This
 is useful for conditions in @file{.inputrc}.
 
+@cindex operate-and-get-next
+@value{GDBN} defines a bindable Readline command,
+@code{operate-and-get-next}.  This is bound to @kbd{C-o} by default.
+This command accepts the current line for execution and fetches the
+next line relative to the current line from the history for editing.
+Any argument is ignored.
+
 @node Command History
 @section Command History
 @cindex command history
