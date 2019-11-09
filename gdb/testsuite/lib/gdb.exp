@@ -6395,6 +6395,21 @@ gdb_caching_proc target_supports_scheduler_locking {
     return $supports_schedule_locking
 }
 
+# Return 1 if compiler supports use of nested functions.  Otherwise,
+# return 0.
+
+gdb_caching_proc support_nested_function_tests {
+    # Compile a test program containing a nested function
+    return [gdb_can_simple_compile nested_func {
+	int main () {
+	    int foo () {
+	        return 0;
+	    }
+	    return foo ();
+	}
+    } executable]
+}
+
 # gdb_target_symbol returns the provided symbol with the correct prefix
 # prepended.  (See gdb_target_symbol_prefix, above.)
 
