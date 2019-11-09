@@ -22,9 +22,11 @@
 #include "defs.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "tui/tui-io.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-win.h"
 #include "tui/tui-stack.h"
+#include "cli/cli-style.h"
 
 #include "gdb_curses.h"
 
@@ -51,6 +53,11 @@ box_win (struct tui_win_info *win_info,
   else
     attrs = tui_border_attrs;
 
+  /* tui_apply_style resets the style entirely, so be sure to call it
+     before applying ATTRS.  */
+  tui_apply_style (win, (highlight_flag
+			 ? tui_active_border_style.style ()
+			 : tui_border_style.style ()));
   wattron (win, attrs);
 #ifdef HAVE_WBORDER
   wborder (win, tui_border_vline, tui_border_vline,
@@ -77,6 +84,7 @@ box_win (struct tui_win_info *win_info,
 	}
     }
   wattroff (win, attrs);
+  tui_apply_style (win, ui_file_style ());
 }
 
 

@@ -25449,6 +25449,17 @@ the user attention to some specific parts of their output.  For example,
 the command @command{apropos -v REGEXP} uses the highlight style to
 mark the documentation parts matching @var{regexp}.
 
+@item tui-border
+Control the styling of the TUI border.  Note that, unlike other
+styling options, only the color of the border can be controlled via
+@code{set style}.  This was done for compatibility reasons, as TUI
+controls to set the border's intensity predated the addition of
+general styling to @value{GDBN}.  @xref{TUI Configuration}.
+
+@item tui-active-border
+Control the styling of the active TUI border; that is, the TUI window
+that has the focus.
+
 @end table
 
 @node Numbers
@@ -28026,6 +28037,9 @@ source text at the next tab stop; the compact display uses only as
 much space as is needed for the line numbers in the current file, and
 only a single space to separate the line numbers from the source.
 @end table
+
+Note that the colors of the TUI borders can be controlled using the
+appropriate @code{set style} commands.  @xref{Output Styling}.
 
 @node Emacs
 @chapter Using @value{GDBN} under @sc{gnu} Emacs

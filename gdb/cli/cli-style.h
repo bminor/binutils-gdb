@@ -22,6 +22,7 @@
 
 #include "ui-file.h"
 #include "command.h"
+#include "gdbsupport/observable.h"
 
 /* A single CLI style option.  */
 class cli_style_option
@@ -47,7 +48,8 @@ public:
 			     struct cmd_list_element **set_list,
 			     void (*do_set) (const char *args, int from_tty),
 			     struct cmd_list_element **show_list,
-			     void (*do_show) (const char *args, int from_tty));
+			     void (*do_show) (const char *args, int from_tty),
+			     bool skip_intensity);
 
   /* Return the 'set style NAME' command list, that can be used
      to build a lambda DO_SET to call add_setshow_commands.  */
@@ -55,6 +57,9 @@ public:
 
   /* Same as SET_LIST but for the show command list.  */
   struct cmd_list_element *show_list () { return m_show_list; };
+
+  /* This style can be observed for any changes.  */
+  gdb::observers::observable<> changed;
 
 private:
 
@@ -75,6 +80,10 @@ private:
      subcommands.  */
   struct cmd_list_element *m_set_list = nullptr;
   struct cmd_list_element *m_show_list = nullptr;
+
+  /* Callback to notify the observable.  */
+  static void do_set_value (const char *ignore, int from_tty,
+			    struct cmd_list_element *cmd);
 
   /* Callback to show the foreground.  */
   static void do_show_foreground (struct ui_file *file, int from_tty,
@@ -110,6 +119,12 @@ extern cli_style_option title_style;
 
 /* The metadata style.  */
 extern cli_style_option metadata_style;
+
+/* The border style of a TUI window that does not have the focus.  */
+extern cli_style_option tui_border_style;
+
+/* The border style of a TUI window that does have the focus.  */
+extern cli_style_option tui_active_border_style;
 
 /* True if source styling is enabled.  */
 extern bool source_styling;

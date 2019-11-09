@@ -1,5 +1,30 @@
 2019-12-01  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Document new settings.
+	* tui/tui-wingeneral.c (box_win): Apply appropriate border style.
+	* tui/tui-win.c (_initialize_tui_win): Add border style
+	observers.
+	* tui/tui-io.h (tui_apply_style): Declare.
+	* tui/tui-io.c (tui_apply_style): Rename from apply_style.  No
+	longer static.
+	(apply_ansi_escape, tui_set_reverse_mode): Update.
+	* cli/cli-style.h (class cli_style_option) <add_setshow_commands>:
+	Add "skip_intensity" parameter.
+	<changed>: New member.
+	<do_set_value>: Declare.
+	(tui_border_style, tui_active_border_style): Declare.
+	* cli/cli-style.c (tui_border_style, tui_active_border_style): New
+	globals.
+	(cli_style_option): Initialize "changed".
+	(cli_style_option::do_set_value): New function.
+	(cli_style_option::add_setshow_commands): Add "skip_intensity"
+	parameter.  Update.
+	(STYLE_ADD_SETSHOW_COMMANDS): Add "SKIP" parameter.
+	(_initialize_cli_style): Update.  Create TUI border style
+	commands.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (tui_copy_source_line): Add "ndigits"
 	parameter.
 	* tui/tui-winsource.c (tui_copy_source_line): Add "ndigits"

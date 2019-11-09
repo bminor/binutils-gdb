@@ -30,6 +30,7 @@
 #include "breakpoint.h"
 #include "frame.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "top.h"
 #include "source.h"
 #include "event-loop.h"
@@ -1517,4 +1518,7 @@ in a compact form.  The compact form puts the source closer to\n\
 the line numbers and uses less horizontal space."),
 			   tui_set_compact_source, tui_show_compact_source,
 			   &tui_setlist, &tui_showlist);
+
+  tui_border_style.changed.attach (tui_rehighlight_all);
+  tui_active_border_style.changed.attach (tui_rehighlight_all);
 }

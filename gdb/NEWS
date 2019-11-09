@@ -169,6 +169,14 @@ maint show worker-threads
   reasonable.  Currently worker threads are only used when demangling
   the names of linker symbols.
 
+set style tui-border foreground COLOR
+set style tui-border background COLOR
+  Control the styling of TUI borders.
+
+set style tui-active-border foreground COLOR
+set style tui-active-border background COLOR
+  Control the styling of the active TUI border.
+
 maint set test-settings KIND
 maint show test-settings KIND
   A set of commands used by the testsuite for exercising the settings

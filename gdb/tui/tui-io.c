@@ -306,8 +306,8 @@ get_color_pair (int fg, int bg)
 
 /* Apply STYLE to W.  */
 
-static void
-apply_style (WINDOW *w, ui_file_style style)
+void
+tui_apply_style (WINDOW *w, ui_file_style style)
 {
   /* Reset.  */
   wattron (w, A_NORMAL);
@@ -413,7 +413,7 @@ apply_ansi_escape (WINDOW *w, const char *buf)
       style.set_reverse (true);
     }
 
-  apply_style (w, style);
+  tui_apply_style (w, style);
   return n_read;
 }
 
@@ -438,7 +438,7 @@ tui_set_reverse_mode (WINDOW *w, bool reverse)
       style.set_fg (reverse_save_fg);
     }
 
-  apply_style (w, style);
+  tui_apply_style (w, style);
 }
 
 /* Print LENGTH characters from the buffer pointed to by BUF to the

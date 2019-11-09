@@ -85,13 +85,23 @@ cli_style_option title_style ("title", ui_file_style::BOLD);
 
 /* See cli-style.h.  */
 
+cli_style_option tui_border_style ("tui-border", ui_file_style::CYAN);
+
+/* See cli-style.h.  */
+
+cli_style_option tui_active_border_style ("tui-active-border",
+					  ui_file_style::CYAN);
+
+/* See cli-style.h.  */
+
 cli_style_option metadata_style ("metadata", ui_file_style::DIM);
 
 /* See cli-style.h.  */
 
 cli_style_option::cli_style_option (const char *name,
 				    ui_file_style::basic_color fg)
-  : m_name (name),
+  : changed (name),
+    m_name (name),
     m_foreground (cli_colors[fg - ui_file_style::NONE]),
     m_background (cli_colors[0]),
     m_intensity (cli_intensities[ui_file_style::NORMAL])
@@ -102,7 +112,8 @@ cli_style_option::cli_style_option (const char *name,
 
 cli_style_option::cli_style_option (const char *name,
 				    ui_file_style::intensity i)
-  : m_name (name),
+  : changed (name),
+    m_name (name),
     m_foreground (cli_colors[0]),
     m_background (cli_colors[0]),
     m_intensity (cli_intensities[i])
@@ -141,6 +152,16 @@ cli_style_option::style () const
     }
 
   return ui_file_style (fg, bg, intensity);
+}
+
+/* See cli-style.h.  */
+
+void
+cli_style_option::do_set_value (const char *ignore, int from_tty,
+				struct cmd_list_element *cmd)
+{
+  cli_style_option *cso = (cli_style_option *) get_cmd_context (cmd);
+  cso->changed.notify ();
 }
 
 /* Implements the cli_style_option::do_show_* functions.
@@ -198,7 +219,8 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 							int from_tty),
 					struct cmd_list_element **show_list,
 					void (*do_show) (const char *args,
-							 int from_tty))
+							 int from_tty),
+					bool skip_intensity)
 {
   m_set_prefix = std::string ("set style ") + m_name + " ";
   m_show_prefix = std::string ("show style ") + m_name + " ";
@@ -213,7 +235,7 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 			_("Set the foreground color for this property."),
 			_("Show the foreground color for this property."),
 			nullptr,
-			nullptr,
+			do_set_value,
 			do_show_foreground,
 			&m_set_list, &m_show_list, (void *) this);
   add_setshow_enum_cmd ("background", theclass, cli_colors,
@@ -221,17 +243,18 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 			_("Set the background color for this property."),
 			_("Show the background color for this property."),
 			nullptr,
-			nullptr,
+			do_set_value,
 			do_show_background,
 			&m_set_list, &m_show_list, (void *) this);
-  add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
-			&m_intensity,
-			_("Set the display intensity for this property."),
-			_("Show the display intensity for this property."),
-			nullptr,
-			nullptr,
-			do_show_intensity,
-			&m_set_list, &m_show_list, (void *) this);
+  if (!skip_intensity)
+    add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
+			  &m_intensity,
+			  _("Set the display intensity for this property."),
+			  _("Show the display intensity for this property."),
+			  nullptr,
+			  do_set_value,
+			  do_show_intensity,
+			  &m_set_list, &m_show_list, (void *) this);
 }
 
 static cmd_list_element *style_set_list;
@@ -323,7 +346,7 @@ it was not linked against GNU Source Highlight."
 			   ), set_style_enabled, show_style_sources,
 			   &style_set_list, &style_show_list);
 
-#define STYLE_ADD_SETSHOW_COMMANDS(STYLE, PREFIX_DOC)	  \
+#define STYLE_ADD_SETSHOW_COMMANDS(STYLE, PREFIX_DOC, SKIP)		\
   STYLE.add_setshow_commands (no_class, PREFIX_DOC,		\
 			      &style_set_list,				\
 			      [] (const char *args, int from_tty)	\
@@ -341,46 +364,60 @@ it was not linked against GNU Source Highlight."
 				  (STYLE.show_list (),			\
 				   from_tty,				\
 				   "");					\
-			      })
+			      }, SKIP)
 
   STYLE_ADD_SETSHOW_COMMANDS (file_name_style,
 			      _("\
 Filename display styling.\n\
-Configure filename colors and display intensity."));
+Configure filename colors and display intensity."), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (function_name_style,
 			      _("\
 Function name display styling.\n\
-Configure function name colors and display intensity"));
+Configure function name colors and display intensity"), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (variable_name_style,
 			      _("\
 Variable name display styling.\n\
-Configure variable name colors and display intensity"));
+Configure variable name colors and display intensity"), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (address_style,
 			      _("\
 Address display styling.\n\
-Configure address colors and display intensity"));
+Configure address colors and display intensity"), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (title_style,
 			      _("\
 Title display styling.\n\
 Configure title colors and display intensity\n\
 Some commands (such as \"apropos -v REGEXP\") use the title style to improve\n\
-readability."));
+readability."), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (highlight_style,
 			      _("\
 Highlight display styling.\n\
 Configure highlight colors and display intensity\n\
 Some commands use the highlight style to draw the attention to a part\n\
-of their output."));
+of their output."), false);
 
   STYLE_ADD_SETSHOW_COMMANDS (metadata_style,
 			      _("\
 Metadata display styling.\n\
 Configure metadata colors and display intensity\n\
 The \"metadata\" style is used when GDB displays information about\n\
-your data, for example \"<unavailable>\""));
+your data, for example \"<unavailable>\""), false);
+
+  STYLE_ADD_SETSHOW_COMMANDS (tui_border_style,
+			      _("\
+TUI border display styling.\n\
+Configure TUI border colors\n\
+The \"tui-border\" style is used when GDB displays the border of a\n\
+TUI window that does not have the focus."), true);
+
+  STYLE_ADD_SETSHOW_COMMANDS (tui_active_border_style,
+			      _("\
+TUI active border display styling.\n\
+Configure TUI active border colors\n\
+The \"tui-active-border\" style is used when GDB displays the border of a\n\
+TUI window that does have the focus."), true);
 }
