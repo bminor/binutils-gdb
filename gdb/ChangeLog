@@ -1,5 +1,9 @@
 2019-12-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_enable): Call tui_update_variables earlier.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Document new settings.
 	* tui/tui-wingeneral.c (box_win): Apply appropriate border style.
 	* tui/tui-win.c (_initialize_tui_win): Add border style

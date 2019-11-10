@@ -496,8 +496,9 @@ tui_enable (void)
   tui_install_hooks ();
   rl_startup_hook = tui_rl_startup_hook;
 
-  tui_update_variables ();
-  
+  if (tui_update_variables ())
+    tui_rehighlight_all ();
+
   tui_setup_io (1);
 
   tui_active = 1;
