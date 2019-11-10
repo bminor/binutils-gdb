@@ -1,3 +1,10 @@
+2019-11-11  Miguel Saldivar  <saldivarcher@gmail.com>
+
+	PR 24996
+	* expression.cc (Trinary_expression::arg2_value): Use correct integer
+	expression when calling "eval_maybe_dot" method.
+	(Trinary_expression::arg3_value): Likewise.
+
 2019-09-28  Alan Modra  <amodra@gmail.com>
 
 	PR 16794
