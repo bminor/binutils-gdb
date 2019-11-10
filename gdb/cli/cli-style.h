@@ -34,9 +34,6 @@ public:
   /* Construct a CLI style option with an intensity.  */
   cli_style_option (const char *name, ui_file_style::intensity i);
 
-  /* Construct a CLI style option with an intensity.  */
-  cli_style_option (ui_file_style::intensity val);
-
   /* Return a ui_file_style corresponding to the settings in this CLI
      style.  */
   ui_file_style style () const;
