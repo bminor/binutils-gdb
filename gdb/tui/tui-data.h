@@ -211,9 +211,6 @@ public:
   /* Window title to display.  */
   std::string title;
 
-  /* Can this window ever be highlighted?  */
-  bool can_highlight = true;
-
   /* Is this window highlighted?  */
   bool is_highlighted = false;
 };

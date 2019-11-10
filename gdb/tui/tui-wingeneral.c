@@ -84,7 +84,7 @@ void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL 
-      && win_info->can_highlight
+      && win_info->can_box ()
       && win_info->handle != NULL)
     {
       box_win (win_info, false);
@@ -98,7 +98,7 @@ void
 tui_highlight_win (struct tui_win_info *win_info)
 {
   if (win_info != NULL
-      && win_info->can_highlight
+      && win_info->can_box ()
       && win_info->handle != NULL)
     {
       box_win (win_info, true);
@@ -110,7 +110,7 @@ tui_highlight_win (struct tui_win_info *win_info)
 void
 tui_win_info::check_and_display_highlight_if_needed ()
 {
-  if (can_highlight)
+  if (can_box ())
     {
       if (is_highlighted)
 	tui_highlight_win (this);

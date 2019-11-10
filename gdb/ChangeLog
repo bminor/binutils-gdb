@@ -1,5 +1,14 @@
 2019-11-10  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_unhighlight_win): Use can_box.
+	(tui_highlight_win): Likewise.
+	(tui_win_info::check_and_display_highlight_if_needed): Likewise.
+	* tui/tui-data.h (struct tui_win_info) <can_highlight>: Remove.
+	* tui/tui-command.h (struct tui_cmd_window) <tui_cmd_window>:
+	Don't set can_highlight.
+
+2019-11-10  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-style.h (class cli_style_option) <cli_style_option>:
 	Remove unused declaration.
 

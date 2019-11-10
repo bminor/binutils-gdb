@@ -30,7 +30,6 @@ struct tui_cmd_window : public tui_win_info
   tui_cmd_window ()
     : tui_win_info (CMD_WIN)
   {
-    can_highlight = false;
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
