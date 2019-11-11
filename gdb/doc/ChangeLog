@@ -1,3 +1,7 @@
+2019-11-11  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Host I/O Packets): Fix typo in "vFile:pwrite".
+
 2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texi (Symbols In Python): Add documentation for

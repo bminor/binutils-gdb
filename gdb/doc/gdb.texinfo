@@ -41773,7 +41773,7 @@ Write @var{data} (a binary buffer) to the open file corresponding
 to @var{fd}.  Start the write at @var{offset} from the start of the
 file.  Unlike many @code{write} system calls, there is no
 separate @var{count} argument; the length of @var{data} in the
-packet is used.  @samp{vFile:write} returns the number of bytes written,
+packet is used.  @samp{vFile:pwrite} returns the number of bytes written,
 which may be shorter than the length of @var{data}, or -1 if an
 error occurred.
 
