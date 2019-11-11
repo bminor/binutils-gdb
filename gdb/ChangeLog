@@ -1,3 +1,9 @@
+2019-11-13  Tom Tromey  <tromey@adacore.com>
+
+	PR build/25182:
+	* psympriv.h (partial_symbol): Remove static assert.
+	* symtab.h (general_symbol_info, symbol): Remove static assert.
+
 2019-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbsupport/format.c (format_pieces::format_pieces): Support
