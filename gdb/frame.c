@@ -2508,14 +2508,15 @@ find_frame_sal (frame_info *frame)
   int notcurrent;
   CORE_ADDR pc;
 
-  /* If the next frame represents an inlined function call, this frame's
-     sal is the "call site" of that inlined function, which can not
-     be inferred from get_frame_pc.  */
-  next_frame = get_next_frame (frame);
   if (frame_inlined_callees (frame) > 0)
     {
       struct symbol *sym;
 
+      /* If the current frame has some inlined callees, and we have a next
+	 frame, then that frame must be an inlined frame.  In this case
+	 this frame's sal is the "call site" of the next frame's inlined
+	 function, which can not be inferred from get_frame_pc.  */
+      next_frame = get_next_frame (frame);
       if (next_frame)
 	sym = get_frame_function (next_frame);
       else

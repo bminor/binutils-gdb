@@ -1,5 +1,10 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-inline-many-frames.c: New file.
+	* gdb.dwarf2/dw2-inline-many-frames.exp: New file.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.dwarf2/dw2-inline-stepping.c: New file.
 	* gdb.dwarf2/dw2-inline-stepping.exp: New file.
 

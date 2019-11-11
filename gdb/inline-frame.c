@@ -37,9 +37,9 @@
 struct inline_state
 {
   inline_state (thread_info *thread_, int skipped_frames_, CORE_ADDR saved_pc_,
-		symbol *skipped_symbol_)
+		std::vector<symbol *> &&skipped_symbols_)
     : thread (thread_), skipped_frames (skipped_frames_), saved_pc (saved_pc_),
-      skipped_symbol (skipped_symbol_)
+      skipped_symbols (std::move (skipped_symbols_))
   {}
 
   /* The thread this data relates to.  It should be a currently
@@ -56,10 +56,10 @@ struct inline_state
      any skipped frames.  */
   CORE_ADDR saved_pc;
 
-  /* Only valid if SKIPPED_FRAMES is non-zero.  This is the symbol
-     of the outermost skipped inline function.  It's used to find the
-     call site of the current frame.  */
-  struct symbol *skipped_symbol;
+  /* Only valid if SKIPPED_FRAMES is non-zero.  This is the list of all
+     function symbols that have been skipped, from inner most to outer
+     most.  It is used to find the call site of the current frame.  */
+  std::vector<struct symbol *> skipped_symbols;
 };
 
 static std::vector<inline_state> inline_states;
@@ -341,7 +341,7 @@ void
 skip_inline_frames (thread_info *thread, bpstat stop_chain)
 {
   const struct block *frame_block, *cur_block;
-  struct symbol *last_sym = NULL;
+  std::vector<struct symbol *> skipped_syms;
   int skip_count = 0;
 
   /* This function is called right after reinitializing the frame
@@ -369,7 +369,7 @@ skip_inline_frames (thread_info *thread, bpstat stop_chain)
 		    break;
 
 		  skip_count++;
-		  last_sym = BLOCK_FUNCTION (cur_block);
+		  skipped_syms.push_back (BLOCK_FUNCTION (cur_block));
 		}
 	      else
 		break;
@@ -382,7 +382,8 @@ skip_inline_frames (thread_info *thread, bpstat stop_chain)
     }
 
   gdb_assert (find_inline_frame_state (thread) == NULL);
-  inline_states.emplace_back (thread, skip_count, this_pc, last_sym);
+  inline_states.emplace_back (thread, skip_count, this_pc,
+			      std::move (skipped_syms));
 
   if (skip_count != 0)
     reinit_frame_cache ();
@@ -421,9 +422,16 @@ struct symbol *
 inline_skipped_symbol (thread_info *thread)
 {
   inline_state *state = find_inline_frame_state (thread);
-
   gdb_assert (state != NULL);
-  return state->skipped_symbol;
+
+  /* This should only be called when we are skipping at least one frame,
+     hence SKIPPED_FRAMES will be greater than zero when we get here.
+     We initialise SKIPPED_FRAMES at the same time as we build
+     SKIPPED_SYMBOLS, hence it should be true that SKIPPED_FRAMES never
+     indexes outside of the SKIPPED_SYMBOLS vector.  */
+  gdb_assert (state->skipped_frames > 0);
+  gdb_assert (state->skipped_frames <= state->skipped_symbols.size ());
+  return state->skipped_symbols[state->skipped_frames - 1];
 }
 
 /* Return the number of functions inlined into THIS_FRAME.  Some of

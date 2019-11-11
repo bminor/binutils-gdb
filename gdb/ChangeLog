@@ -1,5 +1,18 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* frame.c (find_frame_sal): Move call to get_next_frame into more
+	inner scope.
+	* inline-frame.c (inilne_state) <inline_state>: Update argument
+	types.
+	(inilne_state) <skipped_symbol>: Rename to...
+	(inilne_state) <skipped_symbols>: ...this, and change to a vector.
+	(skip_inline_frames): Build vector of skipped symbols and use this
+	to reate the inline_state.
+	(inline_skipped_symbol): Add a comment and some assertions, fetch
+	skipped symbol from the list.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* buildsym.c (lte_is_less_than): Delete.
 	(buildsym_compunit::end_symtab_with_blockvector): Create local
 	lambda function to sort line table entries, and use
