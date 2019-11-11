@@ -1094,6 +1094,7 @@
 [^ :]+:[0-9]+: Info:    	smaxp z0\.h, p0/m, z0\.h, z0\.h
 [^ :]+:[0-9]+: Info:    	smaxp z0\.s, p0/m, z0\.s, z0\.s
 [^ :]+:[0-9]+: Info:    	smaxp z0\.d, p0/m, z0\.d, z0\.d
+[^ :]+:[0-9]+: Error: operand 3 must be the same register as operand 1 -- `smaxp z1\.b,p0/m,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `smaxp z32\.b,p0/m,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `smaxp z0\.b,p0/m,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 4 must be an SVE vector register -- `smaxp z0\.b,p0/m,z0\.b,z32\.b'
@@ -1112,6 +1113,7 @@
 [^ :]+:[0-9]+: Info:    	sminp z0\.h, p0/m, z0\.h, z0\.h
 [^ :]+:[0-9]+: Info:    	sminp z0\.s, p0/m, z0\.s, z0\.s
 [^ :]+:[0-9]+: Info:    	sminp z0\.d, p0/m, z0\.d, z0\.d
+[^ :]+:[0-9]+: Error: operand 3 must be the same register as operand 1 -- `sminp z1\.b,p0/m,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sminp z32\.b,p0/m,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `sminp z0\.b,p0/m,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 4 must be an SVE vector register -- `sminp z0\.b,p0/m,z0\.b,z32\.b'

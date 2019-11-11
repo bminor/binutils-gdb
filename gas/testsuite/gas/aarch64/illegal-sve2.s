@@ -720,6 +720,7 @@ sm4ekey z0.s, z0.s, z0.h
 
 smaxp z0.h, p0/m, z0.b, z0.b
 smaxp z0.b, p0/z, z0.b, z0.b
+smaxp z1.b, p0/m, z0.b, z0.b
 smaxp z32.b, p0/m, z0.b, z0.b
 smaxp z0.b, p0/m, z32.b, z0.b
 smaxp z0.b, p0/m, z0.b, z32.b
@@ -727,6 +728,7 @@ smaxp z0.b, p8/m, z0.b, z0.b
 
 sminp z0.h, p0/m, z0.b, z0.b
 sminp z0.b, p0/z, z0.b, z0.b
+sminp z1.b, p0/m, z0.b, z0.b
 sminp z32.b, p0/m, z0.b, z0.b
 sminp z0.b, p0/m, z32.b, z0.b
 sminp z0.b, p0/m, z0.b, z32.b
