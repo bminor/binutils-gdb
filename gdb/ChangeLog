@@ -1,3 +1,7 @@
+2019-11-14  Christian Biesinger  <cbiesinger@google.com>
+
+	* README (`configure' options): Update.
+
 2019-11-14  Tom Tromey  <tromey@adacore.com>
 
 	* eval.c (evaluate_subexp_standard) <BINOP_ASSIGN>: Do not pass an
