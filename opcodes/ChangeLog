@@ -1,3 +1,8 @@
+2019-11-11  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Replace
+	"index" local variable by that of the already existing "num".
+
 2019-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25167

@@ -2546,17 +2546,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_SHRIMM_PRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED_22:
+	  num = (type == AARCH64_OPND_SVE_SHRIMM_UNPRED_22) ? 2 : 1;
+	  size = aarch64_get_qualifier_esize (opnds[idx - num].qualifier);
+	  if (!value_in_range_p (opnd->imm.value, 1, 8 * size))
 	    {
-	      unsigned int index =
-		(type == AARCH64_OPND_SVE_SHRIMM_UNPRED_22) ? 2 : 1;
-	      size = aarch64_get_qualifier_esize (opnds[idx - index].qualifier);
-	      if (!value_in_range_p (opnd->imm.value, 1, 8 * size))
-		{
-		  set_imm_out_of_range_error (mismatch_detail, idx, 1, 8*size);
-		  return 0;
-		}
-	      break;
-	   }
+	      set_imm_out_of_range_error (mismatch_detail, idx, 1, 8*size);
+	      return 0;
+	    }
+	  break;
 
 	default:
 	  break;
