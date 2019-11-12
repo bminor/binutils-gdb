@@ -1,3 +1,10 @@
+2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* opcodes/arm-dis.c (mve_opcodes): Enable VMOV imm to vec with
+	cmode 1101.
+	(is_mve_encoding_conflict): Update cmode conflict checks for
+	MVE_VMVN_IMM.
+
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_ESSEG

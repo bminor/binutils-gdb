@@ -2842,10 +2842,15 @@ static const struct mopcode32 mve_opcodes[] =
    "vsri%v.%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VMOV immediate to vector,
-     cmode == 11x1 -> VMVN which is UNDEFINED
-     for such a cmode.  */
+     undefinded for cmode == 1111 */
   {ARM_FEATURE_COPROC (FPU_MVE),
-   MVE_VMVN_IMM, 0xef800d50, 0xefb81dd0, UNDEFINED_INSTRUCTION},
+   MVE_VMVN_IMM, 0xef800f70, 0xefb81ff0, UNDEFINED_INSTRUCTION},
+
+  /* Vector VMOV immediate to vector,
+     cmode == 1101 */
+  {ARM_FEATURE_COPROC (FPU_MVE),
+   MVE_VMOV_IMM_TO_VEC, 0xef800d50, 0xefb81fd0,
+   "vmov%v.%5,8-11s\t%13-15,22Q, %E"},
 
   /* Vector VMOV immediate to vector.  */
   {ARM_FEATURE_COPROC (FPU_MVE),
@@ -5664,11 +5669,11 @@ is_mve_encoding_conflict (unsigned long given,
       {
 	unsigned long cmode = arm_decode_field (given, 8, 11);
 
-	if ((cmode & 9) == 1)
+	if (cmode == 0xe)
 	  return TRUE;
-	else if ((cmode & 5) == 1)
+	else if ((cmode & 0x9) == 1)
 	  return TRUE;
-	else if ((cmode & 0xe) == 0xe)
+	else if ((cmode & 0xd) == 9)
 	  return TRUE;
 	else
 	  return FALSE;

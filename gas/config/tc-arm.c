@@ -19545,8 +19545,6 @@ do_neon_mvn (void)
   if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     {
       constraint (!inst.operands[1].isreg && !inst.operands[0].isquad, BAD_FPU);
-      constraint ((inst.instruction & 0xd00) == 0xd00,
-		  _("immediate value out of range"));
     }
 }
 

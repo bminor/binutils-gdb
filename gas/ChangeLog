@@ -1,5 +1,11 @@
 2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* gas/config/tc-arm.c (do_neon_mvn): Allow mve_ext cmode=0xd.
+	* testsuite/gas/arm/mve-vmov-vmvn-vorr-vbic.s: New test.
+	* testsuite/gas/arm/mve-vmov-vmvn-vorr-vbic.d: Likewise.
+
+2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* config/tc-arm.c (s_arm_fpu): Clear selected_cpu fpu bits.
 	(fpu_any): Remove OBJ_ELF guards.
 	* testsuite/gas/arm/fpu-rst.s: New.
