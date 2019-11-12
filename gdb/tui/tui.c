@@ -635,7 +635,7 @@ tui_show_source (const char *fullname, int line)
   tui_add_win_to_layout (SRC_WIN);
 
   tui_update_source_windows_with_line (cursal.symtab, line);
-  tui_update_locator_fullname (fullname);
+  tui_update_locator_fullname (cursal.symtab);
 }
 
 void

@@ -288,10 +288,15 @@ tui_locator_window::set_locator_info (struct gdbarch *gdbarch_in,
 
 /* Update only the full_name portion of the locator.  */
 void
-tui_update_locator_fullname (const char *fullname)
+tui_update_locator_fullname (struct symtab *symtab)
 {
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
+  const char *fullname;
+  if (symtab != nullptr)
+    fullname = symtab_to_fullname (symtab);
+  else
+    fullname = "??";
   locator->set_locator_fullname (fullname);
 }
 

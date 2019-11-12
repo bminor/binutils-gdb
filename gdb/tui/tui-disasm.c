@@ -297,12 +297,8 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
       val.u.line_no = sal.line;
       TUI_SRC_WIN->update_source_window (gdbarch, sal.symtab, val);
       if (sal.symtab)
-	{
-	  set_current_source_symtab_and_line (sal);
-	  tui_update_locator_fullname (symtab_to_fullname (sal.symtab));
-	}
-      else
-	tui_update_locator_fullname ("?");
+	set_current_source_symtab_and_line (sal);
+      tui_update_locator_fullname (sal.symtab);
     }
 }
 

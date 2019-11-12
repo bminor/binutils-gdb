@@ -1,5 +1,15 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_show_source): Update.
+	* tui/tui-winsource.c (tui_display_main): Update.
+	* tui/tui-stack.h (tui_update_locator_fullname): Change parameter
+	to symtab.
+	* tui/tui-stack.c (tui_update_locator_fullname): Change parameter
+	to symtab.
+	* tui/tui-disasm.c (tui_show_disassem_and_update_source): Update.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	PR tui/23619:
 	* tui/tui-io.c (tui_rl_saved_prompt): Remove.
 	(tui_redisplay_readline): Use rl_display_prompt.
