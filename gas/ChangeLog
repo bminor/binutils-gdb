@@ -1,5 +1,20 @@
 2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
 
+	* config/tc-arm.c (do_vfp_nsyn_push): Move in order to enable it for
+	both fpu_vfp_ext_v1xd and mve_ext and add call to the aliased vstm
+	instruction for mve_ext.
+	(do_vfp_nsyn_pop): Move in order to enable it for both
+	fpu_vfp_ext_v1xd and mve_ext and add call to the aliased vldm
+	instruction for mve_ext.
+	(do_neon_ldm_stm): Add fpu_vfp_ext_v1 and mve_ext checks.
+	(insns): Enable vldm, vldmia, vldmdb, vstm, vstmia, vstmdb, vpop,
+	vpush, and fldd, fstd, flds, fsts for arm_ext_v6t2 instead
+	of fpu_vfp_ext_v1xd.
+	* testsuite/gas/arm/v8_1m-mve.s: New.
+	* testsuite/gas/arm/v8_1m-mve.d: New.
+
+2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
+
 	* gas/config/tc-arm.c (do_neon_mvn): Allow mve_ext cmode=0xd.
 	* testsuite/gas/arm/mve-vmov-vmvn-vorr-vbic.s: New test.
 	* testsuite/gas/arm/mve-vmov-vmvn-vorr-vbic.d: Likewise.
