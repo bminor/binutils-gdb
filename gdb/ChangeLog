@@ -1,3 +1,8 @@
+2019-11-14  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* python/py-finishbreakpoint.c (gdbpy_breakpoint_created):
+	only call Py_INCREF (newbp) in the bppy_pending_object case.
+
 2019-11-13  Tom Tromey  <tromey@adacore.com>
 
 	PR build/25182:

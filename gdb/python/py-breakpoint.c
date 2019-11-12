@@ -1017,6 +1017,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
   if (bppy_pending_object)
     {
       newbp = bppy_pending_object;
+      Py_INCREF (newbp);
       bppy_pending_object = NULL;
     }
   else
@@ -1027,7 +1028,6 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       newbp->bp = bp;
       newbp->bp->py_bp_object = newbp;
       newbp->is_finish_bp = 0;
-      Py_INCREF (newbp);
       ++bppy_live;
     }
   else
