@@ -443,7 +443,11 @@ enum
   No_ldSuf,
   /* instruction needs FWAIT */
   FWait,
-  /* quick test for string instructions */
+  /* IsString provides for a quick test for string instructions, and
+     its actual value also indicates which of the operands (if any)
+     requires use of the %es segment.  */
+#define IS_STRING_ES_OP0 2
+#define IS_STRING_ES_OP1 3
   IsString,
   /* RegMem is for instructions with a modrm byte where the register
      destination operand should be encoded in the mod and regmem fields.
@@ -661,7 +665,7 @@ typedef struct i386_opcode_modifier
   unsigned int no_qsuf:1;
   unsigned int no_ldsuf:1;
   unsigned int fwait:1;
-  unsigned int isstring:1;
+  unsigned int isstring:2;
   unsigned int regmem:1;
   unsigned int bndprefixok:1;
   unsigned int notrackprefixok:1;
@@ -772,8 +776,6 @@ enum
   BaseIndex,
   /* Absolute address for jump.  */
   JumpAbsolute,
-  /* String insn operand with fixed es segment */
-  EsSeg,
   /* BYTE size. */
   Byte,
   /* WORD size. 2 byte */
@@ -807,8 +809,9 @@ enum
   (OTNumOfUints * sizeof (unsigned int) * CHAR_BIT)
 
 /* If you get a compiler error for zero width of the unused field,
-   comment it out.  */
+   comment it out.
 #define OTUnused		OTNum
+*/
 
 typedef union i386_operand_type
 {
@@ -830,7 +833,6 @@ typedef union i386_operand_type
       unsigned int disp64:1;
       unsigned int baseindex:1;
       unsigned int jumpabsolute:1;
-      unsigned int esseg:1;
       unsigned int byte:1;
       unsigned int word:1;
       unsigned int dword:1;

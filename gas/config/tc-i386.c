@@ -3161,7 +3161,6 @@ const type_names[] =
   { OPERAND_TYPE_REGYMM, "rYMM" },
   { OPERAND_TYPE_REGZMM, "rZMM" },
   { OPERAND_TYPE_REGMASK, "Mask reg" },
-  { OPERAND_TYPE_ESSEG, "es" },
 };
 
 static void
@@ -4386,8 +4385,9 @@ md_assemble (char *line)
     }
 
   /* Check string instruction segment overrides.  */
-  if (i.tm.opcode_modifier.isstring && i.mem_operands != 0)
+  if (i.tm.opcode_modifier.isstring >= IS_STRING_ES_OP0)
     {
+      gas_assert (i.mem_operands);
       if (!check_string ())
 	return;
       i.disp_operands = 0;
@@ -6168,35 +6168,24 @@ check_reverse:
 static int
 check_string (void)
 {
-  unsigned int mem_op = i.flags[0] & Operand_Mem ? 0 : 1;
+  unsigned int es_op = i.tm.opcode_modifier.isstring - IS_STRING_ES_OP0;
+  unsigned int op = i.tm.operand_types[0].bitfield.baseindex ? es_op : 0;
 
-  if (i.tm.operand_types[mem_op].bitfield.esseg)
+  if (i.seg[op] != NULL && i.seg[op] != &es)
     {
-      if (i.seg[0] != NULL && i.seg[0] != &es)
-	{
-	  as_bad (_("`%s' operand %d must use `%ses' segment"),
-		  i.tm.name,
-		  intel_syntax ? i.tm.operands - mem_op : mem_op + 1,
-		  register_prefix);
-	  return 0;
-	}
-      /* There's only ever one segment override allowed per instruction.
-	 This instruction possibly has a legal segment override on the
-	 second operand, so copy the segment to where non-string
-	 instructions store it, allowing common code.  */
-      i.seg[0] = i.seg[1];
+      as_bad (_("`%s' operand %u must use `%ses' segment"),
+	      i.tm.name,
+	      intel_syntax ? i.tm.operands - es_op : es_op + 1,
+	      register_prefix);
+      return 0;
     }
-  else if (i.tm.operand_types[mem_op + 1].bitfield.esseg)
-    {
-      if (i.seg[1] != NULL && i.seg[1] != &es)
-	{
-	  as_bad (_("`%s' operand %d must use `%ses' segment"),
-		  i.tm.name,
-		  intel_syntax ? i.tm.operands - mem_op - 1 : mem_op + 2,
-		  register_prefix);
-	  return 0;
-	}
-    }
+
+  /* There's only ever one segment override allowed per instruction.
+     This instruction possibly has a legal segment override on the
+     second operand, so copy the segment to where non-string
+     instructions store it, allowing common code.  */
+  i.seg[op] = i.seg[1];
+
   return 1;
 }
 
@@ -9780,16 +9769,16 @@ i386_index_check (const char *operand_string)
 
       if (current_templates->start->opcode_modifier.repprefixok)
 	{
-	  i386_operand_type type = current_templates->end[-1].operand_types[0];
+	  int es_op = current_templates->end[-1].opcode_modifier.isstring
+		      - IS_STRING_ES_OP0;
+	  int op = 0;
 
-	  if (!type.bitfield.baseindex
+	  if (!current_templates->end[-1].operand_types[0].bitfield.baseindex
 	      || ((!i.mem_operands != !intel_syntax)
 		  && current_templates->end[-1].operand_types[1]
 		     .bitfield.baseindex))
-	    type = current_templates->end[-1].operand_types[1];
-	  expected_reg = hash_find (reg_hash,
-				    di_si[addr_mode][type.bitfield.esseg]);
-
+	    op = 1;
+	  expected_reg = hash_find (reg_hash, di_si[addr_mode][op == es_op]);
 	}
       else
 	expected_reg = hash_find (reg_hash, bx[addr_mode]);

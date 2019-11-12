@@ -451,8 +451,6 @@ static initializer operand_type_init[] =
     "Class=RegMask" },
   { "OPERAND_TYPE_REGBND",
     "Class=RegBND" },
-  { "OPERAND_TYPE_ESSEG",
-    "EsSeg" },
   { "OPERAND_TYPE_ACC8",
     "Instance=Accum|Byte" },
   { "OPERAND_TYPE_ACC16",
@@ -725,7 +723,6 @@ static bitfield operand_types[] =
   BITFIELD (Disp32S),
   BITFIELD (Disp64),
   BITFIELD (JumpAbsolute),
-  BITFIELD (EsSeg),
   BITFIELD (Byte),
   BITFIELD (Word),
   BITFIELD (Dword),
@@ -1747,7 +1744,7 @@ main (int argc, char **argv)
   static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH + INSTANCE_WIDTH
 		 == OTNum);
 
-  c = OTNumOfBits - OTMax - 1;
+  c = OTNumOfBits - OTNum;
   if (c)
     fail (_("%d unused bits in i386_operand_type.\n"), c);
 #endif

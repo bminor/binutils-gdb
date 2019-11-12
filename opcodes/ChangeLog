@@ -1,5 +1,22 @@
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_ESSEG
+	entry.
+	(operand_types): Remove EsSeg entry.
+	(main): Replace stale use of OTMax.
+	* i386-opc.h (IS_STRING_ES_OP0, IS_STRING_ES_OP1): Define.
+	(struct i386_opcode_modifier): Expand isstring field to 2 bits.
+	(EsSeg): Delete.
+	(OTUnused): Comment out.
+	(union i386_operand_type): Remove esseg field.
+	* i386-opc.tbl (IsStringEsOp0, IsStringEsOp1): Define.
+	(cmps, scmp, scas, ssca, cmpsd): Add IsStringEsOp0.
+	(ins, movs, smov, movsd): Add IsStringEsOpOp1.
+	(stos, ssto): Add IsStringEsOp0/IsStringEsOpOp1.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_instances): Add RegB entry.
 	* i386-opc.h (enum operand_instance): Add RegB.
 	* i386-opc.tbl (RegC, RegD, RegB): Define.

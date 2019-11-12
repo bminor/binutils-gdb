@@ -1,5 +1,13 @@
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (type_names): Remove OPERAND_TYPE_ESSEG
+	entry.
+	(md_assemble): Adjust isstring field use. Add assertion.
+	(check_string): Mostly re-write.
+	(i386_index_check): Adjust isstring field use and related code.
+
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_immext): Remove SSE3, SVME, and
 	MWAITX special case logic.
 	(process_suffix): Replace immext field uses by instance ones.
