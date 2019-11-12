@@ -627,14 +627,14 @@ tui_reset (void)
 #endif
 
 void
-tui_show_source (const char *fullname, int line)
+tui_show_source ()
 {
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
   /* Make sure that the source window is displayed.  */
   tui_add_win_to_layout (SRC_WIN);
 
-  tui_update_source_windows_with_line (cursal.symtab, line);
+  tui_update_source_windows_with_line (cursal.symtab, cursal.line);
   tui_update_locator_fullname (cursal.symtab);
 }
 

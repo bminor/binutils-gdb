@@ -1,5 +1,11 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (tui_show_source): Remove parameters.
+	* tui/tui.c (tui_show_source): Remove parameters.
+	* tui/tui-out.c (tui_ui_out::do_field_string): Update.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_show_source): Update.
 	* tui/tui-winsource.c (tui_display_main): Update.
 	* tui/tui-stack.h (tui_update_locator_fullname): Change parameter

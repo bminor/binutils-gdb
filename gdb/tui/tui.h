@@ -83,6 +83,6 @@ extern void tui_set_key_mode (enum tui_key_mode mode);
 
 extern int tui_active;
 
-extern void tui_show_source (const char *fullname, int line);
+extern void tui_show_source ();
 
 #endif /* TUI_TUI_H */
