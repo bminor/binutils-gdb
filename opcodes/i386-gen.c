@@ -422,9 +422,9 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_DISP64",
     "Disp64" },
   { "OPERAND_TYPE_INOUTPORTREG",
-    "InOutPortReg" },
+    "Instance=RegD|Word" },
   { "OPERAND_TYPE_SHIFTCOUNT",
-    "ShiftCount" },
+    "Instance=RegC|Byte" },
   { "OPERAND_TYPE_CONTROL",
     "Class=RegCR" },
   { "OPERAND_TYPE_TEST",
@@ -434,7 +434,7 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_FLOATREG",
     "Class=Reg|Tbyte" },
   { "OPERAND_TYPE_FLOATACC",
-    "Acc|Tbyte" },
+    "Instance=Accum|Tbyte" },
   { "OPERAND_TYPE_SREG",
     "Class=SReg" },
   { "OPERAND_TYPE_JUMPABSOLUTE",
@@ -454,13 +454,13 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_ESSEG",
     "EsSeg" },
   { "OPERAND_TYPE_ACC8",
-    "Acc|Byte" },
+    "Instance=Accum|Byte" },
   { "OPERAND_TYPE_ACC16",
-    "Acc|Word" },
+    "Instance=Accum|Word" },
   { "OPERAND_TYPE_ACC32",
-    "Acc|Dword" },
+    "Instance=Accum|Dword" },
   { "OPERAND_TYPE_ACC64",
-    "Acc|Qword" },
+    "Instance=Accum|Qword" },
   { "OPERAND_TYPE_DISP16_32",
     "Disp16|Disp32" },
   { "OPERAND_TYPE_ANYDISP",
@@ -695,6 +695,19 @@ static const struct {
 
 #undef CLASS
 
+#define INSTANCE(n) #n, n
+
+static const struct {
+  const char *name;
+  enum operand_instance value;
+} operand_instances[] = {
+    INSTANCE (Accum),
+    INSTANCE (RegC),
+    INSTANCE (RegD),
+};
+
+#undef INSTANCE
+
 static bitfield operand_types[] =
 {
   BITFIELD (Imm1),
@@ -710,9 +723,6 @@ static bitfield operand_types[] =
   BITFIELD (Disp32),
   BITFIELD (Disp32S),
   BITFIELD (Disp64),
-  BITFIELD (InOutPortReg),
-  BITFIELD (ShiftCount),
-  BITFIELD (Acc),
   BITFIELD (JumpAbsolute),
   BITFIELD (EsSeg),
   BITFIELD (Byte),
@@ -1147,20 +1157,21 @@ enum stage {
 
 static void
 output_operand_type (FILE *table, enum operand_class class,
+		     enum operand_instance instance,
 		     const bitfield *types, unsigned int size,
 		     enum stage stage, const char *indent)
 {
   unsigned int i;
 
-  fprintf (table, "{ { %d, ", class);
+  fprintf (table, "{ { %d, %d, ", class, instance);
 
   for (i = 0; i < size - 1; i++)
     {
-      if (((i + 2) % 20) != 0)
+      if (((i + 3) % 20) != 0)
 	fprintf (table, "%d, ", types[i].value);
       else
 	fprintf (table, "%d,", types[i].value);
-      if (((i + 2) % 20) == 0)
+      if (((i + 3) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
 	  if (stage == stage_macros)
@@ -1179,6 +1190,7 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 {
   char *str, *next, *last;
   enum operand_class class = ClassNone;
+  enum operand_instance instance = InstanceNone;
   bitfield types [ARRAY_SIZE (operand_types)];
 
   /* Copy the default operand type.  */
@@ -1206,6 +1218,17 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 			break;
 		      }
 		}
+
+	      if (str && !strncmp(str, "Instance=", 9))
+		{
+		  for (i = 0; i < ARRAY_SIZE(operand_instances); ++i)
+		    if (!strcmp(str + 9, operand_instances[i].name))
+		      {
+			instance = operand_instances[i].value;
+			str = NULL;
+			break;
+		      }
+		}
 	    }
 	  if (str)
 	    {
@@ -1226,8 +1249,8 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 	    set_bitfield("Disp32S", types, 1, ARRAY_SIZE (types), lineno);
 	}
     }
-  output_operand_type (table, class, types, ARRAY_SIZE (types), stage,
-		       indent);
+  output_operand_type (table, class, instance, types, ARRAY_SIZE (types),
+		       stage, indent);
 }
 
 static void
@@ -1717,9 +1740,11 @@ main (int argc, char **argv)
 
   /* Check the unused bitfield in i386_operand_type.  */
 #ifdef OTUnused
-  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH == OTNum + 1);
+  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH + INSTANCE_WIDTH
+		 == OTNum + 1);
 #else
-  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH == OTNum);
+  static_assert (ARRAY_SIZE (operand_types) + CLASS_WIDTH + INSTANCE_WIDTH
+		 == OTNum);
 
   c = OTNumOfBits - OTMax - 1;
   if (c)

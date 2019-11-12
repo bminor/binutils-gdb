@@ -27,6 +27,10 @@
 #define Reg32 Class=Reg|Dword
 #define Reg64 Class=Reg|Qword
 
+#define Acc          Instance=Accum
+#define ShiftCount   Instance=RegC|Byte
+#define InOutPortReg Instance=RegD|Word
+
 #define FloatAcc Acc|Tbyte
 #define FloatReg Class=Reg|Tbyte
 

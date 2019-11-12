@@ -19,10 +19,10 @@
 // 02110-1301, USA.
 
 // Make %st first as we test for it.
-st, Class=Reg|Acc|Tbyte, 0, 0, 11, 33
+st, Class=Reg|Instance=Accum|Tbyte, 0, 0, 11, 33
 // 8 bit regs
-al, Class=Reg|Acc|Byte, 0, 0, Dw2Inval, Dw2Inval
-cl, Class=Reg|Byte|ShiftCount, 0, 1, Dw2Inval, Dw2Inval
+al, Class=Reg|Instance=Accum|Byte, 0, 0, Dw2Inval, Dw2Inval
+cl, Class=Reg|Instance=RegC|Byte, 0, 1, Dw2Inval, Dw2Inval
 dl, Class=Reg|Byte, 0, 2, Dw2Inval, Dw2Inval
 bl, Class=Reg|Byte, 0, 3, Dw2Inval, Dw2Inval
 ah, Class=Reg|Byte, 0, 4, Dw2Inval, Dw2Inval
@@ -46,9 +46,9 @@ r13b, Class=Reg|Byte, RegRex|RegRex64, 5, Dw2Inval, Dw2Inval
 r14b, Class=Reg|Byte, RegRex|RegRex64, 6, Dw2Inval, Dw2Inval
 r15b, Class=Reg|Byte, RegRex|RegRex64, 7, Dw2Inval, Dw2Inval
 // 16 bit regs
-ax, Class=Reg|Acc|Word, 0, 0, Dw2Inval, Dw2Inval
+ax, Class=Reg|Instance=Accum|Word, 0, 0, Dw2Inval, Dw2Inval
 cx, Class=Reg|Word, 0, 1, Dw2Inval, Dw2Inval
-dx, Class=Reg|Word|InOutPortReg, 0, 2, Dw2Inval, Dw2Inval
+dx, Class=Reg|Instance=RegD|Word, 0, 2, Dw2Inval, Dw2Inval
 bx, Class=Reg|Word|BaseIndex, 0, 3, Dw2Inval, Dw2Inval
 sp, Class=Reg|Word, 0, 4, Dw2Inval, Dw2Inval
 bp, Class=Reg|Word|BaseIndex, 0, 5, Dw2Inval, Dw2Inval
@@ -63,7 +63,7 @@ r13w, Class=Reg|Word, RegRex, 5, Dw2Inval, Dw2Inval
 r14w, Class=Reg|Word, RegRex, 6, Dw2Inval, Dw2Inval
 r15w, Class=Reg|Word, RegRex, 7, Dw2Inval, Dw2Inval
 // 32 bit regs
-eax, Class=Reg|Acc|Dword|BaseIndex, 0, 0, 0, Dw2Inval
+eax, Class=Reg|Instance=Accum|Dword|BaseIndex, 0, 0, 0, Dw2Inval
 ecx, Class=Reg|Dword|BaseIndex, 0, 1, 1, Dw2Inval
 edx, Class=Reg|Dword|BaseIndex, 0, 2, 2, Dw2Inval
 ebx, Class=Reg|Dword|BaseIndex, 0, 3, 3, Dw2Inval
@@ -79,7 +79,7 @@ r12d, Class=Reg|Dword|BaseIndex, RegRex, 4, Dw2Inval, Dw2Inval
 r13d, Class=Reg|Dword|BaseIndex, RegRex, 5, Dw2Inval, Dw2Inval
 r14d, Class=Reg|Dword|BaseIndex, RegRex, 6, Dw2Inval, Dw2Inval
 r15d, Class=Reg|Dword|BaseIndex, RegRex, 7, Dw2Inval, Dw2Inval
-rax, Class=Reg|Acc|Qword|BaseIndex, 0, 0, Dw2Inval, 0
+rax, Class=Reg|Instance=Accum|Qword|BaseIndex, 0, 0, Dw2Inval, 0
 rcx, Class=Reg|Qword|BaseIndex, 0, 1, Dw2Inval, 2
 rdx, Class=Reg|Qword|BaseIndex, 0, 2, Dw2Inval, 1
 rbx, Class=Reg|Qword|BaseIndex, 0, 3, Dw2Inval, 3
@@ -180,7 +180,7 @@ mm4, Class=RegMMX, 0, 4, 33, 45
 mm5, Class=RegMMX, 0, 5, 34, 46
 mm6, Class=RegMMX, 0, 6, 35, 47
 mm7, Class=RegMMX, 0, 7, 36, 48
-xmm0, Class=RegSIMD|Acc|Xmmword, 0, 0, 21, 17
+xmm0, Class=RegSIMD|Instance=Accum|Xmmword, 0, 0, 21, 17
 xmm1, Class=RegSIMD|Xmmword, 0, 1, 22, 18
 xmm2, Class=RegSIMD|Xmmword, 0, 2, 23, 19
 xmm3, Class=RegSIMD|Xmmword, 0, 3, 24, 20
@@ -292,7 +292,7 @@ eip, Dword, RegRex64, RegIP, 8, Dw2Inval
 riz, Qword|BaseIndex, RegRex64, RegIZ, Dw2Inval, Dw2Inval
 eiz, Dword|BaseIndex, 0, RegIZ, Dw2Inval, Dw2Inval
 // fp regs.
-st(0), Class=Reg|Acc|Tbyte, 0, 0, 11, 33
+st(0), Class=Reg|Instance=Accum|Tbyte, 0, 0, 11, 33
 st(1), Class=Reg|Tbyte, 0, 1, 12, 34
 st(2), Class=Reg|Tbyte, 0, 2, 13, 35
 st(3), Class=Reg|Tbyte, 0, 3, 14, 36

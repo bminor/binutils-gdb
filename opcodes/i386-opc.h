@@ -719,12 +719,23 @@ enum operand_class
   RegBND, /* Bound register */
 };
 
+/* Special operand instances.  */
+
+#define INSTANCE_WIDTH 3
+enum operand_instance
+{
+  InstanceNone,
+  Accum, /* Accumulator %al/%ax/%eax/%rax/%st(0)/%xmm0 */
+  RegC,  /* Register to hold shift count = %cl */
+  RegD,  /* Register to hold in/out port addr = %dx */
+};
+
 /* Position of operand_type bits.  */
 
 enum
 {
-  /* Class */
-  Class = CLASS_WIDTH - 1,
+  /* Class and Instance */
+  ClassInstance = CLASS_WIDTH + INSTANCE_WIDTH - 1,
   /* 1 bit immediate */
   Imm1,
   /* 8 bit immediate */
@@ -756,14 +767,8 @@ enum
   Disp32S,
   /* 64 bit displacement */
   Disp64,
-  /* Accumulator %al/%ax/%eax/%rax/%st(0)/%xmm0 */
-  Acc,
   /* Register which can be used for base or index in memory operand.  */
   BaseIndex,
-  /* Register to hold in/out port addr = dx */
-  InOutPortReg,
-  /* Register to hold shift count = cl */
-  ShiftCount,
   /* Absolute address for jump.  */
   JumpAbsolute,
   /* String insn operand with fixed es segment */
@@ -809,6 +814,7 @@ typedef union i386_operand_type
   struct
     {
       unsigned int class:CLASS_WIDTH;
+      unsigned int instance:INSTANCE_WIDTH;
       unsigned int imm1:1;
       unsigned int imm8:1;
       unsigned int imm8s:1;
@@ -821,10 +827,7 @@ typedef union i386_operand_type
       unsigned int disp32:1;
       unsigned int disp32s:1;
       unsigned int disp64:1;
-      unsigned int acc:1;
       unsigned int baseindex:1;
-      unsigned int inoutportreg:1;
-      unsigned int shiftcount:1;
       unsigned int jumpabsolute:1;
       unsigned int esseg:1;
       unsigned int byte:1;

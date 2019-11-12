@@ -1,3 +1,24 @@
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_type_init): Adjust
+	OPERAND_TYPE_INOUTPORTREG, OPERAND_TYPE_SHIFTCOUNT,
+	OPERAND_TYPE_FLOATACC, OPERAND_TYPE_ACC8, OPERAND_TYPE_ACC16,
+	OPERAND_TYPE_ACC32, and OPERAND_TYPE_ACC64 entries.
+	(operand_instances): New.
+	(operand_types): Drop InOutPortReg, ShiftCount, and Acc entries.
+	(output_operand_type): New parameter "instance". Process it.
+	(process_i386_operand_type): New local variable "instance".
+	(main): Adjust static assertions.
+	* i386-opc.h (INSTANCE_WIDTH): Define.
+	(enum operand_instance): New.
+	(Acc, InOutPortReg, ShiftCount): Replace by ClassInstance.
+	(union i386_operand_type): Replace acc, inoutportreg, and
+	shiftcount by instance.
+	* i386-opc.tbl (Acc, InOutPortReg, ShiftCount): Define.
+	* i386-reg.tbl (st, al, cl, ax, dx, eax, rax, xmm0, st(0)):
+	Add Instance=.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2019-11-11  Jan Beulich  <jbeulich@suse.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Switch SVE2's

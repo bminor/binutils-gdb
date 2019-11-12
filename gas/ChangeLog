@@ -1,3 +1,14 @@
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (operand_type_set, operand_type_and,
+	operand_type_and_not, operand_type_or, operand_type_xor): Handle
+	"instance" field specially.
+	(operand_size_match, md_assemble, match_template, process_suffix,
+	check_byte_reg, check_long_reg, check_qword_reg, check_word_reg,
+	process_operands, build_modrm_byte): Use "instance" instead of
+	"acc" / "inoutportreg" / "shiftcount" fields.
+	(optimize_imm): Adjust comment.
+
 2019-11-11  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/aarch64/illegal-sve2.s: Add smaxp/sminp cases
