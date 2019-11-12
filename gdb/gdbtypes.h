@@ -2105,6 +2105,7 @@ extern const struct rank BASE_CONVERSION_BADNESS;
 /* * Badness of converting from non-reference to reference.  Subrank
    is the type of reference conversion being done.  */
 extern const struct rank REFERENCE_CONVERSION_BADNESS;
+extern const struct rank REFERENCE_SEE_THROUGH_BADNESS;
 /* * Conversion to rvalue reference.  */
 #define REFERENCE_CONVERSION_RVALUE 1
 /* * Conversion to const lvalue reference.  */

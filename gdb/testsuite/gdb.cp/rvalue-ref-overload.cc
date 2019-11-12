@@ -35,6 +35,8 @@ public:
 
   int overload1arg (foo_lval_ref);
   int overload1arg (foo_rval_ref);
+  int overloadConst (const foo &);
+  int overloadConst (const foo &&);
 };
 
 void
@@ -71,6 +73,11 @@ main ()
   // result = 1 + 2 + 3 + 3 = 9
   int result = f (i) + f (ci) + f (0) + f (std::move (i));
 
+  /* Overload resolution below requires both a CV-conversion
+     and reference conversion.  */
+  int test_const // = 3
+    = foo_rr_instance1.overloadConst (arg);
+
   marker1 (); // marker1-returns-here
   return result;
 }
@@ -84,3 +91,5 @@ foo::~foo ()                       {}
 
 int foo::overload1arg (foo_lval_ref arg)           { return 1; }
 int foo::overload1arg (foo_rval_ref arg)           { return 2; }
+int foo::overloadConst (const foo &arg)            { return 3; }
+int foo::overloadConst (const foo &&arg)           { return 4; }
