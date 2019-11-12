@@ -64,9 +64,9 @@ r14w, Class=Reg|Word, RegRex, 6, Dw2Inval, Dw2Inval
 r15w, Class=Reg|Word, RegRex, 7, Dw2Inval, Dw2Inval
 // 32 bit regs
 eax, Class=Reg|Instance=Accum|Dword|BaseIndex, 0, 0, 0, Dw2Inval
-ecx, Class=Reg|Dword|BaseIndex, 0, 1, 1, Dw2Inval
-edx, Class=Reg|Dword|BaseIndex, 0, 2, 2, Dw2Inval
-ebx, Class=Reg|Dword|BaseIndex, 0, 3, 3, Dw2Inval
+ecx, Class=Reg|Instance=RegC|Dword|BaseIndex, 0, 1, 1, Dw2Inval
+edx, Class=Reg|Instance=RegD|Dword|BaseIndex, 0, 2, 2, Dw2Inval
+ebx, Class=Reg|Instance=RegB|Dword|BaseIndex, 0, 3, 3, Dw2Inval
 esp, Class=Reg|Dword, 0, 4, 4, Dw2Inval
 ebp, Class=Reg|Dword|BaseIndex, 0, 5, 5, Dw2Inval
 esi, Class=Reg|Dword|BaseIndex, 0, 6, 6, Dw2Inval
@@ -80,9 +80,9 @@ r13d, Class=Reg|Dword|BaseIndex, RegRex, 5, Dw2Inval, Dw2Inval
 r14d, Class=Reg|Dword|BaseIndex, RegRex, 6, Dw2Inval, Dw2Inval
 r15d, Class=Reg|Dword|BaseIndex, RegRex, 7, Dw2Inval, Dw2Inval
 rax, Class=Reg|Instance=Accum|Qword|BaseIndex, 0, 0, Dw2Inval, 0
-rcx, Class=Reg|Qword|BaseIndex, 0, 1, Dw2Inval, 2
-rdx, Class=Reg|Qword|BaseIndex, 0, 2, Dw2Inval, 1
-rbx, Class=Reg|Qword|BaseIndex, 0, 3, Dw2Inval, 3
+rcx, Class=Reg|Instance=RegC|Qword|BaseIndex, 0, 1, Dw2Inval, 2
+rdx, Class=Reg|Instance=RegD|Qword|BaseIndex, 0, 2, Dw2Inval, 1
+rbx, Class=Reg|Instance=RegB|Qword|BaseIndex, 0, 3, Dw2Inval, 3
 rsp, Class=Reg|Qword, 0, 4, Dw2Inval, 7
 rbp, Class=Reg|Qword|BaseIndex, 0, 5, Dw2Inval, 6
 rsi, Class=Reg|Qword|BaseIndex, 0, 6, Dw2Inval, 4

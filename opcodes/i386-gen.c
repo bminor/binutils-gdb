@@ -704,6 +704,7 @@ static const struct {
     INSTANCE (Accum),
     INSTANCE (RegC),
     INSTANCE (RegD),
+    INSTANCE (RegB),
 };
 
 #undef INSTANCE

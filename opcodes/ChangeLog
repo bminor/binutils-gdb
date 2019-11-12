@@ -1,5 +1,19 @@
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_instances): Add RegB entry.
+	* i386-opc.h (enum operand_instance): Add RegB.
+	* i386-opc.tbl (RegC, RegD, RegB): Define.
+	(Acc, ShiftCount, InOutPortReg): Adjust definitions.
+	(monitor, mwait, invlpga, skinit, vmload, vmrun, vmsave, clzero,
+	monitorx, mwaitx): Drop ImmExt and convert encodings
+	accordingly.
+	* i386-reg.tbl (ecx, rcx): Add Instance=RegC.
+	(edx, rdx): Add Instance=RegD.
+	(ebx, rbx): Add Instance=RegB.
+	* i386-tbl.h: Re-generate.
+
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_init): Adjust
 	OPERAND_TYPE_INOUTPORTREG, OPERAND_TYPE_SHIFTCOUNT,
 	OPERAND_TYPE_FLOATACC, OPERAND_TYPE_ACC8, OPERAND_TYPE_ACC16,

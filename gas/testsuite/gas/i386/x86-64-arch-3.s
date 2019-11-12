@@ -10,6 +10,8 @@
 	rdseed    %eax
 #CLZERO
 	clzero
+	clzero  %rax
+	clzero  %eax
 #SHA
 	sha1nexte (%rax), %xmm8
 #XSAVEC

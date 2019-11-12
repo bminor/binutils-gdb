@@ -726,8 +726,9 @@ enum operand_instance
 {
   InstanceNone,
   Accum, /* Accumulator %al/%ax/%eax/%rax/%st(0)/%xmm0 */
-  RegC,  /* Register to hold shift count = %cl */
-  RegD,  /* Register to hold in/out port addr = %dx */
+  RegC,  /* %cl / %cx / %ecx / %rcx, e.g. register to hold shift count */
+  RegD,  /* %dl / %dx / %edx / %rdx, e.g. register to hold I/O port addr */
+  RegB,  /* %bl / %bx / %ebx / %rbx */
 };
 
 /* Position of operand_type bits.  */

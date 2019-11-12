@@ -3850,52 +3850,6 @@ process_immext (void)
 {
   expressionS *exp;
 
-  if ((i.tm.cpu_flags.bitfield.cpusse3 || i.tm.cpu_flags.bitfield.cpusvme)
-      && i.operands > 0)
-    {
-      /* MONITOR/MWAIT as well as SVME instructions have fixed operands
-	 with an opcode suffix which is coded in the same place as an
-	 8-bit immediate field would be.
-	 Here we check those operands and remove them afterwards.  */
-      unsigned int x;
-
-      for (x = 0; x < i.operands; x++)
-	if (register_number (i.op[x].regs) != x)
-	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
-		  register_prefix, i.op[x].regs->reg_name, x + 1,
-		  i.tm.name);
-
-      i.operands = 0;
-    }
-
-  if (i.tm.cpu_flags.bitfield.cpumwaitx && i.operands > 0)
-    {
-      /* MONITORX/MWAITX instructions have fixed operands with an opcode
-	 suffix which is coded in the same place as an 8-bit immediate
-	 field would be.
-	 Here we check those operands and remove them afterwards.  */
-      unsigned int x;
-
-      if (i.operands != 3)
-	abort();
-
-      for (x = 0; x < 2; x++)
-	if (register_number (i.op[x].regs) != x)
-	  goto bad_register_operand;
-
-      /* Check for third operand for mwaitx/monitorx insn.  */
-      if (register_number (i.op[x].regs)
-	  != (x + (i.tm.extension_opcode == 0xfb)))
-	{
-bad_register_operand:
-	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
-		  register_prefix, i.op[x].regs->reg_name, x+1,
-		  i.tm.name);
-	}
-
-      i.operands = 0;
-    }
-
   /* These AMD 3DNow! and SSE2 instructions have an opcode suffix
      which is coded in the same place as an 8-bit immediate field
      would be.  Here we fake an 8-bit immediate operand from the
@@ -6473,7 +6427,7 @@ process_suffix (void)
       if (i.reg_operands > 0
 	  && i.types[0].bitfield.class == Reg
 	  && i.tm.opcode_modifier.addrprefixopreg
-	  && (i.tm.opcode_modifier.immext
+	  && (i.tm.operand_types[0].bitfield.instance == Accum
 	      || i.operands == 1))
 	{
 	  /* The address size override prefix changes the size of the
@@ -6523,7 +6477,7 @@ process_suffix (void)
   if (i.reg_operands != 0
       && i.operands > 1
       && i.tm.opcode_modifier.addrprefixopreg
-      && !i.tm.opcode_modifier.immext)
+      && i.tm.operand_types[0].bitfield.instance != Accum)
     {
       /* Check invalid register operand when the address size override
 	 prefix changes the size of register operands.  */

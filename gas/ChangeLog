@@ -1,5 +1,21 @@
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_immext): Remove SSE3, SVME, and
+	MWAITX special case logic.
+	(process_suffix): Replace immext field uses by instance ones.
+	* testsuite/gas/i386/arch-13.s,
+	testsuite/gas/i386/x86-64-arch-3.s: Add CLZERO with operand
+	cases.
+	* testsuite/gas/i386/svme.s: Add 16-bit operand cases.
+	* testsuite/gas/i386/x86-64-specific-reg.s: Drop FIXME comments.
+	* testsuite/gas/i386/arch-13.d,
+	testsuite/gas/i386/mwaitx-reg.l, testsuite/gas/i386/svme.d,
+	testsuite/gas/i386/x86-64-arch-3.d,
+	testsuite/gas/i386/x86-64-mwaitx-reg.l,
+	testsuite/gas/i386/x86-64-specific-reg.l: Adjust expectations.
+
+2019-11-12  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (operand_type_set, operand_type_and,
 	operand_type_and_not, operand_type_or, operand_type_xor): Handle
 	"instance" field specially.

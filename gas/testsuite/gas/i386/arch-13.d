@@ -12,7 +12,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 f6 ca       	adcx   %edx,%ecx
 [ 	]*[a-f0-9]+:	f3 0f 38 f6 ca       	adox   %edx,%ecx
 [ 	]*[a-f0-9]+:	0f c7 f8             	rdseed %eax
-[ 	]*[a-f0-9]+:	0f 01 fc             	clzero 
+[ 	]*[a-f0-9]+:	0f 01 fc             	clzero[ 	]*
+[ 	]*[a-f0-9]+:	0f 01 fc             	clzero[ 	]*
+[ 	]*[a-f0-9]+:	67 0f 01 fc          	addr16 clzero[ 	]*
 [ 	]*[a-f0-9]+:	0f c7 21             	xsavec \(%ecx\)
 [ 	]*[a-f0-9]+:	0f c7 29             	xsaves \(%ecx\)
 [ 	]*[a-f0-9]+:	66 0f ae 39          	clflushopt \(%ecx\)

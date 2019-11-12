@@ -11,6 +11,8 @@
 	rdseed    %eax
 #CLZERO
 	clzero
+	clzero  %eax
+	clzero  %ax
 #XSAVEC
 	xsavec  (%ecx)
 #XSAVES
