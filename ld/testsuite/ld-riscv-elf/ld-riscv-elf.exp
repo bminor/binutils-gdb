@@ -20,6 +20,7 @@
 #
 
 if [istarget "riscv*-*-*"] {
+    run_dump_test "call-relax"
     run_dump_test "c-lui"
     run_dump_test "c-lui-2"
     run_dump_test "disas-jalr"

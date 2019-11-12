@@ -1,3 +1,10 @@
+2019-11-12  Jim Wilson  <jimw@sifive.com>
+
+	PR 25181
+	* elfnn-riscv.c (_bfd_riscv_relax_call): Always add max_alignment to
+	foff.  If sym_sec->output_section and sec->output_section are the same
+	and not *ABS* then set max_alignment to that section's alignment.
+
 2019-11-07  Alan Modra  <amodra@gmail.com>
 
 	* cpu-cr16c.c: Delete.

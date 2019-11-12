@@ -1,3 +1,13 @@
+2019-11-12  Jim Wilson  <jimw@sifive.com>
+
+	PR 25181
+	* testsuite/ld-riscv-elf/call-relax-0.s: New file.
+	* testsuite/ld-riscv-elf/call-relax-1.s: New file.
+	* testsuite/ld-riscv-elf/call-relax-2.s: New file.
+	* testsuite/ld-riscv-elf/call-relax-3.s: New file.
+	* testsuite/ld-riscv-elf/call-relax.d: New test.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run call-relax test.
+
 2019-11-08  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/aarch64elf.sh: Revert 2019-11-05 change.

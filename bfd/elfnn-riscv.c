@@ -3494,9 +3494,16 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   int rd, r_type, len = 4, rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
   /* If the call crosses section boundaries, an alignment directive could
-     cause the PC-relative offset to later increase.  */
-  if (VALID_UJTYPE_IMM (foff) && sym_sec->output_section != sec->output_section)
-    foff += (foff < 0 ? -max_alignment : max_alignment);
+     cause the PC-relative offset to later increase, so we need to add in the
+     max alignment of any section inclusive from the call to the target.
+     Otherwise, we only need to use the alignment of the current section.  */
+  if (VALID_UJTYPE_IMM (foff))
+    {
+      if (sym_sec->output_section == sec->output_section
+	  && sym_sec->output_section != bfd_abs_section_ptr)
+	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+      foff += (foff < 0 ? -max_alignment : max_alignment);
+    }
 
   /* See if this function call can be shortened.  */
   if (!VALID_UJTYPE_IMM (foff) && !(!bfd_link_pic (link_info) && near_zero))
