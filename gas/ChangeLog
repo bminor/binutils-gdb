@@ -1,3 +1,11 @@
+2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (s_arm_fpu): Clear selected_cpu fpu bits.
+	(fpu_any): Remove OBJ_ELF guards.
+	* testsuite/gas/arm/fpu-rst.s: New.
+	* testsuite/gas/arm/fpu-rst.d: New.
+	* testsuite/gas/arm/fpu-rst.l: New.
+
 2019-11-12  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (type_names): Remove OPERAND_TYPE_ESSEG

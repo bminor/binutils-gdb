@@ -281,9 +281,7 @@ static const arm_feature_set arm_ext_i8mm =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
-#ifdef OBJ_ELF
 static const arm_feature_set fpu_any = FPU_ANY;
-#endif
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
@@ -32775,6 +32773,7 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
     if (streq (opt->name, name))
       {
 	selected_fpu = opt->value;
+	ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, fpu_any);
 #ifndef CPU_DEFAULT
 	if (no_cpu_selected ())
 	  ARM_MERGE_FEATURE_SETS (cpu_variant, arm_arch_any, selected_fpu);
