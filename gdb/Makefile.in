@@ -986,6 +986,7 @@ COMMON_SFILES = \
 	gdbsupport/ptid.c \
 	gdbsupport/rsp-low.c \
 	gdbsupport/run-time-clock.c \
+	gdbsupport/safe-strerror.c \
 	gdbsupport/scoped_mmap.c \
 	gdbsupport/signals.c \
 	gdbsupport/signals-state-save-restore.c \
@@ -2344,9 +2345,7 @@ ALLDEPFILES = \
 	xtensa-linux-nat.c \
 	xtensa-linux-tdep.c \
 	xtensa-tdep.c \
-	xtensa-xtregs.c \
-	gdbsupport/mingw-strerror.c \
-	gdbsupport/posix-strerror.c
+	xtensa-xtregs.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.

@@ -1,5 +1,11 @@
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* Makefile.in: Add safe-strerror.c.
+	* configure: Regenerate.
+	* configure.ac: Don't source common.host.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* config.in: Regenerate.
 	* configure: Regenerate.
 

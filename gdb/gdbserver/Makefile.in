@@ -220,6 +220,7 @@ SFILES = \
 	$(srcdir)/gdbsupport/print-utils.c \
 	$(srcdir)/gdbsupport/ptid.c \
 	$(srcdir)/gdbsupport/rsp-low.c \
+	$(srcdir)/gdbsupport/safe-strerror.c \
 	$(srcdir)/gdbsupport/tdesc.c \
 	$(srcdir)/gdbsupport/xml-utils.c \
 	$(srcdir)/nat/aarch64-sve-linux-ptrace.c \
@@ -266,6 +267,7 @@ OBS = \
 	gdbsupport/print-utils.o \
 	gdbsupport/ptid.o \
 	gdbsupport/rsp-low.o \
+	gdbsupport/safe-strerror.o \
 	gdbsupport/signals.o \
 	gdbsupport/signals-state-save-restore.o \
 	gdbsupport/tdesc.o \

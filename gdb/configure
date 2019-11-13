@@ -6556,10 +6556,6 @@ fi
 
 . $srcdir/configure.host
 
-# Add in the common host objects.
-. $srcdir/gdbsupport/common.host
-gdb_host_obs="$gdb_host_obs $common_host_obs"
-
 # Accumulate some settings from configure.tgt over all enabled targets
 
 TARGET_OBS=

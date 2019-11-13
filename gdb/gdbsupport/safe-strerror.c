@@ -1,4 +1,4 @@
-/* Safe version of strerror for POSIX systems for GDB, the GNU debugger.
+/* Safe version of strerror for GDB, the GNU debugger.
 
    Copyright (C) 2006-2019 Free Software Foundation, Inc.
 

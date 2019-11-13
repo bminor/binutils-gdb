@@ -1,5 +1,15 @@
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* Makefile.in: Replace {posix,mingw}-strerror.c with safe-strerror.c.
+	* configure: Regenerate.
+	* configure.ac: Don't source common.host.
+	* gdbsupport/common.host: Remove.
+	* gdbsupport/mingw-strerror.c: Remove.
+	* gdbsupport/posix-strerror.c: Rename to...
+	* gdbsupport/safe-strerror.c: ...this.
+
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* maint.c (scoped_command_stats::print_time): Use localtime_r
 	instead of localtime (provided through gnulib if necessary).
 	* nat/linux-osdata.c (time_from_time_t): Use ctime_r instead
