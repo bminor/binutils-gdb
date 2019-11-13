@@ -1,3 +1,7 @@
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/list.exp: Check for source on initial listing.
+
 2019-12-11  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.xml/tdesc-arch.exp (set_arch): Add "trans_mode" parameter.

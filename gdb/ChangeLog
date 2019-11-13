@@ -1,5 +1,9 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_enable): Call tui_display_main.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.c (tui_get_begin_asm_address): Use
 	get_current_source_symtab_and_line, and main_name.
 

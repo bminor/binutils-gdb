@@ -513,6 +513,8 @@ tui_enable (void)
 
   if (deprecated_safe_get_selected_frame ())
     tui_show_frame_info (deprecated_safe_get_selected_frame ());
+  else
+    tui_display_main ();
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);

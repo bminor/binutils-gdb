@@ -28,7 +28,7 @@ if {![Term::enter_tui]} {
     unsupported "TUI not supported"
 }
 
-Term::check_contents "initial source listing" "No Source Available"
+Term::check_contents "initial source listing" "21 *return 0"
 
 Term::command "layout asm"
 Term::check_contents "asm window shows main" "$hex <main>"
