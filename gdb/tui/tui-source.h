@@ -56,9 +56,6 @@ struct tui_source_window : public tui_source_window_base
     do_erase_source_content (_("[ No Source Available ]"));
   }
 
-  void show_symtab_source (struct gdbarch *, struct symtab *,
-			   struct tui_line_or_address);
-
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
