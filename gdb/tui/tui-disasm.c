@@ -255,20 +255,6 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 }
 
 
-/* Function to display the disassembly window with disassembled code.  */
-void
-tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
-{
-  struct symtab *s = find_pc_line_symtab (start_addr);
-  struct tui_line_or_address val;
-
-  gdb_assert (TUI_DISASM_WIN != nullptr && TUI_DISASM_WIN->is_visible ());
-
-  val.loa = LOA_ADDRESS;
-  val.u.addr = start_addr;
-  TUI_DISASM_WIN->update_source_window (gdbarch, s, val);
-}
-
 void
 tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {

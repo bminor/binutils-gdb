@@ -213,15 +213,18 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   if (addr != 0)
     {
-      struct symtab_and_line sal;
+      struct symtab_and_line sal = find_pc_line (addr, 0);
       struct tui_line_or_address l;
       
       if (TUI_DISASM_WIN != nullptr)
-	tui_show_disassem (gdbarch, addr);
+	{
+	  l.loa = LOA_ADDRESS;
+	  l.u.addr = addr;
+	  TUI_DISASM_WIN->update_source_window (gdbarch, sal.symtab, l);
+	}
 
       if (TUI_SRC_WIN != nullptr)
 	{
-	  sal = find_pc_line (addr, 0);
 	  l.loa = LOA_LINE;
 	  l.u.line_no = sal.line;
 	  TUI_SRC_WIN->show_symtab_source (gdbarch, sal.symtab, l);
@@ -262,7 +265,9 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
       if (tui_current_layout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
-	  tui_show_disassem (gdbarch, pc);
+	  l.loa = LOA_ADDRESS;
+	  l.u.addr = pc;
+	  TUI_DISASM_WIN->update_source_window (gdbarch, s, l);
 	}
       break;
     }

@@ -1,5 +1,12 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_update_source_windows_with_addr): Call
+	update_source_window directly.
+	* tui/tui-disasm.h (tui_show_disassem): Don't declare.
+	* tui/tui-disasm.c (tui_show_disassem): Remove.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c
 	(tui_source_window_base::update_source_window_as_is): Don't switch focus.
 	* tui/tui-disasm.c (tui_show_disassem): Don't switch focus.
