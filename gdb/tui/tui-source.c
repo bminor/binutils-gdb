@@ -40,7 +40,7 @@
 #include "gdb_curses.h"
 
 /* Function to display source in the source window.  */
-enum tui_status
+bool
 tui_source_window::set_contents (struct gdbarch *arch,
 				 struct symtab *s, 
 				 struct tui_line_or_address line_or_addr)
@@ -48,80 +48,75 @@ tui_source_window::set_contents (struct gdbarch *arch,
   gdb_assert (line_or_addr.loa == LOA_LINE);
   int line_no = line_or_addr.u.line_no;
 
-  enum tui_status ret = TUI_FAILURE;
+  if (s == NULL)
+    return false;
 
-  if (s != NULL)
+  int line_width, nlines;
+
+  line_width = width - TUI_EXECINFO_SIZE - 1;
+  /* Take hilite (window border) into account, when
+     calculating the number of lines.  */
+  nlines = (line_no + (height - 2)) - line_no;
+
+  std::string srclines;
+  const std::vector<off_t> *offsets;
+  if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
+					&srclines)
+      || !g_source_cache.get_line_charpos (s, &offsets))
+    return false;
+
+  int cur_line_no, cur_line;
+  struct tui_locator_window *locator
+    = tui_locator_win_info_ptr ();
+  const char *s_filename = symtab_to_filename_for_display (s);
+
+  title = s_filename;
+
+  m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
+
+  cur_line = 0;
+  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+  start_line_or_addr.loa = LOA_LINE;
+  cur_line_no = start_line_or_addr.u.line_no = line_no;
+
+  int digits = 0;
+  if (compact_source)
     {
-      int line_width, nlines;
-
-      ret = TUI_SUCCESS;
-      line_width = width - TUI_EXECINFO_SIZE - 1;
-      /* Take hilite (window border) into account, when
-	 calculating the number of lines.  */
-      nlines = (line_no + (height - 2)) - line_no;
-
-      std::string srclines;
-      const std::vector<off_t> *offsets;
-      if (!g_source_cache.get_source_lines (s, line_no, line_no + nlines,
-					    &srclines)
-	  || !g_source_cache.get_line_charpos (s, &offsets))
-	ret = TUI_FAILURE;
-      else
-	{
-	  int cur_line_no, cur_line;
-	  struct tui_locator_window *locator
-	    = tui_locator_win_info_ptr ();
-	  const char *s_filename = symtab_to_filename_for_display (s);
-
-	  title = s_filename;
-
-	  m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
-
-	  cur_line = 0;
-	  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-	  start_line_or_addr.loa = LOA_LINE;
-	  cur_line_no = start_line_or_addr.u.line_no = line_no;
-
-	  int digits = 0;
-	  if (compact_source)
-	    {
-	      /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
-	         cast to double to get the right one.  */
-	      double l = log10 ((double) offsets->size ());
-	      digits = 1 + (int) l;
-	    }
-
-	  const char *iter = srclines.c_str ();
-	  content.resize (nlines);
-	  while (cur_line < nlines)
-	    {
-	      struct tui_source_element *element
-		= &content[cur_line];
-
-	      std::string text;
-	      if (*iter != '\0')
-		text = tui_copy_source_line (&iter, cur_line_no,
-					     horizontal_offset,
-					     line_width, digits);
-
-	      /* Set whether element is the execution point
-		 and whether there is a break point on it.  */
-	      element->line_or_addr.loa = LOA_LINE;
-	      element->line_or_addr.u.line_no = cur_line_no;
-	      element->is_exec_point
-		= (filename_cmp (locator->full_name.c_str (),
-				 symtab_to_fullname (s)) == 0
-		   && cur_line_no == locator->line_no);
-
-	      content[cur_line].line = std::move (text);
-
-	      cur_line++;
-	      cur_line_no++;
-	    }
-	  ret = TUI_SUCCESS;
-	}
+      /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
+	 cast to double to get the right one.  */
+      double l = log10 ((double) offsets->size ());
+      digits = 1 + (int) l;
     }
-  return ret;
+
+  const char *iter = srclines.c_str ();
+  content.resize (nlines);
+  while (cur_line < nlines)
+    {
+      struct tui_source_element *element
+	= &content[cur_line];
+
+      std::string text;
+      if (*iter != '\0')
+	text = tui_copy_source_line (&iter, cur_line_no,
+				     horizontal_offset,
+				     line_width, digits);
+
+      /* Set whether element is the execution point
+	 and whether there is a break point on it.  */
+      element->line_or_addr.loa = LOA_LINE;
+      element->line_or_addr.u.line_no = cur_line_no;
+      element->is_exec_point
+	= (filename_cmp (locator->full_name.c_str (),
+			 symtab_to_fullname (s)) == 0
+	   && cur_line_no == locator->line_no);
+
+      content[cur_line].line = std::move (text);
+
+      cur_line++;
+      cur_line_no++;
+    }
+
+  return true;
 }
 
 

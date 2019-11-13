@@ -198,7 +198,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 }
 
 /* Function to set the disassembly window's content.  */
-enum tui_status
+bool
 tui_disasm_window::set_contents (struct gdbarch *arch,
 				 struct symtab *s,
 				 struct tui_line_or_address line_or_addr)
@@ -214,7 +214,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   gdb_assert (line_or_addr.loa == LOA_ADDRESS);
   CORE_ADDR pc = line_or_addr.u.addr;
   if (pc == 0)
-    return TUI_FAILURE;
+    return false;
 
   gdbarch = arch;
   start_line_or_addr.loa = LOA_ADDRESS;
@@ -251,7 +251,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
       src->line_or_addr.u.addr = asm_lines[i].addr;
       src->is_exec_point = asm_lines[i].addr == cur_pc;
     }
-  return TUI_SUCCESS;
+  return true;
 }
 
 

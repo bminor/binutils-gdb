@@ -60,10 +60,9 @@ protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
 
-  enum tui_status set_contents
-    (struct gdbarch *gdbarch,
-     struct symtab *s,
-     struct tui_line_or_address line_or_addr) override;
+  bool set_contents (struct gdbarch *gdbarch,
+		     struct symtab *s,
+		     struct tui_line_or_address line_or_addr) override;
 
 private:
 

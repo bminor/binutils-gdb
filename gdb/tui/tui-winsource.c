@@ -183,10 +183,9 @@ tui_source_window_base::update_source_window_as_is
    struct symtab *s,
    struct tui_line_or_address line_or_addr)
 {
-  enum tui_status ret
-    = set_contents (gdbarch, s, line_or_addr);
+  bool ret = set_contents (gdbarch, s, line_or_addr);
 
-  if (ret == TUI_FAILURE)
+  if (!ret)
     erase_source_content ();
   else
     {

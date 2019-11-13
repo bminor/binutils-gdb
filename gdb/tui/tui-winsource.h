@@ -87,10 +87,9 @@ protected:
 
   void rerender () override;
 
-  virtual enum tui_status set_contents
-    (struct gdbarch *gdbarch,
-     struct symtab *s,
-     struct tui_line_or_address line_or_addr) = 0;
+  virtual bool set_contents (struct gdbarch *gdbarch,
+			     struct symtab *s,
+			     struct tui_line_or_address line_or_addr) = 0;
 
 public:
 

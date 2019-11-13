@@ -1,5 +1,20 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<set_contents>: Return bool.
+	* tui/tui-winsource.c
+	(tui_source_window_base::update_source_window_as_is): Update.
+	* tui/tui-source.h (struct tui_source_window) <set_contents>:
+	Return bool.
+	* tui/tui-source.c (tui_source_window::set_contents): Return
+	bool.  Simplify.
+	* tui/tui-disasm.h (struct tui_disasm_window) <set_contents>:
+	Return bool.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Return
+	bool.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_source_windows_with_addr)
 	(tui_update_source_windows_with_line): Call update_source_window.
 	* tui/tui-source.h (struct tui_source_window)
