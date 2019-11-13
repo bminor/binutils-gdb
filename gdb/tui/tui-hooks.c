@@ -112,7 +112,7 @@ tui_event_modify_breakpoint (struct breakpoint *b)
    if frame information hasn't changed.  */
 
 static void
-tui_refresh_frame_and_register_information (int registers_too_p)
+tui_refresh_frame_and_register_information (bool registers_too_p)
 {
   struct frame_info *fi;
   CORE_ADDR pc;
@@ -188,7 +188,7 @@ tui_before_prompt (const char *current_gdb_prompt)
      refresh registers here unless the frame actually changed by one of these
      commands.  Registers will otherwise be refreshed after a normal stop or by
      our tui_register_changed_hook.  */
-  tui_refresh_frame_and_register_information (/*registers_too_p=*/0);
+  tui_refresh_frame_and_register_information (/*registers_too_p=*/false);
 }
 
 /* Observer for the normal_stop notification.  */
@@ -198,7 +198,7 @@ tui_normal_stop (struct bpstats *bs, int print_frame)
 {
   /* This refresh is intended to catch changes to the selected frame and to
      registers following a normal stop.  */
-  tui_refresh_frame_and_register_information (/*registers_too_p=*/1);
+  tui_refresh_frame_and_register_information (/*registers_too_p=*/true);
 }
 
 /* Token associated with observers registered while TUI hooks are

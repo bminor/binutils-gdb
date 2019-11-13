@@ -1,5 +1,10 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-hooks.c (tui_before_prompt): Change parameter to bool.
+	(tui_before_prompt, tui_normal_stop): Update.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c
 	(tui_source_window_base::update_source_window_as_is): Don't call
 	set_current_source_symtab_and_line.
