@@ -1,3 +1,8 @@
+2019-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 2587
+	* Makefile.am: Fix rule to build .c files from .m files.
+
 2019-09-18  Alan Modra  <amodra@gmail.com>
 
 	* corefile.c, * symtab.c: Update throughout for bfd section
