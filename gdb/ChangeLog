@@ -1,5 +1,12 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_show_source): Update.
+	* tui/tui-winsource.h (tui_update_source_windows_with_line): Update.
+	* tui/tui-winsource.c (tui_update_source_windows_with_line): Take
+	a symtab_symbol_info, not a separate symtab and line.  Simplify.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_source_windows_with_addr):
 	Simplify.
 

@@ -227,8 +227,7 @@ extern void tui_update_all_breakpoint_info (struct breakpoint *being_deleted);
 /* Function to display the "main" routine.  */
 extern void tui_display_main (void);
 extern void tui_update_source_windows_with_addr (struct gdbarch *, CORE_ADDR);
-extern void tui_update_source_windows_with_line (struct symtab *, 
-						 int);
+extern void tui_update_source_windows_with_line (struct symtab_and_line sal);
 
 /* Extract some source text from PTR.  LINE_NO is the line number.  If
    it is positive, it is printed at the start of the line.  FIRST_COL

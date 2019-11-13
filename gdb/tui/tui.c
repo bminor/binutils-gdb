@@ -634,7 +634,7 @@ tui_show_source ()
   /* Make sure that the source window is displayed.  */
   tui_add_win_to_layout (SRC_WIN);
 
-  tui_update_source_windows_with_line (cursal.symtab, cursal.line);
+  tui_update_source_windows_with_line (cursal);
   tui_update_locator_fullname (cursal.symtab);
 }
 

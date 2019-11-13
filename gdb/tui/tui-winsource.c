@@ -214,39 +214,19 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
     win_info->update_source_window (gdbarch, sal);
 }
 
-/* Function to ensure that the source and/or disassemly windows
-   reflect the input address.  */
+/* Function to ensure that the source and/or disassembly windows
+   reflect the symtab and line.  */
 void
-tui_update_source_windows_with_line (struct symtab *s, int line)
+tui_update_source_windows_with_line (struct symtab_and_line sal)
 {
-  struct gdbarch *gdbarch;
-  CORE_ADDR pc;
-  struct symtab_and_line sal;
-
-  if (!s)
+  if (!sal.symtab)
     return;
 
-  sal.pspace = current_program_space;
-  sal.symtab = s;
-  sal.line = line;
+  find_line_pc (sal.symtab, sal.line, &sal.pc);
+  struct gdbarch *gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
 
-  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-
-  switch (tui_current_layout ())
-    {
-    case DISASSEM_COMMAND:
-    case DISASSEM_DATA_COMMAND:
-      find_line_pc (s, line, &pc);
-      tui_update_source_windows_with_addr (gdbarch, pc);
-      break;
-    default:
-      find_line_pc (s, line, &pc);
-      sal.pc = pc;
-      TUI_SRC_WIN->update_source_window (gdbarch, sal);
-      if (tui_current_layout () == SRC_DISASSEM_COMMAND)
-	TUI_DISASM_WIN->update_source_window (gdbarch, sal);
-      break;
-    }
+  for (struct tui_source_window_base *win_info : tui_source_windows ())
+    win_info->update_source_window (gdbarch, sal);
 }
 
 void
