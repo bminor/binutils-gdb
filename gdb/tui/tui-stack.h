@@ -78,6 +78,6 @@ private:
 
 extern void tui_update_locator_fullname (struct symtab *symtab);
 extern void tui_show_locator_content (void);
-extern int tui_show_frame_info (struct frame_info *);
+extern bool tui_show_frame_info (struct frame_info *);
 
 #endif /* TUI_TUI_STACK_H */

@@ -301,10 +301,10 @@ tui_update_locator_fullname (struct symtab *symtab)
 /* Function to print the frame information for the TUI.  The windows are
    refreshed only if frame information has changed since the last refresh.
 
-   Return 1 if frame information has changed (and windows subsequently
-   refreshed), 0 otherwise.  */
+   Return true if frame information has changed (and windows
+   subsequently refreshed), false otherwise.  */
 
-int
+bool
 tui_show_frame_info (struct frame_info *fi)
 {
   bool locator_changed_p;
@@ -329,15 +329,13 @@ tui_show_frame_info (struct frame_info *fi)
 	 not changed.  If frame information has not changed, then the windows'
 	 contents will not change.  So don't bother refreshing the windows.  */
       if (!locator_changed_p)
-	return 0;
+	return false;
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
 	  win_info->maybe_update (fi, sal);
 	  win_info->update_exec_info ();
 	}
-
-      return 1;
     }
   else
     {
@@ -346,13 +344,13 @@ tui_show_frame_info (struct frame_info *fi)
       locator_changed_p = locator->set_locator_info (NULL, sal, "");
 
       if (!locator_changed_p)
-	return 0;
+	return false;
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	win_info->erase_source_content ();
-
-      return 1;
     }
+
+  return true;
 }
 
 void
