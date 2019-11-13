@@ -362,10 +362,7 @@ tui_show_frame_info (struct frame_info *fi)
 	return 0;
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
-	{
-	  win_info->erase_source_content ();
-	  win_info->update_exec_info ();
-	}
+	win_info->erase_source_content ();
 
       return 1;
     }

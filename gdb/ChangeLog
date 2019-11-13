@@ -1,5 +1,10 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (tui_show_frame_info): Don't call
+	update_exec_info.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable): Call tui_display_main.
 
 2019-12-20  Tom Tromey  <tom@tromey.com>
