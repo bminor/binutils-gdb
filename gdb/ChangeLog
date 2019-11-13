@@ -1,5 +1,12 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_show_source): Remove.
+	* tui/tui.h (tui_show_source): Don't declare.
+	* tui/tui-out.c (tui_ui_out::do_field_string): Don't call
+	tui_show_source.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (tui_show_frame_info): Return bool.
 	* tui/tui-stack.c (tui_show_frame_info): Return bool.
 	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):

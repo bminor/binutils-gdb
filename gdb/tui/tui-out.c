@@ -60,10 +60,7 @@ tui_ui_out::do_field_string (int fldno, int width, ui_align align,
   m_start_of_line++;
 
   if (fldname && m_line > 0 && strcmp (fldname, "fullname") == 0)
-    {
-      tui_show_source ();
-      return;
-    }
+    return;
 
   cli_ui_out::do_field_string (fldno, width, align, fldname, string, style);
 }
