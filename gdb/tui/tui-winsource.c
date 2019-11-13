@@ -413,7 +413,7 @@ tui_source_window_base::refill ()
 	   : cursal.symtab);
     }
 
-  update_source_window_as_is (gdbarch, s, content[0].line_or_addr);
+  update_source_window_as_is (gdbarch, s, start_line_or_addr);
 }
 
 /* Scroll the source forward or backward horizontally.  */

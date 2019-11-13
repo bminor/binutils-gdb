@@ -325,7 +325,7 @@ tui_disasm_window::do_scroll_vertical (int num_to_scroll)
       CORE_ADDR pc;
       struct tui_line_or_address val;
 
-      pc = content[0].line_or_addr.u.addr;
+      pc = start_line_or_addr.u.addr;
       if (num_to_scroll >= 0)
 	num_to_scroll++;
       else

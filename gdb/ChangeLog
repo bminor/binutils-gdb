@@ -1,5 +1,14 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_source_window_base::refill): Use
+	start_line_or_addr.
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Use
+	start_line_or_addr.
+	* tui/tui-disasm.c (tui_disasm_window::do_scroll_vertical): Use
+	start_line_or_addr.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<set_contents>: Return bool.
 	* tui/tui-winsource.c
