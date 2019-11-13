@@ -1,5 +1,9 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/list-before.exp: New file.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/list.exp: Check for source on initial listing.
 
 2019-12-11  Tom Tromey  <tromey@adacore.com>

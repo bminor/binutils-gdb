@@ -105,53 +105,52 @@ tui_event_modify_breakpoint (struct breakpoint *b)
   tui_update_all_breakpoint_info (nullptr);
 }
 
-/* Refresh TUI's frame and register information.  This is a hook intended to be
-   used to update the screen after potential frame and register changes.
+/* This is set to true if the next window refresh should come from the
+   current stack frame.  */
 
-   REGISTERS_TOO_P controls whether to refresh our register information even
-   if frame information hasn't changed.  */
+static bool from_stack;
+
+/* This is set to true if the next window refresh should come from the
+   current source symtab.  */
+
+static bool from_source_symtab;
+
+/* Refresh TUI's frame and register information.  This is a hook intended to be
+   used to update the screen after potential frame and register changes.  */
 
 static void
-tui_refresh_frame_and_register_information (bool registers_too_p)
+tui_refresh_frame_and_register_information ()
 {
-  struct frame_info *fi;
-  CORE_ADDR pc;
-  int frame_info_changed_p;
-
-  if (!has_stack_frames ())
+  if (!from_stack && !from_source_symtab)
     return;
 
   target_terminal::scoped_restore_terminal_state term_state;
   target_terminal::ours_for_output ();
 
-  fi = get_selected_frame (NULL);
-  /* Ensure that symbols for this frame are read in.  Also, determine
-     the source language of this frame, and switch to it if
-     desired.  */
-  if (get_frame_pc_if_available (fi, &pc))
+  if (from_stack && has_stack_frames ())
     {
-      struct symtab *s;
+      struct frame_info *fi = get_selected_frame (NULL);
 
-      s = find_pc_line_symtab (pc);
-      /* elz: This if here fixes the problem with the pc not being
-	 displayed in the tui asm layout, with no debug symbols.  The
-	 value of s would be 0 here, and select_source_symtab would
-	 abort the command by calling the 'error' function.  */
-      if (s)
-	select_source_symtab (s);
+      /* Display the frame position (even if there is no symbols or
+	 the PC is not known).  */
+      int frame_info_changed_p = tui_show_frame_info (fi);
+
+      /* Refresh the register window if it's visible.  */
+      if (tui_is_window_visible (DATA_WIN)
+	  && (frame_info_changed_p || from_stack))
+	{
+	  tui_refreshing_registers = 1;
+	  TUI_DATA_WIN->check_register_values (fi);
+	  tui_refreshing_registers = 0;
+	}
     }
-
-  /* Display the frame position (even if there is no symbols or the PC
-     is not known).  */
-  frame_info_changed_p = tui_show_frame_info (fi);
-
-  /* Refresh the register window if it's visible.  */
-  if (tui_is_window_visible (DATA_WIN)
-      && (frame_info_changed_p || registers_too_p))
+  else if (!from_stack)
     {
-      tui_refreshing_registers = 1;
-      TUI_DATA_WIN->check_register_values (fi);
-      tui_refreshing_registers = 0;
+      /* Make sure that the source window is displayed.  */
+      tui_add_win_to_layout (SRC_WIN);
+
+      struct symtab_and_line sal = get_current_source_symtab_and_line ();
+      tui_update_source_windows_with_line (sal);
     }
 }
 
@@ -183,12 +182,9 @@ tui_inferior_exit (struct inferior *inf)
 static void
 tui_before_prompt (const char *current_gdb_prompt)
 {
-  /* This refresh is intended to catch changes to the selected frame following
-     a call to "up", "down" or "frame".  As such we don't necessarily want to
-     refresh registers here unless the frame actually changed by one of these
-     commands.  Registers will otherwise be refreshed after a normal stop or by
-     our tui_register_changed_hook.  */
-  tui_refresh_frame_and_register_information (/*registers_too_p=*/false);
+  tui_refresh_frame_and_register_information ();
+  from_stack = false;
+  from_source_symtab = false;
 }
 
 /* Observer for the normal_stop notification.  */
@@ -196,9 +192,23 @@ tui_before_prompt (const char *current_gdb_prompt)
 static void
 tui_normal_stop (struct bpstats *bs, int print_frame)
 {
-  /* This refresh is intended to catch changes to the selected frame and to
-     registers following a normal stop.  */
-  tui_refresh_frame_and_register_information (/*registers_too_p=*/true);
+  from_stack = true;
+}
+
+/* Observer for user_selected_context_changed.  */
+
+static void
+tui_context_changed (user_selected_what ignore)
+{
+  from_stack = true;
+}
+
+/* Observer for current_source_symtab_and_line_changed.  */
+
+static void
+tui_symtab_changed ()
+{
+  from_source_symtab = true;
 }
 
 /* Token associated with observers registered while TUI hooks are
@@ -236,6 +246,10 @@ tui_attach_detach_observers (bool attach)
 		    tui_normal_stop, attach);
   attach_or_detach (gdb::observers::register_changed,
 		    tui_register_changed, attach);
+  attach_or_detach (gdb::observers::user_selected_context_changed,
+		    tui_context_changed, attach);
+  attach_or_detach (gdb::observers::current_source_symtab_and_line_changed,
+		    tui_symtab_changed, attach);
 }
 
 /* Install the TUI specific hooks.  */

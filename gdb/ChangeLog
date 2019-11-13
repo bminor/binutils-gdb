@@ -1,5 +1,15 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	PR tui/18932:
+	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):
+	Rename parameters.  Handle the not-from-stack-frame case.
+	(from_stack, from_source_symtab): New globals.
+	(tui_before_prompt, tui_normal_stop): Update.
+	(tui_context_changed, tui_symtab_changed): New functions.
+	(tui_attach_detach_observers): Attach new observers.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* source.c (struct current_source_location) <set, symtab, line>:
 	New methods.
 	<m_symtab, m_line>: Rename.  Now private.
