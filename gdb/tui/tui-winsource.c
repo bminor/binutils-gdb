@@ -449,9 +449,6 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
       struct tui_line_or_address content_loa =
 	content[i].line_or_addr;
 
-      gdb_assert (l.loa == LOA_ADDRESS || l.loa == LOA_LINE);
-      gdb_assert (content_loa.loa == LOA_LINE
-		  || content_loa.loa == LOA_ADDRESS);
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
               || (l.loa == LOA_ADDRESS && content_loa.u.addr == l.u.addr)))
@@ -511,9 +508,6 @@ tui_source_window_base::update_breakpoint_info
       iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
         {
 	  struct bp_location *loc;
-
-	  gdb_assert (line->line_or_addr.loa == LOA_LINE
-		      || line->line_or_addr.loa == LOA_ADDRESS);
 
 	  if (bp == being_deleted)
 	    return false;
