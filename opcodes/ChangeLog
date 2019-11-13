@@ -1,3 +1,9 @@
+2019-11-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_insn_types): Replace the INSN_CLASS_I with
+	INSN_CLASS_F and the INSN_CLASS_C with INSN_CLASS_F_AND_C if we
+	use the floating point register (FPR).
+
 2019-11-12  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* opcodes/arm-dis.c (mve_opcodes): Enable VMOV imm to vec with
