@@ -206,21 +206,12 @@ tui_source_window_base::update_source_window_as_is
 void
 tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
+  struct symtab_and_line sal {};
   if (addr != 0)
-    {
-      struct symtab_and_line sal = find_pc_line (addr, 0);
-      
-      if (TUI_DISASM_WIN != nullptr)
-	TUI_DISASM_WIN->update_source_window (gdbarch, sal);
+    sal = find_pc_line (addr, 0);
 
-      if (TUI_SRC_WIN != nullptr)
-	TUI_SRC_WIN->update_source_window (gdbarch, sal);
-    }
-  else
-    {
-      for (struct tui_source_window_base *win_info : tui_source_windows ())
-	win_info->erase_source_content ();
-    }
+  for (struct tui_source_window_base *win_info : tui_source_windows ())
+    win_info->update_source_window (gdbarch, sal);
 }
 
 /* Function to ensure that the source and/or disassemly windows
