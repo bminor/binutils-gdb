@@ -190,13 +190,6 @@ tui_source_window_base::update_source_window_as_is
       update_breakpoint_info (nullptr, false);
       show_source_content ();
       update_exec_info ();
-      if (type == SRC_WIN)
-	{
-	  symtab_and_line new_sal = sal;
-
-	  new_sal.line = sal.line + (content.size () - 2);
-	  set_current_source_symtab_and_line (new_sal);
-	}
     }
 }
 

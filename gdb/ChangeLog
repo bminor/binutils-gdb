@@ -1,5 +1,11 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c
+	(tui_source_window_base::update_source_window_as_is): Don't call
+	set_current_source_symtab_and_line.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window) <set_locator_info>:
 	Take a symtab_and_line.
 	* tui/tui-stack.c (tui_locator_window::set_locator_info): Take a
