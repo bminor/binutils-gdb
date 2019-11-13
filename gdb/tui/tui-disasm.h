@@ -44,9 +44,7 @@ struct tui_disasm_window : public tui_source_window_base
 
   bool location_matches_p (struct bp_location *loc, int line_no) override;
 
-  void maybe_update (struct frame_info *fi, symtab_and_line sal,
-		     int line_no, CORE_ADDR addr)
-    override;
+  void maybe_update (struct frame_info *fi, symtab_and_line sal) override;
 
   void erase_source_content () override
   {

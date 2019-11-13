@@ -341,9 +341,13 @@ tui_show_frame_info (struct frame_info *fi)
       if (!locator_changed_p)
 	return 0;
 
+      /* find_frame_sal does not always set PC, but we want to ensure
+	 that it is available in the SAL.  */
+      sal.pc = pc;
+
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
-	  win_info->maybe_update (fi, sal, locator->line_no, locator->addr);
+	  win_info->maybe_update (fi, sal);
 	  win_info->update_exec_info ();
 	}
 

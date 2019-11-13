@@ -1,5 +1,19 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<maybe_update>: Remove line_no and addr parameters.
+	* tui/tui-stack.c (tui_show_frame_info): Set PC on sal.  Update.
+	* tui/tui-source.h (struct tui_source_window) <maybe_update>:
+	Update.
+	* tui/tui-source.c (tui_source_window::maybe_update): Remove
+	line_no and addr parameters.
+	* tui/tui-disasm.h (struct tui_disasm_window) <maybe_update>:
+	Update.
+	* tui/tui-disasm.c (tui_disasm_window::maybe_update): Remove
+	line_no and addr parameters.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_source_window_base::set_is_exec_point_at)
 	(tui_source_window_base::update_breakpoint_info): Remove asserts.
 

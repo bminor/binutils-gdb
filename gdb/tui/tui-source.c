@@ -209,10 +209,9 @@ tui_source_window::line_is_displayed (int line) const
 }
 
 void
-tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
-				 int line_no, CORE_ADDR addr)
+tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
 {
-  int start_line = (line_no - (viewport_height / 2)) + 1;
+  int start_line = (sal.line - (viewport_height / 2)) + 1;
   if (start_line <= 0)
     start_line = 1;
 
@@ -223,12 +222,11 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
 
   l.loa = LOA_LINE;
   l.u.line_no = start_line;
-  if (!(source_already_displayed
-	&& line_is_displayed (line_no)))
+  if (!(source_already_displayed && line_is_displayed (sal.line)))
     update_source_window (get_frame_arch (fi), sal.symtab, l);
   else
     {
-      l.u.line_no = line_no;
+      l.u.line_no = sal.line;
       set_is_exec_point_at (l);
     }
 }

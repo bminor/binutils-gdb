@@ -384,31 +384,30 @@ tui_disasm_window::addr_is_displayed (CORE_ADDR addr) const
 }
 
 void
-tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal,
-				 int line_no, CORE_ADDR addr)
+tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
 {
   CORE_ADDR low;
 
-  if (find_pc_partial_function (get_frame_pc (fi),
-				NULL, &low, NULL) == 0)
+  struct gdbarch *frame_arch = get_frame_arch (fi);
+
+  if (find_pc_partial_function (sal.pc, NULL, &low, NULL) == 0)
     {
       /* There is no symbol available for current PC.  There is no
 	 safe way how to "disassemble backwards".  */
-      low = get_frame_pc (fi);
+      low = sal.pc;
     }
   else
-    low = tui_get_low_disassembly_address (get_frame_arch (fi),
-					   low, get_frame_pc (fi));
+    low = tui_get_low_disassembly_address (frame_arch, low, sal.pc);
 
   struct tui_line_or_address a;
 
   a.loa = LOA_ADDRESS;
   a.u.addr = low;
-  if (!addr_is_displayed (addr))
-    update_source_window (get_frame_arch (fi), sal.symtab, a);
+  if (!addr_is_displayed (sal.pc))
+    update_source_window (frame_arch, sal.symtab, a);
   else
     {
-      a.u.addr = addr;
+      a.u.addr = sal.pc;
       set_is_exec_point_at (a);
     }
 }

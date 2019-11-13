@@ -109,8 +109,7 @@ public:
 
   /* Update the window to display the given location.  Does nothing if
      the location is already displayed.  */
-  virtual void maybe_update (struct frame_info *fi, symtab_and_line sal,
-			     int line_no, CORE_ADDR addr) = 0;
+  virtual void maybe_update (struct frame_info *fi, symtab_and_line sal) = 0;
 
   void update_source_window_as_is  (struct gdbarch *gdbarch,
 				    struct symtab *s,
