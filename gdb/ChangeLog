@@ -1,5 +1,13 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (struct tui_locator_window) <set_locator_info>:
+	Take a symtab_and_line.
+	* tui/tui-stack.c (tui_locator_window::set_locator_info): Take a
+	symtab_and_line.
+	(tui_show_frame_info): Update.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.c (tui_show_frame_info): Don't call
 	update_exec_info.
 
