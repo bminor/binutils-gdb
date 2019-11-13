@@ -260,7 +260,6 @@ void
 tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
 {
   struct symtab *s = find_pc_line_symtab (start_addr);
-  struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct tui_line_or_address val;
 
   gdb_assert (TUI_DISASM_WIN != nullptr && TUI_DISASM_WIN->is_visible ());
@@ -268,12 +267,6 @@ tui_show_disassem (struct gdbarch *gdbarch, CORE_ADDR start_addr)
   val.loa = LOA_ADDRESS;
   val.u.addr = start_addr;
   TUI_DISASM_WIN->update_source_window (gdbarch, s, val);
-
-  /* If the focus was in the src win, put it in the asm win, if the
-     source view isn't split.  */
-  if (tui_current_layout () != SRC_DISASSEM_COMMAND 
-      && win_with_focus == TUI_SRC_WIN)
-    tui_set_win_focus_to (TUI_DISASM_WIN);
 }
 
 void

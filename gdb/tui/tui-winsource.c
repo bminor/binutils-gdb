@@ -201,11 +201,6 @@ tui_source_window_base::update_source_window_as_is
 	  sal.symtab = s;
 	  sal.pspace = SYMTAB_PSPACE (s);
 	  set_current_source_symtab_and_line (sal);
-	  /* If the focus was in the asm win, put it in the src win if
-	     we don't have a split layout.  */
-	  if (tui_win_with_focus () == TUI_DISASM_WIN
-	      && tui_current_layout () != SRC_DISASSEM_COMMAND)
-	    tui_set_win_focus_to (this);
 	}
     }
 }
