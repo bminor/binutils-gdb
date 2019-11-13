@@ -167,11 +167,10 @@ tui_source_window_base::style_changed ()
 void
 tui_source_window_base::update_source_window
   (struct gdbarch *gdbarch,
-   struct symtab *s,
-   struct tui_line_or_address line_or_addr)
+   const struct symtab_and_line &sal)
 {
   horizontal_offset = 0;
-  update_source_window_as_is (gdbarch, s, line_or_addr);
+  update_source_window_as_is (gdbarch, sal);
 }
 
 
@@ -180,10 +179,9 @@ tui_source_window_base::update_source_window
 void
 tui_source_window_base::update_source_window_as_is
   (struct gdbarch *gdbarch,
-   struct symtab *s,
-   struct tui_line_or_address line_or_addr)
+   const struct symtab_and_line &sal)
 {
-  bool ret = set_contents (gdbarch, s, line_or_addr);
+  bool ret = set_contents (gdbarch, sal);
 
   if (!ret)
     erase_source_content ();
@@ -194,12 +192,10 @@ tui_source_window_base::update_source_window_as_is
       update_exec_info ();
       if (type == SRC_WIN)
 	{
-	  symtab_and_line sal;
+	  symtab_and_line new_sal = sal;
 
-	  sal.line = line_or_addr.u.line_no + (content.size () - 2);
-	  sal.symtab = s;
-	  sal.pspace = SYMTAB_PSPACE (s);
-	  set_current_source_symtab_and_line (sal);
+	  new_sal.line = sal.line + (content.size () - 2);
+	  set_current_source_symtab_and_line (new_sal);
 	}
     }
 }
@@ -213,21 +209,12 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
   if (addr != 0)
     {
       struct symtab_and_line sal = find_pc_line (addr, 0);
-      struct tui_line_or_address l;
       
       if (TUI_DISASM_WIN != nullptr)
-	{
-	  l.loa = LOA_ADDRESS;
-	  l.u.addr = addr;
-	  TUI_DISASM_WIN->update_source_window (gdbarch, sal.symtab, l);
-	}
+	TUI_DISASM_WIN->update_source_window (gdbarch, sal);
 
       if (TUI_SRC_WIN != nullptr)
-	{
-	  l.loa = LOA_LINE;
-	  l.u.line_no = sal.line;
-	  TUI_SRC_WIN->update_source_window (gdbarch, sal.symtab, l);
-	}
+	TUI_SRC_WIN->update_source_window (gdbarch, sal);
     }
   else
     {
@@ -243,10 +230,14 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 {
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
-  struct tui_line_or_address l;
+  struct symtab_and_line sal;
 
   if (!s)
     return;
+
+  sal.pspace = current_program_space;
+  sal.symtab = s;
+  sal.line = line;
 
   gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
 
@@ -258,16 +249,11 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
       tui_update_source_windows_with_addr (gdbarch, pc);
       break;
     default:
-      l.loa = LOA_LINE;
-      l.u.line_no = line;
-      TUI_SRC_WIN->update_source_window (gdbarch, s, l);
+      find_line_pc (s, line, &pc);
+      sal.pc = pc;
+      TUI_SRC_WIN->update_source_window (gdbarch, sal);
       if (tui_current_layout () == SRC_DISASSEM_COMMAND)
-	{
-	  find_line_pc (s, line, &pc);
-	  l.loa = LOA_ADDRESS;
-	  l.u.addr = pc;
-	  TUI_DISASM_WIN->update_source_window (gdbarch, s, l);
-	}
+	TUI_DISASM_WIN->update_source_window (gdbarch, sal);
       break;
     }
 }
@@ -366,33 +352,26 @@ tui_source_window_base::rerender ()
 {
   if (!content.empty ())
     {
-      struct tui_line_or_address line_or_addr;
       struct symtab_and_line cursal
 	= get_current_source_symtab_and_line ();
 
-      line_or_addr = start_line_or_addr;
-      update_source_window (gdbarch, cursal.symtab, line_or_addr);
+      if (start_line_or_addr.loa == LOA_LINE)
+	cursal.line = start_line_or_addr.u.line_no;
+      else
+	cursal.pc = start_line_or_addr.u.addr;
+      update_source_window (gdbarch, cursal);
     }
   else if (deprecated_safe_get_selected_frame () != NULL)
     {
-      struct tui_line_or_address line;
       struct symtab_and_line cursal
 	= get_current_source_symtab_and_line ();
       struct frame_info *frame = deprecated_safe_get_selected_frame ();
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
-      if (type == SRC_WIN)
-	{
-	  line.loa = LOA_LINE;
-	  line.u.line_no = cursal.line;
-	}
-      else
-	{
-	  line.loa = LOA_ADDRESS;
-	  find_line_pc (s, cursal.line, &line.u.addr);
-	}
-      update_source_window (gdbarch, s, line);
+      if (type != SRC_WIN)
+	find_line_pc (s, cursal.line, &cursal.pc);
+      update_source_window (gdbarch, cursal);
     }
   else
     erase_source_content ();
@@ -403,17 +382,24 @@ tui_source_window_base::rerender ()
 void
 tui_source_window_base::refill ()
 {
-  symtab *s = nullptr;
+  symtab_and_line sal {};
 
   if (type == SRC_WIN)
     {
-      symtab_and_line cursal = get_current_source_symtab_and_line ();
-      s = (cursal.symtab == NULL
-	   ? find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)))
-	   : cursal.symtab);
+      sal = get_current_source_symtab_and_line ();
+      if (sal.symtab == NULL)
+	sal = find_pc_line (get_frame_pc (get_selected_frame (NULL)), 0);
     }
 
-  update_source_window_as_is (gdbarch, s, start_line_or_addr);
+  if (sal.pspace == nullptr)
+    sal.pspace = current_program_space;
+
+  if (start_line_or_addr.loa == LOA_LINE)
+    sal.line = start_line_or_addr.u.line_no;
+  else
+    sal.pc = start_line_or_addr.u.addr;
+
+  update_source_window_as_is (gdbarch, sal);
 }
 
 /* Scroll the source forward or backward horizontally.  */

@@ -42,11 +42,10 @@
 /* Function to display source in the source window.  */
 bool
 tui_source_window::set_contents (struct gdbarch *arch,
-				 struct symtab *s, 
-				 struct tui_line_or_address line_or_addr)
+				 const struct symtab_and_line &sal)
 {
-  gdb_assert (line_or_addr.loa == LOA_LINE);
-  int line_no = line_or_addr.u.line_no;
+  struct symtab *s = sal.symtab;
+  int line_no = sal.line;
 
   if (s == NULL)
     return false;
@@ -201,14 +200,16 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
   bool source_already_displayed = (sal.symtab != 0
 				   && showing_source_p (m_fullname.get ()));
 
-  struct tui_line_or_address l;
-
-  l.loa = LOA_LINE;
-  l.u.line_no = start_line;
   if (!(source_already_displayed && line_is_displayed (sal.line)))
-    update_source_window (get_frame_arch (fi), sal.symtab, l);
+    {
+      sal.line = start_line;
+      update_source_window (get_frame_arch (fi), sal);
+    }
   else
     {
+      struct tui_line_or_address l;
+
+      l.loa = LOA_LINE;
       l.u.line_no = sal.line;
       set_is_exec_point_at (l);
     }

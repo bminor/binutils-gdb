@@ -88,8 +88,7 @@ protected:
   void rerender () override;
 
   virtual bool set_contents (struct gdbarch *gdbarch,
-			     struct symtab *s,
-			     struct tui_line_or_address line_or_addr) = 0;
+			     const struct symtab_and_line &sal) = 0;
 
 public:
 
@@ -111,11 +110,9 @@ public:
   virtual void maybe_update (struct frame_info *fi, symtab_and_line sal) = 0;
 
   void update_source_window_as_is  (struct gdbarch *gdbarch,
-				    struct symtab *s,
-				    struct tui_line_or_address line_or_addr);
+				    const struct symtab_and_line &sal);
   void update_source_window (struct gdbarch *gdbarch,
-			     struct symtab *s,
-			     struct tui_line_or_address line_or_addr);
+			     const struct symtab_and_line &sal);
 
   /* Scan the source window and the breakpoints to update the
      break_mode information for each line.  Returns true if something

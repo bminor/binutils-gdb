@@ -200,8 +200,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 /* Function to set the disassembly window's content.  */
 bool
 tui_disasm_window::set_contents (struct gdbarch *arch,
-				 struct symtab *s,
-				 struct tui_line_or_address line_or_addr)
+				 const struct symtab_and_line &sal)
 {
   int i;
   int offset = horizontal_offset;
@@ -211,8 +210,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   int tab_len = tui_tab_width;
   int insn_pos;
 
-  gdb_assert (line_or_addr.loa == LOA_ADDRESS);
-  CORE_ADDR pc = line_or_addr.u.addr;
+  CORE_ADDR pc = sal.pc;
   if (pc == 0)
     return false;
 
@@ -323,7 +321,6 @@ tui_disasm_window::do_scroll_vertical (int num_to_scroll)
   if (!content.empty ())
     {
       CORE_ADDR pc;
-      struct tui_line_or_address val;
 
       pc = start_line_or_addr.u.addr;
       if (num_to_scroll >= 0)
@@ -331,9 +328,10 @@ tui_disasm_window::do_scroll_vertical (int num_to_scroll)
       else
 	--num_to_scroll;
 
-      val.loa = LOA_ADDRESS;
-      val.u.addr = tui_find_disassembly_address (gdbarch, pc, num_to_scroll);
-      update_source_window_as_is (gdbarch, NULL, val);
+      symtab_and_line sal {};
+      sal.pspace = current_program_space;
+      sal.pc = tui_find_disassembly_address (gdbarch, pc, num_to_scroll);
+      update_source_window_as_is (gdbarch, sal);
     }
 }
 
@@ -383,7 +381,10 @@ tui_disasm_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
   a.loa = LOA_ADDRESS;
   a.u.addr = low;
   if (!addr_is_displayed (sal.pc))
-    update_source_window (frame_arch, sal.symtab, a);
+    {
+      sal.pc = low;
+      update_source_window (frame_arch, sal);
+    }
   else
     {
       a.u.addr = sal.pc;

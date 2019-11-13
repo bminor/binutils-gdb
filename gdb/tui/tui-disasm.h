@@ -56,8 +56,7 @@ protected:
   void do_scroll_vertical (int num_to_scroll) override;
 
   bool set_contents (struct gdbarch *gdbarch,
-		     struct symtab *s,
-		     struct tui_line_or_address line_or_addr) override;
+		     const struct symtab_and_line &sal) override;
 
 private:
   /* Answer whether a particular line number or address is displayed

@@ -1,5 +1,29 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<set_contents, update_source_window_as_is, update_source_window>:
+	Take a sal, not a separate symtab and tui_line_or_address.
+	* tui/tui-winsource.c (tui_source_window_base::update_source_window)
+	(tui_source_window_base::update_source_window_as_is): Take a sal,
+	not a separate symtab and tui_line_or_address.
+	(tui_update_source_windows_with_addr)
+	(tui_update_source_windows_with_line)
+	(tui_source_window_base::rerender)
+	(tui_source_window_base::refill): Update.
+	* tui/tui-source.h (struct tui_source_window) <set_contents>: Take
+	a sal, not a separate symtab and tui_line_or_address.
+	* tui/tui-source.c (tui_source_window::set_contents): Take a sal,
+	not a separate symtab and tui_line_or_address.
+	(tui_source_window::maybe_update): Update.
+	* tui/tui-disasm.h (struct tui_disasm_window) <set_contents>: Take
+	a sal, not a separate symtab and tui_line_or_address.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Take a sal,
+	not a separate symtab and tui_line_or_address.
+	(tui_disasm_window::do_scroll_vertical)
+	(tui_disasm_window::maybe_update): Update.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_source_window_base::refill): Use
 	start_line_or_addr.
 	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Use
