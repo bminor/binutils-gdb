@@ -258,25 +258,28 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
   struct tui_locator_window *locator;
   struct gdbarch *gdbarch = get_current_arch ();
-  CORE_ADDR addr;
+  CORE_ADDR addr = 0;
 
   locator = tui_locator_win_info_ptr ();
 
   if (locator->addr == 0)
     {
-      struct bound_minimal_symbol main_symbol;
+      if (have_full_symbols () || have_partial_symbols ())
+	{
+	  set_default_source_symtab_and_line ();
+	  struct symtab_and_line sal = get_current_source_symtab_and_line ();
 
-      /* Find address of the start of program.
-         Note: this should be language specific.  */
-      main_symbol = lookup_minimal_symbol ("main", NULL, NULL);
-      if (main_symbol.minsym == 0)
-        main_symbol = lookup_minimal_symbol ("MAIN", NULL, NULL);
-      if (main_symbol.minsym == 0)
-        main_symbol = lookup_minimal_symbol ("_start", NULL, NULL);
-      if (main_symbol.minsym)
-        addr = BMSYMBOL_VALUE_ADDRESS (main_symbol);
-      else
-        addr = 0;
+	  if (sal.symtab != nullptr)
+	    find_line_pc (sal.symtab, sal.line, &addr);
+	}
+
+      if (addr == 0)
+	{
+	  struct bound_minimal_symbol main_symbol
+	    = lookup_minimal_symbol (main_name (), nullptr, nullptr);
+	  if (main_symbol.minsym != nullptr)
+	    addr = BMSYMBOL_VALUE_ADDRESS (main_symbol);
+	}
     }
   else				/* The target is executing.  */
     {

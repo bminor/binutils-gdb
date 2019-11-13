@@ -1,5 +1,10 @@
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-disasm.c (tui_get_begin_asm_address): Use
+	get_current_source_symtab_and_line, and main_name.
+
+2019-12-20  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_show_source): Update.
 	* tui/tui-winsource.h (tui_update_source_windows_with_line): Update.
 	* tui/tui-winsource.c (tui_update_source_windows_with_line): Take
