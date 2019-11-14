@@ -41,7 +41,7 @@ This document describes the stabs debugging symbol tables.
 @author Cygnus Support
 @page
 @tex
-\def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
+\def\$#1${{#1}}  % Kludge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
 \hfill Cygnus Support\par

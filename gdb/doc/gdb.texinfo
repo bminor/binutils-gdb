@@ -3133,7 +3133,7 @@ single program: e.g., @code{print myglobal} will simply display the
 value of @code{myglobal} in the current inferior.
 
 
-Occasionaly, when debugging @value{GDBN} itself, it may be useful to
+Occasionally, when debugging @value{GDBN} itself, it may be useful to
 get more info about the relationship of inferiors, programs, address
 spaces in a debug session.  You can do that with the @w{@code{maint
 info program-spaces}} command.
@@ -6988,7 +6988,7 @@ requires only that the target do something reasonable when
 results back to @value{GDBN}.  Whatever the target reports back to
 @value{GDBN}, @value{GDBN} will report back to the user.  @value{GDBN}
 assumes that the memory and registers that the target reports are in a
-consistant state, but @value{GDBN} accepts whatever it is given.
+consistent state, but @value{GDBN} accepts whatever it is given.
 }.
 
 On some platforms, @value{GDBN} has built-in support for reverse
@@ -7356,7 +7356,7 @@ support it.  This command allows you to do that, and also allows to
 disable the workarounds.
 
 The argument @var{identifier} identifies the @sc{cpu} and is of the
-form: @code{@var{vendor}:@var{procesor identifier}}.  In addition,
+form: @code{@var{vendor}:@var{processor identifier}}.  In addition,
 there are two special identifiers, @code{none} and @code{auto}
 (default).
 
@@ -8467,7 +8467,7 @@ progspace /build/test frame-filters:
 
 objfile /build/test frame-filters:
   Priority  Enabled  Name
-  999       Yes      BuildProgra Filter
+  999       Yes      BuildProgramFilter
 
 (gdb) disable frame-filter /build/test BuildProgramFilter
 (gdb) info frame-filter
@@ -9047,7 +9047,7 @@ For example, if the executable records the source file as
 recorded as @file{/project/build}, and the @dfn{source path} is
 @file{/mnt/cross:$cdir:$cwd} while the current working directory of
 the @value{GDBN} session is @file{/home/user}, then @value{GDBN} will
-search for the source file in the following loctions:
+search for the source file in the following locations:
 
 @enumerate
 
@@ -12228,7 +12228,7 @@ and vector registers (in the selected stack frame).
 
 @item info registers @var{reggroup} @dots{}
 Print the name and value of the registers in each of the specified
-@var{reggroup}s.  The @var{reggoup} can be any of those returned by
+@var{reggroup}s.  The @var{reggroup} can be any of those returned by
 @code{maint print reggroups} (@pxref{Maintenance Commands}).
 
 @item info registers @var{regname} @dots{}
@@ -13271,7 +13271,7 @@ Whenever @value{GDBN} prints a value memory will be allocated within
 @value{GDBN} to hold the contents of the value.  It is possible in
 some languages with dynamic typing systems, that an invalid program
 may indicate a value that is incorrectly large, this in turn may cause
-@value{GDBN} to try and allocate an overly large ammount of memory.
+@value{GDBN} to try and allocate an overly large amount of memory.
 
 @table @code
 @kindex set max-value-size
@@ -13521,15 +13521,15 @@ The code can have possible execution paths @value{CALLSEQ1B} or
 @value{CALLSEQ2B}, @value{GDBN} cannot find which one from the inferior state.
 
 @code{initial:} state shows some random possible calling sequence @value{GDBN}
-has found.  It then finds another possible calling sequcen - that one is
+has found.  It then finds another possible calling sequence - that one is
 prefixed by @code{compare:}.  The non-ambiguous intersection of these two is
 printed as the @code{reduced:} calling sequence.  That one could have many
-futher @code{compare:} and @code{reduced:} statements as long as there remain
+further @code{compare:} and @code{reduced:} statements as long as there remain
 any non-ambiguous sequence entries.
 
 For the frame of function @code{b} in both cases there are different possible
 @code{$pc} values (@code{0x4004cc} or @code{0x4004ce}), therefore this frame is
-also ambigous.  The only non-ambiguous frame is the one for function @code{a},
+also ambiguous.  The only non-ambiguous frame is the one for function @code{a},
 therefore this one is displayed to the user while the ambiguous frames are
 omitted.
 
@@ -13555,7 +13555,7 @@ i=<optimized out>) at t.c:6
 
 @value{GDBN} cannot find out from the inferior state if and how many times did
 function @code{a} call itself (via function @code{b}) as these calls would be
-tail calls.  Such tail calls would modify thue @code{i} variable, therefore
+tail calls.  Such tail calls would modify the @code{i} variable, therefore
 @value{GDBN} cannot be sure the value it knows would be right - @value{GDBN}
 prints @code{<optimized out>} instead.
 
@@ -14058,7 +14058,7 @@ Static tracepoints accept an extra collect action --- @code{collect
 $_sdata}.  This collects arbitrary user data passed in the probe point
 call to the tracing library.  In the UST example above, you'll see
 that the third argument to @code{trace_mark} is a printf-like format
-string.  The user data is then the result of running that formating
+string.  The user data is then the result of running that formatting
 string against the following arguments.  Note that @code{info
 static-tracepoint-markers} command output lists that format string in
 the @samp{Data:} field.
@@ -17942,7 +17942,7 @@ Name of the task in the program.
 
 @kindex info task @var{taskno}
 @item info task @var{taskno}
-This command shows detailled informations on the specified task, as in
+This command shows detailed informations on the specified task, as in
 the following example:
 @smallexample
 @iftex
@@ -23292,7 +23292,7 @@ information.
 In addition, some systems may provide additional process information
 in core files.  Note that a core file may include a subset of the
 information available from a live process.  Process information is
-currently avaiable from cores created on @sc{gnu}/Linux and FreeBSD
+currently available from cores created on @sc{gnu}/Linux and FreeBSD
 systems.
 
 @table @code
@@ -25437,7 +25437,7 @@ foreground color is blue.
 Control the styling of titles.  These are managed with the
 @code{set style title} family of commands.  By default, this style's
 intensity is bold.  Commands are using the title style to improve
-the readibility of large output.  For example, the commands
+the readability of large output.  For example, the commands
 @command{apropos} and @command{help} are using the title style
 for the command names.
 
@@ -26323,7 +26323,7 @@ value of large memory transfers.
 Displays the current state of displaying @value{GDBN} target debugging
 info.
 @item set debug timestamp
-@cindex timestampping debugging info
+@cindex timestamping debugging info
 Turns on or off display of timestamps with @value{GDBN} debugging info.
 When enabled, seconds and microseconds are displayed before each debugging
 message.
@@ -26544,7 +26544,7 @@ command should not be repeated when the user hits @key{RET}
 @kindex help user-defined
 @item help user-defined
 List all user-defined commands and all python commands defined in class
-COMAND_USER.  The first line of the documentation or docstring is
+COMMAND_USER.  The first line of the documentation or docstring is
 included (if any).
 
 @kindex show user
@@ -28324,7 +28324,7 @@ The valid language names are the same names accepted by the
 On some targets, @value{GDBN} is capable of processing MI commands
 even while the target is running.  This is called @dfn{asynchronous
 command execution} (@pxref{Background Execution}).  The frontend may
-specify a preferrence for asynchronous execution using the
+specify a preference for asynchronous execution using the
 @code{-gdb-set mi-async 1} command, which should be emitted before
 either running the executable or attaching to the target.  After the
 frontend has started the executable or attached to the target, it can
@@ -28382,7 +28382,7 @@ to find the state of a thread, will always work.
 @node Thread groups
 @subsection Thread groups
 @value{GDBN} may be used to debug several processes at the same time.
-On some platfroms, @value{GDBN} may support debugging of several
+On some platforms, @value{GDBN} may support debugging of several
 hardware systems, each one having several cores with several different
 processes running on each core.  This section describes the MI
 mechanism to support such debugging scenarios.
@@ -29213,7 +29213,7 @@ This field is present if the breakpoint has multiple locations.  It is also
 exceptionally present if the breakpoint is enabled and has a single, disabled
 location.
 
-The value is a list of locations.  The format of a location is decribed below.
+The value is a list of locations.  The format of a location is described below.
 
 @end table
 
@@ -32033,7 +32033,7 @@ access this functionality:
 @item @code{-var-update}
 @tab update the variable and its children
 @item @code{-var-set-frozen}
-@tab set frozeness attribute
+@tab set frozenness attribute
 @item @code{-var-set-update-range}
 @tab set range of children to display on update
 @end multitable
@@ -33342,7 +33342,7 @@ and the only way to read every readable unit is to try a read at
 every address, which is not practical.   Therefore, @value{GDBN} will
 attempt to read all accessible memory units at either beginning or the end
 of the region, using a binary division scheme.  This heuristic works
-well for reading accross a memory map boundary.  Note that if a region
+well for reading across a memory map boundary.  Note that if a region
 has a readable range that is neither at the beginning or the end,
 @value{GDBN} will not read it.
 
@@ -34903,7 +34903,7 @@ The current list of features is:
 @ftable @samp
 @item frozen-varobjs
 Indicates support for the @code{-var-set-frozen} command, as well
-as possible presense of the @code{frozen} field in the output
+as possible presence of the @code{frozen} field in the output
 of @code{-varobj-create}.
 @item pending-breakpoints
 Indicates support for the @option{-f} option to the @code{-break-insert}
@@ -35874,7 +35874,7 @@ LLVM JIT.
 
 Broadly speaking, the JIT interface mirrors the dynamic loader interface.  The
 JIT compiler communicates with @value{GDBN} by writing data into a global
-variable and calling a fuction at a well-known symbol.  When @value{GDBN}
+variable and calling a function at a well-known symbol.  When @value{GDBN}
 attaches, it reads a linked list of symbol files from the global variable to
 find existing code, and puts a breakpoint in the function so that it can find
 out about additional code.
@@ -37090,7 +37090,7 @@ specified list of targets.  The special value @samp{all} configures
 @item --with-gdb-datadir=@var{path}
 Set the @value{GDBN}-specific data directory.  @value{GDBN} will look
 here for certain supporting files or scripts.  This defaults to the
-@file{gdb} subdirectory of @samp{datadi} (which can be set using
+@file{gdb} subdirectory of @samp{datadir} (which can be set using
 @code{--datadir}).
 
 @item --with-relocated-sources=@var{dir}
@@ -38775,7 +38775,7 @@ the server must ignore @samp{t} actions for threads that are already
 stopped.
 
 @emph{Note:} In non-stop mode, a thread is considered running until
-@value{GDBN} acknowleges an asynchronous stop notification for it with
+@value{GDBN} acknowledges an asynchronous stop notification for it with
 the @samp{vStopped} packet (@pxref{Remote Non-Stop}).
 
 The stub must support @samp{vCont} if it reports support for
@@ -38898,7 +38898,7 @@ The @samp{vMustReplyEmpty} is used as a feature test to check how
 @command{gdbserver} handles unknown packets, it is important that this
 packet be handled in the same way as other unknown @samp{v} packets.
 If this packet is handled differently to other unknown @samp{v}
-packets then it is possile that @value{GDBN} may run into problems in
+packets then it is possible that @value{GDBN} may run into problems in
 other areas, specifically around use of @samp{vFile:setfs:}.
 
 @item vRun;@var{filename}@r{[};@var{argument}@r{]}@dots{}
@@ -40037,7 +40037,7 @@ Reply:
 @table @samp
 @item OK
 The stub has switched to no-acknowledgment mode.
-@value{GDBN} acknowledges this reponse,
+@value{GDBN} acknowledges this response,
 but neither the stub nor @value{GDBN} shall send or expect further
 @samp{+}/@samp{-} acknowledgments in the current connection.
 @item @w{}
@@ -44841,7 +44841,7 @@ mechanism that makes it possible.  This mechanism is similar to the
 target features mechanism (@pxref{Target Descriptions}), but focuses
 on a different aspect of target.
 
-Operating system information is retrived from the target via the
+Operating system information is retrieved from the target via the
 remote protocol, using @samp{qXfer} requests (@pxref{qXfer osdata
 read}).  The object name in the request should be @samp{osdata}, and
 the @var{annex} identifies the data to be fetched.

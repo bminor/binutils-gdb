@@ -2518,7 +2518,7 @@ class FrameId(object):
 
 class MyUnwinder(Unwinder):
     def __init__(....):
-        supe(MyUnwinder, self).__init___(<expects unwinder name argument>)
+        super(MyUnwinder, self).__init___(<expects unwinder name argument>)
 
     def __call__(pending_frame):
         if not <we recognize frame>:
