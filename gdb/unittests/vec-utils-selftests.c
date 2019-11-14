@@ -38,6 +38,15 @@ unordered_remove_tests ()
   {
     std::vector<void *> var;
 
+    obj() = default;
+
+    /* gcc complains if we provide an assignment operator but no copy
+       constructor, so provide one even if don't really care for this test.  */
+    obj(const obj &other)
+    {
+      this->var = other.var;
+    }
+
     obj &operator= (const obj &other)
     {
       if (this == &other)

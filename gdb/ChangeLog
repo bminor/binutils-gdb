@@ -1,3 +1,8 @@
+2019-11-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* unittests/vec-utils-selftests.c (unordered_remove_tests::obj):
+	Provide explicit default and copy constructor.
+
 2019-11-14  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* python/py-finishbreakpoint.c (gdbpy_breakpoint_created):
