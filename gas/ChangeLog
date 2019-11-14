@@ -1,5 +1,11 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/intel-cmps32.d,
+	testsuite/gas/i386/intel-cmps64.d: Correct regexp closing
+	parentheses placement.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/intel-cmps.s,
 	testsuite/gas/i386/intel-movs.s: Extend.
 	* testsuite/gas/i386/intel-cmps32.d,
