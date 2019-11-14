@@ -658,8 +658,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      || current_templates->start->base_opcode == 0x62 /* bound */)
 	    suffix = WORD_MNEM_SUFFIX;
 	  else if (flag_code == CODE_16BIT
-		   && (current_templates->start->opcode_modifier.jump
-		       || current_templates->start->opcode_modifier.jumpdword))
+		   && (current_templates->start->opcode_modifier.jump == JUMP
+		       || current_templates->start->opcode_modifier.jump
+			  == JUMP_DWORD))
 	    suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	  else if (got_a_float == 1)	/* "f..." */
 	    suffix = SHORT_MNEM_SUFFIX;
@@ -717,8 +718,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	  /* FALLTHROUGH */
 	case O_near_ptr:
-	  if (!current_templates->start->opcode_modifier.jump
-	      && !current_templates->start->opcode_modifier.jumpdword)
+	  if (current_templates->start->opcode_modifier.jump != JUMP
+	      && current_templates->start->opcode_modifier.jump != JUMP_DWORD)
 	    suffix = got_a_float /* so it will cause an error */
 		     ? BYTE_MNEM_SUFFIX
 		     : LONG_DOUBLE_MNEM_SUFFIX;
@@ -739,9 +740,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
     }
 
   /* Operands for jump/call need special consideration.  */
-  if (current_templates->start->opcode_modifier.jump
-      || current_templates->start->opcode_modifier.jumpdword
-      || current_templates->start->opcode_modifier.jumpintersegment)
+  if (current_templates->start->opcode_modifier.jump == JUMP
+      || current_templates->start->opcode_modifier.jump == JUMP_DWORD
+      || current_templates->start->opcode_modifier.jump == JUMP_INTERSEGMENT)
     {
       bfd_boolean jumpabsolute = FALSE;
 
@@ -857,9 +858,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	     ljmp	0x9090,0x90909090
 	   */
 
-	  if ((current_templates->start->opcode_modifier.jumpintersegment
-	       || current_templates->start->opcode_modifier.jumpdword
-	       || current_templates->start->opcode_modifier.jump)
+	  if ((current_templates->start->opcode_modifier.jump == JUMP_INTERSEGMENT
+	       || current_templates->start->opcode_modifier.jump == JUMP_DWORD
+	       || current_templates->start->opcode_modifier.jump == JUMP)
 	      && this_operand == 1
 	      && intel_state.seg == NULL
 	      && i.mem_operands == 1

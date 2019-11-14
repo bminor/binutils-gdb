@@ -1,5 +1,13 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (operand_size_match, md_assemble,
+	parse_insn, match_template, process_suffix, output_jump,
+	output_insn, i386_displacement): Adjust jump* field use/
+	handling.
+	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (struct _i386_insn): Add jumpabsolute field.
 	(operand_type_match): Drop jumpabsolute use.
 	(type_names): Remove OPERAND_TYPE_JUMPABSOLUTE entry.

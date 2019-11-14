@@ -1,5 +1,18 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (opcode_modifiers): Remove JumpDword, JumpByte,
+	JumpInterSegment, and JumpAbsolute entries.
+	* i386-opc.h (JUMP, JUMP_DWORD, JUMP_BYTE, JUMP_INTERSEGMENT,
+	JUMP_ABSOLUTE): Define.
+	(struct i386_opcode_modifier): Extend jump field to 3 bits.
+	Remove jumpdword, jumpbyte, jumpintersegment, and jumpabsolute
+	fields.
+	* i386-opc.tbl (JumpByte, JumpDword, JumpAbsolute,
+	JumpInterSegment): Define.
+	* i386-tbl.h: Re-generate.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (operand_type_init): Remove
 	OPERAND_TYPE_JUMPABSOLUTE entry.
 	(opcode_modifiers): Add JumpAbsolute entry.

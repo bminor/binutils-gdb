@@ -53,6 +53,11 @@
 
 #define RegBND Class=RegBND
 
+#define JumpByte         Jump=JUMP_BYTE
+#define JumpDword        Jump=JUMP_DWORD
+#define JumpAbsolute     Jump=JUMP_ABSOLUTE
+#define JumpInterSegment Jump=JUMP_INTERSEGMENT
+
 #define Size16 Size=SIZE16
 #define Size32 Size=SIZE32
 #define Size64 Size=SIZE64
