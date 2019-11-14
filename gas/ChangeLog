@@ -1,3 +1,15 @@
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/intel-cmps.s,
+	testsuite/gas/i386/intel-movs.s: Extend.
+	* testsuite/gas/i386/intel-cmps32.d,
+	testsuite/gas/i386/intel-cmps64.d,
+	testsuite/gas/i386/intel-movs32.d,
+	testsuite/gas/i386/intel-movs64.d: Adjust expectations.
+	* testsuite/gas/i386/intel-cmps16.d,
+	testsuite/gas/i386/intel-movs16.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
 2019-11-12  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/gas/riscv/insn.d: Add the f extension to -march option.
