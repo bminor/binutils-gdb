@@ -38,6 +38,8 @@
    relocations for the debug info.  */
 static bfd_reloc_status_type riscv_elf_add_sub_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
+static bfd_reloc_status_type riscv_elf_ignore_reloc
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 /* The relocation table used for SHT_RELA sections.  */
 
@@ -844,6 +846,39 @@ static reloc_howto_type howto_table[] =
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
 	 false),			/* pcrel_offset */
+
+  /* Reserved for R_RISCV_PLT32.  */
+  EMPTY_HOWTO (59),
+
+  /* N-bit in-place setting, for unsigned-leb128 local label subtraction.  */
+  HOWTO (R_RISCV_SET_ULEB128,		/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 riscv_elf_ignore_reloc,	/* special_function */
+	 "R_RISCV_SET_ULEB128",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  /* N-bit in-place addition, for unsigned-leb128 local label subtraction.  */
+  HOWTO (R_RISCV_SUB_ULEB128,		/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 riscv_elf_ignore_reloc,	/* special_function */
+	 "R_RISCV_SUB_ULEB128",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */
@@ -905,6 +940,8 @@ static const struct elf_reloc_map riscv_reloc_map[] =
   { BFD_RELOC_RISCV_SET16, R_RISCV_SET16 },
   { BFD_RELOC_RISCV_SET32, R_RISCV_SET32 },
   { BFD_RELOC_RISCV_32_PCREL, R_RISCV_32_PCREL },
+  { BFD_RELOC_RISCV_SET_ULEB128, R_RISCV_SET_ULEB128 },
+  { BFD_RELOC_RISCV_SUB_ULEB128, R_RISCV_SUB_ULEB128 },
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
@@ -1007,6 +1044,23 @@ riscv_elf_add_sub_reloc (bfd *abfd,
     }
   bfd_put (howto->bitsize, abfd, relocation, data + reloc_entry->address);
 
+  return bfd_reloc_ok;
+}
+
+/* Special handler for relocations which don't have to be relocated.
+   This function just simply return bfd_reloc_ok.  */
+
+static bfd_reloc_status_type
+riscv_elf_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+			arelent *reloc_entry,
+			asymbol *symbol ATTRIBUTE_UNUSED,
+			void *data ATTRIBUTE_UNUSED,
+			asection *input_section,
+			bfd *output_bfd,
+			char **error_message ATTRIBUTE_UNUSED)
+{
+  if (output_bfd != NULL)
+    reloc_entry->address += input_section->output_offset;
   return bfd_reloc_ok;
 }
 

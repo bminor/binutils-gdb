@@ -246,8 +246,6 @@ if [is_elf_format] {
     # Test nm --line-numbers on DWARF-4 debug info.    
     set testname "nm --line-numbers on DWARF-4 debug info"
 
-    # The RISCV target does not (currently) support .uleb128.
-    setup_xfail "riscv*-*-*"
     # The SH targets complain that the pseudo-ops used to construct
     # the DWARF data are misaligned.
     setup_xfail "sh*-*-*"

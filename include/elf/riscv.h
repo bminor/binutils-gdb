@@ -87,6 +87,9 @@ START_RELOC_NUMBERS (elf_riscv_reloc_type)
   RELOC_NUMBER (R_RISCV_SET32, 56)
   RELOC_NUMBER (R_RISCV_32_PCREL, 57)
   RELOC_NUMBER (R_RISCV_IRELATIVE, 58)
+  /* Reserved 59 for R_RISCV_PLT32.  */
+  RELOC_NUMBER (R_RISCV_SET_ULEB128, 60)
+  RELOC_NUMBER (R_RISCV_SUB_ULEB128, 61)
 END_RELOC_NUMBERS (R_RISCV_max)
 
 /* Processor specific flags for the ELF header e_flags field.  */

@@ -3950,6 +3950,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_RISCV_SUB32:
     case BFD_RELOC_RISCV_SUB64:
     case BFD_RELOC_RISCV_RELAX:
+    /* cvt_frag_to_fill () has called output_leb128 ().  */
+    case BFD_RELOC_RISCV_SET_ULEB128:
+    case BFD_RELOC_RISCV_SUB_ULEB128:
       break;
 
     case BFD_RELOC_RISCV_TPREL_HI20:
@@ -4714,8 +4717,11 @@ s_riscv_leb128 (int sign)
   char *save_in = input_line_pointer;
 
   expression (&exp);
-  if (exp.X_op != O_constant)
-    as_bad (_("non-constant .%cleb128 is not supported"), sign ? 's' : 'u');
+  if (sign && exp.X_op != O_constant)
+    as_bad (_("non-constant .sleb128 is not supported"));
+  else if (!sign && exp.X_op != O_constant && exp.X_op != O_subtract)
+    as_bad (_(".uleb128 only supports constant or subtract expressions"));
+
   demand_empty_rest_of_line ();
 
   input_line_pointer = save_in;
@@ -4835,12 +4841,58 @@ riscv_set_public_attributes (void)
     riscv_write_out_attrs ();
 }
 
+/* Scan uleb128 subtraction expressions and insert fixups for them.
+   e.g., .uleb128 .L1 - .L0
+   Because relaxation may change the value of the subtraction, we
+   must resolve them at link-time.  */
+
+static void
+riscv_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *sec, void *xxx ATTRIBUTE_UNUSED)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  struct frag *fragP;
+
+  subseg_set (sec, 0);
+
+  for (fragP = seginfo->frchainP->frch_root;
+       fragP; fragP = fragP->fr_next)
+    {
+      expressionS *exp, *exp_dup;
+
+      if (fragP->fr_type != rs_leb128  || fragP->fr_symbol == NULL)
+	continue;
+
+      exp = symbol_get_value_expression (fragP->fr_symbol);
+
+      if (exp->X_op != O_subtract)
+	continue;
+
+      /* Only unsigned leb128 can be handled.  */
+      gas_assert (fragP->fr_subtype == 0);
+      exp_dup = xmemdup (exp, sizeof (*exp), sizeof (*exp));
+      exp_dup->X_op = O_symbol;
+      exp_dup->X_op_symbol = NULL;
+
+      /* Insert relocations to resolve the subtraction at link-time.
+	 Emit the SET relocation first in riscv.  */
+      exp_dup->X_add_symbol = exp->X_add_symbol;
+      fix_new_exp (fragP, fragP->fr_fix, 0,
+		   exp_dup, 0, BFD_RELOC_RISCV_SET_ULEB128);
+      exp_dup->X_add_symbol = exp->X_op_symbol;
+      fix_new_exp (fragP, fragP->fr_fix, 0,
+		   exp_dup, 0, BFD_RELOC_RISCV_SUB_ULEB128);
+    }
+}
+
 /* Called after all assembly has been done.  */
 
 void
 riscv_md_finish (void)
 {
   riscv_set_public_attributes ();
+  if (riscv_opts.relax)
+    bfd_map_over_sections (stdoutput, riscv_insert_uleb128_fixes, NULL);
 }
 
 /* Adjust the symbol table.  */

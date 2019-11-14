@@ -1792,6 +1792,55 @@ perform_relocation (const reloc_howto_type *howto,
 	value = ENCODE_CITYPE_LUI_IMM (RISCV_CONST_HIGH_PART (value));
       break;
 
+    /* SUB_ULEB128 must be applied after SET_ULEB128, so we only write the
+       value back for SUB_ULEB128 should be enough.  */
+    case R_RISCV_SET_ULEB128:
+      break;
+    case R_RISCV_SUB_ULEB128:
+      {
+	unsigned int len = 0;
+	_bfd_read_unsigned_leb128 (input_bfd, contents + rel->r_offset, &len);
+
+	/* Clean the contents value to zero (0x80), but keep the original
+	   length.  */
+	bfd_byte *p = contents + rel->r_offset;
+	bfd_byte *endp = p + len - 1;
+	memset (p, 0x80, len - 1);
+	*(endp) = 0;
+
+	/* Make sure the length of the new uleb128 value within the
+	   original (available) length.  */
+	unsigned int new_len = 0;
+	unsigned int val_t = value;
+	do
+	  {
+	    new_len++;
+	    val_t >>= 7;
+	  }
+	while (val_t);
+	if (new_len > len)
+	  {
+	    _bfd_error_handler
+	      (_("final size of uleb128 value at offset 0x%lx in %pA from "
+		 "%pB exceeds available space"),
+	       (long) rel->r_offset, input_section, input_bfd);
+	    return bfd_reloc_dangerous;
+	  }
+	else
+	  {
+	    p = _bfd_write_unsigned_leb128 (p, endp, value);
+	    BFD_ASSERT (p);
+
+	    /* If the length of the value is reduced and shorter than the
+	       original uleb128 length, then _bfd_write_unsigned_leb128 may
+	       clear the 0x80 to 0x0 for the last byte that was written.
+	       So reset it to keep the the original uleb128 length.  */
+	    if (--p < endp)
+	      *p |= 0x80;
+	  }
+	return bfd_reloc_ok;
+      }
+
     case R_RISCV_32:
     case R_RISCV_64:
     case R_RISCV_ADD8:
@@ -2086,6 +2135,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
+  bfd_vma uleb128_set_vma = 0;
+  Elf_Internal_Rela *uleb128_set_rel = NULL;
   bool absolute;
 
   if (!riscv_init_pcrel_relocs (&pcrel_relocs))
@@ -2425,6 +2476,38 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_32_PCREL:
 	case R_RISCV_DELETE:
 	  /* These require no special handling beyond perform_relocation.  */
+	  break;
+
+	case R_RISCV_SET_ULEB128:
+	  if (uleb128_set_rel == NULL)
+	    {
+	      /* Saved for later usage.  */
+	      uleb128_set_vma = relocation;
+	      uleb128_set_rel = rel;
+	      continue;
+	    }
+	  else
+	    {
+	      msg = ("Mismatched R_RISCV_SET_ULEB128, it must be paired with"
+		     "and applied before R_RISCV_SUB_ULEB128");
+	      r = bfd_reloc_dangerous;
+	    }
+	  break;
+
+	case R_RISCV_SUB_ULEB128:
+	  if (uleb128_set_rel != NULL
+	      && uleb128_set_rel->r_offset == rel->r_offset)
+	    {
+	      relocation = uleb128_set_vma - relocation;
+	      uleb128_set_vma = 0;
+	      uleb128_set_rel = NULL;
+	    }
+	  else
+	    {
+	      msg = ("Mismatched R_RISCV_SUB_ULEB128, it must be paired with"
+		     "and applied after R_RISCV_SET_ULEB128");
+	      r = bfd_reloc_dangerous;
+	    }
 	  break;
 
 	case R_RISCV_GOT_HI20:
