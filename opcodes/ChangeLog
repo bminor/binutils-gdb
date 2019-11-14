@@ -1,5 +1,10 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (syscall, sysret): Drop Cpu64 forms.
+	* i386-tbl.h: Re-generate.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (opcode_modifiers): Remove JumpDword, JumpByte,
 	JumpInterSegment, and JumpAbsolute entries.
 	* i386-opc.h (JUMP, JUMP_DWORD, JUMP_BYTE, JUMP_INTERSEGMENT,
