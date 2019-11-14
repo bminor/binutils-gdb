@@ -1,3 +1,17 @@
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (opcode_modifiers): Add AnySize entry.
+	(operand_types): Remove AnySize entry.
+	* i386-opc.h (AnySize): Move between enums.
+	(struct i386_opcode_modifier): Add anysize field.
+	(OTUnused): Un-comment.
+	(union i386_operand_type): Remove anysize field.
+	* i386-opc.tbl (lea, invlpg, clflush, prefetchnta, prefetcht0,
+	prefetcht1, prefetcht2, prefetchtw, bndmk, bndcl, bndcu, bndcn,
+	bndstx, bndldx, prefetchwt1, clflushopt, clwb, cldemote): Move
+	AnySize.
+	* i386-tbl.h: Re-generate.
+
 2019-11-12  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (riscv_insn_types): Replace the INSN_CLASS_I with

@@ -626,6 +626,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (CheckRegSize),
   BITFIELD (IgnoreSize),
   BITFIELD (DefaultSize),
+  BITFIELD (Anysize),
   BITFIELD (No_bSuf),
   BITFIELD (No_wSuf),
   BITFIELD (No_lSuf),
@@ -733,7 +734,6 @@ static bitfield operand_types[] =
   BITFIELD (Ymmword),
   BITFIELD (Zmmword),
   BITFIELD (Unspecified),
-  BITFIELD (Anysize),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif

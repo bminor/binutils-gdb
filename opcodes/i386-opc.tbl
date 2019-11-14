@@ -191,7 +191,7 @@ out, 1, 0xe6, None, 1, 0, W|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
 out, 1, 0xee, None, 1, 0, W|No_sSuf|No_qSuf|No_ldSuf, { InOutPortReg }
 
 // Load effective address.
-lea, 2, 0x8d, None, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Anysize|BaseIndex, Reg16|Reg32|Reg64 }
+lea, 2, 0x8d, None, 1, 0, Modrm|Anysize|No_bSuf|No_sSuf|No_ldSuf, { BaseIndex, Reg16|Reg32|Reg64 }
 
 // Load segment registers from memory.
 lds, 2, 0xc5, None, 1, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
@@ -890,7 +890,7 @@ xadd, 2, 0xfc0, None, 2, Cpu486, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|IsLockabl
 cmpxchg, 2, 0xfb0, None, 2, Cpu486, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|IsLockable|HLEPrefixOk, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 invd, 0, 0xf08, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 wbinvd, 0, 0xf09, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-invlpg, 1, 0xf01, 0x7, 2, Cpu486, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+invlpg, 1, 0xf01, 0x7, 2, Cpu486, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // 586 and late 486 extensions.
 cpuid, 0, 0xfa2, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -986,7 +986,7 @@ fucompi, 1, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 // Pentium4 extensions.
 
 movnti, 2, 0xfc3, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoAVX, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 lfence, 0, 0xfaee8, None, 3, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { 0 }
 mfence, 0, 0xfaef0, None, 3, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { 0 }
 // Processors that do not support PAUSE treat this opcode as a NOP instruction.
@@ -1332,10 +1332,10 @@ pmovmskb, 2, 0xfd7, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|
 pmulhuw, 2, 0x66e4, None, 1, CpuAVX, Modrm|C|Vex|VexOpcode=0|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmulhuw, 2, 0x660fe4, None, 2, CpuSSE2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmulhuw, 2, 0xfe4, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-prefetchnta, 1, 0xf18, 0x0, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex }
-prefetcht0, 1, 0xf18, 0x1, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex }
-prefetcht1, 1, 0xf18, 0x2, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex }
-prefetcht2, 1, 0xf18, 0x3, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex }
+prefetchnta, 1, 0xf18, 0x0, 2, CpuSSE|Cpu3dnowA, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { BaseIndex }
+prefetcht0, 1, 0xf18, 0x1, 2, CpuSSE|Cpu3dnowA, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { BaseIndex }
+prefetcht1, 1, 0xf18, 0x2, 2, CpuSSE|Cpu3dnowA, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { BaseIndex }
+prefetcht2, 1, 0xf18, 0x3, 2, CpuSSE|Cpu3dnowA, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { BaseIndex }
 psadbw, 2, 0xff6, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 psadbw, 2, 0x66f6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 psadbw, 2, 0x660ff6, None, 2, CpuSSE2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -2776,8 +2776,8 @@ tzmsk,  2, 0x01,   0x4, 1, CpuTBM, Modrm|CheckRegSize|Vex128|VexOpcode=4|VexVVVV
 
 // AMD 3DNow! instructions.
 
-prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
-prefetchw, 1, 0xf0d, 0x1, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow|CpuPRFCHW, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
+prefetchw, 1, 0xf0d, 0x1, 2, Cpu3dnow|CpuPRFCHW, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 femms, 0, 0xf0e, None, 2, Cpu3dnow, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 pavgusb, 2, 0xf0f, 0xbf, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 pf2id, 2, 0xf0f, 0x1d, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
@@ -2877,16 +2877,16 @@ stac, 0, 0xf01cb, None, 3, CpuSMAP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_l
 bnd, 0, 0xf2, None, 1, CpuMPX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, { 0 }
 
 // MPX instructions.
-bndmk, 2, 0xf30f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex, RegBND }
+bndmk, 2, 0xf30f1b, None, 2, CpuMPX, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex, RegBND }
 bndmov, 2, 0x660f1a, None, 2, CpuMPX, D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegBND, RegBND }
-bndcl, 2, 0xf30f1a, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex, RegBND }
-bndcl, 2, 0xf30f1a, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex, RegBND }
-bndcu, 2, 0xf20f1a, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex, RegBND }
-bndcu, 2, 0xf20f1a, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex, RegBND }
-bndcn, 2, 0xf20f1b, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex, RegBND }
-bndcn, 2, 0xf20f1b, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex, RegBND }
-bndstx, 2, 0x0f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Anysize|BaseIndex }
-bndldx, 2, 0x0f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex, RegBND }
+bndcl, 2, 0xf30f1a, None, 2, CpuMPX|CpuNo64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|BaseIndex, RegBND }
+bndcl, 2, 0xf30f1a, None, 2, CpuMPX|Cpu64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|BaseIndex, RegBND }
+bndcu, 2, 0xf20f1a, None, 2, CpuMPX|CpuNo64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|BaseIndex, RegBND }
+bndcu, 2, 0xf20f1a, None, 2, CpuMPX|Cpu64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|BaseIndex, RegBND }
+bndcn, 2, 0xf20f1b, None, 2, CpuMPX|CpuNo64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|BaseIndex, RegBND }
+bndcn, 2, 0xf20f1b, None, 2, CpuMPX|Cpu64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|BaseIndex, RegBND }
+bndstx, 2, 0x0f1b, None, 2, CpuMPX, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, BaseIndex }
+bndldx, 2, 0x0f1a, None, 2, CpuMPX, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex, RegBND }
 
 // SHA instructions.
 sha1rnds4, 3, 0xf3acc, None, 3, CpuSHA, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -4024,13 +4024,13 @@ vscatterpf1qps, 1, 0x66C7, 6, 1, CpuAVX512PF, Modrm|EVex=1|Masking=2|NoDefMask|V
 
 // CpuPREFETCHWT1 instructions.
 
-prefetchwt1, 1, 0x0F0D, 2, 2, CpuPREFETCHWT1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+prefetchwt1, 1, 0x0F0D, 2, 2, CpuPREFETCHWT1, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // CpuPREFETCHWT1 instructions end.
 
 // CLFLUSHOPT instructions.
 
-clflushopt, 1, 0x660fae, 0x7, 2, CpuClflushOpt, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+clflushopt, 1, 0x660fae, 0x7, 2, CpuClflushOpt, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // CLFLUSHOPT instructions end.
 
@@ -4544,7 +4544,7 @@ vreducess, 5, 0x6657, None, 1, CpuAVX512DQ, Modrm|EVex=4|Masking=3|VexOpcode=2|V
 
 // CLWB instructions.
 
-clwb, 1, 0x660fae, 0x6, 2, CpuCLWB, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+clwb, 1, 0x660fae, 0x6, 2, CpuCLWB, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // CLWB instructions end.
 
@@ -4750,7 +4750,7 @@ umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 
 // CLDEMOTE instructions.
 
-cldemote, 1, 0x0f1c, 0x0, 2, CpuCLDEMOTE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex }
+cldemote, 1, 0x0f1c, 0x0, 2, CpuCLDEMOTE, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // CLDEMOTE instructions end.
 

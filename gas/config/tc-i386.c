@@ -2075,7 +2075,7 @@ operand_size_match (const insn_template *t)
     {
       if (i.types[j].bitfield.class != Reg
 	  && i.types[j].bitfield.class != RegSIMD
-	  && t->operand_types[j].bitfield.anysize)
+	  && t->opcode_modifier.anysize)
 	continue;
 
       if (t->operand_types[j].bitfield.class == Reg

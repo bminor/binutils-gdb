@@ -1,5 +1,9 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (operand_size_match): Adjust anysize use.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/intel-cmps32.d,
 	testsuite/gas/i386/intel-cmps64.d: Correct regexp closing
 	parentheses placement.

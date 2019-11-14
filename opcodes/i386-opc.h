@@ -429,6 +429,8 @@ enum
   IgnoreSize,
   /* default insn size depends on mode */
   DefaultSize,
+  /* any memory size */
+  Anysize,
   /* b suffix on instruction illegal */
   No_bSuf,
   /* w suffix on instruction illegal */
@@ -658,6 +660,7 @@ typedef struct i386_opcode_modifier
   unsigned int checkregsize:1;
   unsigned int ignoresize:1;
   unsigned int defaultsize:1;
+  unsigned int anysize:1;
   unsigned int no_bsuf:1;
   unsigned int no_wsuf:1;
   unsigned int no_lsuf:1;
@@ -796,8 +799,6 @@ enum
   Zmmword,
   /* Unspecified memory size.  */
   Unspecified,
-  /* Any memory size.  */
-  Anysize,
 
   /* The number of bits in i386_operand_type.  */
   OTNum
@@ -809,9 +810,8 @@ enum
   (OTNumOfUints * sizeof (unsigned int) * CHAR_BIT)
 
 /* If you get a compiler error for zero width of the unused field,
-   comment it out.
+   comment it out.  */
 #define OTUnused		OTNum
-*/
 
 typedef union i386_operand_type
 {
@@ -843,7 +843,6 @@ typedef union i386_operand_type
       unsigned int ymmword:1;
       unsigned int zmmword:1;
       unsigned int unspecified:1;
-      unsigned int anysize:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif
