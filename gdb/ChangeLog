@@ -1,3 +1,10 @@
+2019-11-21  Tom Tromey  <tromey@adacore.com>
+
+	* gdbsupport/format.c (format_pieces): Parse %I64d.
+	* unittests/format_pieces-selftests.c (test_windows_formats): New
+	function.
+	(run_tests): Call it.
+
 2019-11-21  Peeter Joot  <peeter.joot@lzlabs.com>
 
 	Byte reverse display of variables with DW_END_big, DW_END_little

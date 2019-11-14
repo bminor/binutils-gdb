@@ -126,6 +126,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 	int seen_size_t = 0;
 	int bad = 0;
 	int n_int_args = 0;
+	bool seen_i64 = false;
 
 	/* Skip over "%%", it will become part of a literal piece.  */
 	if (*f == '%')
@@ -195,13 +196,13 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 	  }
 
 	/* The next part of a format specifier is a length modifier.  */
-	if (*f == 'h')
+	switch (*f)
 	  {
+	  case 'h':
 	    seen_h = 1;
 	    f++;
-	  }
-	else if (*f == 'l')
-	  {
+	    break;
+	  case 'l':
 	    f++;
 	    lcount++;
 	    if (*f == 'l')
@@ -209,21 +210,18 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 		f++;
 		lcount++;
 	      }
-	  }
-	else if (*f == 'L')
-	  {
+	    break;
+	  case 'L':
 	    seen_big_l = 1;
 	    f++;
-	  }
-	/* Decimal32 modifier.  */
-	else if (*f == 'H')
-	  {
+	    break;
+	  case 'H':
+	    /* Decimal32 modifier.  */
 	    seen_big_h = 1;
 	    f++;
-	  }
-	/* Decimal64 and Decimal128 modifiers.  */
-	else if (*f == 'D')
-	  {
+	    break;
+	  case 'D':
+	    /* Decimal64 and Decimal128 modifiers.  */
 	    f++;
 
 	    /* Check for a Decimal128.  */
@@ -234,13 +232,24 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 	      }
 	    else
 	      seen_big_d = 1;
-	  }
-	/* For size_t or ssize_t.  */
-	else if (*f == 'z')
-	  {
+	    break;
+	  case 'z':
+	    /* For size_t or ssize_t.  */
 	    seen_size_t = 1;
 	    f++;
-	  }
+	    break;
+	  case 'I':
+	    /* Support the Windows '%I64' extension, because an
+	       earlier call to format_pieces might have converted %lld
+	       to %I64d.  */
+	    if (f[1] == '6' && f[2] == '4')
+	      {
+		f += 3;
+		lcount = 2;
+		seen_i64 = true;
+	      }
+	    break;
+	}
 
 	switch (*f)
 	  {
@@ -353,7 +362,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 
 	sub_start = current_substring;
 
-	if (lcount > 1 && USE_PRINTF_I64)
+	if (lcount > 1 && !seen_i64 && USE_PRINTF_I64)
 	  {
 	    /* Windows' printf does support long long, but not the usual way.
 	       Convert %lld to %I64d.  */

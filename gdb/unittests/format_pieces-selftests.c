@@ -120,12 +120,23 @@ test_format_int_sizes ()
 }
 
 static void
+test_windows_formats ()
+{
+  check ("rc%I64d",
+    {
+     format_piece ("rc", literal_piece, 0),
+     format_piece ("%I64d", long_long_arg, 0),
+    });
+}
+
+static void
 run_tests ()
 {
   test_escape_sequences ();
   test_format_specifier ();
   test_gdb_formats ();
   test_format_int_sizes ();
+  test_windows_formats ();
 }
 
 } /* namespace format_pieces */
