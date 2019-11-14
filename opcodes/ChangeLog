@@ -1,5 +1,17 @@
 2019-11-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Remove
+	OPERAND_TYPE_JUMPABSOLUTE entry.
+	(opcode_modifiers): Add JumpAbsolute entry.
+	(operand_types): Remove JumpAbsolute entry.
+	* i386-opc.h (JumpAbsolute): Move between enums.
+	(struct i386_opcode_modifier): Add jumpabsolute field.
+	(union i386_operand_type): Remove jumpabsolute field.
+	* i386-opc.tbl (call, lcall, jmp, ljmp): Move JumpAbsolute.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2019-11-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (opcode_modifiers): Add AnySize entry.
 	(operand_types): Remove AnySize entry.
 	* i386-opc.h (AnySize): Move between enums.

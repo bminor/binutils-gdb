@@ -353,6 +353,9 @@ struct _i386_insn
     unsigned int prefixes;
     unsigned char prefix[MAX_PREFIXES];
 
+    /* The operand to a branch insn indicates an absolute branch.  */
+    bfd_boolean jumpabsolute;
+
     /* Has MMX register operands.  */
     bfd_boolean has_regmmx;
 
@@ -2147,7 +2150,6 @@ operand_type_match (i386_operand_type overlap,
 {
   i386_operand_type temp = overlap;
 
-  temp.bitfield.jumpabsolute = 0;
   temp.bitfield.unspecified = 0;
   temp.bitfield.byte = 0;
   temp.bitfield.word = 0;
@@ -2161,8 +2163,7 @@ operand_type_match (i386_operand_type overlap,
   if (operand_type_all_zero (&temp))
     goto mismatch;
 
-  if (given.bitfield.baseindex == overlap.bitfield.baseindex
-      && given.bitfield.jumpabsolute == overlap.bitfield.jumpabsolute)
+  if (given.bitfield.baseindex == overlap.bitfield.baseindex)
     return 1;
 
 mismatch:
@@ -3155,7 +3156,6 @@ const type_names[] =
   { OPERAND_TYPE_FLOATREG, "FReg" },
   { OPERAND_TYPE_FLOATACC, "FAcc" },
   { OPERAND_TYPE_SREG, "SReg" },
-  { OPERAND_TYPE_JUMPABSOLUTE, "Jump Absolute" },
   { OPERAND_TYPE_REGMMX, "rMMX" },
   { OPERAND_TYPE_REGXMM, "rXMM" },
   { OPERAND_TYPE_REGYMM, "rYMM" },
@@ -5743,6 +5743,18 @@ match_template (char mnem_suffix)
       if (!size_match)
 	continue;
 
+      /* This is intentionally not
+
+	 if (i.jumpabsolute != t->opcode_modifier.jumpabsolute)
+
+	 as the case of a missing * on the operand is accepted (perhaps with
+	 a warning, issued further down).  */
+      if (i.jumpabsolute && !t->opcode_modifier.jumpabsolute)
+	{
+	  i.error = operand_type_mismatch;
+	  continue;
+	}
+
       for (j = 0; j < MAX_OPERANDS; j++)
 	operand_types[j] = t->operand_types[j];
 
@@ -6120,11 +6132,8 @@ check_reverse:
   if (!quiet_warnings)
     {
       if (!intel_syntax
-	  && (i.types[0].bitfield.jumpabsolute
-	      != operand_types[0].bitfield.jumpabsolute))
-	{
-	  as_warn (_("indirect %s without `*'"), t->name);
-	}
+	  && (i.jumpabsolute != t->opcode_modifier.jumpabsolute))
+	as_warn (_("indirect %s without `*'"), t->name);
 
       if (t->opcode_modifier.isprefix
 	  && t->opcode_modifier.ignoresize)
@@ -6322,7 +6331,7 @@ process_suffix (void)
     }
   else if (intel_syntax
 	   && !i.suffix
-	   && (i.tm.operand_types[0].bitfield.jumpabsolute
+	   && (i.tm.opcode_modifier.jumpabsolute
 	       || i.tm.opcode_modifier.jumpbyte
 	       || i.tm.opcode_modifier.jumpintersegment
 	       || (i.tm.base_opcode == 0x0f01 /* [ls][gi]dt */
@@ -9464,7 +9473,7 @@ i386_displacement (char *disp_start, char *disp_end)
     }
 
   operand_type_set (&bigdisp, 0);
-  if ((i.types[this_operand].bitfield.jumpabsolute)
+  if (i.jumpabsolute
       || (!current_templates->start->opcode_modifier.jump
 	  && !current_templates->start->opcode_modifier.jumpdword))
     {
@@ -9995,7 +10004,7 @@ i386_att_operand (char *operand_string)
       ++op_string;
       if (is_space_char (*op_string))
 	++op_string;
-      i.types[this_operand].bitfield.jumpabsolute = 1;
+      i.jumpabsolute = TRUE;
     }
 
   /* Check if operand is a register.  */
@@ -10051,7 +10060,7 @@ i386_att_operand (char *operand_string)
 	      ++op_string;
 	      if (is_space_char (*op_string))
 		++op_string;
-	      i.types[this_operand].bitfield.jumpabsolute = 1;
+	      i.jumpabsolute = TRUE;
 	    }
 	  goto do_memory_reference;
 	}
@@ -10085,7 +10094,7 @@ i386_att_operand (char *operand_string)
   else if (*op_string == IMMEDIATE_PREFIX)
     {
       ++op_string;
-      if (i.types[this_operand].bitfield.jumpabsolute)
+      if (i.jumpabsolute)
 	{
 	  as_bad (_("immediate operand illegal with absolute jump"));
 	  return 0;

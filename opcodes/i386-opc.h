@@ -411,6 +411,8 @@ enum
   JumpByte,
   /* special case for intersegment leaps/calls */
   JumpInterSegment,
+  /* absolute address for jump */
+  JumpAbsolute,
   /* FP insn memory format bit, sized by 0x4 */
   FloatMF,
   /* src/dest swap for floats. */
@@ -654,6 +656,7 @@ typedef struct i386_opcode_modifier
   unsigned int jumpdword:1;
   unsigned int jumpbyte:1;
   unsigned int jumpintersegment:1;
+  unsigned int jumpabsolute:1;
   unsigned int floatmf:1;
   unsigned int floatr:1;
   unsigned int size:2;
@@ -777,8 +780,6 @@ enum
   Disp64,
   /* Register which can be used for base or index in memory operand.  */
   BaseIndex,
-  /* Absolute address for jump.  */
-  JumpAbsolute,
   /* BYTE size. */
   Byte,
   /* WORD size. 2 byte */
@@ -832,7 +833,6 @@ typedef union i386_operand_type
       unsigned int disp32s:1;
       unsigned int disp64:1;
       unsigned int baseindex:1;
-      unsigned int jumpabsolute:1;
       unsigned int byte:1;
       unsigned int word:1;
       unsigned int dword:1;
