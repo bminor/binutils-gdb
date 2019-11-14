@@ -1,3 +1,9 @@
+2019-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 2587
+	* Makefile.am (SUFFIXES): Add .c.
+	* Makefile.in: Regenerate.
+
 2019-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 2587
