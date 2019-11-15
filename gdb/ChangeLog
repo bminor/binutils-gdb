@@ -1,5 +1,10 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-cmd.c (cmdpy_destroyer): Don't free "doc".
+	(cmdpy_init): Set "doc_allocated".
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/thread-pool.c (thread_pool::set_thread_count): Set
 	name of worker thread.
 	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for
