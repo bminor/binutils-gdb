@@ -1,5 +1,14 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* value.h (add_internal_function): Add new overload.  Move
+	documentation from value.h.
+	* value.c (do_add_internal_function): New function.
+	(add_internal_function): Use it.  Add new overload.
+	(function_destroyer): Don't free doc.
+	* python/py-function.c (fnpy_init): Update.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-cmd.c (cmdpy_destroyer): Don't free "doc".
 	(cmdpy_init): Set "doc_allocated".
 

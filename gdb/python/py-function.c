@@ -127,7 +127,7 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (! docstring)
     docstring.reset (xstrdup (_("This function is not documented.")));
 
-  add_internal_function (name, docstring.release (), fnpy_call,
+  add_internal_function (name, std::move (docstring), fnpy_call,
 			 self_ref.release ());
   return 0;
 }

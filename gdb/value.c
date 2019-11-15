@@ -2426,17 +2426,13 @@ static void
 function_destroyer (struct cmd_list_element *self, void *ignore)
 {
   xfree ((char *) self->name);
-  xfree ((char *) self->doc);
 }
 
-/* Add a new internal function.  NAME is the name of the function; DOC
-   is a documentation string describing the function.  HANDLER is
-   called when the function is invoked.  COOKIE is an arbitrary
-   pointer which is passed to HANDLER and is intended for "user
-   data".  */
-void
-add_internal_function (const char *name, const char *doc,
-		       internal_function_fn handler, void *cookie)
+/* Helper function that does the work for add_internal_function.  */
+
+static struct cmd_list_element *
+do_add_internal_function (const char *name, const char *doc,
+			  internal_function_fn handler, void *cookie)
 {
   struct cmd_list_element *cmd;
   struct internal_function *ifn;
@@ -2448,6 +2444,29 @@ add_internal_function (const char *name, const char *doc,
   cmd = add_cmd (xstrdup (name), no_class, function_command, (char *) doc,
 		 &functionlist);
   cmd->destroyer = function_destroyer;
+
+  return cmd;
+}
+
+/* See value.h.  */
+
+void
+add_internal_function (const char *name, const char *doc,
+		       internal_function_fn handler, void *cookie)
+{
+  do_add_internal_function (name, doc, handler, cookie);
+}
+
+/* See value.h.  */
+
+void
+add_internal_function (const char *name, gdb::unique_xmalloc_ptr<char> &&doc,
+		       internal_function_fn handler, void *cookie)
+{
+  struct cmd_list_element *cmd
+    = do_add_internal_function (name, doc.get (), handler, cookie);
+  doc.release ();
+  cmd->doc_allocated = 1;
 }
 
 /* Update VALUE before discarding OBJFILE.  COPIED_TYPES is used to
