@@ -8450,9 +8450,6 @@ $as_echo "#define STRERROR_R_CHAR_P 0" >>confdefs.h
 
 
 
-  XGETTEXT_EXTRA_OPTIONS=
-
-
 
 
 
@@ -17587,13 +17584,6 @@ $as_echo "$ac_cv_lib_error_at_line" >&6; }
   :
 
   fi
-
-
-  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error:3:c-format"
-
-
-
-  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error_at_line:5:c-format"
 
 
 
@@ -28021,8 +28011,6 @@ fi
 
 
 
-# We don't use automake, but gnulib does.  This line lets us generate
-# its Makefile.in.
 am__api_version='1.15'
 
 # Find a good install program.  We prefer a C program (faster),

@@ -37,9 +37,7 @@ AC_CANONICAL_SYSTEM
 
 gl_INIT
 
-# We don't use automake, but gnulib does.  This line lets us generate
-# its Makefile.in.
-AM_INIT_AUTOMAKE([no-define foreign])
+AM_INIT_AUTOMAKE([no-define no-dist foreign])
 
 AM_SILENT_RULES([yes])
 

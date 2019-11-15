@@ -1,3 +1,9 @@
+2019-11-15  Tom Tromey  <tromey@adacore.com>
+
+	* aclocal.m4, configure, Makefile.in, import/Makefile.in:
+	Rebuild.
+	* configure.ac: Remove obsolete comment.  Add no-dist.
+
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Regenerate.
