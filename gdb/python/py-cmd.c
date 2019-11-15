@@ -98,8 +98,7 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
   gdbpy_ref<cmdpy_object> cmd ((cmdpy_object *) context);
   cmd->command = NULL;
 
-  /* We allocated the name and perhaps the prefix name.  */
-  xfree ((char *) self->name);
+  /* We may have allocated the prefix name.  */
   xfree ((char *) self->prefixname);
 }
 
@@ -562,6 +561,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       cmd->func = cmdpy_function;
       cmd->destroyer = cmdpy_destroyer;
       cmd->doc_allocated = 1;
+      cmd->name_allocated = 1;
 
       obj->command = cmd;
       set_cmd_context (cmd, self_ref.release ());

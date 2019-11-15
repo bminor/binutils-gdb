@@ -1177,7 +1177,7 @@ extern void add_internal_function (const char *name, const char *doc,
 
 /* This overload takes an allocated documentation string.  */
 
-extern void add_internal_function (const char *name,
+extern void add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 				   gdb::unique_xmalloc_ptr<char> &&doc,
 				   internal_function_fn handler,
 				   void *cookie);

@@ -1,5 +1,19 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-function.c (fnpy_init): Update.
+	* value.h (add_internal_function): Adjust declaration.
+	* value.c (function_destroyer): Remove.
+	(do_add_internal_function): Don't set destroyer or copy name.
+	(add_internal_function): Take unique_xmalloc_ptr<char> for name.
+	Set name_allocated.
+	* python/py-cmd.c (cmdpy_destroyer): Don't free "name".
+	(cmdpy_init): Set name_allocated.
+	* cli/cli-decode.h (struct cmd_list_element) <name_allocated>: New
+	member.
+	(~cmd_list_element): Free "name" if needed.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* value.h (add_internal_function): Add new overload.  Move
 	documentation from value.h.
 	* value.c (do_add_internal_function): New function.
