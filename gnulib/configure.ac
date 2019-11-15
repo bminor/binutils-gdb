@@ -21,6 +21,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([libgnu], [UNUSED-VERSION])
 AC_CONFIG_SRCDIR([import/memmem.c])
 AC_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_MACRO_DIRS([import/m4])
+AC_CONFIG_MACRO_DIRS([../config])
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
@@ -37,7 +39,7 @@ gl_INIT
 
 # We don't use automake, but gnulib does.  This line lets us generate
 # its Makefile.in.
-AM_INIT_AUTOMAKE([no-define])
+AM_INIT_AUTOMAKE([no-define foreign])
 
 AM_SILENT_RULES([yes])
 

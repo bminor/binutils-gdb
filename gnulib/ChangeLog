@@ -1,3 +1,14 @@
+2019-11-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.am: New file.
+	* Makefile.in: Replace with generated file.
+	* aclocal-m4-deps.mk: Remove.
+	* configure.ac: Use the foreign option for automake and specify
+	the aclocal search path here.
+	* update-gnulib.sh: Don't generate aclocal-m4-deps.mk anymore.
+	Also don't specify the aclocal include path here, now that it
+	is in configure.ac.
+
 2019-11-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Fix path to say import/ instead of gnulib/.
