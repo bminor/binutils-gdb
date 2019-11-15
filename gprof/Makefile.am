@@ -64,7 +64,7 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 # This empty rule is a hack against gmake patched by Apple.
 %.o:%.m
 
-.c.m:
+.m.c:
 	awk -f $(srcdir)/gen-c-prog.awk > $@ \
 	    FUNCTION=`(echo $*|sed -e 's,.*/,,g' -e 's/_bl//')`_blurb \
 	    FILE=$*.m $<
