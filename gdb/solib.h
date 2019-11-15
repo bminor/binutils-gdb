@@ -39,7 +39,7 @@ extern void clear_solib (void);
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 
 extern void solib_add (const char *, int, int);
-extern int solib_read_symbols (struct so_list *, symfile_add_flags);
+extern bool solib_read_symbols (struct so_list *, symfile_add_flags);
 
 /* Function to be called when the inferior starts up, to discover the
    names of shared libraries that are dynamically linked, the base
@@ -52,9 +52,9 @@ extern void solib_create_inferior_hook (int from_tty);
 
 extern char *solib_name_from_address (struct program_space *, CORE_ADDR);
 
-/* Return 1 if ADDR lies within SOLIB.  */
+/* Return true if ADDR lies within SOLIB.  */
 
-extern int solib_contains_address_p (const struct so_list *, CORE_ADDR);
+extern bool solib_contains_address_p (const struct so_list *, CORE_ADDR);
 
 /* Return whether the data starting at VADDR, size SIZE, must be kept
    in a core file for shared libraries loaded before "gcore" is used
@@ -62,12 +62,12 @@ extern int solib_contains_address_p (const struct so_list *, CORE_ADDR);
    applies when the section would otherwise not be kept in the core
    file (in particular, for readonly sections).  */
 
-extern int solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size);
+extern bool solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size);
 
-/* Return 1 if PC lies in the dynamic symbol resolution code of the
+/* Return true if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
 
-extern int in_solib_dynsym_resolve_code (CORE_ADDR);
+extern bool in_solib_dynsym_resolve_code (CORE_ADDR);
 
 /* Discard symbols that were auto-loaded from shared libraries.  */
 
@@ -96,9 +96,9 @@ extern void set_solib_ops (struct gdbarch *gdbarch,
 
 extern void update_solib_list (int from_tty);
 
-/* Return non-zero if NAME is the libpthread shared library.  */
+/* Return true if NAME is the libpthread shared library.  */
 
-extern int libpthread_name_p (const char *name);
+extern bool libpthread_name_p (const char *name);
 
 /* Look up symbol from both symbol table and dynamic string table.  */
 

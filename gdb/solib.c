@@ -149,7 +149,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 */
 
 static gdb::unique_xmalloc_ptr<char>
-solib_find_1 (const char *in_pathname, int *fd, int is_solib)
+solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
@@ -218,7 +218,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
     temp_pathname.reset (xstrdup (in_pathname));
   else
     {
-      int need_dir_separator;
+      bool need_dir_separator;
 
       /* Concatenate the sysroot and the target reported filename.  We
 	 may need to glue them with a directory separator.  Cases to
@@ -266,7 +266,7 @@ solib_find_1 (const char *in_pathname, int *fd, int is_solib)
       && sysroot != NULL
       && HAS_TARGET_DRIVE_SPEC (fskind, in_pathname))
     {
-      int need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[2]);
+      bool need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[2]);
       char drive[2] = { in_pathname[0], '\0' };
 
       temp_pathname.reset (concat (sysroot,
@@ -380,7 +380,7 @@ exec_file_find (const char *in_pathname, int *fd)
 
   if (*gdb_sysroot != '\0' && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
     {
-      result = solib_find_1 (in_pathname, fd, 0);
+      result = solib_find_1 (in_pathname, fd, false);
 
       if (result == NULL && fskind == file_system_kind_dos_based)
 	{
@@ -390,7 +390,7 @@ exec_file_find (const char *in_pathname, int *fd)
 	  strcpy (new_pathname, in_pathname);
 	  strcat (new_pathname, ".exe");
 
-	  result = solib_find_1 (new_pathname, fd, 0);
+	  result = solib_find_1 (new_pathname, fd, false);
 	}
     }
   else
@@ -449,7 +449,7 @@ solib_find (const char *in_pathname, int *fd)
 	}
     }
 
-  return solib_find_1 (in_pathname, fd, 1);
+  return solib_find_1 (in_pathname, fd, true);
 }
 
 /* Open and return a BFD for the shared library PATHNAME.  If FD is not -1,
@@ -655,10 +655,9 @@ master_so_list (void)
 }
 
 /* Read in symbols for shared object SO.  If SYMFILE_VERBOSE is set in FLAGS,
-   be chatty about it.  Return non-zero if any symbols were actually
-   loaded.  */
+   be chatty about it.  Return true if any symbols were actually loaded.  */
 
-int
+bool
 solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 {
   if (so->symbols_loaded)
@@ -708,24 +707,24 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 			     so->so_name);
 	}
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
-/* Return 1 if KNOWN->objfile is used by any other so_list object in the
-   SO_LIST_HEAD list.  Return 0 otherwise.  */
+/* Return true if KNOWN->objfile is used by any other so_list object in the
+   SO_LIST_HEAD list.  Return false otherwise.  */
 
-static int
+static bool
 solib_used (const struct so_list *const known)
 {
   const struct so_list *pivot;
 
   for (pivot = so_list_head; pivot != NULL; pivot = pivot->next)
     if (pivot != known && pivot->objfile == known->objfile)
-      return 1;
-  return 0;
+      return true;
+  return false;
 }
 
 /* See solib.h.  */
@@ -918,7 +917,7 @@ Do you need \"set solib-search-path\" or \"set sysroot\"?"),
    the file name against "/libpthread".  This can lead to false
    positives, but this should be good enough in practice.  */
 
-int
+bool
 libpthread_name_p (const char *name)
 {
   return (strstr (name, "/libpthread") != NULL);
@@ -926,7 +925,7 @@ libpthread_name_p (const char *name)
 
 /* Return non-zero if SO is the libpthread shared library.  */
 
-static int
+static bool
 libpthread_solib_p (struct so_list *so)
 {
   return libpthread_name_p (so->so_name);
@@ -973,8 +972,8 @@ solib_add (const char *pattern, int from_tty, int readsyms)
      symbols for any that match the pattern --- or any whose symbols
      aren't already loaded, if no pattern was given.  */
   {
-    int any_matches = 0;
-    int loaded_any_symbols = 0;
+    bool any_matches = false;
+    bool loaded_any_symbols = false;
     symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
     if (from_tty)
@@ -991,7 +990,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
           const int add_this_solib =
             (readsyms || libpthread_solib_p (gdb));
 
-	  any_matches = 1;
+	  any_matches = true;
 	  if (add_this_solib)
 	    {
 	      if (gdb->symbols_loaded)
@@ -1003,7 +1002,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 				       gdb->so_name);
 		}
 	      else if (solib_read_symbols (gdb, add_flags))
-		loaded_any_symbols = 1;
+		loaded_any_symbols = true;
 	    }
 	}
 
@@ -1032,7 +1031,7 @@ static void
 info_sharedlibrary_command (const char *pattern, int from_tty)
 {
   struct so_list *so = NULL;	/* link map state variable */
-  int so_missing_debug_info = 0;
+  bool so_missing_debug_info = false;
   int addr_width;
   int nr_libs;
   struct gdbarch *gdbarch = target_gdbarch ();
@@ -1099,7 +1098,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	    && so->symbols_loaded
 	    && !objfile_has_symbols (so->objfile))
 	  {
-	    so_missing_debug_info = 1;
+	    so_missing_debug_info = true;
 	    uiout->field_string ("syms-read", "Yes (*)");
 	  }
 	else
@@ -1126,9 +1125,9 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
     }
 }
 
-/* Return 1 if ADDRESS lies within SOLIB.  */
+/* See solib.h.  */
 
-int
+bool
 solib_contains_address_p (const struct so_list *const solib,
 			  CORE_ADDR address)
 {
@@ -1136,9 +1135,9 @@ solib_contains_address_p (const struct so_list *const solib,
 
   for (p = solib->sections; p < solib->sections_end; p++)
     if (p->addr <= address && address < p->endaddr)
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* If ADDRESS is in a shared lib in program space PSPACE, return its
@@ -1164,21 +1163,17 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
   return (0);
 }
 
-/* Return whether the data starting at VADDR, size SIZE, must be kept
-   in a core file for shared libraries loaded before "gcore" is used
-   to be handled correctly when the core file is loaded.  This only
-   applies when the section would otherwise not be kept in the core
-   file (in particular, for readonly sections).  */
+/* See solib.h.  */
 
-int
+bool
 solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   if (ops->keep_data_in_core)
-    return ops->keep_data_in_core (vaddr, size);
+    return ops->keep_data_in_core (vaddr, size) != 0;
   else
-    return 0;
+    return false;
 }
 
 /* Called by free_all_symtabs */
@@ -1216,15 +1211,14 @@ solib_create_inferior_hook (int from_tty)
   ops->solib_create_inferior_hook (from_tty);
 }
 
-/* Check to see if an address is in the dynamic loader's dynamic
-   symbol resolution code.  Return 1 if so, 0 otherwise.  */
+/* See solib.h.  */
 
-int
+bool
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
-  return ops->in_dynsym_resolve_code (pc);
+  return ops->in_dynsym_resolve_code (pc) != 0;
 }
 
 /* Implements the "sharedlibrary" command.  */
@@ -1298,7 +1292,7 @@ reload_shared_libraries_1 (int from_tty)
   for (so = so_list_head; so != NULL; so = so->next)
     {
       const char *found_pathname = NULL;
-      int was_loaded = so->symbols_loaded;
+      bool was_loaded = so->symbols_loaded != 0;
       symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
       if (from_tty)
@@ -1329,7 +1323,7 @@ reload_shared_libraries_1 (int from_tty)
 	  && (!was_loaded
 	      || filename_cmp (found_pathname, so->so_name) != 0))
 	{
-	  int got_error = 0;
+	  bool got_error = false;
 
 	  try
 	    {
@@ -1341,7 +1335,7 @@ reload_shared_libraries_1 (int from_tty)
 	      exception_fprintf (gdb_stderr, e,
 				 _("Error while mapping "
 				   "shared library sections:\n"));
-	      got_error = 1;
+	      got_error = true;
 	    }
 
 	    if (!got_error
@@ -1415,7 +1409,7 @@ gdb_sysroot_changed (const char *ignored, int from_tty,
 
   if (startswith (gdb_sysroot, old_prefix))
     {
-      static int warning_issued = 0;
+      static bool warning_issued = false;
 
       gdb_assert (strlen (old_prefix) == strlen (new_prefix));
       memcpy (gdb_sysroot, new_prefix, strlen (new_prefix));
@@ -1426,7 +1420,7 @@ gdb_sysroot_changed (const char *ignored, int from_tty,
 		   old_prefix, new_prefix);
 	  warning (_("sysroot set to \"%s\"."), gdb_sysroot);
 
-	  warning_issued = 1;
+	  warning_issued = true;
 	}
     }
 

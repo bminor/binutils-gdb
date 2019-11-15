@@ -1,3 +1,23 @@
+2019-11-25  Christian Biesinger  <cbiesinger@google.com>
+
+	* solib.c (solib_find_1): Change int to bool.
+	(exec_file_find): Change int to bool.
+	(solib_find): Change int to bool.
+	(solib_read_symbols): Change int to bool.
+	(solib_used): Change int to bool.
+	(solib_add): Change int to bool.
+	(info_sharedlibrary_command): Change int to bool.
+	(solib_contains_address_p): Change int to bool.
+	(solib_keep_data_in_core): Change int to bool.
+	(in_solib_dynsym_resolve_code): Change int to bool.
+	(reload_shared_libraries_1): Change int to bool.
+	(gdb_sysroot_changed): Change int to bool.
+	* solib.h (solib_read_symbols): Change int to bool.
+	(solib_contains_address_p): Change int to bool.
+	(solib_keep_data_in_core): Change int to bool.
+	(in_solib_dynsym_resolve_code): Change int to bool.
+	(libpthread_name_p): Change int to bool.
+
 2019-11-25  Luis Machado  <luis.machado@linaro.org>
 
 	* NEWS (New Commands): Mention "set debug remote-packet-max-chars".
