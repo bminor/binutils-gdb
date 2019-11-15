@@ -21,7 +21,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([readline], [UNUSED-VERSION])
 AC_CONFIG_SRCDIR([readline/readline.c])
 AC_CONFIG_AUX_DIR(..)
-AM_INIT_AUTOMAKE
+AC_CONFIG_MACRO_DIRS([../config])
+AM_INIT_AUTOMAKE([no-define no-dist foreign])
 AM_MAINTAINER_MODE
 
 AC_CONFIG_SUBDIRS([readline])
