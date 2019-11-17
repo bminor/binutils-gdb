@@ -15,4 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# The toplevel makefile overrides $(CC) (in EXTRA_HOST_FLAGS) by setting
+# it to whatever CC was in the toplevel configure.  This breaks in Gnulib with
+# older GCCs, because Gnulib's configure uses this variable to store the
+# standard-setting switch (e.g. -std=gnu99/-std=gnu11).  To fix this, we just
+# set MAKEOVERRIDES to empty here so that import/ uses the right $(CC).
+#
+# This problem is visible with compilers that don't use C99 by default, such
+# as GCC 4.8.5 (Centos 7).
+MAKEOVERRIDES =
+
 SUBDIRS = import

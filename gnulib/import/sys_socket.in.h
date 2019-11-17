@@ -1,6 +1,6 @@
 /* Provide a sys/socket header file for systems lacking it (read: MinGW)
    and for systems where it is incomplete.
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2019 Free Software Foundation, Inc.
    Written by Simon Josefsson.
 
    This program is free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, see <https://www.gnu.org/licenses/>.  */
 
 /* This file is supposed to be used on platforms that lack <sys/socket.h>,
    on platforms where <sys/socket.h> cannot be included standalone, and on
@@ -79,7 +79,12 @@ _GL_INLINE_HEADER_BEGIN
 
 #if !@HAVE_SA_FAMILY_T@
 # if !GNULIB_defined_sa_family_t
+/* On OS/2 kLIBC, sa_family_t is unsigned char unless TCPV40HDRS is defined. */
+#  if !defined __KLIBC__ || defined TCPV40HDRS
 typedef unsigned short  sa_family_t;
+#  else
+typedef unsigned char   sa_family_t;
+#  endif
 #  define GNULIB_defined_sa_family_t 1
 # endif
 #endif
@@ -136,6 +141,15 @@ struct sockaddr_storage
 #  define SHUT_RDWR 2
 # endif
 
+# ifdef __VMS                        /* OpenVMS */
+#  ifndef CMSG_SPACE
+#   define CMSG_SPACE(length) _CMSG_SPACE(length)
+#  endif
+#  ifndef CMSG_LEN
+#   define CMSG_LEN(length) _CMSG_LEN(length)
+#  endif
+# endif
+
 #else
 
 # ifdef __CYGWIN__
@@ -155,7 +169,7 @@ struct sockaddr_storage
    code may not run on older Windows releases then.  My Windows 2000
    box was not able to run the code, for example.  The situation is
    slightly confusing because
-   <http://msdn.microsoft.com/en-us/library/ms738520>
+   <https://docs.microsoft.com/en-us/windows/desktop/api/ws2tcpip/nf-ws2tcpip-getaddrinfo>
    suggests that getaddrinfo should be available on all Windows
    releases. */
 
@@ -199,6 +213,15 @@ struct msghdr {
   int msg_flags;
 };
 
+#endif
+
+/* Ensure SO_REUSEPORT is defined.  */
+/* For the subtle differences between SO_REUSEPORT and SO_REUSEADDR, see
+   https://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t
+   and https://lwn.net/Articles/542629/
+ */
+#ifndef SO_REUSEPORT
+# define SO_REUSEPORT SO_REUSEADDR
 #endif
 
 /* Fix some definitions from <winsock2.h>.  */
@@ -494,7 +517,10 @@ _GL_FUNCDECL_RPL (recv, ssize_t, (int fd, void *buf, size_t len, int flags)
                                  _GL_ARG_NONNULL ((2)));
 _GL_CXXALIAS_RPL (recv, ssize_t, (int fd, void *buf, size_t len, int flags));
 # else
-_GL_CXXALIAS_SYS (recv, ssize_t, (int fd, void *buf, size_t len, int flags));
+/* Need to cast, because on HP-UX 11.31 the return type may be
+                             int,
+   depending on compiler options.  */
+_GL_CXXALIAS_SYS_CAST (recv, ssize_t, (int fd, void *buf, size_t len, int flags));
 # endif
 _GL_CXXALIASWARN (recv);
 #elif @HAVE_WINSOCK2_H@
@@ -520,8 +546,11 @@ _GL_FUNCDECL_RPL (send, ssize_t,
 _GL_CXXALIAS_RPL (send, ssize_t,
                   (int fd, const void *buf, size_t len, int flags));
 # else
-_GL_CXXALIAS_SYS (send, ssize_t,
-                  (int fd, const void *buf, size_t len, int flags));
+/* Need to cast, because on HP-UX 11.31 the return type may be
+                             int,
+   depending on compiler options.  */
+_GL_CXXALIAS_SYS_CAST (send, ssize_t,
+                       (int fd, const void *buf, size_t len, int flags));
 # endif
 _GL_CXXALIASWARN (send);
 #elif @HAVE_WINSOCK2_H@
@@ -657,7 +686,7 @@ _GL_WARN_ON_USE (shutdown, "shutdown is not always POSIX compliant - "
    The flags are a bitmask, possibly including O_CLOEXEC (defined in <fcntl.h>)
    and O_TEXT, O_BINARY (defined in "binary-io.h").
    See also the Linux man page at
-   <http://www.kernel.org/doc/man-pages/online/pages/man2/accept4.2.html>.  */
+   <https://www.kernel.org/doc/man-pages/online/pages/man2/accept4.2.html>.  */
 # if @HAVE_ACCEPT4@
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
 #   define accept4 rpl_accept4

@@ -1,11 +1,11 @@
-# serial 11
+# serial 12
 
 dnl From Jim Meyering.
 dnl
 dnl Check whether struct dirent has a member named d_type.
 dnl
 
-# Copyright (C) 1997, 1999-2004, 2006, 2009-2016 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1999-2004, 2006, 2009-2019 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -13,7 +13,7 @@ dnl
 
 AC_DEFUN([gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE],
   [AC_CACHE_CHECK([for d_type member in directory struct],
-                  gl_cv_struct_dirent_d_type,
+                  [gl_cv_struct_dirent_d_type],
      [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <dirent.h>

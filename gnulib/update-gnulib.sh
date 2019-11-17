@@ -68,7 +68,7 @@ IMPORTED_GNULIB_MODULES="\
 "
 
 # The gnulib commit ID to use for the update.
-GNULIB_COMMIT_SHA1="38237baf99386101934cd93278023aa4ae523ec0"
+GNULIB_COMMIT_SHA1="6be2862414da45975b8cbc33acc5387b012f3354"
 
 # The expected version number for the various auto tools we will
 # use after the import.
@@ -164,16 +164,12 @@ fi
 # Apply our local patches.
 apply_patches ()
 {
-    patch -p3 -f -i "$1"
+    patch -p2 -f -i "$1"
     if [ $? -ne 0 ]; then
         echo "Failed to apply some patches.  Aborting."
         exit 1
     fi
 }
-
-apply_patches "patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch"
-apply_patches "patches/0002-mkostemp-mkostemps-Fix-compilation-error-in-C-mode-o.patch"
-apply_patches "patches/0003-Fix-glob-c-Coverity-issues.patch"
 
 # Regenerate all necessary files...
 aclocal &&

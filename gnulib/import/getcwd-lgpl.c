@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2019 Free Software Foundation, Inc.
    This file is part of gnulib.
 
    This program is free software: you can redistribute it and/or modify
@@ -12,7 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -115,10 +115,15 @@ rpl_getcwd (char *buf, size_t size)
     }
   else
     {
-      /* Trim to fit, if possible.  */
-      result = realloc (buf, strlen (buf) + 1);
-      if (!result)
-        result = buf;
+      /* Here result == buf.  */
+      /* Shrink result before returning it.  */
+      size_t actual_size = strlen (result) + 1;
+      if (actual_size < size)
+        {
+          char *shrinked_result = realloc (result, actual_size);
+          if (shrinked_result != NULL)
+            result = shrinked_result;
+        }
     }
   return result;
 }

@@ -1,22 +1,36 @@
 # Check for stdbool.h that conforms to C99.
 
-dnl Copyright (C) 2002-2006, 2009-2016 Free Software Foundation, Inc.
+dnl Copyright (C) 2002-2006, 2009-2019 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-#serial 7
+#serial 8
 
 # Prepare for substituting <stdbool.h> if it is not supported.
 
 AC_DEFUN([AM_STDBOOL_H],
 [
   AC_REQUIRE([AC_CHECK_HEADER_STDBOOL])
+  AC_REQUIRE([AC_CANONICAL_HOST])
 
-  # Define two additional variables used in the Makefile substitution.
-
+  dnl On some platforms, <stdbool.h> does not exist or does not conform to C99.
+  dnl On Solaris 10 with CC=cc CXX=CC, <stdbool.h> exists but is not usable
+  dnl in C++ mode (and no <cstdbool> exists). In this case, we use our
+  dnl replacement, also in C mode (for binary compatibility between C and C++).
   if test "$ac_cv_header_stdbool_h" = yes; then
-    STDBOOL_H=''
+    case "$host_os" in
+      solaris*)
+        if test -z "$GCC"; then
+          STDBOOL_H='stdbool.h'
+        else
+          STDBOOL_H=''
+        fi
+        ;;
+      *)
+        STDBOOL_H=''
+        ;;
+    esac
   else
     STDBOOL_H='stdbool.h'
   fi
@@ -87,8 +101,8 @@ AC_DEFUN([AC_CHECK_HEADER_STDBOOL],
              char o[sizeof n == m * sizeof n[0] ? 1 : -1];
              char p[-1 - (Bool) 0 < 0 && -1 - (bool) 0 < 0 ? 1 : -1];
              /* Catch a bug in an HP-UX C compiler.  See
-                http://gcc.gnu.org/ml/gcc-patches/2003-12/msg02303.html
-                http://lists.gnu.org/archive/html/bug-coreutils/2005-11/msg00161.html
+                https://gcc.gnu.org/ml/gcc-patches/2003-12/msg02303.html
+                https://lists.gnu.org/r/bug-coreutils/2005-11/msg00161.html
               */
              Bool q = true;
              Bool *pq = &q;

@@ -1,11 +1,12 @@
-# exponentl.m4 serial 3
-dnl Copyright (C) 2007-2016 Free Software Foundation, Inc.
+# exponentl.m4 serial 4
+dnl Copyright (C) 2007-2019 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([gl_LONG_DOUBLE_EXPONENT_LOCATION],
 [
   AC_REQUIRE([gl_BIGENDIAN])
+  AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
   AC_CACHE_CHECK([where to find the exponent in a 'long double'],
     [gl_cv_cc_long_double_expbit0],
     [
@@ -79,9 +80,24 @@ int main ()
         [gl_cv_cc_long_double_expbit0=`cat conftest.out`],
         [gl_cv_cc_long_double_expbit0="unknown"],
         [
-          dnl When cross-compiling, we don't know. It depends on the
+          dnl When cross-compiling, in general we don't know. It depends on the
           dnl ABI and compiler version. There are too many cases.
           gl_cv_cc_long_double_expbit0="unknown"
+          case "$host_os" in
+            mingw*) # On native Windows (little-endian), we know the result
+                    # in two cases: mingw, MSVC.
+              AC_EGREP_CPP([Known], [
+#ifdef __MINGW32__
+ Known
+#endif
+                ], [gl_cv_cc_long_double_expbit0="word 2 bit 0"])
+              AC_EGREP_CPP([Known], [
+#ifdef _MSC_VER
+ Known
+#endif
+                ], [gl_cv_cc_long_double_expbit0="word 1 bit 20"])
+              ;;
+          esac
         ])
       rm -f conftest.out
     ])

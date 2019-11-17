@@ -1,5 +1,5 @@
 /* Copy memory area and return pointer after last written byte.
-   Copyright (C) 2003, 2007, 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2007, 2009-2019 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 

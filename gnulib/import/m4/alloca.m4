@@ -1,5 +1,5 @@
-# alloca.m4 serial 14
-dnl Copyright (C) 2002-2004, 2006-2007, 2009-2016 Free Software Foundation,
+# alloca.m4 serial 15
+dnl Copyright (C) 2002-2004, 2006-2007, 2009-2019 Free Software Foundation,
 dnl Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -37,6 +37,13 @@ AC_DEFUN([gl_FUNC_ALLOCA],
   fi
   AC_SUBST([ALLOCA_H])
   AM_CONDITIONAL([GL_GENERATE_ALLOCA_H], [test -n "$ALLOCA_H"])
+
+  if test $ac_cv_working_alloca_h = yes; then
+    HAVE_ALLOCA_H=1
+  else
+    HAVE_ALLOCA_H=0
+  fi
+  AC_SUBST([HAVE_ALLOCA_H])
 ])
 
 # Prerequisites of lib/alloca.c.
@@ -44,12 +51,12 @@ AC_DEFUN([gl_FUNC_ALLOCA],
 AC_DEFUN([gl_PREREQ_ALLOCA], [:])
 
 # This works around a bug in autoconf <= 2.68.
-# See <http://lists.gnu.org/archive/html/bug-gnulib/2011-06/msg00277.html>.
+# See <https://lists.gnu.org/r/bug-gnulib/2011-06/msg00277.html>.
 
 m4_version_prereq([2.69], [] ,[
 
 # This is taken from the following Autoconf patch:
-# http://git.savannah.gnu.org/cgit/autoconf.git/commit/?id=6cd9f12520b0d6f76d3230d7565feba1ecf29497
+# https://git.savannah.gnu.org/gitweb/?p=autoconf.git;a=commitdiff;h=6cd9f12520b0d6f76d3230d7565feba1ecf29497
 
 # _AC_LIBOBJ_ALLOCA
 # -----------------

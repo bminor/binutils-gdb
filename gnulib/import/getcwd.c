@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-1999, 2004-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1991-1999, 2004-2019 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -12,7 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #if !_LIBC
 # include <config.h>
@@ -79,6 +79,10 @@
 # define MATCHING_INO(dp, ino) true
 #endif
 
+#if HAVE_MSVC_INVALID_PARAMETER_HANDLER
+# include "msvc-inval.h"
+#endif
+
 #if !_LIBC
 # define __getcwd rpl_getcwd
 # define __lstat lstat
@@ -100,6 +104,34 @@
 # undef closedir
 #endif
 
+#ifdef _MSC_VER
+# if HAVE_MSVC_INVALID_PARAMETER_HANDLER
+static char *
+getcwd_nothrow (char *buf, size_t size)
+{
+  char *result;
+
+  TRY_MSVC_INVAL
+    {
+      result = _getcwd (buf, size);
+    }
+  CATCH_MSVC_INVAL
+    {
+      result = NULL;
+      errno = ERANGE;
+    }
+  DONE_MSVC_INVAL;
+
+  return result;
+}
+# else
+#  define getcwd_nothrow _getcwd
+# endif
+# define getcwd_system getcwd_nothrow
+#else
+# define getcwd_system getcwd
+#endif
+
 /* Get the name of the current working directory, and put it in SIZE
    bytes of BUF.  Returns NULL if the directory couldn't be determined or
    SIZE was too small.  If successful, returns BUF.  In GNU, if BUF is
@@ -155,7 +187,7 @@ __getcwd (char *buf, size_t size)
      this wrong result with errno = 0.  */
 
 # undef getcwd
-  dir = getcwd (buf, size);
+  dir = getcwd_system (buf, size);
   if (dir || (size && errno == ERANGE))
     return dir;
 
@@ -166,7 +198,7 @@ __getcwd (char *buf, size_t size)
   if (errno == EINVAL && buf == NULL && size == 0)
     {
       char big_buffer[BIG_FILE_NAME_LENGTH + 1];
-      dir = getcwd (big_buffer, sizeof big_buffer);
+      dir = getcwd_system (big_buffer, sizeof big_buffer);
       if (dir)
         return strdup (dir);
     }
@@ -411,7 +443,7 @@ __getcwd (char *buf, size_t size)
 
   if (size == 0)
     /* Ensure that the buffer is only as large as necessary.  */
-    buf = realloc (dir, used);
+    buf = (used < allocated ? realloc (dir, used) : dir);
 
   if (buf == NULL)
     /* Either buf was NULL all along, or 'realloc' failed but

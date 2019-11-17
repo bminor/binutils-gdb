@@ -1,11 +1,11 @@
-# serial 15
+# serial 20
 
 dnl From Jim Meyering.
 dnl
 dnl Check whether struct dirent has a member named d_ino.
 dnl
 
-# Copyright (C) 1997, 1999-2001, 2003-2004, 2006-2007, 2009-2016 Free Software
+# Copyright (C) 1997, 1999-2001, 2003-2004, 2006-2007, 2009-2019 Free Software
 # Foundation, Inc.
 
 # This file is free software; the Free Software Foundation
@@ -15,7 +15,7 @@ dnl
 AC_DEFUN([gl_CHECK_TYPE_STRUCT_DIRENT_D_INO],
   [AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
    AC_CACHE_CHECK([for d_ino member in directory struct],
-                  gl_cv_struct_dirent_d_ino,
+                  [gl_cv_struct_dirent_d_ino],
      [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM(
            [[#include <sys/types.h>
@@ -29,21 +29,25 @@ AC_DEFUN([gl_CHECK_TYPE_STRUCT_DIRENT_D_INO],
                return 1;
              e = readdir (dp);
              if (! e)
-               return 2;
+               { closedir (dp); return 2; }
              if (lstat (e->d_name, &st) != 0)
-               return 3;
+               { closedir (dp); return 3; }
              if (e->d_ino != st.st_ino)
-               return 4;
+               { closedir (dp); return 4; }
              closedir (dp);
              return 0;
            ]])],
            [gl_cv_struct_dirent_d_ino=yes],
            [gl_cv_struct_dirent_d_ino=no],
            [case "$host_os" in
-                           # Guess yes on glibc systems with Linux kernel.
-              linux*-gnu*) gl_cv_struct_dirent_d_ino="guessing yes" ;;
-                           # If we don't know, assume the worst.
-              *)           gl_cv_struct_dirent_d_ino="guessing no" ;;
+                            # Guess yes on glibc systems with Linux kernel.
+              linux*-gnu*)  gl_cv_struct_dirent_d_ino="guessing yes" ;;
+                            # Guess yes on musl systems with Linux kernel.
+              linux*-musl*) gl_cv_struct_dirent_d_ino="guessing yes" ;;
+                            # Guess no on native Windows.
+              mingw*)       gl_cv_struct_dirent_d_ino="guessing no" ;;
+                            # If we don't know, obey --enable-cross-guesses.
+              *)            gl_cv_struct_dirent_d_ino="$gl_cross_guess_normal" ;;
             esac
            ])])
    case "$gl_cv_struct_dirent_d_ino" in
