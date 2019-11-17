@@ -2117,6 +2117,7 @@ tg_start_class_type (void *p, const char *tag, unsigned int id,
   struct pr_handle *info = (struct pr_handle *) p;
   char *tv = NULL;
   const char *name;
+  char idbuf[20];
 
   info->indent += 2;
 
@@ -2131,8 +2132,6 @@ tg_start_class_type (void *p, const char *tag, unsigned int id,
     name = tag;
   else
     {
-      char idbuf[20];
-
       sprintf (idbuf, "%%anon%u", id);
       name = idbuf;
     }

@@ -1,3 +1,8 @@
+2019-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 25198
+	* prdbg.c (tg_start_class_type): Correct scope of idbuf.
+
 2019-11-08  Alan Modra  <amodra@gmail.com>
 
 	PR 25172
