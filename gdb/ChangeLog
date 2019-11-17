@@ -1,5 +1,12 @@
 2019-12-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_copy_source_line): Don't advance past
+	\0.
+	* unittests/tui-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add tui-selftests.c.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable): Call tui_update_variables earlier.
 
 2019-12-01  Tom Tromey  <tom@tromey.com>

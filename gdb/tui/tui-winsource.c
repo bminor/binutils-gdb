@@ -103,6 +103,8 @@ tui_copy_source_line (const char **ptr, int line_no, int first_col,
 	  lineptr += skip_bytes;
 	  continue;
 	}
+      if (c == '\0')
+	break;
 
       ++lineptr;
       ++column;
