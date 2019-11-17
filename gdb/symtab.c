@@ -3158,7 +3158,17 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  ;
 	/* fall through */
 	else
-	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
+	  {
+	    /* Detect an obvious case of infinite recursion.  If this
+	       should occur, we'd like to know about it, so error out,
+	       fatally.  */
+	    if (BMSYMBOL_VALUE_ADDRESS (mfunsym) == pc)
+	      internal_error (__FILE__, __LINE__,
+	        _("Infinite recursion detected in find_pc_sect_line;"
+		  "please file a bug report"));
+
+	    return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
+	  }
       }
 
   symtab_and_line val;
