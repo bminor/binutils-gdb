@@ -276,6 +276,7 @@ blpy_dealloc (PyObject *obj)
   if (block->next)
     block->next->prev = block->prev;
   block->block = NULL;
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Given a block, and a block_object that has previously been
@@ -370,6 +371,7 @@ blpy_block_syms_dealloc (PyObject *obj)
   block_syms_iterator_object *iter_obj = (block_syms_iterator_object *) obj;
 
   Py_XDECREF (iter_obj->source);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Implementation of gdb.Block.is_valid (self) -> Boolean.

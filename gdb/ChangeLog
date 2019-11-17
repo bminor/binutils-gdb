@@ -1,3 +1,15 @@
+2019-11-18  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* python/py-block.c (blpy_dealloc): Call tp_free.
+	(blpy_block_syms_dealloc): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_dealloc): Likewise.
+	* python/py-inferior.c (infpy_dealloc): Likewise.
+	* python/py-lazy-string.c (stpy_dealloc): Likewise.
+	* python/py-linetable.c (ltpy_iterator_dealloc): Likewise.
+	* python/py-symbol.c (sympy_dealloc): Likewise.
+	* python/py-symtab.c (stpy_dealloc): Likewise.
+	* python/py-type.c (typy_iterator_dealloc): Likewise.
+
 2019-11-18  Christian Biesinger  <cbiesinger@google.com>
 
 	* symtab.h (struct symbol) <owner>: Initialize explicitly in the

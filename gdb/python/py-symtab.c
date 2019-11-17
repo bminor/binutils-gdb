@@ -253,6 +253,7 @@ stpy_dealloc (PyObject *obj)
   if (symtab->next)
     symtab->next->prev = symtab->prev;
   symtab->symtab = NULL;
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 

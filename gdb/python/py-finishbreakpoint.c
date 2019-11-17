@@ -83,6 +83,7 @@ bpfinishpy_dealloc (PyObject *self)
   Py_XDECREF (self_bpfinish->function_value);
   Py_XDECREF (self_bpfinish->return_type);
   Py_XDECREF (self_bpfinish->return_value);
+  Py_TYPE (self)->tp_free (self);
 }
 
 /* Triggered when gdbpy_should_stop is about to execute the `stop' callback

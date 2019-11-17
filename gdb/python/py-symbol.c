@@ -357,6 +357,7 @@ sympy_dealloc (PyObject *obj)
   if (sym_obj->next)
     sym_obj->next->prev = sym_obj->prev;
   sym_obj->symbol = NULL;
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Implementation of

@@ -1325,6 +1325,7 @@ typy_iterator_dealloc (PyObject *obj)
   typy_iterator_object *iter_obj = (typy_iterator_object *) obj;
 
   Py_DECREF (iter_obj->source);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Create a new Type referring to TYPE.  */

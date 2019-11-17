@@ -856,6 +856,7 @@ infpy_dealloc (PyObject *obj)
     return;
 
   set_inferior_data (inf, infpy_inf_data_key, NULL);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Clear the INFERIOR pointer in an Inferior object and clear the

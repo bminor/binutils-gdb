@@ -156,6 +156,7 @@ stpy_dealloc (PyObject *self)
   lazy_string_object *self_string = (lazy_string_object *) self;
 
   xfree (self_string->encoding);
+  Py_TYPE (self)->tp_free (self);
 }
 
 /* Low level routine to create a <gdb.LazyString> object.
