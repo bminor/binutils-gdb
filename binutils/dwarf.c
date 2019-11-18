@@ -7590,7 +7590,7 @@ init_dwarf_regnames_riscv (void)
 }
 
 void
-init_dwarf_regnames (unsigned int e_machine)
+init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
 {
   switch (e_machine)
     {

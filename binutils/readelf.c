@@ -4852,7 +4852,7 @@ process_file_header (Filedata * filedata)
       return FALSE;
     }
 
-  init_dwarf_regnames (header->e_machine);
+  init_dwarf_regnames_by_elf_machine_code (header->e_machine);
 
   if (do_header)
     {

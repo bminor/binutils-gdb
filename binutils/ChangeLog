@@ -1,5 +1,13 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf.c (init_dwarf_regnames): Renamed to...
+	(init_dwarf_regnames_by_elf_machine_code): ...this.
+	* dwarf.h (init_dwarf_regnames): Renamed to...
+	(init_dwarf_regnames_by_elf_machine_code): ...this.
+	* readelf.c (process_file_header): Update call to use new name.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf.c (frame_need_space): Compare dwarf_regnames_count against
 	0, and only warn about large numbers of registers if the number is
 	more than the dwarf_regnames_count.
