@@ -1,3 +1,9 @@
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
+	PR 25200
+	* reloc.c (bfd_default_reloc_type_lookup): Don't BFD_FAIL.
+	* elf.c (_bfd_elf_validate_reloc): Don't segfault on NULL howto.
+
 2019-11-18  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data <elf_backend_init_file_header>):

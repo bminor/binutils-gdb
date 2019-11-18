@@ -9222,7 +9222,7 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
 
 	  howto = bfd_reloc_type_lookup (abfd, code);
 
-	  if (areloc->howto->pcrel_offset != howto->pcrel_offset)
+	  if (howto && areloc->howto->pcrel_offset != howto->pcrel_offset)
 	    {
 	      if (howto->pcrel_offset)
 		areloc->addend += areloc->address;

@@ -8123,28 +8123,11 @@ DESCRIPTION
 reloc_howto_type *
 bfd_default_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
 {
-  switch (code)
-    {
-    case BFD_RELOC_CTOR:
-      /* The type of reloc used in a ctor, which will be as wide as the
-	 address - so either a 64, 32, or 16 bitter.  */
-      switch (bfd_arch_bits_per_address (abfd))
-	{
-	case 64:
-	  BFD_FAIL ();
-	  break;
-	case 32:
-	  return &bfd_howto_32;
-	case 16:
-	  BFD_FAIL ();
-	  break;
-	default:
-	  BFD_FAIL ();
-	}
-      break;
-    default:
-      BFD_FAIL ();
-    }
+  /* Very limited support is provided for relocs in generic targets
+     such as elf32-little.  FIXME: Should we always return NULL?  */
+  if (code == BFD_RELOC_CTOR
+      && bfd_arch_bits_per_address (abfd) == 32)
+    return &bfd_howto_32;
   return NULL;
 }
 
