@@ -93,4 +93,9 @@ void init_target_desc (struct target_desc *tdesc,
 
 const struct target_desc *current_target_desc (void);
 
+/* Return true if TDESC contains the feature described by string FEATURE.
+   Return false otherwise.  */
+bool tdesc_contains_feature (const target_desc *tdesc,
+			     const std::string &feature);
+
 #endif /* GDBSERVER_TDESC_H */

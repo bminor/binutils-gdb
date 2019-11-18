@@ -83,7 +83,7 @@ is_sve_tdesc (void)
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
 
-  return regcache->tdesc->reg_defs.size () == AARCH64_SVE_NUM_REGS;
+  return tdesc_contains_feature (regcache->tdesc, "org.gnu.gdb.aarch64.sve");
 }
 
 static void

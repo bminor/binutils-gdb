@@ -1,3 +1,10 @@
+2019-11-20  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-low.c (is_sve_tdesc): Check against target feature
+	instead of register count.
+	* tdesc.c (tdesc_contains_feature): New function.
+	* tdesc.h (tdesc_contains_feature): New prototype.
+
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Add safe-strerror.c.

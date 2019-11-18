@@ -186,3 +186,19 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
   tdesc->features.emplace_back (new_feature);
   return new_feature;
 }
+
+/* See gdbsupport/tdesc.h.  */
+
+bool
+tdesc_contains_feature (const target_desc *tdesc, const std::string &feature)
+{
+  gdb_assert (tdesc != nullptr);
+
+  for (const tdesc_feature_up &f : tdesc->features)
+    {
+      if (f->name == feature)
+	return true;
+    }
+
+  return false;
+}
