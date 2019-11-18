@@ -3037,6 +3037,10 @@ tc_riscv_regname_to_dw2regnum (char *regname)
   if ((reg = reg_lookup_internal (regname, RCLASS_FPR)) >= 0)
     return reg + 32;
 
+  /* CSRs are numbered 4096 -> 8191.  */
+  if ((reg = reg_lookup_internal (regname, RCLASS_CSR)) >= 0)
+    return reg + 4096;
+
   as_bad (_("unknown register `%s'"), regname);
   return -1;
 }

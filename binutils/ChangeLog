@@ -1,5 +1,10 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf.c (regname_internal_riscv): New function.
+	(init_dwarf_regnames_riscv): Use new function.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf.c (typedef dwarf_regname_lookup_ftype): New typedef.
 	(dwarf_regnames_lookup_func): New static global.
 	(init_dwarf_regnames_i386): Set dwarf_regnames_lookup_func.

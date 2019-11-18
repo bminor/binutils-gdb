@@ -1,5 +1,12 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* config/tc-riscv.c (tc_riscv_regname_to_dw2regnum): Lookup CSR
+	names too.
+	* testsuite/gas/riscv/csr-dw-regnums.d: New file.
+	* testsuite/gas/riscv/csr-dw-regnums.s: New file.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* config/tc-riscv.c (struct regname): Delete.
 	(hash_reg_names): Handle value as 'void *'.
 

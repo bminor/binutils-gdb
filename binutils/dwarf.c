@@ -7591,12 +7591,47 @@ static const char *const dwarf_regnames_riscv[] =
  "ft8",  "ft9",  "ft10", "ft11"                             /* 60 - 63 */
 };
 
+/* A RISC-V replacement for REGNAME_INTERNAL_BY_TABLE_ONLY which handles
+   the large number of CSRs.  */
+
+static const char *
+regname_internal_riscv (unsigned int regno)
+{
+  const char *name = NULL;
+
+  /* Lookup in the table first, this covers GPR and FPR.  */
+  if (regno < ARRAY_SIZE (dwarf_regnames_riscv))
+    name = dwarf_regnames_riscv [regno];
+  else if (regno >= 4096 && regno <= 8191)
+    {
+      /* This might be a CSR, these live in a sparse number space from 4096
+	 to 8191  These numbers are defined in the RISC-V ELF ABI
+	 document.  */
+      switch (regno)
+	{
+#define DECLARE_CSR(NAME,VALUE) case VALUE + 4096: name = #NAME; break;
+#include "opcode/riscv-opc.h"
+#undef DECLARE_CSR
+
+	default:
+	  {
+	    static char csr_name[10];
+	    snprintf (csr_name, sizeof (csr_name), "csr%d", (regno - 4096));
+	    name = csr_name;
+	  }
+	  break;
+	}
+    }
+
+  return name;
+}
+
 static void
 init_dwarf_regnames_riscv (void)
 {
-  dwarf_regnames = dwarf_regnames_riscv;
-  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_riscv);
-  dwarf_regnames_lookup_func = regname_internal_by_table_only;
+  dwarf_regnames = NULL;
+  dwarf_regnames_count = 8192;
+  dwarf_regnames_lookup_func = regname_internal_riscv;
 }
 
 void
