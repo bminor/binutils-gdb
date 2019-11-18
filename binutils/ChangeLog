@@ -1,3 +1,8 @@
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
+	* bucomm.c (bfd_nonfatal_message): Add a space between program
+	name and file.
+
 2019-11-18  Alan Modra  <amodra@gmail.com>
 
 	PR 25198

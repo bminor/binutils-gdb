@@ -64,10 +64,10 @@ bfd_nonfatal (const char *string)
    bfd error message is printed.  In summary, error messages are of
    one of the following forms:
 
-   PROGRAM:file: bfd-error-message
-   PROGRAM:file[section]: bfd-error-message
-   PROGRAM:file: printf-message: bfd-error-message
-   PROGRAM:file[section]: printf-message: bfd-error-message.  */
+   PROGRAM: file: bfd-error-message
+   PROGRAM: file[section]: bfd-error-message
+   PROGRAM: file: printf-message: bfd-error-message
+   PROGRAM: file[section]: printf-message: bfd-error-message.  */
 
 void
 bfd_nonfatal_message (const char *filename,
@@ -97,9 +97,9 @@ bfd_nonfatal_message (const char *filename,
 	section_name = bfd_section_name (section);
     }
   if (section_name)
-    fprintf (stderr, ":%s[%s]", filename, section_name);
+    fprintf (stderr, ": %s[%s]", filename, section_name);
   else
-    fprintf (stderr, ":%s", filename);
+    fprintf (stderr, ": %s", filename);
 
   if (format)
     {
