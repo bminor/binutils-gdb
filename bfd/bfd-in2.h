@@ -6964,6 +6964,7 @@ typedef enum bfd_error
   bfd_error_bad_value,
   bfd_error_file_truncated,
   bfd_error_file_too_big,
+  bfd_error_sorry,
   bfd_error_on_input,
   bfd_error_invalid_error_code
 }

@@ -1,3 +1,14 @@
+2019-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 25196
+	* bfd.c (bfd_error_type): Add bfd_error_sorry.
+	(bfd_errmsgs): Likewise.
+	* elf.c (rewrite_elf_program_header): Don't abort on confused
+	lma/alignment.  Replace bfd_error_bad_value with bfd_error_sorry.
+	(_bfd_elf_validate_reloc): Use bfd_error_sorry.
+	(_bfd_elf_final_write_processing): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2019-11-12  Jim Wilson  <jimw@sifive.com>
 
 	PR 25181

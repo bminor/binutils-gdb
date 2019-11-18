@@ -7324,7 +7324,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 					  : 0),
 				       output_section->alignment_power)
 			  != output_section->lma)
-			abort ();
+			goto sorry;
 		    }
 		  else
 		    {
@@ -7363,7 +7363,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	     negative size - or segments that do not contain any sections.  */
 	  if (map->count == 0)
 	    {
-	      bfd_set_error (bfd_error_bad_value);
+	    sorry:
+	      bfd_set_error (bfd_error_sorry);
 	      free (sections);
 	      return FALSE;
 	    }
@@ -9277,7 +9278,7 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
   /* xgettext:c-format */
   _bfd_error_handler (_("%pB: %s unsupported"),
 		      abfd, areloc->howto->name);
-  bfd_set_error (bfd_error_bad_value);
+  bfd_set_error (bfd_error_sorry);
   return FALSE;
 }
 
@@ -12249,7 +12250,7 @@ _bfd_elf_final_write_processing (bfd *abfd)
 	    _bfd_error_handler (_("symbol type STT_GNU_IFUNC is unsupported"));
 	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_unique)
 	    _bfd_error_handler (_("symbol binding STB_GNU_UNIQUE is unsupported"));
-	  bfd_set_error (bfd_error_bad_value);
+	  bfd_set_error (bfd_error_sorry);
 	  return FALSE;
 	}
     }
