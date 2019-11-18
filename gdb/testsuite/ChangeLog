@@ -1,3 +1,9 @@
+2019-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (skip_btrace_tests): Return 1 if the test fails to
+	compile.
+	(skip_btrace_pt_tests): Likewise.
+
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/info-modules.exp: Compile source files in correct

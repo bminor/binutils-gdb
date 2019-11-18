@@ -2942,7 +2942,7 @@ gdb_caching_proc skip_btrace_tests {
     # Compile a test program.
     set src { int main() { return 0; } }
     if {![gdb_simple_compile $me $src executable]} {
-        return 0
+        return 1
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -2993,7 +2993,7 @@ gdb_caching_proc skip_btrace_pt_tests {
     # Compile a test program.
     set src { int main() { return 0; } }
     if {![gdb_simple_compile $me $src executable]} {
-        return 0
+        return 1
     }
 
     # No error message, compilation succeeded so now run it via gdb.
