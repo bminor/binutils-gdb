@@ -7464,14 +7464,14 @@ static const char *const dwarf_regnames_iamcu[] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL  /* 93 - 100  */
 };
 
-void
+static void
 init_dwarf_regnames_i386 (void)
 {
   dwarf_regnames = dwarf_regnames_i386;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
 }
 
-void
+static void
 init_dwarf_regnames_iamcu (void)
 {
   dwarf_regnames = dwarf_regnames_iamcu;
@@ -7510,7 +7510,7 @@ static const char *const dwarf_regnames_x86_64[] =
   "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"
 };
 
-void
+static void
 init_dwarf_regnames_x86_64 (void)
 {
   dwarf_regnames = dwarf_regnames_x86_64;
@@ -7537,7 +7537,7 @@ static const char *const dwarf_regnames_aarch64[] =
   "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31",
 };
 
-void
+static void
 init_dwarf_regnames_aarch64 (void)
 {
   dwarf_regnames = dwarf_regnames_aarch64;
@@ -7561,7 +7561,7 @@ static const char *const dwarf_regnames_s390[] =
   "v24", "v26", "v28", "v30", "v25", "v27", "v29", "v31",
 };
 
-void
+static void
 init_dwarf_regnames_s390 (void)
 {
   dwarf_regnames = dwarf_regnames_s390;
@@ -7582,7 +7582,7 @@ static const char *const dwarf_regnames_riscv[] =
  "ft8",  "ft9",  "ft10", "ft11"                             /* 60 - 63 */
 };
 
-void
+static void
 init_dwarf_regnames_riscv (void)
 {
   dwarf_regnames = dwarf_regnames_riscv;
