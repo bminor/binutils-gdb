@@ -656,7 +656,7 @@ static const struct bfd_elf_special_section elf32_m68hc12_special_sections[] =
 #define elf_backend_object_p		m68hc12_elf_set_mach_from_flags
 #define elf_backend_can_gc_sections		1
 #define elf_backend_special_sections elf32_m68hc12_special_sections
-#define elf_backend_post_process_headers     elf32_m68hc11_post_process_headers
+#define elf_backend_init_file_header     elf32_m68hc11_init_file_header
 #define elf_backend_add_symbol_hook  elf32_m68hc11_add_symbol_hook
 #define elf_backend_merge_symbol_attribute elf32_m68hc11_merge_symbol_attribute
 

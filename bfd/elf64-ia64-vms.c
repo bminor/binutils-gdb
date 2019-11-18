@@ -4611,14 +4611,18 @@ elf64_vms_object_p (bfd *abfd)
   return TRUE;
 }
 
-static void
-elf64_vms_post_process_headers (bfd *abfd,
-				struct bfd_link_info *info ATTRIBUTE_UNUSED)
+static bfd_boolean
+elf64_vms_init_file_header (bfd *abfd, struct bfd_link_info *info)
 {
-  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  Elf_Internal_Ehdr *i_ehdrp;
 
+  if (!_bfd_elf_init_file_header (abfd, info))
+    return FALSE;
+
+  i_ehdrp = elf_elfheader (abfd);
   i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_OPENVMS;
   i_ehdrp->e_ident[EI_ABIVERSION] = 2;
+  return TRUE;
 }
 
 static bfd_boolean
@@ -5553,8 +5557,8 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 #undef  elf_backend_section_from_shdr
 #define elf_backend_section_from_shdr elf64_vms_section_from_shdr
 
-#undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers elf64_vms_post_process_headers
+#undef  elf_backend_init_file_header
+#define elf_backend_init_file_header elf64_vms_init_file_header
 
 #undef  elf_backend_section_processing
 #define elf_backend_section_processing elf64_vms_section_processing

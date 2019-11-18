@@ -1192,10 +1192,9 @@ struct elf_backend_data
   bfd_boolean (*gc_mark_extra_sections)
     (struct bfd_link_info *, elf_gc_mark_hook_fn);
 
-  /* This function, if defined, is called after the ELF headers have
-     been created.  This allows for things like the OS and ABI versions
-     to be changed.  */
-  void (*elf_backend_post_process_headers)
+  /* This function is called to initialise ELF file header info.
+     Customised versions can modify things like the OS and ABI version.  */
+  bfd_boolean (*elf_backend_init_file_header)
     (bfd *, struct bfd_link_info *);
 
   /* This function, if defined, prints a symbol to file and returns the
@@ -2391,7 +2390,7 @@ extern bfd_boolean _bfd_elf_setup_sections
 extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
   (struct bfd_link_info *, const char *, asection *);
 
-extern void _bfd_elf_post_process_headers (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_init_file_header (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elf_final_write_processing (bfd *);
 

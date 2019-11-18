@@ -8131,16 +8131,17 @@ elfNN_aarch64_find_inliner_info (bfd *abfd,
 }
 
 
-static void
-elfNN_aarch64_post_process_headers (bfd *abfd,
-				    struct bfd_link_info *link_info)
+static bfd_boolean
+elfNN_aarch64_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
 {
   Elf_Internal_Ehdr *i_ehdrp;	/* ELF file header, internal form.  */
 
+  if (!_bfd_elf_init_file_header (abfd, link_info))
+    return FALSE;
+
   i_ehdrp = elf_elfheader (abfd);
   i_ehdrp->e_ident[EI_ABIVERSION] = AARCH64_ELF_ABI_VERSION;
-
-  _bfd_elf_post_process_headers (abfd, link_info);
+  return TRUE;
 }
 
 static enum elf_reloc_type_class
@@ -10172,8 +10173,8 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_plt_sym_val			\
   elfNN_aarch64_plt_sym_val
 
-#define elf_backend_post_process_headers	\
-  elfNN_aarch64_post_process_headers
+#define elf_backend_init_file_header		\
+  elfNN_aarch64_init_file_header
 
 #define elf_backend_relocate_section		\
   elfNN_aarch64_relocate_section

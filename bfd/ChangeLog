@@ -1,5 +1,45 @@
 2019-11-18  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data <elf_backend_init_file_header>):
+	Rename from elf_backend_post_process_headers.
+	(_bfd_elf_post_process_headers): Delete.
+	(_bfd_elf_init_file_header): Declare.
+	* elf.c (_bfd_elf_compute_section_file_positions): Call new function
+	in place of prep_headers and elf_backend_post_process_headers.
+	(_bfd_elf_init_file_header): Renamed from prep_headers with
+	updated args and made global.  Delete dead code.
+	(_bfd_elf_post_process_headers): Delete.
+	* elf32-arm.c (elf32_arm_init_file_header): Rename from
+	elf32_arm_post_process_headers and call _bfd_elf_init_file_header.
+	Return status.
+	(elf_backend_init_file_header): Define.
+	(elf_backend_post_process_headers): Don't define.
+	* elf32-i386.c (elf_i386_fbsd_init_file_header): Similarly.
+	* elf32-m68hc1x.c (elf32_m68hc11_init_file_header): Similarly.
+	* elf32-metag.c (elf_metag_init_file_header): Similarly.
+	* elf32-spu.c (spu_elf_init_file_header
+	* elf32-visium.c (visium_elf_init_file_header
+	* elf64-alpha.c (elf64_alpha_fbsd_init_file_header
+	* elf64-hppa.c (elf64_hppa_init_file_header
+	* elf64-ia64-vms.c (elf64_vms_init_file_header
+	* elfnn-aarch64.c (elfNN_aarch64_init_file_header
+	* elfnn-ia64.c (elfNN_hpux_init_file_header
+	* elfxx-mips.c (_bfd_mips_init_file_header
+	* elfxx-mips.h (_bfd_mips_post_process_headers): Delete.
+	(_bfd_mips_init_file_header): Declare.
+	(elf_backend_post_process_headers): Delete.
+	(elf_backend_init_file_header): Define.
+	* elfxx-target.h (elf_backend_post_process_headers): Delete.
+	(elf_backend_init_file_header): Define and use.
+	* elf32-m68hc12.c (elf_backend_init_file_header): Define.
+	(elf_backend_post_process_headers): Don't define.
+	* elf32-m68hc1x.h (elf32_m68hc11_post_process_headers): Delete.
+	(elf32_m68hc11_init_file_header): Declare.
+	* elf32-ppc.c (elf_backend_post_process_headers): Remove
+	unnecessary undef.
+
+2019-11-18  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct elf_backend_data <elf_backend_modify_headers>):
 	Rename from elf_backend_modify_program_headers.
 	(_bfd_elf_modify_headers): Declare.

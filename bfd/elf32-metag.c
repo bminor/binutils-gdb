@@ -3237,14 +3237,17 @@ elf_metag_finish_dynamic_symbol (bfd *output_bfd,
 
 /* Set the Meta ELF ABI version.  */
 
-static void
-elf_metag_post_process_headers (bfd * abfd, struct bfd_link_info * link_info)
+static bfd_boolean
+elf_metag_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
 
-  _bfd_elf_post_process_headers (abfd, link_info);
+  if (!_bfd_elf_init_file_header (abfd, link_info))
+    return FALSE;
+
   i_ehdrp = elf_elfheader (abfd);
   i_ehdrp->e_ident[EI_ABIVERSION] = METAG_ELF_ABI_VERSION;
+  return TRUE;
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -4145,7 +4148,7 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_size_dynamic_sections	elf_metag_size_dynamic_sections
 #define elf_backend_omit_section_dynsym \
 	_bfd_elf_omit_section_dynsym_all
-#define elf_backend_post_process_headers	elf_metag_post_process_headers
+#define elf_backend_init_file_header		elf_metag_init_file_header
 #define elf_backend_reloc_type_class		elf_metag_reloc_type_class
 #define elf_backend_copy_indirect_symbol	elf_metag_copy_indirect_symbol
 #define elf_backend_plt_sym_val		elf_metag_plt_sym_val

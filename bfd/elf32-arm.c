@@ -17850,19 +17850,20 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
   return TRUE;
 }
 
-static void
-elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+static bfd_boolean
+elf32_arm_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
   struct elf32_arm_link_hash_table *globals;
   struct elf_segment_map *m;
 
+  if (!_bfd_elf_init_file_header (abfd, link_info))
+    return FALSE;
+
   i_ehdrp = elf_elfheader (abfd);
 
   if (EF_ARM_EABI_VERSION (i_ehdrp->e_flags) == EF_ARM_EABI_UNKNOWN)
     i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_ARM;
-  else
-    _bfd_elf_post_process_headers (abfd, link_info);
   i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
 
   if (link_info)
@@ -17904,6 +17905,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 	  m->p_flags_valid = 1;
 	}
     }
+  return TRUE;
 }
 
 static enum elf_reloc_type_class
@@ -20504,7 +20506,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
 #define elf_backend_always_size_sections	elf32_arm_always_size_sections
 #define elf_backend_init_index_section		_bfd_elf_init_2_index_sections
-#define elf_backend_post_process_headers	elf32_arm_post_process_headers
+#define elf_backend_init_file_header		elf32_arm_init_file_header
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
 #define elf_backend_fake_sections		elf32_arm_fake_sections

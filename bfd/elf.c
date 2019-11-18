@@ -51,7 +51,6 @@ SECTION
 
 static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
-static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int) ;
 static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
 				    file_ptr offset, size_t align);
@@ -4312,11 +4311,8 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   if (bed->elf_backend_begin_write_processing)
     (*bed->elf_backend_begin_write_processing) (abfd, link_info);
 
-  if (! prep_headers (abfd))
+  if (!(*bed->elf_backend_init_file_header) (abfd, link_info))
     return FALSE;
-
-  /* Post process the headers if necessary.  */
-  (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
   fsargs.failed = FALSE;
   fsargs.link_info = link_info;
@@ -4350,7 +4346,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     }
 
   shstrtab_hdr = &elf_tdata (abfd)->shstrtab_hdr;
-  /* sh_name was set in prep_headers.  */
+  /* sh_name was set in init_file_header.  */
   shstrtab_hdr->sh_type = SHT_STRTAB;
   shstrtab_hdr->sh_flags = bed->elf_strtab_flags;
   shstrtab_hdr->sh_addr = 0;
@@ -6385,8 +6381,9 @@ assign_file_positions_except_relocs (bfd *abfd,
   return TRUE;
 }
 
-static bfd_boolean
-prep_headers (bfd *abfd)
+bfd_boolean
+_bfd_elf_init_file_header (bfd *abfd,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form.  */
   struct elf_strtab_hash *shstrtab;
@@ -6448,16 +6445,6 @@ prep_headers (bfd *abfd)
   /* Each bfd section is section header entry.  */
   i_ehdrp->e_entry = bfd_get_start_address (abfd);
   i_ehdrp->e_shentsize = bed->s->sizeof_shdr;
-
-  /* If we're building an executable, we'll need a program header table.  */
-  if (abfd->flags & EXEC_P)
-    /* It all happens later.  */
-    ;
-  else
-    {
-      i_ehdrp->e_phentsize = 0;
-      i_ehdrp->e_phoff = 0;
-    }
 
   elf_tdata (abfd)->symtab_hdr.sh_name =
     (unsigned int) _bfd_elf_strtab_add (shstrtab, ".symtab", FALSE);
@@ -12223,12 +12210,6 @@ static const asymbol lcomm_sym
 asection _bfd_elf_large_com_section
   = BFD_FAKE_SECTION (_bfd_elf_large_com_section, &lcomm_sym,
 		      "LARGE_COMMON", 0, SEC_IS_COMMON);
-
-void
-_bfd_elf_post_process_headers (bfd *abfd ATTRIBUTE_UNUSED,
-			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
-{
-}
 
 bfd_boolean
 _bfd_elf_final_write_processing (bfd *abfd)

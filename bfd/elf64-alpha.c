@@ -5544,11 +5544,13 @@ static const struct elf_size_info alpha_elf_size_info =
    "FreeBSD" label in the ELF header.  So we put this label on all
    executables and (for simplicity) also all other object files.  */
 
-static void
-elf64_alpha_fbsd_post_process_headers (bfd * abfd,
-	struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+static bfd_boolean
+elf64_alpha_fbsd_init_file_header (bfd *abfd, struct bfd_link_info *info)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
+
+  if (!_bfd_elf_init_file_header (abfd, info))
+    return FALSE;
 
   i_ehdrp = elf_elfheader (abfd);
 
@@ -5558,11 +5560,12 @@ elf64_alpha_fbsd_post_process_headers (bfd * abfd,
   /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
   memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
 #endif
+  return TRUE;
 }
 
-#undef elf_backend_post_process_headers
-#define elf_backend_post_process_headers \
-  elf64_alpha_fbsd_post_process_headers
+#undef elf_backend_init_file_header
+#define elf_backend_init_file_header \
+  elf64_alpha_fbsd_init_file_header
 
 #undef  elf64_bed
 #define elf64_bed elf64_alpha_fbsd_bed

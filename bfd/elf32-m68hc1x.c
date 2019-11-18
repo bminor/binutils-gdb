@@ -1456,20 +1456,21 @@ static void scan_sections_for_abi (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Tweak the OSABI field of the elf header.  */
 
-void
-elf32_m68hc11_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
+bfd_boolean
+elf32_m68hc11_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
 {
   struct m68hc11_scan_param param;
   struct m68hc11_elf_link_hash_table *htab;
 
-  _bfd_elf_post_process_headers (abfd, link_info);
+  if (!_bfd_elf_init_file_header (abfd, link_info))
+    return FALSE;
 
   if (link_info == NULL)
-    return;
+    return TRUE;
 
   htab = m68hc11_elf_hash_table (link_info);
   if (htab == NULL)
-    return;
+    return TRUE;
 
   m68hc11_elf_get_bank_parameters (link_info);
 
@@ -1485,4 +1486,5 @@ elf32_m68hc11_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
       i_ehdrp = elf_elfheader (abfd);
       i_ehdrp->e_flags |= E_M68HC12_BANKS;
     }
+  return TRUE;
 }

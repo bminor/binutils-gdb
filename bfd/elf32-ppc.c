@@ -10509,6 +10509,5 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd)
 
 #undef elf32_bed
 #define elf32_bed				ppc_elf_vxworks_bed
-#undef elf_backend_post_process_headers
 
 #include "elf32-target.h"

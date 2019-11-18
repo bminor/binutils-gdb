@@ -169,9 +169,6 @@ static struct bfd_link_hash_table *elf64_hppa_hash_table_create
 static bfd_boolean elf64_hppa_object_p
   (bfd *);
 
-static void elf64_hppa_post_process_headers
-  (bfd *, struct bfd_link_info *);
-
 static bfd_boolean elf64_hppa_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
@@ -1120,16 +1117,18 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 /* HP requires the EI_OSABI field to be filled in.  The assignment to
    EI_ABIVERSION may not be strictly necessary.  */
 
-static void
-elf64_hppa_post_process_headers (bfd *abfd,
-			 struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+static bfd_boolean
+elf64_hppa_init_file_header (bfd *abfd, struct bfd_link_info *info)
 {
-  Elf_Internal_Ehdr * i_ehdrp;
+  Elf_Internal_Ehdr *i_ehdrp;
+
+  if (!_bfd_elf_init_file_header (abfd, info))
+    return FALSE;
 
   i_ehdrp = elf_elfheader (abfd);
-
   i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
   i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+  return TRUE;
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
@@ -4024,7 +4023,7 @@ const struct elf_size_info hppa64_elf_size_info =
 
 #define elf_backend_create_dynamic_sections \
 					elf64_hppa_create_dynamic_sections
-#define elf_backend_post_process_headers	elf64_hppa_post_process_headers
+#define elf_backend_init_file_header	elf64_hppa_init_file_header
 
 #define elf_backend_omit_section_dynsym _bfd_elf_omit_section_dynsym_all
 

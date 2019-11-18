@@ -16645,11 +16645,14 @@ enum
   MIPS_LIBC_ABI_MAX
 };
 
-void
-_bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
+bfd_boolean
+_bfd_mips_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
 {
   struct mips_elf_link_hash_table *htab = NULL;
   Elf_Internal_Ehdr *i_ehdrp;
+
+  if (!_bfd_elf_init_file_header (abfd, link_info))
+    return FALSE;
 
   i_ehdrp = elf_elfheader (abfd);
   if (link_info)
@@ -16673,8 +16676,7 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
      if it is the only hash section that will be created.  */
   if (link_info && link_info->emit_gnu_hash && !link_info->emit_hash)
     i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_XHASH;
-
-  _bfd_elf_post_process_headers (abfd, link_info);
+  return TRUE;
 }
 
 int

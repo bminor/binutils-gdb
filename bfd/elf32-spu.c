@@ -5185,17 +5185,19 @@ spu_elf_plugin (int val)
 
 /* Set ELF header e_type for plugins.  */
 
-static void
-spu_elf_post_process_headers (bfd *abfd, struct bfd_link_info *info)
+static bfd_boolean
+spu_elf_init_file_header (bfd *abfd, struct bfd_link_info *info)
 {
+  if (!_bfd_elf_init_file_header (abfd, info))
+    return FALSE;
+
   if (spu_plugin)
     {
       Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
 
       i_ehdrp->e_type = ET_DYN;
     }
-
-  _bfd_elf_post_process_headers (abfd, info);
+  return TRUE;
 }
 
 /* We may add an extra PT_LOAD segment for .toe.  We also need extra
@@ -5531,7 +5533,7 @@ spu_elf_size_sections (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 #define elf_backend_additional_program_headers	spu_elf_additional_program_headers
 #define elf_backend_modify_segment_map		spu_elf_modify_segment_map
 #define elf_backend_modify_headers		spu_elf_modify_headers
-#define elf_backend_post_process_headers	spu_elf_post_process_headers
+#define elf_backend_init_file_header		spu_elf_init_file_header
 #define elf_backend_fake_sections		spu_elf_fake_sections
 #define elf_backend_special_sections		spu_elf_special_sections
 #define bfd_elf32_bfd_final_link		spu_elf_final_link
