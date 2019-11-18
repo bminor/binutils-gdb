@@ -1,3 +1,8 @@
+2019-11-18  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.h (struct symbol) <owner>: Initialize explicitly in the
+	constructor instead of using a class initializer.
+
 2019-11-15  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Replace {posix,mingw}-strerror.c with safe-strerror.c.

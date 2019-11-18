@@ -1113,6 +1113,9 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       language = language_unknown;
       ada_mangled = 0;
       section = 0;
+      /* GCC 4.8.5 (on CentOS 7) does not correctly compile class-
+         initialization of unions, so we initialize it manually here.  */
+      owner.symtab = nullptr;
     }
 
   /* Data type of value */
@@ -1127,7 +1130,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     /* The symbol table containing this symbol.  This is the file associated
        with LINE.  It can be NULL during symbols read-in but it is never NULL
        during normal operation.  */
-    struct symtab *symtab = nullptr;
+    struct symtab *symtab;
 
     /* For types defined by the architecture.  */
     struct gdbarch *arch;
