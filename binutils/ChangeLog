@@ -1,5 +1,14 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf.c (init_dwarf_regnames_by_bfd_arch_and_mach): New
+	function.
+	* dwarf.h (init_dwarf_regnames_by_bfd_arch_and_mach): Declare.
+	* objdump.c (dump_dwarf): Call new function instead of calling
+	specific initialization routines.  Restrucure so that eh_addr_size
+	is still calculated correctly.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf.c (init_dwarf_regnames): Renamed to...
 	(init_dwarf_regnames_by_elf_machine_code): ...this.
 	* dwarf.h (init_dwarf_regnames): Renamed to...
