@@ -1,5 +1,29 @@
 2019-11-18  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data <elf_backend_modify_headers>):
+	Rename from elf_backend_modify_program_headers.
+	(_bfd_elf_modify_headers): Declare.
+	* elf.c (assign_file_positions_except_relocs): Set
+	elf_program_header_size.  Always call elf_backend_modify_headers.
+	Extract code modifying file header..
+	(_bfd_elf_modify_headers): ..to here.  New function.
+	* elf32-arm.c (elf_backend_modify_headers): Renamed from
+	elf_backend_modify_program_headers.
+	* elf32-i386.c: Similarly.
+	* elf64-x86-64.c: Similarly.
+	* elfxx-target.h: Similarly.  Default elf_backend_modify_headers
+	to _bfd_elf_modify_headers.
+	* elf-nacl.h (nacl_modify_headers): Rename from
+	nacl_modify_program_headers.
+	* elf-nacl.c (nacl_modify_headers): Rename from
+	nacl_modify_program_headers and call _bfd_elf_modify_headers.
+	* elf32-rx.c (elf32_rx_modify_headers): Similarly.
+	* elf32-spu.c (spu_elf_modify_headers): Similarly.
+	* elfnn-ia64.c (elfNN_ia64_modify_headers): Similarly.
+	* elf32-sh.c (elf_backend_modify_program_headers): Don't undef.
+
+2019-11-18  Alan Modra  <amodra@gmail.com>
+
 	PR 25196
 	* bfd.c (bfd_error_type): Add bfd_error_sorry.
 	(bfd_errmsgs): Likewise.

@@ -6847,8 +6847,6 @@ sh_elf_encode_eh_address (bfd *abfd,
 
 #include "elf32-target.h"
 
-#undef elf_backend_modify_program_headers
-
 /* VxWorks support.  */
 #undef	TARGET_BIG_SYM
 #define	TARGET_BIG_SYM			sh_elf32_vxworks_vec

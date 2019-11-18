@@ -20624,8 +20624,8 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_plt_alignment		4
 #undef	elf_backend_modify_segment_map
 #define	elf_backend_modify_segment_map		elf32_arm_nacl_modify_segment_map
-#undef	elf_backend_modify_program_headers
-#define	elf_backend_modify_program_headers	nacl_modify_program_headers
+#undef	elf_backend_modify_headers
+#define	elf_backend_modify_headers		nacl_modify_headers
 #undef  elf_backend_final_write_processing
 #define elf_backend_final_write_processing	elf32_arm_nacl_final_write_processing
 #undef bfd_elf32_get_synthetic_symtab
@@ -20643,7 +20643,7 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #undef	elf_backend_plt_alignment
 #undef	elf_backend_modify_segment_map
 #define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
-#undef	elf_backend_modify_program_headers
+#undef	elf_backend_modify_headers
 #undef  elf_backend_final_write_processing
 #define elf_backend_final_write_processing	elf32_arm_final_write_processing
 #undef	ELF_MINPAGESIZE

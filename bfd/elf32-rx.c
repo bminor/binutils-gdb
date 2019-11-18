@@ -3684,8 +3684,7 @@ rx_final_link (bfd * abfd, struct bfd_link_info * info)
 }
 
 static bfd_boolean
-elf32_rx_modify_program_headers (bfd * abfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info * info ATTRIBUTE_UNUSED)
+elf32_rx_modify_headers (bfd *abfd, struct bfd_link_info *info)
 {
   const struct elf_backend_data * bed;
   struct elf_obj_tdata * tdata;
@@ -3717,7 +3716,7 @@ elf32_rx_modify_program_headers (bfd * abfd ATTRIBUTE_UNUSED,
 #endif
 	}
 
-  return TRUE;
+  return _bfd_elf_modify_headers (abfd, info);
 }
 
 /* The default literal sections should always be marked as "code" (i.e.,
@@ -4037,7 +4036,7 @@ rx_additional_link_map_text (bfd *obfd, struct bfd_link_info *info, FILE *mapfil
 #define elf_backend_relocate_section		rx_elf_relocate_section
 #define elf_symbol_leading_char			('_')
 #define elf_backend_can_gc_sections		1
-#define elf_backend_modify_program_headers	elf32_rx_modify_program_headers
+#define elf_backend_modify_headers		elf32_rx_modify_headers
 
 #define bfd_elf32_bfd_reloc_type_lookup		rx_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup		rx_reloc_name_lookup

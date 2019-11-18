@@ -5429,8 +5429,8 @@ static const struct elf_x86_backend_data elf_x86_64_nacl_arch_bed =
 #define elf_backend_object_p			elf64_x86_64_nacl_elf_object_p
 #undef	elf_backend_modify_segment_map
 #define	elf_backend_modify_segment_map		nacl_modify_segment_map
-#undef	elf_backend_modify_program_headers
-#define	elf_backend_modify_program_headers	nacl_modify_program_headers
+#undef	elf_backend_modify_headers
+#define	elf_backend_modify_headers		nacl_modify_headers
 #undef	elf_backend_final_write_processing
 #define elf_backend_final_write_processing	nacl_final_write_processing
 
@@ -5483,7 +5483,7 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
 #undef	elf_backend_bfd_from_remote_memory
 #undef	elf_backend_size_info
 #undef	elf_backend_modify_segment_map
-#undef	elf_backend_modify_program_headers
+#undef	elf_backend_modify_headers
 #undef	elf_backend_final_write_processing
 
 /* Intel L1OM support.  */

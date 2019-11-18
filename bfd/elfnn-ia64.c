@@ -1191,8 +1191,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
    for SHF_IA_64_NORECOV on each.  */
 
 static bfd_boolean
-elfNN_ia64_modify_program_headers (bfd *abfd,
-				   struct bfd_link_info *info ATTRIBUTE_UNUSED)
+elfNN_ia64_modify_headers (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf_obj_tdata *tdata = elf_tdata (abfd);
   struct elf_segment_map *m;
@@ -1224,7 +1223,7 @@ elfNN_ia64_modify_program_headers (bfd *abfd,
       found:;
       }
 
-  return TRUE;
+  return _bfd_elf_modify_headers (abfd, info);
 }
 
 /* According to the Tahoe assembler spec, all labels starting with a
@@ -5037,8 +5036,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 	elfNN_ia64_additional_program_headers
 #define elf_backend_modify_segment_map \
 	elfNN_ia64_modify_segment_map
-#define elf_backend_modify_program_headers \
-	elfNN_ia64_modify_program_headers
+#define elf_backend_modify_headers \
+	elfNN_ia64_modify_headers
 #define elf_info_to_howto \
 	elfNN_ia64_info_to_howto
 

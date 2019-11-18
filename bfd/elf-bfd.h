@@ -1165,7 +1165,7 @@ struct elf_backend_data
 
   /* This function is called to modify program headers just before
      they are written.  */
-  bfd_boolean (*elf_backend_modify_program_headers)
+  bfd_boolean (*elf_backend_modify_headers)
     (bfd *, struct bfd_link_info *);
 
   /* This function is called to see if the PHDR header should be
@@ -2305,6 +2305,8 @@ extern bfd_boolean _bfd_elf_compute_section_file_positions
   (bfd *, struct bfd_link_info *);
 extern file_ptr _bfd_elf_assign_file_position_for_section
   (Elf_Internal_Shdr *, file_ptr, bfd_boolean);
+extern bfd_boolean _bfd_elf_modify_headers
+  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elf_validate_reloc
   (bfd *, arelent *);

@@ -6313,6 +6313,7 @@ assign_file_positions_except_relocs (bfd *abfd,
   struct elf_obj_tdata *tdata = elf_tdata (abfd);
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  unsigned int alloc;
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
       && bfd_get_format (abfd) != bfd_core)
@@ -6355,11 +6356,10 @@ assign_file_positions_except_relocs (bfd *abfd,
 	}
 
       elf_next_file_pos (abfd) = off;
+      elf_program_header_size (abfd) = 0;
     }
   else
     {
-      unsigned int alloc;
-
       /* Assign file positions for the loaded sections based on the
 	 assignment of sections to segments.  */
       if (!assign_file_positions_for_load_sections (abfd, link_info))
@@ -6368,41 +6368,15 @@ assign_file_positions_except_relocs (bfd *abfd,
       /* And for non-load sections.  */
       if (!assign_file_positions_for_non_load_sections (abfd, link_info))
 	return FALSE;
+    }
 
-      if (bed->elf_backend_modify_program_headers != NULL)
-	{
-	  if (!(*bed->elf_backend_modify_program_headers) (abfd, link_info))
-	    return FALSE;
-	}
+  if (!(*bed->elf_backend_modify_headers) (abfd, link_info))
+    return FALSE;
 
-      /* Set e_type in ELF header to ET_EXEC for -pie -Ttext-segment=.  */
-      if (link_info != NULL && bfd_link_pie (link_info))
-	{
-	  unsigned int num_segments = i_ehdrp->e_phnum;
-	  Elf_Internal_Phdr *segment = tdata->phdr;
-	  Elf_Internal_Phdr *end_segment = &segment[num_segments];
-
-	  /* Find the lowest p_vaddr in PT_LOAD segments.  */
-	  bfd_vma p_vaddr = (bfd_vma) -1;
-	  for (; segment < end_segment; segment++)
-	    if (segment->p_type == PT_LOAD && p_vaddr > segment->p_vaddr)
-	      p_vaddr = segment->p_vaddr;
-
-	  /* Set e_type to ET_EXEC if the lowest p_vaddr in PT_LOAD
-	     segments is non-zero.  */
-	  if (p_vaddr)
-	    i_ehdrp->e_type = ET_EXEC;
-	}
-
-      /* Write out the program headers.
-	 FIXME: We used to have code here to sort the PT_LOAD segments into
-	 ascending order, as per the ELF spec.  But this breaks some programs,
-	 including the Linux kernel.  But really either the spec should be
-	 changed or the programs updated.  */
-      alloc = i_ehdrp->e_phnum;
-      if (alloc == 0)
-	return TRUE;
-
+  /* Write out the program headers.  */
+  alloc = i_ehdrp->e_phnum;
+  if (alloc != 0)
+    {
       if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0
 	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return FALSE;
@@ -6496,6 +6470,38 @@ prep_headers (bfd *abfd)
       || elf_tdata (abfd)->shstrtab_hdr.sh_name == (unsigned int) -1)
     return FALSE;
 
+  return TRUE;
+}
+
+/* Set e_type in ELF header to ET_EXEC for -pie -Ttext-segment=.
+
+   FIXME: We used to have code here to sort the PT_LOAD segments into
+   ascending order, as per the ELF spec.  But this breaks some programs,
+   including the Linux kernel.  But really either the spec should be
+   changed or the programs updated.  */
+
+bfd_boolean
+_bfd_elf_modify_headers (bfd *obfd, struct bfd_link_info *link_info)
+{
+  if (link_info != NULL && bfd_link_pie (link_info))
+    {
+      Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (obfd);
+      unsigned int num_segments = i_ehdrp->e_phnum;
+      struct elf_obj_tdata *tdata = elf_tdata (obfd);
+      Elf_Internal_Phdr *segment = tdata->phdr;
+      Elf_Internal_Phdr *end_segment = &segment[num_segments];
+
+      /* Find the lowest p_vaddr in PT_LOAD segments.  */
+      bfd_vma p_vaddr = (bfd_vma) -1;
+      for (; segment < end_segment; segment++)
+	if (segment->p_type == PT_LOAD && p_vaddr > segment->p_vaddr)
+	  p_vaddr = segment->p_vaddr;
+
+      /* Set e_type to ET_EXEC if the lowest p_vaddr in PT_LOAD
+	 segments is non-zero.  */
+      if (p_vaddr)
+	i_ehdrp->e_type = ET_EXEC;
+    }
   return TRUE;
 }
 
