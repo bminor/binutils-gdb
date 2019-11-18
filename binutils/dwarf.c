@@ -38,6 +38,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 static const char *regname (unsigned int regno, int row);
+static const char *regname_internal_by_table_only (unsigned int regno);
 
 static int have_frame_base;
 static int need_base_address;
@@ -7360,8 +7361,11 @@ typedef struct Frame_Chunk
 }
 Frame_Chunk;
 
+typedef const char *(*dwarf_regname_lookup_ftype) (unsigned int);
+static dwarf_regname_lookup_ftype dwarf_regnames_lookup_func;
 static const char *const *dwarf_regnames;
 static unsigned int dwarf_regnames_count;
+
 
 /* A marker for a col_type that means this column was never referenced
    in the frame info.  */
@@ -7469,6 +7473,7 @@ init_dwarf_regnames_i386 (void)
 {
   dwarf_regnames = dwarf_regnames_i386;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 static void
@@ -7476,6 +7481,7 @@ init_dwarf_regnames_iamcu (void)
 {
   dwarf_regnames = dwarf_regnames_iamcu;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_iamcu);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 static const char *const dwarf_regnames_x86_64[] =
@@ -7515,6 +7521,7 @@ init_dwarf_regnames_x86_64 (void)
 {
   dwarf_regnames = dwarf_regnames_x86_64;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 static const char *const dwarf_regnames_aarch64[] =
@@ -7542,6 +7549,7 @@ init_dwarf_regnames_aarch64 (void)
 {
   dwarf_regnames = dwarf_regnames_aarch64;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_aarch64);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 static const char *const dwarf_regnames_s390[] =
@@ -7566,6 +7574,7 @@ init_dwarf_regnames_s390 (void)
 {
   dwarf_regnames = dwarf_regnames_s390;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_s390);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 static const char *const dwarf_regnames_riscv[] =
@@ -7587,11 +7596,14 @@ init_dwarf_regnames_riscv (void)
 {
   dwarf_regnames = dwarf_regnames_riscv;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_riscv);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
 void
 init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
 {
+  dwarf_regnames_lookup_func = NULL;
+
   switch (e_machine)
     {
     case EM_386:
@@ -7632,6 +7644,8 @@ void
 init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 					  unsigned long mach)
 {
+  dwarf_regnames_lookup_func = NULL;
+
   switch (arch)
     {
     case bfd_arch_i386:
@@ -7674,18 +7688,31 @@ init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 }
 
 static const char *
-regname (unsigned int regno, int row)
+regname_internal_by_table_only (unsigned int regno)
+{
+  if (dwarf_regnames != NULL
+      && regno < dwarf_regnames_count
+      && dwarf_regnames [regno] != NULL)
+    return dwarf_regnames [regno];
+
+  return NULL;
+}
+
+static const char *
+regname (unsigned int regno, int name_only_p)
 {
   static char reg[64];
 
-  if (dwarf_regnames
-      && regno < dwarf_regnames_count
-      && dwarf_regnames [regno] != NULL)
+  const char *name = NULL;
+
+  if (dwarf_regnames_lookup_func != NULL)
+    name = dwarf_regnames_lookup_func (regno);
+
+  if (name != NULL)
     {
-      if (row)
-	return dwarf_regnames [regno];
-      snprintf (reg, sizeof (reg), "r%d (%s)", regno,
-		dwarf_regnames [regno]);
+      if (name_only_p)
+	return name;
+      snprintf (reg, sizeof (reg), "r%d (%s)", regno, name);
     }
   else
     snprintf (reg, sizeof (reg), "r%d", regno);

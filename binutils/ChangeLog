@@ -1,5 +1,21 @@
 2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf.c (typedef dwarf_regname_lookup_ftype): New typedef.
+	(dwarf_regnames_lookup_func): New static global.
+	(init_dwarf_regnames_i386): Set dwarf_regnames_lookup_func.
+	(init_dwarf_regnames_iamcu): Likewise.
+	(init_dwarf_regnames_x86_64): Likewise.
+	(init_dwarf_regnames_aarch64): Likewise.
+	(init_dwarf_regnames_s390): Likewise.
+	(init_dwarf_regnames_riscv): Likewise.
+	(init_dwarf_regnames_by_elf_machine_code): Reset
+	dwarf_regnames_lookup_func to NULL.
+	(init_dwarf_regnames_by_bfd_arch_and_mach): Likewise.
+	(regname_internal_by_table_only): New function.
+	(regname): Make use of dwarf_regnames_lookup_func.
+
+2019-11-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf.c (init_dwarf_regnames_i386): Make static.
 	(init_dwarf_regnames_iamcu): Make static.
 	(init_dwarf_regnames_x86_64): Make static.
