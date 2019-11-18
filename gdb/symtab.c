@@ -770,10 +770,17 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
   /* Choose 256 as the starting size of the hash table, somewhat arbitrarily.
      The hash table code will round this up to the next prime number.
      Choosing a much larger table size wastes memory, and saves only about
-     1% in symbol reading.  */
+     1% in symbol reading.  However, if the minsym count is already
+     initialized (e.g. because symbol name setting was deferred to
+     a background thread) we can initialize the hashtable with that
+     count, because we will almost certainly have at least that
+     many entries.  If we have a nonzero number but less than 256,
+     we still stay with 256 to have some space for psymbols, etc.  */
+
+  int count = std::max (per_bfd->minimal_symbol_count, 256);
 
   per_bfd->demangled_names_hash.reset (htab_create_alloc
-    (256, hash_demangled_name_entry, eq_demangled_name_entry,
+    (count, hash_demangled_name_entry, eq_demangled_name_entry,
      free_demangled_name_entry, xcalloc, xfree));
 }
 
