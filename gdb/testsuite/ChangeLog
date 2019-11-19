@@ -1,5 +1,10 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.server/multi-ui-errors.c: New file.
+	* gdb.server/multi-ui-errors.exp: New file.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR tui/9765
 	* gdb.tui/tui-layout-asm.exp: Add scrolling test for asm window.
 

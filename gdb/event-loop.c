@@ -376,7 +376,10 @@ start_event_loop (void)
 	  /* If any exception escaped to here, we better enable
 	     stdin.  Otherwise, any command that calls async_disable_stdin,
 	     and then throws, will leave stdin inoperable.  */
-	  async_enable_stdin ();
+	  SWITCH_THRU_ALL_UIS ()
+	    {
+	      async_enable_stdin ();
+	    }
 	  /* If we long-jumped out of do_one_event, we probably didn't
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */

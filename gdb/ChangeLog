@@ -1,5 +1,10 @@
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* event-loop.c (start_event_loop): Wrap async_enable_stdin with
+	SWITCH_THRU_ALL_UIS.
+
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR tui/9765
 	* minsyms.c (lookup_minimal_symbol_by_pc_section): Update header
 	comment, add extra parameter, and update to store previous symbol
