@@ -2646,8 +2646,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   imach = bfd_get_mach (ibfd);
   if (input_arch)
     {
-      if (bfd_get_arch_info (ibfd) == NULL
-	  || bfd_get_arch_info (ibfd)->arch == bfd_arch_unknown)
+      if (iarch == bfd_arch_unknown)
 	{
 	  iarch = input_arch->arch;
 	  imach = input_arch->mach;
@@ -2655,6 +2654,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       else
 	non_fatal (_("Input file `%s' ignores binary architecture parameter."),
 		   bfd_get_archive_filename (ibfd));
+    }
+  if (iarch == bfd_arch_unknown
+      && bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      && bfd_get_flavour (obfd) == bfd_target_elf_flavour)
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (obfd);
+      iarch = bed->arch;
+      imach = 0;
     }
   if (!bfd_set_arch_mach (obfd, iarch, imach)
       && (ibfd->target_defaulted

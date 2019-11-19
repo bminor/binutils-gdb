@@ -1,5 +1,12 @@
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
+	PR 24968
+	* objcopy.c (copy_object): For ELF output and non-ELF input without
+	arch, take arch from output file if not given by -B.  Don't
+	bfd_get_arch_info when we already have iarch.
+
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
 	PR 25191
 	* objcopy.c (is_nondebug_keep_contents_section): Use bfd_get_flavour.
 	(copy_object): Likewise.
