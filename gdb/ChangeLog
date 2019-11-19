@@ -1,3 +1,9 @@
+2020-01-24  Graham Markall  <graham.markall@embecosm.com>
+
+	PR gdb/23718
+	* gdb/python/python.c (execute_gdb_command): Call
+	async_enable_stdin in catch block.
+
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* event-loop.c (start_event_loop): Wrap async_enable_stdin with

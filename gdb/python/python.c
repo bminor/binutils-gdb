@@ -624,6 +624,12 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
+      /* If an exception occurred then we won't hit normal_stop (), or have
+	 an exception reach the top level of the event loop, which are the
+	 two usual places in which stdin would be re-enabled. So, before we
+	 convert the exception and continue back in Python, we should
+	 re-enable stdin here.  */
+      async_enable_stdin ();
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
