@@ -1,5 +1,14 @@
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
+	PR 25191
+	* objcopy.c (is_nondebug_keep_contents_section): Use bfd_get_flavour.
+	(copy_object): Likewise.
+	(setup_section): Likewise.  If flavour of input and output files
+	differ, restrict section flags to the intersection of input and
+	output bfd_applicable_section_flags.
+
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
 	* bucomm.c (bfd_nonfatal_message): Add a space between program
 	name and file.
 

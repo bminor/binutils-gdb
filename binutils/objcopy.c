@@ -1421,16 +1421,16 @@ static bfd_boolean
 is_nondebug_keep_contents_section (bfd *ibfd, asection *isection)
 {
   /* Always keep ELF note sections.  */
-  if (ibfd->xvec->flavour == bfd_target_elf_flavour)
-    return (elf_section_type (isection) == SHT_NOTE);
+  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+    return elf_section_type (isection) == SHT_NOTE;
 
   /* Always keep the .buildid section for PE/COFF.
 
      Strictly, this should be written "always keep the section storing the debug
      directory", but that may be the .text section for objects produced by some
      tools, which it is not sensible to keep.  */
-  if (ibfd->xvec->flavour == bfd_target_coff_flavour)
-    return (strcmp (bfd_section_name (isection), ".buildid") == 0);
+  if (bfd_get_flavour (ibfd) == bfd_target_coff_flavour)
+    return strcmp (bfd_section_name (isection), ".buildid") == 0;
 
   return FALSE;
 }
@@ -2585,7 +2585,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       return FALSE;
     }
 
-  if (ibfd->xvec->flavour != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     {
       if ((do_debug_sections & compress) != 0
 	  && do_debug_sections != compress)
@@ -2683,7 +2683,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       pe_data_type *pe = pe_data (obfd);
 
       /* Copy PE parameters before changing them.  */
-      if (ibfd->xvec->flavour == bfd_target_coff_flavour
+      if (bfd_get_flavour (ibfd) == bfd_target_coff_flavour
 	  && bfd_pei_p (ibfd))
 	pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
 
@@ -3922,11 +3922,16 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Get the, possibly new, name of the output section.  */
   name = bfd_section_name (isection);
   flags = bfd_section_flags (isection);
+  if (bfd_get_flavour (ibfd) != bfd_get_flavour (obfd))
+    {
+      flags &= bfd_applicable_section_flags (ibfd);
+      flags &= bfd_applicable_section_flags (obfd);
+    }
   name = find_section_rename (name, &flags);
 
   /* Prefix sections.  */
-  if ((prefix_alloc_sections_string)
-      && (bfd_section_flags (isection) & SEC_ALLOC))
+  if (prefix_alloc_sections_string
+      && (bfd_section_flags (isection) & SEC_ALLOC) != 0)
     prefix = prefix_alloc_sections_string;
   else if (prefix_sections_string)
     prefix = prefix_sections_string;
@@ -3952,7 +3957,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	   && !is_nondebug_keep_contents_section (ibfd, isection))
     {
       flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
-      if (obfd->xvec->flavour == bfd_target_elf_flavour)
+      if (bfd_get_flavour (obfd) == bfd_target_elf_flavour)
 	{
 	  make_nobits = TRUE;
 
@@ -4055,7 +4060,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (gsym != NULL)
 	{
 	  gsym->flags |= BSF_KEEP;
-	  if (ibfd->xvec->flavour == bfd_target_elf_flavour)
+	  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
 	    elf_group_id (isection) = gsym;
 	}
     }
