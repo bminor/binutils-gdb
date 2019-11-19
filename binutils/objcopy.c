@@ -3752,6 +3752,14 @@ copy_file (const char *input_filename, const char *output_filename,
 	  status = 1;
 	  return;
 	}
+
+      if (gnu_debuglink_filename != NULL)
+	{
+	  non_fatal (_("--add-gnu-debuglink ignored for archive %s"),
+		     bfd_get_filename (ibfd));
+	  gnu_debuglink_filename = NULL;
+	}
+
       /* This is a no-op on non-Coff targets.  */
       set_long_section_mode (obfd, ibfd, long_section_names);
 

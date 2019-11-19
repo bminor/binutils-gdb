@@ -1,5 +1,10 @@
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
+	PR 24499
+	* objcopy.c (copy_file): Ignore --add-gnu-debuglink for archives.
+
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
 	PR 24968
 	* objcopy.c (copy_object): For ELF output and non-ELF input without
 	arch, take arch from output file if not given by -B.  Don't
