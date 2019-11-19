@@ -1,5 +1,14 @@
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
+	PR 25197
+	* coffgen.c (coff_find_nearest_line_with_names): Check that C_FILE
+	u.syment.n_value does point at another C_FILE sym and not into
+	some auxent that happens to look like a C_FILE.  Properly check
+	for integer overflow and avoid possible pointer wrap-around.
+	Simplify pr17512 checks.
+
+2019-11-19  Alan Modra  <amodra@gmail.com>
+
 	PR 25200
 	* reloc.c (bfd_default_reloc_type_lookup): Don't BFD_FAIL.
 	* elf.c (_bfd_elf_validate_reloc): Don't segfault on NULL howto.

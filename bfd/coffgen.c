@@ -1814,10 +1814,11 @@ coff_get_normalized_symtab (bfd *abfd)
   if (! _bfd_coff_get_external_symbols (abfd))
     return NULL;
 
-  size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
+  size = obj_raw_syment_count (abfd);
   /* Check for integer overflow.  */
-  if (size < obj_raw_syment_count (abfd))
+  if (size > (bfd_size_type) -1 / sizeof (combined_entry_type))
     return NULL;
+  size *= sizeof (combined_entry_type);
   internal = (combined_entry_type *) bfd_zalloc (abfd, size);
   if (internal == NULL && size != 0)
     return NULL;
@@ -1844,29 +1845,20 @@ coff_get_normalized_symtab (bfd *abfd)
       symbol_ptr = internal_ptr;
       internal_ptr->is_sym = TRUE;
 
-      /* PR 17512: file: 1353-1166-0.004.  */
-      if (symbol_ptr->u.syment.n_sclass == C_FILE
-	  && symbol_ptr->u.syment.n_numaux > 0
-	  && raw_src + symesz + symbol_ptr->u.syment.n_numaux
-	  * symesz > raw_end)
-	{
-	  bfd_release (abfd, internal);
-	  return NULL;
-	}
-
       for (i = 0;
 	   i < symbol_ptr->u.syment.n_numaux;
 	   i++)
 	{
 	  internal_ptr++;
+	  raw_src += symesz;
+
 	  /* PR 17512: Prevent buffer overrun.  */
-	  if (internal_ptr >= internal_end)
+	  if (raw_src >= raw_end || internal_ptr >= internal_end)
 	    {
 	      bfd_release (abfd, internal);
 	      return NULL;
 	    }
 
-	  raw_src += symesz;
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,
 				symbol_ptr->u.syment.n_sclass,
@@ -2408,13 +2400,16 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	      maxdiff = offset + sec_vma - p2->u.syment.n_value;
 	    }
 
+	  if (p->u.syment.n_value >= cof->raw_syment_count)
+	    break;
+
 	  /* Avoid endless loops on erroneous files by ensuring that
 	     we always move forward in the file.  */
 	  if (p >= cof->raw_syments + p->u.syment.n_value)
 	    break;
 
 	  p = cof->raw_syments + p->u.syment.n_value;
-	  if (p > pend || p->u.syment.n_sclass != C_FILE)
+	  if (!p->is_sym || p->u.syment.n_sclass != C_FILE)
 	    break;
 	}
     }
