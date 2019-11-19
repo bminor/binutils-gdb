@@ -1,3 +1,30 @@
+2019-11-19  Ali Tamur <tamur@google.com>
+
+	* dwarf2read.c (dw2_get_file_names_reader): Replace "if (attr)" with
+	"if (attr != nullptr)".
+	(dwarf2_find_base_address): Likewise.
+	(dwarf2_build_include_psymtabs): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(read_func_scope): Likewise.
+	(read_call_site_scope): Likewise.
+	(dwarf2_get_pc_bounds): Likewise.
+	(dwarf2_record_block_ranges): Likewise.
+	(dwarf2_add_field): Likewise.
+	(dwarf2_add_member_fn): Likewise.
+	(read_structure_type): Likewise.
+	(read_enumeration_type): Likewise.
+	(read_array_type): Likewise.
+	(read_array_order): Likewise.
+	(read_set_type): Likewise.
+	(read_common_block): Likewise.
+	(read_tag_reference_type): Likewise.
+	(read_tag_string_type): Likewise.
+	(read_subroutine_type): Likewise.
+	(read_base_type): Likewise.
+	(read_subrange_type): Likewise.
+	(new_symbol): Likewise.
+	(prepare_one_comp_unit): Likewise.
+
 2019-11-19  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (windows_nat_target::attach): Include GetLastError
