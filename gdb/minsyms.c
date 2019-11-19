@@ -54,6 +54,7 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/parallel-for.h"
+#include "maint.h"
 
 #if CXX_STD_THREAD
 #include <mutex>
@@ -1137,6 +1138,15 @@ minimal_symbol_reader::record_full (gdb::string_view name,
   else
     msymbol->name = name.data ();
 
+  if (worker_threads_disabled ())
+    {
+      /* To keep our behavior as close as possible to the previous non-threaded
+	 behavior for GDB 9.1, we call symbol_set_names here when threads
+	 are disabled.  */
+      symbol_set_names (msymbol, msymbol->name, false, m_objfile->per_bfd);
+      msymbol->name_set = 1;
+    }
+
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
 
@@ -1407,10 +1417,12 @@ minimal_symbol_reader::install ()
 		     (msym, demangled_name,
 		      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
-
-		   hash_values[idx].mangled_name_hash
-		     = fast_hash (msym->name, hash_values[idx].name_length);
 		 }
+	       /* This mangled_name_hash computation has to be outside of
+		  the name_set check, or symbol_set_names below will
+		  be called with an invalid hash value.  */
+	       hash_values[idx].mangled_name_hash
+		 = fast_hash (msym->name, hash_values[idx].name_length);
 	       hash_values[idx].minsym_hash
 		 = msymbol_hash (msym->linkage_name ());
 	       /* We only use this hash code if the search name differs

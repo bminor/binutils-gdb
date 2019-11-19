@@ -26,6 +26,8 @@ extern void set_per_command_time (int);
 
 extern void set_per_command_space (int);
 
+extern bool worker_threads_disabled ();
+
 /* Records a run time and space usage to be used as a base for
    reporting elapsed time or change in space.  */
 

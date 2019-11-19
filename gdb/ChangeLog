@@ -1,5 +1,15 @@
 2019-11-27  Christian Biesinger  <cbiesinger@google.com>
 
+	* maint.c (n_worker_threads): Default to 0.
+	(worker_threads_disabled): New function.
+	* maint.h (worker_threads_disabled): New function.
+	* minsyms.c (minimal_symbol_reader::record_full): Call symbol_set_names
+	here if worker_threads_disabled () is true.
+	(minimal_symbol_reader::install): Skip all threading if
+	worker_threads_disabled () is true.
+
+2019-11-27  Christian Biesinger  <cbiesinger@google.com>
+
 	* minsyms.c (add_minsym_to_hash_table): Use a previously computed
 	hash code if possible.
 	(add_minsym_to_demangled_hash_table): Likewise.
