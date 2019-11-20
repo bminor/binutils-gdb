@@ -47,7 +47,7 @@
 ;; Whereas the 128-bit instructions (at the moment there is only one
 ;; of such instructions, lddw) have the form:
 ;;
-;;      code:8 regs:8 offset:16 imm:32 imm:32 unused:32
+;;      code:8 regs:8 offset:16 imm:32 unused:32 imm:32 
 ;;
 ;; In both formats `regs' is itself composed by two fields:
 ;;
