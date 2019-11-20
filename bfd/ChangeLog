@@ -1,3 +1,8 @@
+2019-11-21  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Exclude dynamic library
+	BFDs that have not been loaded.
+
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
 	PR 25197
