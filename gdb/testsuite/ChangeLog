@@ -1,3 +1,8 @@
+2019-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.python/py-progspace.exp: Add missing parentheses on some
+	'print' commands.
+
 2019-11-19  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/winheight.exp: New file.
