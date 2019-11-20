@@ -1,3 +1,8 @@
+2019-12-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (gdb.prompt): Use correct quotes in example.
+	Shorten sample text.
+
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* doc/gdb.texinfo (GDB/MI Symbol Query): Add documentation of

@@ -5937,13 +5937,12 @@ End a sequence of non-printing characters.
 For example:
 
 @smallexample
-substitute_prompt (``frame: \f,
-                   print arguments: \p@{print frame-arguments@}'')
+substitute_prompt ("frame: \f, args: \p@{print frame-arguments@}")
 @end smallexample
 
 @exdent will return the string:
 
 @smallexample
-"frame: main, print arguments: scalars"
+"frame: main, args: scalars"
 @end smallexample
 @end table
