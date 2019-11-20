@@ -1,5 +1,10 @@
 2019-12-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_all_windows_info): Treat inactive TUI
+	specially.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_copy_source_line): Don't advance past
 	\0.
 	* unittests/tui-selftests.c: New file.

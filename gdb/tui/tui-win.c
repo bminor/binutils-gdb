@@ -847,6 +847,12 @@ tui_set_focus_command (const char *arg, int from_tty)
 static void
 tui_all_windows_info (const char *arg, int from_tty)
 {
+  if (!tui_active)
+    {
+      printf_filtered (_("The TUI is not active.\n"));
+      return;
+    }
+
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct ui_out *uiout = current_uiout;
 
