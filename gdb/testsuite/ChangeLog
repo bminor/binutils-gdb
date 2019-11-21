@@ -1,3 +1,7 @@
+2019-11-21  Lukas Durfina  <ldurfina@tachyum.com>
+
+	* gdb.arch/amd64-eval.exp: Skip test if target is not x86-64.
+
 2019-11-21  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/24956
