@@ -1,3 +1,8 @@
+2019-11-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (is_pecoff_format): Rewrite
+	with positive logic and add more target triples.
+
 2019-11-19  Alan Modra  <amodra@gmail.com>
 
 	PR 24499

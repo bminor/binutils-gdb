@@ -92,6 +92,11 @@ if ![ld_link $CC tmpdir/cdtest {tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/c
     }
 }
 
+# PR 46
+if [is_pecoff_format] {
+    setup_xfail *-*-*
+}
+
 if ![ld_relocate $ld tmpdir/cdtest.o {-Ur tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/cdtest-main.o}] {
     fail $test2
 } else {

@@ -76,7 +76,7 @@ SECTIONS
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
 			LONG (-1); *(.dtors); *(.dtor);  LONG (0); }
     ${RELOCATING+ KEEP (*(SORT_NONE(.fini)))}
-    /* ??? Why is .gcc_exc here?  */
+    ${RELOCATING+/* ??? Why is .gcc_exc here?  */}
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+ etext = .;}
     *(.gcc_except_table)

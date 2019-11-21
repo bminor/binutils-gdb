@@ -1,3 +1,12 @@
+2019-11-21  Alan Modra  <amodra@gmail.com>
+
+	PR 46
+	* scripttempl/pe.sc: Comment on ld -Ur fail.  Wrap .gcc_exc comment.
+	* scripttempl/pep.sc: Likewise.
+	* scripttempl/i386beos.sc: Wrap .gcc_exc comment.
+	* scripttempl/mcorepe.sc: Likewise.
+	* testsuite/ld-cdtest/cdtest.exp (test2): xfail for pe.
+
 2019-11-12  Jim Wilson  <jimw@sifive.com>
 
 	PR 25181
