@@ -92,21 +92,35 @@ extern void initialize_all_files (void);
 #define DEFAULT_PROMPT	"(gdb) "
 #endif
 
-/* Generate a function that exports a pointer to a field of the
-   current UI.  */
-
-#define gen_ret_current_ui_field_ptr(type, name)	\
-type *							\
-current_ui_## name ## _ptr (void)			\
-{							\
-  return &current_ui->m_ ## name;		\
+struct ui_file **
+current_ui_gdb_stdout_ptr ()
+{
+  return &current_ui->m_gdb_stdout;
 }
 
-gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdout)
-gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdin)
-gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stderr)
-gen_ret_current_ui_field_ptr (struct ui_file *, gdb_stdlog)
-gen_ret_current_ui_field_ptr (struct ui_out *, current_uiout)
+struct ui_file **
+current_ui_gdb_stdin_ptr ()
+{
+  return &current_ui->m_gdb_stdin;
+}
+
+struct ui_file **
+current_ui_gdb_stderr_ptr ()
+{
+  return &current_ui->m_gdb_stderr;
+}
+
+struct ui_file **
+current_ui_gdb_stdlog_ptr ()
+{
+  return &current_ui->m_gdb_stdlog;
+}
+
+struct ui_out **
+current_ui_current_uiout_ptr ()
+{
+  return &current_ui->m_current_uiout;
+}
 
 int inhibit_gdbinit = 0;
 
