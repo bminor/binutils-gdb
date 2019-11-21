@@ -1,3 +1,7 @@
+2019-11-22  Tom Tromey  <tom@tromey.com>
+
+	* observable.h: Update comments.
+
 2019-11-22  Tom Tromey  <tromey@adacore.com>
 
 	* ada-tasks.c (ada_task_is_alive): Make parameter const.
