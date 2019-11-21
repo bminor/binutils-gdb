@@ -1,3 +1,15 @@
+2019-11-25  Christian Eggers  <ceggers@gmx.de>
+
+	* dwarf2dbg.c (out_set_addr): Revert 2019-03-13 change.
+	(out_debug_line, out_debug_aranges, out_debug_info): Likewise.
+	* symbols.h (symbol_set_value_now_octets, symbol_octets_p): Remove.
+	* symbols.c (struct symbol_flags): Remove member sy_octets.
+	(symbol_temp_new_now_octets): Don't set symbol_flags::sy_octets.
+	(resolve_symbol_value): Revert: Return octets instead of bytes if
+	sy_octets is set.
+	(symbol_set_value_now_octets): Remove.
+	(symbol_octets_p): Remove.
+
 2019-11-22  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* config/tc-arm.c (arm_ext_crc): New.
