@@ -57,6 +57,24 @@ set cmds "$cmds\n"
 set outdir [standard_output_file {}]
 set cmds_file "$outdir/cmds.txt"
 
+with_test_prefix "userdefined" {
+    set test "define userdefined"
+    gdb_test_multiple $test $test {
+	-re "End with a line saying just \"end\"\\.\r\n>$" {
+	    pass $test
+	}
+    }
+
+    set test "bt"
+    gdb_test_multiple $test $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+
+    gdb_test_no_output "end"
+}
+
 with_test_prefix "logging" {
     gdb_test_no_output "set logging file /dev/null"
     gdb_test "set logging on" \
@@ -64,6 +82,7 @@ with_test_prefix "logging" {
     gdb_test "save breakpoints $cmds_file" "Saved to file '$cmds_file'\\." \
 	"save breakpoints cmds.txt"
     cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
+    gdb_test "userdefined" "#0  main ().*"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
 }
@@ -74,6 +93,7 @@ with_test_prefix "redirect" {
     "Redirecting output to /dev/null.*Copying debug output to /dev/null\\."
     gdb_test_no_output "save breakpoints $cmds_file" "save breakpoints cmds.txt"
     cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
+    gdb_test_no_output "userdefined"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
 }
@@ -87,6 +107,7 @@ with_test_prefix "redirect while already logging" {
     gdb_test "save breakpoints $cmds_file" "Saved to file '$cmds_file'\\." \
 	"save breakpoints cmds.txt"
     cmp_file_string "$cmds_file" "$cmds" "cmds.txt"
+    gdb_test "userdefined" "#0  main ().*"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
     gdb_test_no_output "set logging redirect off"

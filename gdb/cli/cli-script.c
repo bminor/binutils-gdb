@@ -696,6 +696,9 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 enum command_control_type
 execute_control_command (struct command_line *cmd, int from_tty)
 {
+  if (!current_uiout->is_mi_like_p ())
+    return execute_control_command_1 (cmd, from_tty);
+
   /* Make sure we use the console uiout.  It's possible that we are executing
      breakpoint commands while running the MI interpreter.  */
   interp *console = interp_lookup (current_ui, INTERP_CONSOLE);

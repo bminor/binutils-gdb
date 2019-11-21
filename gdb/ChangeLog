@@ -1,3 +1,9 @@
+2019-11-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24956
+	* cli/cli-script.c (execute_control_command): Only switch to
+	INTERP_CONSOLE's ui_out when INTERP_MI is active.
+
 2019-11-19  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-win.c (tui_partial_win_by_name): Move from tui-data.c.

@@ -1,3 +1,8 @@
+2019-11-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24956
+	* gdb.base/ui-redirect.exp: Test output of user-defined command.
+
 2019-11-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.python/py-progspace.exp: Add missing parentheses on some
