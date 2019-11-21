@@ -149,7 +149,7 @@ static char cplus_markers[] = {'$', '.', '\0'};
 
 /* See documentation in gdb-demangle.h.  */
 
-int
+bool
 is_cplus_marker (int c)
 {
   return c && strchr (cplus_markers, c) != NULL;
@@ -213,7 +213,7 @@ demangle_command (const char *args, int from_tty)
 }
 
 void
-_initialize_demangler (void)
+_initialize_gdb_demangle (void)
 {
   int i, ndems;
 

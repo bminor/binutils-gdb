@@ -33,6 +33,7 @@
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/next-iterator.h"
 #include "completer.h"
+#include "gdb-demangle.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -553,7 +554,6 @@ extern const char *symbol_demangled_name
 
 #define SYMBOL_PRINT_NAME(symbol)					\
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
-extern bool demangle;
 
 /* Macro that returns the name to be used when sorting and searching symbols.
    In C++, we search for the demangled form of a name,

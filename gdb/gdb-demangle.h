@@ -29,6 +29,6 @@ extern bool demangle;
 extern bool asm_demangle;
 
 /* Check if a character is one of the commonly used C++ marker characters.  */
-extern int is_cplus_marker (int);
+extern bool is_cplus_marker (int);
 
 #endif /* GDB_DEMANGLE_H */

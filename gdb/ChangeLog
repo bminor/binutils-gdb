@@ -1,3 +1,15 @@
+2019-11-21  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Update.
+	* demangle.c: Rename to...
+	* gdb-demangle.c: ..this.
+	(is_cplus_marker): Change return type to bool.
+	(_initialize_demangler): Rename to...
+	(_initialize_gdb_demangle): ...this.
+	* gdb-demangle.h (is_cplus_marker): Change return type to bool.
+	* symtab.h (demangle): Remove declaration; instead include
+	gdb-demangle.h.
+
 2019-11-21  Tom Tromey  <tromey@adacore.com>
 
 	* gdbsupport/format.c (format_pieces): Parse %I64d.

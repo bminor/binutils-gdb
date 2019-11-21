@@ -1009,7 +1009,6 @@ COMMON_SFILES = \
 	dbxread.c \
 	dcache.c \
 	debug.c \
-	demangle.c \
 	dictionary.c \
 	disasm.c \
 	disasm-selftests.c \
@@ -1040,6 +1039,7 @@ COMMON_SFILES = \
 	frame-base.c \
 	frame-unwind.c \
 	gcore.c \
+	gdb-demangle.c \
 	gdb_bfd.c \
 	gdb_obstack.c \
 	gdb_regex.c \
