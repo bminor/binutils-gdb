@@ -69,14 +69,14 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
    results.  */
 
 static void
-mi_info_one_symbol_details (enum search_domain kind,
-			    struct symbol *sym, int block)
+output_debug_symbol (ui_out *uiout, enum search_domain kind,
+		     struct symbol *sym, int block)
 {
-  struct ui_out *uiout = current_uiout;
-
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
+
   if (SYMBOL_LINE (sym) != 0)
     uiout->field_unsigned ("line", SYMBOL_LINE (sym));
+
   uiout->field_string ("name", SYMBOL_PRINT_NAME (sym));
 
   if (kind == FUNCTIONS_DOMAIN || kind == VARIABLES_DOMAIN)
@@ -90,153 +90,18 @@ mi_info_one_symbol_details (enum search_domain kind,
     }
 }
 
-/* This class is used to produce the nested structure of tuples and lists
-   required to present the results of the MI_SYMBOL_INFO function.  */
-class mi_symbol_info_emitter
+/* Actually output one nondebug symbol, puts a tuple emitter in place
+   and then outputs the fields for this msymbol.  */
+static void
+output_nondebug_symbol (ui_out *uiout,
+			const struct bound_minimal_symbol &msymbol)
 {
-  /* When printing debug symbols we need to track the last symtab so we can
-     spot when we have entered a new one.  */
-  const symtab *m_last_symtab;
+  struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-  /* The ui_out to which output will be sent.  */
-  struct ui_out *m_uiout;
-
-  /* The outer container for all the matched symbols.  */
-  ui_out_emit_tuple m_outer_symbols;
-
-  /* The order of these optional emitters is critical as they will be
-     deleted in reverse order, which is important as these are popped from
-     the uiout stack as they are destroyed.  */
-  gdb::optional<ui_out_emit_list> m_debug_emitter;
-  gdb::optional<ui_out_emit_tuple> m_symtab_emitter;
-  gdb::optional<ui_out_emit_list> m_symbols_emitter;
-  gdb::optional<ui_out_emit_list> m_nondebug_emitter;
-
-  /* Called when we might want to print our first nondebug symbol in order
-     to shutdown any debug symbol printing that might be in progress.  */
-  void maybe_finish_debug_output ()
-  {
-    /* If the debug emitter is in use.  */
-    if (m_debug_emitter.has_value ())
-      {
-	/* Then we should have a symbols list inside a symtab tuple also
-	   currently in use.  */
-	gdb_assert (m_symbols_emitter.has_value ());
-	gdb_assert (m_symtab_emitter.has_value ());
-
-	/* Shut down the symbols list, symtab tuple, and debug list
-	   emitters (in that order).  We are now back to the level of the
-	   outer_symbols tuple ready to (possibly) start a nondebug list,
-	   though that is not done here.  */
-	m_symbols_emitter.reset ();
-	m_symtab_emitter.reset ();
-	m_debug_emitter.reset ();
-      }
-  }
-
-  /* Return true if the nondebug emitter has been put in place.  */
-  bool have_started_nondebug_symbol_output () const
-  {
-    return m_nondebug_emitter.has_value ();
-  }
-
-  /* Called before we print every nondebug symbol.  If this is the first
-     nondebug symbol to be printed then it will setup the emitters required
-     to print nondebug symbols.  */
-  void maybe_start_nondebug_symbol_output ()
-  {
-    if (!have_started_nondebug_symbol_output ())
-      m_nondebug_emitter.emplace (m_uiout, "nondebug");
-  }
-
-  /* Actually output one nondebug symbol, puts a tuple emitter in place
-     and then outputs the fields for this msymbol.  */
-  void output_nondebug_symbol (const struct bound_minimal_symbol &msymbol)
-  {
-    struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
-    ui_out_emit_tuple tuple_emitter (m_uiout, NULL);
-    m_uiout->field_core_addr ("address", gdbarch,
-			      BMSYMBOL_VALUE_ADDRESS (msymbol));
-    m_uiout->field_string ("name", MSYMBOL_PRINT_NAME (msymbol.minsym));
-  }
-
-  /* Called before we print every debug symbol.  If this is the first debug
-     symbol to be printed then it will setup the top level of emitters
-     required to print debug symbols.  */
-  void maybe_start_debug_symbol_output ()
-  {
-    if (!m_debug_emitter.has_value ())
-      m_debug_emitter.emplace (m_uiout, "debug");
-  }
-
-  /* Called before we print every debug symbol, S is the symtab for the
-     symbol to be printed.  If S is different to the last symtab we printed
-     for then we close down the emitters for the last symtab, and create
-     new emitters for this new symtab.  */
-  void setup_emitters_for_symtab (symtab *s)
-  {
-    if (s != m_last_symtab)
-      {
-	/* Reset a possible previous symbol list within a symtab.  */
-	m_symbols_emitter.reset ();
-	m_symtab_emitter.reset ();
-
-	/* Start a new symtab and symbol list within the symtab.  */
-	m_symtab_emitter.emplace (m_uiout, nullptr);
-	m_uiout->field_string ("filename",
-			       symtab_to_filename_for_display (s));
-	m_uiout->field_string ("fullname", symtab_to_fullname (s));
-	m_symbols_emitter.emplace (m_uiout, "symbols");
-
-	/* Record the current symtab.  */
-	m_last_symtab = s;
-      }
-  }
-
-public:
-  /* Constructor.  */
-  mi_symbol_info_emitter (struct ui_out *uiout)
-    : m_last_symtab (nullptr),
-      m_uiout (uiout),
-      m_outer_symbols (uiout, "symbols")
-  { /* Nothing.  */ }
-
-  /* Output P a symbol found by searching for symbols of type KIND.  */
-  void output (const symbol_search &p, enum search_domain kind)
-  {
-    if (p.msymbol.minsym != NULL)
-      {
-	/* If this is the first nondebug symbol, and we have previous
-	   outputted a debug symbol then we need to close down all of the
-	   emitters related to printing debug symbols.  */
-	maybe_finish_debug_output ();
-
-	/* If this is the first nondebug symbol then we need to create the
-	   emitters related to printing nondebug symbols.  */
-	maybe_start_nondebug_symbol_output ();
-
-	/* We are no safe to emit the nondebug symbol.  */
-	output_nondebug_symbol (p.msymbol);
-      }
-    else
-      {
-	/* All debug symbols should appear in the list before all
-	   non-debug symbols.  */
-	gdb_assert (!have_started_nondebug_symbol_output ());
-
-	/* If this is the first debug symbol then we need to create the
-	   outer level of emitters related to printing debug symbols.  */
-	maybe_start_debug_symbol_output ();
-
-	/* Ensure the correct emitters are in place to emit this debug
-	   symbol.  */
-	setup_emitters_for_symtab (symbol_symtab (p.symbol));
-
-	/* Emit information for this debug symbol.  */
-	mi_info_one_symbol_details (kind, p.symbol, p.block);
-      }
-  }
-};
+  uiout->field_core_addr ("address", gdbarch, BMSYMBOL_VALUE_ADDRESS (msymbol));
+  uiout->field_string ("name", MSYMBOL_PRINT_NAME (msymbol.minsym));
+}
 
 /* This is the guts of the commands '-symbol-info-functions',
    '-symbol-info-variables', and '-symbol-info-types'.  It calls
@@ -253,12 +118,55 @@ mi_symbol_info (enum search_domain kind, const char *regexp,
   /* Must make sure that if we're interrupted, symbols gets freed.  */
   global_symbol_searcher sym_search (kind, regexp, t_regexp, exclude_minsyms);
   std::vector<symbol_search> symbols = sym_search.search ();
+  ui_out *uiout = current_uiout;
+  int i = 0;
 
-  mi_symbol_info_emitter emitter (current_uiout);
-  for (const symbol_search &p : symbols)
+  ui_out_emit_tuple outer_symbols_emitter (uiout, "symbols");
+
+  /* Debug symbols are placed first. */
+  if (i < symbols.size () && symbols[i].msymbol.minsym == nullptr)
     {
-      QUIT;
-      emitter.output (p, kind);
+      ui_out_emit_list debug_symbols_list_emitter (uiout, "debug");
+
+      /* As long as we have debug symbols...  */
+      while (i < symbols.size () && symbols[i].msymbol.minsym == nullptr)
+	{
+	  symtab *symtab = symbol_symtab (symbols[i].symbol);
+	  ui_out_emit_tuple symtab_tuple_emitter (uiout, nullptr);
+
+	  uiout->field_string ("filename", symtab_to_filename_for_display (symtab));
+	  uiout->field_string ("fullname", symtab_to_fullname (symtab));
+
+	  ui_out_emit_list symbols_list_emitter (uiout, "symbols");
+
+	  /* As long as we have debug symbols from this symtab...  */
+	  while (i < symbols.size ()
+		 && symbols[i].msymbol.minsym == nullptr
+		 && symbol_symtab (symbols[i].symbol) == symtab)
+	    {
+	      symbol_search &s = symbols[i];
+
+	      output_debug_symbol(uiout, kind, s.symbol, s.block);
+
+	      i++;
+	    }
+	}
+    }
+
+  /* Non-debug symbols are placed after.  */
+  if (i < symbols.size ())
+    {
+      ui_out_emit_list nondebug_symbols_list_emitter (uiout, "nondebug");
+
+      /* As long as we have nondebug symbols...  */
+      while (i < symbols.size ())
+	{
+	  gdb_assert (symbols[i].msymbol.minsym != nullptr);
+
+	  output_nondebug_symbol(uiout, symbols[i].msymbol);
+
+	  i++;
+	}
     }
 }
 
