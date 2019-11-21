@@ -2460,7 +2460,9 @@ merge_gnu_build_notes (bfd *          abfd,
   bfd_vma        prev_start = 0;
   bfd_vma        prev_end = 0;
 
-  new = new_contents = xmalloc (size);
+  /* Not sure how, but the notes might grow in size.
+     (eg see PR 1774507).  Allow for this here.  */
+  new = new_contents = xmalloc (size * 2);
   for (pnote = pnotes, old = contents;
        pnote < pnotes_end;
        pnote ++)
@@ -2527,8 +2529,11 @@ merge_gnu_build_notes (bfd *          abfd,
 #endif
   
   new_size = new - new_contents;
-  memcpy (contents, new_contents, new_size);
-  size = new_size;
+  if (new_size < size)
+    {
+      memcpy (contents, new_contents, new_size);
+      size = new_size;
+    }
   free (new_contents);
 
  done:

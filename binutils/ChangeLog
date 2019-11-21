@@ -1,3 +1,9 @@
+2019-11-21  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Allow for the possibility
+	that the new notes might actually be larger than the original
+	notes.
+
 2019-11-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (is_pecoff_format): Rewrite
