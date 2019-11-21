@@ -630,12 +630,15 @@ proc runto_main { } {
 ### continue_to_breakpoint should use a NAME which is unique within
 ### that test file.
 proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
-    global gdb_prompt
+    global gdb_prompt decimal
     set full_name "continue to breakpoint: $name"
 
     set kfail_pattern "Process record does not support instruction 0xfae64 at.*"
     gdb_test_multiple "continue" $full_name {
-	-re "(?:Breakpoint|Temporary breakpoint) .* (at|in) $location_pattern\r\n$gdb_prompt $" {
+	-re "(?:Breakpoint|Temporary breakpoint) .*(at|in) $location_pattern\r\n$gdb_prompt $" {
+	    pass $full_name
+	}
+	-re "(?:Breakpoint|Temporary breakpoint) $decimal, $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
 	}
 	-re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
