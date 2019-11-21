@@ -557,12 +557,16 @@ static void
 sysv_internal_sizer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 		     void *ignore ATTRIBUTE_UNUSED)
 {
-  bfd_size_type size = bfd_section_size (sec);
+  flagword flags = bfd_section_flags (sec);
+  /* Exclude sections with no flags set.  This is to omit som spaces.  */
+  if (flags == 0)
+    return;
 
   if (   ! bfd_is_abs_section (sec)
       && ! bfd_is_com_section (sec)
       && ! bfd_is_und_section (sec))
     {
+      bfd_size_type size = bfd_section_size (sec);
       int namelen = strlen (bfd_section_name (sec));
 
       if (namelen > svi_namelen)
@@ -589,12 +593,16 @@ static void
 sysv_internal_printer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 		       void *ignore ATTRIBUTE_UNUSED)
 {
-  bfd_size_type size = bfd_section_size (sec);
+  flagword flags = bfd_section_flags (sec);
+  if (flags == 0)
+    return;
 
   if (   ! bfd_is_abs_section (sec)
       && ! bfd_is_com_section (sec)
       && ! bfd_is_und_section (sec))
     {
+      bfd_size_type size = bfd_section_size (sec);
+
       svi_total += size;
 
       sysv_one_line (bfd_section_name (sec),
