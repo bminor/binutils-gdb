@@ -8456,7 +8456,8 @@ resolve_section (const char *name,
 	{
 	  if (strncmp (".end", name + len, 4) == 0)
 	    {
-	      *result = curr->vma + curr->size / bfd_octets_per_byte (abfd);
+	      *result = (curr->vma
+			 + curr->size / bfd_octets_per_byte (abfd, NULL));
 	      return TRUE;
 	    }
 
@@ -8778,7 +8779,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
     shift = (8 * wordsz) - (start + len);
 
   x = get_value (wordsz, chunksz, input_bfd,
-		 contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
+		 contents
+		 + rel->r_offset * bfd_octets_per_byte (input_bfd, NULL));
 
 #ifdef DEBUG
   printf ("Doing complex reloc: "
@@ -8811,7 +8813,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  (unsigned long) ((relocation & mask) << shift), (unsigned long) x);
 #endif
   put_value (wordsz, chunksz, input_bfd, x,
-	     contents + rel->r_offset * bfd_octets_per_byte (input_bfd));
+	     contents + rel->r_offset * bfd_octets_per_byte (input_bfd, NULL));
   return r;
 }
 
@@ -9175,7 +9177,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   struct elf_link_sort_rela *sq;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int i2e = bed->s->int_rels_per_ext_rel;
-  unsigned int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd, NULL);
   void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   struct bfd_link_order *lo;
@@ -11303,7 +11305,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		file_ptr offset = (file_ptr) o->output_offset;
 		bfd_size_type todo = o->size;
 
-		offset *= bfd_octets_per_byte (output_bfd);
+		offset *= bfd_octets_per_byte (output_bfd, NULL);
 
 		if ((o->flags & SEC_ELF_REVERSE_COPY))
 		  {
@@ -11465,7 +11467,7 @@ elf_reloc_link_order (bfd *output_bfd,
 
       ok = bfd_set_section_contents (output_bfd, output_section, buf,
 				     link_order->offset
-				     * bfd_octets_per_byte (output_bfd),
+				     * bfd_octets_per_byte (output_bfd, NULL),
 				     size);
       free (buf);
       if (! ok)
@@ -11633,7 +11635,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       s = sections[n]->u.indirect.section;
       mask = ~(bfd_vma) 0 << s->alignment_power;
       offset = (offset + ~mask) & mask;
-      s->output_offset = offset / bfd_octets_per_byte (abfd);
+      s->output_offset = offset / bfd_octets_per_byte (abfd, NULL);
       sections[n]->offset = offset;
       offset += sections[n]->size;
     }
@@ -12857,7 +12859,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (! bfd_set_section_contents (abfd, o->output_section,
 					      o->contents,
 					      (file_ptr) o->output_offset
-					      * bfd_octets_per_byte (abfd),
+					      * bfd_octets_per_byte (abfd,
+								     NULL),
 					      o->size))
 		goto error_return;
 	    }

@@ -649,4 +649,11 @@ COMMON int flag_sectname_subst;
  #error "Octets per byte conflicts with its power-of-two definition!"
 #endif
 
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
+/* On ELF platforms, mark debug sections with SEC_ELF_OCTETS */
+#define SEC_OCTETS (IS_ELF ? SEC_ELF_OCTETS : 0)
+#else
+#define SEC_OCTETS 0
+#endif
+
 #endif /* GAS */

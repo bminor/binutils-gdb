@@ -1,3 +1,8 @@
+2019-11-25  Alan Modra  <amodra@gmail.com>
+
+	* coff/ti.h (GET_SCNHDR_SIZE, PUT_SCNHDR_SIZE, GET_SCN_SCNLEN),
+	(PUT_SCN_SCNLEN): Adjust bfd_octets_per_byte calls.
+
 2019-11-22  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_CRC): New extension feature
@@ -26,7 +31,7 @@
 	instructions that do not require special handling.
 
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
-2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_V8_6A, ARM_AEXT2_V8_6A,
 	ARM_ARCH_V8_6A): New.
@@ -34,7 +39,7 @@
 	(ARM_AEXT2_V8_6A): Include above macro in definition.
 
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
-2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_BFLOAT16): New feature macros.
 	(AARCH64_ARCH_V8_6): Include BFloat16 feature macros.
@@ -45,7 +50,7 @@
 	instructions to support the movprfx constraint.
 
 2019-11-07  Mihail Ionescu  <mihail.ionescu@arm.com>
-2019-11-07  Matthew Malcomson  <matthew.malcomson@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_V8_6): New.
 	(AARCH64_ARCH_V8_6): New.

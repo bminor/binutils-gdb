@@ -1120,6 +1120,15 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    p = NULL, n = 0;
 	  if (p != NULL && strncmp (name, p, n) == 0)
 	    flags |= SEC_DEBUGGING;
+
+	  /* DWARF debug sections and ELF notes are organized in octets. */
+	  if (strncmp (name, ".debug", 6) == 0 ||
+	      strncmp (name, ".zdebug", 7) == 0 ||
+	      strncmp (name, GNU_BUILD_ATTRS_SECTION_NAME, 21) == 0 ||
+	      strncmp (name, ".note.gnu", 9) == 0)
+	    {
+	      flags |= SEC_ELF_OCTETS;
+	    }
 	}
     }
 
@@ -12054,7 +12063,8 @@ _bfd_elf_section_offset (bfd *abfd,
 
 	  /* address_size and sec->size are in octets.  Convert
 	     to bytes before subtracting the original offset.  */
-	  offset = (sec->size - address_size) / bfd_octets_per_byte (abfd) - offset;
+	  offset = ((sec->size - address_size)
+		    / bfd_octets_per_byte (abfd, NULL) - offset);
 	}
       return offset;
     }

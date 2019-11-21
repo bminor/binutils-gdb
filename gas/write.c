@@ -1960,7 +1960,8 @@ maybe_generate_build_notes (void)
   /* Create a GNU Build Attribute section.  */
   sec = subseg_new (GNU_BUILD_ATTRS_SECTION_NAME, FALSE);
   elf_section_type (sec) = SHT_NOTE;
-  bfd_set_section_flags (sec, SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA);
+  bfd_set_section_flags (sec, (SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA
+			       | SEC_OCTETS));
   bfd_set_section_alignment (sec, 2);
 
   /* Work out the size of the notes that we will create,

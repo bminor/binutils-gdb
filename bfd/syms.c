@@ -1090,7 +1090,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  || r->howto->pc_relative
 		  || r->howto->bitpos != 0
 		  || r->howto->dst_mask != 0xffffffff
-		  || r->address * bfd_octets_per_byte (abfd) + 4 > stabsize)
+		  || (r->address * bfd_octets_per_byte (abfd, NULL) + 4
+		      > stabsize))
 		{
 		  _bfd_error_handler
 		    (_("unsupported .stab relocation"));
@@ -1101,12 +1102,13 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		}
 
 	      val = bfd_get_32 (abfd, info->stabs
-				+ r->address * bfd_octets_per_byte (abfd));
+				+ (r->address
+				   * bfd_octets_per_byte (abfd, NULL)));
 	      val &= r->howto->src_mask;
 	      sym = *r->sym_ptr_ptr;
 	      val += sym->value + sym->section->vma + r->addend;
 	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs
-			  + r->address * bfd_octets_per_byte (abfd));
+			  + r->address * bfd_octets_per_byte (abfd, NULL));
 	    }
 	}
 

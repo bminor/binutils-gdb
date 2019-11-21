@@ -1217,7 +1217,13 @@ resolve_symbol_value (symbolS *symp)
       if (local_symbol_resolved_p (locsym))
 	return final_val;
 
-      final_val += local_symbol_get_frag (locsym)->fr_address / OCTETS_PER_BYTE;
+      /* Symbols whose section has SEC_ELF_OCTETS set,
+	 resolve to octets instead of target bytes. */
+      if (locsym->lsy_section->flags & SEC_OCTETS)
+	final_val += local_symbol_get_frag (locsym)->fr_address;
+      else
+	final_val += (local_symbol_get_frag (locsym)->fr_address
+		      / OCTETS_PER_BYTE);
 
       if (finalize_syms)
 	{
@@ -1330,7 +1336,12 @@ resolve_symbol_value (symbolS *symp)
 	  /* Fall through.  */
 
 	case O_constant:
-	  final_val += symp->sy_frag->fr_address / OCTETS_PER_BYTE;
+	  /* Symbols whose section has SEC_ELF_OCTETS set,
+	     resolve to octets instead of target bytes. */
+	  if (symp->bsym->section->flags & SEC_OCTETS)
+	    final_val += symp->sy_frag->fr_address;
+	  else
+	    final_val += symp->sy_frag->fr_address / OCTETS_PER_BYTE;
 	  if (final_seg == expr_section)
 	    final_seg = absolute_section;
 	  /* Fall through.  */

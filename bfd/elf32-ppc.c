@@ -956,7 +956,7 @@ ppc_elf_addr16_ha_reloc (bfd *abfd,
 	    + input_section->output_section->vma);
   value >>= 16;
 
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~0x1fffc1;
   insn |= (value & 0xffc1) | ((value & 0x3e) << 15);

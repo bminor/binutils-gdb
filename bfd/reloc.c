@@ -722,7 +722,7 @@ bfd_perform_relocation (bfd *abfd,
     return bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd, input_section);
   if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
     return bfd_reloc_outofrange;
 
@@ -744,7 +744,14 @@ bfd_perform_relocation (bfd *abfd,
   else
     output_base = reloc_target_output_section->vma;
 
-  relocation += output_base + symbol->section->output_offset;
+  /* For sections where relocations are in octets, output_base and
+     output_offset must also be converted to octets.  */
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && (symbol->section->flags & SEC_ELF_OCTETS))
+    relocation += ((output_base + symbol->section->output_offset)
+		   * bfd_octets_per_byte (abfd, NULL));
+  else
+    relocation += output_base + symbol->section->output_offset;
 
   /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
@@ -1052,7 +1059,7 @@ bfd_install_relocation (bfd *abfd,
      it will have been checked in `bfd_perform_relocation already'.  */
 
   /* Is the address of the relocation really within the section?  */
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd, input_section);
   if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
     return bfd_reloc_outofrange;
 
@@ -1073,7 +1080,14 @@ bfd_install_relocation (bfd *abfd,
   else
     output_base = reloc_target_output_section->vma;
 
-  relocation += output_base + symbol->section->output_offset;
+  /* For sections where relocations are in octets, output_base and
+     output_offset must also be converted to octets.  */
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && (symbol->section->flags & SEC_ELF_OCTETS))
+    relocation += ((output_base + symbol->section->output_offset)
+		   * bfd_octets_per_byte (abfd, NULL));
+  else
+    relocation += output_base + symbol->section->output_offset;
 
   /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
@@ -1337,7 +1351,8 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
 			  bfd_vma addend)
 {
   bfd_vma relocation;
-  bfd_size_type octets = address * bfd_octets_per_byte (input_bfd);
+  bfd_size_type octets = (address
+			  * bfd_octets_per_byte (input_bfd, input_section));
 
   /* Sanity check the address.  */
   if (!bfd_reloc_offset_in_range (howto, input_bfd, input_section, octets))
@@ -1369,7 +1384,9 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
 
   return _bfd_relocate_contents (howto, input_bfd, relocation,
 				 contents
-				 + address * bfd_octets_per_byte (input_bfd));
+				 + address
+				 * bfd_octets_per_byte (input_bfd,
+							input_section));
 }
 
 /* Relocate a given location using a given value and howto.  */
@@ -8346,7 +8363,8 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
 			 "unused", FALSE, 0, 0, FALSE);
 
-	      off = (*parent)->address * bfd_octets_per_byte (input_bfd);
+	      off = ((*parent)->address
+		     * bfd_octets_per_byte (input_bfd, input_section));
 	      _bfd_clear_contents ((*parent)->howto, input_bfd,
 				   input_section, data, off);
 	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

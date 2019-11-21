@@ -532,7 +532,7 @@ static void
 dump_section_header (bfd *abfd, asection *section, void *data)
 {
   char *comma = "";
-  unsigned int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd, section);
   int longest_section_name = *((int *) data);
 
   /* Ignore linker created section.  See elfNN_ia64_object_p in
@@ -584,7 +584,10 @@ dump_section_header (bfd *abfd, asection *section, void *data)
       PF (SEC_COFF_NOREAD, "NOREAD");
     }
   else if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    PF (SEC_ELF_PURECODE, "PURECODE");
+    {
+      PF (SEC_ELF_OCTETS, "OCTETS");
+      PF (SEC_ELF_PURECODE, "PURECODE");
+    }
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
   PF (SEC_GROUP, "GROUP");
   if (bfd_get_arch (abfd) == bfd_arch_mep)
@@ -2682,7 +2685,7 @@ disassemble_data (bfd *abfd)
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
   disasm_info.disassembler_options = disassembler_options;
-  disasm_info.octets_per_byte = bfd_octets_per_byte (abfd);
+  disasm_info.octets_per_byte = bfd_octets_per_byte (abfd, NULL);
   disasm_info.skip_zeroes = DEFAULT_SKIP_ZEROES;
   disasm_info.skip_zeroes_at_end = DEFAULT_SKIP_ZEROES_AT_END;
   disasm_info.disassembler_needs_relocs = FALSE;
@@ -3459,7 +3462,7 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   bfd_vma addr_offset;
   bfd_vma start_offset;
   bfd_vma stop_offset;
-  unsigned int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd, section);
   /* Bytes per line.  */
   const int onaline = 16;
   char buf[64];

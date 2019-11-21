@@ -507,7 +507,7 @@ mips_reflo_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 	  if (! bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
 					   input_section,
 					   reloc_entry->address
-					   * bfd_octets_per_byte (abfd)))
+					   * bfd_octets_per_byte (abfd, NULL)))
 	    return bfd_reloc_outofrange;
 
 	  /* Do the REFHI relocation.  Note that we actually don't

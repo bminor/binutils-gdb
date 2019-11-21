@@ -1379,7 +1379,8 @@ FUNCTION
 	bfd_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_octets_per_byte (const bfd *abfd);
+	unsigned int bfd_octets_per_byte (const bfd *abfd,
+					  const asection *sec);
 
 DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
@@ -1388,10 +1389,17 @@ DESCRIPTION
 */
 
 unsigned int
-bfd_octets_per_byte (const bfd *abfd)
+bfd_octets_per_byte (const bfd *abfd, const asection *sec)
 {
-  return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
-					bfd_get_mach (abfd));
+  unsigned int opb = bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd),
+						    bfd_get_mach (abfd));
+
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && sec != NULL
+      && (sec->flags & SEC_ELF_OCTETS) != 0)
+    opb = 1;
+
+  return opb;
 }
 
 /*

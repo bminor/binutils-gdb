@@ -1,3 +1,10 @@
+2019-11-25  Christian Eggers  <ceggers@gmx.de>
+
+	* objdump.c (disassemble_data): Provide section parameter to
+	bfd_octets_per_byte.
+	(dump_section): likewise
+	(dump_section_header): likewise. Show SEC_ELF_OCTETS flag if set.
+
 2019-11-21  Alan Modra  <amodra@gmail.com>
 
 	PR 273

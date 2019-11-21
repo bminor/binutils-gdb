@@ -852,7 +852,7 @@ fold_name (etree_type *tree)
 
 	      if (tree->type.node_code == SIZEOF)
 		val = (os->bfd_section->size
-		       / bfd_octets_per_byte (link_info.output_bfd));
+		       / bfd_octets_per_byte (link_info.output_bfd, NULL));
 	      else
 		val = (bfd_vma)1 << os->bfd_section->alignment_power;
 

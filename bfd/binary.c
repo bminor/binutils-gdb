@@ -230,7 +230,6 @@ binary_set_section_contents (bfd *abfd,
 
   if (! abfd->output_has_begun)
     {
-      unsigned int opb;
       bfd_boolean found_low;
       bfd_vma low;
       asection *s;
@@ -251,9 +250,10 @@ binary_set_section_contents (bfd *abfd,
 	    found_low = TRUE;
 	  }
 
-      opb = bfd_octets_per_byte (abfd);
       for (s = abfd->sections; s != NULL; s = s->next)
 	{
+	  unsigned int opb = bfd_octets_per_byte (abfd, s);
+
 	  s->filepos = (s->lma - low) * opb;
 
 	  /* Skip following warning check for sections that will not

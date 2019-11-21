@@ -395,7 +395,12 @@ frag_now_fix_octets (void)
 addressT
 frag_now_fix (void)
 {
-  return frag_now_fix_octets () / OCTETS_PER_BYTE;
+  /* Symbols whose section has SEC_ELF_OCTETS set,
+     resolve to octets instead of target bytes.  */
+  if (now_seg->flags & SEC_OCTETS)
+    return frag_now_fix_octets ();
+  else
+    return frag_now_fix_octets () / OCTETS_PER_BYTE;
 }
 
 void

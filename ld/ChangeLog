@@ -1,3 +1,18 @@
+2019-11-25  Christian Eggers  <ceggers@gmx.de>
+
+	* ldexp.c (fold_name): Provide section parameter to
+	bfd_octets_per_byte.
+	* ldlang (init_opb): New argument s. Set opb_shift to 0 if
+	SEC_ELF_OCTETS for the current section is set.
+	(print_input_section): Pass current section to init_opb.
+	(print_data_statement,print_reloc_statement,
+	print_padding_statement): Likewise.
+	(lang_check_section_addresses): Call init_opb for each
+	section.
+	(lang_size_sections_1,lang_size_sections_1,
+	lang_do_assignments_1): Likewise.
+	(lang_process): Pass NULL to init_opb.
+
 2019-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texi (Output Section Discarding): Add note indicating that

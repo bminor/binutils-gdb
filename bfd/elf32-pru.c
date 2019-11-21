@@ -537,7 +537,7 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
 			     bfd_vma symbol_value, bfd_vma addend)
 {
   bfd_signed_vma relocation;
-  bfd_size_type octets = offset * bfd_octets_per_byte (abfd);
+  bfd_size_type octets = offset * bfd_octets_per_byte (abfd, NULL);
   bfd_byte *location;
   unsigned long in1, in2;
 
@@ -557,7 +557,7 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
   BFD_ASSERT (!howto->pc_relative);
 
   /* A hacked-up version of _bfd_relocate_contents() follows.  */
-  location = data + offset * bfd_octets_per_byte (abfd);
+  location = data + offset * bfd_octets_per_byte (abfd, NULL);
 
   BFD_ASSERT (!howto->pc_relative);
 

@@ -492,7 +492,8 @@ CODE_FRAGMENT
 .static inline bfd_size_type
 .bfd_get_section_limit (const bfd *abfd, const asection *sec)
 .{
-.  return bfd_get_section_limit_octets (abfd, sec) / bfd_octets_per_byte (abfd);
+.  return (bfd_get_section_limit_octets (abfd, sec)
+.	   / bfd_octets_per_byte (abfd, NULL));
 .}
 .
 .{* Functions to handle insertion and deletion of a bfd's sections.  These

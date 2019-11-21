@@ -2215,7 +2215,7 @@ dwarf2_finish (void)
 
   /* Create and switch to the line number section.  */
   line_seg = subseg_new (".debug_line", 0);
-  bfd_set_section_flags (line_seg, SEC_READONLY | SEC_DEBUGGING);
+  bfd_set_section_flags (line_seg, SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
 
   /* For each subsection, chain the debug entries together.  */
   for (s = all_segs; s; s = s->next)
@@ -2261,11 +2261,15 @@ dwarf2_finish (void)
       aranges_seg = subseg_new (".debug_aranges", 0);
       str_seg = subseg_new (".debug_str", 0);
 
-      bfd_set_section_flags (info_seg, SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (abbrev_seg, SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (aranges_seg, SEC_READONLY | SEC_DEBUGGING);
-      bfd_set_section_flags (str_seg, (SEC_READONLY | SEC_DEBUGGING
-				       | SEC_MERGE | SEC_STRINGS));
+      bfd_set_section_flags (info_seg,
+			      SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
+      bfd_set_section_flags (abbrev_seg,
+			      SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
+      bfd_set_section_flags (aranges_seg,
+			      SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
+      bfd_set_section_flags (str_seg,
+			      SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS
+				       | SEC_MERGE | SEC_STRINGS);
       str_seg->entsize = 1;
 
       record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
@@ -2275,7 +2279,8 @@ dwarf2_finish (void)
       else
 	{
 	  ranges_seg = subseg_new (".debug_ranges", 0);
-	  bfd_set_section_flags (ranges_seg, SEC_READONLY | SEC_DEBUGGING);
+	  bfd_set_section_flags (ranges_seg,
+				 SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
 	  record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
 	  out_debug_ranges (ranges_seg);
 	}

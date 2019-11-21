@@ -2402,7 +2402,7 @@ _bfd_generic_reloc_link_order (bfd *abfd,
 	     NULL, NULL, 0);
 	  break;
 	}
-      loc = link_order->offset * bfd_octets_per_byte (abfd);
+      loc = link_order->offset * bfd_octets_per_byte (abfd, sec);
       ok = bfd_set_section_contents (abfd, sec, buf, loc, size);
       free (buf);
       if (! ok)
@@ -2518,7 +2518,7 @@ default_data_link_order (bfd *abfd,
 	}
     }
 
-  loc = link_order->offset * bfd_octets_per_byte (abfd);
+  loc = link_order->offset * bfd_octets_per_byte (abfd, sec);
   result = bfd_set_section_contents (abfd, sec, fill, loc, size);
 
   if (fill != link_order->u.data.contents)
@@ -2655,7 +2655,8 @@ default_indirect_link_order (bfd *output_bfd,
     }
 
   /* Output the section contents.  */
-  loc = input_section->output_offset * bfd_octets_per_byte (output_bfd);
+  loc = (input_section->output_offset
+	 * bfd_octets_per_byte (output_bfd, output_section));
   if (! bfd_set_section_contents (output_bfd, output_section,
 				  new_contents, loc, input_section->size))
     goto error_return;
@@ -3099,7 +3100,7 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
 
   /* Increase the size of the section to align the common symbol.
      The alignment must be a power of two.  */
-  alignment = bfd_octets_per_byte (output_bfd) << power_of_two;
+  alignment = bfd_octets_per_byte (output_bfd, section) << power_of_two;
   BFD_ASSERT (alignment != 0 && (alignment & -alignment) == alignment);
   section->size += alignment - 1;
   section->size &= -alignment;

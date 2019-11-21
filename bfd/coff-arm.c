@@ -118,7 +118,7 @@ coff_arm_reloc (bfd *abfd,
 
       if (! bfd_reloc_offset_in_range (howto, abfd, input_section,
 				       reloc_entry->address
-				       * bfd_octets_per_byte (abfd)))
+				       * bfd_octets_per_byte (abfd, NULL)))
 	return bfd_reloc_outofrange;
 
       switch (howto->size)

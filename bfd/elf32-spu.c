@@ -212,7 +212,7 @@ spu_elf_rel9 (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
 
   /* Get symbol value.  */
   val = 0;

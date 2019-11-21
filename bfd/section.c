@@ -351,6 +351,11 @@ CODE_FRAGMENT
 .  {* This section contains vliw code.  This is for Toshiba MeP only.  *}
 .#define SEC_MEP_VLIW               0x20000000
 .
+.  {* All symbols, sizes and relocations in this section are octets
+.     instead of bytes.  Required for DWARF debug sections as DWARF
+.     information is organized in octets, not bytes.  *}
+.#define SEC_ELF_OCTETS             0x40000000
+.
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD            0x40000000

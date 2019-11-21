@@ -3440,10 +3440,17 @@ ldlang_open_output (lang_statement_union_type *statement)
 }
 
 static void
-init_opb (void)
+init_opb (asection *s)
 {
   unsigned x = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 					      ldfile_output_machine);
+  if (s != NULL)
+    {
+      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+	  && (s->flags & SEC_ELF_OCTETS))
+	x = 1;
+    }
+
   opb_shift = 0;
   if (x > 1)
     while ((x & 1) == 0)
@@ -4626,7 +4633,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
   int len;
   bfd_vma addr;
 
-  init_opb ();
+  init_opb (i);
 
   print_space ();
   minfo ("%s", i->name);
@@ -4707,7 +4714,7 @@ print_data_statement (lang_data_statement_type *data)
   bfd_size_type size;
   const char *name;
 
-  init_opb ();
+  init_opb (data->output_section);
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
 
@@ -4776,7 +4783,7 @@ print_reloc_statement (lang_reloc_statement_type *reloc)
   bfd_vma addr;
   bfd_size_type size;
 
-  init_opb ();
+  init_opb (reloc->output_section);
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
 
@@ -4806,7 +4813,7 @@ print_padding_statement (lang_padding_statement_type *s)
   int len;
   bfd_vma addr;
 
-  init_opb ();
+  init_opb (s->output_section);
   minfo (" *fill*");
 
   len = sizeof " *fill*" - 1;
@@ -5276,6 +5283,7 @@ lang_check_section_addresses (void)
   for (p = NULL, i = 0; i < count; i++)
     {
       s = sections[i].sec;
+      init_opb (s);
       if ((s->flags & SEC_LOAD) != 0)
 	{
 	  s_start = s->lma;
@@ -5326,6 +5334,7 @@ lang_check_section_addresses (void)
       for (p = NULL, i = 0; i < count; i++)
 	{
 	  s = sections[i].sec;
+	  init_opb (s);
 	  s_start = s->vma;
 	  s_end = s_start + TO_ADDR (s->size) - 1;
 
@@ -5450,6 +5459,7 @@ lang_size_sections_1
 	    int section_alignment = 0;
 
 	    os = &s->output_section_statement;
+	    init_opb (os->bfd_section);
 	    if (os->constraint == -1)
 	      break;
 
@@ -6191,6 +6201,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 
 	    os = &(s->output_section_statement);
 	    os->after_end = *found_end;
+	    init_opb (os->bfd_section);
 	    if (os->bfd_section != NULL && !os->ignored)
 	      {
 		if ((os->bfd_section->flags & SEC_ALLOC) != 0)
@@ -7622,7 +7633,7 @@ lang_process (void)
 
   /* Open the output file.  */
   lang_for_each_statement (ldlang_open_output);
-  init_opb ();
+  init_opb (NULL);
 
   ldemul_create_output_section_statements ();
 

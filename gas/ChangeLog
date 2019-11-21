@@ -1,5 +1,17 @@
 2019-11-25  Christian Eggers  <ceggers@gmx.de>
 
+	* as.h: Define SEC_OCTETS as SEC_ELF_OCTETS if OBJ_ELF.
+	* dwarf2dbg.c: (dwarf2_finish): Set section flag SEC_OCTETS for
+	.debug_line, .debug_info, .debug_abbrev, .debug_aranges, .debug_str
+	and .debug_ranges sections.
+	* write.c (maybe_generate_build_notes): Set section flag
+	SEC_OCTETS for .gnu.build.attributes section.
+	* frags.c (frag_now_fix): Don't divide by OCTETS_PER_BYTE if
+	SEC_OCTETS is set.
+	* symbols.c (resolve_symbol_value): Likewise.
+
+2019-11-25  Christian Eggers  <ceggers@gmx.de>
+
 	* dwarf2dbg.c (out_set_addr): Revert 2019-03-13 change.
 	(out_debug_line, out_debug_aranges, out_debug_info): Likewise.
 	* symbols.h (symbol_set_value_now_octets, symbol_octets_p): Remove.

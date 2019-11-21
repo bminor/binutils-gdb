@@ -36,7 +36,7 @@ rl78_sym_diff_handler (bfd * abfd,
 		       char ** error_message ATTRIBUTE_UNUSED)
 {
   bfd_size_type octets;
-  octets = reloc->address * bfd_octets_per_byte (abfd);
+  octets = reloc->address * bfd_octets_per_byte (abfd, NULL);
 
   /* Catch the case where bfd_install_relocation would return
      bfd_reloc_outofrange because the SYM_DIFF reloc is being used in a very

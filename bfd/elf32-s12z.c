@@ -43,7 +43,8 @@ opru18_reloc (bfd *abfd, arelent *reloc_entry, struct bfd_symbol *symbol,
      is shifted one place to the left of where it would normally be.  See
      Appendix A.4 of the S12Z reference manual.  */
 
-  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_size_type octets = (reloc_entry->address
+			  * bfd_octets_per_byte (abfd, NULL));
   bfd_vma result = bfd_get_24 (abfd, (unsigned char *) data + octets);
   bfd_vma val = bfd_asymbol_value (symbol);
 

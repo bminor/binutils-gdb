@@ -1,3 +1,59 @@
+2019-11-25  Christian Eggers  <ceggers@gmx.de>
+
+	* section.c (struct bfd_section): New flag SEC_ELF_OCTETS.
+	* archures.c (bfd_octets_per_byte): New parameter sec.
+	If section is not NULL and SEC_ELF_OCTETS is set, one octet es
+	returned [ELF targets only].
+	* bfd.c (bfd_get_section_limit): Provide section parameter to
+	bfd_octets_per_byte.
+	* bfd-in2.h: regenerate.
+	* binary.c (binary_set_section_contents): Move call to
+	bfd_octets_per_byte into section loop. Provide section parameter
+	to bfd_octets_per_byte.
+	* coff-arm.c (coff_arm_reloc): Provide section parameter
+	to bfd_octets_per_byte.
+	* coff-i386.c (coff_i386_reloc): likewise.
+	* coff-mips.c (mips_reflo_reloc): likewise.
+	* coff-x86_64.c (coff_amd64_reloc): likewise.
+	* cofflink.c (_bfd_coff_link_input_bfd): likewise.
+	(_bfd_coff_reloc_link_order): likewise.
+	* elf.c (_bfd_elf_section_offset): likewise.
+	(_bfd_elf_make_section_from_shdr): likewise.
+	Set SEC_ELF_OCTETS for sections with names .gnu.build.attributes,
+	.debug*, .zdebug* and .note.gnu*.
+	* elf32-msp430.c (rl78_sym_diff_handler): Provide section parameter
+	to bfd_octets_per_byte.
+	* elf32-nds.c (nds32_elf_get_relocated_section_contents): likewise.
+	* elf32-ppc.c (ppc_elf_addr16_ha_reloc): likewise.
+	* elf32-pru.c (pru_elf32_do_ldi32_relocate): likewise.
+	* elf32-s12z.c (opru18_reloc): likewise.
+	* elf32-sh.c (sh_elf_reloc): likewise.
+	* elf32-spu.c (spu_elf_rel9): likewise.
+	* elf32-xtensa.c (bfd_elf_xtensa_reloc): likewise
+	* elf64-ppc.c (ppc64_elf_brtaken_reloc): likewise.
+	(ppc64_elf_addr16_ha_reloc): likewise.
+	(ppc64_elf_toc64_reloc): likewise.
+	* elflink.c (bfd_elf_final_link): likewise.
+	(bfd_elf_perform_complex_relocation): likewise.
+	(elf_fixup_link_order): likewise.
+	(elf_link_input_bfd): likewise.
+	(elf_link_sort_relocs): likewise.
+	(elf_reloc_link_order): likewise.
+	(resolve_section): likewise.
+	* linker.c (_bfd_generic_reloc_link_order): likewise.
+	(bfd_generic_define_common_symbol): likewise.
+	(default_data_link_order): likewise.
+	(default_indirect_link_order): likewise.
+	* srec.c (srec_set_section_contents): likewise.
+	(srec_write_section): likewise.
+	* syms.c (_bfd_stab_section_find_nearest_line): likewise.
+	* reloc.c (_bfd_final_link_relocate): likewise.
+	(bfd_generic_get_relocated_section_contents): likewise.
+	(bfd_install_relocation): likewise.
+	For section which have SEC_ELF_OCTETS set, multiply output_base
+	and output_offset with bfd_octets_per_byte.
+	(bfd_perform_relocation): likewise.
+
 2019-11-21  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Exclude dynamic library

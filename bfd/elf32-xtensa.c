@@ -2103,7 +2103,8 @@ bfd_elf_xtensa_reloc (bfd *abfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag;
-  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_size_type octets = (reloc_entry->address
+			  * bfd_octets_per_byte (abfd, NULL));
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;

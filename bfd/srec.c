@@ -885,7 +885,7 @@ srec_set_section_contents (bfd *abfd,
 			   file_ptr offset,
 			   bfd_size_type bytes_to_do)
 {
-  int opb = bfd_octets_per_byte (abfd);
+  int opb = bfd_octets_per_byte (abfd, NULL);
   tdata_type *tdata = abfd->tdata.srec_data;
   srec_data_list_type *entry;
 
@@ -1053,7 +1053,8 @@ srec_write_section (bfd *abfd,
       if (octets_this_chunk > _bfd_srec_len)
 	octets_this_chunk = _bfd_srec_len;
 
-      address = list->where + octets_written / bfd_octets_per_byte (abfd);
+      address = list->where + (octets_written
+			       / bfd_octets_per_byte (abfd, NULL));
 
       if (! srec_write_record (abfd,
 			       tdata->type,

@@ -13220,7 +13220,7 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
 			 "unused", FALSE, 0, 0, FALSE);
 
-	      off = (*parent)->address * bfd_octets_per_byte (input_bfd);
+	      off = (*parent)->address * bfd_octets_per_byte (input_bfd, NULL);
 	      _bfd_clear_contents ((*parent)->howto, input_bfd,
 				   input_section, data, off);
 	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
