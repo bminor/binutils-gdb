@@ -6,3 +6,7 @@
 	bti c
 	bti j
 	bti jc
+
+	bti C
+	bti J
+	bti JC
