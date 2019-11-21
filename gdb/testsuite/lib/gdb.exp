@@ -6837,5 +6837,274 @@ gdb_caching_proc skip_ctf_tests {
     } executable "additional_flags=-gt"]
 }
 
+# Run a test on the target to see if it supports WRFSBASE and WRGSBASE.
+# Return 0 if so, 1 if it does not.
+
+gdb_caching_proc skip_fsgsbase_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_fsgsbase_tests"
+
+    # Compile a test program.
+    set src {
+        int seg;
+        int main() {
+            void *old;
+
+            __asm__ volatile ("rdfsbase %0" : "=rm"(old));
+            __asm__ volatile ("wrfsbase %0" :: "r"(&seg));
+            __asm__ volatile ("wrfsbase %0" :: "r"(old));
+
+            __asm__ volatile ("rdgsbase %0" : "=rm"(old));
+            __asm__ volatile ("wrgsbase %0" :: "r"(&seg));
+            __asm__ volatile ("wrgsbase %0" :: "r"(old));
+
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "$me:  FSGSBASE support not detected."
+            set skip_fsgsbase_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  FSGSBASE support detected."
+            set skip_fsgsbase_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_fsgsbase_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_fsgsbase_tests" 2
+    return $skip_fsgsbase_tests
+}
+
+# Run a test on the target to see if it supports arch_prctl(ARCH_SET_FS).
+# Return 0 if so, 1 if it does not.
+
+gdb_caching_proc skip_arch_set_fs_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_arch_set_fs_tests"
+
+    # The system call is not available to 32-bit.
+    if { [is_ilp32_target] } {
+        return 1
+    }
+
+    # Compile a test program.
+    set src {
+        #include <stdlib.h>
+        #include <assert.h>
+        #include <unistd.h>
+        #include <sys/syscall.h>
+        #include <asm/prctl.h>
+        #include <sys/prctl.h>
+
+        int seg;
+        int main() {
+            unsigned long old;
+            int errcode;
+
+            errcode = syscall (SYS_arch_prctl, ARCH_GET_FS, &old);
+            assert (errcode == 0);
+
+            errcode = syscall (SYS_arch_prctl, ARCH_SET_FS, &seg);
+            assert (errcode == 0);
+
+            errcode = syscall (SYS_arch_prctl, ARCH_SET_FS, old);
+            assert (errcode == 0);
+
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Assertion `errcode == 0' failed.*${gdb_prompt} $" {
+            verbose -log "$me:  ARCH_SET_FS support not detected."
+            set skip_arch_set_fs_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  ARCH_SET_FS support detected."
+            set skip_arch_set_fs_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_arch_set_fs_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_arch_set_fs_tests" 2
+    return $skip_arch_set_fs_tests
+}
+
+# Run a test on the target to see if it supports arch_prctl(ARCH_SET_GS).
+# Return 0 if so, 1 if it does not.
+
+gdb_caching_proc skip_arch_set_gs_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_arch_set_gs_tests"
+
+    # The system call is not available to 32-bit.
+    if { [is_ilp32_target] } {
+        return 1
+    }
+
+    # Compile a test program.
+    set src {
+        #include <stdlib.h>
+        #include <assert.h>
+        #include <unistd.h>
+        #include <sys/syscall.h>
+        #include <asm/prctl.h>
+        #include <sys/prctl.h>
+
+        int seg;
+        int main() {
+            unsigned long old;
+            int errcode;
+
+            errcode = syscall (SYS_arch_prctl, ARCH_GET_GS, &old);
+            assert (errcode == 0);
+
+            errcode = syscall (SYS_arch_prctl, ARCH_SET_GS, &seg);
+            assert (errcode == 0);
+
+            errcode = syscall (SYS_arch_prctl, ARCH_SET_GS, old);
+            assert (errcode == 0);
+
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Assertion `errcode == 0' failed.*${gdb_prompt} $" {
+            verbose -log "$me:  ARCH_SET_GS support not detected."
+            set skip_arch_set_gs_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  ARCH_SET_GS support detected."
+            set skip_arch_set_gs_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_arch_set_gs_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_arch_set_gs_tests" 2
+    return $skip_arch_set_gs_tests
+}
+
+# Run a test on the target to see if it supports modify_ldt.
+# Return 0 if so, 1 if it does not.
+
+gdb_caching_proc skip_modify_ldt_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_modify_ldt_tests"
+
+    # Compile a test program.
+    set src {
+        #include <stdlib.h>
+        #include <assert.h>
+        #include <unistd.h>
+        #include <sys/types.h>
+        #include <sys/syscall.h>
+        #include <asm/ldt.h>
+
+        int seg;
+        int main() {
+            struct user_desc ud;
+            int errcode;
+
+            memset (&ud, 0, sizeof (ud));
+            ud.entry_number = 0xa7u >> 3;
+            ud.base_addr = (unsigned int) (unsigned long) &seg;
+            ud.limit = (unsigned int) sizeof (seg);
+
+            errcode = syscall (SYS_modify_ldt, 1, &ud, sizeof(ud));
+            assert (errcode == 0);
+
+            return 0;
+        }
+    }
+
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Assertion `errcode.*${gdb_prompt} $" {
+            verbose -log "$me:  modify_ldt support not detected."
+            set skip_modify_ldt_tests 1
+        }
+        -re ".*Assertion `ud.base_addr.*${gdb_prompt} $" {
+            verbose -log "$me:  struct user_desc truncates base."
+            set skip_modify_ldt_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  modify_ldt working."
+            set skip_modify_ldt_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_modify_ldt_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_modify_ldt_tests" 2
+    return $skip_modify_ldt_tests
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

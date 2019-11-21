@@ -1,0 +1,191 @@
+# Copyright (C) 2019 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+standard_testfile
+
+if { ![istarget x86_64-*-* ] && ![istarget i?86-*-* ] } {
+    verbose "Skipping ${testfile}."
+    return
+}
+
+if { [skip_modify_ldt_tests] } {
+    untested "cannot setup LDT"
+    return
+}
+
+set skip_fsgsbase [skip_fsgsbase_tests]
+set skip_arch_set_fs [skip_arch_set_fs_tests]
+set skip_arch_set_gs [skip_arch_set_gs_tests]
+
+set flags { debug }
+set flags [concat $flags additional_flags=-DHAVE_WRFSGSBASE=!$skip_fsgsbase]
+set flags [concat $flags additional_flags=-DHAVE_ARCH_SET_FS=!$skip_arch_set_fs]
+set flags [concat $flags additional_flags=-DHAVE_ARCH_SET_GS=!$skip_arch_set_gs]
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} ${flags}] } {
+    return -1
+}
+
+if { ![runto_main] } {
+    untested "failed to run to main"
+    return -1
+}
+
+proc test_switch { seg } {
+    global skip_fsgsbase skip_arch_set_fs skip_arch_set_gs
+
+    # The inferior provides a new segment selector
+    gdb_test "p switch_${seg}_read (0xa7)" "= 42"
+
+    # The inferior provides the segment base via WRFS/GSBASE.
+    if { $skip_fsgsbase } {
+	untested "FSGSBASE"
+    } else {
+	gdb_test "p wr${seg}base_read (&segs->twentythree)" "= 23"
+    }
+
+    # The inferior provides the segment base via arch_prctl ().
+    if { (($seg == "fs" && $skip_arch_set_fs) ||
+	  ($seg == "gs" && $skip_arch_set_gs)) } {
+	untested "arch_prctl(ARCH_SET_FS/GS)"
+    } else {
+	gdb_test "p arch_set_${seg}_read (&segs->twentythree)" "= 23"
+    }
+}
+
+proc test { seg } {
+    global hex gdb_prompt
+
+    # Check that the target overrides any garbage we put into FS/GS and
+    # FS/GSBASE.
+    gdb_test "p/x \$${seg} = 0xb7" "= 0xb7"
+    # On 32-bit kernels, FS/GSBASE are not defined
+    if { ![istarget i?86-*-* ] } {
+	gdb_test "p/x \$${seg}_base = &segs->twentythree" "= $hex"
+    }
+    gdb_test "next" " l\.2 \\\*/"
+
+    # Since we want to use the same function for different scenarios, we
+    # don't check the actual register values but we check the effect.
+    gdb_test "p value" "= 42"
+
+    # Change the segment selector to point to the 'other' segment.
+    with_test_prefix $seg {
+	gdb_test "p/x \$${seg} = 0xb7" "= 0xb7"
+	gdb_test "p/x &segs->other" $hex
+
+	# Some kernels are nice enough to update the base for us.
+	set testname "${seg}_base"
+	if { ![istarget "x86_64-*-*"] } {
+	    untested $testname
+	} else {
+	    gdb_test_multiple "p/x \$${seg}_base" $testname {
+		-re "= 0x0\r\n$gdb_prompt $" {
+		    pass $testname
+		}
+		-re "= $hex.*\r\n$gdb_prompt $" {
+		    gdb_test "p (int *)\$${seg}_base == &segs->other" "= 1" \
+			$testname
+		}
+		-re "$gdb_prompt $" {
+		    fail $testname
+		}
+	    }
+	}
+
+	# Inferior calls will use the 'other' segment.
+	gdb_test "p read_${seg} ()" "= -42"
+
+	# Inferior calls may switch the segment again.  This will be
+	# undone when we restore the register state after returning from
+	# the inferior call.  Test a few different scenarios.
+	test_switch $seg
+
+	# When we resume, we will read from the 'other' segment as we did
+	# in the inferior call above.  We do this check at the end to
+	# check that inferior calls are not able to override the state.
+	gdb_test "next" " l\.3 \\\*/"
+	gdb_test "p value" "= -42"
+    }
+
+    # Only 64-bit kernels provide FS/GSBASE.
+    if { ![istarget "x86_64-*-*"] } {
+	untested ${seg}_base
+    } elseif { [is_ilp32_target] } {
+	# Even though a 64-bit kernel provides FS/GSBASE for the current
+	# FS/GS selector, it does not allow changing the base independent
+	# of the selector.
+	#
+	# Trying to do that while setting the selector to zero, as tests
+	# do below, results in an inferior crash while trying to use that
+	# zero selector.
+	untested ${seg}_base
+    } else {
+	# Change the segment base to point to 'twentythree'.
+	with_test_prefix ${seg}_base {
+	    # We also need to set the selector to zero.  And we need to do
+	    # so before changing the base.
+	    gdb_test "p/x \$${seg} = 0x0" "= 0x0"
+	    gdb_test "p/x \$${seg}_base = &segs->twentythree" "= $hex"
+
+	    # Inferior calls will use the 'twentythree' segment.
+	    gdb_test "p read_${seg} ()" "= 23"
+
+	    # Check inferior calls switching the segment again.
+	    test_switch $seg
+
+	    # When we resume, we will read from the 'twentythreee' segment
+	    # as we did in the inferior call above.  We do this check at
+	    # the end to check that inferior calls are not able to
+	    # override the state.
+	    gdb_test "next" " l\.4 \\\*/"
+	    gdb_test "p value" "= 23"
+	}
+    }
+}
+
+proc test_one { function seg } {
+    global decimal
+
+    gdb_breakpoint $function
+    gdb_continue_to_breakpoint $function "$function .* l\.1 \\\*/"
+
+    with_test_prefix $function {
+	test $seg
+    }
+}
+
+test_one test_fs fs
+test_one test_gs gs
+
+if { $skip_arch_set_fs } {
+    untested "arch_prctl(ARCH_SET_FS)"
+} else {
+    test_one test_arch_set_fs fs
+}
+
+if { $skip_arch_set_gs } {
+    untested "arch_prctl(ARCH_SET_GS)"
+} else {
+    test_one test_arch_set_gs gs
+}
+
+if { $skip_fsgsbase } {
+    untested "FSGSBASE"
+} else {
+    test_one test_wrfsbase fs
+    test_one test_wrgsbase gs
+}

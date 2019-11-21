@@ -51,6 +51,22 @@ set pre_corefile_local_array \
 set pre_corefile_extern_array \
 	[capture_command_output "print extern_array" "$print_prefix"]
 
+# On IA, a 64-bit kernel provides fs_base and gs_base for 32-bit inferiors
+# via ptrace, yet does not write them into the corefile.  Neither does
+# GDB.
+#
+# They will appear '<unavailable>' when reading the corefile back in.
+# Adjust the above output to reflect this behaviour.
+if { [istarget x86_64-*-* ] && [is_ilp32_target] } {
+    regsub -all "\(\[fg\]s_base *\)$hex *-?$decimal" $pre_corefile_regs \
+	"\\1<unavailable>" pre_corefile_regs
+    verbose -log "adjusted general regs: $pre_corefile_regs"
+
+    regsub -all "\(\[fg\]s_base *\)$hex *-?$decimal" $pre_corefile_allregs \
+	"\\1<unavailable>" pre_corefile_allregs
+    verbose -log "adjusted all regs: $pre_corefile_allregs"
+}
+
 set corefile [standard_output_file gcore.test]
 set core_supported [gdb_gcore_cmd "$corefile" "save a corefile"]
 if {!$core_supported} {
