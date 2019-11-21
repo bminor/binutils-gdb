@@ -1,3 +1,9 @@
+2019-11-22  Tom Tromey  <tromey@adacore.com>
+
+	* ada-tasks.c (ada_task_is_alive): Make parameter const.
+	(print_ada_task_info): Don't try to fetch thread id if task is not
+	alive.
+
 2019-11-22  Christian Biesinger  <cbiesinger@google.com>
 
 	* ada-exp.y: Update.

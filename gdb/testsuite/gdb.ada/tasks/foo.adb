@@ -65,4 +65,7 @@ begin
    for J in Task_List'Range loop
       Task_List (J).Finalize;
    end loop;
+
+   null; -- STOP_HERE_2
+
 end Foo;
