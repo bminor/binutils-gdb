@@ -1,5 +1,9 @@
 2019-11-22  Tom de Vries  <tdevries@suse.de>
 
+	* contrib/words.sh: Improve words extraction.
+
+2019-11-22  Tom de Vries  <tdevries@suse.de>
+
 	* contrib/words.sh: Combine sed invocations.
 
 2019-11-21  Christian Biesinger  <cbiesinger@google.com>
