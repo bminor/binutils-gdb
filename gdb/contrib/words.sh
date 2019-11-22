@@ -114,12 +114,13 @@ export LC_ALL=C
 awk \
     -f "$awkfile" \
     -- "$@" \
-    | sed 's/[%^$~#{}`&=@,. \t\/_()|<>\+\*-]/\n/g' \
-    | sed 's/\[/\n/g' \
-    | sed 's/\]/\n/g' \
-    | sed 's/[0-9][0-9]*/\n/g' \
+    | sed \
+	  -e 's/[%^$~#{}`&=@,. \t\/_()|<>\+\*-]/\n/g' \
+	  -e 's/\[/\n/g' \
+	  -e 's/\]/\n/g' \
+	  -e 's/[0-9][0-9]*/\n/g' \
+	  -e 's/[ \t]*//g' \
     | tr '[:upper:]' '[:lower:]' \
-    | sed 's/[ \t]*//g' \
     | sort \
     | uniq -c \
     | awk "{ if (($minfreq == 0 || $minfreq <= \$1) \
