@@ -1,3 +1,8 @@
+2019-11-22  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.h (LANG_FOR_EACH_INPUT_STATEMENT): Use cast instead of
+	extra check.
+
 2019-11-21  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.h (LANG_FOR_EACH_INPUT_STATEMENT): Check for an empty

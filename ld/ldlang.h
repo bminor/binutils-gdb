@@ -574,7 +574,7 @@ extern asection *section_for_dot
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)			\
   lang_input_statement_type *statement;					\
-  for (statement = file_chain.head == NULL ? NULL : &file_chain.head->input_statement; \
+  for (statement = (lang_input_statement_type *) file_chain.head;	\
        statement != NULL;						\
        statement = statement->next)
 
