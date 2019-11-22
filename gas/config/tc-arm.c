@@ -279,6 +279,8 @@ static const arm_feature_set arm_ext_bf16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16);
 static const arm_feature_set arm_ext_i8mm =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM);
+static const arm_feature_set arm_ext_crc =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set fpu_any = FPU_ANY;
@@ -334,8 +336,6 @@ static const arm_feature_set fpu_neon_ext_armv8 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
   ARM_FEATURE_COPROC (FPU_CRYPTO_EXT_ARMV8);
-static const arm_feature_set crc_ext_armv8 =
-  ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 static const arm_feature_set fpu_neon_ext_v8_1 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA);
 static const arm_feature_set fpu_neon_ext_dotprod =
@@ -24502,9 +24502,9 @@ static const struct asm_opcode insns[] =
   nUF(sha256su0, _sha2op, 2, (RNQ, RNQ), sha256su0),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT   & crc_ext_armv8
+#define ARM_VARIANT   & arm_ext_crc
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT & crc_ext_armv8
+#define THUMB_VARIANT & arm_ext_crc
   TUEc("crc32b", 1000040, fac0f080, 3, (RR, oRR, RR), crc32b),
   TUEc("crc32h", 1200040, fac0f090, 3, (RR, oRR, RR), crc32h),
   TUEc("crc32w", 1400040, fac0f0a0, 3, (RR, oRR, RR), crc32w),
@@ -30946,25 +30946,25 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_ARCH_NEON_VFP_V4),
   ARM_CPU_OPT ("cortex-a32",	  "Cortex-A32",	       ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a35",	  "Cortex-A35",	       ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a53",	  "Cortex-A53",	       ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a55",    "Cortex-A55",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
   ARM_CPU_OPT ("cortex-a57",	  "Cortex-A57",	       ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a72",	  "Cortex-A72",	       ARM_ARCH_V8A,
-	      ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	      FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a73",	  "Cortex-A73",	       ARM_ARCH_V8A,
-	      ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	      FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a75",    "Cortex-A75",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
@@ -30997,7 +30997,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV),
 	       FPU_ARCH_VFP_V3D16),
   ARM_CPU_OPT ("cortex-r52",	  "Cortex-R52",	       ARM_ARCH_V8R,
-	      ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	      FPU_ARCH_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-m35p",	  "Cortex-M35P",       ARM_ARCH_V8M_MAIN,
 	       ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
@@ -31027,7 +31027,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_NONE),
   ARM_CPU_OPT ("exynos-m1",	  "Samsung Exynos M1", ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("neoverse-n1",    "Neoverse N1",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
@@ -31066,7 +31066,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("xgene2",	  "APM X-Gene 2",      ARM_ARCH_V8A,
-	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
@@ -31186,7 +31186,7 @@ static const struct arm_ext_table armv7em_ext_table[] =
 
 static const struct arm_ext_table armv8a_ext_table[] =
 {
-  ARM_ADD ("crc", ARCH_CRC_ARMV8),
+  ARM_ADD ("crc", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC)),
   ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8),
   ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
@@ -31302,7 +31302,7 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
 
 static const struct arm_ext_table armv8r_ext_table[] =
 {
-  ARM_ADD ("crc", ARCH_CRC_ARMV8),
+  ARM_ADD ("crc", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC)),
   ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8),
   ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
@@ -31407,7 +31407,8 @@ struct arm_option_extension_value_table
    use the context sensitive approach using arm_ext_table's.  */
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
-  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  ARM_EXT_OPT ("crc",	 ARM_FEATURE_CORE_HIGH(ARM_EXT2_CRC),
+			 ARM_FEATURE_CORE_HIGH(ARM_EXT2_CRC),
 			 ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),

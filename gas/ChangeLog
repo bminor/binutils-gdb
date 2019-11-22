@@ -1,3 +1,15 @@
+2019-11-22  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (arm_ext_crc): New.
+	(crc_ext_armv8): Remove.
+	(insns): Rename crc_ext_armv8 to arm_ext_crc.
+	(arm_cpus): Replace CRC_EXT_ARMV8 with ARM_EXT2_CRC.
+	(armv8a_ext_table, armv8r_ext_table,
+	arm_option_extension_value_table): Redefine the crc
+	extension in terms of ARM_EXT2_CRC.
+	* gas/testsuite/gas/arm/crc-ext.s: New.
+	* gas/testsuite/gas/arm/crc-ext.d: New.
+
 2019-11-20  Alan Modra  <amodra@gmail.com>
 
 	PR 24944

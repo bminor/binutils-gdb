@@ -3641,17 +3641,17 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT2_ATOMICS),
     0x01f00c9f, 0x0ff00fff, "ldah%c\t%12-15r, [%16-19R]"},
   /* CRC32 instructions.  */
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1000040, 0xfff00ff0, "crc32b\t%12-15R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1200040, 0xfff00ff0, "crc32h\t%12-15R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1400040, 0xfff00ff0, "crc32w\t%12-15R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1000240, 0xfff00ff0, "crc32cb\t%12-15R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1200240, 0xfff00ff0, "crc32ch\t%12-15R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xe1400240, 0xfff00ff0, "crc32cw\t%12-15R, %16-19R, %0-3R"},
 
   /* Privileged Access Never extension instructions.  */
@@ -4657,17 +4657,17 @@ static const struct opcode32 thumb32_opcodes[] =
     0xe8d000ff, 0xfff000ff, "ldaexd%c\t%12-15r, %8-11r, [%16-19R]"},
 
   /* CRC32 instructions.  */
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11R, %16-19R, %0-3R"},
-  {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
     0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11R, %16-19R, %0-3R"},
 
   /* Speculation Barriers.  */
