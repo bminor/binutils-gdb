@@ -1,3 +1,8 @@
+2019-12-04  Christian Biesinger  <cbiesinger@google.com>
+
+	* configure.nat (obsd64): Add missing files x86-nat.o and
+	nat/x86-dregs.o.
+
 2019-12-04  Tom Tromey  <tom@tromey.com>
 
 	* valprint.c (val_print_string): Use metadata_style.

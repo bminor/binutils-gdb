@@ -445,8 +445,9 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: OpenBSD/amd64
-		NATDEPFILES="${NATDEPFILES} obsd-nat.o amd64-nat.o \
-		x86-bsd-nat.o amd64-bsd-nat.o amd64-obsd-nat.o bsd-kvm.o"
+		NATDEPFILES="${NATDEPFILES} obsd-nat.o amd64-nat.o x86-nat.o \
+		x86-bsd-nat.o amd64-bsd-nat.o amd64-obsd-nat.o bsd-kvm.o \
+		nat/x86-dregs.o"
 		LOADLIBES='-lkvm'
 		;;
 	    mips)
