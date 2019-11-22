@@ -433,7 +433,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       if (function != NULL
 	  && (BLOCK_SUPERBLOCK (function_block)
 	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
-	  && (strcmp_iw (SYMBOL_LINKAGE_NAME (function),
+	  && (strcmp_iw (function->linkage_name (),
 			 GCC_FE_WRAPPER_FUNCTION)
 	      == 0))
 	break;

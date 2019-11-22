@@ -99,7 +99,7 @@ pascal_print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "type ");
-  fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new_symbol));
+  fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
   type_print (type, "", stream, 0);
   fprintf_filtered (stream, ";");
 }

@@ -157,7 +157,7 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
     gdbscm_printf (port, " static");
 
   if (BLOCK_FUNCTION (b) != NULL)
-    gdbscm_printf (port, " %s", SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
+    gdbscm_printf (port, " %s", BLOCK_FUNCTION (b)->print_name ());
 
   gdbscm_printf (port, " %s-%s",
 		 hex_string (BLOCK_START (b)), hex_string (BLOCK_END (b)));

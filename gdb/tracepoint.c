@@ -236,11 +236,11 @@ set_traceframe_context (struct frame_info *trace_frame)
   /* Save func name as "$trace_func", a debugger variable visible to
      users.  */
   if (traceframe_fun == NULL
-      || SYMBOL_LINKAGE_NAME (traceframe_fun) == NULL)
+      || traceframe_fun->linkage_name () == NULL)
     clear_internalvar (lookup_internalvar ("trace_func"));
   else
     set_internalvar_string (lookup_internalvar ("trace_func"),
-			    SYMBOL_LINKAGE_NAME (traceframe_fun));
+			    traceframe_fun->linkage_name ());
 
   /* Save file name as "$trace_file", a debugger variable visible to
      users.  */
@@ -693,7 +693,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		    {
 		      error (_("constant `%s' (value %s) "
 			       "will not be collected."),
-			     SYMBOL_PRINT_NAME (exp->elts[2].symbol),
+			     exp->elts[2].symbol->print_name (),
 			     plongest (SYMBOL_VALUE (exp->elts[2].symbol)));
 		    }
 		  else if (SYMBOL_CLASS (exp->elts[2].symbol)
@@ -701,7 +701,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		    {
 		      error (_("`%s' is optimized away "
 			       "and cannot be collected."),
-			     SYMBOL_PRINT_NAME (exp->elts[2].symbol));
+			     exp->elts[2].symbol->print_name ());
 		    }
 		}
 
@@ -926,19 +926,18 @@ collection_list::collect_symbol (struct symbol *sym,
     {
     default:
       printf_filtered ("%s: don't know symbol class %d\n",
-		       SYMBOL_PRINT_NAME (sym),
-		       SYMBOL_CLASS (sym));
+		       sym->print_name (), SYMBOL_CLASS (sym));
       break;
     case LOC_CONST:
       printf_filtered ("constant %s (value %s) will not be collected.\n",
-		       SYMBOL_PRINT_NAME (sym), plongest (SYMBOL_VALUE (sym)));
+		       sym->print_name (), plongest (SYMBOL_VALUE (sym)));
       break;
     case LOC_STATIC:
       offset = SYMBOL_VALUE_ADDRESS (sym);
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_STATIC %s: collect %ld bytes at %s.\n",
-			   SYMBOL_PRINT_NAME (sym), len,
+			   sym->print_name (), len,
 			   paddress (gdbarch, offset));
 	}
       /* A struct may be a C++ class with static fields, go to general
@@ -951,8 +950,7 @@ collection_list::collect_symbol (struct symbol *sym,
     case LOC_REGISTER:
       reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
       if (info_verbose)
-	printf_filtered ("LOC_REG[parm] %s: ", 
-			 SYMBOL_PRINT_NAME (sym));
+	printf_filtered ("LOC_REG[parm] %s: ", sym->print_name ());
       add_local_register (gdbarch, reg, scope);
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
@@ -962,8 +960,7 @@ collection_list::collect_symbol (struct symbol *sym,
       break;
     case LOC_REF_ARG:
       printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
-      printf_filtered ("       (will not collect %s)\n",
-		       SYMBOL_PRINT_NAME (sym));
+      printf_filtered ("       (will not collect %s)\n", sym->print_name ());
       break;
     case LOC_ARG:
       reg = frame_regno;
@@ -971,8 +968,7 @@ collection_list::collect_symbol (struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
-			   " from frame ptr reg %d\n",
-			   SYMBOL_PRINT_NAME (sym), len,
+			   " from frame ptr reg %d\n", sym->print_name (), len,
 			   paddress (gdbarch, offset), reg);
 	}
       add_memrange (gdbarch, reg, offset, len, scope);
@@ -983,8 +979,7 @@ collection_list::collect_symbol (struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %ld bytes at offset %s"
-			   " from reg %d\n",
-			   SYMBOL_PRINT_NAME (sym), len,
+			   " from reg %d\n", sym->print_name (), len,
 			   paddress (gdbarch, offset), reg);
 	}
       add_memrange (gdbarch, reg, offset, len, scope);
@@ -995,8 +990,7 @@ collection_list::collect_symbol (struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
-			   " from frame ptr reg %d\n",
-			   SYMBOL_PRINT_NAME (sym), len,
+			   " from frame ptr reg %d\n", sym->print_name (), len,
 			   paddress (gdbarch, offset), reg);
 	}
       add_memrange (gdbarch, reg, offset, len, scope);
@@ -1008,7 +1002,7 @@ collection_list::collect_symbol (struct symbol *sym,
 
     case LOC_OPTIMIZED_OUT:
       printf_filtered ("%s has been optimized out of existence.\n",
-		       SYMBOL_PRINT_NAME (sym));
+		       sym->print_name ());
       break;
 
     case LOC_COMPUTED:
@@ -1028,7 +1022,7 @@ collection_list::collect_symbol (struct symbol *sym,
       if (!aexpr)
 	{
 	  printf_filtered ("%s has been optimized out of existence.\n",
-			   SYMBOL_PRINT_NAME (sym));
+			   sym->print_name ());
 	  return;
 	}
 
@@ -1424,7 +1418,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_VAR_VALUE:
 		      {
 			struct symbol *sym = exp->elts[2].symbol;
-			const char *name = SYMBOL_NATURAL_NAME (sym);
+			const char *name = sym->natural_name ();
 
 			collect->collect_symbol (exp->elts[2].symbol,
 						 target_gdbarch (),
@@ -2526,7 +2520,7 @@ info_scope_command (const char *args_in, int from_tty)
 	    printf_filtered ("Scope for %s:\n", save_args);
 	  count++;
 
-	  symname = SYMBOL_PRINT_NAME (sym);
+	  symname = sym->print_name ();
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* Probably botched, certainly useless.  */
 
@@ -2616,7 +2610,7 @@ info_scope_command (const char *args_in, int from_tty)
 				   paddress (gdbarch, BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym))));
 		  break;
 		case LOC_UNRESOLVED:
-		  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
+		  msym = lookup_minimal_symbol (sym->linkage_name (),
 						NULL, NULL);
 		  if (msym.minsym == NULL)
 		    printf_filtered ("Unresolved Static");
@@ -3689,7 +3683,7 @@ print_one_static_tracepoint_marker (int count,
   if (sym)
     {
       uiout->text ("in ");
-      uiout->field_string ("func", SYMBOL_PRINT_NAME (sym),
+      uiout->field_string ("func", sym->print_name (),
 			   function_name_style.style ());
       uiout->wrap_hint (wrap_indent);
       uiout->text (" at ");

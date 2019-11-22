@@ -2341,7 +2341,7 @@ cp_set_block_scope (const struct symbol *symbol,
 		    struct block *block,
 		    struct obstack *obstack)
 {
-  if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
+  if (symbol->demangled_name () != NULL)
     {
       /* Try to figure out the appropriate namespace from the
 	 demangled name.  */
@@ -2351,7 +2351,7 @@ cp_set_block_scope (const struct symbol *symbol,
 	 name of the class as well.  This should be harmless, but
 	 is a little unfortunate.  */
 
-      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
+      const char *name = symbol->demangled_name ();
       unsigned int prefix_len = cp_entire_prefix_len (name);
 
       block_set_scope (block, obstack_strndup (obstack, name, prefix_len),

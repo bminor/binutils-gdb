@@ -2066,8 +2066,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 	  gdb_assert (!ls->labels.function_symbols->empty ()
 		      && (ls->labels.function_symbols->size () == 1));
 	  block_symbol s = ls->labels.function_symbols->front ();
-	  explicit_loc->function_name
-	    = xstrdup (SYMBOL_NATURAL_NAME (s.symbol));
+	  explicit_loc->function_name = xstrdup (s.symbol->natural_name ());
 	}
     }
 
@@ -2195,7 +2194,7 @@ create_sals_line_offset (struct linespec_state *self,
 	      skip_prologue_sal (&intermediate_results[i]);
 	    intermediate_results[i].symbol = sym;
 	    add_sal_to_sals (self, &values, &intermediate_results[i],
-			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL, 0);
+			     sym ? sym->natural_name () : NULL, 0);
 	  }
     }
 
@@ -2250,7 +2249,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 	      && maybe_add_address (state->addr_set, pspace, sal.pc))
 	    add_sal_to_sals (state, &sals, &sal,
-			     SYMBOL_NATURAL_NAME (sym.symbol), 0);
+			     sym.symbol->natural_name (), 0);
 	}
     }
   else if (ls->function_symbols != NULL || ls->minimal_symbols != NULL)
@@ -2315,7 +2314,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 		  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 		      && maybe_add_address (state->addr_set, pspace, sal.pc))
 		    add_sal_to_sals (state, &sals, &sal,
-				     SYMBOL_NATURAL_NAME (sym.symbol), 0);
+				     sym.symbol->natural_name (), 0);
 		}
 	    }
 	}
@@ -2903,7 +2902,7 @@ complete_label (completion_tracker &tracker,
     {
       for (const auto &label : *labels)
 	{
-	  char *match = xstrdup (SYMBOL_SEARCH_NAME (label.symbol));
+	  char *match = xstrdup (label.symbol->search_name ());
 	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
 	}
       delete labels;
@@ -4001,7 +4000,7 @@ find_label_symbols_in_block (const struct block *block,
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
-	      && cmp (SYMBOL_SEARCH_NAME (sym), name, name_len) == 0)
+	      && cmp (sym->search_name (), name, name_len) == 0)
 	    {
 	      result->push_back ({sym, block});
 	      label_funcs_ret->push_back ({fn_sym, block});

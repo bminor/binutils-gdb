@@ -1,5 +1,172 @@
 2019-11-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* ada-exp.y: Update.
+	* ada-lang.c (sort_choices): Update.
+	(ada_print_symbol_signature): Update.
+	(resolve_subexp): Update.
+	(ada_parse_renaming): Update.
+	(ada_read_renaming_var_value): Update.
+	(lesseq_defined_than): Update.
+	(remove_extra_symbols): Update.
+	(remove_irrelevant_renamings): Update.
+	(ada_add_block_symbols): Update.
+	(ada_collect_symbol_completion_matches): Update.
+	(ada_is_renaming_symbol): Update.
+	(aggregate_assign_from_choices): Update.
+	(ada_evaluate_subexp): Update.
+	(ada_has_this_exception_support): Update.
+	(ada_is_non_standard_exception_sym): Update.
+	(ada_add_exceptions_from_frame): Update.
+	(ada_add_global_exceptions): Update.
+	(ada_print_subexp): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	(gen_maybe_namespace_elt): Update.
+	(gen_expr_for_cast): Update.
+	(gen_expr): Update.
+	* block.h: Update.
+	* blockframe.c (find_pc_partial_function): Update.
+	* breakpoint.c (print_breakpoint_location): Update.
+	(update_static_tracepoint): Update.
+	* btrace.c (ftrace_print_function_name): Update.
+	(ftrace_function_switched): Update.
+	* buildsym.c (find_symbol_in_list): Update.
+	* c-exp.y: Update.
+	* c-typeprint.c (c_print_typedef): Update.
+	(c_type_print_template_args): Update.
+	* cli/cli-cmds.c (edit_command): Update.
+	(list_command): Update.
+	(print_sal_location): Update.
+	* coffread.c (patch_opaque_types): Update.
+	(process_coff_symbol): Update.
+	(coff_read_enum_type): Update.
+	* compile/compile-c-symbols.c (c_symbol_substitution_name): Update.
+	(convert_one_symbol): Update.
+	(hash_symname): Update.
+	(eq_symname): Update.
+	* compile/compile-cplus-symbols.c (convert_one_symbol): Update.
+	* compile/compile-cplus-types.c (debug_print_scope): Update.
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Update.
+	* compile/compile-object-load.c (get_out_value_type): Update.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
+	(search_symbol_list): Update.
+	(cp_lookup_symbol_imports_or_template): Update.
+	* cp-support.c (overload_list_add_symbol): Update.
+	* ctfread.c (psymtab_to_symtab): Update.
+	* dbxread.c (cp_set_block_scope): Update.
+	* dictionary.c (iter_match_first_hashed): Update.
+	(iter_match_next_hashed): Update.
+	(insert_symbol_hashed): Update.
+	(iter_match_next_linear): Update.
+	* dictionary.h: Update.
+	* dwarf2loc.c (func_get_frame_base_dwarf_block): Update.
+	(locexpr_describe_location_piece): Update.
+	(locexpr_describe_location_1): Update.
+	(locexpr_generate_c_location): Update.
+	(loclist_describe_location): Update.
+	(loclist_generate_c_location): Update.
+	* dwarf2read.c (dw2_debug_names_lookup_symbol): Update.
+	(read_func_scope): Update.
+	(process_enumeration_scope): Update.
+	(new_symbol): Update.
+	(dwarf2_const_value): Update.
+	(dwarf2_symbol_mark_computed): Update.
+	* eval.c (evaluate_funcall): Update.
+	(evaluate_subexp_standard): Update.
+	* expprint.c (print_subexp_standard): Update.
+	(dump_subexp_body_standard): Update.
+	* f-valprint.c (info_common_command_for_block): Update.
+	* findvar.c (get_hosting_frame): Update.
+	(default_read_var_value): Update.
+	* go-lang.c (go_symbol_package_name): Update.
+	* guile/scm-block.c (bkscm_print_block_smob): Update.
+	* guile/scm-symbol.c (syscm_print_symbol_smob): Update.
+	(gdbscm_symbol_name): Update.
+	(gdbscm_symbol_linkage_name): Update.
+	(gdbscm_symbol_print_name): Update.
+	* infcall.c (get_function_name): Update.
+	* infcmd.c (jump_command): Update.
+	(finish_command): Update.
+	* infrun.c (insert_exception_resume_breakpoint): Update.
+	* linespec.c (canonicalize_linespec): Update.
+	(create_sals_line_offset): Update.
+	(convert_linespec_to_sals): Update.
+	(complete_label): Update.
+	(find_label_symbols_in_block): Update.
+	* m2-typeprint.c (m2_print_typedef): Update.
+	* mdebugread.c (mdebug_reg_to_regnum): Update.
+	(parse_symbol): Update.
+	(mylookup_symbol): Update.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Update.
+	(list_args_or_locals): Update.
+	* objc-lang.c (compare_selectors): Update.
+	(info_selectors_command): Update.
+	(compare_classes): Update.
+	(info_classes_command): Update.
+	(find_imps): Update.
+	* p-typeprint.c (pascal_print_typedef): Update.
+	* printcmd.c (build_address_symbolic): Update.
+	(info_address_command): Update.
+	(print_variable_and_value): Update.
+	* python/py-framefilter.c (extract_sym): Update.
+	(py_print_single_arg): Update.
+	* python/py-symbol.c (sympy_str): Update.
+	(sympy_get_name): Update.
+	(sympy_get_linkage_name): Update.
+	* python/python.c (gdbpy_rbreak): Update.
+	* record-btrace.c (btrace_get_bfun_name): Update.
+	(btrace_call_history): Update.
+	* rust-lang.c (rust_print_typedef): Update.
+	* solib-frv.c (frv_fdpic_find_canonical_descriptor): Update.
+	* stabsread.c (stab_reg_to_regnum): Update.
+	(define_symbol): Update.
+	(read_enum_type): Update.
+	(common_block_end): Update.
+	(cleanup_undefined_types_1): Update.
+	(scan_file_globals): Update.
+	* stack.c (print_frame_arg): Update.
+	(print_frame_args): Update.
+	(find_frame_funname): Update.
+	(info_frame_command_core): Update.
+	(iterate_over_block_locals): Update.
+	(print_block_frame_labels): Update.
+	(do_print_variable_and_value): Update.
+	(iterate_over_block_arg_vars): Update.
+	(return_command): Update.
+	* symmisc.c (dump_symtab_1): Update.
+	(print_symbol): Update.
+	* symtab.c (eq_symbol_entry): Update.
+	(symbol_cache_dump): Update.
+	(lookup_language_this): Update.
+	(find_pc_sect_line): Update.
+	(skip_prologue_sal): Update.
+	(symbol_search::compare_search_syms): Update.
+	(treg_matches_sym_type_name): Update.
+	(search_symbols): Update.
+	(print_symbol_info): Update.
+	(rbreak_command): Update.
+	(completion_list_add_symbol): Update.
+	(find_gnu_ifunc): Update.
+	(get_symbol_address): Update.
+	(search_module_symbols): Update.
+	(info_module_subcommand): Update.
+	* symtab.h (SYMBOL_NATURAL_NAME): Remove.
+	(SYMBOL_LINKAGE_NAME): Remove.
+	(SYMBOL_DEMANGLED_NAME): Remove.
+	(SYMBOL_PRINT_NAME): Remove.
+	(SYMBOL_SEARCH_NAME): Remove.
+	* tracepoint.c (set_traceframe_context): Update.
+	(validate_actionline): Update.
+	(collection_list::collect_symbol): Update.
+	(encode_actions_1): Update.
+	(info_scope_command): Update.
+	(print_one_static_tracepoint_marker): Update.
+	* typeprint.c (typedef_hash_table::add_template_parameters): Update.
+	* valops.c (address_of_variable): Update.
+	(find_overload_match): Update.
+	(find_oload_champ): Update.
+
+2019-11-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* ada-lang.c (ada_lookup_simple_minsym): Update.
 	(ada_collect_symbol_completion_matches): Update.
 	* ada-tasks.c (read_atcb): Update.

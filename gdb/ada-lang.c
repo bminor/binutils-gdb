@@ -3201,8 +3201,8 @@ sort_choices (struct block_symbol syms[], int nsyms)
 
       for (j = i - 1; j >= 0; j -= 1)
         {
-          if (encoded_ordered_before (SYMBOL_LINKAGE_NAME (syms[j].symbol),
-                                      SYMBOL_LINKAGE_NAME (sym.symbol)))
+          if (encoded_ordered_before (syms[j].symbol->linkage_name (),
+                                      sym.symbol->linkage_name ()))
             break;
           syms[j + 1] = syms[j];
         }
@@ -3225,7 +3225,7 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
 {
   struct type *type = SYMBOL_TYPE (sym);
 
-  fprintf_filtered (stream, "%s", SYMBOL_PRINT_NAME (sym));
+  fprintf_filtered (stream, "%s", sym->print_name ());
   if (!print_signatures
       || type == NULL
       || TYPE_CODE (type) != TYPE_CODE_FUNC)
@@ -3431,7 +3431,7 @@ See set/show multiple-symbol."));
               ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
                               gdb_stdout, -1, 0, &type_print_raw_options);
               printf_filtered (_("'(%s) (enumeral)\n"),
-			       SYMBOL_PRINT_NAME (syms[i].symbol));
+			       syms[i].symbol->print_name ());
             }
 	  else
 	    {
@@ -3675,8 +3675,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
           int n_candidates;
 
           n_candidates =
-            ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
-                                    (exp->elts[pc + 2].symbol),
+            ada_lookup_symbol_list (exp->elts[pc + 2].symbol->linkage_name (),
                                     exp->elts[pc + 1].block, VAR_DOMAIN,
                                     &candidates);
 
@@ -3718,7 +3717,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
           if (n_candidates == 0)
             error (_("No definition found for %s"),
-                   SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
+                   exp->elts[pc + 2].symbol->print_name ());
           else if (n_candidates == 1)
             i = 0;
           else if (deprocedure_p
@@ -3726,16 +3725,16 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
             {
               i = ada_resolve_function
                 (candidates.data (), n_candidates, NULL, 0,
-                 SYMBOL_LINKAGE_NAME (exp->elts[pc + 2].symbol),
+                 exp->elts[pc + 2].symbol->linkage_name (),
                  context_type, parse_completion);
               if (i < 0)
                 error (_("Could not find a match for %s"),
-                       SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
+                       exp->elts[pc + 2].symbol->print_name ());
             }
           else
             {
               printf_filtered (_("Multiple matches for %s\n"),
-                               SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
+                               exp->elts[pc + 2].symbol->print_name ());
               user_select_syms (candidates.data (), n_candidates, 1);
               i = 0;
             }
@@ -3765,8 +3764,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
             int n_candidates;
 
             n_candidates =
-              ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
-                                      (exp->elts[pc + 5].symbol),
+              ada_lookup_symbol_list (exp->elts[pc + 5].symbol->linkage_name (),
                                       exp->elts[pc + 4].block, VAR_DOMAIN,
                                       &candidates);
 
@@ -3777,11 +3775,11 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
                 i = ada_resolve_function
                   (candidates.data (), n_candidates,
                    argvec, nargs,
-                   SYMBOL_LINKAGE_NAME (exp->elts[pc + 5].symbol),
+                   exp->elts[pc + 5].symbol->linkage_name (),
                    context_type, parse_completion);
                 if (i < 0)
                   error (_("Could not find a match for %s"),
-                         SYMBOL_PRINT_NAME (exp->elts[pc + 5].symbol));
+                         exp->elts[pc + 5].symbol->print_name ());
               }
 
             exp->elts[pc + 4].block = candidates[i].block;
@@ -4264,7 +4262,7 @@ ada_parse_renaming (struct symbol *sym,
     case LOC_STATIC:
     case LOC_COMPUTED:
     case LOC_OPTIMIZED_OUT:
-      info = strstr (SYMBOL_LINKAGE_NAME (sym), "___XR");
+      info = strstr (sym->linkage_name (), "___XR");
       if (info == NULL)
 	return ADA_NOT_RENAMING;
       switch (info[5])
@@ -4313,7 +4311,7 @@ ada_read_renaming_var_value (struct symbol *renaming_sym,
 {
   const char *sym_name;
 
-  sym_name = SYMBOL_LINKAGE_NAME (renaming_sym);
+  sym_name = renaming_sym->linkage_name ();
   expression_up expr = parse_exp_1 (&sym_name, 0, block, 0);
   return evaluate_expression (expr.get ());
 }
@@ -4834,8 +4832,8 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
       {
         struct type *type0 = SYMBOL_TYPE (sym0);
         struct type *type1 = SYMBOL_TYPE (sym1);
-        const char *name0 = SYMBOL_LINKAGE_NAME (sym0);
-        const char *name1 = SYMBOL_LINKAGE_NAME (sym1);
+        const char *name0 = sym0->linkage_name ();
+        const char *name1 = sym1->linkage_name ();
         int len0 = strlen (name0);
 
         return
@@ -4850,8 +4848,8 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 
     case LOC_STATIC:
       {
-        const char *name0 = SYMBOL_LINKAGE_NAME (sym0);
-        const char *name1 = SYMBOL_LINKAGE_NAME (sym1);
+        const char *name0 = sym0->linkage_name ();
+        const char *name1 = sym1->linkage_name ();
         return (strcmp (name0, name1) == 0
                 && SYMBOL_VALUE_ADDRESS (sym0) == SYMBOL_VALUE_ADDRESS (sym1));
       }
@@ -5112,15 +5110,15 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
          the get rid of the stub.  */
 
       if (TYPE_STUB (SYMBOL_TYPE ((*syms)[i].symbol))
-          && SYMBOL_LINKAGE_NAME ((*syms)[i].symbol) != NULL)
+          && (*syms)[i].symbol->linkage_name () != NULL)
         {
           for (j = 0; j < syms->size (); j++)
             {
               if (j != i
                   && !TYPE_STUB (SYMBOL_TYPE ((*syms)[j].symbol))
-                  && SYMBOL_LINKAGE_NAME ((*syms)[j].symbol) != NULL
-                  && strcmp (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol),
-                             SYMBOL_LINKAGE_NAME ((*syms)[j].symbol)) == 0)
+                  && (*syms)[j].symbol->linkage_name () != NULL
+                  && strcmp ((*syms)[i].symbol->linkage_name (),
+                             (*syms)[j].symbol->linkage_name ()) == 0)
                 remove_p = 1;
             }
         }
@@ -5128,16 +5126,16 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       /* Two symbols with the same name, same class and same address
          should be identical.  */
 
-      else if (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol) != NULL
+      else if ((*syms)[i].symbol->linkage_name () != NULL
           && SYMBOL_CLASS ((*syms)[i].symbol) == LOC_STATIC
           && is_nondebugging_type (SYMBOL_TYPE ((*syms)[i].symbol)))
         {
           for (j = 0; j < syms->size (); j += 1)
             {
               if (i != j
-                  && SYMBOL_LINKAGE_NAME ((*syms)[j].symbol) != NULL
-                  && strcmp (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol),
-                             SYMBOL_LINKAGE_NAME ((*syms)[j].symbol)) == 0
+                  && (*syms)[j].symbol->linkage_name () != NULL
+                  && strcmp ((*syms)[i].symbol->linkage_name (),
+                             (*syms)[j].symbol->linkage_name ()) == 0
                   && SYMBOL_CLASS ((*syms)[i].symbol)
 		       == SYMBOL_CLASS ((*syms)[j].symbol)
                   && SYMBOL_VALUE_ADDRESS ((*syms)[i].symbol)
@@ -5314,7 +5312,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 
       if (sym == NULL || SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	continue;
-      name = SYMBOL_LINKAGE_NAME (sym);
+      name = sym->linkage_name ();
       suffix = strstr (name, "___XR");
 
       if (suffix != NULL)
@@ -5325,7 +5323,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 	  is_new_style_renaming = 1;
 	  for (j = 0; j < syms->size (); j += 1)
 	    if (i != j && (*syms)[j].symbol != NULL
-		&& strncmp (name, SYMBOL_LINKAGE_NAME ((*syms)[j].symbol),
+		&& strncmp (name, (*syms)[j].symbol->linkage_name (),
 			    name_len) == 0
 		&& block == (*syms)[j].block)
 	      (*syms)[j].symbol = NULL;
@@ -5354,7 +5352,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
   if (current_function == NULL)
     return syms->size ();
 
-  current_function_name = SYMBOL_LINKAGE_NAME (current_function);
+  current_function_name = current_function->linkage_name ();
   if (current_function_name == NULL)
     return syms->size ();
 
@@ -6267,17 +6265,17 @@ ada_add_block_symbols (struct obstack *obstackp,
           {
             int cmp;
 
-            cmp = (int) '_' - (int) SYMBOL_LINKAGE_NAME (sym)[0];
+            cmp = (int) '_' - (int) sym->linkage_name ()[0];
             if (cmp == 0)
               {
-                cmp = !startswith (SYMBOL_LINKAGE_NAME (sym), "_ada_");
+                cmp = !startswith (sym->linkage_name (), "_ada_");
                 if (cmp == 0)
-                  cmp = strncmp (name, SYMBOL_LINKAGE_NAME (sym) + 5,
+                  cmp = strncmp (name, sym->linkage_name () + 5,
                                  name_len);
               }
 
             if (cmp == 0
-                && is_name_suffix (SYMBOL_LINKAGE_NAME (sym) + name_len + 5))
+                && is_name_suffix (sym->linkage_name () + name_len + 5))
               {
 		if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
 		  {
@@ -6469,7 +6467,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
 	completion_list_add_name (tracker,
 				  SYMBOL_LANGUAGE (sym),
-				  SYMBOL_LINKAGE_NAME (sym),
+				  sym->linkage_name (),
 				  lookup_name, text, word);
       }
     }
@@ -6490,7 +6488,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
 	      completion_list_add_name (tracker,
 					SYMBOL_LANGUAGE (sym),
-					SYMBOL_LINKAGE_NAME (sym),
+					sym->linkage_name (),
 					lookup_name, text, word);
 	    }
 	}
@@ -6512,7 +6510,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
 	      completion_list_add_name (tracker,
 					SYMBOL_LANGUAGE (sym),
-					SYMBOL_LINKAGE_NAME (sym),
+					sym->linkage_name (),
 					lookup_name, text, word);
 	    }
 	}
@@ -7856,7 +7854,7 @@ ada_find_any_type (const char *name)
 static bool
 ada_is_renaming_symbol (struct symbol *name_sym)
 {
-  const char *name = SYMBOL_LINKAGE_NAME (name_sym);
+  const char *name = name_sym->linkage_name ();
   return strstr (name, "___XR") != NULL;
 }
 
@@ -9945,7 +9943,7 @@ aggregate_assign_from_choices (struct value *container,
 	      name = &exp->elts[choice_pos + 2].string;
 	      break;
 	    case OP_VAR_VALUE:
-	      name = SYMBOL_NATURAL_NAME (exp->elts[choice_pos + 2].symbol);
+	      name = exp->elts[choice_pos + 2].symbol->natural_name ();
 	      break;
 	    default:
 	      error (_("Invalid record component association."));
@@ -10610,7 +10608,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
            context other than a function call, in which case, it is
            invalid.  */
         error (_("Unexpected unresolved symbol, %s, during evaluation"),
-               SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
+               exp->elts[pc + 2].symbol->print_name ());
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
@@ -10700,7 +10698,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (exp->elts[*pos].opcode == OP_VAR_VALUE
           && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
         error (_("Unexpected unresolved symbol, %s, during evaluation"),
-               SYMBOL_PRINT_NAME (exp->elts[pc + 5].symbol));
+               exp->elts[pc + 5].symbol->print_name ());
       else
         {
           for (tem = 0; tem <= nargs; tem += 1)
@@ -11923,7 +11921,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   if (SYMBOL_CLASS (sym) != LOC_BLOCK)
     {
       error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+	     sym->linkage_name (), SYMBOL_CLASS (sym));
       return 0;
     }
 
@@ -11946,7 +11944,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   if (SYMBOL_CLASS (sym) != LOC_BLOCK)
     {
       error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+	     sym->linkage_name (), SYMBOL_CLASS (sym));
       return 0;
     }
 
@@ -13141,13 +13139,13 @@ ada_is_non_standard_exception_sym (struct symbol *sym)
     return 0;
 
   for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
-    if (strcmp (SYMBOL_LINKAGE_NAME (sym), standard_exc[i]) == 0)
+    if (strcmp (sym->linkage_name (), standard_exc[i]) == 0)
       return 0;  /* A standard exception.  */
 
   /* Numeric_Error is also a standard exception, so exclude it.
      See the STANDARD_EXC description for more details as to why
      this exception is not listed in that array.  */
-  if (strcmp (SYMBOL_LINKAGE_NAME (sym), "numeric_error") == 0)
+  if (strcmp (sym->linkage_name (), "numeric_error") == 0)
     return 0;
 
   return 1;
@@ -13260,7 +13258,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 	    default:
 	      if (ada_is_exception_sym (sym))
 		{
-		  struct ada_exc_info info = {SYMBOL_PRINT_NAME (sym),
+		  struct ada_exc_info info = {sym->print_name (),
 					      SYMBOL_VALUE_ADDRESS (sym)};
 
 		  exceptions->push_back (info);
@@ -13333,10 +13331,10 @@ ada_add_global_exceptions (compiled_regex *preg,
 
 	      ALL_BLOCK_SYMBOLS (b, iter, sym)
 		if (ada_is_non_standard_exception_sym (sym)
-		    && name_matches_regex (SYMBOL_NATURAL_NAME (sym), preg))
+		    && name_matches_regex (sym->natural_name (), preg))
 		  {
 		    struct ada_exc_info info
-		      = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
+		      = {sym->print_name (), SYMBOL_VALUE_ADDRESS (sym)};
 
 		    exceptions->push_back (info);
 		  }
@@ -13664,7 +13662,7 @@ ada_print_subexp (struct expression *exp, int *pos,
       return;
 
     case OP_VAR_VALUE:
-      fputs_filtered (SYMBOL_NATURAL_NAME (exp->elts[pc + 2].symbol), stream);
+      fputs_filtered (exp->elts[pc + 2].symbol->natural_name (), stream);
       return;
 
     case BINOP_IN_BOUNDS:

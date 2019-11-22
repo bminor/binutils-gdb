@@ -628,9 +628,9 @@ build_address_symbolic (struct gdbarch *gdbarch,
 
       name_location = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (symbol));
       if (do_demangle || asm_demangle)
-	name_temp = SYMBOL_PRINT_NAME (symbol);
+	name_temp = symbol->print_name ();
       else
-	name_temp = SYMBOL_LINKAGE_NAME (symbol);
+	name_temp = symbol->linkage_name ();
     }
 
   if (msymbol.minsym != NULL
@@ -1472,7 +1472,7 @@ info_address_command (const char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, SYMBOL_PRINT_NAME (sym),
+  fprintf_symbol_filtered (gdb_stdout, sym->print_name (),
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
@@ -1592,7 +1592,7 @@ info_address_command (const char *exp, int from_tty)
       {
 	struct bound_minimal_symbol msym;
 
-	msym = lookup_bound_minimal_symbol (SYMBOL_LINKAGE_NAME (sym));
+	msym = lookup_bound_minimal_symbol (sym->linkage_name ());
 	if (msym.minsym == NULL)
 	  printf_filtered ("unresolved");
 	else
@@ -2214,7 +2214,7 @@ print_variable_and_value (const char *name, struct symbol *var,
 {
 
   if (!name)
-    name = SYMBOL_PRINT_NAME (var);
+    name = var->print_name ();
 
   fprintf_filtered (stream, "%s%ps = ", n_spaces (2 * indent),
 		    styled_string (variable_name_style.style (), name));

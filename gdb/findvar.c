@@ -566,9 +566,9 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
 	{
 	  if (BLOCK_FUNCTION (var_block)
 	      && !block_inlined_p (var_block)
-	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (var_block)))
+	      && BLOCK_FUNCTION (var_block)->print_name ())
 	    error (_("No frame is currently executing in block %s."),
-		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (var_block)));
+		   BLOCK_FUNCTION (var_block)->print_name ());
 	  else
 	    error (_("No frame is currently executing in specified"
 		     " block"));
@@ -601,7 +601,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
   if (sym_need == SYMBOL_NEEDS_FRAME)
     gdb_assert (frame != NULL);
   else if (sym_need == SYMBOL_NEEDS_REGISTERS && !target_has_registers)
-    error (_("Cannot read `%s' without registers"), SYMBOL_PRINT_NAME (var));
+    error (_("Cannot read `%s' without registers"), var->print_name ());
 
   if (frame != NULL)
     frame = get_hosting_frame (var, var_block, frame);
@@ -668,7 +668,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
       addr = get_frame_args_address (frame);
       if (!addr)
 	error (_("Unknown argument list address for `%s'."),
-	       SYMBOL_PRINT_NAME (var));
+	       var->print_name ());
       addr += SYMBOL_VALUE (var);
       break;
 
@@ -680,7 +680,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 	argref = get_frame_args_address (frame);
 	if (!argref)
 	  error (_("Unknown argument list address for `%s'."),
-		 SYMBOL_PRINT_NAME (var));
+		 var->print_name ());
 	argref += SYMBOL_VALUE (var);
 	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
@@ -694,7 +694,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
     case LOC_TYPEDEF:
       error (_("Cannot look up value of a typedef `%s'."),
-	     SYMBOL_PRINT_NAME (var));
+	     var->print_name ());
       break;
 
     case LOC_BLOCK:
@@ -721,7 +721,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
 	    if (regval == NULL)
 	      error (_("Value of register variable not available for `%s'."),
-	             SYMBOL_PRINT_NAME (var));
+	             var->print_name ());
 
 	    addr = value_as_address (regval);
 	  }
@@ -731,7 +731,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
 	    if (regval == NULL)
 	      error (_("Value of register variable not available for `%s'."),
-	             SYMBOL_PRINT_NAME (var));
+	             var->print_name ());
 	    return regval;
 	  }
       }
@@ -747,7 +747,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 	struct obj_section *obj_section;
 
 	memset (&lookup_data, 0, sizeof (lookup_data));
-	lookup_data.name = SYMBOL_LINKAGE_NAME (var);
+	lookup_data.name = var->linkage_name ();
 
 	gdbarch_iterate_over_objfiles_in_search_order
 	  (symbol_arch (var),
@@ -767,7 +767,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 	       can't be NULL.  */
 	    gdb_assert (flavour_name != NULL);
 	    error (_("Missing %s symbol \"%s\"."),
-		   flavour_name, SYMBOL_LINKAGE_NAME (var));
+		   flavour_name, var->linkage_name ());
 	  }
 	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.result.objfile, msym);
 	/* Relocate address, unless there is no section or the variable is
@@ -793,7 +793,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
     default:
       error (_("Cannot look up value of a botched symbol `%s'."),
-	     SYMBOL_PRINT_NAME (var));
+	     var->print_name ());
       break;
     }
 

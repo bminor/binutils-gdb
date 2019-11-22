@@ -541,7 +541,7 @@ mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     {
       reg_value_complaint (regno, gdbarch_num_cooked_regs (gdbarch),
-			   SYMBOL_PRINT_NAME (sym));
+			   sym->print_name ());
 
       regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless.  */
     }
@@ -646,7 +646,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* It is a FORTRAN common block.  At least for SGI Fortran the
 	     address is not in the symbol; we need to fix it later in
 	     scan_file_globals.  */
-	  int bucket = hashname (SYMBOL_LINKAGE_NAME (s));
+	  int bucket = hashname (s->linkage_name ());
 	  SYMBOL_VALUE_CHAIN (s) = global_sym_chain[bucket];
 	  global_sym_chain[bucket] = s;
 	}
@@ -1334,7 +1334,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	         for anything except pointers or functions.  */
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (s)) = SYMBOL_LINKAGE_NAME (s);
+	    TYPE_NAME (SYMBOL_TYPE (s)) = s->linkage_name ();
 	}
       break;
 
@@ -4489,10 +4489,10 @@ mylookup_symbol (const char *name, const struct block *block,
   inc = name[0];
   ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
-      if (SYMBOL_LINKAGE_NAME (sym)[0] == inc
+      if (sym->linkage_name ()[0] == inc
 	  && SYMBOL_DOMAIN (sym) == domain
 	  && SYMBOL_CLASS (sym) == theclass
-	  && strcmp (SYMBOL_LINKAGE_NAME (sym), name) == 0)
+	  && strcmp (sym->linkage_name (), name) == 0)
 	return sym;
     }
 

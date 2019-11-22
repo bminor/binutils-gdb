@@ -82,7 +82,7 @@ ftrace_print_function_name (const struct btrace_function *bfun)
   sym = bfun->sym;
 
   if (sym != NULL)
-    return SYMBOL_PRINT_NAME (sym);
+    return sym->print_name ();
 
   if (msym != NULL)
     return msym->print_name ();
@@ -206,7 +206,7 @@ ftrace_function_switched (const struct btrace_function *bfun,
       const char *bfname, *fname;
 
       /* Check the function name.  */
-      if (strcmp (SYMBOL_LINKAGE_NAME (fun), SYMBOL_LINKAGE_NAME (sym)) != 0)
+      if (strcmp (fun->linkage_name (), sym->linkage_name ()) != 0)
 	return 1;
 
       /* Check the location of those functions, as well.  */

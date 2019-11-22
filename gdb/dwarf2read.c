@@ -6073,10 +6073,10 @@ dw2_debug_names_lookup_symbol (struct objfile *objfile, block_enum block_index,
 	 information (but NAME might contain it).  */
 
       if (sym != NULL
-	  && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	  && strcmp_iw (sym->search_name (), name) == 0)
 	return stab;
       if (with_opaque != NULL
-	  && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	  && strcmp_iw (with_opaque->search_name (), name) == 0)
 	stab_best = stab;
 
       /* Keep looking through other CUs.  */
@@ -13776,7 +13776,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 			     (struct symbol *) templ_func);
 
   if (dwarf2_flag_true_p (die, DW_AT_main_subprogram, cu))
-    set_objfile_main_name (objfile, SYMBOL_LINKAGE_NAME (newobj->name),
+    set_objfile_main_name (objfile, newobj->name->linkage_name (),
 			   cu->language);
 
   /* If there is a location expression for DW_AT_frame_base, record
@@ -16476,7 +16476,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 				  * sizeof (struct field));
 		    }
 
-		  FIELD_NAME (fields[num_fields]) = SYMBOL_LINKAGE_NAME (sym);
+		  FIELD_NAME (fields[num_fields]) = sym->linkage_name ();
 		  FIELD_TYPE (fields[num_fields]) = NULL;
 		  SET_FIELD_ENUMVAL (fields[num_fields], SYMBOL_VALUE (sym));
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
@@ -21800,7 +21800,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			 apply.  */
 		      bound_minimal_symbol found
 			= (lookup_minimal_symbol_linkage
-			   (SYMBOL_LINKAGE_NAME (sym), objfile));
+			   (sym->linkage_name (), objfile));
 		      if (found.minsym != nullptr)
 			sym->maybe_copied = 1;
 		    }
@@ -21929,7 +21929,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		       with this objfile, so we don't need to
 		       duplicate it for the type.  */
 		    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		      TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_SEARCH_NAME (sym);
+		      TYPE_NAME (SYMBOL_TYPE (sym)) = sym->search_name ();
 		  }
 	      }
 	  }
@@ -22162,7 +22162,7 @@ dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
   struct dwarf2_locexpr_baton *baton;
 
   dwarf2_const_value_attr (attr, SYMBOL_TYPE (sym),
-			   SYMBOL_PRINT_NAME (sym),
+			   sym->print_name (),
 			   &objfile->objfile_obstack, cu,
 			   &value, &bytes, &baton);
 
@@ -25344,7 +25344,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       else
 	{
 	  dwarf2_invalid_attrib_class_complaint ("location description",
-						 SYMBOL_NATURAL_NAME (sym));
+						 sym->natural_name ());
 	  baton->size = 0;
 	}
 

@@ -959,7 +959,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   if (sym == 0)
     name = 0;
   else
-    name = SYMBOL_LINKAGE_NAME (sym);
+    name = sym->linkage_name ();
 
   /* Check the main executable.  */
   addr = find_canonical_descriptor_in_load_object

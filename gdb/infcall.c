@@ -387,7 +387,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
     struct symbol *symbol = find_pc_function (funaddr);
 
     if (symbol)
-      return SYMBOL_PRINT_NAME (symbol);
+      return symbol->print_name ();
   }
 
   {

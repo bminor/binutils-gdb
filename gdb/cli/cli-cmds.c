@@ -938,7 +938,7 @@ edit_command (const char *arg, int from_tty)
           if (sym)
 	    printf_filtered ("%s is in %s (%s:%d).\n",
 			     paddress (gdbarch, sal.pc),
-			     SYMBOL_PRINT_NAME (sym),
+			     sym->print_name (),
 			     symtab_to_filename_for_display (sal.symtab),
 			     sal.line);
           else
@@ -1270,7 +1270,7 @@ list_command (const char *arg, int from_tty)
       if (sym)
 	printf_filtered ("%s is in %s (%s:%d).\n",
 			 paddress (gdbarch, sal.pc),
-			 SYMBOL_PRINT_NAME (sym),
+			 sym->print_name (),
 			 symtab_to_filename_for_display (sal.symtab), sal.line);
       else
 	printf_filtered ("%s is at %s:%d.\n",
@@ -1758,7 +1758,7 @@ print_sal_location (const symtab_and_line &sal)
 
   const char *sym_name = NULL;
   if (sal.symbol != NULL)
-    sym_name = SYMBOL_PRINT_NAME (sal.symbol);
+    sym_name = sal.symbol->print_name ();
   printf_filtered (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
 		   symtab_to_filename_for_display (sal.symtab),
 		   sal.line, sym_name != NULL ? sym_name : "???");

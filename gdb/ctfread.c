@@ -1230,7 +1230,7 @@ psymtab_to_symtab (struct partial_symtab *pst)
       if (sym == NULL)
 	continue;
 
-      set_symbol_address (ccp->of, sym, SYMBOL_LINKAGE_NAME (sym));
+      set_symbol_address (ccp->of, sym, sym->linkage_name ());
     }
 
   pst->readin = 1;

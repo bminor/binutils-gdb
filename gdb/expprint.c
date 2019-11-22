@@ -126,12 +126,12 @@ print_subexp_standard (struct expression *exp, int *pos,
 	b = exp->elts[pc + 1].block;
 	if (b != NULL
 	    && BLOCK_FUNCTION (b) != NULL
-	    && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)) != NULL)
+	    && BLOCK_FUNCTION (b)->print_name () != NULL)
 	  {
-	    fputs_filtered (SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)), stream);
+	    fputs_filtered (BLOCK_FUNCTION (b)->print_name (), stream);
 	    fputs_filtered ("::", stream);
 	  }
-	fputs_filtered (SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol), stream);
+	fputs_filtered (exp->elts[pc + 2].symbol->print_name (), stream);
       }
       return;
 
@@ -154,7 +154,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       {
 	(*pos) += 2;
 	fprintf_filtered (stream, "%s@entry",
-			  SYMBOL_PRINT_NAME (exp->elts[pc + 1].symbol));
+			  exp->elts[pc + 1].symbol->print_name ());
       }
       return;
 
@@ -899,7 +899,7 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, ", symbol @");
       gdb_print_host_address (exp->elts[elt + 1].symbol, stream);
       fprintf_filtered (stream, " (%s)",
-			SYMBOL_PRINT_NAME (exp->elts[elt + 1].symbol));
+			exp->elts[elt + 1].symbol->print_name ());
       elt += 3;
       break;
     case OP_VAR_MSYM_VALUE:
@@ -915,7 +915,7 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, "Entry value of symbol @");
       gdb_print_host_address (exp->elts[elt].symbol, stream);
       fprintf_filtered (stream, " (%s)",
-			SYMBOL_PRINT_NAME (exp->elts[elt].symbol));
+			exp->elts[elt].symbol->print_name ());
       elt += 2;
       break;
     case OP_LAST:

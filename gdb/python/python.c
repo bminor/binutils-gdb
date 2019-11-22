@@ -791,7 +791,7 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
 
 	  symbol_name = fullname;
 	  symbol_name  += ":";
-	  symbol_name  += SYMBOL_LINKAGE_NAME (p.symbol);
+	  symbol_name  += p.symbol->linkage_name ();
 	}
       else
 	symbol_name = p.msymbol.minsym->linkage_name ();

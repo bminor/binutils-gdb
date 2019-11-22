@@ -325,7 +325,7 @@ extern struct symbol *block_iterator_first (const struct block *block,
 extern struct symbol *block_iterator_next (struct block_iterator *iterator);
 
 /* Initialize ITERATOR to point at the first symbol in BLOCK whose
-   SYMBOL_SEARCH_NAME matches NAME, and return that first symbol, or
+   search_name () matches NAME, and return that first symbol, or
    NULL if there are no such symbols.  */
 
 extern struct symbol *block_iter_match_first (const struct block *block,
@@ -333,7 +333,7 @@ extern struct symbol *block_iter_match_first (const struct block *block,
 					      struct block_iterator *iterator);
 
 /* Advance ITERATOR to point at the next symbol in BLOCK whose
-   SYMBOL_SEARCH_NAME matches NAME, or NULL if there are no more such
+   search_name () matches NAME, or NULL if there are no more such
    symbols.  Don't call this if you've previously received NULL from
    block_iterator_match_first or block_iterator_match_next on this
    iteration.  And don't call it unless ITERATOR was created by a

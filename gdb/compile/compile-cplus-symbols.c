@@ -100,27 +100,27 @@ convert_one_symbol (compile_cplus_instance *instance,
 	      return;
 	    }
 	  instance->plugin ().build_constant
-	    (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+	    (sym_type, sym.symbol->natural_name (),
 	     SYMBOL_VALUE (sym.symbol), filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
 	  error (_("Unsupported LOC_CONST_BYTES for symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_UNDEF:
 	  internal_error (__FILE__, __LINE__, _("LOC_UNDEF found for \"%s\"."),
-			  SYMBOL_PRINT_NAME (sym.symbol));
+			  sym.symbol->print_name ());
 
 	case LOC_COMMON_BLOCK:
 	  error (_("Fortran common block is unsupported for compilation "
 		   "evaluaton of symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_OPTIMIZED_OUT:
 	  error (_("Symbol \"%s\" cannot be used for compilation evaluation "
 		   "as it is optimized out."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_COMPUTED:
 	  if (is_local)
@@ -129,7 +129,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	  warning (_("Symbol \"%s\" is thread-local and currently can only "
 		     "be referenced from the current thread in "
 		     "compiled code."),
-		   SYMBOL_PRINT_NAME (sym.symbol));
+		   sym.symbol->print_name ());
 	  /* FALLTHROUGH */
 	case LOC_UNRESOLVED:
 	  /* 'symbol_name' cannot be used here as that one is used only for
@@ -146,14 +146,14 @@ convert_one_symbol (compile_cplus_instance *instance,
 		if (frame == nullptr)
 		  error (_("Symbol \"%s\" cannot be used because "
 			   "there is no selected frame"),
-			 SYMBOL_PRINT_NAME (sym.symbol));
+			 sym.symbol->print_name ());
 	      }
 
 	    val = read_var_value (sym.symbol, sym.block, frame);
 	    if (VALUE_LVAL (val) != lval_memory)
 	      error (_("Symbol \"%s\" cannot be used for compilation "
 		       "evaluation as its address has not been found."),
-		     SYMBOL_PRINT_NAME (sym.symbol));
+		     sym.symbol->print_name ());
 
 	    kind = GCC_CP_SYMBOL_VARIABLE;
 	    addr = value_address (val);
@@ -189,7 +189,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	  if (!is_local)
 	    {
 	      compile_scope scope
-		= instance->new_scope (SYMBOL_NATURAL_NAME (sym.symbol),
+		= instance->new_scope (sym.symbol->natural_name (),
 				       SYMBOL_TYPE (sym.symbol));
 	      if (scope.nested_type () != GCC_TYPE_NONE)
 		{
@@ -202,9 +202,9 @@ convert_one_symbol (compile_cplus_instance *instance,
 	    }
 
 	  /* Get the `raw' name of the symbol.  */
-	  if (name.empty () && SYMBOL_NATURAL_NAME (sym.symbol) != nullptr)
+	  if (name.empty () && sym.symbol->natural_name () != nullptr)
 	    name = compile_cplus_instance::decl_name
-	      (SYMBOL_NATURAL_NAME (sym.symbol)).get ();
+	      (sym.symbol->natural_name ()).get ();
 
 	  /* Define the decl.  */
 	  instance->plugin ().build_decl

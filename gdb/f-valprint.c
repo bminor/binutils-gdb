@@ -387,17 +387,17 @@ info_common_command_for_block (const struct block *block, const char *comname,
 
 	gdb_assert (SYMBOL_CLASS (sym) == LOC_COMMON_BLOCK);
 
-	if (comname && (!SYMBOL_LINKAGE_NAME (sym)
-	                || strcmp (comname, SYMBOL_LINKAGE_NAME (sym)) != 0))
+	if (comname && (!sym->linkage_name ()
+	                || strcmp (comname, sym->linkage_name ()) != 0))
 	  continue;
 
 	if (*any_printed)
 	  putchar_filtered ('\n');
 	else
 	  *any_printed = 1;
-	if (SYMBOL_PRINT_NAME (sym))
+	if (sym->print_name ())
 	  printf_filtered (_("Contents of F77 COMMON block '%s':\n"),
-			   SYMBOL_PRINT_NAME (sym));
+			   sym->print_name ());
 	else
 	  printf_filtered (_("Contents of blank COMMON block:\n"));
 	
@@ -406,7 +406,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 	    struct value *val = NULL;
 
 	    printf_filtered ("%s = ",
-			     SYMBOL_PRINT_NAME (common->contents[index]));
+			     common->contents[index]->print_name ());
 
 	    try
 	      {

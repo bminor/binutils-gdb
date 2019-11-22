@@ -427,7 +427,7 @@ print_frame_arg (const frame_print_options &fp_opts,
 
   annotate_arg_emitter arg_emitter;
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
+  fprintf_symbol_filtered (&stb, arg->sym->print_name (),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
     {
@@ -435,7 +435,7 @@ print_frame_arg (const frame_print_options &fp_opts,
 	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
       stb.puts ("=");
 
-      fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
+      fprintf_symbol_filtered (&stb, arg->sym->print_name (),
 			       SYMBOL_LANGUAGE (arg->sym),
 			       DMGL_PARAMS | DMGL_ANSI);
     }
@@ -817,11 +817,11 @@ print_frame_args (const frame_print_options &fp_opts,
 	     parameter names occur on the RS/6000, for traceback
 	     tables.  FIXME, should we even print them?  */
 
-	  if (*SYMBOL_LINKAGE_NAME (sym))
+	  if (*sym->linkage_name ())
 	    {
 	      struct symbol *nsym;
 
-	      nsym = lookup_symbol_search_name (SYMBOL_SEARCH_NAME (sym),
+	      nsym = lookup_symbol_search_name (sym->search_name (),
 						b, VAR_DOMAIN).symbol;
 	      gdb_assert (nsym != NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER
@@ -1259,14 +1259,14 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
   func = get_frame_function (frame);
   if (func)
     {
-      const char *print_name = SYMBOL_PRINT_NAME (func);
+      const char *print_name = func->print_name ();
 
       *funlang = SYMBOL_LANGUAGE (func);
       if (funcp)
 	*funcp = func;
       if (*funlang == language_cplus)
 	{
-	  /* It seems appropriate to use SYMBOL_PRINT_NAME() here,
+	  /* It seems appropriate to use print_name() here,
 	     to display the demangled name that we already have
 	     stored in the symbol table, but we stored a version
 	     with DMGL_PARAMS turned on, and here we don't want to
@@ -1494,11 +1494,11 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   gdb::unique_xmalloc_ptr<char> func_only;
   if (func)
     {
-      funname = SYMBOL_PRINT_NAME (func);
+      funname = func->print_name ();
       funlang = SYMBOL_LANGUAGE (func);
       if (funlang == language_cplus)
 	{
-	  /* It seems appropriate to use SYMBOL_PRINT_NAME() here,
+	  /* It seems appropriate to use print_name() here,
 	     to display the demangled name that we already have
 	     stored in the symbol table, but we stored a version
 	     with DMGL_PARAMS turned on, and here we don't want to
@@ -2246,7 +2246,7 @@ iterate_over_block_locals (const struct block *b,
 	    break;
 	  if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
 	    break;
-	  (*cb) (SYMBOL_PRINT_NAME (sym), sym, cb_data);
+	  (*cb) (sym->print_name (), sym, cb_data);
 	  break;
 
 	default:
@@ -2276,7 +2276,7 @@ print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      if (strcmp (SYMBOL_LINKAGE_NAME (sym), "default") == 0)
+      if (strcmp (sym->linkage_name (), "default") == 0)
 	{
 	  if (*have_default)
 	    continue;
@@ -2289,7 +2289,7 @@ print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
-	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
+	  fputs_filtered (sym->print_name (), stream);
 	  get_user_print_options (&opts);
 	  if (opts.addressprint)
 	    {
@@ -2351,8 +2351,7 @@ do_print_variable_and_value (const char *print_name,
   struct frame_info *frame;
 
   if (p->preg.has_value ()
-      && p->preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
-			NULL, 0) != 0)
+      && p->preg->exec (sym->natural_name (), 0, NULL, 0) != 0)
     return;
   if (p->treg.has_value ()
       && !treg_matches_sym_type_name (*p->treg, sym))
@@ -2554,9 +2553,9 @@ iterate_over_block_arg_vars (const struct block *b,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol_search_name (SYMBOL_SEARCH_NAME (sym),
+	  sym2 = lookup_symbol_search_name (sym->search_name (),
 					    b, VAR_DOMAIN).symbol;
-	  (*cb) (SYMBOL_PRINT_NAME (sym), sym2, cb_data);
+	  (*cb) (sym->print_name (), sym2, cb_data);
 	}
     }
 }
@@ -2856,7 +2855,7 @@ return_command (const char *retval_exp, int from_tty)
 	  if (TYPE_NO_RETURN (thisfun->type))
 	    warning (_("Function does not return normally to caller."));
 	  confirmed = query (_("%sMake %s return now? "), query_prefix,
-			     SYMBOL_PRINT_NAME (thisfun));
+			     thisfun->print_name ());
 	}
       if (!confirmed)
 	error (_("Not confirmed"));

@@ -675,7 +675,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_TYPEDEF:
       error (_("Cannot compute value of typedef `%s'."),
-	     SYMBOL_PRINT_NAME (var));
+	     var->print_name ());
       break;
 
     case LOC_BLOCK:
@@ -705,10 +705,10 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
     case LOC_UNRESOLVED:
       {
 	struct bound_minimal_symbol msym
-	  = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
+	  = lookup_minimal_symbol (var->linkage_name (), NULL, NULL);
 
 	if (!msym.minsym)
-	  error (_("Couldn't resolve symbol `%s'."), SYMBOL_PRINT_NAME (var));
+	  error (_("Couldn't resolve symbol `%s'."), var->print_name ());
 
 	/* Push the address of the variable.  */
 	ax_const_l (ax, BMSYMBOL_VALUE_ADDRESS (msym));
@@ -727,7 +727,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     default:
       error (_("Cannot find value of botched symbol `%s'."),
-	     SYMBOL_PRINT_NAME (var));
+	     var->print_name ());
       break;
     }
 }
@@ -1658,7 +1658,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
   if (value->optimized_out)
     error (_("`%s' has been optimized out, cannot use"),
-	   SYMBOL_PRINT_NAME (sym.symbol));
+	   sym.symbol->print_name ());
 
   return 1;
 }
@@ -1784,7 +1784,7 @@ gen_expr_for_cast (struct expression *exp, union exp_element **pc,
 
 	  if (value->optimized_out)
 	    error (_("`%s' has been optimized out, cannot use"),
-		   SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+		   (*pc)[2].symbol->print_name ());
 	}
       else
 	gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
@@ -2008,10 +2008,10 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
       if (value->optimized_out)
 	error (_("`%s' has been optimized out, cannot use"),
-	       SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+	       (*pc)[2].symbol->print_name ());
 
       if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
-	error_unknown_type (SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+	error_unknown_type ((*pc)[2].symbol->print_name ());
 
       (*pc) += 4;
       break;
@@ -2240,7 +2240,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 	if (value->optimized_out)
 	  error (_("`%s' has been optimized out, cannot use"),
-		 SYMBOL_PRINT_NAME (sym));
+		 sym->print_name ());
 
 	(*pc) += 2;
       }

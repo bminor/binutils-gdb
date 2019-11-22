@@ -164,7 +164,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     {
       for (j = list->nsyms; --j >= 0;)
 	{
-	  pp = SYMBOL_LINKAGE_NAME (list->symbol[j]);
+	  pp = list->symbol[j]->linkage_name ();
 	  if (*pp == *name && strncmp (pp, name, length) == 0
 	      && pp[length] == '\0')
 	    {
@@ -319,7 +319,7 @@ buildsym_compunit::finish_block_internal
 	{
 	  complaint (_("block end address less than block "
 		       "start address in %s (patched it)"),
-		     SYMBOL_PRINT_NAME (symbol));
+		     symbol->print_name ());
 	}
       else
 	{
@@ -356,7 +356,7 @@ buildsym_compunit::finish_block_internal
 	      if (symbol)
 		{
 		  complaint (_("inner block not inside outer block in %s"),
-			     SYMBOL_PRINT_NAME (symbol));
+			     symbol->print_name ());
 		}
 	      else
 		{

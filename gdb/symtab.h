@@ -67,7 +67,7 @@ enum class symbol_name_match_type
 
   /* Search name matching.  This is like FULL, but the search name did
      not come from the user; instead it is already a search name
-     retrieved from a SYMBOL_SEARCH_NAME/search_name () call.
+     retrieved from a search_name () call.
      For Ada, this avoids re-encoding an already-encoded search name
      (which would potentially incorrectly lowercase letters in the
      linkage/search name that should remain uppercase).  For C++, it
@@ -545,43 +545,6 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
 extern void symbol_set_names (struct general_symbol_info *symbol,
 			      gdb::string_view linkage_name, bool copy_name,
 			      struct objfile_per_bfd_storage *per_bfd);
-
-/* Now come lots of name accessor macros.  Short version as to when to
-   use which: Use SYMBOL_NATURAL_NAME to refer to the name of the
-   symbol in the original source code.  Use SYMBOL_LINKAGE_NAME if you
-   want to know what the linker thinks the symbol's name is.  Use
-   SYMBOL_PRINT_NAME for output.  Use SYMBOL_DEMANGLED_NAME if you
-   specifically need to know whether SYMBOL_NATURAL_NAME and
-   SYMBOL_LINKAGE_NAME are different.  */
-
-#define SYMBOL_NATURAL_NAME(symbol) \
-  ((symbol)->natural_name ())
-
-/* Return SYMBOL's name from the point of view of the linker.  In
-   languages like C++ where symbols may be mangled for ease of
-   manipulation by the linker, this is the mangled name; otherwise,
-   it's the same as SYMBOL_NATURAL_NAME.  */
-
-#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->name
-
-#define SYMBOL_DEMANGLED_NAME(symbol) \
-  ((symbol)->demangled_name ())
-
-/* Macro that returns a version of the name of a symbol that is
-   suitable for output.  In C++ this is the "demangled" form of the
-   name if demangle is on and the "mangled" form of the name if
-   demangle is off.  In other languages this is just the symbol name.
-   The result should never be NULL.  Don't use this for internal
-   purposes (e.g. storing in a hashtable): it's only suitable for output.
-
-   N.B. symbol may be anything inheriting from general_symbol_info,
-   e.g., struct symbol or struct minimal_symbol.  */
-
-#define SYMBOL_PRINT_NAME(symbol)					\
-  (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
-
-#define SYMBOL_SEARCH_NAME(symbol)					 \
-   ((symbol)->search_name ())
 
 /* Return true if NAME matches the "search" name of SYMBOL, according
    to the symbol's language.  */
@@ -1640,8 +1603,7 @@ extern struct block_symbol lookup_symbol (const char *,
    DOMAIN, visible from lexical block BLOCK if non-NULL or from
    global/static blocks if BLOCK is NULL.  The passed-in search name
    should not come from the user; instead it should already be a
-   search name as retrieved from a
-   SYMBOL_SEARCH_NAME/search_name () call.  See definition of
+   search name as retrieved from a search_name () call.  See definition of
    symbol_name_match_type::SEARCH_NAME.  Returns the struct symbol
    pointer, or NULL if no symbol is found.  The symbol's section is
    fixed up if necessary.  */

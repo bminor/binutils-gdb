@@ -608,7 +608,7 @@ iter_match_first_hashed (const struct dictionary *dict,
        sym = sym->hash_next)
     {
       /* Warning: the order of arguments to compare matters!  */
-      if (matches_name (SYMBOL_SEARCH_NAME (sym), name, NULL))
+      if (matches_name (sym->search_name (), name, NULL))
 	break;
     }
 
@@ -629,7 +629,7 @@ iter_match_next_hashed (const lookup_name_info &name,
        next != NULL;
        next = next->hash_next)
     {
-      if (matches_name (SYMBOL_SEARCH_NAME (next), name, NULL))
+      if (matches_name (next->search_name (), name, NULL))
 	break;
     }
 
@@ -652,7 +652,7 @@ insert_symbol_hashed (struct dictionary *dict,
      language.  The two may not use the same hashing algorithm.  */
   gdb_assert (SYMBOL_LANGUAGE (sym) == DICT_LANGUAGE (dict)->la_language);
 
-  hash = search_name_hash (SYMBOL_LANGUAGE (sym), SYMBOL_SEARCH_NAME (sym));
+  hash = search_name_hash (SYMBOL_LANGUAGE (sym), sym->search_name ());
   hash_index = hash % DICT_HASHED_NBUCKETS (dict);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
@@ -847,7 +847,7 @@ iter_match_next_linear (const lookup_name_info &name,
     {
       sym = DICT_LINEAR_SYM (dict, i);
 
-      if (matches_name (SYMBOL_SEARCH_NAME (sym), name, NULL))
+      if (matches_name (sym->search_name (), name, NULL))
 	{
 	  retval = sym;
 	  break;

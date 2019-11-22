@@ -524,7 +524,7 @@ func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
 
   if (*length == 0)
     error (_("Could not find the frame base for \"%s\"."),
-	   SYMBOL_NATURAL_NAME (framefunc));
+	   framefunc->natural_name ());
 }
 
 static CORE_ADDR
@@ -3635,13 +3635,13 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       if (!b)
 	error (_("No block found for address for symbol \"%s\"."),
-	       SYMBOL_PRINT_NAME (symbol));
+	       symbol->print_name ());
 
       framefunc = block_linkage_function (b);
 
       if (!framefunc)
 	error (_("No function found for block for symbol \"%s\"."),
-	       SYMBOL_PRINT_NAME (symbol));
+	       symbol->print_name ());
 
       func_get_frame_base_dwarf_block (framefunc, addr, &base_data, &base_size);
 
@@ -3655,7 +3655,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	  if (buf_end != base_data + base_size)
 	    error (_("Unexpected opcode after "
 		     "DW_OP_breg%u for symbol \"%s\"."),
-		   frame_reg, SYMBOL_PRINT_NAME (symbol));
+		   frame_reg, symbol->print_name ());
 	}
       else if (base_data[0] >= DW_OP_reg0 && base_data[0] <= DW_OP_reg31)
 	{
@@ -4229,7 +4229,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 
   if (bad || data > end)
     error (_("Corrupted DWARF2 expression for \"%s\"."),
-	   SYMBOL_PRINT_NAME (symbol));
+	   symbol->print_name ());
 }
 
 /* Print a natural-language description of SYMBOL to STREAM.  This
@@ -4282,7 +4282,7 @@ locexpr_generate_c_location (struct symbol *sym, string_file *stream,
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
   if (dlbaton->size == 0)
-    error (_("symbol \"%s\" is optimized out"), SYMBOL_NATURAL_NAME (sym));
+    error (_("symbol \"%s\" is optimized out"), sym->natural_name ());
 
   compile_dwarf_expr_to_c (stream, result_name,
 			   sym, pc, gdbarch, registers_used, addr_size,
@@ -4428,7 +4428,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
 	  error (_("Corrupted DWARF expression for symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (symbol));
+		 symbol->print_name ());
 	default:
 	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}
@@ -4495,7 +4495,7 @@ loclist_generate_c_location (struct symbol *sym, string_file *stream,
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
   if (size == 0)
-    error (_("symbol \"%s\" is optimized out"), SYMBOL_NATURAL_NAME (sym));
+    error (_("symbol \"%s\" is optimized out"), sym->natural_name ());
 
   compile_dwarf_expr_to_c (stream, result_name,
 			   sym, pc, gdbarch, registers_used, addr_size,

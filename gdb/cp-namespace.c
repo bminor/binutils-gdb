@@ -54,9 +54,9 @@ cp_scan_for_anonymous_namespaces (struct buildsym_compunit *compunit,
 				  const struct symbol *const symbol,
 				  struct objfile *const objfile)
 {
-  if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
+  if (symbol->demangled_name () != NULL)
     {
-      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
+      const char *name = symbol->demangled_name ();
       unsigned int previous_component;
       unsigned int next_component;
 
@@ -488,7 +488,7 @@ search_symbol_list (const char *name, int num,
   /* Maybe we should store a dictionary in here instead.  */
   for (i = 0; i < num; ++i)
     {
-      if (strcmp (name, SYMBOL_NATURAL_NAME (syms[i])) == 0)
+      if (strcmp (name, syms[i]->natural_name ()) == 0)
 	return syms[i];
     }
   return NULL;
@@ -542,10 +542,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 
       /* Search the template parameters of the function's defining
 	 context.  */
-      if (SYMBOL_NATURAL_NAME (function))
+      if (function->natural_name ())
 	{
 	  struct type *context;
-	  std::string name_copy (SYMBOL_NATURAL_NAME (function));
+	  std::string name_copy (function->natural_name ());
 	  const struct language_defn *lang = language_def (language_cplus);
 	  struct gdbarch *arch = symbol_arch (function);
 	  const struct block *parent = BLOCK_SUPERBLOCK (block);

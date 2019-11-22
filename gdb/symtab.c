@@ -1151,7 +1151,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
     }
   else
     {
-      slot_name = SYMBOL_SEARCH_NAME (slot->value.found.symbol);
+      slot_name = slot->value.found.symbol->search_name ();
       slot_domain = SYMBOL_DOMAIN (slot->value.found.symbol);
     }
 
@@ -1168,7 +1168,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
       /* It's important that we use the same comparison that was done
 	 the first time through.  If the slot records a found symbol,
 	 then this means using the symbol name comparison function of
-	 the symbol's language with SYMBOL_SEARCH_NAME.  See
+	 the symbol's language with symbol->search_name ().  See
 	 dictionary.c.  It also means using symbol_matches_domain for
 	 found symbols.  See block.c.
 
@@ -1517,7 +1517,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 
 		printf_filtered ("  [%4u] = %s, %s %s\n", i,
 				 host_address_to_string (context),
-				 SYMBOL_PRINT_NAME (found),
+				 found->print_name (),
 				 domain_name (SYMBOL_DOMAIN (found)));
 		break;
 	      }
@@ -1950,7 +1950,7 @@ lookup_language_this (const struct language_defn *lang,
 	  if (symbol_lookup_debug > 1)
 	    {
 	      fprintf_unfiltered (gdb_stdlog, " = %s (%s, block %s)\n",
-				  SYMBOL_PRINT_NAME (sym),
+				  sym->print_name (),
 				  host_address_to_string (sym),
 				  host_address_to_string (block));
 	    }
@@ -3136,7 +3136,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning.  RT */
 	  /* warning ("In stub for %s; unable to find real function/line info",
-	     SYMBOL_LINKAGE_NAME (msymbol)); */
+	     msymbol->linkage_name ()); */
 	  ;
 	/* fall through */
 	else if (BMSYMBOL_VALUE_ADDRESS (mfunsym)
@@ -3144,7 +3144,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out.  */
 	  /* warning ("In stub for %s; unable to find real function/line info",
-	     SYMBOL_LINKAGE_NAME (msymbol)); */
+	     msymbol->linkage_name ()); */
 	  ;
 	/* fall through */
 	else
@@ -3715,7 +3715,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       objfile = symbol_objfile (sym);
       pc = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
       section = SYMBOL_OBJ_SECTION (objfile, sym);
-      name = SYMBOL_LINKAGE_NAME (sym);
+      name = sym->linkage_name ();
     }
   else
     {
@@ -4384,8 +4384,7 @@ symbol_search::compare_search_syms (const symbol_search &sym_a,
   if (sym_a.block != sym_b.block)
     return sym_a.block - sym_b.block;
 
-  return strcmp (SYMBOL_PRINT_NAME (sym_a.symbol),
-		 SYMBOL_PRINT_NAME (sym_b.symbol));
+  return strcmp (sym_a.symbol->print_name (), sym_b.symbol->print_name ());
 }
 
 /* Returns true if the type_name of symbol_type of SYM matches TREG.
@@ -4402,7 +4401,7 @@ treg_matches_sym_type_name (const compiled_regex &treg,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "treg_matches_sym_type_name\n     sym %s\n",
-			  SYMBOL_NATURAL_NAME (sym));
+			  sym->natural_name ());
     }
 
   sym_type = SYMBOL_TYPE (sym);
@@ -4639,7 +4638,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			   && file_matches (symtab_to_fullname (real_symtab),
 					    files, nfiles, 0)))
 		      && ((!preg.has_value ()
-			   || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
+			   || preg->exec (sym->natural_name (), 0,
 					  NULL, 0) == 0)
 			  && ((kind == VARIABLES_DOMAIN
 			       && SYMBOL_CLASS (sym) != LOC_TYPEDEF
@@ -4787,7 +4786,7 @@ print_symbol_info (enum search_domain kind,
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : SYMBOL_PRINT_NAME (sym)),
+		   ? "" : sym->print_name ()),
 		  gdb_stdout, 0);
 
       printf_filtered (";\n");
@@ -4796,7 +4795,7 @@ print_symbol_info (enum search_domain kind,
      point we might want a language specific method to print the module
      symbol so that we can customise the output more.  */
   else if (kind == MODULES_DOMAIN)
-    printf_filtered ("%s\n", SYMBOL_PRINT_NAME (sym));
+    printf_filtered ("%s\n", sym->print_name ());
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -5128,7 +5127,7 @@ rbreak_command (const char *regexp, int from_tty)
 	  const char *fullname = symtab_to_fullname (symtab);
 
 	  string = string_printf ("%s:'%s'", fullname,
-				  SYMBOL_LINKAGE_NAME (p.symbol));
+				  p.symbol->linkage_name ());
 	  break_command (&string[0], from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN, p.symbol, p.block, NULL);
 	}
@@ -5209,7 +5208,7 @@ completion_list_add_symbol (completion_tracker &tracker,
 			    const char *text, const char *word)
 {
   completion_list_add_name (tracker, SYMBOL_LANGUAGE (sym),
-			    SYMBOL_NATURAL_NAME (sym),
+			    sym->natural_name (),
 			    lookup_name, text, word);
 }
 
@@ -5401,7 +5400,7 @@ find_gnu_ifunc (const symbol *sym)
   if (SYMBOL_CLASS (sym) != LOC_BLOCK)
     return {};
 
-  lookup_name_info lookup_name (SYMBOL_SEARCH_NAME (sym),
+  lookup_name_info lookup_name (sym->search_name (),
 				symbol_name_match_type::SEARCH_NAME);
   struct objfile *objfile = symbol_objfile (sym);
 
@@ -6291,7 +6290,7 @@ get_symbol_address (const struct symbol *sym)
   gdb_assert (sym->maybe_copied);
   gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
 
-  const char *linkage_name = SYMBOL_LINKAGE_NAME (sym);
+  const char *linkage_name = sym->linkage_name ();
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
@@ -6372,7 +6371,7 @@ search_module_symbols (const char *module_regexp, const char *regexp,
       /* This is a module.  */
       gdb_assert (p.symbol != nullptr);
 
-      std::string prefix = SYMBOL_PRINT_NAME (p.symbol);
+      std::string prefix = p.symbol->print_name ();
       prefix += "::";
 
       for (const symbol_search &q : symbols)
@@ -6380,7 +6379,7 @@ search_module_symbols (const char *module_regexp, const char *regexp,
 	  if (q.symbol == nullptr)
 	    continue;
 
-	  if (strncmp (SYMBOL_PRINT_NAME (q.symbol), prefix.c_str (),
+	  if (strncmp (q.symbol->print_name (), prefix.c_str (),
 		       prefix.size ()) != 0)
 	    continue;
 
@@ -6523,8 +6522,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
       if (last_module_symbol != p.symbol)
 	{
 	  printf_filtered ("\n");
-	  printf_filtered (_("Module \"%s\":\n"),
-			   SYMBOL_PRINT_NAME (p.symbol));
+	  printf_filtered (_("Module \"%s\":\n"), p.symbol->print_name ());
 	  last_module_symbol = p.symbol;
 	  last_filename = "";
 	}

@@ -622,18 +622,18 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
       if (frame == NULL)
 	error (_("Symbol \"%s\" cannot be used because "
 		 "there is no selected frame"),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       val = read_var_value (sym, NULL, frame);
       if (VALUE_LVAL (val) != lval_memory)
 	error (_("Symbol \"%s\" cannot be used for compilation evaluation "
 		 "as its address has not been found."),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       warning (_("Symbol \"%s\" is thread-local and currently can only "
 		 "be referenced from the current thread in "
 		 "compiled code."),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       fprintfi_filtered (indent, stream, "%s = %s;\n",
 			 result_name,

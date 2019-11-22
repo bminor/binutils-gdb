@@ -829,7 +829,7 @@ rust_print_typedef (struct type *type,
 		    struct ui_file *stream)
 {
   type = check_typedef (type);
-  fprintf_filtered (stream, "type %s = ", SYMBOL_PRINT_NAME (new_symbol));
+  fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
   type_print (type, "", stream, 0);
   fprintf_filtered (stream, ";");
 }

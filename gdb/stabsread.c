@@ -629,7 +629,7 @@ stab_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     {
       reg_value_complaint (regno, gdbarch_num_cooked_regs (gdbarch),
-			   SYMBOL_PRINT_NAME (sym));
+			   sym->print_name ());
 
       regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless.  */
     }
@@ -1039,9 +1039,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
          Symbol references don't have valid names and wont't match up with
          minimal symbols when the global_sym_chain is relocated.
          We'll fixup symbol references when we fixup the defining symbol.  */
-      if (SYMBOL_LINKAGE_NAME (sym) && SYMBOL_LINKAGE_NAME (sym)[0] != '#')
+      if (sym->linkage_name () && sym->linkage_name ()[0] != '#')
 	{
-	  i = hashname (SYMBOL_LINKAGE_NAME (sym));
+	  i = hashname (sym->linkage_name ());
 	  SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
 	  global_sym_chain[i] = sym;
 	}
@@ -1142,8 +1142,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	     the same name to represent an argument passed in a
 	     register.  GCC uses 'P' for the same case.  So if we find
 	     such a symbol pair we combine it into one 'P' symbol.
-	     For Sun cc we need to do this regardless of
-	     stabs_argument_has_addr, because the compiler puts out
+	     For Sun cc we need to do this regardless of stabs_argument_has_addr, because the compiler puts out
 	     the 'p' symbol even if it never saves the argument onto
 	     the stack.
 
@@ -1168,8 +1167,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
 	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
 		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
-		  && strcmp (SYMBOL_LINKAGE_NAME (prev_sym),
-			     SYMBOL_LINKAGE_NAME (sym)) == 0)
+		  && strcmp (prev_sym->linkage_name (),
+			     sym->linkage_name ()) == 0)
 		{
 		  SYMBOL_ACLASS_INDEX (prev_sym) = stab_register_index;
 		  /* Use the type from the LOC_REGISTER; that is the type
@@ -1192,18 +1191,16 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
       if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch,
-					    SYMBOL_LINKAGE_NAME (sym))
-	     != SYMBOL_LINKAGE_NAME (sym))
+	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
+	     != sym->linkage_name ())
 	{
 	  struct bound_minimal_symbol msym;
 
-	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
-					NULL, objfile);
+	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
 	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
+		(gdbarch, sym->linkage_name ());
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
 	      SET_SYMBOL_VALUE_ADDRESS (sym,
@@ -1262,7 +1259,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
 	{
 	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
-	       && strcmp (SYMBOL_LINKAGE_NAME (sym), vtbl_ptr_name))
+	       && strcmp (sym->linkage_name (), vtbl_ptr_name))
 	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
@@ -1303,11 +1300,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      /* Pascal accepts names for pointer types.  */
 	      if (get_current_subfile ()->language == language_pascal)
 		{
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_LINKAGE_NAME (sym);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
           	}
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_LINKAGE_NAME (sym);
+	    TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
 	}
 
       add_symbol_to_list (sym, get_file_symbols ());
@@ -1323,8 +1320,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
           if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
             TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack,
-			  SYMBOL_LINKAGE_NAME (sym),
+	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			  (char *) NULL);
           add_symbol_to_list (struct_sym, get_file_symbols ());
         }
@@ -1351,8 +1347,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	TYPE_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->objfile_obstack,
-		      SYMBOL_LINKAGE_NAME (sym),
+	  = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 		      (char *) NULL);
       add_symbol_to_list (sym, get_file_symbols ());
 
@@ -1367,8 +1362,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack,
-			  SYMBOL_LINKAGE_NAME (sym),
+	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			  (char *) NULL);
 	  add_symbol_to_list (typedef_sym, get_file_symbols ());
 	}
@@ -1380,18 +1374,16 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
       if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch,
-					    SYMBOL_LINKAGE_NAME (sym))
-	     != SYMBOL_LINKAGE_NAME (sym))
+	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
+	     != sym->linkage_name ())
 	{
 	  struct bound_minimal_symbol msym;
 
-	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), 
-					NULL, objfile);
+	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
 	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
+		(gdbarch, sym->linkage_name ());
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
 	      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
@@ -1684,7 +1676,7 @@ again:
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && strcmp (SYMBOL_LINKAGE_NAME (sym), type_name) == 0)
+		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
 		  obstack_free (&objfile->objfile_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -3692,7 +3684,7 @@ read_enum_type (const char **pp, struct type *type,
 	  struct symbol *xsym = syms->symbol[j];
 
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_LINKAGE_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
 	  SET_FIELD_ENUMVAL (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
@@ -4341,7 +4333,7 @@ common_block_end (struct objfile *objfile)
   /* Should we be putting local_symbols back to what it was?
      Does it matter?  */
 
-  i = hashname (SYMBOL_LINKAGE_NAME (sym));
+  i = hashname (sym->linkage_name ());
   SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
   global_sym_chain[i] = sym;
   common_block_name = NULL;
@@ -4527,8 +4519,7 @@ cleanup_undefined_types_1 (void)
 				TYPE_CODE (*type))
 			    && (TYPE_INSTANCE_FLAGS (*type) ==
 				TYPE_INSTANCE_FLAGS (SYMBOL_TYPE (sym)))
-			    && strcmp (SYMBOL_LINKAGE_NAME (sym),
-				       type_name) == 0)
+			    && strcmp (sym->linkage_name (), type_name) == 0)
                           replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
@@ -4614,8 +4605,7 @@ scan_file_globals (struct objfile *objfile)
 
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
-	      if (strcmp (msymbol->linkage_name (),
-			  SYMBOL_LINKAGE_NAME (sym)) == 0)
+	      if (strcmp (msymbol->linkage_name (), sym->linkage_name ()) == 0)
 		{
 		  /* Splice this symbol out of the hash chain and
 		     assign the value we have to it.  */
@@ -4689,7 +4679,7 @@ scan_file_globals (struct objfile *objfile)
 	  else
 	    complaint (_("%s: common block `%s' from "
 			 "global_sym_chain unresolved"),
-		       objfile_name (objfile), SYMBOL_PRINT_NAME (prev));
+		       objfile_name (objfile), prev->print_name ());
 	}
     }
   memset (global_sym_chain, 0, sizeof (global_sym_chain));

@@ -515,7 +515,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
   string_file stb;
 
-  stb.puts (SYMBOL_PRINT_NAME (arg->sym));
+  stb.puts (arg->sym->print_name ());
   if (arg->entry_kind == print_entry_values_only)
     stb.puts ("@entry");
   uiout->field_stream ("name", stb);
@@ -634,7 +634,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      struct frame_arg arg, entryarg;
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
-		sym2 = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
+		sym2 = lookup_symbol (sym->linkage_name (),
 				      block, VAR_DOMAIN,
 				      NULL).symbol;
 	      else

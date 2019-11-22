@@ -3393,7 +3393,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
       parser_fprintf (file, "ssym<name=%s, sym=%s, field_of_this=%d>",
 		       copy_name (value.ssym.stoken).c_str (),
 		       (value.ssym.sym.symbol == NULL
-			? "(null)" : SYMBOL_PRINT_NAME (value.ssym.sym.symbol)),
+			? "(null)" : value.ssym.sym.symbol->print_name ()),
 		       value.ssym.is_a_field_of_this);
       break;
 

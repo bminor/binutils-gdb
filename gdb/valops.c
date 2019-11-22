@@ -1330,13 +1330,13 @@ address_of_variable (struct symbol *var, const struct block *b)
 
 	error (_("Address requested for identifier "
 		 "\"%s\" which is in register $%s"),
-	       SYMBOL_PRINT_NAME (var), regname);
+	       var->print_name (), regname);
 	break;
       }
 
     default:
       error (_("Can't take address of \"%s\" which isn't an lvalue."),
-	     SYMBOL_PRINT_NAME (var));
+	     var->print_name ());
       break;
     }
 
@@ -2644,7 +2644,7 @@ find_overload_match (gdb::array_view<value *> args,
 
       if (fsym)
         {
-          qualified_name = SYMBOL_NATURAL_NAME (fsym);
+          qualified_name = fsym->natural_name ();
 
           /* If we have a function with a C++ name, try to extract just
 	     the function part.  Do not try this for non-functions (e.g.
@@ -3061,7 +3061,7 @@ find_oload_champ (gdb::array_view<value *> args,
 	    fprintf_filtered (gdb_stderr,
 			      "Overloaded function instance "
 			      "%s # of parms %d\n",
-			      SYMBOL_DEMANGLED_NAME (functions[ix]),
+			      functions[ix]->demangled_name (),
 			      (int) parm_types.size ());
 	  for (jj = 0; jj < args.size () - static_offset; jj++)
 	    fprintf_filtered (gdb_stderr,

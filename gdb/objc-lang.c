@@ -537,8 +537,8 @@ compare_selectors (const void *a, const void *b)
 {
   const char *aname, *bname;
 
-  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
-  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
+  aname = (*(struct symbol **) a)->print_name ();
+  bname = (*(struct symbol **) b)->print_name ();
   if (aname == NULL || bname == NULL)
     error (_("internal: compare_selectors(1)"));
 
@@ -675,7 +675,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	  char *p = asel;
 
 	  QUIT;
-	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
+	  name = sym_arr[ix]->natural_name ();
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;		/* Seen this one already (not unique).  */
@@ -706,8 +706,8 @@ compare_classes (const void *a, const void *b)
 {
   const char *aname, *bname;
 
-  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
-  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
+  aname = (*(struct symbol **) a)->print_name ();
+  bname = (*(struct symbol **) b)->print_name ();
   if (aname == NULL || bname == NULL)
     error (_("internal: compare_classes(1)"));
 
@@ -809,7 +809,7 @@ info_classes_command (const char *regexp, int from_tty)
 	  char *p = aclass;
 
 	  QUIT;
-	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
+	  name = sym_arr[ix]->natural_name ();
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;	/* Seen this one already (not unique).  */
@@ -1145,7 +1145,7 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
 					  0).symbol;
 
       if (sym != NULL) 
-	symbol_names->push_back (SYMBOL_NATURAL_NAME (sym));
+	symbol_names->push_back (sym->natural_name ());
       else
 	{
 	  struct bound_minimal_symbol msym

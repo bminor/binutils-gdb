@@ -103,7 +103,7 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
 
       /* Duplicate the symbol name, so the caller has consistency
 	 in garbage collection.  */
-      name->reset (xstrdup (SYMBOL_PRINT_NAME (*sym)));
+      name->reset (xstrdup ((*sym)->print_name ()));
 
       /* If a symbol is specified attempt to determine the language
 	 from the symbol.  If mode is not "auto", then the language
@@ -348,14 +348,14 @@ py_print_single_arg (struct ui_out *out,
     {
       string_file stb;
 
-      fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (fa->sym),
+      fprintf_symbol_filtered (&stb, fa->sym->print_name (),
 			       SYMBOL_LANGUAGE (fa->sym),
 			       DMGL_PARAMS | DMGL_ANSI);
       if (fa->entry_kind == print_entry_values_compact)
 	{
 	  stb.puts ("=");
 
-	  fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (fa->sym),
+	  fprintf_symbol_filtered (&stb, fa->sym->print_name (),
 				   SYMBOL_LANGUAGE (fa->sym),
 				   DMGL_PARAMS | DMGL_ANSI);
 	}

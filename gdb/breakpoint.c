@@ -5818,7 +5818,7 @@ print_breakpoint_location (struct breakpoint *b,
       if (sym)
 	{
 	  uiout->text ("in ");
-	  uiout->field_string ("func", SYMBOL_PRINT_NAME (sym),
+	  uiout->field_string ("func", sym->print_name (),
 			       function_name_style.style ());
 	  uiout->text (" ");
 	  uiout->wrap_hint (wrap_indent_at_field (uiout, "what"));
@@ -13304,7 +13304,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  uiout->text ("Now in ");
 	  if (sym)
 	    {
-	      uiout->field_string ("func", SYMBOL_PRINT_NAME (sym),
+	      uiout->field_string ("func", sym->print_name (),
 				   function_name_style.style ());
 	      uiout->text (" at ");
 	    }

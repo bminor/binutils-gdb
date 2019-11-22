@@ -40,7 +40,7 @@ gdb::unique_xmalloc_ptr<char>
 c_symbol_substitution_name (struct symbol *sym)
 {
   return gdb::unique_xmalloc_ptr<char>
-    (concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL));
+    (concat ("__", sym->natural_name (), "_ptr", (char *) NULL));
 }
 
 /* Convert a given symbol, SYM, to the compiler's representation.
@@ -70,7 +70,7 @@ convert_one_symbol (compile_c_instance *context,
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      context->plugin ().tagbind (SYMBOL_NATURAL_NAME (sym.symbol),
+      context->plugin ().tagbind (sym.symbol->natural_name (),
 				  sym_type, filename, line);
     }
   else
@@ -105,28 +105,28 @@ convert_one_symbol (compile_c_instance *context,
 	      return;
 	    }
 	  context->plugin ().build_constant
-	    (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+	    (sym_type, sym.symbol->natural_name (),
 	     SYMBOL_VALUE (sym.symbol),
 	     filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
 	  error (_("Unsupported LOC_CONST_BYTES for symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_UNDEF:
 	  internal_error (__FILE__, __LINE__, _("LOC_UNDEF found for \"%s\"."),
-			  SYMBOL_PRINT_NAME (sym.symbol));
+			  sym.symbol->print_name ());
 
 	case LOC_COMMON_BLOCK:
 	  error (_("Fortran common block is unsupported for compilation "
 		   "evaluaton of symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_OPTIMIZED_OUT:
 	  error (_("Symbol \"%s\" cannot be used for compilation evaluation "
 		   "as it is optimized out."),
-		 SYMBOL_PRINT_NAME (sym.symbol));
+		 sym.symbol->print_name ());
 
 	case LOC_COMPUTED:
 	  if (is_local)
@@ -135,7 +135,7 @@ convert_one_symbol (compile_c_instance *context,
 	  warning (_("Symbol \"%s\" is thread-local and currently can only "
 		     "be referenced from the current thread in "
 		     "compiled code."),
-		   SYMBOL_PRINT_NAME (sym.symbol));
+		   sym.symbol->print_name ());
 	  /* FALLTHROUGH */
 	case LOC_UNRESOLVED:
 	  /* 'symbol_name' cannot be used here as that one is used only for
@@ -152,14 +152,14 @@ convert_one_symbol (compile_c_instance *context,
 		if (frame == NULL)
 		  error (_("Symbol \"%s\" cannot be used because "
 			   "there is no selected frame"),
-			 SYMBOL_PRINT_NAME (sym.symbol));
+			 sym.symbol->print_name ());
 	      }
 
 	    val = read_var_value (sym.symbol, sym.block, frame);
 	    if (VALUE_LVAL (val) != lval_memory)
 	      error (_("Symbol \"%s\" cannot be used for compilation "
 		       "evaluation as its address has not been found."),
-		     SYMBOL_PRINT_NAME (sym.symbol));
+		     sym.symbol->print_name ());
 
 	    kind = GCC_C_SYMBOL_VARIABLE;
 	    addr = value_address (val);
@@ -193,7 +193,7 @@ convert_one_symbol (compile_c_instance *context,
 	  || symbol_name == NULL)
 	{
 	  decl = context->plugin ().build_decl
-	    (SYMBOL_NATURAL_NAME (sym.symbol),
+	    (sym.symbol->natural_name (),
 	     kind,
 	     sym_type,
 	     symbol_name.get (), addr,
@@ -450,7 +450,7 @@ hash_symname (const void *a)
 {
   const struct symbol *sym = (const struct symbol *) a;
 
-  return htab_hash_string (SYMBOL_NATURAL_NAME (sym));
+  return htab_hash_string (sym->natural_name ());
 }
 
 /* A comparison function for hash tables that just looks at symbol
@@ -462,7 +462,7 @@ eq_symname (const void *a, const void *b)
   const struct symbol *syma = (const struct symbol *) a;
   const struct symbol *symb = (const struct symbol *) b;
 
-  return strcmp (SYMBOL_NATURAL_NAME (syma), SYMBOL_NATURAL_NAME (symb)) == 0;
+  return strcmp (syma->natural_name (), symb->natural_name ()) == 0;
 }
 
 /* If a symbol with the same name as SYM is already in HASHTAB, return

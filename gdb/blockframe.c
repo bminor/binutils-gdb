@@ -269,7 +269,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 	{
 	  const struct block *b = SYMBOL_BLOCK_VALUE (f);
 
-	  cache_pc_function_name = SYMBOL_LINKAGE_NAME (f);
+	  cache_pc_function_name = f->linkage_name ();
 	  cache_pc_function_section = section;
 	  cache_pc_function_block = b;
 

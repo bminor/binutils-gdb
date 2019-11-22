@@ -1049,7 +1049,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	  else if (op == OP_VAR_VALUE)
 	    {
 	      symbol *sym = exp->elts[*pos + 2].symbol;
-	      var_func_name = SYMBOL_PRINT_NAME (sym);
+	      var_func_name = sym->print_name ();
 	    }
 
 	  argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1300,7 +1300,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	(*pos) += 3;
 	symbol *var = exp->elts[pc + 2].symbol;
 	if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ERROR)
-	  error_unknown_type (SYMBOL_PRINT_NAME (var));
+	  error_unknown_type (var->print_name ());
 	if (noside != EVAL_SKIP)
 	    return evaluate_var_value (noside, exp->elts[pc + 1].block, var);
 	else
@@ -1342,7 +1342,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (SYMBOL_COMPUTED_OPS (sym) == NULL
 	    || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
 	  error (_("Symbol \"%s\" does not have any specific entry value"),
-		 SYMBOL_PRINT_NAME (sym));
+		 sym->print_name ());
 
 	frame = get_selected_frame (NULL);
 	return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);

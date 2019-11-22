@@ -1154,13 +1154,12 @@ overload_list_add_symbol (struct symbol *sym,
 
   /* skip any symbols that we've already considered.  */
   for (symbol *listed_sym : *overload_list)
-    if (strcmp (SYMBOL_LINKAGE_NAME (sym),
-		SYMBOL_LINKAGE_NAME (listed_sym)) == 0)
+    if (strcmp (sym->linkage_name (), listed_sym->linkage_name ()) == 0)
       return;
 
   /* Get the demangled name without parameters */
   gdb::unique_xmalloc_ptr<char> sym_name
-    = cp_remove_params (SYMBOL_NATURAL_NAME (sym));
+    = cp_remove_params (sym->natural_name ());
   if (!sym_name)
     return;
 

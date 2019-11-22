@@ -157,7 +157,7 @@ syscm_print_symbol_smob (SCM self, SCM port, scm_print_state *pstate)
     gdbscm_printf (port, "#<%s ", symbol_smob_name);
   gdbscm_printf (port, "%s",
 		 s_smob->symbol != NULL
-		 ? SYMBOL_PRINT_NAME (s_smob->symbol)
+		 ? s_smob->symbol->print_name ()
 		 : "<invalid>");
   if (pstate->writingp)
     scm_puts (">", port);
@@ -376,7 +376,7 @@ gdbscm_symbol_name (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return gdbscm_scm_from_c_string (SYMBOL_NATURAL_NAME (symbol));
+  return gdbscm_scm_from_c_string (symbol->natural_name ());
 }
 
 /* (symbol-linkage-name <gdb:symbol>) -> string */
@@ -388,7 +388,7 @@ gdbscm_symbol_linkage_name (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return gdbscm_scm_from_c_string (SYMBOL_LINKAGE_NAME (symbol));
+  return gdbscm_scm_from_c_string (symbol->linkage_name ());
 }
 
 /* (symbol-print-name <gdb:symbol>) -> string */
@@ -400,7 +400,7 @@ gdbscm_symbol_print_name (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return gdbscm_scm_from_c_string (SYMBOL_PRINT_NAME (symbol));
+  return gdbscm_scm_from_c_string (symbol->print_name ());
 }
 
 /* (symbol-addr-class <gdb:symbol>) -> integer */

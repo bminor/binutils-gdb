@@ -165,8 +165,8 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
   fprintf_filtered (stream, "TYPE ");
   if (!TYPE_NAME (SYMBOL_TYPE (new_symbol))
       || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
-		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0)
-    fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new_symbol));
+		 new_symbol->linkage_name ()) != 0)
+    fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
   else
     fprintf_filtered (stream, "<builtin> = ");
   type_print (type, "", stream, 0);
