@@ -609,6 +609,7 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
   -1,				  /* PKRU register  */
+  -1, -1,			  /* fs_base and gs_base.  */
   11 * 4,			  /* "orig_eax"  */
 };
 
@@ -692,8 +693,14 @@ i386_linux_read_description (uint64_t xcr0)
     [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
     [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
 
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+  const bool segment = true;
+#else
+  const bool segment = false;
+#endif
+
   if (*tdesc == NULL)
-    *tdesc = i386_create_target_description (xcr0, true, false);
+    *tdesc = i386_create_target_description (xcr0, true, segment);
 
   return *tdesc;
 }

@@ -85,6 +85,11 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
   -1,				  /* PKEYS register PKRU  */
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+  FS_BASE * 8, GS_BASE * 8,	  /* fs_base and gs_base  */
+#else
+  -1, -1,			  /* fs_base and gs_base  */
+#endif
   ORIG_RAX * 8			  /* "orig_eax"  */
 };
 

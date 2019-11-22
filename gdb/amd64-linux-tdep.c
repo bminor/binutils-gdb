@@ -98,7 +98,11 @@ int amd64_linux_gregset_reg_offset[] =
   -1,				/* PKEYS register pkru  */
 
   /* End of hardware registers */
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
   21 * 8, 22 * 8,		      /* fs_base and gs_base.  */
+#else
+  -1, -1,			      /* fs_base and gs_base.  */
+#endif
   15 * 8			      /* "orig_rax" */
 };
 
@@ -1593,9 +1597,15 @@ amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
 	[(xcr0_features_bit & X86_XSTATE_PKRU) ? 1 : 0];
     }
 
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+  const bool segment = true;
+#else
+  const bool segment = false;
+#endif
+
   if (*tdesc == NULL)
     *tdesc = amd64_create_target_description (xcr0_features_bit, is_x32,
-					      true, true);
+					      true, segment);
 
   return *tdesc;
 }
