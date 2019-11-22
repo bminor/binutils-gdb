@@ -374,7 +374,7 @@ insert_memory_breakpoint (struct raw_breakpoint *bp)
       if (debug_threads)
 	debug_printf ("Failed to read shadow memory of"
 		      " breakpoint at 0x%s (%s).\n",
-		      paddress (bp->pc), strerror (err));
+		      paddress (bp->pc), safe_strerror (err));
     }
   else
     {
@@ -386,7 +386,7 @@ insert_memory_breakpoint (struct raw_breakpoint *bp)
 	{
 	  if (debug_threads)
 	    debug_printf ("Failed to insert breakpoint at 0x%s (%s).\n",
-			  paddress (bp->pc), strerror (err));
+			  paddress (bp->pc), safe_strerror (err));
 	}
     }
   return err != 0 ? -1 : 0;
@@ -415,7 +415,7 @@ remove_memory_breakpoint (struct raw_breakpoint *bp)
       if (debug_threads)
 	debug_printf ("Failed to uninsert raw breakpoint "
 		      "at 0x%s (%s) while deleting it.\n",
-		      paddress (bp->pc), strerror (err));
+		      paddress (bp->pc), safe_strerror (err));
     }
   return err != 0 ? -1 : 0;
 }
@@ -597,7 +597,7 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
 		  if (debug_threads)
 		    debug_printf ("Failed to uninsert fast tracepoint jump "
 				  "at 0x%s (%s) while deleting it.\n",
-				  paddress (bp->pc), strerror (ret));
+				  paddress (bp->pc), safe_strerror (ret));
 		  return ret;
 		}
 
@@ -660,7 +660,7 @@ set_fast_tracepoint_jump (CORE_ADDR where,
       if (debug_threads)
 	debug_printf ("Failed to read shadow memory of"
 		      " fast tracepoint at 0x%s (%s).\n",
-		      paddress (where), strerror (err));
+		      paddress (where), safe_strerror (err));
       free (jp);
       return NULL;
     }
@@ -684,7 +684,7 @@ set_fast_tracepoint_jump (CORE_ADDR where,
     {
       if (debug_threads)
 	debug_printf ("Failed to insert fast tracepoint jump at 0x%s (%s).\n",
-		      paddress (where), strerror (err));
+		      paddress (where), safe_strerror (err));
 
       /* Unlink it.  */
       proc->fast_tracepoint_jumps = jp->next;
@@ -739,7 +739,7 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
 	  if (debug_threads)
 	    debug_printf ("Failed to uninsert fast tracepoint jump at"
 			  " 0x%s (%s).\n",
-			  paddress (pc), strerror (err));
+			  paddress (pc), safe_strerror (err));
 	}
     }
 }
@@ -786,7 +786,7 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
       if (debug_threads)
 	debug_printf ("Failed to reinsert fast tracepoint jump at"
 		      " 0x%s (%s).\n",
-		      paddress (where), strerror (err));
+		      paddress (where), safe_strerror (err));
     }
 }
 

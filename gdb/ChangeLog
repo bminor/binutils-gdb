@@ -1,3 +1,10 @@
+2019-11-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* linux-nat.c (detach_one_lwp): Call safe_strerror instead of
+	strerror.
+	* nto-procfs.c (nto_procfs_target::create_inferior): Likewise.
+	* windows-nat.c (windows_nat_target::create_inferior): Likewise.
+
 2019-11-25  Tom de Vries  <tdevries@suse.de>
 
 	* contrib/words.sh: Add -c option.

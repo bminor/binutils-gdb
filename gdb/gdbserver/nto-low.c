@@ -247,7 +247,7 @@ nto_xfer_memory (off_t memaddr, unsigned char *myaddr, int len,
   if (nbytes == 0)
     {
       int e = errno;
-      TRACE ("Error in %s : errno=%d (%s)\n", __func__, e, strerror (e));
+      TRACE ("Error in %s : errno=%d (%s)\n", __func__, e, safe_strerror (e));
     }
   return nbytes;
 }
@@ -505,7 +505,7 @@ nto_resume (struct thread_resume *resume_info, size_t n)
 
   err = devctl (nto_inferior.ctl_fd, DCMD_PROC_RUN, &run, sizeof (run), 0);
   if (err != EOK)
-    TRACE ("Error: %d \"%s\"\n", err, strerror (err));
+    TRACE ("Error: %d \"%s\"\n", err, safe_strerror (err));
 }
 
 /* Wait for inferior's event.  

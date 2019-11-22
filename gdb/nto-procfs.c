@@ -1317,7 +1317,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
     {
       /* FIXME: expected warning?  */
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
-         errn, strerror(errn) ); */
+         errn, safe_strerror(errn) ); */
     }
   if (!target_is_pushed (ops))
     push_target (ops);

@@ -55,7 +55,7 @@ debug_set_output (const char *new_debug_file)
   if (fptr == nullptr)
     {
       debug_printf ("Cannot open %s for writing. %s. Switching to stderr.\n",
-		    new_debug_file, strerror (errno));
+		    new_debug_file, safe_strerror (errno));
       return;
     }
 

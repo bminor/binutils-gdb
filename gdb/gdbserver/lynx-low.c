@@ -316,7 +316,7 @@ lynx_attach (unsigned long pid)
 
   if (lynx_ptrace (PTRACE_ATTACH, ptid, 0, 0, 0) != 0)
     error ("Cannot attach to process %lu: %s (%d)\n", pid,
-	   strerror (errno), errno);
+	   safe_strerror (errno), errno);
 
   lynx_add_process (pid, 1);
   lynx_add_threads_after_attach (pid);

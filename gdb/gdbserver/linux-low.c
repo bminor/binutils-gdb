@@ -1159,7 +1159,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	    {
 	      debug_printf ("Cannot attach to lwp %d: "
 			    "thread is gone (%d: %s)\n",
-			    lwpid, err, strerror (err));
+			    lwpid, err, safe_strerror (err));
 	    }
 	}
       else if (err != 0)
@@ -1303,7 +1303,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
 
       debug_printf ("LKL:  kill_lwp (SIGKILL) %s, 0, 0 (%s)\n",
 		    target_pid_to_str (ptid_of (thr)),
-		    save_errno ? strerror (save_errno) : "OK");
+		    save_errno ? safe_strerror (save_errno) : "OK");
     }
 
   errno = 0;
@@ -1314,7 +1314,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
 
       debug_printf ("LKL:  PTRACE_KILL %s, 0, 0 (%s)\n",
 		    target_pid_to_str (ptid_of (thr)),
-		    save_errno ? strerror (save_errno) : "OK");
+		    save_errno ? safe_strerror (save_errno) : "OK");
     }
 }
 
@@ -1560,7 +1560,7 @@ linux_detach_one_lwp (struct lwp_info *lwp)
 	  if (ret == -1)
 	    {
 	      warning (_("Couldn't reap LWP %d while detaching: %s"),
-		       lwpid, strerror (errno));
+		       lwpid, safe_strerror (errno));
 	    }
 	  else if (!WIFEXITED (status) && !WIFSIGNALED (status))
 	    {
@@ -1573,7 +1573,7 @@ linux_detach_one_lwp (struct lwp_info *lwp)
 	{
 	  error (_("Can't detach %s: %s"),
 		 target_pid_to_str (ptid_of (thread)),
-		 strerror (save_errno));
+		 safe_strerror (save_errno));
 	}
     }
   else if (debug_threads)
@@ -2715,7 +2715,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
       if (debug_threads)
 	debug_printf ("LWFE: waitpid(-1, ...) returned %d, %s\n",
-		      ret, errno ? strerror (errno) : "ERRNO-OK");
+		      ret, errno ? safe_strerror (errno) : "ERRNO-OK");
 
       if (ret > 0)
 	{
@@ -5593,7 +5593,7 @@ store_register (const struct usrregs_info *usrregs,
 	    return;
 
 	  if ((*the_low_target.cannot_store_register) (regno) == 0)
-	    error ("writing register %d: %s", regno, strerror (errno));
+	    error ("writing register %d: %s", regno, safe_strerror (errno));
 	}
       regaddr += sizeof (PTRACE_XFER_TYPE);
     }

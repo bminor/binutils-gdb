@@ -1,3 +1,22 @@
+2019-11-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* debug.c (debug_set_output): Call safe_strerror instead of
+	strerror.
+	* linux-low.c (attach_proc_task_lwp_callback): Likewise.
+	(linux_kill_one_lwp): Likewise.
+	(linux_detach_one_lwp): Likewise.
+	(linux_wait_for_event_filtered): Likewise.
+	(store_register): Likewise.
+	* lynx-low.c (lynx_attach): Likewise.
+	* mem-break.c (insert_memory_breakpoint): Likewise.
+	(remove_memory_breakpoint): Likewise.
+	(delete_fast_tracepoint_jump): Likewise.
+	(set_fast_tracepoint_jump): Likewise.
+	(uninsert_fast_tracepoint_jumps_at): Likewise.
+	(reinsert_fast_tracepoint_jumps_at): Likewise.
+	* nto-low.c (nto_xfer_memory): Likewise.
+	(nto_resume): Likewise.
+
 2019-11-20  Luis Machado  <luis.machado@linaro.org>
 
 	* linux-aarch64-low.c (is_sve_tdesc): Check against target feature
