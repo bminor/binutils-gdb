@@ -312,9 +312,8 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
   /* Check if we are in the resolver.  */
   sym = lookup_minimal_symbol_by_pc (pc);
   if (sym.minsym != NULL
-      && (strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym), "__glink") == 0
-	  || strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym),
-		     "__glink_PLTresolve") == 0))
+      && (strcmp (sym.minsym->linkage_name (), "__glink") == 0
+	  || strcmp (sym.minsym->linkage_name (), "__glink_PLTresolve") == 0))
     return 1;
 
   return 0;

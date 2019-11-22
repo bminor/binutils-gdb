@@ -550,9 +550,9 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
       && BMSYMBOL_VALUE_ADDRESS (msym) == pc
-      && MSYMBOL_LINKAGE_NAME (msym.minsym) != NULL)
+      && msym.minsym->linkage_name () != NULL)
     {
-      const char *name = MSYMBOL_LINKAGE_NAME (msym.minsym);
+      const char *name = msym.minsym->linkage_name ();
 
       /* The GNU linker's Thumb call stub to foo is named
 	 __foo_from_thumb.  */
@@ -1254,7 +1254,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
   /* ADDR must correspond to a symbol whose name is __stack_chk_guard.
      Otherwise, this sequence cannot be for stack protector.  */
   if (stack_chk_guard.minsym == NULL
-      || !startswith (MSYMBOL_LINKAGE_NAME (stack_chk_guard.minsym), "__stack_chk_guard"))
+      || !startswith (stack_chk_guard.minsym->linkage_name (), "__stack_chk_guard"))
    return pc;
 
   if (is_thumb)

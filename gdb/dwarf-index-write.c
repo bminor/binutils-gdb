@@ -550,7 +550,7 @@ write_psymbols (struct mapped_symtab *symtab,
 	{
 	  gdb_index_symbol_kind kind = symbol_kind (psym);
 
-	  add_index_entry (symtab, symbol_search_name (&psym->ginfo),
+	  add_index_entry (symtab, psym->ginfo.search_name (),
 			   is_static, kind, cu_index);
 	}
     }
@@ -686,7 +686,7 @@ public:
     const int dwarf_tag = psymbol_tag (psym);
     if (dwarf_tag == 0)
       return;
-    const char *name = symbol_search_name (&psym->ginfo);
+    const char *name = psym->ginfo.search_name ();
 
     if (psym->ginfo.language == language_ada)
       {

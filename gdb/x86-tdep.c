@@ -47,7 +47,7 @@ x86_in_indirect_branch_thunk (CORE_ADDR pc, const char **register_names,
   if (bmfun.minsym == nullptr)
     return false;
 
-  const char *name = MSYMBOL_LINKAGE_NAME (bmfun.minsym);
+  const char *name = bmfun.minsym->linkage_name ();
   if (name == nullptr)
     return false;
 

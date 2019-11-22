@@ -808,7 +808,7 @@ msp430_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   if (!bms.minsym)
     return pc;
 
-  stub_name = MSYMBOL_LINKAGE_NAME (bms.minsym);
+  stub_name = bms.minsym->linkage_name ();
 
   if (gdbarch_tdep (gdbarch)->code_model == MSP_SMALL_CODE_MODEL
       && msp430_in_return_stub (gdbarch, pc, stub_name))

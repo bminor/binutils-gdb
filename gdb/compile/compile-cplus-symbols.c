@@ -323,7 +323,7 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
   sym_type = instance->convert_type (type);
   instance->plugin ().push_namespace ("");
   instance->plugin ().build_decl
-    ("minsym", MSYMBOL_NATURAL_NAME (msym), kind, sym_type, nullptr, addr,
+    ("minsym", msym->natural_name (), kind, sym_type, nullptr, addr,
      nullptr, 0);
   instance->plugin ().pop_binding_level ("");
 }

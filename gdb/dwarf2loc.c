@@ -800,7 +800,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			 _("DW_AT_call_target is not specified at %s in %s"),
 			 paddress (call_site_gdbarch, call_site->pc),
 			 (msym.minsym == NULL ? "???"
-			  : MSYMBOL_PRINT_NAME (msym.minsym)));
+			  : msym.minsym->print_name ()));
 			
 	  }
 	if (caller_frame == NULL)
@@ -814,7 +814,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			   "available at %s in %s"),
 			 paddress (call_site_gdbarch, call_site->pc),
 			 (msym.minsym == NULL ? "???"
-			  : MSYMBOL_PRINT_NAME (msym.minsym)));
+			  : msym.minsym->print_name ()));
 			
 	  }
 	caller_arch = get_frame_arch (caller_frame);
@@ -846,7 +846,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			   "at %s in %s"),
 			 physname, paddress (call_site_gdbarch, call_site->pc),
 			 (msym.minsym == NULL ? "???"
-			  : MSYMBOL_PRINT_NAME (msym.minsym)));
+			  : msym.minsym->print_name ()));
 			
 	  }
 	return BMSYMBOL_VALUE_ADDRESS (msym);
@@ -934,7 +934,7 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 			     "function \"%s\" at %s can call itself via tail "
 			     "calls"),
 			   (msym.minsym == NULL ? "???"
-			    : MSYMBOL_PRINT_NAME (msym.minsym)),
+			    : msym.minsym->print_name ()),
 			   paddress (gdbarch, verify_addr));
 	    }
 
@@ -955,7 +955,7 @@ tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 
   fprintf_unfiltered (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
 		      (msym.minsym == NULL ? "???"
-		       : MSYMBOL_PRINT_NAME (msym.minsym)));
+		       : msym.minsym->print_name ()));
 
 }
 
@@ -1173,10 +1173,10 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 		     "callers or callees between caller function \"%s\" at %s "
 		     "and callee function \"%s\" at %s"),
 		   (msym_caller.minsym == NULL
-		    ? "???" : MSYMBOL_PRINT_NAME (msym_caller.minsym)),
+		    ? "???" : msym_caller.minsym->print_name ()),
 		   paddress (gdbarch, caller_pc),
 		   (msym_callee.minsym == NULL
-		    ? "???" : MSYMBOL_PRINT_NAME (msym_callee.minsym)),
+		    ? "???" : msym_callee.minsym->print_name ()),
 		   paddress (gdbarch, callee_pc));
     }
 
@@ -1276,7 +1276,7 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 		   gdbarch_bfd_arch_info (gdbarch)->printable_name,
 		   paddress (gdbarch, func_addr),
 		   (msym.minsym == NULL ? "???"
-		    : MSYMBOL_PRINT_NAME (msym.minsym)),
+		    : msym.minsym->print_name ()),
 		   gdbarch_bfd_arch_info (caller_gdbarch)->printable_name);
     }
 
@@ -1289,7 +1289,7 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 					   "requires caller of %s (%s)"),
 		   paddress (gdbarch, func_addr),
 		   (msym.minsym == NULL ? "???"
-		    : MSYMBOL_PRINT_NAME (msym.minsym)));
+		    : msym.minsym->print_name ()));
     }
   caller_pc = get_frame_pc (caller_frame);
   call_site = call_site_for_pc (gdbarch, caller_pc);
@@ -1305,9 +1305,9 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 		   _("DW_OP_entry_value resolving expects callee %s at %s "
 		     "but the called frame is for %s at %s"),
 		   (target_msym == NULL ? "???"
-					: MSYMBOL_PRINT_NAME (target_msym)),
+					: target_msym->print_name ()),
 		   paddress (gdbarch, target_addr),
-		   func_msym == NULL ? "???" : MSYMBOL_PRINT_NAME (func_msym),
+		   func_msym == NULL ? "???" : func_msym->print_name (),
 		   paddress (gdbarch, func_addr));
     }
 
@@ -1331,7 +1331,7 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
       throw_error (NO_ENTRY_VALUE_ERROR, _("Cannot find matching parameter "
 					   "at DW_TAG_call_site %s at %s"),
 		   paddress (gdbarch, caller_pc),
-		   msym == NULL ? "???" : MSYMBOL_PRINT_NAME (msym)); 
+		   msym == NULL ? "???" : msym->print_name ()); 
     }
 
   *per_cu_return = call_site->per_cu;

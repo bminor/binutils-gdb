@@ -671,9 +671,9 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	  symbol = 0;
 	  name_location = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  if (do_demangle || asm_demangle)
-	    name_temp = MSYMBOL_PRINT_NAME (msymbol.minsym);
+	    name_temp = msymbol.minsym->print_name ();
 	  else
-	    name_temp = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
+	    name_temp = msymbol.minsym->linkage_name ();
 	}
     }
   if (symbol == NULL && msymbol.minsym == NULL)
@@ -1349,7 +1349,7 @@ info_symbol_command (const char *arg, int from_tty)
 	    offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
 	    mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
 	    sec_name = osect->the_bfd_section->name;
-	    msym_name = MSYMBOL_PRINT_NAME (msymbol);
+	    msym_name = msymbol->print_name ();
 
 	    /* Don't print the offset if it is zero.
 	       We assume there's no need to handle i18n of "sym + offset".  */

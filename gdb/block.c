@@ -242,7 +242,7 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 		     "DW_TAG_call_site %s in %s"),
 		   paddress (gdbarch, pc),
 		   (msym.minsym == NULL ? "???"
-		    : MSYMBOL_PRINT_NAME (msym.minsym)));
+		    : msym.minsym->print_name ()));
     }
 
   return (struct call_site *) *slot;

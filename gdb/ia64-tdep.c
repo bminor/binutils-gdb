@@ -3615,7 +3615,7 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
       minsym = lookup_minimal_symbol_by_pc (addr);
 
       if (minsym.minsym
-	  && is_vtable_name (MSYMBOL_LINKAGE_NAME (minsym.minsym)))
+	  && is_vtable_name (minsym.minsym->linkage_name ()))
 	return read_memory_unsigned_integer (addr, 8, byte_order);
     }
 

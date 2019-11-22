@@ -2418,7 +2418,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
                "couldn't find a symbol at that address, to find trampoline."),
                paddress (gdbarch, addr));
 
-      func_name = MSYMBOL_LINKAGE_NAME (func_msym.minsym);
+      func_name = func_msym.minsym->linkage_name ();
       tramp_name = (char *) xmalloc (strlen (func_name) + 5);
       strcpy (tramp_name, func_name);
       strcat (tramp_name, ".plt");
@@ -2492,7 +2492,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
       if (ptr_msym.minsym)
         {
-          const char *ptr_msym_name = MSYMBOL_LINKAGE_NAME (ptr_msym.minsym);
+          const char *ptr_msym_name = ptr_msym.minsym->linkage_name ();
           int len = strlen (ptr_msym_name);
 
           if (len > 4

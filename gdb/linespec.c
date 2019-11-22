@@ -4221,7 +4221,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 
   if (is_function)
     {
-      const char *msym_name = MSYMBOL_LINKAGE_NAME (msymbol);
+      const char *msym_name = msymbol->linkage_name ();
 
       if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
 	  || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
@@ -4250,7 +4250,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
-    add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);
+    add_sal_to_sals (self, result, &sal, msymbol->natural_name (), 0);
 }
 
 /* A helper function to classify a minimal_symbol_type according to

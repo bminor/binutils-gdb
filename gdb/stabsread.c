@@ -4610,11 +4610,11 @@ scan_file_globals (struct objfile *objfile)
 	  /* Get the hash index and check all the symbols
 	     under that hash index.  */
 
-	  hash = hashname (MSYMBOL_LINKAGE_NAME (msymbol));
+	  hash = hashname (msymbol->linkage_name ());
 
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
-	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
+	      if (strcmp (msymbol->linkage_name (),
 			  SYMBOL_LINKAGE_NAME (sym)) == 0)
 		{
 		  /* Splice this symbol out of the hash chain and

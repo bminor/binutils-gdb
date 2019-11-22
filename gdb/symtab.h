@@ -67,7 +67,7 @@ enum class symbol_name_match_type
 
   /* Search name matching.  This is like FULL, but the search name did
      not come from the user; instead it is already a search name
-     retrieved from a SYMBOL_SEARCH_NAME/MSYMBOL_SEARCH_NAME call.
+     retrieved from a SYMBOL_SEARCH_NAME/search_name () call.
      For Ada, this avoids re-encoding an already-encoded search name
      (which would potentially incorrectly lowercase letters in the
      linkage/search name that should remain uppercase).  For C++, it
@@ -380,6 +380,42 @@ typedef bool (symbol_name_matcher_ftype)
 
 struct general_symbol_info
 {
+  /* Short version as to when to use which name accessor:
+     Use natural_name () to refer to the name of the symbol in the original
+     source code.  Use linkage_name () if you want to know what the linker
+     thinks the symbol's name is.  Use print_name () for output.  Use
+     demangled_name () if you specifically need to know whether natural_name ()
+     and linkage_name () are different.  */
+
+  const char *linkage_name () const
+  { return name; }
+
+  /* Return SYMBOL's "natural" name, i.e. the name that it was called in
+     the original source code.  In languages like C++ where symbols may
+     be mangled for ease of manipulation by the linker, this is the
+     demangled name.  */
+  const char *natural_name () const;
+
+  /* Returns a version of the name of a symbol that is
+     suitable for output.  In C++ this is the "demangled" form of the
+     name if demangle is on and the "mangled" form of the name if
+     demangle is off.  In other languages this is just the symbol name.
+     The result should never be NULL.  Don't use this for internal
+     purposes (e.g. storing in a hashtable): it's only suitable for output.  */
+  const char *print_name () const
+  { return demangle ? natural_name () : linkage_name (); }
+
+  /* Return the demangled name for a symbol based on the language for
+     that symbol.  If no demangled name exists, return NULL.  */
+  const char *demangled_name () const;
+
+  /* Returns the name to be used when sorting and searching symbols.
+     In C++, we search for the demangled form of a name,
+     and so sort symbols accordingly.  In Ada, however, we search by mangled
+     name.  If there is no distinct demangled name, then this
+     returns the same value (same pointer) as linkage_name ().  */
+  const char *search_name () const;
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -518,15 +554,8 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
    specifically need to know whether SYMBOL_NATURAL_NAME and
    SYMBOL_LINKAGE_NAME are different.  */
 
-/* Return SYMBOL's "natural" name, i.e. the name that it was called in
-   the original source code.  In languages like C++ where symbols may
-   be mangled for ease of manipulation by the linker, this is the
-   demangled name.  */
-
 #define SYMBOL_NATURAL_NAME(symbol) \
-  (symbol_natural_name ((symbol)))
-extern const char *symbol_natural_name
-  (const struct general_symbol_info *symbol);
+  ((symbol)->natural_name ())
 
 /* Return SYMBOL's name from the point of view of the linker.  In
    languages like C++ where symbols may be mangled for ease of
@@ -535,12 +564,8 @@ extern const char *symbol_natural_name
 
 #define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->name
 
-/* Return the demangled name for a symbol based on the language for
-   that symbol.  If no demangled name exists, return NULL.  */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
-  (symbol_demangled_name ((symbol)))
-extern const char *symbol_demangled_name
-  (const struct general_symbol_info *symbol);
+  ((symbol)->demangled_name ())
 
 /* Macro that returns a version of the name of a symbol that is
    suitable for output.  In C++ this is the "demangled" form of the
@@ -555,14 +580,8 @@ extern const char *symbol_demangled_name
 #define SYMBOL_PRINT_NAME(symbol)					\
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
-/* Macro that returns the name to be used when sorting and searching symbols.
-   In C++, we search for the demangled form of a name,
-   and so sort symbols accordingly.  In Ada, however, we search by mangled
-   name.  If there is no distinct demangled name, then SYMBOL_SEARCH_NAME
-   returns the same value (same pointer) as SYMBOL_LINKAGE_NAME.  */
 #define SYMBOL_SEARCH_NAME(symbol)					 \
-   (symbol_search_name (symbol))
-extern const char *symbol_search_name (const struct general_symbol_info *ginfo);
+   ((symbol)->search_name ())
 
 /* Return true if NAME matches the "search" name of SYMBOL, according
    to the symbol's language.  */
@@ -749,16 +768,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
   (((symbol)->section >= 0)				\
    ? (&(((objfile)->sections)[(symbol)->section]))	\
    : NULL)
-
-#define MSYMBOL_NATURAL_NAME(symbol) \
-  (symbol_natural_name (symbol))
-#define MSYMBOL_LINKAGE_NAME(symbol)	(symbol)->name
-#define MSYMBOL_PRINT_NAME(symbol)					\
-  (demangle ? MSYMBOL_NATURAL_NAME (symbol) : MSYMBOL_LINKAGE_NAME (symbol))
-#define MSYMBOL_DEMANGLED_NAME(symbol) \
-  (symbol_demangled_name (symbol))
-#define MSYMBOL_SEARCH_NAME(symbol)					 \
-   (symbol_search_name (symbol))
 
 #include "minsyms.h"
 
@@ -1632,7 +1641,7 @@ extern struct block_symbol lookup_symbol (const char *,
    global/static blocks if BLOCK is NULL.  The passed-in search name
    should not come from the user; instead it should already be a
    search name as retrieved from a
-   SYMBOL_SEARCH_NAME/MSYMBOL_SEARCH_NAME call.  See definition of
+   SYMBOL_SEARCH_NAME/search_name () call.  See definition of
    symbol_name_match_type::SEARCH_NAME.  Returns the struct symbol
    pointer, or NULL if no symbol is found.  The symbol's section is
    fixed up if necessary.  */

@@ -7085,7 +7085,7 @@ set_breakpoint_location_function (struct bp_location *loc)
 	{
 	  struct breakpoint *b = loc->owner;
 
-	  function_name = MSYMBOL_LINKAGE_NAME (loc->msymbol);
+	  function_name = loc->msymbol->linkage_name ();
 
 	  if (b->type == bp_breakpoint && b->loc == loc
 	      && loc->next == NULL && b->related_breakpoint == b)

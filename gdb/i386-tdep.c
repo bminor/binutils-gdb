@@ -1948,8 +1948,8 @@ i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  call_dest = call_dest & 0xffffffffU;
  	  s = lookup_minimal_symbol_by_pc (call_dest);
  	  if (s.minsym != NULL
- 	      && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
- 	      && strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
+ 	      && s.minsym->linkage_name () != NULL
+ 	      && strcmp (s.minsym->linkage_name (), "__main") == 0)
  	    pc += 5;
  	}
     }
@@ -3933,7 +3933,7 @@ i386_pe_skip_trampoline_code (struct frame_info *frame,
 	read_memory_unsigned_integer (pc + 2, 4, byte_order);
       struct minimal_symbol *indsym =
 	indirect ? lookup_minimal_symbol_by_pc (indirect).minsym : 0;
-      const char *symname = indsym ? MSYMBOL_LINKAGE_NAME (indsym) : 0;
+      const char *symname = indsym ? indsym->linkage_name () : 0;
 
       if (symname)
 	{

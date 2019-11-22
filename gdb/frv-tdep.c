@@ -1074,8 +1074,8 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       s = lookup_minimal_symbol_by_pc (call_dest);
 
       if (s.minsym != NULL
-          && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
-	  && strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
+          && s.minsym->linkage_name () != NULL
+	  && strcmp (s.minsym->linkage_name (), "__main") == 0)
 	{
 	  pc += 4;
 	  return pc;

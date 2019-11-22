@@ -2537,7 +2537,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
     {
       for (minimal_symbol *msym : objfile->msymbols ())
 	{
-	  if (strcmp (MSYMBOL_LINKAGE_NAME (msym), name) == 0)
+	  if (strcmp (msym->linkage_name (), name) == 0)
 	    {
 	      struct unwind_table_entry *u;
 

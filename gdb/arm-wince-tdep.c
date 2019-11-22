@@ -66,7 +66,7 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   if (indsym.minsym == NULL)
     return 0;
 
-  symname = MSYMBOL_LINKAGE_NAME (indsym.minsym);
+  symname = indsym.minsym->linkage_name ();
   if (symname == NULL || !startswith (symname, "__imp_"))
     return 0;
 
@@ -104,8 +104,8 @@ arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       struct bound_minimal_symbol s = lookup_minimal_symbol_by_pc (call_dest);
 
       if (s.minsym != NULL
-	  && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
-	  && strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__gccmain") == 0)
+	  && s.minsym->linkage_name () != NULL
+	  && strcmp (s.minsym->linkage_name (), "__gccmain") == 0)
 	pc += 4;
     }
 

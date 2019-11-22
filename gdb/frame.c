@@ -2043,7 +2043,7 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
       this_pc_in_block = get_frame_address_in_block (this_frame);
       morestack_msym = lookup_minimal_symbol_by_pc (this_pc_in_block).minsym;
       if (morestack_msym)
-	morestack_name = MSYMBOL_LINKAGE_NAME (morestack_msym);
+	morestack_name = morestack_msym->linkage_name ();
       if (!morestack_name || strcmp (morestack_name, "__morestack") != 0)
 	{
 	  if (frame_debug)

@@ -640,7 +640,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     {
       for (minimal_symbol *msym : objfile->msymbols ())
 	{
-	  const char *name = MSYMBOL_LINKAGE_NAME (msym);
+	  const char *name = msym->linkage_name ();
 
 	  /* If the minimal symbols whose name are prefixed by "__imp_"
 	     or "_imp_", get rid of the prefix, and search the minimal

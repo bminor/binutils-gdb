@@ -610,7 +610,7 @@ info_selectors_command (const char *regexp, int from_tty)
       for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  QUIT;
-	  name = MSYMBOL_NATURAL_NAME (msymbol);
+	  name = msymbol->natural_name ();
 	  if (name
 	      && (name[0] == '-' || name[0] == '+')
 	      && name[1] == '[')		/* Got a method name.  */
@@ -623,7 +623,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	      if (name == NULL)
 		{
 		  complaint (_("Bad method name '%s'"),
-			     MSYMBOL_NATURAL_NAME (msymbol));
+			     msymbol->natural_name ());
 		  continue;
 		}
 	      if (regexp == NULL || re_exec(++name) != 0)
@@ -650,7 +650,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	  for (minimal_symbol *msymbol : objfile->msymbols ())
 	    {
 	      QUIT;
-	      name = MSYMBOL_NATURAL_NAME (msymbol);
+	      name = msymbol->natural_name ();
 	      if (name &&
 		  (name[0] == '-' || name[0] == '+') &&
 		  name[1] == '[')		/* Got a method name.  */
@@ -764,7 +764,7 @@ info_classes_command (const char *regexp, int from_tty)
       for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  QUIT;
-	  name = MSYMBOL_NATURAL_NAME (msymbol);
+	  name = msymbol->natural_name ();
 	  if (name &&
 	      (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -791,7 +791,7 @@ info_classes_command (const char *regexp, int from_tty)
 	  for (minimal_symbol *msymbol : objfile->msymbols ())
 	    {
 	      QUIT;
-	      name = MSYMBOL_NATURAL_NAME (msymbol);
+	      name = msymbol->natural_name ();
 	      if (name &&
 		  (name[0] == '-' || name[0] == '+') &&
 		  name[1] == '[') /* Got a method name.  */
@@ -1014,7 +1014,7 @@ find_methods (char type, const char *theclass, const char *category,
 
 	  /* Check the symbol name first as this can be done entirely without
 	     sending any query to the target.  */
-	  symname = MSYMBOL_NATURAL_NAME (msymbol);
+	  symname = msymbol->natural_name ();
 	  if (symname == NULL)
 	    continue;
 
@@ -1152,7 +1152,7 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
 	    = lookup_minimal_symbol (selector, 0, 0);
 
 	  if (msym.minsym != NULL) 
-	    symbol_names->push_back (MSYMBOL_NATURAL_NAME (msym.minsym));
+	    symbol_names->push_back (msym.minsym->natural_name ());
 	}
     }
 

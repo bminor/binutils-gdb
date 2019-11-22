@@ -569,7 +569,7 @@ maintenance_translate_address (const char *arg, int from_tty)
 
   if (sym.minsym)
     {
-      const char *symbol_name = MSYMBOL_PRINT_NAME (sym.minsym);
+      const char *symbol_name = sym.minsym->print_name ();
       const char *symbol_offset
 	= pulongest (address - BMSYMBOL_VALUE_ADDRESS (sym));
 

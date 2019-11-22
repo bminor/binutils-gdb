@@ -138,7 +138,7 @@ print_subexp_standard (struct expression *exp, int *pos,
     case OP_VAR_MSYM_VALUE:
       {
 	(*pos) += 3;
-	fputs_filtered (MSYMBOL_PRINT_NAME (exp->elts[pc + 2].msymbol), stream);
+	fputs_filtered (exp->elts[pc + 2].msymbol->print_name (), stream);
       }
       return;
 
@@ -908,7 +908,7 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, ", msymbol @");
       gdb_print_host_address (exp->elts[elt + 1].msymbol, stream);
       fprintf_filtered (stream, " (%s)",
-			MSYMBOL_PRINT_NAME (exp->elts[elt + 1].msymbol));
+			exp->elts[elt + 1].msymbol->print_name ());
       elt += 3;
       break;
     case OP_VAR_ENTRY_VALUE:

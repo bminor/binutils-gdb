@@ -308,7 +308,7 @@ convert_symbol_bmsym (compile_c_instance *context,
     }
 
   sym_type = context->convert_type (type);
-  decl = context->plugin ().build_decl (MSYMBOL_NATURAL_NAME (msym),
+  decl = context->plugin ().build_decl (msym->natural_name (),
 					kind, sym_type, NULL, addr,
 					NULL, 0);
   context->plugin ().bind (decl, 1 /* is_global */);

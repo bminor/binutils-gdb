@@ -1,5 +1,126 @@
 2019-11-22  Christian Biesinger  <cbiesinger@google.com>
 
+	* ada-lang.c (ada_lookup_simple_minsym): Update.
+	(ada_collect_symbol_completion_matches): Update.
+	* ada-tasks.c (read_atcb): Update.
+	* amd64-windows-tdep.c (amd64_skip_main_prologue): Update.
+	(amd64_windows_skip_trampoline_code): Update.
+	* arm-tdep.c (skip_prologue_function): Update.
+	(arm_skip_stack_protector): Update.
+	* arm-wince-tdep.c (arm_pe_skip_trampoline_code): Update.
+	(arm_wince_skip_main_prologue): Update.
+	* ax-gdb.c (gen_expr): Update.
+	* block.c (call_site_for_pc): Update.
+	* blockframe.c (find_pc_partial_function): Update.
+	* breakpoint.c (set_breakpoint_location_function): Update.
+	* btrace.c (ftrace_print_function_name): Update.
+	(ftrace_function_switched): Update.
+	* c-valprint.c (print_unpacked_pointer): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* compile/compile-c-symbols.c (convert_symbol_bmsym): Update.
+	* compile/compile-cplus-symbols.c (convert_symbol_bmsym): Update.
+	* dwarf-index-write.c (write_psymbols): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	(func_verify_no_selftailcall): Update.
+	(tailcall_dump): Update.
+	(call_site_find_chain_1): Update.
+	(dwarf_expr_reg_to_entry_parameter): Update.
+	* elfread.c (elf_gnu_ifunc_record_cache): Update.
+	* eval.c (evaluate_funcall): Update.
+	(evaluate_subexp_standard): Update.
+	(evaluate_subexp_for_sizeof): Update.
+	* expprint.c (print_subexp_standard): Update.
+	(dump_subexp_body_standard): Update.
+	* frame.c (get_prev_frame_always_1): Update.
+	* frv-tdep.c (frv_skip_main_prologue): Update.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Update.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Update.
+	(gnuv3_get_typename_from_type_info): Update.
+	(gnuv3_skip_trampoline): Update.
+	* hppa-tdep.c (hppa_lookup_stub_minimal_symbol): Update.
+	* i386-tdep.c (i386_skip_main_prologue): Update.
+	(i386_pe_skip_trampoline_code): Update.
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Update.
+	* infcall.c (get_function_name): Update.
+	* linespec.c (minsym_found): Update.
+	* linux-fork.c (info_checkpoints_command): Update.
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Update.
+	(m32c_m16c_pointer_to_address): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* minsyms.c (add_minsym_to_hash_table): Update.
+	(add_minsym_to_demangled_hash_table): Update.
+	(lookup_minimal_symbol_mangled): Update.
+	(lookup_minimal_symbol_demangled): Update.
+	(lookup_minimal_symbol_linkage): Update.
+	(lookup_minimal_symbol_text): Update.
+	(lookup_minimal_symbol_by_pc_name): Update.
+	(minimal_symbol_is_less_than): Update.
+	(compact_minimal_symbols): Update.
+	(build_minimal_symbol_hash_tables): Update.
+	(find_solib_trampoline_target): Update.
+	* mips-tdep.c (mips_stub_frame_sniffer): Update.
+	(mips_skip_pic_trampoline_code): Update.
+	* msp430-tdep.c (msp430_skip_trampoline_code): Update.
+	* objc-lang.c (info_selectors_command): Update.
+	(info_classes_command): Update.
+	(find_methods): Update.
+	(find_imps): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* ppc-linux-tdep.c (powerpc_linux_in_dynsym_resolve_code): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* printcmd.c (build_address_symbolic): Update.
+	(info_symbol_command): Update.
+	* psymtab.c (psymbol_name_matches): Update.
+	(match_partial_symbol): Update.
+	(lookup_partial_symbol): Update.
+	(print_partial_symbols): Update.
+	(sort_pst_symbols): Update.
+	(maintenance_check_psymtabs): Update.
+	* python/py-framefilter.c (py_print_frame): Update.
+	* python/python.c (gdbpy_rbreak): Update.
+	* record-btrace.c (btrace_get_bfun_name): Update.
+	(btrace_call_history): Update.
+	* rs6000-tdep.c (rs6000_skip_main_prologue): Update.
+	(rs6000_skip_trampoline_code): Update.
+	* sol-thread.c (info_cb): Update.
+	* stabsread.c (scan_file_globals): Update.
+	* stack.c (find_frame_funname): Update.
+	(info_frame_command_core): Update.
+	* symmisc.c (dump_msymbols): Update.
+	* symtab.c (symbol_natural_name): Rename to..,
+	(general_symbol_info::natural_name): ...this.
+	(symbol_demangled_name): Rename to...
+	(general_symbol_info::demangled_name): ...this.
+	(symbol_search_name): Rename to...
+	(general_symbol_info::search_name): ...this.
+	(symbol_matches_search_name): Update.
+	(find_pc_sect_line): Update.
+	(skip_prologue_sal): Update.
+	(search_symbols): Update.
+	(print_msymbol_info): Update.
+	(rbreak_command): Update.
+	(completion_list_add_msymbol): Update.
+	(completion_list_objc_symbol): Update.
+	(get_msymbol_address): Update.
+	* symtab.h (struct general_symbol_info): Add member functions
+	natural_name (), linkage_name (), print_name (), demangled_name (),
+	and search_name ().
+	(SYMBOL_NATURAL_NAME): Update.
+	(symbol_natural_name): Move to a member function on general_symbol_info.
+	(SYMBOL_DEMANGLED_NAME): Update.
+	(symbol_demangled_name): Move to a member function on
+	general_symbol_info.
+	(SYMBOL_SEARCH_NAME): Update.
+	(symbol_search_name): Move to a member function on general_symbol_info.
+	(MSYMBOL_NATURAL_NAME): Remove.
+	(MSYMBOL_LINKAGE_NAME): Remove.
+	(MSYMBOL_PRINT_NAME): Remove.
+	(MSYMBOL_DEMANGLED_NAME): Remove.
+	(MSYMBOL_SEARCH_NAME): Remove.
+	* x86-tdep.c (x86_in_indirect_branch_thunk): Update.
+
+2019-11-22  Christian Biesinger  <cbiesinger@google.com>
+
 	* symtab.c (create_demangled_names_hash): Use per_bfd->
 	minimal_symbol_count for computing the initial size, if greater
 	than our default size.

@@ -1117,7 +1117,7 @@ btrace_get_bfun_name (const struct btrace_function *bfun)
   if (sym != NULL)
     return SYMBOL_PRINT_NAME (sym);
   else if (msym != NULL)
-    return MSYMBOL_PRINT_NAME (msym);
+    return msym->print_name ();
   else
     return "??";
 }
@@ -1178,7 +1178,7 @@ btrace_call_history (struct ui_out *uiout,
 	uiout->field_string ("function", SYMBOL_PRINT_NAME (sym),
 			     function_name_style.style ());
       else if (msym != NULL)
-	uiout->field_string ("function", MSYMBOL_PRINT_NAME (msym),
+	uiout->field_string ("function", msym->print_name (),
 			     function_name_style.style ());
       else if (!uiout->is_mi_like_p ())
 	uiout->field_string ("function", "??",

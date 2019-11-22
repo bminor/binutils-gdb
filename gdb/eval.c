@@ -1044,7 +1044,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	  if (op == OP_VAR_MSYM_VALUE)
 	    {
 	      minimal_symbol *msym = exp->elts[*pos + 2].msymbol;
-	      var_func_name = MSYMBOL_PRINT_NAME (msym);
+	      var_func_name = msym->print_name ();
 	    }
 	  else if (op == OP_VAR_VALUE)
 	    {
@@ -1323,7 +1323,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	type = value_type (val);
 	if (TYPE_CODE (type) == TYPE_CODE_ERROR
 	    && (noside != EVAL_AVOID_SIDE_EFFECTS || pc != 0))
-	  error_unknown_type (MSYMBOL_PRINT_NAME (msymbol));
+	  error_unknown_type (msymbol->print_name ());
 	return val;
       }
 
@@ -3218,7 +3218,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 
 	type = value_type (mval);
 	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
-	  error_unknown_type (MSYMBOL_PRINT_NAME (msymbol));
+	  error_unknown_type (msymbol->print_name ());
 
 	return value_from_longest (size_type, TYPE_LENGTH (type));
       }

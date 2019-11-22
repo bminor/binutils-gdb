@@ -597,7 +597,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 
 	  msym = lookup_minimal_symbol_by_pc (pc);
 	  if (msym.minsym)
-	    printf_filtered (", <%s>", MSYMBOL_LINKAGE_NAME (msym.minsym));
+	    printf_filtered (", <%s>", msym.minsym->linkage_name ());
 	}
 
       putchar_filtered ('\n');

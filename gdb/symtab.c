@@ -944,49 +944,47 @@ symbol_set_names (struct general_symbol_info *gsymbol,
     symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
 }
 
-/* Return the source code name of a symbol.  In languages where
-   demangling is necessary, this is the demangled name.  */
+/* See symtab.h.  */
 
 const char *
-symbol_natural_name (const struct general_symbol_info *gsymbol)
+general_symbol_info::natural_name () const
 {
-  switch (gsymbol->language)
+  switch (language)
     {
     case language_cplus:
     case language_d:
     case language_go:
     case language_objc:
     case language_fortran:
-      if (symbol_get_demangled_name (gsymbol) != NULL)
-	return symbol_get_demangled_name (gsymbol);
+      if (symbol_get_demangled_name (this) != NULL)
+	return symbol_get_demangled_name (this);
       break;
     case language_ada:
-      return ada_decode_symbol (gsymbol);
+      return ada_decode_symbol (this);
     default:
       break;
     }
-  return gsymbol->name;
+  return name;
 }
 
-/* Return the demangled name for a symbol based on the language for
-   that symbol.  If no demangled name exists, return NULL.  */
+/* See symtab.h.  */
 
 const char *
-symbol_demangled_name (const struct general_symbol_info *gsymbol)
+general_symbol_info::demangled_name () const
 {
   const char *dem_name = NULL;
 
-  switch (gsymbol->language)
+  switch (language)
     {
     case language_cplus:
     case language_d:
     case language_go:
     case language_objc:
     case language_fortran:
-      dem_name = symbol_get_demangled_name (gsymbol);
+      dem_name = symbol_get_demangled_name (this);
       break;
     case language_ada:
-      dem_name = ada_decode_symbol (gsymbol);
+      dem_name = ada_decode_symbol (this);
       break;
     default:
       break;
@@ -994,18 +992,15 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
   return dem_name;
 }
 
-/* Return the search name of a symbol---generally the demangled or
-   linkage name of the symbol, depending on how it will be searched for.
-   If there is no distinct demangled name, then returns the same value
-   (same pointer) as SYMBOL_LINKAGE_NAME.  */
+/* See symtab.h.  */
 
 const char *
-symbol_search_name (const struct general_symbol_info *gsymbol)
+general_symbol_info::search_name () const
 {
-  if (gsymbol->language == language_ada)
-    return gsymbol->name;
+  if (language == language_ada)
+    return name;
   else
-    return symbol_natural_name (gsymbol);
+    return natural_name ();
 }
 
 /* See symtab.h.  */
@@ -1016,7 +1011,7 @@ symbol_matches_search_name (const struct general_symbol_info *gsymbol,
 {
   symbol_name_matcher_ftype *name_match
     = get_symbol_name_matcher (language_def (gsymbol->language), name);
-  return name_match (symbol_search_name (gsymbol), name, NULL);
+  return name_match (gsymbol->search_name (), name, NULL);
 }
 
 
@@ -3127,7 +3122,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     if (MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
       {
 	struct bound_minimal_symbol mfunsym
-	  = lookup_minimal_symbol_text (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
+	  = lookup_minimal_symbol_text (msymbol.minsym->linkage_name (),
 					NULL);
 
 	if (mfunsym.minsym == NULL)
@@ -3733,7 +3728,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       objfile = msymbol.objfile;
       pc = BMSYMBOL_VALUE_ADDRESS (msymbol);
       section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
-      name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
+      name = msymbol.minsym->linkage_name ();
     }
 
   gdbarch = get_objfile_arch (objfile);
@@ -4599,7 +4594,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 		  || MSYMBOL_TYPE (msymbol) == ourtype4)
 		{
 		  if (!preg.has_value ()
-		      || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+		      || preg->exec (msymbol->natural_name (), 0,
 				     NULL, 0) == 0)
 		    {
 		      /* Note: An important side-effect of these
@@ -4611,8 +4606,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			     (MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
 			     == NULL)
 			  : (lookup_symbol_in_objfile_from_linkage_name
-			     (objfile, MSYMBOL_LINKAGE_NAME (msymbol),
-			      VAR_DOMAIN)
+			     (objfile, msymbol->linkage_name (), VAR_DOMAIN)
 			     .symbol == NULL))
 			found_misc = 1;
 		    }
@@ -4707,7 +4701,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 		  || MSYMBOL_TYPE (msymbol) == ourtype4)
 		{
 		  if (!preg.has_value ()
-		      || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+		      || preg->exec (msymbol->natural_name (), 0,
 				     NULL, 0) == 0)
 		    {
 		      /* For functions we can do a quick check of whether the
@@ -4718,8 +4712,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			      == NULL))
 			{
 			  if (lookup_symbol_in_objfile_from_linkage_name
-			      (objfile, MSYMBOL_LINKAGE_NAME (msymbol),
-			       VAR_DOMAIN)
+			      (objfile, msymbol->linkage_name (), VAR_DOMAIN)
 			      .symbol == NULL)
 			    {
 			      /* match */
@@ -4829,8 +4822,7 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
 
   printf_filtered (_("%ps  %ps\n"),
 		   styled_string (address_style.style (), tmp),
-		   styled_string (sym_style,
-				  MSYMBOL_PRINT_NAME (msymbol.minsym)));
+		   styled_string (sym_style, msymbol.minsym->print_name ()));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -5143,11 +5135,11 @@ rbreak_command (const char *regexp, int from_tty)
       else
 	{
 	  string = string_printf ("'%s'",
-				  MSYMBOL_LINKAGE_NAME (p.msymbol.minsym));
+				  p.msymbol.minsym->linkage_name ());
 
 	  break_command (&string[0], from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   MSYMBOL_PRINT_NAME (p.msymbol.minsym));
+			   p.msymbol.minsym->print_name ());
 	}
     }
 }
@@ -5230,7 +5222,7 @@ completion_list_add_msymbol (completion_tracker &tracker,
 			     const char *text, const char *word)
 {
   completion_list_add_name (tracker, MSYMBOL_LANGUAGE (sym),
-			    MSYMBOL_NATURAL_NAME (sym),
+			    sym->natural_name (),
 			    lookup_name, text, word);
 }
 
@@ -5250,7 +5242,7 @@ completion_list_objc_symbol (completion_tracker &tracker,
   const char *method, *category, *selector;
   char *tmp2 = NULL;
 
-  method = MSYMBOL_NATURAL_NAME (msymbol);
+  method = msymbol->natural_name ();
 
   /* Is it a method?  */
   if ((method[0] != '-') && (method[0] != '+'))
@@ -6319,7 +6311,7 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
   gdb_assert (minsym->maybe_copied);
   gdb_assert ((objf->flags & OBJF_MAINLINE) == 0);
 
-  const char *linkage_name = MSYMBOL_LINKAGE_NAME (minsym);
+  const char *linkage_name = minsym->linkage_name ();
 
   for (objfile *objfile : current_program_space->objfiles ())
     {

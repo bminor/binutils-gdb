@@ -243,7 +243,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 			+ ANOFFSET (objfile->section_offsets,
 				    msymbol->section));
       fputs_filtered (paddress (gdbarch, addr), outfile);
-      fprintf_filtered (outfile, " %s", MSYMBOL_LINKAGE_NAME (msymbol));
+      fprintf_filtered (outfile, " %s", msymbol->linkage_name ());
       if (section)
 	{
 	  if (section->the_bfd_section != NULL)
@@ -253,9 +253,9 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	    fprintf_filtered (outfile, " spurious section %ld",
 			      (long) (section - objfile->sections));
 	}
-      if (MSYMBOL_DEMANGLED_NAME (msymbol) != NULL)
+      if (msymbol->demangled_name () != NULL)
 	{
-	  fprintf_filtered (outfile, "  %s", MSYMBOL_DEMANGLED_NAME (msymbol));
+	  fprintf_filtered (outfile, "  %s", msymbol->demangled_name ());
 	}
       if (msymbol->filename)
 	fprintf_filtered (outfile, "  %s", msymbol->filename);

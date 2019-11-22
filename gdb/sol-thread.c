@@ -1109,7 +1109,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   startfunc=%s",
 			   msym.minsym
-			   ? MSYMBOL_PRINT_NAME (msym.minsym)
+			   ? msym.minsym->print_name ()
 			   : paddress (target_gdbarch (), ti.ti_startfunc));
 	}
 
@@ -1121,7 +1121,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 
 	  printf_filtered ("   sleepfunc=%s",
 			   msym.minsym
-			   ? MSYMBOL_PRINT_NAME (msym.minsym)
+			   ? msym.minsym->print_name ()
 			   : paddress (target_gdbarch (), ti.ti_pc));
 	}
 

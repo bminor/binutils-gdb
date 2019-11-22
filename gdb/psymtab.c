@@ -534,7 +534,7 @@ psymbol_name_matches (partial_symbol *psym,
   const language_defn *lang = language_def (psym->ginfo.language);
   symbol_name_matcher_ftype *name_match
     = get_symbol_name_matcher (lang, lookup_name);
-  return name_match (symbol_search_name (&psym->ginfo), lookup_name, NULL);
+  return name_match (psym->ginfo.search_name (), lookup_name, NULL);
 }
 
 /* Look in PST for a symbol in DOMAIN whose name matches NAME.  Search
@@ -585,7 +585,7 @@ match_partial_symbol (struct objfile *objfile,
 	  const char *lang_ln
 	    = name.language_lookup_name (lang).c_str ();
 
-	  if (ordered_compare (symbol_search_name (&(*center)->ginfo),
+	  if (ordered_compare ((*center)->ginfo.search_name (),
 			       lang_ln) >= 0)
 	    top = center;
 	  else
@@ -693,7 +693,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	  if (!(center < top))
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
-	  if (strcmp_iw_ordered (symbol_search_name (&(*center)->ginfo),
+	  if (strcmp_iw_ordered ((*center)->ginfo.search_name (),
 				 search_name.get ()) >= 0)
 	    {
 	      top = center;
@@ -836,10 +836,10 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
     {
       QUIT;
       fprintf_filtered (outfile, "    `%s'", (*p)->ginfo.name);
-      if (symbol_demangled_name (&(*p)->ginfo) != NULL)
+      if ((*p)->ginfo.demangled_name () != NULL)
 	{
 	  fprintf_filtered (outfile, "  `%s'",
-			    symbol_demangled_name (&(*p)->ginfo));
+			    (*p)->ginfo.demangled_name ());
 	}
       fputs_filtered (", ", outfile);
       switch ((*p)->domain)
@@ -1283,7 +1283,7 @@ recursively_search_psymtabs
 		   && (*psym)->aclass == LOC_TYPEDEF))
 	      && psymbol_name_matches (*psym, lookup_name)
 	      && (sym_matcher == NULL
-		  || sym_matcher (symbol_search_name (&(*psym)->ginfo))))
+		  || sym_matcher ((*psym)->ginfo.search_name ())))
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
@@ -1478,8 +1478,8 @@ sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
 
   std::sort (begin, end, [] (partial_symbol *s1, partial_symbol *s2)
     {
-      return strcmp_iw_ordered (symbol_search_name (&s1->ginfo),
-				symbol_search_name (&s2->ginfo)) < 0;
+      return strcmp_iw_ordered (s1->ginfo.search_name (),
+				s2->ginfo.search_name ()) < 0;
     });
 }
 
@@ -2106,7 +2106,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	length = ps->n_static_syms;
 	while (length--)
 	  {
-	    sym = block_lookup_symbol (b, symbol_search_name (&(*psym)->ginfo),
+	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
 	    if (!sym)
@@ -2124,7 +2124,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	length = ps->n_global_syms;
 	while (length--)
 	  {
-	    sym = block_lookup_symbol (b, symbol_search_name (&(*psym)->ginfo),
+	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
 	    if (!sym)

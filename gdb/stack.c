@@ -1290,7 +1290,7 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
       msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol.minsym != NULL)
 	{
-	  funname.reset (xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym)));
+	  funname.reset (xstrdup (msymbol.minsym->print_name ()));
 	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }
@@ -1516,7 +1516,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
       msymbol = lookup_minimal_symbol_by_pc (frame_pc);
       if (msymbol.minsym != NULL)
 	{
-	  funname = MSYMBOL_PRINT_NAME (msymbol.minsym);
+	  funname = msymbol.minsym->print_name ();
 	  funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }

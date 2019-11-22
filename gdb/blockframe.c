@@ -337,7 +337,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
     }
 
   cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
+  cache_pc_function_name = msymbol.minsym->linkage_name ();
   cache_pc_function_section = section;
   cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
   cache_pc_function_block = nullptr;

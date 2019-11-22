@@ -2020,7 +2020,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
 
       if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
-	error_unknown_type (MSYMBOL_PRINT_NAME ((*pc)[2].msymbol));
+	error_unknown_type ((*pc)[2].msymbol->linkage_name ());
 
       (*pc) += 4;
       break;

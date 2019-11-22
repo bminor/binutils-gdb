@@ -2119,9 +2119,9 @@ rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
          to __eabi in case the GCC option "-fleading-underscore" was
 	 used to compile the program.  */
       if (s.minsym != NULL
-          && MSYMBOL_LINKAGE_NAME (s.minsym) != NULL
-	  && (strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "__eabi") == 0
-	      || strcmp (MSYMBOL_LINKAGE_NAME (s.minsym), "___eabi") == 0))
+          && s.minsym->linkage_name () != NULL
+	  && (strcmp (s.minsym->linkage_name (), "__eabi") == 0
+	      || strcmp (s.minsym->linkage_name (), "___eabi") == 0))
 	pc += 4;
     }
   return pc;
@@ -2205,7 +2205,7 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym
       && rs6000_in_solib_return_trampoline (gdbarch, pc,
-					    MSYMBOL_LINKAGE_NAME (msymbol.minsym)))
+					    msymbol.minsym->linkage_name ()))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4, byte_order);

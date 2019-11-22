@@ -240,7 +240,7 @@ pascal_val_print (struct type *type,
 	      if (want_space)
 		fputs_filtered (" ", stream);
 	      fputs_filtered ("<", stream);
-	      fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), stream);
+	      fputs_filtered (msymbol.minsym->print_name (), stream);
 	      fputs_filtered (">", stream);
 	      want_space = 1;
 	    }
@@ -255,8 +255,7 @@ pascal_val_print (struct type *type,
 
 	      if (msymbol.minsym != NULL)
 		{
-		  const char *search_name
-		    = MSYMBOL_SEARCH_NAME (msymbol.minsym);
+		  const char *search_name = msymbol.minsym->search_name ();
 		  wsym = lookup_symbol_search_name (search_name, NULL,
 						    VAR_DOMAIN).symbol;
 		}

@@ -714,7 +714,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
 
   /* If .plt jumps back to .plt the symbol is still deferred for later
      resolution and it has no use for GDB.  */
-  const char *target_name = MSYMBOL_LINKAGE_NAME (msym.minsym);
+  const char *target_name = msym.minsym->linkage_name ();
   size_t len = strlen (target_name);
 
   /* Note we check the symbol's name instead of checking whether the

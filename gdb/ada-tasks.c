@@ -669,7 +669,7 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 	  msym = lookup_minimal_symbol_by_pc (task_id);
 	  if (msym.minsym)
 	    {
-	      const char *full_name = MSYMBOL_LINKAGE_NAME (msym.minsym);
+	      const char *full_name = msym.minsym->linkage_name ();
 	      const char *task_name = full_name;
 	      const char *p;
 

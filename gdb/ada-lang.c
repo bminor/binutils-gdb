@@ -4946,7 +4946,7 @@ ada_lookup_simple_minsym (const char *name)
     {
       for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
-	  if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
+	  if (match_name (msymbol->linkage_name (), lookup_name, NULL)
 	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
 	    {
 	      result.minsym = msymbol;
@@ -6449,7 +6449,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
 	  completion_list_add_name (tracker,
 				    symbol_language,
-				    MSYMBOL_LINKAGE_NAME (msymbol),
+				    msymbol->linkage_name (),
 				    lookup_name, text, word);
 	}
     }
