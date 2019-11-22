@@ -4994,6 +4994,11 @@ The special output section name @samp{/DISCARD/} may be used to discard
 input sections.  Any input sections which are assigned to an output
 section named @samp{/DISCARD/} are not included in the output file.
 
+Note, sections that match the @samp{/DISCARD/} output section will be
+discarded even if they are in an ELF section group which has other
+members which are not being discarded.  This is deliberate.
+Discarding takes precedence over grouping.
+
 @node Output Section Attributes
 @subsection Output Section Attributes
 @cindex output section attributes
