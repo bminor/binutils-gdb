@@ -228,11 +228,11 @@ gdbpy_enter::~gdbpy_enter ()
 
   m_error->restore ();
 
-  PyGILState_Release (m_state);
   python_gdbarch = m_gdbarch;
   python_language = m_language;
 
   restore_active_ext_lang (m_previous_active);
+  PyGILState_Release (m_state);
 }
 
 /* Set the quit flag.  */
