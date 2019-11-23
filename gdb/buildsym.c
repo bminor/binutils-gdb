@@ -670,12 +670,6 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 {
   struct linetable_entry *e;
 
-  /* Ignore the dummy line number in libg.o */
-  if (line == 0xffff)
-    {
-      return;
-    }
-
   /* Make sure line vector exists and is big enough.  */
   if (!subfile->line_vector)
     {
