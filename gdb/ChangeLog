@@ -1,3 +1,20 @@
+2019-11-24  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (read_symbols): Update.
+	* psymtab.c (require_partial_symbols): Change type of "verbose" to
+	bool.
+	(psym_map_symtabs_matching_filename, find_pc_sect_psymtab)
+	(psym_lookup_symbol, psym_find_last_source_symtab)
+	(psym_forget_cached_source_info, psym_print_stats)
+	(psym_expand_symtabs_for_function, psym_expand_all_symtabs)
+	(psym_expand_symtabs_with_fullname, psym_map_symbol_filenames)
+	(psym_map_matching_symbols, psym_expand_symtabs_matching)
+	(psym_find_compunit_symtab_by_address)
+	(maintenance_print_psymbols, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* psymtab.h (require_partial_symbols): Change type of "verbose" to
+	bool.
+
 2019-11-22  Tom Tromey  <tom@tromey.com>
 
 	* observable.h: Update comments.
