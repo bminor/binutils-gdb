@@ -744,14 +744,14 @@ bfd_perform_relocation (bfd *abfd,
   else
     output_base = reloc_target_output_section->vma;
 
-  /* For sections where relocations are in octets, output_base and
-     output_offset must also be converted to octets.  */
+  output_base += symbol->section->output_offset;
+
+  /* If symbol addresses are in octets, convert to bytes.  */
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && (symbol->section->flags & SEC_ELF_OCTETS))
-    relocation += ((output_base + symbol->section->output_offset)
-		   * bfd_octets_per_byte (abfd, NULL));
-  else
-    relocation += output_base + symbol->section->output_offset;
+    output_base *= bfd_octets_per_byte (abfd, input_section);
+
+  relocation += output_base;
 
   /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
@@ -1080,14 +1080,14 @@ bfd_install_relocation (bfd *abfd,
   else
     output_base = reloc_target_output_section->vma;
 
-  /* For sections where relocations are in octets, output_base and
-     output_offset must also be converted to octets.  */
+  output_base += symbol->section->output_offset;
+
+  /* If symbol addresses are in octets, convert to bytes.  */
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && (symbol->section->flags & SEC_ELF_OCTETS))
-    relocation += ((output_base + symbol->section->output_offset)
-		   * bfd_octets_per_byte (abfd, NULL));
-  else
-    relocation += output_base + symbol->section->output_offset;
+    output_base *= bfd_octets_per_byte (abfd, input_section);
+
+  relocation += output_base;
 
   /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
@@ -1383,10 +1383,7 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
     }
 
   return _bfd_relocate_contents (howto, input_bfd, relocation,
-				 contents
-				 + address
-				 * bfd_octets_per_byte (input_bfd,
-							input_section));
+				 contents + octets);
 }
 
 /* Relocate a given location using a given value and howto.  */

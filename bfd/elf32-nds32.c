@@ -32,6 +32,9 @@
 #include "opcode/cgen.h"
 #include "../opcodes/nds32-opc.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 /* Relocation HOWTO functions.  */
 static bfd_reloc_status_type nds32_elf_ignore_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
@@ -13220,7 +13223,8 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
 			 "unused", FALSE, 0, 0, FALSE);
 
-	      off = (*parent)->address * bfd_octets_per_byte (input_bfd, NULL);
+	      off = (*parent)->address * OCTETS_PER_BYTE (input_bfd,
+							  input_section);
 	      _bfd_clear_contents ((*parent)->howto, input_bfd,
 				   input_section, data, off);
 	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

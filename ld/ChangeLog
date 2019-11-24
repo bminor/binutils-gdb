@@ -1,3 +1,9 @@
+2019-11-25  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (fold_name): Pass section to bfd_octets_per_byte.
+	* ldlang.c (init_opb): Don't call bfd_arch_mach_octets_per_byte
+	unnecessarily.
+
 2019-11-25  Christian Eggers  <ceggers@gmx.de>
 
 	* ldexp.c (fold_name): Provide section parameter to

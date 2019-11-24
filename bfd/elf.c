@@ -1102,33 +1102,17 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	 not any sort of flag.  Their SEC_ALLOC bits are cleared.  */
       if (name [0] == '.')
 	{
-	  const char *p;
-	  int n;
-	  if (name[1] == 'd')
-	    p = ".debug", n = 6;
-	  else if (name[1] == 'g' && name[2] == 'n')
-	    p = ".gnu.linkonce.wi.", n = 17;
-	  else if (name[1] == 'g' && name[2] == 'd')
-	    p = ".gdb_index", n = 11; /* yes we really do mean 11.  */
-	  else if (name[1] == 'l')
-	    p = ".line", n = 5;
-	  else if (name[1] == 's')
-	    p = ".stab", n = 5;
-	  else if (name[1] == 'z')
-	    p = ".zdebug", n = 7;
-	  else
-	    p = NULL, n = 0;
-	  if (p != NULL && strncmp (name, p, n) == 0)
+	  if (strncmp (name, ".debug", 6) == 0
+	      || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
+	      || strncmp (name, ".zdebug", 7) == 0)
+	    flags |= SEC_DEBUGGING | SEC_ELF_OCTETS;
+	  else if (strncmp (name, GNU_BUILD_ATTRS_SECTION_NAME, 21) == 0
+		   || strncmp (name, ".note.gnu", 9) == 0)
+	    flags |= SEC_ELF_OCTETS;
+	  else if (strncmp (name, ".line", 5) == 0
+		   || strncmp (name, ".stab", 5) == 0
+		   || strcmp (name, ".gdb_index") == 0)
 	    flags |= SEC_DEBUGGING;
-
-	  /* DWARF debug sections and ELF notes are organized in octets. */
-	  if (strncmp (name, ".debug", 6) == 0 ||
-	      strncmp (name, ".zdebug", 7) == 0 ||
-	      strncmp (name, GNU_BUILD_ATTRS_SECTION_NAME, 21) == 0 ||
-	      strncmp (name, ".note.gnu", 9) == 0)
-	    {
-	      flags |= SEC_ELF_OCTETS;
-	    }
 	}
     }
 
@@ -12064,7 +12048,7 @@ _bfd_elf_section_offset (bfd *abfd,
 	  /* address_size and sec->size are in octets.  Convert
 	     to bytes before subtracting the original offset.  */
 	  offset = ((sec->size - address_size)
-		    / bfd_octets_per_byte (abfd, NULL) - offset);
+		    / bfd_octets_per_byte (abfd, sec) - offset);
 	}
       return offset;
     }

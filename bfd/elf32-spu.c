@@ -27,6 +27,9 @@
 #include "elf/spu.h"
 #include "elf32-spu.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 /* We use RELA style relocs.  Don't define USE_REL.  */
 
 static bfd_reloc_status_type spu_elf_rel9 (bfd *, arelent *, asymbol *,
@@ -212,7 +215,7 @@ spu_elf_rel9 (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
 
   /* Get symbol value.  */
   val = 0;

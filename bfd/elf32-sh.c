@@ -30,6 +30,9 @@
 #include "libiberty.h"
 #include "../opcodes/sh-opc.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 static bfd_reloc_status_type sh_elf_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type sh_elf_ignore_reloc
@@ -233,7 +236,8 @@ sh_elf_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol_in,
   bfd_vma sym_value;
   enum elf_sh_reloc_type r_type;
   bfd_vma addr = reloc_entry->address;
-  bfd_byte *hit_data = addr + (bfd_byte *) data;
+  bfd_size_type octets = addr * OCTETS_PER_BYTE (abfd, input_section);
+  bfd_byte *hit_data = (bfd_byte *) data + octets;
 
   r_type = (enum elf_sh_reloc_type) reloc_entry->howto->type;
 
@@ -254,8 +258,7 @@ sh_elf_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol_in,
     return bfd_reloc_undefined;
 
   /* PR 17512: file: 9891ca98.  */
-  if ((addr * bfd_octets_per_byte (abfd, NULL)
-       + bfd_get_reloc_size (reloc_entry->howto))
+  if (octets + bfd_get_reloc_size (reloc_entry->howto)
       > bfd_get_section_limit_octets (abfd, input_section))
     return bfd_reloc_outofrange;
 

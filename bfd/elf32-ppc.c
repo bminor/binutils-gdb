@@ -37,6 +37,9 @@
 #include "dwarf2.h"
 #include "opcode/ppc.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 typedef enum split16_format_type
 {
   split16a_type = 0,
@@ -956,7 +959,7 @@ ppc_elf_addr16_ha_reloc (bfd *abfd,
 	    + input_section->output_section->vma);
   value >>= 16;
 
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~0x1fffc1;
   insn |= (value & 0xffc1) | ((value & 0x3e) << 15);

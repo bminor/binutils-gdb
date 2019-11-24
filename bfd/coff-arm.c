@@ -33,6 +33,9 @@
 
 #include "libcoff.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 /* Macros for manipulation the bits in the flags field of the coff data
    structure.  */
 #define APCS_26_FLAG(abfd) \
@@ -96,7 +99,7 @@ coff_arm_reloc (bfd *abfd,
 		arelent *reloc_entry,
 		asymbol *symbol ATTRIBUTE_UNUSED,
 		void * data,
-		asection *input_section ATTRIBUTE_UNUSED,
+		asection *input_section,
 		bfd *output_bfd,
 		char **error_message ATTRIBUTE_UNUSED)
 {
@@ -114,11 +117,11 @@ coff_arm_reloc (bfd *abfd,
   if (diff != 0)
     {
       reloc_howto_type *howto = reloc_entry->howto;
-      unsigned char *addr = (unsigned char *) data + reloc_entry->address;
+      bfd_size_type octets = (reloc_entry->address
+			      * OCTETS_PER_BYTE (abfd, input_section));
+      unsigned char *addr = (unsigned char *) data + octets;
 
-      if (! bfd_reloc_offset_in_range (howto, abfd, input_section,
-				       reloc_entry->address
-				       * bfd_octets_per_byte (abfd, NULL)))
+      if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
 	return bfd_reloc_outofrange;
 
       switch (howto->size)

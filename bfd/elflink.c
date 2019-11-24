@@ -8457,7 +8457,7 @@ resolve_section (const char *name,
 	  if (strncmp (".end", name + len, 4) == 0)
 	    {
 	      *result = (curr->vma
-			 + curr->size / bfd_octets_per_byte (abfd, NULL));
+			 + curr->size / bfd_octets_per_byte (abfd, curr));
 	      return TRUE;
 	    }
 
@@ -8752,7 +8752,7 @@ decode_complex_addend (unsigned long *start,   /* in bits */
 
 bfd_reloc_status_type
 bfd_elf_perform_complex_relocation (bfd *input_bfd,
-				    asection *input_section ATTRIBUTE_UNUSED,
+				    asection *input_section,
 				    bfd_byte *contents,
 				    Elf_Internal_Rela *rel,
 				    bfd_vma relocation)
@@ -8760,6 +8760,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   bfd_vma shift, x, mask;
   unsigned long start, oplen, len, wordsz, chunksz, lsb0_p, signed_p, trunc_p;
   bfd_reloc_status_type r;
+  bfd_size_type octets;
 
   /*  Perform this reloc, since it is complex.
       (this is not to say that it necessarily refers to a complex
@@ -8778,9 +8779,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   else
     shift = (8 * wordsz) - (start + len);
 
-  x = get_value (wordsz, chunksz, input_bfd,
-		 contents
-		 + rel->r_offset * bfd_octets_per_byte (input_bfd, NULL));
+  octets = rel->r_offset * bfd_octets_per_byte (input_bfd, input_section);
+  x = get_value (wordsz, chunksz, input_bfd, contents + octets);
 
 #ifdef DEBUG
   printf ("Doing complex reloc: "
@@ -8812,8 +8812,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  (unsigned long) relocation, (unsigned long) (mask << shift),
 	  (unsigned long) ((relocation & mask) << shift), (unsigned long) x);
 #endif
-  put_value (wordsz, chunksz, input_bfd, x,
-	     contents + rel->r_offset * bfd_octets_per_byte (input_bfd, NULL));
+  put_value (wordsz, chunksz, input_bfd, x, contents + octets);
   return r;
 }
 
@@ -11305,7 +11304,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		file_ptr offset = (file_ptr) o->output_offset;
 		bfd_size_type todo = o->size;
 
-		offset *= bfd_octets_per_byte (output_bfd, NULL);
+		offset *= bfd_octets_per_byte (output_bfd, o);
 
 		if ((o->flags & SEC_ELF_REVERSE_COPY))
 		  {
@@ -11439,6 +11438,7 @@ elf_reloc_link_order (bfd *output_bfd,
       bfd_byte *buf;
       bfd_boolean ok;
       const char *sym_name;
+      bfd_size_type octets;
 
       size = (bfd_size_type) bfd_get_reloc_size (howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
@@ -11465,10 +11465,10 @@ elf_reloc_link_order (bfd *output_bfd,
 	  break;
 	}
 
+      octets = link_order->offset * bfd_octets_per_byte (output_bfd,
+							 output_section);
       ok = bfd_set_section_contents (output_bfd, output_section, buf,
-				     link_order->offset
-				     * bfd_octets_per_byte (output_bfd, NULL),
-				     size);
+				     octets, size);
       free (buf);
       if (! ok)
 	return FALSE;
@@ -11635,7 +11635,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       s = sections[n]->u.indirect.section;
       mask = ~(bfd_vma) 0 << s->alignment_power;
       offset = (offset + ~mask) & mask;
-      s->output_offset = offset / bfd_octets_per_byte (abfd, NULL);
+      s->output_offset = offset / bfd_octets_per_byte (abfd, s);
       sections[n]->offset = offset;
       offset += sections[n]->size;
     }
@@ -12856,12 +12856,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    continue;
 	  if (strcmp (o->name, ".dynstr") != 0)
 	    {
-	      if (! bfd_set_section_contents (abfd, o->output_section,
-					      o->contents,
-					      (file_ptr) o->output_offset
-					      * bfd_octets_per_byte (abfd,
-								     NULL),
-					      o->size))
+	      bfd_size_type octets = ((file_ptr) o->output_offset
+				      * bfd_octets_per_byte (abfd, o));
+	      if (!bfd_set_section_contents (abfd, o->output_section,
+					     o->contents, octets, o->size))
 		goto error_return;
 	    }
 	  else

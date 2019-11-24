@@ -32,6 +32,9 @@
 #include "xtensa-isa.h"
 #include "xtensa-config.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 #define XTENSA_NO_NOP_REMOVAL 0
 
 /* Local helper functions.  */
@@ -2104,7 +2107,7 @@ bfd_elf_xtensa_reloc (bfd *abfd,
   bfd_vma relocation;
   bfd_reloc_status_type flag;
   bfd_size_type octets = (reloc_entry->address
-			  * bfd_octets_per_byte (abfd, NULL));
+			  * OCTETS_PER_BYTE (abfd, input_section));
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;

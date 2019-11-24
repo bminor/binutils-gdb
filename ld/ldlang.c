@@ -3442,16 +3442,16 @@ ldlang_open_output (lang_statement_union_type *statement)
 static void
 init_opb (asection *s)
 {
-  unsigned x = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
-					      ldfile_output_machine);
-  if (s != NULL)
-    {
-      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
-	  && (s->flags & SEC_ELF_OCTETS))
-	x = 1;
-    }
+  unsigned int x;
 
   opb_shift = 0;
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+      && s != NULL
+      && (s->flags & SEC_ELF_OCTETS) != 0)
+    return;
+
+  x = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+				     ldfile_output_machine);
   if (x > 1)
     while ((x & 1) == 0)
       {

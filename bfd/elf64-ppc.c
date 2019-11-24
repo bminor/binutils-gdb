@@ -35,6 +35,9 @@
 #include "elf64-ppc.h"
 #include "dwarf2.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 static bfd_reloc_status_type ppc64_elf_ha_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type ppc64_elf_branch_reloc
@@ -1405,7 +1408,7 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	    + input_section->output_section->vma);
   value = (bfd_signed_vma) value >> 16;
 
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~0x1fffc1;
   insn |= (value & 0xffc1) | ((value & 0x3e) << 15);
@@ -1480,7 +1483,7 @@ ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
     return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~(0x01 << 21);
   r_type = reloc_entry->howto->type;
@@ -1630,7 +1633,7 @@ ppc64_elf_toc64_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   if (TOCstart == 0)
     TOCstart = ppc64_elf_set_toc (NULL, input_section->output_section->owner);
 
-  octets = reloc_entry->address * bfd_octets_per_byte (abfd, NULL);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
   bfd_put_64 (abfd, TOCstart + TOC_BASE_OFF, (bfd_byte *) data + octets);
   return bfd_reloc_ok;
 }

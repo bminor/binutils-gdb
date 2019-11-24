@@ -32,6 +32,9 @@
 #include "opcode/pru.h"
 #include "libiberty.h"
 
+/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
+#define OCTETS_PER_BYTE(ABFD, SEC) 1
+
 #define SWAP_VALS(A,B)		      \
   do {				      \
       (A) ^= (B);		      \
@@ -537,7 +540,7 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
 			     bfd_vma symbol_value, bfd_vma addend)
 {
   bfd_signed_vma relocation;
-  bfd_size_type octets = offset * bfd_octets_per_byte (abfd, NULL);
+  bfd_size_type octets = offset * OCTETS_PER_BYTE (abfd, input_section);
   bfd_byte *location;
   unsigned long in1, in2;
 
@@ -557,7 +560,7 @@ pru_elf32_do_ldi32_relocate (bfd *abfd, reloc_howto_type *howto,
   BFD_ASSERT (!howto->pc_relative);
 
   /* A hacked-up version of _bfd_relocate_contents() follows.  */
-  location = data + offset * bfd_octets_per_byte (abfd, NULL);
+  location = data + octets;
 
   BFD_ASSERT (!howto->pc_relative);
 

@@ -1,3 +1,40 @@
+2019-11-25  Alan Modra  <amodra@gmail.com>
+
+	* archures.c (bfd_octets_per_byte): Tail call
+	bfd_arch_mach_octets_per_byte.
+	* coff-arm.c (OCTETS_PER_BYTE): Define.
+	(coff_arm_reloc): Introduce new "octets" temp.  Use OCTETS_PER_BYTE
+	with section.  Correct "addr".  Remove ATTRIBUTE_UNUSED.
+	* coff-i386.c (coff_i386_reloc): Similarly.
+	* coff-mips.c (mips_reflo_reloc): Similarly.
+	* coff-x86_64.c (coff_amd64_reloc): Similarly.
+	* elf32-msp430.c (OCTETS_PER_BYTE): Define.
+	(rl78_sym_diff_handler): Use OCTETS_PER_BYTE, with section.
+	* elf32-nds32.c (nds32_elf_get_relocated_section_contents): Similarly.
+	* elf32-ppc.c (ppc_elf_addr16_ha_reloc): Similarly.
+	* elf32-pru.c (pru_elf32_do_ldi32_relocate): Similarly.
+	* elf32-s12z.c (opru18_reloc): Similarly.
+	* elf32-sh.c (sh_elf_reloc): Similarly.
+	* elf32-spu.c (spu_elf_rel9): Similarly.
+	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Similarly.
+	* elf64-ppc.c (ppc64_elf_ha_reloc, ppc64_elf_brtaken_reloc),
+	(ppc64_elf_toc64_reloc): Similarly.
+	* bfd.c (bfd_get_section_limit): Pass section to bfd_octets_per_byte.
+	* cofflink.c (_bfd_coff_link_input_bfd),
+	(_bfd_coff_reloc_link_order): Likewise.
+	* elf.c (_bfd_elf_section_offset): Likewise.
+	* elflink.c (resolve_section, bfd_elf_perform_complex_relocation),
+	(elf_link_input_bfd, elf_reloc_link_order, elf_fixup_link_order),
+	(bfd_elf_final_link): Likewise.
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't strncmp twice
+	to set SEC_ELF_OCTETS.
+	* reloc.c (bfd_perform_relocation): Tidy SEC_ELF_OCTETS special case.
+	(bfd_install_relocation): Likewise.
+	(_bfd_final_link_relocate): Don't recalculate octets.
+	* syms.c (_bfd_stab_section_find_nearest_line): Introduc new
+	"octets" temp.
+	* bfd-in2.h: Regenerate.
+
 2019-11-25  Christian Eggers  <ceggers@gmx.de>
 
 	* section.c (struct bfd_section): New flag SEC_ELF_OCTETS.
