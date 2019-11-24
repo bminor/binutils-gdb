@@ -25,6 +25,7 @@
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"
+#include "gdbarch.h"
 
 #include "m68k-tdep.h"
 
