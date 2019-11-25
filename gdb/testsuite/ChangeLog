@@ -1,5 +1,11 @@
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.base/endianity.c (struct other) <x>: New field.
+	(main): Initialize it.
+	* gdb.base/endianity.exp: Update.
+
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/scalar_storage/storage.adb: New file.
 	* gdb.ada/scalar_storage/pck.adb: New file.
 	* gdb.ada/scalar_storage/pck.ads: New file.
