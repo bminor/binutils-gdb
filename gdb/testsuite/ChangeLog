@@ -1,3 +1,9 @@
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/endianity.c (struct otherendian) <f>: New field.
+	(main): Initialize it.
+	* gdb.base/endianity.exp: Update.
+
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/mi-sym-info.exp: Add tests for -max-results parameter.

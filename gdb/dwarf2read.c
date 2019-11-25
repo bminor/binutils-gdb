@@ -17624,7 +17624,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 
 static struct type *
 dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
-			const char *name_hint)
+			const char *name_hint, enum bfd_endian byte_order)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const struct floatformat **format;
@@ -17632,7 +17632,7 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
 
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format)
-    type = init_float_type (objfile, bits, name, format);
+    type = init_float_type (objfile, bits, name, format, byte_order);
   else
     type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
 
@@ -17671,7 +17671,8 @@ dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
 static struct type *
 dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
 				 struct objfile *objfile,
-				 int bits, const char *name_hint)
+				 int bits, const char *name_hint,
+				 enum bfd_endian byte_order)
 {
   gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *tt = nullptr;
@@ -17720,7 +17721,7 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
     tt = nullptr;
 
   const char *name = (tt == nullptr) ? nullptr : TYPE_NAME (tt);
-  return dwarf2_init_float_type (objfile, bits, name, name_hint);
+  return dwarf2_init_float_type (objfile, bits, name, name_hint, byte_order);
 }
 
 /* Find a representation of a given base type and install
@@ -17733,7 +17734,6 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   int encoding = 0, bits = 0;
-  int endianity = 0;
   const char *name;
   gdbarch *arch;
 
@@ -17746,11 +17746,29 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   name = dwarf2_name (die, cu);
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
-  attr = dwarf2_attr (die, DW_AT_endianity, cu);
-  if (attr)
-    endianity = DW_UNSND (attr);
 
   arch = get_objfile_arch (objfile);
+  enum bfd_endian byte_order = gdbarch_byte_order (arch);
+
+  attr = dwarf2_attr (die, DW_AT_endianity, cu);
+  if (attr)
+    {
+      int endianity = DW_UNSND (attr);
+
+      switch (endianity)
+	{
+	case DW_END_big:
+	  byte_order = BFD_ENDIAN_BIG;
+	  break;
+	case DW_END_little:
+	  byte_order = BFD_ENDIAN_LITTLE;
+	  break;
+	default:
+	  complaint (_("DW_AT_endianity has unrecognized value %d"), endianity);
+	  break;
+	}
+    }
+
   switch (encoding)
     {
       case DW_ATE_address:
@@ -17762,14 +17780,15 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = init_boolean_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_complex_float:
-	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name);
+	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name,
+						byte_order);
 	type = init_complex_type (objfile, name, type);
 	break;
       case DW_ATE_decimal_float:
 	type = init_decfloat_type (objfile, bits, name);
 	break;
       case DW_ATE_float:
-	type = dwarf2_init_float_type (objfile, bits, name, name);
+	type = dwarf2_init_float_type (objfile, bits, name, name, byte_order);
 	break;
       case DW_ATE_signed:
 	type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
@@ -17827,17 +17846,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 
   maybe_set_alignment (cu, die, type);
 
-  switch (endianity)
-    {
-      case DW_END_big:
-        if (gdbarch_byte_order (arch) == BFD_ENDIAN_LITTLE)
-          TYPE_ENDIANITY_NOT_DEFAULT (type) = 1;
-        break;
-      case DW_END_little:
-        if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
-          TYPE_ENDIANITY_NOT_DEFAULT (type) = 1;
-        break;
-    }
+  TYPE_ENDIANITY_NOT_DEFAULT (type) = gdbarch_byte_order (arch) != byte_order;
 
   return set_die_type (die, type, cu);
 }

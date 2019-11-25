@@ -2976,15 +2976,22 @@ init_boolean_type (struct objfile *objfile,
 /* Allocate a TYPE_CODE_FLT type structure associated with OBJFILE.
    BIT is the type size in bits; if BIT equals -1, the size is
    determined by the floatformat.  NAME is the type name.  Set the
-   TYPE_FLOATFORMAT from FLOATFORMATS.  */
+   TYPE_FLOATFORMAT from FLOATFORMATS.  BYTE_ORDER is the byte order
+   to use.  If it is BFD_ENDIAN_UNKNOWN (the default), then the byte
+   order of the objfile's architecture is used.  */
 
 struct type *
 init_float_type (struct objfile *objfile,
 		 int bit, const char *name,
-		 const struct floatformat **floatformats)
+		 const struct floatformat **floatformats,
+		 enum bfd_endian byte_order)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
+  if (byte_order == BFD_ENDIAN_UNKNOWN)
+    {
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      byte_order = gdbarch_byte_order (gdbarch);
+    }
+  const struct floatformat *fmt = floatformats[byte_order];
   struct type *t;
 
   bit = verify_floatformat (bit, fmt);
