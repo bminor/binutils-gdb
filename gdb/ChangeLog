@@ -1,5 +1,22 @@
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (decode_constrained_packed_array)
+	(ada_value_assign, value_assign_to_component): Update.
+	* dwarf2loc.c (rw_pieced_value, access_memory)
+	(dwarf2_compile_expr_to_ax): Update.
+	* dwarf2read.c (dwarf2_add_field): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* gdbarch.sh (bits_big_endian): Remove.
+	* gdbtypes.h (union field_location): Update comment.
+	* target-descriptions.c (make_gdb_type): Update.
+	* valarith.c (value_bit_index): Update.
+	* value.c (struct value) <bitpos>: Update comment.
+	(unpack_bits_as_long, modify_field): Update.
+	* value.h (value_bitpos): Update comment.
+
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdbtypes.c (type_byte_order): Move earlier.  Assert for unknown
 	endian-ness.
 

@@ -1723,7 +1723,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   word = extract_unsigned_integer (valaddr + (rel_index / TARGET_CHAR_BIT), 1,
 				   type_byte_order (type));
   rel_index %= TARGET_CHAR_BIT;
-  if (gdbarch_bits_big_endian (gdbarch))
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;
   return (word >> rel_index) & 1;
 }

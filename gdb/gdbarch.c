@@ -172,7 +172,6 @@ struct gdbarch
 
      */
 
-  int bits_big_endian;
   int short_bit;
   int int_bit;
   int long_bit;
@@ -389,7 +388,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->target_desc = info->target_desc;
 
   /* Force the explicit initialization of these.  */
-  gdbarch->bits_big_endian = (gdbarch->byte_order == BFD_ENDIAN_BIG);
   gdbarch->short_bit = 2*TARGET_CHAR_BIT;
   gdbarch->int_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_bit = 4*TARGET_CHAR_BIT;
@@ -528,7 +526,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->bfd_arch_info == NULL)
     log.puts ("\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level.  */
-  /* Skip verify of bits_big_endian, invalid_p == 0 */
   /* Skip verify of short_bit, invalid_p == 0 */
   /* Skip verify of int_bit, invalid_p == 0 */
   /* Skip verify of long_bit, invalid_p == 0 */
@@ -816,9 +813,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
                       gdbarch_bfd_arch_info (gdbarch)->printable_name);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: bits_big_endian = %s\n",
-                      plongest (gdbarch->bits_big_endian));
   fprintf_unfiltered (file,
                       "gdbarch_dump: breakpoint_from_pc = <%s>\n",
                       host_address_to_string (gdbarch->breakpoint_from_pc));
@@ -1562,23 +1556,6 @@ gdbarch_target_desc (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_target_desc called\n");
   return gdbarch->target_desc;
-}
-
-int
-gdbarch_bits_big_endian (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of bits_big_endian, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_bits_big_endian called\n");
-  return gdbarch->bits_big_endian;
-}
-
-void
-set_gdbarch_bits_big_endian (struct gdbarch *gdbarch,
-                             int bits_big_endian)
-{
-  gdbarch->bits_big_endian = bits_big_endian;
 }
 
 int

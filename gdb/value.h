@@ -146,8 +146,8 @@ extern LONGEST value_bitsize (const struct value *);
 extern void set_value_bitsize (struct value *, LONGEST bit);
 
 /* Only used for bitfields; position of start of field.  For
-   gdbarch_bits_big_endian=0 targets, it is the position of the LSB.  For
-   gdbarch_bits_big_endian=1 targets, it is the position of the MSB.  */
+   little-endian targets, it is the position of the LSB.  For
+   big-endian targets, it is the position of the MSB.  */
 
 extern LONGEST value_bitpos (const struct value *);
 extern void set_value_bitpos (struct value *, LONGEST bit);

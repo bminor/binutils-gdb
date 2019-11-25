@@ -347,10 +347,6 @@ i;enum gdb_osabi;osabi;;;GDB_OSABI_UNKNOWN
 #
 i;const struct target_desc *;target_desc;;;;;;;host_address_to_string (gdbarch->target_desc)
 
-# The bit byte-order has to do just with numbering of bits in debugging symbols
-# and such.  Conceptually, it's quite separate from byte/word byte order.
-v;int;bits_big_endian;;;1;(gdbarch->byte_order == BFD_ENDIAN_BIG);;0
-
 # Number of bits in a short or unsigned short for the target machine.
 v;int;short_bit;;;8 * sizeof (short);2*TARGET_CHAR_BIT;;0
 # Number of bits in an int or unsigned int for the target machine.

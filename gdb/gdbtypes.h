@@ -552,10 +552,9 @@ union type_owner
 union field_location
 {
   /* * Position of this field, counting in bits from start of
-     containing structure.  For gdbarch_bits_big_endian=1
-     targets, it is the bit offset to the MSB.  For
-     gdbarch_bits_big_endian=0 targets, it is the bit offset to
-     the LSB.  */
+     containing structure.  For big-endian targets, it is the bit
+     offset to the MSB.  For little-endian targets, it is the bit
+     offset to the LSB.  */
 
   LONGEST bitpos;
 

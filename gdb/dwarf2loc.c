@@ -1577,8 +1577,7 @@ rw_pieced_value (struct value *v, struct value *from)
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
   gdb::byte_vector buffer;
-  int bits_big_endian
-    = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
+  bool bits_big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
 
   if (from != NULL)
     {
@@ -2817,7 +2816,7 @@ access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
   if (8 * nbytes == nbits)
     return;
 
-  if (gdbarch_bits_big_endian (arch))
+  if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
     {
       /* On a bits-big-endian machine, we want the high-order
 	 NBITS.  */
@@ -2867,7 +2866,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
   enum bfd_endian byte_order = gdbarch_byte_order (arch);
   ULONGEST bits_collected = 0;
   unsigned int addr_size_bits = 8 * addr_size;
-  int bits_big_endian = gdbarch_bits_big_endian (arch);
+  bool bits_big_endian = byte_order == BFD_ENDIAN_BIG;
 
   std::vector<int> offsets (op_end - op_ptr, -1);
 

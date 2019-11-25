@@ -2257,7 +2257,7 @@ decode_constrained_packed_array (struct value *arr)
       return NULL;
     }
 
-  if (gdbarch_bits_big_endian (get_type_arch (value_type (arr)))
+  if (type_byte_order (value_type (arr)) == BFD_ENDIAN_BIG
       && ada_is_modular_type (value_type (arr)))
     {
        /* This is a (right-justified) modular type representing a packed
@@ -2499,7 +2499,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   const gdb_byte *src;                /* First byte containing data to unpack */
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
-  const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+  const int is_big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
   gdb::byte_vector staging;
 
   type = ada_check_typedef (type);
@@ -2645,7 +2645,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       if (from_size == 0)
 	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
 
-      const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+      const int is_big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
       ULONGEST from_offset = 0;
       if (is_big_endian && is_scalar_type (value_type (fromval)))
 	from_offset = from_size - bits;
@@ -2694,7 +2694,7 @@ value_assign_to_component (struct value *container, struct value *component,
   else
     bits = value_bitsize (component);
 
-  if (gdbarch_bits_big_endian (get_type_arch (value_type (container))))
+  if (type_byte_order (value_type (container)) == BFD_ENDIAN_BIG)
     {
       int src_offset;
 
