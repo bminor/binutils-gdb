@@ -949,6 +949,9 @@ create_range_type (struct type *result_type, struct type *index_type,
   if (high_bound->kind == PROP_CONST && high_bound->data.const_val < 0)
     TYPE_UNSIGNED (result_type) = 0;
 
+  TYPE_ENDIANITY_NOT_DEFAULT (result_type)
+    = TYPE_ENDIANITY_NOT_DEFAULT (index_type);
+
   return result_type;
 }
 
