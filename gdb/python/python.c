@@ -36,6 +36,18 @@
 #include "location.h"
 #include "run-on-main-thread.h"
 
+#include "readline/rlstdc.h"
+#include "dlfcn.h"
+
+typedef char *rl_compentry_func_t PARAMS((const char *, int));
+typedef char **rl_completion_func_t PARAMS((const char *, int, int));
+typedef char *rl_quote_func_t PARAMS((char *, int, char *));
+typedef char *rl_dequote_func_t PARAMS((char *, int));
+typedef int rl_compignore_func_t PARAMS((char **));
+typedef void rl_compdisp_func_t PARAMS((char **, int, int));
+
+extern rl_completion_func_t *rl_attempted_completion_function;
+
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
 static const char python_excp_full[] = "full";
@@ -150,6 +162,8 @@ static int gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
 
+extern void toggle_completion_func(bool want_py_completion);
+
 /* The interface between gdb proper and loading of python scripts.  */
 
 const struct extension_language_script_ops python_extension_script_ops =
@@ -195,6 +209,14 @@ const struct extension_language_ops python_extension_ops =
 struct gdbarch *python_gdbarch;
 const struct language_defn *python_language;
 
+
+
+volatile void *gdb_py_rl_cext_p = nullptr;
+volatile void (*gdb_flex_complete_p)(void) = nullptr;
+
+#include "completer.h"
+extern char ** gdb_flex_complete(const char *text, int start, int end);
+
 gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
 			   const struct language_defn *language)
 : m_gdbarch (python_gdbarch),
@@ -213,6 +235,40 @@ gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
 
   /* Save it and ensure ! PyErr_Occurred () afterwards.  */
   m_error.emplace ();
+
+
+  toggle_completion_func(true);
+
+  /*if (!gdb_py_rl_cext_p) {
+    gdb_py_rl_cext_p = dlopen(
+      "/usr/lib/python3.8/lib-dynload/"
+      "readline.cpython-38-arm-linux-gnueabihf.so",
+      RTLD_GLOBAL | RTLD_NODELETE | RTLD_NOW
+    );
+  }
+  if (gdb_py_rl_cext_p) {
+    if (!gdb_flex_complete_p) {
+      gdb_flex_complete_p = dlsym(
+        gdb_py_rl_cext_p, "flex_complete"
+      );
+    }
+    if (gdb_flex_complete_p) {
+      // rl_attempted_completion_function = flex_complete;
+      rl_attempted_completion_function =
+        (void (*)(void))
+        (
+          (
+            (uint32_t) gdb_flex_complete_p
+          )
+          +
+          (
+          (((uint32_t) gdb_flex_complete_p) % 2U) == 0U
+            ? 1U
+            : 0U
+          )
+        );
+    } // (gdb_flex_complete_p)
+  } // (gdb_py_rl_cext_p)*/
 }
 
 gdbpy_enter::~gdbpy_enter ()
@@ -224,6 +280,8 @@ gdbpy_enter::~gdbpy_enter ()
       gdbpy_print_stack ();
       warning (_("internal error: Unhandled Python exception"));
     }
+
+  toggle_completion_func(false);
 
   m_error->restore ();
 
@@ -287,6 +345,10 @@ python_interactive_command (const char *arg, int from_tty)
   int err;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+  scoped_restore saverlfunc = make_scoped_restore (
+    &rl_attempted_completion_function,
+     rl_attempted_completion_function
+  );
 
   arg = skip_spaces (arg);
 
@@ -295,16 +357,21 @@ python_interactive_command (const char *arg, int from_tty)
   if (arg && *arg)
     {
       std::string script = std::string (arg) + "\n";
+      toggle_completion_func(true);
       err = eval_python_command (script.c_str ());
+      toggle_completion_func(false);
     }
   else
     {
+      toggle_completion_func(true);
       err = PyRun_InteractiveLoop (ui->instream, "<stdin>");
+      toggle_completion_func(false);
       dont_repeat ();
     }
 
   if (err)
     {
+      toggle_completion_func(false);
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }

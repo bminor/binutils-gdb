@@ -107,7 +107,11 @@ enum explicit_location_match_type
    readline library sees one in any of the current completion strings,
    it thinks that the string needs to be quoted and automatically
    supplies a leading quote.  */
-static const char gdb_completer_command_word_break_characters[] =
+const char gdb_completer_command_word_break_characters_gdb[] =
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
+const char gdb_completer_command_word_break_characters_py[] =
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
+static char gdb_completer_command_word_break_characters[] =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
 
 /* When completing on file names, we remove from the list of word
@@ -176,14 +180,15 @@ filename_completer (struct cmd_list_element *ignore,
       tracker.add_completion
 	(make_completion_match_str (std::move (p_rl), text, word));
     }
-#if 0
+
   /* There is no way to do this just long enough to affect quote
      inserting without also affecting the next completion.  This
      should be fixed in readline.  FIXME.  */
   /* Ensure that readline does the right thing
      with respect to inserting quotes.  */
-  rl_completer_word_break_characters = "";
-#endif
+  rl_completer_word_break_characters
+    = gdb_completer_command_word_break_characters;
+
 }
 
 /* The corresponding completer_handle_brkchars
@@ -226,6 +231,57 @@ struct gdb_rl_completion_word_info
   const char *quote_characters;
   const char *basic_quote_characters;
 };
+
+
+// BEGIN INSERTED toggle_completion_func fragment
+#define _POSIX_THREADS
+#include "../gnulib/config.h"
+#include "python.h"
+#include "pystate.h"
+#include "object.h"
+#include "readline/readline.h"
+#include "dlfcn.h"
+
+extern char ** (*completion_matches_p)(char* text, void(*on_completion)()) = 0;
+/* A more flexible constructor that saves the "begidx" and "endidx"
+ * before calling the normal completer */
+
+
+void *saved_cmp_func = 0;
+
+
+void toggle_completion_func(bool want_py_completion) {
+    if ( ! saved_cmp_func &&
+         rl_attempted_completion_function &&
+         rl_attempted_completion_function
+           != gdb_rl_attempted_completion_function)
+    {
+      saved_cmp_func = rl_attempted_completion_function;
+    }
+
+    if (!saved_cmp_func) {
+      rl_completer_word_break_characters 
+        = gdb_completer_command_word_break_characters
+          = gdb_completer_command_word_break_characters_gdb;
+      return;
+    }
+    
+    if (want_py_completion) {
+        rl_attempted_completion_function = saved_cmp_func;
+        rl_completer_word_break_characters 
+          = gdb_completer_command_word_break_characters
+            = gdb_completer_command_word_break_characters_py;
+    } else {
+        rl_attempted_completion_function 
+          = gdb_rl_attempted_completion_function;
+        rl_completer_word_break_characters 
+          = gdb_completer_command_word_break_characters
+            = gdb_completer_command_word_break_characters_gdb;
+    }
+}
+
+// END INSERTED toggle_completion_func fragment
+
 
 static const char *
 gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
@@ -388,7 +444,8 @@ const char *
 advance_to_expression_complete_word_point (completion_tracker &tracker,
 					   const char *text)
 {
-  const char *brk_chars = current_language->la_word_break_characters ();
+  const char *brk_chars = gdb_completer_command_word_break_characters;
+    // current_language->la_word_break_characters ();
   return advance_to_completion_word (tracker, brk_chars, text);
 }
 
@@ -1071,6 +1128,38 @@ add_struct_fields (struct type *type, completion_list &output,
 
 /* See completer.h.  */
 
+static const char *get_error_name(const enum errors err) {
+  switch (err) {
+    case GDB_NO_ERROR: return "GDB_NO_ERROR";
+    case GENERIC_ERROR: return "GENERIC_ERROR";
+    case NOT_FOUND_ERROR: return "NOT_FOUND_ERROR";
+    case TLS_NO_LIBRARY_SUPPORT_ERROR: return "TLS_NO_LIBRARY_SUPPORT_ERROR";
+    case TLS_LOAD_MODULE_NOT_FOUND_ERROR: return "TLS_LOAD_MODULE_NOT_FOUND_ERROR";
+    case TLS_NOT_ALLOCATED_YET_ERROR: return "TLS_NOT_ALLOCATED_YET_ERROR";
+    case TLS_GENERIC_ERROR: return "TLS_GENERIC_ERROR";
+    case XML_PARSE_ERROR: return "XML_PARSE_ERROR";
+    case MEMORY_ERROR: return "MEMORY_ERROR";
+    case NOT_AVAILABLE_ERROR: return "NOT_AVAILABLE_ERROR";
+    case OPTIMIZED_OUT_ERROR: return "OPTIMIZED_OUT_ERROR";
+    case NO_ENTRY_VALUE_ERROR: return "NO_ENTRY_VALUE_ERROR";
+    case TARGET_CLOSE_ERROR: return "TARGET_CLOSE_ERROR";
+    case UNDEFINED_COMMAND_ERROR: return "UNDEFINED_COMMAND_ERROR";
+    case NOT_SUPPORTED_ERROR: return "NOT_SUPPORTED_ERROR";
+    case MAX_COMPLETIONS_REACHED_ERROR: return "MAX_COMPLETIONS_REACHED_ERROR";
+    default: return "(invalid enum errors value)";
+  }
+}
+
+static const char *get_return_reason_name(const enum return_reason reason) {
+  switch (reason) {
+    case RETURN_QUIT: return "RETURN_QUIT";
+    case RETURN_ERROR: return "RETURN_ERROR";
+    default: return "(invalid enum return_reason value)";
+  }
+}
+
+
+
 void
 complete_expression (completion_tracker &tracker,
 		     const char *text, const char *word)
@@ -1087,6 +1176,16 @@ complete_expression (completion_tracker &tracker,
     }
   catch (const gdb_exception_error &except)
     {
+      fprintf(
+        stderr,
+        "parse_expression_for_completion threw an exception (reason = %s)"
+        "parsing text \"%s\": "
+        "gdb_exception_error: %s: \"%s\"\n",
+        get_return_reason_name(except.reason),
+        text,
+        get_error_name(except.error),
+        except.message
+      );
       return;
     }
 
@@ -1138,7 +1237,7 @@ expression_completer (struct cmd_list_element *ignore,
 void
 set_rl_completer_word_break_characters (const char *break_chars)
 {
-  rl_completer_word_break_characters = (char *) break_chars;
+  //rl_completer_word_break_characters = (char *) break_chars;
 }
 
 /* Complete on symbols.  */
@@ -2292,6 +2391,16 @@ gdb_rl_attempted_completion_function (const char *text, int start, int end)
     }
   catch (const gdb_exception &ex)
     {
+      fprintf(
+        stderr,
+        "gdb_rl_attempted_completion_function_throw "
+        "threw an exception (reason = %s) parsing text \"%s\": "
+        "gdb_exception: %s: \"%s\"\n",
+        get_return_reason_name(ex.reason),
+        text,
+        get_error_name(ex.error),
+        ex.message
+      );
     }
 
   return NULL;
@@ -2892,13 +3001,13 @@ gdb_display_match_list (char **matches, int len, int max,
 			const struct match_list_displayer *displayer)
 {
   /* Readline will never call this if complete_line returned NULL.  */
-  gdb_assert (max_completions != 0);
+  // gdb_assert (max_completions != 0);
 
   /* complete_line will never return more than this.  */
-  if (max_completions > 0)
-    gdb_assert (len <= max_completions);
+  // if (max_completions > 0)
+  // gdb_assert (len <= max_completions);
 
-  if (rl_completion_query_items > 0 && len >= rl_completion_query_items)
+  if (false && rl_completion_query_items > 0 && len >= rl_completion_query_items)
     {
       char msg[100];
 
