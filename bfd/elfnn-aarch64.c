@@ -3278,7 +3278,7 @@ _bfd_aarch64_add_stub_entry_after (const char *stub_name,
 
 static bfd_boolean
 aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
-			void *in_arg ATTRIBUTE_UNUSED)
+			void *in_arg)
 {
   struct elf_aarch64_stub_hash_entry *stub_entry;
   asection *stub_sec;
@@ -3291,9 +3291,23 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
   unsigned int template_size;
   const uint32_t *template;
   unsigned int i;
+  struct bfd_link_info *info;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
+
+  info = (struct bfd_link_info *) in_arg;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (stub_entry->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    {
+      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
+			    "Retry without --enable-non-contiguous-regions.\n"),
+			  stub_entry->target_section);
+      abort();
+    }
 
   stub_sec = stub_entry->stub_sec;
 

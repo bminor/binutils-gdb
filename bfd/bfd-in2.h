@@ -1192,6 +1192,10 @@ typedef struct bfd_section
     struct bfd_section *s;
     const char *linked_to_symbol_name;
   } map_head, map_tail;
+ /* Points to the output section this section is already assigned to, if any.
+    This is used when support for non-contiguous memory regions is enabled.  */
+ struct bfd_section *already_assigned;
+
 } asection;
 
 /* Relax table contains information about instructions which can
@@ -1373,7 +1377,10 @@ discarded_section (const asection *sec)
      (struct bfd_symbol *) SYM, &SEC.symbol,                           \
                                                                        \
   /* map_head, map_tail                                            */  \
-     { NULL }, { NULL }                                                \
+     { NULL }, { NULL },                                               \
+                                                                       \
+  /* already_assigned                                              */  \
+     NULL                                                              \
     }
 
 /* We use a macro to initialize the static asymbol structures because

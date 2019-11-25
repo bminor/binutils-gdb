@@ -10569,6 +10569,18 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	 discarding, we don't need to keep it.  */
       if (isym->st_shndx != SHN_UNDEF
 	  && isym->st_shndx < SHN_LORESERVE
+	  && isec->output_section == NULL
+	  && flinfo->info->non_contiguous_regions
+	  && flinfo->info->non_contiguous_regions_warnings)
+	{
+	  _bfd_error_handler (_("warning: --enable-non-contiguous-regions "
+				"discards section `%s' from '%s'\n"),
+			      isec->name, isec->owner->filename);
+	  continue;
+	}
+
+      if (isym->st_shndx != SHN_UNDEF
+	  && isym->st_shndx < SHN_LORESERVE
 	  && bfd_section_removed_from_list (output_bfd,
 					    isec->output_section))
 	continue;

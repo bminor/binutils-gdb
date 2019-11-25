@@ -3459,7 +3459,7 @@ metag_type_of_stub (asection *input_sec,
 #define MOV_PC_A0_3	0xa3180ca0
 
 static bfd_boolean
-metag_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg ATTRIBUTE_UNUSED)
+metag_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
   struct elf_metag_stub_hash_entry *hsh;
   asection *stub_sec;
@@ -3467,9 +3467,22 @@ metag_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg ATTRIBUTE_U
   bfd_byte *loc;
   bfd_vma sym_value;
   int size;
+  struct bfd_link_info *info;
 
   /* Massage our args to the form they really have.  */
   hsh = (struct elf_metag_stub_hash_entry *) gen_entry;
+  info = (struct bfd_link_info *) in_arg;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (hsh->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    {
+      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
+			    "Retry without --enable-non-contiguous-regions.\n"),
+			  hsh->target_section);
+      abort();
+    }
 
   stub_sec = hsh->stub_sec;
 

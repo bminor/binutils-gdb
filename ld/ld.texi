@@ -459,6 +459,48 @@ will contain a colon separated list of audit interfaces to use.  This
 option is only meaningful on ELF platforms supporting the rtld-audit interface.
 The -P option is provided for Solaris compatibility.
 
+@kindex --enable-non-contiguous-regions
+@item --enable-non-contiguous-regions
+This option avoids generating an error if an input section does not
+fit a matching output section. The linker tries to allocate the input
+section to subseque nt matching output sections, and generates an
+error only if no output section is large enough.  This is useful when
+several non-contiguous memory regions are available and the input
+section does not require a particular one.  The order in which input
+sections are evaluated does not change, for instance:
+
+@smallexample
+  MEMORY @{
+    MEM1 (rwx) : ORIGIN : 0x1000, LENGTH = 0x14
+    MEM2 (rwx) : ORIGIN : 0x1000, LENGTH = 0x40
+    MEM3 (rwx) : ORIGIN : 0x2000, LENGTH = 0x40
+  @}
+  SECTIONS @{
+    mem1 : @{ *(.data.*); @} > MEM1
+    mem2 : @{ *(.data.*); @} > MEM2
+    mem3 : @{ *(.data.*); @} > MEM2
+  @}
+
+  with input sections:
+  .data.1: size 8
+  .data.2: size 0x10
+  .data.3: size 4
+
+  results in .data.1 affected to mem1, and .data.2 and .data.3
+  affected to mem2, even though .data.3 would fit in mem3.
+@end smallexample
+
+This option is incompatible with INSERT statements because it changes
+the way input sections are mapped to output sections.
+
+@kindex --enable-non-contiguous-regions-warnings
+@item --enable-non-contiguous-regions-warnings
+This option enables warnings when
+@code{--enable-non-contiguous-regions} allows possibly unexpected
+matches in sections mapping, potentially leading to silently
+discarding a section instead of failing because it does not fit any
+output region.
+
 @cindex entry point, from command line
 @kindex -e @var{entry}
 @kindex --entry=@var{entry}

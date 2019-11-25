@@ -731,6 +731,17 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
   switch (hsh->stub_type)
     {
     case hppa_stub_long_branch:
+      /* Fail if the target section could not be assigned to an output
+	 section.  The user should fix his linker script.  */
+      if (hsh->target_section->output_section == NULL
+	  && info->non_contiguous_regions)
+	{
+	  _bfd_error_handler (_("Could not assign '%pA' to an output section. "
+				"Retry without --enable-non-contiguous-regions.\n"),
+			      hsh->target_section);
+	  abort();
+    }
+
       /* Create the long branch.  A long branch is formed with "ldil"
 	 loading the upper bits of the target address into a register,
 	 then branching with "be" which adds in the lower bits.
@@ -751,6 +762,16 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       break;
 
     case hppa_stub_long_branch_shared:
+      /* Fail if the target section could not be assigned to an output
+	 section.  The user should fix his linker script.  */
+      if (hsh->target_section->output_section == NULL
+	  && info->non_contiguous_regions)
+	{
+	  _bfd_error_handler (_("Could not assign %pA to an output section. "
+				"Retry without --enable-non-contiguous-regions.\n"),
+			      hsh->target_section);
+	  abort();
+    }
       /* Branches are relative.  This is where we are going to.  */
       sym_value = (hsh->target_value
 		   + hsh->target_section->output_offset
@@ -823,6 +844,16 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
       break;
 
     case hppa_stub_export:
+      /* Fail if the target section could not be assigned to an output
+	 section.  The user should fix his linker script.  */
+      if (hsh->target_section->output_section == NULL
+	  && info->non_contiguous_regions)
+	{
+	  _bfd_error_handler (_("Could not assign %pA to an output section. "
+				"Retry without --enable-non-contiguous-regions.\n"),
+			      hsh->target_section);
+	  abort();
+    }
       /* Branches are relative.  This is where we are going to.  */
       sym_value = (hsh->target_value
 		   + hsh->target_section->output_offset

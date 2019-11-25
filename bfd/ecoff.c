@@ -78,8 +78,10 @@ static asection bfd_debug_section =
      NULL,
   /* symbol_ptr_ptr,						   */
      NULL,
-  /* map_head, map_tail						   */
-     { NULL }, { NULL }
+  /* map_head, map_tail,					   */
+     { NULL }, { NULL },
+  /* already_assigned 						   */
+     NULL,
 };
 
 /* Create an ECOFF object.  */

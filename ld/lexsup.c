@@ -122,6 +122,10 @@ static const struct ld_option ld_options[] =
     'E', NULL, N_("Export all dynamic symbols"), TWO_DASHES },
   { {"no-export-dynamic", no_argument, NULL, OPTION_NO_EXPORT_DYNAMIC},
     '\0', NULL, N_("Undo the effect of --export-dynamic"), TWO_DASHES },
+  { {"enable-non-contiguous-regions", no_argument, NULL, OPTION_NON_CONTIGUOUS_REGIONS},
+    '\0', NULL, N_("Enable support of non-contiguous memory regions"), TWO_DASHES },
+  { {"enable-non-contiguous-regions-warnings", no_argument, NULL, OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS},
+    '\0', NULL, N_("Enable warnings when --enable-non-contiguous-regions may cause unexpected behaviour"), TWO_DASHES },
   { {"EB", no_argument, NULL, OPTION_EB},
     '\0', NULL, N_("Link big-endian objects"), ONE_DASH },
   { {"EL", no_argument, NULL, OPTION_EL},
@@ -844,6 +848,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NO_EXPORT_DYNAMIC:
 	  link_info.export_dynamic = FALSE;
+	  break;
+	case OPTION_NON_CONTIGUOUS_REGIONS:
+	  link_info.non_contiguous_regions = TRUE;
+	  break;
+	case OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS:
+	  link_info.non_contiguous_regions_warnings = TRUE;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, TRUE);

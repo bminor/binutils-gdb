@@ -2490,7 +2490,20 @@ nios2_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg ATTRIBUTE_U
     = (struct elf32_nios2_stub_hash_entry *) gen_entry;
   asection *stub_sec = hsh->stub_sec;
   bfd_vma sym_value;
+  struct bfd_link_info *info;
 
+  info = (struct bfd_link_info *) in_arg;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (hsh->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    {
+      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
+			    "Retry without --enable-non-contiguous-regions.\n"),
+			  hsh->target_section);
+      abort();
+    }
   /* Make a note of the offset within the stubs for this entry.  */
   hsh->stub_offset = stub_sec->size;
 

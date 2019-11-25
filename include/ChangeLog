@@ -1,3 +1,8 @@
+2020-03-13  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* bfdlink.h (bfd_link_info): Add non_contiguous_regions and
+	non_contiguous_regions_warnings fields.
+
 2020-03-13  Christian Eggers  <ceggers@gmx.de>
 
 	* bfdlink.h (struct bfd_link_order): Add unit (bytes/octets) to

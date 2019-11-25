@@ -1,3 +1,22 @@
+2020-03-13  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* bfd-in2.h: Regenerate.
+	* section.c (asection): Add already_assigned field.
+	(BFD_FAKE_SECTION): Add default initializer for it.
+	* ecoff.c (bfd_debug_section): Initialize already_assigned field.
+	* elf32-arm.c (arm_build_one_stub): Add support for
+	non_contiguous_regions.
+	* elf32-csky.c (csky_build_one_stub): Likewise.
+	* elf32-hppa.c (hppa_build_one_stub): Likewise.
+	* elf32-m68hc11.c (m68hc11_elf_build_one_stub): Likewise.
+	* elf32-m68hc12.c (m68hc12_elf_build_one_stub): Likewise.
+	* elf32-metag.c (metag_build_one_stub): Likewise.
+	* elf32-nios2.c (nios2_build_one_stub): Likewise.
+	* elf64-ppc.c (ppc_build_one_stub): Likewise.
+	(ppc_size_one_stub): Likewise.
+	* elfnn-aarch64.c (aarch64_build_one_stub): Likewise.
+	* elflink.c (elf_link_input_bfd): Likewise.
+
 2020-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24920
