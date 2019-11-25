@@ -1,5 +1,10 @@
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdbtypes.c (type_byte_order): Move earlier.  Assert for unknown
+	endian-ness.
+
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (dwarf2_init_float_type)
 	(dwarf2_init_complex_target_type): Add byte_order parameter.
 	(read_base_type): Compute byte order earlier.

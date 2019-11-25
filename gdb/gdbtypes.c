@@ -3423,6 +3423,26 @@ is_unique_ancestor (struct type *base, struct value *val)
 				    value_address (val), val) == 1;
 }
 
+/* See gdbtypes.h.  */
+
+enum bfd_endian
+type_byte_order (const struct type *type)
+{
+  bfd_endian byteorder = gdbarch_byte_order (get_type_arch (type));
+  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
+    {
+      if (byteorder == BFD_ENDIAN_BIG)
+        return BFD_ENDIAN_LITTLE;
+      else
+	{
+	  gdb_assert (byteorder == BFD_ENDIAN_LITTLE);
+	  return BFD_ENDIAN_BIG;
+	}
+    }
+
+  return byteorder;
+}
+
 
 /* Overload resolution.  */
 
@@ -5700,22 +5720,4 @@ _initialize_gdbtypes (void)
 			   NULL, NULL,
 			   show_strict_type_checking,
 			   &setchecklist, &showchecklist);
-}
-
-/* See gdbtypes.h.  */
-enum bfd_endian
-type_byte_order (const struct type *type)
-{
-  bfd_endian byteorder = gdbarch_byte_order (get_type_arch (type));
-  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
-    {
-      if (byteorder == BFD_ENDIAN_BIG)
-        return BFD_ENDIAN_LITTLE;
-      else if (byteorder == BFD_ENDIAN_LITTLE)
-        return BFD_ENDIAN_BIG;
-      else
-        return BFD_ENDIAN_UNKNOWN;
-    }
-
-  return byteorder;
 }
