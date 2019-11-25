@@ -401,7 +401,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
   if (dp != NULL)
     *dp = delimiter;
 
-  return line_buffer;
+  return line_buffer + point;
 }
 
 /* Find the completion word point for TEXT, emulating the algorithm
