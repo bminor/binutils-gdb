@@ -1,3 +1,14 @@
+2019-11-25  Luis Machado  <luis.machado@linaro.org>
+
+	* NEWS (New Commands): Mention "set debug remote-packet-max-chars".
+	* remote.c (REMOTE_DEBUG_MAX_CHAR): Remove.
+	(remote_packet_max_chars): New static global.
+	(show_remote_packet_max_chars): New function.
+	(remote_target::putpkt_binary): Adjust to use new
+	remote_packet_max_chars option.
+	(remote_target::getpkt_or_notif_sane_1): Likewise.
+	(_initialize_remote): Register new remote-packet-max-chars option.
+
 2019-11-24  Simon Marchi  <simon.marchi@efficios.com>
 
 	* m68k-linux-nat.c: Include gdbarch.h.

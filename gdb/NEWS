@@ -186,6 +186,12 @@ info module variables [-q] [-m MODULE_REGEXP] [-t TYPE_REGEXP] [REGEXP]
   TYPE_REGEXP matches against the variable type, and REGEXP matches
   against the variable name.
 
+set debug remote-packet-max-chars
+show debug remote-packet-max-chars
+  Controls the number of characters to output in a remote packet when using
+  "set debug remote".
+  The default is 512 bytes.
+
 * Changed commands
 
 help

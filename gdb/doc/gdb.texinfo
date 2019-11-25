@@ -26274,6 +26274,19 @@ the serial line to the remote machine.  The info is printed on the
 @item show debug remote
 Displays the state of display of remote packets.
 
+@item set debug remote-packet-max-chars
+Sets the maximum number of characters to display for each remote packet when
+@code{set debug remote} is on.  This is useful to prevent @value{GDBN} from
+displaying lengthy remote packets and polluting the console.
+
+The default value is @code{512}, which means @value{GDBN} will truncate each
+remote packet after 512 bytes.
+
+Setting this option to @code{unlimited} will disable truncation and will output
+the full length of the remote packets.
+@item show debug remote-packet-max-chars
+Displays the number of bytes to output for remote packet debugging.
+
 @item set debug separate-debug-file
 Turns on or off display of debug output about separate debug file search.
 @item show debug separate-debug-file
