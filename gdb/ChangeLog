@@ -1,3 +1,7 @@
+2019-11-25  Tom de Vries  <tdevries@suse.de>
+
+	* contrib/words.sh: Add -c option.
+
 2019-11-25  Christian Biesinger  <cbiesinger@google.com>
 
 	* solib.c (solib_find_1): Change int to bool.

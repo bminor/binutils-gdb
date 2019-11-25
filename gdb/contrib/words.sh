@@ -14,17 +14,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This script intends to facilitate spell checking of comments in C sources.
+# This script intends to facilitate spell checking of source/doc files.
 # It:
-# - extracts comments from C files
-# - transforms the comments into a list of lowercase words
+# - transforms the files into a list of lowercase words
 # - prefixes each word with the frequency
 # - filters out words within a frequency range
 # - sorts the words, longest first
 #
+# If '-c' is passed as option, it operates on the C comments only, rather than
+# on the entire file.
+#
 # For:
 # ...
-# $ ./gdb/contrib/words.sh $(find gdb -type f -name "*.c" -o -name "*.h")
+# $ files=$(find gdb -type f -name "*.c" -o -name "*.h")
+# $ ./gdb/contrib/words.sh -c $files
 # ...
 # it generates a list of ~15000 words prefixed with frequency.
 #
@@ -36,7 +39,8 @@
 #
 # And for:
 # ...
-# $ ./gdb/contrib/words.sh -f 1 $(find gdb -type f -name "*.c" -o -name "*.h")
+# $ files=$(find gdb -type f -name "*.c" -o -name "*.h")
+# $ ./gdb/contrib/words.sh -c -f 1 $files
 # ...
 # it generates a list of ~5000 words with frequency 1.
 #
@@ -45,8 +49,13 @@
 
 minfreq=
 maxfreq=
+c=false
 while [ $# -gt 0 ]; do
     case "$1" in
+	-c)
+	    c=true
+	    shift
+	    ;;
 	--freq|-f)
 	    minfreq=$2
 	    maxfreq=$2
@@ -111,9 +120,13 @@ EOF
 # Stabilize sort.
 export LC_ALL=C
 
-awk \
-    -f "$awkfile" \
-    -- "$@" \
+if $c; then
+    awk \
+	-f "$awkfile" \
+	-- "$@"
+else
+    cat "$@"
+fi \
     | sed \
 	  -e 's/[!"?;:%^$~#{}`&=@,. \t\/_()|<>\+\*-]/\n/g' \
 	  -e 's/\[/\n/g' \
