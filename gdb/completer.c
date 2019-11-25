@@ -109,7 +109,7 @@ enum explicit_location_match_type
    supplies a leading quote.  */
 
 const char gdb_completer_command_word_break_characters_gdb[] =
-" \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
 const char gdb_completer_command_word_break_characters_py[] =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
 char *gdb_completer_command_word_break_characters = gdb_completer_command_word_break_characters_gdb;
@@ -259,20 +259,23 @@ void toggle_completion_func(bool want_py_completion) {
     }
 
     if (!saved_cmp_func) {
-      gdb_completer_command_word_break_characters = gdb_completer_command_word_break_characters_gdb;
+      rl_completer_word_break_characters 
+        = gdb_completer_command_word_break_characters
+          = gdb_completer_command_word_break_characters_gdb;
       return;
     }
-
+    
     if (want_py_completion) {
-      if (saved_cmp_func) {
         rl_attempted_completion_function = saved_cmp_func;
-        gdb_completer_command_word_break_characters = gdb_completer_command_word_break_characters_py;
-      } else {
-        return;
-      }
+        rl_completer_word_break_characters 
+          = gdb_completer_command_word_break_characters
+            = gdb_completer_command_word_break_characters_py;
     } else {
-      rl_attempted_completion_function = gdb_rl_attempted_completion_function;
-      gdb_completer_command_word_break_characters = gdb_completer_command_word_break_characters_gdb;
+        rl_attempted_completion_function 
+          = gdb_rl_attempted_completion_function;
+        rl_completer_word_break_characters 
+          = gdb_completer_command_word_break_characters
+            = gdb_completer_command_word_break_characters_gdb;
     }
 }
 
