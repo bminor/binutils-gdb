@@ -673,7 +673,7 @@ swap_terminal_info (inferior *a, inferior *b)
   std::swap (a->terminal_state, b->terminal_state);
 }
 
-void
+static void
 info_terminal_command (const char *arg, int from_tty)
 {
   target_terminal::info (arg, from_tty);

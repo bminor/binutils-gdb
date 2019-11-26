@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* inferior.h (info_terminal_command): Remove declaration.
+	* inflow.c (info_terminal_command): Make static.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* inferior.c (exit_inferior_silent): Remove.
 
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
