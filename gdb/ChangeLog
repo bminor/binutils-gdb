@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* sparc-nat.c (sparc_xfer_wcookie): Sync declaration with
+	definition.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* remote-sim.c (simulator_command): Make static, remove
 	declaration.
 
