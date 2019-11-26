@@ -87,7 +87,13 @@ i386_linux_read_description (uint64_t xcr0)
 
   if (*tdesc == NULL)
     {
-      *tdesc = i386_create_target_description (xcr0, true, false);
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      const bool segment = true;
+#else
+      const bool segment = false;
+#endif
+
+      *tdesc = i386_create_target_description (xcr0, true, segment);
 
       init_target_desc (*tdesc, i386_expedite_regs);
     }
@@ -118,7 +124,13 @@ amd64_linux_read_description (uint64_t xcr0, bool is_x32)
 
   if (*tdesc == NULL)
     {
-      *tdesc = amd64_create_target_description (xcr0, is_x32, true, true);
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      const bool segment = true;
+#else
+      const bool segment = false;
+#endif
+
+      *tdesc = amd64_create_target_description (xcr0, is_x32, true, segment);
 
       init_target_desc (*tdesc, amd64_expedite_regs);
     }

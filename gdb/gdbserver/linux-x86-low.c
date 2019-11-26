@@ -133,7 +133,7 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8,
 #ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
-  21 * 8,  22 * 8,
+  FS_BASE * 8,  GS_BASE * 8,
 #else
   -1, -1,
 #endif
