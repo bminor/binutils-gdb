@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf-index-write.c: Include dwarf-index-write.h.
+	* mi/mi-interp.c: Include mi/mi-interp.h.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* aarch32-tdep.c: Include aarch32-tdep.h.
 	* aarch32-tdep.h: Forward-declare struct target_desc.
 

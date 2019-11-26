@@ -19,6 +19,8 @@
 
 #include "defs.h"
 
+#include "dwarf-index-write.h"
+
 #include "addrmap.h"
 #include "cli/cli-decode.h"
 #include "gdbsupport/byte-vector.h"
