@@ -1,5 +1,24 @@
 2019-11-27  Alan Modra  <amodra@gmail.com>
 
+	PR 23652
+	* dwarf2.c (_bfd_dwarf2_stash_syms): New function.
+	(_bfd_dwarf2_find_nearest_line): Use it here, passing syms to
+	_bfd_elf_find_function.  Call _bfd_elf_find_function in cases
+	where _bfd_elf_find_nearest_line would do so.
+	* elf.c (_bfd_elf_find_nearest_line): Omit _bfd_elf_find_function
+	for dwarf2.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Similarly.  Tidy.
+	* elf32-arm.c (elf32_arm_maybe_function_sym): New function.
+	(elf_backend_maybe_function_sym): Define.
+	(arm_elf_find_function, elf32_arm_find_nearest_line): Delete.
+	(bfd_elf32_find_nearest_line): Don't define.
+	* elfnn-aarch64.c (elfNN_aarch64_maybe_function_sym): New function.
+	(elf_backend_maybe_function_sym): Define.
+	(aarch64_elf_find_function, elfNN_aarch64_find_nearest_line): Delete.
+	(bfd_elfNN_find_nearest_line): Don't define.
+
+2019-11-27  Alan Modra  <amodra@gmail.com>
+
 	* elf32-sh.c (sh_reloc): Use a bfd_vma insn.
 	(sh_reloc <R_SH_IND12W>): Divide calculated relocation value
 	by two before applying to insn.  Correct overflow test.

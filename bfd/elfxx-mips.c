@@ -13078,27 +13078,17 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
 				     dwarf_debug_sections,
-				     &elf_tdata (abfd)->dwarf2_find_line_info)
-      || _bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
-					filename_ptr, functionname_ptr,
-					line_ptr))
+				     &elf_tdata (abfd)->dwarf2_find_line_info))
+    return TRUE;
+
+  if (_bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr))
     {
-      /* PR 22789: If the function name or filename was not found through
-	 the debug information, then try an ordinary lookup instead.  */
-      if ((functionname_ptr != NULL && *functionname_ptr == NULL)
-	  || (filename_ptr != NULL && *filename_ptr == NULL))
-	{
-	  /* Do not override already discovered names.  */
-	  if (functionname_ptr != NULL && *functionname_ptr != NULL)
-	    functionname_ptr = NULL;
-
-	  if (filename_ptr != NULL && *filename_ptr != NULL)
-	    filename_ptr = NULL;
-
-	  _bfd_elf_find_function (abfd, symbols, section, offset,
-				  filename_ptr, functionname_ptr);
-	}
-
+      if (!*functionname_ptr)
+	_bfd_elf_find_function (abfd, symbols, section, offset,
+				*filename_ptr ? NULL : filename_ptr,
+				functionname_ptr);
       return TRUE;
     }
 

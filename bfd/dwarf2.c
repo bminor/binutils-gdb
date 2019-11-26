@@ -3894,6 +3894,40 @@ set_debug_vma (bfd *orig_bfd, bfd *debug_bfd)
     }
 }
 
+/* If the dwarf2 info was found in a separate debug file, return the
+   debug file section corresponding to the section in the original file
+   and the debug file symbols.  */
+
+static void
+_bfd_dwarf2_stash_syms (struct dwarf2_debug *stash, bfd *abfd,
+			asection **sec, asymbol ***syms)
+{
+  if (stash->bfd_ptr != abfd)
+    {
+      asection *s, *d;
+
+      if (*sec == NULL)
+	{
+	  *syms = stash->syms;
+	  return;
+	}
+
+      for (s = abfd->sections, d = stash->bfd_ptr->sections;
+	   s != NULL && d != NULL;
+	   s = s->next, d = d->next)
+	{
+	  if ((d->flags & SEC_DEBUGGING) != 0)
+	    break;
+	  if (s == *sec
+	      && strcmp (s->name, d->name) == 0)
+	    {
+	      *sec = d;
+	      *syms = stash->syms;
+	    }
+	}
+    }
+}
+
 /* Unset vmas for adjusted sections in STASH.  */
 
 static void
@@ -4888,16 +4922,26 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
 
  done:
-  if (function)
+  if (functionname_ptr && function && function->is_linkage)
+    *functionname_ptr = function->name;
+  else if (functionname_ptr
+	   && ((found && !*functionname_ptr)
+	       || (function && !function->is_linkage)))
     {
-      if (!function->is_linkage)
+      asymbol *fun;
+      asymbol **syms = symbols;
+      asection *sec = section;
+
+      if (symbols == NULL || *symbols == NULL)
+	_bfd_dwarf2_stash_syms (stash, abfd, &sec, &syms);
+      fun = _bfd_elf_find_function (abfd, syms, sec, offset,
+				    *filename_ptr ? NULL : filename_ptr,
+				    functionname_ptr);
+
+      if (function && !function->is_linkage)
 	{
-	  asymbol *fun;
 	  bfd_vma sec_vma;
 
-	  fun = _bfd_elf_find_function (abfd, symbols, section, offset,
-					*filename_ptr ? NULL : filename_ptr,
-					functionname_ptr);
 	  sec_vma = section->vma;
 	  if (section->output_section != NULL)
 	    sec_vma = section->output_section->vma + section->output_offset;
@@ -4908,8 +4952,8 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	     to stop a repeated search of symbols.  */
 	  function->is_linkage = TRUE;
 	}
-      *functionname_ptr = function->name;
     }
+
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
     unset_sections (stash);
 
