@@ -1,3 +1,17 @@
+2019-12-06  Luis Machado  <luis.machado@linaro.org>
+
+	* armemu.c (isize): Move this declaration ...
+	* arminit.c (isize): ... here.
+	* maverick.h: New file.
+	* wrapper.c: Include "maverick.h".
+	(<struct maverick_regs>, <union maverick_acc_regs>): Remove and update
+	comment.
+	(sim_create_inferior): Cast variables to proper type.
+	* maverick.c: Include "maverick.h".
+	(<struct maverick_regs>, <union maverick_acc_regs>): Move
+	declarations to maverick.h and update comment.
+	(DSPsc, DSPacc, DSPregs): Adjust comment.
+
 2018-01-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 22663

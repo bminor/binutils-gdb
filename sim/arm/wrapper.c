@@ -37,6 +37,7 @@
 #include "gdb/signals.h"
 #include "libiberty.h"
 #include "iwmmxt.h"
+#include "maverick.h"
 
 /* TODO: This should get pulled from the SIM_DESC.  */
 host_callback *sim_callback;
@@ -100,38 +101,6 @@ print_insn (ARMword instr)
   size = disassemble_fn (0, & info);
   fprintf (stderr, " %*s\n", size, opbuf);
 }
-
-/* Cirrus DSP registers.
-
-   We need to define these registers outside of maverick.c because
-   maverick.c might not be linked in unless --target=arm9e-* in which
-   case wrapper.c will not compile because it tries to access Cirrus
-   registers.  This should all go away once we get the Cirrus and ARM
-   Coprocessor to coexist in armcopro.c-- aldyh.  */
-
-struct maverick_regs
-{
-  union
-  {
-    int i;
-    float f;
-  } upper;
-
-  union
-  {
-    int i;
-    float f;
-  } lower;
-};
-
-union maverick_acc_regs
-{
-  long double ld;		/* Acc registers are 72-bits.  */
-};
-
-struct maverick_regs     DSPregs[16];
-union maverick_acc_regs  DSPacc[4];
-ARMword DSPsc;
 
 static void
 init (void)
@@ -236,7 +205,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 {
   int argvlen = 0;
   int mach;
-  char **arg;
+  char * const *arg;
 
   init ();
 
