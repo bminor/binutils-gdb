@@ -28,7 +28,8 @@ struct mixin_counter
 
 struct value_type : private mixin_counter { };
 
-void test()
+static void
+test ()
 {
   using O = gdb::optional<value_type>;
 

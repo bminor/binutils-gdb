@@ -33,7 +33,8 @@ struct tracker
 
 int tracker::count = 0;
 
-void test()
+static void
+test ()
 {
   // [20.5.4.1] Constructors
 

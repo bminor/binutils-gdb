@@ -17,7 +17,8 @@
 
 namespace assign_7 {
 
-void test()
+static void
+test ()
 {
   gdb::optional<int> o{666};
   VERIFY(o && *o == 666);

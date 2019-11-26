@@ -21,8 +21,8 @@
 
 namespace cons_1 {
 
-void
-test01()
+static void
+test01 ()
 {
   typedef gdb::string_view::size_type csize_type;
 
@@ -56,8 +56,8 @@ test01()
   VERIFY( str07.length() == 10 );
 }
 
-int
-main()
+static int
+main ()
 { 
   test01();
 

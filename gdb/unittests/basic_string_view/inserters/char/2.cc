@@ -30,8 +30,8 @@ namespace inserters_2 {
 // testing basic_filebuf::xsputn via stress testing with large string_views
 // based on a bug report libstdc++ 9
 // mode == out
-void
-test05(std::size_t size)
+static void
+test05 (std::size_t size)
 {
   bool test ATTRIBUTE_UNUSED = true;
 
@@ -78,8 +78,8 @@ test05(std::size_t size)
   VERIFY( count == 2 * size );
 }
 
-int
-main()
+static int
+main ()
 {
   test05(1); 
   test05(1000); 

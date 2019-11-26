@@ -21,8 +21,8 @@
 
 namespace operations_find_3 {
 
-void
-test03()
+static void
+test03 ()
 {
   typedef gdb::string_view::size_type csize_type;
   csize_type npos = gdb::string_view::npos;
@@ -152,8 +152,8 @@ test04()
 }
 #endif
 
-int
-main()
+static int
+main ()
 {
   test03();
 #ifndef GDB_STRING_VIEW

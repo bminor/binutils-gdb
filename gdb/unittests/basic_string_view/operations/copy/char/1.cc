@@ -21,8 +21,8 @@
 
 namespace operations_copy_1 {
 
-void
-test01()
+static void
+test01 ()
 {
   typedef gdb::string_view::size_type csize_type;
 
@@ -35,8 +35,8 @@ test01()
   VERIFY( '9' == buffer[0] );
 }
 
-int
-main()
+static int
+main ()
 { 
   test01();
 

@@ -21,15 +21,15 @@
 
 namespace cons_3 {
 
-void
-test05()
+static void
+test05 ()
 {
   char const * s = 0;
   gdb::string_view zero_length_built_with_NULL(s, 0);
 }
 
-int
-main()
+static int
+main ()
 { 
   test05();
 

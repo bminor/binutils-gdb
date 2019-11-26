@@ -131,8 +131,8 @@ namespace selftests {
 namespace string_view {
 namespace capacity_1 {
 
-void
-test01()
+static void
+test01 ()
 {
   gdb::basic_string_view<A<B>> str02;
   typedef gdb::basic_string_view< A<B> >::size_type size_type_o;
@@ -161,7 +161,7 @@ test01()
   VERIFY( sz03 >= sz04 );
 }
 
-int
+static int
 main()
 {
   test01();

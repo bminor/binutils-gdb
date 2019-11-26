@@ -24,7 +24,8 @@ struct value_type
 
 void* operator&(const value_type&) = delete;
 
-void test()
+static void
+test ()
 {
   gdb::optional<value_type> o { value_type { 51 } };
   VERIFY( o->i == 51 );

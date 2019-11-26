@@ -55,7 +55,8 @@ struct throwing_construction
   bool propagate;
 };
 
-void test()
+static void
+test ()
 {
   // [20.5.4.1] Constructors
 

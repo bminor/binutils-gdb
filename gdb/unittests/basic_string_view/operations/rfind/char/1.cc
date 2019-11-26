@@ -21,8 +21,8 @@ namespace operations_rfind_1 {
 
 // basic_string_view rfind
 
-void
-test01()
+static void
+test01 ()
 {
   typedef gdb::string_view::size_type csize_type;
   typedef gdb::string_view::const_reference cref;
@@ -84,8 +84,8 @@ test01()
   VERIFY( csz01 == npos );
 }
 
-int
-main()
+static int
+main ()
 {
   test01();
 

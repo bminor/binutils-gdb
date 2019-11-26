@@ -259,7 +259,7 @@ require_not_constructible ()
 
 /* Check the array_view<T>(PTR, SIZE) ctor, when T is a pointer.  */
 
-void
+static void
 check_ptr_size_ctor2 ()
 {
   struct A {};

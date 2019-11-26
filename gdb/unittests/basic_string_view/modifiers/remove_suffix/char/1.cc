@@ -19,8 +19,8 @@
 
 namespace modifiers_remove_suffix {
 
-void
-test01()
+static void
+test01 ()
 {
   using gdb::string_view;
 
@@ -52,8 +52,8 @@ test02()
 }
 #endif
 
-int
-main()
+static int
+main ()
 { 
   test01();
 #ifndef GDB_STRING_VIEW

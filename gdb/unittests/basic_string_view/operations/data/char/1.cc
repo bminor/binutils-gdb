@@ -21,8 +21,8 @@
 
 namespace operations_data_1 {
 
-int
-test01()
+static int
+test01 ()
 {
   gdb::string_view empty;
 
@@ -33,8 +33,8 @@ test01()
   return 0;
 }
 
-int
-main()
+static int
+main ()
 { 
   test01();
 

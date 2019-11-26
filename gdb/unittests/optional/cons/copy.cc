@@ -47,7 +47,8 @@ struct throwing_copy
   throwing_copy(throwing_copy const&) { throw exception {}; }
 };
 
-void test()
+static void
+test ()
 {
   // [20.5.4.1] Constructors
 

@@ -22,8 +22,8 @@
 namespace operations_compare_13650 {
 
 // libstdc++/13650
-void
-test01()
+static void
+test01 ()
 {
   using gdb::string_view;
 
@@ -39,7 +39,7 @@ test01()
   VERIFY( str_b.compare(0, 3, lit_02, 5) < 0 );
 }
 
-int
+static int
 main()
 {
   test01();

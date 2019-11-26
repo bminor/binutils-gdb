@@ -20,8 +20,8 @@
 
 namespace modifiers_swap {
 
-void
-test01()
+static void
+test01 ()
 {
   using gdb::string_view;
 

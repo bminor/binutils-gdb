@@ -92,7 +92,8 @@ struct value_type : private mixin_counter
   state_type state = zero;
 };
 
-void test()
+static void
+test ()
 {
   using O = gdb::optional<value_type>;
   using S = value_type::state_type;

@@ -111,7 +111,7 @@ template<class charT, class traits, class Allocator>
 
 namespace operators_2 {
 
-void
+static void
 test01()
 {
   gdb::string_view 	str_0("costa rica");
@@ -360,8 +360,8 @@ test02()
 }
 #endif
 
-int
-main()
+static int
+main ()
 {
   test01();
 #ifndef GDB_STRING_VIEW

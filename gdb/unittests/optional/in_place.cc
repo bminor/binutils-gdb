@@ -17,7 +17,8 @@
 
 namespace in_place {
 
-void test()
+static void
+test ()
 {
   // [20.5.5] In-place construction
   {

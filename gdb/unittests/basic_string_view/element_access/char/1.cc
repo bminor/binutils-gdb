@@ -21,8 +21,8 @@
 
 namespace element_access_1 {
 
-void
-test01()
+static void
+test01 ()
 {
   typedef gdb::string_view::size_type csize_type;
   typedef gdb::string_view::const_reference cref;
@@ -60,8 +60,8 @@ test01()
   }
 }
 
-int
-main()
+static int
+main ()
 { 
   test01();
   return 0;

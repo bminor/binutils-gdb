@@ -20,8 +20,8 @@
 
 namespace element_access_empty {
 
-int
-main()
+static int
+main ()
 {
   {
     gdb::string_view empty;

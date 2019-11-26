@@ -22,7 +22,8 @@ struct value_type
   int i;
 };
 
-void test()
+static void
+test ()
 {
   gdb::optional<value_type> o { value_type { 51 } };
   VERIFY( (*o).i == 51 );

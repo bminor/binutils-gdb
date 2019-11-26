@@ -61,8 +61,8 @@ test_value(int result, want_value expected)
   return 0;
 }
 
-int
-test01()
+static int
+test01 ()
 {
   using gdb::string_view;
 
@@ -121,8 +121,8 @@ test01()
 }
 
 
-int
-main()
+static int
+main ()
 {
   test01();
 

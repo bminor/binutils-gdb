@@ -21,8 +21,8 @@ namespace operations_rfind_3 {
 
 // basic_string_view::find_last_not_of
 
-void
-test03()
+static void
+test03 ()
 {
   typedef gdb::string_view::size_type csize_type;
   gdb::string_view::size_type pos;
@@ -56,8 +56,9 @@ test03()
   pos = z.find_last_not_of("Xa");
   VERIFY( pos == 1 );
 }
-int
-main()
+
+static int
+main ()
 {
   test03();
 

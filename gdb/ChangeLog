@@ -1,5 +1,86 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* unittests/array-view-selftests.c (check_ptr_size_ctor2): Make
+	static.
+	* unittests/basic_string_view/capacity/1.cc (test01): Likewise.
+	* unittests/basic_string_view/cons/char/1.cc (test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/cons/char/2.cc (test03): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/cons/char/3.cc (test05): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/element_access/char/1.cc (test01):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/element_access/char/empty.cc (main):
+	Likewise.
+	* unittests/basic_string_view/element_access/char/front_back.cc
+	(test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/inserters/char/2.cc (test05):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/modifiers/remove_prefix/char/1.cc
+	(test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/modifiers/remove_suffix/char/1.cc
+	(test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/modifiers/swap/char/1.cc (test01):
+	Likewise.
+	* unittests/basic_string_view/operations/compare/char/1.cc
+	(test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/compare/char/13650.cc
+	(test01): Likewise.
+	* unittests/basic_string_view/operations/copy/char/1.cc (test01):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/data/char/1.cc (test01):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/find/char/1.cc (test01):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/find/char/2.cc (test02):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/find/char/3.cc (test03):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/find/char/4.cc (main):
+	Likewise.
+	* unittests/basic_string_view/operations/rfind/char/1.cc (test01):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/rfind/char/2.cc (test02):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/rfind/char/3.cc (test03):
+	Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operations/substr/char/1.cc
+	(test01): Likewise.
+	(main): Likewise.
+	* unittests/basic_string_view/operators/char/2.cc (main):
+	Likewise.
+	* unittests/optional/assignment/1.cc (test): Likewise.
+	* unittests/optional/assignment/2.cc (test): Likewise.
+	* unittests/optional/assignment/3.cc (test): Likewise.
+	* unittests/optional/assignment/4.cc (test): Likewise.
+	* unittests/optional/assignment/5.cc (test): Likewise.
+	* unittests/optional/assignment/6.cc (test): Likewise.
+	* unittests/optional/assignment/7.cc (test): Likewise.
+	* unittests/optional/cons/copy.cc (test): Likewise.
+	* unittests/optional/cons/default.cc (test): Likewise.
+	* unittests/optional/cons/move.cc (test): Likewise.
+	* unittests/optional/cons/value.cc (test): Likewise.
+	* unittests/optional/in_place.cc (test): Likewise.
+	* unittests/optional/observers/1.cc (test): Likewise.
+	* unittests/optional/observers/2.cc (test): Likewise.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* tui-win.h (tui_set_var_cmd): Remove.
 	* tui-win.c (tui_set_var_cmd): Make static.
 

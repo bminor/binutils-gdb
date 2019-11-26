@@ -20,8 +20,8 @@
 
 namespace element_access_front_back {
 
-void
-test01()
+static void
+test01 ()
 {
   gdb::string_view str("ramifications");
   const gdb::string_view cstr("melodien");
@@ -32,8 +32,8 @@ test01()
   VERIFY( cstr.back() == 'n' );
 }
 
-int
-main()
+static int
+main ()
 {
   test01();
 

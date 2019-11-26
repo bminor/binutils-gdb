@@ -22,7 +22,7 @@
 namespace operations_find_4 {
 
 // libstdc++/31401
-void
+static void
 test01()
 {
   typedef gdb::string_view::size_type csize_type;
@@ -34,8 +34,8 @@ test01()
   VERIFY( pos1 == npos );
 }
 
-int
-main()
+static int
+main ()
 {
   test01();
 
