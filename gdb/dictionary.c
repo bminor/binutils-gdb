@@ -508,16 +508,6 @@ dict_size (const struct dictionary *dict)
    implemented generically by means of the vtable.  Typically, they're
    rarely used.  */
 
-/* Test to see if DICT is empty.  */
-
-static int
-dict_empty (struct dictionary *dict)
-{
-  struct dict_iterator iter;
-
-  return (dict_iterator_first (dict, &iter) == NULL);
-}
-
 
 /* The functions implementing the dictionary interface.  */
 
@@ -1282,18 +1272,4 @@ mdict_size (const struct multidictionary *mdict)
     size += dict_size (mdict->dictionaries[idx]);
 
   return size;
-}
-
-/* See dictionary.h.  */
-
-bool
-mdict_empty (const struct multidictionary *mdict)
-{
-  for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
-    {
-      if (!dict_empty (mdict->dictionaries[idx]))
-	return false;
-    }
-
-  return true;
 }

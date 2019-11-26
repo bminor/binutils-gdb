@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dictionary.c (dict_empty, mdict_empty): Remove.
+	* dictionary.c (mdict_empty): Remove.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	 * arc-tdep.c (arc_insn_get_memory_base_reg): Make static.
 	 (arc_insn_get_memory_offset): Likewise.
 	 (arc_insn_dump): Likewise.

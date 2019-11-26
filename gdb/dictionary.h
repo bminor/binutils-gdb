@@ -93,10 +93,6 @@ extern void mdict_add_symbol (struct multidictionary *mdict,
 extern void mdict_add_pending (struct multidictionary *mdict,
 			       const struct pending *symbol_list);
 
-/* Is the multidictionary empty?  */
-
-extern int mdict_empty (struct multidictionary *mdict);
-
 /* A type containing data that is used when iterating over all symbols
    in a dictionary.  Don't ever look at its innards; this type would
    be opaque if we didn't need to be able to allocate it on the
