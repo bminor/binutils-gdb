@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* completer.c (set_gdb_completion_word_break_characters):
+	Remove.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf-index-write.c: Include dwarf-index-write.h.
 	* mi/mi-interp.c: Include mi/mi-interp.h.
 

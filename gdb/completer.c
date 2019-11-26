@@ -1141,23 +1141,6 @@ set_rl_completer_word_break_characters (const char *break_chars)
   rl_completer_word_break_characters = (char *) break_chars;
 }
 
-/* See definition in completer.h.  */
-
-void
-set_gdb_completion_word_break_characters (completer_ftype *fn)
-{
-  const char *break_chars;
-
-  /* So far we are only interested in differentiating filename
-     completers from everything else.  */
-  if (fn == filename_completer)
-    break_chars = gdb_completer_file_name_break_characters;
-  else
-    break_chars = gdb_completer_command_word_break_characters;
-
-  set_rl_completer_word_break_characters (break_chars);
-}
-
 /* Complete on symbols.  */
 
 void
