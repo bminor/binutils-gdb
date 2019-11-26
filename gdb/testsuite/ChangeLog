@@ -1,3 +1,8 @@
+2019-11-22  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/tasks.exp: Add -ada-task-info regression test.
+	* gdb.ada/tasks/foo.adb: Add another stopping location.
+
 2019-11-21  Peeter Joot  <peeter.joot@lzlabs.com>
 
 	* gdb.base/endianity.c: New test.

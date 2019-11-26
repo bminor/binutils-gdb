@@ -1,8 +1,3 @@
-2019-11-22  Tom Tromey  <tromey@adacore.com>
-
-	* gdb.ada/tasks.exp: Add -ada-task-info regression test.
-	* gdb.ada/tasks/foo.adb: Add another stopping location.
-
 2019-11-20  Luis Machado  <luis.machado@linaro.org>
 
 	* linux-aarch64-low.c (is_sve_tdesc): Check against target feature
