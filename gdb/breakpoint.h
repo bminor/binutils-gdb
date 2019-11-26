@@ -1299,9 +1299,6 @@ const char *bpdisp_text (enum bpdisp disp);
 
 extern void break_command (const char *, int);
 
-extern void hbreak_command_wrapper (const char *, int);
-extern void thbreak_command_wrapper (const char *, int);
-extern void rbreak_command_wrapper (const char *, int);
 extern void watch_command_wrapper (const char *, int, int);
 extern void awatch_command_wrapper (const char *, int, int);
 extern void rwatch_command_wrapper (const char *, int, int);

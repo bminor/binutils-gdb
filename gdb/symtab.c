@@ -5074,14 +5074,6 @@ info_modules_command (const char *args, int from_tty)
 		      from_tty);
 }
 
-/* Breakpoint all functions matching regular expression.  */
-
-void
-rbreak_command_wrapper (char *regexp, int from_tty)
-{
-  rbreak_command (regexp, from_tty);
-}
-
 static void
 rbreak_command (const char *regexp, int from_tty)
 {

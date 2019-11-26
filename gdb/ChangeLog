@@ -1,5 +1,11 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* breakpoint.h (hbreak_command_wrapper, thbreak_command_wrapper,
+	rbreak_command_wrapper): Remove.
+	* symtab.c (rbreak_command_wrapper): Remove.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* inferior.h (info_terminal_command): Remove declaration.
 	* inflow.c (info_terminal_command): Make static.
 
