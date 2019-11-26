@@ -288,7 +288,7 @@ sh_elf_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol_in,
 	sym_value -= 0x1000;
       insn = (insn & 0xf000) | (sym_value & 0xfff);
       bfd_put_16 (abfd, (bfd_vma) insn, hit_data);
-      if (sym_value < (bfd_vma) -0x1000 || sym_value >= 0x1000)
+      if ((bfd_signed_vma) sym_value < -0x1000 || sym_value >= 0x1000)
 	return bfd_reloc_overflow;
       break;
     default:

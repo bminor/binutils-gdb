@@ -1,3 +1,9 @@
+2019-11-26  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-sh.c (sh_elf_reloc): Use a signed_vma when checking for a
+	negative relocated value.
+	* coff-sh.c (sh_reloc): Likewise.
+
 2019-11-25  Alan Modra  <amodra@gmail.com>
 
 	* archures.c (bfd_octets_per_byte): Tail call
