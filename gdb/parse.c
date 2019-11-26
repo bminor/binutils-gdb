@@ -181,7 +181,7 @@ write_exp_elt_sym (struct expr_builder *ps, struct symbol *expelt)
   write_exp_elt (ps, &tmp);
 }
 
-void
+static void
 write_exp_elt_msym (struct expr_builder *ps, minimal_symbol *expelt)
 {
   union exp_element tmp;

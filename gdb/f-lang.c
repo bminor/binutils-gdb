@@ -243,7 +243,8 @@ f_collect_symbol_completion_matches (completion_tracker &tracker,
 }
 
 /* Special expression evaluation cases for Fortran.  */
-struct value *
+
+static struct value *
 evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 		   int *pos, enum noside noside)
 {

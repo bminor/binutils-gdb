@@ -465,7 +465,7 @@ dict_add_pending (struct dictionary *dict,
 /* Initialize ITERATOR to point at the first symbol in DICT, and
    return that first symbol, or NULL if DICT is empty.  */
 
-struct symbol *
+static struct symbol *
 dict_iterator_first (const struct dictionary *dict,
 		     struct dict_iterator *iterator)
 {
@@ -475,14 +475,14 @@ dict_iterator_first (const struct dictionary *dict,
 /* Advance ITERATOR, and return the next symbol, or NULL if there are
    no more symbols.  */
 
-struct symbol *
+static struct symbol *
 dict_iterator_next (struct dict_iterator *iterator)
 {
   return (DICT_VECTOR (DICT_ITERATOR_DICT (iterator)))
     ->iterator_next (iterator);
 }
 
-struct symbol *
+static struct symbol *
 dict_iter_match_first (const struct dictionary *dict,
 		       const lookup_name_info &name,
 		       struct dict_iterator *iterator)
@@ -490,7 +490,7 @@ dict_iter_match_first (const struct dictionary *dict,
   return (DICT_VECTOR (dict))->iter_match_first (dict, name, iterator);
 }
 
-struct symbol *
+static struct symbol *
 dict_iter_match_next (const lookup_name_info &name,
 		      struct dict_iterator *iterator)
 {

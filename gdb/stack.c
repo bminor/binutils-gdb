@@ -1432,7 +1432,7 @@ print_frame (const frame_print_options &fp_opts,
 /* Completion function for "frame function", "info frame function", and
    "select-frame function" commands.  */
 
-void
+static void
 frame_selection_by_function_completer (struct cmd_list_element *ignore,
 				       completion_tracker &tracker,
 				       const char *text, const char *word)

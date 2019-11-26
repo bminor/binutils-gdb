@@ -1961,7 +1961,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
    length LEN in bits.  If non-NULL, NAME is the name of its type.
    If no suitable type is found, return NULL.  */
 
-const struct floatformat **
+static const struct floatformat **
 ppc_floatformat_for_type (struct gdbarch *gdbarch,
                           const char *name, int len)
 {

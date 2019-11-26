@@ -147,7 +147,7 @@ s12z_fprintf_disasm (void *stream, const char *format, ...)
   return 0;
 }
 
-struct disassemble_info
+static struct disassemble_info
 s12z_disassemble_info (struct gdbarch *gdbarch)
 {
   struct disassemble_info di;

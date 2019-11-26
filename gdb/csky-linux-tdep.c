@@ -106,7 +106,7 @@ csky_collect_gregset (const struct regset *regset,
 
 /* Implement the supply_regset hook for FP registers in core files.  */
 
-void
+static void
 csky_supply_fregset (const struct regset *regset,
 		     struct regcache *regcache, int regnum,
 		     const void *regs, size_t len)

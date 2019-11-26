@@ -8177,7 +8177,7 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
    length LEN in bits.  If non-NULL, NAME is the name of its type.
    If no suitable type is found, return NULL.  */
 
-const struct floatformat **
+static const struct floatformat **
 i386_floatformat_for_type (struct gdbarch *gdbarch,
 			   const char *name, int len)
 {

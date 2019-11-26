@@ -208,7 +208,7 @@ arc_insn_get_operand_value_signed (const struct arc_instruction &insn,
 
 /* Get register with base address of memory operation.  */
 
-int
+static int
 arc_insn_get_memory_base_reg (const struct arc_instruction &insn)
 {
   /* POP_S and PUSH_S have SP as an implicit argument in a disassembler.  */
@@ -227,7 +227,7 @@ arc_insn_get_memory_base_reg (const struct arc_instruction &insn)
 
 /* Get offset of a memory operation INSN.  */
 
-CORE_ADDR
+static CORE_ADDR
 arc_insn_get_memory_offset (const struct arc_instruction &insn)
 {
   /* POP_S and PUSH_S have offset as an implicit argument in a
@@ -334,7 +334,7 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
 
 /* Dump INSN into gdb_stdlog.  */
 
-void
+static void
 arc_insn_dump (const struct arc_instruction &insn)
 {
   struct gdbarch *gdbarch = target_gdbarch ();

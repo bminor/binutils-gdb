@@ -120,7 +120,7 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
    gdbarch hook.
    Displays information related to ADI memory corruptions.  */
 
-void
+static void
 sparc64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
 				      struct ui_out *uiout)
 {

@@ -1810,7 +1810,7 @@ cp_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 
 namespace selftests {
 
-void
+static void
 test_cp_symbol_name_matches ()
 {
 #define CHECK_MATCH(SYMBOL, INPUT)					\

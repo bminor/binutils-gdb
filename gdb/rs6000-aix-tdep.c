@@ -141,7 +141,7 @@ aix_sighandle_frame_prev_register (struct frame_info *this_frame,
   return trad_frame_get_register (this_trad_cache, this_frame, regnum);
 }
 
-int
+static int
 aix_sighandle_frame_sniffer (const struct frame_unwind *self,
 			     struct frame_info *this_frame,
 			     void **this_prologue_cache)

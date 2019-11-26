@@ -1,5 +1,29 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	 * arc-tdep.c (arc_insn_get_memory_base_reg): Make static.
+	 (arc_insn_get_memory_offset): Likewise.
+	 (arc_insn_dump): Likewise.
+	 * cp-support.c (test_cp_symbol_name_matches): Likewise.
+	 * csky-linux-tdep.c (csky_supply_fregset): Likewise.
+	 * dictionary.c (dict_iterator_next): Likewise.
+	 (dict_iter_match_first): Likewise.
+	 (dict_iter_match_next): Likewise.
+	 * f-lang.c (evaluate_subexp_f): Likewise.
+	 * hppa-tdep.c (hppa_read_pc): Likewise.
+	 * i386-tdep.c (i386_floatformat_for_type): Likewise.
+	 * parse.c (write_exp_elt_msym): Likewise.
+	 * ppc-linux-tdep.c (ppc_floatformat_for_type): Likewise.
+	 * remote.c (remote_packet_size): Likewise.
+	 (remote_notif_stop_parse): Likewise.
+	 * rs6000-aix-tdep.c (aix_sighandle_frame_sniffer): Likewise.
+	 * s12z-tdep.c (s12z_disassemble_info): Likewise.
+	 * source.c (prepare_path_for_appending): Likewise.
+	 * sparc64-linux-tdep.c
+	 (sparc64_linux_handle_segmentation_fault); Likewise.
+	 * stack.c (frame_selection_by_function_completer): Likewise.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* completer.c (set_gdb_completion_word_break_characters):
 	Remove.
 

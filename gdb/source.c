@@ -679,7 +679,7 @@ info_source_command (const char *ignore, int from_tty)
    letters (for dos) as well as leading '/' characters and './'
    sequences.  */
 
-const char *
+static const char *
 prepare_path_for_appending (const char *path)
 {
   /* For dos paths, d:/foo -> /foo, and d:foo -> foo.  */

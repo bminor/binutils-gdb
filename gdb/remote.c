@@ -5056,7 +5056,7 @@ remote_target::remote_packet_size (const protocol_feature *feature,
   rs->explicit_packet_size = packet_size;
 }
 
-void
+static void
 remote_packet_size (remote_target *remote, const protocol_feature *feature,
 		    enum packet_support support, const char *value)
 {
@@ -6826,7 +6826,7 @@ remote_target::stop_reply_queue_length ()
   return rs->stop_reply_queue.size ();
 }
 
-void
+static void
 remote_notif_stop_parse (remote_target *remote,
 			 struct notif_client *self, const char *buf,
 			 struct notif_event *event)

@@ -1296,7 +1296,7 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_up (addr, 16);
 }
 
-CORE_ADDR
+static CORE_ADDR
 hppa_read_pc (readable_regcache *regcache)
 {
   ULONGEST ipsw;
