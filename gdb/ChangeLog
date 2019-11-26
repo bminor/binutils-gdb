@@ -1,3 +1,8 @@
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* aarch32-tdep.c: Include aarch32-tdep.h.
+	* aarch32-tdep.h: Forward-declare struct target_desc.
+
 2019-11-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* linux-nat.c (detach_one_lwp): Call safe_strerror instead of

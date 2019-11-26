@@ -18,6 +18,8 @@
 #ifndef AARCH32_TDEP_H
 #define AARCH32_TDEP_H
 
+struct target_desc;
+
 /* Get the AArch32 target description.  */
 
 const target_desc *aarch32_read_description ();

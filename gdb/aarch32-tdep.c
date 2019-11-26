@@ -16,6 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "gdbsupport/common-defs.h"
+
+#include "aarch32-tdep.h"
+
 #include "gdbsupport/common-regcache.h"
 #include "arch/aarch32.h"
 
