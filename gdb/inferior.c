@@ -221,14 +221,6 @@ exit_inferior (inferior *inf)
 }
 
 void
-exit_inferior_silent (int pid)
-{
-  struct inferior *inf = find_inferior_pid (pid);
-
-  exit_inferior_1 (inf, 1);
-}
-
-void
 exit_inferior_silent (inferior *inf)
 {
   exit_inferior_1 (inf, 1);
