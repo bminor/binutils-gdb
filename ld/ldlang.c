@@ -1552,7 +1552,7 @@ lang_output_section_find_by_flags (const asection *sec,
 
   /* We know the first statement on this list is *ABS*.  May as well
      skip it.  */
-  first = &lang_os_list.head->output_section_statement;
+  first = (void *) lang_os_list.head;
   first = first->next;
 
   /* First try for an exact match.  */
@@ -1780,7 +1780,7 @@ insert_os_after (lang_output_section_statement_type *after)
   lang_statement_union_type **assign = NULL;
   bfd_boolean ignore_first;
 
-  ignore_first = after == &lang_os_list.head->output_section_statement;
+  ignore_first = after == (void *) lang_os_list.head;
 
   for (where = &after->header.next;
        *where != NULL;
@@ -1904,7 +1904,7 @@ lang_insert_orphan (asection *s,
       /* Shuffle the bfd section list to make the output file look
 	 neater.  This is really only cosmetic.  */
       if (place->section == NULL
-	  && after != &lang_os_list.head->output_section_statement)
+	  && after != (void *) lang_os_list.head)
 	{
 	  asection *bfd_section = after->bfd_section;
 
@@ -2846,7 +2846,7 @@ lookup_name (const char *name)
 {
   lang_input_statement_type *search;
 
-  for (search = &input_file_chain.head->input_statement;
+  for (search = (void *) input_file_chain.head;
        search != NULL;
        search = search->next_real_file)
     {
@@ -4329,7 +4329,7 @@ strip_excluded_output_sections (void)
       lang_reset_memory_regions ();
     }
 
-  for (os = &lang_os_list.head->output_section_statement;
+  for (os = (void *) lang_os_list.head;
        os != NULL;
        os = os->next)
     {
@@ -4390,7 +4390,7 @@ lang_clear_os_map (void)
   if (map_head_is_link_order)
     return;
 
-  for (os = &lang_os_list.head->output_section_statement;
+  for (os = (void *) lang_os_list.head;
        os != NULL;
        os = os->next)
     {
@@ -6728,7 +6728,7 @@ lang_check (void)
   bfd *input_bfd;
   const bfd_arch_info_type *compatible;
 
-  for (file = &file_chain.head->input_statement;
+  for (file = (void *) file_chain.head;
        file != NULL;
        file = file->next)
     {
@@ -7070,7 +7070,7 @@ lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 {
   lang_input_statement_type *f;
 
-  for (f = &input_file_chain.head->input_statement;
+  for (f = (void *) input_file_chain.head;
        f != NULL;
        f = f->next_real_file)
     if (f->flags.real)
@@ -7196,7 +7196,7 @@ lang_reset_memory_regions (void)
       p->last_os = NULL;
     }
 
-  for (os = &lang_os_list.head->output_section_statement;
+  for (os = (void *) lang_os_list.head;
        os != NULL;
        os = os->next)
     {
@@ -7433,8 +7433,8 @@ static lang_input_statement_type *
 find_replacements_insert_point (bfd_boolean *before)
 {
   lang_input_statement_type *claim1, *lastobject;
-  lastobject = &input_file_chain.head->input_statement;
-  for (claim1 = &file_chain.head->input_statement;
+  lastobject = (void *) input_file_chain.head;
+  for (claim1 = (void *) file_chain.head;
        claim1 != NULL;
        claim1 = claim1->next)
     {
@@ -7476,7 +7476,7 @@ find_rescan_insertion (lang_input_statement_type *add)
      file chain if it is full of archive elements.  Archives don't
      appear on the file chain, but if an element has been extracted
      then their input_statement->next points at it.  */
-  for (f = &input_file_chain.head->input_statement;
+  for (f = (void *) input_file_chain.head;
        f != NULL;
        f = f->next_real_file)
     {
@@ -7609,7 +7609,7 @@ lang_propagate_lma_regions (void)
 {
   lang_output_section_statement_type *os;
 
-  for (os = &lang_os_list.head->output_section_statement;
+  for (os = (void *) lang_os_list.head;
        os != NULL;
        os = os->next)
     {
@@ -8286,7 +8286,7 @@ lang_record_phdrs (void)
       bfd_vma at;
 
       c = 0;
-      for (os = &lang_os_list.head->output_section_statement;
+      for (os = (void *) lang_os_list.head;
 	   os != NULL;
 	   os = os->next)
 	{
@@ -8372,7 +8372,7 @@ lang_record_phdrs (void)
   free (secs);
 
   /* Make sure all the phdr assignments succeeded.  */
-  for (os = &lang_os_list.head->output_section_statement;
+  for (os = (void *) lang_os_list.head;
        os != NULL;
        os = os->next)
     {

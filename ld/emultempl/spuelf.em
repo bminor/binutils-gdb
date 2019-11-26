@@ -290,7 +290,7 @@ spu_before_allocation (void)
 	    }
 
 	  /* Ensure alignment of overlay sections is sufficient.  */
-	  for (os = &lang_os_list.head->output_section_statement;
+	  for (os = (void *) lang_os_list.head;
 	       os != NULL;
 	       os = os->next)
 	    if (os->bfd_section != NULL
@@ -512,7 +512,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
     return FALSE;
   close (fd);
 
-  for (search = &input_file_chain.head->input_statement;
+  for (search = (void *) input_file_chain.head;
        search != NULL;
        search = search->next_real_file)
     if (search->filename != NULL)

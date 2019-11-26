@@ -1,3 +1,22 @@
+2019-12-26  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_output_section_find_by_flags): Don't use &p->field
+	when p might be NULL.
+	* ldelf.c (output_rel_find, ldelf_place_orphan): Likewise.
+	(insert_os_after, lang_insert_orphan, lookup_name): Likewise.
+	(strip_excluded_output_sections, lang_clear_os_map): Likewise.
+	(lang_check, lang_for_each_input_file): Likewise.
+	(lang_reset_memory_regions, find_replacements_insert_point): Likewise.
+	(find_rescan_insertion, lang_propagate_lma_regions): Likewise.
+	(lang_record_phdrs): Likewise.
+	* emultempl/alphaelf.em (alpha_after_open): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/ppc32elf.em (ppc_after_check_relocs): Likewise.
+	* emultempl/spuelf.em (spu_before_allocation): Likewise.
+	(embedded_spu_file): Likewise.
+
 2019-12-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (uses_genelf): Remove moxie.
