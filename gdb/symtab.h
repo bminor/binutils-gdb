@@ -416,6 +416,14 @@ struct general_symbol_info
      returns the same value (same pointer) as linkage_name ().  */
   const char *search_name () const;
 
+  /* Set just the linkage name of a symbol; do not try to demangle
+     it.  Used for constructs which do not have a mangled name,
+     e.g. struct tags.  Unlike SYMBOL_SET_NAMES, linkage_name must
+     be terminated and either already on the objfile's obstack or
+     permanently allocated.  */
+  void set_linkage_name (const char *linkage_name)
+  { name = linkage_name; }
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -528,7 +536,6 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
                                  enum language language,
 				 struct obstack *obstack);
 
-
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
    it will attempt to find any demangling algorithm that works and
@@ -537,14 +544,6 @@ extern void symbol_set_language (struct general_symbol_info *symbol,
 
 extern char *symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 					 const char *mangled);
-
-/* Set just the linkage name of a symbol; do not try to demangle
-   it.  Used for constructs which do not have a mangled name,
-   e.g. struct tags.  Unlike SYMBOL_SET_NAMES, linkage_name must
-   be terminated and either already on the objfile's obstack or
-   permanently allocated.  */
-#define SYMBOL_SET_LINKAGE_NAME(symbol,linkage_name) \
-  (symbol)->name = (linkage_name)
 
 /* Set the linkage and natural names of a symbol, by demangling
    the linkage name.  If linkage_name may not be nullterminated,

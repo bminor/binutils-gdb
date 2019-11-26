@@ -426,9 +426,8 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      sym = allocate_symbol (objfile);
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
-	      SYMBOL_SET_LINKAGE_NAME
-		(sym, obstack_strndup (&objfile->objfile_obstack,
-				       name, pp - name));
+	      sym->set_linkage_name
+		(obstack_strndup (&objfile->objfile_obstack, name, pp - name));
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
@@ -710,14 +709,14 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       switch (string[1])
 	{
 	case 't':
-	  SYMBOL_SET_LINKAGE_NAME (sym, "this");
+	  sym->set_linkage_name ("this");
 	  break;
 
 	case 'v':		/* $vtbl_ptr_type */
 	  goto normal;
 
 	case 'e':
-	  SYMBOL_SET_LINKAGE_NAME (sym, "eh_throw");
+	  sym->set_linkage_name ("eh_throw");
 	  break;
 
 	case '_':
@@ -1202,7 +1201,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, sym->linkage_name ());
 
-	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
+	      sym->set_linkage_name (new_name);
 	      SET_SYMBOL_VALUE_ADDRESS (sym,
 					BMSYMBOL_VALUE_ADDRESS (msym));
 	    }
@@ -1385,7 +1384,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, sym->linkage_name ());
 
-	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
+	      sym->set_linkage_name (new_name);
 	      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
 	    }
 	}
@@ -3638,7 +3637,7 @@ read_enum_type (const char **pp, struct type *type,
 	return error_type (pp, objfile);
 
       sym = allocate_symbol (objfile);
-      SYMBOL_SET_LINKAGE_NAME (sym, name);
+      sym->set_linkage_name (name);
       SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
 			   &objfile->objfile_obstack);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
@@ -4306,7 +4305,7 @@ common_block_end (struct objfile *objfile)
 
   sym = allocate_symbol (objfile);
   /* Note: common_block_name already saved on objfile_obstack.  */
-  SYMBOL_SET_LINKAGE_NAME (sym, common_block_name);
+  sym->set_linkage_name (common_block_name);
   SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 
   /* Now we copy all the symbols which have been defined since the BCOMM.  */

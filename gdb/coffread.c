@@ -2106,7 +2106,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  sym = allocate_symbol (objfile);
 
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
-	  SYMBOL_SET_LINKAGE_NAME (sym, name);
+	  sym->set_linkage_name (name);
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;

@@ -1105,8 +1105,7 @@ write_ambiguous_var (struct parser_state *par_state,
   struct symbol *sym = new (&temp_parse_space) symbol ();
 
   SYMBOL_DOMAIN (sym) = UNDEF_DOMAIN;
-  SYMBOL_SET_LINKAGE_NAME (sym,
-			   obstack_strndup (&temp_parse_space, name, len));
+  sym->set_linkage_name (obstack_strndup (&temp_parse_space, name, len));
   SYMBOL_LANGUAGE (sym) = language_ada;
 
   write_exp_elt_opcode (par_state, OP_VAR_VALUE);

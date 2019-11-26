@@ -1,3 +1,19 @@
+2019-11-27  Christian Biesinger  <cbiesinger@google.com>
+
+	* ada-exp.y (write_ambiguous_var): Replace SYMBOL_SET_LINKAGE_NAME
+	with sym->set_linkage_name.
+	* coffread.c (coff_read_enum_type): Likewise.
+	* mdebugread.c (parse_symbol): Likewise.
+	* stabsread.c (patch_block_stabs): Likewise.
+	(define_symbol): Likewise.
+	(read_enum_type): Likewise.
+	(common_block_end): Likewise.
+	* symtab.h (struct general_symbol_info) <set_linkage_name>: New
+	function.
+	(SYMBOL_SET_LINKAGE_NAME): Remove.
+	* xcoffread.c (process_xcoff_symbol): Replace SYMBOL_SET_LINKAGE_NAME
+	with sym->set_linkage_name.
+
 2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* mi/mi-cmds.c (mi_cmds): Add 'symbol-info-modules' entry.
