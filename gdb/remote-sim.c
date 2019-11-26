@@ -69,8 +69,6 @@ static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 static void gdb_os_error (host_callback *, const char *, ...)
      ATTRIBUTE_NORETURN;
 
-void simulator_command (char *args, int from_tty);
-
 /* Naming convention:
 
    sim_* are the interface to the simulator (see remote-sim.h).
@@ -1162,7 +1160,7 @@ gdbsim_target::mourn_inferior ()
 /* Pass the command argument through to the simulator verbatim.  The
    simulator must do any command interpretation work.  */
 
-void
+static void
 simulator_command (const char *args, int from_tty)
 {
   struct sim_inferior_data *sim_data;

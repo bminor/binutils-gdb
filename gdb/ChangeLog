@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* remote-sim.c (simulator_command): Make static, remove
+	declaration.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* unittests/array-view-selftests.c (check_ptr_size_ctor2): Make
 	static.
 	* unittests/basic_string_view/capacity/1.cc (test01): Likewise.
