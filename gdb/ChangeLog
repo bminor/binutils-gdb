@@ -1,3 +1,8 @@
+2019-11-26  Tom Tromey  <tromey@adacore.com>
+
+	* cp-support.c (_initialize_cp_support): Conditionally initialize
+	gdb_demangle_attempt_core_dump.
+
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
 	* python/py-function.c (fnpy_init): Update.

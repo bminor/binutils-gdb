@@ -2199,6 +2199,8 @@ display the offending symbol."),
 			   NULL,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  gdb_demangle_attempt_core_dump = can_dump_core (LIMIT_CUR);
 #endif
 
 #if GDB_SELF_TEST
@@ -2207,6 +2209,4 @@ display the offending symbol."),
   selftests::register_test ("cp_remove_params",
 			    selftests::test_cp_remove_params);
 #endif
-
-  gdb_demangle_attempt_core_dump = can_dump_core (LIMIT_CUR);
 }
