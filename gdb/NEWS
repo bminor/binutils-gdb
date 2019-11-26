@@ -58,6 +58,10 @@
  with extensions .gdb, .py and .scm are supported as long as GDB was
  compiled with support for that language.
 
+* GDB now supports multithreaded symbol loading for higher performance.
+  This feature is still in testing, so it is disabled by default.  You
+  can turn it on using 'maint set worker-threads unlimited'.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
@@ -152,7 +156,7 @@ set style highlight intensity VALUE
 maint set worker-threads
 maint show worker-threads
   Control the number of worker threads that can be used by GDB.  The
-  default is "unlimited", which lets GDB choose a number that is
+  default is 0.  "unlimited" lets GDB choose a number that is
   reasonable.  Currently worker threads are only used when demangling
   the names of linker symbols.
 
