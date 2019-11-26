@@ -54,7 +54,4 @@ extern void tui_update_gdb_sizes (void);
 /* Create or get the TUI command list.  */
 struct cmd_list_element **tui_get_cmd_list (void);
 
-/* Set a TUI variable.  */
-void tui_set_var_cmd (char *, int, struct cmd_list_element *);
-
 #endif /* TUI_TUI_WIN_H */

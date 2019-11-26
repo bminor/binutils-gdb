@@ -1,5 +1,10 @@
 2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
 
+	* tui-win.h (tui_set_var_cmd): Remove.
+	* tui-win.c (tui_set_var_cmd): Make static.
+
+2019-11-26  Simon Marchi  <simon.marchi@efficios.com>
+
 	* breakpoint.h (hbreak_command_wrapper, thbreak_command_wrapper,
 	rbreak_command_wrapper): Remove.
 	* symtab.c (rbreak_command_wrapper): Remove.

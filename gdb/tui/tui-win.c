@@ -334,7 +334,8 @@ tui_get_cmd_list (void)
 
 /* The set_func hook of "set tui ..." commands that affect the window
    borders on the TUI display.  */
-void
+
+static void
 tui_set_var_cmd (const char *null_args,
 		 int from_tty, struct cmd_list_element *c)
 {
