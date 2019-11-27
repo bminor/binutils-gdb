@@ -1,3 +1,8 @@
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/info-modules.exp: Compile source files in correct
+	order.
+
 2019-11-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.dwarf2/imported-unit.exp: New file.
