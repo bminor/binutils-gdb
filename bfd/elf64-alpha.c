@@ -1468,7 +1468,8 @@ elf64_alpha_find_nearest_line (bfd *abfd, asymbol **symbols,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, discriminator_ptr,
 				     dwarf_debug_sections,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
+				     &elf_tdata (abfd)->dwarf2_find_line_info)
+      == 1)
     return TRUE;
 
   msec = bfd_get_section_by_name (abfd, ".mdebug");

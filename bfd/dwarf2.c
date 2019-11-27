@@ -3923,6 +3923,7 @@ _bfd_dwarf2_stash_syms (struct dwarf2_debug *stash, bfd *abfd,
 	    {
 	      *sec = d;
 	      *syms = stash->syms;
+	      break;
 	    }
 	}
     }
@@ -4692,15 +4693,19 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
    then find the nearest source code location corresponding to
    the address SECTION + OFFSET.
-   Returns TRUE if the line is found without error and fills in
+   Returns 1 if the line is found without error and fills in
    FILENAME_PTR and LINENUMBER_PTR.  In the case where SYMBOL was
    NULL the FUNCTIONNAME_PTR is also filled in.
+   Returns 2 if partial information from _bfd_elf_find_function is
+   returned (function and maybe file) by looking at symbols.  DWARF2
+   info is present but not regarding the requested code location.
+   Returns 0 otherwise.
    SYMBOLS contains the symbol table for ABFD.
    DEBUG_SECTIONS contains the name of the dwarf debug sections.
    field and in the abbreviation offset, or zero to indicate that the
    default value should be used.  */
 
-bfd_boolean
+int
 _bfd_dwarf2_find_nearest_line (bfd *abfd,
 			       asymbol **symbols,
 			       asymbol *symbol,
@@ -4726,7 +4731,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   bfd_vma addr;
   struct comp_unit* each;
   struct funcinfo *function = NULL;
-  bfd_boolean found = FALSE;
+  int found = FALSE;
   bfd_boolean do_line;
 
   *filename_ptr = NULL;
@@ -4925,18 +4930,20 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   if (functionname_ptr && function && function->is_linkage)
     *functionname_ptr = function->name;
   else if (functionname_ptr
-	   && ((found && !*functionname_ptr)
+	   && (!*functionname_ptr
 	       || (function && !function->is_linkage)))
     {
       asymbol *fun;
       asymbol **syms = symbols;
       asection *sec = section;
 
-      if (symbols == NULL || *symbols == NULL)
-	_bfd_dwarf2_stash_syms (stash, abfd, &sec, &syms);
+      _bfd_dwarf2_stash_syms (stash, abfd, &sec, &syms);
       fun = _bfd_elf_find_function (abfd, syms, sec, offset,
 				    *filename_ptr ? NULL : filename_ptr,
 				    functionname_ptr);
+
+      if (!found && fun != NULL)
+	found = 2;
 
       if (function && !function->is_linkage)
 	{

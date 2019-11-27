@@ -1,6 +1,21 @@
 2019-11-27  Alan Modra  <amodra@gmail.com>
 
 	PR 23652
+	* dwarf2.c (_bfd_dwarf2_stash_syms): Break out of loop on finding
+	matching section.
+	(_bfd_dwarf2_find_nearest_line): Return an int, with value 2 when
+	returning info from the symbol table.  Do the _bfd_elf_find_function
+	search also when !found.  Call _bfd_dwarf2_stash_syms regardless of
+	symbols.
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Accept dwarf2
+	result of 1 only.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Likewise.
+	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Update prototype.
+	* libbfd.h: Regenerate.
+
+2019-11-27  Alan Modra  <amodra@gmail.com>
+
+	PR 23652
 	* dwarf2.c (_bfd_dwarf2_stash_syms): New function.
 	(_bfd_dwarf2_find_nearest_line): Use it here, passing syms to
 	_bfd_elf_find_function.  Call _bfd_elf_find_function in cases
