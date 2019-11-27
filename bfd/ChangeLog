@@ -1,3 +1,10 @@
+2019-11-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-sh.c (sh_reloc): Use a bfd_vma insn.
+	(sh_reloc <R_SH_IND12W>): Divide calculated relocation value
+	by two before applying to insn.  Correct overflow test.
+	* coff-sh.c (sh_reloc): Likewise.
+
 2019-11-26  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-sh.c (sh_elf_reloc): Use a signed_vma when checking for a
