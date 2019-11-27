@@ -1,3 +1,8 @@
+2019-11-28  Tom Tromey  <tom@tromey.com>
+
+	* guile/guile-internal.h (vlscm_scm_from_value_unsafe): Don't
+	declare.
+
 2019-11-28  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* jit.c (jit_bfd_try_read_symtab): Fix printed function name in the

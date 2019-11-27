@@ -580,8 +580,6 @@ extern int vlscm_is_value (SCM scm);
 
 extern SCM vlscm_scm_from_value (struct value *value);
 
-extern SCM vlscm_scm_from_value_unsafe (struct value *value);
-
 extern struct value *vlscm_convert_typed_value_from_scheme
   (const char *func_name, int obj_arg_pos, SCM obj,
    int type_arg_pos, SCM type_scm, struct type *type, SCM *except_scmp,
