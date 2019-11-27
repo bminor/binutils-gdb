@@ -1,3 +1,9 @@
+2019-11-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.h (struct dwarf2_per_objfile): Remove unnecessary
+	backslashes.
+	* cp-support.c: Remove unnecessary backslashes.
+
 2019-11-27  Christian Biesinger  <cbiesinger@google.com>
 
 	* ada-exp.y (write_ambiguous_var): Replace SYMBOL_SET_LINKAGE_NAME

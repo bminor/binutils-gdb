@@ -2006,7 +2006,7 @@ static std::string
 quote (const char *str)
 {
   if (str != NULL)
-    return std::string (1, '\"') + str + '\"';
+    return std::string (1, '"') + str + '"';
   else
     return "<null>";
 }
