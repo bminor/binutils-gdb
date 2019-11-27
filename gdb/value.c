@@ -3947,7 +3947,7 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
 }
 
-/* Implementation of the convenience function $_cimag.  Extracts the
+/* Implementation of the convenience function $_creal.  Extracts the
    real part from a complex number.  */
 
 static struct value *

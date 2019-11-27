@@ -1,5 +1,9 @@
 2019-11-28  Tom Tromey  <tom@tromey.com>
 
+	* value.c (creal_internal_fn): Fix comment.
+
+2019-11-28  Tom Tromey  <tom@tromey.com>
+
 	* gdbtypes.h (struct range_bounds) <flag_upper_bound_is_count,
 	flag_bound_evaluated>: Now unsigned.
 
