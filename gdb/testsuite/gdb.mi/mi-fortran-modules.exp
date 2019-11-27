@@ -22,7 +22,7 @@ set MIFLAGS "-i=mi"
 standard_testfile "mi-fortran-modules.f90" "mi-fortran-modules-2.f90"
 
 if {[prepare_for_testing "failed to prepare" ${testfile} \
-	 [list $srcfile $srcfile2] {debug f90}]} {
+	 [list $srcfile2 $srcfile] {debug f90}]} {
     return -1
 }
 

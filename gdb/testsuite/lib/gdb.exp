@@ -3719,6 +3719,16 @@ proc gdb_compile {source dest type options} {
     } else {
 	set new_options [universal_compile_options]
     }
+
+    # Place (and look for) Fortran `.mod` files in the output
+    # directory for this specific test.
+    if {[lsearch -exact $options f77] != -1 \
+	    || [lsearch -exact $options f90] != -1 } {
+	# Fortran compile.
+	set mod_path [standard_output_file ""]
+	lappend new_options "additional_flags=-J${mod_path}"
+    }
+
     set shlib_found 0
     set shlib_load 0
     set getting_compiler_info 0

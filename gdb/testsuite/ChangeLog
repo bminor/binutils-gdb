@@ -1,5 +1,12 @@
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/gdb.exp (gdb_compile): Add -J compiler option when building
+	Fortran tests.
+	* gdb.mi/mi-fortran-modules.exp: Compile source files in correct
+	order.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/type-kinds.exp (test_cast_1_to_type_kind): Handle
 	casting to type with no kind specified.
 	(test_basic_parsing_of_type_kinds): Additional tests for types
