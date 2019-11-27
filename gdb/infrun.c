@@ -432,7 +432,6 @@ follow_fork_inferior (int follow_child, int detach_fork)
 Can not resume the parent process over vfork in the foreground while\n\
 holding the child stopped.  Try \"set detach-on-fork\" or \
 \"set schedule-multiple\".\n"));
-      /* FIXME output string > 80 columns.  */
       return 1;
     }
 

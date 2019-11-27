@@ -1,3 +1,7 @@
+2019-12-02  Luis Machado  <luis.machado@linaro.org>
+
+	* infrun.c (follow_fork_inferior): Remove outdated FIXME comment.
+
 2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (read_tag_string_type): Read the fields required to
