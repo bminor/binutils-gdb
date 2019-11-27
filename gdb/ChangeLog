@@ -1,5 +1,9 @@
 2019-11-27  Christian Biesinger  <cbiesinger@google.com>
 
+	* NEWS: Mention the new multithreaded symbol loading.
+
+2019-11-27  Christian Biesinger  <cbiesinger@google.com>
+
 	* maint.c (n_worker_threads): Default to 0.
 	(worker_threads_disabled): New function.
 	* maint.h (worker_threads_disabled): New function.
