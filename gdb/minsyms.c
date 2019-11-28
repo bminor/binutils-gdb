@@ -1132,10 +1132,10 @@ minimal_symbol_reader::record_full (gdb::string_view name,
 			 &m_objfile->per_bfd->storage_obstack);
 
   if (copy_name)
-    msymbol->name = obstack_strndup (&m_objfile->per_bfd->storage_obstack,
-				     name.data (), name.size ());
+    msymbol->m_name = obstack_strndup (&m_objfile->per_bfd->storage_obstack,
+				       name.data (), name.size ());
   else
-    msymbol->name = name.data ();
+    msymbol->m_name = name.data ();
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
@@ -1397,22 +1397,23 @@ minimal_symbol_reader::install ()
 	   for (minimal_symbol *msym = start; msym < end; ++msym)
 	     {
 	       size_t idx = msym - msymbols;
-	       hash_values[idx].name_length = strlen (msym->name);
+	       hash_values[idx].name_length = strlen (msym->linkage_name ());
 	       if (!msym->name_set)
 		 {
-		   /* This will be freed later, by symbol_set_names.  */
+		   /* This will be freed later, by compute_and_set_names.  */
 		   char *demangled_name
-		     = symbol_find_demangled_name (msym, msym->name);
+		     = symbol_find_demangled_name (msym, msym->linkage_name ());
 		   symbol_set_demangled_name
 		     (msym, demangled_name,
 		      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
 		 }
 	       /* This mangled_name_hash computation has to be outside of
-		  the name_set check, or symbol_set_names below will
+		  the name_set check, or compute_and_set_names below will
 		  be called with an invalid hash value.  */
 	       hash_values[idx].mangled_name_hash
-		 = fast_hash (msym->name, hash_values[idx].name_length);
+		 = fast_hash (msym->linkage_name (),
+			      hash_values[idx].name_length);
 	       hash_values[idx].minsym_hash
 		 = msymbol_hash (msym->linkage_name ());
 	       /* We only use this hash code if the search name differs
@@ -1431,10 +1432,9 @@ minimal_symbol_reader::install ()
 	     for (minimal_symbol *msym = start; msym < end; ++msym)
 	       {
 		 size_t idx = msym - msymbols;
-		 symbol_set_names
-		   (msym,
-		    gdb::string_view(msym->name,
-				     hash_values[idx].name_length),
+		 msym->compute_and_set_names
+		   (gdb::string_view (msym->linkage_name (),
+				      hash_values[idx].name_length),
 		    false,
 		    m_objfile->per_bfd,
 		    hash_values[idx].mangled_name_hash);

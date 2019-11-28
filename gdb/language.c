@@ -1052,7 +1052,7 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   gdbarch = TYPE_OWNER (type).gdbarch;
   symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
 
-  symbol->name = TYPE_NAME (type);
+  symbol->m_name = TYPE_NAME (type);
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;

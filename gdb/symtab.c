@@ -855,19 +855,19 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
    so the pointer can be discarded after calling this function.  */
 
 void
-symbol_set_names (struct general_symbol_info *gsymbol,
-		  gdb::string_view linkage_name, bool copy_name,
-		  struct objfile_per_bfd_storage *per_bfd,
-		  gdb::optional<hashval_t> hash)
+general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
+					    bool copy_name,
+					    objfile_per_bfd_storage *per_bfd,
+					    gdb::optional<hashval_t> hash)
 {
   struct demangled_name_entry **slot;
 
-  if (gsymbol->language () == language_ada)
+  if (language () == language_ada)
     {
       /* In Ada, we do the symbol lookups using the mangled name, so
          we can save some space by not storing the demangled name.  */
       if (!copy_name)
-	gsymbol->name = linkage_name.data ();
+	m_name = linkage_name.data ();
       else
 	{
 	  char *name = (char *) obstack_alloc (&per_bfd->storage_obstack,
@@ -875,9 +875,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 
 	  memcpy (name, linkage_name.data (), linkage_name.length ());
 	  name[linkage_name.length ()] = '\0';
-	  gsymbol->name = name;
+	  m_name = name;
 	}
-      symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
+      symbol_set_demangled_name (this, NULL, &per_bfd->storage_obstack);
 
       return;
     }
@@ -896,7 +896,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   if (*slot == NULL
       /* A C version of the symbol may have already snuck into the table.
 	 This happens to, e.g., main.init (__go_init_main).  Cope.  */
-      || (gsymbol->language () == language_go && (*slot)->demangled == nullptr))
+      || (language () == language_go && (*slot)->demangled == nullptr))
     {
       /* A 0-terminated copy of the linkage name.  Callers must set COPY_NAME
          to true if the string might not be nullterminated.  We have to make
@@ -920,9 +920,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
          allocated from the heap and needs to be freed by us, just
          like if we called symbol_find_demangled_name here.  */
       gdb::unique_xmalloc_ptr<char> demangled_name
-	(gsymbol->language_specific.demangled_name
-	 ? const_cast<char *> (gsymbol->language_specific.demangled_name)
-	 : symbol_find_demangled_name (gsymbol, linkage_name_copy.data ()));
+	(language_specific.demangled_name
+	 ? const_cast<char *> (language_specific.demangled_name)
+	 : symbol_find_demangled_name (this, linkage_name_copy.data ()));
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
@@ -957,18 +957,17 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	    (gdb::string_view (mangled_ptr, linkage_name.length ()));
 	}
       (*slot)->demangled = std::move (demangled_name);
-      (*slot)->language = gsymbol->language ();
+      (*slot)->language = language ();
     }
-  else if (gsymbol->language () == language_unknown
-	   || gsymbol->language () == language_auto)
-    gsymbol->m_language = (*slot)->language;
+  else if (language () == language_unknown || language () == language_auto)
+    m_language = (*slot)->language;
 
-  gsymbol->name = (*slot)->mangled.data ();
+  m_name = (*slot)->mangled.data ();
   if ((*slot)->demangled != nullptr)
-    symbol_set_demangled_name (gsymbol, (*slot)->demangled.get (),
+    symbol_set_demangled_name (this, (*slot)->demangled.get (),
 			       &per_bfd->storage_obstack);
   else
-    symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
+    symbol_set_demangled_name (this, NULL, &per_bfd->storage_obstack);
 }
 
 /* See symtab.h.  */
@@ -991,7 +990,7 @@ general_symbol_info::natural_name () const
     default:
       break;
     }
-  return name;
+  return linkage_name ();
 }
 
 /* See symtab.h.  */
@@ -1025,7 +1024,7 @@ const char *
 general_symbol_info::search_name () const
 {
   if (language () == language_ada)
-    return name;
+    return linkage_name ();
   else
     return natural_name ();
 }
@@ -1670,7 +1669,8 @@ fixup_section (struct general_symbol_info *ginfo,
      e.g. on PowerPC64, where the minimal symbol for a function will
      point to the function descriptor, while the debug symbol will
      point to the actual function code.  */
-  msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->name, objfile);
+  msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->linkage_name (),
+					   objfile);
   if (msym)
     ginfo->section = MSYMBOL_SECTION (msym);
   else

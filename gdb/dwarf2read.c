@@ -9953,7 +9953,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 
       sym = allocate_symbol (objfile);
       sym->set_language (language_go, &objfile->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, saved_package_name, false, objfile);
+      sym->compute_and_set_names (saved_package_name, false, objfile->per_bfd);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
@@ -10878,7 +10878,7 @@ dwarf2_compute_name (const char *name,
   /* For Fortran GDB prefers DW_AT_*linkage_name for the physname if present
      but otherwise compute it by typename_concat inside GDB.
      FIXME: Actually this is not really true, or at least not always true.
-     It's all very confusing.  SYMBOL_SET_NAMES doesn't try to demangle
+     It's all very confusing.  compute_and_set_names doesn't try to demangle
      Fortran names because there is no mangling standard.  So new_symbol
      will set the demangled name to the result of dwarf2_full_name, and it is
      the demangled name that GDB uses if it exists.  */
@@ -21873,7 +21873,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Cache this symbol's name and the name's demangled form (if any).  */
       sym->set_language (cu->language, &objfile->objfile_obstack);
       linkagename = dwarf2_physname (name, die, cu);
-      SYMBOL_SET_NAMES (sym, linkagename, false, objfile);
+      sym->compute_and_set_names (linkagename, false, objfile->per_bfd);
 
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */

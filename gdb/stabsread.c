@@ -749,14 +749,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  new_name = cp_canonicalize_string (name);
 	}
       if (!new_name.empty ())
-	{
-	  SYMBOL_SET_NAMES (sym,
-			    new_name,
-			    1, objfile);
-	}
+	sym->compute_and_set_names (new_name, true, objfile->per_bfd);
       else
-	SYMBOL_SET_NAMES (sym, gdb::string_view (string, p - string), true,
-			  objfile);
+	sym->compute_and_set_names (gdb::string_view (string, p - string), true,
+				    objfile->per_bfd);
 
       if (sym->language () == language_cplus)
 	cp_scan_for_anonymous_namespaces (get_buildsym_compunit (), sym,

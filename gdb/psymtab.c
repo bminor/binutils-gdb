@@ -835,7 +835,7 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
   while (count-- > 0)
     {
       QUIT;
-      fprintf_filtered (outfile, "    `%s'", (*p)->ginfo.name);
+      fprintf_filtered (outfile, "    `%s'", (*p)->ginfo.linkage_name ());
       if ((*p)->ginfo.demangled_name () != NULL)
 	{
 	  fprintf_filtered (outfile, "  `%s'",
@@ -1534,9 +1534,9 @@ psymbol_hash (const void *addr, int length)
   h = fast_hash (&lang, sizeof (unsigned int), h);
   h = fast_hash (&domain, sizeof (unsigned int), h);
   h = fast_hash (&theclass, sizeof (unsigned int), h);
-  /* Note that psymbol names are interned via symbol_set_names, so
+  /* Note that psymbol names are interned via compute_and_set_names, so
      there's no need to hash the contents of the name here.  */
-  h = fast_hash (&psymbol->ginfo.name, sizeof (psymbol->ginfo.name), h);
+  h = fast_hash (&psymbol->ginfo.m_name, sizeof (psymbol->ginfo.m_name), h);
 
   return h;
 }
@@ -1557,9 +1557,9 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
           && sym1->domain == sym2->domain
           && sym1->aclass == sym2->aclass
 	  /* Note that psymbol names are interned via
-	     symbol_set_names, so there's no need to compare the
+	     compute_and_set_names, so there's no need to compare the
 	     contents of the name here.  */
-          && sym1->ginfo.name == sym2->ginfo.name);
+          && sym1->ginfo.linkage_name () == sym2->ginfo.linkage_name ());
 }
 
 /* Helper function, initialises partial symbol structure and stashes
@@ -1585,8 +1585,7 @@ add_psymbol_to_bcache (gdb::string_view name, bool copy_name,
   psymbol.domain = domain;
   psymbol.aclass = theclass;
   psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());
-  symbol_set_names (&psymbol.ginfo, name, copy_name,
-		    objfile->per_bfd);
+  psymbol.ginfo.compute_and_set_names (name, copy_name, objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
   return ((struct partial_symbol *)
@@ -2110,7 +2109,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	    if (!sym)
 	      {
 		printf_filtered ("Static symbol `");
-		puts_filtered ((*psym)->ginfo.name);
+		puts_filtered ((*psym)->ginfo.linkage_name ());
 		printf_filtered ("' only found in ");
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
@@ -2128,7 +2127,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	    if (!sym)
 	      {
 		printf_filtered ("Global symbol `");
-		puts_filtered ((*psym)->ginfo.name);
+		puts_filtered ((*psym)->ginfo.linkage_name ());
 		printf_filtered ("' only found in ");
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");

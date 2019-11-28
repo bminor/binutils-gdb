@@ -135,7 +135,7 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   struct pending *link;
 
   /* If this is an alias for another symbol, don't add it.  */
-  if (symbol->name && symbol->name[0] == '#')
+  if (symbol->linkage_name () && symbol->linkage_name ()[0] == '#')
     return;
 
   /* We keep PENDINGSIZE symbols in each link of the list.  If we

@@ -672,8 +672,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
-      block_name->name = obstack_strdup (&objfile->objfile_obstack,
-					 gdb_block_iter.name.get ());
+      block_name->m_name = obstack_strdup (&objfile->objfile_obstack,
+					   gdb_block_iter.name.get ());
 
       BLOCK_FUNCTION (new_block) = block_name;
 

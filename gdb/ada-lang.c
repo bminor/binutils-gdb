@@ -1376,7 +1376,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 
   if (!gsymbol->ada_mangled)
     {
-      std::string decoded = ada_decode (gsymbol->name);
+      std::string decoded = ada_decode (gsymbol->linkage_name ());
       struct obstack *obstack = gsymbol->language_specific.obstack;
 
       gsymbol->ada_mangled = 1;

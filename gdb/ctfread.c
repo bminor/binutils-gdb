@@ -399,7 +399,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
       OBJSTAT (ccp->of, n_syms++);
 
       sym->set_language (language_c, &ccp->of->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, name, false, ccp->of);
+      sym->compute_and_set_names (name, false, ccp->of->per_bfd);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_TYPE (sym) = fip->ptype;
@@ -428,7 +428,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
       OBJSTAT (objfile, n_syms++);
 
       sym->set_language (language_c, &objfile->objfile_obstack);
-      SYMBOL_SET_NAMES (sym, name.get (), true, objfile);
+      sym->compute_and_set_names (name.get (), true, objfile->per_bfd);
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 
@@ -1048,7 +1048,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	if (type)
 	  {
 	    sym = new_symbol (ccp, type, id);
-	    SYMBOL_SET_NAMES (sym, name, false, ccp->of);
+	    sym->compute_and_set_names (name, false, ccp->of->per_bfd);
 	  }
 	break;
       case CTF_K_STRUCT:
@@ -1064,7 +1064,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	SYMBOL_TYPE (sym) = type;
 	SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
-	SYMBOL_SET_NAMES (sym, name, false, ccp->of);
+	sym->compute_and_set_names (name, false, ccp->of->per_bfd);
 	add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
 	break;
       default:
