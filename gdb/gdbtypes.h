@@ -631,12 +631,12 @@ struct range_bounds
   /* True if HIGH range bound contains the number of elements in the
      subrange.  This affects how the final high bound is computed.  */
 
-  int flag_upper_bound_is_count : 1;
+  unsigned int flag_upper_bound_is_count : 1;
 
   /* True if LOW or/and HIGH are resolved into a static bound from
      a dynamic one.  */
 
-  int flag_bound_evaluated : 1;
+  unsigned int flag_bound_evaluated : 1;
 };
 
 /* Compare two range_bounds objects for equality.  Simply does

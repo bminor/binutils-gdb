@@ -1,5 +1,10 @@
 2019-11-28  Tom Tromey  <tom@tromey.com>
 
+	* gdbtypes.h (struct range_bounds) <flag_upper_bound_is_count,
+	flag_bound_evaluated>: Now unsigned.
+
+2019-11-28  Tom Tromey  <tom@tromey.com>
+
 	* guile/guile-internal.h (vlscm_scm_from_value_unsafe): Don't
 	declare.
 
