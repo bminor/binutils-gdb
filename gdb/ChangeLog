@@ -1,3 +1,10 @@
+2019-11-28  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* jit.c (jit_bfd_try_read_symtab): Fix printed function name in the
+	debug output.
+	* jit.c (jit_unregister_code): Add debug print to match
+	`jit_register_code`.
+
 2019-11-27  Christian Biesinger  <cbiesinger@google.com>
 
 	* NEWS: Mention the new multithreaded symbol loading.

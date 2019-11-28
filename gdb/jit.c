@@ -874,7 +874,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"jit_register_code, symfile_addr = %s, "
+			"jit_bfd_try_read_symtab, symfile_addr = %s, "
 			"symfile_size = %s\n",
 			paddress (gdbarch, code_entry->symfile_addr),
 			pulongest (code_entry->symfile_size));
@@ -958,6 +958,9 @@ jit_register_code (struct gdbarch *gdbarch,
 static void
 jit_unregister_code (struct objfile *objfile)
 {
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog, "jit_unregister_code (%s)\n",
+			host_address_to_string (objfile));
   delete objfile;
 }
 
