@@ -46,12 +46,21 @@ set array_contents \
 	 " = \\(\\( -26, -25, -24, -23, -22, -21\\) \\( -19, -18, -17, -16, -15, -14\\) \\( -12, -11, -10, -9, -8, -7\\) \\)" \
 	 " = \\(\\( -26, -24, -22, -20, -18\\) \\( -5, -3, -1, 1, 3\\) \\( 16, 18, 20, 22, 24\\) \\( 37, 39, 41, 43, 45\\) \\)" ]
 
+set message_strings \
+    [list \
+	 " = 'array'" \
+	 " = 'array \\(1:5,1:5\\)'" \
+	 " = 'array \\(1:10:2,1:10:2\\)'" \
+	 " = 'array \\(1:10:3,1:10:2\\)'" \
+	 " = 'array \\(1:10:5,1:10:3\\)'" ]
+
 set i 0
-foreach result $array_contents {
+foreach result $array_contents msg $message_strings {
     incr i
     with_test_prefix "test $i" {
 	gdb_continue_to_breakpoint "show"
 	gdb_test "p array" $result
+	gdb_test "p message" "$msg"
     }
 }
 

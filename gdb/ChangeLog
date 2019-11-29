@@ -1,5 +1,18 @@
 2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2read.c (read_tag_string_type): Read the fields required to
+	make a dynamic string, and possibly create a dynamic range for the
+	string.
+	(attr_to_dynamic_prop): Setup is_reference based on the type of
+	attribute being processed.
+	* gdbtypes.c (is_dynamic_type_internal): Handle TYPE_CODE_STRING.
+	(resolve_dynamic_array): Rename to...
+	(resolve_dynamic_array_or_string): ...this, update header comment,
+	and accept TYPE_CODE_STRING.
+	(resolve_dynamic_type_internal): Handle TYPE_CODE_STRING.
+
+2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (dwarf2_per_cu_int_type): New function, takes most
 	of its implementation from...
 	(dwarf2_per_cu_addr_sized_int_type): ...here, which now just calls

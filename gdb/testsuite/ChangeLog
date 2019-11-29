@@ -1,3 +1,7 @@
+2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/array-slices.exp: Add test for dynamic strings.
+
 2019-12-01  Richard Bunt  <richard.bunt@arm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

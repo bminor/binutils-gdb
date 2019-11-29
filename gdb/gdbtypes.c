@@ -1967,6 +1967,9 @@ is_dynamic_type_internal (struct type *type, int top_level)
 		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0));
       }
 
+    case TYPE_CODE_STRING:
+      /* Strings are very much like an array of characters, and can be
+	 treated as one here.  */
     case TYPE_CODE_ARRAY:
       {
 	gdb_assert (TYPE_NFIELDS (type) == 1);
@@ -2088,13 +2091,13 @@ resolve_dynamic_range (struct type *dyn_range_type,
   return static_range_type;
 }
 
-/* Resolves dynamic bound values of an array type TYPE to static ones.
-   ADDR_STACK is a stack of struct property_addr_info to be used
-   if needed during the dynamic resolution.  */
+/* Resolves dynamic bound values of an array or string type TYPE to static
+   ones.  ADDR_STACK is a stack of struct property_addr_info to be used if
+   needed during the dynamic resolution.  */
 
 static struct type *
-resolve_dynamic_array (struct type *type,
-		       struct property_addr_info *addr_stack)
+resolve_dynamic_array_or_string (struct type *type,
+				 struct property_addr_info *addr_stack)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -2103,7 +2106,10 @@ resolve_dynamic_array (struct type *type,
   struct dynamic_prop *prop;
   unsigned int bit_stride = 0;
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+  /* For dynamic type resolution strings can be treated like arrays of
+     characters.  */
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      || TYPE_CODE (type) == TYPE_CODE_STRING);
 
   type = copy_type (type);
 
@@ -2129,7 +2135,7 @@ resolve_dynamic_array (struct type *type,
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
   if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array (ary_dim, addr_stack);
+    elt_type = resolve_dynamic_array_or_string (ary_dim, addr_stack);
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
@@ -2332,8 +2338,11 @@ resolve_dynamic_type_internal (struct type *type,
 	    break;
 	  }
 
+	case TYPE_CODE_STRING:
+	  /* Strings are very much like an array of characters, and can be
+	     treated as one here.  */
 	case TYPE_CODE_ARRAY:
-	  resolved_type = resolve_dynamic_array (type, addr_stack);
+	  resolved_type = resolve_dynamic_array_or_string (type, addr_stack);
 	  break;
 
 	case TYPE_CODE_RANGE:

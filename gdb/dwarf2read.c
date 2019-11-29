@@ -17323,29 +17323,90 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *type, *range_type, *index_type, *char_type;
   struct attribute *attr;
-  unsigned int length;
+  struct dynamic_prop prop;
+  bool length_is_constant = true;
+  LONGEST length;
+
+  /* There are a couple of places where bit sizes might be made use of
+     when parsing a DW_TAG_string_type, however, no producer that we know
+     of make use of these.  Handling bit sizes that are a multiple of the
+     byte size is easy enough, but what about other bit sizes?  Lets deal
+     with that problem when we have to.  Warn about these attributes being
+     unsupported, then parse the type and ignore them like we always
+     have.  */
+  if (dwarf2_attr (die, DW_AT_bit_size, cu) != nullptr
+      || dwarf2_attr (die, DW_AT_string_length_bit_size, cu) != nullptr)
+    {
+      static bool warning_printed = false;
+      if (!warning_printed)
+	{
+	  warning (_("DW_AT_bit_size and DW_AT_string_length_bit_size not "
+		     "currently supported on DW_TAG_string_type."));
+	  warning_printed = true;
+	}
+    }
 
   attr = dwarf2_attr (die, DW_AT_string_length, cu);
-  if (attr != nullptr)
+  if (attr != nullptr && !attr_form_is_constant (attr))
     {
-      length = DW_UNSND (attr);
+      /* The string length describes the location at which the length of
+	 the string can be found.  The size of the length field can be
+	 specified with one of the attributes below.  */
+      struct type *prop_type;
+      struct attribute *len
+	= dwarf2_attr (die, DW_AT_string_length_byte_size, cu);
+      if (len == nullptr)
+	len = dwarf2_attr (die, DW_AT_byte_size, cu);
+      if (len != nullptr && attr_form_is_constant (len))
+	{
+	  /* Pass 0 as the default as we know this attribute is constant
+	     and the default value will not be returned.  */
+	  LONGEST sz = dwarf2_get_attr_constant_value (len, 0);
+	  prop_type = dwarf2_per_cu_int_type (cu->per_cu, sz, true);
+	}
+      else
+	{
+	  /* If the size is not specified then we assume it is the size of
+	     an address on this target.  */
+	  prop_type = dwarf2_per_cu_addr_sized_int_type (cu->per_cu, true);
+	}
+
+      /* Convert the attribute into a dynamic property.  */
+      if (!attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
+	length = 1;
+      else
+	length_is_constant = false;
+    }
+  else if (attr != nullptr)
+    {
+      /* This DW_AT_string_length just contains the length with no
+	 indirection.  There's no need to create a dynamic property in this
+	 case.  Pass 0 for the default value as we know it will not be
+	 returned in this case.  */
+      length = dwarf2_get_attr_constant_value (attr, 0);
+    }
+  else if ((attr = dwarf2_attr (die, DW_AT_byte_size, cu)) != nullptr)
+    {
+      /* We don't currently support non-constant byte sizes for strings.  */
+      length = dwarf2_get_attr_constant_value (attr, 1);
     }
   else
     {
-      /* Check for the DW_AT_byte_size attribute.  */
-      attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-      if (attr != nullptr)
-        {
-          length = DW_UNSND (attr);
-        }
-      else
-        {
-          length = 1;
-        }
+      /* Use 1 as a fallback length if we have nothing else.  */
+      length = 1;
     }
 
   index_type = objfile_type (objfile)->builtin_int;
-  range_type = create_static_range_type (NULL, index_type, 1, length);
+  if (length_is_constant)
+    range_type = create_static_range_type (NULL, index_type, 1, length);
+  else
+    {
+      struct dynamic_prop low_bound;
+
+      low_bound.kind = PROP_CONST;
+      low_bound.data.const_val = 1;
+      range_type = create_range_type (NULL, index_type, &low_bound, &prop, 0);
+    }
   char_type = language_string_char_type (cu->language_defn, gdbarch);
   type = create_string_type (NULL, char_type, range_type);
 
@@ -17806,7 +17867,15 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       baton->locexpr.per_cu = cu->per_cu;
       baton->locexpr.size = DW_BLOCK (attr)->size;
       baton->locexpr.data = DW_BLOCK (attr)->data;
-      baton->locexpr.is_reference = false;
+      switch (attr->name)
+	{
+	case DW_AT_string_length:
+	  baton->locexpr.is_reference = true;
+	  break;
+	default:
+	  baton->locexpr.is_reference = false;
+	  break;
+	}
       prop->data.baton = baton;
       prop->kind = PROP_LOCEXPR;
       gdb_assert (prop->data.baton != NULL);
