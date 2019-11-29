@@ -1,5 +1,12 @@
 2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2read.c (dwarf2_per_cu_int_type): New function, takes most
+	of its implementation from...
+	(dwarf2_per_cu_addr_sized_int_type): ...here, which now just calls
+	the new function.
+
+2019-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2read.c (read_subrange_type): Read bit and byte stride and
 	create a range with stride where appropriate.
 	* f-valprint.c: Include 'gdbarch.h'.

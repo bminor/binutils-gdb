@@ -1910,6 +1910,9 @@ static void process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile);
 static struct type *dwarf2_per_cu_addr_type (struct dwarf2_per_cu_data *per_cu);
 static struct type *dwarf2_per_cu_addr_sized_int_type
 	(struct dwarf2_per_cu_data *per_cu, bool unsigned_p);
+static struct type *dwarf2_per_cu_int_type
+	(struct dwarf2_per_cu_data *per_cu, int size_in_bytes,
+	 bool unsigned_p);
 
 /* Class, the destructor of which frees all allocated queue entries.  This
    will only have work to do if an error was thrown while processing the
@@ -17887,24 +17890,22 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
   return 1;
 }
 
-/* Find an integer type the same size as the address size given in the
-   compilation unit header for PER_CU.  UNSIGNED_P controls if the integer
-   is unsigned or not.  */
+/* Find an integer type SIZE_IN_BYTES bytes in size and return it.
+   UNSIGNED_P controls if the integer is unsigned or not.  */
 
 static struct type *
-dwarf2_per_cu_addr_sized_int_type (struct dwarf2_per_cu_data *per_cu,
-				   bool unsigned_p)
+dwarf2_per_cu_int_type (struct dwarf2_per_cu_data *per_cu,
+			int size_in_bytes, bool unsigned_p)
 {
   struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
-  int addr_size = dwarf2_per_cu_addr_size (per_cu);
   struct type *int_type;
 
   /* Helper macro to examine the various builtin types.  */
-#define TRY_TYPE(F)						\
-  int_type = (unsigned_p					\
-	      ? objfile_type (objfile)->builtin_unsigned_ ## F	\
-	      : objfile_type (objfile)->builtin_ ## F);		\
-  if (int_type != NULL && TYPE_LENGTH (int_type) == addr_size)	\
+#define TRY_TYPE(F)							\
+  int_type = (unsigned_p						\
+	      ? objfile_type (objfile)->builtin_unsigned_ ## F		\
+	      : objfile_type (objfile)->builtin_ ## F);			\
+  if (int_type != NULL && TYPE_LENGTH (int_type) == size_in_bytes)	\
     return int_type
 
   TRY_TYPE (char);
@@ -17916,6 +17917,18 @@ dwarf2_per_cu_addr_sized_int_type (struct dwarf2_per_cu_data *per_cu,
 #undef TRY_TYPE
 
   gdb_assert_not_reached ("unable to find suitable integer type");
+}
+
+/* Find an integer type the same size as the address size given in the
+   compilation unit header for PER_CU.  UNSIGNED_P controls if the integer
+   is unsigned or not.  */
+
+static struct type *
+dwarf2_per_cu_addr_sized_int_type (struct dwarf2_per_cu_data *per_cu,
+				   bool unsigned_p)
+{
+  int addr_size = dwarf2_per_cu_addr_size (per_cu);
+  return dwarf2_per_cu_int_type (per_cu, addr_size, unsigned_p);
 }
 
 /* Read the DW_AT_type attribute for a sub-range.  If this attribute is not
