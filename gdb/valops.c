@@ -3023,6 +3023,28 @@ find_oload_champ (gdb::array_view<value *> args,
       bv = rank_function (parm_types,
 			  args.slice (static_offset));
 
+      if (overload_debug)
+	{
+	  if (methods != NULL)
+	    fprintf_filtered (gdb_stderr,
+			      "Overloaded method instance %s, # of parms %d\n",
+			      methods[ix].physname, (int) parm_types.size ());
+	  else if (xmethods != NULL)
+	    fprintf_filtered (gdb_stderr,
+			      "Xmethod worker, # of parms %d\n",
+			      (int) parm_types.size ());
+	  else
+	    fprintf_filtered (gdb_stderr,
+			      "Overloaded function instance "
+			      "%s # of parms %d\n",
+			      functions[ix]->demangled_name (),
+			      (int) parm_types.size ());
+	  for (jj = 0; jj < args.size () - static_offset; jj++)
+	    fprintf_filtered (gdb_stderr,
+			      "...Badness @ %d : %d\n",
+			      jj, bv[jj].rank);
+	}
+
       if (oload_champ_bv->empty ())
 	{
 	  *oload_champ_bv = std::move (bv);
@@ -3048,29 +3070,9 @@ find_oload_champ (gdb::array_view<value *> args,
 	    break;
 	  }
       if (overload_debug)
-	{
-	  if (methods != NULL)
-	    fprintf_filtered (gdb_stderr,
-			      "Overloaded method instance %s, # of parms %d\n",
-			      methods[ix].physname, (int) parm_types.size ());
-	  else if (xmethods != NULL)
-	    fprintf_filtered (gdb_stderr,
-			      "Xmethod worker, # of parms %d\n",
-			      (int) parm_types.size ());
-	  else
-	    fprintf_filtered (gdb_stderr,
-			      "Overloaded function instance "
-			      "%s # of parms %d\n",
-			      functions[ix]->demangled_name (),
-			      (int) parm_types.size ());
-	  for (jj = 0; jj < args.size () - static_offset; jj++)
-	    fprintf_filtered (gdb_stderr,
-			      "...Badness @ %d : %d\n", 
-			      jj, bv[jj].rank);
-	  fprintf_filtered (gdb_stderr, "Overload resolution "
-			    "champion is %d, ambiguous? %d\n", 
-			    oload_champ, oload_ambiguous);
-	}
+	fprintf_filtered (gdb_stderr, "Overload resolution "
+			  "champion is %d, ambiguous? %d\n",
+			  oload_champ, oload_ambiguous);
     }
 
   return oload_champ;
