@@ -3039,10 +3039,15 @@ find_oload_champ (gdb::array_view<value *> args,
 			      "%s # of parms %d\n",
 			      functions[ix]->demangled_name (),
 			      (int) parm_types.size ());
-	  for (jj = 0; jj < args.size () - static_offset; jj++)
+
+	  fprintf_filtered (gdb_stderr,
+			    "...Badness of length : {%d, %d}\n",
+			    bv[0].rank, bv[0].subrank);
+
+	  for (jj = 1; jj < bv.size (); jj++)
 	    fprintf_filtered (gdb_stderr,
-			      "...Badness @ %d : %d\n",
-			      jj, bv[jj].rank);
+			      "...Badness of arg %d : {%d, %d}\n",
+			      jj, bv[jj].rank, bv[jj].subrank);
 	}
 
       if (oload_champ_bv->empty ())

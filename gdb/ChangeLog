@@ -1,5 +1,9 @@
 2019-11-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* valops.c (find_oload_champ): Improve debug output.
+
+2019-11-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* valops.c (find_oload_champ): Print part of debug messages
 	before the badness vector is std::move'd.
 
