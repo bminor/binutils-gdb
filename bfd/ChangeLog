@@ -1,5 +1,15 @@
 2019-12-03  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2.c (read_indirect_string): Don't duplicate offset check
+	done in read_section.
+	(read_indirect_line_string): Likewise.
+	(read_alt_indirect_string): Likewise.
+	(read_alt_indirect_ref): Likewise.
+	(read_abbrevs): Likewise.  Free memory on all failure paths.
+	Use correct unsigned type for pointer difference comparison.
+
+2019-12-03  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c (struct dwarf2_debug): Update comments.  Remove sec
 	and sec_info_ptr.
 	(_bfd_dwarf2_slurp_debug_info): Don't set sec or sec_info_ptr.

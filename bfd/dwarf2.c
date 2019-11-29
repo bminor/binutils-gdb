@@ -721,8 +721,6 @@ read_indirect_string (struct comp_unit * unit,
 		      &stash->dwarf_str_buffer, &stash->dwarf_str_size))
     return NULL;
 
-  if (offset >= stash->dwarf_str_size)
-    return NULL;
   str = (char *) stash->dwarf_str_buffer + offset;
   if (*str == '\0')
     return NULL;
@@ -760,8 +758,6 @@ read_indirect_line_string (struct comp_unit * unit,
 		      &stash->dwarf_line_str_size))
     return NULL;
 
-  if (offset >= stash->dwarf_line_str_size)
-    return NULL;
   str = (char *) stash->dwarf_line_str_buffer + offset;
   if (*str == '\0')
     return NULL;
@@ -825,8 +821,6 @@ read_alt_indirect_string (struct comp_unit * unit,
 		      &stash->alt_dwarf_str_size))
     return NULL;
 
-  if (offset >= stash->alt_dwarf_str_size)
-    return NULL;
   str = (char *) stash->alt_dwarf_str_buffer + offset;
   if (*str == '\0')
     return NULL;
@@ -874,8 +868,6 @@ read_alt_indirect_ref (struct comp_unit * unit,
 		      &stash->alt_dwarf_info_size))
     return NULL;
 
-  if (offset >= stash->alt_dwarf_info_size)
-    return NULL;
   return stash->alt_dwarf_info_buffer + offset;
 }
 
@@ -963,9 +955,6 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 		      &stash->dwarf_abbrev_buffer, &stash->dwarf_abbrev_size))
     return NULL;
 
-  if (offset >= stash->dwarf_abbrev_size)
-    return NULL;
-
   amt = sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE;
   abbrevs = (struct abbrev_info **) bfd_zalloc (abfd, amt);
   if (abbrevs == NULL)
@@ -983,7 +972,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
       amt = sizeof (struct abbrev_info);
       cur_abbrev = (struct abbrev_info *) bfd_zalloc (abfd, amt);
       if (cur_abbrev == NULL)
-	return NULL;
+	goto fail;
 
       /* Read in abbrev header.  */
       cur_abbrev->number = abbrev_number;
@@ -1025,21 +1014,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	      amt *= sizeof (struct attr_abbrev);
 	      tmp = (struct attr_abbrev *) bfd_realloc (cur_abbrev->attrs, amt);
 	      if (tmp == NULL)
-		{
-		  size_t i;
-
-		  for (i = 0; i < ABBREV_HASH_SIZE; i++)
-		    {
-		      struct abbrev_info *abbrev = abbrevs[i];
-
-		      while (abbrev)
-			{
-			  free (abbrev->attrs);
-			  abbrev = abbrev->next;
-			}
-		    }
-		  return NULL;
-		}
+		goto fail;
 	      cur_abbrev->attrs = tmp;
 	    }
 
@@ -1063,7 +1038,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	 already read (which means we are about to read the abbreviations
 	 for the next compile unit) or if the end of the abbreviation
 	 table is reached.  */
-      if ((unsigned int) (abbrev_ptr - stash->dwarf_abbrev_buffer)
+      if ((size_t) (abbrev_ptr - stash->dwarf_abbrev_buffer)
 	  >= stash->dwarf_abbrev_size)
 	break;
       abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr,
@@ -1072,8 +1047,26 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
       if (lookup_abbrev (abbrev_number, abbrevs) != NULL)
 	break;
     }
-
   return abbrevs;
+
+ fail:
+  if (abbrevs != NULL)
+    {
+      size_t i;
+
+      for (i = 0; i < ABBREV_HASH_SIZE; i++)
+	{
+	  struct abbrev_info *abbrev = abbrevs[i];
+
+	  while (abbrev)
+	    {
+	      free (abbrev->attrs);
+	      abbrev = abbrev->next;
+	    }
+	}
+      free (abbrevs);
+    }
+  return NULL;
 }
 
 /* Returns true if the form is one which has a string value.  */
