@@ -15252,13 +15252,18 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
       /* Normally a DW_TAG_variant_part won't have a size, but our
 	 representation requires one, so set it to the maximum of the
-	 child sizes.  */
+	 child sizes, being sure to account for the offset at which
+	 each child is seen.  */
       if (TYPE_LENGTH (fp->type) == 0)
 	{
 	  unsigned max = 0;
 	  for (int i = 0; i < TYPE_NFIELDS (fp->type); ++i)
-	    if (TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i)) > max)
-	      max = TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i));
+	    {
+	      unsigned len = ((TYPE_FIELD_BITPOS (fp->type, i) + 7) / 8
+			      + TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i)));
+	      if (len > max)
+		max = len;
+	    }
 	  TYPE_LENGTH (fp->type) = max;
 	}
     }

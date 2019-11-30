@@ -1,3 +1,8 @@
+2019-11-30  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_add_field): Include field offset when
+	computing variant part length.
+
 2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	* NEWS:  Mention define-prefix.  Tell that command names can now
 	contain a . character.
