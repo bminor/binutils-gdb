@@ -4701,9 +4701,7 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
    info is present but not regarding the requested code location.
    Returns 0 otherwise.
    SYMBOLS contains the symbol table for ABFD.
-   DEBUG_SECTIONS contains the name of the dwarf debug sections.
-   field and in the abbreviation offset, or zero to indicate that the
-   default value should be used.  */
+   DEBUG_SECTIONS contains the name of the dwarf debug sections.  */
 
 int
 _bfd_dwarf2_find_nearest_line (bfd *abfd,
