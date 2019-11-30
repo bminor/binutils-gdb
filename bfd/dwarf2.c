@@ -82,50 +82,23 @@ struct adjusted_section
   bfd_vma adj_vma;
 };
 
-struct dwarf2_debug
+struct dwarf2_debug_file
 {
-  /* A list of all previously read comp_units.  */
-  struct comp_unit *all_comp_units;
-
-  /* Last comp unit in list above.  */
-  struct comp_unit *last_comp_unit;
-
-  /* Names of the debug sections.  */
-  const struct dwarf_debug_section *debug_sections;
-
-  /* The next unread compilation unit within the .debug_info section.
-     Zero indicates that the .debug_info section has not been loaded
-     into a buffer yet.  */
-  bfd_byte *info_ptr;
-
-  /* Pointer to the end of the .debug_info section memory buffer.  */
-  bfd_byte *info_ptr_end;
-
-  /* Pointer to the original bfd for which debug was loaded.  This is what
-     we use to compare and so check that the cached debug data is still
-     valid - it saves having to possibly dereference the gnu_debuglink each
-     time.  */
-  bfd *orig_bfd;
-
-  /* Pointer to the bfd.  The bfd might be different than expected
-     because of gnu_debuglink sections.  */
+  /* The actual bfd from which debug info was loaded.  Might be
+     different to orig_bfd because of gnu_debuglink sections.  */
   bfd *bfd_ptr;
-
-  /* Support for alternate debug info sections created by the DWZ utility:
-     This includes a pointer to an alternate bfd which contains *extra*,
-     possibly duplicate debug sections, and pointers to the loaded
-     .debug_str and .debug_info sections from this bfd.  */
-  bfd *		 alt_bfd_ptr;
-  bfd_byte *	 alt_dwarf_str_buffer;
-  bfd_size_type	 alt_dwarf_str_size;
-  bfd_byte *	 alt_dwarf_info_buffer;
-  bfd_size_type	 alt_dwarf_info_size;
-
-  /* A pointer to the memory block allocated for .debug_info sections.  */
-  bfd_byte *info_ptr_memory;
 
   /* Pointer to the symbol table.  */
   asymbol **syms;
+
+  /* The current info pointer for the .debug_info section being parsed.  */
+  bfd_byte *info_ptr;
+
+  /* A pointer to the memory block allocated for .debug_info sections.  */
+  bfd_byte *dwarf_info_buffer;
+
+  /* Length of the loaded .debug_info sections.  */
+  bfd_size_type dwarf_info_size;
 
   /* Pointer to the .debug_abbrev section loaded into memory.  */
   bfd_byte *dwarf_abbrev_buffer;
@@ -156,6 +129,27 @@ struct dwarf2_debug
 
   /* Length of the loaded .debug_ranges section.  */
   bfd_size_type dwarf_ranges_size;
+
+  /* A list of all previously read comp_units.  */
+  struct comp_unit *all_comp_units;
+
+  /* Last comp unit in list above.  */
+  struct comp_unit *last_comp_unit;
+};
+
+struct dwarf2_debug
+{
+  /* Names of the debug sections.  */
+  const struct dwarf_debug_section *debug_sections;
+
+  /* Per-file stuff.  */
+  struct dwarf2_debug_file f, alt;
+
+  /* Pointer to the original bfd for which debug was loaded.  This is what
+     we use to compare and so check that the cached debug data is still
+     valid - it saves having to possibly dereference the gnu_debuglink each
+     time.  */
+  bfd *orig_bfd;
 
   /* If the most recent call to bfd_find_nearest_line was given an
      address in an inlined function, preserve a pointer into the
@@ -271,8 +265,9 @@ struct comp_unit
   /* A list of the variables found in this comp. unit.  */
   struct varinfo *variable_table;
 
-  /* Pointer to dwarf2_debug structure.  */
+  /* Pointers to dwarf2_debug structures.  */
   struct dwarf2_debug *stash;
+  struct dwarf2_debug_file *file;
 
   /* DWARF format version for this unit - from unit header.  */
   int version;
@@ -701,6 +696,7 @@ read_indirect_string (struct comp_unit * unit,
 {
   bfd_uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
   char *str;
 
   if (buf + unit->offset_size > buf_end)
@@ -717,11 +713,11 @@ read_indirect_string (struct comp_unit * unit,
   *bytes_read_ptr = unit->offset_size;
 
   if (! read_section (unit->abfd, &stash->debug_sections[debug_str],
-		      stash->syms, offset,
-		      &stash->dwarf_str_buffer, &stash->dwarf_str_size))
+		      file->syms, offset,
+		      &file->dwarf_str_buffer, &file->dwarf_str_size))
     return NULL;
 
-  str = (char *) stash->dwarf_str_buffer + offset;
+  str = (char *) file->dwarf_str_buffer + offset;
   if (*str == '\0')
     return NULL;
   return str;
@@ -737,6 +733,7 @@ read_indirect_line_string (struct comp_unit * unit,
 {
   bfd_uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
   char *str;
 
   if (buf + unit->offset_size > buf_end)
@@ -753,12 +750,12 @@ read_indirect_line_string (struct comp_unit * unit,
   *bytes_read_ptr = unit->offset_size;
 
   if (! read_section (unit->abfd, &stash->debug_sections[debug_line_str],
-		      stash->syms, offset,
-		      &stash->dwarf_line_str_buffer,
-		      &stash->dwarf_line_str_size))
+		      file->syms, offset,
+		      &file->dwarf_line_str_buffer,
+		      &file->dwarf_line_str_size))
     return NULL;
 
-  str = (char *) stash->dwarf_line_str_buffer + offset;
+  str = (char *) file->dwarf_line_str_buffer + offset;
   if (*str == '\0')
     return NULL;
   return str;
@@ -791,7 +788,7 @@ read_alt_indirect_string (struct comp_unit * unit,
 
   *bytes_read_ptr = unit->offset_size;
 
-  if (stash->alt_bfd_ptr == NULL)
+  if (stash->alt.bfd_ptr == NULL)
     {
       bfd *debug_bfd;
       char *debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
@@ -810,18 +807,17 @@ read_alt_indirect_string (struct comp_unit * unit,
 	  bfd_close (debug_bfd);
 	  return NULL;
 	}
-      stash->alt_bfd_ptr = debug_bfd;
+      stash->alt.bfd_ptr = debug_bfd;
     }
 
-  if (! read_section (unit->stash->alt_bfd_ptr,
+  if (! read_section (unit->stash->alt.bfd_ptr,
 		      stash->debug_sections + debug_str_alt,
-		      NULL, /* FIXME: Do we need to load alternate symbols ?  */
-		      offset,
-		      &stash->alt_dwarf_str_buffer,
-		      &stash->alt_dwarf_str_size))
+		      stash->alt.syms, offset,
+		      &stash->alt.dwarf_str_buffer,
+		      &stash->alt.dwarf_str_size))
     return NULL;
 
-  str = (char *) stash->alt_dwarf_str_buffer + offset;
+  str = (char *) stash->alt.dwarf_str_buffer + offset;
   if (*str == '\0')
     return NULL;
 
@@ -838,7 +834,7 @@ read_alt_indirect_ref (struct comp_unit * unit,
 {
   struct dwarf2_debug *stash = unit->stash;
 
-  if (stash->alt_bfd_ptr == NULL)
+  if (stash->alt.bfd_ptr == NULL)
     {
       bfd *debug_bfd;
       char *debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
@@ -857,18 +853,17 @@ read_alt_indirect_ref (struct comp_unit * unit,
 	  bfd_close (debug_bfd);
 	  return NULL;
 	}
-      stash->alt_bfd_ptr = debug_bfd;
+      stash->alt.bfd_ptr = debug_bfd;
     }
 
-  if (! read_section (unit->stash->alt_bfd_ptr,
+  if (! read_section (unit->stash->alt.bfd_ptr,
 		      stash->debug_sections + debug_info_alt,
-		      NULL, /* FIXME: Do we need to load alternate symbols ?  */
-		      offset,
-		      &stash->alt_dwarf_info_buffer,
-		      &stash->alt_dwarf_info_size))
+		      stash->alt.syms, offset,
+		      &stash->alt.dwarf_info_buffer,
+		      &stash->alt.dwarf_info_size))
     return NULL;
 
-  return stash->alt_dwarf_info_buffer + offset;
+  return stash->alt.dwarf_info_buffer + offset;
 }
 
 static bfd_uint64_t
@@ -940,7 +935,8 @@ lookup_abbrev (unsigned int number, struct abbrev_info **abbrevs)
    in a hash table.  */
 
 static struct abbrev_info**
-read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
+read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
+	      struct dwarf2_debug_file *file)
 {
   struct abbrev_info **abbrevs;
   bfd_byte *abbrev_ptr;
@@ -951,8 +947,9 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
   bfd_size_type amt;
 
   if (! read_section (abfd, &stash->debug_sections[debug_abbrev],
-		      stash->syms, offset,
-		      &stash->dwarf_abbrev_buffer, &stash->dwarf_abbrev_size))
+		      file->syms, offset,
+		      &file->dwarf_abbrev_buffer,
+		      &file->dwarf_abbrev_size))
     return NULL;
 
   amt = sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE;
@@ -960,8 +957,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
   if (abbrevs == NULL)
     return NULL;
 
-  abbrev_ptr = stash->dwarf_abbrev_buffer + offset;
-  abbrev_end = stash->dwarf_abbrev_buffer + stash->dwarf_abbrev_size;
+  abbrev_ptr = file->dwarf_abbrev_buffer + offset;
+  abbrev_end = file->dwarf_abbrev_buffer + file->dwarf_abbrev_size;
   abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
 					 FALSE, abbrev_end);
   abbrev_ptr += bytes_read;
@@ -1038,8 +1035,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	 already read (which means we are about to read the abbreviations
 	 for the next compile unit) or if the end of the abbreviation
 	 table is reached.  */
-      if ((size_t) (abbrev_ptr - stash->dwarf_abbrev_buffer)
-	  >= stash->dwarf_abbrev_size)
+      if ((size_t) (abbrev_ptr - file->dwarf_abbrev_buffer)
+	  >= file->dwarf_abbrev_size)
 	break;
       abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr,
 					     &bytes_read, FALSE, abbrev_end);
@@ -2013,9 +2010,11 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 /* Decode the line number information for UNIT.  */
 
 static struct line_info_table*
-decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
+decode_line_info (struct comp_unit *unit)
 {
   bfd *abfd = unit->abfd;
+  struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
   struct line_info_table* table;
   bfd_byte *line_ptr;
   bfd_byte *line_end;
@@ -2027,8 +2026,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   bfd_size_type amt;
 
   if (! read_section (abfd, &stash->debug_sections[debug_line],
-		      stash->syms, unit->line_offset,
-		      &stash->dwarf_line_buffer, &stash->dwarf_line_size))
+		      file->syms, unit->line_offset,
+		      &file->dwarf_line_buffer, &file->dwarf_line_size))
     return NULL;
 
   amt = sizeof (struct line_info_table);
@@ -2049,16 +2048,16 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 
   table->lcl_head = NULL;
 
-  if (stash->dwarf_line_size < 16)
+  if (file->dwarf_line_size < 16)
     {
       _bfd_error_handler
 	(_("DWARF error: line info section is too small (%" PRId64 ")"),
-	 (int64_t) stash->dwarf_line_size);
+	 (int64_t) file->dwarf_line_size);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
-  line_ptr = stash->dwarf_line_buffer + unit->line_offset;
-  line_end = stash->dwarf_line_buffer + stash->dwarf_line_size;
+  line_ptr = file->dwarf_line_buffer + unit->line_offset;
+  line_end = file->dwarf_line_buffer + file->dwarf_line_size;
 
   /* Read in the prologue.  */
   lh.total_length = read_4_bytes (abfd, line_ptr, line_end);
@@ -2384,16 +2383,16 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      break;
 	    case DW_LNS_set_file:
 	      {
-		unsigned int file;
+		unsigned int filenum;
 
 		/* The file and directory tables are 0
 		   based, the references are 1 based.  */
-		file = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
-					      FALSE, line_end);
+		filenum = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+						 FALSE, line_end);
 		line_ptr += bytes_read;
 		if (filename)
 		  free (filename);
-		filename = concat_filename (table, file);
+		filename = concat_filename (table, filenum);
 		break;
 	      }
 	    case DW_LNS_set_column:
@@ -2537,12 +2536,12 @@ fail:
 static bfd_boolean
 read_debug_ranges (struct comp_unit * unit)
 {
-  struct dwarf2_debug * stash = unit->stash;
+  struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
 
   return read_section (unit->abfd, &stash->debug_sections[debug_ranges],
-		       stash->syms, 0,
-		       &stash->dwarf_ranges_buffer,
-		       &stash->dwarf_ranges_size);
+		       file->syms, 0,
+		       &file->dwarf_ranges_buffer, &file->dwarf_ranges_size);
 }
 
 /* Function table functions.  */
@@ -2805,9 +2804,9 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
   return FALSE;
 }
 
-static struct comp_unit *stash_comp_unit (struct dwarf2_debug *);
-static bfd_boolean comp_unit_maybe_decode_line_info (struct comp_unit *,
-						     struct dwarf2_debug *);
+static struct comp_unit *stash_comp_unit (struct dwarf2_debug *,
+					  struct dwarf2_debug_file *);
+static bfd_boolean comp_unit_maybe_decode_line_info (struct comp_unit *);
 
 static bfd_boolean
 find_abstract_instance (struct comp_unit *unit,
@@ -2852,12 +2851,12 @@ find_abstract_instance (struct comp_unit *unit,
 	 a symbolic reference to a label in any .debug_info section
 	 might be used.  Since we lay out multiple .debug_info
 	 sections at non-zero VMAs (see place_sections), and read
-	 them contiguously into stash->info_ptr_memory, that means
-	 the reference is relative to stash->info_ptr_memory.  */
+	 them contiguously into dwarf_info_buffer, that means the
+	 reference is relative to dwarf_info_buffer.  */
       size_t total;
 
-      info_ptr = unit->stash->info_ptr_memory;
-      info_ptr_end = unit->stash->info_ptr_end;
+      info_ptr = unit->file->dwarf_info_buffer;
+      info_ptr_end = info_ptr + unit->file->dwarf_info_size;
       total = info_ptr_end - info_ptr;
       if (!die_ref)
 	return TRUE;
@@ -2889,7 +2888,7 @@ find_abstract_instance (struct comp_unit *unit,
 
 	  while (u == NULL)
 	    {
-	      u = stash_comp_unit (unit->stash);
+	      u = stash_comp_unit (unit->stash, unit->file);
 	      if (u == NULL)
 		break;
 	      if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
@@ -2920,8 +2919,8 @@ find_abstract_instance (struct comp_unit *unit,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      info_ptr_end = (unit->stash->alt_dwarf_info_buffer
-		      + unit->stash->alt_dwarf_info_size);
+      info_ptr_end = (unit->stash->alt.dwarf_info_buffer
+		      + unit->stash->alt.dwarf_info_size);
 
       /* FIXME: Do we need to locate the correct CU, in a similar
 	 fashion to the code in the DW_FORM_ref_addr case above ?  */
@@ -2997,7 +2996,7 @@ find_abstract_instance (struct comp_unit *unit,
 		    }
 		  break;
 		case DW_AT_decl_file:
-		  if (!comp_unit_maybe_decode_line_info (unit, unit->stash))
+		  if (!comp_unit_maybe_decode_line_info (unit))
 		    return FALSE;
 		  *filename_ptr = concat_filename (unit->line_table,
 						   attr.u.val);
@@ -3023,16 +3022,16 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
   bfd_byte *ranges_end;
   bfd_vma base_address = unit->base_address;
 
-  if (! unit->stash->dwarf_ranges_buffer)
+  if (! unit->file->dwarf_ranges_buffer)
     {
       if (! read_debug_ranges (unit))
 	return FALSE;
     }
 
-  ranges_ptr = unit->stash->dwarf_ranges_buffer + offset;
-  if (ranges_ptr < unit->stash->dwarf_ranges_buffer)
+  ranges_ptr = unit->file->dwarf_ranges_buffer + offset;
+  if (ranges_ptr < unit->file->dwarf_ranges_buffer)
     return FALSE;
-  ranges_end = unit->stash->dwarf_ranges_buffer + unit->stash->dwarf_ranges_size;
+  ranges_end = unit->file->dwarf_ranges_buffer + unit->file->dwarf_ranges_size;
 
   for (;;)
     {
@@ -3362,6 +3361,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 static struct comp_unit *
 parse_comp_unit (struct dwarf2_debug *stash,
+		 struct dwarf2_debug_file *file,
+		 bfd_byte *info_ptr,
 		 bfd_vma unit_length,
 		 bfd_byte *info_ptr_unit,
 		 unsigned int offset_size)
@@ -3375,12 +3376,11 @@ parse_comp_unit (struct dwarf2_debug *stash,
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
   struct attribute attr;
-  bfd_byte *info_ptr = stash->info_ptr;
   bfd_byte *end_ptr = info_ptr + unit_length;
   bfd_size_type amt;
   bfd_vma low_pc = 0;
   bfd_vma high_pc = 0;
-  bfd *abfd = stash->bfd_ptr;
+  bfd *abfd = file->bfd_ptr;
   bfd_boolean high_pc_relative = FALSE;
   enum dwarf_unit_type unit_type;
 
@@ -3457,7 +3457,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
     }
 
   /* Read the abbrevs for this compilation unit into a table.  */
-  abbrevs = read_abbrevs (abfd, abbrev_offset, stash);
+  abbrevs = read_abbrevs (abfd, abbrev_offset, stash, file);
   if (! abbrevs)
     return NULL;
 
@@ -3493,6 +3493,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
   unit->abbrevs = abbrevs;
   unit->end_ptr = end_ptr;
   unit->stash = stash;
+  unit->file = file;
   unit->info_ptr_unit = info_ptr_unit;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
@@ -3619,18 +3620,17 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 			     const char **filename_ptr,
 			     struct funcinfo **function_ptr,
 			     unsigned int *linenumber_ptr,
-			     unsigned int *discriminator_ptr,
-			     struct dwarf2_debug *stash)
+			     unsigned int *discriminator_ptr)
 {
   bfd_boolean func_p;
 
-  if (!comp_unit_maybe_decode_line_info (unit, stash))
+  if (!comp_unit_maybe_decode_line_info (unit))
     return FALSE;
 
   *function_ptr = NULL;
   func_p = lookup_address_in_function_table (unit, addr, function_ptr);
   if (func_p && (*function_ptr)->tag == DW_TAG_inlined_subroutine)
-    stash->inliner_chain = *function_ptr;
+    unit->stash->inliner_chain = *function_ptr;
 
   return lookup_address_in_line_info_table (unit->line_table, addr,
 					    filename_ptr,
@@ -3643,8 +3643,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
    FALSE otherwise.  */
 
 static bfd_boolean
-comp_unit_maybe_decode_line_info (struct comp_unit *unit,
-				  struct dwarf2_debug *stash)
+comp_unit_maybe_decode_line_info (struct comp_unit *unit)
 {
   if (unit->error)
     return FALSE;
@@ -3657,7 +3656,7 @@ comp_unit_maybe_decode_line_info (struct comp_unit *unit,
 	  return FALSE;
 	}
 
-      unit->line_table = decode_line_info (unit, stash);
+      unit->line_table = decode_line_info (unit);
 
       if (! unit->line_table)
 	{
@@ -3689,10 +3688,9 @@ comp_unit_find_line (struct comp_unit *unit,
 		     asymbol *sym,
 		     bfd_vma addr,
 		     const char **filename_ptr,
-		     unsigned int *linenumber_ptr,
-		     struct dwarf2_debug *stash)
+		     unsigned int *linenumber_ptr)
 {
-  if (!comp_unit_maybe_decode_line_info (unit, stash))
+  if (!comp_unit_maybe_decode_line_info (unit))
     return FALSE;
 
   if (sym->flags & BSF_FUNCTION)
@@ -3751,7 +3749,7 @@ comp_unit_hash_info (struct dwarf2_debug *stash,
 
   BFD_ASSERT (stash->info_hash_status != STASH_INFO_HASH_DISABLED);
 
-  if (!comp_unit_maybe_decode_line_info (unit, stash))
+  if (!comp_unit_maybe_decode_line_info (unit))
     return FALSE;
 
   BFD_ASSERT (!unit->cached);
@@ -3890,17 +3888,17 @@ static void
 _bfd_dwarf2_stash_syms (struct dwarf2_debug *stash, bfd *abfd,
 			asection **sec, asymbol ***syms)
 {
-  if (stash->bfd_ptr != abfd)
+  if (stash->f.bfd_ptr != abfd)
     {
       asection *s, *d;
 
       if (*sec == NULL)
 	{
-	  *syms = stash->syms;
+	  *syms = stash->f.syms;
 	  return;
 	}
 
-      for (s = abfd->sections, d = stash->bfd_ptr->sections;
+      for (s = abfd->sections, d = stash->f.bfd_ptr->sections;
 	   s != NULL && d != NULL;
 	   s = s->next, d = d->next)
 	{
@@ -3910,7 +3908,7 @@ _bfd_dwarf2_stash_syms (struct dwarf2_debug *stash, bfd *abfd,
 	      && strcmp (s->name, d->name) == 0)
 	    {
 	      *sec = d;
-	      *syms = stash->syms;
+	      *syms = stash->f.syms;
 	      break;
 	    }
 	}
@@ -3984,9 +3982,9 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 
 	  i++;
 	}
-      if (abfd == stash->bfd_ptr)
+      if (abfd == stash->f.bfd_ptr)
 	break;
-      abfd = stash->bfd_ptr;
+      abfd = stash->f.bfd_ptr;
     }
 
   if (i <= 1)
@@ -4049,14 +4047,14 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 	      p->adj_vma = sect->vma;
 	      p++;
 	    }
-	  if (abfd == stash->bfd_ptr)
+	  if (abfd == stash->f.bfd_ptr)
 	    break;
-	  abfd = stash->bfd_ptr;
+	  abfd = stash->f.bfd_ptr;
 	}
     }
 
-  if (orig_bfd != stash->bfd_ptr)
-    set_debug_vma (orig_bfd, stash->bfd_ptr);
+  if (orig_bfd != stash->f.bfd_ptr)
+    set_debug_vma (orig_bfd, stash->f.bfd_ptr);
 
   return TRUE;
 }
@@ -4160,13 +4158,13 @@ stash_maybe_update_info_hash_tables (struct dwarf2_debug *stash)
   struct comp_unit *each;
 
   /* Exit if hash tables are up-to-date.  */
-  if (stash->all_comp_units == stash->hash_units_head)
+  if (stash->f.all_comp_units == stash->hash_units_head)
     return TRUE;
 
   if (stash->hash_units_head)
     each = stash->hash_units_head->prev_unit;
   else
-    each = stash->last_comp_unit;
+    each = stash->f.last_comp_unit;
 
   while (each)
     {
@@ -4179,7 +4177,7 @@ stash_maybe_update_info_hash_tables (struct dwarf2_debug *stash)
       each = each->prev_unit;
     }
 
-  stash->hash_units_head = stash->all_comp_units;
+  stash->hash_units_head = stash->f.all_comp_units;
   return TRUE;
 }
 
@@ -4194,7 +4192,7 @@ stash_verify_info_hash_table (struct dwarf2_debug *stash)
   struct info_list_node *node;
   bfd_boolean found;
 
-  for (each_unit = stash->all_comp_units;
+  for (each_unit = stash->f.all_comp_units;
        each_unit;
        each_unit = each_unit->next_unit)
     {
@@ -4374,7 +4372,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	{
 	  /* Check that we did previously find some debug information
 	     before attempting to make use of it.  */
-	  if (stash->bfd_ptr != NULL)
+	  if (stash->f.bfd_ptr != NULL)
 	    {
 	      if (do_place && !place_sections (abfd, stash))
 		return FALSE;
@@ -4394,7 +4392,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
     }
   stash->orig_bfd = abfd;
   stash->debug_sections = debug_sections;
-  stash->syms = symbols;
+  stash->f.syms = symbols;
   if (!save_section_vma (abfd, stash))
     return FALSE;
 
@@ -4437,10 +4435,10 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	}
 
       symbols = bfd_get_outsymbols (debug_bfd);
-      stash->syms = symbols;
+      stash->f.syms = symbols;
       stash->close_on_cleanup = TRUE;
     }
-  stash->bfd_ptr = debug_bfd;
+  stash->f.bfd_ptr = debug_bfd;
 
   if (do_place
       && !place_sections (abfd, stash))
@@ -4463,7 +4461,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       total_size = msec->size;
       if (! read_section (debug_bfd, &stash->debug_sections[debug_info],
 			  symbols, 0,
-			  &stash->info_ptr_memory, &total_size))
+			  &stash->f.dwarf_info_buffer, &total_size))
 	return FALSE;
     }
   else
@@ -4483,8 +4481,8 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	  total_size += msec->size;
 	}
 
-      stash->info_ptr_memory = (bfd_byte *) bfd_malloc (total_size);
-      if (stash->info_ptr_memory == NULL)
+      stash->f.dwarf_info_buffer = (bfd_byte *) bfd_malloc (total_size);
+      if (stash->f.dwarf_info_buffer == NULL)
 	return FALSE;
 
       total_size = 0;
@@ -4499,7 +4497,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	    continue;
 
 	  if (!(bfd_simple_get_relocated_section_contents
-		(debug_bfd, msec, stash->info_ptr_memory + total_size,
+		(debug_bfd, msec, stash->f.dwarf_info_buffer + total_size,
 		 symbols)))
 	    return FALSE;
 
@@ -4507,33 +4505,33 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	}
     }
 
-  stash->info_ptr = stash->info_ptr_memory;
-  stash->info_ptr_end = stash->info_ptr + total_size;
+  stash->f.info_ptr = stash->f.dwarf_info_buffer;
+  stash->f.dwarf_info_size = total_size;
   return TRUE;
 }
 
-/* Parse the next DWARF2 compilation unit at STASH->INFO_PTR.  */
+/* Parse the next DWARF2 compilation unit at FILE->INFO_PTR.  */
 
 static struct comp_unit *
-stash_comp_unit (struct dwarf2_debug *stash)
+stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 {
   bfd_size_type length;
   unsigned int offset_size;
-  bfd_byte *info_ptr_unit = stash->info_ptr;
+  bfd_byte *info_ptr_unit = file->info_ptr;
+  bfd_byte *info_ptr_end = file->dwarf_info_buffer + file->dwarf_info_size;
 
-  if (stash->info_ptr >= stash->info_ptr_end)
+  if (file->info_ptr >= info_ptr_end)
     return NULL;
 
-  length = read_4_bytes (stash->bfd_ptr, stash->info_ptr,
-			 stash->info_ptr_end);
+  length = read_4_bytes (file->bfd_ptr, file->info_ptr, info_ptr_end);
   /* A 0xffffff length is the DWARF3 way of indicating
      we use 64-bit offsets, instead of 32-bit offsets.  */
   if (length == 0xffffffff)
     {
       offset_size = 8;
-      length = read_8_bytes (stash->bfd_ptr, stash->info_ptr + 4,
-			     stash->info_ptr_end);
-      stash->info_ptr += 12;
+      length = read_8_bytes (file->bfd_ptr, file->info_ptr + 4,
+			     info_ptr_end);
+      file->info_ptr += 12;
     }
   /* A zero length is the IRIX way of indicating 64-bit offsets,
      mostly because the 64-bit length will generally fit in 32
@@ -4541,9 +4539,9 @@ stash_comp_unit (struct dwarf2_debug *stash)
   else if (length == 0)
     {
       offset_size = 8;
-      length = read_4_bytes (stash->bfd_ptr, stash->info_ptr + 4,
-			     stash->info_ptr_end);
-      stash->info_ptr += 8;
+      length = read_4_bytes (file->bfd_ptr, file->info_ptr + 4,
+			     info_ptr_end);
+      file->info_ptr += 8;
     }
   /* In the absence of the hints above, we assume 32-bit DWARF2
      offsets even for targets with 64-bit addresses, because:
@@ -4557,33 +4555,34 @@ stash_comp_unit (struct dwarf2_debug *stash)
   else
     {
       offset_size = 4;
-      stash->info_ptr += 4;
+      file->info_ptr += 4;
     }
 
   if (length != 0
-      && stash->info_ptr + length <= stash->info_ptr_end
-      && stash->info_ptr + length > stash->info_ptr)
+      && file->info_ptr + length <= info_ptr_end
+      && file->info_ptr + length > file->info_ptr)
     {
-      struct comp_unit *each = parse_comp_unit (stash, length, info_ptr_unit,
-						offset_size);
+      struct comp_unit *each = parse_comp_unit (stash, file,
+						file->info_ptr, length,
+						info_ptr_unit, offset_size);
       if (each)
 	{
-	  if (stash->all_comp_units)
-	    stash->all_comp_units->prev_unit = each;
+	  if (file->all_comp_units)
+	    file->all_comp_units->prev_unit = each;
 	  else
-	    stash->last_comp_unit = each;
+	    file->last_comp_unit = each;
 
-	  each->next_unit = stash->all_comp_units;
-	  stash->all_comp_units = each;
+	  each->next_unit = file->all_comp_units;
+	  file->all_comp_units = each;
 
-	  stash->info_ptr += length;
+	  file->info_ptr += length;
 	  return each;
 	}
     }
 
   /* Don't trust any of the DWARF info after a corrupted length or
      parse error.  */
-  stash->info_ptr = stash->info_ptr_end;
+  file->info_ptr = info_ptr_end;
   return NULL;
 }
 
@@ -4638,11 +4637,11 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 	}
     }
 
-  for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
+  for (unit = stash->f.all_comp_units; unit; unit = unit->next_unit)
     {
       struct funcinfo * func;
 
-      comp_unit_maybe_decode_line_info (unit, stash);
+      comp_unit_maybe_decode_line_info (unit);
 
       for (func = unit->function_table; func != NULL; func = func->prev_func)
 	if (func->name && func->arange.low)
@@ -4775,7 +4774,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
   /* A null info_ptr indicates that there is no dwarf2 info
      (or that an error occured while setting up the stash).  */
-  if (! stash->info_ptr)
+  if (! stash->f.info_ptr)
     return FALSE;
 
   stash->inliner_chain = NULL;
@@ -4804,13 +4803,13 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       else
 	{
 	  /* Check the previously read comp. units first.  */
-	  for (each = stash->all_comp_units; each; each = each->next_unit)
+	  for (each = stash->f.all_comp_units; each; each = each->next_unit)
 	    if ((symbol->flags & BSF_FUNCTION) == 0
 		|| each->arange.high == 0
 		|| comp_unit_contains_address (each, addr))
 	      {
 		found = comp_unit_find_line (each, symbol, addr, filename_ptr,
-					     linenumber_ptr, stash);
+					     linenumber_ptr);
 		if (found)
 		  goto done;
 	      }
@@ -4824,18 +4823,16 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       unsigned int local_linenumber = 0;
       unsigned int local_discriminator = 0;
 
-      for (each = stash->all_comp_units; each; each = each->next_unit)
+      for (each = stash->f.all_comp_units; each; each = each->next_unit)
 	{
 	  bfd_vma range = (bfd_vma) -1;
 
 	  found = ((each->arange.high == 0
 		    || comp_unit_contains_address (each, addr))
-		   && (range = comp_unit_find_nearest_line (each, addr,
-							    & local_filename,
-							    & local_function,
-							    & local_linenumber,
-							    & local_discriminator,
-							    stash)) != 0);
+		   && (range = (comp_unit_find_nearest_line
+				(each, addr, &local_filename,
+				 &local_function, &local_linenumber,
+				 &local_discriminator))) != 0);
 	  if (found)
 	    {
 	      /* PRs 15935 15994: Bogus debug information may have provided us
@@ -4872,7 +4869,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
 
   /* Read each remaining comp. units checking each as they are read.  */
-  while ((each = stash_comp_unit (stash)) != NULL)
+  while ((each = stash_comp_unit (stash, &stash->f)) != NULL)
     {
       /* DW_AT_low_pc and DW_AT_high_pc are optional for
 	 compilation units.  If we don't have them (i.e.,
@@ -4884,9 +4881,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 		  || each->arange.high == 0
 		  || comp_unit_contains_address (each, addr))
 		 && comp_unit_find_line (each, symbol, addr,
-					 filename_ptr,
-					 linenumber_ptr,
-					 stash));
+					 filename_ptr, linenumber_ptr));
       else
 	found = ((each->arange.high == 0
 		  || comp_unit_contains_address (each, addr))
@@ -4894,8 +4889,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 						 filename_ptr,
 						 &function,
 						 linenumber_ptr,
-						 discriminator_ptr,
-						 stash) != 0);
+						 discriminator_ptr) != 0);
 
       if (found)
 	break;
@@ -4974,96 +4968,91 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 {
   struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;
   struct comp_unit *each;
+  struct dwarf2_debug_file *file;
 
   if (abfd == NULL || stash == NULL)
     return;
 
-  for (each = stash->all_comp_units; each; each = each->next_unit)
-    {
-      struct abbrev_info **abbrevs = each->abbrevs;
-      struct funcinfo *function_table = each->function_table;
-      struct varinfo *variable_table = each->variable_table;
-      size_t i;
-
-      for (i = 0; i < ABBREV_HASH_SIZE; i++)
-	{
-	  struct abbrev_info *abbrev = abbrevs[i];
-
-	  while (abbrev)
-	    {
-	      free (abbrev->attrs);
-	      abbrev = abbrev->next;
-	    }
-	}
-
-      if (each->line_table)
-	{
-	  free (each->line_table->dirs);
-	  free (each->line_table->files);
-	}
-
-      while (function_table)
-	{
-	  if (function_table->file)
-	    {
-	      free (function_table->file);
-	      function_table->file = NULL;
-	    }
-
-	  if (function_table->caller_file)
-	    {
-	      free (function_table->caller_file);
-	      function_table->caller_file = NULL;
-	    }
-	  function_table = function_table->prev_func;
-	}
-
-      if (each->lookup_funcinfo_table)
-	{
-	  free (each->lookup_funcinfo_table);
-	  each->lookup_funcinfo_table = NULL;
-	}
-
-      while (variable_table)
-	{
-	  if (variable_table->file)
-	    {
-	      free (variable_table->file);
-	      variable_table->file = NULL;
-	    }
-
-	  variable_table = variable_table->prev_var;
-	}
-    }
-
-  if (stash->funcinfo_hash_table)
-    bfd_hash_table_free (&stash->funcinfo_hash_table->base);
   if (stash->varinfo_hash_table)
     bfd_hash_table_free (&stash->varinfo_hash_table->base);
-  if (stash->dwarf_abbrev_buffer)
-    free (stash->dwarf_abbrev_buffer);
-  if (stash->dwarf_line_buffer)
-    free (stash->dwarf_line_buffer);
-  if (stash->dwarf_str_buffer)
-    free (stash->dwarf_str_buffer);
-  if (stash->dwarf_line_str_buffer)
-    free (stash->dwarf_line_str_buffer);
-  if (stash->dwarf_ranges_buffer)
-    free (stash->dwarf_ranges_buffer);
-  if (stash->info_ptr_memory)
-    free (stash->info_ptr_memory);
+  if (stash->funcinfo_hash_table)
+    bfd_hash_table_free (&stash->funcinfo_hash_table->base);
+
+  file = &stash->f;
+  while (1)
+    {
+      for (each = file->all_comp_units; each; each = each->next_unit)
+	{
+	  struct abbrev_info **abbrevs = each->abbrevs;
+	  struct funcinfo *function_table = each->function_table;
+	  struct varinfo *variable_table = each->variable_table;
+	  size_t i;
+
+	  for (i = 0; i < ABBREV_HASH_SIZE; i++)
+	    {
+	      struct abbrev_info *abbrev = abbrevs[i];
+
+	      while (abbrev)
+		{
+		  free (abbrev->attrs);
+		  abbrev = abbrev->next;
+		}
+	    }
+
+	  if (each->line_table)
+	    {
+	      free (each->line_table->files);
+	      free (each->line_table->dirs);
+	    }
+
+	  if (each->lookup_funcinfo_table)
+	    {
+	      free (each->lookup_funcinfo_table);
+	      each->lookup_funcinfo_table = NULL;
+	    }
+
+	  while (function_table)
+	    {
+	      if (function_table->file)
+		{
+		  free (function_table->file);
+		  function_table->file = NULL;
+		}
+	      if (function_table->caller_file)
+		{
+		  free (function_table->caller_file);
+		  function_table->caller_file = NULL;
+		}
+	      function_table = function_table->prev_func;
+	    }
+
+	  while (variable_table)
+	    {
+	      if (variable_table->file)
+		{
+		  free (variable_table->file);
+		  variable_table->file = NULL;
+		}
+	      variable_table = variable_table->prev_var;
+	    }
+	}
+
+      free (file->dwarf_line_str_buffer);
+      free (file->dwarf_str_buffer);
+      free (file->dwarf_ranges_buffer);
+      free (file->dwarf_line_buffer);
+      free (file->dwarf_abbrev_buffer);
+      free (file->dwarf_info_buffer);
+      if (file == &stash->alt)
+	break;
+      file = &stash->alt;
+    }
+  free (stash->sec_vma);
+  free (stash->adjusted_sections);
   if (stash->close_on_cleanup)
-    bfd_close (stash->bfd_ptr);
-  if (stash->alt_dwarf_str_buffer)
-    free (stash->alt_dwarf_str_buffer);
-  if (stash->alt_dwarf_info_buffer)
-    free (stash->alt_dwarf_info_buffer);
-  if (stash->sec_vma)
-    free (stash->sec_vma);
-  if (stash->adjusted_sections)
-    free (stash->adjusted_sections);
-  if (stash->alt_bfd_ptr)
-    bfd_close (stash->alt_bfd_ptr);
+    bfd_close (stash->f.bfd_ptr);
+  if (stash->alt.bfd_ptr)
+    bfd_close (stash->alt.bfd_ptr);
 }
 
 /* Find the function to a particular section and offset,

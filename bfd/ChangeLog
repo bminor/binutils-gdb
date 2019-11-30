@@ -1,5 +1,31 @@
 2019-12-03  Alan Modra  <amodra@gmail.com>
 
+	PR 25230
+	* dwarf2.c (struct dwarf2_debug_file): New struct.
+	(struct dwarf2_debug): Delete fields now in dwarf2_debug_file.
+	Add f, alt fields.
+	(struct comp_unit): Add file field.
+	(read_indirect_string, read_indirect_line_string): Adjust to suit.
+	(read_alt_indirect_string, read_alt_indirect_ref): Likewise.
+	(read_debug_ranges, find_abstract_instance, read_rangelist): Likewise.
+	(_bfd_dwarf2_stash_syms, place_sections): Likewise.
+	(stash_maybe_update_info_hash_tablse): Likewise.
+	(stash_verify_info_hash_table): Likewise.
+	(_bfd_dwarf2_slurp_debug_info): Likewise.
+	(_bfd_dwarf2_find_symbol_bias): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.
+	(_bfd_dwarf2_cleanup_debug_info): Likewise.
+	(read_abbrevs): Add file param and adjust.  Update calls.
+	(stash_comp_unit): Likewise.
+	(decode_line_info): Delete stash param and adjust.  Update calls.
+	(comp_unit_find_nearest_line): Likewise.
+	(comp_unit_maybe_decode_line_info): Likewise.
+	(comp_unit_find_line): Likewise.
+	(parse_comp_unit): Add file and info_ptr param and adjust.  Update
+	calls.
+
+2019-12-03  Alan Modra  <amodra@gmail.com>
+
 	* dwarf2.c (read_indirect_string): Don't duplicate offset check
 	done in read_section.
 	(read_indirect_line_string): Likewise.
