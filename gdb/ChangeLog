@@ -1,3 +1,7 @@
+2019-12-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* inferior.c (prune_inferiors):  Only call delete_inferior,
+	Do not modify the inferior list.
+
 2019-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* c-exp.y: Update calls to lookup_typename,

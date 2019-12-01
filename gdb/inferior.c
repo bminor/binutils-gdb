@@ -370,24 +370,22 @@ have_live_inferiors (void)
 void
 prune_inferiors (void)
 {
-  struct inferior *ss, **ss_link;
+  inferior *ss;
 
   ss = inferior_list;
-  ss_link = &inferior_list;
   while (ss)
     {
       if (!ss->deletable ()
 	  || !ss->removable
 	  || ss->pid != 0)
 	{
-	  ss_link = &ss->next;
-	  ss = *ss_link;
+	  ss = ss->next;
 	  continue;
 	}
 
-      *ss_link = ss->next;
+      inferior *ss_next = ss->next;
       delete_inferior (ss);
-      ss = *ss_link;
+      ss = ss_next;
     }
 }
 
