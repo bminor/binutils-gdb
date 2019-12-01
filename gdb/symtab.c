@@ -183,6 +183,16 @@ struct symbol_cache_slot
   } value;
 };
 
+/* Clear out SLOT.  */
+
+static void
+symbol_cache_clear_slot (struct symbol_cache_slot *slot)
+{
+  if (slot->state == SYMBOL_SLOT_NOT_FOUND)
+    xfree (slot->value.not_found.name);
+  slot->state = SYMBOL_SLOT_UNUSED;
+}
+
 /* Symbols don't specify global vs static block.
    So keep them in separate caches.  */
 
@@ -201,6 +211,19 @@ struct block_symbol_cache
   struct symbol_cache_slot symbols[1];
 };
 
+/* Clear all slots of BSC and free BSC.  */
+
+static void
+destroy_block_symbol_cache (struct block_symbol_cache *bsc)
+{
+  if (bsc != nullptr)
+    {
+      for (unsigned int i = 0; i < bsc->size; i++)
+	symbol_cache_clear_slot (&bsc->symbols[i]);
+      xfree (bsc);
+    }
+}
+
 /* The symbol cache.
 
    Searching for symbols in the static and global blocks over multiple objfiles
@@ -217,8 +240,8 @@ struct symbol_cache
 
   ~symbol_cache ()
   {
-    xfree (global_symbols);
-    xfree (static_symbols);
+    destroy_block_symbol_cache (global_symbols);
+    destroy_block_symbol_cache (static_symbols);
   }
 
   struct block_symbol_cache *global_symbols = nullptr;
@@ -1234,8 +1257,8 @@ resize_symbol_cache (struct symbol_cache *cache, unsigned int new_size)
 	  && new_size == 0))
     return;
 
-  xfree (cache->global_symbols);
-  xfree (cache->static_symbols);
+  destroy_block_symbol_cache (cache->global_symbols);
+  destroy_block_symbol_cache (cache->static_symbols);
 
   if (new_size == 0)
     {
@@ -1371,16 +1394,6 @@ symbol_cache_lookup (struct symbol_cache *cache,
     }
   ++bsc->misses;
   return {};
-}
-
-/* Clear out SLOT.  */
-
-static void
-symbol_cache_clear_slot (struct symbol_cache_slot *slot)
-{
-  if (slot->state == SYMBOL_SLOT_NOT_FOUND)
-    xfree (slot->value.not_found.name);
-  slot->state = SYMBOL_SLOT_UNUSED;
 }
 
 /* Mark SYMBOL as found in SLOT.

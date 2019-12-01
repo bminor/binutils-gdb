@@ -1,3 +1,9 @@
+2019-12-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* symtab.c (symbol_cache_clear_slot):  Move close to cleared type.
+	(destroy_block_symbol_cache): New function.
+	(symbol_cache:~symbol_cache) Call destroy_block_symbol_cache.
+	(resize_symbol_cache): Likewise.
+
 2019-12-02  Tom Tromey  <tom@tromey.com>
 
 	* unittests/tui-selftests.c (run_tests): Make conditional.
