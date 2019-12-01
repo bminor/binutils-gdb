@@ -48,6 +48,18 @@ typedef void rl_compdisp_func_t PARAMS((char **, int, int));
 
 extern rl_completion_func_t *rl_attempted_completion_function;
 
+#include "readline/rlstdc.h"
+#include "dlfcn.h"
+
+typedef char *rl_compentry_func_t PARAMS((const char *, int));
+typedef char **rl_completion_func_t PARAMS((const char *, int, int));
+typedef char *rl_quote_func_t PARAMS((char *, int, char *));
+typedef char *rl_dequote_func_t PARAMS((char *, int));
+typedef int rl_compignore_func_t PARAMS((char **));
+typedef void rl_compdisp_func_t PARAMS((char **, int, int));
+
+extern rl_completion_func_t *rl_attempted_completion_function;
+
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
 static const char python_excp_full[] = "full";
