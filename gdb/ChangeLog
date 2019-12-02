@@ -1,3 +1,8 @@
+2019-12-02  Tom Tromey  <tom@tromey.com>
+
+	* unittests/tui-selftests.c (run_tests): Make conditional.
+	(_initialize_tui_selftest): Make conditional.
+
 2019-12-02  Christian Biesinger  <cbiesinger@google.com>
 
 	* aix-thread.c (debug_aix_thread): Change type to bool.

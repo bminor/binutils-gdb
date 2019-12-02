@@ -21,6 +21,8 @@
 #include "gdbsupport/selftest.h"
 #include "tui/tui-winsource.h"
 
+#ifdef TUI
+
 namespace selftests {
 namespace tui {
 
@@ -41,8 +43,12 @@ run_tests ()
 } /* namespace tui*/
 } /* namespace selftests */
 
+#endif /* TUI */
+
 void
 _initialize_tui_selftest ()
 {
+#ifdef TUI
   selftests::register_test ("tui", selftests::tui::run_tests);
+#endif
 }
