@@ -1,6 +1,22 @@
 2019-12-03  Alan Modra  <amodra@gmail.com>
 
 	PR 25230
+	* dwarf2.c (struct dwarf2_debug_file): Add line_table and
+	abbrev_offsets.
+	(struct abbrev_offset_entry): New.
+	(hash_abbrev, eq_abbrev, del_abbrev): New functions.
+	(read_abbrevs): Check whether we have already read abbrevs at
+	given offset, and add new offset/abbrev to hash table.
+	(decode_line_info): Keep line table at offset zero in file struct.
+	Return this for a cu reusing the same dir/file list.
+	(find_abstract_instance): Find cu for DW_FORM_GNU_ref_alt.
+	(_bfd_dwarf2_slurp_debug_info): Create offset/abbrev hash tables.
+	(_bfd_dwarf2_cleanup_debug_info): Adjust deletion of lines and
+	abbrevs.
+
+2019-12-03  Alan Modra  <amodra@gmail.com>
+
+	PR 25230
 	* dwarf2.c (struct dwarf2_debug_file): New struct.
 	(struct dwarf2_debug): Delete fields now in dwarf2_debug_file.
 	Add f, alt fields.

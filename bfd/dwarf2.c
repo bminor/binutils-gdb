@@ -135,6 +135,12 @@ struct dwarf2_debug_file
 
   /* Last comp unit in list above.  */
   struct comp_unit *last_comp_unit;
+
+  /* Line table at line_offset zero.  */
+  struct line_info_table *line_table;
+
+  /* Hash table to map offsets to decoded abbrevs.  */
+  htab_t abbrev_offsets;
 };
 
 struct dwarf2_debug
@@ -929,6 +935,51 @@ lookup_abbrev (unsigned int number, struct abbrev_info **abbrevs)
   return NULL;
 }
 
+/* We keep a hash table to map .debug_abbrev section offsets to the
+   array of abbrevs, so that compilation units using the same set of
+   abbrevs do not waste memory.  */
+
+struct abbrev_offset_entry
+{
+  size_t offset;
+  struct abbrev_info **abbrevs;
+};
+
+static hashval_t
+hash_abbrev (const void *p)
+{
+  const struct abbrev_offset_entry *ent = p;
+  return htab_hash_pointer ((void *) ent->offset);
+}
+
+static int
+eq_abbrev (const void *pa, const void *pb)
+{
+  const struct abbrev_offset_entry *a = pa;
+  const struct abbrev_offset_entry *b = pb;
+  return a->offset == b->offset;
+}
+
+static void
+del_abbrev (void *p)
+{
+  struct abbrev_offset_entry *ent = p;
+  struct abbrev_info **abbrevs = ent->abbrevs;
+  size_t i;
+
+  for (i = 0; i < ABBREV_HASH_SIZE; i++)
+    {
+      struct abbrev_info *abbrev = abbrevs[i];
+
+      while (abbrev)
+	{
+	  free (abbrev->attrs);
+	  abbrev = abbrev->next;
+	}
+    }
+  free (ent);
+}
+
 /* In DWARF version 2, the description of the debugging information is
    stored in a separate .debug_abbrev section.  Before we read any
    dies from a section we read in all abbreviations and install them
@@ -945,6 +996,17 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
   bfd_size_type amt;
+  void **slot;
+  struct abbrev_offset_entry ent = { offset, NULL };
+
+  if (ent.offset != offset)
+    return NULL;
+
+  slot = htab_find_slot (file->abbrev_offsets, &ent, INSERT);
+  if (slot == NULL)
+    return NULL;
+  if (*slot != NULL)
+    return ((struct abbrev_offset_entry *) (*slot))->abbrevs;
 
   if (! read_section (abfd, &stash->debug_sections[debug_abbrev],
 		      file->syms, offset,
@@ -1044,6 +1106,12 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
       if (lookup_abbrev (abbrev_number, abbrevs) != NULL)
 	break;
     }
+
+  *slot = bfd_malloc (sizeof ent);
+  if (!*slot)
+    goto fail;
+  ent.abbrevs = abbrevs;
+  memcpy (*slot, &ent, sizeof ent);
   return abbrevs;
 
  fail:
@@ -2025,28 +2093,13 @@ decode_line_info (struct comp_unit *unit)
   unsigned int exop_len;
   bfd_size_type amt;
 
+  if (unit->line_offset == 0 && file->line_table)
+    return file->line_table;
+
   if (! read_section (abfd, &stash->debug_sections[debug_line],
 		      file->syms, unit->line_offset,
 		      &file->dwarf_line_buffer, &file->dwarf_line_size))
     return NULL;
-
-  amt = sizeof (struct line_info_table);
-  table = (struct line_info_table *) bfd_alloc (abfd, amt);
-  if (table == NULL)
-    return NULL;
-  table->abfd = abfd;
-  table->comp_dir = unit->comp_dir;
-
-  table->num_files = 0;
-  table->files = NULL;
-
-  table->num_dirs = 0;
-  table->dirs = NULL;
-
-  table->num_sequences = 0;
-  table->sequences = NULL;
-
-  table->lcl_head = NULL;
 
   if (file->dwarf_line_size < 16)
     {
@@ -2183,6 +2236,24 @@ decode_line_info (struct comp_unit *unit)
       lh.standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr, line_end);
       line_ptr += 1;
     }
+
+  amt = sizeof (struct line_info_table);
+  table = (struct line_info_table *) bfd_alloc (abfd, amt);
+  if (table == NULL)
+    return NULL;
+  table->abfd = abfd;
+  table->comp_dir = unit->comp_dir;
+
+  table->num_files = 0;
+  table->files = NULL;
+
+  table->num_dirs = 0;
+  table->dirs = NULL;
+
+  table->num_sequences = 0;
+  table->sequences = NULL;
+
+  table->lcl_head = NULL;
 
   if (lh.version >= 5)
     {
@@ -2441,6 +2512,8 @@ decode_line_info (struct comp_unit *unit)
 	free (filename);
     }
 
+  if (unit->line_offset == 0)
+    file->line_table = table;
   if (sort_line_sequences (table))
     return table;
 
@@ -2818,7 +2891,7 @@ find_abstract_instance (struct comp_unit *unit,
 			int *linenumber_ptr)
 {
   bfd *abfd = unit->abfd;
-  bfd_byte *info_ptr;
+  bfd_byte *info_ptr = NULL;
   bfd_byte *info_ptr_end;
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -2868,14 +2941,38 @@ find_abstract_instance (struct comp_unit *unit,
 	  return FALSE;
 	}
       info_ptr += die_ref;
+    }
+  else if (attr_ptr->form == DW_FORM_GNU_ref_alt)
+    {
+      bfd_boolean first_time = unit->stash->alt.dwarf_info_buffer == NULL;
 
+      info_ptr = read_alt_indirect_ref (unit, die_ref);
+      if (first_time)
+	unit->stash->alt.info_ptr = unit->stash->alt.dwarf_info_buffer;
+      if (info_ptr == NULL)
+	{
+	  _bfd_error_handler
+	    (_("DWARF error: unable to read alt ref %" PRIu64),
+	     (uint64_t) die_ref);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      info_ptr_end = (unit->stash->alt.dwarf_info_buffer
+		      + unit->stash->alt.dwarf_info_size);
+      if (unit->stash->alt.all_comp_units)
+	unit = unit->stash->alt.all_comp_units;
+    }
+
+  if (attr_ptr->form == DW_FORM_ref_addr
+      || attr_ptr->form == DW_FORM_GNU_ref_alt)
+    {
       /* Now find the CU containing this pointer.  */
       if (info_ptr >= unit->info_ptr_unit && info_ptr < unit->end_ptr)
 	info_ptr_end = unit->end_ptr;
       else
 	{
 	  /* Check other CUs to see if they contain the abbrev.  */
-	  struct comp_unit * u;
+	  struct comp_unit *u;
 
 	  for (u = unit->prev_unit; u != NULL; u = u->prev_unit)
 	    if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
@@ -2886,15 +2983,27 @@ find_abstract_instance (struct comp_unit *unit,
 	      if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
 		break;
 
-	  while (u == NULL)
-	    {
-	      u = stash_comp_unit (unit->stash, unit->file);
-	      if (u == NULL)
-		break;
-	      if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
-		break;
-	      u = NULL;
-	    }
+	  if (attr_ptr->form == DW_FORM_ref_addr)
+	    while (u == NULL)
+	      {
+		u = stash_comp_unit (unit->stash, &unit->stash->f);
+		if (u == NULL)
+		  break;
+		if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
+		  break;
+		u = NULL;
+	      }
+
+	  if (attr_ptr->form == DW_FORM_GNU_ref_alt)
+	    while (u == NULL)
+	      {
+		u = stash_comp_unit (unit->stash, &unit->stash->alt);
+		if (u == NULL)
+		  break;
+		if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
+		  break;
+		u = NULL;
+	      }
 
 	  if (u == NULL)
 	    {
@@ -2907,23 +3016,6 @@ find_abstract_instance (struct comp_unit *unit,
 	  unit = u;
 	  info_ptr_end = unit->end_ptr;
 	}
-    }
-  else if (attr_ptr->form == DW_FORM_GNU_ref_alt)
-    {
-      info_ptr = read_alt_indirect_ref (unit, die_ref);
-      if (info_ptr == NULL)
-	{
-	  _bfd_error_handler
-	    (_("DWARF error: unable to read alt ref %" PRIu64),
-	     (uint64_t) die_ref);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-      info_ptr_end = (unit->stash->alt.dwarf_info_buffer
-		      + unit->stash->alt.dwarf_info_size);
-
-      /* FIXME: Do we need to locate the correct CU, in a similar
-	 fashion to the code in the DW_FORM_ref_addr case above ?  */
     }
   else
     {
@@ -4396,6 +4488,16 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   if (!save_section_vma (abfd, stash))
     return FALSE;
 
+  stash->f.abbrev_offsets = htab_create_alloc (10, hash_abbrev, eq_abbrev,
+					       del_abbrev, calloc, free);
+  if (!stash->f.abbrev_offsets)
+    return FALSE;
+
+  stash->alt.abbrev_offsets = htab_create_alloc (10, hash_abbrev, eq_abbrev,
+						 del_abbrev, calloc, free);
+  if (!stash->alt.abbrev_offsets)
+    return FALSE;
+
   *pinfo = stash;
 
   if (debug_bfd == NULL)
@@ -4983,23 +5085,10 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     {
       for (each = file->all_comp_units; each; each = each->next_unit)
 	{
-	  struct abbrev_info **abbrevs = each->abbrevs;
 	  struct funcinfo *function_table = each->function_table;
 	  struct varinfo *variable_table = each->variable_table;
-	  size_t i;
 
-	  for (i = 0; i < ABBREV_HASH_SIZE; i++)
-	    {
-	      struct abbrev_info *abbrev = abbrevs[i];
-
-	      while (abbrev)
-		{
-		  free (abbrev->attrs);
-		  abbrev = abbrev->next;
-		}
-	    }
-
-	  if (each->line_table)
+	  if (each->line_table && each->line_table != file->line_table)
 	    {
 	      free (each->line_table->files);
 	      free (each->line_table->dirs);
@@ -5036,6 +5125,13 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 	      variable_table = variable_table->prev_var;
 	    }
 	}
+
+      if (file->line_table)
+	{
+	  free (file->line_table->files);
+	  free (file->line_table->dirs);
+	}
+      htab_delete (file->abbrev_offsets);
 
       free (file->dwarf_line_str_buffer);
       free (file->dwarf_str_buffer);
