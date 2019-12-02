@@ -1,3 +1,19 @@
+2019-12-06  Christian Biesinger  <cbiesinger@google.com>
+
+	* bcache.c: Put in namespace gdb.
+	* bcache.h: Likewise.
+	* gdbtypes.c (check_types_worklist): Update.
+	(types_deeply_equal): Update.
+	* macrotab.c (struct macro_table) <bcache>: Update.
+	(new_macro_table): Update.
+	* macrotab.h (struct bcache): Put this forward declaration
+	inside namespace gdb.
+	(new_macro_table): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <filename_cache>:
+	Update.
+	<macro_cache>: Update.
+	* psymtab.h: (psymtab_storage) <psymbol_cache>: Update.
+
 2019-12-06  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/24971

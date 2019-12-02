@@ -136,6 +136,8 @@
   
 */
 
+namespace gdb {
+
 struct bstring;
 
 struct bcache
@@ -221,5 +223,7 @@ private:
   /* Expand the hash table.  */
   void expand_hash_table ();
 };
+
+} /* namespace gdb */
 
 #endif /* BCACHE_H */

@@ -40,7 +40,7 @@ struct macro_table
 
   /* The bcache we should use to hold macro names, argument names, and
      definitions, or zero if we should use xmalloc.  */
-  struct bcache *bcache;
+  gdb::bcache *bcache;
 
   /* The main source file for this compilation unit --- the one whose
      name was given to the compiler.  This is the root of the
@@ -1025,7 +1025,7 @@ macro_for_each_in_scope (struct macro_source_file *file, int line,
 
 
 struct macro_table *
-new_macro_table (struct obstack *obstack, struct bcache *b,
+new_macro_table (struct obstack *obstack, gdb::bcache *b,
 		 struct compunit_symtab *cust)
 {
   struct macro_table *t;

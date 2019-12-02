@@ -3813,7 +3813,7 @@ check_types_equal (struct type *type1, struct type *type2,
 
 static bool
 check_types_worklist (std::vector<type_equality_entry> *worklist,
-		      struct bcache *cache)
+		      gdb::bcache *cache)
 {
   while (!worklist->empty ())
     {
@@ -3849,7 +3849,7 @@ types_deeply_equal (struct type *type1, struct type *type2)
   if (type1 == type2)
     return true;
 
-  struct bcache cache (nullptr, nullptr);
+  gdb::bcache cache (nullptr, nullptr);
   worklist.emplace_back (type1, type2);
   return check_types_worklist (&worklist, &cache);
 }

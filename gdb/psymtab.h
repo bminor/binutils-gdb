@@ -120,7 +120,7 @@ public:
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
-  struct bcache psymbol_cache;
+  gdb::bcache psymbol_cache;
 
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the objfile_obstack.  */

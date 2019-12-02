@@ -23,8 +23,11 @@
 #include "gdbsupport/function-view.h"
 
 struct obstack;
-struct bcache;
 struct compunit_symtab;
+
+namespace gdb {
+struct bcache;
+}
 
 /* How do we represent a source location?  I mean, how should we
    represent them within GDB; the user wants to use all sorts of
@@ -170,7 +173,7 @@ struct macro_source_file
    the same source location (although 'gcc -DFOO -UFOO -DFOO=2' does
    do that in GCC 4.1.2.).  */
 struct macro_table *new_macro_table (struct obstack *obstack,
-                                     struct bcache *bcache,
+                                     gdb::bcache *bcache,
 				     struct compunit_symtab *cust);
 
 
