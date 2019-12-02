@@ -2124,6 +2124,29 @@ private:
   /* When this flag is false then minsyms that match M_SYMBOL_REGEXP will
      be included in the results, otherwise they are excluded.  */
   bool m_exclude_minsyms = false;
+
+  /* Expand symtabs in OBJFILE that match PREG, are of type M_KIND.  Return
+     true if any msymbols were seen that we should later consider adding to
+     the results list.  */
+  bool expand_symtabs (objfile *objfile,
+		       const gdb::optional<compiled_regex> &preg) const;
+
+  /* Add symbols from symtabs in OBJFILE that match PREG, and TREG, and are
+     of type M_KIND, to the results vector RESULTS.  */
+  void add_matching_symbols (objfile *objfile,
+			     const gdb::optional<compiled_regex> &preg,
+			     const gdb::optional<compiled_regex> &treg,
+			     std::vector<symbol_search> *results) const;
+
+  /* Add msymbols from OBJFILE that match PREG and M_KIND, to the
+     results vector RESULTS.  */
+  void add_matching_msymbols (objfile *objfile,
+			      const gdb::optional<compiled_regex> &preg,
+			      std::vector<symbol_search> *results) const;
+
+  /* Return true if MSYMBOL is of type KIND.  */
+  static bool is_suitable_msymbol (const enum search_domain kind,
+				   const minimal_symbol *msymbol);
 };
 
 /* When searching for Fortran symbols within modules (functions/variables)

@@ -1,5 +1,24 @@
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (symbol_search::compare_search_syms): Update header
+	comment.
+	(global_symbol_searcher::is_suitable_msymbol): New function.
+	(global_symbol_searcher::expand_symtabs): New function.
+	(global_symbol_searcher::add_matching_symbols): New function.
+	(global_symbol_searcher::add_matching_msymbols): New function.
+	(global_symbol_searcher::search): Move most of the content
+	into the new functions above, and call them as needed.
+	* symtab.h (global_symbol_searcher) <expand_symtabs>: New member
+	function.
+	(global_symbol_searcher) <add_matching_symbols>: New member
+	function.
+	(global_symbol_searcher) <add_matching_msymbols>: New member
+	function.
+	(global_symbol_searcher) <is_suitable_msymbol>: New member
+	function.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* mi/mi-cmds.c (mi_cmds): Add -symbol-info-module-functions and
 	-symbol-info-module-variables entries.
 	* mi/mi-cmds.h (mi_cmd_symbol_info_module_functions): Declare.
