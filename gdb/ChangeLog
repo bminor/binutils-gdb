@@ -1,3 +1,7 @@
+2019-12-02  Christian Biesinger  <cbiesinger@google.com>
+
+	* aix-thread.c (debug_aix_thread): Change type to bool.
+
 2019-12-02  Luis Machado  <luis.machado@linaro.org>
 
 	* infrun.c (follow_fork_inferior): Remove outdated FIXME comment.
