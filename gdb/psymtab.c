@@ -1530,14 +1530,13 @@ psymbol_hash (const void *addr, int length)
   unsigned int domain = psymbol->domain;
   unsigned int theclass = psymbol->aclass;
 
-  h = hash_continue (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
-  h = hash_continue (&lang, sizeof (unsigned int), h);
-  h = hash_continue (&domain, sizeof (unsigned int), h);
-  h = hash_continue (&theclass, sizeof (unsigned int), h);
+  h = fast_hash (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
+  h = fast_hash (&lang, sizeof (unsigned int), h);
+  h = fast_hash (&domain, sizeof (unsigned int), h);
+  h = fast_hash (&theclass, sizeof (unsigned int), h);
   /* Note that psymbol names are interned via symbol_set_names, so
      there's no need to hash the contents of the name here.  */
-  h = hash_continue (&psymbol->ginfo.name,
-		     sizeof (psymbol->ginfo.name), h);
+  h = fast_hash (&psymbol->ginfo.name, sizeof (psymbol->ginfo.name), h);
 
   return h;
 }

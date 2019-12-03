@@ -1,3 +1,15 @@
+2019-12-03  Christian Biesinger  <cbiesinger@google.com>
+
+	* bcache.c (hash): Remove.
+	(hash_continue): Remove.
+	* bcache.h (hash): Remove.
+	(hash_continue): Remove.
+	(struct bcache) <ctor>: Update.
+	* psymtab.c (psymbol_hash): Update.
+	* stabsread.c (hashname): Update.
+	* utils.h (fast_hash): Add an argument for a start value,
+	defaulting to zero.
+
 2019-12-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	* symtab.c (symbol_cache_clear_slot):  Move close to cleared type.
 	(destroy_block_symbol_cache): New function.

@@ -138,23 +138,18 @@
 
 struct bstring;
 
-/* The hash functions */
-extern unsigned long hash (const void *addr, int length);
-extern unsigned long hash_continue (const void *addr, int length,
-                                    unsigned long h);
-
 struct bcache
 {
   /* Allocate a bcache.  HASH_FN and COMPARE_FN can be used to pass in
      custom hash, and compare functions to be used by this bcache.  If
-     HASH_FUNCTION is NULL hash() is used and if COMPARE_FUNCTION is
+     HASH_FUNCTION is NULL fast_hash() is used and if COMPARE_FUNCTION is
      NULL memcmp() is used.  */
 
   explicit bcache (unsigned long (*hash_fn)(const void *,
 					    int length) = nullptr,
 		   int (*compare_fn)(const void *, const void *,
 				     int length) = nullptr)
-    : m_hash_function (hash_fn == nullptr ? hash : hash_fn),
+    : m_hash_function (hash_fn == nullptr ? default_hash : hash_fn),
       m_compare_function (compare_fn == nullptr ? compare : compare_fn)
   {
   }
@@ -216,6 +211,12 @@ private:
 
   /* Default compare function.  */
   static int compare (const void *addr1, const void *addr2, int length);
+
+  /* Default hash function.  */
+  static unsigned long default_hash (const void *ptr, int length)
+  {
+    return fast_hash (ptr, length, 0);
+  }
 
   /* Expand the hash table.  */
   void expand_hash_table ();

@@ -51,31 +51,6 @@ struct bstring
   d;
 };
 
-/* The old hash function was stolen from SDBM. This is what DB 3.0
-   uses now, and is better than the old one.  */
-
-unsigned long
-hash(const void *addr, int length)
-{
-  return hash_continue (addr, length, 0);
-}
-
-/* Continue the calculation of the hash H at the given address.  */
-
-unsigned long
-hash_continue (const void *addr, int length, unsigned long h)
-{
-  const unsigned char *k, *e;
-
-  k = (const unsigned char *)addr;
-  e = k+length;
-  for (; k< e;++k)
-    {
-      h *=16777619;
-      h ^= *k;
-    }
-  return (h);
-}
 
 /* Growing the bcache's hash table.  */
 

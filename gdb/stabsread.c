@@ -4778,7 +4778,7 @@ find_name_end (const char *name)
 int
 hashname (const char *name)
 {
-  return hash (name, strlen (name)) % HASHSIZE;
+  return fast_hash (name, strlen (name)) % HASHSIZE;
 }
 
 /* Initializer for this module.  */
