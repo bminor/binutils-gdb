@@ -1,5 +1,10 @@
 2019-12-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-fortran-modules.exp: Add patterns to skip system
+	modules.
+
+2019-12-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/derived-type-striding.exp: KFAIL if we are using a
 	broken version of GCC.
 
