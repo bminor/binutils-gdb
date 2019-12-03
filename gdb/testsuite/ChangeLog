@@ -1,3 +1,11 @@
+2019-12-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/unchecked_union.exp: New file.
+	* gdb.ada/unchecked_union/pck.adb: New file.
+	* gdb.ada/unchecked_union/pck.ads: New file.
+	* gdb.ada/unchecked_union/unchecked_union.adb: New file.
+	* gdb-utils.exp (string_to_regexp): Also quote "?".
+
 2019-12-10  George Barrett  <bob@bob131.so>
 
 	Test scripted probe breakpoints.

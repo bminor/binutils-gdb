@@ -1,3 +1,9 @@
+2019-12-10  Tom Tromey  <tromey@adacore.com>
+
+	* ada-typeprint.c (print_choices): Use a single "?".
+	(print_variant_part): Print "?" if the discriminant name
+	is not known.
+
 2019-12-10  George Barrett  <bob@bob131.so>
 
 	Fix scripted probe breakpoints.

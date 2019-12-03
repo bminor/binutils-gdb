@@ -526,7 +526,7 @@ print_choices (struct type *type, int field_num, struct ui_file *stream,
     }
 
 Huh:
-  fprintf_filtered (stream, "?? =>");
+  fprintf_filtered (stream, "? =>");
   return 0;
 }
 
@@ -592,9 +592,12 @@ print_variant_part (struct type *type, int field_num, struct type *outer_type,
 		    struct ui_file *stream, int show, int level,
 		    const struct type_print_options *flags)
 {
-  fprintf_filtered (stream, "\n%*scase %s is", level + 4, "",
-		    ada_variant_discrim_name
-		    (TYPE_FIELD_TYPE (type, field_num)));
+  const char *variant
+    = ada_variant_discrim_name (TYPE_FIELD_TYPE (type, field_num));
+  if (*variant == '\0')
+    variant = "?";
+
+  fprintf_filtered (stream, "\n%*scase %s is", level + 4, "", variant);
   print_variant_clauses (type, field_num, outer_type, stream, show,
 			 level + 4, flags);
   fprintf_filtered (stream, "\n%*send case;", level + 4, "");
