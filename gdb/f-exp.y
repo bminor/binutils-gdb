@@ -167,8 +167,10 @@ static int parse_number (struct parser_state *, const char *, int,
 %token INT_KEYWORD INT_S2_KEYWORD LOGICAL_S1_KEYWORD LOGICAL_S2_KEYWORD 
 %token LOGICAL_S8_KEYWORD
 %token LOGICAL_KEYWORD REAL_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD 
+%token COMPLEX_KEYWORD
 %token COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD COMPLEX_S32_KEYWORD 
 %token BOOL_AND BOOL_OR BOOL_NOT   
+%token SINGLE DOUBLE PRECISION
 %token <lval> CHARACTER 
 
 %token <voidval> DOLLAR_VARIABLE
@@ -617,12 +619,22 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = parse_f_type (pstate)->builtin_real_s8; }
 	|	REAL_S16_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_real_s16; }
+	|	COMPLEX_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_complex_s8; }
 	|	COMPLEX_S8_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_complex_s8; }
 	|	COMPLEX_S16_KEYWORD 
 			{ $$ = parse_f_type (pstate)->builtin_complex_s16; }
 	|	COMPLEX_S32_KEYWORD 
 			{ $$ = parse_f_type (pstate)->builtin_complex_s32; }
+	|	SINGLE PRECISION
+			{ $$ = parse_f_type (pstate)->builtin_real;}
+	|	DOUBLE PRECISION
+			{ $$ = parse_f_type (pstate)->builtin_real_s8;}
+	|	SINGLE COMPLEX_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_complex_s8;}
+	|	DOUBLE COMPLEX_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_complex_s16;}
 	;
 
 nonempty_typelist
@@ -956,10 +968,13 @@ static const struct token f77_keywords[] =
   { "integer", INT_KEYWORD, BINOP_END, true },
   { "logical", LOGICAL_KEYWORD, BINOP_END, true },
   { "real_16", REAL_S16_KEYWORD, BINOP_END, true },
-  { "complex", COMPLEX_S8_KEYWORD, BINOP_END, true },
+  { "complex", COMPLEX_KEYWORD, BINOP_END, true },
   { "sizeof", SIZEOF, BINOP_END, true },
   { "real_8", REAL_S8_KEYWORD, BINOP_END, true },
   { "real", REAL_KEYWORD, BINOP_END, true },
+  { "single", SINGLE, BINOP_END, true },
+  { "double", DOUBLE, BINOP_END, true },
+  { "precision", PRECISION, BINOP_END, true },
   /* The following correspond to actual functions in Fortran and are case
      insensitive.  */
   { "kind", KIND, BINOP_END, false },

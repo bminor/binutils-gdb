@@ -1,3 +1,13 @@
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+
+	* f-exp.y (COMPLEX_KEYWORD, SINGLE, DOUBLE, PRECISION): New
+	tokens.
+	(typebase): New patterns for complex, single/double precision, and
+	single/double complex.
+	(f77_keywords): Change token for complex keyword, and add single,
+	double, and precision keywords.
+
 2019-12-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* avr-tdep.c (_initialize_avr_tdep): Improve help of command

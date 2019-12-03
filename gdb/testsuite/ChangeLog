@@ -1,3 +1,11 @@
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/type-kinds.exp (test_cast_1_to_type_kind): Handle
+	casting to type with no kind specified.
+	(test_basic_parsing_of_type_kinds): Additional tests for types
+	with no kind specified, and add tests for single/double
+	precision/complex types.
+
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/endianity.c (struct other) <x>: New field.
