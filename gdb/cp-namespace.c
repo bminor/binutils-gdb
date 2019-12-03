@@ -516,7 +516,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 			  domain_name (domain));
     }
 
-  if (function != NULL && SYMBOL_LANGUAGE (function) == language_cplus)
+  if (function != NULL && function->language () == language_cplus)
     {
       /* Search the function's template parameters.  */
       if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))

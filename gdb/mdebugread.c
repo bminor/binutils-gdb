@@ -794,11 +794,11 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* All functions in C++ have prototypes.  For C we don't have enough
          information in the debug info.  */
-      if (SYMBOL_LANGUAGE (s) == language_cplus)
+      if (s->language () == language_cplus)
 	TYPE_PROTOTYPED (SYMBOL_TYPE (s)) = 1;
 
       /* Create and enter a new lexical context.  */
-      b = new_block (FUNCTION_BLOCK, SYMBOL_LANGUAGE (s));
+      b = new_block (FUNCTION_BLOCK, s->language ());
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;

@@ -1,5 +1,67 @@
 2019-12-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* ada-lang.c (ada_add_block_symbols): Update.
+	(ada_collect_symbol_completion_matches): Update.
+	* ax-gdb.c (gen_expr): Update.
+	* block.c (block_lookup_symbol): Update.
+	(block_lookup_symbol_primary): Update.
+	(block_find_symbol): Update.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Update.
+	* dbxread.c (process_one_symbol): Update.
+	* dictionary.c (insert_symbol_hashed): Update.
+	(collate_pending_symbols_by_language): Update.
+	(mdict_add_symbol): Update.
+	* dwarf-index-write.c (write_psymbols): Update.
+	* dwarf2read.c (fixup_go_packaging): Update.
+	* findvar.c (read_var_value): Update.
+	* ft32-tdep.c (ft32_skip_prologue): Update.
+	* go-lang.c (go_symbol_package_name): Update.
+	* language.h (scoped_switch_to_sym_language_if_auto::
+	scoped_switch_to_sym_language_if_auto): Update.
+	* linespec.c (find_method): Update.
+	(find_label_symbols_in_block): Update.
+	* mdebugread.c (parse_symbol): Update.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Update.
+	* minsyms.c (add_minsym_to_demangled_hash_table): Update.
+	(minimal_symbol_reader::install): Update.
+	* moxie-tdep.c (moxie_skip_prologue): Update.
+	* parse.c (parse_exp_in_context): Update.
+	* psymtab.c (psymbol_name_matches): Update.
+	(match_partial_symbol): Update.
+	(lookup_partial_symbol): Update.
+	(psymbol_hash): Update.
+	(psymbol_compare): Update.
+	* python/py-framefilter.c (extract_sym): Update.
+	(py_print_single_arg): Update.
+	* stabsread.c (define_symbol): Update.
+	* stack.c (print_frame_arg): Update.
+	(find_frame_funname): Update.
+	(info_frame_command_core): Update.
+	* symfile.c (set_initial_language): Update.
+	* symtab.c (symbol_set_demangled_name): Update.
+	(symbol_get_demangled_name): Update.
+	(symbol_set_language): Update.
+	(symbol_find_demangled_name): Update.
+	(symbol_set_names): Update.
+	(general_symbol_info::natural_name): Update.
+	(general_symbol_info::demangled_name): Update.
+	(general_symbol_info::search_name): Update.
+	(symbol_matches_search_name): Update.
+	(eq_symbol_entry): Update.
+	(iterate_over_symbols): Update.
+	(completion_list_add_symbol): Update.
+	(completion_list_add_msymbol): Update.
+	(completion_list_add_fields): Update.
+	* symtab.h (struct general_symbol_info) <language>: New function.
+	<language>: Rename to...
+	<m_language>: ...this.
+	(SYMBOL_LANGUAGE): Remove.
+	(MSYMBOL_LANGUAGE): Remove.
+	(struct symbol) <ctor>: Update.
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Update.
+
+2019-12-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* ada-exp.y (write_ambiguous_var): Call symbol_set_language to
 	set the language of sym.
 	* language.c (language_alloc_type_symbol): Likewise.

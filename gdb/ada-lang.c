@@ -6220,8 +6220,7 @@ ada_add_block_symbols (struct obstack *obstackp,
        sym != NULL;
        sym = block_iter_match_next (lookup_name, &iter))
     {
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
 	{
 	  if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
 	    {
@@ -6260,7 +6259,7 @@ ada_add_block_symbols (struct obstack *obstackp,
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
-        if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+        if (symbol_matches_domain (sym->language (),
                                    SYMBOL_DOMAIN (sym), domain))
           {
             int cmp;
@@ -6428,7 +6427,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 	  if (completion_skip_symbol (mode, msymbol))
 	    continue;
 
-	  language symbol_language = MSYMBOL_LANGUAGE (msymbol);
+	  language symbol_language = msymbol->language ();
 
 	  /* Ada minimal symbols won't have their language set to Ada.  If
 	     we let completion_list_add_name compare using the
@@ -6466,7 +6465,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 	  continue;
 
 	completion_list_add_name (tracker,
-				  SYMBOL_LANGUAGE (sym),
+				  sym->language (),
 				  sym->linkage_name (),
 				  lookup_name, text, word);
       }
@@ -6487,7 +6486,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 		continue;
 
 	      completion_list_add_name (tracker,
-					SYMBOL_LANGUAGE (sym),
+					sym->language (),
 					sym->linkage_name (),
 					lookup_name, text, word);
 	    }
@@ -6509,7 +6508,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 		continue;
 
 	      completion_list_add_name (tracker,
-					SYMBOL_LANGUAGE (sym),
+					sym->language (),
 					sym->linkage_name (),
 					lookup_name, text, word);
 	    }

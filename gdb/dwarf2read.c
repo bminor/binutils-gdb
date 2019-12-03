@@ -9916,7 +9916,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	{
 	  struct symbol *sym = list->symbol[i];
 
-	  if (SYMBOL_LANGUAGE (sym) == language_go
+	  if (sym->language () == language_go
 	      && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	    {
 	      char *this_package_name = go_symbol_package_name (sym);

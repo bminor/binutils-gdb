@@ -430,7 +430,7 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* Found a function.  */
       sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL).symbol;
       /* Don't use line number debug info for assembly source files.  */
-      if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
+      if (sym && sym->language () != language_asm)
 	{
 	  sal = find_pc_line (func_addr, 0);
 	  if (sal.end && sal.end < func_end)

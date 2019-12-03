@@ -428,7 +428,7 @@ print_frame_arg (const frame_print_options &fp_opts,
   annotate_arg_emitter arg_emitter;
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
   fprintf_symbol_filtered (&stb, arg->sym->print_name (),
-			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
+			   arg->sym->language (), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
     {
       /* It is OK to provide invalid MI-like stream as with
@@ -436,7 +436,7 @@ print_frame_arg (const frame_print_options &fp_opts,
       stb.puts ("=");
 
       fprintf_symbol_filtered (&stb, arg->sym->print_name (),
-			       SYMBOL_LANGUAGE (arg->sym),
+			       arg->sym->language (),
 			       DMGL_PARAMS | DMGL_ANSI);
     }
   if (arg->entry_kind == print_entry_values_only
@@ -474,7 +474,7 @@ print_frame_arg (const frame_print_options &fp_opts,
 	      /* Use the appropriate language to display our symbol, unless the
 		 user forced the language to a specific language.  */
 	      if (language_mode == language_mode_auto)
-		language = language_def (SYMBOL_LANGUAGE (arg->sym));
+		language = language_def (arg->sym->language ());
 	      else
 		language = current_language;
 
@@ -1261,7 +1261,7 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
     {
       const char *print_name = func->print_name ();
 
-      *funlang = SYMBOL_LANGUAGE (func);
+      *funlang = func->language ();
       if (funcp)
 	*funcp = func;
       if (*funlang == language_cplus)
@@ -1291,7 +1291,7 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
       if (msymbol.minsym != NULL)
 	{
 	  funname.reset (xstrdup (msymbol.minsym->print_name ()));
-	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
+	  *funlang = msymbol.minsym->language ();
 	}
     }
 
@@ -1495,7 +1495,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (func)
     {
       funname = func->print_name ();
-      funlang = SYMBOL_LANGUAGE (func);
+      funlang = func->language ();
       if (funlang == language_cplus)
 	{
 	  /* It seems appropriate to use print_name() here,
@@ -1517,7 +1517,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
       if (msymbol.minsym != NULL)
 	{
 	  funname = msymbol.minsym->print_name ();
-	  funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
+	  funlang = msymbol.minsym->language ();
 	}
     }
   calling_frame_info = get_prev_frame (fi);

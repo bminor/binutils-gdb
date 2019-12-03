@@ -715,7 +715,7 @@ public:
       {
 	m_lang = current_language->la_language;
 	m_switched = true;
-	set_language (SYMBOL_LANGUAGE (sym));
+	set_language (sym->language ());
       }
     else
       {

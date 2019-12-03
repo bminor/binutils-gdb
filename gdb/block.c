@@ -729,7 +729,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 	     STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	     make sure there is no "better" matching symbol, i.e., one with
 	     exactly the same domain.  PR 16253.  */
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+	  if (symbol_matches_domain (sym->language (),
 				     SYMBOL_DOMAIN (sym), domain))
 	    other = better_symbol (other, sym, domain);
 	}
@@ -750,7 +750,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 
       ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+	  if (symbol_matches_domain (sym->language (),
 				     SYMBOL_DOMAIN (sym), domain))
 	    {
 	      sym_found = sym;
@@ -819,8 +819,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 	 STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	 make sure there is no "better" matching symbol, i.e., one with
 	 exactly the same domain.  PR 16253.  */
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
 	other = better_symbol (other, sym, domain);
     }
 
@@ -847,8 +846,7 @@ block_find_symbol (const struct block *block, const char *name,
     {
       /* MATCHER is deliberately called second here so that it never sees
 	 a non-domain-matching symbol.  */
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain)
+      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain)
 	  && matcher (sym, data))
 	return sym;
     }

@@ -162,7 +162,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 {
   if (sym->demangled_hash_next == NULL)
     {
-      objfile->per_bfd->demangled_hash_languages.set (MSYMBOL_LANGUAGE (sym));
+      objfile->per_bfd->demangled_hash_languages.set (sym->language ());
 
       struct minimal_symbol **table
 	= objfile->per_bfd->msymbol_demangled_hash;
@@ -1420,8 +1420,7 @@ minimal_symbol_reader::install ()
 		  build_minimal_symbol_hash_tables.  */
 	       if (msym->search_name () != msym->linkage_name ())
 		 hash_values[idx].minsym_demangled_hash
-		   = search_name_hash (MSYMBOL_LANGUAGE (msym),
-				       msym->search_name ());
+		   = search_name_hash (msym->language (), msym->search_name ());
 	     }
 	   {
 	     /* To limit how long we hold the lock, we only acquire it here

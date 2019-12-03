@@ -807,7 +807,7 @@ struct value *
 read_var_value (struct symbol *var, const struct block *var_block,
 		struct frame_info *frame)
 {
-  const struct language_defn *lang = language_def (SYMBOL_LANGUAGE (var));
+  const struct language_defn *lang = language_def (var->language ());
 
   gdb_assert (lang != NULL);
   gdb_assert (lang->la_read_var_value != NULL);

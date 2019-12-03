@@ -1098,7 +1098,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       struct symbol *func = block_linkage_function (block);
 
       if (func != NULL)
-        lang = language_def (SYMBOL_LANGUAGE (func));
+        lang = language_def (func->language ());
       if (lang == NULL || lang->la_language == language_unknown)
         lang = current_language;
     }

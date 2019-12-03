@@ -531,7 +531,7 @@ static bool
 psymbol_name_matches (partial_symbol *psym,
 		      const lookup_name_info &lookup_name)
 {
-  const language_defn *lang = language_def (psym->ginfo.language);
+  const language_defn *lang = language_def (psym->ginfo.language ());
   symbol_name_matcher_ftype *name_match
     = get_symbol_name_matcher (lang, lookup_name);
   return name_match (psym->ginfo.search_name (), lookup_name, NULL);
@@ -581,7 +581,7 @@ match_partial_symbol (struct objfile *objfile,
 	  center = bottom + (top - bottom) / 2;
 	  gdb_assert (center < top);
 
-	  enum language lang = (*center)->ginfo.language;
+	  enum language lang = (*center)->ginfo.language ();
 	  const char *lang_ln
 	    = name.language_lookup_name (lang).c_str ();
 
@@ -596,7 +596,7 @@ match_partial_symbol (struct objfile *objfile,
       while (top <= real_top
 	     && psymbol_name_matches (*top, name))
 	{
-	  if (symbol_matches_domain ((*top)->ginfo.language,
+	  if (symbol_matches_domain ((*top)->ginfo.language (),
 				     (*top)->domain, domain))
 	    return *top;
 	  top++;
@@ -610,7 +610,7 @@ match_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (symbol_matches_domain ((*psym)->ginfo.language,
+	  if (symbol_matches_domain ((*psym)->ginfo.language (),
 				     (*psym)->domain, domain)
 	      && psymbol_name_matches (*psym, name))
 	    return *psym;
@@ -719,7 +719,7 @@ lookup_partial_symbol (struct objfile *objfile,
       while (top <= real_top && symbol_matches_search_name (&(*top)->ginfo,
 							    lookup_name))
 	{
-	  if (symbol_matches_domain ((*top)->ginfo.language,
+	  if (symbol_matches_domain ((*top)->ginfo.language (),
 				     (*top)->domain, domain))
 	    return *top;
 	  top++;
@@ -733,7 +733,7 @@ lookup_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (symbol_matches_domain ((*psym)->ginfo.language,
+	  if (symbol_matches_domain ((*psym)->ginfo.language (),
 				     (*psym)->domain, domain)
 	      && symbol_matches_search_name (&(*psym)->ginfo, lookup_name))
 	    return *psym;
@@ -1526,7 +1526,7 @@ psymbol_hash (const void *addr, int length)
 {
   unsigned long h = 0;
   struct partial_symbol *psymbol = (struct partial_symbol *) addr;
-  unsigned int lang = psymbol->ginfo.language;
+  unsigned int lang = psymbol->ginfo.language ();
   unsigned int domain = psymbol->domain;
   unsigned int theclass = psymbol->aclass;
 
@@ -1553,7 +1553,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
 
   return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
                   sizeof (sym1->ginfo.value)) == 0
-	  && sym1->ginfo.language == sym2->ginfo.language
+	  && sym1->ginfo.language () == sym2->ginfo.language ()
           && sym1->domain == sym2->domain
           && sym1->aclass == sym2->aclass
 	  /* Note that psymbol names are interned via

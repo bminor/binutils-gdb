@@ -425,6 +425,9 @@ struct general_symbol_info
   void set_linkage_name (const char *linkage_name)
   { name = linkage_name; }
 
+  enum language language () const
+  { return m_language; }
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -479,7 +482,7 @@ struct general_symbol_info
      This is used to select one of the fields from the language specific
      union above.  */
 
-  ENUM_BITFIELD(language) language : LANGUAGE_BITS;
+  ENUM_BITFIELD(language) m_language : LANGUAGE_BITS;
 
   /* This is only used by Ada.  If set, then the 'demangled_name' field
      of language_specific is valid.  Otherwise, the 'obstack' field is
@@ -522,7 +525,6 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
 #define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->value.common_block
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
-#define SYMBOL_LANGUAGE(symbol)		(symbol)->language
 #define SYMBOL_SECTION(symbol)		(symbol)->section
 #define SYMBOL_OBJ_SECTION(objfile, symbol)			\
   (((symbol)->section >= 0)				\
@@ -741,7 +743,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 #define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
 #define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
-#define MSYMBOL_LANGUAGE(symbol)	(symbol)->language
 #define MSYMBOL_SECTION(symbol)		(symbol)->section
 #define MSYMBOL_OBJ_SECTION(objfile, symbol)			\
   (((symbol)->section >= 0)				\
@@ -1098,7 +1099,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       name = nullptr;
       value.ivalue = 0;
       language_specific.obstack = nullptr;
-      language = language_unknown;
+      m_language = language_unknown;
       ada_mangled = 0;
       section = 0;
       /* GCC 4.8.5 (on CentOS 7) does not correctly compile class-

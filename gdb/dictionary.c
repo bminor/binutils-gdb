@@ -640,9 +640,9 @@ insert_symbol_hashed (struct dictionary *dict,
 
   /* We don't want to insert a symbol into a dictionary of a different
      language.  The two may not use the same hashing algorithm.  */
-  gdb_assert (SYMBOL_LANGUAGE (sym) == DICT_LANGUAGE (dict)->la_language);
+  gdb_assert (sym->language () == DICT_LANGUAGE (dict)->la_language);
 
-  hash = search_name_hash (SYMBOL_LANGUAGE (sym), sym->search_name ());
+  hash = search_name_hash (sym->language (), sym->search_name ());
   hash_index = hash % DICT_HASHED_NBUCKETS (dict);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
@@ -928,7 +928,7 @@ collate_pending_symbols_by_language (const struct pending *symbol_list)
     {
       for (int i = list_counter->nsyms - 1; i >= 0; --i)
 	{
-	  enum language language = SYMBOL_LANGUAGE (list_counter->symbol[i]);
+	  enum language language = list_counter->symbol[i]->language ();
 	  nsyms[language].push_back (list_counter->symbol[i]);
 	}
     }
@@ -1116,13 +1116,13 @@ void
 mdict_add_symbol (struct multidictionary *mdict, struct symbol *sym)
 {
   struct dictionary *dict
-    = find_language_dictionary (mdict, SYMBOL_LANGUAGE (sym));
+    = find_language_dictionary (mdict, sym->language ());
 
   if (dict == nullptr)
     {
       /* SYM is of a new language that we haven't previously seen.
 	 Create a new dictionary for it.  */
-      dict = create_new_language_dictionary (mdict, SYMBOL_LANGUAGE (sym));
+      dict = create_new_language_dictionary (mdict, sym->language ());
     }
 
   dict_add_symbol (dict, sym);

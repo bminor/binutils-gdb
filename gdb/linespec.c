@@ -3683,7 +3683,7 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
       gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
       t = check_typedef (SYMBOL_TYPE (sym));
-      find_methods (t, SYMBOL_LANGUAGE (sym),
+      find_methods (t, sym->language (),
 		    method_name, &result_names, &superclass_vec);
 
       /* Handle all items from a single program space at once; and be
@@ -3696,7 +3696,7 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 	     this program space, consider superclasses.  */
 	  if (result_names.size () == last_result_len)
 	    find_superclass_methods (std::move (superclass_vec), method_name,
-				     SYMBOL_LANGUAGE (sym), &result_names);
+				     sym->language (), &result_names);
 
 	  /* We have a list of candidate symbol names, so now we
 	     iterate over the symbol tables looking for all
@@ -3998,7 +3998,7 @@ find_label_symbols_in_block (const struct block *block,
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+	  if (symbol_matches_domain (sym->language (),
 				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
 	      && cmp (sym->search_name (), name, name_len) == 0)
 	    {

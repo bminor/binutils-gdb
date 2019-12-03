@@ -109,7 +109,7 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
 	 from the symbol.  If mode is not "auto", then the language
 	 has been explicitly set, use that.  */
       if (language_mode == language_mode_auto)
-	*language = language_def (SYMBOL_LANGUAGE (*sym));
+	*language = language_def ((*sym)->language ());
       else
 	*language = current_language;
     }
@@ -320,7 +320,7 @@ py_print_single_arg (struct ui_out *out,
     {
       if (fa->val == NULL && fa->error == NULL)
 	return;
-      language = language_def (SYMBOL_LANGUAGE (fa->sym));
+      language = language_def (fa->sym->language ());
       val = fa->val;
     }
   else
@@ -349,14 +349,14 @@ py_print_single_arg (struct ui_out *out,
       string_file stb;
 
       fprintf_symbol_filtered (&stb, fa->sym->print_name (),
-			       SYMBOL_LANGUAGE (fa->sym),
+			       fa->sym->language (),
 			       DMGL_PARAMS | DMGL_ANSI);
       if (fa->entry_kind == print_entry_values_compact)
 	{
 	  stb.puts ("=");
 
 	  fprintf_symbol_filtered (&stb, fa->sym->print_name (),
-				   SYMBOL_LANGUAGE (fa->sym),
+				   fa->sym->language (),
 				   DMGL_PARAMS | DMGL_ANSI);
 	}
       if (fa->entry_kind == print_entry_values_only

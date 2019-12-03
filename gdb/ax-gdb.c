@@ -2230,7 +2230,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 	b = block_for_pc (ax->scope);
 	func = block_linkage_function (b);
-	lang = language_def (SYMBOL_LANGUAGE (func));
+	lang = language_def (func->language ());
 
 	sym = lookup_language_this (lang, b).symbol;
 	if (!sym)
