@@ -107,12 +107,9 @@ struct dwarf2_debug
      time.  */
   bfd *orig_bfd;
 
-  /* Pointer to the bfd, section and address of the beginning of the
-     section.  The bfd might be different than expected because of
-     gnu_debuglink sections.  */
+  /* Pointer to the bfd.  The bfd might be different than expected
+     because of gnu_debuglink sections.  */
   bfd *bfd_ptr;
-  asection *sec;
-  bfd_byte *sec_info_ptr;
 
   /* Support for alternate debug info sections created by the DWZ utility:
      This includes a pointer to an alternate bfd which contains *extra*,
@@ -124,9 +121,7 @@ struct dwarf2_debug
   bfd_byte *	 alt_dwarf_info_buffer;
   bfd_size_type	 alt_dwarf_info_size;
 
-  /* A pointer to the memory block allocated for info_ptr.  Neither
-     info_ptr nor sec_info_ptr are guaranteed to stay pointing to the
-     beginning of the malloc block.  */
+  /* A pointer to the memory block allocated for .debug_info sections.  */
   bfd_byte *info_ptr_memory;
 
   /* Pointer to the symbol table.  */
@@ -855,7 +850,7 @@ read_alt_indirect_ref (struct comp_unit * unit,
       char *debug_filename = bfd_follow_gnu_debugaltlink (unit->abfd, DEBUGDIR);
 
       if (debug_filename == NULL)
-	return FALSE;
+	return NULL;
 
       debug_bfd = bfd_openr (debug_filename, NULL);
       free (debug_filename);
@@ -4521,8 +4516,6 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 
   stash->info_ptr = stash->info_ptr_memory;
   stash->info_ptr_end = stash->info_ptr + total_size;
-  stash->sec = find_debug_info (debug_bfd, debug_sections, NULL);
-  stash->sec_info_ptr = stash->info_ptr;
   return TRUE;
 }
 
@@ -4591,15 +4584,6 @@ stash_comp_unit (struct dwarf2_debug *stash)
 	  stash->all_comp_units = each;
 
 	  stash->info_ptr += length;
-
-	  if ((bfd_size_type) (stash->info_ptr - stash->sec_info_ptr)
-	      == stash->sec->size)
-	    {
-	      stash->sec = find_debug_info (stash->bfd_ptr,
-					    stash->debug_sections,
-					    stash->sec);
-	      stash->sec_info_ptr = stash->info_ptr;
-	    }
 	  return each;
 	}
     }
