@@ -100,6 +100,10 @@
 
 * New commands
 
+set debug breakpoint on|off
+  show debug breakpoint
+  Print additional debug messages about breakpoint insertion and removal.
+
 maintenance print record-instruction [ N ]
   Print the recorded information for a given instruction.  If N is not given
   prints how GDB would undo the last instruction executed.  If N is negative,

@@ -83,6 +83,7 @@
 #include "progspace-and-thread.h"
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/common-utils.h"
 
 /* Prototypes for local functions.  */
 
@@ -199,6 +200,68 @@ enum ugll_insert_mode
      as no thread is running yet.  */
   UGLL_INSERT
 };
+
+/* Return a textual version of INSERT_MODE.  */
+
+static const char *
+ugll_insert_mode_text (ugll_insert_mode insert_mode)
+{
+/* Make sure the compiler warns if a new ugll_insert_mode enumerator is added
+   but not handled here.  */
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_ERROR_SWITCH
+  switch (insert_mode)
+    {
+    case UGLL_DONT_INSERT:
+      return "UGLL_DONT_INSERT";
+    case UGLL_MAY_INSERT:
+      return "UGLL_MAY_INSERT";
+    case UGLL_INSERT:
+      return "UGLL_INSERT";
+    }
+DIAGNOSTIC_POP
+
+  gdb_assert_not_reached ("must handle all enum values");
+}
+
+/* Return a textual version of REASON.  */
+
+static const char *
+remove_bp_reason_str (remove_bp_reason reason)
+{
+/* Make sure the compiler warns if a new remove_bp_reason enumerator is added
+   but not handled here.  */
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_ERROR_SWITCH
+  switch (reason)
+    {
+    case REMOVE_BREAKPOINT:
+      return "regular remove";
+    case DETACH_BREAKPOINT:
+      return "detach";
+    }
+DIAGNOSTIC_POP
+
+  gdb_assert_not_reached ("must handle all enum values");
+}
+
+/* Return a textual version of breakpoint location BL describing number,
+   location and address.  */
+
+static std::string
+breakpoint_location_address_str (const bp_location *bl)
+{
+  std::string str = string_printf ("Breakpoint %d (%s) at address %s",
+				   bl->owner->number,
+				   host_address_to_string (bl),
+				   paddress (bl->gdbarch, bl->address));
+
+  std::string loc_string = bl->to_string ();
+  if (!loc_string.empty ())
+    str += string_printf (" %s", loc_string.c_str ());
+
+  return str;
+}
 
 static void update_global_location_list (enum ugll_insert_mode);
 
@@ -508,6 +571,22 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 {
   gdb_printf (file, _("Always inserted breakpoint mode is %s.\n"),
 	      value);
+}
+
+/* True if breakpoint debug output is enabled.  */
+static bool debug_breakpoint = false;
+
+/* Print a "breakpoint" debug statement.  */
+#define breakpoint_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_breakpoint, "breakpoint", fmt, \
+			      ##__VA_ARGS__)
+
+/* "show debug breakpoint" implementation.  */
+static void
+show_debug_breakpoint (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file, _("Breakpoint location debugging is %s.\n"), value);
 }
 
 /* See breakpoint.h.  */
@@ -2728,6 +2807,8 @@ insert_bp_location (struct bp_location *bl,
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
 
+  breakpoint_debug_printf ("%s", breakpoint_location_address_str (bl).c_str ());
+
   /* Note we don't initialize bl->target_info, as that wipes out
      the breakpoint location's shadow_contents if the breakpoint
      is still inserted at that location.  This in turn breaks
@@ -3269,6 +3350,8 @@ void
 remove_breakpoints_inf (inferior *inf)
 {
   int val;
+
+  breakpoint_debug_printf ("inf->num = %d", inf->num);
 
   for (bp_location *bl : all_bp_locations ())
     {
@@ -3914,6 +3997,10 @@ detach_breakpoints (ptid_t ptid)
 static int
 remove_breakpoint_1 (struct bp_location *bl, enum remove_bp_reason reason)
 {
+  breakpoint_debug_printf ("%s due to %s",
+			   breakpoint_location_address_str (bl).c_str (),
+			   remove_bp_reason_str (reason));
+
   int val;
 
   /* BL is never in moribund_locations by our callers.  */
@@ -7418,6 +7505,17 @@ bp_location::bp_location (breakpoint *owner)
   : bp_location::bp_location (owner,
 			      bp_location_from_bp_type (owner->type))
 {
+}
+
+/* See breakpoint.h.  */
+
+std::string
+bp_location::to_string () const
+{
+  string_file stb;
+  ui_out_redirect_pop redir (current_uiout, &stb);
+  print_breakpoint_location (this->owner, this);
+  return stb.string ();
 }
 
 /* Decrement reference count.  If the reference count reaches 0,
@@ -11152,6 +11250,9 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   CORE_ADDR last_addr = 0;
   /* Last breakpoint location program space that was marked for update.  */
   int last_pspace_num = -1;
+
+  breakpoint_debug_printf ("insert_mode = %s",
+			   ugll_insert_mode_text (insert_mode));
 
   /* Used in the duplicates detection below.  When iterating over all
      bp_locations, points to the first bp_location of a given address.
@@ -14894,6 +14995,15 @@ when execution stops."),
 				&show_always_inserted_mode,
 				&breakpoint_set_cmdlist,
 				&breakpoint_show_cmdlist);
+
+  add_setshow_boolean_cmd ("breakpoint", class_maintenance,
+			   &debug_breakpoint, _("\
+Set breakpoint location debugging."), _("\
+Show breakpoint location debugging."), _("\
+When on, breakpoint location specific debugging is enabled."),
+			   NULL,
+			   show_debug_breakpoint,
+			   &setdebuglist, &showdebuglist);
 
   add_setshow_enum_cmd ("condition-evaluation", class_breakpoint,
 			condition_evaluation_enums,

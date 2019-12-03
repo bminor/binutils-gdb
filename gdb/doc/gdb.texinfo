@@ -28366,6 +28366,14 @@ debugging info.
 Turn on or off debugging messages for built-in XML parsers.
 @item show debug xml
 Displays the current state of XML debugging messages.
+
+@item set debug breakpoints
+@cindex breakpoint debugging info
+Turns on or off display of @value{GDBN} debugging info for breakpoint insertion
+and removal.  The default is off.
+@item show debug breakpoints
+Displays the current state of displaying @value{GDBN} debugging info for
+breakpoint insertion and removal.
 @end table
 
 @node Other Misc Settings

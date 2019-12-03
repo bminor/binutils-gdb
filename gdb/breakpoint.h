@@ -509,6 +509,10 @@ public:
 
   /* The objfile the symbol or minimal symbol were found in.  */
   const struct objfile *objfile = NULL;
+
+  /* Return a string representation of the bp_location.
+     This is only meant to be used in debug messages.  */
+  std::string to_string () const;
 };
 
 /* A policy class for bp_location reference counting.  */
