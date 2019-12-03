@@ -20,6 +20,10 @@ if {[skip_fortran_tests]} { return -1 }
 
 standard_testfile ".f90"
 
+# Unfortunately recent versions of GCC broke the stride information in
+# the DEBUG so tests in this file will fail.
+set gcc_with_broken_stride [test_compiler_info {gcc-[89]-*}]
+
 if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
 	 {debug f90}]} {
     return -1
@@ -31,7 +35,9 @@ if {![runto [gdb_get_line_number "post_init"]]} then {
 }
 
 # Test homogeneous derived type.
+if { $gcc_with_broken_stride } { setup_kfail *-*-* gcc/92775 }
 gdb_test "p point_dimension" "= \\\(2, 2, 2, 2, 2, 2, 2, 2, 2\\\)"
 
 # Test mixed type derived type.
+if { $gcc_with_broken_stride } { setup_kfail *-*-* gcc/92775 }
 gdb_test "p point_mixed_dimension" "= \\\(3, 3, 3, 3\\\)"
