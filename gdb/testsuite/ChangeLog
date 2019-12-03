@@ -1,3 +1,10 @@
+2019-12-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/info-modules.exp: Rewrite to make use of new
+	sym-info-cmds library.
+	* gdb.fortran/info-types.exp: Likewise.
+	* lib/sym-info-cmds.exp: New file.
+
 2019-12-08  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/imported-unit.exp: Fix inter-CU references.
