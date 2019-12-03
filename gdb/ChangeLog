@@ -1,3 +1,11 @@
+2019-12-04  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (val_print_string): Use metadata_style.
+	* go-valprint.c (print_go_string): Use metadata style.
+	* p-valprint.c (pascal_object_print_static_field): Use metadata
+	style.
+	* cp-valprint.c (cp_print_static_field): Use metadata style.
+
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
 

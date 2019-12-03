@@ -865,9 +865,9 @@ pascal_object_print_static_field (struct value *val,
 	{
 	  if (value_address (val) == first_dont_print[i])
 	    {
-	      fputs_filtered ("\
-<same as static member of an already seen type>",
-			      stream);
+	      fputs_styled (_("\
+<same as static member of an already seen type>"),
+			    metadata_style.style (), stream);
 	      return;
 	    }
 	}

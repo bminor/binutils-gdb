@@ -638,9 +638,9 @@ cp_print_static_field (struct type *type,
 	{
 	  if (value_address (val) == first_dont_print[i])
 	    {
-	      fputs_filtered ("<same as static member of an already"
-			      " seen type>",
-			      stream);
+	      fputs_styled (_("<same as static member of an already"
+			      " seen type>"),
+			    metadata_style.style (), stream);
 	      return;
 	    }
 	}
@@ -670,9 +670,9 @@ cp_print_static_field (struct type *type,
 	{
 	  if (target_type == first_dont_print[i])
 	    {
-	      fputs_filtered ("<same as static member of an already"
-			      " seen type>",
-			      stream);
+	      fputs_styled (_("<same as static member of an already"
+			      " seen type>"),
+			    metadata_style.style (), stream);
 	      return;
 	    }
 	}

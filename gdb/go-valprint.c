@@ -29,6 +29,7 @@
 #include "go-lang.h"
 #include "c-lang.h"
 #include "valprint.h"
+#include "cli/cli-style.h"
 
 /* Print a Go string.
 
@@ -71,9 +72,9 @@ print_go_string (struct type *type,
 
   if (length < 0)
     {
-      fputs_filtered (_("<invalid length: "), stream);
-      fputs_filtered (plongest (addr), stream);
-      fputs_filtered (">", stream);
+      printf_filtered (_("<invalid length: %ps>"),
+		       styled_string (metadata_style.style (),
+				      plongest (addr)));
       return;
     }
 

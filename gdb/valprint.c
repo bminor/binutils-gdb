@@ -2897,9 +2897,9 @@ val_print_string (struct type *elttype, const char *encoding,
     {
       std::string str = memory_error_message (TARGET_XFER_E_IO, gdbarch, addr);
 
-      fprintf_filtered (stream, "<error: ");
-      fputs_filtered (str.c_str (), stream);
-      fprintf_filtered (stream, ">");
+      fprintf_filtered (stream, _("<error: %ps>"),
+			styled_string (metadata_style.style (),
+				       str.c_str ()));
     }
 
   return (bytes_read / width);
