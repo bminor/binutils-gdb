@@ -31,14 +31,22 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	e3 00                	jrcxz  0x69	68: R_X86_64_PC8	\$\+0x1
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	66 ff 13             	callw  \*\(%rbx\)
+[ 	]*[a-f0-9]+:	66 ff 1b             	lcallw \*\(%rbx\)
+[ 	]*[a-f0-9]+:	ff 1b                	lcall  \*\(%rbx\)
+[ 	]*[a-f0-9]+:	ff 13                	callq  \*\(%rbx\)
+[ 	]*[a-f0-9]+:	ff 13                	callq  \*\(%rbx\)
 [ 	]*[a-f0-9]+:	ff 1b                	lcall  \*\(%rbx\)
 [ 	]*[a-f0-9]+:	66 ff 23             	jmpw   \*\(%rbx\)
+[ 	]*[a-f0-9]+:	66 ff 2b             	ljmpw  \*\(%rbx\)
 [ 	]*[a-f0-9]+:	ff 2b                	ljmp   \*\(%rbx\)
-[ 	]*[a-f0-9]+:	eb 00                	jmp    0x76
+[ 	]*[a-f0-9]+:	ff 23                	jmpq   \*\(%rbx\)
+[ 	]*[a-f0-9]+:	ff 23                	jmpq   \*\(%rbx\)
+[ 	]*[a-f0-9]+:	ff 2b                	ljmp   \*\(%rbx\)
+[ 	]*[a-f0-9]+:	eb 00                	jmp    0x[0-9a-f]*
 [ 	]*[a-f0-9]+:	90                   	nop
-[ 	]*[a-f0-9]+:	67 e3 00             	jecxz  0x7a
+[ 	]*[a-f0-9]+:	67 e3 00             	jecxz  0x[0-9a-f]*
 [ 	]*[a-f0-9]+:	90                   	nop
-[ 	]*[a-f0-9]+:	e3 00                	jrcxz  0x7d
+[ 	]*[a-f0-9]+:	e3 00                	jrcxz  0x[0-9a-f]*
 [ 	]*[a-f0-9]+:	90                   	nop
-[ 	]*[a-f0-9]+:	eb 00                	jmp    0x80
+[ 	]*[a-f0-9]+:	eb 00                	jmp    0x[0-9a-f]*
 #pass
