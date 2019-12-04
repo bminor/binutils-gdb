@@ -21,7 +21,6 @@
 #include "defs.h"
 
 #include "gdbarch.h"
-#include "arch-utils.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "aarch64-tdep.h"
@@ -31,12 +30,11 @@
 #include "symtab.h"
 #include "tramp-frame.h"
 #include "trad-frame.h"
+#include "target/target.h"
 
-#include "inferior.h"
 #include "regcache.h"
 #include "regset.h"
 
-#include "cli/cli-utils.h"
 #include "stap-probe.h"
 #include "parser-defs.h"
 #include "user-regs.h"
@@ -45,8 +43,6 @@
 
 #include "record-full.h"
 #include "linux-record.h"
-#include "auxv.h"
-#include "elf/common.h"
 
 /* Signal frame handling.
 
