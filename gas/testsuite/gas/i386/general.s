@@ -230,9 +230,13 @@
 	push	$0
 	push	$0x1234
 	push	(%bx)
+	push	%es
+	push	%fs
 	pusha
 	pushf
 	pop	(%bx)
+	pop	%es
+	pop	%fs
 	popa
 	popf
 	ret

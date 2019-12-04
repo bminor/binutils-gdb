@@ -6207,10 +6207,11 @@ process_suffix (void)
     i.suffix = LONG_MNEM_SUFFIX;
   else if (i.tm.opcode_modifier.size == SIZE64)
     i.suffix = QWORD_MNEM_SUFFIX;
-  else if (i.reg_operands)
+  else if (i.reg_operands
+	   && (i.operands > 1 || i.types[0].bitfield.class == Reg))
     {
       /* If there's no instruction mnemonic suffix we try to invent one
-	 based on register operands.  */
+	 based on GPR operands.  */
       if (!i.suffix)
 	{
 	  /* We take i.suffix from the last register operand specified,
@@ -6315,19 +6316,24 @@ process_suffix (void)
 	   /* exclude sysret */
 	   && i.tm.base_opcode != 0x0f07)
     {
-      if (stackop_size == LONG_MNEM_SUFFIX
-	  && i.tm.base_opcode == 0xcf)
+      i.suffix = stackop_size;
+      if (stackop_size == LONG_MNEM_SUFFIX)
 	{
 	  /* stackop_size is set to LONG_MNEM_SUFFIX for the
 	     .code16gcc directive to support 16-bit mode with
 	     32-bit address.  For IRET without a suffix, generate
 	     16-bit IRET (opcode 0xcf) to return from an interrupt
 	     handler.  */
-	  i.suffix = WORD_MNEM_SUFFIX;
-	  as_warn (_("generating 16-bit `iret' for .code16gcc directive"));
+	  if (i.tm.base_opcode == 0xcf)
+	    {
+	      i.suffix = WORD_MNEM_SUFFIX;
+	      as_warn (_("generating 16-bit `iret' for .code16gcc directive"));
+	    }
+	  /* Warn about changed behavior for segment register push/pop.  */
+	  else if ((i.tm.base_opcode | 1) == 0x07)
+	    as_warn (_("generating 32-bit `%s', unlike earlier gas versions"),
+		     i.tm.name);
 	}
-      else
-	i.suffix = stackop_size;
     }
   else if (intel_syntax
 	   && !i.suffix
