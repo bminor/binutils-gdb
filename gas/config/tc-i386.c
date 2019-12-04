@@ -8259,15 +8259,9 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpu687
 	  || i.tm.cpu_flags.bitfield.cpufisttp)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
-      /* Don't set GNU_PROPERTY_X86_FEATURE_2_MMX for prefetchtXXX nor
-	 Xfence instructions.  */
-      if (i.tm.base_opcode != 0xf18
-	  && i.tm.base_opcode != 0xf0d
-	  && i.tm.base_opcode != 0xfaef8
-	  && (i.has_regmmx
-	      || i.tm.cpu_flags.bitfield.cpummx
-	      || i.tm.cpu_flags.bitfield.cpua3dnow
-	      || i.tm.cpu_flags.bitfield.cpua3dnowa))
+      if (i.has_regmmx
+	  || i.tm.base_opcode == 0xf77 /* emms */
+	  || i.tm.base_opcode == 0xf0e /* femms */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
       if (i.has_regxmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
