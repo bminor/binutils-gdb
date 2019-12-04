@@ -217,6 +217,43 @@
 	movzb	%al,%ecx
 
 .code16gcc
+# Except for IRET use 32-bit implicit stack accesses by default.
+	call	.
+	call	*(%bx)
+	enter	$0,$0
+	iret
+	lcall	*(%bx)
+	lcall	$0,$0
+	leave
+	lret
+	lret	$0
+	push	$0
+	push	$0x1234
+	push	(%bx)
+	pusha
+	pushf
+	pop	(%bx)
+	popa
+	popf
+	ret
+	ret	$0
+
+# However use 16-bit branches not accessing the stack by default.
+	ja	.
+	ja	.+0x1234
+	jcxz	.
+	jmp	.
+	jmp	.+0x1234
+	jmp	*(%bx)
+	ljmp	*(%bx)
+	ljmp	$0,$0
+	loop	.
+	syscall
+	sysenter
+	sysexit
+	sysret
+	xbegin	.
+
 # Use 16-bit layout by default for fldenv.
 	fldenv	(%eax)
 	fldenvs	(%eax)

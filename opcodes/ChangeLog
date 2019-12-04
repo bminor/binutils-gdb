@@ -1,3 +1,10 @@
+2019-12-04  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (push, pop): Drop DefaultSize from GPR-only
+	forms.
+	(xbegin): Drop DefaultSize.
+	* i386-tbl.h: Re-generate.
+
 2019-11-22  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	* opcodes/arm-dis.c (arm_opcodes, thumb32_opcodes):

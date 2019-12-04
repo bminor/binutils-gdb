@@ -6311,7 +6311,9 @@ process_suffix (void)
   else if (i.tm.opcode_modifier.defaultsize
 	   && !i.suffix
 	   /* exclude fldenv/frstor/fsave/fstenv */
-	   && i.tm.opcode_modifier.no_ssuf)
+	   && i.tm.opcode_modifier.no_ssuf
+	   /* exclude sysret */
+	   && i.tm.base_opcode != 0x0f07)
     {
       if (stackop_size == LONG_MNEM_SUFFIX
 	  && i.tm.base_opcode == 0xcf)
