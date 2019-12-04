@@ -21,7 +21,6 @@
 #include "defs.h"
 
 #include "frame.h"
-#include "inferior.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
@@ -40,17 +39,11 @@
 #include "prologue-value.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
-#include "language.h"
-#include "infcall.h"
-#include "ax.h"
 #include "ax-gdb.h"
 #include "gdbsupport/selftest.h"
 
 #include "aarch64-tdep.h"
 #include "aarch64-ravenscar-thread.h"
-
-#include "elf-bfd.h"
-#include "elf/aarch64.h"
 
 #include "record.h"
 #include "record-full.h"
