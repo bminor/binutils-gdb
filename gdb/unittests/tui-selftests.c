@@ -19,9 +19,10 @@
 
 #include "defs.h"
 #include "gdbsupport/selftest.h"
-#include "tui/tui-winsource.h"
 
 #ifdef TUI
+
+#include "tui/tui-winsource.h"
 
 namespace selftests {
 namespace tui {

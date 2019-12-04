@@ -1,5 +1,9 @@
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
+	* unittests/tui-selftests.c: Conditionally include tui-winsource.h.
+
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (process_structure_scope): Initialize
 	"discr_offset".
 
