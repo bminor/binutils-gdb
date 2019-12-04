@@ -1,3 +1,11 @@
+2019-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* filtered-iterator.h (filtered_iterator) <operator==,
+	operator!=>: Compare wrapped iterators, not wrapped pointers.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/filtered_iterator-selftests.c.
+	* unittests/filtered_iterator-selftests.c: New file.
+
 2019-12-04  Tom Tromey  <tromey@adacore.com>
 
 	* gdbtypes.c (create_range_type): Inherit endianity

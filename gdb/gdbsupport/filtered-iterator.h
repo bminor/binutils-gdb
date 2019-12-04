@@ -64,10 +64,10 @@ public:
   }
 
   bool operator== (const self_type &other) const
-  { return *m_it == *other.m_it; }
+  { return m_it == other.m_it; }
 
   bool operator!= (const self_type &other) const
-  { return *m_it != *other.m_it; }
+  { return m_it != other.m_it; }
 
 private:
 

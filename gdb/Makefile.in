@@ -422,6 +422,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/common-utils-selftests.c \
 	unittests/copy_bitwise-selftests.c \
 	unittests/environ-selftests.c \
+	unittests/filtered_iterator-selftests.c \
 	unittests/format_pieces-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/help-doc-selftests.c \
