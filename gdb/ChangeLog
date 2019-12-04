@@ -1,3 +1,8 @@
+2019-12-04  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.c (process_structure_scope): Initialize
+	"discr_offset".
+
 2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* mi/mi-symbol-cmds.c (mi_symbol_info): Take extra parameter, and

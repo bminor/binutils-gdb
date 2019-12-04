@@ -16060,7 +16060,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      read the discriminant member, so we can record it later in the
      discriminant_info.  */
   bool is_variant_part = TYPE_FLAG_DISCRIMINATED_UNION (type);
-  sect_offset discr_offset;
+  sect_offset discr_offset {};
   bool has_template_parameters = false;
 
   if (is_variant_part)
