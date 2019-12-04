@@ -1,5 +1,10 @@
 2019-12-04  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (lfs, lgs, lss): Drop No_qSuf.
+	* i386-tbl.h: Re-generate.
+
+2019-12-04  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (mod_table): Use Ev instead of Em for movdiri.
 
 2019-12-04  Jan Beulich  <jbeulich@suse.com>

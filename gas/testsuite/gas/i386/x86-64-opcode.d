@@ -45,6 +45,18 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c7 00 00 00 00 70    	movl   \$0x70000000,\(%rax\)
 [ 	]*[a-f0-9]+:	49 c7 00 00 00 00 70 	movq   \$0x70000000,\(%r8\)
 [ 	]*[a-f0-9]+:	48 c7 00 00 00 00 70 	movq   \$0x70000000,\(%rax\)
+[ 	]*[a-f0-9]+:	0f b4 08             	lfs    \(%rax\),%ecx
+[ 	]*[a-f0-9]+:	0f b4 01             	lfs    \(%rcx\),%eax
+[ 	]*[a-f0-9]+:	66 0f b4 08          	lfs    \(%rax\),%cx
+[ 	]*[a-f0-9]+:	66 0f b4 01          	lfs    \(%rcx\),%ax
+[ 	]*[a-f0-9]+:	0f b5 11             	lgs    \(%rcx\),%edx
+[ 	]*[a-f0-9]+:	0f b5 0a             	lgs    \(%rdx\),%ecx
+[ 	]*[a-f0-9]+:	66 0f b5 11          	lgs    \(%rcx\),%dx
+[ 	]*[a-f0-9]+:	66 0f b5 0a          	lgs    \(%rdx\),%cx
+[ 	]*[a-f0-9]+:	0f b2 1a             	lss    \(%rdx\),%ebx
+[ 	]*[a-f0-9]+:	0f b2 13             	lss    \(%rbx\),%edx
+[ 	]*[a-f0-9]+:	66 0f b2 1a          	lss    \(%rdx\),%bx
+[ 	]*[a-f0-9]+:	66 0f b2 13          	lss    \(%rbx\),%dx
 [ 	]*[a-f0-9]+:	41 0f c3 00          	movnti %eax,\(%r8\)
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%rax\)
 [ 	]*[a-f0-9]+:	49 0f c3 00          	movnti %rax,\(%r8\)

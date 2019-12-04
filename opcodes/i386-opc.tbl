@@ -201,9 +201,9 @@ lea, 2, 0x8d, None, 1, 0, Modrm|Anysize|No_bSuf|No_sSuf|No_ldSuf, { BaseIndex, R
 // Load segment registers from memory.
 lds, 2, 0xc5, None, 1, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
 les, 2, 0xc4, None, 1, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
-lfs, 2, 0xfb4, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lgs, 2, 0xfb5, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lss, 2, 0xfb2, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lfs, 2, 0xfb4, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lgs, 2, 0xfb5, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lss, 2, 0xfb2, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { DWord|Fword|Tbyte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Flags register instructions.
 clc, 0, 0xf8, None, 1, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
