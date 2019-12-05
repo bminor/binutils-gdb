@@ -3281,6 +3281,8 @@ frame_apply_command (const char* cmd, int from_tty)
 static void
 faas_command (const char *cmd, int from_tty)
 {
+  if (cmd == NULL || *cmd == '\0')
+    error (_("Please specify a command to apply on all frames"));
   std::string expanded = std::string ("frame apply all -s ") + cmd;
   execute_command (expanded.c_str (), from_tty);
 }

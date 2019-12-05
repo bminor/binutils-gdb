@@ -1,3 +1,7 @@
+2019-12-06  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* stack.c (faas_command): Check a command is provided.
+	* thread.c (taas_command, tfaas_command): Likewise.
+
 2019-12-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	* inferior.c (prune_inferiors):  Only call delete_inferior,
 	Do not modify the inferior list.

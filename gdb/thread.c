@@ -1818,6 +1818,8 @@ thread_apply_command (const char *tidlist, int from_tty)
 static void
 taas_command (const char *cmd, int from_tty)
 {
+  if (cmd == NULL || *cmd == '\0')
+    error (_("Please specify a command to apply on all threads"));
   std::string expanded = std::string ("thread apply all -s ") + cmd;
   execute_command (expanded.c_str (), from_tty);
 }
@@ -1827,6 +1829,8 @@ taas_command (const char *cmd, int from_tty)
 static void
 tfaas_command (const char *cmd, int from_tty)
 {
+  if (cmd == NULL || *cmd == '\0')
+    error (_("Please specify a command to apply on all frames of all threads"));
   std::string expanded
     = std::string ("thread apply all -s -- frame apply all -s ") + cmd;
   execute_command (expanded.c_str (), from_tty);
