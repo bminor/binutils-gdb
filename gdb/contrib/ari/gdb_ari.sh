@@ -581,17 +581,6 @@ Do not use `long long'\'', instead use LONGEST"
     fail("long long")
 }
 
-BEGIN { doc["ATTRIBUTE_UNUSED"] = "\
-Do not use ATTRIBUTE_UNUSED, do not bother (GDB is compiled with -Werror and, \
-consequently, is not able to tolerate false warnings.  Since -Wunused-param \
-produces such warnings, neither that warning flag nor ATTRIBUTE_UNUSED \
-are used by GDB"
-    category["ATTRIBUTE_UNUSED"] = ari_regression
-}
-/(^|[^_[:alnum:]])ATTRIBUTE_UNUSED([^_[:alnum:]]|$)/ {
-    fail("ATTRIBUTE_UNUSED")
-}
-
 BEGIN { doc["ATTR_FORMAT"] = "\
 Do not use ATTR_FORMAT, use ATTRIBUTE_PRINTF instead"
     category["ATTR_FORMAT"] = ari_regression
