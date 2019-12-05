@@ -1,3 +1,10 @@
+2019-12-05  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Only give FDE encoding warnings if --eh-frame-hdr was specified.
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Make
+	FDE encoding warning conditional.
+
 2019-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 25029

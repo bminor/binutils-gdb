@@ -1532,19 +1532,23 @@ _bfd_elf_discard_section_eh_frame
 		   don't create the binary search table,
 		   since it is affected by runtime relocations.  */
 		hdr_info->u.dwarf.table = FALSE;
-		if (num_warnings_issued < 10)
+		/* Only warn if --eh-frame-hdr was specified.  */
+		if (info->eh_frame_hdr_type != 0)
 		  {
-		    _bfd_error_handler
-		      /* xgettext:c-format */
-		      (_("FDE encoding in %pB(%pA) prevents .eh_frame_hdr"
-			 " table being created"), abfd, sec);
-		    num_warnings_issued ++;
-		  }
-		else if (num_warnings_issued == 10)
-		  {
-		    _bfd_error_handler
-		      (_("further warnings about FDE encoding preventing .eh_frame_hdr generation dropped"));
-		    num_warnings_issued ++;
+		    if (num_warnings_issued < 10)
+		      {
+			_bfd_error_handler
+			  /* xgettext:c-format */
+			  (_("FDE encoding in %pB(%pA) prevents .eh_frame_hdr"
+			     " table being created"), abfd, sec);
+			num_warnings_issued ++;
+		      }
+		    else if (num_warnings_issued == 10)
+		      {
+			_bfd_error_handler
+			  (_("further warnings about FDE encoding preventing .eh_frame_hdr generation dropped"));
+			num_warnings_issued ++;
+		      }
 		  }
 	      }
 	    ent->removed = 0;
