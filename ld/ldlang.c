@@ -9273,14 +9273,15 @@ lang_print_memory_usage (void)
   for (r = lang_memory_region_list; r->next != NULL; r = r->next)
     {
       bfd_vma used_length = r->current - r->origin;
-      double percent;
 
       printf ("%16s: ",r->name_list.name);
       lang_print_memory_size (used_length);
       lang_print_memory_size ((bfd_vma) r->length);
 
-      percent = used_length * 100.0 / r->length;
-
-      printf ("    %6.2f%%\n", percent);
+      if (r->length != 0)
+	{
+	  double percent = used_length * 100.0 / r->length;
+	  printf ("    %6.2f%%\n", percent);
+	}
     }
 }
