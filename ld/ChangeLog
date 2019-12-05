@@ -1,5 +1,10 @@
 2019-12-05  Alan Modra  <amodra@gmail.com>
 
+	PR 25244
+	* ldlang.c (lang_print_memory_usage): Correct last patch.
+
+2019-12-05  Alan Modra  <amodra@gmail.com>
+
 	PR 25243
 	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Move definition
 	of __exidx_start and __exidx_end into ARM.exidx.

@@ -9281,7 +9281,8 @@ lang_print_memory_usage (void)
       if (r->length != 0)
 	{
 	  double percent = used_length * 100.0 / r->length;
-	  printf ("    %6.2f%%\n", percent);
+	  printf ("    %6.2f%%", percent);
 	}
+      printf ("\n");
     }
 }
