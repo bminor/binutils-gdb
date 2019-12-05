@@ -1,3 +1,9 @@
+2019-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 25029
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Ignore empty sections
+	when computing the sizes stored in the headers.
+
 2019-12-03  Alan Modra  <amodra@gmail.com>
 
 	PR 25230

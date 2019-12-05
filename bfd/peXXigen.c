@@ -723,6 +723,9 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
       {
 	int rounded = FA (sec->size);
 
+	if (rounded == 0)
+	  continue;
+
 	/* The first non-zero section filepos is the header size.
 	   Sections without contents will have a filepos of 0.  */
 	if (hsize == 0)
