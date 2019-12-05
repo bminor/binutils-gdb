@@ -8990,9 +8990,7 @@ struct aarch64_option_cpu_value_table
 static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
 			AARCH64_ARCH_NONE},
-  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO
-					 | AARCH64_FEATURE_AES
-					 | AARCH64_FEATURE_SHA2, 0),
+  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
 			AARCH64_ARCH_NONE},

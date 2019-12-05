@@ -45,7 +45,6 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8	0x00000001	/* All processors.  */
 #define AARCH64_FEATURE_V8_2	0x00000020      /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_V8_3	0x00000040      /* ARMv8.3 processors.  */
-#define AARCH64_FEATURE_CRYPTO	0x00010000	/* Crypto instructions.  */
 #define AARCH64_FEATURE_FP	0x00020000	/* FP instructions.  */
 #define AARCH64_FEATURE_SIMD	0x00040000	/* SIMD instructions.  */
 #define AARCH64_FEATURE_CRC	0x00080000	/* CRC instructions.  */
@@ -102,6 +101,9 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SVE2_BITPERM	0x000000100
 #define AARCH64_FEATURE_SVE2_SM4		0x000000200
 #define AARCH64_FEATURE_SVE2_SHA3	0x000000400
+
+/* Crypto instructions are the combination of AES and SHA2.  */
+#define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \

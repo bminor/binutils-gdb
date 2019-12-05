@@ -1,3 +1,9 @@
+2019-12-05  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_feature_crypto,
+	aarch64_feature_crypto_v8_2, CRYPTO, CRYPTO_V8_2, CRYP_INSN,
+	CRYPTO_V8_2_INSN): Delete.
+
 2019-12-05  Alan Modra  <amodra@gmail.com>
 
 	PR 25249

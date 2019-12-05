@@ -2324,9 +2324,6 @@ static const aarch64_feature_set aarch64_feature_fp =
   AARCH64_FEATURE (AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_simd =
   AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0);
-static const aarch64_feature_set aarch64_feature_crypto =
-  AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_AES
-		   | AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0);
 static const aarch64_feature_set aarch64_feature_lse =
@@ -2363,9 +2360,6 @@ static const aarch64_feature_set aarch64_feature_aes =
   AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_AES, 0);
 static const aarch64_feature_set aarch64_feature_v8_4 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_4, 0);
-static const aarch64_feature_set aarch64_feature_crypto_v8_2 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_CRYPTO
-		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sm4 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4
 		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
@@ -2423,7 +2417,6 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
 #define SIMD		&aarch64_feature_simd
-#define CRYPTO		&aarch64_feature_crypto
 #define CRC		&aarch64_feature_crc
 #define LSE		&aarch64_feature_lse
 #define LOR		&aarch64_feature_lor
@@ -2443,7 +2436,6 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
 #define ARMV8_4		&aarch64_feature_v8_4
 #define SHA3		&aarch64_feature_sha3
 #define SM4		&aarch64_feature_sm4
-#define CRYPTO_V8_2	&aarch64_feature_crypto_v8_2
 #define FP_F16_V8_2	&aarch64_feature_fp_16_v8_2
 #define DOTPROD		&aarch64_feature_dotprod
 #define ARMV8_5		&aarch64_feature_v8_5
@@ -2476,8 +2468,6 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
   { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _SIMD_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,VERIFIER) \
   { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, 0, 0, VERIFIER }
-#define CRYP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, CRYPTO, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _CRC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, CRC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LSE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -2510,8 +2500,6 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
   { NAME, OPCODE, MASK, CLASS, 0, AES, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define V8_4_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_4, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define CRYPTO_V8_2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, CRYPTO_V8_2, OPS, QUALS, FLAGS, 0, NULL }
 #define SHA3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, SHA3, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SM4_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
