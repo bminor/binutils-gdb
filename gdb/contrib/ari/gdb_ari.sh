@@ -1110,18 +1110,6 @@ Do not use strnicmp(), instead use strncasecmp()"
     fail("strnicmp")
 }
 
-# Boolean expressions and conditionals
-
-BEGIN { doc["boolean"] = "\
-Do not use `boolean'\'',  use `bool'\'' instead"
-    category["boolean"] = ari_regression
-}
-/(^|[^_[:alnum:]])boolean([^_[:alnum:]]|$)/ {
-    if (is_yacc_or_lex == 0) {
-       fail("boolean")
-    }
-}
-
 # Typedefs that are either redundant or can be reduced to `struct
 # type *''.
 # Must be placed before if assignment otherwise ARI exceptions
@@ -1141,20 +1129,6 @@ Do not use strlen dirent.d_name, instead use NAMELEN"
 }
 /(^|[^_[:alnum:]])strlen[[:space:]]*\(.*[^_[:alnum:]]d_name([^_[:alnum:]]|$)/ {
     fail("strlen d_name")
-}
-
-BEGIN { doc["var_boolean"] = "\
-Replace var_boolean with add_setshow_boolean_cmd"
-    category["var_boolean"] = ari_regression
-    fix("var_boolean", "gdb/command.h", 1)
-    # fix only uses the last directory level
-    fix("var_boolean", "cli/cli-decode.c", 2)
-}
-/(^|[^_[:alnum:]])var_boolean([^_[:alnum:]]|$)/ {
-    if (($0 !~ /(^|[^_[:alnum:]])case *var_boolean:/) \
-        && ($0 !~ /(^|[^_[:alnum:]])[=!]= *var_boolean/)) {
-	fail("var_boolean")
-    }
 }
 
 BEGIN { doc["generic_use_struct_convention"] = "\
