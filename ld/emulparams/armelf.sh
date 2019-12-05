@@ -26,9 +26,12 @@ OTHER_SECTIONS='
 ATTRS_SECTIONS='.ARM.attributes 0 : { KEEP (*(.ARM.attributes)) KEEP (*(.gnu.attributes)) }'
 OTHER_READONLY_SECTIONS="
   .ARM.extab ${RELOCATING-0} : { *(.ARM.extab${RELOCATING+* .gnu.linkonce.armextab.*}) }
-  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_start = .); }
-  .ARM.exidx ${RELOCATING-0} : { *(.ARM.exidx${RELOCATING+* .gnu.linkonce.armexidx.*}) }
-  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_end = .); }"
+  .ARM.exidx ${RELOCATING-0} :
+    {
+      ${RELOCATING+PROVIDE_HIDDEN (__exidx_start = .);}
+      *(.ARM.exidx${RELOCATING+* .gnu.linkonce.armexidx.*})
+      ${RELOCATING+PROVIDE_HIDDEN (__exidx_end = .);}
+    }"
 
 DATA_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__data_start = .${CREATE_SHLIB+)};"
 

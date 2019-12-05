@@ -1,5 +1,18 @@
 2019-12-05  Alan Modra  <amodra@gmail.com>
 
+	PR 25243
+	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Move definition
+	of __exidx_start and __exidx_end into ARM.exidx.
+	* emulparams/armelf_linux_eabi.sh (OTHER_READONLY_SECTIONS): Likewise.
+	* emulparams/armsymbian.sh (OTHER_READONLY_SECTIONS): Similarly.
+	* emulparams/elf32_tic6x_le.sh (OTHER_READONLY_SECTIONS): Similarly.
+	* emulparams/armelf_fuchsia.sh: Source armelf_linux_eabi.sh,
+	just redefining TEXT_START_ADDR.
+	* emulparams/armelf_linux_fdpiceabi.sh: Source armelf_linux_eabi.sh,
+	adding to OTHER_READONLY_SECTIONS.
+
+2019-12-05  Alan Modra  <amodra@gmail.com>
+
 	PR 25244
 	* ldlang.c (lang_print_memory_usage): Don't print percent used
 	when length is zero.
