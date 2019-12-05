@@ -60,7 +60,8 @@ Options:
   -Werror        Treat all problems as errors.
   -Wall          Report all problems.
   -Wari          Report problems that should be fixed in new code.
-  -WCATEGORY     Report problems in the specifed category.  Valid categories
+  -WCATEGORY     Report problems in the specifed category.  The category
+                 can be prefixed with "no-".  Valid categories
                  are: ${all}
 EOF
     exit 1
@@ -102,6 +103,10 @@ fi
 # Validate all errors and warnings.
 for w in ${warning} ${error}
 do
+    case "$w" in
+	no-*) w=`echo x$w | sed -e 's/xno-//'`;;
+    esac
+
     case " ${all} " in
     *" ${w} "* ) ;;
     * ) usage "Unknown option -W${w}" ;;
@@ -123,11 +128,19 @@ do
 done
 for w in ${warning}
 do
-    warnings="${warnings} warning[ari_${w}] = 1;"
+    val=1
+    case "$w" in
+	no-*) w=`echo x$w | sed -e 's/xno-//'`; val=0 ;;
+    esac
+    warnings="${warnings} warning[ari_${w}] = $val;"
 done
 for e in ${error}
 do
-    errors="${errors} error[ari_${e}]  = 1;"
+    val=1
+    case "$e" in
+	no-*) e=`echo x$e | sed -e 's/xno-//'`; val=0 ;;
+    esac
+    errors="${errors} error[ari_${e}]  = $val;"
 done
 
 if [ "$AWK" = "" ] ; then
