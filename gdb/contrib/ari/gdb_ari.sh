@@ -810,7 +810,6 @@ get_frame_locals_address, or get_frame_args_address."
 BEGIN { doc["floatformat_to_double"] = "\
 Do not use floatformat_to_double() from libierty, \
 instead use floatformat_to_doublest()"
-    fix("floatformat_to_double", "gdb/doublest.c", 1)
     category["floatformat_to_double"] = ari_regression
 }
 /(^|[^_[:alnum:]])floatformat_to_double[[:space:]]*\(/ {

@@ -647,8 +647,8 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
     {
       double dto;
 
-      floatformat_to_double (fmt->split_half ? fmt->split_half : fmt,
-			     from, &dto);
+      floatformat_to_double	/* ARI: floatformat_to_double */
+	(fmt->split_half ? fmt->split_half : fmt, from, &dto);
       *to = (T) dto;
       return;
     }

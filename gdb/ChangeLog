@@ -1,5 +1,12 @@
 2019-12-13  Tom Tromey  <tromey@adacore.com>
 
+	* contrib/ari/gdb_ari.sh: Remove "fix" call for
+	floatformat_to_double.
+	* target-float.c (host_float_ops<T>::from_target): Add ARI
+	comment.
+
+2019-12-13  Tom Tromey  <tromey@adacore.com>
+
 	* contrib/ari/gdb_ari.sh: Remove "fix" call for abort.
 	* utils.c (abort_with_message, dump_core, internal_vproblem): Add
 	ARI marker to abort.
