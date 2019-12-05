@@ -1,3 +1,17 @@
+2019-12-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25249
+	* microblaze-dis.c (NUM_STRBUFS, STRBUF_SIZE): Define.
+	(struct string_buf): New.
+	(strbuf): New function.
+	(get_field): Use strbuf rather than strdup of local temp.
+	(get_field_imm, get_field_imm5, get_field_imm5_mbar): Likewise.
+	(get_field_rfsl, get_field_imm15): Likewise.
+	(get_field_rd, get_field_r1, get_field_r2): Update macros.
+	(get_field_special): Likewise.  Don't strcpy spr.  Formatting.
+	(print_insn_microblaze): Formatting.  Init and pass string_buf to
+	get_field functions.
+
 2019-12-04  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (lfs, lgs, lss): Drop No_qSuf.
