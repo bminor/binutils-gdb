@@ -647,7 +647,6 @@ FNR == 1 {
 BEGIN { doc["abort"] = "\
 Do not use abort, instead use internal_error; GDB should never abort"
     category["abort"] = ari_regression
-    fix("abort", "gdb/utils.c", 3)
 }
 /(^|[^_[:alnum:]])abort[[:space:]]*\(/ {
     fail("abort")

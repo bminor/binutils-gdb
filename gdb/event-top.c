@@ -881,7 +881,7 @@ handle_sigsegv (int sig)
   install_handle_sigsegv ();
 
   if (thread_local_segv_handler == nullptr)
-    abort ();
+    abort ();			/* ARI: abort */
   thread_local_segv_handler (sig);
 }
 

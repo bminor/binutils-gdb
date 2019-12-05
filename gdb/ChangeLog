@@ -1,5 +1,12 @@
 2019-12-13  Tom Tromey  <tromey@adacore.com>
 
+	* contrib/ari/gdb_ari.sh: Remove "fix" call for abort.
+	* utils.c (abort_with_message, dump_core, internal_vproblem): Add
+	ARI marker to abort.
+	* event-top.c (handle_sigsegv): Add ARI marker to abort.
+
+2019-12-13  Tom Tromey  <tromey@adacore.com>
+
 	* contrib/ari/gdb_ari.sh: Fix floatformat_from_double text.
 
 2019-12-13  Tom Tromey  <tromey@adacore.com>
