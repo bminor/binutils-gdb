@@ -52,7 +52,7 @@ usage ()
 Error: $1
 
 Usage:
-    $0 --print-doc --print-idx -Wall -Werror -W<category> <file> ...
+    $0 --print-doc --print-idx -Wall -Werror -WCATEGORY FILE ...
 Options:
   --print-doc    Print a list of all potential problems, then exit.
   --print-idx    Include the problems IDX (index or key) in every message.
@@ -60,7 +60,7 @@ Options:
   -Werror        Treat all problems as errors.
   -Wall          Report all problems.
   -Wari          Report problems that should be fixed in new code.
-  -W<category>   Report problems in the specifed category.  Valid categories
+  -WCATEGORY     Report problems in the specifed category.  Valid categories
                  are: ${all}
 EOF
     exit 1
