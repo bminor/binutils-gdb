@@ -820,7 +820,7 @@ instead use floatformat_to_doublest()"
 
 BEGIN { doc["floatformat_from_double"] = "\
 Do not use floatformat_from_double() from libierty, \
-instead use floatformat_from_doublest()"
+instead use host_float_ops<T>::from_target()"
     category["floatformat_from_double"] = ari_regression
 }
 /(^|[^_[:alnum:]])floatformat_from_double[[:space:]]*\(/ {
