@@ -1,3 +1,15 @@
+2019-12-05  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-aarch64.c (aarch64_features): Make SHA2 a prereq of
+	SHA3.
+	* testsuite/gas/aarch64/crypto.s
+	* testsuite/gas/aarch64/crypto-directive.d: Refer to crypto.d
+	for actual output.
+	* testsuite/gas/aarch64/illegal-crypto-nofp.l: Relax
+	expectations.
+	* testsuite/gas/aarch64/crypto-directive2.d,
+	testsuite/gas/aarch64/crypto-directive3.d: New.
+
 2019-12-04  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386-intel.c (i386_intel_operand): Handle LFS et al

@@ -21,7 +21,15 @@
 
 	.text
 	.ifdef DIRECTIVE
+	.if DIRECTIVE > 1
+	.arch_extension aes
+	.arch_extension sha2
+	.else
 	.arch_extension crypto
+	.endif
+	.if DIRECTIVE == 3
+	.arch_extension nosha3
+	.endif
 	.endif
 
 	aese	v7.16b, v31.16b
