@@ -547,7 +547,6 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	  struct type *context;
 	  std::string name_copy (function->natural_name ());
 	  const struct language_defn *lang = language_def (language_cplus);
-	  struct gdbarch *arch = symbol_arch (function);
 	  const struct block *parent = BLOCK_SUPERBLOCK (block);
 	  struct symbol *sym;
 
@@ -561,7 +560,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	      else
 		{
 		  name_copy.erase (prefix_len);
-		  context = lookup_typename (lang, arch,
+		  context = lookup_typename (lang,
 					     name_copy.c_str (),
 					     parent, 1);
 		}

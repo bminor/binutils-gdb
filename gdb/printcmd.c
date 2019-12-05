@@ -2326,7 +2326,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   const gdb_byte *str;
   size_t len;
   struct gdbarch *gdbarch = get_type_arch (value_type (value));
-  struct type *wctype = lookup_typename (current_language, gdbarch,
+  struct type *wctype = lookup_typename (current_language,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
 
@@ -2601,7 +2601,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    {
 	      struct gdbarch *gdbarch
 		= get_type_arch (value_type (val_args[i]));
-	      struct type *wctype = lookup_typename (current_language, gdbarch,
+	      struct type *wctype = lookup_typename (current_language,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
 	      const gdb_byte *bytes;

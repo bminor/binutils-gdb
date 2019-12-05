@@ -1,3 +1,28 @@
+2019-12-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* c-exp.y: Update calls to lookup_typename,
+	lookup_signed_typename and lookup_unsigned_typename.
+	* c-lang.c (evaluate_subexp_c): Likewise.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template):
+	Likewise.
+	* eval.c (binop_promote): Likewise.
+	* gdbtypes.c (lookup_typename): Remove gdbarch parameter.
+	(lookup_unsigned_typename): Likewise.
+	(lookup_signed_typename): Likewise.
+	* gdbtypes.h (lookup_unsigned_typename): Likewise.
+	(lookup_signed_typename): Likewise.
+	(lookup_typename): Likewise.
+	* guile/scm-type.c (tyscm_lookup_typename): Update calls to
+	lookup_typename, lookup_signed_typename,
+	lookup_unsigned_typename.
+	* m2-exp.y: Likewise.
+	* printcmd.c (printf_wide_c_string): Likewise.
+	(ui_printf): Likewise.
+	* python/py-type.c (typy_lookup_typename): Likewise.
+	* python/py-xmethods.c (python_xmethod_worker::invoke):
+	Likewise.
+	* rust-exp.y: Likewise.
+
 2019-12-04  Christian Biesinger  <cbiesinger@google.com>
 
 	* configure.nat (obsd64): Add missing files x86-nat.o and

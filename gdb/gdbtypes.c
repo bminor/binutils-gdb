@@ -1555,7 +1555,7 @@ type_name_or_error (struct type *type)
 
 struct type *
 lookup_typename (const struct language_defn *language,
-		 struct gdbarch *gdbarch, const char *name,
+		 const char *name,
 		 const struct block *block, int noerr)
 {
   struct symbol *sym;
@@ -1572,29 +1572,28 @@ lookup_typename (const struct language_defn *language,
 
 struct type *
 lookup_unsigned_typename (const struct language_defn *language,
-			  struct gdbarch *gdbarch, const char *name)
+			  const char *name)
 {
   char *uns = (char *) alloca (strlen (name) + 10);
 
   strcpy (uns, "unsigned ");
   strcpy (uns + 9, name);
-  return lookup_typename (language, gdbarch, uns, NULL, 0);
+  return lookup_typename (language, uns, NULL, 0);
 }
 
 struct type *
-lookup_signed_typename (const struct language_defn *language,
-			struct gdbarch *gdbarch, const char *name)
+lookup_signed_typename (const struct language_defn *language, const char *name)
 {
   struct type *t;
   char *uns = (char *) alloca (strlen (name) + 8);
 
   strcpy (uns, "signed ");
   strcpy (uns + 7, name);
-  t = lookup_typename (language, gdbarch, uns, NULL, 1);
+  t = lookup_typename (language, uns, NULL, 1);
   /* If we don't find "signed FOO" just try again with plain "FOO".  */
   if (t != NULL)
     return t;
-  return lookup_typename (language, gdbarch, name, NULL, 0);
+  return lookup_typename (language, name, NULL, 0);
 }
 
 /* Lookup a structure type named "struct NAME",

@@ -824,7 +824,6 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_opcode (pstate, OP_LONG);
 			  write_exp_elt_type (pstate, lookup_signed_typename
 					      (pstate->language (),
-					       pstate->gdbarch (),
 					       "int"));
 			  type = check_typedef (type);
 
@@ -1301,117 +1300,89 @@ typebase
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "int"); }
 	|	LONG
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long"); }
 	|	SHORT
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "short"); }
 	|	LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long"); }
 	|	SIGNED_KEYWORD LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long"); }
 	|	UNSIGNED LONG INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG LONG
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "long long"); }
 	|	UNSIGNED LONG LONG
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long long"); }
 	|	UNSIGNED LONG LONG INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long long"); }
 	|	LONG LONG UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long long"); }
 	|	LONG LONG UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "long long"); }
 	|	SHORT INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "short"); }
 	|	UNSIGNED SHORT INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "short"); }
 	|	SHORT UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "short"); }
 	|	SHORT UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "short"); }
 	|	DOUBLE_KEYWORD
 			{ $$ = lookup_typename (pstate->language (),
-						pstate->gdbarch (),
 						"double",
 						NULL,
 						0); }
 	|	LONG DOUBLE_KEYWORD
 			{ $$ = lookup_typename (pstate->language (),
-						pstate->gdbarch (),
 						"long double",
 						NULL,
 						0); }
@@ -1483,19 +1454,15 @@ typebase
 			}
 	|	UNSIGNED type_name
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 TYPE_NAME($2.type)); }
 	|	UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 pstate->gdbarch (),
 							 "int"); }
 	|	SIGNED_KEYWORD type_name
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       pstate->gdbarch (),
 						       "int"); }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
@@ -1517,7 +1484,6 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "int";
 		  $$.stoken.length = 3;
 		  $$.type = lookup_signed_typename (pstate->language (),
-						    pstate->gdbarch (),
 						    "int");
 		}
 	|	LONG
@@ -1525,7 +1491,6 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "long";
 		  $$.stoken.length = 4;
 		  $$.type = lookup_signed_typename (pstate->language (),
-						    pstate->gdbarch (),
 						    "long");
 		}
 	|	SHORT
@@ -1533,7 +1498,6 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "short";
 		  $$.stoken.length = 5;
 		  $$.type = lookup_signed_typename (pstate->language (),
-						    pstate->gdbarch (),
 						    "short");
 		}
 	;

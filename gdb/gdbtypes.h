@@ -2005,10 +2005,10 @@ extern struct type *lookup_string_range_type (struct type *, LONGEST, LONGEST);
 extern struct type *create_set_type (struct type *, struct type *);
 
 extern struct type *lookup_unsigned_typename (const struct language_defn *,
-					      struct gdbarch *, const char *);
+					      const char *);
 
 extern struct type *lookup_signed_typename (const struct language_defn *,
-					    struct gdbarch *, const char *);
+					    const char *);
 
 extern void get_unsigned_type_max (struct type *, ULONGEST *);
 
@@ -2048,8 +2048,7 @@ extern void check_stub_method_group (struct type *, int);
 extern char *gdb_mangle_name (struct type *, int, int);
 
 extern struct type *lookup_typename (const struct language_defn *,
-				     struct gdbarch *, const char *,
-				     const struct block *, int);
+				     const char *, const struct block *, int);
 
 extern struct type *lookup_template_type (const char *, struct type *,
 					  const struct block *);

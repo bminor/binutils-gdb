@@ -2024,7 +2024,7 @@ rust_parser::rust_lookup_type (const char *name, const struct block *block)
       return SYMBOL_TYPE (result.symbol);
     }
 
-  type = lookup_typename (language (), arch (), name, NULL, 1);
+  type = lookup_typename (language (), name, NULL, 1);
   if (type != NULL)
     return type;
 

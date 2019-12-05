@@ -580,7 +580,7 @@ python_xmethod_worker::invoke (struct value *obj,
     }
   else
     {
-      res = allocate_value (lookup_typename (python_language, python_gdbarch,
+      res = allocate_value (lookup_typename (python_language,
 					     "void", NULL, 0));
     }
 

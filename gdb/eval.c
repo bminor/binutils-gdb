@@ -562,20 +562,20 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	  break;
 	case language_opencl:
 	  if (result_len <= TYPE_LENGTH (lookup_signed_typename
-					 (language, gdbarch, "int")))
+					 (language, "int")))
 	    {
 	      promoted_type =
 		(unsigned_operation
-		 ? lookup_unsigned_typename (language, gdbarch, "int")
-		 : lookup_signed_typename (language, gdbarch, "int"));
+		 ? lookup_unsigned_typename (language, "int")
+		 : lookup_signed_typename (language, "int"));
 	    }
 	  else if (result_len <= TYPE_LENGTH (lookup_signed_typename
-					      (language, gdbarch, "long")))
+					      (language, "long")))
 	    {
 	      promoted_type =
 		(unsigned_operation
-		 ? lookup_unsigned_typename (language, gdbarch, "long")
-		 : lookup_signed_typename (language, gdbarch,"long"));
+		 ? lookup_unsigned_typename (language, "long")
+		 : lookup_signed_typename (language,"long"));
 	    }
 	  break;
 	default:
