@@ -89,7 +89,7 @@ string_printf (const char* fmt, ...)
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
   va_start (vp, fmt);
-  vsprintf (&str[0], fmt, vp);
+  vsprintf (&str[0], fmt, vp);	/* ARI: vsprintf */
   va_end (vp);
 
   return str;
@@ -111,7 +111,7 @@ string_vprintf (const char* fmt, va_list args)
 
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
-  vsprintf (&str[0], fmt, args);
+  vsprintf (&str[0], fmt, args); /* ARI: vsprintf */
 
   return str;
 }
@@ -147,7 +147,7 @@ string_vappendf (std::string &str, const char *fmt, va_list args)
 
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
-  vsprintf (&str[curr_size], fmt, args);
+  vsprintf (&str[curr_size], fmt, args); /* ARI: vsprintf */
 }
 
 char *
