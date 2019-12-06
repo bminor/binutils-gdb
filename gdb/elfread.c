@@ -210,11 +210,16 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       || ms_type == mst_text_gnu_ifunc)
     address = gdbarch_addr_bits_remove (gdbarch, address);
 
+  /* We only setup section information for allocatable sections.  Usually
+     we'd only expect to find msymbols for allocatable sections, but if the
+     ELF is malformed then this might not be the case.  In that case don't
+     create an msymbol that references an uninitialised section object.  */
+  int section_index = 0;
+  if ((bfd_section_flags (bfd_section) & SEC_ALLOC) == SEC_ALLOC)
+    section_index = gdb_bfd_section_index (objfile->obfd, bfd_section);
+
   struct minimal_symbol *result
-    = reader.record_full (name, copy_name, address,
-			  ms_type,
-			  gdb_bfd_section_index (objfile->obfd,
-						 bfd_section));
+    = reader.record_full (name, copy_name, address, ms_type, section_index);
   if ((objfile->flags & OBJF_MAINLINE) == 0
       && (ms_type == mst_data || ms_type == mst_bss))
     result->maybe_copied = 1;

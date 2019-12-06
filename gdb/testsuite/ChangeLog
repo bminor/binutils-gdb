@@ -1,5 +1,11 @@
 2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-bad-elf-other.S: New file.
+	* gdb.dwarf2/dw2-bad-elf.c: New file.
+	* gdb.dwarf2/dw2-bad-elf.exp: New file.
+
+2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/dwarf.exp (Dwarf::lines): Reset _line_saw_program and
 	_line_saw_file.
 

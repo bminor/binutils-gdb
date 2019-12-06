@@ -1,3 +1,8 @@
+2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elfread.c (record_minimal_symbol): Set section index to 0 for
+	non-allocatable sections.
+
 
 2020-01-13  Ali Tamur <tamur@google.com>
 
