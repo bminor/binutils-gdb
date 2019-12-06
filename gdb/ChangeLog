@@ -1,3 +1,13 @@
+2020-01-14  Luis Machado  <luis.machado@linaro.org>
+
+	* inf-ptrace.c (inf_ptrace_target::resume): Update comments.
+	* infrun.c (resume_1): Likewise.
+	(handle_inferior_event): Remove stale comment.
+	* linux-nat.c (linux_nat_target::resume): Update comments.
+	(save_stop_reason): Likewise.
+	(linux_nat_filter_event): Likewise.
+	* linux-nat.h (struct lwp_info) <stop_pc>, <stop_reason>: Likewise.
+
 2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elfread.c (record_minimal_symbol): Set section index to 0 for

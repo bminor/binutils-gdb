@@ -1700,7 +1700,8 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   resume_many = (minus_one_ptid == ptid
 		 || ptid.is_pid ());
 
-  /* Mark the lwps we're resuming as resumed.  */
+  /* Mark the lwps we're resuming as resumed and update their
+     last_resume_kind to resume_continue.  */
   iterate_over_lwps (ptid, resume_set_callback);
 
   /* See if it's the current inferior that should be handled
@@ -2725,7 +2726,7 @@ save_stop_reason (struct lwp_info *lp)
 	    {
 	      /* If we determine the LWP stopped for a SW breakpoint,
 		 trust it.  Particularly don't check watchpoint
-		 registers, because at least on s390, we'd find
+		 registers, because, at least on s390, we'd find
 		 stopped-by-watchpoint as long as there's a watchpoint
 		 set.  */
 	      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
@@ -2929,7 +2930,7 @@ resumed_callback (struct lwp_info *lp)
 }
 
 /* Check if we should go on and pass this event to common code.
-   Return the affected lwp if we are, or NULL otherwise.  */
+   Return the affected lwp if we should, or NULL otherwise.  */
 
 static struct lwp_info *
 linux_nat_filter_event (int lwpid, int status)
@@ -3122,7 +3123,7 @@ linux_nat_filter_event (int lwpid, int status)
 
   /* Don't report signals that GDB isn't interested in, such as
      signals that are neither printed nor stopped upon.  Stopping all
-     threads can be a bit time-consuming so if we want decent
+     threads can be a bit time-consuming, so if we want decent
      performance with heavily multi-threaded programs, especially when
      they're using a high frequency timer, we'd better avoid it if we
      can.  */

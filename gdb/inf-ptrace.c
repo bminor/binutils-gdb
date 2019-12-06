@@ -354,10 +354,10 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   if (step)
     {
       /* If this system does not support PT_STEP, a higher level
-         function will have called single_step() to transmute the step
-         request into a continue request (by setting breakpoints on
-         all possible successor instructions), so we don't have to
-         worry about that here.  */
+	 function will have called the appropriate functions to transmute the
+	 step request into a continue request (by setting breakpoints on
+	 all possible successor instructions), so we don't have to
+	 worry about that here.  */
       request = PT_STEP;
     }
 

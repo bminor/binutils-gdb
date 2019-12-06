@@ -229,7 +229,7 @@ struct lwp_info
 
   /* When 'stopped' is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
-     running, and stepping, this is the address at which the lwp was
+     running and stepping, this is the address at which the lwp was
      resumed (that is, it's the previous stop PC).  If the LWP is
      running and not stepping, this is 0.  */
   CORE_ADDR stop_pc;
@@ -238,7 +238,7 @@ struct lwp_info
   int step;
 
   /* The reason the LWP last stopped, if we need to track it
-     (breakpoint, watchpoint, etc.)  */
+     (breakpoint, watchpoint, etc.).  */
   enum target_stop_reason stop_reason;
 
   /* On architectures where it is possible to know the data address of
