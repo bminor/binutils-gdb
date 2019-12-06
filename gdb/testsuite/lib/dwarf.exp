@@ -1309,6 +1309,8 @@ namespace eval Dwarf {
 	set is_64 0
 	set _unit_version 4
 	set _unit_addr_size default
+	set _line_saw_program 0
+	set _line_saw_file 0
 
 	foreach { name value } $options {
 	    switch -exact -- $name {
