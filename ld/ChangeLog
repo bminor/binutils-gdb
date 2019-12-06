@@ -1,3 +1,10 @@
+2019-12-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-mips-elf/eh-frame1-n32.d: Pass --eh-frame-hdr to ld.
+	* testsuite/ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n64.d: Likewise.
+
 2019-12-05  Alan Modra  <amodra@gmail.com>
 
 	PR 25244
