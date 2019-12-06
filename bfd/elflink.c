@@ -1904,7 +1904,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   if (skip)
     goto nondefault;
 
-  if (hi->def_regular)
+  if (hi->def_regular || ELF_COMMON_DEF_P (hi))
     {
       /* If the undecorated symbol will have a version added by a
 	 script different to H, then don't indirect to/from the
@@ -2367,7 +2367,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
   /* We only need version numbers for symbols defined in regular
      objects.  */
-  if (!h->def_regular)
+  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
     {
       /* Hide symbols defined in discarded input sections.  */
       if ((h->root.type == bfd_link_hash_defined
@@ -10246,7 +10246,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  Elf_Internal_Versym iversym;
 	  Elf_External_Versym *eversym;
 
-	  if (!h->def_regular)
+	  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
 	    {
 	      if (h->verinfo.verdef == NULL
 		  || (elf_dyn_lib_class (h->verinfo.verdef->vd_bfd)
