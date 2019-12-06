@@ -657,6 +657,43 @@ block_iter_match_next (const lookup_name_info &name,
   return block_iter_match_step (iterator, name, 0);
 }
 
+/* Return true if symbol A is the best match possible for DOMAIN.  */
+
+static bool
+best_symbol (struct symbol *a, const domain_enum domain)
+{
+  return (SYMBOL_DOMAIN (a) == domain
+	  && SYMBOL_CLASS (a) != LOC_UNRESOLVED);
+}
+
+/* Return symbol B if it is a better match than symbol A for DOMAIN.
+   Otherwise return A.  */
+
+static struct symbol *
+better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
+{
+  if (a == NULL)
+    return b;
+  if (b == NULL)
+    return a;
+
+  if (SYMBOL_DOMAIN (a) == domain
+      && SYMBOL_DOMAIN (b) != domain)
+    return a;
+  if (SYMBOL_DOMAIN (b) == domain
+      && SYMBOL_DOMAIN (a) != domain)
+    return b;
+
+  if (SYMBOL_CLASS (a) != LOC_UNRESOLVED
+      && SYMBOL_CLASS (b) == LOC_UNRESOLVED)
+    return a;
+  if (SYMBOL_CLASS (b) != LOC_UNRESOLVED
+      && SYMBOL_CLASS (a) == LOC_UNRESOLVED)
+    return b;
+
+  return a;
+}
+
 /* See block.h.
 
    Note that if NAME is the demangled form of a C++ symbol, we will fail
@@ -684,7 +721,9 @@ block_lookup_symbol (const struct block *block, const char *name,
 
       ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain)
+	  /* See comment related to PR gcc/debug/91507 in
+	     block_lookup_symbol_primary.  */
+	  if (best_symbol (sym, domain))
 	    return sym;
 	  /* This is a bit of a hack, but symbol_matches_domain might ignore
 	     STRUCT vs VAR domain symbols.  So if a matching symbol is found,
@@ -692,7 +731,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 	     exactly the same domain.  PR 16253.  */
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				     SYMBOL_DOMAIN (sym), domain))
-	    other = sym;
+	    other = better_symbol (other, sym, domain);
 	}
       return other;
     }
@@ -746,7 +785,34 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
        sym != NULL;
        sym = mdict_iter_match_next (lookup_name, &mdict_iter))
     {
-      if (SYMBOL_DOMAIN (sym) == domain)
+      /* With the fix for PR gcc/debug/91507, we get for:
+	 ...
+	 extern char *zzz[];
+	 char *zzz[ ] = {
+	   "abc",
+	   "cde"
+	 };
+	 ...
+	 DWARF which will result in two entries in the symbol table, a decl
+	 with type char *[] and a def with type char *[2].
+
+	 If we return the decl here, we don't get the value of zzz:
+	 ...
+	 $ gdb a.spec.out -batch -ex "p zzz"
+	 $1 = 0x601030 <zzz>
+	 ...
+	 because we're returning the symbol without location information, and
+	 because the fallback that uses the address from the minimal symbols
+	 doesn't work either because the type of the decl does not specify a
+	 size.
+
+	 To fix this, we prefer def over decl in best_symbol and
+	 better_symbol.
+
+	 In absence of the gcc fix, both def and decl have type char *[], so
+	 the only option to make this work is improve the fallback to use the
+	 size of the minimal symbol.  Filed as PR exp/24989.  */
+      if (best_symbol (sym, domain))
 	return sym;
 
       /* This is a bit of a hack, but symbol_matches_domain might ignore
@@ -755,7 +821,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 	 exactly the same domain.  PR 16253.  */
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
-	other = sym;
+	other = better_symbol (other, sym, domain);
     }
 
   return other;
