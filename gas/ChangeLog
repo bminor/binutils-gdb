@@ -1,3 +1,12 @@
+2019-12-06  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	Backported from mainline.
+	2019-12-06  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* dw2gencfi.c (cfi_pseudo_table): Add cfi_negate_ra_state.
+	* testsuite/gas/aarch64/pac_negate_ra_state.s: New file.
+	* testsuite/gas/aarch64/pac_negate_ra_state.d: Likewise.
+
 2019-10-14  Tamar Christina  <tamar.christina@arm.com>
 
 	Backported from mainline.
