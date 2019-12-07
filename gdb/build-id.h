@@ -34,12 +34,18 @@ extern int build_id_verify (bfd *abfd,
 			    size_t check_len, const bfd_byte *check);
 
 
-/* Find and open a BFD given a build-id.  If no BFD can be found,
-   return NULL.  The returned reference to the BFD must be released by
-   the caller.  */
+/* Find and open a BFD for a debuginfo file  given a build-id.  If no BFD
+   can be found, return NULL.  */
 
 extern gdb_bfd_ref_ptr build_id_to_debug_bfd (size_t build_id_len,
 					      const bfd_byte *build_id);
+
+/* Find and open a BFD for an executable file given a build-id.  If no BFD
+   can be found, return NULL.  The returned reference to the BFD must be
+   released by the caller.  */
+
+extern gdb_bfd_ref_ptr build_id_to_exec_bfd (size_t build_id_len,
+					     const bfd_byte *build_id);
 
 /* Find the separate debug file for OBJFILE, by using the build-id
    associated with OBJFILE's BFD.  If successful, returns the file name for the

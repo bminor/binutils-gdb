@@ -43,6 +43,7 @@
 #include "gdb_bfd.h"
 #include "completer.h"
 #include "gdbsupport/filestuff.h"
+#include "build-id.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -351,6 +352,27 @@ core_file_command (const char *filename, int from_tty)
     core_target_open (filename, from_tty);
 }
 
+/* Locate (and load) an executable file (and symbols) given the core file
+   BFD ABFD.  */
+
+static void
+locate_exec_from_corefile_build_id (bfd *abfd, int from_tty)
+{
+  const bfd_build_id *build_id = build_id_bfd_get (abfd);
+  if (build_id == nullptr)
+    return;
+
+  gdb_bfd_ref_ptr execbfd
+    = build_id_to_exec_bfd (build_id->size, build_id->data);
+
+  if (execbfd != nullptr)
+    {
+      exec_file_attach (bfd_get_filename (execbfd.get ()), from_tty);
+      symbol_file_add_main (bfd_get_filename (execbfd.get ()),
+			    symfile_add_flag (from_tty ? SYMFILE_VERBOSE : 0));
+    }
+}
+
 /* See gdbcore.h.  */
 
 void
@@ -455,6 +477,9 @@ core_target_open (const char *arg, int from_tty)
       else
 	switch_to_thread (thread);
     }
+
+  if (exec_bfd == nullptr)
+    locate_exec_from_corefile_build_id (core_bfd, from_tty);
 
   post_create_inferior (target, from_tty);
 

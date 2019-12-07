@@ -1,3 +1,10 @@
+2019-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/corefile-buildid-shlib-shr.c: New file.
+	* gdb.base/corefile-buildid-shlib.c: New file.
+	* gdb.base/corefile-buildid.c: New file.
+	* gdb.base/corefile-buildid.exp: New file.
+
 2019-12-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/varval.exp: Add decl before def test.

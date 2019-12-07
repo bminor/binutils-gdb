@@ -1,3 +1,21 @@
+2019-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* build-id.c (build_id_bfd_get): Permit bfd_core, too.
+	(build_id_to_debug_bfd): Make static, rewriting to use
+	build_id_to_bfd_suffix.
+	(build_id_to_bfd_suffix): Copy of build_id_to_debug_bfd,
+	adding `suffix' parameter. Append SUFFIX to file names
+	when searching for matching files.
+	(build_id_to_debug_bfd): Use build_id_to_bfd_suffix.
+	(build_id_to_exec_bfd): Likewise.
+	* build-id.h (build_id_to_debug_bfd): Clarify that function
+	searches for BFD of debug info file.
+	(build_id_to_exec_bfd): Declare.
+	* corelow.c: Include build-id.h.
+	(locate_exec_from_corefile_build_id): New function.
+	(core_target_open): If no executable BFD is found,
+	search for a core file BFD using build-id.
+
 2019-12-06  Christian Biesinger  <cbiesinger@google.com>
 
 	* bcache.c: Put in namespace gdb.
