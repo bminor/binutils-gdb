@@ -2195,32 +2195,32 @@ loop_prim_n_bytes (struct mem_read_abstraction_base *mra)
 
 
 static enum optr
-exg_sex_discrim (struct mem_read_abstraction_base *mra, enum optr hint ATTRIBUTE_UNUSED)
+exg_sex_discrim (struct mem_read_abstraction_base *mra,
+		 enum optr hint ATTRIBUTE_UNUSED)
 {
   uint8_t eb;
   int status = mra->read (mra, 0, 1, &eb);
+  enum optr operator = OP_INVALID;
   if (status < 0)
-    return OP_INVALID;
+    return operator;
 
   struct operand *op0 = create_register_operand ((eb & 0xf0) >> 4);
   struct operand *op1 = create_register_operand (eb & 0xf);
 
   int reg0 = ((struct register_operand *) op0)->reg;
-  if (reg0 < 0 || reg0 >= S12Z_N_REGISTERS)
-    return OP_INVALID;
-
   int reg1 = ((struct register_operand *) op1)->reg;
-  if (reg1 < 0 || reg1 >= S12Z_N_REGISTERS)
-    return OP_INVALID;
+  if (reg0 >= 0 && reg0 < S12Z_N_REGISTERS
+      && reg1 >= 0 && reg1 < S12Z_N_REGISTERS)
+    {
+      const struct reg *r0 = registers + reg0;
+      const struct reg *r1 = registers + reg1;
 
-  const struct reg *r0 = registers + reg0;
-  const struct reg *r1 = registers + reg1;
-
-  enum optr operator = (r0->bytes < r1->bytes) ? OP_sex : OP_exg;
+      operator = r0->bytes < r1->bytes ? OP_sex : OP_exg;
+    }
 
   free (op0);
   free (op1);
-  
+
   return operator;
 }
 
