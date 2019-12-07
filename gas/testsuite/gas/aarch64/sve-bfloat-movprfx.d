@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <\.text>:
+0+ <\.text>:
  *[0-9a-f]+:	0420bc20 	movprfx	z0, z1
  *[0-9a-f]+:	64638040 	bfdot	z0\.s, z2\.h, z3\.h
  *[0-9a-f]+:	0420bc20 	movprfx	z0, z1

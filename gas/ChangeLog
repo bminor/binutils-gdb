@@ -1,3 +1,19 @@
+2019-12-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/aarch64/bfloat16.d: Match 32-bit and 64-bit output.
+	* testsuite/gas/aarch64/dgh.d: Likewise.
+	* testsuite/gas/aarch64/f32mm.d: Likewise.
+	* testsuite/gas/aarch64/f64mm.d: Likewise.
+	* testsuite/gas/aarch64/i8mm.d: Likewise.
+	* testsuite/gas/aarch64/pac_ab_key.d: Likewise.
+	* testsuite/gas/aarch64/pac_negate_ra_state.d: Likewise.
+	* testsuite/gas/aarch64/reloc-prel_g0.d: Likewise.
+	* testsuite/gas/aarch64/reloc-prel_g0_nc.d: Likewise.
+	* testsuite/gas/aarch64/reloc-prel_g1.d: Likewise.
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.d: Likewise.
+	* testsuite/gas/aarch64/sve-movprfx-mm.d: Likewise.
+	* testsuite/gas/aarch64/sve2.d: Likewise.
+
 2019-12-06  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* dw2gencfi.c (cfi_pseudo_table): Add cfi_negate_ra_state.

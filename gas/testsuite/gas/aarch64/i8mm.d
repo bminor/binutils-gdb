@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <\.text>:
+0+ <\.text>:
  *[0-9a-f]+:	451b9ab1 	smmla	z17\.s, z21\.b, z27\.b
  *[0-9a-f]+:	45009800 	smmla	z0\.s, z0\.b, z0\.b
  *[0-9a-f]+:	45db9ab1 	ummla	z17\.s, z21\.b, z27\.b

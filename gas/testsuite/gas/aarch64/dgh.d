@@ -6,6 +6,6 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <\.text>:
+0+ <\.text>:
  *[0-9a-f]*:	d50320df 	hint	#0x6
  *[0-9a-f]*:	d50320df 	hint	#0x6

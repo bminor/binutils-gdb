@@ -7,7 +7,7 @@
 
 Contents of the .eh_frame section:
 
-00000000 0000000000000010 00000000 CIE
+0+ 0+10 0+ CIE
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 4
@@ -16,17 +16,17 @@ Contents of the .eh_frame section:
   Augmentation data:     1b
   DW_CFA_def_cfa: r31 \(sp\) ofs 0
 
-00000014 0000000000000018 00000018 FDE cie=00000000 pc=0000000000000000..0000000000000008
-  DW_CFA_advance_loc: 4 to 0000000000000004
+0+14 0+18 0+18 FDE cie=0+ pc=0+\.\.0+8
+  DW_CFA_advance_loc: 4 to 0+4
   DW_CFA_GNU_window_save
-  DW_CFA_advance_loc: 4 to 0000000000000008
+  DW_CFA_advance_loc: 4 to 0+8
   DW_CFA_def_cfa_offset: 16
   DW_CFA_offset: r29 \(x29\) at cfa-16
   DW_CFA_offset: r30 \(x30\) at cfa-8
   DW_CFA_nop
   DW_CFA_nop
 
-00000030 0000000000000014 00000000 CIE
+0+30 0+14 0+ CIE
   Version:               1
   Augmentation:          "zRB"
   Code alignment factor: 4
@@ -38,17 +38,17 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-00000048 000000000000001c 0000001c FDE cie=00000030 pc=0000000000000008..0000000000000010
-  DW_CFA_advance_loc: 4 to 000000000000000c
+0+48 0+1(c|8) 0+1c FDE cie=0+30 pc=0+8\.\.0+10
+  DW_CFA_advance_loc: 4 to 0+c
   DW_CFA_GNU_window_save
-  DW_CFA_advance_loc: 4 to 0000000000000010
+  DW_CFA_advance_loc: 4 to 0+10
   DW_CFA_def_cfa_offset: 16
   DW_CFA_offset: r29 \(x29\) at cfa-16
   DW_CFA_offset: r30 \(x30\) at cfa-8
   DW_CFA_nop
   DW_CFA_nop
-  DW_CFA_nop
-  DW_CFA_nop
-  DW_CFA_nop
-  DW_CFA_nop
+#?  DW_CFA_nop
+#?  DW_CFA_nop
+#?  DW_CFA_nop
+#?  DW_CFA_nop
 

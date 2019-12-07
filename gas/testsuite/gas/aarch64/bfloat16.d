@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <\.text>:
+0+ <\.text>:
  *[0-9a-f]+:	647b82b1 	bfdot	z17\.s, z21\.h, z27\.h
  *[0-9a-f]+:	64608000 	bfdot	z0\.s, z0\.h, z0\.h
  *[0-9a-f]+:	647d42b1 	bfdot	z17\.s, z21\.h, z5\.h\[3\]

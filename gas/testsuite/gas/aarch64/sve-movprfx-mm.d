@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <\.text>:
+0+ <\.text>:
  *[0-9a-f]+:	0420bc11 	movprfx	z17, z0
  *[0-9a-f]+:	451b9ab1 	smmla	z17\.s, z21\.b, z27\.b
  *[0-9a-f]+:	0420bc11 	movprfx	z17, z0
