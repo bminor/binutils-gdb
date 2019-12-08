@@ -1,3 +1,8 @@
+2019-12-08  Wataru Ashihara  <wataash@wataash.com>
+
+	* darwin-nat.c (darwin_nat_target::create_inferior): Fix
+	template argument for scoped_restore_tmpl from bool to int.
+
 2019-12-07  Keith Seitz  <keiths@redhat.com>
 
 	* build-id.c (build_id_bfd_get): Permit bfd_core, too.
