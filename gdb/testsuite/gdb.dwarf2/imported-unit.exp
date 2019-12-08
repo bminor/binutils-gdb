@@ -73,24 +73,24 @@ Dwarf::assemble $asm_file {
 	    {name "<artificial>"}
 	} {
 	    imported_unit {
-		{import :$cu_label ref_addr}
+		{import %$cu_label}
 	    }
 	    subprogram {
-		{abstract_origin :$main_label}
+		{abstract_origin %$main_label}
 		{low_pc $main_start addr}
 		{high_pc "$main_start + $main_length" addr}
 	    } {
 		subprogram {
-		    {abstract_origin :$doit_label}
+		    {abstract_origin %$doit_label}
 		    {low_pc $doit_start addr}
 		    {high_pc "$doit_start + $doit_length" addr}
 		} {
 		    formal_parameter {
-			{abstract_origin :$doit_self_label}
+			{abstract_origin %$doit_self_label}
 		    }
 		}
 	        DW_TAG_variable {
-		    {abstract_origin :$foo_label}
+		    {abstract_origin %$foo_label}
 		    {location 4 data1}
 		}
 	    }

@@ -1,3 +1,7 @@
+2019-12-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/imported-unit.exp: Fix inter-CU references.
+
 2019-12-07  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.base/corefile-buildid-shlib-shr.c: New file.
