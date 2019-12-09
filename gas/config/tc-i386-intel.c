@@ -676,8 +676,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		add_prefix (DATA_PREFIX_OPCODE);
 	      suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	    }
-	  else
-	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
 	  break;
 
 	case O_qword_ptr:
