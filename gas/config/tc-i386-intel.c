@@ -54,18 +54,18 @@ intel_state;
 #define O_qword_ptr O_md25
 /* mmword ptr X_add_symbol */
 #define O_mmword_ptr O_qword_ptr
-/* oword ptr X_add_symbol */
-#define O_oword_ptr O_md24
 /* fword ptr X_add_symbol */
-#define O_fword_ptr O_md23
+#define O_fword_ptr O_md24
 /* tbyte ptr X_add_symbol */
-#define O_tbyte_ptr O_md22
+#define O_tbyte_ptr O_md23
+/* oword ptr X_add_symbol */
+#define O_oword_ptr O_md22
 /* xmmword ptr X_add_symbol */
-#define O_xmmword_ptr O_md21
+#define O_xmmword_ptr O_oword_ptr
 /* ymmword ptr X_add_symbol */
-#define O_ymmword_ptr O_md20
+#define O_ymmword_ptr O_md21
 /* zmmword ptr X_add_symbol */
-#define O_zmmword_ptr O_md19
+#define O_zmmword_ptr O_md20
 
 static struct
   {
@@ -388,8 +388,7 @@ static int i386_intel_simplify (expressionS *e)
     case O_fword_ptr:
     case O_qword_ptr: /* O_mmword_ptr */
     case O_tbyte_ptr:
-    case O_oword_ptr:
-    case O_xmmword_ptr:
+    case O_oword_ptr: /* O_xmmword_ptr */
     case O_ymmword_ptr:
     case O_zmmword_ptr:
     case O_near_ptr:
@@ -702,8 +701,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    i.types[this_operand].bitfield.byte = 1; /* cause an error */
 	  break;
 
-	case O_oword_ptr:
-	case O_xmmword_ptr:
+	case O_oword_ptr: /* O_xmmword_ptr */
 	  i.types[this_operand].bitfield.xmmword = 1;
 	  break;
 

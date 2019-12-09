@@ -1,5 +1,14 @@
 2019-12-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (O_oword_ptr): Move.
+	(O_xmmword_ptr): Alias to O_oword_ptr.
+	(O_fword_ptr, O_tbyte_ptr, O_ymmword_ptr, O_zmmword_ptr): Adjust
+	expansion.
+	(i386_intel_simplify, i386_intel_operand): Fold O_oword_ptr and
+	O_xmmword_ptr cases, leaving comments.
+
+2019-12-09  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386-intel.c (O_mmword_ptr): Define.
 	(i386_types): Add mmword entry.
 	(i386_intel_simplify, i386_intel_operand): Add comment.
