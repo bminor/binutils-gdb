@@ -695,6 +695,25 @@ proc_with_prefix test_bkpt_qualified {} {
 	"-q in spec string and qualified false"
 }
 
+proc_with_prefix test_bkpt_probe {} {
+    global decimal hex testfile srcfile
+
+    if { [prepare_for_testing "failed to prepare" ${testfile}-probes \
+	    ${srcfile} {debug c++ additional_flags=-DUSE_PROBES}] } {
+	return -1
+    }
+
+    if ![runto_main] then {
+	fail "cannot run to main."
+	return 0
+    }
+
+    gdb_test \
+	"python gdb.Breakpoint(\"-probe test:result_updated\")" \
+	"Breakpoint $decimal at $hex" \
+	"-probe in spec string"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -708,3 +727,4 @@ test_bkpt_pending
 test_bkpt_events
 test_bkpt_explicit_loc
 test_bkpt_qualified
+test_bkpt_probe

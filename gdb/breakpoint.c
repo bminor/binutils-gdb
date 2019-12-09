@@ -246,6 +246,9 @@ struct breakpoint_ops bkpt_breakpoint_ops;
 /* Breakpoints set on probes.  */
 static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 
+/* Tracepoints set on probes.  */
+static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
+
 /* Dynamic printf class type.  */
 struct breakpoint_ops dprintf_breakpoint_ops;
 
@@ -9163,6 +9166,41 @@ decode_static_tracepoint_spec (const char **arg_p)
   return sals;
 }
 
+/* Returns the breakpoint ops appropriate for use with with LOCATION_TYPE and
+   according to IS_TRACEPOINT.  */
+
+static const struct breakpoint_ops *
+breakpoint_ops_for_event_location_type (enum event_location_type location_type,
+					bool is_tracepoint)
+{
+  if (is_tracepoint)
+    {
+      if (location_type == PROBE_LOCATION)
+	return &tracepoint_probe_breakpoint_ops;
+      else
+	return &tracepoint_breakpoint_ops;
+    }
+  else
+    {
+      if (location_type == PROBE_LOCATION)
+	return &bkpt_probe_breakpoint_ops;
+      else
+	return &bkpt_breakpoint_ops;
+    }
+}
+
+/* See breakpoint.h.  */
+
+const struct breakpoint_ops *
+breakpoint_ops_for_event_location (const struct event_location *location,
+				   bool is_tracepoint)
+{
+  if (location != nullptr)
+    return breakpoint_ops_for_event_location_type
+      (event_location_type (location), is_tracepoint);
+  return is_tracepoint ? &tracepoint_breakpoint_ops : &bkpt_breakpoint_ops;
+}
+
 /* See breakpoint.h.  */
 
 int
@@ -9344,16 +9382,10 @@ break_command_1 (const char *arg, int flag, int from_tty)
   enum bptype type_wanted = (flag & BP_HARDWAREFLAG
 			     ? bp_hardware_breakpoint
 			     : bp_breakpoint);
-  struct breakpoint_ops *ops;
 
   event_location_up location = string_to_event_location (&arg, current_language);
-
-  /* Matching breakpoints on probes.  */
-  if (location != NULL
-      && event_location_type (location.get ()) == PROBE_LOCATION)
-    ops = &bkpt_probe_breakpoint_ops;
-  else
-    ops = &bkpt_breakpoint_ops;
+  const struct breakpoint_ops *ops = breakpoint_ops_for_event_location
+    (location.get (), false /* is_tracepoint */);
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
@@ -12802,8 +12834,7 @@ tracepoint_decode_location (struct breakpoint *b,
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
 
-/* The breakpoint_ops structure to be use on tracepoints placed in a
-   static probe.  */
+/* Virtual table for tracepoints on static probes.  */
 
 static void
 tracepoint_probe_create_sals_from_location
@@ -12823,8 +12854,6 @@ tracepoint_probe_decode_location (struct breakpoint *b,
   /* We use the same method for breakpoint on probes.  */
   return bkpt_probe_decode_location (b, location, search_pspace);
 }
-
-static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 
 /* Dprintf breakpoint_ops methods.  */
 
@@ -14467,15 +14496,10 @@ set_tracepoint_count (int num)
 static void
 trace_command (const char *arg, int from_tty)
 {
-  struct breakpoint_ops *ops;
-
   event_location_up location = string_to_event_location (&arg,
 							 current_language);
-  if (location != NULL
-      && event_location_type (location.get ()) == PROBE_LOCATION)
-    ops = &tracepoint_probe_breakpoint_ops;
-  else
-    ops = &tracepoint_breakpoint_ops;
+  const struct breakpoint_ops *ops = breakpoint_ops_for_event_location
+    (location.get (), true /* is_tracepoint */);
 
   create_breakpoint (get_current_arch (),
 		     location.get (),

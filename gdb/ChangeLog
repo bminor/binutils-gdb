@@ -1,3 +1,19 @@
+2019-12-10  George Barrett  <bob@bob131.so>
+
+	Fix scripted probe breakpoints.
+	* breakpoint.c (tracepoint_probe_breakpoint_ops): Move
+	declaration forward.
+	(breakpoint_ops_for_event_location_type)
+	(breakpoint_ops_for_event_location): Add function definitions.
+	(break_command_1, trace_command): Use
+	breakpoint_ops_for_event_location.
+	* breakpoint.h (breakpoint_ops_for_event_location): Add function
+	declarations.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Use
+	breakpoint_ops_for_event_location.
+	* python/py-breakpoint.c (bppy_init): Use
+	breakpoint_ops_for_event_location.
+
 2019-12-09  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdbtypes.c (rank_one_type): Return INCOMPATIBLE_TYPE_BADNESS
