@@ -176,3 +176,9 @@ start:
 	lfs	eax, dword ptr [eax]
 	lgs	eax, qword ptr [eax]
 	lss	eax, tbyte ptr [eax]
+
+	fld	near ptr [ebx]
+	fst	far ptr [ebx]
+
+	fild	far ptr [ebx]
+	fist	near ptr [ebx]

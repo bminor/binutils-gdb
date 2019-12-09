@@ -718,9 +718,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	case O_near_ptr:
 	  if (current_templates->start->opcode_modifier.jump != JUMP
 	      && current_templates->start->opcode_modifier.jump != JUMP_DWORD)
-	    suffix = got_a_float /* so it will cause an error */
-		     ? BYTE_MNEM_SUFFIX
-		     : LONG_DOUBLE_MNEM_SUFFIX;
+	    {
+	      /* cause an error */
+	      i.types[this_operand].bitfield.byte = 1;
+	      i.types[this_operand].bitfield.tbyte = 1;
+	      suffix = i.suffix;
+	    }
 	  break;
 
 	default:

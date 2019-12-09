@@ -1,6 +1,14 @@
 2019-12-09  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386-intel.c (i386_intel_operand): Set "byte"
+	attribute suffix instead of suffix for floating point insns when
+	handling O_near_ptr / O_far_ptr.
+	* testsuite/gas/i386/intelbad.s: Add FPU tests.
+	* testsuite/gas/i386/intelbad.l: Adjust expectations.
+
+2019-12-09  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386-intel.c (i386_intel_operand): Set "byte"
 	attribute suffix instead of suffix uniformly for insns not
 	possibly accepting "tbyte ptr" explicitly.
 
