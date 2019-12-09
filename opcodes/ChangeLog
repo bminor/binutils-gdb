@@ -1,5 +1,11 @@
 2019-12-10  Alan Modra  <amodra@gmail.com>
 
+	* ppc-dis.c (private): Delete variable.
+	(get_powerpc_dialect): Don't segfault on NULL info->private_data.
+	(powerpc_init_dialect): Don't use global private.
+
+2019-12-10  Alan Modra  <amodra@gmail.com>
+
 	* s12z-opc.c: Formatting.
 
 2019-12-08  Alan Modra  <amodra@gmail.com>

@@ -40,7 +40,7 @@ struct dis_private
 {
   /* Stash the result of parsing disassembler_options here.  */
   ppc_cpu_t dialect;
-} private;
+};
 
 #define POWERPC_DIALECT(INFO) \
   (((struct dis_private *) ((INFO)->private_data))->dialect)
@@ -259,7 +259,8 @@ get_powerpc_dialect (struct disassemble_info *info)
 {
   ppc_cpu_t dialect = 0;
 
-  dialect = POWERPC_DIALECT (info);
+  if (info->private_data)
+    dialect = POWERPC_DIALECT (info);
 
   /* Disassemble according to the section headers flags for VLE-mode.  */
   if (dialect & PPC_OPCODE_VLE
@@ -308,7 +309,7 @@ powerpc_init_dialect (struct disassemble_info *info)
   struct dis_private *priv = calloc (sizeof (*priv), 1);
 
   if (priv == NULL)
-    priv = &private;
+    return;
 
   switch (info->mach)
     {
