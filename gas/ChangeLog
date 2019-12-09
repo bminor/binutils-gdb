@@ -1,5 +1,11 @@
 2019-12-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (i386_intel_operand): Set "byte"
+	attribute suffix instead of suffix uniformly for insns not
+	possibly accepting "tbyte ptr" explicitly.
+
+2019-12-09  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386-intel.c (i386_intel_operand): Don't set suffix
 	for floating point insns when handling O_fword_ptr.
 

@@ -691,17 +691,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  i.types[this_operand].bitfield.tbyte = 1;
 	  if (got_a_float == 1)
 	    suffix = LONG_DOUBLE_MNEM_SUFFIX;
-	  else if (current_templates->start->operand_types[0].bitfield.fword
-		   || current_templates->start->operand_types[0].bitfield.tbyte)
-	    {
-	      /* l[defgs]s, [ls][gi]dt */
-	      if (flag_code == CODE_64BIT)
-		suffix = QWORD_MNEM_SUFFIX;
-	      else
-		i.types[this_operand].bitfield.byte = 1; /* cause an error */
-	    }
+	  else if ((current_templates->start->operand_types[0].bitfield.fword
+		    || current_templates->start->operand_types[0].bitfield.tbyte)
+		   && flag_code == CODE_64BIT)
+	    suffix = QWORD_MNEM_SUFFIX; /* l[fgs]s, [ls][gi]dt */
 	  else
-	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
+	    i.types[this_operand].bitfield.byte = 1; /* cause an error */
 	  break;
 
 	case O_oword_ptr:
