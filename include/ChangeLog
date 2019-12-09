@@ -1,3 +1,8 @@
+2019-12-10  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (struct disassemble_info): Delete insn_sets.
+	(INIT_DISASSEMBLE_INFO_NO_ARCH): Don't define.
+
 2019-12-05  Jan Beulich  <jbeulich@suse.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_CRYPTO): Expand to the

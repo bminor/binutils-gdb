@@ -639,7 +639,7 @@ print_insn_ip2k (bfd_vma pc, disassemble_info *info)
     cgen_bitset_add (isa, CGEN_COMPUTE_ISA (info));
   }
 #else
-  isa = info->insn_sets;
+  isa = info->private_data;
 #endif
 
   /* If we've switched cpu's, try to find a handle we've used before */

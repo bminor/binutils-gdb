@@ -78,11 +78,6 @@ typedef struct disassemble_info
   enum bfd_endian endian;
   /* Endianness of code, for mixed-endian situations such as ARM BE8.  */
   enum bfd_endian endian_code;
-  /* An arch/mach-specific bitmask of selected instruction subsets, mainly
-     for processors with run-time-switchable instruction sets.  The default,
-     zero, means that there is no constraint.  CGEN-based opcodes ports
-     may use ISA_foo masks.  */
-  void *insn_sets;
 
   /* Some targets need information about the current section to accurately
      display insns.  If this is NULL, the target disassembler function
@@ -394,9 +389,6 @@ extern void init_disassemble_info (struct disassemble_info *dinfo, void *stream,
 /* For compatibility with existing code.  */
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
   init_disassemble_info (&(INFO), (STREAM), (fprintf_ftype) (FPRINTF_FUNC))
-#define INIT_DISASSEMBLE_INFO_NO_ARCH(INFO, STREAM, FPRINTF_FUNC) \
-  init_disassemble_info (&(INFO), (STREAM), (fprintf_ftype) (FPRINTF_FUNC))
-
 
 #ifdef __cplusplus
 }
