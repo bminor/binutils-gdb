@@ -1,3 +1,10 @@
+2019-12-10  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (struct objdump_disasm_info): Delete "sec".
+	(find_symbol_for_address): Use inf->section rather than aux->sec.
+	(objdump_print_addr, disassemble_bytes): Likewise.
+	(disassemble_section): Don't set aux->sec.
+
 2019-12-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (regexp_diff): Support #?REGEXP.

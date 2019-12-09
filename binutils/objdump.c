@@ -147,7 +147,6 @@ static int include_path_count;
 struct objdump_disasm_info
 {
   bfd *              abfd;
-  asection *         sec;
   bfd_boolean        require_sec;
   arelent **         dynrelbuf;
   long               dynrelcount;
@@ -1078,7 +1077,7 @@ find_symbol_for_address (bfd_vma vma,
 
   aux = (struct objdump_disasm_info *) inf->application_data;
   abfd = aux->abfd;
-  sec = aux->sec;
+  sec = inf->section;
   opb = inf->octets_per_byte;
 
   /* Perform a binary search looking for the closest symbol to the
@@ -1342,7 +1341,8 @@ objdump_print_addr (bfd_vma vma,
 
       if (display_file_offsets)
 	inf->fprintf_func (inf->stream, _(" (File Offset: 0x%lx)"),
-			   (long int)(aux->sec->filepos + (vma - aux->sec->vma)));
+			   (long int) (inf->section->filepos
+				       + (vma - inf->section->vma)));
       return;
     }
 
@@ -1362,7 +1362,7 @@ objdump_print_addr (bfd_vma vma,
   if (!skip_find)
     sym = find_symbol_for_address (vma, inf, NULL);
 
-  objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, inf,
+  objdump_print_addr_with_sym (aux->abfd, inf->section, sym, vma, inf,
 			       skip_zeroes);
 }
 
@@ -1871,7 +1871,7 @@ disassemble_bytes (struct disassemble_info * inf,
   SFILE sfile;
 
   aux = (struct objdump_disasm_info *) inf->application_data;
-  section = aux->sec;
+  section = inf->section;
 
   sfile.alloc = 120;
   sfile.buffer = (char *) xmalloc (sfile.alloc);
@@ -2384,7 +2384,6 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       return;
     }
 
-  paux->sec = section;
   pinfo->buffer = data;
   pinfo->buffer_vma = section->vma;
   pinfo->buffer_length = datasize;
