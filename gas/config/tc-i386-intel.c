@@ -52,6 +52,8 @@ intel_state;
 #define O_dword_ptr O_md26
 /* qword ptr X_add_symbol */
 #define O_qword_ptr O_md25
+/* mmword ptr X_add_symbol */
+#define O_mmword_ptr O_qword_ptr
 /* oword ptr X_add_symbol */
 #define O_oword_ptr O_md24
 /* fword ptr X_add_symbol */
@@ -105,6 +107,7 @@ const i386_types[] =
     I386_TYPE(dword, 4),
     I386_TYPE(fword, 6),
     I386_TYPE(qword, 8),
+    I386_TYPE(mmword, 8),
     I386_TYPE(tbyte, 10),
     I386_TYPE(oword, 16),
     I386_TYPE(xmmword, 16),
@@ -383,7 +386,7 @@ static int i386_intel_simplify (expressionS *e)
     case O_word_ptr:
     case O_dword_ptr:
     case O_fword_ptr:
-    case O_qword_ptr:
+    case O_qword_ptr: /* O_mmword_ptr */
     case O_tbyte_ptr:
     case O_oword_ptr:
     case O_xmmword_ptr:
@@ -678,7 +681,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    }
 	  break;
 
-	case O_qword_ptr:
+	case O_qword_ptr: /* O_mmword_ptr */
 	  i.types[this_operand].bitfield.qword = 1;
 	  if (current_templates->start->base_opcode == 0x62 /* bound */
 	      || got_a_float == 1)	/* "f..." */

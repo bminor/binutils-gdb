@@ -1,5 +1,15 @@
 2019-12-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (O_mmword_ptr): Define.
+	(i386_types): Add mmword entry.
+	(i386_intel_simplify, i386_intel_operand): Add comment.
+	* testsuite/gas/i386/intel-expr.s: Also test mmword and zmmword.
+	* testsuite/gas/i386/intelok.s: Also test "mmword ptr".
+	* testsuite/gas/i386/intel-expr.d, testsuite/gas/i386/intelok.d,
+	testsuite/gas/i386/intelok.e: Adjust expectations.
+
+2019-12-09  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386-intel.c (i386_intel_operand): Set "byte"
 	attribute suffix instead of suffix for floating point insns when
 	handling O_near_ptr / O_far_ptr.
