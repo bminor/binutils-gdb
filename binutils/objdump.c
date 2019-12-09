@@ -2730,6 +2730,7 @@ disassemble_data (bfd *abfd)
   if (aux.dynrelbuf != NULL)
     free (aux.dynrelbuf);
   free (sorted_syms);
+  disassemble_free_target (&disasm_info);
 }
 
 static bfd_boolean

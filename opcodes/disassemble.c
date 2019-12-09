@@ -716,6 +716,65 @@ disassemble_init_for_target (struct disassemble_info * info)
     }
 }
 
+void
+disassemble_free_target (struct disassemble_info *info)
+{
+  if (info == NULL)
+    return;
+
+  switch (info->arch)
+    {
+    default:
+      return;
+
+#ifdef ARCH_bpf
+    case bfd_arch_bpf:
+#endif
+#ifdef ARCH_m32c
+    case bfd_arch_m32c:
+#endif
+#if defined ARCH_bpf || defined ARCH_m32c
+      if (info->private_data)
+	{
+	  CGEN_BITSET *mask = info->private_data;
+	  free (mask->bits);
+	}
+      break;
+#endif
+
+#ifdef ARCH_arc
+    case bfd_arch_arc:
+      break;
+#endif
+#ifdef ARCH_cris
+    case bfd_arch_cris:
+      break;
+#endif
+#ifdef ARCH_mmix
+    case bfd_arch_mmix:
+      break;
+#endif
+#ifdef ARCH_nfp
+    case bfd_arch_nfp:
+      break;
+#endif
+#ifdef ARCH_powerpc
+    case bfd_arch_powerpc:
+      break;
+#endif
+#ifdef ARCH_riscv
+    case bfd_arch_riscv:
+      break;
+#endif
+#ifdef ARCH_rs6000
+    case bfd_arch_rs6000:
+      break;
+#endif
+    }
+
+  free (info->private_data);
+}
+
 /* Remove whitespace and consecutive commas from OPTIONS.  */
 
 char *

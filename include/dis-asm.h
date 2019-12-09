@@ -325,7 +325,10 @@ extern disassembler_ftype disassembler (enum bfd_architecture arc,
 
 /* Amend the disassemble_info structure as necessary for the target architecture.
    Should only be called after initialising the info->arch field.  */
-extern void disassemble_init_for_target (struct disassemble_info * dinfo);
+extern void disassemble_init_for_target (struct disassemble_info *);
+
+/* Tidy any memory allocated by targets, such as info->private_data.  */
+extern void disassemble_free_target (struct disassemble_info *);
 
 /* Document any target specific options available from the disassembler.  */
 extern void disassembler_usage (FILE *);

@@ -1,5 +1,10 @@
 2019-12-10  Alan Modra  <amodra@gmail.com>
 
+	PR 24960
+	* dis-asm.h (disassemble_free_target): Declare.
+
+2019-12-10  Alan Modra  <amodra@gmail.com>
+
 	* dis-asm.h (struct disassemble_info): Delete insn_sets.
 	(INIT_DISASSEMBLE_INFO_NO_ARCH): Don't define.
 

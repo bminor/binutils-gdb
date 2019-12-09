@@ -1,5 +1,10 @@
 2019-12-10  Alan Modra  <amodra@gmail.com>
 
+	PR 24960
+	* disassemble.c (disassemble_free_target): New function.
+
+2019-12-10  Alan Modra  <amodra@gmail.com>
+
 	* cgen-dis.in (print_insn_@arch@): Replace insn_sets with private_data.
 	* disassemble.c (disassemble_init_for_target): Likewise.
 	* bpf-dis.c: Regenerate.
