@@ -1,3 +1,8 @@
+2019-12-09  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386-intel.c (i386_intel_operand): Don't special
+	case LDS et al when handling O_word_ptr.
+
 2019-12-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/aarch64/bfloat16.d: Match 32-bit and 64-bit output.

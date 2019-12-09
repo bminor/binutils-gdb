@@ -639,12 +639,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_word_ptr:
 	  i.types[this_operand].bitfield.word = 1;
-	  if ((current_templates->start->name[0] == 'l'
-	       && current_templates->start->name[2] == 's'
-	       && current_templates->start->name[3] == 0)
-	      || current_templates->start->base_opcode == 0x62 /* bound */)
-	    suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
-	  else if (got_a_float == 2)	/* "fi..." */
+	  if (got_a_float == 2)	/* "fi..." */
 	    suffix = SHORT_MNEM_SUFFIX;
 	  else
 	    suffix = WORD_MNEM_SUFFIX;
