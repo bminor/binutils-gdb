@@ -62,6 +62,12 @@ f (int &&x)
   return 3;
 }
 
+static int
+g (int &&x)
+{
+  return x;
+}
+
 int
 main ()
 {
@@ -77,6 +83,12 @@ main ()
      and reference conversion.  */
   int test_const // = 3
     = foo_rr_instance1.overloadConst (arg);
+
+  /* The statement below is illegal: cannot bind rvalue reference of
+     type 'int&&' to lvalue of type 'int'.
+
+     result = g (i); */
+  result = g (5); // this is OK
 
   marker1 (); // marker1-returns-here
   return result;

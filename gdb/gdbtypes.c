@@ -4303,12 +4303,9 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	}
       else
 	{
-	  /* Lvalues should prefer lvalue overloads.  */
+	  /* It's illegal to pass an lvalue as an rvalue.  */
 	  if (TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
-	    {
-	      rank.subrank = REFERENCE_CONVERSION_RVALUE;
-	      return sum_ranks (rank, REFERENCE_CONVERSION_BADNESS);
-	    }
+	    return INCOMPATIBLE_TYPE_BADNESS;
 	}
     }
 
