@@ -977,11 +977,11 @@ xml_fetch_content_from_file (const char *filename, void *baton)
     {
       char *fullname = concat (dirname, "/", filename, (char *) NULL);
 
-      file = gdb_fopen_cloexec (fullname, FOPEN_RT);
+      file = gdb_fopen_cloexec (fullname, FOPEN_RB);
       xfree (fullname);
     }
   else
-    file = gdb_fopen_cloexec (filename, FOPEN_RT);
+    file = gdb_fopen_cloexec (filename, FOPEN_RB);
 
   if (file == NULL)
     return {};

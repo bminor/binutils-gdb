@@ -55,13 +55,16 @@ if { "$arch1" == "" || "$arch2" == "" || "$default_arch" == "" } {
 
 # Run these tests twice, once for $arch1 and once for $arch2, to
 # make sure that the tdesc file overrides the global default.
+# TRANS_MODE indicates how newlines should be represented; it should
+# be one of the values supported by "fconfigure -translation".
 
-proc set_arch { arch which } {
+proc set_arch { arch which trans_mode } {
     global gdb_prompt
     global subdir
 
     set filename [standard_output_file tdesc-arch.xml]
     set fd [open $filename w]
+    fconfigure $fd -translation $trans_mode
     puts $fd \
 	"<target>
 	    <architecture>$arch</architecture>
@@ -92,8 +95,13 @@ proc set_arch { arch which } {
     remote_file host delete $filename
 }
 
-set_arch $arch1 first
-set_arch $arch2 second
+set_arch $arch1 first lf
+set_arch $arch2 second lf
+
+with_test_prefix crlf {
+    set_arch $arch1 first crlf
+    set_arch $arch2 second crlf
+}
 
 # Check an invalid architecture setting.
 set filename [standard_output_file tdesc-arch.xml]
