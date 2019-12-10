@@ -1,5 +1,9 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* tic6x-dis.c (tic6x_extract_32): Avoid signed overflow.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* tic4x-dis.c (tic4x_print_register): Formatting.  Don't segfault
 	on NULL registertable entry.
 	(tic4x_hash_opcode): Use unsigned arithmetic.
