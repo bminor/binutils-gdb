@@ -137,17 +137,19 @@ tic4x_print_register (struct disassemble_info *info, unsigned long regno)
     {
       registertable = xmalloc (sizeof (tic4x_register_t *) * REG_TABLE_SIZE);
       for (i = 0; i < tic3x_num_registers; i++)
-	registertable[tic3x_registers[i].regno] = (tic4x_register_t *) (tic3x_registers + i);
+	registertable[tic3x_registers[i].regno]
+	  = (tic4x_register_t *) (tic3x_registers + i);
       if (IS_CPU_TIC4X (tic4x_version))
 	{
 	  /* Add C4x additional registers, overwriting
 	     any C3x registers if necessary.  */
 	  for (i = 0; i < tic4x_num_registers; i++)
-	    registertable[tic4x_registers[i].regno] =
-	      (tic4x_register_t *)(tic4x_registers + i);
+	    registertable[tic4x_registers[i].regno]
+	      = (tic4x_register_t *)(tic4x_registers + i);
 	}
     }
-  if ((int) regno > (IS_CPU_TIC4X (tic4x_version) ? TIC4X_REG_MAX : TIC3X_REG_MAX))
+  if (regno > (IS_CPU_TIC4X (tic4x_version) ? TIC4X_REG_MAX : TIC3X_REG_MAX)
+      || registertable[regno] == NULL)
     return 0;
   if (info != NULL)
     (*info->fprintf_func) (info->stream, "%s", registertable[regno]->name);
@@ -639,9 +641,9 @@ tic4x_hash_opcode (tic4x_inst_t **optable,
 		   const tic4x_inst_t *inst,
 		   const unsigned long tic4x_oplevel)
 {
-  int j;
-  int opcode = inst->opcode >> (32 - TIC4X_HASH_SIZE);
-  int opmask = inst->opmask >> (32 - TIC4X_HASH_SIZE);
+  unsigned int j;
+  unsigned int opcode = inst->opcode >> (32 - TIC4X_HASH_SIZE);
+  unsigned int opmask = inst->opmask >> (32 - TIC4X_HASH_SIZE);
 
   /* Use a TIC4X_HASH_SIZE bit index as a hash index.  We should
      have unique entries so there's no point having a linked list

@@ -1,5 +1,11 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* tic4x-dis.c (tic4x_print_register): Formatting.  Don't segfault
+	on NULL registertable entry.
+	(tic4x_hash_opcode): Use unsigned arithmetic.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* s12z-opc.c (z_decode_signed_value): Avoid signed overflow.
 
 2019-12-11  Alan Modra  <amodra@gmail.com>
