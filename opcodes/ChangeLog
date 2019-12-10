@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* h8300-dis.c (extract_immediate): Avoid signed overflow.
+	(bfd_h8_disassemble): Likewise.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* d30v-dis.c (print_insn): Make opind unsigned.  Don't access
 	past end of operands array.
 
