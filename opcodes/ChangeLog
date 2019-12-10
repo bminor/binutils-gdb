@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* m68k-dis.c (COERCE32): Cast value first.
+	(NEXTLONG, NEXTULONG): Avoid signed overflow.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* h8300-dis.c (extract_immediate): Avoid signed overflow.
 	(bfd_h8_disassemble): Likewise.
 

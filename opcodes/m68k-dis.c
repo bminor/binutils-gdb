@@ -96,7 +96,7 @@ enum print_insn_arg_error
   while (0)
 
 /* Get a 4 byte signed integer.  */
-#define COERCE32(x) ((bfd_signed_vma) ((x) ^ 0x80000000) - 0x80000000)
+#define COERCE32(x) (((bfd_vma) (x) ^ 0x80000000) - 0x80000000)
 
 #define NEXTLONG(p, val, ret_val)					\
   do									\
@@ -104,7 +104,8 @@ enum print_insn_arg_error
       p += 4;								\
       if (!FETCH_DATA (info, p))					\
 	return ret_val;							\
-      val = COERCE32 ((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1]); \
+      val = COERCE32 (((((((unsigned) p[-4] << 8) + p[-3]) << 8)	\
+			+ p[-2]) << 8) + p[-1]);			\
     }									\
   while (0)
 
@@ -115,7 +116,8 @@ enum print_insn_arg_error
       p += 4;								\
       if (!FETCH_DATA (info, p))					\
 	return PRINT_INSN_ARG_MEMORY_ERROR;				\
-      val = (unsigned int) ((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1]); \
+      val = (((((((unsigned) p[-4] << 8) + p[-3]) << 8)			\
+	       + p[-2]) << 8) + p[-1]);					\
     }									\
   while (0)
 
