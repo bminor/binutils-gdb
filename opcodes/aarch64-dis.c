@@ -2843,6 +2843,8 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 
     case sve_size_tsz_bhs:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_sz, FLD_SVE_tszl_19);
+      if (i == 0)
+	return FALSE;
       while (i != 1)
 	{
 	  if (i & 1)

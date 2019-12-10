@@ -1,5 +1,11 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	PR 25270
+	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Return
+	false when field is zero for sve_size_tsz_bhs.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* epiphany-ibld.c: Regenerate.
 
 2019-12-10  Alan Modra  <amodra@gmail.com>
