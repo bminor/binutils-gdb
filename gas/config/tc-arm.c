@@ -32633,6 +32633,7 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
     if (streq (opt->name, name))
       {
 	selected_arch = opt->value;
+	selected_ctx_ext_table = opt->ext_table;
 	selected_ext = arm_arch_none;
 	selected_cpu = selected_arch;
 	strcpy (selected_cpu_name, opt->name);

@@ -1,3 +1,9 @@
+2019-12-10  Vladimir Murzin  <vladimir.murzin@arm.com>
+
+	* config/tc-arm.c (s_arm_arch): Set selected_ctx_ext_table.
+	* testsuite/gas/arm/mve-arch-ext.s: New.
+	* testsuite/gas/arm/mve-arch-ext.d: New.
+
 2019-12-09  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386-intel.c (O_oword_ptr): Move.
