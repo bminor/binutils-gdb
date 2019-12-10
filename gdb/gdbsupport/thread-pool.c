@@ -25,6 +25,7 @@
 #include "gdbsupport/alt-stack.h"
 #include "gdbsupport/block-signals.h"
 #include <algorithm>
+#include "diagnostics.h"
 
 /* On the off chance that we have the pthread library on a Windows
    host, but std::thread is not using it, avoid calling
@@ -36,8 +37,31 @@
 #endif
 
 #ifdef USE_PTHREAD_SETNAME_NP
+
 #include <pthread.h>
-#endif
+
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
+
+/* Handle platform discrepancies in pthread_setname_np: macOS uses a
+   single-argument form, while Linux uses a two-argument form.  This
+   wrapper handles the difference.  */
+
+static void
+set_thread_name (int (*set_name) (pthread_t, const char *), const char *name)
+{
+  set_name (pthread_self (), name);
+}
+
+static void
+set_thread_name (void (*set_name) (const char *), const char *name)
+{
+  set_name (name);
+}
+
+DIAGNOSTIC_POP
+
+#endif	/* USE_PTHREAD_SETNAME_NP */
 
 namespace gdb
 {
@@ -75,9 +99,6 @@ thread_pool::set_thread_count (size_t num_threads)
       for (size_t i = m_thread_count; i < num_threads; ++i)
 	{
 	  std::thread thread (&thread_pool::thread_function, this);
-#ifdef USE_PTHREAD_SETNAME_NP
-	  pthread_setname_np (thread.native_handle (), "gdb worker");
-#endif
 	  thread.detach ();
 	}
     }
@@ -115,6 +136,12 @@ thread_pool::post_task (std::function<void ()> func)
 void
 thread_pool::thread_function ()
 {
+#ifdef USE_PTHREAD_SETNAME_NP
+  /* This must be done here, because on macOS one can only set the
+     name of the current thread.  */
+  set_thread_name (pthread_setname_np, "gdb worker");
+#endif
+
   /* Ensure that SIGSEGV is delivered to an alternate signal
      stack.  */
   gdb::alternate_signal_stack signal_stack;

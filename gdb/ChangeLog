@@ -1,5 +1,12 @@
 2019-12-11  Tom Tromey  <tromey@adacore.com>
 
+	PR build/25268:
+	* gdbsupport/thread-pool.c (set_thread_name): New function.
+	(thread_pool::set_thread_count): Don't call pthread_setname_np.
+	(thread_pool::thread_function): Call set_thread_name.
+
+2019-12-11  Tom Tromey  <tromey@adacore.com>
+
 	* fbsd-tdep.c (fbsd_core_info_proc_status): Cast result of
 	bfd_get_signed_8.
 
