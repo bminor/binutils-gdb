@@ -64,7 +64,7 @@ static char *entry_mask_bit[] =
 #define COERCE32(x) ((int) (((x) ^ 0x80000000) - 0x80000000))
 #define NEXTLONG(p)  \
   (p += 4, FETCH_DATA (info, p), \
-   (COERCE32 ((((((p[-1] << 8) + p[-2]) << 8) + p[-3]) << 8) + p[-4])))
+   (COERCE32 (((((((unsigned) p[-1] << 8) + p[-2]) << 8) + p[-3]) << 8) + p[-4])))
 
 /* Maximum length of an instruction.  */
 #define MAXLEN 25
