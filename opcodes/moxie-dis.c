@@ -33,7 +33,7 @@ static void *stream;
 /* Macros to extract operands from the instruction word.  */
 #define OP_A(i) ((i >> 4) & 0xf)
 #define OP_B(i) (i & 0xf)
-#define INST2OFFSET(o) ((((signed short)((o & ((1<<10)-1))<<6))>>6)<<1)
+#define INST2OFFSET(o) (((((o) & 0x3ff) ^ 0x200) - 0x200) << 1)
 
 static const char * reg_names[16] =
   { "$fp", "$sp", "$r0", "$r1", "$r2", "$r3", "$r4", "$r5",
