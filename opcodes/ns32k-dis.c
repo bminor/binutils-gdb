@@ -262,8 +262,8 @@ list_search (int reg_value, const struct ns32k_option *optionP, char *result)
 static int
 bit_extract (bfd_byte *buffer, int offset, int count)
 {
-  int result;
-  int bit;
+  unsigned int result;
+  unsigned int bit;
 
   if (offset < 0 || count < 0)
     return 0;
@@ -291,8 +291,8 @@ bit_extract (bfd_byte *buffer, int offset, int count)
 static int
 bit_extract_simple (bfd_byte *buffer, int offset, int count)
 {
-  int result;
-  int bit;
+  unsigned int result;
+  unsigned int bit;
 
   if (offset < 0 || count < 0)
     return 0;
@@ -325,12 +325,10 @@ bit_copy (bfd_byte *buffer, int offset, int count, char *to)
 }
 
 static int
-sign_extend (int value, int bits)
+sign_extend (unsigned int value, unsigned int bits)
 {
-  value = value & ((1 << bits) - 1);
-  return (value & (1 << (bits - 1))
-	  ? value | (~((1 << bits) - 1))
-	  : value);
+  unsigned int sign = 1u << bits;
+  return ((value & (sign - 1)) ^ sign) - sign;
 }
 
 static void

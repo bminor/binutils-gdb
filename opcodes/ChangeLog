@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* ns32k-dis.c (bit_extract): Use unsigned arithmetic.
+	(bit_extract_simple, sign_extend): Likewise.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* nios2-dis.c (nios2_print_insn_arg): Use 1u << 31.
 
 2019-12-11  Alan Modra  <amodra@gmail.com>
