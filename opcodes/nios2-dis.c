@@ -867,7 +867,7 @@ nios2_print_insn_arg (const char *argptr,
 
 	  case iw_L5I4X1_type:
 	    /* Encoding for push.n/pop.n.  */
-	    reglist |= (1 << 31);
+	    reglist |= (1u << 31);
 	    if (GET_IW_L5I4X1_FP (opcode))
 	      reglist |= (1 << 28);
 	    if (GET_IW_L5I4X1_CS (opcode))
