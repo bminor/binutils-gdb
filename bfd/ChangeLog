@@ -1,3 +1,8 @@
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
+	* cpu-ia64-opc.c (ext_imms_scaled): Avoid undefined left shift
+	of negative values by using unsigned vars.
+
 2019-12-07  Alan Modra  <amodra@gmail.com>
 
 	PR 25236
