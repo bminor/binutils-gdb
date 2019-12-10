@@ -1100,7 +1100,7 @@ epiphany_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 31, 24, 32, total_length, pc, & value);
-        value = ((((value) << (1))) + (pc));
+        value = ((((value) * (2))) + (pc));
         fields->f_simm24 = value;
       }
       break;
@@ -1111,7 +1111,7 @@ epiphany_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 15, 8, 32, total_length, pc, & value);
-        value = ((((value) << (1))) + (pc));
+        value = ((((value) * (2))) + (pc));
         fields->f_simm8 = value;
       }
       break;

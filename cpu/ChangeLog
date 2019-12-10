@@ -1,3 +1,8 @@
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
+	* epiphany.cpu (f-simm8, f-simm24): Use multiply rather than
+	shift left to avoid UB on left shift of negative values.
+
 2019-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu: Fix comment describing the 128-bit instruction format.

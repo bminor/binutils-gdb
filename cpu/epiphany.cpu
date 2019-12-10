@@ -149,11 +149,11 @@
 
 (df f-simm8	  "branch displacement"   (PCREL-ADDR RELOC) 15 8 INT
     ((value pc) (sra SI (sub SI value pc) 1))
-    ((value pc) (add SI (sll SI value 1) pc)))
+    ((value pc) (add SI (mul SI value 2) pc)))
 
 (df f-simm24     "branch displacement"	  (PCREL-ADDR RELOC) 31 24 INT
     ((value pc) (sra SI (sub SI value pc) 1))
-    ((value pc) (add SI (sll SI value 1) pc)))
+    ((value pc) (add SI (mul SI value 2) pc)))
 
 (df f-sdisp3     "signed immediate 3 bit"      ()     9 3  INT #f #f)
 
