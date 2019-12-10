@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
+#include "diagnostics.h"
 #include <string.h>
 
 /* There are two different versions of strerror_r; one is GNU-specific, the
@@ -25,6 +26,11 @@
    us choose the right behavior for each return type.  We cannot rely on Gnulib
    to solve this for us because IPA does not use Gnulib but uses this
    function.  */
+
+/* We only ever use one of the two overloads, so suppress the warning for
+   an unused function.  */
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
 
 /* Called if we have a XSI-compliant strerror_r.  */
 static char *
@@ -39,6 +45,8 @@ select_strerror_r (char *res, char *)
 {
   return res;
 }
+
+DIAGNOSTIC_POP
 
 /* Implementation of safe_strerror as defined in common-utils.h.  */
 

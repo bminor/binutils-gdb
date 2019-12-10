@@ -1,5 +1,10 @@
 2019-12-10  Christian Biesinger  <cbiesinger@google.com>
 
+	* gdbsupport/safe-strerror.c: Supress the unused function warning
+	for select_strerror_r.
+
+2019-12-10  Christian Biesinger  <cbiesinger@google.com>
+
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* gdbsupport/agent.c (gdb_connect_sync_socket): Call
