@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* cr16-dis.c (EXTRACT, SBM): Rewrite.
+	(cr16_match_opcode): Delete duplicate bcond test.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* bfin-dis.c (HOST_LONG_WORD_SIZE, XFIELD): Delete.
 	(SIGNBIT): New.
 	(MASKBITS, SIGNEXTEND): Rewrite.

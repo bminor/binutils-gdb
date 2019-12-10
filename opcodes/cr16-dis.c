@@ -30,11 +30,11 @@
 
 /* Extract 'n_bits' from 'a' starting from offset 'offs'.  */
 #define EXTRACT(a, offs, n_bits)                    \
-  (n_bits == 32 ? (((a) >> (offs)) & 0xffffffffL)   \
-  : (((a) >> (offs)) & ((1 << (n_bits)) -1)))
+  (((a) >> (offs)) & ((1ul << ((n_bits) - 1) << 1) - 1))
 
-/* Set Bit Mask - a mask to set all bits starting from offset 'offs'.  */
-#define SBM(offs)  ((((1 << (32 - offs)) -1) << (offs)))
+/* Set Bit Mask - a mask to set all bits in a 32-bit word starting
+   from offset 'offs'.  */
+#define SBM(offs)  ((1ul << 31 << 1) - (1ul << (offs)))
 
 typedef struct
 {
@@ -329,9 +329,6 @@ cr16_match_opcode (void)
   while (instruction >= cr16_instruction)
     {
       mask = build_mask ();
-      /* Adjust mask for bcond with 32-bit size instruction */
-      if ((IS_INSN_MNEMONIC("b") && instruction->size == 2))
-        mask = 0xff0f0000;
 
       if ((doubleWord & mask) == BIN (instruction->match,
                                       instruction->match_bits))
