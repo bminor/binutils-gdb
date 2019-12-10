@@ -1,3 +1,9 @@
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (INSN_HAS_RELOC, DISASSEMBLE_DATA),
+	(USER_SPECIFIED_MACHINE_TYPE, WIDE_OUTPUT): Make unsigned.
+	* opcode/tic80.h (TIC80_OPERAND_*): Likewise.
+
 2019-12-10  Alan Modra  <amodra@gmail.com>
 
 	PR 24960

@@ -138,68 +138,68 @@ extern const struct tic80_operand tic80_operands[];
 /* This operand must be an even register number.  Floating point numbers
    for example are stored in even/odd register pairs. */
 
-#define TIC80_OPERAND_EVEN	(1 << 0)
+#define TIC80_OPERAND_EVEN	(1u << 0)
 
 /* This operand must be an odd register number and must be one greater than
    the register number of the previous operand.  I.E. the second register in
    an even/odd register pair. */
 
-#define TIC80_OPERAND_ODD	(1 << 1)
+#define TIC80_OPERAND_ODD	(1u << 1)
 
 /* This operand takes signed values.  */
 
-#define TIC80_OPERAND_SIGNED	(1 << 2)
+#define TIC80_OPERAND_SIGNED	(1u << 2)
 
 /* This operand may be either a predefined constant name or a numeric value.
    An example would be a condition code like "eq0.b" which has the numeric
    value 0x2. */
 
-#define TIC80_OPERAND_NUM	(1 << 3)
+#define TIC80_OPERAND_NUM	(1u << 3)
 
 /* This operand should be wrapped in parentheses rather than separated
    from the previous one by a comma.  This is used for various
    instructions, like the load and store instructions, which want
    their operands to look like "displacement(reg)" */
 
-#define TIC80_OPERAND_PARENS	(1 << 4)
+#define TIC80_OPERAND_PARENS	(1u << 4)
 
 /* This operand is a PC relative branch offset.  The disassembler prints
    these symbolically if possible.  Note that the offsets are taken as word
    offsets. */
 
-#define TIC80_OPERAND_PCREL	(1 << 5)
+#define TIC80_OPERAND_PCREL	(1u << 5)
 
 /* This flag is a hint to the disassembler for using hex as the prefered
    printing format, even for small positive or negative immediate values.
    Normally values in the range -999 to 999 are printed as signed decimal
    values and other values are printed in hex. */
 
-#define TIC80_OPERAND_BITFIELD	(1 << 6)
+#define TIC80_OPERAND_BITFIELD	(1u << 6)
 
 /* This operand may have a ":m" modifier specified by bit 17 in a short
    immediate form instruction. */
 
-#define TIC80_OPERAND_M_SI	(1 << 7)
+#define TIC80_OPERAND_M_SI	(1u << 7)
 
 /* This operand may have a ":m" modifier specified by bit 15 in a long
    immediate or register form instruction. */
 
-#define TIC80_OPERAND_M_LI	(1 << 8)
+#define TIC80_OPERAND_M_LI	(1u << 8)
 
 /* This operand may have a ":s" modifier specified in bit 11 in a long
    immediate or register form instruction. */
 
-#define TIC80_OPERAND_SCALED	(1 << 9)
+#define TIC80_OPERAND_SCALED	(1u << 9)
 
 /* This operand is a floating point value */
 
-#define TIC80_OPERAND_FLOAT	(1 << 10)
+#define TIC80_OPERAND_FLOAT	(1u << 10)
 
 /* This operand is an byte offset from a base relocation. The lower
  two bits of the final relocated address are ignored when the value is
  written to the program counter. */
 
-#define TIC80_OPERAND_BASEREL	(1 << 11)
+#define TIC80_OPERAND_BASEREL	(1u << 11)
 
 /* This operand is an "endmask" field for a shift instruction.
    It is treated special in that it can have values of 0-32,
@@ -208,29 +208,29 @@ extern const struct tic80_operand tic80_operands[];
    has no way of knowing from the instruction which value was 
    given at assembly time, so it just uses '0'. */
 
-#define TIC80_OPERAND_ENDMASK	(1 << 12)
+#define TIC80_OPERAND_ENDMASK	(1u << 12)
 
 /* This operand is one of the 32 general purpose registers.
    The disassembler prints these with a leading 'r'. */
 
-#define TIC80_OPERAND_GPR	(1 << 27)
+#define TIC80_OPERAND_GPR	(1u << 27)
 
 /* This operand is a floating point accumulator register.
    The disassembler prints these with a leading 'a'. */
 
-#define TIC80_OPERAND_FPA	( 1 << 28)
+#define TIC80_OPERAND_FPA	(1u << 28)
 
 /* This operand is a control register number, either numeric or
    symbolic (like "EIF", "EPC", etc).
    The disassembler prints these symbolically. */
 
-#define TIC80_OPERAND_CR	(1 << 29)
+#define TIC80_OPERAND_CR	(1u << 29)
 
 /* This operand is a condition code, either numeric or
    symbolic (like "eq0.b", "ne0.w", etc).
    The disassembler prints these symbolically. */
 
-#define TIC80_OPERAND_CC	(1 << 30)
+#define TIC80_OPERAND_CC	(1u << 30)
 
 /* This operand is a bit number, either numeric or
    symbolic (like "eq.b", "or.f", etc).
@@ -238,7 +238,7 @@ extern const struct tic80_operand tic80_operands[];
    Note that they appear in the instruction in 1's complement relative
    to the values given in the manual. */
 
-#define TIC80_OPERAND_BITNUM	(1 << 31)
+#define TIC80_OPERAND_BITNUM	(1u << 31)
 
 /* This mask is used to strip operand bits from an int that contains
    both operand bits and a numeric value in the lsbs. */
