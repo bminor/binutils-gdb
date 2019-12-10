@@ -88,7 +88,7 @@ get_operand_value (const struct v850_operand *operand,
 		   bfd_boolean noerror,
 		   int *invalid)
 {
-  long value;
+  unsigned long value;
   bfd_byte buffer[4];
 
   if ((operand->flags & V850E_IMMEDIATE16)
@@ -158,11 +158,13 @@ get_operand_value (const struct v850_operand *operand,
       if (operand->bits == -1)
 	value = (insn & operand->shift);
       else
-	value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+	value = (insn >> operand->shift) & ((1ul << operand->bits) - 1);
 
       if (operand->flags & V850_OPERAND_SIGNED)
-	value = ((long)(value << (sizeof (long)*8 - operand->bits))
-		 >> (sizeof (long)*8 - operand->bits));
+	{
+	  unsigned long sign = 1ul << (operand->bits - 1);
+	  value = (value ^ sign) - sign;
+	}
     }
 
   return value;

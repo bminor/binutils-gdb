@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* v850-dis.c (get_operand_value): Use unsigned arithmetic.  Don't
+	sign extend using shifts.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* tic6x-dis.c (tic6x_extract_32): Avoid signed overflow.
 
 2019-12-11  Alan Modra  <amodra@gmail.com>
