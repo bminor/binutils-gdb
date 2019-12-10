@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* cris-dis.c (print_with_operands): Avoid signed integer
+	overflow when collecting bytes of a 32-bit integer.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* cr16-dis.c (EXTRACT, SBM): Rewrite.
 	(cr16_match_opcode): Delete duplicate bcond test.
 
