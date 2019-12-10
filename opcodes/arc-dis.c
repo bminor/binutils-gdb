@@ -295,7 +295,7 @@ find_format_from_table (struct disassemble_info *info,
 	  if (operand->extract)
 	    value = (*operand->extract) (insn, &invalid);
 	  else
-	    value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+	    value = (insn >> operand->shift) & ((1ull << operand->bits) - 1);
 
 	  /* Check for LIMM indicator.  If it is there, then make sure
 	     we pick the right format.  */

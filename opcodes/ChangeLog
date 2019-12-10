@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* arc-dis.c (find_format_from_table): Use ull constant when
+	shifting by up to 32.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	PR 25270
 	* aarch64-dis.c (aarch64_decode_variant_using_iclass): Return
 	false when field is zero for sve_size_tsz_bhs.
