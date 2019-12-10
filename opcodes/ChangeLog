@@ -1,5 +1,9 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* s12z-opc.c (z_decode_signed_value): Avoid signed overflow.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* ns32k-dis.c (bit_extract): Use unsigned arithmetic.
 	(bit_extract_simple, sign_extend): Likewise.
 

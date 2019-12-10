@@ -410,9 +410,7 @@ z_decode_signed_value (struct mem_read_abstraction_base *mra, int offset,
   int i;
   uint32_t value = 0;
   for (i = 0; i < size; ++i)
-    {
-      value |= buffer[i] << (8 * (size - i - 1));
-    }
+    value = (value << 8) | buffer[i];
 
   if (buffer[0] & 0x80)
     {
