@@ -1,3 +1,7 @@
+2021-02-04  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.xml/tdesc-regs.exp: Use correct core-regs for ARC.
+
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
 	* gdb.threads/detach-step-over.c: New file.
