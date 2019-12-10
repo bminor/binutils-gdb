@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* d30v-dis.c (print_insn): Make opind unsigned.  Don't access
+	past end of operands array.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* csky-dis.c (csky_chars_to_number): Rewrite.  Avoid signed
 	overflow when collecting bytes of a number.
 

@@ -125,7 +125,8 @@ print_insn (struct disassemble_info *info,
 {
   int val, opnum, need_comma = 0;
   struct d30v_operand *oper;
-  int i, match, opind = 0, need_paren = 0, found_control = 0;
+  int i, match, need_paren = 0, found_control = 0;
+  unsigned int opind = 0;
 
   (*info->fprintf_func) (info->stream, "%s", insn->op->name);
 
@@ -154,7 +155,8 @@ print_insn (struct disassemble_info *info,
 
   (*info->fprintf_func) (info->stream, "\t");
 
-  while ((opnum = insn->form->operands[opind++]) != 0)
+  while (opind < ARRAY_SIZE (insn->form->operands)
+	 && (opnum = insn->form->operands[opind++]) != 0)
     {
       int bits;
 
@@ -314,7 +316,7 @@ print_insn (struct disassemble_info *info,
 	  (*info->fprintf_func) (info->stream, "0x%x", val);
 	}
       /* If there is another operand, then write a comma and space.  */
-      if (opind < (int) ARRAY_SIZE (insn->form->operands)
+      if (opind < ARRAY_SIZE (insn->form->operands)
 	  && insn->form->operands[opind]
 	  && !(found_control && opind == 2))
 	need_comma = 1;
