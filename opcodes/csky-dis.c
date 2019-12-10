@@ -140,11 +140,11 @@ csky_chars_to_number (unsigned char * buf, int n)
   unsigned int val = 0;
 
   if (dis_info.info->endian == BFD_ENDIAN_BIG)
-    while (n--)
-      val |= buf[n] << (n*8);
-  else
     for (i = 0; i < n; i++)
-      val |= buf[i] << (i*8);
+      val = val << 8 | (buf[i] & 0xff);
+  else
+    for (i = n - 1; i >= 0; i--)
+      val = val << 8 | (buf[i] & 0xff);
   return val;
 }
 

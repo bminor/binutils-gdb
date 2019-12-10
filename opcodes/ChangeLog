@@ -1,5 +1,10 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* csky-dis.c (csky_chars_to_number): Rewrite.  Avoid signed
+	overflow when collecting bytes of a number.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* cris-dis.c (print_with_operands): Avoid signed integer
 	overflow when collecting bytes of a 32-bit integer.
 
