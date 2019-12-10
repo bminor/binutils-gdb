@@ -146,10 +146,7 @@ public:
   }
 
   /* A constructor that calls buildargv on STR.  STR may be NULL, in
-     which case this object is initialized with a NULL array.  If
-     buildargv fails due to out-of-memory, call malloc_failure.
-     Therefore, the value is guaranteed to be non-NULL, unless the
-     parameter itself is NULL.  */
+     which case this object is initialized with a NULL array.  */
 
   explicit gdb_argv (const char *str)
     : m_argv (NULL)

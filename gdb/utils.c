@@ -3033,9 +3033,6 @@ gdb_argv::reset (const char *s)
 {
   char **argv = buildargv (s);
 
-  if (s != NULL && argv == NULL)
-    malloc_failure (0);
-
   freeargv (m_argv);
   m_argv = argv;
 }

@@ -977,8 +977,6 @@ xml_fetch_content_from_file (const char *filename, void *baton)
     {
       char *fullname = concat (dirname, "/", filename, (char *) NULL);
 
-      if (fullname == NULL)
-	malloc_failure (0);
       file = gdb_fopen_cloexec (fullname, FOPEN_RT);
       xfree (fullname);
     }

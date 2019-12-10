@@ -1,5 +1,12 @@
 2019-12-12  Tom Tromey  <tromey@adacore.com>
 
+	* xml-support.c (xml_fetch_content_from_file): Don't call
+	malloc_failure.
+	* utils.h (class gdb_argv): Remove malloc_failure comment.
+	* utils.c (gdb_argv::reset): Don't call malloc_failure.
+
+2019-12-12  Tom Tromey  <tromey@adacore.com>
+
 	* Makefile.in (ALL_TARGET_OBS): Add riscv-ravenscar-thread.o.
 	(HFILES_NO_SRCDIR): Add riscv-ravenscar-thread.h.
 	(ALLDEPFILES): Add riscv-ravenscar-thread.c.
