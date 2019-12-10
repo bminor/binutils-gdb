@@ -1,5 +1,17 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* xtensa-modules.c (Field_* functions): Don't mask using shifts.
+	(Operand_soffsetx4_decode, Operand_simm4_decode),
+	(Operand_simm8_decode, Operand_simm8x256_decode),
+	(Operand_simm12b_decode, Operand_label8_decode),
+	(Operand_label12_decode, Operand_soffset_decode),
+	(Operand_xt_wbr15_label_decode, Operand_xt_wbr18_label_decode): Don't
+	sign extend using shifts.
+	(Operand_immrx4_decode, Operand_uimm16x4_decode): Avoid UB in
+	constant.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* cpu-ia64-opc.c (ext_imms_scaled): Avoid undefined left shift
 	of negative values by using unsigned vars.
 
