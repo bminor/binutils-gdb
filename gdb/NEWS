@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 8.3
+*** Changes since GDB 9
+
+*** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.
 
