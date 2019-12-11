@@ -1,3 +1,8 @@
+2019-12-11  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 9 branch created (27f7b2f64062ac9e52afc60509263c2702a9ebd0):
+	* version.in: Bump version to 9.0.90.DATE-git.
+
 2019-12-11  Tom Tromey  <tromey@adacore.com>
 
 	PR build/25268:
