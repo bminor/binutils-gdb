@@ -5024,7 +5024,8 @@ get_aarch64_insn (char *buf)
 {
   unsigned char *where = (unsigned char *) buf;
   uint32_t result;
-  result = (where[0] | (where[1] << 8) | (where[2] << 16) | (where[3] << 24));
+  result = ((where[0] | (where[1] << 8) | (where[2] << 16)
+	     | ((uint32_t) where[3] << 24)));
   return result;
 }
 

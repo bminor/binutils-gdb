@@ -5340,7 +5340,7 @@ parse_dalu (const char *line, metag_insn *insn,
 	      /* Only MOV instructions have a DSP register as a
 		 destination. Set the MOV DSPe.r opcode. The simple
 		 OR'ing is OK because the usual MOV opcode is 0x00.  */
-	      insn->bits = (0x91 << 24);
+	      insn->bits = 0x91u << 24;
 	      du_shift = 0;
 	      l1_shift = 2;
 	      regs_shift[0] = 19;
@@ -5455,7 +5455,7 @@ parse_dalu (const char *line, metag_insn *insn,
 			  du_shift = 0;
 			  l1_shift = 2;
 			  regs_shift[1] = 14;
-			  insn->bits = (0x92 << 24); /* Set opcode.  */
+			  insn->bits = 0x92u << 24; /* Set opcode.  */
 			}
 		    }
 		}

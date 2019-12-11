@@ -1777,8 +1777,8 @@ static char *
 parse_fexp (char *s, expressionS *e, unsigned char isdouble, uint64_t *dbnum)
 {
   int length;                       /* Number of chars in an object.  */
-  register char const *err = NULL;  /* Error from scanning float literal.  */
-  char temp[8];
+  const char *err = NULL;           /* Error from scanning float literal.  */
+  unsigned char temp[8];
 
   /* input_line_pointer->1st char of a flonum (we hope!).  */
   input_line_pointer = s;
@@ -1788,9 +1788,9 @@ parse_fexp (char *s, expressionS *e, unsigned char isdouble, uint64_t *dbnum)
     input_line_pointer += 2;
 
   if (isdouble)
-    err = md_atof ('d', temp, &length);
+    err = md_atof ('d', (char *) temp, &length);
   else
-    err = md_atof ('f', temp, &length);
+    err = md_atof ('f', (char *) temp, &length);
   know (length <= 8);
   know (err != NULL || length > 0);
 
@@ -1818,41 +1818,42 @@ parse_fexp (char *s, expressionS *e, unsigned char isdouble, uint64_t *dbnum)
     {
       uint32_t fnum;
       if (target_big_endian)
-	fnum = (((temp[0] << 24) & 0xffffffff)
-		| ((temp[1] << 16) & 0xffffff)
-		| ((temp[2] << 8) & 0xffff)
-		| (temp[3] & 0xff));
+	fnum = (((uint32_t) temp[0] << 24)
+		| (temp[1] << 16)
+		| (temp[2] << 8)
+		| temp[3]);
       else
-	fnum = (((temp[3] << 24) & 0xffffffff)
-			   | ((temp[2] << 16) & 0xffffff)
-			   | ((temp[1] << 8) & 0xffff)
-			   | (temp[0] & 0xff));
-      e->X_add_number = fnum;    }
+	fnum = (((uint32_t) temp[3] << 24)
+		| (temp[2] << 16)
+		| (temp[1] << 8)
+		| temp[0]);
+      e->X_add_number = fnum;
+    }
   else
     {
       if (target_big_endian)
 	{
-	  *dbnum = (((temp[0] << 24) & 0xffffffff)
-		    | ((temp[1] << 16) & 0xffffff)
-		    | ((temp[2] << 8) & 0xffff)
-		    | (temp[3] & 0xff));
+	  *dbnum = (((uint32_t) temp[0] << 24)
+		    | (temp[1] << 16)
+		    | (temp[2] << 8)
+		    | temp[3]);
 	  *dbnum <<= 32;
-	  *dbnum |= (((temp[4] << 24) & 0xffffffff)
-		     | ((temp[5] << 16) & 0xffffff)
-		     | ((temp[6] << 8) & 0xffff)
-		     | (temp[7] & 0xff));
+	  *dbnum |= (((uint32_t) temp[4] << 24)
+		     | (temp[5] << 16)
+		     | (temp[6] << 8)
+		     | temp[7]);
 	}
       else
 	{
-	  *dbnum = (((temp[7] << 24) & 0xffffffff)
-		    | ((temp[6] << 16) & 0xffffff)
-		    | ((temp[5] << 8) & 0xffff)
-		    | (temp[4] & 0xff));
+	  *dbnum = (((uint32_t) temp[7] << 24)
+		    | (temp[6] << 16)
+		    | (temp[5] << 8)
+		    | temp[4]);
 	  *dbnum <<= 32;
-	  *dbnum |= (((temp[3] << 24) & 0xffffffff)
-		     | ((temp[2] << 16) & 0xffffff)
-		     | ((temp[1] << 8) & 0xffff)
-		     | (temp[0] & 0xff));
+	  *dbnum |= (((uint32_t) temp[3] << 24)
+		     | (temp[2] << 16)
+		     | (temp[1] << 8)
+		     | temp[0]);
       }
     }
   return input_line_pointer;

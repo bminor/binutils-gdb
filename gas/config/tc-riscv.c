@@ -1043,9 +1043,9 @@ static void
 load_const (int reg, expressionS *ep)
 {
   int shift = RISCV_IMM_BITS;
-  bfd_vma upper_imm;
+  bfd_vma upper_imm, sign = (bfd_vma) 1 << (RISCV_IMM_BITS - 1);
   expressionS upper = *ep, lower = *ep;
-  lower.X_add_number = (int32_t) ep->X_add_number << (32-shift) >> (32-shift);
+  lower.X_add_number = ((ep->X_add_number & (sign + sign - 1)) ^ sign) - sign;
   upper.X_add_number -= lower.X_add_number;
 
   if (ep->X_op != O_constant)

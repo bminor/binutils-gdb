@@ -1,5 +1,22 @@
 2019-12-12  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-aarch64.c (get_aarch64_insn): Avoid signed overflow.
+	* config/tc-metag.c (parse_dalu): Likewise.
+	* config/tc-tic4x.c (md_pcrel_from): Likewise.
+	* config/tc-tic6x.c (tic6x_output_unwinding): Likewise.
+	* config/tc-csky.c (parse_fexp): Use an unsigned char temp buffer.
+	Don't use register keyword.  Avoid signed overflow and remove now
+	unneccesary char masks.  Formatting.
+	* config/tc-ia64.c (operand_match): Don't use shifts to sign extend.
+	* config/tc-mep.c (mep_apply_fix): Likewise.
+	* config/tc-pru.c (md_apply_fix): Likewise.
+	* config/tc-riscv.c (load_const): Likewise.
+	* config/tc-nios2.c (md_apply_fix): Likewise.  Don't potentially
+	truncate fixup before right shift.  Tidy BFD_RELOC_NIOS2_HIADJ16
+	calculation.
+
+2019-12-12  Alan Modra  <amodra@gmail.com>
+
 	* config/obj-evax.c (crc32, encode_32, encode_16, decode_16):
 	Remove unnecessary prototypes.
 	(number_of_codings): Delete, use ARRAY_SIZE instead throughout.

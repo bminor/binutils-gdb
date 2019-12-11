@@ -1790,7 +1790,7 @@ mep_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     switch (fixP->fx_cgen.opinfo)
       {
       case BFD_RELOC_MEP_LOW16:
-	*valP = ((long)(*valP & 0xffff)) << 16 >> 16;
+	*valP = ((*valP & 0xffff) ^ 0x8000) - 0x8000;
 	break;
       case BFD_RELOC_MEP_HI16U:
 	*valP >>= 16;

@@ -5839,9 +5839,8 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
-	      && ((val & ((bfd_vma) 1 << 31)) != 0))
-	    val = ((val << 32) >> 32);
+	  if ((val & (~(bfd_vma) 0 << 32)) == 0)
+	    val = (val ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 
 	  /* Check for 0x100000000.  This is valid because
 	     0x100000000-1 is the same as ((uint32_t) -1).  */
@@ -5879,9 +5878,8 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
-	      && ((val & ((bfd_vma) 1 << 31)) != 0))
-	    val = ((val << 32) >> 32);
+	  if ((val & (~(bfd_vma) 0 << 32)) == 0)
+	    val = (val ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 	}
       else
 	val = e->X_add_number;

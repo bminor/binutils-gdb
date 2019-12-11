@@ -2937,7 +2937,7 @@ md_pcrel_from (fixS *fixP)
   unsigned int op;
 
   buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
-  op = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
+  op = ((unsigned) buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
   return ((fixP->fx_where + fixP->fx_frag->fr_address) >> 2) +
     tic4x_pc_offset (op);

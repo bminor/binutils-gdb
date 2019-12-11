@@ -5060,7 +5060,7 @@ tic6x_output_unwinding (bfd_boolean need_extab)
       if (unwind->personality_index == -1)
 	{
 	  tmp = md_chars_to_number (unwind->frag_start + 4, 4);
-	  tmp |= ((unwind->data_bytes - 8) >> 2) << 24;
+	  tmp |= (valueT) ((unwind->data_bytes - 8) >> 2) << 24;
 	  md_number_to_chars (unwind->frag_start + 4, tmp, 4);
 	}
       else if (unwind->personality_index == 1 || unwind->personality_index == 2)

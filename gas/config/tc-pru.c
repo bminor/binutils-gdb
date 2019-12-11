@@ -642,7 +642,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   unsigned char *where;
   valueT value = *valP;
-  long n;
 
   /* Assert that the fixup is one we can handle.  */
   gas_assert (fixP != NULL && valP != NULL
@@ -801,11 +800,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    pru_diagnose_overflow (fixup, howto, fixP, insn);
 
 	  /* Apply the right shift.  */
-	  fixup = ((offsetT)fixup) >> howto->rightshift;
+	  fixup = (offsetT) fixup >> howto->rightshift;
 
 	  /* Truncate the fixup to right size.  */
-	  n = sizeof (fixup) * 8 - howto->bitsize;
-	  fixup = (fixup << n) >> n;
+	  if (howto->bitsize == 0)
+	    fixup = 0;
+	  else
+	    fixup &= ((valueT) 2 << (howto->bitsize - 1)) - 1;
 
 	  /* Fix up the instruction.  Non-contiguous bitfields need
 	     special handling.  */
