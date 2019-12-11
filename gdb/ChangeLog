@@ -1,3 +1,9 @@
+2019-12-12  Luis Machado  <luis.machado@linaro.org>
+
+	* gdbsupport/safe-strerror.c: Don't include diagnostics.h.
+	(select_strerror_r): Use ATTRIBUTE_UNUSED instead of the diagnostics
+	macros.
+
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-win.c (tui_set_win_height_command): Call

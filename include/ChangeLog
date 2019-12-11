@@ -1,3 +1,8 @@
+2019-12-12  Luis Machado  <luis.machado@linaro.org>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_UNUSED_FUNCTION). Remove
+	definitions.
+
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
 	* opcode/mmix.h (PUSHGO_INSN_BYTE): Make unsigned.

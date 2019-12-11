@@ -53,8 +53,6 @@
   DIAGNOSTIC_IGNORE ("-Wdeprecated-declarations")
 # define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER \
   DIAGNOSTIC_IGNORE ("-Wdeprecated-register")
-# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
-  DIAGNOSTIC_IGNORE ("-Wunused-function")
 # if __has_warning ("-Wenum-compare-switch")
 #  define DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES \
    DIAGNOSTIC_IGNORE ("-Wenum-compare-switch")
@@ -64,9 +62,6 @@
   DIAGNOSTIC_IGNORE ("-Wformat-nonliteral")
 
 #elif defined (__GNUC__) /* GCC */
-
-# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
-  DIAGNOSTIC_IGNORE ("-Wunused-function")
 
 # define DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION \
   DIAGNOSTIC_IGNORE ("-Wstringop-truncation")
@@ -86,10 +81,6 @@
 
 #ifndef DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
 # define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
-#endif
-
-#ifndef DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
-# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
 #endif
 
 #ifndef DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
