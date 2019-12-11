@@ -148,7 +148,7 @@ enum hppa_reloc_expr_type_alt
 #define HPPA_R_ARG_RELOC(a)	\
   (((a) >> 22) & 0x3ff)
 #define HPPA_R_CONSTANT(a)	\
-  ((((bfd_signed_vma)(a)) << (BFD_ARCH_SIZE-22)) >> (BFD_ARCH_SIZE-22))
+  ((((bfd_signed_vma) (a) & 0x3fffff) ^ 0x200000) - 0x200000)
 #define HPPA_R_ADDEND(r, c)	\
   (((r) << 22) + ((c) & 0x3fffff))
 

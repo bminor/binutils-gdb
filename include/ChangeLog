@@ -1,5 +1,11 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* opcode/mmix.h (PUSHGO_INSN_BYTE): Make unsigned.
+	(GO_INSN_BYTE, SETL_INSN_BYTE, INCML_INSN_BYTE, INCMH_INSN_BYTE),
+	(INCH_INSN_BYTE, SWYM_INSN_BYTE, JMP_INSN_BYTE): Likewise.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* dis-asm.h (INSN_HAS_RELOC, DISASSEMBLE_DATA),
 	(USER_SPECIFIED_MACHINE_TYPE, WIDE_OUTPUT): Make unsigned.
 	* opcode/tic80.h (TIC80_OPERAND_*): Likewise.

@@ -1,5 +1,18 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* elf32-rx.c (elf32_rx_relax_section): Avoid signed overflow.
+	* libaout.h (N_SET_INFO, N_SET_FLAGS): Likewise.
+	* netbsd.h (write_object_contents): Likewise.
+	* elf32-arm.c (bfd_elf32_arm_vfp11_erratum_scan): Likewise.
+	* libhppa.h (HPPA_R_CONSTANT): Don't signed extend with shifts.
+	(stm32l4xx_create_replacing_stub_vldm): Don't truncate high bits
+	with shifts.
+	* elf32-nds32.h (R_NDS32_RELAX_ENTRY_DISABLE_RELAX_FLAG): Define
+	using 1u shifted left.  Ditto for other macros.
+	* mmo.c (LOP): Make unsigned.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* libbfd.c (bfd_get_8): Return a bfd_vma.
 	(bfd_get_signed_8): Return a bfd_signed_vma.
 	* bfd-in2.h: Regenerate.

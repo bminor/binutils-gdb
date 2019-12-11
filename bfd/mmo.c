@@ -207,7 +207,7 @@ EXAMPLE
 #include "elf/mmix.h"
 #include "opcode/mmix.h"
 
-#define LOP 0x98
+#define LOP 0x98u
 #define LOP_QUOTE 0
 #define LOP_LOC 1
 #define LOP_SKIP 2

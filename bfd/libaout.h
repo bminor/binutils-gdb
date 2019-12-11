@@ -309,7 +309,7 @@ enum machine_type
 # define N_SET_INFO(execp, magic, type, flags) \
 ((execp)->a_info = ((magic) & 0xffff) \
  | (((int)(type) & 0xff) << 16) \
- | (((flags) & 0xff) << 24))
+ | (((flags) & 0xffu) << 24))
 #endif
 
 #ifndef N_SET_DYNAMIC
@@ -332,7 +332,7 @@ enum machine_type
 #ifndef N_SET_FLAGS
 # define N_SET_FLAGS(execp, flags) \
 ((execp)->a_info = \
- ((execp)->a_info & 0x00ffffff) | (((flags) & 0xff) << 24))
+ ((execp)->a_info & 0x00ffffff) | (((flags) & 0xffu) << 24))
 #endif
 
 typedef struct aout_symbol

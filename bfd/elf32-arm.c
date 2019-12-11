@@ -8506,14 +8506,14 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 	    {
 	      unsigned int next_i = i + 4;
 	      unsigned int insn = bfd_big_endian (abfd)
-		? (contents[i] << 24)
-		  | (contents[i + 1] << 16)
-		  | (contents[i + 2] << 8)
-		  | contents[i + 3]
-		: (contents[i + 3] << 24)
-		  | (contents[i + 2] << 16)
-		  | (contents[i + 1] << 8)
-		  | contents[i];
+		? (((unsigned) contents[i] << 24)
+		   | (contents[i + 1] << 16)
+		   | (contents[i + 2] << 8)
+		   | contents[i + 3])
+		: (((unsigned) contents[i + 3] << 24)
+		   | (contents[i + 2] << 16)
+		   | (contents[i + 1] << 8)
+		   | contents[i]);
 	      unsigned int writemask = 0;
 	      enum bfd_arm_vfp11_pipe vpipe;
 
@@ -19356,7 +19356,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
 				      const bfd_byte *const initial_insn_addr,
 				      bfd_byte *const base_stub_contents)
 {
-  int num_words = ((unsigned int) initial_insn << 24) >> 24;
+  int num_words = initial_insn & 0xff;
   bfd_byte *current_stub_contents = base_stub_contents;
 
   BFD_ASSERT (is_thumb2_vldm (initial_insn));

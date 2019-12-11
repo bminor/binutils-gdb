@@ -2932,9 +2932,9 @@ elf32_rx_relax_section (bfd *		       abfd,
 		  break;
 		case 0:
 #if RX_OPCODE_BIG_ENDIAN
-		  imm_val = (ip[0] << 24) | (ip[1] << 16) | (ip[2] << 8) | ip[3];
+		  imm_val = ((unsigned) ip[0] << 24) | (ip[1] << 16) | (ip[2] << 8) | ip[3];
 #else
-		  imm_val = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+		  imm_val = ((unsigned) ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
 #endif
 		  break;
 		}
