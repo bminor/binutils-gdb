@@ -1,3 +1,8 @@
+2019-12-11  Tom Tromey  <tromey@adacore.com>
+
+	* fbsd-tdep.c (fbsd_core_info_proc_status): Cast result of
+	bfd_get_signed_8.
+
 2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Document -raw-values option and the related setting commands.

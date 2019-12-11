@@ -1433,7 +1433,7 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
 			   sec, value);
   printf_filtered ("stime, children: %s.%06d\n", plongest (sec), (int) value);
   printf_filtered ("'nice' value: %d\n",
-		   bfd_get_signed_8 (core_bfd, descdata + kp->ki_nice));
+		   (int) bfd_get_signed_8 (core_bfd, descdata + kp->ki_nice));
   fbsd_core_fetch_timeval (gdbarch, descdata + kp->ki_start, sec, value);
   printf_filtered ("Start time: %s.%06d\n", plongest (sec), (int) value);
   printf_filtered ("Virtual memory size: %s kB\n",
