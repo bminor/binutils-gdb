@@ -327,8 +327,8 @@ bit_copy (bfd_byte *buffer, int offset, int count, char *to)
 static int
 sign_extend (unsigned int value, unsigned int bits)
 {
-  unsigned int sign = 1u << bits;
-  return ((value & (sign - 1)) ^ sign) - sign;
+  unsigned int sign = 1u << (bits - 1);
+  return ((value & (sign + sign - 1)) ^ sign) - sign;
 }
 
 static void

@@ -1,5 +1,9 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* ns32k-dis.c (sign_extend): Correct last patch.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* vax-dis.c (NEXTLONG): Avoid signed overflow.
 
 2019-12-11  Alan Modra  <amodra@gmail.com>
