@@ -1,3 +1,7 @@
+2019-12-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.texinfo (Writing JIT Debug Info Readers): Fix typo.
+
 2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Command Options): Use -p and -pretty in the example,
