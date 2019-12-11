@@ -154,6 +154,7 @@ static int pic_code	     = FALSE;
 static int fix_v4bx	     = FALSE;
 /* Warn on using deprecated features.  */
 static int warn_on_deprecated = TRUE;
+static int warn_on_restrict_it = FALSE;
 
 /* Understand CodeComposer Studio assembly syntax.  */
 bfd_boolean codecomposer_syntax = FALSE;
@@ -22788,6 +22789,7 @@ it_fsm_post_encode (void)
     handle_pred_state ();
 
   if (now_pred.insn_cond
+      && warn_on_restrict_it
       && !now_pred.warn_deprecated
       && warn_on_deprecated
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8)
@@ -30529,6 +30531,11 @@ struct arm_option_table arm_opts[] =
   {"mwarn-deprecated", NULL, &warn_on_deprecated, 1, NULL},
   {"mno-warn-deprecated", N_("do not warn on use of deprecated feature"),
    &warn_on_deprecated, 0, NULL},
+
+  {"mwarn-restrict-it", N_("warn about performance deprecated IT instructions"
+   " in ARMv8-A and ARMv8-R"), &warn_on_restrict_it, 1, NULL},
+  {"mno-warn-restrict-it", NULL, &warn_on_restrict_it, 0, NULL},
+
   {"mwarn-syms", N_("warn about symbols that match instruction names [default]"), (int *) (& flag_warn_syms), TRUE, NULL},
   {"mno-warn-syms", N_("disable warnings about symobls that match instructions"), (int *) (& flag_warn_syms), FALSE, NULL},
   {NULL, NULL, NULL, 0, NULL}

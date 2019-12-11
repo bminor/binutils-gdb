@@ -1,3 +1,17 @@
+2019-12-11  Wilco Dijkstra  <wdijkstr@arm.com>
+
+	* config/tc-arm.c (warn_on_restrict_it): Add new variable.
+	(it_fsm_post_encode): Check warn_on_restrict_it.
+	(arm_option_table): Add -mwarn-restrict-it/-mno-warn-restrict-it.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.d: Add -mwarn-restrict-it.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad-ext.d: Likewise.
+	* testsuite/gas/arm/armv8-a-bad.d: Likewise.
+	* testsuite/gas/arm/armv8-a-it-bad.d: Likewise.
+	* testsuite/gas/arm/armv8-r-bad.d: Likewise.
+	* testsuite/gas/arm/armv8-r-it-bad.d: Likewise.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.d: Likewise.
+	* testsuite/gas/arm/udf.d: Likewise.
+
 2018-12-11  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (md_assemble): Extend SSE check conditional.
