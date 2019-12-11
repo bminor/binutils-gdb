@@ -1,5 +1,11 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* libbfd.c (bfd_get_8): Return a bfd_vma.
+	(bfd_get_signed_8): Return a bfd_signed_vma.
+	* bfd-in2.h: Regenerate.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* xtensa-modules.c (Field_* functions): Don't mask using shifts.
 	(Operand_soffsetx4_decode, Operand_simm4_decode),
 	(Operand_simm8_decode, Operand_simm8x256_decode),

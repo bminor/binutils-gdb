@@ -1680,8 +1680,10 @@ dump_dumpx_core (bfd *abfd, struct external_core_dumpx *hdr)
 {
   if (options[OPT_FILE_HEADER].selected)
     {
-      printf ("  signal:     %u\n", bfd_h_get_8 (abfd, hdr->c_signo));
-      printf ("  flags:      0x%02x\n", bfd_h_get_8 (abfd, hdr->c_flag));
+      printf ("  signal:     %u\n",
+	      (unsigned) bfd_h_get_8 (abfd, hdr->c_signo));
+      printf ("  flags:      0x%02x\n",
+	      (unsigned) bfd_h_get_8 (abfd, hdr->c_flag));
       printf ("  entries:    %u\n",
 	      (unsigned) bfd_h_get_16 (abfd, hdr->c_entries));
 #ifdef BFD64
