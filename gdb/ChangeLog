@@ -1,5 +1,9 @@
 2019-12-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 9.0.90.
+
+2019-12-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Change "Changes since GDB 8.3" into "Changes in GDB 9".
 
 2019-12-11  Joel Brobecker  <brobecker@adacore.com>
