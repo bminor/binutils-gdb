@@ -1092,7 +1092,7 @@ epiphany_cgen_extract_operand (CGEN_CPU_DESC cd,
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 8, 32, total_length, pc, & fields->f_disp8);
         if (length <= 0) break;
 {
-  FLD (f_sdisp11) = ((SI) (((((((FLD (f_disp8)) << (3))) | (FLD (f_disp3)))) << (21))) >> (21));
+  FLD (f_sdisp11) = ((((((((((FLD (f_disp8)) << (3))) | (FLD (f_disp3)))) & (2047))) ^ (1024))) - (1024));
 }
       }
       break;

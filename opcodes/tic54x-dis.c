@@ -394,8 +394,7 @@ print_instruction (disassemble_info *info,
             break;
           }
         case OP_k5:
-          sprintf (operand[i], "#%d",
-                   (int) (((signed char) opcode & 0x1F) << 3) >> 3);
+          sprintf (operand[i], "#%d", ((opcode & 0x1F) ^ 0x10) - 0x10);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_k8u:

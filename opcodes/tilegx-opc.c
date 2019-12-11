@@ -8102,8 +8102,8 @@ parse_insn_tilegx (tilegx_bundle_bits bits,
 	  if (op->is_signed)
 	    {
 	      /* Sign-extend the operand.  */
-	      int shift = (int)((sizeof(int) * 8) - op->num_bits);
-	      raw_opval = (raw_opval << shift) >> shift;
+	      unsigned int sign = 1u << (op->num_bits - 1);
+	      raw_opval = ((raw_opval & (sign + sign - 1)) ^ sign) - sign;
 	    }
 
 	  /* Adjust PC-relative scaled branch offsets.  */

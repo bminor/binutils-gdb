@@ -1,5 +1,19 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* arc-dis.c (BITS): Don't truncate high bits with shifts.
+	* nios2-dis.c (nios2_print_insn_arg): Don't sign extend with shifts.
+	* tic54x-dis.c (print_instruction): Likewise.
+	* tilegx-opc.c (parse_insn_tilegx): Likewise.
+	* tilepro-opc.c (parse_insn_tilepro): Likewise.
+	* visium-dis.c (disassem_class0): Likewise.
+	* pdp11-dis.c (sign_extend): Likewise.
+	(SIGN_BITS): Delete.
+	* epiphany-ibld.c: Regenerate.
+	* lm32-ibld.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* ns32k-dis.c (sign_extend): Correct last patch.
 
 2019-12-11  Alan Modra  <amodra@gmail.com>

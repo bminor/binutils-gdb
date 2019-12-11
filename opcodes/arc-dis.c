@@ -137,8 +137,7 @@ static bfd_boolean print_hex = FALSE;
   (info->endian == BFD_ENDIAN_LITTLE ? bfd_getm32 (bfd_getl32 (buf))	\
    : bfd_getb32 (buf))
 
-#define BITS(word,s,e)  (((word) << (sizeof (word) * 8 - 1 - e)) >>	\
-			 (s + (sizeof (word) * 8 - 1 - e)))
+#define BITS(word,s,e)  (((word) >> (s)) & ((1ull << ((e) - (s)) << 1) - 1))
 #define OPCODE_32BIT_INSN(word)	(BITS ((word), 27, 31))
 
 /* Functions implementation.  */

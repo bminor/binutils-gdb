@@ -1,5 +1,11 @@
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
+	* epiphany.cpu (f-sdisp11): Don't sign extend with shifts.
+	* lm32.cpu (f-branch, f-vall): Likewise.
+	* m32.cpu (f-lab-8-16): Likewise.
+
+2019-12-11  Alan Modra  <amodra@gmail.com>
+
 	* epiphany.cpu (f-simm8, f-simm24): Use multiply rather than
 	shift left to avoid UB on left shift of negative values.
 

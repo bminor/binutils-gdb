@@ -94,7 +94,7 @@ disassem_class0 (disassemble_info *info, unsigned int ins)
       /* BRR instruction.  */
       {
 	unsigned cbf = (ins >> 27) & 0x000f;
-	int displacement = ((int) (ins << 16)) >> 16;
+	int displacement = ((ins & 0xffff) ^ 0x8000) - 0x8000;
 
 	if (ins == 0)
 	  (*info->fprintf_func) (info->stream, "nop");

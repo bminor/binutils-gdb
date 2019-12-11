@@ -1489,7 +1489,7 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_LAB_8_16 :
       {
         long value = fields->f_lab_8_16;
-        value = ((((((((value) - (((pc) + (1))))) & (255))) << (8))) | (((USI) (((((value) - (((pc) + (1))))) & (65535))) >> (8))));
+        value = ((((((((value) - (((pc) + (1))))) & (255))) << (8))) | (((USI) (((((value) - (((pc) + (1))))) & (65280))) >> (8))));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGN_OPT)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 8, 16, 32, total_length, buffer);
       }
       break;
@@ -2654,7 +2654,7 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGN_OPT)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 8, 16, 32, total_length, pc, & value);
-        value = ((((((USI) (((value) & (65535))) >> (8))) | (((SI) (((((value) & (255))) << (24))) >> (16))))) + (((pc) + (1))));
+        value = ((((((((((USI) (((value) & (65280))) >> (8))) | (((((value) & (255))) << (8))))) ^ (32768))) - (32768))) + (((pc) + (1))));
         fields->f_lab_8_16 = value;
       }
       break;

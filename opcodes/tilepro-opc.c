@@ -10220,8 +10220,8 @@ parse_insn_tilepro (tilepro_bundle_bits bits,
 	  if (op->is_signed)
 	    {
 	      /* Sign-extend the operand.  */
-	      int shift = (int)((sizeof(int) * 8) - op->num_bits);
-	      opval = (opval << shift) >> shift;
+	      unsigned int sign = 1u << (op->num_bits - 1);
+	      opval = ((opval & (sign + sign - 1)) ^ sign) - sign;
 	    }
 
 	  /* Adjust PC-relative scaled branch offsets.  */
