@@ -460,6 +460,7 @@ run_dump_test "pr24721"
 run_dump_test "pr24721-x32"
 run_dump_test "pr24905"
 run_dump_test "pr24905-x32"
+run_dump_test "align-branch-1"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

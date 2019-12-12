@@ -498,6 +498,24 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "optimize-6a" "-I${srcdir}/$subdir -march=+noavx -al"
     run_dump_test "optimize-6b"
     run_list_test "optimize-7" "-I${srcdir}/$subdir -march=+noavx2 -al"
+    run_dump_test "align-branch-1a"
+    run_dump_test "align-branch-1b"
+    run_dump_test "align-branch-1c"
+    run_dump_test "align-branch-1d"
+    run_dump_test "align-branch-1e"
+    run_dump_test "align-branch-1f"
+    run_dump_test "align-branch-1g"
+    run_dump_test "align-branch-1h"
+    run_dump_test "align-branch-1i"
+    run_dump_test "align-branch-2a"
+    run_dump_test "align-branch-2b"
+    run_dump_test "align-branch-2c"
+    run_dump_test "align-branch-4a"
+    run_dump_test "align-branch-4b"
+    run_dump_test "align-branch-5"
+    run_dump_test "align-branch-6"
+    run_dump_test "align-branch-7"
+    run_dump_test "align-branch-8"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -572,6 +590,10 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "evex-no-scale-32"
 	run_dump_test "property-1"
 	run_dump_test "property-2"
+
+	if {[istarget "*-*-linux*"]} then {
+	    run_dump_test "align-branch-3"
+	}
 
 	if { [gas_64_check] } then {
 	    run_dump_test "att-regs"
@@ -1032,6 +1054,24 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_list_test "x86-64-optimize-7a" "-I${srcdir}/$subdir -march=+noavx -al"
     run_dump_test "x86-64-optimize-7b"
     run_list_test "x86-64-optimize-8" "-I${srcdir}/$subdir -march=+noavx2 -al"
+    run_dump_test "x86-64-align-branch-1a"
+    run_dump_test "x86-64-align-branch-1b"
+    run_dump_test "x86-64-align-branch-1c"
+    run_dump_test "x86-64-align-branch-1d"
+    run_dump_test "x86-64-align-branch-1e"
+    run_dump_test "x86-64-align-branch-1f"
+    run_dump_test "x86-64-align-branch-1g"
+    run_dump_test "x86-64-align-branch-1h"
+    run_dump_test "x86-64-align-branch-1i"
+    run_dump_test "x86-64-align-branch-2a"
+    run_dump_test "x86-64-align-branch-2b"
+    run_dump_test "x86-64-align-branch-2c"
+    run_dump_test "x86-64-align-branch-4a"
+    run_dump_test "x86-64-align-branch-4b"
+    run_dump_test "x86-64-align-branch-5"
+    run_dump_test "x86-64-align-branch-6"
+    run_dump_test "x86-64-align-branch-7"
+    run_dump_test "x86-64-align-branch-8"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
@@ -1096,6 +1136,11 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "evex-no-scale-64"
 	run_dump_test "x86-64-property-1"
 	run_dump_test "x86-64-property-2"
+
+	if {[istarget "*-*-linux*"]} then {
+	    run_dump_test "x86-64-align-branch-3"
+	}
+
     }
 
     set ASFLAGS "$old_ASFLAGS"

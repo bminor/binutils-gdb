@@ -1,3 +1,12 @@
+2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/align-branch-1.d: New file.
+	* testsuite/ld-i386/align-branch-1.s: Likewise.
+	* testsuite/ld-x86-64/align-branch-1.d: Likewise.
+	* testsuite/ld-x86-64/align-branch-1.3: Likewise.
+	* testsuite/ld-i386/i386.exp: Run the new test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2019-12-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/eh4.d: Match optional padding DW_CFA_nop in FDEs.
