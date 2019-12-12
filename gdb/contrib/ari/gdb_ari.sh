@@ -587,8 +587,6 @@ Do not use strerror(), instead use safe_strerror()"
 BEGIN { doc["long long"] = "\
 Do not use `long long'\'', instead use LONGEST"
     category["long long"] = ari_code
-    # defs.h needs two such patterns for LONGEST and ULONGEST definitions
-    fix("long long", "gdb/defs.h", 2)
 }
 /(^|[^_[:alnum:]])long[[:space:]]+long([^_[:alnum:]]|$)/ {
     fail("long long")
