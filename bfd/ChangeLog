@@ -1,3 +1,8 @@
+2019-12-12  Alan Modra  <amodra@gmail.com>
+
+	* libbfd.c (bfd_get): Don't cast result of bfd_get_8.
+	* bfd-in2.h: Regenerate.
+
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
 	* elf32-rx.c (elf32_rx_relax_section): Avoid signed overflow.
