@@ -1,5 +1,16 @@
 2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/25274
+	* config/tc-i386.c (optimize_encoding): Also check R12-R15
+	registers for "test $imm7, %r64/%r32/%r16 -> test $imm7, %r8"
+	optimization.
+	* testsuite/gas/i386/x86-64-optimize-3.s: Add tests for test
+	with r12.
+	* testsuite/gas/i386/x86-64-optimize-3.d: Updated.
+	* testsuite/gas/i386/x86-64-optimize-3b.d: Likewise.
+
+2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/i386/align-branch-1.s: New file.
 	* testsuite/gas/i386/align-branch-1a.d: Likewise.
 	* testsuite/gas/i386/align-branch-1b.d: Likewise.

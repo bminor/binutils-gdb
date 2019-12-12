@@ -4008,10 +4008,9 @@ optimize_encoding (void)
 	  i.types[1].bitfield.byte = 1;
 	  /* Ignore the suffix.  */
 	  i.suffix = 0;
-	  if (base_regnum >= 4
-	      && !(i.op[1].regs->reg_flags & RegRex))
+	  if (base_regnum >= 4)
 	    {
-	      /* Handle SP, BP, SI and DI registers.  */
+	      /* Handle SP, BP, SI, DI and R12-R15 registers.  */
 	      if (i.types[1].bitfield.word)
 		j = 16;
 	      else if (i.types[1].bitfield.dword)

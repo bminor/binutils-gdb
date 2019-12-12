@@ -19,6 +19,10 @@ _start:
 	test	$0x7f, %r9d
 	test	$0x7f, %r9w
 	test	$0x7f, %r9b
+	test	$0x7f, %r12
+	test	$0x7f, %r12d
+	test	$0x7f, %r12w
+	test	$0x7f, %r12b
 
 	and	%cl, %cl
 	and	%dx, %dx
