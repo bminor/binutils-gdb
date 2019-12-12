@@ -808,7 +808,6 @@ static int
 jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
                             CORE_ADDR entry_addr)
 {
-  gdb_byte *gdb_mem;
   int status;
   jit_dbg_reader_data priv_data;
   struct gdb_reader_funcs *funcs;
@@ -831,12 +830,12 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
   if (!loaded_jit_reader)
     return 0;
 
-  gdb_mem = (gdb_byte *) xmalloc (code_entry->symfile_size);
+  gdb::byte_vector gdb_mem (code_entry->symfile_size);
 
   status = 1;
   try
     {
-      if (target_read_memory (code_entry->symfile_addr, gdb_mem,
+      if (target_read_memory (code_entry->symfile_addr, gdb_mem.data (),
 			      code_entry->symfile_size))
 	status = 0;
     }
@@ -848,12 +847,12 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
   if (status)
     {
       funcs = loaded_jit_reader->functions;
-      if (funcs->read (funcs, &callbacks, gdb_mem, code_entry->symfile_size)
+      if (funcs->read (funcs, &callbacks, gdb_mem.data (),
+		       code_entry->symfile_size)
           != GDB_SUCCESS)
         status = 0;
     }
 
-  xfree (gdb_mem);
   if (jit_debug && status == 0)
     fprintf_unfiltered (gdb_stdlog,
                         "Could not read symtab using the loaded JIT reader.\n");

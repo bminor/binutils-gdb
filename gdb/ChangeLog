@@ -1,3 +1,8 @@
+2019-12-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_reader_try_read_symtab): Replace xmalloc/xfree with
+	gdb::byte_vector.
+
 2019-12-12  Tom Tromey  <tromey@adacore.com>
 
 	* xml-support.c (xml_fetch_content_from_file): Don't call
