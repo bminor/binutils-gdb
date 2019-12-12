@@ -1,5 +1,11 @@
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/resize.exp: Fix regexp.
+	* gdb.tui/regs.exp: Fix regexps.
+	* gdb.tui/main.exp: Fix regexp.
+
+2019-12-11  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/resize.exp: Update.
 	* gdb.tui/empty.exp (layouts): Update.
 

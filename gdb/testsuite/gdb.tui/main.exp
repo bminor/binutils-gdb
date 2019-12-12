@@ -31,4 +31,4 @@ if {![Term::enter_tui]} {
 }
 
 Term::command "file [standard_output_file $testfile]"
-Term::check_contents "show main after file" ">|21 *return 0"
+Term::check_contents "show main after file" "\\|.*21 *return 0"

@@ -34,7 +34,7 @@ if {![Term::enter_tui]} {
     unsupported "TUI not supported"
 }
 
-Term::check_contents "source at startup" ">|21 *return 0"
+Term::check_contents "source at startup" "\\|.*21 *return 0"
 
 Term::command "layout regs"
 Term::check_box "register box" 0 0 80 7
@@ -42,4 +42,4 @@ Term::check_box "source box in regs layout" 0 6 80 9
 
 set text [Term::get_line 1]
 # Just check for any register window content at all.
-Term::check_contents "any register contents" "^|.*\[^ \].*|$"
+Term::check_contents "any register contents" "\\|.*\[^ \].*\\|"

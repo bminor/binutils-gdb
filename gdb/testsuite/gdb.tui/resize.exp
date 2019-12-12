@@ -34,7 +34,7 @@ if {![Term::enter_tui]} {
     unsupported "TUI not supported"
 }
 
-Term::check_contents "source at startup" ">|21 *return 0"
+Term::check_contents "source at startup" "\\|.*21 *return 0"
 
 Term::resize 40 90
 Term::check_box "source box after resize" 0 0 90 26
