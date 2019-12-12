@@ -1,3 +1,10 @@
+2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (md_generic_table_relax_frag): New.  Defined to
+	relax_frag if not defined.
+	(relax_segment): Call md_generic_table_relax_frag instead of
+	relax_frag.
+
 2019-12-12  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-aarch64.c (get_aarch64_insn): Avoid signed overflow.

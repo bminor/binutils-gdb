@@ -1210,6 +1210,11 @@ If you do not define @code{md_relax_frag}, you may define
 machine independent code knows how to use such a table to relax PC relative
 references.  See @file{tc-m68k.c} for an example.  @xref{Relaxation}.
 
+@item md_generic_table_relax_frag
+@cindex md_generic_table_relax_frag
+If defined, it is a C statement that is invoked, instead of
+the default implementation, to scan @code{TC_GENERIC_RELAX_TABLE}.
+
 @item md_prepare_relax_scan
 @cindex md_prepare_relax_scan
 If defined, it is a C statement that is invoked prior to scanning
