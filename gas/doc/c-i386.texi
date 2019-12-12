@@ -449,6 +449,17 @@ This option specifies the maximum number of prefixes on an instruction
 to align branches.  @var{NUM} should be between 0 and 5.  The default
 @var{NUM} is 5.
 
+@cindex @samp{-mbranches-within-32B-boundaries} option, i386
+@cindex @samp{-mbranches-within-32B-boundaries} option, x86-64
+@item -mbranches-within-32B-boundaries
+This option aligns conditional jumps, fused conditional jumps and
+unconditional jumps within 32 byte boundary with up to 5 segment prefixes
+on an instruction.  It is equivalent to
+@option{-malign-branch-boundary=32}
+@option{-malign-branch=jcc+fused+jmp}
+@option{-malign-branch-prefix-size=5}.
+The default doesn't align branches.
+
 @cindex @samp{-mx86-used-note=} option, i386
 @cindex @samp{-mx86-used-note=} option, x86-64
 @item -mx86-used-note=@var{no}

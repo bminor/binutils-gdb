@@ -12000,6 +12000,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MALIGN_BRANCH_BOUNDARY (OPTION_MD_BASE + 27)
 #define OPTION_MALIGN_BRANCH_PREFIX_SIZE (OPTION_MD_BASE + 28)
 #define OPTION_MALIGN_BRANCH (OPTION_MD_BASE + 29)
+#define OPTION_MBRANCHES_WITH_32B_BOUNDARIES (OPTION_MD_BASE + 30)
 
 struct option md_longopts[] =
 {
@@ -12038,6 +12039,7 @@ struct option md_longopts[] =
   {"malign-branch-boundary", required_argument, NULL, OPTION_MALIGN_BRANCH_BOUNDARY},
   {"malign-branch-prefix-size", required_argument, NULL, OPTION_MALIGN_BRANCH_PREFIX_SIZE},
   {"malign-branch", required_argument, NULL, OPTION_MALIGN_BRANCH},
+  {"mbranches-within-32B-boundaries", no_argument, NULL, OPTION_MBRANCHES_WITH_32B_BOUNDARIES},
   {"mamd64", no_argument, NULL, OPTION_MAMD64},
   {"mintel64", no_argument, NULL, OPTION_MINTEL64},
   {NULL, no_argument, NULL, 0}
@@ -12500,6 +12502,14 @@ md_parse_option (int c, const char *arg)
       free (saved);
       break;
 
+    case OPTION_MBRANCHES_WITH_32B_BOUNDARIES:
+      align_branch_power = 5;
+      align_branch_prefix_size = 5;
+      align_branch = (align_branch_jcc_bit
+		      | align_branch_fused_bit
+		      | align_branch_jmp_bit);
+      break;
+
     case OPTION_MAMD64:
       intel64 = 0;
       break;
@@ -12762,6 +12772,9 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -malign-branch-prefix-size=NUM (default: 5)\n\
                           align branches with NUM prefixes per instruction\n"));
+  fprintf (stream, _("\
+  -mbranches-within-32B-boundaries\n\
+                          align branches within 32 byte boundary\n"));
   fprintf (stream, _("\
   -mamd64                 accept only AMD64 ISA [default]\n"));
   fprintf (stream, _("\

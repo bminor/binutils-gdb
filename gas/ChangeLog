@@ -1,5 +1,12 @@
 2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (OPTION_MBRANCHES_WITH_32B_BOUNDARIES): New.
+	(md_longopts): Add -mbranches-within-32B-boundaries.
+	(md_parse_option): Handle -mbranches-within-32B-boundaries.
+	(md_show_usage): Add -mbranches-within-32B-boundaries.
+
+2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (_i386_insn): Add has_gotpc_tls_reloc.
 	(tls_get_addr): New.
 	(last_insn): New.
