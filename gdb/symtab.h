@@ -428,6 +428,10 @@ struct general_symbol_info
   enum language language () const
   { return m_language; }
 
+  /* Initializes the language dependent portion of a symbol
+     depending upon the language for the symbol.  */
+  void set_language (enum language language, struct obstack *obstack);
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -530,14 +534,6 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
   (((symbol)->section >= 0)				\
    ? (&(((objfile)->sections)[(symbol)->section]))	\
    : NULL)
-
-/* Initializes the language dependent portion of a symbol
-   depending upon the language for the symbol.  */
-#define SYMBOL_SET_LANGUAGE(symbol,language,obstack)	\
-  (symbol_set_language ((symbol), (language), (obstack)))
-extern void symbol_set_language (struct general_symbol_info *symbol,
-                                 enum language language,
-				 struct obstack *obstack);
 
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,

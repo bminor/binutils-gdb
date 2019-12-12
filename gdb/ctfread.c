@@ -379,7 +379,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
       struct symbol *sym = allocate_symbol (ccp->of);
       OBJSTAT (ccp->of, n_syms++);
 
-      SYMBOL_SET_LANGUAGE (sym, language_c, &ccp->of->objfile_obstack);
+      sym->set_language (language_c, &ccp->of->objfile_obstack);
       SYMBOL_SET_NAMES (sym, name, false, ccp->of);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -408,7 +408,7 @@ new_symbol (ctf_context_t *ccp, struct type *type, ctf_id_t tid)
       sym = allocate_symbol (objfile);
       OBJSTAT (objfile, n_syms++);
 
-      SYMBOL_SET_LANGUAGE (sym, language_c, &objfile->objfile_obstack);
+      sym->set_language (language_c, &objfile->objfile_obstack);
       SYMBOL_SET_NAMES (sym, name.get (), true, objfile);
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;

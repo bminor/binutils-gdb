@@ -1,5 +1,25 @@
 2019-12-15  Christian Biesinger  <cbiesinger@google.com>
 
+	* ada-exp.y (write_ambiguous_var): Update.
+	* coffread.c (process_coff_symbol): Update.
+	* ctfread.c (ctf_add_enum_member_cb): Update.
+	(new_symbol): Update.
+	* dwarf2read.c (fixup_go_packaging): Update.
+	(new_symbol): Update.
+	* language.c (language_alloc_type_symbol): Update.
+	* mdebugread.c (new_symbol): Update.
+	* minsyms.c (minimal_symbol_reader::record_full): Update.
+	* psymtab.c (add_psymbol_to_bcache): Update.
+	* stabsread.c (define_symbol): Update.
+	(read_enum_type): Update.
+	* symtab.c (symbol_set_language): Make this a member function...
+	(general_symbol_info::set_language): ... here.
+	* symtab.h (struct general_symbol_info) <set_language>: New function.
+	(SYMBOL_SET_LANGUAGE): Remove.
+	(symbol_set_language): Remove.
+
+2019-12-15  Christian Biesinger  <cbiesinger@google.com>
+
 	* ada-lang.c (ada_add_block_symbols): Update.
 	(ada_collect_symbol_completion_matches): Update.
 	* ax-gdb.c (gen_expr): Update.

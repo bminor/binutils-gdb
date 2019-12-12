@@ -1584,8 +1584,7 @@ add_psymbol_to_bcache (gdb::string_view name, bool copy_name,
   psymbol.ginfo.section = section;
   psymbol.domain = domain;
   psymbol.aclass = theclass;
-  symbol_set_language (&psymbol.ginfo, language,
-		       objfile->partial_symtabs->obstack ());
+  psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());
   symbol_set_names (&psymbol.ginfo, name, copy_name,
 		    objfile->per_bfd);
 

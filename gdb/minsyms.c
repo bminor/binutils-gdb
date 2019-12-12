@@ -1128,8 +1128,8 @@ minimal_symbol_reader::record_full (gdb::string_view name,
       m_msym_bunch = newobj;
     }
   msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
-  symbol_set_language (msymbol, language_auto,
-		       &m_objfile->per_bfd->storage_obstack);
+  msymbol->set_language (language_auto,
+			 &m_objfile->per_bfd->storage_obstack);
 
   if (copy_name)
     msymbol->name = obstack_strndup (&m_objfile->per_bfd->storage_obstack,

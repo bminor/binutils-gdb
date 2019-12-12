@@ -9952,7 +9952,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       struct symbol *sym;
 
       sym = allocate_symbol (objfile);
-      SYMBOL_SET_LANGUAGE (sym, language_go, &objfile->objfile_obstack);
+      sym->set_language (language_go, &objfile->objfile_obstack);
       SYMBOL_SET_NAMES (sym, saved_package_name, false, objfile);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
@@ -21782,7 +21782,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       OBJSTAT (objfile, n_syms++);
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
-      SYMBOL_SET_LANGUAGE (sym, cu->language, &objfile->objfile_obstack);
+      sym->set_language (cu->language, &objfile->objfile_obstack);
       linkagename = dwarf2_physname (name, die, cu);
       SYMBOL_SET_NAMES (sym, linkagename, false, objfile);
 

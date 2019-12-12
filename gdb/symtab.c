@@ -712,28 +712,26 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
    depending upon the language for the symbol.  */
 
 void
-symbol_set_language (struct general_symbol_info *gsymbol,
-                     enum language language,
-		     struct obstack *obstack)
+general_symbol_info::set_language (enum language language,
+				   struct obstack *obstack)
 {
-  gsymbol->m_language = language;
+  m_language = language;
   if (language == language_cplus
       || language == language_d
       || language == language_go
       || language == language_objc
       || language == language_fortran)
     {
-      symbol_set_demangled_name (gsymbol, NULL, obstack);
+      symbol_set_demangled_name (this, NULL, obstack);
     }
   else if (language == language_ada)
     {
-      gdb_assert (gsymbol->ada_mangled == 0);
-      gsymbol->language_specific.obstack = obstack;
+      gdb_assert (ada_mangled == 0);
+      language_specific.obstack = obstack;
     }
   else
     {
-      memset (&gsymbol->language_specific, 0,
-	      sizeof (gsymbol->language_specific));
+      memset (&language_specific, 0, sizeof (language_specific));
     }
 }
 

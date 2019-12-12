@@ -700,8 +700,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_LINE (sym) = 0;	/* unknown */
     }
 
-  SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
-		       &objfile->objfile_obstack);
+  sym->set_language (get_current_subfile ()->language,
+		     &objfile->objfile_obstack);
 
   if (is_cplus_marker (string[0]))
     {
@@ -3638,8 +3638,8 @@ read_enum_type (const char **pp, struct type *type,
 
       sym = allocate_symbol (objfile);
       sym->set_linkage_name (name);
-      SYMBOL_SET_LANGUAGE (sym, get_current_subfile ()->language,
-			   &objfile->objfile_obstack);
+      sym->set_language (get_current_subfile ()->language,
+			 &objfile->objfile_obstack);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE (sym) = n;
