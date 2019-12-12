@@ -423,6 +423,32 @@ R_X86_64_REX_GOTPCRELX, in 64-bit mode.
 relocations.  The default can be controlled by a configure option
 @option{--enable-x86-relax-relocations}.
 
+@cindex @samp{-malign-branch-boundary=} option, i386
+@cindex @samp{-malign-branch-boundary=} option, x86-64
+@item -malign-branch-boundary=@var{NUM}
+This option controls how the assembler should align branches with segment
+prefixes or NOP.  @var{NUM} must be a power of 2.  It should be 0 or
+no less than 16.  Branches will be aligned within @var{NUM} byte
+boundary.  @option{-malign-branch-boundary=0}, which is the default,
+doesn't align branches.
+
+@cindex @samp{-malign-branch=} option, i386
+@cindex @samp{-malign-branch=} option, x86-64
+@item -malign-branch=@var{TYPE}[+@var{TYPE}...]
+This option specifies types of branches to align. @var{TYPE} is
+combination of @samp{jcc}, which aligns conditional jumps,
+@samp{fused}, which aligns fused conditional jumps, @samp{jmp},
+which aligns unconditional jumps, @samp{call} which aligns calls,
+@samp{ret}, which aligns rets, @samp{indirect}, which aligns indirect
+jumps and calls.  The default is @option{-malign-branch=jcc+fused+jmp}.
+
+@cindex @samp{-malign-branch-prefix-size=} option, i386
+@cindex @samp{-malign-branch-prefix-size=} option, x86-64
+@item -malign-branch-prefix-size=@var{NUM}
+This option specifies the maximum number of prefixes on an instruction
+to align branches.  @var{NUM} should be between 0 and 5.  The default
+@var{NUM} is 5.
+
 @cindex @samp{-mx86-used-note=} option, i386
 @cindex @samp{-mx86-used-note=} option, x86-64
 @item -mx86-used-note=@var{no}

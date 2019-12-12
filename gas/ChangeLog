@@ -1,5 +1,65 @@
 2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (_i386_insn): Add has_gotpc_tls_reloc.
+	(tls_get_addr): New.
+	(last_insn): New.
+	(align_branch_power): New.
+	(align_branch_kind): New.
+	(align_branch_bit): New.
+	(align_branch): New.
+	(MAX_FUSED_JCC_PADDING_SIZE): New.
+	(align_branch_prefix_size): New.
+	(BRANCH_PADDING): New.
+	(BRANCH_PREFIX): New.
+	(FUSED_JCC_PADDING): New.
+	(i386_generate_nops): Support BRANCH_PADDING and FUSED_JCC_PADDING.
+	(md_begin): Abort if align_branch_prefix_size <
+	MAX_FUSED_JCC_PADDING_SIZE.
+	(md_assemble): Set last_insn.
+	(maybe_fused_with_jcc_p): New.
+	(add_fused_jcc_padding_frag_p): New.
+	(add_branch_prefix_frag_p): New.
+	(add_branch_padding_frag_p): New.
+	(output_insn): Generate a BRANCH_PADDING, FUSED_JCC_PADDING or
+	BRANCH_PREFIX frag and terminate each frag to align branches.
+	(output_disp): Set i.has_gotpc_tls_reloc to TRUE for GOTPC and
+	relaxable TLS relocations.
+	(output_imm): Likewise.
+	(i386_next_non_empty_frag): New.
+	(i386_next_jcc_frag): New.
+	(i386_classify_machine_dependent_frag): New.
+	(i386_branch_padding_size): New.
+	(i386_generic_table_relax_frag): New.
+	(md_estimate_size_before_relax): Handle COND_JUMP_PADDING,
+	FUSED_JCC_PADDING and COND_JUMP_PREFIX frags.
+	(md_convert_frag): Handle BRANCH_PADDING, BRANCH_PREFIX and
+	FUSED_JCC_PADDING frags.
+	(OPTION_MALIGN_BRANCH_BOUNDARY): New.
+	(OPTION_MALIGN_BRANCH_PREFIX_SIZE): New.
+	(OPTION_MALIGN_BRANCH): New.
+	(md_longopts): Add -malign-branch-boundary=,
+	-malign-branch-prefix-size= and -malign-branch=.
+	(md_parse_option): Handle -malign-branch-boundary=,
+	-malign-branch-prefix-size= and -malign-branch=.
+	(md_show_usage): Display -malign-branch-boundary=,
+	-malign-branch-prefix-size= and -malign-branch=.
+	(i386_target_format): Set tls_get_addr.
+	(i386_cons_align): New.
+	* config/tc-i386.h (i386_cons_align): New.
+	(md_cons_align): New.
+	(i386_generic_table_relax_frag): New.
+	(md_generic_table_relax_frag): New.
+	(i386_tc_frag_data): Add u, padding_address, length,
+	max_prefix_length, prefix_length, default_prefix, cmp_size,
+	classified and branch_type.
+	(TC_FRAG_INIT): Initialize u, padding_address, length,
+	max_prefix_length, prefix_length, default_prefix, cmp_size,
+	classified and branch_type.
+	* doc/c-i386.texi: Document -malign-branch-boundary=,
+	-malign-branch= and -malign-branch-prefix-size=.
+
+2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* write.c (md_generic_table_relax_frag): New.  Defined to
 	relax_frag if not defined.
 	(relax_segment): Call md_generic_table_relax_frag instead of
