@@ -619,21 +619,6 @@ Do not use NORETURN, use ATTRIBUTE_NORETURN instead"
 
 # General problems
 
-BEGIN { doc["multiple messages"] = "\
-Do not use multiple calls to warning or error, instead use a single call"
-    category["multiple messages"] = ari_gettext
-}
-FNR == 1 {
-    warning_fnr = -1
-}
-/(^|[^_[:alnum:]])(warning|error)[[:space:]]*\(/ {
-    if (FNR == warning_fnr + 1) {
-	fail("multiple messages")
-    } else {
-	warning_fnr = FNR
-    }
-}
-
 # Commented out, but left inside sources, just in case.
 # BEGIN { doc["inline"] = "\
 # Do not use the inline attribute; \

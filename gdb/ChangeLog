@@ -1,5 +1,10 @@
 2019-12-13  Tom Tromey  <tromey@adacore.com>
 
+	* contrib/ari/gdb_ari.sh: Remove check for multiple calls to
+	warning or error.
+
+2019-12-13  Tom Tromey  <tromey@adacore.com>
+
 	* contrib/ari/gdb_ari.sh: Remove call to "fix" for "long long".
 
 2019-12-13  Tom Tromey  <tromey@adacore.com>
