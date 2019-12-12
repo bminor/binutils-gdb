@@ -1,3 +1,16 @@
+2019-12-12  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-evax.c (crc32, encode_32, encode_16, decode_16):
+	Remove unnecessary prototypes.
+	(number_of_codings): Delete, use ARRAY_SIZE instead throughout.
+	(codings, decodings): Make arrays of unsigned char.
+	(crc32): Use unsigned variables.  Delete unnecessary mask.
+	(encode_32, encode_16): Return unsigned char*, and make static
+	buffer an unsigned char array.
+	(decode_16): Make arg an unsigned char*.  Remove useless casts.
+	(shorten_identifier): Use unsigned char crc_chars.
+	(is_truncated_identifier): Make ptr an unsigned char*.
+
 2019-12-11  Wilco Dijkstra  <wdijkstr@arm.com>
 
 	* config/tc-arm.c (warn_on_restrict_it): Add new variable.
