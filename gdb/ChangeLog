@@ -1,3 +1,8 @@
+2019-12-12  Tom Tromey  <tromey@adacore.com>
+
+	* gdbsupport/thread-pool.c (set_thread_name): Use
+	ATTRIBUTE_UNUSED.
+
 2019-12-12  Luis Machado  <luis.machado@linaro.org>
 
 	* gdbsupport/safe-strerror.c: Don't include diagnostics.h.

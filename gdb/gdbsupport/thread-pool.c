@@ -25,7 +25,6 @@
 #include "gdbsupport/alt-stack.h"
 #include "gdbsupport/block-signals.h"
 #include <algorithm>
-#include "diagnostics.h"
 
 /* On the off chance that we have the pthread library on a Windows
    host, but std::thread is not using it, avoid calling
@@ -40,26 +39,21 @@
 
 #include <pthread.h>
 
-DIAGNOSTIC_PUSH
-DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
-
 /* Handle platform discrepancies in pthread_setname_np: macOS uses a
    single-argument form, while Linux uses a two-argument form.  This
    wrapper handles the difference.  */
 
-static void
+ATTRIBUTE_UNUSED static void
 set_thread_name (int (*set_name) (pthread_t, const char *), const char *name)
 {
   set_name (pthread_self (), name);
 }
 
-static void
+ATTRIBUTE_UNUSED static void
 set_thread_name (void (*set_name) (const char *), const char *name)
 {
   set_name (name);
 }
-
-DIAGNOSTIC_POP
 
 #endif	/* USE_PTHREAD_SETNAME_NP */
 
