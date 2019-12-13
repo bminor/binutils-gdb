@@ -1,5 +1,15 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* readelf.c (dump_section_as_ctf): Support .ctf archives using
+	ctf_arc_bufopen.  Automatically load the .ctf member of such
+	archives as the parent of all other members, unless specifically
+	overridden via --ctf-parent.  Split out dumping code into...
+	(dump_ctf_archive_member): ... here, as in objdump, and call
+	it once per archive member.
+	(dump_ctf_indent_lines): Code style fix.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac [--enable-libctf]: New, default yes.
 	Set ENABLE_LIBCTF accordingly.
 	* Makefile.am [!ENABLE_LIBCTF]: Empty LIBCTF and LIBCTF_NOBFD.

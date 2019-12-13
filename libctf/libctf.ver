@@ -128,6 +128,7 @@ LIBCTF_1.0 {
 	ctf_arc_write;
 	ctf_arc_write_fd;
 	ctf_arc_open;
+	ctf_arc_bufopen;
 	ctf_arc_close;
 	ctf_arc_open_by_name;
 	ctf_arc_open_by_name_sections;

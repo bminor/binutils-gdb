@@ -1,5 +1,17 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_new_archive_internal): Declare.
+	(ctf_arc_bufopen): Remove.
+	(ctf_archive_internal) <ctfi_free_symsect>: New.
+	* ctf-archive.c (ctf_arc_close): Use it.
+	(ctf_arc_bufopen): Fuse into...
+	(ctf_new_archive_internal): ... this, moved across from...
+	* ctf-open-bfd.c: ... here.
+	(ctf_bfdopen_ctfsect): Use ctf_arc_bufopen.
+	* libctf.ver: Add it.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_forward): Intern in the right namespace.
 	(ctf_dtd_delete): Remove correspondingly.
 	(ctf_rollback): Likewise.

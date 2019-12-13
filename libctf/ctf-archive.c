@@ -343,21 +343,71 @@ search_modent_by_name (const void *key, const void *ent)
   return strcmp (k, &search_nametbl[le64toh (v->name_offset)]);
 }
 
-/* A trivial wrapper: open a CTF archive, from data in a buffer (which the
-   caller must preserve until ctf_arc_close() time).  Returns the archive, or
-   NULL and an error in *err (if not NULL).  */
-struct ctf_archive *
-ctf_arc_bufopen (const void *buf, size_t size _libctf_unused_, int *errp)
-{
-  struct ctf_archive *arc = (struct ctf_archive *) buf;
+/* Make a new struct ctf_archive_internal wrapper for a ctf_archive or a
+   ctf_file.  Closes ARC and/or FP on error.  Arrange to free the SYMSECT or
+   STRSECT, as needed, on close.  */
 
-  if (le64toh (arc->ctfa_magic) != CTFA_MAGIC)
+struct ctf_archive_internal *
+ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
+			  ctf_file_t *fp, const ctf_sect_t *symsect,
+			  const ctf_sect_t *strsect,
+			  int *errp)
+{
+  struct ctf_archive_internal *arci;
+
+  if ((arci = calloc (1, sizeof (struct ctf_archive_internal))) == NULL)
     {
-      if (errp)
-	*errp = ECTF_FMT;
-      return NULL;
+      if (is_archive)
+	ctf_arc_close_internal (arc);
+      else
+	ctf_file_close (fp);
+      return (ctf_set_open_errno (errp, errno));
     }
-  return arc;
+  arci->ctfi_is_archive = is_archive;
+  if (is_archive)
+    arci->ctfi_archive = arc;
+  else
+    arci->ctfi_file = fp;
+  if (symsect)
+     memcpy (&arci->ctfi_symsect, symsect, sizeof (struct ctf_sect));
+  if (strsect)
+     memcpy (&arci->ctfi_strsect, strsect, sizeof (struct ctf_sect));
+  arci->ctfi_free_symsect = 0;
+
+  return arci;
+}
+
+/* Open a CTF archive or dictionary from data in a buffer (which the caller must
+   preserve until ctf_arc_close() time).  Returns the archive, or NULL and an
+   error in *err (if not NULL).  */
+ctf_archive_t *
+ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
+		 const ctf_sect_t *strsect, int *errp)
+{
+  struct ctf_archive *arc = NULL;
+  int is_archive;
+  ctf_file_t *fp = NULL;
+
+  if (ctfsect->cts_size > sizeof (uint64_t) &&
+      ((*(uint64_t *) ctfsect->cts_data) == CTFA_MAGIC))
+    {
+      /* The archive is mmappable, so this operation is trivial.  */
+
+      is_archive = 1;
+      arc = (struct ctf_archive *) ctfsect->cts_data;
+    }
+  else
+    {
+      is_archive = 0;
+      if ((fp = ctf_bufopen (ctfsect, symsect, strsect, errp)) == NULL)
+	{
+	  ctf_dprintf ("ctf_internal_open(): cannot open CTF: %s\n",
+		       ctf_errmsg (*errp));
+	  return NULL;
+	}
+    }
+  return ctf_new_archive_internal (is_archive, arc, fp, symsect, strsect,
+				   errp);
 }
 
 /* Open a CTF archive.  Returns the archive, or NULL and an error in *err (if
@@ -436,8 +486,8 @@ ctf_arc_close (ctf_archive_t *arc)
     ctf_arc_close_internal (arc->ctfi_archive);
   else
     ctf_file_close (arc->ctfi_file);
-  free ((void *) arc->ctfi_symsect.cts_data);
-  /* Do not free the ctfi_strsect: it is bound to the bfd.  */
+  if (arc->ctfi_free_symsect)
+    free ((void *) arc->ctfi_symsect.cts_data);
   free (arc->ctfi_data);
   if (arc->ctfi_bfd_close)
     arc->ctfi_bfd_close (arc);

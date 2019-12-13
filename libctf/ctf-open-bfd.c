@@ -32,40 +32,6 @@
 
 #include "elf-bfd.h"
 
-/* Make a new struct ctf_archive_internal wrapper for a ctf_archive or a
-   ctf_file.  Closes ARC and/or FP on error.  Arrange to free the SYMSECT or
-   STRSECT, as needed, on close (though the STRSECT interior is bound to the bfd
-   * and is not actually freed by this machinery).  */
-
-static struct ctf_archive_internal *
-ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
-			  ctf_file_t *fp, const ctf_sect_t *symsect,
-			  const ctf_sect_t *strsect,
-			  int *errp)
-{
-  struct ctf_archive_internal *arci;
-
-  if ((arci = calloc (1, sizeof (struct ctf_archive_internal))) == NULL)
-    {
-      if (is_archive)
-	ctf_arc_close_internal (arc);
-      else
-	ctf_file_close (fp);
-      return (ctf_set_open_errno (errp, errno));
-    }
-  arci->ctfi_is_archive = is_archive;
-  if (is_archive)
-    arci->ctfi_archive = arc;
-  else
-    arci->ctfi_file = fp;
-  if (symsect)
-     memcpy (&arci->ctfi_symsect, symsect, sizeof (struct ctf_sect));
-  if (strsect)
-     memcpy (&arci->ctfi_strsect, strsect, sizeof (struct ctf_sect));
-
-  return arci;
-}
-
 /* Free the BFD bits of a CTF file on ctf_arc_close().  */
 
 static void
@@ -107,6 +73,7 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 
   if ((arc = ctf_bfdopen_ctfsect (abfd, &ctfsect, errp)) != NULL)
     {
+      /* This frees the cts_data later.  */
       arc->ctfi_data = (void *) ctfsect.cts_data;
       return arc;
     }
@@ -116,20 +83,16 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 }
 
 /* Open a CTF file given the specified BFD and CTF section (which may contain a
-   CTF archive or a file).  Takes ownership of the ctfsect, and frees it
-   later.  */
+   CTF archive or a file).  */
 
 ctf_archive_t *
 ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 		     const ctf_sect_t *ctfsect, int *errp)
 {
-  struct ctf_archive *arc = NULL;
   ctf_archive_t *arci;
-  ctf_file_t *fp = NULL;
   ctf_sect_t *symsectp = NULL;
   ctf_sect_t *strsectp = NULL;
   const char *bfderrstr = NULL;
-  int is_archive;
 
 #ifdef HAVE_BFD_ELF
   ctf_sect_t symsect, strsect;
@@ -192,30 +155,13 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
     }
 #endif
 
-  if (ctfsect->cts_size > sizeof (uint64_t) &&
-      ((*(uint64_t *) ctfsect->cts_data) == CTFA_MAGIC))
-    {
-      is_archive = 1;
-      if ((arc = ctf_arc_bufopen ((void *) ctfsect->cts_data,
-				  ctfsect->cts_size, errp)) == NULL)
-	goto err_free_str;
-    }
-  else
-    {
-      is_archive = 0;
-      if ((fp = ctf_bufopen (ctfsect, symsectp, strsectp, errp)) == NULL)
-	{
-	  ctf_dprintf ("ctf_internal_open(): cannot open CTF: %s\n",
-		       ctf_errmsg (*errp));
-	  goto err_free_str;
-	}
-    }
-  arci = ctf_new_archive_internal (is_archive, arc, fp, symsectp, strsectp,
-				   errp);
-
+  arci = ctf_arc_bufopen (ctfsect, symsectp, strsectp, errp);
   if (arci)
-    return arci;
- err_free_str: ;
+    {
+      /* Request freeing of the symsect.  */
+      arci->ctfi_free_symsect = 1;
+      return arci;
+    }
 #ifdef HAVE_BFD_ELF
  err_free_sym:
   free (symtab);

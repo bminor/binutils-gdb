@@ -309,6 +309,7 @@ struct ctf_archive_internal
   struct ctf_archive *ctfi_archive;
   ctf_sect_t ctfi_symsect;
   ctf_sect_t ctfi_strsect;
+  int ctfi_free_symsect;
   void *ctfi_data;
   bfd *ctfi_abfd;		    /* Optional source of section data.  */
   void (*ctfi_bfd_close) (struct ctf_archive_internal *);
@@ -435,8 +436,11 @@ extern void ctf_str_rollback (ctf_file_t *, ctf_snapshot_id_t);
 extern void ctf_str_purge_refs (ctf_file_t *);
 extern ctf_strs_writable_t ctf_str_write_strtab (ctf_file_t *);
 
+extern struct ctf_archive_internal *ctf_new_archive_internal
+	(int is_archive, struct ctf_archive *arc,
+	 ctf_file_t *fp, const ctf_sect_t *symsect,
+	 const ctf_sect_t *strsect, int *errp);
 extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
-extern struct ctf_archive *ctf_arc_bufopen (const void *, size_t, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern void *ctf_set_open_errno (int *, int);
 extern unsigned long ctf_set_errno (ctf_file_t *, int);

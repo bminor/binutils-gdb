@@ -1,3 +1,7 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_arc_bufopen): New.
+
 2020-06-26  Pat Bernardi  <bernardi@adacore.com>
 
 	* elf/m68k.h: Add enum for GNU object attribute with floating point
