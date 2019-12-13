@@ -1990,7 +1990,7 @@ windows_nat_target::attach (const char *args, int from_tty)
 
   if (from_tty)
     {
-      char *exec_file = (char *) get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,

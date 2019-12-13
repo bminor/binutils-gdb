@@ -186,7 +186,6 @@ inf_ptrace_target::mourn_inferior ()
 void
 inf_ptrace_target::attach (const char *args, int from_tty)
 {
-  char *exec_file;
   pid_t pid;
   struct inferior *inf;
 
@@ -210,7 +209,7 @@ inf_ptrace_target::attach (const char *args, int from_tty)
 
   if (from_tty)
     {
-      exec_file = get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,

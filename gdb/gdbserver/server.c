@@ -265,7 +265,7 @@ get_exec_wrapper ()
 
 /* See gdbsupport/common-inferior.h.  */
 
-char *
+const char *
 get_exec_file (int err)
 {
   if (err && program_path.get () == NULL)

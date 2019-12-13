@@ -693,7 +693,6 @@ nto_procfs_target::pid_to_exec_file (const int pid)
 void
 nto_procfs_target::attach (const char *args, int from_tty)
 {
-  char *exec_file;
   int pid;
   struct inferior *inf;
 
@@ -704,7 +703,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
 
   if (from_tty)
     {
-      exec_file = (char *) get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
@@ -1215,7 +1214,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
 
   argv = xmalloc ((allargs.size () / (unsigned) 2 + 2) *
 		  sizeof (*argv));
-  argv[0] = get_exec_file (1);
+  argv[0] = const_cast<char *> (get_exec_file (1));
   if (!argv[0])
     {
       if (exec_file)

@@ -2195,7 +2195,6 @@ void
 gnu_nat_target::attach (const char *args, int from_tty)
 {
   int pid;
-  char *exec_file;
   struct inf *inf = cur_inf ();
   struct inferior *inferior;
 
@@ -2206,7 +2205,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
 
   if (from_tty)
     {
-      exec_file = (char *) get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', pid %d\n",
@@ -2260,7 +2259,7 @@ gnu_nat_target::detach (inferior *inf, int from_tty)
 
   if (from_tty)
     {
-      char *exec_file = get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered ("Detaching from program `%s' pid %d\n",

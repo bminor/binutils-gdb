@@ -141,7 +141,7 @@ validate_files (void)
 
 /* See gdbsupport/common-inferior.h.  */
 
-char *
+const char *
 get_exec_file (int err)
 {
   if (exec_filename)
@@ -151,7 +151,6 @@ get_exec_file (int err)
 
   error (_("No executable file specified.\n\
 Use the \"file\" or \"exec-file\" command."));
-  return NULL;
 }
 
 

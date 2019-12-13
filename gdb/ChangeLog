@@ -1,3 +1,19 @@
+2019-12-16  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat_target::attach): Update.
+	* remote.c (extended_remote_target::attach): Update.
+	* procfs.c (procfs_target::attach): Update.
+	* nto-procfs.c (nto_procfs_target::attach): Update.
+	(nto_procfs_target::create_inferior): Update.
+	* inf-ptrace.c (inf_ptrace_target::attach): Update.
+	* gnu-nat.c (gnu_nat_target::attach): Update.
+	(gnu_nat_target::detach): Update.
+	* darwin-nat.c (darwin_nat_target::attach): Update.
+	* corefile.c (get_exec_file): Constify result.  Remove extraneous
+	return.
+	* bsd-kvm.c (bsd_kvm_target_open): Update.
+	* gdbsupport/common-inferior.h (get_exec_file): Constify result.
+
 2019-12-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/common-defs.h: Remove workaround for a gnulib bug

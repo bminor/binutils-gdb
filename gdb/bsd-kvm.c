@@ -106,7 +106,7 @@ static void
 bsd_kvm_target_open (const char *arg, int from_tty)
 {
   char errbuf[_POSIX2_LINE_MAX];
-  char *execfile = NULL;
+  const char *execfile = NULL;
   kvm_t *temp_kd;
   char *filename = NULL;
 
