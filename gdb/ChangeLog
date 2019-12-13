@@ -1,3 +1,8 @@
+2019-12-13  Tom Tromey  <tromey@adacore.com>
+
+	* gdbsupport/safe-iterator.h (class basic_safe_range) <begin,
+	end>: No longer "const".
+
 2019-12-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.c: Fix indentation, replace spaces with tabs where

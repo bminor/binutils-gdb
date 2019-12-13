@@ -117,12 +117,12 @@ public:
   {
   }
 
-  iterator begin () const
+  iterator begin ()
   {
     return iterator (m_range.begin (), m_range.end ());
   }
 
-  iterator end () const
+  iterator end ()
   {
     return iterator (m_range.end (), m_range.end ());
   }
