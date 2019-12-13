@@ -1,3 +1,8 @@
+2019-12-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c: Fix indentation, replace spaces with tabs where
+	applicable.
+
 2019-12-13  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* configure.tgt: Match msp430-*-elf* targets when configuring GDB.
