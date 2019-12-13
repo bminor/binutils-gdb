@@ -1,6 +1,18 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	PR libctf/25120
+	* configure.ac: Check for bswap_16, bswap_32, and bswap_64 decls.
+	* swap.h (bswap_16): Do not assume that presence of <byteswap.h>
+	means this is declared.
+	(bswap_32): Likewise.
+	(bswap_64): Likewise.
+	(bswap_identity_64): Remove, unused.
+	* configure: Regenerated.
+	* config.h.in: Likewise.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/25120
 	* ctf-impl.h (_libctf_printflike_): Add non-GNU-C fallback.
 	(_libctf_unlikely_): Likewise.
 	(_libctf_unused): Likewise.

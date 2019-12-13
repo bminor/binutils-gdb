@@ -13028,6 +13028,40 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_ASPRINTF $ac_have_decl
 _ACEOF
 
+ac_fn_c_check_decl "$LINENO" "bswap_16" "ac_cv_have_decl_bswap_16" "#include <byteswap.h>
+"
+if test "x$ac_cv_have_decl_bswap_16" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_BSWAP_16 $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "bswap_32" "ac_cv_have_decl_bswap_32" "#include <byteswap.h>
+"
+if test "x$ac_cv_have_decl_bswap_32" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_BSWAP_32 $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "bswap_64" "ac_cv_have_decl_bswap_64" "#include <byteswap.h>
+"
+if test "x$ac_cv_have_decl_bswap_64" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_BSWAP_64 $ac_have_decl
+_ACEOF
+
 
 
 

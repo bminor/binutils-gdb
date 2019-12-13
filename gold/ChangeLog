@@ -1,3 +1,9 @@
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Check for bswap_16, bswap_32, and bswap_64 decls.
+	* configure: Regenerated.
+	* config.h.in: Likewise.
+
 2020-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* target-reloc.h (issue_discarded_error): Initialise the

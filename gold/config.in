@@ -52,6 +52,18 @@
    don't. */
 #undef HAVE_DECL_BASENAME
 
+/* Define to 1 if you have the declaration of `bswap_16', and to 0 if you
+   don't. */
+#undef HAVE_DECL_BSWAP_16
+
+/* Define to 1 if you have the declaration of `bswap_32', and to 0 if you
+   don't. */
+#undef HAVE_DECL_BSWAP_32
+
+/* Define to 1 if you have the declaration of `bswap_64', and to 0 if you
+   don't. */
+#undef HAVE_DECL_BSWAP_64
+
 /* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
 #undef HAVE_DECL_FFS
 
