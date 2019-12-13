@@ -44,9 +44,6 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
 			      const char **errmsg);
 static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg);
 
-/* bsearch() internal state.  */
-static __thread char *search_nametbl;
-
 /* Write out a CTF archive to the start of the file referenced by the passed-in
    fd.  The entries in CTF_FILES are referenced by name: the names are passed in
    the names array, which must have CTF_FILES entries.
@@ -332,13 +329,14 @@ sort_modent_by_name (const void *one, const void *two, void *n)
 		 &nametbl[le64toh (b->name_offset)]);
 }
 
-/* bsearch() function to search for a given name in the sorted array of struct
+/* bsearch_r() function to search for a given name in the sorted array of struct
    ctf_archive_modents.  */
 static int
-search_modent_by_name (const void *key, const void *ent)
+search_modent_by_name (const void *key, const void *ent, void *arg)
 {
   const char *k = key;
   const struct ctf_archive_modent *v = ent;
+  const char *search_nametbl = arg;
 
   return strcmp (k, &search_nametbl[le64toh (v->name_offset)]);
 }
@@ -503,6 +501,7 @@ ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
 			       const char *name, int *errp)
 {
   struct ctf_archive_modent *modent;
+  const char *search_nametbl;
 
   if (name == NULL)
     name = _CTF_SECTION;		 /* The default name.  */
@@ -512,10 +511,10 @@ ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
   modent = (ctf_archive_modent_t *) ((char *) arc
 				     + sizeof (struct ctf_archive));
 
-  search_nametbl = (char *) arc + le64toh (arc->ctfa_names);
-  modent = bsearch (name, modent, le64toh (arc->ctfa_nfiles),
-		    sizeof (struct ctf_archive_modent),
-		    search_modent_by_name);
+  search_nametbl = (const char *) arc + le64toh (arc->ctfa_names);
+  modent = bsearch_r (name, modent, le64toh (arc->ctfa_nfiles),
+		      sizeof (struct ctf_archive_modent),
+		      search_modent_by_name, (void *) search_nametbl);
 
   /* This is actually a common case and normal operation: no error
      debug output.  */

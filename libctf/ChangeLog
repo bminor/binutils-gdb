@@ -1,5 +1,12 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	PR libctf/25120
+	* ctf-archive.c (search_nametbl): No longer global: declare...
+	(ctf_arc_open_by_name_internal): ... here. Use bsearch_r.
+	(search_modent_by_name): Take and use ARG for the nametbl.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_new_archive_internal): Declare.
 	(ctf_arc_bufopen): Remove.
 	(ctf_archive_internal) <ctfi_free_symsect>: New.
