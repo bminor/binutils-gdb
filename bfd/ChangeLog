@@ -1,3 +1,10 @@
+2019-12-13  Alan Modra  <amodra@gmail.com>
+
+	PR 25237
+	* elf.c: (assign_file_positions_for_load_sections): Attempt to
+	keep meaningless p_offset for PT_LOAD segments without file
+	contents within file size.
+
 2019-12-12  Alan Modra  <amodra@gmail.com>
 
 	* libbfd.c (bfd_get): Don't cast result of bfd_get_8.

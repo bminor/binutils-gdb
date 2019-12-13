@@ -5752,7 +5752,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
 	{
 	  if (!m->includes_filehdr && !m->includes_phdrs)
-	    p->p_offset = off;
+	    {
+	      p->p_offset = off;
+	      if (no_contents)
+		/* Put meaningless p_offset for PT_LOAD segments
+		   without file contents somewhere within the first
+		   page, in an attempt to not point past EOF.  */
+		p->p_offset = off % (p->p_align > maxpagesize
+				     ? p->p_align : maxpagesize);
+	    }
 	  else
 	    {
 	      file_ptr adjust;
