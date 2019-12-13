@@ -1,3 +1,7 @@
+2019-12-16  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* Makefile.in: Fix build with GNU Make 3.81
+
 2019-12-16  Tom Tromey  <tromey@adacore.com>
 
 	* server.c (get_exec_file): Constify result.
