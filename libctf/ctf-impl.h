@@ -59,6 +59,13 @@ extern "C"
 #define _libctf_unused_ __attribute__ ((__unused__))
 #define _libctf_malloc_ __attribute__((__malloc__))
 
+#else
+
+#define _libctf_printflike_(string_index,first_to_check)
+#define _libctf_unlikely_(x) (x)
+#define _libctf_unused_
+#define _libctf_malloc_
+
 #endif
 
 /* libctf in-memory state.  */

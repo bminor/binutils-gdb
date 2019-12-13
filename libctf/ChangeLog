@@ -1,6 +1,14 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	PR libctf/25120
+	* ctf-impl.h (_libctf_printflike_): Add non-GNU-C fallback.
+	(_libctf_unlikely_): Likewise.
+	(_libctf_unused): Likewise.
+	(_libctf_malloc_): Likewise.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/25120
 	* ctf-archive.c (search_nametbl): No longer global: declare...
 	(ctf_arc_open_by_name_internal): ... here. Use bsearch_r.
 	(search_modent_by_name): Take and use ARG for the nametbl.
