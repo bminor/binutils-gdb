@@ -845,12 +845,7 @@ maintenance_set_profile_cmd (const char *args, int from_tty,
 }
 #endif
 
-static int n_worker_threads = 0;
-
-bool worker_threads_disabled ()
-{
-  return n_worker_threads == 0;
-}
+static int n_worker_threads = -1;
 
 /* Update the thread pool for the desired number of threads.  */
 static void

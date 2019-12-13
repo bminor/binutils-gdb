@@ -54,7 +54,6 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/parallel-for.h"
-#include "maint.h"
 
 #if CXX_STD_THREAD
 #include <mutex>
@@ -1137,15 +1136,6 @@ minimal_symbol_reader::record_full (gdb::string_view name,
 				     name.data (), name.size ());
   else
     msymbol->name = name.data ();
-
-  if (worker_threads_disabled ())
-    {
-      /* To keep our behavior as close as possible to the previous non-threaded
-	 behavior for GDB 9.1, we call symbol_set_names here when threads
-	 are disabled.  */
-      symbol_set_names (msymbol, msymbol->name, false, m_objfile->per_bfd);
-      msymbol->name_set = 1;
-    }
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
