@@ -1,3 +1,8 @@
+2019-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Symbols In Python): Remove duplicate description of
+	gdb.lookup_global_symbol.
+
 2019-12-11  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.texinfo (Writing JIT Debug Info Readers): Fix typo.

@@ -4883,20 +4883,6 @@ search all object files in the order they appear in the debug
 information.
 @end defun
 
-@findex gdb.lookup_global_symbol
-@defun gdb.lookup_global_symbol (name @r{[}, domain@r{]})
-This function searches for a global symbol by name.
-The search scope can be restricted to by the domain argument.
-
-@var{name} is the name of the symbol.  It must be a string.
-The optional @var{domain} argument restricts the search to the domain type.
-The @var{domain} argument must be a domain constant defined in the @code{gdb}
-module and described later in this chapter.
-
-The result is a @code{gdb.Symbol} object or @code{None} if the symbol
-is not found.
-@end defun
-
 @findex gdb.lookup_static_symbols
 @defun gdb.lookup_static_symbols (name @r{[}, domain@r{]})
 Similar to @code{gdb.lookup_static_symbol}, this function searches for
