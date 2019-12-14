@@ -1,3 +1,9 @@
+2019-12-15  Christian Biesinger  <cbiesinger@google.com>
+
+	* ada-exp.y (write_ambiguous_var): Call symbol_set_language to
+	set the language of sym.
+	* language.c (language_alloc_type_symbol): Likewise.
+
 2019-12-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	https://bugzilla.redhat.com/show_bug.cgi?id=1728147
