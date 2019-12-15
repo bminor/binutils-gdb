@@ -954,15 +954,6 @@ print_insn_score16 (bfd_vma pc, struct disassemble_info *info, long given)
                               reg = given >> bitstart;
                               reg &= (2 << (bitend - bitstart)) - 1;
 
-                              /* Check rpush rd, 0 and rpop! rd, 0.
-                                 If reg = 0, then set to 32.  */
-                              if (((given & 0x00007c00) == 0x00006c00
-                                    || (given & 0x00007c00) == 0x00006800)
-                                  && reg == 0)
-                                {
-                                  reg = 32;
-                                }
-
                               switch (*c)
                                 {
                                 case 'R':
@@ -972,6 +963,13 @@ print_insn_score16 (bfd_vma pc, struct disassemble_info *info, long given)
                                   func (stream, "%s", score_regnames[reg]);
                                   break;
                                 case 'd':
+				  /* Check rpush rd, 0 and rpop! rd, 0.
+				     If 0, then print 32.  */
+				  if (((given & 0x00007c00) == 0x00006c00
+				       || (given & 0x00007c00) == 0x00006800)
+				      && reg == 0)
+				    reg = 32;
+
                                   if (*(c + 1) == '\0')
                                     func (stream, "%ld", reg);
                                   else

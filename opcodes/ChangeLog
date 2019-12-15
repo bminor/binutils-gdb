@@ -1,5 +1,10 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* score-dis.c (print_insn_score16): Move rpush/rpop imm field
+	value adjustment so that it doesn't affect reg field too.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* crx-dis.c (EXTRACT, SBM): Avoid signed overflow.
 	(get_number_of_operands, getargtype, getbits, getregname),
 	(getcopregname, getprocregname, gettrapstring, getcinvstring),
