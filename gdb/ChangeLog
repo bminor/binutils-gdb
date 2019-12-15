@@ -1,3 +1,8 @@
+2019-12-21  George Barrett  <bob@bob131.so>
+
+	* solib-svr4.c (svr4_handle_solib_event): Add fallback link
+	namespace test for when the debug struct isn't available.
+
 2019-12-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (print_gdb_configuration): Print "--with-xxhash" or
