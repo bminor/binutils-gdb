@@ -858,7 +858,7 @@ nios2_print_insn_arg (const char *argptr,
 		if (i & (1 << 10))
 		  reglist |= (1 << 28);
 		if (i & (1 << 11))
-		  reglist |= (1 << 31);
+		  reglist |= (1u << 31);
 	      }
 	    else
 	      reglist = i << 2;
@@ -887,7 +887,7 @@ nios2_print_insn_arg (const char *argptr,
 	for (k = (dir == 1 ? 0 : 31);
 	     (dir == 1 && k < 32) || (dir == -1 && k >= 0);
 	     k += dir)
-	  if (reglist & (1 << k))
+	  if (reglist & (1u << k))
 	    {
 	      if (t)
 		(*info->fprintf_func) (info->stream, ",");
