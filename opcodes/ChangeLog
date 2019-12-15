@@ -1,3 +1,8 @@
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
+	* moxie-dis.c (INST2OFFSET): Don't left shift a signed value.
+	(print_insn_moxie): Remove unnecessary cast.
+
 2019-12-12  Alan Modra  <amodra@gmail.com>
 
 	* csky-dis.c (csky_chars_to_number): Remove abort and unnecessary
