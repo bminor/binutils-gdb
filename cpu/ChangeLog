@@ -1,3 +1,7 @@
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
+	* xstormy16.cpu (f-rel12a): Avoid signed overflow.
+
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
 	* epiphany.cpu (f-sdisp11): Don't sign extend with shifts.
