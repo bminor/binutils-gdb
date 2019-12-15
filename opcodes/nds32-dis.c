@@ -72,28 +72,13 @@ extern struct nds32_opcode nds32_opcodes[];
 extern const field_t operand_fields[];
 extern keyword_t *keywords[];
 extern const keyword_t keyword_gpr[];
-static void print_insn16 (bfd_vma pc, disassemble_info *info,
-			  uint32_t insn, uint32_t parse_mode);
-static void print_insn32 (bfd_vma pc, disassemble_info *info, uint32_t insn,
-			  uint32_t parse_mode);
+
 static uint32_t nds32_mask_opcode (uint32_t);
 static void nds32_special_opcode (uint32_t, struct nds32_opcode **);
 static int get_mapping_symbol_type (struct disassemble_info *, int,
 				    enum map_type *);
 static int is_mapping_symbol (struct disassemble_info *, int,
 			      enum map_type *);
-
-/* define in objdump.c.  */
-struct objdump_disasm_info
-{
-  bfd *              abfd;
-  asection *         sec;
-  bfd_boolean        require_sec;
-  arelent **         dynrelbuf;
-  long               dynrelcount;
-  disassembler_ftype disassemble_fn;
-  arelent *          reloc;
-};
 
 /* Hash function for disassemble.  */
 
@@ -128,8 +113,8 @@ nds32_parse_audio_ext (const field_t *pfd,
   if (pfd->hw_res == HW_INT || pfd->hw_res == HW_UINT)
     {
       if (pfd->hw_res == HW_INT)
-	int_value =
-	  N32_IMMS ((insn >> pfd->bitpos), pfd->bitsize) << pfd->shift;
+	int_value = (unsigned) N32_IMMS (insn >> pfd->bitpos,
+					 pfd->bitsize) << pfd->shift;
       else
 	int_value = __GF (insn, pfd->bitpos, pfd->bitsize) << pfd->shift;
 
@@ -321,9 +306,9 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 	      else if ((pfd->hw_res == HW_INT) || (pfd->hw_res == HW_UINT))
 		{
 		  if (pfd->hw_res == HW_INT)
-		    int_value =
-		      N32_IMMS ((insn >> pfd->bitpos),
-			    pfd->bitsize) << pfd->shift;
+		    int_value
+		      = (unsigned) N32_IMMS (insn >> pfd->bitpos,
+					     pfd->bitsize) << pfd->shift;
 		  else
 		    int_value =
 		      __GF (insn, pfd->bitpos, pfd->bitsize) << pfd->shift;
@@ -411,8 +396,8 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 	  else if ((pfd->hw_res == HW_INT) || (pfd->hw_res == HW_UINT))
 	    {
 	      if (pfd->hw_res == HW_INT)
-		int_value =
-		  N32_IMMS ((insn >> pfd->bitpos), pfd->bitsize) << pfd->shift;
+		int_value = (unsigned) N32_IMMS (insn >> pfd->bitpos,
+						 pfd->bitsize) << pfd->shift;
 	      else
 		int_value =
 		  __GF (insn, pfd->bitpos, pfd->bitsize) << pfd->shift;
