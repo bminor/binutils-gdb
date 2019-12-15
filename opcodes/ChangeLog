@@ -1,5 +1,9 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* microblaze-dis.c (read_insn_microblaze): Avoid signed overflow.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* nios2-dis.c (nios2_print_insn_arg): Avoid signed overflow
 
 2019-12-16  Alan Modra  <amodra@gmail.com>
