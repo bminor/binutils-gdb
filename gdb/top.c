@@ -55,6 +55,7 @@
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
 #include "gdbsupport/pathstuff.h"
+#include "cli/cli-style.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -924,8 +925,8 @@ show_history_filename (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("The filename in which to record "
-			    "the command history is \"%s\".\n"),
-		    value);
+			    "the command history is \"%ps\".\n"),
+		    styled_string (file_name_style.style (), value));
 }
 
 /* This is like readline(), but it has some gdb-specific behavior.
@@ -1192,8 +1193,10 @@ gdb_safe_append_history (void)
   saved_errno = errno;
   if (ret < 0 && saved_errno != ENOENT)
     {
-      warning (_("Could not rename %s to %s: %s"),
-	       history_filename, local_history_filename.c_str (),
+      warning (_("Could not rename %ps to %ps: %s"),
+	       styled_string (file_name_style.style (), history_filename),
+	       styled_string (file_name_style.style (),
+			      local_history_filename.c_str ()),
 	       safe_strerror (saved_errno));
     }
   else
@@ -2094,8 +2097,9 @@ static void
 show_gdb_datadir (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("GDB's data directory is \"%s\".\n"),
-		    gdb_datadir.c_str ());
+  fprintf_filtered (file, _("GDB's data directory is \"%ps\".\n"),
+		    styled_string (file_name_style.style (),
+				   gdb_datadir.c_str ()));
 }
 
 static void

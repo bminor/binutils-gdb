@@ -1,3 +1,14 @@
+2020-01-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* ui-file.c (stdio_file::can_emit_style_escape)
+	(tee_file::can_emit_style_escape): Ensure style is used also on
+	gdb_stderr when gdb_stderr is a tty supporting styling, similarly
+	to gdb_stdout.
+	* main.c (set_gdb_data_directory): Use file style to output the
+	warning that the given pathname is not a directory.
+	* top.c (show_history_filename, gdb_safe_append_history)
+	(show_gdb_datadir): Use file style.
+
 2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	* solib-target.c (struct lm_info_target):

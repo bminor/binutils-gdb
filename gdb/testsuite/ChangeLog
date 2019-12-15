@@ -1,3 +1,7 @@
+2020-01-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/style.exp: Test that warnings are styled.
+
 2019-12-29  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* gdb.base/line65535.exp: New file.

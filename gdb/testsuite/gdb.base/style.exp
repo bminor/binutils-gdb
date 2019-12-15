@@ -139,4 +139,10 @@ save_vars { env(TERM) } {
 
     gdb_test "show logging file" \
 	"The current logfile is \"[style .*? file]\"\\..*"
+
+    # Check warnings are styled by setting a rubbish data directory.
+    gdb_test "set data-directory Makefile" \
+	"warning: [style .*? file] is not a directory\\..*"
+    gdb_test "show data-directory" \
+	"GDB's data directory is \"[style .*? file]\"\\..*"
 }

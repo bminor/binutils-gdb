@@ -124,7 +124,8 @@ set_gdb_data_directory (const char *new_datadir)
       print_sys_errmsg (new_datadir, save_errno);
     }
   else if (!S_ISDIR (st.st_mode))
-    warning (_("%s is not a directory."), new_datadir);
+    warning (_("%ps is not a directory."),
+	     styled_string (file_name_style.style (), new_datadir));
 
   gdb_datadir = gdb_realpath (new_datadir).get ();
 

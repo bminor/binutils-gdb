@@ -302,7 +302,7 @@ stdio_file::isatty ()
 bool
 stdio_file::can_emit_style_escape ()
 {
-  return (this == gdb_stdout
+  return ((this == gdb_stdout || this == gdb_stderr)
 	  && this->isatty ()
 	  && term_cli_styling ());
 }
@@ -391,7 +391,7 @@ tee_file::term_out ()
 bool
 tee_file::can_emit_style_escape ()
 {
-  return (this == gdb_stdout
+  return ((this == gdb_stdout || this == gdb_stderr)
 	  && m_one->term_out ()
 	  && term_cli_styling ());
 }
