@@ -1,6 +1,6 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
 #   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
-#   2014, 2015, 2016, 2019 Free Software Foundation, Inc.
+#   2014, 2015, 2016, 2019, 2020 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ host_libs="intl libiberty opcodes bfd readline tcl tk itcl libgui zlib libbacktr
 # binutils, gas and ld appear in that order because it makes sense to run
 # "make check" in that particular order.
 # If --enable-gold is used, "gold" may replace "ld".
-host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gprof etc expect dejagnu m4 utils guile fastjar gnattools libcc1 gotools"
+host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gdbserver gprof etc expect dejagnu m4 utils guile fastjar gnattools libcc1 gotools"
 
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
@@ -781,6 +781,22 @@ case "${target}" in
     unsupported_languages="$unsupported_languages go"
     ;;
 esac
+
+# Only allow gdbserver on some systems.
+if test -d ${srcdir}/gdbserver; then
+    if test x$enable_gdbserver = x; then
+	AC_MSG_CHECKING([for gdbserver support])
+	if (srcdir=${srcdir}/gdbserver; \
+		. ${srcdir}/configure.srv; \
+		test -n "$UNSUPPORTED")
+	then
+	    AC_MSG_RESULT([no])
+	    noconfigdirs="$noconfigdirs gdbserver"
+	else
+	    AC_MSG_RESULT([yes])
+	fi
+    fi
+fi
 
 # Disable libgo for some systems where it is known to not work.
 # For testing, you can easily override this with --enable-libgo.

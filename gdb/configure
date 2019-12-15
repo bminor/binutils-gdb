@@ -905,7 +905,6 @@ with_tcl
 with_tk
 with_x
 enable_sim
-enable_gdbserver
 with_babeltrace
 with_libbabeltrace_prefix
 with_xxhash
@@ -930,8 +929,7 @@ YACC
 YFLAGS
 XMKMF'
 ac_subdirs_all='testsuite
-gdbtk
-gdbserver'
+gdbtk'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1575,8 +1573,6 @@ Optional Features:
                           gcc is used
   --enable-ubsan          enable undefined behavior sanitizer (auto/yes/no)
   --enable-sim            link gdb with simulator
-  --enable-gdbserver      automatically build gdbserver (yes/no/auto, default
-                          is auto)
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
 
@@ -6738,7 +6734,6 @@ fi
 # For other settings, only the main target counts.
 gdb_sim=
 gdb_osabi=
-build_gdbserver=
 targ=$target; . ${srcdir}/configure.tgt
 
 # Fetch the default architecture and default target vector from BFD.
@@ -17846,40 +17841,6 @@ cat >>confdefs.h <<_ACEOF
 #define GDB_OSABI_DEFAULT $gdb_osabi
 _ACEOF
 
-fi
-
-# Check whether --enable-gdbserver was given.
-if test "${enable_gdbserver+set}" = set; then :
-  enableval=$enable_gdbserver; case "${enableval}" in
-  yes| no|auto) ;;
-  *) as_fn_error $? "bad value ${enableval} for --enable-gdbserver option" "$LINENO" 5 ;;
-esac
-else
-  enable_gdbserver=auto
-fi
-
-
-# We only build gdbserver automatically in a native configuration, and
-# only if the user did not explicitly disable its build.
-if test "$gdb_native" = "yes" -a "$enable_gdbserver" != "no"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether gdbserver is supported on this host" >&5
-$as_echo_n "checking whether gdbserver is supported on this host... " >&6; }
-  if test "x$build_gdbserver" = xyes; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    subdirs="$subdirs gdbserver"
-
-    gdbserver_build_enabled=yes
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  fi
-fi
-
-# If the user explicitly request the gdbserver to be built, verify that
-# we were in fact able to enable it.
-if test "$enable_gdbserver" = "yes" -a "$gdbserver_build_enabled" != "yes"; then
-  as_fn_error $? "Automatic gdbserver build is not supported for this configuration" "$LINENO" 5
 fi
 
 # Check for babeltrace and babeltrace-ctf

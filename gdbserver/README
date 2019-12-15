@@ -100,27 +100,24 @@ The supported targets as of November 2006 are:
 	spu*-*-*
 	x86_64-*-linux*
 
-Configuring GDBserver you should specify the same machine for host and
-target (which are the machine that GDBserver is going to run on.  This
-is not the same as the machine that GDB is going to run on; building
-GDBserver automatically as part of building a whole tree of tools does
-not currently work if cross-compilation is involved (we don't get the
-right CC in the Makefile, to start with)).
-
-Building GDBserver for your target is very straightforward.  If you build
-GDB natively on a target which GDBserver supports, it will be built
+Building GDBserver for your host is very straightforward.  If you build
+GDB natively on a host which GDBserver supports, it will be built
 automatically when you build GDB.  You can also build just GDBserver:
 
 	% mkdir obj
 	% cd obj
-	% path-to-gdbserver-sources/configure
-	% make
+	% path-to-toplevel-sources/configure --disable-gdb
+	% make all-gdbserver
+
+(If you have a combined binutils+gdb tree, you may want to also
+disable other directories when configuring, e.g., binutils, gas, gold,
+gprof, and ld.)
 
 If you prefer to cross-compile to your target, then you can also build
 GDBserver that way.  In a Bourne shell, for example:
 
 	% export CC=your-cross-compiler
-	% path-to-gdbserver-sources/configure your-target-name
+	% path-to-topevel-sources/configure your-target-name --disable-gdb
 	% make
 
 Using GDBreplay:

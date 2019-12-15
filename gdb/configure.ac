@@ -254,7 +254,6 @@ AC_SUBST(HAVE_NATIVE_GCORE_TARGET)
 # For other settings, only the main target counts.
 gdb_sim=
 gdb_osabi=
-build_gdbserver=
 targ=$target; . ${srcdir}/configure.tgt
 
 # Fetch the default architecture and default target vector from BFD.
@@ -1999,33 +1998,6 @@ AC_SUBST_FILE(nat_makefile_frag)
 if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
 		       [Define to the default OS ABI for this configuration.])
-fi
-
-AC_ARG_ENABLE(gdbserver,
-AS_HELP_STRING([--enable-gdbserver],
-               [automatically build gdbserver (yes/no/auto, default is auto)]),
-[case "${enableval}" in
-  yes| no|auto) ;;
-  *) AC_MSG_ERROR(bad value ${enableval} for --enable-gdbserver option) ;;
-esac],[enable_gdbserver=auto])
-
-# We only build gdbserver automatically in a native configuration, and
-# only if the user did not explicitly disable its build.
-if test "$gdb_native" = "yes" -a "$enable_gdbserver" != "no"; then
-  AC_MSG_CHECKING(whether gdbserver is supported on this host)
-  if test "x$build_gdbserver" = xyes; then
-    AC_MSG_RESULT(yes)
-    AC_CONFIG_SUBDIRS(gdbserver)
-    gdbserver_build_enabled=yes
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-# If the user explicitly request the gdbserver to be built, verify that
-# we were in fact able to enable it.
-if test "$enable_gdbserver" = "yes" -a "$gdbserver_build_enabled" != "yes"; then
-  AC_MSG_ERROR(Automatic gdbserver build is not supported for this configuration)
 fi
 
 # Check for babeltrace and babeltrace-ctf

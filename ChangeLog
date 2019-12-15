@@ -1,3 +1,14 @@
+2020-02-07  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* src-release.sh (GDB_SUPPORT_DIRS): Add gdbserver.
+	* gdbserver: New directory, moved from gdb/gdbserver.
+	* configure.ac (host_tools): Add gdbserver.
+	Only build gdbserver on certain systems.
+	* Makefile.in, configure: Rebuild.
+	* Makefile.def (host_modules, dependencies): Add gdbserver.
+	* MAINTAINERS: Add gdbserver.
+
 2020-01-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* src-release.sh (getver): Look for gdbsupport's

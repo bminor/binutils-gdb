@@ -114,6 +114,7 @@ host_modules= { module= zlib; no_install=true; no_check=true;
 	        extra_configure_flags='@extra_host_zlib_configure_flags@';};
 host_modules= { module= gnulib; };
 host_modules= { module= gdbsupport; };
+host_modules= { module= gdbserver; };
 host_modules= { module= gdb; };
 host_modules= { module= expect; };
 host_modules= { module= guile; };

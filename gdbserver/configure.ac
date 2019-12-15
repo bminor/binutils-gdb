@@ -44,7 +44,7 @@ AX_CXX_COMPILE_STDCXX(11, , mandatory)
 AC_HEADER_STDC
 
 # Set the 'development' global.
-. $srcdir/../../bfd/development.sh
+. $srcdir/../bfd/development.sh
 
 GDB_AC_SELFTEST([
   srv_selftest_objs="gdbsupport/selftest.o"
@@ -80,10 +80,10 @@ fi
 # gdbserver/.  We need to build gnulib under some other directory not
 # "gnulib", to avoid the problem of both GDB and GDBserver wanting to
 # build it in the same directory, when building in the source dir.
-ACX_CONFIGURE_DIR(["../../gnulib"], ["build-gnulib-gdbserver"],
+ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"],
                   ["$gnulib_extra_configure_args"])
 
-ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
+ACX_CONFIGURE_DIR(["../libiberty"], ["build-libiberty-gdbserver"])
 
 AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
 		 sys/procfs.h linux/elf.h dnl

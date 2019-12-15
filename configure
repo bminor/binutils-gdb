@@ -2831,7 +2831,7 @@ host_libs="intl libiberty opcodes bfd readline tcl tk itcl libgui zlib libbacktr
 # binutils, gas and ld appear in that order because it makes sense to run
 # "make check" in that particular order.
 # If --enable-gold is used, "gold" may replace "ld".
-host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gprof etc expect dejagnu m4 utils guile fastjar gnattools libcc1 gotools"
+host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gdbserver gprof etc expect dejagnu m4 utils guile fastjar gnattools libcc1 gotools"
 
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
@@ -3537,6 +3537,25 @@ case "${target}" in
     unsupported_languages="$unsupported_languages go"
     ;;
 esac
+
+# Only allow gdbserver on some systems.
+if test -d ${srcdir}/gdbserver; then
+    if test x$enable_gdbserver = x; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbserver support" >&5
+$as_echo_n "checking for gdbserver support... " >&6; }
+	if (srcdir=${srcdir}/gdbserver; \
+		. ${srcdir}/configure.srv; \
+		test -n "$UNSUPPORTED")
+	then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	    noconfigdirs="$noconfigdirs gdbserver"
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	fi
+    fi
+fi
 
 # Disable libgo for some systems where it is known to not work.
 # For testing, you can easily override this with --enable-libgo.

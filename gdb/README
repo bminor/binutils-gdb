@@ -583,12 +583,11 @@ of remote stubs to be used with remote.c.  They are designed to run
 standalone on an m68k, i386, or SPARC cpu and communicate properly
 with the remote.c stub over a serial line.
 
-   The directory gdb/gdbserver/ contains `gdbserver', a program that
+   The directory gdbserver/ contains `gdbserver', a program that
 allows remote debugging for Unix applications.  GDBserver is only
-supported for some native configurations, including Sun 3, Sun 4, and
-Linux.
+supported for some native configurations.
 
-   The file gdb/gdbserver/README includes further notes on GDBserver; in
+   The file gdbserver/README includes further notes on GDBserver; in
 particular, it explains how to build GDBserver for cross-debugging
 (where GDBserver runs on the target machine, which is of a different
 architecture than the host machine running GDB).

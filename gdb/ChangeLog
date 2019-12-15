@@ -1,3 +1,12 @@
+2020-02-07  Tom Tromey  <tom@tromey.com>
+
+	* README: Update gdbserver documentation.
+	* gdbserver: Move to top level.
+	* configure.tgt (build_gdbserver): Remove.
+	* configure.ac: Remove --enable-gdbserver.
+	* configure: Rebuild.
+	* Makefile.in (distclean): Don't mention gdbserver.
+
 2020-02-06  Shahab Vahedi  <shahab@synopsys.com>
 
 	* source-cache.c (source_cache::ensure): Surround

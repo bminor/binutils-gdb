@@ -1,6 +1,8 @@
 # Mappings from configuration triplets to gdbserver build options.
 # This is invoked from the autoconf-generated configure script, to
 # produce the appropriate Makefile substitutions.
+# It is also sourced by the top level configure script, to determine
+# whether gdbserver is supported on a given host.
 
 # This file sets the following shell variables:
 #   srv_regobj		The register protocol appropriate for this target.
@@ -12,6 +14,7 @@
 #			gdbserver in this configuration.
 #   ipa_obj		Any other target-specific modules appropriate
 #			for this target's in-process agent.
+#   UNSUPPORTED         Set to 1 if the host is unsupported.
 #
 # In addition, on GNU/Linux the following shell variables will be set:
 #   srv_linux_regsets	Set to "yes" if ptrace(PTRACE_GETREGS) and friends
@@ -30,9 +33,9 @@ ipa_ppc_linux_regobj="powerpc-32l-ipa.o powerpc-altivec32l-ipa.o powerpc-vsx32l-
 # these files over and over again.
 srv_linux_obj="linux-low.o nat/linux-osdata.o nat/linux-procfs.o nat/linux-ptrace.o nat/linux-waitpid.o nat/linux-personality.o nat/linux-namespaces.o fork-child.o nat/fork-inferior.o"
 
-# Input is taken from the "${target}" variable.
+# Input is taken from the "${host}" variable.
 
-case "${target}" in
+case "${host}" in
   aarch64*-*-linux*)	srv_tgtobj="linux-aarch64-low.o"
 			srv_tgtobj="$srv_tgtobj nat/aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
@@ -396,7 +399,8 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  *)			echo "Error: target not supported by gdbserver."
-			exit 1
+  *)
+			# Who are you?
+			UNSUPPORTED=1
 			;;
 esac

@@ -6072,7 +6072,7 @@ fi
 
 
 # Set the 'development' global.
-. $srcdir/../../bfd/development.sh
+. $srcdir/../bfd/development.sh
 
 
 # Check whether we will enable the inclusion of unit tests when
@@ -6255,7 +6255,7 @@ fi
 # "gnulib", to avoid the problem of both GDB and GDBserver wanting to
 # build it in the same directory, when building in the source dir.
 
-  in_src="../../gnulib"
+  in_src="../gnulib"
   in_build="build-gnulib-gdbserver"
   in_extra_args="$gnulib_extra_configure_args"
 
@@ -6358,7 +6358,7 @@ $as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cach
 
 
 
-  in_src="../../libiberty"
+  in_src="../libiberty"
   in_build="build-libiberty-gdbserver"
   in_extra_args=
 

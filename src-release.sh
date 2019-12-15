@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#   Copyright (C) 1990-2019 Free Software Foundation
+#   Copyright (C) 1990-2020 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -315,7 +315,7 @@ gas_release()
     tar_compress $package $tool "$GAS_SUPPORT_DIRS" "$compressors"
 }
 
-GDB_SUPPORT_DIRS="bfd include libiberty libctf opcodes readline sim intl libdecnumber cpu zlib contrib gnulib gdbsupport"
+GDB_SUPPORT_DIRS="bfd include libiberty libctf opcodes readline sim intl libdecnumber cpu zlib contrib gnulib gdbsupport gdbserver"
 gdb_release()
 {
     compressors=$1

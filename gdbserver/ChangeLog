@@ -1,3 +1,20 @@
+2020-02-07  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* README: Update build documentation.
+	* configure.srv: Set UNSUPPORTED if host is unsupported.  Check
+	host, not target.
+	* configure.ac: Update paths.
+	* configure: Rebuild.
+	* acinclude.m4: Update paths.
+	* Makefile.in: Update include paths.
+	(depcomp, INCLUDE_DIR, INCGNU, INCSUPPORT, INCLUDE_CFLAGS)
+	(SFILES, XML_DIR, n, $(GNULIB_BUILDDIR)/Makefile, config.status)
+	(version-generated.c, stamp-xml, regdat_sh, arch/%-ipa.o)
+	(gdbsupport/%-ipa.o, %-ipa.o, arch/%.o, gdbsupport/%.o, %.o)
+	(%-generated.c): Update paths.
+	* Move entire directory from ../gdb/gdbserver.
+
 2020-01-29  Maciej W. Rozycki  <macro@wdc.com>
 
 	* configure.srv <i[34567]86-*-mingw*>: Fix whitespace damage.

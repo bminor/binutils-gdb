@@ -5,7 +5,6 @@
 #  gdb_target_obs	target-specific object files to use
 #  gdb_sim		simulator library for target
 #  gdb_osabi		default OS ABI to use with target
-#  build_gdbserver	set to "yes" if gdbserver supports target
 #  gdb_have_gcore	set to "true"/"false" if this target can run gcore
 
 # NOTE: Every file added to a gdb_target_obs variable for any target here
@@ -129,7 +128,6 @@ aarch64*-*-linux*)
 			arm-tdep.o arm-linux-tdep.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o \
 			symfile-mem.o linux-record.o"
-	build_gdbserver=yes
 	;;
 
 alpha*-*-linux*)
@@ -162,13 +160,11 @@ arc*-*-elf32)
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
 	gdb_target_obs="arm-wince-tdep.o windows-tdep.o"
-	build_gdbserver=yes
 	;;
 arm*-*-linux*)
 	# Target: ARM based machine running GNU/Linux
 	gdb_target_obs="arch/arm-linux.o arm-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
-	build_gdbserver=yes
 	;;
 arm*-*-freebsd*)
 	# Target: FreeBSD/arm
@@ -202,7 +198,6 @@ bfin-*-*linux*)
 	# Target: Blackfin Linux
 	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o"
 	gdb_sim=../sim/bfin/libsim.a
-	build_gdbserver=yes
 	;;
 bfin-*-*)
 	# Target: Blackfin processor
@@ -285,7 +280,6 @@ i[34567]86-*-nto*)
 	# Target: Intel 386 running qnx6.
 	gdb_target_obs="solib-svr4.o \
 			i386-nto-tdep.o nto-tdep.o"
-	build_gdbserver=yes
 	;;
 i[34567]86-*-solaris2* | x86_64-*-solaris2*)
 	# Target: Solaris x86_64
@@ -303,7 +297,6 @@ i[34567]86-*-linux*)
 	    # Target: GNU/Linux x86-64
 	    gdb_target_obs="amd64-linux-tdep.o ${gdb_target_obs}"
 	fi
-	build_gdbserver=yes
 	;;
 i[34567]86-*-gnu*)
 	# Target: Intel 386 running the GNU Hurd
@@ -312,12 +305,10 @@ i[34567]86-*-gnu*)
 i[34567]86-*-cygwin*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-cygwin-tdep.o windows-tdep.o"
-	build_gdbserver=yes
 	;;
 i[34567]86-*-mingw32*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-cygwin-tdep.o windows-tdep.o"
-	build_gdbserver=yes
 	;;
 i[34567]86-*-go32* | i[34567]86-*-msdosdjgpp*)
 	# Target: i386 running DJGPP/go32.
@@ -328,7 +319,6 @@ ia64-*-linux*)
 	# Target: Intel IA-64 running GNU/Linux
 	gdb_target_obs="ia64-linux-tdep.o linux-tdep.o \
 			solib-svr4.o symfile-mem.o"
-	build_gdbserver=yes
 	;;
 ia64-*-*vms*)
 	# Target: Intel IA-64 running OpenVMS
@@ -359,7 +349,6 @@ m32r*-*-linux*)
 			glibc-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o"
 	gdb_sim=../sim/m32r/libsim.a
-	build_gdbserver=yes
 	;;
 m32r*-*-*)
 	# Target: Renesas m32r processor
@@ -382,7 +371,6 @@ m68*-*-linux*)
 	# Target: Motorola m68k with a.out and ELF
 	gdb_target_obs="m68k-tdep.o m68k-linux-tdep.o solib-svr4.o \
 			linux-tdep.o glibc-tdep.o symfile-mem.o"
-	build_gdbserver=yes
 	;;
 m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
 	# Target: NetBSD/m68k
@@ -416,7 +404,6 @@ mips*-*-linux*)
 	gdb_target_obs="mips-tdep.o mips-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
-	build_gdbserver=yes
 	;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	# Target: MIPS running NetBSD
@@ -480,7 +467,6 @@ or1k*-*-linux*)
 	gdb_target_obs="or1k-tdep.o or1k-linux-tdep.o solib-svr4.o \
 			symfile-mem.o glibc-tdep.o linux-tdep.o"
 	gdb_sim=../sim/or1k/libsim.a
-	build_gdbserver=yes
 	;;
 
 or1k-*-* | or1knd-*-*)
@@ -522,7 +508,6 @@ powerpc*-*-linux*)
 			linux-record.o \
 			arch/ppc-linux-common.o"
 	gdb_sim=../sim/ppc/libsim.a
-	build_gdbserver=yes
 	;;
 powerpc-*-lynx*178)
 	# Target: PowerPC running Lynx178.
@@ -541,7 +526,6 @@ s390*-*-linux*)
 	# Target: S390 running Linux
 	gdb_target_obs="s390-linux-tdep.o s390-tdep.o solib-svr4.o \
 			linux-tdep.o linux-record.o symfile-mem.o"
-	build_gdbserver=yes
 	;;
 
 riscv*-*-freebsd*)
@@ -575,7 +559,6 @@ rx-*-elf)
 score-*-*)
 	# Target: S+core embedded system
 	gdb_target_obs="score-tdep.o"
-	build_gdbserver=yes
 	;;
 
 sh*-*-linux*)
@@ -584,7 +567,6 @@ sh*-*-linux*)
 			solib-svr4.o symfile-mem.o \
 			glibc-tdep.o linux-tdep.o"
 	gdb_sim=../sim/sh/libsim.a
-	build_gdbserver=yes
 	;;
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 	# Target: NetBSD/sh
@@ -612,7 +594,6 @@ sparc-*-linux*)
 	    gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o \
 			    sparc64-linux-tdep.o ${gdb_target_obs}"
 	fi
-	build_gdbserver=yes
 	;;
 sparc64-*-linux*)
 	# Target: GNU/Linux UltraSPARC
@@ -620,7 +601,6 @@ sparc64-*-linux*)
 			sparc64-linux-tdep.o sparc-tdep.o sparc-sol2-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o linux-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
-	build_gdbserver=yes
 	;;
 sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
 	# Target: FreeBSD/sparc64
@@ -689,7 +669,6 @@ tilegx-*-linux*)
 	# Target: TILE-Gx
 	gdb_target_obs="tilegx-tdep.o tilegx-linux-tdep.o solib-svr4.o \
 			symfile-mem.o glibc-tdep.o linux-tdep.o"
-	build_gdbserver=yes
 	;;
 
 xstormy16-*-*)
@@ -742,7 +721,6 @@ x86_64-*-linux*)
 	gdb_target_obs="amd64-linux-tdep.o ${i386_tobjs}  \
 			i386-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
-	build_gdbserver=yes
 	;;
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 	# Target: FreeBSD/amd64
@@ -754,7 +732,6 @@ x86_64-*-mingw* | x86_64-*-cygwin*)
 	gdb_target_obs="amd64-windows-tdep.o \
                         ${i386_tobjs} i386-cygwin-tdep.o \
                         windows-tdep.o"
-	build_gdbserver=yes
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	# Target: NetBSD/amd64
@@ -772,7 +749,6 @@ x86_64-*-rtems*)
 xtensa*-*-*linux*)
 	# Target: GNU/Linux Xtensa
 	gdb_target_obs="xtensa-linux-tdep.o symfile-mem.o linux-tdep.o"
-	build_gdbserver=yes
 	;;
 
 esac

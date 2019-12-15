@@ -1,42 +1,42 @@
 dnl gdb/gdbserver/configure.in uses BFD_HAVE_SYS_PROCFS_TYPE.
-m4_include(../../bfd/bfd.m4)
+m4_include(../bfd/bfd.m4)
 
-m4_include(../acx_configure_dir.m4)
+m4_include(../gdb/acx_configure_dir.m4)
 
 # This gets AM_GDB_WARNINGS.
-m4_include(../warning.m4)
+m4_include(../gdb/warning.m4)
 
 dnl This gets autoconf bugfixes
-m4_include(../../config/override.m4)
+m4_include(../config/override.m4)
 
 dnl For ACX_PKGVERSION and ACX_BUGURL.
-m4_include(../../config/acx.m4)
+m4_include(../config/acx.m4)
 
-m4_include(../../config/depstand.m4)
-m4_include(../../config/lead-dot.m4)
+m4_include(../config/depstand.m4)
+m4_include(../config/lead-dot.m4)
 
 dnl Needed for common.m4
 dnl For AC_LIB_HAVE_LINKFLAGS.
-m4_include(../../config/lib-ld.m4)
-m4_include(../../config/lib-prefix.m4)
-m4_include(../../config/lib-link.m4)
+m4_include(../config/lib-ld.m4)
+m4_include(../config/lib-prefix.m4)
+m4_include(../config/lib-link.m4)
 dnl codeset.m4 is needed for common.m4, but not for
 dnl anything else in gdbserver.
-m4_include(../../config/codeset.m4)
-m4_include(../../gdbsupport/common.m4)
+m4_include(../config/codeset.m4)
+m4_include(../gdbsupport/common.m4)
 
 dnl For libiberty_INIT.
-m4_include(../libiberty.m4)
+m4_include(../gdb/libiberty.m4)
 
 dnl For GDB_AC_PTRACE.
-m4_include(../ptrace.m4)
+m4_include(../gdb/ptrace.m4)
 
-m4_include(../ax_cxx_compile_stdcxx.m4)
+m4_include(../gdb/ax_cxx_compile_stdcxx.m4)
 
 dnl For GDB_AC_SELFTEST.
-m4_include(../selftest.m4)
+m4_include(../gdb/selftest.m4)
 
-m4_include([../../config/ax_pthread.m4])
+m4_include([../config/ax_pthread.m4])
 
 dnl Check for existence of a type $1 in libthread_db.h
 dnl Based on BFD_HAVE_SYS_PROCFS_TYPE in bfd/bfd.m4.
