@@ -1,5 +1,17 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* crx-dis.c (EXTRACT, SBM): Avoid signed overflow.
+	(get_number_of_operands, getargtype, getbits, getregname),
+	(getcopregname, getprocregname, gettrapstring, getcinvstring),
+	(getregliststring, get_word_at_PC, get_words_at_PC, build_mask),
+	(powerof2, match_opcode, make_instruction, print_arguments),
+	(print_arg): Delete forward declarations, moving static to..
+	(getregname, getcopregname, getregliststring): ..these definitions.
+	(build_mask): Return unsigned int mask.
+	(match_opcode): Use unsigned int vars.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* bfin-dis.c (fmtconst, fmtconst_val): Avoid signed overflow.
 
 2019-12-16  Alan Modra  <amodra@gmail.com>

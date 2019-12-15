@@ -260,7 +260,7 @@ typedef struct
     /* Size (in words).  */
     unsigned int size;
     /* Constant prefix (matched by the disassembler).  */
-    unsigned long match;
+    unsigned int match;
     /* Match size (in bits).  */
     int match_bits;
     /* Attributes.  */

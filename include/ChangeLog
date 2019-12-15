@@ -1,5 +1,9 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* opcode/crx.h (inst <match>): Make unsigned int.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* opcode/nds32.h (N32_BIT): Define using 1u.
 	(__SEXT): Use __MASK and N32_BIT.
 	(N32_IMMS): Remove duplicate mask.
