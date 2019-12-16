@@ -41,6 +41,7 @@
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
 #include "completer.h"
+#include <forward_list>
 
 static std::string jit_reader_dir;
 
@@ -481,15 +482,19 @@ struct gdb_symtab
 
   /* The source file for this symtab.  */
   std::string file_name;
-
-  struct gdb_symtab *next = nullptr;
 };
 
 /* Proxy object for building an object.  */
 
 struct gdb_object
 {
-  struct gdb_symtab *symtabs;
+  /* Symtabs of this object.
+
+     This is specifically a linked list, instead of, for example, a vector,
+     because the pointers are returned to the user's debug info reader.  So
+     it's important that the objects don't change location during their
+     lifetime (which would happen with a vector of objects getting resized).  */
+  std::forward_list<gdb_symtab> symtabs;
 };
 
 /* The type of the `private' data passed around by the callback
@@ -521,7 +526,7 @@ jit_object_open_impl (struct gdb_symbol_callbacks *cb)
   /* CB is not required right now, but sometime in the future we might
      need a handle to it, and we'd like to do that without breaking
      the ABI.  */
-  return XCNEW (struct gdb_object);
+  return new gdb_object;
 }
 
 /* Readers call into this function to open a new gdb_symtab, which,
@@ -534,10 +539,8 @@ jit_symtab_open_impl (struct gdb_symbol_callbacks *cb,
 {
   /* CB stays unused.  See comment in jit_object_open_impl.  */
 
-  gdb_symtab *ret = new gdb_symtab (file_name);
-  ret->next = object->symtabs;
-  object->symtabs = ret;
-  return ret;
+  object->symtabs.emplace_front (file_name);
+  return &object->symtabs.front ();
 }
 
 /* Returns true if the block corresponding to old should be placed
@@ -774,8 +777,6 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	    BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	}
     }
-
-  delete stab;
 }
 
 /* Called when closing a gdb_objfile.  Converts OBJ to a proper
@@ -785,7 +786,6 @@ static void
 jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 		       struct gdb_object *obj)
 {
-  struct gdb_symtab *i, *j;
   struct objfile *objfile;
   jit_dbg_reader_data *priv_data;
 
@@ -795,14 +795,12 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 			   OBJF_NOT_FILENAME);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
-  j = NULL;
-  for (i = obj->symtabs; i; i = j)
-    {
-      j = i->next;
-      finalize_symtab (i, objfile);
-    }
+  for (gdb_symtab &symtab : obj->symtabs)
+    finalize_symtab (&symtab, objfile);
+
   add_objfile_entry (objfile, *priv_data);
-  xfree (obj);
+
+  delete obj;
 }
 
 /* Try to read CODE_ENTRY using the loaded jit reader (if any).

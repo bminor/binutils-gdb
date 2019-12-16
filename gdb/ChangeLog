@@ -1,5 +1,17 @@
 2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c: Include forward_list.
+	(struct gdb_symtab) <next>: Remove field.
+	(struct gdb_object) <symtabs>: Change type to
+	std::forward_list<gdb_symtab>.
+	(jit_object_open_impl): Allocate gdb_object with new.
+	(jit_symtab_open_impl): Adjust to std::forward_list.
+	(finalize_symtab): Don't delete symtab.
+	(jit_object_close_impl):  Adjust to std::forward_list.  Free
+	gdb_object with delete.
+
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (struct gdb_symtab): Add constructor, destructor,
 	initialize fields.
 	<linetable>: Change type to unique_xmalloc_ptr.
