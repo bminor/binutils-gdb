@@ -31,6 +31,7 @@ AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_RANLIB
 AM_PROG_AR
+ZW_GNU_GETTEXT_SISTER_DIR
 
 dnl Default to a non shared library.  This may be overridden by the
 dnl configure option --enable-shared.
