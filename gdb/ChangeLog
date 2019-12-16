@@ -1,5 +1,16 @@
 2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (struct gdb_block) <next>: Remove field.
+	(struct gdb_symtab) <~gdb_symtab>: Remove.
+	<blocks>: Change type to std::forward_list<gdb_block>.
+	(compare_block): Remove.
+	(jit_block_open_impl): Adjust to std::forward_list.  Place the new
+	block at the beginning, don't mind about sorting.
+	(finalize_symtab): Adjust to std::forward_list, sort the blocks list
+	before using it.
+
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (struct gdb_block): Add constructor, initialize
 	real_block and next fields.
 	<name>: Change type to gdb::unique_xmalloc_ptr.

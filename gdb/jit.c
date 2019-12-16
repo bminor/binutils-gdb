@@ -437,10 +437,8 @@ struct gdb_block
       name (name != nullptr ? xstrdup (name) : nullptr)
   {}
 
-  /* gdb_blocks are linked into a tree structure.  Next points to the
-     next node at the same depth as this block and parent to the
-     parent gdb_block.  */
-  struct gdb_block *next = nullptr, *parent;
+  /* The parent of this block.  */
+  struct gdb_block *parent;
 
   /* Points to the "real" block that is being built out of this
      instance.  This block will be added to a blockvector, which will
@@ -463,23 +461,14 @@ struct gdb_symtab
     : file_name (file_name != nullptr ? file_name : "")
   {}
 
-  ~gdb_symtab ()
-  {
-    gdb_block *gdb_block_iter, *gdb_block_iter_tmp;
-
-    for ((gdb_block_iter = this->blocks,
-	  gdb_block_iter_tmp = gdb_block_iter->next);
-         gdb_block_iter;
-         gdb_block_iter = gdb_block_iter_tmp)
-      {
-        gdb_block_iter_tmp = gdb_block_iter->next;
-	delete gdb_block_iter;
-      }
-  }
-
   /* The list of blocks in this symtab.  These will eventually be
-     converted to real blocks.  */
-  struct gdb_block *blocks = nullptr;
+     converted to real blocks.
+
+     This is specifically a linked list, instead of, for example, a vector,
+     because the pointers are returned to the user's debug info reader.  So
+     it's important that the objects don't change location during their
+     lifetime (which would happen with a vector of objects getting resized).  */
+  std::forward_list<gdb_block> blocks;
 
   /* The number of blocks inserted.  */
   int nblocks = 0;
@@ -550,28 +539,6 @@ jit_symtab_open_impl (struct gdb_symbol_callbacks *cb,
   return &object->symtabs.front ();
 }
 
-/* Returns true if the block corresponding to old should be placed
-   before the block corresponding to new in the final blockvector.  */
-
-static int
-compare_block (const struct gdb_block *const old,
-	       const struct gdb_block *const newobj)
-{
-  if (old == NULL)
-    return 1;
-  if (old->begin < newobj->begin)
-    return 1;
-  else if (old->begin == newobj->begin)
-    {
-      if (old->end > newobj->end)
-	return 1;
-      else
-	return 0;
-    }
-  else
-    return 0;
-}
-
 /* Called by readers to open a new gdb_block.  This function also
    inserts the new gdb_block in the correct place in the corresponding
    gdb_symtab.  */
@@ -581,35 +548,12 @@ jit_block_open_impl (struct gdb_symbol_callbacks *cb,
 		     struct gdb_symtab *symtab, struct gdb_block *parent,
 		     GDB_CORE_ADDR begin, GDB_CORE_ADDR end, const char *name)
 {
-  struct gdb_block *block = new gdb_block (parent, begin, end, name);
-
-  block->next = symtab->blocks;
-
-  /* Ensure that the blocks are inserted in the correct (reverse of
-     the order expected by blockvector).  */
-  if (compare_block (symtab->blocks, block))
-    {
-      symtab->blocks = block;
-    }
-  else
-    {
-      struct gdb_block *i = symtab->blocks;
-
-      for (;; i = i->next)
-	{
-	  /* Guaranteed to terminate, since compare_block (NULL, _)
-	     returns 1.  */
-	  if (compare_block (i->next, block))
-	    {
-	      block->next = i->next;
-	      i->next = block;
-	      break;
-	    }
-	}
-    }
+  /* Place the block at the beginning of the list, it will be sorted when the
+     symtab is finalized.  */
+  symtab->blocks.emplace_front (parent, begin, end, name);
   symtab->nblocks++;
 
-  return block;
+  return &symtab->blocks.front ();
 }
 
 /* Readers call this to add a line mapping (from PC to line number) to
@@ -655,14 +599,20 @@ static void
 finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 {
   struct compunit_symtab *cust;
-  struct gdb_block *gdb_block_iter;
-  struct block *block_iter;
-  int actual_nblocks, i;
   size_t blockvector_size;
   CORE_ADDR begin, end;
   struct blockvector *bv;
 
-  actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
+  int actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
+
+  /* Sort the blocks in the order they should appear in the blockvector.  */
+  stab->blocks.sort([] (const gdb_block &a, const gdb_block &b)
+    {
+      if (a.begin != b.begin)
+	return a.begin < b.begin;
+
+      return a.end > b.end;
+    });
 
   cust = allocate_compunit_symtab (objfile, stab->file_name.c_str ());
   allocate_symtab (cust, stab->file_name.c_str ());
@@ -689,19 +639,18 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 					     blockvector_size);
   COMPUNIT_BLOCKVECTOR (cust) = bv;
 
-  /* (begin, end) will contain the PC range this entire blockvector
-     spans.  */
+  /* At the end of this function, (begin, end) will contain the PC range this
+     entire blockvector spans.  */
   BLOCKVECTOR_MAP (bv) = NULL;
-  begin = stab->blocks->begin;
-  end = stab->blocks->end;
+  begin = stab->blocks.front ().begin;
+  end = stab->blocks.front ().end;
   BLOCKVECTOR_NBLOCKS (bv) = actual_nblocks;
 
   /* First run over all the gdb_block objects, creating a real block
      object for each.  Simultaneously, keep setting the real_block
      fields.  */
-  for (i = (actual_nblocks - 1), gdb_block_iter = stab->blocks;
-       i >= FIRST_LOCAL_BLOCK;
-       i--, gdb_block_iter = gdb_block_iter->next)
+  int block_idx = FIRST_LOCAL_BLOCK;
+  for (gdb_block &gdb_block_iter : stab->blocks)
     {
       struct block *new_block = allocate_block (&objfile->objfile_obstack);
       struct symbol *block_name = allocate_symbol (objfile);
@@ -713,8 +662,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_MULTIDICT (new_block)
 	= mdict_create_linear (&objfile->objfile_obstack, NULL);
       /* The address range.  */
-      BLOCK_START (new_block) = (CORE_ADDR) gdb_block_iter->begin;
-      BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter->end;
+      BLOCK_START (new_block) = (CORE_ADDR) gdb_block_iter.begin;
+      BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter.end;
 
       /* The name.  */
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
@@ -724,22 +673,24 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
       block_name->name = obstack_strdup (&objfile->objfile_obstack,
-					 gdb_block_iter->name.get ());
+					 gdb_block_iter.name.get ());
 
       BLOCK_FUNCTION (new_block) = block_name;
 
-      BLOCKVECTOR_BLOCK (bv, i) = new_block;
+      BLOCKVECTOR_BLOCK (bv, block_idx) = new_block;
       if (begin > BLOCK_START (new_block))
 	begin = BLOCK_START (new_block);
       if (end < BLOCK_END (new_block))
 	end = BLOCK_END (new_block);
 
-      gdb_block_iter->real_block = new_block;
+      gdb_block_iter.real_block = new_block;
+
+      block_idx++;
     }
 
   /* Now add the special blocks.  */
-  block_iter = NULL;
-  for (i = 0; i < FIRST_LOCAL_BLOCK; i++)
+  struct block *block_iter = NULL;
+  for (enum block_enum i : { GLOBAL_BLOCK, STATIC_BLOCK })
     {
       struct block *new_block;
 
@@ -762,21 +713,19 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   /* Fill up the superblock fields for the real blocks, using the
      real_block fields populated earlier.  */
-  for (gdb_block_iter = stab->blocks;
-       gdb_block_iter;
-       gdb_block_iter = gdb_block_iter->next)
+  for (gdb_block &gdb_block_iter : stab->blocks)
     {
-      if (gdb_block_iter->parent != NULL)
+      if (gdb_block_iter.parent != NULL)
 	{
 	  /* If the plugin specifically mentioned a parent block, we
 	     use that.  */
-	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
-	    gdb_block_iter->parent->real_block;
+	  BLOCK_SUPERBLOCK (gdb_block_iter.real_block) =
+	    gdb_block_iter.parent->real_block;
 	}
       else
 	{
 	  /* And if not, we set a default parent block.  */
-	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
+	  BLOCK_SUPERBLOCK (gdb_block_iter.real_block) =
 	    BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	}
     }
