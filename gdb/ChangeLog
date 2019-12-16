@@ -1,5 +1,14 @@
 2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (struct gdb_block): Add constructor, initialize
+	real_block and next fields.
+	<name>: Change type to gdb::unique_xmalloc_ptr.
+	(struct gdb_symtab) <~gdb_symtab>: Free blocks with delete.
+	(jit_block_open_impl): Allocate gdb_block with new.
+	(finalize_symtab): Adjust to gdb::unique_xmalloc_ptr.
+
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c: Include forward_list.
 	(struct gdb_symtab) <next>: Remove field.
 	(struct gdb_object) <symtabs>: Change type to
