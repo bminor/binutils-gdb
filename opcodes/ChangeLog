@@ -1,5 +1,9 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* bfin-dis.c (fmtconst, fmtconst_val): Avoid signed overflow.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* nds32-dis.c (print_insn16, print_insn32): Remove forward decls.
 	(struct objdump_disasm_info): Delete.
 	(nds32_parse_audio_ext, nds32_parse_opcode): Cast result of

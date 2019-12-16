@@ -128,7 +128,8 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
 
       if (constant_formats[cf].pcrel)
 	x = SIGNEXTEND (x, constant_formats[cf].nbits);
-      ea = (x + constant_formats[cf].offset) << constant_formats[cf].scale;
+      ea = x + constant_formats[cf].offset;
+      ea = ea << constant_formats[cf].scale;
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
@@ -152,17 +153,14 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
     {
       int nb = constant_formats[cf].nbits + 1;
 
-      x = x | (1 << constant_formats[cf].nbits);
+      x = x | (1ul << constant_formats[cf].nbits);
       x = SIGNEXTEND (x, nb);
     }
   else if (constant_formats[cf].issigned)
     x = SIGNEXTEND (x, constant_formats[cf].nbits);
 
-  if (constant_formats[cf].offset)
-    x += constant_formats[cf].offset;
-
-  if (constant_formats[cf].scale)
-    x <<= constant_formats[cf].scale;
+  x += constant_formats[cf].offset;
+  x = (unsigned long) x << constant_formats[cf].scale;
 
   if (constant_formats[cf].decimal)
     sprintf (buf, "%*li", constant_formats[cf].leading, x);
@@ -186,7 +184,8 @@ fmtconst_val (const_forms_t cf, unsigned int x, unsigned int pc)
 
       if (constant_formats[cf].pcrel)
 	x = SIGNEXTEND (x, constant_formats[cf].nbits);
-      ea = (x + constant_formats[cf].offset) << constant_formats[cf].scale;
+      ea = x + constant_formats[cf].offset;
+      ea = ea << constant_formats[cf].scale;
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
@@ -197,7 +196,7 @@ fmtconst_val (const_forms_t cf, unsigned int x, unsigned int pc)
   if (constant_formats[cf].negative)
     {
       int nb = constant_formats[cf].nbits + 1;
-      x = x | (1u << constant_formats[cf].nbits);
+      x = x | (1ul << constant_formats[cf].nbits);
       x = SIGNEXTEND (x, nb);
     }
   else if (constant_formats[cf].issigned)
