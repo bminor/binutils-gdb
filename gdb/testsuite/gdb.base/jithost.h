@@ -18,10 +18,21 @@
 #ifndef JITHOST_H
 #define JITHOST_H
 
+struct jithost_abi_bounds
+{
+  const char *begin, *end;
+};
+
 struct jithost_abi
 {
-  const char *begin;
-  const char *end;
+  /* Beginning and past-the-end for the whole object. */
+  struct jithost_abi_bounds object;
+
+  /* Beginning and past-the-end for function_stack_mangle.  */
+  struct jithost_abi_bounds function_stack_mangle;
+
+  /* Beginning and past-the-end for function_add.  */
+  struct jithost_abi_bounds function_add;
 };
 
 #endif /* JITHOST_H */

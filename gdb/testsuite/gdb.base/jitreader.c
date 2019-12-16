@@ -34,8 +34,10 @@ enum register_mapping
 
 struct reader_state
 {
-  uintptr_t code_begin;
-  uintptr_t code_end;
+  struct {
+    uintptr_t begin;
+    uintptr_t end;
+  } func_stack_mangle;
 };
 
 static enum gdb_status
@@ -46,15 +48,24 @@ read_debug_info (struct gdb_reader_funcs *self,
   struct jithost_abi *symfile = memory;
   struct gdb_object *object = cbs->object_open (cbs);
   struct gdb_symtab *symtab = cbs->symtab_open (cbs, object, "");
-  GDB_CORE_ADDR begin = (GDB_CORE_ADDR) symfile->begin;
-  GDB_CORE_ADDR end = (GDB_CORE_ADDR) symfile->end;
+
   struct reader_state *state = (struct reader_state *) self->priv_data;
 
-  /* Record the function's range, for the unwinder.  */
-  state->code_begin = begin;
-  state->code_end = end;
+  /* Record the stack mangle function's range, for the unwinder.  */
+  state->func_stack_mangle.begin
+    = (uintptr_t) symfile->function_stack_mangle.begin;
+  state->func_stack_mangle.end
+    = (uintptr_t) symfile->function_stack_mangle.end;
 
-  cbs->block_open (cbs, symtab, NULL, begin, end, "jit_function_00");
+  cbs->block_open (cbs, symtab, NULL,
+		   (GDB_CORE_ADDR) symfile->function_stack_mangle.begin,
+		   (GDB_CORE_ADDR) symfile->function_stack_mangle.end,
+		   "jit_function_stack_mangle");
+
+  cbs->block_open (cbs, symtab, NULL,
+		   (GDB_CORE_ADDR) symfile->function_add.begin,
+		   (GDB_CORE_ADDR) symfile->function_add.end,
+		   "jit_function_add");
 
   cbs->symtab_close (cbs, symtab);
   cbs->object_close (cbs, object);
@@ -113,7 +124,7 @@ read_sp (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs,
 
   /* If stopped at the instruction after the "xor $-1, %rsp", demangle
      the stack pointer back.  */
-  if (ip == state->code_begin + 5)
+  if (ip == state->func_stack_mangle.begin + 5)
     sp ^= (uintptr_t) -1;
 
   *value = sp;
@@ -132,7 +143,8 @@ unwind_frame (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs)
   if (!read_register (cbs, AMD64_RA, &this_ip))
     return GDB_FAIL;
 
-  if (this_ip >= state->code_end || this_ip < state->code_begin)
+  if (this_ip >= state->func_stack_mangle.end
+      || this_ip < state->func_stack_mangle.begin)
     return GDB_FAIL;
 
   /* Unwind RBP in order to make the unwinder that tries to unwind
@@ -168,7 +180,7 @@ get_frame_id (struct gdb_reader_funcs *self, struct gdb_unwind_callbacks *cbs)
   read_register (cbs, AMD64_RA, &ip);
   read_sp (self, cbs, ip, &sp);
 
-  frame_id.code_address = (GDB_CORE_ADDR) state->code_begin;
+  frame_id.code_address = (GDB_CORE_ADDR) state->func_stack_mangle.begin;
   frame_id.stack_address = (GDB_CORE_ADDR) sp;
 
   return frame_id;

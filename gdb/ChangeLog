@@ -1,3 +1,7 @@
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (finalize_symtab): Set gdb_block_iter_tmp in loop.
+
 2019-12-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 9.0.90.DATE-git.

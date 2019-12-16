@@ -31,7 +31,8 @@ void __attribute__((noinline)) __jit_debug_register_code () { }
 struct jit_descriptor __jit_debug_descriptor = { 1, 0, 0, 0 };
 struct jit_code_entry only_entry;
 
-typedef void (jit_function_t) ();
+typedef void (jit_function_stack_mangle_t) (void);
+typedef long (jit_function_add_t) (long a, long b);
 
 /* The code of the jit_function_00 function that is copied into an
    mmapped buffer in the inferior at run time.
@@ -39,26 +40,47 @@ typedef void (jit_function_t) ();
    The second instruction mangles the stack pointer, meaning that when
    stopped at the third instruction, GDB needs assistance from the JIT
    unwinder in order to be able to unwind successfully.  */
-const unsigned char jit_function_00_code[] = {
+static const unsigned char jit_function_stack_mangle_code[] = {
   0xcc,				/* int3 */
   0x48, 0x83, 0xf4, 0xff,	/* xor $0xffffffffffffffff, %rsp */
   0x48, 0x83, 0xf4, 0xff,	/* xor $0xffffffffffffffff, %rsp */
   0xc3				/* ret */
 };
 
+/* And another "JIT-ed" function, with the prototype `jit_function_add_t`.  */
+static const unsigned char jit_function_add_code[] = {
+  0x48, 0x01, 0xfe,		/* add %rdi,%rsi */
+  0x48, 0x89, 0xf0,		/* mov %rsi,%rax */
+  0xc3,				/* retq */
+};
+
 int
 main (int argc, char **argv)
 {
-  struct jithost_abi *symfile;
+  struct jithost_abi *symfile = malloc (sizeof (struct jithost_abi));
   char *code = mmap (NULL, getpagesize (), PROT_WRITE | PROT_EXEC,
 		     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  jit_function_t *function = (jit_function_t *) code;
+  char *code_end = code;
 
-  memcpy (code, jit_function_00_code, sizeof (jit_function_00_code));
+  /* "JIT" function_stack_mangle.  */
+  memcpy (code_end, jit_function_stack_mangle_code,
+	  sizeof (jit_function_stack_mangle_code));
+  jit_function_stack_mangle_t *function_stack_mangle
+    = (jit_function_stack_mangle_t *) code_end;
+  symfile->function_stack_mangle.begin = code_end;
+  code_end += sizeof (jit_function_stack_mangle_code);
+  symfile->function_stack_mangle.end = code_end;
 
-  symfile = malloc (sizeof (struct jithost_abi));
-  symfile->begin = code;
-  symfile->end = code + sizeof (jit_function_00_code);
+  /* "JIT" function_add.  */
+  memcpy (code_end, jit_function_add_code, sizeof (jit_function_add_code));
+  jit_function_add_t *function_add = (jit_function_add_t *) code_end;
+  symfile->function_add.begin = code_end;
+  code_end += sizeof (jit_function_add_code);
+  symfile->function_add.end = code_end;
+
+  /* Bounds of the whole object.  */
+  symfile->object.begin = code;
+  symfile->object.end = code_end;
 
   only_entry.symfile_addr = symfile;
   only_entry.symfile_size = sizeof (struct jithost_abi);
@@ -69,7 +91,8 @@ main (int argc, char **argv)
   __jit_debug_descriptor.version = 1;
   __jit_debug_register_code ();
 
-  function ();
+  function_stack_mangle ();
+  function_add (5, 6);
 
   return 0;
 }
