@@ -178,18 +178,15 @@ extract_all_fields (const aarch64_operand *self, aarch64_insn code)
 }
 
 /* Sign-extend bit I of VALUE.  */
-static inline int32_t
+static inline uint64_t
 sign_extend (aarch64_insn value, unsigned i)
 {
-  uint32_t ret = value;
+  uint64_t ret, sign;
 
   assert (i < 32);
-  if ((value >> i) & 0x1)
-    {
-      uint32_t val = (uint32_t)(-1) << i;
-      ret = ret | val;
-    }
-  return (int32_t) ret;
+  ret = value;
+  sign = (uint64_t) 1 << i;
+  return ((ret & (sign + sign - 1)) ^ sign) - sign;
 }
 
 /* N.B. the following inline helpfer functions create a dependency on the
@@ -658,7 +655,7 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 		 const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int64_t imm;
+  uint64_t imm;
 
   imm = extract_all_fields (self, code);
 

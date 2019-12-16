@@ -1,5 +1,11 @@
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
+	* aarch64-dis.c (sign_extend): Return uint64_t.  Rewrite without
+	conditional.
+	(aarch64_ext_imm): Avoid signed overflow.
+
+2019-12-16  Alan Modra  <amodra@gmail.com>
+
 	* microblaze-dis.c (read_insn_microblaze): Avoid signed overflow.
 
 2019-12-16  Alan Modra  <amodra@gmail.com>
