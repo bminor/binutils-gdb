@@ -1,5 +1,15 @@
 2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (struct gdb_symtab): Add constructor, destructor,
+	initialize fields.
+	<linetable>: Change type to unique_xmalloc_ptr.
+	<file_name>: Change type to std::string.
+	(jit_symtab_open_impl): Allocate gdb_symtab with new.
+	(jit_symtab_line_mapping_add_impl): Adjust.
+	(finalize_symtab): Adjust, call delete on stab.
+
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (finalize_symtab): Set gdb_block_iter_tmp in loop.
 
 2019-12-16  Tom Tromey  <tromey@adacore.com>
