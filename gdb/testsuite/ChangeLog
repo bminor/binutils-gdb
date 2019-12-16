@@ -1,3 +1,25 @@
+2019-12-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/jit-reader.exp (jit_reader_test): Rename
+	jit_function_00 to jit_function_stack_mangle.
+	* gdb.base/jithost.c (jit_function_t): Rename to...
+	(jit_function_stack_mangle_t): ... this.
+	(jit_function_add_t): New typedef.
+	(jit_function_00_code): Rename to...
+	(jit_function_stack_mangle_code): ... this, make static.
+	(jit_function_add_code): New.
+	(main): Generate "add" function and call it.  Adjust to changes
+	in jithost_abi.
+	* gdb.base/jithost.h (struct jithost_abi_bounds): New.
+	(struct jithost_abi) <begin, end>: Remove fields.
+	<object, function_stack_mangle, function_add>: New fields.
+	* gdb.base/jitreader.c (struct reader_state) <code_begin,
+	code_end>: Remove fields.
+	<func_stack_mangle>: New field.
+	(read_debug_info): Adjust to renaming, create block for "add"
+	function.
+	(read_sp, unwind_frame, get_frame_id): Adjust to other changes.
+
 2019-12-11  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/resize.exp: Fix regexp.

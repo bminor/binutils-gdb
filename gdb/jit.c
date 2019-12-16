@@ -765,6 +765,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
        gdb_block_iter;
        gdb_block_iter = gdb_block_iter_tmp)
     {
+      gdb_block_iter_tmp = gdb_block_iter->next;
       xfree ((void *) gdb_block_iter->name);
       xfree (gdb_block_iter);
     }

@@ -120,7 +120,7 @@ proc jit_reader_test {} {
 	with_test_prefix "before mangling" {
 	    gdb_test "bt" \
 		[multi_line \
-		     "#0 ${any} in jit_function_00 ${any}" \
+		     "#0 ${any} in jit_function_stack_mangle ${any}" \
 		     "#1 ${any} in main ${any}" \
 		    ] \
 		"bt works"
@@ -128,7 +128,7 @@ proc jit_reader_test {} {
 	    set sp_before_mangling \
 		[get_hexadecimal_valueof "\$sp" 0 "get sp"]
 
-	    gdb_test "up" "#1  $any in main $any\r\n$any  function $any" \
+	    gdb_test "up" "#1  $any in main $any\r\n$any  function_stack_mangle $any" \
 		"move up to caller"
 
 	    set caller_sp \
@@ -140,7 +140,7 @@ proc jit_reader_test {} {
 	# reader's unwinder understands the mangling and should thus
 	# be able to unwind at that location.
 	with_test_prefix "after mangling" {
-	    gdb_test "si" "in jit_function_00 .*" "step over stack mangling"
+	    gdb_test "si" "in jit_function_stack_mangle .*" "step over stack mangling"
 
 	    set sp_after_mangling \
 		[get_hexadecimal_valueof "\$sp" 0 "get sp"]
@@ -152,7 +152,7 @@ proc jit_reader_test {} {
 	    # the mangled stack pointer.
 	    gdb_test "bt" \
 		[multi_line \
-		     "#0 ${any} in jit_function_00 ${any}" \
+		     "#0 ${any} in jit_function_stack_mangle ${any}" \
 		     "#1 ${any} in main ${any}" \
 		    ] \
 		"bt works"
@@ -161,11 +161,11 @@ proc jit_reader_test {} {
 		info_registers_current_frame $sp_after_mangling
 
 		gdb_test "info frame" \
-		    "Stack level 0, frame at $sp_before_mangling.*in jit_function_00.*"
+		    "Stack level 0, frame at $sp_before_mangling.*in jit_function_stack_mangle.*"
 	    }
 
 	    with_test_prefix "caller frame" {
-		gdb_test "up" "#1  $any in main $any\r\n$any  function $any" \
+		gdb_test "up" "#1  $any in main $any\r\n$any  function_stack_mangle $any" \
 		    "up to caller"
 
 		# Since the JIT unwinder only provides RIP/RSP/RBP,
@@ -243,7 +243,7 @@ proc jit_reader_test {} {
 	# the mangled stack pointer.
 	gdb_test "bt" \
 	    [multi_line \
-		 "#0 ${any} in jit_function_00 ${any}" \
+		 "#0 ${any} in jit_function_stack_mangle ${any}" \
 		 "#1 ${any} in main ${any}" \
 		]
     }
