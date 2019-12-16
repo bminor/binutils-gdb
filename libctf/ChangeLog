@@ -1,5 +1,10 @@
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c: Include <unistd.h>.
+	* ctf-open-bfd.c: Likewise.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
 	PR libctf/25120
 	* configure.ac: Check for bswap_16, bswap_32, and bswap_64 decls.
 	* swap.h (bswap_16): Do not assume that presence of <byteswap.h>
