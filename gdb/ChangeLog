@@ -1,3 +1,7 @@
+2019-12-17  Christian Biesinger  <cbiesinger@google.com>
+
+	* bsd-kvm.c: Include gdbsupport/pathstuff.h.
+
 2019-12-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* tui/tui-layout.h (class tui_layout_base): Add virtual
