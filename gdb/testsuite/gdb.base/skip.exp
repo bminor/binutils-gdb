@@ -21,8 +21,8 @@ load_lib completion-support.exp
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" "skip" \
-                          {skip.c skip1.c } \
-                          {debug nowarnings}] } {
+			  {skip.c skip1.c } \
+			  {debug nowarnings}] } {
     return -1
 }
 
