@@ -877,7 +877,7 @@ nds32_mask_opcode (uint32_t insn)
 	}
       return MASK_OP (insn, 0x1f << 20);
     default:
-      return (1 << 31);
+      return 1u << 31;
     }
 }
 
@@ -976,8 +976,8 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
   int status;
   bfd_byte buf[4];
   bfd_byte buf_data[16];
-  long long given;
-  long long given1;
+  uint64_t given;
+  uint64_t given1;
   uint32_t insn;
   int n;
   int last_symbol_index = -1;
@@ -1129,24 +1129,25 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
       info->bytes_per_line = 4;
 
       if (size == 16)
-	info->fprintf_func (info->stream, ".qword\t0x%016llx%016llx",
+	info->fprintf_func (info->stream, ".qword\t0x%016" PRIx64 "%016" PRIx64,
 			    given, given1);
       else if (size == 8)
-	info->fprintf_func (info->stream, ".dword\t0x%016llx", given);
+	info->fprintf_func (info->stream, ".dword\t0x%016" PRIx64, given);
       else if (size == 4)
-	info->fprintf_func (info->stream, ".word\t0x%08llx", given);
+	info->fprintf_func (info->stream, ".word\t0x%08" PRIx64, given);
       else if (size == 2)
 	{
 	  /* short */
 	  if (mapping_type == MAP_DATA0)
-	    info->fprintf_func (info->stream, ".byte\t0x%02llx", given & 0xFF);
+	    info->fprintf_func (info->stream, ".byte\t0x%02" PRIx64,
+				given & 0xFF);
 	  else
-	    info->fprintf_func (info->stream, ".short\t0x%04llx", given);
+	    info->fprintf_func (info->stream, ".short\t0x%04" PRIx64, given);
 	}
       else
 	{
 	  /* byte */
-	  info->fprintf_func (info->stream, ".byte\t0x%02llx", given);
+	  info->fprintf_func (info->stream, ".byte\t0x%02" PRIx64, given);
 	}
 
       return size;

@@ -1,5 +1,10 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* nds32-dis.c (nds32_mask_opcode): Avoid signed overflow.
+	(print_insn_nds32): Use uint64_t for "given" and "given1".
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* tic80-dis.c: Delete file.
 	* tic80-opc.c: Delete file.
 	* disassemble.c: Remove tic80 support.
