@@ -1,3 +1,12 @@
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/tic80coff.sh: Delete file.
+	* scripttempl/tic80coff.sc: Delete file.
+	* configure.tgt: Remove tic80 support.
+	* Makefile.am: Likewise.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/align-branch-1.d: New file.

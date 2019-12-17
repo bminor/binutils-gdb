@@ -292,7 +292,6 @@ etic3xcoff.c
 etic3xcoff_onchip.c
 etic4xcoff.c
 etic54xcoff.c
-etic80coff.c
 ev850.c
 ev850_rh850.c
 evanilla.c

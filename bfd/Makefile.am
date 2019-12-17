@@ -160,7 +160,6 @@ ALL_MACHINES = \
 	cpu-tic4x.lo \
 	cpu-tic54x.lo \
 	cpu-tic6x.lo \
-	cpu-tic80.lo \
 	cpu-tilegx.lo \
 	cpu-tilepro.lo \
 	cpu-v850.lo \
@@ -246,7 +245,6 @@ ALL_MACHINES_CFILES = \
 	cpu-tic4x.c \
 	cpu-tic54x.c \
 	cpu-tic6x.c \
-	cpu-tic80.c \
 	cpu-tilegx.c \
 	cpu-tilepro.c \
 	cpu-v850.c \
@@ -278,7 +276,6 @@ BFD32_BACKENDS = \
 	coff-tic30.lo \
 	coff-tic4x.lo \
 	coff-tic54x.lo \
-	coff-tic80.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
 	coffgen.lo \
@@ -414,7 +411,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-tic30.c \
 	coff-tic4x.c \
 	coff-tic54x.c \
-	coff-tic80.c \
 	coff-z80.c \
 	coff-z8k.c \
 	coffgen.c \

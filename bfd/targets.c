@@ -899,7 +899,6 @@ extern const bfd_target tic6x_elf32_c6000_be_vec;
 extern const bfd_target tic6x_elf32_c6000_le_vec;
 extern const bfd_target tic6x_elf32_linux_be_vec;
 extern const bfd_target tic6x_elf32_linux_le_vec;
-extern const bfd_target tic80_coff_vec;
 extern const bfd_target tilegx_elf32_be_vec;
 extern const bfd_target tilegx_elf32_le_vec;
 extern const bfd_target tilegx_elf64_be_vec;
@@ -1306,7 +1305,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&tic54x_coff2_vec,
 	&tic6x_elf32_be_vec,
 	&tic6x_elf32_le_vec,
-	&tic80_coff_vec,
 
 	&tilegx_elf32_be_vec,
 	&tilegx_elf32_le_vec,

@@ -1,3 +1,8 @@
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp: Remove tic80 support.
+	* testsuite/binutils-all/objdump.exp: Likewise.
+
 2019-12-11  Alan Modra  <amodra@gmail.com>
 
 	* od-xcoff.c (dump_dumpx_core): Adjust for bfd_h_get_8 change.

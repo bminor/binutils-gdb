@@ -32,7 +32,6 @@ coff-stgo32.c
 coff-tic30.c
 coff-tic4x.c
 coff-tic54x.c
-coff-tic80.c
 coff-x86_64.c
 coff-z80.c
 coff-z8k.c
@@ -117,7 +116,6 @@ cpu-tic30.c
 cpu-tic4x.c
 cpu-tic54x.c
 cpu-tic6x.c
-cpu-tic80.c
 cpu-tilegx.c
 cpu-tilepro.c
 cpu-v850.c

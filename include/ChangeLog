@@ -1,3 +1,8 @@
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
+	* coff/tic80.h: Delete file.
+	* opcode/tic80.h: Delete file.
+
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
 	* opcode/crx.h (inst <match>): Make unsigned int.

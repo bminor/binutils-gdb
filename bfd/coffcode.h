@@ -2330,12 +2330,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       break;
 #endif
 
-#ifdef TIC80_ARCH_MAGIC
-    case TIC80_ARCH_MAGIC:
-      arch = bfd_arch_tic80;
-      break;
-#endif
-
 #ifdef MCOREMAGIC
     case MCOREMAGIC:
       arch = bfd_arch_mcore;
@@ -2715,12 +2709,6 @@ coff_set_flags (bfd * abfd,
       return TRUE;
 #endif
 
-#ifdef TIC80_ARCH_MAGIC
-    case bfd_arch_tic80:
-      *magicp = TIC80_ARCH_MAGIC;
-      return TRUE;
-#endif
-
 #ifdef ARMMAGIC
     case bfd_arch_arm:
 #ifdef ARM_WINCE
@@ -2883,7 +2871,7 @@ sort_by_secaddr (const void * arg1, const void * arg2)
 /* Calculate the file position for each section.  */
 
 #define ALIGN_SECTIONS_IN_FILE
-#if defined(TIC80COFF) || defined(TICOFF)
+#ifdef TICOFF
 #undef ALIGN_SECTIONS_IN_FILE
 #endif
 
@@ -3811,9 +3799,6 @@ coff_write_object_contents (bfd * abfd)
      but it doesn't hurt to set it internally.  */
   internal_f.f_target_id = TI_TARGET_ID;
 #endif
-#ifdef TIC80_TARGET_ID
-  internal_f.f_target_id = TIC80_TARGET_ID;
-#endif
 
   /* FIXME, should do something about the other byte orders and
      architectures.  */
@@ -3841,10 +3826,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = TICOFF_AOUT_MAGIC;
 #define __A_MAGIC_SET__
 #endif
-#ifdef TIC80COFF
-    internal_a.magic = TIC80_ARCH_MAGIC;
-#define __A_MAGIC_SET__
-#endif /* TIC80 */
 
 #if defined(ARM)
 #define __A_MAGIC_SET__
@@ -4775,7 +4756,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_ALIAS:	/* Duplicate tag.  */
 #endif
 	      /* New storage classes for TI COFF.  */
-#if defined(TIC80COFF) || defined(TICOFF)
+#ifdef TICOFF
 	    case C_UEXT:	/* Tentative external definition.  */
 #endif
 	    case C_EXTLAB:	/* External load time label.  */

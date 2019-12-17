@@ -901,9 +901,6 @@ tic6x-*-uclinux)	targ_emul=elf32_tic6x_linux_le
 			targ_extra_emuls="elf32_tic6x_linux_be elf32_tic6x_le elf32_tic6x_be"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-tic80-*-*)		targ_emul=tic80coff
-			targ_extra_ofiles=
-			;;
 tilegx-*-*)		targ_emul=elf64tilegx
 			targ_extra_emuls="elf64tilegx_be elf32tilegx elf32tilegx_be"
 			targ_extra_libpath=$targ_extra_emuls

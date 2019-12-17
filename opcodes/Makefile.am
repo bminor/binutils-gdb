@@ -245,8 +245,6 @@ TARGET_LIBOPCODES_CFILES = \
 	tic54x-dis.c \
 	tic54x-opc.c \
 	tic6x-dis.c \
-	tic80-dis.c \
-	tic80-opc.c \
 	tilegx-dis.c \
 	tilegx-opc.c \
 	tilepro-dis.c \

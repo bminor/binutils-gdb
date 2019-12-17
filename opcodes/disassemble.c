@@ -88,7 +88,6 @@
 #define ARCH_tic4x
 #define ARCH_tic54x
 #define ARCH_tic6x
-#define ARCH_tic80
 #define ARCH_tilegx
 #define ARCH_tilepro
 #define ARCH_v850
@@ -462,11 +461,6 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_tic6x
     case bfd_arch_tic6x:
       disassemble = print_insn_tic6x;
-      break;
-#endif
-#ifdef ARCH_tic80
-    case bfd_arch_tic80:
-      disassemble = print_insn_tic80;
       break;
 #endif
 #ifdef ARCH_ft32

@@ -4588,7 +4588,7 @@ with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
 For the arc, hppa, i386 using ELF, iq2000, m68k, or1k,
-s390, sparc, tic4x, tic80 and xtensa, the first expression is the
+s390, sparc, tic4x and xtensa, the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
 is already a multiple of 8, no change is needed.  For the tic54x, the

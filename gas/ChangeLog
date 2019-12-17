@@ -1,3 +1,7 @@
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texi: Remove mention of tic80.
+
 2019-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25274

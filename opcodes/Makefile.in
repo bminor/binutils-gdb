@@ -635,8 +635,6 @@ TARGET_LIBOPCODES_CFILES = \
 	tic54x-dis.c \
 	tic54x-opc.c \
 	tic6x-dis.c \
-	tic80-dis.c \
-	tic80-opc.c \
 	tilegx-dis.c \
 	tilegx-opc.c \
 	tilepro-dis.c \
@@ -1051,8 +1049,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tic54x-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tic54x-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tic6x-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tic80-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tic80-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tilegx-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tilegx-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tilepro-dis.Plo@am__quote@

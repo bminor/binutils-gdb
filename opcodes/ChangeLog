@@ -1,5 +1,17 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* tic80-dis.c: Delete file.
+	* tic80-opc.c: Delete file.
+	* disassemble.c: Remove tic80 support.
+	* disassemble.h: Likewise.
+	* Makefile.am: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* bpf-ibld.c: Regenerate.
 
 2019-12-16  Alan Modra  <amodra@gmail.com>

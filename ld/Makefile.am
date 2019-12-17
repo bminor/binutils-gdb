@@ -379,7 +379,6 @@ ALL_EMULATION_SOURCES = \
 	etic3xcoff_onchip.c \
 	etic4xcoff.c \
 	etic54xcoff.c \
-	etic80coff.c \
 	ev850.c \
 	ev850_rh850.c \
 	evanilla.c \
@@ -869,7 +868,6 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic3xcoff_onchip.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic4xcoff.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic54xcoff.Pc@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic80coff.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ev850.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ev850_rh850.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evanilla.Pc@am__quote@
