@@ -8,5 +8,5 @@
 # relocations in read-only sections.
 
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +(GLOBAL +HIDDEN|LOCAL +DEFAULT) +[0-9]+ +___?start___sancov_cntrs
+ +[0-9]+: +[a-f0-9]+ +0 +(NOTYPE|OBJECT) +(GLOBAL +HIDDEN|LOCAL +DEFAULT) +[0-9]+ +___?start___sancov_cntrs
 #pass

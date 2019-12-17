@@ -1,5 +1,14 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/pr21233-l.sd: Accept OBJECT for type and
+	PRC for section of symbols.
+	* testsuite/ld-elf/pr23591.d: Likewise.
+	* testsuite/ld-elf/provide-hidden-s.nd: Likewise.
+	* testsuite/ld-mips-elf/start.s: Make symbols function type.
+	* testsuite/ld-mips-elf/hash2.d: Adjust.  Don't xfail irix.
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/tic80coff.sh: Delete file.
 	* scripttempl/tic80coff.sc: Delete file.
 	* configure.tgt: Remove tic80 support.
