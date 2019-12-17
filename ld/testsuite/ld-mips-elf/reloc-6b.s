@@ -1,4 +1,5 @@
 	.globl	__start .text
+	.type	__start, @function
 	.globl	gs .text
 __start:
 gs:

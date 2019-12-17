@@ -1,6 +1,7 @@
 	.abicalls
 	.option	pic0
 	.global	__start
+	.type	__start, @function
 	.ent	__start
 __start:
 	jal	foo
@@ -8,6 +9,7 @@ __start:
 	.end	__start
 
 	.global	ext
+	.type	ext, @function
 	.ent	ext
 ext:
 	lui	$gp,%hi(__gnu_local_gp)

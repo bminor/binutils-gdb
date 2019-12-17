@@ -1,6 +1,7 @@
 	.set	mips16
 
 	.globl	__start
+	.type	__start, @function
 	.ent	__start
 	.align	4
 __start:

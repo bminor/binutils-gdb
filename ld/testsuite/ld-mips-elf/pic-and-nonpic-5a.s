@@ -1,6 +1,7 @@
 	.abicalls
 	.option	pic0
 	.global	__start
+	.type	__start, @function
 	.ent	__start
 __start:
 	lui	$2,%hi(foo)

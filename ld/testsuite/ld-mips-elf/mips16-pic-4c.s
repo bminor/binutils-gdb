@@ -7,6 +7,7 @@
 
 	.section .mips16.call.f2, "ax", @progbits
 	.ent	__call
+	.type	__call, @function
 __call:
 	la	$25,f2
 	jr	$25
@@ -18,6 +19,7 @@ __call:
 
 	.section .mips16.call.fp.f3, "ax", @progbits
 	.ent	__call_fp
+	.type	__call_fp, @function
 __call_fp:
 	la	$25,f3
 	jr	$25

@@ -1,5 +1,49 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-avr/lds-mega.d: Adjust symbols to suit objdump change.
+	* testsuite/ld-avr/lds-tiny.d: Likewise.
+	* testsuite/ld-x86-64/load2.d: Likewise.
+	* testsuite/ld-mips-elf/compact-eh1.s: Give function symbols
+	function type.
+	* testsuite/ld-mips-elf/compact-eh1a.s: Likewise.
+	* testsuite/ld-mips-elf/compact-eh1b.s: Likewise.
+	* testsuite/ld-mips-elf/compact-eh2.s: Likewise.
+	* testsuite/ld-mips-elf/compact-eh3.s: Likewise.
+	* testsuite/ld-mips-elf/compact-eh3a.s: Likewise.
+	* testsuite/ld-mips-elf/eh-frame5.s: Likewise.
+	* testsuite/ld-mips-elf/ehdr_start-new.s: Likewise.
+	* testsuite/ld-mips-elf/ehdr_start-o32.s: Likewise.
+	* testsuite/ld-mips-elf/emit-relocs-1a.s: Likewise.
+	* testsuite/ld-mips-elf/jaloverflow-2.s: Likewise.
+	* testsuite/ld-mips-elf/jaloverflow.s: Likewise.
+	* testsuite/ld-mips-elf/mips16-call-global-1.s: Likewise.
+	* testsuite/ld-mips-elf/mips16-intermix-1.s: Likewise.
+	* testsuite/ld-mips-elf/mips16-pic-1b.s: Likewise.
+	* testsuite/ld-mips-elf/mips16-pic-4c.s: Likewise.
+	* testsuite/ld-mips-elf/no-shared-1-n64.s: Likewise.
+	* testsuite/ld-mips-elf/no-shared-1-o32.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1b-micromips.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-1b.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-2a.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3b.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-4b.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-5a.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-6-n32c.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-6-n64c.s: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-6-o32c.s: Likewise.
+	* testsuite/ld-mips-elf/pie.s: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr.s: Likewise.
+	* testsuite/ld-mips-elf/reloc-1a.s: Likewise.
+	* testsuite/ld-mips-elf/reloc-2a.s: Likewise.
+	* testsuite/ld-mips-elf/reloc-4.s: Likewise.
+	* testsuite/ld-mips-elf/reloc-5.s: Likewise.
+	* testsuite/ld-mips-elf/reloc-6b.s: Likewise.
+	* testsuite/ld-mips-elf/textrel-1.s: Likewise.
+	* testsuite/ld-mips-elf/undefweak-overflow.s: Likewise.
+	* testsuite/ld-mips-elf/undefweak-overflow.d: Adjust.
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr21233-l.sd: Accept OBJECT for type and
 	PRC for section of symbols.
 	* testsuite/ld-elf/pr23591.d: Likewise.

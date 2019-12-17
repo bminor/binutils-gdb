@@ -803,6 +803,8 @@ remove_useless_symbols (asymbol **symbols, long count)
   return out_ptr - symbols;
 }
 
+static const asection *compare_section;
+
 /* Sort symbols into value order.  */
 
 static int
@@ -814,8 +816,7 @@ compare_symbols (const void *ap, const void *bp)
   const char *bn;
   size_t anl;
   size_t bnl;
-  bfd_boolean af;
-  bfd_boolean bf;
+  bfd_boolean as, af, bs, bf;
   flagword aflags;
   flagword bflags;
 
@@ -824,10 +825,16 @@ compare_symbols (const void *ap, const void *bp)
   else if (bfd_asymbol_value (a) < bfd_asymbol_value (b))
     return -1;
 
-  if (a->section > b->section)
-    return 1;
-  else if (a->section < b->section)
+  /* Prefer symbols from the section currently being disassembled.
+     Don't sort symbols from other sections by section, since there
+     isn't much reason to prefer one section over another otherwise.
+     See sym_ok comment for why we compare by section name.  */
+  as = strcmp (compare_section->name, a->section->name) == 0;
+  bs = strcmp (compare_section->name, b->section->name) == 0;
+  if (as && !bs)
     return -1;
+  if (!as && bs)
+    return 1;
 
   an = bfd_asymbol_name (a);
   bn = bfd_asymbol_name (b);
@@ -853,7 +860,8 @@ compare_symbols (const void *ap, const void *bp)
 
 #define file_symbol(s, sn, snl)			\
   (((s)->flags & BSF_FILE) != 0			\
-   || ((sn)[(snl) - 2] == '.'			\
+   || ((snl) > 2				\
+       && (sn)[(snl) - 2] == '.'		\
        && ((sn)[(snl) - 1] == 'o'		\
 	   || (sn)[(snl) - 1] == 'a')))
 
@@ -865,8 +873,8 @@ compare_symbols (const void *ap, const void *bp)
   if (! af && bf)
     return -1;
 
-  /* Try to sort global symbols before local symbols before function
-     symbols before debugging symbols.  */
+  /* Sort function and object symbols before global symbols before
+     local symbols before section symbols before debugging symbols.  */
 
   aflags = a->flags;
   bflags = b->flags;
@@ -878,9 +886,23 @@ compare_symbols (const void *ap, const void *bp)
       else
 	return -1;
     }
+  if ((aflags & BSF_SECTION_SYM) != (bflags & BSF_SECTION_SYM))
+    {
+      if ((aflags & BSF_SECTION_SYM) != 0)
+	return 1;
+      else
+	return -1;
+    }
   if ((aflags & BSF_FUNCTION) != (bflags & BSF_FUNCTION))
     {
       if ((aflags & BSF_FUNCTION) != 0)
+	return -1;
+      else
+	return 1;
+    }
+  if ((aflags & BSF_OBJECT) != (bflags & BSF_OBJECT))
+    {
+      if ((aflags & BSF_OBJECT) != 0)
 	return -1;
       else
 	return 1;
@@ -1102,14 +1124,11 @@ find_symbol_for_address (bfd_vma vma,
 
   /* The symbol we want is now in min, the low end of the range we
      were searching.  If there are several symbols with the same
-     value, we want the first (non-section/non-debugging) one.  */
+     value, we want the first one.  */
   thisplace = min;
   while (thisplace > 0
 	 && (bfd_asymbol_value (sorted_syms[thisplace])
-	     == bfd_asymbol_value (sorted_syms[thisplace - 1]))
-	 && ((sorted_syms[thisplace - 1]->flags
-	      & (BSF_SECTION_SYM | BSF_DEBUGGING)) == 0)
-	 )
+	     == bfd_asymbol_value (sorted_syms[thisplace - 1])))
     --thisplace;
 
   /* Prefer a symbol in the current section if we have multple symbols
@@ -2389,6 +2408,10 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   pinfo->buffer_length = datasize;
   pinfo->section = section;
 
+  /* Sort the symbols into value and section order.  */
+  compare_section = section;
+  qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
+
   /* Skip over the relocs belonging to addresses below the
      start address.  */
   while (rel_pp < rel_ppend
@@ -2631,9 +2654,6 @@ disassemble_data (bfd *abfd)
       sorted_syms[sorted_symcount] = synthsyms + i;
       ++sorted_symcount;
     }
-
-  /* Sort the symbols into section and symbol order.  */
-  qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
   init_disassemble_info (&disasm_info, stdout, (fprintf_ftype) fprintf);
 

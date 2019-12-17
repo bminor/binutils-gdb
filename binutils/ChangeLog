@@ -1,5 +1,16 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* objdump.c (compare_section): New static var.
+	(compare_symbols): Sort by current section only.  Don't access
+	symbol name out of bounds when checking for file symbols.
+	Sort section symbols and object symbols.
+	(find_symbol_for_address): Remove bogus debugging and section
+	symbol test.
+	(disassemble_data): Move symbol sort from here..
+	(disassemble_section): ..to here.  Set compare_section.
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objcopy.exp: Remove tic80 support.
 	* testsuite/binutils-all/objdump.exp: Likewise.
 

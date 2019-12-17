@@ -3,6 +3,7 @@
 
 	.module mips64r6
 	.globl	start
+	.type	start, @function
 	.weak	foo
 start:
 	.set noreorder
