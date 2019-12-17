@@ -1,5 +1,9 @@
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
+	* visium-dis.c (print_insn_visium): Avoid signed overflow.
+
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
 	* aarch64-opc.c (value_fit_signed_field_p): Avoid signed overflow.
 	(value_fit_unsigned_field_p): Likewise.
 	(aarch64_wide_constant_p): Likewise.

@@ -789,7 +789,7 @@ print_insn_visium (bfd_vma addr, disassemble_info *info)
 
   /* Get 32-bit instruction word.  */
   FETCH_DATA (info, buffer + 4);
-  ins = buffer[0] << 24;
+  ins = (unsigned) buffer[0] << 24;
   ins |= buffer[1] << 16;
   ins |= buffer[2] << 8;
   ins |= buffer[3];
