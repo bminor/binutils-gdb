@@ -288,8 +288,8 @@
                     (set (ifield f-imm64-a) (and (ifield f-imm64) (const #xffffffff)))))
   (extract (sequence ()
                      (set (ifield f-imm64)
-                          (or (sll DI (zext DI (ifield f-imm64-c)) (const 32))
-                              (zext DI (ifield f-imm64-a)))))))
+                          (or (sll UDI (zext UDI (ifield f-imm64-c)) (const 32))
+                              (zext UDI (ifield f-imm64-a)))))))
 
 ;;; Operands
 

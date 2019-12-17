@@ -689,7 +689,7 @@ bpf_cgen_extract_operand (CGEN_CPU_DESC cd,
         length = extract_normal (cd, ex_info, insn_value, 0, 96, 31, 32, 32, total_length, pc, & fields->f_imm64_c);
         if (length <= 0) break;
 {
-  FLD (f_imm64) = ((((((DI) (UINT) (FLD (f_imm64_c)))) << (32))) | (((DI) (UINT) (FLD (f_imm64_a)))));
+  FLD (f_imm64) = ((((((UDI) (UINT) (FLD (f_imm64_c)))) << (32))) | (((UDI) (UINT) (FLD (f_imm64_a)))));
 }
       }
       break;

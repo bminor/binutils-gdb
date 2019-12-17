@@ -1,3 +1,7 @@
+2019-12-17  Alan Modra  <amodra@gmail.com>
+
+	* bpf.cpu (f-imm64): Avoid signed overflow.
+
 2019-12-16  Alan Modra  <amodra@gmail.com>
 
 	* xstormy16.cpu (f-rel12a): Avoid signed overflow.
