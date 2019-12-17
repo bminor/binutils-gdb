@@ -1,3 +1,8 @@
+2019-12-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tui/tui-layout.h (class tui_layout_base): Add virtual
+	destructor.
+
 2019-12-16  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* infcmd.c (prepare_one_step): Step over skipped inline functions.

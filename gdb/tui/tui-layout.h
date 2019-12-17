@@ -34,6 +34,8 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (tui_layout_base);
 
+  virtual ~tui_layout_base () = default;
+
   /* Clone this object.  Ordinarily a layout is cloned before it is
      used, so that any necessary modifications do not affect the
      "skeleton" layout.  */
