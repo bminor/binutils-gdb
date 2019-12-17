@@ -546,7 +546,7 @@ value_fit_signed_field_p (int64_t value, unsigned width)
   assert (width < 32);
   if (width < sizeof (value) * 8)
     {
-      int64_t lim = (int64_t)1 << (width - 1);
+      int64_t lim = (uint64_t) 1 << (width - 1);
       if (value >= -lim && value < lim)
 	return 1;
     }
@@ -560,7 +560,7 @@ value_fit_unsigned_field_p (int64_t value, unsigned width)
   assert (width < 32);
   if (width < sizeof (value) * 8)
     {
-      int64_t lim = (int64_t)1 << width;
+      int64_t lim = (uint64_t) 1 << width;
       if (value >= 0 && value < lim)
 	return 1;
     }
@@ -1063,7 +1063,7 @@ match_operands_qualifier (aarch64_inst *inst, bfd_boolean update_p)
    amount will be returned in *SHIFT_AMOUNT.  */
 
 bfd_boolean
-aarch64_wide_constant_p (int64_t value, int is32, unsigned int *shift_amount)
+aarch64_wide_constant_p (uint64_t value, int is32, unsigned int *shift_amount)
 {
   int amount;
 
@@ -1074,22 +1074,21 @@ aarch64_wide_constant_p (int64_t value, int is32, unsigned int *shift_amount)
       /* Allow all zeros or all ones in top 32-bits, so that
 	 32-bit constant expressions like ~0x80000000 are
 	 permitted.  */
-      uint64_t ext = value;
-      if (ext >> 32 != 0 && ext >> 32 != (uint64_t) 0xffffffff)
+      if (value >> 32 != 0 && value >> 32 != 0xffffffff)
 	/* Immediate out of range.  */
 	return FALSE;
-      value &= (int64_t) 0xffffffff;
+      value &= 0xffffffff;
     }
 
   /* first, try movz then movn */
   amount = -1;
-  if ((value & ((int64_t) 0xffff << 0)) == value)
+  if ((value & ((uint64_t) 0xffff << 0)) == value)
     amount = 0;
-  else if ((value & ((int64_t) 0xffff << 16)) == value)
+  else if ((value & ((uint64_t) 0xffff << 16)) == value)
     amount = 16;
-  else if (!is32 && (value & ((int64_t) 0xffff << 32)) == value)
+  else if (!is32 && (value & ((uint64_t) 0xffff << 32)) == value)
     amount = 32;
-  else if (!is32 && (value & ((int64_t) 0xffff << 48)) == value)
+  else if (!is32 && (value & ((uint64_t) 0xffff << 48)) == value)
     amount = 48;
 
   if (amount == -1)
@@ -1535,7 +1534,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 			       : _("z0-z7 expected"));
 	      return 0;
 	    }
-	  mask = (1 << (size - shift)) - 1;
+	  mask = (1u << (size - shift)) - 1;
 	  if (!value_in_range_p (opnd->reglane.index, 0, mask))
 	    {
 	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, mask);
@@ -2161,7 +2160,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, size))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0,
-					  (1 << size) - 1);
+					  (1u << size) - 1);
 	      return 0;
 	    }
 	  break;

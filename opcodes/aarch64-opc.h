@@ -485,7 +485,7 @@ enum aarch64_modifier_kind
 aarch64_get_operand_modifier_from_value (aarch64_insn, bfd_boolean);
 
 
-bfd_boolean aarch64_wide_constant_p (int64_t, int, unsigned int *);
+bfd_boolean aarch64_wide_constant_p (uint64_t, int, unsigned int *);
 bfd_boolean aarch64_logical_immediate_p (uint64_t, int, aarch64_insn *);
 int aarch64_shrink_expanded_imm8 (uint64_t);
 
