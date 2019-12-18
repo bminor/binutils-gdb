@@ -1018,12 +1018,12 @@ fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
 
 	    /* For local sockets, print out the first non-nul path
 	       rather than both paths.  */
-	    const struct fbsd_sockaddr_un *sun
+	    const struct fbsd_sockaddr_un *saddr_un
 	      = reinterpret_cast<const struct fbsd_sockaddr_un *> (kf_sa_local);
-	    if (sun->sun_path[0] == 0)
-	      sun = reinterpret_cast<const struct fbsd_sockaddr_un *>
+	    if (saddr_un->sun_path[0] == 0)
+	      saddr_un = reinterpret_cast<const struct fbsd_sockaddr_un *>
 		(kf_sa_peer);
-	    printf_filtered ("%s", sun->sun_path);
+	    printf_filtered ("%s", saddr_un->sun_path);
 	    break;
 	  }
 	case FBSD_AF_INET:
