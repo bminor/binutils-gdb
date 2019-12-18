@@ -918,13 +918,15 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
                    && G_FLD (inst->v, 2, 0) == 0x0)
             {
               /* subei! r0, n */
-              sp_offset += (int) pow (2, G_FLD (inst->v, 6, 3));
+              sp_offset += (int) pow (2.0, G_FLD (inst->v, 6, 3));
             }
           else if (G_FLD (inst->v, 14, 7) == 0xc0
                    && G_FLD (inst->v, 2, 0) == 0x0)
             {
               /* addei! r0, n */
-              sp_offset -= (int) pow (2, G_FLD (inst->v, 6, 3));
+	      /* Solaris 11+gcc 5.5 has ambiguous overloads of pow, so we
+		 pass 2.0 instead of 2 to get the right one.  */
+              sp_offset -= (int) pow (2.0, G_FLD (inst->v, 6, 3));
             }
         }
       else

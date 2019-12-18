@@ -1,5 +1,10 @@
 2019-12-19  Christian Biesinger  <cbiesinger@google.com>
 
+	* score-tdep.c (score7_analyze_prologue): Pass 2.0 instead of
+	2 to pow ().
+
+2019-12-19  Christian Biesinger  <cbiesinger@google.com>
+
 	* tui/tui-source.c (tui_source_window::set_contents): Cast argument of
 	log10 to double to fix Solaris 11 with gcc 5.5.
 
