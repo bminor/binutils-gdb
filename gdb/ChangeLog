@@ -1,3 +1,9 @@
+2019-12-18  Tom Tromey  <tromey@adacore.com>
+
+	PR build/25268:
+	* gdbsupport/thread-pool.c (set_thread_name): Expect "int" return
+	type on macOS.  Add comment.
+
 2019-12-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* c-lang.c (c_get_string, asm_language_defn): Remove space
