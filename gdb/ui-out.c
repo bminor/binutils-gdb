@@ -730,13 +730,13 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 		base_field_s *bf = va_arg (args, base_field_s *);
 		switch (bf->kind)
 		  {
-		  case field_kind::SIGNED:
+		  case field_kind::FIELD_SIGNED:
 		    {
 		      auto *f = (signed_field_s *) bf;
 		      field_signed (f->name, f->val);
 		    }
 		    break;
-		  case field_kind::STRING:
+		  case field_kind::FIELD_STRING:
 		    {
 		      auto *f = (string_field_s *) bf;
 		      field_string (f->name, f->str);
