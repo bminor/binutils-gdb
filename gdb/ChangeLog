@@ -1,3 +1,12 @@
+2019-12-18  Tom Tromey  <tromey@adacore.com>
+
+	PR build/25250:
+	* ui-out.c (ui_out::vmessage): Update.
+	* ui-out.h (enum class field_kind) <FIELD_STRING, FIELD_SIGNED>:
+	Rename.
+	(string_field): Update.
+	(signed_field): Update.
+
 2019-12-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* top.c (print_gdb_configuration): Adjust indentation.
