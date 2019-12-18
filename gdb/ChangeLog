@@ -1,3 +1,7 @@
+2019-12-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* top.c (print_gdb_configuration): Adjust indentation.
+
 2019-12-17  Christian Biesinger  <cbiesinger@google.com>
 
 	* bsd-kvm.c: Include gdbsupport/pathstuff.h.
