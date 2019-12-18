@@ -85,7 +85,9 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	  int digits = 0;
 	  if (compact_source)
 	    {
-	      double l = log10 (offsets->size ());
+	      /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
+	         cast to double to get the right one.  */
+	      double l = log10 ((double) offsets->size ());
 	      digits = 1 + (int) l;
 	    }
 

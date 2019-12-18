@@ -1,5 +1,10 @@
 2019-12-19  Christian Biesinger  <cbiesinger@google.com>
 
+	* tui/tui-source.c (tui_source_window::set_contents): Cast argument of
+	log10 to double to fix Solaris 11 with gcc 5.5.
+
+2019-12-19  Christian Biesinger  <cbiesinger@google.com>
+
 	* fbsd-tdep.c (fbsd_info_proc_files_entry): Rename local var
 	"sun" to "saddr_un".
 
