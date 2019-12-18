@@ -166,6 +166,16 @@ install:
 		else true; fi; \
 	done
 
+install-strip:
+	@rootme=`pwd` ; export rootme ; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true; \
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install-strip) || exit 1; \
+		else true; fi; \
+	done
+
 installcheck:
 	@echo No installcheck target is available yet for the GNU simulators.
 

@@ -115,6 +115,7 @@ force:
 
 # Copy the files into directories where they will be run.
 install: install-man
+install-strip: install-man
 
 install-man: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
