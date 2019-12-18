@@ -1,3 +1,9 @@
+2019-12-18  Anthony Green  <green@moxielogic.com>
+
+	* emulparams/elf32moxie.sh (TEMPLATE_NAME): Switch to elf template
+	to enable --build-id.
+	* configure.tgt: Don't define targ_extra_ofiles for moxie-*-*.
+
 2019-12-18  Alan Modra  <amodra@gmail.com>
 
 	* pe-dll.c (pe_get32, pe_as32): Avoid signed overflow.
