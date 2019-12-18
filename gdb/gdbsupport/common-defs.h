@@ -66,9 +66,13 @@
    plus this seems like a reasonable safety measure.  The check for
    optimization is required because _FORTIFY_SOURCE only works when
    optimization is enabled.  If _FORTIFY_SOURCE is already defined,
-   then we don't do anything.  */
+   then we don't do anything.  Also, on MinGW, fortify requires
+   linking to -lssp, and to avoid the hassle of checking for
+   that and linking to it statically, we just don't define
+   _FORTIFY_SOURCE there.  */
 
-#if !defined _FORTIFY_SOURCE && defined __OPTIMIZE__ && __OPTIMIZE__ > 0
+#if (!defined _FORTIFY_SOURCE && defined __OPTIMIZE__ && __OPTIMIZE__ > 0 \
+     && !defined(__MINGW32__))
 #define _FORTIFY_SOURCE 2
 #endif
 
