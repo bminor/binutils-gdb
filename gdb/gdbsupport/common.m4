@@ -62,7 +62,7 @@ AC_DEFUN([GDB_AC_COMMON], [
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test $gdb_cv_cxx_std_thread = yes; then
+  if test "$gdb_cv_cxx_std_thread" = "yes"; then
     AC_DEFINE(CXX_STD_THREAD, 1,
 	      [Define to 1 if std::thread works.])
   fi
@@ -75,7 +75,7 @@ AC_CACHE_CHECK([for sigsetjmp], gdb_cv_func_sigsetjmp,
 #include <setjmp.h>
 ], [sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);],
 gdb_cv_func_sigsetjmp=yes, gdb_cv_func_sigsetjmp=no)])
-if test $gdb_cv_func_sigsetjmp = yes; then
+if test "$gdb_cv_func_sigsetjmp" = "yes"; then
   AC_DEFINE(HAVE_SIGSETJMP, 1, [Define if sigsetjmp is available. ])
 fi
 ])

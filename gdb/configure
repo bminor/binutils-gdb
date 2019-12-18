@@ -6777,7 +6777,7 @@ else
 fi
 
 if test x"$enable_gdbmi" = xyes; then
-  if test -d $srcdir/mi; then
+  if test -d "$srcdir/mi"; then
     CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
     CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
     CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
@@ -6809,7 +6809,7 @@ if test "${enable_gdbtk+set}" = set; then :
       as_fn_error $? "bad value $enableval for --enable-gdbtk" "$LINENO" 5 ;;
   esac
 else
-  if test -d $srcdir/gdbtk; then
+  if test -d "$srcdir/gdbtk"; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
@@ -6956,7 +6956,7 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_var__etext" >&5
 $as_echo "$ac_cv_var__etext" >&6; }
-if test $ac_cv_var__etext = yes; then
+if test "$ac_cv_var__etext" = yes; then
 
 $as_echo "#define HAVE__ETEXT 1" >>confdefs.h
 
@@ -6989,13 +6989,13 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_var_etext" >&5
 $as_echo "$ac_cv_var_etext" >&6; }
-if test $ac_cv_var_etext = yes; then
+if test "$ac_cv_var_etext" = yes; then
 
 $as_echo "#define HAVE_ETEXT 1" >>confdefs.h
 
 fi
 if test "$enable_profiling" = yes ; then
-  if test $ac_cv_func_monstartup = no || test $ac_cv_func__mcleanup = no; then
+  if test "$ac_cv_func_monstartup" = no || test "$ac_cv_func__mcleanup" = no; then
     as_fn_error $? "--enable-profiling requires monstartup and _mcleanup" "$LINENO" 5
   fi
   PROFILE_CFLAGS=-pg
@@ -7028,7 +7028,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_cc_supports_pg" >&5
 $as_echo "$ac_cv_cc_supports_pg" >&6; }
 
-  if test $ac_cv_cc_supports_pg = no; then
+  if test "$ac_cv_cc_supports_pg" = no; then
     as_fn_error $? "--enable-profiling requires a compiler which supports -pg" "$LINENO" 5
   fi
 
@@ -8932,7 +8932,7 @@ fi
 # Check whether we should enable the TUI, but only do so if we really
 # can.
 if test x"$enable_tui" != xno; then
-  if test -d $srcdir/tui; then
+  if test -d "$srcdir/tui"; then
     if test "$curses_found" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
@@ -8955,7 +8955,7 @@ fi
 
 case $host_os in
   cygwin*)
-    if test -d $srcdir/libtermcap; then
+    if test -d "$srcdir/libtermcap"; then
       LIBS="../libtermcap/libtermcap.a $LIBS"
       ac_cv_search_tgetent="../libtermcap/libtermcap.a"
     fi ;;
@@ -10328,7 +10328,7 @@ $as_echo "$as_me: WARNING: python support disabled; some features may be unavail
 else
   case "${with_python}" in
   [\\/]* | ?:[\\/]*)
-    if test -d ${with_python}; then
+    if test -d "${with_python}"; then
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"
       python_prefix=
@@ -10364,7 +10364,7 @@ else
     python_prefix=
     case "${with_python}" in
     yes | auto)
-      if test ${build} = ${host}; then
+      if test "${build}" = "${host}"; then
         # Extract the first word of "python", so it can be a program name with args.
 set dummy python; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -14339,7 +14339,7 @@ done
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test $gdb_cv_cxx_std_thread = yes; then
+  if test "$gdb_cv_cxx_std_thread" = "yes"; then
 
 $as_echo "#define CXX_STD_THREAD 1" >>confdefs.h
 
@@ -14378,7 +14378,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_sigsetjmp" >&5
 $as_echo "$gdb_cv_func_sigsetjmp" >&6; }
-if test $gdb_cv_func_sigsetjmp = yes; then
+if test "$gdb_cv_func_sigsetjmp" = "yes"; then
 
 $as_echo "#define HAVE_SIGSETJMP 1" >>confdefs.h
 
@@ -14661,7 +14661,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_setpgrp_void" >&5
 $as_echo "$ac_cv_func_setpgrp_void" >&6; }
-if test $ac_cv_func_setpgrp_void = yes; then
+if test "$ac_cv_func_setpgrp_void" = yes; then
   $as_echo "#define SETPGRP_VOID 1" >>confdefs.h
 
 fi
@@ -14700,7 +14700,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_gnu_regex" >&5
 $as_echo "$gdb_cv_have_gnu_regex" >&6; }
-if test $gdb_cv_have_gnu_regex = yes; then
+if test "$gdb_cv_have_gnu_regex" = yes; then
   gdb_use_included_regex=no
 fi
 
@@ -14761,7 +14761,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_struct_lwp" >&5
 $as_echo "$gdb_cv_struct_lwp" >&6; }
-if test $gdb_cv_struct_lwp = yes; then
+if test "$gdb_cv_struct_lwp" = yes; then
 
 $as_echo "#define HAVE_STRUCT_LWP 1" >>confdefs.h
 
@@ -14794,7 +14794,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_struct_reg" >&5
 $as_echo "$gdb_cv_struct_reg" >&6; }
-if test $gdb_cv_struct_reg = yes; then
+if test "$gdb_cv_struct_reg" = yes; then
 
 $as_echo "#define HAVE_STRUCT_REG 1" >>confdefs.h
 
@@ -14880,7 +14880,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_ptrace_getregs" >&5
 $as_echo "$gdb_cv_have_ptrace_getregs" >&6; }
-if test $gdb_cv_have_ptrace_getregs = yes; then
+if test "$gdb_cv_have_ptrace_getregs" = yes; then
 
 $as_echo "#define HAVE_PTRACE_GETREGS 1" >>confdefs.h
 
@@ -14913,7 +14913,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_ptrace_getfpxregs" >&5
 $as_echo "$gdb_cv_have_ptrace_getfpxregs" >&6; }
-if test $gdb_cv_have_ptrace_getfpxregs = yes; then
+if test "$gdb_cv_have_ptrace_getfpxregs" = yes; then
 
 $as_echo "#define HAVE_PTRACE_GETFPXREGS 1" >>confdefs.h
 
@@ -14947,7 +14947,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_pt_getdbregs" >&5
 $as_echo "$gdb_cv_have_pt_getdbregs" >&6; }
-if test $gdb_cv_have_pt_getdbregs = yes; then
+if test "$gdb_cv_have_pt_getdbregs" = yes; then
 
 $as_echo "#define HAVE_PT_GETDBREGS 1" >>confdefs.h
 
@@ -14981,7 +14981,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_pt_getxmmregs" >&5
 $as_echo "$gdb_cv_have_pt_getxmmregs" >&6; }
-if test $gdb_cv_have_pt_getxmmregs = yes; then
+if test "$gdb_cv_have_pt_getxmmregs" = yes; then
 
 $as_echo "#define HAVE_PT_GETXMMREGS 1" >>confdefs.h
 
@@ -15343,7 +15343,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_c_long_long" >&5
 $as_echo "$gdb_cv_c_long_long" >&6; }
-if test $gdb_cv_c_long_long != yes; then
+if test "$gdb_cv_c_long_long" != yes; then
   # libdecnumber requires long long.
   as_fn_error $? "Compiler must support long long for GDB." "$LINENO" 5
 fi
@@ -15388,7 +15388,7 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_long_long" >&5
 $as_echo "$gdb_cv_printf_has_long_long" >&6; }
-if test $gdb_cv_printf_has_long_long = yes; then
+if test "$gdb_cv_printf_has_long_long" = yes; then
 
 $as_echo "#define PRINTF_HAS_LONG_LONG 1" >>confdefs.h
 
@@ -15432,7 +15432,7 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_decfloat" >&5
 $as_echo "$gdb_cv_printf_has_decfloat" >&6; }
-if test $gdb_cv_printf_has_decfloat = yes; then
+if test "$gdb_cv_printf_has_decfloat" = yes; then
 
 $as_echo "#define PRINTF_HAS_DECFLOAT 1" >>confdefs.h
 
@@ -15461,7 +15461,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_c_long_double" >&5
 $as_echo "$gdb_cv_c_long_double" >&6; }
-if test $gdb_cv_c_long_double = yes; then
+if test "$gdb_cv_c_long_double" = yes; then
 
 $as_echo "#define HAVE_LONG_DOUBLE 1" >>confdefs.h
 
@@ -15503,7 +15503,7 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_long_double" >&5
 $as_echo "$gdb_cv_printf_has_long_double" >&6; }
-if test $gdb_cv_printf_has_long_double = yes; then
+if test "$gdb_cv_printf_has_long_double" = yes; then
 
 $as_echo "#define PRINTF_HAS_LONG_DOUBLE 1" >>confdefs.h
 
@@ -15545,7 +15545,7 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_scanf_has_long_double" >&5
 $as_echo "$gdb_cv_scanf_has_long_double" >&6; }
-if test $gdb_cv_scanf_has_long_double = yes; then
+if test "$gdb_cv_scanf_has_long_double" = yes; then
 
 $as_echo "#define SCANF_HAS_LONG_DOUBLE 1" >>confdefs.h
 
@@ -15682,7 +15682,7 @@ fi
 $as_echo "$found" >&6; }
 
 
-if test ${build} = ${host} -a ${host} = ${target} ; then
+if test "${build}" = "${host}" -a "${host}" = "${target}" ; then
    case ${host_os} in
    aix*)
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for AiX thread debugging library" >&5
@@ -15713,7 +15713,7 @@ fi
 
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_aix_thread_debug" >&5
 $as_echo "$gdb_cv_have_aix_thread_debug" >&6; }
-      if test $gdb_cv_have_aix_thread_debug = yes; then
+      if test "$gdb_cv_have_aix_thread_debug" = yes; then
          CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
          CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
          LIBS="$LIBS -lpthdebug"
@@ -16346,7 +16346,7 @@ esac
 
 # libreadline needs libuser32.a in a cygwin environment
 WIN32LIBS=
-if test x$gdb_cv_os_cygwin = xyes; then
+if test x"$gdb_cv_os_cygwin" = xyes; then
     WIN32LIBS="-luser32"
     case "${target}" in
 	*cygwin*) WIN32LIBS="$WIN32LIBS -limagehlp"
@@ -16410,7 +16410,7 @@ $as_echo "$gdb_cv_var_elf" >&6; }
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
-if test $gdb_cv_var_elf = yes; then
+if test "$gdb_cv_var_elf" = yes; then
   CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
@@ -16521,7 +16521,7 @@ $as_echo "$gdb_cv_var_macho" >&6; }
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
-if test $gdb_cv_var_macho = yes; then
+if test "$gdb_cv_var_macho" = yes; then
   CONFIG_OBS="$CONFIG_OBS machoread.o"
 fi
 
@@ -16529,7 +16529,7 @@ fi
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
 # If building on ELF, look for lzma support for embedded compressed debug info.
-if test $gdb_cv_var_elf = yes; then
+if test "$gdb_cv_var_elf" = yes; then
 
 # Check whether --with-lzma was given.
 if test "${with_lzma+set}" = set; then :
@@ -17523,7 +17523,7 @@ $as_echo "${private_dir}" >&6; }
 	CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
 	CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-gdbtk"
 
-	if test x$gdb_cv_os_cygwin = xyes; then
+	if test x"$gdb_cv_os_cygwin" = xyes; then
 	  WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32"
 	  WIN32LDAPP="-Wl,--subsystem,console"
 	  CONFIG_OBS="${CONFIG_OBS} gdbres.o"

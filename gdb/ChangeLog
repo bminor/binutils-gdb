@@ -1,5 +1,11 @@
 2019-12-19  Christian Biesinger  <cbiesinger@google.com>
 
+	* configure: Regenerate.
+	* configure.ac: Quote variable arguments of test.
+	* gdbsupport/common.m4: Likewise.
+
+2019-12-19  Christian Biesinger  <cbiesinger@google.com>
+
 	* score-tdep.c (score7_analyze_prologue): Pass 2.0 instead of
 	2 to pow ().
 
