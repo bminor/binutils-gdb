@@ -3289,7 +3289,7 @@ pe_get32 (bfd *abfd, int where)
 
   bfd_seek (abfd, (file_ptr) where, SEEK_SET);
   bfd_bread (b, (bfd_size_type) 4, abfd);
-  return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
+  return b[0] + (b[1] << 8) + (b[2] << 16) + ((unsigned) b[3] << 24);
 }
 
 static unsigned int
@@ -3297,7 +3297,7 @@ pe_as32 (void *ptr)
 {
   unsigned char *b = ptr;
 
-  return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
+  return b[0] + (b[1] << 8) + (b[2] << 16) + ((unsigned) b[3] << 24);
 }
 
 bfd_boolean

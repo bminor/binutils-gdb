@@ -1,3 +1,7 @@
+2019-12-18  Alan Modra  <amodra@gmail.com>
+
+	* pe-dll.c (pe_get32, pe_as32): Avoid signed overflow.
+
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-avr/lds-mega.d: Adjust symbols to suit objdump change.
