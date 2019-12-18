@@ -1,5 +1,11 @@
 2019-12-18  Tom Tromey  <tromey@adacore.com>
 
+	PR build/25268:
+	* gdbsupport/thread-pool.c (set_thread_name): Expect "int" return
+	type on macOS.  Add comment.
+
+2019-12-18  Tom Tromey  <tromey@adacore.com>
+
 	PR build/25250:
 	* ui-out.c (ui_out::vmessage): Update.
 	* ui-out.h (enum class field_kind) <FIELD_STRING, FIELD_SIGNED>:
