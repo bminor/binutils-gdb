@@ -871,7 +871,7 @@ int
 s7_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 {
   unsigned char b[4];
-  long given;
+  unsigned long given;
   long ridparity;
   int status;
   bfd_boolean insn_pce_p = FALSE;
@@ -907,11 +907,11 @@ s7_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 
   if (little)
     {
-      given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+      given = (b[0]) | (b[1] << 8) | (b[2] << 16) | ((unsigned) b[3] << 24);
     }
   else
     {
-      given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
+      given = ((unsigned) b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
     }
 
   if ((given & 0x80008000) == 0x80008000)

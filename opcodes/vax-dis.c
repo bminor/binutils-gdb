@@ -440,7 +440,8 @@ print_insn_vax (bfd_vma memaddr, disassemble_info *info)
       int offset;
 
       FETCH_DATA (info, buffer + 4);
-      offset = buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0];
+      offset = ((unsigned) buffer[3] << 24 | buffer[2] << 16
+		| buffer[1] << 8 | buffer[0]);
       (*info->fprintf_func) (info->stream, ".long 0x%08x", offset);
 
       return 4;

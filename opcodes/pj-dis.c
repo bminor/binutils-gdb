@@ -32,10 +32,10 @@ get_int (bfd_vma memaddr, int *iptr, struct disassemble_info *info)
   unsigned char ival[4];
   int status = info->read_memory_func (memaddr, ival, 4, info);
 
-  *iptr = (ival[0] << 24)
-    | (ival[1] << 16)
-    | (ival[2] << 8)
-    | (ival[3] << 0);
+  *iptr = (((unsigned) ival[0] << 24)
+	   | (ival[1] << 16)
+	   | (ival[2] << 8)
+	   | (ival[3] << 0));
 
   return status;
 }

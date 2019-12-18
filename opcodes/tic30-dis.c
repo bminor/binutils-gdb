@@ -696,8 +696,10 @@ print_insn_tic30 (bfd_vma pc, disassemble_info *info)
   bfd_vma bufaddr = pc - info->buffer_vma;
 
   /* Obtain the current instruction word from the buffer.  */
-  insn_word = (*(info->buffer + bufaddr) << 24) | (*(info->buffer + bufaddr + 1) << 16) |
-    (*(info->buffer + bufaddr + 2) << 8) | *(info->buffer + bufaddr + 3);
+  insn_word = (((unsigned) *(info->buffer + bufaddr) << 24)
+	       | (*(info->buffer + bufaddr + 1) << 16)
+	       | (*(info->buffer + bufaddr + 2) << 8)
+	       | *(info->buffer + bufaddr + 3));
   _pc = pc / 4;
   /* Get the instruction refered to by the current instruction word
      and print it out based on its type.  */

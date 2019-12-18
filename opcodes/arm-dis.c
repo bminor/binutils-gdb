@@ -11705,7 +11705,7 @@ static int
 print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 {
   unsigned char b[4];
-  long		given;
+  unsigned long given;
   int           status;
   int           is_thumb = FALSE;
   int           is_data = FALSE;
@@ -11885,9 +11885,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 
       status = info->read_memory_func (pc, (bfd_byte *) b, 4, info);
       if (little_code)
-	given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+	given = (b[0]) | (b[1] << 8) | (b[2] << 16) | ((unsigned) b[3] << 24);
       else
-	given = (b[3]) | (b[2] << 8) | (b[1] << 16) | (b[0] << 24);
+	given = (b[3]) | (b[2] << 8) | (b[1] << 16) | ((unsigned) b[0] << 24);
     }
   else
     {

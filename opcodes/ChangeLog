@@ -1,3 +1,20 @@
+2019-12-18  Alan Modra  <amodra@gmail.com>
+
+	* alpha-opc.c (OP): Avoid signed overflow.
+	* arm-dis.c (print_insn): Likewise.
+	* mcore-dis.c (print_insn_mcore): Likewise.
+	* pj-dis.c (get_int): Likewise.
+	* ppc-opc.c (EBD15, EBD15BI): Likewise.
+	* score7-dis.c (s7_print_insn): Likewise.
+	* tic30-dis.c (print_insn_tic30): Likewise.
+	* v850-opc.c (insert_SELID): Likewise.
+	* vax-dis.c (print_insn_vax): Likewise.
+	* arc-ext.c (create_map): Likewise.
+	(struct ExtAuxRegister): Make "address" field unsigned int.
+	(arcExtMap_auxRegName): Pass unsigned address.
+	(dump_ARC_extmap): Adjust.
+	* arc-ext.h (arcExtMap_auxRegName): Update prototype.
+
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
 	* visium-dis.c (print_insn_visium): Avoid signed overflow.

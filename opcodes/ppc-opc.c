@@ -2967,7 +2967,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 
 /* A BD15 form instruction for extended conditional branch mnemonics.  */
 #define EBD15(op, aa, bo, lk)			\
-  (((op) & 0x3f) << 26)				\
+  (((op) & 0x3fu) << 26)			\
   | (((aa) & 0xf) << 22)			\
   | (((bo) & 0x3) << 20)			\
   | ((lk) & 1)
@@ -2976,7 +2976,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A BD15 form instruction for extended conditional branch mnemonics
    with BI.  */
 #define EBD15BI(op, aa, bo, bi, lk)		\
-  ((((op) & 0x3f) << 26)			\
+  ((((op) & 0x3fu) << 26)			\
    | (((aa) & 0xf) << 22)			\
    | (((bo) & 0x3) << 20)			\
    | (((bi) & 0x3) << 16)			\

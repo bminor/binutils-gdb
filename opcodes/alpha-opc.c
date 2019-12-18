@@ -332,7 +332,7 @@ const unsigned alpha_num_operands = sizeof(alpha_operands)/sizeof(*alpha_operand
 /* Macros used to form opcodes.  */
 
 /* The main opcode.  */
-#define OP(x)		(((x) & 0x3F) << 26)
+#define OP(x)		(((x) & 0x3Fu) << 26)
 #define OP_MASK		0xFC000000
 
 /* Branch format instructions.  */
