@@ -1,3 +1,8 @@
+2019-12-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* c-lang.c (c_get_string, asm_language_defn): Remove space
+	before tab.
+
 2019-12-18  Tom Tromey  <tromey@adacore.com>
 
 	PR build/25250:

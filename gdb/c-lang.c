@@ -303,14 +303,14 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (*length >= 0)
 	i  = *length;
       else
- 	/* Otherwise, look for a null character.  */
- 	for (i = 0; i < fetchlimit; i++)
+	/* Otherwise, look for a null character.  */
+	for (i = 0; i < fetchlimit; i++)
 	  if (extract_unsigned_integer (contents + i * width,
 					width, byte_order) == 0)
- 	    break;
+	    break;
   
       /* I is now either a user-defined length, the number of non-null
- 	 characters, or FETCHLIMIT.  */
+	 characters, or FETCHLIMIT.  */
       *length = i * width;
       buffer->reset ((gdb_byte *) xmalloc (*length));
       memcpy (buffer->get (), contents, *length);
@@ -1119,7 +1119,7 @@ extern const struct language_defn asm_language_defn =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  c_language_arch_info, 	/* FIXME: la_language_arch_info.  */
+  c_language_arch_info,		/* FIXME: la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
