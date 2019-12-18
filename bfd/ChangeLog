@@ -1,3 +1,15 @@
+2019-12-18  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (ELF_LOCAL_SYMBOL_HASH): Avoid signed overflow.
+	* elf32-hppa.c (final_link_relocate): Likewise.
+	* elf32-ppc.c (_bfd_elf_ppc_at_tls_transform): Likewise.
+	(_bfd_elf_ppc_at_tprel_transform, is_insn_ds_form): Likewise.
+	(is_insn_dq_form, ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ok_lo_toc_insn, ppc64_elf_edit_toc): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* elfxx-mips.c (mips_elf_perform_relocation): Likewise.
+	* netbsd.h (N_SET_FLAGS): Likewise.
+
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
 	* coff-tic80.c: Delete file.

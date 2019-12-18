@@ -8259,34 +8259,34 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 static bfd_boolean
 ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 {
-  return ((insn & (0x3f << 26)) == 12u << 26 /* addic */
-	  || (insn & (0x3f << 26)) == 14u << 26 /* addi */
-	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
-	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
-	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
-	  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
-	  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
-	  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
-	  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
-	  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
-	  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
-	  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
-	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
-	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
-	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
-	  || (insn & (0x3f << 26)) == 56u << 26 /* lq,lfq */
-	  || ((insn & (0x3f << 26)) == 57u << 26 /* lxsd,lxssp,lfdp */
+  return ((insn & (0x3fu << 26)) == 12u << 26 /* addic */
+	  || (insn & (0x3fu << 26)) == 14u << 26 /* addi */
+	  || (insn & (0x3fu << 26)) == 32u << 26 /* lwz */
+	  || (insn & (0x3fu << 26)) == 34u << 26 /* lbz */
+	  || (insn & (0x3fu << 26)) == 36u << 26 /* stw */
+	  || (insn & (0x3fu << 26)) == 38u << 26 /* stb */
+	  || (insn & (0x3fu << 26)) == 40u << 26 /* lhz */
+	  || (insn & (0x3fu << 26)) == 42u << 26 /* lha */
+	  || (insn & (0x3fu << 26)) == 44u << 26 /* sth */
+	  || (insn & (0x3fu << 26)) == 46u << 26 /* lmw */
+	  || (insn & (0x3fu << 26)) == 47u << 26 /* stmw */
+	  || (insn & (0x3fu << 26)) == 48u << 26 /* lfs */
+	  || (insn & (0x3fu << 26)) == 50u << 26 /* lfd */
+	  || (insn & (0x3fu << 26)) == 52u << 26 /* stfs */
+	  || (insn & (0x3fu << 26)) == 54u << 26 /* stfd */
+	  || (insn & (0x3fu << 26)) == 56u << 26 /* lq,lfq */
+	  || ((insn & (0x3fu << 26)) == 57u << 26 /* lxsd,lxssp,lfdp */
 	      /* Exclude lfqu by testing reloc.  If relocs are ever
 		 defined for the reduced D field in psq_lu then those
 		 will need testing too.  */
 	      && r_type != R_PPC64_TOC16_LO && r_type != R_PPC64_GOT16_LO)
-	  || ((insn & (0x3f << 26)) == 58u << 26 /* ld,lwa */
+	  || ((insn & (0x3fu << 26)) == 58u << 26 /* ld,lwa */
 	      && (insn & 1) == 0)
-	  || (insn & (0x3f << 26)) == 60u << 26 /* stfq */
-	  || ((insn & (0x3f << 26)) == 61u << 26 /* lxv,stx{v,sd,ssp},stfdp */
+	  || (insn & (0x3fu << 26)) == 60u << 26 /* stfq */
+	  || ((insn & (0x3fu << 26)) == 61u << 26 /* lxv,stx{v,sd,ssp},stfdp */
 	      /* Exclude stfqu.  psq_stu as above for psq_lu.  */
 	      && r_type != R_PPC64_TOC16_LO && r_type != R_PPC64_GOT16_LO)
-	  || ((insn & (0x3f << 26)) == 62u << 26 /* std,stq */
+	  || ((insn & (0x3fu << 26)) == 62u << 26 /* std,stq */
 	      && (insn & 1) == 0));
 }
 
@@ -9117,7 +9117,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  insn = bfd_get_32 (ibfd, buf);
 		  if (insn_check == check_lo
 		      ? !ok_lo_toc_insn (insn, r_type)
-		      : ((insn & ((0x3f << 26) | 0x1f << 16))
+		      : ((insn & ((0x3fu << 26) | 0x1f << 16))
 			 != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
 		    {
 		      char str[12];
@@ -9188,7 +9188,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 						 rel->r_offset & ~3, 4))
 		    goto got_error_ret;
 		  insn = bfd_get_32 (ibfd, buf);
-		  if (((insn & ((0x3f << 26) | 0x1f << 16))
+		  if (((insn & ((0x3fu << 26) | 0x1f << 16))
 		       != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
 		    continue;
 		  break;
@@ -9201,7 +9201,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 						 rel->r_offset & ~3, 4))
 		    goto got_error_ret;
 		  insn = bfd_get_32 (ibfd, buf);
-		  if ((insn & (0x3f << 26 | 0x3)) != 58u << 26 /* ld */)
+		  if ((insn & (0x3fu << 26 | 0x3)) != 58u << 26 /* ld */)
 		    continue;
 		  break;
 
@@ -9218,7 +9218,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  if ((insn & (-1u << 18)) != ((1u << 26) | (1u << 20)))
 		    continue;
 		  insn = bfd_get_32 (ibfd, buf + 4);
-		  if ((insn & (0x3f << 26)) != 57u << 26)
+		  if ((insn & (0x3fu << 26)) != 57u << 26)
 		    continue;
 		  break;
 		}
@@ -14537,7 +14537,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_LO_DS_OPT:
 	  insn = bfd_get_32 (input_bfd, contents + rel->r_offset - d_offset);
-	  if ((insn & (0x3f << 26)) != 58u << 26)
+	  if ((insn & (0x3fu << 26)) != 58u << 26)
 	    abort ();
 	  insn += (14u << 26) - (58u << 26);
 	  bfd_put_32 (input_bfd, insn, contents + rel->r_offset - d_offset);
@@ -14679,7 +14679,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  /* For pcrel IE to LE we already have the full
 		     offset and thus don't need an addi here.  A nop
 		     or mr will do.  */
-		  if ((insn & (0x3f << 26)) == 14 << 26)
+		  if ((insn & (0x3fu << 26)) == 14 << 26)
 		    {
 		      /* Extract regs from addi rt,ra,si.  */
 		      unsigned int rt = (insn >> 21) & 0x1f;
@@ -14759,7 +14759,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		{
 		  /* IE */
 		  insn1 &= (0x1f << 21) | (0x1f << 16);
-		  insn1 |= 58 << 26;	/* ld */
+		  insn1 |= 58u << 26;	/* ld */
 		  insn2 = 0x7c636a14;	/* add 3,3,13 */
 		  if (offset != (bfd_vma) -1)
 		    rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
@@ -15434,7 +15434,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	      if ((insn & (0x3f << 26 | 0x3)) == 58u << 26 /* ld */)
+	      if ((insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
 		{
 		  insn += (14u << 26) - (58u << 26);
 		  bfd_put_32 (input_bfd, insn, contents + (rel->r_offset & ~3));
@@ -15451,14 +15451,14 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	      if ((insn & (0x3f << 26 | 0x3)) == 58u << 26 /* ld */)
+	      if ((insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
 		{
 		  insn += (14u << 26) - (58u << 26);
 		  bfd_put_32 (input_bfd, insn, contents + (rel->r_offset & ~3));
 		  r_type = R_PPC64_TOC16_LO;
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		}
-	      else if ((insn & (0x3f << 26)) == 15u << 26 /* addis */)
+	      else if ((insn & (0x3fu << 26)) == 15u << 26 /* addis */)
 		{
 		  r_type = R_PPC64_TOC16_HA;
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
@@ -16418,10 +16418,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
 	      insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & (0x3f << 26)) == 12u << 26 /* addic */)
+	      if ((insn & (0x3fu << 26)) == 12u << 26 /* addic */)
 		{
 		  /* Transform addic to addi when we change reg.  */
-		  insn &= ~((0x3f << 26) | (0x1f << 16));
+		  insn &= ~((0x3fu << 26) | (0x1f << 16));
 		  insn |= (14u << 26) | (2 << 16);
 		}
 	      else
@@ -16438,7 +16438,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
 	      insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & ((0x3f << 26) | 0x1f << 16))
+	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
 		  != ((15u << 26) | (13 << 16)) /* addis rt,13,imm */)
 		/* xgettext:c-format */
 		info->callbacks->minfo
@@ -16547,8 +16547,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     forms of all the _DS relocs bloats all reloc switches in
 	     this file.  It doesn't make much sense to use these
 	     relocs in data, so testing the insn should be safe.  */
-	  if ((insn & (0x3f << 26)) == (56u << 26)
-	      || ((insn & (0x3f << 26)) == (61u << 26) && (insn & 3) == 1))
+	  if ((insn & (0x3fu << 26)) == (56u << 26)
+	      || ((insn & (0x3fu << 26)) == (61u << 26) && (insn & 3) == 1))
 	    mask = 15;
 	  relocation += addend;
 	  addend = insn & (mask ^ 3);
@@ -16597,15 +16597,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  enum complain_overflow complain = complain_overflow_signed;
 
 	  insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	  if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
+	  if ((insn & (0x3fu << 26)) == 10u << 26 /* cmpli */)
 	    complain = complain_overflow_bitfield;
 	  else if (howto->rightshift == 0
-		   ? ((insn & (0x3f << 26)) == 28u << 26 /* andi */
-		      || (insn & (0x3f << 26)) == 24u << 26 /* ori */
-		      || (insn & (0x3f << 26)) == 26u << 26 /* xori */)
-		   : ((insn & (0x3f << 26)) == 29u << 26 /* andis */
-		      || (insn & (0x3f << 26)) == 25u << 26 /* oris */
-		      || (insn & (0x3f << 26)) == 27u << 26 /* xoris */))
+		   ? ((insn & (0x3fu << 26)) == 28u << 26 /* andi */
+		      || (insn & (0x3fu << 26)) == 24u << 26 /* ori */
+		      || (insn & (0x3fu << 26)) == 26u << 26 /* xori */)
+		   : ((insn & (0x3fu << 26)) == 29u << 26 /* andis */
+		      || (insn & (0x3fu << 26)) == 25u << 26 /* oris */
+		      || (insn & (0x3fu << 26)) == 27u << 26 /* xoris */))
 	    complain = complain_overflow_unsigned;
 	  if (howto->complain_on_overflow != complain)
 	    {

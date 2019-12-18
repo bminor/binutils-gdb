@@ -3221,7 +3221,7 @@ final_link_relocate (asection *input_section,
 		     struct elf32_hppa_link_hash_entry *hh,
 		     struct bfd_link_info *info)
 {
-  int insn;
+  unsigned int insn;
   unsigned int r_type = ELF32_R_TYPE (rela->r_info);
   unsigned int orig_r_type = r_type;
   reloc_howto_type *howto = elf_hppa_howto_table + r_type;
@@ -3340,7 +3340,7 @@ final_link_relocate (asection *input_section,
 	      /* GCC sometimes uses a register other than r19 for the
 		 operation, so we must convert any addil instruction
 		 that uses this relocation.  */
-	      if ((insn & 0xfc000000) == ((int) OP_ADDIL << 26))
+	      if ((insn & 0xfc000000) == OP_ADDIL << 26)
 		insn = ADDIL_DP;
 	      else
 		/* We must have a ldil instruction.  It's too hard to find
@@ -3374,8 +3374,8 @@ final_link_relocate (asection *input_section,
 	 instance: "extern int foo" with foo defined as "const int foo".  */
       if (sym_sec == NULL || (sym_sec->flags & SEC_CODE) != 0)
 	{
-	  if ((insn & ((0x3f << 26) | (0x1f << 21)))
-	      == (((int) OP_ADDIL << 26) | (27 << 21)))
+	  if ((insn & ((0x3fu << 26) | (0x1f << 21)))
+	      == ((OP_ADDIL << 26) | (27 << 21)))
 	    {
 	      insn &= ~ (0x1f << 21);
 	    }

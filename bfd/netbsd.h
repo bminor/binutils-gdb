@@ -48,7 +48,7 @@
 	 ((execp)->a_info & 0xfb00ffff) | ((((int) (machtype)) & 0x3ff) << 16))
 #define N_SET_FLAGS(execp, flags) \
 	((execp)->a_info = \
-	 ((execp)->a_info & 0x03ffffff) | ((flags & 0x03f) << 26))
+	 ((execp)->a_info & 0x03ffffff) | ((flags & 0x3fu) << 26))
 
 #include "sysdep.h"
 #include "bfd.h"

@@ -6602,7 +6602,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	}
 
       /* Make this the JALX opcode.  */
-      x = (x & ~(0x3f << 26)) | (jalx_opcode << 26);
+      x = (x & ~(0x3fu << 26)) | (jalx_opcode << 26);
     }
   else if (cross_mode_jump_p && b_reloc_p (r_type))
     {
