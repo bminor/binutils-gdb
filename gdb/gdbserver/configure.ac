@@ -363,7 +363,7 @@ if test "$srv_linux_thread_db" = "yes"; then
   [AC_TRY_COMPILE([#include <thread_db.h>], [TD_VERSION;],
 		  [gdbsrv_cv_have_td_version=yes],
 		  [gdbsrv_cv_have_td_version=no])])
-  if test $gdbsrv_cv_have_td_version = yes; then
+  if test "$gdbsrv_cv_have_td_version" = yes; then
     AC_DEFINE(HAVE_TD_VERSION, 1, [Define if TD_VERSION is available.])
   fi
 fi
@@ -398,7 +398,7 @@ AC_CACHE_CHECK([whether the target supports __sync_*_compare_and_swap],
 AC_TRY_LINK([], [int foo, bar; bar = __sync_val_compare_and_swap(&foo, 0, 1);],
 		gdbsrv_cv_have_sync_builtins=yes,
 		gdbsrv_cv_have_sync_builtins=no)])
-if test $gdbsrv_cv_have_sync_builtins = yes; then
+if test "$gdbsrv_cv_have_sync_builtins" = yes; then
   AC_DEFINE(HAVE_SYNC_BUILTINS, 1,
     [Define to 1 if the target supports __sync_*_compare_and_swap])
 fi

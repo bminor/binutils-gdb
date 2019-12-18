@@ -7731,7 +7731,7 @@ done
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test $gdb_cv_cxx_std_thread = yes; then
+  if test "$gdb_cv_cxx_std_thread" = "yes"; then
 
 $as_echo "#define CXX_STD_THREAD 1" >>confdefs.h
 
@@ -7770,7 +7770,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_sigsetjmp" >&5
 $as_echo "$gdb_cv_func_sigsetjmp" >&6; }
-if test $gdb_cv_func_sigsetjmp = yes; then
+if test "$gdb_cv_func_sigsetjmp" = "yes"; then
 
 $as_echo "#define HAVE_SIGSETJMP 1" >>confdefs.h
 
@@ -9198,7 +9198,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_td_version" >&5
 $as_echo "$gdbsrv_cv_have_td_version" >&6; }
-  if test $gdbsrv_cv_have_td_version = yes; then
+  if test "$gdbsrv_cv_have_td_version" = yes; then
 
 $as_echo "#define HAVE_TD_VERSION 1" >>confdefs.h
 
@@ -9263,7 +9263,7 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_sync_builtins" >&5
 $as_echo "$gdbsrv_cv_have_sync_builtins" >&6; }
-if test $gdbsrv_cv_have_sync_builtins = yes; then
+if test "$gdbsrv_cv_have_sync_builtins" = yes; then
 
 $as_echo "#define HAVE_SYNC_BUILTINS 1" >>confdefs.h
 

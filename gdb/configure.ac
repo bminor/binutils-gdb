@@ -284,7 +284,7 @@ AS_HELP_STRING([--disable-gdbmi], [disable machine-interface (MI)]),
   esac],
   [enable_gdbmi=yes])
 if test x"$enable_gdbmi" = xyes; then
-  if test -d $srcdir/mi; then
+  if test -d "$srcdir/mi"; then
     CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
     CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
     CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
@@ -311,7 +311,7 @@ AS_HELP_STRING([--enable-gdbtk], [enable gdbtk graphical user interface (GUI)]),
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-gdbtk]) ;;
   esac],
-  [if test -d $srcdir/gdbtk; then
+  [if test -d "$srcdir/gdbtk"; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
@@ -389,7 +389,7 @@ AC_CACHE_CHECK([for _etext], ac_cv_var__etext,
 extern char _etext;
 ],
 [free (&_etext);], ac_cv_var__etext=yes, ac_cv_var__etext=no)])
-if test $ac_cv_var__etext = yes; then
+if test "$ac_cv_var__etext" = yes; then
   AC_DEFINE(HAVE__ETEXT, 1,
             [Define to 1 if your system has the _etext variable. ])
 fi
@@ -399,12 +399,12 @@ AC_CACHE_CHECK([for etext], ac_cv_var_etext,
 extern char etext;
 ],
 [free (&etext);], ac_cv_var_etext=yes, ac_cv_var_etext=no)])
-if test $ac_cv_var_etext = yes; then
+if test "$ac_cv_var_etext" = yes; then
   AC_DEFINE(HAVE_ETEXT, 1,
             [Define to 1 if your system has the etext variable. ])
 fi
 if test "$enable_profiling" = yes ; then
-  if test $ac_cv_func_monstartup = no || test $ac_cv_func__mcleanup = no; then
+  if test "$ac_cv_func_monstartup" = no || test "$ac_cv_func__mcleanup" = no; then
     AC_MSG_ERROR(--enable-profiling requires monstartup and _mcleanup)
   fi
   PROFILE_CFLAGS=-pg
@@ -415,7 +415,7 @@ if test "$enable_profiling" = yes ; then
     [AC_TRY_COMPILE([], [int x;], ac_cv_cc_supports_pg=yes,
      ac_cv_cc_supports_pg=no)])
 
-  if test $ac_cv_cc_supports_pg = no; then
+  if test "$ac_cv_cc_supports_pg" = no; then
     AC_MSG_ERROR(--enable-profiling requires a compiler which supports -pg)
   fi
 
@@ -534,7 +534,7 @@ fi
 # Check whether we should enable the TUI, but only do so if we really
 # can.
 if test x"$enable_tui" != xno; then
-  if test -d $srcdir/tui; then
+  if test -d "$srcdir/tui"; then
     if test "$curses_found" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
@@ -556,7 +556,7 @@ fi
 
 case $host_os in
   cygwin*)
-    if test -d $srcdir/libtermcap; then
+    if test -d "$srcdir/libtermcap"; then
       LIBS="../libtermcap/libtermcap.a $LIBS"
       ac_cv_search_tgetent="../libtermcap/libtermcap.a"
     fi ;;
@@ -758,7 +758,7 @@ if test "${with_python}" = no; then
 else
   case "${with_python}" in
   [[\\/]]* | ?:[[\\/]]*)
-    if test -d ${with_python}; then
+    if test -d "${with_python}"; then
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"
       python_prefix=
@@ -794,7 +794,7 @@ else
     python_prefix=
     case "${with_python}" in
     yes | auto)
-      if test ${build} = ${host}; then
+      if test "${build}" = "${host}"; then
         AC_PATH_PROG(python_prog_path, python, missing)
         if test "${python_prog_path}" = missing; then
           python_prog=missing
@@ -1335,7 +1335,7 @@ else
   else
     exit (1);
 ], ac_cv_func_setpgrp_void=no, ac_cv_func_setpgrp_void=yes)])
-if test $ac_cv_func_setpgrp_void = yes; then
+if test "$ac_cv_func_setpgrp_void" = yes; then
   AC_DEFINE(SETPGRP_VOID, 1)
 fi
 fi
@@ -1356,7 +1356,7 @@ AC_CACHE_CHECK(
 #endif],
     gdb_cv_have_gnu_regex=yes,
     gdb_cv_have_gnu_regex=no)])
-if test $gdb_cv_have_gnu_regex = yes; then
+if test "$gdb_cv_have_gnu_regex" = yes; then
   gdb_use_included_regex=no
 fi
 
@@ -1381,7 +1381,7 @@ AC_CACHE_CHECK([for struct lwp], gdb_cv_struct_lwp,
 #define _KMEMUSER
 #include <sys/lwp.h>], [struct lwp l;],
 gdb_cv_struct_lwp=yes, gdb_cv_struct_lwp=no)])
-if test $gdb_cv_struct_lwp = yes; then
+if test "$gdb_cv_struct_lwp" = yes; then
   AC_DEFINE(HAVE_STRUCT_LWP, 1,
             [Define to 1 if your system has struct lwp.])
 fi
@@ -1391,7 +1391,7 @@ AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
 [AC_TRY_COMPILE([#include <sys/types.h>
 #include <machine/reg.h>], [struct reg r;],
 gdb_cv_struct_reg=yes, gdb_cv_struct_reg=no)])
-if test $gdb_cv_struct_reg = yes; then
+if test "$gdb_cv_struct_reg" = yes; then
   AC_DEFINE(HAVE_STRUCT_REG, 1,
             [Define to 1 if your system has struct reg in <machine/reg.h>.])
 fi
@@ -1417,7 +1417,7 @@ AC_CACHE_VAL(gdb_cv_have_ptrace_getregs,
 		[gdb_cv_have_ptrace_getregs=yes],
 		[gdb_cv_have_ptrace_getregs=no])])
 AC_MSG_RESULT($gdb_cv_have_ptrace_getregs)
-if test $gdb_cv_have_ptrace_getregs = yes; then
+if test "$gdb_cv_have_ptrace_getregs" = yes; then
   AC_DEFINE(HAVE_PTRACE_GETREGS, 1,
   [Define if sys/ptrace.h defines the PTRACE_GETREGS request.])
 fi
@@ -1430,7 +1430,7 @@ AC_CACHE_VAL(gdb_cv_have_ptrace_getfpxregs,
 		[gdb_cv_have_ptrace_getfpxregs=yes],
 		[gdb_cv_have_ptrace_getfpxregs=no])])
 AC_MSG_RESULT($gdb_cv_have_ptrace_getfpxregs)
-if test $gdb_cv_have_ptrace_getfpxregs = yes; then
+if test "$gdb_cv_have_ptrace_getfpxregs" = yes; then
   AC_DEFINE(HAVE_PTRACE_GETFPXREGS, 1,
   [Define if sys/ptrace.h defines the PTRACE_GETFPXREGS request.])
 fi
@@ -1444,7 +1444,7 @@ AC_CACHE_VAL(gdb_cv_have_pt_getdbregs,
 		[gdb_cv_have_pt_getdbregs=yes],
 		[gdb_cv_have_pt_getdbregs=no])])
 AC_MSG_RESULT($gdb_cv_have_pt_getdbregs)
-if test $gdb_cv_have_pt_getdbregs = yes; then
+if test "$gdb_cv_have_pt_getdbregs" = yes; then
   AC_DEFINE(HAVE_PT_GETDBREGS, 1,
   [Define if sys/ptrace.h defines the PT_GETDBREGS request.])
 fi
@@ -1458,7 +1458,7 @@ AC_CACHE_VAL(gdb_cv_have_pt_getxmmregs,
 		[gdb_cv_have_pt_getxmmregs=yes],
 		[gdb_cv_have_pt_getxmmregs=no])])
 AC_MSG_RESULT($gdb_cv_have_pt_getxmmregs)
-if test $gdb_cv_have_pt_getxmmregs = yes; then
+if test "$gdb_cv_have_pt_getxmmregs" = yes; then
   AC_DEFINE(HAVE_PT_GETXMMREGS, 1,
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
@@ -1494,7 +1494,7 @@ AC_CACHE_CHECK([for long long support in compiler], gdb_cv_c_long_long,
 [[switch (foo & 2) { case 0: return 1; }]])],
                                   gdb_cv_c_long_long=yes,
                                   gdb_cv_c_long_long=no)])
-if test $gdb_cv_c_long_long != yes; then
+if test "$gdb_cv_c_long_long" != yes; then
   # libdecnumber requires long long.
   AC_MSG_ERROR([Compiler must support long long for GDB.])
 fi
@@ -1515,7 +1515,7 @@ AC_CACHE_CHECK([for long long support in printf],
                               gdb_cv_printf_has_long_long=yes,
                               gdb_cv_printf_has_long_long=no,
                               gdb_cv_printf_has_long_long=no)])
-if test $gdb_cv_printf_has_long_long = yes; then
+if test "$gdb_cv_printf_has_long_long" = yes; then
   AC_DEFINE(PRINTF_HAS_LONG_LONG, 1,
             [Define to 1 if the "%ll" format works to print long longs.])
 fi
@@ -1534,7 +1534,7 @@ AC_CACHE_CHECK([for decfloat support in printf],
                               gdb_cv_printf_has_decfloat=yes,
                               gdb_cv_printf_has_decfloat=no,
                               gdb_cv_printf_has_decfloat=no)])
-if test $gdb_cv_printf_has_decfloat = yes; then
+if test "$gdb_cv_printf_has_decfloat" = yes; then
   AC_DEFINE(PRINTF_HAS_DECFLOAT, 1,
             [Define to 1 if the "%H, %D and %DD" formats work to print decfloats.])
 fi
@@ -1548,7 +1548,7 @@ AC_CACHE_CHECK([for long double support in compiler], gdb_cv_c_long_double,
                [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[long double foo;]])],
                                   gdb_cv_c_long_double=yes,
                                   gdb_cv_c_long_double=no)])
-if test $gdb_cv_c_long_double = yes; then
+if test "$gdb_cv_c_long_double" = yes; then
   AC_DEFINE(HAVE_LONG_DOUBLE, 1,
            [Define to 1 if the compiler supports long double.])
 fi
@@ -1565,7 +1565,7 @@ AC_CACHE_CHECK([for long double support in printf],
                               gdb_cv_printf_has_long_double=yes,
                               gdb_cv_printf_has_long_double=no,
                               gdb_cv_printf_has_long_double=no)])
-if test $gdb_cv_printf_has_long_double = yes; then
+if test "$gdb_cv_printf_has_long_double" = yes; then
   AC_DEFINE(PRINTF_HAS_LONG_DOUBLE, 1,
             [Define to 1 if the "%Lg" format works to print long doubles.])
 fi
@@ -1583,7 +1583,7 @@ AC_CACHE_CHECK([for long double support in scanf],
                               gdb_cv_scanf_has_long_double=yes,
                               gdb_cv_scanf_has_long_double=no,
                               gdb_cv_scanf_has_long_double=no)])
-if test $gdb_cv_scanf_has_long_double = yes; then
+if test "$gdb_cv_scanf_has_long_double" = yes; then
   AC_DEFINE(SCANF_HAS_LONG_DOUBLE, 1,
             [Define to 1 if the "%Lg" format works to scan long doubles.])
 fi
@@ -1666,7 +1666,7 @@ dnl
 dnl Note that we only want this if we are both native (host == target),
 dnl and not doing a canadian cross build (build == host).
 
-if test ${build} = ${host} -a ${host} = ${target} ; then
+if test "${build}" = "${host}" -a "${host}" = "${target}" ; then
    case ${host_os} in
    aix*)
       AC_MSG_CHECKING(for AiX thread debugging library)
@@ -1678,7 +1678,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
                                    gdb_cv_have_aix_thread_debug=yes,
                                    gdb_cv_have_aix_thread_debug=no)])
       AC_MSG_RESULT($gdb_cv_have_aix_thread_debug)
-      if test $gdb_cv_have_aix_thread_debug = yes; then
+      if test "$gdb_cv_have_aix_thread_debug" = yes; then
          CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
          CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
          LIBS="$LIBS -lpthdebug"
@@ -1818,7 +1818,7 @@ AC_SUBST(SER_HARDWIRE)
 
 # libreadline needs libuser32.a in a cygwin environment
 WIN32LIBS=
-if test x$gdb_cv_os_cygwin = xyes; then
+if test x"$gdb_cv_os_cygwin" = xyes; then
     WIN32LIBS="-luser32"
     case "${target}" in
 	*cygwin*) WIN32LIBS="$WIN32LIBS -limagehlp"
@@ -1842,7 +1842,7 @@ AC_SUBST(WIN32LIBS)
 # Add ELF support to GDB, but only if BFD includes ELF support.
 GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
                  [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
-if test $gdb_cv_var_elf = yes; then
+if test "$gdb_cv_var_elf" = yes; then
   CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
@@ -1855,7 +1855,7 @@ fi
 # Add macho support to GDB, but only if BFD includes it.
 GDB_AC_CHECK_BFD([for Mach-O support in BFD], gdb_cv_var_macho,
                  [bfd_mach_o_lookup_command (NULL, 0, NULL)], mach-o.h)
-if test $gdb_cv_var_macho = yes; then
+if test "$gdb_cv_var_macho" = yes; then
   CONFIG_OBS="$CONFIG_OBS machoread.o"
 fi
 
@@ -1863,7 +1863,7 @@ fi
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
 # If building on ELF, look for lzma support for embedded compressed debug info.
-if test $gdb_cv_var_elf = yes; then
+if test "$gdb_cv_var_elf" = yes; then
   AC_ARG_WITH(lzma,
     AS_HELP_STRING([--with-lzma], [support lzma compression (auto/yes/no)]),
     [], [with_lzma=auto])
@@ -1992,7 +1992,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
 	CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-gdbtk"
 
-	if test x$gdb_cv_os_cygwin = xyes; then
+	if test x"$gdb_cv_os_cygwin" = xyes; then
 	  WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32"
 	  WIN32LDAPP="-Wl,--subsystem,console"
 	  CONFIG_OBS="${CONFIG_OBS} gdbres.o"
