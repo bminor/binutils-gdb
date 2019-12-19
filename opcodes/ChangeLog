@@ -1,3 +1,10 @@
+2019-12-19  Dr N.W. Filardo  <nwf20@cam.ac.uk>
+
+	PR 25277
+	* microblaze-opcm.h (enum microblaze_instr): Prefix fadd, fmul and
+	fdiv with "mbi_".
+	* microblaze-opc.h (opcodes): Adjust to suit.
+
 2019-12-18  Alan Modra  <amodra@gmail.com>
 
 	* alpha-opc.c (OP): Avoid signed overflow.
