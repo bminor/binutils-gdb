@@ -1,5 +1,10 @@
 2019-12-18  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Use size_t for vars.
+	* elf64-ppc.c (sym_exists_at): Use size_t for lo, hi and mid.
+
+2019-12-18  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (ELF_LOCAL_SYMBOL_HASH): Avoid signed overflow.
 	* elf32-hppa.c (final_link_relocate): Likewise.
 	* elf32-ppc.c (_bfd_elf_ppc_at_tls_transform): Likewise.

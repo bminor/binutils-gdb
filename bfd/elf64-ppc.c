@@ -2120,9 +2120,10 @@ compare_symbols (const void *ap, const void *bp)
 /* Search SYMS for a symbol of the given VALUE.  */
 
 static asymbol *
-sym_exists_at (asymbol **syms, long lo, long hi, unsigned int id, bfd_vma value)
+sym_exists_at (asymbol **syms, size_t lo, size_t hi, unsigned int id,
+	       bfd_vma value)
 {
-  long mid;
+  size_t mid;
 
   if (id == (unsigned) -1)
     {
