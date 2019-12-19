@@ -1,5 +1,12 @@
 2019-12-18  Alan Modra  <amodra@gmail.com>
 
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Don't overflow when
+	checking symbol count against section size.  Guard against strlen
+	running off end of buffer by allocating one more byte and zeroing.
+	* coff64-rs6000.c (xcoff64_slurp_armap): Likewise.
+
+2019-12-18  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Use size_t for vars.
 	* elf64-ppc.c (sym_exists_at): Use size_t for lo, hi and mid.
 

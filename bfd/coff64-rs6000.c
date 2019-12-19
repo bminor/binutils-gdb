@@ -1933,18 +1933,27 @@ xcoff64_slurp_armap (bfd *abfd)
     return FALSE;
 
   sz = bfd_scan_vma (hdr.size, (const char **) NULL, 10);
+  if (sz == (bfd_size_type) -1)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
 
   /* Read in the entire symbol table.  */
-  contents = (bfd_byte *) bfd_alloc (abfd, sz);
+  contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
   if (contents == NULL)
     return FALSE;
   if (bfd_bread (contents, sz, abfd) != sz)
     return FALSE;
 
+  /* Ensure strings are NULL terminated so we don't wander off the end
+     of the buffer.  */
+  contents[sz] = 0;
+
   /* The symbol table starts with an eight byte count.  */
   c = H_GET_64 (abfd, contents);
 
-  if (c * 8 >= sz)
+  if (c >= sz / 8)
     {
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
