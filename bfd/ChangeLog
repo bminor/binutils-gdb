@@ -1,3 +1,7 @@
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_read_ar_hdr): Free ar_hdr on error return.
+
 2019-12-18  Alan Modra  <amodra@gmail.com>
 
 	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Don't overflow when
