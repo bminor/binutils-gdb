@@ -101,6 +101,12 @@ struct stap_probe_arg
 class stap_static_probe_ops : public static_probe_ops
 {
 public:
+  /* We need a user-provided constructor to placate some compilers.
+     See PR build/24937.  */
+  stap_static_probe_ops ()
+  {
+  }
+
   /* See probe.h.  */
   bool is_linespec (const char **linespecp) const override;
 

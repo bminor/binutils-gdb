@@ -1,3 +1,8 @@
+2020-01-07  Tom Tromey  <tromey@adacore.com>
+
+	PR build/24937:
+	* stap-probe.c (class stap_static_probe_ops): Add constructor.
+
 2020-01-02  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* cli/cli-style.c: Set cli_styling to 'true' in the Cygwin build.
