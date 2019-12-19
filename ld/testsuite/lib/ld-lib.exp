@@ -1109,7 +1109,6 @@ proc uses_genelf { } {
 	 || [istarget "ft32-*-*"]
 	 || [istarget "iq2000-*-*"]
 	 || [istarget "mn10200-*-*"]
-	 || [istarget "moxie-*-*"]
 	 || [istarget "msp430-*-*"]
 	 || [istarget "mt-*-*"]
 	 || [istarget "pj*-*-*"]
