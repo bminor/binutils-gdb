@@ -77,9 +77,9 @@ enum ui_out_type
 /* The possible kinds of fields.  */
 enum class field_kind
   {
-    /* "FIELD_STRING" needs has a funny name to avoid clashes with
-       tokens named "STRING".  See PR build/25250.  FIELD_SIGNED is
-       given a similar name for consistency.  */
+    /* "FIELD_STRING" needs a funny name to avoid clashes with tokens
+       named "STRING".  See PR build/25250.  FIELD_SIGNED is given a
+       similar name for consistency.  */
     FIELD_SIGNED,
     FIELD_STRING,
   };

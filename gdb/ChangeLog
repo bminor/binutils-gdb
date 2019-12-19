@@ -1,3 +1,7 @@
+2019-12-19  Tom Tromey  <tromey@adacore.com>
+
+	* ui-out.h (enum class field_kind): Fix comment.
+
 2019-12-11  Tom Tromey  <tromey@adacore.com>
 
 	* xml-support.c (xml_fetch_content_from_file): Use FOPEN_RB.
