@@ -41,6 +41,9 @@ TAGS.sub
 .gdbinit
 .gdb_history
 
+perf.data
+perf.data.old
+
 # ignore core files, but not java/net/protocol/core/
 core
 !core/

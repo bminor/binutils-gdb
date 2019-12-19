@@ -1,3 +1,7 @@
+2019-12-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* .gitignore: Add perf.data and perf.data.old.
+
 2019-10-17  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* src-release.sh (GDB_SUPPORT_DIRS): Add libctf.
