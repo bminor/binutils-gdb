@@ -513,6 +513,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	  *(const char **) &matching_vector[match_count] = name;
 	}
     }
+  else if (matching_vector)
+    free (matching_vector);
   return FALSE;
 }
 

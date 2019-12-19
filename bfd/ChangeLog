@@ -1,5 +1,10 @@
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
+	* format.c (bfd_check_format_matches): Free matching_vector when
+	not returning matching target strings.
+
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
 	* coff-alpha.c (alpha_ecoff_read_ar_hdr): Free ar_hdr on error return.
 
 2019-12-18  Alan Modra  <amodra@gmail.com>
