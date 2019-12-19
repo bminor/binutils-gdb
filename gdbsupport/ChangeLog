@@ -1,5 +1,13 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* configure, Makefile.in, aclocal.m4, common.m4, config.in:
+	Rebuild.
+	* common.m4 (GDB_AC_COMMON): Move many checks from
+	gdb/configure.ac.
+	* acinclude.m4: Include bfd.m4, ptrace.m4.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* common-defs.h: Add GDBSERVER case.  Update includes.
 	* acinclude.m4, aclocal.m4, config.in, configure, configure.ac,
 	Makefile.am, Makefile.in, README: New files.

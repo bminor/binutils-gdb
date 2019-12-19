@@ -114,12 +114,17 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/codeset.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/largefile.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
+	$(top_srcdir)/../config/lib-ld.m4 \
+	$(top_srcdir)/../config/lib-link.m4 \
+	$(top_srcdir)/../config/lib-prefix.m4 \
 	$(top_srcdir)/../config/override.m4 \
 	$(top_srcdir)/../config/plugins.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/common.m4 $(top_srcdir)/../config/ax_pthread.m4 \
+	$(top_srcdir)/../bfd/bfd.m4 $(top_srcdir)/common.m4 \
+	$(top_srcdir)/../config/ax_pthread.m4 \
 	$(top_srcdir)/../gdb/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/../gdb/libiberty.m4 \
-	$(top_srcdir)/../gdb/selftest.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/../gdb/selftest.m4 \
+	$(top_srcdir)/../gdb/ptrace.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -243,6 +248,7 @@ GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 HAVE_CXX11 = @HAVE_CXX11@
+HAVE_LIBIPT = @HAVE_LIBIPT@
 INCINTL = @INCINTL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -253,8 +259,10 @@ INSTOBJEXT = @INSTOBJEXT@
 LDFLAGS = @LDFLAGS@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
+LIBIPT = @LIBIPT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LTLIBIPT = @LTLIBIPT@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@

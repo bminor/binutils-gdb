@@ -1,5 +1,12 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac: Remove any checks that were added to common.m4.
+	* acinclude.m4: Include lib-ld.m4, lib-prefix.m4, and
+	lib-link.m4.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* server.h: Include config.h.
 	* gdbreplay.c: Include config.h.
 	* configure: Rebuild.

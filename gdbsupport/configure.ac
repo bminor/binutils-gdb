@@ -45,6 +45,9 @@ GDB_AC_COMMON
 GDB_AC_SELFTEST
 AM_CONDITIONAL(SELFTEST, $enable_unittests)
 
+# Check the return and argument types of ptrace.
+GDB_AC_PTRACE
+
 TARGET_WORD_SIZE=`sed -n 's,#define BFD_ARCH_SIZE \(.*\)$,\1,p' ../bfd/bfd-in3.h`
 AC_DEFINE_UNQUOTED(TARGET_WORD_SIZE, $TARGET_WORD_SIZE,
    [Define to the word size for the target.])

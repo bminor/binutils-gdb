@@ -480,11 +480,6 @@ AC_SEARCH_LIBS(kinfo_getvmmap, util util-freebsd,
   [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
             [Define to 1 if your system has the kinfo_getvmmap function. ])])
 
-# fbsd-nat.c can also use kinfo_getfile.
-AC_SEARCH_LIBS(kinfo_getfile, util util-freebsd,
-  [AC_DEFINE(HAVE_KINFO_GETFILE, 1,
-            [Define to 1 if your system has the kinfo_getfile function. ])])
-
 AM_ICONV
 
 # GDB may fork/exec the iconv program to get the list of supported character
@@ -1204,57 +1199,16 @@ fi
 AC_SUBST(SRCHIGH_LIBS)
 AC_SUBST(SRCHIGH_CFLAGS)
 
-AC_ARG_WITH(intel_pt,
-  AS_HELP_STRING([--with-intel-pt], [include Intel Processor Trace support (auto/yes/no)]),
-  [], [with_intel_pt=auto])
-AC_MSG_CHECKING([whether to use intel pt])
-AC_MSG_RESULT([$with_intel_pt])
-
-if test "${with_intel_pt}" = no; then
-  AC_MSG_WARN([Intel Processor Trace support disabled; some features may be unavailable.])
-  HAVE_LIBIPT=no
-else
-  AC_PREPROC_IFELSE([AC_LANG_SOURCE([[
-#include <linux/perf_event.h>
-#ifndef PERF_ATTR_SIZE_VER5
-# error
-#endif
-  ]])], [perf_event=yes], [perf_event=no])
-  if test "$perf_event" != yes; then
-    if test "$with_intel_pt" = yes; then
-      AC_MSG_ERROR([linux/perf_event.h missing or too old])
-    else
-      AC_MSG_WARN([linux/perf_event.h missing or too old; some features may be unavailable.])
-    fi
-  fi
-
-  AC_LIB_HAVE_LINKFLAGS([ipt], [], [#include "intel-pt.h"], [pt_insn_alloc_decoder (0);])
-  if test "$HAVE_LIBIPT" != yes; then
-    if test "$with_intel_pt" = yes; then
-      AC_MSG_ERROR([libipt is missing or unusable])
-    else
-      AC_MSG_WARN([libipt is missing or unusable; some features may be unavailable.])
-    fi
-  else
-    save_LIBS=$LIBS
-    LIBS="$LIBS $LIBIPT"
-    AC_CHECK_FUNCS(pt_insn_event)
-    AC_CHECK_MEMBERS([struct pt_insn.enabled, struct pt_insn.resynced], [], [],
-                     [#include <intel-pt.h>])
-    LIBS=$save_LIBS
-  fi
-fi
-
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #
 
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
-AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
-                  thread_db.h linux/elf.h \
+AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h \
+                  thread_db.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
-		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
+		  sys/resource.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h \
 		  termios.h elf_hp.h])
 AC_CHECK_HEADERS(sys/user.h, [], [],
@@ -1279,12 +1233,6 @@ libiberty_INIT
 AC_CHECK_DECLS([snprintf])
 AM_LC_MESSAGES
 
-# ----------------------- #
-# Checks for structures.  #
-# ----------------------- #
-
-AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
-
 # ------------------ #
 # Checks for types.  #
 # ------------------ #
@@ -1306,15 +1254,13 @@ AC_C_BIGENDIAN
 # Checks for library functions.  #
 # ------------------------------ #
 
-AC_FUNC_MMAP
-AC_FUNC_VFORK
-AC_CHECK_FUNCS([getauxval getrusage getuid getgid \
+AC_CHECK_FUNCS([getuid getgid \
 		pipe poll pread pread64 pwrite resize_term \
-		sbrk getpgid setpgid setpgrp setsid \
+		getpgid setsid \
 		sigaction sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid \
-		ptrace64 sigaltstack setns use_default_colors])
+		use_default_colors])
 AM_LANGINFO_CODESET
 GDB_AC_COMMON
 
@@ -1474,17 +1420,6 @@ AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
 # FreeBSD 10.3.
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_syscall_code], [], [],
                  [#include <sys/ptrace.h>])
-
-if test "$ac_cv_header_sys_procfs_h" = yes; then
-  BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(elf_fpregset_t)
-fi
 
 # Check if the compiler supports the `long long' type.
 
@@ -1735,29 +1670,6 @@ fi
 if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTLS, 1,
             [Define if <thread_db.h> has the TD_NOTLS error code.])
-fi
-
-dnl Check if we can disable the virtual address space randomization.
-dnl The functionality of setarch -R.
-AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
-define([PERSONALITY_TEST], [AC_LANG_PROGRAM([#include <sys/personality.h>], [
-#      if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#       define ADDR_NO_RANDOMIZE 0x0040000
-#      endif
-       /* Test the flag could be set and stays set.  */
-       personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
-       if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
-	   return 1])])
-AC_RUN_IFELSE([PERSONALITY_TEST],
-	      [have_personality=true],
-	      [have_personality=false],
-	      [AC_LINK_IFELSE([PERSONALITY_TEST],
-			      [have_personality=true],
-			      [have_personality=false])])
-if $have_personality
-then
-    AC_DEFINE([HAVE_PERSONALITY], 1,
-	      [Define if you support the personality syscall.])
 fi
 
 dnl Set the host's .gdbinit filename.

@@ -85,12 +85,12 @@ ACX_CONFIGURE_DIR(["../../gnulib"], ["build-gnulib-gdbserver"],
 ACX_CONFIGURE_DIR(["../../libiberty"], ["build-libiberty-gdbserver"])
 
 AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
-		 proc_service.h sys/procfs.h linux/elf.h dnl
+		 sys/procfs.h linux/elf.h dnl
 		 fcntl.h signal.h sys/file.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)
 AC_FUNC_FORK
-AC_CHECK_FUNCS(getauxval pread pwrite pread64 setns)
+AC_CHECK_FUNCS(pread pwrite pread64)
 
 GDB_AC_COMMON
 
@@ -159,8 +159,6 @@ LIBS="$old_LIBS"
 libiberty_INIT
 
 AC_CHECK_DECLS([perror, vasprintf, vsnprintf])
-
-AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 
 # See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
 # Older amd64 Linux's don't have the fs_base and gs_base members of
@@ -298,14 +296,6 @@ if test "${srv_linux_btrace}" = "yes"; then
 	    [Define if the target supports branch tracing.])
 fi
 
-if test "$ac_cv_header_sys_procfs_h" = yes; then
-  BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(elf_fpregset_t)
-fi
-
 dnl Some systems (e.g., Android) have lwpid_t defined in libthread_db.h.
 if test "$bfd_cv_have_sys_procfs_type_lwpid_t" != yes; then
   GDBSERVER_HAVE_THREAD_DB_TYPE(lwpid_t)
@@ -403,30 +393,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
 		        [gdbsrv_cv_have_visibility_hidden=yes],
 	        	[gdbsrv_cv_have_visibility_hidden=no])
 CFLAGS="$saved_cflags"
-
-dnl Check if we can disable the virtual address space randomization.
-dnl The functionality of setarch -R.
-AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
-define([PERSONALITY_TEST], [AC_LANG_PROGRAM([#include <sys/personality.h>], [
-#      if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#       define ADDR_NO_RANDOMIZE 0x0040000
-#      endif
-       /* Test the flag could be set and stays set.  */
-       personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
-       if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
-           return 1])])
-AC_RUN_IFELSE([PERSONALITY_TEST],
-              [gdbsrv_cv_have_personality=true],
-              [gdbsrv_cv_have_personality=false],
-              [AC_LINK_IFELSE([PERSONALITY_TEST],
-                              [gdbsrv_cv_have_personality=true],
-                              [gdbsrv_cv_have_personality=false])])
-if $gdbsrv_cv_have_personality
-then
-    AC_DEFINE([HAVE_PERSONALITY], 1,
-              [Define if you support the personality syscall.])
-fi
-
 
 IPA_DEPFILES=""
 extra_libraries=""

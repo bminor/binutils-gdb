@@ -28,6 +28,10 @@
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
+/* Define to 1 if you have the declaration of `ADDR_NO_RANDOMIZE', and to 0 if
+   you don't. */
+#undef HAVE_DECL_ADDR_NO_RANDOMIZE
+
 /* Define to 1 if you have the declaration of `asprintf', and to 0 if you
    don't. */
 #undef HAVE_DECL_ASPRINTF
@@ -38,6 +42,10 @@
 
 /* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
 #undef HAVE_DECL_FFS
+
+/* Define to 1 if you have the declaration of `ptrace', and to 0 if you don't.
+   */
+#undef HAVE_DECL_PTRACE
 
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */
@@ -78,17 +86,47 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define if <sys/procfs.h> has elf_fpregset_t. */
+#undef HAVE_ELF_FPREGSET_T
+
 /* Define to 1 if you have the `fdwalk' function. */
 #undef HAVE_FDWALK
+
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
+/* Define if <sys/procfs.h> has fpregset_t. */
+#undef HAVE_FPREGSET_T
+
+/* Define to 1 if you have the `getauxval' function. */
+#undef HAVE_GETAUXVAL
+
+/* Define to 1 if you have the `getpagesize' function. */
+#undef HAVE_GETPAGESIZE
 
 /* Define to 1 if you have the `getrlimit' function. */
 #undef HAVE_GETRLIMIT
 
+/* Define to 1 if you have the `getrusage' function. */
+#undef HAVE_GETRUSAGE
+
+/* Define if <sys/procfs.h> has gregset_t. */
+#undef HAVE_GREGSET_T
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if your system has the kinfo_getfile function. */
+#undef HAVE_KINFO_GETFILE
+
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 #undef HAVE_LANGINFO_CODESET
+
+/* Define if you have the ipt library. */
+#undef HAVE_LIBIPT
+
+/* Define to 1 if you have the <linux/elf.h> header file. */
+#undef HAVE_LINUX_ELF_H
 
 /* Define to 1 if you have the <linux/perf_event.h> header file. */
 #undef HAVE_LINUX_PERF_EVENT_H
@@ -99,14 +137,38 @@
 /* Define to 1 if the system has the type `long long'. */
 #undef HAVE_LONG_LONG
 
+/* Define if <sys/procfs.h> has lwpid_t. */
+#undef HAVE_LWPID_T
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have a working `mmap' system call. */
+#undef HAVE_MMAP
+
+/* Define if you support the personality syscall. */
+#undef HAVE_PERSONALITY
 
 /* Define to 1 if you have the `pipe' function. */
 #undef HAVE_PIPE
 
 /* Define to 1 if you have the `pipe2' function. */
 #undef HAVE_PIPE2
+
+/* Define if <sys/procfs.h> has prfpregset_t. */
+#undef HAVE_PRFPREGSET_T
+
+/* Define if <sys/procfs.h> has prgregset32_t. */
+#undef HAVE_PRGREGSET32_T
+
+/* Define if <sys/procfs.h> has prgregset_t. */
+#undef HAVE_PRGREGSET_T
+
+/* Define to 1 if you have the <proc_service.h> header file. */
+#undef HAVE_PROC_SERVICE_H
+
+/* Define if <sys/procfs.h> has psaddr_t. */
+#undef HAVE_PSADDR_T
 
 /* Have PTHREAD_PRIO_INHERIT. */
 #undef HAVE_PTHREAD_PRIO_INHERIT
@@ -117,8 +179,32 @@
 /* Define to 1 if you have the `pthread_sigmask' function. */
 #undef HAVE_PTHREAD_SIGMASK
 
+/* Define to 1 if you have the `ptrace64' function. */
+#undef HAVE_PTRACE64
+
+/* Define to 1 if you have the <ptrace.h> header file. */
+#undef HAVE_PTRACE_H
+
+/* Define to 1 if you have the `pt_insn_event' function. */
+#undef HAVE_PT_INSN_EVENT
+
+/* Define to 1 if you have the `sbrk' function. */
+#undef HAVE_SBRK
+
+/* Define to 1 if you have the `setns' function. */
+#undef HAVE_SETNS
+
+/* Define to 1 if you have the `setpgid' function. */
+#undef HAVE_SETPGID
+
+/* Define to 1 if you have the `setpgrp' function. */
+#undef HAVE_SETPGRP
+
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigaltstack' function. */
+#undef HAVE_SIGALTSTACK
 
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
@@ -143,6 +229,27 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* Define to 1 if `enabled' is a member of `struct pt_insn'. */
+#undef HAVE_STRUCT_PT_INSN_ENABLED
+
+/* Define to 1 if `resynced' is a member of `struct pt_insn'. */
+#undef HAVE_STRUCT_PT_INSN_RESYNCED
+
+/* Define to 1 if `st_blksize' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BLKSIZE
+
+/* Define to 1 if `st_blocks' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/procfs.h> header file. */
+#undef HAVE_SYS_PROCFS_H
+
+/* Define to 1 if you have the <sys/ptrace.h> header file. */
+#undef HAVE_SYS_PTRACE_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H
@@ -171,11 +278,23 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `vfork' function. */
+#undef HAVE_VFORK
+
+/* Define to 1 if you have the <vfork.h> header file. */
+#undef HAVE_VFORK_H
+
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
+
+/* Define to 1 if `fork' works. */
+#undef HAVE_WORKING_FORK
+
+/* Define to 1 if `vfork' works. */
+#undef HAVE_WORKING_VFORK
 
 /* Name of package */
 #undef PACKAGE
@@ -201,6 +320,21 @@
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
+
+/* Define to the type of arg 1 for ptrace. */
+#undef PTRACE_TYPE_ARG1
+
+/* Define to the type of arg 3 for ptrace. */
+#undef PTRACE_TYPE_ARG3
+
+/* Define to the type of arg 4 for ptrace. */
+#undef PTRACE_TYPE_ARG4
+
+/* Define to the type of arg 5 for ptrace. */
+#undef PTRACE_TYPE_ARG5
+
+/* Define as the return type of ptrace. */
+#undef PTRACE_TYPE_RET
 
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
@@ -270,5 +404,11 @@
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
 
+/* Define to `int' if <sys/types.h> does not define. */
+#undef pid_t
+
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
+
+/* Define as `fork' if `vfork' does not work. */
+#undef vfork

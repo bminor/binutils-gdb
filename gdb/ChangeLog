@@ -1,5 +1,10 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac: Move many checks to ../gdbsupport/common.m4.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* nat/x86-linux-dregs.c: Include configh.h.
 	* nat/linux-ptrace.c: Include configh.h.
 	* nat/linux-btrace.c: Include configh.h.
