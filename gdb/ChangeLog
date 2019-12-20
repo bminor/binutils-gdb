@@ -1,5 +1,15 @@
 2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* dwarf2read.c (is_valid_DW_AT_calling_convention_for_subroutine):
+	New function.
+	(read_subroutine_type): Validate the parsed
+	DW_AT_calling_convention value before assigning it to a
+	subroutine's calling_convention attribute.
+	* gdbtypes.h (struct func_type) <calling_convention>: Use
+	an enum bitfield as its type, instead of plain unsigned.
+
+2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	PR gdb/25054
 	* infcall.c (call_function_by_hand_dummy): Update the argument-
 	passing section for call-by-value parameters.

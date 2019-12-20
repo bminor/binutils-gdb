@@ -1157,9 +1157,9 @@ struct func_type
     /* * The calling convention for targets supporting multiple ABIs.
        Right now this is only fetched from the Dwarf-2
        DW_AT_calling_convention attribute.  The value is one of the
-       DW_CC enum dwarf_calling_convention constants.  */
+       DW_CC constants.  */
 
-    unsigned calling_convention : 8;
+    ENUM_BITFIELD (dwarf_calling_convention) calling_convention : 8;
 
     /* * Whether this function normally returns to its caller.  It is
        set from the DW_AT_noreturn attribute if set on the

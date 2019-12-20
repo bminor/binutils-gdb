@@ -15872,6 +15872,32 @@ is_valid_DW_AT_calling_convention_for_type (ULONGEST value)
     }
 }
 
+/* Check if the given VALUE is a valid enum dwarf_calling_convention
+   constant for a subroutine, according to DWARF5 spec, Table 3.3, and
+   also according to GNU-specific values (see include/dwarf2.h).  */
+
+static bool
+is_valid_DW_AT_calling_convention_for_subroutine (ULONGEST value)
+{
+  switch (value)
+    {
+    case DW_CC_normal:
+    case DW_CC_program:
+    case DW_CC_nocall:
+      return true;
+
+    case DW_CC_GNU_renesas_sh:
+    case DW_CC_GNU_borland_fastcall_i386:
+    case DW_CC_GDB_IBM_OpenCL:
+      return true;
+
+    default:
+      complaint (_("unrecognized DW_AT_calling_convention value "
+		   "(%lu) for a subroutine"), value);
+      return false;
+    }
+}
+
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to create a type for the structure or union.  Fill in
    the type's name and general properties; the members will not be
@@ -17540,8 +17566,10 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      the subroutine die.  Otherwise set the calling convention to
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
-  if (attr != nullptr)
-    TYPE_CALLING_CONVENTION (ftype) = DW_UNSND (attr);
+  if (attr != nullptr
+      && is_valid_DW_AT_calling_convention_for_subroutine (DW_UNSND (attr)))
+    TYPE_CALLING_CONVENTION (ftype)
+      = (enum dwarf_calling_convention) (DW_UNSND (attr));
   else if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL"))
     TYPE_CALLING_CONVENTION (ftype) = DW_CC_GDB_IBM_OpenCL;
   else
