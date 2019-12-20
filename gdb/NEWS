@@ -3,6 +3,10 @@
 
 *** Changes since GDB 9
 
+* Multithreaded symbol loading has now been enabled by default on systems
+  that support it (see entry for GDB 9, below), providing faster
+  performance for programs with many symbols.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.
