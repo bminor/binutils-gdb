@@ -1,3 +1,7 @@
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
+	* or1korbis.cpu (f-disp26, f-disp21): Don't left shift negative values.
+
 2019-12-17  Alan Modra  <amodra@gmail.com>
 
 	* bpf.cpu (f-imm64): Avoid signed overflow.

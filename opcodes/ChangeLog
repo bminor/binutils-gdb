@@ -1,5 +1,9 @@
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
+	* or1k-ibld.c: Regenerate.
+
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
 	* hppa-dis.c (extract_16, extract_21, print_insn_hppa): Use
 	unsigned variables.
 
