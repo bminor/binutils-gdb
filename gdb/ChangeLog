@@ -1,3 +1,8 @@
+2019-12-20  Weimin Pan  <weimin.pan@oracle.com>
+	* ctfread.c (ctf_file_key): Change type to objfile_key.
+	(struct ctf_context): Remove typedef.
+	(get_objfile_text_range): Use ANOFFSET to get text base.
+
 2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* dwarf2read.c (is_valid_DW_AT_calling_convention_for_subroutine):
