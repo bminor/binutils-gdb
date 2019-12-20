@@ -1,5 +1,11 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* nat/linux-btrace.c: Don't include <config.h>.
+	* nat/linux-ptrace.c: Don't include <config.h>.
+	* nat/x86-linux-dregs.c: Don't include <config.h>.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* configure.ac: Move many checks to ../gdbsupport/common.m4.
 
