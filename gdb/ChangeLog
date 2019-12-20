@@ -1,3 +1,25 @@
+2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* dwarf2read.c (dwarf2_add_member_fn): Read the DW_AT_defaulted
+	and DW_AT_deleted attributes of a function.
+	(read_structure_type): Read the DW_AT_calling_convention attribute
+	of a type.
+	(is_valid_DW_AT_defaulted): New function.
+	(is_valid_DW_AT_calling_convention_for_type): New function.
+	* gdbtypes.h: Include dwarf2.h.
+	(struct fn_field)<defaulted>: New field to store the
+	DW_AT_defaulted attribute.
+	(struct fn_field)<is_deleted>: New field to store the
+	DW_AT_deleted attribute.
+	(struct cplus_struct_type)<calling_convention>: New field to store
+	the DW_AT_calling_convention attribute.
+	(TYPE_FN_FIELD_DEFAULTED): New macro.
+	(TYPE_FN_FIELD_DELETED): New macro.
+	(TYPE_CPLUS_CALLING_CONVENTION): New macro.
+	* gdbtypes.c (dump_fn_fieldlists): Update for the changes made
+	to the .h file.
+	(print_cplus_stuff): Likewise.
+
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui.c (tui_show_source): Remove.

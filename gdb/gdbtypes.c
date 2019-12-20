@@ -4494,6 +4494,10 @@ dump_fn_fieldlists (struct type *type, int spaces)
 			    TYPE_FN_FIELD_PROTECTED (f, overload_idx));
 	  printfi_filtered (spaces + 8, "is_stub %d\n",
 			    TYPE_FN_FIELD_STUB (f, overload_idx));
+	  printfi_filtered (spaces + 8, "defaulted %d\n",
+			    TYPE_FN_FIELD_DEFAULTED (f, overload_idx));
+	  printfi_filtered (spaces + 8, "is_deleted %d\n",
+			    TYPE_FN_FIELD_DELETED (f, overload_idx));
 	  printfi_filtered (spaces + 8, "voffset %u\n",
 			    TYPE_FN_FIELD_VOFFSET (f, overload_idx));
 	}
@@ -4557,6 +4561,9 @@ print_cplus_stuff (struct type *type, int spaces)
     {
       dump_fn_fieldlists (type, spaces);
     }
+
+  printfi_filtered (spaces, "calling_convention %d\n",
+		    TYPE_CPLUS_CALLING_CONVENTION (type));
 }
 
 /* Print the contents of the TYPE's type_specific union, assuming that

@@ -15472,6 +15472,25 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 	  && (type_name[len] == '\0' || type_name[len] == '<'));
 }
 
+/* Check if the given VALUE is a recognized enum
+   dwarf_defaulted_attribute constant according to DWARF5 spec,
+   Table 7.24.  */
+
+static bool
+is_valid_DW_AT_defaulted (ULONGEST value)
+{
+  switch (value)
+    {
+    case DW_DEFAULTED_no:
+    case DW_DEFAULTED_in_class:
+    case DW_DEFAULTED_out_of_class:
+      return true;
+    }
+
+  complaint (_("unrecognized DW_AT_defaulted value (%lu)"), value);
+  return false;
+}
+
 /* Add a member function to the proper fieldlist.  */
 
 static void
@@ -15583,6 +15602,16 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   attr = dwarf2_attr (die, DW_AT_artificial, cu);
   if (attr && DW_UNSND (attr) != 0)
     fnp->is_artificial = 1;
+
+  /* Check for defaulted methods.  */
+  attr = dwarf2_attr (die, DW_AT_defaulted, cu);
+  if (attr != nullptr && is_valid_DW_AT_defaulted (DW_UNSND (attr)))
+    fnp->defaulted = (enum dwarf_defaulted_attribute) DW_UNSND (attr);
+
+  /* Check for deleted methods.  */
+  attr = dwarf2_attr (die, DW_AT_deleted, cu);
+  if (attr != nullptr && DW_UNSND (attr) != 0)
+    fnp->is_deleted = 1;
 
   fnp->is_constructor = dwarf2_is_constructor (die, cu);
 
@@ -15823,6 +15852,26 @@ maybe_set_alignment (struct dwarf2_cu *cu, struct die_info *die,
 	       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
 }
 
+/* Check if the given VALUE is a valid enum dwarf_calling_convention
+   constant for a type, according to DWARF5 spec, Table 5.5.  */
+
+static bool
+is_valid_DW_AT_calling_convention_for_type (ULONGEST value)
+{
+  switch (value)
+    {
+    case DW_CC_normal:
+    case DW_CC_pass_by_reference:
+    case DW_CC_pass_by_value:
+      return true;
+
+    default:
+      complaint (_("unrecognized DW_AT_calling_convention value "
+		   "(%lu) for a type"), value);
+      return false;
+    }
+}
+
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to create a type for the structure or union.  Fill in
    the type's name and general properties; the members will not be
@@ -15903,6 +15952,18 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
   if (cu->language == language_cplus && die->tag == DW_TAG_class_type)
     TYPE_DECLARED_CLASS (type) = 1;
+
+  /* Store the calling convention in the type if it's available in
+     the die.  Otherwise the calling convention remains set to
+     the default value DW_CC_normal.  */
+  attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
+  if (attr != nullptr
+      && is_valid_DW_AT_calling_convention_for_type (DW_UNSND (attr)))
+    {
+      ALLOCATE_CPLUS_STRUCT_TYPE (type);
+      TYPE_CPLUS_CALLING_CONVENTION (type)
+	= (enum dwarf_calling_convention) (DW_UNSND (attr));
+    }
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)

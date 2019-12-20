@@ -50,6 +50,7 @@
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
+#include "dwarf2.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -957,9 +958,18 @@ struct fn_field
 
   unsigned int is_constructor : 1;
 
+  /* * True if this function is deleted, false otherwise.  */
+
+  unsigned int is_deleted : 1;
+
+  /* * DW_AT_defaulted attribute for this function.  The value is one
+     of the DW_DEFAULTED constants.  */
+
+  ENUM_BITFIELD (dwarf_defaulted_attribute) defaulted : 2;
+
   /* * Unused.  */
 
-  unsigned int dummy:9;
+  unsigned int dummy:6;
 
   /* * Index into that baseclass's virtual function table, minus 2;
      else if static: VOFFSET_STATIC; else: 0.  */
@@ -1032,6 +1042,12 @@ struct cplus_struct_type
        dynamic.  Zero if not yet computed.  */
 
     int is_dynamic : 2;
+
+    /* * The calling convention for this type, fetched from the
+       DW_AT_calling_convention attribute.  The value is one of the
+       DW_CC constants.  */
+
+    ENUM_BITFIELD (dwarf_calling_convention) calling_convention : 8;
 
     /* * The base class which defined the virtual function table pointer.  */
 
@@ -1437,6 +1453,8 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
     ? (struct cplus_struct_type*)&cplus_struct_default \
     : TYPE_RAW_CPLUS_SPECIFIC(thistype))
 #define TYPE_RAW_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
+#define TYPE_CPLUS_CALLING_CONVENTION(thistype) \
+  TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff->calling_convention
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
 #define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
 #define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
@@ -1553,6 +1571,8 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
+#define TYPE_FN_FIELD_DEFAULTED(thisfn, n) ((thisfn)[n].defaulted)
+#define TYPE_FN_FIELD_DELETED(thisfn, n) ((thisfn)[n].is_deleted)
 
 /* Accessors for typedefs defined by a class.  */
 #define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
