@@ -1,5 +1,9 @@
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
+	* xtensa-isa.c (xtensa_insnbuf_from_chars): Avoid signed overflow.
+
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
 	* libhppa.h (hppa_field_adjust, bfd_hppa_insn2fmt): Delete forward
 	declaration.  Move ATTRIBUTE_UNUSED to definition.
 	(sign_extend, low_sign_extend, sign_unext, low_sign_unext),

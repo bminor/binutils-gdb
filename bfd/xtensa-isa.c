@@ -223,7 +223,7 @@ xtensa_insnbuf_from_chars (xtensa_isa isa,
       int word_inx = byte_to_word_index (i);
       int bit_inx = byte_to_bit_index (i);
 
-      insn[word_inx] |= (*cp & 0xff) << bit_inx;
+      insn[word_inx] |= (unsigned) (*cp & 0xff) << bit_inx;
     }
 }
 
