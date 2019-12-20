@@ -1,3 +1,8 @@
+2019-12-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/sym-info-cmds.exp (GDBInfoModuleSymbols::check_no_entry):
+	Add quote in test name.
+
 2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.cp/pass-by-ref.cc: Delete.  Generated in the output
