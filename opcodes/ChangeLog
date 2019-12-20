@@ -1,3 +1,11 @@
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
+	* m68hc11-dis.c (read_memory): Delete forward decls.
+	(print_indexed_operand, print_insn): Likewise.
+	(print_indexed_operand): Formatting.  Don't rely on short being
+	exactly 16 bits, make sign extension explicit.
+	(print_insn): Likewise.  Avoid signed overflow.
+
 2019-12-19  Alan Modra  <amodra@gmail.com>
 
 	* vax-dis.c (print_insn_mode): Stop index mode recursion.
