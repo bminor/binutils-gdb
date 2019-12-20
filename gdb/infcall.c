@@ -42,6 +42,7 @@
 #include "thread-fsm.h"
 #include <algorithm>
 #include "gdbsupport/scope-exit.h"
+#include <list>
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -704,6 +705,33 @@ reserve_stack_space (const type *values_type, CORE_ADDR &sp)
   return addr;
 }
 
+/* The data structure which keeps a destructor function and
+   its implicit 'this' parameter.  */
+
+struct destructor_info
+{
+  destructor_info (struct value *function, struct value *self)
+    : function (function), self (self) { }
+
+  struct value *function;
+  struct value *self;
+};
+
+
+/* Auxiliary function that takes a list of destructor functions
+   with their 'this' parameters, and invokes the functions.  */
+
+static void
+call_destructors (const std::list<destructor_info> &dtors_to_invoke,
+		  struct type *default_return_type)
+{
+  for (auto vals : dtors_to_invoke)
+    {
+      call_function_by_hand (vals.function, default_return_type,
+			     gdb::make_array_view (&(vals.self), 1));
+    }
+}
+
 /* See infcall.h.  */
 
 struct value *
@@ -983,6 +1011,12 @@ call_function_by_hand_dummy (struct value *function,
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
+  /* Coerce the arguments and handle pass-by-reference.
+     We want to remember the destruction required for pass-by-ref values.
+     For these, store the dtor function and the 'this' argument
+     in DTORS_TO_INVOKE.  */
+  std::list<destructor_info> dtors_to_invoke;
+
   for (int i = args.size () - 1; i >= 0; i--)
     {
       int prototyped;
@@ -1017,12 +1051,95 @@ call_function_by_hand_dummy (struct value *function,
       else
 	param_type = NULL;
 
+      value *original_arg = args[i];
       args[i] = value_arg_coerce (gdbarch, args[i],
 				  param_type, prototyped);
 
-      if (param_type != NULL
-	  && !(language_pass_by_reference (param_type).trivially_copyable))
-	args[i] = value_addr (args[i]);
+      if (param_type == NULL)
+	continue;
+
+      auto info = language_pass_by_reference (param_type);
+      if (!info.copy_constructible)
+	error (_("expression cannot be evaluated because the type '%s' "
+		 "is not copy constructible"), TYPE_NAME (param_type));
+
+      if (!info.destructible)
+	error (_("expression cannot be evaluated because the type '%s' "
+		 "is not destructible"), TYPE_NAME (param_type));
+
+      if (info.trivially_copyable)
+	continue;
+
+      /* Make a copy of the argument on the stack.  If the argument is
+	 trivially copy ctor'able, copy bit by bit.  Otherwise, call
+	 the copy ctor to initialize the clone.  */
+      CORE_ADDR addr = reserve_stack_space (param_type, sp);
+      value *clone
+	= value_from_contents_and_address (param_type, nullptr, addr);
+      push_thread_stack_temporary (call_thread.get (), clone);
+      value *clone_ptr
+	= value_from_pointer (lookup_pointer_type (param_type), addr);
+
+      if (info.trivially_copy_constructible)
+	{
+	  int length = TYPE_LENGTH (param_type);
+	  write_memory (addr, value_contents (args[i]), length);
+	}
+      else
+	{
+	  value *copy_ctor;
+	  value *cctor_args[2] = { clone_ptr, original_arg };
+	  find_overload_match (gdb::make_array_view (cctor_args, 2),
+			       TYPE_NAME (param_type), METHOD,
+			       &clone_ptr, nullptr, &copy_ctor, nullptr,
+			       nullptr, 0, EVAL_NORMAL);
+
+	  if (copy_ctor == nullptr)
+	    error (_("expression cannot be evaluated because a copy "
+		     "constructor for the type '%s' could not be found "
+		     "(maybe inlined?)"), TYPE_NAME (param_type));
+
+	  call_function_by_hand (copy_ctor, default_return_type,
+				 gdb::make_array_view (cctor_args, 2));
+	}
+
+      /* If the argument has a destructor, remember it so that we
+	 invoke it after the infcall is complete.  */
+      if (!info.trivially_destructible)
+	{
+	  /* Looking up the function via overload resolution does not
+	     work because the compiler (in particular, gcc) adds an
+	     artificial int parameter in some cases.  So we look up
+	     the function by using the "~" name.  This should be OK
+	     because there can be only one dtor definition.  */
+	  const char *dtor_name = nullptr;
+	  for (int fieldnum = 0;
+	       fieldnum < TYPE_NFN_FIELDS (param_type);
+	       fieldnum++)
+	    {
+	      fn_field *fn
+		= TYPE_FN_FIELDLIST1 (param_type, fieldnum);
+	      const char *field_name
+		= TYPE_FN_FIELDLIST_NAME (param_type, fieldnum);
+
+	      if (field_name[0] == '~')
+		dtor_name = TYPE_FN_FIELD_PHYSNAME (fn, 0);
+	    }
+
+	  if (dtor_name == nullptr)
+	    error (_("expression cannot be evaluated because a destructor "
+		     "for the type '%s' could not be found "
+		     "(maybe inlined?)"), TYPE_NAME (param_type));
+
+	  value *dtor
+	    = find_function_in_inferior (dtor_name, 0);
+
+	  /* Insert the dtor to the front of the list to call them
+	     in reverse order later.  */
+	  dtors_to_invoke.emplace_front (dtor, clone_ptr);
+	}
+
+      args[i] = clone_ptr;
     }
 
   /* Reserve space for the return structure to be written on the
@@ -1189,6 +1306,10 @@ call_function_by_hand_dummy (struct value *function,
 	    maybe_remove_breakpoints ();
 
 	    gdb_assert (retval != NULL);
+
+	    /* Destruct the pass-by-ref argument clones.  */
+	    call_destructors (dtors_to_invoke, default_return_type);
+
 	    return retval;
 	  }
 
