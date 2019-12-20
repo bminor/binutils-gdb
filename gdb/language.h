@@ -128,6 +128,47 @@ struct language_arch_info
   struct type *bool_type_default;
 };
 
+/* In a language (particularly C++) a function argument of an aggregate
+   type (i.e.  class/struct/union) may be implicitly passed by reference
+   even though it is declared a call-by-value argument in the source.
+   The struct below puts together necessary information for GDB to be
+   able to detect and carry out pass-by-reference semantics for a
+   particular type.  This type is referred as T in the inlined comments
+   below.
+
+   The default values of the fields are chosen to give correct semantics
+   for primitive types and for simple aggregate types, such as
+
+   class T {
+     int x;
+   };  */
+
+struct language_pass_by_ref_info
+{
+  /* True if an argument of type T can be passed to a function by value
+     (i.e.  not through an implicit reference).  False, otherwise.  */
+  bool trivially_copyable = true;
+
+  /* True if a copy of a value of type T can be initialized by
+     memcpy'ing the value bit-by-bit.  False, otherwise.
+     E.g.  If T has a user-defined copy ctor, this should be false.  */
+  bool trivially_copy_constructible = true;
+
+  /* True if a value of type T can be destructed simply by reclaiming
+     the memory area occupied by the value.  False, otherwise.
+     E.g.  If T has a user-defined destructor, this should be false.  */
+  bool trivially_destructible = true;
+
+  /* True if it is allowed to create a copy of a value of type T.
+     False, otherwise.
+     E.g.  If T has a deleted copy ctor, this should be false.  */
+  bool copy_constructible = true;
+
+  /* True if a value of type T can be destructed.  False, otherwise.
+     E.g.  If T has a deleted destructor, this should be false.  */
+  bool destructible = true;
+};
+
 /* Structure tying together assorted information about a language.  */
 
 struct language_defn
@@ -356,9 +397,10 @@ struct language_defn
                                   struct ui_file *stream,
                                   const struct value_print_options *options);
 
-    /* Return non-zero if TYPE should be passed (and returned) by
-       reference at the language level.  */
-    int (*la_pass_by_reference) (struct type *type);
+    /* Return information about whether TYPE should be passed
+       (and returned) by reference at the language level.  */
+    struct language_pass_by_ref_info (*la_pass_by_reference)
+      (struct type *type);
 
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
@@ -613,14 +655,14 @@ extern void default_print_array_index (struct value *index_value,
                                        struct ui_file *stream,
 				       const struct value_print_options *options);
 
-/* Return non-zero if TYPE should be passed (and returned) by
-   reference at the language level.  */
-int language_pass_by_reference (struct type *type);
+/* Return information about whether TYPE should be passed
+   (and returned) by reference at the language level.  */
+struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
 
-/* Return zero; by default, types are passed by value at the language
-   level.  The target ABI may pass or return some structs by reference
-   independent of this.  */
-int default_pass_by_reference (struct type *type);
+/* Return a default struct that provides pass-by-reference information
+   about the given TYPE.  Languages should update the default values
+   as appropriate.  */
+struct language_pass_by_ref_info default_pass_by_reference (struct type *type);
 
 /* The default implementation of la_print_typedef.  */
 void default_print_typedef (struct type *type, struct symbol *new_symbol,

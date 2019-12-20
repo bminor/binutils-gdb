@@ -1020,7 +1020,8 @@ call_function_by_hand_dummy (struct value *function,
       args[i] = value_arg_coerce (gdbarch, args[i],
 				  param_type, prototyped);
 
-      if (param_type != NULL && language_pass_by_reference (param_type))
+      if (param_type != NULL
+	  && !(language_pass_by_reference (param_type).trivially_copyable))
 	args[i] = value_addr (args[i]);
     }
 

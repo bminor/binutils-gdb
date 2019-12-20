@@ -1230,7 +1230,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   return real_stop_pc;
 }
 
-/* Return nonzero if a type should be passed by reference.
+/* Return pass-by-reference information for the given TYPE.
 
    The rule in the v3 ABI document comes from section 3.1.1.  If the
    type has a non-trivial copy constructor or destructor, then the
@@ -1248,22 +1248,33 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 
    We don't do anything with the constructors or destructors,
    but we have to get the argument passing right anyway.  */
-static int
+
+static struct language_pass_by_ref_info
 gnuv3_pass_by_reference (struct type *type)
 {
   int fieldnum, fieldelem;
 
   type = check_typedef (type);
 
+  /* Start with the default values.  */
+  struct language_pass_by_ref_info info
+    = default_pass_by_reference (type);
+
+  /* FIXME: Currently, this implementation only fills in the
+     'trivially-copyable' field to preserve GDB's existing behavior.  */
+
   /* We're only interested in things that can have methods.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION)
-    return 0;
+    return info;
 
   /* A dynamic class has a non-trivial copy constructor.
      See c++98 section 12.8 Copying class objects [class.copy].  */
   if (gnuv3_dynamic_class (type))
-    return 1;
+    {
+      info.trivially_copyable = false;
+      return info;
+    }
 
   for (fieldnum = 0; fieldnum < TYPE_NFN_FIELDS (type); fieldnum++)
     for (fieldelem = 0; fieldelem < TYPE_FN_FIELDLIST_LENGTH (type, fieldnum);
@@ -1280,7 +1291,10 @@ gnuv3_pass_by_reference (struct type *type)
 
 	/* If we've found a destructor, we must pass this by reference.  */
 	if (name[0] == '~')
-	  return 1;
+	  {
+	    info.trivially_copyable = false;
+	    return info;
+	  }
 
 	/* If the mangled name of this method doesn't indicate that it
 	   is a constructor, we're not interested.
@@ -1302,11 +1316,13 @@ gnuv3_pass_by_reference (struct type *type)
 
 	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
 	      {
-		struct type *arg_target_type;
-
-	        arg_target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+		struct type *arg_target_type
+		  = check_typedef (TYPE_TARGET_TYPE (arg_type));
 		if (class_types_same_p (arg_target_type, type))
-		  return 1;
+		  {
+		    info.trivially_copyable = false;
+		    return info;
+		  }
 	      }
 	  }
       }
@@ -1319,11 +1335,18 @@ gnuv3_pass_by_reference (struct type *type)
      about recursive loops here, since we are only looking at members
      of complete class type.  Also ignore any static members.  */
   for (fieldnum = 0; fieldnum < TYPE_NFIELDS (type); fieldnum++)
-    if (! field_is_static (&TYPE_FIELD (type, fieldnum))
-        && gnuv3_pass_by_reference (TYPE_FIELD_TYPE (type, fieldnum)))
-      return 1;
+    if (!field_is_static (&TYPE_FIELD (type, fieldnum)))
+      {
+	struct language_pass_by_ref_info field_info
+	  = gnuv3_pass_by_reference (TYPE_FIELD_TYPE (type, fieldnum));
+	if (!field_info.trivially_copyable)
+	  {
+	    info.trivially_copyable = false;
+	    return info;
+	  }
+      }
 
-  return 0;
+  return info;
 }
 
 static void

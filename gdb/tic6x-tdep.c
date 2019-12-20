@@ -784,7 +784,7 @@ tic6x_return_value (struct gdbarch *gdbarch, struct value *function,
       if (type != NULL)
 	{
 	  type = check_typedef (type);
-	  if (language_pass_by_reference (type))
+	  if (!(language_pass_by_reference (type).trivially_copyable))
 	    return RETURN_VALUE_STRUCT_CONVENTION;
 	}
     }

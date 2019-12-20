@@ -652,21 +652,23 @@ language_class_name_from_physname (const struct language_defn *lang,
   return NULL;
 }
 
-/* Return non-zero if TYPE should be passed (and returned) by
-   reference at the language level.  */
-int
+/* Return information about whether TYPE should be passed
+   (and returned) by reference at the language level.  */
+
+struct language_pass_by_ref_info
 language_pass_by_reference (struct type *type)
 {
   return current_language->la_pass_by_reference (type);
 }
 
-/* Return zero; by default, types are passed by value at the language
-   level.  The target ABI may pass or return some structs by reference
-   independent of this.  */
-int
+/* Return a default struct that provides pass-by-reference information
+   about the given TYPE.  Languages should update the default values
+   as appropriate.  */
+
+struct language_pass_by_ref_info
 default_pass_by_reference (struct type *type)
 {
-  return 0;
+  return {};
 }
 
 /* Return the default string containing the list of characters

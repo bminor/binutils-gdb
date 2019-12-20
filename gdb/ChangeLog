@@ -1,5 +1,24 @@
 2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* language.h (struct language_pass_by_ref_info): New struct.
+	(struct language_defn)<la_pass_by_reference>: Change the signature
+	to return a language_pass_by_ref_info instead of an int.
+	(language_pass_by_reference): Ditto.
+	(default_pass_by_reference): Ditto.
+	Adjust the users listed below.
+	* arch-utils.c (default_return_in_first_hidden_param_p):
+	Update.
+	* cp-abi.c (cp_pass_by_reference): Update.
+	* cp-abi.h (cp_pass_by_reference): Update declaration.
+	(struct cp_abi_ops)<pass_by_reference>: Update.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Update.
+	* infcall.c (call_function_by_hand_dummy): Update.
+	* language.c (language_pass_by_reference): Update.
+	(default_pass_by_reference): Update.
+	* tic6x-tdep.c (tic6x_return_value): Update.
+
+2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* dwarf2read.c (dwarf2_add_member_fn): Read the DW_AT_defaulted
 	and DW_AT_deleted attributes of a function.
 	(read_structure_type): Read the DW_AT_calling_convention attribute
