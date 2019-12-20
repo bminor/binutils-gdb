@@ -1,5 +1,15 @@
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
+	* libhppa.h (hppa_field_adjust, bfd_hppa_insn2fmt): Delete forward
+	declaration.  Move ATTRIBUTE_UNUSED to definition.
+	(sign_extend, low_sign_extend, sign_unext, low_sign_unext),
+	(re_assemble_3, re_assemble_12, re_assemble_14, re_assemble_16),
+	(re_assemble_17, re_assemble_21, re_assemble_22): Likewise.  Make
+	args and return value unsigned.  Use unsigned variables.
+	(hppa_rebuild_insn): Similarly.
+
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
 	* format.c (bfd_check_format_matches): Free matching_vector when
 	not returning matching target strings.
 
