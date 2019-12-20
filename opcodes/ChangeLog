@@ -1,5 +1,12 @@
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
+	PR 25281
+	* sh-dis.c (print_insn_ddt): Properly check validity of MOVX_NOPY
+	and MOVY_NOPX insns.  For invalid cases include 0xf000 in the word
+	printed.  Print .word in more cases.
+
+2019-12-20  Alan Modra  <amodra@gmail.com>
+
 	* or1k-ibld.c: Regenerate.
 
 2019-12-20  Alan Modra  <amodra@gmail.com>
