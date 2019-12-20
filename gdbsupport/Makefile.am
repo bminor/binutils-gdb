@@ -68,3 +68,7 @@ libgdbsupport_a_SOURCES = \
     thread-pool.c \
     xml-utils.c	\
     $(selftest)
+
+# Double-check that no defines are missing from our configury.
+check-defines:
+	cd $(srcdir) && emacs --script check-defines.el

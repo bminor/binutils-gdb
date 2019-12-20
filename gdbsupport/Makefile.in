@@ -691,6 +691,10 @@ uninstall-am:
 override CC := $(CXX)
 override CFLAGS := $(CXXFLAGS)
 
+# Double-check that no defines are missing from our configury.
+check-defines:
+	cd $(srcdir) && emacs --script check-defines.el
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

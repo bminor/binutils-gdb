@@ -1,5 +1,11 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in: Rebuild.
+	* Makefile.am (check-defines): New target.
+	* check-defines.el: New file.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* configure, Makefile.in, aclocal.m4, common.m4, config.in:
 	Rebuild.
 	* common.m4 (GDB_AC_COMMON): Move many checks from
