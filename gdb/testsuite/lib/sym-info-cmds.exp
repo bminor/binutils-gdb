@@ -233,7 +233,7 @@ namespace eval GDBInfoSymbols {
 
 	if { $testname == "" } {
 	    set testname \
-		"$_last_command: check no matches for '$filename', $lineno', and '$text'"
+		"$_last_command: check no matches for '$filename', '$lineno', and '$text'"
 	}
 
 	if { $lineno == "" } {

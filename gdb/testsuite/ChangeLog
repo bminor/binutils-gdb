@@ -1,5 +1,10 @@
 2019-12-20  Simon Marchi  <simon.marchi@efficios.com>
 
+	* lib/sym-info-cmds.exp (GDBInfoSymbols::check_no_entry): Add
+	(another) quote in test name.
+
+2019-12-20  Simon Marchi  <simon.marchi@efficios.com>
+
 	* lib/sym-info-cmds.exp (GDBInfoModuleSymbols::check_no_entry):
 	Add quote in test name.
 
