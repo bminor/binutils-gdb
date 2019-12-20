@@ -1,5 +1,17 @@
 2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gnu-v3-abi.c (enum definition_style): New enum type.
+	(get_def_style): New function.
+	(is_user_provided_def): New function.
+	(is_implicit_def): New function.
+	(is_copy_or_move_constructor_type): New function.
+	(is_copy_constructor_type): New function.
+	(is_move_constructor_type): New function.
+	(gnuv3_pass_by_reference): Collect language_pass_by_ref_info
+	for a given type.
+
+2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* language.h (struct language_pass_by_ref_info): New struct.
 	(struct language_defn)<la_pass_by_reference>: Change the signature
 	to return a language_pass_by_ref_info instead of an int.

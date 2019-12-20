@@ -23,6 +23,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "demangle.h"
+#include "dwarf2.h"
 #include "objfiles.h"
 #include "valprint.h"
 #include "c-lang.h"
@@ -1230,6 +1231,127 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   return real_stop_pc;
 }
 
+/* A member function is in one these states.  */
+
+enum definition_style
+{
+  DOES_NOT_EXIST_IN_SOURCE,
+  DEFAULTED_INSIDE,
+  DEFAULTED_OUTSIDE,
+  DELETED,
+  EXPLICIT,
+};
+
+/* Return how the given field is defined.  */
+
+static definition_style
+get_def_style (struct fn_field *fn, int fieldelem)
+{
+  if (TYPE_FN_FIELD_DELETED (fn, fieldelem))
+    return DELETED;
+
+  if (TYPE_FN_FIELD_ARTIFICIAL (fn, fieldelem))
+    return DOES_NOT_EXIST_IN_SOURCE;
+
+  switch (TYPE_FN_FIELD_DEFAULTED (fn, fieldelem))
+    {
+    case DW_DEFAULTED_no:
+      return EXPLICIT;
+    case DW_DEFAULTED_in_class:
+      return DEFAULTED_INSIDE;
+    case DW_DEFAULTED_out_of_class:
+      return DEFAULTED_OUTSIDE;
+    default:
+      break;
+    }
+
+  return EXPLICIT;
+}
+
+/* Helper functions to determine whether the given definition style
+   denotes that the definition is user-provided or implicit.
+   Being defaulted outside the class decl counts as an explicit
+   user-definition, while being defaulted inside is implicit.  */
+
+static bool
+is_user_provided_def (definition_style def)
+{
+  return def == EXPLICIT || def == DEFAULTED_OUTSIDE;
+}
+
+static bool
+is_implicit_def (definition_style def)
+{
+  return def == DOES_NOT_EXIST_IN_SOURCE || def == DEFAULTED_INSIDE;
+}
+
+/* Helper function to decide if METHOD_TYPE is a copy/move
+   constructor type for CLASS_TYPE.  EXPECTED is the expected
+   type code for the "right-hand-side" argument.
+   This function is supposed to be used by the IS_COPY_CONSTRUCTOR_TYPE
+   and IS_MOVE_CONSTRUCTOR_TYPE functions below.  Normally, you should
+   not need to call this directly.  */
+
+static bool
+is_copy_or_move_constructor_type (struct type *class_type,
+				  struct type *method_type,
+				  type_code expected)
+{
+  /* The method should take at least two arguments...  */
+  if (TYPE_NFIELDS (method_type) < 2)
+    return false;
+
+  /* ...and the second argument should be the same as the class
+     type, with the expected type code...  */
+  struct type *arg_type = TYPE_FIELD_TYPE (method_type, 1);
+
+  if (TYPE_CODE (arg_type) != expected)
+    return false;
+
+  struct type *target = check_typedef (TYPE_TARGET_TYPE (arg_type));
+  if (!(class_types_same_p (target, class_type)))
+    return false;
+
+  /* ...and if any of the remaining arguments don't have a default value
+     then this is not a copy or move constructor, but just a
+     constructor.  */
+  for (int i = 2; i < TYPE_NFIELDS (method_type); i++)
+    {
+      arg_type = TYPE_FIELD_TYPE (method_type, i);
+      /* FIXME aktemur/2019-10-31: As of this date, neither
+	 clang++-7.0.0 nor g++-8.2.0 produce a DW_AT_default_value
+	 attribute.  GDB is also not set to read this attribute, yet.
+	 Hence, we immediately return false if there are more than
+	 2 parameters.
+	 GCC bug link:
+	 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=42959
+      */
+      return false;
+    }
+
+  return true;
+}
+
+/* Return true if METHOD_TYPE is a copy ctor type for CLASS_TYPE.  */
+
+static bool
+is_copy_constructor_type (struct type *class_type,
+			  struct type *method_type)
+{
+  return is_copy_or_move_constructor_type (class_type, method_type,
+					   TYPE_CODE_REF);
+}
+
+/* Return true if METHOD_TYPE is a move ctor type for CLASS_TYPE.  */
+
+static bool
+is_move_constructor_type (struct type *class_type,
+			  struct type *method_type)
+{
+  return is_copy_or_move_constructor_type (class_type, method_type,
+					   TYPE_CODE_RVALUE_REF);
+}
+
 /* Return pass-by-reference information for the given TYPE.
 
    The rule in the v3 ABI document comes from section 3.1.1.  If the
@@ -1238,16 +1360,15 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
    is one or perform the copy itself otherwise), pass the address of
    the copy, and then destroy the temporary (if necessary).
 
-   For return values with non-trivial copy constructors or
+   For return values with non-trivial copy/move constructors or
    destructors, space will be allocated in the caller, and a pointer
    will be passed as the first argument (preceding "this").
 
    We don't have a bulletproof mechanism for determining whether a
-   constructor or destructor is trivial.  For GCC and DWARF2 debug
-   information, we can check the artificial flag.
-
-   We don't do anything with the constructors or destructors,
-   but we have to get the argument passing right anyway.  */
+   constructor or destructor is trivial.  For GCC and DWARF5 debug
+   information, we can check the calling_convention attribute,
+   the 'artificial' flag, the 'defaulted' attribute, and the
+   'deleted' attribute.  */
 
 static struct language_pass_by_ref_info
 gnuv3_pass_by_reference (struct type *type)
@@ -1260,21 +1381,39 @@ gnuv3_pass_by_reference (struct type *type)
   struct language_pass_by_ref_info info
     = default_pass_by_reference (type);
 
-  /* FIXME: Currently, this implementation only fills in the
-     'trivially-copyable' field to preserve GDB's existing behavior.  */
+  bool has_cc_attr = false;
+  bool is_pass_by_value = false;
+  bool is_dynamic = false;
+  definition_style cctor_def = DOES_NOT_EXIST_IN_SOURCE;
+  definition_style dtor_def = DOES_NOT_EXIST_IN_SOURCE;
+  definition_style mctor_def = DOES_NOT_EXIST_IN_SOURCE;
 
   /* We're only interested in things that can have methods.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     return info;
 
+  /* The compiler may have emitted the calling convention attribute.
+     Note: GCC does not produce this attribute as of version 9.2.1.
+     Bug link: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=92418  */
+  if (TYPE_CPLUS_CALLING_CONVENTION (type) == DW_CC_pass_by_value)
+    {
+      has_cc_attr = true;
+      is_pass_by_value = true;
+      /* Do not return immediately.  We have to find out if this type
+	 is copy_constructible and destructible.  */
+    }
+
+  if (TYPE_CPLUS_CALLING_CONVENTION (type) == DW_CC_pass_by_reference)
+    {
+      has_cc_attr = true;
+      is_pass_by_value = false;
+    }
+
   /* A dynamic class has a non-trivial copy constructor.
      See c++98 section 12.8 Copying class objects [class.copy].  */
   if (gnuv3_dynamic_class (type))
-    {
-      info.trivially_copyable = false;
-      return info;
-    }
+    is_dynamic = true;
 
   for (fieldnum = 0; fieldnum < TYPE_NFN_FIELDS (type); fieldnum++)
     for (fieldelem = 0; fieldelem < TYPE_FN_FIELDLIST_LENGTH (type, fieldnum);
@@ -1284,48 +1423,74 @@ gnuv3_pass_by_reference (struct type *type)
 	const char *name = TYPE_FN_FIELDLIST_NAME (type, fieldnum);
 	struct type *fieldtype = TYPE_FN_FIELD_TYPE (fn, fieldelem);
 
-	/* If this function is marked as artificial, it is compiler-generated,
-	   and we assume it is trivial.  */
-	if (TYPE_FN_FIELD_ARTIFICIAL (fn, fieldelem))
-	  continue;
-
-	/* If we've found a destructor, we must pass this by reference.  */
 	if (name[0] == '~')
 	  {
-	    info.trivially_copyable = false;
-	    return info;
+	    /* We've found a destructor.
+	       There should be at most one dtor definition.  */
+	    gdb_assert (dtor_def == DOES_NOT_EXIST_IN_SOURCE);
+	    dtor_def = get_def_style (fn, fieldelem);
 	  }
-
-	/* If the mangled name of this method doesn't indicate that it
-	   is a constructor, we're not interested.
-
-	   FIXME drow/2007-09-23: We could do this using the name of
-	   the method and the name of the class instead of dealing
-	   with the mangled name.  We don't have a convenient function
-	   to strip off both leading scope qualifiers and trailing
-	   template arguments yet.  */
-	if (!is_constructor_name (TYPE_FN_FIELD_PHYSNAME (fn, fieldelem))
-	    && !TYPE_FN_FIELD_CONSTRUCTOR (fn, fieldelem))
-	  continue;
-
-	/* If this method takes two arguments, and the second argument is
-	   a reference to this class, then it is a copy constructor.  */
-	if (TYPE_NFIELDS (fieldtype) == 2)
+	else if (is_constructor_name (TYPE_FN_FIELD_PHYSNAME (fn, fieldelem))
+		 || TYPE_FN_FIELD_CONSTRUCTOR (fn, fieldelem))
 	  {
-	    struct type *arg_type = TYPE_FIELD_TYPE (fieldtype, 1);
-
-	    if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
+	    /* FIXME drow/2007-09-23: We could do this using the name of
+	       the method and the name of the class instead of dealing
+	       with the mangled name.  We don't have a convenient function
+	       to strip off both leading scope qualifiers and trailing
+	       template arguments yet.  */
+	    if (is_copy_constructor_type (type, fieldtype))
 	      {
-		struct type *arg_target_type
-		  = check_typedef (TYPE_TARGET_TYPE (arg_type));
-		if (class_types_same_p (arg_target_type, type))
-		  {
-		    info.trivially_copyable = false;
-		    return info;
-		  }
+		/* There may be more than one cctors.  E.g.: one that
+		   take a const parameter and another that takes a
+		   non-const parameter.  Such as:
+
+		   class K {
+		     K (const K &k)...
+		     K (K &k)...
+		   };
+
+		   It is sufficient for the type to be non-trivial
+		   even only one of the cctors is explicit.
+		   Therefore, update the cctor_def value in the
+		   implicit -> explicit direction, not backwards.  */
+
+		if (is_implicit_def (cctor_def))
+		  cctor_def = get_def_style (fn, fieldelem);
+	      }
+	    else if (is_move_constructor_type (type, fieldtype))
+	      {
+		/* Again, there may be multiple move ctors.  Update the
+		   mctor_def value if we found an explicit def and the
+		   existing one is not explicit.  Otherwise retain the
+		   existing value.  */
+		if (is_implicit_def (mctor_def))
+		  mctor_def = get_def_style (fn, fieldelem);
 	      }
 	  }
       }
+
+  bool cctor_implicitly_deleted
+    = (mctor_def != DOES_NOT_EXIST_IN_SOURCE
+       && cctor_def == DOES_NOT_EXIST_IN_SOURCE);
+
+  bool cctor_explicitly_deleted = (cctor_def == DELETED);
+
+  if (cctor_implicitly_deleted || cctor_explicitly_deleted)
+    info.copy_constructible = false;
+
+  if (dtor_def == DELETED)
+    info.destructible = false;
+
+  info.trivially_destructible = is_implicit_def (dtor_def);
+
+  info.trivially_copy_constructible
+    = (is_implicit_def (cctor_def)
+       && !is_dynamic);
+
+  info.trivially_copyable
+    = (info.trivially_copy_constructible
+       && info.trivially_destructible
+       && !is_user_provided_def (mctor_def));
 
   /* Even if all the constructors and destructors were artificial, one
      of them may have invoked a non-artificial constructor or
@@ -1337,14 +1502,34 @@ gnuv3_pass_by_reference (struct type *type)
   for (fieldnum = 0; fieldnum < TYPE_NFIELDS (type); fieldnum++)
     if (!field_is_static (&TYPE_FIELD (type, fieldnum)))
       {
+	struct type *field_type = TYPE_FIELD_TYPE (type, fieldnum);
+
+	/* For arrays, make the decision based on the element type.  */
+	if (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
+	  field_type = check_typedef (TYPE_TARGET_TYPE (field_type));
+
 	struct language_pass_by_ref_info field_info
-	  = gnuv3_pass_by_reference (TYPE_FIELD_TYPE (type, fieldnum));
+	  = gnuv3_pass_by_reference (field_type);
+
+	if (!field_info.copy_constructible)
+	  info.copy_constructible = false;
+	if (!field_info.destructible)
+	  info.destructible = false;
 	if (!field_info.trivially_copyable)
-	  {
-	    info.trivially_copyable = false;
-	    return info;
-	  }
+	  info.trivially_copyable = false;
+	if (!field_info.trivially_copy_constructible)
+	  info.trivially_copy_constructible = false;
+	if (!field_info.trivially_destructible)
+	  info.trivially_destructible = false;
       }
+
+  /* Consistency check.  */
+  if (has_cc_attr && info.trivially_copyable != is_pass_by_value)
+    {
+      /* DWARF CC attribute is not the same as the inferred value;
+	 use the DWARF attribute.  */
+      info.trivially_copyable = is_pass_by_value;
+    }
 
   return info;
 }
