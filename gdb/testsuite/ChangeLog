@@ -1,3 +1,11 @@
+2019-12-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.cp/pass-by-ref.cc: Delete.  Generated in the output
+	directory instead.
+	* gdb.cp/pass-by-ref.exp: Extend with more cases.
+	* gdb.cp/pass-by-ref-2.cc: New file.
+	* gdb.cp/pass-by-ref-2.exp: New file.
+
 2019-12-20  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/list-before.exp: New file.
