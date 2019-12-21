@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+int  bidule = 0;
 int  should_exit = 0;
 
 int main ()

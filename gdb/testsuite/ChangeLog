@@ -1,3 +1,7 @@
+2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/attach.exp: Test 'set exec-file-mismatch'.
+
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/dw2-inline-many-frames.c: New file.

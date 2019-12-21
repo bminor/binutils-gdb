@@ -474,7 +474,12 @@ proc test_command_line_attach_run {} {
     global gdb_prompt
     global binfile
 
-    if ![isnative] then {
+    # Skip test if we cannot attach on the command line and use the run command.
+    # ??? Unclear what condition to use to return here when using gdbserver.
+    # ??? None of the below works.
+    #    ![isnative] || [target_is_gdbserver]
+    #    ![isnative] || [use_gdb_stub]
+    if { ![isnative] || [is_remote target] } then {
 	unsupported "commandline attach run test"
 	return 0
     }
@@ -513,13 +518,90 @@ proc test_command_line_attach_run {} {
     }
 }
 
+
+# This is a test of 'set exec-file-mismatch' handling.
+
+proc_with_prefix do_attach_exec_mismatch_handling_tests {} {
+    global gdb_prompt
+    global binfile
+    global binfile2
+
+    clean_restart $binfile
+
+    # Start two programs that can be attached to.
+    # The first program contains a 'int bidule' variable, the second a 'float bidule'.
+
+    set test_spawn_id [spawn_wait_for_attach $binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
+    set test_spawn_id2 [spawn_wait_for_attach $binfile2]
+    set testpid2 [spawn_id_get_pid $test_spawn_id2]
+
+
+    # Test with the default value of 'set exec-file-mismatch load".
+    set test "mismatch load"
+    gdb_test "attach $testpid" "Attaching to program.*" "$test attach1"
+    # Verify that we can "see" the variable "bidule" in the
+    # program, and that it is an integer.
+    gdb_test "ptype bidule" " = int" "$test after attach1, bidule is int"
+    # Detach the process.
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach1"
+    gdb_test_multiple "attach $testpid2" "$test attach2" {
+	-re "Attaching to program.*exec-file-mismatch handling is currently \"ask\".*Load new symbol table from .*attach2\".*\(y or n\)" {
+	    pass "$test attach2"
+	}
+    }
+    gdb_test "y" "Reading symbols from .*attach2.*" "$test load attach2"
+    # Verify that we can "see" the variable "bidule" in the
+    # program, and that it is a float.
+    gdb_test "ptype bidule" " = float" "$test after attach2 and load, bidule is float"
+    # Detach the process.
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach2"
+
+
+    # Test with 'set exec-file-mismatch warn".
+    set test "mismatch warn"
+    gdb_test_no_output "set exec-file-mismatch warn"
+    gdb_test_multiple "attach $testpid" "$test attach" {
+	-re "Attaching to program.*exec-file-mismatch handling is currently \"warn\".*$gdb_prompt" {
+	    pass "$test attach"
+	}
+    }
+    # Verify that we still (wrongly) "see" the variable "bidule" as a float,
+    # as we have not loaded the correct exec-file.
+    gdb_test "ptype bidule" " = float" "$test after attach and warn, bidule is float"
+    # Detach the process.
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach"
+
+
+    # Same test but with 'set exec-file-mismatch off".
+    set test "mismatch off"
+    gdb_test_no_output "set exec-file-mismatch off"
+    gdb_test_multiple "attach $testpid" "$test attach" {
+	-re "Attaching to program.*$gdb_prompt" {
+	    pass "$test attach"
+	}
+    }
+    # Verify that we still (wrongly) "see" the variable "bidule" as a float,
+    # as we have not warned the user and not loaded the correct exec-file
+    gdb_test "ptype bidule" " = float" "$test after attach and warn, bidule is float"
+    # Detach the process.
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach"
+
+
+    # Don't leave a process around
+    kill_wait_spawned_process $test_spawn_id
+    kill_wait_spawned_process $test_spawn_id2
+}
+
 do_attach_tests
 do_attach_failure_tests
 do_call_attach_tests
+do_attach_exec_mismatch_handling_tests
 
 # Test "gdb --pid"
 
 do_command_attach_tests
+
 
 test_command_line_attach_run
 

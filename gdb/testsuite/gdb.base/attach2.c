@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+float  bidule = 0.0;
 int  should_exit = 0;
 
 int main ()
