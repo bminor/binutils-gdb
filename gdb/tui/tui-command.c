@@ -42,14 +42,6 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 {
   width = width_;
   height = height_;
-  if (height > 1)
-    {
-      /* Note this differs from the base class implementation, because
-	 this window can't be boxed.  */
-      viewport_height = height - 1;
-    }
-  else
-    viewport_height = 1;
   x = origin_x;
   y = origin_y;
 

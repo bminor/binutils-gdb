@@ -266,8 +266,7 @@ tui_data_window::display_registers_from (int start_element_no)
   /* Now create each data "sub" window, and write the display into
      it.  */
   cur_y = 1;
-  while (i < m_regs_content.size ()
-	 && cur_y <= viewport_height)
+  while (i < m_regs_content.size () && cur_y <= height - 2)
     {
       for (j = 0;
 	   j < m_regs_column_count && i < m_regs_content.size ();

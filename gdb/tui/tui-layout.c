@@ -373,10 +373,6 @@ tui_gen_win_info::resize (int height_, int width_,
 
   width = width_;
   height = height_;
-  if (height > 1)
-    viewport_height = height - 2;
-  else
-    viewport_height = 1;
   x = origin_x_;
   y = origin_y_;
 

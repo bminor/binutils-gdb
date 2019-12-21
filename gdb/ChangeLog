@@ -1,3 +1,13 @@
+2019-12-27  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-source.c (tui_source_window::maybe_update): Update.
+	* tui/tui-regs.c (tui_data_window::display_registers_from):
+	Update.
+	* tui/tui-layout.c (tui_gen_win_info::resize): Update.
+	* tui/tui-data.h (struct tui_gen_win_info) <viewport_height>:
+	Remove.
+	* tui/tui-command.c (tui_cmd_window::resize): Update.
+
 2019-12-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* ada-lang.c (ada_decode_symbol): Update.

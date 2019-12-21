@@ -110,8 +110,6 @@ public:
   /* Origin of window.  */
   int x = 0;
   int y = 0;
-  /* Viewport height.  */
-  int viewport_height = 0;
 };
 
 /* Constant definitions.  */

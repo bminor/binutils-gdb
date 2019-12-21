@@ -193,7 +193,7 @@ tui_source_window::line_is_displayed (int line) const
 void
 tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
 {
-  int start_line = (sal.line - (viewport_height / 2)) + 1;
+  int start_line = (sal.line - ((height - 2) / 2)) + 1;
   if (start_line <= 0)
     start_line = 1;
 
