@@ -1483,7 +1483,7 @@ This GDB was configured as follows:\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-babeltrace\n		\
+             --without-babeltrace\n\
 "));
 #endif
 
