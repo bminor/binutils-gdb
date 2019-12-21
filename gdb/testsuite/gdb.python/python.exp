@@ -234,6 +234,10 @@ gdb_test "python print (len(symtab))" "2" "test decode_line current location"
 gdb_test "python print (symtab\[0\])" "None" "test decode_line expression parse"
 gdb_test "python print (len(symtab\[1\]))" "1" "test decode_line current location"
 
+# Test that decode_line with an empty string argument does not crash.
+gdb_py_test_silent_cmd "python symtab2 = gdb.decode_line('')" \
+    "test decode_line with empty string" 1
+
 if { [is_remote host] } {
     set python_c [string_to_regexp "python.c"]
 } else {

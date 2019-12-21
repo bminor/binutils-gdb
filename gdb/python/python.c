@@ -810,6 +810,15 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
 
+  /* Treat a string consisting of just whitespace the same as
+     NULL.  */
+  if (arg != NULL)
+    {
+      arg = skip_spaces (arg);
+      if (*arg == '\0')
+	arg = NULL;
+    }
+
   if (arg != NULL)
     location = string_to_event_location_basic (&arg, python_language,
 					       symbol_name_match_type::WILD);

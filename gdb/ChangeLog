@@ -1,5 +1,11 @@
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
+	PR symtab/12535:
+	* python/python.c (gdbpy_decode_line): Treat empty string the same
+	as no argument.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (CLIBS): Remove second use of $(LIBIBERTY).
 
 2020-01-14  Tom Tromey  <tom@tromey.com>
