@@ -58,8 +58,8 @@
 #include "readline/readline.h"
 
 /* Tells whether the TUI is active or not.  */
-int tui_active = 0;
-static int tui_finish_init = 1;
+bool tui_active = false;
+static bool tui_finish_init = true;
 
 enum tui_key_mode tui_current_key_mode = TUI_COMMAND_MODE;
 
@@ -482,7 +482,7 @@ tui_enable (void)
       tui_set_win_focus_to (TUI_SRC_WIN);
       keypad (TUI_CMD_WIN->handle.get (), TRUE);
       wrefresh (TUI_CMD_WIN->handle.get ());
-      tui_finish_init = 0;
+      tui_finish_init = false;
     }
   else
     {
@@ -501,7 +501,7 @@ tui_enable (void)
 
   tui_setup_io (1);
 
-  tui_active = 1;
+  tui_active = true;
 
   /* Resize windows before anything might display/refresh a
      window.  */
@@ -555,7 +555,7 @@ tui_disable (void)
   /* Update gdb's knowledge of its terminal.  */
   gdb_save_tty_state ();
 
-  tui_active = 0;
+  tui_active = false;
   tui_update_gdb_sizes ();
 }
 
@@ -638,7 +638,7 @@ tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr)
 bool
 tui_is_window_visible (enum tui_win_type type)
 {
-  if (tui_active == 0)
+  if (!tui_active)
     return false;
 
   if (tui_win_list[type] == 0)

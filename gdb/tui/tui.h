@@ -81,6 +81,6 @@ extern enum tui_key_mode tui_current_key_mode;
    keymap.  */
 extern void tui_set_key_mode (enum tui_key_mode mode);
 
-extern int tui_active;
+extern bool tui_active;
 
 #endif /* TUI_TUI_H */
