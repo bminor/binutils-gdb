@@ -483,19 +483,27 @@ display_tib (const char * args, int from_tty)
 
 void
 windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
+			     CORE_ADDR *text_offset_cached,
 			     struct gdbarch *gdbarch, struct obstack *obstack)
 {
-  CORE_ADDR text_offset;
+  CORE_ADDR text_offset = text_offset_cached ? *text_offset_cached : 0;
 
   obstack_grow_str (obstack, "<library name=\"");
   std::string p = xml_escape_text (so_name);
   obstack_grow_str (obstack, p.c_str ());
   obstack_grow_str (obstack, "\"><segment address=\"");
-  gdb_bfd_ref_ptr dll (gdb_bfd_open (so_name, gnutarget, -1));
-  /* The following calls are OK even if dll is NULL.
-     The default value 0x1000 is returned by pe_text_section_offset
-     in that case.  */
-  text_offset = pe_text_section_offset (dll.get ());
+
+  if (!text_offset)
+    {
+      gdb_bfd_ref_ptr dll (gdb_bfd_open (so_name, gnutarget, -1));
+      /* The following calls are OK even if dll is NULL.
+	 The default value 0x1000 is returned by pe_text_section_offset
+	 in that case.  */
+      text_offset = pe_text_section_offset (dll.get ());
+      if (text_offset_cached)
+	*text_offset_cached = text_offset;
+    }
+
   obstack_grow_str (obstack, paddress (gdbarch, load_addr + text_offset));
   obstack_grow_str (obstack, "\"/></library>");
 }

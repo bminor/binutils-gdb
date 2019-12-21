@@ -137,7 +137,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
     windows_xfer_shared_library (module_name, base_addr,
-				 data->gdbarch, data->obstack);
+				 NULL, data->gdbarch, data->obstack);
   data->module_count++;
 
 out:

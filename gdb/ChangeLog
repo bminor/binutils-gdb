@@ -1,3 +1,12 @@
+2020-01-23  Hannes Domani  <ssbssa@yahoo.de>
+
+	* i386-cygwin-tdep.c (core_process_module_section): Update.
+	* windows-nat.c (struct lm_info_windows): Add text_offset.
+	(windows_xfer_shared_libraries): Update.
+	* windows-tdep.c (windows_xfer_shared_library):
+	Add text_offset_cached argument.
+	* windows-tdep.h (windows_xfer_shared_library): Update.
+
 2020-01-21  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbarch.sh: Add declaration for _initialize_gdbarch.

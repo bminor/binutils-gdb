@@ -682,6 +682,7 @@ windows_nat_target::store_registers (struct regcache *regcache, int r)
 struct lm_info_windows : public lm_info_base
 {
   LPVOID load_addr = 0;
+  CORE_ADDR text_offset = 0;
 };
 
 static struct so_list solib_start, *solib_end;
@@ -2974,6 +2975,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 
       windows_xfer_shared_library (so->so_name, (CORE_ADDR)
 				   (uintptr_t) li->load_addr,
+				   &li->text_offset,
 				   target_gdbarch (), &obstack);
     }
   obstack_grow_str0 (&obstack, "</library-list>\n");
