@@ -212,11 +212,12 @@ tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 void
 tui_update_source_windows_with_line (struct symtab_and_line sal)
 {
-  if (!sal.symtab)
-    return;
-
-  find_line_pc (sal.symtab, sal.line, &sal.pc);
-  struct gdbarch *gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+  struct gdbarch *gdbarch = nullptr;
+  if (sal.symtab != nullptr)
+    {
+      find_line_pc (sal.symtab, sal.line, &sal.pc);
+      gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+    }
 
   for (struct tui_source_window_base *win_info : tui_source_windows ())
     win_info->update_source_window (gdbarch, sal);

@@ -1,3 +1,7 @@
+2020-01-19  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/main.exp: Add check for plain "file".
+
 2020-01-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* lib/gdb.exp: Fix spelling error (seperatelly).

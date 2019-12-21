@@ -26,9 +26,16 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
 # Note: don't pass the executable here
 Term::clean_restart 24 80
 
+# Later on we'd like to avoid having to answer a question.
+gdb_test_no_output "set interactive-mode off"
+
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
 }
 
 Term::command "file [standard_output_file $testfile]"
 Term::check_contents "show main after file" "\\|.*21 *return 0"
+
+# Ensure that "file" clears the source window.
+Term::command "file"
+Term::check_contents "file clears window" "No Source Available"
