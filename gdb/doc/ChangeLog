@@ -1,3 +1,9 @@
+2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Attach): Document the new option and the
+	set/show commands.
+	(Connecting): Reference the exec-file-mismatch option.
+
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting): Say "current inferior not connected"

@@ -2905,6 +2905,30 @@ the program is not found) by using the source file search path
 the @code{file} command to load the program.  @xref{Files, ,Commands to
 Specify Files}.
 
+@anchor{set exec-file-mismatch}
+If the debugger can determine the name of the executable file running
+in the process it is attaching to, and this file name does not match
+the name of the current exec-file loaded by @value{GDBN}, the option
+@code{exec-file-mismatch} specifies how to handle the mismatch.
+
+@table @code
+@kindex exec-file-mismatch
+@cindex set exec-file-mismatch
+@item set exec-file-mismatch @samp{ask|warn|off}
+
+Whether to detect mismatch between the name of the current executable
+file loaded by @value{GDBN} and the name of the executable file used to
+start the process.  If @samp{ask}, the default, display a warning
+and ask the user whether to load the process executable file; if
+@samp{warn}, just display a warning; if @samp{off}, don't attempt to
+detect a mismatch.
+
+@cindex show exec-file-mismatch
+@item show exec-file-mismatch
+Show the current value of @code{exec-file-mismatch}.
+
+@end table
+
 The first thing @value{GDBN} does after arranging to debug the specified
 process is to stop it.  You can examine and modify an attached process
 with all the @value{GDBN} commands that are ordinarily available when
@@ -21838,6 +21862,12 @@ you may use the @code{attach} command after the connection has been
 established.  If you are using @code{gdbserver}, you may also invoke
 @code{gdbserver} using the @option{--attach} option
 (@pxref{Running gdbserver}).
+
+Some remote targets allow @value{GDBN} to determine the executable file running
+in the process the debugger is attaching to.  In such a case, @value{GDBN}
+uses the value of @code{exec-file-mismatch} to handle a possible mismatch
+between the executable file name running in the process and the name of the
+current exec-file loaded by @value{GDBN} (@pxref{set exec-file-mismatch}).
 
 @end table
 

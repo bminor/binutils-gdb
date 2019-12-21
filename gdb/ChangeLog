@@ -1,5 +1,9 @@
 2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention the new option and the set/show commands.
+
+2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* exec.c (exec_file_mismatch_names, exec_file_mismatch_mode)
 	(show_exec_file_mismatch_command, set_exec_file_mismatch_command)
 	(validate_exec_file): New variables, enums, functions.

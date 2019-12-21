@@ -10,6 +10,19 @@
   that support it (see entry for GDB 9, below), providing faster
   performance for programs with many symbols.
 
+* New commands
+
+set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).
+show exec-file-mismatch -- Show exec-file-mismatch handling (ask|warn|off).
+  Set or show the option 'exec-file-mismatch'.  When GDB attaches to
+  a running process and can determine the name of the executable file
+  the process runs, this new option indicates whether to detect mismatch
+  between the name of the current executable file loaded by GDB
+  and the name of the executable file used to start the process.
+  If 'ask', the default, display a warning and ask the user
+  whether to load the process executable file; if 'warn', just display
+  a warning; if 'off', don't attempt to detect a mismatch.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.
