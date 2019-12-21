@@ -1478,35 +1478,43 @@ This GDB was configured as follows:\n\
 #endif
 
 #if HAVE_LIBBABELTRACE
-    fprintf_filtered (stream, _("\
+  fprintf_filtered (stream, _("\
              --with-babeltrace\n\
 "));
 #else
-    fprintf_filtered (stream, _("\
-             --without-babeltrace\n\
+  fprintf_filtered (stream, _("\
+             --without-babeltrace\n		\
 "));
 #endif
 
 #if HAVE_LIBIPT
-    fprintf_filtered (stream, _("\
+  fprintf_filtered (stream, _("\
              --with-intel-pt\n\
 "));
 #else
-    fprintf_filtered (stream, _("\
+  fprintf_filtered (stream, _("\
              --without-intel-pt\n\
 "));
 #endif
 
 #if HAVE_LIBMPFR
-    fprintf_filtered (stream, _("\
+  fprintf_filtered (stream, _("\
              --with-mpfr\n\
 "));
 #else
-    fprintf_filtered (stream, _("\
+  fprintf_filtered (stream, _("\
              --without-mpfr\n\
 "));
 #endif
-
+#if HAVE_LIBXXHASH
+  fprintf_filtered (stream, _("\
+             --with-xxhash\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-xxhash\n\
+"));
+#endif
 #ifdef WITH_PYTHON_PATH
   fprintf_filtered (stream, _("\
              --with-python=%s%s\n\

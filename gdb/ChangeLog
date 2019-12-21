@@ -1,3 +1,8 @@
+2019-12-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* top.c (print_gdb_configuration): Print "--with-xxhash" or
+	"--without-xxhash" according to HAVE_LIBXXHASH.
+
 2019-12-20  Weimin Pan  <weimin.pan@oracle.com>
 	* ctfread.c (ctf_file_key): Change type to objfile_key.
 	(struct ctf_context): Remove typedef.
