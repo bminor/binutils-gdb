@@ -2785,6 +2785,9 @@ attach_command (const char *args, int from_tty)
 	target_stop (ptid_t (inferior_ptid.pid ()));
     }
 
+  /* Check for exec file mismatch, and let the user solve it.  */
+  validate_exec_file (from_tty);
+
   mode = async_exec ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_STOP;
 
   /* Some system don't generate traps when attaching to inferior.

@@ -47,6 +47,7 @@
 #include "solist.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
+#include "cli/cli-style.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 
@@ -82,6 +83,50 @@ struct exec_target final : public target_ops
 };
 
 static exec_target exec_ops;
+
+/* How to handle a mismatch between the current exec file and the exec
+   file determined from target.  */
+
+static const char *const exec_file_mismatch_names[]
+  = {"ask", "warn", "off", NULL };
+enum exec_file_mismatch_mode
+  {
+    exec_file_mismatch_ask, exec_file_mismatch_warn, exec_file_mismatch_off
+  };
+static const char *exec_file_mismatch = exec_file_mismatch_names[0];
+static enum exec_file_mismatch_mode exec_file_mismatch_mode
+  = exec_file_mismatch_ask;
+
+/* Show command.  */
+static void
+show_exec_file_mismatch_command (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (gdb_stdout,
+		    _("exec-file-mismatch handling is currently \"%s\".\n"),
+		    exec_file_mismatch_names[exec_file_mismatch_mode]);
+}
+
+/* Set command.  Change the setting for range checking.  */
+static void
+set_exec_file_mismatch_command (const char *ignore,
+				int from_tty, struct cmd_list_element *c)
+{
+  for (enum exec_file_mismatch_mode mode = exec_file_mismatch_ask;
+       ;
+       mode = static_cast<enum exec_file_mismatch_mode>(1 + (int) mode))
+    {
+      if (strcmp (exec_file_mismatch, exec_file_mismatch_names[mode]) == 0)
+	{
+	  exec_file_mismatch_mode = mode;
+	  return;
+	}
+      if (mode == exec_file_mismatch_off)
+	internal_error (__FILE__, __LINE__,
+			_("Unrecognized exec-file-mismatch setting: \"%s\""),
+			exec_file_mismatch);
+    }
+}
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -186,6 +231,61 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 	{
 	  if (!exception_print_same (prev_err, err))
 	    warning ("%s", err.what ());
+	}
+    }
+}
+
+/* See gdbcore.h.  */
+
+void
+validate_exec_file (int from_tty)
+{
+  /* If user asked to ignore the mismatch, do nothing.  */
+  if (exec_file_mismatch_mode == exec_file_mismatch_off)
+    return;
+
+  const char *current_exec_file = get_exec_file (0);
+  struct inferior *inf = current_inferior ();
+  /* Try to determine a filename from the process itself.  */
+  const char *pid_exec_file = target_pid_to_exec_file (inf->pid);
+
+  /* If wee cannot validate the exec file, return.  */
+  if (current_exec_file == NULL || pid_exec_file == NULL)
+    return;
+
+  std::string exec_file_target (pid_exec_file);
+
+  /* In case the exec file is not local, exec_file_target has to point at
+     the target file system.  */
+  if (is_target_filename (current_exec_file) && !target_filesystem_is_local ())
+    exec_file_target = TARGET_SYSROOT_PREFIX + exec_file_target;
+
+  if (exec_file_target != current_exec_file)
+    {
+      warning
+	(_("Mismatch between current exec-file %ps\n"
+	   "and automatically determined exec-file %ps\n"
+	   "exec-file-mismatch handling is currently \"%s\""),
+	 styled_string (file_name_style.style (), current_exec_file),
+	 styled_string (file_name_style.style (), exec_file_target.c_str ()),
+	 exec_file_mismatch_names[exec_file_mismatch_mode]);
+      if (exec_file_mismatch_mode == exec_file_mismatch_ask)
+	{
+	  symfile_add_flags add_flags = SYMFILE_MAINLINE;
+	  if (from_tty)
+	    add_flags |= SYMFILE_VERBOSE;
+	  try
+	    {
+	      symbol_file_add_main (exec_file_target.c_str (), add_flags);
+	      exec_file_attach (exec_file_target.c_str (), from_tty);
+	    }
+	  catch (gdb_exception_error &err)
+	    {
+	      warning (_("loading %ps %s"),
+		       styled_string (file_name_style.style (),
+				      exec_file_target.c_str ()),
+		       err.message != NULL ? err.what () : "error");
+	    }
 	}
     }
 }
@@ -332,8 +432,9 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!exec_bfd)
 	{
-	  error (_("\"%s\": could not open as an executable file: %s."),
-		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	  error (_("\"%ps\": could not open as an executable file: %s."),
+		 styled_string (file_name_style.style (), scratch_pathname),
+		 bfd_errmsg (bfd_get_error ()));
 	}
 
       /* gdb_realpath_keepfile resolves symlinks on the local
@@ -349,8 +450,8 @@ exec_file_attach (const char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close ();
-	  error (_("\"%s\": not in executable format: %s"),
-		 scratch_pathname,
+	  error (_("\"%ps\": not in executable format: %s"),
+		 styled_string (file_name_style.style (), scratch_pathname),
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
@@ -359,8 +460,9 @@ exec_file_attach (const char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close ();
-	  error (_("\"%s\": can't find the file sections: %s"),
-		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	  error (_("\"%ps\": can't find the file sections: %s"),
+		 styled_string (file_name_style.style (), scratch_pathname),
+		 bfd_errmsg (bfd_get_error ()));
 	}
 
       exec_bfd_mtime = bfd_get_mtime (exec_bfd);
@@ -911,7 +1013,9 @@ print_section_info (struct target_section_table *t, bfd *abfd)
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
   int wid = gdbarch_addr_bit (gdbarch) <= 32 ? 8 : 16;
 
-  printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
+  printf_filtered ("\t`%ps', ",
+		   styled_string (file_name_style.style (),
+				  bfd_get_filename (abfd)));
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
@@ -938,8 +1042,9 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 	    }
 	}
       if (p == t->sections_end)
-	warning (_("Cannot find section for the entry point of %s."),
-		 bfd_get_filename (abfd));
+	warning (_("Cannot find section for the entry point of %ps."),
+		 styled_string (file_name_style.style (),
+				bfd_get_filename (abfd)));
 
       entry_point = gdbarch_addr_bits_remove (gdbarch, 
 					      bfd_get_start_address (abfd) 
@@ -966,7 +1071,9 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 			 hex_string_custom (psect->filepos, 8));
       printf_filtered (" is %s", bfd_section_name (psect));
       if (pbfd != abfd)
-	printf_filtered (" in %s", bfd_get_filename (pbfd));
+	printf_filtered (" in %ps",
+			 styled_string (file_name_style.style (),
+					bfd_get_filename (pbfd)));
       printf_filtered ("\n");
     }
 }
@@ -1102,6 +1209,24 @@ Show writing into executable and core files."), NULL,
 			   NULL,
 			   show_write_files,
 			   &setlist, &showlist);
+
+  add_setshow_enum_cmd ("exec-file-mismatch", class_support,
+			exec_file_mismatch_names,
+			&exec_file_mismatch,
+			_("\
+Set exec-file-mismatch handling (ask|warn|off)."),
+			_("\
+Show exec-file-mismatch handling (ask|warn|off)."),
+			_("\
+Specifies how to handle a mismatch between the current exec-file name\n\
+loaded by GDB and the exec-file name automatically determined when attaching\n\
+to a process:\n\n\
+ ask  - warn the user and ask whether to load the determined exec-file.\n\
+ warn - warn the user, but do not change the exec-file.\n\
+ off  - do not check for mismatch."),
+			set_exec_file_mismatch_command,
+			show_exec_file_mismatch_command,
+			&setlist, &showlist);
 
   add_target (exec_target_info, exec_target_open, filename_completer);
 }

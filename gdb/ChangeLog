@@ -1,3 +1,15 @@
+2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* exec.c (exec_file_mismatch_names, exec_file_mismatch_mode)
+	(show_exec_file_mismatch_command, set_exec_file_mismatch_command)
+	(validate_exec_file): New variables, enums, functions.
+	(exec_file_locate_attach, print_section_info): Style the filenames.
+	(_initialize_exec): Install show_exec_file_mismatch_command and
+	 set_exec_file_mismatch_command.
+	* gdbcore.h (validate_exec_file): Declare.
+	* infcmd.c (attach_command): Call validate_exec_file.
+	* remote.c ( remote_target::remote_add_inferior): Likewise.
+
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* frame.c (find_frame_sal): Move call to get_next_frame into more
