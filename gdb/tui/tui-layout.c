@@ -201,9 +201,9 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  && cur_layout != SRC_DATA_COMMAND)
 	{
 	  if (cur_layout == DISASSEM_DATA_COMMAND)
-	    show_layout (SRC_DATA_COMMAND);
+	    tui_set_layout (SRC_DATA_COMMAND);
 	  else
-	    show_layout (SRC_COMMAND);
+	    tui_set_layout (SRC_COMMAND);
 	}
       break;
     case DISASSEM_WIN:
@@ -212,9 +212,9 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  && cur_layout != DISASSEM_DATA_COMMAND)
 	{
 	  if (cur_layout == SRC_DATA_COMMAND)
-	    show_layout (DISASSEM_DATA_COMMAND);
+	    tui_set_layout (DISASSEM_DATA_COMMAND);
 	  else
-	    show_layout (DISASSEM_COMMAND);
+	    tui_set_layout (DISASSEM_COMMAND);
 	}
       break;
     case DATA_WIN:
@@ -222,9 +222,9 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  && cur_layout != DISASSEM_DATA_COMMAND)
 	{
 	  if (cur_layout == DISASSEM_COMMAND)
-	    show_layout (DISASSEM_DATA_COMMAND);
+	    tui_set_layout (DISASSEM_DATA_COMMAND);
 	  else
-	    show_layout (SRC_DATA_COMMAND);
+	    tui_set_layout (SRC_DATA_COMMAND);
 	}
       break;
     default:

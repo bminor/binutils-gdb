@@ -1,3 +1,7 @@
+2020-01-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.tui/list.exp: Test 'focus next' after 'list main'.
+
 2020-01-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/style.exp: Test that warnings are styled.
