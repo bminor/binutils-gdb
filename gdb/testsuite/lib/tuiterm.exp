@@ -388,8 +388,10 @@ namespace eval Term {
 	_clear_lines 0 $_rows
     }
 
-    # Accept some output from gdb and update the screen.
-    proc _accept {wait_for} {
+    # Accept some output from gdb and update the screen.  WAIT_FOR is
+    # a regexp matching the line to wait for.  Return 0 on timeout, 1
+    # on success.
+    proc wait_for {wait_for} {
 	global expect_out
 	global gdb_prompt
 	variable _cur_x
@@ -424,7 +426,7 @@ namespace eval Term {
 		timeout {
 		    # Assume a timeout means we somehow missed the
 		    # expected result, and carry on.
-		    return
+		    return 0
 		}
 	    }
 
@@ -443,6 +445,8 @@ namespace eval Term {
 		set wait_for $prompt_wait_for
 	    }
 	}
+
+	return 1
     }
 
     # Like ::clean_restart, but ensures that gdb starts in an
@@ -490,7 +494,7 @@ namespace eval Term {
     # be supplied by this function.
     proc command {cmd} {
 	send_gdb "$cmd\n"
-	_accept [string_to_regexp $cmd]
+	wait_for [string_to_regexp $cmd]
     }
 
     # Return the text of screen line N, without attributes.  Lines are
@@ -682,14 +686,14 @@ namespace eval Term {
 	# Due to the strange column resizing behavior, and because we
 	# don't care about this intermediate resize, we don't check
 	# the size here.
-	_accept "@@ resize done $_resize_count"
+	wait_for "@@ resize done $_resize_count"
 	incr _resize_count
 	# Somehow the number of columns transmitted to gdb is one less
 	# than what we request from expect.  We hide this weird
 	# details from the caller.
 	_do_resize $_rows $cols
 	stty columns [expr {$_cols + 1}] < $gdb_spawn_name
-	_accept "@@ resize done $_resize_count, size = ${_cols}x${rows}"
+	wait_for "@@ resize done $_resize_count, size = ${_cols}x${rows}"
 	incr _resize_count
     }
 }

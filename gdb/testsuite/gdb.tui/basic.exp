@@ -35,6 +35,19 @@ gdb_assert {![string match "No Source Available" $text]} \
 Term::command "list main"
 Term::check_contents "list main" "21 *return 0"
 
+# Get the first source line.
+set line [Term::get_line 1]
+# Send an up arrow.
+send_gdb "\033\[A"
+# Wait for a redraw and check that the first line changed.
+if {[Term::wait_for [string_to_regexp $line]] \
+	&& [Term::get_line 1] != $line\
+	&& [Term::get_line 2] == $line} {
+    pass "scroll up"
+} else {
+    fail "scroll up"
+}
+
 Term::check_box "source box" 0 0 80 15
 
 Term::command "layout asm"

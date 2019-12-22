@@ -1,3 +1,11 @@
+2020-01-09  Tom Tromey  <tom@tromey.com>
+
+	PR tui/18932:
+	* lib/tuiterm.exp (Term::wait_for): Rename from _accept.  Return a
+	meangingful value.
+	(Term::command, Term::resize): Update.
+	* gdb.tui/basic.exp: Add scrolling test.
+
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.tui/tui-layout-asm.exp: New file.

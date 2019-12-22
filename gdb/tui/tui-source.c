@@ -136,26 +136,29 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 {
   if (!content.empty ())
     {
-      struct tui_line_or_address l;
       struct symtab *s;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      struct gdbarch *arch = gdbarch;
 
       if (cursal.symtab == NULL)
-	s = find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)));
+	{
+	  struct frame_info *fi = get_selected_frame (NULL);
+	  s = find_pc_line_symtab (get_frame_pc (fi));
+	  arch = get_frame_arch (fi);
+	}
       else
 	s = cursal.symtab;
 
-      l.loa = LOA_LINE;
-      l.u.line_no = start_line_or_addr.u.line_no
-	+ num_to_scroll;
+      int line_no = start_line_or_addr.u.line_no + num_to_scroll;
       const std::vector<off_t> *offsets;
       if (g_source_cache.get_line_charpos (s, &offsets)
-	  && l.u.line_no > offsets->size ())
-	l.u.line_no = start_line_or_addr.u.line_no;
-      if (l.u.line_no <= 0)
-	l.u.line_no = 1;
+	  && line_no > offsets->size ())
+	line_no = start_line_or_addr.u.line_no;
+      if (line_no <= 0)
+	line_no = 1;
 
-      print_source_lines (s, l.u.line_no, l.u.line_no + 1, 0);
+      cursal.line = line_no;
+      update_source_window (arch, cursal);
     }
 }
 
