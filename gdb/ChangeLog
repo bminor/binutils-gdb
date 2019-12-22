@@ -1,3 +1,7 @@
+2020-01-06  Hannes Domani  <ssbssa@yahoo.de>
+
+	* source.c (print_source_lines_base): Set last_line_listed.
+
 2020-01-06  Shahab Vahedi  <shahab@synopsys.com>
 
 	* tui/tui-disasm.c: Remove trailing spaces.

@@ -1232,6 +1232,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   loc->set (s, line);
   first_line_listed = line;
+  last_line_listed = line;
 
   /* If printing of source lines is disabled, just print file and line
      number.  */
