@@ -1,5 +1,14 @@
 2019-12-23  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (add_symbol): Add "max" parameter.  Error on string
+	length larger than max.
+	(_bfd_vms_slurp_egsd): Ensure record is at least large enough to
+	read string length byte, error if not.  Pass size to add_symbol.
+	(_bfd_vms_slurp_etir): Don't read past end of buffer when reading
+	type and length.  Allow read of last byte in buffer.
+
+2019-12-23  Alan Modra  <amodra@gmail.com>
+
 	* wasm-module.c (wasm_read_leb128): Don't allow oversize shifts.
 	Catch value overflow.  Sign extend only on terminating byte.
 

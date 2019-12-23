@@ -1137,12 +1137,20 @@ add_symbol_entry (bfd *abfd, struct vms_symbol_entry *sym)
    Return NULL in case of error.  */
 
 static struct vms_symbol_entry *
-add_symbol (bfd *abfd, const unsigned char *ascic)
+add_symbol (bfd *abfd, const unsigned char *ascic, unsigned int max)
 {
   struct vms_symbol_entry *entry;
-  int len;
+  unsigned int len;
 
   len = *ascic++;
+  max -= 1;
+  if (len > max)
+    {
+      _bfd_error_handler (_("record is too small for symbol name length"));
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
+
   entry = (struct vms_symbol_entry *)bfd_zalloc (abfd, sizeof (*entry) + len);
   if (entry == NULL)
     return NULL;
@@ -1292,7 +1300,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 	case EGSD__C_SYM:
 	  {
-	    int nameoff;
+	    unsigned int nameoff;
 	    struct vms_symbol_entry *entry;
 	    struct vms_egsy *egsy = (struct vms_egsy *) vms_rec;
 	    flagword old_flags;
@@ -1303,7 +1311,13 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    else
 	      nameoff = ESRF__B_NAMLNG;
 
-	    entry = add_symbol (abfd, vms_rec + nameoff);
+	    if (nameoff >= gsd_size)
+	      {
+		_bfd_error_handler (_("ECSD__C_SYM record is too small"));
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
+	    entry = add_symbol (abfd, vms_rec + nameoff, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
 
@@ -1363,11 +1377,17 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    struct vms_symbol_entry *entry;
 	    struct vms_egst *egst = (struct vms_egst *)vms_rec;
 	    flagword old_flags;
+	    unsigned int nameoff = offsetof (struct vms_egst, namlng);
 
 	    old_flags = bfd_getl16 (egst->header.flags);
 
-	    entry = add_symbol (abfd, &egst->namlng);
-
+	    if (nameoff >= gsd_size)
+	      {
+		_bfd_error_handler (_("ECSD__C_SYMG record is too small"));
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
+	    entry = add_symbol (abfd, &egst->namlng, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
 
@@ -1854,19 +1874,23 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
   while (ptr < maxptr)
     {
-      int cmd = bfd_getl16 (ptr);
-      int cmd_length = bfd_getl16 (ptr + 2);
+      int cmd, cmd_length;
 
-      ptr += 4;
+      if (ptr + 4 > maxptr)
+	goto corrupt_etir;
+
+      cmd = bfd_getl16 (ptr);
+      cmd_length = bfd_getl16 (ptr + 2);
 
       /* PR 21589 and 21579: Check for a corrupt ETIR record.  */
-      if (cmd_length < 4 || (ptr + cmd_length > maxptr + 4))
+      if (cmd_length < 4 || ptr + cmd_length > maxptr)
 	{
 	corrupt_etir:
 	  _bfd_error_handler (_("corrupt ETIR record encountered"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+      ptr += 4;
 
 #if VMS_DEBUG
       _bfd_vms_debug (4, "etir: %s(%d)\n",
@@ -1890,7 +1914,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
 	     stack 32 bit value, sign extend to 64 bit.  */
 	case ETIR__C_STA_LW:
-	  if (ptr + 4 >= maxptr)
+	  if (ptr + 4 > maxptr)
 	    goto corrupt_etir;
 	  _bfd_vms_push (abfd, bfd_getl32 (ptr), RELC_NONE);
 	  break;
@@ -1900,7 +1924,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
 	     stack 64 bit value of symbol.  */
 	case ETIR__C_STA_QW:
-	  if (ptr + 8 >= maxptr)
+	  if (ptr + 8 > maxptr)
 	    goto corrupt_etir;
 	  _bfd_vms_push (abfd, bfd_getl64 (ptr), RELC_NONE);
 	  break;
@@ -1915,7 +1939,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  {
 	    int psect;
 
-	    if (ptr + 12 >= maxptr)
+	    if (ptr + 12 > maxptr)
 	      goto corrupt_etir;
 	    psect = bfd_getl32 (ptr);
 	    if ((unsigned int) psect >= PRIV (section_count))
@@ -2006,7 +2030,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  {
 	    int size;
 
-	    if (ptr + 4 >= maxptr)
+	    if (ptr + 4 > maxptr)
 	      goto corrupt_etir;
 	    size = bfd_getl32 (ptr);
 	    _bfd_vms_pop (abfd, &op1, &rel1);
@@ -2089,7 +2113,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  {
 	    unsigned int size;
 
-	    if (ptr + 4 >= maxptr)
+	    if (ptr + 4 > maxptr)
 	      goto corrupt_etir;
 	    size = bfd_getl32 (ptr);
 	    image_write (abfd, ptr + 4, size);
@@ -2252,7 +2276,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Augment relocation base: increment image location counter by offset
 	     arg: lw	offset value.  */
 	case ETIR__C_CTL_AUGRB:
-	  if (ptr + 4 >= maxptr)
+	  if (ptr + 4 > maxptr)
 	    goto corrupt_etir;
 	  op1 = bfd_getl32 (ptr);
 	  image_inc_ptr (abfd, op1);
