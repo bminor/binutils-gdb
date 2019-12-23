@@ -4717,7 +4717,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 		    default:
 		      printf (_("UNKNOWN (%u): length %ld\n"),
-			      ext_op_code, op_code_data - data);
+			      ext_op_code, (long int) (op_code_data - data));
 		      break;
 		    }
 		  data = op_code_end;
