@@ -1,3 +1,8 @@
+2020-01-16  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (windows_get_tlb_type):
+	Add rtl_user_process_parameters type.
+
 2020-01-16  Pedro Alves  <palves@redhat.com>
             Norbert Lange  <nolange79@gmail.com>
 
