@@ -1,5 +1,11 @@
 2019-12-23  Alan Modra  <amodra@gmail.com>
 
+	* score-dis.c (print_insn_score32): Avoid signed overflow.
+	(print_insn_score48): Likewise.  Don't cast to int when printing
+	hex values.
+
+2019-12-23  Alan Modra  <amodra@gmail.com>
+
 	* iq2000-ibld.c: Regenerate.
 
 2019-12-23  Alan Modra  <amodra@gmail.com>
