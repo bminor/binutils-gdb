@@ -1152,6 +1152,10 @@ m;int;insn_is_ret;CORE_ADDR addr;addr;;default_insn_is_ret;;0
 # Return non-zero if the instruction at ADDR is a jump; zero otherwise.
 m;int;insn_is_jump;CORE_ADDR addr;addr;;default_insn_is_jump;;0
 
+# Return true if there's a program/permanent breakpoint planted in
+# memory at ADDRESS, return false otherwise.
+m;bool;program_breakpoint_here_p;CORE_ADDR address;address;;default_program_breakpoint_here_p;;0
+
 # Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
 # Return 0 if *READPTR is already at the end of the buffer.
 # Return -1 if there is insufficient buffer for a whole entry.

@@ -1,3 +1,27 @@
+2020-01-29  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-tdep.c (BRK_INSN_MASK): Define to 0xffe0001f.
+	(BRK_INSN_MASK): Define to 0xd4200000.
+	(aarch64_program_breakpoint_here_p): New function.
+	(aarch64_gdbarch_init): Set gdbarch_program_breakpoint_here_p hook.
+	* arch-utils.c (default_program_breakpoint_here_p): Moved from
+	breakpoint.c.
+	* arch-utils.h (default_program_breakpoint_here_p): Moved from
+	breakpoint.h
+	* breakpoint.c (bp_loc_is_permanent): Changed return type to bool and
+	call gdbarch_program_breakpoint_here_p.
+	(program_breakpoint_here): Moved to arch-utils.c, renamed to
+	default_program_breakpoint_here_p, changed return type to bool and
+	simplified.
+	* breakpoint.h (program_breakpoint_here): Moved prototype to
+	arch-utils.h, renamed to default_program_breakpoint_here_p and changed
+	return type to bool.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (program_breakpoint_here_p): New method.
+	* infrun.c (handle_signal_stop): Call
+	gdbarch_program_breakpoint_here_p.
+
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
 	* ctfread.c (struct ctf_fp_info): Reindent.

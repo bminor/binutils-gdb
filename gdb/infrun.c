@@ -6147,8 +6147,8 @@ handle_signal_stop (struct execution_control_state *ecs)
      been removed.  */
   if (random_signal && target_stopped_by_sw_breakpoint ())
     {
-      if (program_breakpoint_here_p (gdbarch,
-				     ecs->event_thread->suspend.stop_pc))
+      if (gdbarch_program_breakpoint_here_p (gdbarch,
+					     ecs->event_thread->suspend.stop_pc))
 	{
 	  struct regcache *regcache;
 	  int decr_pc;

@@ -1194,11 +1194,6 @@ enum breakpoint_here
 
 /* Prototypes for breakpoint-related functions.  */
 
-/* Return 1 if there's a program/permanent breakpoint planted in
-   memory at ADDRESS, return 0 otherwise.  */
-
-extern int program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address);
-
 extern enum breakpoint_here breakpoint_here_p (const address_space *,
 					       CORE_ADDR);
 

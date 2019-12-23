@@ -1201,6 +1201,39 @@ aarch64_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
   return false;
 }
 
+/* Used for matching BRK instructions for AArch64.  */
+static constexpr uint32_t BRK_INSN_MASK = 0xffe0001f;
+static constexpr uint32_t BRK_INSN_BASE = 0xd4200000;
+
+/* Implementation of gdbarch_program_breakpoint_here_p for aarch64.  */
+
+static bool
+aarch64_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
+{
+  const uint32_t insn_len = 4;
+  gdb_byte target_mem[4];
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we may find temporary breakpoints, ones
+     inserted by GDB, and flag them as permanent breakpoints.  */
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (0);
+
+  if (target_read_memory (address, target_mem, insn_len) == 0)
+    {
+      uint32_t insn =
+	(uint32_t) extract_unsigned_integer (target_mem, insn_len,
+					     gdbarch_byte_order_for_code (gdbarch));
+
+      /* Check if INSN is a BRK instruction pattern.  There are multiple choices
+	 of such instructions with different immediate values.  Different OS'
+	 may use a different variation, but they have the same outcome.  */
+	return ((insn & BRK_INSN_MASK) == BRK_INSN_BASE);
+    }
+
+  return false;
+}
+
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
@@ -3388,6 +3421,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register DWARF CFA vendor handler.  */
   set_gdbarch_execute_dwarf_cfa_vendor_op (gdbarch,
 					   aarch64_execute_dwarf_cfa_vendor_op);
+
+  /* Permanent/Program breakpoint handling.  */
+  set_gdbarch_program_breakpoint_here_p (gdbarch,
+					 aarch64_program_breakpoint_here_p);
 
   /* Add some default predicates.  */
   frame_unwind_append_unwinder (gdbarch, &aarch64_stub_unwind);

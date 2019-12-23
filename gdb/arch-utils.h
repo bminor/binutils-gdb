@@ -228,6 +228,10 @@ extern int default_insn_is_call (struct gdbarch *, CORE_ADDR);
 extern int default_insn_is_ret (struct gdbarch *, CORE_ADDR);
 extern int default_insn_is_jump (struct gdbarch *, CORE_ADDR);
 
+/* Default implementation of gdbarch_program_breakpoint_here_p.  */
+extern bool default_program_breakpoint_here_p (struct gdbarch *gdbarch,
+					       CORE_ADDR addr);
+
 /* Do-nothing version of vsyscall_range.  Returns false.  */
 
 extern int default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);

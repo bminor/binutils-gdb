@@ -876,6 +876,38 @@ int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
   return 0;
 }
 
+/*  See arch-utils.h.  */
+
+bool
+default_program_breakpoint_here_p (struct gdbarch *gdbarch,
+				   CORE_ADDR address)
+{
+  int len;
+  const gdb_byte *bpoint = gdbarch_breakpoint_from_pc (gdbarch, &address, &len);
+
+  /* Software breakpoints unsupported?  */
+  if (bpoint == nullptr)
+    return false;
+
+  gdb_byte *target_mem = (gdb_byte *) alloca (len);
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we may find temporary breakpoints, ones
+     inserted by GDB, and flag them as permanent breakpoints.  */
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (0);
+
+  if (target_read_memory (address, target_mem, len) == 0)
+    {
+      /* Check if this is a breakpoint instruction for this architecture,
+	 including ones used by GDB.  */
+      if (memcmp (target_mem, bpoint, len) == 0)
+	return true;
+    }
+
+  return false;
+}
+
 void
 default_skip_permanent_breakpoint (struct regcache *regcache)
 {

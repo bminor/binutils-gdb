@@ -8515,7 +8515,7 @@ mention (struct breakpoint *b)
 }
 
 
-static int bp_loc_is_permanent (struct bp_location *loc);
+static bool bp_loc_is_permanent (struct bp_location *loc);
 
 static struct bp_location *
 add_location_to_breakpoint (struct breakpoint *b,
@@ -8581,42 +8581,10 @@ add_location_to_breakpoint (struct breakpoint *b,
 }
 
 
-/* See breakpoint.h.  */
+/* Return true if LOC is pointing to a permanent breakpoint,
+   return false otherwise.  */
 
-int
-program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
-{
-  int len;
-  CORE_ADDR addr;
-  const gdb_byte *bpoint;
-  gdb_byte *target_mem;
-
-  addr = address;
-  bpoint = gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
-
-  /* Software breakpoints unsupported?  */
-  if (bpoint == NULL)
-    return 0;
-
-  target_mem = (gdb_byte *) alloca (len);
-
-  /* Enable the automatic memory restoration from breakpoints while
-     we read the memory.  Otherwise we could say about our temporary
-     breakpoints they are permanent.  */
-  scoped_restore restore_memory
-    = make_scoped_restore_show_memory_breakpoints (0);
-
-  if (target_read_memory (address, target_mem, len) == 0
-      && memcmp (target_mem, bpoint, len) == 0)
-    return 1;
-
-  return 0;
-}
-
-/* Return 1 if LOC is pointing to a permanent breakpoint,
-   return 0 otherwise.  */
-
-static int
+static bool
 bp_loc_is_permanent (struct bp_location *loc)
 {
   gdb_assert (loc != NULL);
@@ -8624,14 +8592,14 @@ bp_loc_is_permanent (struct bp_location *loc)
   /* If we have a non-breakpoint-backed catchpoint or a software
      watchpoint, just return 0.  We should not attempt to read from
      the addresses the locations of these breakpoint types point to.
-     program_breakpoint_here_p, below, will attempt to read
+     gdbarch_program_breakpoint_here_p, below, will attempt to read
      memory.  */
   if (!bl_address_is_meaningful (loc))
-    return 0;
+    return false;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
   switch_to_program_space_and_thread (loc->pspace);
-  return program_breakpoint_here_p (loc->gdbarch, loc->address);
+  return gdbarch_program_breakpoint_here_p (loc->gdbarch, loc->address);
 }
 
 /* Build a command list for the dprintf corresponding to the current

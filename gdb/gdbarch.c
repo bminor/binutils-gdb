@@ -345,6 +345,7 @@ struct gdbarch
   gdbarch_insn_is_call_ftype *insn_is_call;
   gdbarch_insn_is_ret_ftype *insn_is_ret;
   gdbarch_insn_is_jump_ftype *insn_is_jump;
+  gdbarch_program_breakpoint_here_p_ftype *program_breakpoint_here_p;
   gdbarch_auxv_parse_ftype *auxv_parse;
   gdbarch_print_auxv_entry_ftype *print_auxv_entry;
   gdbarch_vsyscall_range_ftype *vsyscall_range;
@@ -464,6 +465,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->insn_is_call = default_insn_is_call;
   gdbarch->insn_is_ret = default_insn_is_ret;
   gdbarch->insn_is_jump = default_insn_is_jump;
+  gdbarch->program_breakpoint_here_p = default_program_breakpoint_here_p;
   gdbarch->print_auxv_entry = default_print_auxv_entry;
   gdbarch->vsyscall_range = default_vsyscall_range;
   gdbarch->infcall_mmap = default_infcall_mmap;
@@ -708,6 +710,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of insn_is_call, invalid_p == 0 */
   /* Skip verify of insn_is_ret, invalid_p == 0 */
   /* Skip verify of insn_is_jump, invalid_p == 0 */
+  /* Skip verify of program_breakpoint_here_p, invalid_p == 0 */
   /* Skip verify of auxv_parse, has predicate.  */
   /* Skip verify of print_auxv_entry, invalid_p == 0 */
   /* Skip verify of vsyscall_range, invalid_p == 0 */
@@ -1248,6 +1251,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: process_record_signal = <%s>\n",
                       host_address_to_string (gdbarch->process_record_signal));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: program_breakpoint_here_p = <%s>\n",
+                      host_address_to_string (gdbarch->program_breakpoint_here_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: ps_regnum = %s\n",
                       plongest (gdbarch->ps_regnum));
@@ -4926,6 +4932,23 @@ set_gdbarch_insn_is_jump (struct gdbarch *gdbarch,
                           gdbarch_insn_is_jump_ftype insn_is_jump)
 {
   gdbarch->insn_is_jump = insn_is_jump;
+}
+
+bool
+gdbarch_program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->program_breakpoint_here_p != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_program_breakpoint_here_p called\n");
+  return gdbarch->program_breakpoint_here_p (gdbarch, address);
+}
+
+void
+set_gdbarch_program_breakpoint_here_p (struct gdbarch *gdbarch,
+                                       gdbarch_program_breakpoint_here_p_ftype program_breakpoint_here_p)
+{
+  gdbarch->program_breakpoint_here_p = program_breakpoint_here_p;
 }
 
 int
