@@ -248,9 +248,65 @@ extern void * xcalloc2 (size_t, size_t);
 extern void * xcmalloc (size_t, size_t);
 extern void * xcrealloc (void *, size_t, size_t);
 
-extern dwarf_vma read_leb128 (unsigned char *, unsigned int *, bfd_boolean, const unsigned char * const);
-
 /* A callback into the client.  Returns TRUE if there is a
    relocation against the given debug section at the given
    offset.  */
 extern bfd_boolean reloc_at (struct dwarf_section *, dwarf_vma);
+
+extern dwarf_vma read_leb128 (unsigned char *, const unsigned char *const,
+			      bfd_boolean, unsigned int *, int *);
+
+static inline void
+report_leb_status (int status)
+{
+  if ((status & 1) != 0)
+    error (_("LEB end of data\n"));
+  else if ((status & 2) != 0)
+    error (_("LEB value too large\n"));
+}
+
+#define SKIP_ULEB(start, end)					\
+  do								\
+    {								\
+      unsigned int _len;					\
+      read_leb128 (start, end, FALSE, &_len, NULL);		\
+      start += _len;						\
+    } while (0)
+
+#define SKIP_SLEB(start, end)					\
+  do								\
+    {								\
+      unsigned int _len;					\
+      read_leb128 (start, end, TRUE, &_len, NULL);		\
+      start += _len;						\
+    } while (0)
+
+#define READ_ULEB(var, start, end)				\
+  do								\
+    {								\
+      dwarf_vma _val;						\
+      unsigned int _len;					\
+      int _status;						\
+								\
+      _val = read_leb128 (start, end, FALSE, &_len, &_status);	\
+      start += _len;						\
+      (var) = _val;						\
+      if ((var) != _val)					\
+	_status |= 2;						\
+      report_leb_status (_status);				\
+    } while (0)
+
+#define READ_SLEB(var, start, end)				\
+  do								\
+    {								\
+      dwarf_signed_vma _val;					\
+      unsigned int _len;					\
+      int _status;						\
+								\
+      _val = read_leb128 (start, end, TRUE, &_len, &_status);	\
+      start += _len;						\
+      (var) = _val;						\
+      if ((var) != _val)					\
+	_status |= 2;						\
+      report_leb_status (_status);				\
+    } while (0)

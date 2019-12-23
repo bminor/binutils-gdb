@@ -749,17 +749,6 @@ find_section_in_set (Filedata * filedata, const char * name, unsigned int * set)
   return find_section (filedata, name);
 }
 
-/* Read an unsigned LEB128 encoded value from DATA.
-   Set *LENGTH_RETURN to the number of bytes read.  */
-
-static inline unsigned long
-read_uleb128 (unsigned char * data,
-	      unsigned int * length_return,
-	      const unsigned char * const end)
-{
-  return read_leb128 (data, length_return, FALSE, end);
-}
-
 /* Return TRUE if the current file is for IA-64 machine and OpenVMS ABI.
    This OS has so many departures from the ELF standard that we test it at
    many places.  */
@@ -8782,7 +8771,7 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	    }
 	  else
 	    {
-	      offset = read_uleb128 (buf, &len, buf + i + 1);
+	      offset = read_leb128 (buf, buf + i + 1, FALSE, &len, NULL);
 	      assert (len == i + 1);
 	      offset = offset * 4 + 0x204;
 	      printf ("vsp = vsp + %ld", offset);
@@ -9001,7 +8990,7 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
 	      return FALSE;
 	    }
 
-	  offset = read_uleb128 (buf, &len, buf + i + 1);
+	  offset = read_leb128 (buf, buf + i + 1, FALSE, &len, NULL);
 	  assert (len == i + 1);
 	  offset = offset * 8 + 0x408;
 	  printf (_("sp = sp + %ld"), offset);
@@ -14492,10 +14481,7 @@ display_tag_value (signed int tag,
     }
   else
     {
-      unsigned int len;
-
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("%ld (0x%lx)\n", val, val);
     }
 
@@ -14510,17 +14496,14 @@ display_arc_attribute (unsigned char * p,
 		       const unsigned char * const end)
 {
   unsigned int tag;
-  unsigned int len;
   unsigned int val;
 
-  tag = read_uleb128 (p, &len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
 
   switch (tag)
     {
     case Tag_ARC_PCS_config:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_PCS_config: ");
       switch (val)
 	{
@@ -14546,8 +14529,7 @@ display_arc_attribute (unsigned char * p,
       break;
 
     case Tag_ARC_CPU_base:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_CPU_base: ");
       switch (val)
 	{
@@ -14571,8 +14553,7 @@ display_arc_attribute (unsigned char * p,
       break;
 
     case Tag_ARC_CPU_variation:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_CPU_variation: ");
       switch (val)
 	{
@@ -14595,21 +14576,18 @@ display_arc_attribute (unsigned char * p,
       break;
 
     case Tag_ARC_ABI_rf16:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_rf16: %s\n", val ? _("yes") : _("no"));
       break;
 
     case Tag_ARC_ABI_osver:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_osver: v%d\n", val);
       break;
 
     case Tag_ARC_ABI_pic:
     case Tag_ARC_ABI_sda:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf (tag == Tag_ARC_ABI_sda ? "  Tag_ARC_ABI_sda: "
 	      : "  Tag_ARC_ABI_pic: ");
       switch (val)
@@ -14630,28 +14608,24 @@ display_arc_attribute (unsigned char * p,
       break;
 
     case Tag_ARC_ABI_tls:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_tls: %s\n", val ? "r25": "none");
       break;
 
     case Tag_ARC_ABI_enumsize:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_enumsize: %s\n", val ? _("default") :
 	      _("smallest"));
       break;
 
     case Tag_ARC_ABI_exceptions:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_exceptions: %s\n", val ? _("OPTFP")
 	      : _("default"));
       break;
 
     case Tag_ARC_ABI_double_size:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ABI_double_size: %d\n", val);
       break;
 
@@ -14666,14 +14640,12 @@ display_arc_attribute (unsigned char * p,
       break;
 
     case Tag_ARC_ISA_mpy_option:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ISA_mpy_option: %d\n", val);
       break;
 
     case Tag_ARC_ATR_version:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ARC_ATR_version: %d\n", val);
       break;
 
@@ -14818,14 +14790,12 @@ display_arm_attribute (unsigned char * p,
 		       const unsigned char * const end)
 {
   unsigned int tag;
-  unsigned int len;
   unsigned int val;
   arm_attr_public_tag * attr;
   unsigned i;
   unsigned int type;
 
-  tag = read_uleb128 (p, &len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
   attr = NULL;
   for (i = 0; i < ARRAY_SIZE (arm_attr_public_tags); i++)
     {
@@ -14845,8 +14815,7 @@ display_arm_attribute (unsigned char * p,
 	  switch (tag)
 	    {
 	    case 7: /* Tag_CPU_arch_profile.  */
-	      val = read_uleb128 (p, &len, end);
-	      p += len;
+	      READ_ULEB (val, p, end);
 	      switch (val)
 		{
 		case 0: printf (_("None\n")); break;
@@ -14859,8 +14828,7 @@ display_arm_attribute (unsigned char * p,
 	      break;
 
 	    case 24: /* Tag_align_needed.  */
-	      val = read_uleb128 (p, &len, end);
-	      p += len;
+	      READ_ULEB (val, p, end);
 	      switch (val)
 		{
 		case 0: printf (_("None\n")); break;
@@ -14878,8 +14846,7 @@ display_arm_attribute (unsigned char * p,
 	      break;
 
 	    case 25: /* Tag_align_preserved.  */
-	      val = read_uleb128 (p, &len, end);
-	      p += len;
+	      READ_ULEB (val, p, end);
 	      switch (val)
 		{
 		case 0: printf (_("None\n")); break;
@@ -14898,8 +14865,7 @@ display_arm_attribute (unsigned char * p,
 
 	    case 32: /* Tag_compatibility.  */
 	      {
-		val = read_uleb128 (p, &len, end);
-		p += len;
+		READ_ULEB (val, p, end);
 		printf (_("flag = %d, vendor = "), val);
 		if (p < end - 1)
 		  {
@@ -14925,12 +14891,10 @@ display_arm_attribute (unsigned char * p,
 	      break;
 
 	    case 65: /* Tag_also_compatible_with.  */
-	      val = read_uleb128 (p, &len, end);
-	      p += len;
+	      READ_ULEB (val, p, end);
 	      if (val == 6 /* Tag_CPU_arch.  */)
 		{
-		  val = read_uleb128 (p, &len, end);
-		  p += len;
+		  READ_ULEB (val, p, end);
 		  if ((unsigned int) val >= ARRAY_SIZE (arm_attr_tag_CPU_arch))
 		    printf ("??? (%d)\n", val);
 		  else
@@ -14955,8 +14919,7 @@ display_arm_attribute (unsigned char * p,
 
 	default:
 	  assert (attr->type & 0x80);
-	  val = read_uleb128 (p, &len, end);
-	  p += len;
+	  READ_ULEB (val, p, end);
 	  type = attr->type & 0x7f;
 	  if (val >= type)
 	    printf ("??? (%d)\n", val);
@@ -14974,19 +14937,16 @@ display_gnu_attribute (unsigned char * p,
 		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, unsigned int, const unsigned char * const),
 		       const unsigned char * const end)
 {
-  int tag;
-  unsigned int len;
+  unsigned int tag;
   unsigned int val;
 
-  tag = read_uleb128 (p, &len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
 
   /* Tag_compatibility is the only generic GNU attribute defined at
      present.  */
   if (tag == 32)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
 
       printf (_("flag = %d, vendor = "), val);
       if (p == end)
@@ -15024,19 +14984,17 @@ display_power_gnu_attribute (unsigned char * p,
 			     unsigned int tag,
 			     const unsigned char * const end)
 {
-  unsigned int len;
   unsigned int val;
 
   if (tag == Tag_GNU_Power_ABI_FP)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_Power_ABI_FP: ");
-      if (len == 0)
+      if (p == end)
 	{
 	  printf (_("<corrupt>\n"));
 	  return p;
 	}
+      READ_ULEB (val, p, end);
 
       if (val > 15)
 	printf ("(%#x), ", val);
@@ -15077,14 +15035,13 @@ display_power_gnu_attribute (unsigned char * p,
 
   if (tag == Tag_GNU_Power_ABI_Vector)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_Power_ABI_Vector: ");
-      if (len == 0)
+      if (p == end)
 	{
 	  printf (_("<corrupt>\n"));
 	  return p;
 	}
+      READ_ULEB (val, p, end);
 
       if (val > 3)
 	printf ("(%#x), ", val);
@@ -15109,14 +15066,13 @@ display_power_gnu_attribute (unsigned char * p,
 
   if (tag == Tag_GNU_Power_ABI_Struct_Return)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_Power_ABI_Struct_Return: ");
-      if (len == 0)
+      if (p == end)
 	{
 	  printf (_("<corrupt>\n"));
 	  return p;
 	}
+      READ_ULEB (val, p, end);
 
       if (val > 2)
 	printf ("(%#x), ", val);
@@ -15147,14 +15103,12 @@ display_s390_gnu_attribute (unsigned char * p,
 			    unsigned int tag,
 			    const unsigned char * const end)
 {
-  unsigned int len;
-  int val;
+  unsigned int val;
 
   if (tag == Tag_GNU_S390_ABI_Vector)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_S390_ABI_Vector: ");
+      READ_ULEB (val, p, end);
 
       switch (val)
 	{
@@ -15262,21 +15216,18 @@ display_sparc_gnu_attribute (unsigned char * p,
 			     unsigned int tag,
 			     const unsigned char * const end)
 {
-  unsigned int len;
-  int val;
+  unsigned int val;
 
   if (tag == Tag_GNU_Sparc_HWCAPS)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_GNU_Sparc_HWCAPS: ");
       display_sparc_hwcaps (val);
       return p;
     }
   if (tag == Tag_GNU_Sparc_HWCAPS2)
     {
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_GNU_Sparc_HWCAPS2: ");
       display_sparc_hwcaps2 (val);
       return p;
@@ -15330,26 +15281,20 @@ display_mips_gnu_attribute (unsigned char * p,
 {
   if (tag == Tag_GNU_MIPS_ABI_FP)
     {
-      unsigned int len;
       unsigned int val;
 
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_MIPS_ABI_FP: ");
-
+      READ_ULEB (val, p, end);
       print_mips_fp_abi_value (val);
-
       return p;
    }
 
   if (tag == Tag_GNU_MIPS_ABI_MSA)
     {
-      unsigned int len;
       unsigned int val;
 
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_MIPS_ABI_MSA: ");
+      READ_ULEB (val, p, end);
 
       switch (val)
 	{
@@ -15374,18 +15319,15 @@ display_tic6x_attribute (unsigned char * p,
 			 const unsigned char * const end)
 {
   unsigned int tag;
-  unsigned int len;
-  int val;
+  unsigned int val;
 
-  tag = read_uleb128 (p, &len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
 
   switch (tag)
     {
     case Tag_ISA:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_ISA: ");
+      READ_ULEB (val, p, end);
 
       switch (val)
 	{
@@ -15417,9 +15359,8 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_wchar_t:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_ABI_wchar_t: ");
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0:
@@ -15438,9 +15379,8 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_stack_align_needed:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_ABI_stack_align_needed: ");
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0:
@@ -15456,8 +15396,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_stack_align_preserved:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_stack_align_preserved: ");
       switch (val)
 	{
@@ -15474,8 +15413,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_DSBT:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_DSBT: ");
       switch (val)
 	{
@@ -15492,8 +15430,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_PID:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_PID: ");
       switch (val)
 	{
@@ -15513,8 +15450,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_PIC:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_PIC: ");
       switch (val)
 	{
@@ -15531,8 +15467,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_array_object_alignment:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_array_object_alignment: ");
       switch (val)
 	{
@@ -15552,8 +15487,7 @@ display_tic6x_attribute (unsigned char * p,
       return p;
 
     case Tag_ABI_array_object_align_expected:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       printf ("  Tag_ABI_array_object_align_expected: ");
       switch (val)
 	{
@@ -15574,8 +15508,7 @@ display_tic6x_attribute (unsigned char * p,
 
     case Tag_ABI_compatibility:
       {
-	val = read_uleb128 (p, &len, end);
-	p += len;
+	READ_ULEB (val, p, end);
 	printf ("  Tag_ABI_compatibility: ");
 	printf (_("flag = %d, vendor = "), val);
 	if (p < end - 1)
@@ -15666,19 +15599,16 @@ static unsigned char *
 display_msp430x_attribute (unsigned char * p,
 			   const unsigned char * const end)
 {
-  unsigned int len;
   unsigned int val;
   unsigned int tag;
 
-  tag = read_uleb128 (p, & len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
 
   switch (tag)
     {
     case OFBA_MSPABI_Tag_ISA:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_ISA: ");
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0: printf (_("None\n")); break;
@@ -15689,9 +15619,8 @@ display_msp430x_attribute (unsigned char * p,
       break;
 
     case OFBA_MSPABI_Tag_Code_Model:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_Code_Model: ");
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0: printf (_("None\n")); break;
@@ -15702,9 +15631,8 @@ display_msp430x_attribute (unsigned char * p,
       break;
 
     case OFBA_MSPABI_Tag_Data_Model:
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_Data_Model: ");
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0: printf (_("None\n")); break;
@@ -15737,8 +15665,7 @@ display_msp430x_attribute (unsigned char * p,
 	}
       else
 	{
-	  val = read_uleb128 (p, &len, end);
-	  p += len;
+	  READ_ULEB (val, p, end);
 	  printf ("%d (0x%x)\n", val, val);
 	}
       break;
@@ -15755,12 +15682,10 @@ display_msp430_gnu_attribute (unsigned char * p,
 {
   if (tag == Tag_GNU_MSP430_Data_Region)
     {
-      unsigned int len;
-      int val;
+      unsigned int val;
 
-      val = read_uleb128 (p, &len, end);
-      p += len;
       printf ("  Tag_GNU_MSP430_Data_Region: ");
+      READ_ULEB (val, p, end);
 
       switch (val)
 	{
@@ -15771,7 +15696,7 @@ display_msp430_gnu_attribute (unsigned char * p,
 	  printf (_("Lower Region Only\n"));
 	  break;
 	default:
-	  printf ("??? (%d)\n", val);
+	  printf ("??? (%u)\n", val);
 	}
       return p;
     }
@@ -15780,7 +15705,7 @@ display_msp430_gnu_attribute (unsigned char * p,
 
 struct riscv_attr_tag_t {
   const char *name;
-  int tag;
+  unsigned int tag;
 };
 
 static struct riscv_attr_tag_t riscv_attr_tag[] =
@@ -15799,14 +15724,12 @@ static unsigned char *
 display_riscv_attribute (unsigned char *p,
 			 const unsigned char * const end)
 {
-  unsigned int len;
-  int val;
-  int tag;
+  unsigned int val;
+  unsigned int tag;
   struct riscv_attr_tag_t *attr = NULL;
   unsigned i;
 
-  tag = read_uleb128 (p, &len, end);
-  p += len;
+  READ_ULEB (tag, p, end);
 
   /* Find the name of attribute. */
   for (i = 0; i < ARRAY_SIZE (riscv_attr_tag); i++)
@@ -15828,13 +15751,11 @@ display_riscv_attribute (unsigned char *p,
     case Tag_RISCV_priv_spec:
     case Tag_RISCV_priv_spec_minor:
     case Tag_RISCV_priv_spec_revision:
-      val = read_uleb128 (p, &len, end);
-      p += len;
-      printf (_("%d\n"), val);
+      READ_ULEB (val, p, end);
+      printf (_("%u\n"), val);
       break;
     case Tag_RISCV_unaligned_access:
-      val = read_uleb128 (p, &len, end);
-      p += len;
+      READ_ULEB (val, p, end);
       switch (val)
 	{
 	case 0:
@@ -15846,9 +15767,8 @@ display_riscv_attribute (unsigned char *p,
 	}
       break;
     case Tag_RISCV_stack_align:
-      val = read_uleb128 (p, &len, end);
-      p += len;
-      printf (_("%d-bytes\n"), val);
+      READ_ULEB (val, p, end);
+      printf (_("%u-bytes\n"), val);
       break;
     case Tag_RISCV_arch:
       p = display_tag_value (-1, p, end);
@@ -15967,7 +15887,7 @@ process_attributes (Filedata * filedata,
 	      while (attr_len > 0 && p < contents + sect->sh_size)
 		{
 		  int tag;
-		  int val;
+		  unsigned int val;
 		  bfd_vma size;
 		  unsigned char * end;
 
@@ -16018,10 +15938,7 @@ process_attributes (Filedata * filedata,
 		    do_numlist:
 		      for (;;)
 			{
-			  unsigned int j;
-
-			  val = read_uleb128 (p, &j, end);
-			  p += j;
+			  READ_ULEB (val, p, end);
 			  if (val == 0)
 			    break;
 			  printf (" %d", val);
