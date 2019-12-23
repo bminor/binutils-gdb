@@ -9927,12 +9927,12 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  unsigned int immed = (given & 0xff);
 			  unsigned int a, i;
 
-			  a = (((immed << (32 - rotate))
-				| (immed >> rotate)) & 0xffffffff);
+			  a = (immed << ((32 - rotate) & 31)
+			       | immed >> rotate) & 0xffffffff;
 			  /* If there is another encoding with smaller rotate,
 			     the rotate should be specified directly.  */
 			  for (i = 0; i < 32; i += 2)
-			    if ((a << i | a >> (32 - i)) <= 0xff)
+			    if ((a << i | a >> ((32 - i) & 31)) <= 0xff)
 			      break;
 
 			  if (i != rotate)

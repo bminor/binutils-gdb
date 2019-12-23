@@ -1,3 +1,7 @@
+2019-12-24  Alan Modra  <amodra@gmail.com>
+
+	* arm-dis.c (print_insn_arm): Don't shift by 32 on unsigned int var.
+
 2019-12-23  Jan Beulich  <jbeulich@suse.com>
 
 	* ppc-dis.c (print_insn_powerpc): Rename local variable "spaces"
