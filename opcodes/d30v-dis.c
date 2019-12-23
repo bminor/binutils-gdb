@@ -90,11 +90,11 @@ lookup_opcode (struct d30v_insn *insn, long num, int is_long)
 }
 
 static int
-extract_value (long long num, struct d30v_operand *oper, int is_long)
+extract_value (uint64_t num, const struct d30v_operand *oper, int is_long)
 {
-  int val;
+  unsigned int val;
   int shift = 12 - oper->position;
-  int mask = (0xFFFFFFFF >> (32 - oper->bits));
+  unsigned int mask = (0xFFFFFFFF >> (32 - oper->bits));
 
   if (is_long)
     {
@@ -118,13 +118,13 @@ extract_value (long long num, struct d30v_operand *oper, int is_long)
 static void
 print_insn (struct disassemble_info *info,
 	    bfd_vma memaddr,
-	    long long num,
+	    uint64_t num,
 	    struct d30v_insn *insn,
 	    int is_long,
 	    int show_ext)
 {
   int val, opnum, need_comma = 0;
-  struct d30v_operand *oper;
+  const struct d30v_operand *oper;
   int i, match, need_paren = 0, found_control = 0;
   unsigned int opind = 0;
 
@@ -136,7 +136,7 @@ print_insn (struct disassemble_info *info,
       opind++;
       val =
 	extract_value (num,
-		       (struct d30v_operand *) &d30v_operand_table[insn->form->operands[0]],
+		       &d30v_operand_table[insn->form->operands[0]],
 		       is_long);
       (*info->fprintf_func) (info->stream, "%s", d30v_cc_names[val]);
     }
@@ -160,7 +160,7 @@ print_insn (struct disassemble_info *info,
     {
       int bits;
 
-      oper = (struct d30v_operand *) &d30v_operand_table[opnum];
+      oper = &d30v_operand_table[opnum];
       bits = oper->bits;
       if (oper->flags & OPERAND_SHIFT)
 	bits += 3;
@@ -210,8 +210,8 @@ print_insn (struct disassemble_info *info,
 	  match = 0;
 	  if (oper->flags & OPERAND_CONTROL)
 	    {
-	      struct d30v_operand *oper3 =
-		(struct d30v_operand *) &d30v_operand_table[insn->form->operands[2]];
+	      const struct d30v_operand *oper3
+		= &d30v_operand_table[insn->form->operands[2]];
 	      int id = extract_value (num, oper3, is_long);
 
 	      found_control = 1;
@@ -330,9 +330,9 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
 {
   int status, result;
   bfd_byte buffer[12];
-  unsigned long in1, in2;
+  uint32_t in1, in2;
   struct d30v_insn insn;
-  long long num;
+  uint64_t num;
 
   insn.form = NULL;
 
@@ -353,9 +353,9 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
     {
       info->bytes_per_line = 8;
       if (!(result = lookup_opcode (&insn, in1, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in1);
+	(*info->fprintf_func) (info->stream, ".long\t0x%x", in1);
       else
-	print_insn (info, memaddr, (long long) in1, &insn, 0, result);
+	print_insn (info, memaddr, (uint64_t) in1, &insn, 0, result);
       return 4;
     }
   in2 = bfd_getb32 (buffer);
@@ -365,17 +365,17 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
       /* LONG instruction.  */
       if (!(result = lookup_opcode (&insn, in1, 1)))
 	{
-	  (*info->fprintf_func) (info->stream, ".long\t0x%lx,0x%lx", in1, in2);
+	  (*info->fprintf_func) (info->stream, ".long\t0x%x,0x%x", in1, in2);
 	  return 8;
 	}
-      num = (long long) in1 << 32 | in2;
+      num = (uint64_t) in1 << 32 | in2;
       print_insn (info, memaddr, num, &insn, 1, result);
     }
   else
     {
       num = in1;
       if (!(result = lookup_opcode (&insn, in1, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in1);
+	(*info->fprintf_func) (info->stream, ".long\t0x%x", in1);
       else
 	print_insn (info, memaddr, num, &insn, 0, result);
 
@@ -396,7 +396,7 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
       insn.form = NULL;
       num = in2;
       if (!(result = lookup_opcode (&insn, in2, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in2);
+	(*info->fprintf_func) (info->stream, ".long\t0x%x", in2);
       else
 	print_insn (info, memaddr, num, &insn, 0, result);
     }
