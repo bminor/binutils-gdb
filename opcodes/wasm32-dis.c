@@ -192,29 +192,36 @@ wasm_read_leb128 (bfd_vma                   pc,
   unsigned int num_read = 0;
   unsigned int shift = 0;
   unsigned char byte = 0;
-  bfd_boolean success = FALSE;
+  int status = 1;
 
   while (info->read_memory_func (pc + num_read, &byte, 1, info) == 0)
     {
       num_read++;
 
-      result |= ((bfd_vma) (byte & 0x7f)) << shift;
+      if (shift < sizeof (result) * 8)
+	{
+	  result |= ((uint64_t) (byte & 0x7f)) << shift;
+	  if ((result >> shift) != (byte & 0x7f))
+	    /* Overflow.  */
+	    status |= 2;
+	  shift += 7;
+	}
+      else if ((byte & 0x7f) != 0)
+	status |= 2;
 
-      shift += 7;
       if ((byte & 0x80) == 0)
-        {
-          success = TRUE;
-          break;
-        }
+	{
+	  status &= ~1;
+	  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+	    result |= -((uint64_t) 1 << shift);
+	  break;
+	}
     }
 
   if (length_return != NULL)
     *length_return = num_read;
   if (error_return != NULL)
-    *error_return = ! success;
-
-  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -((uint64_t) 1 << shift);
+    *error_return = status != 0;
 
   return result;
 }

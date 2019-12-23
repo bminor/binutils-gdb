@@ -111,18 +111,28 @@ wasm_read_leb128 (bfd *		  abfd,
   unsigned int num_read = 0;
   unsigned int shift = 0;
   unsigned char byte = 0;
-  bfd_boolean success = FALSE;
+  int status = 1;
 
   while (bfd_bread (&byte, 1, abfd) == 1)
     {
       num_read++;
 
-      result |= ((bfd_vma) (byte & 0x7f)) << shift;
+      if (shift < sizeof (result) * 8)
+	{
+	  result |= ((bfd_vma) (byte & 0x7f)) << shift;
+	  if ((result >> shift) != (byte & 0x7f))
+	    /* Overflow.  */
+	    status |= 2;
+	  shift += 7;
+	}
+      else if ((byte & 0x7f) != 0)
+	status |= 2;
 
-      shift += 7;
       if ((byte & 0x80) == 0)
 	{
-	  success = TRUE;
+	  status &= ~1;
+	  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+	    result |= -((bfd_vma) 1 << shift);
 	  break;
 	}
     }
@@ -130,10 +140,7 @@ wasm_read_leb128 (bfd *		  abfd,
   if (length_return != NULL)
     *length_return = num_read;
   if (error_return != NULL)
-    *error_return = ! success;
-
-  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -((bfd_vma) 1 << shift);
+    *error_return = status != 0;
 
   return result;
 }

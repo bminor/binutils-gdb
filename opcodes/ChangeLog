@@ -1,3 +1,8 @@
+2019-12-23  Alan Modra  <amodra@gmail.com>
+
+	* wasm32-dis.c (wasm_read_leb128): Don't allow oversize shifts.
+	Catch value overflow.  Sign extend only on terminating byte.
+
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
 	PR 25281
