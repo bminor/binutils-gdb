@@ -1,3 +1,7 @@
+2019-12-23  Alan Modra  <amodra@gmail.com>
+
+	* iq2000.cpu (f-offset): Avoid left shift of negative values.
+
 2019-12-20  Alan Modra  <amodra@gmail.com>
 
 	* or1korbis.cpu (f-disp26, f-disp21): Don't left shift negative values.
