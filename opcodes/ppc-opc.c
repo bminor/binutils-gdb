@@ -2147,17 +2147,17 @@ const struct powerpc_operand powerpc_operands[] =
      off a register, and implies that the next operand is a register in
      parentheses.  */
 #define D34 DS + 1
-  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_d34, extract_d34,
+  { UINT64_C(0x3ffffffff), PPC_OPSHIFT_INV, insert_d34, extract_d34,
     PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
   /* The SI field in an 8-byte D form prefix instruction.  */
 #define SI34 D34 + 1
-  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_d34, extract_d34, PPC_OPERAND_SIGNED },
+  { UINT64_C(0x3ffffffff), PPC_OPSHIFT_INV, insert_d34, extract_d34, PPC_OPERAND_SIGNED },
 
   /* The NSI field in an 8-byte D form prefix instruction.  This is the
      same as the SI34 field, only negated.  */
 #define NSI34 SI34 + 1
-  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_nsi34, extract_nsi34,
+  { UINT64_C(0x3ffffffff), PPC_OPSHIFT_INV, insert_nsi34, extract_nsi34,
     PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
   /* The DUIS or BHRBE fields in a XFX form instruction, 10 bits

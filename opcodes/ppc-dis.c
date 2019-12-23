@@ -824,16 +824,16 @@ print_insn_powerpc (bfd_vma memaddr,
 	need_paren
       } op_separator;
       bfd_boolean skip_optional;
-      int spaces;
+      int blanks;
 
       (*info->fprintf_func) (info->stream, "%s", opcode->name);
       /* gdb fprintf_func doesn't return count printed.  */
-      spaces = 8 - strlen (opcode->name);
-      if (spaces <= 0)
-	spaces = 1;
+      blanks = 8 - strlen (opcode->name);
+      if (blanks <= 0)
+	blanks = 1;
 
       /* Now extract and print the operands.  */
-      op_separator = spaces;
+      op_separator = blanks;
       skip_optional = FALSE;
       for (opindex = opcode->operands; *opindex != 0; opindex++)
 	{
