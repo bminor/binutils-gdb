@@ -1,3 +1,10 @@
+2019-12-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* posixstat.h (S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH)
+	(S_IXOTH, S_IRWXG, S_IRWXO): Define if undefined, even if S_IRWXU
+	is defined, because non-Posix systems may defined only the user
+	bits.
+
 [Readline-specific changelog.  Descriptions of changes to the source are
  found in the bash changelog.]
 
