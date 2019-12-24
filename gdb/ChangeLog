@@ -1,3 +1,54 @@
+
+2020-01-13  Ali Tamur <tamur@google.com>
+
+	* dwarf2read.c (dwarf2_debug_sections): Add debug_str_offsets sections.
+	(dwarf2_cu): Add str_offsets_base field.  Change the type of addr_base
+	to gdb::optional.  Update comments.
+	(dwo_file): Update comments.
+	(read_attribute): Update API to take an additional out parameter,
+	need_reprocess.  This is used to mark attributes that need other
+	attributes (e.g. str_offsets_base) for correct computation which may not
+	have been read yet.
+	(read_attribute_reprocess): New function declaration.
+	(read_addr_index): Likewise.
+	(read_dwo_str_index): Likewise.
+	(read_stub_str_index): Likewise.
+	(dwarf2_per_objfile::locate_sections): Handle debug_str_offsets section.
+	(lookup_addr_base): New function definition.
+	(lookup_ranges_base): Likewise.
+	(read_cutu_die_from_dwo): Use the new functions: lookup_addr_base,
+	lookup_ranges_base.
+	(init_cutu_and_read_dies): Update comments.
+	(init_cutu_and_read_dies_no_follow): Change API to take parent compile
+	unit.  This is used to inherit parent's str_offsets_base and addr_base.
+	Update comments.
+	(init_cutu_and_read_dies_simple): Reflect API changes.
+	(skip_one_die): Reflect API changes.  Handle DW_FORM_rnglistx.
+	(create_cus_hash_table): Change API to take parent compile unit.  
+	Reflect API changes.
+	(open_and_init_dwo_file): Reflect API changes.
+	(dwarf2_get_pc_bounds): Update comments.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_full_die_1): Change implementation to reprocess attributes that
+	need str_offsets_base and addr_base.
+	(partial_die_info::read): Likewise.
+	(read_attribute_reprocess): New function definition.
+	(read_attribute_value): Change API to take an additional out parameter,
+	need_reprocess.  Handle DW_FORM_rnglistx.  No longer trigger an error
+	when a non-dwo compile unit has index based attributes.
+	(read_attribute): Reflect API changes.
+	(read_addr_index_1): Reflect API changes.  Update comments.
+	(dwarf2_read_addr_index_data): Reflect API changes.
+	(dwarf2_read_addr_index): Likewise.
+	(read_str_index): Change API and implementation.  This becomes a helper
+	to be used by the new string index related methods.  Update error
+	message and comments.
+	(read_dwo_str_index): New function definition.
+	(read_stub_str_index): Likewise.
+	* dwarf2read.h (dwarf2_per_objfile): Add str_offsets field.
+	* symfile.h (dwarf2_debug_sections): Likewise.
+	* xcoffread.c (dwarf2_debug_sections): Likewise.
+
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbcore.h (struct core_fns) <core_read_registers>: Change

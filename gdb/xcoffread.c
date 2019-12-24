@@ -166,6 +166,7 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { NULL, NULL },
   { ".dwmac", NULL },
   { ".dwstr", NULL },
+  { NULL, NULL }, /* debug_str_offsets */
   { NULL, NULL }, /* debug_line_str */
   { ".dwrnges", NULL },
   { NULL, NULL }, /* debug_rnglists */

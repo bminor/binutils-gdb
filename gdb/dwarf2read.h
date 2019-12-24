@@ -156,6 +156,7 @@ public:
   dwarf2_section_info macinfo {};
   dwarf2_section_info macro {};
   dwarf2_section_info str {};
+  dwarf2_section_info str_offsets {};
   dwarf2_section_info line_str {};
   dwarf2_section_info ranges {};
   dwarf2_section_info rnglists {};
