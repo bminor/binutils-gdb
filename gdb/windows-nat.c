@@ -940,7 +940,14 @@ catch_errors (void (*func) ())
 static void
 windows_clear_solib (void)
 {
-  solib_start.next = NULL;
+  struct so_list *so;
+
+  for (so = solib_start.next; so; so = solib_start.next)
+    {
+      solib_start.next = so->next;
+      windows_free_so (so);
+    }
+
   solib_end = &solib_start;
 }
 

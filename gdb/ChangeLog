@@ -1,3 +1,7 @@
+2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-nat.c (windows_clear_solib): Free so_list linked list.
+
 2020-01-03  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* MAINTAINERS (Write After Approval): Add myself.
