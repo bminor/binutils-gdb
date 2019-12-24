@@ -1,5 +1,9 @@
 2019-12-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.c (print_disassembly): Reorder "if".
+
+2019-12-27  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_active): Now bool.
 	(tui_finish_init): Likewise.
 	(tui_enable): Update.
