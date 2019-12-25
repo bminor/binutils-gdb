@@ -1,3 +1,10 @@
+2019-12-26  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* dwarf2read.c (is_valid_DW_AT_defaulted)
+	(is_valid_DW_AT_calling_convention_for_type)
+	(is_valid_DW_AT_calling_convention_for_subroutine): Fix printing
+	ULONGEST variables on x86-32.
+
 2019-12-21  George Barrett  <bob@bob131.so>
 
 	* solib-svr4.c (svr4_handle_solib_event): Add fallback link

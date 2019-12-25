@@ -15487,7 +15487,7 @@ is_valid_DW_AT_defaulted (ULONGEST value)
       return true;
     }
 
-  complaint (_("unrecognized DW_AT_defaulted value (%lu)"), value);
+  complaint (_("unrecognized DW_AT_defaulted value (%s)"), pulongest (value));
   return false;
 }
 
@@ -15867,7 +15867,7 @@ is_valid_DW_AT_calling_convention_for_type (ULONGEST value)
 
     default:
       complaint (_("unrecognized DW_AT_calling_convention value "
-		   "(%lu) for a type"), value);
+		   "(%s) for a type"), pulongest (value));
       return false;
     }
 }
@@ -15893,7 +15893,7 @@ is_valid_DW_AT_calling_convention_for_subroutine (ULONGEST value)
 
     default:
       complaint (_("unrecognized DW_AT_calling_convention value "
-		   "(%lu) for a subroutine"), value);
+		   "(%s) for a subroutine"), pulongest (value));
       return false;
     }
 }
