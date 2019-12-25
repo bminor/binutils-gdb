@@ -209,18 +209,15 @@ skip_function_command (const char *arg, int from_tty)
   /* Default to the current function if no argument is given.  */
   if (arg == NULL)
     {
+      frame_info *fi = get_selected_frame (_("No default function now."));
+      struct symbol *sym = get_frame_function (fi);
       const char *name = NULL;
-      CORE_ADDR pc;
 
-      if (!last_displayed_sal_is_valid ())
-	error (_("No default function now."));
-
-      pc = get_last_displayed_addr ();
-      if (!find_pc_partial_function (pc, &name, NULL, NULL))
-	{
-	  error (_("No function found containing current program point %s."),
-		  paddress (get_current_arch (), pc));
-	}
+      if (sym != NULL)
+	name = sym->print_name ();
+      else
+	error (_("No function found containing current program point %s."),
+	       paddress (get_current_arch (), get_frame_pc (fi)));
       skip_function (name);
       return;
     }

@@ -76,3 +76,17 @@ with_test_prefix "triple step" {
     gdb_test "step 3" ".*" "step over baz, again"
     gdb_test "bt" "\\s*\\#0\\s+main.*" "again back to main"
 }
+
+if ![runto_main] {
+    fail "can't run to main"
+    return
+}
+
+gdb_test "skip delete" ".*" "skip delete"
+
+with_test_prefix "skip current frame" {
+    gdb_test "bt" "\\s*\\#0\\s+main.*" "in the main"
+    gdb_test "step" ".*" "step into foo"
+    gdb_test "bt" "\\s*\\#0\\s+foo.*" "in the foo"
+    gdb_test "skip" "Function foo will be skipped when stepping\." "skip"
+}
