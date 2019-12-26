@@ -1,3 +1,8 @@
+2019-12-26  Alan Modra  <amodra@gmail.com>
+
+	* v850-dis.c (disassemble): Avoid signed overflow.  Don't use
+	long vars when unsigned int will do.
+
 2019-12-24  Alan Modra  <amodra@gmail.com>
 
 	* arm-dis.c (print_insn_arm): Don't shift by 32 on unsigned int var.
