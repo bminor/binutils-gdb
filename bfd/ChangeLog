@@ -1,3 +1,7 @@
+2019-12-26  Hannes Domani  <ssbssa@yahoo.de>
+
+	* peicode.h (pe_bfd_read_buildid): Free data.
+
 2019-12-23  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (add_symbol): Add "max" parameter.  Error on string

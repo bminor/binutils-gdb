@@ -1396,6 +1396,8 @@ pe_bfd_read_buildid (bfd *abfd)
 	  break;
 	}
     }
+
+  free (data);
 }
 
 static const bfd_target *
