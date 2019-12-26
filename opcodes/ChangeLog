@@ -1,5 +1,10 @@
 2019-12-26  Alan Modra  <amodra@gmail.com>
 
+	* crx-dis.c (get_number_of_operands): Don't access operands[]
+	out of bounds.
+
+2019-12-26  Alan Modra  <amodra@gmail.com>
+
 	* v850-dis.c (disassemble): Avoid signed overflow.  Don't use
 	long vars when unsigned int will do.
 
