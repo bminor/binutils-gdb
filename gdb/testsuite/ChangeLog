@@ -1,3 +1,8 @@
+2020-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/backtrace.c: New file.
+	* gdb.base/backtrace.exp: New file.
+
 2020-01-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.tui/list.exp: Test 'focus next' after 'list main'.
