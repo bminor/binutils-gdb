@@ -1,3 +1,20 @@
+2019-12-26  Alan Modra  <amodra@gmail.com>
+
+	* som.c (setup_sections): Don't overflow space_strings_size.  Use
+	bfd_malloc2 to catch overflow of size calculation.
+	(som_prep_for_fixups): Use bfd_zalloc2 to catch overflow of size
+	calculation.
+	(som_build_and_write_symbol_table): Similarly use bfd_zmalloc2.
+	(som_slurp_symbol_table): Similarly use bfd_zmalloc2, bfd_malloc2,
+	and bfd_zalloc2.
+	(bfd_som_attach_aux_hdr): Use size_t vars for string length.
+	(som_bfd_count_ar_symbols): Use bfd_malloc2 to catch overflow of
+	size calculation.  Use size_t vars for length and catch overflow.
+	(som_slurp_armap): Use bfd_alloc2 to catch overflow of size
+	calculation.
+	(som_bfd_ar_write_symbol_stuff): Similarly use bfd_zmalloc2 and
+	bfd_malloc2.  Perform size calculations in bfd_size_type.
+
 2019-12-26  Hannes Domani  <ssbssa@yahoo.de>
 
 	* peicode.h (pe_bfd_read_buildid): Free data.

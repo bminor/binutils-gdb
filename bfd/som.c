@@ -2074,7 +2074,7 @@ setup_sections (bfd *abfd,
 		struct som_header *file_hdr,
 		unsigned long current_offset)
 {
-  char *space_strings;
+  char *space_strings = NULL;
   unsigned int space_index, i;
   unsigned int total_subspaces = 0;
   asection **subspace_sections = NULL;
@@ -2083,6 +2083,11 @@ setup_sections (bfd *abfd,
 
   /* First, read in space names.  */
   amt = file_hdr->space_strings_size;
+  if (amt == (bfd_size_type) -1)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   space_strings = bfd_malloc (amt + 1);
   if (space_strings == NULL && amt != 0)
     goto error_return;
@@ -2339,9 +2344,7 @@ setup_sections (bfd *abfd,
     }
   /* Now that we've read in all the subspace records, we need to assign
      a target index to each subspace.  */
-  amt = total_subspaces;
-  amt *= sizeof (asection *);
-  subspace_sections = bfd_malloc (amt);
+  subspace_sections = bfd_malloc2 (total_subspaces, sizeof (asection *));
   if (subspace_sections == NULL)
     goto error_return;
 
@@ -2801,7 +2804,6 @@ som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
   unsigned long i;
   asection *section;
   asymbol **sorted_syms;
-  bfd_size_type amt;
 
   /* Most SOM relocations involving a symbol have a length which is
      dependent on the index of the symbol.  So symbols which are
@@ -2873,9 +2875,7 @@ som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
 
   /* Sort a copy of the symbol table, rather than the canonical
      output symbol table.  */
-  amt = num_syms;
-  amt *= sizeof (asymbol *);
-  sorted_syms = bfd_zalloc (abfd, amt);
+  sorted_syms = bfd_zalloc2 (abfd, num_syms, sizeof (asymbol *));
   memcpy (sorted_syms, syms, num_syms * sizeof (asymbol *));
   qsort (sorted_syms, num_syms, sizeof (asymbol *), compare_syms);
   obj_som_sorted_syms (abfd) = sorted_syms;
@@ -4459,10 +4459,10 @@ som_build_and_write_symbol_table (bfd *abfd)
 
   /* Compute total symbol table size and allocate a chunk of memory
      to hold the symbol table as we build it.  */
-  symtab_size = num_syms;
-  symtab_size *= sizeof (struct som_external_symbol_dictionary_record);
-  som_symtab = bfd_zmalloc (symtab_size);
-  if (som_symtab == NULL && symtab_size != 0)
+  som_symtab
+    = bfd_zmalloc2 (num_syms,
+		    sizeof (struct som_external_symbol_dictionary_record));
+  if (som_symtab == NULL && num_syms != 0)
     goto error_return;
 
   /* Walk over each symbol.  */
@@ -4502,6 +4502,8 @@ som_build_and_write_symbol_table (bfd *abfd)
   if (bfd_seek (abfd, symtab_location, SEEK_SET) != 0)
     return FALSE;
 
+  symtab_size = num_syms;
+  symtab_size *= sizeof (struct som_external_symbol_dictionary_record);
   if (bfd_bwrite ((void *) som_symtab, symtab_size, abfd) != symtab_size)
     goto error_return;
 
@@ -4652,20 +4654,18 @@ som_slurp_symbol_table (bfd *abfd)
 
   stringtab = obj_som_stringtab (abfd);
 
-  amt = symbol_count;
-  amt *= sizeof (som_symbol_type);
-  symbase = bfd_zmalloc (amt);
+  symbase = bfd_zmalloc2 (symbol_count, sizeof (som_symbol_type));
   if (symbase == NULL)
     goto error_return;
 
   /* Read in the external SOM representation.  */
-  amt = symbol_count;
-  amt *= symsize;
-  buf = bfd_malloc (amt);
-  if (buf == NULL && amt != 0)
+  buf = bfd_malloc2 (symbol_count, symsize);
+  if (buf == NULL)
     goto error_return;
   if (bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET) != 0)
     goto error_return;
+  amt = symbol_count;
+  amt *= symsize;
   if (bfd_bread (buf, amt, abfd) != amt)
     goto error_return;
 
@@ -5299,9 +5299,7 @@ som_slurp_reloc_table (bfd *abfd,
   if (section->relocation != NULL)
     return TRUE;
 
-  amt = num_relocs;
-  amt *= sizeof (arelent);
-  internal_relocs = bfd_zalloc (abfd, (amt));
+  internal_relocs = bfd_zalloc2 (abfd, num_relocs, sizeof (arelent));
   if (internal_relocs == NULL)
     return FALSE;
 
@@ -5612,7 +5610,7 @@ bfd_som_attach_aux_hdr (bfd *abfd, int type, char *string)
     }
   else if (type == COPYRIGHT_AUX_ID)
     {
-      int len = strlen (string);
+      size_t len = strlen (string);
       int pad = 0;
 
       if (len % 4)
@@ -5887,9 +5885,8 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
   lst_filepos = bfd_tell (abfd) - sizeof (struct som_external_lst_header);
 
-  amt = lst_header->hash_size * 4;
-  hash_table = bfd_malloc (amt);
-  if (hash_table == NULL && amt != 0)
+  hash_table = bfd_malloc2 (lst_header->hash_size, 4);
+  if (hash_table == NULL && lst_header->hash_size != 0)
     goto error_return;
 
   /* Don't forget to initialize the counter!  */
@@ -5897,6 +5894,7 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
   /* Read in the hash table.  The has table is an array of 32bit file offsets
      which point to the hash chains.  */
+  amt = (bfd_size_type) lst_header->hash_size * 4;
   if (bfd_bread ((void *) hash_table, amt, abfd) != amt)
     goto error_return;
 
@@ -5969,13 +5967,13 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
   unsigned int string_loc;
 
   lst_filepos = bfd_tell (abfd) - sizeof (struct som_external_lst_header);
-  amt = lst_header->hash_size * 4;
-  hash_table = bfd_malloc (amt);
-  if (hash_table == NULL && amt != 0)
+  hash_table = bfd_malloc2 (lst_header->hash_size, 4);
+  if (hash_table == NULL && lst_header->hash_size != 0)
     goto error_return;
 
   /* Read in the hash table.  The has table is an array of 32bit file offsets
      which point to the hash chains.  */
+  amt = (bfd_size_type) lst_header->hash_size * 4;
   if (bfd_bread ((void *) hash_table, amt, abfd) != amt)
     goto error_return;
 
@@ -5984,11 +5982,13 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
   if (bfd_seek (abfd, lst_filepos + lst_header->dir_loc, SEEK_SET) != 0)
     goto error_return;
 
-  amt = lst_header->module_count * sizeof (struct som_external_som_entry);
-  som_dict = bfd_malloc (amt);
-  if (som_dict == NULL && amt != 0)
+  som_dict = bfd_malloc2 (lst_header->module_count,
+			  sizeof (struct som_external_som_entry));
+  if (som_dict == NULL && lst_header->module_count != 0)
     goto error_return;
 
+  amt = lst_header->module_count;
+  amt *= sizeof (struct som_external_som_entry);
   if (bfd_bread ((void *) som_dict, amt, abfd) != amt)
     goto error_return;
 
@@ -5999,7 +5999,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
     {
       struct som_external_lst_symbol_record lst_symbol;
       unsigned int hash_val;
-      unsigned int len;
+      size_t len;
       unsigned char ext_len[4];
       char *name;
 
@@ -6032,6 +6032,11 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
       len = bfd_getb32 (ext_len);
 
       /* Allocate space for the name and null terminate it too.  */
+      if (len == (size_t) -1)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
       name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
       if (!name)
 	goto error_return;
@@ -6076,6 +6081,11 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	  len = bfd_getb32 (ext_len);
 
 	  /* Allocate space for the name and null terminate it too.  */
+	  if (len == (size_t) -1)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      goto error_return;
+	    }
 	  name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
 	  if (!name)
 	    goto error_return;
@@ -6191,9 +6201,7 @@ som_slurp_armap (bfd *abfd)
 
   /* Initialize the cache and allocate space for the library symbols.  */
   ardata->cache = 0;
-  amt = ardata->symdef_count;
-  amt *= sizeof (carsym);
-  ardata->symdefs = bfd_alloc (abfd, amt);
+  ardata->symdefs = bfd_alloc2 (abfd, ardata->symdef_count, sizeof (carsym));
   if (!ardata->symdefs)
     return FALSE;
 
@@ -6325,19 +6333,17 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
   unsigned int hash_size;
 
   hash_size = bfd_getb32 (lst.hash_size);
-  amt = hash_size * 4;
-  hash_table = bfd_zmalloc (amt);
+  hash_table = bfd_zmalloc2 (hash_size, 4);
   if (hash_table == NULL && hash_size != 0)
     goto error_return;
 
   module_count = bfd_getb32 (lst.module_count);
-  amt = module_count * sizeof (struct som_external_som_entry);
-  som_dict = bfd_zmalloc (amt);
+  som_dict = bfd_zmalloc2 (module_count, sizeof (struct som_external_som_entry));
   if (som_dict == NULL && module_count != 0)
     goto error_return;
 
-  amt = hash_size * sizeof (struct som_external_lst_symbol_record *);
-  last_hash_entry = bfd_zmalloc (amt);
+  last_hash_entry
+    = bfd_zmalloc2 (hash_size, sizeof (struct som_external_lst_symbol_record *));
   if (last_hash_entry == NULL && hash_size != 0)
     goto error_return;
 
@@ -6365,9 +6371,7 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
   curr_som_offset = (curr_som_offset + 0x1) & ~0x1;
 
   /* FIXME should be done with buffers just like everything else...  */
-  amt = nsyms;
-  amt *= sizeof (struct som_external_lst_symbol_record);
-  lst_syms = bfd_malloc (amt);
+  lst_syms = bfd_malloc2 (nsyms, sizeof (struct som_external_lst_symbol_record));
   if (lst_syms == NULL && nsyms != 0)
     goto error_return;
   strings = bfd_malloc ((bfd_size_type) string_size);
@@ -6515,17 +6519,17 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
     }
 
   /* Now scribble out the hash table.  */
-  amt = hash_size * 4;
+  amt = (bfd_size_type) hash_size * 4;
   if (bfd_bwrite ((void *) hash_table, amt, abfd) != amt)
     goto error_return;
 
   /* Then the SOM dictionary.  */
-  amt = module_count * sizeof (struct som_external_som_entry);
+  amt = (bfd_size_type) module_count * sizeof (struct som_external_som_entry);
   if (bfd_bwrite ((void *) som_dict, amt, abfd) != amt)
     goto error_return;
 
   /* The library symbols.  */
-  amt = nsyms * sizeof (struct som_external_lst_symbol_record);
+  amt = (bfd_size_type) nsyms * sizeof (struct som_external_lst_symbol_record);
   if (bfd_bwrite ((void *) lst_syms, amt, abfd) != amt)
     goto error_return;
 
