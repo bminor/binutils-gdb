@@ -1153,12 +1153,12 @@ print_frame_info (const frame_print_options &fp_opts,
 
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
-    }
 
-  /* If disassemble-next-line is set to on and there is line debug
-     messages, output assembly codes for next line.  */
-  if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
-    do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
+      /* If disassemble-next-line is set to on and there is line debug
+	 messages, output assembly codes for next line.  */
+      if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
+	do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
+    }
 
   if (set_current_sal)
     {
