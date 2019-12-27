@@ -182,6 +182,7 @@ static char *parse_insn (char *, char *);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
 static void swap_2_operands (int, int);
+static enum flag_code i386_addressing_mode (void);
 static void optimize_imm (void);
 static void optimize_disp (void);
 static const insn_template *match_template (char);
@@ -5883,51 +5884,50 @@ match_template (char mnem_suffix)
 	    break;
 	}
 
-      /* Address size prefix will turn Disp64/Disp32/Disp16 operand
-	 into Disp32/Disp16/Disp32 operand.  */
-      if (i.prefix[ADDR_PREFIX] != 0)
-	  {
-	    /* There should be only one Disp operand.  */
-	    switch (flag_code)
+      if (!t->opcode_modifier.jump
+	  || t->opcode_modifier.jump == JUMP_ABSOLUTE)
+	{
+	  /* There should be only one Disp operand.  */
+	  for (j = 0; j < MAX_OPERANDS; j++)
+	    if (operand_type_check (operand_types[j], disp))
+	      break;
+	  if (j < MAX_OPERANDS)
 	    {
-	    case CODE_16BIT:
-	      for (j = 0; j < MAX_OPERANDS; j++)
+	      bfd_boolean override = (i.prefix[ADDR_PREFIX] != 0);
+
+	      addr_prefix_disp = j;
+
+	      /* Address size prefix will turn Disp64/Disp32S/Disp32/Disp16
+		 operand into Disp32/Disp32/Disp16/Disp32 operand.  */
+	      switch (flag_code)
 		{
-		  if (operand_types[j].bitfield.disp16)
+		case CODE_16BIT:
+		  override = !override;
+		  /* Fall through.  */
+		case CODE_32BIT:
+		  if (operand_types[j].bitfield.disp32
+		      && operand_types[j].bitfield.disp16)
 		    {
-		      addr_prefix_disp = j;
-		      operand_types[j].bitfield.disp32 = 1;
-		      operand_types[j].bitfield.disp16 = 0;
-		      break;
+		      operand_types[j].bitfield.disp16 = override;
+		      operand_types[j].bitfield.disp32 = !override;
 		    }
-		}
-	      break;
-	    case CODE_32BIT:
-	      for (j = 0; j < MAX_OPERANDS; j++)
-		{
-		  if (operand_types[j].bitfield.disp32)
+		  operand_types[j].bitfield.disp32s = 0;
+		  operand_types[j].bitfield.disp64 = 0;
+		  break;
+
+		case CODE_64BIT:
+		  if (operand_types[j].bitfield.disp32s
+		      || operand_types[j].bitfield.disp64)
 		    {
-		      addr_prefix_disp = j;
-		      operand_types[j].bitfield.disp32 = 0;
-		      operand_types[j].bitfield.disp16 = 1;
-		      break;
+		      operand_types[j].bitfield.disp64 &= !override;
+		      operand_types[j].bitfield.disp32s &= !override;
+		      operand_types[j].bitfield.disp32 = override;
 		    }
+		  operand_types[j].bitfield.disp16 = 0;
+		  break;
 		}
-	      break;
-	    case CODE_64BIT:
-	      for (j = 0; j < MAX_OPERANDS; j++)
-		{
-		  if (operand_types[j].bitfield.disp64)
-		    {
-		      addr_prefix_disp = j;
-		      operand_types[j].bitfield.disp64 = 0;
-		      operand_types[j].bitfield.disp32 = 1;
-		      break;
-		    }
-		}
-	      break;
 	    }
-	  }
+	}
 
       /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
       if (i.reloc[0] == BFD_RELOC_386_GOT32 && t->base_opcode == 0xa0)
@@ -9937,10 +9937,11 @@ i386_displacement (char *disp_start, char *disp_end)
 
   operand_type_set (&bigdisp, 0);
   if (i.jumpabsolute
+      || i.types[this_operand].bitfield.baseindex
       || (current_templates->start->opcode_modifier.jump != JUMP
 	  && current_templates->start->opcode_modifier.jump != JUMP_DWORD))
     {
-      bigdisp.bitfield.disp32 = 1;
+      i386_addressing_mode ();
       override = (i.prefix[ADDR_PREFIX] != 0);
       if (flag_code == CODE_64BIT)
 	{
@@ -9949,12 +9950,13 @@ i386_displacement (char *disp_start, char *disp_end)
 	      bigdisp.bitfield.disp32s = 1;
 	      bigdisp.bitfield.disp64 = 1;
 	    }
+	  else
+	    bigdisp.bitfield.disp32 = 1;
 	}
       else if ((flag_code == CODE_16BIT) ^ override)
-	{
-	  bigdisp.bitfield.disp32 = 0;
 	  bigdisp.bitfield.disp16 = 1;
-	}
+      else
+	  bigdisp.bitfield.disp32 = 1;
     }
   else
     {
@@ -9966,10 +9968,7 @@ i386_displacement (char *disp_start, char *disp_end)
 	  if (override || i.suffix == WORD_MNEM_SUFFIX)
 	    bigdisp.bitfield.disp16 = 1;
 	  else
-	    {
-	      bigdisp.bitfield.disp32 = 1;
-	      bigdisp.bitfield.disp32s = 1;
-	    }
+	    bigdisp.bitfield.disp32s = 1;
 	}
       else
 	{
@@ -10141,6 +10140,11 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       ret = 0;
     }
 #endif
+
+  if (current_templates->start->opcode_modifier.jump == JUMP_BYTE
+      /* Constants get taken care of by optimize_disp().  */
+      && exp->X_op != O_constant)
+    i.types[this_operand].bitfield.disp8 = 1;
 
   /* Check if this is a displacement only operand.  */
   bigdisp = i.types[this_operand];

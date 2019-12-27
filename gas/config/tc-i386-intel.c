@@ -939,12 +939,13 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	  if (flag_code == CODE_64BIT)
 	    {
-	      i.types[this_operand].bitfield.disp32 = 1;
 	      if (!i.prefix[ADDR_PREFIX])
 		{
 		  i.types[this_operand].bitfield.disp64 = 1;
 		  i.types[this_operand].bitfield.disp32s = 1;
 		}
+	      else
+		i.types[this_operand].bitfield.disp32 = 1;
 	    }
 	  else if (!i.prefix[ADDR_PREFIX] ^ (flag_code == CODE_16BIT))
 	    i.types[this_operand].bitfield.disp32 = 1;

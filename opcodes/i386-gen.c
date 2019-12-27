@@ -1236,7 +1236,8 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 	  if (!active_cpu_flags.bitfield.cpu64
 	      && !active_cpu_flags.bitfield.cpumpx)
 	    set_bitfield("Disp16", types, 1, ARRAY_SIZE (types), lineno);
-	  set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
+	  if (!active_cpu_flags.bitfield.cpu64)
+	    set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
 	  if (!active_cpu_flags.bitfield.cpuno64)
 	    set_bitfield("Disp32S", types, 1, ARRAY_SIZE (types), lineno);
 	}

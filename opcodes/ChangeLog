@@ -1,3 +1,13 @@
+2019-12-27  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (process_i386_operand_type): Don't set Disp32 for
+	Cpu64 templates.
+	* i386-opc.tbl (mov): Fold two templates.
+	(jcxz, jecxz, jrcxz, loop, loope, loopne, loopnz, loopz): Drop
+	Disp16, Disp32, and Disp32S.
+	(xbegin): Add Disp32S.
+	* i386-tbl.h: Re-generate.
+
 2019-12-26  Alan Modra  <amodra@gmail.com>
 
 	* crx-dis.c (get_number_of_operands): Don't access operands[]
