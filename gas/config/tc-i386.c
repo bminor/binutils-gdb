@@ -7910,8 +7910,8 @@ output_branch (void)
   /* BND prefixed jump.  */
   if (i.prefix[BND_PREFIX] != 0)
     {
-      FRAG_APPEND_1_CHAR (i.prefix[BND_PREFIX]);
-      i.prefixes -= 1;
+      prefix++;
+      i.prefixes--;
     }
 
   if (i.prefixes != 0 && !intel_syntax)
@@ -7930,6 +7930,8 @@ output_branch (void)
   if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE
       || i.prefix[SEG_PREFIX] == DS_PREFIX_OPCODE)
     *p++ = i.prefix[SEG_PREFIX];
+  if (i.prefix[BND_PREFIX] != 0)
+    *p++ = BND_PREFIX_OPCODE;
   if (i.prefix[REX_PREFIX] != 0)
     *p++ = i.prefix[REX_PREFIX];
   *p = i.tm.base_opcode;
@@ -8042,16 +8044,16 @@ output_jump (void)
 	size = 2;
     }
 
-  if (i.prefix[REX_PREFIX] != 0)
-    {
-      FRAG_APPEND_1_CHAR (i.prefix[REX_PREFIX]);
-      i.prefixes -= 1;
-    }
-
   /* BND prefixed jump.  */
   if (i.prefix[BND_PREFIX] != 0)
     {
       FRAG_APPEND_1_CHAR (i.prefix[BND_PREFIX]);
+      i.prefixes -= 1;
+    }
+
+  if (i.prefix[REX_PREFIX] != 0)
+    {
+      FRAG_APPEND_1_CHAR (i.prefix[REX_PREFIX]);
       i.prefixes -= 1;
     }
 
@@ -8109,11 +8111,8 @@ output_interseg_jump (void)
       i.prefixes -= 1;
       code16 ^= CODE16;
     }
-  if (i.prefix[REX_PREFIX] != 0)
-    {
-      prefix++;
-      i.prefixes -= 1;
-    }
+
+  gas_assert (!i.prefix[REX_PREFIX]);
 
   size = 4;
   if (code16)
