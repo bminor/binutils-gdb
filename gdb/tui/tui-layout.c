@@ -113,6 +113,8 @@ tui_set_layout (enum tui_layout_type layout_type)
 
   if (new_layout != cur_layout)
     {
+      tui_suppress_output suppress;
+
       show_layout (new_layout);
 
       /* Now determine where focus should be.  */

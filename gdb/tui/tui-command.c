@@ -70,7 +70,7 @@ tui_refresh_cmd_win (void)
 {
   WINDOW *w = TUI_CMD_WIN->handle.get ();
 
-  wrefresh (w);
+  tui_wrefresh (w);
 
   /* FIXME: It's not clear why this is here.
      It was present in the original tui_puts code and is kept in order to

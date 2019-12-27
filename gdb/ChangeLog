@@ -1,5 +1,28 @@
 2020-01-19  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_show_assembly): Use tui_suppress_output.
+	* tui/tui-wingeneral.h (class tui_suppress_output): New.
+	(tui_wrefresh): Declare.
+	* tui/tui-wingeneral.c (suppress_output): New global.
+	(tui_suppress_output, ~tui_suppress_output): New constructor and
+	destructor.
+	(tui_wrefresh): New function.
+	(tui_gen_win_info::refresh_window): Use tui_wrefresh.
+	(tui_gen_win_info::make_window): Call wnoutrefresh when needed.
+	* tui/tui-regs.h (struct tui_data_window) <no_refresh>: Declare
+	method.
+	* tui/tui-regs.c (tui_data_window::erase_data_content): Call
+	tui_wrefresh.
+	(tui_data_window::no_refresh): New method.
+	(tui_data_item_window::refresh_window): Call tui_wrefresh.
+	(tui_reg_command): Use tui_suppress_output
+	* tui/tui-layout.c (tui_set_layout): Use tui_suppress_output.
+	* tui/tui-data.h (struct tui_gen_win_info) <no_refresh>: New
+	method.
+	* tui/tui-command.c (tui_refresh_cmd_win): Call tui_wrefresh.
+
+2020-01-19  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_update_source_windows_with_line):
 	Handle case where symtab is null.
 

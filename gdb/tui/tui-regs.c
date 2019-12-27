@@ -381,7 +381,7 @@ tui_data_window::erase_data_content (const char *prompt)
 	x_pos = half_width - strlen (prompt);
       mvwaddstr (handle.get (), (height / 2), x_pos, (char *) prompt);
     }
-  wrefresh (handle.get ());
+  tui_wrefresh (handle.get ());
 }
 
 /* See tui-regs.h.  */
@@ -432,6 +432,14 @@ tui_data_window::refresh_window ()
   tui_gen_win_info::refresh_window ();
   for (auto &&win : m_regs_content)
     win.refresh_window ();
+}
+
+void
+tui_data_window::no_refresh ()
+{
+  tui_gen_win_info::no_refresh ();
+  for (auto &&win : m_regs_content)
+    win.no_refresh ();
 }
 
 /* This function check all displayed registers for changes in values,
@@ -502,7 +510,7 @@ tui_data_item_window::refresh_window ()
 	 windows, which according to the ncurses man pages aren't well
 	 supported.  */
       touchwin (handle.get ());
-      wrefresh (handle.get ());
+      tui_wrefresh (handle.get ());
     }
 }
 
@@ -573,6 +581,8 @@ tui_reg_command (const char *args, int from_tty)
 
       /* Make sure the curses mode is enabled.  */
       tui_enable ();
+
+      tui_suppress_output suppress;
 
       /* Make sure the register window is visible.  If not, select an
 	 appropriate layout.  We need to do this before trying to run the

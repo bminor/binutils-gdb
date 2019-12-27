@@ -99,6 +99,13 @@ public:
     return handle != nullptr;
   }
 
+  /* Disable output until the next call to doupdate.  */
+  virtual void no_refresh ()
+  {
+    if (handle != nullptr)
+      wnoutrefresh (handle.get ());
+  }
+
   /* Window handle.  */
   std::unique_ptr<WINDOW, curses_deleter> handle;
   /* Type of window.  */

@@ -70,6 +70,8 @@ struct tui_data_window : public tui_win_info
 
   void refresh_window () override;
 
+  void no_refresh () override;
+
   const char *name () const override
   {
     return DATA_NAME;

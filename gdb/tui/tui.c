@@ -30,6 +30,7 @@
 #include "tui/tui-regs.h"
 #include "tui/tui-stack.h"
 #include "tui/tui-win.h"
+#include "tui/tui-wingeneral.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
 #include "target.h"
@@ -577,6 +578,7 @@ tui_disable_command (const char *args, int from_tty)
 void
 tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
+  tui_suppress_output suppress;
   tui_add_win_to_layout (DISASSEM_WIN);
   tui_update_source_windows_with_addr (gdbarch, addr);
 }
