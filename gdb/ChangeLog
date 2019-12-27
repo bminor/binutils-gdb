@@ -1,5 +1,11 @@
 2019-12-27  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Remove
+	commented-out code.
+	* tui/tui.c: Remove #if 0 code.
+
+2019-12-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.c (print_disassembly): Reorder "if".
 
 2019-12-27  Tom Tromey  <tom@tromey.com>

@@ -44,9 +44,6 @@
 #include <ctype.h>
 #include <signal.h>
 #include <fcntl.h>
-#if 0
-#include <termio.h>
-#endif
 #include <setjmp.h>
 
 #include "gdb_curses.h"
@@ -574,59 +571,6 @@ tui_disable_command (const char *args, int from_tty)
 {
   tui_disable ();
 }
-
-#if 0
-/* Solaris <sys/termios.h> defines CTRL.  */
-#ifndef CTRL
-#define CTRL(x)         (x & ~0140)
-#endif
-
-#define FILEDES         2
-#define CHK(val, dft)   (val<=0 ? dft : val)
-
-static void
-tui_reset (void)
-{
-  struct termio mode;
-
-  /* Reset the teletype mode bits to a sensible state.
-     Copied tset.c.  */
-#if defined (TIOCGETC)
-  struct tchars tbuf;
-#endif /* TIOCGETC */
-#ifdef UCB_NTTY
-  struct ltchars ltc;
-
-  if (ldisc == NTTYDISC)
-    {
-      ioctl (FILEDES, TIOCGLTC, &ltc);
-      ltc.t_suspc = CHK (ltc.t_suspc, CTRL ('Z'));
-      ltc.t_dsuspc = CHK (ltc.t_dsuspc, CTRL ('Y'));
-      ltc.t_rprntc = CHK (ltc.t_rprntc, CTRL ('R'));
-      ltc.t_flushc = CHK (ltc.t_flushc, CTRL ('O'));
-      ltc.t_werasc = CHK (ltc.t_werasc, CTRL ('W'));
-      ltc.t_lnextc = CHK (ltc.t_lnextc, CTRL ('V'));
-      ioctl (FILEDES, TIOCSLTC, &ltc);
-    }
-#endif /* UCB_NTTY */
-#ifdef TIOCGETC
-  ioctl (FILEDES, TIOCGETC, &tbuf);
-  tbuf.t_intrc = CHK (tbuf.t_intrc, CTRL ('?'));
-  tbuf.t_quitc = CHK (tbuf.t_quitc, CTRL ('\\'));
-  tbuf.t_startc = CHK (tbuf.t_startc, CTRL ('Q'));
-  tbuf.t_stopc = CHK (tbuf.t_stopc, CTRL ('S'));
-  tbuf.t_eofc = CHK (tbuf.t_eofc, CTRL ('D'));
-  /* brkc is left alone.  */
-  ioctl (FILEDES, TIOCSETC, &tbuf);
-#endif /* TIOCGETC */
-  mode.sg_flags &= ~(RAW
-#ifdef CBREAK
-		     | CBREAK
-#endif /* CBREAK */
-		     | VTDELAY | ALLDELAY);
-  mode.sg_flags |= XTABS | ECHO | CRMOD | ANYP;
-}
-#endif
 
 void
 tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr)
