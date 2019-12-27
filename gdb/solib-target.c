@@ -46,7 +46,7 @@ struct lm_info_target : public lm_info_base
 
   /* The cached offsets for each section of this shared library,
      determined from SEGMENT_BASES, or SECTION_BASES.  */
-  section_offsets *offsets = NULL;
+  gdb::unique_xmalloc_ptr<section_offsets> offsets;
 };
 
 typedef std::vector<std::unique_ptr<lm_info_target>> lm_info_vector;
@@ -309,9 +309,8 @@ solib_target_relocate_section_addresses (struct so_list *so,
     {
       int num_sections = gdb_bfd_count_sections (so->abfd);
 
-      li->offsets
-	= ((struct section_offsets *)
-	   xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
+      li->offsets.reset ((struct section_offsets *)
+			 xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
 
       if (!li->section_bases.empty ())
 	{
@@ -377,7 +376,8 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	      ULONGEST orig_delta;
 	      int i;
 
-	      if (!symfile_map_offsets_to_segments (so->abfd, data, li->offsets,
+	      if (!symfile_map_offsets_to_segments (so->abfd, data,
+						    li->offsets.get (),
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
 		warning (_("\

@@ -1,5 +1,11 @@
 2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
 
+	* solib-target.c (struct lm_info_target):
+	Change offsets to be a unique_xmalloc_ptr.
+	(solib_target_relocate_section_addresses): Update.
+
+2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
+
 	* windows-nat.c (windows_clear_solib): Free so_list linked list.
 
 2020-01-03  Bernd Edlinger  <bernd.edlinger@hotmail.de>
