@@ -1,5 +1,12 @@
 2019-12-27  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (Jdqw): Define.
+	(dqw_mode): Adjust associated comment.
+	(rm_table): Use Jdqw for XBEGIN.
+	(OP_J): Handle dqw_mode.
+
+2019-12-27  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (process_i386_operand_type): Don't set Disp32 for
 	Cpu64 templates.
 	* i386-opc.tbl (mov): Fold two templates.

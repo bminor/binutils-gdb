@@ -7861,6 +7861,18 @@ build_modrm_byte (void)
   return default_seg;
 }
 
+static unsigned int
+flip_code16 (unsigned int code16)
+{
+  gas_assert (i.tm.operands == 1);
+
+  return !(i.prefix[REX_PREFIX] & REX_W)
+	 && (code16 ? i.tm.operand_types[0].bitfield.disp32
+		      || i.tm.operand_types[0].bitfield.disp32s
+		    : i.tm.operand_types[0].bitfield.disp16)
+	 ? CODE16 : 0;
+}
+
 static void
 output_branch (void)
 {
@@ -7880,7 +7892,7 @@ output_branch (void)
     {
       prefix = 1;
       i.prefixes -= 1;
-      code16 ^= CODE16;
+      code16 ^= flip_code16(code16);
     }
   /* Pentium4 branch hints.  */
   if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE /* not taken */
@@ -8022,7 +8034,7 @@ output_jump (void)
 	{
 	  FRAG_APPEND_1_CHAR (DATA_PREFIX_OPCODE);
 	  i.prefixes -= 1;
-	  code16 ^= CODE16;
+	  code16 ^= flip_code16(code16);
 	}
 
       size = 4;
@@ -9960,12 +9972,34 @@ i386_displacement (char *disp_start, char *disp_end)
     }
   else
     {
-      /* For PC-relative branches, the width of the displacement
-	 is dependent upon data size, not address size.  */
+      /* For PC-relative branches, the width of the displacement may be
+	 dependent upon data size, but is never dependent upon address size.
+	 Also make sure to not unintentionally match against a non-PC-relative
+	 branch template.  */
+      static templates aux_templates;
+      const insn_template *t = current_templates->start;
+      bfd_boolean has_intel64 = FALSE;
+
+      aux_templates.start = t;
+      while (++t < current_templates->end)
+	{
+	  if (t->opcode_modifier.jump
+	      != current_templates->start->opcode_modifier.jump)
+	    break;
+	  if (t->opcode_modifier.intel64)
+	    has_intel64 = TRUE;
+	}
+      if (t < current_templates->end)
+	{
+	  aux_templates.end = t;
+	  current_templates = &aux_templates;
+	}
+
       override = (i.prefix[DATA_PREFIX] != 0);
       if (flag_code == CODE_64BIT)
 	{
-	  if (override || i.suffix == WORD_MNEM_SUFFIX)
+	  if ((override || i.suffix == WORD_MNEM_SUFFIX)
+	      && (!intel64 || !has_intel64))
 	    bigdisp.bitfield.disp16 = 1;
 	  else
 	    bigdisp.bitfield.disp32s = 1;

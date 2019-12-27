@@ -1,5 +1,18 @@
 2019-12-27  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (flip_code16): New.
+	(output_branch, output_jump): Use it.
+	(i386_displacement): Restrict template set to just direct
+	branches when handling a respective operand. Don't set Disp16
+	when in Intel64 mode and there's a respective template.
+	* testsuite/gas/i386/i386.exp: Convert x86-64-branch-3 from list
+	to dump test. Drop its XFail again.
+	* testsuite/gas/i386/x86-64-branch-3.d: New.
+	* testsuite/gas/i386/x86-64-branch-3.l: Delete.
+	* testsuite/gas/i386/x86-64-branch-3.s: Add XBEGIN case.
+
+2019-12-27  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_addressing_mode): Declare.
 	(match_template): Don't transform displacement width flags for
 	non-indirect branches. Re-write transformation logic.

@@ -296,6 +296,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define I1 { OP_I, const_1_mode }
 #define Jb { OP_J, b_mode }
 #define Jv { OP_J, v_mode }
+#define Jdqw { OP_J, dqw_mode }
 #define Cm { OP_C, m_mode }
 #define Dm { OP_D, m_mode }
 #define Td { OP_T, d_mode }
@@ -558,7 +559,8 @@ enum
   v_bndmk_mode,
   /* operand size depends on REX prefixes.  */
   dq_mode,
-  /* registers like dq_mode, memory like w_mode.  */
+  /* registers like dq_mode, memory like w_mode, displacements like
+     v_mode without considering Intel64 ISA.  */
   dqw_mode,
   /* bounds operand */
   bnd_mode,
@@ -10969,7 +10971,7 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_C7_REG_7 */
-    { "xbeginT",	{ Skip_MODRM, Jv }, 0 },
+    { "xbeginT",	{ Skip_MODRM, Jdqw }, 0 },
   },
   {
     /* RM_0F01_REG_0 */
@@ -14828,10 +14830,12 @@ OP_J (int bytemode, int sizeflag)
       break;
     case v_mode:
       if (isa64 == amd64)
+    case dqw_mode:
 	USED_REX (REX_W);
       if ((sizeflag & DFLAG)
 	  || (address_mode == mode_64bit
-	      && (isa64 != amd64 || (rex & REX_W))))
+	      && ((isa64 != amd64 && bytemode != dqw_mode)
+		  || (rex & REX_W))))
 	disp = get32s ();
       else
 	{
