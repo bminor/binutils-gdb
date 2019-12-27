@@ -7914,8 +7914,8 @@ output_branch (void)
       i.prefixes--;
     }
 
-  if (i.prefixes != 0 && !intel_syntax)
-    as_warn (_("skipping prefixes on this instruction"));
+  if (i.prefixes != 0)
+    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
 
   /* It's always a symbol;  End frag & setup for relax.
      Make sure there is enough room in this frag for the largest
@@ -8057,8 +8057,8 @@ output_jump (void)
       i.prefixes -= 1;
     }
 
-  if (i.prefixes != 0 && !intel_syntax)
-    as_warn (_("skipping prefixes on this instruction"));
+  if (i.prefixes != 0)
+    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
 
   p = frag_more (i.tm.opcode_length + size);
   switch (i.tm.opcode_length)
@@ -8118,8 +8118,8 @@ output_interseg_jump (void)
   if (code16)
     size = 2;
 
-  if (i.prefixes != 0 && !intel_syntax)
-    as_warn (_("skipping prefixes on this instruction"));
+  if (i.prefixes != 0)
+    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
 
   /* 1 opcode; 2 segment; offset  */
   p = frag_more (prefix + 1 + 2 + size);
