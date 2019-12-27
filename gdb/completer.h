@@ -326,6 +326,10 @@ public:
      LIST.  */
   void add_completions (completion_list &&list);
 
+  /* Remove completion matching NAME from the completion list, does nothing
+     if NAME is not already in the completion list.  */
+  void remove_completion (const char *name);
+
   /* Set the quote char to be appended after a unique completion is
      added to the input line.  Set to '\0' to clear.  See
      m_quote_char's description.  */

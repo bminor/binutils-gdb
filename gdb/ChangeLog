@@ -1,5 +1,14 @@
 2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* completer.c (completion_tracker::remove_completion): Define new
+	function.
+	* completer.h (completion_tracker::remove_completion): Declare new
+	function.
+	* symtab.c (completion_list_add_symbol): Remove aliasing msymbols
+	when adding a C++ function symbol.
+
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* completer.c (completion_tracker::completion_hash_entry): Define
 	new class.
 	(advance_to_filename_complete_word_point): Call

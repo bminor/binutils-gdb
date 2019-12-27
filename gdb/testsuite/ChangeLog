@@ -1,3 +1,8 @@
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.linespec/cp-completion-aliases.cc: New file.
+	* gdb.linespec/cp-completion-aliases.exp: New file.
+
 2020-03-19  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.opt/inline-locals.exp: Add kfail PR number.  Make kfail matching

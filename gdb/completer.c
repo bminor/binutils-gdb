@@ -1678,6 +1678,20 @@ completion_tracker::add_completions (completion_list &&list)
     add_completion (std::move (candidate));
 }
 
+/* See completer.h.  */
+
+void
+completion_tracker::remove_completion (const char *name)
+{
+  hashval_t hash = htab_hash_string (name);
+  if (htab_find_slot_with_hash (m_entries_hash, name, hash, NO_INSERT)
+      != NULL)
+    {
+      htab_remove_elt_with_hash (m_entries_hash, name, hash);
+      m_lowest_common_denominator_valid = false;
+    }
+}
+
 /* Helper for the make_completion_match_str overloads.  Returns NULL
    as an indication that we want MATCH_NAME exactly.  It is up to the
    caller to xstrdup that string if desired.  */

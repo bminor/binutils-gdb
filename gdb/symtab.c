@@ -5296,6 +5296,27 @@ completion_list_add_symbol (completion_tracker &tracker,
   completion_list_add_name (tracker, sym->language (),
 			    sym->natural_name (),
 			    lookup_name, text, word);
+
+  /* C++ function symbols include the parameters within both the msymbol
+     name and the symbol name.  The problem is that the msymbol name will
+     describe the parameters in the most basic way, with typedefs stripped
+     out, while the symbol name will represent the types as they appear in
+     the program.  This means we will see duplicate entries in the
+     completion tracker.  The following converts the symbol name back to
+     the msymbol name and removes the msymbol name from the completion
+     tracker.  */
+  if (sym->language () == language_cplus
+      && SYMBOL_DOMAIN (sym) == VAR_DOMAIN
+      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+    {
+      /* The call to canonicalize returns the empty string if the input
+	 string is already in canonical form, thanks to this we don't
+	 remove the symbol we just added above.  */
+      std::string str
+	= cp_canonicalize_string_no_typedefs (sym->natural_name ());
+      if (!str.empty ())
+	tracker.remove_completion (str.c_str ());
+    }
 }
 
 /* completion_list_add_name wrapper for struct minimal_symbol.  */
