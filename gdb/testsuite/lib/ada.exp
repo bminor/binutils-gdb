@@ -149,3 +149,39 @@ proc gnatmake_version_at_least { major } {
     # Unknown, return 1
     return 1
 }
+
+# Return 1 if the GNAT runtime appears to have debug info.
+
+gdb_caching_proc gnat_runtime_has_debug_info {
+    global srcdir
+
+    set src "$srcdir/lib/gnat_debug_info_test.adb"
+    set dst [standard_output_file "gnat_debug_info_test"]
+
+    if { [gdb_compile_ada $src $dst executable {debug}] != "" } {
+	fail "failed to compile gnat-debug-info test binary"
+	return 0
+    }
+
+    clean_restart $dst
+
+    if { ! [runto "GNAT_Debug_Info_Test"] } {
+	fail "failed to run to GNAT_Debug_Info_Test"
+	return 0
+    }
+
+    set has_debug_info 0
+
+    gdb_test_multiple "whatis __gnat_debug_raise_exception" "" {
+	-re "type = <text variable, no debug info>" { }
+	-re "type = void" {
+	    set has_debug_info 1
+	}
+	default {
+	    # Some other unexpected output...
+	    fail $gdb_test_name
+	}
+    }
+
+    return $has_debug_info
+}

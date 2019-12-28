@@ -1,3 +1,11 @@
+2019-12-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/ada.exp (gnat_runtime_has_debug_info): New proc.
+	* lib/gnat_debug_info_test.adb: New file.
+	* gdb.ada/ptype_tagged_param.exp: Use
+	gnat_runtime_has_debug_info, expect a different output if
+	runtime does not have debug info.
+
 2019-12-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lib/sym-info-cmds.exp (GDBInfoSymbols::check_no_entry): Add
