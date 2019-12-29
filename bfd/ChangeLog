@@ -1,5 +1,20 @@
 2019-12-29  Alan Modra  <amodra@gmail.com>
 
+	* vms-misc.c (_bfd_vms_save_sized_string): Add abfd param, make
+	size a size_t.  Use bfd_alloc rather than bfd_malloc.
+	(_bfd_vms_save_counted_string): Similarly.
+	* vms.h (_bfd_vms_save_sized_string): Update prototype.
+	(_bfd_vms_save_counted_string): Likewise.
+	* vms-alpha.c (_bfd_vms_slurp_ehdr): Adjust
+	_bfd_vms_save_counted_string and bfd_vms_save_sized_string calls.
+	(_bfd_vms_slurp_egsd, parse_module): Likewise.
+	(_bfd_vms_slurp_eisd): Likewise.  Check return status.
+	(alpha_vms_bfd_link_hash_table_free): New function.
+	(alpha_vms_bfd_link_hash_table_create): Arrange to call it.
+	(vms_close_and_cleanup): Free more memory.  Don't release tdata.
+
+2019-12-29  Alan Modra  <amodra@gmail.com>
+
 	* coffcode.h (coff_close_and_cleanup): Redefine to..
 	* coffgen.c (_bfd_coff_close_and_cleanup): ..this.  New function.
 	* libcoff-in.h (_bfd_coff_close_and_cleanup): Declare.
