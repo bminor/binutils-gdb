@@ -26,6 +26,7 @@
 #include "bfd.h"
 #include "objdump.h"
 #include "bucomm.h"
+#include "elfcomm.h"
 #include "dwarf.h"
 #include "bfdlink.h"
 #include "mach-o.h"
@@ -709,13 +710,13 @@ dump_dyld_info_rebase (bfd *abfd, unsigned char *buf, unsigned int len,
 		  bfd_mach_o_get_name (bfd_mach_o_dyld_rebase_type_name, imm));
 	  break;
 	case BFD_MACH_O_REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("set segment: %u and offset: 0x%08x\n",
 		  imm, (unsigned) leb);
 	  i += leblen;
 	  break;
 	case BFD_MACH_O_REBASE_OPCODE_ADD_ADDR_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("add addr uleb: 0x%08x\n", (unsigned) leb);
 	  i += leblen;
 	  break;
@@ -726,20 +727,20 @@ dump_dyld_info_rebase (bfd *abfd, unsigned char *buf, unsigned int len,
 	  printf ("rebase imm times: %u\n", imm);
 	  break;
 	case BFD_MACH_O_REBASE_OPCODE_DO_REBASE_ULEB_TIMES:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("rebase uleb times: %u\n", (unsigned) leb);
 	  i += leblen;
 	  break;
 	case BFD_MACH_O_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("rebase add addr uleb: %u\n", (unsigned) leb);
 	  i += leblen;
 	  break;
 	case BFD_MACH_O_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("rebase uleb times (%u)", (unsigned) leb);
 	  i += leblen;
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf (" skipping uleb (%u)\n", (unsigned) leb);
 	  i += leblen;
 	  break;
@@ -776,7 +777,7 @@ dump_dyld_info_bind (bfd *abfd, unsigned char *buf, unsigned int len,
 	  printf ("set dylib ordinal imm: %u\n", imm);
 	  break;
 	case BFD_MACH_O_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("set dylib ordinal uleb: %u\n", imm);
 	  i += leblen;
 	  break;
@@ -799,19 +800,19 @@ dump_dyld_info_bind (bfd *abfd, unsigned char *buf, unsigned int len,
 	case BFD_MACH_O_BIND_OPCODE_SET_ADDEND_SLEB:
 	  {
 	    bfd_signed_vma svma;
-	    svma = read_leb128 (buf + i, &leblen, 0, buf + len);
+	    svma = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	    printf ("set addend sleb: 0x%08x\n", (unsigned) svma);
 	    i += leblen;
 	  }
 	  break;
 	case BFD_MACH_O_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("set segment: %u and offset: 0x%08x\n",
 		  imm, (unsigned) leb);
 	  i += leblen;
 	  break;
 	case BFD_MACH_O_BIND_OPCODE_ADD_ADDR_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("add addr uleb: 0x%08x\n", (unsigned) leb);
 	  i += leblen;
 	  break;
@@ -819,7 +820,7 @@ dump_dyld_info_bind (bfd *abfd, unsigned char *buf, unsigned int len,
 	  printf ("do bind\n");
 	  break;
 	case BFD_MACH_O_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("do bind add addr uleb: 0x%08x\n", (unsigned) leb);
 	  i += leblen;
 	  break;
@@ -827,10 +828,10 @@ dump_dyld_info_bind (bfd *abfd, unsigned char *buf, unsigned int len,
 	  printf ("do bind add addr imm scaled: %u\n", imm * ptrsize);
 	  break;
 	case BFD_MACH_O_BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB:
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf ("do bind uleb times (%u)", (unsigned) leb);
 	  i += leblen;
-	  leb = read_leb128 (buf + i, &leblen, 0, buf + len);
+	  leb = read_leb128 (buf + i, buf + len, 0, &leblen, NULL);
 	  printf (" skipping uleb (%u)\n", (unsigned) leb);
 	  i += leblen;
 	  break;
@@ -858,7 +859,7 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
   unsigned int child_count;
   unsigned int i;
 
-  size = read_leb128 (buf + off, &leblen, 0, buf + len);
+  size = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
   off += leblen;
 
   if (size != 0)
@@ -866,7 +867,7 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
       bfd_vma flags;
       struct export_info_data *d;
 
-      flags = read_leb128 (buf + off, &leblen, 0, buf + len);
+      flags = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
       off += leblen;
 
       fputs ("   ", stdout);
@@ -889,7 +890,7 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
 	{
 	  bfd_vma lib;
 
-	  lib = read_leb128 (buf + off, &leblen, 0, buf + len);
+	  lib = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
 	  off += leblen;
 
 	  fputs (" [reexport] ", stdout);
@@ -911,12 +912,12 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
 	  bfd_vma offset;
 	  bfd_vma resolv = 0;
 
-	  offset = read_leb128 (buf + off, &leblen, 0, buf + len);
+	  offset = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
 	  off += leblen;
 
 	  if (flags & BFD_MACH_O_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER)
 	    {
-	      resolv = read_leb128 (buf + off, &leblen, 0, buf + len);
+	      resolv = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
 	      off += leblen;
 	    }
 
@@ -929,7 +930,7 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
 	}
     }
 
-  child_count = read_leb128 (buf + off, &leblen, 0, buf + len);
+  child_count = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
   off += leblen;
 
   for (i = 0; i < child_count; i++)
@@ -943,7 +944,7 @@ dump_dyld_info_export_1 (bfd *abfd, unsigned char *buf, unsigned int len,
 
       off += strlen ((const char *)buf + off) + 1;
 
-      sub_off = read_leb128 (buf + off, &leblen, 0, buf + len);
+      sub_off = read_leb128 (buf + off, buf + len, 0, &leblen, NULL);
       off += leblen;
 
       dump_dyld_info_export_1 (abfd, buf, len, sub_off, &sub_data, base);
@@ -1311,7 +1312,7 @@ dump_segment_split_info (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
     }
   for (p = buf + 1; *p != 0; p += len)
     {
-      addr += read_leb128 (p, &len, 0, buf + cmd->datasize);
+      addr += read_leb128 (p, buf + cmd->datasize, 0, &len, NULL);
       fputs ("    ", stdout);
       bfd_printf_vma (abfd, addr);
       putchar ('\n');

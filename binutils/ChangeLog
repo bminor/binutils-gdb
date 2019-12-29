@@ -1,3 +1,9 @@
+2019-12-30  Alan Modra  <amodra@gmail.com>
+
+	* od-macho.c: Include elfcomm.h.
+	(dump_dyld_info_rebase, dump_dyld_info_bind): Fix read_leb128 args.
+	(dump_dyld_info_export_1, dump_segment_split_info): Likewise.
+
 2019-12-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* dwarf.c (display_debug_lines_decoded): Cast printf parameter to
