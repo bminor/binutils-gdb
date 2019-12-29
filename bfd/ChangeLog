@@ -1,3 +1,10 @@
+2019-12-29  Hannes Domani  <ssbssa@yahoo.de>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR 15350
+	* bfd.c (bfd_update_compression_header): Write zlib header for
+	formats other than ELF too.
+
 2019-12-26  Alan Modra  <amodra@gmail.com>
 
 	* som.c (setup_sections): Don't overflow space_strings_size.  Use

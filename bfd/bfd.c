@@ -2540,59 +2540,57 @@ void
 bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 			       asection *sec)
 {
-  if ((abfd->flags & BFD_COMPRESS) != 0)
+  if ((abfd->flags & BFD_COMPRESS) == 0)
+    abort ();
+
+  switch (bfd_get_flavour (abfd))
     {
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    case bfd_target_elf_flavour:
+      if ((abfd->flags & BFD_COMPRESS_GABI) != 0)
 	{
-	  if ((abfd->flags & BFD_COMPRESS_GABI) != 0)
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+	  /* Set the SHF_COMPRESSED bit.  */
+	  elf_section_flags (sec) |= SHF_COMPRESSED;
+
+	  if (bed->s->elfclass == ELFCLASS32)
 	    {
-	      const struct elf_backend_data *bed
-		= get_elf_backend_data (abfd);
-
-	      /* Set the SHF_COMPRESSED bit.  */
-	      elf_section_flags (sec) |= SHF_COMPRESSED;
-
-	      if (bed->s->elfclass == ELFCLASS32)
-		{
-		  Elf32_External_Chdr *echdr
-		    = (Elf32_External_Chdr *) contents;
-		  bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
-		  bfd_put_32 (abfd, sec->size, &echdr->ch_size);
-		  bfd_put_32 (abfd, 1 << sec->alignment_power,
-			      &echdr->ch_addralign);
-		  /* bfd_log2 (alignof (Elf32_Chdr)) */
-		  bfd_set_section_alignment (sec, 2);
-		}
-	      else
-		{
-		  Elf64_External_Chdr *echdr
-		    = (Elf64_External_Chdr *) contents;
-		  bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
-		  bfd_put_32 (abfd, 0, &echdr->ch_reserved);
-		  bfd_put_64 (abfd, sec->size, &echdr->ch_size);
-		  bfd_put_64 (abfd, 1 << sec->alignment_power,
-			      &echdr->ch_addralign);
-		  /* bfd_log2 (alignof (Elf64_Chdr)) */
-		  bfd_set_section_alignment (sec, 3);
-		}
+	      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
+	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, sec->size, &echdr->ch_size);
+	      bfd_put_32 (abfd, 1 << sec->alignment_power,
+			  &echdr->ch_addralign);
+	      /* bfd_log2 (alignof (Elf32_Chdr)) */
+	      bfd_set_section_alignment (sec, 2);
 	    }
 	  else
 	    {
-	      /* Clear the SHF_COMPRESSED bit.  */
-	      elf_section_flags (sec) &= ~SHF_COMPRESSED;
-
-	      /* Write the zlib header.  It should be "ZLIB" followed by
-		 the uncompressed section size, 8 bytes in big-endian
-		 order.  */
-	      memcpy (contents, "ZLIB", 4);
-	      bfd_putb64 (sec->size, contents + 4);
-	      /* No way to keep the original alignment, just use 1 always. */
-	      bfd_set_section_alignment (sec, 0);
+	      Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
+	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, 0, &echdr->ch_reserved);
+	      bfd_put_64 (abfd, sec->size, &echdr->ch_size);
+	      bfd_put_64 (abfd, 1 << sec->alignment_power,
+			  &echdr->ch_addralign);
+	      /* bfd_log2 (alignof (Elf64_Chdr)) */
+	      bfd_set_section_alignment (sec, 3);
 	    }
+	  break;
 	}
+
+      /* Clear the SHF_COMPRESSED bit.  */
+      elf_section_flags (sec) &= ~SHF_COMPRESSED;
+      /* Fall through.  */
+
+    default:
+      /* Write the zlib header.  It should be "ZLIB" followed by
+	 the uncompressed section size, 8 bytes in big-endian
+	 order.  */
+      memcpy (contents, "ZLIB", 4);
+      bfd_putb64 (sec->size, contents + 4);
+      /* No way to keep the original alignment, just use 1 always. */
+      bfd_set_section_alignment (sec, 0);
+      break;
     }
-  else
-    abort ();
 }
 
 /*
