@@ -1180,7 +1180,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
   int gsd_type;
   unsigned int gsd_size;
   unsigned char *vms_rec;
-  unsigned long base_addr;
+  bfd_vma base_addr;
 
   vms_debug2 ((2, "EGSD\n"));
 
@@ -1196,7 +1196,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
   PRIV (recrd.rec_size) -= 8;
 
   /* Calculate base address for each section.  */
-  base_addr = 0L;
+  base_addr = 0;
 
   while (PRIV (recrd.rec_size) > 4)
     {
@@ -1244,7 +1244,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    else
 	      {
 		char *name;
-		unsigned long align_addr;
+		bfd_vma align_addr;
 
 		name = _bfd_vms_save_counted_string (abfd, &egps->namlng,
 						     gsd_size - 4);
@@ -1255,7 +1255,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 		section->filepos = 0;
 		section->size = bfd_getl32 (egps->alloc);
-		section->alignment_power = egps->align;
+		section->alignment_power = egps->align & 31;
 
 		vms_section_data (section)->flags = vms_flags;
 		vms_section_data (section)->no_flags = 0;
@@ -1283,10 +1283,9 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 		  return FALSE;
 
 		/* Give a non-overlapping vma to non absolute sections.  */
-		align_addr = (1 << section->alignment_power);
-		if ((base_addr % align_addr) != 0)
-		  base_addr += (align_addr - (base_addr % align_addr));
-		section->vma = (bfd_vma)base_addr;
+		align_addr = (bfd_vma) 1 << section->alignment_power;
+		base_addr = (base_addr + align_addr - 1) & -align_addr;
+		section->vma = base_addr;
 		base_addr += section->size;
 	      }
 
@@ -6648,7 +6647,7 @@ evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
 	  fprintf (file, _("   bitmap: 0x%08x (count: %u):\n"), val, count);
 
 	  for (k = 0; k < 32; k++)
-	    if (val & (1 << k))
+	    if (val & (1u << k))
 	      {
 		if (n == 0)
 		  fputs ("   ", file);

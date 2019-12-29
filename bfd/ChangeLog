@@ -1,5 +1,11 @@
 2019-12-29  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Make base_addr a bfd_vma.
+	Limit alignment power.  Correct and simplify alignment expression.
+	(evax_bfd_print_relocation_records): Avoid signed shift left.
+
+2019-12-29  Alan Modra  <amodra@gmail.com>
+
 	* vms-misc.c (_bfd_vms_save_sized_string): Add abfd param, make
 	size a size_t.  Use bfd_alloc rather than bfd_malloc.
 	(_bfd_vms_save_counted_string): Similarly.
