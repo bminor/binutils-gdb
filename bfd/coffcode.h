@@ -5642,7 +5642,7 @@ static bfd_coff_backend_data bigobj_swap_table =
 #endif /* COFF_WITH_PE_BIGOBJ */
 
 #ifndef coff_close_and_cleanup
-#define coff_close_and_cleanup		    _bfd_generic_close_and_cleanup
+#define coff_close_and_cleanup		    _bfd_coff_close_and_cleanup
 #endif
 
 #ifndef coff_bfd_free_cached_info

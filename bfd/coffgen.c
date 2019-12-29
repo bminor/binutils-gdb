@@ -3161,3 +3161,18 @@ bfd_coff_group_name (bfd *abfd, const asection *sec)
     return ci->name;
   return NULL;
 }
+
+bfd_boolean
+_bfd_coff_close_and_cleanup (bfd *abfd)
+{
+  if (abfd->format == bfd_object
+      && bfd_family_coff (abfd)
+      && coff_data (abfd) != NULL)
+    {
+      obj_coff_keep_syms (abfd) = FALSE;
+      obj_coff_keep_strings (abfd) = FALSE;
+      if (!_bfd_coff_free_symbols (abfd))
+	return FALSE;
+    }
+  return _bfd_generic_close_and_cleanup (abfd);
+}
