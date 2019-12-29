@@ -1,3 +1,7 @@
+2020-01-02  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* cli/cli-style.c: Set cli_styling to 'true' in the Cygwin build.
+
 2020-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* stack.c (print_frame_info): Move disassemble_next_line code

@@ -25,7 +25,7 @@
 
 /* True if styling is enabled.  */
 
-#if defined (__MSDOS__) || defined (__CYGWIN__)
+#if defined (__MSDOS__)
 bool cli_styling = false;
 #else
 bool cli_styling = true;
