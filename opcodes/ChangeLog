@@ -1,3 +1,8 @@
+2019-12-30  Alan Modra  <amodra@gmail.com>
+
+	PR 25319
+	* tic4x-dis.c (tic4x_print_cond): Correct order of xcalloc args.
+
 2019-12-29  Alan Modra  <amodra@gmail.com>
 
 	* sparc-dis.c (SEX): Don't use left and right shift to sign extend.
