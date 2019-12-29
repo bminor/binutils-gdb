@@ -277,7 +277,7 @@ tic4x_print_cond (struct disassemble_info *info, unsigned int cond)
 
   if (condtable == NULL)
     {
-      condtable = xmalloc (sizeof (tic4x_cond_t *) * 32);
+      condtable = xcalloc (sizeof (tic4x_cond_t *), 32);
       for (i = 0; i < tic4x_num_conds; i++)
 	condtable[tic4x_conds[i].cond] = (tic4x_cond_t *)(tic4x_conds + i);
     }

@@ -1,3 +1,8 @@
+2019-12-29  Alan Modra  <amodra@gmail.com>
+
+	PR 25319
+	* tic4x-dis.c (tic4x_print_cond): Init all of condtable.
+
 2019-12-27  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (Jdqw): Define.
