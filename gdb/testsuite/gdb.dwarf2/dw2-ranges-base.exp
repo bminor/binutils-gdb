@@ -146,10 +146,10 @@ gdb_test "info line frame3" \
 set end_seq_count 0
 gdb_test_multiple "maint info line-table" \
     "count END markers in line table" {
-	-re "^$decimal\[ \t\]+$decimal\[ \t\]+$hex\r\n" {
+	-re "^$decimal\[ \t\]+$decimal\[ \t\]+$hex\(\[ \t\]+Y\)?\r\n" {
 	    exp_continue
 	}
-	-re "^$decimal\[ \t\]+END\[ \t\]+$hex\r\n" {
+	-re "^$decimal\[ \t\]+END\[ \t\]+$hex\(\[ \t\]+Y\)?\r\n" {
 	    incr end_seq_count
 	    exp_continue
 	}
@@ -159,7 +159,7 @@ gdb_test_multiple "maint info line-table" \
 	-re ".*linetable: \\(\\(struct linetable \\*\\) 0x0\\):\r\nNo line table.\r\n" {
 	    exp_continue
 	}
-	-re ".*linetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\r\n" {
+	-re ".*linetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\[ \t\]+IS-STMT\r\n" {
 	    exp_continue
 	}
     }

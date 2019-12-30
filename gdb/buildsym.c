@@ -666,7 +666,7 @@ buildsym_compunit::pop_subfile ()
 
 void
 buildsym_compunit::record_line (struct subfile *subfile, int line,
-				CORE_ADDR pc)
+				CORE_ADDR pc, bool is_stmt)
 {
   struct linetable_entry *e;
 
@@ -679,6 +679,17 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 	   + subfile->line_vector_length * sizeof (struct linetable_entry));
       subfile->line_vector->nitems = 0;
       m_have_line_numbers = true;
+    }
+
+  /* If we have a duplicate for the previous entry then ignore the new
+     entry, except, if the new entry is setting the is_stmt flag, then
+     ensure the previous entry respects the new setting.  */
+  e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+  if (e->line == line && e->pc == pc)
+    {
+      if (is_stmt && !e->is_stmt)
+	e->is_stmt = 1;
+      return;
     }
 
   if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
@@ -716,6 +727,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line;
+  e->is_stmt = is_stmt ? 1 : 0;
   e->pc = pc;
 }
 

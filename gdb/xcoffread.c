@@ -432,6 +432,9 @@ arrange_linetable (struct linetable *oldLineTb)
 
   for (function_count = 0, ii = 0; ii < oldLineTb->nitems; ++ii)
     {
+      if (oldLineTb->item[ii].is_stmt == 0)
+	continue;
+
       if (oldLineTb->item[ii].line == 0)
 	{			/* Function entry found.  */
 	  if (function_count >= fentry_size)
@@ -442,6 +445,7 @@ arrange_linetable (struct linetable *oldLineTb)
 			  fentry_size * sizeof (struct linetable_entry));
 	    }
 	  fentry[function_count].line = ii;
+	  fentry[function_count].is_stmt = 1;
 	  fentry[function_count].pc = oldLineTb->item[ii].pc;
 	  ++function_count;
 

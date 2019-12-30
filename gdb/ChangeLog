@@ -1,3 +1,41 @@
+2020-03-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* buildsym-legacy.c (record_line): Pass extra parameter to
+	record_line.
+	* buildsym.c (buildsym_compunit::record_line): Take an extra
+	parameter, reduce duplication in the line table, and record the
+	is_stmt flag in the line table.
+	* buildsym.h (buildsym_compunit::record_line): Add extra
+	parameter.
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Ignore
+	non-statement lines.
+	* dwarf2/read.c (dwarf_record_line_1): Add extra parameter, pass
+	this to the symtab builder.
+	(dwarf_finish_line): Pass extra parameter to dwarf_record_line_1.
+	(lnp_state_machine::record_line): Pass a suitable is_stmt flag
+	through to dwarf_record_line_1.
+	* infrun.c (process_event_stop_test): When stepping, don't stop at
+	a non-statement instruction, and only refresh the step info when
+	we land in the middle of a line's range.  Also add an extra
+	comment.
+	* jit.c (jit_symtab_line_mapping_add_impl): Initialise is_stmt
+	field.
+	* record-btrace.c (btrace_find_line_range): Only record lines
+	marked as is-statement.
+	* stack.c (frame_show_address): Show the frame address if we are
+	in a non-statement sal.
+	* symmisc.c (dump_symtab_1): Print the is_stmt flag.
+	(maintenance_print_one_line_table): Print a header for the is_stmt
+	column, and include is_stmt information in the output.
+	* symtab.c (find_pc_sect_line): Find lines marked as statements in
+	preference to non-statements.
+	(find_pcs_for_symtab_line): Prefer is-statement entries.
+	(find_line_common): Likewise.
+	* symtab.h (struct linetable_entry): Add is_stmt field.
+	(struct symtab_and_line): Likewise.
+	* xcoffread.c (arrange_linetable): Initialise is_stmt field when
+	arranging the line table.
+
 2020-03-07  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (read_typedef): Treat anonymous typedef as forwarder

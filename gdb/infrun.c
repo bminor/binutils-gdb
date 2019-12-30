@@ -7045,6 +7045,10 @@ process_event_stop_test (struct execution_control_state *ecs)
 	}
     }
 
+  /* This always returns the sal for the inner-most frame when we are in a
+     stack of inlined frames, even if GDB actually believes that it is in a
+     more outer frame.  This is checked for below by calls to
+     inline_skipped_frames.  */
   stop_pc_sal = find_pc_line (ecs->event_thread->suspend.stop_pc, 0);
 
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
@@ -7179,19 +7183,36 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
+  bool refresh_step_info = true;
   if ((ecs->event_thread->suspend.stop_pc == stop_pc_sal.pc)
       && (ecs->event_thread->current_line != stop_pc_sal.line
  	  || ecs->event_thread->current_symtab != stop_pc_sal.symtab))
     {
-      /* We are at the start of a different line.  So stop.  Note that
-         we don't stop if we step into the middle of a different line.
-         That is said to make things like for (;;) statements work
-         better.  */
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog,
-			     "infrun: stepped to a different line\n");
-      end_stepping_range (ecs);
-      return;
+      if (stop_pc_sal.is_stmt)
+	{
+	  /* We are at the start of a different line.  So stop.  Note that
+	     we don't stop if we step into the middle of a different line.
+	     That is said to make things like for (;;) statements work
+	     better.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped to a different line\n");
+	  end_stepping_range (ecs);
+	  return;
+	}
+      else if (frame_id_eq (get_frame_id (get_current_frame ()),
+			    ecs->event_thread->control.step_frame_id))
+	{
+	  /* We are at the start of a different line, however, this line is
+	     not marked as a statement, and we have not changed frame.  We
+	     ignore this line table entry, and continue stepping forward,
+	     looking for a better place to stop.  */
+	  refresh_step_info = false;
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped to a different line, but "
+				"it's not the start of a statement\n");
+	}
     }
 
   /* We aren't done stepping.
@@ -7199,12 +7220,20 @@ process_event_stop_test (struct execution_control_state *ecs)
      Optimize by setting the stepping range to the line.
      (We might not be in the original line, but if we entered a
      new line in mid-statement, we continue stepping.  This makes
-     things like for(;;) statements work better.)  */
+     things like for(;;) statements work better.)
+
+     If we entered a SAL that indicates a non-statement line table entry,
+     then we update the stepping range, but we don't update the step info,
+     which includes things like the line number we are stepping away from.
+     This means we will stop when we find a line table entry that is marked
+     as is-statement, even if it matches the non-statement one we just
+     stepped into.   */
 
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
   ecs->event_thread->control.may_range_step = 1;
-  set_step_info (ecs->event_thread, frame, stop_pc_sal);
+  if (refresh_step_info)
+    set_step_info (ecs->event_thread, frame, stop_pc_sal);
 
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");

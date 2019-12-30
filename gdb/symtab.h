@@ -1277,7 +1277,13 @@ struct rust_vtable_symbol : public symbol
 
 struct linetable_entry
 {
+  /* The line number for this entry.  */
   int line;
+
+  /* True if this PC is a good location to place a breakpoint for LINE.  */
+  unsigned is_stmt : 1;
+
+  /* The address for this entry.  */
   CORE_ADDR pc;
 };
 
@@ -1852,6 +1858,10 @@ struct symtab_and_line
   CORE_ADDR end = 0;
   bool explicit_pc = false;
   bool explicit_line = false;
+
+  /* If the line number information is valid, then this indicates if this
+     line table entry had the is-stmt flag set or not.  */
+  bool is_stmt = false;
 
   /* The probe associated with this symtab_and_line.  */
   probe *prob = NULL;

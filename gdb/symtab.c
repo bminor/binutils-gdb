@@ -3236,6 +3236,23 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  best = prev;
 	  best_symtab = iter_s;
 
+	  /* If during the binary search we land on a non-statement entry,
+	     scan backward through entries at the same address to see if
+	     there is an entry marked as is-statement.  In theory this
+	     duplication should have been removed from the line table
+	     during construction, this is just a double check.  If the line
+	     table has had the duplication removed then this should be
+	     pretty cheap.  */
+	  if (!best->is_stmt)
+	    {
+	      struct linetable_entry *tmp = best;
+	      while (tmp > first && (tmp - 1)->pc == tmp->pc
+		     && (tmp - 1)->line != 0 && !tmp->is_stmt)
+		--tmp;
+	      if (tmp->is_stmt)
+		best = tmp;
+	    }
+
 	  /* Discard BEST_END if it's before the PC of the current BEST.  */
 	  if (best_end <= best->pc)
 	    best_end = 0;
@@ -3266,6 +3283,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     }
   else
     {
+      val.is_stmt = best->is_stmt;
       val.symtab = best_symtab;
       val.line = best->line;
       val.pc = best->pc;
@@ -3434,7 +3452,8 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	{
 	  struct linetable_entry *item = &SYMTAB_LINETABLE (symtab)->item[idx];
 
-	  if (*best_item == NULL || item->line < (*best_item)->line)
+	  if (*best_item == NULL
+	      || (item->line < (*best_item)->line && item->is_stmt))
 	    *best_item = item;
 
 	  break;
@@ -3544,6 +3563,10 @@ find_line_common (struct linetable *l, int lineno,
   for (i = start; i < len; i++)
     {
       struct linetable_entry *item = &(l->item[i]);
+
+      /* Ignore non-statements.  */
+      if (!item->is_stmt)
+	continue;
 
       if (item->line == lineno)
 	{

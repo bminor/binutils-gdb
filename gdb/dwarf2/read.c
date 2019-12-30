@@ -19939,7 +19939,7 @@ dwarf_record_line_p (struct dwarf2_cu *cu,
 
 static void
 dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
-		     unsigned int line, CORE_ADDR address,
+		     unsigned int line, CORE_ADDR address, bool is_stmt,
 		     struct dwarf2_cu *cu)
 {
   CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
@@ -19953,7 +19953,7 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
     }
 
   if (cu != nullptr)
-    cu->get_builder ()->record_line (subfile, line, addr);
+    cu->get_builder ()->record_line (subfile, line, addr, is_stmt);
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
@@ -19976,7 +19976,7 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
 			  paddress (gdbarch, address));
     }
 
-  dwarf_record_line_1 (gdbarch, subfile, 0, address, cu);
+  dwarf_record_line_1 (gdbarch, subfile, 0, address, true, cu);
 }
 
 void
@@ -20003,8 +20003,7 @@ lnp_state_machine::record_line (bool end_sequence)
   else if (m_op_index == 0 || end_sequence)
     {
       fe->included_p = 1;
-      if (m_record_lines_p
-	  && (producer_is_codewarrior (m_cu) || m_is_stmt || end_sequence))
+      if (m_record_lines_p)
 	{
 	  if (m_last_subfile != m_cu->get_builder ()->get_current_subfile ()
 	      || end_sequence)
@@ -20015,6 +20014,8 @@ lnp_state_machine::record_line (bool end_sequence)
 
 	  if (!end_sequence)
 	    {
+	      bool is_stmt = producer_is_codewarrior (m_cu) || m_is_stmt;
+
 	      if (dwarf_record_line_p (m_cu, m_line, m_last_line,
 				       m_line_has_non_zero_discriminator,
 				       m_last_subfile))
@@ -20022,7 +20023,7 @@ lnp_state_machine::record_line (bool end_sequence)
 		  buildsym_compunit *builder = m_cu->get_builder ();
 		  dwarf_record_line_1 (m_gdbarch,
 				       builder->get_current_subfile (),
-				       m_line, m_address,
+				       m_line, m_address, is_stmt,
 				       m_currently_recording_lines ? m_cu : nullptr);
 		}
 	      m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
