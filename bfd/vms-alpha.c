@@ -2634,6 +2634,22 @@ vms_initialize (bfd * abfd)
   return FALSE;
 }
 
+/* Free malloc'd memory.  */
+
+static void
+alpha_vms_free_private (bfd *abfd)
+{
+  struct module *module;
+
+  free (PRIV (recrd.buf));
+  free (PRIV (sections));
+  free (PRIV (syms));
+  free (PRIV (dst_ptr_offsets));
+
+  for (module = PRIV (modules); module; module = module->next)
+    free (module->file_table);
+}
+
 /* Check the format for a file being read.
    Return a (bfd_target *) if it's an object file or zero if not.  */
 
@@ -2648,7 +2664,10 @@ alpha_vms_object_p (bfd *abfd)
 
   /* Allocate alpha-vms specific data.  */
   if (!vms_initialize (abfd))
-    goto error_ret;
+    {
+      abfd->tdata.any = tdata_save;
+      return NULL;
+    }
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
     goto err_wrong_format;
@@ -2788,8 +2807,7 @@ alpha_vms_object_p (bfd *abfd)
   bfd_set_error (bfd_error_wrong_format);
 
  error_ret:
-  if (PRIV (recrd.buf))
-    free (PRIV (recrd.buf));
+  alpha_vms_free_private (abfd);
   if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
     bfd_release (abfd, abfd->tdata.any);
   abfd->tdata.any = tdata_save;
@@ -9339,15 +9357,7 @@ vms_close_and_cleanup (bfd * abfd)
 
   if (abfd->format == bfd_object)
     {
-      struct module *module;
-
-      free (PRIV (recrd.buf));
-      free (PRIV (sections));
-      free (PRIV (syms));
-      free (PRIV (dst_ptr_offsets));
-
-      for (module = PRIV (modules); module; module = module->next)
-	free (module->file_table);
+      alpha_vms_free_private (abfd);
 
 #ifdef VMS
       if (abfd->direction == write_direction)

@@ -1,5 +1,11 @@
 2019-12-30  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (alpha_vms_free_private): New function, extracted..
+	(vms_close_and_cleanup): ..from here.
+	(alpha_vms_object_p): Call alpha_vms_free_private on failure.
+
+2019-12-30  Alan Modra  <amodra@gmail.com>
+
 	* coffgen.c (coff_real_object_p): Free malloc'd memory on failure.
 
 2019-12-30  Alan Modra  <amodra@gmail.com>
