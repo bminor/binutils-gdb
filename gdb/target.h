@@ -878,11 +878,10 @@ struct target_ops
     /* Determine current architecture of thread PTID.
 
        The target is supposed to determine the architecture of the code where
-       the target is currently stopped at (on Cell, if a target is in spu_run,
-       to_thread_architecture would return SPU, otherwise PPC32 or PPC64).
-       This is architecture used to perform decr_pc_after_break adjustment,
-       and also determines the frame architecture of the innermost frame.
-       ptrace operations need to operate according to target_gdbarch ().  */
+       the target is currently stopped at.  The architecture information is
+       used to perform decr_pc_after_break adjustment, and also to determine
+       the frame architecture of the innermost frame.  ptrace operations need to
+       operate according to target_gdbarch ().  */
     virtual struct gdbarch *thread_architecture (ptid_t)
       TARGET_DEFAULT_RETURN (NULL);
 

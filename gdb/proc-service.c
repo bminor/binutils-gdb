@@ -129,10 +129,7 @@ ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr,
 /* Get a regcache for LWPID using its inferior's "main" architecture,
    which is the register set libthread_db expects to be using.  In
    multi-arch debugging scenarios, the thread's architecture may
-   differ from the inferior's "main" architecture.  E.g., in the Cell
-   combined debugger, if GDB happens to interrupt SPU code, the
-   thread's architecture is SPU, and the main architecture is
-   PowerPC.  */
+   differ from the inferior's "main" architecture.  */
 
 static struct regcache *
 get_ps_regcache (struct ps_prochandle *ph, lwpid_t lwpid)
