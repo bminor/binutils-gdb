@@ -1,5 +1,9 @@
 2019-12-30  Alan Modra  <amodra@gmail.com>
 
+	* coffgen.c (coff_real_object_p): Free malloc'd memory on failure.
+
+2019-12-30  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (do_slurp_bsd_armap): Use bfd_alloc rather than
 	bfd_zalloc when memory is all written after the call.
 	(do_slurp_coff_armap): Likewise.  Set bfd_error on ridiculously

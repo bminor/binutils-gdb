@@ -305,6 +305,9 @@ coff_real_object_p (bfd *abfd,
   return abfd->xvec;
 
  fail:
+  obj_coff_keep_syms (abfd) = FALSE;
+  obj_coff_keep_strings (abfd) = FALSE;
+  _bfd_coff_free_symbols (abfd);
   bfd_release (abfd, tdata);
  fail2:
   abfd->tdata.any = tdata_save;
