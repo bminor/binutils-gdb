@@ -1,5 +1,9 @@
 2020-01-01  Hannes Domani  <ssbssa@yahoo.de>
 
+	* Makefile.in: Use INSTALL_PROGRAM_ENV.
+
+2020-01-01  Hannes Domani  <ssbssa@yahoo.de>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>

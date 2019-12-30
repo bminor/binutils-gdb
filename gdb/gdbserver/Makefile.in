@@ -381,10 +381,10 @@ install-only:
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	if [ x"$(IPA_DEPFILES)" != x ]; then \
 		$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir); \
-		$(INSTALL_PROGRAM) $(IPA_LIB) $(DESTDIR)$(libdir)/$(IPA_LIB); \
+		$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $(IPA_LIB) $(DESTDIR)$(libdir)/$(IPA_LIB); \
 	fi; \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
-	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
+	$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 	# Note that we run install and not install-only, as the latter
 	# is not part of GNU standards and in particular not provided
 	# in libiberty.
