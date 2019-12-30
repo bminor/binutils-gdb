@@ -119,7 +119,7 @@ struct tui_translate
 /* Translation table for border-mode variables.
    The list of values must be terminated by a NULL.
    After the NULL value, an entry defines the default.  */
-struct tui_translate tui_border_mode_translate[] = {
+static struct tui_translate tui_border_mode_translate[] = {
   { "normal",		A_NORMAL },
   { "standout",		A_STANDOUT },
   { "reverse",		A_REVERSE },
@@ -135,7 +135,7 @@ struct tui_translate tui_border_mode_translate[] = {
    character (see wborder, border curses operations).
    -1 is used to indicate the ACS because ACS characters
    are determined at run time by curses (depends on terminal).  */
-struct tui_translate tui_border_kind_translate_vline[] = {
+static struct tui_translate tui_border_kind_translate_vline[] = {
   { "space",    ' ' },
   { "ascii",    '|' },
   { "acs",      -1 },
@@ -143,7 +143,7 @@ struct tui_translate tui_border_kind_translate_vline[] = {
   { "ascii",    '|' }
 };
 
-struct tui_translate tui_border_kind_translate_hline[] = {
+static struct tui_translate tui_border_kind_translate_hline[] = {
   { "space",    ' ' },
   { "ascii",    '-' },
   { "acs",      -1 },
@@ -151,7 +151,7 @@ struct tui_translate tui_border_kind_translate_hline[] = {
   { "ascii",    '-' }
 };
 
-struct tui_translate tui_border_kind_translate_ulcorner[] = {
+static struct tui_translate tui_border_kind_translate_ulcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
@@ -159,7 +159,7 @@ struct tui_translate tui_border_kind_translate_ulcorner[] = {
   { "ascii",    '+' }
 };
 
-struct tui_translate tui_border_kind_translate_urcorner[] = {
+static struct tui_translate tui_border_kind_translate_urcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
@@ -167,7 +167,7 @@ struct tui_translate tui_border_kind_translate_urcorner[] = {
   { "ascii",    '+' }
 };
 
-struct tui_translate tui_border_kind_translate_llcorner[] = {
+static struct tui_translate tui_border_kind_translate_llcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
@@ -175,7 +175,7 @@ struct tui_translate tui_border_kind_translate_llcorner[] = {
   { "ascii",    '+' }
 };
 
-struct tui_translate tui_border_kind_translate_lrcorner[] = {
+static struct tui_translate tui_border_kind_translate_lrcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
@@ -185,7 +185,7 @@ struct tui_translate tui_border_kind_translate_lrcorner[] = {
 
 
 /* Tui configuration variables controlled with set/show command.  */
-const char *tui_active_border_mode = "bold-standout";
+static const char *tui_active_border_mode = "bold-standout";
 static void
 show_tui_active_border_mode (struct ui_file *file,
 			     int from_tty,
@@ -197,7 +197,7 @@ The attribute mode to use for the active TUI window border is \"%s\".\n"),
 		    value);
 }
 
-const char *tui_border_mode = "normal";
+static const char *tui_border_mode = "normal";
 static void
 show_tui_border_mode (struct ui_file *file, 
 		      int from_tty,
@@ -209,7 +209,7 @@ The attribute mode to use for the TUI window borders is \"%s\".\n"),
 		    value);
 }
 
-const char *tui_border_kind = "acs";
+static const char *tui_border_kind = "acs";
 static void
 show_tui_border_kind (struct ui_file *file, 
 		      int from_tty,

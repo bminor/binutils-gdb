@@ -1,5 +1,15 @@
 2019-12-30  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_border_mode_translate)
+	(tui_border_kind_translate_vline, tui_border_kind_translate_hline)
+	(tui_border_kind_translate_ulcorner)
+	(tui_border_kind_translate_urcorner)
+	(tui_border_kind_translate_llcorner)
+	(tui_border_kind_translate_lrcorner, tui_active_border_mode)
+	(tui_border_mode, tui_border_kind): Now static.
+
+2019-12-30  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-interp.c (tui_start_enabled): Now bool.
 	(_initialize_tui_interp): Update.
 	* tui/tui-hooks.c (tui_refreshing_registers): Now bool.
