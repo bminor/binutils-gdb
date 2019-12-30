@@ -57,7 +57,7 @@ tui_new_objfile_hook (struct objfile* objfile)
 }
 
 /* Prevent recursion of deprecated_register_changed_hook().  */
-static int tui_refreshing_registers = 0;
+static bool tui_refreshing_registers = false;
 
 /* Observer for the register_changed notification.  */
 
@@ -75,11 +75,11 @@ tui_register_changed (struct frame_info *frame, int regno)
      up in the other.  So we always use the selected frame here, and ignore
      FRAME.  */
   fi = get_selected_frame (NULL);
-  if (tui_refreshing_registers == 0)
+  if (!tui_refreshing_registers)
     {
-      tui_refreshing_registers = 1;
+      tui_refreshing_registers = true;
       TUI_DATA_WIN->check_register_values (fi);
-      tui_refreshing_registers = 0;
+      tui_refreshing_registers = false;
     }
 }
 
@@ -139,9 +139,9 @@ tui_refresh_frame_and_register_information ()
       if (tui_is_window_visible (DATA_WIN)
 	  && (frame_info_changed_p || from_stack))
 	{
-	  tui_refreshing_registers = 1;
+	  tui_refreshing_registers = true;
 	  TUI_DATA_WIN->check_register_values (fi);
-	  tui_refreshing_registers = 0;
+	  tui_refreshing_registers = false;
 	}
     }
   else if (!from_stack)

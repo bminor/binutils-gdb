@@ -35,9 +35,9 @@
 #include "inferior.h"
 #include "main.h"
 
-/* Set to 1 when the TUI mode must be activated when we first start
+/* Set to true when the TUI mode must be activated when we first start
    gdb.  */
-static int tui_start_enabled = 0;
+static bool tui_start_enabled = false;
 
 class tui_interp final : public cli_interp_base
 {
@@ -312,7 +312,7 @@ _initialize_tui_interp (void)
   interp_factory_register (INTERP_TUI, tui_interp_factory);
 
   if (interpreter_p && strcmp (interpreter_p, INTERP_TUI) == 0)
-    tui_start_enabled = 1;
+    tui_start_enabled = true;
 
   if (interpreter_p && strcmp (interpreter_p, INTERP_CONSOLE) == 0)
     {

@@ -44,7 +44,7 @@ extern chtype tui_border_hline;
 extern int tui_border_attrs;
 extern int tui_active_border_attrs;
 
-extern int tui_update_variables (void);
+extern bool tui_update_variables ();
 
 extern void tui_initialize_win (void);
 

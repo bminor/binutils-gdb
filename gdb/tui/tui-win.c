@@ -254,23 +254,23 @@ translate (const char *name, struct tui_translate *table)
 /* Update the tui internal configuration according to gdb settings.
    Returns 1 if the configuration has changed and the screen should
    be redrawn.  */
-int
-tui_update_variables (void)
+bool
+tui_update_variables ()
 {
-  int need_redraw = 0;
+  bool need_redraw = false;
   struct tui_translate *entry;
 
   entry = translate (tui_border_mode, tui_border_mode_translate);
   if (tui_border_attrs != entry->value)
     {
       tui_border_attrs = entry->value;
-      need_redraw = 1;
+      need_redraw = true;
     }
   entry = translate (tui_active_border_mode, tui_border_mode_translate);
   if (tui_active_border_attrs != entry->value)
     {
       tui_active_border_attrs = entry->value;
-      need_redraw = 1;
+      need_redraw = true;
     }
 
   /* If one corner changes, all characters are changed.
@@ -280,7 +280,7 @@ tui_update_variables (void)
   if (tui_border_lrcorner != (chtype) entry->value)
     {
       tui_border_lrcorner = (entry->value < 0) ? ACS_LRCORNER : entry->value;
-      need_redraw = 1;
+      need_redraw = true;
     }
   entry = translate (tui_border_kind, tui_border_kind_translate_llcorner);
   tui_border_llcorner = (entry->value < 0) ? ACS_LLCORNER : entry->value;
