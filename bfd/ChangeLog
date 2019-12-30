@@ -1,5 +1,9 @@
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
+	* mmo.c (mmo_mkobject): Allocate tdata with bfd_zalloc.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
 	* coffgen.c (coff_real_object_p): Free malloc'd memory on target
 	match too.
 

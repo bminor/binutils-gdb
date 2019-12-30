@@ -579,7 +579,7 @@ mmo_mkobject (bfd *abfd)
 
       /* All fields are zero-initialized, so we don't have to explicitly
 	 initialize most.  */
-      tdata_type *tdata = (tdata_type *) bfd_zmalloc (sizeof (tdata_type));
+      tdata_type *tdata = (tdata_type *) bfd_zalloc (abfd, sizeof (tdata_type));
       if (tdata == NULL)
 	return FALSE;
 
