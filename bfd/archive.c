@@ -968,7 +968,7 @@ do_slurp_bsd_armap (bfd *abfd)
   if (parsed_size < 4)
     return FALSE;
 
-  raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
+  raw_armap = (bfd_byte *) bfd_alloc (abfd, parsed_size);
   if (raw_armap == NULL)
     return FALSE;
 
@@ -1059,16 +1059,22 @@ do_slurp_coff_armap (bfd *abfd)
      bsd-style one in core all at once, for simplicity.  */
 
   if (nsymz > ~ (bfd_size_type) 0 / sizeof (carsym))
-    return FALSE;
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
 
   carsym_size = (nsymz * sizeof (carsym));
   ptrsize = (4 * nsymz);
 
   if (carsym_size + stringsize + 1 <= carsym_size)
-    return FALSE;
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
 
-  ardata->symdefs = (struct carsym *) bfd_zalloc (abfd,
-						  carsym_size + stringsize + 1);
+  ardata->symdefs = (struct carsym *) bfd_alloc (abfd,
+						 carsym_size + stringsize + 1);
   if (ardata->symdefs == NULL)
     return FALSE;
   carsyms = ardata->symdefs;
@@ -1083,7 +1089,7 @@ do_slurp_coff_armap (bfd *abfd)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
-      goto release_raw_armap;
+      goto release_symdefs;
     }
 
   /* OK, build the carsyms.  */
@@ -1128,8 +1134,6 @@ do_slurp_coff_armap (bfd *abfd)
 
   return TRUE;
 
-release_raw_armap:
-  bfd_release (abfd, raw_armap);
 release_symdefs:
   bfd_release (abfd, (ardata)->symdefs);
   return FALSE;
@@ -1238,7 +1242,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	goto byebye;
 
       bfd_ardata (abfd)->extended_names_size = amt;
-      bfd_ardata (abfd)->extended_names = (char *) bfd_zalloc (abfd, amt + 1);
+      bfd_ardata (abfd)->extended_names = (char *) bfd_alloc (abfd, amt + 1);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
 	byebye:
@@ -1256,6 +1260,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	  bfd_ardata (abfd)->extended_names = NULL;
 	  goto byebye;
 	}
+      bfd_ardata (abfd)->extended_names[amt] = 0;
 
       /* Since the archive is supposed to be printable if it contains
 	 text, the entries in the list are newline-padded, not null
@@ -1607,7 +1612,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
   if (total_namelen == 0)
     return TRUE;
 
-  *tabloc = (char *) bfd_zalloc (abfd, total_namelen);
+  *tabloc = (char *) bfd_alloc (abfd, total_namelen);
   if (*tabloc == NULL)
     return FALSE;
 
@@ -1664,16 +1669,14 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	    stroff = last_stroff;
 	  else
 	    {
-	      strcpy (strptr, normal);
-	      if (! trailing_slash)
-		strptr[thislen] = ARFMAG[1];
-	      else
-		{
-		  strptr[thislen] = '/';
-		  strptr[thislen + 1] = ARFMAG[1];
-		}
+	      last_filename = filename;
 	      stroff = strptr - *tabloc;
 	      last_stroff = stroff;
+	      memcpy (strptr, normal, thislen);
+	      strptr += thislen;
+	      if (trailing_slash)
+		*strptr++ = '/';
+	      *strptr++ = ARFMAG[1];
 	    }
 	  hdr->ar_name[0] = ar_padchar (current);
 	  if (bfd_is_thin_archive (abfd) && current->origin > 0)
@@ -1686,13 +1689,6 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	    }
 	  else
 	    _bfd_ar_spacepad (hdr->ar_name + 1, maxname - 1, "%-ld", stroff);
-	  if (normal != last_filename)
-	    {
-	      strptr += thislen + 1;
-	      if (trailing_slash)
-		++strptr;
-	      last_filename = filename;
-	    }
 	}
     }
 

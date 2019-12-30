@@ -1,3 +1,14 @@
+2019-12-30  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (do_slurp_bsd_armap): Use bfd_alloc rather than
+	bfd_zalloc when memory is all written after the call.
+	(do_slurp_coff_armap): Likewise.  Set bfd_error on ridiculously
+	large allocations that overflow bfd_size_type.  Use just one
+	bfd_release on error exit.
+	(_bfd_slurp_extended_name_table): Use bfd_alloc for extended_names,
+	clear last byte rather than the entire array.  Use bfd_alloc for
+	string table.  Rearrange and simplify code copying file names.
+
 2019-12-29  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Make base_addr a bfd_vma.
