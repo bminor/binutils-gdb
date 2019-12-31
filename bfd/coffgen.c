@@ -302,6 +302,9 @@ coff_real_object_p (bfd *abfd,
 	}
     }
 
+  obj_coff_keep_syms (abfd) = FALSE;
+  obj_coff_keep_strings (abfd) = FALSE;
+  _bfd_coff_free_symbols (abfd);
   return abfd->xvec;
 
  fail:
