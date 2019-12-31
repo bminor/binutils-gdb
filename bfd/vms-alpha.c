@@ -529,12 +529,12 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       asection *section;
       flagword bfd_flags;
 
-      /* PR 17512: file: 3d9e9fe9.
-	 12 is the offset of the eisdsize field from the start of the record (8)
-	 plus the size of the eisdsize field (4).  */
-      if (offset >= PRIV (recrd.rec_size) - 12)
+      /* PR 17512: file: 3d9e9fe9.  */
+      if (offset > PRIV (recrd.rec_size)
+	  || (PRIV (recrd.rec_size) - offset
+	      < offsetof (struct vms_eisd, eisdsize) + 4))
 	return FALSE;
-      eisd = (struct vms_eisd *)(PRIV (recrd.rec) + offset);
+      eisd = (struct vms_eisd *) (PRIV (recrd.rec) + offset);
       rec_size = bfd_getl32 (eisd->eisdsize);
       if (rec_size == 0)
 	break;
@@ -547,11 +547,10 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 	}
 
       /* Make sure that there is enough data present in the record.  */
-      /* FIXME: Should we use sizeof (struct vms_eisd) rather than just 32 here ?  */
-      if (rec_size < 32)
+      if (rec_size < offsetof (struct vms_eisd, type) + 1)
 	return FALSE;
       /* Make sure that the record is not too big either.  */
-      if (offset + rec_size >= PRIV (recrd.rec_size))
+      if (rec_size > PRIV (recrd.rec_size) - offset)
 	return FALSE;
 
       offset += rec_size;
@@ -592,7 +591,7 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 
       if (flags & EISD__M_GBL)
 	{
-	  if (rec_size < offsetof (struct vms_eisd, gblnam))
+	  if (rec_size <= offsetof (struct vms_eisd, gblnam))
 	    return FALSE;
 	  else if (rec_size < sizeof (struct vms_eisd))
 	    name = _bfd_vms_save_counted_string (abfd, eisd->gblnam,
@@ -600,7 +599,7 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 	  else
 	    name = _bfd_vms_save_counted_string (abfd, eisd->gblnam,
 						 EISD__K_GBLNAMLEN);
-	  if (name == NULL)
+	  if (name == NULL || name[0] == 0)
 	    return FALSE;
 	  bfd_flags |= SEC_COFF_SHARED_LIBRARY;
 	  bfd_flags &= ~(SEC_ALLOC | SEC_LOAD);
@@ -1181,6 +1180,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
   unsigned int gsd_size;
   unsigned char *vms_rec;
   bfd_vma base_addr;
+  long psindx;
 
   vms_debug2 ((2, "EGSD\n"));
 
@@ -1210,16 +1210,9 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       /* PR 21615: Check for size overflow.  */
       if (PRIV (recrd.rec_size) < gsd_size)
 	{
-	  _bfd_error_handler (_("corrupt EGSD record: size (%#x) is larger than remaining space (%#x)"),
-			      gsd_size, PRIV (recrd.rec_size));
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-
-      if (gsd_size < 4)
-	{
-	  _bfd_error_handler (_("corrupt EGSD record: size (%#x) is too small"),
-			      gsd_size);
+	  _bfd_error_handler (_("corrupt EGSD record type %d: size (%#x) "
+				"is larger than remaining space (%#x)"),
+			      gsd_type, gsd_size, PRIV (recrd.rec_size));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1229,10 +1222,19 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	case EGSD__C_PSC:
 	  /* Program section definition.  */
 	  {
-	    struct vms_egps *egps = (struct vms_egps *)vms_rec;
+	    struct vms_egps *egps = (struct vms_egps *) vms_rec;
 	    flagword new_flags, vms_flags;
 	    asection *section;
 
+	    if (offsetof (struct vms_egps, flags) + 2 > gsd_size)
+	      {
+	      too_small:
+		_bfd_error_handler (_("corrupt EGSD record type %d: size (%#x) "
+				      "is too small"),
+				    gsd_type, gsd_size);
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
 	    vms_flags = bfd_getl16 (egps->flags);
 
 	    if ((vms_flags & EGPS__V_REL) == 0)
@@ -1245,9 +1247,14 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	      {
 		char *name;
 		bfd_vma align_addr;
+		size_t left;
 
-		name = _bfd_vms_save_counted_string (abfd, &egps->namlng,
-						     gsd_size - 4);
+		if (offsetof (struct vms_egps, namlng) >= gsd_size)
+		  goto too_small;
+		left = gsd_size - offsetof (struct vms_egps, namlng);
+		name = _bfd_vms_save_counted_string (abfd, &egps->namlng, left);
+		if (name == NULL || name[0] == 0)
+		  return FALSE;
 
 		section = bfd_make_section (abfd, name);
 		if (!section)
@@ -1314,6 +1321,8 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    struct vms_egsy *egsy = (struct vms_egsy *) vms_rec;
 	    flagword old_flags;
 
+	    if (offsetof (struct vms_egsy, flags) + 2 > gsd_size)
+	      goto too_small;
 	    old_flags = bfd_getl16 (egsy->flags);
 	    if (old_flags & EGSY__V_DEF)
 	      nameoff = ESDF__B_NAMLNG;
@@ -1321,11 +1330,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	      nameoff = ESRF__B_NAMLNG;
 
 	    if (nameoff >= gsd_size)
-	      {
-		_bfd_error_handler (_("ECSD__C_SYM record is too small"));
-		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
-	      }
+	      goto too_small;
 	    entry = add_symbol (abfd, vms_rec + nameoff, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
@@ -1343,8 +1348,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 	    if (old_flags & EGSY__V_DEF)
 	      {
-		struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
-		long psindx;
+		struct vms_esdf *esdf = (struct vms_esdf *) vms_rec;
 
 		entry->value = bfd_getl64 (esdf->value);
 		if (PRIV (sections) == NULL)
@@ -1354,7 +1358,9 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 		/* PR 21813: Check for an out of range index.  */
 		if (psindx < 0 || psindx >= (int) PRIV (section_count))
 		  {
-		    _bfd_error_handler (_("corrupt EGSD record: its psindx field is too big (%#lx)"),
+		  bad_psindx:
+		    _bfd_error_handler (_("corrupt EGSD record: its psindx "
+					  "field is too big (%#lx)"),
 					psindx);
 		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
@@ -1367,14 +1373,9 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 		    entry->code_value = bfd_getl64 (esdf->code_address);
 		    psindx = bfd_getl32 (esdf->ca_psindx);
-		/* PR 21813: Check for an out of range index.  */
+		    /* PR 21813: Check for an out of range index.  */
 		    if (psindx < 0 || psindx >= (int) PRIV (section_count))
-		      {
-			_bfd_error_handler (_("corrupt EGSD record: its psindx field is too big (%#lx)"),
-					    psindx);
-			bfd_set_error (bfd_error_bad_value);
-			return FALSE;
-		      }
+		      goto bad_psindx;
 		    entry->code_section = PRIV (sections)[psindx];
 		  }
 	      }
@@ -1391,11 +1392,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    old_flags = bfd_getl16 (egst->header.flags);
 
 	    if (nameoff >= gsd_size)
-	      {
-		_bfd_error_handler (_("ECSD__C_SYMG record is too small"));
-		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
-	      }
+	      goto too_small;
 	    entry = add_symbol (abfd, &egst->namlng, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
@@ -1408,19 +1405,12 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 	    if (old_flags & EGSY__V_REL)
 	      {
-		long psindx;
-
 		if (PRIV (sections) == NULL)
 		  return FALSE;
 		psindx = bfd_getl32 (egst->psindx);
 		/* PR 21813: Check for an out of range index.  */
 		if (psindx < 0 || psindx >= (int) PRIV (section_count))
-		  {
-		    _bfd_error_handler (_("corrupt EGSD record: its psindx field is too big (%#lx)"),
-					psindx);
-		    bfd_set_error (bfd_error_bad_value);
-		    return FALSE;
-		  }
+		  goto bad_psindx;
 		entry->section = PRIV (sections)[psindx];
 	      }
 	    else

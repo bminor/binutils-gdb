@@ -1,3 +1,15 @@
+2019-12-31  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Don't overflow when checking
+	offset.  Don't overflow when checking rec_size, and do allow
+	rec_size to the end of the buffer.  Ensure eisd->type can be
+	accessed, not just the first 32 bytes.  Don't call
+	_bfd_vms_save_counted_string with zero length remaining.  Fail
+	on empty string section name.
+	(_bfd_vms_slurp_egsd): Formatting.  Catch more reads past end
+	of record size.  Correct remaining length calculation.  Fail
+	on empty string section name.  Consolidate error paths.
+
 2019-12-30  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (alpha_vms_free_private): New function, extracted..
