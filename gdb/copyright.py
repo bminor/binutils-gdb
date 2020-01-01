@@ -34,6 +34,7 @@ import datetime
 import os
 import os.path
 import subprocess
+import sys
 
 
 def get_update_list():
@@ -143,6 +144,8 @@ def main ():
     """The main subprogram."""
     if not os.path.isfile("gnulib/import/extra/update-copyright"):
         print "Error: This script must be called from the gdb directory."
+        sys.exit(1)
+
     root_dir = os.path.dirname(os.getcwd())
     os.chdir(root_dir)
 
