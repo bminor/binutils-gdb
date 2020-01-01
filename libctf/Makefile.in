@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2019 Free Software Foundation, Inc.
+#   Copyright (C) 2019-2020 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -110,13 +110,13 @@ host_triplet = @host@
 @NEED_CTF_QSORT_R_TRUE@am__append_1 = ctf-qsort_r.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
+	$(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/override.m4 \
 	$(top_srcdir)/../config/warnings.m4 \
-	$(top_srcdir)/../config/zlib.m4 \
-	$(top_srcdir)/../bfd/acinclude.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
 	$(top_srcdir)/configure.ac
