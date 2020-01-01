@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # Copyright (C) 2011-2019 Free Software Foundation, Inc.
 #
@@ -31,6 +31,7 @@ This removes the bulk of the changes which are most likely to be correct.
 """
 
 import datetime
+import locale
 import os
 import os.path
 import subprocess
@@ -84,7 +85,8 @@ def update_files(update_list):
     update_cmd += update_list
 
     p = subprocess.Popen(update_cmd, stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
+                         stderr=subprocess.STDOUT,
+                         encoding=locale.getpreferredencoding())
     update_out = p.communicate()[0]
 
     # Process the output.  Typically, a lot of files do not have
@@ -95,20 +97,18 @@ def update_files(update_list):
     # the line out from the output, since there is nothing more to do,
     # short of looking at each file and seeing which notice is appropriate.
     # Too much work! (~4,000 files listed as of 2012-01-03).
-    update_out = update_out.splitlines()
+    update_out = update_out.splitlines(keepends=False)
     warning_string = ': warning: copyright statement not found'
     warning_len = len(warning_string)
 
     for line in update_out:
-        if line.endswith('\n'):
-            line = line[:-1]
         if line.endswith(warning_string):
             filename = line[:-warning_len]
             if may_have_copyright_notice(filename):
-                print line
+                print(line)
         else:
             # Unrecognized file format. !?!
-            print "*** " + line
+            print("*** " + line)
 
 
 def may_have_copyright_notice(filename):
@@ -128,11 +128,15 @@ def may_have_copyright_notice(filename):
     # 50 lines...
     MAX_LINES = 50
 
-    fd = open(filename)
+    # We don't really know what encoding each file might be following,
+    # so just open the file as a byte stream. We only need to search
+    # for a pattern that should be the same regardless of encoding,
+    # so that should be good enough.
+    fd = open(filename, 'rb')
 
     lineno = 1
     for line in fd:
-        if 'Copyright' in line:
+        if b'Copyright' in line:
             return True
         lineno += 1
         if lineno > 50:
@@ -147,7 +151,7 @@ def main ():
 
     if not (os.path.isdir('gdb') and
             os.path.isfile("gnulib/import/extra/update-copyright")):
-        print "Error: This script must be called from the gdb directory."
+        print("Error: This script must be called from the gdb directory.")
         sys.exit(1)
 
     update_list = get_update_list()
@@ -156,19 +160,19 @@ def main ():
     # Remind the user that some files need to be updated by HAND...
 
     if MULTIPLE_COPYRIGHT_HEADERS:
-        print
+        print()
         print("\033[31m"
               "REMINDER: Multiple copyright headers must be updated by hand:"
               "\033[0m")
         for filename in MULTIPLE_COPYRIGHT_HEADERS:
-            print "  ", filename
+            print("  ", filename)
 
     if BY_HAND:
-        print
-        print "\033[31mREMINDER: The following files must be updated by hand." \
-              "\033[0m"
+        print()
+        print("\033[31mREMINDER: The following files must be updated by hand." \
+              "\033[0m")
         for filename in BY_HAND:
-            print "  ", filename
+            print("  ", filename)
 
 ############################################################################
 #
