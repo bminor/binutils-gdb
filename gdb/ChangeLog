@@ -1,3 +1,7 @@
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* top.c (print_gdb_version): Change copyright year to 2020.
+
 2019-12-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* configure: Regenerate.
