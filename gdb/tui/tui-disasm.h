@@ -1,6 +1,6 @@
 /* Disassembly display.
 
-   Copyright (C) 1998-2019 Free Software Foundation, Inc.
+   Copyright (C) 1998-2020 Free Software Foundation, Inc.
    
    Contributed by Hewlett-Packard Company.
 

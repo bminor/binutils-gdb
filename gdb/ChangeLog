@@ -1,5 +1,10 @@
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update copyright year range in all the GDB files automatically
+	handled by our copyright.py script.
+
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py: Convert to Python 3.
 
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
