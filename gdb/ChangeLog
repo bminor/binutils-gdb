@@ -1,5 +1,10 @@
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py: Adapt after move of gnulib directory from gdb
+	directory to toplevel directory.
+
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (main): Exit if run from the wrong directory.
 
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>

@@ -45,7 +45,7 @@ def get_update_list():
     the files are relative to that root directory.
     """
     result = []
-    for gdb_dir in ('gdb', 'sim', 'include/gdb'):
+    for gdb_dir in ('gdb', 'gnulib', 'sim', 'include/gdb'):
         for root, dirs, files in os.walk(gdb_dir, topdown=True):
             for dirname in dirs:
                 reldirname = "%s/%s" % (root, dirname)
@@ -80,7 +80,7 @@ def update_files(update_list):
     os.environ['UPDATE_COPYRIGHT_USE_INTERVALS'] = '2'
 
     # Perform the update, and save the output in a string.
-    update_cmd = ['bash', 'gdb/gnulib/import/extra/update-copyright']
+    update_cmd = ['bash', 'gnulib/import/extra/update-copyright']
     update_cmd += update_list
 
     p = subprocess.Popen(update_cmd, stdout=subprocess.PIPE,
@@ -142,12 +142,13 @@ def may_have_copyright_notice(filename):
 
 def main ():
     """The main subprogram."""
-    if not os.path.isfile("gnulib/import/extra/update-copyright"):
-        print "Error: This script must be called from the gdb directory."
-        sys.exit(1)
-
     root_dir = os.path.dirname(os.getcwd())
     os.chdir(root_dir)
+
+    if not (os.path.isdir('gdb') and
+            os.path.isfile("gnulib/import/extra/update-copyright")):
+        print "Error: This script must be called from the gdb directory."
+        sys.exit(1)
 
     update_list = get_update_list()
     update_files (update_list)
@@ -185,7 +186,7 @@ def main ():
 EXCLUDE_LIST = (
     'gdb/nat/glibc_thread_db.h',
     'gdb/CONTRIBUTE',
-    'gdb/gnulib/import'
+    'gnulib/import'
 )
 
 # Files which should not be modified, either because they are
