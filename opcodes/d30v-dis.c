@@ -271,14 +271,10 @@ print_insn (struct disassemble_info *info,
 	  /* IMM6S3 is unsigned.  */
 	  if (oper->flags & OPERAND_SIGNED || bits == 32)
 	    {
-	      long max;
-	      max = (1 << (bits - 1));
-	      if (val & max)
+	      unsigned int sign = 1u << (bits - 1);
+	      if (val & sign)
 		{
-		  if (bits == 32)
-		    val = -val;
-		  else
-		    val = -val & ((1 << bits) - 1);
+		  val = -val & (sign + sign - 1);
 		  neg = 1;
 		}
 	    }
@@ -303,13 +299,11 @@ print_insn (struct disassemble_info *info,
 	{
 	  if (oper->flags & OPERAND_SIGNED)
 	    {
-	      int max = (1 << (bits - 1));
+	      unsigned int sign = 1u << (bits - 1);
 
-	      if (val & max)
+	      if (val & sign)
 		{
-		  val = -val;
-		  if (bits < 32)
-		    val &= ((1 << bits) - 1);
+		  val = -val & (sign + sign - 1);
 		  (*info->fprintf_func) (info->stream, "-");
 		}
 	    }
