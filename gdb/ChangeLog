@@ -1,5 +1,9 @@
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py: Convert to Python 3.
+
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py: Adapt after move of gnulib directory from gdb
 	directory to toplevel directory.
 
