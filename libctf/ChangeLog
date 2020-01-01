@@ -1,3 +1,7 @@
+2020-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2019-10-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* swap.h (bswap_16, bswap_32, bswap_64): Make static.
