@@ -1,3 +1,7 @@
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo, refcard.tex: Update copyright year range.
+
 2019-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texi (Symbols In Python): Remove duplicate description of

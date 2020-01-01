@@ -1,5 +1,9 @@
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh: Update copyright year range of generated files.
+
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Update copyright year range in all GDB files.
 
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
