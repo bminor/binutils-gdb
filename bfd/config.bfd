@@ -207,7 +207,7 @@ wasm32)		 targ_archs=bfd_wasm32_arch ;;
 x86_64*)	 targ_archs=bfd_i386_arch ;;
 xtensa*)	 targ_archs=bfd_xtensa_arch ;;
 xgate)		 targ_archs=bfd_xgate_arch ;;
-z80|r800)	 targ_archs=bfd_z80_arch ;;
+z80*|r800|z180|gbz80|ez80*)	 targ_archs=bfd_z80_arch ;;
 z8k*)		 targ_archs=bfd_z8k_arch ;;
 *)		 targ_archs=bfd_${targ_cpu}_arch ;;
 esac
@@ -1404,8 +1404,13 @@ case "${targ}" in
     targ_defvec=xc16x_elf32_vec
     ;;
 
-  z80-*-*)
+  z80-*-coff)
     targ_defvec=z80_coff_vec
+    targ_underscore=no
+    ;;
+
+  z80-*-elf)
+    targ_defvec=z80_elf32_vec
     targ_underscore=no
     ;;
 

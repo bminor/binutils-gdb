@@ -1,3 +1,22 @@
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* Makefile.am: Add z80-elf target support.
+	* configure.ac: Likewise.
+	* targets.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* config.bfd: Add z80-elf target support and new arches: ez80 and
+	z180.
+	* elf32-z80.c: New file.
+	* archures.c: Add new z80 architectures: eZ80 and Z180.
+	* coffcode.h: Likewise.
+	* cpu-z80.c: Likewise.
+	* coff-z80.c: Add new relocations for Z80 target and local label
+	check.
+	* reloc.c: Add new relocs.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2020-01-02  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 25210

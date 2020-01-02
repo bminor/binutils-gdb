@@ -1,3 +1,7 @@
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* coff/internal.h: Add defintions of Z80 reloc names.
+
 2020-01-02  Christian Biesinger  <cbiesinger@google.com>
 
 	* opcode/s12z.h: Undef REG_Y.

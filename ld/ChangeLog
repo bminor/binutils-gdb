@@ -1,3 +1,29 @@
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* Makefile.am: Add new target z80-elf
+	* configure.tgt: Likewise.
+	* Makefile.in: Regenerate.
+	* emultempl/z80.em: Add support for eZ80 and Z180 architectures.
+	* emulparams/elf32z80.sh: New file.
+	* emultempl/z80elf.em: Likewise.
+	* testsuite/ld-elf/comm-data4.s: Fix for Z80.
+	* testsuite/ld-elf/comm-data5.s: Fix for Z80.
+	* testsuite/ld-scripts/fill16.d: Fix for Z80.
+	* testsuite/ld-z80/arch_ez80_adl.d: Likewise.
+	* testsuite/ld-z80/arch_ez80_z80.d: Likewise.
+	* testsuite/ld-z80/arch_r800.d: Likewise.
+	* testsuite/ld-z80/arch_z180.d: Likewise.
+	* testsuite/ld-z80/arch_z80.d: Likewise.
+	* testsuite/ld-z80/comb_arch_ez80_z80.d: Likewise.
+	* testsuite/ld-z80/comb_arch_z180.d: Likewise.
+	* testsuite/ld-z80/labels.s: Likewise.
+	* testsuite/ld-z80/relocs.s: Likewise.
+	* testsuite/ld-z80/relocs_b_ez80.d: Likewise.
+	* testsuite/ld-z80/relocs_b_z80.d: Likewise.
+	* testsuite/ld-z80/relocs_f_z80.d: Likewise.
+	* testsuite/ld-z80/z80.exp: Likewise.
+	* NEWS: Mention the new support.
+
 2020-01-02  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 25210

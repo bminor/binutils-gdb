@@ -1,5 +1,15 @@
 -*- text -*-
 
+* Add support for Zilog eZ80 and Zilog Z180 CPUs.
+
+* Add support for z80-elf target.
+
+* Add support for relocation of each byte or word of multibyte value to Z80
+  targets (just use right shift to 0, 8, 16, or 24 bits or AND operation
+  with 0xff/0xffff mask): ld a, label >> 16 \ ld hl, label & 0xffff
+
+* Add SDCC support for Z80 targets.
+
 Changes in 2.33:
 
 * Add support for the Arm Scalable Vector Extension version 2 (SVE2)

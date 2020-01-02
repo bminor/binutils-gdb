@@ -1012,6 +1012,9 @@ xstormy16-*-*)		targ_emul=elf32xstormy16
 			;;
 xtensa*-*-*)		targ_emul=elf32xtensa
 			;;
+z80-*-elf*)		targ_emul=elf32z80
+			targ_extra_ofiles="ldelf.o ldelfgen.o"
+			;;
 z80-*-coff)		targ_emul=z80
 			targ_extra_ofiles=
 			;;

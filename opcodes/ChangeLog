@@ -1,3 +1,7 @@
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* z80-dis.c: Add support for eZ80 and Z80 instructions.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

@@ -630,7 +630,10 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset Z80
 
 @emph{Target Z80 options:}
-  [@b{-z80}] [@b{-r800}]
+  [@b{-z80}]|[@b{-z180}]|[@b{-r800}]|[@b{-ez80}]|[@b{-ez80-adl}]
+  [@b{-strict}]|[@b{-full}]
+  [@b{-with-inst=@var{INST}[,...]}] [@b{-Wnins @var{INST}[,...]}]
+  [@b{-without-inst=@var{INST}[,...]}] [@b{-Fins @var{INST}[,...]}]
   [@b{ -ignore-undocumented-instructions}] [@b{-Wnud}]
   [@b{ -ignore-unportable-instructions}] [@b{-Wnup}]
   [@b{ -warn-undocumented-instructions}] [@b{-Wud}]
@@ -1943,10 +1946,34 @@ Xtensa processor.
 The following options are available when @value{AS} is configured for
 a Z80 family processor.
 @table @gcctabopt
+
 @item -z80
 Assemble for Z80 processor.
 @item -r800
 Assemble for R800 processor.
+@item -z180
+Assemble for Z180 processor.
+@item -ez80
+Assemble for eZ80 processor in Z80 memory mode by default.
+@item -ez80-adl
+Assemble for eZ80 processor in ADL memory mode by default.
+
+@item  @code{-colonless}
+Accept colonless labels. All names at line begin are treated as labels.
+@item  @code{-sdcc}
+Accept assembler code produces by SDCC.
+
+@item  @code{-strict}
+Accept documented instructions only.
+@item  @code{-full}
+Accept all known Z80 instructions.
+@item  @code{-with-inst=INST[,...]}
+@itemx @code{-Wnins INST[,...]}
+Enable specified undocumented instruction(s).
+@item  @code{-without-inst=INST[,...]}
+@itemx @code{-Fins INST[,...]}
+Disable specified undocumented instruction(s).
+
 @item  -ignore-undocumented-instructions
 @itemx -Wnud
 Assemble undocumented Z80 instructions that also work on R800 without warning.
@@ -1965,6 +1992,22 @@ Treat all undocumented instructions as errors.
 @item  -forbid-unportable-instructions
 @itemx -Fup
 Treat undocumented Z80 instructions that do not work on R800 as errors.
+@end table
+
+Folowing undocumented instructions may be enabled/disabled by
+@code{-with-inst}/@code{-without-inst}:
+@table @gcctabopt
+@item  @code{idx-reg-halves}
+All operations with halves of index registers (IXL, IXH, IYL, IYH).
+@item  @code{sli}
+SLI or SLL instruction.
+@item  @code{op-ii-ld}
+Istructions like @code{<op> (<ii>+<d>),<r>}, where @code{<op>}
+is shift or bit manipulation instruction (RLC, SLA, SET, RES...).
+@item @code{in-f-c}
+Instruction @code{IN F,(C)}.
+@item @code{out-c-0}
+Instruction @code{OUT (C),0}
 @end table
 @end ifset
 
@@ -6770,7 +6813,7 @@ If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
 
 @ifset Z80
-On Z80 @code{set} is a real instruction, use
+On Z80 @code{set} is a real instruction, use @code{.set} or
 @samp{@var{symbol} defl @var{expression}} instead.
 @end ifset
 

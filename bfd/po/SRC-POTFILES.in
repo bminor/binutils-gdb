@@ -236,6 +236,7 @@ elf32-xc16x.c
 elf32-xgate.c
 elf32-xstormy16.c
 elf32-xtensa.c
+elf32-z80.c
 elf32.c
 elf64-alpha.c
 elf64-bpf.c

@@ -27,41 +27,90 @@
 @section Options
 @cindex Z80 options
 @cindex options for Z80
-The Zilog Z80 and Ascii R800 version of @code{@value{AS}} have a few machine
-dependent options.
 @table @option
 @cindex @code{-z80} command-line option, Z80
 @item -z80
-Produce code for the Z80 processor. There are additional options to
-request warnings and error messages for undocumented instructions.
-@item  -ignore-undocumented-instructions
-@itemx -Wnud
+Produce code for the Z80 processor. By default accepted undocumented
+operations with halves of index registers (IXL, IXH, IYL, IYH) and
+instuction IN F,(C). Other useful undocumented instructions produces
+warnings. Undocumented instructions may not work on some CPUs, use
+them on your own risk.
+
+@cindex @code{-r800} command-line option, R800
+@item -r800
+Produce code for the R800 processor.
+
+@cindex @code{-z180} command-line option, Z180
+@item -z180
+Produce code for the Z180 processor.
+
+@cindex @code{-ez80} command-line option, eZ80
+@item -ez80
+Produce code for the eZ80 processor in Z80 memory mode by default.
+
+@cindex @code{-ez80-adl} command-line option, eZ80
+@item -ez80-adl
+Produce code for the eZ80 processor in ADL memory mode by default.
+
+@cindex Compatibility options
+@item  @code{-colonless}
+Accept colonless labels. All names at line begin are treated as labels.
+
+@item  @code{-sdcc}
+Accept assembler code produces by SDCC.
+
+@cindex Undocumented instruction control
+@item  @code{-strict}
+Accept documented instructions only.
+
+@item  @code{-full}
+Accept all known Z80 instructions.
+
+@item  @code{-with-inst=INST[,...]}
+@itemx @code{-Wnins INST[,...]}
+Enable specified undocumented instruction(s).
+
+@item  @code{-without-inst=INST[,...]}
+@itemx @code{-Fins INST[,...]}
+Disable specified undocumented instruction(s).
+
+@cindex Obsolete options
+@item  @code{-ignore-undocumented-instructions}
+@itemx @code{-Wnud}
 Silently assemble undocumented Z80-instructions that have been adopted
-as documented R800-instructions.
-@item  -ignore-unportable-instructions
-@itemx -Wnup
+as documented R800-instructions .
+@item  @code{-ignore-unportable-instructions}
+@itemx @code{-Wnup}
 Silently assemble all undocumented Z80-instructions.
-@item  -warn-undocumented-instructions
-@itemx -Wud
+@item  @code{-warn-undocumented-instructions}
+@itemx @code{-Wud}
 Issue warnings for undocumented Z80-instructions that work on R800, do
 not assemble other undocumented instructions without warning.
-@item  -warn-unportable-instructions
-@itemx -Wup
+@item  @code{-warn-unportable-instructions}
+@itemx @code{-Wup}
 Issue warnings for other undocumented Z80-instructions, do not treat any
 undocumented instructions as errors.
-@item  -forbid-undocumented-instructions
-@itemx -Fud
+@item  @code{-forbid-undocumented-instructions}
+@itemx @code{-Fud}
 Treat all undocumented z80-instructions as errors.
 @item  -forbid-unportable-instructions
-@itemx -Fup
+@itemx @code{-Fup}
 Treat undocumented z80-instructions that do not work on R800 as errors.
+@end table
 
-@cindex @code{-r800} command-line option, Z80
-@item -r800
-Produce code for the R800 processor. The assembler does not support
-undocumented instructions for the R800.
-In line with common practice, @code{@value{AS}} uses Z80 instruction names
-for the R800 processor, as far as they exist.
+Known undocumented instructions.
+@table @option
+@cindex Known undocumented instructions
+@item  @code{idx-reg-halves}
+All operations with halves of index registers (IXL, IXH, IYL, IYH).
+@item  @code{sli}
+SLI or SLL instruction. Same as @code{SLA r; INC r}.
+@item  @code{op-ii-ld}
+Istructions like @code{<op> (<ii>+<d>),<r>}. For example: @code{RL (IX+5),C}
+@item @code{in-f-c}
+Instruction @code{IN F,(C)}.
+@item @code{out-c-0}
+Instruction @code{OUT (C),0}
 @end table
 
 @cindex Z80 Syntax
@@ -158,6 +207,11 @@ compatibility with other assemblers.
 These are the additional directives in @code{@value{AS}} for the Z80:
 
 @table @code
+@item assume @var{ADL}@samp{=}@var{expression}
+Set ADL status for eZ80. Non-null value enable compilation ADL mode else
+used Z80 mode. ADL and Z80 mode produces incompatible object code. Mixing
+both of them within one binary may lead problems with disassembler.
+
 @item db @var{expression}|@var{string}[,@var{expression}|@var{string}...]
 @itemx defb @var{expression}|@var{string}[,@var{expression}|@var{string}...]
 For each @var{string} the characters are copied to the object file, for
@@ -192,9 +246,6 @@ These directives set the value of @var{symbol} to @var{expression}. If
 @code{equ} is used, it is an error if @var{symbol} is already defined.
 Symbols defined with @code{equ} are not protected from redefinition.
 
-@item set
-This is a normal instruction on Z80, and not an assembler directive.
-
 @item psect @var{name}
 A synonym for @xref{Section}, no second argument should be given.
 @ignore
@@ -223,18 +274,19 @@ The section is marked as read only.
 
 @node Z80 Opcodes
 @section Opcodes
-In line with common practice, Z80 mnemonics are used for both the Z80 and
-the R800.
+In line with common practice, Z80 mnemonics are used for the Z80,
+the Z180, eZ80 and the R800.
 
 In many instructions it is possible to use one of the half index
 registers (@samp{ixl},@samp{ixh},@samp{iyl},@samp{iyh}) in stead of an
 8-bit general purpose register. This yields instructions that are
-documented on the R800 and undocumented on the Z80.
-Similarly @code{in f,(c)} is documented on the R800 and undocumented on
-the Z80.
+documented on the eZ80 and the R800, undocumented on the Z80 and
+unsupported on the Z180.
+Similarly @code{in f,(c)} is documented on the R800, undocumented on
+the Z80 and unsupported on the Z180 and the eZ80.
 
 The assembler also supports the following undocumented Z80-instructions,
-that have not been adopted in the R800 instruction set:
+that have not been adopted in any other instruction set:
 @table @code
 @item out (c),0
 Sends zero to the port pointed to by register c.
@@ -266,3 +318,6 @@ As above, but with @samp{iy} instead of @samp{ix}.
 The web site at @uref{http://www.z80.info} is a good starting place to
 find more information on programming the Z80.
 
+You may enable or disable any of these instructions for any target CPU
+even this instruction is not supported by any real CPU of this type.
+Useful for custom CPU cores.

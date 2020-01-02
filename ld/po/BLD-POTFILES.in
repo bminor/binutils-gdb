@@ -161,6 +161,7 @@ eelf32xc16xl.c
 eelf32xc16xs.c
 eelf32xstormy16.c
 eelf32xtensa.c
+eelf32z80.c
 eelf64_aix.c
 eelf64_ia64.c
 eelf64_ia64_fbsd.c

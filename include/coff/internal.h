@@ -808,5 +808,11 @@ struct internal_reloc
 #define R_OFF8    0x32		/* 8 bit signed abs, for (i[xy]+d) */
 #define R_IMM24   0x33          /* 24 bit abs */
 /* R_JR, R_IMM8, R_IMM16, R_IMM32 - as for Z8k */
+#define R_BYTE0  0x34		/* first (lowest) 8 bits of multibyte value */
+#define R_BYTE1  0x35		/* second 8 bits of multibyte value */
+#define R_BYTE2  0x36		/* third 8 bits of multibyte value */
+#define R_BYTE3  0x37		/* fourth (highest) 8 bits of multibyte value */
+#define R_WORD0  0x38		/* lowest 16 bits of 32 or 24 bit value */
+#define R_WORD1  0x39		/* highest 16 bits of 32 or 24 bit value */
 
 #endif /* GNU_COFF_INTERNAL_H */

@@ -1,3 +1,8 @@
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* readelf.c: Add support for new Z*) relocations and machine
+	types.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

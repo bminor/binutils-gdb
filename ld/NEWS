@@ -2,6 +2,13 @@
 
 * cr16c support removed.
 
+* Add support for z80-elf.
+
+* Add support for relocation of each byte or word of multibyte value to Z80
+  targets.
+
+* Add support for Zilog eZ80 (both ADL and Z80 mode) and Zilog Z180 CPUs.
+
 Changes in 2.33:
 
 * Add command-line option --no-print-map-discarded.
