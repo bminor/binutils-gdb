@@ -441,6 +441,12 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	}
     }
 
+  if (expptr == 0)
+    {
+      /* no section contains export table rva */
+      return;
+    }
+
   export_rva = export_opthdrrva;
   export_size = export_opthdrsize;
 
