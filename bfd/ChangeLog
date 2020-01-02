@@ -1,3 +1,9 @@
+2020-01-02  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25210
+	PR 24753
+	* elfnn-aarch64.c (_bfd_aarch64_create_stub_section): Set ELF class.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

@@ -96,6 +96,7 @@ run_dump_test "erratum843419-far-adr"
 run_dump_test "erratum843419-far-full"
 run_dump_test "erratum843419-full"
 run_dump_test "erratum843419-no-args"
+run_dump_test "erratum835769-843419"
 
 # Relocation Tests
 run_dump_test_lp64 "weak-undefined"

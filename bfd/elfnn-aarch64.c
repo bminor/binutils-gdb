@@ -3177,6 +3177,10 @@ _bfd_aarch64_create_stub_section (asection *section,
   if (s_name == NULL)
     return NULL;
 
+  /* PR 25210.  Set the right class on the stub_bfd.  */
+  elf_elfheader (htab->stub_bfd)->e_ident[EI_CLASS] = ELFCLASSNN;
+  BFD_ASSERT (ELFCLASSNN == get_elf_backend_data (htab->stub_bfd)->s->elfclass);
+
   memcpy (s_name, section->name, namelen);
   memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
   return (*htab->add_stub_section) (s_name, section);

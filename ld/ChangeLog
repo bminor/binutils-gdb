@@ -1,3 +1,12 @@
+2020-01-02  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25210
+	PR 24753
+	* emultempl/aarch64elf.em (elf${ELFSIZE}_aarch64_add_stub_section):
+	Remove SEC_LINKER_CREATED.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add erratum835769-843419.
+	* testsuite/ld-aarch64/erratum835769-843419.d: New test.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
