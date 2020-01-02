@@ -1,5 +1,13 @@
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
+	* format.c (bfd_check_format_matches): Add preserve_match.
+	Save initial bfd state in "preserve", matched bfd state in
+	"preserve_match".  Save just the first match.  Release
+	bfd_alloc memory.  Restore and finish preserved state as
+	appropriate on all function exit paths.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
 	* mmo.c (mmo_mkobject): Allocate tdata with bfd_zalloc.
 
 2020-01-04  Alan Modra  <amodra@gmail.com>
