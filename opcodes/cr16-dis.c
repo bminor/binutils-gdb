@@ -319,8 +319,7 @@ cr16_match_opcode (void)
 {
   unsigned long mask;
   /* The instruction 'constant' opcode doesn't exceed 32 bits.  */
-  unsigned long doubleWord = (cr16_words[1]
-			     + (cr16_words[0] << 16)) & 0xffffffff;
+  unsigned long doubleWord = cr16_words[1] + ((unsigned) cr16_words[0] << 16);
 
   /* Start searching from end of instruction table.  */
   instruction = &cr16_instruction[NUMOPCODES - 2];
