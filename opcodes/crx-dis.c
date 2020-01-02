@@ -337,7 +337,7 @@ match_opcode (void)
   unsigned int mask;
 
   /* The instruction 'constant' opcode doewsn't exceed 32 bits.  */
-  unsigned int doubleWord = (words[1] + (words[0] << 16)) & 0xffffffff;
+  unsigned int doubleWord = words[1] + ((unsigned) words[0] << 16);
 
   /* Start searching from end of instruction table.  */
   instruction = &crx_instruction[NUMOPCODES - 2];

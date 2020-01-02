@@ -1,5 +1,9 @@
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
+	* crx-dis.c (match_opcode): Avoid shift left of signed value.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
 	* d30v-dis.c (print_insn): Avoid signed overflow in left shift.
 
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
