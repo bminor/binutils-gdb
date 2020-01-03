@@ -5073,7 +5073,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   INT8MATMUL_SVE_INSNC ("usdot",  0x44a01800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
   INT8MATMUL_SVE_INSNC ("sudot",  0x44a01c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_INDEX), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),
   F32MATMUL_SVE_INSNC ("fmmla",   0x64a0e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_S, 0, C_SCAN_MOVPRFX, 0),
-  F64MATMUL_SVE_INSNC ("fmmla",   0x64c0e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, C_SCAN_MOVPRFX, 0),
+  F64MATMUL_SVE_INSNC ("fmmla",   0x64e0e400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, C_SCAN_MOVPRFX, 0),
   F64MATMUL_SVE_INSN ("ld1rob",  0xa4200000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_BZU, F_OD(1), 0),
   F64MATMUL_SVE_INSN ("ld1roh",  0xa4a00000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_HZU, F_OD(1), 0),
   F64MATMUL_SVE_INSN ("ld1row",  0xa5200000, 0xffe0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX),  OP_SVE_SZU, F_OD(1), 0),

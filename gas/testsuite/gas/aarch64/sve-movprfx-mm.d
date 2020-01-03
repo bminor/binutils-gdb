@@ -21,4 +21,4 @@ Disassembly of section \.text:
  *[0-9a-f]+:	0420bc11 	movprfx	z17, z0
  *[0-9a-f]+:	64bbe6b1 	fmmla	z17\.s, z21\.s, z27\.s
  *[0-9a-f]+:	0420bc11 	movprfx	z17, z0
- *[0-9a-f]+:	64dbe6b1 	fmmla	z17\.d, z21\.d, z27\.d
+ *[0-9a-f]+:	64fbe6b1 	fmmla	z17\.d, z21\.d, z27\.d

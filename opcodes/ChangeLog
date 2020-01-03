@@ -1,3 +1,9 @@
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
+	FMMLA encoding.
+	* opcodes/aarch64-dis-2.c: Re-generate.
+
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* z80-dis.c: Add support for eZ80 and Z80 instructions.

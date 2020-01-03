@@ -6,8 +6,8 @@
 Disassembly of section \.text:
 
 0+ <\.text>:
- *[0-9a-f]+:	64dbe6b1 	fmmla	z17\.d, z21\.d, z27\.d
- *[0-9a-f]+:	64c0e400 	fmmla	z0\.d, z0\.d, z0\.d
+ *[0-9a-f]+:	64fbe6b1 	fmmla	z17\.d, z21\.d, z27\.d
+ *[0-9a-f]+:	64e0e400 	fmmla	z0\.d, z0\.d, z0\.d
  *[0-9a-f]+:	a43b17f1 	ld1rob	{z17\.b}, p5/z, \[sp, x27\]
  *[0-9a-f]+:	a42003e0 	ld1rob	{z0\.b}, p0/z, \[sp, x0\]
  *[0-9a-f]+:	a4bb17f1 	ld1roh	{z17\.h}, p5/z, \[sp, x27\]

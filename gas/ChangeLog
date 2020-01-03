@@ -1,3 +1,8 @@
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/aarch64/f64mm.d,
+	testsuite/gas/aarch64/sve-movprfx-mm.d: Adjust expectations.
+
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* config/tc-z80.c: Add new architectures: Z180 and eZ80. Add
