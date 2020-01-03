@@ -1,3 +1,19 @@
+2020-01-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 25308
+	* elf-properties.c (_bfd_elf_convert_gnu_properties): Check the
+	return value from bfd_malloc.
+	* elf32-arm.c (bfd_elf32_arm_vfp11_fix_veneer_locations): Likewise.
+	(bfd_elf32_arm_stm32l4xx_fix_veneer_locations): Likewise.
+	(elf32_arm_filter_cmse_symbols): Likewise.
+	(elf32_arm_write_section): Likewise.
+	* mach-o.c (bfd_mach_o_core_fetch_environment): Likewise.
+	(bfd_mach_o_follow_dsym): Likewise.
+	* pef.c (bfd_pef_print_loader_section): Likewise.
+	(bfd_pef_scan_start_address): Likewise.
+	(bfd_pef_parse_function_stubs): Likewise.
+	(bfd_pef_parse_symbols): Likewise.
+
 2020-01-03  Sergei Trofimovich  <siarheit@google.com>
 
         * elfnn-ia64.c (elfNN_ia64_merge_private_bfd_data): don't fail

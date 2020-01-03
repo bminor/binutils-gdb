@@ -5752,6 +5752,8 @@ bfd_mach_o_core_fetch_environment (bfd *abfd,
 	  unsigned char *buf = bfd_malloc (1024);
 	  unsigned long size = 1024;
 
+	  if (buf == NULL)
+	    return -1;
 	  for (;;)
 	    {
 	      bfd_size_type nread = 0;
@@ -5797,6 +5799,8 @@ bfd_mach_o_core_fetch_environment (bfd *abfd,
 		      bottom = seg->fileoff + seg->filesize - offset;
 		      top = seg->fileoff + seg->filesize - 4;
 		      *rbuf = bfd_malloc (top - bottom);
+		      if (*rbuf == NULL)
+			return -1;
 		      *rlen = top - bottom;
 
 		      memcpy (*rbuf, buf + size - *rlen, *rlen);
@@ -5941,6 +5945,9 @@ bfd_mach_o_follow_dsym (bfd *abfd)
   dsym_filename = (char *)bfd_malloc (strlen (base_bfd->filename)
 				       + strlen (dsym_subdir) + 1
 				       + strlen (base_basename) + 1);
+  if (dsym_filename == NULL)
+    return NULL;
+
   sprintf (dsym_filename, "%s%s/%s",
 	   base_bfd->filename, dsym_subdir, base_basename);
 

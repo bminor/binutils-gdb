@@ -447,6 +447,8 @@ bfd_pef_print_loader_section (bfd *abfd, FILE *file)
 
   loaderlen = loadersec->size;
   loaderbuf = bfd_malloc (loaderlen);
+  if (loaderbuf == NULL)
+    return -1;
 
   if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0
       || bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen
@@ -478,6 +480,9 @@ bfd_pef_scan_start_address (bfd *abfd)
 
   loaderlen = loadersec->size;
   loaderbuf = bfd_malloc (loaderlen);
+  if (loaderbuf == NULL)
+    goto end;
+
   if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
     goto error;
   if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)
@@ -753,6 +758,8 @@ bfd_pef_parse_function_stubs (bfd *abfd,
     (header.imported_library_count * sizeof (bfd_pef_imported_library));
   imports = bfd_malloc
     (header.total_imported_symbol_count * sizeof (bfd_pef_imported_symbol));
+  if (libraries == NULL || imports == NULL)
+    goto error;
 
   if (loaderlen < (56 + (header.imported_library_count * 24)))
     goto error;
@@ -897,6 +904,8 @@ bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
     {
       codelen = codesec->size;
       codebuf = bfd_malloc (codelen);
+      if (codebuf == NULL)
+	goto end;
       if (bfd_seek (abfd, codesec->filepos, SEEK_SET) < 0)
 	goto end;
       if (bfd_bread ((void *) codebuf, codelen, abfd) != codelen)
@@ -908,6 +917,8 @@ bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
     {
       loaderlen = loadersec->size;
       loaderbuf = bfd_malloc (loaderlen);
+      if (loaderbuf == NULL)
+	goto end;
       if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
 	goto end;
       if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)

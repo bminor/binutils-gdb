@@ -703,6 +703,8 @@ _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
   if (size > bfd_section_size (isec))
     {
       contents = (bfd_byte *) bfd_malloc (size);
+      if (contents == NULL)
+	return FALSE;
       free (*ptr);
       *ptr = contents;
     }
