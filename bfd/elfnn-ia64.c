@@ -39,6 +39,10 @@
 #define	LOG_SECTION_ALIGN	2
 #endif
 
+#define is_ia64_elf(bfd)			   \
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+   && elf_object_id (bfd) == IA64_ELF_DATA)
+
 typedef struct bfd_hash_entry *(*new_hash_entry_func)
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 
@@ -4732,6 +4736,7 @@ elfNN_ia64_set_private_flags (bfd *abfd, flagword flags)
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
+
 static bfd_boolean
 elfNN_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
@@ -4740,10 +4745,8 @@ elfNN_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_flags;
   bfd_boolean ok = TRUE;
 
-  /* Don't even pretend to support mixed-format linking.  */
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return FALSE;
+  if (!is_ia64_elf (ibfd) || !is_ia64_elf (obfd))
+    return TRUE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
