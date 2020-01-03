@@ -1,5 +1,12 @@
 2020-01-03  Nick Clifton  <nickc@redhat.com>
 
+	PR 25307
+	(bfd_pef_parse_function_stubs): Correct the test that ensures that
+	there is enough data remaining in the code buffer before
+	attempting to read a function stub.
+
+2020-01-03  Nick Clifton  <nickc@redhat.com>
+
 	PR 25308
 	* elf-properties.c (_bfd_elf_convert_gnu_properties): Check the
 	return value from bfd_malloc.

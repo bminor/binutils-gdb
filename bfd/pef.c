@@ -806,7 +806,7 @@ bfd_pef_parse_function_stubs (bfd *abfd,
 	  codepos += 4;
 	}
 
-      if ((codepos + 4) > codelen)
+      if ((codepos + 24) > codelen)
 	break;
 
       ret = bfd_pef_parse_function_stub (abfd, codebuf + codepos, 24, &sym_index);
