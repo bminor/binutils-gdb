@@ -1,5 +1,10 @@
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/aarch64/f64mm.s: Scale index of LD1RO{H,W,D}.
+	* testsuite/gas/aarch64/f64mm.d: Adjust expectations.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/aarch64/i8mm.s: Add 128-bit form tests for
 	by-element usdot. Add 64-bit form tests for by-element sudot.
 	* testsuite/gas/aarch64/i8mm.d: Adjust expectations.

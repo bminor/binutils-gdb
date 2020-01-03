@@ -1,17 +1,22 @@
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
-	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Correct SIMD
+	* aarch64-tbl.h (aarch64_opcode_table): Use
+	SVE_ADDR_RX_LSL{1,2,3} for LD1RO{H,W,D}.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Correct SIMD
 	forms of SUDOT and USDOT.
 
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
-	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Drop 'i' from
+	* aarch64-tbl.h (aarch64_opcode_table): Drop 'i' from
 	uzip{1,2}.
 	* opcodes/aarch64-dis-2.c: Re-generate.
 
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
-	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
+	* aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
 	FMMLA encoding.
 	* opcodes/aarch64-dis-2.c: Re-generate.
 
