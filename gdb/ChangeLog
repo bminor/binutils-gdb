@@ -1,3 +1,9 @@
+2020-01-05  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::thread_architecture): Use bfd_arch_aarch64
+	and bfd_mach_aarch64.
+
 2020-01-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* ui-file.c (stdio_file::can_emit_style_escape)
