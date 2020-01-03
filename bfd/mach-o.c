@@ -618,12 +618,12 @@ cputype (unsigned long value)
 }
 
 static const char *
-cpusubtype (unsigned long cputype, unsigned long cpusubtype)
+cpusubtype (unsigned long cpu_type, unsigned long cpu_subtype)
 {
   static char buffer[128];
 
   buffer[0] = 0;
-  switch (cpusubtype & BFD_MACH_O_CPU_SUBTYPE_MASK)
+  switch (cpu_subtype & BFD_MACH_O_CPU_SUBTYPE_MASK)
     {
     case 0:
       break;
@@ -633,13 +633,13 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
       sprintf (buffer, _("<unknown mask flags>")); break;
     }
 
-  cpusubtype &= ~ BFD_MACH_O_CPU_SUBTYPE_MASK;
+  cpu_subtype &= ~ BFD_MACH_O_CPU_SUBTYPE_MASK;
 
-  switch (cputype)
+  switch (cpu_type)
     {
     case BFD_MACH_O_CPU_TYPE_X86_64:
     case BFD_MACH_O_CPU_TYPE_I386:
-      switch (cpusubtype)
+      switch (cpu_subtype)
 	{
 	case BFD_MACH_O_CPU_SUBTYPE_X86_ALL:
 	  return strcat (buffer, " (X86_ALL)");
@@ -649,7 +649,7 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
       break;
 
     case BFD_MACH_O_CPU_TYPE_ARM:
-      switch (cpusubtype)
+      switch (cpu_subtype)
 	{
 	case BFD_MACH_O_CPU_SUBTYPE_ARM_ALL:
 	  return strcat (buffer, " (ARM_ALL)");
@@ -669,7 +669,7 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
       break;
 
     case BFD_MACH_O_CPU_TYPE_ARM64:
-      switch (cpusubtype)
+      switch (cpu_subtype)
 	{
 	case BFD_MACH_O_CPU_SUBTYPE_ARM64_ALL:
 	  return strcat (buffer, " (ARM64_ALL)");
@@ -684,7 +684,7 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
       break;
     }
 
-  if (cpusubtype != 0)
+  if (cpu_subtype != 0)
     return strcat (buffer, _(" (<unknown>)"));
 
   return buffer;
@@ -5101,8 +5101,8 @@ bfd_mach_o_scan (bfd *abfd,
 		 bfd_mach_o_data_struct *mdata)
 {
   unsigned int i;
-  enum bfd_architecture cputype;
-  unsigned long cpusubtype;
+  enum bfd_architecture cpu_type;
+  unsigned long cpu_subtype;
   unsigned int hdrsize;
 
   hdrsize = mach_o_wide_p (header) ?
@@ -5128,8 +5128,8 @@ bfd_mach_o_scan (bfd *abfd,
   abfd->tdata.mach_o_data = mdata;
 
   bfd_mach_o_convert_architecture (header->cputype, header->cpusubtype,
-				   &cputype, &cpusubtype);
-  if (cputype == bfd_arch_unknown)
+				   &cpu_type, &cpu_subtype);
+  if (cpu_type == bfd_arch_unknown)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
@@ -5138,7 +5138,7 @@ bfd_mach_o_scan (bfd *abfd,
       return FALSE;
     }
 
-  bfd_set_arch_mach (abfd, cputype, cpusubtype);
+  bfd_set_arch_mach (abfd, cpu_type, cpu_subtype);
 
   if (header->ncmds != 0)
     {
@@ -5226,8 +5226,8 @@ bfd_mach_o_gen_mkobject (bfd *abfd)
 const bfd_target *
 bfd_mach_o_header_p (bfd *abfd,
 		     file_ptr hdr_off,
-		     bfd_mach_o_filetype filetype,
-		     bfd_mach_o_cpu_type cputype)
+		     bfd_mach_o_filetype file_type,
+		     bfd_mach_o_cpu_type cpu_type)
 {
   bfd_mach_o_header header;
   bfd_mach_o_data_struct *mdata;
@@ -5254,9 +5254,9 @@ bfd_mach_o_header_p (bfd *abfd,
   /* Check cputype and filetype.
      In case of wildcard, do not accept magics that are handled by existing
      targets.  */
-  if (cputype)
+  if (cpu_type)
     {
-      if (header.cputype != cputype)
+      if (header.cputype != cpu_type)
 	goto wrong;
     }
   else
@@ -5269,9 +5269,9 @@ bfd_mach_o_header_p (bfd *abfd,
 #endif
     }
 
-  if (filetype)
+  if (file_type)
     {
-      if (header.filetype != filetype)
+      if (header.filetype != file_type)
 	goto wrong;
     }
   else

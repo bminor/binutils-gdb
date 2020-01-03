@@ -2011,7 +2011,7 @@ dump_obj_compact_unwind (bfd *abfd,
 
 	  putchar (' ');
 	  printf_uint64 (bfd_get_64 (abfd, e->start));
-	  printf (" %08lx", bfd_get_32 (abfd, e->length));
+	  printf (" %08lx", (unsigned long)bfd_get_32 (abfd, e->length));
 	  putchar (' ');
 	  printf_uint64 (bfd_get_64 (abfd, e->personality));
 	  putchar (' ');
