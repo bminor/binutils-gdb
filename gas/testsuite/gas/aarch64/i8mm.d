@@ -29,15 +29,23 @@ Disassembly of section \.text:
  *[0-9a-f]+:	6e80a400 	ummla	v0\.4s, v0\.16b, v0\.16b
  *[0-9a-f]+:	4e80ac00 	usmmla	v0\.4s, v0\.16b, v0\.16b
  *[0-9a-f]+:	4e9baeb1 	usmmla	v17\.4s, v21\.16b, v27\.16b
- *[0-9a-f]+:	4e9b9eb1 	usdot	v17\.2s, v21\.8b, v27\.8b
- *[0-9a-f]+:	4e809c00 	usdot	v0\.2s, v0\.8b, v0\.8b
- *[0-9a-f]+:	4e9b9eb1 	usdot	v17\.2s, v21\.8b, v27\.8b
- *[0-9a-f]+:	4e809c00 	usdot	v0\.2s, v0\.8b, v0\.8b
- *[0-9a-f]+:	4fbbfab1 	usdot	v17\.2s, v21\.8b, v27\.4b\[3\]
- *[0-9a-f]+:	4fa0f800 	usdot	v0\.2s, v0\.8b, v0\.4b\[3\]
- *[0-9a-f]+:	4f9bf2b1 	usdot	v17\.2s, v21\.8b, v27\.4b\[0\]
- *[0-9a-f]+:	4f80f000 	usdot	v0\.2s, v0\.8b, v0\.4b\[0\]
- *[0-9a-f]+:	4f3bfab1 	sudot	v17\.2s, v21\.8b, v27\.4b\[3\]
- *[0-9a-f]+:	4f20f800 	sudot	v0\.2s, v0\.8b, v0\.4b\[3\]
- *[0-9a-f]+:	4f1bf2b1 	sudot	v17\.2s, v21\.8b, v27\.4b\[0\]
- *[0-9a-f]+:	4f00f000 	sudot	v0\.2s, v0\.8b, v0\.4b\[0\]
+ *[0-9a-f]+:	0e9b9eb1 	usdot	v17\.2s, v21\.8b, v27\.8b
+ *[0-9a-f]+:	0e809c00 	usdot	v0\.2s, v0\.8b, v0\.8b
+ *[0-9a-f]+:	4e9b9eb1 	usdot	v17\.4s, v21\.16b, v27\.16b
+ *[0-9a-f]+:	4e809c00 	usdot	v0\.4s, v0\.16b, v0\.16b
+ *[0-9a-f]+:	0fbbfab1 	usdot	v17\.2s, v21\.8b, v27\.4b\[3\]
+ *[0-9a-f]+:	0fa0f800 	usdot	v0\.2s, v0\.8b, v0\.4b\[3\]
+ *[0-9a-f]+:	0f9bf2b1 	usdot	v17\.2s, v21\.8b, v27\.4b\[0\]
+ *[0-9a-f]+:	0f80f000 	usdot	v0\.2s, v0\.8b, v0\.4b\[0\]
+ *[0-9a-f]+:	4fbbfab1 	usdot	v17\.4s, v21\.16b, v27\.4b\[3\]
+ *[0-9a-f]+:	4fa0f800 	usdot	v0\.4s, v0\.16b, v0\.4b\[3\]
+ *[0-9a-f]+:	4f9bf2b1 	usdot	v17\.4s, v21\.16b, v27\.4b\[0\]
+ *[0-9a-f]+:	4f80f000 	usdot	v0\.4s, v0\.16b, v0\.4b\[0\]
+ *[0-9a-f]+:	0f3bfab1 	sudot	v17\.2s, v21\.8b, v27\.4b\[3\]
+ *[0-9a-f]+:	0f20f800 	sudot	v0\.2s, v0\.8b, v0\.4b\[3\]
+ *[0-9a-f]+:	0f1bf2b1 	sudot	v17\.2s, v21\.8b, v27\.4b\[0\]
+ *[0-9a-f]+:	0f00f000 	sudot	v0\.2s, v0\.8b, v0\.4b\[0\]
+ *[0-9a-f]+:	4f3bfab1 	sudot	v17\.4s, v21\.16b, v27\.4b\[3\]
+ *[0-9a-f]+:	4f20f800 	sudot	v0\.4s, v0\.16b, v0\.4b\[3\]
+ *[0-9a-f]+:	4f1bf2b1 	sudot	v17\.4s, v21\.16b, v27\.4b\[0\]
+ *[0-9a-f]+:	4f00f000 	sudot	v0\.4s, v0\.16b, v0\.4b\[0\]

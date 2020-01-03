@@ -5092,9 +5092,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   INT8MATMUL_INSN ("smmla",  0x4e80a400, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
   INT8MATMUL_INSN ("ummla",  0x6e80a400, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
   INT8MATMUL_INSN ("usmmla", 0x4e80ac00, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_MMLA64, 0),
-  INT8MATMUL_INSN ("usdot",  0x4e809c00, 0xffe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
-  INT8MATMUL_INSN ("usdot",  0x4f80f000, 0xffc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
-  INT8MATMUL_INSN ("sudot",  0x4f00f000, 0xffc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+  INT8MATMUL_INSN ("usdot",  0x0e809c00, 0xbfe0fc00, aarch64_misc, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
+  INT8MATMUL_INSN ("usdot",  0x0f80f000, 0xbfc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+  INT8MATMUL_INSN ("sudot",  0x0f00f000, 0xbfc0f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
 
   /* BFloat instructions.  */
   BFLOAT16_SVE_INSNC ("bfdot",  0x64608000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
