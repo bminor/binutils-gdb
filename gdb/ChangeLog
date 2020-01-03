@@ -1,3 +1,7 @@
+2020-01-03  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2020-01-02  Luis Machado  <luis.machado@linaro.org>
 
 	* proc-service.c (get_ps_regcache): Remove reference to obsolete
