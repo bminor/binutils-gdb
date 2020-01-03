@@ -1,5 +1,9 @@
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
+	* m32r-ibld.c: Regenerate.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
 	* cr16-dis.c (cr16_match_opcode): Avoid shift left of signed value.
 
 2020-01-04  Alan Modra  <amodra@gmail.com>

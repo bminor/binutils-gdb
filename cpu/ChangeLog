@@ -1,3 +1,8 @@
+2020-02-04  Alan Modra  <amodra@gmail.com>
+
+	* m32r.cpu (f-disp8): Avoid left shift of negative values.
+	(f-disp16, f-disp24): Likewise.
+
 2019-12-23  Alan Modra  <amodra@gmail.com>
 
 	* iq2000.cpu (f-offset): Avoid left shift of negative values.
