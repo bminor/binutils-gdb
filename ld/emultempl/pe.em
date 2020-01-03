@@ -270,6 +270,7 @@ fragment <<EOF
 #define OPTION_INSERT_TIMESTAMP		(OPTION_TERMINAL_SERVER_AWARE + 1)
 #define OPTION_NO_INSERT_TIMESTAMP	(OPTION_INSERT_TIMESTAMP + 1)
 #define OPTION_BUILD_ID			(OPTION_NO_INSERT_TIMESTAMP + 1)
+#define OPTION_ENABLE_RELOC_SECTION	(OPTION_BUILD_ID + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -349,6 +350,7 @@ gld${EMULATION_NAME}_add_options
     {"wdmdriver", no_argument, NULL, OPTION_WDM_DRIVER},
     {"tsaware", no_argument, NULL, OPTION_TERMINAL_SERVER_AWARE},
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+    {"enable-reloc-section", no_argument, NULL, OPTION_ENABLE_RELOC_SECTION},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -483,6 +485,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        in object files\n"));
   fprintf (file, _("  --dynamicbase                      Image base address may be relocated using\n\
                                        address space layout randomization (ASLR)\n"));
+  fprintf (file, _("  --enable-reloc-section             Create the base relocation table\n"));
   fprintf (file, _("  --forceinteg               Code integrity checks are enforced\n"));
   fprintf (file, _("  --nxcompat                 Image is compatible with data execution prevention\n"));
   fprintf (file, _("  --no-isolation             Image understands isolation but do not isolate the image\n"));
@@ -855,6 +858,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
 /*  Get DLLCharacteristics bits  */
     case OPTION_DYNAMIC_BASE:
       pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE;
+      /* fall through */
+    case OPTION_ENABLE_RELOC_SECTION:
+      pe_dll_enable_reloc_section = 1;
       break;
     case OPTION_FORCE_INTEGRITY:
       pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY;
@@ -1947,6 +1953,7 @@ gld_${EMULATION_NAME}_finish (void)
 #ifdef DLL_SUPPORT
   if (bfd_link_pic (&link_info)
 #if !defined(TARGET_IS_shpe)
+      || pe_dll_enable_reloc_section
       || (!bfd_link_relocatable (&link_info)
 	  && pe_def_file->num_exports != 0)
 #endif

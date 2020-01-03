@@ -1,3 +1,15 @@
+2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	* emultempl/pe.em: Add new option --enable-reloc-section.
+	* emultempl/pep.em: Likewise.
+	* ld.texi: Document --enable-reloc-section.
+	* pe-dll.c (pe_dll_build_sections): Use pe_dll_enable_reloc_section.
+	(pe_dll_fill_sections): Simplify by calling pe_exe_fill_sections.
+	* pe-dll.h: Add extern declaration of option flag.
+	* pep-dll.c (pe_dll_enable_reloc_section):
+	Add alias define for pep_dll_enable_reloc_section.
+	* pep-dll.h: Add extern declaration of option flag.
+
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* Makefile.am: Add new target z80-elf

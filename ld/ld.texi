@@ -2995,12 +2995,15 @@ of the PE file header:
 @item --high-entropy-va
 Image is compatible with 64-bit address space layout randomization
 (ASLR).
+This option also implies @option{--dynamicbase} and
+@option{--enable-reloc-section}.
 
 @kindex --dynamicbase
 @item --dynamicbase
 The image base address may be relocated using address space layout
 randomization (ASLR).  This feature was introduced with MS Windows
 Vista for i386 PE targets.
+This option also implies @option{--enable-reloc-section}.
 
 @kindex --forceinteg
 @item --forceinteg
@@ -3043,6 +3046,11 @@ same sources are linked.  The option @option{--no-insert-timestamp}
 can be used to insert a zero value for the timestamp, this ensuring
 that binaries produced from identical sources will compare
 identically.
+
+@kindex --enable-reloc-section
+@item --enable-reloc-section
+Create the base relocation table, which is necessary if the image
+is loaded at a different image base than specified in the PE header.
 @end table
 
 @c man end

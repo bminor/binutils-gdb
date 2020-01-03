@@ -39,6 +39,7 @@ extern int pep_dll_extra_pe_debug;
 extern int pep_use_nul_prefixed_import_tables;
 extern int pep_use_coff_long_section_names;
 extern int pep_leading_underscore;
+extern int pep_dll_enable_reloc_section;
 
 typedef enum { EXCLUDESYMS, EXCLUDELIBS, EXCLUDEFORIMPLIB } exclude_type;
 
