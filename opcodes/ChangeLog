@@ -1,5 +1,11 @@
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Drop 'i' from
+	uzip{1,2}.
+	* opcodes/aarch64-dis-2.c: Re-generate.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
 	FMMLA encoding.
 	* opcodes/aarch64-dis-2.c: Re-generate.

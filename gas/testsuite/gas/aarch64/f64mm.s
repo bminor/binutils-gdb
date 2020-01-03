@@ -60,10 +60,10 @@ zip1 z0.q, z0.q, z0.q
 zip2 z17.q, z21.q, z5.q
 zip2 z0.q, z0.q, z0.q
 
-uzip1 z17.q, z21.q, z5.q
-uzip1 z0.q, z0.q, z0.q
-uzip2 z17.q, z21.q, z5.q
-uzip2 z0.q, z0.q, z0.q
+uzp1 z17.q, z21.q, z5.q
+uzp1 z0.q, z0.q, z0.q
+uzp2 z17.q, z21.q, z5.q
+uzp2 z0.q, z0.q, z0.q
 
 trn1 z17.q, z21.q, z5.q
 trn1 z0.q, z0.q, z0.q

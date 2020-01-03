@@ -9913,7 +9913,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                   /* 33222222222211111111110000000000
                                                                      10987654321098765432109876543210
                                                                      000001x1101xxxxx000010xxxxxxxxxx
-                                                                     uzip1.  */
+                                                                     uzp1.  */
                                                                   return 2409;
                                                                 }
                                                               else
@@ -9943,7 +9943,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                   /* 33222222222211111111110000000000
                                                                      10987654321098765432109876543210
                                                                      000001x1101xxxxx000011xxxxxxxxxx
-                                                                     uzip2.  */
+                                                                     uzp2.  */
                                                                   return 2410;
                                                                 }
                                                               else

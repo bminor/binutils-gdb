@@ -5084,8 +5084,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   F64MATMUL_SVE_INSN ("ld1rod",  0xa5a02000, 0xfff0e000, sve_misc, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4x32), OP_SVE_DZU, F_OD(1), 0),
   F64MATMUL_SVE_INSN ("zip1",    0x05a00000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
   F64MATMUL_SVE_INSN ("zip2",    0x05a00400, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
-  F64MATMUL_SVE_INSN ("uzip1",   0x05a00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
-  F64MATMUL_SVE_INSN ("uzip2",   0x05a00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("uzp1",    0x05a00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
+  F64MATMUL_SVE_INSN ("uzp2",    0x05a00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
   F64MATMUL_SVE_INSN ("trn1",    0x05a01800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
   F64MATMUL_SVE_INSN ("trn2",    0x05a01c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_QQQ, 0, 0),
   /* Matrix Multiply advanced SIMD instructions.  */

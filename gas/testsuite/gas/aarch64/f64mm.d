@@ -52,10 +52,10 @@ Disassembly of section \.text:
  *[0-9a-f]+:	05a00000 	zip1	z0\.q, z0\.q, z0\.q
  *[0-9a-f]+:	05a506b1 	zip2	z17\.q, z21\.q, z5\.q
  *[0-9a-f]+:	05a00400 	zip2	z0\.q, z0\.q, z0\.q
- *[0-9a-f]+:	05a50ab1 	uzip1	z17\.q, z21\.q, z5\.q
- *[0-9a-f]+:	05a00800 	uzip1	z0\.q, z0\.q, z0\.q
- *[0-9a-f]+:	05a50eb1 	uzip2	z17\.q, z21\.q, z5\.q
- *[0-9a-f]+:	05a00c00 	uzip2	z0\.q, z0\.q, z0\.q
+ *[0-9a-f]+:	05a50ab1 	uzp1	z17\.q, z21\.q, z5\.q
+ *[0-9a-f]+:	05a00800 	uzp1	z0\.q, z0\.q, z0\.q
+ *[0-9a-f]+:	05a50eb1 	uzp2	z17\.q, z21\.q, z5\.q
+ *[0-9a-f]+:	05a00c00 	uzp2	z0\.q, z0\.q, z0\.q
  *[0-9a-f]+:	05a51ab1 	trn1	z17\.q, z21\.q, z5\.q
  *[0-9a-f]+:	05a01800 	trn1	z0\.q, z0\.q, z0\.q
  *[0-9a-f]+:	05a51eb1 	trn2	z17\.q, z21\.q, z5\.q

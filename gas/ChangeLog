@@ -1,5 +1,10 @@
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/aarch64/f64mm.s: Drop 'i' from uzip<n>.
+	* testsuite/gas/aarch64/f64mm.d: Adjust expectations.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/aarch64/f64mm.d,
 	testsuite/gas/aarch64/sve-movprfx-mm.d: Adjust expectations.
 
