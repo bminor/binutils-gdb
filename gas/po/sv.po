@@ -20,7 +20,7 @@ msgstr ""
 "Project-Id-Version: gas 2.31.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2019-01-19 16:32+0000\n"
-"PO-Revision-Date: 2019-08-22 16:30+0200\n"
+"PO-Revision-Date: 2019-12-25 13:46+0800\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -29,7 +29,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.2.4\n"
 
 #: app.c:501 app.c:515
 msgid "end of file in comment"
@@ -123,16 +123,13 @@ msgid "  --alternate             initially turn on alternate macro syntax\n"
 msgstr "  --alternate             slå inledningsvis på alternativ makrosyntax\n"
 
 #: as.c:256
-#, fuzzy, c-format
-#| msgid ""
-#| "  --compress-debug-sections\n"
-#| "                          compress DWARF debug sections using zlib\n"
+#, c-format
 msgid ""
 "  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n"
 "                          compress DWARF debug sections using zlib [default]\n"
 msgstr ""
-"  --compress-debug-sections\n"
-"                          komprimera DWARF-felsökningssektioner med zlib\n"
+"  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n"
+"                          komprimera DWARF-felsökningssektioner med zlib [standard]\n"
 
 #: as.c:259
 #, c-format
@@ -144,28 +141,22 @@ msgstr ""
 "                          komprimera inte DWARF-felsökningssektioner\n"
 
 #: as.c:263
-#, fuzzy, c-format
-#| msgid ""
-#| "  --compress-debug-sections\n"
-#| "                          compress DWARF debug sections using zlib\n"
+#, c-format
 msgid ""
 "  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n"
 "                          compress DWARF debug sections using zlib\n"
 msgstr ""
-"  --compress-debug-sections\n"
+"  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n"
 "                          komprimera DWARF-felsökningssektioner med zlib\n"
 
 #: as.c:266
-#, fuzzy, c-format
-#| msgid ""
-#| "  --nocompress-debug-sections\n"
-#| "                          don't compress DWARF debug sections\n"
+#, c-format
 msgid ""
 "  --nocompress-debug-sections\n"
 "                          don't compress DWARF debug sections [default]\n"
 msgstr ""
 "  --nocompress-debug-sections\n"
-"                          komprimera inte DWARF-felsökningssektioner\n"
+"                          komprimera inte DWARF-felsökningssektioner [standard]\n"
 
 #: as.c:270
 #, c-format
@@ -226,10 +217,9 @@ msgid "(default: no)\n"
 msgstr "(standard: nej)\n"
 
 #: as.c:309
-#, fuzzy, c-format
-#| msgid "  -Z                      generate object file even after errors\n"
+#, c-format
 msgid "                          generate ELF common symbols with STT_COMMON type\n"
-msgstr "  -Z                      generera objektfil även efter fel\n"
+msgstr "                          generera gemensamma ELF-symboler med STT_COMMON-typ\n"
 
 #: as.c:311
 #, c-format
@@ -242,10 +232,9 @@ msgid "  --generate-missing-build-notes=[no|yes] "
 msgstr "  --generate-missing-build-notes=[no|yes] "
 
 #: as.c:321
-#, fuzzy, c-format
-#| msgid "                          Registers will not need any prefix.\n"
+#, c-format
 msgid "                          generate GNU Build notes if none are present in the input\n"
-msgstr "                          Register kommer inte att behöva något prefix.\n"
+msgstr "                          generera GNU byggnoteringar om inga finns i indatan\n"
 
 #: as.c:325
 #, c-format
@@ -2682,7 +2671,7 @@ msgstr "ogiltig %s-flagga för %s-cpu"
 
 #: config/tc-arc.c:836
 msgid "conflicting ISA extension attributes."
-msgstr "ISA-utökningsattribut står i konflikt"
+msgstr "ISA-utökningsattribut står i konflikt."
 
 #: config/tc-arc.c:855
 msgid "Multiple .cpu directives found"
@@ -5082,30 +5071,7 @@ msgid "Known MCU names:"
 msgstr "Kända MCU-namn:"
 
 #: config/tc-avr.c:658
-#, fuzzy, c-format
-#| msgid ""
-#| "AVR Assembler options:\n"
-#| "  -mmcu=[avr-name] select microcontroller variant\n"
-#| "                   [avr-name] can be:\n"
-#| "                   avr1  - classic AVR core without data RAM\n"
-#| "                   avr2  - classic AVR core with up to 8K program memory\n"
-#| "                   avr25 - classic AVR core with up to 8K program memory\n"
-#| "                           plus the MOVW instruction\n"
-#| "                   avr3  - classic AVR core with up to 64K program memory\n"
-#| "                   avr31 - classic AVR core with up to 128K program memory\n"
-#| "                   avr35 - classic AVR core with up to 64K program memory\n"
-#| "                           plus the MOVW instruction\n"
-#| "                   avr4  - enhanced AVR core with up to 8K program memory\n"
-#| "                   avr5  - enhanced AVR core with up to 64K program memory\n"
-#| "                   avr51 - enhanced AVR core with up to 128K program memory\n"
-#| "                   avr6  - enhanced AVR core with up to 256K program memory\n"
-#| "                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
-#| "                   avrxmega3 - XMEGA, > 8K, <= 64K FLASH, > 64K RAM\n"
-#| "                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
-#| "                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
-#| "                   avrxmega6 - XMEGA, > 128K, <= 256K FLASH, <= 64K RAM\n"
-#| "                   avrxmega7 - XMEGA, > 128K, <= 256K FLASH, > 64K RAM\n"
-#| "                   avrtiny   - AVR Tiny core with 16 gp registers\n"
+#, c-format
 msgid ""
 "AVR Assembler options:\n"
 "  -mmcu=[avr-name] select microcontroller variant\n"
@@ -5146,7 +5112,7 @@ msgstr ""
 "                   avr51 - förbättrad AVR-kärna med upp till 128K programminne\n"
 "                   avr6  - förbättrad AVR-kärna med upp till 256K programminne\n"
 "                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
-"                   avrxmega3 - XMEGA, > 8K, <= 64K FLASH, > 64K RAM\n"
+"                   avrxmega3 - XMEGA, RAM + FLASH < 64K, Flash visible in RAM\n"
 "                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
 "                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
 "                   avrxmega6 - XMEGA, > 128K, <= 256K FLASH, <= 64K RAM\n"
@@ -5154,15 +5120,7 @@ msgstr ""
 "                   avrtiny   - AVR Tiny-kärna med 16 gp-register\n"
 
 #: config/tc-avr.c:681
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mall-opcodes    accept all AVR opcodes, even if not supported by MCU\n"
-#| "  -mno-skip-bug    disable warnings for skipping two-word instructions\n"
-#| "                   (default for avr4, avr5)\n"
-#| "  -mno-wrap        reject rjmp/rcall instructions with 8K wrap-around\n"
-#| "                   (default for avr3, avr5)\n"
-#| "  -mrmw            accept Read-Modify-Write instructions\n"
-#| "  -mlink-relax     generate relocations for linker relaxation\n"
+#, c-format
 msgid ""
 "  -mall-opcodes    accept all AVR opcodes, even if not supported by MCU\n"
 "  -mno-skip-bug    disable warnings for skipping two-word instructions\n"
@@ -5180,7 +5138,10 @@ msgstr ""
 "  -mno-wrap        avvisa rjmp/rcall-instruktioner med 8K omslag\n"
 "                   (standard för avr3, avr5)\n"
 "  -mrmw            acceptera Read-Modify-Write-instruktioner\n"
-"  -mlink-relax     generera omlokaliseringar för länkarlättnad\n"
+"  -mlink-relax     generera omlokaliseringar för länkarlättnad (standard)\n"
+"  -mno-link-relax  generera inte omlokaliseringar för länkarlättnad.\n"
+"  -mgcc-isr        acceptera pseudoinstruktionen __gcc_isr.\n"
+"\n"
 
 #: config/tc-avr.c:720
 #, c-format
@@ -6111,22 +6072,19 @@ msgid "  -mcpu=CPU\t\t\tselect processor CPU:"
 msgstr "  -mcpu=CPU\t\t\tvälj processor CPU:"
 
 #: config/tc-csky.c:1095
-#, fuzzy, c-format
-#| msgid "  -mlittle-endian         generate little-endian code\n"
+#, c-format
 msgid "  -EL  -mlittle-endian\t\tgenerate little-endian output\n"
-msgstr "  -mlittle-endian         generera kod enligt omvänd byteordning\n"
+msgstr "  -EL  -mlittle-endian\t\tgenerera utdata enlight omvänd byteordning\n"
 
 #: config/tc-csky.c:1097
-#, fuzzy, c-format
-#| msgid "  -mbig-endian            generate big-endian code\n"
+#, c-format
 msgid "  -EB  -mbig-endian\t\tgenerate big-endian output\n"
-msgstr "  -mbig-endian            generera kod enligt rak byteordning\n"
+msgstr "  -EB  -mbig-endian\t\tgenerera utdata enligt rak byteordning\n"
 
 #: config/tc-csky.c:1099
-#, fuzzy, c-format
-#| msgid "  --pic\t\t\tEnable generation of position-independent code.\n"
+#, c-format
 msgid "  -fpic  -pic\t\t\tgenerate position-independent code\n"
-msgstr "  --pic\t\t\tAktivera generering av positionsoberoende kod.\n"
+msgstr "  -fpic  -pic\t\t\tgenerera positionsoberoende kod\n"
 
 #: config/tc-csky.c:1102
 #, c-format
@@ -6214,10 +6172,9 @@ msgid "  -mno-istack\n"
 msgstr "  -mno-istack\n"
 
 #: config/tc-csky.c:1144
-#, fuzzy, c-format
-#| msgid "  -mno-stld23\t\t  disable st/ld offset23 instruction\n"
+#, c-format
 msgid "  -mhard-float\t\t\tenable hard float instructions\n"
-msgstr "  -mno-stld23\t\t  inaktivera st/ld offset23-instruktion\n"
+msgstr "  -mhard-float\t\t\taktivera hårda flyttalsinstruktioner\n"
 
 #: config/tc-csky.c:1146
 #, c-format
@@ -6235,16 +6192,14 @@ msgid "  -mcache\t\t\tenable cache prefetch instruction\n"
 msgstr "  -mcache\t\t\taktivera cache-förhandshämtningsinstruktion\n"
 
 #: config/tc-csky.c:1152
-#, fuzzy, c-format
-#| msgid "  -mno-stld23\t\t  disable st/ld offset23 instruction\n"
+#, c-format
 msgid "  -msecurity\t\t\tenable security instructions\n"
-msgstr "  -mno-stld23\t\t  inaktivera st/ld offset23-instruktion\n"
+msgstr "  -msecurity\t\t\taktivera säkerhetsinstruktioner\n"
 
 #: config/tc-csky.c:1154
-#, fuzzy, c-format
-#| msgid "  -mno-stld23\t\t  disable st/ld offset23 instruction\n"
+#, c-format
 msgid "  -mtrust\t\t\tenable trust instructions\n"
-msgstr "  -mno-stld23\t\t  inaktivera st/ld offset23-instruktion\n"
+msgstr "  -mtrust\t\t\taktivera förtroendeinstruktioner\n"
 
 #: config/tc-csky.c:1156
 #, c-format
@@ -6444,7 +6399,7 @@ msgstr "Instruktion i R-behållare klämd av flödeskontroll i L-behållare."
 
 #: config/tc-d10v.c:1054 config/tc-d30v.c:1075
 msgid "MU instruction may not be in the right container"
-msgstr "MU-instruktion kan inte befinnas sig i den högra behållaren."
+msgstr "MU-instruktion kan inte befinnas sig i den högra behållaren"
 
 #: config/tc-d10v.c:1060 config/tc-d30v.c:1087
 msgid "unknown execution type passed to write_2_short()"
@@ -6499,15 +6454,7 @@ msgid "Register name %s conflicts with symbol of the same name"
 msgstr "Registernamn %s står i konflikt med en symbol med samma namn"
 
 #: config/tc-d30v.c:239
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "D30V options:\n"
-#| "-O                      Make adjacent short instructions parallel if possible.\n"
-#| "-n                      Warn about all NOPs inserted by the assembler.\n"
-#| "-N\t\t\tWarn about NOPs inserted after word multiplies.\n"
-#| "-c                      Warn about symbols whoes names match register names.\n"
-#| "-C                      Opposite of -C.  -c is the default.\n"
+#, c-format
 msgid ""
 "\n"
 "D30V options:\n"
@@ -6521,7 +6468,7 @@ msgstr ""
 "D30V-flaggor:\n"
 "-O                      Gör intilliggande korta instruktioner parallella om möjligt.\n"
 "-n                      Varna om alla NOP:ar som infogas av assemblern.\n"
-"-N\t\t\tVarna om NOP:ar som infogats efter multipler av ord.\n"
+"-N                      Varna om NOP:ar som infogats efter multipler av ord.\n"
 "-c                      Varna om symboler vilkas namn matchar registernamn.\n"
 "-C                      Motsatsen till -C. -c är standard.\n"
 
@@ -6727,7 +6674,7 @@ msgstr "misslyckades med rimlighetskontroll för regnum."
 
 #: config/tc-dlx.c:881
 msgid "failed general register sanity check."
-msgstr "misslyckades med rimlighetskontroll för generellt register"
+msgstr "misslyckades med rimlighetskontroll för generellt register."
 
 #. Types or values of args don't match.
 #: config/tc-dlx.c:889
@@ -6881,10 +6828,9 @@ msgid "-mPIC           Mark generated file as using large position independent c
 msgstr "-mPIC           Markera generera fil som att den använder stor positionsoberoende kod\n"
 
 #: config/tc-frv.c:472
-#, fuzzy, c-format
-#| msgid "-mlibrary-pic   Mark generated file as using position indepedent code for libraries\n"
+#, c-format
 msgid "-mlibrary-pic   Mark generated file as using position independent code for libraries\n"
-msgstr "-mlibrary-pic   Markera generera fil som att den använder positionsoberoende kod för bibliotek\n"
+msgstr "-mlibrary-pic   Markera genererad fil som att den använder positionsoberoende kod för bibliotek\n"
 
 #: config/tc-frv.c:473
 #, c-format
@@ -7153,10 +7099,9 @@ msgid "Invalid argument to --mach option: %s"
 msgstr "Ogiltigt argument till --mach-flagga: %s"
 
 #: config/tc-h8300.c:2199
-#, fuzzy, c-format
-#| msgid " ARM-specific assembler options:\n"
+#, c-format
 msgid " H8300-specific assembler options:\n"
-msgstr " ARM-specifika assemblerflaggor:\n"
+msgstr " H8300-specifika assemblerflaggor:\n"
 
 #: config/tc-h8300.c:2200
 #, c-format
@@ -7168,10 +7113,9 @@ msgstr ""
 "                           h8300h, h8300hn, h8300s, h8300sn, h8300sx, h8300sxn\n"
 
 #: config/tc-h8300.c:2203
-#, fuzzy, c-format
-#| msgid "  -mindex-reg             support pseudo index registers\n"
+#, c-format
 msgid "  -h-tick-hex              Support H'00 style hex constants\n"
-msgstr "  -mindex-reg             ha stöd för pseudoindexregister\n"
+msgstr "  -h-tick-hex              Ha stöd för hexkonstanter i H'00-stil\n"
 
 #: config/tc-h8300.c:2212
 #, c-format
@@ -7777,10 +7721,9 @@ msgid "expecting lockable instruction after `lock'"
 msgstr "förväntar låsbar instruktion efter ”lock”"
 
 #: config/tc-i386.c:4197
-#, fuzzy, c-format
-#| msgid "width suffixes are invalid in ARM mode -- `%s'"
+#, c-format
 msgid "data size prefix invalid with `%s'"
-msgstr "breddsuffix är ogiltiga i ARM-läge -- ”%s”"
+msgstr "datastorleksprefix ogiltigt med ”%s”"
 
 #: config/tc-i386.c:4207
 msgid "expecting valid branch instruction after `bnd'"
@@ -8433,93 +8376,75 @@ msgid "  -msse2avx               encode SSE instructions with VEX prefix\n"
 msgstr "  -msse2avx               koda SSE-instruktioner med VEX-prefix\n"
 
 #: config/tc-i386.c:11499
-#, fuzzy, c-format
-#| msgid ""
-#| "  -msse-check=[none|error|warning]\n"
-#| "                          check SSE instructions\n"
+#, c-format
 msgid ""
 "  -msse-check=[none|error|warning] (default: warning)\n"
 "                          check SSE instructions\n"
 msgstr ""
-"  -msse-check=[none|error|warning]\n"
+"  -msse-check=[none|error|warning] (standard: warning)\n"
 "                          kontrollera SSE-instruktioner\n"
 
 #: config/tc-i386.c:11502
-#, fuzzy, c-format
-#| msgid ""
-#| "  -moperand-check=[none|error|warning]\n"
-#| "                          check operand combinations for validity\n"
+#, c-format
 msgid ""
 "  -moperand-check=[none|error|warning] (default: warning)\n"
 "                          check operand combinations for validity\n"
 msgstr ""
-"  -moperand-check=[none|error|warning]\n"
+"  -moperand-check=[none|error|warning] (standard: warning)\n"
 "                          kontrollera giltighet av operandkombinationer\n"
 
 #: config/tc-i386.c:11505
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mavxscalar=[128|256]   encode scalar AVX instructions with specific vector\n"
-#| "                           length\n"
+#, c-format
 msgid ""
 "  -mavxscalar=[128|256] (default: 128)\n"
 "                          encode scalar AVX instructions with specific vector\n"
 "                           length\n"
 msgstr ""
-"  -mavxscalar=[128|256]   koda skalära AVX-instruktioner med specifik\n"
+"  -mavxscalar=[128|256] (standard: 128)\n"
+"                          koda skalära AVX-instruktioner med specifik\n"
 "                           vektorlängd\n"
 
 #: config/tc-i386.c:11509
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mevexwig=[0|1]         encode EVEX instructions with specific EVEX.W value\n"
-#| "                           for EVEX.W bit ignored instructions\n"
+#, c-format
 msgid ""
 "  -mvexwig=[0|1] (default: 0)\n"
 "                          encode VEX instructions with specific VEX.W value\n"
 "                           for VEX.W bit ignored instructions\n"
 msgstr ""
-"  -mevexwig=[0|1]         koda EVEX-instruktioner med specifikt EVEX.W-värde\n"
-"                           för EVEX.W-bitöverhoppade instruktioner\n"
+"  -mvexwig=[0|1] (standard: 0)\n"
+"                          koda VEX-instruktioner med specifikt VEX.W-värde\n"
+"                           för VEX.W-bitöverhoppade instruktioner\n"
 
 #: config/tc-i386.c:11513
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mevexlig=[128|256|512] encode scalar EVEX instructions with specific vector\n"
-#| "                           length\n"
+#, c-format
 msgid ""
 "  -mevexlig=[128|256|512] (default: 128)\n"
 "                          encode scalar EVEX instructions with specific vector\n"
 "                           length\n"
 msgstr ""
-"  -mevexlig=[128|256|512] koda skalära EVEX-instruktioner med specifik\n"
+"  -mevexlig=[128|256|512] (standard: 128)\n"
+"                          koda skalära EVEX-instruktioner med specifik\n"
 "                           vektorlängd\n"
 
 #: config/tc-i386.c:11517
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mevexwig=[0|1]         encode EVEX instructions with specific EVEX.W value\n"
-#| "                           for EVEX.W bit ignored instructions\n"
+#, c-format
 msgid ""
 "  -mevexwig=[0|1] (default: 0)\n"
 "                          encode EVEX instructions with specific EVEX.W value\n"
 "                           for EVEX.W bit ignored instructions\n"
 msgstr ""
-"  -mevexwig=[0|1]         koda EVEX-instruktioner med specifikt EVEX.W-värde\n"
+"  -mevexwig=[0|1] (standard: 0)\n"
+"                          koda EVEX-instruktioner med specifikt EVEX.W-värde\n"
 "                           för EVEX.W-bitöverhoppade instruktioner\n"
 
 #: config/tc-i386.c:11521
-#, fuzzy, c-format
-#| msgid ""
-#| "  -mevexrcig=[rne|rd|ru|rz]\n"
-#| "                          encode EVEX instructions with specific EVEX.RC value\n"
-#| "                           for SAE-only ignored instructions\n"
+#, c-format
 msgid ""
 "  -mevexrcig=[rne|rd|ru|rz] (default: rne)\n"
 "                          encode EVEX instructions with specific EVEX.RC value\n"
 "                           for SAE-only ignored instructions\n"
 msgstr ""
-"  -mevexrcig=[rne|rd|ru|rz]\n"
+"  -mevexrcig=[rne|rd|ru|rz] (standard: rne)\n"
 "                          koda EVEX-instruktioner med ett specifikt EVEX.RC-värde\n"
 "                           för endast-SAE överhoppade instruktioner\n"
 
@@ -8539,18 +8464,18 @@ msgid "(default: intel)\n"
 msgstr "(standard: intel)\n"
 
 #: config/tc-i386.c:11531
-#, fuzzy, c-format
-#| msgid "  -R                      fold data section into text section\n"
+#, c-format
 msgid "                          use AT&T/Intel mnemonic\n"
-msgstr "  -R                      fäll in datasektion i textsektion\n"
+msgstr "                          använd AT&T/Intel-mnemonic\n"
 
 #: config/tc-i386.c:11533
-#, fuzzy, c-format
-#| msgid "  -msyntax=[att|intel]    use AT&T/Intel syntax\n"
+#, c-format
 msgid ""
 "  -msyntax=[att|intel] (default: att)\n"
 "                          use AT&T/Intel syntax\n"
-msgstr "  -msyntax=[att|intel]    använd AT&T/Intel-syntax\n"
+msgstr ""
+"  -msyntax=[att|intel] (standard: att)\n"
+"                          använd AT&T/Intel-syntax\n"
 
 #: config/tc-i386.c:11536
 #, c-format
@@ -8568,10 +8493,9 @@ msgid "  -madd-bnd-prefix        add BND prefix for all valid branches\n"
 msgstr "  -madd-bnd-prefix        lägg till BND-prefix för alla giltiga grenar\n"
 
 #: config/tc-i386.c:11543
-#, fuzzy, c-format
-#| msgid "  -nosched                  disable scheduling restrictions\n"
+#, c-format
 msgid "  -mshared                disable branch optimization for shared code\n"
-msgstr "  -nosched                  inaktivera schemaläggningsrestriktioner\n"
+msgstr "  -mshared                inaktivera grenoptimering för delad kod\n"
 
 #: config/tc-i386.c:11545
 #, c-format
@@ -8579,10 +8503,9 @@ msgid "  -mx86-used-note=[no|yes] "
 msgstr "  -mx86-used-note=[no|yes] "
 
 #: config/tc-i386.c:11551
-#, fuzzy, c-format
-#| msgid "  -Z                      generate object file even after errors\n"
+#, c-format
 msgid "                          generate x86 used ISA and feature properties\n"
-msgstr "  -Z                      generera objektfil även efter fel\n"
+msgstr "                          generera använda x86-ISA- och funktionsegenskaper\n"
 
 #: config/tc-i386.c:11555
 #, c-format
@@ -8590,31 +8513,24 @@ msgid "  -mbig-obj               generate big object files\n"
 msgstr "  -mbig-obj               generera stora objektfiler\n"
 
 #: config/tc-i386.c:11558
-#, fuzzy, c-format
-#| msgid ""
-#| "  -momit-lock-prefix=[no|yes]\n"
-#| "                          strip all lock prefixes\n"
+#, c-format
 msgid ""
 "  -momit-lock-prefix=[no|yes] (default: no)\n"
 "                          strip all lock prefixes\n"
 msgstr ""
-"  -momit-lock-prefix=[no|yes]\n"
+"  -momit-lock-prefix=[no|yes] (standard: no)\n"
 "                          rensa bort alla låsprefix\n"
 
 #: config/tc-i386.c:11561
-#, fuzzy, c-format
-#| msgid ""
-#| "  --reduce-memory-overheads \n"
-#| "                          prefer smaller memory use at the cost of longer\n"
-#| "                          assembly times\n"
+#, c-format
 msgid ""
 "  -mfence-as-lock-add=[no|yes] (default: no)\n"
 "                          encode lfence, mfence and sfence as\n"
 "                           lock addl $0x0, (%%{re}sp)\n"
 msgstr ""
-"  --reduce-memory-overheads \n"
-"                          föredra mindre minnesanvändning till priset av\n"
-"                          längre assembleringstider\n"
+"  -mfence-as-lock-add=[no|yes] (standard: no)\n"
+"                          koda lfence, mfence och sfence som\n"
+"                           lock addl $0x0, (%%{re}sp)\n"
 
 #: config/tc-i386.c:11565
 #, c-format
@@ -8622,20 +8538,14 @@ msgid "  -mrelax-relocations=[no|yes] "
 msgstr "  -mrelax-relocations=[no|yes] "
 
 #: config/tc-i386.c:11571
-#, fuzzy, c-format
-#| msgid ""
-#| "  -momit-lock-prefix=[no|yes]\n"
-#| "                          strip all lock prefixes\n"
+#, c-format
 msgid "                          generate relax relocations\n"
-msgstr ""
-"  -momit-lock-prefix=[no|yes]\n"
-"                          rensa bort alla låsprefix\n"
+msgstr "                          generera lättnadsomlokaliseringar\n"
 
 #: config/tc-i386.c:11573
-#, fuzzy, c-format
-#| msgid "  -mfdpic                  assemble for the FDPIC ABI\n"
+#, c-format
 msgid "  -mamd64                 accept only AMD64 ISA [default]\n"
-msgstr "  -mfdpic                  assemblera för FDPIC ABI:t\n"
+msgstr "  -mamd64                 acceptera endast AMD64 ISA [standard]\n"
 
 #: config/tc-i386.c:11575
 #, c-format
@@ -9743,12 +9653,9 @@ msgid "  -no-warn-explicit-parallel-conflicts  do not warn when parallel\n"
 msgstr "  -no-warn-explicit-parallel-conflicts  varna inte när parallella\n"
 
 #: config/tc-m32r.c:399
-#, fuzzy, c-format
-#| msgid "                                         instructions might violate contraints\n"
+#, c-format
 msgid "                                         instructions might violate constraints\n"
-msgstr ""
-"                                         instruktioner kan kränka begränsningar\n"
-"\n"
+msgstr "                                         instruktioner kan kränka begränsningar\n"
 
 #: config/tc-m32r.c:401
 #, c-format
@@ -10703,8 +10610,7 @@ msgstr ""
 "-mcpu=<cpu>\t\tstll in cpu [standard %s]\n"
 
 #: config/tc-m68k.c:7602
-#, fuzzy, c-format
-#| msgid "-m[no-]%-16s enable/disable%s architecture extension\n"
+#, c-format
 msgid "-m[no-]%-16s enable/disable %s architecture extension\n"
 msgstr "-m[no-]%-16s aktivera/inaktivera %s-arkitektur utökning\n"
 
@@ -12179,10 +12085,9 @@ msgid ".option pic%d not supported"
 msgstr ".option pic%d stöds inte"
 
 #: config/tc-mips.c:16292
-#, fuzzy, c-format
-#| msgid ".option pic%d not supported"
+#, c-format
 msgid ".option pic%d not supported in VxWorks PIC mode"
-msgstr ".option pic%d stöds inte"
+msgstr ".option pic%d stöds inte i VxWorks PIC-läge"
 
 #: config/tc-mips.c:16304 config/tc-mips.c:16641
 msgid "-G may not be used with SVR4 PIC code"
@@ -12398,16 +12303,13 @@ msgstr ""
 "-no-mips16\t\tgenerera inte mips16-instruktioner\n"
 
 #: config/tc-mips.c:20089
-#, fuzzy, c-format
-#| msgid ""
-#| "-mips16\t\t\tgenerate mips16 instructions\n"
-#| "-no-mips16\t\tdo not generate mips16 instructions\n"
+#, c-format
 msgid ""
 "-mmips16e2\t\tgenerate MIPS16e2 instructions\n"
 "-mno-mips16e2\t\tdo not generate MIPS16e2 instructions\n"
 msgstr ""
-"-mips16\t\t\tgenerera mips16-instruktioner\n"
-"-no-mips16\t\tgenerera inte mips16-instruktioner\n"
+"-mmips16e2\t\t\tgenerera MIPS16e2-instruktioner\n"
+"-mno-mips16e2\t\tgenerera inte MIPS16e2-instruktioner\n"
 
 #: config/tc-mips.c:20092
 #, c-format
@@ -12446,16 +12348,13 @@ msgstr ""
 "-mno-dspr2\t\\generera inte DSP R2-instruktioner\n"
 
 #: config/tc-mips.c:20104
-#, fuzzy, c-format
-#| msgid ""
-#| "-mdspr2\t\t\tgenerate DSP R2 instructions\n"
-#| "-mno-dspr2\t\tdo not generate DSP R2 instructions\n"
+#, c-format
 msgid ""
 "-mdspr3\t\t\tgenerate DSP R3 instructions\n"
 "-mno-dspr3\t\tdo not generate DSP R3 instructions\n"
 msgstr ""
-"-mdspr2\t\t\tgenerera DSP R2-instruktioner\n"
-"-mno-dspr2\t\\generera inte DSP R2-instruktioner\n"
+"-mdspr3\t\t\tgenerera DSP R3-instruktioner\n"
+"-mno-dspr3\t\\generera inte DSP R3-instruktioner\n"
 
 #: config/tc-mips.c:20107
 #, c-format
@@ -12503,76 +12402,58 @@ msgstr ""
 "-mno-virt\t\tgenerera inte Virtualization-instruktioner\n"
 
 #: config/tc-mips.c:20122
-#, fuzzy, c-format
-#| msgid ""
-#| "-mmcu\t\t\tgenerate MCU instructions\n"
-#| "-mno-mcu\t\tdo not generate MCU instructions\n"
+#, c-format
 msgid ""
 "-mcrc\t\t\tgenerate CRC instructions\n"
 "-mno-crc\t\tdo not generate CRC instructions\n"
 msgstr ""
-"-mmcu\t\t\tgenerera MCU-instruktioner\n"
-"-mno-mcu\t\tgenerera inte MCU-instruktioner\n"
+"-mcrc\t\t\tgenerera CRC-instruktioner\n"
+"-mno-crc\t\tgenerera inte CRC-instruktioner\n"
 
 #: config/tc-mips.c:20125
-#, fuzzy, c-format
-#| msgid ""
-#| "-mvirt\t\t\tgenerate Virtualization instructions\n"
-#| "-mno-virt\t\tdo not generate Virtualization instructions\n"
+#, c-format
 msgid ""
 "-mginv\t\t\tgenerate Global INValidate (GINV) instructions\n"
 "-mno-ginv\t\tdo not generate Global INValidate instructions\n"
 msgstr ""
-"-mvirt\t\t\tgenerera Virtualization-instruktioner\n"
-"-mno-virt\t\tgenerera inte Virtualization-instruktioner\n"
+"-mginv\t\t\tgenerera GINV-instruktioner (Global INValidate)\n"
+"-mno-ginv\t\tgenerara inte GINV-instruktioner\n"
 
 #: config/tc-mips.c:20128
-#, fuzzy, c-format
-#| msgid ""
-#| "-msmartmips\t\tgenerate smartmips instructions\n"
-#| "-mno-smartmips\t\tdo not generate smartmips instructions\n"
+#, c-format
 msgid ""
 "-mloongson-mmi\t\tgenerate Loongson MultiMedia extensions Instructions (MMI) instructions\n"
 "-mno-loongson-mmi\tdo not generate Loongson MultiMedia extensions Instructions\n"
 msgstr ""
-"-msmartmips\t\tgenerera smartmips-instruktioner\n"
-"-mno-smartmips\t\tgenerera inte smartmips-instruktioner\n"
+"-mloongson-mmi\t\tgenerera Loongson MMI-instruktioner (MultiMedia extensions Instructions)\n"
+"-mno-loongson-mmi\tgenerera inte Loongson MMI-instruktioner\n"
 
 #: config/tc-mips.c:20131
-#, fuzzy, c-format
-#| msgid ""
-#| "-mxpa\t\t\tgenerate eXtended Physical Address (XPA) instructions\n"
-#| "-mno-xpa\t\tdo not generate eXtended Physical Address (XPA) instructions\n"
+#, c-format
 msgid ""
 "-mloongson-cam\t\tgenerate Loongson Content Address Memory (CAM) instructions\n"
 "-mno-loongson-cam\tdo not generate Loongson Content Address Memory Instructions\n"
 msgstr ""
-"-mxpa\t\t\tgenerera eXtended Physical Address (XPA)-instruktioner\n"
-"-mno-xpa\t\tgenerera inte eXtended Physical Address (XPA)-instruktioner\n"
+"-mloongson-cam\t\tgenerera Loongson CAM-instruktioner (Content Address Memory)\n"
+"-mno-loongson-cam\tgenerera inte Loongson CAM-instruktioner\n"
 
 #: config/tc-mips.c:20134
-#, fuzzy, c-format
-#| msgid ""
-#| "-mmt\t\t\tgenerate MT instructions\n"
-#| "-mno-mt\t\t\tdo not generate MT instructions\n"
+#, c-format
 msgid ""
 "-mloongson-ext\t\tgenerate Loongson EXTensions (EXT) instructions\n"
 "-mno-loongson-ext\tdo not generate Loongson EXTensions Instructions\n"
 msgstr ""
-"-mmt\t\t\tgenerera MT-instruktioner\n"
-"-mno-mt\t\t\tgenerera inte MT-instruktioner\n"
+"-mloongson-ext\t\tgenerera Loongson EXT-instruktioner (EXTensions)\n"
+"-mno-loongson-ext\tgenerera inte Loongson EXT-instruktioner\n"
 
 #: config/tc-mips.c:20137
-#, fuzzy, c-format
-#| msgid ""
-#| "-mdspr2\t\t\tgenerate DSP R2 instructions\n"
-#| "-mno-dspr2\t\tdo not generate DSP R2 instructions\n"
+#, c-format
 msgid ""
 "-mloongson-ext2\t\tgenerate Loongson EXTensions R2 (EXT2) instructions\n"
 "-mno-loongson-ext2\tdo not generate Loongson EXTensions R2 Instructions\n"
 msgstr ""
-"-mdspr2\t\t\tgenerera DSP R2-instruktioner\n"
-"-mno-dspr2\t\\generera inte DSP R2-instruktioner\n"
+"-mloongson-ext2\t\tgenerera Loongson EXT2-instruktioner (EXTensions R2)\n"
+"-mno-loongson-ext2\tgenerera inte Loongson EXT2-instruktioner\n"
 
 #: config/tc-mips.c:20140
 #, c-format
@@ -12584,21 +12465,7 @@ msgstr ""
 "-mno-insn32\t\tgenerera alla microMIPS-instruktioner\n"
 
 #: config/tc-mips.c:20143
-#, fuzzy, c-format
-#| msgid ""
-#| "-mfix-loongson2f-jump\twork around Loongson2F JUMP instructions\n"
-#| "-mfix-loongson2f-nop\twork around Loongson2F NOP errata\n"
-#| "-mfix-vr4120\t\twork around certain VR4120 errata\n"
-#| "-mfix-vr4130\t\twork around VR4130 mflo/mfhi errata\n"
-#| "-mfix-24k\t\tinsert a nop after ERET and DERET instructions\n"
-#| "-mfix-cn63xxp1\t\twork around CN63XXP1 PREF errata\n"
-#| "-mgp32\t\t\tuse 32-bit GPRs, regardless of the chosen ISA\n"
-#| "-mfp32\t\t\tuse 32-bit FPRs, regardless of the chosen ISA\n"
-#| "-msym32\t\t\tassume all symbols have 32-bit values\n"
-#| "-O0\t\t\tremove unneeded NOPs, do not swap branches\n"
-#| "-O\t\t\tremove unneeded NOPs and swap branches\n"
-#| "--trap, --no-break\ttrap exception on div by 0 and mult overflow\n"
-#| "--break, --no-trap\tbreak exception on div by 0 and mult overflow\n"
+#, c-format
 msgid ""
 "-mfix-loongson2f-jump\twork around Loongson2F JUMP instructions\n"
 "-mfix-loongson2f-nop\twork around Loongson2F NOP errata\n"
@@ -12622,24 +12489,18 @@ msgstr ""
 "-mfix-vr4130\t\tlösning för VR4130 mflo/mfhi-errata\n"
 "-mfix-24k\t\tinfoga en nop efter ERET- och DERET-instruktioner\n"
 "-mfix-cn63xxp1\t\tlösning för CN63XXP1 PREF-errata\n"
+"-mfix-r5900\t\tarbeta runt errata för kort loop på R5900\n"
 "-mgp32\t\t\tanvänd 32-bitars GPRs, oberoende av vald ISA\n"
 "-mfp32\t\t\tanvänd 32-bitars FPRs, oberoende av vald ISA\n"
 "-msym32\t\t\tantag att alla symbole har 32-bitars värden\n"
-"-O0\t\t\tta bort onödiga NOP:ar, växla inte grenar\n"
-"-O\t\t\tta bort onödiga NOP:ar och växla grenar\n"
+"-O0\t\t\tta inte bort onödiga NOP:ar, växla inte grenar\n"
+"-O, -O1\t\t\tta bort onödiga NOP:ar, växla inte grenar\n"
+"-O2\t\t\tta bort onödiga NOP:ar och växla grenar\n"
 "--trap, --no-break\tfånga undantag vid division med 0 och mult. överspill\n"
 "--break, --no-trap\tavbryt exekvering vid division med 0 och mult. överspill\n"
 
 #: config/tc-mips.c:20159
-#, fuzzy, c-format
-#| msgid ""
-#| "-mhard-float\t\tallow floating-point instructions\n"
-#| "-msoft-float\t\tdo not allow floating-point instructions\n"
-#| "-msingle-float\t\tonly allow 32-bit floating-point operations\n"
-#| "-mdouble-float\t\tallow 32-bit and 64-bit floating-point operations\n"
-#| "--[no-]construct-floats\t[dis]allow floating point values to be constructed\n"
-#| "--[no-]relax-branch\t[dis]allow out-of-range branches to be relaxed\n"
-#| "-mnan=ENCODING\t\tselect an IEEE 754 NaN encoding convention, either of:\n"
+#, c-format
 msgid ""
 "-mhard-float\t\tallow floating-point instructions\n"
 "-msoft-float\t\tdo not allow floating-point instructions\n"
@@ -12657,6 +12518,8 @@ msgstr ""
 "-mdouble-float\t\ttillåt 32- och 64-bitars flyttalsinstruktioner\n"
 "--[no-]construct-floats\ttillåt (inte) konstruktion av flyttal\n"
 "--[no-]relax-branch\ttillåt (inte) grenar utanför intervall att lättas\n"
+"-mignore-branch-isa\tacceptera ogiltiga grenar som kräver skiftning av ISA-läge\n"
+"-mno-ignore-branch-isa\tavvisa ogiltiga grenar som kräver skiftning av ISa-läge\n"
 "-mnan=KODNING\t\tvälj en IEEE 754 NaN-kodningskonvention, endera av:\n"
 
 #: config/tc-mips.c:20177
@@ -12683,26 +12546,23 @@ msgstr ""
 "-mabi=ABI\t\tskapa objektfil som stämmer med ABI för:\n"
 
 #: config/tc-mips.c:20198
-#, fuzzy, c-format
-#| msgid "--fdpic\t\t\tgenerate an FDPIC object file\n"
+#, c-format
 msgid "-32\t\t\tcreate o32 ABI object file%s\n"
-msgstr "--fdpic\t\t\tgenerera en FDPIC-objektfil\n"
+msgstr "-32\t\t\tskapa o32 ABI-objektfil%s\n"
 
 #: config/tc-mips.c:20200 config/tc-mips.c:20203 config/tc-mips.c:20206
 msgid " (default)"
 msgstr " (standard)"
 
 #: config/tc-mips.c:20201
-#, fuzzy, c-format
-#| msgid "--fdpic\t\t\tgenerate an FDPIC object file\n"
+#, c-format
 msgid "-n32\t\t\tcreate n32 ABI object file%s\n"
-msgstr "--fdpic\t\t\tgenerera en FDPIC-objektfil\n"
+msgstr "-n32\t\t\tskapa n32 ABI-objektfil%s\n"
 
 #: config/tc-mips.c:20204
-#, fuzzy, c-format
-#| msgid "--fdpic\t\t\tgenerate an FDPIC object file\n"
+#, c-format
 msgid "-64\t\t\tcreate 64 ABI object file%s\n"
-msgstr "--fdpic\t\t\tgenerera en FDPIC-objektfil\n"
+msgstr "-64\t\t\tskapa 64 ABI-objektfil%s\n"
 
 #: config/tc-mips.c:20286
 msgid "missing .end at end of assembly"
@@ -13207,7 +13067,7 @@ msgstr "okänd operand %s"
 #: config/tc-msp430.c:1991
 #, c-format
 msgid "extra characters '%s' at the end of absolute operand '%s'"
-msgstr "Extra tecken ”%s” vid slutet av absolut operand ”%s”"
+msgstr "extra tecken ”%s” vid slutet av absolut operand ”%s”"
 
 #: config/tc-msp430.c:2010 config/tc-msp430.c:2124
 #, c-format
@@ -13702,10 +13562,9 @@ msgid "  -mall-ext\t\t  Turn on all extensions and instructions support\n"
 msgstr "  -mall-ext\t\t  Slå på stöd för alla utökningar och instruktioner\n"
 
 #: config/tc-nds32.c:2770
-#, fuzzy, c-format
-#| msgid "need PIC qualifier with symbol. '%s'"
+#, c-format
 msgid "la must use with symbol. '%s'"
-msgstr "behöver PIC-kvalificerare med symbol. ”%s”"
+msgstr "la måste användas med symbol. ”%s”"
 
 #: config/tc-nds32.c:2823
 #, c-format
@@ -14061,10 +13920,8 @@ msgstr ""
 "Om du inte behöver felsöka denna kod använd .set nobreak för att slå av denna varning."
 
 #: config/tc-nios2.c:1939 config/tc-nios2.c:1967
-#, fuzzy
-#| msgid "-mips16 cannot be used with -micromips"
 msgid "r31 cannot be used with jmp; use ret instead"
-msgstr "-mips16 kan inte användas med -micromips"
+msgstr "-mips16 kan inte användas med jmp; använd ret istället"
 
 #: config/tc-nios2.c:1982
 msgid "r31 cannot be used with jmpr.n; use ret.n instead"
@@ -14453,25 +14310,7 @@ msgid "--nops needs a numeric argument"
 msgstr "--nops behöver ett numeriskt argument"
 
 #: config/tc-ppc.c:1326
-#, fuzzy, c-format
-#| msgid ""
-#| "PowerPC options:\n"
-#| "-a32                    generate ELF32/XCOFF32\n"
-#| "-a64                    generate ELF64/XCOFF64\n"
-#| "-u                      ignored\n"
-#| "-mpwrx, -mpwr2          generate code for POWER/2 (RIOS2)\n"
-#| "-mpwr                   generate code for POWER (RIOS1)\n"
-#| "-m601                   generate code for PowerPC 601\n"
-#| "-mppc, -mppc32, -m603, -m604\n"
-#| "                        generate code for PowerPC 603/604\n"
-#| "-m403                   generate code for PowerPC 403\n"
-#| "-m405                   generate code for PowerPC 405\n"
-#| "-m440                   generate code for PowerPC 440\n"
-#| "-m464                   generate code for PowerPC 464\n"
-#| "-m476                   generate code for PowerPC 476\n"
-#| "-m7400, -m7410, -m7450, -m7455\n"
-#| "                        generate code for PowerPC 7400/7410/7450/7455\n"
-#| "-m750cl                 generate code for PowerPC 750cl\n"
+#, c-format
 msgid ""
 "PowerPC options:\n"
 "-a32                    generate ELF32/XCOFF32\n"
@@ -14509,24 +14348,12 @@ msgstr ""
 "-m476                   generera kod för PowerPC 476\n"
 "-m7400, -m7410, -m7450, -m7455\n"
 "                        generera kod för PowerPC 7400/7410/7450/7455\n"
-"-m750cl                 generera kod för PowerPC 750cl\n"
+"-m750cl, -mgekko, -mbroadway\n"
+"                        generera kod för PowerPC 750cl/Gekko/Broadway\n"
+"-m821, -m850, -m860     generea kod för PowerPC 821/850/860\n"
 
 #: config/tc-ppc.c:1346
-#, fuzzy, c-format
-#| msgid ""
-#| "-mppc64, -m620          generate code for PowerPC 620/625/630\n"
-#| "-mppc64bridge           generate code for PowerPC 64, including bridge insns\n"
-#| "-mbooke                 generate code for 32-bit PowerPC BookE\n"
-#| "-ma2                    generate code for A2 architecture\n"
-#| "-mpower4, -mpwr4        generate code for Power4 architecture\n"
-#| "-mpower5, -mpwr5, -mpwr5x\n"
-#| "                        generate code for Power5 architecture\n"
-#| "-mpower6, -mpwr6        generate code for Power6 architecture\n"
-#| "-mpower7, -mpwr7        generate code for Power7 architecture\n"
-#| "-mpower8, -mpwr8        generate code for Power8 architecture\n"
-#| "-mcell                  generate code for Cell Broadband Engine architecture\n"
-#| "-mcom                   generate code Power/PowerPC common instructions\n"
-#| "-many                   generate code for any architecture (PWR/PWRX/PPC)\n"
+#, c-format
 msgid ""
 "-mppc64, -m620          generate code for PowerPC 620/625/630\n"
 "-mppc64bridge           generate code for PowerPC 64, including bridge insns\n"
@@ -14553,27 +14380,13 @@ msgstr ""
 "-mpower6, -mpwr6        generera kod för Power6-arkitektur\n"
 "-mpower7, -mpwr7        generera kod för Power7-arkitektur\n"
 "-mpower8, -mpwr8        generera kod för Power8-arkitektur\n"
+"-mpower9, -mpwr9        generera kod för Power9-arkitektur\n"
 "-mcell                  generera kod för Cell Broadband Engine-arkitektur\n"
-"-mcom                   generera kod för Power/PowerPC common instructions\n"
+"-mcom                   generera kod för allmänna Power/PowerPC-instruktioner\n"
 "-many                   generera kod för vilken arkitektur som helst (PWR/PWRX/PPC)\n"
 
 #: config/tc-ppc.c:1361
-#, fuzzy, c-format
-#| msgid ""
-#| "-maltivec               generate code for AltiVec\n"
-#| "-mvsx                   generate code for Vector-Scalar (VSX) instructions\n"
-#| "-mhtm                   generate code for Hardware Transactional Memory\n"
-#| "-me300                  generate code for PowerPC e300 family\n"
-#| "-me500, -me500x2        generate code for Motorola e500 core complex\n"
-#| "-me500mc,               generate code for Freescale e500mc core complex\n"
-#| "-me500mc64,             generate code for Freescale e500mc64 core complex\n"
-#| "-me5500,                generate code for Freescale e5500 core complex\n"
-#| "-me6500,                generate code for Freescale e6500 core complex\n"
-#| "-mspe                   generate code for Motorola SPE instructions\n"
-#| "-mvle                   generate code for Freescale VLE instructions\n"
-#| "-mtitan                 generate code for AppliedMicro Titan core complex\n"
-#| "-mregnames              Allow symbolic names for registers\n"
-#| "-mno-regnames           Do not allow symbolic names for registers\n"
+#, c-format
 msgid ""
 "-maltivec               generate code for AltiVec\n"
 "-mvsx                   generate code for Vector-Scalar (VSX) instructions\n"
@@ -14592,7 +14405,6 @@ msgid ""
 msgstr ""
 "-maltivec               generera kod för AltiVec\n"
 "-mvsx                   generera kod för Vector-Scalar (VSX)-instruktioner\n"
-"-mhtm                   generera kod för Hardware Transactional Memory\n"
 "-me300                  generera kod för PowerPC e300-familjen\n"
 "-me500, -me500x2        generera kod för Motorola e500-kärnkomplex\n"
 "-me500mc,               generera kod för Freescale e500mc-kärnkomplex\n"
@@ -14600,6 +14412,7 @@ msgstr ""
 "-me5500,                generera kod för Freescale e5500-kärnkomplex\n"
 "-me6500,                generera kod för Freescale e6500-kärnkomplex\n"
 "-mspe                   generera kod för Motorola SPE-instruktioner\n"
+"-mspe2                  generera kod för Motorola SPE2-instruktioner\n"
 "-mvle                   generera kod för Freescale VLE-instruktioner\n"
 "-mtitan                 generera kod för AppliedMicro Titan-kärnkomplex\n"
 "-mregnames              Tillåt symboliska namn för register\n"
@@ -15315,10 +15128,8 @@ msgid "non-constant .%cleb128 is not supported"
 msgstr "icke-konstant .%cleb128 stöds inte"
 
 #: config/tc-riscv.c:3146
-#, fuzzy
-#| msgid "\".option\" directive must appear before any instructions"
 msgid ".attribute arch must set before any instructions"
-msgstr "”.option”-direktiv måste finnas före instruktioner"
+msgstr ".attribute arch måste sättas före alla instruktioner"
 
 #: config/tc-rl78.c:213
 msgid "16-bit relocation used in 8-bit operand"
@@ -15344,10 +15155,9 @@ msgid " RL78 specific command line options:\n"
 msgstr " RL78-specifika kommandoradsflaggor:\n"
 
 #: config/tc-rl78.c:368
-#, fuzzy, c-format
-#| msgid "  -mrelax                   Enable relaxation\n"
+#, c-format
 msgid "  --mrelax          Enable link time relaxation\n"
-msgstr "  -mrelax                   Aktivera lättnad\n"
+msgstr "  --mrelax          Aktivera länktidslättnad\n"
 
 #: config/tc-rl78.c:369
 #, c-format
@@ -15355,22 +15165,19 @@ msgid "  --mg10            Enable support for G10 variant\n"
 msgstr "  --mg10            Aktivera stöd för G10-variant\n"
 
 #: config/tc-rl78.c:370
-#, fuzzy, c-format
-#| msgid "  --mg10            Enable support for G10 variant\n"
+#, c-format
 msgid "  --mg13            Selects the G13 core.\n"
-msgstr "  --mg10            Aktivera stöd för G10-variant\n"
+msgstr "  --mg13            Väljer G13-kärnan.\n"
 
 #: config/tc-rl78.c:371
-#, fuzzy, c-format
-#| msgid "  --mg10            Enable support for G10 variant\n"
+#, c-format
 msgid "  --mg14            Selects the G14 core [default]\n"
-msgstr "  --mg10            Aktivera stöd för G10-variant\n"
+msgstr "  --mg14            Vĺjer G14-kärnan [standard]\n"
 
 #: config/tc-rl78.c:372
-#, fuzzy, c-format
-#| msgid "  -mv850e2v4                Alias for -mv850e3v5\n"
+#, c-format
 msgid "  --mrl78           Alias for --mg14\n"
-msgstr "  -mv850e2v4                Alias för -mv850e3v5\n"
+msgstr "  --mrl78           Alias för --mg14\n"
 
 #: config/tc-rl78.c:373
 #, c-format
@@ -15487,10 +15294,9 @@ msgid "  --mint-register=<value>\n"
 msgstr "  --mint-register=<value>\n"
 
 #: config/tc-rx.c:221
-#, fuzzy, c-format
-#| msgid "  --mcpu=<rx100|rx200|rx600|rx610>\n"
+#, c-format
 msgid "  --mcpu=<rx100|rx200|rx600|rx610|rxv2|rxv3|rxv3-dfpu>\n"
-msgstr "  --mcpu=<rx100|rx200|rx600|rx610>\n"
+msgstr "  --mcpu=<rx100|rx200|rx600|rx610|rxv2|rxv3|rxv3-dfpu>\n"
 
 #: config/tc-rx.c:222
 #, c-format
@@ -16126,52 +15932,44 @@ msgid "        -EL\t\tassemble code for a little-endian cpu\n"
 msgstr "        -EL\t\tassemblera koda för cpu med omvänd byteordning\n"
 
 #: config/tc-score.c:7798
-#, fuzzy, c-format
-#| msgid "        -FIXDD\t\tassemble code for fix data dependency\n"
+#, c-format
 msgid "        -FIXDD\t\tfix data dependencies\n"
-msgstr "        -FIXDD\t\tassemblera kod för fixa databeroenden\n"
+msgstr "        -FIXDD\t\tfixa databeroenden\n"
 
 #: config/tc-score.c:7800
-#, fuzzy, c-format
-#| msgid "        -NWARN\t\tassemble code for no warning message for fix data dependency\n"
+#, c-format
 msgid "        -NWARN\t\tdo not print warning message when fixing data dependencies\n"
-msgstr "        -NWARN\t\tassemblera kod utan att ge varningsmeddelanden för fixa databeroenden\n"
+msgstr "        -NWARN\t\tskriv inte ut varningsmeddelanden när databeroenden fixas\n"
 
 #: config/tc-score.c:7802
-#, fuzzy, c-format
-#| msgid "        -SCORE5\t\tassemble code for target is SCORE5\n"
+#, c-format
 msgid "        -SCORE5\t\tassemble code for target SCORE5\n"
 msgstr "        -SCORE5\t\tassemblera kod för målet SCORE5\n"
 
 #: config/tc-score.c:7804
-#, fuzzy, c-format
-#| msgid "        -SCORE5U\tassemble code for target is SCORE5U\n"
+#, c-format
 msgid "        -SCORE5U\tassemble code for target SCORE5U\n"
-msgstr "        -SCORE5U\tassemblera kod för mål SCORE5U\n"
+msgstr "        -SCORE5U\tassemblera kod för målet SCORE5U\n"
 
 #: config/tc-score.c:7806
-#, fuzzy, c-format
-#| msgid "        -SCORE5\t\tassemble code for target is SCORE5\n"
+#, c-format
 msgid "        -SCORE7\t\tassemble code for target SCORE7 [default]\n"
-msgstr "        -SCORE5\t\tassemblera kod för målet SCORE5\n"
+msgstr "        -SCORE7\t\tassemblera kod för målet SCORE7 [standard]\n"
 
 #: config/tc-score.c:7808
-#, fuzzy, c-format
-#| msgid "        -SCORE3\t\tassemble code for target is SCORE3\n"
+#, c-format
 msgid "        -SCORE3\t\tassemble code for target SCORE3\n"
-msgstr "        -SCORE3\t\tassemblera kod för mål SCORE3\n"
+msgstr "        -SCORE3\t\tassemblera kod för målet SCORE3\n"
 
 #: config/tc-score.c:7810
-#, fuzzy, c-format
-#| msgid "        -march=score3\tassemble code for target is SCORE3\n"
+#, c-format
 msgid "        -march=score7\tassemble code for target SCORE7 [default]\n"
-msgstr "        -march=score3\tassemblera kod för mål SCORE3\n"
+msgstr "        -march=score7\tassemblera kod för målet SCORE7 [standard]\n"
 
 #: config/tc-score.c:7812
-#, fuzzy, c-format
-#| msgid "        -march=score3\tassemble code for target is SCORE3\n"
+#, c-format
 msgid "        -march=score3\tassemble code for target SCORE3\n"
-msgstr "        -march=score3\tassemblera kod för mål SCORE3\n"
+msgstr "        -march=score3\tassemblera kod för målet SCORE3\n"
 
 #: config/tc-score.c:7814
 #, c-format
@@ -16179,28 +15977,24 @@ msgid "        -USE_R1\t\tassemble code for no warning message when using temp r
 msgstr "        -USE_R1\t\tassemblera kod utan varningsmeddelande när temporärregister r1 används\n"
 
 #: config/tc-score.c:7816
-#, fuzzy, c-format
-#| msgid "        -KPIC\t\tassemble code for PIC\n"
+#, c-format
 msgid "        -KPIC\t\tgenerate PIC\n"
-msgstr "        -KPIC\t\tassemblera kod för PIC\n"
+msgstr "        -KPIC\t\tgenerera PIC\n"
 
 #: config/tc-score.c:7818
-#, fuzzy, c-format
-#| msgid "        -O0\t\tassembler will not perform any optimizations\n"
+#, c-format
 msgid "        -O0\t\tdo not perform any optimizations\n"
-msgstr "        -O0\t\tassembler kommer inte att utföra några optimeringar\n"
+msgstr "        -O0\t\tutför inte några optimeringar\n"
 
 #: config/tc-score.c:7820
-#, fuzzy, c-format
-#| msgid "        -G gpnum\tassemble code for setting gpsize and default is 8 byte\n"
+#, c-format
 msgid "        -G gpnum\tassemble code for setting gpsize, default is 8 bytes\n"
 msgstr "        -G gpnum\tassemblera kod för inställning av gpsize, standardvärdet är 8 byte\n"
 
 #: config/tc-score.c:7822
-#, fuzzy, c-format
-#| msgid "        -V \t\tSunplus release version \n"
+#, c-format
 msgid "        -V \t\tSunplus release version\n"
-msgstr "        -V \t\tSunplus-version \n"
+msgstr "        -V \t\tSunplus-version\n"
 
 #: config/tc-sh.c:61
 msgid "directive .big encountered when option -big required"
@@ -16536,17 +16330,7 @@ msgid "\t\t\t[default is %s]\n"
 msgstr "\t\t\t[standard är %s]\n"
 
 #: config/tc-sparc.c:692
-#, fuzzy, c-format
-#| msgid ""
-#| "-KPIC\t\t\tgenerate PIC\n"
-#| "-V\t\t\tprint assembler version number\n"
-#| "-undeclared-regs\tignore application global register usage without\n"
-#| "\t\t\tappropriate .register directive (default)\n"
-#| "-no-undeclared-regs\tforce error on application global register usage\n"
-#| "\t\t\twithout appropriate .register directive\n"
-#| "-q\t\t\tignored\n"
-#| "-Qy, -Qn\t\tignored\n"
-#| "-s\t\t\tignored\n"
+#, c-format
 msgid ""
 "-KPIC\t\t\tgenerate PIC\n"
 "-V\t\t\tprint assembler version number\n"
@@ -16565,6 +16349,7 @@ msgstr ""
 "\t\t\tlämpliga .register-direktiv (standard)\n"
 "-no-undeclared-regs\ttvinga fel vid användning av global registeranvändning\n"
 "\t\t\tutan lämpligt .register-direktiv\n"
+"--dcti-couple-detect\tvarna när ett oförutsägbar DCTI-par hittas\n"
 "-q\t\t\thoppas över\n"
 "-Qy, -Qn\t\thoppas över\n"
 "-s\t\t\thoppas över\n"
@@ -18675,16 +18460,14 @@ msgid "  -m4byte-align             Mark the binary as using 32-bit alignment (de
 msgstr "  -m4byte-align             Markera binären som att den använder 32-bitars justering (standard)\n"
 
 #: config/tc-v850.c:1560
-#, fuzzy, c-format
-#| msgid "  -m4byte-align             Mark the binary as using 32-bit alignment (default)\n"
+#, c-format
 msgid "  -msoft-float              Mark the binary as not using FP insns (default for pre e2v3)\n"
-msgstr "  -m4byte-align             Markera binären som att den använder 32-bitars justering (standard)\n"
+msgstr "  -msoft-float              Markera binären som att den inte använder FP-instr (standard för allt före e2v3)\n"
 
 #: config/tc-v850.c:1561
-#, fuzzy, c-format
-#| msgid "  -mrh850-abi               Mark the binary as using the RH850 ABI (default)\n"
+#, c-format
 msgid "  -mhard-float              Mark the binary as using FP insns (default for e2v3 and up)\n"
-msgstr "  -mrh850-abi               Markera binären som att den använder RH850-ABI:t (standard)\n"
+msgstr "  -mhard-float              Markera binären som att den använder FP-instr (standard för e2v3 och uppåt)\n"
 
 #: config/tc-v850.c:1949
 #, c-format
@@ -19176,17 +18959,7 @@ msgid "architecture variant invalid"
 msgstr "arkitekturvariant ogiltig"
 
 #: config/tc-xgate.c:370
-#, fuzzy, c-format
-#| msgid ""
-#| "Freescale XGATE co-processor options:\n"
-#| "  -mshort                 use 16-bit int ABI (default)\n"
-#| "  -mlong                  use 32-bit int ABI\n"
-#| "  -mshort-double          use 32-bit double ABI\n"
-#| "  -mlong-double           use 64-bit double ABI (default)\n"
-#| "  --mxgate                specify the processor variant[default %s]\n"
-#| "  --print-insn-syntax     print the syntax of instruction in case of error\n"
-#| "  --print-opcodes         print the list of instructions with syntax\n"
-#| "  --generate-example      generate an example of each instruction"
+#, c-format
 msgid ""
 "Freescale XGATE co-processor options:\n"
 "  -mshort                 use 16-bit int ABI (default)\n"
@@ -19748,7 +19521,7 @@ msgstr "ogiltig tom loop"
 
 #: config/tc-xtensa.c:8832
 msgid "loop target does not follow loop instruction in section"
-msgstr "loopmål följer inte loopinstruktion i sektion."
+msgstr "loopmål följer inte loopinstruktion i sektion"
 
 #: config/tc-xtensa.c:9403
 msgid "cannot find suitable trampoline"

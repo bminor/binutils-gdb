@@ -1,3 +1,7 @@
+2020-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/aarch64/f64mm.s: Scale index of LD1RO{H,W,D}.
