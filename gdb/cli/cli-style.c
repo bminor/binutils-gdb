@@ -341,8 +341,9 @@ If enabled, source code is styled.\n"
 "Note that source styling only works if styling in general is enabled,\n\
 see \"show style enabled\"."
 #else
-"Source highlighting is disabled in this installation of gdb, because\n\
-it was not linked against GNU Source Highlight."
+"Source highlighting may be disabled in this installation of gdb, because\n\
+it was not linked against GNU Source Highlight.  However, it might still be\n\
+available if the appropriate extension is available at runtime."
 #endif
 			   ), set_style_enabled, show_style_sources,
 			   &style_set_list, &style_show_list);

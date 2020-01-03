@@ -149,6 +149,8 @@ static void gdbpy_set_quit_flag (const struct extension_language_defn *);
 static int gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
+static gdb::optional<std::string> gdbpy_colorize
+  (const std::string &filename, const std::string &contents);
 
 /* The interface between gdb proper and loading of python scripts.  */
 
@@ -188,6 +190,8 @@ const struct extension_language_ops python_extension_ops =
   gdbpy_before_prompt_hook,
 
   gdbpy_get_matching_xmethod_workers,
+
+  gdbpy_colorize,
 };
 
 /* Architecture and language to be used in callbacks from
@@ -1102,6 +1106,74 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
     }
 
   return EXT_LANG_RC_NOP;
+}
+
+/* This is the extension_language_ops.colorize "method".  */
+
+static gdb::optional<std::string>
+gdbpy_colorize (const std::string &filename, const std::string &contents)
+{
+  if (!gdb_python_initialized)
+    return {};
+
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+
+  if (gdb_python_module == nullptr
+      || !PyObject_HasAttrString (gdb_python_module, "colorize"))
+    return {};
+
+  gdbpy_ref<> hook (PyObject_GetAttrString (gdb_python_module, "colorize"));
+  if (hook == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  if (!PyCallable_Check (hook.get ()))
+    return {};
+
+  gdbpy_ref<> fname_arg (PyString_FromString (filename.c_str ()));
+  if (fname_arg == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+  gdbpy_ref<> contents_arg (PyString_FromString (contents.c_str ()));
+  if (contents_arg == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
+						    fname_arg.get (),
+						    contents_arg.get (),
+						    nullptr));
+  if (result == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  if (!gdbpy_is_string (result.get ()))
+    return {};
+
+  gdbpy_ref<> unic = python_string_to_unicode (result.get ());
+  if (unic == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+  gdbpy_ref<> host_str (PyUnicode_AsEncodedString (unic.get (),
+						   host_charset (),
+						   nullptr));
+  if (host_str == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  return std::string (PyBytes_AsString (host_str.get ()));
 }
 
 

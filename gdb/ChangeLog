@@ -1,3 +1,15 @@
+2020-01-21  Tom Tromey  <tromey@adacore.com>
+
+	* source-cache.c (source_cache::ensure): Call ext_lang_colorize.
+	* python/python.c (python_extension_ops): Update.
+	(gdbpy_colorize): New function.
+	* python/lib/gdb/__init__.py (colorize): New function.
+	* extension.h (ext_lang_colorize): Declare.
+	* extension.c (ext_lang_colorize): New function.
+	* extension-priv.h (struct extension_language_ops) <colorize>: New
+	member.
+	* cli/cli-style.c (_initialize_cli_style): Update help text.
+
 2020-01-21  Luis Machado  <luis.machado@linaro.org>
 
 	* aarch64-tdep.c (struct aarch64_displaced_step_closure)

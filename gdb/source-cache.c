@@ -178,9 +178,10 @@ source_cache::ensure (struct symtab *s)
 
   std::string contents = get_plain_source_lines (s, fullname);
 
-#ifdef HAVE_SOURCE_HIGHLIGHT
   if (source_styling && gdb_stdout->can_emit_style_escape ())
     {
+#ifdef HAVE_SOURCE_HIGHLIGHT
+      bool already_styled = false;
       const char *lang_name = get_language_name (SYMTAB_LANGUAGE (s));
       if (lang_name != nullptr)
 	{
@@ -202,6 +203,7 @@ source_cache::ensure (struct symtab *s)
 	      std::ostringstream output;
 	      highlighter->highlight (input, output, lang_name, fullname);
 	      contents = output.str ();
+	      already_styled = true;
 	    }
 	  catch (...)
 	    {
@@ -213,8 +215,16 @@ source_cache::ensure (struct symtab *s)
 		 un-highlighted text. */
 	    }
 	}
-    }
+
+      if (!already_styled)
 #endif /* HAVE_SOURCE_HIGHLIGHT */
+	{
+	  gdb::optional<std::string> ext_contents;
+	  ext_contents = ext_lang_colorize (fullname, contents);
+	  if (ext_contents.has_value ())
+	    contents = std::move (*ext_contents);
+	}
+    }
 
   source_text result = { std::move (fullname), std::move (contents) };
   m_source_map.push_back (std::move (result));

@@ -903,6 +903,27 @@ xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
   return result_type;
 }
 
+/* See extension.h.  */
+
+gdb::optional<std::string>
+ext_lang_colorize (const std::string &filename, const std::string &contents)
+{
+  int i;
+  const struct extension_language_defn *extlang;
+  gdb::optional<std::string> result;
+
+  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+    {
+      if (extlang->ops->colorize == nullptr)
+	continue;
+      result = extlang->ops->colorize (filename, contents);
+      if (result.has_value ())
+	return result;
+    }
+
+  return result;
+}
+
 /* Called via an observer before gdb prints its prompt.
    Iterate over the extension languages giving them a chance to
    change the prompt.  The first one to change the prompt wins,

@@ -254,6 +254,13 @@ struct extension_language_ops
      struct type *obj_type,
      const char *method_name,
      std::vector<xmethod_worker_up> *dm_vec);
+
+  /* Colorize a source file.  NAME is the source file's name, and
+     CONTENTS is the contents of the file.  This should either return
+     colorized (using ANSI terminal escapes) version of the contents,
+     or an empty option.  */
+  gdb::optional<std::string> (*colorize) (const std::string &name,
+					  const std::string &contents);
 };
 
 /* State necessary to restore a signal handler to its previous value.  */
