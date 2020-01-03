@@ -588,6 +588,10 @@ COMMON int flag_m68k_mri;
 #define flag_m68k_mri 0
 #endif
 
+#ifndef TC_STRING_ESCAPES
+#define TC_STRING_ESCAPES 1
+#endif
+
 #ifdef WARN_COMMENTS
 COMMON int           warn_comment;
 COMMON unsigned int  found_comment;

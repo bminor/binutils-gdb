@@ -1,3 +1,13 @@
+2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25311
+	* as.h (TC_STRING_ESCAPES): Provide a default definition.
+	* app.c (do_scrub_chars): Use TC_STRING_ESCAPES instead of
+	NO_STRING_ESCAPES.
+	* read.c (next_char_of_string): Likewise.
+	* config/tc-ppc.h (TC_STRING_ESCAPES): Define.
+	* config/tc-z80.h (TC_STRING_ESCAPES): Define.
+
 2020-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

@@ -61,7 +61,7 @@ extern const char *ppc_target_format (void);
 
 /* Strings do not use backslash escapes under COFF.  */
 #ifdef OBJ_COFF
-#define NO_STRING_ESCAPES
+#define TC_STRING_ESCAPES 0
 #endif
 
 #ifdef OBJ_ELF

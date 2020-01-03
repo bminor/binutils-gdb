@@ -5435,8 +5435,9 @@ next_char_of_string (void)
       bump_line_counters ();
       break;
 
-#ifndef NO_STRING_ESCAPES
     case '\\':
+      if (!TC_STRING_ESCAPES)
+	break;
       switch (c = *input_line_pointer++ & CHAR_MASK)
 	{
 	case 'b':
@@ -5538,7 +5539,6 @@ next_char_of_string (void)
 	  break;
 	}
       break;
-#endif /* ! defined (NO_STRING_ESCAPES) */
 
     default:
       break;
