@@ -597,7 +597,7 @@ proc empty_archive { } {
 
     # This commmand used to fail with: "Malformed archive".
     set got [binutils_run $AR "-t $archive"]
-    if ![string match "empty" $got] {
+    if ![string match "empty" $got] {
 	fail $testname
 	return
     }

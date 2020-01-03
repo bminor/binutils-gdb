@@ -912,23 +912,7 @@ with_xxhash
 with_libxxhash_prefix
 enable_unit_tests
 '
-      ac_precious_vars='build_alias
-host_alias
-target_alias
-CC
-CFLAGS
-LDFLAGS
-LIBS
-CPPFLAGS
-CXX
-CXXFLAGS
-CCC
-CPP
-MAKEINFO
-MAKEINFOFLAGS
-YACC
-YFLAGS
-XMKMF'
+ac_dumb_vars_configure=''
 ac_subdirs_all='testsuite
 gdbtk
 gdbserver'
@@ -1457,7 +1441,7 @@ fi
 case $srcdir in
 */) srcdir=`expr "X$srcdir" : 'X\(.*[^/]\)' \| "X$srcdir" : 'X\(.*\)'`;;
 esac
-for ac_var in $ac_precious_vars; do
+for ac_var in ; do
   eval ac_env_${ac_var}_set=\${${ac_var}+set}
   eval ac_env_${ac_var}_value=\$${ac_var}
   eval ac_cv_env_${ac_var}_set=\${${ac_var}+set}
@@ -2877,7 +2861,7 @@ as_fn_append ac_header_list " sys/param.h"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
-for ac_var in $ac_precious_vars; do
+for ac_var in ; do
   eval ac_old_set=\$ac_cv_env_${ac_var}_set
   eval ac_new_set=\$ac_env_${ac_var}_set
   eval ac_old_val=\$ac_cv_env_${ac_var}_value
@@ -2924,7 +2908,7 @@ $as_echo "$as_me:   current value: \`$ac_new_val'" >&2;}
     esac
   fi
 done
-if $ac_cache_corrupted; then
+if false; then 
   { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
   { $as_echo "$as_me:${as_lineno-$LINENO}: error: changes in the environment can compromise the build" >&5
@@ -10474,21 +10458,21 @@ fi
     # We have a python program to use, but it may be too old.
     # Don't flag an error for --with-python=auto (the default).
     have_python_config=yes
-    python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
+    python_includes=`${python_prog}-config --includes`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         as_fn_error $? "failure running python-config --includes" "$LINENO" 5
       fi
     fi
-    python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
+    python_libs="`${python_prog}-config --ldflags` -lpython3.9"
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         as_fn_error $? "failure running python-config --ldflags" "$LINENO" 5
       fi
     fi
-    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
+    python_prefix=`${python_prog}-config --exec-prefix`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
@@ -19690,7 +19674,7 @@ Try \`$0 --help' for more information." ;;
   shift
 done
 
-ac_configure_extra_args=
+ac_configure_extra_args="${extra_args}"
 
 if $ac_cs_silent; then
   exec 6>/dev/null

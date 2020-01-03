@@ -1475,7 +1475,7 @@ prompt_for_continue (void)
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
-  gdb::unique_xmalloc_ptr<char> ignore (gdb_readline_wrapper (cont_prompt));
+  //gdb::unique_xmalloc_ptr<char> ignore (gdb_readline_wrapper (cont_prompt));
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
   prompt_for_continue_wait_time += steady_clock::now () - prompt_started;
@@ -1483,6 +1483,7 @@ prompt_for_continue (void)
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
 
+  /*
   if (ignore != NULL)
     {
       char *p = ignore.get ();
@@ -1490,16 +1491,16 @@ prompt_for_continue (void)
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
-	/* Do not call quit here; there is no possibility of SIGINT.  */
+	// Do not call quit here; there is no possibility of SIGINT.
 	throw_quit ("Quit");
       if (p[0] == 'c')
 	disable_pagination = true;
     }
-
+  */
   /* Now we have to do this again, so that GDB will know that it doesn't
      need to save the ---Type <return>--- line at the top of the screen.  */
   reinitialize_more_filter ();
-  pagination_disabled_for_command = disable_pagination;
+  pagination_disabled_for_command = 1; //disable_pagination;
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }

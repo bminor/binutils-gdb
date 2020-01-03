@@ -26,6 +26,7 @@ srcdir="$1"
 host_alias="$2"
 target_alias="$3"
 output="$4"
+: ${output:=${output:-version.c}}
 
 rm -f version.c-tmp $output version.tmp
 date=`sed -n -e 's/^.* BFD_VERSION_DATE \(.*\)$/\1/p' $srcdir/../bfd/version.h`

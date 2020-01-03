@@ -2761,8 +2761,8 @@ extrasub_build=
 for module in ${build_configdirs} ; do
   if test -z "${no_recursion}" \
      && test -f ${build_subdir}/${module}/Makefile; then
-    echo 1>&2 "*** removing ${build_subdir}/${module}/Makefile to force reconfigure"
-    rm -f ${build_subdir}/${module}/Makefile
+    :
+    :
   fi
   extrasub_build="$extrasub_build
 /^@if build-$module\$/d
@@ -2777,7 +2777,7 @@ for module in ${configdirs} ; do
   if test -z "${no_recursion}"; then
     for file in stage*-${module}/Makefile prev-${module}/Makefile ${module}/Makefile; do
       if test -f ${file}; then
-	echo 1>&2 "*** removing ${file} to force reconfigure"
+    :
 	rm -f ${file}
       fi
     done
@@ -2798,8 +2798,8 @@ extrasub_target=
 for module in ${target_configdirs} ; do
   if test -z "${no_recursion}" \
      && test -f ${target_subdir}/${module}/Makefile; then
-    echo 1>&2 "*** removing ${target_subdir}/${module}/Makefile to force reconfigure"
-    rm -f ${target_subdir}/${module}/Makefile
+    :
+    :
   fi
 
   # We only bootstrap target libraries listed in bootstrap_target_libs.

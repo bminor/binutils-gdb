@@ -648,14 +648,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 '
-      ac_precious_vars='build_alias
-host_alias
-target_alias
-CC
-CFLAGS
-LDFLAGS
-LIBS
-CPPFLAGS'
+ac_dumb_vars_configure=''
 
 
 # Initialize some variables set by options.
@@ -1182,7 +1175,7 @@ fi
 case $srcdir in
 */) srcdir=`expr "X$srcdir" : 'X\(.*[^/]\)' \| "X$srcdir" : 'X\(.*\)'`;;
 esac
-for ac_var in $ac_precious_vars; do
+for ac_var in ; do
   eval ac_env_${ac_var}_set=\${${ac_var}+set}
   eval ac_env_${ac_var}_value=\$${ac_var}
   eval ac_cv_env_${ac_var}_set=\${${ac_var}+set}
@@ -1672,7 +1665,7 @@ fi
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
-for ac_var in $ac_precious_vars; do
+for ac_var in ; do
   eval ac_old_set=\$ac_cv_env_${ac_var}_set
   eval ac_new_set=\$ac_env_${ac_var}_set
   eval ac_old_val=\$ac_cv_env_${ac_var}_value
@@ -1719,7 +1712,7 @@ $as_echo "$as_me:   current value: \`$ac_new_val'" >&2;}
     esac
   fi
 done
-if $ac_cache_corrupted; then
+if false; then 
   { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
   { $as_echo "$as_me:${as_lineno-$LINENO}: error: changes in the environment can compromise the build" >&5
@@ -3227,7 +3220,7 @@ Try \`$0 --help' for more information." ;;
   shift
 done
 
-ac_configure_extra_args=
+ac_configure_extra_args="${extra_args}"
 
 if $ac_cs_silent; then
   exec 6>/dev/null
