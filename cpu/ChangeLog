@@ -1,4 +1,13 @@
-2020-02-04  Alan Modra  <amodra@gmail.com>
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
+	* m32c.cpu (f-dsp-8-u16, f-dsp-8-s16): Rearrange to mask any sign
+	bits before shifting rather than masking after shifting.
+	(f-dsp-16-u16, f-dsp-16-s16, f-dsp-32-u16, f-dsp-32-s16): Likewise.
+	(f-dsp-40-u16, f-dsp-40-s16, f-dsp-48-u16, f-dsp-48-s16): Likewise.
+	(f-dsp-64-u16, f-dsp-8-s24): Likewise.
+	(f-bitbase32-16-s19-unprefixed): Avoid signed left shift.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
 
 	* m32r.cpu (f-disp8): Avoid left shift of negative values.
 	(f-disp16, f-disp24): Likewise.

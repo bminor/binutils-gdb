@@ -436,42 +436,42 @@
 
 (df f-dsp-8-u16 "16 bit unsigned" (all-isas) 8 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 
 (df f-dsp-8-s16 "8 bit   signed" (all-isas) 8 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00)))))	; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8)))))	; insert
      ((value pc) (ext INT
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00)))))	; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8)))))	; extract
 )
 
 (df f-dsp-16-u16 "16 bit unsigned" (all-isas) 16 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 
 (df f-dsp-16-s16 "16 bit   signed" (all-isas) 16 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; insert
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; extract
 )
 
 (dnmf f-dsp-24-u16 "16 bit unsigned" (all-isas) UINT
@@ -504,79 +504,82 @@
 
 (df f-dsp-32-u16 "16 bit unsigned" (all-isas) 32 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 
 (df f-dsp-32-s16 "16 bit   signed" (all-isas) 32 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; insert
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00)))))	; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8)))))	; extract
 )
 
 (df f-dsp-40-u16 "16 bit unsigned" (all-isas) 40 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 
 (df f-dsp-40-s16 "16 bit   signed" (all-isas) 40 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; insert
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; extract
 )
 
 (df f-dsp-48-u16 "16 bit unsigned" (all-isas) 48 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 
 (df f-dsp-48-s16 "16 bit   signed" (all-isas) 48 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; insert
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; extract
 )
 
 (df f-dsp-64-u16 "16 bit unsigned" (all-isas) 64 16 UINT
      ((value pc) (or UHI
-		     (and (srl value 8) #x00ff)
-		     (and (sll value 8) #xff00))) ; insert
+		     (and (srl value 8) #xff)
+		     (sll (and value #xff) 8))) ; insert
      ((value pc) (or UHI
-		     (and UHI (srl UHI value 8) #x00ff)
-		     (and UHI (sll UHI value 8) #xff00))) ; extract
+		     (and UHI (srl UHI value 8) #xff)
+		     (sll UHI (and UHI value #xff) 8))) ; extract
 )
 (df  f-dsp-8-s24 "24 bit signed" (all-isas) 8 24 INT
-     ((value pc) (or SI
-		     (or (and (srl value 16) #xff) (and value #xff00))
-		     (sll (ext INT (trunc QI (and value #xff))) 16)))
-     ((value pc) (or SI
-		     (or (and (srl value 16) #xff) (and value #xff00))
-		     (sll (ext INT (trunc QI (and value #xff))) 16)))
+     ((value pc) (sub SI (xor (or SI (or (and (srl value 16) #xff)
+					 (and value #xff00))
+				  (sll (and value #xff) 16))
+			      #x800000) #x800000))
+     ((value pc) (sub SI (xor (or SI
+				  (or (and (srl value 16) #xff)
+				      (and value #xff00))
+				  (sll (and value #xff) 16))
+			      #x800000) #x800000))
  )
 
 (df  f-dsp-8-u24 "24 bit unsigned" (all-isas) 8 24 UINT
@@ -846,7 +849,7 @@
 		(set (ifield f-dsp-16-s16) (sra INT (ifield f-bitbase32-16-s19-unprefixed) 3))
 		)
       (sequence () ; extract
-		(set (ifield f-bitbase32-16-s19-unprefixed) (or (sll (ifield f-dsp-16-s16) 3)
+		(set (ifield f-bitbase32-16-s19-unprefixed) (or (mul (ifield f-dsp-16-s16) 8)
 								(ifield f-bitno32-unprefixed)))
 		)
 )
