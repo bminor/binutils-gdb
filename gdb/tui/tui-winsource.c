@@ -352,7 +352,11 @@ tui_source_window_base::refill ()
     {
       sal = get_current_source_symtab_and_line ();
       if (sal.symtab == NULL)
-	sal = find_pc_line (get_frame_pc (get_selected_frame (NULL)), 0);
+	{
+	  struct frame_info *fi = deprecated_safe_get_selected_frame ();
+	  if (fi != nullptr)
+	    sal = find_pc_line (get_frame_pc (fi), 0);
+	}
     }
 
   if (sal.pspace == nullptr)

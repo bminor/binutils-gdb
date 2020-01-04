@@ -1,3 +1,9 @@
+2020-01-11  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.c (box_win): Check cli_styling.
+	* tui/tui-winsource.c (tui_source_window_base::refill): Use
+	deprecated_safe_get_selected_frame.
+
 2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* inferior.c (print_inferior): Switch inferior before printing it.
