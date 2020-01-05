@@ -1,5 +1,11 @@
 2020-01-05  Joel Brobecker  <brobecker@adacore.com>
 
+	PR binutils/25155:
+	* configure.ac: Add AC_CHECK_DECLS([asprintf]).
+	* configure, config.h.in: Regenerate.
+
+2020-01-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* Makefile.in, aclocal.m4: Regenerate.
 
 2019-10-16  Simon Marchi  <simon.marchi@polymtl.ca>

@@ -99,6 +99,8 @@ AC_C_BIGENDIAN
 AC_CHECK_HEADERS(byteswap.h endian.h)
 AC_CHECK_FUNCS(pread)
 
+AC_CHECK_DECLS([asprintf])
+
 dnl Check for qsort_r.  (Taken from gnulib.)
 AC_CHECK_FUNCS_ONCE([qsort_r])
 if test $ac_cv_func_qsort_r = yes; then
