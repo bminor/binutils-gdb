@@ -1,3 +1,21 @@
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
+	* mach-o.c (bfd_mach_o_read_dylinker): Don't read past end of
+	command.  Check name offset is within command.
+	(bfd_mach_o_read_dylib, bfd_mach_o_read_prebound_dylib),
+	(bfd_mach_o_read_prebind_cksum, bfd_mach_o_read_twolevel_hints),
+	(bfd_mach_o_read_fvmlib, bfd_mach_o_read_dysymtab),
+	(bfd_mach_o_read_symtab, bfd_mach_o_read_uuid),
+	(bfd_mach_o_read_linkedit, bfd_mach_o_read_str),
+	(bfd_mach_o_read_dyld_info, bfd_mach_o_read_version_min),
+	(bfd_mach_o_read_encryption_info, bfd_mach_o_read_source_version),
+	(bfd_mach_o_read_encryption_info_64, bfd_mach_o_read_main),
+	(bfd_mach_o_read_note, bfd_mach_o_read_build_version),
+	(bfd_mach_o_read_segment): Similarly.
+	(bfd_mach_o_read_thread): Properly bound check thread struct.
+	Don't repeat checks on second loop.
+	(bfd_mach_o_read_command): Fail on invalid command length.
+
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
 	* format.c (bfd_check_format_matches): Add preserve_match.
