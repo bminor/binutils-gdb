@@ -1,4 +1,4 @@
-2020-02-05  Joel Brobecker  <brobecker@adacore.com>
+2020-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	PR binutils/25155:
 	* configure.ac: Add AC_CHECK_DECLS([asprintf]).
