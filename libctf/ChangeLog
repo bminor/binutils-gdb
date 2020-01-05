@@ -1,3 +1,9 @@
+2020-02-05  Joel Brobecker  <brobecker@adacore.com>
+
+	PR binutils/25155:
+	* configure.ac: Add AC_CHECK_DECLS([asprintf]).
+	* configure, config.h.in: Regenerate.
+
 2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
