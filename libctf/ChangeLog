@@ -1,3 +1,7 @@
+2020-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in, aclocal.m4: Regenerate.
+
 2019-10-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* swap.h (bswap_16, bswap_32, bswap_64): Make static.
