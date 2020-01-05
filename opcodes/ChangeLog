@@ -1,3 +1,12 @@
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
+	PR 25344
+	* z80-dis.c (suffix): Don't use a local struct buffer copy.
+	Peek at next byte to prevent recursion on repeated prefix bytes.
+	Ensure uninitialised "mybuf" is not accessed.
+	(print_insn_z80): Don't zero n_fetch and n_used here,..
+	(print_insn_z80_buf): ..do it here instead.
+
 2020-01-04  Alan Modra  <amodra@gmail.com>
 
 	* m32r-ibld.c: Regenerate.

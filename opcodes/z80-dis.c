@@ -713,55 +713,57 @@ static int
 print_insn_z80_buf (struct buffer *buf, disassemble_info *info);
 
 static int
-suffix (struct buffer *buf_in, disassemble_info *info, const char *txt)
+suffix (struct buffer *buf, disassemble_info *info, const char *txt)
 {
-  struct buffer buf;
   char mybuf[TXTSIZ*4];
   fprintf_ftype old_fprintf;
   void *old_stream;
   char *p;
 
-  buf_in->n_used++;
-  buf = *buf_in;
-  buf.n_fetch = 0;
-  buf.n_used = 0;
-  buf.base++;
   switch (txt[2])
     {
     case 'l': /* SIL or LIL */
-      buf.nn_len = 3;
+      buf->nn_len = 3;
       break;
     case 's': /* SIS or LIS */
-      buf.nn_len = 2;
+      buf->nn_len = 2;
       break;
     default:
-      /* unknown suffix */
-      return -1;
+      abort ();
     }
+  if (!fetch_data (buf, info, 1)
+      || buf->data[1] == 0x40
+      || buf->data[1] == 0x49
+      || buf->data[1] == 0x52
+      || buf->data[1] == 0x5b)
+    {
+      /* Double prefix, or end of data.  */
+      info->fprintf_func (info->stream, "nop ;%s", txt);
+      buf->n_used = 1;
+      return buf->n_used;
+    }
+
   old_fprintf = info->fprintf_func;
   old_stream = info->stream;
-  info->fprintf_func = (fprintf_ftype)&sprintf;
+  info->fprintf_func = (fprintf_ftype) &sprintf;
   info->stream = mybuf;
-  print_insn_z80_buf(&buf, info);
+  buf->base++;
+  if (print_insn_z80_buf (buf, info) >= 0)
+    buf->n_used++;
   info->fprintf_func = old_fprintf;
   info->stream = old_stream;
 
-  for (p = &mybuf[0]; *p && *p != ' ' && *p != '.'; ++p)
-    ;
-
-  if (*p == '.') /* suffix already present */
+  for (p = mybuf; *p; ++p)
+    if (*p == ' ')
+      break;
+  if (*p)
     {
-      info->fprintf_func(info->stream, "nop ;%s", txt); /* double prefix */
-      return buf_in->n_used;
+      *p++ = '\0';
+      info->fprintf_func (info->stream, "%s.%s %s", mybuf, txt, p);
     }
-
-  *p++ = '\0';
-  info->fprintf_func(info->stream, *p ? "%s.%s %s" : "%s.%s", mybuf, txt, p);
-
-  memcpy(&buf_in->data[1], buf.data, sizeof(buf.data)-1);
-  buf_in->n_used += buf.n_used;
-  buf_in->n_fetch += buf.n_fetch;
-  return buf_in->n_used;
+  else
+    info->fprintf_func (info->stream, "%s.%s", mybuf, txt);
+  return buf->n_used;
 }
 
 /* Table to disassemble machine codes without prefix.  */
@@ -839,8 +841,6 @@ print_insn_z80 (bfd_vma addr, disassemble_info * info)
   struct buffer buf;
 
   buf.base = addr;
-  buf.n_fetch = 0;
-  buf.n_used = 0;
   buf.inss = 1 << info->mach;
   buf.nn_len = info->mach == bfd_mach_ez80_adl ? 3 : 2;
   info->bytes_per_line = (buf.inss & INSS_EZ80) ? 6 : 4; /* <ss pp oo nn mm MM> OR <pp oo nn mm> */
@@ -853,6 +853,8 @@ print_insn_z80_buf (struct buffer *buf, disassemble_info *info)
 {
   struct tab_elt *p;
 
+  buf->n_fetch = 0;
+  buf->n_used = 0;
   if (! fetch_data (buf, info, 1))
     return -1;
 
