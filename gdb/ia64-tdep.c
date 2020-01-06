@@ -2713,7 +2713,7 @@ ia64_find_unwind_table (struct objfile *objfile, unw_word_t ip,
   ehdr = elf_tdata (bfd)->elf_header;
   phdr = elf_tdata (bfd)->phdr;
 
-  load_base = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  load_base = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
 
   for (i = 0; i < ehdr->e_phnum; ++i)
     {

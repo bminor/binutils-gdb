@@ -726,7 +726,7 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 #define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
   (((symbol)->maybe_copied) ? get_msymbol_address (objfile, symbol)	\
    : ((symbol)->value.address						\
-      + ANOFFSET ((objfile)->section_offsets, ((symbol)->section))))
+      + (objfile)->section_offsets[(symbol)->section]))
 /* For a bound minsym, we can easily compute the address directly.  */
 #define BMSYMBOL_VALUE_ADDRESS(symbol) \
   MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
@@ -1309,30 +1309,11 @@ struct linetable
 };
 
 /* How to relocate the symbols from each section in a symbol file.
-   Each struct contains an array of offsets.
    The ordering and meaning of the offsets is file-type-dependent;
    typically it is indexed by section numbers or symbol types or
-   something like that.
+   something like that.  */
 
-   To give us flexibility in changing the internal representation
-   of these offsets, the ANOFFSET macro must be used to insert and
-   extract offset values in the struct.  */
-
-struct section_offsets
-{
-  CORE_ADDR offsets[1];		/* As many as needed.  */
-};
-
-#define	ANOFFSET(secoff, whichone) \
-  ((whichone == -1)			  \
-   ? (internal_error (__FILE__, __LINE__, \
-		      _("Section index is uninitialized")), -1) \
-   : secoff->offsets[whichone])
-
-/* The size of a section_offsets table for N sections.  */
-#define SIZEOF_N_SECTION_OFFSETS(n) \
-  (sizeof (struct section_offsets) \
-   + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
+typedef std::vector<CORE_ADDR> section_offsets;
 
 /* Each source file or header is represented by a struct symtab.
    The name "symtab" is historical, another name for it is "filetab".

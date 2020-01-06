@@ -580,7 +580,7 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
 
 static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
-	      struct section_offsets *section_offsets, struct objfile *objfile)
+	      const section_offsets &section_offsets, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
@@ -610,18 +610,18 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
          The value of a stBlock symbol is the displacement from the
          procedure address.  */
       if (sh->st != stEnd && sh->st != stBlock)
-	sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+	sh->value += section_offsets[SECT_OFF_TEXT (objfile)];
       break;
     case scData:
     case scSData:
     case scRData:
     case scPData:
     case scXData:
-      sh->value += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
+      sh->value += section_offsets[SECT_OFF_DATA (objfile)];
       break;
     case scBss:
     case scSBss:
-      sh->value += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
+      sh->value += section_offsets[SECT_OFF_BSS (objfile)];
       break;
     }
 
@@ -2023,8 +2023,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
       /* GDB expects the absolute function start address for the
          procedure descriptor in e->pdr.adr.
          As the address in the procedure descriptor is usually relative,
-         we would have to relocate e->pdr.adr with cur_fdr->adr and
-         ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (pst->objfile)).
+         we would have to relocate e->pdr.adr with cur_fdr->adr.
          Unfortunately cur_fdr->adr and e->pdr.adr are both absolute
          in shared libraries on some systems, and on other systems
          e->pdr.adr is sometimes offset by a bogus value.
@@ -2060,11 +2059,8 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
    This routine clobbers top_stack->cur_block and ->cur_st.  */
 
-static void parse_external (EXTR *, int, struct section_offsets *,
-			    struct objfile *);
-
 static void
-parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
+parse_external (EXTR *es, int bigend, const section_offsets &section_offsets,
 		struct objfile *objfile)
 {
   union aux_ext *ax;
@@ -3862,7 +3858,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
   struct linetable *lines;
   CORE_ADDR lowest_pdr_addr = 0;
   int last_symtab_ended = 0;
-  struct section_offsets *section_offsets = objfile->section_offsets;
+  const section_offsets &section_offsets = objfile->section_offsets;
 
   if (pst->readin)
     return;
@@ -3980,8 +3976,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 		      && previous_stab_code != (unsigned char) N_SO
 		      && *name == '\000')
 		    {
-		      valu += ANOFFSET (section_offsets,
-					SECT_OFF_TEXT (objfile));
+		      valu += section_offsets[SECT_OFF_TEXT (objfile)];
 		      previous_stab_code = N_SO;
 		      cust = end_symtab (valu, SECT_OFF_TEXT (objfile));
 		      end_stabs ();
@@ -4028,8 +4023,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      else
 		{
 		  /* Handle encoded stab line number.  */
-		  valu += ANOFFSET (section_offsets,
-				    SECT_OFF_TEXT (objfile));
+		  valu += section_offsets[SECT_OFF_TEXT (objfile)];
 		  record_line (get_current_subfile (), sh.index,
 			       gdbarch_addr_bits_remove (gdbarch, valu));
 		}

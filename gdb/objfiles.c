@@ -391,9 +391,9 @@ entry_point_address_query (CORE_ADDR *entry_p)
   if (symfile_objfile == NULL || !symfile_objfile->per_bfd->ei.entry_point_p)
     return 0;
 
+  int idx = symfile_objfile->per_bfd->ei.the_bfd_section_index;
   *entry_p = (symfile_objfile->per_bfd->ei.entry_point
-	      + ANOFFSET (symfile_objfile->section_offsets,
-			  symfile_objfile->per_bfd->ei.the_bfd_section_index));
+	      + symfile_objfile->section_offsets[idx]);
 
   return 1;
 }
@@ -626,7 +626,7 @@ objfile::~objfile ()
 
 static void
 relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
-		     struct section_offsets *delta)
+		     const section_offsets &delta)
 {
   fixup_symbol_section (sym, objfile);
 
@@ -640,7 +640,7 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
     {
       SET_SYMBOL_VALUE_ADDRESS (sym,
 				SYMBOL_VALUE_ADDRESS (sym)
-				+ ANOFFSET (delta, SYMBOL_SECTION (sym)));
+				+ delta[SYMBOL_SECTION (sym)]);
     }
 }
 
@@ -650,19 +650,16 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
 
 static int
 objfile_relocate1 (struct objfile *objfile, 
-		   const struct section_offsets *new_offsets)
+		   const section_offsets &new_offsets)
 {
-  struct section_offsets *delta =
-    ((struct section_offsets *) 
-     alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
+  section_offsets delta (objfile->section_offsets.size ());
 
   int something_changed = 0;
 
-  for (int i = 0; i < objfile->num_sections; ++i)
+  for (int i = 0; i < objfile->section_offsets.size (); ++i)
     {
-      delta->offsets[i] =
-	ANOFFSET (new_offsets, i) - ANOFFSET (objfile->section_offsets, i);
-      if (ANOFFSET (delta, i) != 0)
+      delta[i] = new_offsets[i] - objfile->section_offsets[i];
+      if (delta[i] != 0)
 	something_changed = 1;
     }
   if (!something_changed)
@@ -681,9 +678,7 @@ objfile_relocate1 (struct objfile *objfile,
 	    if (l)
 	      {
 		for (int i = 0; i < l->nitems; ++i)
-		  l->item[i].pc += ANOFFSET (delta,
-					     COMPUNIT_BLOCK_LINE_SECTION
-					     (cust));
+		  l->item[i].pc += delta[COMPUNIT_BLOCK_LINE_SECTION (cust)];
 	      }
 	  }
       }
@@ -694,8 +689,7 @@ objfile_relocate1 (struct objfile *objfile,
 	int block_line_section = COMPUNIT_BLOCK_LINE_SECTION (cust);
 
 	if (BLOCKVECTOR_MAP (bv))
-	  addrmap_relocate (BLOCKVECTOR_MAP (bv),
-			    ANOFFSET (delta, block_line_section));
+	  addrmap_relocate (BLOCKVECTOR_MAP (bv), delta[block_line_section]);
 
 	for (int i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
 	  {
@@ -704,16 +698,14 @@ objfile_relocate1 (struct objfile *objfile,
 	    struct mdict_iterator miter;
 
 	    b = BLOCKVECTOR_BLOCK (bv, i);
-	    BLOCK_START (b) += ANOFFSET (delta, block_line_section);
-	    BLOCK_END (b) += ANOFFSET (delta, block_line_section);
+	    BLOCK_START (b) += delta[block_line_section];
+	    BLOCK_END (b) += delta[block_line_section];
 
 	    if (BLOCK_RANGES (b) != nullptr)
 	      for (int j = 0; j < BLOCK_NRANGES (b); j++)
 		{
-		  BLOCK_RANGE_START (b, j)
-		    += ANOFFSET (delta, block_line_section);
-		  BLOCK_RANGE_END (b, j) += ANOFFSET (delta,
-						      block_line_section);
+		  BLOCK_RANGE_START (b, j) += delta[block_line_section];
+		  BLOCK_RANGE_END (b, j) += delta[block_line_section];
 		}
 
 	    /* We only want to iterate over the local symbols, not any
@@ -741,8 +733,8 @@ objfile_relocate1 (struct objfile *objfile,
   {
     int i;
 
-    for (i = 0; i < objfile->num_sections; ++i)
-      (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
+    for (i = 0; i < objfile->section_offsets.size (); ++i)
+      objfile->section_offsets[i] = new_offsets[i];
   }
 
   /* Rebuild section map next time we need it.  */
@@ -773,7 +765,7 @@ objfile_relocate1 (struct objfile *objfile,
 
 void
 objfile_relocate (struct objfile *objfile,
-		  const struct section_offsets *new_offsets)
+		  const section_offsets &new_offsets)
 {
   int changed = 0;
 
@@ -792,15 +784,13 @@ objfile_relocate (struct objfile *objfile,
 
       addr_info_make_relative (&objfile_addrs, debug_objfile->obfd);
 
-      gdb_assert (debug_objfile->num_sections
+      gdb_assert (debug_objfile->section_offsets.size ()
 		  == gdb_bfd_count_sections (debug_objfile->obfd));
-      std::vector<struct section_offsets>
-	new_debug_offsets (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
-      relative_addr_info_to_section_offsets (new_debug_offsets.data (),
-					     debug_objfile->num_sections,
-					     objfile_addrs);
+      section_offsets new_debug_offsets
+	(debug_objfile->section_offsets.size ());
+      relative_addr_info_to_section_offsets (new_debug_offsets, objfile_addrs);
 
-      changed |= objfile_relocate1 (debug_objfile, new_debug_offsets.data ());
+      changed |= objfile_relocate1 (debug_objfile, new_debug_offsets);
     }
 
   /* Relocate breakpoints as necessary, after things are relocated.  */
@@ -815,14 +805,7 @@ objfile_relocate (struct objfile *objfile,
 static int
 objfile_rebase1 (struct objfile *objfile, CORE_ADDR slide)
 {
-  struct section_offsets *new_offsets =
-    ((struct section_offsets *)
-     alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
-  int i;
-
-  for (i = 0; i < objfile->num_sections; ++i)
-    new_offsets->offsets[i] = slide;
-
+  section_offsets new_offsets (objfile->section_offsets.size (), slide);
   return objfile_relocate1 (objfile, new_offsets);
 }
 

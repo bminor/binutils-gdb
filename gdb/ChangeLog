@@ -1,5 +1,81 @@
 2020-01-08  Tom Tromey  <tromey@adacore.com>
 
+	* xcoffread.c (enter_line_range, read_xcoff_symtab)
+	(process_xcoff_symbol, xcoff_symfile_offsets): Update.
+	* symtab.h (MSYMBOL_VALUE_ADDRESS): Update.
+	(struct section_offsets, ANOFFSET, SIZEOF_N_SECTION_OFFSETS):
+	Remove.
+	(section_offsets): New typedef.
+	* symtab.c (fixup_section, get_msymbol_address): Update.
+	* symmisc.c (dump_msymbols): Update.
+	* symfile.h (relative_addr_info_to_section_offsets)
+	(symfile_map_offsets_to_segments): Update.
+	* symfile.c (build_section_addr_info_from_objfile)
+	(init_objfile_sect_indices): Update.
+	(struct place_section_arg): Change type of "offsets".
+	(place_section): Update.
+	(relative_addr_info_to_section_offsets): Change type of
+	"section_offsets".  Remove "num_sections" parameter.
+	(default_symfile_offsets, syms_from_objfile_1)
+	(set_objfile_default_section_offset): Update.
+	(reread_symbols): No need to preserve section offsets by hand.
+	(symfile_map_offsets_to_segments): Change type of "offsets".
+	* stap-probe.c (relocate_address): Update.
+	* stabsread.h (process_one_symbol): Update.
+	* solib-target.c (struct lm_info_target) <offsets>: Change type.
+	(solib_target_relocate_section_addresses): Update.
+	* solib-svr4.c (enable_break, svr4_relocate_main_executable):
+	Update.
+	* solib-frv.c (frv_relocate_main_executable): Update.
+	* solib-dsbt.c (dsbt_relocate_main_executable): Update.
+	* solib-aix.c (solib_aix_get_section_offsets): Change return
+	type.
+	(solib_aix_solib_create_inferior_hook): Update.
+	* remote.c (remote_target::get_offsets): Update.
+	* psymtab.c (find_pc_sect_psymtab): Update.
+	* psympriv.h (struct partial_symbol) <address, text_low,
+	text_high>: Update.
+	* objfiles.h (obj_section_offset): Update.
+	(struct objfile) <section_offsets>: Change type.
+	<num_sections>: Remove.
+	(objfile_relocate): Update.
+	* objfiles.c (entry_point_address_query): Update
+	(relocate_one_symbol): Change type of "section_offsets".
+	(objfile_relocate1, objfile_relocate1): Change type of
+	"new_offsets".
+	(objfile_rebase1): Update.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	(read_alphacoff_dynamic_symtab): Remove "section_offsets"
+	parameter.
+	* mdebugread.c (parse_symbol): Change type of "section_offsets".
+	(parse_external, psymtab_to_symtab_1): Update.
+	* machoread.c (macho_symfile_offsets): Update.
+	* ia64-tdep.c (ia64_find_unwind_table): Update.
+	* hppa-tdep.c (read_unwind_info): Update.
+	* hppa-bsd-tdep.c (hppabsd_find_global_pointer): Update.
+	* dwarf2read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges, dw2_find_pc_sect_compunit_symtab)
+	(process_psymtab_comp_unit_reader, add_partial_symbol)
+	(add_partial_subprogram, process_full_comp_unit)
+	(read_file_scope, read_func_scope, read_lexical_block_scope)
+	(read_call_site_scope, dwarf2_rnglists_process)
+	(dwarf2_ranges_process, dwarf2_ranges_read)
+	(dwarf_decode_lines_1, var_decode_location, new_symbol)
+	(dwarf2_fetch_die_loc_sect_off, dwarf2_per_cu_text_offset):
+	Update.
+	* dwarf2-frame.c (execute_cfa_program, dwarf2_frame_find_fde):
+	Update.
+	* dtrace-probe.c (dtrace_probe::get_relocated_address): Update.
+	* dbxread.c (read_dbx_symtab, read_ofile_symtab): Update.
+	(process_one_symbol): Change type of "section_offsets".
+	* ctfread.c (get_objfile_text_range): Update.
+	* coffread.c (coff_symtab_read, enter_linenos)
+	(process_coff_symbol): Update.
+	* coff-pe-read.c (add_pe_forwarded_sym): Update.
+	* amd64-windows-tdep.c (amd64_windows_find_unwind_info): Update.
+
+2020-01-08  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2read.c (parse_macro_definition): Use std::string.
 	(parse_macro_definition): Likewise.
 

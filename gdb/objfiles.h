@@ -141,7 +141,7 @@ struct obj_section
 
 /* Relocation offset applied to S.  */
 #define obj_section_offset(s)						\
-  (((s)->objfile->section_offsets)->offsets[gdb_bfd_section_index ((s)->objfile->obfd, (s)->the_bfd_section)])
+  (((s)->objfile->section_offsets)[gdb_bfd_section_index ((s)->objfile->obfd, (s)->the_bfd_section)])
 
 /* The memory address of section S (vma + offset).  */
 #define obj_section_addr(s)				      		\
@@ -560,14 +560,12 @@ public:
   /* Set of relocation offsets to apply to each section.
      The table is indexed by the_bfd_section->index, thus it is generally
      as large as the number of sections in the binary.
-     The table is stored on the objfile_obstack.
 
      These offsets indicate that all symbols (including partial and
      minimal symbols) which have been read have been relocated by this
      much.  Symbols which are yet to be read need to be relocated by it.  */
 
-  struct section_offsets *section_offsets = nullptr;
-  int num_sections = 0;
+  ::section_offsets section_offsets;
 
   /* Indexes in the section_offsets array.  These are initialized by the
      *_symfile_offsets() family of functions (som_symfile_offsets,
@@ -669,7 +667,7 @@ extern void build_objfile_section_table (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 
-extern void objfile_relocate (struct objfile *, const struct section_offsets *);
+extern void objfile_relocate (struct objfile *, const section_offsets &);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
 
 extern int objfile_has_partial_symbols (struct objfile *objfile);

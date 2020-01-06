@@ -266,7 +266,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
      really be relocated properly, but nevertheless we make a stab at
      it, choosing an approach consistent with the history of this
      code.  */
-  baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
 
   reader.record_with_info (qualified_name.c_str (), vma - baseaddr, msymtype,
 			   section);

@@ -390,19 +390,15 @@ solib_aix_clear_solib (void)
 }
 
 /* Compute and return the OBJFILE's section_offset array, using
-   the associated loader info (INFO).
+   the associated loader info (INFO).  */
 
-   The resulting array is computed on the heap and must be
-   deallocated after use.  */
-
-static gdb::unique_xmalloc_ptr<struct section_offsets>
+static section_offsets
 solib_aix_get_section_offsets (struct objfile *objfile,
 			       lm_info_aix *info)
 {
   bfd *abfd = objfile->obfd;
 
-  gdb::unique_xmalloc_ptr<struct section_offsets> offsets
-    (XCNEWVEC (struct section_offsets, objfile->num_sections));
+  section_offsets offsets (objfile->section_offsets.size ());
 
   /* .text */
 
@@ -411,7 +407,7 @@ solib_aix_get_section_offsets (struct objfile *objfile,
       struct bfd_section *sect
 	= objfile->sections[objfile->sect_index_text].the_bfd_section;
 
-      offsets->offsets[objfile->sect_index_text]
+      offsets[objfile->sect_index_text]
 	= info->text_addr + sect->filepos - bfd_section_vma (sect);
     }
 
@@ -422,7 +418,7 @@ solib_aix_get_section_offsets (struct objfile *objfile,
       struct bfd_section *sect
 	= objfile->sections[objfile->sect_index_data].the_bfd_section;
 
-      offsets->offsets[objfile->sect_index_data]
+      offsets[objfile->sect_index_data]
 	= info->data_addr - bfd_section_vma (sect);
     }
 
@@ -435,8 +431,8 @@ solib_aix_get_section_offsets (struct objfile *objfile,
   if (objfile->sect_index_bss != -1
       && objfile->sect_index_data != -1)
     {
-      offsets->offsets[objfile->sect_index_bss]
-	= (offsets->offsets[objfile->sect_index_data]
+      offsets[objfile->sect_index_bss]
+	= (offsets[objfile->sect_index_data]
 	   + solib_aix_bss_data_overlap (abfd));
     }
 
@@ -468,10 +464,10 @@ solib_aix_solib_create_inferior_hook (int from_tty)
   lm_info_aix &exec_info = (*library_list)[0];
   if (symfile_objfile != NULL)
     {
-      gdb::unique_xmalloc_ptr<struct section_offsets> offsets
+      section_offsets offsets
 	= solib_aix_get_section_offsets (symfile_objfile, &exec_info);
 
-      objfile_relocate (symfile_objfile, offsets.get ());
+      objfile_relocate (symfile_objfile, offsets);
     }
 }
 

@@ -87,8 +87,7 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 		     we have to do it ourselves.  */
 		  pltgot = extract_unsigned_integer (buf, sizeof buf,
 						     byte_order);
-		  pltgot += ANOFFSET (sec->objfile->section_offsets,
-				      SECT_OFF_TEXT (sec->objfile));
+		  pltgot += sec->objfile->section_offsets[SECT_OFF_TEXT (sec->objfile)];
 
 		  return pltgot;
 		}

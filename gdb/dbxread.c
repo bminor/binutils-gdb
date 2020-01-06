@@ -1046,9 +1046,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
   /* If data_sect_index is still -1, that's okay.  It's perfectly fine
      for the file to have no .data, no .bss, and no .text at all, if
-     it also has no global or static variables.  If it does, we will
-     get an internal error from an ANOFFSET macro below when we try to
-     use data_sect_index.  */
+     it also has no global or static variables.  */
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
@@ -2179,13 +2177,12 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   int sym_size;			/* Size of symbols to read */
   CORE_ADDR text_offset;	/* Start of text segment for symbols */
   int text_size;		/* Size of text segment for symbols */
-  struct section_offsets *section_offsets;
 
   sym_offset = LDSYMOFF (pst);
   sym_size = LDSYMLEN (pst);
   text_offset = pst->text_low (objfile);
   text_size = pst->text_high (objfile) - pst->text_low (objfile);
-  section_offsets = objfile->section_offsets;
+  const section_offsets &section_offsets = objfile->section_offsets;
 
   dbxread_objfile = objfile;
 
@@ -2378,7 +2375,7 @@ cp_set_block_scope (const struct symbol *symbol,
 
 void
 process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
-		    const struct section_offsets *section_offsets,
+		    const section_offsets &section_offsets,
 		    struct objfile *objfile, enum language language)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -2469,7 +2466,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       sline_found_in_function = 0;
 
       /* Relocate for dynamic loading.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+      valu += section_offsets[SECT_OFF_TEXT (objfile)];
       valu = gdbarch_addr_bits_remove (gdbarch, valu);
       last_function_start = valu;
 
@@ -2557,7 +2554,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
     case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.
          Relocate for dynamic loading.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+      valu += section_offsets[SECT_OFF_TEXT (objfile)];
       break;
 
     case N_SO:
@@ -2565,7 +2562,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
          source file.  Finish the symbol table of the previous source
          file (if any) and start accumulating a new symbol table.
          Relocate for dynamic loading.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+      valu += section_offsets[SECT_OFF_TEXT (objfile)];
 
       n_opt_found = 0;
 
@@ -2601,7 +2598,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
          sub-source-file, one whose contents were copied or included
          in the compilation of the main source file (whose name was
          given in the N_SO symbol).  Relocate for dynamic loading.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+      valu += section_offsets[SECT_OFF_TEXT (objfile)];
       start_subfile (name);
       break;
 
@@ -2701,7 +2698,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		   symbol_file_add as addr (this is known to affect
 		   SunOS 4, and I suspect ELF too).  Since there is no
 		   Ttext.text symbol, we can get addr from the text offset.  */
-		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+		valu += section_offsets[SECT_OFF_TEXT (objfile)];
 		goto define_a_symbol;
 	      }
 	  }
@@ -2723,22 +2720,22 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case_N_STSYM:		/* Static symbol in data segment.  */
     case N_DSLINE:		/* Source line number, data segment.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
+      valu += section_offsets[SECT_OFF_DATA (objfile)];
       goto define_a_symbol;
 
     case_N_LCSYM:		/* Static symbol in BSS segment.  */
     case N_BSLINE:		/* Source line number, BSS segment.  */
       /* N_BROWS: overlaps with N_BSLINE.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
+      valu += section_offsets[SECT_OFF_BSS (objfile)];
       goto define_a_symbol;
 
     case_N_ROSYM:		/* Static symbol in read-only data segment.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_RODATA (objfile));
+      valu += section_offsets[SECT_OFF_RODATA (objfile)];
       goto define_a_symbol;
 
     case N_ENTRY:		/* Alternate entry point.  */
       /* Relocate for dynamic loading.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+      valu += section_offsets[SECT_OFF_TEXT (objfile)];
       goto define_a_symbol;
 
       /* The following symbol types we don't know how to process.
@@ -2789,8 +2786,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	      /* Deal with the SunPRO 3.0 compiler which omits the
 	         address from N_FUN symbols.  */
 	      if (type == N_FUN
-		  && valu == ANOFFSET (section_offsets,
-				       SECT_OFF_TEXT (objfile))
+		  && valu == section_offsets[SECT_OFF_TEXT (objfile)]
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  struct bound_minimal_symbol minsym

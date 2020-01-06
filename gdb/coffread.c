@@ -919,8 +919,8 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		     file with no symbols.  */
 		  if (in_source_file)
 		    complete_symtab (filestring,
-		    cs->c_value + ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile)),
+				     (cs->c_value
+				      + objfile->section_offsets[SECT_OFF_TEXT (objfile)]),
 				     main_aux.x_scn.x_scnlen);
 		  in_source_file = 0;
 		}
@@ -986,7 +986,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
  		    || cs->c_sclass == C_THUMBEXTFUNC
  		    || cs->c_sclass == C_THUMBEXT
  		    || (pe_file && (cs->c_sclass == C_STAT)))
-		  offset = ANOFFSET (objfile->section_offsets, sec);
+		  offset = objfile->section_offsets[sec];
 
 		if (bfd_section->flags & SEC_CODE)
 		  {
@@ -1113,8 +1113,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 			    NULL, cstk.start_addr,
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
-			    + ANOFFSET (objfile->section_offsets,
-					SECT_OFF_TEXT (objfile)));
+			    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 	      within_function = 0;
 	    }
 	  break;
@@ -1123,8 +1122,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	  if (strcmp (cs->c_name, ".bb") == 0)
 	    {
 	      tmpaddr = cs->c_value;
-	      tmpaddr += ANOFFSET (objfile->section_offsets,
-				   SECT_OFF_TEXT (objfile));
+	      tmpaddr += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
 	      push_context (++depth, tmpaddr);
 	    }
 	  else if (strcmp (cs->c_name, ".eb") == 0)
@@ -1147,9 +1145,9 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		}
 	      if (*get_local_symbols () && !outermost_context_p ())
 		{
-		  tmpaddr =
-		    cs->c_value + ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
+		  tmpaddr
+		    = (cs->c_value
+		       + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 		  /* Make a block for the local symbols within.  */
 		  finish_block (0, cstk.old_blocks, NULL,
 				cstk.start_addr, tmpaddr);
@@ -1441,8 +1439,7 @@ enter_linenos (long file_offset, int first_line,
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
 	{
 	  CORE_ADDR addr = lptr.l_addr.l_paddr;
-	  addr += ANOFFSET (objfile->section_offsets,
-			    SECT_OFF_TEXT (objfile));
+	  addr += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
 	  record_line (get_current_subfile (),
 		       first_line + L_LNNO32 (&lptr),
 		       gdbarch_addr_bits_remove (gdbarch, addr));
@@ -1577,8 +1574,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets,
-				      SECT_OFF_TEXT (objfile));
+      SYMBOL_VALUE (sym) += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
       SYMBOL_TYPE (sym) =
 	lookup_function_type (decode_function_type (cs, cs->c_type,
 						    aux, objfile));
@@ -1610,8 +1606,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
-				    + ANOFFSET (objfile->section_offsets,
-						SECT_OFF_TEXT (objfile)));
+				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 	  add_symbol_to_list (sym, get_global_symbols ());
 	  break;
 
@@ -1621,8 +1616,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
-				    + ANOFFSET (objfile->section_offsets,
-						SECT_OFF_TEXT (objfile)));
+				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 	  if (within_function)
 	    {
 	      /* Static symbol of local scope.  */

@@ -911,8 +911,7 @@ dsbt_relocate_main_executable (void)
   info->main_executable_lm_info = new lm_info_dsbt;
   info->main_executable_lm_info->map = ldm;
 
-  gdb::unique_xmalloc_ptr<struct section_offsets> new_offsets
-    (XCNEWVEC (struct section_offsets, symfile_objfile->num_sections));
+  section_offsets new_offsets (symfile_objfile->section_offsets.size ());
   changed = 0;
 
   ALL_OBJFILE_OSECTIONS (symfile_objfile, osect)
@@ -926,7 +925,7 @@ dsbt_relocate_main_executable (void)
       /* Current address of section.  */
       addr = obj_section_addr (osect);
       /* Offset from where this section started.  */
-      offset = ANOFFSET (symfile_objfile->section_offsets, osect_idx);
+      offset = symfile_objfile->section_offsets[osect_idx];
       /* Original address prior to any past relocations.  */
       orig_addr = addr - offset;
 
@@ -935,10 +934,10 @@ dsbt_relocate_main_executable (void)
 	  if (ldm->segs[seg].p_vaddr <= orig_addr
 	      && orig_addr < ldm->segs[seg].p_vaddr + ldm->segs[seg].p_memsz)
 	    {
-	      new_offsets->offsets[osect_idx]
+	      new_offsets[osect_idx]
 		= ldm->segs[seg].addr - ldm->segs[seg].p_vaddr;
 
-	      if (new_offsets->offsets[osect_idx] != offset)
+	      if (new_offsets[osect_idx] != offset)
 		changed = 1;
 	      break;
 	    }
@@ -946,7 +945,7 @@ dsbt_relocate_main_executable (void)
     }
 
   if (changed)
-    objfile_relocate (symfile_objfile, new_offsets.get ());
+    objfile_relocate (symfile_objfile, new_offsets);
 
   /* Now that symfile_objfile has been relocated, we can compute the
      GOT value and stash it away.  */

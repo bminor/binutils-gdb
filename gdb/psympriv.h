@@ -55,8 +55,7 @@ struct partial_symbol
      the offsets provided in OBJFILE.  */
   CORE_ADDR address (const struct objfile *objfile) const
   {
-    return (ginfo.value.address
-	    + ANOFFSET (objfile->section_offsets, ginfo.section));
+    return ginfo.value.address + objfile->section_offsets[ginfo.section];
   }
 
   /* Set the address of this partial symbol.  The address must be
@@ -120,15 +119,13 @@ struct partial_symtab
   /* Return the relocated low text address of this partial_symtab.  */
   CORE_ADDR text_low (struct objfile *objfile) const
   {
-    return m_text_low + ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_TEXT (objfile));
+    return m_text_low + objfile->section_offsets[SECT_OFF_TEXT (objfile)];
   }
 
   /* Return the relocated high text address of this partial_symtab.  */
   CORE_ADDR text_high (struct objfile *objfile) const
   {
-    return m_text_high + ANOFFSET (objfile->section_offsets,
-				   SECT_OFF_TEXT (objfile));
+    return m_text_high + objfile->section_offsets[SECT_OFF_TEXT (objfile)];
   }
 
   /* Set the low text address of this partial_symtab.  */

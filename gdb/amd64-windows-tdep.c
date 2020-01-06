@@ -953,8 +953,8 @@ amd64_windows_find_unwind_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   pe = pe_data (sec->objfile->obfd);
   dir = &pe->pe_opthdr.DataDirectory[PE_EXCEPTION_TABLE];
 
-  base = pe->pe_opthdr.ImageBase
-    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  base = (pe->pe_opthdr.ImageBase
+	  + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
   *image_base = base;
 
   /* Find the entry.

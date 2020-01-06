@@ -46,7 +46,7 @@ struct lm_info_target : public lm_info_base
 
   /* The cached offsets for each section of this shared library,
      determined from SEGMENT_BASES, or SECTION_BASES.  */
-  gdb::unique_xmalloc_ptr<section_offsets> offsets;
+  section_offsets offsets;
 };
 
 typedef std::vector<std::unique_ptr<lm_info_target>> lm_info_vector;
@@ -305,12 +305,11 @@ solib_target_relocate_section_addresses (struct so_list *so,
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */
-  if (li->offsets == NULL)
+  if (li->offsets.empty ())
     {
       int num_sections = gdb_bfd_count_sections (so->abfd);
 
-      li->offsets.reset ((struct section_offsets *)
-			 xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
+      li->offsets.assign (num_sections, 0);
 
       if (!li->section_bases.empty ())
 	{
@@ -355,7 +354,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		      gdb_assert (so->addr_low <= so->addr_high);
 		      found_range = 1;
 		    }
-		  li->offsets->offsets[i] = li->section_bases[bases_index];
+		  li->offsets[i] = li->section_bases[bases_index];
 		  bases_index++;
 		}
 	      if (!found_range)
@@ -377,7 +376,7 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	      int i;
 
 	      if (!symfile_map_offsets_to_segments (so->abfd, data,
-						    li->offsets.get (),
+						    li->offsets,
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
 		warning (_("\
@@ -414,9 +413,8 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 	}
     }
 
-  offset = li->offsets->offsets[gdb_bfd_section_index
-			        (sec->the_bfd_section->owner,
-				 sec->the_bfd_section)];
+  offset = li->offsets[gdb_bfd_section_index (sec->the_bfd_section->owner,
+					      sec->the_bfd_section)];
   sec->addr += offset;
   sec->endaddr += offset;
 }

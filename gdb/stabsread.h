@@ -178,7 +178,7 @@ extern struct partial_symtab *dbx_end_psymtab
    int textlow_not_set);
 
 extern void process_one_symbol (int, int, CORE_ADDR, const char *,
-				const struct section_offsets *,
+				const section_offsets &,
 				struct objfile *, enum language);
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,

@@ -4049,7 +4049,6 @@ remote_target::get_offsets ()
   char *ptr;
   int lose, num_segments = 0, do_sections, do_segments;
   CORE_ADDR text_addr, data_addr, bss_addr, segments[2];
-  struct section_offsets *offs;
   struct symfile_segment_data *data;
 
   if (symfile_objfile == NULL)
@@ -4128,10 +4127,7 @@ remote_target::get_offsets ()
   else if (*ptr != '\0')
     warning (_("Target reported unsupported offsets: %s"), buf);
 
-  offs = ((struct section_offsets *)
-	  alloca (SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections)));
-  memcpy (offs, symfile_objfile->section_offsets,
-	  SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
+  section_offsets offs = symfile_objfile->section_offsets;
 
   data = get_symfile_segment_data (symfile_objfile->obfd);
   do_segments = (data != NULL);
@@ -4184,15 +4180,15 @@ remote_target::get_offsets ()
 
   if (do_sections)
     {
-      offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
+      offs[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
 
       /* This is a temporary kludge to force data and bss to use the
 	 same offsets because that's what nlmconv does now.  The real
 	 solution requires changes to the stub and remote.c that I
 	 don't have time to do right now.  */
 
-      offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_addr;
-      offs->offsets[SECT_OFF_BSS (symfile_objfile)] = data_addr;
+      offs[SECT_OFF_DATA (symfile_objfile)] = data_addr;
+      offs[SECT_OFF_BSS (symfile_objfile)] = data_addr;
     }
 
   objfile_relocate (symfile_objfile, offs);

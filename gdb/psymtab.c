@@ -316,8 +316,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
   if (objfile->partial_symtabs->psymtabs != NULL
       && objfile->partial_symtabs->psymtabs_addrmap != NULL)
     {
-      CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
-				     SECT_OFF_TEXT (objfile));
+      CORE_ADDR baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
 
       struct partial_symtab *pst
 	= ((struct partial_symtab *)
