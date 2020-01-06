@@ -1,3 +1,8 @@
+2020-01-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbsupport/gdb_wait.c: Include <signal.h> instead of
+	gdb/signals.h, as we are now using native signal symbols.
+
 2020-01-06  Shahab Vahedi  <shahab@synopsys.com>
 
 	* tui/tui-disasm.c (tui_disasm_window::addr_is_displayed): Avoid

@@ -34,7 +34,7 @@
    false positives is justified by the utility of reporting the
    terminating signal in the "normal" cases.  */
 
-# include "gdb/signals.h"	/* for enum gdb_signal */
+# include <signal.h>
 
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>		/* for EXCEPTION_* constants */
