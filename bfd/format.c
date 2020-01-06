@@ -325,12 +325,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	goto err_ret;
 
-      /* If _bfd_check_format neglects to set bfd_error, assume
-	 bfd_error_wrong_format.  We didn't used to even pay any
-	 attention to bfd_error, so I suspect that some
-	 _bfd_check_format might have this problem.  */
-      bfd_set_error (bfd_error_wrong_format);
-
       temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (temp)
 	{
@@ -389,8 +383,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 		goto err_ret;
 	    }
 	}
-      else if (bfd_get_error () != bfd_error_wrong_format)
-	goto err_ret;
     }
 
   if (best_count == 1)

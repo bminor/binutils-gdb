@@ -1,5 +1,11 @@
 2020-01-06  Alan Modra  <amodra@gmail.com>
 
+	* format.c (bfd_check_format_matches): Ignore bfd_error on target
+	match failures.  Don't init to bfd_error_wrong_format before
+	calling _bfd_check_format.
+
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (_bfd_vms_push, _bfd_vms_pop): Return pass/fail
 	status rather than exiting on stack overflow or underflow.
 	(_bfd_vms_slurp_etir): Adjust to suit.
