@@ -1987,10 +1987,11 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_RISCV_CALL:
+	case R_RISCV_CALL_PLT:
 	  /* Handle a call to an undefined weak function.  This won't be
 	     relaxed, so we have to handle it here.  */
 	  if (h != NULL && h->root.type == bfd_link_hash_undefweak
-	      && h->plt.offset == MINUS_ONE)
+	      && (!bfd_link_pic (info) || h->plt.offset == MINUS_ONE))
 	    {
 	      /* We can use x0 as the base register.  */
 	      bfd_vma insn = bfd_get_32 (input_bfd,
@@ -2003,9 +2004,9 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	    }
 	  /* Fall through.  */
 
-	case R_RISCV_CALL_PLT:
 	case R_RISCV_JAL:
 	case R_RISCV_RVC_JUMP:
+	  /* This line has to match the check in _bfd_riscv_relax_section.  */
 	  if (bfd_link_pic (info) && h != NULL && h->plt.offset != MINUS_ONE)
 	    {
 	      /* Refer to the PLT entry.  */
@@ -4128,7 +4129,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      undefined_weak = TRUE;
 	    }
 
-	  if (h->plt.offset != MINUS_ONE)
+	  /* This line has to match the check in riscv_elf_relocate_section
+	     in the R_RISCV_CALL[_PLT] case.  */
+	  if (bfd_link_pic (info) && h->plt.offset != MINUS_ONE)
 	    {
 	      sym_sec = htab->elf.splt;
 	      symval = h->plt.offset;

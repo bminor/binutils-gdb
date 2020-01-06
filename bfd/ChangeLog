@@ -1,3 +1,13 @@
+2020-01-06  Jim Wilson  <jimw@sifive.com>
+
+	PR 25205
+	* elfnn-riscv.c (riscv_elf_relocate_section) <R_RISCV_CALL>: Add
+	check for !bfd_link_pic (info).
+	<R_RISCV_CALL_PLT>: Move next to R_RISCV_CALL.
+	<R_RISCV_JAL>: Add comment.
+	(_bfd_riscv_relax_section): For plt.offset check, add check for
+	bfd_link_pic (info).  Add comment.
+
 2020-01-06  Alan Modra  <amodra@gmail.com>
 
 	* format.c (bfd_check_format_matches): Ignore bfd_error on target
