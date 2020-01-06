@@ -1,7 +1,6 @@
- .globl __start
- .type __start, @function
+.globl __start
 	.space 8
- .ent __start
+.ent __start
 __start:
 .Lstart:
 	.space 16
@@ -10,7 +9,7 @@ __start:
         jal __start
 	.space 64
 	jal .Lstart
- .end __start
+.end __start
 
 # make objdump print ...
 	.space 8

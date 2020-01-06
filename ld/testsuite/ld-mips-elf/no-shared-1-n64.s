@@ -1,7 +1,6 @@
 	.abicalls
 	.text
 	.globl	__start
-	.type	__start, @function
 	.ent	__start
 __start:
 	lui	$2,%hi(__gnu_local_gp)

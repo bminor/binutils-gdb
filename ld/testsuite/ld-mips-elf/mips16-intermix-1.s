@@ -1,7 +1,6 @@
 	.text
 	.align	2
 	.globl	__start
-	.type	__start, @function
 	.set	nomips16
 	.ent	__start
 __start:

@@ -12,7 +12,6 @@
 	callpic	used21,mips16
 
 	.globl	__start
-	.type	__start, @function
 	.ent	__start
 	.set	nomips16
 __start:

@@ -2,7 +2,6 @@
 	.text
 	.weak	__ehdr_start
 	.globl	__start
-	.type	__start, @function
 	.ent	__start
 	.frame	$29, 0, $31
 	.mask	0x00000000, 0

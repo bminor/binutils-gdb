@@ -2,7 +2,6 @@
 	.option	pic0
 	.set	noreorder
 	.global	__start
-	.type	__start, @function
 	.ent	__start
 __start:
 	jal	f1

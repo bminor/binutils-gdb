@@ -1,7 +1,6 @@
 	.abicalls
 	.option	pic0
 	.global	__start
-	.type	__start, @function
 	.set	micromips
 	.ent	__start
 __start:
