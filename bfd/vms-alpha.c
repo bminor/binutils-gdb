@@ -1456,7 +1456,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 /* Push value and section index.  */
 
-static void
+static bfd_boolean
 _bfd_vms_push (bfd *abfd, bfd_vma val, unsigned int reloc)
 {
   vms_debug2 ((4, "<push %08lx (0x%08x) at %d>\n",
@@ -1469,26 +1469,28 @@ _bfd_vms_push (bfd *abfd, bfd_vma val, unsigned int reloc)
     {
       bfd_set_error (bfd_error_bad_value);
       _bfd_error_handler (_("stack overflow (%d) in _bfd_vms_push"), PRIV (stackptr));
-      exit (1);
+      return FALSE;
     }
+  return TRUE;
 }
 
 /* Pop value and section index.  */
 
-static void
+static bfd_boolean
 _bfd_vms_pop (bfd *abfd, bfd_vma *val, unsigned int *rel)
 {
   if (PRIV (stackptr) == 0)
     {
       bfd_set_error (bfd_error_bad_value);
       _bfd_error_handler (_("stack underflow in _bfd_vms_pop"));
-      exit (1);
+      return FALSE;
     }
   PRIV (stackptr)--;
   *val = PRIV (stack[PRIV (stackptr)]).value;
   *rel = PRIV (stack[PRIV (stackptr)]).reloc;
 
   vms_debug2 ((4, "<pop %08lx (0x%08x)>\n", (unsigned long)*val, *rel));
+  return TRUE;
 }
 
 /* Routines to fill sections contents during tir/etir read.  */
@@ -1905,7 +1907,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	     stack 32 bit value of symbol (high bits set to 0).  */
 	case ETIR__C_STA_GBL:
 	  _bfd_vms_get_value (abfd, ptr, maxptr, info, &op1, &h);
-	  _bfd_vms_push (abfd, op1, alpha_vms_sym_to_ctxt (h));
+	  if (!_bfd_vms_push (abfd, op1, alpha_vms_sym_to_ctxt (h)))
+	    return FALSE;
 	  break;
 
 	  /* Stack longword
@@ -1915,7 +1918,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	case ETIR__C_STA_LW:
 	  if (ptr + 4 > maxptr)
 	    goto corrupt_etir;
-	  _bfd_vms_push (abfd, bfd_getl32 (ptr), RELC_NONE);
+	  if (!_bfd_vms_push (abfd, bfd_getl32 (ptr), RELC_NONE))
+	    return FALSE;
 	  break;
 
 	  /* Stack quadword
@@ -1925,7 +1929,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	case ETIR__C_STA_QW:
 	  if (ptr + 8 > maxptr)
 	    goto corrupt_etir;
-	  _bfd_vms_push (abfd, bfd_getl64 (ptr), RELC_NONE);
+	  if (!_bfd_vms_push (abfd, bfd_getl64 (ptr), RELC_NONE))
+	    return FALSE;
 	  break;
 
 	  /* Stack psect base plus quadword offset
@@ -1949,7 +1954,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 		return FALSE;
 	      }
 	    op1 = bfd_getl64 (ptr + 4);
-	    _bfd_vms_push (abfd, op1, psect | RELC_SEC_BASE);
+	    if (!_bfd_vms_push (abfd, op1, psect | RELC_SEC_BASE))
+	      return FALSE;
 	  }
 	  break;
 
@@ -1964,7 +1970,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Store byte: pop stack, write byte
 	     arg: -.  */
 	case ETIR__C_STO_B:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
 	  image_write_b (abfd, (unsigned int) op1 & 0xff);
@@ -1973,7 +1980,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Store word: pop stack, write word
 	     arg: -.  */
 	case ETIR__C_STO_W:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
 	  image_write_w (abfd, (unsigned int) op1 & 0xffff);
@@ -1982,7 +1990,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Store longword: pop stack, write longword
 	     arg: -.  */
 	case ETIR__C_STO_LW:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 & RELC_SEC_BASE)
 	    {
 	      op1 = alpha_vms_fix_sec_rel (abfd, info, rel1, op1);
@@ -2005,7 +2014,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Store quadword: pop stack, write quadword
 	     arg: -.  */
 	case ETIR__C_STO_QW:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 & RELC_SEC_BASE)
 	    {
 	      op1 = alpha_vms_fix_sec_rel (abfd, info, rel1, op1);
@@ -2032,7 +2042,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    if (ptr + 4 > maxptr)
 	      goto corrupt_etir;
 	    size = bfd_getl32 (ptr);
-	    _bfd_vms_pop (abfd, &op1, &rel1);
+	    if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	      return FALSE;
 	    if (rel1 != RELC_NONE)
 	      goto bad_context;
 	    while (op1-- > 0)
@@ -2095,7 +2106,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Store offset to psect: pop stack, add low 32 bits to base of psect
 	     arg: none.  */
 	case ETIR__C_STO_OFF:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 
 	  if (!(rel1 & RELC_SEC_BASE))
 	    abort ();
@@ -2266,7 +2278,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Det relocation base: pop stack, set image location counter
 	     arg: none.  */
 	case ETIR__C_CTL_SETRB:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (!(rel1 & RELC_SEC_BASE))
 	    abort ();
 	  image_set_ptr (abfd, op1, rel1 & RELC_MASK, info);
@@ -2284,7 +2297,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Define location: pop index, save location counter under index
 	     arg: none.  */
 	case ETIR__C_CTL_DFLOC:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
 	  dst_define_location (abfd, op1);
@@ -2293,7 +2307,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Set location: pop index, restore location counter from index
 	     arg: none.  */
 	case ETIR__C_CTL_STLOC:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
 	  dst_restore_location (abfd, op1);
@@ -2302,28 +2317,34 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  /* Stack defined location: pop index, push location counter from index
 	     arg: none.  */
 	case ETIR__C_CTL_STKDL:
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, dst_retrieve_location (abfd, op1), RELC_NONE);
+	  if (!_bfd_vms_push (abfd, dst_retrieve_location (abfd, op1),
+			      RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_NOP:      /* No-op.  */
 	  break;
 
 	case ETIR__C_OPR_ADD:      /* Add.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 == RELC_NONE && rel2 != RELC_NONE)
 	    rel1 = rel2;
 	  else if (rel1 != RELC_NONE && rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op1 + op2, rel1);
+	  if (!_bfd_vms_push (abfd, op1 + op2, rel1))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_SUB:      /* Subtract.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 == RELC_NONE && rel2 != RELC_NONE)
 	    rel1 = rel2;
 	  else if ((rel1 & RELC_SEC_BASE) && (rel2 & RELC_SEC_BASE))
@@ -2334,69 +2355,90 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  else if (rel1 != RELC_NONE && rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op2 - op1, rel1);
+	  if (!_bfd_vms_push (abfd, op2 - op1, rel1))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_MUL:      /* Multiply.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op1 * op2, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, op1 * op2, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_DIV:      /* Divide.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
 	  if (op2 == 0)
-	    _bfd_vms_push (abfd, 0, RELC_NONE);
+	    {
+	      if (!_bfd_vms_push (abfd, 0, RELC_NONE))
+		return FALSE;
+	    }
 	  else
-	    _bfd_vms_push (abfd, op2 / op1, RELC_NONE);
+	    {
+	      if (!_bfd_vms_push (abfd, op2 / op1, RELC_NONE))
+		return FALSE;
+	    }
 	  break;
 
 	case ETIR__C_OPR_AND:      /* Logical AND.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op1 & op2, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, op1 & op2, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_IOR:      /* Logical inclusive OR.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op1 | op2, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, op1 | op2, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_EOR:      /* Logical exclusive OR.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, op1 ^ op2, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, op1 ^ op2, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_NEG:      /* Negate.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, -op1, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, -op1, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_COM:      /* Complement.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  _bfd_vms_push (abfd, ~op1, RELC_NONE);
+	  if (!_bfd_vms_push (abfd, ~op1, RELC_NONE))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_ASH:      /* Arithmetic shift.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
-	  _bfd_vms_pop (abfd, &op2, &rel2);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1)
+	      || !_bfd_vms_pop (abfd, &op2, &rel2))
+	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    {
 	    bad_context:
@@ -2408,7 +2450,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    op1 >>= -(int)op2;
 	  else			/* Shift left.  */
 	    op1 <<= (int)op2;
-	  _bfd_vms_push (abfd, op1, RELC_NONE); /* FIXME: sym.  */
+	  if (!_bfd_vms_push (abfd, op1, RELC_NONE)) /* FIXME: sym.  */
+	    return FALSE;
 	  break;
 
 	case ETIR__C_OPR_INSV:      /* Insert field.   */
@@ -2422,14 +2465,20 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	  break;
 
 	case ETIR__C_OPR_SEL:      /* Select.  */
-	  _bfd_vms_pop (abfd, &op1, &rel1);
+	  if (!_bfd_vms_pop (abfd, &op1, &rel1))
+	    return FALSE;
 	  if (op1 & 0x01L)
-	    _bfd_vms_pop (abfd, &op1, &rel1);
+	    {
+	      if (!_bfd_vms_pop (abfd, &op1, &rel1))
+		return FALSE;
+	    }
 	  else
 	    {
-	      _bfd_vms_pop (abfd, &op1, &rel1);
-	      _bfd_vms_pop (abfd, &op2, &rel2);
-	      _bfd_vms_push (abfd, op1, rel1);
+	      if (!_bfd_vms_pop (abfd, &op1, &rel1)
+		  || !_bfd_vms_pop (abfd, &op2, &rel2))
+		return FALSE;
+	      if (!_bfd_vms_push (abfd, op1, rel1))
+		return FALSE;
 	    }
 	  break;
 
