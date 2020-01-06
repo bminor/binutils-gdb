@@ -603,7 +603,7 @@ set build_tests {
    "-shared" "-fPIC"
    {data2.c} {} "libdata2.so"}
   {"Build libcomm1.o"
-   "-r -nostdlib" ""
+   "-r -nostdlib" "-fcommon"
    {comm1.c} {} "libcomm1.o"}
   {"Build libfunc1.so"
    "-shared" "-fPIC"
@@ -634,16 +634,16 @@ set build_tests {
    "-r -nostdlib" ""
    {pr11138-2.c} {} "libpr11138-2.o"}
   {"Build pr13250-1.so"
-   "-shared" "-fPIC"
+   "-shared" "-fPIC -fcommon"
    {pr13250-1.c} {} "libpr13250-1.so"}
   {"Build pr13250-2.so with libpr13250-1.so"
-   "-shared -Wl,--no-as-needed tmpdir/libpr13250-1.so" "-fPIC"
+   "-shared -Wl,--no-as-needed tmpdir/libpr13250-1.so" "-fPIC -fcommon"
    {pr13250-2.c} {} "libpr13250-2.so"}
   {"Build libpr13250-3.o"
-   "-r -nostdlib" ""
+   "-r -nostdlib" "-fcommon"
    {pr13250-3.c} {} "libpr13250-3.o"}
   {"Build libpr14323-2.so"
-   "-shared" "-fPIC"
+   "-shared" "-fPIC -fcommon"
    {pr14323-2.c} {} "libpr14323-2.so"}
   {"Build pr14862-1.o"
    "-r -nostdlib" ""
@@ -879,7 +879,7 @@ set run_tests [list \
      "-Wl,--no-as-needed,--version-script=pr11138-2.map tmpdir/libpr11138-1.so tmpdir/pr11138-2.o" "" \
      {dummy.c} "pr11138b" "pr11138.out" ] \
     [list "Run with pr13250-3.c, libpr13250-1.so and libpr13250-2.so" \
-     "-Wl,--as-needed tmpdir/pr13250-3.o tmpdir/libpr13250-1.so tmpdir/libpr13250-2.so" "" \
+     "-Wl,--as-needed tmpdir/pr13250-3.o tmpdir/libpr13250-1.so tmpdir/libpr13250-2.so" "-fcommon" \
      {dummy.c} "pr13250" "pass.out" ] \
     [list "Run with pr14323-1.c pr14323-2.so" \
      "-Wl,--no-as-needed tmpdir/libpr14323-2.so" "" \
