@@ -3,6 +3,9 @@
 
 *** Changes since GDB 9
 
+* Debugging MS-Windows processes now sets $_exitsignal when the
+  inferior is terminated by a signal, instead of setting $_exitcode.
+
 * Multithreaded symbol loading has now been enabled by default on systems
   that support it (see entry for GDB 9, below), providing faster
   performance for programs with many symbols.
