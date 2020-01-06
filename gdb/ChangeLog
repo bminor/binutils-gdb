@@ -1,3 +1,10 @@
+2020-01-06  Shahab Vahedi  <shahab@synopsys.com>
+
+	* tui/tui-disasm.c (tui_disasm_window::addr_is_displayed): Avoid
+	overflow by an early check of content vs threshold.
+        * tui/tui-source.c (tui_source_window::line_is_displayed):
+	Likewise.
+
 2020-01-06  Eli Zaretskii  <eliz@gnu.org>
 
 	* NEWS: Mention the recent fix of $_exitsignal on MS-Windows.

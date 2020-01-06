@@ -348,19 +348,17 @@ tui_disasm_window::location_matches_p (struct bp_location *loc, int line_no)
 bool
 tui_disasm_window::addr_is_displayed (CORE_ADDR addr) const
 {
-  bool is_displayed = false;
-  int threshold = SCROLL_THRESHOLD;
+  if (content.size () < SCROLL_THRESHOLD)
+    return false;
 
-  int i = 0;
-  while (i < content.size () - threshold && !is_displayed)
+  for (size_t i = 0; i < content.size () - SCROLL_THRESHOLD; ++i)
     {
-      is_displayed
-	= (content[i].line_or_addr.loa == LOA_ADDRESS
-	   && content[i].line_or_addr.u.addr == addr);
-      i++;
+      if (content[i].line_or_addr.loa == LOA_ADDRESS
+	  && content[i].line_or_addr.u.addr == addr)
+	return true;
     }
 
-  return is_displayed;
+  return false;
 }
 
 void
