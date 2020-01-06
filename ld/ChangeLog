@@ -1,3 +1,9 @@
+2020-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 25326
+	* testsuite/ld-elf/shared.exp: Add -fcommon option to compiler
+	command line when building pr19579 binaries.
+
 2020-01-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	* emultempl/pe.em: Add new option --enable-reloc-section.

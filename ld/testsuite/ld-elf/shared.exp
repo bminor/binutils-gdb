@@ -1061,7 +1061,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr19579a.o" \
-	    "" "-fPIE" \
+	    "" "-fPIE -fcommon" \
 	    {pr19579a.c} \
 	    {} \
 	    "libpr19579a.a" \
@@ -1069,7 +1069,7 @@ if { [istarget *-*-linux*]
 	[list \
 	    "Build libpr19579.so" \
 	    "-shared" \
-	    "-fPIC" \
+	    "-fPIC -fcommon" \
 	    {pr19579b.c} \
 	    {} \
 	    "libpr19579.so" \
@@ -1077,7 +1077,7 @@ if { [istarget *-*-linux*]
 	[list \
 	    "Build libpr19579now.so" \
 	    "-shared -Wl,-z,now" \
-	    "-fPIC" \
+	    "-fPIC -fcommon" \
 	    {pr19579b.c} \
 	    {} \
 	    "libpr19579.so" \
