@@ -1,3 +1,12 @@
+2020-01-06  Eli Zaretskii  <eliz@gnu.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* win32-low.c (get_child_debug_event): Extract the fatal exception
+	from the exit status and convert to the equivalent Posix signal
+	number.
+	(win32_wait): Allow TARGET_WAITKIND_SIGNALLED status as well.
+	* Makefile.in (OBS, SFILES): Add gdb_wait.[co].
+
 2020-01-01  Hannes Domani  <ssbssa@yahoo.de>
 
 	* Makefile.in: Use INSTALL_PROGRAM_ENV.

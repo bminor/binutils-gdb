@@ -1,3 +1,22 @@
+2020-01-06  Eli Zaretskii  <eliz@gnu.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_SFILES): Add gdbsupport/gdb_wait.c.
+	* windows-tdep.c: New enumeration of WINDOWS_SIG* signals.
+	(windows_gdb_signal_to_target): New function, uses the above
+	enumeration to convert GDB internal signal codes to equivalent
+	Windows codes.
+	(windows_init_abi): Call set_gdbarch_gdb_signal_to_target.
+	* windows-nat.c: Include "gdb_wait.h".
+	(get_windows_debug_event): Extract the fatal exception from the
+	exit status and convert to the equivalent Posix signal number.
+	* cli/cli-cmds.c (exit_status_set_internal_vars): Account for the
+	possibility that WTERMSIG returns GDB_SIGNAL_UNKNOWN.
+	* gdbsupport/gdb_wait.c: New file, implements
+	windows_status_to_termsig.
+	* gdbsupport/gdb_wait.h (WIFEXITED, WIFSIGNALED, WEXITSTATUS)
+	(WTERMSIG) [__MINGW32__]: Separate definitions for MinGW.
+
 2020-01-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-layout.c (tui_add_win_to_layout): Use tui_set_layout not

@@ -986,6 +986,7 @@ COMMON_SFILES = \
 	gdbsupport/gdb-dlfcn.c \
 	gdbsupport/gdb_tilde_expand.c \
 	gdbsupport/gdb_vecs.c \
+	gdbsupport/gdb_wait.c \
 	gdbsupport/netstuff.c \
 	gdbsupport/new-op.c \
 	gdbsupport/pathstuff.c \

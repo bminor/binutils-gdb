@@ -34,6 +34,7 @@
 #include <process.h>
 #include "gdbsupport/gdb_tilde_expand.h"
 #include "gdbsupport/common-inferior.h"
+#include "gdbsupport/gdb_wait.h"
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
@@ -1511,8 +1512,24 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      ourstatus->kind = TARGET_WAITKIND_EXITED;
-      ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
+      {
+	DWORD exit_status = current_event.u.ExitProcess.dwExitCode;
+	/* If the exit status looks like a fatal exception, but we
+	   don't recognize the exception's code, make the original
+	   exit status value available, to avoid losing information.  */
+	int exit_signal
+	  = WIFSIGNALED (exit_status) ? WTERMSIG (exit_status) : -1;
+	if (exit_signal == -1)
+	  {
+	    ourstatus->kind = TARGET_WAITKIND_EXITED;
+	    ourstatus->value.integer = exit_status;
+	  }
+	else
+	  {
+	    ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	    ourstatus->value.sig = gdb_signal_from_host (exit_signal);
+	  }
+      }
       child_continue (DBG_CONTINUE, -1);
       CloseHandle (current_process_handle);
       current_process_handle = NULL;
@@ -1607,6 +1624,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	  win32_clear_inferiors ();
 	  return ptid_t (current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
+	case TARGET_WAITKIND_SIGNALLED:
 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    ourstatus->value.sig));

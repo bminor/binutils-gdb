@@ -38,20 +38,33 @@
    in POSIX.1.  We fail to define WNOHANG and WUNTRACED, which POSIX.1
    <sys/wait.h> defines, since our code does not use waitpid() (but
    NOTE exception for GNU/Linux below).  We also fail to declare
-   wait() and waitpid().  */
+   wait() and waitpid().
+
+   For MinGW, we use the fact that when a Windows program is
+   terminated by a fatal exception, its exit code is the value of that
+   exception, as defined by the various EXCEPTION_* symbols in the
+   Windows API headers.  See also gdb_wait.c.  */
 
 #ifndef	WIFEXITED
-#define WIFEXITED(w)	(((w)&0377) == 0)
+# ifdef __MINGW32__
+#  define WIFEXITED(w)	(((w) & 0xC0000000) == 0)
+# else
+#  define WIFEXITED(w)	(((w)&0377) == 0)
+# endif
 #endif
 
 #ifndef	WIFSIGNALED
-#define WIFSIGNALED(w)	(((w)&0377) != 0177 && ((w)&~0377) == 0)
+# ifdef __MINGW32__
+#  define WIFSIGNALED(w)	(((w) & 0xC0000000) == 0xC0000000)
+# else
+#  define WIFSIGNALED(w)	(((w)&0377) != 0177 && ((w)&~0377) == 0)
+# endif
 #endif
 
 #ifndef	WIFSTOPPED
 #ifdef IBM6000
 
-/* Unfortunately, the above comment (about being compatible in all Unix 
+/* Unfortunately, the above comment (about being compatible in all Unix
    systems) is not quite correct for AIX, sigh.  And AIX 3.2 can generate
    status words like 0x57c (sigtrap received after load), and gdb would
    choke on it.  */
@@ -64,11 +77,20 @@
 #endif
 
 #ifndef	WEXITSTATUS
-#define WEXITSTATUS(w)	(((w) >> 8) & 0377) /* same as WRETCODE */
+# ifdef __MINGW32__
+#  define WEXITSTATUS(w)	((w) & ~0xC0000000)
+# else
+#  define WEXITSTATUS(w)	(((w) >> 8) & 0377) /* same as WRETCODE */
+# endif
 #endif
 
 #ifndef	WTERMSIG
-#define WTERMSIG(w)	((w) & 0177)
+# ifdef __MINGW32__
+extern int windows_status_to_termsig (unsigned long);
+#  define WTERMSIG(w)	windows_status_to_termsig (w)
+# else
+#  define WTERMSIG(w)	((w) & 0177)
+# endif
 #endif
 
 #ifndef	WSTOPSIG

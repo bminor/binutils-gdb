@@ -217,6 +217,7 @@ SFILES = \
 	$(srcdir)/gdbsupport/gdb-dlfcn.c \
 	$(srcdir)/gdbsupport/gdb_tilde_expand.c \
 	$(srcdir)/gdbsupport/gdb_vecs.c \
+	$(srcdir)/gdbsupport/gdb_wait.c \
 	$(srcdir)/gdbsupport/netstuff.c \
 	$(srcdir)/gdbsupport/new-op.c \
 	$(srcdir)/gdbsupport/pathstuff.c \
@@ -264,6 +265,7 @@ OBS = \
 	gdbsupport/gdb-dlfcn.o \
 	gdbsupport/gdb_tilde_expand.o \
 	gdbsupport/gdb_vecs.o \
+	gdbsupport/gdb_wait.o \
 	gdbsupport/netstuff.o \
 	gdbsupport/new-op.o \
 	gdbsupport/pathstuff.o \
