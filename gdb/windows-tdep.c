@@ -50,7 +50,7 @@ enum
    WINDOWS_SIGILL = 4,
    WINDOWS_SIGTRAP = 5,	/* MinGW64/Cygwin */
 #ifdef __CYGWIN__
-   WINDOWS_SGABRT = 6,
+   WINDOWS_SIGABRT = 6,
 #else
    WINDOWS_SIGIOT = 6,	/* MinGW64 */
 #endif
