@@ -6002,6 +6002,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
       size_t len;
       unsigned char ext_len[4];
       char *name;
+      unsigned int ndx;
 
       /* An empty chain has zero as it's file offset.  */
       hash_val = bfd_getb32 (hash_table + 4 * i);
@@ -6048,9 +6049,14 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 
       /* Fill in the file offset.  Note that the "location" field points
 	 to the SOM itself, not the ar_hdr in front of it.  */
-      set->file_offset =
-	bfd_getb32 (som_dict[bfd_getb32 (lst_symbol.som_index)].location)
-	- sizeof (struct ar_hdr);
+      ndx = bfd_getb32 (lst_symbol.som_index);
+      if (ndx >= lst_header->module_count)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  goto error_return;
+	}
+      set->file_offset
+	= bfd_getb32 (som_dict[ndx].location) - sizeof (struct ar_hdr);
 
       /* Go to the next symbol.  */
       set++;
@@ -6097,9 +6103,14 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 
 	  /* Fill in the file offset.  Note that the "location" field points
 	     to the SOM itself, not the ar_hdr in front of it.  */
-	  set->file_offset =
-	    bfd_getb32 (som_dict[bfd_getb32 (lst_symbol.som_index)].location)
-	    - sizeof (struct ar_hdr);
+	  ndx = bfd_getb32 (lst_symbol.som_index);
+	  if (ndx >= lst_header->module_count)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      goto error_return;
+	    }
+	  set->file_offset
+	    = bfd_getb32 (som_dict[ndx].location) - sizeof (struct ar_hdr);
 
 	  /* Go on to the next symbol.  */
 	  set++;

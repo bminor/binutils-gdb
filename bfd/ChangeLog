@@ -1,5 +1,9 @@
 2020-01-06  Alan Modra  <amodra@gmail.com>
 
+	* som.c (som_bfd_fill_in_ar_symbols): Bounds check som_dict index.
+
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
 	* mach-o.c (bfd_mach_o_read_dylinker): Don't read past end of
 	command.  Check name offset is within command.
 	(bfd_mach_o_read_dylib, bfd_mach_o_read_prebound_dylib),
