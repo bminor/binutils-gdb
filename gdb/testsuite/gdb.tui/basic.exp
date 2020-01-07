@@ -48,6 +48,33 @@ if {[Term::wait_for [string_to_regexp $line]] \
     fail "scroll up"
 }
 
+# Check the horizontal scrolling.  First confirm that 'main ()' is
+# where we expect it to be.  This relies on the current way we
+# position source code on the screen, which might change in the
+# future.  The important part of this test is detecting the left/right
+# scrolling, not which line main is actually on.
+set line_num 6
+set line [Term::get_line $line_num]
+gdb_assert {[regexp -- "19\[\\t \]+main \\(\\)" $line]} \
+    "check main is where we expect on the screen"
+set regexp "19\[\\t \]+ain \\(\\)"
+# Send a right arrow.
+send_gdb "\033\[C"
+if {[Term::wait_for $regexp]} {
+    pass "scroll right"
+} else {
+    fail "scroll right"
+}
+set line [Term::get_line $line_num]
+# Send a down arrow.
+send_gdb "\033\[B"
+if {[Term::wait_for $regexp] \
+	&& [Term::get_line [expr {$line_num - 1}]] == $line} {
+    pass "scroll down"
+} else {
+    fail "scroll down"
+}
+
 Term::check_box "source box" 0 0 80 15
 
 Term::command "layout asm"

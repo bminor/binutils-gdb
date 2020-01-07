@@ -1,3 +1,9 @@
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Update
+	all source windows, and maintain horizontal scroll status while
+	doing so.
+
 2020-01-09  Tom Tromey  <tom@tromey.com>
 
 	PR tui/18932:

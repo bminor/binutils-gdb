@@ -158,7 +158,9 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 	line_no = 1;
 
       cursal.line = line_no;
-      update_source_window (arch, cursal);
+      find_line_pc (cursal.symtab, cursal.line, &cursal.pc);
+      for (struct tui_source_window_base *win_info : tui_source_windows ())
+	win_info->update_source_window_as_is (arch, cursal);
     }
 }
 
