@@ -1,5 +1,10 @@
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/tuiterm.exp (Term::dump_screen): Always dump the screen when
+	called.
+
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/skip.exp: Fix race condition in test.
 
 2020-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>

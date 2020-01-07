@@ -595,10 +595,10 @@ namespace eval Term {
     proc dump_screen {} {
 	variable _rows
 	variable _cols
-	verbose "Screen Dump ($_cols x $_rows):"
+	verbose -log "Screen Dump ($_cols x $_rows):"
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
-	    verbose "$fmt [get_line $y]"
+	    verbose -log "$fmt [get_line $y]"
 	}
     }
 
