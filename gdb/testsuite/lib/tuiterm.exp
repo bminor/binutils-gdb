@@ -462,15 +462,25 @@ namespace eval Term {
 	}
     }
 
-    # Start the TUI.  Returns 1 on success, 0 if TUI tests should be
-    # skipped.
-    proc enter_tui {} {
+    # Setup ready for starting the tui, but don't actually start it.
+    # Returns 1 on success, 0 if TUI tests should be skipped.
+    proc prepare_for_tui {} {
 	if {[skip_tui_tests]} {
 	    return 0
 	}
 
 	gdb_test_no_output "set tui border-kind ascii"
 	gdb_test_no_output "maint set tui-resize-message on"
+	return 1
+    }
+
+    # Start the TUI.  Returns 1 on success, 0 if TUI tests should be
+    # skipped.
+    proc enter_tui {} {
+	if {![prepare_for_tui]} {
+	    return 0
+	}
+
 	command "tui enable"
 	return 1
     }

@@ -1,5 +1,10 @@
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/tuiterm.exp (Term::prepare_for_tui): New proc.
+	(Term::enter_tui): Use Term::prepare_for_tui.
+
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/tuiterm.exp (Term::dump_screen): Always dump the screen when
 	called.
 
