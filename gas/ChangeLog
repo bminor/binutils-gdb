@@ -1,3 +1,10 @@
+2020-01-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* onfig/tc-arc.c (parse_reloc_symbol): New function.
+	(tokenize_arguments): Clean up, use parse_reloc_symbol function.
+	(md_operand): Set X_md to absent.
+	(arc_parse_name): Check for X_md.
+
 2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25311

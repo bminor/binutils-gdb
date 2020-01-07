@@ -1092,6 +1092,102 @@ debug_exp (expressionS *t)
   fflush (stderr);
 }
 
+/* Helper for parsing an argument, used for sorting out the relocation
+   type.  */
+
+static void
+parse_reloc_symbol (expressionS *resultP)
+{
+  char *reloc_name, c, *sym_name;
+  size_t len;
+  int i;
+  const struct arc_reloc_op_tag *r;
+  expressionS right;
+  symbolS *base;
+
+  /* A relocation operand has the following form
+     @identifier@relocation_type.  The identifier is already in
+     tok!  */
+  if (resultP->X_op != O_symbol)
+    {
+      as_bad (_("No valid label relocation operand"));
+      resultP->X_op = O_illegal;
+      return;
+    }
+
+  /* Parse @relocation_type.  */
+  input_line_pointer++;
+  c = get_symbol_name (&reloc_name);
+  len = input_line_pointer - reloc_name;
+  if (len == 0)
+    {
+      as_bad (_("No relocation operand"));
+      resultP->X_op = O_illegal;
+      return;
+    }
+
+  /* Go through known relocation and try to find a match.  */
+  r = &arc_reloc_op[0];
+  for (i = arc_num_reloc_op - 1; i >= 0; i--, r++)
+    if (len == r->length
+	&& memcmp (reloc_name, r->name, len) == 0)
+      break;
+  if (i < 0)
+    {
+      as_bad (_("Unknown relocation operand: @%s"), reloc_name);
+      resultP->X_op = O_illegal;
+      return;
+    }
+
+  *input_line_pointer = c;
+  SKIP_WHITESPACE_AFTER_NAME ();
+  /* Extra check for TLS: base.  */
+  if (*input_line_pointer == '@')
+    {
+      if (resultP->X_op_symbol != NULL
+	  || resultP->X_op != O_symbol)
+	{
+	  as_bad (_("Unable to parse TLS base: %s"),
+		  input_line_pointer);
+	  resultP->X_op = O_illegal;
+	  return;
+	}
+      input_line_pointer++;
+      c = get_symbol_name (&sym_name);
+      base = symbol_find_or_make (sym_name);
+      resultP->X_op = O_subtract;
+      resultP->X_op_symbol = base;
+      restore_line_pointer (c);
+      right.X_add_number = 0;
+    }
+
+  if ((*input_line_pointer != '+')
+      && (*input_line_pointer != '-'))
+    right.X_add_number = 0;
+  else
+    {
+      /* Parse the constant of a complex relocation expression
+	 like @identifier@reloc +/- const.  */
+      if (! r->complex_expr)
+	{
+	  as_bad (_("@%s is not a complex relocation."), r->name);
+	  resultP->X_op = O_illegal;
+	  return;
+	}
+      expression (&right);
+      if (right.X_op != O_constant)
+	{
+	  as_bad (_("Bad expression: @%s + %s."),
+		  r->name, input_line_pointer);
+	  resultP->X_op = O_illegal;
+	  return;
+	}
+    }
+
+  resultP->X_md = r->op;
+  resultP->X_add_number = right.X_add_number;
+}
+
 /* Parse the arguments to an opcode.  */
 
 static int
@@ -1104,11 +1200,6 @@ tokenize_arguments (char *str,
   bfd_boolean saw_arg = FALSE;
   int brk_lvl = 0;
   int num_args = 0;
-  int i;
-  size_t len;
-  const struct arc_reloc_op_tag *r;
-  expressionS tmpE;
-  char *reloc_name, c;
 
   memset (tok, 0, sizeof (*tok) * ntok);
 
@@ -1170,94 +1261,20 @@ tokenize_arguments (char *str,
 	    goto err;
 
 	  /* Parse @label.  */
+	  input_line_pointer++;
 	  tok->X_op = O_symbol;
 	  tok->X_md = O_absent;
 	  expression (tok);
-	  if (*input_line_pointer != '@')
-	    goto normalsymbol; /* This is not a relocation.  */
 
-	relocationsym:
-
-	  /* A relocation operand has the following form
-	     @identifier@relocation_type.  The identifier is already
-	     in tok!  */
-	  if (tok->X_op != O_symbol)
-	    {
-	      as_bad (_("No valid label relocation operand"));
-	      goto err;
-	    }
-
-	  /* Parse @relocation_type.  */
-	  input_line_pointer++;
-	  c = get_symbol_name (&reloc_name);
-	  len = input_line_pointer - reloc_name;
-	  if (len == 0)
-	    {
-	      as_bad (_("No relocation operand"));
-	      goto err;
-	    }
-
-	  /* Go through known relocation and try to find a match.  */
-	  r = &arc_reloc_op[0];
-	  for (i = arc_num_reloc_op - 1; i >= 0; i--, r++)
-	    if (len == r->length
-		&& memcmp (reloc_name, r->name, len) == 0)
-	      break;
-	  if (i < 0)
-	    {
-	      as_bad (_("Unknown relocation operand: @%s"), reloc_name);
-	      goto err;
-	    }
-
-	  *input_line_pointer = c;
-	  SKIP_WHITESPACE_AFTER_NAME ();
-	  /* Extra check for TLS: base.  */
 	  if (*input_line_pointer == '@')
-	    {
-	      symbolS *base;
-	      if (tok->X_op_symbol != NULL
-		  || tok->X_op != O_symbol)
-		{
-		  as_bad (_("Unable to parse TLS base: %s"),
-			  input_line_pointer);
-		  goto err;
-		}
-	      input_line_pointer++;
-	      char *sym_name;
-	      c = get_symbol_name (&sym_name);
-	      base = symbol_find_or_make (sym_name);
-	      tok->X_op = O_subtract;
-	      tok->X_op_symbol = base;
-	      restore_line_pointer (c);
-	      tmpE.X_add_number = 0;
-	    }
-	  if ((*input_line_pointer != '+')
-		   && (*input_line_pointer != '-'))
-	    {
-	      tmpE.X_add_number = 0;
-	    }
-	  else
-	    {
-	      /* Parse the constant of a complex relocation expression
-		 like @identifier@reloc +/- const.  */
-	      if (! r->complex_expr)
-		{
-		  as_bad (_("@%s is not a complex relocation."), r->name);
-		  goto err;
-		}
-	      expression (&tmpE);
-	      if (tmpE.X_op != O_constant)
-		{
-		  as_bad (_("Bad expression: @%s + %s."),
-			  r->name, input_line_pointer);
-		  goto err;
-		}
-	    }
-
-	  tok->X_md = r->op;
-	  tok->X_add_number = tmpE.X_add_number;
+	    parse_reloc_symbol (tok);
 
 	  debug_exp (tok);
+
+	  if (tok->X_op == O_illegal
+              || tok->X_op == O_absent
+              || num_args == ntok)
+	    goto err;
 
 	  saw_comma = FALSE;
 	  saw_arg = TRUE;
@@ -1282,9 +1299,8 @@ tokenize_arguments (char *str,
 	     identifier@relocation_type, if it is the case parse the
 	     relocation type as well.  */
 	  if (*input_line_pointer == '@')
-	    goto relocationsym;
+	    parse_reloc_symbol (tok);
 
-	normalsymbol:
 	  debug_exp (tok);
 
 	  if (tok->X_op == O_illegal
@@ -3336,16 +3352,18 @@ md_atof (int type, char *litP, int *sizeP)
 
 /* Called for any expression that can not be recognized.  When the
    function is called, `input_line_pointer' will point to the start of
-   the expression.  */
+   the expression.  We use it when we have complex operations like
+   @label1 - @label2.  */
 
 void
-md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
+md_operand (expressionS *expressionP)
 {
   char *p = input_line_pointer;
   if (*p == '@')
     {
       input_line_pointer++;
       expressionP->X_op = O_symbol;
+      expressionP->X_md = O_absent;
       expression (expressionP);
     }
 }
@@ -3364,7 +3382,8 @@ arc_parse_name (const char *name,
   if (!assembling_insn)
     return FALSE;
 
-  if (e->X_op == O_symbol)
+  if (e->X_op == O_symbol
+      && e->X_md == O_absent)
     return FALSE;
 
   sym = hash_find (arc_reg_hash, name);
