@@ -600,6 +600,37 @@ namespace eval Term {
 	}
     }
 
+    # Check the contents of a box on the screen.  This is a little
+    # like check_contents, but doens't check the whole screen
+    # contents, only the contents of a single box.  This procedure
+    # includes (effectively) a call to check_box to ensure there is a
+    # box where expected, if there is then the contents of the box are
+    # matched against REGEXP.
+    proc check_box_contents {test_name x y width height regexp} {
+	variable _chars
+
+	set why [_check_box $x $y $width $height]
+	if {$why != ""} {
+	    dump_screen
+	    fail "$test_name (box check: $why)"
+	    return
+	}
+
+	# Now grab the contents of the box, join each line together
+	# with a newline character and match against REGEXP.
+	set result ""
+	for {set yy [expr {$y + 1}]} {$yy < [expr {$y + $height - 1}]} {incr yy} {
+	    for {set xx [expr {$x + 1}]} {$xx < [expr {$x + $width - 1}]} {incr xx} {
+		append result [lindex $_chars($xx,$yy) 0]
+	    }
+	    append result "\n"
+	}
+
+	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
+	    dump_screen
+	}
+    }
+
     # A debugging function to dump the current screen, with line
     # numbers.
     proc dump_screen {} {

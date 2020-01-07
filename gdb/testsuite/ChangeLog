@@ -1,5 +1,9 @@
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/tuiterm.exp (Term::check_box_contents): New proc.
+
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/tuiterm.exp (Term::prepare_for_tui): New proc.
 	(Term::enter_tui): Use Term::prepare_for_tui.
 
