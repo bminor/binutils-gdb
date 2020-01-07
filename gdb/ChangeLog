@@ -1,3 +1,8 @@
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui.c (tui_enable): Register tui hooks after calling
+	tui_display_main.
+
 2020-01-09  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/common-defs.h: Don't define _FORTIFY_SOURCE on MinGW.

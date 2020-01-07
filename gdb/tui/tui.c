@@ -489,10 +489,6 @@ tui_enable (void)
      clearok (stdscr, TRUE);
    }
 
-  /* Install the TUI specific hooks.  */
-  tui_install_hooks ();
-  rl_startup_hook = tui_rl_startup_hook;
-
   if (tui_update_variables ())
     tui_rehighlight_all ();
 
@@ -512,6 +508,12 @@ tui_enable (void)
     tui_show_frame_info (deprecated_safe_get_selected_frame ());
   else
     tui_display_main ();
+
+  /* Install the TUI specific hooks.  This must be done after the call to
+     tui_display_main so that we don't detect the symtab changed event it
+     can cause.  */
+  tui_install_hooks ();
+  rl_startup_hook = tui_rl_startup_hook;
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);

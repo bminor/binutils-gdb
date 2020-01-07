@@ -1,5 +1,9 @@
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.tui/tui-layout-asm.exp: New file.
+
+2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/tuiterm.exp (Term::check_box_contents): New proc.
 
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
