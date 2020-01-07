@@ -1,3 +1,7 @@
+2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
+
+	* opcode/arc.h (insn_class_t): Add 'LLOCK' and 'SCOND'.
+
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* coff/internal.h: Add defintions of Z80 reloc names.

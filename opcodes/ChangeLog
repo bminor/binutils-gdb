@@ -1,3 +1,12 @@
+2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-tbl.h (llock): Use 'LLOCK' as class.
+	(llockd): Likewise.
+	(scond): Use 'SCOND' as class.
+	(scondd): Likewise.
+	(llockd): Set data_size_mode to 'C_ZZ_D' which is 64-bit.
+	(scondd): Likewise.
+
 2020-01-06  Alan Modra  <amodra@gmail.com>
 
 	* m32c-ibld.c: Regenerate.
