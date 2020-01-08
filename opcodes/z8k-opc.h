@@ -292,9 +292,9 @@ typedef struct {
   void (*func) (void);
   unsigned int arg_info[4];
   unsigned int byte_info[10];
-  int noperands;
-  int length;
-  int idx;
+  unsigned int noperands;
+  unsigned int length;
+  unsigned int idx;
 } opcode_entry_type;
 
 #ifdef DEFINE_TABLE

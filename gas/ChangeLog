@@ -1,3 +1,8 @@
+2020-01-08  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-z8k.c (md_begin): Make idx unsigned.
+	(get_specific): Likewise for this_index.
+
 2020-01-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* onfig/tc-arc.c (parse_reloc_symbol): New function.

@@ -143,7 +143,7 @@ void
 md_begin (void)
 {
   const opcode_entry_type *opcode;
-  int idx = -1;
+  unsigned int idx = -1u;
 
   opcode_hash_control = hash_new ();
 
@@ -861,7 +861,7 @@ get_specific (opcode_entry_type *opcode, op_type *operands)
   int found = 0;
   unsigned int noperands = opcode->noperands;
 
-  int this_index = opcode->idx;
+  unsigned int this_index = opcode->idx;
 
   while (this_index == opcode->idx && !found)
     {

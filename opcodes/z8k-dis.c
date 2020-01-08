@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "disassemble.h"
+#include "libiberty.h"
 
 #define DEFINE_TABLE
 #include "z8k-opc.h"
@@ -35,7 +36,7 @@ typedef struct
   unsigned short words[24];
 
   /* Nibble number of first word not yet fetched.  */
-  int max_fetched;
+  unsigned int max_fetched;
   bfd_vma insn_start;
   OPCODES_SIGJMP_BUF bailout;
 
@@ -189,7 +190,7 @@ print_insn_z8002 (bfd_vma addr, disassemble_info *info)
 int
 z8k_lookup_instr (unsigned char *nibbles, disassemble_info *info)
 {
-  int nibl_index, tabl_index;
+  unsigned int nibl_index, tabl_index;
   int nibl_matched;
   int need_fetch = 0;
   unsigned short instr_nibl;
@@ -202,7 +203,9 @@ z8k_lookup_instr (unsigned char *nibbles, disassemble_info *info)
     {
       nibl_matched = 1;
       for (nibl_index = 0;
-	   nibl_index < z8k_table[tabl_index].length * 2 && nibl_matched;
+	   nibl_matched
+	     && nibl_index < ARRAY_SIZE (z8k_table[0].byte_info)
+	     && nibl_index < z8k_table[tabl_index].length * 2;
 	   nibl_index++)
 	{
 	  if ((nibl_index % 4) == 0)
@@ -281,7 +284,7 @@ output_instr (instr_data_s *instr_data,
               unsigned long addr ATTRIBUTE_UNUSED,
               disassemble_info *info)
 {
-  int num_bytes;
+  unsigned int num_bytes;
   char out_str[100];
 
   out_str[0] = 0;
@@ -297,7 +300,7 @@ output_instr (instr_data_s *instr_data,
 static void
 unpack_instr (instr_data_s *instr_data, int is_segmented, disassemble_info *info)
 {
-  int nibl_count, loop;
+  unsigned int nibl_count, loop;
   unsigned short instr_nibl, instr_byte, instr_word;
   long instr_long;
   unsigned int tabl_datum, datum_class;

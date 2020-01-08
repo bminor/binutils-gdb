@@ -1,3 +1,15 @@
+2020-01-08  Alan Modra  <amodra@gmail.com>
+
+	* z8k-dis.c: Include libiberty.h
+	(instr_data_s): Make max_fetched unsigned.
+	(z8k_lookup_instr): Make nibl_index and tabl_index unsigned.
+	Don't exceed byte_info bounds.
+	(output_instr): Make num_bytes unsigned.
+	(unpack_instr): Likewise for nibl_count and loop.
+	* z8kgen.c (gas <opcode_entry_type>): Make noperands, length and
+	idx unsigned.
+	* z8k-opc.h: Regenerate.
+
 2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-tbl.h (llock): Use 'LLOCK' as class.

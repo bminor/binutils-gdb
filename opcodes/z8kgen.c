@@ -1290,9 +1290,9 @@ gas (void)
   printf ("  void (*func) (void);\n");
   printf ("  unsigned int arg_info[4];\n");
   printf ("  unsigned int byte_info[%d];\n", BYTE_INFO_LEN);
-  printf ("  int noperands;\n");
-  printf ("  int length;\n");
-  printf ("  int idx;\n");
+  printf ("  unsigned int noperands;\n");
+  printf ("  unsigned int length;\n");
+  printf ("  unsigned int idx;\n");
   printf ("} opcode_entry_type;\n\n");
   printf ("#ifdef DEFINE_TABLE\n");
   printf ("const opcode_entry_type z8k_table[] = {\n");
