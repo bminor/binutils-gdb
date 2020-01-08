@@ -435,6 +435,8 @@ private:
 				   struct address_space *aspace);
 };
 
+using regcache_up = std::unique_ptr<regcache>;
+
 class readonly_detached_regcache : public readable_regcache
 {
 public:
