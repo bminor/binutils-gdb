@@ -1,5 +1,13 @@
 2020-01-08  Nick Clifton  <nickc@redhat.com>
 
+	PR 25284
+	* doc/as.texi (Align): Document the fact that all arguments can be
+	omitted.
+	(Balign): Likewise.
+	(P2align): Likewise.
+
+2020-01-08  Nick Clifton  <nickc@redhat.com>
+
 	PR 14891
 	* config/obj-elf.c (obj_elf_section): Fail if the section name is
 	already defined as a different symbol type.
