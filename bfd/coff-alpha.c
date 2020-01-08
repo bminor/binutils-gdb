@@ -423,7 +423,7 @@ alpha_ecoff_object_p (bfd *abfd)
 	{
 	  bfd_size_type size;
 
-	  size = sec->line_filepos * 8;
+	  size = (bfd_size_type) sec->line_filepos * 8;
 	  BFD_ASSERT (size == sec->size
 		      || size + 8 == sec->size);
 	  if (!bfd_set_section_size (sec, size))

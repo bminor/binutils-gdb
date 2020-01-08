@@ -1,3 +1,7 @@
+2020-01-10  Alan Modra  <amodra@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_object_p): Calculate size in bfd_size_type.
+
 2020-01-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 25221
