@@ -1,3 +1,13 @@
+2020-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 14891
+	* config/obj-elf.c (obj_elf_section): Fail if the section name is
+	already defined as a different symbol type.
+	* testsuite/gas/elf/pr14891.s: New test source file.
+	* testsuite/gas/elf/pr14891.d: New test driver.
+	* testsuite/gas/elf/pr14891.s: New test expected error output.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
 2020-01-08  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-z8k.c (md_begin): Make idx unsigned.

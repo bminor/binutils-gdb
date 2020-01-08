@@ -1039,6 +1039,18 @@ obj_elf_section (int push)
   name = obj_elf_section_name ();
   if (name == NULL)
     return;
+
+  symbolS * sym;
+  if ((sym = symbol_find (name)) != NULL
+      && ! symbol_section_p (sym)
+      && S_IS_DEFINED (sym)
+      && ! S_IS_VOLATILE (sym)
+      && ! S_CAN_BE_REDEFINED (sym))
+    {
+      as_bad (_("section name '%s' already defined as another symbol"), name);
+      ignore_rest_of_line ();
+      return;
+    }
   type = SHT_NULL;
   attr = 0;
   gnu_attr = 0;
