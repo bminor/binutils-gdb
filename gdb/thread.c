@@ -1090,85 +1090,85 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
     for (inferior *inf : all_inferiors ())
       for (thread_info *tp : inf->threads ())
-      {
-	int core;
+	{
+	  int core;
 
-	any_thread = true;
-	if (tp == current_thread && tp->state == THREAD_EXITED)
-	  current_exited = true;
+	  any_thread = true;
+	  if (tp == current_thread && tp->state == THREAD_EXITED)
+	    current_exited = true;
 
-	if (!should_print_thread (requested_threads, default_inf_num,
-				  global_ids, pid, tp))
-	  continue;
+	  if (!should_print_thread (requested_threads, default_inf_num,
+				    global_ids, pid, tp))
+	    continue;
 
-	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-	if (!uiout->is_mi_like_p ())
-	  {
-	    if (tp == current_thread)
-	      uiout->field_string ("current", "*");
-	    else
-	      uiout->field_skip ("current");
+	  if (!uiout->is_mi_like_p ())
+	    {
+	      if (tp == current_thread)
+		uiout->field_string ("current", "*");
+	      else
+		uiout->field_skip ("current");
 
-	    uiout->field_string ("id-in-tg", print_thread_id (tp));
-	  }
+	      uiout->field_string ("id-in-tg", print_thread_id (tp));
+	    }
 
-	if (show_global_ids || uiout->is_mi_like_p ())
-	  uiout->field_signed ("id", tp->global_num);
+	  if (show_global_ids || uiout->is_mi_like_p ())
+	    uiout->field_signed ("id", tp->global_num);
 
-	/* For the CLI, we stuff everything into the target-id field.
-	   This is a gross hack to make the output come out looking
-	   correct.  The underlying problem here is that ui-out has no
-	   way to specify that a field's space allocation should be
-	   shared by several fields.  For MI, we do the right thing
-	   instead.  */
+	  /* For the CLI, we stuff everything into the target-id field.
+	     This is a gross hack to make the output come out looking
+	     correct.  The underlying problem here is that ui-out has no
+	     way to specify that a field's space allocation should be
+	     shared by several fields.  For MI, we do the right thing
+	     instead.  */
 
-	if (uiout->is_mi_like_p ())
-	  {
-	    uiout->field_string ("target-id", target_pid_to_str (tp->ptid));
+	  if (uiout->is_mi_like_p ())
+	    {
+	      uiout->field_string ("target-id", target_pid_to_str (tp->ptid));
 
-	    const char *extra_info = target_extra_thread_info (tp);
-	    if (extra_info != nullptr)
-	      uiout->field_string ("details", extra_info);
+	      const char *extra_info = target_extra_thread_info (tp);
+	      if (extra_info != nullptr)
+		uiout->field_string ("details", extra_info);
 
-	    const char *name = (tp->name != nullptr
-				? tp->name
-				: target_thread_name (tp));
-	    if (name != NULL)
-	      uiout->field_string ("name", name);
-	  }
-	else
-	  {
-	    uiout->field_string ("target-id",
-				 thread_target_id_str (tp).c_str ());
-	  }
+	      const char *name = (tp->name != nullptr
+				  ? tp->name
+				  : target_thread_name (tp));
+	      if (name != NULL)
+		uiout->field_string ("name", name);
+	    }
+	  else
+	    {
+	      uiout->field_string ("target-id",
+				   thread_target_id_str (tp).c_str ());
+	    }
 
-	if (tp->state == THREAD_RUNNING)
-	  uiout->text ("(running)\n");
-	else
-	  {
-	    /* The switch below puts us at the top of the stack (leaf
-	       frame).  */
-	    switch_to_thread (tp);
-	    print_stack_frame (get_selected_frame (NULL),
-			       /* For MI output, print frame level.  */
-			       uiout->is_mi_like_p (),
-			       LOCATION, 0);
-	  }
+	  if (tp->state == THREAD_RUNNING)
+	    uiout->text ("(running)\n");
+	  else
+	    {
+	      /* The switch below puts us at the top of the stack (leaf
+		 frame).  */
+	      switch_to_thread (tp);
+	      print_stack_frame (get_selected_frame (NULL),
+				 /* For MI output, print frame level.  */
+				 uiout->is_mi_like_p (),
+				 LOCATION, 0);
+	    }
 
-	if (uiout->is_mi_like_p ())
-	  {
-	    const char *state = "stopped";
+	  if (uiout->is_mi_like_p ())
+	    {
+	      const char *state = "stopped";
 
-	    if (tp->state == THREAD_RUNNING)
-	      state = "running";
-	    uiout->field_string ("state", state);
-	  }
+	      if (tp->state == THREAD_RUNNING)
+		state = "running";
+	      uiout->field_string ("state", state);
+	    }
 
-	core = target_core_of_thread (tp->ptid);
-	if (uiout->is_mi_like_p () && core != -1)
-	  uiout->field_signed ("core", core);
-      }
+	  core = target_core_of_thread (tp->ptid);
+	  if (uiout->is_mi_like_p () && core != -1)
+	    uiout->field_signed ("core", core);
+	}
 
     /* This end scope restores the current thread and the frame
        selected before the "info threads" command, and it finishes the
