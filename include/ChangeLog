@@ -1,3 +1,12 @@
+2020-01-10  Alan Modra  <amodra@gmail.com>
+
+	* opcode/spu.h: Formatting.
+	(UNSIGNED_EXTRACT): Use 1u.
+	(SIGNED_EXTRACT): Don't sign extend with shifts.
+	(DECODE_INSN_I9a, DECODE_INSN_I9b): Avoid left shift of signed value.
+	Keep result signed.
+	(DECODE_INSN_U9a, DECODE_INSN_U9b): Delete.
+
 2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
 
 	* opcode/arc.h (insn_class_t): Add 'LLOCK' and 'SCOND'.
