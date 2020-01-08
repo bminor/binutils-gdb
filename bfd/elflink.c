@@ -11820,6 +11820,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   bfd_vma attr_size = 0;
   const char *std_attrs_section;
   struct elf_link_hash_table *htab = elf_hash_table (info);
+  bfd_boolean sections_removed;
 
   if (!is_elf_hash_table (htab))
     return FALSE;
@@ -11866,6 +11867,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* The object attributes have been merged.  Remove the input
      sections from the link, and set the contents of the output
      section.  */
+  sections_removed = FALSE;
   std_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
@@ -11905,8 +11907,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  o->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (abfd, o);
 	  abfd->section_count--;
+	  sections_removed = TRUE;
 	}
     }
+  if (sections_removed)
+    _bfd_fix_excluded_sec_syms (abfd, info);
 
   /* Count up the number of relocations we will output for each output
      section, so that we know the sizes of the reloc sections.  We

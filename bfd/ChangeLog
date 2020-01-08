@@ -1,3 +1,9 @@
+2020-01-08  Alan Modra  <amodra@gmail.com>
+
+	PR 25351
+	* elflink.c (bfd_elf_final_link): Call _bfd_fix_excluded_sec_syms
+	after removing sections.
+
 2020-01-06  Jim Wilson  <jimw@sifive.com>
 
 	PR 25205
