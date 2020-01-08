@@ -1,3 +1,8 @@
+2020-01-09  Christian Biesinger  <cbiesinger@google.com>
+
+	* symtab.c (general_symbol_info::compute_and_set_names): Move the
+	unique_xmalloc_ptr outside the if to always free the demangled name.
+
 2020-01-08  Tom Tromey  <tromey@adacore.com>
 
 	* xcoffread.c (enter_line_range, read_xcoff_symtab)

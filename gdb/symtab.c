@@ -892,6 +892,16 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
           htab_find_slot_with_hash (per_bfd->demangled_names_hash.get (),
 				    &entry, *hash, INSERT));
 
+  /* The const_cast is safe because the only reason it is already
+     initialized is if we purposefully set it from a background
+     thread to avoid doing the work here.  However, it is still
+     allocated from the heap and needs to be freed by us, just
+     like if we called symbol_find_demangled_name here.  If this is
+     nullptr, we call symbol_find_demangled_name below, but we put
+     this smart pointer here to be sure that we don't leak this name.  */
+  gdb::unique_xmalloc_ptr<char> demangled_name
+    (const_cast<char *> (language_specific.demangled_name));
+
   /* If this name is not in the hash table, add it.  */
   if (*slot == NULL
       /* A C version of the symbol may have already snuck into the table.
@@ -914,15 +924,9 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
       else
 	linkage_name_copy = linkage_name;
 
-      /* The const_cast is safe because the only reason it is already
-         initialized is if we purposefully set it from a background
-         thread to avoid doing the work here.  However, it is still
-         allocated from the heap and needs to be freed by us, just
-         like if we called symbol_find_demangled_name here.  */
-      gdb::unique_xmalloc_ptr<char> demangled_name
-	(language_specific.demangled_name
-	 ? const_cast<char *> (language_specific.demangled_name)
-	 : symbol_find_demangled_name (this, linkage_name_copy.data ()));
+      if (demangled_name.get () == nullptr)
+	 demangled_name.reset
+	   (symbol_find_demangled_name (this, linkage_name_copy.data ()));
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
