@@ -1,3 +1,9 @@
+2020-01-10  Alan Modra  <amodra@gmail.com>
+
+	* m10300-dis.c (disassemble): Move extraction of DREG, AREG, RREG,
+	and XRREG value earlier to avoid a shift with negative exponent.
+	* m10200-dis.c (disassemble): Similarly.
+
 2020-01-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 25224
