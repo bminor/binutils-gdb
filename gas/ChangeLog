@@ -1,5 +1,11 @@
 2020-01-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_encoding): Add
+	is_any_vex_encoding() invocations. Drop respective
+	i.tm.extension_opcode == None checks.
+
+2020-01-09  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_assemble): Check RegRex is clear during
 	REX transformations. Correct comment indentation.
 
