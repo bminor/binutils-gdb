@@ -144,7 +144,8 @@ with_test_prefix "step after disabling 3" {
     gdb_test "step" ".*" "step 2"; # Return from bar()
     # With gcc 9.2.0 we jump once back to main before entering foo here.
     # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" "main \\(\\) at .*" "step"
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
     gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
@@ -265,7 +266,8 @@ with_test_prefix "step using -fu for baz" {
     gdb_test "step" ".*" "step 2"; # Return from bar()
     # With gcc 9.2.0 we jump once back to main before entering foo here.
     # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" "main \\(\\) at.*" "step"
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
     gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
@@ -282,7 +284,8 @@ with_test_prefix "step using -rfu for baz" {
     gdb_test "step" ".*" "step 2"; # Return from bar()
     # With gcc 9.2.0 we jump once back to main before entering foo here.
     # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" "main \\(\\) at.*" "step"
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
     gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
