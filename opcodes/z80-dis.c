@@ -82,7 +82,7 @@ fetch_data (struct buffer *buf, disassemble_info * info, int n)
 {
   int r;
 
-  if (buf->n_fetch + n > (int)sizeof(buf->data))
+  if (buf->n_fetch + n > (int)sizeof (buf->data))
     abort ();
 
   r = info->read_memory_func (buf->base + buf->n_fetch,
@@ -470,9 +470,9 @@ pref_ed (struct buffer *buf, disassemble_info *info,
 {
   struct tab_elt *p;
 
-  if (fetch_data(buf, info, 1))
+  if (fetch_data (buf, info, 1))
     {
-      for (p = opc_ed; p->val != (buf->data[1] & p->mask) || !mach_inst(buf, p); ++p)
+      for (p = opc_ed; p->val != (buf->data[1] & p->mask) || !mach_inst (buf, p); ++p)
         ;
       p->fp (buf, info, p->text);
     }
@@ -585,7 +585,7 @@ ld_r_d (struct buffer *buf, disassemble_info * info, const char *txt)
 }
 
 static int
-ld_d_r(struct buffer *buf, disassemble_info * info, const char *txt)
+ld_d_r (struct buffer *buf, disassemble_info * info, const char *txt)
 {
   char mytxt[TXTSIZ];
   signed char c;
@@ -596,14 +596,14 @@ ld_d_r(struct buffer *buf, disassemble_info * info, const char *txt)
 }
 
 static int
-ld_ii_ii(struct buffer *buf, disassemble_info * info, const char *txt)
+ld_ii_ii (struct buffer *buf, disassemble_info * info, const char *txt)
 {
   char mytxt[TXTSIZ];
   signed char c;
   int p;
   static const char *ii[2] = { "ix", "iy" };
 
-  p = (buf->data[buf->n_fetch - 2] == '\xdd') ? 0 : 1;
+  p = (buf->data[buf->n_fetch - 2] == (char) 0xdd) ? 0 : 1;
   c = buf->data[buf->n_fetch - 1];
   if ((c & 0x07) != 0x07)
     p = 1 - p; /* 0 -> 1, 1 -> 0 */
@@ -858,7 +858,7 @@ print_insn_z80_buf (struct buffer *buf, disassemble_info *info)
   if (! fetch_data (buf, info, 1))
     return -1;
 
-  for (p = opc_main; p->val != (buf->data[0] & p->mask) || !mach_inst(buf, p); ++p)
+  for (p = opc_main; p->val != (buf->data[0] & p->mask) || !mach_inst (buf, p); ++p)
     ;
   p->fp (buf, info, p->text);
 

@@ -1,3 +1,9 @@
+2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25224
+	* z80-dis.c (ld_ii_ii): Use character constant when checking
+	opcode byte value.
+
 2020-01-09  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (SEP_Fixup): New.

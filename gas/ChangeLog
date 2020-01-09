@@ -1,3 +1,12 @@
+2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25224
+	* config/tc-z80.c (emit_ld_m_rr): Use integer types when checking
+	opcode byte values.
+	(emit_ld_r_r): Likewise.
+	(emit_ld_rr_m): Likewise.
+	(emit_ld_rr_nn): Likewise.
+
 2020-01-09  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (optimize_encoding): Add
