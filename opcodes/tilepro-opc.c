@@ -10215,7 +10215,7 @@ parse_insn_tilepro (tilepro_bundle_bits bits,
 	{
 	  const struct tilepro_operand *op =
 	    &tilepro_operands[opc->operands[pipe][i]];
-	  int opval = op->extract (bits);
+	  unsigned int opval = op->extract (bits);
 
 	  if (op->is_signed)
 	    {
@@ -10226,10 +10226,7 @@ parse_insn_tilepro (tilepro_bundle_bits bits,
 
 	  /* Adjust PC-relative scaled branch offsets.  */
 	  if (op->type == TILEPRO_OP_TYPE_ADDRESS)
-	    {
-	      opval *= TILEPRO_BUNDLE_SIZE_IN_BYTES;
-	      opval += (int)pc;
-	    }
+	    opval = opval * TILEPRO_BUNDLE_SIZE_IN_BYTES + pc;
 
 	  /* Record the final value.  */
 	  d->operands[i] = op;
