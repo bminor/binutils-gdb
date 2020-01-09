@@ -2737,7 +2737,8 @@ struct aarch64_displaced_step_closure : public displaced_step_closure
      is being displaced stepping.  */
   int cond = 0;
 
-  /* PC adjustment offset after displaced stepping.  */
+  /* PC adjustment offset after displaced stepping.  If 0, then we don't
+     write the PC back, assuming the PC is already the right address.  */
   int32_t pc_adjust = 0;
 };
 
@@ -3032,11 +3033,12 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 {
   aarch64_displaced_step_closure *dsc = (aarch64_displaced_step_closure *) dsc_;
 
+  ULONGEST pc;
+
+  regcache_cooked_read_unsigned (regs, AARCH64_PC_REGNUM, &pc);
+
   if (dsc->cond)
     {
-      ULONGEST pc;
-
-      regcache_cooked_read_unsigned (regs, AARCH64_PC_REGNUM, &pc);
       if (pc - to == 8)
 	{
 	  /* Condition is true.  */
@@ -3052,6 +3054,13 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 
   if (dsc->pc_adjust != 0)
     {
+      /* Make sure the previous instruction was executed (that is, the PC
+	 has changed).  If the PC didn't change, then discard the adjustment
+	 offset.  Otherwise we may skip an instruction before its execution
+	 took place.  */
+      if ((pc - to) == 0)
+	dsc->pc_adjust = 0;
+
       if (debug_displaced)
 	{
 	  debug_printf ("displaced: fixup: set PC to %s:%d\n",
