@@ -1,3 +1,10 @@
+2020-01-09  Aaron Merey  <amerey@redhat.com>
+
+        * config/debuginfod.m4: New file. Add macro AC_DEBUGINFOD. Adds
+        new configure option --with-debuginfod.
+        * configure: Regenerate.
+        * configure.ac: Call AC_DEBUGINFOD.
+
 2019-12-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* .gitignore: Add perf.data and perf.data.old.
