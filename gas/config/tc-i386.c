@@ -4574,6 +4574,7 @@ md_assemble (char *line)
 	  if (i.types[x].bitfield.class == Reg && i.types[x].bitfield.byte
 	      && (i.op[x].regs->reg_flags & RegRex64) == 0)
 	    {
+	      gas_assert (!(i.op[x].regs->reg_flags & RegRex));
 	      /* In case it is "hi" register, give up.  */
 	      if (i.op[x].regs->reg_num > 3)
 		as_bad (_("can't encode register '%s%s' in an "
@@ -4592,7 +4593,7 @@ md_assemble (char *line)
   if (i.rex == 0 && i.rex_encoding)
     {
       /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
-         that uses legacy register.  If it is "hi" register, don't add
+	 that uses legacy register.  If it is "hi" register, don't add
 	 the REX_OPCODE byte.  */
       int x;
       for (x = 0; x < 2; x++)
@@ -4601,6 +4602,7 @@ md_assemble (char *line)
 	    && (i.op[x].regs->reg_flags & RegRex64) == 0
 	    && i.op[x].regs->reg_num > 3)
 	  {
+	    gas_assert (!(i.op[x].regs->reg_flags & RegRex));
 	    i.rex_encoding = FALSE;
 	    break;
 	  }

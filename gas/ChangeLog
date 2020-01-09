@@ -1,5 +1,10 @@
 2020-01-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_assemble): Check RegRex is clear during
+	REX transformations. Correct comment indentation.
+
+2020-01-09  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Generalize register
 	transformation for TEST optimization.
 
