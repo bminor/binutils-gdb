@@ -1,3 +1,8 @@
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 25224
+	* z80-dis.c (ld_ii_ii): Use correct cast.
+
 2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25224

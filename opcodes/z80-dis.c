@@ -603,7 +603,7 @@ ld_ii_ii (struct buffer *buf, disassemble_info * info, const char *txt)
   int p;
   static const char *ii[2] = { "ix", "iy" };
 
-  p = (buf->data[buf->n_fetch - 2] == (char) 0xdd) ? 0 : 1;
+  p = (buf->data[buf->n_fetch - 2] == (signed char) 0xdd) ? 0 : 1;
   c = buf->data[buf->n_fetch - 1];
   if ((c & 0x07) != 0x07)
     p = 1 - p; /* 0 -> 1, 1 -> 0 */
