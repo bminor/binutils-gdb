@@ -11572,8 +11572,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		  if (dynreloc_st_type == STT_GNU_IFUNC)
 		    outrel.r_info = ELF32_R_INFO (0, R_ARM_IRELATIVE);
 		  else if (bfd_link_pic (info)
-			   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			       || h->root.type != bfd_link_hash_undefweak))
+			   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 		    outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
 		  else
 		    {
@@ -16527,8 +16526,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	       GOT entry's R_ARM_IRELATIVE relocation.  */
 	    elf32_arm_allocate_irelocs (info, htab->root.srelgot, 1);
 	  else if (bfd_link_pic (info)
-		   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		       || h->root.type != bfd_link_hash_undefweak))
+		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    /* Reserve room for the GOT entry's R_ARM_RELATIVE relocation.  */
 	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	  else if (htab->fdpic_p && tls_type == GOT_NORMAL)
