@@ -1,5 +1,14 @@
 -*- text -*-
 
+* Binutils now supports debuginfod, an HTTP server for distributing
+  ELF/DWARF debugging information as well as source code. When built with
+  debuginfod, readelf and objdump can automatically query debuginfod
+  servers for separate debug files when they otherwise cannot be found.
+  To build binutils with debuginfod, pass --with-debuginfod to configure.
+  This requires libdebuginfod, the debuginfod client library. debuginfod
+  is distributed with elfutils, starting with version 0.178. For more
+  information see https://sourceware.org/elfutils.
+
 * Add --output option to the "ar" program.  This option can be used to specify
   the output directory when extracting members from an archive.
 

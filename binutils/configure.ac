@@ -18,6 +18,7 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 m4_include([../bfd/version.m4])
+m4_include([../config/debuginfod.m4])
 AC_INIT([binutils], BFD_VERSION)
 AC_CONFIG_SRCDIR(ar.c)
 
@@ -62,6 +63,8 @@ if test "${enableval}" = no; then
 else
   default_strings_all=1
 fi], [default_strings_all=1])
+
+AC_DEBUGINFOD
 
 AC_DEFINE_UNQUOTED(DEFAULT_STRINGS_ALL, $default_strings_all,
 		   [Should strings use -a behavior by default?])

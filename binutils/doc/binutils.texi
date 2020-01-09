@@ -154,6 +154,7 @@ in the section entitled ``GNU Free Documentation License''.
 * elfedit::                     Update ELF header and property of ELF files
 * Common Options::              Command-line options for all utilities
 * Selecting the Target System:: How these utilities determine the target
+* debuginfod::                  Using binutils with debuginfod
 * Reporting Bugs::              Reporting Bugs
 * GNU Free Documentation License::  GNU Free Documentation License
 * Binutils Index::              Binutils Index
@@ -5200,6 +5201,23 @@ Ways to specify:
 @item
 deduced from the input file
 @end enumerate
+
+@node debuginfod
+@chapter debuginfod
+@cindex separate debug files
+
+debuginfod is a web service that indexes ELF/DWARF debugging resources
+by build-id and serves them over HTTP.
+
+Binutils can be built with the debuginfod client library
+@code{libdebuginfod} using the @option{--with-debuginfod} configure option.
+This option is enabled by default if @code{libdebuginfod} is installed
+and found at configure time. This allows @command{objdump} and
+@command{readelf} to automatically query debuginfod servers for
+separate debug files when the files are otherwise not found.
+
+debuginfod is packaged with elfutils, starting with version 0.178.
+You can get the latest version from `https://sourceware.org/elfutils/'.
 
 @node Reporting Bugs
 @chapter Reporting Bugs

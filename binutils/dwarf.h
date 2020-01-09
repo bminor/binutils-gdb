@@ -256,6 +256,10 @@ extern bfd_boolean reloc_at (struct dwarf_section *, dwarf_vma);
 extern dwarf_vma read_leb128 (unsigned char *, const unsigned char *const,
 			      bfd_boolean, unsigned int *, int *);
 
+#if HAVE_LIBDEBUGINFOD
+extern unsigned char * get_build_id (void *);
+#endif
+
 static inline void
 report_leb_status (int status)
 {

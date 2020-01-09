@@ -32,6 +32,10 @@
 #include "safe-ctype.h"
 #include <assert.h>
 
+#ifdef HAVE_LIBDEBUGINFOD
+#include <elfutils/debuginfod.h>
+#endif
+
 #undef MAX
 #undef MIN
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -10128,12 +10132,83 @@ add_separate_debug_file (const char * filename, void * handle)
   first_separate_info = i;
 }
 
+#if HAVE_LIBDEBUGINFOD
+/* Query debuginfod servers for the target debuglink or debugaltlink
+   file. If successful, store the path of the file in filename and
+   return TRUE, otherwise return FALSE.  */
+
+static bfd_boolean
+debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
+                                      char ** filename,
+                                      void * file)
+{
+  size_t build_id_len;
+  unsigned char * build_id;
+
+  if (strcmp (section->uncompressed_name, ".gnu_debuglink") == 0)
+    {
+      /* Get the build-id of file.  */
+      build_id = get_build_id (file);
+      build_id_len = 0;
+    }
+  else if (strcmp (section->uncompressed_name, ".gnu_debugaltlink") == 0)
+    {
+      /* Get the build-id of the debugaltlink file.  */
+      unsigned int filelen;
+
+      filelen = strnlen ((const char *)section->start, section->size);
+      if (filelen == section->size)
+        /* Corrupt debugaltlink.  */
+        return FALSE;
+
+      build_id = section->start + filelen + 1;
+      build_id_len = section->size - (filelen + 1);
+
+      if (build_id_len == 0)
+        return FALSE;
+    }
+  else
+    return FALSE;
+
+  if (build_id)
+    {
+      int fd;
+      debuginfod_client * client;
+
+      client = debuginfod_begin ();
+      if (client == NULL)
+        return FALSE;
+
+      /* Query debuginfod servers for the target file. If found its path
+         will be stored in filename.  */
+      fd = debuginfod_find_debuginfo (client, build_id, build_id_len, filename);
+      debuginfod_end (client);
+
+      /* Only free build_id if we allocated space for a hex string
+         in get_build_id ().  */
+      if (build_id_len == 0)
+        free (build_id);
+
+      if (fd >= 0)
+        {
+          /* File successfully retrieved. Close fd since we want to
+             use open_debug_file () on filename instead.  */
+          close (fd);
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+#endif
+
 static void *
 load_separate_debug_info (const char *            main_filename,
 			  struct dwarf_section *  xlink,
 			  parse_func_type         parse_func,
 			  check_func_type         check_func,
-			  void *                  func_data)
+			  void *                  func_data,
+                          void *                  file ATTRIBUTE_UNUSED)
 {
   const char *   separate_filename;
   char *         debug_filename;
@@ -10235,6 +10310,23 @@ load_separate_debug_info (const char *            main_filename,
   if (check_func (debug_filename, func_data))
     goto found;
 
+#if HAVE_LIBDEBUGINFOD
+  {
+    char * tmp_filename;
+
+    if (debuginfod_fetch_separate_debug_info (xlink,
+                                              & tmp_filename,
+                                              file))
+      {
+        /* File successfully downloaded from server, replace
+           debug_filename with the file's path.  */
+        free (debug_filename);
+        debug_filename = tmp_filename;
+        goto found;
+      }
+  }
+#endif
+
   /* Failed to find the file.  */
   warn (_("could not find separate debug file '%s'\n"), separate_filename);
   warn (_("tried: %s\n"), debug_filename);
@@ -10263,6 +10355,16 @@ load_separate_debug_info (const char *            main_filename,
 
   sprintf (debug_filename, "%s", separate_filename);
   warn (_("tried: %s\n"), debug_filename);
+
+#if HAVE_LIBDEBUGINFOD
+  {
+    char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
+    if (urls == NULL)
+      urls = "";
+
+    warn (_("tried: DEBUGINFOD_URLS=%s\n"), urls);
+  }
+#endif
 
   free (canon_dir);
   free (debug_filename);
@@ -10410,7 +10512,8 @@ load_separate_debug_files (void * file, const char * filename)
 				& debug_displays[gnu_debugaltlink].section,
 				parse_gnu_debugaltlink,
 				check_gnu_debugaltlink,
-				& build_id_data);
+				& build_id_data,
+				file);
     }
 
   if (load_debug_section (gnu_debuglink, file))
@@ -10421,7 +10524,8 @@ load_separate_debug_files (void * file, const char * filename)
 				& debug_displays[gnu_debuglink].section,
 				parse_gnu_debuglink,
 				check_gnu_debuglink,
-				& crc32);
+				& crc32,
+				file);
     }
 
   if (first_separate_info != NULL)

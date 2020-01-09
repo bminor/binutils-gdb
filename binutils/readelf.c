@@ -14194,6 +14194,138 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
   return TRUE;
 }
 
+#if HAVE_LIBDEBUGINFOD
+/* Return a hex string representation of the build-id.  */
+unsigned char *
+get_build_id (void * data)
+{
+  Filedata * filedata = (Filedata *)data;
+  Elf_Internal_Shdr * shdr;
+  unsigned long i;
+
+  /* Iterate through notes to find note.gnu.build-id.  */
+  for (i = 0, shdr = filedata->section_headers;
+       i < filedata->file_header.e_shnum && shdr != NULL;
+       i++, shdr++)
+    {
+      if (shdr->sh_type != SHT_NOTE)
+        continue;
+
+      char * next;
+      char * end;
+      size_t data_remaining;
+      size_t min_notesz;
+      Elf_External_Note * enote;
+      Elf_Internal_Note inote;
+
+      bfd_vma offset = shdr->sh_offset;
+      bfd_vma align = shdr->sh_addralign;
+      bfd_vma length = shdr->sh_size;
+
+      enote = (Elf_External_Note *) get_section_contents (shdr, filedata);
+      if (enote == NULL)
+        continue;
+
+      if (align < 4)
+        align = 4;
+      else if (align != 4 && align != 8)
+        continue;
+
+      end = (char *) enote + length;
+      data_remaining = end - (char *) enote;
+
+      if (!is_ia64_vms (filedata))
+        {
+          min_notesz = offsetof (Elf_External_Note, name);
+          if (data_remaining < min_notesz)
+            {
+              warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
+                              "not enough for a full note\n",
+                              "Corrupt note: only %ld bytes remain, "
+                              "not enough for a full note\n",
+                              data_remaining),
+                    (long) data_remaining);
+              break;
+            }
+          data_remaining -= min_notesz;
+
+          inote.type     = BYTE_GET (enote->type);
+          inote.namesz   = BYTE_GET (enote->namesz);
+          inote.namedata = enote->name;
+          inote.descsz   = BYTE_GET (enote->descsz);
+          inote.descdata = ((char *) enote
+                            + ELF_NOTE_DESC_OFFSET (inote.namesz, align));
+          inote.descpos  = offset + (inote.descdata - (char *) enote);
+          next = ((char *) enote
+                  + ELF_NOTE_NEXT_OFFSET (inote.namesz, inote.descsz, align));
+        }
+      else
+        {
+          Elf64_External_VMS_Note *vms_enote;
+
+          /* PR binutils/15191
+             Make sure that there is enough data to read.  */
+          min_notesz = offsetof (Elf64_External_VMS_Note, name);
+          if (data_remaining < min_notesz)
+            {
+              warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
+                              "not enough for a full note\n",
+                              "Corrupt note: only %ld bytes remain, "
+                              "not enough for a full note\n",
+                              data_remaining),
+                    (long) data_remaining);
+              break;
+            }
+          data_remaining -= min_notesz;
+
+          vms_enote = (Elf64_External_VMS_Note *) enote;
+          inote.type     = BYTE_GET (vms_enote->type);
+          inote.namesz   = BYTE_GET (vms_enote->namesz);
+          inote.namedata = vms_enote->name;
+          inote.descsz   = BYTE_GET (vms_enote->descsz);
+          inote.descdata = inote.namedata + align_power (inote.namesz, 3);
+          inote.descpos  = offset + (inote.descdata - (char *) enote);
+          next = inote.descdata + align_power (inote.descsz, 3);
+        }
+
+      /* Skip malformed notes.  */
+      if ((size_t) (inote.descdata - inote.namedata) < inote.namesz
+          || (size_t) (inote.descdata - inote.namedata) > data_remaining
+          || (size_t) (next - inote.descdata) < inote.descsz
+          || ((size_t) (next - inote.descdata)
+              > data_remaining - (size_t) (inote.descdata - inote.namedata)))
+        {
+          warn (_("debuginfod: note with invalid namesz and/or descsz found\n"));
+          warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx, alignment: %u\n"),
+                inote.type, inote.namesz, inote.descsz, (int) align);
+          continue;
+        }
+
+      /* Check if this is the build-id note. If so then convert the build-id
+         bytes to a hex string.  */
+      if (inote.namesz > 0
+          && const_strneq (inote.namedata, "GNU")
+          && inote.type == NT_GNU_BUILD_ID)
+        {
+          unsigned long j;
+          char * build_id;
+
+          build_id = malloc (inote.descsz * 2 + 1);
+          if (build_id == NULL)
+              return NULL;
+
+          for (j = 0; j < inote.descsz; ++j)
+            sprintf (build_id + (j * 2), "%02x", inote.descdata[j] & 0xff);
+          build_id[inote.descsz * 2] = '\0';
+
+          return (unsigned char *)build_id;
+        }
+    }
+
+  return NULL;
+}
+#endif /* HAVE_LIBDEBUGINFOD */
+
 /* If this is not NULL, load_debug_section will only look for sections
    within the list of sections given here.  */
 static unsigned int * section_subset = NULL;
