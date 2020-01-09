@@ -1,3 +1,10 @@
+2020-01-10  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/22269
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use
+	UNDEFWEAK_NO_DYNAMIC_RELOC.
+	(allocate_dynrelocs_for_symbol): Likewise.
+
 2020-01-10  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 25210
