@@ -3037,8 +3037,16 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 
   regcache_cooked_read_unsigned (regs, AARCH64_PC_REGNUM, &pc);
 
+  if (debug_displaced)
+    debug_printf ("Displaced: PC after stepping: %s (was %s).\n",
+		  paddress (gdbarch, pc), paddress (gdbarch, to));
+
   if (dsc->cond)
     {
+      if (debug_displaced)
+	debug_printf ("Displaced: [Conditional] pc_adjust before: %d\n",
+		      dsc->pc_adjust);
+
       if (pc - to == 8)
 	{
 	  /* Condition is true.  */
@@ -3050,7 +3058,17 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 	}
       else
 	gdb_assert_not_reached ("Unexpected PC value after displaced stepping");
+
+      if (debug_displaced)
+	debug_printf ("Displaced: [Conditional] pc_adjust after: %d\n",
+		      dsc->pc_adjust);
     }
+
+  if (debug_displaced)
+    debug_printf ("Displaced: %s PC by %d\n",
+		  dsc->pc_adjust? "adjusting" : "not adjusting",
+		  dsc->pc_adjust);
+
 
   if (dsc->pc_adjust != 0)
     {
@@ -3059,11 +3077,16 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 	 offset.  Otherwise we may skip an instruction before its execution
 	 took place.  */
       if ((pc - to) == 0)
-	dsc->pc_adjust = 0;
+	{
+	  if (debug_displaced)
+	    debug_printf ("Displaced: PC did not move. Discarding PC "
+			  "adjustment.\n");
+	  dsc->pc_adjust = 0;
+	}
 
       if (debug_displaced)
 	{
-	  debug_printf ("displaced: fixup: set PC to %s:%d\n",
+	  debug_printf ("Displaced: fixup: set PC to %s:%d\n",
 			paddress (gdbarch, from), dsc->pc_adjust);
 	}
       regcache_cooked_write_unsigned (regs, AARCH64_PC_REGNUM,
