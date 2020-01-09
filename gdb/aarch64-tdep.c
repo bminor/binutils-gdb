@@ -2735,7 +2735,7 @@ struct aarch64_displaced_step_closure : public displaced_step_closure
 {
   /* It is true when condition instruction, such as B.CON, TBZ, etc,
      is being displaced stepping.  */
-  int cond = 0;
+  bool cond = false;
 
   /* PC adjustment offset after displaced stepping.  If 0, then we don't
      write the PC back, assuming the PC is already the right address.  */
@@ -2816,7 +2816,7 @@ aarch64_displaced_step_b_cond (const unsigned cond, const int32_t offset,
   */
 
   emit_bcond (dsd->insn_buf, cond, 8);
-  dsd->dsc->cond = 1;
+  dsd->dsc->cond = true;
   dsd->dsc->pc_adjust = offset;
   dsd->insn_count = 1;
 }
@@ -2851,7 +2851,7 @@ aarch64_displaced_step_cb (const int32_t offset, const int is_cbnz,
   */
   emit_cb (dsd->insn_buf, is_cbnz, aarch64_register (rn, is64), 8);
   dsd->insn_count = 1;
-  dsd->dsc->cond = 1;
+  dsd->dsc->cond = true;
   dsd->dsc->pc_adjust = offset;
 }
 
@@ -2876,7 +2876,7 @@ aarch64_displaced_step_tb (const int32_t offset, int is_tbnz,
   */
   emit_tb (dsd->insn_buf, is_tbnz, bit, aarch64_register (rt, 1), 8);
   dsd->insn_count = 1;
-  dsd->dsc->cond = 1;
+  dsd->dsc->cond = true;
   dsd->dsc->pc_adjust = offset;
 }
 

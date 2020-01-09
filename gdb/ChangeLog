@@ -1,5 +1,13 @@
 2020-01-21  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-tdep.c (struct aarch64_displaced_step_closure)
+	<cond>: Change type to bool.
+	(aarch64_displaced_step_b_cond): Update cond to use bool type.
+	(aarch64_displaced_step_cb): Likewise.
+	(aarch64_displaced_step_tb): Likewise.
+
+2020-01-21  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-tdep.c (aarch64_displaced_step_fixup): Add more debugging
 	output.
 
