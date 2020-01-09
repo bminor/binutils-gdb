@@ -1,5 +1,13 @@
 2020-01-09  Nick Clifton  <nickc@redhat.com>
 
+	PR 25220
+	* objcopy.c (empty_name): New variable.
+	(need_sym_before): Prevent an attempt to free a static variable.
+	(filter_symbols): Avoid strcmp test by checking for pointer
+	equality.
+
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
 	* po/zh_TW.po: Updated Traditional Chinese translation.
 
 2020-01-09  Aaron Merey  <amerey@redhat.com>

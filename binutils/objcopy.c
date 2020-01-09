@@ -68,7 +68,7 @@ struct addsym_node
   long      symval;
   flagword  flags;
   char *    section;
-  char *    othersym;
+  const char *  othersym;
 };
 
 typedef struct section_rename
@@ -808,7 +808,7 @@ parse_flags (const char *s)
    string can't be parsed.  */
 
 static flagword
-parse_symflags (const char *s, char **other)
+parse_symflags (const char *s, const char **other)
 {
   flagword ret;
   const char *snext;
@@ -1453,6 +1453,9 @@ is_hidden_symbol (asymbol *sym)
   return FALSE;
 }
 
+/* Empty name is hopefully never a valid symbol name.  */
+static const char * empty_name = "";
+
 static bfd_boolean
 need_sym_before (struct addsym_node **node, const char *sym)
 {
@@ -1464,10 +1467,12 @@ need_sym_before (struct addsym_node **node, const char *sym)
     {
       if (!ptr->othersym)
 	break;
+      if (ptr->othersym == empty_name)
+	continue;
       else if (strcmp (ptr->othersym, sym) == 0)
 	{
-	  free (ptr->othersym);
-	  ptr->othersym = ""; /* Empty name is hopefully never a valid symbol name.  */
+	  free ((char *) ptr->othersym);
+	  ptr->othersym = empty_name;
 	  *node = ptr;
 	  return TRUE;
 	}
@@ -1695,7 +1700,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	{
 	  if (ptr->othersym)
 	    {
-	      if (strcmp (ptr->othersym, ""))
+	      if (ptr->othersym != empty_name)
 		fatal (_("'before=%s' not found"), ptr->othersym);
 	    }
 	  else
