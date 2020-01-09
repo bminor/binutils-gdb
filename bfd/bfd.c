@@ -2768,7 +2768,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
-  /* Do nothing if ELF classes of input and output are the same. */
+  /* Do nothing if ELF classes of input and output are the same.  */
   if (get_elf_backend_data (ibfd)->s->elfclass
       == get_elf_backend_data (obfd)->s->elfclass)
     return TRUE;
@@ -2782,10 +2782,16 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   if ((ibfd->flags & BFD_DECOMPRESS))
     return TRUE;
 
-  /* Do nothing if the input section isn't a SHF_COMPRESSED section. */
+  /* Do nothing if the input section isn't a SHF_COMPRESSED section.  */
   ihdr_size = bfd_get_compression_header_size (ibfd, isec);
   if (ihdr_size == 0)
     return TRUE;
+
+  /* PR 25221.  Check for corrupt input sections.  */
+  if (ihdr_size > bfd_get_section_limit (ibfd, isec))
+    /* FIXME: Issue a warning about a corrupt
+       compression header size field ?  */
+    return FALSE;
 
   contents = *ptr;
 
@@ -2802,6 +2808,12 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
       ohdr_size = sizeof (Elf64_External_Chdr);
 
       use_memmove = FALSE;
+    }
+  else if (ihdr_size != sizeof (Elf64_External_Chdr))
+    {
+      /* FIXME: Issue a warning about a corrupt
+	 compression header size field ?  */
+      return FALSE;
     }
   else
     {
