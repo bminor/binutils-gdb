@@ -1,3 +1,32 @@
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Traditional Chinese translation.
+
+2020-01-09  Aaron Merey  <amerey@redhat.com>
+
+        * Makefile.am (readelf_LDADD, objdump_LDADD): Add libdebuginfod.
+        * Makefile.in: Regenerate.
+        * NEWS: Update.
+        * config.in: Regenerate.
+        * configure: Regenerate.
+        * configure.ac: Call AC_DEBUGINFOD.
+        * doc/Makefile.in: Regenerate.
+        * doc/binutils.texi: Add section on using binutils
+        with debuginfod.
+        * dwarf.c (debuginfod_fetch_separate_debug_info): New function.
+        Query debuginfod servers for the target debug file.
+        (load_separate_debug_info): Call
+        debuginfod_fetch_separate_debug_info if configured with
+        debuginfod.
+        (load_separate_debug_files): Add file argument to
+        load_separate_debug_info calls.
+        * dwarf.h (get_build_id): Add declaration.
+        * objdump.c (get_build_id): New function. Get build-id of file.
+        * readelf.c (get_build_id): Likewise.
+        * testsuite/binutils-all/debuginfod.exp: New tests.
+        * testsuite/binutils-all/linkdebug.s: Add .note.gnu.build-id
+        section.
+
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* readelf.c: Add support for new Z*) relocations and machine
