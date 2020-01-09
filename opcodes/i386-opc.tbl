@@ -904,8 +904,10 @@ rdmsr, 0, 0xf32, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|IsLockable|NoRex64|HLEPrefixOk, { Qword|Unspecified|BaseIndex }
 
 // Pentium II/Pentium Pro extensions.
-sysenter, 0, 0xf34, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-sysexit, 0, 0xf35, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysenter, 0, 0xf34, None, 2, Cpu686, Intel64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysenter, 0, 0xf34, None, 2, Cpu686|CpuNo64, AMD64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysexit, 0, 0xf35, None, 2, Cpu686, Intel64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysexit, 0, 0xf35, None, 2, Cpu686|CpuNo64, AMD64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fxsave, 1, 0xfae, 0x0, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
 fxsave64, 1, 0xfae, 0x0, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
 fxrstor, 1, 0xfae, 0x1, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }

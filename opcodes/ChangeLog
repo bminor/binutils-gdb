@@ -1,3 +1,14 @@
+2020-01-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (SEP_Fixup): New.
+	(SEP): Define.
+	(dis386_twobyte): Use it for sysenter/sysexit.
+	(enum x86_64_isa): Change amd64 enumerator to value 1.
+	(OP_J): Compare isa64 against intel64 instead of amd64.
+	* i386-opc.tbl (sysenter, sysexit): Split into AMD64 and Intel64
+	forms.
+	* i386-tbl.h: Re-generate.
+
 2020-01-08  Alan Modra  <amodra@gmail.com>
 
 	* z8k-dis.c: Include libiberty.h

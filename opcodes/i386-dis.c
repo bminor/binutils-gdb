@@ -107,6 +107,7 @@ static void OP_3DNowSuffix (int, int);
 static void CMP_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
+static void SEP_Fixup (int, int);
 static void BND_Fixup (int, int);
 static void NOTRACK_Fixup (int, int);
 static void HLE_Fixup1 (int, int);
@@ -412,6 +413,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMCq { OP_EMC, q_mode }
 #define MXC { OP_MXC, 0 }
 #define OPSUF { OP_3DNowSuffix, 0 }
+#define SEP { SEP_Fixup, 0 }
 #define CMP { CMP_Fixup, 0 }
 #define XMM0 { XMM_Fixup, 0 }
 #define FXSAVE { FXSAVE_Fixup, 0 }
@@ -2713,8 +2715,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "rdtsc",		{ XX }, 0 },
   { "rdmsr",		{ XX }, 0 },
   { "rdpmc",		{ XX }, 0 },
-  { "sysenter",		{ XX }, 0 },
-  { "sysexit",		{ XX }, 0 },
+  { "sysenter",		{ SEP }, 0 },
+  { "sysexit",		{ SEP }, 0 },
   { Bad_Opcode },
   { "getsec",		{ XX }, 0 },
   /* 38 */
@@ -11316,7 +11318,7 @@ static char scale_char;
 
 enum x86_64_isa
 {
-  amd64 = 0,
+  amd64 = 1,
   intel64
 };
 
@@ -14829,12 +14831,12 @@ OP_J (int bytemode, int sizeflag)
 	disp -= 0x100;
       break;
     case v_mode:
-      if (isa64 == amd64)
+      if (isa64 != intel64)
     case dqw_mode:
 	USED_REX (REX_W);
       if ((sizeflag & DFLAG)
 	  || (address_mode == mode_64bit
-	      && ((isa64 != amd64 && bytemode != dqw_mode)
+	      && ((isa64 == intel64 && bytemode != dqw_mode)
 		  || (rex & REX_W))))
 	disp = get32s ();
       else
@@ -14852,7 +14854,7 @@ OP_J (int bytemode, int sizeflag)
 		       & ~((bfd_vma) 0xffff));
 	}
       if (address_mode != mode_64bit
-	  || (isa64 == amd64 && !(rex & REX_W)))
+	  || (isa64 != intel64 && !(rex & REX_W)))
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
@@ -15600,6 +15602,18 @@ REP_Fixup (int bytemode, int sizeflag)
       abort ();
       break;
     }
+}
+
+static void
+SEP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  if ( isa64 != amd64 )
+    return;
+
+  obufp = obuf;
+  BadOp ();
+  mnemonicendp = obufp;
+  ++codep;
 }
 
 /* For BND-prefixed instructions 0xF2 prefix should be displayed as
