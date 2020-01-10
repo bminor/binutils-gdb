@@ -1,5 +1,27 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/kill-detach-inferiors-cmd.exp: Adjust expected output
+	of "add-inferior".
+	* gdb.base/quit-live.exp: Likewise.
+	* gdb.base/remote-exec-file.exp: Likewise.
+	* gdb.guile/scm-progspace.exp: Likewise.
+	* gdb.linespec/linespec.exp: Likewise.
+	* gdb.mi/new-ui-mi-sync.exp: Likewise.
+	* gdb.mi/user-selected-context-sync.exp: Likewise.
+	* gdb.multi/multi-target.exp (setup): Add "info connection" and
+	"info inferiors" tests.
+	* gdb.multi/remove-inferiors.exp: Adjust expected output of
+	"add-inferior".
+	* gdb.multi/watchpoint-multi.exp: Likewise.
+	* gdb.python/py-inferior.exp: Likewise.
+	* gdb.server/extended-remote-restart.exp: Likewise.
+	* gdb.threads/fork-plus-threads.exp: Adjust expected output of
+	"info inferiors".
+	* gdb.threads/forking-threads-plus-breakpoint.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/multi-target.c: New file.
 	* gdb.multi/multi-target.exp: New file.
 	* lib/gdbserver-support.exp (gdb_target_cmd): Handle "Non-stop

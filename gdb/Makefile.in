@@ -1140,6 +1140,7 @@ COMMON_SFILES = \
 	symmisc.c \
 	symtab.c \
 	target.c \
+	target-connection.c \
 	target-dcache.c \
 	target-descriptions.c \
 	target-memory.c \

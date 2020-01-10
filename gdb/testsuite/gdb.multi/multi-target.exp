@@ -137,8 +137,34 @@ proc setup {non-stop} {
 	return 0
     }
 
+    set ws "\[ \t\]+"
+    global decimal
+
+    # Test "info connections" and "info inferior"'s "Connection"
+    # column, while at it.
+
+    gdb_test "info connections" \
+	[multi_line \
+	     "Num${ws}What${ws}Description${ws}" \
+	     "  1${ws}native${ws}Native process${ws}" \
+	     "  2${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+	     "  3${ws}core${ws}Local core dump file${ws}" \
+	     "  4${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+	   "\\* 5${ws}core${ws}Local core dump file${ws}" \
+	    ]
+
+    gdb_test "info inferiors" \
+	[multi_line \
+	     "Num${ws}Description${ws}Connection${ws}Executable${ws}" \
+	     "  1${ws}process ${decimal}${ws}1 \\(native\\)${ws}${binfile}${ws}" \
+	     "  2${ws}process ${decimal}${ws}2 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
+	     "  3${ws}process ${decimal}${ws}3 \\(core\\)${ws}${binfile}${ws}" \
+	     "  4${ws}process ${decimal}${ws}1 \\(native\\)${ws}${binfile}${ws}" \
+	     "  5${ws}process ${decimal}${ws}4 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
+	   "\\* 6${ws}process ${decimal}${ws}5 \\(core\\)${ws}${binfile}${ws}" \
+	    ]
+
     # For debugging.
-    gdb_test "info inferiors" ".*"
     gdb_test "info threads" ".*"
 
     # Make "continue" resume all inferiors.

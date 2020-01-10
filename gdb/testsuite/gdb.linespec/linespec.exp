@@ -201,7 +201,7 @@ gdb_test "break lspec.h:$line" \
 # Multi-inferior tests.
 #
 
-gdb_test "add-inferior" "Added inferior 2" \
+gdb_test "add-inferior" "Added inferior 2.*" \
     "add inferior for linespec tests"
 
 gdb_test "inferior 2" "Switching to inferior 2 .*" \

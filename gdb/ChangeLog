@@ -1,5 +1,23 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_SFILES): Add target-connection.c.
+	* inferior.c (uiout_field_connection): New function.
+	(print_inferior): Add new "connection-id" column.
+	(add_inferior_command): Show connection number/string of added
+	inferior.
+	* process-stratum-target.h
+	(process_stratum_target::connection_string): New virtual method.
+	(process_stratum_target::connection_number): New field.
+	* remote.c (remote_target::connection_string): New override.
+	* target-connection.c: New file.
+	* target-connection.h: New file.
+	* target.c (decref_target): Remove process_stratum targets from
+	the connection list.
+	(target_stack::push): Add process_stratum targets to the
+	connection list.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	Revert:
 	2016-04-12  Pedro Alves  <palves@redhat.com>
 	* serial.c (serial_open, serial_fdopen_ops, do_serial_close):

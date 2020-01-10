@@ -415,7 +415,7 @@ proc_with_prefix test_setup { mode } {
 	# Add the second inferior now.  While this is not mandatory, it allows
 	# us to assume that per-inferior thread numbering will be used,
 	# simplifying test_continue_to_start a bit (Thread 1.2 and not Thread 2).
-	gdb_test "add-inferior" "Added inferior 2" "add inferior 2"
+	gdb_test "add-inferior" "Added inferior 2 on connection .*" "add inferior 2"
 
 	# Prepare the first inferior for the test.
 	test_continue_to_start $mode 1

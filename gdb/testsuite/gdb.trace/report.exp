@@ -391,7 +391,7 @@ proc use_collected_data { data_source } {
 	# There is always a thread of an inferior, either a live one or
 	# a faked one.
 	gdb_test "info threads" "\\* ${decimal}    (process|Thread) \[0-9\.\]+\[ \t\].*"
-	gdb_test "info inferiors" "\\* 1    process ${decimal} \[ \t\]+${binfile}.*"
+	gdb_test "info inferiors" "\\* 1    process ${decimal} \[ \t\]+\[^\r\n\]*\[ \t\]+${binfile}.*"
     }
 }
 

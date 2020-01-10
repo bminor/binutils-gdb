@@ -83,7 +83,7 @@ proc do_test {sync_command} {
     # in the separate MI UI.  Note the "run" variant usually triggers
     # =thread-group-started/=thread-created/=library-loaded as well.
     with_spawn_id $gdb_main_spawn_id {
-	gdb_test "add-inferior" "Added inferior 2"
+	gdb_test "add-inferior" "Added inferior 2 on connection .*"
     }
 
     # Interrupt the program.

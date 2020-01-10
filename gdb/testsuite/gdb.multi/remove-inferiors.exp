@@ -26,7 +26,7 @@ proc switch_to_inferior { num message } {
 }
 
 proc add_inferior { expected_num message } {
-    gdb_test "add-inferior" "Added inferior ${expected_num}" "${message}"
+    gdb_test "add-inferior" "Added inferior ${expected_num}( on connection .*)?" "${message}"
 }
 
 proc test_remove_inferiors { } {

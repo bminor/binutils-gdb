@@ -49,6 +49,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "terminal.h"
 #include <unordered_map>
+#include "target-connection.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -561,7 +562,11 @@ decref_target (target_ops *t)
 {
   t->decref ();
   if (t->refcount () == 0)
-    target_close (t);
+    {
+      if (t->stratum () == process_stratum)
+	connection_list_remove (as_process_stratum_target (t));
+      target_close (t);
+    }
 }
 
 /* See target.h.  */
@@ -572,6 +577,9 @@ target_stack::push (target_ops *t)
   t->incref ();
 
   strata stratum = t->stratum ();
+
+  if (stratum == process_stratum)
+    connection_list_add (as_process_stratum_target (t));
 
   /* If there's already a target at this stratum, remove it.  */
 

@@ -27,7 +27,7 @@ with_test_prefix "set inf 1" {
 
 # Set remote exec-file in inferior 2.
 with_test_prefix "set inf 2" {
-    gdb_test "add-inferior" "Added inferior 2" "add inferior 2"
+    gdb_test "add-inferior" "Added inferior 2.*" "add inferior 2"
     gdb_test "inferior 2" "Switching to inferior 2.*"
     gdb_test_no_output "set remote exec-file prog2"
 }

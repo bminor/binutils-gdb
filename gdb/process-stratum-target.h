@@ -31,6 +31,16 @@ public:
 
   strata stratum () const final override { return process_stratum; }
 
+  /* Return a string representation of this target's open connection.
+     This string is used to distinguish different instances of a given
+     target type.  For example, when remote debugging, the target is
+     called "remote", but since we may have more than one remote
+     target open, connection_string() returns the connection serial
+     connection name, e.g., "localhost:10001", "192.168.0.1:20000",
+     etc.  This string is shown in several places, e.g., in "info
+     connections" and "info inferiors".  */
+  virtual const char *connection_string () { return nullptr; }
+
   /* We must default these because they must be implemented by any
      target that can run.  */
   bool can_async_p () override { return false; }
@@ -58,6 +68,9 @@ public:
      stop events for all known threads, because any of those threads
      may have spawned new threads we haven't heard of yet.  */
   bool threads_executing = false;
+
+  /* The connection number.  Visible in "info connections".  */
+  int connection_number = 0;
 };
 
 /* Downcast TARGET to process_stratum_target.  */

@@ -120,7 +120,7 @@ proc quit_with_live_inferior {appear_how extra_inferior quit_how} {
     }
 
     if {$extra_inferior} {
-	gdb_test "add-inferior" "Added inferior 2*" \
+	gdb_test "add-inferior" "Added inferior 2 on connection .*" \
 	    "add empty inferior 2"
 	gdb_test "inferior 2" "Switching to inferior 2.*" \
 	    "switch to inferior 2"

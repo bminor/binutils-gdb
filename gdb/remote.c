@@ -406,6 +406,8 @@ public:
   const target_info &info () const override
   { return remote_target_info; }
 
+  const char *connection_string () override;
+
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }
 
@@ -4851,6 +4853,17 @@ remote_target::start_remote (int from_tty, int extended_p)
   /* Maybe breakpoints are global and need to be inserted now.  */
   if (breakpoints_should_be_inserted_now ())
     insert_breakpoints ();
+}
+
+const char *
+remote_target::connection_string ()
+{
+  remote_state *rs = get_remote_state ();
+
+  if (rs->remote_desc->name != NULL)
+    return rs->remote_desc->name;
+  else
+    return NULL;
 }
 
 /* Open a connection to a remote debugger.
