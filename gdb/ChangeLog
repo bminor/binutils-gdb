@@ -1,5 +1,10 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* tracefile-tfile.c (tfile_target::close): Assert that trace_fd is
+	not -1.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* break-catch-sig.c (signal_catchpoint_print_it): Don't pass a
 	ptid to get_last_target_status.
 	* break-catch-syscall.c (print_it_catch_syscall): Don't pass a

@@ -616,8 +616,7 @@ tfile_interp_line (char *line, struct uploaded_tp **utpp,
 void
 tfile_target::close ()
 {
-  if (trace_fd < 0)
-    return;
+  gdb_assert (trace_fd != -1);
 
   inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
   exit_inferior_silent (current_inferior ());
