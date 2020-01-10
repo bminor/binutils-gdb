@@ -1,5 +1,12 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/multi-target.c: New file.
+	* gdb.multi/multi-target.exp: New file.
+	* lib/gdbserver-support.exp (gdb_target_cmd): Handle "Non-stop
+	mode requested, but remote does not support non-stop".
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.server/extended-remote-restart.exp (test_reload): Explicitly
 	disconnect before reconnecting.
 
