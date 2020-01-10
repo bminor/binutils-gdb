@@ -414,11 +414,7 @@ run_one_inferior (struct inferior *inf, void *arg)
       switch_to_thread (tp);
     }
   else
-    {
-      set_current_inferior (inf);
-      switch_to_no_thread ();
-      set_current_program_space (inf->pspace);
-    }
+    switch_to_inferior_no_thread (inf);
   mi_execute_cli_command (run_cmd, async_p,
 			  async_p ? "&" : NULL);
   return 0;

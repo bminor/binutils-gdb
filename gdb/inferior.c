@@ -575,6 +575,16 @@ kill_inferior_command (const char *args, int from_tty)
   bfd_cache_close_all ();
 }
 
+/* See inferior.h.  */
+
+void
+switch_to_inferior_no_thread (inferior *inf)
+{
+  set_current_inferior (inf);
+  switch_to_no_thread ();
+  set_current_program_space (inf->pspace);
+}
+
 static void
 inferior_command (const char *args, int from_tty)
 {
@@ -605,9 +615,7 @@ inferior_command (const char *args, int from_tty)
     }
   else
     {
-      set_current_inferior (inf);
-      switch_to_no_thread ();
-      set_current_program_space (inf->pspace);
+      switch_to_inferior_no_thread (inf);
 
       gdb::observers::user_selected_context_changed.notify
 	(USER_SELECTED_INFERIOR);
@@ -737,11 +745,8 @@ add_inferior_command (const char *args, int from_tty)
       if (exec != NULL)
 	{
 	  /* Switch over temporarily, while reading executable and
-	     symbols.q.  */
-	  set_current_program_space (inf->pspace);
-	  set_current_inferior (inf);
-	  switch_to_no_thread ();
-
+	     symbols.  */
+	  switch_to_inferior_no_thread (inf);
 	  exec_file_attach (exec.get (), from_tty);
 	  symbol_file_add_main (exec.get (), add_flags);
 	}

@@ -1,3 +1,12 @@
+2020-01-10  Pedro Alves <palves@redhat.com>
+
+	* inferior.c (switch_to_inferior_no_thread): New function,
+	factored out from ...
+	(inferior_command): ... here.
+	* inferior.h (switch_to_inferior_no_thread): Declare.
+	* mi/mi-main.c (run_one_inferior): Use
+	switch_to_inferior_no_thread.
+
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* infcmd.c (kill_command): Remove dead code.
