@@ -28,6 +28,7 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
+#include "target-connection.h"
 #include "gdbthread.h"
 #include "annotate.h"
 #include "symfile.h"
@@ -2881,6 +2882,61 @@ commit_resume_all_targets ()
     }
 }
 
+/* Check that all the targets we're about to resume are in non-stop
+   mode.  Ideally, we'd only care whether all targets support
+   target-async, but we're not there yet.  E.g., stop_all_threads
+   doesn't know how to handle all-stop targets.  Also, the remote
+   protocol in all-stop mode is synchronous, irrespective of
+   target-async, which means that things like a breakpoint re-set
+   triggered by one target would try to read memory from all targets
+   and fail.  */
+
+static void
+check_multi_target_resumption (process_stratum_target *resume_target)
+{
+  if (!non_stop && resume_target == nullptr)
+    {
+      scoped_restore_current_thread restore_thread;
+
+      /* This is used to track whether we're resuming more than one
+	 target.  */
+      process_stratum_target *first_connection = nullptr;
+
+      /* The first inferior we see with a target that does not work in
+	 always-non-stop mode.  */
+      inferior *first_not_non_stop = nullptr;
+
+      for (inferior *inf : all_non_exited_inferiors (resume_target))
+	{
+	  switch_to_inferior_no_thread (inf);
+
+	  if (!target_has_execution)
+	    continue;
+
+	  process_stratum_target *proc_target
+	    = current_inferior ()->process_target();
+
+	  if (!target_is_non_stop_p ())
+	    first_not_non_stop = inf;
+
+	  if (first_connection == nullptr)
+	    first_connection = proc_target;
+	  else if (first_connection != proc_target
+		   && first_not_non_stop != nullptr)
+	    {
+	      switch_to_inferior_no_thread (first_not_non_stop);
+
+	      proc_target = current_inferior ()->process_target();
+
+	      error (_("Connection %d (%s) does not support "
+		       "multi-target resumption."),
+		     proc_target->connection_number,
+		     make_target_connection_string (proc_target).c_str ());
+	    }
+	}
+    }
+}
+
 /* Basic routine for continuing the program in various fashions.
 
    ADDR is the address to resume at, or -1 for resume where stopped.
@@ -2930,6 +2986,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
     = user_visible_resume_ptid (cur_thr->control.stepping_command);
   process_stratum_target *resume_target
     = user_visible_resume_target (resume_ptid);
+
+  check_multi_target_resumption (resume_target);
 
   if (addr == (CORE_ADDR) -1)
     {

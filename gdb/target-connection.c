@@ -53,12 +53,9 @@ connection_list_remove (process_stratum_target *t)
   t->connection_number = 0;
 }
 
-/* Make a target connection string for T.  This is usually T's
-   shortname, but it includes the result of
-   process_stratum_target::connection_string() too if T supports
-   it.  */
+/* See target-connection.h.  */
 
-static std::string
+std::string
 make_target_connection_string (process_stratum_target *t)
 {
   if (t->connection_string () != NULL)

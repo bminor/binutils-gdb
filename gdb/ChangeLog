@@ -1,5 +1,14 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c: Include "target-connection.h".
+	(check_multi_target_resumption): New.
+	(proceed): Call it.
+	* target-connection.c (make_target_connection_string): Make
+	extern.
+	* target-connection.h (make_target_connection_string): Declare.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_SFILES): Add target-connection.c.
 	* inferior.c (uiout_field_connection): New function.
 	(print_inferior): Add new "connection-id" column.

@@ -20,6 +20,8 @@
 #ifndef TARGET_CONNECTION_H
 #define TARGET_CONNECTION_H
 
+#include <string>
+
 struct process_stratum_target;
 
 /* Add a process target to the connection list, if not already
@@ -28,5 +30,11 @@ void connection_list_add (process_stratum_target *t);
 
 /* Remove a process target from the connection list.  */
 void connection_list_remove (process_stratum_target *t);
+
+/* Make a target connection string for T.  This is usually T's
+   shortname, but it includes the result of
+   process_stratum_target::connection_string() too if T supports
+   it.  */
+std::string make_target_connection_string (process_stratum_target *t);
 
 #endif /* TARGET_CONNECTION_H */
