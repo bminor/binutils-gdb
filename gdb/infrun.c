@@ -4621,11 +4621,8 @@ handle_no_resumed (struct execution_control_state *ecs)
      process exited meanwhile (thus updating the thread list results
      in an empty thread list).  In this case we know we'll be getting
      a process exit event shortly.  */
-  for (inferior *inf : all_inferiors ())
+  for (inferior *inf : all_non_exited_inferiors ())
     {
-      if (inf->pid == 0)
-	continue;
-
       thread_info *thread = any_live_thread_of_inferior (inf);
       if (thread == NULL)
 	{
