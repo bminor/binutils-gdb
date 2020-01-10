@@ -2511,20 +2511,6 @@ kill_command (const char *arg, int from_tty)
     printf_unfiltered (_("[Inferior %d (%s) killed]\n"),
 		       infnum, pid_str.c_str ());
 
-  /* If we still have other inferiors to debug, then don't mess with
-     with their threads.  */
-  if (!have_inferiors ())
-    {
-      init_thread_list ();		/* Destroy thread info.  */
-
-      /* Killing off the inferior can leave us with a core file.  If
-	 so, print the state we are left in.  */
-      if (target_has_stack)
-	{
-	  printf_filtered (_("In %s,\n"), target_longname);
-	  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
-	}
-    }
   bfd_cache_close_all ();
 }
 

@@ -1,5 +1,9 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* infcmd.c (kill_command): Remove dead code.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_target::mourn_inferior): No longer check
 	whether the target is running.
 
