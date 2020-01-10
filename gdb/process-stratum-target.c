@@ -77,9 +77,9 @@ process_stratum_target::has_registers ()
 }
 
 bool
-process_stratum_target::has_execution (ptid_t the_ptid)
+process_stratum_target::has_execution (inferior *inf)
 {
-  /* If there's no thread selected, then we can't make it run through
-     hoops.  */
-  return the_ptid != null_ptid;
+  /* If there's a process running already, we can't make it run
+     through hoops.  */
+  return inf->pid != 0;
 }

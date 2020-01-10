@@ -50,7 +50,7 @@ public:
   bool has_memory () override;
   bool has_stack () override;
   bool has_registers () override;
-  bool has_execution (ptid_t the_ptid) override;
+  bool has_execution (inferior *inf) override;
 };
 
 #endif /* !defined (PROCESS_STRATUM_TARGET_H) */

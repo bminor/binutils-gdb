@@ -339,6 +339,9 @@ public:
   /* Returns true if we can delete this inferior.  */
   bool deletable () const { return refcount () == 0; }
 
+  bool has_execution ()
+  { return target_has_execution_1 (this); }
+
   /* Pointer to next inferior in singly-linked list of inferiors.  */
   struct inferior *next = NULL;
 

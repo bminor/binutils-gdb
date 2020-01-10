@@ -223,20 +223,20 @@ target_has_registers_1 (void)
   return 0;
 }
 
-int
-target_has_execution_1 (ptid_t the_ptid)
+bool
+target_has_execution_1 (inferior *inf)
 {
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
-    if (t->has_execution (the_ptid))
-      return 1;
+    if (t->has_execution (inf))
+      return true;
 
-  return 0;
+  return false;
 }
 
 int
 target_has_execution_current (void)
 {
-  return target_has_execution_1 (inferior_ptid);
+  return target_has_execution_1 (current_inferior ());
 }
 
 /* This is used to implement the various target commands.  */

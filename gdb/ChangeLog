@@ -1,5 +1,33 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* corelow.c (core_target::has_execution): Change parameter type to
+	inferior pointer.
+	* inferior.c (number_of_live_inferiors): Use
+	inferior::has_execution instead of target_has_execution_1.
+	* inferior.h (inferior::has_execution): New.
+	* linux-thread-db.c (thread_db_target::update_thread_list): Use
+	inferior::has_execution instead of target_has_execution_1.
+	* process-stratum-target.c
+	(process_stratum_target::has_execution): Change parameter type to
+	inferior pointer.  Check the inferior's PID instead of
+	inferior_ptid.
+	* process-stratum-target.h
+	(process_stratum_target::has_execution): Change parameter type to
+	inferior pointer.
+	* record-full.c (record_full_core_target::has_execution): Change
+	parameter type to inferior pointer.
+	* target.c (target_has_execution_1): Change parameter type to
+	inferior pointer.
+	(target_has_execution_current): Adjust.
+	* target.h (target_ops::has_execution): Change parameter type to
+	inferior pointer.
+	(target_has_execution_1): Change parameter type to inferior
+	pointer.  Change return type to bool.
+	* tracefile.h (tracefile_target::has_execution): Change parameter
+	type to inferior pointer.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* exceptions.c (print_flush): Remove current_top_target() check.
 
 2020-01-10  Pedro Alves  <palves@redhat.com>
