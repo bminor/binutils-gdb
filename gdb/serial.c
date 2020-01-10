@@ -247,6 +247,7 @@ serial_open_ops_1 (const struct serial_ops *ops, const char *open_name)
       return NULL;
     }
 
+  scb->name = open_name != NULL ? xstrdup (open_name) : NULL;
   scb->next = scb_base;
   scb_base = scb;
 
@@ -291,6 +292,7 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
 
   scb = new_serial (ops);
 
+  scb->name = NULL;
   scb->next = scb_base;
   scb_base = scb;
 
@@ -329,6 +331,8 @@ do_serial_close (struct serial *scb, int really_close)
 
   if (really_close)
     scb->ops->close (scb);
+
+  xfree (scb->name);
 
   /* For serial_is_open.  */
   scb->bufp = NULL;
