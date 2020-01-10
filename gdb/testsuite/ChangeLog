@@ -1,5 +1,9 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/remote-exec-file.exp: New file.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/fork-running-state.exp (do_test): Adjust expected
 	output.
 	* gdb.threads/async.c: New.

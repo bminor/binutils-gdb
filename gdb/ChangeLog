@@ -1,5 +1,10 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (show_remote_exec_file): Show the current inferior's
+	exec-file instead of the command variable's value.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* record-full.c (record_full_resume_ptid): New global.
 	(record_full_target::resume): Set it.
 	(record_full_wait_1): Use record_full_resume_ptid instead of

@@ -1268,7 +1268,7 @@ static void
 show_remote_exec_file (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, "%s\n", remote_exec_file_var);
+  fprintf_filtered (file, "%s\n", get_remote_exec_file ());
 }
 
 static int
