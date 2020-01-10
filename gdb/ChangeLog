@@ -1,5 +1,9 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* exceptions.c (print_flush): Remove current_top_target() check.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (show_remote_exec_file): Show the current inferior's
 	exec-file instead of the command variable's value.
 
