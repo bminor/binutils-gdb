@@ -9843,26 +9843,6 @@ remote_target::mourn_inferior ()
 
   /* Call common code to mark the inferior as not running.  */
   generic_mourn_inferior ();
-
-  if (!have_inferiors ())
-    {
-      if (!remote_multi_process_p (rs))
-	{
-	  /* Check whether the target is running now - some remote stubs
-	     automatically restart after kill.	*/
-	  putpkt ("?");
-	  getpkt (&rs->buf, 0);
-
-	  if (rs->buf[0] == 'S' || rs->buf[0] == 'T')
-	    {
-	      /* Assume that the target has been restarted.  Set
-		 inferior_ptid so that bits of core GDB realizes
-		 there's something here, e.g., so that the user can
-		 say "kill" again.  */
-	      inferior_ptid = magic_null_ptid;
-	    }
-	}
-    }
 }
 
 bool

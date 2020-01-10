@@ -1,5 +1,10 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_target::mourn_inferior): No longer check
+	whether the target is running.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* corelow.c (core_target::has_execution): Change parameter type to
 	inferior pointer.
 	* inferior.c (number_of_live_inferiors): Use
