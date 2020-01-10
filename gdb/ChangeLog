@@ -1,5 +1,11 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_target::start_remote): Don't set inferior_ptid
+	directly.  Instead find the first thread in the thread list and
+	use switch_to_thread.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_target::remote_add_inferior): Don't bind a
 	process to the current inferior if the current inferior is already
 	bound to a process.

@@ -4701,8 +4701,8 @@ remote_target::start_remote (int from_tty, int extended_p)
 	     says should be current.  If we're reconnecting to a
 	     multi-threaded program, this will ideally be the thread
 	     that last reported an event before GDB disconnected.  */
-	  inferior_ptid = get_current_thread (wait_status);
-	  if (inferior_ptid == null_ptid)
+	  ptid_t curr_thread = get_current_thread (wait_status);
+	  if (curr_thread == null_ptid)
 	    {
 	      /* Odd... The target was able to list threads, but not
 		 tell us which thread was current (no "thread"
@@ -4714,8 +4714,14 @@ remote_target::start_remote (int from_tty, int extended_p)
 		                    "warning: couldn't determine remote "
 				    "current thread; picking first in list.\n");
 
-	      inferior_ptid = inferior_list->thread_list->ptid;
+	      for (thread_info *tp : all_non_exited_threads ())
+		{
+		  switch_to_thread (tp);
+		  break;
+		}
 	    }
+	  else
+	    switch_to_thread (find_thread_ptid (curr_thread));
 	}
 
       /* init_wait_for_inferior should be called before get_offsets in order
