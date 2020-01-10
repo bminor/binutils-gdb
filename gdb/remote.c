@@ -2367,6 +2367,26 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
 	 between program/address spaces.  We simply bind the inferior
 	 to the program space's address space.  */
       inf = current_inferior ();
+
+      /* However, if the current inferior is already bound to a
+	 process, find some other empty inferior.  */
+      if (inf->pid != 0)
+	{
+	  inf = nullptr;
+	  for (inferior *it : all_inferiors ())
+	    if (it->pid == 0)
+	      {
+		inf = it;
+		break;
+	      }
+	}
+      if (inf == nullptr)
+	{
+	  /* Since all inferiors were already bound to a process, add
+	     a new inferior.  */
+	  inf = add_inferior_with_spaces ();
+	}
+      switch_to_inferior_no_thread (inf);
       inferior_appeared (inf, pid);
     }
 

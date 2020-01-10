@@ -1,3 +1,9 @@
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_target::remote_add_inferior): Don't bind a
+	process to the current inferior if the current inferior is already
+	bound to a process.
+
 2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 	    Pedro Alves	 <palves@redhat.com>
 

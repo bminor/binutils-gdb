@@ -113,7 +113,9 @@ proc test_reload { do_kill_p follow_child_p } {
 	    "Check inferior was killed"
     }
 
-    # Reconnect to the target.
+    # Disconnect, and reconnect to the target.
+    gdb_test "disconnect" ".*"
+
     if { [gdb_reconnect] == 0 } {
 	pass "reconnect after fork"
     } else {

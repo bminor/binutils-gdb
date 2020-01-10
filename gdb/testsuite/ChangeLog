@@ -1,3 +1,8 @@
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/extended-remote-restart.exp (test_reload): Explicitly
+	disconnect before reconnecting.
+
 2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 	    Pedro Alves	 <palves@redhat.com>
 
