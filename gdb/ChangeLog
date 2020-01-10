@@ -1,5 +1,11 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (first_remote_resumed_thread): New.
+	(remote_target::wait_as): Use it as default event_ptid instead of
+	inferior_ptid.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_no_resumed): Use all_non_exited_inferiors.
 
 2020-01-10  Pedro Alves  <palves@redhat.com>

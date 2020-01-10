@@ -7692,6 +7692,17 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status, int optio
     }
 }
 
+/* Return the first resumed thread.  */
+
+static ptid_t
+first_remote_resumed_thread ()
+{
+  for (thread_info *tp : all_non_exited_threads (minus_one_ptid))
+    if (tp->resumed)
+      return tp->ptid;
+  return null_ptid;
+}
+
 /* Wait until the remote machine stops, then return, storing status in
    STATUS just as `wait' would.  */
 
@@ -7828,7 +7839,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status, int options)
       if (event_ptid != null_ptid)
 	record_currthread (rs, event_ptid);
       else
-	event_ptid = inferior_ptid;
+	event_ptid = first_remote_resumed_thread ();
     }
   else
     /* A process exit.  Invalidate our notion of current thread.  */
