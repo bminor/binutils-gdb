@@ -1243,6 +1243,8 @@ symbol_file_clear (int from_tty)
 
   current_program_space->free_all_objfiles ();
 
+  clear_symtab_users (0);
+
   gdb_assert (symfile_objfile == NULL);
   if (from_tty)
     printf_filtered (_("No symbol file now.\n"));

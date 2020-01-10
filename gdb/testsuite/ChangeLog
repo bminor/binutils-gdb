@@ -1,5 +1,9 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.server/bkpt-other-inferior.exp: New file.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/kill-detach-inferiors-cmd.exp: Adjust expected output
 	of "add-inferior".
 	* gdb.base/quit-live.exp: Likewise.

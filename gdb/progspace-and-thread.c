@@ -25,8 +25,9 @@ void
 switch_to_program_space_and_thread (program_space *pspace)
 {
   inferior *inf = find_inferior_for_program_space (pspace);
+  gdb_assert (inf != nullptr);
 
-  if (inf != NULL && inf->pid != 0)
+  if (inf->pid != 0)
     {
       thread_info *tp = any_live_thread_of_inferior (inf);
 
@@ -39,6 +40,5 @@ switch_to_program_space_and_thread (program_space *pspace)
 	}
     }
 
-  switch_to_no_thread ();
-  set_current_program_space (pspace);
+  switch_to_inferior_no_thread (inf);
 }

@@ -1,3 +1,15 @@
+2020-01-10  Aleksandar Paunovic  <aleksandar.paunovic@intel.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* progspace-and-thread.c (switch_to_program_space_and_thread):
+	Assert there's an inferior for PSPACE.  Use
+	switch_to_inferior_no_thread to switch the inferior too.
+	* progspace.c (program_space::~program_space): Call
+	clear_symtab_users here, with SYMFILE_DEFER_BP_RESET.
+	(program_space::free_all_objfiles): Don't call clear_symtab_users
+	here.
+	* symfile.c (symbol_file_clear): Call clear_symtab_users here.
+
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention multi-target debugging, "info connections", and

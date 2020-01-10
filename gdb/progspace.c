@@ -147,6 +147,9 @@ program_space::~program_space ()
   no_shared_libraries (NULL, 0);
   exec_close ();
   free_all_objfiles ();
+  /* Defer breakpoint re-set because we don't want to create new
+     locations for this pspace which we're tearing down.  */
+  clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     free_address_space (this->aspace);
   clear_section_table (&this->target_sections);
@@ -168,8 +171,6 @@ program_space::free_all_objfiles ()
 
   while (!objfiles_list.empty ())
     objfiles_list.front ()->unlink ();
-
-  clear_symtab_users (0);
 }
 
 /* See progspace.h.  */
