@@ -557,7 +557,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   inferior_appeared (current_inferior (), TFILE_PID);
   inferior_ptid = ptid_t (TFILE_PID);
-  add_thread_silent (inferior_ptid);
+  add_thread_silent (&tfile_ops, inferior_ptid);
 
   if (ts->traceframe_count <= 0)
     warning (_("No traceframes present in this file."));

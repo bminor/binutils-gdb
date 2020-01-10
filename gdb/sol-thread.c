@@ -461,9 +461,13 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       /* See if we have a new thread.  */
       if (rtnval.tid_p () && rtnval != save_ptid)
 	{
-	  thread_info *thr = find_thread_ptid (rtnval);
+	  thread_info *thr = find_thread_ptid (current_inferior (), rtnval);
 	  if (thr == NULL || thr->state == THREAD_EXITED)
-	    add_thread (rtnval);
+	    {
+	      process_stratum_target *proc_target
+		= current_inferior ()->process_target ();
+	      add_thread (proc_target, rtnval);
+	    }
 	}
     }
 
@@ -853,7 +857,8 @@ ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
   ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
-    = get_thread_arch_regcache (ptid, target_gdbarch ());
+    = get_thread_arch_regcache (current_inferior ()->process_target (),
+				ptid, target_gdbarch ());
 
   target_fetch_registers (regcache, -1);
   fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
@@ -869,7 +874,8 @@ ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 {
   ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
-    = get_thread_arch_regcache (ptid, target_gdbarch ());
+    = get_thread_arch_regcache (current_inferior ()->process_target (),
+				ptid, target_gdbarch ());
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregset);
   target_store_registers (regcache, -1);
@@ -921,7 +927,8 @@ ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 {
   ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
-    = get_thread_arch_regcache (ptid, target_gdbarch ());
+    = get_thread_arch_regcache (current_inferior ()->process_target (),
+				ptid, target_gdbarch ());
 
   target_fetch_registers (regcache, -1);
   fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
@@ -937,7 +944,8 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 {
   ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
-    = get_thread_arch_regcache (ptid, target_gdbarch ());
+    = get_thread_arch_regcache (current_inferior ()->process_target (),
+				ptid, target_gdbarch ());
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
   target_store_registers (regcache, -1);
@@ -1037,9 +1045,13 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
     return -1;
 
   ptid_t ptid = ptid_t (inferior_ptid.pid (), 0, ti.ti_tid);
-  thread_info *thr = find_thread_ptid (ptid);
+  thread_info *thr = find_thread_ptid (current_inferior (), ptid);
   if (thr == NULL || thr->state == THREAD_EXITED)
-    add_thread (ptid);
+    {
+      process_stratum_target *proc_target
+	= current_inferior ()->process_target ();
+      add_thread (proc_target, ptid);
+    }
 
   return 0;
 }

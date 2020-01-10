@@ -83,6 +83,7 @@ struct dummy_target : public target_ops
   bool can_async_p () override;
   bool is_async_p () override;
   void async (int arg0) override;
+  int async_wait_fd () override;
   void thread_events (int arg0) override;
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
@@ -251,6 +252,7 @@ struct debug_target : public target_ops
   bool can_async_p () override;
   bool is_async_p () override;
   void async (int arg0) override;
+  int async_wait_fd () override;
   void thread_events (int arg0) override;
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
@@ -2160,6 +2162,31 @@ debug_target::async (int arg0)
   fprintf_unfiltered (gdb_stdlog, "<- %s->async (", this->beneath ()->shortname ());
   target_debug_print_int (arg0);
   fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+int
+target_ops::async_wait_fd ()
+{
+  return this->beneath ()->async_wait_fd ();
+}
+
+int
+dummy_target::async_wait_fd ()
+{
+  noprocess ();
+}
+
+int
+debug_target::async_wait_fd ()
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->async_wait_fd (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->async_wait_fd ();
+  fprintf_unfiltered (gdb_stdlog, "<- %s->async_wait_fd (", this->beneath ()->shortname ());
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
 }
 
 void

@@ -383,7 +383,7 @@ ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
-  if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
+  if (gdbarch_bfd_arch_info (ph->thread->inf->gdbarch)->bits_per_word == 32)
     {
       unsigned int base_addr;
       ps_err_e result;

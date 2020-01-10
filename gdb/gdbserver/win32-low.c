@@ -307,7 +307,7 @@ win32_stopped_data_address (void)
 /* Transfer memory from/to the debugged process.  */
 static int
 child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
-		   int write, struct target_ops *target)
+		   int write, process_stratum_target *target)
 {
   BOOL success;
   SIZE_T done = 0;
@@ -1795,7 +1795,7 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
   return the_low_target.breakpoint;
 }
 
-static struct target_ops win32_target_ops = {
+static process_stratum_target win32_target_ops = {
   win32_create_inferior,
   NULL,  /* post_create_inferior */
   win32_attach,

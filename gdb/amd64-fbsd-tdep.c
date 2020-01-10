@@ -30,6 +30,7 @@
 #include "amd64-tdep.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
+#include "inferior.h"
 
 /* Support for signal handlers.  */
 
@@ -212,7 +213,8 @@ amd64fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 {
   struct regcache *regcache;
 
-  regcache = get_thread_arch_regcache (ptid, gdbarch);
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
 
   target_fetch_registers (regcache, AMD64_FSBASE_REGNUM);
 

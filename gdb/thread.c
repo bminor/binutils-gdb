@@ -55,13 +55,6 @@
 
 static int highest_thread_num;
 
-/* True if any thread is, or may be executing.  We need to track this
-   separately because until we fully sync the thread list, we won't
-   know whether the target is fully stopped, even if we see stop
-   events for all known threads, because any of those threads may have
-   spawned new threads we haven't heard of yet.  */
-static int threads_executing;
-
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
 
@@ -89,7 +82,7 @@ private:
 struct thread_info*
 inferior_thread (void)
 {
-  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  struct thread_info *tp = find_thread_ptid (current_inferior (), inferior_ptid);
   gdb_assert (tp);
   return tp;
 }
@@ -195,7 +188,7 @@ clear_thread_inferior_resources (struct thread_info *tp)
 
   thread_cancel_execution_command (tp);
 
-  clear_inline_frame_state (tp->ptid);
+  clear_inline_frame_state (tp);
 }
 
 /* Set the TP's state as exited.  */
@@ -260,12 +253,11 @@ new_thread (struct inferior *inf, ptid_t ptid)
 }
 
 struct thread_info *
-add_thread_silent (ptid_t ptid)
+add_thread_silent (process_stratum_target *targ, ptid_t ptid)
 {
-  struct inferior *inf = find_inferior_ptid (ptid);
-  gdb_assert (inf != NULL);
+  inferior *inf;
 
-  thread_info *tp = find_thread_ptid (inf, ptid);
+  thread_info *tp = find_thread_ptid (targ, ptid);
   if (tp)
     /* Found an old thread with the same id.  It has to be dead,
        otherwise we wouldn't be adding a new thread with the same id.
@@ -281,7 +273,7 @@ add_thread_silent (ptid_t ptid)
 
       if (inferior_ptid == ptid)
 	{
-	  thread_info *new_thr = new_thread (inf, null_ptid);
+	  thread_info *new_thr = new_thread (tp->inf, null_ptid);
 
 	  /* Make switch_to_thread not read from the thread.  */
 	  new_thr->state = THREAD_EXITED;
@@ -300,10 +292,14 @@ add_thread_silent (ptid_t ptid)
 	  /* All done.  */
 	  return new_thr;
 	}
-      else
-	/* Just go ahead and delete it.  */
-	delete_thread (tp);
+
+      inf = tp->inf;
+
+      /* Just go ahead and delete it.  */
+      delete_thread (tp);
     }
+  else
+    inf = find_inferior_ptid (targ, ptid);
 
   tp = new_thread (inf, ptid);
   gdb::observers::new_thread.notify (tp);
@@ -312,9 +308,10 @@ add_thread_silent (ptid_t ptid)
 }
 
 struct thread_info *
-add_thread_with_info (ptid_t ptid, private_thread_info *priv)
+add_thread_with_info (process_stratum_target *targ, ptid_t ptid,
+		      private_thread_info *priv)
 {
-  struct thread_info *result = add_thread_silent (ptid);
+  thread_info *result = add_thread_silent (targ, ptid);
 
   result->priv.reset (priv);
 
@@ -326,9 +323,9 @@ add_thread_with_info (ptid_t ptid, private_thread_info *priv)
 }
 
 struct thread_info *
-add_thread (ptid_t ptid)
+add_thread (process_stratum_target *targ, ptid_t ptid)
 {
-  return add_thread_with_info (ptid, NULL);
+  return add_thread_with_info (targ, ptid, NULL);
 }
 
 private_thread_info::~private_thread_info () = default;
@@ -352,6 +349,14 @@ thread_info::~thread_info ()
   xfree (this->name);
 }
 
+/* Returns true if THR is the current thread.  */
+
+static bool
+is_current_thread (const thread_info *thr)
+{
+  return thr->inf == current_inferior () && thr->ptid == inferior_ptid;
+}
+
 /* See gdbthread.h.  */
 
 bool
@@ -359,7 +364,7 @@ thread_info::deletable () const
 {
   /* If this is the current thread, or there's code out there that
      relies on it existing (refcount > 0) we can't delete yet.  */
-  return refcount () == 0 && ptid != inferior_ptid;
+  return refcount () == 0 && !is_current_thread (this);
 }
 
 /* Add TP to the end of the step-over chain LIST_P.  */
@@ -514,12 +519,12 @@ find_thread_id (struct inferior *inf, int thr_num)
   return NULL;
 }
 
-/* Find a thread_info by matching PTID.  */
+/* See gdbthread.h.  */
 
 struct thread_info *
-find_thread_ptid (ptid_t ptid)
+find_thread_ptid (process_stratum_target *targ, ptid_t ptid)
 {
-  inferior *inf = find_inferior_ptid (ptid);
+  inferior *inf = find_inferior_ptid (targ, ptid);
   if (inf == NULL)
     return NULL;
   return find_thread_ptid (inf, ptid);
@@ -584,9 +589,9 @@ any_thread_p ()
 }
 
 int
-thread_count (void)
+thread_count (process_stratum_target *proc_target)
 {
-  auto rng = all_threads ();
+  auto rng = all_threads (proc_target);
   return std::distance (rng.begin (), rng.end ());
 }
 
@@ -609,10 +614,10 @@ valid_global_thread_id (int global_id)
   return 0;
 }
 
-int
-in_thread_list (ptid_t ptid)
+bool
+in_thread_list (process_stratum_target *targ, ptid_t ptid)
 {
-  return find_thread_ptid (ptid) != nullptr;
+  return find_thread_ptid (targ, ptid) != nullptr;
 }
 
 /* Finds the first thread of the inferior.  */
@@ -788,7 +793,8 @@ get_last_thread_stack_temporary (thread_info *tp)
 }
 
 void
-thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
+thread_change_ptid (process_stratum_target *targ,
+		    ptid_t old_ptid, ptid_t new_ptid)
 {
   struct inferior *inf;
   struct thread_info *tp;
@@ -796,7 +802,7 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   /* It can happen that what we knew as the target inferior id
      changes.  E.g, target remote may only discover the remote process
      pid after adding the inferior to GDB's list.  */
-  inf = find_inferior_ptid (old_ptid);
+  inf = find_inferior_ptid (targ, old_ptid);
   inf->pid = new_ptid.pid ();
 
   tp = find_thread_ptid (inf, old_ptid);
@@ -808,9 +814,9 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
 /* See gdbthread.h.  */
 
 void
-set_resumed (ptid_t ptid, int resumed)
+set_resumed (process_stratum_target *targ, ptid_t ptid, bool resumed)
 {
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  for (thread_info *tp : all_non_exited_threads (targ, ptid))
     tp->resumed = resumed;
 }
 
@@ -848,7 +854,7 @@ thread_info::set_running (bool running)
 }
 
 void
-set_running (ptid_t ptid, int running)
+set_running (process_stratum_target *targ, ptid_t ptid, bool running)
 {
   /* We try not to notify the observer if no thread has actually
      changed the running state -- merely to reduce the number of
@@ -856,7 +862,7 @@ set_running (ptid_t ptid, int running)
      multiple *running notifications just fine.  */
   bool any_started = false;
 
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  for (thread_info *tp : all_non_exited_threads (targ, ptid))
     if (set_running_thread (tp, running))
       any_started = true;
 
@@ -878,32 +884,32 @@ set_executing_thread (thread_info *thr, bool executing)
 }
 
 void
-set_executing (ptid_t ptid, int executing)
+set_executing (process_stratum_target *targ, ptid_t ptid, bool executing)
 {
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  for (thread_info *tp : all_non_exited_threads (targ, ptid))
     set_executing_thread (tp, executing);
 
   /* It only takes one running thread to spawn more threads.  */
   if (executing)
-    threads_executing = 1;
+    targ->threads_executing = true;
   /* Only clear the flag if the caller is telling us everything is
      stopped.  */
   else if (minus_one_ptid == ptid)
-    threads_executing = 0;
+    targ->threads_executing = false;
 }
 
 /* See gdbthread.h.  */
 
-int
-threads_are_executing (void)
+bool
+threads_are_executing (process_stratum_target *target)
 {
-  return threads_executing;
+  return target->threads_executing;
 }
 
 void
-set_stop_requested (ptid_t ptid, int stop)
+set_stop_requested (process_stratum_target *targ, ptid_t ptid, bool stop)
 {
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  for (thread_info *tp : all_non_exited_threads (targ, ptid))
     tp->stop_requested = stop;
 
   /* Call the stop requested observer so other components of GDB can
@@ -913,11 +919,11 @@ set_stop_requested (ptid_t ptid, int stop)
 }
 
 void
-finish_thread_state (ptid_t ptid)
+finish_thread_state (process_stratum_target *targ, ptid_t ptid)
 {
   bool any_started = false;
 
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  for (thread_info *tp : all_non_exited_threads (targ, ptid))
     if (set_running_thread (tp, tp->executing))
       any_started = true;
 
@@ -1333,7 +1339,7 @@ switch_to_thread (thread_info *thr)
 {
   gdb_assert (thr != NULL);
 
-  if (inferior_ptid == thr->ptid)
+  if (is_current_thread (thr))
     return;
 
   switch_to_thread_no_regs (thr);
@@ -1344,9 +1350,9 @@ switch_to_thread (thread_info *thr)
 /* See gdbsupport/common-gdbthread.h.  */
 
 void
-switch_to_thread (ptid_t ptid)
+switch_to_thread (process_stratum_target *proc_target, ptid_t ptid)
 {
-  thread_info *thr = find_thread_ptid (ptid);
+  thread_info *thr = find_thread_ptid (proc_target, ptid);
   switch_to_thread (thr);
 }
 
@@ -2073,18 +2079,39 @@ print_selected_thread_frame (struct ui_out *uiout,
 }
 
 /* Update the 'threads_executing' global based on the threads we know
-   about right now.  */
+   about right now.  This is used by infrun to tell whether we should
+   pull events out of the current target.  */
 
 static void
 update_threads_executing (void)
 {
-  threads_executing = 0;
-  for (thread_info *tp : all_non_exited_threads ())
+  process_stratum_target *targ = current_inferior ()->process_target ();
+
+  if (targ == NULL)
+    return;
+
+  targ->threads_executing = false;
+
+  for (inferior *inf : all_non_exited_inferiors (targ))
     {
-      if (tp->executing)
+      if (!inf->has_execution ())
+	continue;
+
+      /* If the process has no threads, then it must be we have a
+	 process-exit event pending.  */
+      if (inf->thread_list == NULL)
 	{
-	  threads_executing = 1;
-	  break;
+	  targ->threads_executing = true;
+	  return;
+	}
+
+      for (thread_info *tp : inf->non_exited_threads ())
+	{
+	  if (tp->executing)
+	    {
+	      targ->threads_executing = true;
+	      return;
+	    }
 	}
     }
 }

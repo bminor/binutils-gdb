@@ -206,7 +206,7 @@ inf_child_target::mourn_inferior ()
 void
 inf_child_target::maybe_unpush_target ()
 {
-  if (!inf_child_explicitly_opened && !have_inferiors ())
+  if (!inf_child_explicitly_opened)
     unpush_target (this);
 }
 

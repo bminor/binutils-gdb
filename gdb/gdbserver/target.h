@@ -63,7 +63,10 @@ struct thread_resume
   CORE_ADDR step_range_end;	/* Exclusive */
 };
 
-struct target_ops
+/* GDBserver doesn't have a concept of strata like GDB, but we call
+   its target vector "process_stratum" anyway for the benefit of
+   shared code.  */
+struct process_stratum_target
 {
   /* Start a new process.
 
@@ -476,9 +479,9 @@ struct target_ops
   bool (*thread_handle) (ptid_t ptid, gdb_byte **handle, int *handle_len);
 };
 
-extern struct target_ops *the_target;
+extern process_stratum_target *the_target;
 
-void set_target_ops (struct target_ops *);
+void set_target_ops (process_stratum_target *);
 
 #define create_inferior(program, program_args)	\
   (*the_target->create_inferior) (program, program_args)
@@ -702,7 +705,7 @@ ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
 
 /* Prepare to read or write memory from the inferior process.  See the
-   corresponding target_ops methods for more details.  */
+   corresponding process_stratum_target methods for more details.  */
 
 int prepare_to_access_memory (void);
 void done_accessing_memory (void);

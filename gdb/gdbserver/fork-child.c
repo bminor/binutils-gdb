@@ -107,7 +107,8 @@ post_fork_inferior (int pid, const char *program)
   atexit (restore_old_foreground_pgrp);
 #endif
 
-  startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED,
+  startup_inferior (the_target, pid,
+		    START_INFERIOR_TRAPS_EXPECTED,
 		    &cs.last_status, &cs.last_ptid);
   current_thread->last_resume_kind = resume_stop;
   current_thread->last_status = cs.last_status;

@@ -519,7 +519,7 @@ Please switch to another checkpoint before deleting the current one"));
      list, waitpid the ptid.
      If fi->parent_ptid is a part of lwp and it is stopped, waitpid the
      ptid.  */
-  thread_info *parent = find_thread_ptid (pptid);
+  thread_info *parent = find_thread_ptid (linux_target, pptid);
   if ((parent == NULL && find_fork_ptid (pptid))
       || (parent != NULL && parent->state == THREAD_STOPPED))
     {
@@ -679,7 +679,7 @@ checkpoint_command (const char *args, int from_tty)
     error (_("checkpoint: call_function_by_hand returned null."));
 
   retpid = value_as_long (ret);
-  get_last_target_status (&last_target_ptid, &last_target_waitstatus);
+  get_last_target_status (nullptr, &last_target_ptid, &last_target_waitstatus);
 
   fp = find_fork_pid (retpid);
 

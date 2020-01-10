@@ -805,7 +805,11 @@ sync_threadlists (void)
 	  priv->pdtid = pbuf[pi].pdtid;
 	  priv->tid = pbuf[pi].tid;
 
-	  thread = add_thread_with_info (ptid_t (infpid, 0, pbuf[pi].pthid), priv);
+	  process_stratum_target *proc_target
+	    = current_inferior ()->process_target ();
+	  thread = add_thread_with_info (proc_target,
+					 ptid_t (infpid, 0, pbuf[pi].pthid),
+					 priv);
 
 	  pi++;
 	}
@@ -837,7 +841,9 @@ sync_threadlists (void)
 	    }
 	  else
 	    {
-	      thread = add_thread (pptid);
+	      process_stratum_target *proc_target
+		= current_inferior ()->process_target ();
+	      thread = add_thread (proc_target, pptid);
 
 	      aix_thread_info *priv = new aix_thread_info;
 	      thread->priv.reset (priv);
@@ -1043,7 +1049,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     }
   else
     {
-      thread = find_thread_ptid (ptid);
+      thread = find_thread_ptid (current_inferior (), ptid);
       if (!thread)
 	error (_("aix-thread resume: unknown pthread %ld"),
 	       ptid.lwp ());
@@ -1089,7 +1095,9 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
   if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED
       && status->value.sig == GDB_SIGNAL_TRAP)
     {
-      struct regcache *regcache = get_thread_regcache (ptid);
+      process_stratum_target *proc_target
+	= current_inferior ()->process_target ();
+      struct regcache *regcache = get_thread_regcache (proc_target, ptid);
       struct gdbarch *gdbarch = regcache->arch ();
 
       if (regcache_read_pc (regcache)
@@ -1354,7 +1362,7 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
     beneath ()->fetch_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (regcache->ptid ());
+      thread = find_thread_ptid (current_inferior (), regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 
@@ -1692,7 +1700,7 @@ aix_thread_target::store_registers (struct regcache *regcache, int regno)
     beneath ()->store_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (regcache->ptid ());
+      thread = find_thread_ptid (current_inferior (), regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 
@@ -1740,7 +1748,9 @@ aix_thread_target::thread_alive (ptid_t ptid)
 
   /* We update the thread list every time the child stops, so all
      valid threads should be in the thread list.  */
-  return in_thread_list (ptid);
+  process_stratum_target *proc_target
+    = current_inferior ()->process_target ();
+  return in_thread_list (proc_target, ptid);
 }
 
 /* Return a printable representation of composite PID for use in

@@ -185,7 +185,7 @@ signal_catchpoint_print_it (bpstat bs)
   const char *signal_name;
   struct ui_out *uiout = current_uiout;
 
-  get_last_target_status (nullptr, &last);
+  get_last_target_status (nullptr, nullptr, &last);
 
   signal_name = signal_to_name_or_int (last.value.sig);
 

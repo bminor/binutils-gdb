@@ -88,6 +88,7 @@ public:
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
 
+  int async_wait_fd () override;
   void async (int) override;
 
   void close () override;

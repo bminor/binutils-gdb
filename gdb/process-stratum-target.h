@@ -51,6 +51,22 @@ public:
   bool has_stack () override;
   bool has_registers () override;
   bool has_execution (inferior *inf) override;
+
+  /* True if any thread is, or may be executing.  We need to track
+     this separately because until we fully sync the thread list, we
+     won't know whether the target is fully stopped, even if we see
+     stop events for all known threads, because any of those threads
+     may have spawned new threads we haven't heard of yet.  */
+  bool threads_executing = false;
 };
+
+/* Downcast TARGET to process_stratum_target.  */
+
+static inline process_stratum_target *
+as_process_stratum_target (target_ops *target)
+{
+  gdb_assert (target->stratum () == process_stratum);
+  return static_cast<process_stratum_target *> (target);
+}
 
 #endif /* !defined (PROCESS_STRATUM_TARGET_H) */

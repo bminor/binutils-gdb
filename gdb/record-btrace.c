@@ -556,9 +556,10 @@ record_btrace_target::info_record ()
 
   DEBUG ("info");
 
-  tp = find_thread_ptid (inferior_ptid);
-  if (tp == NULL)
+  if (inferior_ptid == null_ptid)
     error (_("No thread."));
+
+  tp = inferior_thread ();
 
   validate_registers_access ();
 
@@ -1373,7 +1374,8 @@ record_btrace_target::call_history_from (ULONGEST from, int size,
 enum record_method
 record_btrace_target::record_method (ptid_t ptid)
 {
-  struct thread_info * const tp = find_thread_ptid (ptid);
+  process_stratum_target *proc_target = current_inferior ()->process_target ();
+  thread_info *const tp = find_thread_ptid (proc_target, ptid);
 
   if (tp == NULL)
     error (_("No thread."));
@@ -1389,7 +1391,8 @@ record_btrace_target::record_method (ptid_t ptid)
 bool
 record_btrace_target::record_is_replaying (ptid_t ptid)
 {
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  process_stratum_target *proc_target = current_inferior ()->process_target ();
+  for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
     if (btrace_is_replaying (tp))
       return true;
 
@@ -1519,13 +1522,10 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
 void
 record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  struct btrace_insn_iterator *replay;
-  struct thread_info *tp;
-
-  tp = find_thread_ptid (regcache->ptid ());
+  thread_info *tp = find_thread_ptid (regcache->target (), regcache->ptid ());
   gdb_assert (tp != NULL);
 
-  replay = tp->btrace.replay;
+  btrace_insn_iterator *replay = tp->btrace.replay;
   if (replay != NULL && !record_btrace_generating_corefile)
     {
       const struct btrace_insn *insn;
@@ -1966,6 +1966,8 @@ get_thread_current_frame_id (struct thread_info *tp)
 
   switch_to_thread (tp);
 
+  process_stratum_target *proc_target = tp->inf->process_target ();
+
   /* Clear the executing flag to allow changes to the current frame.
      We are not actually running, yet.  We just started a reverse execution
      command or a record goto command.
@@ -1974,7 +1976,7 @@ get_thread_current_frame_id (struct thread_info *tp)
      move the thread.  Since we need to recompute the stack, we temporarily
      set EXECUTING to false.  */
   executing = tp->executing;
-  set_executing (inferior_ptid, false);
+  set_executing (proc_target, inferior_ptid, false);
 
   id = null_frame_id;
   try
@@ -1984,13 +1986,13 @@ get_thread_current_frame_id (struct thread_info *tp)
   catch (const gdb_exception &except)
     {
       /* Restore the previous execution state.  */
-      set_executing (inferior_ptid, executing);
+      set_executing (proc_target, inferior_ptid, executing);
 
       throw;
     }
 
   /* Restore the previous execution state.  */
-  set_executing (inferior_ptid, executing);
+  set_executing (proc_target, inferior_ptid, executing);
 
   return id;
 }
@@ -2154,11 +2156,14 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
      record_btrace_wait below.
 
      For all-stop targets, we only step INFERIOR_PTID and continue others.  */
+
+  process_stratum_target *proc_target = current_inferior ()->process_target ();
+
   if (!target_is_non_stop_p ())
     {
       gdb_assert (inferior_ptid.matches (ptid));
 
-      for (thread_info *tp : all_non_exited_threads (ptid))
+      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
 	{
 	  if (tp->ptid.matches (inferior_ptid))
 	    record_btrace_resume_thread (tp, flag);
@@ -2168,7 +2173,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     }
   else
     {
-      for (thread_info *tp : all_non_exited_threads (ptid))
+      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
 	record_btrace_resume_thread (tp, flag);
     }
 
@@ -2526,7 +2531,8 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
     }
 
   /* Keep a work list of moving threads.  */
-  for (thread_info *tp : all_non_exited_threads (ptid))
+  process_stratum_target *proc_target = current_inferior ()->process_target ();
+  for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
     if ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
       moving.push_back (tp);
 
@@ -2646,7 +2652,10 @@ record_btrace_target::stop (ptid_t ptid)
     }
   else
     {
-      for (thread_info *tp : all_non_exited_threads (ptid))
+      process_stratum_target *proc_target
+	= current_inferior ()->process_target ();
+
+      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
 	{
 	  tp->btrace.flags &= ~BTHR_MOVE;
 	  tp->btrace.flags |= BTHR_STOP;

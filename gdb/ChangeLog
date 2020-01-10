@@ -1,4 +1,423 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
+	    John Baldwin  <jhb@FreeBSD.org>
+
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::thread_architecture): Adjust.
+	* ada-tasks.c (print_ada_task_info): Adjust find_thread_ptid call.
+	(task_command_1): Likewise.
+	* aix-thread.c (sync_threadlists, aix_thread_target::resume)
+	(aix_thread_target::wait, aix_thread_target::fetch_registers)
+	(aix_thread_target::store_registers)
+	(aix_thread_target::thread_alive): Adjust.
+	* amd64-fbsd-tdep.c: Include "inferior.h".
+	(amd64fbsd_get_thread_local_address): Pass down target.
+	* amd64-linux-nat.c (ps_get_thread_area): Use ps_prochandle
+	thread's gdbarch instead of target_gdbarch.
+	* break-catch-sig.c (signal_catchpoint_print_it): Adjust call to
+	get_last_target_status.
+	* break-catch-syscall.c (print_it_catch_syscall): Likewise.
+	* breakpoint.c (breakpoints_should_be_inserted_now): Consider all
+	inferiors.
+	(update_inserted_breakpoint_locations): Skip if inferiors with no
+	execution.
+	(update_global_location_list): When handling moribund locations,
+	find representative inferior for location's pspace, and use thread
+	count of its process_stratum target.
+	* bsd-kvm.c (bsd_kvm_target_open): Pass target down.
+	* bsd-uthread.c (bsd_uthread_target::wait): Use
+	as_process_stratum_target and adjust thread_change_ptid and
+	add_thread calls.
+	(bsd_uthread_target::update_thread_list): Use
+	as_process_stratum_target and adjust find_thread_ptid,
+	thread_change_ptid and add_thread calls.
+	* btrace.c (maint_btrace_packet_history_cmd): Adjust
+	find_thread_ptid call.
+	* corelow.c (add_to_thread_list): Adjust add_thread call.
+	(core_target_open): Adjust add_thread_silent and thread_count
+	calls.
+	(core_target::pid_to_str): Adjust find_inferior_ptid call.
+	* ctf.c (ctf_target_open): Adjust add_thread_silent call.
+	* event-top.c (async_disconnect): Pop targets from all inferiors.
+	* exec.c (add_target_sections): Push exec target on all inferiors
+	sharing the program space.
+	(remove_target_sections): Remove the exec target from all
+	inferiors sharing the program space.
+	(exec_on_vfork): New.
+	* exec.h (exec_on_vfork): Declare.
+	* fbsd-nat.c (fbsd_add_threads): Add fbsd_nat_target parameter.
+	Pass it down.
+	(fbsd_nat_target::update_thread_list): Adjust.
+	(fbsd_nat_target::resume): Adjust.
+	(fbsd_handle_debug_trap): Add fbsd_nat_target parameter.  Pass it
+	down.
+	(fbsd_nat_target::wait, fbsd_nat_target::post_attach): Adjust.
+	* fbsd-tdep.c (fbsd_corefile_thread): Adjust
+	get_thread_arch_regcache call.
+	* fork-child.c (gdb_startup_inferior): Pass target down to
+	startup_inferior and set_executing.
+	* gdbthread.h (struct process_stratum_target): Forward declare.
+	(add_thread, add_thread_silent, add_thread_with_info)
+	(in_thread_list): Add process_stratum_target parameter.
+	(find_thread_ptid(inferior*, ptid_t)): New overload.
+	(find_thread_ptid, thread_change_ptid): Add process_stratum_target
+	parameter.
+	(all_threads()): Delete overload.
+	(all_threads, all_non_exited_threads): Add process_stratum_target
+	parameter.
+	(all_threads_safe): Use brace initialization.
+	(thread_count): Add process_stratum_target parameter.
+	(set_resumed, set_running, set_stop_requested, set_executing)
+	(threads_are_executing, finish_thread_state): Add
+	process_stratum_target parameter.
+	(switch_to_thread): Use is_current_thread.
+	* i386-fbsd-tdep.c: Include "inferior.h".
+	(i386fbsd_get_thread_local_address): Pass down target.
+	* i386-linux-nat.c (i386_linux_nat_target::low_resume): Adjust.
+	* inf-child.c (inf_child_target::maybe_unpush_target): Remove
+	have_inferiors check.
+	* inf-ptrace.c (inf_ptrace_target::create_inferior)
+	(inf_ptrace_target::attach): Adjust.
+	* infcall.c (run_inferior_call): Adjust.
+	* infcmd.c (run_command_1): Pass target to
+	scoped_finish_thread_state.
+	(proceed_thread_callback): Skip inferiors with no execution.
+	(continue_command): Rename 'all_threads' local to avoid hiding
+	'all_threads' function.  Adjust get_last_target_status call.
+	(prepare_one_step): Adjust set_running call.
+	(signal_command): Use user_visible_resume_target.  Compare thread
+	pointers instead of inferior_ptid.
+	(info_program_command): Adjust to pass down target.
+	(attach_command): Mark target's 'thread_executing' flag.
+	(stop_current_target_threads_ns): New, factored out from ...
+	(interrupt_target_1): ... this.  Switch inferior before making
+	target calls.
+	* inferior-iter.h
+	(struct all_inferiors_iterator, struct all_inferiors_range)
+	(struct all_inferiors_safe_range)
+	(struct all_non_exited_inferiors_range): Filter on
+	process_stratum_target too.  Remove explicit.
+	* inferior.c (inferior::inferior): Push dummy target on target
+	stack.
+	(find_inferior_pid, find_inferior_ptid, number_of_live_inferiors):
+	Add process_stratum_target parameter, and pass it down.
+	(have_live_inferiors): Adjust.
+	(switch_to_inferior_and_push_target): New.
+	(add_inferior_command, clone_inferior_command): Handle
+	"-no-connection" parameter.  Use
+	switch_to_inferior_and_push_target.
+	(_initialize_inferior): Mention "-no-connection" option in
+	the help of "add-inferior" and "clone-inferior" commands.
+	* inferior.h: Include "process-stratum-target.h".
+	(interrupt_target_1): Use bool.
+	(struct inferior) <push_target, unpush_target, target_is_pushed,
+	find_target_beneath, top_target, process_target, target_at,
+	m_stack>: New.
+	(discard_all_inferiors): Delete.
+	(find_inferior_pid, find_inferior_ptid, number_of_live_inferiors)
+	(all_inferiors, all_non_exited_inferiors): Add
+	process_stratum_target parameter.
+	* infrun.c: Include "gdb_select.h" and <unordered_map>.
+	(target_last_proc_target): New global.
+	(follow_fork_inferior): Push target on new inferior.  Pass target
+	to add_thread_silent.  Call exec_on_vfork.  Handle target's
+	reference count.
+	(follow_fork): Adjust get_last_target_status call.  Also consider
+	target.
+	(follow_exec): Push target on new inferior.
+	(struct execution_control_state) <target>: New field.
+	(user_visible_resume_target): New.
+	(do_target_resume): Call target_async.
+	(resume_1): Set target's threads_executing flag.  Consider resume
+	target.
+	(commit_resume_all_targets): New.
+	(proceed): Also consider resume target.  Skip threads of inferiors
+	with no execution.  Commit resumtion in all targets.
+	(start_remote): Pass current inferior to wait_for_inferior.
+	(infrun_thread_stop_requested): Consider target as well.  Pass
+	thread_info pointer to clear_inline_frame_state instead of ptid.
+	(infrun_thread_thread_exit): Consider target as well.
+	(random_pending_event_thread): New inferior parameter.  Use it.
+	(do_target_wait): Rename to ...
+	(do_target_wait_1): ... this.  Add inferior parameter, and pass it
+	down.
+	(threads_are_resumed_pending_p, do_target_wait): New.
+	(prepare_for_detach): Adjust calls.
+	(wait_for_inferior): New inferior parameter.  Handle it.  Use
+	do_target_wait_1 instead of do_target_wait.
+	(fetch_inferior_event): Adjust.  Switch to representative
+	inferior.  Pass target down.
+	(set_last_target_status): Add process_stratum_target parameter.
+	Save target in global.
+	(get_last_target_status): Add process_stratum_target parameter and
+	handle it.
+	(nullify_last_target_wait_ptid): Clear 'target_last_proc_target'.
+	(context_switch): Check inferior_ptid == null_ptid before calling
+	inferior_thread().
+	(get_inferior_stop_soon): Pass down target.
+	(wait_one): Rename to ...
+	(poll_one_curr_target): ... this.
+	(struct wait_one_event): New.
+	(wait_one): New.
+	(stop_all_threads): Adjust.
+	(handle_no_resumed, handle_inferior_event): Adjust to consider the
+	event's target.
+	(switch_back_to_stepped_thread): Also consider target.
+	(print_stop_event): Update.
+	(normal_stop): Update.  Also consider the resume target.
+	* infrun.h (wait_for_inferior): Remove declaration.
+	(user_visible_resume_target): New declaration.
+	(get_last_target_status, set_last_target_status): New
+	process_stratum_target parameter.
+	* inline-frame.c (clear_inline_frame_state(ptid_t)): Add
+	process_stratum_target parameter, and use it.
+	(clear_inline_frame_state (thread_info*)): New.
+	* inline-frame.c (clear_inline_frame_state(ptid_t)): Add
+	process_stratum_target parameter.
+	(clear_inline_frame_state (thread_info*)): Declare.
+	* linux-fork.c (delete_checkpoint_command): Pass target down to
+	find_thread_ptid.
+	(checkpoint_command): Adjust.
+	* linux-nat.c (linux_nat_target::follow_fork): Switch to thread
+	instead of just tweaking inferior_ptid.
+	(linux_nat_switch_fork): Pass target down to thread_change_ptid.
+	(exit_lwp): Pass target down to find_thread_ptid.
+	(attach_proc_task_lwp_callback): Pass target down to
+	add_thread/set_running/set_executing.
+	(linux_nat_target::attach): Pass target down to
+	thread_change_ptid.
+	(get_detach_signal): Pass target down to find_thread_ptid.
+	Consider last target status's target.
+	(linux_resume_one_lwp_throw, resume_lwp)
+	(linux_handle_syscall_trap, linux_handle_extended_wait, wait_lwp)
+	(stop_wait_callback, save_stop_reason, linux_nat_filter_event)
+	(linux_nat_wait_1, resume_stopped_resumed_lwps): Pass target down.
+	(linux_nat_target::async_wait_fd): New.
+	(linux_nat_stop_lwp, linux_nat_target::thread_address_space): Pass
+	target down.
+	* linux-nat.h (linux_nat_target::async_wait_fd): Declare.
+	* linux-tdep.c (get_thread_arch_regcache): Pass target down.
+	* linux-thread-db.c (struct thread_db_info::process_target): New
+	field.
+	(add_thread_db_info): Save target.
+	(get_thread_db_info): New process_stratum_target parameter.  Also
+	match target.
+	(delete_thread_db_info): New process_stratum_target parameter.
+	Also match target.
+	(thread_from_lwp): Adjust to pass down target.
+	(thread_db_notice_clone): Pass down target.
+	(check_thread_db_callback): Pass down target.
+	(try_thread_db_load_1): Always push the thread_db target.
+	(try_thread_db_load, record_thread): Pass target down.
+	(thread_db_target::detach): Pass target down.  Always unpush the
+	thread_db target.
+	(thread_db_target::wait, thread_db_target::mourn_inferior): Pass
+	target down.  Always unpush the thread_db target.
+	(find_new_threads_callback, thread_db_find_new_threads_2)
+	(thread_db_target::update_thread_list): Pass target down.
+	(thread_db_target::pid_to_str): Pass current inferior down.
+	(thread_db_target::get_thread_local_address): Pass target down.
+	(thread_db_target::resume, maintenance_check_libthread_db): Pass
+	target down.
+	* nto-procfs.c (nto_procfs_target::update_thread_list): Adjust.
+	* procfs.c (procfs_target::procfs_init_inferior): Declare.
+	(proc_set_current_signal, do_attach, procfs_target::wait): Adjust.
+	(procfs_init_inferior): Rename to ...
+	(procfs_target::procfs_init_inferior): ... this and adjust.
+	(procfs_target::create_inferior, procfs_notice_thread)
+	(procfs_do_thread_registers): Adjust.
+	* ppc-fbsd-tdep.c: Include "inferior.h".
+	(ppcfbsd_get_thread_local_address): Pass down target.
+	* proc-service.c (ps_xfer_memory): Switch current inferior and
+	program space as well.
+	(get_ps_regcache): Pass target down.
+	* process-stratum-target.c
+	(process_stratum_target::thread_address_space)
+	(process_stratum_target::thread_architecture): Pass target down.
+	* process-stratum-target.h
+	(process_stratum_target::threads_executing): New field.
+	(as_process_stratum_target): New.
+	* ravenscar-thread.c
+	(ravenscar_thread_target::update_inferior_ptid): Pass target down.
+	(ravenscar_thread_target::wait, ravenscar_add_thread): Pass target
+	down.
+	* record-btrace.c (record_btrace_target::info_record): Adjust.
+	(record_btrace_target::record_method)
+	(record_btrace_target::record_is_replaying)
+	(record_btrace_target::fetch_registers)
+	(get_thread_current_frame_id, record_btrace_target::resume)
+	(record_btrace_target::wait, record_btrace_target::stop): Pass
+	target down.
+	* record-full.c (record_full_wait_1): Switch to event thread.
+	Pass target down.
+	* regcache.c (regcache::regcache)
+	(get_thread_arch_aspace_regcache, get_thread_arch_regcache): Add
+	process_stratum_target parameter and handle it.
+	(current_thread_target): New global.
+	(get_thread_regcache): Add process_stratum_target parameter and
+	handle it.  Switch inferior before calling target method.
+	(get_thread_regcache): Pass target down.
+	(get_thread_regcache_for_ptid): Pass target down.
+	(registers_changed_ptid): Add process_stratum_target parameter and
+	handle it.
+	(registers_changed_thread, registers_changed): Pass target down.
+	(test_get_thread_arch_aspace_regcache): New.
+	(current_regcache_test): Define a couple local test_target_ops
+	instances and use them for testing.
+	(readwrite_regcache): Pass process_stratum_target parameter.
+	(cooked_read_test, cooked_write_test): Pass mock_target down.
+	* regcache.h (get_thread_regcache, get_thread_arch_regcache)
+	(get_thread_arch_aspace_regcache): Add process_stratum_target
+	parameter.
+	(regcache::target): New method.
+	(regcache::regcache, regcache::get_thread_arch_aspace_regcache)
+	(regcache::registers_changed_ptid): Add process_stratum_target
+	parameter.
+	(regcache::m_target): New field.
+	(registers_changed_ptid): Add process_stratum_target parameter.
+	* remote.c (remote_state::supports_vCont_probed): New field.
+	(remote_target::async_wait_fd): New method.
+	(remote_unpush_and_throw): Add remote_target parameter.
+	(get_current_remote_target): Adjust.
+	(remote_target::remote_add_inferior): Push target.
+	(remote_target::remote_add_thread)
+	(remote_target::remote_notice_new_inferior)
+	(get_remote_thread_info): Pass target down.
+	(remote_target::update_thread_list): Skip threads of inferiors
+	bound to other targets.  (remote_target::close): Don't discard
+	inferiors.  (remote_target::add_current_inferior_and_thread)
+	(remote_target::process_initial_stop_replies)
+	(remote_target::start_remote)
+	(remote_target::remote_serial_quit_handler): Pass down target.
+	(remote_target::remote_unpush_target): New remote_target
+	parameter.  Unpush the target from all inferiors.
+	(remote_target::remote_unpush_and_throw): New remote_target
+	parameter.  Pass it down.
+	(remote_target::open_1): Check whether the current inferior has
+	execution instead of checking whether any inferior is live.  Pass
+	target down.
+	(remote_target::remote_detach_1): Pass down target.  Use
+	remote_unpush_target.
+	(extended_remote_target::attach): Pass down target.
+	(remote_target::remote_vcont_probe): Set supports_vCont_probed.
+	(remote_target::append_resumption): Pass down target.
+	(remote_target::append_pending_thread_resumptions)
+	(remote_target::remote_resume_with_hc, remote_target::resume)
+	(remote_target::commit_resume): Pass down target.
+	(remote_target::remote_stop_ns): Check supports_vCont_probed.
+	(remote_target::interrupt_query)
+	(remote_target::remove_new_fork_children)
+	(remote_target::check_pending_events_prevent_wildcard_vcont)
+	(remote_target::remote_parse_stop_reply)
+	(remote_target::process_stop_reply): Pass down target.
+	(first_remote_resumed_thread): New remote_target parameter.  Pass
+	it down.
+	(remote_target::wait_as): Pass down target.
+	(unpush_and_perror): New remote_target parameter.  Pass it down.
+	(remote_target::readchar, remote_target::remote_serial_write)
+	(remote_target::getpkt_or_notif_sane_1)
+	(remote_target::kill_new_fork_children, remote_target::kill): Pass
+	down target.
+	(remote_target::mourn_inferior): Pass down target.  Use
+	remote_unpush_target.
+	(remote_target::core_of_thread)
+	(remote_target::remote_btrace_maybe_reopen): Pass down target.
+	(remote_target::pid_to_exec_file)
+	(remote_target::thread_handle_to_thread_info): Pass down target.
+	(remote_target::async_wait_fd): New.
+	* riscv-fbsd-tdep.c: Include "inferior.h".
+	(riscv_fbsd_get_thread_local_address): Pass down target.
+	* sol2-tdep.c (sol2_core_pid_to_str): Pass down target.
+	* sol-thread.c (sol_thread_target::wait, ps_lgetregs, ps_lsetregs)
+	(ps_lgetfpregs, ps_lsetfpregs, sol_update_thread_list_callback):
+	Adjust.
+	* solib-spu.c (spu_skip_standalone_loader): Pass down target.
+	* solib-svr4.c (enable_break): Pass down target.
+	* spu-multiarch.c (parse_spufs_run): Pass down target.
+	* spu-tdep.c (spu2ppu_sniffer): Pass down target.
+	* target-delegates.c: Regenerate.
+	* target.c (g_target_stack): Delete.
+	(current_top_target): Return the current inferior's top target.
+	(target_has_execution_1): Refer to the passed-in inferior's top
+	target.
+	(target_supports_terminal_ours): Check whether the initial
+	inferior was already created.
+	(decref_target): New.
+	(target_stack::push): Incref/decref the target.
+	(push_target, push_target, unpush_target): Adjust.
+	(target_stack::unpush): Defref target.
+	(target_is_pushed): Return bool.  Adjust to refer to the current
+	inferior's target stack.
+	(dispose_inferior): Delete, and inline parts ...
+	(target_preopen): ... here.  Only dispose of the current inferior.
+	(target_detach): Hold strong target reference while detaching.
+	Pass target down.
+	(target_thread_name): Add assertion.
+	(target_resume): Pass down target.
+	(target_ops::beneath, find_target_at): Adjust to refer to the
+	current inferior's target stack.
+	(get_dummy_target): New.
+	(target_pass_ctrlc): Pass the Ctrl-C to the first inferior that
+	has a thread running.
+	(initialize_targets): Rename to ...
+	(_initialize_target): ... this.
+	* target.h: Include "gdbsupport/refcounted-object.h".
+	(struct target_ops): Inherit refcounted_object.
+	(target_ops::shortname, target_ops::longname): Make const.
+	(target_ops::async_wait_fd): New method.
+	(decref_target): Declare.
+	(struct target_ops_ref_policy): New.
+	(target_ops_ref): New typedef.
+	(get_dummy_target): Declare function.
+	(target_is_pushed): Return bool.
+	* thread-iter.c (all_matching_threads_iterator::m_inf_matches)
+	(all_matching_threads_iterator::all_matching_threads_iterator):
+	Handle filter target.
+	* thread-iter.h (struct all_matching_threads_iterator, struct
+	all_matching_threads_range, class all_non_exited_threads_range):
+	Filter by target too.  Remove explicit.
+	* thread.c (threads_executing): Delete.
+	(inferior_thread): Pass down current inferior.
+	(clear_thread_inferior_resources): Pass down thread pointer
+	instead of ptid_t.
+	(add_thread_silent, add_thread_with_info, add_thread): Add
+	process_stratum_target parameter.  Use it for thread and inferior
+	searches.
+	(is_current_thread): New.
+	(thread_info::deletable): Use it.
+	(find_thread_ptid, thread_count, in_thread_list)
+	(thread_change_ptid, set_resumed, set_running): New
+	process_stratum_target parameter.  Pass it down.
+	(set_executing): New process_stratum_target parameter.  Pass it
+	down.  Adjust reference to 'threads_executing'.
+	(threads_are_executing): New process_stratum_target parameter.
+	Adjust reference to 'threads_executing'.
+	(set_stop_requested, finish_thread_state): New
+	process_stratum_target parameter.  Pass it down.
+	(switch_to_thread): Also match inferior.
+	(switch_to_thread): New process_stratum_target parameter.  Pass it
+	down.
+	(update_threads_executing): Reimplement.
+	* top.c (quit_force): Pop targets from all inferior.
+	(gdb_init): Don't call initialize_targets.
+	* windows-nat.c (windows_nat_target) <get_windows_debug_event>:
+	Declare.
+	(windows_add_thread, windows_delete_thread): Adjust.
+	(get_windows_debug_event): Rename to ...
+	(windows_nat_target::get_windows_debug_event): ... this.  Adjust.
+	* tracefile-tfile.c (tfile_target_open): Pass down target.
+	* gdbsupport/common-gdbthread.h (struct process_stratum_target):
+	Forward declare.
+	(switch_to_thread): Add process_stratum_target parameter.
+	* mi/mi-interp.c (mi_on_resume_1): Add process_stratum_target
+	parameter.  Use it.
+	(mi_on_resume): Pass target down.
+	* nat/fork-inferior.c (startup_inferior): Add
+	process_stratum_target parameter.  Pass it down.
+	* nat/fork-inferior.h (startup_inferior): Add
+	process_stratum_target parameter.
+	* python/py-threadevent.c (py_get_event_thread): Pass target down.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_target::start_remote): Don't set inferior_ptid
 	directly.  Instead find the first thread in the thread list and

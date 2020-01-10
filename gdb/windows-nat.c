@@ -350,6 +350,8 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   bool get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 
   const char *thread_name (struct thread_info *) override;
+
+  int get_windows_debug_event (int pid, struct target_waitstatus *ourstatus);
 };
 
 static windows_nat_target the_windows_nat_target;
@@ -458,9 +460,9 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
      the main thread silently (in reality, this thread is really
      more of a process to the user than a thread).  */
   if (main_thread_p)
-    add_thread_silent (ptid);
+    add_thread_silent (&the_windows_nat_target, ptid);
   else
-    add_thread (ptid);
+    add_thread (&the_windows_nat_target, ptid);
 
   /* Set the debug registers for the new thread if they are used.  */
   if (debug_registers_used)
@@ -529,7 +531,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 		       target_pid_to_str (ptid).c_str (),
 		       (unsigned) exit_code);
 
-  delete_thread (find_thread_ptid (ptid));
+  delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
   for (th = &thread_head;
        th->next != NULL && th->next->id != id;
@@ -1524,9 +1526,10 @@ ctrl_c_handler (DWORD event_type)
 
 /* Get the next event from the child.  Returns a non-zero thread id if the event
    requires handling by WFI (or whatever).  */
-static int
-get_windows_debug_event (struct target_ops *ops,
-			 int pid, struct target_waitstatus *ourstatus)
+
+int
+windows_nat_target::get_windows_debug_event (int pid,
+					     struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
@@ -1556,8 +1559,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     "CREATE_THREAD_DEBUG_EVENT"));
       if (saw_create != 1)
 	{
-	  struct inferior *inf;
-	  inf = find_inferior_pid (current_event.dwProcessId);
+	  inferior *inf = find_inferior_pid (this, current_event.dwProcessId);
 	  if (!saw_create && inf->attach_flag)
 	    {
 	      /* Kludge around a Windows bug where first event is a create
@@ -1779,7 +1781,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     the user tries to resume the execution in the inferior.
 	     This is a classic race that we should try to fix one day.  */
       SetConsoleCtrlHandler (&ctrl_c_handler, TRUE);
-      retval = get_windows_debug_event (this, pid, ourstatus);
+      retval = get_windows_debug_event (pid, ourstatus);
       SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (retval)

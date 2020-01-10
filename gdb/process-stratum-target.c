@@ -29,7 +29,7 @@ struct address_space *
 process_stratum_target::thread_address_space (ptid_t ptid)
 {
   /* Fall-back to the "main" address space of the inferior.  */
-  inferior *inf = find_inferior_ptid (ptid);
+  inferior *inf = find_inferior_ptid (this, ptid);
 
   if (inf == NULL || inf->aspace == NULL)
     internal_error (__FILE__, __LINE__,
@@ -43,7 +43,7 @@ process_stratum_target::thread_address_space (ptid_t ptid)
 struct gdbarch *
 process_stratum_target::thread_architecture (ptid_t ptid)
 {
-  inferior *inf = find_inferior_ptid (ptid);
+  inferior *inf = find_inferior_ptid (this, ptid);
   gdb_assert (inf != NULL);
   return inf->gdbarch;
 }

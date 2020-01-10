@@ -44,6 +44,13 @@ extern int build_section_table (struct bfd *, struct target_section **,
 
 extern void clear_section_table (struct target_section_table *table);
 
+/* The current inferior is a child vforked and its program space is
+   shared with its parent.  This pushes the exec target on the
+   current/child inferior's target stack if there are sections in the
+   program space's section table.  */
+
+extern void exec_on_vfork ();
+
 /* Read from mappable read-only sections of BFD executable files.
    Return TARGET_XFER_OK, if read is successful.  Return
    TARGET_XFER_EOF if read is done.  Return TARGET_XFER_E_IO

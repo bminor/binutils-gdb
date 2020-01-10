@@ -186,7 +186,7 @@ print_it_catch_syscall (bpstat bs)
   struct syscall s;
   struct gdbarch *gdbarch = bs->bp_location_at->gdbarch;
 
-  get_last_target_status (nullptr, &last);
+  get_last_target_status (nullptr, nullptr, &last);
 
   get_syscall_by_number (gdbarch, last.value.syscall_number, &s);
 

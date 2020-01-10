@@ -30,6 +30,7 @@
 #include "i387-tdep.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
+#include "inferior.h"
 
 /* Support for signal handlers.  */
 
@@ -332,7 +333,8 @@ i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   if (tdep->fsbase_regnum == -1)
     error (_("Unable to fetch %%gsbase"));
 
-  regcache = get_thread_arch_regcache (ptid, gdbarch);
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
 
   target_fetch_registers (regcache, tdep->fsbase_regnum + 1);
 

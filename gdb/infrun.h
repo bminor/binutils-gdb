@@ -25,6 +25,7 @@ struct target_waitstatus;
 struct frame_info;
 struct address_space;
 struct return_value_info;
+struct process_stratum_target;
 
 /* True if we are debugging run control.  */
 extern unsigned int debug_infrun;
@@ -93,7 +94,13 @@ extern void proceed (CORE_ADDR, enum gdb_signal);
    resumed.  */
 extern ptid_t user_visible_resume_ptid (int step);
 
-extern void wait_for_inferior (void);
+/* Return the process_stratum target that we will proceed, in the
+   perspective of the user/frontend.  If RESUME_PTID is
+   MINUS_ONE_PTID, then we'll resume all threads of all targets, so
+   the function returns NULL.  Otherwise, we'll be resuming a process
+   or thread of the current process, so we return the current
+   inferior's process stratum target.  */
+extern process_stratum_target *user_visible_resume_target (ptid_t resume_ptid);
 
 /* Return control to GDB when the inferior stops for real.  Print
    appropriate messages, remove breakpoints, give terminal our modes,
@@ -101,15 +108,16 @@ extern void wait_for_inferior (void);
    target, false otherwise.  */
 extern int normal_stop (void);
 
-/* Return the cached copy of the last ptid/waitstatus returned
+/* Return the cached copy of the last target/ptid/waitstatus returned
    by target_wait()/deprecated_target_wait_hook().  The data is
    actually cached by handle_inferior_event(), which gets called
    immediately after target_wait()/deprecated_target_wait_hook().  */
-extern void get_last_target_status (ptid_t *ptid,
+extern void get_last_target_status (process_stratum_target **target,
+				    ptid_t *ptid,
 				    struct target_waitstatus *status);
 
-/* Set the cached copy of the last ptid/waitstatus.  */
-extern void set_last_target_status (ptid_t ptid,
+/* Set the cached copy of the last target/ptid/waitstatus.  */
+extern void set_last_target_status (process_stratum_target *target, ptid_t ptid,
 				    struct target_waitstatus status);
 
 /* Clear the cached copy of the last ptid/waitstatus returned by

@@ -991,11 +991,11 @@ fbsd_enable_proc_events (pid_t pid)
    called to discover new threads each time the thread list is updated.  */
 
 static void
-fbsd_add_threads (pid_t pid)
+fbsd_add_threads (fbsd_nat_target *target, pid_t pid)
 {
   int i, nlwps;
 
-  gdb_assert (!in_thread_list (ptid_t (pid)));
+  gdb_assert (!in_thread_list (target, ptid_t (pid)));
   nlwps = ptrace (PT_GETNUMLWPS, pid, NULL, 0);
   if (nlwps == -1)
     perror_with_name (("ptrace"));
@@ -1010,7 +1010,7 @@ fbsd_add_threads (pid_t pid)
     {
       ptid_t ptid = ptid_t (pid, lwps[i], 0);
 
-      if (!in_thread_list (ptid))
+      if (!in_thread_list (target, ptid))
 	{
 #ifdef PT_LWP_EVENTS
 	  struct ptrace_lwpinfo pl;
@@ -1026,7 +1026,7 @@ fbsd_add_threads (pid_t pid)
 	    fprintf_unfiltered (gdb_stdlog,
 				"FLWP: adding thread for LWP %u\n",
 				lwps[i]);
-	  add_thread (ptid);
+	  add_thread (target, ptid);
 	}
     }
 }
@@ -1043,7 +1043,7 @@ fbsd_nat_target::update_thread_list ()
 #else
   prune_threads ();
 
-  fbsd_add_threads (inferior_ptid.pid ());
+  fbsd_add_threads (this, inferior_ptid.pid ());
 #endif
 }
 
@@ -1174,7 +1174,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   if (ptid.lwp_p ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
-      inferior *inf = find_inferior_ptid (ptid);
+      inferior *inf = find_inferior_ptid (this, ptid);
 
       for (thread_info *tp : inf->non_exited_threads ())
         {
@@ -1193,7 +1193,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     {
       /* If ptid is a wildcard, resume all matching threads (they won't run
 	 until the process is continued however).  */
-      for (thread_info *tp : all_non_exited_threads (ptid))
+      for (thread_info *tp : all_non_exited_threads (this, ptid))
 	if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
 	  perror_with_name (("ptrace"));
       ptid = inferior_ptid;
@@ -1239,7 +1239,8 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
    core, return true.  */
 
 static bool
-fbsd_handle_debug_trap (ptid_t ptid, const struct ptrace_lwpinfo &pl)
+fbsd_handle_debug_trap (fbsd_nat_target *target, ptid_t ptid,
+			const struct ptrace_lwpinfo &pl)
 {
 
   /* Ignore traps without valid siginfo or for signals other than
@@ -1266,7 +1267,7 @@ fbsd_handle_debug_trap (ptid_t ptid, const struct ptrace_lwpinfo &pl)
   if (pl.pl_siginfo.si_code == TRAP_BRKPT)
     {
       /* Fixup PC for the software breakpoint.  */
-      struct regcache *regcache = get_thread_regcache (ptid);
+      struct regcache *regcache = get_thread_regcache (target, ptid);
       struct gdbarch *gdbarch = regcache->arch ();
       int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 
@@ -1340,7 +1341,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 threads might be skipped during post_attach that
 		 have not yet reported their PL_FLAG_EXITED event.
 		 Ignore EXITED events for an unknown LWP.  */
-	      thread_info *thr = find_thread_ptid (wptid);
+	      thread_info *thr = find_thread_ptid (this, wptid);
 	      if (thr != nullptr)
 		{
 		  if (debug_fbsd_lwp)
@@ -1364,13 +1365,13 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     PL_FLAG_BORN in case the first stop reported after
 	     attaching to an existing process is a PL_FLAG_BORN
 	     event.  */
-	  if (in_thread_list (ptid_t (pid)))
+	  if (in_thread_list (this, ptid_t (pid)))
 	    {
 	      if (debug_fbsd_lwp)
 		fprintf_unfiltered (gdb_stdlog,
 				    "FLWP: using LWP %u for first thread\n",
 				    pl.pl_lwpid);
-	      thread_change_ptid (ptid_t (pid), wptid);
+	      thread_change_ptid (this, ptid_t (pid), wptid);
 	    }
 
 #ifdef PT_LWP_EVENTS
@@ -1380,13 +1381,13 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 threads might be added by fbsd_add_threads that have
 		 not yet reported their PL_FLAG_BORN event.  Ignore
 		 BORN events for an already-known LWP.  */
-	      if (!in_thread_list (wptid))
+	      if (!in_thread_list (this, wptid))
 		{
 		  if (debug_fbsd_lwp)
 		    fprintf_unfiltered (gdb_stdlog,
 					"FLWP: adding thread for LWP %u\n",
 					pl.pl_lwpid);
-		  add_thread (wptid);
+		  add_thread (this, wptid);
 		}
 	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	      return wptid;
@@ -1474,7 +1475,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 #endif
 
 #ifdef USE_SIGTRAP_SIGINFO
-	  if (fbsd_handle_debug_trap (wptid, pl))
+	  if (fbsd_handle_debug_trap (this, wptid, pl))
 	    return wptid;
 #endif
 
@@ -1633,7 +1634,7 @@ void
 fbsd_nat_target::post_attach (int pid)
 {
   fbsd_enable_proc_events (pid);
-  fbsd_add_threads (pid);
+  fbsd_add_threads (this, pid);
 }
 
 #ifdef PL_FLAG_EXEC

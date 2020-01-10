@@ -645,10 +645,19 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
      events --- the frontend shouldn't see them as stopped.  In
      all-stop, always finish the state of all threads, as we may be
      resuming more than just the new process.  */
-  ptid_t finish_ptid = (non_stop
-			? ptid_t (current_inferior ()->pid)
-			: minus_one_ptid);
-  scoped_finish_thread_state finish_state (finish_ptid);
+  process_stratum_target *finish_target;
+  ptid_t finish_ptid;
+  if (non_stop)
+    {
+      finish_target = current_inferior ()->process_target ();
+      finish_ptid = ptid_t (current_inferior ()->pid);
+    }
+  else
+    {
+      finish_target = nullptr;
+      finish_ptid = minus_one_ptid;
+    }
+  scoped_finish_thread_state finish_state (finish_target, finish_ptid);
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
@@ -716,6 +725,9 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
      thread stopped until I say otherwise', then we can optimize
      this.  */
   if (thread->state != THREAD_STOPPED)
+    return 0;
+
+  if (!thread->inf->has_execution ())
     return 0;
 
   switch_to_thread (thread);
@@ -811,7 +823,7 @@ static void
 continue_command (const char *args, int from_tty)
 {
   int async_exec;
-  int all_threads = 0;
+  bool all_threads_p = false;
 
   ERROR_NO_INFERIOR;
 
@@ -823,17 +835,17 @@ continue_command (const char *args, int from_tty)
     {
       if (startswith (args, "-a"))
 	{
-	  all_threads = 1;
+	  all_threads_p = true;
 	  args += sizeof ("-a") - 1;
 	  if (*args == '\0')
 	    args = NULL;
 	}
     }
 
-  if (!non_stop && all_threads)
+  if (!non_stop && all_threads_p)
     error (_("`-a' is meaningless in all-stop mode."));
 
-  if (args != NULL && all_threads)
+  if (args != NULL && all_threads_p)
     error (_("Can't resume all threads and specify "
 	     "proceed count simultaneously."));
 
@@ -850,10 +862,11 @@ continue_command (const char *args, int from_tty)
 	tp = inferior_thread ();
       else
 	{
+	  process_stratum_target *last_target;
 	  ptid_t last_ptid;
 
-	  get_last_target_status (&last_ptid, nullptr);
-	  tp = find_thread_ptid (last_ptid);
+	  get_last_target_status (&last_target, &last_ptid, nullptr);
+	  tp = find_thread_ptid (last_target, last_ptid);
 	}
       if (tp != NULL)
 	bs = tp->control.stop_bpstat;
@@ -881,7 +894,7 @@ continue_command (const char *args, int from_tty)
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
 
-  if (!non_stop || !all_threads)
+  if (!non_stop || !all_threads_p)
     {
       ensure_valid_thread ();
       ensure_not_running ();
@@ -892,7 +905,7 @@ continue_command (const char *args, int from_tty)
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
-  continue_1 (all_threads);
+  continue_1 (all_threads_p);
 }
 
 /* Record the starting point of a "step" or "next" command.  */
@@ -1112,7 +1125,7 @@ prepare_one_step (struct step_command_fsm *sm)
 
 	      /* Pretend that we've ran.  */
 	      resume_ptid = user_visible_resume_ptid (1);
-	      set_running (resume_ptid, 1);
+	      set_running (tp->inf->process_target (), resume_ptid, true);
 
 	      step_into_inline_frame (tp);
 
@@ -1316,10 +1329,14 @@ signal_command (const char *signum_exp, int from_tty)
       /* This indicates what will be resumed.  Either a single thread,
 	 a whole process, or all threads of all processes.  */
       ptid_t resume_ptid = user_visible_resume_ptid (0);
+      process_stratum_target *resume_target
+	= user_visible_resume_target (resume_ptid);
 
-      for (thread_info *tp : all_non_exited_threads (resume_ptid))
+      thread_info *current = inferior_thread ();
+
+      for (thread_info *tp : all_non_exited_threads (resume_target, resume_ptid))
 	{
-	  if (tp->ptid == inferior_ptid)
+	  if (tp == current)
 	    continue;
 
 	  if (tp->suspend.stop_signal != GDB_SIGNAL_0
@@ -1982,6 +1999,7 @@ info_program_command (const char *args, int from_tty)
   bpstat bs;
   int num, stat;
   ptid_t ptid;
+  process_stratum_target *proc_target;
 
   if (!target_has_execution)
     {
@@ -1990,14 +2008,17 @@ info_program_command (const char *args, int from_tty)
     }
 
   if (non_stop)
-    ptid = inferior_ptid;
+    {
+      ptid = inferior_ptid;
+      proc_target = current_inferior ()->process_target ();
+    }
   else
-    get_last_target_status (&ptid, nullptr);
+    get_last_target_status (&proc_target, &ptid, nullptr);
 
   if (ptid == null_ptid || ptid == minus_one_ptid)
     error (_("No selected thread."));
 
-  thread_info *tp = find_thread_ptid (ptid);
+  thread_info *tp = find_thread_ptid (proc_target, ptid);
 
   if (tp->state == THREAD_EXITED)
     error (_("Invalid selected thread."));
@@ -2786,12 +2807,16 @@ attach_command (const char *args, int from_tty)
       add_inferior_continuation (attach_command_continuation, a,
 				 attach_command_continuation_free_args);
 
+      /* Let infrun consider waiting for events out of this
+	 target.  */
+      inferior->process_target ()->threads_executing = true;
+
       if (!target_is_async_p ())
 	mark_infrun_async_event_handler ();
       return;
     }
-
-  attach_post_wait (args, from_tty, mode);
+  else
+    attach_post_wait (args, from_tty, mode);
 }
 
 /* We had just found out that the target was already attached to an
@@ -2908,20 +2933,15 @@ disconnect_command (const char *args, int from_tty)
     deprecated_detach_hook ();
 }
 
-void 
-interrupt_target_1 (int all_threads)
+/* Stop PTID in the current target, and tag the PTID threads as having
+   been explicitly requested to stop.  PTID can be a thread, a
+   process, or minus_one_ptid, meaning all threads of all inferiors of
+   the current target.  */
+
+static void
+stop_current_target_threads_ns (ptid_t ptid)
 {
-  ptid_t ptid;
-
-  if (all_threads)
-    ptid = minus_one_ptid;
-  else
-    ptid = inferior_ptid;
-
-  if (non_stop)
-    target_stop (ptid);
-  else
-    target_interrupt ();
+  target_stop (ptid);
 
   /* Tag the thread as having been explicitly requested to stop, so
      other parts of gdb know not to resume this thread automatically,
@@ -2929,8 +2949,32 @@ interrupt_target_1 (int all_threads)
      non-stop mode, as when debugging a multi-threaded application in
      all-stop mode, we will only get one stop event --- it's undefined
      which thread will report the event.  */
+  set_stop_requested (current_inferior ()->process_target (),
+		      ptid, 1);
+}
+
+/* See inferior.h.  */
+
+void
+interrupt_target_1 (bool all_threads)
+{
   if (non_stop)
-    set_stop_requested (ptid, 1);
+    {
+      if (all_threads)
+	{
+	  scoped_restore_current_thread restore_thread;
+
+	  for (inferior *inf : all_inferiors ())
+	    {
+	      switch_to_inferior_no_thread (inf);
+	      stop_current_target_threads_ns (minus_one_ptid);
+	    }
+	}
+      else
+	stop_current_target_threads_ns (inferior_ptid);
+    }
+  else
+    target_interrupt ();
 }
 
 /* interrupt [-a]

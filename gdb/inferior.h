@@ -56,6 +56,8 @@ struct thread_info;
 #include "gdbsupport/common-inferior.h"
 #include "gdbthread.h"
 
+#include "process-stratum-target.h"
+
 struct infcall_suspend_state;
 struct infcall_control_state;
 
@@ -206,7 +208,7 @@ extern void registers_info (const char *, int);
 
 extern void continue_1 (int all_threads);
 
-extern void interrupt_target_1 (int all_threads);
+extern void interrupt_target_1 (bool all_threads);
 
 using delete_longjmp_breakpoint_cleanup
   = FORWARD_SCOPE_EXIT (delete_longjmp_breakpoint);
@@ -342,6 +344,35 @@ public:
 
   /* Returns true if we can delete this inferior.  */
   bool deletable () const { return refcount () == 0; }
+
+  /* Push T in this inferior's target stack.  */
+  void push_target (struct target_ops *t)
+  { m_target_stack.push (t); }
+
+  /* Unpush T from this inferior's target stack.  */
+  int unpush_target (struct target_ops *t)
+  { return m_target_stack.unpush (t); }
+
+  /* Returns true if T is pushed in this inferior's target stack.  */
+  bool target_is_pushed (target_ops *t)
+  { return m_target_stack.is_pushed (t); }
+
+  /* Find the target beneath T in this inferior's target stack.  */
+  target_ops *find_target_beneath (const target_ops *t)
+  { return m_target_stack.find_beneath (t); }
+
+  /* Return the target at the top of this inferior's target stack.  */
+  target_ops *top_target ()
+  { return m_target_stack.top (); }
+
+  /* Return the target at process_stratum level in this inferior's
+     target stack.  */
+  struct process_stratum_target *process_target ()
+  { return (process_stratum_target *) m_target_stack.at (process_stratum); }
+
+  /* Return the target at STRATUM in this inferior's target stack.  */
+  target_ops *target_at (enum strata stratum)
+  { return m_target_stack.at (stratum); }
 
   bool has_execution ()
   { return target_has_execution_1 (this); }
@@ -507,6 +538,10 @@ public:
 
   /* Per inferior data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS;
+
+private:
+  /* The inferior's target stack.  */
+  target_stack m_target_stack;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB
@@ -537,14 +572,14 @@ extern void exit_inferior_num_silent (int num);
 
 extern void inferior_appeared (struct inferior *inf, int pid);
 
-/* Get rid of all inferiors.  */
-extern void discard_all_inferiors (void);
+/* Search function to lookup an inferior of TARG by target 'pid'.  */
+extern struct inferior *find_inferior_pid (process_stratum_target *targ,
+					   int pid);
 
-/* Search function to lookup an inferior by target 'pid'.  */
-extern struct inferior *find_inferior_pid (int pid);
-
-/* Search function to lookup an inferior whose pid is equal to 'ptid.pid'. */
-extern struct inferior *find_inferior_ptid (ptid_t ptid);
+/* Search function to lookup an inferior of TARG whose pid is equal to
+   'ptid.pid'. */
+extern struct inferior *find_inferior_ptid (process_stratum_target *targ,
+					    ptid_t ptid);
 
 /* Search function to lookup an inferior by GDB 'num'.  */
 extern struct inferior *find_inferior_id (int num);
@@ -571,8 +606,9 @@ extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 
-/* Returns the number of live inferiors (real live processes).  */
-extern int number_of_live_inferiors (void);
+/* Returns the number of live inferiors running on PROC_TARGET (real
+   live processes with execution).  */
+extern int number_of_live_inferiors (process_stratum_target *proc_target);
 
 /* Returns true if there are any live inferiors in the inferior list
    (not cores, not executables, real live processes).  */
@@ -629,18 +665,18 @@ all_inferiors_safe ()
 */
 
 inline all_inferiors_range
-all_inferiors ()
+all_inferiors (process_stratum_target *proc_target = nullptr)
 {
-  return {};
+  return all_inferiors_range (proc_target);
 }
 
 /* Return a range that can be used to walk over all inferiors with PID
    not zero, with range-for.  */
 
 inline all_non_exited_inferiors_range
-all_non_exited_inferiors ()
+all_non_exited_inferiors (process_stratum_target *proc_target = nullptr)
 {
-  return {};
+  return all_non_exited_inferiors_range (proc_target);
 }
 
 /* Prune away automatically added inferiors that aren't required

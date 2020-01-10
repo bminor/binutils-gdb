@@ -22,7 +22,7 @@
 #include "tracepoint.h"
 #include "gdbsupport/byte-vector.h"
 
-struct target_ops *the_target;
+process_stratum_target *the_target;
 
 int
 set_desired_thread ()
@@ -119,7 +119,7 @@ done_accessing_memory (void)
 
   /* Restore the previous selected thread.  */
   cs.general_thread = prev_general_thread;
-  switch_to_thread (cs.general_thread);
+  switch_to_thread (the_target, cs.general_thread);
 }
 
 int
@@ -284,9 +284,9 @@ start_non_stop (int nonstop)
 }
 
 void
-set_target_ops (struct target_ops *target)
+set_target_ops (process_stratum_target *target)
 {
-  the_target = XNEW (struct target_ops);
+  the_target = XNEW (process_stratum_target);
   memcpy (the_target, target, sizeof (*the_target));
 }
 

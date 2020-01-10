@@ -26,6 +26,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 /* Register maps.  */
 
@@ -183,7 +184,8 @@ riscv_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 {
   struct regcache *regcache;
 
-  regcache = get_thread_arch_regcache (ptid, gdbarch);
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
 
   target_fetch_registers (regcache, RISCV_TP_REGNUM);
 

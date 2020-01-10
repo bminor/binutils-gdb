@@ -1740,13 +1740,17 @@ quit_force (int *exit_arg, int from_tty)
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */
-  try
+  for (inferior *inf : all_inferiors ())
     {
-      pop_all_targets ();
-    }
-  catch (const gdb_exception &ex)
-    {
-      exception_print (gdb_stderr, ex);
+      switch_to_inferior_no_thread (inf);
+      try
+	{
+	  pop_all_targets ();
+	}
+      catch (const gdb_exception &ex)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
     }
 
   /* Save the history information if it is appropriate to do so.  */
@@ -2298,7 +2302,6 @@ gdb_init (char *argv0)
 #endif
 
   init_cmd_lists ();	    /* This needs to be done first.  */
-  initialize_targets ();    /* Setup target_terminal macros for utils.c.  */
 
   init_page_info ();
 

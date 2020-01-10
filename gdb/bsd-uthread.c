@@ -381,9 +381,11 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr;
+  process_stratum_target *beneath
+    = as_process_stratum_target (this->beneath ());
 
   /* Pass the request to the layer beneath.  */
-  ptid = beneath ()->wait (ptid, status, options);
+  ptid = beneath->wait (ptid, status, options);
 
   /* If the process is no longer alive, there's no point in figuring
      out the thread ID.  It will fail anyway.  */
@@ -414,13 +416,13 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
      ptid with tid set, then ptid is still the initial thread of
      the process.  Notify GDB core about it.  */
   if (inferior_ptid.tid () == 0
-      && ptid.tid () != 0 && !in_thread_list (ptid))
-    thread_change_ptid (inferior_ptid, ptid);
+      && ptid.tid () != 0 && !in_thread_list (beneath, ptid))
+    thread_change_ptid (beneath, inferior_ptid, ptid);
 
   /* Don't let the core see a ptid without a corresponding thread.  */
-  thread_info *thread = find_thread_ptid (ptid);
+  thread_info *thread = find_thread_ptid (beneath, ptid);
   if (thread == NULL || thread->state == THREAD_EXITED)
-    add_thread (ptid);
+    add_thread (beneath, ptid);
 
   return ptid;
 }
@@ -467,16 +469,18 @@ bsd_uthread_target::update_thread_list ()
     {
       ptid_t ptid = ptid_t (pid, 0, addr);
 
-      thread_info *thread = find_thread_ptid (ptid);
+      process_stratum_target *proc_target
+	= as_process_stratum_target (this->beneath ());
+      thread_info *thread = find_thread_ptid (proc_target, ptid);
       if (thread == nullptr || thread->state == THREAD_EXITED)
 	{
 	  /* If INFERIOR_PTID doesn't have a tid member yet, then ptid
 	     is still the initial thread of the process.  Notify GDB
 	     core about it.  */
 	  if (inferior_ptid.tid () == 0)
-	    thread_change_ptid (inferior_ptid, ptid);
+	    thread_change_ptid (proc_target, inferior_ptid, ptid);
 	  else
-	    add_thread (ptid);
+	    add_thread (proc_target, ptid);
 	}
 
       addr = bsd_uthread_read_memory_address (addr + offset);

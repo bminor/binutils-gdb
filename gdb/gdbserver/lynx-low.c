@@ -721,7 +721,7 @@ lynx_request_interrupt (void)
 
 /* The LynxOS target_ops vector.  */
 
-static struct target_ops lynx_target_ops = {
+static process_stratum_target lynx_target_ops = {
   lynx_create_inferior,
   NULL,  /* post_create_inferior */
   lynx_attach,

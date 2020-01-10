@@ -95,37 +95,54 @@ find_inline_frame_state (thread_info *thread)
   return &state;
 }
 
-/* Forget about any hidden inlined functions in PTID, which is new or
-   about to be resumed.  PTID may be minus_one_ptid (all processes)
-   or a PID (all threads in this process).  */
+/* See inline-frame.h.  */
 
 void
-clear_inline_frame_state (ptid_t ptid)
+clear_inline_frame_state (process_stratum_target *target, ptid_t filter_ptid)
 {
-  if (ptid == minus_one_ptid)
-    {
-      inline_states.clear ();
-      return;
-    }
+  gdb_assert (target != NULL);
 
-  if (ptid.is_pid ())
+  if (filter_ptid == minus_one_ptid || filter_ptid.is_pid ())
     {
-      int pid = ptid.pid ();
+      auto matcher = [target, &filter_ptid] (const inline_state &state)
+	{
+	  thread_info *t = state.thread;
+	  return (t->inf->process_target () == target
+		  && t->ptid.matches (filter_ptid));
+	};
+
       auto it = std::remove_if (inline_states.begin (), inline_states.end (),
-				[pid] (const inline_state &state)
-				  {
-				    return pid == state.thread->inf->pid;
-				  });
+				matcher);
 
       inline_states.erase (it, inline_states.end ());
 
       return;
     }
 
+
+  auto matcher = [target, &filter_ptid] (const inline_state &state)
+    {
+      thread_info *t = state.thread;
+      return (t->inf->process_target () == target
+	      && filter_ptid == t->ptid);
+    };
+
   auto it = std::find_if (inline_states.begin (), inline_states.end (),
-			  [&ptid] (const inline_state &state)
+			  matcher);
+
+  if (it != inline_states.end ())
+    unordered_remove (inline_states, it);
+}
+
+/* See inline-frame.h.  */
+
+void
+clear_inline_frame_state (thread_info *thread)
+{
+  auto it = std::find_if (inline_states.begin (), inline_states.end (),
+			  [thread] (const inline_state &state)
 			    {
-			      return ptid == state.thread->ptid;
+			      return thread == state.thread;
 			    });
 
   if (it != inline_states.end ())

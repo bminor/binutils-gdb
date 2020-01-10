@@ -219,6 +219,9 @@ get_base_thread_from_ravenscar_task (ptid_t ptid)
 void
 ravenscar_thread_target::update_inferior_ptid ()
 {
+  process_stratum_target *proc_target
+    = as_process_stratum_target (this->beneath ());
+
   int base_cpu;
 
   m_base_ptid = inferior_ptid;
@@ -239,8 +242,8 @@ ravenscar_thread_target::update_inferior_ptid ()
   /* The running thread may not have been added to
      system.tasking.debug's list yet; so ravenscar_update_thread_list
      may not always add it to the thread list.  Add it here.  */
-  if (!find_thread_ptid (inferior_ptid))
-    add_thread (inferior_ptid);
+  if (!find_thread_ptid (proc_target, inferior_ptid))
+    add_thread (proc_target, inferior_ptid);
 }
 
 /* The Ravenscar Runtime exports a symbol which contains the ID of
@@ -336,12 +339,14 @@ ravenscar_thread_target::wait (ptid_t ptid,
 			       struct target_waitstatus *status,
 			       int options)
 {
+  process_stratum_target *beneath
+    = as_process_stratum_target (this->beneath ());
   ptid_t event_ptid;
 
   inferior_ptid = m_base_ptid;
   if (ptid != minus_one_ptid)
     ptid = m_base_ptid;
-  event_ptid = beneath ()->wait (ptid, status, 0);
+  event_ptid = beneath->wait (ptid, status, 0);
   /* Find any new threads that might have been created, and update
      inferior_ptid to the active thread.
 
@@ -367,8 +372,8 @@ ravenscar_thread_target::wait (ptid_t ptid,
 static void
 ravenscar_add_thread (struct ada_task_info *task)
 {
-  if (find_thread_ptid (task->ptid) == NULL)
-    add_thread (task->ptid);
+  if (find_thread_ptid (current_inferior (), task->ptid) == NULL)
+    add_thread (current_inferior ()->process_target (), task->ptid);
 }
 
 void

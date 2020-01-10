@@ -70,17 +70,22 @@ static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 		gdb_byte *buf, size_t len, int write)
 {
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  int ret;
-  CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
+  scoped_restore_current_inferior restore_inferior;
+  set_current_inferior (ph->thread->inf);
 
+  scoped_restore_current_program_space restore_current_progspace;
+  set_current_program_space (ph->thread->inf->pspace);
+
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = ph->thread->ptid;
 
+  CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
+
+  int ret;
   if (write)
     ret = target_write_memory (core_addr, buf, len);
   else
     ret = target_read_memory (core_addr, buf, len);
-
   return (ret == 0 ? PS_OK : PS_ERR);
 }
 
@@ -135,7 +140,9 @@ static struct regcache *
 get_ps_regcache (struct ps_prochandle *ph, lwpid_t lwpid)
 {
   inferior *inf = ph->thread->inf;
-  return get_thread_arch_regcache (ptid_t (inf->pid, lwpid), inf->gdbarch);
+  return get_thread_arch_regcache (inf->process_target (),
+				   ptid_t (inf->pid, lwpid),
+				   inf->gdbarch);
 }
 
 /* Get the general registers of LWP LWPID within the target process PH

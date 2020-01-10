@@ -1228,6 +1228,8 @@ record_full_wait_1 (struct target_ops *ops,
 		     interested in the event.  */
 
 		  registers_changed ();
+		  switch_to_thread (current_inferior ()->process_target (),
+				    ret);
 		  regcache = get_current_regcache ();
 		  tmp_pc = regcache_read_pc (regcache);
 		  const struct address_space *aspace = regcache->aspace ();
@@ -1260,14 +1262,17 @@ record_full_wait_1 (struct target_ops *ops,
 
                       if (gdbarch_software_single_step_p (gdbarch))
 			{
+			  process_stratum_target *proc_target
+			    = current_inferior ()->process_target ();
+
 			  /* Try to insert the software single step breakpoint.
 			     If insert success, set step to 0.  */
-			  set_executing (inferior_ptid, 0);
+			  set_executing (proc_target, inferior_ptid, 0);
 			  reinit_frame_cache ();
 
 			  step = !insert_single_step_breakpoints (gdbarch);
 
-			  set_executing (inferior_ptid, 1);
+			  set_executing (proc_target, inferior_ptid, 1);
 			}
 
 		      if (record_debug)
@@ -1290,6 +1295,8 @@ record_full_wait_1 (struct target_ops *ops,
     }
   else
     {
+      switch_to_thread (current_inferior ()->process_target (),
+			record_full_resume_ptid);
       struct regcache *regcache = get_current_regcache ();
       struct gdbarch *gdbarch = regcache->arch ();
       const struct address_space *aspace = regcache->aspace ();

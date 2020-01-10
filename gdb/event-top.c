@@ -1137,12 +1137,16 @@ async_disconnect (gdb_client_data arg)
       exception_print (gdb_stderr, exception);
     }
 
-  try
+  for (inferior *inf : all_inferiors ())
     {
-      pop_all_targets ();
-    }
-  catch (const gdb_exception &exception)
-    {
+      switch_to_inferior_no_thread (inf);
+      try
+	{
+	  pop_all_targets ();
+	}
+      catch (const gdb_exception &exception)
+	{
+	}
     }
 
   signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */

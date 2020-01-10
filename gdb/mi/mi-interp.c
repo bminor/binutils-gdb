@@ -961,7 +961,8 @@ multiple_inferiors_p ()
 }
 
 static void
-mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
+mi_on_resume_1 (struct mi_interp *mi,
+		process_stratum_target *targ, ptid_t ptid)
 {
   /* To cater for older frontends, emit ^running, but do it only once
      per each command.  We do it here, since at this point we know
@@ -984,7 +985,7 @@ mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
       && !multiple_inferiors_p ())
     fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
   else
-    for (thread_info *tp : all_non_exited_threads (ptid))
+    for (thread_info *tp : all_non_exited_threads (targ, ptid))
       mi_output_running (tp);
 
   if (!running_result_record_printed && mi_proceeded)
@@ -1004,10 +1005,11 @@ mi_on_resume (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
 
+  process_stratum_target *target = current_inferior ()->process_target ();
   if (ptid == minus_one_ptid || ptid.is_pid ())
     tp = inferior_thread ();
   else
-    tp = find_thread_ptid (ptid);
+    tp = find_thread_ptid (target, ptid);
 
   /* Suppress output while calling an inferior function.  */
   if (tp->control.in_infcall)
@@ -1023,7 +1025,7 @@ mi_on_resume (ptid_t ptid)
       target_terminal::scoped_restore_terminal_state term_state;
       target_terminal::ours_for_output ();
 
-      mi_on_resume_1 (mi, ptid);
+      mi_on_resume_1 (mi, target, ptid);
     }
 }
 

@@ -7354,7 +7354,7 @@ linux_get_hwcap2 (int wordsize)
   return hwcap2;
 }
 
-static struct target_ops linux_target_ops = {
+static process_stratum_target linux_target_ops = {
   linux_create_inferior,
   linux_post_create_inferior,
   linux_attach,

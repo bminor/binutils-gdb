@@ -657,7 +657,7 @@ i386_linux_nat_target::low_resume (ptid_t ptid, int step, enum gdb_signal signal
 
   if (step)
     {
-      struct regcache *regcache = get_thread_regcache (ptid);
+      struct regcache *regcache = get_thread_regcache (this, ptid);
       struct gdbarch *gdbarch = regcache->arch ();
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       ULONGEST pc;

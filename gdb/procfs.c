@@ -160,6 +160,8 @@ public:
 
   int can_use_hw_breakpoint (enum bptype, int, int) override;
   bool stopped_data_address (CORE_ADDR *) override;
+
+  void procfs_init_inferior (int pid);
 };
 
 static procfs_target the_procfs_target;
@@ -1315,6 +1317,7 @@ proc_set_current_signal (procinfo *pi, int signo)
     char sinfo[sizeof (siginfo_t)];
   } arg;
   siginfo_t mysinfo;
+  process_stratum_target *wait_target;
   ptid_t wait_ptid;
   struct target_waitstatus wait_status;
 
@@ -1327,8 +1330,9 @@ proc_set_current_signal (procinfo *pi, int signo)
     pi = find_procinfo_or_die (pi->pid, 0);
 
   /* The pointer is just a type alias.  */
-  get_last_target_status (&wait_ptid, &wait_status);
-  if (wait_ptid == inferior_ptid
+  get_last_target_status (&wait_target, &wait_ptid, &wait_status);
+  if (wait_target == &the_procfs_target
+      && wait_ptid == inferior_ptid
       && wait_status.kind == TARGET_WAITKIND_STOPPED
       && wait_status.value.sig == gdb_signal_from_host (signo)
       && proc_get_status (pi)
@@ -1987,7 +1991,7 @@ do_attach (ptid_t ptid)
 
   /* Add it to gdb's thread list.  */
   ptid = ptid_t (pi->pid, lwpid, 0);
-  add_thread (ptid);
+  add_thread (&the_procfs_target, ptid);
 
   return ptid;
 }
@@ -2285,7 +2289,7 @@ wait_again:
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval).c_str ());
-		    delete_thread (find_thread_ptid (retval));
+		    delete_thread (find_thread_ptid (this, retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
 		  }
@@ -2307,7 +2311,7 @@ wait_again:
 		    if (!proc_run_process (pi, 0, 0))
 		      proc_error (pi, "target_wait, run_process", __LINE__);
 
-		    inf = find_inferior_pid (pi->pid);
+		    inf = find_inferior_pid (this, pi->pid);
 		    if (inf->attach_flag)
 		      {
 			/* Don't call wait: simulate waiting for exit,
@@ -2394,8 +2398,8 @@ wait_again:
 
 		    temp_ptid = ptid_t (pi->pid, temp_tid, 0);
 		    /* If not in GDB's thread list, add it.  */
-		    if (!in_thread_list (temp_ptid))
-		      add_thread (temp_ptid);
+		    if (!in_thread_list (this, temp_ptid))
+		      add_thread (this, temp_ptid);
 
 		    /* Return to WFI, but tell it to immediately resume.  */
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
@@ -2406,7 +2410,7 @@ wait_again:
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval).c_str ());
-		    delete_thread (find_thread_ptid (retval));
+		    delete_thread (find_thread_ptid (this, retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
 		  }
@@ -2463,8 +2467,8 @@ wait_again:
 
 		    /* If not in GDB's thread list, add it.  */
 		    temp_ptid = ptid_t (pi->pid, temp_tid, 0);
-		    if (!in_thread_list (temp_ptid))
-		      add_thread (temp_ptid);
+		    if (!in_thread_list (this, temp_ptid))
+		      add_thread (this, temp_ptid);
 
 		    status->kind = TARGET_WAITKIND_STOPPED;
 		    status->value.sig = GDB_SIGNAL_0;
@@ -2492,12 +2496,12 @@ wait_again:
 		 threads database, add it.  */
 	      if (retval.pid () > 0
 		  && retval != inferior_ptid
-		  && !in_thread_list (retval))
+		  && !in_thread_list (this, retval))
 		{
 		  /* We have a new thread.  We need to add it both to
 		     GDB's list and to our own.  If we don't create a
 		     procinfo, resume may be unhappy later.  */
-		  add_thread (retval);
+		  add_thread (this, retval);
 		  if (find_procinfo (retval.pid (),
 				     retval.lwp ()) == NULL)
 		    create_procinfo (retval.pid (),
@@ -2850,8 +2854,8 @@ procfs_target::mourn_inferior ()
    whatever is necessary to make the child ready to be debugged, and
    then wait for the child to synchronize.  */
 
-static void
-procfs_init_inferior (struct target_ops *ops, int pid)
+void
+procfs_target::procfs_init_inferior (int pid)
 {
   procinfo *pi;
   int fail;
@@ -2859,8 +2863,8 @@ procfs_init_inferior (struct target_ops *ops, int pid)
 
   /* This routine called on the parent side (GDB side)
      after GDB forks the inferior.  */
-  if (!target_is_pushed (ops))
-    push_target (ops);
+  if (!target_is_pushed (this))
+    push_target (this);
 
   pi = create_procinfo (pid, 0);
   if (pi == NULL)
@@ -2921,8 +2925,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
   /* We already have a main thread registered in the thread table at
      this point, but it didn't have any lwp info yet.  Notify the core
      about it.  This changes inferior_ptid as well.  */
-  thread_change_ptid (ptid_t (pid),
-		      ptid_t (pid, lwpid, 0));
+  thread_change_ptid (this, ptid_t (pid), ptid_t (pid, lwpid, 0));
 
   gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 }
@@ -3089,9 +3092,9 @@ procfs_target::create_inferior (const char *exec_file,
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (ptid_t (pid));
+  add_thread_silent (this, ptid_t (pid));
 
-  procfs_init_inferior (this, pid);
+  procfs_init_inferior (pid);
 }
 
 /* An observer for the "inferior_created" event.  */
@@ -3108,9 +3111,9 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
 {
   ptid_t gdb_threadid = ptid_t (pi->pid, thread->tid, 0);
 
-  thread_info *thr = find_thread_ptid (gdb_threadid);
+  thread_info *thr = find_thread_ptid (&the_procfs_target, gdb_threadid);
   if (thr == NULL || thr->state == THREAD_EXITED)
-    add_thread (gdb_threadid);
+    add_thread (&the_procfs_target, gdb_threadid);
 
   return 0;
 }
@@ -3739,7 +3742,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 			    char *note_data, int *note_size,
 			    enum gdb_signal stop_signal)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (&the_procfs_target, ptid);
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
