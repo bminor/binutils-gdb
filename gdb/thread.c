@@ -62,8 +62,6 @@ static int highest_thread_num;
    spawned new threads we haven't heard of yet.  */
 static int threads_executing;
 
-static int thread_alive (struct thread_info *);
-
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
 
@@ -679,14 +677,38 @@ any_live_thread_of_inferior (inferior *inf)
 }
 
 /* Return true if TP is an active thread.  */
-static int
-thread_alive (struct thread_info *tp)
+static bool
+thread_alive (thread_info *tp)
 {
   if (tp->state == THREAD_EXITED)
-    return 0;
-  if (!target_thread_alive (tp->ptid))
-    return 0;
-  return 1;
+    return false;
+
+  /* Ensure we're looking at the right target stack.  */
+  gdb_assert (tp->inf == current_inferior ());
+
+  return target_thread_alive (tp->ptid);
+}
+
+/* Switch to thread TP if it is alive.  Returns true if successfully
+   switched, false otherwise.  */
+
+static bool
+switch_to_thread_if_alive (thread_info *thr)
+{
+  scoped_restore_current_thread restore_thread;
+
+  /* Switch inferior first, so that we're looking at the right target
+     stack.  */
+  switch_to_inferior_no_thread (thr->inf);
+
+  if (thread_alive (thr))
+    {
+      switch_to_thread (thr);
+      restore_thread.dont_restore ();
+      return true;
+    }
+
+  return false;
 }
 
 /* See gdbthreads.h.  */
@@ -694,9 +716,15 @@ thread_alive (struct thread_info *tp)
 void
 prune_threads (void)
 {
+  scoped_restore_current_thread restore_thread;
+
   for (thread_info *tp : all_threads_safe ())
-    if (!thread_alive (tp))
-      delete_thread (tp);
+    {
+      switch_to_inferior_no_thread (tp->inf);
+
+      if (!thread_alive (tp))
+	delete_thread (tp);
+    }
 }
 
 /* See gdbthreads.h.  */
@@ -1037,6 +1065,9 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
     gdb::optional<ui_out_emit_list> list_emitter;
     gdb::optional<ui_out_emit_table> table_emitter;
 
+    /* We'll be switching threads temporarily below.  */
+    scoped_restore_current_thread restore_thread;
+
     if (uiout->is_mi_like_p ())
       list_emitter.emplace (uiout, "threads");
     else
@@ -1054,6 +1085,10 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
 	    if (!uiout->is_mi_like_p ())
 	      {
+		/* Switch inferiors so we're looking at the right
+		   target stack.  */
+		switch_to_inferior_no_thread (tp->inf);
+
 		target_id_col_width
 		  = std::max (target_id_col_width,
 			      thread_target_id_str (tp).size ());
@@ -1085,9 +1120,6 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	uiout->table_body ();
       }
 
-    /* We'll be switching threads temporarily.  */
-    scoped_restore_current_thread restore_thread;
-
     for (inferior *inf : all_inferiors ())
       for (thread_info *tp : inf->threads ())
 	{
@@ -1115,6 +1147,9 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
 	  if (show_global_ids || uiout->is_mi_like_p ())
 	    uiout->field_signed ("id", tp->global_num);
+
+	  /* Switch to the thread (and inferior / target).  */
+	  switch_to_thread (tp);
 
 	  /* For the CLI, we stuff everything into the target-id field.
 	     This is a gross hack to make the output come out looking
@@ -1147,9 +1182,8 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	    uiout->text ("(running)\n");
 	  else
 	    {
-	      /* The switch below puts us at the top of the stack (leaf
+	      /* The switch above put us at the top of the stack (leaf
 		 frame).  */
-	      switch_to_thread (tp);
 	      print_stack_frame (get_selected_frame (NULL),
 				 /* For MI output, print frame level.  */
 				 uiout->is_mi_like_p (),
@@ -1662,7 +1696,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
       scoped_restore_current_thread restore_thread;
 
       for (thread_info *thr : thr_list_cpy)
-	if (thread_alive (thr))
+	if (switch_to_thread_if_alive (thr))
 	  thr_try_catch_cmd (thr, cmd, from_tty, flags);
     }
 }
@@ -1819,7 +1853,7 @@ thread_apply_command (const char *tidlist, int from_tty)
 	  continue;
 	}
 
-      if (!thread_alive (tp))
+      if (!switch_to_thread_if_alive (tp))
 	{
 	  warning (_("Thread %s has terminated."), print_thread_id (tp));
 	  continue;
@@ -1987,10 +2021,8 @@ show_print_thread_events (struct ui_file *file, int from_tty,
 void
 thread_select (const char *tidstr, thread_info *tp)
 {
-  if (!thread_alive (tp))
+  if (!switch_to_thread_if_alive (tp))
     error (_("Thread ID %s has terminated."), tidstr);
-
-  switch_to_thread (tp);
 
   annotate_thread_changed ();
 

@@ -2940,6 +2940,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
     {
       for (thread_info *tp : all_non_exited_threads (resume_ptid))
 	{
+	  switch_to_thread_no_regs (tp);
+
 	  /* Ignore the current thread here.  It's handled
 	     afterwards.  */
 	  if (tp == cur_thr)
@@ -2957,6 +2959,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
 	  thread_step_over_chain_enqueue (tp);
 	}
+
+      switch_to_thread (cur_thr);
     }
 
   /* Enqueue the current thread last, so that we move all other
@@ -2993,6 +2997,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	   Start all other threads that are implicitly resumed too.  */
       for (thread_info *tp : all_non_exited_threads (resume_ptid))
         {
+	  switch_to_thread_no_regs (tp);
+
 	  if (tp->resumed)
 	    {
 	      if (debug_infrun)
@@ -4377,6 +4383,7 @@ stop_all_threads (void)
 					    "infrun:   %s executing, "
 					    "need stop\n",
 					    target_pid_to_str (t->ptid).c_str ());
+		      switch_to_thread_no_regs (t);
 		      target_stop (t->ptid);
 		      t->stop_requested = 1;
 		    }
@@ -5221,6 +5228,8 @@ restart_threads (struct thread_info *event_thread)
 
   for (thread_info *tp : all_non_exited_threads ())
     {
+      switch_to_thread_no_regs (tp);
+
       if (tp == event_thread)
 	{
 	  if (debug_infrun)
@@ -5479,9 +5488,8 @@ handle_signal_stop (struct execution_control_state *ecs)
     {
       struct regcache *regcache = get_thread_regcache (ecs->event_thread);
       struct gdbarch *reg_gdbarch = regcache->arch ();
-      scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-      inferior_ptid = ecs->ptid;
+      switch_to_thread (ecs->event_thread);
 
       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
 			  paddress (reg_gdbarch,
@@ -6924,6 +6932,8 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 
       for (thread_info *tp : all_non_exited_threads ())
         {
+	  switch_to_thread_no_regs (tp);
+
 	  /* Ignore threads of processes the caller is not
 	     resuming.  */
 	  if (!sched_multi
@@ -6975,6 +6985,8 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	      return 1;
 	    }
 	}
+
+      switch_to_thread (ecs->event_thread);
     }
 
   return 0;
