@@ -1,3 +1,9 @@
+2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Pedro Alves	 <palves@redhat.com>
+
+	* gdb.server/connect-without-multi-process.exp: Also test
+	continuing to end.
+
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/remote-exec-file.exp: New file.

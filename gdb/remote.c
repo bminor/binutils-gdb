@@ -7441,7 +7441,6 @@ Packet: '%s'\n"),
     case 'W':		/* Target exited.  */
     case 'X':
       {
-	int pid;
 	ULONGEST value;
 
 	/* GDB used to accept only 2 hex chars here.  Stubs should
@@ -7465,8 +7464,9 @@ Packet: '%s'\n"),
 	      event->ws.value.sig = GDB_SIGNAL_UNKNOWN;
 	  }
 
-	/* If no process is specified, assume inferior_ptid.  */
-	pid = inferior_ptid.pid ();
+	/* If no process is specified, return null_ptid, and let the
+	   caller figure out the right process to use.  */
+	int pid = 0;
 	if (*p == '\0')
 	  ;
 	else if (*p == ';')
@@ -7842,8 +7842,16 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status, int options)
 	event_ptid = first_remote_resumed_thread ();
     }
   else
-    /* A process exit.  Invalidate our notion of current thread.  */
-    record_currthread (rs, minus_one_ptid);
+    {
+      /* A process exit.  Invalidate our notion of current thread.  */
+      record_currthread (rs, minus_one_ptid);
+      /* It's possible that the packet did not include a pid.  */
+      if (event_ptid == null_ptid)
+	event_ptid = first_remote_resumed_thread ();
+      /* EVENT_PTID could still be NULL_PTID.  Double-check.  */
+      if (event_ptid == null_ptid)
+	event_ptid = magic_null_ptid;
+    }
 
   return event_ptid;
 }
