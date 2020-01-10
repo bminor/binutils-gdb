@@ -478,6 +478,13 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (noprocess ());
     virtual void commit_resume ()
       TARGET_DEFAULT_IGNORE ();
+    /* See target_wait's description.  Note that implementations of
+       this method must not assume that inferior_ptid on entry is
+       pointing at the thread or inferior that ends up reporting an
+       event.  The reported event could be for some other thread in
+       the current inferior or even for a different process of the
+       current target.  inferior_ptid may also be null_ptid on
+       entry.  */
     virtual ptid_t wait (ptid_t, struct target_waitstatus *,
 			 int TARGET_DEBUG_PRINTER (target_debug_print_options))
       TARGET_DEFAULT_FUNC (default_target_wait);

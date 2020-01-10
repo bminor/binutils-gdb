@@ -1,5 +1,12 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* record-full.c (record_full_resume_ptid): New global.
+	(record_full_target::resume): Set it.
+	(record_full_wait_1): Use record_full_resume_ptid instead of
+	inferior_ptid.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (scoped_restore_current_thread)
 	<dont_restore, restore, m_dont_restore>: Declare.
 	* thread.c (thread_alive): Add assertion.  Return bool.
