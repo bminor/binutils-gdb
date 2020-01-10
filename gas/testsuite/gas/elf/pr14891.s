@@ -1,6 +1,6 @@
 
 foo:
-.section foo, "a"
+ .section foo, "a"
 
-.section bar, "a"
+ .section bar, "a"
 bar:
