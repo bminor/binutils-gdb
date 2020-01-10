@@ -494,6 +494,11 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
   uiout->table_header (17, ui_left, "exec", "Executable");
 
   uiout->table_body ();
+
+  /* Restore the current thread after the loop because we switch the
+     inferior in the loop.  */
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+  inferior *current_inf = current_inferior ();
   for (inferior *inf : all_inferiors ())
     {
       if (!number_is_in_list (requested_inferiors, inf->num))
@@ -501,12 +506,16 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      if (inf == current_inferior ())
+      if (inf == current_inf)
 	uiout->field_string ("current", "*");
       else
 	uiout->field_skip ("current");
 
       uiout->field_signed ("number", inf->num);
+
+      /* Because target_pid_to_str uses current_top_target,
+	 switch the inferior.  */
+      switch_to_inferior_no_thread (inf);
 
       uiout->field_string ("target-id", inferior_pid_to_str (inf->pid));
 

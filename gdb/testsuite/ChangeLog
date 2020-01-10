@@ -1,3 +1,10 @@
+2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.multi/multi-target.exp (setup): Factor out "info
+	connections" and "info inferiors" tests to ...
+	(test_info_inferiors): ... this new procedure.
+	(top level): Run new "info-inferiors" tests.
+
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.server/bkpt-other-inferior.exp: New file.

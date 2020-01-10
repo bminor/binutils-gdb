@@ -137,33 +137,6 @@ proc setup {non-stop} {
 	return 0
     }
 
-    set ws "\[ \t\]+"
-    global decimal
-
-    # Test "info connections" and "info inferior"'s "Connection"
-    # column, while at it.
-
-    gdb_test "info connections" \
-	[multi_line \
-	     "Num${ws}What${ws}Description${ws}" \
-	     "  1${ws}native${ws}Native process${ws}" \
-	     "  2${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
-	     "  3${ws}core${ws}Local core dump file${ws}" \
-	     "  4${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
-	   "\\* 5${ws}core${ws}Local core dump file${ws}" \
-	    ]
-
-    gdb_test "info inferiors" \
-	[multi_line \
-	     "Num${ws}Description${ws}Connection${ws}Executable${ws}" \
-	     "  1${ws}process ${decimal}${ws}1 \\(native\\)${ws}${binfile}${ws}" \
-	     "  2${ws}process ${decimal}${ws}2 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
-	     "  3${ws}process ${decimal}${ws}3 \\(core\\)${ws}${binfile}${ws}" \
-	     "  4${ws}process ${decimal}${ws}1 \\(native\\)${ws}${binfile}${ws}" \
-	     "  5${ws}process ${decimal}${ws}4 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
-	   "\\* 6${ws}process ${decimal}${ws}5 \\(core\\)${ws}${binfile}${ws}" \
-	    ]
-
     # For debugging.
     gdb_test "info threads" ".*"
 
@@ -365,6 +338,85 @@ proc test_ping_pong_next {} {
     }
 }
 
+# Test "info inferiors" and "info connections".  MULTI_PROCESS
+# indicates whether the multi-process feature of remote targets is
+# turned off or on.
+proc test_info_inferiors {multi_process} {
+    setup "off"
+
+    gdb_test_no_output \
+	"set remote multiprocess-feature-packet $multi_process"
+
+    # Get the description for inferior INF for when the current
+    # inferior id is CURRENT.
+    proc inf_desc {inf current} {
+	set ws "\[ \t\]+"
+	global decimal
+	upvar multi_process multi_process
+
+	if {($multi_process == "off") && ($inf == 2 || $inf == 5)} {
+	    set desc "Remote target"
+	} else {
+	    set desc "process ${decimal}"
+	}
+
+	set desc "${inf}${ws}${desc}${ws}"
+	if {$inf == $current} {
+	    return "\\* $desc"
+	} else {
+	    return "  $desc"
+	}
+    }
+
+    # Get the "Num" column for CONNECTION for when the current
+    # inferior id is CURRENT_INF.
+    proc connection_num {connection current_inf} {
+	switch $current_inf {
+	    "4" { set current_connection "1"}
+	    "5" { set current_connection "4"}
+	    "6" { set current_connection "5"}
+	    default { set current_connection $current_inf}
+	}
+	if {$connection == $current_connection} {
+	    return "\\* $connection"
+	} else {
+	    return "  $connection"
+	}
+    }
+
+    set ws "\[ \t\]+"
+    global decimal binfile
+
+    # Test "info connections" and "info inferior" by switching to each
+    # inferior one by one.
+    for {set inf 1} {$inf <= 6} {incr inf} {
+	with_test_prefix "inferior $inf" {
+	    gdb_test "inferior $inf" "Switching to inferior $inf.*"
+
+	    gdb_test "info connections" \
+		[multi_line \
+		     "Num${ws}What${ws}Description${ws}" \
+		     "[connection_num 1 $inf]${ws}native${ws}Native process${ws}" \
+		     "[connection_num 2 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+		     "[connection_num 3 $inf]${ws}core${ws}Local core dump file${ws}" \
+		     "[connection_num 4 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+		     "[connection_num 5 $inf]${ws}core${ws}Local core dump file${ws}" \
+		    ]
+
+	    gdb_test "info inferiors" \
+		[multi_line \
+		     "Num${ws}Description${ws}Connection${ws}Executable${ws}" \
+		     "[inf_desc 1 $inf]1 \\(native\\)${ws}${binfile}${ws}" \
+		     "[inf_desc 2 $inf]2 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
+		     "[inf_desc 3 $inf]3 \\(core\\)${ws}${binfile}${ws}" \
+		     "[inf_desc 4 $inf]1 \\(native\\)${ws}${binfile}${ws}" \
+		     "[inf_desc 5 $inf]4 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
+		     "[inf_desc 6 $inf]5 \\(core\\)${ws}${binfile}${ws}" \
+		    ]
+	}
+    }
+}
+
 # Make a core file with two threads upfront.  Several tests load the
 # same core file.
 prepare_core
@@ -384,4 +436,11 @@ with_test_prefix "interrupt" {
 # Test ping-ponging between two targets with "next".
 with_test_prefix "ping-pong" {
     test_ping_pong_next
+}
+
+# Test "info inferiors" and "info connections" commands.
+with_test_prefix "info-inferiors" {
+    foreach_with_prefix multi_process {"on" "off"} {
+	test_info_inferiors $multi_process
+    }
 }

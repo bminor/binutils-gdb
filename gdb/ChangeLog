@@ -1,3 +1,7 @@
+2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* inferior.c (print_inferior): Switch inferior before printing it.
+
 2020-01-10  Aleksandar Paunovic  <aleksandar.paunovic@intel.com>
 	    Pedro Alves  <palves@redhat.com>
 
