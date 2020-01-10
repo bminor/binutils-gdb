@@ -1,3 +1,12 @@
+2020-01-10  George Barrett  <bob@bob131.so>
+
+	* gdb.base/stap-probe.c: Rename USE_PROBES to USE_SEMAPHORES.
+	* gdb.base/stap-probe.exp: Likewise.
+	(stap_test): Pass argument as an additional flag.
+	(stap_test_no_debuginfo): Likewise.
+	(stap_test): Check `info probes stap' output for semaphore
+	addresses if the test binary is supposed to have them.
+
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.tui/basic.exp: Add more scrolling tests.

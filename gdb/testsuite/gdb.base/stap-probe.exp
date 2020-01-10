@@ -22,7 +22,7 @@ proc stap_test {exec_name {arg ""}} {
     global testfile hex srcfile
 
     if {[prepare_for_testing "failed to prepare" ${exec_name} $srcfile \
-	   [concat $arg debug]]} {
+	   [concat additional_flags=$arg debug]]} {
 	return -1
     }
 
@@ -33,9 +33,14 @@ proc stap_test {exec_name {arg ""}} {
     gdb_test "print \$_probe_argc" "No probe at PC $hex" \
 	"check argument not at probe point"
 
-    gdb_test "info probes stap" \
-	"test *user *$hex .*"
-    
+    if {[string first "-DUSE_SEMAPHORES" $arg] != -1} {
+	gdb_test "info probes stap" \
+	    "test *user *$hex *$hex .*"
+    } else {
+	gdb_test "info probes stap" \
+	    "test *user *$hex .*"
+    }
+
     if {[runto "-pstap test:user"]} {
 	pass "run to -pstap test:user"
     } else {
@@ -96,7 +101,7 @@ proc stap_test_no_debuginfo {exec_name {arg ""}} {
     global testfile hex
 
     if {[prepare_for_testing "failed to prepare" ${exec_name} ${testfile}.c \
-	   {$arg nodebug optimize=-O2}]} {
+	   [concat additional_flags=$arg nodebug optimize=-O2]]} {
 	return -1
     }
 
@@ -166,7 +171,7 @@ with_test_prefix "without semaphore, not optimized" {
 }
 
 with_test_prefix "with semaphore, not optimized" {
-    stap_test "stap-probe-sem-noopt" "-DUSE_PROBES"
+    stap_test "stap-probe-sem-noopt" "-DUSE_SEMAPHORES"
 }
 
 with_test_prefix "without semaphore, optimized" {
@@ -174,5 +179,5 @@ with_test_prefix "without semaphore, optimized" {
 }
 
 with_test_prefix "with semaphore, optimized" {
-    stap_test_no_debuginfo "stap-probe-sem-opt" "-DUSE_PROBES"
+    stap_test_no_debuginfo "stap-probe-sem-opt" "-DUSE_SEMAPHORES"
 }
