@@ -1,3 +1,20 @@
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (scoped_restore_current_thread)
+	<dont_restore, restore, m_dont_restore>: Declare.
+	* thread.c (thread_alive): Add assertion.  Return bool.
+	(switch_to_thread_if_alive): New.
+	(prune_threads): Switch inferior/thread.
+	(print_thread_info_1): Switch thread before calling target methods.
+	(scoped_restore_current_thread::restore): New, factored out from
+	...
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	... this.
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Add assertion.
+	(thread_apply_all_command, thread_select): Use
+	switch_to_thread_if_alive.
+
 2020-01-10  George Barrett  <bob@bob131.so>
 
 	* stap-probe.c (stap_modify_semaphore): Don't check for null

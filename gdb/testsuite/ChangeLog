@@ -1,3 +1,12 @@
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fork-running-state.exp (do_test): Adjust expected
+	output.
+	* gdb.threads/async.c: New.
+	* gdb.threads/async.exp: New.
+	* gdb.multi/tids-gid-reset.c: New.
+	* gdb.multi/tids-gid-reset.exp: New.
+
 2020-01-10  George Barrett  <bob@bob131.so>
 
 	* gdb.base/stap-probe.c (relocation_marker): Add dummy variable

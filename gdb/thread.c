@@ -1375,7 +1375,8 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
     }
 }
 
-scoped_restore_current_thread::~scoped_restore_current_thread ()
+void
+scoped_restore_current_thread::restore ()
 {
   /* If an entry of thread_info was previously selected, it won't be
      deleted because we've increased its refcount.  The thread represented
@@ -1402,6 +1403,22 @@ scoped_restore_current_thread::~scoped_restore_current_thread ()
       && target_has_stack
       && target_has_memory)
     restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
+}
+
+scoped_restore_current_thread::~scoped_restore_current_thread ()
+{
+  if (!m_dont_restore)
+    {
+      try
+	{
+	  restore ();
+	}
+      catch (const gdb_exception &ex)
+	{
+	  /* We're in a dtor, there's really nothing else we can do
+	     but swallow the exception.  */
+	}
+    }
 
   if (m_thread != NULL)
     m_thread->decref ();

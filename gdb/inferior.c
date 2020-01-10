@@ -247,6 +247,7 @@ inferior_appeared (struct inferior *inf, int pid)
 {
   /* If this is the first inferior with threads, reset the global
      thread id.  */
+  delete_exited_threads ();
   if (!any_thread_p ())
     init_thread_list ();
 

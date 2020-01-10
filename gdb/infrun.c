@@ -3039,6 +3039,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   finish_state.release ();
 
+  /* If we've switched threads above, switch back to the previously
+     current thread.  We don't want the user to see a different
+     selected thread.  */
+  switch_to_thread (cur_thr);
+
   /* Tell the event loop to wait for it to stop.  If the target
      supports asynchronous execution, it'll do this from within
      target_resume.  */
@@ -3693,14 +3698,11 @@ fetch_inferior_event (void *client_data)
 	set_current_traceframe (-1);
       }
 
-    gdb::optional<scoped_restore_current_thread> maybe_restore_thread;
-
-    if (non_stop)
-      /* In non-stop mode, the user/frontend should not notice a thread
-	 switch due to internal events.  Make sure we reverse to the
-	 user selected thread and frame after handling the event and
-	 running any breakpoint commands.  */
-      maybe_restore_thread.emplace ();
+    /* The user/frontend should not notice a thread switch due to
+       internal events.  Make sure we revert to the user selected
+       thread and frame after handling the event and running any
+       breakpoint commands.  */
+    scoped_restore_current_thread restore_thread;
 
     overlay_cache_invalid = 1;
     /* Flush target cache before starting to handle each event.  Target
@@ -3777,6 +3779,19 @@ fetch_inferior_event (void *client_data)
 		inferior_event_handler (INF_EXEC_COMPLETE, NULL);
 		cmd_done = 1;
 	      }
+
+	    /* If we got a TARGET_WAITKIND_NO_RESUMED event, then the
+	       previously selected thread is gone.  We have two
+	       choices - switch to no thread selected, or restore the
+	       previously selected thread (now exited).  We chose the
+	       later, just because that's what GDB used to do.  After
+	       this, "info threads" says "The current thread <Thread
+	       ID 2> has terminated." instead of "No thread
+	       selected.".  */
+	    if (!non_stop
+		&& cmd_done
+		&& ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED)
+	      restore_thread.dont_restore ();
 	  }
       }
 
