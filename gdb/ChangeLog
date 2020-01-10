@@ -1,3 +1,8 @@
+2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-wingeneral.c (box_win): Position the title in the center
+	of the border.
+
 2020-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* corelow.c (core_target::get_core_register_section): Use

@@ -75,13 +75,13 @@ box_win (struct tui_win_info *win_info,
       int max_len = win_info->width - 2 - 2;
 
       if (win_info->title.size () <= max_len)
-	mvwaddstr (win, 0, 3, win_info->title.c_str ());
+	mvwaddstr (win, 0, 2, win_info->title.c_str ());
       else
 	{
 	  std::string truncated
 	    = "..." + win_info->title.substr (win_info->title.size ()
 					      - max_len + 3);
-	  mvwaddstr (win, 0, 3, truncated.c_str ());
+	  mvwaddstr (win, 0, 2, truncated.c_str ());
 	}
     }
   wattroff (win, attrs);

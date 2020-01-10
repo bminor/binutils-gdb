@@ -569,9 +569,20 @@ namespace eval Term {
 	    return "lr corner"
 	}
 
-	# Note we do not check the horizonal borders of the box.  The
-	# top will contain a title, and the bottom may as well, if it
-	# is overlapped by some other border.
+	# Note we do not check the full horizonal borders of the box.
+	# The top will contain a title, and the bottom may as well, if
+	# it is overlapped by some other border.  However, at most a
+	# title should appear as '+-VERY LONG TITLE-+', so we can
+	# check for the '+-' on the left, and '-+' on the right.
+	if {[get_char [expr {$x + 1}] $y] != "-"} {
+	    return "ul title padding"
+	}
+
+	if {[get_char [expr {$x2 - 1}] $y] != "-"} {
+	    return "ul title padding"
+	}
+
+	# Now check the vertical borders.
 	for {set i [expr {$y + 1}]} {$i < $y2 - 1} {incr i} {
 	    if {[get_char $x $i] != "|"} {
 		return "left side $i"

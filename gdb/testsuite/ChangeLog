@@ -1,3 +1,8 @@
+2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/tuiterm.exp (Term::_check_box): Check some parts of the top
+	border.
+
 2020-01-10  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.multi/multi-target.exp (setup): Factor out "info
