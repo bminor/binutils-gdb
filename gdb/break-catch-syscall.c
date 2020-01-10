@@ -182,12 +182,11 @@ print_it_catch_syscall (bpstat bs)
      syscall is.  It can be in the TARGET_WAITKIND_SYSCALL_ENTRY
      or TARGET_WAITKIND_SYSCALL_RETURN, and depending on it we
      must print "called syscall" or "returned from syscall".  */
-  ptid_t ptid;
   struct target_waitstatus last;
   struct syscall s;
   struct gdbarch *gdbarch = bs->bp_location_at->gdbarch;
 
-  get_last_target_status (&ptid, &last);
+  get_last_target_status (nullptr, &last);
 
   get_syscall_by_number (gdbarch, last.value.syscall_number, &s);
 

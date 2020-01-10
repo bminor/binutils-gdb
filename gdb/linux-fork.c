@@ -215,7 +215,6 @@ call_lseek (int fd, off_t offset, int whence)
 static void
 fork_load_infrun_state (struct fork_info *fp)
 {
-  extern void nullify_last_target_wait_ptid ();
   int i;
 
   linux_nat_switch_fork (fp->ptid);

@@ -101,11 +101,20 @@ extern void wait_for_inferior (void);
    target, false otherwise.  */
 extern int normal_stop (void);
 
+/* Return the cached copy of the last ptid/waitstatus returned
+   by target_wait()/deprecated_target_wait_hook().  The data is
+   actually cached by handle_inferior_event(), which gets called
+   immediately after target_wait()/deprecated_target_wait_hook().  */
 extern void get_last_target_status (ptid_t *ptid,
 				    struct target_waitstatus *status);
 
+/* Set the cached copy of the last ptid/waitstatus.  */
 extern void set_last_target_status (ptid_t ptid,
 				    struct target_waitstatus status);
+
+/* Clear the cached copy of the last ptid/waitstatus returned by
+   target_wait().  */
+extern void nullify_last_target_wait_ptid ();
 
 /* Stop all threads.  Only returns after everything is halted.  */
 extern void stop_all_threads (void);

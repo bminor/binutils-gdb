@@ -1315,10 +1315,9 @@ get_detach_signal (struct lwp_info *lp)
 	}
       else if (!target_is_non_stop_p ())
 	{
-	  struct target_waitstatus last;
 	  ptid_t last_ptid;
 
-	  get_last_target_status (&last_ptid, &last);
+	  get_last_target_status (&last_ptid, nullptr);
 
 	  if (lp->ptid.lwp () == last_ptid.lwp ())
 	    signo = tp->suspend.stop_signal;

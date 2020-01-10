@@ -1,5 +1,29 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* break-catch-sig.c (signal_catchpoint_print_it): Don't pass a
+	ptid to get_last_target_status.
+	* break-catch-syscall.c (print_it_catch_syscall): Don't pass a
+	ptid to get_last_target_status.
+	* infcmd.c (continue_command): Don't pass a target_waitstatus to
+	get_last_target_status.
+	(info_program_command): Don't pass a target_waitstatus to
+	get_last_target_status.
+	* infrun.c (init_wait_for_inferior): Use
+	nullify_last_target_wait_ptid.
+	(get_last_target_status): Handle nullptr arguments.
+	(nullify_last_target_wait_ptid): Clear target_last_waitstatus.
+	(print_stop_event): Don't pass a ptid to get_last_target_status.
+	(normal_stop): Don't pass a ptid to get_last_target_status.
+	* infrun.h (get_last_target_status, set_last_target_status): Move
+	comments here and update.
+	(nullify_last_target_wait_ptid): Declare.
+	* linux-fork.c (fork_load_infrun_state): Remove local extern
+	declaration of nullify_last_target_wait_ptid.
+	* linux-nat.c (get_detach_signal): Don't pass a target_waitstatus
+	to get_last_target_status.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (scoped_restore_current_thread)
 	<dont_restore, restore, m_dont_restore>: Declare.
 	* thread.c (thread_alive): Add assertion.  Return bool.

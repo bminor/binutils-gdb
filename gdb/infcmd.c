@@ -851,9 +851,8 @@ continue_command (const char *args, int from_tty)
       else
 	{
 	  ptid_t last_ptid;
-	  struct target_waitstatus ws;
 
-	  get_last_target_status (&last_ptid, &ws);
+	  get_last_target_status (&last_ptid, nullptr);
 	  tp = find_thread_ptid (last_ptid);
 	}
       if (tp != NULL)
@@ -1993,11 +1992,7 @@ info_program_command (const char *args, int from_tty)
   if (non_stop)
     ptid = inferior_ptid;
   else
-    {
-      struct target_waitstatus ws;
-
-      get_last_target_status (&ptid, &ws);
-    }
+    get_last_target_status (&ptid, nullptr);
 
   if (ptid == null_ptid || ptid == minus_one_ptid)
     error (_("No selected thread."));
