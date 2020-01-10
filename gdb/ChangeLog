@@ -1,3 +1,10 @@
+2020-01-10  George Barrett  <bob@bob131.so>
+
+	* stap-probe.c (stap_modify_semaphore): Don't check for null
+	semaphores.
+	(stap_probe::set_semaphore, stap_probe::clear_semaphore): Check
+	for null semaphores.
+
 2020-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-source.c (tui_source_window::do_scroll_vertical): Update

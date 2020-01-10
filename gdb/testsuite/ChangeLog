@@ -1,5 +1,16 @@
 2020-01-10  George Barrett  <bob@bob131.so>
 
+	* gdb.base/stap-probe.c (relocation_marker): Add dummy variable
+	to help in finding the image relocation offset.
+	* gdb.base/stap-probe.exp (stap_test): Accept arbitrary compile
+	options in arguments.
+	(stap_test_no_debuginfo): Likewise.
+	(stap-probe-nosem-noopt-pie, stap-probe-nosem-noopt-nopie): Add
+	test variants.
+	(stap_test): Add null semaphore relocation test.
+
+2020-01-10  George Barrett  <bob@bob131.so>
+
 	* gdb.base/stap-probe.c: Rename USE_PROBES to USE_SEMAPHORES.
 	* gdb.base/stap-probe.exp: Likewise.
 	(stap_test): Pass argument as an additional flag.

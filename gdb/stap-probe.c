@@ -1430,9 +1430,6 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   struct type *type = builtin_type (gdbarch)->builtin_unsigned_short;
   ULONGEST value;
 
-  if (address == 0)
-    return;
-
   /* Swallow errors.  */
   if (target_read_memory (address, bytes, TYPE_LENGTH (type)) != 0)
     {
@@ -1466,6 +1463,8 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
 void
 stap_probe::set_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 {
+  if (m_sem_addr == 0)
+    return;
   stap_modify_semaphore (relocate_address (m_sem_addr, objfile), 1, gdbarch);
 }
 
@@ -1474,6 +1473,8 @@ stap_probe::set_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 void
 stap_probe::clear_semaphore (struct objfile *objfile, struct gdbarch *gdbarch)
 {
+  if (m_sem_addr == 0)
+    return;
   stap_modify_semaphore (relocate_address (m_sem_addr, objfile), 0, gdbarch);
 }
 
