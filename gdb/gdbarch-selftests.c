@@ -71,11 +71,6 @@ register_to_value_test (struct gdbarch *gdbarch)
       builtin->builtin_char32,
     };
 
-  /* Error out if debugging something, because we're going to push the
-     test target, which would pop any existing target.  */
-  if (current_top_target ()->stratum () >= process_stratum)
-   error (_("target already pushed"));
-
   /* Create a mock environment.  An inferior with a thread, with a
      process_stratum target pushed.  */
 

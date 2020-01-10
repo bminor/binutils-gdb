@@ -1,4 +1,9 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch-selftests.c (register_to_value_test): Remove "target
+	already pushed" check.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
 	    John Baldwin  <jhb@FreeBSD.org>
 
 	* aarch64-linux-nat.c
