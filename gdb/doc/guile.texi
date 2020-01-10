@@ -2155,7 +2155,7 @@ A program space, or @dfn{progspace}, represents a symbolic view
 of an address space.
 It consists of all of the objfiles of the program.
 @xref{Objfiles In Guile}.
-@xref{Inferiors and Programs, program spaces}, for more details
+@xref{Inferiors Connections and Programs, program spaces}, for more details
 about program spaces.
 
 Each progspace is represented by an instance of the @code{<gdb:progspace>}
@@ -2178,7 +2178,7 @@ if the program it refers to is not loaded in @value{GDBN} any longer.
 @deffn {Scheme Procedure} current-progspace
 This function returns the program space of the currently selected inferior.
 There is always a current progspace, this never returns @code{#f}.
-@xref{Inferiors and Programs}.
+@xref{Inferiors Connections and Programs}.
 @end deffn
 
 @deffn {Scheme Procedure} progspaces

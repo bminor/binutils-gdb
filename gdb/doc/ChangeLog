@@ -1,3 +1,14 @@
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Starting): Say "current inferior not connected"
+	instead of "GDB not connected".
+	(Inferiors and Programs): Rename node to ...
+	(Inferiors Connections and Programs): ... this.  Update all
+	references.  Talk about multiple target connections.  Update "info
+	inferiors" info to mention the connections column.  Describe "info
+	connections".  Document "add-inferior -no-connection".
+	* guile.texi, python.texi: Update cross references.
+
 2020-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo, refcard.tex: Update copyright year range.

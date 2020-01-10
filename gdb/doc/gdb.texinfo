@@ -2250,8 +2250,8 @@ kill a child process.
 * Input/Output::                Your program's input and output
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
-
-* Inferiors and Programs::      Debugging multiple inferiors and programs
+* Inferiors Connections and Programs:: Debugging multiple inferiors
+					 connections and programs
 * Threads::                     Debugging programs with multiple threads
 * Forks::                       Debugging forks
 * Checkpoint/Restart::          Setting a @emph{bookmark} to return to later
@@ -2506,27 +2506,28 @@ $@file{.zshenv} for the Z shell, or the file specified in the
 @itemx set auto-connect-native-target off
 @itemx show auto-connect-native-target
 
-By default, if not connected to any target yet (e.g., with
-@code{target remote}), the @code{run} command starts your program as a
-native process under @value{GDBN}, on your local machine.  If you're
-sure you don't want to debug programs on your local machine, you can
-tell @value{GDBN} to not connect to the native target automatically
-with the @code{set auto-connect-native-target off} command.
+By default, if the current inferior is not connected to any target yet
+(e.g., with @code{target remote}), the @code{run} command starts your
+program as a native process under @value{GDBN}, on your local machine.
+If you're sure you don't want to debug programs on your local machine,
+you can tell @value{GDBN} to not connect to the native target
+automatically with the @code{set auto-connect-native-target off}
+command.
 
-If @code{on}, which is the default, and if @value{GDBN} is not
+If @code{on}, which is the default, and if the current inferior is not
 connected to a target already, the @code{run} command automaticaly
 connects to the native target, if one is available.
 
-If @code{off}, and if @value{GDBN} is not connected to a target
-already, the @code{run} command fails with an error:
+If @code{off}, and if the current inferior is not connected to a
+target already, the @code{run} command fails with an error:
 
 @smallexample
 (@value{GDBP}) run
 Don't know how to run.  Try "help target".
 @end smallexample
 
-If @value{GDBN} is already connected to a target, @value{GDBN} always
-uses it with the @code{run} command.
+If the current inferior is already connected to a target, @value{GDBN}
+always uses it with the @code{run} command.
 
 In any case, you can explicitly connect to the native target with the
 @code{target native} command.  For example,
@@ -2956,15 +2957,17 @@ next type @code{run}, @value{GDBN} notices that the file has changed, and
 reads the symbol table again (while trying to preserve your current
 breakpoint settings).
 
-@node Inferiors and Programs
-@section Debugging Multiple Inferiors and Programs
+@node Inferiors Connections and Programs
+@section Debugging Multiple Inferiors Connections and Programs
 
 @value{GDBN} lets you run and debug multiple programs in a single
 session.  In addition, @value{GDBN} on some systems may let you run
 several programs simultaneously (otherwise you have to exit from one
-before starting another).  In the most general case, you can have
-multiple threads of execution in each of multiple processes, launched
-from multiple executables.
+before starting another).  On some systems @value{GDBN} may even let
+you debug several programs simultaneously on different remote systems.
+In the most general case, you can have multiple threads of execution
+in each of multiple processes, launched from multiple executables,
+running on different machines.
 
 @cindex inferior
 @value{GDBN} represents the state of each program execution with an
@@ -2999,6 +3002,11 @@ the inferior number assigned by @value{GDBN}
 the target system's inferior identifier
 
 @item
+the target connection the inferior is bound to, including the unique
+connection number assigned by @value{GDBN}, and the protocol used by
+the connection.
+
+@item
 the name of the executable the inferior is running.
 
 @end enumerate
@@ -3013,9 +3021,51 @@ For example,
 
 @smallexample
 (@value{GDBP}) info inferiors
-  Num  Description       Executable
-  2    process 2307      hello
-* 1    process 3401      goodbye
+  Num  Description       Connection                      Executable
+* 1    process 3401      1 (native)                      goodbye
+  2    process 2307      2 (extended-remote host:10000)  hello
+@end smallexample
+
+To find out what open target connections exist at any moment, use
+@w{@code{info connections}}:
+
+@table @code
+@kindex info connections [ @var{id}@dots{} ]
+@item info connections
+Print a list of all open target connections currently being managed by
+@value{GDBN}.  By default all connections are printed, but the
+argument @var{id}@dots{} -- a space separated list of connections
+numbers -- can be used to limit the display to just the requested
+connections.
+
+@value{GDBN} displays for each connection (in this order):
+
+@enumerate
+@item
+the connection number assigned by @value{GDBN}.
+
+@item
+the protocol used by the connection.
+
+@item
+a textual description of the protocol used by the connection.
+
+@end enumerate
+
+@noindent
+An asterisk @samp{*} preceding the connection number indicates the
+connection of the current inferior.
+
+For example,
+@end table
+@c end table here to get a little more width for example
+
+@smallexample
+(@value{GDBP}) info connections
+  Num  What                        Description
+* 1    extended-remote host:10000  Extended remote serial target in gdb-specific protocol
+  2    native                      Native process
+  3    core                        Local core dump file
 @end smallexample
 
 To switch focus between inferiors, use the @code{inferior} command:
@@ -3044,12 +3094,21 @@ remove inferiors from the debugging session use the
 
 @table @code
 @kindex add-inferior
-@item add-inferior [ -copies @var{n} ] [ -exec @var{executable} ]
+@item add-inferior [ -copies @var{n} ] [ -exec @var{executable} ] [-no-connection ]
 Adds @var{n} inferiors to be run using @var{executable} as the
 executable; @var{n} defaults to 1.  If no executable is specified,
 the inferiors begins empty, with no program.  You can still assign or
 change the program assigned to the inferior at any time by using the
 @code{file} command with the executable name as its argument.
+
+By default, the new inferior begins connected to the same target
+connection as the current inferior.  For example, if the current
+inferior was connected to @code{gdbserver} with @code{target remote},
+then the new inferior will be connected to the same @code{gdbserver}
+instance.  The @samp{-no-connection} option starts the new inferior
+with no connection yet.  You can then for example use the @code{target
+remote} command to connect to some other @code{gdbserver} instance,
+use @code{run} to spawn a local program, etc.
 
 @kindex clone-inferior
 @item clone-inferior [ -copies @var{n} ] [ @var{infno} ]
@@ -3060,15 +3119,15 @@ want to run another instance of the inferior you are debugging.
 
 @smallexample
 (@value{GDBP}) info inferiors
-  Num  Description       Executable
-* 1    process 29964     helloworld
+  Num  Description       Connection   Executable
+* 1    process 29964     1 (native)   helloworld
 (@value{GDBP}) clone-inferior
 Added inferior 2.
 1 inferiors added.
 (@value{GDBP}) info inferiors
-  Num  Description       Executable
-  2    <null>            helloworld
-* 1    process 29964     helloworld
+  Num  Description       Connection   Executable
+* 1    process 29964     1 (native)   helloworld
+  2    <null>            1 (native)   helloworld
 @end smallexample
 
 You can now simply switch focus to inferior 2 and run it.
@@ -3721,14 +3780,14 @@ If you choose to set @samp{detach-on-fork} mode off, then @value{GDBN}
 will retain control of all forked processes (including nested forks).
 You can list the forked processes under the control of @value{GDBN} by
 using the @w{@code{info inferiors}} command, and switch from one fork
-to another by using the @code{inferior} command (@pxref{Inferiors and
-Programs, ,Debugging Multiple Inferiors and Programs}).
+to another by using the @code{inferior} command (@pxref{Inferiors Connections and
+Programs, ,Debugging Multiple Inferiors Connections and Programs}).
 
 To quit debugging one of the forked processes, you can either detach
 from it by using the @w{@code{detach inferiors}} command (allowing it
 to run independently), or kill it using the @w{@code{kill inferiors}}
-command.  @xref{Inferiors and Programs, ,Debugging Multiple Inferiors
-and Programs}.
+command.  @xref{Inferiors Connections and Programs, ,Debugging
+Multiple Inferiors Connections and Programs}.
 
 If you ask to debug a child process and a @code{vfork} is followed by an
 @code{exec}, @value{GDBN} executes the new target up to the first
@@ -11911,8 +11970,8 @@ gdbserver that supports the @code{qGetTIBAddr} request.
 This variable contains the address of the thread information block.
 
 @item $_inferior
-The number of the current inferior.  @xref{Inferiors and
-Programs, ,Debugging Multiple Inferiors and Programs}.
+The number of the current inferior.  @xref{Inferiors Connections and
+Programs, ,Debugging Multiple Inferiors Connections and Programs}.
 
 @item $_thread
 The thread number of the current thread.  @xref{thread numbers}.
@@ -13108,7 +13167,7 @@ character.
 
 @value{GDBN} caches data exchanged between the debugger and a target.
 Each cache is associated with the address space of the inferior.
-@xref{Inferiors and Programs}, about inferior and address space.
+@xref{Inferiors Connections and Programs}, about inferior and address space.
 Such caching generally improves performance in remote debugging
 (@pxref{Remote Debugging}), because it reduces the overhead of the
 remote protocol by bundling memory reads and writes into large chunks.
@@ -28524,7 +28583,7 @@ groups can be obtained using @samp{-list-thread-groups --available}.
 In general, the content of a thread group may be only retrieved only
 after attaching to that thread group.
 
-Thread groups are related to inferiors (@pxref{Inferiors and
+Thread groups are related to inferiors (@pxref{Inferiors Connections and
 Programs}).  Each inferior corresponds to a thread group of a special
 type @samp{process}, and some additional operations are permitted on
 such thread groups.
@@ -35903,7 +35962,7 @@ popup menu, but is needless clutter on the command line, and
 -add-inferior
 @end smallexample
 
-Creates a new inferior (@pxref{Inferiors and Programs}).  The created
+Creates a new inferior (@pxref{Inferiors Connections and Programs}).  The created
 inferior is not associated with any executable.  Such association may
 be established with the @samp{-file-exec-and-symbols} command
 (@pxref{GDB/MI File Commands}).  The command response has a single
@@ -46189,11 +46248,11 @@ command, otherwise you may get an error that looks something like
 @command{gdbserver} can also debug multiple inferiors at once,
 described in
 @ifset man
-the @value{GDBN} manual in node @code{Inferiors and Programs}
--- shell command @code{info -f gdb -n 'Inferiors and Programs'}.
+the @value{GDBN} manual in node @code{Inferiors Connections and Programs}
+-- shell command @code{info -f gdb -n 'Inferiors Connections and Programs'}.
 @end ifset
 @ifclear man
-@ref{Inferiors and Programs}.
+@ref{Inferiors Connections and Programs}.
 @end ifclear
 In such case use the @code{extended-remote} @value{GDBN} command variant:
 

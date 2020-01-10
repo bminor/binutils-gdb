@@ -77,6 +77,21 @@
   This feature is still in testing, so it is disabled by default.  You
   can turn it on using 'maint set worker-threads unlimited'.
 
+* Multi-target debugging support
+
+  GDB now supports debugging multiple target connections
+  simultaneously.  For example, you can now have each inferior
+  connected to different remote servers running in different machines,
+  or have one inferior debugging a local native process, an inferior
+  debugging a core dump, etc.
+
+  This support is experimental and comes with some limitations -- you
+  can only resume multiple targets simultaneously if all targets
+  support non-stop mode, and all remote stubs or servers must support
+  the same set of remote protocol features exactly.  See also "info
+  connections" and "add-inferior -no-connection" below, and "maint set
+  target-non-stop" in the user manual.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
@@ -243,6 +258,9 @@ show debug remote-packet-max-chars
   "set debug remote".
   The default is 512 bytes.
 
+info connections
+  Lists the target connections currently in use.
+
 * Changed commands
 
 help
@@ -286,6 +304,17 @@ show print raw-frame-arguments
   frame-arguments" commands (now with a dash instead of a space).  The
   old commands are now deprecated and may be removed in a future
   release.
+
+add-inferior [-no-connection]
+  The add-inferior command now supports a "-no-connection" flag that
+  makes the new inferior start with no target connection associated.
+  By default, the new inferior inherits the target connection of the
+  current inferior.  See also "info connections".
+
+info inferior
+  This command's output now includes a new "Connection" column
+  indicating which target connection an inferior is bound to.  See
+  "info connections" above.
 
 maint test-options require-delimiter
 maint test-options unknown-is-error

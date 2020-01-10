@@ -1,5 +1,10 @@
 2020-01-10  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention multi-target debugging, "info connections", and
+	"add-inferior -no-connection".
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c: Include "target-connection.h".
 	(check_multi_target_resumption): New.
 	(proceed): Call it.

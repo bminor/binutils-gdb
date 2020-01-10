@@ -2928,7 +2928,7 @@ itself.
 
 @findex gdb.Inferior
 Programs which are being run under @value{GDBN} are called inferiors
-(@pxref{Inferiors and Programs}).  Python scripts can access
+(@pxref{Inferiors Connections and Programs}).  Python scripts can access
 information about and manipulate inferiors controlled by @value{GDBN}
 via objects of the @code{gdb.Inferior} class.
 
@@ -4161,7 +4161,7 @@ A program space, or @dfn{progspace}, represents a symbolic view
 of an address space.
 It consists of all of the objfiles of the program.
 @xref{Objfiles In Python}.
-@xref{Inferiors and Programs, program spaces}, for more details
+@xref{Inferiors Connections and Programs, program spaces}, for more details
 about program spaces.
 
 The following progspace-related functions are available in the
@@ -4170,7 +4170,7 @@ The following progspace-related functions are available in the
 @findex gdb.current_progspace
 @defun gdb.current_progspace ()
 This function returns the program space of the currently selected inferior.
-@xref{Inferiors and Programs}.  This is identical to
+@xref{Inferiors Connections and Programs}.  This is identical to
 @code{gdb.selected_inferior().progspace} (@pxref{Inferiors In Python}) and is
 included for historical compatibility.
 @end defun
