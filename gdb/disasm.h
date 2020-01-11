@@ -47,6 +47,10 @@ public:
     : gdb_disassembler (gdbarch, file, dis_asm_read_memory)
   {}
 
+  ~gdb_disassembler ();
+
+  DISABLE_COPY_AND_ASSIGN (gdb_disassembler);
+
   int print_insn (CORE_ADDR memaddr, int *branch_delay_insns = NULL);
 
   /* Return the gdbarch of gdb_disassembler.  */

@@ -1,5 +1,12 @@
 2020-01-19  Tom Tromey  <tom@tromey.com>
 
+	* disasm.c (~gdb_disassembler): New destructor.
+	(gdb_buffered_insn_length): Call disassemble_free_target.
+	* disasm.h (class gdb_disassembler): Declare destructor.  Use
+	DISABLE_COPY_AND_ASSIGN.
+
+2020-01-19  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (abbrev_table_up): Move typedef earlier.
 	(die_reader_func_ftype): Remove.
 	(cutu_reader): New class.

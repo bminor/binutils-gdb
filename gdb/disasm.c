@@ -781,6 +781,11 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
   disassemble_init_for_target (&m_di);
 }
 
+gdb_disassembler::~gdb_disassembler ()
+{
+  disassemble_free_target (&m_di);
+}
+
 int
 gdb_disassembler::print_insn (CORE_ADDR memaddr,
 			      int *branch_delay_insns)
@@ -908,7 +913,9 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
   gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr,
 				     &disassembler_options_holder);
 
-  return gdbarch_print_insn (gdbarch, addr, &di);
+  int result = gdbarch_print_insn (gdbarch, addr, &di);
+  disassemble_free_target (&di);
+  return result;
 }
 
 char *
