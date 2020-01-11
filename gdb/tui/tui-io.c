@@ -950,10 +950,12 @@ tui_dispatch_ctrl_char (unsigned int ch)
   return 0;
 }
 
-/* Get a character from the command window.  This is called from the
-   readline package.  */
+/* Main worker for tui_getc.  Get a character from the command window.
+   This is called from the readline package, but wrapped in a
+   try/catch by tui_getc.  */
+
 static int
-tui_getc (FILE *fp)
+tui_getc_1 (FILE *fp)
 {
   int ch;
   WINDOW *w;
@@ -1034,6 +1036,29 @@ tui_getc (FILE *fp)
     }
 
   return ch;
+}
+
+/* Get a character from the command window.  This is called from the
+   readline package.  */
+
+static int
+tui_getc (FILE *fp)
+{
+  try
+    {
+      return tui_getc_1 (fp);
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* Just in case, don't ever let an exception escape to readline.
+	 This shouldn't ever happen, but if it does, print the
+	 exception instead of just crashing GDB.  */
+      exception_print (gdb_stderr, ex);
+
+      /* If we threw an exception, it's because we recognized the
+	 character.  */
+      return 0;
+    }
 }
 
 /* See tui-io.h.  */
