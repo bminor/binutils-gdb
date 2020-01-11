@@ -1,3 +1,8 @@
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR tui/9765
+	* gdb.tui/tui-layout-asm.exp: Add scrolling test for asm window.
+
 2020-01-19  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/main.exp: Add check for plain "file".

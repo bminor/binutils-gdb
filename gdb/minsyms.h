@@ -240,7 +240,9 @@ enum class lookup_msym_prefer
 
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
-   than or equal to PC, and which matches SECTION.
+   than or equal to PC_IN, and which matches SECTION.  A matching symbol
+   must either be zero sized and have address PC_IN, or PC_IN must fall
+   within the range of addresses covered by the matching symbol.
 
    If SECTION is NULL, this uses the result of find_pc_section
    instead.
@@ -249,12 +251,17 @@ enum class lookup_msym_prefer
    found, or NULL if PC is not in a suitable range.
 
    See definition of lookup_msym_prefer for description of PREFER.  By
-   default mst_text symbols are preferred.  */
+   default mst_text symbols are preferred.
+
+   If the PREVIOUS pointer is non-NULL, and no matching symbol is found,
+   then the contents will be set to reference the closest symbol before
+   PC_IN.  */
 
 struct bound_minimal_symbol lookup_minimal_symbol_by_pc_section
-  (CORE_ADDR,
-   struct obj_section *,
-   lookup_msym_prefer prefer = lookup_msym_prefer::TEXT);
+  (CORE_ADDR pc_in,
+   struct obj_section *section,
+   lookup_msym_prefer prefer = lookup_msym_prefer::TEXT,
+   bound_minimal_symbol *previous = nullptr);
 
 /* Backward compatibility: search through the minimal symbol table 
    for a matching PC (no section given).

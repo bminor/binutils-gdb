@@ -666,24 +666,18 @@ msym_prefer_to_msym_type (lookup_msym_prefer prefer)
   gdb_assert_not_reached ("unhandled lookup_msym_prefer");
 }
 
-/* Search through the minimal symbol table for each objfile and find
-   the symbol whose address is the largest address that is still less
-   than or equal to PC, and matches SECTION (which is not NULL).
-   Returns a pointer to the minimal symbol if such a symbol is found,
-   or NULL if PC is not in a suitable range.
+/* See minsyms.h.
+
    Note that we need to look through ALL the minimal symbol tables
    before deciding on the symbol that comes closest to the specified PC.
    This is because objfiles can overlap, for example objfile A has .text
    at 0x100 and .data at 0x40000 and objfile B has .text at 0x234 and
-   .data at 0x40048.
-
-   If WANT_TRAMPOLINE is set, prefer mst_solib_trampoline symbols when
-   there are text and trampoline symbols at the same address.
-   Otherwise prefer mst_text symbols.  */
+   .data at 0x40048.  */
 
 bound_minimal_symbol
 lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *section,
-				     lookup_msym_prefer prefer)
+				     lookup_msym_prefer prefer,
+				     bound_minimal_symbol *previous)
 {
   int lo;
   int hi;
@@ -692,6 +686,12 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
   struct minimal_symbol *best_symbol = NULL;
   struct objfile *best_objfile = NULL;
   struct bound_minimal_symbol result;
+
+  if (previous != nullptr)
+    {
+      previous->minsym = nullptr;
+      previous->objfile = nullptr;
+    }
 
   if (section == NULL)
     {
@@ -886,8 +886,23 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		  if (best_zero_sized != -1)
 		    hi = best_zero_sized;
 		  else
-		    /* Go on to the next object file.  */
-		    continue;
+		    {
+		      /* If needed record this symbol as the closest
+			 previous symbol.  */
+		      if (previous != nullptr)
+			{
+			  if (previous->minsym == nullptr
+			      || (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
+				  > MSYMBOL_VALUE_RAW_ADDRESS
+					(previous->minsym)))
+			    {
+			      previous->minsym = &msymbol[hi];
+			      previous->objfile = objfile;
+			    }
+			}
+		      /* Go on to the next object file.  */
+		      continue;
+		    }
 		}
 
 	      /* The minimal symbol indexed by hi now is the best one in this

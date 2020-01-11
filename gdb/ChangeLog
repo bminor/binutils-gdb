@@ -1,3 +1,21 @@
+2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR tui/9765
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Update header
+	comment, add extra parameter, and update to store previous symbol
+	when appropriate.
+	* minsyms.h (lookup_minimal_symbol_by_pc_section): Update comment,
+	add extra parameter.
+	* tui/tui-disasm.c (tui_disassemble): Update header comment,
+	remove unneeded parameter, add try/catch around gdb_print_insn,
+	rewrite to add items to asm_lines vector.
+	(tui_find_backward_disassembly_start_address): New function.
+	(tui_find_disassembly_address): Updated throughout.
+	(tui_disasm_window::set_contents): Update for changes to
+	tui_disassemble.
+	(tui_disasm_window::do_scroll_vertical): No need to adjust the
+	number of lines to scroll.
+
 2020-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* objfiles.h (ALL_OBJFILE_OSECTIONS): Move up.
