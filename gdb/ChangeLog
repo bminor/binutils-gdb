@@ -1,5 +1,45 @@
 2020-01-19  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (abbrev_table_up): Move typedef earlier.
+	(die_reader_func_ftype): Remove.
+	(cutu_reader): New class.
+	(dw2_get_file_names_reader): Remove "data" parameter.
+	(dw2_get_file_names): Use cutu_reader.
+	(create_debug_type_hash_table): Update.
+	(read_cutu_die_from_dwo): Update comment.
+	(lookup_dwo_unit): Add dwo_name parameter.
+	(cutu_reader::init_tu_and_read_dwo_dies): Now a method.  Remove
+	die_reader_func_ftype and data parameters.
+	(cutu_reader::cutu_reader): Rename from init_cutu_and_read_dies.
+	Remove die_reader_func_ftype and data parameters.
+	(~cutu_reader): New; from init_cutu_and_read_dies.
+	(cutu_reader::cutu_reader): Rename from
+	init_cutu_and_read_dies_no_follow.  Remove die_reader_func_ftype
+	and data parameters.
+	(init_cutu_and_read_dies_simple): Remove.
+	(struct process_psymtab_comp_unit_data): Remove.
+	(process_psymtab_comp_unit_reader): Remove data parameter; add
+	want_partial_unit and pretend_language parameters.
+	(process_psymtab_comp_unit): Use cutu_reader.
+	(build_type_psymtabs_reader): Remove data parameter.
+	(build_type_psymtabs_1): Use cutu_reader.
+	(process_skeletonless_type_unit): Likewise.
+	(load_partial_comp_unit_reader): Remove.
+	(load_partial_comp_unit): Use cutu_reader.
+	(load_full_comp_unit_reader): Remove.
+	(load_full_comp_unit): Use cutu_reader.
+	(struct create_dwo_cu_data): Remove.
+	(create_dwo_cu_reader): Remove datap parameter; add dwo_file and
+	dwo_unit parameters.
+	(create_cus_hash_table): Use cutu_reader.
+	(struct dwarf2_read_addr_index_data): Remove.
+	(dwarf2_read_addr_index_reader): Remove.
+	(dwarf2_read_addr_index): Use cutu_reader.
+	(read_signatured_type_reader): Remove.
+	(read_signatured_type): Use cutu_reader.
+
+2020-01-19  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_show_assembly): Use tui_suppress_output.
 	* tui/tui-wingeneral.h (class tui_suppress_output): New.
 	(tui_wrefresh): Declare.

@@ -874,6 +874,9 @@ struct dwp_file
   asection **elf_sections = nullptr;
 };
 
+struct abbrev_table;
+typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
+
 /* Struct used to pass misc. parameters to read_die_and_children, et
    al.  which are used for both .debug_info and .debug_types dies.
    All parameters here are unchanging for the life of the call.  This
@@ -907,12 +910,45 @@ struct die_reader_specs
   struct abbrev_table *abbrev_table;
 };
 
-/* Type of function passed to init_cutu_and_read_dies, et.al.  */
-typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
-				      const gdb_byte *info_ptr,
-				      struct die_info *comp_unit_die,
-				      int has_children,
-				      void *data);
+/* A subclass of die_reader_specs that holds storage and has complex
+   constructor and destructor behavior.  */
+
+class cutu_reader : public die_reader_specs
+{
+public:
+
+  cutu_reader (struct dwarf2_per_cu_data *this_cu,
+	       struct abbrev_table *abbrev_table,
+	       int use_existing_cu, int keep,
+	       bool skip_partial);
+
+  explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
+			struct dwarf2_cu *parent_cu = nullptr,
+			struct dwo_file *dwo_file = nullptr);
+
+  ~cutu_reader ();
+
+  DISABLE_COPY_AND_ASSIGN (cutu_reader);
+
+  const gdb_byte *info_ptr = nullptr;
+  struct die_info *comp_unit_die = nullptr;
+  int has_children = 0;
+  bool dummy_p = false;
+
+private:
+  void init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
+				  int use_existing_cu, int keep);
+
+  struct dwarf2_per_cu_data *m_this_cu;
+  int m_keep = 0;
+  std::unique_ptr<dwarf2_cu> m_new_cu;
+
+  /* The ordinary abbreviation table.  */
+  abbrev_table_up m_abbrev_table_holder;
+
+  /* The DWO abbreviation table.  */
+  abbrev_table_up m_dwo_abbrev_table;
+};
 
 /* dir_index is 1-based in DWARF 4 and before, and is 0-based in DWARF 5 and
    later.  */
@@ -1264,8 +1300,6 @@ private:
   struct abbrev_info **m_abbrevs;
 };
 
-typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
-
 /* Attributes have a name and a value.  */
 struct attribute
   {
@@ -1452,7 +1486,7 @@ static struct partial_symtab *create_partial_symtab
 static void build_type_psymtabs_reader (const struct die_reader_specs *reader,
 					const gdb_byte *info_ptr,
 					struct die_info *type_unit_die,
-					int has_children, void *data);
+					int has_children);
 
 static void dwarf2_build_psymtabs_hard
   (struct dwarf2_per_objfile *dwarf2_per_objfile);
@@ -1989,15 +2023,6 @@ static const gdb_byte *read_and_check_comp_unit_head
    struct dwarf2_section_info *section,
    struct dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
    rcuh_kind section_kind);
-
-static void init_cutu_and_read_dies
-  (struct dwarf2_per_cu_data *this_cu, struct abbrev_table *abbrev_table,
-   int use_existing_cu, int keep, bool skip_partial,
-   die_reader_func_ftype *die_reader_func, void *data);
-
-static void init_cutu_and_read_dies_simple
-  (struct dwarf2_per_cu_data *this_cu,
-   die_reader_func_ftype *die_reader_func, void *data);
 
 static htab_t allocate_signatured_type_table (struct objfile *objfile);
 
@@ -3663,8 +3688,7 @@ static void
 dw2_get_file_names_reader (const struct die_reader_specs *reader,
 			   const gdb_byte *info_ptr,
 			   struct die_info *comp_unit_die,
-			   int has_children,
-			   void *data)
+			   int has_children)
 {
   struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_per_cu_data *this_cu = cu->per_cu;
@@ -3760,7 +3784,10 @@ dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
   if (this_cu->v.quick->no_file_data)
     return NULL;
 
-  init_cutu_and_read_dies_simple (this_cu, dw2_get_file_names_reader, NULL);
+  cutu_reader reader (this_cu);
+  if (!reader.dummy_p)
+    dw2_get_file_names_reader (&reader, reader.info_ptr, reader.comp_unit_die,
+			       reader.has_children);
 
   if (this_cu->v.quick->no_file_data)
     return NULL;
@@ -6795,9 +6822,8 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
      not present, in which case the bfd is unknown.  */
   abfd = get_section_bfd_owner (section);
 
-  /* We don't use init_cutu_and_read_dies_simple, or some such, here
-     because we don't need to read any dies: the signature is in the
-     header.  */
+  /* We don't use cutu_reader here because we don't need to read
+     any dies: the signature is in the header.  */
 
   end_ptr = info_ptr + section->size;
   while (info_ptr < end_ptr)
@@ -7240,9 +7266,9 @@ init_cu_die_reader (struct die_reader_specs *reader,
   reader->abbrev_table = abbrev_table;
 }
 
-/* Subroutine of init_cutu_and_read_dies to simplify it.
+/* Subroutine of cutu_reader to simplify it.
    Read in the rest of a CU/TU top level DIE from DWO_UNIT.
-   There's just a lot of work to do, and init_cutu_and_read_dies is big enough
+   There's just a lot of work to do, and cutu_reader is big enough
    already.
 
    STUB_COMP_UNIT_DIE is for the stub DIE, we copy over certain attributes
@@ -7449,17 +7475,18 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
   return DW_UNSND (attr);
 }
 
-/* Subroutine of init_cutu_and_read_dies to simplify it.
+/* Subroutine of cutu_reader to simplify it.
    Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
    Returns NULL if the specified DWO unit cannot be found.  */
 
 static struct dwo_unit *
 lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
-		 struct die_info *comp_unit_die)
+		 struct die_info *comp_unit_die,
+		 const char *dwo_name)
 {
   struct dwarf2_cu *cu = this_cu->cu;
   struct dwo_unit *dwo_unit;
-  const char *comp_dir, *dwo_name;
+  const char *comp_dir;
 
   gdb_assert (cu != NULL);
 
@@ -7490,23 +7517,16 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   return dwo_unit;
 }
 
-/* Subroutine of init_cutu_and_read_dies to simplify it.
+/* Subroutine of cutu_reader to simplify it.
    See it for a description of the parameters.
    Read a TU directly from a DWO file, bypassing the stub.  */
 
-static void
-init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
-			   int use_existing_cu, int keep,
-			   die_reader_func_ftype *die_reader_func,
-			   void *data)
+void
+cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
+					int use_existing_cu, int keep)
 {
-  std::unique_ptr<dwarf2_cu> new_cu;
   struct signatured_type *sig_type;
   struct die_reader_specs reader;
-  const gdb_byte *info_ptr;
-  struct die_info *comp_unit_die;
-  int has_children;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
 
   /* Verify we can do the following downcast, and that we have the
      data we need.  */
@@ -7518,48 +7538,28 @@ init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
     {
       gdb_assert (this_cu->cu->dwo_unit == sig_type->dwo_unit);
       /* There's no need to do the rereading_dwo_cu handling that
-	 init_cutu_and_read_dies does since we don't read the stub.  */
+	 cutu_reader does since we don't read the stub.  */
     }
   else
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      new_cu.reset (new dwarf2_cu (this_cu));
+      m_new_cu.reset (new dwarf2_cu (this_cu));
     }
 
   /* A future optimization, if needed, would be to use an existing
      abbrev table.  When reading DWOs with skeletonless TUs, all the TUs
      could share abbrev tables.  */
 
-  /* The abbreviation table used by READER, this must live at least as long as
-     READER.  */
-  abbrev_table_up dwo_abbrev_table;
-
   if (read_cutu_die_from_dwo (this_cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
 			      &reader, &info_ptr,
 			      &comp_unit_die, &has_children,
-			      &dwo_abbrev_table) == 0)
+			      &m_dwo_abbrev_table) == 0)
     {
       /* Dummy die.  */
-      return;
-    }
-
-  /* All the "real" work is done here.  */
-  die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
-
-  /* This duplicates the code in init_cutu_and_read_dies,
-     but the alternative is making the latter more complex.
-     This function is only for the special case of using DWO files directly:
-     no point in overly complicating the general case just to handle this.  */
-  if (new_cu != NULL && keep)
-    {
-      /* Link this CU into read_in_chain.  */
-      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = this_cu;
-      /* The chain owns it now.  */
-      new_cu.release ();
+      dummy_p = true;
     }
 }
 
@@ -7574,28 +7574,23 @@ init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
    Otherwise, a new CU is allocated with xmalloc.
 
    If KEEP is non-zero, then if we allocated a dwarf2_cu we add it to
-   read_in_chain.  Otherwise the dwarf2_cu data is freed at the end.
+   read_in_chain.  Otherwise the dwarf2_cu data is freed at the
+   end.  */
 
-   WARNING: If THIS_CU is a "dummy CU" (used as filler by the incremental
-   linker) then DIE_READER_FUNC will not get called.  */
-
-static void
-init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
-			 struct abbrev_table *abbrev_table,
-			 int use_existing_cu, int keep,
-			 bool skip_partial,
-			 die_reader_func_ftype *die_reader_func,
-			 void *data)
+cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
+			  struct abbrev_table *abbrev_table,
+			  int use_existing_cu, int keep,
+			  bool skip_partial)
+  : die_reader_specs {},
+    m_this_cu (this_cu),
+    m_keep (keep)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = get_section_bfd_owner (section);
   struct dwarf2_cu *cu;
-  const gdb_byte *begin_info_ptr, *info_ptr;
-  struct die_reader_specs reader;
-  struct die_info *comp_unit_die;
-  int has_children;
+  const gdb_byte *begin_info_ptr;
   struct signatured_type *sig_type = NULL;
   struct dwarf2_section_info *abbrev_section;
   /* Non-zero if CU currently points to a DWO file and we need to
@@ -7618,8 +7613,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       /* Narrow down the scope of possibilities to have to understand.  */
       gdb_assert (this_cu->is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      init_tu_and_read_dwo_dies (this_cu, use_existing_cu, keep,
-				 die_reader_func, data);
+      init_tu_and_read_dwo_dies (this_cu, use_existing_cu, keep);
       return;
     }
 
@@ -7630,7 +7624,6 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
   abbrev_section = get_abbrev_section_for_cu (this_cu);
 
-  std::unique_ptr<dwarf2_cu> new_cu;
   if (use_existing_cu && this_cu->cu != NULL)
     {
       cu = this_cu->cu;
@@ -7647,8 +7640,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      new_cu.reset (new dwarf2_cu (this_cu));
-      cu = new_cu.get ();
+      m_new_cu.reset (new dwarf2_cu (this_cu));
+      cu = m_new_cu.get ();
     }
 
   /* Get the header.  */
@@ -7701,28 +7694,33 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + this_cu->length
       || peek_abbrev_code (abfd, info_ptr) == 0)
-    return;
+    {
+      dummy_p = true;
+      return;
+    }
 
   /* If we don't have them yet, read the abbrevs for this compilation unit.
      And if we need to read them now, make sure they're freed when we're
-     done (own the table through ABBREV_TABLE_HOLDER).  */
-  abbrev_table_up abbrev_table_holder;
+     done.  */
   if (abbrev_table != NULL)
     gdb_assert (cu->header.abbrev_sect_off == abbrev_table->sect_off);
   else
     {
-      abbrev_table_holder
+      m_abbrev_table_holder
 	= abbrev_table_read_table (dwarf2_per_objfile, abbrev_section,
 				   cu->header.abbrev_sect_off);
-      abbrev_table = abbrev_table_holder.get ();
+      abbrev_table = m_abbrev_table_holder.get ();
     }
 
   /* Read the top level CU/TU die.  */
-  init_cu_die_reader (&reader, cu, section, NULL, abbrev_table);
-  info_ptr = read_full_die (&reader, &comp_unit_die, info_ptr, &has_children);
+  init_cu_die_reader (this, cu, section, NULL, abbrev_table);
+  info_ptr = read_full_die (this, &comp_unit_die, info_ptr, &has_children);
 
   if (skip_partial && comp_unit_die->tag == DW_TAG_partial_unit)
-    return;
+    {
+      dummy_p = true;
+      return;
+    }
 
   /* If we are in a DWO stub, process it and then read in the "real" CU/TU
      from the DWO file.  read_cutu_die_from_dwo will allocate the abbreviation
@@ -7733,7 +7731,6 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
      Note that if USE_EXISTING_OK != 0, and THIS_CU->cu already contains a
      DWO CU, that this test will fail (the attribute will not be present).  */
   const char *dwo_name = dwarf2_dwo_name (comp_unit_die, cu);
-  abbrev_table_up dwo_abbrev_table;
   if (dwo_name != nullptr)
     {
       struct dwo_unit *dwo_unit;
@@ -7746,16 +7743,17 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 		     sect_offset_str (this_cu->sect_off),
 		     bfd_get_filename (abfd));
 	}
-      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die);
+      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die, dwo_name);
       if (dwo_unit != NULL)
 	{
 	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
 				      comp_unit_die, NULL,
-				      &reader, &info_ptr,
+				      this, &info_ptr,
 				      &dwo_comp_unit_die, &has_children,
-				      &dwo_abbrev_table) == 0)
+				      &m_dwo_abbrev_table) == 0)
 	    {
 	      /* Dummy die.  */
+	      dummy_p = true;
 	      return;
 	    }
 	  comp_unit_die = dwo_comp_unit_die;
@@ -7769,18 +7767,20 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	     debug info.  */
 	}
     }
+}
 
-  /* All of the above is setup for this call.  Yikes.  */
-  die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
-
+cutu_reader::~cutu_reader ()
+{
   /* Done, clean up.  */
-  if (new_cu != NULL && keep)
+  if (m_new_cu != NULL && m_keep && !dummy_p)
     {
+      struct dwarf2_per_objfile *dwarf2_per_objfile
+	= m_this_cu->dwarf2_per_objfile;
       /* Link this CU into read_in_chain.  */
-      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = this_cu;
+      m_this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = m_this_cu;
       /* The chain owns it now.  */
-      new_cu.release ();
+      m_new_cu.release ();
     }
 }
 
@@ -7793,9 +7793,6 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
    We fill in THIS_CU->length.
 
-   WARNING: If THIS_CU is a "dummy CU" (used as filler by the incremental
-   linker) then DIE_READER_FUNC will not get called.
-
    THIS_CU->cu is always freed when done.
    This is done in order to not leave THIS_CU->cu in a state where we have
    to care whether it refers to the "main" CU or the DWO CU.
@@ -7803,12 +7800,11 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
    When parent_cu is passed, it is used to provide a default value for
    str_offsets_base and addr_base from the parent.  */
 
-static void
-init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
-				   struct dwarf2_cu *parent_cu,
-				   struct dwo_file *dwo_file,
-				   die_reader_func_ftype *die_reader_func,
-				   void *data)
+cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
+			  struct dwarf2_cu *parent_cu,
+			  struct dwo_file *dwo_file)
+  : die_reader_specs {},
+    m_this_cu (this_cu)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -7816,8 +7812,6 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   bfd *abfd = get_section_bfd_owner (section);
   struct dwarf2_section_info *abbrev_section;
   const gdb_byte *begin_info_ptr, *info_ptr;
-  struct die_reader_specs reader;
-  struct die_info *comp_unit_die;
   int has_children;
 
   if (dwarf_die_debug)
@@ -7834,11 +7828,11 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   /* This is cheap if the section is already read in.  */
   dwarf2_read_section (objfile, section);
 
-  struct dwarf2_cu cu (this_cu);
+  m_new_cu.reset (new dwarf2_cu (this_cu));
 
   begin_info_ptr = info_ptr = section->buffer + to_underlying (this_cu->sect_off);
   info_ptr = read_and_check_comp_unit_head (dwarf2_per_objfile,
-					    &cu.header, section,
+					    &m_new_cu->header, section,
 					    abbrev_section, info_ptr,
 					    (this_cu->is_debug_types
 					     ? rcuh_kind::TYPE
@@ -7846,42 +7840,28 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
 
   if (parent_cu != nullptr)
     {
-      cu.str_offsets_base = parent_cu->str_offsets_base;
-      cu.addr_base = parent_cu->addr_base;
+      m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
+      m_new_cu->addr_base = parent_cu->addr_base;
     }
-  this_cu->length = get_cu_length (&cu.header);
+  this_cu->length = get_cu_length (&m_new_cu->header);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + this_cu->length
       || peek_abbrev_code (abfd, info_ptr) == 0)
-    return;
+    {
+      dummy_p = true;
+      return;
+    }
 
-  abbrev_table_up abbrev_table
+  m_abbrev_table_holder
     = abbrev_table_read_table (dwarf2_per_objfile, abbrev_section,
-			       cu.header.abbrev_sect_off);
+			       m_new_cu->header.abbrev_sect_off);
 
-  init_cu_die_reader (&reader, &cu, section, dwo_file, abbrev_table.get ());
-  info_ptr = read_full_die (&reader, &comp_unit_die, info_ptr, &has_children);
-
-  die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
+  init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
+		      m_abbrev_table_holder.get ());
+  info_ptr = read_full_die (this, &comp_unit_die, info_ptr, &has_children);
 }
 
-/* Read a CU/TU, except that this does not look for DW_AT_GNU_dwo_name
-   (DW_AT_dwo_name) and does not lookup the specified DWO file.
-   This cannot be used to read DWO files.
-
-   THIS_CU->cu is always freed when done.
-   This is done in order to not leave THIS_CU->cu in a state where we have
-   to care whether it refers to the "main" CU or the DWO CU.
-   We can revisit this if the data shows there's a performance issue.  */
-
-static void
-init_cutu_and_read_dies_simple (struct dwarf2_per_cu_data *this_cu,
-				die_reader_func_ftype *die_reader_func,
-				void *data)
-{
-  init_cutu_and_read_dies_no_follow (this_cu, NULL, NULL, die_reader_func, data);
-}
 
 /* Type Unit Groups.
 
@@ -8059,29 +8039,15 @@ create_partial_symtab (struct dwarf2_per_cu_data *per_cu, const char *name)
   return pst;
 }
 
-/* The DATA object passed to process_psymtab_comp_unit_reader has this
-   type.  */
-
-struct process_psymtab_comp_unit_data
-{
-  /* True if we are reading a DW_TAG_partial_unit.  */
-
-  int want_partial_unit;
-
-  /* The "pretend" language that is used if the CU doesn't declare a
-     language.  */
-
-  enum language pretend_language;
-};
-
-/* die_reader_func for process_psymtab_comp_unit.  */
+/* DIE reader function for process_psymtab_comp_unit.  */
 
 static void
 process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 				  const gdb_byte *info_ptr,
 				  struct die_info *comp_unit_die,
 				  int has_children,
-				  void *data)
+				  int want_partial_unit,
+				  enum language pretend_language)
 {
   struct dwarf2_cu *cu = reader->cu;
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
@@ -8092,15 +8058,13 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   struct partial_symtab *pst;
   enum pc_bounds_kind cu_bounds_kind;
   const char *filename;
-  struct process_psymtab_comp_unit_data *info
-    = (struct process_psymtab_comp_unit_data *) data;
 
-  if (comp_unit_die->tag == DW_TAG_partial_unit && !info->want_partial_unit)
+  if (comp_unit_die->tag == DW_TAG_partial_unit && !want_partial_unit)
     return;
 
   gdb_assert (! per_cu->is_debug_types);
 
-  prepare_one_comp_unit (cu, comp_unit_die, info->pretend_language);
+  prepare_one_comp_unit (cu, comp_unit_die, pretend_language);
 
   /* Allocate a new partial symbol table structure.  */
   filename = dwarf2_string_attr (comp_unit_die, DW_AT_name, cu);
@@ -8222,17 +8186,21 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   if (this_cu->cu != NULL)
     free_one_cached_comp_unit (this_cu);
 
-  if (this_cu->is_debug_types)
-    init_cutu_and_read_dies (this_cu, NULL, 0, 0, false,
-			     build_type_psymtabs_reader, NULL);
-  else
+  cutu_reader reader (this_cu, NULL, 0, 0, false);
+
+  if (reader.dummy_p)
     {
-      process_psymtab_comp_unit_data info;
-      info.want_partial_unit = want_partial_unit;
-      info.pretend_language = pretend_language;
-      init_cutu_and_read_dies (this_cu, NULL, 0, 0, false,
-			       process_psymtab_comp_unit_reader, &info);
+      /* Nothing.  */
     }
+  else if (this_cu->is_debug_types)
+    build_type_psymtabs_reader (&reader, reader.info_ptr, reader.comp_unit_die,
+				reader.has_children);
+  else
+    process_psymtab_comp_unit_reader (&reader, reader.info_ptr,
+				      reader.comp_unit_die,
+				      reader.has_children,
+				      want_partial_unit,
+				      pretend_language);
 
   /* Age out any secondary CUs.  */
   age_cached_comp_units (this_cu->dwarf2_per_objfile);
@@ -8244,8 +8212,7 @@ static void
 build_type_psymtabs_reader (const struct die_reader_specs *reader,
 			    const gdb_byte *info_ptr,
 			    struct die_info *type_unit_die,
-			    int has_children,
-			    void *data)
+			    int has_children)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = reader->cu->per_cu->dwarf2_per_objfile;
@@ -8259,7 +8226,6 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   CORE_ADDR lowpc, highpc;
   struct partial_symtab *pst;
 
-  gdb_assert (data == NULL);
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
@@ -8390,8 +8356,12 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	  ++tu_stats->nr_uniq_abbrev_tables;
 	}
 
-      init_cutu_and_read_dies (&tu.sig_type->per_cu, abbrev_table.get (),
-			       0, 0, false, build_type_psymtabs_reader, NULL);
+      cutu_reader reader (&tu.sig_type->per_cu, abbrev_table.get (),
+			  0, 0, false);
+      if (!reader.dummy_p)
+	build_type_psymtabs_reader (&reader, reader.info_ptr,
+				    reader.comp_unit_die,
+				    reader.has_children);
     }
 }
 
@@ -8496,8 +8466,10 @@ process_skeletonless_type_unit (void **slot, void *info)
   *slot = entry;
 
   /* This does the job that build_type_psymtabs_1 would have done.  */
-  init_cutu_and_read_dies (&entry->per_cu, NULL, 0, 0, false,
-			   build_type_psymtabs_reader, NULL);
+  cutu_reader reader (&entry->per_cu, NULL, 0, 0, false);
+  if (!reader.dummy_p)
+    build_type_psymtabs_reader (&reader, reader.info_ptr,
+				reader.comp_unit_die, reader.has_children);
 
   return 1;
 }
@@ -8619,34 +8591,25 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 			objfile_name (objfile));
 }
 
-/* die_reader_func for load_partial_comp_unit.  */
-
-static void
-load_partial_comp_unit_reader (const struct die_reader_specs *reader,
-			       const gdb_byte *info_ptr,
-			       struct die_info *comp_unit_die,
-			       int has_children,
-			       void *data)
-{
-  struct dwarf2_cu *cu = reader->cu;
-
-  prepare_one_comp_unit (cu, comp_unit_die, language_minimal);
-
-  /* Check if comp unit has_children.
-     If so, read the rest of the partial symbols from this comp unit.
-     If not, there's no more debug_info for this comp unit.  */
-  if (has_children)
-    load_partial_dies (reader, info_ptr, 0);
-}
-
 /* Load the partial DIEs for a secondary CU into memory.
    This is also used when rereading a primary CU with load_all_dies.  */
 
 static void
 load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 {
-  init_cutu_and_read_dies (this_cu, NULL, 1, 1, false,
-			   load_partial_comp_unit_reader, NULL);
+  cutu_reader reader (this_cu, NULL, 1, 1, false);
+
+  if (!reader.dummy_p)
+    {
+      prepare_one_comp_unit (reader.cu, reader.comp_unit_die,
+			     language_minimal);
+
+      /* Check if comp unit has_children.
+	 If so, read the rest of the partial symbols from this comp unit.
+	 If not, there's no more debug_info for this comp unit.  */
+      if (reader.has_children)
+	load_partial_dies (&reader, reader.info_ptr, 0);
+    }
 }
 
 static void
@@ -9787,19 +9750,21 @@ die_eq (const void *item_lhs, const void *item_rhs)
   return die_lhs->sect_off == die_rhs->sect_off;
 }
 
-/* die_reader_func for load_full_comp_unit.
-   This is identical to read_signatured_type_reader,
-   but is kept separate for now.  */
+/* Load the DIEs associated with PER_CU into memory.  */
 
 static void
-load_full_comp_unit_reader (const struct die_reader_specs *reader,
-			    const gdb_byte *info_ptr,
-			    struct die_info *comp_unit_die,
-			    int has_children,
-			    void *data)
+load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
+		     bool skip_partial,
+		     enum language pretend_language)
 {
-  struct dwarf2_cu *cu = reader->cu;
-  enum language *language_ptr = (enum language *) data;
+  gdb_assert (! this_cu->is_debug_types);
+
+  cutu_reader reader (this_cu, NULL, 1, 1, skip_partial);
+  if (reader.dummy_p)
+    return;
+
+  struct dwarf2_cu *cu = reader.cu;
+  const gdb_byte *info_ptr = reader.info_ptr;
 
   gdb_assert (cu->die_hash == NULL);
   cu->die_hash =
@@ -9811,10 +9776,11 @@ load_full_comp_unit_reader (const struct die_reader_specs *reader,
 			  hashtab_obstack_allocate,
 			  dummy_obstack_deallocate);
 
-  if (has_children)
-    comp_unit_die->child = read_die_and_siblings (reader, info_ptr,
-						  &info_ptr, comp_unit_die);
-  cu->dies = comp_unit_die;
+  if (reader.has_children)
+    reader.comp_unit_die->child
+      = read_die_and_siblings (&reader, reader.info_ptr,
+			       &info_ptr, reader.comp_unit_die);
+  cu->dies = reader.comp_unit_die;
   /* comp_unit_die is not stored in die_hash, no need.  */
 
   /* We try not to read any attributes in this function, because not
@@ -9823,20 +9789,7 @@ load_full_comp_unit_reader (const struct die_reader_specs *reader,
      or we won't be able to build types correctly.
      Similarly, if we do not read the producer, we can not apply
      producer-specific interpretation.  */
-  prepare_one_comp_unit (cu, cu->dies, *language_ptr);
-}
-
-/* Load the DIEs associated with PER_CU into memory.  */
-
-static void
-load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
-		     bool skip_partial,
-		     enum language pretend_language)
-{
-  gdb_assert (! this_cu->is_debug_types);
-
-  init_cutu_and_read_dies (this_cu, NULL, 1, 1, skip_partial,
-			   load_full_comp_unit_reader, &pretend_language);
+  prepare_one_comp_unit (cu, cu->dies, pretend_language);
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -11973,14 +11926,6 @@ allocate_dwo_unit_table (struct objfile *objfile)
 			       dummy_obstack_deallocate);
 }
 
-/* Structure used to pass data to create_dwo_debug_info_hash_table_reader.  */
-
-struct create_dwo_cu_data
-{
-  struct dwo_file *dwo_file;
-  struct dwo_unit dwo_unit;
-};
-
 /* die_reader_func for create_dwo_cu.  */
 
 static void
@@ -11988,14 +11933,12 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
 		      const gdb_byte *info_ptr,
 		      struct die_info *comp_unit_die,
 		      int has_children,
-		      void *datap)
+		      struct dwo_file *dwo_file,
+		      struct dwo_unit *dwo_unit)
 {
   struct dwarf2_cu *cu = reader->cu;
   sect_offset sect_off = cu->per_cu->sect_off;
   struct dwarf2_section_info *section = cu->per_cu->section;
-  struct create_dwo_cu_data *data = (struct create_dwo_cu_data *) datap;
-  struct dwo_file *dwo_file = data->dwo_file;
-  struct dwo_unit *dwo_unit = &data->dwo_unit;
 
   gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
   if (!signature.has_value ())
@@ -12046,33 +11989,32 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
   while (info_ptr < end_ptr)
     {
       struct dwarf2_per_cu_data per_cu;
-      struct create_dwo_cu_data create_dwo_cu_data;
+      struct dwo_unit read_unit {};
       struct dwo_unit *dwo_unit;
       void **slot;
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
-      memset (&create_dwo_cu_data.dwo_unit, 0,
-	      sizeof (create_dwo_cu_data.dwo_unit));
       memset (&per_cu, 0, sizeof (per_cu));
       per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
-      create_dwo_cu_data.dwo_file = &dwo_file;
 
-      init_cutu_and_read_dies_no_follow (
-	  &per_cu, cu, &dwo_file, create_dwo_cu_reader, &create_dwo_cu_data);
+      cutu_reader reader (&per_cu, cu, &dwo_file);
+      if (!reader.dummy_p)
+	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
+			      reader.has_children, &dwo_file, &read_unit);
       info_ptr += per_cu.length;
 
       // If the unit could not be parsed, skip it.
-      if (create_dwo_cu_data.dwo_unit.dwo_file == NULL)
+      if (read_unit.dwo_file == NULL)
 	continue;
 
       if (cus_htab == NULL)
 	cus_htab = allocate_dwo_unit_table (objfile);
 
       dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
-      *dwo_unit = create_dwo_cu_data.dwo_unit;
+      *dwo_unit = read_unit;
       slot = htab_find_slot (cus_htab, dwo_unit, INSERT);
       gdb_assert (slot != NULL);
       if (*slot != NULL)
@@ -20263,32 +20205,6 @@ read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
   return read_addr_index (cu, addr_index);
 }
 
-/* Data structure to pass results from dwarf2_read_addr_index_reader
-   back to dwarf2_read_addr_index.  */
-
-struct dwarf2_read_addr_index_data
-{
-  gdb::optional<ULONGEST> addr_base;
-  int addr_size;
-};
-
-/* die_reader_func for dwarf2_read_addr_index.  */
-
-static void
-dwarf2_read_addr_index_reader (const struct die_reader_specs *reader,
-			       const gdb_byte *info_ptr,
-			       struct die_info *comp_unit_die,
-			       int has_children,
-			       void *data)
-{
-  struct dwarf2_cu *cu = reader->cu;
-  struct dwarf2_read_addr_index_data *aidata =
-    (struct dwarf2_read_addr_index_data *) data;
-
-  aidata->addr_base = cu->addr_base;
-  aidata->addr_size = cu->header.addr_size;
-}
-
 /* Given an index in .debug_addr, fetch the value.
    NOTE: This can be called during dwarf expression evaluation,
    long after the debug information has been read, and thus per_cu->cu
@@ -20326,14 +20242,9 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      struct dwarf2_read_addr_index_data aidata;
-
-      /* Note: We can't use init_cutu_and_read_dies_simple here,
-	 we need addr_base.  */
-      init_cutu_and_read_dies (per_cu, NULL, 0, 0, false,
-			       dwarf2_read_addr_index_reader, &aidata);
-      addr_base = aidata.addr_base;
-      addr_size = aidata.addr_size;
+      cutu_reader reader (per_cu, NULL, 0, 0, false);
+      addr_base = reader.cu->addr_base;
+      addr_size = reader.cu->header.addr_size;
     }
 
   return read_addr_index_1 (dwarf2_per_objfile, addr_index, addr_base,
@@ -24211,44 +24122,6 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
   gdb_assert (per_cu->cu != NULL);
 }
 
-/* die_reader_func for read_signatured_type.
-   This is identical to load_full_comp_unit_reader,
-   but is kept separate for now.  */
-
-static void
-read_signatured_type_reader (const struct die_reader_specs *reader,
-			     const gdb_byte *info_ptr,
-			     struct die_info *comp_unit_die,
-			     int has_children,
-			     void *data)
-{
-  struct dwarf2_cu *cu = reader->cu;
-
-  gdb_assert (cu->die_hash == NULL);
-  cu->die_hash =
-    htab_create_alloc_ex (cu->header.length / 12,
-			  die_hash,
-			  die_eq,
-			  NULL,
-			  &cu->comp_unit_obstack,
-			  hashtab_obstack_allocate,
-			  dummy_obstack_deallocate);
-
-  if (has_children)
-    comp_unit_die->child = read_die_and_siblings (reader, info_ptr,
-						  &info_ptr, comp_unit_die);
-  cu->dies = comp_unit_die;
-  /* comp_unit_die is not stored in die_hash, no need.  */
-
-  /* We try not to read any attributes in this function, because not
-     all CUs needed for references have been loaded yet, and symbol
-     table processing isn't initialized.  But we have to set the CU language,
-     or we won't be able to build types correctly.
-     Similarly, if we do not read the producer, we can not apply
-     producer-specific interpretation.  */
-  prepare_one_comp_unit (cu, cu->dies, language_minimal);
-}
-
 /* Read in a signatured type and build its CU and DIEs.
    If the type is a stub for the real type in a DWO file,
    read in the real type from the DWO file as well.  */
@@ -24261,8 +24134,39 @@ read_signatured_type (struct signatured_type *sig_type)
   gdb_assert (per_cu->is_debug_types);
   gdb_assert (per_cu->cu == NULL);
 
-  init_cutu_and_read_dies (per_cu, NULL, 0, 1, false,
-			   read_signatured_type_reader, NULL);
+  cutu_reader reader (per_cu, NULL, 0, 1, false);
+
+  if (!reader.dummy_p)
+    {
+      struct dwarf2_cu *cu = reader.cu;
+      const gdb_byte *info_ptr = reader.info_ptr;
+
+      gdb_assert (cu->die_hash == NULL);
+      cu->die_hash =
+	htab_create_alloc_ex (cu->header.length / 12,
+			      die_hash,
+			      die_eq,
+			      NULL,
+			      &cu->comp_unit_obstack,
+			      hashtab_obstack_allocate,
+			      dummy_obstack_deallocate);
+
+      if (reader.has_children)
+	reader.comp_unit_die->child
+	  = read_die_and_siblings (&reader, info_ptr, &info_ptr,
+				   reader.comp_unit_die);
+      cu->dies = reader.comp_unit_die;
+      /* comp_unit_die is not stored in die_hash, no need.  */
+
+      /* We try not to read any attributes in this function, because
+	 not all CUs needed for references have been loaded yet, and
+	 symbol table processing isn't initialized.  But we have to
+	 set the CU language, or we won't be able to build types
+	 correctly.  Similarly, if we do not read the producer, we can
+	 not apply producer-specific interpretation.  */
+      prepare_one_comp_unit (cu, cu->dies, language_minimal);
+    }
+
   sig_type->per_cu.tu_read = 1;
 }
 
