@@ -1,5 +1,9 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* fr30-ibld.c: Regenerate.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* xgate-dis.c (print_insn): Don't left shift signed value.
 	(ripBits): Formatting, use 1u.
 

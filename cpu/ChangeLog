@@ -1,3 +1,8 @@
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* fr30.cpu (f-disp9, f-disp10, f-s10, f-rel9, f-rel12): Don't
+	left shift signed values.
+
 2020-01-06  Alan Modra  <amodra@gmail.com>
 
 	* m32c.cpu (f-dsp-8-u16, f-dsp-8-s16): Rearrange to mask any sign
