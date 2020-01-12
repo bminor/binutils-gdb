@@ -148,8 +148,7 @@ tic4x_print_register (struct disassemble_info *info, unsigned long regno)
 	      = (tic4x_register_t *)(tic4x_registers + i);
 	}
     }
-  if (regno > (IS_CPU_TIC4X (tic4x_version) ? TIC4X_REG_MAX : TIC3X_REG_MAX)
-      || registertable[regno] == NULL)
+  if (regno > (IS_CPU_TIC4X (tic4x_version) ? TIC4X_REG_MAX : TIC3X_REG_MAX))
     return 0;
   if (info != NULL)
     (*info->fprintf_func) (info->stream, "%s", registertable[regno]->name);

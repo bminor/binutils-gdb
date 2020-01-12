@@ -1,5 +1,9 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* tic4x-dis.c (tic4x_print_register): Remove dead code.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* fr30-ibld.c: Regenerate.
 
 2020-01-13  Alan Modra  <amodra@gmail.com>

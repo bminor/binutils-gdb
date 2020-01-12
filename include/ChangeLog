@@ -1,3 +1,9 @@
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* opcode/tic4x.h (EXTR): Delete.
+	(EXTRU, EXTRS, INSERTU, INSERTS): Rewrite without zero/sign
+	extension using shifts.  Do trim INSERTU value to specified bitfield.
+
 2020-01-10  Alan Modra  <amodra@gmail.com>
 
 	* opcode/spu.h: Formatting.
