@@ -16,6 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+
+#include "linux-arm-tdesc.h"
+
 #include "tdesc.h"
 #include "arch/arm.h"
 #include <inttypes.h>

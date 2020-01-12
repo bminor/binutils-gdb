@@ -1,5 +1,10 @@
 2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-arm-tdesc.c: Include linux-arm-tdesc.h.
+	* linux-arm-tdesc.h: Include arch/arm.h.
+
+2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-aarch64-low.c (aarch64_write_goto_address): Make static.
 
 2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>

@@ -18,6 +18,8 @@
 #ifndef GDBSERVER_LINUX_ARM_TDESC_H
 #define GDBSERVER_LINUX_ARM_TDESC_H
 
+#include "arch/arm.h"
+
 /* Return the Arm target description with fp registers FP_TYPE.  */
 
 const target_desc * arm_linux_read_description (arm_fp_type fp_type);
