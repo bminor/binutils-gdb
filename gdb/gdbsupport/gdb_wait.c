@@ -19,6 +19,8 @@
 
 #include "common-defs.h"
 
+#include "gdb_wait.h"
+
 #ifdef __MINGW32__
 
 /* The underlying idea is that when a Windows program is terminated by

@@ -1,3 +1,7 @@
+2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbsupport/gdb_wait.c: Include gdb_wait.h.
+
 2020-01-12  Pedro Alves  <palves@redhat.com>
 
 	* bsd-kvm.c (bsd_kvm_target::close): Call exit_inferior_silent
