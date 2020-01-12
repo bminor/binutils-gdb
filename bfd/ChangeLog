@@ -1,5 +1,10 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Ensure minimum size even
+	for "ignored" records.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* wasm-module.c (wasm_scan_name_function_section): Formatting.
 	Delete asect name check.  Move asect NULL check to wasm_object_p.
 	Correct bounds check of sizes against end.  Replace uses of

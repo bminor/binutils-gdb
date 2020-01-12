@@ -1217,6 +1217,16 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	  return FALSE;
 	}
 
+      if (gsd_size < 4)
+	{
+	too_small:
+	  _bfd_error_handler (_("corrupt EGSD record type %d: size (%#x) "
+				"is too small"),
+			      gsd_type, gsd_size);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
       switch (gsd_type)
 	{
 	case EGSD__C_PSC:
@@ -1227,14 +1237,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    asection *section;
 
 	    if (offsetof (struct vms_egps, flags) + 2 > gsd_size)
-	      {
-	      too_small:
-		_bfd_error_handler (_("corrupt EGSD record type %d: size (%#x) "
-				      "is too small"),
-				    gsd_type, gsd_size);
-		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
-	      }
+	      goto too_small;
 	    vms_flags = bfd_getl16 (egps->flags);
 
 	    if ((vms_flags & EGPS__V_REL) == 0)
