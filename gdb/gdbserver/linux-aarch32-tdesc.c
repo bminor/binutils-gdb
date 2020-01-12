@@ -16,6 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+
+#include "linux-aarch32-tdesc.h"
+
 #include "tdesc.h"
 #include "arch/aarch32.h"
 #include <inttypes.h>
