@@ -1,5 +1,9 @@
 2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-aarch64-low.c (aarch64_write_goto_address): Make static.
+
+2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-aarch32-tdesc.c: Include linux-aarch32-tdesc.h.
 	* linux-aarch64-tdesc.c: Include linux-aarch64-tdesc.h.
 

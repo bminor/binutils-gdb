@@ -2638,7 +2638,7 @@ aarch64_emit_goto (int *offset_p, int *size_p)
 
 /* Implementation of emit_ops method "write_goto_address".  */
 
-void
+static void
 aarch64_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
 {
   uint32_t insn;
