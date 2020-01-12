@@ -1,3 +1,10 @@
+2020-01-12  Pedro Alves  <palves@redhat.com>
+
+	* bsd-kvm.c (bsd_kvm_target::close): Call exit_inferior_silent
+	directly for the current inferior instead of
+	discard_all_inferiors.
+	(discard_all_inferiors): Delete.
+
 2020-01-11  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-wingeneral.c (box_win): Check cli_styling.

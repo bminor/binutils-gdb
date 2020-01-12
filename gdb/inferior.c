@@ -260,13 +260,6 @@ inferior_appeared (struct inferior *inf, int pid)
   gdb::observers::inferior_appeared.notify (inf);
 }
 
-void
-discard_all_inferiors (void)
-{
-  for (inferior *inf : all_non_exited_inferiors ())
-    exit_inferior_silent (inf);
-}
-
 struct inferior *
 find_inferior_id (int num)
 {
