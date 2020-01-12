@@ -1,3 +1,15 @@
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* wasm-module.c (wasm_scan_name_function_section): Formatting.
+	Delete asect name check.  Move asect NULL check to wasm_object_p.
+	Correct bounds check of sizes against end.  Replace uses of
+	bfd_zalloc with bfd_alloc, zeroing only necessary bytes.  Use
+	just one bfd_release.
+	(wasm_scan): Don't use malloc/strdup for section names,
+	bfd_alloc instead.  Simplify code prefixing section name.
+	Formatting.  Don't attempt to free memory here..
+	(wasm_object_p): ..do so here.
+
 2020-01-10  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/22269
