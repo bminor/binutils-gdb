@@ -1,3 +1,12 @@
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbcore.h (struct core_fns) <core_read_registers>: Change
+	core_reg_sect type to gdb_byte *.
+	* arm-nbsd-nat.c (fetch_elfcore_registers): Likewise.
+	* cris-tdep.c (fetch_core_registers): Likewise.
+	* corelow.c (core_target::get_core_register_section): Change
+	type of `contents` to gdb::byte_vector.
+
 2020-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-wingeneral.c (box_win): Position the title in the center

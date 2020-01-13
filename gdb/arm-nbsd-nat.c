@@ -397,7 +397,7 @@ arm_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 
 static void
 fetch_elfcore_registers (struct regcache *regcache,
-			 char *core_reg_sect, unsigned core_reg_size,
+			 gdb_byte *core_reg_sect, unsigned core_reg_size,
 			 int which, CORE_ADDR ignore)
 {
   struct reg gregset;

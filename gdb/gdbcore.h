@@ -213,7 +213,7 @@ struct core_fns
        address X is at location core_reg_sect+x+reg_addr.  */
 
     void (*core_read_registers) (struct regcache *regcache,
-				 char *core_reg_sect,
+				 gdb_byte *core_reg_sect,
 				 unsigned core_reg_size,
 				 int which, CORE_ADDR reg_addr);
 

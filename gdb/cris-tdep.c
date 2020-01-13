@@ -3793,7 +3793,7 @@ cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
 
 static void
 fetch_core_registers (struct regcache *regcache,
-		      char *core_reg_sect, unsigned core_reg_size,
+		      gdb_byte *core_reg_sect, unsigned core_reg_size,
                       int which, CORE_ADDR reg_addr)
 {
   cris_elf_gregset_t gregset;

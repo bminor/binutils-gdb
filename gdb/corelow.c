@@ -621,7 +621,7 @@ core_target::get_core_register_section (struct regcache *regcache,
 	       section_name.c_str ());
     }
 
-  std::vector<char> contents (size);
+  gdb::byte_vector contents (size);
   if (!bfd_get_section_contents (core_bfd, section, contents.data (),
 				 (file_ptr) 0, size))
     {
