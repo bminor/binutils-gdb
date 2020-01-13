@@ -1,5 +1,9 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* hostio-errno.c: Include hostio.h.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (%-generated.c): Make $(regdat_sh) a regular
 	prerequisite.
 

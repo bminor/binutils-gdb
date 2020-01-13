@@ -22,6 +22,9 @@
    on top of errno.  */
 
 #include "server.h"
+
+#include "hostio.h"
+
 #include "gdbsupport/fileio.h"
 
 void
