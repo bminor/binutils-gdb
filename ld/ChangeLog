@@ -1,5 +1,9 @@
 2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
+	* testsuite/ld-arc/relax-local-pic.d: Improve matching patterns.
+
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
+
 	* Makefile.am: Remove earcelf_prof.c and earclinux_prof.c
 	emulations.
 	* configure.tgt: Likewise.
