@@ -1,3 +1,8 @@
+2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+
+        * opcode/arc-dis.c (regnames): Correct ACCL/ACCH naming, fix typo
+	reserved register name.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	* ns32k-dis.c (Is_gen): Use strchr, add 'f'.

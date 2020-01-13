@@ -90,7 +90,7 @@ static const char * const regnames[64] =
   "r32", "r33", "r34", "r35", "r36", "r37", "r38", "r39",
   "r40", "r41", "r42", "r43", "r44", "r45", "r46", "r47",
   "r48", "r49", "r50", "r51", "r52", "r53", "r54", "r55",
-  "r56", "r57", "ACCL", "ACCH", "lp_count", "rezerved", "LIMM", "pcl"
+  "r56", "r57", "r58", "r59", "lp_count", "reserved", "LIMM", "pcl"
 };
 
 static const char * const addrtypenames[ARC_NUM_ADDRTYPES] =
