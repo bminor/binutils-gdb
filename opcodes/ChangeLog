@@ -1,3 +1,8 @@
+2020-01-14  Alan Modra  <amodra@gmail.com>
+
+	* z8k-dis.c (unpack_instr): Formatting.  Cast unsigned short
+	values to unsigned before shifting.
+
 2020-01-13  Thomas Troeger  <tstroege@gmx.de>
 
 	* arm-dis.c (print_insn_arm): Fill in insn info fields for control

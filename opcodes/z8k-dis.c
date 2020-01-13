@@ -369,8 +369,8 @@ unpack_instr (instr_data_s *instr_data, int is_segmented, disassemble_info *info
 	      break;
 	    case ARG_IMM32:
 	      FETCH_DATA (info, nibl_count + 8);
-	      instr_long = (instr_data->words[nibl_count] << 16)
-		| (instr_data->words[nibl_count + 4]);
+	      instr_long = ((unsigned) instr_data->words[nibl_count] << 16
+			    | instr_data->words[nibl_count + 4]);
 	      instr_data->immediate = instr_long;
 	      nibl_count += 7;
 	      break;
@@ -402,17 +402,17 @@ unpack_instr (instr_data_s *instr_data, int is_segmented, disassemble_info *info
 	      if (instr_nibl & 0x8)
 		{
 		  FETCH_DATA (info, nibl_count + 8);
-		  instr_long = (instr_data->words[nibl_count] << 16)
-		    | (instr_data->words[nibl_count + 4]);
-		  instr_data->address = ((instr_word & 0x7f00) << 16)
-		    + (instr_long & 0xffff);
+		  instr_long = ((unsigned) instr_data->words[nibl_count] << 16
+				| instr_data->words[nibl_count + 4]);
+		  instr_data->address = ((instr_word & 0x7f00) << 16
+					 | (instr_long & 0xffff));
 		  nibl_count += 7;
 		  seg_length = 2;
 		}
 	      else
 		{
-		  instr_data->address = ((instr_word & 0x7f00) << 16)
-		    + (instr_word & 0x00ff);
+		  instr_data->address = ((instr_word & 0x7f00) << 16
+					 | (instr_word & 0x00ff));
 		  nibl_count += 3;
 		}
 	    }
