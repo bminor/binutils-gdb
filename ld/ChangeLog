@@ -1,3 +1,9 @@
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
+
+	* scripttempl/elfarcv2.sc : Allow interrupt vector table to be
+	located at an arbitrary address.  Use DWARF.sc file.
+	* scripttempl/elfarc.sc: Use DWARF.sc file.
+
 2020-01-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-mips-elf/eh-frame5.s,
