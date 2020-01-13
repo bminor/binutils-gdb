@@ -370,12 +370,18 @@ read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 #  define UNKNOWN_SIDE_EFFECTS() do {} while (0)
 #endif
 
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC void stop_tracing (void);
+
 IP_AGENT_EXPORT_FUNC void
 stop_tracing (void)
 {
   /* GDBserver places breakpoint here.  */
   UNKNOWN_SIDE_EFFECTS();
 }
+
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC void flush_trace_buffer (void);
 
 IP_AGENT_EXPORT_FUNC void
 flush_trace_buffer (void)
@@ -1496,6 +1502,9 @@ init_trace_buffer (LONGEST bufsize)
 
 #ifdef IN_PROCESS_AGENT
 
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC void about_to_request_buffer_space (void);
+
 IP_AGENT_EXPORT_FUNC void
 about_to_request_buffer_space (void)
 {
@@ -2091,6 +2100,9 @@ create_trace_state_variable (int num, int gdb)
   return tsv;
 }
 
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC LONGEST get_trace_state_variable_value (int num);
+
 IP_AGENT_EXPORT_FUNC LONGEST
 get_trace_state_variable_value (int num)
 {
@@ -2116,6 +2128,10 @@ get_trace_state_variable_value (int num)
 
   return tsv->value;
 }
+
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC void set_trace_state_variable_value (int num,
+							  LONGEST val);
 
 IP_AGENT_EXPORT_FUNC void
 set_trace_state_variable_value (int num, LONGEST val)
@@ -5785,6 +5801,10 @@ fast_tracepoint_collecting, returning continue-until-break at %s",
 EXTERN_C_PUSH
 IP_AGENT_EXPORT_VAR collecting_t *collecting;
 EXTERN_C_POP
+
+/* This is needed for -Wmissing-declarations.  */
+IP_AGENT_EXPORT_FUNC void gdb_collect (struct tracepoint *tpoint,
+				       unsigned char *regs);
 
 /* This routine, called from the jump pad (in asm) is designed to be
    called from the jump pads of fast tracepoints, thus it is on the

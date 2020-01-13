@@ -1,5 +1,13 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* tracepoint.h (IP_AGENT_EXPORT_FUNC) [!IN_PROCESS_AGENT]:
+	Define to static.
+	* tracepoint.c (stop_tracing, flush_trace_buffer,
+	about_to_request_buffer_space, get_trace_state_variable_value,
+	set_trace_state_variable_value, gdb_collect): Add declaration.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* linux-x86-low.c (x86_linux_regs_info, amd64_emit_eq_goto,
 	amd64_emit_ne_goto, amd64_emit_lt_goto, amd64_emit_le_goto,
 	amd64_emit_gt_goto, amd64_emit_ge_goto, amd64_emit_ge_goto,

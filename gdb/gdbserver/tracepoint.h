@@ -62,7 +62,7 @@ void initialize_tracepoint (void);
 # define IP_AGENT_EXPORT_VAR EXPORTED_SYMBOL ATTR_USED
 # define IP_AGENT_EXPORT_VAR_DECL EXTERN_C EXPORTED_SYMBOL
 #else
-# define IP_AGENT_EXPORT_FUNC
+# define IP_AGENT_EXPORT_FUNC static
 # define IP_AGENT_EXPORT_VAR
 # define IP_AGENT_EXPORT_VAR_DECL extern
 #endif
