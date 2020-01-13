@@ -347,9 +347,7 @@ flip_bytes (char *ptr, int count)
 }
 
 /* Given a character C, does it represent a general addressing mode?  */
-#define Is_gen(c) \
-  ((c) == 'F' || (c) == 'L' || (c) == 'B' \
-   || (c) == 'W' || (c) == 'D' || (c) == 'A' || (c) == 'I' || (c) == 'Z')
+#define Is_gen(c) (strchr ("FLBWDAIZf", (c)) != NULL)
 
 /* Adressing modes.  */
 #define Adrmod_index_byte        0x1c
@@ -808,9 +806,10 @@ print_insn_ns32k (bfd_vma memaddr, disassemble_info *info)
 	 if we are using scaled indexed addressing mode, since the index
 	 bytes occur right after the basic instruction, not as part
 	 of the addressing extension.  */
-      if (Is_gen(d[1]))
+      if (Is_gen (d[1]))
 	{
-	  int addr_mode = bit_extract (buffer, ioffset - 5, 5);
+	  int bitoff = d[1] == 'f' ? 10 : 5;
+	  int addr_mode = bit_extract (buffer, ioffset - bitoff, 5);
 
 	  if (Adrmod_is_index (addr_mode))
 	    {
@@ -819,7 +818,7 @@ print_insn_ns32k (bfd_vma memaddr, disassemble_info *info)
 	    }
 	}
 
-      if (d[2] && Is_gen(d[3]))
+      if (d[2] && Is_gen (d[3]))
 	{
 	  int addr_mode = bit_extract (buffer, ioffset - 10, 5);
 
