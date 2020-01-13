@@ -841,6 +841,7 @@ static void
 arc_select_cpu (const char *arg, enum mach_selection_type sel)
 {
   int i;
+  static struct cpu_type old_cpu = { 0, 0, 0, E_ARC_OSABI_CURRENT, 0 };
 
   /* We should only set a default if we've not made a selection from some
      other source.  */
@@ -871,7 +872,6 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
                 }
 	      return;
             }
-
 	  /* Initialise static global data about selected machine type.  */
 	  selected_cpu.flags = cpu_types[i].flags;
 	  selected_cpu.name = cpu_types[i].name;
@@ -889,7 +889,17 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
   /* Check if set features are compatible with the chosen CPU.  */
   arc_check_feature ();
 
+  /* If we change the CPU, we need to re-init the bfd.  */
+  if (mach_selection_mode != MACH_SELECTION_NONE
+      && (old_cpu.mach != selected_cpu.mach))
+    {
+      bfd_find_target (arc_target_format, stdoutput);
+      if (! bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
+	as_warn (_("Could not set architecture and machine"));
+    }
+
   mach_selection_mode = sel;
+  old_cpu = selected_cpu;
 }
 
 /* Here ends all the ARCompact extension instruction assembling

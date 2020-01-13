@@ -20,13 +20,14 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include "opcode/arc.h"
-
+#ifndef TC_ARC
 /* By convention, you should define this macro in the `.h' file.  For
    example, `tc-m68k.h' defines `TC_M68K'.  You might have to use this
    if it is necessary to add CPU specific code to the object format
    file.  */
 #define TC_ARC
+
+#include "opcode/arc.h"
 
 /* We want local label support.  */
 #define LOCAL_LABELS_FB 1
@@ -267,3 +268,5 @@ struct arc_relax_type
   /* Number of flags.  Used for re-assembling in md_convert_frag.  */
   int nflg;
 };
+
+#endif

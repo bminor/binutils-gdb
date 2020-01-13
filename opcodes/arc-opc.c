@@ -1691,7 +1691,7 @@ const struct arc_flag_class arc_flag_classes[] =
   { F_CLASS_OPTIONAL, { F_ASFAKE, F_NULL}},
 
 #define C_NE	    (C_AS + 1)
-  { F_CLASS_OPTIONAL, { F_NE, F_NULL}},
+  { F_CLASS_REQUIRED, { F_NE, F_NULL}},
 
   /* ARC NPS400 Support: See comment near head of file.  */
 #define C_NPS_CL     (C_NE + 1)

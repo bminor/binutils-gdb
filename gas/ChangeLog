@@ -1,3 +1,10 @@
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
+
+	* config/tc-arc.c (arc_select_cpu): Re-init the bfd if we change
+	the CPU.
+	* config/tc-arc.h: Add header if/defs.
+	* testsuite/gas/arc/pseudos.d: Improve matching pattern.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/wasm32/allinsn.d: Update expected output.

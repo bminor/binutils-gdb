@@ -1,5 +1,14 @@
 2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
+	* Makefile.am: Remove earcelf_prof.c and earclinux_prof.c
+	emulations.
+	* configure.tgt: Likewise.
+	* Makefile.in: Regenerate.
+	* emulparams/arcelf_prof.sh: Remove file.
+	* emulparams/arclinux_prof.sh: Likewise.
+
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
+
 	* scripttempl/elfarcv2.sc : Allow interrupt vector table to be
 	located at an arbitrary address.  Use DWARF.sc file.
 	* scripttempl/elfarc.sc: Use DWARF.sc file.

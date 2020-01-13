@@ -1,5 +1,9 @@
 2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
 
+	* arc-opc.c (C_NE): Make it required.
+
+2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+
         * opcode/arc-dis.c (regnames): Correct ACCL/ACCH naming, fix typo
 	reserved register name.
 
