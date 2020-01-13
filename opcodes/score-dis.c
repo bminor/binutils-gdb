@@ -565,7 +565,7 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
                               {
                               case 'r':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;
@@ -575,7 +575,7 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
                                 break;
                               case 'd':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;
@@ -600,14 +600,14 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
                                       || ((given & insn->mask) == 0x0c00000b)   /* stc1  */
                                       || ((given & insn->mask) == 0x0c000013)   /* stc2  */
                                       || ((given & insn->mask) == 0x0c00001b))  /* stc3  */
-                                    reg <<= 2;
+                                    reg *= 4;
 
                                   func (stream, "%ld", reg);
                                 }
                                 break;
                               case 'x':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;
@@ -617,7 +617,7 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
                                 break;
                                 case 'w':
                                 {
-                                    long reg;
+                                    unsigned long reg;
                                     reg = given >> bitstart;
                                     reg &= (2u << (bitend - bitstart)) - 1;
                                     reg <<= 2;
@@ -731,7 +731,7 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
                            }
                            else
                            {
-                               long reg;
+                               unsigned long reg;
                                int bitstart = 10;
                                int bitend = 14;
                                reg = given >> bitstart;
@@ -784,7 +784,7 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
                               {
                               case 'r':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;
@@ -794,7 +794,7 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
                                 break;
                               case 'd':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;
@@ -817,14 +817,14 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
                                       || ((given & insn->mask) == 0x0c00000b)   /* stc1  */
                                       || ((given & insn->mask) == 0x0c000013)   /* stc2  */
                                       || ((given & insn->mask) == 0x0c00001b))  /* stc3  */
-                                    reg <<= 2;
+                                    reg *= 4;
 
                                   func (stream, "%ld", reg);
                                 }
                                 break;
                               case 'x':
                                 {
-                                  long reg;
+                                  unsigned long reg;
 
                                   reg = given >> bitstart;
                                   reg &= (2u << (bitend - bitstart)) - 1;

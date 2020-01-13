@@ -1,5 +1,12 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* score-dis.c (print_insn_score48): Use unsigned variables for
+	unsigned values.  Don't left shift negative values.
+	(print_insn_score32): Likewise.
+	* score7-dis.c (print_insn_score32, print_insn_score16): Likewise.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* tic4x-dis.c (tic4x_print_register): Remove dead code.
 
 2020-01-13  Alan Modra  <amodra@gmail.com>
