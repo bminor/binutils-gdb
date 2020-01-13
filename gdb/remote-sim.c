@@ -74,6 +74,43 @@ static void gdb_os_error (host_callback *, const char *, ...)
    sim_* are the interface to the simulator (see remote-sim.h).
    gdbsim_* are stuff which is internal to gdb.  */
 
+/* Value of the next pid to allocate for an inferior.  As indicated
+   elsewhere, its initial value is somewhat arbitrary; it's critical
+   though that it's not zero or negative.  */
+static int next_pid;
+#define INITIAL_PID 42000
+
+/* Simulator-specific, per-inferior state.  */
+struct sim_inferior_data {
+  explicit sim_inferior_data (SIM_DESC desc)
+    : gdbsim_desc (desc),
+      remote_sim_ptid (next_pid, 0, next_pid)
+  {
+    ++next_pid;
+  }
+
+  ~sim_inferior_data ();
+
+  /* Flag which indicates whether or not the program has been loaded.  */
+  int program_loaded = 0;
+
+  /* Simulator descriptor for this inferior.  */
+  SIM_DESC gdbsim_desc;
+
+  /* This is the ptid we use for this particular simulator instance.  Its
+     value is somewhat arbitrary, as the simulator target don't have a
+     notion of tasks or threads, but we need something non-null to place
+     in inferior_ptid.  For simulators which permit multiple instances,
+     we also need a unique identifier to use for each inferior.  */
+  ptid_t remote_sim_ptid;
+
+  /* Signal with which to resume.  */
+  enum gdb_signal resume_siggnal = GDB_SIGNAL_0;
+
+  /* Flag which indicates whether resume should step or not.  */
+  int resume_step = 0;
+};
+
 static const target_info gdbsim_target_info = {
   "sim",
   N_("simulator"),
@@ -126,46 +163,15 @@ struct gdbsim_target final
 
   bool has_all_memory ()  override;
   bool has_memory ()  override;
+
+private:
+  sim_inferior_data *get_inferior_data_by_ptid (ptid_t ptid,
+						int sim_instance_needed);
+  void resume_one_inferior (inferior *inf, bool step, gdb_signal siggnal);
+  void close_one_inferior (inferior *inf);
 };
 
 static struct gdbsim_target gdbsim_ops;
-
-/* Value of the next pid to allocate for an inferior.  As indicated
-   elsewhere, its initial value is somewhat arbitrary; it's critical
-   though that it's not zero or negative.  */
-static int next_pid;
-#define INITIAL_PID 42000
-
-/* Simulator-specific, per-inferior state.  */
-struct sim_inferior_data {
-  explicit sim_inferior_data (SIM_DESC desc)
-    : gdbsim_desc (desc),
-      remote_sim_ptid (next_pid, 0, next_pid)
-  {
-    ++next_pid;
-  }
-
-  ~sim_inferior_data ();
-
-  /* Flag which indicates whether or not the program has been loaded.  */
-  int program_loaded = 0;
-
-  /* Simulator descriptor for this inferior.  */
-  SIM_DESC gdbsim_desc;
-
-  /* This is the ptid we use for this particular simulator instance.  Its
-     value is somewhat arbitrary, as the simulator target don't have a
-     notion of tasks or threads, but we need something non-null to place
-     in inferior_ptid.  For simulators which permit multiple instances,
-     we also need a unique identifier to use for each inferior.  */
-  ptid_t remote_sim_ptid;
-
-  /* Signal with which to resume.  */
-  enum gdb_signal resume_siggnal = GDB_SIGNAL_0;
-
-  /* Flag which indicates whether resume should step or not.  */
-  int resume_step = 0;
-};
 
 static inferior_key<sim_inferior_data> sim_inferior_data_key;
 
@@ -262,8 +268,9 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
    inferior in question.  Return NULL when no inferior is found or
    when ptid has a zero or negative pid component.  */
 
-static struct sim_inferior_data *
-get_sim_inferior_data_by_ptid (ptid_t ptid, int sim_instance_needed)
+sim_inferior_data *
+gdbsim_target::get_inferior_data_by_ptid (ptid_t ptid,
+					  int sim_instance_needed)
 {
   struct inferior *inf;
   int pid = ptid.pid ();
@@ -271,7 +278,7 @@ get_sim_inferior_data_by_ptid (ptid_t ptid, int sim_instance_needed)
   if (pid <= 0)
     return NULL;
 
-  inf = find_inferior_pid (pid);
+  inf = find_inferior_pid (this, pid);
 
   if (inf)
     return get_sim_inferior_data (inf, sim_instance_needed);
@@ -441,7 +448,7 @@ void
 gdbsim_target::fetch_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct inferior *inf = find_inferior_ptid (regcache->ptid ());
+  struct inferior *inf = find_inferior_ptid (this, regcache->ptid ());
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
@@ -510,7 +517,7 @@ void
 gdbsim_target::store_registers (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct inferior *inf = find_inferior_ptid (regcache->ptid ());
+  struct inferior *inf = find_inferior_ptid (this, regcache->ptid ());
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
@@ -656,7 +663,7 @@ gdbsim_target::create_inferior (const char *exec_file,
 
   inferior_ptid = sim_data->remote_sim_ptid;
   inferior_appeared (current_inferior (), inferior_ptid.pid ());
-  add_thread_silent (inferior_ptid);
+  add_thread_silent (this, inferior_ptid);
 
   insert_breakpoints ();	/* Needed to get correct instruction
 				   in cache.  */
@@ -767,11 +774,10 @@ gdbsim_target_open (const char *args, int from_tty)
   gdbsim_is_open = 1;
 }
 
-/* Callback for iterate_over_inferiors.  Called (indirectly) by
-   gdbsim_close().  */
+/* Helper for gdbsim_target::close.  */
 
-static int
-gdbsim_close_inferior (struct inferior *inf, void *arg)
+void
+gdbsim_target::close_one_inferior (inferior *inf)
 {
   struct sim_inferior_data *sim_data = sim_inferior_data_key.get (inf);
   if (sim_data != NULL)
@@ -785,14 +791,12 @@ gdbsim_close_inferior (struct inferior *inf, void *arg)
 	 Thus we need to verify the existence of an inferior using the
 	 pid in question before setting inferior_ptid via
 	 switch_to_thread() or mourning the inferior.  */
-      if (find_inferior_ptid (ptid) != NULL)
+      if (find_inferior_ptid (this, ptid) != NULL)
 	{
-	  switch_to_thread (ptid);
+	  switch_to_thread (this, ptid);
 	  generic_mourn_inferior ();
 	}
     }
-
-  return 0;
 }
 
 /* Close out all files and local state before this target loses control.  */
@@ -803,7 +807,8 @@ gdbsim_target::close ()
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_close\n");
 
-  iterate_over_inferiors (gdbsim_close_inferior, NULL);
+  for (inferior *inf : all_inferiors (this))
+    close_one_inferior (inf);
 
   if (sim_argv != NULL)
     {
@@ -839,45 +844,30 @@ gdbsim_target::detach (inferior *inf, int from_tty)
    or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be given
    to the target, or zero for no signal.  */
 
-struct resume_data
-{
-  enum gdb_signal siggnal;
-  int step;
-};
-
-static int
-gdbsim_resume_inferior (struct inferior *inf, void *arg)
+void
+gdbsim_target::resume_one_inferior (inferior *inf, bool step,
+				    gdb_signal siggnal)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (inf, SIM_INSTANCE_NOT_NEEDED);
-  struct resume_data *rd = (struct resume_data *) arg;
 
   if (sim_data)
     {
-      sim_data->resume_siggnal = rd->siggnal;
-      sim_data->resume_step = rd->step;
+      sim_data->resume_siggnal = siggnal;
+      sim_data->resume_step = step;
 
       if (remote_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    _("gdbsim_resume: pid %d, step %d, signal %d\n"),
-			    inf->pid, rd->step, rd->siggnal);
+			    inf->pid, step, siggnal);
     }
-
-  /* When called from iterate_over_inferiors, a zero return causes the
-     iteration process to proceed until there are no more inferiors to
-     consider.  */
-  return 0;
 }
 
 void
 gdbsim_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 {
-  struct resume_data rd;
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data_by_ptid (ptid, SIM_INSTANCE_NOT_NEEDED);
-
-  rd.siggnal = siggnal;
-  rd.step = step;
+    = get_inferior_data_by_ptid (ptid, SIM_INSTANCE_NOT_NEEDED);
 
   /* We don't access any sim_data members within this function.
      What's of interest is whether or not the call to
@@ -887,9 +877,12 @@ gdbsim_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
      either have multiple inferiors to resume or an error condition.  */
 
   if (sim_data)
-    gdbsim_resume_inferior (find_inferior_ptid (ptid), &rd);
+    resume_one_inferior (find_inferior_ptid (this, ptid), step, siggnal);
   else if (ptid == minus_one_ptid)
-    iterate_over_inferiors (gdbsim_resume_inferior, &rd);
+    {
+      for (inferior *inf : all_inferiors (this))
+	resume_one_inferior (inf, step, siggnal);
+    }
   else
     error (_("The program is not being run."));
 }
@@ -969,7 +962,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
 				      SIM_INSTANCE_NEEDED);
   else
     {
-      sim_data = get_sim_inferior_data_by_ptid (ptid, SIM_INSTANCE_NEEDED);
+      sim_data = get_inferior_data_by_ptid (ptid, SIM_INSTANCE_NEEDED);
       if (sim_data == NULL)
 	error (_("Unable to wait for pid %d.  Inferior not found."),
 	       ptid.pid ());
@@ -1248,7 +1241,7 @@ bool
 gdbsim_target::thread_alive (ptid_t ptid)
 {
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data_by_ptid (ptid, SIM_INSTANCE_NOT_NEEDED);
+    = get_inferior_data_by_ptid (ptid, SIM_INSTANCE_NOT_NEEDED);
 
   if (sim_data == NULL)
     return false;

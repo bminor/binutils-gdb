@@ -1,3 +1,23 @@
+2020-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote-sim.c (next_pid, INITIAL_PID, sim_inferior_data): Move
+	up.
+	(gdbsim_target) <get_inferior_data_by_ptid, resume_one_inferior,
+	close_one_inferior>: New methods.
+	(get_sim_inferior_data_by_ptid): Move to gdbsim_target,
+	pass down target to find_inferior_pid.
+	(gdbsim_target::fetch_registers, gdbsim_target::store_registers):
+	Pass down target to find_inferior_ptid.
+	(gdbsim_target::create_inferior): Pass down target to
+	add_thread_silent.
+	(gdbsim_close_inferior): Move to gdbsim_close_inferior, pass
+	target down to find_inferior_ptid and switch_to_thread.
+	(gdbsim_target::close): Update to call close_one_inferior.
+	(struct resume_data): Remove.
+	(gdbsim_resume_inferior): Move to gdbsim_target.  Take arguments
+	directly, rather than through a void pointer.
+	(gdbsim_target::resume): Update to call resume_one_inferior.
+
 2020-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbsupport/gdb_wait.c: Include gdb_wait.h.
