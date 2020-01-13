@@ -17,10 +17,8 @@ eaixrs6.c
 ealpha.c
 ealphavms.c
 earcelf.c
-earcelf_prof.c
 earclinux.c
 earclinux_nps.c
-earclinux_prof.c
 earcv2elf.c
 earcv2elfx.c
 earm_wince_pe.c

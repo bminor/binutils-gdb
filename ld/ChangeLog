@@ -1,3 +1,7 @@
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
 	* testsuite/ld-arc/relax-local-pic.d: Improve matching patterns.
