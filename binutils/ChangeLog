@@ -1,5 +1,6 @@
 2020-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* objdump.c (disassemble_bytes): Remove C99-ism.
 	* testsuite/binutils-all/debuginfod.exp: New tests.
 
 2020-01-13  Thomas Troeger  <tstroege@gmx.de>

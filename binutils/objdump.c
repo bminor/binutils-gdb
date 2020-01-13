@@ -2623,8 +2623,9 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	      size_t line_buffer_size = strlen (line_buffer);
 	      char last_color = 0;
+	      size_t i;
 
-	      for (size_t i = 0; i <= line_buffer_size; ++i)
+	      for (i = 0; i <= line_buffer_size; ++i)
 		{
 		  if (color_output)
 		    {
