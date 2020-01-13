@@ -1,3 +1,8 @@
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	PR 25362
+	* nm.c (display_rel_file): Free dyn_syms.
+
 2020-01-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 25220

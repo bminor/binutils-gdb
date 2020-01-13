@@ -1171,6 +1171,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	  *symp = 0;
 	  symcount += synth_count;
 	}
+      if (!dynamic && dyn_syms != NULL)
+	free (dyn_syms);
     }
 
   /* lto_slim_object is set to false when a bfd is loaded with a compiler
