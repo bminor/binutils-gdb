@@ -7801,6 +7801,7 @@ display_debug_frames (struct dwarf_section *section,
       unsigned int offset_size;
       unsigned int initial_length_size;
       bfd_boolean all_nops;
+      static Frame_Chunk fde_fc;
 
       saved_start = start;
 
@@ -7898,7 +7899,6 @@ display_debug_frames (struct dwarf_section *section,
       else
 	{
 	  unsigned char *look_for;
-	  static Frame_Chunk fde_fc;
 	  unsigned long segment_selector;
 
 	  if (is_eh)
@@ -8704,6 +8704,17 @@ display_debug_frames (struct dwarf_section *section,
       /* Interpret the CFA - as long as it is not completely full of NOPs.  */
       if (do_debug_frames_interp && ! all_nops)
 	frame_display_row (fc, &need_col_headers, &max_regs);
+
+      if (fde_fc.col_type != NULL)
+	{
+	  free (fde_fc.col_type);
+	  fde_fc.col_type = NULL;
+	}
+      if (fde_fc.col_offset != NULL)
+	{
+	  free (fde_fc.col_offset);
+	  fde_fc.col_offset = NULL;
+	}
 
       start = block_end;
       eh_addr_size = saved_eh_addr_size;

@@ -13333,6 +13333,11 @@ apply_relocations (Filedata *                 filedata,
 	  || relsec->sh_link >= filedata->file_header.e_shnum)
 	continue;
 
+      symsec = filedata->section_headers + relsec->sh_link;
+      if (symsec->sh_type != SHT_SYMTAB
+	  && symsec->sh_type != SHT_DYNSYM)
+	return FALSE;
+
       is_rela = relsec->sh_type == SHT_RELA;
 
       if (is_rela)
@@ -13352,10 +13357,6 @@ apply_relocations (Filedata *                 filedata,
       if (filedata->file_header.e_machine == EM_SH)
 	is_rela = FALSE;
 
-      symsec = filedata->section_headers + relsec->sh_link;
-      if (symsec->sh_type != SHT_SYMTAB
-	  && symsec->sh_type != SHT_DYNSYM)
-	return FALSE;
       symtab = GET_ELF_SYMBOLS (filedata, symsec, & num_syms);
 
       for (rp = relocs; rp < relocs + num_relocs; ++rp)
@@ -14395,6 +14396,13 @@ free_debug_section (enum dwarf_section_display_enum debug)
   section->start = NULL;
   section->address = 0;
   section->size = 0;
+
+  if (section->reloc_info != NULL)
+    {
+      free (section->reloc_info);
+      section->reloc_info = NULL;
+      section->num_relocs = 0;
+    }
 }
 
 static bfd_boolean
@@ -19341,6 +19349,7 @@ process_notes_at (Filedata *           filedata,
     {
       warn (_("Corrupt note: alignment %ld, expecting 4 or 8\n"),
 	    (long) align);
+      free (pnotes);
       return FALSE;
     }
 
@@ -20011,6 +20020,13 @@ process_object (Filedata * filedata)
   filedata->string_table = NULL;
   filedata->string_table_length = 0;
 
+  if (filedata->dump_sects != NULL)
+    {
+      free (filedata->dump_sects);
+      filedata->dump_sects = NULL;
+      filedata->num_dump_sects = 0;
+    }
+
   if (dynamic_strings)
     {
       free (dynamic_strings);
@@ -20315,13 +20331,6 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
           if (! process_object (filedata))
 	    ret = FALSE;
         }
-
-      if (filedata->dump_sects != NULL)
-	{
-	  free (filedata->dump_sects);
-	  filedata->dump_sects = NULL;
-	  filedata->num_dump_sects = 0;
-	}
 
       free (qualified_name);
     }
