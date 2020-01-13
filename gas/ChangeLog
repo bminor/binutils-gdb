@@ -1,3 +1,8 @@
+2020-01-13  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (f64mm, f32mm): Add sve as a feature
+	dependency.
+
 2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
 	* config/tc-arc.c (arc_select_cpu): Re-init the bfd if we change
