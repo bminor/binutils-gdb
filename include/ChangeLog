@@ -1,3 +1,7 @@
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
+
+	* elf/arc-cpu.def: Update ARC cpu list.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	* opcode/tic4x.h (EXTR): Delete.
