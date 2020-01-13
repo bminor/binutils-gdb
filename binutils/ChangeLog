@@ -1,7 +1,7 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
-	PR 23560
-	PR 23561
+	PR 25360
+	PR 25361
 	* dwarf.c (display_debug_frames): Move fde_fc earlier.  Free
 	fde_fc col_type and col_offset.
 	* readelf.c (apply_relocations): Move symsec check earlier.
