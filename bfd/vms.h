@@ -98,7 +98,7 @@ struct evax_private_udata_struct
 
 /* vms-misc.c.  */
 
-#define VMS_DEBUG 1
+#define VMS_DEBUG 0
 
 #if VMS_DEBUG
 extern void _bfd_vms_debug (int, char *, ...) ATTRIBUTE_PRINTF_2;

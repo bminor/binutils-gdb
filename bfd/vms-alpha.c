@@ -503,6 +503,7 @@ _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
   vms_debug2 ((4, "EIHD size %d imgtype %d symvva 0x%lx eisd %d eihs %d\n",
 	       size, imgtype, (unsigned long)symvva,
 	       *eisd_offset, *eihs_offset));
+  (void) size;
 
   return TRUE;
 }
@@ -1594,18 +1595,16 @@ image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 #if VMS_DEBUG
   _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
 		  (long)PRIV (image_offset));
-  _bfd_hexdump (9, ptr, size, 0);
 #endif
 
   if (PRIV (image_section)->contents != NULL)
     {
       asection *sec = PRIV (image_section);
-      file_ptr off = PRIV (image_offset);
+      size_t off = PRIV (image_offset);
 
       /* Check bounds.  */
-      if (off > (file_ptr)sec->size
-	  || size > (file_ptr)sec->size
-	  || off + size > (file_ptr)sec->size)
+      if (off > sec->size
+	  || size > sec->size - off)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -1613,6 +1612,9 @@ image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 
       memcpy (sec->contents + off, ptr, size);
     }
+#if VMS_DEBUG
+  _bfd_hexdump (9, ptr, size, 0);
+#endif
 
   PRIV (image_offset) += size;
   return TRUE;
@@ -1861,10 +1863,10 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
   unsigned char *ptr;
   unsigned int length;
   unsigned char *maxptr;
-  bfd_vma op1;
-  bfd_vma op2;
-  unsigned int rel1;
-  unsigned int rel2;
+  bfd_vma op1 = 0;
+  bfd_vma op2 = 0;
+  unsigned int rel1 = RELC_NONE;
+  unsigned int rel2 = RELC_NONE;
   struct alpha_vms_link_hash_entry *h;
 
   PRIV (recrd.rec) += ETIR__C_HEADER_SIZE;
