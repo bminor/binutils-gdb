@@ -1,5 +1,9 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure: Re-generate.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* tracepoint.h (IP_AGENT_EXPORT_FUNC) [!IN_PROCESS_AGENT]:
 	Define to static.
 	* tracepoint.c (stop_tracing, flush_trace_buffer,

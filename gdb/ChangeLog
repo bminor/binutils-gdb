@@ -1,5 +1,10 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* warning.m4: Add -Wmissing-declarations to build_warnings.
+	* configure: Re-generate.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* python/python.c (init__gdb_module): Add declaration.
 
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>

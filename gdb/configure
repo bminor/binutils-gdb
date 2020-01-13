@@ -16105,7 +16105,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wshadow=local \
 -Wdeprecated-copy \
 -Wdeprecated-copy-dtor \
--Wredundant-move"
+-Wredundant-move \
+-Wmissing-declarations"
 
 case "${host}" in
   *-*-mingw32*)
