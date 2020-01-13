@@ -188,8 +188,9 @@ ppcnbsd_init_abi (struct gdbarch_info info,
   tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd2_sigtramp);
 }
 
+void _initialize_ppcnbsd_tdep ();
 void
-_initialize_ppcnbsd_tdep (void)
+_initialize_ppcnbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_NETBSD,
 			  ppcnbsd_init_abi);

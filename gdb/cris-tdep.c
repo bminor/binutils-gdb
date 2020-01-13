@@ -3829,8 +3829,9 @@ static struct core_fns cris_elf_core_fns =
   NULL                                  /* next */
 };
 
+void _initialize_cris_tdep ();
 void
-_initialize_cris_tdep (void)
+_initialize_cris_tdep ()
 {
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   

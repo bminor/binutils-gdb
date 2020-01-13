@@ -1022,8 +1022,9 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
 
 struct target_so_ops dsbt_so_ops;
 
+void _initialize_dsbt_solib ();
 void
-_initialize_dsbt_solib (void)
+_initialize_dsbt_solib ()
 {
   dsbt_so_ops.relocate_section_addresses = dsbt_relocate_section_addresses;
   dsbt_so_ops.free_so = dsbt_free_so;

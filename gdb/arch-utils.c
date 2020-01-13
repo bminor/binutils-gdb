@@ -1004,8 +1004,9 @@ default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
   return "";
 }
 
+void _initialize_gdbarch_utils ();
 void
-_initialize_gdbarch_utils (void)
+_initialize_gdbarch_utils ()
 {
   add_setshow_enum_cmd ("endian", class_support,
 			endian_enum, &set_endian_string, 

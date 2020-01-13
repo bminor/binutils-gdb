@@ -1281,8 +1281,9 @@ m68k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
     return;
 }
 
+void _initialize_m68k_tdep ();
 void
-_initialize_m68k_tdep (void)
+_initialize_m68k_tdep ()
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
 }

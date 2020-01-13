@@ -53,6 +53,7 @@ unpack_field_as_long_tests (struct gdbarch *arch)
 }
 }
 
+void _initialize_unpack_selftests ();
 void
 _initialize_unpack_selftests ()
 {

@@ -1455,8 +1455,9 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
       ada_tasks_invalidate_inferior_data (inf);
 }
 
+void _initialize_tasks ();
 void
-_initialize_tasks (void)
+_initialize_tasks ()
 {
   /* Attach various observers.  */
   gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer);

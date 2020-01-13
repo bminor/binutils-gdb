@@ -293,8 +293,9 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, sol2_core_pid_to_str);
 }
 
+void _initialize_sparc_sol2_tdep ();
 void
-_initialize_sparc_sol2_tdep (void)
+_initialize_sparc_sol2_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0,
 			  GDB_OSABI_SOLARIS, sparc32_sol2_init_abi);

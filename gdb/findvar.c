@@ -1088,8 +1088,9 @@ copy_integer_to_size_test ()
 
 #endif
 
+void _initialize_findvar ();
 void
-_initialize_findvar (void)
+_initialize_findvar ()
 {
 #if GDB_SELF_TEST
   selftests::register_test

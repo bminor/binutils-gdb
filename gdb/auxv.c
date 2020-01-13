@@ -546,8 +546,9 @@ info_auxv_command (const char *cmd, int from_tty)
     }
 }
 
+void _initialize_auxv ();
 void
-_initialize_auxv (void)
+_initialize_auxv ()
 {
   add_info ("auxv", info_auxv_command,
 	    _("Display the inferior's auxiliary vector.\n\

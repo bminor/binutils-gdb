@@ -2520,8 +2520,9 @@ varobj_invalidate (void)
   all_root_varobjs (varobj_invalidate_iter, NULL);
 }
 
+void _initialize_varobj ();
 void
-_initialize_varobj (void)
+_initialize_varobj ()
 {
   varobj_table = XCNEWVEC (struct vlist *, VAROBJ_TABLE_SIZE);
 

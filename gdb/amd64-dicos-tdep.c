@@ -46,8 +46,9 @@ amd64_dicos_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+void _initialize_amd64_dicos_tdep ();
 void
-_initialize_amd64_dicos_tdep (void)
+_initialize_amd64_dicos_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
 				  amd64_dicos_osabi_sniffer);

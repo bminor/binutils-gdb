@@ -598,6 +598,7 @@ Support for Ravenscar task/thread switching is disabled\n"));
 /* Module startup initialization function, automagically called by
    init.c.  */
 
+void _initialize_ravenscar ();
 void
 _initialize_ravenscar ()
 {

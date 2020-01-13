@@ -1404,8 +1404,9 @@ jit_gdbarch_data_init (struct obstack *obstack)
   return data;
 }
 
+void _initialize_jit ();
 void
-_initialize_jit (void)
+_initialize_jit ()
 {
   jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
 					   JIT_READER_DIR_RELOCATABLE);

@@ -961,8 +961,9 @@ static const struct sym_fns macho_sym_fns = {
   &psym_functions
 };
 
+void _initialize_machoread ();
 void
-_initialize_machoread (void)
+_initialize_machoread ()
 {
   add_symtab_fns (bfd_target_mach_o_flavour, &macho_sym_fns);
 

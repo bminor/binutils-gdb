@@ -1569,8 +1569,9 @@ remove_user_added_objfile (struct objfile *objfile)
     }
 }
 
+void _initialize_solib ();
 void
-_initialize_solib (void)
+_initialize_solib ()
 {
   solib_data = gdbarch_data_register_pre_init (solib_init);
 

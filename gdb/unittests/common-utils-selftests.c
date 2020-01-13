@@ -125,6 +125,7 @@ string_vappendf_tests ()
 
 } /* namespace selftests */
 
+void _initialize_common_utils_selftests ();
 void
 _initialize_common_utils_selftests ()
 {

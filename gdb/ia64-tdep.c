@@ -4012,8 +4012,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_ia64_tdep ();
 void
-_initialize_ia64_tdep (void)
+_initialize_ia64_tdep ()
 {
   gdbarch_register (bfd_arch_ia64, ia64_gdbarch_init, NULL);
 }

@@ -2935,8 +2935,9 @@ gdb_display_match_list (char **matches, int len, int max,
     }
 }
 
+void _initialize_completer ();
 void
-_initialize_completer (void)
+_initialize_completer ()
 {
   add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
 				       &max_completions, _("\

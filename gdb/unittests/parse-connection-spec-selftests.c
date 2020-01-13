@@ -239,6 +239,7 @@ run_tests ()
 } /* namespace parse_connection_spec_tests */
 } /* namespace selftests */
 
+void _initialize_parse_connection_spec_selftests ();
 void
 _initialize_parse_connection_spec_selftests ()
 {

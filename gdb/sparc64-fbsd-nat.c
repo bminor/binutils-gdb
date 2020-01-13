@@ -62,8 +62,9 @@ sparc64fbsd_kvm_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 /* Add some extra features to the generic SPARC target.  */
 static sparc_target<fbsd_nat_target> the_sparc64_fbsd_nat_target;
 
+void _initialize_sparc64fbsd_nat ();
 void
-_initialize_sparc64fbsd_nat (void)
+_initialize_sparc64fbsd_nat ()
 {
   add_inf_child_target (&the_sparc64_fbsd_nat_target);
 

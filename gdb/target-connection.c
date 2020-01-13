@@ -149,6 +149,8 @@ info_connections_command (const char *args, int from_tty)
   print_connection (current_uiout, args);
 }
 
+void _initialize_target_connection ();
+
 void
 _initialize_target_connection ()
 {

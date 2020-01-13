@@ -93,6 +93,7 @@ run_tests ()
 } /* namespace scoped_fd */
 } /* namespace selftests */
 
+void _initialize_scoped_fd_selftests ();
 void
 _initialize_scoped_fd_selftests ()
 {

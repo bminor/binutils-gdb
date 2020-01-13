@@ -261,8 +261,9 @@ mi_cmd_inferior_tty_show (const char *command, char **argv, int argc)
     current_uiout->field_string ("inferior_tty_terminal", inferior_io_terminal);
 }
 
+void _initialize_mi_cmd_env ();
 void 
-_initialize_mi_cmd_env (void)
+_initialize_mi_cmd_env ()
 {
   const char *env;
 

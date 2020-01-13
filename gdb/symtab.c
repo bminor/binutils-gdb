@@ -6689,8 +6689,9 @@ info_module_var_func_command_completer (struct cmd_list_element *ignore,
 
 
 
+void _initialize_symtab ();
 void
-_initialize_symtab (void)
+_initialize_symtab ()
 {
   cmd_list_element *c;
 

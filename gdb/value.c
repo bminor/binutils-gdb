@@ -4127,8 +4127,9 @@ test_insert_into_bit_range_vector ()
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
+void _initialize_values ();
 void
-_initialize_values (void)
+_initialize_values ()
 {
   add_cmd ("convenience", no_class, show_convenience, _("\
 Debugger convenience (\"$foo\") variables and functions.\n\

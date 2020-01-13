@@ -1287,8 +1287,9 @@ gdbsim_target::has_memory ()
   return true;
 }
 
+void _initialize_remote_sim ();
 void
-_initialize_remote_sim (void)
+_initialize_remote_sim ()
 {
   struct cmd_list_element *c;
 

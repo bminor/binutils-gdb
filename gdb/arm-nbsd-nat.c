@@ -444,8 +444,9 @@ static struct core_fns arm_netbsd_elfcore_fns =
   NULL
 };
 
+void _initialize_arm_netbsd_nat ();
 void
-_initialize_arm_netbsd_nat (void)
+_initialize_arm_netbsd_nat ()
 {
   add_inf_child_target (&the_arm_netbsd_nat_target);
 

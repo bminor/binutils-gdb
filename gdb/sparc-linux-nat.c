@@ -66,8 +66,9 @@ fill_fpregset (const struct regcache *regcache,
   sparc32_collect_fpregset (sparc_fpregmap, regcache, regnum, fpregs);
 }
 
+void _initialize_sparc_linux_nat ();
 void
-_initialize_sparc_linux_nat (void)
+_initialize_sparc_linux_nat ()
 {
   sparc_fpregmap = &sparc32_bsd_fpregmap;
 

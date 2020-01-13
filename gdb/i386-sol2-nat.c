@@ -241,8 +241,9 @@ fill_fpregset (const struct regcache *regcache,
 
 #endif
 
+void _initialize_amd64_sol2_nat ();
 void
-_initialize_amd64_sol2_nat (void)
+_initialize_amd64_sol2_nat ()
 {
 #if PR_MODEL_NATIVE == PR_MODEL_LP64
   amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;

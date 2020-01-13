@@ -682,8 +682,9 @@ builtin_go_type (struct gdbarch *gdbarch)
   return (const struct builtin_go_type *) gdbarch_data (gdbarch, go_type_data);
 }
 
+void _initialize_go_language ();
 void
-_initialize_go_language (void)
+_initialize_go_language ()
 {
   go_type_data = gdbarch_data_register_post_init (build_go_types);
 }

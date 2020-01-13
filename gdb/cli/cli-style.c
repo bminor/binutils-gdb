@@ -313,6 +313,7 @@ set_style_name (const char *name)
   return result;
 }
 
+void _initialize_cli_style ();
 void
 _initialize_cli_style ()
 {

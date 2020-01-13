@@ -719,8 +719,9 @@ show_solib_aix_debug (struct ui_file *file, int from_tty,
 /* The target_so_ops for AIX targets.  */
 struct target_so_ops solib_aix_so_ops;
 
+void _initialize_solib_aix ();
 void
-_initialize_solib_aix (void)
+_initialize_solib_aix ()
 {
   solib_aix_so_ops.relocate_section_addresses
     = solib_aix_relocate_section_addresses;

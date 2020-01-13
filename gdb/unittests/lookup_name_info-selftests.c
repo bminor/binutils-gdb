@@ -103,6 +103,7 @@ run_tests ()
 
 }} // namespace selftests::lookup_name
 
+void _initialize_lookup_name_info_selftests ();
 void
 _initialize_lookup_name_info_selftests ()
 {

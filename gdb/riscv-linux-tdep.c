@@ -186,8 +186,9 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* Initialize RISC-V Linux target support.  */
 
+void _initialize_riscv_linux_tdep ();
 void
-_initialize_riscv_linux_tdep (void)
+_initialize_riscv_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_riscv, 0, GDB_OSABI_LINUX,
 			  riscv_linux_init_abi);

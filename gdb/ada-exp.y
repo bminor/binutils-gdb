@@ -1456,8 +1456,9 @@ type_system_address (struct parser_state *par_state)
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }
 
+void _initialize_ada_exp ();
 void
-_initialize_ada_exp (void)
+_initialize_ada_exp ()
 {
   obstack_init (&temp_parse_space);
 }

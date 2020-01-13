@@ -228,8 +228,9 @@ hppa_nbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
     }
 }
 
+void _initialize_hppanbsd_nat ();
 void
-_initialize_hppanbsd_nat (void)
+_initialize_hppanbsd_nat ()
 {
   add_inf_child_target (&the_hppa_nbsd_nat_target);
 }

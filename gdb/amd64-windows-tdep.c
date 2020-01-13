@@ -1245,8 +1245,9 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
 
+void _initialize_amd64_windows_tdep ();
 void
-_initialize_amd64_windows_tdep (void)
+_initialize_amd64_windows_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_CYGWIN,
                           amd64_windows_init_abi);

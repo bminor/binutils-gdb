@@ -48,6 +48,7 @@ static void test_xml_escape_text_append ()
 }
 }
 
+void _initialize_xml_utils ();
 void
 _initialize_xml_utils ()
 {

@@ -2812,8 +2812,9 @@ show_record_full_command (const char *args, int from_tty)
   cmd_show_list (show_record_full_cmdlist, from_tty, "");
 }
 
+void _initialize_record_full ();
 void
-_initialize_record_full (void)
+_initialize_record_full ()
 {
   struct cmd_list_element *c;
 

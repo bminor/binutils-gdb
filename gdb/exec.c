@@ -1063,8 +1063,9 @@ exec_target::find_memory_regions (find_memory_region_ftype func, void *data)
   return objfile_find_memory_regions (this, func, data);
 }
 
+void _initialize_exec ();
 void
-_initialize_exec (void)
+_initialize_exec ()
 {
   struct cmd_list_element *c;
 

@@ -962,8 +962,9 @@ maintenance_info_bfds (const char *arg, int from_tty)
   htab_traverse (all_bfds, print_one_bfd, uiout);
 }
 
+void _initialize_gdb_bfd ();
 void
-_initialize_gdb_bfd (void)
+_initialize_gdb_bfd ()
 {
   all_bfds = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
 				NULL, xcalloc, xfree);

@@ -1131,8 +1131,9 @@ tfile_append_tdesc_line (const char *line)
   buffer_grow_str (&trace_tdesc, "\n");
 }
 
+void _initialize_tracefile_tfile ();
 void
-_initialize_tracefile_tfile (void)
+_initialize_tracefile_tfile ()
 {
   add_target (tfile_target_info, tfile_target_open, filename_completer);
 }

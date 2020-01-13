@@ -26133,8 +26133,9 @@ show_check_physname (struct ui_file *file, int from_tty,
 		    value);
 }
 
+void _initialize_dwarf2_read ();
 void
-_initialize_dwarf2_read (void)
+_initialize_dwarf2_read ()
 {
   add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
 Set DWARF specific variables.\n\

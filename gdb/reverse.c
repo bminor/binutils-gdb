@@ -322,8 +322,9 @@ info_bookmarks_command (const char *args, int from_tty)
     }
 }
 
+void _initialize_reverse ();
 void
-_initialize_reverse (void)
+_initialize_reverse ()
 {
   add_com ("reverse-step", class_run, reverse_step, _("\
 Step program backward until it reaches the beginning of another source line.\n\

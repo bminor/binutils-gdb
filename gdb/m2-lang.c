@@ -457,8 +457,9 @@ builtin_m2_type (struct gdbarch *gdbarch)
 
 /* Initialization for Modula-2 */
 
+void _initialize_m2_language ();
 void
-_initialize_m2_language (void)
+_initialize_m2_language ()
 {
   m2_type_data = gdbarch_data_register_post_init (build_m2_types);
 }

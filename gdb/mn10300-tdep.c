@@ -1417,8 +1417,9 @@ mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      tdep->am33_mode);
 }
 
+void _initialize_mn10300_tdep ();
 void
-_initialize_mn10300_tdep (void)
+_initialize_mn10300_tdep ()
 {
   gdbarch_register (bfd_arch_mn10300, mn10300_gdbarch_init, mn10300_dump_tdep);
 }

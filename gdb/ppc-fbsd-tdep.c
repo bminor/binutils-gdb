@@ -361,8 +361,9 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					ppcfbsd_get_thread_local_address);
 }
 
+void _initialize_ppcfbsd_tdep ();
 void
-_initialize_ppcfbsd_tdep (void)
+_initialize_ppcfbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_FREEBSD,
 			  ppcfbsd_init_abi);

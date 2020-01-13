@@ -416,8 +416,9 @@ proc_prettyfprint_status (long flags, int why, int what, int thread)
     }
 }
 
+void _initialize_proc_api ();
 void
-_initialize_proc_api (void)
+_initialize_proc_api ()
 {
   add_setshow_boolean_cmd ("procfs-trace", no_class, &procfs_trace, _("\
 Set tracing for /proc api calls."), _("\

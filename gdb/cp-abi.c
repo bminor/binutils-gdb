@@ -391,8 +391,9 @@ show_cp_abi_cmd (const char *args, int from_tty)
   uiout->text (").\n");
 }
 
+void _initialize_cp_abi ();
 void
-_initialize_cp_abi (void)
+_initialize_cp_abi ()
 {
   struct cmd_list_element *c;
 

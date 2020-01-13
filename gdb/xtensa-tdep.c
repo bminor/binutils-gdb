@@ -3253,8 +3253,9 @@ xtensa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   error (_("xtensa_dump_tdep(): not implemented"));
 }
 
+void _initialize_xtensa_tdep ();
 void
-_initialize_xtensa_tdep (void)
+_initialize_xtensa_tdep ()
 {
   gdbarch_register (bfd_arch_xtensa, xtensa_gdbarch_init, xtensa_dump_tdep);
   xtensa_init_reggroups ();

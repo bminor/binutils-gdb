@@ -90,8 +90,9 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
 static i386_bsd_nat_target<obsd_nat_target> the_i386_obsd_nat_target;
 
+void _initialize_i386obsd_nat ();
 void
-_initialize_i386obsd_nat (void)
+_initialize_i386obsd_nat ()
 {
   add_inf_child_target (&i386_obsd_nat_target);
 

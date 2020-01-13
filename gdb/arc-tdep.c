@@ -2145,8 +2145,9 @@ dump_arc_instruction_command (const char *args, int from_tty)
   arc_insn_dump (insn);
 }
 
+void _initialize_arc_tdep ();
 void
-_initialize_arc_tdep (void)
+_initialize_arc_tdep ()
 {
   gdbarch_register (bfd_arch_arc, arc_gdbarch_init, arc_dump_tdep);
 

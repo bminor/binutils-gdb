@@ -665,8 +665,9 @@ complete_skip_number (cmd_list_element *cmd,
     }
 }
 
+void _initialize_step_skip ();
 void
-_initialize_step_skip (void)
+_initialize_step_skip ()
 {
   static struct cmd_list_element *skiplist = NULL;
   struct cmd_list_element *c;

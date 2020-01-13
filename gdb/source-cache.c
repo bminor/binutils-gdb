@@ -329,6 +329,7 @@ static void extract_lines_test ()
 }
 #endif
 
+void _initialize_source_cache ();
 void
 _initialize_source_cache ()
 {

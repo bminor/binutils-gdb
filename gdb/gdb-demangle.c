@@ -212,8 +212,9 @@ demangle_command (const char *args, int from_tty)
     error (_("Can't demangle \"%s\""), name);
 }
 
+void _initialize_gdb_demangle ();
 void
-_initialize_gdb_demangle (void)
+_initialize_gdb_demangle ()
 {
   int i, ndems;
 

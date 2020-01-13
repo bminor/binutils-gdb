@@ -478,8 +478,9 @@ set_gnutarget (const char *newtarget)
   set_gnutarget_command (NULL, 0, NULL);
 }
 
+void _initialize_core ();
 void
-_initialize_core (void)
+_initialize_core ()
 {
   struct cmd_list_element *c;
 

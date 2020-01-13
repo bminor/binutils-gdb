@@ -187,8 +187,9 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
+void _initialize_ppcobsd_nat ();
 void
-_initialize_ppcobsd_nat (void)
+_initialize_ppcobsd_nat ()
 {
   add_inf_child_target (&the_ppc_obsd_nat_target);
 

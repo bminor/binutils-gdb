@@ -305,8 +305,9 @@ frame_unwind_got_address (struct frame_info *frame, int regnum,
   return reg_val;
 }
 
+void _initialize_frame_unwind ();
 void
-_initialize_frame_unwind (void)
+_initialize_frame_unwind ()
 {
   frame_unwind_data = gdbarch_data_register_pre_init (frame_unwind_init);
 }

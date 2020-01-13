@@ -152,6 +152,7 @@ copy_bitwise_tests (void)
 
 } /* namespace selftests */
 
+void _initialize_copy_bitwise_utils_selftests ();
 void
 _initialize_copy_bitwise_utils_selftests ()
 {

@@ -2743,8 +2743,9 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
 
 /* Initialization code.  */
 
+void _initialize_ax_gdb ();
 void
-_initialize_ax_gdb (void)
+_initialize_ax_gdb ()
 {
   add_cmd ("agent", class_maintenance, agent_command,
 	   _("\

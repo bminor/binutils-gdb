@@ -2113,8 +2113,9 @@ gdb_maint_setting_str_internal_fn (struct gdbarch *gdbarch,
 				 gdbarch);
 }
 
+void _initialize_cli_cmds ();
 void
-_initialize_cli_cmds (void)
+_initialize_cli_cmds ()
 {
   struct cmd_list_element *c;
 

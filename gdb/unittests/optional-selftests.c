@@ -87,6 +87,7 @@ run_tests ()
 } /* namespace optional */
 } /* namespace selftests */
 
+void _initialize_optional_selftests ();
 void
 _initialize_optional_selftests ()
 {

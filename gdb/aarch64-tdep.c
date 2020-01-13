@@ -3406,8 +3406,9 @@ static void aarch64_process_record_test (void);
 }
 #endif
 
+void _initialize_aarch64_tdep ();
 void
-_initialize_aarch64_tdep (void)
+_initialize_aarch64_tdep ()
 {
   gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init,
 		    aarch64_dump_tdep);

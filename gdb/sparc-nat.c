@@ -305,8 +305,9 @@ sparc_xfer_wcookie (enum target_object object,
 }
 
 
+void _initialize_sparc_nat ();
 void
-_initialize_sparc_nat (void)
+_initialize_sparc_nat ()
 {
   /* Default to using SunOS 4 register sets.  */
   if (sparc_gregmap == NULL)

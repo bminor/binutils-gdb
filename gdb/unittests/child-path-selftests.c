@@ -59,6 +59,7 @@ test ()
 }
 }
 
+void _initialize_child_path_selftests ();
 void
 _initialize_child_path_selftests ()
 {

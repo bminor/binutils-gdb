@@ -122,6 +122,7 @@ x86bsd_dr_get_control (void)
 
 #endif /* PT_GETDBREGS */
 
+void _initialize_x86_bsd_nat ();
 void
 _initialize_x86_bsd_nat ()
 {

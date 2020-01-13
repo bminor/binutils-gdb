@@ -14229,8 +14229,9 @@ ada_free_objfile_observer (struct objfile *objfile)
   ada_clear_symbol_cache ();
 }
 
+void _initialize_ada_language ();
 void
-_initialize_ada_language (void)
+_initialize_ada_language ()
 {
   initialize_ada_catchpoint_ops ();
 

@@ -1057,8 +1057,9 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Register the above initialization routine.  */
 
+void _initialize_rx_tdep ();
 void
-_initialize_rx_tdep (void)
+_initialize_rx_tdep ()
 {
   register_gdbarch_init (bfd_arch_rx, rx_gdbarch_init);
   initialize_tdesc_rx ();

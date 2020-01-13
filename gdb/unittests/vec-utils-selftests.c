@@ -66,6 +66,7 @@ unordered_remove_tests ()
 } /* namespace vector_utils_tests */
 } /* amespace selftests */
 
+void _initialize_vec_utils_selftests ();
 void
 _initialize_vec_utils_selftests ()
 {

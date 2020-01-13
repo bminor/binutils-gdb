@@ -3147,8 +3147,9 @@ show_record_pt_buffer_size_value (struct ui_file *file, int from_tty,
 
 /* Initialize btrace commands.  */
 
+void _initialize_record_btrace ();
 void
-_initialize_record_btrace (void)
+_initialize_record_btrace ()
 {
   add_prefix_cmd ("btrace", class_obscure, cmd_record_btrace_start,
 		  _("Start branch trace recording."), &record_btrace_cmdlist,

@@ -103,6 +103,7 @@ run_tests ()
 } /* namespace scoped_restore_tests */
 } /* namespace selftests */
 
+void _initialize_scoped_restore_selftests ();
 void
 _initialize_scoped_restore_selftests ()
 {

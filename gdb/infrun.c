@@ -9319,8 +9319,9 @@ infrun_async_inferior_event_handler (gdb_client_data data)
   inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
+void _initialize_infrun ();
 void
-_initialize_infrun (void)
+_initialize_infrun ()
 {
   struct cmd_list_element *c;
 

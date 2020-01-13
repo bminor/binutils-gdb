@@ -101,8 +101,9 @@ alpha_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
     return FPR_BASE + regno - gdbarch_fp0_regnum (gdbarch);
 }
 
+void _initialize_alpha_linux_nat ();
 void
-_initialize_alpha_linux_nat (void)
+_initialize_alpha_linux_nat ()
 {
   linux_target = &the_alpha_linux_nat_target;
   add_inf_child_target (&the_alpha_linux_nat_target);

@@ -319,8 +319,9 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
     }
 }
 
+void _initialize_i386bsd_nat ();
 void
-_initialize_i386bsd_nat (void)
+_initialize_i386bsd_nat ()
 {
   int offset;
 

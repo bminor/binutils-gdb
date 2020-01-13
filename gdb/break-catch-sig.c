@@ -424,8 +424,9 @@ initialize_signal_catchpoint_ops (void)
   ops->explains_signal = signal_catchpoint_explains_signal;
 }
 
+void _initialize_break_catch_sig ();
 void
-_initialize_break_catch_sig (void)
+_initialize_break_catch_sig ()
 {
   initialize_signal_catchpoint_ops ();
 

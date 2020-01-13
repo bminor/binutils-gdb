@@ -1335,8 +1335,9 @@ mi_interp_factory (const char *name)
   return new mi_interp (name);
 }
 
+void _initialize_mi_interp ();
 void
-_initialize_mi_interp (void)
+_initialize_mi_interp ()
 {
   /* The various interpreter levels.  */
   interp_factory_register (INTERP_MI1, mi_interp_factory);

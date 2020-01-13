@@ -526,8 +526,9 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 }
 
+void _initialize_hppa_linux_tdep ();
 void
-_initialize_hppa_linux_tdep (void)
+_initialize_hppa_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_LINUX,
 			  hppa_linux_init_abi);

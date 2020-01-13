@@ -310,6 +310,7 @@ x86_linux_get_thread_area (pid_t pid, void *addr, unsigned int *base_addr)
 }
 
 
+void _initialize_x86_linux_nat ();
 void
 _initialize_x86_linux_nat ()
 {

@@ -174,8 +174,9 @@ i386_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
 }
 #endif
 
+void _initialize_i386fbsd_nat ();
 void
-_initialize_i386fbsd_nat (void)
+_initialize_i386fbsd_nat ()
 {
   add_inf_child_target (&the_i386_fbsd_nat_target);
 

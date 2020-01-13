@@ -1404,6 +1404,7 @@ gcc_cp_plugin::pop_binding_level (const char *debug_name)
   return pop_binding_level ();
 }
 
+void _initialize_compile_cplus_types ();
 void
 _initialize_compile_cplus_types ()
 {

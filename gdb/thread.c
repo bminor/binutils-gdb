@@ -2189,8 +2189,9 @@ static const struct internalvar_funcs gthread_funcs =
   NULL
 };
 
+void _initialize_thread ();
 void
-_initialize_thread (void)
+_initialize_thread ()
 {
   static struct cmd_list_element *thread_apply_list = NULL;
   cmd_list_element *c;

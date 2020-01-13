@@ -2188,8 +2188,9 @@ static const struct sym_fns coff_sym_fns =
   &psym_functions
 };
 
+void _initialize_coffread ();
 void
-_initialize_coffread (void)
+_initialize_coffread ()
 {
   add_symtab_fns (bfd_target_coff_flavour, &coff_sym_fns);
 

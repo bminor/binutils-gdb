@@ -61,6 +61,7 @@ test_parse_static_tracepoint_marker_definition ()
 } /* namespace tracepoint_tests */
 } /* namespace selftests */
 
+void _initialize_tracepoint_selftests ();
 void
 _initialize_tracepoint_selftests ()
 {

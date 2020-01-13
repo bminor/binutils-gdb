@@ -3260,8 +3260,9 @@ svr4_iterate_over_objfiles_in_search_order
     }
 }
 
+void _initialize_svr4_solib ();
 void
-_initialize_svr4_solib (void)
+_initialize_svr4_solib ()
 {
   solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
 

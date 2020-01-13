@@ -622,8 +622,9 @@ binary_append_command (const char *cmd, int from_tty)
 	     gdb_stdout);
 }
 
+void _initialize_cli_dump ();
 void
-_initialize_cli_dump (void)
+_initialize_cli_dump ()
 {
   struct cmd_list_element *c;
 

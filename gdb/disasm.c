@@ -1128,8 +1128,9 @@ disassembler_options_completer (struct cmd_list_element *ignore,
 
 /* Initialization code.  */
 
+void _initialize_disasm ();
 void
-_initialize_disasm (void)
+_initialize_disasm ()
 {
   struct cmd_list_element *cmd;
 

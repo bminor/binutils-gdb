@@ -228,8 +228,9 @@ static const struct serial_ops pipe_ops =
   ser_unix_write_prim
 };
 
+void _initialize_ser_pipe ();
 void
-_initialize_ser_pipe (void)
+_initialize_ser_pipe ()
 {
   serial_add_interface (&pipe_ops);
 }

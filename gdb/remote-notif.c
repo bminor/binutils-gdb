@@ -237,8 +237,9 @@ remote_notif_state::~remote_notif_state ()
     delete pending_event[i];
 }
 
+void _initialize_notif ();
 void
-_initialize_notif (void)
+_initialize_notif ()
 {
   add_setshow_boolean_cmd ("notification", no_class, &notif_debug,
 			   _("\

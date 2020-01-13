@@ -790,8 +790,9 @@ initialize_layouts ()
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
 
+void _initialize_tui_layout ();
 void
-_initialize_tui_layout (void)
+_initialize_tui_layout ()
 {
   struct cmd_list_element *cmd;
 

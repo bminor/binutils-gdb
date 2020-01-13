@@ -119,8 +119,9 @@ arm_symbian_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_SYMBIAN;
 }
 
+void _initialize_arm_symbian_tdep ();
 void
-_initialize_arm_symbian_tdep (void)
+_initialize_arm_symbian_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
 				  bfd_target_elf_flavour,

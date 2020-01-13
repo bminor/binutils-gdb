@@ -1332,8 +1332,9 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
+void _initialize_objc_language ();
 void
-_initialize_objc_language (void)
+_initialize_objc_language ()
 {
   add_info ("selectors", info_selectors_command,
 	    _("All Objective-C selectors, or those matching REGEXP."));

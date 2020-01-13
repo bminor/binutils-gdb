@@ -127,6 +127,7 @@ run_tests ()
 } /* namespace observers */
 } /* namespace selftests */
 
+void _initialize_observer_selftest ();
 void
 _initialize_observer_selftest ()
 {

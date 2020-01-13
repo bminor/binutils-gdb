@@ -69,8 +69,9 @@ sparc64_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
   return 0;
 }
 
+void _initialize_sparc64_nat ();
 void
-_initialize_sparc64_nat (void)
+_initialize_sparc64_nat ()
 {
   sparc_supply_gregset = sparc64_supply_gregset;
   sparc_collect_gregset = sparc64_collect_gregset;

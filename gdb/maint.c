@@ -1135,8 +1135,9 @@ Selftests have been disabled for this build.\n"));
 }
 
 
+void _initialize_maint_cmds ();
 void
-_initialize_maint_cmds (void)
+_initialize_maint_cmds ()
 {
   struct cmd_list_element *cmd;
 

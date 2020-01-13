@@ -994,8 +994,9 @@ core_target::info_proc (const char *args, enum info_proc_what request)
   return true;
 }
 
+void _initialize_corelow ();
 void
-_initialize_corelow (void)
+_initialize_corelow ()
 {
   add_target (core_target_info, core_target_open, filename_completer);
 }

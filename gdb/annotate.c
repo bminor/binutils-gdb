@@ -614,8 +614,9 @@ breakpoint_changed (struct breakpoint *b)
   annotate_breakpoints_invalid ();
 }
 
+void _initialize_annotate ();
 void
-_initialize_annotate (void)
+_initialize_annotate ()
 {
   gdb::observers::breakpoint_created.attach (breakpoint_changed);
   gdb::observers::breakpoint_deleted.attach (breakpoint_changed);

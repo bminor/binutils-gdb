@@ -61,6 +61,7 @@ static void test_hex2str ()
 } /* namespace rsp_low */
 } /* namespace selftests */
 
+void _initialize_rsp_low_selftests ();
 void
 _initialize_rsp_low_selftests ()
 {

@@ -761,8 +761,9 @@ builtin_f_type (struct gdbarch *gdbarch)
   return (const struct builtin_f_type *) gdbarch_data (gdbarch, f_type_data);
 }
 
+void _initialize_f_language ();
 void
-_initialize_f_language (void)
+_initialize_f_language ()
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
 }

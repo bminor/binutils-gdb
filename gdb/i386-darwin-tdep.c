@@ -286,8 +286,9 @@ i386_mach_o_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+void _initialize_i386_darwin_tdep ();
 void
-_initialize_i386_darwin_tdep (void)
+_initialize_i386_darwin_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_mach_o_flavour,
                                   i386_mach_o_osabi_sniffer);

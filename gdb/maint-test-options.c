@@ -424,6 +424,7 @@ maintenance_test_options_command (const char *arg, int from_tty)
 }
 
 
+void _initialize_maint_test_options ();
 void
 _initialize_maint_test_options ()
 {

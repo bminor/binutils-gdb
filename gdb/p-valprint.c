@@ -891,8 +891,9 @@ pascal_object_print_static_field (struct value *val,
   common_val_print (val, stream, recurse, &opts, current_language);
 }
 
+void _initialize_pascal_valprint ();
 void
-_initialize_pascal_valprint (void)
+_initialize_pascal_valprint ()
 {
   add_setshow_boolean_cmd ("pascal_static-members", class_support,
 			   &user_print_options.pascal_static_field_print, _("\

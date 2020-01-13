@@ -1177,8 +1177,9 @@ s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
 }
 
+void _initialize_s390_linux_tdep ();
 void
-_initialize_s390_linux_tdep (void)
+_initialize_s390_linux_tdep ()
 {
   /* Hook us into the OSABI mechanism.  */
   gdbarch_register_osabi (bfd_arch_s390, bfd_mach_s390_31, GDB_OSABI_LINUX,

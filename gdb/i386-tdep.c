@@ -9032,8 +9032,9 @@ show_mpx_cmd (const char *args, int from_tty)
   cmd_show_list (mpx_show_cmdlist, from_tty, "");
 }
 
+void _initialize_i386_tdep ();
 void
-_initialize_i386_tdep (void)
+_initialize_i386_tdep ()
 {
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
 

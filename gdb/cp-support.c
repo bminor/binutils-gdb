@@ -2163,8 +2163,9 @@ info_vtbl_command (const char *arg, int from_tty)
   cplus_print_vtable (value);
 }
 
+void _initialize_cp_support ();
 void
-_initialize_cp_support (void)
+_initialize_cp_support ()
 {
   add_prefix_cmd ("cplus", class_maintenance,
 		  maint_cplus_command,

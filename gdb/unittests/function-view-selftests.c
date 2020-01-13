@@ -171,6 +171,7 @@ run_tests ()
 } /* namespace function_view */
 } /* namespace selftests */
 
+void _initialize_function_view_selftests ();
 void
 _initialize_function_view_selftests ()
 {

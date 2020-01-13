@@ -135,6 +135,7 @@ run_tests ()
 
 #endif /* !defined(HAVE_SYS_MMAN_H) */
 
+void _initialize_scoped_mmap_selftests ();
 void
 _initialize_scoped_mmap_selftests ()
 {

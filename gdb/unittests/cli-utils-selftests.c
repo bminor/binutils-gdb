@@ -110,6 +110,7 @@ test_cli_utils ()
 }
 }
 
+void _initialize_cli_utils_selftests ();
 void
 _initialize_cli_utils_selftests ()
 {

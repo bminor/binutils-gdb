@@ -2081,8 +2081,9 @@ go32_info_dos_command (const char *args, int from_tty)
   help_list (info_dos_cmdlist, "info dos ", class_info, gdb_stdout);
 }
 
+void _initialize_go32_nat ();
 void
-_initialize_go32_nat (void)
+_initialize_go32_nat ()
 {
   x86_dr_low.set_control = go32_set_dr7;
   x86_dr_low.set_addr = go32_set_dr;

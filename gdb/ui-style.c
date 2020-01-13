@@ -404,6 +404,7 @@ skip_ansi_escape (const char *buf, int *n_read)
   return true;
 }
 
+void _initialize_ui_style ();
 void
 _initialize_ui_style ()
 {

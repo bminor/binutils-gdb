@@ -1475,7 +1475,8 @@ elfctf_build_psymtabs (struct objfile *of)
   scan_partial_symbols (fp, of);
 }
 
+void _initialize_ctfread ();
 void
-_initialize_ctfread (void)
+_initialize_ctfread ()
 {
 }

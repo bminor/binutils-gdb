@@ -2258,8 +2258,9 @@ const struct sparc_fpregmap sparc32_bsd_fpregmap =
   32 * 4,			/* %fsr */
 };
 
+void _initialize_sparc_tdep ();
 void
-_initialize_sparc_tdep (void)
+_initialize_sparc_tdep ()
 {
   register_gdbarch_init (bfd_arch_sparc, sparc32_gdbarch_init);
 }

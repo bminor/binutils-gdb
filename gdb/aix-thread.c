@@ -1834,8 +1834,9 @@ aix_thread_target::get_ada_task_ptid (long lwp, long thread)
 /* Module startup initialization function, automagically called by
    init.c.  */
 
+void _initialize_aix_thread ();
 void
-_initialize_aix_thread (void)
+_initialize_aix_thread ()
 {
   /* Notice when object files get loaded and unloaded.  */
   gdb::observers::new_objfile.attach (new_objfile);

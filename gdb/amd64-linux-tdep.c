@@ -2272,8 +2272,9 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
+void _initialize_amd64_linux_tdep ();
 void
-_initialize_amd64_linux_tdep (void)
+_initialize_amd64_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_LINUX, amd64_linux_init_abi);

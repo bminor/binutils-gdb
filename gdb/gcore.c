@@ -590,8 +590,9 @@ gcore_memory_sections (bfd *obfd)
   return 1;
 }
 
+void _initialize_gcore ();
 void
-_initialize_gcore (void)
+_initialize_gcore ()
 {
   add_com ("generate-core-file", class_files, gcore_command, _("\
 Save a core file with the current state of the debugged process.\n\

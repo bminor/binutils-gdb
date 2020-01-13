@@ -159,8 +159,9 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
+void _initialize_mips64obsd_tdep ();
 void
-_initialize_mips64obsd_tdep (void)
+_initialize_mips64obsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_OPENBSD,
 			  mips64obsd_init_abi);

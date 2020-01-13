@@ -996,8 +996,9 @@ triggers a breakpoint or watchpoint."),
 			   &maintenance_show_cmdlist);
 }
 
+void _initialize_aarch64_linux_nat ();
 void
-_initialize_aarch64_linux_nat (void)
+_initialize_aarch64_linux_nat ()
 {
   add_show_debug_regs_command ();
 

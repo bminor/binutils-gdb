@@ -3864,8 +3864,9 @@ test_set_ext_lang_command ()
 
 #endif /* GDB_SELF_TEST */
 
+void _initialize_symfile ();
 void
-_initialize_symfile (void)
+_initialize_symfile ()
 {
   struct cmd_list_element *c;
 

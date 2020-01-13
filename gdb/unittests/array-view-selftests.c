@@ -523,6 +523,7 @@ run_tests ()
 } /* namespace array_view_tests */
 } /* namespace selftests */
 
+void _initialize_array_view_selftests ();
 void
 _initialize_array_view_selftests ()
 {

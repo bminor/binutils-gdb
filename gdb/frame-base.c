@@ -121,8 +121,9 @@ frame_base_find_by_frame (struct frame_info *this_frame)
   return table->default_base;
 }
 
+void _initialize_frame_base ();
 void
-_initialize_frame_base (void)
+_initialize_frame_base ()
 {
   frame_base_data = gdbarch_data_register_pre_init (frame_base_init);
 }

@@ -3262,8 +3262,9 @@ make_value_print_options_def_group (value_print_options *opts)
   return {{value_print_option_defs}, opts};
 }
 
+void _initialize_valprint ();
 void
-_initialize_valprint (void)
+_initialize_valprint ()
 {
   cmd_list_element *cmd;
 

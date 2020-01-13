@@ -1453,8 +1453,9 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_v850_tdep ();
 void
-_initialize_v850_tdep (void)
+_initialize_v850_tdep ()
 {
   register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
   register_gdbarch_init (bfd_arch_v850_rh850, v850_gdbarch_init);

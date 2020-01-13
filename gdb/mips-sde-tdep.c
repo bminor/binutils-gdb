@@ -256,8 +256,9 @@ mips_sde_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_base_append_sniffer (gdbarch, mips_sde_frame_base_sniffer);
 }
 
+void _initialize_mips_sde_tdep ();
 void
-_initialize_mips_sde_tdep (void)
+_initialize_mips_sde_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_mips,
 				  bfd_target_elf_flavour,

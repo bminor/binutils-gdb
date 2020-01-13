@@ -71,8 +71,9 @@ shnbsd_init_abi (struct gdbarch_info info,
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
+void _initialize_shnbsd_tdep ();
 void
-_initialize_shnbsd_tdep (void)
+_initialize_shnbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD,
 			  shnbsd_init_abi);

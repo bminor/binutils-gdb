@@ -379,8 +379,9 @@ static const struct sym_fns ecoff_sym_fns =
   &psym_functions
 };
 
+void _initialize_mipsread ();
 void
-_initialize_mipsread (void)
+_initialize_mipsread ()
 {
   add_symtab_fns (bfd_target_ecoff_flavour, &ecoff_sym_fns);
 }

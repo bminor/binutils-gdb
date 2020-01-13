@@ -507,8 +507,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return (gdbarch);
 }
 
+void _initialize_vax_tdep ();
 void
-_initialize_vax_tdep (void)
+_initialize_vax_tdep ()
 {
   gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
 }

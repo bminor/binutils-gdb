@@ -106,6 +106,7 @@ normalize_mem_ranges_tests ()
 } /* namespace memrange_tests */
 } /* namespace selftests */
 
+void _initialize_memrange_selftests ();
 void
 _initialize_memrange_selftests ()
 {

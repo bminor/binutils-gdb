@@ -471,8 +471,9 @@ tracefile_target::get_trace_status (struct trace_status *ts)
   return -1;
 }
 
+void _initialize_tracefile ();
 void
-_initialize_tracefile (void)
+_initialize_tracefile ()
 {
   add_com ("tsave", class_trace, tsave_command, _("\
 Save the trace data to a file.\n\

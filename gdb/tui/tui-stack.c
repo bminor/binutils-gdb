@@ -370,8 +370,9 @@ tui_update_command (const char *arg, int from_tty)
 /* Function to initialize gdb commands, for tui window stack
    manipulation.  */
 
+void _initialize_tui_stack ();
 void
-_initialize_tui_stack (void)
+_initialize_tui_stack ()
 {
   add_com ("update", class_tui, tui_update_command,
 	   _("Update the source window and locator to "

@@ -3334,8 +3334,9 @@ amd64_target_description (uint64_t xcr0, bool segments)
   return *tdesc;
 }
 
+void _initialize_amd64_tdep ();
 void
-_initialize_amd64_tdep (void)
+_initialize_amd64_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NONE,
  			  amd64_none_init_abi);

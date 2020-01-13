@@ -4514,8 +4514,9 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_generate_c_location
 };
 
+void _initialize_dwarf2loc ();
 void
-_initialize_dwarf2loc (void)
+_initialize_dwarf2loc ()
 {
   add_setshow_zuinteger_cmd ("entry-values", class_maintenance,
 			     &entry_values_debug,

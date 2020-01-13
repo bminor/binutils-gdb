@@ -248,8 +248,9 @@ nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = 10;
 }
 
+void _initialize_nios2_linux_tdep ();
 void
-_initialize_nios2_linux_tdep (void)
+_initialize_nios2_linux_tdep ()
 {
 
   const struct bfd_arch_info *arch_info;

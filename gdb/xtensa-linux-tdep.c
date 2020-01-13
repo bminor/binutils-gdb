@@ -125,8 +125,9 @@ xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 }
 
+void _initialize_xtensa_linux_tdep ();
 void
-_initialize_xtensa_linux_tdep (void)
+_initialize_xtensa_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_xtensa, bfd_mach_xtensa, GDB_OSABI_LINUX,
 			  xtensa_linux_init_abi);

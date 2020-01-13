@@ -1865,8 +1865,9 @@ source_lines_range::source_lines_range (int startline,
 }
 
 
+void _initialize_source ();
 void
-_initialize_source (void)
+_initialize_source ()
 {
   struct cmd_list_element *c;
 

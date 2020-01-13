@@ -98,6 +98,7 @@ help_doc_invariants_tests ()
 } /* namespace help_doc_tests */
 } /* namespace selftests */
 
+void _initialize_help_doc_selftests ();
 void
 _initialize_help_doc_selftests ()
 {

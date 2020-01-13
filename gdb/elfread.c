@@ -1469,8 +1469,9 @@ static const struct gnu_ifunc_fns elf_gnu_ifunc_fns =
   elf_gnu_ifunc_resolver_return_stop
 };
 
+void _initialize_elfread ();
 void
-_initialize_elfread (void)
+_initialize_elfread ()
 {
   add_symtab_fns (bfd_target_elf_flavour, &elf_sym_fns);
 

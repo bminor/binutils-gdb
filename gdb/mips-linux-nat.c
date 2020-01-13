@@ -783,8 +783,9 @@ mips_linux_nat_target::close ()
   linux_nat_trad_target::close ();
 }
 
+void _initialize_mips_linux_nat ();
 void
-_initialize_mips_linux_nat (void)
+_initialize_mips_linux_nat ()
 {
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
 			   &show_debug_regs, _("\

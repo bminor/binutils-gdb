@@ -2155,8 +2155,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
 }
 
+void _initialize_ppc_linux_tdep ();
 void
-_initialize_ppc_linux_tdep (void)
+_initialize_ppc_linux_tdep ()
 {
   /* Register for all sub-families of the POWER/PowerPC: 32-bit and
      64-bit PowerPC, and the older rs6k.  */

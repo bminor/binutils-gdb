@@ -237,8 +237,9 @@ m32r_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 		  _("Got request to store bad register number %d."), regno);
 }
 
+void _initialize_m32r_linux_nat ();
 void
-_initialize_m32r_linux_nat (void)
+_initialize_m32r_linux_nat ()
 {
   /* Register the target.  */
   linux_target = &the_m32r_linux_nat_target;

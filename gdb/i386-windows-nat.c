@@ -79,8 +79,9 @@ i386_windows_segment_register_p (int regnum)
   return regnum >= I386_CS_REGNUM && regnum <= I386_GS_REGNUM;
 }
 
+void _initialize_i386_windows_nat ();
 void
-_initialize_i386_windows_nat (void)
+_initialize_i386_windows_nat ()
 {
   windows_set_context_register_offsets (mappings);
   windows_set_segment_register_p (i386_windows_segment_register_p);

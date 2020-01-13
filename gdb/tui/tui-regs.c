@@ -650,8 +650,9 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
     }
 }
 
+void _initialize_tui_regs ();
 void
-_initialize_tui_regs (void)
+_initialize_tui_regs ()
 {
   struct cmd_list_element **tuicmd, *cmd;
 

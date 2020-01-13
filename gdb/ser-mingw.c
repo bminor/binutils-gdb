@@ -1338,8 +1338,9 @@ static const struct serial_ops tcp_ops =
   net_windows_done_wait_handle
 };
 
+void _initialize_ser_windows ();
 void
-_initialize_ser_windows (void)
+_initialize_ser_windows ()
 {
   WSADATA wsa_data;
 

@@ -85,8 +85,9 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
+void _initialize_arm_netbsd_tdep ();
 void
-_initialize_arm_netbsd_tdep (void)
+_initialize_arm_netbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NETBSD,
                           arm_netbsd_elf_init_abi);

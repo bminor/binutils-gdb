@@ -1008,8 +1008,10 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   return text;
 }
 
+void _initialize_xml_support ();
+void _initialize_xml_support ();
 void
-_initialize_xml_support (void)
+_initialize_xml_support ()
 {
   add_setshow_boolean_cmd ("xml", class_maintenance, &debug_xml,
 			   _("Set XML parser debugging."),

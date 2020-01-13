@@ -14312,8 +14312,9 @@ set_range_stepping (const char *ignore_args, int from_tty,
     }
 }
 
+void _initialize_remote ();
 void
-_initialize_remote (void)
+_initialize_remote ()
 {
   struct cmd_list_element *cmd;
   const char *cmd_name;

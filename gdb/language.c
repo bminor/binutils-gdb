@@ -1136,8 +1136,9 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
 
 /* Initialize the language routines.  */
 
+void _initialize_language ();
 void
-_initialize_language (void)
+_initialize_language ()
 {
   static const char *const type_or_range_names[]
     = { "on", "off", "warn", "auto", NULL };

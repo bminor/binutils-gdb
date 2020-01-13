@@ -1781,6 +1781,7 @@ save_gdb_index_command (const char *arg, int from_tty)
     }
 }
 
+void _initialize_dwarf_index_write ();
 void
 _initialize_dwarf_index_write ()
 {

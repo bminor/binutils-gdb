@@ -76,6 +76,7 @@ parse_memory_map_tests ()
 
 #endif /* HAVE_LIBEXPAT */
 
+void _initialize_memory_map_selftests ();
 void
 _initialize_memory_map_selftests ()
 {

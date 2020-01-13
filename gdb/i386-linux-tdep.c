@@ -1076,8 +1076,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					 i386_linux_handle_segmentation_fault);
 }
 
+void _initialize_i386_linux_tdep ();
 void
-_initialize_i386_linux_tdep (void)
+_initialize_i386_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);

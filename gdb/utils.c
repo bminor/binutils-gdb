@@ -3415,8 +3415,9 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
     }
 }
 
+void _initialize_utils ();
 void
-_initialize_utils (void)
+_initialize_utils ()
 {
   add_setshow_uinteger_cmd ("width", class_support, &chars_per_line, _("\
 Set number of characters where GDB should wrap lines of its output."), _("\

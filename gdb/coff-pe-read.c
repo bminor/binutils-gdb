@@ -691,8 +691,9 @@ show_debug_coff_pe_read (struct ui_file *file, int from_tty,
 
 /* Adds "Set/show debug coff_pe_read" commands.  */
 
+void _initialize_coff_pe_read ();
 void
-_initialize_coff_pe_read (void)
+_initialize_coff_pe_read ()
 {
   add_setshow_zuinteger_cmd ("coff-pe-read", class_maintenance,
 			     &debug_coff_pe_read,

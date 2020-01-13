@@ -109,8 +109,9 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 /* Add some extra features to the generic SPARC target.  */
 static sparc_target<obsd_nat_target> the_sparc64_obsd_nat_target;
 
+void _initialize_sparc64obsd_nat ();
 void
-_initialize_sparc64obsd_nat (void)
+_initialize_sparc64obsd_nat ()
 {
   sparc_supply_gregset = sparc64_supply_gregset;
   sparc_collect_gregset = sparc64_collect_gregset;

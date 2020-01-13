@@ -1142,8 +1142,9 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 
 struct target_so_ops frv_so_ops;
 
+void _initialize_frv_solib ();
 void
-_initialize_frv_solib (void)
+_initialize_frv_solib ()
 {
   frv_so_ops.relocate_section_addresses = frv_relocate_section_addresses;
   frv_so_ops.free_so = frv_free_so;

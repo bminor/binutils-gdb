@@ -321,8 +321,9 @@ struct reggroup *const all_reggroup = &all_group;
 struct reggroup *const save_reggroup = &save_group;
 struct reggroup *const restore_reggroup = &restore_group;
 
+void _initialize_reggroup ();
 void
-_initialize_reggroup (void)
+_initialize_reggroup ()
 {
   reggroups_data = gdbarch_data_register_pre_init (reggroups_init);
 

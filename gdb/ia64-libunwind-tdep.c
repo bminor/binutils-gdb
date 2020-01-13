@@ -591,8 +591,9 @@ libunwind_is_initialized (void)
   return libunwind_initialized;
 }
 
+void _initialize_libunwind_frame ();
 void
-_initialize_libunwind_frame (void)
+_initialize_libunwind_frame ()
 {
   libunwind_descr_handle
     = gdbarch_data_register_post_init (libunwind_descr_init);

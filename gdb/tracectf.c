@@ -1721,8 +1721,9 @@ ctf_target::traceframe_info ()
 
 /* module initialization */
 
+void _initialize_ctf ();
 void
-_initialize_ctf (void)
+_initialize_ctf ()
 {
 #if HAVE_LIBBABELTRACE
   add_target (ctf_target_info, ctf_target_open, filename_completer);

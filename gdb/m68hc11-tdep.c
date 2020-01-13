@@ -1512,8 +1512,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   return gdbarch;
 }
 
+void _initialize_m68hc11_tdep ();
 void
-_initialize_m68hc11_tdep (void)
+_initialize_m68hc11_tdep ()
 {
   register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
   register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);

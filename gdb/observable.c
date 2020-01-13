@@ -87,8 +87,9 @@ show_observer_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Observer debugging is %s.\n"), value);
 }
 
+void _initialize_observer ();
 void
-_initialize_observer (void)
+_initialize_observer ()
 {
   add_setshow_zuinteger_cmd ("observer", class_maintenance,
 			     &gdb::observers::observer_debug, _("\

@@ -1190,8 +1190,9 @@ sol_thread_target::get_ada_task_ptid (long lwp, long thread)
   return (thread_info->ptid);
 }
 
+void _initialize_sol_thread ();
 void
-_initialize_sol_thread (void)
+_initialize_sol_thread ()
 {
   void *dlhandle;
 

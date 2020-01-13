@@ -7307,8 +7307,9 @@ ppc_insn_ds_field (unsigned int insn)
 
 /* Initialization code.  */
 
+void _initialize_rs6000_tdep ();
 void
-_initialize_rs6000_tdep (void)
+_initialize_rs6000_tdep ()
 {
   gdbarch_register (bfd_arch_rs6000, rs6000_gdbarch_init, rs6000_dump_tdep);
   gdbarch_register (bfd_arch_powerpc, rs6000_gdbarch_init, rs6000_dump_tdep);

@@ -553,8 +553,9 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	       mips_fbsd_lp64_fetch_link_map_offsets));
 }
 
+void _initialize_mips_fbsd_tdep ();
 void
-_initialize_mips_fbsd_tdep (void)
+_initialize_mips_fbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_FREEBSD,
 			  mips_fbsd_init_abi);

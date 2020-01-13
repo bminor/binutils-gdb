@@ -111,8 +111,9 @@ static const struct serial_ops uds_ops =
   uds_write_prim
 };
 
+void _initialize_ser_socket ();
 void
-_initialize_ser_socket (void)
+_initialize_ser_socket ()
 {
   serial_add_interface (&uds_ops);
 }

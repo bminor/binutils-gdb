@@ -438,8 +438,9 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
 
 struct target_so_ops solib_target_so_ops;
 
+void _initialize_solib_target ();
 void
-_initialize_solib_target (void)
+_initialize_solib_target ()
 {
   solib_target_so_ops.relocate_section_addresses
     = solib_target_relocate_section_addresses;

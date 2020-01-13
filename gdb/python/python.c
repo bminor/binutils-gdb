@@ -1730,8 +1730,9 @@ do_start_initialization ()
 /* See python.h.  */
 cmd_list_element *python_cmd_element = nullptr;
 
+void _initialize_python ();
 void
-_initialize_python (void)
+_initialize_python ()
 {
   add_com ("python-interactive", class_obscure,
 	   python_interactive_command,

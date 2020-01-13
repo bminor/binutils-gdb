@@ -838,8 +838,9 @@ info_mach_exceptions_command (const char *args, int from_tty)
     }
 }
 
+void _initialize_darwin_info_commands ();
 void
-_initialize_darwin_info_commands (void)
+_initialize_darwin_info_commands ()
 {
   add_info ("mach-tasks", info_mach_tasks_command,
             _("Get list of tasks in system."));

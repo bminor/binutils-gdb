@@ -2354,8 +2354,9 @@ show_dwarf_unwinders_enabled_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
+void _initialize_dwarf2_frame ();
 void
-_initialize_dwarf2_frame (void)
+_initialize_dwarf2_frame ()
 {
   dwarf2_frame_data = gdbarch_data_register_pre_init (dwarf2_frame_init);
 

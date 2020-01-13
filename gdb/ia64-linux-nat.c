@@ -921,8 +921,9 @@ ia64_linux_nat_target::low_status_is_event (int status)
 				 || WSTOPSIG (status) == SIGILL);
 }
 
+void _initialize_ia64_linux_nat ();
 void
-_initialize_ia64_linux_nat (void)
+_initialize_ia64_linux_nat ()
 {
   /* Register the target.  */
   linux_target = &the_ia64_linux_nat_target;

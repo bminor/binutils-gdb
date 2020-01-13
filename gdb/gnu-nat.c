@@ -3500,8 +3500,9 @@ to the thread's initial suspend-count when gdb notices the threads."),
 	   &thread_cmd_list);
 }
 
+void _initialize_gnu_nat ();
 void
-_initialize_gnu_nat (void)
+_initialize_gnu_nat ()
 {
   proc_server = getproc ();
 

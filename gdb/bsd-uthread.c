@@ -544,8 +544,9 @@ bsd_uthread_target::pid_to_str (ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+void _initialize_bsd_uthread ();
 void
-_initialize_bsd_uthread (void)
+_initialize_bsd_uthread ()
 {
   bsd_uthread_data = gdbarch_data_register_pre_init (bsd_uthread_init);
 

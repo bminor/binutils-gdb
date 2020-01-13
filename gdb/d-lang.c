@@ -344,8 +344,9 @@ builtin_d_type (struct gdbarch *gdbarch)
   return (const struct builtin_d_type *) gdbarch_data (gdbarch, d_type_data);
 }
 
+void _initialize_d_language ();
 void
-_initialize_d_language (void)
+_initialize_d_language ()
 {
   d_type_data = gdbarch_data_register_post_init (build_d_types);
 }

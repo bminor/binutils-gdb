@@ -277,8 +277,9 @@ tui_remove_hooks (void)
   tui_attach_detach_observers (false);
 }
 
+void _initialize_tui_hooks ();
 void
-_initialize_tui_hooks (void)
+_initialize_tui_hooks ()
 {
   /* Install the permanent hooks.  */
   gdb::observers::new_objfile.attach (tui_new_objfile_hook);

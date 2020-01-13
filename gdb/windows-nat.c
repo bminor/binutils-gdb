@@ -3056,8 +3056,9 @@ windows_nat_target::thread_name (struct thread_info *thr)
 }
 
 
+void _initialize_windows_nat ();
 void
-_initialize_windows_nat (void)
+_initialize_windows_nat ()
 {
   x86_dr_low.set_control = cygwin_set_dr7;
   x86_dr_low.set_addr = cygwin_set_dr;
@@ -3218,8 +3219,9 @@ windows_nat_target::thread_alive (ptid_t ptid)
   return WaitForSingleObject (thread_rec (tid, FALSE)->h, 0) != WAIT_OBJECT_0;
 }
 
+void _initialize_check_for_gdb_ini ();
 void
-_initialize_check_for_gdb_ini (void)
+_initialize_check_for_gdb_ini ()
 {
   char *homedir;
   if (inhibit_gdbinit)
@@ -3315,8 +3317,9 @@ bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
 
+void _initialize_loadable ();
 void
-_initialize_loadable (void)
+_initialize_loadable ()
 {
   HMODULE hm = NULL;
 

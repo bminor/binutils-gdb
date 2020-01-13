@@ -62,6 +62,7 @@ i386_coff_osabi_sniffer (bfd *abfd)
 }
 
 
+void _initialize_i386_go32_tdep ();
 void
 _initialize_i386_go32_tdep ()
 {

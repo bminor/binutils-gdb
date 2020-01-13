@@ -135,8 +135,9 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
+void _initialize_tilegx_linux_tdep ();
 void
-_initialize_tilegx_linux_tdep (void)
+_initialize_tilegx_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_tilegx, bfd_mach_tilegx, GDB_OSABI_LINUX,
 			  tilegx_linux_init_abi);

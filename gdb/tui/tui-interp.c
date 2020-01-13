@@ -306,8 +306,9 @@ tui_interp_factory (const char *name)
   return new tui_interp (name);
 }
 
+void _initialize_tui_interp ();
 void
-_initialize_tui_interp (void)
+_initialize_tui_interp ()
 {
   interp_factory_register (INTERP_TUI, tui_interp_factory);
 

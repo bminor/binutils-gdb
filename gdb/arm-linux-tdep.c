@@ -2001,8 +2001,9 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_gcc_target_options (gdbarch, arm_linux_gcc_target_options);
 }
 
+void _initialize_arm_linux_tdep ();
 void
-_initialize_arm_linux_tdep (void)
+_initialize_arm_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_LINUX,
 			  arm_linux_init_abi);

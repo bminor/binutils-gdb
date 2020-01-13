@@ -124,8 +124,9 @@ aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
     }
 }
 
+void _initialize_aarch64_fbsd_nat ();
 void
-_initialize_aarch64_fbsd_nat (void)
+_initialize_aarch64_fbsd_nat ()
 {
   add_inf_child_target (&the_aarch64_fbsd_nat_target);
 }

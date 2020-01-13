@@ -1669,8 +1669,9 @@ fbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
 #endif
 #endif
 
+void _initialize_fbsd_nat ();
 void
-_initialize_fbsd_nat (void)
+_initialize_fbsd_nat ()
 {
 #ifdef PT_LWPINFO
   add_setshow_boolean_cmd ("fbsd-lwp", class_maintenance,

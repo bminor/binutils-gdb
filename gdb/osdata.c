@@ -289,8 +289,9 @@ info_osdata_command (const char *arg, int from_tty)
   info_osdata (arg);
 }
 
+void _initialize_osdata ();
 void
-_initialize_osdata (void)
+_initialize_osdata ()
 {
   add_info ("os", info_osdata_command,
            _("Show OS data ARG."));

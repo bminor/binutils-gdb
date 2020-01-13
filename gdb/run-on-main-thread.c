@@ -89,6 +89,7 @@ run_on_main_thread (std::function<void ()> &&func)
   serial_event_set (runnable_event);
 }
 
+void _initialize_run_on_main_thread ();
 void
 _initialize_run_on_main_thread ()
 {

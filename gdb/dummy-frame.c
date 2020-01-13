@@ -431,8 +431,9 @@ maintenance_print_dummy_frames (const char *args, int from_tty)
     }
 }
 
+void _initialize_dummy_frame ();
 void
-_initialize_dummy_frame (void)
+_initialize_dummy_frame ()
 {
   add_cmd ("dummy-frames", class_maintenance, maintenance_print_dummy_frames,
 	   _("Print the contents of the internal dummy-frame stack."),

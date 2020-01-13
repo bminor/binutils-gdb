@@ -4802,8 +4802,9 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
   reader.install ();
 }
 
+void _initialize_mdebugread ();
 void
-_initialize_mdebugread (void)
+_initialize_mdebugread ()
 {
   mdebug_register_index
     = register_symbol_register_impl (LOC_REGISTER, &mdebug_register_funcs);

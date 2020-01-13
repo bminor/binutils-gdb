@@ -413,8 +413,9 @@ init_gnuv2_ops (void)
   gnu_v2_abi_ops.baseclass_offset = gnuv2_baseclass_offset;
 }
 
+void _initialize_gnu_v2_abi ();
 void
-_initialize_gnu_v2_abi (void)
+_initialize_gnu_v2_abi ()
 {
   init_gnuv2_ops ();
   register_cp_abi (&gnu_v2_abi_ops);

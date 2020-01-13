@@ -3162,8 +3162,9 @@ use \"set args\" without arguments.\n\
 \n\
 To start the inferior without using a shell, use \"set startup-with-shell off\"."
 
+void _initialize_infcmd ();
 void
-_initialize_infcmd (void)
+_initialize_infcmd ()
 {
   static struct cmd_list_element *info_proc_cmdlist;
   struct cmd_list_element *c = NULL;

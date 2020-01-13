@@ -126,8 +126,9 @@ mips_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
     }
 }
 
+void _initialize_mips_fbsd_nat ();
 void
-_initialize_mips_fbsd_nat (void)
+_initialize_mips_fbsd_nat ()
 {
   add_inf_child_target (&the_mips_fbsd_nat_target);
 }

@@ -2422,8 +2422,9 @@ set_sh_command (const char *args, int from_tty)
   help_list (setshcmdlist, "set sh ", all_commands, gdb_stdout);
 }
 
+void _initialize_sh_tdep ();
 void
-_initialize_sh_tdep (void)
+_initialize_sh_tdep ()
 {
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
 

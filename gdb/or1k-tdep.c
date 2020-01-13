@@ -1269,8 +1269,9 @@ or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 }
 
 
+void _initialize_or1k_tdep ();
 void
-_initialize_or1k_tdep (void)
+_initialize_or1k_tdep ()
 {
   /* Register this architecture.  */
   gdbarch_register (bfd_arch_or1k, or1k_gdbarch_init, or1k_dump_tdep);

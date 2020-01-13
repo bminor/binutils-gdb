@@ -5694,8 +5694,9 @@ objfile_type (struct objfile *objfile)
   return objfile_type;
 }
 
+void _initialize_gdbtypes ();
 void
-_initialize_gdbtypes (void)
+_initialize_gdbtypes ()
 {
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
 

@@ -2737,8 +2737,9 @@ eval_command (const char *arg, int from_tty)
   execute_command (expanded.c_str (), from_tty);
 }
 
+void _initialize_printcmd ();
 void
-_initialize_printcmd (void)
+_initialize_printcmd ()
 {
   struct cmd_list_element *c;
 

@@ -2482,6 +2482,7 @@ darwin_nat_target::supports_multi_process ()
   return true;
 }
 
+void _initialize_darwin_nat ();
 void
 _initialize_darwin_nat ()
 {

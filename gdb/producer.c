@@ -208,6 +208,7 @@ Version 18.0 Beta";
 }
 #endif
 
+void _initialize_producer ();
 void
 _initialize_producer ()
 {

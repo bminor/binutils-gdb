@@ -4545,8 +4545,9 @@ current_lwp_ptid (void)
   return inferior_ptid;
 }
 
+void _initialize_linux_nat ();
 void
-_initialize_linux_nat (void)
+_initialize_linux_nat ()
 {
   add_setshow_zuinteger_cmd ("lin-lwp", class_maintenance,
 			     &debug_linux_nat, _("\

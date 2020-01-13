@@ -154,8 +154,9 @@ arm_wince_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+void _initialize_arm_wince_tdep ();
 void
-_initialize_arm_wince_tdep (void)
+_initialize_arm_wince_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_arm, bfd_target_coff_flavour,
                                   arm_wince_osabi_sniffer);

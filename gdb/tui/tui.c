@@ -605,8 +605,9 @@ tui_get_command_dimension (unsigned int *width,
   return true;
 }
 
+void _initialize_tui ();
 void
-_initialize_tui (void)
+_initialize_tui ()
 {
   struct cmd_list_element **tuicmd;
 

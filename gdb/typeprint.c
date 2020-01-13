@@ -798,8 +798,9 @@ show_print_type_nested_types  (struct ui_file *file, int from_tty,
     }
 }
 
+void _initialize_typeprint ();
 void
-_initialize_typeprint (void)
+_initialize_typeprint ()
 {
   struct cmd_list_element *c;
 

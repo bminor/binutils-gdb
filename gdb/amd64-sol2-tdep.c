@@ -118,8 +118,9 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, sol2_core_pid_to_str);
 }
 
+void _initialize_amd64_sol2_tdep ();
 void
-_initialize_amd64_sol2_tdep (void)
+_initialize_amd64_sol2_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_SOLARIS, amd64_sol2_init_abi);

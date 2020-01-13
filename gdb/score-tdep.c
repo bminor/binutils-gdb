@@ -1510,8 +1510,9 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_score_tdep ();
 void
-_initialize_score_tdep (void)
+_initialize_score_tdep ()
 {
   gdbarch_register (bfd_arch_score, score_gdbarch_init, NULL);
 }

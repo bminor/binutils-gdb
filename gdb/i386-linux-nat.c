@@ -711,8 +711,9 @@ i386_linux_nat_target::low_resume (ptid_t ptid, int step, enum gdb_signal signal
     perror_with_name (("ptrace"));
 }
 
+void _initialize_i386_linux_nat ();
 void
-_initialize_i386_linux_nat (void)
+_initialize_i386_linux_nat ()
 {
   linux_target = &the_i386_linux_nat_target;
 

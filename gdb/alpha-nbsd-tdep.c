@@ -278,8 +278,9 @@ alphanbsd_init_abi (struct gdbarch_info info,
 }
 
 
+void _initialize_alphanbsd_tdep ();
 void
-_initialize_alphanbsd_tdep (void)
+_initialize_alphanbsd_tdep ()
 {
   /* Even though NetBSD/alpha used ELF since day one, it used the
      traditional a.out-style core dump format before NetBSD 1.6, but

@@ -3909,8 +3909,9 @@ cast_into_complex (struct type *type, struct value *val)
     error (_("cannot cast non-number to complex"));
 }
 
+void _initialize_valops ();
 void
-_initialize_valops (void)
+_initialize_valops ()
 {
   add_setshow_boolean_cmd ("overload-resolution", class_support,
 			   &overload_resolution, _("\

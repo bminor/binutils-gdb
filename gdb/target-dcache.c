@@ -152,8 +152,9 @@ code_cache_enabled_p (void)
   return code_cache_enabled;
 }
 
+void _initialize_target_dcache ();
 void
-_initialize_target_dcache (void)
+_initialize_target_dcache ()
 {
   add_setshow_boolean_cmd ("stack-cache", class_support,
 			   &stack_cache_enabled_1, _("\

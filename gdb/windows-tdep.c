@@ -619,8 +619,9 @@ static const struct internalvar_funcs tlb_funcs =
   NULL
 };
 
+void _initialize_windows_tdep ();
 void
-_initialize_windows_tdep (void)
+_initialize_windows_tdep ()
 {
   init_w32_command_list ();
   add_cmd ("thread-information-block", class_info, display_tib,

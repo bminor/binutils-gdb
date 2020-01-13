@@ -295,8 +295,9 @@ build_table (struct mi_cmd *commands)
     }
 }
 
+void _initialize_mi_cmds ();
 void
-_initialize_mi_cmds (void)
+_initialize_mi_cmds ()
 {
   build_table (mi_cmds);
   memset (&stats, 0, sizeof (stats));

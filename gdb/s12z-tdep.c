@@ -685,8 +685,9 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_s12z_tdep ();
 void
-_initialize_s12z_tdep (void)
+_initialize_s12z_tdep ()
 {
   gdbarch_register (bfd_arch_s12z, s12z_gdbarch_init, NULL);
 }

@@ -142,6 +142,7 @@ run_tests ()
 } /* namespace format_pieces */
 } /* namespace selftests */
 
+void _initialize_format_pieces_selftests ();
 void
 _initialize_format_pieces_selftests ()
 {

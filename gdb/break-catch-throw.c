@@ -532,8 +532,9 @@ initialize_throw_catchpoint_ops (void)
   ops->allocate_location = allocate_location_exception_catchpoint;
 }
 
+void _initialize_break_catch_throw ();
 void
-_initialize_break_catch_throw (void)
+_initialize_break_catch_throw ()
 {
   initialize_throw_catchpoint_ops ();
 

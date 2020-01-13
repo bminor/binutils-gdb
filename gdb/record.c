@@ -772,8 +772,9 @@ set_record_call_history_size (const char *args, int from_tty,
 			 &record_call_history_size);
 }
 
+void _initialize_record ();
 void
-_initialize_record (void)
+_initialize_record ()
 {
   struct cmd_list_element *c;
 

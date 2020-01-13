@@ -1436,8 +1436,9 @@ increase_expout_size (struct expr_builder *ps, size_t lenelt)
     }
 }
 
+void _initialize_parse ();
 void
-_initialize_parse (void)
+_initialize_parse ()
 {
   add_setshow_zuinteger_cmd ("expression", class_maintenance,
 			     &expressiondebug,

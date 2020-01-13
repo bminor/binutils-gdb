@@ -152,8 +152,9 @@ standard_macro_lookup (const char *name, void *baton)
   return result;
 }
 
+void _initialize_macroscope ();
 void
-_initialize_macroscope (void)
+_initialize_macroscope ()
 {
   macro_user_macros = new_macro_table (NULL, NULL, NULL);
   macro_set_main (macro_user_macros, "<user-defined>");

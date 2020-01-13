@@ -270,8 +270,9 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					amd64fbsd_get_thread_local_address);
 }
 
+void _initialize_amd64fbsd_tdep ();
 void
-_initialize_amd64fbsd_tdep (void)
+_initialize_amd64fbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_FREEBSD, amd64fbsd_init_abi);

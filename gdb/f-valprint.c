@@ -479,8 +479,9 @@ info_common_command (const char *comname, int from_tty)
     }
 }
 
+void _initialize_f_valprint ();
 void
-_initialize_f_valprint (void)
+_initialize_f_valprint ()
 {
   add_info ("common", info_common_command,
 	    _("Print out the values contained in a Fortran COMMON block."));

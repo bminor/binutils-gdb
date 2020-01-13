@@ -1530,8 +1530,9 @@ found and/or loaded."),
   return &retval;
 }
 
+void _initialize_auto_load ();
 void
-_initialize_auto_load (void)
+_initialize_auto_load ()
 {
   struct cmd_list_element *cmd;
   char *scripts_directory_help, *gdb_name_help, *python_name_help;

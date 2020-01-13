@@ -233,8 +233,9 @@ maintenance_print_user_registers (const char *args, int from_tty)
     fprintf_unfiltered (gdb_stdout, " %-11s %3d\n", reg->name, regnum);
 }
 
+void _initialize_user_regs ();
 void
-_initialize_user_regs (void)
+_initialize_user_regs ()
 {
   user_regs_data = gdbarch_data_register_post_init (user_regs_init);
 

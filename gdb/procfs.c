@@ -3700,8 +3700,9 @@ proc_untrace_sysexit_cmd (const char *args, int from_tty)
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }
 
+void _initialize_procfs ();
 void
-_initialize_procfs (void)
+_initialize_procfs ()
 {
   gdb::observers::inferior_created.attach (procfs_inferior_created);
 

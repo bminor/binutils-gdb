@@ -1061,8 +1061,9 @@ maintenance_cplus_namespace (const char *args, int from_tty)
   printf_unfiltered (_("The `maint namespace' command was removed.\n"));
 }
 
+void _initialize_cp_namespace ();
 void
-_initialize_cp_namespace (void)
+_initialize_cp_namespace ()
 {
   struct cmd_list_element *cmd;
 

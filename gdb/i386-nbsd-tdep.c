@@ -421,8 +421,9 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = pcc_struct_return;
 }
 
+void _initialize_i386nbsd_tdep ();
 void
-_initialize_i386nbsd_tdep (void)
+_initialize_i386nbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD,
 			  i386nbsdelf_init_abi);

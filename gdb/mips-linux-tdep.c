@@ -1642,8 +1642,9 @@ mips_linux_init_abi (struct gdbarch_info info,
     }
 }
 
+void _initialize_mips_linux_tdep ();
 void
-_initialize_mips_linux_tdep (void)
+_initialize_mips_linux_tdep ()
 {
   const struct bfd_arch_info *arch_info;
 

@@ -172,6 +172,7 @@ run_tests ()
 
 #endif /* __cplusplus < 201703L */
 
+void _initialize_string_view_selftests ();
 void
 _initialize_string_view_selftests ()
 {

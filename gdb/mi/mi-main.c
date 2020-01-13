@@ -2749,8 +2749,9 @@ mi_cmd_complete (const char *command, char **argv, int argc)
 }
 
 
+void _initialize_mi_main ();
 void
-_initialize_mi_main (void)
+_initialize_mi_main ()
 {
   struct cmd_list_element *c;
 

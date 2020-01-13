@@ -645,8 +645,9 @@ show_debug_symfile (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Symfile debugging is %s.\n"), value);
 }
 
+void _initialize_symfile_debug ();
 void
-_initialize_symfile_debug (void)
+_initialize_symfile_debug ()
 {
   add_setshow_boolean_cmd ("symfile", no_class, &debug_symfile, _("\
 Set debugging of the symfile functions."), _("\

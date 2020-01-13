@@ -897,8 +897,9 @@ info_probes_dtrace_command (const char *arg, int from_tty)
   info_probes_for_spops (arg, from_tty, &dtrace_static_probe_ops);
 }
 
+void _initialize_dtrace_probe ();
 void
-_initialize_dtrace_probe (void)
+_initialize_dtrace_probe ()
 {
   all_static_probe_ops.push_back (&dtrace_static_probe_ops);
 

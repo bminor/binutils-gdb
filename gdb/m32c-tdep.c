@@ -2644,8 +2644,9 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_m32c_tdep ();
 void
-_initialize_m32c_tdep (void)
+_initialize_m32c_tdep ()
 {
   register_gdbarch_init (bfd_arch_m32c, m32c_gdbarch_init);
 

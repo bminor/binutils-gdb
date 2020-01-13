@@ -1505,8 +1505,9 @@ init_procfs_targets (void)
 
 #define OSTYPE_NTO 1
 
+void _initialize_procfs ();
 void
-_initialize_procfs (void)
+_initialize_procfs ()
 {
   sigset_t set;
 

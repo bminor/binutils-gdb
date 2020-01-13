@@ -594,8 +594,9 @@ dummy_cmd (const char *args, int from_tty)
 static struct cmd_list_element *mem_set_cmdlist;
 static struct cmd_list_element *mem_show_cmdlist;
 
+void _initialize_mem ();
 void
-_initialize_mem (void)
+_initialize_mem ()
 {
   add_com ("mem", class_vars, mem_command, _("\
 Define attributes for memory region or reset memory region handling to "

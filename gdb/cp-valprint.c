@@ -789,8 +789,9 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 }
 
 
+void _initialize_cp_valprint ();
 void
-_initialize_cp_valprint (void)
+_initialize_cp_valprint ()
 {
   obstack_begin (&dont_print_stat_array_obstack,
 		 32 * sizeof (struct type *));

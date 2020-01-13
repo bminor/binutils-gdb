@@ -202,8 +202,9 @@ show_logging_command (const char *args, int from_tty)
     printf_unfiltered (_("Debug output will be logged and displayed.\n"));
 }
 
+void _initialize_cli_logging ();
 void
-_initialize_cli_logging (void)
+_initialize_cli_logging ()
 {
   static struct cmd_list_element *set_logging_cmdlist, *show_logging_cmdlist;
 

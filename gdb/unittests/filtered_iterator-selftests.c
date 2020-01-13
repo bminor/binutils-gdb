@@ -155,6 +155,7 @@ test_filtered_iterator_eq ()
 
 } /* namespace selftests */
 
+void _initialize_filtered_iterator_selftests ();
 void
 _initialize_filtered_iterator_selftests ()
 {

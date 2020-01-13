@@ -210,8 +210,9 @@ memory_error_test (struct gdbarch *gdbarch)
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
+void _initialize_disasm_selftests ();
 void
-_initialize_disasm_selftests (void)
+_initialize_disasm_selftests ()
 {
 #if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("print_one_insn",

@@ -3511,8 +3511,9 @@ riscv_init_reggroups ()
   csr_reggroup = reggroup_new ("csr", USER_REGGROUP);
 }
 
+void _initialize_riscv_tdep ();
 void
-_initialize_riscv_tdep (void)
+_initialize_riscv_tdep ()
 {
   riscv_create_csr_aliases ();
   riscv_init_reggroups ();

@@ -1012,8 +1012,9 @@ parse_scrolling_args (const char *arg,
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
+void _initialize_tui_win ();
 void
-_initialize_tui_win (void)
+_initialize_tui_win ()
 {
   static struct cmd_list_element *tui_setlist;
   static struct cmd_list_element *tui_showlist;

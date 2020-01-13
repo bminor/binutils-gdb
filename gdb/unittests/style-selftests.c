@@ -101,6 +101,7 @@ run_tests ()
 } /* namespace style */
 } /* namespace selftests */
 
+void _initialize_style_selftest ();
 void
 _initialize_style_selftest ()
 {

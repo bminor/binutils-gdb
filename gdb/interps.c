@@ -439,8 +439,9 @@ current_interpreter (void)
 }
 
 /* This just adds the "interpreter-exec" command.  */
+void _initialize_interpreter ();
 void
-_initialize_interpreter (void)
+_initialize_interpreter ()
 {
   struct cmd_list_element *c;
 

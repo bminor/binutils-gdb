@@ -934,8 +934,9 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
     }
 }
 
+void _initialize_extension ();
 void
-_initialize_extension (void)
+_initialize_extension ()
 {
   gdb::observers::before_prompt.attach (ext_lang_before_prompt);
 }

@@ -1507,8 +1507,9 @@ When the function is done executing, GDB will silently stop."),
   gdb_assert_not_reached ("... should not be here");
 }
 
+void _initialize_infcall ();
 void
-_initialize_infcall (void)
+_initialize_infcall ()
 {
   add_setshow_boolean_cmd ("may-call-functions", no_class,
 			   &may_call_functions_p, _("\

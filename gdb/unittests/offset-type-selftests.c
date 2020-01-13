@@ -171,6 +171,7 @@ run_tests ()
 } /* namespace offset_type */
 } /* namespace selftests */
 
+void _initialize_offset_type_selftests ();
 void
 _initialize_offset_type_selftests ()
 {

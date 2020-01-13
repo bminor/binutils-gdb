@@ -1824,8 +1824,9 @@ maintenance_check_xml_descriptions (const char *dir, int from_tty)
 		   (long) selftests::xml_tdesc.size (), failed);
 }
 
+void _initialize_target_descriptions ();
 void
-_initialize_target_descriptions (void)
+_initialize_target_descriptions ()
 {
   tdesc_data = gdbarch_data_register_pre_init (tdesc_data_init);
 

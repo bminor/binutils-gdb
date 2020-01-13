@@ -51,6 +51,7 @@ test_substitute_path_component ()
 }
 }
 
+void _initialize_utils_selftests ();
 void
 _initialize_utils_selftests ()
 {

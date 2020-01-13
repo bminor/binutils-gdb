@@ -81,6 +81,7 @@ test ()
 }
 }
 
+void _initialize_mkdir_recursive_selftests ();
 void
 _initialize_mkdir_recursive_selftests ()
 {

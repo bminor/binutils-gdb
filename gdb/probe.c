@@ -876,8 +876,9 @@ static const struct internalvar_funcs probe_funcs =
 
 std::vector<const static_probe_ops *> all_static_probe_ops;
 
+void _initialize_probe ();
 void
-_initialize_probe (void)
+_initialize_probe ()
 {
   all_static_probe_ops.push_back (&any_static_probe_ops);
 

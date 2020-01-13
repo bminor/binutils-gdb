@@ -61,8 +61,9 @@ i386gnu_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 }
 
+void _initialize_i386gnu_tdep ();
 void
-_initialize_i386gnu_tdep (void)
+_initialize_i386gnu_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_HURD, i386gnu_init_abi);
 }

@@ -8971,8 +8971,9 @@ mips_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      mips_fpu_type_str (MIPS_FPU_TYPE (gdbarch)));
 }
 
+void _initialize_mips_tdep ();
 void
-_initialize_mips_tdep (void)
+_initialize_mips_tdep ()
 {
   static struct cmd_list_element *mipsfpulist = NULL;
 

@@ -99,8 +99,9 @@ maintenance_show_test_settings_value_cmd
 }
 
 
+void _initialize_maint_test_settings ();
 void
-_initialize_maint_test_settings (void)
+_initialize_maint_test_settings ()
 {
   maintenance_test_settings_filename = xstrdup ("/foo/bar");
 

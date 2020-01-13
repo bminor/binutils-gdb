@@ -9479,8 +9479,9 @@ static void arm_record_test (void);
 }
 #endif
 
+void _initialize_arm_tdep ();
 void
-_initialize_arm_tdep (void)
+_initialize_arm_tdep ()
 {
   long length;
   int i, j;

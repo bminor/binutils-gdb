@@ -225,8 +225,9 @@ riscv_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					riscv_fbsd_get_thread_local_address);
 }
 
+void _initialize_riscv_fbsd_tdep ();
 void
-_initialize_riscv_fbsd_tdep (void)
+_initialize_riscv_fbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_riscv, 0, GDB_OSABI_FREEBSD,
 			  riscv_fbsd_init_abi);

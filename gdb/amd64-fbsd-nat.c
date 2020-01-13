@@ -209,8 +209,9 @@ amd64_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
 }
 #endif
 
+void _initialize_amd64fbsd_nat ();
 void
-_initialize_amd64fbsd_nat (void)
+_initialize_amd64fbsd_nat ()
 {
   int offset;
 

@@ -315,8 +315,9 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
+void _initialize_sparcnbsd_tdep ();
 void
-_initialize_sparcnbsd_tdep (void)
+_initialize_sparcnbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD,
 			  sparc32nbsd_init_abi);

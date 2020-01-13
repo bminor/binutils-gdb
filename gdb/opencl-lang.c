@@ -1178,8 +1178,9 @@ build_opencl_types (struct gdbarch *gdbarch)
   return types;
 }
 
+void _initialize_opencl_language ();
 void
-_initialize_opencl_language (void)
+_initialize_opencl_language ()
 {
   opencl_type_data = gdbarch_data_register_post_init (build_opencl_types);
 }

@@ -2671,8 +2671,9 @@ ppc_linux_nat_target::read_description ()
   return ppc_linux_match_description (features);
 }
 
+void _initialize_ppc_linux_nat ();
 void
-_initialize_ppc_linux_nat (void)
+_initialize_ppc_linux_nat ()
 {
   linux_target = &the_ppc_linux_nat_target;
 

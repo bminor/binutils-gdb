@@ -1040,8 +1040,9 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
 
 /* Do early runtime initializations.  */
 
+void _initialize_symmisc ();
 void
-_initialize_symmisc (void)
+_initialize_symmisc ()
 {
   std_in = stdin;
   std_out = stdout;

@@ -2486,8 +2486,9 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
+void _initialize_linux_tdep ();
 void
-_initialize_linux_tdep (void)
+_initialize_linux_tdep ()
 {
   linux_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_linux_gdbarch_data);

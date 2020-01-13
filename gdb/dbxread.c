@@ -3180,8 +3180,9 @@ static const struct sym_fns aout_sym_fns =
   &psym_functions
 };
 
+void _initialize_dbxread ();
 void
-_initialize_dbxread (void)
+_initialize_dbxread ()
 {
   add_symtab_fns (bfd_target_aout_flavour, &aout_sym_fns);
 }

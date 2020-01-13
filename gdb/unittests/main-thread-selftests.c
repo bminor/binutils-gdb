@@ -70,6 +70,7 @@ run_tests ()
 }
 }
 
+void _initialize_main_thread_selftests ();
 void
 _initialize_main_thread_selftests ()
 {

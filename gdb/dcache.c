@@ -684,8 +684,9 @@ show_dcache_command (const char *args, int from_tty)
   cmd_show_list (dcache_show_list, from_tty, "");
 }
 
+void _initialize_dcache ();
 void
-_initialize_dcache (void)
+_initialize_dcache ()
 {
   add_setshow_boolean_cmd ("remotecache", class_support,
 			   &dcache_enabled_p, _("\

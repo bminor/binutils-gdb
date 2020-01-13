@@ -2390,8 +2390,9 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_nios2_tdep ();
 void
-_initialize_nios2_tdep (void)
+_initialize_nios2_tdep ()
 {
   gdbarch_register (bfd_arch_nios2, nios2_gdbarch_init, NULL);
   initialize_tdesc_nios2 ();

@@ -1854,8 +1854,9 @@ cooked_write_test (struct gdbarch *gdbarch)
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
+void _initialize_regcache ();
 void
-_initialize_regcache (void)
+_initialize_regcache ()
 {
   regcache_descr_handle
     = gdbarch_data_register_post_init (init_regcache_descr);

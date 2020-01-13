@@ -715,8 +715,9 @@ am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &am33_linux_rt_sigframe);
 }
 
+void _initialize_mn10300_linux_tdep ();
 void
-_initialize_mn10300_linux_tdep (void)
+_initialize_mn10300_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_mn10300, 0,
 			  GDB_OSABI_LINUX, am33_linux_init_osabi);

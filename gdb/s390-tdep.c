@@ -7215,8 +7215,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_s390_tdep ();
 void
-_initialize_s390_tdep (void)
+_initialize_s390_tdep ()
 {
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
