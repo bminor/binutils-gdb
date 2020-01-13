@@ -1,5 +1,9 @@
 2020-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* regformats/regdat.sh: Generate declaration for init function.
+
+2020-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote-sim.c (next_pid, INITIAL_PID, sim_inferior_data): Move
 	up.
 	(gdbsim_target) <get_inferior_data_by_ptid, resume_one_inferior,

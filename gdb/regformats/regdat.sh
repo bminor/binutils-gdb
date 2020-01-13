@@ -127,6 +127,10 @@ do
 
     echo "const struct target_desc *tdesc_${name};"
     echo ""
+
+    # This is necessary for -Wmissing-declarations.
+    echo "void init_registers_${name} (void);"
+
     echo "void"
     echo "init_registers_${name} (void)"
     echo "{"
