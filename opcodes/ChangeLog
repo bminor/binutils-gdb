@@ -1,5 +1,10 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* score-dis.c: Formatting.
+	* score7-dis.c: Formatting.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* score-dis.c (print_insn_score48): Use unsigned variables for
 	unsigned values.  Don't left shift negative values.
 	(print_insn_score32): Likewise.
