@@ -1,5 +1,10 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (%-generated.c): Remove rule for files from
+	regformats/i386.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* configure: Re-generate.
 
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
