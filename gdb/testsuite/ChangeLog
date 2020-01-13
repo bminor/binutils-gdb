@@ -1,3 +1,8 @@
+2020-01-29  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.arch/aarch64-brk-patterns.c: New source file.
+	* gdb.arch/aarch64-brk-patterns.exp: New test.
+
 2020-01-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.cp/pass-by-ref-2.exp: Mark some tests as XFAIL based on the
