@@ -1,5 +1,12 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* wasm32-dis.c (print_insn_wasm32): Localise variables.  Store
+	result of wasm_read_leb128 in a uint64_t and check that bits
+	are not lost when copying to other locals.  Use uint32_t for
+	most locals.  Use PRId64 when printing int64_t.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* score-dis.c: Formatting.
 	* score7-dis.c: Formatting.
 

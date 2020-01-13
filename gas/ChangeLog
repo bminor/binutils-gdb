@@ -1,5 +1,9 @@
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/wasm32/allinsn.d: Update expected output.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-tic4x.c (tic4x_operands_match): Correct tic3x trap
 	insertion.
 
