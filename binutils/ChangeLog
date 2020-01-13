@@ -1,3 +1,25 @@
+2020-01-13  Thomas Troeger  <tstroege@gmx.de>
+
+	* objdump.c (visualize_jumps, color_output, extended_color_output)
+	(detected_jumps): New variables.
+	(usage): Add the new jump visualization options.
+	(option_values): Add new option value.
+	(long_options): Add the new option.
+	(jump_info_new, jump_info_free): New functions.
+	(jump_info_min_address, jump_info_max_address): Likewise.
+	(jump_info_end_address, jump_info_is_start_address): Likewise.
+	(jump_info_is_end_address, jump_info_size): Likewise.
+	(jump_info_unlink, jump_info_insert): Likewise.
+	(jump_info_add_front, jump_info_move_linked): Likewise.
+	(jump_info_intersect, jump_info_merge): Likewise.
+	(jump_info_sort, jump_info_visualize_address): Likewise.
+	(disassemble_jumps): New function - used to locate jumps.
+	(disassemble_bytes): Add ascii art generation.
+	(disassemble_section): Add scan to locate jumps.
+	(main): Parse the new visualization option.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	PR 25360

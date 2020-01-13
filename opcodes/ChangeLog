@@ -1,3 +1,12 @@
+2020-01-13  Thomas Troeger  <tstroege@gmx.de>
+
+	* arm-dis.c (print_insn_arm): Fill in insn info fields for control
+	flow instructions.
+	(print_insn_thumb16, print_insn_thumb32): Likewise.
+	(print_insn): Initialize the insn info.
+	* i386-dis.c (print_insn): Initialize the insn info fields, and
+	detect jumps.
+
 2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
 
 	* arc-opc.c (C_NE): Make it required.

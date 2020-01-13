@@ -15,6 +15,25 @@
 * Add --keep-section option to objcopy and strip.  This option keeps the
   specified section from being removed.
 
+ * Add visualization of jumps inside a function by drawing an ascii character
+   graph between the address and the disassembler column.  Enabled via the
+   --visualize-jumps command line option for objdump.  Currently supported by
+   the x86, x86_64, and ARM targets.  The output looks something like this:
+
+  c6:	|  |     \----------> be 00 00 00 00       	mov    $0x0,%esi
+  cb:	|  |           /----> 48 8b 3d 00 00 00 00 	mov    0x0(%rip),%rdi        # d2 <main+0xd2>
+  d2:	|  |           |      31 c0                	xor    %eax,%eax
+  d4:	|  |           |  /-- e8 00 00 00 00       	callq  d9 <main+0xd9>
+  d9:	|  |           |  \-> bf 02 00 00 00       	mov    $0x2,%edi
+  de:	|  +-----------|----- e8 00 00 00 00       	callq  e3 <main+0xe3>
+  e3:	|  \-----------|----> 48 89 da             	mov    %rbx,%rdx
+  e6:	|              |      be 00 00 00 00       	mov    $0x0,%esi
+  eb:	|              \----- eb de                	jmp    cb <main+0xcb>
+  ed:	\-------------------> 48 8b 16             	mov    (%rsi),%rdx
+
+  Additional arguments to the --visualize-jumps option add colors to the
+  output.
+
 Changes in 2.33:
 
 * Add --source-comment[=<txt>] option to objdump which if present,

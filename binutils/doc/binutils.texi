@@ -2169,6 +2169,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix=}@var{prefix}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
+        [@option{--visualize-jumps[=color|=extended-color|=off]}
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -2680,6 +2681,17 @@ This is the default when @option{--prefix-addresses} is used.
 @cindex Instruction width
 Display @var{width} bytes on a single line when disassembling
 instructions.
+
+@item --visualize-jumps[=color|=extended-color|=off]
+Visualize jumps that stay inside a function by drawing ASCII art between
+the start and target addresses.  The optional @option{=color} argument
+adds color to the output using simple terminal colors.  Alternatively
+the @option{=extended-color} argument will add color using 8bit
+colors, but these might not work on all terminals.
+
+If it is necessary to disable the @option{visualize-jumps} option
+after it has previously been enabled then use
+@option{visualize-jumps=off}.
 
 @item -W[lLiaprmfFsoRtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]

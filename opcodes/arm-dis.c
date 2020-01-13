@@ -9886,7 +9886,13 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		    case 'b':
 		      {
 			bfd_vma disp = (((given & 0xffffff) ^ 0x800000) - 0x800000);
-			info->print_address_func (disp * 4 + pc + 8, info);
+			bfd_vma target = disp * 4 + pc + 8;
+			info->print_address_func (target, info);
+
+			/* Fill in instruction information.  */
+			info->insn_info_valid = 1;
+			info->insn_type = dis_branch;
+			info->target = target;
 		      }
 		      break;
 
@@ -10024,6 +10030,11 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  address += 2;
 
 		        info->print_address_func (address, info);
+
+			/* Fill in instruction information.  */
+			info->insn_info_valid = 1;
+			info->insn_type = dis_branch;
+			info->target = address;
 		      }
 		      break;
 
@@ -10388,6 +10399,11 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 				     + ((given & 0x00f8) >> 2)
 				     + ((given & 0x0200) >> 3));
 		  info->print_address_func (address, info);
+
+		  /* Fill in instruction information.  */
+		  info->insn_info_valid = 1;
+		  info->insn_type = dis_branch;
+		  info->target = address;
 		}
 		break;
 
@@ -10461,8 +10477,14 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 
 			  case 'B':
 			    reg = ((reg ^ (1 << bitend)) - (1 << bitend));
-			    info->print_address_func (reg * 2 + pc + 4, info);
+			    bfd_vma target = reg * 2 + pc + 4;
+			    info->print_address_func (target, info);
 			    value_in_comment = 0;
+
+			    /* Fill in instruction information.  */
+			    info->insn_info_valid = 1;
+			    info->insn_type = dis_branch;
+			    info->target = target;
 			    break;
 
 			  case 'c':
@@ -11019,7 +11041,13 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  offset |= (given & 0x000007ff) << 1;
 		  offset -= (1 << 20);
 
-		  info->print_address_func (pc + 4 + offset, info);
+		  bfd_vma target = pc + 4 + offset;
+		  info->print_address_func (target, info);
+
+		  /* Fill in instruction information.  */
+		  info->insn_info_valid = 1;
+		  info->insn_type = dis_branch;
+		  info->target = target;
 		}
 		break;
 
@@ -11043,6 +11071,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      offset &= ~2u;
 
 		  info->print_address_func (offset, info);
+
+		  /* Fill in instruction information.  */
+		  info->insn_info_valid = 1;
+		  info->insn_type = dis_branch;
+		  info->target = offset;
 		}
 		break;
 
@@ -11714,6 +11747,14 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   void	 	(*printer) (bfd_vma, struct disassemble_info *, long);
   bfd_boolean   found = FALSE;
   struct arm_private_data *private_data;
+
+  /* Clear instruction information field.  */
+  info->insn_info_valid = 0;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;
+  info->insn_type = dis_noninsn;
+  info->target = 0;
+  info->target2 = 0;
 
   if (info->disassembler_options)
     {

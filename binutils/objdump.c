@@ -124,6 +124,9 @@ static size_t prefix_length;
 static bfd_boolean unwind_inlines;	/* --inlines.  */
 static const char * disasm_sym;		/* Disassembly start symbol.  */
 static const char * source_comment;     /* --source_comment.  */
+static bfd_boolean visualize_jumps = FALSE;          /* --visualize-jumps.  */
+static bfd_boolean color_output = FALSE;             /* --visualize-jumps=color.  */
+static bfd_boolean extended_color_output = FALSE;    /* --visualize-jumps=extended-color.  */
 
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
@@ -198,6 +201,9 @@ static const struct objdump_private_desc * const objdump_private_vectors[] =
     OBJDUMP_PRIVATE_VECTORS
     NULL
   };
+
+/* The list of detected jumps inside a function.  */
+static struct jump_info *detected_jumps = NULL;
 
 static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 static void
@@ -278,7 +284,12 @@ usage (FILE *stream, int status)
                              or deeper\n\
       --dwarf-check          Make additional dwarf internal consistency checks.\
       \n\
-      --ctf-parent=SECTION     Use SECTION as the CTF parent\n\n"));
+      --ctf-parent=SECTION       Use SECTION as the CTF parent\n\
+      --visualize-jumps          Visualize jumps by drawing ASCII art lines\n\
+      --visualize-jumps=color    Use colors in the ASCII art\n\
+      --visualize-jumps=extended-color   Use extended 8-bit color codes\n\
+      --visualize-jumps=off      Disable jump visualization\n\n"));
+
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
 
@@ -316,7 +327,8 @@ enum option_values
     OPTION_INLINES,
     OPTION_SOURCE_COMMENT,
     OPTION_CTF,
-    OPTION_CTF_PARENT
+    OPTION_CTF_PARENT,
+    OPTION_VISUALIZE_JUMPS
   };
 
 static struct option long_options[]=
@@ -376,6 +388,7 @@ static struct option long_options[]=
   {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
   {"inlines", no_argument, 0, OPTION_INLINES},
+  {"visualize-jumps", optional_argument, 0, OPTION_VISUALIZE_JUMPS},
   {0, no_argument, 0, 0}
 };
 
@@ -1845,6 +1858,583 @@ objdump_sprintf (SFILE *f, const char *format, ...)
   return n;
 }
 
+/* Code for generating (colored) diagrams of control flow start and end
+   points.  */
+
+/* Structure used to store the properties of a jump.  */
+
+struct jump_info
+{
+  /* The next jump, or NULL if this is the last object.  */
+  struct jump_info *next;
+  /* The previous jump, or NULL if this is the first object.  */
+  struct jump_info *prev;
+  /* The start addresses of the jump.  */
+  struct
+    {
+      /* The list of start addresses.  */
+      bfd_vma *addresses;
+      /* The number of elements.  */
+      size_t count;
+      /* The maximum number of elements that fit into the array.  */
+      size_t max_count;
+    } start;
+  /* The end address of the jump.  */
+  bfd_vma end;
+  /* The drawing level of the jump.  */
+  int level;
+};
+
+/* Construct a jump object for a jump from start
+   to end with the corresponding level.  */
+
+static struct jump_info *
+jump_info_new (bfd_vma start, bfd_vma end, int level)
+{
+  struct jump_info *result = xmalloc (sizeof (struct jump_info));
+
+  result->next = NULL;
+  result->prev = NULL;
+  result->start.addresses = xmalloc (sizeof (bfd_vma *) * 2);
+  result->start.addresses[0] = start;
+  result->start.count = 1;
+  result->start.max_count = 2;
+  result->end = end;
+  result->level = level;
+
+  return result;
+}
+
+/* Free a jump object and return the next object
+   or NULL if this was the last one.  */
+
+static struct jump_info *
+jump_info_free (struct jump_info *ji)
+{
+  struct jump_info *result = NULL;
+
+  if (ji)
+    {
+      result = ji->next;
+      if (ji->start.addresses)
+	free (ji->start.addresses);
+      free (ji);
+    }
+
+  return result;
+}
+
+/* Get the smallest value of all start and end addresses.  */
+
+static bfd_vma
+jump_info_min_address (const struct jump_info *ji)
+{
+  bfd_vma min_address = ji->end;
+  size_t i;
+
+  for (i = ji->start.count; i-- > 0;)
+    if (ji->start.addresses[i] < min_address)
+      min_address = ji->start.addresses[i];
+  return min_address;
+}
+
+/* Get the largest value of all start and end addresses.  */
+
+static bfd_vma
+jump_info_max_address (const struct jump_info *ji)
+{
+  bfd_vma max_address = ji->end;
+  size_t i;
+
+  for (i = ji->start.count; i-- > 0;)
+    if (ji->start.addresses[i] > max_address)
+      max_address = ji->start.addresses[i];
+  return max_address;
+}
+
+/* Get the target address of a jump.  */
+
+static bfd_vma
+jump_info_end_address (const struct jump_info *ji)
+{
+  return ji->end;
+}
+
+/* Test if an address is one of the start addresses of a jump.  */
+
+static bfd_boolean
+jump_info_is_start_address (const struct jump_info *ji, bfd_vma address)
+{
+  bfd_boolean result = FALSE;
+  size_t i;
+
+  for (i = ji->start.count; i-- > 0;)
+    if (address == ji->start.addresses[i])
+      {
+	result = TRUE;
+	break;
+      }
+
+  return result;
+}
+
+/* Test if an address is the target address of a jump.  */
+
+static bfd_boolean
+jump_info_is_end_address (const struct jump_info *ji, bfd_vma address)
+{
+  return (address == ji->end);
+}
+
+/* Get the difference between the smallest and largest address of a jump.  */
+
+static bfd_vma
+jump_info_size (const struct jump_info *ji)
+{
+  return jump_info_max_address (ji) - jump_info_min_address (ji);
+}
+
+/* Unlink a jump object from a list.  */
+
+static void
+jump_info_unlink (struct jump_info *node,
+		  struct jump_info **base)
+{
+  if (node->next)
+    node->next->prev = node->prev;
+  if (node->prev)
+    node->prev->next = node->next;
+  else
+    *base = node->next;
+  node->next = NULL;
+  node->prev = NULL;
+}
+
+/* Insert unlinked jump info node into a list.  */
+
+static void
+jump_info_insert (struct jump_info *node,
+		  struct jump_info *target,
+		  struct jump_info **base)
+{
+  node->next = target;
+  node->prev = target->prev;
+  target->prev = node;
+  if (node->prev)
+    node->prev->next = node;
+  else
+    *base = node;
+}
+
+/* Add unlinked node to the front of a list.  */
+
+static void
+jump_info_add_front (struct jump_info *node,
+		     struct jump_info **base)
+{
+  node->next = *base;
+  if (node->next)
+    node->next->prev = node;
+  node->prev = NULL;
+  *base = node;
+}
+
+/* Move linked node to target position.  */
+
+static void
+jump_info_move_linked (struct jump_info *node,
+		       struct jump_info *target,
+		       struct jump_info **base)
+{
+  /* Unlink node.  */
+  jump_info_unlink (node, base);
+  /* Insert node at target position.  */
+  jump_info_insert (node, target, base);
+}
+
+/* Test if two jumps intersect.  */
+
+static bfd_boolean
+jump_info_intersect (const struct jump_info *a,
+		     const struct jump_info *b)
+{
+  return ((jump_info_max_address (a) >= jump_info_min_address (b))
+	  && (jump_info_min_address (a) <= jump_info_max_address (b)));
+}
+
+/* Merge two compatible jump info objects.  */
+
+static void
+jump_info_merge (struct jump_info **base)
+{
+  struct jump_info *a;
+
+  for (a = *base; a; a = a->next)
+    {
+      struct jump_info *b;
+
+      for (b = a->next; b; b = b->next)
+	{
+	  /* Merge both jumps into one.  */
+	  if (a->end == b->end)
+	    {
+	      /* Reallocate addresses.  */
+	      size_t needed_size = a->start.count + b->start.count;
+	      size_t i;
+
+	      if (needed_size > a->start.max_count)
+		{
+		  a->start.max_count += b->start.max_count;
+		  a->start.addresses =
+		    xrealloc (a->start.addresses,
+			      a->start.max_count * sizeof(bfd_vma *));
+		}
+
+	      /* Append start addresses.  */
+	      for (i = 0; i < b->start.count; ++i)
+		a->start.addresses[a->start.count++] =
+		  b->start.addresses[i];
+
+	      /* Remove and delete jump.  */
+	      struct jump_info *tmp = b->prev;
+	      jump_info_unlink (b, base);
+	      jump_info_free (b);
+	      b = tmp;
+	    }
+	}
+    }
+}
+
+/* Sort jumps by their size and starting point using a stable
+   minsort. This could be improved if sorting performance is
+   an issue, for example by using mergesort.  */
+
+static void
+jump_info_sort (struct jump_info **base)
+{
+  struct jump_info *current_element = *base;
+
+  while (current_element)
+    {
+      struct jump_info *best_match = current_element;
+      struct jump_info *runner = current_element->next;
+      bfd_vma best_size = jump_info_size (best_match);
+
+      while (runner)
+	{
+	  bfd_vma runner_size = jump_info_size (runner);
+
+	  if ((runner_size < best_size)
+	      || ((runner_size == best_size)
+		  && (jump_info_min_address (runner)
+		      < jump_info_min_address (best_match))))
+	    {
+	      best_match = runner;
+	      best_size = runner_size;
+	    }
+
+	  runner = runner->next;
+	}
+
+      if (best_match == current_element)
+	current_element = current_element->next;
+      else
+	jump_info_move_linked (best_match, current_element, base);
+    }
+}
+
+/* Visualize all jumps at a given address.  */
+
+static void
+jump_info_visualize_address (const struct jump_info *jumps,
+			     bfd_vma address,
+			     int max_level,
+			     char *line_buffer,
+			     uint8_t *color_buffer)
+{
+  size_t len = (max_level + 1) * 3;
+  const struct jump_info *ji;
+
+  /* Clear line buffer.  */
+  memset(line_buffer, ' ', len);
+  memset(color_buffer, 0, len);
+
+  /* Iterate over jumps and add their ASCII art.  */
+  for (ji = jumps; ji; ji = ji->next)
+    {
+      if ((jump_info_min_address (ji) <= address)
+	  && (jump_info_max_address (ji) >= address))
+	{
+	  /* Hash target address to get an even
+	     distribution between all values.  */
+	  bfd_vma hash_address = jump_info_end_address (ji);
+	  uint8_t color = iterative_hash_object (hash_address, 0);
+	  /* Fetch line offset.  */
+	  int offset = (max_level - ji->level) * 3;
+
+	  /* Draw start line.  */
+	  if (jump_info_is_start_address (ji, address))
+	    {
+	      size_t i = offset + 1;
+
+	      for (; i < len - 1; ++i)
+		if (line_buffer[i] == ' ')
+		  {
+		    line_buffer[i] = '-';
+		    color_buffer[i] = color;
+		  }
+
+	      if (line_buffer[i] == ' ')
+		{
+		  line_buffer[i] = '-';
+		  color_buffer[i] = color;
+		}
+	      else if (line_buffer[i] == '>')
+		{
+		  line_buffer[i] = 'X';
+		  color_buffer[i] = color;
+		}
+
+	      if (line_buffer[offset] == ' ')
+		{
+		  if (address <= ji->end)
+		    line_buffer[offset] =
+		      (jump_info_min_address (ji) == address) ? '/': '+';
+		  else
+		    line_buffer[offset] =
+		      (jump_info_max_address (ji) == address) ? '\\': '+';
+		  color_buffer[offset] = color;
+		}
+	    }
+	  /* Draw jump target.  */
+	  else if (jump_info_is_end_address (ji, address))
+	    {
+	      size_t i = offset + 1;
+
+	      for (; i < len - 1; ++i)
+		if (line_buffer[i] == ' ')
+		  {
+		    line_buffer[i] = '-';
+		    color_buffer[i] = color;
+		  }
+
+	      if (line_buffer[i] == ' ')
+		{
+		  line_buffer[i] = '>';
+		  color_buffer[i] = color;
+		}
+	      else if (line_buffer[i] == '-')
+		{
+		  line_buffer[i] = 'X';
+		  color_buffer[i] = color;
+		}
+
+	      if (line_buffer[offset] == ' ')
+		{
+		  if (jump_info_min_address (ji) < address)
+		    line_buffer[offset] =
+		      (jump_info_max_address (ji) > address) ? '>' : '\\';
+		  else
+		    line_buffer[offset] = '/';
+		  color_buffer[offset] = color;
+		}
+	    }
+	  /* Draw intermediate line segment.  */
+	  else if (line_buffer[offset] == ' ')
+	    {
+	      line_buffer[offset] = '|';
+	      color_buffer[offset] = color;
+	    }
+	}
+    }
+}
+
+/* Clone of disassemble_bytes to detect jumps inside a function.  */
+/* FIXME: is this correct? Can we strip it down even further?  */
+
+static struct jump_info *
+disassemble_jumps (struct disassemble_info * inf,
+		   disassembler_ftype        disassemble_fn,
+		   bfd_vma                   start_offset,
+		   bfd_vma                   stop_offset,
+		   bfd_vma		     rel_offset,
+		   arelent ***               relppp,
+		   arelent **                relppend)
+{
+  struct objdump_disasm_info *aux;
+  struct jump_info *jumps = NULL;
+  asection *section;
+  bfd_vma addr_offset;
+  unsigned int opb = inf->octets_per_byte;
+  int octets = opb;
+  SFILE sfile;
+
+  aux = (struct objdump_disasm_info *) inf->application_data;
+  section = inf->section;
+
+  sfile.alloc = 120;
+  sfile.buffer = (char *) xmalloc (sfile.alloc);
+  sfile.pos = 0;
+
+  inf->insn_info_valid = 0;
+  inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
+  inf->stream = &sfile;
+
+  addr_offset = start_offset;
+  while (addr_offset < stop_offset)
+    {
+      int previous_octets;
+
+      /* Remember the length of the previous instruction.  */
+      previous_octets = octets;
+      octets = 0;
+
+      sfile.pos = 0;
+      inf->bytes_per_line = 0;
+      inf->bytes_per_chunk = 0;
+      inf->flags = ((disassemble_all ? DISASSEMBLE_DATA : 0)
+        | (wide_output ? WIDE_OUTPUT : 0));
+      if (machine)
+	inf->flags |= USER_SPECIFIED_MACHINE_TYPE;
+
+      if (inf->disassembler_needs_relocs
+	  && (bfd_get_file_flags (aux->abfd) & EXEC_P) == 0
+	  && (bfd_get_file_flags (aux->abfd) & DYNAMIC) == 0
+	  && *relppp < relppend)
+	{
+	  bfd_signed_vma distance_to_rel;
+
+	  distance_to_rel = (**relppp)->address - (rel_offset + addr_offset);
+
+	  /* Check to see if the current reloc is associated with
+	     the instruction that we are about to disassemble.  */
+	  if (distance_to_rel == 0
+	      /* FIXME: This is wrong.  We are trying to catch
+		 relocs that are addressed part way through the
+		 current instruction, as might happen with a packed
+		 VLIW instruction.  Unfortunately we do not know the
+		 length of the current instruction since we have not
+		 disassembled it yet.  Instead we take a guess based
+		 upon the length of the previous instruction.  The
+		 proper solution is to have a new target-specific
+		 disassembler function which just returns the length
+		 of an instruction at a given address without trying
+		 to display its disassembly. */
+	      || (distance_to_rel > 0
+		&& distance_to_rel < (bfd_signed_vma) (previous_octets/ opb)))
+	    {
+	      inf->flags |= INSN_HAS_RELOC;
+	    }
+	}
+
+      if (! disassemble_all
+	  && (section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
+	  == (SEC_CODE | SEC_HAS_CONTENTS))
+	/* Set a stop_vma so that the disassembler will not read
+	   beyond the next symbol.  We assume that symbols appear on
+	   the boundaries between instructions.  We only do this when
+	   disassembling code of course, and when -D is in effect.  */
+	inf->stop_vma = section->vma + stop_offset;
+
+      inf->stop_offset = stop_offset;
+
+      /* Extract jump information.  */
+      inf->insn_info_valid = 0;
+      octets = (*disassemble_fn) (section->vma + addr_offset, inf);
+      /* Test if a jump was detected.  */
+      if (inf->insn_info_valid
+	  && ((inf->insn_type == dis_branch)
+	      || (inf->insn_type == dis_condbranch)
+	      || (inf->insn_type == dis_jsr)
+	      || (inf->insn_type == dis_condjsr))
+	  && (inf->target >= section->vma + start_offset)
+	  && (inf->target < section->vma + stop_offset))
+	{
+	  struct jump_info *ji =
+	    jump_info_new (section->vma + addr_offset, inf->target, -1);
+	  jump_info_add_front (ji, &jumps);
+	}
+
+      inf->stop_vma = 0;
+
+      addr_offset += octets / opb;
+    }
+
+  inf->fprintf_func = (fprintf_ftype) fprintf;
+  inf->stream = stdout;
+
+  free (sfile.buffer);
+
+  /* Merge jumps.  */
+  jump_info_merge (&jumps);
+  /* Process jumps.  */
+  jump_info_sort (&jumps);
+
+  /* Group jumps by level.  */
+  struct jump_info *last_jump = jumps;
+  int max_level = -1;
+
+  while (last_jump)
+    {
+      /* The last jump is part of the next group.  */
+      struct jump_info *base = last_jump;
+      /* Increment level.  */
+      base->level = ++max_level;
+
+      /* Find jumps that can be combined on the same
+	 level, with the largest jumps tested first.
+	 This has the advantage that large jumps are on
+	 lower levels and do not intersect with small
+	 jumps that get grouped on higher levels.  */
+      struct jump_info *exchange_item = last_jump->next;
+      struct jump_info *it = exchange_item;
+
+      for (; it; it = it->next)
+	{
+	  /* Test if the jump intersects with any
+	     jump from current group.  */
+	  bfd_boolean ok = TRUE;
+	  struct jump_info *it_collision;
+
+	  for (it_collision = base;
+	       it_collision != exchange_item;
+	       it_collision = it_collision->next)
+	    {
+	      /* This jump intersects so we leave it out.  */
+	      if (jump_info_intersect (it_collision, it))
+		{
+		  ok = FALSE;
+		  break;
+		}
+	    }
+
+	  /* Add jump to group.  */
+	  if (ok)
+	    {
+	      /* Move current element to the front.  */
+	      if (it != exchange_item)
+		{
+		  struct jump_info *save = it->prev;
+		  jump_info_move_linked (it, exchange_item, &jumps);
+		  last_jump = it;
+		  it = save;
+		}
+	      else
+		{
+		  last_jump = exchange_item;
+		  exchange_item = exchange_item->next;
+		}
+	      last_jump->level = max_level;
+	    }
+	}
+
+      /* Move to next group.  */
+      last_jump = exchange_item;
+    }
+
+  return jumps;
+}
+
 /* The number of zeroes we want to see before we start skipping them.
    The number is arbitrarily chosen.  */
 
@@ -1927,6 +2517,30 @@ disassemble_bytes (struct disassemble_info * inf,
 
   inf->insn_info_valid = 0;
 
+  /* Determine maximum level. */
+  int max_level = -1;
+  struct jump_info *base = detected_jumps ? detected_jumps : NULL;
+  struct jump_info *ji;
+
+  for (ji = base; ji; ji = ji->next)
+    {
+      if (ji->level > max_level)
+	{
+	  max_level = ji->level;
+	}
+    }
+
+  /* Allocate line buffer if there are any jumps.  */
+  size_t len = (max_level + 1) * 3 + 1;
+  char *line_buffer = (max_level >= 0) ? xmalloc(len): NULL;
+  uint8_t *color_buffer = (max_level >= 0) ? xmalloc(len): NULL;
+
+  if (line_buffer)
+    {
+      line_buffer[len - 1] = 0;
+      color_buffer[len - 1] = 0;
+    }
+
   addr_offset = start_offset;
   while (addr_offset < stop_offset)
     {
@@ -1996,6 +2610,44 @@ disassemble_bytes (struct disassemble_info * inf,
 	      objdump_print_address (section->vma + addr_offset, inf);
 	      aux->require_sec = FALSE;
 	      putchar (' ');
+	    }
+
+	  /* Visualize jumps. */
+	  if (line_buffer)
+	    {
+	      jump_info_visualize_address (base,
+					   section->vma + addr_offset,
+					   max_level,
+					   line_buffer,
+					   color_buffer);
+
+	      size_t line_buffer_size = strlen (line_buffer);
+	      char last_color = 0;
+
+	      for (size_t i = 0; i <= line_buffer_size; ++i)
+		{
+		  if (color_output)
+		    {
+		      uint8_t color = (i < line_buffer_size) ? color_buffer[i]: 0;
+
+		      if (color != last_color)
+			{
+			  if (color)
+			    if (extended_color_output)
+			      /* Use extended 8bit color, but
+			         do not choose dark colors.  */
+			      printf ("\033[38;5;%dm", 124 + (color % 108));
+			    else
+			      /* Use simple terminal colors.  */
+			      printf ("\033[%dm", 31 + (color % 7));
+			  else
+			    /* Clear color.  */
+			    printf ("\033[0m");
+			  last_color = color;
+			}
+		    }
+		  putchar ((i < line_buffer_size) ? line_buffer[i]: ' ');
+		}
 	    }
 
 	  if (insns)
@@ -2291,6 +2943,8 @@ disassemble_bytes (struct disassemble_info * inf,
     }
 
   free (sfile.buffer);
+  free (line_buffer);
+  free (color_buffer);
 }
 
 static void
@@ -2611,9 +3265,42 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	insns = FALSE;
 
       if (do_print)
-	disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
-			   addr_offset, nextstop_offset,
-			   rel_offset, &rel_pp, rel_ppend);
+	{
+	  /* Resolve symbol name.  */
+	  if (visualize_jumps && abfd && sym && sym->name)
+	    {
+	      struct disassemble_info di;
+	      SFILE sf;
+
+	      sf.alloc = strlen (sym->name) + 40;
+	      sf.buffer = (char*) xmalloc (sf.alloc);
+	      sf.pos = 0;
+	      di.fprintf_func = (fprintf_ftype) objdump_sprintf;
+	      di.stream = &sf;
+
+	      objdump_print_symname (abfd, &di, sym);
+
+	      /* Fetch jump information.  */
+	      detected_jumps = disassemble_jumps
+		(pinfo, paux->disassemble_fn,
+		 addr_offset, nextstop_offset,
+		 rel_offset, &rel_pp, rel_ppend);
+
+	      /* Free symbol name.  */
+	      free (sf.buffer);
+	    }
+
+	  /* Add jumps to output.  */
+	  disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
+			     addr_offset, nextstop_offset,
+			     rel_offset, &rel_pp, rel_ppend);
+
+	  /* Free jumps.  */
+	  while (detected_jumps)
+	    {
+	      detected_jumps = jump_info_free (detected_jumps);
+	    }
+	}
 
       addr_offset = nextstop_offset;
       sym = nextsym;
@@ -4436,6 +5123,25 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_INLINES:
 	  unwind_inlines = TRUE;
+	  break;
+	case OPTION_VISUALIZE_JUMPS:
+	  visualize_jumps = TRUE;
+	  color_output = FALSE;
+	  extended_color_output = FALSE;
+	  if (optarg != NULL)
+	    {
+	      if (streq (optarg, "color"))
+		color_output = TRUE;
+	      else if (streq (optarg, "extended-color"))
+		{
+		  color_output = TRUE;
+		  extended_color_output = TRUE;
+		}
+	      else if (streq (optarg, "off"))
+		visualize_jumps = FALSE;
+	      else
+		nonfatal (_("unrecognized argument to --visualize-option"));
+	    }
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)
