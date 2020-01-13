@@ -1,5 +1,14 @@
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* linux-x86-low.c (x86_linux_regs_info, amd64_emit_eq_goto,
+	amd64_emit_ne_goto, amd64_emit_lt_goto, amd64_emit_le_goto,
+	amd64_emit_gt_goto, amd64_emit_ge_goto, amd64_emit_ge_goto,
+	i386_emit_eq_goto, i386_emit_ne_goto, i386_emit_lt_goto,
+	i386_emit_le_goto, i386_emit_gt_goto, i386_emit_ge_goto): Make
+	static.
+
+2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* inferiors.c: Include gdbsupport/common-inferior.h.
 
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>

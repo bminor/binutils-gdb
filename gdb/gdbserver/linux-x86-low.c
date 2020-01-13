@@ -961,7 +961,7 @@ static struct regs_info i386_linux_regs_info =
     &x86_regsets_info
   };
 
-const struct regs_info *
+static const struct regs_info *
 x86_linux_regs_info (void)
 {
 #ifdef __x86_64__
@@ -1970,7 +1970,7 @@ amd64_emit_void_call_2 (CORE_ADDR fn, int arg1)
 	    "pop %rax");
 }
 
-void
+static void
 amd64_emit_eq_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_eq,
@@ -1990,7 +1990,7 @@ amd64_emit_eq_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 amd64_emit_ne_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_ne,
@@ -2010,7 +2010,7 @@ amd64_emit_ne_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 amd64_emit_lt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_lt,
@@ -2030,7 +2030,7 @@ amd64_emit_lt_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 amd64_emit_le_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_le,
@@ -2050,7 +2050,7 @@ amd64_emit_le_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 amd64_emit_gt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_gt,
@@ -2070,7 +2070,7 @@ amd64_emit_gt_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 amd64_emit_ge_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM (amd64_ge,
@@ -2605,7 +2605,7 @@ i386_emit_void_call_2 (CORE_ADDR fn, int arg1)
 }
 
 
-void
+static void
 i386_emit_eq_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (eq,
@@ -2630,7 +2630,7 @@ i386_emit_eq_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 i386_emit_ne_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (ne,
@@ -2656,7 +2656,7 @@ i386_emit_ne_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 i386_emit_lt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (lt,
@@ -2682,7 +2682,7 @@ i386_emit_lt_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 i386_emit_le_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (le,
@@ -2708,7 +2708,7 @@ i386_emit_le_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 i386_emit_gt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (gt,
@@ -2734,7 +2734,7 @@ i386_emit_gt_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-void
+static void
 i386_emit_ge_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM32 (ge,
