@@ -594,7 +594,6 @@ core_target::get_core_register_section (struct regcache *regcache,
 {
   struct bfd_section *section;
   bfd_size_type size;
-  char *contents;
   bool variable_size_section = (regset != NULL
 				&& regset->flags & REGSET_VARIABLE_SIZE);
 
@@ -622,9 +621,9 @@ core_target::get_core_register_section (struct regcache *regcache,
 	       section_name.c_str ());
     }
 
-  contents = (char *) alloca (size);
-  if (! bfd_get_section_contents (core_bfd, section, contents,
-				  (file_ptr) 0, size))
+  std::vector<char> contents (size);
+  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
+				 (file_ptr) 0, size))
     {
       warning (_("Couldn't read %s registers from `%s' section in core file."),
 	       human_name, section_name.c_str ());
@@ -633,12 +632,12 @@ core_target::get_core_register_section (struct regcache *regcache,
 
   if (regset != NULL)
     {
-      regset->supply_regset (regset, regcache, -1, contents, size);
+      regset->supply_regset (regset, regcache, -1, contents.data (), size);
       return;
     }
 
   gdb_assert (m_core_vec != nullptr);
-  m_core_vec->core_read_registers (regcache, contents, size, which,
+  m_core_vec->core_read_registers (regcache, contents.data (), size, which,
 				   (CORE_ADDR) bfd_section_vma (section));
 }
 

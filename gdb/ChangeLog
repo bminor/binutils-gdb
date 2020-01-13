@@ -1,3 +1,8 @@
+2020-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* corelow.c (core_target::get_core_register_section): Use
+	  std::vector instead of alloca.
+
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* warning.m4: Add -Wmissing-declarations to build_warnings.
