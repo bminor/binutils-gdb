@@ -1,3 +1,7 @@
+2020-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/debuginfod.exp: New tests.
+
 2020-01-13  Thomas Troeger  <tstroege@gmx.de>
 
 	* objdump.c (visualize_jumps, color_output, extended_color_output)
