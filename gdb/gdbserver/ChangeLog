@@ -1,3 +1,7 @@
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
 2020-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in (%-generated.c): Remove rule for files from

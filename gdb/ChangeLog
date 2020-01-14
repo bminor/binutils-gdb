@@ -1,3 +1,8 @@
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* gdbsupport/common.m4 (GDB_AC_COMMON): Fix indentation.
+
 2020-01-14  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* skip.c (skip_function_command): Make skip w/o arguments use the
