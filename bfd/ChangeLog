@@ -1,3 +1,12 @@
+2020-01-15  Alan Modra  <amodra@gmail.com>
+
+	PR 25384
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Update comment.
+	(ppc64_elf_adjust_dynamic_symbol): Don't allow .dynbss copies
+	of function symbols unless dot symbols are present.  Do warn
+	whenever one is created, regardles of whether a PLT entry is
+	also emitted for the function symbol.
+
 2020-01-14  Alan Modra  <amodra@gmail.com>
 
 	* som.c (som_bfd_count_ar_symbols): Error when file position
