@@ -1,3 +1,13 @@
+2020-01-27  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/step-over-syscall.exp (setup): Check if we're already
+	sitting at a syscall instruction when we hit the syscall function's
+	breakpoint.
+	Check PC against one obtained with the x command.
+	Validate syscall number.
+	(step_over_syscall): Don't continue to the syscall instruction if
+	we're already there.
+
 2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/attach.exp: Test 'set exec-file-mismatch'.
