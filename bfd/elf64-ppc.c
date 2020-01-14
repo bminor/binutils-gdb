@@ -2768,20 +2768,20 @@ must_be_dyn_reloc (struct bfd_link_info *info,
 }
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
-   copying dynamic variables from a shared lib into an app's dynbss
+   copying dynamic variables from a shared lib into an app's .dynbss
    section, and instead use a dynamic relocation to point into the
-   shared lib.  With code that gcc generates, it's vital that this be
-   enabled;  In the PowerPC64 ABI, the address of a function is actually
-   the address of a function descriptor, which resides in the .opd
-   section.  gcc uses the descriptor directly rather than going via the
-   GOT as some other ABI's do, which means that initialized function
-   pointers must reference the descriptor.  Thus, a function pointer
-   initialized to the address of a function in a shared library will
-   either require a copy reloc, or a dynamic reloc.  Using a copy reloc
-   redefines the function descriptor symbol to point to the copy.  This
-   presents a problem as a plt entry for that function is also
-   initialized from the function descriptor symbol and the copy reloc
-   may not be initialized first.  */
+   shared lib.  With code that gcc generates it is vital that this be
+   enabled;  In the PowerPC64 ELFv1 ABI the address of a function is
+   actually the address of a function descriptor which resides in the
+   .opd section.  gcc uses the descriptor directly rather than going
+   via the GOT as some other ABIs do, which means that initialized
+   function pointers reference the descriptor.  Thus, a function
+   pointer initialized to the address of a function in a shared
+   library will either require a .dynbss copy and a copy reloc, or a
+   dynamic reloc.  Using a .dynbss copy redefines the function
+   descriptor symbol to point to the copy.  This presents a problem as
+   a PLT entry for that function is also initialized from the function
+   descriptor symbol and the copy may not be initialized first.  */
 #define ELIMINATE_COPY_RELOCS 1
 
 /* Section name for stubs is the associated section name plus this
@@ -6435,13 +6435,23 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       || h->protected_def)
     return TRUE;
 
-  if (h->plt.plist != NULL)
+  if (h->type == STT_FUNC
+      || h->type == STT_GNU_IFUNC)
     {
-      /* We should never get here, but unfortunately there are versions
-	 of gcc out there that improperly (for this ABI) put initialized
-	 function pointers, vtable refs and suchlike in read-only
-	 sections.  Allow them to proceed, but warn that this might
-	 break at runtime.  */
+      /* .dynbss copies of function symbols only work if we have
+	 ELFv1 dot-symbols.  ELFv1 compilers since 2004 default to not
+	 use dot-symbols and set the function symbol size to the text
+	 size of the function rather than the size of the descriptor.
+	 That's wrong for copying a descriptor.  */
+      if (((struct ppc_link_hash_entry *) h)->oh == NULL
+	  || !(h->size == 24 || h->size == 16))
+	return TRUE;
+
+      /* We should never get here, but unfortunately there are old
+	 versions of gcc (circa gcc-3.2) that improperly for the
+	 ELFv1 ABI put initialized function pointers, vtable refs and
+	 suchlike in read-only sections.  Allow them to proceed, but
+	 warn that this might break at runtime.  */
       info->callbacks->einfo
 	(_("%P: copy reloc against `%pT' requires lazy plt linking; "
 	   "avoid setting LD_BIND_NOW=1 or upgrade gcc\n"),
