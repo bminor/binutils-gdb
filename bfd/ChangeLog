@@ -1,5 +1,10 @@
 2020-01-14  Alan Modra  <amodra@gmail.com>
 
+	* som.c (som_bfd_count_ar_symbols): Error when file position
+	of symbols on chains is not strictly increasing.
+
+2020-01-14  Alan Modra  <amodra@gmail.com>
+
 	* vms.h (VMS_DEBUG): Define as 0.
 	* vms-alpha.c (image_write): Move debug output after bounds check.
 	Tidy bounds check.

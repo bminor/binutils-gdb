@@ -5892,8 +5892,8 @@ som_bfd_count_ar_symbols (bfd *abfd,
   /* Don't forget to initialize the counter!  */
   *count = 0;
 
-  /* Read in the hash table.  The has table is an array of 32bit file offsets
-     which point to the hash chains.  */
+  /* Read in the hash table.  The hash table is an array of 32-bit
+     file offsets which point to the hash chains.  */
   amt = (bfd_size_type) lst_header->hash_size * 4;
   if (bfd_bread ((void *) hash_table, amt, abfd) != amt)
     goto error_return;
@@ -5927,6 +5927,15 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
 	  if (next_entry == 0)
 	    break;
+
+	  /* Assume symbols on a chain are in increasing file offset
+	     order.  Otherwise we can loop here with fuzzed input.  */
+	  if (next_entry < hash_val + sizeof (ext_lst_symbol))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      goto error_return;
+	    }
+	  hash_val = next_entry;
 
 	  /* Seek to the next symbol.  */
 	  if (bfd_seek (abfd, lst_filepos + next_entry, SEEK_SET) != 0)
