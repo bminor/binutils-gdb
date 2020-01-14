@@ -24,87 +24,125 @@
 @end menu
 
 @node Z80 Options
-@section Options
+@section Command-line Options
 @cindex Z80 options
 @cindex options for Z80
-@table @option
+@c man begin OPTIONS
+@table @gcctabopt
 @cindex @code{-z80} command-line option, Z80
 @item -z80
 Produce code for the Z80 processor. By default accepted undocumented
-operations with halves of index registers (IXL, IXH, IYL, IYH) and
-instuction IN F,(C). Other useful undocumented instructions produces
+operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL}, @code{IYH}) and
+instuction @code{IN F,(C)}. Other useful undocumented instructions produces
 warnings. Undocumented instructions may not work on some CPUs, use
 them on your own risk.
 
-@cindex @code{-r800} command-line option, R800
+@cindex @code{-r800} command-line option, Z80
 @item -r800
 Produce code for the R800 processor.
 
-@cindex @code{-z180} command-line option, Z180
+@cindex @code{-z180} command-line option, Z80
 @item -z180
 Produce code for the Z180 processor.
 
-@cindex @code{-ez80} command-line option, eZ80
+@cindex @code{-ez80} command-line option, Z80
 @item -ez80
 Produce code for the eZ80 processor in Z80 memory mode by default.
 
-@cindex @code{-ez80-adl} command-line option, eZ80
+@cindex @code{-ez80-adl} command-line option, Z80
 @item -ez80-adl
 Produce code for the eZ80 processor in ADL memory mode by default.
 
-@cindex Compatibility options
-@item  @code{-colonless}
+@cindex @code{-local-prefix} command-line option, Z80
+@item  -local-prefix=@var{prefix}
+Mark all labels with specified prefix as local. But such label can be
+marked global explicitly in the code. This option do not change default
+local label prefix @code{.L}, it is just adds new one.
+
+@cindex @code{-colonless} command-line option, Z80
+@item  -colonless
 Accept colonless labels. All names at line begin are treated as labels.
 
-@item  @code{-sdcc}
-Accept assembler code produces by SDCC.
+@cindex @code{-sdcc} command-line option, Z80
+@item  -sdcc
+Accept assembler code produced by SDCC.
 
-@cindex Undocumented instruction control
-@item  @code{-strict}
+@cindex @code{-fp-s} command-line option, Z80
+@item -fp-s=@var{FORMAT}
+Single precision floating point numbers format. Default: ieee754 (32 bit).
+
+@cindex @code{-fp-d} command-line option, Z80
+@item -fp-d=@var{FORMAT}
+Double precision floating point numbers format. Default: ieee754 (64 bit).
+
+@cindex @code{-strict} command-line option, Z80
+@item  -strict
 Accept documented instructions only.
 
-@item  @code{-full}
+@cindex @code{-full} command-line option, Z80
+@item  -full
 Accept all known Z80 instructions.
 
-@item  @code{-with-inst=INST[,...]}
-@itemx @code{-Wnins INST[,...]}
+@item  -with-inst=@var{INST}[,...]
+@itemx -Wnins @var{INST}[,...]
 Enable specified undocumented instruction(s).
 
-@item  @code{-without-inst=INST[,...]}
-@itemx @code{-Fins INST[,...]}
+@item  -without-inst=@var{INST}[,...]
+@itemx -Fins @var{INST}[,...]
 Disable specified undocumented instruction(s).
 
-@cindex Obsolete options
-@item  @code{-ignore-undocumented-instructions}
-@itemx @code{-Wnud}
+@item  -ignore-undocumented-instructions
+@itemx -Wnud
 Silently assemble undocumented Z80-instructions that have been adopted
 as documented R800-instructions .
-@item  @code{-ignore-unportable-instructions}
-@itemx @code{-Wnup}
+@item  -ignore-unportable-instructions
+@itemx -Wnup
 Silently assemble all undocumented Z80-instructions.
-@item  @code{-warn-undocumented-instructions}
-@itemx @code{-Wud}
+@item  -warn-undocumented-instructions
+@itemx -Wud
 Issue warnings for undocumented Z80-instructions that work on R800, do
 not assemble other undocumented instructions without warning.
-@item  @code{-warn-unportable-instructions}
-@itemx @code{-Wup}
+@item  -warn-unportable-instructions
+@itemx -Wup
 Issue warnings for other undocumented Z80-instructions, do not treat any
 undocumented instructions as errors.
-@item  @code{-forbid-undocumented-instructions}
-@itemx @code{-Fud}
+@item  -forbid-undocumented-instructions
+@itemx -Fud
 Treat all undocumented z80-instructions as errors.
 @item  -forbid-unportable-instructions
-@itemx @code{-Fup}
+@itemx -Fup
 Treat undocumented z80-instructions that do not work on R800 as errors.
+@end table
+@c man end
+
+Floating point numbers formats.
+@table @option
+@item @code{ieee754}
+Single or double precision IEEE754 compatible format.
+
+@item @code{half}
+Half precision IEEE754 compatible format (16 bits).
+
+@item @code{single}
+Single precision IEEE754 compatible format (32 bits).
+
+@item @code{double}
+Double precision IEEE754 compatible format (64 bits).
+
+@item @code{zeda32}
+32 bit floating point format from z80float library by Zeda.
+
+@item @code{math48}
+48 bit floating point format from Math48 package by Anders Hejlsberg.
 @end table
 
 Known undocumented instructions.
 @table @option
 @cindex Known undocumented instructions
 @item  @code{idx-reg-halves}
-All operations with halves of index registers (IXL, IXH, IYL, IYH).
+All operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL}, @code{IYH}).
 @item  @code{sli}
-SLI or SLL instruction. Same as @code{SLA r; INC r}.
+@code{SLI} or @code{SLL} instruction. Same as @code{SLA r; INC r}.
 @item  @code{op-ii-ld}
 Istructions like @code{<op> (<ii>+<d>),<r>}. For example: @code{RL (IX+5),C}
 @item @code{in-f-c}
@@ -132,6 +170,7 @@ The suffix @samp{b} denotes a backreference to local label.
 * Z80-Chars::                Special Characters
 * Z80-Regs::                 Register Names
 * Z80-Case::                 Case Sensitivity
+* Z80-Labels::               Labels
 @end menu
 
 @node Z80-Chars
@@ -191,11 +230,35 @@ The case of letters is significant in labels and symbol names. The case
 is also important to distinguish the suffix @samp{b} for a backward reference
 to a local label from the suffix @samp{B} for a number in binary notation.
 
+@node Z80-Labels
+@subsection Labels
+
+@cindex labels, Z80
+@cindex Z80 labels
+Labels started by @code{.L} acts as local labels. You may specify custom local
+label prefix by @code{-local-prefix} command-line option.
+Dollar, forward and backward local labels are supported. By default, all labels
+are followed by colon.
+Legacy code with colonless labels can be built with @code{-colonless}
+command-line option specified. In this case all tokens at line begin are treated
+as labels.
+
 @node Z80 Floating Point
 @section Floating Point
 @cindex floating point, Z80
 @cindex Z80 floating point
-Floating-point numbers are not supported.
+Floating-point numbers of following types are supported:
+
+@table @option
+@item @code{ieee754}
+Supported half, single and double precision IEEE754 compatible numbers.
+
+@item @code{zeda32}
+32 bit floating point numbers from z80float library by Zeda.
+
+@item @code{math48}
+48 bit floating point numbers from Math48 package by Anders Hejlsberg.
+@end table
 
 @node Z80 Directives
 @section Z80 Assembler Directives
@@ -208,15 +271,19 @@ These are the additional directives in @code{@value{AS}} for the Z80:
 
 @table @code
 @item assume @var{ADL}@samp{=}@var{expression}
-Set ADL status for eZ80. Non-null value enable compilation ADL mode else
+Set ADL status for eZ80. Non-zero value enable compilation in ADL mode else
 used Z80 mode. ADL and Z80 mode produces incompatible object code. Mixing
 both of them within one binary may lead problems with disassembler.
 
 @item db @var{expression}|@var{string}[,@var{expression}|@var{string}...]
 @itemx defb @var{expression}|@var{string}[,@var{expression}|@var{string}...]
+@itemx defm @var{string}...]
 For each @var{string} the characters are copied to the object file, for
 each other @var{expression} the value is stored in one byte.
 A warning is issued in case of an overflow.
+Backslash symbol in the strings is generic symbol, it cannot be used as
+escape character (for this purpose use @code{.ascii} or @code{.asciiz}
+directives).
 
 @item dw @var{expression}[,@var{expression}...]
 @itemx defw @var{expression}[,@var{expression}...]
@@ -289,7 +356,7 @@ The assembler also supports the following undocumented Z80-instructions,
 that have not been adopted in any other instruction set:
 @table @code
 @item out (c),0
-Sends zero to the port pointed to by register c.
+Sends zero to the port pointed to by register @code{C}.
 
 @item sli @var{m}
 Equivalent to @code{@var{m} = (@var{m}<<1)+1}, the operand @var{m} can

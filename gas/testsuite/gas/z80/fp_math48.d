@@ -1,6 +1,6 @@
 #name: Math48 floating point numbers
 #objdump: -s -j .data
-#as: -float=math48
+#as: -fp-s=math48
 
 .*:[     ]+file format (coff)|(elf32)\-z80
 

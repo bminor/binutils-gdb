@@ -1,3 +1,9 @@
+2020-01-14  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25377
+	* z80-dis.c (suffix): Use .db instruction to generate double
+	prefix.
+
 2020-01-14  Alan Modra  <amodra@gmail.com>
 
 	* z8k-dis.c (unpack_instr): Formatting.  Cast unsigned short

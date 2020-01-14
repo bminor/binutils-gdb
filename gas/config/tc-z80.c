@@ -23,13 +23,14 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "elf/z80.h"
+#include "dwarf2dbg.h"
 
 /* Exported constants.  */
 const char comment_chars[] = ";\0";
 const char line_comment_chars[] = "#;\0";
 const char line_separator_chars[] = "\0";
 const char EXP_CHARS[] = "eE\0";
-const char FLT_CHARS[] = "RrFf\0";
+const char FLT_CHARS[] = "RrDdFfSsHh\0";
 
 /* For machine specific options.  */
 const char * md_shortopts = ""; /* None yet.  */
@@ -50,8 +51,8 @@ enum options
   OPTION_MACH_IUP,
   OPTION_MACH_WUP,
   OPTION_MACH_FUP,
-  OPTION_FLOAT_FORMAT,
-  OPTION_DOUBLE_FORMAT,
+  OPTION_FP_SINGLE_FORMAT,
+  OPTION_FP_DOUBLE_FORMAT,
   OPTION_COMPAT_LL_PREFIX,
   OPTION_COMPAT_COLONLESS,
   OPTION_COMPAT_SDCC
@@ -84,8 +85,8 @@ struct option md_longopts[] =
   { "z180",      no_argument, NULL, OPTION_MACH_Z180},
   { "ez80",      no_argument, NULL, OPTION_MACH_EZ80_Z80},
   { "ez80-adl",  no_argument, NULL, OPTION_MACH_EZ80_ADL},
-  { "float",     required_argument, NULL, OPTION_FLOAT_FORMAT},
-  { "double",    required_argument, NULL, OPTION_DOUBLE_FORMAT},
+  { "fp-s",      required_argument, NULL, OPTION_FP_SINGLE_FORMAT},
+  { "fp-d",      required_argument, NULL, OPTION_FP_DOUBLE_FORMAT},
   { "strict",    no_argument, NULL, OPTION_MACH_FUD},
   { "full",      no_argument, NULL, OPTION_MACH_IUP},
   { "with-inst", required_argument, NULL, OPTION_MACH_INST},
@@ -164,6 +165,12 @@ static const char *
 str_to_zeda32 (char *litP, int *sizeP);
 static const char *
 str_to_float48 (char *litP, int *sizeP);
+static const char *
+str_to_ieee754_h (char *litP, int *sizeP);
+static const char *
+str_to_ieee754_s (char *litP, int *sizeP);
+static const char *
+str_to_ieee754_d (char *litP, int *sizeP);
 
 static str_to_float_t
 get_str_to_float (const char *arg)
@@ -174,7 +181,16 @@ get_str_to_float (const char *arg)
   if (strcasecmp (arg, "math48") == 0)
     return str_to_float48;
 
-  if (strcasecmp (arg, "ieee754") != 0)
+  if (strcasecmp (arg, "half") != 0)
+    return str_to_ieee754_h;
+
+  if (strcasecmp (arg, "single") != 0)
+    return str_to_ieee754_s;
+
+  if (strcasecmp (arg, "double") != 0)
+    return str_to_ieee754_d;
+
+  if (strcasecmp (arg, "ieee754") == 0)
     as_fatal (_("invalid floating point numbers type `%s'"), arg);
   return NULL;
 }
@@ -248,10 +264,10 @@ md_parse_option (int c, const char* arg)
       ins_ok = INS_GBZ80;
       ins_err = INS_UNDOC | INS_UNPORT;
       break;
-    case OPTION_FLOAT_FORMAT:
+    case OPTION_FP_SINGLE_FORMAT:
       str_to_float = get_str_to_float (arg);
       break;
-    case OPTION_DOUBLE_FORMAT:
+    case OPTION_FP_DOUBLE_FORMAT:
       str_to_double = get_str_to_float (arg);
       break;
     case OPTION_MACH_INST:
@@ -319,11 +335,14 @@ Compatibility options:\n\
   -local-prefix=TEXT\t  treat labels prefixed by TEXT as local\n\
   -colonless\t\t  permit colonless labels\n\
   -sdcc\t\t\t  accept SDCC specific instruction syntax\n\
-  -float=FORMAT\t\t  set floating point numbers format\n\
-  -double=FORMAT\t\t  set floating point numbers format\n\
+  -fp-s=FORMAT\t\t  set single precission FP numbers format\n\
+  -fp-d=FORMAT\t\t  set double precission FP numbers format\n\
 Where FORMAT one of:\n\
   ieee754\t\t  IEEE754 compatible\n\
-  zeda32\t\t\t  Zeda z80float library 32 bit format\n\
+  half\t\t\t  IEEE754 half precision (16 bit)\n\
+  single\t\t  IEEE754 single precision (32 bit)\n\
+  double\t\t  IEEE754 double precision (64 bit)\n\
+  zeda32\t\t  Zeda z80float library 32 bit format\n\
   math48\t\t  48 bit format from Math48 library\n\
 \n\
 Support for known undocumented instructions:\n\
@@ -649,13 +668,17 @@ md_atof (int type, char *litP, int *sizeP)
     {
     case 'f':
     case 'F':
+    case 's':
+    case 'S':
       if (str_to_float)
-        return str_to_float (litP, sizeP);
+	return str_to_float (litP, sizeP);
       break;
     case 'd':
     case 'D':
+    case 'r':
+    case 'R':
       if (str_to_double)
-        return str_to_double (litP, sizeP);
+	return str_to_double (litP, sizeP);
       break;
     }
   return ieee_md_atof (type, litP, sizeP, FALSE);
@@ -3255,6 +3278,7 @@ md_assemble (char *str)
     }
   else
     {
+      dwarf2_emit_insn (0);
       if ((*p) && (!ISSPACE (*p)))
         {
           if (*p != '.' || !(ins_ok & INS_EZ80) || !assemble_suffix (&p))
@@ -3669,4 +3693,22 @@ str_to_float48(char *litP, int *sizeP)
   for (i = 0; i < 40; i += 8)
     *litP++ = (char)(mantissa >> i);
   return NULL;
+}
+
+static const char *
+str_to_ieee754_h(char *litP, int *sizeP)
+{
+  return ieee_md_atof ('h', litP, sizeP, FALSE);
+}
+
+static const char *
+str_to_ieee754_s(char *litP, int *sizeP)
+{
+  return ieee_md_atof ('s', litP, sizeP, FALSE);
+}
+
+static const char *
+str_to_ieee754_d(char *litP, int *sizeP)
+{
+  return ieee_md_atof ('d', litP, sizeP, FALSE);
 }

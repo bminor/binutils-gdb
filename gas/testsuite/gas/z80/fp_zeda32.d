@@ -1,5 +1,5 @@
 #name: Zeda32 floating point numbers
-#as: -float=zeda32
+#as: -fp-s=zeda32
 #objdump: -s -j .data
 
 .*:[     ]+file format (coff)|(elf32)\-z80

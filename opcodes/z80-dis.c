@@ -738,7 +738,7 @@ suffix (struct buffer *buf, disassemble_info *info, const char *txt)
       || buf->data[1] == 0x5b)
     {
       /* Double prefix, or end of data.  */
-      info->fprintf_func (info->stream, "nop ;%s", txt);
+      info->fprintf_func (info->stream, ".db 0x%02x ; %s", (unsigned)buf->data[0], txt);
       buf->n_used = 1;
       return buf->n_used;
     }

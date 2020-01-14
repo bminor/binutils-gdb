@@ -96,7 +96,6 @@ extern void z80_cons_fix_new (fragS *, int, int, expressionS *);
 /* We allow single quotes to delimit character constants as
    well, but it is cleaner to handle that in tc-z80.c.  */
 #define SINGLE_QUOTE_STRINGS
-#define TC_STRING_ESCAPES 0
 
 /* An `.lcomm' directive with no explicit alignment parameter will
    use this macro to set P2VAR to the alignment that a request for

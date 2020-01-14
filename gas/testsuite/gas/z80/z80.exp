@@ -90,6 +90,8 @@ if [istarget z80-*-*] then {
     run_dump_test "ez80_adl_all"
 #test for eZ80 instructions with sufficies in ADL mode
     run_dump_test "ez80_adl_suf"
+#test for eZ80 opcode prefixes as multiple bytes before instruction
+    run_dump_test "ez80_pref_dis"
 # test for SDCC compatibility mode
     run_dump_test "sdcc"
 # test for colonless labels

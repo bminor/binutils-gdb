@@ -1,3 +1,18 @@
+2020-01-14  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25377
+	* config/tc-z80.c: Add support for half precision, single
+	precision and double precision floating point values.
+	* config/tc-z80.h b/gas/config/tc-z80.h: Disable string escapes.
+	* doc/as.texi: Add new z80 command line options.
+	* doc/c-z80.texi: Document new z80 command line options.
+	* testsuite/gas/z80/ez80_pref_dis.s: New test.
+	* testsuite/gas/z80/ez80_pref_dis.d: New test driver.
+	* testsuite/gas/z80/z80.exp: Run the new test.
+	* testsuite/gas/z80/fp_math48.d: Use correct command line option.
+	* testsuite/gas/z80/fp_zeda32.d: Likewise.
+	* testsuite/gas/z80/strings.d: Update expected output.
+
 2020-01-13  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-aarch64.c (f64mm, f32mm): Add sve as a feature
