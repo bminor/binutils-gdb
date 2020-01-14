@@ -1,3 +1,7 @@
+2020-01-14  Lili Cui <lili.cui@intel.com>
+
+	* testsuite/ld-i386/align-branch-1.d: Updated for i686-pc-elf.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	* po/BLD-POTFILES.in: Regenerate.

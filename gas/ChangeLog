@@ -1,3 +1,28 @@
+2020-01-14  Lili Cui <lili.cui@intel.com>
+
+	* testsuite/gas/i386/align-branch-1a.d: Updated for Darwin.
+	* testsuite/gas/i386/align-branch-1b.d: Likewise.
+	* testsuite/gas/i386/align-branch-1c.d: Likewise.
+	* testsuite/gas/i386/align-branch-1d.d: Likewise.
+	* testsuite/gas/i386/align-branch-1e.d: Likewise.
+	* testsuite/gas/i386/align-branch-1f.d: Likewise.
+	* testsuite/gas/i386/align-branch-1g.d: Likewise.
+	* testsuite/gas/i386/align-branch-1h.d: Likewise.
+	* testsuite/gas/i386/align-branch-1i.d: Likewise.
+	* testsuite/gas/i386/align-branch-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1a.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1b.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1c.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1d.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1e.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1f.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1g.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1h.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1i.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-5.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Skip x86-64-align-branch-2a,
+	x86-64-align-branch-2b and x86-64-align-branch-2c on Darwin.
+
 2020-01-14  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25377

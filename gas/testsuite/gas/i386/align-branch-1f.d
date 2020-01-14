@@ -20,7 +20,7 @@ Disassembly of section .text:
   18:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   1b:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   1e:	39 c5                	cmp    %eax,%ebp
-  20:	74 5c                	je     7e <foo\+0x7e>
+  20:	74 5c                	je     (0x)?7e( .*)?
   22:	89 73 f4             	mov    %esi,-0xc\(%ebx\)
   25:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   28:	89 7d f8             	mov    %edi,-0x8\(%ebp\)
@@ -32,9 +32,9 @@ Disassembly of section .text:
   3a:	5d                   	pop    %ebp
   3b:	5d                   	pop    %ebp
   3c:	5d                   	pop    %ebp
-  3d:	74 3f                	je     7e <foo\+0x7e>
+  3d:	74 3f                	je     (0x)?7e( .*)?
   3f:	5d                   	pop    %ebp
-  40:	74 3c                	je     7e <foo\+0x7e>
+  40:	74 3c                	je     (0x)?7e( .*)?
   42:	89 44 24 fc          	mov    %eax,-0x4\(%esp\)
   46:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   49:	89 7d f8             	mov    %edi,-0x8\(%ebp\)
@@ -44,10 +44,10 @@ Disassembly of section .text:
   55:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   58:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   5b:	5d                   	pop    %ebp
-  5c:	eb 27                	jmp    85 <foo\+0x85>
+  5c:	eb 27                	jmp    (0x)?85( .*)?
   5e:	66 90                	xchg   %ax,%ax
-  60:	eb 23                	jmp    85 <foo\+0x85>
-  62:	eb 21                	jmp    85 <foo\+0x85>
+  60:	eb 23                	jmp    (0x)?85( .*)?
+  62:	eb 21                	jmp    (0x)?85( .*)?
   64:	89 45 fc             	mov    %eax,-0x4\(%ebp\)
   67:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   6a:	89 7d f8             	mov    %edi,-0x8\(%ebp\)
@@ -57,10 +57,12 @@ Disassembly of section .text:
   76:	5d                   	pop    %ebp
   77:	5d                   	pop    %ebp
   78:	39 c5                	cmp    %eax,%ebp
-  7a:	74 02                	je     7e <foo\+0x7e>
-  7c:	eb 07                	jmp    85 <foo\+0x85>
+  7a:	74 02                	je     (0x)?7e( .*)?
+  7c:	eb 07                	jmp    (0x)?85( .*)?
+#...
   7e:	36 8b 45 f4          	mov    %ss:-0xc\(%ebp\),%eax
   82:	89 45 fc             	mov    %eax,-0x4\(%ebp\)
+#...
   85:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   8b:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   91:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
@@ -72,6 +74,6 @@ Disassembly of section .text:
   b1:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   b7:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   bd:	89 75 00             	mov    %esi,0x0\(%ebp\)
-  c0:	74 c3                	je     85 <foo\+0x85>
-  c2:	74 c1                	je     85 <foo\+0x85>
+  c0:	74 c3                	je     (0x)?85( .*)?
+  c2:	74 c1                	je     (0x)?85( .*)?
 #pass
