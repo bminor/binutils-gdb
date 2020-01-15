@@ -1,5 +1,11 @@
 2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* peXXigen.c (pe_is_repro): New function.
+	(_bfd_XX_print_private_bfd_data_common): Note timestamp is
+	actually a build hash if PE_IMAGE_DEBUG_TYPE_REPRO is present.
+
+2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* peXXigen.c (debug_type_names): Add names for new debug data type
 	values.
 

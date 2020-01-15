@@ -2746,6 +2746,71 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+static bfd_boolean
+pe_is_repro (bfd * abfd)
+{
+  pe_data_type *pe = pe_data (abfd);
+  struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
+  asection *section;
+  bfd_byte *data = 0;
+  bfd_size_type dataoff;
+  unsigned int i;
+  bfd_boolean res = FALSE;
+
+  bfd_vma addr = extra->DataDirectory[PE_DEBUG_DATA].VirtualAddress;
+  bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
+
+  if (size == 0)
+    return FALSE;
+
+  addr += extra->ImageBase;
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      if ((addr >= section->vma) && (addr < (section->vma + section->size)))
+	break;
+    }
+
+  if ((section == NULL)
+      || (!(section->flags & SEC_HAS_CONTENTS))
+      || (section->size < size))
+    {
+      return FALSE;
+    }
+
+  dataoff = addr - section->vma;
+
+  if (size > (section->size - dataoff))
+    {
+      return FALSE;
+    }
+
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return FALSE;
+    }
+
+  for (i = 0; i < size / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+    {
+      struct external_IMAGE_DEBUG_DIRECTORY *ext
+	= &((struct external_IMAGE_DEBUG_DIRECTORY *)(data + dataoff))[i];
+      struct internal_IMAGE_DEBUG_DIRECTORY idd;
+
+      _bfd_XXi_swap_debugdir_in (abfd, ext, &idd);
+
+      if (idd.Type == PE_IMAGE_DEBUG_TYPE_REPRO)
+        {
+          res = TRUE;
+          break;
+        }
+    }
+
+  free(data);
+
+  return res;
+}
+
 /* Print out the program headers.  */
 
 bfd_boolean
@@ -2777,11 +2842,21 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   PF (IMAGE_FILE_BYTES_REVERSED_HI, "big endian");
 #undef PF
 
-  /* ctime implies '\n'.  */
-  {
-    time_t t = pe->coff.timestamp;
-    fprintf (file, "\nTime/Date\t\t%s", ctime (&t));
-  }
+  /*
+    If a PE_IMAGE_DEBUG_TYPE_REPRO entry is present in the debug directory, the
+    timestamp is to be interpreted as the hash of a reproducible build.
+  */
+  if (pe_is_repro (abfd))
+    {
+      fprintf (file, "\nTime/Date\t\t%08lx", pe->coff.timestamp);
+      fprintf (file, "\t(This is a reproducible build file hash, not a timestamp)\n");
+    }
+  else
+    {
+      /* ctime implies '\n'.  */
+      time_t t = pe->coff.timestamp;
+      fprintf (file, "\nTime/Date\t\t%s", ctime (&t));
+    }
 
 #ifndef IMAGE_NT_OPTIONAL_HDR_MAGIC
 # define IMAGE_NT_OPTIONAL_HDR_MAGIC 0x10b
