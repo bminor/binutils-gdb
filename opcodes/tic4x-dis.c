@@ -51,8 +51,11 @@ typedef enum
 }
 indirect_t;
 
-static int tic4x_version = 0;
+static unsigned long tic4x_version = 0;
 static int tic4x_dp = 0;
+static tic4x_inst_t **optab = NULL;
+static tic4x_inst_t **optab_special = NULL;
+static const char *registernames[REG_TABLE_SIZE];
 
 static int
 tic4x_pc_offset (unsigned int op)
@@ -130,28 +133,24 @@ tic4x_print_str (struct disassemble_info *info, const char *str)
 static int
 tic4x_print_register (struct disassemble_info *info, unsigned long regno)
 {
-  static tic4x_register_t ** registertable = NULL;
   unsigned int i;
 
-  if (registertable == NULL)
+  if (registernames[REG_R0] == NULL)
     {
-      registertable = xmalloc (sizeof (tic4x_register_t *) * REG_TABLE_SIZE);
       for (i = 0; i < tic3x_num_registers; i++)
-	registertable[tic3x_registers[i].regno]
-	  = (tic4x_register_t *) (tic3x_registers + i);
+	registernames[tic3x_registers[i].regno] = tic3x_registers[i].name;
       if (IS_CPU_TIC4X (tic4x_version))
 	{
 	  /* Add C4x additional registers, overwriting
 	     any C3x registers if necessary.  */
 	  for (i = 0; i < tic4x_num_registers; i++)
-	    registertable[tic4x_registers[i].regno]
-	      = (tic4x_register_t *)(tic4x_registers + i);
+	    registernames[tic4x_registers[i].regno] = tic4x_registers[i].name;
 	}
     }
   if (regno > (IS_CPU_TIC4X (tic4x_version) ? TIC4X_REG_MAX : TIC3X_REG_MAX))
     return 0;
   if (info != NULL)
-    (*info->fprintf_func) (info->stream, "%s", registertable[regno]->name);
+    (*info->fprintf_func) (info->stream, "%s", registernames[regno]);
   return 1;
 }
 
@@ -687,61 +686,75 @@ tic4x_disassemble (unsigned long pc,
 		   unsigned long instruction,
 		   struct disassemble_info *info)
 {
-  static tic4x_inst_t **optable = NULL;
-  static tic4x_inst_t **optable_special = NULL;
   tic4x_inst_t *p;
   int i;
   unsigned long tic4x_oplevel;
 
-  tic4x_version = info->mach;
+  if (tic4x_version != info->mach)
+    {
+      tic4x_version = info->mach;
+      /* Don't stash anything from a previous call using a different
+	 machine.  */
+      if (optab)
+	{
+	  free (optab);
+	  optab = NULL;
+	}
+      if (optab_special)
+	{
+	  free (optab_special);
+	  optab_special = NULL;
+	}
+      registernames[REG_R0] = NULL;
+    }
 
   tic4x_oplevel  = (IS_CPU_TIC4X (tic4x_version)) ? OP_C4X : 0;
   tic4x_oplevel |= OP_C3X | OP_LPWR | OP_IDLE2 | OP_ENH;
 
-  if (optable == NULL)
+  if (optab == NULL)
     {
-      optable = xcalloc (sizeof (tic4x_inst_t *), (1 << TIC4X_HASH_SIZE));
+      optab = xcalloc (sizeof (tic4x_inst_t *), (1 << TIC4X_HASH_SIZE));
 
-      optable_special = xcalloc (sizeof (tic4x_inst_t *), TIC4X_SPESOP_SIZE);
+      optab_special = xcalloc (sizeof (tic4x_inst_t *), TIC4X_SPESOP_SIZE);
 
       /* Install opcodes in reverse order so that preferred
 	 forms overwrite synonyms.  */
       for (i = tic4x_num_insts - 1; i >= 0; i--)
-        tic4x_hash_opcode (optable, optable_special, &tic4x_insts[i],
+	tic4x_hash_opcode (optab, optab_special, &tic4x_insts[i],
 			   tic4x_oplevel);
 
       /* We now need to remove the insn that are special from the
-         "normal" optable, to make the disasm search this extra list
-         for them.  */
+	 "normal" optable, to make the disasm search this extra list
+	 for them.  */
       for (i = 0; i < TIC4X_SPESOP_SIZE; i++)
-        if (optable_special[i] != NULL)
-          optable[optable_special[i]->opcode >> (32 - TIC4X_HASH_SIZE)] = NULL;
+	if (optab_special[i] != NULL)
+	  optab[optab_special[i]->opcode >> (32 - TIC4X_HASH_SIZE)] = NULL;
     }
 
   /* See if we can pick up any loading of the DP register...  */
   if ((instruction >> 16) == 0x5070 || (instruction >> 16) == 0x1f70)
     tic4x_dp = EXTRU (instruction, 15, 0);
 
-  p = optable[instruction >> (32 - TIC4X_HASH_SIZE)];
+  p = optab[instruction >> (32 - TIC4X_HASH_SIZE)];
   if (p != NULL)
     {
       if (((instruction & p->opmask) == p->opcode)
-           && tic4x_print_op (NULL, instruction, p, pc))
-        tic4x_print_op (info, instruction, p, pc);
+	  && tic4x_print_op (NULL, instruction, p, pc))
+	tic4x_print_op (info, instruction, p, pc);
       else
-        (*info->fprintf_func) (info->stream, "%08lx", instruction);
+	(*info->fprintf_func) (info->stream, "%08lx", instruction);
     }
   else
     {
       for (i = 0; i<TIC4X_SPESOP_SIZE; i++)
-        if (optable_special[i] != NULL
-            && optable_special[i]->opcode == instruction)
-          {
-            (*info->fprintf_func)(info->stream, "%s", optable_special[i]->name);
-            break;
-          }
+	if (optab_special[i] != NULL
+	    && optab_special[i]->opcode == instruction)
+	  {
+	    (*info->fprintf_func)(info->stream, "%s", optab_special[i]->name);
+	    break;
+	  }
       if (i == TIC4X_SPESOP_SIZE)
-        (*info->fprintf_func) (info->stream, "%08lx", instruction);
+	(*info->fprintf_func) (info->stream, "%08lx", instruction);
     }
 
   /* Return size of insn in words.  */

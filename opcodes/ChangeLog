@@ -1,3 +1,13 @@
+2020-01-15  Alan Modra  <amodra@gmail.com>
+
+	* tic4x-dis.c (tic4x_version): Make unsigned long.
+	(optab, optab_special, registernames): New file scope vars.
+	(tic4x_print_register): Set up registernames rather than
+	malloc'd registertable.
+	(tic4x_disassemble): Delete optable and optable_special.  Use
+	optab and optab_special instead.  Throw away old optab,
+	optab_special and registernames when info->mach changes.
+
 2020-01-14  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25377
