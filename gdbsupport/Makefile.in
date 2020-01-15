@@ -688,6 +688,8 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
+override CXX += $(CXX_DIALECT)
+
 override CC := $(CXX)
 override CFLAGS := $(CXXFLAGS)
 
