@@ -1,3 +1,8 @@
+2020-01-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infcmd.c (post_create_inferior): Use get_thread_regcache
+	instead of get_current_regcache.
+
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/12535:

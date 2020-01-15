@@ -441,7 +441,8 @@ post_create_inferior (struct target_ops *target, int from_tty)
   thr->suspend.stop_pc = 0;
   try
     {
-      thr->suspend.stop_pc = regcache_read_pc (get_current_regcache ());
+      regcache *rc = get_thread_regcache (thr);
+      thr->suspend.stop_pc = regcache_read_pc (rc);
     }
   catch (const gdb_exception_error &ex)
     {
