@@ -24,6 +24,8 @@ AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
     -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd
 
+override CXX += $(CXX_DIALECT)
+
 override CC := $(CXX)
 override CFLAGS := $(CXXFLAGS)
 
