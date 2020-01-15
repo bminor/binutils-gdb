@@ -1,3 +1,8 @@
+2020-01-15  Lars Brinkhoff  <lars@nocrew.org>
+
+	PR 20694
+	* temulparams/pdp11.sh (TARGET_PAGE_SIZE): Set to 8192.
+
 2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new test.
