@@ -2630,7 +2630,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   asection *section;
   bfd_byte *data = 0;
   bfd_size_type dataoff;
-  unsigned int i;
+  unsigned int i, j;
 
   bfd_vma addr = extra->DataDirectory[PE_DEBUG_DATA].VirtualAddress;
   bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
@@ -2722,8 +2722,8 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 					       idd.SizeOfData, cvinfo))
 	    continue;
 
-	  for (i = 0; i < cvinfo->SignatureLength; i++)
-	    sprintf (&signature[i*2], "%02x", cvinfo->Signature[i] & 0xff);
+	  for (j = 0; j < cvinfo->SignatureLength; j++)
+	    sprintf (&signature[j*2], "%02x", cvinfo->Signature[j] & 0xff);
 
 	  /* xgettext:c-format */
 	  fprintf (file, _("(format %c%c%c%c signature %s age %ld)\n"),
@@ -2731,6 +2731,8 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 		   signature, cvinfo->Age);
 	}
     }
+
+  free(data);
 
   if (size % sizeof (struct external_IMAGE_DEBUG_DIRECTORY) != 0)
     fprintf (file,

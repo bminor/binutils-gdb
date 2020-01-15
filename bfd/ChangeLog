@@ -1,3 +1,8 @@
+2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* peXXigen.c (pe_print_debugdata): Fix the iteration variable for
+	inner loop.  Fix a memory leak.
+
 2020-01-30  Alan Modra  <amodra@gmail.com>
 
 	* coffgen.c (coff_real_object_p): Don't clear obj_coff_keep_syms
