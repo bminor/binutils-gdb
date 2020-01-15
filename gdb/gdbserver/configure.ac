@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(server.c)
-AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
+AC_CONFIG_HEADERS(gdbserver-config.h:gdbserver-config.in, [echo > stamp-h])
 
 AM_MAINTAINER_MODE
 

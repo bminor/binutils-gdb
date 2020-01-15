@@ -20,31 +20,7 @@
 #ifndef COMMON_COMMON_DEFS_H
 #define COMMON_COMMON_DEFS_H
 
-#ifdef GDBSERVER
-
-#include <build-gnulib-gdbserver/config.h>
-
-#undef PACKAGE_NAME
-#undef PACKAGE
-#undef PACKAGE_VERSION
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-
 #include <config.h>
-
-#else  /* GDBSERVER */
-
-#include <gdbsupport/support-config.h>
-
-#undef PACKAGE_NAME
-#undef PACKAGE
-#undef PACKAGE_VERSION
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-
-#include "gnulib/config.h"
-
-#endif	/* GDBSERVER */
 
 /* From:
     https://www.gnu.org/software/gnulib/manual/html_node/stdint_002eh.html

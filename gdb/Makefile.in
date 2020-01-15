@@ -563,7 +563,7 @@ CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config \
+GDB_CFLAGS = -I$(srcdir)/config.h -I. -I$(srcdir) -I$(srcdir)/config \
 	-DLOCALEDIR="\"$(localedir)\"" $(DEFS)
 
 # MH_CFLAGS, if defined, has host-dependent CFLAGS from the config directory.
@@ -1573,7 +1573,7 @@ DISTSTUFF = $(YYFILES)
 # All generated files which can be included by another file.
 generated_files = \
 	ada-lex.c \
-	config.h \
+	gdb-config.h \
 	jit-reader.h \
 	$(NAT_GENERATED_FILES) \
 	$(NM_H)
@@ -1974,9 +1974,9 @@ gdb-gdb.py: $(srcdir)/gdb-gdb.py.in
 gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
 	$(SHELL) config.status $@
 
-config.h: stamp-h ; @true
-stamp-h: $(srcdir)/config.in config.status
-	$(SHELL) config.status config.h
+gdb-config.h: stamp-h ; @true
+stamp-h: $(srcdir)/gdb-config.in config.status
+	$(SHELL) config.status gdb-config.h
 
 nm.h: stamp-nmh ; @true
 stamp-nmh: config.status

@@ -21,7 +21,6 @@
 
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/scoped_fd.h"
-#include "config.h"
 #include "gdbsupport/selftest.h"
 
 namespace selftests {

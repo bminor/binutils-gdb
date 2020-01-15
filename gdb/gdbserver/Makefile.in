@@ -120,7 +120,7 @@ INCSUPPORT = -I$(srcdir)/../.. -I../..
 # in those directories should be included with the subdirectory.
 # e.g.: "target/wait.h".
 #
-INCLUDE_CFLAGS = -I. -I${srcdir} \
+INCLUDE_CFLAGS = -I$(srcdir)/config.h -I. -I${srcdir} \
 	-I$(srcdir)/../regformats -I$(srcdir)/.. -I$(INCLUDE_DIR) \
 	$(INCGNU) $(INCSUPPORT)
 

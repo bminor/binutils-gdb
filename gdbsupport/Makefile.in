@@ -195,7 +195,7 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
-	$(LISP)config.in
+	$(LISP)support-config.in
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
 # *not* preserved.
@@ -346,7 +346,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I ../config
-AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
+AM_CPPFLAGS = -I$(srcdir)/config.h -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
     -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd
 
@@ -431,10 +431,10 @@ support-config.h: stamp-h1
 	@test -f $@ || rm -f stamp-h1
 	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
 
-stamp-h1: $(srcdir)/config.in $(top_builddir)/config.status
+stamp-h1: $(srcdir)/support-config.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status support-config.h
-$(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+$(srcdir)/support-config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@

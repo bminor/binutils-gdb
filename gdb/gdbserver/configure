@@ -2695,7 +2695,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-ac_config_headers="$ac_config_headers config.h:config.in"
+ac_config_headers="$ac_config_headers gdbserver-config.h:gdbserver-config.in"
 
 
 
@@ -11438,7 +11438,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
+    "gdbserver-config.h") CONFIG_HEADERS="$CONFIG_HEADERS gdbserver-config.h:gdbserver-config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
     "gdbdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gdbdepdir" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
@@ -11997,7 +11997,7 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
 
   case $ac_file$ac_mode in
-    "config.h":H) echo > stamp-h ;;
+    "gdbserver-config.h":H) echo > stamp-h ;;
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
     "gdbdepdir":C)
   for subdir in ${CONFIG_SRC_SUBDIR}

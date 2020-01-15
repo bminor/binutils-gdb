@@ -20,7 +20,7 @@
 AUTOMAKE_OPTIONS = no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I ../config
 
-AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
+AM_CPPFLAGS = -I$(srcdir)/config.h -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
     -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd
 
