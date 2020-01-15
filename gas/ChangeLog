@@ -1,3 +1,7 @@
+2020-01-15  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt: Add sparc-*-freebsd case.
+
 2019-08-22  Kyrylo Tkachov <kyrylo.tkachov@arm.com>
 
 	Backport from mainline

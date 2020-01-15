@@ -393,6 +393,7 @@ case ${generic_target} in
 
   sparc-*-linux-*)			fmt=elf em=linux ;;
   sparc-*-solaris*)			fmt=elf em=solaris ;;
+  sparc-*-freebsd*)			fmt=elf em=freebsd ;;
   sparc-*-*bsd*)			fmt=elf em=nbsd ;;
 
   spu-*-elf)				fmt=elf ;;
