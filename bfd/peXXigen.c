@@ -2603,7 +2603,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
   return TRUE;
 }
 
-#define IMAGE_NUMBEROF_DEBUG_TYPES 12
+#define IMAGE_NUMBEROF_DEBUG_TYPES 17
 
 static char * debug_type_names[IMAGE_NUMBEROF_DEBUG_TYPES] =
 {
@@ -2619,6 +2619,11 @@ static char * debug_type_names[IMAGE_NUMBEROF_DEBUG_TYPES] =
   "Borland",
   "Reserved",
   "CLSID",
+  "Feature",
+  "CoffGrp",
+  "ILTCG",
+  "MPX",
+  "Repro",
 };
 
 static bfd_boolean

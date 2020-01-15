@@ -157,6 +157,11 @@ struct internal_IMAGE_DEBUG_DIRECTORY
 #define PE_IMAGE_DEBUG_TYPE_BORLAND          9
 #define PE_IMAGE_DEBUG_TYPE_RESERVED10       10
 #define PE_IMAGE_DEBUG_TYPE_CLSID            11
+#define PE_IMAGE_DEBUG_TYPE_VC_FEATURE       12
+#define PE_IMAGE_DEBUG_TYPE_POGO             13
+#define PE_IMAGE_DEBUG_TYPE_ILTCG            14
+#define PE_IMAGE_DEBUG_TYPE_MPX              15
+#define PE_IMAGE_DEBUG_TYPE_REPRO            16
 
 /* Extra structure for a codeview debug record */
 #define CV_INFO_SIGNATURE_LENGTH 16

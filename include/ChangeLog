@@ -1,3 +1,9 @@
+2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* coff/internal.h (PE_IMAGE_DEBUG_TYPE_VC_FEATURE)
+	(PE_IMAGE_DEBUG_TYPE_POGO, PE_IMAGE_DEBUG_TYPE_ILTCG)
+	(PE_IMAGE_DEBUG_TYPE_MPX, PE_IMAGE_DEBUG_TYPE_REPRO): Add.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.34 branch created.
