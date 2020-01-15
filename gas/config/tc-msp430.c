@@ -275,21 +275,21 @@ target_is_430xv2 (void)
   return selected_isa == MSP_ISA_430Xv2;
 }
 
-/* Generate an absolute 16-bit relocation.
-   For the 430X we generate a relocation without linker range checking
-    if the value is being used in an extended (ie 20-bit) instruction,
-    otherwise if have a shifted expression we use a HI reloc.
+/* Generate an absolute 16-bit relocation, for 430 (!extended_op) instructions
+   only.
+   For the 430X we generate a 430 relocation only for the case where part of an
+   expression is being extracted (e.g. #hi(EXP), #lo(EXP). Otherwise generate
+   a 430X relocation.
    For the 430 we generate a relocation without assembler range checking
-    if we are handling an immediate value or a byte-width instruction.  */
+   if we are handling an immediate value or a byte-width instruction.  */
 
 #undef  CHECK_RELOC_MSP430
 #define CHECK_RELOC_MSP430(OP)				\
   (target_is_430x ()					\
-  ? (extended_op					\
-     ? BFD_RELOC_16					\
-     : ((OP).vshift == 1)				\
-     ? BFD_RELOC_MSP430_ABS_HI16			\
-     : BFD_RELOC_MSP430X_ABS16)				\
+   ? ((OP).expp == MSP_EXPP_ALL				\
+       ? BFD_RELOC_MSP430X_ABS16			\
+       : ((OP).vshift == 1				\
+	  ? BFD_RELOC_MSP430_ABS_HI16 : BFD_RELOC_16))	\
    : ((imm_op || byte_op)				\
       ? BFD_RELOC_MSP430_16_BYTE : BFD_RELOC_MSP430_16))
 
@@ -1909,13 +1909,15 @@ msp430_srcoperand (struct msp430_operand_s * op,
       char *h = l;
       int vshift = -1;
       int rval = 0;
+      /* Use all parts of the constant expression by default.  */
+      enum msp430_expp_e expp = MSP_EXPP_ALL;
 
       /* Check if there is:
 	 llo(x) - least significant 16 bits, x &= 0xffff
 	 lhi(x) - x = (x >> 16) & 0xffff,
 	 hlo(x) - x = (x >> 32) & 0xffff,
 	 hhi(x) - x = (x >> 48) & 0xffff
-	 The value _MUST_ be constant expression: #hlo(1231231231).  */
+	 The value _MUST_ be an immediate expression: #hlo(1231231231).  */
 
       *imm_op = TRUE;
 
@@ -1923,31 +1925,37 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	{
 	  vshift = 0;
 	  rval = 3;
+	  expp = MSP_EXPP_LLO;
 	}
       else if (strncasecmp (h, "#lhi(", 5) == 0)
 	{
 	  vshift = 1;
 	  rval = 3;
+	  expp = MSP_EXPP_LHI;
 	}
       else if (strncasecmp (h, "#hlo(", 5) == 0)
 	{
 	  vshift = 2;
 	  rval = 3;
+	  expp = MSP_EXPP_HLO;
 	}
       else if (strncasecmp (h, "#hhi(", 5) == 0)
 	{
 	  vshift = 3;
 	  rval = 3;
+	  expp = MSP_EXPP_HHI;
 	}
       else if (strncasecmp (h, "#lo(", 4) == 0)
 	{
 	  vshift = 0;
 	  rval = 2;
+	  expp = MSP_EXPP_LO;
 	}
       else if (strncasecmp (h, "#hi(", 4) == 0)
 	{
 	  vshift = 1;
 	  rval = 2;
+	  expp = MSP_EXPP_HI;
 	}
 
       op->reg = 0;		/* Reg PC.  */
@@ -1956,6 +1964,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       __tl = h + 1 + rval;
       op->mode = OP_EXP;
       op->vshift = vshift;
+      op->expp = expp;
 
       end = parse_exp (__tl, &(op->exp));
       if (end != NULL && *end != 0 && *end != ')' )
@@ -2167,6 +2176,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	}
       op->mode = OP_EXP;
       op->vshift = 0;
+      op->expp = MSP_EXPP_ALL;
       if (op->exp.X_op == O_constant)
 	{
 	  int x = op->exp.X_add_number;
@@ -2275,6 +2285,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       *h = 0;
       op->mode = OP_EXP;
       op->vshift = 0;
+      op->expp = MSP_EXPP_ALL;
       end = parse_exp (__tl, &(op->exp));
       if (end != NULL && *end != 0)
 	{
@@ -2348,6 +2359,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
   op->am = (*l == '-' ? 3 : 1);
   op->ol = 1;
   op->vshift = 0;
+  op->expp = MSP_EXPP_ALL;
   __tl = l;
   end = parse_exp (__tl, &(op->exp));
   if (end != NULL && * end != 0)
@@ -2382,6 +2394,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
       op->am = 1;
       op->ol = 1;
       op->vshift = 0;
+      op->expp = MSP_EXPP_ALL;
       (void) parse_exp (__tl, &(op->exp));
 
       if (op->exp.X_op != O_constant || op->exp.X_add_number != 0)

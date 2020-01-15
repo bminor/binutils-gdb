@@ -1,3 +1,8 @@
+2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new test.
+	* testsuite/ld-msp430-elf/reloc-lo-430x.s: New test.
+
 2020-01-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/ambiguousv1b.d: Adjust expected output.

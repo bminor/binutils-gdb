@@ -52,4 +52,5 @@ if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "attr-430x-large-lower-good"
     run_dump_test "attr-430x-large-any-bad"
     run_dump_test "attr-430x-large-any-good"
+    run_dump_test "reloc-lo-430x"
 }

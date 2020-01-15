@@ -1,3 +1,8 @@
+2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* opcode/msp430.h (enum msp430_expp_e): New.
+	(struct msp430_operand_s): Add expp member to struct.
+
 2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
 	* elf/arc-cpu.def: Update ARC cpu list.

@@ -1,3 +1,16 @@
+2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (CHECK_RELOC_MSP430): Always generate 430X
+	relocations when the target is 430X, except when extracting part of an
+	expression.
+	(msp430_srcoperand): Adjust comment.
+	Initialize the expp member of the msp430_operand_s struct as
+	appropriate.
+	(msp430_dstoperand): Likewise.
+	* testsuite/gas/msp430/msp430.exp: Run new test.
+	* testsuite/gas/msp430/reloc-lo-430x.d: New test.
+	* testsuite/gas/msp430/reloc-lo-430x.s: New test.
+
 2020-01-15  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt: Add sparc-*-freebsd case.
