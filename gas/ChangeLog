@@ -1,3 +1,13 @@
+2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25376
+	* config/tc-arm.c (mve_ext, mve_fp_ext): Use CORE_HIGH.
+	(armv8_1m_main_ext_table): Use CORE_HIGH for mve.
+	* testsuite/arm/armv8_1-m-fpu-mve-1.s: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-1.d: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-2.s: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-2.d: New.
+
 2020-01-16  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (match_template): Drop found_cpu_match local

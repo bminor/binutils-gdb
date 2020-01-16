@@ -77,6 +77,8 @@
 #define ARM_EXT2_BF16	     0x00020000 /* ARMv8 bfloat16.		     */
 #define ARM_EXT2_I8MM	     0x00040000 /* ARMv8.6A i8mm.		     */
 #define ARM_EXT2_CRC	     0x00080000	/* ARMv8 CRC32 */
+#define ARM_EXT2_MVE	     0x00100000	/* MVE Integer extension.	   */
+#define ARM_EXT2_MVE_FP	     0x00200000	/* MVE Floating Point extension.   */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -107,8 +109,6 @@
 #define FPU_VFP_EXT_ARMV8xD  0x00002000	/* Single-precision FP for ARMv8.  */
 #define FPU_NEON_EXT_RDMA    0x00001000	/* v8.1 Adv.SIMD extensions.	   */
 #define FPU_NEON_EXT_DOTPROD 0x00000800	/* Dot Product extension.	   */
-#define FPU_MVE		     0x00000400 /* MVE Integer extension.	   */
-#define FPU_MVE_FP	     0x00000200 /* MVE Floating Point extension.   */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
@@ -372,9 +372,8 @@
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
 #define FPU_NONE	ARM_FEATURE_LOW (0, 0)
-#define ARM_ANY		ARM_FEATURE (-1, -1, 0)	/* Any basic core.  */
+#define ARM_ANY		ARM_FEATURE (-1, -1 & ~ (ARM_EXT2_MVE | ARM_EXT2_MVE_FP), 0)	/* Any basic core.  */
 #define FPU_ANY		ARM_FEATURE_COPROC (-1) /* Any FPU.  */
-#define ARM_FEATURE_ALL	ARM_FEATURE (-1, -1, -1)/* All CPU and FPU features.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
    ISA is Thumb-2.  */

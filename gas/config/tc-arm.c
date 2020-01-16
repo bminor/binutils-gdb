@@ -318,9 +318,9 @@ static const arm_feature_set fpu_neon_ext_v1 =
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
 static const arm_feature_set mve_ext =
-  ARM_FEATURE_COPROC (FPU_MVE);
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE);
 static const arm_feature_set mve_fp_ext =
-  ARM_FEATURE_COPROC (FPU_MVE_FP);
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP);
 #ifdef OBJ_ELF
 static const arm_feature_set fpu_vfp_fp16 =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
@@ -31298,12 +31298,11 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
   ARM_ADD ("fp.dp",
 	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
 			FPU_VFP_V5D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
-  ARM_EXT ("mve", ARM_FEATURE_COPROC (FPU_MVE),
-	   ARM_FEATURE_COPROC (FPU_MVE | FPU_MVE_FP)),
+  ARM_EXT ("mve", ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
+	   ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE | ARM_EXT2_MVE_FP)),
   ARM_ADD ("mve.fp",
-	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
-			FPU_MVE | FPU_MVE_FP | FPU_VFP_V5_SP_D16 |
-			FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
+	   ARM_FEATURE (0, ARM_EXT2_FP16_INST | ARM_EXT2_MVE | ARM_EXT2_MVE_FP,
+			FPU_VFP_V5_SP_D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 

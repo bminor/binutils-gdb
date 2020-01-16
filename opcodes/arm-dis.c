@@ -810,7 +810,7 @@ static const struct sopcode32 coprocessor_opcodes[] =
   /* Floating point coprocessor (VFP) instructions.  */
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ee00a10, 0x0fff0fff, "vmsr%c\tfpsid, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD | FPU_MVE),
+  {ANY, ARM_FEATURE (0, ARM_EXT2_V8_1M_MAIN, FPU_VFP_EXT_V1xD),
     0x0ee10a10, 0x0fff0fff, "vmsr%c\tfpscr, %12-15r"},
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0x0ee20a10, 0x0fff0fff, "vmsr%c\tfpscr_nzcvqc, %12-15r"},
@@ -826,9 +826,9 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0ee90a10, 0x0fff0fff, "vmsr%c\tfpinst, %12-15r\t@ Impl def"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0eea0a10, 0x0fff0fff, "vmsr%c\tfpinst2, %12-15r\t@ Impl def"},
-  {ANY, ARM_FEATURE_COPROC (FPU_MVE),
+  {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
     0x0eec0a10, 0x0fff0fff, "vmsr%c\tvpr, %12-15r"},
-  {ANY, ARM_FEATURE_COPROC (FPU_MVE),
+  {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
     0x0eed0a10, 0x0fff0fff, "vmsr%c\tp0, %12-15r"},
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0x0eee0a10, 0x0fff0fff, "vmsr%c\tfpcxt_ns, %12-15r"},
@@ -838,7 +838,7 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0ef00a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpsid"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ef1fa10, 0x0fffffff, "vmrs%c\tAPSR_nzcv, fpscr"},
-  {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD | FPU_MVE),
+  {ANY, ARM_FEATURE (0, ARM_EXT2_V8_1M_MAIN, FPU_VFP_EXT_V1xD),
     0x0ef10a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpscr"},
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0x0ef20a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpscr_nzcvqc"},
@@ -854,9 +854,9 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0ef90a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpinst\t@ Impl def"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0efa0a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpinst2\t@ Impl def"},
-  {ANY, ARM_FEATURE_COPROC (FPU_MVE),
+  {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
     0x0efc0a10, 0x0fff0fff, "vmrs%c\t%12-15r, vpr"},
-  {ANY, ARM_FEATURE_COPROC (FPU_MVE),
+  {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
     0x0efd0a10, 0x0fff0fff, "vmrs%c\t%12-15r, p0"},
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0x0efe0a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpcxt_ns"},
@@ -2154,624 +2154,624 @@ static const struct mopcode32 mve_opcodes[] =
 {
   /* MVE.  */
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPST,
    0xfe310f4d, 0xffbf1fff,
    "vpst%i"
   },
 
   /* Floating point VPT T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VPT_FP_T1,
    0xee310f00, 0xefb10f50,
    "vpt%i.f%28s\t%n, %17-19Q, %1-3,5Q"},
   /* Floating point VPT T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VPT_FP_T2,
    0xee310f40, 0xefb10f50,
    "vpt%i.f%28s\t%n, %17-19Q, %0-3Z"},
 
   /* Vector VPT T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T1,
    0xfe010f00, 0xff811f51,
    "vpt%i.i%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VPT T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T2,
    0xfe010f01, 0xff811f51,
    "vpt%i.u%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VPT T3.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T3,
    0xfe011f00, 0xff811f50,
    "vpt%i.s%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VPT T4.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T4,
    0xfe010f40, 0xff811f70,
    "vpt%i.i%20-21s\t%n, %17-19Q, %0-3Z"},
   /* Vector VPT T5.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T5,
    0xfe010f60, 0xff811f70,
    "vpt%i.u%20-21s\t%n, %17-19Q, %0-3Z"},
   /* Vector VPT T6.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPT_VEC_T6,
    0xfe011f40, 0xff811f50,
    "vpt%i.s%20-21s\t%n, %17-19Q, %0-3Z"},
 
   /* Vector VBIC immediate.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VBIC_IMM,
    0xef800070, 0xefb81070,
    "vbic%v.i%8-11s\t%13-15,22Q, %E"},
 
   /* Vector VBIC register.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VBIC_REG,
    0xef100150, 0xffb11f51,
    "vbic%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VABAV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VABAV,
    0xee800f01, 0xefc10f51,
    "vabav%v.%u%20-21s\t%12-15r, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VABD floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VABD_FP,
    0xff200d40, 0xffa11f51,
    "vabd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VABD.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VABD_VEC,
    0xef000740, 0xef811f51,
    "vabd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VABS floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VABS_FP,
    0xFFB10740, 0xFFB31FD1,
    "vabs%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
   /* Vector VABS.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VABS_VEC,
    0xffb10340, 0xffb31fd1,
    "vabs%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VADD floating point T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VADD_FP_T1,
    0xef000d40, 0xffa11f51,
    "vadd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
   /* Vector VADD floating point T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VADD_FP_T2,
    0xee300f40, 0xefb11f70,
    "vadd%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
   /* Vector VADD T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VADD_VEC_T1,
    0xef000840, 0xff811f51,
    "vadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
   /* Vector VADD T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VADD_VEC_T2,
    0xee010f40, 0xff811f70,
    "vadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VADDLV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VADDLV,
    0xee890f00, 0xef8f1fd1,
    "vaddlv%5A%v.%u32\t%13-15l, %20-22h, %1-3Q"},
 
   /* Vector VADDV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VADDV,
    0xeef10f00, 0xeff31fd1,
    "vaddv%5A%v.%u%18-19s\t%13-15l, %1-3Q"},
 
   /* Vector VADC.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VADC,
    0xee300f00, 0xffb10f51,
    "vadc%12I%v.i32\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VAND.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VAND,
    0xef000150, 0xffb11f51,
    "vand%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VBRSR register.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VBRSR,
    0xfe011e60, 0xff811f70,
    "vbrsr%v.%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VCADD floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCADD_FP,
    0xfc800840, 0xfea11f51,
    "vcadd%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%24o"},
 
   /* Vector VCADD.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCADD_VEC,
    0xfe000f00, 0xff810f51,
    "vcadd%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%12o"},
 
   /* Vector VCLS.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCLS,
    0xffb00440, 0xffb31fd1,
    "vcls%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCLZ.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCLZ,
    0xffb004c0, 0xffb31fd1,
    "vclz%v.i%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCMLA.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCMLA_FP,
    0xfc200840, 0xfe211f51,
    "vcmla%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%23-24o"},
 
   /* Vector VCMP floating point T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCMP_FP_T1,
    0xee310f00, 0xeff1ef50,
    "vcmp%v.f%28s\t%n, %17-19Q, %1-3,5Q"},
 
   /* Vector VCMP floating point T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCMP_FP_T2,
    0xee310f40, 0xeff1ef50,
    "vcmp%v.f%28s\t%n, %17-19Q, %0-3Z"},
 
   /* Vector VCMP T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T1,
    0xfe010f00, 0xffc1ff51,
    "vcmp%v.i%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VCMP T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T2,
    0xfe010f01, 0xffc1ff51,
    "vcmp%v.u%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VCMP T3.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T3,
    0xfe011f00, 0xffc1ff50,
    "vcmp%v.s%20-21s\t%n, %17-19Q, %1-3,5Q"},
   /* Vector VCMP T4.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T4,
    0xfe010f40, 0xffc1ff70,
    "vcmp%v.i%20-21s\t%n, %17-19Q, %0-3Z"},
   /* Vector VCMP T5.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T5,
    0xfe010f60, 0xffc1ff70,
    "vcmp%v.u%20-21s\t%n, %17-19Q, %0-3Z"},
   /* Vector VCMP T6.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCMP_VEC_T6,
    0xfe011f40, 0xffc1ff50,
    "vcmp%v.s%20-21s\t%n, %17-19Q, %0-3Z"},
 
   /* Vector VDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VDUP,
    0xeea00b10, 0xffb10f5f,
    "vdup%v.%5,22s\t%17-19,7Q, %12-15r"},
 
   /* Vector VEOR.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VEOR,
    0xff000150, 0xffd11f51,
    "veor%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VFMA, vector * scalar.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VFMA_FP_SCALAR,
    0xee310e40, 0xefb11f70,
    "vfma%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VFMA floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VFMA_FP,
    0xef000c50, 0xffa11f51,
    "vfma%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VFMS floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VFMS_FP,
    0xef200c50, 0xffa11f51,
    "vfms%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VFMAS, vector * scalar.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VFMAS_FP_SCALAR,
    0xee311e40, 0xefb11f70,
    "vfmas%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VHADD T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VHADD_T1,
    0xef000040, 0xef811f51,
    "vhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VHADD T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VHADD_T2,
    0xee000f40, 0xef811f70,
    "vhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VHSUB T1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VHSUB_T1,
    0xef000240, 0xef811f51,
    "vhsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VHSUB T2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VHSUB_T2,
    0xee001f40, 0xef811f70,
    "vhsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VCMUL.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCMUL_FP,
    0xee300e00, 0xefb10f50,
    "vcmul%v.f%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%0,12o"},
 
    /* Vector VCTP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VCTP,
    0xf000e801, 0xffc0ffff,
    "vctp%v.%20-21s\t%16-19r"},
 
   /* Vector VDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VDUP,
    0xeea00b10, 0xffb10f5f,
    "vdup%v.%5,22s\t%17-19,7Q, %12-15r"},
 
   /* Vector VRHADD.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRHADD,
    0xef000140, 0xef811f51,
    "vrhadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VCVT.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCVT_FP_FIX_VEC,
    0xef800c50, 0xef801cd1,
    "vcvt%v.%s\t%13-15,22Q, %1-3,5Q, #%16-21k"},
 
   /* Vector VCVT.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCVT_BETWEEN_FP_INT,
    0xffb30640, 0xffb31e51,
    "vcvt%v.%s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCVT between single and half-precision float, bottom half.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCVT_FP_HALF_FP,
    0xee3f0e01, 0xefbf1fd1,
    "vcvtb%v.%s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCVT between single and half-precision float, top half.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCVT_FP_HALF_FP,
    0xee3f1e01, 0xefbf1fd1,
    "vcvtt%v.%s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VCVT.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VCVT_FROM_FP_TO_INT,
    0xffb30040, 0xffb31c51,
    "vcvt%m%v.%s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VDDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VDDUP,
    0xee011f6e, 0xff811f7e,
    "vddup%v.u%20-21s\t%13-15,22Q, %17-19l, #%0,7u"},
 
   /* Vector VDWDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VDWDUP,
    0xee011f60, 0xff811f70,
    "vdwdup%v.u%20-21s\t%13-15,22Q, %17-19l, %1-3h, #%0,7u"},
 
   /* Vector VHCADD.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VHCADD,
    0xee000f00, 0xff810f51,
    "vhcadd%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q, #%12o"},
 
   /* Vector VIWDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VIWDUP,
    0xee010f60, 0xff811f70,
    "viwdup%v.u%20-21s\t%13-15,22Q, %17-19l, %1-3h, #%0,7u"},
 
   /* Vector VIDUP.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VIDUP,
    0xee010f6e, 0xff811f7e,
    "vidup%v.u%20-21s\t%13-15,22Q, %17-19l, #%0,7u"},
 
   /* Vector VLD2.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLD2,
    0xfc901e00, 0xff901e5f,
    "vld2%5d.%7-8s\t%B, [%16-19r]%w"},
 
   /* Vector VLD4.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLD4,
    0xfc901e01, 0xff901e1f,
    "vld4%5-6d.%7-8s\t%B, [%16-19r]%w"},
 
   /* Vector VLDRB gather load.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRB_GATHER_T1,
    0xec900e00, 0xefb01e50,
    "vldrb%v.%u%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q]"},
 
   /* Vector VLDRH gather load.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRH_GATHER_T2,
    0xec900e10, 0xefb01e50,
    "vldrh%v.%u%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VLDRW gather load.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRW_GATHER_T3,
    0xfc900f40, 0xffb01fd0,
    "vldrw%v.u32\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VLDRD gather load.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRD_GATHER_T4,
    0xec900fd0, 0xefb01fd0,
    "vldrd%v.u64\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VLDRW gather load.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRW_GATHER_T5,
    0xfd101e00, 0xff111f00,
    "vldrw%v.u32\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
 
   /* Vector VLDRD gather load, variant T6.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRD_GATHER_T6,
    0xfd101f00, 0xff111f00,
    "vldrd%v.u64\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
 
   /* Vector VLDRB.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRB_T1,
    0xec100e00, 0xee581e00,
    "vldrb%v.%u%7-8s\t%13-15Q, %d"},
 
   /* Vector VLDRH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRH_T2,
    0xec180e00, 0xee581e00,
    "vldrh%v.%u%7-8s\t%13-15Q, %d"},
 
   /* Vector VLDRB unsigned, variant T5.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRB_T5,
    0xec101e00, 0xfe101f80,
    "vldrb%v.u8\t%13-15,22Q, %d"},
 
   /* Vector VLDRH unsigned, variant T6.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRH_T6,
    0xec101e80, 0xfe101f80,
    "vldrh%v.u16\t%13-15,22Q, %d"},
 
   /* Vector VLDRW unsigned, variant T7.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VLDRW_T7,
    0xec101f00, 0xfe101f80,
    "vldrw%v.u32\t%13-15,22Q, %d"},
 
   /* Vector VMAX.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMAX,
    0xef000640, 0xef811f51,
    "vmax%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMAXA.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMAXA,
    0xee330e81, 0xffb31fd1,
    "vmaxa%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VMAXNM floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMAXNM_FP,
    0xff000f50, 0xffa11f51,
    "vmaxnm%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMAXNMA floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMAXNMA_FP,
    0xee3f0e81, 0xefbf1fd1,
    "vmaxnma%v.f%28s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VMAXNMV floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMAXNMV_FP,
    0xeeee0f00, 0xefff0fd1,
    "vmaxnmv%v.f%28s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMAXNMAV floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMAXNMAV_FP,
    0xeeec0f00, 0xefff0fd1,
    "vmaxnmav%v.f%28s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMAXV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMAXV,
    0xeee20f00, 0xeff30fd1,
    "vmaxv%v.%u%18-19s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMAXAV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMAXAV,
    0xeee00f00, 0xfff30fd1,
    "vmaxav%v.s%18-19s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMIN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMIN,
    0xef000650, 0xef811f51,
    "vmin%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMINA.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMINA,
    0xee331e81, 0xffb31fd1,
    "vmina%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VMINNM floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMINNM_FP,
    0xff200f50, 0xffa11f51,
    "vminnm%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMINNMA floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMINNMA_FP,
    0xee3f1e81, 0xefbf1fd1,
    "vminnma%v.f%28s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VMINNMV floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMINNMV_FP,
    0xeeee0f80, 0xefff0fd1,
    "vminnmv%v.f%28s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMINNMAV floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMINNMAV_FP,
    0xeeec0f80, 0xefff0fd1,
    "vminnmav%v.f%28s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMINV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMINV,
    0xeee20f80, 0xeff30fd1,
    "vminv%v.%u%18-19s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMINAV.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMINAV,
    0xeee00f80, 0xfff30fd1,
    "vminav%v.s%18-19s\t%12-15r, %1-3,5Q"},
 
   /* Vector VMLA.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLA,
    0xee010e40, 0xef811f70,
    "vmla%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VMLALDAV.  Note must appear before VMLADAV due to instruction
      opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLALDAV,
    0xee801e00, 0xef801f51,
    "vmlaldav%5Ax%v.%u%16s\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLALDAV,
    0xee800e00, 0xef801f51,
    "vmlalv%5A%v.%u%16s\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLAV T1 variant, same as VMLADAV but with X == 0.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLADAV_T1,
    0xeef00e00, 0xeff01f51,
    "vmlav%5A%v.%u%16s\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLAV T2 variant, same as VMLADAV but with X == 0.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLADAV_T2,
    0xeef00f00, 0xeff11f51,
    "vmlav%5A%v.%u8\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLADAV T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLADAV_T1,
    0xeef01e00, 0xeff01f51,
    "vmladav%5Ax%v.%u%16s\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLADAV T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLADAV_T2,
    0xeef01f00, 0xeff11f51,
    "vmladav%5Ax%v.%u8\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLAS.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLAS,
    0xee011e40, 0xef811f70,
    "vmlas%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VRMLSLDAVH.  Note must appear before VMLSDAV due to instruction
      opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRMLSLDAVH,
    0xfe800e01, 0xff810f51,
    "vrmlsldavh%5A%X%v.s32\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLSLDAV.  Note must appear before VMLSDAV due to instruction
      opcdoe aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLSLDAV,
    0xee800e01, 0xff800f51,
    "vmlsldav%5A%X%v.%u%16s\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLSDAV T1 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLSDAV_T1,
    0xeef00e01, 0xfff00f51,
    "vmlsdav%5A%X%v.s%16s\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMLSDAV T2 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMLSDAV_T2,
    0xfef00e01, 0xfff10f51,
    "vmlsdav%5A%X%v.s8\t%13-15l, %17-19,7Q, %1-3Q"},
 
   /* Vector VMOV between gpr and half precision register, op == 0.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMOV_HFP_TO_GP,
    0xee000910, 0xfff00f7f,
    "vmov.f16\t%7,16-19F, %12-15r"},
 
   /* Vector VMOV between gpr and half precision register, op == 1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMOV_HFP_TO_GP,
    0xee100910, 0xfff00f7f,
    "vmov.f16\t%12-15r, %7,16-19F"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMOV_GP_TO_VEC_LANE,
    0xee000b10, 0xff900f1f,
    "vmov%c.%5-6,21-22s\t%17-19,7Q[%N], %12-15r"},
@@ -2779,7 +2779,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VORR immediate to vector.
      NOTE: MVE_VORR_IMM must appear in the table
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VORR_IMM,
    0xef800050, 0xefb810f0,
    "vorr%v.i%8-11s\t%13-15,22Q, %E"},
@@ -2787,7 +2787,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VQSHL T2 Variant.
      NOTE: MVE_VQSHL_T2 must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHL_T2,
    0xef800750, 0xef801fd1,
    "vqshl%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2796,7 +2796,7 @@ static const struct mopcode32 mve_opcodes[] =
      NOTE: MVE_VQSHL_T2 must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHLU_T3,
    0xff800650, 0xff801fd1,
    "vqshlu%v.s%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2804,7 +2804,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VRSHR
      NOTE: MVE_VRSHR must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRSHR,
    0xef800250, 0xef801fd1,
    "vrshr%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2812,7 +2812,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VSHL.
      NOTE: MVE_VSHL must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHL_T1,
    0xef800550, 0xff801fd1,
    "vshl%v.i%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2820,7 +2820,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VSHR
      NOTE: MVE_VSHR must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHR,
    0xef800050, 0xef801fd1,
    "vshr%v.%u%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2828,7 +2828,7 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VSLI
      NOTE: MVE_VSLI must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSLI,
    0xff800550, 0xff801fd1,
    "vsli%v.%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
@@ -2836,163 +2836,163 @@ static const struct mopcode32 mve_opcodes[] =
   /* Vector VSRI
      NOTE: MVE_VSRI must appear in the table before
      before MVE_VMOV_IMM_TO_VEC due to opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSRI,
    0xff800450, 0xff801fd1,
    "vsri%v.%19-21s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VMOV immediate to vector,
      undefinded for cmode == 1111 */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMVN_IMM, 0xef800f70, 0xefb81ff0, UNDEFINED_INSTRUCTION},
 
   /* Vector VMOV immediate to vector,
      cmode == 1101 */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV_IMM_TO_VEC, 0xef800d50, 0xefb81fd0,
    "vmov%v.%5,8-11s\t%13-15,22Q, %E"},
 
   /* Vector VMOV immediate to vector.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV_IMM_TO_VEC,
    0xef800050, 0xefb810d0,
    "vmov%v.%5,8-11s\t%13-15,22Q, %E"},
 
   /* Vector VMOV two 32-bit lanes to two gprs, idx = 0.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_VEC_LANE_TO_GP,
    0xec000f00, 0xffb01ff0,
    "vmov%c\t%0-3r, %16-19r, %13-15,22Q[2], %13-15,22Q[0]"},
 
   /* Vector VMOV two 32-bit lanes to two gprs, idx = 1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_VEC_LANE_TO_GP,
    0xec000f10, 0xffb01ff0,
    "vmov%c\t%0-3r, %16-19r, %13-15,22Q[3], %13-15,22Q[1]"},
 
   /* Vector VMOV Two gprs to two 32-bit lanes, idx = 0.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_GP_TO_VEC_LANE,
    0xec100f00, 0xffb01ff0,
    "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
 
   /* Vector VMOV Two gprs to two 32-bit lanes, idx = 1.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_GP_TO_VEC_LANE,
    0xec100f10, 0xffb01ff0,
    "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
 
   /* Vector VMOV Vector lane to gpr.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMOV_VEC_LANE_TO_GP,
    0xee100b10, 0xff100f1f,
    "vmov%c.%u%5-6,21-22s\t%12-15r, %17-19,7Q[%N]"},
 
   /* Vector VSHLL T1 Variant.  Note: VSHLL T1 must appear before MVE_VMOVL due
      to instruction opcode aliasing.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHLL_T1,
    0xeea00f40, 0xefa00fd1,
    "vshll%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VMOVL long.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOVL,
    0xeea00f40, 0xefa70fd1,
    "vmovl%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VMOV and narrow.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOVN,
    0xfe310e81, 0xffb30fd1,
    "vmovn%T%v.i%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Floating point move extract.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMOVX,
    0xfeb00a40, 0xffbf0fd0,
    "vmovx.f16\t%22,12-15F, %5,0-3F"},
 
   /* Vector VMUL floating-point T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMUL_FP_T1,
    0xff000d50, 0xffa11f51,
    "vmul%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMUL floating-point T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VMUL_FP_T2,
    0xee310e60, 0xefb11f70,
    "vmul%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VMUL T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMUL_VEC_T1,
    0xef000950, 0xff811f51,
    "vmul%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMUL T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMUL_VEC_T2,
    0xee011e60, 0xff811f70,
    "vmul%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VMULH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMULH,
    0xee010e01, 0xef811f51,
    "vmulh%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VRMULH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRMULH,
    0xee011e01, 0xef811f51,
    "vrmulh%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMULL integer.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMULL_INT,
    0xee010e00, 0xef810f51,
    "vmull%T%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMULL polynomial.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMULL_POLY,
    0xee310e00, 0xefb10f51,
    "vmull%T%v.%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VMVN immediate to vector.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMVN_IMM,
    0xef800070, 0xefb810f0,
    "vmvn%v.i%8-11s\t%13-15,22Q, %E"},
 
   /* Vector VMVN register.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMVN_REG,
    0xffb005c0, 0xffbf1fd1,
    "vmvn%v\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VNEG floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VNEG_FP,
    0xffb107c0, 0xffb31fd1,
    "vneg%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VNEG.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VNEG_VEC,
    0xffb103c0, 0xffb31fd1,
    "vneg%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VORN, vector bitwise or not.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VORN,
    0xef300150, 0xffb11f51,
    "vorn%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VORR register.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VORR_REG,
    0xef200150, 0xffb11f51,
    "vorr%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
@@ -3002,488 +3002,488 @@ static const struct mopcode32 mve_opcodes[] =
      MVE_VMOV_VEC_TO_VEC need to placed after MVE_VORR_REG in this mve_opcodes
      array.  */
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV_VEC_TO_VEC,
    0xef200150, 0xffb11f51,
    "vmov%v\t%13-15,22Q, %17-19,7Q"},
 
   /* Vector VQDMULL T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMULL_T1,
    0xee300f01, 0xefb10f51,
    "vqdmull%T%v.s%28s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VPNOT.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPNOT,
    0xfe310f4d, 0xffffffff,
    "vpnot%v"},
 
   /* Vector VPSEL.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VPSEL,
    0xfe310f01, 0xffb11f51,
    "vpsel%v\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQABS.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQABS,
    0xffb00740, 0xffb31fd1,
    "vqabs%v.s%18-19s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQADD T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQADD_T1,
    0xef000050, 0xef811f51,
    "vqadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQADD T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQADD_T2,
    0xee000f60, 0xef811f70,
    "vqadd%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQDMULL T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMULL_T2,
    0xee300f60, 0xefb10f70,
    "vqdmull%T%v.s%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQMOVN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQMOVN,
    0xee330e01, 0xefb30fd1,
    "vqmovn%T%v.%u%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VQMOVUN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQMOVUN,
    0xee310e81, 0xffb30fd1,
    "vqmovun%T%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VQDMLADH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMLADH,
    0xee000e00, 0xff810f51,
    "vqdmladh%X%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQRDMLADH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMLADH,
    0xee000e01, 0xff810f51,
    "vqrdmladh%X%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQDMLAH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMLAH,
    0xee000e60, 0xff811f70,
    "vqdmlah%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQRDMLAH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMLAH,
    0xee000e40, 0xff811f70,
    "vqrdmlah%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQDMLASH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMLASH,
    0xee001e60, 0xff811f70,
    "vqdmlash%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQRDMLASH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMLASH,
    0xee001e40, 0xff811f70,
    "vqrdmlash%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQDMLSDH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMLSDH,
    0xfe000e00, 0xff810f51,
    "vqdmlsdh%X%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQRDMLSDH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMLSDH,
    0xfe000e01, 0xff810f51,
    "vqrdmlsdh%X%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQDMULH T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMULH_T1,
    0xef000b40, 0xff811f51,
    "vqdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQRDMULH T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMULH_T2,
    0xff000b40, 0xff811f51,
    "vqrdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQDMULH T3 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQDMULH_T3,
    0xee010e60, 0xff811f70,
    "vqdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQRDMULH T4 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRDMULH_T4,
    0xfe010e60, 0xff811f70,
    "vqrdmulh%v.s%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VQNEG.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQNEG,
    0xffb007c0, 0xffb31fd1,
    "vqneg%v.s%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VQRSHL T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRSHL_T1,
    0xef000550, 0xef811f51,
    "vqrshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
 
   /* Vector VQRSHL T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRSHL_T2,
    0xee331ee0, 0xefb31ff0,
    "vqrshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
 
   /* Vector VQRSHRN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRSHRN,
    0xee800f41, 0xefa00fd1,
    "vqrshrn%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VQRSHRUN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQRSHRUN,
    0xfe800fc0, 0xffa00fd1,
    "vqrshrun%T%v.s%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VQSHL T1 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHL_T1,
    0xee311ee0, 0xefb31ff0,
    "vqshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
 
   /* Vector VQSHL T4 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHL_T4,
    0xef000450, 0xef811f51,
    "vqshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
 
   /* Vector VQSHRN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHRN,
    0xee800f40, 0xefa00fd1,
    "vqshrn%T%v.%u%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VQSHRUN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSHRUN,
    0xee800fc0, 0xffa00fd1,
    "vqshrun%T%v.s%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VQSUB T1 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSUB_T1,
    0xef000250, 0xef811f51,
    "vqsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VQSUB T2 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VQSUB_T2,
    0xee001f60, 0xef811f70,
    "vqsub%v.%u%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VREV16.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VREV16,
    0xffb00140, 0xffb31fd1,
    "vrev16%v.8\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VREV32.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VREV32,
    0xffb000c0, 0xffb31fd1,
    "vrev32%v.%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VREV64.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VREV64,
    0xffb00040, 0xffb31fd1,
    "vrev64%v.%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VRINT floating point.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VRINT_FP,
    0xffb20440, 0xffb31c51,
    "vrint%m%v.f%18-19s\t%13-15,22Q, %1-3,5Q"},
 
   /* Vector VRMLALDAVH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRMLALDAVH,
    0xee800f00, 0xef811f51,
    "vrmlalvh%5A%v.%u32\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
   /* Vector VRMLALDAVH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRMLALDAVH,
    0xee801f00, 0xef811f51,
    "vrmlaldavh%5Ax%v.%u32\t%13-15l, %20-22h, %17-19,7Q, %1-3Q"},
 
   /* Vector VRSHL T1 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRSHL_T1,
    0xef000540, 0xef811f51,
    "vrshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
 
   /* Vector VRSHL T2 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRSHL_T2,
    0xee331e60, 0xefb31ff0,
    "vrshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
 
   /* Vector VRSHRN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VRSHRN,
    0xfe800fc1, 0xffa00fd1,
    "vrshrn%T%v.i%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VSBC.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSBC,
    0xfe300f00, 0xffb10f51,
    "vsbc%12I%v.i32\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VSHL T2 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHL_T2,
    0xee311e60, 0xefb31ff0,
    "vshl%v.%u%18-19s\t%13-15,22Q, %0-3r"},
 
   /* Vector VSHL T3 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHL_T3,
    0xef000440, 0xef811f51,
    "vshl%v.%u%20-21s\t%13-15,22Q, %1-3,5Q, %17-19,7Q"},
 
   /* Vector VSHLC.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHLC,
    0xeea00fc0, 0xffa01ff0,
    "vshlc%v\t%13-15,22Q, %0-3r, #%16-20d"},
 
   /* Vector VSHLL T2 Variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHLL_T2,
    0xee310e01, 0xefb30fd1,
    "vshll%T%v.%u%18-19s\t%13-15,22Q, %1-3,5Q, #%18-19d"},
 
   /* Vector VSHRN.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSHRN,
    0xee800fc1, 0xffa00fd1,
    "vshrn%T%v.i%19-20s\t%13-15,22Q, %1-3,5Q, #%16-18d"},
 
   /* Vector VST2 no writeback.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VST2,
    0xfc801e00, 0xffb01e5f,
    "vst2%5d.%7-8s\t%B, [%16-19r]"},
 
   /* Vector VST2 writeback.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VST2,
    0xfca01e00, 0xffb01e5f,
    "vst2%5d.%7-8s\t%B, [%16-19r]!"},
 
   /* Vector VST4 no writeback.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VST4,
    0xfc801e01, 0xffb01e1f,
    "vst4%5-6d.%7-8s\t%B, [%16-19r]"},
 
   /* Vector VST4 writeback.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VST4,
    0xfca01e01, 0xffb01e1f,
    "vst4%5-6d.%7-8s\t%B, [%16-19r]!"},
 
   /* Vector VSTRB scatter store, T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRB_SCATTER_T1,
    0xec800e00, 0xffb01e50,
    "vstrb%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q]"},
 
   /* Vector VSTRH scatter store, T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRH_SCATTER_T2,
    0xec800e10, 0xffb01e50,
    "vstrh%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VSTRW scatter store, T3 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRW_SCATTER_T3,
    0xec800e40, 0xffb01e50,
    "vstrw%v.%7-8s\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VSTRD scatter store, T4 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRD_SCATTER_T4,
    0xec800fd0, 0xffb01fd0,
    "vstrd%v.64\t%13-15,22Q, [%16-19r, %1-3,5Q%o]"},
 
   /* Vector VSTRW scatter store, T5 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRW_SCATTER_T5,
    0xfd001e00, 0xff111f00,
    "vstrw%v.32\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
 
   /* Vector VSTRD scatter store, T6 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRD_SCATTER_T6,
    0xfd001f00, 0xff111f00,
    "vstrd%v.64\t%13-15,22Q, [%17-19,7Q, #%a%0-6i]%w"},
 
   /* Vector VSTRB.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRB_T1,
    0xec000e00, 0xfe581e00,
    "vstrb%v.%7-8s\t%13-15Q, %d"},
 
   /* Vector VSTRH.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRH_T2,
    0xec080e00, 0xfe581e00,
    "vstrh%v.%7-8s\t%13-15Q, %d"},
 
   /* Vector VSTRB variant T5.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRB_T5,
    0xec001e00, 0xfe101f80,
    "vstrb%v.8\t%13-15,22Q, %d"},
 
   /* Vector VSTRH variant T6.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRH_T6,
    0xec001e80, 0xfe101f80,
    "vstrh%v.16\t%13-15,22Q, %d"},
 
   /* Vector VSTRW variant T7.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSTRW_T7,
    0xec001f00, 0xfe101f80,
    "vstrw%v.32\t%13-15,22Q, %d"},
 
   /* Vector VSUB floating point T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VSUB_FP_T1,
    0xef200d40, 0xffa11f51,
    "vsub%v.f%20s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VSUB floating point T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE_FP),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
    MVE_VSUB_FP_T2,
    0xee301f40, 0xefb11f70,
    "vsub%v.f%28s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
   /* Vector VSUB T1 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSUB_VEC_T1,
    0xff000840, 0xff811f51,
    "vsub%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %1-3,5Q"},
 
   /* Vector VSUB T2 variant.  */
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VSUB_VEC_T2,
    0xee011f40, 0xff811f70,
    "vsub%v.i%20-21s\t%13-15,22Q, %17-19,7Q, %0-3r"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_ASRLI,
    0xea50012f, 0xfff1813f,
    "asrl%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_ASRL,
    0xea50012d, 0xfff101ff,
    "asrl%c\t%17-19l, %9-11h, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_LSLLI,
    0xea50010f, 0xfff1813f,
    "lsll%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_LSLL,
    0xea50010d, 0xfff101ff,
    "lsll%c\t%17-19l, %9-11h, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_LSRL,
    0xea50011f, 0xfff1813f,
    "lsrl%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SQRSHRL,
    0xea51012d, 0xfff1017f,
    "sqrshrl%c\t%17-19l, %9-11h, %k, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SQRSHR,
    0xea500f2d, 0xfff00fff,
    "sqrshr%c\t%16-19S, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SQSHLL,
    0xea51013f, 0xfff1813f,
    "sqshll%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SQSHL,
    0xea500f3f, 0xfff08f3f,
    "sqshl%c\t%16-19S, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SRSHRL,
    0xea51012f, 0xfff1813f,
    "srshrl%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_SRSHR,
    0xea500f2f, 0xfff08f3f,
    "srshr%c\t%16-19S, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_UQRSHLL,
    0xea51010d, 0xfff1017f,
    "uqrshll%c\t%17-19l, %9-11h, %k, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_UQRSHL,
    0xea500f0d, 0xfff00fff,
    "uqrshl%c\t%16-19S, %12-15S"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_UQSHLL,
     0xea51010f, 0xfff1813f,
    "uqshll%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_UQSHL,
    0xea500f0f, 0xfff08f3f,
    "uqshl%c\t%16-19S, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_URSHRL,
     0xea51011f, 0xfff1813f,
    "urshrl%c\t%17-19l, %9-11h, %j"},
 
-  {ARM_FEATURE_COPROC (FPU_MVE),
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_URSHR,
    0xea500f1f, 0xfff08f3f,
    "urshr%c\t%16-19S, %j"},
@@ -11714,11 +11714,18 @@ select_arm_features (unsigned long mach,
     case bfd_mach_arm_8M_MAIN:	 ARM_SET_FEATURES (ARM_ARCH_V8M_MAIN); break;
     case bfd_mach_arm_8_1M_MAIN:
       ARM_SET_FEATURES (ARM_ARCH_V8_1M_MAIN);
+      arm_feature_set mve_all
+	= ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE | ARM_EXT2_MVE_FP);
+      ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, mve_all);
       force_thumb = 1;
       break;
       /* If the machine type is unknown allow all architecture types and all
-	 extensions.  */
-    case bfd_mach_arm_unknown:	 ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
+	 extensions, with the exception of MVE as that clashes with NEON.  */
+    case bfd_mach_arm_unknown:
+      ARM_SET_FEATURES (ARM_FEATURE (-1,
+				     -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP),
+				     -1));
+      break;
     default:
       abort ();
     }

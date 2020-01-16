@@ -1,3 +1,12 @@
+2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25376
+	* opcodes/arm-dis.c (coprocessor_opcodes): Use CORE_HIGH for MVE bits.
+	(neon_opcodes): Likewise.
+	(select_arm_features): Make sure we enable MVE bits when selecting
+	armv8.1-m.main.  Make sure we do not enable MVE bits when not selecting
+	any architecture.
+
 2020-01-16  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl: Drop stale comment from XOP section.

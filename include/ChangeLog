@@ -1,3 +1,11 @@
+2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25376
+	* opcodes/arm.h (FPU_MVE, FPU_MVE_FPU): Move these features to...
+	(ARM_EXT2_MVE, ARM_EXT2_MVE_FP): ... the CORE_HIGH space.
+	(ARM_ANY): Redefine to not include any MVE bits.
+	(ARM_FEATURE_ALL): Removed.
+
 2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* opcode/msp430.h (enum msp430_expp_e): New.
