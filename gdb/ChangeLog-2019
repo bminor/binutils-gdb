@@ -2801,8 +2801,8 @@
 	(str_value_from_setting, gdb_setting_str_internal_fn)
 	(gdb_maint_setting_str_internal_fn): New functions.
 	(_initialize_cli_cmds): Define the new convenience functions.
-	* gdb/cli/cli-setshow.h (get_setshow_command_value_string): Constify.
-	* gdb/cli/cli-setshow.c (get_setshow_command_value_string): Constify.
+	* cli/cli-setshow.h (get_setshow_command_value_string): Constify.
+	* cli/cli-setshow.c (get_setshow_command_value_string): Constify.
 
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
@@ -3526,7 +3526,7 @@
 
 2019-10-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/dwarf2read.c (dwarf2_per_objfile::~dwarf2_per_objfile):
+	* dwarf2read.c (dwarf2_per_objfile::~dwarf2_per_objfile):
 	Update for new std::vector based implementation.
 	(process_psymtab_comp_unit_reader): Likewise.
 	(scan_partial_symbols): Likewise.
@@ -3535,7 +3535,7 @@
 	(process_imported_unit_die): Likewise.
 	(queue_and_load_dwo_tu): Likewise.
 	(follow_die_sig_1): Likewise.
-	* gdb/dwarf2read.h: Remove DEF_VEC_P.
+	* dwarf2read.h: Remove DEF_VEC_P.
 	(typedef dwarf2_per_cu_ptr): Remove.
 	(struct dwarf2_per_cu_data) <imported_symtabs_empty>: New
 	function.
@@ -5048,7 +5048,7 @@
 
 	* NEWS: Announce that Ada task names are now shown at more places,
 	and between quotes (except in info task output).
-	* gdb/ada-tasks.c (task_to_str): New function.
+	* ada-tasks.c (task_to_str): New function.
 	(display_current_task_id): Call task_to_str.
 	(task_command_1): Likewise.
 	(print_ada_task_info): In non-mi mode, Properly align headers and data
@@ -5095,7 +5095,7 @@
 
 2019-09-11  Ali Tamur  <tamur@google.com>
 
-	*gdb/target-float.c (host_float_ops<T>::to_longest): Update
+	* target-float.c (host_float_ops<T>::to_longest): Update
 	implementation.
 
 2019-09-11  Christian Biesinger  <cbiesinger@google.com>
@@ -5502,17 +5502,17 @@
 
 2019-08-25  Yoshinori Sato <ysato@users.sourceforge.jp>
 
-        * gdb/rx-tdep.c (rx_register_names): New.
+        * rx-tdep.c (rx_register_names): New.
         (rx_register_name): Delete.
         (rx_psw_type): Delete.
         (rx_fpsw_type): Delete.
         (rx_register_type): Delete.
         (rx_gdbarch_init): Convert target-descriptions.
         (_initialize_rx_tdep): Add initialize_tdesc_rx.
-        * gdb/features/Makefile: Add rx.xml.
-        * gdb/features/rx.xml: New.
-        * gdb/features/rx.c: Generated.
-        * gdb/NEWS: Mention target description support.
+        * features/Makefile: Add rx.xml.
+        * features/rx.xml: New.
+        * features/rx.c: Generated.
+        * NEWS: Mention target description support.
 
 2019-08-22  Christian Biesinger  <cbiesinger@google.com>
 
@@ -6752,7 +6752,7 @@
 2019-07-26  Brian Callahan  <bcallah@openbsd.org>
 
 	PR gdb/24839:
-	* gdb/obsd-nat.c (obsd_nat_target::pid_to_str): Fix typo in return
+	* obsd-nat.c (obsd_nat_target::pid_to_str): Fix typo in return
 	type.
 
 2019-07-25  Christian Biesinger  <cbiesinger@google.com>
@@ -9489,7 +9489,7 @@
 2019-06-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/24364
-	* gdb/dtrace-probe.c (dtrace_static_probe_ops::get_probe): Don't
+	* dtrace-probe.c (dtrace_static_probe_ops::get_probe): Don't
 	call dtrace_process_dof with NULL dof.
 
 2019-06-16  Tom de Vries  <tdevries@suse.de>
@@ -11174,7 +11174,8 @@
 	for big-endian copies.
 
 2019-04-30  Ali Tamur  <tamur@google.com>
-	* gdb/dwarf2read.c (read_3_bytes): New declaration.
+
+	* dwarf2read.c (read_3_bytes): New declaration.
 	(read_attribute_value): Added DW_FORM_strx1-4 cases.
 	(read_3_bytes): New function.
 
@@ -11263,11 +11264,11 @@
 
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/expprint.c (dump_subexp_body_standard): Remove use of
+	* expprint.c (dump_subexp_body_standard): Remove use of
 	UNOP_KIND.
-	* gdb/expression.h (exp_opcode): Include 'fortran-operator.def'.
-	* gdb/f-exp.y (exp): Rename UNOP_KIND to UNOP_FORTRAN_KIND.
-	* gdb/f-lang.c (evaluate_subexp_f): Likewise.
+	* expression.h (exp_opcode): Include 'fortran-operator.def'.
+	* f-exp.y (exp): Rename UNOP_KIND to UNOP_FORTRAN_KIND.
+	* f-lang.c (evaluate_subexp_f): Likewise.
 	(operator_length_f): New fuction.
 	(print_subexp_f): New function.
 	(op_name_f): New function.
@@ -11275,9 +11276,9 @@
 	(operator_check_f): New function.
 	(exp_descriptor_f): Replace standard expression handling functions
 	with new functions.
-	* gdb/fortran-operator.def: New file.
-	* gdb/parse.c (operator_length_standard): Remove use of UNOP_KIND.
-	* gdb/std-operator.def: Remove UNOP_KIND.
+	* fortran-operator.def: New file.
+	* parse.c (operator_length_standard): Remove use of UNOP_KIND.
+	* std-operator.def: Remove UNOP_KIND.
 
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
@@ -11526,7 +11527,6 @@
 	(dump_die_shallow): Likewise.
 	(dwarf2_fetch_constant_bytes): Likewise.
 	(skip_form_bytes): Likewise.
-	* testsuite/lib/dwarf.exp (_handle_DW_FORM): Add DW_FORM_strx.
 
 2019-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
@@ -11720,7 +11720,7 @@
 
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/lm32-tdep.c (lm32_unwind_sp): Delete.
+	* lm32-tdep.c (lm32_unwind_sp): Delete.
 	(lm32_unwind_pc): Delete.
 	(lm32_dummy_id): Delete.
 	(lm32_gdbarch_init): Don't register deleted functions with
@@ -11728,7 +11728,7 @@
 
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/iq2000-tdep.c (iq2000_unwind_sp): Delete.
+	* iq2000-tdep.c (iq2000_unwind_sp): Delete.
 	(iq2000_unwind_pc): Delete.
 	(iq2000_dummy_id): Delete.
 	(iq2000_gdbarch_init): Don't register deleted functions with
@@ -13292,7 +13292,7 @@
 	target_waitstatus_to_string and target_pid_to_str.
 	(handle_inferior_event): Replace various trace of
 	wait status kind by a single trace.
-	* gdb/gnu-nat.c (gnu_nat_target::wait): Replace local
+	* gnu-nat.c (gnu_nat_target::wait): Replace local
 	wait status kind image by target_waitstatus_to_string.
 	* target/waitstatus.c (target_waitstatus_to_string): Fix
 	obsolete comment.
@@ -14864,13 +14864,13 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/hppa-tdep.c (hppa_dummy_id): Delete.
+	* hppa-tdep.c (hppa_dummy_id): Delete.
 	(hppa_gdbarch_init): Don't register deleted functions with
 	gdbarch.
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/h8300-tdep.c (h8300_unwind_pc): Delete.
+	* h8300-tdep.c (h8300_unwind_pc): Delete.
 	(h8300_unwind_sp): Delete.
 	(h8300_dummy_id): Delete.
 	(h8300_gdbarch_init): Don't register deleted functions with
@@ -14878,7 +14878,7 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/ft32-tdep.c (ft32_dummy_id): Delete.
+	* ft32-tdep.c (ft32_dummy_id): Delete.
 	(ft32_unwind_pc): Delete.
 	(ft32_unwind_sp): Delete.
 	(ft32_gdbarch_init): Don't register deleted functions with
@@ -14886,7 +14886,7 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/frv-tdep.c (frv_dummy_id): Delete.
+	* frv-tdep.c (frv_dummy_id): Delete.
 	(frv_unwind_pc): Delete.
 	(frv_unwind_sp): Delete.
 	(frv_gdbarch_init): Don't register deleted functions with
@@ -14894,7 +14894,7 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/riscv-tdep.c (riscv_dummy_id): Delete.
+	* riscv-tdep.c (riscv_dummy_id): Delete.
 	(riscv_unwind_pc): Delete.
 	(riscv_unwind_sp): Delete.
 	(riscv_gdbarch_init): Don't register deleted functions with
@@ -14902,7 +14902,7 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/csky-tdep.c (csky_dummy_id): Delete.
+	* csky-tdep.c (csky_dummy_id): Delete.
 	(csky_unwind_pc): Delete.
 	(csky_unwind_sp): Delete.
 	(csky_gdbarch_init): Don't register deleted functions with
@@ -14910,7 +14910,7 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/cris-tdep.c (cris_dummy_id): Delete.
+	* cris-tdep.c (cris_dummy_id): Delete.
 	(cris_unwind_pc): Delete.
 	(cris_unwind_sp): Delete.
 	(cris_gdbarch_init): Don't register deleted functions with
@@ -14918,34 +14918,34 @@
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/bfin-tdep.c (bfin_dummy_id): Delete.
+	* bfin-tdep.c (bfin_dummy_id): Delete.
 	(bfin_unwind_pc): Delete.
 	(bfin_gdbarch_init): Don't register deleted functions with gdbarch.
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/arm-tdep.c (arm_dummy_id): Delete.
+	* arm-tdep.c (arm_dummy_id): Delete.
 	(arm_unwind_pc): Delete.
 	(arm_unwind_sp): Delete.
 	(arm_gdbarch_init): Don't register deleted functions with gdbarch.
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/arc-tdep.c (arc_dummy_id): Delete.
+	* arc-tdep.c (arc_dummy_id): Delete.
 	(arc_unwind_pc): Delete.
 	(arc_unwind_sp): Delete.
 	(arc_gdbarch_init): Don't register deleted functions with gdbarch.
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/alpha-tdep.c (alpha_dummy_id): Delete.
+	* alpha-tdep.c (alpha_dummy_id): Delete.
 	(alpha_unwind_pc): Delete.
 	(alpha_gdbarch_init): Don't register deleted functions with
 	gdbarch.
 
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-	* gdb/aarch64-tdep.c (aarch64_dummy_id): Delete.
+	* aarch64-tdep.c (aarch64_dummy_id): Delete.
 	(aarch64_unwind_pc): Delete.
 	(aarch64_unwind_sp): Delete.
 	(aarch64_gdbarch_init): Don't register deleted functions with

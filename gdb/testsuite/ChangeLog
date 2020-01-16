@@ -2449,6 +2449,10 @@
 	* gdb.cp/meth-typedefs.exp: Add new tests for `test_incomplete'
 	functions.
 
+2019-04-25  Ali Tamur  <tamur@google.com>
+
+	* lib/dwarf.exp (_handle_DW_FORM): Add DW_FORM_strx.
+
 2019-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR corefiles/11608
@@ -4472,6 +4476,13 @@
 
 	PR gdb/23104
 	* gdb.base/info-shared.exp: Replace libs=-ldl with shlib_load.
+
+2018-04-22  Rajendra SY  <rajendra.sy@gmail.com>
+
+	PR gdb/23095
+	* gdb.base/break-probes.exp: Pass shlib_load to
+	prepare_for_testing.  Set normal_bp to r_debug_state if target is
+	bsd.
 
 2018-04-19  Richard Bunt  <richard.bunt@arm.com>
 
