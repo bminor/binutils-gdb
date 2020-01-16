@@ -889,7 +889,7 @@ linux_read_pt (struct btrace_data_pt *btrace,
       return BTRACE_ERR_NONE;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unkown btrace read type."));
+  internal_error (__FILE__, __LINE__, _("Unknown btrace read type."));
 }
 
 /* See linux-btrace.h.  */

@@ -541,7 +541,7 @@ record_btrace_print_conf (const struct btrace_config *conf)
       return;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+  internal_error (__FILE__, __LINE__, _("Unknown branch trace format."));
 }
 
 /* The info_record method of target record-btrace.  */

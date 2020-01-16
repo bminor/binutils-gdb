@@ -3877,7 +3877,7 @@ proc gdb_compile {source dest type options} {
 	    # Force output to unbuffered mode, by linking in an object file
 	    # with a global contructor that calls setvbuf.
 	    #
-	    # Compile the special object seperatelly for two reasons:
+	    # Compile the special object separately for two reasons:
 	    #  1) Insulate it from $options.
 	    #  2) Avoid compiling it for every gdb_compile invocation,
 	    #  which is time consuming, especially if we're remote

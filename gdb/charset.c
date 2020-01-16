@@ -989,7 +989,7 @@ intermediate_encoding (void)
   /* Not valid, free the allocated memory.  */
   xfree (result);
   /* No valid charset found, generate error here.  */
-  error (_("Unable to find a vaild charset for string conversions"));
+  error (_("Unable to find a valid charset for string conversions"));
 }
 
 #endif /* USE_INTERMEDIATE_ENCODING_FUNCTION */

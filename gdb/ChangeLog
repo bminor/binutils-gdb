@@ -1,3 +1,12 @@
+2020-01-16  Christian Biesinger  <cbiesinger@google.com>
+
+	* btrace.c (btrace_compute_ftrace_1): Fix spelling error (Unkown).
+	(btrace_stitch_trace): Likewise.
+	* charset.c (intermediate_encoding): Likewise (vaild).
+	* nat/linux-btrace.c (linux_read_pt): Likewise (Unkown).
+	* python/py-record-btrace.c (struct PyMethodDef): Likewise (occurences).
+	* record-btrace.c (record_btrace_print_conf): Likewise (unkown).
+
 2020-01-16  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-tdep.c (windows_get_tlb_type):
