@@ -1,3 +1,14 @@
+2020-01-16  Pedro Alves  <palves@redhat.com>
+            Norbert Lange  <nolange79@gmail.com>
+
+	PR build/24805
+	* gdbsupport/gdb_proc_service.h (PS_EXPORT): New.
+	(ps_get_thread_area, ps_getpid, ps_lcontinue, ps_lgetfpregs)
+	(ps_lgetregs, ps_lsetfpregs, ps_lsetregs, ps_lstop, ps_pcontinue)
+	(ps_pdread, ps_pdwrite, ps_pglobal_lookup, ps_pstop, ps_ptread)
+	(ps_ptwrite, ps_lgetxregs, ps_lgetxregsize, ps_lsetxregs)
+	(ps_plog): Redeclare exported functions with default visibility.
+
 2020-01-16  Nitika Achra  <Nitika.Achra@amd.com>
 
 	* dwarf2loc.c (decode_debug_loclists_addresses): Handle

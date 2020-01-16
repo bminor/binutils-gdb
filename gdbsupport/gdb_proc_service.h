@@ -170,4 +170,33 @@ EXTERN_C_POP
 
 #endif /* HAVE_PROC_SERVICE_H */
 
+/* Make sure we export the needed symbols, in case GDB is built with
+   -fvisibility=hidden.  */
+
+#define PS_EXPORT(SYM)						\
+  __attribute__((visibility ("default"))) typeof (SYM) SYM
+
+PS_EXPORT (ps_get_thread_area);
+PS_EXPORT (ps_getpid);
+PS_EXPORT (ps_lcontinue);
+PS_EXPORT (ps_lgetfpregs);
+PS_EXPORT (ps_lgetregs);
+PS_EXPORT (ps_lsetfpregs);
+PS_EXPORT (ps_lsetregs);
+PS_EXPORT (ps_lstop);
+PS_EXPORT (ps_pcontinue);
+PS_EXPORT (ps_pdread);
+PS_EXPORT (ps_pdwrite);
+PS_EXPORT (ps_pglobal_lookup);
+PS_EXPORT (ps_pstop);
+PS_EXPORT (ps_ptread);
+PS_EXPORT (ps_ptwrite);
+
+#ifdef __sun__
+PS_EXPORT (ps_lgetxregs);
+PS_EXPORT (ps_lgetxregsize);
+PS_EXPORT (ps_lsetxregs);
+PS_EXPORT (ps_plog);
+#endif
+
 #endif /* COMMON_GDB_PROC_SERVICE_H */
