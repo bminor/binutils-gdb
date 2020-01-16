@@ -1,5 +1,9 @@
 2020-01-16  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
+	* scripttempl/elf32msp430_3.sc: Remove.
+
+2020-01-16  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
 	* scripttempl/elf32msp430.sc: Add input section rules for
 	.upper.{text,data,rodata,bss}.
 	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new test.
