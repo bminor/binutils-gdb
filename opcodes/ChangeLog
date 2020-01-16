@@ -1,3 +1,11 @@
+2020-01-16  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (pextrq, pinsrq): Drop IgnoreSize and Qword. Drop
+	Size64 from and use VexW1 on SSE2AVX forms.
+	(vpextrq, vpinsrq): Drop IgnoreSize and Qword. Drop Size64 from
+	VEX-encoded forms. Add Cpu64 to EVEX-encoded forms. Use VexW1.
+	* i386-tbl.h: Re-generate.
+
 2020-01-15  Alan Modra  <amodra@gmail.com>
 
 	* tic4x-dis.c (tic4x_version): Make unsigned long.
