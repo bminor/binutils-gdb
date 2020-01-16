@@ -2607,8 +2607,6 @@ vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=2|V
 vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {RegXMM, Dword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 
 // XOP instructions
-// We add Imm8 to Vex_Imm4.  We use Imm8 to indicate that the operand
-// is an immediate.  We will check if its value will fit 4 bits.
 
 vfrczpd,    2, 0x81, None, 1, CpuXOP, Modrm|VexOpcode=4|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vfrczps,    2, 0x80, None, 1, CpuXOP, Modrm|VexOpcode=4|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }

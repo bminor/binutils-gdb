@@ -1,5 +1,9 @@
 2020-01-16  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Drop stale comment from XOP section.
+
+2020-01-16  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (movq): Add VexWIG to SSE2AVX XMM->XMM forms.
 	(extractps): Add VexWIG to SSE2AVX forms.
 	* i386-tbl.h: Re-generate.
