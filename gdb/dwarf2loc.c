@@ -173,6 +173,41 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
 
   switch (*loc_ptr++)
     {
+    case DW_LLE_base_addressx:
+      *low = 0;
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	 return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high = dwarf2_read_addr_index (per_cu, u64);
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_BASE_ADDRESS;
+    case DW_LLE_startx_length:
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	 return DEBUG_LOC_BUFFER_OVERFLOW;
+      *low = dwarf2_read_addr_index (per_cu, u64);
+      *high = *low;
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	 return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high += u64;
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_START_LENGTH;
+    case DW_LLE_start_length:
+      if (buf_end - loc_ptr < addr_size)
+	 return DEBUG_LOC_BUFFER_OVERFLOW;
+      if (signed_addr_p)
+	 *low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	 *low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+      *high = *low;
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	 return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high += u64;
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_START_LENGTH;
     case DW_LLE_end_of_list:
       *new_ptr = loc_ptr;
       return DEBUG_LOC_END_OF_LIST;
@@ -197,6 +232,10 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
       *high = u64;
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_END;
+    /* Following cases are not supported yet.  */
+    case DW_LLE_startx_endx:
+    case DW_LLE_start_end:
+    case DW_LLE_default_location:
     default:
       return DEBUG_LOC_INVALID_ENTRY;
     }

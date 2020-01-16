@@ -1,3 +1,8 @@
+2020-01-16  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2loc.c (decode_debug_loclists_addresses): Handle
+	DW_LLE_base_addressx, DW_LLE_startx_length, DW_LLE_start_length.
+
 2020-01-15  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infcmd.c (post_create_inferior): Use get_thread_regcache
