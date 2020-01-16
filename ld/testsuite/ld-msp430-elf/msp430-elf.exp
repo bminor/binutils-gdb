@@ -176,6 +176,8 @@ run_ld_link_tests $msp430warntests
 run_dump_test valid-map
 run_ld_link_tests {{ "Check no reloc overflow with #lo and data in the upper region"
         "-m msp430X" "" "" {reloc-lo-430x.s} {} "reloc-lo-430x"}}
+run_ld_link_tests {{ "Check .upper prefixed input sections can be placed"
+        "-m msp430X" "" "" {upper-input-sections.s} {} "upper-input-sections"}}
 
 # Don't run data region tests if a data region is specified
 if {[string match "*-mdata-region*" [board_info [target_info name] multilib_flags]]} {

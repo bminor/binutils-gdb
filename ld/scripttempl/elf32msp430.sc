@@ -171,6 +171,8 @@ SECTIONS
 
     *(.either.text.* .either.text)
 
+    *(.upper.text.* .upper.text)
+
     . = ALIGN(2);
     *(SORT_NONE(.fini9))
     *(SORT_NONE(.fini8))
@@ -198,6 +200,9 @@ SECTIONS
     ${RELOCATING+*(.rodata1)
 
     *(.either.rodata.*) *(.either.rodata)
+
+    *(.upper.rodata.* .upper.rodata)
+
     *(.eh_frame_hdr)
     KEEP (*(.eh_frame))
 
@@ -267,6 +272,8 @@ SECTIONS
 
     *(.either.data.* .either.data)
 
+    *(.upper.data.* .upper.data)
+
     *(.got.plt) *(.got)
     . = ALIGN(2);
     *(.sdata .sdata.* .gnu.linkonce.s.*)
@@ -286,6 +293,7 @@ SECTIONS
     . = ALIGN(2);}
     *(.bss)
     ${RELOCATING+*(.either.bss.* .either.bss)
+    *(.upper.bss.* .upper.bss)
     *(COMMON)
     PROVIDE (__bss_end = .);}
   } ${RELOCATING+ > data}
