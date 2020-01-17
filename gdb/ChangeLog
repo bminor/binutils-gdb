@@ -1,5 +1,11 @@
 2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
 
+	* windows-tdep.c (struct enum_value_name): New struct.
+	(create_enum): New function.
+	(windows_get_siginfo_type): Create and use enum types.
+
+2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
+
 	* NEWS: Mention $_siginfo support for Windows.
 	* windows-nat.c (handle_exception): Set siginfo_er.
 	(windows_nat_target::mourn_inferior): Reset siginfo_er.

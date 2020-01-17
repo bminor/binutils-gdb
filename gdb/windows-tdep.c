@@ -680,6 +680,71 @@ windows_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
   return -1;
 }
 
+struct enum_value_name
+{
+  uint32_t value;
+  const char *name;
+};
+
+/* Allocate a TYPE_CODE_ENUM type structure with its named values.  */
+
+static struct type *
+create_enum (struct gdbarch *gdbarch, int bit, const char *name,
+	     const struct enum_value_name *values, int count)
+{
+  struct type *type;
+  int i;
+
+  type = arch_type (gdbarch, TYPE_CODE_ENUM, bit, name);
+  TYPE_NFIELDS (type) = count;
+  TYPE_FIELDS (type) = (struct field *)
+    TYPE_ZALLOC (type, sizeof (struct field) * count);
+  TYPE_UNSIGNED (type) = 1;
+
+  for (i = 0; i < count; i++)
+  {
+    TYPE_FIELD_NAME (type, i) = values[i].name;
+    SET_FIELD_ENUMVAL (TYPE_FIELD (type, i), values[i].value);
+  }
+
+  return type;
+}
+
+static const struct enum_value_name exception_values[] =
+{
+  { 0x40000015, "FATAL_APP_EXIT" },
+  { 0x40010005, "DBG_CONTROL_C" },
+  { 0x40010008, "DBG_CONTROL_BREAK" },
+  { 0x80000002, "DATATYPE_MISALIGNMENT" },
+  { 0x80000003, "BREAKPOINT" },
+  { 0x80000004, "SINGLE_STEP" },
+  { 0xC0000005, "ACCESS_VIOLATION" },
+  { 0xC0000006, "IN_PAGE_ERROR" },
+  { 0xC000001D, "ILLEGAL_INSTRUCTION" },
+  { 0xC0000025, "NONCONTINUABLE_EXCEPTION" },
+  { 0xC0000026, "INVALID_DISPOSITION" },
+  { 0xC000008C, "ARRAY_BOUNDS_EXCEEDED" },
+  { 0xC000008D, "FLOAT_DENORMAL_OPERAND" },
+  { 0xC000008E, "FLOAT_DIVIDE_BY_ZERO" },
+  { 0xC000008F, "FLOAT_INEXACT_RESULT" },
+  { 0xC0000090, "FLOAT_INVALID_OPERATION" },
+  { 0xC0000091, "FLOAT_OVERFLOW" },
+  { 0xC0000092, "FLOAT_STACK_CHECK" },
+  { 0xC0000093, "FLOAT_UNDERFLOW" },
+  { 0xC0000094, "INTEGER_DIVIDE_BY_ZERO" },
+  { 0xC0000095, "INTEGER_OVERFLOW" },
+  { 0xC0000096, "PRIV_INSTRUCTION" },
+  { 0xC00000FD, "STACK_OVERFLOW" },
+  { 0xC0000409, "FAST_FAIL" },
+};
+
+static const struct enum_value_name violation_values[] =
+{
+  { 0, "READ_ACCESS_VIOLATION" },
+  { 1, "WRITE_ACCESS_VIOLATION" },
+  { 8, "DATA_EXECUTION_PREVENTION_VIOLATION" },
+};
+
 /* Implement the "get_siginfo_type" gdbarch method.  */
 
 static struct type *
@@ -687,7 +752,8 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
 {
   struct windows_gdbarch_data *windows_gdbarch_data;
   struct type *dword_type, *pvoid_type, *ulongptr_type;
-  struct type *siginfo_ptr_type, *siginfo_type;
+  struct type *code_enum, *violation_enum;
+  struct type *violation_type, *para_type, *siginfo_ptr_type, *siginfo_type;
 
   windows_gdbarch_data = get_windows_gdbarch_data (gdbarch);
   if (windows_gdbarch_data->siginfo_type != NULL)
@@ -700,12 +766,38 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   ulongptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 				     1, "ULONG_PTR");
 
+  /* ExceptionCode value names */
+  code_enum = create_enum (gdbarch, gdbarch_int_bit (gdbarch),
+			   "ExceptionCode", exception_values,
+			   ARRAY_SIZE (exception_values));
+
+  /* ACCESS_VIOLATION type names */
+  violation_enum = create_enum (gdbarch, gdbarch_ptr_bit (gdbarch),
+				"ViolationType", violation_values,
+				ARRAY_SIZE (violation_values));
+
+  /* ACCESS_VIOLATION information */
+  violation_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (violation_type, "Type", violation_enum);
+  append_composite_type_field (violation_type, "Address", pvoid_type);
+
+  /* Unnamed union of the documented field ExceptionInformation,
+     and the alternative AccessViolationInformation (which displays
+     human-readable values for ExceptionCode ACCESS_VIOLATION).  */
+  para_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  append_composite_type_field (para_type, "ExceptionInformation",
+			       lookup_array_range_type (ulongptr_type, 0, 14));
+  append_composite_type_field (para_type, "AccessViolationInformation",
+			       violation_type);
+
   siginfo_type = arch_composite_type (gdbarch, "EXCEPTION_RECORD",
 				      TYPE_CODE_STRUCT);
   siginfo_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 					NULL, siginfo_type);
 
-  append_composite_type_field (siginfo_type, "ExceptionCode", dword_type);
+  /* ExceptionCode is documented as type DWORD, but here a helper
+     enum type is used instead to display a human-readable value.  */
+  append_composite_type_field (siginfo_type, "ExceptionCode", code_enum);
   append_composite_type_field (siginfo_type, "ExceptionFlags", dword_type);
   append_composite_type_field (siginfo_type, "ExceptionRecord",
 			       siginfo_ptr_type);
@@ -713,10 +805,8 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
 			       pvoid_type);
   append_composite_type_field (siginfo_type, "NumberParameters", dword_type);
   /* The 64-bit variant needs some padding.  */
-  append_composite_type_field_aligned (siginfo_type, "ExceptionInformation",
-				       lookup_array_range_type (ulongptr_type,
-								0, 14),
-				       TYPE_LENGTH (ulongptr_type));
+  append_composite_type_field_aligned (siginfo_type, "",
+				       para_type, TYPE_LENGTH (ulongptr_type));
 
   windows_gdbarch_data->siginfo_type = siginfo_type;
 
