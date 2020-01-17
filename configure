@@ -2279,6 +2279,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+if test x"${enable_gdb}" != x"no"; then
+  # For this branch, we do not support building GDB in-tree.
+  # Try to detect whether we are in this situation or not by
+  # searching for a couple of known files in the source directory.
+  if test -f gnulib/update-gnulib.sh -a -f gdb/ChangeLog; then
+    as_fn_error $? "GDB must be configured and built in a directory separate from its sources.
+
+To do so, create a dedicated directory for your GDB build and invoke
+the configure script from that directory:
+
+      $ mkdir build
+      $ cd build
+      $ <full path to your sources>/gdb-VERSION/configure [etc...]
+      $ make" "$LINENO" 5
+  fi
+fi
+
 progname=$0
 # if PWD already has a value, it is probably wrong.
 if test -n "$PWD" ; then PWD=`${PWDCMD-pwd}`; fi

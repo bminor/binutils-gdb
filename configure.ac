@@ -33,6 +33,23 @@ m4_include([config/isl.m4])
 AC_INIT(move-if-change)
 AC_DISABLE_OPTION_CHECKING
 
+if test x"${enable_gdb}" != x"no"; then
+  # For this branch, we do not support building GDB in-tree.
+  # Try to detect whether we are in this situation or not by
+  # searching for a couple of known files in the source directory.
+  if test -f gnulib/update-gnulib.sh -a -f gdb/ChangeLog; then
+    AC_MSG_ERROR([GDB must be configured and built in a directory separate from its sources.
+
+To do so, create a dedicated directory for your GDB build and invoke
+the configure script from that directory:
+
+      $ mkdir build
+      $ cd build
+      $ <full path to your sources>/gdb-VERSION/configure [[etc...]]
+      $ make])
+  fi
+fi
+
 progname=$0
 # if PWD already has a value, it is probably wrong.
 if test -n "$PWD" ; then PWD=`${PWDCMD-pwd}`; fi
