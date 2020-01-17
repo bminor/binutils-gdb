@@ -1,7 +1,7 @@
 /* Libiberty realpath.  Like realpath, but more consistent behavior.
    Based on gdb_realpath from GDB.
 
-   Copyright (C) 2003-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of the libiberty library.
 
@@ -48,9 +48,6 @@ components will be simplified.  The returned value will be allocated using
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
 #endif
 
 /* On GNU libc systems the declaration is only visible with _GNU_SOURCE.  */
@@ -157,17 +154,4 @@ lrealpath (const char *filename)
 
   /* This system is a lost cause, just duplicate the filename.  */
   return strdup (filename);
-}
-
-/* Return true when FD file descriptor exists.  */
-
-int
-is_valid_fd (int fd)
-{
-#if defined(_WIN32)
-  HANDLE h = (HANDLE) _get_osfhandle (fd);
-  return h != (HANDLE) -1;
-#else
-  return fcntl (fd, F_GETFD) >= 0;
-#endif
 }
