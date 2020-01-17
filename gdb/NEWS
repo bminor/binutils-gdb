@@ -10,6 +10,9 @@
   that support it (see entry for GDB 9, below), providing faster
   performance for programs with many symbols.
 
+* The $_siginfo convenience variable now also works on Windows targets,
+  and will display the EXCEPTION_RECORD of the last handled exception.
+
 * New commands
 
 set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).

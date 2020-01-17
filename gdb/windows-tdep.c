@@ -153,6 +153,30 @@ static const int FULL_TIB_SIZE = 0x1000;
 
 static bool maint_display_all_tib = false;
 
+static struct gdbarch_data *windows_gdbarch_data_handle;
+
+struct windows_gdbarch_data
+{
+  struct type *siginfo_type;
+};
+
+/* Allocate windows_gdbarch_data for an arch.  */
+
+static void *
+init_windows_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct windows_gdbarch_data);
+}
+
+/* Get windows_gdbarch_data of an arch.  */
+
+static struct windows_gdbarch_data *
+get_windows_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return ((struct windows_gdbarch_data *)
+	  gdbarch_data (gdbarch, windows_gdbarch_data_handle));
+}
+
 /* Define Thread Local Base pointer type.  */
 
 static struct type *
@@ -656,6 +680,49 @@ windows_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
   return -1;
 }
 
+/* Implement the "get_siginfo_type" gdbarch method.  */
+
+static struct type *
+windows_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  struct windows_gdbarch_data *windows_gdbarch_data;
+  struct type *dword_type, *pvoid_type, *ulongptr_type;
+  struct type *siginfo_ptr_type, *siginfo_type;
+
+  windows_gdbarch_data = get_windows_gdbarch_data (gdbarch);
+  if (windows_gdbarch_data->siginfo_type != NULL)
+    return windows_gdbarch_data->siginfo_type;
+
+  dword_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+				  1, "DWORD");
+  pvoid_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), "PVOID",
+				  builtin_type (gdbarch)->builtin_void);
+  ulongptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+				     1, "ULONG_PTR");
+
+  siginfo_type = arch_composite_type (gdbarch, "EXCEPTION_RECORD",
+				      TYPE_CODE_STRUCT);
+  siginfo_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+					NULL, siginfo_type);
+
+  append_composite_type_field (siginfo_type, "ExceptionCode", dword_type);
+  append_composite_type_field (siginfo_type, "ExceptionFlags", dword_type);
+  append_composite_type_field (siginfo_type, "ExceptionRecord",
+			       siginfo_ptr_type);
+  append_composite_type_field (siginfo_type, "ExceptionAddress",
+			       pvoid_type);
+  append_composite_type_field (siginfo_type, "NumberParameters", dword_type);
+  /* The 64-bit variant needs some padding.  */
+  append_composite_type_field_aligned (siginfo_type, "ExceptionInformation",
+				       lookup_array_range_type (ulongptr_type,
+								0, 14),
+				       TYPE_LENGTH (ulongptr_type));
+
+  windows_gdbarch_data->siginfo_type = siginfo_type;
+
+  return siginfo_type;
+}
+
 /* To be called from the various GDB_OSABI_CYGWIN handlers for the
    various Windows architectures and machine types.  */
 
@@ -675,6 +742,8 @@ windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch, windows_gdb_signal_to_target);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
+
+  set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
 }
 
 /* Implementation of `tlb' variable.  */
@@ -690,6 +759,9 @@ void _initialize_windows_tdep ();
 void
 _initialize_windows_tdep ()
 {
+  windows_gdbarch_data_handle
+    = gdbarch_data_register_post_init (init_windows_gdbarch_data);
+
   init_w32_command_list ();
   add_cmd ("thread-information-block", class_info, display_tib,
 	   _("Display thread information block."),

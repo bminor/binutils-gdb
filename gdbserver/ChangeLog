@@ -1,3 +1,9 @@
+2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-low.c (win32_clear_inferiors): Reset siginfo_er.
+	(handle_exception): Set siginfo_er.
+	(win32_xfer_siginfo): New function.
+
 2020-02-07  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 

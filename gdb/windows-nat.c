@@ -236,6 +236,7 @@ static DEBUG_EVENT current_event;	/* The current debug event from
 					   WaitForDebugEvent */
 static HANDLE current_process_handle;	/* Currently executing process */
 static windows_thread_info *current_thread;	/* Info on currently selected thread */
+static EXCEPTION_RECORD siginfo_er;	/* Contents of $_siginfo */
 
 /* Counts of things.  */
 static int exception_count = 0;
@@ -1166,6 +1167,8 @@ handle_exception (struct target_waitstatus *ourstatus)
   EXCEPTION_RECORD *rec = &current_event.u.Exception.ExceptionRecord;
   DWORD code = rec->ExceptionCode;
   handle_exception_result result = HANDLE_EXCEPTION_HANDLED;
+
+  memcpy (&siginfo_er, rec, sizeof siginfo_er);
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
@@ -2863,6 +2866,7 @@ windows_nat_target::mourn_inferior ()
       CHECK (CloseHandle (current_process_handle));
       open_process_used = 0;
     }
+  siginfo_er.ExceptionCode = 0;
   inf_child_target::mourn_inferior ();
 }
 
@@ -2996,6 +3000,30 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   return len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
 
+/* Helper for windows_nat_target::xfer_partial that handles signal info.  */
+
+static enum target_xfer_status
+windows_xfer_siginfo (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
+		      ULONGEST *xfered_len)
+{
+  if (siginfo_er.ExceptionCode == 0)
+    return TARGET_XFER_E_IO;
+
+  if (readbuf == nullptr)
+    return TARGET_XFER_E_IO;
+
+  if (offset > sizeof (siginfo_er))
+    return TARGET_XFER_E_IO;
+
+  if (offset + len > sizeof (siginfo_er))
+    len = sizeof (siginfo_er) - offset;
+
+  memcpy (readbuf, (char *) &siginfo_er + offset, len);
+  *xfered_len = len;
+
+  return TARGET_XFER_OK;
+}
+
 enum target_xfer_status
 windows_nat_target::xfer_partial (enum target_object object,
 				  const char *annex, gdb_byte *readbuf,
@@ -3010,6 +3038,9 @@ windows_nat_target::xfer_partial (enum target_object object,
     case TARGET_OBJECT_LIBRARIES:
       return windows_xfer_shared_libraries (this, object, annex, readbuf,
 					    writebuf, offset, len, xfered_len);
+
+    case TARGET_OBJECT_SIGNAL_INFO:
+      return windows_xfer_siginfo (readbuf, offset, len, xfered_len);
 
     default:
       if (beneath () == NULL)

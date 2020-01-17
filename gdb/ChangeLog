@@ -1,3 +1,17 @@
+2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	* NEWS: Mention $_siginfo support for Windows.
+	* windows-nat.c (handle_exception): Set siginfo_er.
+	(windows_nat_target::mourn_inferior): Reset siginfo_er.
+	(windows_xfer_siginfo): New function.
+	(windows_nat_target::xfer_partial): Call windows_xfer_siginfo.
+	* windows-tdep.c (struct windows_gdbarch_data): New struct.
+	(init_windows_gdbarch_data): New function.
+	(get_windows_gdbarch_data): New function.
+	(windows_get_siginfo_type): New function.
+	(windows_init_abi): Register windows_get_siginfo_type.
+	(_initialize_windows_tdep): Register init_windows_gdbarch_data.
+
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (class cutu_reader) <cutu_reader,
