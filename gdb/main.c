@@ -575,14 +575,9 @@ captured_main_1 (struct captured_main_args *context)
   gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
 					GDB_DATADIR_RELOCATABLE);
 
-#ifdef WITH_PYTHON_PATH
-  {
-    /* For later use in helping Python find itself.  */
-    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", (char *) NULL);
-
-    python_libdir = relocate_gdb_directory (tmp, PYTHON_PATH_RELOCATABLE);
-    xfree (tmp);
-  }
+#ifdef WITH_PYTHON_LIBDIR
+  python_libdir = relocate_gdb_directory (WITH_PYTHON_LIBDIR,
+					  PYTHON_LIBDIR_RELOCATABLE);
 #endif
 
 #ifdef RELOC_SRCDIR

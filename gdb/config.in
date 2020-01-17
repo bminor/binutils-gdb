@@ -649,6 +649,10 @@
 /* Define as the return type of ptrace. */
 #undef PTRACE_TYPE_RET
 
+/* Define if the python lib directory should be relocated when GDB is moved.
+   */
+#undef PYTHON_LIBDIR_RELOCATABLE
+
 /* Define if the python directory should be relocated when GDB is moved. */
 #undef PYTHON_PATH_RELOCATABLE
 
@@ -751,6 +755,10 @@
 
 /* Define if the PPC simulator is being linked in. */
 #undef WITH_PPC_SIM
+
+/* Directory containing Python's standard libraries from --with-python-libdir.
+   */
+#undef WITH_PYTHON_LIBDIR
 
 /* Define if --with-python provides a path, either directly or via
    python-config.py --exec-prefix. */

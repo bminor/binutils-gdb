@@ -890,6 +890,7 @@ with_mpfr
 with_libmpfr_prefix
 with_libmpfr_type
 with_python
+with_python_libdir
 with_guile
 enable_source_highlight
 with_intel_pt
@@ -1625,6 +1626,8 @@ Optional Packages:
   --with-libmpfr-type=TYPE     type of library to search for (auto/static/shared)
   --with-python[=PYTHON]  include python support
                           (auto/yes/no/<python-program>)
+  --with-python-libdir[=DIR]
+                          search for python's libraries in DIR
   --with-guile[=GUILE]    include guile support
                           (auto/yes/no/<guile-version>/<pkg-config-program>)
   --with-intel-pt         include Intel Processor Trace support (auto/yes/no)
@@ -10665,6 +10668,21 @@ _ACEOF
   fi
 fi
 
+
+# Check whether --with-python-libdir was given.
+if test "${with_python_libdir+set}" = set; then :
+  withval=$with_python_libdir;
+else
+
+    # If no python libdir is specified then select one based on
+    # python's prefix path.
+    if test -n "${python_prefix}"; then
+      with_python_libdir=${python_prefix}/lib
+    fi
+
+fi
+
+
 if test "${have_libpython}" != no; then
 
 $as_echo "#define HAVE_PYTHON 1" >>confdefs.h
@@ -10674,6 +10692,37 @@ $as_echo "#define HAVE_PYTHON 1" >>confdefs.h
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_PYTHON_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-python"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_PYTHON_CFLAGS)"
+
+  if test -n "${with_python_libdir}"; then
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_PYTHON_LIBDIR "${with_python_libdir}"
+_ACEOF
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${with_python_libdir} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define PYTHON_LIBDIR_RELOCATABLE $value
+_ACEOF
+
+
+  fi
 
   # Flags needed to compile Python code (taken from python-config --cflags).
   # We cannot call python-config directly because it will output whatever was

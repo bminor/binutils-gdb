@@ -1,3 +1,10 @@
+2020-02-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Add --with-python-libdir option.
+	* main.c: Use WITH_PYTHON_LIBDIR.
+
 2020-02-19  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (general_symbol_info::compute_and_set_names): Use

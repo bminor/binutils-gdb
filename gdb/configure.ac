@@ -890,6 +890,24 @@ else
   fi
 fi
 
+dnl Use --with-python-libdir to control where GDB looks for the Python
+dnl libraries.
+dnl
+dnl If this is not given then the default will be based on the value
+dnl passed to --with-python, which is in the python_prefix variable.
+dnl If the --with-python option wasn't given then the default value in
+dnl python_prefix is based on running the 'gdb/python/python-config
+dnl --exec-prefix' script.
+AC_ARG_WITH(python-libdir,
+  AS_HELP_STRING([--with-python-libdir@<:@=DIR@:>@], [search for python's libraries in DIR]),
+  [],[
+    # If no python libdir is specified then select one based on
+    # python's prefix path.
+    if test -n "${python_prefix}"; then
+      with_python_libdir=${python_prefix}/lib
+    fi
+  ])
+
 if test "${have_libpython}" != no; then
   AC_DEFINE(HAVE_PYTHON, 1, [Define if Python interpreter is being linked in.])
   CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_PYTHON_OBS)"
@@ -897,6 +915,12 @@ if test "${have_libpython}" != no; then
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_PYTHON_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-python"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_PYTHON_CFLAGS)"
+
+  if test -n "${with_python_libdir}"; then
+    AC_DEFINE_UNQUOTED(WITH_PYTHON_LIBDIR, "${with_python_libdir}",
+		       [Directory containing Python's standard libraries from --with-python-libdir.])
+    GDB_AC_DEFINE_RELOCATABLE(PYTHON_LIBDIR, [python lib], ${with_python_libdir})
+  fi
 
   # Flags needed to compile Python code (taken from python-config --cflags).
   # We cannot call python-config directly because it will output whatever was
