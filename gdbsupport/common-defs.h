@@ -34,7 +34,7 @@
 
 #else  /* GDBSERVER */
 
-#include <gdbsupport/support-config.h>
+#include <gdbsupport/config.h>
 
 #undef PACKAGE_NAME
 #undef PACKAGE

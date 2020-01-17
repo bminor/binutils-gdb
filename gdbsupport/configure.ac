@@ -18,7 +18,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([gdbsupport], 1.0)
 AC_CONFIG_SRCDIR(common-defs.h)
-AC_CONFIG_HEADER(support-config.h:config.in)
+AC_CONFIG_HEADER(config.h:config.in)
 AC_CANONICAL_SYSTEM
 AM_MAINTAINER_MODE
 AC_CONFIG_AUX_DIR(..)
