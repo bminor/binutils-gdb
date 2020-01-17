@@ -462,18 +462,6 @@ infpy_get_progspace (PyObject *self, void *closure)
   return pspace_to_pspace_object (pspace).release ();
 }
 
-static int
-build_inferior_list (struct inferior *inf, void *arg)
-{
-  PyObject *list = (PyObject *) arg;
-  gdbpy_ref<inferior_object> inferior = inferior_to_inferior_object (inf);
-
-  if (inferior == NULL)
-    return 0;
-
-  return PyList_Append (list, (PyObject *) inferior.get ()) ? 1 : 0;
-}
-
 /* Implementation of gdb.inferiors () -> (gdb.Inferior, ...).
    Returns a tuple of all inferiors.  */
 PyObject *
@@ -483,8 +471,16 @@ gdbpy_inferiors (PyObject *unused, PyObject *unused2)
   if (list == NULL)
     return NULL;
 
-  if (iterate_over_inferiors (build_inferior_list, list.get ()))
-    return NULL;
+  for (inferior *inf : all_inferiors ())
+    {
+      gdbpy_ref<inferior_object> inferior = inferior_to_inferior_object (inf);
+
+      if (inferior == NULL)
+	continue;
+
+      if (PyList_Append (list.get (), (PyObject *) inferior.get ()) != 0)
+	return NULL;
+    }
 
   return PyList_AsTuple (list.get ());
 }
