@@ -1,5 +1,14 @@
 2020-01-17  Simon Marchi  <simon.marchi@efficios.com>
 
+	* top.c (struct qt_args): Remove.
+	(kill_or_detach): Change return type to void, replace `void *`
+	parameter with a proper one.
+	(print_inferior_quit_action):  Likewise.
+	(quit_confirm): Use range-based for loop to iterate over inferiors.
+	(quit_force): Likewise.
+
+2020-01-17  Simon Marchi  <simon.marchi@efficios.com>
+
 	* mi/mi-main.c (run_one_inferior): Change return type to void, replace
 	`void *` parameter with proper parameters.
 	(mi_cmd_exec_run): Use range-based loop to iterate over inferiors.

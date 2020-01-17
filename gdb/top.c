@@ -1607,21 +1607,14 @@ set_prompt (const char *s)
 }
 
 
-struct qt_args
+/* Kills or detaches the given inferior, depending on how we originally
+   gained control of it.  */
+
+static void
+kill_or_detach (inferior *inf, int from_tty)
 {
-  int from_tty;
-};
-
-/* Callback for iterate_over_inferiors.  Kills or detaches the given
-   inferior, depending on how we originally gained control of it.  */
-
-static int
-kill_or_detach (struct inferior *inf, void *args)
-{
-  struct qt_args *qt = (struct qt_args *) args;
-
   if (inf->pid == 0)
-    return 0;
+    return;
 
   thread_info *thread = any_thread_of_inferior (inf);
   if (thread != NULL)
@@ -1632,37 +1625,30 @@ kill_or_detach (struct inferior *inf, void *args)
       if (target_has_execution)
 	{
 	  if (inf->attach_flag)
-	    target_detach (inf, qt->from_tty);
+	    target_detach (inf, from_tty);
 	  else
 	    target_kill ();
 	}
     }
-
-  return 0;
 }
 
-/* Callback for iterate_over_inferiors.  Prints info about what GDB
-   will do to each inferior on a "quit".  ARG points to a struct
-   ui_out where output is to be collected.  */
+/* Prints info about what GDB will do to inferior INF on a "quit".  OUT is
+   where to collect the output.  */
 
-static int
-print_inferior_quit_action (struct inferior *inf, void *arg)
+static void
+print_inferior_quit_action (inferior *inf, ui_file *out)
 {
-  struct ui_file *stb = (struct ui_file *) arg;
-
   if (inf->pid == 0)
-    return 0;
+    return;
 
   if (inf->attach_flag)
-    fprintf_filtered (stb,
+    fprintf_filtered (out,
 		      _("\tInferior %d [%s] will be detached.\n"), inf->num,
 		      target_pid_to_str (ptid_t (inf->pid)).c_str ());
   else
-    fprintf_filtered (stb,
+    fprintf_filtered (out,
 		      _("\tInferior %d [%s] will be killed.\n"), inf->num,
 		      target_pid_to_str (ptid_t (inf->pid)).c_str ());
-
-  return 0;
 }
 
 /* If necessary, make the user confirm that we should quit.  Return
@@ -1679,7 +1665,10 @@ quit_confirm (void)
   string_file stb;
 
   stb.puts (_("A debugging session is active.\n\n"));
-  iterate_over_inferiors (print_inferior_quit_action, &stb);
+
+  for (inferior *inf : all_inferiors ())
+    print_inferior_quit_action (inf, &stb);
+
   stb.puts (_("\nQuit anyway? "));
 
   return query ("%s", stb.c_str ());
@@ -1712,7 +1701,6 @@ void
 quit_force (int *exit_arg, int from_tty)
 {
   int exit_code = 0;
-  struct qt_args qt;
 
   undo_terminal_modifications_before_exit ();
 
@@ -1723,15 +1711,14 @@ quit_force (int *exit_arg, int from_tty)
   else if (return_child_result)
     exit_code = return_child_result_value;
 
-  qt.from_tty = from_tty;
-
   /* We want to handle any quit errors and exit regardless.  */
 
   /* Get out of tfind mode, and kill or detach all inferiors.  */
   try
     {
       disconnect_tracing ();
-      iterate_over_inferiors (kill_or_detach, &qt);
+      for (inferior *inf : all_inferiors ())
+	kill_or_detach (inf, from_tty);
     }
   catch (const gdb_exception &ex)
     {
