@@ -91,8 +91,6 @@ static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
 			       ssize_t len, const bfd_byte *myaddr);
 static void mi_on_sync_execution_done (void);
 
-static int report_initial_inferior (struct inferior *inf, void *closure);
-
 /* Display the MI prompt.  */
 
 static void
@@ -137,12 +135,27 @@ mi_interp::init (bool top_level)
 
   if (top_level)
     {
-      /* The initial inferior is created before this function is
-	 called, so we need to report it explicitly.  Use iteration in
-	 case future version of GDB creates more than one inferior
-	 up-front.  */
-      iterate_over_inferiors (report_initial_inferior, mi);
-    }
+      /* The initial inferior is created before this function is called, so we
+	 need to report it explicitly when initializing the top-level MI
+	 interpreter.
+
+	 This is also called when additional MI interpreters are added (using
+	 the new-ui command), when multiple inferiors possibly exist, so we need
+	 to use iteration to report all the inferiors.  mi_inferior_added can't
+	 be used, because it would print the event on all the other MI UIs.  */
+
+      for (inferior *inf : all_inferiors ())
+	{
+	  target_terminal::scoped_restore_terminal_state term_state;
+	  target_terminal::ours_for_output ();
+
+	  fprintf_unfiltered (mi->event_channel,
+			      "thread-group-added,id=\"i%d\"",
+			      inf->num);
+
+	  gdb_flush (mi->event_channel);
+	}
+  }
 }
 
 void
@@ -1251,26 +1264,6 @@ mi_user_selected_context_changed (user_selected_what selection)
 
       gdb_flush (mi->event_channel);
     }
-}
-
-static int
-report_initial_inferior (struct inferior *inf, void *closure)
-{
-  /* This function is called from mi_interpreter_init, and since
-     mi_inferior_added assumes that inferior is fully initialized
-     and top_level_interpreter_data is set, we cannot call
-     it here.  */
-  struct mi_interp *mi = (struct mi_interp *) closure;
-
-  target_terminal::scoped_restore_terminal_state term_state;
-  target_terminal::ours_for_output ();
-
-  fprintf_unfiltered (mi->event_channel,
-		      "thread-group-added,id=\"i%d\"",
-		      inf->num);
-  gdb_flush (mi->event_channel);
-
-  return 0;
 }
 
 ui_out *
