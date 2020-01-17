@@ -3539,7 +3539,7 @@ WXOR (ARMword instr)
   return ARMul_DONE;
 }
 
-/* This switch table is moved to a seperate function in order
+/* This switch table is moved to a separate function in order
    to work around a compiler bug in the host compiler...  */
 
 static int

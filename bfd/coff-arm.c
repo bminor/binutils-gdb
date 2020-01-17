@@ -1154,7 +1154,7 @@ static const insn32 t2a6_bx_insn    = 0xe12fff1e;
 
 /* The standard COFF backend linker does not cope with the special
    Thumb BRANCH23 relocation.  The alternative would be to split the
-   BRANCH23 into seperate HI23 and LO23 relocations. However, it is a
+   BRANCH23 into separate HI23 and LO23 relocations. However, it is a
    bit simpler simply providing our own relocation driver.  */
 
 /* The reloc processing routine for the ARM/Thumb COFF linker.  NOTE:

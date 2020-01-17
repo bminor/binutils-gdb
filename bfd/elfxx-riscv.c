@@ -1300,7 +1300,7 @@ riscv_parse_sv_or_non_std_ext (riscv_parse_subset_t *rps,
 
       if (*p != '\0' && *p != '_')
 	{
-	  rps->error_handler ("-march=%s: %s must seperate with _",
+	  rps->error_handler ("-march=%s: %s must separate with _",
 			      march, ext_type_str);
 	  return NULL;
 	}

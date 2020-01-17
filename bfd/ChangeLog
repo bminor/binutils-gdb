@@ -1,3 +1,10 @@
+2020-01-17  Christian Biesinger  <cbiesinger@google.com>
+
+	* coff-arm.c: Fix spelling error (seperate).
+	* elfxx-riscv.c (riscv_parse_sv_or_non_std_ext): Fix spelling
+	error (seperate).
+	* sysdep.h (strnlen): Fix spelling error (seperate).
+
 2020-01-15  Lars Brinkhoff  <lars@nocrew.org>
 
 	PR 20694
