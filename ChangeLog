@@ -1,3 +1,8 @@
+2020-01-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.def: Add dependencies of all-gdbsupport on all-bfd.
+	* Makefile.in: Re-generate.
+
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
 	* src-release.sh (GDB_SUPPORT_DIRS): Add gdbsupport.

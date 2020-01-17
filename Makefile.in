@@ -51991,6 +51991,7 @@ all-gdb: maybe-all-opcodes
 all-gdb: maybe-all-libdecnumber
 all-gdb: maybe-all-libctf
 configure-gdbsupport: maybe-configure-bfd
+all-gdbsupport: maybe-all-bfd
 configure-gprof: maybe-configure-intl
 all-gprof: maybe-all-libiberty
 all-gprof: maybe-all-bfd

@@ -417,6 +417,7 @@ dependencies = { module=all-libgui; on=all-itcl; };
 
 dependencies = { module=configure-gdbsupport; on=configure-bfd; };
 dependencies = { module=configure-gdbsupport; on=configure-gnulib; };
+dependencies = { module=all-gdbsupport; on=all-bfd; };
 dependencies = { module=all-gdbsupport; on=all-gnulib; };
 
 // Host modules specific to binutils.
