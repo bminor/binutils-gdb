@@ -1,3 +1,10 @@
+2020-01-17  Thomas Troeger  <tstroege@gmx.de>
+
+	* objdump.c (jump_info_visualize_address): Discard jumps that are
+	no longer needed.
+	(disassemble_bytes): Only compute the maximum level if jumps were
+	detected.
+
 2020-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (disassemble_bytes): Remove C99-ism.

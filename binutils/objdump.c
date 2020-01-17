@@ -1704,7 +1704,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 
 	  /* Skip selected directory levels.  */
 	  for (s = fname + 1; *s != '\0' && level < prefix_strip; s++)
-	    if (IS_DIR_SEPARATOR(*s))
+	    if (IS_DIR_SEPARATOR (*s))
 	      {
 		fname = s;
 		level++;
@@ -2087,7 +2087,7 @@ jump_info_merge (struct jump_info **base)
 		  a->start.max_count += b->start.max_count;
 		  a->start.addresses =
 		    xrealloc (a->start.addresses,
-			      a->start.max_count * sizeof(bfd_vma *));
+			      a->start.max_count * sizeof (bfd_vma *));
 		}
 
 	      /* Append start addresses.  */
@@ -2146,24 +2146,34 @@ jump_info_sort (struct jump_info **base)
 /* Visualize all jumps at a given address.  */
 
 static void
-jump_info_visualize_address (const struct jump_info *jumps,
-			     bfd_vma address,
+jump_info_visualize_address (bfd_vma address,
 			     int max_level,
 			     char *line_buffer,
 			     uint8_t *color_buffer)
 {
+  struct jump_info *ji = detected_jumps;
   size_t len = (max_level + 1) * 3;
-  const struct jump_info *ji;
 
   /* Clear line buffer.  */
-  memset(line_buffer, ' ', len);
-  memset(color_buffer, 0, len);
+  memset (line_buffer, ' ', len);
+  memset (color_buffer, 0, len);
 
   /* Iterate over jumps and add their ASCII art.  */
-  for (ji = jumps; ji; ji = ji->next)
+  while (ji)
     {
-      if ((jump_info_min_address (ji) <= address)
-	  && (jump_info_max_address (ji) >= address))
+      /* Discard jumps that are never needed again.  */
+      if (jump_info_max_address (ji) < address)
+	{
+	  struct jump_info *tmp = ji;
+
+	  ji = ji->next;
+	  jump_info_unlink (tmp, &detected_jumps);
+	  jump_info_free (tmp);
+	  continue;
+	}
+
+      /* This jump intersects with the current address.  */
+      if (jump_info_min_address (ji) <= address)
 	{
 	  /* Hash target address to get an even
 	     distribution between all values.  */
@@ -2246,6 +2256,8 @@ jump_info_visualize_address (const struct jump_info *jumps,
 	      color_buffer[offset] = color;
 	    }
 	}
+
+      ji = ji->next;
     }
 }
 
@@ -2518,26 +2530,27 @@ disassemble_bytes (struct disassemble_info * inf,
   inf->insn_info_valid = 0;
 
   /* Determine maximum level. */
+  uint8_t *color_buffer = NULL;
+  char *line_buffer = NULL;
   int max_level = -1;
-  struct jump_info *base = detected_jumps ? detected_jumps : NULL;
-  struct jump_info *ji;
 
-  for (ji = base; ji; ji = ji->next)
+  /* Some jumps were detected.  */
+  if (detected_jumps)
     {
-      if (ji->level > max_level)
+      struct jump_info *ji;
+
+      /* Find maximum jump level.  */
+      for (ji = detected_jumps; ji; ji = ji->next)
 	{
-	  max_level = ji->level;
+	  if (ji->level > max_level)
+	    max_level = ji->level;
 	}
-    }
 
-  /* Allocate line buffer if there are any jumps.  */
-  size_t len = (max_level + 1) * 3 + 1;
-  char *line_buffer = (max_level >= 0) ? xmalloc(len): NULL;
-  uint8_t *color_buffer = (max_level >= 0) ? xmalloc(len): NULL;
-
-  if (line_buffer)
-    {
+      /* Allocate buffers.  */
+      size_t len = (max_level + 1) * 3 + 1;
+      line_buffer = xmalloc (len);
       line_buffer[len - 1] = 0;
+      color_buffer = xmalloc (len);
       color_buffer[len - 1] = 0;
     }
 
@@ -2615,8 +2628,7 @@ disassemble_bytes (struct disassemble_info * inf,
 	  /* Visualize jumps. */
 	  if (line_buffer)
 	    {
-	      jump_info_visualize_address (base,
-					   section->vma + addr_offset,
+	      jump_info_visualize_address (section->vma + addr_offset,
 					   max_level,
 					   line_buffer,
 					   color_buffer);
@@ -3934,7 +3946,7 @@ dump_bfd_header (bfd *abfd)
 				   bfd_get_mach (abfd)));
   printf (_("flags 0x%08x:\n"), abfd->flags & ~BFD_FLAGS_FOR_BFD_USE_MASK);
 
-#define PF(x, y)    if (abfd->flags & x) {printf("%s%s", comma, y); comma=", ";}
+#define PF(x, y)    if (abfd->flags & x) {printf ("%s%s", comma, y); comma=", ";}
   PF (HAS_RELOC, "HAS_RELOC");
   PF (EXEC_P, "EXEC_P");
   PF (HAS_LINENO, "HAS_LINENO");
@@ -4478,7 +4490,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	     Undo this transformation, otherwise the output
 	     will be confusing.  */
 	  if (abfd->xvec->flavour == bfd_target_elf_flavour
-	      && elf_tdata(abfd)->elf_header->e_machine == EM_SPARCV9
+	      && elf_tdata (abfd)->elf_header->e_machine == EM_SPARCV9
 	      && relcount > 1
 	      && !strcmp (q->howto->name, "R_SPARC_LO10"))
 	    {
