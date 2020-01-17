@@ -6,9 +6,9 @@ _start:
 	{vex3} {load} vmovaps %xmm7,%xmm2
 	{vex3} {store} vmovaps %xmm7,%xmm2
 	vmovaps %xmm7,%xmm2
-	{vex2} vmovaps %xmm7,%xmm2
-	{vex2} {load} vmovaps %xmm7,%xmm2
-	{vex2} {store} vmovaps %xmm7,%xmm2
+	{vex} vmovaps %xmm7,%xmm2
+	{vex} {load} vmovaps %xmm7,%xmm2
+	{vex} {store} vmovaps %xmm7,%xmm2
 	{vex3} vmovaps (%eax),%xmm2
 	vmovaps (%eax),%xmm2
 	{vex2} vmovaps (%eax),%xmm2

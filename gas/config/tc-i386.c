@@ -419,7 +419,7 @@ struct _i386_insn
     enum
       {
 	vex_encoding_default = 0,
-	vex_encoding_vex2,
+	vex_encoding_vex,
 	vex_encoding_vex3,
 	vex_encoding_evex
       } vec_encoding;
@@ -4722,8 +4722,8 @@ parse_insn (char *line, char *mnemonic)
 		  i.dir_encoding = dir_encoding_store;
 		  break;
 		case 0x4:
-		  /* {vex2} */
-		  i.vec_encoding = vex_encoding_vex2;
+		  /* {vex} */
+		  i.vec_encoding = vex_encoding_vex;
 		  break;
 		case 0x5:
 		  /* {vex3} */

@@ -758,10 +758,10 @@ Different encoding options can be specified via pseudo prefixes:
 @samp{@{store@}} -- prefer store-form instruction.
 
 @item
-@samp{@{vex2@}} -- prefer 2-byte VEX prefix for VEX instruction.
+@samp{@{vex@}} --  encode with VEX prefix.
 
 @item
-@samp{@{vex3@}} -- prefer 3-byte VEX prefix for VEX instruction.
+@samp{@{vex3@}} -- encode with 3-byte VEX prefix.
 
 @item
 @samp{@{evex@}} --  encode with EVEX prefix.
