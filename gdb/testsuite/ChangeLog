@@ -1,5 +1,11 @@
 2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/derived-type-striding.exp: Add a new test.
+	* gdb.fortran/derived-type-striding.f90: Add pointer variable for
+	new test.
+
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/cached-source-file.exp: Avoid source file paths in test
 	names.
 

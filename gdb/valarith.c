@@ -187,7 +187,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
 {
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
-  ULONGEST elt_size = type_length_units (elt_type);
+  LONGEST elt_size = type_length_units (elt_type);
 
   /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
      in a byte.  */
@@ -199,7 +199,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
       elt_size = stride / (unit_size * 8);
     }
 
-  ULONGEST elt_offs = elt_size * (index - lowerbound);
+  LONGEST elt_offs = elt_size * (index - lowerbound);
 
   if (index < lowerbound
       || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)

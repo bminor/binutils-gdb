@@ -41,3 +41,5 @@ gdb_test "p point_dimension" "= \\\(2, 2, 2, 2, 2, 2, 2, 2, 2\\\)"
 # Test mixed type derived type.
 if { $gcc_with_broken_stride } { setup_kfail *-*-* gcc/92775 }
 gdb_test "p point_mixed_dimension" "= \\\(3, 3, 3, 3\\\)"
+
+gdb_test "p cloud_slice" " = \\\(\\\( x = 1, y = 2, z = 3 \\\)\\\)"

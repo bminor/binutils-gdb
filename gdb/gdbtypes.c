@@ -1223,7 +1223,7 @@ create_array_type_with_stride (struct type *result_type,
 	  && !type_not_allocated (result_type)))
     {
       LONGEST low_bound, high_bound;
-      unsigned int stride;
+      int stride;
 
       /* If the array itself doesn't provide a stride value then take
 	 whatever stride the range provides.  Don't update BIT_STRIDE as
@@ -1241,9 +1241,18 @@ create_array_type_with_stride (struct type *result_type,
 	 In such cases, the array length should be zero.  */
       if (high_bound < low_bound)
 	TYPE_LENGTH (result_type) = 0;
-      else if (stride > 0)
-	TYPE_LENGTH (result_type) =
-	  (stride * (high_bound - low_bound + 1) + 7) / 8;
+      else if (stride != 0)
+	{
+	  /* Ensure that the type length is always positive, even in the
+	     case where (for example in Fortran) we have a negative
+	     stride.  It is possible to have a single element array with a
+	     negative stride in Fortran (this doesn't mean anything
+	     special, it's still just a single element array) so do
+	     consider that case when touching this code.  */
+	  LONGEST element_count = abs (high_bound - low_bound + 1);
+	  TYPE_LENGTH (result_type)
+	    = ((abs (stride) * element_count) + 7) / 8;
+	}
       else
 	TYPE_LENGTH (result_type) =
 	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);

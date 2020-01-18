@@ -1,3 +1,9 @@
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (create_array_type_with_stride): Handle negative
+	array strides.
+	* valarith.c (value_subscripted_rvalue): Likewise.
+
 2020-02-25  Luis Machado  <luis.machado@linaro.org>
 
 	* aarch64-tdep.c (aarch64_vnv_type): Fix comment typo.
