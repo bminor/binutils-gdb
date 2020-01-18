@@ -80,9 +80,9 @@ How to perform a release.
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.34.51])
+       m4_define([BFD_VERSION], [2.34.50])
        
-     Update the release number in bfd/version.m4 for the branch.
+     Update the release number in bfd/version.m4 for the BRANCH.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 

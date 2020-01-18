@@ -1,5 +1,10 @@
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.34 branch created.
 
 2020-01-17  Thomas Troeger  <tstroege@gmx.de>

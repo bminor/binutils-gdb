@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-01-02 11:10+0000\n"
+"POT-Creation-Date: 2020-01-18 14:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgid "specified register cannot be written to"
 msgstr ""
 
 #. Invalid option.
-#: aarch64-dis.c:93 arc-dis.c:801 arm-dis.c:11328
+#: aarch64-dis.c:93 arc-dis.c:801 arm-dis.c:11361
 #, c-format
 msgid "unrecognised disassembler option: %s"
 msgstr ""
@@ -606,12 +606,12 @@ msgstr ""
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:11319
+#: arm-dis.c:11352
 #, c-format
 msgid "unrecognised register name set: %s"
 msgstr ""
 
-#: arm-dis.c:12018
+#: arm-dis.c:12066
 #, c-format
 msgid ""
 "\n"
@@ -994,11 +994,11 @@ msgstr ""
 msgid "Don't understand 0x%x \n"
 msgstr ""
 
-#: i386-dis.c:11060
+#: i386-dis.c:11062
 msgid "<internal disassembler error>"
 msgstr ""
 
-#: i386-dis.c:11355
+#: i386-dis.c:11360
 #, c-format
 msgid ""
 "\n"
@@ -1007,86 +1007,86 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: i386-dis.c:11359
+#: i386-dis.c:11364
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr ""
 
-#: i386-dis.c:11360
+#: i386-dis.c:11365
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr ""
 
-#: i386-dis.c:11361
+#: i386-dis.c:11366
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr ""
 
-#: i386-dis.c:11362
+#: i386-dis.c:11367
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:11363
+#: i386-dis.c:11368
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr ""
 
-#: i386-dis.c:11364
+#: i386-dis.c:11369
 #, c-format
 msgid ""
 "  att-mnemonic\n"
 "              Display instruction in AT&T mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:11366
+#: i386-dis.c:11371
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
 "              Display instruction in Intel mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:11368
+#: i386-dis.c:11373
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr ""
 
-#: i386-dis.c:11369
+#: i386-dis.c:11374
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr ""
 
-#: i386-dis.c:11370
+#: i386-dis.c:11375
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr ""
 
-#: i386-dis.c:11371
+#: i386-dis.c:11376
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr ""
 
-#: i386-dis.c:11372
+#: i386-dis.c:11377
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr ""
 
-#: i386-dis.c:11373
+#: i386-dis.c:11378
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:11374
+#: i386-dis.c:11379
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:11375
+#: i386-dis.c:11380
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:11938
+#: i386-dis.c:11943
 msgid "64-bit address is disabled"
 msgstr ""
 
@@ -1387,12 +1387,12 @@ msgstr ""
 msgid "internal error: lm32_cgen_cpu_open: no endianness specified"
 msgstr ""
 
-#: m10200-dis.c:157 m10300-dis.c:580
+#: m10200-dis.c:151 m10300-dis.c:574
 #, c-format
 msgid "unknown\t0x%04lx"
 msgstr ""
 
-#: m10200-dis.c:327
+#: m10200-dis.c:321
 #, c-format
 msgid "unknown\t0x%02lx"
 msgstr ""
@@ -1837,7 +1837,7 @@ msgstr ""
 #. an immediate either. We don't know how much to increase
 #. aoffsetp by since whatever generated this is broken
 #. anyway!
-#: ns32k-dis.c:537
+#: ns32k-dis.c:535
 #, c-format
 msgid "$<undefined>"
 msgstr ""
@@ -2078,8 +2078,8 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: score-dis.c:660 score-dis.c:867 score-dis.c:1026 score-dis.c:1140
-#: score-dis.c:1147 score-dis.c:1154 score7-dis.c:695 score7-dis.c:858
+#: score-dis.c:661 score-dis.c:879 score-dis.c:1040 score-dis.c:1146
+#: score-dis.c:1154 score-dis.c:1161 score7-dis.c:695 score7-dis.c:858
 msgid "<illegal instruction>"
 msgstr ""
 
@@ -2213,7 +2213,7 @@ msgstr ""
 msgid "Name well-known globals"
 msgstr ""
 
-#: wasm32-dis.c:510
+#: wasm32-dis.c:537
 #, c-format
 msgid ""
 "The following WebAssembly-specific disassembler options are supported for "
