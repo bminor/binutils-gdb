@@ -1,3 +1,66 @@
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
+	Synchronize top level configure files with master version:
+
+	2020-01-01  Ben Elliston  <bje@gnu.org>
+
+	* config.guess: Update copyright years.
+	* config.sub: Likewise.
+
+	2019-12-21  Ben Elliston  <bje@gnu.org>
+
+	* config.guess (set_cc_for_build): Prevent multiple calls by
+	checking if $tmp is already set. We can't check CC_FOR_BUILD as
+	the user may set it externally. Thanks to Torbjörn Granlund for
+	the bug report.
+
+	2019-12-21  Torbjörn Granlund  <tg@gmplib.org>
+
+	* config.guess (alpha:Linux:*:*): Guard against missing
+	/proc/cpuinfo by redirecting standard error to /dev/null.
+
+	2019-09-12  Daniel Bittman  <danielbittman1@gmail.com>
+
+	* config.guess (*:Twizzler:*:*): New.
+	* config.sub (-twizzler*): New.
+
+	2019-07-24  Ben Elliston  <bje@gnu.org>
+
+	* config.guess (mips:OSF1:*.*): Whitespace cleanup.
+
+	2019-06-30  Ben Elliston  <bje@gnu.org>
+
+	* config.sub (case $os): Match nsk* and powerunix. Don't later
+	match nsk* and set os=nsk which removes the OS version number.
+
+	2019-06-30  Ben Elliston  <bje@gnu.org>
+
+	* config.sub: Recognise os108*.
+
+	2019-06-26  Ben Elliston  <bje@gnu.org>
+
+	* config.sub (hp300): Set $os to hpux.
+
+	2019-06-26  Ben Elliston  <bje@gnu.org>
+
+	* config.sub (vsta): Move into alphabetical order.
+
+	2019-06-10  Ben Elliston  <bje@gnu.org>
+
+	* config.guess (*:OS108:*:*): Recognise new OS.
+
+	2019-05-28  Ben Elliston  <bje@gnu.org>
+
+	* config.guess (*:Darwin:*:*): Run xcode-select to determine if a
+	system compiler is installed. If not, do not run set_cc_for_build,
+	as the default cc will open a dialog box asking to install
+	Xcode. If no C compiler is available, guess based on uname -p and
+	uname -m.
+
+	2019-05-28  Ben Elliston  <bje@gnu.org>
+
+	* config.guess (*:Darwin:*:*): Simplify UNAME_PROCESSOR.
+
 2020-01-17  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.def: Add dependencies of all-gdbsupport on all-bfd.
