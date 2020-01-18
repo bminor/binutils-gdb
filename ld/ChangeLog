@@ -1,3 +1,7 @@
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
+	Binutils 2.34 branch created.
+
 2020-01-16  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* scripttempl/elf32msp430_3.sc: Remove.

@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.34:
+
 * Binutils now supports debuginfod, an HTTP server for distributing
   ELF/DWARF debugging information as well as source code. When built with
   debuginfod, readelf and objdump can automatically query debuginfod

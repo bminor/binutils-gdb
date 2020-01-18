@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.34:
+
 * cr16c support removed.
 
 * Add support for z80-elf.

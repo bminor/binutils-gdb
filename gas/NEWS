@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.34:
+
 * Add support for Zilog eZ80 and Zilog Z180 CPUs.
 
 * Add support for z80-elf target.

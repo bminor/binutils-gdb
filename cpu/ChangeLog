@@ -1,3 +1,7 @@
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
+	Binutils 2.34 branch created.
+
 2020-01-13  Alan Modra  <amodra@gmail.com>
 
 	* fr30.cpu (f-disp9, f-disp10, f-s10, f-rel9, f-rel12): Don't

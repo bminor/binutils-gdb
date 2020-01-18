@@ -1,5 +1,9 @@
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
+	Binutils 2.34 branch created.
+
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
 	Synchronize top level configure files with master version:
 
 	2020-01-01  Ben Elliston  <bje@gnu.org>
