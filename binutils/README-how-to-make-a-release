@@ -96,7 +96,7 @@ How to perform a release.
      Make sure that this includes the .pot files as well as the
      configure and makefiles.
 
-  8. Create an initial pre-release:
+  9. Create an initial pre-release:
 
      a. Remove any auto-generated files, in order to force the
         src-release script to rebuild them.
@@ -110,12 +110,12 @@ How to perform a release.
 
      c. Build a test target using this tarball.
 
-           cp binutils-<version>.tar.xz /dev/shm
+           cp binutils-<OLD_VERSION>.90.tar.xz /dev/shm
 	   cd /dev/shm
-	   tar xvf binutils-<version>.tar.xz
+	   tar xvf binutils-<OLD_VERSION>.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../<version>/configure --quiet --enable-gold
+	   ../binutils-<OLD_VERSION>.90/configure --quiet --enable-gold
 	   make
 
         If there are problems, fix them.
@@ -123,45 +123,45 @@ How to perform a release.
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
           cd <branch-sources>
-          scp binutils-<version>.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-<version>.tar.xz
+          scp binutils-<OLD_VERSION>.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
 
      e. Clean up the source directory again.
 
          git clean -fdx .
 
-   9. Tell the Translation Project where to find the new tarball.
+  10. Tell the Translation Project where to find the new tarball.
       <coordinator@translationproject.org>
       qv: http://translationproject.org/html/maintainers.html
 
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.3x release branch has been created for the FSF binutils.
+  The <NEW_VERSION> release branch has been created for the GNU binutils.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.3x.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
 
-  We hope to make the official release of the sources on the 8th July
+  We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
   be fixed before the release.
 ------------------------------------------------------------------------
 
-  10. Announce the availability of the snapshot and the branch on the
+  11. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
       
 ------------------------------------------------------------------------
 Hi Everyone, 
 
-  The 2.3x branch has now been created:
+  The <NEW_VERSION> branch has now been created:
 
-     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_3x-branch 2.3x
+     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-<NEW_VERSION>-branch <NEW_VERSION>
 
   A snapshot of the sources is also available here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.3x.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
 
   Please could all patches for the branch be run by me.
   The rules for the branch are:
@@ -174,14 +174,15 @@ Hi Everyone,
     * Fixes for testsuite failures are OK.
 
   Ideally I would like to make the release happen in two weeks time,
-  i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
+  i.e. <DATE>.  Which I hope will be enough time for everyone
   to get their final fixes in.
 ------------------------------------------------------------------------
 
-  11. Build various different toolchains, test them and nag
+  12. Build various different toolchains, test them and nag
       maintainers to fix any testsuite failures for their
       architectures...
 
+==============================================================================
 
 When the time comes to actually make the release....
 
@@ -195,7 +196,7 @@ When the time comes to actually make the release....
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
-      value.  Eg "2.29.90" becomes "2.30".  Change bfd/development.sh
+      value.  Eg "2.33.90" becomes "2.34".  Change bfd/development.sh
       to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
       updates and add a  "this-is-the-2.3x-release" comment and
@@ -283,7 +284,7 @@ When the time comes to actually make the release....
       directories had to be made by hand, as shown above).
 
          cd as
-	 lcd <build-dir>/gas/doc/as.html
+	 lcd <build-dir>/gas/doc/as.html<
 	 put *
 	 cd ../bfd
 	 lcd ../../../bfd/doc/bfd.html

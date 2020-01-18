@@ -1,5 +1,10 @@
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
+	* README-how-to-make-a-release: Update notes on how to cut a
+	branch for a release.
+
+2020-01-18  Nick Clifton  <nickc@redhat.com>
+
 	* configure: Regenerate.
 	* po/binutils.pot: Regenerate.
 
