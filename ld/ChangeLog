@@ -1,3 +1,9 @@
+2020-01-18  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-x86-64/align-branch-1.d: Loosen instruction regexps
+	to admit whatever absolute address.  The label-relative address is
+	what the test needs to verify.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
