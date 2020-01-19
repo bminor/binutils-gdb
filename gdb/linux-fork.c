@@ -110,8 +110,7 @@ find_last_fork (void)
 static bool
 one_fork_p ()
 {
-  return (!fork_list.empty ()
-	  && &fork_list.front () == &fork_list.back ());
+  return fork_list.size () == 1;
 }
 
 /* Add a new fork to the internal fork list.  */
