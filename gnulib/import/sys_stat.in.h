@@ -536,40 +536,6 @@ _GL_WARN_ON_USE (lchmod, "lchmod is unportable - "
 #endif
 
 
-#if @GNULIB_LSTAT@
-# if ! @HAVE_LSTAT@
-/* mingw does not support symlinks, therefore it does not have lstat.  But
-   without links, stat does just fine.  */
-#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
-#   define lstat stat
-#  endif
-_GL_CXXALIAS_RPL_1 (lstat, stat, int, (const char *name, struct stat *buf));
-# elif @REPLACE_LSTAT@
-#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
-#   undef lstat
-#   define lstat rpl_lstat
-#  endif
-_GL_FUNCDECL_RPL (lstat, int, (const char *name, struct stat *buf)
-                              _GL_ARG_NONNULL ((1, 2)));
-_GL_CXXALIAS_RPL (lstat, int, (const char *name, struct stat *buf));
-# else
-_GL_CXXALIAS_SYS (lstat, int, (const char *name, struct stat *buf));
-# endif
-# if @HAVE_LSTAT@
-_GL_CXXALIASWARN (lstat);
-# endif
-#elif @GNULIB_OVERRIDES_STRUCT_STAT@
-# undef lstat
-# define lstat lstat_used_without_requesting_gnulib_module_lstat
-#elif defined GNULIB_POSIXCHECK
-# undef lstat
-# if HAVE_RAW_DECL_LSTAT
-_GL_WARN_ON_USE (lstat, "lstat is unportable - "
-                 "use gnulib module lstat for portability");
-# endif
-#endif
-
-
 #if @REPLACE_MKDIR@
 # if !(defined __cplusplus && defined GNULIB_NAMESPACE)
 #  undef mkdir
@@ -781,6 +747,38 @@ _GL_WARN_ON_USE (stat, "stat is unportable - "
 # endif
 #endif
 
+#if @GNULIB_LSTAT@
+# if ! @HAVE_LSTAT@
+/* mingw does not support symlinks, therefore it does not have lstat.  But
+   without links, stat does just fine.  */
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define lstat stat
+#  endif
+_GL_CXXALIAS_RPL_1 (lstat, stat, int, (const char *name, struct stat *buf));
+# elif @REPLACE_LSTAT@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef lstat
+#   define lstat rpl_lstat
+#  endif
+_GL_FUNCDECL_RPL (lstat, int, (const char *name, struct stat *buf)
+                              _GL_ARG_NONNULL ((1, 2)));
+_GL_CXXALIAS_RPL (lstat, int, (const char *name, struct stat *buf));
+# else
+_GL_CXXALIAS_SYS (lstat, int, (const char *name, struct stat *buf));
+# endif
+# if @HAVE_LSTAT@
+_GL_CXXALIASWARN (lstat);
+# endif
+#elif @GNULIB_OVERRIDES_STRUCT_STAT@
+# undef lstat
+# define lstat lstat_used_without_requesting_gnulib_module_lstat
+#elif defined GNULIB_POSIXCHECK
+# undef lstat
+# if HAVE_RAW_DECL_LSTAT
+_GL_WARN_ON_USE (lstat, "lstat is unportable - "
+                 "use gnulib module lstat for portability");
+# endif
+#endif
 
 #if @GNULIB_UTIMENSAT@
 /* Use the rpl_ prefix also on Solaris <= 9, because on Solaris 9 our utimensat
