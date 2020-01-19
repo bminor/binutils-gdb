@@ -3659,7 +3659,7 @@ ldlang_open_ctf (void)
   if ((ctf_output = ctf_create (&err)) != NULL)
     return;
 
-  einfo (_("%P: warning: CTF output not created: `s'\n"),
+  einfo (_("%P: warning: CTF output not created: `%s'\n"),
 	 ctf_errmsg (err));
 
   LANG_FOR_EACH_INPUT_STATEMENT (errfile)

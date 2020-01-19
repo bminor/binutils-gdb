@@ -11189,7 +11189,7 @@ get_alpha_symbol_other (unsigned int other)
     case STO_ALPHA_NOPV:       return "NOPV";
     case STO_ALPHA_STD_GPLOAD: return "STD GPLOAD";
     default:
-      error (_("Unrecognized alpah specific other value: %u"), other);
+      error (_("Unrecognized alpha specific other value: %u"), other);
       return _("<unknown>");
     }
 }

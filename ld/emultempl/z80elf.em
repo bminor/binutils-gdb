@@ -48,7 +48,7 @@ z80_elf_after_open (void)
 	{
 	  if ((new_mach == EF_Z80_MACH_R800 || mach == EF_Z80_MACH_R800) ||
 	      (new_mach == EF_Z80_MACH_GBZ80 || mach == EF_Z80_MACH_GBZ80))
-	    einfo (_("%F%P: %pB: Istruction set of object files mismatched\n"),
+	    einfo (_("%F%P: %pB: Instruction set of object files mismatched\n"),
 		   abfd);
 	  else if (mach < new_mach)
 	    mach = new_mach;
