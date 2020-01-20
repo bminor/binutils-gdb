@@ -1,3 +1,8 @@
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_elf_hash_entry): New function, use throughout file.
+	(defined_sym_val, is_tls_get_addr): Likewise.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* version.m4 (BFD_VERSION): Set to 2.34.50.
