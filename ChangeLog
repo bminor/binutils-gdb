@@ -1,3 +1,8 @@
+2020-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote-sim.c (gdbsim_target::wait): Return
+	sim_data->remote_sim_ptid instead of inferior_ptid.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.34 branch created.

@@ -1022,7 +1022,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
       break;
     }
 
-  return inferior_ptid;
+  return sim_data->remote_sim_ptid;
 }
 
 /* Get ready to modify the registers array.  On machines which store
