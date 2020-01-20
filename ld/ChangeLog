@@ -1,3 +1,24 @@
+2020-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25416
+	* testsuite/ld-x86-64/pr25416-1.s: New file
+	* testsuite/ld-x86-64/pr25416-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-1.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-2.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-3.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-3.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-4.d: Likewise.
+	* testsuite/ld-x86-64/pr25416-4.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-5a.c: Likewise.
+	* testsuite/ld-x86-64/pr25416-5b.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-5c.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-5d.s: Likewise.
+	* testsuite/ld-x86-64/pr25416-5e.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/25416 tests.
+
 2020-01-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsexe.d: Match new __tls_get_addr stub.

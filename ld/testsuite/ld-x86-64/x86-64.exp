@@ -461,6 +461,12 @@ run_dump_test "pr24721-x32"
 run_dump_test "pr24905"
 run_dump_test "pr24905-x32"
 run_dump_test "align-branch-1"
+run_dump_test "pr25416-1a"
+run_dump_test "pr25416-2b"
+run_dump_test "pr25416-2a"
+run_dump_test "pr25416-2b"
+run_dump_test "pr25416-3"
+run_dump_test "pr25416-4"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -1302,6 +1308,51 @@ if { [isnative] && [check_compiler_available] } {
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
+	run_cc_link_tests [list \
+	    [list \
+		"Build pr25416-5b.o (GDesc -maddress-mode=short)" \
+		"" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5b.s } \
+	    ] \
+	    [list \
+		"Build pr25416-5b.so (GDesc -> IE -maddress-mode=short)" \
+		"-shared" \
+		"-fPIC -Wa,-mx86-used-note=yes" \
+		{ pr25416-5b.s pr25416-5d.s } \
+		{} \
+		"pr25416-5b.so" \
+	    ] \
+	    [list \
+		"Build pr25416-5c.o (GDesc -maddress-mode=long)" \
+		"" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5c.s } \
+	    ] \
+	    [list \
+		"Build pr25416-5c.so (GDesc -> IE -maddress-mode=long)" \
+		"-shared" \
+		"-fPIC -Wa,-mx86-used-note=yes" \
+		{ pr25416-5c.s pr25416-5d.s } \
+		{} \
+		"pr25416-5c.so" \
+	    ] \
+	    [list \
+		"Build pr25416-5d.so (GDesc -maddress-mode=short)" \
+		"-shared" \
+		"-fPIC -Wa,-mx86-used-note=yes" \
+		{ pr25416-5b.s pr25416-5e.s } \
+		{} \
+		"pr25416-5d.so" \
+	    ] \
+	    [list \
+		"Build pr25416-5d.o (IE -maddress-mode=short)" \
+		"" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5d.s } \
+	    ] \
+	]
+
 	run_ld_link_exec_tests [list \
 	    [list \
 		"Run pr22001-1b" \
@@ -1320,6 +1371,67 @@ if { [isnative] && [check_compiler_available] } {
 		"pr21997-1b" \
 		"pass.out" \
 		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5a (GDesc -> IE -maddress-mode=short)" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr25416-5b.so" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5a" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5b (GDesc -> LE -maddress-mode=short" \
+		"$NOPIE_LDFLAGS tmpdir/pr25416-5b.o tmpdir/pr25416-5d.o" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5b" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5c (GDesc -> IE -maddress-mode=long)" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr25416-5c.so" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5c" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5d (GDesc -> LE -maddress-mode=long)" \
+		"$NOPIE_LDFLAGS tmpdir/pr25416-5c.o tmpdir/pr25416-5d.o" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5d" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5e (GDesc -maddress-mode=short)" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr25416-5d.so" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5e" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr25416-5f (PIE GDesc -> LE -maddress-mode=short)" \
+		"-pie tmpdir/pr25416-5b.o tmpdir/pr25416-5d.o" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5f" \
+		"pass.out" \
+	    ] \
+	    [list \
+		"Run pr25416-5g (PIE GDesc -> LE -maddress-mode=long)" \
+		"-pie tmpdir/pr25416-5c.o tmpdir/pr25416-5d.o" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr25416-5a.c } \
+		"pr25416-5g" \
+		"pass.out" \
 	    ] \
 	]
     } else {

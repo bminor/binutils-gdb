@@ -1,3 +1,16 @@
+2020-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25416
+	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Support
+	"rex leal x@tlsdesc(%rip), %reg" and "call *x@tlsdesc(%eax)" in
+	X32 mode.
+	(elf_x86_64_relocate_section): In x32 mode, for GDesc -> LE
+	transition, relax "rex leal x@tlsdesc(%rip), %reg" to
+	"rex movl $x@tpoff, %reg", for GDesc -> IE transition, relax
+	"rex leal x@tlsdesc(%rip), %reg" to
+	"rex movl x@gottpoff(%rip), %eax".  For both transitions, relax
+	"call *(%eax)" to "nopl (%rax)".
+
 2020-01-20  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (LD_R11_0R3, CMPDI_R11_0, STD_R11_0R1, LD_R11_0R1),

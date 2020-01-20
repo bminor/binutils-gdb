@@ -1223,7 +1223,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 
     case R_X86_64_GOTPC32_TLSDESC:
       /* Check transition from GDesc access model:
-		leaq x@tlsdesc(%rip), %rax
+		leaq x@tlsdesc(%rip), %rax <--- LP64 mode.
+		rex leal x@tlsdesc(%rip), %eax <--- X32 mode.
 
 	 Make sure it's a leaq adding rip to a 32-bit offset
 	 into any register, although it's probably almost always
@@ -1233,7 +1234,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	return FALSE;
 
       val = bfd_get_8 (abfd, contents + offset - 3);
-      if ((val & 0xfb) != 0x48)
+      val &= 0xfb;
+      if (val != 0x48 && (ABI_64_P (abfd) || val != 0x40))
 	return FALSE;
 
       if (bfd_get_8 (abfd, contents + offset - 2) != 0x8d)
@@ -1244,13 +1246,26 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 
     case R_X86_64_TLSDESC_CALL:
       /* Check transition from GDesc access model:
-		call *x@tlsdesc(%rax)
+		call *x@tlsdesc(%rax) <--- LP64 mode.
+		call *x@tlsdesc(%eax) <--- X32 mode.
        */
       if (offset + 2 <= sec->size)
 	{
-	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  unsigned int prefix;
 	  call = contents + offset;
-	  return call[0] == 0xff && call[1] == 0x10;
+	  prefix = 0;
+	  if (!ABI_64_P (abfd))
+	    {
+	      /* Check for call *x@tlsdesc(%eax).  */
+	      if (call[0] == 0x67)
+		{
+		  prefix = 1;
+		  if (offset + 3 > sec->size)
+		    return FALSE;
+		}
+	    }
+	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  return call[prefix] == 0xff && call[1 + prefix] == 0x10;
 	}
 
       return FALSE;
@@ -3401,10 +3416,13 @@ corrupt_input:
 		{
 		  /* GDesc -> LE transition.
 		     It's originally something like:
-		     leaq x@tlsdesc(%rip), %rax
+		     leaq x@tlsdesc(%rip), %rax <--- LP64 mode.
+		     rex leal x@tlsdesc(%rip), %eax <--- X32 mode.
 
 		     Change it to:
-		     movl $x@tpoff, %rax.  */
+		     movq $x@tpoff, %rax <--- LP64 mode.
+		     rex movl $x@tpoff, %eax <--- X32 mode.
+		   */
 
 		  unsigned int val, type;
 
@@ -3412,7 +3430,8 @@ corrupt_input:
 		    goto corrupt_input;
 		  type = bfd_get_8 (input_bfd, contents + roff - 3);
 		  val = bfd_get_8 (input_bfd, contents + roff - 1);
-		  bfd_put_8 (output_bfd, 0x48 | ((type >> 2) & 1),
+		  bfd_put_8 (output_bfd,
+			     (type & 0x48) | ((type >> 2) & 1),
 			     contents + roff - 3);
 		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
@@ -3426,11 +3445,30 @@ corrupt_input:
 		{
 		  /* GDesc -> LE transition.
 		     It's originally:
-		     call *(%rax)
+		     call *(%rax) <--- LP64 mode.
+		     call *(%eax) <--- X32 mode.
 		     Turn it into:
-		     xchg %ax,%ax.  */
-		  bfd_put_8 (output_bfd, 0x66, contents + roff);
-		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
+		     xchg %ax,%ax <-- LP64 mode.
+		     nopl (%rax)  <-- X32 mode.
+		   */
+		  unsigned int prefix = 0;
+		  if (!ABI_64_P (input_bfd))
+		    {
+		      /* Check for call *x@tlsdesc(%eax).  */
+		      if (contents[roff] == 0x67)
+			prefix = 1;
+		    }
+		  if (prefix)
+		    {
+		      bfd_put_8 (output_bfd, 0x0f, contents + roff);
+		      bfd_put_8 (output_bfd, 0x1f, contents + roff + 1);
+		      bfd_put_8 (output_bfd, 0x00, contents + roff + 2);
+		    }
+		  else
+		    {
+		      bfd_put_8 (output_bfd, 0x66, contents + roff);
+		      bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
+		    }
 		  continue;
 		}
 	      else if (r_type == R_X86_64_GOTTPOFF)
@@ -3741,13 +3779,18 @@ corrupt_input:
 		{
 		  /* GDesc -> IE transition.
 		     It's originally something like:
-		     leaq x@tlsdesc(%rip), %rax
+		     leaq x@tlsdesc(%rip), %rax <--- LP64 mode.
+		     rex leal x@tlsdesc(%rip), %eax <--- X32 mode.
 
 		     Change it to:
-		     movq x@gottpoff(%rip), %rax # before xchg %ax,%ax.  */
+		     # before xchg %ax,%ax in LP64 mode.
+		     movq x@gottpoff(%rip), %rax
+		     # before nopl (%rax) in X32 mode.
+		     rex movl x@gottpoff(%rip), %eax
+		  */
 
 		  /* Now modify the instruction as appropriate. To
-		     turn a leaq into a movq in the form we use it, it
+		     turn a lea into a mov in the form we use it, it
 		     suffices to change the second byte from 0x8d to
 		     0x8b.  */
 		  if (roff < 2)
@@ -3768,13 +3811,32 @@ corrupt_input:
 		{
 		  /* GDesc -> IE transition.
 		     It's originally:
-		     call *(%rax)
+		     call *(%rax) <--- LP64 mode.
+		     call *(%eax) <--- X32 mode.
 
 		     Change it to:
-		     xchg %ax, %ax.  */
+		     xchg %ax, %ax <-- LP64 mode.
+		     nopl (%rax)  <-- X32 mode.
+		   */
 
-		  bfd_put_8 (output_bfd, 0x66, contents + roff);
-		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
+		  unsigned int prefix = 0;
+		  if (!ABI_64_P (input_bfd))
+		    {
+		      /* Check for call *x@tlsdesc(%eax).  */
+		      if (contents[roff] == 0x67)
+			prefix = 1;
+		    }
+		  if (prefix)
+		    {
+		      bfd_put_8 (output_bfd, 0x0f, contents + roff);
+		      bfd_put_8 (output_bfd, 0x1f, contents + roff + 1);
+		      bfd_put_8 (output_bfd, 0x00, contents + roff + 2);
+		    }
+		  else
+		    {
+		      bfd_put_8 (output_bfd, 0x66, contents + roff);
+		      bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
+		    }
 		  continue;
 		}
 	      else
