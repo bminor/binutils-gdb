@@ -10106,7 +10106,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  case 'T':
 			    /* We want register + 1 when decoding T.  */
 			    if (*c == 'T')
-			      ++value;
+			      value = (value + 1) & 0xf;
 
 			    if (c[1] == 'u')
 			      {

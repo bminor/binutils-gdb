@@ -1,3 +1,7 @@
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
+	* arm-dis.c (print_insn_arm): Wrap 'T' value.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
