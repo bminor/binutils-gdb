@@ -73,6 +73,9 @@
 #define ARM_EXT2_SB	     0x00002000	/* Speculation Barrier instruction.  */
 #define ARM_EXT2_PREDRES     0x00004000	/* Prediction Restriction insns.     */
 #define ARM_EXT2_V8_1M_MAIN  0x00008000 /* ARMv8.1-M Mainline.		     */
+#define ARM_EXT2_CRC	     0x00080000	/* ARMv8 CRC32 */
+#define ARM_EXT2_MVE	     0x00100000	/* MVE Integer extension.	   */
+#define ARM_EXT2_MVE_FP	     0x00200000	/* MVE Floating Point extension.   */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -99,12 +102,10 @@
 #define FPU_VFP_EXT_ARMV8    0x00020000	/* Double-precision FP for ARMv8.  */
 #define FPU_NEON_EXT_ARMV8   0x00010000	/* Neon for ARMv8.		   */
 #define FPU_CRYPTO_EXT_ARMV8 0x00008000	/* Crypto for ARMv8.		   */
-#define CRC_EXT_ARMV8	     0x00004000	/* CRC32 for ARMv8.		   */
+/* Unused                    0x00004000	*/
 #define FPU_VFP_EXT_ARMV8xD  0x00002000	/* Single-precision FP for ARMv8.  */
 #define FPU_NEON_EXT_RDMA    0x00001000	/* v8.1 Adv.SIMD extensions.	   */
 #define FPU_NEON_EXT_DOTPROD 0x00000800	/* Dot Product extension.	   */
-#define FPU_MVE		     0x00000400 /* MVE Integer extension.	   */
-#define FPU_MVE_FP	     0x00000200 /* MVE Floating Point extension.   */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
@@ -269,7 +270,6 @@
 						    | FPU_NEON_ARMV8	 \
 						    | FPU_VFP_ARMV8	 \
 						    | FPU_NEON_EXT_DOTPROD)
-#define ARCH_CRC_ARMV8		ARM_FEATURE_COPROC (CRC_EXT_ARMV8)
 #define FPU_ARCH_NEON_VFP_ARMV8_1					 \
 				ARM_FEATURE_COPROC (FPU_NEON_ARMV8_1	 \
 						    | FPU_VFP_ARMV8)
@@ -338,19 +338,19 @@
 #define ARM_ARCH_V7M	 ARM_FEATURE_CORE (ARM_AEXT_V7M, ARM_EXT2_V6T2_V8M)
 #define ARM_ARCH_V7EM	 ARM_FEATURE_CORE (ARM_AEXT_V7EM, ARM_EXT2_V6T2_V8M)
 #define ARM_ARCH_V8A	 ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_AEXT2_V8A)
-#define ARM_ARCH_V8A_CRC ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8A,	   \
-				      CRC_EXT_ARMV8)
-#define ARM_ARCH_V8_1A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A,	   \
-				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA)
-#define ARM_ARCH_V8_2A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_2A,	   \
-				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA)
-#define ARM_ARCH_V8_3A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_3A,	   \
-				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA)
-#define ARM_ARCH_V8_4A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_4A,	   \
-				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA	   \
+#define ARM_ARCH_V8A_CRC ARM_FEATURE (ARM_AEXT_V8A,	   \
+				      ARM_AEXT2_V8A | ARM_EXT2_CRC)
+#define ARM_ARCH_V8_1A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A	   \
+				      | ARM_EXT2_CRC,  FPU_NEON_EXT_RDMA)
+#define ARM_ARCH_V8_2A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_2A	   \
+				      | ARM_EXT2_CRC,  FPU_NEON_EXT_RDMA)
+#define ARM_ARCH_V8_3A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_3A	   \
+				      | ARM_EXT2_CRC, FPU_NEON_EXT_RDMA)
+#define ARM_ARCH_V8_4A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_4A	   \
+				      | ARM_EXT2_CRC, FPU_NEON_EXT_RDMA	   \
 						    | FPU_NEON_EXT_DOTPROD)
-#define ARM_ARCH_V8_5A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_5A,	   \
-				      CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA	   \
+#define ARM_ARCH_V8_5A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_5A	   \
+				      | ARM_EXT2_CRC, FPU_NEON_EXT_RDMA	   \
 						    | FPU_NEON_EXT_DOTPROD)
 #define ARM_ARCH_V8M_BASE      ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE,	   \
 						 ARM_AEXT2_V8M_BASE)
@@ -365,9 +365,8 @@
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
 #define FPU_NONE	ARM_FEATURE_LOW (0, 0)
-#define ARM_ANY		ARM_FEATURE (-1, -1, 0)	/* Any basic core.  */
+#define ARM_ANY		ARM_FEATURE (-1, -1 & ~ (ARM_EXT2_MVE | ARM_EXT2_MVE_FP), 0)	/* Any basic core.  */
 #define FPU_ANY		ARM_FEATURE_COPROC (-1) /* Any FPU.  */
-#define ARM_FEATURE_ALL	ARM_FEATURE (-1, -1, -1)/* All CPU and FPU features.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
    ISA is Thumb-2.  */

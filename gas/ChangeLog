@@ -1,3 +1,53 @@
+2020-01-20  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	Backport from trunk:
+	2019-10-17  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (selected_ctx_ext_table) New static variable.
+	(arm_parse_arch): Set context sensitive extension table based on the
+	chosen base architecture.
+	(s_arm_arch_extension): Change to lookup extensions in the new context
+	sensitive tables.
+	* testsuite/gas/arm/mve-ext.s: New.
+	* testsuite/gas/arm/mve-ext.d: New.
+	* testsuite/gas/arm/mvefp-ext.s: New.
+	* testsuite/gas/arm/mvefp-ext.d: New.
+
+	2019-10-30  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (s_arm_fpu): Clear selected_cpu fpu bits.
+	* testsuite/gas/arm/fpu-rst.s: New.
+	* testsuite/gas/arm/fpu-rst.d: New.
+	* testsuite/gas/arm/fpu-rst.l: New.
+
+	2019-11-21  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* config/tc-arm.c (arm_ext_crc): New.
+	(crc_ext_armv8): Remove.
+	(insns): Rename crc_ext_armv8 to arm_ext_crc.
+	(arm_cpus): Replace CRC_EXT_ARMV8 with ARM_EXT2_CRC.
+	(armv8a_ext_table, armv8r_ext_table,
+	arm_option_extension_value_table): Redefine the crc
+	extension in terms of ARM_EXT2_CRC.
+	* testsuite/gas/arm/crc-ext.s: New.
+	* testsuite/gas/arm/crc-ext.d: New.
+
+	2019-12-10  Vladimir Murzin  <vladimir.murzin@arm.com>
+
+	* config/tc-arm.c (s_arm_arch): Set selected_ctx_ext_table.
+	* testsuite/gas/arm/mve-arch-ext.s: New.
+	* testsuite/gas/arm/mve-arch-ext.d: New.
+
+	2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25376
+	* config/tc-arm.c (mve_ext, mve_fp_ext): Use CORE_HIGH.
+	(armv8_1m_main_ext_table): Use CORE_HIGH for mve.
+	* testsuite/arm/armv8_1-m-fpu-mve-1.s: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-1.d: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-2.s: New.
+	* testsuite/arm/armv8_1-m-fpu-mve-2.d: New.
+
 2020-01-15  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt: Add sparc-*-freebsd case.

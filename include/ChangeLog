@@ -1,3 +1,24 @@
+2020-01-20  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	Backport from trunk:
+	2019-11-21  Mihail Ionescu  <mihail.ionescu@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_CRC): New extension feature
+	to replace CRC_EXT_ARMV8.
+	(CRC_EXT_ARMV8): Remove and mark bit as unused.
+	(ARM_ARCH_V8A_CRC, ARM_ARCH_V8_1A, ARM_ARCH_V8_2A,
+	ARM_ARCH_V8_3A, ARM_ARCH_V8_4A, ARM_ARCH_V8_5A):
+	Redefine using ARM_EXT2_CRC instead of
+	CRC_EXT_ARMV8.
+
+	2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25376
+	* opcodes/arm.h (FPU_MVE, FPU_MVE_FPU): Move these features to...
+	(ARM_EXT2_MVE, ARM_EXT2_MVE_FP): ... the CORE_HIGH space.
+	(ARM_ANY): Redefine to not include any MVE bits.
+	(ARM_FEATURE_ALL): Removed.
+
 2019-09-09  Phil Blundell  <pb@pbcl.net>
 
 	binutils 2.33 branch created.
