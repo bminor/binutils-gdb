@@ -1,5 +1,27 @@
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.h (struct ppc64_elf_params): Add no_tls_get_addr_regsave.
+	* elf64-ppc.c (struct ppc_link_hash_table): Add tga_desc and
+	tga_desc_fd.
+	(is_tls_get_addr): Match tga_desc and tga_desc_df too.
+	(STDU_R1_0R1, ADDI_R1_R1): Define.
+	(tls_get_addr_prologue, tls_get_addr_epilogue): New functions.
+	(ppc64_elf_tls_setup): Set up tga_desc and tga_desc_fd.  Indirect
+	tga_desc_fd to opt_fd, and tga_desc to opt.  Set
+	no_tls_get_addr_regsave.
+	(branch_reloc_hash_match): Add hash3 and hash4.
+	(ppc64_elf_tls_optimize): Handle tga_desc_fd and tga_desc too.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	(plt_stub_size, build_plt_stub): Likewise.  Size regsave
+	__tls_get_addr stub.
+	(build_tls_get_addr_stub): Build regsave __tls_get_addr stub and
+	eh_frame.
+	(ppc_size_one_stub): Handle tga_desc_fd and tga_desc too.  Size
+	eh_frame for regsave __tls_get_addr.
+
+2020-01-22  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_size_stubs): Correct condition under
 	which __tls_get_addr calls will be eliminated.
 

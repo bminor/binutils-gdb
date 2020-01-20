@@ -36,7 +36,7 @@ static void ppc_layout_sections_again (void);
 static struct ppc64_elf_params params = { NULL,
 					  &ppc_add_stub_section,
 					  &ppc_layout_sections_again,
-					  1, -1, 0,
+					  1, -1, -1, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 5,
 					  -1, 0, -1, -1, 0};
 
@@ -694,6 +694,8 @@ enum ppc64_opt
   OPTION_NO_TLS_OPT,
   OPTION_TLS_GET_ADDR_OPT,
   OPTION_NO_TLS_GET_ADDR_OPT,
+  OPTION_TLS_GET_ADDR_REGSAVE,
+  OPTION_NO_TLS_GET_ADDR_REGSAVE,
   OPTION_NO_OPD_OPT,
   OPTION_NO_INLINE_OPT,
   OPTION_NO_TOC_OPT,
@@ -722,6 +724,8 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "tls-get-addr-optimize", no_argument, NULL, OPTION_TLS_GET_ADDR_OPT },
   { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
+  { "tls-get-addr-regsave", no_argument, NULL, OPTION_TLS_GET_ADDR_REGSAVE },
+  { "no-tls-get-addr-regsave", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_REGSAVE},
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
   { "no-inline-optimize", no_argument, NULL, OPTION_NO_INLINE_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
@@ -796,6 +800,12 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
 		   ));
   fprintf (file, _("\
   --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call\n"
+		   ));
+  fprintf (file, _("\
+  --tls-get-addr-regsave      Force register save __tls_get_addr stub\n"
+		   ));
+  fprintf (file, _("\
+  --no-tls-get-addr-regsave   Don'\''t use register save __tls_get_addr stub\n"
 		   ));
   fprintf (file, _("\
   --no-opd-optimize           Don'\''t optimize the OPD section\n"
@@ -903,6 +913,14 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_TLS_GET_ADDR_OPT:
       params.tls_get_addr_opt = 0;
+      break;
+
+    case OPTION_TLS_GET_ADDR_REGSAVE:
+      params.no_tls_get_addr_regsave = 0;
+      break;
+
+    case OPTION_NO_TLS_GET_ADDR_REGSAVE:
+      params.no_tls_get_addr_regsave = 1;
       break;
 
     case OPTION_NO_OPD_OPT:

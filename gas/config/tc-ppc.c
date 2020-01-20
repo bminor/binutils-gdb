@@ -3255,7 +3255,10 @@ parse_tls_arg (char **str, const expressionS *exp, struct ppc_fixup *tls_fix)
     ++sym_name;
 
   tls_fix->reloc = BFD_RELOC_NONE;
-  if (strcasecmp (sym_name, "__tls_get_addr") == 0)
+  if (strncasecmp (sym_name, "__tls_get_addr", 14) == 0
+      && (sym_name[14] == 0
+	  || strcasecmp (sym_name + 14, "_desc") == 0
+	  || strcasecmp (sym_name + 14, "_opt") == 0))
     {
       char *hold = input_line_pointer;
       input_line_pointer = *str + 1;
