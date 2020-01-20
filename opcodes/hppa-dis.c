@@ -207,7 +207,7 @@ static void
 fput_const (unsigned num, disassemble_info *info)
 {
   if ((int) num < 0)
-    (*info->fprintf_func) (info->stream, "-%x", - (int) num);
+    (*info->fprintf_func) (info->stream, "-%x", -num);
   else
     (*info->fprintf_func) (info->stream, "%x", num);
 }
