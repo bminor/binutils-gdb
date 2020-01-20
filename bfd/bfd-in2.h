@@ -6744,6 +6744,7 @@ struct bfd
       struct hppabsd_core_struct *hppabsd_core_data;
       struct sgi_core_struct *sgi_core_data;
       struct lynx_core_struct *lynx_core_data;
+      struct minidump_core_struct *minidump_core_data;
       struct osf_core_struct *osf_core_data;
       struct cisco_core_struct *cisco_core_data;
       struct versados_data_struct *versados_data;

@@ -949,6 +949,7 @@ extern const bfd_target core_cisco_le_vec;
 extern const bfd_target core_hppabsd_vec;
 extern const bfd_target core_hpux_vec;
 extern const bfd_target core_irix_vec;
+extern const bfd_target core_minidump_vec;
 extern const bfd_target core_netbsd_vec;
 extern const bfd_target core_osf_vec;
 extern const bfd_target core_ptrace_vec;
@@ -1387,6 +1388,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&core_cisco_be_vec,
 	&core_cisco_le_vec,
 #endif
+	&core_minidump_vec,
 #ifdef HPPABSD_CORE
 	&core_hppabsd_vec,
 #endif

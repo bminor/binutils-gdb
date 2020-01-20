@@ -617,8 +617,8 @@ core_target::get_core_register_section (struct regcache *regcache,
     }
   if (size != section_min_size && !variable_size_section)
     {
-      warning (_("Unexpected size of section `%s' in core file."),
-	       section_name.c_str ());
+      warning (_("Unexpected size of section `%s' in core file, expected `%i'."),
+	       section_name.c_str (), section_min_size);
     }
 
   gdb::byte_vector contents (size);
