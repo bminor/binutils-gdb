@@ -66,7 +66,7 @@ struct gdb_bfd_data
       needs_relocations (0),
       crc_computed (0)
   {
-    struct stat buf;
+    sys_stat buf;
 
     if (bfd_stat (abfd, &buf) == 0)
       {
@@ -355,23 +355,60 @@ gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
   return 0;
 }
 
+/* Convert between a struct stat (potentially a gnulib replacement)
+   and a sys_stat (the system's struct stat).  */
+
+static sys_stat
+to_sys_stat (struct stat *st)
+{
+  sys_stat sst {};
+
+#define COPY(FIELD) \
+  sst.FIELD = st->FIELD
+
+  COPY (st_dev);
+  COPY (st_ino);
+  COPY (st_mode);
+  COPY (st_nlink);
+  COPY (st_uid);
+  COPY (st_gid);
+  COPY (st_rdev);
+
+  /* Check for overflow?  */
+  COPY (st_size);
+
+  // Should probably check _GL_WINDOWS_STAT_TIMESPEC and refer to
+  // st_atim, etc. instead.
+  COPY (st_atime);
+  COPY (st_mtime);
+  COPY (st_ctime);
+
+#undef COPY
+
+  return sst;
+}
+
 /* Wrapper for target_fileio_fstat suitable for passing as the
    STAT_FUNC argument to gdb_bfd_openr_iovec.  */
 
 static int
 gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
-			    struct stat *sb)
+			    sys_stat *sb)
 {
   int fd = *(int *) stream;
   int target_errno;
   int result;
 
-  result = target_fileio_fstat (fd, sb, &target_errno);
+  struct stat st;
+
+  result = target_fileio_fstat (fd, &st, &target_errno);
   if (result == -1)
     {
       errno = fileio_errno_to_host (target_errno);
       bfd_set_error (bfd_error_system_call);
     }
+
+  *sb = to_sys_stat (&st);
 
   return result;
 }
@@ -818,7 +855,7 @@ gdb_bfd_openr_iovec (const char *filename, const char *target,
 					void *stream),
 		     int (*stat_func) (struct bfd *abfd,
 				       void *stream,
-				       struct stat *sb))
+				       sys_stat *sb))
 {
   bfd *result = bfd_openr_iovec (filename, target,
 				 open_func, open_closure,

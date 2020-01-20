@@ -32,7 +32,20 @@ typedef unsigned long long ULONGEST;
 
 #else /* GDBSERVER */
 
+/* Gnulib may replace struct stat with its own version.  Bfd does not
+   use gnulib, so when we call into bfd, we must use the system struct
+   stat.  */
+#define __need_system_sys_stat_h 1
+
+#include <sys/stat.h>
+
 #include "bfd.h"
+
+typedef struct stat sys_stat;
+
+#undef __need_system_sys_stat_h
+
+#include <sys/stat.h>
 
 /* * A byte from the program being debugged.  */
 typedef bfd_byte gdb_byte;

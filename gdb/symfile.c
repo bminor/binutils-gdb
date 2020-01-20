@@ -1260,7 +1260,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 {
   unsigned long file_crc;
   int file_crc_p;
-  struct stat parent_stat, abfd_stat;
+  sys_stat parent_stat, abfd_stat;
   int verified_as_different;
 
   /* Find a separate debug info file as if symbols would be present in

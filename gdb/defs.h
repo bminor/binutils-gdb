@@ -34,7 +34,6 @@
 #undef PACKAGE_TARNAME
 
 #include <config.h>
-#include "bfd.h"
 
 #include <sys/types.h>
 #include <limits.h>

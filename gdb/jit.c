@@ -124,11 +124,11 @@ mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 /* For statting the file, we only support the st_size attribute.  */
 
 static int
-mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
+mem_bfd_iovec_stat (struct bfd *abfd, void *stream, sys_stat *sb)
 {
   struct target_buffer *buffer = (struct target_buffer*) stream;
 
-  memset (sb, 0, sizeof (struct stat));
+  memset (sb, 0, sizeof (sys_stat));
   sb->st_size = buffer->size;
   return 0;
 }

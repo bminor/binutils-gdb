@@ -154,7 +154,7 @@ gdb_bfd_ref_ptr gdb_bfd_openr_iovec (const char *filename, const char *target,
 							void *stream),
 				     int (*stat_func) (struct bfd *abfd,
 						       void *stream,
-						       struct stat *sb));
+						       sys_stat *sb));
 
 /* A wrapper for bfd_openr_next_archived_file that initializes the
    gdb-specific reference count.  */
