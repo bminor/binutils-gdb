@@ -1,3 +1,11 @@
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsexe.d: Match new __tls_get_addr stub.
+	* testsuite/ld-powerpc/tlsexeno.d: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.d: Likewise.
+	* testsuite/ld-powerpc/tlsexetocno.d: Likewise.
+	* testsuite/ld-powerpc/tlsopt5.d: Likewise.
+
 2020-01-18  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-x86-64/align-branch-1.d: Loosen instruction regexps

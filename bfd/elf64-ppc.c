@@ -10885,17 +10885,14 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 
 /* Build a special .plt call stub for __tls_get_addr.  */
 
-#define LD_R11_0R3	0xe9630000
+#define LD_R0_0R3	0xe8030000
 #define LD_R12_0R3	0xe9830000
 #define MR_R0_R3	0x7c601b78
-#define CMPDI_R11_0	0x2c2b0000
+#define CMPDI_R0_0	0x2c200000
 #define ADD_R3_R12_R13	0x7c6c6a14
 #define BEQLR		0x4d820020
 #define MR_R3_R0	0x7c030378
-#define STD_R11_0R1	0xf9610000
 #define BCTRL		0x4e800421
-#define LD_R11_0R1	0xe9610000
-#define MTLR_R11	0x7d6803a6
 
 static inline bfd_byte *
 build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
@@ -10905,10 +10902,10 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd *obfd = htab->params->stub_bfd;
   bfd_byte *loc = p;
 
-  bfd_put_32 (obfd, LD_R11_0R3 + 0, p),		p += 4;
+  bfd_put_32 (obfd, LD_R0_0R3 + 0, p),		p += 4;
   bfd_put_32 (obfd, LD_R12_0R3 + 8, p),		p += 4;
+  bfd_put_32 (obfd, CMPDI_R0_0, p),		p += 4;
   bfd_put_32 (obfd, MR_R0_R3, p),		p += 4;
-  bfd_put_32 (obfd, CMPDI_R11_0, p),		p += 4;
   bfd_put_32 (obfd, ADD_R3_R12_R13, p),		p += 4;
   bfd_put_32 (obfd, BEQLR, p),			p += 4;
   bfd_put_32 (obfd, MR_R3_R0, p),		p += 4;
@@ -10917,8 +10914,8 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   if (stub_entry->stub_type != ppc_stub_plt_call_r2save)
     return build_plt_stub (htab, stub_entry, p, offset, r);
 
-  bfd_put_32 (obfd, MFLR_R11, p),		p += 4;
-  bfd_put_32 (obfd, STD_R11_0R1 + STK_LINKER (htab), p), p += 4;
+  bfd_put_32 (obfd, MFLR_R0, p),		p += 4;
+  bfd_put_32 (obfd, STD_R0_0R1 + STK_LINKER (htab), p), p += 4;
 
   if (r != NULL)
     r[0].r_offset += 2 * 4;
@@ -10926,8 +10923,8 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd_put_32 (obfd, BCTRL, p - 4);
 
   bfd_put_32 (obfd, LD_R2_0R1 + STK_TOC (htab), p),	p += 4;
-  bfd_put_32 (obfd, LD_R11_0R1 + STK_LINKER (htab), p),	p += 4;
-  bfd_put_32 (obfd, MTLR_R11, p),		p += 4;
+  bfd_put_32 (obfd, LD_R0_0R1 + STK_LINKER (htab), p),	p += 4;
+  bfd_put_32 (obfd, MTLR_R0, p),		p += 4;
   bfd_put_32 (obfd, BLR, p),			p += 4;
 
   if (htab->glink_eh_frame != NULL

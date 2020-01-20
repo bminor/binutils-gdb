@@ -1,5 +1,12 @@
 2020-01-20  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (LD_R11_0R3, CMPDI_R11_0, STD_R11_0R1, LD_R11_0R1),
+	(MTLR_R11): Don't define.
+	(LD_R0_0R3, CMPDI_R0_0): Define.
+	(build_tls_get_addr_stub): Don't use r11 in stub.
+
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc_elf_hash_entry): New function, use throughout file.
 	(defined_sym_val, is_tls_get_addr): Likewise.
 
