@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libiberty.h"
 
+#include <stdlib.h>
+
 /* List of all modules.  */
 static MODULE_INSTALL_FN * const modules[] = {
   standard_install,

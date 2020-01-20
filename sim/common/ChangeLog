@@ -1,3 +1,12 @@
+2020-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* nrun.c: Include stdlib.h.
+	* sim-core.c: Likewise.
+	* sim-engine.c: Likewise.
+	* sim-io.c: Likewise.
+	* sim-module.c: Likewise.
+	* sim-reason.c: Likewise.
+
 2019-12-19  Tom Tromey  <tromey@adacore.com>
 
 	PR build/24572:

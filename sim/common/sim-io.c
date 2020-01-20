@@ -33,6 +33,8 @@
 #include <unistd.h>
 #endif
 
+#include <stdlib.h>
+
 /* Define the rate at which the simulator should poll the host
    for a quit. */
 #ifndef POLL_QUIT_INTERVAL

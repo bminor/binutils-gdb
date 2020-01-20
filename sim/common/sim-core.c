@@ -30,6 +30,8 @@
 #include "sim-hw.h"
 #endif
 
+#include <stdlib.h>
+
 /* "core" module install handler.
 
    This is called via sim_module_install to install the "core"

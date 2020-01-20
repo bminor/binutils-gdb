@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 #include <signal.h>
+#include <stdlib.h>
 
 /* For strsignal.  */
 #ifdef HAVE_STRING_H
