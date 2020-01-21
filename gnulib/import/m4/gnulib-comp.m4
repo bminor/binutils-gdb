@@ -110,8 +110,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module inttypes-incomplete:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
-  # Code from module largefile:
-  AC_REQUIRE([AC_SYS_LARGEFILE])
   # Code from module libc-config:
   # Code from module limits-h:
   # Code from module localcharset:
@@ -412,7 +410,6 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([isnanl])
     gl_PREREQ_ISNANL
   fi
-  AC_REQUIRE([gl_LARGEFILE])
   gl___INLINE
   gl_LIMITS_H
   gl_LOCALCHARSET
@@ -1095,7 +1092,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/inttypes.m4
   m4/isnand.m4
   m4/isnanl.m4
-  m4/largefile.m4
   m4/lib-ld.m4
   m4/lib-link.m4
   m4/lib-prefix.m4

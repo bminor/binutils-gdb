@@ -33,6 +33,7 @@
 #  --no-libtool \
 #  --macro-prefix=gl \
 #  --no-vc-files \
+#  --avoid=largefile \
 #  alloca \
 #  canonicalize-lgpl \
 #  dirent \

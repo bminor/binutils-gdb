@@ -1855,9 +1855,9 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
-enable_largefile
 enable_threads
 enable_plugins
+enable_largefile
 enable_cross_guesses
 enable_dependency_tracking
 enable_silent_rules
@@ -2493,11 +2493,11 @@ Optional Features:
   --enable-maintainer-mode
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
-  --disable-largefile     omit support for large files
   --enable-threads={isoc|posix|isoc+posix|windows}
                           specify multithreading API
   --disable-threads       build without multithread safety
   --enable-plugins        Enable support for plugins
+  --disable-largefile     omit support for large files
   --enable-cross-guesses={conservative|risky}
                           specify policy for cross-compilation guesses
   --enable-dependency-tracking
@@ -5946,208 +5946,6 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
       ;;
   esac
 
-# Check whether --enable-largefile was given.
-if test "${enable_largefile+set}" = set; then :
-  enableval=$enable_largefile;
-fi
-
-if test "$enable_largefile" != no; then
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for special C compiler options needed for large files" >&5
-$as_echo_n "checking for special C compiler options needed for large files... " >&6; }
-if ${ac_cv_sys_largefile_CC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_sys_largefile_CC=no
-     if test "$GCC" != yes; then
-       ac_save_CC=$CC
-       while :; do
-         # IRIX 6.2 and later do not support large files by default,
-         # so use the C compiler's -n32 option if that helps.
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-         if ac_fn_c_try_compile "$LINENO"; then :
-  break
-fi
-rm -f core conftest.err conftest.$ac_objext
-         CC="$CC -n32"
-         if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_largefile_CC=' -n32'; break
-fi
-rm -f core conftest.err conftest.$ac_objext
-         break
-       done
-       CC=$ac_save_CC
-       rm -f conftest.$ac_ext
-    fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_largefile_CC" >&5
-$as_echo "$ac_cv_sys_largefile_CC" >&6; }
-  if test "$ac_cv_sys_largefile_CC" != no; then
-    CC=$CC$ac_cv_sys_largefile_CC
-  fi
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _FILE_OFFSET_BITS value needed for large files" >&5
-$as_echo_n "checking for _FILE_OFFSET_BITS value needed for large files... " >&6; }
-if ${ac_cv_sys_file_offset_bits+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  while :; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_file_offset_bits=no; break
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#define _FILE_OFFSET_BITS 64
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_file_offset_bits=64; break
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  ac_cv_sys_file_offset_bits=unknown
-  break
-done
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_file_offset_bits" >&5
-$as_echo "$ac_cv_sys_file_offset_bits" >&6; }
-case $ac_cv_sys_file_offset_bits in #(
-  no | unknown) ;;
-  *)
-cat >>confdefs.h <<_ACEOF
-#define _FILE_OFFSET_BITS $ac_cv_sys_file_offset_bits
-_ACEOF
-;;
-esac
-rm -rf conftest*
-  if test $ac_cv_sys_file_offset_bits = unknown; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _LARGE_FILES value needed for large files" >&5
-$as_echo_n "checking for _LARGE_FILES value needed for large files... " >&6; }
-if ${ac_cv_sys_large_files+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  while :; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_large_files=no; break
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#define _LARGE_FILES 1
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_large_files=1; break
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  ac_cv_sys_large_files=unknown
-  break
-done
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_large_files" >&5
-$as_echo "$ac_cv_sys_large_files" >&6; }
-case $ac_cv_sys_large_files in #(
-  no | unknown) ;;
-  *)
-cat >>confdefs.h <<_ACEOF
-#define _LARGE_FILES $ac_cv_sys_large_files
-_ACEOF
-;;
-esac
-rm -rf conftest*
-  fi
-
-
-$as_echo "#define _DARWIN_USE_64_BIT_INODE 1" >>confdefs.h
-
-fi
-
 
 
 
@@ -6287,8 +6085,6 @@ fi
   # Code from module inttypes-incomplete:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
-  # Code from module largefile:
-
   # Code from module libc-config:
   # Code from module limits-h:
   # Code from module localcharset:
@@ -6567,9 +6363,9 @@ else
      if test "$GCC" != yes; then
        ac_save_CC=$CC
        while :; do
-         # IRIX 6.2 and later do not support large files by default,
-         # so use the C compiler's -n32 option if that helps.
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	 # IRIX 6.2 and later do not support large files by default,
+	 # so use the C compiler's -n32 option if that helps.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <sys/types.h>
  /* Check that off_t can represent 2**63 - 1 correctly.
@@ -6578,8 +6374,8 @@ else
     incorrectly reject 9223372036854775807.  */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
 int
 main ()
 {
@@ -6588,16 +6384,16 @@ main ()
   return 0;
 }
 _ACEOF
-         if ac_fn_c_try_compile "$LINENO"; then :
+	 if ac_fn_c_try_compile "$LINENO"; then :
   break
 fi
 rm -f core conftest.err conftest.$ac_objext
-         CC="$CC -n32"
-         if ac_fn_c_try_compile "$LINENO"; then :
+	 CC="$CC -n32"
+	 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_sys_largefile_CC=' -n32'; break
 fi
 rm -f core conftest.err conftest.$ac_objext
-         break
+	 break
        done
        CC=$ac_save_CC
        rm -f conftest.$ac_ext
@@ -6624,8 +6420,8 @@ else
     incorrectly reject 9223372036854775807.  */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
 int
 main ()
 {
@@ -6648,8 +6444,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     incorrectly reject 9223372036854775807.  */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
 int
 main ()
 {
@@ -6693,8 +6489,8 @@ else
     incorrectly reject 9223372036854775807.  */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
 int
 main ()
 {
@@ -6717,8 +6513,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     incorrectly reject 9223372036854775807.  */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
 int
 main ()
 {
@@ -6748,8 +6544,6 @@ esac
 rm -rf conftest*
   fi
 
-
-$as_echo "#define _DARWIN_USE_64_BIT_INODE 1" >>confdefs.h
 
 fi
 
@@ -8298,6 +8092,9 @@ $as_echo "#define STRERROR_R_CHAR_P 1" >>confdefs.h
 fi
 
 
+  XGETTEXT_EXTRA_OPTIONS=
+
+
 
 
 ac_fn_c_check_decl "$LINENO" "fchdir" "ac_cv_have_decl_fchdir" "$ac_includes_default"
@@ -9544,84 +9341,6 @@ fi
 
 
 
-  case "$host_os" in
-    mingw*)
-                        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 64-bit off_t" >&5
-$as_echo_n "checking for 64-bit off_t... " >&6; }
-if ${gl_cv_type_off_t_64+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-                int verify_off_t_size[sizeof (off_t) >= 8 ? 1 : -1];
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_type_off_t_64=yes
-else
-  gl_cv_type_off_t_64=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_type_off_t_64" >&5
-$as_echo "$gl_cv_type_off_t_64" >&6; }
-      if test $gl_cv_type_off_t_64 = no; then
-        WINDOWS_64_BIT_OFF_T=1
-      else
-        WINDOWS_64_BIT_OFF_T=0
-      fi
-                        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 64-bit st_size" >&5
-$as_echo_n "checking for 64-bit st_size... " >&6; }
-if ${gl_cv_member_st_size_64+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-                struct stat buf;
-                int verify_st_size_size[sizeof (buf.st_size) >= 8 ? 1 : -1];
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_member_st_size_64=yes
-else
-  gl_cv_member_st_size_64=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_member_st_size_64" >&5
-$as_echo "$gl_cv_member_st_size_64" >&6; }
-      if test $gl_cv_member_st_size_64 = no; then
-        WINDOWS_64_BIT_ST_SIZE=1
-      else
-        WINDOWS_64_BIT_ST_SIZE=0
-      fi
-      ;;
-    *)
-                                                      WINDOWS_64_BIT_OFF_T=0
-      WINDOWS_64_BIT_ST_SIZE=0
-      ;;
-  esac
-
-
-
 
 
 
@@ -9712,7 +9431,7 @@ $as_echo "$gl_cv_next_sys_stat_h" >&6; }
 
 
 
-
+    WINDOWS_64_BIT_ST_SIZE=0
 
 
 
@@ -15304,7 +15023,7 @@ _ACEOF
 
 
 
-
+    WINDOWS_64_BIT_OFF_T=0
 
 
 
@@ -16996,6 +16715,13 @@ $as_echo "$ac_cv_lib_error_at_line" >&6; }
   :
 
   fi
+
+
+  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error:3:c-format"
+
+
+
+  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error_at_line:5:c-format"
 
 
 
@@ -20368,7 +20094,6 @@ _ACEOF
 
 
   fi
-
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports the __inline keyword" >&5
 $as_echo_n "checking whether the compiler supports the __inline keyword... " >&6; }
@@ -25943,7 +25668,7 @@ $as_echo "$gl_cv_next_sys_stat_h" >&6; }
 
 
 
-
+    WINDOWS_64_BIT_ST_SIZE=0
 
 
 

@@ -38,6 +38,7 @@
 #  --no-libtool \
 #  --macro-prefix=gl \
 #  --no-vc-files \
+#  --avoid=largefile \
 #  alloca \
 #  canonicalize-lgpl \
 #  dirent \
@@ -113,7 +114,7 @@ gl_MODULES([
   wchar
   wctype-h
 ])
-gl_AVOID([])
+gl_AVOID([ largefile])
 gl_SOURCE_BASE([import])
 gl_M4_BASE([import/m4])
 gl_PO_BASE([])

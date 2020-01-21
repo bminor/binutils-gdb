@@ -47,6 +47,7 @@
 #  --no-libtool \
 #  --macro-prefix=gl \
 #  --no-vc-files \
+#  --avoid=largefile \
 #  alloca \
 #  canonicalize-lgpl \
 #  dirent \
@@ -227,7 +228,6 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/inttypes.m4 \
 	$(top_srcdir)/import/m4/isnand.m4 \
 	$(top_srcdir)/import/m4/isnanl.m4 \
-	$(top_srcdir)/import/m4/largefile.m4 \
 	$(top_srcdir)/import/m4/limits-h.m4 \
 	$(top_srcdir)/import/m4/localcharset.m4 \
 	$(top_srcdir)/import/m4/locale-fr.m4 \

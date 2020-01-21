@@ -155,6 +155,7 @@ $gnulib_prefix/gnulib-tool --import --dir=. --lib=libgnu \
   --tests-base=tests --aux-dir=import/extra \
   --no-conditional-dependencies --no-libtool --macro-prefix=gl \
   --no-vc-files \
+  --avoid=largefile \
   $IMPORTED_GNULIB_MODULES
 if [ $? -ne 0 ]; then
    echo "Error: gnulib import failed.  Aborting."
