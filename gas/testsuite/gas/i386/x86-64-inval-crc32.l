@@ -67,3 +67,5 @@ GAS LISTING .*
 [ 	]*32[ 	]+crc32  al,al
 [ 	]*33[ 	]+crc32  ax, ax
 [ 	]*34[ 	]+crc32  rax,eax
+[ 	]*35[ 	]*
+#pass

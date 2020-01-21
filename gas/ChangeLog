@@ -1,5 +1,12 @@
 2020-01-21  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/inval-crc32.s,
+	testsuite/gas/i386/x86-64-inval-crc32.s: Add alignment directive.
+	* testsuite/gas/i386/inval-crc32.l,
+	testsuite/gas/i386/x86-64-inval-crc32.l: Adjust expectations.
+
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Merge CRC32 handling into
 	generic code path. Deal with No_lSuf being set in a template.
 	* testsuite/gas/i386/inval-crc32.l,
