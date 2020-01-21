@@ -23,8 +23,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 7e 28 72 f5    	vcvtneps2bf16 %ymm5,%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 0f 72 b4 f4 00 00 00 10 	vcvtneps2bf16x 0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
 [ 	]*[a-f0-9]+:	62 f2 7e 18 72 31    	vcvtneps2bf16 \(%ecx\)\{1to4\},%xmm6
+[ 	]*[a-f0-9]+:	62 f2 7e 18 72 31    	vcvtneps2bf16 \(%ecx\)\{1to4\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 08 72 71 7f 	vcvtneps2bf16x 0x7f0\(%ecx\),%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 9f 72 b2 00 f8 ff ff 	vcvtneps2bf16 -0x800\(%edx\)\{1to4\},%xmm6\{%k7\}\{z\}
+[ 	]*[a-f0-9]+:	62 f2 7e 38 72 31    	vcvtneps2bf16 \(%ecx\)\{1to8\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 38 72 31    	vcvtneps2bf16 \(%ecx\)\{1to8\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 28 72 71 7f 	vcvtneps2bf16y 0xfe0\(%ecx\),%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e bf 72 b2 00 f0 ff ff 	vcvtneps2bf16 -0x1000\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
@@ -52,8 +54,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 7e 28 72 f5    	vcvtneps2bf16 %ymm5,%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 0f 72 b4 f4 00 00 00 10 	vcvtneps2bf16x 0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
 [ 	]*[a-f0-9]+:	62 f2 7e 18 72 31    	vcvtneps2bf16 \(%ecx\)\{1to4\},%xmm6
+[ 	]*[a-f0-9]+:	62 f2 7e 18 72 31    	vcvtneps2bf16 \(%ecx\)\{1to4\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 08 72 71 7f 	vcvtneps2bf16x 0x7f0\(%ecx\),%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 9f 72 b2 00 f8 ff ff 	vcvtneps2bf16 -0x800\(%edx\)\{1to4\},%xmm6\{%k7\}\{z\}
+[ 	]*[a-f0-9]+:	62 f2 7e 38 72 31    	vcvtneps2bf16 \(%ecx\)\{1to8\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 38 72 31    	vcvtneps2bf16 \(%ecx\)\{1to8\},%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e 28 72 71 7f 	vcvtneps2bf16y 0xfe0\(%ecx\),%xmm6
 [ 	]*[a-f0-9]+:	62 f2 7e bf 72 b2 00 f0 ff ff 	vcvtneps2bf16 -0x1000\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
