@@ -1,5 +1,50 @@
 2020-01-21  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Drop SYSRET special case
+	and an intel_syntax check. Re-write lack-of-suffix processing
+	logic.
+	* doc/c-i386.texi: Document operand size defaults for suffix-
+	less AT&T syntax insns.
+	* testsuite/gas/i386/bundle.s, testsuite/gas/i386/lock-1.s,
+	testsuite/gas/i386/opcode.s, testsuite/gas/i386/sse3.s,
+	testsuite/gas/i386/x86-64-avx-scalar.s,
+	testsuite/gas/i386/x86-64-avx.s,
+	testsuite/gas/i386/x86-64-bundle.s,
+	testsuite/gas/i386/x86-64-intel64.s,
+	testsuite/gas/i386/x86-64-lock-1.s,
+	testsuite/gas/i386/x86-64-opcode.s,
+	testsuite/gas/i386/x86-64-sse2avx.s,
+	testsuite/gas/i386/x86-64-sse3.s: Add missing suffixes.
+	* testsuite/gas/i386/nops.s, testsuite/gas/i386/sse-noavx.s,
+	testsuite/gas/i386/x86-64-nops.s,
+	testsuite/gas/i386/x86-64-ptwrite.s,
+	testsuite/gas/i386/x86-64-simd.s,
+	testsuite/gas/i386/x86-64-sse-noavx.s,
+	testsuite/gas/i386/x86-64-suffix.s: Drop bogus suffix-less
+	insns.
+	* testsuite/gas/i386/noreg16.s, testsuite/gas/i386/noreg32.s,
+	testsuite/gas/i386/noreg64.s: Add further tests.
+	* testsuite/gas/i386/ilp32/x86-64-nops.d,
+	testsuite/gas/i386/nops.d, testsuite/gas/i386/noreg16.d,
+	testsuite/gas/i386/noreg32.d, testsuite/gas/i386/noreg64.d,
+	testsuite/gas/i386/sse-noavx.d,
+	testsuite/gas/i386/x86-64-intel64.d,
+	testsuite/gas/i386/x86-64-nops.d,
+	testsuite/gas/i386/x86-64-opcode.d,
+	testsuite/gas/i386/x86-64-ptwrite-intel.d,
+	testsuite/gas/i386/x86-64-ptwrite.d,
+	testsuite/gas/i386/x86-64-simd-intel.d,
+	testsuite/gas/i386/x86-64-simd-suffix.d,
+	testsuite/gas/i386/x86-64-simd.d,
+	testsuite/gas/i386/x86-64-sse-noavx.d
+	testsuite/gas/i386/x86-64-suffix.d,
+	testsuite/gas/i386/x86-64-suffix-intel.d: Adjust expectations.
+	* testsuite/gas/i386/noreg16.l, testsuite/gas/i386/noreg32.l,
+	testsuite/gas/i386/noreg64.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx512_bf16_vl.s,
 	testsuite/gas/i386/x86-64-avx512_bf16_vl.s: Add broadcast forms
 	of VCVTNEPS2BF16{X,Y}. Add operand-size less Intel syntax

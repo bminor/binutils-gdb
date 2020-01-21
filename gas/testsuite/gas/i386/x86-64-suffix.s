@@ -15,7 +15,6 @@ foo:
 	iret
 	iretq
 	sysretl
-	sysret
 	sysretq
 
 	.intel_syntax noprefix
@@ -24,5 +23,4 @@ foo:
 	iret
 	iretq
 	sysretd
-	sysret
 	sysretq

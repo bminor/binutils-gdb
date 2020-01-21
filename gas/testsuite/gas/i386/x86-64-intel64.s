@@ -11,7 +11,8 @@ _start:
 	lssq	(%rdx), %rbx
 
 	syscall
-	sysret
+	sysretl
+	sysretq
 
 	.intel_syntax noprefix
 	lfs	rax, [rcx]

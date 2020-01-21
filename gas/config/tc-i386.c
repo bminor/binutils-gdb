@@ -6395,9 +6395,7 @@ process_suffix (void)
   else if (i.tm.opcode_modifier.defaultsize
 	   && !i.suffix
 	   /* exclude fldenv/frstor/fsave/fstenv */
-	   && i.tm.opcode_modifier.no_ssuf
-	   /* exclude sysret */
-	   && i.tm.base_opcode != 0x0f07)
+	   && i.tm.opcode_modifier.no_ssuf)
     {
       i.suffix = stackop_size;
       if (stackop_size == LONG_MNEM_SUFFIX)
@@ -6418,8 +6416,7 @@ process_suffix (void)
 		     i.tm.name);
 	}
     }
-  else if (intel_syntax
-	   && !i.suffix
+  else if (!i.suffix
 	   && (i.tm.opcode_modifier.jump == JUMP_ABSOLUTE
 	       || i.tm.opcode_modifier.jump == JUMP_BYTE
 	       || i.tm.opcode_modifier.jump == JUMP_INTERSEGMENT
@@ -6446,42 +6443,49 @@ process_suffix (void)
 	}
     }
 
-  if (!i.suffix)
+  if (!i.suffix
+      && !i.tm.opcode_modifier.defaultsize
+      && !i.tm.opcode_modifier.ignoresize)
     {
-      if (!intel_syntax)
-	{
-	  if (i.tm.opcode_modifier.w)
-	    {
-	      as_bad (_("no instruction mnemonic suffix given and "
-			"no register operands; can't size instruction"));
-	      return 0;
-	    }
-	}
-      else
-	{
-	  unsigned int suffixes;
+      unsigned int suffixes;
 
-	  suffixes = !i.tm.opcode_modifier.no_bsuf;
-	  if (!i.tm.opcode_modifier.no_wsuf)
-	    suffixes |= 1 << 1;
-	  if (!i.tm.opcode_modifier.no_lsuf)
-	    suffixes |= 1 << 2;
-	  if (!i.tm.opcode_modifier.no_ldsuf)
-	    suffixes |= 1 << 3;
-	  if (!i.tm.opcode_modifier.no_ssuf)
-	    suffixes |= 1 << 4;
-	  if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
-	    suffixes |= 1 << 5;
+      suffixes = !i.tm.opcode_modifier.no_bsuf;
+      if (!i.tm.opcode_modifier.no_wsuf)
+	suffixes |= 1 << 1;
+      if (!i.tm.opcode_modifier.no_lsuf)
+	suffixes |= 1 << 2;
+      if (!i.tm.opcode_modifier.no_ldsuf)
+	suffixes |= 1 << 3;
+      if (!i.tm.opcode_modifier.no_ssuf)
+	suffixes |= 1 << 4;
+      if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
+	suffixes |= 1 << 5;
 
-	  /* There are more than suffix matches.  */
-	  if (i.tm.opcode_modifier.w
-	      || ((suffixes & (suffixes - 1))
-		  && !i.tm.opcode_modifier.defaultsize
-		  && !i.tm.opcode_modifier.ignoresize))
+      /* Are multiple suffixes allowed?  */
+      if (suffixes & (suffixes - 1))
+	{
+	  if (intel_syntax)
 	    {
 	      as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
 	      return 0;
 	    }
+	  if (operand_check == check_error)
+	    {
+	      as_bad (_("no instruction mnemonic suffix given and "
+			"no register operands; can't size `%s'"), i.tm.name);
+	      return 0;
+	    }
+	  if (operand_check == check_warning)
+	    as_warn (_("no instruction mnemonic suffix given and "
+		       "no register operands; using default for `%s'"),
+		     i.tm.name);
+
+	  if (i.tm.opcode_modifier.floatmf)
+	    i.suffix = SHORT_MNEM_SUFFIX;
+	  else if (flag_code == CODE_16BIT)
+	    i.suffix = WORD_MNEM_SUFFIX;
+	  else
+	    i.suffix = LONG_MNEM_SUFFIX;
 	}
     }
 

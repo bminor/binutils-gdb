@@ -720,9 +720,9 @@ _start:
 
 # Tests for op regl/mem32, xmm[, xmm]
 	cvtsi2sd %ecx,%xmm4
-	cvtsi2sd (%rcx),%xmm4
+	cvtsi2sdl (%rcx),%xmm4
 	cvtsi2ss %ecx,%xmm4
-	cvtsi2ss (%rcx),%xmm4
+	cvtsi2ssl (%rcx),%xmm4
 
 # Tests for op imm8, xmm/mem32, xmm[, xmm]
 	cmpss $100,%xmm4,%xmm6

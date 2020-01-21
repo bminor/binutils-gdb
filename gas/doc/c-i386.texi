@@ -723,6 +723,31 @@ assembler which assumes that a missing mnemonic suffix implies long
 operand size.  (This incompatibility does not affect compiler output
 since compilers always explicitly specify the mnemonic suffix.)
 
+When there is no sizing suffix and no (suitable) register operands to
+deduce the size of memory operands, with a few exceptions and where long
+operand size is possible in the first place, operand size will default
+to long in 32- and 64-bit modes.  Similarly it will default to short in
+16-bit mode. Noteworthy exceptions are
+
+@itemize @bullet
+@item
+Instructions with an implicit on-stack operand as well as branches,
+which default to quad in 64-bit mode.
+
+@item
+Sign- and zero-extending moves, which default to byte size source
+operands.
+
+@item
+Floating point insns with integer operands, which default to short (for
+perhaps historical reasons).
+
+@item
+CRC32 with a 64-bit destination, which defaults to a quad source
+operand.
+
+@end itemize
+
 Almost all instructions have the same names in AT&T and Intel format.
 There are a few exceptions.  The sign extend and zero extend
 instructions need two sizes to specify them.  They need a size to

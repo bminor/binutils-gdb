@@ -189,48 +189,48 @@
 	CVTTSS2SIq %xmm0,%r8	      #	 --  --	 F3 4C	 0f 2c c0	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                 REX to access upper reg.
 
         # CVTSI2SS
-	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	 ; OVR 128-bit media instruction override
-	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
+	CVTSI2SSl (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	 ; OVR 128-bit media instruction override
+	CVTSI2SSl (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SSl (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SSl (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
 	CVTSI2SS  %eax,%xmm0	      #	 --  --	 F3 --	 0f 2a c0	                 ; OVR 128-bit media instruction override
 	CVTSI2SS  %eax,%xmm15	      #	 --  --	 F3 44	 0f 2a f8	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
 	CVTSI2SS  %eax,%xmm8	      #	 --  --	 F3 44	 0f 2a c0	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
 	CVTSI2SS  %eax,%xmm7	      #	 --  --	 F3 --	 0f 2a f8	                 ; OVR 128-bit media instruction override
-	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	                 ; OVR 128-bit media instruction override
-	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
-	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
+	CVTSI2SSl (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	                 ; OVR 128-bit media instruction override
+	CVTSI2SSl (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SSl (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SSl (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SSl (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
 
         # CVTSI2SD
-	CVTSI2SD  (%r8),%xmm0	      #	 --  --	 F2 41	 0F 2A 00			 ; REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm0	      #	 --  --	 F2 --	 0F 2A 00			 ; OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm15	      #	 --  --	 F2 45	 0F 2A 38			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm15	      #	 --  --	 F2 44	 0F 2A 38			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm8	      #	 --  --	 F2 45	 0F 2A 00			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm8	      #	 --  --	 F2 44	 0F 2A 00			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm7	      #	 --  --	 F2 41	 0F 2A 38			 ; REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm7	      #	 --  --	 F2 --	 0F 2A 38			 ; OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm0	      #	 --  --	 F2 41	 0F 2A 00			 ; REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm0	      #	 --  --	 F2 --	 0F 2A 00			 ; OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm15	      #	 --  --	 F2 45	 0F 2A 38			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm15	      #	 --  --	 F2 44	 0F 2A 38			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm8	      #	 --  --	 F2 45	 0F 2A 00			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm8	      #	 --  --	 F2 44	 0F 2A 00			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm7	      #	 --  --	 F2 41	 0F 2A 38			 ; REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm7	      #	 --  --	 F2 --	 0F 2A 38			 ; OVR 128bit MMinstr.
 	CVTSI2SD  %eax,%xmm0	      #	 --  --	 F2 --	 0F 2A C0			 ; OVR 128bit MMinstr.
 	CVTSI2SD  %eax,%xmm15	      #	 --  --	 F2 44	 0F 2A F8			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
 	CVTSI2SD  %eax,%xmm8	      #	 --  --	 F2 44	 0F 2A C0			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
 	CVTSI2SD  %eax,%xmm7	      #	 --  --	 F2 --	 0F 2A F8			 ; OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm0	      #	 --  --	 F2 41	 0F 2A 00			 ; REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm0	      #	 --  --	 F2 --	 0F 2A 00			 ; OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm15	      #	 --  --	 F2 45	 0F 2A 38			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm15	      #	 --  --	 F2 44	 0F 2A 38			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm8	      #	 --  --	 F2 45	 0F 2A 00			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm8	      #	 --  --	 F2 44	 0F 2A 00			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%r8),%xmm7	      #	 --  --	 F2 41	 0F 2A 38			 ; REX to access upper reg. OVR 128bit MMinstr.
-	CVTSI2SD  (%rax),%xmm7	      #	 --  --	 F2 --	 0F 2A 38			 ; OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm0	      #	 --  --	 F2 41	 0F 2A 00			 ; REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm0	      #	 --  --	 F2 --	 0F 2A 00			 ; OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm15	      #	 --  --	 F2 45	 0F 2A 38			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm15	      #	 --  --	 F2 44	 0F 2A 38			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm8	      #	 --  --	 F2 45	 0F 2A 00			 ; REX to access upper XMM reg. REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm8	      #	 --  --	 F2 44	 0F 2A 00			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%r8),%xmm7	      #	 --  --	 F2 41	 0F 2A 38			 ; REX to access upper reg. OVR 128bit MMinstr.
+	CVTSI2SDl (%rax),%xmm7	      #	 --  --	 F2 --	 0F 2A 38			 ; OVR 128bit MMinstr.
 
 	# MOVD
 	MOVD (%r8),%xmm0	      #	 --  --	 66 41	 0F 6E 00			 ; REX to access upper reg. Data128 = ZEXT(Data32). OVR 128bit MMinstr.
@@ -446,7 +446,8 @@
         str (%rax)	              #  --  --	 -- --	 0F 00 08
 
         syscall		              #  --  --	 -- --	 0F 05
-        sysret		              #  --  --	 -- --	 0F 07
+        sysretl		              #  --  --	 -- --	 0F 07
+        sysretq		              #  --  --	 -- 48	 0F 07
 
         swapgs		              #  --  --	 -- --	 0F 01 f8
 
