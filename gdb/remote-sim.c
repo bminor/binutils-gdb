@@ -189,21 +189,6 @@ static char **sim_argv = NULL;
 static host_callback gdb_callback;
 static int callbacks_initialized = 0;
 
-/* Callback for iterate_over_inferiors.  It checks to see if the sim
-   descriptor passed via ARG is the same as that for the inferior
-   designated by INF.  Return true if so; false otherwise.  */
-
-static int
-check_for_duplicate_sim_descriptor (struct inferior *inf, void *arg)
-{
-  struct sim_inferior_data *sim_data;
-  SIM_DESC new_sim_desc = (SIM_DESC) arg;
-
-  sim_data = sim_inferior_data_key.get (inf);
-
-  return (sim_data != NULL && sim_data->gdbsim_desc == new_sim_desc);
-}
-
 /* Flags indicating whether or not a sim instance is needed.  One of these
    flags should be passed to get_sim_inferior_data().  */
 
@@ -225,27 +210,33 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
   if (sim_instance_needed == SIM_INSTANCE_NEEDED
       && (sim_data == NULL || sim_data->gdbsim_desc == NULL))
     {
-      struct inferior *idup;
       sim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
       if (sim_desc == NULL)
 	error (_("Unable to create simulator instance for inferior %d."),
 	       inf->num);
 
-      idup = iterate_over_inferiors (check_for_duplicate_sim_descriptor,
-				     sim_desc);
-      if (idup != NULL)
+      /* Check if the sim descriptor is the same as that of another
+	 inferior.  */
+      for (inferior *other_inf : all_inferiors ())
 	{
-	  /* We don't close the descriptor due to the fact that it's
-	     shared with some other inferior.  If we were to close it,
-	     that might needlessly muck up the other inferior.  Of
-	     course, it's possible that the damage has already been
-	     done...  Note that it *will* ultimately be closed during
-	     cleanup of the other inferior.  */
-	  sim_desc = NULL;
-	  error (
- _("Inferior %d and inferior %d would have identical simulator state.\n"
-   "(This simulator does not support the running of more than one inferior.)"),
-		 inf->num, idup->num);
+	  sim_inferior_data *other_sim_data
+	    = sim_inferior_data_key.get (other_inf);
+
+	  if (other_sim_data != NULL
+	      && other_sim_data->gdbsim_desc == sim_desc)
+	    {
+	      /* We don't close the descriptor due to the fact that it's
+		 shared with some other inferior.  If we were to close it,
+		 that might needlessly muck up the other inferior.  Of
+		 course, it's possible that the damage has already been
+		 done...  Note that it *will* ultimately be closed during
+		 cleanup of the other inferior.  */
+	      sim_desc = NULL;
+	      error (
+_("Inferior %d and inferior %d would have identical simulator state.\n"
+ "(This simulator does not support the running of more than one inferior.)"),
+		     inf->num, other_inf->num);
+	    }
 	}
     }
 
@@ -896,30 +887,17 @@ gdbsim_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 
    For simulators that do not support this operation, just abort.  */
 
-static int
-gdbsim_interrupt_inferior (struct inferior *inf, void *arg)
-{
-  struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
-
-  if (sim_data)
-    {
-      if (!sim_stop (sim_data->gdbsim_desc))
-	{
-	  quit ();
-	}
-    }
-
-  /* When called from iterate_over_inferiors, a zero return causes the
-     iteration process to proceed until there are no more inferiors to
-     consider.  */
-  return 0;
-}
-
 void
 gdbsim_target::interrupt ()
 {
-  iterate_over_inferiors (gdbsim_interrupt_inferior, NULL);
+  for (inferior *inf : all_inferiors ())
+    {
+      sim_inferior_data *sim_data
+	= get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
+
+      if (sim_data != nullptr && !sim_stop (sim_data->gdbsim_desc))
+	  quit ();
+    }
 }
 
 /* GDB version of os_poll_quit callback.
