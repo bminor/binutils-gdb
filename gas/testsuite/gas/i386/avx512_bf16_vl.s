@@ -17,9 +17,11 @@ _start:
 	vcvtneps2bf16	%ymm5, %xmm6	 #AVX512{BF16,VL}
 	vcvtneps2bf16x	0x10000000(%esp, %esi, 8), %xmm6{%k7}	 #AVX512{BF16,VL} MASK_ENABLING
 	vcvtneps2bf16	(%ecx){1to4}, %xmm6	 #AVX512{BF16,VL} BROADCAST_EN
+	vcvtneps2bf16x	(%ecx){1to4}, %xmm6	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16x	2032(%ecx), %xmm6	 #AVX512{BF16,VL} Disp8
 	vcvtneps2bf16	-2048(%edx){1to4}, %xmm6{%k7}{z}	 #AVX512{BF16,VL} Disp8 BROADCAST_EN MASK_ENABLING ZEROCTL
 	vcvtneps2bf16	(%ecx){1to8}, %xmm6	 #AVX512{BF16,VL} BROADCAST_EN
+	vcvtneps2bf16y	(%ecx){1to8}, %xmm6	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16y	4064(%ecx), %xmm6	 #AVX512{BF16,VL} Disp8
 	vcvtneps2bf16	-4096(%edx){1to8}, %xmm6{%k7}{z}	 #AVX512{BF16,VL} Disp8 BROADCAST_EN MASK_ENABLING ZEROCTL
 	vdpbf16ps	%ymm4, %ymm5, %ymm6	 #AVX512{BF16,VL}
@@ -47,9 +49,11 @@ _start:
 	vcvtneps2bf16	xmm6, xmm5	 #AVX512{BF16,VL}
 	vcvtneps2bf16	xmm6, ymm5	 #AVX512{BF16,VL}
 	vcvtneps2bf16	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512{BF16,VL} MASK_ENABLING
+	vcvtneps2bf16	xmm6, [ecx]{1to4}	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16	xmm6, DWORD PTR [ecx]{1to4}	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16	xmm6, XMMWORD PTR [ecx+2032]	 #AVX512{BF16,VL} Disp8
 	vcvtneps2bf16	xmm6{k7}{z}, DWORD PTR [edx-2048]{1to4}	 #AVX512{BF16,VL} Disp8 BROADCAST_EN MASK_ENABLING ZEROCTL
+	vcvtneps2bf16	xmm6, [ecx]{1to8}	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16	xmm6, DWORD PTR [ecx]{1to8}	 #AVX512{BF16,VL} BROADCAST_EN
 	vcvtneps2bf16	xmm6, YMMWORD PTR [ecx+4064]	 #AVX512{BF16,VL} Disp8
 	vcvtneps2bf16	xmm6{k7}{z}, DWORD PTR [edx-4096]{1to8}	 #AVX512{BF16,VL} Disp8 BROADCAST_EN MASK_ENABLING ZEROCTL

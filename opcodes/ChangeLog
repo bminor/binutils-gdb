@@ -1,3 +1,10 @@
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vcvtneps2bf16x): Add Broadcast, Xmmword, and
+	Dword.
+	(vcvtneps2bf16y): Add Broadcast, Ymmword, and Dword.
+	* i386-tbl.h: Re-generate.
+
 2020-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
