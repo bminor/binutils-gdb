@@ -1,3 +1,7 @@
+2020-01-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (proceed): Fix indentation.
+
 2020-01-21  Tom Tromey  <tromey@adacore.com>
 
 	* source-cache.c (source_cache::ensure): Call ext_lang_colorize.

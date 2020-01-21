@@ -3128,46 +3128,46 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  {
 	    switch_to_thread_no_regs (tp);
 
-	  if (!tp->inf->has_execution ())
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: proceed: [%s] target has "
-				    "no execution\n",
-				    target_pid_to_str (tp->ptid).c_str ());
-	      continue;
-	    }
+	    if (!tp->inf->has_execution ())
+	      {
+		if (debug_infrun)
+		  fprintf_unfiltered (gdb_stdlog,
+				      "infrun: proceed: [%s] target has "
+				      "no execution\n",
+				      target_pid_to_str (tp->ptid).c_str ());
+		continue;
+	      }
 
-	  if (tp->resumed)
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: proceed: [%s] resumed\n",
-				    target_pid_to_str (tp->ptid).c_str ());
-	      gdb_assert (tp->executing || tp->suspend.waitstatus_pending_p);
-	      continue;
-	    }
+	    if (tp->resumed)
+	      {
+		if (debug_infrun)
+		  fprintf_unfiltered (gdb_stdlog,
+				      "infrun: proceed: [%s] resumed\n",
+				      target_pid_to_str (tp->ptid).c_str ());
+		gdb_assert (tp->executing || tp->suspend.waitstatus_pending_p);
+		continue;
+	      }
 
-	  if (thread_is_in_step_over_chain (tp))
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: proceed: [%s] needs step-over\n",
-				    target_pid_to_str (tp->ptid).c_str ());
-	      continue;
-	    }
+	    if (thread_is_in_step_over_chain (tp))
+	      {
+		if (debug_infrun)
+		  fprintf_unfiltered (gdb_stdlog,
+				      "infrun: proceed: [%s] needs step-over\n",
+				      target_pid_to_str (tp->ptid).c_str ());
+		continue;
+	      }
 
-	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: proceed: resuming %s\n",
-				target_pid_to_str (tp->ptid).c_str ());
+	    if (debug_infrun)
+	      fprintf_unfiltered (gdb_stdlog,
+				  "infrun: proceed: resuming %s\n",
+				  target_pid_to_str (tp->ptid).c_str ());
 
-	  reset_ecs (ecs, tp);
-	  switch_to_thread (tp);
-	  keep_going_pass_signal (ecs);
-	  if (!ecs->wait_some_more)
-	    error (_("Command aborted."));
-	}
+	    reset_ecs (ecs, tp);
+	    switch_to_thread (tp);
+	    keep_going_pass_signal (ecs);
+	    if (!ecs->wait_some_more)
+	      error (_("Command aborted."));
+	  }
       }
     else if (!cur_thr->resumed && !thread_is_in_step_over_chain (cur_thr))
       {
