@@ -261,7 +261,7 @@ void toggle_completion_func(bool want_py_completion) {
 
     if (!saved_cmp_func) {
       rl_completer_word_break_characters 
-        // = gdb_completer_command_word_break_characters
+//        = gdb_completer_command_word_break_characters
           = gdb_completer_command_word_break_characters_gdb;
       return;
     }
@@ -269,13 +269,13 @@ void toggle_completion_func(bool want_py_completion) {
     if (want_py_completion) {
         rl_attempted_completion_function = saved_cmp_func;
         rl_completer_word_break_characters 
-          // = gdb_completer_command_word_break_characters
+          //= gdb_completer_command_word_break_characters;
             = gdb_completer_command_word_break_characters_py;
     } else {
         rl_attempted_completion_function 
           = gdb_rl_attempted_completion_function;
         rl_completer_word_break_characters 
-          // = gdb_completer_command_word_break_characters
+          //= gdb_completer_command_word_break_characters;
             = gdb_completer_command_word_break_characters_gdb;
     }
 }
@@ -308,7 +308,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
   found_quote = delimiter = 0;
   quote_char = '\0';
 
-  brkchars = info->word_break_characters;
+  brkchars =  rl_completer_word_break_characters ; //info->word_break_c haracters;
 
   if (info->quote_characters != NULL)
     {
