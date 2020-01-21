@@ -1,5 +1,9 @@
 2020-01-21  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh: Add declaration for _initialize_gdbarch.
+
+2020-01-21  Simon Marchi  <simon.marchi@efficios.com>
+
 	* remote-sim.c (check_for_duplicate_sim_descriptor): Remove.
 	(get_sim_inferior_data): Remove use of iterate_over_inferiors,
 	replace with range-based for.

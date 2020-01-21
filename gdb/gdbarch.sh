@@ -2600,8 +2600,9 @@ target_gdbarch (void)
   return current_inferior ()->gdbarch;
 }
 
+void _initialize_gdbarch ();
 void
-_initialize_gdbarch (void)
+_initialize_gdbarch ()
 {
   add_setshow_zuinteger_cmd ("arch", class_maintenance, &gdbarch_debug, _("\\
 Set architecture debugging."), _("\\
