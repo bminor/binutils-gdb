@@ -26,6 +26,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 3f 34 12          	cmpw   \$0x1234,\(%bx\)
  *[a-f0-9]+:	a7                   	cmpsw  %es:\(%di\),%ds:\(%si\)
  *[a-f0-9]+:	67 a7                	cmpsw  %es:\(%edi\),%ds:\(%esi\)
+ *[a-f0-9]+:	f2 0f 38 f1 07       	crc32w \(%bx\),%eax
  *[a-f0-9]+:	f2 0f 2a 07          	cvtsi2sdl \(%bx\),%xmm0
  *[a-f0-9]+:	f3 0f 2a 07          	cvtsi2ssl \(%bx\),%xmm0
  *[a-f0-9]+:	ff 0f                	decw   \(%bx\)

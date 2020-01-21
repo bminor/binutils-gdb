@@ -30,6 +30,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 38 78 56 34 12    	cmpl   \$0x12345678,\(%eax\)
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%edi\),%ds:\(%esi\)
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%edi\),%ds:\(%esi\)
+ *[a-f0-9]+:	f2 0f 38 f1 00       	crc32l \(%eax\),%eax
  *[a-f0-9]+:	f2 0f 2a 00          	cvtsi2sdl \(%eax\),%xmm0
  *[a-f0-9]+:	f3 0f 2a 00          	cvtsi2ssl \(%eax\),%xmm0
  *[a-f0-9]+:	ff 08                	decl   \(%eax\)

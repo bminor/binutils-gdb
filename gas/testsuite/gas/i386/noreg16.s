@@ -20,6 +20,7 @@ noreg:
 	cmp	$0x1234, (%bx)
 	cmps
 	cmps	%es:(%edi), (%esi)
+	crc32	(%bx), %eax
 	cvtsi2sd (%bx), %xmm0
 	cvtsi2ss (%bx), %xmm0
 	dec	(%bx)

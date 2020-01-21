@@ -21,6 +21,7 @@
 .*:[1-9][0-9]*: Warning: .* `cmp'
 .*:[1-9][0-9]*: Warning: .* `cmps'
 .*:[1-9][0-9]*: Warning: .* `cmps'
+.*:[1-9][0-9]*: Warning: .* `crc32'
 .*:[1-9][0-9]*: Warning: .* `dec'
 .*:[1-9][0-9]*: Warning: .* `div'
 .*:[1-9][0-9]*: Warning: .* `fadd'

@@ -1,5 +1,19 @@
 2020-01-21  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Merge CRC32 handling into
+	generic code path. Deal with No_lSuf being set in a template.
+	* testsuite/gas/i386/inval-crc32.l,
+	testsuite/gas/i386/x86-64-inval-crc32.l: Expect warning(s)
+	instead of error(s) when operand size is ambiguous.
+	* testsuite/gas/i386/noreg16.s, testsuite/gas/i386/noreg32.s,
+	testsuite/gas/i386/noreg64.s: Add CRC32 tests.
+	* testsuite/gas/i386/noreg16.d, testsuite/gas/i386/noreg16.l,
+	testsuite/gas/i386/noreg32.d, testsuite/gas/i386/noreg32.l,
+	testsuite/gas/i386/noreg64.d, testsuite/gas/i386/noreg64.l:
+	Adjust expectations.
+
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Drop SYSRET special case
 	and an intel_syntax check. Re-write lack-of-suffix processing
 	logic.
