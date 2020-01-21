@@ -1,7 +1,15 @@
 #ld:
-#readelf: --notes --wide
+#readelf: --notes --wide -l
 #target: *-*-linux* *-*-gnu* *-*-nacl*
 
+#...
+  GNU_PROPERTY .*
+#...
+ +[0-9]+ +\.note\.gnu\.property 
+#...
+ +[0-9]+ +\.note\.gnu\.property 
+#...
+ +[0-9]+ +\.note\.gnu\.property 
 #...
 Displaying notes found in: \.note\.gnu\.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description
