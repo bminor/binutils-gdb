@@ -515,8 +515,9 @@ void
 ravenscar_thread_target::mourn_inferior ()
 {
   m_base_ptid = null_ptid;
-  beneath ()->mourn_inferior ();
+  target_ops *beneath = this->beneath ();
   unpush_target (this);
+  beneath->mourn_inferior ();
 }
 
 /* Implement the to_core_of_thread target_ops "method".  */

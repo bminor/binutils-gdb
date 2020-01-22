@@ -1,3 +1,8 @@
+2020-01-31  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::mourn_inferior):
+	Call beneath target's mourn_inferior after unpushing.
+
 2020-01-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR tui/9765
