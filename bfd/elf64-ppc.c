@@ -13080,7 +13080,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		      if (!get_tls_mask (&tls_mask, NULL, NULL, &local_syms,
 					 irela - 1, input_bfd))
 			goto error_ret_free_internal;
-		      if ((*tls_mask & TLS_TLS) != 0)
+		      if ((*tls_mask & TLS_TLS) != 0
+			  && (*tls_mask & (TLS_GD | TLS_LD)) == 0)
 			continue;
 		    }
 
