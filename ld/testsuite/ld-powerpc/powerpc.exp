@@ -280,6 +280,12 @@ set ppc64elftests {
     {"TLSdesc2" "-melf64ppc -shared --hash-style=both --no-plt-localentry tmpdir/tlsdll.so" "" "-a64"  {tlsdesc.s}
      {{objdump -dr tlsdesc2.d} {readelf -wf tlsdesc2.wf}}
      "tlsdesc2"}
+    {"TLSdesc3" "-melf64ppc --no-tls-optimize tmpdir/tlsdll.o" "" "-a64"  {tlsdesc.s}
+     {{objdump -dr tlsdesc3.d} {readelf -wf tlsdesc3.wf}}
+     "tlsdesc3"}
+    {"TLSdesc4" "-melf64ppc --no-tls-optimize tmpdir/tlsdll.o" "" "-a64"  {tlsdesc4.s}
+     {{objdump -dr tlsdesc4.d} {readelf -wf tlsdesc4.wf}}
+     "tlsdesc4"}
     {"sym@tocbase" "-shared -melf64ppc" "" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
     {"TOC opt" "-melf64ppc" "" "-a64"  {tocopt.s}

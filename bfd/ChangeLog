@@ -1,5 +1,16 @@
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Add tga_group.
+	(ppc64_elf_archive_symbol_lookup): Extract __tls_get_addr_opt for
+	__tls_get_addr_desc.
+	(ppc64_elf_size_stubs): Add section for linker generated
+	__tls_get_addr_desc wrapper function.  Loop at least once if
+	generating this function.
+	(emit_tga_desc, emit_tga_desc_eh_frame): New functions.
+	(ppc64_elf_build_stubs): Generate __tls_get_addr_desc.
+
+2020-01-22  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.h (struct ppc64_elf_params): Add no_tls_get_addr_regsave.
 	* elf64-ppc.c (struct ppc_link_hash_table): Add tga_desc and
 	tga_desc_fd.

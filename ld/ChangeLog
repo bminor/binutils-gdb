@@ -1,5 +1,14 @@
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tlsdesc3.d,
+	* testsuite/ld-powerpc/tlsdesc3.wf,
+	* testsuite/ld-powerpc/tlsdesc4.d,
+	* testsuite/ld-powerpc/tlsdesc4.s,
+	* testsuite/ld-powerpc/tlsdesc4.wf: New tests.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
+2020-01-22  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc64elf.em (ppc64_opt, PARSE_AND_LIST_LONGOPTS),
 	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Support
 	--tls-get-addr-regsave and --no-tls-get-addr-regsave.

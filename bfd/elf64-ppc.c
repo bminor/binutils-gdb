@@ -3182,6 +3182,7 @@ struct ppc_link_hash_table
   struct ppc_link_hash_entry *tls_get_addr_fd;
   struct ppc_link_hash_entry *tga_desc;
   struct ppc_link_hash_entry *tga_desc_fd;
+  struct map_stub *tga_group;
 
   /* The size of reliplt used by got entry relocs.  */
   bfd_size_type got_reli_size;
@@ -4150,6 +4151,11 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
   memcpy (dot_name + 1, name, len + 1);
   h = _bfd_elf_archive_symbol_lookup (abfd, info, dot_name);
   bfd_release (abfd, dot_name);
+  if (h != NULL)
+    return h;
+
+  if (strcmp (name, "__tls_get_addr_opt") == 0)
+    h = _bfd_elf_archive_symbol_lookup (abfd, info, "__tls_get_addr_desc");
   return h;
 }
 
@@ -13088,6 +13094,40 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
   if (!group_sections (info, stub_group_size, stubs_always_before_branch))
     return FALSE;
 
+  htab->tga_group = NULL;
+  if (!htab->params->no_tls_get_addr_regsave
+      && htab->tga_desc_fd != NULL
+      && (htab->tga_desc_fd->elf.root.type == bfd_link_hash_undefined
+	  || htab->tga_desc_fd->elf.root.type == bfd_link_hash_undefweak)
+      && htab->tls_get_addr_fd != NULL
+      && is_static_defined (&htab->tls_get_addr_fd->elf))
+    {
+      asection *sym_sec, *code_sec, *stub_sec;
+      bfd_vma sym_value;
+      struct _opd_sec_data *opd;
+
+      sym_sec = htab->tls_get_addr_fd->elf.root.u.def.section;
+      sym_value = defined_sym_val (&htab->tls_get_addr_fd->elf);
+      code_sec = sym_sec;
+      opd = get_opd_info (sym_sec);
+      if (opd != NULL)
+	opd_entry_value (sym_sec, sym_value, &code_sec, NULL, FALSE);
+      htab->tga_group = htab->sec_info[code_sec->id].u.group;
+      stub_sec = (*htab->params->add_stub_section) (".tga_desc.stub",
+						    htab->tga_group->link_sec);
+      if (stub_sec == NULL)
+	return FALSE;
+      htab->tga_group->stub_sec = stub_sec;
+
+      htab->tga_desc_fd->elf.root.type = bfd_link_hash_defined;
+      htab->tga_desc_fd->elf.root.u.def.section = stub_sec;
+      htab->tga_desc_fd->elf.root.u.def.value = 0;
+      htab->tga_desc_fd->elf.type = STT_FUNC;
+      htab->tga_desc_fd->elf.def_regular = 1;
+      htab->tga_desc_fd->elf.non_elf = 0;
+      _bfd_elf_link_hash_hide_symbol (info, &htab->tga_desc_fd->elf, TRUE);
+    }
+
 #define STUB_SHRINK_ITER 20
   /* Loop until no stubs added.  After iteration 20 of this loop we may
      exit on a stub section shrinking.  This is to break out of a
@@ -13517,6 +13557,14 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	      stub_sec->flags &= ~SEC_RELOC;
 	    }
 	}
+      if (htab->tga_group != NULL)
+	{
+	  /* See emit_tga_desc and emit_tga_desc_eh_frame.  */
+	  htab->tga_group->eh_size
+	    = 1 + 2 + (htab->opd_abi != 0) + 3 + 8 * 2 + 3 + 8 + 3;
+	  htab->tga_group->lr_restore = 23 * 4;
+	  htab->tga_group->stub_sec->size = 24 * 4;
+	}
 
       if (htab->stub_iteration <= STUB_SHRINK_ITER
 	  || htab->brlt->rawsize < htab->brlt->size)
@@ -13580,7 +13628,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	      || (htab->stub_iteration > STUB_SHRINK_ITER
 		  && htab->brlt->rawsize > htab->brlt->size))
 	  && (htab->glink_eh_frame == NULL
-	      || htab->glink_eh_frame->rawsize == htab->glink_eh_frame->size))
+	      || htab->glink_eh_frame->rawsize == htab->glink_eh_frame->size)
+	  && (htab->tga_group == NULL
+	      || htab->stub_iteration > 1))
 	break;
 
       /* Ask the linker to do its stuff.  */
@@ -14086,6 +14136,74 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Emit the static wrapper function preserving registers around a
+   __tls_get_addr_opt call.  */
+
+static bfd_boolean
+emit_tga_desc (struct ppc_link_hash_table *htab)
+{
+  asection *stub_sec = htab->tga_group->stub_sec;
+  unsigned int cfa_updt = 11 * 4;
+  bfd_byte *p;
+  bfd_vma to, from, delta;
+
+  BFD_ASSERT (htab->tga_desc_fd->elf.root.type == bfd_link_hash_defined
+	      && htab->tga_desc_fd->elf.root.u.def.section == stub_sec
+	      && htab->tga_desc_fd->elf.root.u.def.value == 0);
+  to = defined_sym_val (&htab->tls_get_addr_fd->elf);
+  from = defined_sym_val (&htab->tga_desc_fd->elf) + cfa_updt;
+  delta = to - from;
+  if (delta + (1 << 25) >= 1 << 26)
+    {
+      _bfd_error_handler (_("__tls_get_addr call offset overflow"));
+      htab->stub_error = TRUE;
+      return FALSE;
+    }
+
+  p = stub_sec->contents;
+  p = tls_get_addr_prologue (htab->elf.dynobj, p, htab);
+  bfd_put_32 (stub_sec->owner, B_DOT | 1 | (delta & 0x3fffffc), p);
+  p += 4;
+  p = tls_get_addr_epilogue (htab->elf.dynobj, p, htab);
+  return stub_sec->size == (bfd_size_type) (p - stub_sec->contents);
+}
+
+/* Emit eh_frame describing the static wrapper function.  */
+
+static bfd_byte *
+emit_tga_desc_eh_frame (struct ppc_link_hash_table *htab, bfd_byte *p)
+{
+  unsigned int cfa_updt = 11 * 4;
+  unsigned int i;
+
+  *p++ = DW_CFA_advance_loc + cfa_updt / 4;
+  *p++ = DW_CFA_def_cfa_offset;
+  if (htab->opd_abi)
+    {
+      *p++ = 128;
+      *p++ = 1;
+    }
+  else
+    *p++ = 96;
+  *p++ = DW_CFA_offset_extended_sf;
+  *p++ = 65;
+  *p++ = (-16 / 8) & 0x7f;
+  for (i = 4; i < 12; i++)
+    {
+      *p++ = DW_CFA_offset + i;
+      *p++ = (htab->opd_abi ? 13 : 12) - i;
+    }
+  *p++ = DW_CFA_advance_loc + 10;
+  *p++ = DW_CFA_def_cfa_offset;
+  *p++ = 0;
+  for (i = 4; i < 12; i++)
+    *p++ = DW_CFA_restore + i;
+  *p++ = DW_CFA_advance_loc + 2;
+  *p++ = DW_CFA_restore_extended;
+  *p++ = 65;
+  return p;
+}
+
 /* Build all the stubs associated with the current output file.
    The stubs are kept in a hash table attached to the main linker
    hash table.  This function is called via gldelf64ppc_finish.  */
@@ -14242,6 +14360,24 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 		      B_DOT | ((htab->glink->contents - p + 8) & 0x3fffffc), p);
 	  indx++;
 	  p += 4;
+	}
+    }
+
+  if (htab->tga_group != NULL)
+    {
+      htab->tga_group->lr_restore = 23 * 4;
+      htab->tga_group->stub_sec->size = 24 * 4;
+      if (!emit_tga_desc (htab))
+	return FALSE;
+      if (htab->glink_eh_frame != NULL
+	  && htab->glink_eh_frame->size != 0)
+	{
+	  size_t align = 4;
+
+	  p = htab->glink_eh_frame->contents;
+	  p += (sizeof (glink_eh_frame_cie) + align - 1) & -align;
+	  p += 17;
+	  htab->tga_group->eh_size = emit_tga_desc_eh_frame (htab, p) - p;
 	}
     }
 
