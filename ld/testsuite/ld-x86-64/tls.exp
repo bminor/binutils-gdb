@@ -177,8 +177,8 @@ run_ld_link_exec_tests [list \
     ] \
 ]
 
-# -mtls-dialect=gnu2 isn't supported on x32.
-if [istarget "x86_64-*-linux*-gnux32"] {
+# Skip if -mtls-dialect=gnu2 doesn't work.
+if { ![run_host_cmd_yesno $CC "-c -O2 -fPIC $GNU2_CFLAGS $srcdir/$subdir/tlsdesc1b.c -o tmpdir/tlsdesc1b.o"] } {
     return
 }
 

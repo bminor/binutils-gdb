@@ -1,3 +1,9 @@
+2020-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25416
+	* testsuite/ld-x86-64/tls.exp: Skip GNU2 TLS tests only without
+	compiler support.
+
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsdesc3.d,
