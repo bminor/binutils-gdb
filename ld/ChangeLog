@@ -1,5 +1,9 @@
 2020-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr23900-1.d: Adjusted.
+
+2020-01-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/pr23900-1.d: Also pass -l to readelf.
 
 2020-01-20  Nick Clifton  <nickc@redhat.com>
