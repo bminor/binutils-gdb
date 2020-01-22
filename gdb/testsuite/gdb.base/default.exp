@@ -497,8 +497,6 @@ gdb_test "set environment" "Argument required .environment variable and value.*"
 gdb_test "set height" "Argument required .integer to set it to.*"
 #test set history expansion
 gdb_test_no_output "set history expansion" "set history expansion"
-#test set history filename
-gdb_test "set history filename" "Argument required .filename to set it to.*"
 # Make sure the history ends up in the right place.
 gdb_test_no_output "set history filename [standard_output_file .gdb_history]" \
     "set the history filename"

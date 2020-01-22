@@ -1,3 +1,10 @@
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Command History): Extend description for
+	GDBHISTFILE and GDBHISTSIZE, add detail about the filename for
+	'set history filename' being optional.  Describe the effect of an
+	empty history filename on 'set history save on'.
+
 2020-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Threads): Fix alignment in 'info threads' example

@@ -1,3 +1,21 @@
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention new behaviour of the history filename.
+	* top.c (write_history_p): Add comment.
+	(show_write_history_p): Add header comment, give a different
+	message when history writing is on, but the history filename is
+	empty.
+	(history_filename): Add comment.
+	(history_filename_empty): New function.
+	(show_history_filename): Add header comment, give a different
+	message when the filename is empty.
+	(init_history): Compare history_filename against nullptr, and only
+	read history if the filename is not empty.
+	(set_history_filename): Add header comment, and only make
+	non-empty filenames absolute.
+	(init_main): Make the filename argument to 'set history filename'
+	optional.
+
 2020-03-02  Christian Biesinger  <cbiesinger@google.com>
 
 	* arm-nbsd-nat.c (arm_supply_fparegset): Rename to...

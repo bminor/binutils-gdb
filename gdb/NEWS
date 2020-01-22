@@ -33,6 +33,12 @@
 
 * TUI windows can now be arranged horizontally.
 
+* The command history filename can now be set to the empty string
+  either using 'set history filename' or by setting 'GDBHISTFILE=' in
+  the environment.  The effect of setting this filename to the empty
+  string is that GDB will not try to load any previous command
+  history.
+
 * New commands
 
 set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).

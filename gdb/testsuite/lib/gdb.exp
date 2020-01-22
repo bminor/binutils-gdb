@@ -5097,6 +5097,12 @@ proc gdb_init { test_file_name } {
     # tests.
     setenv TERM "dumb"
 
+    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
+    # environment, we don't want these modifications to the history
+    # settings.
+    unset -nocomplain ::env(GDBHISTFILE)
+    unset -nocomplain ::env(GDBHISTSIZE)
+
     # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
     # during startup.  See "man expect" for details about stty_init.
     global stty_init

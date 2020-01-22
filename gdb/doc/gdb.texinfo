@@ -25306,7 +25306,7 @@ history.
 @cindex history file
 @kindex set history filename
 @cindex @env{GDBHISTFILE}, environment variable
-@item set history filename @var{fname}
+@item set history filename @r{[}@var{fname}@r{]}
 Set the name of the @value{GDBN} command history file to @var{fname}.
 This is the file where @value{GDBN} reads an initial command history
 list, and where it writes the command history from this session when it
@@ -25316,15 +25316,29 @@ to the value of the environment variable @code{GDBHISTFILE}, or to
 @file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
 is not set.
 
+The @code{GDBHISTFILE} environment variable is read after processing
+any @value{GDBN} initialization files (@pxref{Startup}) and after
+processing any commands passed using command line options (for
+example, @code{-ex}).
+
+If the @var{fname} argument is not given, or if the @code{GDBHISTFILE}
+is the empty string then @value{GDBN} will neither try to load an
+existing history file, nor will it try to save the history on exit.
+
 @cindex save command history
 @kindex set history save
 @item set history save
 @itemx set history save on
 Record command history in a file, whose name may be specified with the
-@code{set history filename} command.  By default, this option is disabled.
+@code{set history filename} command.  By default, this option is
+disabled.  The command history will be recorded when @value{GDBN}
+exits.  If @code{set history filename} is set to the empty string then
+history saving is disabled, even when @code{set history save} is
+@code{on}.
 
 @item set history save off
-Stop recording command history in a file.
+Don't record the command history into the file specified by @code{set
+history filename} when @value{GDBN} exits.
 
 @cindex history size
 @kindex set history size
@@ -25337,6 +25351,11 @@ to 256 if this variable is not set.  Non-numeric values of @env{GDBHISTSIZE}
 are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
 either a negative number or the empty string, then the number of commands
 @value{GDBN} keeps in the history list is unlimited.
+
+The @code{GDBHISTSIZE} environment variable is read after processing
+any @value{GDBN} initialization files (@pxref{Startup}) and after
+processing any commands passed using command line options (for
+example, @code{-ex}).
 
 @cindex remove duplicate history
 @kindex set history remove-duplicates

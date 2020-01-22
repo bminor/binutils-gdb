@@ -1,5 +1,13 @@
 2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/default.exp: Remove test of 'set history filename'.
+	* gdb.base/gdbinit-history.exp: Add tests for setting the history
+	filename to the empty string.
+	* lib/gdb.exp (gdb_init): Unset environment variables GDBHISTFILE
+	and GDBHISTSIZE.
+
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.server/stop-reply-no-thread.exp: Add test where T packet is
 	disabled.
 
