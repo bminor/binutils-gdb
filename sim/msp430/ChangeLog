@@ -1,3 +1,8 @@
+2020-01-22  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* msp430-sim.c (msp430_step_once): Ignore the carry flag when executing
+	an RRC instruction, if the ZC bit of the extension word is set.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.

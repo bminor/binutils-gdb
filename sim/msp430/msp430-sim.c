@@ -1292,8 +1292,10 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = SRC;
 	  carry_to_use = u1 & 1;
 	  uresult = u1 >> 1;
-	  if (SR & MSP430_FLAG_C)
-	  uresult |= (1 << (opcode->size - 1));
+	  /* If the ZC bit of the opcode is set, it means we are synthesizing
+	     RRUX, so the carry bit must be ignored.  */
+	  if (opcode->zc == 0 && (SR & MSP430_FLAG_C))
+	    uresult |= (1 << (opcode->size - 1));
 	  TRACE_ALU (MSP430_CPU (sd), "RRC: %#x >>= %#x",
 		     u1, uresult);
 	  DEST (uresult);
