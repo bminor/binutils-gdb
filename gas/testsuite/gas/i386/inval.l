@@ -88,6 +88,9 @@
 .*:98: Error: .*rol.*
 .*:99: Error: .*rcl.*
 .*:102: Error: .*
+.*:104: Error: .*
+.*:105: Error: .*
+.*:106: Error: .*
 GAS LISTING .*
 
 
@@ -196,3 +199,7 @@ GAS LISTING .*
 [ 	]*[1-9][0-9]*[ 	]+
 [ 	]*[1-9][0-9]*[ 	]+\.att_syntax prefix
 [ 	]*[1-9][0-9]*[ 	]+movsd \(%esi\), %ss:\(%edi\), %ss:\(%eax\)
+[ 	]*[1-9][0-9]*[ 	]+
+[ 	]*[1-9][0-9]*[ 	]+movl	%ds, %ax
+[ 	]*[1-9][0-9]*[ 	]+movl	%ax, %ds
+[ 	]*[1-9][0-9]*[ 	]+movl	%ax, %bx

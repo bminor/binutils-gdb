@@ -9,8 +9,6 @@
 .*:25: Warning:.*
 .*:27: Warning:.*
 .*:29: Warning:.*
-.*:39: Warning:.*
-.*:41: Warning:.*
 .*:48: Warning:.*
 .*:51: Warning:.*
 .*:124: Warning:.*
@@ -30,7 +28,6 @@
 .*:142: Warning:.*
 .*:143: Warning:.*
 .*:144: Warning:.*
-.*:178: Warning:.*
 .*:224: Warning:.*
 .*:233: Warning:.*
 .*:234: Warning:.*
@@ -84,11 +81,9 @@
   36 007e 1F                		popl	%ds
   37 007f 8CD8              		mov	%ds,%eax
   38 0081 8CD8              		movl	%ds,%eax
-  39 0083 8CD8              		movl	%ds,%ax
-.*Warning:.*
+  39 0083 8CDB              		movl	%ds,%ebx
   40 0085 8ED8              		mov	%eax,%ds
-  41 0087 8ED8              		movl	%ax,%ds
-.*Warning:.*
+  41 0087 8EDB              		movl	%ebx,%ds
   42 0089 8ED8              		movl	%eax,%ds
   43                       	
   44 008b 661E              		pushw	%ds
@@ -244,8 +239,7 @@
  175 01a9 66F7F1            		div	%cx,%ax
  176 01ac F7F1              		div	%ecx,%eax
  177 01ae 8EDE              		mov	%si,%ds
- 178 01b0 8EDE              		movl	%si,%ds		# warning here
-.*Warning:.*
+ 178 01b0 8EDF              		movl	%edi,%ds
  179 01b2 1E                		pushl	%ds
  180 01b3 1E                		push	%ds
  181 01b4 A0000000 00       		mov	0,%al

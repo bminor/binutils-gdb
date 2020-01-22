@@ -36,9 +36,9 @@
 	popl	%ds
 	mov	%ds,%eax
 	movl	%ds,%eax
-	movl	%ds,%ax
+	movl	%ds,%ebx
 	mov	%eax,%ds
-	movl	%ax,%ds
+	movl	%ebx,%ds
 	movl	%eax,%ds
 
 	pushw	%ds
@@ -175,7 +175,7 @@
 	div	%cx,%ax
 	div	%ecx,%eax
 	mov	%si,%ds
-	movl	%si,%ds		# warning here
+	movl	%edi,%ds
 	pushl	%ds
 	push	%ds
 	mov	0,%al

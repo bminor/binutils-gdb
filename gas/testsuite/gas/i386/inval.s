@@ -100,3 +100,7 @@ movnti word ptr [eax], ax
 
 	.att_syntax prefix
 	movsd (%esi), %ss:(%edi), %ss:(%eax)
+
+	movl	%ds, %ax
+	movl	%ax, %ds
+	movl	%ax, %bx

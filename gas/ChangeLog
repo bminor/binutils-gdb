@@ -1,3 +1,15 @@
+2020-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25438
+	* config/tc-i386.c (check_long_reg): Always disallow double word
+	suffix in mnemonic with word general register.
+	* testsuite/gas/i386/general.s: Replace word general register
+	with double word general register for movl.
+	* testsuite/gas/i386/inval.s: Add tests for movl with word general
+	register.
+	* testsuite/gas/i386/general.l: Updated.
+	* testsuite/gas/i386/inval.l: Likewise.
+
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (parse_tls_arg): Handle tls arg for
