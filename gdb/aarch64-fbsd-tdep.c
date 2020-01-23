@@ -134,7 +134,7 @@ const struct regset aarch64_fbsd_fpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
-/* Implement the "regset_from_core_section" gdbarch method.  */
+/* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
 aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,

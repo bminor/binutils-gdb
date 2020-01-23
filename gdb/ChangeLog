@@ -1,3 +1,15 @@
+2020-01-24  Christian Biesinger  <cbiesinger@google.com>
+
+	* aarch64-fbsd-tdep.c (aarch64_fbsd_iterate_over_regset_sections):
+	Update comment.
+	* aarch64-linux-tdep.c (aarch64_linux_iterate_over_regset_sections):
+	Likewise.
+	* arm-fbsd-tdep.c (arm_fbsd_iterate_over_regset_sections): Likewise.
+	* gdbcore.h (deprecated_add_core_fns): Update comment to point to
+	the correct replacement (iterate_over_regset_sections).
+	* riscv-fbsd-tdep.c (riscv_fbsd_iterate_over_regset_sections):
+	Update comment.
+
 2020-01-24  Graham Markall  <graham.markall@embecosm.com>
 
 	PR gdb/23718

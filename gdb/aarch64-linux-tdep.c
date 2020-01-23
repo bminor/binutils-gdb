@@ -582,7 +582,7 @@ aarch64_linux_collect_sve_regset (const struct regset *regset,
 			    size - SVE_HEADER_SIZE);
 }
 
-/* Implement the "regset_from_core_section" gdbarch method.  */
+/* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
 aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,

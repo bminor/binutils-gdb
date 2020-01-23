@@ -269,8 +269,7 @@ private:
   std::string m_storage;
 };
 
-/* NOTE: cagney/2004-04-05: Replaced by "regset.h" and
-   regset_from_core_section().  */
+/* Replaced by the "iterate_over_regset_sections" gdbarch method.  */
 extern void deprecated_add_core_fns (struct core_fns *cf);
 extern int default_core_sniffer (struct core_fns *cf, bfd * abfd);
 extern int default_check_format (bfd * abfd);
