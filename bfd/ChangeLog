@@ -1,3 +1,9 @@
+2020-01-23  Alan Modra  <amodra@gmail.com>
+
+	PR 25444
+	* elf.c (assign_file_positions_for_load_sections): Avoid divide
+	by zero when p_align is zero.
+
 2020-01-22  Maxim Blinov  <maxim.blinov@embecosm.com>
 
 	* bfd/elfnn-riscv.c (riscv_skip_prefix): New.

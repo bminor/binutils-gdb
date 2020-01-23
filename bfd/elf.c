@@ -5755,11 +5755,17 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      p->p_offset = off;
 	      if (no_contents)
-		/* Put meaningless p_offset for PT_LOAD segments
-		   without file contents somewhere within the first
-		   page, in an attempt to not point past EOF.  */
-		p->p_offset = off % (p->p_align > maxpagesize
-				     ? p->p_align : maxpagesize);
+		{
+		  /* Put meaningless p_offset for PT_LOAD segments
+		     without file contents somewhere within the first
+		     page, in an attempt to not point past EOF.  */
+		  bfd_size_type align = maxpagesize;
+		  if (align < p->p_align)
+		    align = p->p_align;
+		  if (align < 1)
+		    align = 1;
+		  p->p_offset = off % align;
+		}
 	    }
 	  else
 	    {
