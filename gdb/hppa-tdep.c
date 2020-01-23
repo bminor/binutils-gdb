@@ -357,7 +357,7 @@ read_unwind_info (struct objfile *objfile)
   struct hppa_unwind_info *ui;
   struct hppa_objfile_private *obj_private;
 
-  text_offset = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  text_offset = objfile->text_section_offset ();
   ui = (struct hppa_unwind_info *) obstack_alloc (&objfile->objfile_obstack,
 					   sizeof (struct hppa_unwind_info));
 

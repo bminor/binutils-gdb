@@ -1,3 +1,54 @@
+2020-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* objfiles.h (ALL_OBJFILE_OSECTIONS): Move up.
+	(SECT_OFF_DATA): Likewise.
+	(SECT_OFF_RODATA): Likewise.
+	(SECT_OFF_TEXT): Likewise.
+	(SECT_OFF_BSS): Likewise.
+	(struct objfile) <text_section_offset, data_section_offset>: New
+	methods.
+	* amd64-windows-tdep.c (amd64_windows_find_unwind_info): Use
+	objfile::text_section_offset.
+	* coff-pe-read.c (add_pe_forwarded_sym): Likewise.
+	* coffread.c (coff_symtab_read): Likewise.
+	(enter_linenos): Likewise.
+	(process_coff_symbol): Likewise.
+	* ctfread.c (get_objfile_text_range): Likewise.
+	* dtrace-probe.c (dtrace_probe::get_relocated_address):
+	Use objfile::data_section_offset.
+	* dwarf2-frame.c (execute_cfa_program): Use
+	objfile::text_section_offset.
+	(dwarf2_frame_find_fde): Likewise.
+	* dwarf2read.c (create_addrmap_from_index): Likewise.
+	(create_addrmap_from_aranges): Likewise.
+	(dw2_find_pc_sect_compunit_symtab): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(add_partial_symbol): Likewise.
+	(add_partial_subprogram): Likewise.
+	(process_full_comp_unit): Likewise.
+	(read_file_scope): Likewise.
+	(read_func_scope): Likewise.
+	(read_lexical_block_scope): Likewise.
+	(read_call_site_scope): Likewise.
+	(dwarf2_rnglists_process): Likewise.
+	(dwarf2_ranges_process): Likewise.
+	(dwarf2_ranges_read): Likewise.
+	(dwarf_decode_lines_1): Likewise.
+	(new_symbol): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Likewise.
+	(dwarf2_per_cu_text_offset): Likewise.
+	* hppa-bsd-tdep.c (hppabsd_find_global_pointer): Likewise.
+	* hppa-tdep.c (read_unwind_info): Likewise.
+	* ia64-tdep.c (ia64_find_unwind_table): Likewise.
+	* psympriv.h (struct partial_symtab): Likewise.
+	* psymtab.c (find_pc_sect_psymtab): Likewise.
+	* solib-svr4.c (enable_break): Likewise.
+	* stap-probe.c (relocate_address): Use
+	objfile::data_section_offset.
+	* xcoffread.c (enter_line_range): Use
+	objfile::text_section_offset.
+	(read_xcoff_symtab): Likewise.
+
 2020-01-23  Simon Marchi  <simon.marchi@efficios.com>
 
 	* darwin-nat.c (darwin_nat_target::wait_1): Move `inf`

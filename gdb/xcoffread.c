@@ -865,7 +865,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
       addr = (int_lnno.l_lnno
 	      ? int_lnno.l_addr.l_paddr
 	      : read_symbol_nvalue (int_lnno.l_addr.l_symndx));
-      addr += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+      addr += objfile->text_section_offset ();
 
       if (addr < startaddr || (endaddr && addr >= endaddr))
 	return;
@@ -1233,7 +1233,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 			}
 
 		      file_start_addr =
-			cs->c_value + objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+			cs->c_value + objfile->text_section_offset ();
 		      file_end_addr = file_start_addr + CSECT_LEN (&main_aux);
 
 		      if (cs->c_name && (cs->c_name[0] == '.' || cs->c_name[0] == '@'))
@@ -1355,7 +1355,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	case C_FCN:
 	  if (strcmp (cs->c_name, ".bf") == 0)
 	    {
-	      CORE_ADDR off = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+	      CORE_ADDR off = objfile->text_section_offset ();
 
 	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 				    0, cs->c_naux, &main_aux);
@@ -1399,7 +1399,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 			    NULL, cstk.start_addr,
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
-			     + objfile->section_offsets[SECT_OFF_TEXT (objfile)]));
+			     + objfile->text_section_offset ()));
 	      within_function = 0;
 	    }
 	  break;
@@ -1466,7 +1466,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      depth++;
 	      newobj = push_context (depth,
 				  (cs->c_value
-				   + objfile->section_offsets[SECT_OFF_TEXT (objfile)]));
+				   + objfile->text_section_offset ()));
 	    }
 	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
@@ -1488,7 +1488,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 				cstk.old_blocks, NULL,
 				cstk.start_addr,
 				(cs->c_value
-				 + objfile->section_offsets[SECT_OFF_TEXT (objfile)]));
+				 + objfile->text_section_offset ()));
 		}
 	      *get_local_symbols () = cstk.locals;
 	    }

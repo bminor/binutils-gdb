@@ -3213,7 +3213,7 @@ create_addrmap_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   iter = index->address_table.data ();
   end = iter + index->address_table.size ();
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   while (iter < end)
     {
@@ -3259,7 +3259,7 @@ create_addrmap_from_aranges (struct dwarf2_per_objfile *dwarf2_per_objfile,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  const CORE_ADDR baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  const CORE_ADDR baseaddr = objfile->text_section_offset ();
 
   auto_obstack temp_obstack;
   addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
@@ -5281,7 +5281,7 @@ dw2_find_pc_sect_compunit_symtab (struct objfile *objfile,
   if (!objfile->partial_symtabs->psymtabs_addrmap)
     return NULL;
 
-  CORE_ADDR baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  CORE_ADDR baseaddr = objfile->text_section_offset ();
   data = (struct dwarf2_per_cu_data *) addrmap_find
     (objfile->partial_symtabs->psymtabs_addrmap, pc - baseaddr);
   if (!data)
@@ -8076,7 +8076,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   /* This must be done before calling dwarf2_build_include_psymtabs.  */
   pst->dirname = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   dwarf2_find_base_address (comp_unit_die, cu);
 
@@ -8954,7 +8954,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   const char *actual_name = NULL;
   CORE_ADDR baseaddr;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   gdb::unique_xmalloc_ptr<char> built_actual_name
     = partial_die_full_name (pdi, cu);
@@ -9197,7 +9197,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	      CORE_ADDR this_highpc;
 	      CORE_ADDR this_lowpc;
 
-	      baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+	      baseaddr = objfile->text_section_offset ();
 	      this_lowpc
 		= (gdbarch_adjust_dwarf2_addr (gdbarch,
 					       pdi->lowpc + baseaddr)
@@ -10399,7 +10399,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct block *static_block;
   CORE_ADDR addr;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   /* Clear the list here in case something was left over.  */
   cu->method_list.clear ();
@@ -11601,7 +11601,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR baseaddr;
 
   prepare_one_comp_unit (cu, die, cu->language);
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   get_scope_pc_bounds (die, &lowpc, &highpc, cu);
 
@@ -13704,7 +13704,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
 
@@ -13883,7 +13883,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *child_die;
   CORE_ADDR baseaddr;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   /* Ignore blocks with missing or invalid low and high pc attributes.  */
   /* ??? Perhaps consider discontiguous blocks defined by DW_AT_ranges
@@ -13957,7 +13957,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   int nparams;
   struct die_info *child_die;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   attr = dwarf2_attr (die, DW_AT_call_return_pc, cu);
   if (attr == NULL)
@@ -14354,7 +14354,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
     }
   buffer = dwarf2_per_objfile->rnglists.buffer + offset;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   while (1)
     {
@@ -14522,7 +14522,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
     }
   buffer = dwarf2_per_objfile->ranges.buffer + offset;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   while (1)
     {
@@ -14600,7 +14600,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 {
   struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  const CORE_ADDR baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  const CORE_ADDR baseaddr = objfile->text_section_offset ();
   int low_set = 0;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
@@ -21425,7 +21425,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
      the line number program).  */
   bool record_lines_p = !decode_for_pst_p;
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   line_ptr = lh->statement_program_start;
   line_end = lh->statement_program_end;
@@ -21853,7 +21853,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
 
-  baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
   if (name)
@@ -23651,7 +23651,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 	  != dwarf2_per_objfile->abstract_to_concrete.end ()))
     {
       CORE_ADDR pc = (*get_frame_pc) (baton);
-      CORE_ADDR baseaddr = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+      CORE_ADDR baseaddr = objfile->text_section_offset ();
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       for (const auto &cand_off
@@ -25659,9 +25659,7 @@ dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *per_cu)
 CORE_ADDR
 dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
 {
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
-
-  return objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+  return per_cu->dwarf2_per_objfile->objfile->text_section_offset ();
 }
 
 /* Return a type that is a generic pointer type, the size of which matches

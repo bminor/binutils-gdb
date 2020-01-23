@@ -2273,7 +2273,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  CORE_ADDR load_addr;
 
 	  tmp_bfd = os->objfile->obfd;
-	  load_addr = os->objfile->section_offsets[SECT_OFF_TEXT (os->objfile)];
+	  load_addr = os->objfile->text_section_offset ();
 
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
 	  if (interp_sect)

@@ -119,13 +119,13 @@ struct partial_symtab
   /* Return the relocated low text address of this partial_symtab.  */
   CORE_ADDR text_low (struct objfile *objfile) const
   {
-    return m_text_low + objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+    return m_text_low + objfile->text_section_offset ();
   }
 
   /* Return the relocated high text address of this partial_symtab.  */
   CORE_ADDR text_high (struct objfile *objfile) const
   {
-    return m_text_high + objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+    return m_text_high + objfile->text_section_offset ();
   }
 
   /* Set the low text address of this partial_symtab.  */

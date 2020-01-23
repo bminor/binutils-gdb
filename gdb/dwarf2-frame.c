@@ -384,7 +384,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 					   fde->cie->ptr_size, insn_ptr,
 					   &bytes_read, fde->initial_location);
 	      /* Apply the objfile offset for relocatable objects.  */
-	      fs->pc += fde->cie->unit->objfile->section_offsets[SECT_OFF_TEXT (fde->cie->unit->objfile)];
+	      fs->pc += fde->cie->unit->objfile->text_section_offset ();
 	      insn_ptr += bytes_read;
 	      break;
 
@@ -1686,7 +1686,7 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 	continue;
 
       gdb_assert (!objfile->section_offsets.empty ());
-      offset = objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+      offset = objfile->text_section_offset ();
 
       gdb_assert (fde_table->num_entries > 0);
       if (*pc < offset + fde_table->entries[0]->initial_location)

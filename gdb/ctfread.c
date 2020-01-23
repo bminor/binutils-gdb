@@ -1165,7 +1165,7 @@ get_objfile_text_range (struct objfile *of, int *tsize)
 
   codes = bfd_get_section_by_name (abfd, ".text");
   *tsize = codes ? bfd_section_size (codes) : 0;
-  return of->section_offsets[SECT_OFF_TEXT (of)];
+  return of->text_section_offset ();
 }
 
 /* Start a symtab for OBJFILE in CTF format.  */

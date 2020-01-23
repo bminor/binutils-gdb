@@ -920,7 +920,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  if (in_source_file)
 		    complete_symtab (filestring,
 				     (cs->c_value
-				      + objfile->section_offsets[SECT_OFF_TEXT (objfile)]),
+				      + objfile->text_section_offset ()),
 				     main_aux.x_scn.x_scnlen);
 		  in_source_file = 0;
 		}
@@ -1113,7 +1113,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 			    NULL, cstk.start_addr,
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
-			    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
+			    + objfile->text_section_offset ());
 	      within_function = 0;
 	    }
 	  break;
@@ -1122,7 +1122,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	  if (strcmp (cs->c_name, ".bb") == 0)
 	    {
 	      tmpaddr = cs->c_value;
-	      tmpaddr += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+	      tmpaddr += objfile->text_section_offset ();
 	      push_context (++depth, tmpaddr);
 	    }
 	  else if (strcmp (cs->c_name, ".eb") == 0)
@@ -1145,9 +1145,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		}
 	      if (*get_local_symbols () && !outermost_context_p ())
 		{
-		  tmpaddr
-		    = (cs->c_value
-		       + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
+		  tmpaddr = cs->c_value + objfile->text_section_offset ();
 		  /* Make a block for the local symbols within.  */
 		  finish_block (0, cstk.old_blocks, NULL,
 				cstk.start_addr, tmpaddr);
@@ -1439,7 +1437,7 @@ enter_linenos (long file_offset, int first_line,
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
 	{
 	  CORE_ADDR addr = lptr.l_addr.l_paddr;
-	  addr += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+	  addr += objfile->text_section_offset ();
 	  record_line (get_current_subfile (),
 		       first_line + L_LNNO32 (&lptr),
 		       gdbarch_addr_bits_remove (gdbarch, addr));
@@ -1574,7 +1572,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_VALUE (sym) += objfile->section_offsets[SECT_OFF_TEXT (objfile)];
+      SYMBOL_VALUE (sym) += objfile->text_section_offset ();
       SYMBOL_TYPE (sym) =
 	lookup_function_type (decode_function_type (cs, cs->c_type,
 						    aux, objfile));

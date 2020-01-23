@@ -155,6 +155,37 @@ struct obj_section
    + bfd_section_size ((s)->the_bfd_section)				\
    + obj_section_offset (s))
 
+#define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
+  for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
+    if (osect->the_bfd_section == NULL)					\
+      {									\
+	/* Nothing.  */							\
+      }									\
+    else
+
+#define SECT_OFF_DATA(objfile) \
+     ((objfile->sect_index_data == -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_data not initialized")), -1)	\
+      : objfile->sect_index_data)
+
+#define SECT_OFF_RODATA(objfile) \
+     ((objfile->sect_index_rodata == -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_rodata not initialized")), -1)	\
+      : objfile->sect_index_rodata)
+
+#define SECT_OFF_TEXT(objfile) \
+     ((objfile->sect_index_text == -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_text not initialized")), -1)	\
+      : objfile->sect_index_text)
+
+/* Sometimes the .bss section is missing from the objfile, so we don't
+   want to die here.  Let the users of SECT_OFF_BSS deal with an
+   uninitialized section index.  */
+#define SECT_OFF_BSS(objfile) (objfile)->sect_index_bss
+
 /* The "objstats" structure provides a place for gdb to record some
    interesting information about its internal state at runtime, on a
    per objfile basis, such as information about the number of symbols
@@ -492,6 +523,15 @@ public:
     return separate_debug_range (this);
   }
 
+  CORE_ADDR text_section_offset () const
+  {
+    return section_offsets[SECT_OFF_TEXT (this)];
+  }
+
+  CORE_ADDR data_section_offset () const
+  {
+    return section_offsets[SECT_OFF_DATA (this)];
+  }
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -737,38 +777,6 @@ extern void default_iterate_over_objfiles_in_search_order
   (struct gdbarch *gdbarch,
    iterate_over_objfiles_in_search_order_cb_ftype *cb,
    void *cb_data, struct objfile *current_objfile);
-
-
-#define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
-  for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
-    if (osect->the_bfd_section == NULL)					\
-      {									\
-	/* Nothing.  */							\
-      }									\
-    else
-
-#define SECT_OFF_DATA(objfile) \
-     ((objfile->sect_index_data == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_data not initialized")), -1)	\
-      : objfile->sect_index_data)
-
-#define SECT_OFF_RODATA(objfile) \
-     ((objfile->sect_index_rodata == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_rodata not initialized")), -1)	\
-      : objfile->sect_index_rodata)
-
-#define SECT_OFF_TEXT(objfile) \
-     ((objfile->sect_index_text == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_text not initialized")), -1)	\
-      : objfile->sect_index_text)
-
-/* Sometimes the .bss section is missing from the objfile, so we don't
-   want to die here.  Let the users of SECT_OFF_BSS deal with an
-   uninitialized section index.  */
-#define SECT_OFF_BSS(objfile) (objfile)->sect_index_bss
 
 /* Reset the per-BFD storage area on OBJ.  */
 
