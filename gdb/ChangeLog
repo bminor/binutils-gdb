@@ -1,5 +1,10 @@
 2020-01-23  Simon Marchi  <simon.marchi@efficios.com>
 
+	* darwin-nat.c (darwin_nat_target::wait_1): Move `inf`
+	declaration to narrower scopes.
+
+2020-01-23  Simon Marchi  <simon.marchi@efficios.com>
+
 	* darwin-nat.h (struct darwin_exception_msg, enum
 	darwin_msg_state, struct darwin_thread_info, darwin_thread_t):
 	Move up.

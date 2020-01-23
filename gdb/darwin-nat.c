@@ -1202,7 +1202,6 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
   mach_msg_header_t *hdr = &msgin.hdr;
   ptid_t res;
   darwin_thread_t *thread;
-  struct inferior *inf;
 
   inferior_debug
     (2, _("darwin_wait: waiting for a message pid=%d thread=%lx\n"),
@@ -1211,7 +1210,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
   /* Handle fake stop events at first.  */
   if (darwin_inf_fake_stop != NULL)
     {
-      inf = darwin_inf_fake_stop;
+      inferior *inf = darwin_inf_fake_stop;
       darwin_inf_fake_stop = NULL;
 
       darwin_inferior *priv = get_darwin_inferior (inf);
@@ -1250,6 +1249,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
       if (darwin_debug_flag > 10)
 	darwin_dump_message (hdr, darwin_debug_flag > 11);
 
+      inferior *inf;
       res = decode_message (hdr, &thread, &inf, status);
       if (res == minus_one_ptid)
 	continue;
@@ -1290,6 +1290,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
       if (darwin_debug_flag > 10)
 	darwin_dump_message (hdr, darwin_debug_flag > 11);
 
+      inferior *inf;
       ptid2 = decode_message (hdr, &thread, &inf, &status2);
 
       if (inf != NULL && thread != NULL
