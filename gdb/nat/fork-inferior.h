@@ -21,6 +21,7 @@
 #define NAT_FORK_INFERIOR_H
 
 #include <string>
+#include "gdbsupport/function-view.h"
 
 struct process_stratum_target;
 
@@ -42,7 +43,7 @@ struct process_stratum_target;
 extern pid_t fork_inferior (const char *exec_file_arg,
 			    const std::string &allargs,
 			    char **env, void (*traceme_fun) (),
-			    void (*init_trace_fun) (int),
+			    gdb::function_view<void (int)> init_trace_fun,
 			    void (*pre_trace_fun) (),
 			    const char *shell_file_arg,
 			    void (*exec_fun) (const char *file,

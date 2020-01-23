@@ -267,7 +267,8 @@ execv_argv::init_for_shell (const char *exec_file,
 pid_t
 fork_inferior (const char *exec_file_arg, const std::string &allargs,
 	       char **env, void (*traceme_fun) (),
-	       void (*init_trace_fun) (int), void (*pre_trace_fun) (),
+	       gdb::function_view<void (int)> init_trace_fun,
+	       void (*pre_trace_fun) (),
 	       const char *shell_file_arg,
                void (*exec_fun)(const char *file, char * const *argv,
                                 char * const *env))
@@ -439,7 +440,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
      initialize anything target-vector-specific that needs
      initializing.  */
   if (init_trace_fun)
-    (*init_trace_fun) (pid);
+    init_trace_fun (pid);
 
   /* We are now in the child process of interest, having exec'd the
      correct program, and are poised at the first instruction of the

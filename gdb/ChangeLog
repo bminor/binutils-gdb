@@ -1,3 +1,40 @@
+2020-01-23  Simon Marchi  <simon.marchi@efficios.com>
+
+	* darwin-nat.h (struct darwin_exception_msg, enum
+	darwin_msg_state, struct darwin_thread_info, darwin_thread_t):
+	Move up.
+	(class darwin_nat_target) <wait_1, check_new_threads,
+	decode_exception_message, decode_message, stop_inferior,
+	init_thread_list, ptrace_him, cancel_breakpoint>: Declare.
+	* darwin-nat.c (darwin_check_new_threads): Rename to...
+	(darwin_nat_target::check_new_threads): ... this.
+	(darwin_suspend_inferior_it): Remove.
+	(darwin_decode_exception_message): Rename to...
+	(darwin_nat_target::decode_exception_message): ... this.
+	(darwin_nat_target::resume): Pass target to find_inferior_ptid.
+	(darwin_decode_message): Rename to...
+	(darwin_nat_target::decode_message): ... this.
+	(cancel_breakpoint): Rename to...
+	(darwin_nat_target::cancel_breakpoint): ... this.
+	(darwin_wait): Rename to...
+	(darwin_nat_target::wait_1): ... this.  Use range-based for loop
+	instead of iterate_over_inferiors.
+	(darwin_nat_target::wait): Call wait_1 instead of darwin_wait.
+	(darwin_stop_inferior): Rename to...
+	(darwin_nat_target::stop_inferior): ... this.
+	(darwin_nat_target::kill): Call wait_1 instead of darwin_wait.
+	(darwin_init_thread_list): Rename to...
+	(darwin_nat_target::init_thread_list): ... this.
+	(darwin_ptrace_him): Rename to...
+	(darwin_nat_target::ptrace_him): ... this.
+	(darwin_nat_target::create_inferior): Pass lambda function to
+	fork_inferior.
+	(darwin_nat_target::detach): Call stop_inferior instead of
+	darwin_stop_inferior.
+	* fork-inferior.h (fork_inferior): Change init_trace_fun
+	parameter to gdb::function_view.
+	* fork-inferior.c (fork_inferior): Likewise.
+
 2020-01-23  Hannes Domani  <ssbssa@yahoo.de>
 
 	* i386-cygwin-tdep.c (core_process_module_section): Update.
