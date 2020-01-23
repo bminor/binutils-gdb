@@ -1,6 +1,11 @@
 2020-01-29  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-01-23  Alan Modra  <amodra@gmail.com>
+	PR 25444
+	* elf.c (assign_file_positions_for_load_sections): Avoid divide
+	by zero when p_align is zero.
+
 	2020-01-22  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_size_stubs): Correct condition under
 	which __tls_get_addr calls will be eliminated.
