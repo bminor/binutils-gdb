@@ -1,3 +1,14 @@
+2020-01-22  Maxim Blinov  <maxim.blinov@embecosm.com>
+
+	* testsuite/gas/riscv/march-ok-s.d: sx is no longer valid and
+	s exts must be known, so rename *ok* to *fail*.
+	* testsuite/gas/riscv/march-ok-sx.d: Likewise.
+	* testsuite/gas/riscv/march-ok-s-with-version: Likewise.
+	* testsuite/gas/riscv/march-fail-s.l: Expected error messages for
+	above change.
+	* testsuite/gas/riscv/march-fail-sx.l: Likewise.
+	* testsuite/gas/riscv/march-fail-sx-with-version.l: Likewise.
+
 2020-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25438

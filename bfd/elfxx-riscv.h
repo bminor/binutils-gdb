@@ -86,3 +86,20 @@ riscv_release_subset_list (riscv_subset_list_t *);
 
 extern char *
 riscv_arch_str (unsigned, const riscv_subset_list_t *);
+
+/* ISA extension name class. E.g. "zbb" corresponds to RV_ISA_CLASS_Z,
+   "xargs" corresponds to RV_ISA_CLASS_X, etc.  Order is important
+   here.  */
+
+typedef enum riscv_isa_ext_class
+  {
+   RV_ISA_CLASS_S,
+   RV_ISA_CLASS_Z,
+   RV_ISA_CLASS_X,
+   RV_ISA_CLASS_UNKNOWN
+  } riscv_isa_ext_class_t;
+
+/* Classify the argument 'ext' into one of riscv_isa_ext_class_t.  */
+
+riscv_isa_ext_class_t
+riscv_get_prefix_class (const char *);

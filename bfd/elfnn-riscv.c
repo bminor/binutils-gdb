@@ -2736,30 +2736,6 @@ riscv_std_ext_p (const char *name)
   return (strlen (name) == 1) && (name[0] != 'x') && (name[0] != 's');
 }
 
-/* Predicator for non-standard extension.  */
-
-static bfd_boolean
-riscv_non_std_ext_p (const char *name)
-{
-  return (strlen (name) >= 2) && (name[0] == 'x');
-}
-
-/* Predicator for standard supervisor extension.  */
-
-static bfd_boolean
-riscv_std_sv_ext_p (const char *name)
-{
-  return (strlen (name) >= 2) && (name[0] == 's') && (name[1] != 'x');
-}
-
-/* Predicator for non-standard supervisor extension.  */
-
-static bfd_boolean
-riscv_non_std_sv_ext_p (const char *name)
-{
-  return (strlen (name) >= 3) && (name[0] == 's') && (name[1] == 'x');
-}
-
 /* Error handler when version mis-match.  */
 
 static void
@@ -2885,53 +2861,102 @@ riscv_merge_std_ext (bfd *ibfd,
   return TRUE;
 }
 
-/* Merge non-standard and supervisor extensions.
-   Return Value:
-     Return FALSE if failed to merge.
+/* If C is a prefix class, then return the EXT string without the prefix.
+   Otherwise return the entire EXT string.  */
 
-   Arguments:
-     `bfd`: bfd handler.
-     `in_arch`: Raw arch string for input object.
-     `out_arch`: Raw arch string for output object.
-     `pin`: subset list for input object, and it'll skip all merged subset after
-            merge.
-     `pout`: Like `pin`, but for output object. */
+static const char *
+riscv_skip_prefix (const char *ext, riscv_isa_ext_class_t c)
+{
+  switch (c)
+    {
+    case RV_ISA_CLASS_X: return &ext[1];
+    case RV_ISA_CLASS_S: return &ext[1];
+    case RV_ISA_CLASS_Z: return &ext[1];
+    default: return ext;
+    }
+}
+
+/* Compare prefixed extension names canonically.  */
+
+static int
+riscv_prefix_cmp (const char *a, const char *b)
+{
+  riscv_isa_ext_class_t ca = riscv_get_prefix_class (a);
+  riscv_isa_ext_class_t cb = riscv_get_prefix_class (b);
+
+  /* Extension name without prefix  */
+  const char *anp = riscv_skip_prefix (a, ca);
+  const char *bnp = riscv_skip_prefix (b, cb);
+
+  if (ca == cb)
+    return strcasecmp (anp, bnp);
+
+  return (int)ca - (int)cb;
+}
+
+/* Merge multi letter extensions.  PIN is a pointer to the head of the input
+   object subset list.  Likewise for POUT and the output object.  Return TRUE
+   on success and FALSE when a conflict is found.  */
 
 static bfd_boolean
-riscv_merge_non_std_and_sv_ext (bfd *ibfd,
-				riscv_subset_t **pin,
-				riscv_subset_t **pout,
-				bfd_boolean (*predicate_func) (const char *))
+riscv_merge_multi_letter_ext (bfd *ibfd,
+			      riscv_subset_t **pin,
+			      riscv_subset_t **pout)
 {
   riscv_subset_t *in = *pin;
   riscv_subset_t *out = *pout;
+  riscv_subset_t *tail;
 
-  for (in = *pin; in != NULL && predicate_func (in->name); in = in->next)
-    riscv_add_subset (&merged_subsets, in->name, in->major_version,
-		      in->minor_version);
+  int cmp;
 
-  for (out = *pout; out != NULL && predicate_func (out->name); out = out->next)
+  while (in && out)
     {
-      riscv_subset_t *find_ext =
-	riscv_lookup_subset (&merged_subsets, out->name);
-      if (find_ext != NULL)
+      cmp = riscv_prefix_cmp (in->name, out->name);
+
+      if (cmp < 0)
 	{
-	  /* Check version is same or not. */
-	  /* TODO: Allow different merge policy.  */
-	  if ((find_ext->major_version != out->major_version)
-	      || (find_ext->minor_version != out->minor_version))
-	    {
-	      riscv_version_mismatch (ibfd, find_ext, out);
-	      return FALSE;
-	    }
+	  /* `in' comes before `out', append `in' and increment.  */
+	  riscv_add_subset (&merged_subsets, in->name, in->major_version,
+			    in->minor_version);
+	  in = in->next;
+	}
+      else if (cmp > 0)
+	{
+	  /* `out' comes before `in', append `out' and increment.  */
+	  riscv_add_subset (&merged_subsets, out->name, out->major_version,
+			    out->minor_version);
+	  out = out->next;
 	}
       else
-	riscv_add_subset (&merged_subsets, out->name,
-			  out->major_version, out->minor_version);
+	{
+	  /* Both present, check version and increment both.  */
+	  if ((in->major_version != out->major_version)
+	      || (in->minor_version != out->minor_version))
+	    {
+	      riscv_version_mismatch (ibfd, in, out);
+	      return FALSE;
+	    }
+
+	  riscv_add_subset (&merged_subsets, out->name, out->major_version,
+			    out->minor_version);
+	  out = out->next;
+	  in = in->next;
+	}
     }
 
-  *pin = in;
-  *pout = out;
+  if (in || out) {
+    /* If we're here, either `in' or `out' is running longer than
+       the other. So, we need to append the corresponding tail.  */
+    tail = in ? in : out;
+
+    while (tail)
+      {
+	riscv_add_subset (&merged_subsets, tail->name, tail->major_version,
+			  tail->minor_version);
+	tail = tail->next;
+      }
+  }
+
   return TRUE;
 }
 
@@ -2990,14 +3015,9 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   /* Merge standard extension.  */
   if (!riscv_merge_std_ext (ibfd, in_arch, out_arch, &in, &out))
     return NULL;
-  /* Merge non-standard extension.  */
-  if (!riscv_merge_non_std_and_sv_ext (ibfd, &in, &out, riscv_non_std_ext_p))
-    return NULL;
-  /* Merge standard supervisor extension.  */
-  if (!riscv_merge_non_std_and_sv_ext (ibfd, &in, &out, riscv_std_sv_ext_p))
-    return NULL;
-  /* Merge non-standard supervisor extension.  */
-  if (!riscv_merge_non_std_and_sv_ext (ibfd, &in, &out, riscv_non_std_sv_ext_p))
+
+  /* Merge all non-single letter extensions with single call.  */
+  if (!riscv_merge_multi_letter_ext (ibfd, &in, &out))
     return NULL;
 
   if (xlen_in != xlen_out)

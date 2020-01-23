@@ -1,3 +1,32 @@
+2020-01-22  Maxim Blinov  <maxim.blinov@embecosm.com>
+
+	* bfd/elfnn-riscv.c (riscv_skip_prefix): New.
+	(riscv_prefix_cmp): Likewise.
+	(riscv_non_std_ext_p): Deleted.
+	(riscv_std_sv_ext_p): Likewise.
+	(riscv_non_std_sv_ext_p): Likewise.
+	(riscv_merge_non_std_and_sv_ext): Rename to...
+	(riscv_merge_multi_letter_ext): and modified to use riscv_prefix_cmp.
+	(riscv_merge_arch_attr_info): Replace 3 calls to
+	riscv_merge_non_std_and_sv_ext with single call to
+	riscv_merge_multi_letter_ext.
+	* bfd/elfxx-riscv.c (riscv_parse_std_ext): Break if we
+	encounter a 'z' prefix.
+	(riscv_get_prefix_class): New function, return prefix class based
+	on first few characters of input string.
+	(riscv_parse_config): New structure to factor out minor differences
+	in extension class parsing behaviour.
+	(riscv_parse_sv_or_non_std_ext): Rename to...
+	(riscv_parse_prefixed_ext): and parameterise with
+	riscv_parse_config.
+	(riscv_std_z_ext_strtab, riscv_std_s_ext_strtab): New.
+	(riscv_multi_letter_ext_valid_p): New.
+	(riscv_ext_x_valid_p, riscv_ext_z_valid_p, riscv_ext_s_valid_p): New.
+	(riscv_parse_subset): Delegate all non-single-letter parsing work
+	to riscv_parse_prefixed_ext.
+	* bfd/elfxx-riscv.h (riscv_isa_ext_class): New type.
+	(riscv_get_prefix_class): Declare.
+
 2020-01-22  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add tga_group.
