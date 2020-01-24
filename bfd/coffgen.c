@@ -3175,8 +3175,10 @@ _bfd_coff_close_and_cleanup (bfd *abfd)
       && bfd_family_coff (abfd)
       && coff_data (abfd) != NULL)
     {
-      obj_coff_keep_syms (abfd) = FALSE;
-      obj_coff_keep_strings (abfd) = FALSE;
+      /* PR 25447:
+	 Do not clear the keep_syms and keep_strings flags.
+	 These may have been set by pe_ILF_build_a_bfd() indicating
+	 that the syms and strings pointers are not to be freed.  */
       if (!_bfd_coff_free_symbols (abfd))
 	return FALSE;
     }

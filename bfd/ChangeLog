@@ -1,3 +1,10 @@
+2020-01-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 25447
+	* coffgen.c (_bfd_coff_close_and_cleanup): Do not clear the keep
+	syms and keep strings flags as these may have been set in order to
+	prevent a bogus call to free.
+
 2020-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
