@@ -1063,16 +1063,24 @@ FOCUS_USAGE
   set_cmd_completer (cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\
 Scroll window forward.\n\
-Usage: + [WIN] [N]"));
+Usage: + [N] [WIN]\n\
+Scroll window WIN N lines forwards.  Both WIN and N are optional, N\n\
+defaults to 1, and WIN defaults to the currently focused window."));
   add_com ("-", class_tui, tui_scroll_backward_command, _("\
 Scroll window backward.\n\
-Usage: - [WIN] [N]"));
+Usage: - [N] [WIN]\n\
+Scroll window WIN N lines backwards.  Both WIN and N are optional, N\n\
+defaults to 1, and WIN defaults to the currently focused window."));
   add_com ("<", class_tui, tui_scroll_left_command, _("\
 Scroll window text to the left.\n\
-Usage: < [WIN] [N]"));
+Usage: < [N] [WIN]\n\
+Scroll window WIN N characters left.  Both WIN and N are optional, N\n\
+defaults to 1, and WIN defaults to the currently focused window."));
   add_com (">", class_tui, tui_scroll_right_command, _("\
 Scroll window text to the right.\n\
-Usage: > [WIN] [N]"));
+Usage: > [N] [WIN]\n\
+Scroll window WIN N characters right.  Both WIN and N are optional, N\n\
+defaults to 1, and WIN defaults to the currently focused window."));
 
   /* Define the tui control variables.  */
   add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,

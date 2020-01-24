@@ -1,3 +1,8 @@
+2020-01-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-win.c (_initialize_tui_win): Update help text for '+',
+	'-', '<', and '>' commands.
+
 2020-01-29  Pedro Alves  <palves@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 
