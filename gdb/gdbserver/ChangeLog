@@ -1,3 +1,7 @@
+2020-01-24  Maciej W. Rozycki  <macro@wdc.com>
+
+	* Makefile.in (TAGS): Remove config files from the recipe.
+
 2020-01-14  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.
