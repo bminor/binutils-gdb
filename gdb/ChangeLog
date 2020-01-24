@@ -1,5 +1,10 @@
 2020-01-24  Christian Biesinger  <cbiesinger@google.com>
 
+	* arm-nbsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-01-24  Christian Biesinger  <cbiesinger@google.com>
+
 	* aarch64-fbsd-tdep.c (aarch64_fbsd_iterate_over_regset_sections):
 	Update comment.
 	* aarch64-linux-tdep.c (aarch64_linux_iterate_over_regset_sections):
