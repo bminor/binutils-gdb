@@ -14242,7 +14242,7 @@ get_build_id (void * data)
             {
               warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
                               "not enough for a full note\n",
-                              "Corrupt note: only %ld bytes remain, "
+                              "debuginfod: Corrupt note: only %ld bytes remain, "
                               "not enough for a full note\n",
                               data_remaining),
                     (long) data_remaining);
@@ -14271,7 +14271,7 @@ get_build_id (void * data)
             {
               warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
                               "not enough for a full note\n",
-                              "Corrupt note: only %ld bytes remain, "
+                              "debuginfod: Corrupt note: only %ld bytes remain, "
                               "not enough for a full note\n",
                               data_remaining),
                     (long) data_remaining);

@@ -1,3 +1,8 @@
+2020-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_build_id): Fix warning messages about corrupt
+	notes.
+
 2020-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
