@@ -1,3 +1,16 @@
+2020-01-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25410
+	* thread.c (scoped_restore_current_thread::restore): Use
+	switch_to_inferior_no_thread.
+	* exec.c: Include "progspace-and-thread.h".
+	(add_target_sections, remove_target_sections):
+	scoped_restore_current_pspace_and_thread instead of
+	scoped_restore_current_thread.
+	* infrun.c (handle_vfork_child_exec_or_exit): Assign the pspace
+	and aspace to the inferior before calling clone_program_space.
+	Remove stale comment.
+
 2020-01-24  Christian Biesinger  <cbiesinger@google.com>
 
 	* arm-nbsd-nat.c (arm_nbsd_nat_target::fetch_registers): Rename to...

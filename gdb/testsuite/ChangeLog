@@ -1,3 +1,10 @@
+2020-01-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25410
+	* gdb.multi/multi-re-run-1.c: New.
+	* gdb.multi/multi-re-run-2.c: New.
+	* gdb.multi/multi-re-run.exp: New.
+
 2020-01-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/23718

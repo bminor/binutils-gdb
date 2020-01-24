@@ -1429,10 +1429,7 @@ scoped_restore_current_thread::restore ()
       && m_inf->pid != 0)
     switch_to_thread (m_thread);
   else
-    {
-      switch_to_no_thread ();
-      set_current_inferior (m_inf);
-    }
+    switch_to_inferior_no_thread (m_inf);
 
   /* The running state of the originally selected thread may have
      changed, so we have to recheck it here.  */

@@ -1020,8 +1020,6 @@ handle_vfork_child_exec_or_exit (int exec)
 	}
       else
 	{
-	  struct program_space *pspace;
-
 	  /* If this is a vfork child exiting, then the pspace and
 	     aspaces were shared with the parent.  Since we're
 	     reporting the process exit, we'll be mourning all that is
@@ -1037,18 +1035,12 @@ handle_vfork_child_exec_or_exit (int exec)
 	  scoped_restore restore_ptid
 	    = make_scoped_restore (&inferior_ptid, null_ptid);
 
-	  /* This inferior is dead, so avoid giving the breakpoints
-	     module the option to write through to it (cloning a
-	     program space resets breakpoints).  */
-	  inf->aspace = NULL;
-	  inf->pspace = NULL;
-	  pspace = new program_space (maybe_new_address_space ());
-	  set_current_program_space (pspace);
+	  inf->pspace = new program_space (maybe_new_address_space ());
+	  inf->aspace = inf->pspace->aspace;
+	  set_current_program_space (inf->pspace);
 	  inf->removable = 1;
 	  inf->symfile_flags = SYMFILE_NO_READ;
-	  clone_program_space (pspace, vfork_parent->pspace);
-	  inf->pspace = pspace;
-	  inf->aspace = pspace->aspace;
+	  clone_program_space (inf->pspace, vfork_parent->pspace);
 
 	  resume_parent = vfork_parent->pid;
 	}

@@ -33,6 +33,7 @@
 #include "arch-utils.h"
 #include "gdbthread.h"
 #include "progspace.h"
+#include "progspace-and-thread.h"
 #include "gdb_bfd.h"
 #include "gcore.h"
 #include "source.h"
@@ -547,7 +548,7 @@ add_target_sections (void *owner,
 	  table->sections[space + i].owner = owner;
 	}
 
-      scoped_restore_current_thread restore_thread;
+      scoped_restore_current_pspace_and_thread restore_pspace_thread;
       program_space *curr_pspace = current_program_space;
 
       /* If these are the first file sections we can provide memory
@@ -645,7 +646,7 @@ remove_target_sections (void *owner)
 	 inferior sharing the program space.  */
       if (old_count + (dest - src) == 0)
 	{
-	  scoped_restore_current_thread restore_thread;
+	  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 	  program_space *curr_pspace = current_program_space;
 
 	  for (inferior *inf : all_inferiors ())
