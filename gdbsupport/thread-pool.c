@@ -40,8 +40,16 @@
 #include <pthread.h>
 
 /* Handle platform discrepancies in pthread_setname_np: macOS uses a
-   single-argument form, while Linux uses a two-argument form.  This
-   wrapper handles the difference.  */
+   single-argument form, while Linux uses a two-argument form.  NetBSD
+   takes a printf-style format and an argument.  This wrapper handles the
+   difference.  */
+
+ATTRIBUTE_UNUSED static void
+set_thread_name (int (*set_name) (pthread_t, const char *, void *),
+				  const char *name)
+{
+  set_name (pthread_self (), "%s", const_cast<char *> (name));
+}
 
 ATTRIBUTE_UNUSED static void
 set_thread_name (int (*set_name) (pthread_t, const char *), const char *name)
