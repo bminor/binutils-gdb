@@ -1244,9 +1244,7 @@ riscv_get_prefix_class (const char *arch)
 {
   switch (*arch)
     {
-    case 's':
-      return RV_ISA_CLASS_S;
-
+    case 's': return RV_ISA_CLASS_S;
     case 'x': return RV_ISA_CLASS_X;
     case 'z': return RV_ISA_CLASS_Z;
     default: return RV_ISA_CLASS_UNKNOWN;
@@ -1324,8 +1322,8 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 
       /* Check that the name is valid.
 	 For 'x', anything goes but it cannot simply be 'x'.
-	 For 'z', it must be known from a list and also cannot simply be 'z'.
-	 For 's', it must be known from a list and also *can* simply be 's'.  */
+	 For 's', it must be known from a list and cannot simply be 's'.
+	 For 'z', it must be known from a list and cannot simply be 'z'.  */
 
       /* Check that the extension name is well-formed.  */
       if (!config->ext_valid_p (subset))

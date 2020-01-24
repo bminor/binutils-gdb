@@ -1,3 +1,9 @@
+2020-01-24  Jim Wilson  <jimw@sifive.com>
+
+	* elfxx-riscv.c (riscv_get_prefix_class): Format s case like others.
+	(riscv_parse_prefixed_ext): Fix s extension comment and reword to
+	avoid over long line.
+
 2020-01-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 25447
