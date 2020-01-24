@@ -268,7 +268,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
       if (asm_lines.size () < max_lines)
 	{
 	  if (!possible_new_low.has_value ())
-	    return pc;
+	    return new_low;
 
 	  /* Take the best possible match we have.  */
 	  new_low = *possible_new_low;
