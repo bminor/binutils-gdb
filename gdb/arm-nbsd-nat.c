@@ -192,7 +192,7 @@ fetch_fp_regs (struct regcache *regcache)
 }
 
 void
-arm_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
+arm_netbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
@@ -381,7 +381,7 @@ store_fp_regs (const struct regcache *regcache)
 }
 
 void
-arm_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
+arm_netbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {

@@ -1,5 +1,12 @@
 2020-01-24  Christian Biesinger  <cbiesinger@google.com>
 
+	* arm-nbsd-nat.c (arm_nbsd_nat_target::fetch_registers): Rename to...
+	(arm_netbsd_nat_target::fetch_registers): ...this.
+	(arm_nbsd_nat_target::store_registers): Rename to...
+	(arm_netbsd_nat_target::store_registers): ...this.
+
+2020-01-24  Christian Biesinger  <cbiesinger@google.com>
+
 	* arm-nbsd-nat.c: Define _KERNTYPES to get the declaration of
 	register_t.
 
