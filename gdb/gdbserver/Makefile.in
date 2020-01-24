@@ -45,11 +45,14 @@ htmldir = $(prefix)/html
 includedir = @includedir@
 CONFIG_SRC_SUBDIR = @CONFIG_SRC_SUBDIR@
 
+install_sh = @install_sh@
+
 SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 RANLIB = @RANLIB@
 
@@ -58,6 +61,7 @@ CXX = @CXX@
 CXX_DIALECT = @CXX_DIALECT@
 AR = @AR@
 AR_FLAGS = rc
+STRIP = @STRIP@
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
@@ -393,6 +397,12 @@ install-only:
 	# is not part of GNU standards and in particular not provided
 	# in libiberty.
 	@$(MAKE) $(FLAGS_TO_PASS) DO=install "DODIRS=$(SUBDIRS)" subdir_do
+
+install-strip:
+	$(MAKE) $(FLAGS_TO_PASS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install-only
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \

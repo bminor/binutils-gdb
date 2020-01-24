@@ -1,3 +1,11 @@
+2020-01-24  Hannes Domani  <ssbssa@yahoo.de>
+
+	* Makefile.in (install-strip): New target.
+	(install_sh, INSTALL_STRIP_PROGRAM, STRIP): New variables.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Add AM_PROG_INSTALL_STRIP.
+
 2020-01-24  Maciej W. Rozycki  <macro@wdc.com>
 
 	* Makefile.in (SFILES): Adjust paths to point to real files.
