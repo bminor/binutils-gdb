@@ -6025,7 +6025,7 @@ ac_config_commands="$ac_config_commands depdir"
 
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch gdbsupport"
+CONFIG_SRC_SUBDIR="arch gdbsupport nat target"
 
 
 ac_config_commands="$ac_config_commands gdbdepdir"

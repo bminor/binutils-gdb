@@ -56,7 +56,7 @@ ACX_NONCANONICAL_HOST
 ZW_CREATE_DEPDIR
 
 # Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch gdbsupport"
+CONFIG_SRC_SUBDIR="arch gdbsupport nat target"
 AC_SUBST(CONFIG_SRC_SUBDIR)
 
 AC_CONFIG_COMMANDS([gdbdepdir],[

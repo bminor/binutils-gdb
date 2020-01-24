@@ -198,11 +198,11 @@ SFILES = \
 	$(srcdir)/win32-low.c \
 	$(srcdir)/wincecompat.c \
 	$(srcdir)/x86-low.c \
-	$(srcdir)/arch/arm.c \
-	$(srcdir)/arch/arm-get-next-pcs.c \
-	$(srcdir)/arch/arm-linux.c \
-	$(srcdir)/arch/ppc-linux-common.c \
 	$(srcdir)/../alloc.c \
+	$(srcdir)/../arch/arm.c \
+	$(srcdir)/../arch/arm-get-next-pcs.c \
+	$(srcdir)/../arch/arm-linux.c \
+	$(srcdir)/../arch/ppc-linux-common.c \
 	$(srcdir)/../../gdbsupport/btrace-common.c \
 	$(srcdir)/../../gdbsupport/buffer.c \
 	$(srcdir)/../../gdbsupport/cleanups.c \
@@ -229,15 +229,15 @@ SFILES = \
 	$(srcdir)/../../gdbsupport/safe-strerror.c \
 	$(srcdir)/../../gdbsupport/tdesc.c \
 	$(srcdir)/../../gdbsupport/xml-utils.c \
-	$(srcdir)/nat/aarch64-sve-linux-ptrace.c \
-	$(srcdir)/nat/linux-btrace.c \
-	$(srcdir)/nat/linux-namespaces.c \
-	$(srcdir)/nat/linux-osdata.c \
-	$(srcdir)/nat/linux-personality.c \
-	$(srcdir)/nat/mips-linux-watch.c \
-	$(srcdir)/nat/ppc-linux.c \
-	$(srcdir)/nat/fork-inferior.c \
-	$(srcdir)/target/waitstatus.c
+	$(srcdir)/../nat/aarch64-sve-linux-ptrace.c \
+	$(srcdir)/../nat/linux-btrace.c \
+	$(srcdir)/../nat/linux-namespaces.c \
+	$(srcdir)/../nat/linux-osdata.c \
+	$(srcdir)/../nat/linux-personality.c \
+	$(srcdir)/../nat/mips-linux-watch.c \
+	$(srcdir)/../nat/ppc-linux.c \
+	$(srcdir)/../nat/fork-inferior.c \
+	$(srcdir)/../target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -295,7 +295,7 @@ OBS = \
 	tracepoint.o \
 	utils.o \
 	version.o \
-	waitstatus.o \
+	target/waitstatus.o \
 	$(DEPFILES) \
 	$(LIBOBJS) \
 	$(XML_BUILTIN)
@@ -459,7 +459,9 @@ TAGS:	${TAGFILES}
 	etags \
 	  `for i in yzzy ${DEPFILES}; do \
 	     if [ x$$i != xyzzy ]; then \
-	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' ; \
+	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' \
+		 -e 's,/\(arch\|nat\|target\)/,/../\1/,' \
+		 -e 's,/\(gdbsupport\)/,/../../\1/,'; \
 	     fi; \
 	   done` \
 	  ${TAGFILES}
@@ -633,11 +635,11 @@ gdbsupport/%.o: ../../gdbsupport/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-%.o: ../nat/%.c
+nat/%.o: ../nat/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-%.o: ../target/%.c
+target/%.o: ../target/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

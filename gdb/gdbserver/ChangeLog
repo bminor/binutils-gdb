@@ -1,5 +1,19 @@
 2020-01-24  Maciej W. Rozycki  <macro@wdc.com>
 
+	* Makefile.in (SFILES): Adjust paths to point to real files.
+	(OBS): Move waitstatus.o to target/waitstatus.o.
+	(TAGS): Transform paths appropriately.
+	(%.o): Rename to...
+	(nat/%.o): ... this pattern rule.
+	(%.o): Rename to...
+	(target/%.o): ... this pattern rule.
+	* configure.srv: Adjust paths throughout to include nat/ prefix
+	with the revant files.
+	* configure.ac: Add `nat' and `target' to CONFIG_SRC_SUBDIR.
+	* configure: Regenerate.
+
+2020-01-24  Maciej W. Rozycki  <macro@wdc.com>
+
 	* Makefile.in (TAGS): Remove config files from the recipe.
 
 2020-01-14  Tom Tromey  <tom@tromey.com>
