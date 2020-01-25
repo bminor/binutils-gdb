@@ -4976,13 +4976,13 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
    and 'info functions' commands.  These correspond to the -q, -t, and -n
    options.  */
 
-struct info_print_options
+struct info_vars_funcs_options
 {
   bool quiet = false;
   bool exclude_minsyms = false;
   char *type_regexp = nullptr;
 
-  ~info_print_options ()
+  ~info_vars_funcs_options ()
   {
     xfree (type_regexp);
   }
@@ -4991,24 +4991,25 @@ struct info_print_options
 /* The options used by the 'info variables' and 'info functions'
    commands.  */
 
-static const gdb::option::option_def info_print_options_defs[] = {
-  gdb::option::boolean_option_def<info_print_options> {
+static const gdb::option::option_def info_vars_funcs_options_defs[] = {
+  gdb::option::boolean_option_def<info_vars_funcs_options> {
     "q",
-    [] (info_print_options *opt) { return &opt->quiet; },
+    [] (info_vars_funcs_options *opt) { return &opt->quiet; },
     nullptr, /* show_cmd_cb */
     nullptr /* set_doc */
   },
 
-  gdb::option::boolean_option_def<info_print_options> {
+  gdb::option::boolean_option_def<info_vars_funcs_options> {
     "n",
-    [] (info_print_options *opt) { return &opt->exclude_minsyms; },
+    [] (info_vars_funcs_options *opt) { return &opt->exclude_minsyms; },
     nullptr, /* show_cmd_cb */
     nullptr /* set_doc */
   },
 
-  gdb::option::string_option_def<info_print_options> {
+  gdb::option::string_option_def<info_vars_funcs_options> {
     "t",
-    [] (info_print_options *opt) { return &opt->type_regexp; },
+    [] (info_vars_funcs_options *opt) { return &opt->type_regexp;
+  },
     nullptr, /* show_cmd_cb */
     nullptr /* set_doc */
   }
@@ -5018,20 +5019,20 @@ static const gdb::option::option_def info_print_options_defs[] = {
    functions'.  */
 
 static gdb::option::option_def_group
-make_info_print_options_def_group (info_print_options *opts)
+make_info_vars_funcs_options_def_group (info_vars_funcs_options *opts)
 {
-  return {{info_print_options_defs}, opts};
+  return {{info_vars_funcs_options_defs}, opts};
 }
 
 /* Command completer for 'info variables' and 'info functions'.  */
 
 static void
-info_print_command_completer (struct cmd_list_element *ignore,
-			      completion_tracker &tracker,
-			      const char *text, const char * /* word */)
+info_vars_funcs_command_completer (struct cmd_list_element *ignore,
+				   completion_tracker &tracker,
+				   const char *text, const char * /* word */)
 {
   const auto group
-    = make_info_print_options_def_group (nullptr);
+    = make_info_vars_funcs_options_def_group (nullptr);
   if (gdb::option::complete_options
       (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
     return;
@@ -5045,8 +5046,8 @@ info_print_command_completer (struct cmd_list_element *ignore,
 static void
 info_variables_command (const char *args, int from_tty)
 {
-  info_print_options opts;
-  auto grp = make_info_print_options_def_group (&opts);
+  info_vars_funcs_options opts;
+  auto grp = make_info_vars_funcs_options_def_group (&opts);
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
   if (args != nullptr && *args == '\0')
@@ -5061,8 +5062,9 @@ info_variables_command (const char *args, int from_tty)
 static void
 info_functions_command (const char *args, int from_tty)
 {
-  info_print_options opts;
-  auto grp = make_info_print_options_def_group (&opts);
+  info_vars_funcs_options opts;
+
+  auto grp = make_info_vars_funcs_options_def_group (&opts);
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
   if (args != nullptr && *args == '\0')
@@ -6709,7 +6711,7 @@ Usage: info variables [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
 				      _("global and static variables"),
 				      true));
-  set_cmd_completer_handle_brkchars (c, info_print_command_completer);
+  set_cmd_completer_handle_brkchars (c, info_vars_funcs_command_completer);
   if (dbx_commands)
     {
       c = add_com ("whereis", class_info, info_variables_command,
@@ -6719,7 +6721,7 @@ Usage: whereis [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the global and static variables.\n"),
 					 _("global and static variables"),
 					 true));
-      set_cmd_completer_handle_brkchars (c, info_print_command_completer);
+      set_cmd_completer_handle_brkchars (c, info_vars_funcs_command_completer);
     }
 
   c = add_info ("functions", info_functions_command,
@@ -6729,7 +6731,7 @@ Usage: info functions [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
 Prints the functions.\n"),
 				      _("functions"),
 				      true));
-  set_cmd_completer_handle_brkchars (c, info_print_command_completer);
+  set_cmd_completer_handle_brkchars (c, info_vars_funcs_command_completer);
 
   c = add_info ("types", info_types_command, _("\
 All type names, or those matching REGEXP.\n\
