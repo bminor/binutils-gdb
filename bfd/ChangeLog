@@ -1,3 +1,9 @@
+2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/25458
+	* elflink.c (_bfd_elf_gc_mark_rsec): Mark all weak aliases.
+
 2020-01-24  Jim Wilson  <jimw@sifive.com>
 
 	* elfxx-riscv.c (riscv_get_prefix_class): Format s case like others.

@@ -1,3 +1,13 @@
+2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/25458
+	* testsuite/ld-elf/pr25458.map: New file.
+	* testsuite/ld-elf/pr25458.rd: Likewise.
+	* testsuite/ld-elf/pr25458a.s: Likewise.
+	* testsuite/ld-elf/pr25458b.s: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/25458 test.
+
 2020-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25416
