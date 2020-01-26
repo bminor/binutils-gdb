@@ -137,7 +137,7 @@ case ${gdb_host} in
 	    i386)
 		# Native config information for GDB on amd64
 		# systems running Cygwin.
-		NATDEPFILES="${NATDEPFILES} amd64-windows-nat.o"
+		NATDEPFILES="${NATDEPFILES} i386-windows-nat.o amd64-windows-nat.o"
 		;;
 	esac
 	;;
@@ -325,7 +325,7 @@ case ${gdb_host} in
     mingw64)
 	case ${gdb_host_cpu} in
 	    i386)
-		NATDEPFILES="${NATDEPFILES} amd64-windows-nat.o"
+		NATDEPFILES="${NATDEPFILES} i386-windows-nat.o amd64-windows-nat.o"
 		;;
 	esac
 	;;

@@ -70,16 +70,24 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_wait.h"
 
+#define STATUS_WX86_BREAKPOINT 0x4000001F
+#define STATUS_WX86_SINGLE_STEP 0x4000001E
+
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
 #define DebugBreakProcess		dyn_DebugBreakProcess
 #define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
 #define EnumProcessModules		dyn_EnumProcessModules
+#define EnumProcessModulesEx		dyn_EnumProcessModulesEx
 #define GetModuleInformation		dyn_GetModuleInformation
 #define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
 #define OpenProcessToken		dyn_OpenProcessToken
 #define GetConsoleFontSize		dyn_GetConsoleFontSize
 #define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
+#define Wow64SuspendThread		dyn_Wow64SuspendThread
+#define Wow64GetThreadContext		dyn_Wow64GetThreadContext
+#define Wow64SetThreadContext		dyn_Wow64SetThreadContext
+#define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
 
 typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
 						   PTOKEN_PRIVILEGES,
@@ -100,6 +108,12 @@ typedef BOOL WINAPI (EnumProcessModules_ftype) (HANDLE, HMODULE *, DWORD,
 						LPDWORD);
 static EnumProcessModules_ftype *EnumProcessModules;
 
+#ifdef __x86_64__
+typedef BOOL WINAPI (EnumProcessModulesEx_ftype) (HANDLE, HMODULE *, DWORD,
+						  LPDWORD, DWORD);
+static EnumProcessModulesEx_ftype *EnumProcessModulesEx;
+#endif
+
 typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
 						  LPMODULEINFO, DWORD);
 static GetModuleInformation_ftype *GetModuleInformation;
@@ -116,6 +130,22 @@ static GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
 
 typedef COORD WINAPI (GetConsoleFontSize_ftype) (HANDLE, DWORD);
 static GetConsoleFontSize_ftype *GetConsoleFontSize;
+
+#ifdef __x86_64__
+typedef DWORD WINAPI (Wow64SuspendThread_ftype) (HANDLE);
+static Wow64SuspendThread_ftype *Wow64SuspendThread;
+
+typedef BOOL WINAPI (Wow64GetThreadContext_ftype) (HANDLE, PWOW64_CONTEXT);
+static Wow64GetThreadContext_ftype *Wow64GetThreadContext;
+
+typedef BOOL WINAPI (Wow64SetThreadContext_ftype) (HANDLE,
+						   const WOW64_CONTEXT *);
+static Wow64SetThreadContext_ftype *Wow64SetThreadContext;
+
+typedef BOOL WINAPI (Wow64GetThreadSelectorEntry_ftype) (HANDLE, DWORD,
+							 PLDT_ENTRY);
+static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
+#endif
 
 #undef STARTUPINFO
 #undef CreateProcess
@@ -224,7 +254,13 @@ typedef struct windows_thread_info_struct
     char *name;
     int suspended;
     int reload_context;
-    CONTEXT context;
+    union
+      {
+	CONTEXT context;
+#ifdef __x86_64__
+	WOW64_CONTEXT wow64_context;
+#endif
+      };
   }
 windows_thread_info;
 
@@ -243,6 +279,10 @@ static int exception_count = 0;
 static int event_count = 0;
 static int saw_create;
 static int open_process_used = 0;
+#ifdef __x86_64__
+static bool wow64_process = false;
+static bool ignore_first_breakpoint = false;
+#endif
 
 /* User options.  */
 static bool new_console = false;
@@ -360,15 +400,16 @@ static windows_nat_target the_windows_nat_target;
 /* Set the MAPPINGS static global to OFFSETS.
    See the description of MAPPINGS for more details.  */
 
-void
+static void
 windows_set_context_register_offsets (const int *offsets)
 {
   mappings = offsets;
 }
 
-/* See windows-nat.h.  */
+/* Set the function that should be used by this module to determine
+   whether a given register is a segment register or not.  */
 
-void
+static void
 windows_set_segment_register_p (segment_register_p_ftype *fun)
 {
   segment_register_p = fun;
@@ -452,6 +493,12 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   th->id = id;
   th->h = h;
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
+#ifdef __x86_64__
+  /* For WOW64 processes, this is actually the pointer to the 64bit TIB,
+     and the 32bit TIB is exactly 2 pages after it.  */
+  if (wow64_process)
+    th->thread_local_base += 0x2000;
+#endif
   th->next = thread_head.next;
   thread_head.next = th;
 
@@ -468,17 +515,36 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   /* Set the debug registers for the new thread if they are used.  */
   if (debug_registers_used)
     {
-      /* Only change the value of the debug registers.  */
-      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-      CHECK (GetThreadContext (th->h, &th->context));
-      th->context.Dr0 = dr[0];
-      th->context.Dr1 = dr[1];
-      th->context.Dr2 = dr[2];
-      th->context.Dr3 = dr[3];
-      th->context.Dr6 = DR6_CLEAR_VALUE;
-      th->context.Dr7 = dr[7];
-      CHECK (SetThreadContext (th->h, &th->context));
-      th->context.ContextFlags = 0;
+#ifdef __x86_64__
+      if (wow64_process)
+	{
+	  /* Only change the value of the debug registers.  */
+	  th->wow64_context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
+	  th->wow64_context.Dr0 = dr[0];
+	  th->wow64_context.Dr1 = dr[1];
+	  th->wow64_context.Dr2 = dr[2];
+	  th->wow64_context.Dr3 = dr[3];
+	  th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
+	  th->wow64_context.Dr7 = dr[7];
+	  CHECK (Wow64SetThreadContext (th->h, &th->wow64_context));
+	  th->wow64_context.ContextFlags = 0;
+	}
+      else
+#endif
+	{
+	  /* Only change the value of the debug registers.  */
+	  th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+	  CHECK (GetThreadContext (th->h, &th->context));
+	  th->context.Dr0 = dr[0];
+	  th->context.Dr1 = dr[1];
+	  th->context.Dr2 = dr[2];
+	  th->context.Dr3 = dr[3];
+	  th->context.Dr6 = DR6_CLEAR_VALUE;
+	  th->context.Dr7 = dr[7];
+	  CHECK (SetThreadContext (th->h, &th->context));
+	  th->context.ContextFlags = 0;
+	}
     }
   return th;
 }
@@ -565,7 +631,13 @@ windows_fetch_one_register (struct regcache *regcache,
   gdb_assert (r >= 0);
   gdb_assert (!th->reload_context);
 
-  char *context_offset = ((char *) &th->context) + mappings[r];
+  char *context_ptr = (char *) &th->context;
+#ifdef __x86_64__
+  if (wow64_process)
+    context_ptr = (char *) &th->wow64_context;
+#endif
+
+  char *context_offset = context_ptr + mappings[r];
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -617,6 +689,26 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 	}
       else
 #endif
+#ifdef __x86_64__
+      if (wow64_process)
+	{
+	  th->wow64_context.ContextFlags = CONTEXT_DEBUGGER_DR;
+	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
+	  /* Copy dr values from that thread.
+	     But only if there were not modified since last stop.
+	     PR gdb/2388 */
+	  if (!debug_registers_changed)
+	    {
+	      dr[0] = th->wow64_context.Dr0;
+	      dr[1] = th->wow64_context.Dr1;
+	      dr[2] = th->wow64_context.Dr2;
+	      dr[3] = th->wow64_context.Dr3;
+	      dr[6] = th->wow64_context.Dr6;
+	      dr[7] = th->wow64_context.Dr7;
+	    }
+	}
+      else
+#endif
 	{
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (GetThreadContext (th->h, &th->context));
@@ -655,7 +747,13 @@ windows_store_one_register (const struct regcache *regcache,
 {
   gdb_assert (r >= 0);
 
-  regcache->raw_collect (r, ((char *) &th->context) + mappings[r]);
+  char *context_ptr = (char *) &th->context;
+#ifdef __x86_64__
+  if (wow64_process)
+    context_ptr = (char *) &th->wow64_context;
+#endif
+
+  regcache->raw_collect (r, context_ptr + mappings[r]);
 }
 
 /* Store a new register value into the context of the thread tied to
@@ -1043,7 +1141,14 @@ static int
 display_selector (HANDLE thread, DWORD sel)
 {
   LDT_ENTRY info;
-  if (GetThreadSelectorEntry (thread, sel, &info))
+  BOOL ret;
+#ifdef __x86_64__
+  if (wow64_process)
+    ret = Wow64GetThreadSelectorEntry (thread, sel, &info);
+  else
+#endif
+    ret = GetThreadSelectorEntry (thread, sel, &info);
+  if (ret)
     {
       int base, limit;
       printf_filtered ("0x%03x: ", (unsigned) sel);
@@ -1127,25 +1232,50 @@ display_selectors (const char * args, int from_tty)
     }
   if (!args)
     {
-
-      puts_filtered ("Selector $cs\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegCs);
-      puts_filtered ("Selector $ds\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegDs);
-      puts_filtered ("Selector $es\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegEs);
-      puts_filtered ("Selector $ss\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegSs);
-      puts_filtered ("Selector $fs\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegFs);
-      puts_filtered ("Selector $gs\n");
-      display_selector (current_thread->h,
-	current_thread->context.SegGs);
+#ifdef __x86_64__
+      if (wow64_process)
+	{
+	  puts_filtered ("Selector $cs\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegCs);
+	  puts_filtered ("Selector $ds\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegDs);
+	  puts_filtered ("Selector $es\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegEs);
+	  puts_filtered ("Selector $ss\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegSs);
+	  puts_filtered ("Selector $fs\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegFs);
+	  puts_filtered ("Selector $gs\n");
+	  display_selector (current_thread->h,
+			    current_thread->wow64_context.SegGs);
+	}
+      else
+#endif
+	{
+	  puts_filtered ("Selector $cs\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegCs);
+	  puts_filtered ("Selector $ds\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegDs);
+	  puts_filtered ("Selector $es\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegEs);
+	  puts_filtered ("Selector $ss\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegSs);
+	  puts_filtered ("Selector $fs\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegFs);
+	  puts_filtered ("Selector $gs\n");
+	  display_selector (current_thread->h,
+			    current_thread->context.SegGs);
+	}
     }
   else
     {
@@ -1246,6 +1376,19 @@ handle_exception (struct target_waitstatus *ourstatus)
       ourstatus->value.sig = GDB_SIGNAL_FPE;
       break;
     case EXCEPTION_BREAKPOINT:
+#ifdef __x86_64__
+      if (ignore_first_breakpoint)
+	{
+	  /* For WOW64 processes, there are always 2 breakpoint exceptions
+	     on startup, first a BREAKPOINT for the 64bit ntdll.dll,
+	     then a WX86_BREAKPOINT for the 32bit ntdll.dll.
+	     Here we only care about the WX86_BREAKPOINT's.  */
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ignore_first_breakpoint = false;
+	}
+#endif
+      /* FALLTHROUGH */
+    case STATUS_WX86_BREAKPOINT:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
       break;
@@ -1258,6 +1401,7 @@ handle_exception (struct target_waitstatus *ourstatus)
       ourstatus->value.sig = GDB_SIGNAL_INT;
       break;
     case EXCEPTION_SINGLE_STEP:
+    case STATUS_WX86_SINGLE_STEP:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_SINGLE_STEP");
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
       break;
@@ -1346,29 +1490,62 @@ windows_continue (DWORD continue_status, int id, int killed)
     if ((id == -1 || id == (int) th->id)
 	&& th->suspended)
       {
-	if (debug_registers_changed)
+#ifdef __x86_64__
+	if (wow64_process)
 	  {
-	    th->context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
-	    th->context.Dr0 = dr[0];
-	    th->context.Dr1 = dr[1];
-	    th->context.Dr2 = dr[2];
-	    th->context.Dr3 = dr[3];
-	    th->context.Dr6 = DR6_CLEAR_VALUE;
-	    th->context.Dr7 = dr[7];
-	  }
-	if (th->context.ContextFlags)
-	  {
-	    DWORD ec = 0;
-
-	    if (GetExitCodeThread (th->h, &ec)
-		&& ec == STILL_ACTIVE)
+	    if (debug_registers_changed)
 	      {
-		BOOL status = SetThreadContext (th->h, &th->context);
-
-		if (!killed)
-		  CHECK (status);
+		th->wow64_context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
+		th->wow64_context.Dr0 = dr[0];
+		th->wow64_context.Dr1 = dr[1];
+		th->wow64_context.Dr2 = dr[2];
+		th->wow64_context.Dr3 = dr[3];
+		th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
+		th->wow64_context.Dr7 = dr[7];
 	      }
-	    th->context.ContextFlags = 0;
+	    if (th->wow64_context.ContextFlags)
+	      {
+		DWORD ec = 0;
+
+		if (GetExitCodeThread (th->h, &ec)
+		    && ec == STILL_ACTIVE)
+		  {
+		    BOOL status = Wow64SetThreadContext (th->h,
+							 &th->wow64_context);
+
+		    if (!killed)
+		      CHECK (status);
+		  }
+		th->wow64_context.ContextFlags = 0;
+	      }
+	  }
+	else
+#endif
+	  {
+	    if (debug_registers_changed)
+	      {
+		th->context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
+		th->context.Dr0 = dr[0];
+		th->context.Dr1 = dr[1];
+		th->context.Dr2 = dr[2];
+		th->context.Dr3 = dr[3];
+		th->context.Dr6 = DR6_CLEAR_VALUE;
+		th->context.Dr7 = dr[7];
+	      }
+	    if (th->context.ContextFlags)
+	      {
+		DWORD ec = 0;
+
+		if (GetExitCodeThread (th->h, &ec)
+		    && ec == STILL_ACTIVE)
+		  {
+		    BOOL status = SetThreadContext (th->h, &th->context);
+
+		    if (!killed)
+		      CHECK (status);
+		  }
+		th->context.ContextFlags = 0;
+	      }
 	  }
 	if (th->suspended > 0)
 	  (void) ResumeThread (th->h);
@@ -1468,28 +1645,59 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   th = thread_rec (inferior_ptid.tid (), FALSE);
   if (th)
     {
-      if (step)
+#ifdef __x86_64__
+      if (wow64_process)
 	{
-	  /* Single step by setting t bit.  */
-	  struct regcache *regcache = get_current_regcache ();
-	  struct gdbarch *gdbarch = regcache->arch ();
-	  fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
-	  th->context.EFlags |= FLAG_TRACE_BIT;
-	}
-
-      if (th->context.ContextFlags)
-	{
-	  if (debug_registers_changed)
+	  if (step)
 	    {
-	      th->context.Dr0 = dr[0];
-	      th->context.Dr1 = dr[1];
-	      th->context.Dr2 = dr[2];
-	      th->context.Dr3 = dr[3];
-	      th->context.Dr6 = DR6_CLEAR_VALUE;
-	      th->context.Dr7 = dr[7];
+	      /* Single step by setting t bit.  */
+	      struct regcache *regcache = get_current_regcache ();
+	      struct gdbarch *gdbarch = regcache->arch ();
+	      fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
+	      th->wow64_context.EFlags |= FLAG_TRACE_BIT;
 	    }
-	  CHECK (SetThreadContext (th->h, &th->context));
-	  th->context.ContextFlags = 0;
+
+	  if (th->wow64_context.ContextFlags)
+	    {
+	      if (debug_registers_changed)
+		{
+		  th->wow64_context.Dr0 = dr[0];
+		  th->wow64_context.Dr1 = dr[1];
+		  th->wow64_context.Dr2 = dr[2];
+		  th->wow64_context.Dr3 = dr[3];
+		  th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
+		  th->wow64_context.Dr7 = dr[7];
+		}
+	      CHECK (Wow64SetThreadContext (th->h, &th->wow64_context));
+	      th->wow64_context.ContextFlags = 0;
+	    }
+	}
+      else
+#endif
+	{
+	  if (step)
+	    {
+	      /* Single step by setting t bit.  */
+	      struct regcache *regcache = get_current_regcache ();
+	      struct gdbarch *gdbarch = regcache->arch ();
+	      fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
+	      th->context.EFlags |= FLAG_TRACE_BIT;
+	    }
+
+	  if (th->context.ContextFlags)
+	    {
+	      if (debug_registers_changed)
+		{
+		  th->context.Dr0 = dr[0];
+		  th->context.Dr1 = dr[1];
+		  th->context.Dr2 = dr[2];
+		  th->context.Dr3 = dr[3];
+		  th->context.Dr6 = DR6_CLEAR_VALUE;
+		  th->context.Dr7 = dr[7];
+		}
+	      CHECK (SetThreadContext (th->h, &th->context));
+	      th->context.ContextFlags = 0;
+	    }
 	}
     }
 
@@ -1814,17 +2022,41 @@ windows_add_all_dlls (void)
   HMODULE *hmodules;
   int i;
 
-  if (EnumProcessModules (current_process_handle, &dummy_hmodule,
-			  sizeof (HMODULE), &cb_needed) == 0)
-    return;
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
+				sizeof (HMODULE), &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, &dummy_hmodule,
+			      sizeof (HMODULE), &cb_needed) == 0)
+	return;
+    }
 
   if (cb_needed < 1)
     return;
 
   hmodules = (HMODULE *) alloca (cb_needed);
-  if (EnumProcessModules (current_process_handle, hmodules,
-			  cb_needed, &cb_needed) == 0)
-    return;
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, hmodules,
+				cb_needed, &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, hmodules,
+			      cb_needed, &cb_needed) == 0)
+	return;
+    }
 
   for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
@@ -1878,6 +2110,21 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   windows_clear_solib ();
   clear_proceed_status (0);
   init_wait_for_inferior ();
+
+#ifdef __x86_64__
+  ignore_first_breakpoint = !attaching && wow64_process;
+
+  if (!wow64_process)
+    {
+      windows_set_context_register_offsets (amd64_mappings);
+      windows_set_segment_register_p (amd64_windows_segment_register_p);
+    }
+  else
+#endif
+    {
+      windows_set_context_register_offsets (i386_mappings);
+      windows_set_segment_register_p (i386_windows_segment_register_p);
+    }
 
   inf = current_inferior ();
   inferior_appeared (inf, pid);
@@ -2029,6 +2276,17 @@ windows_nat_target::attach (const char *args, int from_tty)
 			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
+#ifdef __x86_64__
+  HANDLE h = OpenProcess (PROCESS_QUERY_INFORMATION, FALSE, pid);
+  if (h != NULL)
+    {
+      BOOL wow64;
+      if (IsWow64Process (h, &wow64))
+	wow64_process = wow64;
+      CloseHandle (h);
+    }
+#endif
+
   do_initial_windows_stuff (this, pid, 1);
   target_terminal::ours ();
 }
@@ -2083,9 +2341,21 @@ windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
   DWORD cbNeeded;
 
   cbNeeded = 0;
-  if (!EnumProcessModules (current_process_handle, &dh_buf,
-			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
-    return 0;
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (!EnumProcessModulesEx (current_process_handle, &dh_buf,
+				 sizeof (HMODULE), &cbNeeded,
+				 LIST_MODULES_32BIT) || !cbNeeded)
+	return 0;
+    }
+  else
+#endif
+    {
+      if (!EnumProcessModules (current_process_handle, &dh_buf,
+			       sizeof (HMODULE), &cbNeeded) || !cbNeeded)
+	return 0;
+    }
 
   /* We know the executable is always first in the list of modules,
      which we just fetched.  So no need to fetch more.  */
@@ -2843,6 +3113,12 @@ windows_nat_target::create_inferior (const char *exec_file,
     error (_("Error creating process %s, (error %u)."),
 	   exec_file, (unsigned) GetLastError ());
 
+#ifdef __x86_64__
+  BOOL wow64;
+  if (IsWow64Process (pi.hProcess, &wow64))
+    wow64_process = wow64;
+#endif
+
   CloseHandle (pi.hThread);
   CloseHandle (pi.hProcess);
 
@@ -3006,19 +3282,40 @@ static enum target_xfer_status
 windows_xfer_siginfo (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 		      ULONGEST *xfered_len)
 {
+  char *buf = (char *) &siginfo_er;
+  size_t bufsize = sizeof (siginfo_er);
+
+#ifdef __x86_64__
+  EXCEPTION_RECORD32 er32;
+  if (wow64_process)
+    {
+      buf = (char *) &er32;
+      bufsize = sizeof (er32);
+
+      er32.ExceptionCode = siginfo_er.ExceptionCode;
+      er32.ExceptionFlags = siginfo_er.ExceptionFlags;
+      er32.ExceptionRecord = (uintptr_t) siginfo_er.ExceptionRecord;
+      er32.ExceptionAddress = (uintptr_t) siginfo_er.ExceptionAddress;
+      er32.NumberParameters = siginfo_er.NumberParameters;
+      int i;
+      for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
+	er32.ExceptionInformation[i] = siginfo_er.ExceptionInformation[i];
+    }
+#endif
+
   if (siginfo_er.ExceptionCode == 0)
     return TARGET_XFER_E_IO;
 
   if (readbuf == nullptr)
     return TARGET_XFER_E_IO;
 
-  if (offset > sizeof (siginfo_er))
+  if (offset > bufsize)
     return TARGET_XFER_E_IO;
 
-  if (offset + len > sizeof (siginfo_er))
-    len = sizeof (siginfo_er) - offset;
+  if (offset + len > bufsize)
+    len = bufsize - offset;
 
-  memcpy (readbuf, (char *) &siginfo_er + offset, len);
+  memcpy (readbuf, buf + offset, len);
   *xfered_len = len;
 
   return TARGET_XFER_OK;
@@ -3368,6 +3665,12 @@ _initialize_loadable ()
       GPA (hm, GetConsoleFontSize);
       GPA (hm, DebugActiveProcessStop);
       GPA (hm, GetCurrentConsoleFont);
+#ifdef __x86_64__
+      GPA (hm, Wow64SuspendThread);
+      GPA (hm, Wow64GetThreadContext);
+      GPA (hm, Wow64SetThreadContext);
+      GPA (hm, Wow64GetThreadSelectorEntry);
+#endif
     }
 
   /* Set variables to dummy versions of these processes if the function
@@ -3390,6 +3693,9 @@ _initialize_loadable ()
   if (hm)
     {
       GPA (hm, EnumProcessModules);
+#ifdef __x86_64__
+      GPA (hm, EnumProcessModulesEx);
+#endif
       GPA (hm, GetModuleInformation);
       GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
         GetProcAddress (hm, GetModuleFileNameEx_name);

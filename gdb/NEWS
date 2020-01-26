@@ -39,6 +39,9 @@
   string is that GDB will not try to load any previous command
   history.
 
+* On Windows targets, it is now possible to debug 32-bit programs with a
+  64-bit GDB.
+
 * New commands
 
 set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).

@@ -1,3 +1,47 @@
+2020-03-04  Hannes Domani  <ssbssa@yahoo.de>
+
+	* NEWS: Mention support for WOW64 processes.
+	* amd64-windows-nat.c (amd64_mappings): Rename and remove static.
+	(amd64_windows_segment_register_p): Remove static.
+	(_initialize_amd64_windows_nat): Update.
+	* configure.nat <windows> (NATDEPFILES): Add i386-windows-nat.o.
+	* i386-windows-nat.c (context_offset): Update.
+	(i386_mappings): Rename and remove static.
+	(i386_windows_segment_register_p): Remove static.
+	(_initialize_i386_windows_nat): Update.
+	* windows-nat.c (STATUS_WX86_BREAKPOINT): New macro.
+	(STATUS_WX86_SINGLE_STEP): New macro.
+	(EnumProcessModulesEx): New macro.
+	(Wow64SuspendThread): New macro.
+	(Wow64GetThreadContext): New macro.
+	(Wow64SetThreadContext): New macro.
+	(Wow64GetThreadSelectorEntry): New macro.
+	(windows_set_context_register_offsets): Add static.
+	(windows_set_segment_register_p): Likewise.
+	(windows_add_thread): Adapt for WOW64 processes.
+	(windows_fetch_one_register): Likewise.
+	(windows_nat_target::fetch_registers): Likewise.
+	(windows_store_one_register): Likewise.
+	(display_selector): Likewise.
+	(display_selectors): Likewise.
+	(handle_exception): Likewise.
+	(windows_continue): Likewise.
+	(windows_nat_target::resume): Likewise.
+	(windows_add_all_dlls): Likewise.
+	(do_initial_windows_stuff): Likewise.
+	(windows_nat_target::attach): Likewise.
+	(windows_get_exec_module_filename): Likewise.
+	(windows_nat_target::create_inferior): Likewise.
+	(windows_xfer_siginfo): Likewise.
+	(_initialize_loadable): Initialize Wow64SuspendThread,
+	Wow64GetThreadContext, Wow64SetThreadContext,
+	Wow64GetThreadSelectorEntry and EnumProcessModulesEx.
+	* windows-nat.h (windows_set_context_register_offsets):
+	Remove declaration.
+	(windows_set_segment_register_p): Likewise.
+	(i386_windows_segment_register_p): Add declaration.
+	(amd64_windows_segment_register_p): Likewise.
+
 2020-03-04  Luis Machado  <luis.machado@linaro.org>
 
 	Revert aa66aac47b4dd38f9524ddb5546c08cc09930d37 due to regressions
