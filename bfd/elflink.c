@@ -13123,7 +13123,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 		       bfd_boolean *start_stop)
 {
   unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
+  struct elf_link_hash_entry *h, *hw;
 
   r_symndx = cookie->rel->r_info >> cookie->r_sym_shift;
   if (r_symndx == STN_UNDEF)
@@ -13143,12 +13143,16 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
       h->mark = 1;
-      /* If this symbol is weak and there is a non-weak definition, we
-	 keep the non-weak definition because many backends put
-	 dynamic reloc info on the non-weak definition for code
-	 handling copy relocs.  */
-      if (h->is_weakalias)
-	weakdef (h)->mark = 1;
+      /* Keep all aliases of the symbol too.  If an object symbol
+	 needs to be copied into .dynbss then all of its aliases
+	 should be present as dynamic symbols, not just the one used
+	 on the copy relocation.  */
+      hw = h;
+      while (hw->is_weakalias)
+	{
+	  hw = hw->u.alias;
+	  hw->mark = 1;
+	}
 
       if (start_stop != NULL)
 	{

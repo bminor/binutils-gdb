@@ -1,6 +1,11 @@
 2020-01-29  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+		    Alan Modra  <amodra@gmail.com>
+	PR ld/25458
+	* elflink.c (_bfd_elf_gc_mark_rsec): Mark all weak aliases.
+
 	2020-01-23  Alan Modra  <amodra@gmail.com>
 	PR 25444
 	* elf.c (assign_file_positions_for_load_sections): Avoid divide

@@ -337,6 +337,38 @@ if { [check_gc_sections_available] } {
 	    "pr22150" \
 	] \
     ]
+
+    switch -glob $target_triplet {
+	# exclude targets that don't support copy relocs
+	bfin-*-* { }
+	frv-*-* { }
+	lm32-*-* { }
+	mips*-*-* { }
+	tic6x-*-* { }
+	xtensa-*-* { }
+	default {
+	    run_ld_link_tests [list \
+		[list \
+		     "Build pr25458.so" \
+		     "$LFLAGS -shared --version-script=pr25458.map" \
+		     "" \
+		     "$AFLAGS_PIC" \
+		     {pr25458b.s} \
+		     {} \
+		     "pr25458.so" \
+		] \
+		[list \
+		     "Build pr25458" \
+		     "$LFLAGS -e _start --gc-sections" \
+		     "tmpdir/pr25458.so" \
+		     "$AFLAGS_PIC" \
+		     {pr25458a.s} \
+		     {{readelf {--dyn-sym --wide} pr25458.rd}} \
+		     "pr25458" \
+		] \
+	    ]
+	}
+    }
 }
 
 set ASFLAGS $old_ASFLAGS
