@@ -1,3 +1,37 @@
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c (completion_tracker::completion_hash_entry): Define
+	new class.
+	(advance_to_filename_complete_word_point): Call
+	recompute_lowest_common_denominator.
+	(completion_tracker::completion_tracker): Call discard_completions
+	to setup the hash table.
+	(completion_tracker::discard_completions): Allow for being called
+	from the constructor, pass new equal function, and element deleter
+	when constructing the hash table.  Initialise new class member
+	variables.
+	(completion_tracker::maybe_add_completion): Remove use of
+	m_entries_vec, and store more information into m_entries_hash.
+	(completion_tracker::recompute_lcd_visitor): New function, most
+	content taken from...
+	(completion_tracker::recompute_lowest_common_denominator):
+	...here, this now just visits each item in the hash calling the
+	above visitor.
+	(completion_tracker::build_completion_result): Remove use of
+	m_entries_vec, call recompute_lowest_common_denominator.
+	* completer.h (completion_tracker::have_completions): Remove use
+	of m_entries_vec.
+	(completion_tracker::completion_hash_entry): Declare new class.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	function signature.
+	(completion_tracker::recompute_lcd_visitor): Declare new function.
+	(completion_tracker::m_entries_vec): Delete.
+	(completion_tracker::m_entries_hash): Initialize to NULL.
+	(completion_tracker::m_lowest_common_denominator_valid): New
+	member variable.
+	(completion_tracker::m_lowest_common_denominator_max_length): New
+	member variable.
+
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
 	* regformats/regdef.h: Put reg in gdb namespace.
