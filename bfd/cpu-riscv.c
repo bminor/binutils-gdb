@@ -39,6 +39,23 @@ riscv_compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
   return a;
 }
 
+/* Return TRUE if STRING matches the architecture described by INFO.  */
+
+static bfd_boolean
+riscv_scan (const struct bfd_arch_info *info, const char *string)
+{
+  if (bfd_default_scan (info, string))
+    return TRUE;
+
+  /* The string might have extra characters for supported subsets.  So allow
+     a match that ignores trailing characters in string.  */
+  if (strncasecmp (string, info->printable_name,
+		   strlen (info->printable_name)) == 0)
+    return TRUE;
+
+  return FALSE;
+}
+
 #define N(BITS, NUMBER, PRINT, DEFAULT, NEXT)			\
   {								\
     BITS,      /* Bits in a word.  */				\
@@ -51,7 +68,7 @@ riscv_compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
     3,								\
     DEFAULT,							\
     riscv_compatible,						\
-    bfd_default_scan,						\
+    riscv_scan,							\
     bfd_arch_default_fill,					\
     NEXT,							\
     0 /* Maximum offset of a reloc from the start of an insn.  */\

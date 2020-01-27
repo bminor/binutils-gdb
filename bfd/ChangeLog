@@ -1,3 +1,8 @@
+2020-01-27  Jim Wilson  <jimw@sifive.com>
+
+	* cpu-riscv.c (riscv_scan): New.
+	(N): Change bfd_default_scan to riscv_scan.
+
 2020-01-27  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.am (ALL_MACHINES): Remove cpu-plugin.lo.
