@@ -1,3 +1,14 @@
+2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25403
+	* aarch64-tbl.h (struct aarch64_opcode): Re-order cfinv.
+	* aarch64-asm-2.c: Regenerate
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
 2020-01-20  Mihail Ionescu  <mihail.ionescu@arm.com>
 
 	Backport from trunk
