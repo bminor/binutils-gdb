@@ -1,3 +1,14 @@
+2020-01-27  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.am (ALL_MACHINES): Remove cpu-plugin.lo.
+	(ALL_MACHINES_CFILES): Remove cpu-plugin.c.
+	* Makefile.in: Regenerate.
+	* cpu-plugin.c: Remove.
+	* archures.c (enum bfd_architecture): Remove bfd_arch_plugin.
+	(bfd_plugin_arch): Remove declaration.
+	* bfd-in2.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 

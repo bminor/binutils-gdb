@@ -99,7 +99,6 @@ cpu-ns32k.c
 cpu-or1k.c
 cpu-pdp11.c
 cpu-pj.c
-cpu-plugin.c
 cpu-powerpc.c
 cpu-pru.c
 cpu-riscv.c

@@ -568,7 +568,6 @@ ALL_MACHINES = \
 	cpu-or1k.lo \
 	cpu-pdp11.lo \
 	cpu-pj.lo \
-	cpu-plugin.lo \
 	cpu-powerpc.lo \
 	cpu-pru.lo \
 	cpu-rs6000.lo \
@@ -653,7 +652,6 @@ ALL_MACHINES_CFILES = \
 	cpu-or1k.c \
 	cpu-pdp11.c \
 	cpu-pj.c \
-	cpu-plugin.c \
 	cpu-powerpc.c \
 	cpu-pru.c \
 	cpu-rs6000.c \
@@ -1382,7 +1380,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-or1k.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-pdp11.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-pj.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-powerpc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-pru.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-riscv.Plo@am__quote@
