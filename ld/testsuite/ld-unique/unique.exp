@@ -163,8 +163,8 @@ if { $fails == 0 } {
 }
 
 # Check the empty object file.
-case $target_triplet in {
-    { hppa*-*-linux* } { set expected_none {UNIX - GNU} }
+switch -glob $target_triplet {
+    hppa*-*-linux* { set expected_none {UNIX - GNU} }
     default { set expected_none {UNIX - System V} }
 }
 if {! [check_osabi tmpdir/unique_empty.o $expected_none]} {

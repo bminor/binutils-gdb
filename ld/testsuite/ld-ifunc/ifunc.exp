@@ -268,8 +268,8 @@ if { $fails == 0 } {
 # ifunc should have an OSABI field of GNU.  The linked non-ifunc using
 # executable should have an OSABI field of NONE (aka System V).
 
-case $target_triplet in {
-    { hppa*-*-linux* } { set expected_none {UNIX - GNU} }
+switch -glob $target_triplet {
+    hppa*-*-linux* { set expected_none {UNIX - GNU} }
     default { set expected_none {UNIX - System V} }
 }
 

@@ -42,10 +42,10 @@ gas_test_error "err.s" "" "macro infinite recursion"
 setup_xfail "tic4x*-*"
 gas_test "and.s" "" "" "logical and in macro definition"
 
-case $target_triplet in {
-    { hppa*-*-* } { if [istarget *-*-linux*] { run_dump_test semi } }
-    { *c4x*-*-* } { }
-    { *c54x*-*-* } { }
+switch -glob $target_triplet {
+    hppa*-*-* { if [istarget *-*-linux*] { run_dump_test semi } }
+    *c4x*-*-* { }
+    *c54x*-*-* { }
     default {
 	run_dump_test semi
     }
@@ -74,14 +74,14 @@ run_dump_test app4
 
 run_list_test badarg ""
 
-case $target_triplet in {
-    { *c54x*-*-* } { }
-    { *c4x*-*-* } { }
-    { mmix-* } { }
-    { ns32k-*-* } { }
-    { rl78-*-* } { }
-    { rx-*-* } { }
-    { vax-*-* } { }
+switch -glob $target_triplet {
+    *c54x*-*-* { }
+    *c4x*-*-* { }
+    mmix-* { }
+    ns32k-*-* { }
+    rl78-*-* { }
+    rx-*-* { }
+    vax-*-* { }
     default { run_list_test dot "-alm" }
 }
 run_list_test end ""

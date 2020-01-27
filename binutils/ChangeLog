@@ -1,3 +1,8 @@
+2020-01-27  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (big_or_little_endian): Replace
+	case statement with switch statement.
+
 2020-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_build_id): Fix warning messages about corrupt

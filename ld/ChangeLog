@@ -1,3 +1,10 @@
+2020-01-27  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elfvers/vers.exp: Replace case statements with
+	switch statements.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-unique/unique.exp: Likewise.
+
 2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 

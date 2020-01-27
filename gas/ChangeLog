@@ -1,3 +1,11 @@
+2020-01-27  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/gas.exp: Replace case statements with switch
+	statements.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/macros/macros.exp: Likewise.
+	* testsuite/lib/gas-defs.exp: Likewise.
+
 2020-01-27  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 25403

@@ -112,14 +112,15 @@ if { [is_elf_format] } then {
 	&& ![istarget "am3*-*-*"]} then {
       run_dump_test "ehopt0"
     }
-    case $target_triplet in {
-	{ m68k-*-* m68[03]??-*-* } {
+    switch -glob $target_triplet {
+	m68k-*-* -
+	m68[03]??-*-* {
 	    run_dump_test "file" { { as "--defsym m68k=1" } }
 	}
-	{ mmix-*-* } {
+	mmix-*-* {
 	    run_dump_test "file" { { as "--defsym mmix=1" } }
 	}
-	{ xtensa*-*-* } {
+	xtensa*-*-* {
 	    run_dump_test "file" { { as "--rename-section file.s=file.c" } }
 	}
 	default {
@@ -135,37 +136,37 @@ if { [is_elf_format] } then {
     run_dump_test "group1b"
     run_dump_test "group2"
     run_dump_test "group3"
-    case $target_triplet in {
-	{ hppa64*-*-hpux* } { }
-	{ riscv*-*-* } { }
+    switch -glob $target_triplet {
+	hppa64*-*-hpux* { }
+	riscv*-*-* { }
 	default {
 	    run_dump_test "groupautoa"
 	}
     }
-    case $target_triplet in {
-	{ hppa64*-*-hpux* } { }
-	{ riscv*-*-* } { }
-	{ xtensa*-*-* } { }
+    switch -glob $target_triplet {
+	hppa64*-*-hpux* { }
+	riscv*-*-* { }
+	xtensa*-*-* { }
 	default {
 	    run_dump_test "groupautob"
 	}
     }
-    case $target_triplet in {
-	{ alpha*-*-* } { }
-	{ am3*-*-* } { }
-	{ *c54x*-*-* } { }
-	{ cr16*-*-* } { }
-	{ crx*-*-* } { }
-	{ h8300-*-* } { }
-	{ hppa*-*-* } { }
-	{ iq2000*-*-* } { }
-	{ mips*-*-* } { }
-	{ mn10200-*-* } { }
-	{ mn10300-*-* } { }
-	{ msp43*-*-* } { }
-	{ rl78-*-* } { }
-	{ riscv*-*-* } { }
-	{ rx-*-* } { }
+    switch -glob $target_triplet {
+	alpha*-*-* { }
+	am3*-*-* { }
+	*c54x*-*-* { }
+	cr16*-*-* { }
+	crx*-*-* { }
+	h8300-*-* { }
+	hppa*-*-* { }
+	iq2000*-*-* { }
+	mips*-*-* { }
+	mn10200-*-* { }
+	mn10300-*-* { }
+	msp43*-*-* { }
+	rl78-*-* { }
+	riscv*-*-* { }
+	rx-*-* { }
 	default {
 	    # The next test can fail if the target does not convert fixups
 	    # against ordinary symbols into relocations against section symbols.
@@ -183,11 +184,12 @@ if { [is_elf_format] } then {
     # new sections created without atrributes.
     if {! [istarget "h8300-*-*"]} then {
 	set as_flags "-al --generate-missing-build-notes=no"
-	case $target_triplet in {
-	    { i*86-*-* x86_64-*-* } {
+	switch -glob $target_triplet {
+	    i*86-*-* -
+	    x86_64-*-* {
 		set as_flags "$as_flags -mx86-used-note=no"
 	    }
-	    { riscv*-*-* } {
+	    riscv*-*-* {
 		set as_flags "$as_flags -march-attr"
 	    }
 	}

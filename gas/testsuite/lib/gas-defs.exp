@@ -267,7 +267,7 @@ proc gas_init { args } {
     global target_os
     global stdoptlist
 
-    case "$target_cpu" in {
+    switch -glob "$target_cpu" {
 	"m68???"		{ set target_cpu_family m68k }
 	"i[3-7]86"		{ set target_cpu_family i386 }
 	default			{ set target_cpu_family $target_cpu }

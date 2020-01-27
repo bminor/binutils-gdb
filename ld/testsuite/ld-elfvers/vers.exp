@@ -92,9 +92,9 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     }
 }
 
-case $target_triplet in {
-    { ia64-*-* } { set as_options "-x" }
-    { sparc-*-* } { set as_options "-Av9a" }
+switch -glob $target_triplet {
+    ia64-*-* { set as_options "-x" }
+    sparc-*-* { set as_options "-Av9a" }
     default { set as_options "" }
 }
 

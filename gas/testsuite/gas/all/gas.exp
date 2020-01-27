@@ -80,9 +80,9 @@ if { ![ishost "*-*-mingw*"] } then {
 }
 
 # .equ works differently on some targets.
-case $target_triplet in {
-    { hppa*-*-* } { }
-    { *c54x*-*-* } { }
+switch -glob $target_triplet {
+    hppa*-*-* { }
+    *c54x*-*-* { }
     default {
 	gas_test "equ-ok.s" "" "" ".equ for symbol already set"
 	gas_test_error "equ-bad.s" "" ".equ for symbol already set through .eqv"
@@ -106,19 +106,19 @@ run_dump_test forward
 # mmix doesn't like .L1:
 # ti addresses aren't octets.
 if { ![is_aout_format] } {
-    case $target_triplet in {
-	{ hppa*64*-*-* } {
+    switch -glob $target_triplet {
+	hppa*64*-*-* {
 	    run_dump_test fwdexp
 	}
-	{ alpha-*-*linux*ecoff } { }
-	{ alpha-*-osf* } { }
-	{ hppa*-*-hpux* } { }
-	{ mep-*-* } { }
-	{ mmix-*-* } { }
-	{ nds32*-*-* } { }
-	{ tic30*-*-* } { }
-	{ tic4x*-*-* } { }
-	{ tic54x*-*-* } { }
+	alpha-*-*linux*ecoff { }
+	alpha-*-osf* { }
+	hppa*-*-hpux* { }
+	mep-*-* { }
+	mmix-*-* { }
+	nds32*-*-* { }
+	tic30*-*-* { }
+	tic4x*-*-* { }
+	tic54x*-*-* { }
 	default {
 	    run_dump_test fwdexp
 	}
@@ -129,23 +129,23 @@ if { ![is_aout_format] } {
 # most of the tests won't work on targets that set linkrelax.
 # 4 octet bytes confuse address matching on ti targets.
 # pdp11 gets unexpected reloc types.
-case $target_triplet in {
-    { alpha*-*-* } { }
-    { am3*-*-* } { }
-    { cr16*-*-* } { }
-    { crx*-*-* } { }
-    { h8300-*-* } { }
-    { mips*-*-* } { }
-    { mn10200-*-* } { }
-    { mn10300-*-* } { }
-    { msp430*-*-* } { }
-    { nds32*-*-* } { }
-    { pdp11-*-* } { }
-    { tic30*-*-* } { }
-    { tic4x*-*-* } { }
-    { tic54x*-*-* } { }
-    { xtensa*-*-* } { }
-    { z80-*-* } { }
+switch -glob $target_triplet {
+    alpha*-*-* { }
+    am3*-*-* { }
+    cr16*-*-* { }
+    crx*-*-* { }
+    h8300-*-* { }
+    mips*-*-* { }
+    mn10200-*-* { }
+    mn10300-*-* { }
+    msp430*-*-* { }
+    nds32*-*-* { }
+    pdp11-*-* { }
+    tic30*-*-* { }
+    tic4x*-*-* { }
+    tic54x*-*-* { }
+    xtensa*-*-* { }
+    z80-*-* { }
     default {
 	run_dump_test redef
 	# These targets fail redef2 because they disallow redefined
@@ -269,10 +269,10 @@ if {    ![istarget *c30*-*-*]
 
 # ".struct" and ".align" have different meanings on c54x
 # These directives are done in the c54x-specific tests instead
-case $target_triplet in {
-    { hppa*-*-* } { }
-    { *c4x*-*-* } { }
-    { *c54x*-*-* } { }
+switch -glob $target_triplet {
+    hppa*-*-* { }
+    *c4x*-*-* { }
+    *c54x*-*-* { }
     default {
 	run_dump_test struct
 	run_dump_test align
@@ -281,14 +281,14 @@ case $target_triplet in {
 }
 
 # '<' and '>' appear to have special meanings on the excluded targets
-case $target_triplet in {
-    { frv-*-* } { }
-    { hppa*-*-* } { }
-    { m32r-*-* } { }
-    { mmix-*-* } { }
-    { *c4x*-*-* } { }
-    { *c54x*-*-* } { }
-    { bfin-*-* } { }
+switch -glob $target_triplet {
+    frv-*-* { }
+    hppa*-*-* { }
+    m32r-*-* { }
+    mmix-*-* { }
+    *c4x*-*-* { }
+    *c54x*-*-* { }
+    bfin-*-* { }
     default {
 	run_dump_test altmacro
 	# The second test is valid only when '!' is not a comment
@@ -342,14 +342,14 @@ proc test_cond {} {
 # not limited to the fact that it depends on specific section
 # names appearing in the output file.
 # Again, p2align doesn't work on c54x and related targets.
-case $target_triplet in {
-    { alpha-*-linux*ecoff} { }
-    { alpha-*-osf*} { }
-    { hppa*-*-* } { }
-    { *c4x*-*-* } { }
-    { *c54x*-*-* } { }
-    { rl78-*-* } { }
-    { rx-*-* } { }
+switch -glob $target_triplet {
+    alpha-*-linux*ecoff { }
+    alpha-*-osf* { }
+    hppa*-*-* { }
+    *c4x*-*-* { }
+    *c54x*-*-* { }
+    rl78-*-* { }
+    rx-*-* { }
     default {
         test_cond
 	remote_download host "$srcdir/$subdir/incbin.dat"
@@ -394,11 +394,11 @@ run_dump_test quad
 run_dump_test octa
 
 # .set works differently on some targets.
-case $target_triplet in {
-    { alpha*-*-* } { }
-    { mips*-*-* } { }
-    { *c54x*-*-* } { }
-    { z80-*-* } { }
+switch -glob $target_triplet {
+    alpha*-*-* { }
+    mips*-*-* { }
+    *c54x*-*-* { }
+    z80-*-* { }
     default {
 	run_dump_test weakref1
 	run_dump_test weakref1g
@@ -426,17 +426,17 @@ dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn
 dg-finish
 
 # Set $nop_type appropriately to indicate the NOP instruction mnemonic.
-case $target_triplet in {
-    { "bpf-*-*" } {
+switch -glob $target_triplet {
+    bpf-*-* {
         set nop_type 6
     }
-    { "mmix-*-*" } {
+    mmix-*-* {
 	set nop_type 5
     }
-    { "or1k*-*-*" } {
+    or1k*-*-* {
 	set nop_type 2
     }
-    { "ia64-*-*" } {
+    ia64-*-* {
 	set nop_type 1
     }
     default {
