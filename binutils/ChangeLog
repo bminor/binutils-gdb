@@ -1,3 +1,8 @@
+2020-01-27  Roland McGrath  <mcgrathr@google.com>
+
+	* objcopy.c (compare_gnu_build_notes): Fix comparison results
+	for overlapping ranges so that (A == B) == (B == A) holds.
+
 2020-01-27  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (big_or_little_endian): Replace

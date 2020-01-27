@@ -1945,7 +1945,7 @@ typedef struct objcopy_internal_note
   bfd_vma            start;
   bfd_vma            end;
 } objcopy_internal_note;
-  
+
 #define DEBUG_MERGE 0
 
 #if DEBUG_MERGE
@@ -2041,7 +2041,7 @@ compare_gnu_build_notes (const void * data1, const void * data2)
 		    pnote1->note.namesz - 3 : pnote2->note.namesz - 3);
   if (cmp)
     return cmp;
-  
+
   if (pnote1->end < pnote2->start)
     return -1;
   if (pnote1->start > pnote2->end)
@@ -2052,13 +2052,15 @@ compare_gnu_build_notes (const void * data1, const void * data2)
     return -1;
   if (pnote1->end > pnote2->end)
     return 1;
-  
+  if (pnote1->end < pnote2->end)
+    return -1;
+
   /* Put OPEN notes before function notes.  */
   if (is_open_note (pnote1) && ! is_open_note (pnote2))
     return -1;
   if (! is_open_note (pnote1) && is_open_note (pnote2))
     return 1;
-  
+
   return 0;
 }
 
@@ -2086,7 +2088,7 @@ sort_gnu_build_notes (const void * data1, const void * data2)
 
       return 1;				/* 1: F   2: O   */
     }
-  
+
   /* Sort by starting address.  */
   if (pnote1->start < pnote2->start)
     return -1;
@@ -2104,7 +2106,7 @@ sort_gnu_build_notes (const void * data1, const void * data2)
       && pnote2->note.namesz > 4
       && pnote1->note.namedata[3] != pnote2->note.namedata[3])
     return pnote1->note.namedata[3] - pnote2->note.namedata[3];
-  
+
   return 0;
 }
 
@@ -2151,7 +2153,7 @@ merge_gnu_build_notes (bfd *          abfd,
 	  goto done;
 	}
     }
-  
+
   /* Make a copy of the notes and convert to our internal format.
      Minimum size of a note is 12 bytes.  Also locate the version
      notes and check them.  */
@@ -2232,7 +2234,7 @@ merge_gnu_build_notes (bfd *          abfd,
 	     address.  */
 	  end = (bfd_vma) -1;
 	  break;
-	  
+
 	case 8:
 	  if (! is_64bit (abfd))
 	    {
@@ -2257,7 +2259,7 @@ merge_gnu_build_notes (bfd *          abfd,
 	  start = bfd_get_64 (abfd, pnote->note.descdata);
 	  end = bfd_get_64 (abfd, pnote->note.descdata + 8);
 	  break;
-	  
+
 	default:
 	  err = _("corrupt GNU build attribute note: bad description size");
 	  goto done;
@@ -2396,7 +2398,7 @@ merge_gnu_build_notes (bfd *          abfd,
 	      || memcmp (back->note.namedata,
 			 pnote->note.namedata, pnote->note.namesz) != 0)
 	    break;
-	  
+
 	  if (back->start == pnote->start
 	      && back->end == pnote->end)
 	    {
@@ -2450,7 +2452,7 @@ merge_gnu_build_notes (bfd *          abfd,
       if (! is_deleted_note (pnote))
 	merge_debug ("Unable to do anything with note at %#08lx\n",
 		     (pnote->note.namedata - (char *) contents) - 12);
-#endif		     
+#endif
     }
 
   /* Resort the notes.  */
@@ -2532,7 +2534,7 @@ merge_gnu_build_notes (bfd *          abfd,
 		   pnote->note.namesz
 		   );
 #endif
-  
+
   new_size = new - new_contents;
   if (new_size < size)
     {
@@ -4057,7 +4059,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     alignment = p->alignment;
   else
     alignment = bfd_section_alignment (isection);
-  
+
   /* FIXME: This is probably not enough.  If we change the LMA we
      may have to recompute the header for the file as well.  */
   if (!bfd_set_section_alignment (osection, alignment))
@@ -5468,7 +5470,7 @@ copy_main (int argc, char *argv[])
 	    s = strchr (optarg, '=');
 	    if (s == NULL)
 	      fatal (_("bad format for --set-section-alignment: argument needed"));
-	    
+
 	    align = atoi (s + 1);
 	    if (align <= 0)
 	      fatal (_("bad format for --set-section-alignment: numeric argument needed"));
@@ -5480,7 +5482,7 @@ copy_main (int argc, char *argv[])
 	    	align >>= 1;
 	    	++palign;
 	      }
-	    
+
 	    if (align != 1)
 	      /* Number has more than on 1, i.e. wasn't a power of 2.  */
 	      fatal (_("bad format for --set-section-alignment: alignment is not a power of two"));
@@ -5496,7 +5498,7 @@ copy_main (int argc, char *argv[])
 	      p->alignment = palign;
 	  }
 	  break;
-	  
+
 	case OPTION_RENAME_SECTION:
 	  {
 	    flagword flags;
