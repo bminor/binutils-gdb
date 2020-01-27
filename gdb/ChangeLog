@@ -1,5 +1,10 @@
 2020-01-26  Tom Tromey  <tom@tromey.com>
 
+	* ctfread.c (struct ctf_fp_info): Reindent.
+	(_initialize_ctfread): Remove.
+
+2020-01-26  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (partial_map_expand_apply)
 	(psym_find_pc_sect_compunit_symtab, psym_lookup_symbol)
 	(psymtab_to_symtab, psym_find_last_source_symtab, dump_psymtab)

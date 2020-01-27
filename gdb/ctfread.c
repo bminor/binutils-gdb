@@ -88,9 +88,9 @@ static const struct objfile_key<htab, htab_deleter> ctf_tid_key;
 
 struct ctf_fp_info
 {
-    explicit ctf_fp_info (ctf_file_t *cfp) : fp (cfp) {}
-    ~ctf_fp_info ();
-    ctf_file_t *fp;
+  explicit ctf_fp_info (ctf_file_t *cfp) : fp (cfp) {}
+  ~ctf_fp_info ();
+  ctf_file_t *fp;
 };
 
 /* Cleanup function for the ctf_file_key data.  */
@@ -1484,10 +1484,4 @@ elfctf_build_psymtabs (struct objfile *of)
   ctf_file_key.emplace (of, fp);
 
   scan_partial_symbols (fp, of);
-}
-
-void _initialize_ctfread ();
-void
-_initialize_ctfread ()
-{
 }
