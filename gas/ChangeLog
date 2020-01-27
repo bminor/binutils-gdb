@@ -1,3 +1,9 @@
+2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25403
+	* testsuite/gas/aarch64/armv8_4-a.d: Add cfinv.
+	* testsuite/gas/aarch64/armv8_4-a.s: Likewise.
+
 2020-01-22  Maxim Blinov  <maxim.blinov@embecosm.com>
 
 	* testsuite/gas/riscv/march-ok-s.d: sx is no longer valid and
