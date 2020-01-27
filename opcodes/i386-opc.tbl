@@ -135,7 +135,9 @@ movsx, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf|R
 movsx, 2, 0xfbe, None, 2, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IntelSyntax, { Reg8|Byte|BaseIndex, Reg16|Reg32|Reg64 }
 movsx, 2, 0xfbf, None, 2, Cpu386, Modrm|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IntelSyntax, { Reg16|Word|BaseIndex, Reg32|Reg64 }
 movsx, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64|IntelSyntax, { Reg32|Dword|BaseIndex, Reg64 }
-movsxd, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg32|Dword|Unspecified|BaseIndex, Reg64 }
+movsxd, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
+movsxd, 2, 0x63, None, 1, Cpu64, AMD64|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg16 }
+movsxd, 2, 0x63, None, 1, Cpu64, Intel64|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Unspecified|BaseIndex, Reg16 }
 
 // Move with zero extend.
 movzb, 2, 0xfb6, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }

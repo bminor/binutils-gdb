@@ -37,6 +37,7 @@ extending the Intel architecture to 64-bits.
 * i386-TBM::                    AMD's Trailing Bit Manipulation Instructions
 * i386-16bit::                  Writing 16-bit Code
 * i386-Arch::                   Specifying an x86 CPU architecture
+* i386-ISA::                    AMD64 ISA vs. Intel64 ISA
 * i386-Bugs::                   AT&T Syntax bugs
 * i386-Notes::                  Notes
 @end menu
@@ -856,6 +857,12 @@ Several x87 instructions, @samp{fadd}, @samp{fdiv}, @samp{fdivp},
 assembler with different mnemonics from those in Intel IA32 specification.
 @code{@value{GCC}} generates those instructions with AT&T mnemonic.
 
+@itemize @bullet
+@item @samp{movslq} with AT&T mnemonic only accepts 64-bit destination
+register.  @samp{movsxd} should be used to encode 16-bit or 32-bit
+destination register with both AT&T and Intel mnemonics.
+@end itemize
+
 @node i386-Regs
 @section Register Naming
 
@@ -1437,6 +1444,17 @@ For example
 @smallexample
  .arch i8086,nojumps
 @end smallexample
+
+@node i386-ISA
+@section AMD64 ISA vs. Intel64 ISA
+
+There are some discrepancies between AMD64 and Intel64 ISAs.
+
+@itemize @bullet
+@item For @samp{movsxd} with 16-bit destination register, AMD64
+supports 32-bit source operand and Intel64 supports 16-bit source
+operand.
+@end itemize
 
 @node i386-Bugs
 @section AT&T Syntax bugs

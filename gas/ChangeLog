@@ -1,3 +1,22 @@
+2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25445
+	* config/tc-i386.c (check_long_reg): Also convert to QWORD for
+	movsxd.
+	* doc/c-i386.texi: Add a node for AMD64 vs. Intel64 ISA
+	differences.  Document movslq and movsxd.
+	* testsuite/gas/i386/i386.exp: Run PR binutils/25445 tests.
+	* testsuite/gas/i386/x86-64-movsxd-intel.d: New file.
+	* testsuite/gas/i386/x86-64-movsxd-intel64-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-intel64-inval.l: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-intel64-inval.s: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-intel64.d: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-intel64.s: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-inval.l: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd-inval.s: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd.d: Likewise.
+	* testsuite/gas/i386/x86-64-movsxd.s: Likewise.
+
 2020-01-27  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/all/gas.exp: Replace case statements with switch

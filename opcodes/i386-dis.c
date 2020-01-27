@@ -124,6 +124,7 @@ static void OP_Vex_2src_1 (int, int);
 static void OP_Vex_2src_2 (int, int);
 
 static void MOVBE_Fixup (int, int);
+static void MOVSXD_Fixup (int, int);
 
 static void OP_Mask (int, int);
 
@@ -556,6 +557,7 @@ enum
   a_mode,
   cond_jump_mode,
   loop_jcxz_mode,
+  movsxd_mode,
   v_bnd_mode,
   /* like v_bnd_mode in 32bit, no RIP-rel in 64bit mode.  */
   v_bndmk_mode,
@@ -6873,7 +6875,7 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_63 */
   {
     { "arpl", { Ew, Gw }, 0 },
-    { "movs{lq|xd}", { Gv, Ed }, 0 },
+    { "movs", { { OP_G, movsxd_mode }, { MOVSXD_Fixup, movsxd_mode } }, 0 },
   },
 
   /* X86_64_6D */
@@ -13536,6 +13538,13 @@ intel_operand_size (int bytemode, int sizeflag)
 	oappend ("DWORD PTR ");
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
+    case movsxd_mode:
+      if (!(sizeflag & DFLAG) && isa64 == intel64)
+	oappend ("WORD PTR ");
+      else
+	oappend ("DWORD PTR ");
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
     case d_mode:
     case d_scalar_mode:
     case d_scalar_swap_mode:
@@ -13920,6 +13929,13 @@ OP_E_register (int bytemode, int sizeflag)
 	    names = names16;
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	}
+      break;
+    case movsxd_mode:
+      if (!(sizeflag & DFLAG) && isa64 == intel64)
+	names = names16;
+      else
+	names = names32;
+      used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case va_mode:
       names = (address_mode == mode_64bit
@@ -14492,12 +14508,14 @@ OP_G (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
+    case movsxd_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	oappend (names64[modrm.reg + add]);
       else
 	{
-	  if ((sizeflag & DFLAG) || bytemode != v_mode)
+	  if ((sizeflag & DFLAG)
+	      || (bytemode != v_mode && bytemode != movsxd_mode))
 	    oappend (names32[modrm.reg + add]);
 	  else
 	    oappend (names16[modrm.reg + add]);
@@ -16561,6 +16579,45 @@ MOVBE_Fixup (int bytemode, int sizeflag)
 
 skip:
   OP_M (bytemode, sizeflag);
+}
+
+static void
+MOVSXD_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "movsxd".  */
+  char *p = mnemonicendp;
+
+  switch (bytemode)
+    {
+    case movsxd_mode:
+      if (intel_syntax)
+	{
+	  *p++ = 'x';
+	  *p++ = 'd';
+	  goto skip;
+	}
+
+      USED_REX (REX_W);
+      if (rex & REX_W)
+	{
+	  *p++ = 'l';
+	  *p++ = 'q';
+	}
+      else
+	{
+	  *p++ = 'x';
+	  *p++ = 'd';
+	}
+      break;
+    default:
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      break;
+    }
+
+skip:
+  mnemonicendp = p;
+  *p = '\0';
+  OP_E (bytemode, sizeflag);
 }
 
 static void

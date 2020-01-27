@@ -6690,7 +6690,9 @@ check_long_reg (void)
 	     && i.tm.operand_types[op].bitfield.dword)
       {
 	if (intel_syntax
-	    && i.tm.opcode_modifier.toqword
+	    && (i.tm.opcode_modifier.toqword
+		/* Also convert to QWORD for MOVSXD.  */
+		|| i.tm.base_opcode == 0x63)
 	    && i.types[0].bitfield.class != RegSIMD)
 	  {
 	    /* Convert to QWORD.  We want REX byte. */

@@ -1,3 +1,18 @@
+2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	PR binutils/25445
+	* i386-dis.c (MOVSXD_Fixup): New function.
+	(movsxd_mode): New enum.
+	(x86_64_table): Use MOVSXD_Fixup and movsxd_mode on movsxd.
+	(intel_operand_size): Handle movsxd_mode.
+	(OP_E_register): Likewise.
+	(OP_G): Likewise.
+	* i386-opc.tbl: Remove Rex64 and allow 32-bit destination
+	register on movsxd.  Add movsxd with 16-bit destination register
+	for AMD64 and Intel64 ISAs.
+	* i386-tbl.h: Regenerated.
+
 2020-01-27  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 25403
