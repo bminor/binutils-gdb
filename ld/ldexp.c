@@ -730,7 +730,10 @@ fold_name (etree_type *tree)
 					    tree->name.name,
 					    TRUE, FALSE, TRUE);
 	  if (!h)
-	    einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
+	    {
+	      if (expld.phase != lang_first_phase_enum)
+		einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
+	    }
 	  else if (h->type == bfd_link_hash_defined
 		   || h->type == bfd_link_hash_defweak)
 	    {

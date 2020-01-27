@@ -1,3 +1,8 @@
+2020-01-28  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (fold_name): Don't print bfd_link_hash_lookup failed
+	in first phase.
+
 2020-01-27  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elfvers/vers.exp: Replace case statements with
