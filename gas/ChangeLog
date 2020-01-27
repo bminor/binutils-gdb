@@ -1,3 +1,12 @@
+2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25403
+	* testsuite/gas/aarch64/armv8_4-a.d: Add cfinv.
+	* testsuite/gas/aarch64/armv8_4-a.s: Likewise.
+
 2020-01-21  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/avx512_bf16_vl.s,
