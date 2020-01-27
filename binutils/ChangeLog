@@ -1,3 +1,8 @@
+2020-01-27  Roland McGrath  <mcgrathr@google.com>
+
+	* objcopy.c (compare_gnu_build_notes): Fix comparison results
+	for overlapping ranges so that (A == B) == (B == A) holds.
+
 2020-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
