@@ -1548,8 +1548,8 @@ handle_qxfer_libraries (const char *annex,
 
   for (const dll_info &dll : all_dlls)
     document += string_printf
-      ("  <library name=\"%s\"><segment address=\"0x%lx\"/></library>\n",
-       dll.name.c_str (), (long) dll.base_addr);
+      ("  <library name=\"%s\"><segment address=\"0x%s\"/></library>\n",
+       dll.name.c_str (), paddress (dll.base_addr));
 
   document += "</library-list>\n";
 
