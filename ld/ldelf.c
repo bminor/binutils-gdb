@@ -894,7 +894,7 @@ ldelf_parse_ld_so_conf (struct ldelf_ld_so_conf *info, const char *filename)
 
 static bfd_boolean
 ldelf_check_ld_so_conf (const struct bfd_link_needed_list *l, int force,
-			int elfsize)
+			int elfsize, const char *prefix)
 {
   static bfd_boolean initialized;
   static const char *ld_so_conf;
@@ -907,7 +907,7 @@ ldelf_check_ld_so_conf (const struct bfd_link_needed_list *l, int force,
 
       info.path = NULL;
       info.len = info.alloc = 0;
-      tmppath = concat (ld_sysroot, "${prefix}/etc/ld.so.conf",
+      tmppath = concat (ld_sysroot, prefix, "/etc/ld.so.conf",
 			(const char *) NULL);
       if (!ldelf_parse_ld_so_conf (&info, tmppath))
 	{
@@ -986,7 +986,7 @@ ldelf_check_needed (lang_input_statement_type *s)
 
 void
 ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
-		  int elfsize)
+		  int elfsize, const char *prefix)
 {
   struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
@@ -1260,7 +1260,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 		break;
 
 	      if (is_linux
-		  && ldelf_check_ld_so_conf (l, force, elfsize))
+		  && ldelf_check_ld_so_conf (l, force, elfsize, prefix))
 		break;
 	    }
 
