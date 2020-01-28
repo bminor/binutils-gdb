@@ -22,7 +22,7 @@ extern const char *ldelf_emit_note_gnu_build_id;
 
 extern void ldelf_after_parse (void);
 extern bfd_boolean ldelf_load_symbols (lang_input_statement_type *);
-extern void ldelf_after_open (int, int, int, int, int);
+extern void ldelf_after_open (int, int, int, int, int, const char *);
 extern bfd_boolean ldelf_setup_build_id (bfd *);
 extern void ldelf_append_to_separated_string (char **, char *);
 extern void ldelf_before_allocation (char *, char *, const char *);

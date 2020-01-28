@@ -125,7 +125,7 @@ static void
 gld${EMULATION_NAME}_after_open (void)
 {
   ldelf_after_open ($IS_LIBPATH, $IS_NATIVE,
-		    $IS_LINUX_TARGET, $IS_FREEBSD_TARGET, $ELFSIZE);
+		    $IS_LINUX_TARGET, $IS_FREEBSD_TARGET, $ELFSIZE, "$prefix");
 }
 
 EOF
