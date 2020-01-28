@@ -1,3 +1,8 @@
+2020-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_build_id): Simplify warning message about corrupt
+	notes encountered whilst scanning for the build-id.
+
 2020-01-27  Roland McGrath  <mcgrathr@google.com>
 
 	* objcopy.c (compare_gnu_build_notes): Fix comparison results

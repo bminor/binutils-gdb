@@ -14122,7 +14122,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 		      ? sizeof (Elf32_External_Chdr)
 		      : sizeof (Elf64_External_Chdr)))
 	    {
-	      warn (_("compressed section %s is too small to contain a compression header"),
+	      warn (_("compressed section %s is too small to contain a compression header\n"),
 		    section->name);
 	      return FALSE;
 	    }
@@ -14204,7 +14204,8 @@ get_build_id (void * data)
   Elf_Internal_Shdr * shdr;
   unsigned long i;
 
-  /* Iterate through notes to find note.gnu.build-id.  */
+  /* Iterate through notes to find note.gnu.build-id.
+     FIXME: Only the first note in any note section is examined.  */
   for (i = 0, shdr = filedata->section_headers;
        i < filedata->file_header.e_shnum && shdr != NULL;
        i++, shdr++)
@@ -14240,13 +14241,10 @@ get_build_id (void * data)
           min_notesz = offsetof (Elf_External_Note, name);
           if (data_remaining < min_notesz)
             {
-              warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
-                              "not enough for a full note\n",
-                              "debuginfod: Corrupt note: only %ld bytes remain, "
-                              "not enough for a full note\n",
-                              data_remaining),
-                    (long) data_remaining);
-              break;
+	      warn (_("\
+malformed note encountered in section %s whilst scanning for build-id note\n"),
+		    printable_section_name (filedata, shdr));
+              continue;
             }
           data_remaining -= min_notesz;
 
@@ -14269,13 +14267,10 @@ get_build_id (void * data)
           min_notesz = offsetof (Elf64_External_VMS_Note, name);
           if (data_remaining < min_notesz)
             {
-              warn (ngettext ("debuginfod: Corrupt note: only %ld byte remains, "
-                              "not enough for a full note\n",
-                              "debuginfod: Corrupt note: only %ld bytes remain, "
-                              "not enough for a full note\n",
-                              data_remaining),
-                    (long) data_remaining);
-              break;
+	      warn (_("\
+malformed note encountered in section %s whilst scanning for build-id note\n"),
+		    printable_section_name (filedata, shdr));
+              continue;
             }
           data_remaining -= min_notesz;
 
@@ -14296,9 +14291,9 @@ get_build_id (void * data)
           || ((size_t) (next - inote.descdata)
               > data_remaining - (size_t) (inote.descdata - inote.namedata)))
         {
-          warn (_("debuginfod: note with invalid namesz and/or descsz found\n"));
-          warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx, alignment: %u\n"),
-                inote.type, inote.namesz, inote.descsz, (int) align);
+	  warn (_("\
+malformed note encountered in section %s whilst scanning for build-id note\n"),
+		printable_section_name (filedata, shdr));
           continue;
         }
 
@@ -14313,13 +14308,13 @@ get_build_id (void * data)
 
           build_id = malloc (inote.descsz * 2 + 1);
           if (build_id == NULL)
-              return NULL;
+	    return NULL;
 
           for (j = 0; j < inote.descsz; ++j)
             sprintf (build_id + (j * 2), "%02x", inote.descdata[j] & 0xff);
           build_id[inote.descsz * 2] = '\0';
 
-          return (unsigned char *)build_id;
+          return (unsigned char *) build_id;
         }
     }
 
