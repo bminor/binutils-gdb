@@ -1,3 +1,8 @@
+2020-01-28  Hannes Domani  <ssbssa@yahoo.de>
+
+	* server.c (handle_qxfer_libraries): Write segment-address with
+	paddress.
+
 2020-01-24  Hannes Domani  <ssbssa@yahoo.de>
 
 	* Makefile.in (install-strip): New target.
