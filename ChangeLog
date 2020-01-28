@@ -1,3 +1,9 @@
+2020-01-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* src-release.sh (getver): Look for gdbsupport's
+	create-version.sh script at the current directory if tool is
+	"gdb".
+
 2020-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* remote-sim.c (gdbsim_target::wait): Return
