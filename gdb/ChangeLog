@@ -1,3 +1,9 @@
+2020-01-29  Pedro Alves  <palves@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* infcmd.c (construct_inferior_arguments): Assert that
+	'argc' is greater than 0.
+
 2020-01-29  Luis Machado  <luis.machado@linaro.org>
 
 	* aarch64-tdep.c (BRK_INSN_MASK): Define to 0xffe0001f.

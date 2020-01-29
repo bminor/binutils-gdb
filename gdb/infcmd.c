@@ -268,6 +268,11 @@ construct_inferior_arguments (int argc, char **argv)
 {
   char *result;
 
+  /* ARGC should always be at least 1, but we double check this
+     here.  This is also needed to silence -Werror-stringop
+     warnings.  */
+  gdb_assert (argc > 0);
+
   if (startup_with_shell)
     {
 #ifdef __MINGW32__
