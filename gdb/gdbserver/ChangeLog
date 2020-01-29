@@ -1,3 +1,7 @@
+2020-01-29  Maciej W. Rozycki  <macro@wdc.com>
+
+	* configure.srv <i[34567]86-*-mingw*>: Fix whitespace damage.
+
 2020-01-29  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* configure.srv (powerpc*-*-linux*): Use srv_tgtobj in second
