@@ -369,6 +369,12 @@ proc test_for_class { prefix states cbvfun data_field length} {
     global ADDED
     global TRACE
 
+    # GCC version <= 6 and Clang do not emit DW_AT_defaulted and DW_AT_deleted.
+    set is_gcc_6_or_older [test_compiler_info {gcc-[0-6]-*}]
+    set is_clang [test_compiler_info {clang-*}]
+    # But Clang version >= 7 emits DW_AT_calling_convention for types.
+    set is_clang_6_or_older [test_compiler_info {clang-[0-6]-*}]
+
     with_test_prefix $name {
 	if {[is_copy_constructible $states]} {
 	    set expected [expr {$ORIGINAL + $ADDED}]
@@ -377,6 +383,19 @@ proc test_for_class { prefix states cbvfun data_field length} {
 	    }
 	    if {$dtor == "explicit"} {
 		gdb_test "print tracer = 0" " = 0" "reset the tracer"
+	    }
+
+	    if {$cctor == "defaultedIn" || $dtor == "defaultedIn"} {
+		if {$is_gcc_6_or_older || $is_clang_6_or_older} {
+		    setup_xfail "*-*-*"
+		} elseif {$is_clang} {
+		    # If this is a pass-by-value case, Clang >= 7's
+		    # DW_AT_calling_convention leads to the right decision.
+		    # Otherwise, it is expected to fail.
+		    if {"defaultedOut" in $states || "explicit" in $states} {
+			setup_xfail "*-*-*"
+		    }
+		}
 	    }
 	    gdb_test "print ${cbvfun}<$name> (${name}_var)" " = $expected" \
 		"call '$cbvfun'"
@@ -389,10 +408,17 @@ proc test_for_class { prefix states cbvfun data_field length} {
 		    "cbv argument should not change (item $last_index)"
 	    }
 	    if {$dtor == "explicit"} {
+		if {$cctor == "defaultedIn"
+		    && ($is_gcc_6_or_older || $is_clang)} {
+		    setup_xfail "*-*-*"
+		}
 		gdb_test "print tracer" " = $TRACE" \
 		    "destructor should be called"
 	    }
 	} else {
+	    if {$cctor == "deleted" && ($is_gcc_6_or_older || $is_clang)} {
+		setup_xfail "*-*-*"
+	    }
 	    gdb_test "print ${cbvfun}<$name> (${name}_var)" \
 		".* cannot be evaluated .* '${name}' is not copy constructible" \
 		"calling '$cbvfun' should be refused"
