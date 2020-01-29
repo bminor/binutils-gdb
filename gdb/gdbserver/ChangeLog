@@ -1,3 +1,8 @@
+2020-01-29  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* configure.srv (powerpc*-*-linux*): Use srv_tgtobj in second
+	assignment instead of srv_linux_obj.
+
 2020-01-28  Hannes Domani  <ssbssa@yahoo.de>
 
 	* server.c (handle_qxfer_libraries): Write segment-address with
