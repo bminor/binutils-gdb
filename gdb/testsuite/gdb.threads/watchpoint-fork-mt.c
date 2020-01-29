@@ -114,8 +114,10 @@ main (void)
   int i;
   void *thread_result;
 
+#if DEBUG
   setbuf (stdout, NULL);
   printf ("main: %d\n", (int) gettid ());
+#endif
 
   /* General hardware breakpoints and watchpoints validity.  */
   marker ();

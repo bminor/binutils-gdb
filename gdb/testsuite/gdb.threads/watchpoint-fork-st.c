@@ -40,8 +40,10 @@ mark_exit (void)
 int
 main (void)
 {
+#if DEBUG
   setbuf (stdout, NULL);
   printf ("main: %d\n", (int) getpid ());
+#endif
 
   /* General hardware breakpoints and watchpoints validity.  */
   marker ();
