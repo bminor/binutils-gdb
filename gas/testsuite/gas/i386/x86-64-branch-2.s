@@ -7,3 +7,6 @@ bar:
 
 	data16 call foo
 	data16 rex.w call foo
+
+	retw
+	retw $8

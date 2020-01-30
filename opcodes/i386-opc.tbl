@@ -400,8 +400,10 @@ ljmp, 1, 0xff, 0x5, 1, 0, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, {
 
 ret, 0, 0xc3, None, 1, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk|BNDPrefixOk, { 0 }
 ret, 1, 0xc2, None, 1, CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|RepPrefixOk|BNDPrefixOk, { Imm16 }
-ret, 0, 0xc3, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { 0 }
-ret, 1, 0xc2, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0, 0xc3, None, 1, Cpu64, AMD64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { 0 }
+ret, 1, 0xc2, None, 1, Cpu64, AMD64|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0, 0xc3, None, 1, Cpu64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { 0 }
+ret, 1, 0xc2, None, 1, Cpu64, Intel64|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
 lret, 0, 0xcb, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { 0 }
 lret, 1, 0xca, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { Imm16 }
 // Intel Syntax.

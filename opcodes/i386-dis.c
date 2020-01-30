@@ -1764,6 +1764,8 @@ enum
   X86_64_6F,
   X86_64_82,
   X86_64_9A,
+  X86_64_C2,
+  X86_64_C3,
   X86_64_C4,
   X86_64_C5,
   X86_64_CE,
@@ -2586,8 +2588,8 @@ static const struct dis386 dis386[] = {
   /* c0 */
   { REG_TABLE (REG_C0) },
   { REG_TABLE (REG_C1) },
-  { "retT",		{ Iw, BND }, 0 },
-  { "retT",		{ BND }, 0 },
+  { X86_64_TABLE (X86_64_C2) },
+  { X86_64_TABLE (X86_64_C3) },
   { X86_64_TABLE (X86_64_C4) },
   { X86_64_TABLE (X86_64_C5) },
   { REG_TABLE (REG_C6) },
@@ -6899,6 +6901,18 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_9A */
   {
     { "Jcall{T|}", { Ap }, 0 },
+  },
+
+  /* X86_64_C2 */
+  {
+    { "retP",		{ Iw, BND }, 0 },
+    { "ret@",		{ Iw, BND }, 0 },
+  },
+
+  /* X86_64_C3 */
+  {
+    { "retP",		{ BND }, 0 },
+    { "ret@",		{ BND }, 0 },
   },
 
   /* X86_64_C4 */
