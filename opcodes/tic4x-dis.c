@@ -52,7 +52,7 @@ typedef enum
 indirect_t;
 
 static unsigned long tic4x_version = 0;
-static int tic4x_dp = 0;
+static unsigned int tic4x_dp = 0;
 static tic4x_inst_t **optab = NULL;
 static tic4x_inst_t **optab_special = NULL;
 static const char *registernames[REG_TABLE_SIZE];

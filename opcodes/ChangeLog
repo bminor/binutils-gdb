@@ -1,3 +1,7 @@
+2020-01-30  Alan Modra  <amodra@gmail.com>
+
+	* tic4x-dis.c (tic4x_dp): Make unsigned.
+
 2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 	    Jan Beulich  <jbeulich@suse.com>
 
