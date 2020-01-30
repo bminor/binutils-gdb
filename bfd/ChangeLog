@@ -1,5 +1,19 @@
 2020-01-31  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (elf32-target.h, elf64-target.h): Don't use a temp
+	file.  Use $< and $@ in rules.
+	(elf32-aarch64.c, elf64-aarch64.c): Likewise.
+	(elf32-ia64.c, elf64-ia64.c): Likewise.
+	(elf32-riscv.c, elf64-riscv.c): Likewise.
+	(peigen.c, pepigen.c, pex64igen.c): Likewise.
+	(elf32-aarch64.c, elf64-aarch64.c): Don't emit $srcdir on #line.
+	(elf32-riscv.c, elf64-riscv.c): Likewise, and use $(SED).
+	(elf32-ia64.c, elf64-ia64.c): Do emit #line.
+	(peigen.c, pepigen.c, pex64igen.c): Likewise.
+	* Makefile.in: Regenerate.
+
+2020-01-31  Alan Modra  <amodra@gmail.com>
+
 	PR 4110
 	* elf.c (setup_group): Don't clear entire section contents,
 	just the padding after group flags.  Release alloc'd memory

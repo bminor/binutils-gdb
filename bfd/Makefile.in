@@ -1959,63 +1959,46 @@ dwarf2.lo: dwarf2.c Makefile
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
 
 elf32-target.h : elfxx-target.h
-	rm -f elf32-target.h
-	$(SED) -e s/NN/32/g < $(srcdir)/elfxx-target.h > elf32-target.new
-	mv -f elf32-target.new elf32-target.h
+	$(SED) -e s/NN/32/g < $< > $@
 
 elf64-target.h : elfxx-target.h
-	rm -f elf64-target.h
-	$(SED) -e s/NN/64/g < $(srcdir)/elfxx-target.h > elf64-target.new
-	mv -f elf64-target.new elf64-target.h
+	$(SED) -e s/NN/64/g < $< > $@
 
 elf32-aarch64.c : elfnn-aarch64.c
-	rm -f elf32-aarch64.c
-	echo "#line 1 \"$(srcdir)/elfnn-aarch64.c\"" > elf32-aarch64.new
-	$(SED) -e s/NN/32/g < $(srcdir)/elfnn-aarch64.c >> elf32-aarch64.new
-	mv -f elf32-aarch64.new elf32-aarch64.c
+	echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-aarch64.c : elfnn-aarch64.c
-	rm -f elf64-aarch64.c
-	echo "#line 1 \"$(srcdir)/elfnn-aarch64.c\"" > elf64-aarch64.new
-	$(SED) -e s/NN/64/g < $(srcdir)/elfnn-aarch64.c >> elf64-aarch64.new
-	mv -f elf64-aarch64.new elf64-aarch64.c
+	echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-ia64.c : elfnn-ia64.c
-	rm -f elf32-ia64.c
-	$(SED) -e s/NN/32/g < $(srcdir)/elfnn-ia64.c > elf32-ia64.new
-	mv -f elf32-ia64.new elf32-ia64.c
+	echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-ia64.c : elfnn-ia64.c
-	rm -f elf64-ia64.c
-	$(SED) -e s/NN/64/g < $(srcdir)/elfnn-ia64.c > elf64-ia64.new
-	mv -f elf64-ia64.new elf64-ia64.c
+	echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-riscv.c : elfnn-riscv.c
-	rm -f elf32-riscv.c
-	echo "#line 1 \"$(srcdir)/elfnn-riscv.c\"" > elf32-riscv.new
-	sed -e s/NN/32/g < $(srcdir)/elfnn-riscv.c >> elf32-riscv.new
-	mv -f elf32-riscv.new elf32-riscv.c
+	echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-riscv.c : elfnn-riscv.c
-	rm -f elf64-riscv.c
-	echo "#line 1 \"$(srcdir)/elfnn-riscv.c\"" > elf64-riscv.new
-	sed -e s/NN/64/g < $(srcdir)/elfnn-riscv.c >> elf64-riscv.new
-	mv -f elf64-riscv.new elf64-riscv.c
+	echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(SED) -e s/NN/64/g < $< >> $@
 
 peigen.c : peXXigen.c
-	rm -f peigen.c
-	$(SED) -e s/XX/pe/g < $(srcdir)/peXXigen.c > peigen.new
-	mv -f peigen.new peigen.c
+	echo "#line 1 \"peXXigen.c\"" > $@
+	$(SED) -e s/XX/pe/g < $< >> $@
 
 pepigen.c : peXXigen.c
-	rm -f pepigen.c
-	$(SED) -e s/XX/pep/g < $(srcdir)/peXXigen.c > pepigen.new
-	mv -f pepigen.new pepigen.c
+	echo "#line 1 \"peXXigen.c\"" > $@
+	$(SED) -e s/XX/pep/g < $< >> $@
 
 pex64igen.c: peXXigen.c
-	rm -f pex64igen.c
-	$(SED) -e s/XX/pex64/g < $(srcdir)/peXXigen.c > pex64igen.new
-	mv -f pex64igen.new pex64igen.c
+	echo "#line 1 \"peXXigen.c\"" > $@
+	$(SED) -e s/XX/pex64/g < $< >> $@
 $(BFD32_LIBS) \
  $(BFD64_LIBS) \
  $(ALL_MACHINES) \
