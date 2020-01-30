@@ -676,8 +676,6 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      continue;
 		    }
 
-		  memset (shdr->contents, 0, amt);
-
 		  if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
 		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
 			  != shdr->sh_size))
@@ -692,7 +690,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      /* PR 17510: If the group contents are even
 			 partially corrupt, do not allow any of the
 			 contents to be used.  */
-		      memset (shdr->contents, 0, amt);
+		      bfd_release (abfd, shdr->contents);
+		      shdr->contents = NULL;
 		      continue;
 		    }
 
@@ -712,6 +711,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      idx = H_GET_32 (abfd, src);
 		      if (src == shdr->contents)
 			{
+			  dest->shdr = NULL;
 			  dest->flags = idx;
 			  if (shdr->bfd_section != NULL && (idx & GRP_COMDAT))
 			    shdr->bfd_section->flags
