@@ -1,3 +1,7 @@
+2020-01-30  Alan Modra  <amodra@gmail.com>
+
+	* m32c-ibld.c: Regenerate.
+
 2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-opc.c: Regenerate.

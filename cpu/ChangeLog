@@ -1,3 +1,15 @@
+2020-01-30  Alan Modra  <amodra@gmail.com>
+
+	* m32c.cpu (f-src32-rn-unprefixed-QI): Shift before inverting.
+	(f-src32-rn-prefixed-QI, f-dst32-rn-unprefixed-QI): Likewise.
+	(f-dst32-rn-prefixed-QI): Likewise.
+	(f-dsp-32-s32): Mask before shifting left.
+	(f-dsp-48-u32, f-dsp-48-s32): Likewise.
+	(f-bitbase32-16-s11-unprefixed): Multiply signed field rather than
+	shifting left.
+	(f-bitbase32-24-s11-prefixed, f-bitbase32-24-s19-prefixed): Likewise.
+	(h-gr-SI): Mask before shifting.
+
 2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu (define-alu-insn-un): The unary BPF instructions
