@@ -302,14 +302,10 @@ coff_real_object_p (bfd *abfd,
 	}
     }
 
-  obj_coff_keep_syms (abfd) = FALSE;
-  obj_coff_keep_strings (abfd) = FALSE;
   _bfd_coff_free_symbols (abfd);
   return abfd->xvec;
 
  fail:
-  obj_coff_keep_syms (abfd) = FALSE;
-  obj_coff_keep_strings (abfd) = FALSE;
   _bfd_coff_free_symbols (abfd);
   bfd_release (abfd, tdata);
  fail2:
@@ -1877,10 +1873,13 @@ coff_get_normalized_symtab (bfd *abfd)
 	}
     }
 
-  /* Free the raw symbols, but not the strings (if we have them).  */
-  obj_coff_keep_strings (abfd) = TRUE;
-  if (! _bfd_coff_free_symbols (abfd))
-    return NULL;
+  /* Free the raw symbols.  */
+  if (obj_coff_external_syms (abfd) != NULL
+      && ! obj_coff_keep_syms (abfd))
+    {
+      free (obj_coff_external_syms (abfd));
+      obj_coff_external_syms (abfd) = NULL;
+    }
 
   for (internal_ptr = internal; internal_ptr < internal_end;
        internal_ptr++)

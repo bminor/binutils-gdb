@@ -4782,7 +4782,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 	{
 	  bfd_size_type sz = o->rawsize ? o->rawsize : o->size;
 	  if (!bfd_get_section_contents (input_bfd, o, flinfo->contents, 0, sz))
-	    return FALSE;
+	    goto err_out;
 	  contents = flinfo->contents;
 	}
 
@@ -4804,7 +4804,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			      (flinfo->section_info[target_index].relocs
 			       + o->output_section->reloc_count)));
 	  if (internal_relocs == NULL)
-	    return FALSE;
+	    goto err_out;
 
 	  /* Call processor specific code to relocate the section
 	     contents.  */
@@ -4814,7 +4814,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 					   internal_relocs,
 					   flinfo->internal_syms,
 					   xcoff_data (input_bfd)->csects))
-	    return FALSE;
+	    goto err_out;
 
 	  offset = o->output_section->vma + o->output_offset - o->vma;
 	  irel = internal_relocs;
@@ -4866,7 +4866,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  amt = sizeof (* n);
 			  n = bfd_alloc (flinfo->output_bfd, amt);
 			  if (n == NULL)
-			    return FALSE;
+			    goto err_out;
 			  si = flinfo->section_info + target_index;
 			  n->next = si->toc_rel_hashes;
 			  n->h = h;
@@ -4948,7 +4948,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 				      (input_bfd, is, buf));
 
 			      if (name == NULL)
-				return FALSE;
+				goto err_out;
 
 			      (*flinfo->info->callbacks->unattached_reloc)
 				(flinfo->info, name,
@@ -4972,7 +4972,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		  if (!xcoff_create_ldrel (output_bfd, flinfo,
 					   o->output_section, input_bfd,
 					   irel, sec, h))
-		    return FALSE;
+		    goto err_out;
 		}
 	    }
 
@@ -4983,7 +4983,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
       if (! bfd_set_section_contents (output_bfd, o->output_section,
 				      contents, (file_ptr) o->output_offset,
 				      o->size))
-	return FALSE;
+	goto err_out;
     }
 
   obj_coff_keep_syms (input_bfd) = keep_syms;
@@ -4995,6 +4995,10 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
     }
 
   return TRUE;
+
+ err_out:
+  obj_coff_keep_syms (input_bfd) = keep_syms;
+  return FALSE;
 }
 
 #undef N_TMASK
