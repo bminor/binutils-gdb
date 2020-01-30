@@ -1,3 +1,7 @@
+2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c: Regenerate.
+
 2020-01-30  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (X86_64_C2, X86_64_C3): New enumerators.

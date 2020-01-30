@@ -373,7 +373,7 @@
        ((ISA (.sym ebpf x-endian)))
        (.str x-basename x-suffix " $dst" x-endian)
        (+ (f-imm32 0) (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian)
-          x-op-class OP_SRC_X x-op-code) () ()))
+          x-op-class OP_SRC_K x-op-code) () ()))
 
 (define-pmacro (define-alu-insn-bin x-basename x-suffix x-op-class x-op-code x-endian)
   (begin

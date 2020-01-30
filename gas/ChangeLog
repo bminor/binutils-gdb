@@ -1,3 +1,10 @@
+2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/bpf/alu.d: Update expected opcode for `neg'.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu32.d: Likewise for `neg32'.
+	* testsuite/gas/bpf/alu32-be.d: Likewise.
+
 2020-01-30  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/x86-64-branch-2.s,

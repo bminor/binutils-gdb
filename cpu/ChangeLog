@@ -1,3 +1,9 @@
+2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu (define-alu-insn-un): The unary BPF instructions
+	(neg and neg32) use OP_SRC_K even if they operate only in
+	registers.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.34 branch created.

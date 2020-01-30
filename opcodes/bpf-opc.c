@@ -452,13 +452,13 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (DSTLE), 0 } },
-    & ifmt_negle, { 0x8f }
+    & ifmt_negle, { 0x87 }
   },
 /* neg32 $dstle */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (DSTLE), 0 } },
-    & ifmt_negle, { 0x8c }
+    & ifmt_negle, { 0x84 }
   },
 /* add $dstbe,$imm32 */
   {
@@ -752,13 +752,13 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (DSTBE), 0 } },
-    & ifmt_negbe, { 0x8f }
+    & ifmt_negbe, { 0x87 }
   },
 /* neg32 $dstbe */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (DSTBE), 0 } },
-    & ifmt_negbe, { 0x8c }
+    & ifmt_negbe, { 0x84 }
   },
 /* endle $dstle,$endsize */
   {

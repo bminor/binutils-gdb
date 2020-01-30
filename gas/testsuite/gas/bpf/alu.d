@@ -55,4 +55,4 @@ Disassembly of section .text:
  168:	c7 03 00 00 66 fd ff ff 	arsh %r3,-666
  170:	c7 04 00 00 ef be ad 7e 	arsh %r4,0x7eadbeef
  178:	cf 65 00 00 00 00 00 00 	arsh %r5,%r6
- 180:	8f 02 00 00 00 00 00 00 	neg %r2
+ 180:	87 02 00 00 00 00 00 00 	neg %r2
