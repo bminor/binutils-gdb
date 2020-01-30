@@ -7402,18 +7402,14 @@ Packet: '%s'\n"),
 		     reported expedited registers.  */
 		  if (event->ptid == null_ptid)
 		    {
+		      /* If there is no thread-id information then leave
+			 the event->ptid as null_ptid.  Later in
+			 process_stop_reply we will pick a suitable
+			 thread.  */
 		      const char *thr = strstr (p1 + 1, ";thread:");
 		      if (thr != NULL)
 			event->ptid = read_ptid (thr + strlen (";thread:"),
 						 NULL);
-		      else
-			{
-			  /* Either the current thread hasn't changed,
-			     or the inferior is not multi-threaded.
-			     The event must be for the thread we last
-			     set as (or learned as being) current.  */
-			  event->ptid = event->rs->general_thread;
-			}
 		    }
 
 		  if (rsa == NULL)
@@ -7668,10 +7664,35 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
   *status = stop_reply->ws;
   ptid = stop_reply->ptid;
 
-  /* If no thread/process was reported by the stub, assume the current
-     inferior.  */
+  /* If no thread/process was reported by the stub then use the first
+     non-exited thread in the current target.  */
   if (ptid == null_ptid)
-    ptid = inferior_ptid;
+    {
+      for (thread_info *thr : all_non_exited_threads (this))
+	{
+	  if (ptid != null_ptid)
+	    {
+	      static bool warned = false;
+
+	      if (!warned)
+		{
+		  /* If you are seeing this warning then the remote target
+		     has multiple threads and either sent an 'S' stop
+		     packet, or a 'T' stop packet without a thread-id.  In
+		     both of these cases GDB is unable to know which thread
+		     just stopped and is now having to guess.  The correct
+		     action is to fix the remote target to send the correct
+		     packet (a 'T' packet and include a thread-id).  */
+		  warning (_("multi-threaded target stopped without sending "
+			     "a thread-id, using first non-exited thread"));
+		  warned = true;
+		}
+	      break;
+	    }
+	  ptid = thr->ptid;
+	}
+      gdb_assert (ptid != null_ptid);
+    }
 
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED

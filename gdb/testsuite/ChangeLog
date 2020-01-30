@@ -1,3 +1,8 @@
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.server/stop-reply-no-thread.exp: Add test where T packet is
+	disabled.
+
 2020-03-02  Pedro Alves  <palves@redhat.com>
 	      Tom de Vries  <tdevries@suse.de>
 

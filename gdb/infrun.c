@@ -3456,6 +3456,12 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   ptid_t event_ptid;
   struct thread_info *tp;
 
+  /* We know that we are looking for an event in the target of inferior
+     INF, but we don't know which thread the event might come from.  As
+     such we want to make sure that INFERIOR_PTID is reset so that none of
+     the wait code relies on it - doing so is always a mistake.  */
+  switch_to_inferior_no_thread (inf);
+
   /* First check if there is a resumed thread with a wait status
      pending.  */
   if (ptid == minus_one_ptid || ptid.is_pid ())
@@ -3651,8 +3657,6 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
 
   auto do_wait = [&] (inferior *inf)
   {
-    switch_to_inferior_no_thread (inf);
-
     ecs->ptid = do_target_wait_1 (inf, wait_ptid, &ecs->ws, options);
     ecs->target = inf->process_target ();
     return (ecs->ws.kind != TARGET_WAITKIND_IGNORE);

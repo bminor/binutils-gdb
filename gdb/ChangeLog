@@ -1,3 +1,13 @@
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (remote_target::remote_parse_stop_reply): Don't use the
+	general_thread if the stop reply is missing a thread-id.
+	(remote_target::process_stop_reply): Use the first non-exited
+	thread if the target didn't pass a thread-id.
+	* infrun.c (do_target_wait): Move call to
+	switch_to_inferior_no_thread to ....
+	(do_target_wait_1): ... here.
+
 2020-02-29  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* debuginfod-support.c: Include defs.h first.
