@@ -9,11 +9,12 @@
 	CALLq *(%rax)		      # --  --  -- --   FF 10
 
 	# RET
-	lret			      # --  --  -- --   CB
+	lretl			      # --  --  -- --   CB
+	lretq			      # --  --  -- 48   CB
 	retq			      # --  --  -- --   C3
 
 	# IRET
-	IRET			      # --  --  -- --   CF				 ; 32-bit operand size
+	IRETL			      # --  --  -- --   CF				 ; 32-bit operand size
 	IRETW			      # 66  --  -- --   CF				 ; O16 for 16-bit operand size
 	IRETQ			      # --  --  -- 48   CF				 ; REX for 64-bit operand size
 

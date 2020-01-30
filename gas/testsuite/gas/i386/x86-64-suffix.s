@@ -12,7 +12,6 @@ foo:
 
 	iretw
 	iretl
-	iret
 	iretq
 	sysretl
 	sysretq

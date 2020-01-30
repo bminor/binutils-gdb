@@ -1,6 +1,7 @@
 #source: x86-64-suffix.s
 #objdump: -dw -Msuffix,intel
 #name: x86-64 suffix (Intel mode)
+#warning_output: x86-64-suffix.e
 
 .*: +file format .*
 
@@ -14,7 +15,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 01 c3             	vmresume 
 [ 	]*[a-f0-9]+:	0f 01 c4             	vmxoff 
 [ 	]*[a-f0-9]+:	66 cf                	iretw  
-[ 	]*[a-f0-9]+:	cf                   	iretd  
 [ 	]*[a-f0-9]+:	cf                   	iretd  
 [ 	]*[a-f0-9]+:	48 cf                	iretq  
 [ 	]*[a-f0-9]+:	0f 07                	sysretd 

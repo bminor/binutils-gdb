@@ -99,6 +99,14 @@ cdqe
 movsx rax, eax
 movsx rax, ax
 movsx rax, al
+retf
+retf 16
+retfw
+retfw 2
+retfd
+retfd 4
+retfq
+retfq 8
 bar:
 .att_syntax
 #testcase for symbol references.

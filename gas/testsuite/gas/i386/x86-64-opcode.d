@@ -12,6 +12,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	41 ff 10             	callq  \*\(%r8\)
 [ 	]*[a-f0-9]+:	ff 10                	callq  \*\(%rax\)
 [ 	]*[a-f0-9]+:	cb                   	lret   
+[ 	]*[a-f0-9]+:	48 cb                	lretq *
 [ 	]*[a-f0-9]+:	c3                   	retq   
 [ 	]*[a-f0-9]+:	cf                   	iret   
 [ 	]*[a-f0-9]+:	66 cf                	iretw  

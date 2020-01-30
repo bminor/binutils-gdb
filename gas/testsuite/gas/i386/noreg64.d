@@ -66,6 +66,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	ff 00                	incl   \(%rax\)
  *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
+ *[a-f0-9]+:	cf                   	iret *
  *[a-f0-9]+:	ff 20                	jmpq   \*\(%rax\)
  *[a-f0-9]+:	0f 01 10             	lgdt   \(%rax\)
  *[a-f0-9]+:	0f 01 18             	lidt   \(%rax\)
@@ -73,6 +74,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	0f 01 30             	lmsw   \(%rax\)
  *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax
  *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax
+ *[a-f0-9]+:	cb                   	lret *
+ *[a-f0-9]+:	ca 04 00             	lret   \$0x4
  *[a-f0-9]+:	0f 00 18             	ltr    \(%rax\)
  *[a-f0-9]+:	c7 00 12 00 00 00    	movl   \$0x12,\(%rax\)
  *[a-f0-9]+:	c7 00 34 12 00 00    	movl   \$0x1234,\(%rax\)

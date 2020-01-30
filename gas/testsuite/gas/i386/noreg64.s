@@ -59,6 +59,7 @@ noreg:
 	inc	(%rax)
 	ins
 	ins	%dx, %es:(%rdi)
+	iret
 	jmp	*(%rax)
 	lgdt	(%rax)
 	lidt	(%rax)
@@ -66,6 +67,8 @@ noreg:
 	lmsw	(%rax)
 	lods
 	lods	(%rsi)
+	lret
+	lret	$4
 	ltr	(%rax)
 	mov	$0x12, (%rax)
 	mov	$0x1234, (%rax)
