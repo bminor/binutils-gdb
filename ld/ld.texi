@@ -7614,7 +7614,7 @@ will normally be used on systems having a newer glibc.
 and restores volatile registers around the call into glibc.  Normally,
 this is done when the linker detects a call to __tls_get_addr_desc.
 Such calls then go via the register saving stub to __tls_get_addr_opt.
-@option {--no-tls-get-addr-regsave} disables generation of the
+@option{--no-tls-get-addr-regsave} disables generation of the
 register saves.
 
 @cindex PowerPC64 OPD optimization
