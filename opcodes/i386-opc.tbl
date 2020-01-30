@@ -374,10 +374,10 @@ shrd, 2, 0xfad, None, 2, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { 
 // Control transfer instructions.
 call, 1, 0xe8, None, 1, CpuNo64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp16|Disp32 }
 call, 1, 0xe8, None, 1, Cpu64, AMD64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32S }
-call, 1, 0xe8, None, 1, Cpu64, Intel64|JumpDword|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp32S }
+call, 1, 0xe8, None, 1, Cpu64, Intel64|JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp32S }
 call, 1, 0xff, 0x2, 1, CpuNo64, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
 call, 1, 0xff, 0x2, 1, Cpu64, AMD64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
-call, 1, 0xff, 0x2, 1, Cpu64, Intel64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
+call, 1, 0xff, 0x2, 1, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax
 call, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 // Intel Syntax
@@ -795,13 +795,13 @@ fstsw, 1, 0xdd, 0x7, 1, CpuFP, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|
 fstsw, 0, 0xdfe0, None, 2, Cpu287|Cpu387, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|FWait, { 0 }
 fnclex, 0, 0xdbe2, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fclex, 0, 0xdbe2, None, 2, CpuFP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|FWait, { 0 }
-// Short forms of fldenv, fstenv use data size prefix.
-fnstenv, 1, 0xd9, 0x6, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-fstenv, 1, 0xd9, 0x6, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf|FWait, { Unspecified|BaseIndex }
-fldenv, 1, 0xd9, 0x4, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-fnsave, 1, 0xdd, 0x6, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-fsave, 1, 0xdd, 0x6, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf|FWait, { Unspecified|BaseIndex }
-frstor, 1, 0xdd, 0x4, 1, CpuFP, Modrm|DefaultSize|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+// Short forms of fldenv, fstenv, fsave, and frstor use data size prefix.
+fnstenv, 1, 0xd9, 0x6, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+fstenv, 1, 0xd9, 0x6, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf|FWait, { Unspecified|BaseIndex }
+fldenv, 1, 0xd9, 0x4, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+fnsave, 1, 0xdd, 0x6, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+fsave, 1, 0xdd, 0x6, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf|FWait, { Unspecified|BaseIndex }
+frstor, 1, 0xdd, 0x4, 1, CpuFP, Modrm|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 // 8087 only
 fneni, 0, 0xdbe0, None, 2, Cpu8087, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 feni, 0, 0xdbe0, None, 2, Cpu8087, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|FWait, { 0 }

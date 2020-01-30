@@ -6368,10 +6368,7 @@ process_suffix (void)
       else
 	abort ();
     }
-  else if (i.tm.opcode_modifier.defaultsize
-	   && !i.suffix
-	   /* exclude fldenv/frstor/fsave/fstenv */
-	   && i.tm.opcode_modifier.no_ssuf)
+  else if (i.tm.opcode_modifier.defaultsize && !i.suffix)
     {
       i.suffix = stackop_size;
       if (stackop_size == LONG_MNEM_SUFFIX)
@@ -6421,7 +6418,9 @@ process_suffix (void)
 
   if (!i.suffix
       && !i.tm.opcode_modifier.defaultsize
-      && !i.tm.opcode_modifier.ignoresize)
+      && !i.tm.opcode_modifier.ignoresize
+      /* Accept FLDENV et al without suffix.  */
+      && (i.tm.opcode_modifier.no_ssuf || i.tm.opcode_modifier.floatmf))
     {
       unsigned int suffixes;
 
