@@ -1,3 +1,12 @@
+2020-01-31  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.s: Use .h rather than
+	.s for the movprfx.
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.d: Update accordingly.
+	* testsuite/gas/aarch64/sve-movprfx_28.d,
+	* testsuite/gas/aarch64/sve-movprfx_28.l,
+	* testsuite/gas/aarch64/sve-movprfx_28.s: New test.
+
 2020-01-30  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (output_disp): Tighten base_opcode check.

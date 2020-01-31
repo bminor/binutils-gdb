@@ -1,3 +1,8 @@
+2020-01-31  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode): Set C_MAX_ELEM for SVE bfcvt.
+	Remove C_SCAN_MOVPRFX for SVE bfcvtnt.
+
 2020-01-30  Alan Modra  <amodra@gmail.com>
 
 	* m32c-ibld.c: Regenerate.
