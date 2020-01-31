@@ -1,3 +1,8 @@
+2020-01-31  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (nios2_cons): Handle %gotoff as well as
+	%tls_ldo.
+
 2020-01-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR gas/25472

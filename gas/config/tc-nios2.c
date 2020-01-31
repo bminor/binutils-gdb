@@ -4011,31 +4011,48 @@ nios2_elf_section_flags (flagword flags, int attr, int type ATTRIBUTE_UNUSED)
   return flags;
 }
 
-/* Implement TC_PARSE_CONS_EXPRESSION to handle %tls_ldo(...) */
+/* Implement TC_PARSE_CONS_EXPRESSION to handle %tls_ldo(...) and
+   %gotoff(...).  */
 bfd_reloc_code_real_type
 nios2_cons (expressionS *exp, int size)
 {
-  bfd_reloc_code_real_type nios2_tls_ldo_reloc = BFD_RELOC_NONE;
+  bfd_reloc_code_real_type explicit_reloc = BFD_RELOC_NONE;
+  const char *reloc_name = NULL;
 
   SKIP_WHITESPACE ();
   if (input_line_pointer[0] == '%')
     {
       if (strprefix (input_line_pointer + 1, "tls_ldo"))
 	{
+	  reloc_name = "%tls_ldo";
 	  if (size != 4)
 	    as_bad (_("Illegal operands: %%tls_ldo in %d-byte data field"),
 		    size);
 	  else
 	    {
 	      input_line_pointer += 8;
-	      nios2_tls_ldo_reloc = BFD_RELOC_NIOS2_TLS_DTPREL;
+	      explicit_reloc = BFD_RELOC_NIOS2_TLS_DTPREL;
 	    }
 	}
-      if (nios2_tls_ldo_reloc != BFD_RELOC_NONE)
+      else if (strprefix (input_line_pointer + 1, "gotoff"))
+	{
+	  reloc_name = "%gotoff";
+	  if (size != 4)
+	    as_bad (_("Illegal operands: %%gotoff in %d-byte data field"),
+		    size);
+	  else
+	    {
+	      input_line_pointer += 7;
+	      explicit_reloc = BFD_RELOC_NIOS2_GOTOFF;
+	    }
+	}
+
+      if (explicit_reloc != BFD_RELOC_NONE)
 	{
 	  SKIP_WHITESPACE ();
 	  if (input_line_pointer[0] != '(')
-	    as_bad (_("Illegal operands: %%tls_ldo requires arguments in ()"));
+	    as_bad (_("Illegal operands: %s requires arguments in ()"),
+		    reloc_name);
 	  else
 	    {
 	      int c;
@@ -4053,29 +4070,32 @@ nios2_cons (expressionS *exp, int size)
 		  }
 
 	      if (c != ')')
-		as_bad (_("Illegal operands: %%tls_ldo requires arguments in ()"));
+		as_bad (_("Illegal operands: %s requires arguments in ()"),
+			reloc_name);
 	      else
 		{
 		  *end = '\0';
 		  expression (exp);
 		  *end = c;
 		  if (input_line_pointer != end)
-		    as_bad (_("Illegal operands: %%tls_ldo requires arguments in ()"));
+		    as_bad (_("Illegal operands: %s requires arguments in ()"),
+			    reloc_name);
 		  else
 		    {
 		      input_line_pointer++;
 		      SKIP_WHITESPACE ();
 		      c = *input_line_pointer;
 		      if (! is_end_of_line[c] && c != ',')
-			as_bad (_("Illegal operands: garbage after %%tls_ldo()"));
+			as_bad (_("Illegal operands: garbage after %s()"),
+				reloc_name);
 		    }
 		}
 	    }
 	}
     }
-  if (nios2_tls_ldo_reloc == BFD_RELOC_NONE)
+  if (explicit_reloc == BFD_RELOC_NONE)
     expression (exp);
-  return nios2_tls_ldo_reloc;
+  return explicit_reloc;
 }
 
 /* Implement HANDLE_ALIGN.  */
