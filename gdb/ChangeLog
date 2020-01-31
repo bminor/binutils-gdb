@@ -1,3 +1,8 @@
+2020-02-01  Shahab Vahedi  <shahab@synopsys.com>
+
+	* target-descriptions.c (tdesc_register_in_reggroup_p): Return 0
+	when reg->group is empty and reggroup is not.
+
 2020-01-31  Tom Tromey  <tromey@adacore.com>
 
 	* ravenscar-thread.c (ravenscar_thread_target::mourn_inferior):
