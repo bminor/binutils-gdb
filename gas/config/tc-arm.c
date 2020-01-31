@@ -24989,6 +24989,12 @@ static const struct asm_opcode insns[] =
  mcCE(fstd,	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
  mcCE(flds,	d100a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
  mcCE(fsts,	d000a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
+
+  /* Memory operations.	 */
+ mcCE(fldmias,	c900a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ mcCE(fldmdbs,	d300a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
+ mcCE(fstmias,	c800a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ mcCE(fstmdbs,	d200a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
 #undef THUMB_VARIANT
 
   /* Moves and type conversions.  */
@@ -25003,17 +25009,13 @@ static const struct asm_opcode insns[] =
  cCE("fmxr",	ee00a10, 2, (RVC, RR),	      rn_rd),
 
   /* Memory operations.	 */
- cCE("fldmias",	c900a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
  cCE("fldmfds",	c900a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
- cCE("fldmdbs",	d300a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
  cCE("fldmeas",	d300a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
  cCE("fldmiax",	c900b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
  cCE("fldmfdx",	c900b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
  cCE("fldmdbx",	d300b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
  cCE("fldmeax",	d300b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
- cCE("fstmias",	c800a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
  cCE("fstmeas",	c800a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
- cCE("fstmdbs",	d200a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
  cCE("fstmfds",	d200a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
  cCE("fstmiax",	c800b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
  cCE("fstmeax",	c800b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
