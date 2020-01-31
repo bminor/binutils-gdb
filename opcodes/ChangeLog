@@ -1,3 +1,8 @@
+2020-02-10  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode): Set C_MAX_ELEM for SVE bfcvt.
+	Remove C_SCAN_MOVPRFX for SVE bfcvtnt.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

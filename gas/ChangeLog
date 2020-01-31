@@ -1,3 +1,12 @@
+2020-02-10  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.s: Use .h rather than
+	.s for the movprfx.
+	* testsuite/gas/aarch64/sve-bfloat-movprfx.d: Update accordingly.
+	* testsuite/gas/aarch64/sve-movprfx_28.d,
+	* testsuite/gas/aarch64/sve-movprfx_28.l,
+	* testsuite/gas/aarch64/sve-movprfx_28.s: New test.
+
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention x86 assembler options to align branches for

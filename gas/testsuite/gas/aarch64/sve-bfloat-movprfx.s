@@ -27,5 +27,5 @@ movprfx z0, z1
 bfcvt z0.h, p0/m, z2.s
 
 # Predicated movprfx + bfcvt
-movprfx z0.h, p0/m, z1.h
+movprfx z0.s, p0/m, z1.s
 bfcvt z0.h, p0/m, z2.s
