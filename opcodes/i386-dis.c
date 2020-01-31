@@ -405,7 +405,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxmmdw { OP_EX, xmmdw_mode }
 #define EXxmmqd { OP_EX, xmmqd_mode }
 #define EXymmq { OP_EX, ymmq_mode }
-#define EXVexWdq { OP_EX, vex_w_dq_mode }
 #define EXVexWdqScalar { OP_EX, vex_scalar_w_dq_mode }
 #define EXEvexXGscat { OP_EX, evex_x_gscat_mode }
 #define EXEvexXNoBcst { OP_EX, evex_x_nobcst_mode }
@@ -595,14 +594,12 @@ enum
   vex128_mode,
   /* 256bit vex mode */
   vex256_mode,
-  /* operand size depends on the VEX.W bit.  */
-  vex_w_dq_mode,
 
-  /* Similar to vex_w_dq_mode, with VSIB dword indices.  */
+  /* Operand size depends on the VEX.W bit, with VSIB dword indices.  */
   vex_vsib_d_w_dq_mode,
   /* Similar to vex_vsib_d_w_dq_mode, with smaller memory.  */
   vex_vsib_d_w_d_mode,
-  /* Similar to vex_w_dq_mode, with VSIB qword indices.  */
+  /* Operand size depends on the VEX.W bit, with VSIB qword indices.  */
   vex_vsib_q_w_dq_mode,
   /* Similar to vex_vsib_q_w_dq_mode, with smaller memory.  */
   vex_vsib_q_w_d_mode,
@@ -623,7 +620,7 @@ enum
   q_scalar_swap_mode,
   /* like vex_mode, ignore vector length.  */
   vex_scalar_mode,
-  /* like vex_w_dq_mode, ignore vector length.  */
+  /* Operand size depends on the VEX.W bit, ignore vector length.  */
   vex_scalar_w_dq_mode,
 
   /* Static rounding.  */
@@ -13775,7 +13772,6 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("OWORD PTR ");
       break;
     case xmm_mdq_mode:
-    case vex_w_dq_mode:
     case vex_scalar_w_dq_mode:
       if (!need_vex)
 	abort ();
