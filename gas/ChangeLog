@@ -1,3 +1,16 @@
+2020-01-31  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* config/tc-arm.c (fldmias): Moved inside "THUMB_VARIANT & arm_ext_v6t2"
+	to support VLDMIA instruction for MVE.
+	(fldmdbs): Moved inside "THUMB_VARIANT & arm_ext_v6t2" to support VLDMDB
+	instruction for MVE.
+	(fstmias): Moved inside "THUMB_VARIANT & arm_ext_v6t2" to support VSTMIA
+	instruction for MVE.
+	(fstmdbs): Moved inside "THUMB_VARIANT & arm_ext_v6t2" to support VSTMDB
+	instruction for MVE.
+	* testsuite/gas/arm/mve-ldst.d: New test.
+	* testsuite/gas/arm/mve-ldst.s: Likewise.
+
 2020-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
