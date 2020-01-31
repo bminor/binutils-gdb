@@ -1,3 +1,8 @@
+2020-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/ru.po: Updated Russian translation.
+
 2020-01-27  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.

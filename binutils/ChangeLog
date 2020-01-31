@@ -1,3 +1,7 @@
+2020-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2020-01-27  Roland McGrath  <mcgrathr@google.com>
 
 	* objcopy.c (compare_gnu_build_notes): Fix comparison results
