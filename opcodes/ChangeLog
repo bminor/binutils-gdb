@@ -1,5 +1,13 @@
 2020-01-31  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EXxmm_mdq, xmm_mdq_mode): Delete.
+	(intel_operand_size, OP_EX): Drop xmm_mdq_mode case label.
+	(OP_E_memory): Replace xmm_mdq_mode case label by
+	vex_scalar_w_dq_mode one.
+	* i386-dis-evex-prefix.h: Replace EXxmm_mdq by EXVexWdqScalar.
+
+2020-01-31  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EXVexWdq, vex_w_dq_mode): Delete.
 	(vex_vsib_d_w_dq_mode, vex_vsib_q_w_dq_mode,
 	vex_scalar_w_dq_mode): Don't refer to vex_w_dq_mode in comments.

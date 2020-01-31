@@ -401,7 +401,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxmm_mw { OP_EX, xmm_mw_mode }
 #define EXxmm_md { OP_EX, xmm_md_mode }
 #define EXxmm_mq { OP_EX, xmm_mq_mode }
-#define EXxmm_mdq { OP_EX, xmm_mdq_mode }
 #define EXxmmdw { OP_EX, xmmdw_mode }
 #define EXxmmqd { OP_EX, xmmqd_mode }
 #define EXymmq { OP_EX, ymmq_mode }
@@ -537,9 +536,6 @@ enum
   xmm_md_mode,
   /* XMM register or quad word memory operand */
   xmm_mq_mode,
-  /* XMM register or double/quad word memory operand, depending on
-     VEX.W.  */
-  xmm_mdq_mode,
   /* 16-byte XMM, word, double word or quad word operand.  */
   xmmdw_mode,
   /* 16-byte XMM, double word, quad word operand or xmm word operand.  */
@@ -13771,7 +13767,6 @@ intel_operand_size (int bytemode, int sizeflag)
     case o_mode:
       oappend ("OWORD PTR ");
       break;
-    case xmm_mdq_mode:
     case vex_scalar_w_dq_mode:
       if (!need_vex)
 	abort ();
@@ -14016,12 +14011,12 @@ OP_E_memory (int bytemode, int sizeflag)
 	      break;
 	    }
 	    /* fall through */
+	case vex_scalar_w_dq_mode:
 	case vex_vsib_d_w_dq_mode:
 	case vex_vsib_d_w_d_mode:
 	case vex_vsib_q_w_dq_mode:
 	case vex_vsib_q_w_d_mode:
 	case evex_x_gscat_mode:
-	case xmm_mdq_mode:
 	  shift = vex.w ? 3 : 2;
 	  break;
 	case x_mode:
@@ -15367,7 +15362,6 @@ OP_EX (int bytemode, int sizeflag)
       && bytemode != xmm_mw_mode
       && bytemode != xmm_md_mode
       && bytemode != xmm_mq_mode
-      && bytemode != xmm_mdq_mode
       && bytemode != xmmq_mode
       && bytemode != evex_half_bcst_xmmq_mode
       && bytemode != ymm_mode
