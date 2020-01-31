@@ -1,3 +1,8 @@
+2020-01-31  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): DW_EH_PE_datarel
+	encodings are relative to the GOT on nios2, too.
+
 2020-01-31  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (elf32-target.h, elf64-target.h): Don't use a temp
