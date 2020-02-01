@@ -99,8 +99,8 @@ do_proto_toplev()
 	    *) disables="$disables --disable-$dir" ;;
 	esac
     done
-    echo "==> configure --target=i386-pc-linux-gnu $disables $enables"
-    ./configure --target=i386-pc-linux-gnu $disables $enables
+    echo "==> configure --target=i386-pc-linux-gnu --enable-src-release-build=yes $disables $enables"
+    ./configure --target=i386-pc-linux-gnu --enable-src-release-build=yes $disables $enables
     $MAKE configure-host configure-target \
 	ALL_GCC="" ALL_GCC_C="" ALL_GCC_CXX="" \
 	CC_FOR_TARGET="$CC" CXX_FOR_TARGET="$CXX"

@@ -1,3 +1,11 @@
+2020-02-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure.ac: Don't abort the build if trying to build GDB in tree
+	_and_ invoking with '--enable-src-release-build'.
+	* configure: Regenerate.
+	* src-release.sh (do_proto_toplev): Invoke 'configure' using
+	'--enable-src-release-build'.
+
 2020-01-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Abort the build with an error if trying to build

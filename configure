@@ -2279,7 +2279,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-if test x"${enable_gdb}" != x"no"; then
+if test x"${enable_gdb}" != x"no" -a x"${enable_src_release_build}" != x"yes"; then
   # For this branch, we do not support building GDB in-tree.
   # Try to detect whether we are in this situation or not by
   # searching for a couple of known files in the source directory.

@@ -33,7 +33,7 @@ m4_include([config/isl.m4])
 AC_INIT(move-if-change)
 AC_DISABLE_OPTION_CHECKING
 
-if test x"${enable_gdb}" != x"no"; then
+if test x"${enable_gdb}" != x"no" -a x"${enable_src_release_build}" != x"yes"; then
   # For this branch, we do not support building GDB in-tree.
   # Try to detect whether we are in this situation or not by
   # searching for a couple of known files in the source directory.
