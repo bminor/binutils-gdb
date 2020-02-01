@@ -26,6 +26,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifndef ENOTSUP
+#define ENOTSUP ENOSYS
+#endif
+
 int _libctf_version = CTF_VERSION;	      /* Library client version.  */
 int _libctf_debug = 0;			      /* Debugging messages enabled.  */
 

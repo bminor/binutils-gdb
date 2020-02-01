@@ -1,3 +1,10 @@
+2020-02-01  Eli Zaretskii  <eliz@gnu.org>
+
+	PR binutils/25155:
+	* ctf-create.c (EOVERFLOW): If not defined by system header,
+	redirect to ERANGE as a poor man's substitute.
+	* ctf-subr.c (ENOTSUP): If not defined, use ENOSYS instead.
+
 2020-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	PR binutils/25155:

@@ -23,6 +23,10 @@
 #include <string.h>
 #include <zlib.h>
 
+#ifndef EOVERFLOW
+#define EOVERFLOW ERANGE
+#endif
+
 #ifndef roundup
 #define roundup(x, y)  ((((x) + ((y) - 1)) / (y)) * (y))
 #endif
