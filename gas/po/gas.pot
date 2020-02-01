@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-01-18 14:02+0000\n"
+"POT-Creation-Date: 2020-02-01 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1990,7 +1990,7 @@ msgstr ""
 msgid "selected processor does not support `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:7544 config/tc-arm.c:27479
+#: config/tc-aarch64.c:7544 config/tc-arm.c:27481
 msgid "GOT already in the symbol table"
 msgstr ""
 
@@ -2016,8 +2016,8 @@ msgstr ""
 msgid "immediate offset out of range"
 msgstr ""
 
-#: config/tc-aarch64.c:7953 config/tc-arm.c:27817 config/tc-arm.c:27885
-#: config/tc-arm.c:28167
+#: config/tc-aarch64.c:7953 config/tc-arm.c:27819 config/tc-arm.c:27887
+#: config/tc-arm.c:28169
 #, c-format
 msgid "undefined symbol %s used as an immediate value"
 msgstr ""
@@ -2038,7 +2038,7 @@ msgstr ""
 msgid "conditional branch target not word aligned"
 msgstr ""
 
-#: config/tc-aarch64.c:7995 config/tc-aarch64.c:8010 config/tc-arm.c:28462
+#: config/tc-aarch64.c:7995 config/tc-aarch64.c:8010 config/tc-arm.c:28464
 msgid "conditional branch out of range"
 msgstr ""
 
@@ -2046,14 +2046,14 @@ msgstr ""
 msgid "branch target not word aligned"
 msgstr ""
 
-#: config/tc-aarch64.c:8026 config/tc-arm.c:899 config/tc-arm.c:29265
+#: config/tc-aarch64.c:8026 config/tc-arm.c:899 config/tc-arm.c:29267
 #: config/tc-mips.c:16047 config/tc-mips.c:16063 config/tc-mips.c:16153
 msgid "branch out of range"
 msgstr ""
 
-#: config/tc-aarch64.c:8085 config/tc-arm.c:28058 config/tc-arm.c:28073
-#: config/tc-arm.c:28088 config/tc-arm.c:28099 config/tc-arm.c:28122
-#: config/tc-arm.c:28969 config/tc-moxie.c:716 config/tc-pj.c:452
+#: config/tc-aarch64.c:8085 config/tc-arm.c:28060 config/tc-arm.c:28075
+#: config/tc-arm.c:28090 config/tc-arm.c:28101 config/tc-arm.c:28124
+#: config/tc-arm.c:28971 config/tc-moxie.c:716 config/tc-pj.c:452
 #: config/tc-sh.c:3727
 msgid "offset out of range"
 msgstr ""
@@ -2071,7 +2071,7 @@ msgstr ""
 msgid "unexpected %s fixup"
 msgstr ""
 
-#: config/tc-aarch64.c:8327 config/tc-arm.c:29685 config/tc-arm.c:29706
+#: config/tc-aarch64.c:8327 config/tc-arm.c:29687 config/tc-arm.c:29708
 #: config/tc-mips.c:18414 config/tc-or1k.c:345 config/tc-score.c:7468
 #, c-format
 msgid "cannot represent %s relocation in this object file format"
@@ -2082,16 +2082,16 @@ msgstr ""
 msgid "cannot do %u-byte relocation"
 msgstr ""
 
-#: config/tc-aarch64.c:8683 config/tc-arm.c:30180 config/tc-score.c:6293
+#: config/tc-aarch64.c:8683 config/tc-arm.c:30182 config/tc-score.c:6293
 #: config/tc-score.c:6523 config/tc-score.c:6528
 msgid "virtual memory exhausted"
 msgstr ""
 
-#: config/tc-aarch64.c:8849 config/tc-arm.c:30523
+#: config/tc-aarch64.c:8849 config/tc-arm.c:30525
 msgid "assemble for big-endian"
 msgstr ""
 
-#: config/tc-aarch64.c:8850 config/tc-arm.c:30524
+#: config/tc-aarch64.c:8850 config/tc-arm.c:30526
 msgid "assemble for little-endian"
 msgstr ""
 
@@ -2107,41 +2107,41 @@ msgstr ""
 msgid "do not output verbose error messages"
 msgstr ""
 
-#: config/tc-aarch64.c:9137 config/tc-arm.c:31607
+#: config/tc-aarch64.c:9137 config/tc-arm.c:31611
 msgid "invalid architectural extension"
 msgstr ""
 
-#: config/tc-aarch64.c:9162 config/tc-arm.c:31639
+#: config/tc-aarch64.c:9162 config/tc-arm.c:31643
 msgid "must specify extensions to add before specifying those to remove"
 msgstr ""
 
-#: config/tc-aarch64.c:9170 config/tc-arm.c:31647
+#: config/tc-aarch64.c:9170 config/tc-arm.c:31651
 msgid "missing architectural extension"
 msgstr ""
 
-#: config/tc-aarch64.c:9197 config/tc-arm.c:31733
+#: config/tc-aarch64.c:9197 config/tc-arm.c:31737
 #, c-format
 msgid "unknown architectural extension `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:9221 config/tc-arm.c:31783 config/tc-metag.c:5834
+#: config/tc-aarch64.c:9221 config/tc-arm.c:31787 config/tc-metag.c:5834
 #, c-format
 msgid "missing cpu name `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:9235 config/tc-aarch64.c:9452 config/tc-arm.c:31818
-#: config/tc-arm.c:32617 config/tc-csky.c:896 config/tc-metag.c:5845
+#: config/tc-aarch64.c:9235 config/tc-aarch64.c:9452 config/tc-arm.c:31822
+#: config/tc-arm.c:32621 config/tc-csky.c:896 config/tc-metag.c:5845
 #, c-format
 msgid "unknown cpu `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:9253 config/tc-arm.c:31836
+#: config/tc-aarch64.c:9253 config/tc-arm.c:31840
 #, c-format
 msgid "missing architecture name `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:9267 config/tc-aarch64.c:9499 config/tc-arm.c:31858
-#: config/tc-arm.c:32652 config/tc-arm.c:32682 config/tc-score.c:7703
+#: config/tc-aarch64.c:9267 config/tc-aarch64.c:9499 config/tc-arm.c:31862
+#: config/tc-arm.c:32656 config/tc-arm.c:32686 config/tc-score.c:7703
 #, c-format
 msgid "unknown architecture `%s'\n"
 msgstr ""
@@ -2160,16 +2160,16 @@ msgstr ""
 msgid "<abi name>\t  specify for ABI <abi name>"
 msgstr ""
 
-#: config/tc-aarch64.c:9310 config/tc-arm.c:31945 config/tc-metag.c:5911
+#: config/tc-aarch64.c:9310 config/tc-arm.c:31949 config/tc-metag.c:5911
 msgid "<cpu name>\t  assemble for CPU <cpu name>"
 msgstr ""
 
-#: config/tc-aarch64.c:9312 config/tc-arm.c:31947
+#: config/tc-aarch64.c:9312 config/tc-arm.c:31951
 msgid "<arch name>\t  assemble for architecture <arch name>"
 msgstr ""
 
-#: config/tc-aarch64.c:9351 config/tc-aarch64.c:9371 config/tc-arm.c:32015
-#: config/tc-arm.c:32033 config/tc-arm.c:32053 config/tc-metag.c:5936
+#: config/tc-aarch64.c:9351 config/tc-aarch64.c:9371 config/tc-arm.c:32019
+#: config/tc-arm.c:32037 config/tc-arm.c:32057 config/tc-metag.c:5936
 #, c-format
 msgid "option `-%c%s' is deprecated: %s"
 msgstr ""
@@ -2179,12 +2179,12 @@ msgstr ""
 msgid " AArch64-specific assembler options:\n"
 msgstr ""
 
-#: config/tc-aarch64.c:9402 config/tc-arc.c:3583 config/tc-arm.c:32084
+#: config/tc-aarch64.c:9402 config/tc-arc.c:3583 config/tc-arm.c:32088
 #, c-format
 msgid "  -EB                     assemble code for a big-endian cpu\n"
 msgstr ""
 
-#: config/tc-aarch64.c:9407 config/tc-arc.c:3585 config/tc-arm.c:32089
+#: config/tc-aarch64.c:9407 config/tc-arc.c:3585 config/tc-arm.c:32093
 #, c-format
 msgid "  -EL                     assemble code for a little-endian cpu\n"
 msgstr ""
@@ -3651,7 +3651,7 @@ msgstr ""
 msgid "invalid unwind opcode"
 msgstr ""
 
-#: config/tc-arm.c:5052 config/tc-arm.c:31762
+#: config/tc-arm.c:5052 config/tc-arm.c:31766
 #, c-format
 msgid "unrecognised float16 format \"%s\""
 msgstr ""
@@ -3664,7 +3664,7 @@ msgstr ""
 #: config/tc-arm.c:12139 config/tc-arm.c:14259 config/tc-arm.c:16192
 #: config/tc-arm.c:16227 config/tc-arm.c:17155 config/tc-arm.c:19082
 #: config/tc-arm.c:19090 config/tc-arm.c:19097 config/tc-arm.c:20739
-#: config/tc-arm.c:28846 config/tc-arm.c:28910 config/tc-arm.c:28918
+#: config/tc-arm.c:28848 config/tc-arm.c:28912 config/tc-arm.c:28920
 #: config/tc-metag.c:5176 config/tc-z8k.c:1151 config/tc-z8k.c:1161
 msgid "immediate value out of range"
 msgstr ""
@@ -4120,7 +4120,7 @@ msgstr ""
 msgid "shift by register not allowed in thumb mode"
 msgstr ""
 
-#: config/tc-arm.c:11274 config/tc-arm.c:14099 config/tc-arm.c:28140
+#: config/tc-arm.c:11274 config/tc-arm.c:14099 config/tc-arm.c:28142
 msgid "shift expression is too large"
 msgstr ""
 
@@ -4335,7 +4335,7 @@ msgstr ""
 msgid "instruction does not allow shifted index"
 msgstr ""
 
-#: config/tc-arm.c:14402 config/tc-arm.c:29281
+#: config/tc-arm.c:14402 config/tc-arm.c:29283
 msgid "out of range label-relative fixup value"
 msgstr ""
 
@@ -4743,573 +4743,573 @@ msgstr ""
 msgid "file finished with an open VPT/VPST block."
 msgstr ""
 
-#: config/tc-arm.c:26787
+#: config/tc-arm.c:26789
 #, c-format
 msgid "alignments greater than %d bytes not supported in .text sections."
 msgstr ""
 
-#: config/tc-arm.c:27054 config/tc-ia64.c:3594
+#: config/tc-arm.c:27056 config/tc-ia64.c:3594
 #, c-format
 msgid "Group section `%s' has no group signature"
 msgstr ""
 
-#: config/tc-arm.c:27100
+#: config/tc-arm.c:27102
 msgid "handlerdata in cantunwind frame"
 msgstr ""
 
-#: config/tc-arm.c:27117
+#: config/tc-arm.c:27119
 msgid "too many unwind opcodes for personality routine 0"
 msgstr ""
 
-#: config/tc-arm.c:27148
+#: config/tc-arm.c:27150
 msgid "attempt to recreate an unwind entry"
 msgstr ""
 
-#: config/tc-arm.c:27158
+#: config/tc-arm.c:27160
 msgid "too many unwind opcodes"
 msgstr ""
 
-#: config/tc-arm.c:27457
+#: config/tc-arm.c:27459
 #, c-format
 msgid "[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"
 msgstr ""
 
-#: config/tc-arm.c:27819 config/tc-arm.c:27887
+#: config/tc-arm.c:27821 config/tc-arm.c:27889
 #, c-format
 msgid "symbol %s is in a different section"
 msgstr ""
 
-#: config/tc-arm.c:27821 config/tc-arm.c:27889
+#: config/tc-arm.c:27823 config/tc-arm.c:27891
 #, c-format
 msgid "symbol %s is weak and may be overridden later"
 msgstr ""
 
-#: config/tc-arm.c:27866 config/tc-arm.c:28238
+#: config/tc-arm.c:27868 config/tc-arm.c:28240
 #, c-format
 msgid "invalid constant (%lx) after fixup"
 msgstr ""
 
-#: config/tc-arm.c:27922
+#: config/tc-arm.c:27924
 #, c-format
 msgid "unable to compute ADRL instructions for PC offset of 0x%lx"
 msgstr ""
 
-#: config/tc-arm.c:27958 config/tc-arm.c:27988
+#: config/tc-arm.c:27960 config/tc-arm.c:27990
 msgid "invalid literal constant: pool needs to be closer"
 msgstr ""
 
-#: config/tc-arm.c:27961 config/tc-arm.c:28010
+#: config/tc-arm.c:27963 config/tc-arm.c:28012
 #, c-format
 msgid "bad immediate value for offset (%ld)"
 msgstr ""
 
-#: config/tc-arm.c:27991
+#: config/tc-arm.c:27993
 #, c-format
 msgid "bad immediate value for 8-bit offset (%ld)"
 msgstr ""
 
-#: config/tc-arm.c:28051
+#: config/tc-arm.c:28053
 msgid "offset not a multiple of 4"
 msgstr ""
 
-#: config/tc-arm.c:28254
+#: config/tc-arm.c:28256
 msgid "invalid smc expression"
 msgstr ""
 
-#: config/tc-arm.c:28264
+#: config/tc-arm.c:28266
 msgid "invalid hvc expression"
 msgstr ""
 
-#: config/tc-arm.c:28275 config/tc-arm.c:28284
+#: config/tc-arm.c:28277 config/tc-arm.c:28286
 msgid "invalid swi expression"
 msgstr ""
 
-#: config/tc-arm.c:28294
+#: config/tc-arm.c:28296
 msgid "invalid expression in load/store multiple"
 msgstr ""
 
-#: config/tc-arm.c:28356
+#: config/tc-arm.c:28358
 #, c-format
 msgid "blx to '%s' an ARM ISA state function changed to bl"
 msgstr ""
 
-#: config/tc-arm.c:28375
+#: config/tc-arm.c:28377
 msgid "misaligned branch destination"
 msgstr ""
 
-#: config/tc-arm.c:28496
+#: config/tc-arm.c:28498
 #, c-format
 msgid "blx to Thumb func '%s' from Thumb ISA state changed to bl"
 msgstr ""
 
-#: config/tc-arm.c:28545
+#: config/tc-arm.c:28547
 msgid "Thumb2 branch out of range"
 msgstr ""
 
-#: config/tc-arm.c:28597 config/tc-arm.c:28630
+#: config/tc-arm.c:28599 config/tc-arm.c:28632
 msgid "Relocation supported only in FDPIC mode"
 msgstr ""
 
-#: config/tc-arm.c:28660
+#: config/tc-arm.c:28662
 msgid "rel31 relocation overflow"
 msgstr ""
 
-#: config/tc-arm.c:28682 config/tc-arm.c:28688 config/tc-arm.c:28692
-#: config/tc-arm.c:28739
+#: config/tc-arm.c:28684 config/tc-arm.c:28690 config/tc-arm.c:28694
+#: config/tc-arm.c:28741
 msgid "co-processor offset out of range"
 msgstr ""
 
-#: config/tc-arm.c:28756
+#: config/tc-arm.c:28758
 #, c-format
 msgid "invalid offset, target not word aligned (0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:28763 config/tc-arm.c:28772 config/tc-arm.c:28780
-#: config/tc-arm.c:28788 config/tc-arm.c:28796
+#: config/tc-arm.c:28765 config/tc-arm.c:28774 config/tc-arm.c:28782
+#: config/tc-arm.c:28790 config/tc-arm.c:28798
 #, c-format
 msgid "invalid offset, value too big (0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:28837
+#: config/tc-arm.c:28839
 msgid "invalid Hi register with immediate"
 msgstr ""
 
-#: config/tc-arm.c:28853
+#: config/tc-arm.c:28855
 msgid "invalid immediate for stack address calculation"
 msgstr ""
 
-#: config/tc-arm.c:28872
+#: config/tc-arm.c:28874
 msgid "address calculation needs a strongly defined nearby symbol"
 msgstr ""
 
-#: config/tc-arm.c:28888
+#: config/tc-arm.c:28890
 msgid "symbol too far away"
 msgstr ""
 
-#: config/tc-arm.c:28900
+#: config/tc-arm.c:28902
 #, c-format
 msgid "invalid immediate for address calculation (value = 0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:28930
+#: config/tc-arm.c:28932
 #, c-format
 msgid "invalid immediate: %ld is out of range"
 msgstr ""
 
-#: config/tc-arm.c:28942
+#: config/tc-arm.c:28944
 #, c-format
 msgid "invalid shift value: %ld"
 msgstr ""
 
-#: config/tc-arm.c:29012 config/tc-arm.c:29083
+#: config/tc-arm.c:29014 config/tc-arm.c:29085
 #, c-format
 msgid "the offset 0x%08lX is not representable"
 msgstr ""
 
-#: config/tc-arm.c:29044
+#: config/tc-arm.c:29046
 #, c-format
 msgid "Unable to process relocation for thumb opcode: %lx"
 msgstr ""
 
-#: config/tc-arm.c:29123
+#: config/tc-arm.c:29125
 #, c-format
 msgid "bad offset 0x%08lX (only 12 bits available for the magnitude)"
 msgstr ""
 
-#: config/tc-arm.c:29162
+#: config/tc-arm.c:29164
 #, c-format
 msgid "bad offset 0x%08lX (only 8 bits available for the magnitude)"
 msgstr ""
 
-#: config/tc-arm.c:29202
+#: config/tc-arm.c:29204
 #, c-format
 msgid "bad offset 0x%08lX (must be word-aligned)"
 msgstr ""
 
-#: config/tc-arm.c:29207
+#: config/tc-arm.c:29209
 #, c-format
 msgid "bad offset 0x%08lX (must be an 8-bit number of words)"
 msgstr ""
 
-#: config/tc-arm.c:29428 config/tc-score.c:7379
+#: config/tc-arm.c:29430 config/tc-score.c:7379
 #, c-format
 msgid "bad relocation fixup type (%d)"
 msgstr ""
 
-#: config/tc-arm.c:29546
+#: config/tc-arm.c:29548
 msgid "literal referenced across section boundary"
 msgstr ""
 
-#: config/tc-arm.c:29626
+#: config/tc-arm.c:29628
 msgid "internal relocation (type: IMMEDIATE) not fixed up"
 msgstr ""
 
-#: config/tc-arm.c:29631
+#: config/tc-arm.c:29633
 msgid "ADRL used for a symbol not defined in the same file"
 msgstr ""
 
-#: config/tc-arm.c:29638
+#: config/tc-arm.c:29640
 #, c-format
 msgid "%s used for a symbol not defined in the same file"
 msgstr ""
 
-#: config/tc-arm.c:29654
+#: config/tc-arm.c:29656
 #, c-format
 msgid "undefined local label `%s'"
 msgstr ""
 
-#: config/tc-arm.c:29660
+#: config/tc-arm.c:29662
 msgid "internal_relocation (type: OFFSET_IMM) not fixed up"
 msgstr ""
 
-#: config/tc-arm.c:29682 config/tc-cris.c:4006 config/tc-csky.c:877
+#: config/tc-arm.c:29684 config/tc-cris.c:4006 config/tc-csky.c:877
 #: config/tc-ft32.c:709 config/tc-mcore.c:1928 config/tc-microblaze.c:1995
 #: config/tc-mmix.c:2894 config/tc-moxie.c:825 config/tc-ns32k.c:2248
 #: config/tc-score.c:7466
 msgid "<unknown>"
 msgstr ""
 
-#: config/tc-arm.c:30084
+#: config/tc-arm.c:30086
 #, c-format
 msgid "%s: unexpected function type: %d"
 msgstr ""
 
-#: config/tc-arm.c:30224
+#: config/tc-arm.c:30226
 msgid "use of old and new-style options to set CPU type"
 msgstr ""
 
-#: config/tc-arm.c:30243
+#: config/tc-arm.c:30245
 msgid "use of old and new-style options to set FPU type"
 msgstr ""
 
-#: config/tc-arm.c:30322
+#: config/tc-arm.c:30324
 msgid "hard-float conflicts with specified fpu"
 msgstr ""
 
-#: config/tc-arm.c:30513
+#: config/tc-arm.c:30515
 msgid "generate PIC code"
 msgstr ""
 
-#: config/tc-arm.c:30514
+#: config/tc-arm.c:30516
 msgid "assemble Thumb code"
 msgstr ""
 
-#: config/tc-arm.c:30515
+#: config/tc-arm.c:30517
 msgid "support ARM/Thumb interworking"
 msgstr ""
 
-#: config/tc-arm.c:30517
+#: config/tc-arm.c:30519
 msgid "code uses 32-bit program counter"
 msgstr ""
 
-#: config/tc-arm.c:30518
+#: config/tc-arm.c:30520
 msgid "code uses 26-bit program counter"
 msgstr ""
 
-#: config/tc-arm.c:30519
+#: config/tc-arm.c:30521
 msgid "floating point args are in fp regs"
 msgstr ""
 
-#: config/tc-arm.c:30521
+#: config/tc-arm.c:30523
 msgid "re-entrant code"
 msgstr ""
 
-#: config/tc-arm.c:30522
+#: config/tc-arm.c:30524
 msgid "code is ATPCS conformant"
 msgstr ""
 
 #. These are recognized by the assembler, but have no affect on code.
-#: config/tc-arm.c:30528
+#: config/tc-arm.c:30530
 msgid "use frame pointer"
 msgstr ""
 
-#: config/tc-arm.c:30529
+#: config/tc-arm.c:30531
 msgid "use stack size checking"
 msgstr ""
 
-#: config/tc-arm.c:30532
+#: config/tc-arm.c:30534
 msgid "do not warn on use of deprecated feature"
 msgstr ""
 
-#: config/tc-arm.c:30535
+#: config/tc-arm.c:30537
 msgid ""
 "warn about performance deprecated IT instructions in ARMv8-A and ARMv8-R"
 msgstr ""
 
-#: config/tc-arm.c:30539
+#: config/tc-arm.c:30541
 msgid "warn about symbols that match instruction names [default]"
 msgstr ""
 
-#: config/tc-arm.c:30540
+#: config/tc-arm.c:30542
 msgid "disable warnings about symobls that match instructions"
 msgstr ""
 
 #. DON'T add any new processors to this list -- we want the whole list
 #. to go away...  Add them to the processors table instead.
-#: config/tc-arm.c:30556 config/tc-arm.c:30557
+#: config/tc-arm.c:30558 config/tc-arm.c:30559
 msgid "use -mcpu=arm1"
 msgstr ""
 
-#: config/tc-arm.c:30558 config/tc-arm.c:30559
+#: config/tc-arm.c:30560 config/tc-arm.c:30561
 msgid "use -mcpu=arm2"
 msgstr ""
 
-#: config/tc-arm.c:30560 config/tc-arm.c:30561
+#: config/tc-arm.c:30562 config/tc-arm.c:30563
 msgid "use -mcpu=arm250"
 msgstr ""
 
-#: config/tc-arm.c:30562 config/tc-arm.c:30563
+#: config/tc-arm.c:30564 config/tc-arm.c:30565
 msgid "use -mcpu=arm3"
 msgstr ""
 
-#: config/tc-arm.c:30564 config/tc-arm.c:30565
+#: config/tc-arm.c:30566 config/tc-arm.c:30567
 msgid "use -mcpu=arm6"
 msgstr ""
 
-#: config/tc-arm.c:30566 config/tc-arm.c:30567
+#: config/tc-arm.c:30568 config/tc-arm.c:30569
 msgid "use -mcpu=arm600"
 msgstr ""
 
-#: config/tc-arm.c:30568 config/tc-arm.c:30569
+#: config/tc-arm.c:30570 config/tc-arm.c:30571
 msgid "use -mcpu=arm610"
 msgstr ""
 
-#: config/tc-arm.c:30570 config/tc-arm.c:30571
+#: config/tc-arm.c:30572 config/tc-arm.c:30573
 msgid "use -mcpu=arm620"
 msgstr ""
 
-#: config/tc-arm.c:30572 config/tc-arm.c:30573
+#: config/tc-arm.c:30574 config/tc-arm.c:30575
 msgid "use -mcpu=arm7"
 msgstr ""
 
-#: config/tc-arm.c:30574 config/tc-arm.c:30575
+#: config/tc-arm.c:30576 config/tc-arm.c:30577
 msgid "use -mcpu=arm70"
 msgstr ""
 
-#: config/tc-arm.c:30576 config/tc-arm.c:30577
+#: config/tc-arm.c:30578 config/tc-arm.c:30579
 msgid "use -mcpu=arm700"
 msgstr ""
 
-#: config/tc-arm.c:30578 config/tc-arm.c:30579
+#: config/tc-arm.c:30580 config/tc-arm.c:30581
 msgid "use -mcpu=arm700i"
 msgstr ""
 
-#: config/tc-arm.c:30580 config/tc-arm.c:30581
+#: config/tc-arm.c:30582 config/tc-arm.c:30583
 msgid "use -mcpu=arm710"
 msgstr ""
 
-#: config/tc-arm.c:30582 config/tc-arm.c:30583
+#: config/tc-arm.c:30584 config/tc-arm.c:30585
 msgid "use -mcpu=arm710c"
 msgstr ""
 
-#: config/tc-arm.c:30584 config/tc-arm.c:30585
+#: config/tc-arm.c:30586 config/tc-arm.c:30587
 msgid "use -mcpu=arm720"
 msgstr ""
 
-#: config/tc-arm.c:30586 config/tc-arm.c:30587
+#: config/tc-arm.c:30588 config/tc-arm.c:30589
 msgid "use -mcpu=arm7d"
 msgstr ""
 
-#: config/tc-arm.c:30588 config/tc-arm.c:30589
+#: config/tc-arm.c:30590 config/tc-arm.c:30591
 msgid "use -mcpu=arm7di"
 msgstr ""
 
-#: config/tc-arm.c:30590 config/tc-arm.c:30591
+#: config/tc-arm.c:30592 config/tc-arm.c:30593
 msgid "use -mcpu=arm7m"
 msgstr ""
 
-#: config/tc-arm.c:30592 config/tc-arm.c:30593
+#: config/tc-arm.c:30594 config/tc-arm.c:30595
 msgid "use -mcpu=arm7dm"
 msgstr ""
 
-#: config/tc-arm.c:30594 config/tc-arm.c:30595
+#: config/tc-arm.c:30596 config/tc-arm.c:30597
 msgid "use -mcpu=arm7dmi"
 msgstr ""
 
-#: config/tc-arm.c:30596 config/tc-arm.c:30597
+#: config/tc-arm.c:30598 config/tc-arm.c:30599
 msgid "use -mcpu=arm7100"
 msgstr ""
 
-#: config/tc-arm.c:30598 config/tc-arm.c:30599
+#: config/tc-arm.c:30600 config/tc-arm.c:30601
 msgid "use -mcpu=arm7500"
 msgstr ""
 
-#: config/tc-arm.c:30600 config/tc-arm.c:30601
+#: config/tc-arm.c:30602 config/tc-arm.c:30603
 msgid "use -mcpu=arm7500fe"
 msgstr ""
 
-#: config/tc-arm.c:30602 config/tc-arm.c:30603 config/tc-arm.c:30604
-#: config/tc-arm.c:30605
+#: config/tc-arm.c:30604 config/tc-arm.c:30605 config/tc-arm.c:30606
+#: config/tc-arm.c:30607
 msgid "use -mcpu=arm7tdmi"
 msgstr ""
 
-#: config/tc-arm.c:30606 config/tc-arm.c:30607
+#: config/tc-arm.c:30608 config/tc-arm.c:30609
 msgid "use -mcpu=arm710t"
 msgstr ""
 
-#: config/tc-arm.c:30608 config/tc-arm.c:30609
+#: config/tc-arm.c:30610 config/tc-arm.c:30611
 msgid "use -mcpu=arm720t"
 msgstr ""
 
-#: config/tc-arm.c:30610 config/tc-arm.c:30611
+#: config/tc-arm.c:30612 config/tc-arm.c:30613
 msgid "use -mcpu=arm740t"
 msgstr ""
 
-#: config/tc-arm.c:30612 config/tc-arm.c:30613
+#: config/tc-arm.c:30614 config/tc-arm.c:30615
 msgid "use -mcpu=arm8"
 msgstr ""
 
-#: config/tc-arm.c:30614 config/tc-arm.c:30615
+#: config/tc-arm.c:30616 config/tc-arm.c:30617
 msgid "use -mcpu=arm810"
 msgstr ""
 
-#: config/tc-arm.c:30616 config/tc-arm.c:30617
+#: config/tc-arm.c:30618 config/tc-arm.c:30619
 msgid "use -mcpu=arm9"
 msgstr ""
 
-#: config/tc-arm.c:30618 config/tc-arm.c:30619
+#: config/tc-arm.c:30620 config/tc-arm.c:30621
 msgid "use -mcpu=arm9tdmi"
 msgstr ""
 
-#: config/tc-arm.c:30620 config/tc-arm.c:30621
+#: config/tc-arm.c:30622 config/tc-arm.c:30623
 msgid "use -mcpu=arm920"
 msgstr ""
 
-#: config/tc-arm.c:30622 config/tc-arm.c:30623
+#: config/tc-arm.c:30624 config/tc-arm.c:30625
 msgid "use -mcpu=arm940"
 msgstr ""
 
-#: config/tc-arm.c:30624
+#: config/tc-arm.c:30626
 msgid "use -mcpu=strongarm"
 msgstr ""
 
-#: config/tc-arm.c:30626
+#: config/tc-arm.c:30628
 msgid "use -mcpu=strongarm110"
 msgstr ""
 
-#: config/tc-arm.c:30628
+#: config/tc-arm.c:30630
 msgid "use -mcpu=strongarm1100"
 msgstr ""
 
-#: config/tc-arm.c:30630
+#: config/tc-arm.c:30632
 msgid "use -mcpu=strongarm1110"
 msgstr ""
 
-#: config/tc-arm.c:30631
+#: config/tc-arm.c:30633
 msgid "use -mcpu=xscale"
 msgstr ""
 
-#: config/tc-arm.c:30632
+#: config/tc-arm.c:30634
 msgid "use -mcpu=iwmmxt"
 msgstr ""
 
-#: config/tc-arm.c:30633
+#: config/tc-arm.c:30635
 msgid "use -mcpu=all"
 msgstr ""
 
 #. Architecture variants -- don't add any more to this list either.
-#: config/tc-arm.c:30636 config/tc-arm.c:30637
+#: config/tc-arm.c:30638 config/tc-arm.c:30639
 msgid "use -march=armv2"
 msgstr ""
 
-#: config/tc-arm.c:30638 config/tc-arm.c:30639
+#: config/tc-arm.c:30640 config/tc-arm.c:30641
 msgid "use -march=armv2a"
 msgstr ""
 
-#: config/tc-arm.c:30640 config/tc-arm.c:30641
+#: config/tc-arm.c:30642 config/tc-arm.c:30643
 msgid "use -march=armv3"
 msgstr ""
 
-#: config/tc-arm.c:30642 config/tc-arm.c:30643
+#: config/tc-arm.c:30644 config/tc-arm.c:30645
 msgid "use -march=armv3m"
 msgstr ""
 
-#: config/tc-arm.c:30644 config/tc-arm.c:30645
+#: config/tc-arm.c:30646 config/tc-arm.c:30647
 msgid "use -march=armv4"
 msgstr ""
 
-#: config/tc-arm.c:30646 config/tc-arm.c:30647
+#: config/tc-arm.c:30648 config/tc-arm.c:30649
 msgid "use -march=armv4t"
 msgstr ""
 
-#: config/tc-arm.c:30648 config/tc-arm.c:30649
+#: config/tc-arm.c:30650 config/tc-arm.c:30651
 msgid "use -march=armv5"
 msgstr ""
 
-#: config/tc-arm.c:30650 config/tc-arm.c:30651
+#: config/tc-arm.c:30652 config/tc-arm.c:30653
 msgid "use -march=armv5t"
 msgstr ""
 
-#: config/tc-arm.c:30652 config/tc-arm.c:30653
+#: config/tc-arm.c:30654 config/tc-arm.c:30655
 msgid "use -march=armv5te"
 msgstr ""
 
 #. Floating point variants -- don't add any more to this list either.
-#: config/tc-arm.c:30656
+#: config/tc-arm.c:30658
 msgid "use -mfpu=fpe"
 msgstr ""
 
-#: config/tc-arm.c:30657
+#: config/tc-arm.c:30659
 msgid "use -mfpu=fpa10"
 msgstr ""
 
-#: config/tc-arm.c:30658
+#: config/tc-arm.c:30660
 msgid "use -mfpu=fpa11"
 msgstr ""
 
-#: config/tc-arm.c:30660
+#: config/tc-arm.c:30662
 msgid "use either -mfpu=softfpa or -mfpu=softvfp"
 msgstr ""
 
-#: config/tc-arm.c:31706
+#: config/tc-arm.c:31710
 msgid "extension does not apply to the base architecture"
 msgstr ""
 
-#: config/tc-arm.c:31735
+#: config/tc-arm.c:31739
 msgid "architectural extensions must be specified in alphabetical order"
 msgstr ""
 
-#: config/tc-arm.c:31874 config/tc-arm.c:32815
+#: config/tc-arm.c:31878 config/tc-arm.c:32819
 #, c-format
 msgid "unknown floating point format `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:31890
+#: config/tc-arm.c:31894
 #, c-format
 msgid "unknown floating point abi `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:31906
+#: config/tc-arm.c:31910
 #, c-format
 msgid "unknown EABI `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:31926
+#: config/tc-arm.c:31930
 #, c-format
 msgid "unknown implicit IT mode `%s', should be arm, thumb, always, or never."
 msgstr ""
 
-#: config/tc-arm.c:31949 config/tc-metag.c:5913
+#: config/tc-arm.c:31953 config/tc-metag.c:5913
 msgid "<fpu name>\t  assemble for FPU architecture <fpu name>"
 msgstr ""
 
-#: config/tc-arm.c:31951
+#: config/tc-arm.c:31955
 msgid "<abi>\t  assemble for floating point ABI <abi>"
 msgstr ""
 
-#: config/tc-arm.c:31954
+#: config/tc-arm.c:31958
 msgid "<ver>\t\t  assemble for eabi version <ver>"
 msgstr ""
 
-#: config/tc-arm.c:31957
+#: config/tc-arm.c:31961
 msgid "<mode>\t  controls implicit insertion of IT instructions"
 msgstr ""
 
-#: config/tc-arm.c:31959
+#: config/tc-arm.c:31963
 msgid "\t\t\t  TI CodeComposer Studio syntax compatibility mode"
 msgstr ""
 
-#: config/tc-arm.c:31962
+#: config/tc-arm.c:31966
 msgid ""
 "[ieee|alternative]\n"
 "                          set the encoding for half precision floating point "
@@ -5317,32 +5317,32 @@ msgid ""
 "                          or Arm alternative format."
 msgstr ""
 
-#: config/tc-arm.c:32073
+#: config/tc-arm.c:32077
 #, c-format
 msgid " ARM-specific assembler options:\n"
 msgstr ""
 
-#: config/tc-arm.c:32093
+#: config/tc-arm.c:32097
 #, c-format
 msgid "  --fix-v4bx              Allow BX in ARMv4 code\n"
 msgstr ""
 
-#: config/tc-arm.c:32097
+#: config/tc-arm.c:32101
 #, c-format
 msgid "  --fdpic                 generate an FDPIC object file\n"
 msgstr ""
 
-#: config/tc-arm.c:32403
+#: config/tc-arm.c:32407
 msgid "no architecture contains all the instructions used\n"
 msgstr ""
 
-#: config/tc-arm.c:32755
+#: config/tc-arm.c:32759
 #, c-format
 msgid ""
 "architectural extension `%s' is not allowed for the current base architecture"
 msgstr ""
 
-#: config/tc-arm.c:32778
+#: config/tc-arm.c:32782
 #, c-format
 msgid "unknown architecture extension `%s'\n"
 msgstr ""

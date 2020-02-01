@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-01-18 14:02+0000\n"
+"POT-Creation-Date: 2020-02-01 11:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,7 +96,7 @@ msgstr ""
 msgid "%s: cannot find section %s"
 msgstr ""
 
-#: addr2line.c:448 ar.c:747 dlltool.c:3507 nm.c:1712 objcopy.c:5949
+#: addr2line.c:448 ar.c:747 dlltool.c:3507 nm.c:1712 objcopy.c:5951
 #: objdump.c:5045 size.c:153 strings.c:291 windmc.c:960 windres.c:816
 msgid "fatal error: libbfd ABI mismatch"
 msgstr ""
@@ -413,7 +413,7 @@ msgstr ""
 msgid "Cannot convert existing thin library %s to normal format"
 msgstr ""
 
-#: ar.c:1033 ar.c:1130 ar.c:1446 objcopy.c:3549
+#: ar.c:1033 ar.c:1130 ar.c:1446 objcopy.c:3551
 #, c-format
 msgid "internal stat error on %s"
 msgstr ""
@@ -4785,7 +4785,7 @@ msgstr ""
 msgid "cannot open '%s': %s"
 msgstr ""
 
-#: objcopy.c:1093 objcopy.c:4971
+#: objcopy.c:1093 objcopy.c:4973
 #, c-format
 msgid "%s: fread failed"
 msgstr ""
@@ -4860,445 +4860,445 @@ msgstr ""
 msgid "copy from `%s' [unknown] to `%s' [unknown]\n"
 msgstr ""
 
-#: objcopy.c:2149
+#: objcopy.c:2151
 #, c-format
 msgid "%s[%s]: Cannot merge - there are relocations against this section"
 msgstr ""
 
-#: objcopy.c:2171
+#: objcopy.c:2173
 msgid "corrupt GNU build attribute note: description size not a factor of 4"
 msgstr ""
 
-#: objcopy.c:2178
+#: objcopy.c:2180
 msgid "corrupt GNU build attribute note: wrong note type"
 msgstr ""
 
-#: objcopy.c:2184
+#: objcopy.c:2186
 msgid "corrupt GNU build attribute note: note too big"
 msgstr ""
 
-#: objcopy.c:2190
+#: objcopy.c:2192
 msgid "corrupt GNU build attribute note: name too small"
 msgstr ""
 
-#: objcopy.c:2213
+#: objcopy.c:2215
 msgid "corrupt GNU build attribute note: unsupported version"
 msgstr ""
 
-#: objcopy.c:2262
+#: objcopy.c:2264
 msgid "corrupt GNU build attribute note: bad description size"
 msgstr ""
 
-#: objcopy.c:2293
+#: objcopy.c:2295
 msgid "corrupt GNU build attribute note: name not NUL terminated"
 msgstr ""
 
-#: objcopy.c:2305
+#: objcopy.c:2307
 msgid "corrupt GNU build attribute notes: excess data at end"
 msgstr ""
 
-#: objcopy.c:2312
+#: objcopy.c:2314
 msgid "bad GNU build attribute notes: no known versions detected"
 msgstr ""
 
 #. This happens with glibc.  No idea why.
-#: objcopy.c:2316
+#: objcopy.c:2318
 #, c-format
 msgid "%s[%s]: Warning: version note missing - assuming version 3"
 msgstr ""
 
-#: objcopy.c:2326
+#: objcopy.c:2328
 msgid "bad GNU build attribute notes: multiple different versions"
 msgstr ""
 
 #. PR 17636: Call non-fatal so that we return to our parent who
 #. may need to tidy temporary files.
-#: objcopy.c:2581
+#: objcopy.c:2583
 msgid "Unable to change endianness of input file(s)"
 msgstr ""
 
-#: objcopy.c:2593
+#: objcopy.c:2595
 #, c-format
 msgid "error: the input file '%s' has no sections"
 msgstr ""
 
-#: objcopy.c:2603
+#: objcopy.c:2605
 #, c-format
 msgid ""
 "--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"
 msgstr ""
 
-#: objcopy.c:2610
+#: objcopy.c:2612
 #, c-format
 msgid "--elf-stt-common=[yes|no] is unsupported on `%s'"
 msgstr ""
 
-#: objcopy.c:2617
+#: objcopy.c:2619
 #, c-format
 msgid "copy from `%s' [%s] to `%s' [%s]\n"
 msgstr ""
 
-#: objcopy.c:2665
+#: objcopy.c:2667
 #, c-format
 msgid "Input file `%s' ignores binary architecture parameter."
 msgstr ""
 
-#: objcopy.c:2681
+#: objcopy.c:2683
 #, c-format
 msgid "Unable to recognise the format of the input file `%s'"
 msgstr ""
 
-#: objcopy.c:2684
+#: objcopy.c:2686
 #, c-format
 msgid "Output file cannot represent architecture `%s'"
 msgstr ""
 
-#: objcopy.c:2747
+#: objcopy.c:2749
 #, c-format
 msgid "warning: file alignment (0x%s) > section alignment (0x%s)"
 msgstr ""
 
-#: objcopy.c:2813
+#: objcopy.c:2815
 #, c-format
 msgid "can't add section '%s'"
 msgstr ""
 
-#: objcopy.c:2827
+#: objcopy.c:2829
 #, c-format
 msgid "can't create section `%s'"
 msgstr ""
 
-#: objcopy.c:2875
+#: objcopy.c:2877
 #, c-format
 msgid "error: %s not found, can't be updated"
 msgstr ""
 
-#: objcopy.c:2908
+#: objcopy.c:2910
 msgid "warning: note section is empty"
 msgstr ""
 
-#: objcopy.c:2917
+#: objcopy.c:2919
 msgid "warning: could not load note section"
 msgstr ""
 
-#: objcopy.c:2933
+#: objcopy.c:2935
 msgid "warning: failed to set merged notes size"
 msgstr ""
 
-#: objcopy.c:2956
+#: objcopy.c:2958
 #, c-format
 msgid "can't dump section '%s' - it does not exist"
 msgstr ""
 
-#: objcopy.c:2964
+#: objcopy.c:2966
 msgid "can't dump section - it has no contents"
 msgstr ""
 
-#: objcopy.c:2972
+#: objcopy.c:2974
 msgid "can't dump section - it is empty"
 msgstr ""
 
-#: objcopy.c:2981
+#: objcopy.c:2983
 msgid "could not open section dump file"
 msgstr ""
 
-#: objcopy.c:2990
+#: objcopy.c:2992
 #, c-format
 msgid "error writing section contents to %s (error: %s)"
 msgstr ""
 
-#: objcopy.c:3000
+#: objcopy.c:3002
 msgid "could not retrieve section contents"
 msgstr ""
 
-#: objcopy.c:3014
+#: objcopy.c:3016
 #, c-format
 msgid "%s: debuglink section already exists"
 msgstr ""
 
-#: objcopy.c:3026
+#: objcopy.c:3028
 #, c-format
 msgid "cannot create debug link section `%s'"
 msgstr ""
 
-#: objcopy.c:3118
+#: objcopy.c:3120
 msgid "Can't fill gap after section"
 msgstr ""
 
-#: objcopy.c:3141
+#: objcopy.c:3143
 msgid "can't add padding"
 msgstr ""
 
-#: objcopy.c:3296
+#: objcopy.c:3298
 msgid "error: failed to locate merged notes"
 msgstr ""
 
-#: objcopy.c:3305
+#: objcopy.c:3307
 msgid "error: failed to merge notes"
 msgstr ""
 
-#: objcopy.c:3314
+#: objcopy.c:3316
 msgid "error: failed to copy merged notes into output"
 msgstr ""
 
-#: objcopy.c:3331
+#: objcopy.c:3333
 #, c-format
 msgid "%s: Could not find any mergeable note sections"
 msgstr ""
 
-#: objcopy.c:3340
+#: objcopy.c:3342
 #, c-format
 msgid "cannot fill debug link section `%s'"
 msgstr ""
 
-#: objcopy.c:3402
+#: objcopy.c:3404
 msgid "error copying private BFD data"
 msgstr ""
 
-#: objcopy.c:3413
+#: objcopy.c:3415
 #, c-format
 msgid "this target does not support %lu alternative machine codes"
 msgstr ""
 
-#: objcopy.c:3417
+#: objcopy.c:3419
 msgid "treating that number as an absolute e_machine value instead"
 msgstr ""
 
-#: objcopy.c:3421
+#: objcopy.c:3423
 msgid "ignoring the alternative value"
 msgstr ""
 
-#: objcopy.c:3467
+#: objcopy.c:3469
 msgid "sorry: copying thin archives is not currently supported"
 msgstr ""
 
-#: objcopy.c:3474 objcopy.c:3529
+#: objcopy.c:3476 objcopy.c:3531
 #, c-format
 msgid "cannot create tempdir for archive copying (error: %s)"
 msgstr ""
 
-#: objcopy.c:3511
+#: objcopy.c:3513
 #, c-format
 msgid "illegal pathname found in archive member: %s"
 msgstr ""
 
-#: objcopy.c:3562
+#: objcopy.c:3564
 msgid "Unable to recognise the format of file"
 msgstr ""
 
-#: objcopy.c:3695
+#: objcopy.c:3697
 #, c-format
 msgid "error: the input file '%s' is empty"
 msgstr ""
 
-#: objcopy.c:3768
+#: objcopy.c:3770
 #, c-format
 msgid "--add-gnu-debuglink ignored for archive %s"
 msgstr ""
 
-#: objcopy.c:3871
+#: objcopy.c:3873
 #, c-format
 msgid "Multiple renames of section %s"
 msgstr ""
 
-#: objcopy.c:3917
+#: objcopy.c:3919
 msgid "error in private header data"
 msgstr ""
 
-#: objcopy.c:4001
+#: objcopy.c:4003
 msgid "failed to create output section"
 msgstr ""
 
-#: objcopy.c:4016
+#: objcopy.c:4018
 msgid "failed to set size"
 msgstr ""
 
-#: objcopy.c:4035
+#: objcopy.c:4037
 msgid "failed to set vma"
 msgstr ""
 
-#: objcopy.c:4065
+#: objcopy.c:4067
 msgid "failed to set alignment"
 msgstr ""
 
-#: objcopy.c:4097
+#: objcopy.c:4099
 msgid "failed to copy private data"
 msgstr ""
 
-#: objcopy.c:4254
+#: objcopy.c:4256
 msgid "relocation count is negative"
 msgstr ""
 
 #. User must pad the section up in order to do this.
-#: objcopy.c:4351
+#: objcopy.c:4353
 #, c-format
 msgid ""
 "cannot reverse bytes: length of section %s must be evenly divisible by %d"
 msgstr ""
 
-#: objcopy.c:4560
+#: objcopy.c:4562
 msgid "can't create debugging section"
 msgstr ""
 
-#: objcopy.c:4574
+#: objcopy.c:4576
 msgid "can't set debugging section contents"
 msgstr ""
 
-#: objcopy.c:4583
+#: objcopy.c:4585
 #, c-format
 msgid "don't know how to write debugging information for %s"
 msgstr ""
 
-#: objcopy.c:4768
+#: objcopy.c:4770
 msgid "could not create temporary file to hold stripped copy"
 msgstr ""
 
-#: objcopy.c:4840
+#: objcopy.c:4842
 #, c-format
 msgid "%s: bad version in PE subsystem"
 msgstr ""
 
-#: objcopy.c:4870
+#: objcopy.c:4872
 #, c-format
 msgid "unknown PE subsystem: %s"
 msgstr ""
 
-#: objcopy.c:4924 objcopy.c:5194 objcopy.c:5274 objcopy.c:5415 objcopy.c:5447
-#: objcopy.c:5510 objcopy.c:5514 objcopy.c:5534
+#: objcopy.c:4926 objcopy.c:5196 objcopy.c:5276 objcopy.c:5417 objcopy.c:5449
+#: objcopy.c:5512 objcopy.c:5516 objcopy.c:5536
 #, c-format
 msgid "bad format for %s"
 msgstr ""
 
-#: objcopy.c:4953
+#: objcopy.c:4955
 #, c-format
 msgid "cannot open: %s: %s"
 msgstr ""
 
-#: objcopy.c:5006
+#: objcopy.c:5008
 msgid "byte number must be non-negative"
 msgstr ""
 
-#: objcopy.c:5012
+#: objcopy.c:5014
 #, c-format
 msgid "architecture %s unknown"
 msgstr ""
 
-#: objcopy.c:5020
+#: objcopy.c:5022
 msgid "interleave must be positive"
 msgstr ""
 
-#: objcopy.c:5029
+#: objcopy.c:5031
 msgid "interleave width must be positive"
 msgstr ""
 
-#: objcopy.c:5347
+#: objcopy.c:5349
 #, c-format
 msgid "unrecognized --compress-debug-sections type `%s'"
 msgstr ""
 
-#: objcopy.c:5368
+#: objcopy.c:5370
 #, c-format
 msgid "unrecognized --elf-stt-common= option `%s'"
 msgstr ""
 
-#: objcopy.c:5384
+#: objcopy.c:5386
 #, c-format
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr ""
 
-#: objcopy.c:5470
+#: objcopy.c:5472
 msgid "bad format for --set-section-alignment: argument needed"
 msgstr ""
 
-#: objcopy.c:5474
+#: objcopy.c:5476
 msgid "bad format for --set-section-alignment: numeric argument needed"
 msgstr ""
 
 #. Number has more than on 1, i.e. wasn't a power of 2.
-#: objcopy.c:5486
+#: objcopy.c:5488
 msgid "bad format for --set-section-alignment: alignment is not a power of two"
 msgstr ""
 
-#: objcopy.c:5589
+#: objcopy.c:5591
 #, c-format
 msgid "unknown long section names option '%s'"
 msgstr ""
 
-#: objcopy.c:5612
+#: objcopy.c:5614
 msgid "unable to parse alternative machine code"
 msgstr ""
 
-#: objcopy.c:5661
+#: objcopy.c:5663
 msgid "number of bytes to reverse must be positive and even"
 msgstr ""
 
-#: objcopy.c:5664
+#: objcopy.c:5666
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
 msgstr ""
 
-#: objcopy.c:5679
+#: objcopy.c:5681
 #, c-format
 msgid "%s: invalid reserve value for --heap"
 msgstr ""
 
-#: objcopy.c:5685
+#: objcopy.c:5687
 #, c-format
 msgid "%s: invalid commit value for --heap"
 msgstr ""
 
-#: objcopy.c:5710
+#: objcopy.c:5712
 #, c-format
 msgid "%s: invalid reserve value for --stack"
 msgstr ""
 
-#: objcopy.c:5716
+#: objcopy.c:5718
 #, c-format
 msgid "%s: invalid commit value for --stack"
 msgstr ""
 
-#: objcopy.c:5725
+#: objcopy.c:5727
 msgid "verilog data width must be at least 1 byte"
 msgstr ""
 
-#: objcopy.c:5742
+#: objcopy.c:5744
 msgid "--globalize-symbol(s) is incompatible with -G/--keep-global-symbol(s)"
 msgstr ""
 
-#: objcopy.c:5754
+#: objcopy.c:5756
 msgid "interleave start byte must be set with --byte"
 msgstr ""
 
-#: objcopy.c:5757
+#: objcopy.c:5759
 msgid "byte number must be less than interleave"
 msgstr ""
 
-#: objcopy.c:5760
+#: objcopy.c:5762
 msgid "interleave width must be less than or equal to interleave - byte`"
 msgstr ""
 
-#: objcopy.c:5789
+#: objcopy.c:5791
 #, c-format
 msgid "unknown input EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5820
+#: objcopy.c:5822
 #, c-format
 msgid "unknown output EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5833
+#: objcopy.c:5835
 #, c-format
 msgid "warning: could not locate '%s'.  System error message: %s"
 msgstr ""
 
-#: objcopy.c:5845
+#: objcopy.c:5847
 #, c-format
 msgid ""
 "warning: could not create temporary file whilst copying '%s', (error: %s)"
 msgstr ""
 
-#: objcopy.c:5878 objcopy.c:5892
+#: objcopy.c:5880 objcopy.c:5894
 #, c-format
 msgid "%s %s%c0x%s never used"
 msgstr ""

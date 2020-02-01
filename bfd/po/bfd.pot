@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-01-18 14:01+0000\n"
+"POT-Creation-Date: 2020-02-01 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -274,8 +274,8 @@ msgstr ""
 msgid "using multiple gp values"
 msgstr ""
 
-#: coff-alpha.c:1501 coff-alpha.c:1507 elf.c:9274 elf32-mcore.c:100
-#: elf32-mcore.c:455 elf32-ppc.c:7670 elf32-ppc.c:8821 elf64-ppc.c:15566
+#: coff-alpha.c:1501 coff-alpha.c:1507 elf.c:9280 elf32-mcore.c:100
+#: elf32-mcore.c:455 elf32-ppc.c:7670 elf32-ppc.c:8821 elf64-ppc.c:15567
 #, c-format
 msgid "%pB: %s unsupported"
 msgstr ""
@@ -498,16 +498,16 @@ msgstr ""
 msgid "<corrupt info> %s"
 msgstr ""
 
-#: coffgen.c:2706 elflink.c:14466 linker.c:2960
+#: coffgen.c:2706 elflink.c:14470 linker.c:2960
 msgid "%F%P: already_linked_table: %E\n"
 msgstr ""
 
-#: coffgen.c:3047 elflink.c:13460
+#: coffgen.c:3047 elflink.c:13464
 #, c-format
 msgid "removing unused section '%pA' in file '%pB'"
 msgstr ""
 
-#: coffgen.c:3124 elflink.c:13678
+#: coffgen.c:3124 elflink.c:13682
 msgid "warning: gc-sections option ignored"
 msgstr ""
 
@@ -1221,7 +1221,7 @@ msgstr ""
 msgid "%pB: not enough room for program headers, try linking with -N"
 msgstr ""
 
-#: elf.c:5808
+#: elf.c:5814
 #, c-format
 msgid "%pB: section %pA lma %#<PRIx64> adjusted to %#<PRIx64>"
 msgstr ""
@@ -1229,74 +1229,74 @@ msgstr ""
 #. The fix for this error is usually to edit the linker script being
 #. used and set up the program headers manually.  Either that or
 #. leave room for the headers at the start of the SECTIONS.
-#: elf.c:5928
+#: elf.c:5934
 #, c-format
 msgid "%pB: error: PHDR segment not covered by LOAD segment"
 msgstr ""
 
-#: elf.c:5964
+#: elf.c:5970
 #, c-format
 msgid "%pB: section `%pA' can't be allocated in segment %d"
 msgstr ""
 
-#: elf.c:6095
+#: elf.c:6101
 #, c-format
 msgid "%pB: warning: allocated section `%s' not in segment"
 msgstr ""
 
-#: elf.c:6256
+#: elf.c:6262
 #, c-format
 msgid ""
 "%pB: error: non-load segment %d includes file header and/or program header"
 msgstr ""
 
-#: elf.c:6760
+#: elf.c:6766
 #, c-format
 msgid "%pB: symbol `%s' required but not present"
 msgstr ""
 
-#: elf.c:7102
+#: elf.c:7108
 #, c-format
 msgid ""
 "%pB: warning: empty loadable segment detected at vaddr=%#<PRIx64>, is this "
 "intentional?"
 msgstr ""
 
-#: elf.c:7722
+#: elf.c:7728
 #, c-format
 msgid "%pB: warning: segment alignment of %#<PRIx64> is too large"
 msgstr ""
 
-#: elf.c:8222
+#: elf.c:8228
 #, c-format
 msgid ""
 "unable to find equivalent output section for symbol '%s' from section '%s'"
 msgstr ""
 
-#: elf.c:8577
+#: elf.c:8583
 #, c-format
 msgid "%pB: .gnu.version_r invalid entry"
 msgstr ""
 
-#: elf.c:8593
+#: elf.c:8599
 #, c-format
 msgid "error: %pB version reference section is too large (%#<PRIx64> bytes)"
 msgstr ""
 
-#: elf.c:8716
+#: elf.c:8722
 #, c-format
 msgid "%pB: .gnu.version_d invalid entry"
 msgstr ""
 
-#: elf.c:12238
+#: elf.c:12244
 msgid "GNU_MBIND section is unsupported"
 msgstr ""
 
-#: elf.c:12240
+#: elf.c:12246
 msgid "symbol type STT_GNU_IFUNC is unsupported"
 msgstr ""
 
-#: elf.c:12242
+#: elf.c:12248
 msgid "symbol binding STB_GNU_UNIQUE is unsupported"
 msgstr ""
 
@@ -3152,7 +3152,7 @@ msgstr ""
 msgid "%X%H: unsupported bss-plt -fPIC ifunc %s\n"
 msgstr ""
 
-#: elf32-ppc.c:7646 elf64-ppc.c:16456
+#: elf32-ppc.c:7646 elf64-ppc.c:16457
 msgid "%H: warning: %s unexpected insn %#x.\n"
 msgstr ""
 
@@ -3204,13 +3204,13 @@ msgstr ""
 msgid "%H: %s reloc against `%s': error %d\n"
 msgstr ""
 
-#: elf32-ppc.c:9947 elf64-ppc.c:17009
+#: elf32-ppc.c:9947 elf64-ppc.c:17010
 msgid ""
 "%X%P: text relocations and GNU indirect functions will result in a segfault "
 "at runtime\n"
 msgstr ""
 
-#: elf32-ppc.c:9951 elf64-ppc.c:17013
+#: elf32-ppc.c:9951 elf64-ppc.c:17014
 msgid ""
 "%P: warning: text relocations and GNU indirect functions may result in a "
 "segfault at runtime\n"
@@ -3587,7 +3587,7 @@ msgstr ""
 msgid "overlay stub relocation overflow"
 msgstr ""
 
-#: elf32-spu.c:1992 elf64-ppc.c:14110
+#: elf32-spu.c:1992 elf64-ppc.c:14111
 msgid "stubs don't match calculated size"
 msgstr ""
 
@@ -4442,7 +4442,7 @@ msgstr ""
 msgid "can't find branch stub `%s'"
 msgstr ""
 
-#: elf64-ppc.c:11235 elf64-ppc.c:11502 elf64-ppc.c:13671
+#: elf64-ppc.c:11235 elf64-ppc.c:11502 elf64-ppc.c:13672
 #, c-format
 msgid "%P: linkage table error against `%pT'\n"
 msgstr ""
@@ -4457,19 +4457,19 @@ msgstr ""
 msgid "%pB section %pA exceeds stub group size"
 msgstr ""
 
-#: elf64-ppc.c:14069 elf64-ppc.c:14088
+#: elf64-ppc.c:14070 elf64-ppc.c:14089
 #, c-format
 msgid "%s offset too large for .eh_frame sdata4 encoding"
 msgstr ""
 
-#: elf64-ppc.c:14124
+#: elf64-ppc.c:14125
 #, c-format
 msgid "linker stubs in %u group\n"
 msgid_plural "linker stubs in %u groups\n"
 msgstr[0] ""
 msgstr[1] ""
 
-#: elf64-ppc.c:14128
+#: elf64-ppc.c:14129
 #, c-format
 msgid ""
 "  branch         %lu\n"
@@ -4487,54 +4487,54 @@ msgid ""
 "  global entry   %lu"
 msgstr ""
 
-#: elf64-ppc.c:14523
+#: elf64-ppc.c:14524
 #, c-format
 msgid "%H: %s used with TLS symbol `%pT'\n"
 msgstr ""
 
-#: elf64-ppc.c:14525
+#: elf64-ppc.c:14526
 #, c-format
 msgid "%H: %s used with non-TLS symbol `%pT'\n"
 msgstr ""
 
-#: elf64-ppc.c:15279
+#: elf64-ppc.c:15280
 #, c-format
 msgid "%H: call to `%pT' lacks nop, can't restore toc; (plt call stub)\n"
 msgstr ""
 
-#: elf64-ppc.c:15285
+#: elf64-ppc.c:15286
 #, c-format
 msgid ""
 "%H: call to `%pT' lacks nop, can't restore toc; (toc save/adjust stub)\n"
 msgstr ""
 
-#: elf64-ppc.c:16170
+#: elf64-ppc.c:16171
 #, c-format
 msgid "%H: %s for indirect function `%pT' unsupported\n"
 msgstr ""
 
-#: elf64-ppc.c:16257
+#: elf64-ppc.c:16258
 #, c-format
 msgid ""
 "%X%P: %pB: %s against %pT is not supported by glibc as a dynamic relocation\n"
 msgstr ""
 
-#: elf64-ppc.c:16312
+#: elf64-ppc.c:16313
 #, c-format
 msgid "%P: %pB: %s is not supported for `%pT'\n"
 msgstr ""
 
-#: elf64-ppc.c:16571
+#: elf64-ppc.c:16572
 #, c-format
 msgid "%H: error: %s not a multiple of %u\n"
 msgstr ""
 
-#: elf64-ppc.c:16594
+#: elf64-ppc.c:16595
 #, c-format
 msgid "%H: unresolvable %s against `%pT'\n"
 msgstr ""
 
-#: elf64-ppc.c:16739
+#: elf64-ppc.c:16740
 #, c-format
 msgid "%H: %s against `%pT': error %d\n"
 msgstr ""
@@ -4965,17 +4965,17 @@ msgstr ""
 msgid "%P%X: can not read symbols: %E\n"
 msgstr ""
 
-#: elflink.c:13804
+#: elflink.c:13808
 #, c-format
 msgid "%pB: %pA+%#<PRIx64>: no symbol found for INHERIT"
 msgstr ""
 
-#: elflink.c:13845
+#: elflink.c:13849
 #, c-format
 msgid "%pB: section '%pA': corrupt VTENTRY entry"
 msgstr ""
 
-#: elflink.c:13988
+#: elflink.c:13992
 #, c-format
 msgid "unrecognized INPUT_SECTION_FLAG %s\n"
 msgstr ""

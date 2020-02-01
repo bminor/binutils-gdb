@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-01-18 14:04+0000\n"
+"POT-Creation-Date: 2020-02-01 11:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -269,57 +269,57 @@ msgstr ""
 msgid "%F%P:%pS / by zero\n"
 msgstr ""
 
-#: ldexp.c:733 ldlang.c:3830 ldmain.c:1194 earm_wince_pe.c:1772 earmpe.c:1772
+#: ldexp.c:735 ldlang.c:3830 ldmain.c:1194 earm_wince_pe.c:1772 earmpe.c:1772
 #: ei386pe.c:1772 ei386pe_posix.c:1772 ei386pep.c:1646 emcorepe.c:1772
 #: eppcpe.c:1772 eshpe.c:1772
 msgid "%F%P: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldexp.c:745
+#: ldexp.c:748
 msgid "%X%P:%pS: unresolvable symbol `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:760
+#: ldexp.c:763
 msgid "%F%P:%pS: undefined symbol `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:798 ldexp.c:816 ldexp.c:844
+#: ldexp.c:801 ldexp.c:819 ldexp.c:847
 msgid "%F%P:%pS: undefined section `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:875 ldexp.c:889
+#: ldexp.c:878 ldexp.c:892
 msgid "%F%P:%pS: undefined MEMORY region `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:901
+#: ldexp.c:904
 msgid "%F%P:%pS: unknown constant `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:1049
+#: ldexp.c:1052
 msgid "%F%P:%pS can not PROVIDE assignment to location counter\n"
 msgstr ""
 
-#: ldexp.c:1082
+#: ldexp.c:1085
 msgid "%F%P:%pS invalid assignment to location counter\n"
 msgstr ""
 
-#: ldexp.c:1086
+#: ldexp.c:1089
 msgid "%F%P:%pS assignment to location counter invalid outside of SECTIONS\n"
 msgstr ""
 
-#: ldexp.c:1105
+#: ldexp.c:1108
 msgid "%F%P:%pS cannot move location counter backwards (from %V to %V)\n"
 msgstr ""
 
-#: ldexp.c:1165
+#: ldexp.c:1168
 msgid "%F%P:%s: hash creation failed\n"
 msgstr ""
 
-#: ldexp.c:1530 ldexp.c:1572 ldexp.c:1632
+#: ldexp.c:1533 ldexp.c:1575 ldexp.c:1635
 msgid "%F%P:%pS: nonconstant expression for %s\n"
 msgstr ""
 
-#: ldexp.c:1658 ldlang.c:1255 ldlang.c:3405 ldlang.c:7644
+#: ldexp.c:1661 ldlang.c:1255 ldlang.c:3405 ldlang.c:7644
 msgid "%F%P: can not create hash table: %E\n"
 msgstr ""
 
