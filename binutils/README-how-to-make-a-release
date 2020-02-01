@@ -196,7 +196,7 @@ When the time comes to actually make the release....
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
-      value.  Eg "2.33.90" becomes "2.34".  Change bfd/development.sh
+      value.  Eg "2.34.90" becomes "2.35".  Change bfd/development.sh
       to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
       updates and add a  "this-is-the-2.3x-release" comment and
@@ -211,7 +211,7 @@ When the time comes to actually make the release....
       Remove any spurious autom4te.cache files left over from the
       reconfiguring:
 
-            % find . -depth -name autom4te.cache -exec rm -r {} \;
+            git clean -fdx
 
   23. Note - check to see if any new files have been added to the top
       level of the source directory, but which are not in the
@@ -223,21 +223,39 @@ When the time comes to actually make the release....
             ./src-release.sh -b -g -l -x binutils
 
   24. Check that the files in the tarballs have the correct
-      permissions. 
+      permissions.  (FIXME: How to do this ?)
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
       source directory read-only before building.  Also test
       "make install".  If necessary fix any problems.
 
+        cd /dev/shm
+	mkdir delme
+	cd delme
+	tar xvf <path-to-sources>/binutils-2.X.tar.xz
+	chmod -R -w binutils-2.X
+	mkdir build
+	cd build
+	../binutils-2.X/configure --enable-gold --prefix=`pwd`/install
+	make all-gas all-gold all-ld all-binutils all-gprof
+	make check-gas check-binutils check-ld check-gold
+        make install-gas install-gold install-ld install-binutils
+
   26. Tag the branch with the new release number:
 
             git tag -a binutils-2_3x
 	      [optional: add "-u XXXXX" to sign with a gpg key]
-	    git push origin binutils-2_3x
-
+	      enter a tag message such as: "Official Binutils 2.3x release"
+	      
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
+
+        Then push the release:
+	
+	    git push origin binutils-2_3x
+
+        If you get an error message along the lines of "Invalid revision range ..." you can ignore it.
 
   27. Upload the tarballs to ftp.gnu.org.
 
@@ -256,8 +274,9 @@ When the time comes to actually make the release....
  	 chmod 644 binutils-2.3x.tar.*
 	 quit
 
-      FIXME: Should the signatures (created by the gnupload script in
-      step 29) be uploaded as well ?
+      FIXME: Are the signatures (created by the gnupload script in step 27) needed ?
+      [The above commands upload them and nobody has complained, so suggest that they
+      are retained].
 
   29. Update web pages.  For sourceware.org:
 
@@ -268,7 +287,11 @@ When the time comes to actually make the release....
          cd /sourceware/www/sourceware/htdocs/binutils
 	 mkdir docs-2.3x
 	 cd docs-2.3x
-	 mkdir as bfd binutils gprof ld
+	 mkdir as
+	 mkdir bfd
+	 mkdir binutils
+	 mkdir gprof
+	 mkdir ld
 	 cd ../docs-2.3(x-1)
 	 get index.html
 
@@ -284,8 +307,8 @@ When the time comes to actually make the release....
       directories had to be made by hand, as shown above).
 
          cd as
-	 lcd <build-dir>/gas/doc/as.html<
-	 put *
+	 lcd <build-dir>/gas/doc/as.html
+	 put *      {be patient - this takes a long time...}
 	 cd ../bfd
 	 lcd ../../../bfd/doc/bfd.html
 	 put *
@@ -300,7 +323,7 @@ When the time comes to actually make the release....
 	 put *
 	 
       Edit the top level binutils index.html file to change the links
-      to the new documentation.
+      to point to the new documentation.
 
          cd ../../..
 	 get index.html
@@ -334,13 +357,13 @@ When the time comes to actually make the release....
 
           checksums: xxxx
 
-       This release contains numerous bug fixes, and also the
-       following new features:
+        This release contains numerous bug fixes, and also the
+        following new features:
 
           <extract info from the NEWS files>
 
-       Our thanks go out to all of the binutils contributors, past and
-       present, for helping to make this release possible.
+        Our thanks go out to all of the binutils contributors, past and
+        present, for helping to make this release possible.
 
       -----------------------------------------------------------------------
 
@@ -358,13 +381,13 @@ When the time comes to actually make the release....
       is now open for business as usual and that patched no longer
       need special approval.
 
-  34. Examine the bfd/config.bfd file and move any pending obsolete
-      targets into the definitely obsolete section.  Create a
-      changelog entry and commit.
+  34. Examine the bfd/config.bfd file in the mainline sources and move
+      any pending obsolete targets into the definitely obsolete
+      section.  Create a changelog entry and commit.
       
--------------------------------------------------
+--------------------------------------------------------------------------
 How to perform a point release.
--------------------------------------------------
+--------------------------------------------------------------------------
 
 A point release is easier than a normal release since a lot of the
 work has already been done.  The branch has been created, the
