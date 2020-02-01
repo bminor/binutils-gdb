@@ -1090,7 +1090,7 @@ frv_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 15, 16, 32, total_length, pc, & value);
-        value = ((((value) << (2))) + (pc));
+        value = ((((value) * (4))) + (pc));
         fields->f_label16 = value;
       }
       break;
@@ -1101,7 +1101,7 @@ frv_cgen_extract_operand (CGEN_CPU_DESC cd,
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 18, 32, total_length, pc, & fields->f_labelL18);
         if (length <= 0) break;
 {
-  FLD (f_label24) = ((((((((FLD (f_labelH6)) << (18))) | (FLD (f_labelL18)))) << (2))) + (pc));
+  FLD (f_label24) = ((((((((FLD (f_labelH6)) * (((1) << (18))))) | (FLD (f_labelL18)))) * (4))) + (pc));
 }
       }
       break;
@@ -1156,7 +1156,7 @@ frv_cgen_extract_operand (CGEN_CPU_DESC cd,
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 5, 6, 32, total_length, pc, & fields->f_u12_l);
         if (length <= 0) break;
 {
-  FLD (f_u12) = ((((FLD (f_u12_h)) << (6))) | (FLD (f_u12_l)));
+  FLD (f_u12) = ((((FLD (f_u12_h)) * (64))) | (FLD (f_u12_l)));
 }
       }
       break;

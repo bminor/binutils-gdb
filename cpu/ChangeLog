@@ -1,3 +1,8 @@
+2020-02-01  Alan Modra  <amodra@gmail.com>
+
+	* frv.cpu (f-u12): Multiply rather than left shift signed values.
+	(f-label16, f-label24): Likewise.
+
 2020-01-30  Alan Modra  <amodra@gmail.com>
 
 	* m32c.cpu (f-src32-rn-unprefixed-QI): Shift before inverting.
