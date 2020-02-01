@@ -1,6 +1,11 @@
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+
+2020-02-01  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.34 release.
+	* configure: Regenerate.
 
 2020-01-23  Nick Clifton  <nickc@redhat.com>
 

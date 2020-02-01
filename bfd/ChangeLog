@@ -1,6 +1,15 @@
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
+	* development.sh: Set development to true.
+	* version.m4: Set to 2.34.0.
+	* configure: Regenerate.
+
+2020-02-01  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.34 release.
+	* development.sh: Set fields to false.
+	* version.m4: Set to 2.34.
+	* configure: Regenerate.
 
 2020-01-29  Alan Modra  <amodra@gmail.com>
 
