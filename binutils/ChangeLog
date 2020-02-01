@@ -1,3 +1,9 @@
+2020-02-03  Sergei Trofimovich  <siarheit@google.com>
+
+	* coffdump.c (program_name): Drop redundant definition.
+	* srconv.c (program_name): Likewise
+	* sysdump.c (program_name): Likewise
+
 2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25380
