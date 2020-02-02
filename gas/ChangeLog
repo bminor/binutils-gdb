@@ -1,3 +1,7 @@
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/elf/section13.s: Replace @nobits with %nobits.
+
 2020-02-01  Anthony Green  <green@moxielogic.com>
 
        * config/tc-moxie.c (md_begin): Don't force big-endian mode.
