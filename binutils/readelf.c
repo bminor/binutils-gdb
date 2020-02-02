@@ -1629,7 +1629,8 @@ dump_relocations (Filedata *          filedata,
 	{
 	  if (symtab == NULL || symtab_index >= nsyms)
 	    {
-	      error (_(" bad symbol index: %08lx in reloc"), (unsigned long) symtab_index);
+	      error (_(" bad symbol index: %08lx in reloc\n"),
+		     (unsigned long) symtab_index);
 	      res = FALSE;
 	    }
 	  else
@@ -1733,7 +1734,8 @@ dump_relocations (Filedata *          filedata,
 		printf (_("<string table index: %3ld>"), psym->st_name);
 	      else if (psym->st_name >= strtablen)
 		{
-		  error (_("<corrupt string table index: %3ld>"), psym->st_name);
+		  error (_("<corrupt string table index: %3ld>\n"),
+			 psym->st_name);
 		  res = FALSE;
 		}
 	      else
@@ -8786,7 +8788,7 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	    }
 	  if (i == sizeof (buf))
 	    {
-	      error (_("corrupt change to vsp"));
+	      error (_("corrupt change to vsp\n"));
 	      res = FALSE;
 	    }
 	  else
@@ -9877,7 +9879,8 @@ process_dynamic_section (Filedata * filedata)
 	  if ((bfd_size_type) section.sh_offset > filedata->file_size)
 	    {
 	      /* See PR 21379 for a reproducer.  */
-	      error (_("Invalid DT_SYMTAB entry: %lx"), (long) section.sh_offset);
+	      error (_("Invalid DT_SYMTAB entry: %lx\n"),
+		     (long) section.sh_offset);
 	      return FALSE;
 	    }
 
@@ -11176,7 +11179,7 @@ get_symbol_visibility (unsigned int visibility)
     case STV_HIDDEN:	return "HIDDEN";
     case STV_PROTECTED: return "PROTECTED";
     default:
-      error (_("Unrecognized visibility value: %u"), visibility);
+      error (_("Unrecognized visibility value: %u\n"), visibility);
       return _("<unknown>");
     }
 }
@@ -11189,7 +11192,7 @@ get_alpha_symbol_other (unsigned int other)
     case STO_ALPHA_NOPV:       return "NOPV";
     case STO_ALPHA_STD_GPLOAD: return "STD GPLOAD";
     default:
-      error (_("Unrecognized alpha specific other value: %u"), other);
+      error (_("Unrecognized alpha specific other value: %u\n"), other);
       return _("<unknown>");
     }
 }

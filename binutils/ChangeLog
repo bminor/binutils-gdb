@@ -1,3 +1,10 @@
+2020-02-03  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* readelf.c (dump_relocations, dump_relocations)
+	(decode_arm_unwind_bytecode, process_dynamic_section)
+	(get_symbol_visibility, get_alpha_symbol_other): Add newline to
+	error message.
+
 2020-02-03  Sergei Trofimovich  <siarheit@google.com>
 
 	* coffdump.c (program_name): Drop redundant definition.
