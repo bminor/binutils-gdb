@@ -28,6 +28,11 @@
 
 #include <sys/ptrace.h>
 
+/* Work around glibc header breakage causing ELF_NFPREG not to be usable.  */
+#ifndef NFPREG
+# define NFPREG 33
+#endif
+
 /* RISC-V Linux native additions to the default linux support.  */
 
 class riscv_linux_nat_target final : public linux_nat_target
@@ -88,21 +93,35 @@ static void
 supply_fpregset_regnum (struct regcache *regcache, const prfpregset_t *fpregs,
 			int regnum)
 {
+  int flen = register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
+  union
+    {
+      const prfpregset_t *fpregs;
+      const gdb_byte *buf;
+    }
+  fpbuf = { .fpregs = fpregs };
   int i;
 
   if (regnum == -1)
     {
       /* We only support the FP registers and FCSR here.  */
-      for (i = RISCV_FIRST_FP_REGNUM; i <= RISCV_LAST_FP_REGNUM; i++)
-	regcache->raw_supply (i, &fpregs->__d.__f[i - RISCV_FIRST_FP_REGNUM]);
+      for (i = RISCV_FIRST_FP_REGNUM;
+	   i <= RISCV_LAST_FP_REGNUM;
+	   i++, fpbuf.buf += flen)
+	regcache->raw_supply (i, fpbuf.buf);
 
-      regcache->raw_supply (RISCV_CSR_FCSR_REGNUM, &fpregs->__d.__fcsr);
+      regcache->raw_supply (RISCV_CSR_FCSR_REGNUM, fpbuf.buf);
     }
   else if (regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
-    regcache->raw_supply (regnum,
-			  &fpregs->__d.__f[regnum - RISCV_FIRST_FP_REGNUM]);
+    {
+      fpbuf.buf += flen * (regnum - RISCV_FIRST_FP_REGNUM);
+      regcache->raw_supply (regnum, fpbuf.buf);
+    }
   else if (regnum == RISCV_CSR_FCSR_REGNUM)
-    regcache->raw_supply (RISCV_CSR_FCSR_REGNUM, &fpregs->__d.__fcsr);
+    {
+      fpbuf.buf += flen * (RISCV_LAST_FP_REGNUM - RISCV_FIRST_FP_REGNUM + 1);
+      regcache->raw_supply (RISCV_CSR_FCSR_REGNUM, fpbuf.buf);
+    }
 }
 
 /* Copy all floating point registers from regset FPREGS into REGCACHE.  */
@@ -145,19 +164,35 @@ void
 fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 	       int regnum)
 {
+  int flen = register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
+  union
+    {
+      prfpregset_t *fpregs;
+      gdb_byte *buf;
+    }
+  fpbuf = { .fpregs = fpregs };
+  int i;
+
   if (regnum == -1)
     {
       /* We only support the FP registers and FCSR here.  */
-      for (int i = RISCV_FIRST_FP_REGNUM; i <= RISCV_LAST_FP_REGNUM; i++)
-	regcache->raw_collect (i, &fpregs->__d.__f[i - RISCV_FIRST_FP_REGNUM]);
+      for (i = RISCV_FIRST_FP_REGNUM;
+	   i <= RISCV_LAST_FP_REGNUM;
+	   i++, fpbuf.buf += flen)
+	regcache->raw_collect (i, fpbuf.buf);
 
-      regcache->raw_collect (RISCV_CSR_FCSR_REGNUM, &fpregs->__d.__fcsr);
+      regcache->raw_collect (RISCV_CSR_FCSR_REGNUM, fpbuf.buf);
     }
   else if (regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
-    regcache->raw_collect (regnum,
-			   &fpregs->__d.__f[regnum - RISCV_FIRST_FP_REGNUM]);
+    {
+      fpbuf.buf += flen * (regnum - RISCV_FIRST_FP_REGNUM);
+      regcache->raw_collect (regnum, fpbuf.buf);
+    }
   else if (regnum == RISCV_CSR_FCSR_REGNUM)
-    regcache->raw_collect (RISCV_CSR_FCSR_REGNUM, &fpregs->__d.__fcsr);
+    {
+      fpbuf.buf += flen * (RISCV_LAST_FP_REGNUM - RISCV_FIRST_FP_REGNUM + 1);
+      regcache->raw_collect (RISCV_CSR_FCSR_REGNUM, fpbuf.buf);
+    }
 }
 
 /* Return a target description for the current target.  */
@@ -166,8 +201,8 @@ const struct target_desc *
 riscv_linux_nat_target::read_description ()
 {
   struct riscv_gdbarch_features features;
-  struct iovec iov;
   elf_fpregset_t regs;
+  int flen;
   int tid;
 
   /* Figuring out xlen is easy.  */
@@ -175,19 +210,40 @@ riscv_linux_nat_target::read_description ()
 
   tid = inferior_ptid.lwp ();
 
-  iov.iov_base = &regs;
-  iov.iov_len = sizeof (regs);
+  /* Start with no f-registers.  */
+  features.flen = 0;
 
-  /* Can we fetch the f-registers?  */
-  if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
-	      (PTRACE_TYPE_ARG3) &iov) == -1)
-    features.flen = 0;		/* No f-registers.  */
-  else
+  /* How much worth of f-registers can we fetch if any?  */
+  for (flen = sizeof (regs.__f.__f[0]); ; flen *= 2)
     {
-      /* TODO: We need a way to figure out the actual length of the
-	 f-registers.  We could have 64-bit x-registers, with 32-bit
-	 f-registers.  For now, just assumed xlen and flen match.  */
-      features.flen = features.xlen;
+      size_t regset_size;
+      struct iovec iov;
+
+      /* Regsets have a uniform slot size, so we count FSCR like
+	 an FP data register.  */
+      regset_size = ELF_NFPREG * flen;
+      if (regset_size > sizeof (regs))
+	break;
+
+      iov.iov_base = &regs;
+      iov.iov_len = regset_size;
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
+		  (PTRACE_TYPE_ARG3) &iov) == -1)
+	{
+	  switch (errno)
+	    {
+	    case EINVAL:
+	      continue;
+	    case EIO:
+	      break;
+	    default:
+	      perror_with_name (_("Couldn't get registers"));
+	      break;
+	    }
+	}
+      else
+	features.flen = flen;
+      break;
     }
 
   return riscv_create_target_description (features);
@@ -228,7 +284,9 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       elf_fpregset_t regs;
 
       iov.iov_base = &regs;
-      iov.iov_len = sizeof (regs);
+      iov.iov_len = ELF_NFPREG * register_size (regcache->arch (),
+						RISCV_FIRST_FP_REGNUM);
+      gdb_assert (iov.iov_len <= sizeof (regs));
 
       if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
 		  (PTRACE_TYPE_ARG3) &iov) == -1)
@@ -289,7 +347,9 @@ riscv_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
       elf_fpregset_t regs;
 
       iov.iov_base = &regs;
-      iov.iov_len = sizeof (regs);
+      iov.iov_len = ELF_NFPREG * register_size (regcache->arch (),
+						RISCV_FIRST_FP_REGNUM);
+      gdb_assert (iov.iov_len <= sizeof (regs));
 
       if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
 		  (PTRACE_TYPE_ARG3) &iov) == -1)
