@@ -1,3 +1,8 @@
+2020-02-03  Lukas Durfina  <ldurfina@tachyum.com>  (tiny change)
+
+	* gdb.base/fileio.c: Remove #include of <sys/errno.h>.
+	Replace #include of <sys/fcntl.h> by <fcntl.h>.
+
 2020-02-01  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.server/server-kill-python.exp: Fix $gdb_tst_name typo.
