@@ -292,7 +292,7 @@ CODE_FRAGMENT
 .#define SEC_LINKER_CREATED           0x100000
 .
 .  {* This section contains a section ID to distinguish different
-.     sections withe the same section name.  *}
+.     sections with the same section name.  *}
 .#define SEC_ASSEMBLER_SECTION_ID     0x100000
 .
 .  {* This section should not be subject to garbage collection.

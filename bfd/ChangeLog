@@ -1,5 +1,10 @@
 2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfd-in2.h: Regenerated.
+	* section.c (SEC_ASSEMBLER_SECTION_ID): Fix a typo in comments.
+
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/25380
 	* bfd-in2.h: Regenerated.
 	* ecoff.c (bfd_debug_section): Add section_id.
