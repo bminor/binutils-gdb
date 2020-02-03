@@ -366,8 +366,6 @@ func:
 	.long  0x7eede58c    /* stwat   r23,r13,28         */
 	.long  0x4c000264    /* urfid                      */
 	.long  0x7c00f6e4    /* rmieg   r30                */
-	.long  0x7d407a6a    /* ldmx    r10,0,r15          */
-	.long  0x7d437a6a    /* ldmx    r10,r3,r15         */
 	.long  0x4c0002e4    /* stop                       */
 	.long  0x7c00003c    /* wait                       */
 	.long  0x7c00003c    /* wait                       */

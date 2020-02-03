@@ -1,3 +1,15 @@
+2020-02-03  Rogerio A. Cardoso  <rcardoso@linux.ibm.com>
+
+	* gdb.arch/powerpc-power8.exp: Delete trailing whitespace of
+	tbegin., tend. instructions. Replace bctar-, bctar+, bctarl-,
+	bctarl+ extended mnemonics when avaliable by bgttar, bnstarl,
+	blttar, bnetarl.
+	* gdb.arch/powerpc-power8.s: Fix comments. Fix instructions
+	binary for blttar, bnetarl.
+	* gdb.arch/powerpc-power9.exp: Delete trailing whitespace of
+	wait instruction. Delete ldmx test.
+	* gdb.arch/powerpc-power9.s: Delete ldmx instruction.
+
 2020-02-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* gdb.fortran/array-bounds-high.exp: New file.
