@@ -1401,7 +1401,7 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_64_HI :
       {
         long value = fields->f_dsp_64_s16;
-        value = EXTHISI (((HI) (INT) (((((((UINT) (value) >> (8))) & (255))) | (((((value) << (8))) & (65280)))))));
+        value = EXTHISI (((HI) (INT) (((((((UINT) (value) >> (8))) & (255))) | (((((value) & (255))) << (8)))))));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 64, 0, 16, 32, total_length, buffer);
       }
       break;
@@ -2561,7 +2561,7 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 64, 0, 16, 32, total_length, pc, & value);
-        value = EXTHISI (((HI) (INT) (((((((UINT) (value) >> (8))) & (255))) | (((((value) << (8))) & (65280)))))));
+        value = EXTHISI (((HI) (INT) (((((((UINT) (value) >> (8))) & (255))) | (((((value) & (255))) << (8)))))));
         fields->f_dsp_64_s16 = value;
       }
       break;

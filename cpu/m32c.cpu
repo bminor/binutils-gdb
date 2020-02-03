@@ -781,12 +781,12 @@
 (df f-dsp-64-s16 " 16 bit signed" (all-isas) 64 16 INT
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; insert
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; insert
      ((value pc) (ext INT 
 		      (trunc HI
-			     (or (and (srl value 8) #x00ff)
-				 (and (sll value 8) #xff00))))) ; extract
+			     (or (and (srl value 8) #xff)
+				 (sll (and value #xff) 8))))) ; extract
 )
 
 ;-------------------------------------------------------------

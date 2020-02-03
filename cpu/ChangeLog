@@ -1,3 +1,7 @@
+2020-02-03  Alan Modra  <amodra@gmail.com>
+
+	* m32c.cpu (f-dsp-64-s16): Mask before shifting signed value.
+
 2020-02-01  Alan Modra  <amodra@gmail.com>
 
 	* frv.cpu (f-u12): Multiply rather than left shift signed values.

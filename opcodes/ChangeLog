@@ -1,3 +1,7 @@
+2020-02-03  Alan Modra  <amodra@gmail.com>
+
+	* m32c-ibld.c: Regenerate.
+
 2020-02-01  Alan Modra  <amodra@gmail.com>
 
 	* frv-ibld.c: Regenerate.
