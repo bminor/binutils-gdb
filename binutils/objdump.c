@@ -1065,6 +1065,13 @@ sym_ok (bfd_boolean               want_section,
 {
   if (want_section)
     {
+      /* NB: An object file can have different sections with the same
+         section name.  Compare compare section pointers if they have
+	 the same owner.  */
+      if (sorted_syms[place]->section->owner == sec->owner
+	  && sorted_syms[place]->section != sec)
+	return FALSE;
+
       /* Note - we cannot just compare section pointers because they could
 	 be different, but the same...  Ie the symbol that we are trying to
 	 find could have come from a separate debug info file.  Under such

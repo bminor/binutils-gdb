@@ -1,5 +1,43 @@
 2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/25380
+	* config/obj-elf.c (section_match): Removed.
+	(get_section): Also match SEC_ASSEMBLER_SECTION_ID and
+	section_id.
+	(obj_elf_change_section): Replace info and group_name arguments
+	with match_p.  Also update the section ID and flags from match_p.
+	(obj_elf_section): Handle "unique,N".  Update call to
+	obj_elf_change_section.
+	* config/obj-elf.h (elf_section_match): New.
+	(obj_elf_change_section): Updated.
+	* config/tc-arm.c (start_unwind_section): Update call to
+	obj_elf_change_section.
+	* config/tc-ia64.c (obj_elf_vms_common): Likewise.
+	* config/tc-microblaze.c (microblaze_s_data): Likewise.
+	(microblaze_s_sdata): Likewise.
+	(microblaze_s_rdata): Likewise.
+	(microblaze_s_bss): Likewise.
+	* config/tc-mips.c (s_change_section): Likewise.
+	* config/tc-msp430.c (msp430_profiler): Likewise.
+	* config/tc-rx.c (parse_rx_section): Likewise.
+	* config/tc-tic6x.c (tic6x_start_unwind_section): Likewise.
+	* doc/as.texi: Document "unique,N" in .section directive.
+	* testsuite/gas/elf/elf.exp: Run "unique,N" tests.
+	* testsuite/gas/elf/section15.d: New file.
+	* testsuite/gas/elf/section15.s: Likewise.
+	* testsuite/gas/elf/section16.s: Likewise.
+	* testsuite/gas/elf/section16a.d: Likewise.
+	* testsuite/gas/elf/section16b.d: Likewise.
+	* testsuite/gas/elf/section17.d: Likewise.
+	* testsuite/gas/elf/section17.l: Likewise.
+	* testsuite/gas/elf/section17.s: Likewise.
+	* testsuite/gas/i386/unique.d: Likewise.
+	* testsuite/gas/i386/unique.s: Likewise.
+	* testsuite/gas/i386/x86-64-unique.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run unique and x86-64-unique.
+
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/elf/section13.s: Replace @nobits with %nobits.
 
 2020-02-01  Anthony Green  <green@moxielogic.com>

@@ -6709,6 +6709,18 @@ this directive.  If that section used @code{G}, then the new section will use
 @code{G} with those same @var{GroupName} and @var{linkage} fields implicitly.
 If not, then the @code{?} symbol has no effect.
 
+The optional @var{unique,@code{<number>}} argument must come last.  It
+assigns @var{@code{<number>}} as a unique section ID to distinguish
+different sections with the same section name like these:
+
+@smallexample
+.section @var{name},"@var{flags}",@@@var{type},@var{unique,@code{<number>}}
+.section @var{name},"@var{flags}"G,@@@var{type},@var{GroupName},[@var{linkage}],@var{unique,@code{<number>}}
+.section @var{name},"@var{flags}"MG,@@@var{type},@var{entsize},@var{GroupName}[,@var{linkage}],@var{unique,@code{<number>}}
+@end smallexample
+
+The valid values of @var{@code{<number>}} are between 0 and 4294967295.
+
 If no flags are specified, the default flags depend upon the section name.  If
 the section name is not recognized, the default will be for the section to have
 none of the above flags: it will not be allocated in memory, nor writable, nor

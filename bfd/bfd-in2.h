@@ -795,6 +795,10 @@ typedef struct bfd_section
   /* A unique sequence number.  */
   unsigned int id;
 
+  /* A unique section number which can be used by assembler to
+     distinguish different sections with the same section name.  */
+  unsigned int section_id;
+
   /* Which section in the bfd; 0..n-1 as sections are created in a bfd.  */
   unsigned int index;
 
@@ -927,6 +931,10 @@ typedef struct bfd_section
      going through the first-pass output, trusting that someone
      else up the line will take care of it later.  */
 #define SEC_LINKER_CREATED           0x100000
+
+  /* This section contains a section ID to distinguish different
+     sections withe the same section name.  */
+#define SEC_ASSEMBLER_SECTION_ID     0x100000
 
   /* This section should not be subject to garbage collection.
      Also set to inform the linker that this section should not be
@@ -1329,8 +1337,8 @@ discarded_section (const asection *sec)
 }
 
 #define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)                   \
-  /* name, id,  index, next, prev, flags, user_set_vma,            */  \
-  {  NAME, IDX, 0,     NULL, NULL, FLAGS, 0,                           \
+  /* name, id,  section_id, index, next, prev, flags, user_set_vma, */ \
+  {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,               \
                                                                        \
   /* linker_mark, linker_has_input, gc_mark, decompress_status,    */  \
      0,           0,                1,       0,                        \

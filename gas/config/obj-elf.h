@@ -77,6 +77,16 @@ struct elf_obj_sy
 #endif
 };
 
+/* Match section group name, the sh_info field and the section_id
+   field.  */
+struct elf_section_match
+{
+  const char *group_name;
+  unsigned int info;
+  unsigned int section_id;
+  flagword flags;
+};
+
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
 #ifndef FALSE
@@ -162,7 +172,7 @@ extern void obj_elf_common (int);
 extern void obj_elf_data (int);
 extern void obj_elf_text (int);
 extern void obj_elf_change_section
-  (const char *, unsigned int, unsigned int, bfd_vma, int, const char *,
+  (const char *, unsigned int, bfd_vma, int, struct elf_section_match *,
    int, int);
 extern void obj_elf_vtable_inherit (int);
 extern void obj_elf_vtable_entry (int);

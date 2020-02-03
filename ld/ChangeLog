@@ -1,3 +1,11 @@
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25380
+	* testsuite/ld-i386/pr22001-1c.S: Use "unique,N" in .section
+	directives.
+	* testsuite/ld-i386/tls-gd1.S: Likewise.
+	* testsuite/ld-x86-64/pr21481b.S: Likewise.
+
 2020-01-30  Jan Beulich  <jbeulich@suse.com>
 
 	* ld.texi: Remove space between @option and brace.

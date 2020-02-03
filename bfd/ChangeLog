@@ -1,3 +1,12 @@
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25380
+	* bfd-in2.h: Regenerated.
+	* ecoff.c (bfd_debug_section): Add section_id.
+	* section.c (bfd_section): Add section_id.
+	(SEC_ASSEMBLER_SECTION_ID): New.
+	(BFD_FAKE_SECTION): Add section_id.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Move the c30-aout and tic30-aout targets onto the

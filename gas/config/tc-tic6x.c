@@ -4606,7 +4606,7 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
   const char * text_name;
   const char * prefix;
   const char * prefix_once;
-  const char * group_name;
+  struct elf_section_match match;
   size_t prefix_len;
   size_t text_len;
   char * sec_name;
@@ -4649,13 +4649,13 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
 
   flags = SHF_ALLOC;
   linkonce = 0;
-  group_name = 0;
+  memset (&match, 0, sizeof (match));
 
   /* Handle COMDAT group.  */
   if (prefix != prefix_once && (text_seg->flags & SEC_LINK_ONCE) != 0)
     {
-      group_name = elf_group_name (text_seg);
-      if (group_name == NULL)
+      match.group_name = elf_group_name (text_seg);
+      if (match.group_name == NULL)
 	{
 	  as_bad (_("group section `%s' has no group signature"),
 		  segment_name (text_seg));
@@ -4666,7 +4666,7 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
       linkonce = 1;
     }
 
-  obj_elf_change_section (sec_name, type, 0, flags, 0, group_name,
+  obj_elf_change_section (sec_name, type, flags, 0, &match,
 			  linkonce, 0);
 
   /* Set the section link for index tables.  */

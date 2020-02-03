@@ -16418,7 +16418,7 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
   if (section_type == SHT_MIPS_DWARF)
     section_type = SHT_PROGBITS;
 
-  obj_elf_change_section (section_name, section_type, 0, section_flag,
+  obj_elf_change_section (section_name, section_type, section_flag,
 			  section_entry_size, 0, 0, 0);
 
   if (now_seg->name != section_name)

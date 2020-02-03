@@ -1,3 +1,9 @@
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25380
+	* objdump.c (sym_ok): Return FALSE if 2 sections are in the
+	same file with different section pointers.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Update with more details on the

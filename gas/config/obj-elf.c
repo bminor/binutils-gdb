@@ -518,22 +518,18 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
-/* Match both section group name and the sh_info field.  */
-struct section_match
-{
-  const char *group_name;
-  unsigned int info;
-};
-
 static bfd_boolean
 get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
-  struct section_match *match = (struct section_match *) inf;
+  struct elf_section_match *match = (struct elf_section_match *) inf;
   const char *gname = match->group_name;
   const char *group_name = elf_group_name (sec);
   unsigned int info = elf_section_data (sec)->this_hdr.sh_info;
 
   return (info == match->info
+	  && ((bfd_section_flags (sec) & SEC_ASSEMBLER_SECTION_ID)
+	       == (match->flags & SEC_ASSEMBLER_SECTION_ID))
+	  && sec->section_id == match->section_id
 	  && (group_name == gname
 	      || (group_name != NULL
 		  && gname != NULL
@@ -561,10 +557,9 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 void
 obj_elf_change_section (const char *name,
 			unsigned int type,
-			unsigned int info,
 			bfd_vma attr,
 			int entsize,
-			const char *group_name,
+			struct elf_section_match *match_p,
 			int linkonce,
 			int push)
 {
@@ -573,7 +568,12 @@ obj_elf_change_section (const char *name,
   flagword flags;
   const struct elf_backend_data *bed;
   const struct bfd_elf_special_section *ssect;
-  struct section_match match;
+
+  if (match_p == NULL)
+    {
+      static struct elf_section_match unused_match;
+      match_p = &unused_match;
+    }
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -594,10 +594,8 @@ obj_elf_change_section (const char *name,
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
-  match.group_name = group_name;
-  match.info = info;
   old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section,
-					(void *) &match);
+					(void *) match_p);
   if (old_sec)
     {
       sec = old_sec;
@@ -696,7 +694,7 @@ obj_elf_change_section (const char *name,
 #endif
 	  else
 	    {
-	      if (group_name == NULL)
+	      if (match_p->group_name == NULL)
 		as_warn (_("setting incorrect section attributes for %s"),
 			 name);
 	      override = TRUE;
@@ -732,16 +730,20 @@ obj_elf_change_section (const char *name,
 	type = bfd_elf_get_default_section_type (flags);
       elf_section_type (sec) = type;
       elf_section_flags (sec) = attr;
-      elf_section_data (sec)->this_hdr.sh_info = info;
+      elf_section_data (sec)->this_hdr.sh_info = match_p->info;
 
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
 	seg_info (sec)->bss = 1;
 
+      /* Set the section ID and flags.  */
+      sec->section_id = match_p->section_id;
+      flags |= match_p->flags;
+
       bfd_set_section_flags (sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
-      elf_group_name (sec) = group_name;
+      elf_group_name (sec) = match_p->group_name;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -1006,7 +1008,7 @@ obj_elf_section_name (void)
 void
 obj_elf_section (int push)
 {
-  const char *name, *group_name;
+  const char *name;
   char *beg;
   int type, dummy;
   bfd_vma attr;
@@ -1014,7 +1016,7 @@ obj_elf_section (int push)
   int entsize;
   int linkonce;
   subsegT new_subsection = -1;
-  unsigned int info = 0;
+  struct elf_section_match match;
 
   if (flag_mri)
     {
@@ -1040,6 +1042,8 @@ obj_elf_section (int push)
   if (name == NULL)
     return;
 
+  memset (&match, 0, sizeof (match));
+
   symbolS * sym;
   if ((sym = symbol_find (name)) != NULL
       && ! symbol_section_p (sym)
@@ -1054,7 +1058,6 @@ obj_elf_section (int push)
   type = SHT_NULL;
   attr = 0;
   gnu_attr = 0;
-  group_name = NULL;
   entsize = 0;
   linkonce = 0;
 
@@ -1159,8 +1162,8 @@ obj_elf_section (int push)
 	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
-	      group_name = obj_elf_section_name ();
-	      if (group_name == NULL)
+	      match.group_name = obj_elf_section_name ();
+	      if (match.group_name == NULL)
 		attr &= ~SHF_GROUP;
 	      else if (*input_line_pointer == ',')
 		{
@@ -1186,26 +1189,86 @@ obj_elf_section (int push)
 	      const char *now_group = elf_group_name (now_seg);
 	      if (now_group != NULL)
 		{
-		  group_name = xstrdup (now_group);
+		  match.group_name = xstrdup (now_group);
 		  linkonce = (now_seg->flags & SEC_LINK_ONCE) != 0;
 		}
 	    }
 
 	  if ((gnu_attr & SHF_GNU_MBIND) != 0 && *input_line_pointer == ',')
 	    {
+	      char *save = input_line_pointer;
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      if (ISDIGIT (* input_line_pointer))
 		{
 		  char *t = input_line_pointer;
-		  info = strtoul (input_line_pointer,
-				  &input_line_pointer, 0);
-		  if (info == (unsigned int) -1)
+		  match.info = strtoul (input_line_pointer,
+					&input_line_pointer, 0);
+		  if (match.info == (unsigned int) -1)
 		    {
 		      as_warn (_("unsupported mbind section info: %s"), t);
-		      info = 0;
+		      match.info = 0;
 		    }
 		}
+	      else
+		input_line_pointer = save;
+	    }
+
+	  if (*input_line_pointer == ',')
+	    {
+	      char *save = input_line_pointer;
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      if (strncmp (input_line_pointer, "unique", 6) == 0)
+		{
+		  input_line_pointer += 6;
+		  SKIP_WHITESPACE ();
+		  if (*input_line_pointer == ',')
+		    {
+		      ++input_line_pointer;
+		      SKIP_WHITESPACE ();
+		      if (ISDIGIT (* input_line_pointer))
+			{
+			  bfd_vma id;
+			  bfd_boolean overflow;
+			  char *t = input_line_pointer;
+			  if (sizeof (bfd_vma) <= sizeof (unsigned long))
+			    {
+			      errno = 0;
+			      id = strtoul (input_line_pointer,
+					    &input_line_pointer, 0);
+			      overflow = (id == (unsigned long) -1
+					  && errno == ERANGE);
+			    }
+			  else
+			    {
+			      id = bfd_scan_vma
+				(input_line_pointer,
+				 (const char **) &input_line_pointer, 0);
+			      overflow = id == ~(bfd_vma) 0;
+			    }
+			  if (overflow || id > (unsigned int) -1)
+			    {
+			      char *linefeed, saved_char = 0;
+			      if ((linefeed = strchr (t, '\n')) != NULL)
+				{
+				  saved_char = *linefeed;
+				  *linefeed = '\0';
+				}
+			      as_bad (_("unsupported section id: %s"), t);
+			      if (saved_char)
+				*linefeed = saved_char;
+			    }
+			  else
+			    {
+			      match.section_id = id;
+			      match.flags |= SEC_ASSEMBLER_SECTION_ID;
+			    }
+			}
+		    }
+		}
+	      else
+		input_line_pointer = save;
 	    }
 	}
       else
@@ -1238,8 +1301,8 @@ obj_elf_section (int push)
 done:
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, info, attr, entsize, group_name,
-			  linkonce, push);
+  obj_elf_change_section (name, type, attr, entsize, &match, linkonce,
+			  push);
 
   if ((gnu_attr & SHF_GNU_MBIND) != 0)
     {
