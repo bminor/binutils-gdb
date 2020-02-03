@@ -123,9 +123,9 @@ print_insn (struct disassemble_info *info,
 	    int is_long,
 	    int show_ext)
 {
-  int val, opnum, need_comma = 0;
+  unsigned int val, opnum;
   const struct d30v_operand *oper;
-  int i, match, need_paren = 0, found_control = 0;
+  int i, match, need_comma = 0, need_paren = 0, found_control = 0;
   unsigned int opind = 0;
 
   (*info->fprintf_func) (info->stream, "%s", insn->op->name);

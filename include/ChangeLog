@@ -1,3 +1,7 @@
+2020-02-04  Alan Modra  <amodra@gmail.com>
+
+	* opcode/d30v.h (struct pd_reg): Make value field unsigned.
+
 2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* coff/internal.h (PE_IMAGE_DEBUG_TYPE_VC_FEATURE)

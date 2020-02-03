@@ -33,7 +33,7 @@ struct pd_reg
 {
   char *name;		/* name to recognize */
   char *pname;		/* name to print for this register */
-  int value;
+  unsigned int value;
 };
 
 extern const struct pd_reg pre_defined_registers[];

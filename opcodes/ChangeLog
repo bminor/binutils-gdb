@@ -1,3 +1,7 @@
+2020-02-04  Alan Modra  <amodra@gmail.com>
+
+	* d30v-dis.c (print_insn): Make "val" and "opnum" unsigned.
+
 2020-02-03  Alan Modra  <amodra@gmail.com>
 
 	* m32c-ibld.c: Regenerate.
