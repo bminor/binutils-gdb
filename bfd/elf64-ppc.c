@@ -2817,8 +2817,8 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    ppc_stub_plt_branch:
    Similar to the above, but a 24 bit branch in the stub section won't
    reach its destination.
-   .	addis	%r11,%r2,xxx@toc@ha
-   .	ld	%r12,xxx@toc@l(%r11)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r12,xxx@toc@l(%r12)
    .	mtctr	%r12
    .	bctr
 
@@ -2844,8 +2844,8 @@ must_be_dyn_reloc (struct bfd_link_info *info,
 
    A ppc_stub_plt_branch with an r2 offset looks like:
    .	std	%r2,40(%r1)
-   .	addis	%r11,%r2,xxx@toc@ha
-   .	ld	%r12,xxx@toc@l(%r11)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r12,xxx@toc@l(%r12)
    .	addis	%r2,%r2,off@ha
    .	addi	%r2,%r2,off@l
    .	mtctr	%r12
