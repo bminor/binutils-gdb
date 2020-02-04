@@ -1,3 +1,8 @@
+2020-03-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/dwarf.exp (Dwarf::lines) Add support for modifying the
+	is-stmt flag in the line table.
+
 2020-03-09  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (cached_file): Create cache dir.

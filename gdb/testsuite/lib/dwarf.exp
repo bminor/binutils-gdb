@@ -1311,12 +1311,14 @@ namespace eval Dwarf {
 	set _unit_addr_size default
 	set _line_saw_program 0
 	set _line_saw_file 0
+	set _default_is_stmt 1
 
 	foreach { name value } $options {
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
 		version { set _unit_version $value }
 		addr_size { set _unit_addr_size $value }
+		default_is_stmt { set _default_is_stmt $value }
 		default { error "unknown option $name" }
 	    }
 	}
@@ -1363,7 +1365,7 @@ namespace eval Dwarf {
 	define_label $header_len_label
 
 	_op .byte 1 "minimum_instruction_length"
-	_op .byte 1 "default_is_stmt"
+	_op .byte $_default_is_stmt "default_is_stmt"
 	_op .byte 1 "line_base"
 	_op .byte 1 "line_range"
 	_op .byte 10 "opcode_base"
@@ -1436,6 +1438,10 @@ namespace eval Dwarf {
 
 	    proc DW_LNS_copy {} {
 		_op .byte 1
+	    }
+
+	    proc DW_LNS_negate_stmt {} {
+		_op .byte 6
 	    }
 
 	    proc DW_LNS_advance_pc {offset} {
