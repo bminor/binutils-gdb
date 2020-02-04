@@ -1,5 +1,9 @@
 2020-02-04  Tom de Vries  <tdevries@suse.de>
 
+	* README (Race detection): Add note.
+
+2020-02-04  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (inferior_exited_re): Use "\[^\n\r\]*" instead of ".*".
 
 2020-02-04  Tom de Vries  <tdevries@suse.de>
