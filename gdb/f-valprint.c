@@ -115,7 +115,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
   struct type *range_type = TYPE_INDEX_TYPE (check_typedef (type));
   CORE_ADDR addr = address + embedded_offset;
   LONGEST lowerbound, upperbound;
-  int i;
+  LONGEST i;
 
   get_discrete_bounds (range_type, &lowerbound, &upperbound);
 

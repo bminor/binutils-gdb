@@ -1,3 +1,8 @@
+2020-02-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* gdb.fortran/array-bounds-high.exp: New file.
+	* gdb.fortran/array-bounds-high.f90: New file.
+
 2020-02-03  Lukas Durfina  <ldurfina@tachyum.com>  (tiny change)
 
 	* gdb.base/fileio.c: Remove #include of <sys/errno.h>.
