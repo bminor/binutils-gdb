@@ -117,7 +117,7 @@ if ![info exists env(EXEEXT)] {
 
 set octal "\[0-7\]+"
 
-set inferior_exited_re "(\\\[Inferior \[0-9\]+ \\(.*\\) exited)"
+set inferior_exited_re "(?:\\\[Inferior \[0-9\]+ \\(.*\\) exited)"
 
 # A regular expression that matches a value history number.
 # E.g., $1, $2, etc.

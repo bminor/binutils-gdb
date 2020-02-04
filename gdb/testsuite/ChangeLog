@@ -1,3 +1,7 @@
+2020-02-04  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (inferior_exited_re): Use non-capturing parentheses.
+
 2020-02-03  Rogerio A. Cardoso  <rcardoso@linux.ibm.com>
 
 	* gdb.arch/powerpc-power8.exp: Delete trailing whitespace of
