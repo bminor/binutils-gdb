@@ -86,6 +86,7 @@ struct sim_inferior_data {
     : gdbsim_desc (desc),
       remote_sim_ptid (next_pid, 0, next_pid)
   {
+    gdb_assert (remote_sim_ptid != null_ptid);
     ++next_pid;
   }
 
