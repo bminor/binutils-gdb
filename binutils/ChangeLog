@@ -1,3 +1,9 @@
+2020-02-04  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (CFILES): Add od-elf32_avr.c.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2020-02-03  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* readelf.c (dump_relocations, dump_relocations)
