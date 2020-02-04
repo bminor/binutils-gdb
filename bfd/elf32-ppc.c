@@ -8780,7 +8780,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC_VLE_ADDR20:
 	  ppc_elf_vle_split20 (output_bfd, contents + rel->r_offset, relocation);
-	  continue;
+	  goto copy_reloc;
 
 	  /* Relocate against the beginning of the section.  */
 	case R_PPC_SECTOFF:
