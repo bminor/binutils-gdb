@@ -4449,8 +4449,8 @@ remote_target::process_initial_stop_replies (int from_tty)
 	  || ws.value.sig != GDB_SIGNAL_0)
 	evthread->suspend.waitstatus_pending_p = 1;
 
-      set_executing (this, event_ptid, 0);
-      set_running (this, event_ptid, 0);
+      set_executing (this, event_ptid, false);
+      set_running (this, event_ptid, false);
       get_remote_thread_info (evthread)->vcont_resumed = 0;
     }
 

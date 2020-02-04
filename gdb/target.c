@@ -2127,7 +2127,7 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
   /* We only set the internal executing state here.  The user/frontend
      running state is set at a higher level.  This also clears the
      thread's stop_pc as side effect.  */
-  set_executing (curr_target, ptid, 1);
+  set_executing (curr_target, ptid, true);
   clear_inline_frame_state (curr_target, ptid);
 }
 

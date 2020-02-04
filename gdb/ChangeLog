@@ -1,3 +1,23 @@
+2020-02-03  Simon Marchi  <simon.marchi@efficios.com>
+
+	* fork-child.c (gdb_startup_inferior): Use bool instead of int.
+	* gdbthread.h (class thread_info) <resumed>: Likewise.
+	* infrun.c (resume_1): Likewise.
+	(proceed): Likewise.
+	(infrun_thread_stop_requested): Likewise.
+	(stop_all_threads): Likewise.
+	(handle_inferior_event): Likewise.
+	(restart_threads): Likewise.
+	(finish_step_over): Likewise.
+	(keep_going_stepped_thread): Likewise.
+	* linux-nat.c (attach_proc_task_lwp_callback): Likewise.
+	(linux_handle_extended_wait): Likewise.
+	* record-btrace.c (get_thread_current_frame_id): Likewise.
+	* record-full.c (record_full_wait_1): Likewise.
+	* remote.c (remote_target::process_initial_stop_replies): Likewise.
+	* target.c (target_resume): Likewise.
+	* thread.c (set_running_thread): Likewise.
+
 2020-02-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* f-valprint.c (f77_print_array_1): Changed datatype of index

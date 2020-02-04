@@ -1166,8 +1166,8 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	     matching libthread_db is not found (or the process uses
 	     raw clone).  */
 	  add_thread (linux_target, lp->ptid);
-	  set_running (linux_target, lp->ptid, 1);
-	  set_executing (linux_target, lp->ptid, 1);
+	  set_running (linux_target, lp->ptid, true);
+	  set_executing (linux_target, lp->ptid, true);
 	}
 
       return 1;
@@ -2038,8 +2038,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	     internal to this module, from the perspective of infrun
 	     and the user/frontend, this new thread is running until
 	     it next reports a stop.  */
-	  set_running (linux_target, new_lp->ptid, 1);
-	  set_executing (linux_target, new_lp->ptid, 1);
+	  set_running (linux_target, new_lp->ptid, true);
+	  set_executing (linux_target, new_lp->ptid, true);
 
 	  if (WSTOPSIG (status) != SIGSTOP)
 	    {

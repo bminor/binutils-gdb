@@ -301,20 +301,20 @@ public:
      if the thread does not have a user-given name.  */
   char *name = NULL;
 
-  /* Non-zero means the thread is executing.  Note: this is different
+  /* True means the thread is executing.  Note: this is different
      from saying that there is an active target and we are stopped at
      a breakpoint, for instance.  This is a real indicator whether the
      thread is off and running.  */
   bool executing = false;
 
-  /* Non-zero if this thread is resumed from infrun's perspective.
+  /* True if this thread is resumed from infrun's perspective.
      Note that a thread can be marked both as not-executing and
      resumed at the same time.  This happens if we try to resume a
      thread that has a wait status pending.  We shouldn't let the
      thread really run until that wait status has been processed, but
      we should not process that wait status if we didn't try to let
      the thread run.  */
-  int resumed = 0;
+  bool resumed = false;
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
      THREAD_STOPPED states are different from EXECUTING.  When the

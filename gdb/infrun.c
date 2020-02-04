@@ -2282,7 +2282,7 @@ resume_1 (enum gdb_signal sig)
 	}
 
       tp->inf->process_target ()->threads_executing = true;
-      tp->resumed = 1;
+      tp->resumed = true;
 
       /* FIXME: What should we do if we are supposed to resume this
 	 thread with a signal?  Maybe we should maintain a queue of
@@ -2410,7 +2410,7 @@ resume_1 (enum gdb_signal sig)
 
 	      resume_ptid = internal_resume_ptid (user_step);
 	      do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
-	      tp->resumed = 1;
+	      tp->resumed = true;
 	      return;
 	    }
 	}
@@ -2622,7 +2622,7 @@ resume_1 (enum gdb_signal sig)
     }
 
   do_target_resume (resume_ptid, step, sig);
-  tp->resumed = 1;
+  tp->resumed = true;
 }
 
 /* Resume the inferior.  SIG is the signal to give the inferior
@@ -3022,7 +3022,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      inferior function, as in that case we pretend the inferior
      doesn't run at all.  */
   if (!cur_thr->control.in_infcall)
-    set_running (resume_target, resume_ptid, 1);
+    set_running (resume_target, resume_ptid, true);
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
@@ -3306,7 +3306,7 @@ infrun_thread_stop_requested (ptid_t ptid)
       /* Otherwise we can process the (new) pending event now.  Set
 	 it so this pending event is considered by
 	 do_target_wait.  */
-      tp->resumed = 1;
+      tp->resumed = true;
     }
 }
 
@@ -4749,7 +4749,7 @@ stop_all_threads (void)
 
 		  /* The thread may be not executing, but still be
 		     resumed with a pending status to process.  */
-		  t->resumed = 0;
+		  t->resumed = false;
 		}
 	    }
 
@@ -4788,7 +4788,7 @@ stop_all_threads (void)
 
 	      t->stop_requested = 0;
 	      t->executing = 0;
-	      t->resumed = 0;
+	      t->resumed = false;
 	      t->control.may_range_step = 0;
 
 	      /* This may be the first time we see the inferior report
@@ -5126,10 +5126,10 @@ handle_inferior_event (struct execution_control_state *ecs)
     else
       mark_ptid = ecs->ptid;
 
-    set_executing (ecs->target, mark_ptid, 0);
+    set_executing (ecs->target, mark_ptid, false);
 
     /* Likewise the resumed flag.  */
-    set_resumed (ecs->target, mark_ptid, 0);
+    set_resumed (ecs->target, mark_ptid, false);
   }
 
   switch (ecs->ws.kind)
@@ -5623,7 +5623,7 @@ restart_threads (struct thread_info *event_thread)
 				"infrun: restart threads: "
 				"[%s] has pending status\n",
 				target_pid_to_str (tp->ptid).c_str ());
-	  tp->resumed = 1;
+	  tp->resumed = true;
 	  continue;
 	}
 
@@ -5763,7 +5763,7 @@ finish_step_over (struct execution_control_state *ecs)
 	  /* This was cleared early, by handle_inferior_event.  Set it
 	     so this pending event is considered by
 	     do_target_wait.  */
-	  tp->resumed = 1;
+	  tp->resumed = true;
 
 	  gdb_assert (!tp->executing);
 
@@ -7424,7 +7424,7 @@ keep_going_stepped_thread (struct thread_info *tp)
 				     get_frame_address_space (frame),
 				     tp->suspend.stop_pc);
 
-      tp->resumed = 1;
+      tp->resumed = true;
       resume_ptid = internal_resume_ptid (tp->control.stepping_command);
       do_target_resume (resume_ptid, 0, GDB_SIGNAL_0);
     }

@@ -1958,7 +1958,7 @@ static struct frame_id
 get_thread_current_frame_id (struct thread_info *tp)
 {
   struct frame_id id;
-  int executing;
+  bool executing;
 
   /* Set current thread, which is implicitly used by
      get_current_frame.  */

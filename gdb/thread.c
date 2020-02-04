@@ -823,13 +823,13 @@ set_resumed (process_stratum_target *targ, ptid_t ptid, bool resumed)
 /* Helper for set_running, that marks one thread either running or
    stopped.  */
 
-static int
-set_running_thread (struct thread_info *tp, int running)
+static bool
+set_running_thread (struct thread_info *tp, bool running)
 {
-  int started = 0;
+  bool started = false;
 
   if (running && tp->state == THREAD_STOPPED)
-    started = 1;
+    started = true;
   tp->state = running ? THREAD_RUNNING : THREAD_STOPPED;
 
   if (!running)
