@@ -1,5 +1,18 @@
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
+	PR gdb/25190:
+        * gdb/remote-sim.c (gdb_os_write_stderr): Update.
+        * gdb/remote.c (remote_console_output): Update.
+        * gdb/ui-file.c (fputs_unfiltered): Rename to...
+        (ui_file_puts): ...this.
+        * gdb/ui-file.h (ui_file_puts): Add declaration.
+        * gdb/utils.c (emit_style_escape): Update.
+        (flush_wrap_buffer): Update.
+        (fputs_maybe_filtered): Update.
+        (fputs_unfiltered): Add function.
+
+2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
+
         * gdb/event-loop.c (gdb_wait_for_event): Update.
         * gdb/printcmd.c (printf_command): Update.
         * gdb/remote-fileio.c (remote_fileio_func_write): Update.

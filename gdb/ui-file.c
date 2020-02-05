@@ -150,7 +150,7 @@ ui_file_read (struct ui_file *file, char *buf, long length_buf)
 }
 
 void
-fputs_unfiltered (const char *buf, struct ui_file *file)
+ui_file_puts (struct ui_file *file, const char *buf)
 {
   file->puts (buf);
 }
