@@ -29,4 +29,4 @@ extern struct ppc_reg_offsets ppcnbsd_reg_offsets;
 extern const struct regset ppcnbsd_gregset;
 extern const struct regset ppcnbsd_fpregset;
 
-#endif /* ppc-nbsd-tdep.h */
+#endif /* PPC_NBSD_TDEP_H */

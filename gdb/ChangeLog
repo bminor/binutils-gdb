@@ -1,3 +1,7 @@
+2020-02-05  Christian Biesinger  <cbiesinger@google.com>
+
+	* ppc-nbsd-tdep.h: Fix macro name in #endif comment.
+
 2020-02-05  Maciej W. Rozycki  <macro@wdc.com>
 
 	* nat/riscv-linux-tdesc.h: New file.
