@@ -1,3 +1,11 @@
+2020-02-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section12a.d: Use supports_gnu_osabi in
+	xfail, and rename test.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section16a.d: Likewise.
+	* testsuite/gas/elf/section16b.d: Likewise.
+
 2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25380

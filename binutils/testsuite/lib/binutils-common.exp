@@ -171,32 +171,38 @@ proc is_rela { binary_file } {
 # in square brackets or as machine triplet otherwise.
 #
 proc match_target { target } {
-   if [string match {\[*\]} $target] {
+   if [regexp {^!?\[.*\]$} $target] {
 	return $target
    } else {
 	return [istarget $target]
    }
 }
 
-# True if the ELF target supports STB_GNU_UNIQUE with the ELF header's
-# OSABI field set to ELFOSABI_GNU.
+# True if the ELF target supports setting the ELF header OSABI field
+# to ELFOSABI_GNU or ELFOSABI_FREEBSD, a requirement for STT_GNU_IFUNC
+# symbol and SHF_GNU_MBIND section support.
 #
 # This generally depends on the target OS only, however there are a
 # number of exceptions for bare metal targets as follows.  The MSP430
-# and Visium targets set OSABI to ELFOSABI_STANDALONE and cannot
-# support STB_GNU_UNIQUE.  Likewise non-EABI ARM targets set OSABI to
-# ELFOSABI_ARM, and TI C6X targets to ELFOSABI_C6000_*.  Finally
-# rather than `bfd_elf_final_link' a number of targets use
-# `_bfd_generic_final_link', which does not support STB_GNU_UNIQUE
-# symbol binding causing assertion failures.
+# and Visium targets set OSABI to ELFOSABI_STANDALONE.  Likewise
+# non-EABI ARM targets set OSABI to ELFOSABI_ARM
 #
-proc supports_gnu_unique {} {
+# Note that some TI C6X targets use ELFOSABI_C6000_* but one doesn't,
+# so we don't try to sort out tic6x here.  (The effect is that linker
+# testcases will generally need to exclude tic6x or use a -m option.)
+#
+proc supports_gnu_osabi {} {
     if { [istarget *-*-gnu*]
 	 || [istarget *-*-linux*]
-	 || [istarget *-*-nacl*] } {
-	return 1
-    }
-    if { [istarget "arm*-*-*eabi*"] } {
+	 || [istarget *-*-nacl*]
+	 || ( [istarget *-*-*bsd*] && ![istarget arm*-*-netbsd*] )
+	 || [istarget *-*-symbianelf]
+	 || [istarget *-*-lynxos]
+	 || ( [istarget *-*-nto*] && ![istarget arm*-*-*] )
+	 || [istarget *-*-irix*]
+	 || [istarget *-*-*eabi*]
+	 || [istarget *-*-rtems*]
+	 || [istarget *-*-solaris*] } {
 	return 1
     }
     if { [istarget "wasm32*-*-*"] } {
@@ -207,19 +213,36 @@ proc supports_gnu_unique {} {
     }
     if { [istarget "arm*-*-*"]
 	 || [istarget "msp430-*-*"]
-	 || [istarget "tic6x-*-*"]
 	 || [istarget "visium-*-*"] } {
 	return 0
     }
-    if { [istarget "am33_2.0-*-*"]
-	 || [istarget "d30v-*-*"]
+    return 1
+}
+
+# Return true if target uses the generic_link_hash_table linker.
+proc is_generic { } {
+    if { [istarget "d30v-*-*"]
 	 || [istarget "dlx-*-*"]
 	 || [istarget "pj*-*-*"]
 	 || [istarget "s12z-*-*"]
 	 || [istarget "xgate-*-*"] } {
+	return 1
+    }
+    return 0
+}
+
+# True if the ELF target supports STB_GNU_UNIQUE.
+#
+# This require ELFOSABI_GNU, and `bfd_elf_final_link'.
+#
+proc supports_gnu_unique {} {
+    if { [istarget *-*-freebsd*] } {
 	return 0
     }
-    return 1
+    if { [supports_gnu_osabi] && ![is_generic] } {
+	return 1
+    }
+    return 0
 }
 
 # True for targets that do not sort .symtab as per the ELF standard.

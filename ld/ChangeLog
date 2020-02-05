@@ -1,5 +1,10 @@
 2020-02-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/ld-lib.exp (is_generic): Delete.
+	* testsuite/ld-unique/unique.exp: Exclude tic6x.
+
+2020-02-06  Alan Modra  <amodra@gmail.com>
+
 	* configure.tgt (i[3-7]86-*-moss*): Don't clear targ_extra_ofiles.
 	(i[3-7]86-*-openbsd*, x86_64-*-openbsd*): Add.
 

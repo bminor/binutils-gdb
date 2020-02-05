@@ -30,7 +30,7 @@ if { ![is_elf_format] } {
 }
 
 # Require STB_GNU_UNIQUE support with OSABI set to GNU.
-if { ![supports_gnu_unique] } {
+if { ![supports_gnu_unique] || [istarget tic6x-*-*] } {
     verbose "UNIQUE tests not run - target does not support UNIQUE"
     return
 }

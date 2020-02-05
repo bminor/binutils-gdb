@@ -1,10 +1,9 @@
 #source: section16.s
 #as: --no-pad-sections
 #readelf: -Sg --wide
-#name: mbind sections
+#name: mbind sections 16
 # A number of targets do not support SHF_GNU_MBIND
-#xfail: arm*-*-netbsdelf* arm*-*-nto* msp430-*-* visium-*-*
-#xfail: *-*-hpux* *-*-cloudabi
+#xfail: ![supports_gnu_osabi]
 
 #...
   \[[ 0-9]+\] \.mbind\.data[ 	]+PROGBITS[ 	]+0+0 0+[0-9a-f]+ 0+1 00 WAD  0   0  1
