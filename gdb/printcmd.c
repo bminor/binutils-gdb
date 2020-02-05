@@ -2720,7 +2720,7 @@ printf_command (const char *arg, int from_tty)
   ui_printf (arg, gdb_stdout);
   reset_terminal_style (gdb_stdout);
   wrap_here ("");
-  gdb_flush (gdb_stdout);
+  ui_file_flush (gdb_stdout);
 }
 
 /* Implement the "eval" command.  */

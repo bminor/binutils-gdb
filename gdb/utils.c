@@ -1544,6 +1544,15 @@ flush_wrap_buffer (struct ui_file *stream)
     }
 }
 
+/* See utils.h.  */
+
+void
+gdb_flush (struct ui_file *stream)
+{
+  flush_wrap_buffer (stream);
+  ui_file_flush (stream);
+}
+
 /* Indicate that if the next sequence of characters overflows the line,
    a newline should be inserted here rather than when it hits the end.
    If INDENT is non-null, it is a string to be printed to indent the
