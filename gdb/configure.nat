@@ -276,7 +276,8 @@ case ${gdb_host} in
 		;;
 	    riscv*)
 		# Host: RISC-V, running Linux
-		NATDEPFILES="${NATDEPFILES} riscv-linux-nat.o"
+		NATDEPFILES="${NATDEPFILES} riscv-linux-nat.o \
+		nat/riscv-linux-tdesc.o"
 		;;
 	    s390)
 		# Host: S390, running Linux

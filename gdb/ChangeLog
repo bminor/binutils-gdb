@@ -1,3 +1,12 @@
+2020-02-05  Maciej W. Rozycki  <macro@wdc.com>
+
+	* nat/riscv-linux-tdesc.h: New file.
+	* nat/riscv-linux-tdesc.c: New file, taking code from...
+	* riscv-linux-nat.c (riscv_linux_nat_target::read_description):
+	... here.
+	* configure.nat <linux> <riscv*>: Add nat/riscv-linux-tdesc.o to
+	NATDEPFILES.
+
 2020-02-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* remote-sim.c (sim_inferior_data::sim_inferior_data): Assert that

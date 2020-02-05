@@ -22,9 +22,10 @@
 #include "linux-nat.h"
 #include "riscv-tdep.h"
 #include "inferior.h"
-#include "target-descriptions.h"
 
 #include "elf/common.h"
+
+#include "nat/riscv-linux-tdesc.h"
 
 #include <sys/ptrace.h>
 
@@ -200,53 +201,7 @@ fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 const struct target_desc *
 riscv_linux_nat_target::read_description ()
 {
-  struct riscv_gdbarch_features features;
-  elf_fpregset_t regs;
-  int flen;
-  int tid;
-
-  /* Figuring out xlen is easy.  */
-  features.xlen = sizeof (elf_greg_t);
-
-  tid = inferior_ptid.lwp ();
-
-  /* Start with no f-registers.  */
-  features.flen = 0;
-
-  /* How much worth of f-registers can we fetch if any?  */
-  for (flen = sizeof (regs.__f.__f[0]); ; flen *= 2)
-    {
-      size_t regset_size;
-      struct iovec iov;
-
-      /* Regsets have a uniform slot size, so we count FSCR like
-	 an FP data register.  */
-      regset_size = ELF_NFPREG * flen;
-      if (regset_size > sizeof (regs))
-	break;
-
-      iov.iov_base = &regs;
-      iov.iov_len = regset_size;
-      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	{
-	  switch (errno)
-	    {
-	    case EINVAL:
-	      continue;
-	    case EIO:
-	      break;
-	    default:
-	      perror_with_name (_("Couldn't get registers"));
-	      break;
-	    }
-	}
-      else
-	features.flen = flen;
-      break;
-    }
-
-  return riscv_create_target_description (features);
+  return riscv_linux_read_description (inferior_ptid.lwp ());
 }
 
 /* Fetch REGNUM (or all registers if REGNUM == -1) from the target
