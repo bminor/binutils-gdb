@@ -1,3 +1,8 @@
+2020-02-07  Tom Tromey  <tromey@adacore.com>
+
+	PR breakpoints/24915:
+	* source.c (find_and_open_source): Do not check basenames_may_differ.
+
 2020-01-10  Christian Biesinger  <cbiesinger@google.com>
 
 	* gdbsupport/common-defs.h: Don't define _FORTIFY_SOURCE on MinGW.
