@@ -1,5 +1,10 @@
 2020-02-05  Christian Biesinger  <cbiesinger@google.com>
 
+	* sparc-nat.h (struct sparc_target) <xfer_partial>: Fix base class
+	function call.
+
+2020-02-05  Christian Biesinger  <cbiesinger@google.com>
+
 	* ppc-nbsd-tdep.h: Fix macro name in #endif comment.
 
 2020-02-05  Maciej W. Rozycki  <macro@wdc.com>
