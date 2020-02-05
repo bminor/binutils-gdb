@@ -100,7 +100,7 @@ public:
 /* A preallocated null_file stream.  */
 extern null_file null_stream;
 
-extern void gdb_flush (ui_file *);
+extern void ui_file_flush (ui_file *);
 
 extern int ui_file_isatty (struct ui_file *);
 

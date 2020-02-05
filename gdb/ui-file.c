@@ -91,7 +91,7 @@ null_file::write_async_safe (const char *buf, long sizeof_buf)
 
 
 void
-gdb_flush (struct ui_file *file)
+ui_file_flush (struct ui_file *file)
 {
   file->flush ();
 }
@@ -315,7 +315,7 @@ stdio_file::can_emit_style_escape ()
 void
 stderr_file::write (const char *buf, long length_buf)
 {
-  gdb_flush (gdb_stdout);
+  ui_file_flush (gdb_stdout);
   stdio_file::write (buf, length_buf);
 }
 
@@ -325,7 +325,7 @@ stderr_file::write (const char *buf, long length_buf)
 void
 stderr_file::puts (const char *linebuffer)
 {
-  gdb_flush (gdb_stdout);
+  ui_file_flush (gdb_stdout);
   stdio_file::puts (linebuffer);
 }
 

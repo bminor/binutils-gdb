@@ -641,7 +641,7 @@ remote_fileio_func_write (remote_target *remote, char *buf)
       case FIO_FD_CONSOLE_OUT:
 	ui_file_write (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr,
 		       (char *) buffer, length);
-	gdb_flush (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr);
+	ui_file_flush (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr);
 	ret = length;
 	break;
       default:

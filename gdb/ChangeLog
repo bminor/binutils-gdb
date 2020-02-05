@@ -1,3 +1,20 @@
+2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+        * gdb/event-loop.c (gdb_wait_for_event): Update.
+        * gdb/printcmd.c (printf_command): Update.
+        * gdb/remote-fileio.c (remote_fileio_func_write): Update.
+        * gdb/remote-sim.c (gdb_os_flush_stdout): Update.
+        (gdb_os_flush_stderr): Update.
+        * gdb/remote.c (remote_console_output): Update.
+        * gdb/ui-file.c (gdb_flush): Rename to...
+        (ui_file_flush): ...this.
+        (stderr_file::write): Update.
+        (stderr_file::puts): Update.
+        * gdb/ui-file.h (gdb_flush): Rename to...
+        (ui_file_flush): ...this.
+        * gdb/utils.c (gdb_flush): Add function.
+        * gdb/utils.h (gdb_flush): Add declaration.
+
 2020-02-07  Tom Tromey  <tromey@adacore.com>
 
 	PR breakpoints/24915:
